@@ -28,8 +28,8 @@ func run(main_node: Node) -> void:
 				n["last"] = 0.0
 				n["vel"] = Vector3.ZERO
 	await _go(0.3, hold)
-	m.fx.hit_number(P, T, 34.0, Color("ff6a5a"), false)
-	m.fx.hit_number(P, T, 61.0, Color("ffd24a"), true)
+	m.fx.damage_number(P, T, 34.0, {}, P)
+	m.fx.damage_number(P, T, 61.0, {"crit": true}, P)
 	m.fx.healed(P, 18.0)
 	m.fx.word(P.pos + Vector3(0, 1.3, 0), "COMBO", Color.WHITE)
 	for t in [

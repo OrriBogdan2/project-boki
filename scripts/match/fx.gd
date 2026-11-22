@@ -784,9 +784,7 @@ func _process(delta: float) -> void:
 			l.visible = false
 			nums.erase(n)
 	if nums.size() > 1:
-		NumSpacing.spread(nums, cam)      # numbers on one spot slide apart (docs/HUD.md)
-		for n in nums:                    # and the spread never pushes one back over your hunter
-			HunterZone.clear_label(n["node"], cam, zone)
+		NumSpacing.spread(nums, cam, zone)      # numbers on one spot slide apart (docs/HUD.md)
 	for rg in rings.duplicate():
 		rg["t"] += delta
 		var k: float = rg["t"] / rg["dur"]

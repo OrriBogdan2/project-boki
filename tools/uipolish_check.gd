@@ -10,7 +10,8 @@ extends RefCounted
 ##   5. no floating callout words in the world: fx.word is called only for Gil's n/need count
 ##   6. building the theme logs no engine error (every startup logged one, so it was the last line
 ##      of each GPU bench crash and read as its cause)
-##   7. closing (PanelClose): Esc closes the top panel only, a right click outside closes it, and the
+##   7. a sentence label wraps and takes its row's width (else it collapses to one letter per line)
+##   8. closing (PanelClose): Esc closes the top panel only, a right click outside closes it, and the
 ##      game never sees the click that closed it (real key and mouse events through Input)
 ##   8. a sentence label wraps and takes its row's width (else it collapses to one letter per line)
 
