@@ -17,7 +17,12 @@ static func fit(lbl: Label3D, cam: Camera3D, frame: Rect2, avoid: Array) -> void
 		if a.has_area() and cur.intersects(a):
 			var up := a.position.y - cur.end.y - GAP
 			var down := a.end.y - cur.position.y + GAP
-			d.y += up if -up < down else down
+			var up_ok := cur.position.y + up >= frame.position.y  # (a way out of the frame is no way)
+			var down_ok := cur.end.y + down <= frame.end.y
+			if up_ok and (-up < down or not down_ok):
+				d.y += up
+			elif down_ok:
+				d.y += down
 	var at := Rect2(box.position + d, box.size)
 	d.x += maxf(0.0, frame.position.x - at.position.x) - maxf(0.0, at.end.x - frame.end.x)
 	d.y += maxf(0.0, frame.position.y - at.position.y) - maxf(0.0, at.end.y - frame.end.y)

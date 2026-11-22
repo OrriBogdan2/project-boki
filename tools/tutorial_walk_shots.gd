@@ -11,6 +11,7 @@ extends RefCounted
 const GUARD := 24000  # ticks of 1 sim step: the whole course with the driver
 const CARD_WAIT := 600  # ticks of 1 sim step a fresh banner may take to settle
 const TOAST := "Combo!  Hit three foes in a row to build the meter up"
+const BEAT_WAIT_S := 0.6  # s of real time on a garden step: its strip has dropped in, the spotlight beat is still up
 const GARDEN_TURNS := 40  # a garden course never takes more steps than this
 
 var bad := 0
@@ -119,9 +120,9 @@ func _garden() -> void:
 		turns += 1
 		var id := FarmTutorial.current()
 		g.refresh()
-		for i in 12:  # 1.2 s on: the spotlight's opening beat is over
+		for i in 12:
 			g.tick(0.1)
-			await main.get_tree().process_frame
+		await main.get_tree().create_timer(BEAT_WAIT_S).timeout
 		await RenderingServer.frame_post_draw
 		shots += 1
 		_save("garden_%02d_%s" % [shots, id])
