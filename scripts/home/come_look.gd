@@ -7,7 +7,9 @@ extends RefCounted
 ## goes back to what it was doing: its walk and think timer come back, and on the base its machine waited
 ## (BaseLife._taken sees k["look"]). A Boki napping, working, eating or at a toy stays out of it. The first to
 ## arrive keeps one memory line of the day (Save.remember). No rewards, no pop-ups: it is only life at home
-## (GARDEN.md section 4).
+## (GARDEN.md section 4). The first time you come home with a garden item kind you never had (a Thumpnut), only the
+## nearest Boki walks up, reacts by its traits and says a line, once per kind per save (Save.d tutorial flag), and
+## its journal keeps one line ("sniffed the new Thumpnut").
 
 const MAX_LOOKERS := 3
 const NEAR_R := 16.0         # m: Boki this close to the news hear it and come
@@ -21,13 +23,17 @@ const TRY_DIST := 0.6        # m: the first Boki touches a new toy
 const ARRIVED_R := 0.7       # m: close enough to the spot to count as there
 const WATCH_S := 3.0         # s a Boki stays looking once it is there
 const GIVE_UP_S := 14.0      # s of walking before it looks from where it is
+const ITEM_KEY := "loot_react_"      # Save.d tutorial flag + the item id: that kind has been looked at
 const RARE_MARK := "Rare Egg"      # in a hatched Boki's first memory line
 const BUSY := ["job", "fetch", "bath", "indoors", "called_t", "eat", "play"]      # k keys: the farm has it
+
+const _JOURNAL_VERB := {"hide": "hid from", "sniff": "sniffed", "puff": "puffed up at"}      # by _reaction
 
 static var _looks: Array = []
 static var _extracts := -1         # expeditions made when the farm last looked (a rise: you came home)
 static var _eggs := {}             # Rare Egg ids at home when the farm last looked
 static var _inks := {}             # Ink id -> how many you had when the farm last looked
+static var _items := {}            # garden item id -> how many were in the bag when the farm last looked
 
 ## Every frame: walks each looker over, then lets it look and speak.
 static func tick(h, d: float) -> void:
@@ -43,7 +49,7 @@ static func tick(h, d: float) -> void:
 ## News at `at`. `who` is the new Boki's entry ({} for none); `what` names the toy (for "toy") or the Ink ("ink").
 ## Returns the Boki who set off, first one first.
 static func event(h, kind: String, at: Vector3, who: Dictionary, what := "") -> Array:
-	var came := _pick(h, at, who)
+	var came := _pick(h, at, who, kind)
 	for l in _looks.duplicate():
 		_release(l)
 	for i in came.size():
@@ -56,16 +62,23 @@ static func event(h, kind: String, at: Vector3, who: Dictionary, what := "") -> 
 		_looks.append({"k": k, "kind": kind, "timid": timid, "delay": STAGGER_S * i, "walk": 0.0, "watch": -1.0,
 			"said": false,
 			"spot": h.world.free_spot_near(at + Vector3(cos(a), 0, sin(a)) * dist)})
-	if not came.is_empty():
+	if came.is_empty():
+		return came
+	if kind == "item":
+		CareJournal.note(came[0]["rec"], "%s the new %s" % [_JOURNAL_VERB[_reaction(came[0])], what])
+	else:
 		Save.remember(came[0]["rec"], "look", _memory(kind, who, what))
 	return came
 
-## The three most curious Boki that can come; the timid ones among them go last.
-static func _pick(h, at: Vector3, who: Dictionary) -> Array:
+## The three most curious Boki that can come; the timid ones among them go last. A new item brings only the nearest.
+static func _pick(h, at: Vector3, who: Dictionary, kind := "") -> Array:
 	var isle: int = h.world.island_of(at.x, at.z)
 	var out: Array = (h.kins as Array).filter(func(k):
 		return k != who and _free(k) and h.world.island_of(k["pos"].x, k["pos"].z) == isle \
 			and (k["pos"] as Vector3).distance_to(at) < NEAR_R)
+	if kind == "item":
+		out.sort_custom(func(a, b): return a["pos"].distance_to(at) < b["pos"].distance_to(at))
+		return out.slice(0, 1)
 	out.sort_custom(func(a, b): return _trait(a, "curiosity") > _trait(b, "curiosity"))
 	out = out.slice(0, MAX_LOOKERS)
 	var bold: Array = out.filter(func(k): return not _timid(k))
@@ -153,7 +166,7 @@ static func _topic(l: Dictionary) -> String:
 	if l["timid"]:
 		return "look_shy"
 	return {"boki": "new_boki", "rare": "look_rare", "egg": "look_rare", "toy": "look_toy", "loot": "look_loot",
-		"ink": "look_loot"}[l["kind"]]
+		"ink": "look_loot", "item": "look_item"}[l["kind"]]
 
 ## A Boki that has just arrived is news; was it from a Rare Egg?
 static func arrival_kind(rec: Dictionary) -> String:
@@ -172,16 +185,28 @@ static func loot_home(h) -> void:
 	var new_egg := eggs.keys().any(func(id): return not _eggs.has(id))
 	var inks := _ink_counts()
 	var new_ink := _more_ink(inks)
+	var new_item := _new_item(Save.d["items"]) if came else ""
 	_eggs = eggs
 	_inks = inks
+	_items = (Save.d["items"] as Dictionary).duplicate()
 	if not came:
 		return
 	if new_egg:
 		event(h, "egg", h.ppos, {})
+	elif new_item != "" and not event(h, "item", h.ppos, {}, GardenItems.item_name(new_item)).is_empty():
+		Save.d["tutorial"][ITEM_KEY + new_item] = true
 	elif new_ink != "":
 		event(h, "ink", h.ppos, {}, Goods.name_of("good:" + new_ink))
 	else:
 		event(h, "loot", h.ppos, {})
+
+## The first garden item kind with more in the bag than when the farm last looked that no Boki has met yet, or "".
+static func _new_item(bag: Dictionary) -> String:
+	for id in GardenItems.ids():
+		var seen: bool = Save.d["tutorial"].get(ITEM_KEY + id, false)
+		if not seen and int(bag.get(id, 0)) > int(_items.get(id, 0)):
+			return id
+	return ""
 
 ## Every Rare Egg at home, by id: in the incubator's cradles and on its shelf.
 static func _egg_ids() -> Dictionary:
