@@ -31,6 +31,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main_tree = main.get_tree()
 	var ids: Array = DEFAULT
 	var px := 480
