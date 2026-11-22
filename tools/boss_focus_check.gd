@@ -44,6 +44,9 @@ func run(main: Node) -> void:
 		h.ctrl = "bot" if h == B else "idle"
 		h.inp["move"] = Vector2.ZERO
 		if not keep.has(h): h.out = true
+	var diff: Dictionary = (B.ai["diff"] as Dictionary).duplicate()
+	diff["aggro"] = 1.0      # (a timid roll would cut its reach under the 5 m the control stands at)
+	B.ai["diff"] = diff
 	for L in m.lairs.list: m.lairs.activate(L)
 	var F: Dictionary = m.lairs.list[0]
 	for g in F["guards"]:
@@ -58,13 +61,16 @@ func run(main: Node) -> void:
 	_spot(B, outside - side * 2.5)
 	# ---- 1. the control: outside the lair, the player is fair game
 	var went := false
+	P.reveal_t = 2.5      # (seen whichever way the bot faces: it only sees what is in front of it)
 	for i in int(2.0 / Match.DT):
 		_step()
 		if B.ai["tgt"] == P: went = true
+	P.reveal_t = 0.0
 	ok(boss.dormant and m.lairs.boss_fight(B).is_empty() and went,
 		"outside the lair, boss asleep: the bot goes for the player 5 m away")
 	# ---- 2. sealed in: the boss only (a hit from before the seal doesn't count)
 	B.hurt(2.0, P, {"src": "shot"})
+	P.reveal_t = TURN_T      # (a shot gives the shooter away, whichever way the bot faces)
 	# (off the bot's line to the boss: a shot through the boss would hit the player)
 	_spot(P, F["c"] + Vector3(-side.z, 0.0, side.x) * 5.0)      # (5 m: a shot at the boss splashes 2.5 m)
 	_spot(B, F["c"] - side * 2.5)
