@@ -35,7 +35,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
-	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	tree = main.get_tree()
 	Save.no_write = true
 	var d := Save.fresh()
