@@ -147,6 +147,9 @@ def retexture(o):
     --original-uv keeps the model's own UVs (a clean low-poly's)."""
     body = {"ai_model": o.model, "multiview_image_urls": [data_uri(p) for p in o.images[:4]],
             "enable_original_uv": o.original_uv, "enable_pbr": False, "target_formats": ["glb"]}
+    if getattr(o, "prompt", None):      # text style instead of the reference views
+        body.pop("multiview_image_urls")
+        body["text_style_prompt"] = o.prompt
     if o.model != "meshy-n1":
         body["texture_resolution"] = o.texture_res
     if o.source.lower().endswith(".glb"):
@@ -204,6 +207,7 @@ def main():
     r.add_argument("out")
     r.add_argument("source", help="a task id, or a .glb to upload")
     r.add_argument("images", nargs="+")
+    r.add_argument("--prompt", default=None)
     r.add_argument("--model", default="meshy-7")
     r.add_argument("--texture-res", default="8k")
     r.add_argument("--original-uv", action="store_true")
