@@ -598,6 +598,7 @@ func _guard_pulls(m: Match, p: Hunter, t2: Hunter, home: Vector3) -> void:
 
 ## A knock from before the guard that reaches a wall inside it: ours (no source row), as main: the guard takes the
 ## wall's 10 damage; the slam's stun is set outside the hit and still lands.
+## (The knock is 30: main now scales a knock down to about 0.57, and a slam needs 8 m/s on arrival.)
 func _guard_wall_slam(m: Match, p: Hunter, t: Hunter, t2: Hunter, home: Vector3) -> void:
 	var k: JuggernautKit = p.ak
 	a_x.step(m, 1.5)
@@ -610,7 +611,7 @@ func _guard_wall_slam(m: Match, p: Hunter, t: Hunter, t2: Hunter, home: Vector3)
 	t.teleport(home + Vector3(-6.0, 0, -3.0))
 	var w := HeroZones.rock(m, t2, home + Vector3(3.2, 0, 0), Vector2(1, 0), "gwall", 4.0, 30.0, 999.0, false)
 	k.cd["x"] = 0.0
-	p.hurt(1.0, t2, {"src": "abil", "ab": "lmb", "kb": Vector2(14.0, 0.0), "lift": 0.5})
+	p.hurt(1.0, t2, {"src": "abil", "ab": "lmb", "kb": Vector2(30.0, 0.0), "lift": 0.5})
 	var t0 := m.time
 	HunterKeys.ult_pressed(p)
 	var slam_in_guard := false
