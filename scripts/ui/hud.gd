@@ -812,6 +812,8 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
 	WaysOutHud.draw(self)
+	if not HudGroups.clock_shown(m):
+		return      # a save's first expedition: the clock waits for the first Ways Out beat or kill (HudReveal "beat_clock")
 	var left := m.length - m.time
 	var phase := "ISLANDS FALLING" if left < 30.0 else HeartHud.zone_line(m).to_upper()      # (the tide's clock)
 	var pc := BAD if left < 30.0 else SideColor.tone("tide_next")
