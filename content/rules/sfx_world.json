@@ -94,6 +94,8 @@
     "scripts/match/heart.gd",
     "scripts/match/heart_sfx.gd",
     "scripts/match/exits.gd",
+    "scripts/match/exits_flow.gd",
+    "scripts/match/exits_look.gd",
     "scripts/match/quest_seat.gd",
     "scripts/match/quest_seats.gd",
     "scripts/match/seat_beacon.gd"
@@ -101,8 +103,8 @@
    "holes": [
     "heart _force:portal",
     "heart _tide_tick:thump",
-    "exits _tick_outpost/open:thump",
-    "exits _waves:thump",
+    "exits_flow _tick_outpost/open:thump",
+    "exits_flow _waves:thump",
     "quest_seat _force:horn",
     "quest_seats _reseal:boom"
    ]

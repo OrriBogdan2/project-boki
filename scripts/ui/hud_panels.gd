@@ -10,7 +10,7 @@ extends Control
 const REDRAW_HZ := 20.0      # panel redraws per second
 var hud: Node
 var _t := 0.0
-var used_us := 0             # microseconds spent drawing since tooling last read it (--perf-probe, --perf-bench)
+var used_us := 0             # microseconds spent drawing since tooling last read it (--perf-bench)
 static var draws := 0        # panel redraws so far; RankMarks keeps a "+" only while the latest one drew it
 
 static func make(h: Node) -> HudPanels:
@@ -27,6 +27,10 @@ static func make(h: Node) -> HudPanels:
 const MIN_FRAMES := 3
 var _frames := 0
 func tick(delta: float) -> void:
+	var box := SafeArea.frame(get_parent_area_size())  # (on 21:9 and wider, a centred 16:9 frame)
+	if box != get_rect():
+		position = box.position
+		size = box.size
 	_t -= delta
 	_frames += 1
 	if _t <= 0.0 and _frames >= MIN_FRAMES:
@@ -39,6 +43,7 @@ func _draw_panels() -> void:
 	draws += 1
 	var main_canvas: Control = hud.c
 	hud.c = self
+	SafeArea.origin = position
 	hud.hover_spots.clear()
 	var m: Match = hud.m
 	var p: Hunter = m.player
@@ -86,4 +91,5 @@ func _draw_panels() -> void:
 	SafeArea.begin("")
 	HudScale.pass_end()
 	hud.c = main_canvas
+	SafeArea.origin = Vector2.ZERO
 	used_us += Time.get_ticks_usec() - t0

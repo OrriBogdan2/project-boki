@@ -36,7 +36,10 @@ single-process online match fed the relay's peer list by hand (`--net-leave-chec
    is newer than it.
 7. **Dead monsters are never freed until the match ends.** `mobs` keeps every dead Mob node (lair adds,
    exit guards); every `for mb in mobs` walks them. Bounded per match; unbounded in a long Training
-   Grounds session (dummies respawn forever, match.gd ~4545). Fix: free dead mobs after their death fx.
+   Grounds session (training.gd respawns monsters forever). **Fixed:** `MobReap` frees a dead camp monster
+   2 s after its dissolve and clears `mobs`, `ents_by_id` and what hunters and Boki remember of it (offline only;
+   bosses, the Blight and shrublings stay until the match ends). `--mob-reap-check`: 10 min of kills, 738 mobs and
+   +34200 nodes before, 4 mobs and +1500 nodes (perk orbs) after.
 8. **Remote shot copies carry a freed owner.** The `s` event builds a throwaway `Ent`, `spawn_shot`
    stores it as the shot's `by`, then it is freed. Every current reader is guarded (`cos`,
    `is_instance_valid`), but the next one that isn't will crash. Fix: pass `null`-safe team data instead.

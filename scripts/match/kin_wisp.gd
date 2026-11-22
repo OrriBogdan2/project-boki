@@ -66,7 +66,7 @@ static func ride(k: Kin, dt: float) -> bool:
 		return false
 	k.pos = k.owner_h.pos + Vector3(0, 1.5, 0)
 	k.prev = k.pos
-	TutorialLead.wisp_step(k, dt)       # (the match tutorial: it floats on ahead to the step's goal, a look only)
+	TutorialLead.wisp_step(k, dt)  # (the match tutorial: it floats on ahead to the step's goal, a look only)
 	return true
 
 
@@ -85,7 +85,7 @@ static func render(k: Kin) -> bool:
 	var sh := o.model.get_node_or_null("Rig/Torso/Shoulder") as Node3D
 	var y := sh.global_position.y if sh else o.position.y + SHOULDER_Y
 	var a: float = TAU * (k.m.time * ORBIT_HZ + float(k.model.get_meta("phase", 0.0)))
-	var mid: Vector3 = o.position            # (leading in the tutorial: it orbits a spot out ahead, still a look only)
+	var mid: Vector3 = o.position  # (leading in the tutorial: it orbits a spot out ahead, still a look only)
 	if k.comp and k.comp.lead_pos != Vector3.INF:
 		mid = k.comp.lead_pos
 		y += mid.y - o.position.y
