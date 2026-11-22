@@ -10858,3 +10858,4 @@ READY ext/remote-smooth-flake-1118 0cbd2f880c (remote-smooth-check flake: NetSmo
 READY ext/hunter-tex-2k 4d0102a49b573918052cb7f96c49e31a2579ae9e (hunter 4K->2K textures, pack -96 MB, size_limit + warden_tex_guard; merged main, size_budget resolved)
 READY ext/vfx-sparkle-grounded 1397473bdbf99a470719ccf2c76be4260799ec54 (Sparkle Grounded mark look)
 READY ext/p14b-port-1118 5bfb42cca2 (P14 part 2 SFX re-merged with main: gen_sfx_ui keeps main's creator/clan sounds + cast_broken + ready_e; match-audio-check 191 checks, 1 fail same as main (glider strain loop); sfx-set-check 0 fail; health --strict style ratchet red same as main)
+READY ext/hunter-tex-2k e2c677c4dfb27e9272bc09c80f522427c16d5410 (hunter 4K->2K textures, pack -96 MB; contains main 0b967858b9; size_budget re-measured 791.2 MB; warden_tex_guard 0 over 2048)
