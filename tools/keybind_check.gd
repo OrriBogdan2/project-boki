@@ -106,6 +106,10 @@ func run(main: Node) -> void:
 			"keys6_v": 1}
 	KeyMigrate.run(s6)
 	ok(not s6["keys"].has("throw") and int(s6["keys7_v"]) == 1, "a saved G Boki key moves to C (%s)" % str(s6))
+	# C: the Boki Summon in a match (wisps on), a Boki's details at home: separate contexts, no clash
+	var cs: Array = S.conflicts(_key(KEY_C), "details")
+	ok(S.slots("summon")[0] == "key:%d" % KEY_C and not cs.any(func(x): return x[0] == "summon"),
+			"Summon ships on C and does not clash with details (home) on it (%s)" % str(cs))
 	# clashes: F is interact's
 	var cf: Array = S.conflicts(_key(KEY_F), "ultimate")
 	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the ultimate F is caught: it's Interact's (%s)" % str(cf))
