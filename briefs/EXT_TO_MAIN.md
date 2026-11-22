@@ -10947,3 +10947,4 @@ READY ext/parity-recheck-lace 92c0343dd1a0e8a65db62bfbff431104a1e366c9 (Lace par
 READY ext/tutorial-wall-kick-step 9fde8142f215181ba9eac3e2aea99e2b9ccb6111 (wall-kick step needs the kick)
 READY ext/tut-sizes-playthrough 394516685eb6cd36ededdcf2b3fd1e9038e57786 (tutorials fit 720p to ultrawide)
 READY ext/anim-stun-knock-v95 36098d4deb3 (stun/knock poses on v95)
+READY ext/tut-text-audit ed2865d295 (tutorial and hint text audit)
