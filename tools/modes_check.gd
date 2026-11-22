@@ -46,8 +46,10 @@ func _match(mode: String, hunters: int, squads: int) -> void:
 	var teams := {}
 	for h in m.hunters:
 		teams[h.team] = int(teams.get(h.team, 0)) + 1
-	ok(m.hunters.size() == hunters and teams.size() == squads,
-		"%s: %d hunters in %d squads (want %d in %d)" % [mode, m.hunters.size(), teams.size(), hunters, squads])
+	ok(
+		m.hunters.size() == hunters and teams.size() == squads,
+		"%s: %d hunters in %d squads (want %d in %d)" % [mode, m.hunters.size(), teams.size(), hunters, squads]
+	)
 	m.queue_free()
 	for i in 3:
 		await main.get_tree().process_frame
@@ -55,7 +57,7 @@ func _match(mode: String, hunters: int, squads: int) -> void:
 
 func _panel() -> void:
 	var hm = await main._hb_home()
-	ExpeditionPanel.open(hm)      # (the panel itself: a fresh save would get the starter Relic first)
+	ExpeditionPanel.open(hm)  # (the panel itself: a fresh save would get the starter Relic first)
 	await main.get_tree().process_frame
 	_cards(hm.panel_host, "the expedition panel")
 	var rolling := _texts(hm.panel_host).filter(func(t): return String(t).to_lower().contains("rolling"))
@@ -71,8 +73,10 @@ func _panel() -> void:
 	var lobby: Control = load("res://scripts/ui/lobby.gd").new()
 	main.add_child(lobby)
 	await main.get_tree().process_frame
-	ok(lobby.mode == "solos" and lobby.mode_btns.has("solos") and lobby.mode_btns.has("trios"),
-		"the online lobby offers Trios and Solos and opens on the last pick (%s)" % lobby.mode)
+	ok(
+		lobby.mode == "solos" and lobby.mode_btns.has("solos") and lobby.mode_btns.has("trios"),
+		"the online lobby offers Trios and Solos and opens on the last pick (%s)" % lobby.mode
+	)
 	lobby.queue_free()
 	Save.d["exp_mode"] = "trios"
 

@@ -5,11 +5,12 @@ extends RefCounted
 ## memory line, and a short card says where it came from and where it went. One in the Burrow (the garden's
 ## out-cap was full) gets the card too, and the card says so.
 
-const ARRIVE_OFFSET := Vector3(1.8, 0.0, 1.2)      # m from where you arrive: close enough to see it come
-const CARD_W := 460.0                              # px
+const ARRIVE_OFFSET := Vector3(1.8, 0.0, 1.2)  # m from where you arrive: close enough to see it come
+const CARD_W := 460.0  # px
 
 ## uids of Boki carried home since the garden last looked (Game.apply_result adds, Home's welcome takes).
 static var pending: Array = []
+
 
 ## Memory line: 'came home from <map> with <Hunter>' (where = the origin's "where": map, hunter).
 static func line(where: Dictionary) -> String:
@@ -18,12 +19,14 @@ static func line(where: Dictionary) -> String:
 	var hunter := String(where.get("hunter", ""))
 	return s if hunter == "" else "%s with %s" % [s, hunter]
 
+
 ## Was this uid carried home just now? Forgets it.
 static func take(uid: String) -> bool:
 	var i := pending.find(uid)
 	if i >= 0:
 		pending.remove_at(i)
 	return i >= 0
+
 
 ## The card's two lines: where it came from, and where it went.
 static func card_lines(rec: Dictionary) -> Array:
@@ -33,6 +36,7 @@ static func card_lines(rec: Dictionary) -> Array:
 		var full := "The garden already has %d out, so %s went to the Burrow." % [KinBox.farm_cap(), nm]
 		return ["%s %s." % [nm, from], full]
 	return ["%s %s." % [nm, from], "It is out in the garden, and the others are coming to look."]
+
 
 ## The garden's welcome: a Boki just carried home that is out stands at the arrival point; one that went to the
 ## Burrow has no body here, so its card is all there is. Each gets its card.
@@ -46,6 +50,7 @@ static func arrive(h, arrived: Array) -> void:
 		if KinBox.is_boxed(rec) and take(String(uid)):
 			show_card(h, rec)
 
+
 ## Stands the Boki at the arrival point (where you appear), clear of the others.
 static func place(h, k: Dictionary) -> void:
 	var taken: Array = h.kins.map(func(o): return o["pos"])
@@ -54,9 +59,12 @@ static func place(h, k: Dictionary) -> void:
 	(k["node"] as Node3D).position = at
 	k["goal"] = Vector3.INF
 
+
 ## The card, once nothing else is open.
 static func show_card(h, rec: Dictionary) -> void:
-	h.arrivals.add(func():
-		var v: VBoxContainer = h._new_panel("%s came home" % rec["name"], CARD_W)
-		for l in card_lines(rec):
-			v.add_child(UI.label(String(l), 15, UI.INK)))
+	h.arrivals.add(
+		func():
+			var v: VBoxContainer = h._new_panel("%s came home" % rec["name"], CARD_W)
+			for l in card_lines(rec):
+				v.add_child(UI.label(String(l), 15, UI.INK))
+	)

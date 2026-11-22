@@ -8,6 +8,7 @@ const WIN := Vector2i(1280, 720)
 var main: Node
 var dir := ""
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
@@ -24,6 +25,7 @@ func run(main_node: Node) -> void:
 	for mode in Data.MODES:
 		await _shots(mode)
 	main.get_tree().quit(0)
+
 
 func _shots(mode: String) -> void:
 	var m := Match.new()
@@ -45,7 +47,9 @@ func _shots(mode: String) -> void:
 	var mates := m.hunters.filter(func(x): return x.team == m.player.team).size()
 	print("SOLO-HUD-SHOT %s: %d hunters on your squad" % [mode, mates])
 	m.queue_free()
-	for i in 3: await main.get_tree().process_frame
+	for i in 3:
+		await main.get_tree().process_frame
+
 
 func _save(file: String) -> void:
 	main.get_viewport().get_texture().get_image().save_jpg(dir.path_join(file), 0.88)
