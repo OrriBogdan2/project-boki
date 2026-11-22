@@ -11039,3 +11039,4 @@ READY ext/merge-lane-N3-1122 86980ba00a8745f01ef544a8a5e68a472ed63c14 (lane N3 b
 READY ext/sfx-lace-heavy-release e6a06a8392bc7aa0c23e34e1c075751f93078059 (Lace Heavy Shot release cue settled)
 READY ext/anim-stun-knock-v95 9ef526fc46 (stun/knock poses on v95; origin/main d8cc9d1ea8 merged cleanly; --check 0 failures, health --strict OK, --warden-clips-check 3 reds identical to earlier run: porthole/lure, breaker 108k tris, dredge jump)
 READY ext/ui-dmg-number-kinds 2c4179bce78294fec1ef8af05fe33c55bbcf1f27 (damage number kinds; origin/main d8cc9d1ea87 merged in, no conflicts; --check 0, --dmg-number-check 0, --number-looks-check 0, health --strict OK; no Net/save change)
+READY ext/ui-dmg-number-kinds 2c4179bce78294fec1ef8af05fe33c55bbcf1f27 (damage number kinds; origin/main d8cc9d1ea87 merged in, no conflicts; --check 0, --dmg-number-check 0, --number-looks-check 0, health --strict OK; no Net/save change)
