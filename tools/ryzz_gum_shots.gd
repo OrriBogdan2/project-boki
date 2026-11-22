@@ -30,6 +30,8 @@ func run(main: Node) -> void:
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	_stage(main)
+	for k in 90:
+		await tree.process_frame     # (the loading cover is gone before the first shot)
 	for st in STATES:
 		await _state(String(st))
 	var probe := _hunter()
@@ -88,9 +90,11 @@ func _freeze(h: Node3D) -> void:
 		(ap as AnimationPlayer).active = false
 	WardenGlb.skeleton(h.get_node("Warden")).reset_bone_poses()
 
-## The face's centre (m): a fixed drop below the crown anchor.
+## The face's centre (m): a fixed lift over the head bone (the lips sit just below it, the crown 0.28 above it).
 func _face(h: Node3D) -> Vector3:
-	return WardenGlb.anchor(h, "anchor_head_top").global_position - Vector3(0, 0.15, 0)
+	var skel := WardenGlb.skeleton(h.get_node("Warden"))
+	return skel.global_transform * skel.get_bone_global_pose(WardenSkeleton.find(skel, "head")).origin \
+		+ Vector3(0, 0.04, 0)
 
 func _grab() -> Image:
 	await tree.process_frame
@@ -114,7 +118,7 @@ func _state(st: String) -> void:
 		var yaw := deg_to_rad(float(VIEWS[v][0]))
 		var up := deg_to_rad(float(VIEWS[v][1]))
 		var dir := Vector3(sin(yaw) * cos(up), sin(up), cos(yaw) * cos(up))
-		cam.position = c + dir * 2.2
+		cam.position = c + dir * 3.2
 		cam.look_at(c)
 		var img := await _grab()
 		var m := (img.get_height() - CROP) / 2
