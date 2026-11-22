@@ -10,7 +10,8 @@ extends RefCounted
 ##   keys     flat [phase, value, phase, value ...] from 0 to 1, value in rad, m, scale or rad/s
 ## Phases: idle, walk, run and stagger loop (walk/run by gait distance); windup is windup_k(), the same number the
 ## ground telegraph fills with, so the body gathers exactly as the tell fills; strike runs the blow plus its
-## follow-through; flinch is the hit flash; death runs DEATH_S. run is walk at RUN_AMP when it has no table of its own.
+## follow-through; flinch is the hit-react, layered over idle, walk and run for FLINCH_S after each hit; death runs
+## DEATH_S. run is walk at RUN_AMP when it has no table of its own.
 ## Tables are baked once into 32-sample curves; a frame is table lookups only, no allocation.
 
 const IDLE := 0
@@ -30,21 +31,24 @@ const LUNGE_S := 0.2              # s: a skitter's lunge, then LUNGE_REC of reco
 const LUNGE_REC := 0.45           # s
 const RECOVER_S := {"spit": 0.5, "volley": 0.6, "slam": 0.8}      # s: follow-through after the blow, by attack
 const DEATH_S := 0.32             # s: the death move, then the monster is gone
-const FLASH_S := 0.12             # s: the hit flash Ent sets; the flinch rides it
 const RUN_SPEED := 3.6            # m/s: above this the run table plays
 const RUN_AMP := 1.4              # run = walk x this when a kind has no run table
 ## s per idle loop
 const IDLE_S := {"brute": 5.0, "spitter": 3.0, "skitter": 2.5, "bomber": 2.2, "sentinel": 4.0, "glimmer": 2.0}
 const STAGGER_S := 2.0            # s per stagger loop
-## gait cycles per radian of Mob.anim / TAU
-const GAIT := {"skitter": 1.6, "spitter": 1.0, "brute": 0.9, "bomber": 1.0, "sentinel": 1.0, "glimmer": 1.3}
+## m of ground per gait cycle: Mob.anim advances with the distance walked, so the feet keep pace with the floor
+const STRIDE_M := {"skitter": 1.8, "spitter": 2.3, "brute": 2.8, "bomber": 2.8, "sentinel": 1.0, "glimmer": 2.3}
+const HIT_RATE := 30.0            # 1/s: pivots follow this fast while the hit-react layer plays
+const FLINCH_S := 0.22            # s: the hit-react plays over idle, walk and run for this long after a hit
 const FAR_M := 30.0               # m from the camera focus: beyond this the body is not posed
 const SAMPLES := 32
 const STRIDE := 10                # floats per pivot in Rig.acc: rx ry rz px py pz sx sy sz wy
 const CHANS := {"rx": [0], "ry": [1], "rz": [2], "px": [3], "py": [4], "pz": [5], "sx": [6], "sy": [7], "sz": [8],
 	"sxz": [6, 8], "sa": [6, 7, 8], "wy": [9]}
-## per channel: which of rotation, position, scale, spin a pivot needs
-const KIND_BIT := [1, 1, 1, 2, 2, 2, 4, 4, 4, 8]
+## per channel: which of rotation x, y, z, position, scale, spin a pivot needs. Rotation is per axis so an axis no
+## track drives is left alone: Mob.render leans and shivers Body on x and z, and a Body ry track must not undo that.
+const KIND_BIT := [1, 16, 32, 2, 2, 2, 4, 4, 4, 8]
+const ROT_BITS := 1 | 16 | 32 | 8
 
 const SK_A := ["Leg0-1", "Leg2-1", "Leg11"]            # skitter tripods
 const SK_B := ["Leg01", "Leg21", "Leg1-1"]
@@ -349,6 +353,8 @@ class Rig:
 	var acc := PackedFloat32Array()
 	var def: Dictionary
 	var desync := 0.0      # per-monster offset so a camp does not breathe in step
+	var hit_t := 0.0       # s left of the hit-react layer
+	var last_flash := 0.0  # Ent.flash_t last frame: a rise is a new hit
 
 static func base_kind(kind: String) -> String:
 	return "brute" if kind == "warden" else kind
@@ -434,7 +440,6 @@ static func state_of(mb: Mob) -> int:
 	if mb.stagger_t > 0.0 or mb.stun_t > 0.0: return STAGGER
 	if mb.st == "windup": return WINDUP
 	if mb.st == "lunge" or mb.st == "recover": return STRIKE
-	if mb.flash_t > 0.0: return FLINCH
 	var spd := Vector2(mb.vel.x, mb.vel.z).length()
 	if spd <= 0.3: return IDLE
 	return RUN if spd > RUN_SPEED else WALK
@@ -443,11 +448,10 @@ static func phase_of(mb: Mob, state: int, desync: float) -> float:
 	var k := base_kind(mb.mkind)
 	match state:
 		IDLE: return fposmod(float(mb.m.time) / float(IDLE_S.get(k, 2.5)) + desync, 1.0)
-		WALK, RUN: return fposmod(mb.anim * float(GAIT.get(k, 1.0)) / TAU, 1.0)
+		WALK, RUN: return fposmod(mb.anim / TAU, 1.0)
 		WINDUP: return windup_k(mb.st_t, float(mb.md["windup"]))
 		STRIKE: return strike_k(String(mb.md["attack"]), mb.st, mb.st_t)
 		STAGGER: return fposmod(float(mb.m.time) / STAGGER_S + desync, 1.0)
-		FLINCH: return clampf(1.0 - mb.flash_t / FLASH_S, 0.0, 1.0)
 	return clampf(mb.death_t / DEATH_S, 0.0, 1.0)
 
 # ------------------------------------------------------------------ posing
@@ -473,6 +477,21 @@ static func _rig(model: Node3D, kind: String) -> Rig:
 	model.set_meta("mob_rig", rig)
 	return rig
 
+## Adds a state's tracks, sampled at phase `ph`, into the pivot accumulator.
+static func _layer(acc: PackedFloat32Array, trs: Array, ph: float, loop: bool, amp: float) -> void:
+	for tr in trs:
+		var p: float = ph + float(tr[3])
+		p = fposmod(p, 1.0) if loop else minf(p, 1.0)
+		var x := p * SAMPLES
+		var i := mini(int(x), SAMPLES - 1)
+		var cv: PackedFloat32Array = tr[2]
+		var v := (cv[i] + (cv[i + 1] - cv[i]) * (x - i)) * amp
+		var tg: PackedInt32Array = tr[0]
+		var sg: PackedFloat32Array = tr[1]
+		for j in tg.size():
+			acc[tg[j]] += v * sg[j]
+
+
 ## Samples the monster's current state into its pivots. False when this body has no keyed moves (pack models, bosses).
 static func pose(mb: Mob, delta: float) -> bool:
 	if mb.model == null or not mb.model.has_meta("sculpted") or not has_kind(mb.mkind):
@@ -490,29 +509,29 @@ static func pose(mb: Mob, delta: float) -> bool:
 		amp = RUN_AMP
 	var acc := rig.acc
 	acc.fill(0.0)
-	var loop: bool = LOOPS[state]
-	for tr in trs:
-		var p: float = ph + float(tr[3])
-		p = fposmod(p, 1.0) if loop else minf(p, 1.0)
-		var x := p * SAMPLES
-		var i := mini(int(x), SAMPLES - 1)
-		var cv: PackedFloat32Array = tr[2]
-		var v := (cv[i] + (cv[i + 1] - cv[i]) * (x - i)) * amp
-		var tg: PackedInt32Array = tr[0]
-		var sg: PackedFloat32Array = tr[1]
-		for j in tg.size():
-			acc[tg[j]] += v * sg[j]
-	var a := 1.0 - exp(-float(RATE[state]) * delta)
+	_layer(acc, trs, ph, LOOPS[state], amp)
+	if mb.flash_t > rig.last_flash:
+		rig.hit_t = FLINCH_S
+	rig.last_flash = mb.flash_t
+	rig.hit_t = maxf(0.0, rig.hit_t - delta)
+	if rig.hit_t > 0.0 and state <= RUN:  # a hit shows on the body without dropping the gait or the breath
+		_layer(acc, rig.def["states"][FLINCH], 1.0 - rig.hit_t / FLINCH_S, false, 1.0)
+	var a := 1.0 - exp(-maxf(float(RATE[state]), HIT_RATE if rig.hit_t > 0.0 else 0.0) * delta)
 	for k in rig.nodes.size():
 		var n := rig.nodes[k]
 		var b := k * STRIDE
 		var mk := rig.mask[k]
-		if mk & 1 or mk & 8:
+		if mk & ROT_BITS:
 			var rr := rig.rest_r[k]
 			var r := n.rotation
-			r.x = lerpf(r.x, rr.x + acc[b], a)
-			r.z = lerpf(r.z, rr.z + acc[b + 2], a)
-			r.y = r.y + acc[b + 9] * delta if mk & 8 else lerpf(r.y, rr.y + acc[b + 1], a)
+			if mk & 1:
+				r.x = lerpf(r.x, rr.x + acc[b], a)
+			if mk & 32:
+				r.z = lerpf(r.z, rr.z + acc[b + 2], a)
+			if mk & 8:
+				r.y = r.y + acc[b + 9] * delta
+			elif mk & 16:
+				r.y = lerpf(r.y, rr.y + acc[b + 1], a)
 			n.rotation = r
 		if mk & 2:
 			var rp := rig.rest_p[k]
