@@ -128,7 +128,7 @@ static func build(species: String, rec := {}) -> Node3D:
 	body.set_instance_shader_parameter("rim_col", cols["glow"])
 	root.add_child(body)
 	root.add_child(_trail((cols["glow"] as Color).lightened(TRAIL_LIGHTEN)))
-	root.set_meta("phase", randf())
+	root.set_meta("phase", KitLooks.vis_rng.randf())
 	return root
 
 ## [ears, tail] feature names for a species: its hand-built body's, else its `look` data's.
@@ -158,6 +158,13 @@ static func pose(wisp: Node3D, t: float) -> void:
 	body.scale = Vector3(1.0 + squash * 0.6, 1.0 - squash, 1.0 + squash * 0.6)
 	body.rotation.z = -dart * DART_LEAN
 	(wisp.get_node("Trail") as Node3D).position = body.position
+
+## The edge of the body in the side colour (SideColor: you, your squad, rivals), so whose it is reads at a glance.
+## Only sets the shader parameter when the colour changes.
+static func side(wisp: Node3D, col: Color) -> void:
+	if wisp.get_meta("side", Color(0, 0, 0, 0)) != col:
+		wisp.set_meta("side", col)
+		(wisp.get_node("Body") as GeometryInstance3D).set_instance_shader_parameter("rim_col", col)
 
 ## Dim with no sparkles while its summon rests, bright when it is ready. Cheap to call every frame.
 static func dim(wisp: Node3D, resting: bool) -> void:

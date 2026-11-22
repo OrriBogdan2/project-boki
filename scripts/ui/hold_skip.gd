@@ -3,7 +3,9 @@ extends Control
 ## The story player's input: hold to skip, click for next. A tap of any key, mouse button
 ## or pad button fires `tapped` (the scene moves on one beat); holding one for HOLD_S fires `skipped`.
 ## It sits in a corner unseen until a press: then a small ring with "Hold to skip" beside it fades in,
-## fills while held, and fades away LINGER_S after letting go.
+## fills while held, and fades away LINGER_S after letting go. A watcher who has pressed nothing is told anyway:
+## after HINT_AT s the hint shows by itself for HINT_S s (docs/TUTORIAL_PACE.md: the prologue was 37 s of
+## nothing on screen saying a key ends it).
 ##
 ##   var hs := HoldSkip.new(); add_child(hs)
 ##   hs.tapped.connect(...); hs.skipped.connect(...)
@@ -15,6 +17,8 @@ signal skipped
 const HOLD_S := 1.0        # s held to skip it all
 const TAP_S := 0.35        # s: let go sooner and it was a tap; let go later (but short of HOLD_S) and nothing happens
 const LINGER_S := 1.5      # s the hint stays up after letting go
+const HINT_AT := 4.0       # s of watching with no press before the hint shows by itself
+const HINT_S := 6.0        # s that unprompted hint stays up (a press takes over)
 const FADE_S := 0.25       # s for the hint to fade in or out
 const RING_R := 11.0       # px: the ring's radius
 const RING_W := 3.0        # px: its line width
@@ -24,6 +28,8 @@ const TEXT_SIZE := 13
 var held: InputEvent = null      # the press being held, until its release
 var held_s := 0.0
 var since_up := LINGER_S         # s since the last release (the hint lingers, then fades)
+var watched_s := 0.0             # s since this was added
+var pressed_once := false        # any press seen: the hint is then the press's own
 var done := false
 
 func _init() -> void:
@@ -37,6 +43,7 @@ func feed(event: InputEvent) -> bool:
 	if done or not button or event.is_echo():
 		return false
 	if event.is_pressed():
+		pressed_once = true
 		if held == null:
 			held = event
 			held_s = 0.0
@@ -51,6 +58,7 @@ func feed(event: InputEvent) -> bool:
 	return true
 
 func _process(delta: float) -> void:
+	watched_s += delta
 	if held != null and not done:
 		held_s += delta
 		if held_s >= HOLD_S:
@@ -60,6 +68,8 @@ func _process(delta: float) -> void:
 	else:
 		since_up += delta
 	var up := held != null or done or since_up < LINGER_S
+	if not pressed_once and watched_s >= HINT_AT and watched_s < HINT_AT + HINT_S:
+		up = true      # (nothing pressed yet: say what ends it)
 	modulate.a = move_toward(modulate.a, 1.0 if up else 0.0, delta / FADE_S)
 	if modulate.a > 0.0:
 		queue_redraw()

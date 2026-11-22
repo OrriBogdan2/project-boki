@@ -374,8 +374,10 @@ func run(main: Node) -> void:
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
 	_overheat()         # after every timed row: its ~9 s of level glide would move them
 	load("res://tools/move_feel_turn.gd").new(self).run()      # every kit's 180 stick flip at a run (~30 s, late too)
+	load("res://tools/move_feel_hunters.gd").new(self).run()      # the movement review rows, every kit (late too)
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
+	_vault_exit()       # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -996,8 +998,8 @@ static func ue_band(v0: float) -> Vector2:
 ## The run speed of every Hunter row in content/rules/hunter_move.json: speed -> its ids.
 static func run_speeds() -> Dictionary:
 	var out := {}
-	for id in HunterMove.rules():
-		var row = HunterMove.rules()[id]
+	for id in MoveRules.data():
+		var row = MoveRules.data()[id]
 		if row is Dictionary and row.has("speed"):
 			var v := float(row["speed"])
 			out[v] = out.get(v, []) + [id]
@@ -1333,7 +1335,7 @@ const KIT_DASH := {
 	# owner 11-11: 10-15% further in the same time, so the footage's 3 m x1.125
 	"archer": {"ground": [3.375, 0.386], "long": [5.0, 0.286],
 			"src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed, owner 11-11: x1.125 far"},
-	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
+	"ashwick": {"ground": [3.4, 0.33], "air": [3.4, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 3.4 m (owner 11-17)"},
 	"tender": {"ground": [3.15, 0.23], "src": "[footage] Elluna 2 bh / 0.2 s, owner: shorter, slower (air: own check)"},
 	"bulwark": {"ground": [3.5, 0.17], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
 	# owner item 183 (bdb7703bd): with a charge her air cartwheel is the ground one (the sheet's 8.4 m / 0.95 s retired)
@@ -1345,7 +1347,7 @@ const KIT_DASH := {
 	# owner playtest 11-11 (8f7f15198): the lane 7.5% longer, 6.02-10.48 m at 43 m/s, so 6.02 / 43 x1.15
 	"mage": {"ground": [6.02, 0.161], "air": [6.02, 0.161], "long": [5.0, 0.2],
 				"src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
-	"gil": {"ground": [6.0, 0.4], "air": [4.25, 0.23], "src": "ours: Ground Swim 6 m/0.4 s, air light long"},
+	"gil": {"ground": [4.5, 0.55], "air": [4.25, 0.23], "src": "owner 11-11: Ground Swim 4.5 m/0.55 s, air light long"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 
@@ -2334,7 +2336,7 @@ func _screen_scale() -> void:
 	_source_scale(cam, vh, hfov)
 
 ## The same measures under the source_scale test style (content/rules/camera.json, off by default): the
-## source's ground across and its Hunter size together, then back to the default style. The MFEEL source
+## source's ground across and its Hunter size together, then back to the Supervive style. The MFEEL source
 ## line is the bigger body against what keeps its size (docs/MOVEMENT_FEEL.md "Source scale flag").
 func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 	cam.use_style("source_scale")

@@ -70,11 +70,11 @@ What the in-game kit card (K) says.
 
 **Flashover (passive).** Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe is Ablaze: 3s of burning for 0.5% of their health a second, one flame over their head. Fed again to full Char they Flash over: a fiercer burn (1%), three flames and a glow. Anything that stokes a foe already burning upgrades it. A burning foe takes 6% more from the stream and the cinder (10% once Flashed over), and the stream also takes 0.4% (0.6%) of their health a second. A knock heals you 16% of your health.
 
-**Soot Ram (dash, Shift, 9s cooldown).** A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 18 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed.
+**Soot Ram (dash, Shift, 9s cooldown).** A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 18 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a poof of the same length that keeps some of your speed.
 
 **Cinder Shot (RMB, 7s cooldown).**
 
-- *Tap:* Hold to aim down a lane, release: a cinder that always flies its full 14m: 13 damage, a 30% slow for 1.5s, and it sets the foe Ablaze. On a foe that is already burning it hits 6% harder (10% on a Flashed-over one), upgrades the burn and spreads the burn to foes within 4m. A miss fizzles at the end of its flight.
+- *Tap:* Press: a lane shows with a flash in her palm, and 0.4s later a cinder flies its full 14m: 13 damage, a 30% slow for 1.5s, and it sets the foe Ablaze. On a foe that is already burning it hits 6% harder (10% on a Flashed-over one), upgrades the burn and spreads the burn to foes within 4m. A miss fizzles at the end of its flight.
 
 **Furnace Cloak (E, 10.5s cooldown).** On the press, a blast of heat round you (4.5m, the ring shows its edge): 9 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
