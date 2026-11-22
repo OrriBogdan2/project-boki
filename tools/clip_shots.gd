@@ -5,8 +5,8 @@ extends RefCounted
 ## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
-## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model (contract clips or
-## a Meshy-native one), <dir>/states/f###.png every 1/fps s.
+## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model
+## (contract clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 

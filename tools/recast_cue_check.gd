@@ -351,7 +351,7 @@ func _world_plain() -> void:
 ## On the owner's screen the badge carries the foe's state, so the kit's world copy of it hides there: Sable's Mark
 ## pips, Sparkle's Static marker (its count and pips, the Live ring when full; the sparks on the body stay). Seen by
 ## anyone else (the same kit not local) the world art shows. Neve has no badge: her ice shards in the foe are the one
-## read for everyone (owner 11-11, --neve-feel-check).
+## read for everyone (--neve-feel-check).
 func _split() -> void:
 	for hero in ["thief", "mage"]:
 		var s := setup(hero, 6.0)

@@ -12,8 +12,9 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const SPIKE_MS := 8.0          # ms over the median frame (and over the repeat) that counts as a first-cast hitch
-const NOISE_X := 3.0           # a first-use cost must also be over NOISE_X medians: load noise scales with the frame (w2 quiet: median 10-14 ms,
-                               # noise up to 1.1x; a bisect at load 40: median 19-33 ms, noise up to 2.0x); real hitches were 183-260 ms
+# a first-use cost must also be over NOISE_X medians: load noise scales with the frame (w2 quiet: median 10-14 ms,
+# noise up to 1.1x; a bisect at load 40: median 19-33 ms, noise up to 2.0x); real hitches were 183-260 ms
+const NOISE_X := 3.0
 const WINDOW := 24             # frames watched after a press (shots that land, a fuse's late burst)
 const SETTLE := 60             # frames between presses: effects of the last slot die down
 const SLOTS := ["lmb", "rmb", "e", "r", "dash", "q"]
@@ -133,7 +134,8 @@ func _span(m: Match, P: Hunter, T: Hunter) -> Array:
 func _row(ak: String, s: String, went: String, med: float, f: float, rep: float, what: String) -> void:
 	var cost := f - rep
 	var over := maxf(SPIKE_MS, NOISE_X * med)      # (a bisect on a box at load 40, flat SPIKE_MS: 32 false FAILs)
-	var traced := what != "0 pipelines; "      # nothing made, nothing compiled: a slow frame with no cause is the host, not the first cast
+	# nothing made, nothing compiled: a slow frame with no cause is the host, not the first cast
+	var traced := what != "0 pipelines; "
 	var hitch := cost > over and f - med > over and traced
 	if hitch: bad += 1
 	rows.append([ak, s, went, med, f, rep, cost, ("FAIL: " + what) if hitch else "ok"])
