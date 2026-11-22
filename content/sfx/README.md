@@ -11,3 +11,4 @@ Format and rules: docs/AUDIO.md.
 `training.json` is the Training Grounds' station cues and the duel ring's countdown (scripts/match/training_sfx.gd).
 `blight_mobs.json` is the Blight mobs' wind-up voices (`v_bl_*`, played by `Mob._begin_attack`).
 `carry.json` is the lead swap, the carry-out claim and a stolen Boki (scripts/match/carry_sfx.gd).
+`belt.json` is the belt cancel cues (`belt_spill` for a spilt tonic, `belt_fumble` for a dropped repair), played by `UtilityUse.spill`; `--hearth-lamp-check`.
