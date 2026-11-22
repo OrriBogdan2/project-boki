@@ -19,7 +19,8 @@ extends RefCounted
 ##    points forward or back: a strafe's legs spread sideways, not in pitch, so it keeps its clip's own bob; and by
 ##    "loco.bob_fix": [walk, run] (default 1: 0 for a clip already in step, which the pull only roughens).
 ##  - with no footing (state "footing", HazardMoves on ice: the hazard's "moves" data) the stride shortens by "stride",
-##    the clip quickens by "cadence" and the free arms (those in "arm_swing") lift "arms_out" rad out from the side.
+##    the clip quickens by "cadence" and the free arms (those in "arm_swing") lift "arms_out" rad out from the side;
+##    no foot holds its spot (the foot lock fades out with it).
 ##  - "loco.foot_lock": [walk, run] (0..1, default 0) holds a foot where it came down while it is on the ground (the
 ##    lowest LOCK_BAND of its own height range), the ground under it going back at the body's speed, by the legs'
 ##    two-bone IK (WardenSkeleton.reach_bones), at most LOCK_PULL of the leg off the clip's ankle; lifted, it eases back
@@ -128,7 +129,7 @@ func plan(spd: float, lc: Dictionary, pos: Vector2, w: float, moving := 1.0) -> 
 	var run_mps := lerpf(float(mps[1]), float(side[1]), side_k) + (float(back[1]) - float(mps[1])) * back_k
 	gain = lerpf(float(stride[0]), float(stride[1]), w) * lerpf(1.0, float(foot.get("stride", 1.0)), foot_w)
 	var fl: Array = lc.get("foot_lock", [0.0, 0.0])
-	lock = lerpf(float(fl[0]), float(fl[1]), w)
+	lock = lerpf(float(fl[0]), float(fl[1]), w) * (1.0 - foot_w)      # no footing: no foot holds its spot
 	ground_v = Vector3(pos.x, 0.0, -pos.y).normalized() * spd
 	var b: Array = lc.get("bob", [1.0, 1.0])
 	bob = lerpf(float(b[0]), float(b[1]), w)
