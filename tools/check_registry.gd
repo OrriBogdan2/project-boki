@@ -234,7 +234,6 @@ const CHECKS := {
 	"--model-draws": ["res://tools/model_draws.gd", "model_draws", null],  # surfaces per .glb
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],  # item 94
 	"--first-cast-check": ["res://tools/first_cast_check.gd", "first_cast_check", null],  # first use of each slot
-	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],  # 6 Hunters, 4 Boki
 	"--texture-budget-check": ["res://tools/texture_budget_check.gd", "texture_budget_check", null],
 	"--match-profile": ["res://tools/match_profile.gd", "match_profile", null],  # GPU: a 30-hunter match, per phase
 	# draw calls, tris, shadow lights, frame ms
@@ -1015,6 +1014,7 @@ const CHECKS := {
 const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
+	"fight-p99-gpu": "--fight-p99-check --quality=medium --bench-view=1920x1080 --timing-strict",
 }
 
 ## Flags the gate leaves out: the whole run is part of the listed flags' runs (same script, a mode or an
