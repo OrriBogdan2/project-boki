@@ -10924,3 +10924,4 @@ READY ext/anim-dash-mark-cinder-lace 6d45528b17ce09e431c14608dc660d0632e5542f (c
 READY ext/ui-garden-sizes 19139c04a (garden screens fit 720p to ultrawide)
 READY ext/anim-dash-mark-cinder-lace 863ef01e0c0 (Cinder ram/poof + Lace roll/flick marked dash; dash cells proc->clip)
 READY ext/ui-results-boki-line a882ed986c7d1bbfc2d251b472517be1aa9139a0 (results show Boki XP and bond)
+READY ext/vfx-gil-smoke-ring 2b6d46558d365ab25d924e8761475b88c8e25d24 (Gil RMB/Zeep looks cleaned up)
