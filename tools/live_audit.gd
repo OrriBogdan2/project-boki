@@ -12,9 +12,10 @@ const RUN_MPS := 5.0
 const DASH_MPS := 9.0
 const ATTACK_MOVES := {"archer": "arc_loose", "bulwark": "bul_throw", "gunslinger": "gunslinger_lmb", "thief": "thf_lmb_r"}
 const DASH_MOVES := {"gunslinger": "gunslinger_dash", "thief": "thf_exdash"}
-const SAMPLES := {"idle": [0.4, 1.0, 1.6], "run": [0.0, 0.12, 0.24], "dash": [0.0, 0.1, 0.2], "jump": [0.05, 0.3, 0.6],
+const SAMPLES := {"idle": [0.4, 1.0, 1.6], "run": [0.0, 0.12, 0.24], "dash": [0.0, 0.1, 0.2], "glide": [0.2, 0.6, 1.0], "jump": [0.05, 0.3, 0.6],
 	"attack": [0.1, 0.25, 0.45], "hit": [0.05, 0.15, 0.35]}
-const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
+const CLIPS := ["idle", "run", "dash", "glide", "jump", "attack", "hit"]
+const FILM := {"idle": 1.6, "run": 0.9, "dash": 0.5, "glide": 1.0, "hit": 0.6, "attack": 1.0}
 
 var close := false
 var film := false
@@ -88,6 +89,10 @@ func _state(id: String, clip: String, yaw: float, t: float) -> Dictionary:
 			if not native and DASH_MOVES.has(id):
 				s["kmove"] = DASH_MOVES[id]
 				s["kmove_t"] = t
+		"glide":
+			s["grounded"] = false
+			s["gliding"] = true
+			s["vel"] = fw * 6.0 + Vector3(0.0, -1.5, 0.0)
 		"jump":
 			s["grounded"] = false
 			s["vel"] = fw * 4.0 + Vector3(0.0, 3.0 - t * 8.0, 0.0)
@@ -119,13 +124,13 @@ func _hunter(id: String, dir: String) -> void:
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
 	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
-	for clip in (["idle", "run", "attack"] if film else CLIPS):
+	for clip in (FILM.keys() if film else CLIPS):
 		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
 		if film:       # every 2nd step (15 fps) over a clip's span
 			times = []
-			for j in int(float({"idle": 1.6, "run": 0.9, "attack": 1.0}[clip]) / (2.0 * DT)):
+			for j in int(float(FILM[clip]) / (2.0 * DT)):
 				times.append(j * 2.0 * DT)
 		# settle: the pre-state (standing, or running for a hit/jump) for 25 frames, then the clip's own state
 		var s := _state(id, "idle" if clip != "dash" else "run", yaw, 0.0)

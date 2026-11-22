@@ -16,7 +16,7 @@ const FADE := 0.15  # s: one clip into the next
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
-const LOOPS := ["idle", "walk", "run", "crouch"]
+const LOOPS := ["idle", "walk", "run", "crouch", "dash", "glide"]  # (dash, glide, hit: optional clips, data "clips")
 const ARMS_CLIP := "%s_arms"  # the crouch with another clip's arms (data "crouch_arms_from"), added beside Meshy's
 const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chains are the arms (data "arm_roots")
 ## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
@@ -38,6 +38,7 @@ var cur := ""  # the game state playing ("idle", "walk", ...)
 var attack_left := 0.0  # s the attack clip still owns the body
 var attack_move := false  # it was started by a kit move or a swing (not a cast or a shot): the open reach waits
 var last := {"kmove": "", "swing_n": 0, "cast": INF, "recoil": 0.0}
+var hit_last := INF  # the state's hit_t last frame: a smaller one is a new hit
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
@@ -111,7 +112,8 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	plays = (d["clips"] as Dictionary).duplicate()
 	for st in LOOPS:
-		player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
+		if plays.has(st):
+			player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
 	skel = WardenGlb.skeleton(glb)
 	# (the clips advance in _process, then the layers go on top: WardenSync's order)
 	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
@@ -212,12 +214,21 @@ func hand_position() -> Vector3:
 func _loco(s: Dictionary) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var ground := Vector2(vel.x, vel.z).length()
+	var hit_t := float(s.get("hit_t", INF))
+	var new_hit := hit_t < hit_last
+	hit_last = hit_t
 	if bool(s.get("dead", false)):
 		_play("idle", 0.0)
+	elif plays.has("hit") and hit_t < _clip_len("hit"):  # a flinch clip of its own (Vex): it plays out, then the loco
+		_play("hit", 1.0, new_hit)
+	elif plays.has("glide") and bool(s.get("gliding", false)):
+		_play("glide", 1.0)
 	elif not bool(s.get("grounded", true)):
 		_play("jump", float(d.get("jump_rate", 1.0)))
 	elif float(s.get("crouch", 0.0)) > 0.5:
 		_play("crouch", _rate(ground, "crouch_mps", 0.0))
+	elif plays.has("dash") and ground >= float(d.get("dash_from", 7.0)):
+		_play("dash", _rate(ground, "dash_mps", RATE_MIN))
 	elif ground >= float(d.get("run_from", 3.0)):
 		_play("run", _rate(ground, "run_mps", RATE_MIN))
 	elif ground >= STILL:
