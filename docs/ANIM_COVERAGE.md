@@ -82,17 +82,13 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
 | nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
-| nimbostrich | shared | shared | shared | shared | shared | shared | proc | proc |
 | opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
-| orchisloth | shared | shared | shared | shared | shared | shared | proc | proc |
 | scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
 | sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
-| spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
-| squalltross | shared | shared | shared | shared | shared | shared | proc | proc |
-| threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
-| tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
-| velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
+| nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
+| orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| spatewader | shared | clip | clip | shared | shared | shared | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
 | burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -111,8 +107,12 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
+| squalltross | clip | clip | clip | clip | clip | clip | proc | proc |
+| threadwyrm | clip | clip | clip | clip | clip | clip | proc | proc |
 | thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
+| tuatrune | clip | clip | clip | clip | clip | clip | proc | proc |
 | umbrathere | clip | clip | clip | clip | clip | clip | proc | proc |
+| velvorm | clip | clip | clip | clip | clip | clip | proc | proc |
 | cairnback | clip | clip | clip | clip | clip | clip | proc | proc |
 | hivara | clip | clip | clip | clip | clip | clip | proc | proc |
 | zephyrak | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -151,8 +151,9 @@ Worst five, backlog-ready:
    marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
    clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
    theirs too.
-4. **25 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
-   models, 9116769e95: casquebill to velvorm in the table; hoarheron has its own idle only). Nothing is `missing` on
+4. **21 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
+   models, 9116769e95: casquebill to velvorm in the table, less squalltross, threadwyrm, tuatrune and velvorm, which
+   have their own since `ext/anim-boki-own-clips-sttv`; hoarheron has its own idle only). Nothing is `missing` on
    any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. That includes glomwort,
    whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
    sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
