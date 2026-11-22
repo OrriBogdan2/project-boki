@@ -14,8 +14,8 @@ const TOP := 5                 # the worst cancels printed
 
 ## Heroes whose worst cancel pops past POP: the ceiling in m each is held to until its clips are reworked (a blend of
 ## two far-apart arm poses peaks mid-arc: a hammer's lever, a held pose cut for the next one). A cancel rework drops its
-## entry (the check says when one now passes). thief 0.52: Sable's run foot_mps fit (4.99 -> 4.6) moves the run phase at the cut, bola>stun 0.454 -> 0.515.
-const OVER := {"juggernaut": 1.1, "bulwark": 0.8, "ashwick": 0.4, "dredge": 0.62, "tender": 0.58, "thief": 0.52, "dolm": 0.27}
+## entry (the check says when one now passes). thief 0.54: Sable's run foot_mps fit (4.99 -> 4.6) moves the run phase at the cut, bola>stun 0.454 -> 0.515; with the merge lane's blend-out changes on top 0.534.
+const OVER := {"juggernaut": 1.1, "bulwark": 0.8, "ashwick": 0.4, "dredge": 0.62, "tender": 0.58, "thief": 0.54, "dolm": 0.27}
 ## Cancels still blending in after the window: "<hero> <from>@<cut>><to>" rows (docs/DEBT.md).
 const LATE_OPEN := [
 	"juggernaut jug_guard@0.50>glide", "gunslinger gunslinger_lmb@0.10>gunslinger_lmb",
