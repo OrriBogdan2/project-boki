@@ -393,9 +393,10 @@ func _end_wire(refund: bool) -> void:
 	if wire.is_empty(): return
 	if refund: h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
 	wire = {}
-	if h.knock_t < 0.05 and h.loco.is_in(Loco.S.KNOCKED):
-		h.knock_t = 0.0         # the wire's own knocked state (a real knock lasts longer) ends with it, so the streak
-		h.loco.go(Loco.S.GROUNDED if h.grounded else Loco.S.AIRBORNE)       # is a dash a glide press can cancel
+	if h.knock_t < 0.05:
+		h.knock_t = 0.0         # the wire's own no-keys hold (a real knock lasts longer) ends with it: carried under
+		if h.loco.is_in(Loco.S.KNOCKED):      # the streak it would refuse the glider (HunterLoco._glide_ok), so the
+			h.loco.go(Loco.S.GROUNDED if h.grounded else Loco.S.AIRBORNE)      # streak is a dash a glide press cancels
 	AimKit.hide(h, "dash")
 	AimKit.hide(h, "dash_end")
 
@@ -488,12 +489,28 @@ func _tick_glide_cancel() -> void:
 	glide_key_was = key
 	if not fresh or h.grounded or h.glide_cd > 0.0 or h.shot_down or m.time - h.kb_t <= 0.4:
 		return
+	if not _wire_let_go() and ult.glide_out():
+		_let_go()
+
+## DECISIONS 11-08 "Shift cancels into glide instantly for every Hunter": a fresh glide press in the air (a second
+## Space too, which the glide key above never sees) ends the Wirerun's charge or streak the way Hunter._dash_into_glide
+## ends a dash, and the glider opens on that press. Kitefall's flight stays the glide key's only (into_jump.x).
+func glide_cancel() -> bool:
+	return m.time - h.kb_t > 0.4 and _wire_let_go()
+
+## Ends the Wirerun's charge or streak for the glider; false when neither is under way (a run with no press keeps
+## its full distance).
+func _wire_let_go() -> bool:
 	if not wire.is_empty():
 		_end_wire(false)
 	elif run_t > 0.0:
 		_cut_run()
-	elif not ult.glide_out():
-		return
+	else:
+		return false
+	_let_go()
+	return true
+
+func _let_go() -> void:
 	play("")
 	h.knock_t = 0.0                # the charge's own no-keys hold
 	h.loco.go(Loco.S.AIRBORNE)     # (that hold left the state Knocked, which may not open a glider)
