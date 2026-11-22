@@ -93,8 +93,11 @@ func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed
 
 ## The loco_rate scale for speed `spd` (m/s) at `w` of the way from the walk ring to the run ring, from the "loco"
 ## data, and sets `gain` and `bob`: "stride": [walk, run] stretch of the thighs, "foot_mps": [walk, run] foot speed of
-## the clips with it at rate 1 (m/s, tools/anim_audit.gd), "bob": [walk, run]. "side_foot_mps" (optional, same shape)
-## is the strafe loops' own, mixed in by how far `pos` (the blend position, x right, y forward) points sideways. The
+## the clips with it at rate 1 on the model at its own scale (m/s, tools/anim_audit.gd; the run's fitted on the
+## --foot-slide-check STEP line), "bob": [walk, run]. `spd` is at that scale too (WardenClips divides a match's
+## draw scale out). "side_foot_mps" (optional, same shape) is the strafe loops' own, mixed in by how far `pos` (the
+## blend position, x right, y forward) points sideways, and "back_foot_mps" (optional) the back loops', by how far
+## it points back (tools/foot_slide_check.gd --fit-dirs). The
 ## walk plays stretched to the run's cycle (WardenClips._gait_loop), so the blend steps as one cycle of the blended
 ## length and covers the blended stride: the rate that keeps that stride planted at this speed, clamped as the clips
 ## feel it (a hasted run, up to HunterMove.speed_cap, keeps its feet planted instead of sliding at RATE_MAX).
@@ -105,9 +108,12 @@ func plan(spd: float, lc: Dictionary, pos: Vector2, w: float, moving := 1.0) -> 
 	var stride: Array = lc.get("stride", [1.0, 1.0])
 	var foot: Array = lc.get("foot_mps", [lc.get("walk_speed", 2.2), lc.get("run_speed", 4.6)])
 	var side: Array = lc.get("side_foot_mps", foot)
-	var side_k := absf(pos.x) / maxf(absf(pos.x) + absf(pos.y), 0.01)
-	var walk_mps := lerpf(float(foot[0]), float(side[0]), side_k)
-	var run_mps := lerpf(float(foot[1]), float(side[1]), side_k)
+	var back: Array = lc.get("back_foot_mps", foot)
+	var sum := maxf(absf(pos.x) + absf(pos.y), 0.01)
+	var side_k := absf(pos.x) / sum
+	var back_k := maxf(-pos.y, 0.0) / sum
+	var walk_mps := lerpf(float(foot[0]), float(side[0]), side_k) + (float(back[0]) - float(foot[0])) * back_k
+	var run_mps := lerpf(float(foot[1]), float(side[1]), side_k) + (float(back[1]) - float(foot[1])) * back_k
 	gain = lerpf(float(stride[0]), float(stride[1]), w)
 	var fl: Array = lc.get("foot_lock", [0.0, 0.0])
 	lock = lerpf(float(fl[0]), float(fl[1]), w)

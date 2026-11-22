@@ -177,6 +177,7 @@ func build_ui() -> void:
 	var skip := Button.new()
 	skip.text = "Skip drill"
 	skip.pressed.connect(_skip)
+	UI.sfx(skip)
 	bottom.add_child(skip)
 	if m.hud:
 		m.hud.ui_extra.append(skip)       # the mouse is over UI here: no shooting, the pointer shows
