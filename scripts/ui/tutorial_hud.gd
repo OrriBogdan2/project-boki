@@ -44,11 +44,22 @@ static func draw(h, sz: Vector2) -> void:
 	if tu.target != Vector3.INF and h.m.cam and h.m.player:
 		dir = MarkerDir.off_dir(h.m.cam, sz, tu.target, h.m.player.pos)
 	_bar(h, r, tu, dir)
+	_keep_sign_clear(h, sz, tu)
 	_pick_ring(h, tu)
 	if not tu.card_up():
 		_extras(h, r, tu)
 	if tu.done_t > 0.0:
 		_check(h, lanes(sz)["check"], tu.done_t / Tutorial.DONE_T)
+
+## A gap step's sign (a label in the world) stays inside the safe frame, off the HUD blocks, the strip and the
+## hunter: the pad it stands over can sit under them.
+static func _keep_sign_clear(h, sz: Vector2, tu: Tutorial) -> void:
+	var sign3 := tu.pad_sign(tu.id())
+	if sign3 == null or h.m.cam == null:
+		return
+	var avoid: Array = h.m.cam.hud_keep.values()
+	avoid.append_array([TutorialStrip.rect(sz), HunterZone.rect(h.m)])
+	LabelFit.fit(sign3, h.m.cam, HudStyle.safe_rect(sz), avoid)
 
 ## The step's one line in the strip: key cap on the left, on the right the counter and, while the target's
 ## pin isn't on screen, an arrow pointing the way with the distance. A nag re-pulses it. (The plain-words

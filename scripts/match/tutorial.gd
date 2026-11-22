@@ -738,16 +738,6 @@ func _props() -> void:
 			var land: bool = _off_pad(pd["id"])
 			lab.text = String(LAND_SIGN[pd["id"]]) if land else String(pd["text"])
 			lab.position = stop(pd["id"], "at" if land else "pad") + Vector3(0, SIGN_RISE, 0)
-		if on:
-			_keep_sign_on_screen(lab)
-
-
-## A gap sign stays inside the safe frame, off the HUD blocks, the strip and the hunter (the pad can sit under them).
-func _keep_sign_on_screen(lab: Label3D) -> void:
-	var sz := m.get_viewport().get_visible_rect().size
-	var avoid: Array = m.cam.hud_keep.values()
-	avoid.append_array([TutorialStrip.rect(sz), HunterZone.rect(m)])
-	LabelFit.fit(lab, m.cam, HudStyle.safe_rect(sz), avoid)
 
 
 ## Beams standing in the world right now (--tutorial-idle-check).

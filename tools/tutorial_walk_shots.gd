@@ -194,6 +194,7 @@ func _frame() -> void:
 	for i in 6:
 		await main.get_tree().process_frame
 	m.cam.snap(m.player.pos)
+	m.cam.hud_keep = HudScale.drawn  # (Match's own frame is off here: the HUD blocks the camera keeps clear of)
 	await RenderingServer.frame_post_draw
 
 
