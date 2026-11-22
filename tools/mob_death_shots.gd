@@ -3,13 +3,14 @@ extends RefCounted
 ## same spot cropped at fixed times after the kill: mob_death_<case>.png, left to right (see TIMES). Cases: a
 ## skitter, a warden, a lair boss, and a wiped camp of skitters (the staggered kill).
 
-const TIMES := [0.0, 0.1, 0.2, 0.3, 0.45, 0.6, 0.9]     # s after the kill
-const CROP := 520                                       # px, the square around the screen centre
-const STAND_FRAMES := 20                                # frames the foes are drawn alive before the kill
-const SETTLE_S := 1.0                                   # s the camera gets to settle on the spot
+const TIMES := [0.0, 0.1, 0.2, 0.3, 0.45, 0.6, 0.9]  # s after the kill
+const CROP := 520  # px, the square around the screen centre
+const STAND_FRAMES := 20  # frames the foes are drawn alive before the kill
+const SETTLE_S := 1.0  # s the camera gets to settle on the spot
 
 var main: Node
 var m: Match
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -32,7 +33,8 @@ func run(mn: Node) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	for o in m.hunters:
-		if o != m.player: o.ctrl = "idle"
+		if o != m.player:
+			o.ctrl = "idle"
 	m.hud.visible = false
 	await _case(dir, "skitter", 1)
 	await _case(dir, "warden", 1)
@@ -41,35 +43,38 @@ func run(mn: Node) -> void:
 	print("MOBDEATHSHOT DONE")
 	main.get_tree().quit()
 
+
 func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
 
+
 ## The foes to kill: `n` monsters (or the first lair's boss) a few metres ahead of the player.
 func _foes(kind_s: String, n: int) -> Array:
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	if kind_s == "boss":
-		var L: Dictionary = m.lairs.list[0]
-		m.lairs.activate(L)
-		if L["state"] == "sealed":
-			m.lairs.open(L, m.player, "dial")
-		var b: Boss = L["boss_mob"]
+		var l: Dictionary = m.lairs.list[0]
+		m.lairs.activate(l)
+		if l["state"] == "sealed":
+			m.lairs.open(l, m.player, "dial")
+		var b: Boss = l["boss_mob"]
 		b.dormant = false
 		b.stagger_t = 0.0
 		return [b]
-	var at := P.pos + Vector3(0, 0, -3.0)
+	var at := p.pos + Vector3(0, 0, -3.0)
 	var out: Array = []
 	var mob_kind := "skitter" if kind_s == "camp" else kind_s
 	for i in n:
 		out.append(m.spawn_mob(mob_kind, at + Vector3((i % 3 - 1) * 1.0, 0, (i / 3) * 1.0)))
 	return out
 
+
 func _case(dir: String, kind_s: String, n: int) -> void:
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	if kind_s == "boss":
-		var L: Dictionary = m.lairs.list[0]
-		P.teleport(L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0 + Vector3(0, 1.0, 0))
-	m.cam.focus = P.pos
+		var l: Dictionary = m.lairs.list[0]
+		p.teleport(l["c"] + Vector3(l["out"].x, 0, l["out"].y) * 3.0 + Vector3(0, 1.0, 0))
+	m.cam.focus = p.pos
 	await _frames(int(SETTLE_S * 60.0))
 	var foes := _foes(kind_s, n)
 	await _frames(STAND_FRAMES)
@@ -78,7 +83,7 @@ func _case(dir: String, kind_s: String, n: int) -> void:
 		mid += mb.pos / foes.size()
 	var strip := Image.create(CROP * TIMES.size(), CROP, false, Image.FORMAT_RGBA8)
 	for mb in foes:
-		mb.hurt(mb.hp + mb.max_hp, P, {"src": "shot"})
+		mb.hurt(mb.hp + mb.max_hp, p, {"src": "shot"})
 	var t0 := m.time
 	for i in TIMES.size():
 		while m.time - t0 < float(TIMES[i]):

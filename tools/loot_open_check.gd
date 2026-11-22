@@ -9,25 +9,31 @@ extends RefCounted
 ## and holding, one row per phase.
 
 const DT := 1.0 / 30.0
-const REACH := 0.2             # m: a wrist's farthest from the lid's box once the reach is in
-const CHEST_AT := Vector3(0, 0, -1.25)       # m: a chest ahead (interact range < 1.6)
-const BOX_AT := Vector3(0.95, 0, -0.95)      # m: a deathbox ahead-right, 1.34 m off (range 1.5)
+const REACH := 0.2  # m: a wrist's farthest from the lid's box once the reach is in
+const CHEST_AT := Vector3(0, 0, -1.25)  # m: a chest ahead (interact range < 1.6)
+const BOX_AT := Vector3(0.95, 0, -0.95)  # m: a deathbox ahead-right, 1.34 m off (range 1.5)
 const STRIP := ["juggernaut", "rimewright", "gunslinger"]
-const PHASES := [0.0, 0.12, 0.7]            # s into the hold: standing, reaching, holding
+const PHASES := [0.0, 0.12, 0.7]  # s into the hold: standing, reaching, holding
 const SHOT := Vector2i(1080, 420)
-const LIVE_MOVE := "jug_slash_r"             # Kael's kit move before he opens a chest: its id stays on his kit
-const LIVE_NEXT := Vector3(0, 0, 6.0)        # m: the second chest's spot, clear of the first one's spill
-const LIVE_SETTLE := 1.5       # s: that move's clip is over
-const CANCELS := {"move": {"vel": Vector3(0, 0, -3.0)}, "dash": {"rolling": true}, "cast": {"cast": 0.0},
-	"hit": {"hit_t": 0.0, "hit_dir": Vector2(0, 1)}}
+const LIVE_MOVE := "jug_slash_r"  # Kael's kit move before he opens a chest: its id stays on his kit
+const LIVE_NEXT := Vector3(0, 0, 6.0)  # m: the second chest's spot, clear of the first one's spill
+const LIVE_SETTLE := 1.5  # s: that move's clip is over
+const CANCELS := {
+	"move": {"vel": Vector3(0, 0, -3.0)},
+	"dash": {"rolling": true},
+	"cast": {"cast": 0.0},
+	"hit": {"hit_t": 0.0, "hit_dir": Vector2(0, 1)}
+}
 
 var bad := 0
 var holder: Node3D
+
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		print("OPEN FAIL ", what)
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -45,7 +51,9 @@ func run(main: Node) -> void:
 	print("LOOT_OPEN_CHECK_DONE heroes %d, failures: %d" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## False for a Hero with no clips (none now: Gil borrows Meeko's through clips_from): the rig's own hold pose plays (HunterAnim._act_legs).
+
+## False for a Hero with no clips (none now: Gil borrows Meeko's through clips_from): the rig's own hold pose
+## plays (HunterAnim._act_legs).
 func _hero(id: String) -> bool:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
@@ -70,6 +78,7 @@ func _hero(id: String) -> bool:
 	print(line)
 	m.free()
 	return true
+
 
 ## One channel on one box: returns the plan and the worst wrist miss, for the line.
 func _channel(id: String, m: Node3D, sync: Node, op: WardenOpen, box: Node3D, kind: String) -> String:
@@ -108,8 +117,11 @@ func _channel(id: String, m: Node3D, sync: Node, op: WardenOpen, box: Node3D, ki
 	for i in int(WardenOpen.RETURN_S / DT) + 1:
 		sync.call("_process", DT)
 	ok(op.w == 0.0, "%s %s: straight back to the clips once the hold ends" % [id, kind])
-	return "%s miss %.2f (step %.2f drop %.2f lean %.2f)" % [kind, worst, float(plan.get("step", -1.0)),
-			float(plan.get("drop", -1.0)), float(plan.get("lean", -1.0))]
+	return (
+		"%s miss %.2f (step %.2f drop %.2f lean %.2f)"
+		% [kind, worst, float(plan.get("step", -1.0)), float(plan.get("drop", -1.0)), float(plan.get("lean", -1.0))]
+	)
+
 
 ## A real match: Hunter._anim_state finds the lid, Match's chest hold is the channel.
 func _live(main: Node) -> void:
@@ -146,8 +158,10 @@ func _live(main: Node) -> void:
 		if op.t > WardenOpen.REACH_S + DT:
 			worst = maxf(worst, maxf(_miss(op, "hand.L", lid), _miss(op, "hand.R", lid)))
 	var want := int(float(ChestLoot.R()["hold_s"]) / DT) - 1
-	ok(c["open"] and off == 0 and on >= want, "live: the pose is on the whole chest hold (%d on, %d off, want %d)"
-			% [on, off, want])
+	ok(
+		c["open"] and off == 0 and on >= want,
+		"live: the pose is on the whole chest hold (%d on, %d off, want %d)" % [on, off, want]
+	)
 	ok(worst <= REACH, "live: both wrists on the chest's lid (worst %.3f m off it, limit %.2f)" % [worst, REACH])
 	p.inp["interact"] = false
 	for i in 12:
@@ -170,15 +184,18 @@ func _live(main: Node) -> void:
 	p.inp["interact"] = false
 	m.queue_free()
 
+
 func _frame(m: Match, p: Hunter, sync: Node) -> void:
 	m.step(DT)
 	p.render(DT, 1.0)
 	sync.call("_process", DT)
 
+
 func _miss(op: WardenOpen, bone: String, lid: AABB) -> float:
 	var sk := op.skel
 	var p := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, bone)).origin
 	return p.distance_to(p.clamp(lid.position, lid.end))
+
 
 func _lid_box(box: Node3D) -> AABB:
 	var lid := box.find_child("Lid", true, false) as Node3D
@@ -190,6 +207,7 @@ func _lid_box(box: Node3D) -> AABB:
 		first = false
 	return out
 
+
 func _strip(main: Node, out: String) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
 	# the boot cover (logo) and any screen are 2D over the world: off, or the strip shoots the splash
@@ -200,8 +218,9 @@ func _strip(main: Node, out: String) -> void:
 			(c as CanvasItem).visible = false
 	main.get_window().size = SHOT
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
-		"stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ground := MeshInstance3D.new()

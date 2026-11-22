@@ -6,10 +6,11 @@ extends RefCounted
 ## Sounds: tools/gen_sfx_shield.py, content/sfx/shield.json.
 
 const WARD := "ward"
-const BLOCK_DB := -4.0          # dB over the file: the thunk sits under the hit tick
+const BLOCK_DB := -4.0  # dB over the file: the thunk sits under the hit tick
 const BREAK_DB := -1.0
-const SOFT_HIT := 8.0           # the hit that soaks this much or less plays a touch higher and lighter
-const HEAVY_HIT := 40.0         # ...and this much or more a touch lower
+const SOFT_HIT := 8.0  # the hit that soaks this much or less plays a touch higher and lighter
+const HEAVY_HIT := 40.0  # ...and this much or more a touch lower
+
 
 ## The shield on `h` just soaked `soaked` damage; `h.shield` is what is left.
 static func hit(h: Hunter, soaked: float) -> void:

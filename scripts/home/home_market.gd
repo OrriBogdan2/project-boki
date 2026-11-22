@@ -36,13 +36,15 @@ func _init(home, spawn_kin_cb: Callable) -> void:
 
 ## The stall level a tab opens at.
 static func tab_level(tab_name: String) -> int:
+	if tab_name == "Shelter":
+		return Shelter.open_level()
 	return int(TABS.filter(func(t): return t[0] == tab_name)[0][1])
 
 ## The tabs this stall's level opens.
 func tabs() -> Array:
 	var lv := Stalls.level()
 	var no_exchange := FarmUnlocks.base_mode()
-	var out := TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
+	var out := TABS.filter(func(t): return tab_level(String(t[0])) <= lv and not (no_exchange and t[0] == "Exchange")) \
 			.map(func(t): return String(t[0]))
 	if not out.has("Shelter") and not TransferPost.inbox.is_empty():
 		out.append("Shelter")      # a Boki handed to you waits there, at any stall level
@@ -110,7 +112,7 @@ func _next_level(v: VBoxContainer) -> void:
 ## section headers. Some only go on sale once you've made it out of enough expeditions or finished a
 ## challenge; wear and utility restock by rarity (Stalls.vendor_has).
 func _vendor(v: VBoxContainer) -> void:
-	UI.subtitle(v, "Goods for your Boki, your Hunter, the farm and the house")
+	UI.subtitle(v, "")      # (the tabs below say what is on sale)
 	var row := UI.hbox(6)
 	for t in vendor_tabs():
 		var tt: String = t
@@ -152,7 +154,7 @@ func _seed_goods() -> Array:
 		var cd: Dictionary = Data.CROPS[c]
 		var ck: String = c
 		var have := "have %d" % int(Save.d.get("seeds", {}).get(c, 0))
-		goods.append(["seed:" + c, "%s seeds" % cd["name"], "Plant on a farm plot. " + String(cd["desc"]),
+		goods.append(["seed:" + c, "%s seeds" % cd["name"], String(cd["desc"]),
 			int(cd["price"]), cd["color"], func():
 				Save.add_seed(ck, 1)
 				FarmTutorial.event("buy"), have])
@@ -160,8 +162,8 @@ func _seed_goods() -> Array:
 
 func _boki_food() -> Array:
 	var goods: Array = []
-	for f in Care.FOODS:
-		var fd: Dictionary = Care.FOODS[f]
+	for f in Care.foods_v:
+		var fd: Dictionary = Care.foods_v[f]
 		var fk: String = f
 		var desc := "Boki eat this. Feed it from a Boki's card. " + String(fd["desc"])
 		goods.append(["food:" + f, fd["name"], desc, int(fd["price"]), Color("ffb36a"),
@@ -232,7 +234,7 @@ func _vendor_card(g: Array) -> Control:
 	var col: Color = Color(g[4])
 	var card := UI.card(UI.CARD if is_open else Color(UI.NIGHT_HI, 0.9), 10, 12)
 	card.custom_minimum_size = Vector2(404, 0)
-	card.tooltip_text = String(g[2]) + ("" if is_open else "\n" + Progress.req_text(key))
+	card.tooltip_text = String(g[2])      # (a locked one says what opens it on the card itself)
 	var hr := UI.hbox(10)
 	card.add_child(hr)
 	var icons := {"seed": "seed", "food": "heart", "tonic": "tonic", "acc": "paw", "furn": "home", "plots": "seed",
@@ -312,8 +314,7 @@ func _vendor_sell(v: VBoxContainer) -> void:
 
 # ------------------------------------------------------------------ the Exchange
 func _exchange(v: VBoxContainer) -> void:
-	UI.subtitle(v, "Tradewind Exchange: post a price for wood, stone, scrap, crops, food and tonics. "
-		+ "Offers match the best price first; each sale pays a %d%% tax." % int(Exchange.TAX * 100))
+	UI.subtitle(v, "Post a price; the best offer sells first. Each sale pays %d%% tax." % int(Exchange.TAX * 100))
 	var tabs_row := HFlowContainer.new()
 	tabs_row.add_theme_constant_override("h_separation", 6)
 	tabs_row.add_theme_constant_override("v_separation", 6)

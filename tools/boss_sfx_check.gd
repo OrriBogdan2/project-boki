@@ -78,24 +78,24 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true})
 	m.set_process(false)
-	var P: Hunter = m.player
-	var Q: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
-	for L in m.lairs.list: m.lairs.activate(L)
+	var p: Hunter = m.player
+	var q: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	for l in m.lairs.list: m.lairs.activate(l)
 	var seen := []
-	for L in m.lairs.list:
-		var b: Boss = L["boss_mob"]
-		var kind := String(L["boss"])
+	for l in m.lairs.list:
+		var b: Boss = l["boss_mob"]
+		var kind := String(l["boss"])
 		if seen.has(kind): continue
 		seen.append(kind)
-		for g in L["guards"]:
+		for g in l["guards"]:
 			if is_instance_valid(g) and not g.dead:
 				g.dead = true
 				g.visible = false
-		if L["state"] == "sealed": m.lairs.open(L, P, "dial")
-		P.teleport(Vector3(L["c"].x, m.world.ground_at(L["c"].x, L["c"].z), L["c"].z))
-		Sfx.listener = L["c"] + Vector3(60, 0, 0)      # the lair band: past hear_range, inside the set's reach
+		if l["state"] == "sealed": m.lairs.open(l, p, "dial")
+		p.teleport(Vector3(l["c"].x, m.world.ground_at(l["c"].x, l["c"].z), l["c"].z))
+		Sfx.listener = l["c"] + Vector3(60, 0, 0)      # the lair band: past hear_range, inside the set's reach
 		var t0 := Time.get_ticks_msec()
-		m.lairs.wake(L, P)
+		m.lairs.wake(l, p)
 		_expect("%s wakes (heard from 60 m)" % kind, "boss_%s_wake" % kind, _played(t0))
 		await _gap(main)
 		Sfx.listener = b.pos      # the fight itself: the stings carry the usual 22 m
@@ -108,22 +108,22 @@ func run(main: Node) -> void:
 		_expect("%s enrage" % kind, "boss_%s_phase" % kind, _played(t0))
 		await _gap(main)
 		b.dmg_mult = 0.0      # (the blows run for their sound, not for P's health)
-		await _attacks(main, b, kind, P)
+		await _attacks(main, b, kind, p)
 		t0 = Time.get_ticks_msec()
 		b.stagger_t = 0.0
-		b._stagger(P, {})
+		b._stagger(p, {})
 		_expect("%s stagger" % kind, "boss_%s_stagger" % kind, _played(t0))
 		await _gap(main)
 		t0 = Time.get_ticks_msec()
 		b.stagger_t = 0.0
 		b.invul_t = 0.0
-		b.hurt(b.hp + b.max_hp, P, {"src": "shot"})
+		b.hurt(b.hp + b.max_hp, p, {"src": "shot"})
 		var heard := _played(t0)
 		_expect("%s falls to your squad" % kind, "boss_%s_defeat" % kind, heard)
 		_expect("%s body falls" % kind, "boss_%s_fall" % kind, heard)
 		await _gap(main)
 		t0 = Time.get_ticks_msec()
-		BossSfx.defeat(m, b, Q)
+		BossSfx.defeat(m, b, q)
 		var rival := _played(t0)
 		var mine := rival.has("boss_%s_defeat" % kind)
 		ok(rival.has("horn") and not mine, "%s falls to a rival: the horn, not your sting" % kind)

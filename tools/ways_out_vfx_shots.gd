@@ -16,7 +16,7 @@ const RIVAL := 3                           # the squad on the seats (teams 1 and
 var main: Node
 var m: Match
 var dir := ""
-var P: Hunter
+var p_v: Hunter
 var user: Hunter
 var duel: Array = []
 var pin := Callable()                      # re-applies the row's state every frame (the host would move it on)
@@ -32,53 +32,53 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
-	var H := m.heart
-	var L: Dictionary = m.exits.seats.lair.ref
-	var X: Dictionary = m.exits.seats.uplink.ref
+	var h := m.heart
+	var l: Dictionary = m.exits.seats.lair.ref
+	var x: Dictionary = m.exits.seats.uplink.ref
 	var heart_locked := func():
-		H._force(Heart.S.CHARGING, "shots")
-		H.charge = 30.0
+		h._force(Heart.S.CHARGING, "shots")
+		h.charge = 30.0
 	var heart_open := func():
-		H.charge = Heart.r("charge_s")
-		H.spark_pos = H.site
-		H._force(Heart.S.READY, "shots")
+		h.charge = Heart.r("charge_s")
+		h.spark_pos = h.site
+		h._force(Heart.S.READY, "shots")
 	var heart_used := func():
-		H.early_team = RIVAL
-		H._force(Heart.S.WAITING, "shots")
+		h.early_team = RIVAL
+		h._force(Heart.S.WAITING, "shots")
 	var lair_racing := func():
-		L["state"] = "awake"
-		L["locked"] = true
-		L["lock_at"] = m.time
-		L["sealed_in"] = [user]
+		l["state"] = "awake"
+		l["locked"] = true
+		l["lock_at"] = m.time
+		l["sealed_in"] = [user]
 	var lair_won := func():
-		L["state"] = "cleared"
-		L["locked"] = false
-		L["won_by"] = RIVAL
-		L["victory"] = true
-		L["sealed_in"] = []
-		L["flown"] = [user]
+		l["state"] = "cleared"
+		l["locked"] = false
+		l["won_by"] = RIVAL
+		l["victory"] = true
+		l["sealed_in"] = []
+		l["flown"] = [user]
 	var uplink_open := func():
-		X["state"] = "idle"
-		X["team"] = -1
+		x["state"] = "idle"
+		x["team"] = -1
 	var uplink_racing := func():
-		X["state"] = "charging"
-		X["team"] = RIVAL
-		X["prog"] = 0.6
+		x["state"] = "charging"
+		x["team"] = RIVAL
+		x["prog"] = 0.6
 	var uplink_won := func():
 		if m.exits.seats.uplink.state != QuestSeat.S.TAKEN:
 			m.exits.seats.uplink._force(QuestSeat.S.TAKEN, "shots", RIVAL)      # (the lift ridden)
-		X["state"] = "closed"
-		X["team"] = RIVAL
-		X["taken"] = true
-	user.teleport(m.world.free_spot_near(L["c"], [], 1.0, 0.45, 6.0))
-	await _row("lair_racing", "Sealed Lair raced (rival)", 180.0, L["c"], lair_racing)
-	await _row("lair_won", "Sealed Lair won (rival)", 240.0, L["c"], lair_won)
-	await _row("heart_locked", "Heart locked (charging)", 270.0, H.site, heart_locked, false)
-	await _row("heart_unlocked", "Heart unlocked (spark out, Gate open)", 330.0, H.site, heart_open, false)
-	await _row("heart_early_used", "Heart early seat used", 350.0, H.site, heart_used, false)
-	await _row("uplink_open", "Uplink open", 390.0, X["pos"], uplink_open)
-	await _row("uplink_racing", "Uplink raced (rival)", 400.0, X["pos"], uplink_racing)
-	await _row("uplink_won", "Uplink won (rival)", 450.0, X["pos"], uplink_won)
+		x["state"] = "closed"
+		x["team"] = RIVAL
+		x["taken"] = true
+	user.teleport(m.world.free_spot_near(l["c"], [], 1.0, 0.45, 6.0))
+	await _row("lair_racing", "Sealed Lair raced (rival)", 180.0, l["c"], lair_racing)
+	await _row("lair_won", "Sealed Lair won (rival)", 240.0, l["c"], lair_won)
+	await _row("heart_locked", "Heart locked (charging)", 270.0, h.site, heart_locked, false)
+	await _row("heart_unlocked", "Heart unlocked (spark out, Gate open)", 330.0, h.site, heart_open, false)
+	await _row("heart_early_used", "Heart early seat used", 350.0, h.site, heart_used, false)
+	await _row("uplink_open", "Uplink open", 390.0, x["pos"], uplink_open)
+	await _row("uplink_racing", "Uplink raced (rival)", 400.0, x["pos"], uplink_racing)
+	await _row("uplink_won", "Uplink won (rival)", 450.0, x["pos"], uplink_won)
 	await _blight_row()
 	_sheet()
 	print("WAYSSHOT done quality=%s frames=%d" % [Settings.quality(), shots.size()])
@@ -99,14 +99,14 @@ func _setup() -> void:
 		mb.queue_free()
 	m.mobs.clear()
 	m.exits.seats.build()
-	P = m.player
+	p_v = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.max_hp = 50000.0
 		h.hp = h.max_hp
 		if h.team == RIVAL:
 			user = h
-		elif h != P and duel.size() < 2:
+		elif h != p_v and duel.size() < 2:
 			duel.append(h)
 	var layer := CanvasLayer.new()
 	layer.layer = 120
@@ -180,7 +180,7 @@ func _clock() -> void:
 	m.time = t_sess - m.sess_t0
 
 func _shoot(id: String, word: String, d: float) -> void:
-	P.teleport(spot)
+	p_v.teleport(spot)
 	for i in duel.size():
 		var h: Hunter = duel[i]
 		h.teleport(m.world.free_spot_near(spot + Vector3(-3.0 - 3.0 * i, 0, 2.0), [spot], 1.0, 0.45, 4.0))
@@ -193,8 +193,8 @@ func _shoot(id: String, word: String, d: float) -> void:
 			pin.call()
 		m.step(Match.DT)
 		_clock()
-		P.teleport(spot)
-		m.cam.snap(P.pos)
+		p_v.teleport(spot)
+		m.cam.snap(p_v.pos)
 		for h in m.hunters:
 			h.render(Match.DT, 1.0)
 		await main.get_tree().process_frame

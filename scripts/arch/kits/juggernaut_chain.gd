@@ -151,7 +151,7 @@ func _hook(f: Ent, at: Vector3) -> void:
 	tightened = false
 	hooks += 1
 	k.vfx("chain_hook", at + Vector3(0, 1.0 if f else 0.5, 0))
-	if m.time - e_pressed_at <= JuggernautKit.BUFFER:
+	if m.time - e_pressed_at <= Loco.press_buffer:
 		pull()                      # E was pressed a hair before it bit
 
 func _miss(at: Vector3) -> void:
@@ -301,6 +301,9 @@ func _tick_hooked(dt: float) -> void:
 		return
 	var most := float(data()["tether_max"])
 	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most
+	if stretch > 1.0 and not k.lunge.is_empty():
+		snap()                      # a Lunge carried him past the length: it breaks, no clamp
+		return
 	if stretch > 1.0:
 		_hold_taut(most)
 		stretch = 1.0

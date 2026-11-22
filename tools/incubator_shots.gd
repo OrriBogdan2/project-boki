@@ -8,13 +8,14 @@ extends RefCounted
 ##   LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 ...
 ## Run under xvfb with a renderer. Never touches the real save.
 
-const PACES := [1.0, 0.8, 0.6, 0.4, 0.2]      # each cradle's share of the full warmth by the last frame
-const FRAME_W := 960                          # px wide
-const ZOOM := 0.22                            # close on the cradles (the Nook demo's close-up is 0.42)
-const HOLD := 2.0                             # seconds of film held at the end: the ready egg rattles
-const SETTLE := 20                            # frames for the cover, light and camera to settle first
+const PACES := [1.0, 0.8, 0.6, 0.4, 0.2]  # each cradle's share of the full warmth by the last frame
+const FRAME_W := 960  # px wide
+const ZOOM := 0.22  # close on the cradles (the Nook demo's close-up is 0.42)
+const HOLD := 2.0  # seconds of film held at the end: the ready egg rattles
+const SETTLE := 20  # frames for the cover, light and camera to settle first
 
 var main: Node
+
 
 func run(m: Node) -> void:
 	main = m
@@ -22,9 +23,12 @@ func run(m: Node) -> void:
 	var secs := 12.0
 	var fps := 24
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
-		if String(a).begins_with("--shots-secs="): secs = float(String(a).substr(13))
-		if String(a).begins_with("--shots-fps="): fps = int(String(a).substr(12))
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
+		if String(a).begins_with("--shots-secs="):
+			secs = float(String(a).substr(13))
+		if String(a).begins_with("--shots-fps="):
+			fps = int(String(a).substr(12))
 	DirAccess.make_dir_recursive_absolute(dir.path_join("frames"))
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -37,12 +41,12 @@ func run(m: Node) -> void:
 		Incubator.add(String(Data.common_kin()[i % Data.common_kin().size()]))
 	var home = await main._hb_home()
 	if main.get("fade") != null:
-		main.fade.reveal(0.01)      # lift the boot cover, or every frame is the logo
+		main.fade.reveal(0.01)  # lift the boot cover, or every frame is the logo
 		home.day_t = 0.5
 	var mid := Vector3.ZERO
 	for i in PACES.size():
 		mid += home.hinc.slot_pos(i) / PACES.size()
-	home.ppos = Vector3(mid.x, 0, mid.z)      # the camera follows you: stand among the eggs, unseen
+	home.ppos = Vector3(mid.x, 0, mid.z)  # the camera follows you: stand among the eggs, unseen
 	home.player.position = home.ppos
 	home.player.visible = false
 	home.cam.snap(home.ppos)
