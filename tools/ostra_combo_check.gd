@@ -7,6 +7,7 @@ extends "res://tools/hero_pair_check.gd"
 const TIME := preload("res://tools/ostra_anim_time_check.gd")        # his move timing against the footage frames
 
 func run(main_node: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = main_node
 	await _ostra()
 	await _bolt_through_terrain()

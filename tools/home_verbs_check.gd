@@ -33,6 +33,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond: bad += 1
 
 func run(m: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = m
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--home-verbs-shots="):

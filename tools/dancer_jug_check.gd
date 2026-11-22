@@ -19,6 +19,7 @@ var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
 func run(main_node: Node, who := "all") -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	A = AKCheck.new()
 	A.main = main_node
 	if who in ["all", "thief"]:
