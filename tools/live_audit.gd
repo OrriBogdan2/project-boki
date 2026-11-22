@@ -21,8 +21,8 @@ var close := false
 var native := false
 var video := false  # --video: every frame (30 fps) of idle 1.2 s, run 1.0 s, attack 0.6 s as v0000.jpg ...
 var vn := 0
+var gripcam := false  # --grip: a close camera on the right fist (grip_<clip>_<k>.jpg)
 var probe := false  # --probe: probe.tsv, the fish and hand bones per frame
-var probe_rows: PackedStringArray = []
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -36,6 +36,7 @@ func run(main: Node) -> void:
 		if a == "--close": close = true
 		if a == "--video": video = true
 		if a == "--probe": probe = true
+		if a == "--grip": gripcam = true
 		if a == "--contract": WardenNative.contract_only = true  # the live contract model of a native-flagged Hunter
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -129,6 +130,8 @@ func _hunter(id: String, dir: String) -> void:
 		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
+		if probe:
+			times = [{"idle": 3.2, "run": 1.2, "dash": 1.0, "jump": 1.4, "attack": 2.4, "hit": 0.8}[clip]]
 		if video:
 			times = []
 			for k in int({"idle": 1.2, "run": 1.0, "attack": 0.6}[clip] / DT):
@@ -158,78 +161,100 @@ func _hunter(id: String, dir: String) -> void:
 	f.store_string("\n".join(marks) + "\n")
 	f.close()
 	if probe:
-		var pf := FileAccess.open(dir.path_join("probe.tsv"), FileAccess.WRITE)
-		pf.store_string("\n".join(probe_rows) + "\n")
+		var pf := FileAccess.open(dir.path_join("probe.json"), FileAccess.WRITE)
+		pf.store_string(JSON.stringify(pj))
 		pf.close()
 	model.queue_free()
+
+## --probe: probe.json = bones, per-bone capsule radii (bind verts), the fish's verts + local transform, and every
+## frame's bone poses in world, for solving the fish's grip offline.
+var pj := {"frames": []}
+
+func _xf9(t: Transform3D) -> Array:
+	var b := t.basis
+	return [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z, t.origin.x, t.origin.y, t.origin.z]
 
 func _probe(model: Node3D, clip: String, i: int) -> void:
 	var sk := WardenGlb.skeleton(model.get_node("Warden"))
 	var fish := WardenProps.part(sk, "hand.R")
 	if fish == null:
 		return
-	var hb := sk.find_bone("RightHand")
-	if probe_rows.is_empty():
-		_probe_geom(model, sk, fish, hb)
-	var hp := sk.get_bone_global_pose(hb)
-	var w := sk.global_transform * hp
-	var grip := w * (fish.transform * Vector3(-0.175, -0.03, 0.0))
-	var fist := w * fist_local
-	var tip := w * (fish.transform * Vector3(-0.646, 0, 0))
-	var trunk := sk.global_transform * sk.get_bone_global_pose(sk.find_bone("Spine02")).origin
-	probe_rows.append("%s\t%d\tgrip-fist %.3f\tgrip %s\tfist %s\ttip %s\ttrunk %s" % [clip, i,
-		grip.distance_to(fist), str(grip), str(fist), str(tip), str(trunk)])
+	if not pj.has("bones"):
+		_probe_geom(model, sk, fish)
+	var poses := []
+	for bi in sk.get_bone_count():
+		poses.append(_xf9(sk.global_transform * sk.get_bone_global_pose(bi)))
+	(pj["frames"] as Array).append({"clip": clip, "i": i, "pose": poses, "fish": _xf9(fish.transform)})
 
-var fist_local := Vector3.ZERO
-
-func _probe_geom(model: Node3D, sk: Skeleton3D, fish: MeshInstance3D, hb: int) -> void:
-	# fist centre: skinned verts with >0.6 weight on RightHand, bind pose, in the bone's rest frame
-	var cen := Vector3.ZERO
-	var cnt := 0
+func _probe_geom(model: Node3D, sk: Skeleton3D, fish: MeshInstance3D) -> void:
+	var names := []
+	var parents := []
+	var rest := []
+	for bi in sk.get_bone_count():
+		names.append(sk.get_bone_name(bi))
+		parents.append(sk.get_bone_parent(bi))
+		rest.append(_xf9(sk.get_bone_global_rest(bi)))
+	pj["bones"] = names
+	pj["parents"] = parents
+	pj["rest"] = rest
+	var vb := {}  # bone -> [verts in skeleton rest space]
 	for mi in model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		var m := mi as MeshInstance3D
 		if m.skin == null or m.mesh == null or m == fish:
 			continue
+		var to_sk := sk.global_transform.affine_inverse() * m.global_transform
 		for sidx in m.mesh.get_surface_count():
 			var arr := m.mesh.surface_get_arrays(sidx)
 			var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-			var bs = arr[Mesh.ARRAY_BONES]
-			var ws = arr[Mesh.ARRAY_WEIGHTS]
-			if bs == null:
+			var bs: PackedInt32Array = arr[Mesh.ARRAY_BONES] if arr[Mesh.ARRAY_BONES] is PackedInt32Array else PackedInt32Array()
+			var ws: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+			if bs.is_empty():
 				continue
-			var per := (bs as PackedInt32Array).size() / vs.size() if bs is PackedInt32Array else (bs as PackedFloat32Array).size() / vs.size()
+			var per := bs.size() / vs.size()
 			for v in vs.size():
+				var bestw := 0.0
+				var bestb := -1
 				for k in per:
-					var bi := int(bs[v * per + k])
-					var bname := m.skin.get_bind_name(bi)
-					var jb := sk.find_bone(bname) if bname != "" else m.skin.get_bind_bone(bi)
-					if jb == hb and float(ws[v * per + k]) > 0.6:
-						cen += vs[v]
-						cnt += 1
-		var c := cen / maxf(cnt, 1)
-		var rest := sk.get_bone_global_rest(hb)
-		var in_sk: Vector3 = (sk.global_transform.affine_inverse() * m.global_transform) * c
-		fist_local = rest.affine_inverse() * in_sk
-		probe_rows.append("GEOM fist verts %d centre_in_bone %s hand_rest_origin %s" % [cnt, str(fist_local), str(rest.origin)])
-		break
-	var mesh := fish.mesh
-	var arr := mesh.surface_get_arrays(0)
-	var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-	var prof := {}
-	for v in vs:
-		var kx := int(floor(v.x / 0.05))
-		var e: Array = prof.get(kx, [1e9, -1e9, 1e9, -1e9])
-		e[0] = minf(e[0], v.y); e[1] = maxf(e[1], v.y); e[2] = minf(e[2], v.z); e[3] = maxf(e[3], v.z)
-		prof[kx] = e
-	var ks := prof.keys()
-	ks.sort()
-	for k in ks:
-		var e2: Array = prof[k]
-		probe_rows.append("GEOM fishprof x=%.2f y[%.3f,%.3f] z[%.3f,%.3f]" % [k * 0.05, e2[0], e2[1], e2[2], e2[3]])
-	probe_rows.append("GEOM fishxf %s scale-ish %s" % [str(fish.transform), str(fish.transform.basis.get_scale())])
+					if ws[v * per + k] > bestw:
+						bestw = ws[v * per + k]
+						bestb = bs[v * per + k]
+				if bestb < 0 or bestw < 0.5:
+					continue
+				var bname := m.skin.get_bind_name(bestb)
+				var jb := sk.find_bone(bname) if bname != "" else m.skin.get_bind_bone(bestb)
+				if jb < 0:
+					continue
+				if not vb.has(jb):
+					vb[jb] = []
+				(vb[jb] as Array).append(to_sk * vs[v])
+	var caps := {}
+	for jb in vb:
+		var vl: Array = vb[jb]
+		var vs2: Array = []
+		for k in range(0, vl.size(), maxi(1, vl.size() / 200)):
+			vs2.append([vl[k].x, vl[k].y, vl[k].z])
+		caps[sk.get_bone_name(jb)] = vs2
+	pj["bind_verts"] = caps
+	var arr2 := fish.mesh.surface_get_arrays(0)
+	var fv: PackedVector3Array = arr2[Mesh.ARRAY_VERTEX]
+	var fl := []
+	for k in range(0, fv.size(), maxi(1, fv.size() / 600)):
+		fl.append([fv[k].x, fv[k].y, fv[k].z])
+	pj["fish_verts"] = fl
 
 func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
 	if probe:
+		return
+	if gripcam:
+		var sk := WardenGlb.skeleton(model.get_node("Warden"))
+		var hp: Vector3 = sk.global_transform * sk.get_bone_global_pose(sk.find_bone("RightHand")).origin
+		hp += (sk.global_transform.basis * sk.get_bone_global_pose(sk.find_bone("RightHand")).basis * Vector3(0.0, 0.1, 0.0))
+		cam.fov = 30.0
+		cam.position = hp + Vector3(0.0, 0.35, 1.7)
+		cam.look_at(hp)
+		await RenderingServer.frame_post_draw
+		await RenderingServer.frame_post_draw
+		tree.root.get_texture().get_image().save_jpg(dir.path_join("grip_" + name + ".jpg"), 0.93)
 		return
 	if close:
 		for knee in [false, true]:
