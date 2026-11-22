@@ -863,6 +863,8 @@ const STRIDE := {
 	"mossgrade": [0.34, 0.87],
 	"nettlynx": [0.31, 0.60],
 	"thrumbird": [1.50, 2.90],
+	"lilybara": [0.56, 1.08],
+	"umbrathere": [0.25, 0.60],
 	"duskapi": [0.36, 1.43],
 	"glaciyak": [0.35, 1.43],
 	"heatherhorn": [0.24, 1.20],

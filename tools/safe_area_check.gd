@@ -78,6 +78,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(mn: Node, mode: String) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = mn
 	Save.no_write = true
 	for a in OS.get_cmdline_user_args():
