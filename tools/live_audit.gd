@@ -17,6 +17,9 @@ const SAMPLES := {"idle": [0.4, 1.0, 1.6], "run": [0.0, 0.12, 0.24], "dash": [0.
 const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
+var film := false       # --film: every frame of idle, run, attack in sequence -> <dir>/film/NNNN.jpg (match camera)
+var film_n := 0
+const FILM_T := {"idle": 1.0, "run": 0.9, "attack": 0.7}
 var native := false
 
 func run(main: Node) -> void:
@@ -29,6 +32,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a == "--film": film = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -117,7 +121,10 @@ func _hunter(id: String, dir: String) -> void:
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
 	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
-	for clip in CLIPS:
+	var clips: Array = FILM_T.keys() if film else CLIPS
+	if film:
+		DirAccess.make_dir_recursive_absolute(dir.path_join("film"))
+	for clip in clips:
 		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
@@ -127,13 +134,17 @@ func _hunter(id: String, dir: String) -> void:
 		for k in 25:
 			poser.call("_process", DT)
 		var n := 0
-		var steps := int(float(times[-1]) / DT) + 1
+		var steps := int(float(FILM_T[clip] if film else times[-1]) / DT) + 1
 		var want := 0
 		for i in steps:
 			var t := i * DT
 			s = _state(id, clip, yaw, t)
 			model.set_meta(WardenClips.STATE, s)
 			poser.call("_process", DT)
+			if film:
+				await _shoot(model, dir, "film/%04d" % film_n, bx)
+				film_n += 1
+				continue
 			if want < times.size() and t + DT * 0.5 >= float(times[want]):
 				await _shoot(model, dir, "%s_%d" % [clip, want], bx)
 				marks.append("%s %d t=%.3f state=%s" % [clip, want, t, str(s)])
