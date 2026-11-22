@@ -3843,6 +3843,7 @@ func step(dt: float) -> void:
 	for k in kins: k.sim(SimLod.kin_dt(k, dt))
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
+	MobReap.tick(self)
 	if blight: blight.tick(dt)
 	_prof("mobs")
 	Prof.begin("physics")
@@ -4998,6 +4999,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			HunterNet.apply(h, it)
 		"k":
 			var k: Kin = e
+			if k.dead and t_owner >= 0.0 and t_owner <= k.net_dead_t:
+				return       # snapshots (unreliable) can land after the kill event (reliable): one sent before the kill is stale
 			k.face = it[5]; k.hp = it[6]; k.max_hp = it[7]
 			var st: int = int(it[8])
 			if st >= 0 and st < KIN_STATES.size():
@@ -5279,6 +5282,7 @@ func _net_ev(x, from: String) -> void:
 			if k:
 				k.dead = true
 				k.visible = false
+				k.net_dead_t = time
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
