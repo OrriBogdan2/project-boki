@@ -4,12 +4,13 @@ extends "res://tools/clip_shots.gd"
 ## renderer; a montage of them is the contact sheet.
 
 const StatesCheck := preload("res://tools/warden_states_check.gd")
-const SHOT_FRAME := 24     # the frame of a state's run that is shown (a hit and a landing show an earlier one)
+const SHOT_FRAME := 24  # the frame of a state's run that is shown (a hit and a landing show an earlier one)
 const EARLY_FRAME := 6
 const SETTLE_FRAMES := 20  # frames a new model gets to load before it is driven
-const SHOT_YAW := 150.0    # deg: the three-quarter view
-const SHOT_DIST := 5.6     # m
-const SHOT_AT_Y := 0.8     # m: the height the camera looks at
+const SHOT_YAW := 150.0  # deg: the three-quarter view
+const SHOT_DIST := 5.6  # m
+const SHOT_AT_Y := 0.8  # m: the height the camera looks at
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -24,7 +25,7 @@ func run(main: Node) -> void:
 			frame_px = int(a.substr(7))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-		main.fade.visible = false     # (the boot's cover and logo can come back over a late frame)
+		main.fade.visible = false  # (the boot's cover and logo can come back over a late frame)
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
@@ -35,6 +36,7 @@ func run(main: Node) -> void:
 		await _hunter(String(id), out)
 	print("WARDEN_STATES_SHOTS_DONE ", ids.size())
 	tree.quit()
+
 
 func _hunter(id: String, out: String) -> void:
 	var art := WardenGlb.art(id)

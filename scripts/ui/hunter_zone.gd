@@ -43,11 +43,11 @@ static func box(top: Vector2, bottom: Vector2) -> Rect2:
 
 
 ## The sideways move (px, negative = left) that takes `box` out of `zone`: to whichever side is nearer. 0 when clear.
-static func slide(box: Rect2, zone: Rect2) -> float:
-	if not zone.has_area() or not box.intersects(zone):
+static func slide(box_v: Rect2, zone: Rect2) -> float:
+	if not zone.has_area() or not box_v.intersects(zone):
 		return 0.0
-	var left := zone.position.x - box.end.x - SIDE_GAP
-	var right := zone.end.x - box.position.x + SIDE_GAP
+	var left := zone.position.x - box_v.end.x - SIDE_GAP
+	var right := zone.end.x - box_v.position.x + SIDE_GAP
 	return left if -left < right else right
 
 

@@ -18,9 +18,12 @@ var main: Node
 var m: Match
 var hud
 
+
 func ok(cond: bool, what: String) -> void:
 	print("BUFFSTACK %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func frames_until(t: float) -> void:
 	var guard := 0
@@ -28,19 +31,25 @@ func frames_until(t: float) -> void:
 		await main.get_tree().process_frame
 		guard += 1
 
+
 func ids() -> Array:
 	return hud.buffs.shown.map(func(r): return r["id"])
 
+
 func row(id: String) -> Dictionary:
 	for r in hud.buffs.shown:
-		if r["id"] == id: return r
+		if r["id"] == id:
+			return r
 	return {}
+
 
 func stacks(id: String) -> int:
 	return int(row(id).get("stacks", 0))
 
+
 func frac(id: String, none: float) -> float:
 	return float(row(id).get("frac", none))
+
 
 func start(demo: String) -> Hunter:
 	Save.no_write = true
@@ -49,11 +58,20 @@ func start(demo: String) -> Hunter:
 	m = Match.new()
 	main.add_child(m)
 	var opts := HudRefDemo.opts("--hudref-demo=" + demo)
-	opts.merge({"tier": 0, "length": 1e9, "seed": 5, "arch": "gunslinger", "cls": Arch.weight("gunslinger"),
-		"weapon": Arch.signature("gunslinger")})
+	opts.merge(
+		{
+			"tier": 0,
+			"length": 1e9,
+			"seed": 5,
+			"arch": "gunslinger",
+			"cls": Arch.weight("gunslinger"),
+			"weapon": Arch.signature("gunslinger")
+		}
+	)
 	m.start(opts)
 	hud = m.hud
 	return m.player
+
 
 ## Swift, a kin damage buff and two Fever stacks, `secs` long (Swift lasts a third of that).
 func three(p: Hunter, secs: float) -> void:
@@ -62,12 +80,14 @@ func three(p: Hunter, secs: float) -> void:
 	p.ak.res = 2.0
 	p.ak.res_wait = secs
 
+
 func seven(p: Hunter) -> void:
 	for f in ["haste_t", "cloak_t", "crit_t", "phase_t", "guard_t", "shield_t"]:
 		p.set(f, 8.0)
 	p.shield = 30.0
 	p.ak.res = 1.0
 	p.ak.res_wait = 8.0
+
 
 func hover(id: String) -> void:
 	var ev := InputEventMouseMotion.new()
@@ -76,8 +96,10 @@ func hover(id: String) -> void:
 	Input.parse_input_event(ev)
 	Input.flush_buffered_events()
 
+
 func shot(out: String, name: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(out.path_join(name + ".png"))
+
 
 func shots(out: String) -> void:
 	var p := start("fight")
@@ -94,6 +116,7 @@ func shots(out: String) -> void:
 	shot(out, "seven")
 	main.get_tree().quit(0)
 
+
 func run(main_node: Node, mode := "check") -> void:
 	main = main_node
 	if main.get("fade") != null:
@@ -101,13 +124,14 @@ func run(main_node: Node, mode := "check") -> void:
 	if mode == "shots":
 		var out := "user://buff_stack_shots"
 		for a in OS.get_cmdline_user_args():
-			if a.begins_with("--shots-dir="): out = a.substr(12)
+			if a.begins_with("--shots-dir="):
+				out = a.substr(12)
 		DirAccess.make_dir_recursive_absolute(out)
 		await shots(out)
 		return
 	var p := start("plates")
 	await frames_until(1.0)
-	p.shield = 0.0      # the hudref demo hands you a heal shield (the vitals strip's check); this one starts bare
+	p.shield = 0.0  # the hudref demo hands you a heal shield (the vitals strip's check); this one starts bare
 	p.shield_t = 0.0
 	await frames_until(m.time + 0.2)
 	ok(hud != null and ids().is_empty() and hud.buffs.more == 0, "nothing on you: no icons")
@@ -124,8 +148,10 @@ func run(main_node: Node, mode := "check") -> void:
 	await main.get_tree().process_frame
 	ok(hud.buffs.carded == ["kin_damage"], "the mouse on one icon: only its card (%s)" % str(hud.buffs.carded))
 	var lines := BuffStack.card_lines(row("kin_damage"))
-	ok(lines[0] == "Boki: more damage" and lines[1].begins_with("Your Boki, ") and lines[1].ends_with(" s left"),
-		"the card names it, its source and the seconds left (%s)" % str(lines))
+	ok(
+		lines[0] == "Boki: more damage" and lines[1].begins_with("Your Boki, ") and lines[1].ends_with(" s left"),
+		"the card names it, its source and the seconds left (%s)" % str(lines)
+	)
 	hover("")
 	Input.action_press("scores")
 	await main.get_tree().process_frame
@@ -136,8 +162,10 @@ func run(main_node: Node, mode := "check") -> void:
 	var mid := frac("swift", 1.0)
 	ok(mid > 0.1 and mid < 0.7, "the ring drains with the time left (%.2f at 0.6 of 1.0 s)" % mid)
 	await frames_until(t0 + 1.3)
-	ok(not ids().has("swift") and ids().has("kin_damage"),
-		"swift is gone at 1 s, the longer kin buff stays (%s)" % str(ids()))
+	ok(
+		not ids().has("swift") and ids().has("kin_damage"),
+		"swift is gone at 1 s, the longer kin buff stays (%s)" % str(ids())
+	)
 	await frames_until(t0 + 3.4)
 	ok(not ids().has("kin_damage"), "the kin buff leaves when its 3 s run out (%s)" % str(ids()))
 	await frames_until(t0 + 3.6)

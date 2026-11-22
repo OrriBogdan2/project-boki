@@ -12,29 +12,63 @@ extends RefCounted
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const ARCHES := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gil", "gunslinger", "juggernaut", "mage",
-	"ostra", "rimewright", "tender", "thief"]
+const ARCHES := [
+	"archer",
+	"ashwick",
+	"bulwark",
+	"dolm",
+	"dredge",
+	"gil",
+	"gunslinger",
+	"juggernaut",
+	"mage",
+	"ostra",
+	"rimewright",
+	"tender",
+	"thief"
+]
 const MOVES := ["lmb", "lhold", "rmb", "hold", "e", "r"]
-const WATCH := 2.0             # s watched after each press
-const HELD := 0.5              # s a held button stays down
-const SYNC_MAX := 0.05         # s a sound may sit off its strike or hit before it is listed
-const STRIKE_MIN := 8.0        # m/s: a hand slower than this at its fastest has no strike to see (a rifle's aim)
+const WATCH := 2.0  # s watched after each press
+const HELD := 0.5  # s a held button stays down
+const SYNC_MAX := 0.05  # s a sound may sit off its strike or hit before it is listed
+const STRIKE_MIN := 8.0  # m/s: a hand slower than this at its fastest has no strike to see (a rifle's aim)
 ## Wind-up sounds, by a whole part of the name ("spin" is bjorn_spin, not br_spine); br_crack is Stone Row's tell
-const WIND := ["wind", "aim", "draw", "overdraw", "charge", "tell", "summon", "place", "count", "whirl", "hum",
-	"creak", "shield_up", "pilot", "spin", "leap", "prime", "br_crack"]
-const LOUD := 0.3              # of a file's peak: where its lead-in ends (a swell is heard from about here)
+const WIND := [
+	"wind",
+	"aim",
+	"draw",
+	"overdraw",
+	"charge",
+	"tell",
+	"summon",
+	"place",
+	"count",
+	"whirl",
+	"hum",
+	"creak",
+	"shield_up",
+	"pilot",
+	"spin",
+	"leap",
+	"prime",
+	"br_crack"
+]
+const LOUD := 0.3  # of a file's peak: where its lead-in ends (a swell is heard from about here)
 ## arch -> move -> [the sound fixed to play from its own event, that event: "strike", "hit", "shot" (the release)
 ## or "rise" (the first rock of a Stone Row or a Basalt Spine up)]
-const FIXED := {"bulwark": {"lmb": ["bjorn_throw", "strike"]}, "dolm": {"e": ["br_raise", "rise"]},
-	"dredge": {"rmb": ["dr_throw", "shot"], "hold": ["dr_throw", "shot"]}}
+const FIXED := {
+	"bulwark": {"lmb": ["bjorn_throw", "strike"]},
+	"dolm": {"e": ["br_raise", "rise"]},
+	"dredge": {"rmb": ["dr_throw", "shot"], "hold": ["dr_throw", "shot"]}
+}
 ## Sounds past SYNC_MAX that are right where they play (on their own event; the reason is in SFX_TIMING.md):
 ## arch -> move -> [sound]. Any other own sound past SYNC_MAX fails its kit's row.
 const KNOWN := {
 	"archer": {"e": ["pin_rain"]},
 	"ashwick": {"lhold": ["ashwick_tank_hiss", "lw_roar"], "e": ["lw_shield"], "r": ["lw_jet", "lw_jet_land"]},
 	"dolm": {"lhold": ["br_punch", "dolm_rock_crunch"], "hold": ["dolm_rock_crunch"], "r": ["br_spine", "br_slam"]},
-	"dredge": {"rmb": ["dredge_coin_jingle", "dr_let_go"], "hold": ["dredge_coin_jingle", "dr_let_go"],
-		"r": ["dr_blast_end"]},
+	"dredge":
+	{"rmb": ["dredge_coin_jingle", "dr_let_go"], "hold": ["dredge_coin_jingle", "dr_let_go"], "r": ["dr_blast_end"]},
 	"gil": {"rmb": ["gil_toss", "gil_pop_zeep"], "hold": ["gil_toss", "gil_pop_zeep"], "r": ["gil_wave_land"]},
 	"gunslinger": {"rmb": ["gunslinger_grenade_thunk"], "hold": ["gunslinger_grenade_thunk"], "r": ["vn_nuke_fire"]},
 	"juggernaut": {"lhold": ["jug_ting"], "hold": ["jug_ting"], "r": ["juggernaut_heal"]},
@@ -44,19 +78,21 @@ const KNOWN := {
 	"tender": {"e": ["tender_lantern_chime"]},
 }
 
-var A
+var a_v
 var bad := 0
-var lead_in := {}              # sound name -> s from its start to where it is heard
+var lead_in := {}  # sound name -> s from its start to where it is heard
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SFXSTRIKE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
-	A = load("res://tools/archetype_check.gd").new()
-	A.main = main
+	a_v = load("res://tools/archetype_check.gd").new()
+	a_v.main = main
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--strike-only="):
@@ -79,15 +115,18 @@ func run(main: Node) -> void:
 	print("SFXSTRIKE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 static func _own(arch: String) -> Dictionary:
 	var f := FileAccess.open("res://content/sfx/%s.json" % arch, FileAccess.READ)
 	return (JSON.parse_string(f.get_as_text()) as Dictionary).get("sounds", {}) if f else {}
+
 
 static func _wind(sname: String) -> bool:
 	for w: String in WIND:
 		if ("_%s_" % sname).contains("_%s_" % w):
 			return true
 	return false
+
 
 ## s from the start of sound `sname`'s file (its first take) to its first 10 ms at LOUD of its peak: a whoosh
 ## into a cut is heard that much after it plays. Read from the 16-bit .wav itself (the import is compressed).
@@ -107,7 +146,7 @@ func _lead_in(sname: String) -> float:
 		var id := b.slice(i, i + 4).get_string_from_ascii()
 		if id == "fmt ":
 			if b.decode_u16(i + 22) != 16:
-				break                   # (not 16-bit: read as no lead-in)
+				break  # (not 16-bit: read as no lead-in)
 			ch = b.decode_u16(i + 10)
 			rate = b.decode_u32(i + 12)
 		elif id == "data":
@@ -116,6 +155,7 @@ func _lead_in(sname: String) -> float:
 		i += 8 + n + (n & 1)
 	lead_in[sname] = at
 	return at
+
 
 ## s to the first window of `win` frames (`frame` bytes each) whose loudest sample reaches LOUD of the peak.
 static func _loud_at(pcm: PackedByteArray, frame: int, win: int) -> float:
@@ -132,17 +172,19 @@ static func _loud_at(pcm: PackedByteArray, frame: int, win: int) -> float:
 			return w * 0.01
 	return 0.0
 
+
 ## s from when sound `sname` is first heard to the nearest of the `events` (INF: it never played or none happened).
 static func _offset(r: Dictionary, sname: String, events := ["strike", "hit", "shot", "rise"]) -> float:
 	for s: Array in r["snd"]:
 		if s[0] == sname:
 			var best := INF
 			for ev: String in events:
-				for at: float in (r[ev] if r[ev] is Array else [r[ev]]):
+				for at: float in r[ev] if r[ev] is Array else [r[ev]]:
 					if at >= 0.0 and absf(float(s[2]) - at) < absf(best):
 						best = float(s[2]) - at
 			return best
 	return INF
+
 
 ## The timed sounds of a move heard past SYNC_MAX from every event of it (wind-ups are not timed).
 static func _off_beat(r: Dictionary) -> Array:
@@ -153,9 +195,11 @@ static func _off_beat(r: Dictionary) -> Array:
 			out.append(s[0])
 	return out
 
+
 ## Past SYNC_MAX, counted in whole ms (a frame is 16.7 ms; 3 frames round to exactly 50).
 static func _late(off: float) -> bool:
 	return absi(roundi(off * 1000.0)) > roundi(SYNC_MAX * 1000.0)
+
 
 ## strike | release | hit | each sound @ its play (+ its lead-in when over a frame; ms off its nearest event,
 ## "!" past SYNC_MAX)
@@ -185,56 +229,57 @@ static func _row(r: Dictionary) -> String:
 	var sh := str(roundi(float(rel.min()) * 1000.0)) if not rel.is_empty() else "-"
 	return "%s | %s | %s | %s" % [st, sh, ht, ", ".join(parts)]
 
+
 ## One press of `mv` on a fresh match. Times in s from the press.
 func measure(arch: String, mv: String) -> Dictionary:
-	var r: Array = A.setup(arch, 3.0)
+	var r: Array = a_v.setup(arch, 3.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t_v: Hunter = r[2]
 	var own := _own(arch)
 	for f in 20:
-		_frame(m, P)
-	var sk := _skel(P)
+		_frame(m, p)
+	var sk := _skel(p)
 	var hands: Array = []
 	for nm in ["hand.R", "hand.L"]:
 		if sk and sk.find_bone(nm) >= 0:
 			hands.append(sk.find_bone(nm))
 	var prev := {}
 	var out := {"snd": [], "hit": [], "shot": [], "strike": -1.0, "clip": "", "rise": -1.0}
-	var rocks := _rocks(P)
+	var rocks := _rocks(p)
 	var sid := m.shot_n
 	var fastest := STRIKE_MIN
-	var hp := T.hp
+	var hp := t_v.hp
 	for f in int(WATCH / DT):
 		var t := f * DT
 		var held := f < int(HELD / DT)
-		P.inp["fire"] = (mv == "lmb" and f == 0) or (mv == "lhold" and held)
-		P.inp["sec"] = mv in ["rmb", "hold"] and f == 0
-		P.inp["sec_hold"] = mv == "hold" and held
-		P.inp["sig"] = mv == "e" and f == 0
+		p.inp["fire"] = (mv == "lmb" and f == 0) or (mv == "lhold" and held)
+		p.inp["sec"] = mv in ["rmb", "hold"] and f == 0
+		p.inp["sec_hold"] = mv == "hold" and held
+		p.inp["sig"] = mv == "e" and f == 0
 		if mv == "r" and f == 0:
-			P.ak.cd["x"] = 0.0
-			P.ult = 1.0
-			P.ak.cast_ult()
-		A.aim_at(P, T.pos)
-		Sfx.listener = P.pos
-		Sfx.last_played.clear()          # every play this frame lands in last_played (no spacing across frames)
+			p.ak.cd["x"] = 0.0
+			p.ult = 1.0
+			p.ak.cast_ult()
+		a_v.aim_at(p, t_v.pos)
+		Sfx.listener = p.pos
+		Sfx.last_played.clear()  # every play this frame lands in last_played (no spacing across frames)
 		Sfx.recent.clear()
-		_frame(m, P)
+		_frame(m, p)
 		for s: String in Sfx.last_played:
 			if String(own.get(s, "")) in ["fire", "impact", "cast", "signature"]:
 				out["snd"].append([s, t, t + _lead_in(s)])
-		if T.hp < hp - 0.01:
+		if t_v.hp < hp - 0.01:
 			out["hit"].append(t)
-		hp = T.hp
+		hp = t_v.hp
 		for sd: Dictionary in m.shots:
-			if sd["by"] == P and int(sd["sid"]) > sid:
+			if sd["by"] == p and int(sd["sid"]) > sid:
 				sid = int(sd["sid"])
 				if out["shot"].is_empty() or out["shot"][-1] != t:
 					out["shot"].append(t)
-		if _rocks(P) > rocks and float(out["rise"]) < 0.0:
+		if _rocks(p) > rocks and float(out["rise"]) < 0.0:
 			out["rise"] = t
-		var c := _clips(P)
+		var c := _clips(p)
 		var v := 0.0
 		for bi: int in hands:
 			var o := sk.get_bone_global_pose(bi).origin
@@ -247,23 +292,27 @@ func measure(arch: String, mv: String) -> Dictionary:
 	m.queue_free()
 	return out
 
-func _frame(m: Match, P: Hunter) -> void:
+
+func _frame(m: Match, p: Hunter) -> void:
 	m.step(DT)
-	P.render(DT, 1.0)
-	if P.model and P.model.has_node("Warden/Sync"):
-		var sync: Node = P.model.get_node("Warden/Sync")
+	p.render(DT, 1.0)
+	if p.model and p.model.has_node("Warden/Sync"):
+		var sync: Node = p.model.get_node("Warden/Sync")
 		sync.set_process(false)
 		sync.call("_process", DT)
+
 
 ## Rocks Tenzo has raised: Stone Row's and Basalt Spine's.
 static func _rocks(h: Hunter) -> int:
 	var k := h.ak as DolmKit
 	return k.rocks_made + k.spine.rocks_raised if k else 0
 
+
 func _clips(h: Hunter) -> WardenClips:
 	if not (h.model and h.model.has_node("Warden/Sync")):
 		return null
 	return h.model.get_node("Warden/Sync").get("clips") as WardenClips
+
 
 func _skel(h: Hunter) -> Skeleton3D:
 	if not (h.model and h.model.has_node("Warden")):

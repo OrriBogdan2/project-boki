@@ -361,10 +361,10 @@ func _tick_skid(dt: float) -> void:
 
 ## The key on the spot the next hop would land on (toward the cursor as it is now) while the skid waits for it.
 func _mark_next() -> void:
-	var left := int(dd()["hops"]) - int(st["n"])
-	if left <= 0 or not h.is_local():
+	var left_v := int(dd()["hops"]) - int(st["n"])
+	if left_v <= 0 or not h.is_local():
 		return
-	var spot := spot_for(h.aim_dir(), left - 1)
+	var spot := spot_for(h.aim_dir(), left_v - 1)
 	if not spot.is_empty():
 		RecastMarker.show_at(h, "dash", spot["at"], float(st["left"]), float(dd()["window"]), HOP_COL)
 

@@ -1,5 +1,6 @@
 """The online-feel proxy must never outlive the check that started it (11-14 orphans stuck gate jobs ~90 min).
 Run: python3 tools/test_online_feel_proxy.py"""
+
 import os
 import signal
 import subprocess
@@ -38,8 +39,10 @@ def start(args, tmp_port):
 class ProxyReap(unittest.TestCase):
     def test_dies_with_killed_parent(self):
         # a stand-in for the check's game: it starts the proxy, then is SIGKILLed (suite timeout, crash)
-        code = ("import subprocess,sys;p=subprocess.Popen([sys.executable,%r,'47311','47312','100']);"
-                "print(p.pid,flush=True);import time;time.sleep(60)" % PROXY)
+        code = (
+            "import subprocess,sys;p=subprocess.Popen([sys.executable,%r,'47311','47312','100']);"
+            "print(p.pid,flush=True);import time;time.sleep(60)" % PROXY
+        )
         parent = subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.PIPE, text=True)
         pid = int(parent.stdout.readline())
         time.sleep(1.0)

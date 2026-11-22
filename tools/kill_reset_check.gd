@@ -32,63 +32,63 @@ func run(main: Node) -> void:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
-	var P: Hunter = m.player
-	var foes: Array = m.hunters.filter(func(o): return o != P and o.team != P.team)
+	var p: Hunter = m.player
+	var foes: Array = m.hunters.filter(func(o): return o != p and o.team != p.team)
 	ok(foes.size() >= 2, "a match with at least two rival hunters (%d)" % foes.size())
 	for o in m.hunters:
-		if o != P: o.ctrl = "idle"
+		if o != p: o.ctrl = "idle"
 	var far := m.world.random_ground()
 	for o in m.hunters:
-		if o != P: o.teleport(far)
+		if o != p: o.teleport(far)
 	CombatBus.dash_reset_cue.connect(func(h, src): cues.append([h, src]))
 	var f1: Hunter = foes[0]
 	var f2: Hunter = foes[1]
-	var mates: Array = m.hunters.filter(func(o): return o != P and o.team == P.team)
+	var mates: Array = m.hunters.filter(func(o): return o != p and o.team == p.team)
 	ok(mates.size() >= 2 and foes.size() >= 6, "a squad of three (%d mates, %d rivals)" % [mates.size(), foes.size()])
 
 	# (a) a knock: every dash charge, the long-dash cooldown, +5% health, and the cue for the local hunter
-	P.max_hp = 200.0; P.hp = 100.0
-	P.lvl = Hunter.XP_TO.size()      # (at the level cap: a takedown's XP can't level you, so quiet growth stays out of the numbers)
-	_spend(P)
-	m.knock(f1, P, {})
+	p.max_hp = 200.0; p.hp = 100.0
+	p.lvl = Hunter.XP_TO.size()      # (at the level cap: a takedown's XP can't level you, so quiet growth stays out of the numbers)
+	_spend(p)
+	m.knock(f1, p, {})
 	ok(f1.downed, "(a) the rival is down")
-	ok(P.dashes >= P.max_dashes() - 0.001 and P.max_dashes() >= 1.0, "(a) the knock brings back every dash charge (%.2f / %.2f)" % [P.dashes, P.max_dashes()])
-	ok(P.ex_cd == 0.0, "(a) the long-dash cooldown is cleared")
-	ok(absf(P.hp - (100.0 + 200.0 * DashReset.HEAL)) < 0.01, "(a) +5%% of max health (%.1f, want 110)" % P.hp)
-	ok(cues.size() == 1 and cues[0][0] == P and cues[0][1] == "takedown", "(a) the reset cue event fired once for the local hunter (%d)" % cues.size())
+	ok(p.dashes >= p.max_dashes() - 0.001 and p.max_dashes() >= 1.0, "(a) the knock brings back every dash charge (%.2f / %.2f)" % [p.dashes, p.max_dashes()])
+	ok(p.ex_cd == 0.0, "(a) the long-dash cooldown is cleared")
+	ok(absf(p.hp - (100.0 + 200.0 * DashReset.HEAL)) < 0.01, "(a) +5%% of max health (%.1f, want 110)" % p.hp)
+	ok(cues.size() == 1 and cues[0][0] == p and cues[0][1] == "takedown", "(a) the reset cue event fired once for the local hunter (%d)" % cues.size())
 	_knock_beat(m, "(a) a knock you land", true)
 
 	# (b) the heal never passes max health
-	P.hp = P.max_hp - 3.0
-	_spend(P)
-	m.knock(f2, P, {})
-	ok(is_equal_approx(P.hp, P.max_hp) and P.dashes >= P.max_dashes() - 0.001, "(b) near full health the heal stops at max (%.1f / %.1f)" % [P.hp, P.max_hp])
+	p.hp = p.max_hp - 3.0
+	_spend(p)
+	m.knock(f2, p, {})
+	ok(is_equal_approx(p.hp, p.max_hp) and p.dashes >= p.max_dashes() - 0.001, "(b) near full health the heal stops at max (%.1f / %.1f)" % [p.hp, p.max_hp])
 
 	# (c) finishing the downed rival is a kill: the reset again
-	P.hp = 100.0; _spend(P)
+	p.hp = 100.0; _spend(p)
 	var n0 := cues.size()
-	m.eliminate(f1, P, "shot", true)
-	ok(f1.out and P.kills >= 1, "(c) the kill is credited")
-	ok(P.dashes >= P.max_dashes() - 0.001 and absf(P.hp - 110.0) < 0.01 and cues.size() == n0 + 1, "(c) a kill resets and heals too (dashes %.2f, hp %.1f)" % [P.dashes, P.hp])
+	m.eliminate(f1, p, "shot", true)
+	ok(f1.out and p.kills >= 1, "(c) the kill is credited")
+	ok(p.dashes >= p.max_dashes() - 0.001 and absf(p.hp - 110.0) < 0.01 and cues.size() == n0 + 1, "(c) a kill resets and heals too (dashes %.2f, hp %.1f)" % [p.dashes, p.hp])
 
 	# (d) a mob kill does nothing
-	var mob := m.spawn_mob("skitter", P.pos + Vector3(3, 0, 0))
-	P.hp = 100.0; _spend(P)
+	var mob := m.spawn_mob("skitter", p.pos + Vector3(3, 0, 0))
+	p.hp = 100.0; _spend(p)
 	n0 = cues.size()
-	mob.hurt(mob.max_hp * 10.0, P, {"src": "test"})
+	mob.hurt(mob.max_hp * 10.0, p, {"src": "test"})
 	for i in 5: m.step(Match.DT)
 	ok(mob.dead, "(d) the mob is dead")
-	ok(P.dashes < 0.5 and P.ex_cd > 4.0 and P.hp < 101.0 and cues.size() == n0, "(d) killing a mob does not reset or heal (dashes %.2f, ex_cd %.1f, hp %.1f)" % [P.dashes, P.ex_cd, P.hp])
+	ok(p.dashes < 0.5 and p.ex_cd > 4.0 and p.hp < 101.0 and cues.size() == n0, "(d) killing a mob does not reset or heal (dashes %.2f, ex_cd %.1f, hp %.1f)" % [p.dashes, p.ex_cd, p.hp])
 
 	# (e) a bot's takedown resets it, but no cue (not the local hunter)
 	var bot: Hunter = null
 	for o in m.hunters:
-		if o != P and not o.out and not o.downed and o.team != P.team and o != f1 and o != f2 and bot == null:
+		if o != p and not o.out and not o.downed and o.team != p.team and o != f1 and o != f2 and bot == null:
 			bot = o
 	if bot == null: bot = foes[2] if foes.size() > 2 else null
 	if bot != null:
-		var victim: Hunter = P
-		var team2: Array = m.hunters.filter(func(o): return o != bot and o != P and o.team != bot.team and not o.downed and not o.out)
+		var victim: Hunter = p
+		var team2: Array = m.hunters.filter(func(o): return o != bot and o != p and o.team != bot.team and not o.downed and not o.out)
 		if not team2.is_empty(): victim = team2[0]
 		bot.hp = bot.max_hp * 0.5; _spend(bot)
 		var bhp := bot.hp
@@ -102,13 +102,13 @@ func run(main: Node) -> void:
 		ok(false, "(e) no bot to test")
 
 	# (f) a teammate or yourself counts for nothing
-	_spend(P); P.hp = 100.0; n0 = cues.size()
-	DashReset.takedown(P, P)
-	ok(P.dashes < 0.5 and cues.size() == n0, "(f) no reset for a takedown on yourself")
+	_spend(p); p.hp = 100.0; n0 = cues.size()
+	DashReset.takedown(p, p)
+	ok(p.dashes < 0.5 and cues.size() == n0, "(f) no reset for a takedown on yourself")
 
 	# (g) the hero resets give the same cue
 	n0 = cues.size()
-	DashReset.cue(P)
+	DashReset.cue(p)
 	ok(cues.size() == n0 + 1 and cues[-1][1] == "hero", "(g) a hero-specific reset fires the same event")
 	DashReset.cue(bot if bot != null else f2)
 	ok(cues.size() == n0 + 1, "(g) and only for the local hunter")
@@ -130,25 +130,25 @@ func run(main: Node) -> void:
 		hud_pop = String(m.hud.slot_fx.get("dash", {}).get("kind", "")) == "reset"
 	ok(hud_pop, "(h) the HUD holds the Shift pop")
 
-	_assists(m, P, mates, foes)
+	_assists(m, p, mates, foes)
 	m.queue_free()
 	print("KILLRESET DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
 ## (i)-(l) the assist rule, the one-charge rule for multi-charge dashes and the per-hero opt-out.
-func _assists(m: Match, P: Hunter, mates: Array, foes: Array) -> void:
+func _assists(m: Match, p: Hunter, mates: Array, foes: Array) -> void:
 	var helper: Hunter = mates[0]
 	var stale: Hunter = mates[1]
 	var v: Hunter = foes[-1]
-	for h in [P, helper, stale]: _spend(h)
-	P.hp = 100.0
+	for h in [p, helper, stale]: _spend(h)
+	p.hp = 100.0
 	v.hurt(1.0, helper, {"src": "test"})
 	v.hurt(1.0, stale, {"src": "test"})
 	v.hit_by[stale.get_instance_id()] = m.time - DashReset.ASSIST_WINDOW - 1.0
-	m.knock(v, P, {})
+	m.knock(v, p, {})
 	var want := helper.max_dashes() if helper.max_dashes() <= 1.0 else 1.0
-	ok(v.downed and P.dashes >= P.max_dashes() - 0.001 and P.ex_cd == 0.0,
-			"(i) the knocker refreshes (%.2f)" % P.dashes)
+	ok(v.downed and p.dashes >= p.max_dashes() - 0.001 and p.ex_cd == 0.0,
+			"(i) the knocker refreshes (%.2f)" % p.dashes)
 	ok(is_equal_approx(helper.dashes, want) and helper.ex_cd == 0.0,
 			"(i) the teammate who hit the victim refreshes (%.2f, want %.2f)" % [helper.dashes, want])
 	ok(stale.dashes < 0.01 and stale.ex_cd > 4.0,
@@ -156,70 +156,70 @@ func _assists(m: Match, P: Hunter, mates: Array, foes: Array) -> void:
 
 	# (j) the local hunter as the assister: the softer cue, no heal
 	var v2: Hunter = foes[-2]
-	_spend(P)
-	P.hp = 100.0
-	v2.hurt(1.0, P, {"src": "test"})
+	_spend(p)
+	p.hp = 100.0
+	v2.hurt(1.0, p, {"src": "test"})
 	var n0 := cues.size()
 	m.knock(v2, helper, {})
-	ok(P.dashes > 0.99 and is_equal_approx(P.hp, 100.0),
-			"(j) an assist refreshes the local hunter, no heal (%.2f, hp %.1f)" % [P.dashes, P.hp])
+	ok(p.dashes > 0.99 and is_equal_approx(p.hp, 100.0),
+			"(j) an assist refreshes the local hunter, no heal (%.2f, hp %.1f)" % [p.dashes, p.hp])
 	ok(cues.size() == n0 + 1 and cues[-1][1] == "assist", "(j) with the assist cue (%s)" % str(cues.slice(n0)))
 
 	# (k) a 2-charge dash gains exactly one charge (the kit's dash.charges set to 2 for it)
-	var dd: Dictionary = P.ak.dash_def() if P.ak else {}
+	var dd: Dictionary = p.ak.dash_def() if p.ak else {}
 	var had: Variant = dd.get("charges")
 	dd["charges"] = 2
 	var v3: Hunter = foes[-3]
-	_spend(P)
-	P.dashes = 0.3
-	m.knock(v3, P, {})
-	ok(P.max_dashes() >= 2.0 and is_equal_approx(P.dashes, 1.3),
-			"(k) a %d-charge dash gains one charge (0.3 -> %.2f)" % [int(P.max_dashes()), P.dashes])
-	_second_wind(m, P, foes[-5])
+	_spend(p)
+	p.dashes = 0.3
+	m.knock(v3, p, {})
+	ok(p.max_dashes() >= 2.0 and is_equal_approx(p.dashes, 1.3),
+			"(k) a %d-charge dash gains one charge (0.3 -> %.2f)" % [int(p.max_dashes()), p.dashes])
+	_second_wind(m, p, foes[-5])
 	if had == null: dd.erase("charges")
 	else: dd["charges"] = had
 
 	# (l) a hero whose dash data opts out gets nothing
-	ok(P.ak != null, "(l) the local hunter has a kit")
+	ok(p.ak != null, "(l) the local hunter has a kit")
 	dd["knock_refresh"] = false
-	_spend(P)
-	m.knock(foes[-4], P, {})
+	_spend(p)
+	m.knock(foes[-4], p, {})
 	dd.erase("knock_refresh")
-	ok(P.dashes < 0.01 and P.ex_cd > 4.0, "(l) knock_refresh: false opts out (%.2f)" % P.dashes)
+	ok(p.dashes < 0.01 and p.ex_cd > 4.0, "(l) knock_refresh: false opts out (%.2f)" % p.dashes)
 
 	# (m) being knocked: no slow-mo, no full-screen flash either
 	if m.hud: m.hud.flash_t = 0.0      # (c)'s kill flash; that one stays, only knocks lost theirs
 	m.hitstop = 0.0
-	m.knock(P, foes[-5], {})
-	ok(P.downed, "(m) the local hunter is down")
+	m.knock(p, foes[-5], {})
+	ok(p.downed, "(m) the local hunter is down")
 	_knock_beat(m, "(m) being knocked", false)
 
 ## (n) Second Wind: a hit taking `P` from 30% health or more to under it refills every dash charge, once per
 ## 45 s; a hit that stays above, or one inside the 45 s, does nothing. Without the perk nothing happens.
-func _second_wind(m: Match, P: Hunter, foe: Hunter) -> void:
-	var line := P.max_hp * DashReset.SECOND_WIND_HP
+func _second_wind(_m: Match, p: Hunter, foe: Hunter) -> void:
+	var line := p.max_hp * DashReset.SECOND_WIND_HP
 	var drop := func() -> void:
-		_spend(P)
-		P.hp = line + 1.0
-		P.hurt(30.0, foe, {"src": "test"})
+		_spend(p)
+		p.hp = line + 1.0
+		p.hurt(30.0, foe, {"src": "test"})
 	drop.call()
-	ok(P.dashes < 0.01, "(n) no Second Wind perk: the drop under 30%% gives nothing (%.2f)" % P.dashes)
-	P.perks.append("secondwind")
-	P.second_wind_at = -INF
-	_spend(P)
-	P.hp = P.max_hp
-	P.hurt(5.0, foe, {"src": "test"})
-	ok(P.dashes < 0.01, "(n) a hit that stays over 30%% gives nothing (%.2f)" % P.dashes)
+	ok(p.dashes < 0.01, "(n) no Second Wind perk: the drop under 30%% gives nothing (%.2f)" % p.dashes)
+	p.perks.append("secondwind")
+	p.second_wind_at = -INF
+	_spend(p)
+	p.hp = p.max_hp
+	p.hurt(5.0, foe, {"src": "test"})
+	ok(p.dashes < 0.01, "(n) a hit that stays over 30%% gives nothing (%.2f)" % p.dashes)
 	drop.call()
-	ok(P.hp < line and is_equal_approx(P.dashes, P.max_dashes()) and P.ex_cd == 0.0,
-			"(n) Second Wind: under 30%% (hp %.0f) refills all %d charges (%.2f)" % [P.hp, P.max_dashes(), P.dashes])
+	ok(p.hp < line and is_equal_approx(p.dashes, p.max_dashes()) and p.ex_cd == 0.0,
+			"(n) Second Wind: under 30%% (hp %.0f) refills all %d charges (%.2f)" % [p.hp, p.max_dashes(), p.dashes])
 	drop.call()
-	ok(P.dashes < 0.01, "(n) a second drop inside 45 s gives nothing (%.2f)" % P.dashes)
-	P.second_wind_at -= DashReset.SECOND_WIND_CD
+	ok(p.dashes < 0.01, "(n) a second drop inside 45 s gives nothing (%.2f)" % p.dashes)
+	p.second_wind_at -= DashReset.SECOND_WIND_CD
 	drop.call()
-	ok(is_equal_approx(P.dashes, P.max_dashes()), "(n) 45 s later it fires again (%.2f)" % P.dashes)
-	P.perks.erase("secondwind")
-	P.hp = P.max_hp
+	ok(is_equal_approx(p.dashes, p.max_dashes()), "(n) 45 s later it fires again (%.2f)" % p.dashes)
+	p.perks.erase("secondwind")
+	p.hp = p.max_hp
 
 ## A knock is a short freeze and the confirm, never slow motion or a full-screen flash (one rhythm
 ## offline and online); the knocker also gets the short freeze. Clears the freeze after.

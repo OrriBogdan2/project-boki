@@ -51,11 +51,34 @@ func run(m: Node) -> void:
 	await _place("starter_pick", "hatch", {})
 	await _place("farm_home", "home", {})
 	await _place("party", "party", {})
-	var result := {"extracted": true, "gems": 1, "seeds": {}, "caught": [rec], "knocks": 0, "damage": 1, "taken": 1,
-		"kills": 0, "downs": 0, "deaths": 0, "revives": 0, "armor_tier": 1, "time": 60.0}
+	var result := {
+		"extracted": true,
+		"gems": 1,
+		"seeds": {},
+		"caught": [rec],
+		"knocks": 0,
+		"damage": 1,
+		"taken": 1,
+		"kills": 0,
+		"downs": 0,
+		"deaths": 0,
+		"revives": 0,
+		"armor_tier": 1,
+		"time": 60.0
+	}
 	await _place("results_caught", "results", result)
-	var match_opts := {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
-		"no_drop": true, "demo_kin": species, "sandbox_demo": false, "kin_demo": true}
+	var match_opts := {
+		"training": true,
+		"teams": 1,
+		"squad": 1,
+		"tier": 0,
+		"length": 1e9,
+		"seed": 4242,
+		"no_drop": true,
+		"demo_kin": species,
+		"sandbox_demo": false,
+		"kin_demo": true
+	}
 	await _place("match_own_boki", "match", match_opts)
 	await _reveal()
 	await _portrait(rec)
@@ -126,12 +149,12 @@ func _record() -> Dictionary:
 
 func _place(label: String, screen: String, opts: Dictionary) -> void:
 	main.show_screen(screen, opts)
-	for i in 600:       # a farm or a match takes a while to build: up to 600 frames until a rigged Boki shows
+	for i in 600:  # a farm or a match takes a while to build: up to 600 frames until a rigged Boki shows
 		await main.get_tree().process_frame
 		if i >= 90 and not _rigs().is_empty():
 			break
 	var ld = main.get("_ld")
-	for i in 900:       # the loading screen of a match, then the fade in
+	for i in 900:  # the loading screen of a match, then the fade in
 		if ld == null or not is_instance_valid(ld) or not ld.is_inside_tree():
 			break
 		await main.get_tree().process_frame

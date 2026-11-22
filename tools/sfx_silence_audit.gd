@@ -12,32 +12,37 @@ extends RefCounted
 
 const SECS := 150.0
 const SEED := 31
-const NEAR := 6.0       # m: a cue this close to an event's place belongs to it
-const WINDOW := 2       # steps an event waits for its cue (its own step and the next)
-const THROW_EVERY := 5.0    # s between the player's throws (--audit-throw)
-const THROW_REACH := 10.0   # m: how far toward the nearest rival the Boki is thrown
-const SHOW := 40        # rows printed
-const NOISE := ["step", "wisp_hum", "glider_wind"]     # constant background cues, never an event's own
+const NEAR := 6.0  # m: a cue this close to an event's place belongs to it
+const WINDOW := 2  # steps an event waits for its cue (its own step and the next)
+const THROW_EVERY := 5.0  # s between the player's throws (--audit-throw)
+const THROW_REACH := 10.0  # m: how far toward the nearest rival the Boki is thrown
+const SHOW := 40  # rows printed
+const NOISE := ["step", "wisp_hum", "glider_wind"]  # constant background cues, never an event's own
 
 var fails := 0
-var shared := {}        # cue name -> true: the generic names no sound set owns
-var tally := {}         # key -> {n, none, shared, cues: {name: n}}
+var shared := {}  # cue name -> true: the generic names no sound set owns
+var tally := {}  # key -> {n, none, shared, cues: {name: n}}
 var pending: Array = []
-var prev := {}          # hunter id -> last polled state
+var prev := {}  # hunter id -> last polled state
 var prev_exit := {}
 var step_events: Array = []
-var missing := {}       # cue name -> times asked for with no sound file anywhere
+var missing := {}  # cue name -> times asked for with no sound file anywhere
+
+var _m: Match
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SILENCE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		fails += 1
 
+
 func _arg(flag: String, fallback: String) -> String:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with(flag + "="):
 			return String(a).substr(flag.length() + 1)
 	return fallback
+
 
 func _load_shared() -> void:
 	var owned := {}
@@ -51,6 +56,7 @@ func _load_shared() -> void:
 		if not owned.has(n):
 			shared[n] = true
 
+
 func _who(e) -> String:
 	if e is Hunter:
 		return String(e.arch) if e.arch != "" else "classkit"
@@ -58,15 +64,21 @@ func _who(e) -> String:
 		return String(e.get_script().get_global_name()).to_snake_case()
 	return "world"
 
+
 ## What a hit landed on, for the key: a hunter, a Boki ("kin"), a monster or the rest.
 func _target_class(e) -> String:
-	if e is Hunter: return "hunter"
-	if e is Kin: return "kin"
-	if e is Mob: return "mob"
+	if e is Hunter:
+		return "hunter"
+	if e is Kin:
+		return "kin"
+	if e is Mob:
+		return "mob"
 	return "other"
+
 
 func _at(e) -> Vector3:
 	return e.pos if e is Ent else Vector3.INF
+
 
 ## far_at: the bodies the far test looks at (default all places; a hit uses its target, as Juice.hit does).
 func _add(kind: String, detail: String, who, places: Array, far_at: Array = []) -> void:
@@ -86,20 +98,23 @@ func _add(kind: String, detail: String, who, places: Array, far_at: Array = []) 
 	var key := "%s %s [%s]" % [kind, detail, who_tag]
 	step_events.append({"key": key, "ps": ps, "mine": mine, "cues": [], "age": 0})
 
-var _m: Match
 
 func _on_hit(attacker: Node, target: Node, _amount: float, tags: Array) -> void:
 	var detail := "%s>%s %s" % [_who(attacker), _target_class(target), ",".join(tags)]
 	_add("hit", detail, attacker, [attacker, target], [target])
 
+
 func _on_cast(caster: Node, id: String, slot: String) -> void:
 	_add("cast", "%s %s" % [slot, id], caster, [caster])
+
 
 func _on_status(target: Node, status: String, by: Node, _t: float) -> void:
 	_add("status", "%s on %s" % [status, _who(target)], by, [target])
 
+
 func _on_kin(kin: Node, owner_h: Node) -> void:
-	_add("boki", "%s" % kin.get("state"), owner_h, [owner_h, kin])     # (its cues play at the Boki, often far from you)
+	_add("boki", "%s" % kin.get("state"), owner_h, [owner_h, kin])  # (its cues play at the Boki, often far from you)
+
 
 func _poll() -> void:
 	for h: Hunter in _m.hunters:
@@ -109,23 +124,39 @@ func _poll() -> void:
 			belt += int(b.get("n", 0))
 		var kin_state: String = h.kin.state if h.kin is Kin else ""
 		var recast: bool = h.ak != null and not h.ak.recast_window().is_empty()
-		var s := {"downed": h.downed, "out": h.out, "extracted": h.extracted, "lvl": h.lvl, "belt": belt,
-			"recast": recast, "kin": kin_state, "arch": _who(h)}
+		var s := {
+			"downed": h.downed,
+			"out": h.out,
+			"extracted": h.extracted,
+			"lvl": h.lvl,
+			"belt": belt,
+			"recast": recast,
+			"kin": kin_state,
+			"arch": _who(h)
+		}
 		var p: Dictionary = prev.get(id, s)
 		var who := _who(h)
-		if s["downed"] and not p["downed"]: _add("knock", who, h, [h])
-		if s["out"] and not p["out"]: _add("out", who, h, [h])
-		if s["extracted"] and not p["extracted"]: _add("extract", who, h, [h])
-		if s["lvl"] > p["lvl"]: _add("level", who, h, [h])
-		if s["belt"] > p["belt"]: _add("pickup", who, h, [h])
-		if s["recast"] != p["recast"]: _add("recast", "%s %s" % [who, "open" if s["recast"] else "close"], h, [h])
-		if s["kin"] != p["kin"] and p["kin"] != "": _add("boki", "%s>%s" % [p["kin"], s["kin"]], h, [h, h.kin])
+		if s["downed"] and not p["downed"]:
+			_add("knock", who, h, [h])
+		if s["out"] and not p["out"]:
+			_add("out", who, h, [h])
+		if s["extracted"] and not p["extracted"]:
+			_add("extract", who, h, [h])
+		if s["lvl"] > p["lvl"]:
+			_add("level", who, h, [h])
+		if s["belt"] > p["belt"]:
+			_add("pickup", who, h, [h])
+		if s["recast"] != p["recast"]:
+			_add("recast", "%s %s" % [who, "open" if s["recast"] else "close"], h, [h])
+		if s["kin"] != p["kin"] and p["kin"] != "":
+			_add("boki", "%s>%s" % [p["kin"], s["kin"]], h, [h, h.kin])
 		prev[id] = s
 	for x in _m.exits.list:
 		var st := String(x.get("state", ""))
 		if prev_exit.has(x["pos"]) and prev_exit[x["pos"]] != st:
 			_add("exit", "%s>%s" % [x.get("kind", "?"), st], null, [x["pos"]])
 		prev_exit[x["pos"]] = st
+
 
 ## Every place of an event is beyond Juice.FAR from the player: Juice.hit draws and plays nothing that far
 ## (and most cue reaches are shorter), so a "none" there is distance, not a missing wire. Ranked last.
@@ -135,8 +166,10 @@ func _far(ps: Array) -> bool:
 		return false
 	return ps.all(func(q): return q is Vector3 and q.is_finite() and _flat(q, p.pos) > Juice.FAR)
 
+
 func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
+
 
 func _match_cues(new_cues: Array) -> void:
 	for c in new_cues:
@@ -163,6 +196,7 @@ func _match_cues(new_cues: Array) -> void:
 			keep.append(ev)
 	pending = keep
 
+
 func _tally(ev: Dictionary) -> void:
 	var t: Dictionary = tally.get(ev["key"], {"n": 0, "none": 0, "shared": 0, "cues": {}})
 	t["n"] += 1
@@ -175,21 +209,29 @@ func _tally(ev: Dictionary) -> void:
 		t["cues"][n] = int(t["cues"].get(n, 0)) + 1
 	tally[ev["key"]] = t
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	_load_shared()
 	ok(Sfx.cue_log == null, "the cue log is off by default")
 	var secs := float(_arg("--audit-secs", str(SECS)))
-	var opts := {"teams": 10, "squad": 3, "tier": 0, "length": 1e9, "seed": int(_arg("--audit-seed", str(SEED))),
-		"no_drop": true, "autoplay": true}
+	var opts := {
+		"teams": 10,
+		"squad": 3,
+		"tier": 0,
+		"length": 1e9,
+		"seed": int(_arg("--audit-seed", str(SEED))),
+		"no_drop": true,
+		"autoplay": true
+	}
 	var arch := _arg("--audit-arch", "")
 	ok(arch == "" or Arch.exists(arch), "the player's archetype '%s' exists" % arch)
 	if Arch.exists(arch):
 		opts.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
 	var throw := OS.get_cmdline_user_args().has("--audit-throw")
 	if throw:
-		opts["demo_kin"] = "cindle"         # (a fresh save has no Boki for the player)
+		opts["demo_kin"] = "cindle"  # (a fresh save has no Boki for the player)
 	_m = Match.new()
 	main.add_child(_m)
 	_m.start(opts)
@@ -224,6 +266,7 @@ func run(main: Node) -> void:
 	print("SILENCE CHECK DONE, failures: ", fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 ## --audit-throw: the player's Boki leaves the shoulder toward the nearest rival; once out, it is called back.
 func _throw_own() -> void:
 	var p: Hunter = _m.player
@@ -239,12 +282,14 @@ func _throw_own() -> void:
 		to.y = 0.0
 		k.throw_to(p.pos + to.normalized() * THROW_REACH)
 
+
 ## Hunters per archetype, to pick the one a seed covers least ("ashwick 0" is absent from the list).
 func _arch_counts() -> String:
 	var n := {}
 	for h: Hunter in _m.hunters:
 		n[_who(h)] = int(n.get(_who(h), 0)) + 1
 	return ", ".join(n.keys().map(func(a): return "%s %d" % [a, n[a]]))
+
 
 ## The cues the audit's first fixes added, each probed on its own (docs/AUDIO.md, Silence audit).
 func _cues_of(probe: Callable) -> Array:
@@ -254,8 +299,9 @@ func _cues_of(probe: Callable) -> Array:
 	Sfx.cue_log = null
 	return names
 
+
 func _fixes() -> void:
-	for kind in Data.MOBS:      # (the boss and the stones with no strike have no wind-up call)
+	for kind in Data.MOBS:  # (the boss and the stones with no strike have no wind-up call)
 		if Data.MOBS[kind]["attack"] in ["none", "boss"]:
 			continue
 		ok(Sfx.ensure("v_" + String(kind).trim_prefix("bl_")), "mob %s has a wind-up voice" % kind)
@@ -296,7 +342,7 @@ func _fixes() -> void:
 	ok("pickup" in _cues_of(func(): Juice.rival_pickup(_m, a)), "another hunter's pickup is heard")
 	_raid_rows()
 	var tgt: Hunter = b
-	for t in KinLib.TYPES:      # a Boki's ability hit between two others: its type's impact, not the shared hit
+	for t in KinLib.TYPES:  # a Boki's ability hit between two others: its type's impact, not the shared hit
 		k.sp = k.sp.duplicate()
 		k.sp["type"] = t
 		var heard := _cues_of(func(): Juice.hit(_m, tgt, k, 10.0, {"src": "kin", "ab": "k1"}, false, false))
@@ -307,6 +353,7 @@ func _fixes() -> void:
 			ok(true, "all 19 types: a Boki's ability hit plays its own ki_<type> impact")
 	ok(missing.is_empty(), "no cue the match asked for lacks a sound file (%s)" % [missing.keys()])
 
+
 ## Heart Raid's events (scripts/match/raid_sfx.gd), each on a Nightmare raid of its own: the cue its event plays.
 func _raid_rows() -> void:
 	var o := HeartRaid.opts(1, "nightmare")
@@ -316,28 +363,37 @@ func _raid_rows() -> void:
 	rm.start(o)
 	rm.set_process(false)
 	var rd: HeartRaid = rm.heart_raid
-	rd.audio.update()      # (the first look only notes the state)
-	var run := func(n: int): for i in n: rm.step(Match.DT)
-	var ticks := _cues_of(func():
-		rd.next_wave_t = rm.sess_time() + float(RaidSfx.TICK_S) - 0.5
-		rd.gates.mark(0, rd.next_wave_t)
-		rd.gates.show_marks()
-		run.call(int(0.6 / Match.DT)))
+	rd.audio.update()  # (the first look only notes the state)
+	var run_v := func(n: int):
+		for i in n:
+			rm.step(Match.DT)
+	var ticks := _cues_of(
+		func():
+			rd.next_wave_t = rm.sess_time() + float(RaidSfx.TICK_S) - 0.5
+			rd.gates.mark(0, rd.next_wave_t)
+			rd.gates.show_marks()
+			run_v.call(int(0.6 / Match.DT))
+	)
 	var n_ticks := ticks.count("raid_gate_tick")
 	var gates_n := rd.gates.marks.size()
 	ok(n_ticks >= gates_n, "raid: every marked gate ticks (%d for %d gates)" % [n_ticks, gates_n])
-	var wave := _cues_of(func():
-		rd.wave += 1
-		rd.audio.update())
+	var wave := _cues_of(
+		func():
+			rd.wave += 1
+			rd.audio.update()
+	)
 	ok("raid_wave_open" in wave, "raid: a wave opening has its sting")
-	var rise := _cues_of(func():
-		rd._spawn_boss()
-		rd.audio.update())
+	var rise := _cues_of(
+		func():
+			rd._spawn_boss()
+			rd.audio.update()
+	)
 	ok("raid_boss_rise" in rise, "raid: the boss rising has its sting")
 	var b := rd.boss as Boss
 	ok("raid_phase" in _cues_of(func(): b._phase_up(1)), "raid: a boss phase change has its cue")
 	ok("raid_rockfall_warn" in _cues_of(func(): b._atk_rockfall()), "raid: the Nightmare rockfall warns")
 	rm.queue_free()
+
 
 ## A Boki ability hit row (k1, k2 or zone, seen 10+ times) none of whose cues is a type impact ki_<type>.
 func _plain_boki_row(key: String, t: Dictionary) -> bool:
@@ -346,8 +402,10 @@ func _plain_boki_row(key: String, t: Dictionary) -> bool:
 		return false
 	return not t["cues"].keys().any(func(c): return String(c).begins_with("ki_"))
 
+
 func _bad(t: Dictionary) -> int:
 	return int(t["none"]) + int(t["shared"])
+
 
 func _report() -> void:
 	var rows: Array = []
@@ -357,7 +415,7 @@ func _report() -> void:
 		total += int(t["n"])
 		rows.append([k, t])
 	ok(total > 0, "%d events seen" % total)
-	var sums := {"near": [0, 0], "far": [0, 0]}     # [none, none + shared]
+	var sums := {"near": [0, 0], "far": [0, 0]}  # [none, none + shared]
 	for r in rows:
 		var band := "far" if String(r[0]).ends_with("[far]") else "near"
 		sums[band][0] += int(r[1]["none"])
@@ -374,17 +432,29 @@ func _report() -> void:
 			plain_rows.append(r[0])
 	ok(plain_rows.is_empty(), "every Boki ability hit row (kin>*) shows a type impact ki_*: %s" % [plain_rows])
 	ok(kinds.size() >= 5, "event kinds seen: %s" % [", ".join(kinds.keys())])
-	rows.sort_custom(func(x, y):
-		var fx := String(x[0]).ends_with("[far]")
-		var fy := String(y[0]).ends_with("[far]")
-		return fy if fx != fy else _bad(x[1]) > _bad(y[1]))
+	rows.sort_custom(
+		func(x, y):
+			var fx := String(x[0]).ends_with("[far]")
+			var fy := String(y[0]).ends_with("[far]")
+			return fy if fx != fy else _bad(x[1]) > _bad(y[1])
+	)
 	var lines: Array = []
 	for r in rows:
 		var t: Dictionary = r[1]
 		var cues: Array = t["cues"].keys()
 		cues.sort_custom(func(a, b): return t["cues"][a] > t["cues"][b])
-		lines.append("%d\t%d\t%d\t%s\t%s" % [t["none"] + t["shared"], t["none"], t["n"], r[0],
-			", ".join(cues.slice(0, 4).map(func(n): return "%s x%d" % [n, t["cues"][n]]))])
+		lines.append(
+			(
+				"%d\t%d\t%d\t%s\t%s"
+				% [
+					t["none"] + t["shared"],
+					t["none"],
+					t["n"],
+					r[0],
+					", ".join(cues.slice(0, 4).map(func(n): return "%s x%d" % [n, t["cues"][n]]))
+				]
+			)
+		)
 	var shown := 0
 	for l in lines:
 		if shown < SHOW and int(String(l).get_slice("\t", 0)) > 0:

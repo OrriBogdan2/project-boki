@@ -5,6 +5,7 @@ extends RefCounted
 
 const RULES_PATH := "res://content/rules/armor.json"
 
+
 static func tiers() -> Array:
 	var out: Array = []
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))

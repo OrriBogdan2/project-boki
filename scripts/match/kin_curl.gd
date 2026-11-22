@@ -6,10 +6,10 @@ extends RefCounted
 ## was last drawn off you, carried along with you (its seat moves with you, so the hop never trails your glide).
 ## --boki-curl-check dumps it per frame.
 
-const CURL_S := 0.6         # s: the hop onto your back and down (a ~3 m hop off a jump: under 0.15 m a frame)
-const BALL_PITCH := 0.9     # rad: the curled ball's body pitch
-const SEAT := Vector3(0, 0.55, 0.36)   # the ball's seat in your shown torso's space
-const REACH := 4.0         # m: from farther off you it is put on (a stow, the drop), not hopped up
+const CURL_S := 0.6  # s: the hop onto your back and down (a ~3 m hop off a jump: under 0.15 m a frame)
+const BALL_PITCH := 0.9  # rad: the curled ball's body pitch
+const SEAT := Vector3(0, 0.55, 0.36)  # the ball's seat in your shown torso's space
+const REACH := 4.0  # m: from farther off you it is put on (a stow, the drop), not hopped up
 const GROUND_SCALE := 0.95  # its size on its feet (x its evo scale), as Kin.render draws it off you
 
 

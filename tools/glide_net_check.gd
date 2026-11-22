@@ -47,18 +47,18 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	var G := await _host_up()
-	if G == null:
+	var g := await _host_up()
+	if g == null:
 		return _finish()
-	await _place(G, home + PARK)
+	await _place(g, home + PARK)
 	var med := {}
 	var jumps := {"btn": [], "space": []}      # cm each drop's copy steps over the guest's own steps
-	await _drop_once(G, "btn", 0)  # unmeasured: the host's first glider copy loads its canopy and trail
+	await _drop_once(g, "btn", 0)  # unmeasured: the host's first glider copy loads its canopy and trail
 	for mode in MODES:
 		var lags: Array = []
 		var frames: Array = []
 		for i in DROPS:
-			var got := await _drop_once(G, mode, i)
+			var got := await _drop_once(g, mode, i)
 			lags.append(got[0])
 			frames.append(got[1])
 			jumps[mode].append(got[2])
@@ -86,7 +86,7 @@ func _host() -> void:
 
 ## One drop on the guest, then the hunter back at the park: [the host copy's lag (s), the guest's open frames,
 ## the copy's biggest step over the guest's own (cm)].
-func _drop_once(G: Node, mode: String, i: int) -> Array:
+func _drop_once(g: Node, mode: String, i: int) -> Array:
 	host_open_ms = 0
 	replies.clear()
 	copy_rec.clear()
@@ -99,7 +99,7 @@ func _drop_once(G: Node, mode: String, i: int) -> Array:
 	var g_ms := int(_got("open_ms"))
 	var lag := (host_open_ms - g_ms) / 1000.0 if host_open_ms > 0 and g_ms > 0 else 9.0
 	var frames := int(_got("frames"))
-	await _place(G, home + PARK)
+	await _place(g, home + PARK)
 	return [snappedf(lag, 0.001), frames, snappedf(jump, 0.1)]
 
 ## The biggest distance between two neighbouring positions of `rec`, m.
@@ -120,33 +120,33 @@ func _on_msg(topic: String, data, from: String) -> void:
 ## The guest's hunter drops from `at`, presses mid-fall (the mode's key), holds, lets go; then says when it opened.
 ## The guest steps the drop itself (one step a frame, its main loop idle meanwhile), so the open's frame is exact.
 func _drop(mode: String, at: Vector3, wait: float) -> void:
-	var P := m.player
+	var p := m.player
 	driving = true
-	_fresh(P)
-	for k in ["glide", "glide_btn", "jump"]: P.inp[k] = false
-	P.inp["glide_press_only"] = true       # a player's keys, as Match sets them
-	P.teleport(at)
+	_fresh(p)
+	for k in ["glide", "glide_btn", "jump"]: p.inp[k] = false
+	p.inp["glide_press_only"] = true       # a player's keys, as Match sets them
+	p.teleport(at)
 	own_rec.clear()
-	P.grounded = false
-	P.coyote = 0.0
-	P.glide_fuel = 1.0
-	P.glide_cd = 0.0
+	p.grounded = false
+	p.coyote = 0.0
+	p.glide_fuel = 1.0
+	p.glide_cd = 0.0
 	await super._run(FALL_S + wait)
 	var open_ms := 0
 	var frames := -1
 	for i in roundi(HOLD_S / DT):
-		P.inp["glide"] = true
-		P.inp["glide_btn"] = mode == "btn"
-		P.inp["jump"] = mode == "space" and i == 0     # Match's do_jump route: a second Space press in the air
+		p.inp["glide"] = true
+		p.inp["glide_btn"] = mode == "btn"
+		p.inp["jump"] = mode == "space" and i == 0     # Match's do_jump route: a second Space press in the air
 		await super._run(DT)
-		if P.gliding and frames < 0:
+		if p.gliding and frames < 0:
 			frames = i + 1
 			open_ms = int(Time.get_unix_time_from_system() * 1000.0)
-	P.inp["glide"] = false
-	P.inp["glide_btn"] = false
+	p.inp["glide"] = false
+	p.inp["glide_btn"] = false
 	await super._run(CLOSE_S)
 	driving = false
-	Net.lobby_emit("dn_r", {"pos": [P.pos.x, P.pos.y, P.pos.z], "open_ms": open_ms, "frames": frames,
+	Net.lobby_emit("dn_r", {"pos": [p.pos.x, p.pos.y, p.pos.z], "open_ms": open_ms, "frames": frames,
 		"step_cm": _max_step(own_rec) * 100.0})
 
 ## The guest's main loop waits out a frame while a drop steps the match itself.

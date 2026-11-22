@@ -50,7 +50,8 @@ func run(m: Node) -> void:
 	Overlay.open_more()
 	var pause_help := false
 	for b in Overlay.host.find_children("*", "Button", true, false):
-		if (b as Button).text.contains("Help"): pause_help = true
+		if (b as Button).text.contains("Help"):
+			pause_help = true
 	ok(pause_help, "the More page has Help")
 	Overlay.open_words()
 	var shown := 0

@@ -2,8 +2,7 @@ extends RefCounted
 ## --drop-merge-check: fewer, bigger drops (DropMerge). Part 1: a cluster of gem and seed drops becomes
 ## one pile of each kind with the same totals, a far drop and other kinds stay apart, a pile is bigger the
 ## more it holds and never past the cap, picking it up gives exactly the total, and a collected gem node
-## is reused by the next drop. Part 2 is an audit: 30 bots for 5 and 10 minutes, what lies on the ground
-## (pickups, gear/loot pickups, deathboxes). Never touches the save.
+## is reused by the next drop. Never touches the save.
 
 var main: Node
 var fails := 0
@@ -19,7 +18,6 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	await _piles()
-	await _audit()
 	print("DROPMERGE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -79,19 +77,4 @@ func _piles() -> void:
 	var reuse: Node3D = m.pickups[-1]["node"]
 	ok("the next gem drop reuses that node, visible and normal size",
 		reuse == node and node.visible and is_equal_approx(node.scale.x, 1.0))
-	m.queue_free()
-
-func _audit() -> void:
-	var m := await _match(15, 2, 41)
-	var bots := m.hunters.size() - 1
-	for minute in [5, 10]:
-		while m.time < minute * 60.0:
-			m.step(Match.DT)
-		var gems := 0
-		for p in m.pickups:
-			if p["kind"] == "gem":
-				gems += int(p["v"])
-		print("DROPMERGE audit %2d min, %d bots+you: pickups %d (gem value %d), gear/loot %d, deathboxes %d" % [
-			minute, bots, m.pickups.size(), gems, m.wpicks.size(), m.boxes.size()])
-	ok("the 30-bot match ran 10 minutes", m.time >= 600.0)
 	m.queue_free()

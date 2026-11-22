@@ -3,18 +3,21 @@ extends RefCounted
 ## bowl_three.png (three hungry Boki at the bowl: one eating, the others queued in the ring) and bowl_next.png
 ## (the next one's turn). Never touches the real save.
 
-const AT := Vector3(5.0, 0.0, 3.0)        # m from the landing where the bowl goes
-const SECS := 25.0                       # s before a frame is taken anyway
+const AT := Vector3(5.0, 0.0, 3.0)  # m from the landing where the bowl goes
+const SECS := 25.0  # s before a frame is taken anyway
 
 var main: Node
 var home: Node
 var dir := ""
 
+
 func _grab(file: String) -> void:
-	home._close_panel()      # the arrival cards (today's wishes) would cover the frame
-	for _i in 3: await main.get_tree().process_frame
+	home._close_panel()  # the arrival cards (today's wishes) would cover the frame
+	for _i in 3:
+		await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
 	print("BOWLSHOT ", file)
+
 
 ## Waits real frames until `done` holds or the time is up.
 func _until(done: Callable) -> void:
@@ -22,6 +25,7 @@ func _until(done: Callable) -> void:
 	while t < SECS and not done.call():
 		await main.get_tree().process_frame
 		t += main.get_process_delta_time()
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -45,7 +49,7 @@ func run(main_node: Node) -> void:
 	HomeLayout.new_fs(d, 5)
 	Save.d = d
 	home = await main._hb_home()
-	while home.building:      # the farm builds over several frames under the ink wipe
+	while home.building:  # the farm builds over several frames under the ink wipe
 		await main.get_tree().process_frame
 	main.fade.reveal(0.01)
 	var c: Vector3 = home.world.free_spot_near(HomeLayout.LANDING + AT, [], 1.0)
@@ -60,14 +64,17 @@ func run(main_node: Node) -> void:
 		k["pos"] = home.world.free_spot_near(FeedBowl.at(bowl) + Vector3(cos(a), 0, sin(a)) * 5.0, [], 0.6)
 		(k["node"] as Node3D).position = k["pos"]
 		k["t"] = 0.0
-	for _i in 3: FeedBowl.drop(home, bowl)
+	for _i in 3:
+		FeedBowl.drop(home, bowl)
 	var at_bowl := func() -> bool:
 		var phases: Array = home.kins.map(func(k): return FeedBowl.phase(k))
 		return phases.has("eat") and phases.all(func(p): return p in ["wait", "huff", "eat"])
 	await _until(at_bowl)
 	await _grab("bowl_three")
-	await _until(func() -> bool: return FeedBowl.snacks(bowl).size() < 3 and home.kins.any(
-		func(k): return FeedBowl.phase(k) == "eat"))
+	await _until(
+		func() -> bool:
+			return FeedBowl.snacks(bowl).size() < 3 and home.kins.any(func(k): return FeedBowl.phase(k) == "eat")
+	)
 	await main.get_tree().create_timer(0.8).timeout
 	await _grab("bowl_next")
 	FarmUnlocks.rules()["base_mode"] = false

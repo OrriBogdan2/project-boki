@@ -17,9 +17,9 @@ func _init() -> void:
 	tag = "SFXREMOTE"
 	guest_flag = "--sfx-remote-check=guest"
 
-func run(main_node: Node) -> void:
+func run(main_node: Node, shard := "") -> void:
 	Sfx.played.connect(_log)
-	await super.run(main_node)
+	await super.run(main_node, shard)
 
 func _sample() -> void:
 	if m and m.player:

@@ -149,6 +149,6 @@ static func clipped(root: Node) -> Array:
 static func wider(c: Control, s: String, room: float) -> bool:
 	var font := c.get_theme_font("font")
 	var w := 0.0
-	for line in s.split("\n"):      # (a plain label with line breaks is as wide as its longest line)
+	for line in s.split("\n"):  # (a plain label with line breaks is as wide as its longest line)
 		w = maxf(w, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, c.get_theme_font_size("font_size")).x)
 	return w > room + 1.0
