@@ -80,6 +80,7 @@ const ODD_KEYS := [
 	KEY_MEDIASTOP,
 	KEY_MEDIANEXT
 ]
+
 ## Caps that are also everyday words or numbers: only a hit after "press", "hold", "tap", "key" or in "(A)".
 const WORDLIKE := ["A", "I", "1", "2", "3", "4"]
 

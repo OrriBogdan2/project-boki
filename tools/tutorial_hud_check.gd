@@ -371,9 +371,14 @@ func _hint_lines() -> void:
 		var line := String(pair[1])
 		var short := line.length() <= TipText.MAX_LEN and not line.contains("\n")
 		ok(short, "hint '%s' is one short line (%d chars)" % [pair[0], line.length()])
-	var keyed := {"move": ["fire", "dash", "jump"], "ability": ["signature", "ultimate"],
-			"ability (kit)": ["throw", "ultimate"], "ult": ["ultimate"],
-			"stagger": ["signature", "ultimate", "gear1"], "overheat_lift": ["jump"]}
+	var keyed := {
+		"move": ["fire", "dash", "jump"],
+		"ability": ["signature", "ultimate"],
+		"ability (kit)": ["throw", "ultimate"],
+		"ult": ["ultimate"],
+		"stagger": ["signature", "ultimate", "gear1"],
+		"overheat_lift": ["jump"]
+	}
 	var lines := {}
 	for pair in TipText.all_lines():
 		lines[pair[0]] = String(pair[1])
@@ -382,6 +387,7 @@ func _hint_lines() -> void:
 			ok(String(lines[k]).contains(Settings.key_cap(act)), "hint '%s' shows the live %s key" % [k, act])
 	var down := String(lines["down"])
 	ok(not down.contains("trusting") and down.contains("wisp"), "the down hint speaks of the wisp")
+
 
 func _cc_tips() -> void:
 	var tips: Dictionary = Content.rules("tutorial")["tips"]
