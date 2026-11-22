@@ -110,6 +110,7 @@ var root_bi := -1            # the root bone: the heading and HunterAnim's air t
 var lean := 0.0              # rad the root is tipped forward (FEEL)
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
+var look_y := 0.0            # the model's own scale (Models.hunter's "look_scale"), read on the first move
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
 var steps: WardenSteps       # the feet planting, for the footsteps (scripts/heroes/warden_steps.gd)
 var crouch_steps: WardenSteps  # the same for the crouch layer's sneak ring (null: no crouch)
@@ -1006,7 +1007,12 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var ring := _walk_ring()
 	var out := loco_pos.length()
 	var moving := _out_of_idle(out, ring, goal.length(), spd)
-	_p("loco_rate/scale", gait.plan(spd, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
+	# ("foot_mps" is read on the model at its own scale; a match draws it bigger (Hunter.VIS_SCALE, Kael's grow),
+	# and a bigger stride covers that much more ground a cycle, so the rate takes the speed at the model's scale)
+	if look_y <= 0.0:
+		look_y = float(root.get_meta("look_scale", root.scale.y))
+	var body_mps := spd * look_y / maxf(absf(root.scale.y), 0.01)
+	_p("loco_rate/scale", gait.plan(body_mps, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
 	if spd >= STILL and still_t >= SET_OFF_STILL:
 		_set_off()
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
