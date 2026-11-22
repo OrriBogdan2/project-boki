@@ -4,6 +4,7 @@ class_name LabelFit
 
 const GAP := 6.0  # px kept between the label and whatever it steps aside for
 
+
 ## `lbl` nudged on screen (px, screen space) clear of every Rect2 in `avoid`, then inside `frame`.
 static func fit(lbl: Label3D, cam: Camera3D, frame: Rect2, avoid: Array) -> void:
 	lbl.offset = Vector2.ZERO

@@ -78,8 +78,10 @@ func _walk() -> void:
 		ok(_clear(), "%s: the lane clears the strip, the check mark and the hunter" % sid)
 		var lanes := TutorialHud.lanes(m.hud.c.size)
 		var safe := HudStyle.safe_rect(m.hud.c.size)
-		ok(safe.grow(1.0).encloses(lanes["banner"]) and safe.grow(1.0).encloses(lanes["check"]),
-				"%s: the strip and check mark are in the safe frame" % sid)
+		ok(
+			safe.grow(1.0).encloses(lanes["banner"]) and safe.grow(1.0).encloses(lanes["check"]),
+			"%s: the strip and check mark are in the safe frame" % sid
+		)
 		_sign(sid, safe)
 		shots += 1
 		_save("match_%02d_%s" % [shots, sid])
@@ -154,7 +156,8 @@ func _sign(sid: String, safe: Rect2) -> void:
 			hit = str(k)
 	if box.intersects(TutorialStrip.rect(m.hud.c.size)):
 		hit = "strip"
-	ok(safe.grow(1.0).encloses(box) and hit == "", "%s: the sign %s is in the safe frame, clear of the HUD (%s)" % [sid, box, hit])
+	var fits := safe.grow(1.0).encloses(box) and hit == ""
+	ok(fits, "%s: the sign %s is in the safe frame, clear of the HUD (%s)" % [sid, box, hit])
 
 
 ## The strip, the goals tracker and the skip row, whichever show, inside the safe frame (window pixels).
