@@ -125,7 +125,7 @@ func in_lava(f: Ent) -> bool:
 
 # ------------------------------------------------------------------ flight
 func _fly(dt: float) -> void:
-	if h.stun_t > 0.0 or h.downed or h.out or KinMerge.active(h):
+	if h.stun_t > 0.0 or h.downed or h.out:
 		_land()
 		return
 	if h.inp.get("jump", false) and h.vel.y > 0.0:

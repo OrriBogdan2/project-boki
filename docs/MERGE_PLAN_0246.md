@@ -713,7 +713,7 @@ Order: feel and anim first (most owner-visible, lots of shared kit files), then 
 | ext/step-sounds-unified-rebased | 83dfbf1aa | 11-11 | conflict (121: MERGE_REPORT.md, IMPORT.md, ryzz_atlas.jpg…) |  |  | SUPERSEDES ext/step-sounds-unified 8dd5161cf; on rpc1. origin/main d255acbee was already in 8dd5161cf, so the AUDIO.md/sfx.gd/match_audio_ch… |
 | ext/ui-sfx-set | 8661028ec | 11-09 | conflict (4: AUDIO.md, exits.gd, ui.gd…) |  | ext/sfx-lobby-pick | SFX: one UiSfx helper for hover/press/back/error; new synth cues ui_capture, ui_extract_start, ui_extract_fail. Listen for: Boki scan finish… |
 | ext/sfx-ready-cues-summon | d196b69bf | 11-10 | conflict (6: AUDIO.md, game.gd, net.gd…) | ext/wisp-summon |  | follow-up to ext/sfx-ready-cues 9176cee38: the Boki summon coming back plays ready_boki once on your own HUD, and the wisp brightens with a … |
-| ext/sfx-summon | 29d9d520f | 11-09 | conflict (6: AUDIO.md, game.gd, net.gd…) | ext/wisp-summon-pop | ext/combat-bots-downed +11 | summon_burst/end/killed_<size> small/medium/large from kin_v2 size, species chirp layered in KinSummon.cue, positional reach 35 so a rival s… |
+| ext/sfx-summon | 29d9d520f | 11-09 | conflict (6: AUDIO.md, game.gd, net.gd…) | ext/wisp-summon-pop | ext/combat-bots-downed +11 | summon_burst/end/killed_<size> small/medium/large from kin size, species chirp layered in KinSummon.cue, positional reach 35 so a rival s… |
 
 ### Wave 9: vfx (57)
 
