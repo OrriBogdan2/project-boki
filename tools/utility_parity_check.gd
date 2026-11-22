@@ -96,6 +96,7 @@ func _skyfall(m: Match, P: Hunter, foe: Hunter) -> void:
 	ok(left > 2.0 and left <= 3.0, "...for 3 s (%.1f s left a beat in)" % left)
 
 func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
+	_steps(m, 3.0, foe)       # the thrower lands first: the Skyfall test can leave it above the ground the patch lies on
 	foe.out = false
 	foe.downed = false
 	foe.dead = false
