@@ -1031,9 +1031,14 @@ const COVERED := {
 ## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run; --rng-seed=N seeds them
 ## from N instead, to prove a check does not lean on one stream (a branch that adds a draw shifts every later one).
 static func run(main: Node, args: PackedStringArray) -> bool:
-	for flag in CHECKS:
+	var checks := all()
+	if not _dupes.is_empty():
+		printerr("CHECKREGISTRY FAIL: duplicate flags across tools/checks/*.gd and CHECKS: ", _dupes)
+		main.get_tree().quit(1)
+		return true
+	for flag in checks:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
-			var e: Array = CHECKS[flag]
+			var e: Array = checks[flag]
 			Content.rules("merge_forms")["fusion_enabled"] = true      # (checks run with Fusion on)
 			seed(hash(flag))
 			for a in args:
@@ -1047,3 +1052,40 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 				c.run(main, e[2])
 			return true
 	return false
+
+
+static var _merged: Dictionary = {}
+static var _dupes: Array = []
+
+
+## Every check, one lookup: the legacy CHECKS above plus the area files in tools/checks/. A flag present in two
+## places is recorded in _dupes (run() and --registry-check fail on it) and the first one wins.
+static func all() -> Dictionary:
+	if not _merged.is_empty():
+		return _merged
+	var out: Dictionary = CHECKS.duplicate()
+	for area: GDScript in _areas():
+		var found: Dictionary = area.get_script_constant_map().get("CHECKS", {})
+		for flag: String in found:
+			if out.has(flag):
+				_dupes.append(flag)
+			else:
+				out[flag] = found[flag]
+	_merged = out
+	return out
+
+
+## The entry for one flag ([script, meta name, argument]), or [] when it is not registered.
+static func get_entry(flag: String) -> Array:
+	return all().get(flag, [])
+
+
+## The area files (tools/checks/*.gd); --registry-check holds this list to the files on disk.
+static func _areas() -> Array:
+	return [
+		preload("res://tools/checks/anim.gd"), preload("res://tools/checks/boki.gd"),
+		preload("res://tools/checks/combat.gd"), preload("res://tools/checks/farm.gd"),
+		preload("res://tools/checks/misc.gd"), preload("res://tools/checks/net.gd"),
+		preload("res://tools/checks/sfx.gd"), preload("res://tools/checks/tutorial.gd"),
+		preload("res://tools/checks/ui.gd"), preload("res://tools/checks/vfx.gd"),
+	]
