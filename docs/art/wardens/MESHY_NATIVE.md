@@ -52,6 +52,14 @@ Offhand (the twin hold's left piece, the fist hold's second gauntlet) stay hidde
 in every frame. Props that orbit (data `orbits`: orbit node -> Meshy bone; Tenzo's three seeing-stones on `Head`) are
 copied from the contract `<art>.glb` and turned by WardenOrbits as on the contract path. Their holder follows the
 bone's place, not its turn, so the ring stays level when a clip bows the head.
+Parts the contract model has and Meshy's mesh lacks (data `props`: contract bone -> material names; Kael's sword on
+`hand.R`, Cinder's heel jets on `jet.0`/`jet.1`) are cut out of the contract `.glb` by material and hung rigidly on the
+Meshy bone that plays that bone (WardenProps): limb onto limb, the contract's ahead onto Meshy's thumb or toes, then
+bent by data `tilt` (Kael's blade lies along his arm: Meshy's clips do not bend the wrist as his contract idle does).
+The contract's anchors on that bone ride the part (the blade tip on the blade). Data `stretch` {kmove, y, rest} keys
+the parts' length as the contract clips key Cinder's jet bones (x0.06 at rest, x3 in Flue Flight). Floating companions
+in Meshy's mesh (Meeko's sun and cloud, surfaces named as in `warden_anim/<art>.json` "companions") are cut out and
+circle her as on the contract path, the data's skeleton space carried onto Meshy's.
 
 ## Not on the native path (yet)
 Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Tenzo's
