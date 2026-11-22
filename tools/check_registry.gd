@@ -101,6 +101,7 @@ const CHECKS := {
 	"--merge-keeps-check": ["res://tools/merge_keeps_check.gd", "merge_keeps_check", null],
 	"--fusion-off-check": ["res://tools/fusion_off_check.gd", "fusion_off_check", null],  # 0101
 	"--boki-follow-check": ["res://tools/boki_follow_check.gd", "boki_follow_check", null],
+	"--boki-curl-check": ["res://tools/boki_curl_check.gd", "boki_curl_check", null],
 	"--capture-check": ["res://tools/capture_check.gd", "capture_check", null],
 	"--teammate-check": ["res://tools/teammate_check.gd", "teammate_check", null],
 	"--airheal-check": ["res://tools/airheal_check.gd", "airheal_check", null],
