@@ -8,6 +8,7 @@ Fails when
   - a flag is listed twice across check_registry.gd and tools/checks/*.gd (CheckRegistry.all() would fail at startup).
 Run by tools/health.py --strict.
 """
+
 import glob, os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

@@ -487,10 +487,10 @@ func _ship(c: Control) -> void:
 	if m.ship.is_empty() or m.ship.get("gone", false):
 		return
 	var a := to_screen(m.ship["a"]); var b := to_screen(m.ship["b"])
-	var L := a.distance_to(b)
+	var l := a.distance_to(b)
 	var d := 0.0
-	while d < L:
-		c.draw_line(a.lerp(b, d / L), a.lerp(b, minf(1.0, (d + 8.0) / L)), Color(1, 1, 1, 0.35), 2.0, true)
+	while d < l:
+		c.draw_line(a.lerp(b, d / l), a.lerp(b, minf(1.0, (d + 8.0) / l)), Color(1, 1, 1, 0.35), 2.0, true)
 		d += 14.0
 	var sp := to_screen(m.ship_pos())
 	var dir: Vector3 = m.ship["dir"]
@@ -508,10 +508,10 @@ func _wave_ships(c: Control) -> void:
 		if s.get("gone", false) or s.get("node") == null:
 			continue
 		var a := to_screen(s["a"]); var b := to_screen(s["b"])
-		var L := a.distance_to(b)
+		var l := a.distance_to(b)
 		var d := 0.0
-		while d < L:
-			c.draw_line(a.lerp(b, d / L), a.lerp(b, minf(1.0, (d + 6.0) / L)), Color(1.0, 0.72, 0.35, 0.4), 2.0, true)
+		while d < l:
+			c.draw_line(a.lerp(b, d / l), a.lerp(b, minf(1.0, (d + 6.0) / l)), Color(1.0, 0.72, 0.35, 0.4), 2.0, true)
 			d += 12.0
 		var sp := to_screen(m.ship_pos_of(s))
 		sp = Vector2(clampf(sp.x, rect.position.x + 8, rect.end.x - 8), clampf(sp.y, rect.position.y + 8, rect.end.y - 8))
@@ -537,26 +537,26 @@ func _bounties(c: Control, team: int) -> void:
 func _lair_alerts(c: Control) -> void:
 	if m.lairs == null or m.player == null:
 		return
-	for L in m.lairs.list:
-		if not m.lairs.alerted(L, m.player):
+	for l in m.lairs.list:
+		if not m.lairs.alerted(l, m.player):
 			continue
-		var pv := to_screen(L["c"])
+		var pv := to_screen(l["c"])
 		if not rect.grow(-6.0).has_point(pv):
 			continue
-		var fight := String(L.get("alert", "")) == "fight"
-		var col: Color = Lairs.color_of(L) if fight else Color("ffd36a")
+		var fight := String(l.get("alert", "")) == "fight"
+		var col: Color = Lairs.color_of(l) if fight else Color("ffd36a")
 		var ph := fmod(Time.get_ticks_msec() / 1000.0 * 1.2, 1.0)
 		c.draw_arc(pv, 14.0 + ph * 22.0, 0, TAU, 32, Color(col, 1.0 - ph), 3.0, true)
 		c.draw_circle(pv, 15.0, Color(0, 0, 0, 0.55))
 		c.draw_arc(pv, 15.0, 0, TAU, 28, col, 2.0, true)
-		hud._lair_icon(pv, L, 1.5)
+		hud._lair_icon(pv, l, 1.5)
 		var t := ""
-		if not L.get("locked", false):
+		if not l.get("locked", false):
 			t = "GATE OPEN"
-		elif L.get("victory", false):
-			t = "FALLEN  ·  GATE %s" % Lairs.clock(m.lairs.victory_left(L))
+		elif l.get("victory", false):
+			t = "FALLEN  ·  GATE %s" % Lairs.clock(m.lairs.victory_left(l))
 		else:
-			t = "FIGHT  ·  %s" % Lairs.clock(m.lairs.lock_left(L))
+			t = "FIGHT  ·  %s" % Lairs.clock(m.lairs.lock_left(l))
 		hud._ctext(pv + Vector2(0, 30), t, 11, col, hud.big)
 
 func _pings(c: Control, team: int) -> void:
@@ -722,7 +722,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)" if Life.has_mates(m, m.player) else "Revive beacon", 12, INK)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
-func _side(c: Control, sz: Vector2) -> void:
+func _side(c: Control, _sz: Vector2) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return

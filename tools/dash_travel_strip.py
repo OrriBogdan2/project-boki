@@ -3,14 +3,15 @@
    python3 tools/dash_travel_strip.py <before_dir> <after_dir> <out_dir>
 Per Hunter one JPG: the top row the first folder's frames, the bottom row the second's, N shots from the press at
 the shots' own cadence (SHOT_EVERY drawn frames each), the drawn frame's number on each. docs/art/anim_audit/DASH_TRAVEL.md."""
+
 import os
 import re
 import sys
 
 from PIL import Image, ImageDraw
 
-FRAMES = 9          # tiles per row
-TILE_W = 220        # px, the shot scaled to this width
+FRAMES = 9  # tiles per row
+TILE_W = 220  # px, the shot scaled to this width
 
 
 def shots(folder):
@@ -28,7 +29,7 @@ def row(paths):
     for frame, path in paths[:FRAMES]:
         img = Image.open(path).convert("RGB")
         w, h = img.size
-        crop = img.crop((w // 4, h // 6, w * 3 // 4, h * 5 // 6))     # the Hunter sits mid-screen
+        crop = img.crop((w // 4, h // 6, w * 3 // 4, h * 5 // 6))  # the Hunter sits mid-screen
         crop = crop.resize((TILE_W, int(crop.height * TILE_W / crop.width)))
         draw = ImageDraw.Draw(crop)
         draw.text((6, 4), "f%d" % frame, fill=(255, 255, 255))
@@ -46,7 +47,9 @@ def main(before, after, out):
     a, b = shots(before), shots(after)
     for arch in sorted(set(a) | set(b)):
         rows = [r for r in (row(a.get(arch, [])), row(b.get(arch, []))) if r is not None]
-        sheet = Image.new("RGB", (max(r.width for r in rows), sum(r.height for r in rows) + 4 * (len(rows) - 1)), (0, 0, 0))
+        sheet = Image.new(
+            "RGB", (max(r.width for r in rows), sum(r.height for r in rows) + 4 * (len(rows) - 1)), (0, 0, 0)
+        )
         y = 0
         for r in rows:
             sheet.paste(r, (0, y))
