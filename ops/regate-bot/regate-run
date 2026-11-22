@@ -95,6 +95,17 @@ log "import parse errors: main=$PE_M cand=$PE_C"
 [ "$PE_C" -le "$PE_M" ] || finish RED "compile: $PE_C parse/script errors on import vs $PE_M on main" \
 	"REGATE RED ${NEW} (not pushed): merging origin/main ${MAIN:0:10} into $BRANCH adds parse/script errors on import ($PE_C vs $PE_M on main), see the import log. [regate-bot pr=$PR head=${HEAD_SHA:0:10} main=${MAIN:0:10}]"
 
+# 2b. style ratchet (tools/style_lint.py via tools/style_gate.sh): a file the PR makes worse than main has it is RED
+# (main's own old regressions are not counted; a main without the script skips the step)
+if [ -x "$CT/tools/style_gate.sh" ]; then
+	STYLE=$("$CT/tools/style_gate.sh" "$MT" "$CT"); SRC=$?
+	log "style ratchet rc=$SRC"
+	[ "$SRC" = 0 ] || finish RED "style ratchet: $(echo "$STYLE" | wc -l) file(s) worse than main" \
+		"REGATE RED ${NEW} (not pushed): $BRANCH makes the style ratchet worse than origin/main ${MAIN:0:10} (tools/style_lint.py; fix the lines or, after cleaning up, run --update):
+$(echo "$STYLE" | head -20)
+[regate-bot pr=$PR head=${HEAD_SHA:0:10} main=${MAIN:0:10}]"
+fi
+
 # 4 (background). export dry-run
 (
 	if [ -x ~/bin/release-dryrun ]; then ~/bin/release-dryrun "$CT"; exit; fi
