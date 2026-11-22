@@ -21,7 +21,6 @@ static var abyss_slow_from: float = _phys["abyss_slow_from"]
 static var abyss_slow_to: float = _phys["abyss_slow_to"]
 static var glide_height: float = _phys["glide_height"]
 static var glide_pull_vy: float = _phys["glide_pull_vy"]
-static var glide_accel: float = _phys["glide_accel"]
 static var glide_start_vy: float = _phys["glide_start_vy"]
 static var glide_sink: float = _phys["glide_sink"]
 static var glide_heat_s: float = _phys["glide_heat_s"]
@@ -46,7 +45,11 @@ static var haste: float = _phys["haste"]
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
-static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed and accel)
+static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed, accel, glide)
+## m/s, the glide cruise every hunter shares (MaxGlide), at body scale so a run into a glide keeps the source's ratio
+static var glide_cruise: float = _phys["glide_cruise"] * body_scale
+## m/s^2, the glider's pull toward where you steer at or under cruise, scaled with the cruise so a turn takes as long
+static var glide_accel: float = _phys["glide_accel"] * body_scale
 
 static func rules() -> Dictionary:
 	return _rules
@@ -98,8 +101,8 @@ static func climbs_tall(h: Hunter) -> bool:
 
 ## The source's walking brake at `speed` (m/s^2): brake_friction's share of the speed plus brake_decel. UE
 ## sheds any speed over the run this way, keys held or not, so a knock or a kit step slides out the same.
-static func brake_rate(speed: float) -> float:
-	return brake_friction * speed + brake_decel
+static func brake_rate(speed_v: float) -> float:
+	return brake_friction * speed_v + brake_decel
 
 ## Ground speed after a step with no keys: UE's walking brake (ApplyVelocityBraking) exactly, so a let-go from a
 ## run slides 0.31-0.37 m and a knock or kit step slides out under the same rule. A step longer than
@@ -180,9 +183,9 @@ static func slide_speed(dist: float, to_speed := 0.0) -> float:
 
 ## `hv` pushed along unit `dir` up to at least `speed` there, everything across `dir` kept (a knock, a lunge, a
 ## kit's air step): it adds to what you carry instead of overwriting it, so air steering lives on (DECISIONS 11-08).
-static func push(hv: Vector2, dir: Vector2, speed: float) -> Vector2:
+static func push(hv: Vector2, dir: Vector2, speed_v: float) -> Vector2:
 	var along := hv.dot(dir)
-	return hv + dir * (maxf(along, speed) - along)
+	return hv + dir * (maxf(along, speed_v) - along)
 
 ## Gravity for a step in the air, capped at fall_cap. The step moves at its mean vertical speed (the half of
 ## the speed change the position integration in Hunter._physics misses is added here), so a jump's apex and

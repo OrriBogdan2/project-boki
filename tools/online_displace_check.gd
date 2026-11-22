@@ -175,7 +175,8 @@ func _scenario(G: Hunter) -> void:
 	await _move("Motley swap dash", "ostra", Vector3(8, 0, 0), _ostra, 2.2, G, B, ["guest", "self"], {"tp": true})
 	await _move("Meeko Hearth Call pull", "tender", Vector3(8, 0, 0), _meeko, 5.4, G, B, ["guest"],
 		{"mates": true, "tp": true})
-	await _move("Sparkle Kitefall launch and crash", "mage", Vector3(6, 0, 0), _sparkle, 4.8, G, B, ["self"])  # no knock on the target now
+	# no knock on the target now
+	await _move("Sparkle Kitefall launch and crash", "mage", Vector3(6, 0, 0), _sparkle, 4.8, G, B, ["self"])
 	await _move("Knock into a wall", "mage", Vector3(4, 0, 2), _knock, 1.4, G, B, ["guest"])
 	await _move("Kael Rampage dash", "juggernaut", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
 	await _move("Grimble Barge dash", "dredge", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])

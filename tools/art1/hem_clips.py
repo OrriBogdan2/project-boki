@@ -18,7 +18,7 @@ import hem_pieces as H
 import actionkit
 import crouchkit
 import gardenkit
-from posekit import Clip, FnClip, Solver, add_breath, ang_dir as D, frame_of, lerp, two_bone
+from posekit import Clip, FnClip, Solver, add_breath, ang_dir as D, frame_of, lerp
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 J = H.joints(os.path.join(REPO, "art/wardens/src/hem_rig.json"))
@@ -250,7 +250,7 @@ def stance(u):
     hs = 0.35 * _beat(_at(u, FOLLOW), 0.38, 0.50, 0.78, 0.90)
     p["hed"] = (p["hed"][0] + 0.03 * h, -0.26 + 0.44 * h, p["hed"][2] + 0.06)
     p["tor"] = (p["tor"][0], p["tor"][1] + 0.14 * hs, p["tor"][2])
-    yaw = p["prt"][1] + p["tor"][1]
+    _yaw = p["prt"][1] + p["tor"][1]
     hp = (p["pel"][0], p["pel"][1], 0.777 + p["pel"][2])
     # the bow rides the shoulders' turn and the weight, a beat behind
     hb = 0.35 * _beat(_at(u, 0.3), 0.38, 0.50, 0.78, 0.90)
@@ -293,7 +293,7 @@ def gait(k, heading):
         lp, pl = foot(u + 0.5, -1.0)
         p["FR"], p["FL"], p["FRp"], p["FLp"] = tuple(rp), tuple(lp), pr, pl
         p["FRy"], p["FLy"] = -0.06 + math.radians(heading) * 0.5, 0.06 + math.radians(heading) * 0.5
-        s2, c1, s1 = math.sin(u * 4 * math.pi + 0.5), math.cos(u * 2 * math.pi), math.sin(u * 2 * math.pi)
+        s2, c1, _s1 = math.sin(u * 4 * math.pi + 0.5), math.cos(u * 2 * math.pi), math.sin(u * 2 * math.pi)
         p["pel"] = (0.016 * c1 * (1.3 - k), 0.012 * k * fwd - 0.03 * back, -0.024 - 0.038 * k + (0.012 + 0.018 * k) * s2)
         lean = (0.06 + 0.14 * k) * fwd - 0.08 * back
         p["prt"] = (lean * 0.6, 0.10 * c1, -0.05 * c1 * (1.2 - k) + 0.1 * k * d.x)
@@ -469,9 +469,9 @@ def clips():
 
 def extras_for(sol):
     """Keys that aren't arm or leg IK: fingers, lids, brows, the bow's limbs, its string's nock, the arrow."""
-    pbs = sol.arm.pose.bones
+    _pbs = sol.arm.pose.bones
     R0, H0 = sol.R0, sol.H0
-    MX, MY, MZ = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
+    MX, MY, _MZ = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
 
     def loc(b, q):
         return R0[b].inverted() @ q @ R0[b]

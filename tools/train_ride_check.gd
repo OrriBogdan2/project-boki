@@ -327,7 +327,7 @@ func _case_glide_land(t: float) -> void:
 	P.grounded = false
 	st.carried.erase(P)  # (set down in the air, not stepped off the deck)
 	P.gliding = true  # (open already and sinking: a glider opened right over the deck kicks up first)
-	P.vel = Vector3(fwd.x * Hunter.GLIDE_SPEED, -1.4, fwd.y * Hunter.GLIDE_SPEED)
+	P.vel = Vector3(fwd.x * HunterMove.glide_cruise, -1.4, fwd.y * HunterMove.glide_cruise)
 	P.inp["move"] = fwd
 	P.inp["glide"] = true
 	P.inp["glide_btn"] = true

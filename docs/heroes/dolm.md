@@ -261,8 +261,9 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   only if ground lies on that line within the reach of the hops left. So a gap he can finish is crossed, and open abyss is
   not: the hop pulls back to the last solid ground. Out on a void rock with no press, the chain ends there: the rock crumbles and he
   falls or glides. Off the map's grid nothing is ground, so a chain can't leave it.
-- **Rough ground:** a hop up a terrace (up to 2.5m) uses the shared sure arc over the lip; drops take the same hop time; a wall in reach pulls the
-  spot back; no spot at all ends the chain where he is, with the crash.
+- **Rough ground:** a hop up a terrace (up to 2.5m) uses the shared sure arc over the lip; a hop down a lip springs up as on the flat (aimed no lower
+  than a rock top, 0.6m) and once its hop time is up he drops the rest onto the spot, so he leaves the lip mid-hop; a skid that would
+  run off a lip goes at least at run speed (`--move-feel-check` ledge_dash dolm rows); a wall in reach pulls the spot back; no spot at all ends the chain where he is, with the crash.
 - **Other moves:** RMB let go mid-hop: the slam lands with that hop and the chain ends there (crash and slam, as the old leap). Opening the
   glider, being downed or a merge drops the chain with no crash. Bots ride the whole chain.
 - **Space in a hop's flight (DECISIONS 11-08, Shift cancels into glide instantly for every Hunter):** the hop lets go on the press
@@ -338,6 +339,8 @@ would also settle the same row on the boulder. Unsettled rows for a follow-up: t
 ## Combinations (`--dolm-combo-check`, tools/breah_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|
+| Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, slows | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
+| Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, ROCKFALL | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, ROCKFALL | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, slows | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then slam | rocks in the ring fly outward | `combo: Stone Row > slam launches the rocks` |
