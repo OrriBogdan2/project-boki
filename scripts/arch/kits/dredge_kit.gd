@@ -221,7 +221,7 @@ func _drop_holds() -> void:
 ## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
 ## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
-	if h.wid != "shotgun" or KinMerge.active(h):
+	if h.wid != "shotgun":
 		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
@@ -406,9 +406,6 @@ func _let_go(tip: Vector3) -> void:
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
 	hook_sd = {}
-	if KinMerge.transforming(h) or KinMerge.active(h):
-		hook_hold = null
-		return
 	var rdf := rmb_def()
 	if f.mass() >= 6.0 or Blockers.body_stops(f, h):
 		hook_hold = null
