@@ -1,0 +1,28 @@
+PROBE renderer=gl_compatibility size=(1280.0, 720.0) msaa=0 shadows=false quality=auto
+PROBE load total 19847 ms over 331 frames; worst frame 468 ms
+PROBE build steps total 17081 ms: build.warm_up 6666, build.hunters 5027, build.generate 1151, world.terrain 1135, build.spawns 597, world.grass 484, world.walls 475, world.scatter_plan 309, build.mobs 281, build.chests 248, build.pads_exits 220, build.hud 111, world.roots 108, map.bake 97
+PROBE phase     frames wall_avg wall_p95 wall_max   script  scr_max    rcpu     hud     draws  prims_k     casters
+PROBE first         31     56.6     42.3    645.5     3.94    22.47   27.56   24.29 2916/2916     1168   766/    0
+PROBE planning      75     29.2     33.7     59.1     0.72     1.48    7.20    6.37 2858/3120     1389   766/    0
+PROBE ride         194    200.0    633.0   1455.6    29.50   238.68    8.47    2.74 1987/3402     1302   766/    0
+PROBE drop          82    110.1    135.2    271.4    27.50    48.72    5.93    5.47 1646/3396      713   930/    0
+PROBE land         151     64.4     85.8    172.1    41.63    93.02    3.96    4.25  965/1787      380   795/    0
+PROBE map           60     69.3     83.4     96.8    37.08    51.56    5.71    9.22 1802/1852      492   805/    0
+PROBE fight        301     60.2     74.8    140.0    35.11    90.39    5.03    5.41 1435/1531      556   807/    0
+PROBE worst frames (wall ms, script ms, render cpu ms, phase, sim t, build steps inside):
+PROBE    1455.6  216.21     4.2 hud   6.0 ride      t=  7.0 
+PROBE           new nodes: { "Node3D:@Node3D": 1, "MeshInstance3D:@MeshInstance3D": 28 }
+PROBE    1352.2  220.85     4.1 hud   6.3 ride      t=  7.3 
+PROBE           new nodes: { "Node3D:@Node3D": 2, "MeshInstance3D:Ring": 2, "MeshInstance3D:Ball": 2, "MeshInstance3D:Knot": 2, "MeshInstance3D:Aura": 2, "MeshInstance3D:String": 2 }
+PROBE    1342.8  203.55     4.5 hud   1.3 ride      t=  7.4 
+PROBE           new nodes: { "MeshInstance3D:@MeshInstance3D": 28, "Node3D:@Node3D": 1, "MeshInstance3D:Ring": 1, "MeshInstance3D:Ball": 1, "MeshInstance3D:Knot": 1, "MeshInstance3D:Aura": 1, "MeshInstance3D:String": 1 }
+PROBE    1337.4  221.57     4.2 hud   1.4 ride      t=  7.2 
+PROBE           new nodes: { "MeshInstance3D:@MeshInstance3D": 4 }
+PROBE    1314.9  219.95     4.3 hud   1.1 ride      t=  7.1 
+PROBE    1239.1  195.43     4.0 hud   1.1 ride      t=  7.5 
+PROBE           new nodes: { "MeshInstance3D:@MeshInstance3D": 2 }
+PROBE    1204.3  190.34     4.0 hud   1.3 ride      t=  7.7 
+PROBE           new nodes: { "MeshInstance3D:@MeshInstance3D": 27 }
+PROBE    1194.3  197.84     4.2 hud   5.5 ride      t=  7.6 
+PROBE           new nodes: { "Node3D:KitLooks": 1, "Node3D:@Node3D": 3, "MeshInstance3D:Halo": 1, "MeshInstance3D:Core": 1, "MeshInstance3D:Ring": 2, "MeshInstance3D:Ball": 2, "MeshInstance3D:Knot": 2, "MeshInstance3D:Aura": 2, "MeshInstance3D:String": 2 }
+PROBE memory: textures 292.7 MB, buffers 271.1 MB, video 563.9 MB, static 548.3 MB, objects 44307, nodes 19502

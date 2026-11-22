@@ -1,0 +1,26 @@
+PROBE renderer=gl_compatibility size=(1280.0, 720.0) msaa=0 shadows=false quality=auto
+PROBE load total 12381 ms over 274 frames; worst frame 423 ms
+PROBE build steps total 10484 ms: build.warm_up 4429, build.hunters 2766, world.terrain 673, build.generate 548, world.walls 426, build.spawns 376, world.grass 233, world.scatter_plan 212, build.pads_exits 196, build.chests 160, build.mobs 127, map.bake 91, world.roots 61, world.landmarks 55
+PROBE phase     frames wall_avg wall_p95 wall_max   script  scr_max    rcpu     hud     draws  prims_k     casters
+PROBE first         31     26.0     29.3     62.4     2.38    11.85    7.12   17.43 2841/2841     1507   527/    0
+PROBE planning      75     20.4     25.4     37.6     0.42     0.86    5.78    5.05 2631/2936     1595   527/    0
+PROBE ride          57     46.7     69.6     77.4     5.73    10.10    4.40    2.11 1928/2358     1495   531/    0
+PROBE drop         108     48.9     62.0     81.0    11.44    22.79    3.75    3.47  950/2195      410   567/    0
+PROBE land         151     23.7     29.8     52.4    12.19    40.66    2.40    2.31  554/1084      225   532/    0
+PROBE map           60     28.3     39.4     46.8    10.81    19.44    4.09    5.68 1080/1102      243   534/    0
+PROBE fight        301     25.2     30.6     50.9    12.21    23.31    3.04    2.81  827/ 890      313   534/    0
+PROBE worst frames (wall ms, script ms, render cpu ms, phase, sim t, build steps inside):
+PROBE      81.0    8.51     3.5 hud   5.7 drop      t=  5.7 
+PROBE           new nodes: { "PanelContainer:@PanelContainer": 1, "Label:@Label": 1, "MeshInstance3D:@MeshInstance3D": 1, "Node3D:@Node3D": 1 }
+PROBE      79.7   10.28     3.1 hud   1.5 drop      t= 10.4 
+PROBE      77.4    4.88     3.4 hud   5.4 ride      t=  3.5 
+PROBE           new nodes: { "MeshInstance3D:@MeshInstance3D": 16 }
+PROBE      76.8    7.12     4.5 hud   4.9 ride      t=  5.0 
+PROBE      73.6   13.63     3.2 hud   5.1 drop      t=  8.2 
+PROBE      69.6    9.05     3.4 hud   4.6 ride      t=  5.6 
+PROBE           new nodes: { "MeshInstance3D:@MeshInstance3D": 15 }
+PROBE      69.6    5.23     3.5 hud   0.7 ride      t=  4.5 
+PROBE           new nodes: { "Node3D:@Node3D": 1, "MeshInstance3D:Ring": 1, "MeshInstance3D:Ball": 1, "MeshInstance3D:Knot": 1, "MeshInstance3D:Aura": 1, "MeshInstance3D:String": 1 }
+PROBE      67.3    8.71     4.9 hud   4.5 ride      t=  5.3 
+PROBE           new nodes: { "MeshInstance3D:@MeshInstance3D": 16 }
+PROBE memory: textures 247.6 MB, buffers 151.2 MB, video 398.8 MB, static 447.7 MB, objects 25999, nodes 10760
