@@ -7,6 +7,54 @@ One table per area: the source's value, ours, where each comes from, and a statu
 - **Ours** is a data row (file named) or a measurement by a check: `MFEEL` = `--move-feel-check`, `RATE` = `--move-rate-check` (both on the real step; 2026-11-10, branch ext/move-parity-1).
 - The match steps at 60 Hz (`Match.DT`). Since decision 0048 the farm does too.
 
+## Review on main, 2026-11-20 (all 13 Hunters)
+
+Main 0b0b680df2 plus this branch's one fix, at 60 Hz. Per-Hunter rows come from `--move-feel-check`'s "hunter" lines (`tools/move_feel_hunters.gd`, each kit swapped in), `--move-rule-guard-check` and `--wallmove-check`. **Source** is the value that rules the row (owner > data > footage). Verdicts: `match`, `ruling` (the owner's number holds), `unknown` (the source has no number; ours unchanged), `changed` (moved since its closing commit by a later decision: needs an owner call), `REGRESSED -> fixed`, `red` (fails its check on main; not traced here).
+
+| Row | Source | Main | Verdict |
+|---|---|---|---|
+| Run speed | data row 4.45–4.85 m/s x body_scale 1.16 (decision 0061) | 5.162–5.626 m/s, 13/13 on their row (±0.01) | match (the §1 "Ours" column predates 0061) |
+| Acceleration | data row 47–54 m/s² x 1.16 | 95% of run in 0.083–0.100 s, 13/13 | match |
+| Brake, keys let go | 22.2 m/s², friction 1 x 2, sub-steps ≤ 1/33 s, stop under 0.1 m/s | the same rows; `brake_vs_ue_err` 0.000 m/s | match |
+| Let-go slide and stop | 0.28–0.39 m in ~0.17 s at the data's run speeds (b5e1af358e) | 0.412–0.481 m in 0.200 s, 13/13 inside the source's band for our faster run; `ground_stop_dist` 0.429 (target ≤ 0.40) and the 5 farm-stop rows of `--move-rate-check` red | changed (0061 scaled the run, not the brake): owner call |
+| Facing turn | 1280°/s | 180° in 0.150 s; run flip within 1 step of the source's rule, 0.217 s | match |
+| 90° turn of the velocity | none | 0.117 s | unknown |
+| Sneak | 0.5 | 0.5 | match |
+| First key acts | – | the same step | match |
+| Gravity | 14.7 m/s² | 14.7 | match |
+| Jump lift-off | owner 6.8 m/s (data 7.5) | 6.800 m/s, 13/13 | ruling |
+| Jump apex / airtime | follow the lift-off | 1.517 m / 0.900 s (30/60/144 fps within 0.005 m) | ruling |
+| Coyote / buffer | none | 0.117 / 0.133 s, match and farm | unknown |
+| Fall cap / free fall 1 s | 12 m/s / 7.35 m | 12 / 7.20 m | match |
+| Air control | owner 11-08: steer in the air | reverse 8.94 m/s in the check window; farm = match trace | ruling |
+| Air drag, keys idle | 0.375 | 0.4 /s | match |
+| Bleed over run in a glide | none (owner 11-08 model, 2.0 /s) | 12 m/s glide: 5.64 after 2 s (target ≤ 5.5), steering along 6.41 (≤ 6.0) | red (`--air-control-check` item 9) |
+| Shift then glide, item 4 / chain, item 7 | owner 11-08 | Neve 10.50 -> 9.16 -> 8.84 m/s; worst one-step loss 84% (≤ 30%) | red (`--air-control-check`) |
+| Dash exit | run speed, then the walking stop | 1.000x run; slide 0.429 m | match (slide as the let-go row) |
+| Dash, default kit | kit rows | 4.852 m in 0.450 s, the same at 30/60/144 fps (§8's 4.11 m / 0.517 s predates later dash tuning) | match across rates |
+| Jump out of a dash | none | 0.750 (Vex, Kael, Cinder), 0.752 (Lace) | unknown |
+| Glide opening | a press in the air, 0.85 m/s down | opens on the press step; never from holding Space (13/13) | match |
+| Glide top speed | 5.0 m/s | 5.000 m/s, 13/13 | match |
+| Glide steer | footage (decision 0027) | 90° in 0.383 s, 13/13; reverse 0.600 s | unknown (footage-tuned, unchanged) |
+| Glide catch / sink | none / owner over 2.2 | 0.183 s / 1.4 m/s | unknown |
+| Glide heat | owner 11-02 | 9.017 s to overheat | ruling |
+| Overheated glider lift | owner item 63: half strength | 0.52 of the full lift (8.7 of 16.7 m/s), at the lip in 1.55 s, 13/13 | ruling |
+| Swoop | §5 says "never" (owner 11-08 item 8) | a level-out after a short dive is 2.46x for 1.5 s (`swoop_x`, 358153be8e, data-sourced in MOVEMENT_FEEL) | owner call (the two docs disagree) |
+| Dive | 32.5 m/s, 35 m/s², steer 0.25, cancel 3.5 m, 10 s | peak 32.500 m/s 13/13; 90% in 0.750 s; steer 0.250; cancels 3.09 m up; 9.98 s | match |
+| Walking off a ledge | owner: always allowed | walks and crouch-walks off a rim, 26/26 | ruling |
+| Walk off, keys turned back into the face | wallmove-check 1b (dcceafd026): lands below | Lace's tall climb caught the ledge she left (1.17 m up) | REGRESSED -> fixed (cb30534328; lands 0.00 m, still climbs the wall from a jump) |
+| Ground dash off a ledge (decision 0046) | the dash carries over the lip | Cinder ends at 0.367x run (≥ 0.75x), Albert held 14 steps | red (`ledge_dash`) |
+| Mantle into a rim from an air dash | `--mantle-check` | Vex, Albert stall 2.1–2.2 s at a 1.5 m rim | red (`dash-rim`) |
+| Ledge rise / fling | ours [est] | rise 0.350 s, timed fling 3.694 m, window 0.233 s (§7's 0.333 s / 3.24 m predate 0061) | unknown (targets pass) |
+| Wall kick and bounce | ours, every Hunter | 13/13 kick and bounce from a run, a jump, a dash and after every ability, nothing blocked | ruling |
+| Knock arc at 0.4 s | footage | Lace 4.242 m (4.03–4.23), Sparkle 2.879 m (2.62–2.82), 0.797 landed (≥ 0.85) | red (`knock_*`) |
+| Haste + kin buff | data: bonuses add | 1.326x (1.49–1.51) | red (`haste_two_bonus_x`) |
+| Sable's dash curve, Cartwheel exit | footage | peak at 0.10 of the dash (0.28–0.44), 1.547x (1.7–1.9), distance 0.429x; Cartwheel exit 1.18x run | red (`dash_curve_*`, `vault_exit_run`) |
+| Air limits: a fall during a cast (items 162, 162b) | owner | Meeko's fire in a fall acts as on the ground (`--air-limits-check`) | red |
+| Online feel (100 ms) | – | `--online-feel-check` 0 failures | match |
+
+`--feel-golden-check` has 104 drifted samples on main (the golden predates later tuning); this branch leaves them unchanged. The `red` rows were red on main before this branch and are listed for follow-up; they are outside the rows this review fixes.
+
 ## 1. Ground
 
 | Quantity | Source | Ours | Truth | Status |
@@ -80,7 +128,7 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 | Height hold | 8.5 m over the ground, sinks 3.5 m/s above it | glide_height 8.5, glide_pull_vy 3.5 | [D]; hunter_move.json | match |
 | Drop into speed (swoop) | height trades for speed | never | owner 11-08 item 8 | off (ruling) |
 | Heat | coefficients not decoded; [F] a level glide ~14 s to the hot ring (Tom Kick's guide, docs/the reference_FEEL.md; not on disk to recount); the same footage check as Sink | 9 s from the open to overheat, hunter_move.json `glide_heat_s` (x the archetype's glide_cap); a lift heats 4x as fast | owner 11-02 "lasts too long, not punishing enough" outranks the footage; MFEEL `glide_overheat_s`, `--glider-heat-check` | off (owner) / unknown (coefficients) |
-| Overheat | burns; the glider closes | opens at any heat, burns, lifts at half strength | [W]; owner item 63 | off (ruling) |
+| Overheat | burns; the glider closes | opens at any heat, burns, flies at 0.7x speed, lifts as strongly as a cool one | [W]; owner item 63 | off (ruling) |
 | Dive | −32.5 m/s, force 350,000, steer 0.25, cancel under 3.5 m, 10 s | dive_vy 32.5, dive_accel 35, dive_steer 0.25, dive_cancel_h 3.5, dive_timeout 10 | [D]; hunter_move.json | match |
 | Spike (knocked out of a glide) | stun 0.7 s on landing; slam threshold not decoded | land stun 0.7 s; slam numbers [est] | [W]; hunter_move.json `glide_spike` | match / unknown (slam) |
 

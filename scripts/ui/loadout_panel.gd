@@ -11,7 +11,7 @@ const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
 const TILE_H := 48.0
 const BADGE := 30.0
-const HINT := "Point at a thing:  Enter wears or takes it off  ·  Delete drops it  ·  or hold and drag it onto a slot"
+const HINT := "Point at a thing:  Enter wears or takes it off  ·  Delete drops it  ·  or drag it onto a slot"
 
 var _m: Match
 var _p: Hunter

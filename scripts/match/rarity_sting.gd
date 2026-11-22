@@ -5,14 +5,15 @@ extends RefCounted
 ## when it is claimed (Capture) and when it hatches at home (EggHatch). Quieter than the catch chime.
 ## In a match each Boki is announced once, and never while the fight music is at its loudest.
 
-const SIGHT_M := 30.0           # m: a rare Boki in sight within this range is announced
-const SCAN_S := 0.5             # s between looks at the field
-const LOUD_HEAT := 0.5          # MusicDir.heat at or above this is the fight's loud part: the sting waits
+const SIGHT_M := 30.0  # m: a rare Boki in sight within this range is announced
+const SCAN_S := 0.5  # s between looks at the field
+const LOUD_HEAT := 0.5  # MusicDir.heat at or above this is the fight's loud part: the sting waits
 const NAMES := ["", "rarity_rare", "rarity_very_rare"]
-const DB := [0.0, -6.0, -4.0]   # dB under the full-scale sound, by tier: well under the scan chime
+const DB := [0.0, -6.0, -4.0]  # dB under the full-scale sound, by tier: well under the scan chime
 
-var seen := {}                  # Kin instance id -> true: announced this match
+var seen := {}  # Kin instance id -> true: announced this match
 var wait := 0.0
+
 
 ## 0 common, 1 a rare species, 2 a shimmer.
 static func tier(species: String, rec: Dictionary) -> int:
@@ -20,15 +21,18 @@ static func tier(species: String, rec: Dictionary) -> int:
 		return 2
 	return 1 if Data.is_rare(species) else 0
 
+
 ## A sting for this tier, flat (not placed in the world): nothing for a common Boki.
 static func play(t: int) -> void:
 	if t > 0:
 		Sfx.play(NAMES[t], null, DB[t], 0.0)
 
+
 ## The claim: a rare Boki just caught, unless the fight is at its loudest.
 static func claim(m: Match, k: Kin) -> void:
 	if m.music_dir == null or m.music_dir.heat < LOUD_HEAT:
 		play(tier(k.species, k.rec))
+
 
 ## Every SCAN_S: announce the best new rare Boki in sight. `heat` is the fight music's level (0..1);
 ## while it is loud nothing is marked seen, so the Boki is announced once the fight eases.

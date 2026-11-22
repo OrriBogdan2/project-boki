@@ -1,6 +1,6 @@
 class_name HomeBelt
 extends RefCounted
-## The utility belt on the farm: choosing what goes on keys 1, 2 and 3 for the next expedition (rows in
+## The utility belt on the farm: choosing what goes on keys 1 to 4 for the next expedition (rows in
 ## the expedition panel), and the armory's Utility tab that lists your stash. What you pick leaves the
 ## stash when you set out (Equal.take_belt), up to the cap for the difficulty tier; everyone also gets
 ## the everyday issue (two tonics, two armor kits). Gloves and boots are chosen in HomeEcon.

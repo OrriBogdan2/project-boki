@@ -11,6 +11,9 @@ extends "res://tools/wall_slide_check.gd"
 ## or a prop's 0.9 m) is left round its end, where the corner slip adds to it: a try that misses the table
 ## there asserts instead that it got past the end and ended free of the wall ("round"). Tenzo's Rock Hop is a
 ## leap to a spot picked short of the wall (KIT_STOPS): it only must never end up inside it.
+## No Hunter's body may overlap the wall on any step of a try, except while a Spirit Walk is on (Lace's dash goes
+## through rocks and barriers by design): her walk is held into each barrier for its whole length and must end with
+## her out of it (PinSpirit.end puts her back), never left inside.
 ## Counts fixed simulation steps; never touches the save. Prints one "DWALL ..." line per try and
 ## "DASH WALL CHECK DONE, failures: N".
 
@@ -20,6 +23,8 @@ const WINDOW := 150  # steps (2.5 s): the longest dash (Ostra's 1.8 s trade) and
 const START_GAP := 0.02  # m off the face the body starts, touching it
 const BOUNCED := 0.3  # m off the wall a try ends that counts as a rebound (for the print)
 const PROP_TOUCH := 0.9  # m before the prop's corner the dash meets its face
+const SPIRIT_HERO := "archer"  # Lace: her Shift phases through rocks and barriers (spirit_t)
+const SPIRIT_STEPS := 240  # 4 s: the walk's 2.8 s plus the roll, and the ending after it
 const REF_DIR := Vector2(1, 0)  # the reference dashes' line on open ground
 const PATH_LEN := 9.0  # m of open ground the slide and what follows the corner must have
 # kits whose dash stops at a wall on purpose: the try only asserts it never ends inside the wall
@@ -41,6 +46,7 @@ const HUNTERS := [
 
 var own_walls: Array = []  # the Tenzo rock and the Neve wall the tries meet
 var dash_end := Vector2.ZERO  # where the last _dash's dash itself ended (roll_t ran out), from its start
+var pen_steps := 0  # steps of the last _dash or _hold_into the body overlapped a wall with no Spirit Walk on
 
 
 func run(main: Node) -> void:
@@ -77,6 +83,8 @@ func run(main: Node) -> void:
 				continue
 			for ang in DASH_ANGLES:
 				_dash_try(a, s, ang)
+			if a == SPIRIT_HERO and s.has("wall"):
+				_hold_into(a, s)
 	print("DASH WALL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -98,6 +106,7 @@ func _dash_try(hero: String, s: Dictionary, ang: float) -> void:
 	elif along < length * table * 0.5:
 		how = "stop"
 	var ok := length > 0.5 and absf(along - length * table) <= length * table * KEEP_TOL
+	var pen := pen_steps
 	if not ok and length * table > _room(s):
 		how = "round"  # the face ended first (a corner slip round it): past its end and free of it
 		ok = length > 0.5 and along >= _room(s) and w.occupy(P.pos.x, P.pos.z, P.r, P.pos.y, false) == 0.0
@@ -106,11 +115,13 @@ func _dash_try(hero: String, s: Dictionary, ang: float) -> void:
 		StoneStand.mover = P  # (his own rocks count as he walks them, as BreahHop._lands asks)
 		ok = w.occupy(P.pos.x, P.pos.z, P.r, P.pos.y, false) == 0.0  # it ends free, not in the wall
 		StoneStand.mover = null
+	elif pen > 0:
+		ok = false  # (a kit move that stops on purpose has its own end-free assert above)
 	if not ok:
 		bad += 1
 	print(
 		(
-			"DWALL %-10s %-12s a%-2d dash %4.1fm  kept %3d%% (table %3d%%)  along %4.1fm  out %5.2fm  %-6s  %s"
+			"DWALL %-10s %-12s a%-2d dash %4.1fm  kept %3d%% (table %3d%%)  along %4.1fm  out %5.2fm  %-6s  in %2d  %s"
 			% [
 				hero,
 				s["name"],
@@ -121,6 +132,7 @@ func _dash_try(hero: String, s: Dictionary, ang: float) -> void:
 				along,
 				out,
 				how,
+				pen,
 				"ok" if ok else "FAIL"
 			]
 		)
@@ -136,12 +148,14 @@ func _dash(at: Vector3, wish: Vector2) -> Vector2:
 	var cursor := at + Vector3(wish.x, 0.9, wish.y) * 6.0
 	var rolled := false
 	dash_end = Vector2.INF
+	pen_steps = 0
 	for i in WINDOW:
 		P.inp["move"] = wish if i == 0 else Vector2.ZERO
 		P.inp["aim"] = cursor
 		P.inp["dash"] = i == 0
 		P.inp["dash_down"] = i == 0  # a tap: held for the press's step only
 		_step()
+		_count_overlap()
 		rolled = rolled or P.roll_t > 0.0
 		if rolled and P.roll_t <= 0.0 and dash_end == Vector2.INF:
 			dash_end = Vector2(P.pos.x - at.x, P.pos.z - at.z)
@@ -149,6 +163,46 @@ func _dash(at: Vector3, wish: Vector2) -> Vector2:
 	if dash_end == Vector2.INF:
 		dash_end = got
 	return got
+
+
+## Lace's Spirit Walk held straight into barrier s for its whole length: she goes through it (by design), and must
+## come out the far side or be put back, never be left inside once the walk is over.
+func _hold_into(hero: String, s: Dictionary) -> void:
+	var wish: Vector2 = -s["n"]
+	_rest()
+	var at: Vector2 = _touch(s) + s["n"] * START_GAP
+	_reset(Vector3(at.x, float(s["y"]), at.y), wish)
+	pen_steps = 0
+	var inside := 0
+	for i in SPIRIT_STEPS:
+		P.inp["move"] = wish if P.spirit_t > 0.0 or i == 0 else Vector2.ZERO  # (held while the walk lasts)
+		P.inp["aim"] = P.pos + Vector3(wish.x, 0.9, wish.y) * 6.0
+		P.inp["dash"] = i == 0
+		P.inp["dash_down"] = i == 0
+		_step()
+		_count_overlap()
+		if P.spirit_t > 0.0 and _overlaps():
+			inside += 1
+	var ok := pen_steps == 0 and not _overlaps()
+	if not ok:
+		bad += 1
+	print(
+		(
+			"DWALL %-10s %-12s spirit held through: %3d steps phased, %d overlapping after  %s"
+			% [hero, s["name"], inside, pen_steps, "ok" if ok else "FAIL"]
+		)
+	)
+
+
+## True when the body overlaps something solid (a wall, rock or ledge) as a walking body would.
+func _overlaps() -> bool:
+	return w.occupy(P.pos.x, P.pos.z, P.r, P.pos.y, false) != 0.0
+
+
+## Counts the step as a penetration when the body overlaps a wall and no Spirit Walk is on.
+func _count_overlap() -> void:
+	if P.spirit_t <= 0.0 and _overlaps():
+		pen_steps += 1
 
 
 ## Metres of face from the touch on to its end, along the slide (a long straight cliff or Neve wall: plenty).

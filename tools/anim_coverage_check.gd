@@ -103,15 +103,18 @@ func _hunter_row(art: String) -> Array:
 ## spring KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side
 ## (Kin.render).
 ## Jump is the hop clip only when Kin.render asks for it in the air (kact hop): without that a leap runs.
+## Glide: a carried Boki spreads its legs (BokiHomeClips' glide, played when Kin.render sets kact glide); `_boki_air`
+## checks the live rig plays it.
 func _boki_row(id: String) -> Array:
 	var clips := _glb_clips("res://art/kin/%s/%s.glb" % [id, id])
 	var flinch := func(file: String, call: String) -> String:
 		return "proc" if FileAccess.get_file_as_string(file).contains(call) else "missing"
 	var kin_src := FileAccess.get_file_as_string("res://scripts/match/kin.gd")
-	var jump := _cell(clips.has("hop") and kin_src.contains('set_meta("kact", "hop" if airborne'), false)
+	var jump := _cell(clips.has("hop") and kin_src.contains('var act := "hop" if airborne'), false)
 	return [_cell(clips.has("idle")), _cell(clips.has("walk")), _cell(clips.has("run")), _cell(clips.has("attack")),
 		flinch.call("res://scripts/arch/oomph.gd", "KinFlinch.hit("), "proc", jump,
-		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("), "missing",
+		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("),
+		_cell(clips.has("glide"), kin_src.contains('act = "glide"')),
 		flinch.call("res://scripts/match/kin.gd", "KinFlinch.dash("),
 		_cell(clips.has("ability")), "missing"]
 
@@ -125,6 +128,9 @@ func _boki_air(main: Node, id: String) -> void:
 	ok(rig._state_clip() == "hop", "%s plays hop in the air, not %s" % [id, rig._state_clip()])
 	rig.player.get_animation_library("").remove_animation("hop")
 	ok(rig._state_clip() == "run", "%s without a hop clip runs in the air, not %s" % [id, rig._state_clip()])
+	k.set_meta("kact", "glide")
+	ok(rig._state_clip() == "glide" and rig.player.has_animation("glide"), "%s plays glide through a glide: %s" % [
+		id, rig._state_clip()])
 	k.free()
 
 func _table(cols: Array, rows: Dictionary) -> String:
