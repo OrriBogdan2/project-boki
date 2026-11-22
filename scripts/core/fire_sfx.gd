@@ -25,9 +25,7 @@ static var _who := {}  # emitter id -> {"last": ms, "rr": next take, "ends": [ms
 
 ## One round of `sname` from emitter `who` (a Hunter's instance id) at `pos`. `rate` is the weapon's s a round;
 ## `now` is the clock in ms (the check passes its own).
-static func shot(
-	who: int, sname: String, pos, vol_db: float, rate: float, now := Time.get_ticks_msec()
-) -> void:
+static func shot(who: int, sname: String, pos, vol_db: float, rate: float, now := Time.get_ticks_msec()) -> void:
 	if rate >= HELD_RATE or Sfx.take_count(sname) < 2:
 		Sfx.play(sname, pos, vol_db)
 		return
