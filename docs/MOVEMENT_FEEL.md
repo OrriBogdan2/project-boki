@@ -1,5 +1,7 @@
 # Movement feel: targets, sources, measurements
 
+New sections go in `docs/MOVEMENT_FEEL.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
+
 The owner's note (Oct 31 2026): dropping, gliding and moving felt sloppy. The reference is the bar: snappy and responsive, especially the glide, and Shift into a glide should give you more momentum.
 
 Every target below is checked by `--move-feel-check` (`tools/move_feel_check.gd`). The check drives the real match step with scripted inputs. It counts fixed 60 Hz simulation steps, never wall-clock time, so a loaded machine can't skew it. It never touches the save. `--fps-feel-check` steps the same moves at 1/30, 1/60 and 1/144 s and holds jump apex and glide sink within 3% of each other (dash and knock rows print only, docs/DEBT.md; docs/decisions/0170).
