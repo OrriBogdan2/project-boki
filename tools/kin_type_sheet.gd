@@ -3,15 +3,17 @@ extends RefCounted
 ## cast accents side by side at the match camera, each type's name above it, captured a few times through
 ## their lives: <dir>/types_<n>.png.
 
-const SLOW := 0.05             # Engine.time_scale while capturing
-const GAP := 3.0               # m between types
+const SLOW := 0.05  # Engine.time_scale while capturing
+const GAP := 3.0  # m between types
 const PER_ROW := 6
-const SHOTS := [0.1, 0.25, 0.5, 0.9]    # s after the casts start
+const SHOTS := [0.1, 0.25, 0.5, 0.9]  # s after the casts start
+
 
 func run(main: Node) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	var m := Match.new()
@@ -19,11 +21,13 @@ func run(main: Node) -> void:
 	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
+	if fade != null:
+		await fade.reveal(0.01)
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
-	if m.hud: m.hud.visible = false
+	if m.hud:
+		m.hud.visible = false
 	m.player.ctrl = "idle"
 	var types: Array = KinTypeFx.LOOKS.keys()
 	var rows := int(ceil(types.size() / float(PER_ROW)))

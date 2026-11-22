@@ -6,22 +6,28 @@ extends RefCounted
 ## the whole lock. The heroes that lock are asserted (LOCKED), so a new lock gets its row here. Reuses the dash-flow
 ## check's training match and slot presses. Never touches the save.
 
-const LATE_S := 0.1             # s of lock left when the late press is made (inside Loco.press_buffer)
-const EARLY_AT := 2             # steps into the lock for the press that comes too early to be held
-const SETTLE := 20              # steps the ult may take to start its lock
-const LOCK_MAX := 600           # steps a lock may run before the check gives up on it
-const PAST := 0.4               # s past the lock's end we watch for the press
-# kits whose ult locks the body; Vex left it on main 5687b9120da (owner 11-17: her ult slows, never roots)
+const LATE_S := 0.1  # s of lock left when the late press is made (inside Loco.press_buffer)
+const EARLY_AT := 2  # steps into the lock for the press that comes too early to be held
+const SETTLE := 20  # steps the ult may take to start its lock
+const LOCK_MAX := 600  # steps a lock may run before the check gives up on it
+const PAST := 0.4  # s past the lock's end we watch for the press
+
+# kits whose ult locks the body; Vex left it on main 5687b9120da (her ult slows, never roots)
 const LOCKED := ["juggernaut", "mage", "ostra"]
+
+const LOST := -1  # never went off
+const INSIDE := -2  # went off while the lock still held
 
 var bad := 0
 var skipped := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
+
 func ok(cond: bool, what: String) -> void:
 	print("CASTLOCK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -37,6 +43,7 @@ func run(main: Node) -> void:
 	print("CASTLOCK DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
 
+
 ## True when the hero's ult locks the body.
 func _hero(m: Match, hero: String) -> bool:
 	var lock_n := _lock_steps(m)
@@ -49,16 +56,24 @@ func _hero(m: Match, hero: String) -> bool:
 			continue
 		var late := lock_n - int(LATE_S / Match.DT)
 		var got := _trial(m, late, slot)
-		ok(got >= 0 and got != INSIDE, "%s %s pressed %.2fs before its %.2fs lock ends: %s"
-				% [hero, slot, (lock_n - late) * Match.DT, lock_n * Match.DT, _said(got)])
+		ok(
+			got >= 0 and got != INSIDE,
+			(
+				"%s %s pressed %.2fs before its %.2fs lock ends: %s"
+				% [hero, slot, (lock_n - late) * Match.DT, lock_n * Match.DT, _said(got)]
+			)
+		)
 		if lock_n * Match.DT > Loco.press_buffer + LATE_S:
 			got = _trial(m, EARLY_AT, slot)
-			ok(got == LOST, "%s %s pressed %.2fs before its lock ends is not held: %s"
-					% [hero, slot, (lock_n - EARLY_AT) * Match.DT, _said(got)])
+			ok(
+				got == LOST,
+				(
+					"%s %s pressed %.2fs before its lock ends is not held: %s"
+					% [hero, slot, (lock_n - EARLY_AT) * Match.DT, _said(got)]
+				)
+			)
 	return true
 
-const LOST := -1                # never went off
-const INSIDE := -2              # went off while the lock still held
 
 func _said(got: int) -> String:
 	if got == LOST:
@@ -67,9 +82,11 @@ func _said(got: int) -> String:
 		return "went off inside the lock"
 	return "went off %d steps after the lock let it" % got
 
+
 func _locked() -> bool:
 	var k := flow.hunter.ak
 	return k.busy() and not k.disabled()
+
 
 ## Casts the ult and counts the steps its lock holds the kit (0: no lock within SETTLE steps).
 func _lock_steps(m: Match) -> int:
@@ -82,6 +99,7 @@ func _lock_steps(m: Match) -> int:
 		n += 1
 	return n
 
+
 ## Readies the hunter, casts the ult and steps to the lock's first step (or SETTLE steps when none comes).
 func _start(m: Match) -> void:
 	flow._ready_up(m)
@@ -91,6 +109,7 @@ func _start(m: Match) -> void:
 			return
 		m.step(Match.DT)
 
+
 ## Steps from the first step the lock lets `slot` go to the step a press made `at` steps into the lock goes off;
 ## LOST or INSIDE.
 func _trial(m: Match, at: int, slot: String) -> int:
@@ -99,7 +118,7 @@ func _trial(m: Match, at: int, slot: String) -> int:
 	var before := flow._snap()
 	flow._press(slot)
 	var freed_at := -1
-	for i in int((LOCK_MAX + PAST / Match.DT)):
+	for i in int(LOCK_MAX + PAST / Match.DT):
 		m.step(Match.DT)
 		if freed_at < 0 and not _locked():
 			freed_at = i

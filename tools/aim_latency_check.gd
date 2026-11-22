@@ -9,15 +9,12 @@ extends RefCounted
 ## Prints "AIMLAG <case> <key> = <value>  allow <= N  ok|FAIL" per measure and
 ## "AIM LATENCY CHECK DONE, failures: N" at the end.
 
-var bad := 0
-var m: Match
-var P: Hunter
-var root: Window
 const TOL_PX := 0.5  # px: an aim point this close to where the cursor projects counts as under it
 const SETTLE_FRAMES := 90  # frames with the mouse still before a move, so the camera is at rest
-const STATIC_PX := 40.0  # px (canvas): a move that stays inside the camera's cursor dead zone (CamRig.FOLLOW)
+const STATIC_PX := 40.0  # px (canvas): a move that stays inside the camera's cursor dead zone (CamRig.follow_v)
 const PAN_PX := 400.0  # px (canvas): a move that makes the view lean after the cursor
 const WATCH := 6  # frames measured after a move
+
 ## [case, refresh rate Hz, window px, the user's UI scale (Settings ui_scale)]
 const CASES := [
 	["60hz_720p", 60, Vector2i(1280, 720), 1.0],
@@ -25,6 +22,11 @@ const CASES := [
 	["60hz_4k_ui1.5", 60, Vector2i(3840, 2160), 1.5],
 	["144hz_4k_ui1.5", 144, Vector2i(3840, 2160), 1.5],
 ]
+
+var bad := 0
+var m: Match
+var p: Hunter
+var root: Window
 
 
 func run(main: Node) -> void:
@@ -38,18 +40,18 @@ func run(main: Node) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	P = m.player
+	p = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
-		if h != P:
+		if h != p:
 			h.teleport(Vector3(-500, 50, -500))
 			h.out = true
-	if P.kin:
-		(P.kin as Kin).stow()
-	P.ctrl = "local"
-	P.teleport(m.world.spawns[0])
-	P.vel = Vector3.ZERO
+	if p.kin:
+		(p.kin as Kin).stow()
+	p.ctrl = "local"
+	p.teleport(m.world.spawns[0])
+	p.vel = Vector3.ZERO
 	m.paused = false
 	for c in CASES:
 		_case(String(c[0]), int(c[1]), c[2], float(c[3]))
@@ -109,7 +111,7 @@ func _watch(to: Vector2, cs: float, dt: float) -> Dictionary:
 		var gap_now := _gap(m.cam.global_transform)
 		var gap_prev := _gap(before)
 		if k == 0:
-			out["gap0"] = m.cam.unproject_position(P.inp["aim"]).distance_to(mouse)
+			out["gap0"] = m.cam.unproject_position(p.inp["aim"]).distance_to(mouse)
 		if out["aim"] == 99 and gap_now <= TOL_PX:
 			out["aim"] = k
 		var stale := 99
@@ -127,7 +129,7 @@ func _gap(cam_tf: Transform3D) -> float:
 	var now: Transform3D = m.cam.global_transform
 	m.cam.global_transform = cam_tf
 	var e: Vector3 = m.cam.mouse_on_plane(m.aim_y + 0.95)
-	var aim: Vector3 = P.inp["aim"]
+	var aim: Vector3 = p.inp["aim"]
 	var gap := m.cam.unproject_position(Vector3(e.x, aim.y, e.z)).distance_to(m.cam.unproject_position(aim))
 	m.cam.global_transform = now
 	return gap

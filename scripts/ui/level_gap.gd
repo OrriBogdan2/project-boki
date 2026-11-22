@@ -5,10 +5,10 @@ extends RefCounted
 ## plain within one. The colours are Okabe-Ito entries (orange, blue) and the triangle carries the same
 ## meaning, so hue is never the only cue.
 
-const GAP := 2                   # levels apart (either way) before a rival's badge changes
-const WARM := Color("e69f00")    # Okabe-Ito orange: they out-level you
-const COOL := Color("0072b2")    # Okabe-Ito blue: you out-level them
-const TRI := 4.5                 # px half-width of the triangle cue
+const GAP := 2  # levels apart (either way) before a rival's badge changes
+const WARM := Color("e69f00")  # Okabe-Ito orange: they out-level you
+const COOL := Color("0072b2")  # Okabe-Ito blue: you out-level them
+const TRI := 4.5  # px half-width of the triangle cue
 
 
 ## Their level minus yours, signed, for a rival; 0 for yourself, a teammate or no viewer.
@@ -29,7 +29,7 @@ static func tint(gap: int) -> Color:
 
 ## The triangle cue left of the badge `r`: apex first, up for warm, down for cool.
 static func cue_points(r: Rect2, gap: int) -> PackedVector2Array:
-	var d := -1.0 if band(gap) > 0 else 1.0      # screen y grows downward
+	var d := -1.0 if band(gap) > 0 else 1.0  # screen y grows downward
 	var at := Vector2(r.position.x - TRI - 3.0, r.get_center().y)
 	return PackedVector2Array([at + Vector2(0, d * TRI), at + Vector2(-TRI, -d * TRI), at + Vector2(TRI, -d * TRI)])
 

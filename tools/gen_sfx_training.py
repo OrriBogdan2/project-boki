@@ -13,9 +13,10 @@
 Original synthesis, no samples; the cues are 44.1 kHz mono wavs levelled by sfx_lib, the beds stereo Ogg
 loops written with gen_ambience's helpers. Needs numpy, scipy and ffmpeg.
 """
+
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, env, mix, at, lpf, hpf, bpf, noise
+from sfx_lib import N, env, mix, at, lpf, bpf, noise
 import gen_ambience as A
 
 S.reseed(7311)
@@ -34,7 +35,8 @@ def count(i):
 
 def horn(i):
     d = 0.9
-    t = S.T(d); n = N(d)
+    t = S.T(d)
+    _n = N(d)
     f = 233.0 * (1.0 + 0.02 * np.minimum(t / 0.06, 1.0))
     ph = 2 * np.pi * np.cumsum(f) / S.SR
     tone = sum(a * np.sin(k * ph) for k, a in ((1, 1.0), (2, 0.6), (3, 0.42), (4, 0.25), (5, 0.14)))
@@ -59,7 +61,7 @@ def reset(i):
 
 def bot_spawn(i):
     d = 0.55
-    shimmer = S.sweep(400, 1600, d, 'sin', 2.0) * S.shape(d, 0.35, 0.05, 0.15)
+    shimmer = S.sweep(400, 1600, d, "sin", 2.0) * S.shape(d, 0.35, 0.05, 0.15)
     sparkle = bpf(noise(d), 4000, 9000) * S.shape(d, 0.3, 0.05, 0.2) * 0.25
     land = at(S.kick(160, 60, 0.25, 0.03, 0.07), 0.42)
     return S.reflections(mix(0.6 * shimmer, sparkle, 0.9 * land))
@@ -79,29 +81,36 @@ def wind_bed():
 def island_bed():
     n = int(A.SR * (BED_SECONDS + 2.0))
     out = np.stack([A.lpf(A.rng.standard_normal(n), 300) * A.slow(n, 0.05, 0.5, 1.0) for _ in range(2)], 1)
-    for _ in range(14):                      # leaves stirring: short bursts of soft high noise
-        s0 = int(A.rng.integers(0, n - A.SR)); m = int(A.SR * A.rng.uniform(0.4, 1.0))
+    for _ in range(14):  # leaves stirring: short bursts of soft high noise
+        s0 = int(A.rng.integers(0, n - A.SR))
+        m = int(A.SR * A.rng.uniform(0.4, 1.0))
         g = A.bpf(A.rng.standard_normal(m), 2500, 7000) * np.sin(np.pi * np.arange(m) / m) ** 2 * 0.12
         pan = A.rng.uniform(0.15, 0.85)
-        out[s0:s0 + m, 0] += g * (1 - pan); out[s0:s0 + m, 1] += g * pan
-    for _ in range(4):                       # a far wind chime, once in a while
-        s0 = int(A.rng.integers(0, n - A.SR * 3)); m = int(A.SR * 2.5); tt = np.arange(m) / A.SR
+        out[s0 : s0 + m, 0] += g * (1 - pan)
+        out[s0 : s0 + m, 1] += g * pan
+    for _ in range(4):  # a far wind chime, once in a while
+        s0 = int(A.rng.integers(0, n - A.SR * 3))
+        m = int(A.SR * 2.5)
+        tt = np.arange(m) / A.SR
         f0 = A.rng.choice([1047.0, 1175.0, 1319.0, 1568.0])
-        c = sum(a * np.sin(2 * np.pi * f0 * r * tt) * np.exp(-tt / dc) for r, a, dc in ((1.0, 0.5, 0.8), (2.76, 0.2, 0.4)))
+        c = sum(
+            a * np.sin(2 * np.pi * f0 * r * tt) * np.exp(-tt / dc) for r, a, dc in ((1.0, 0.5, 0.8), (2.76, 0.2, 0.4))
+        )
         pan = A.rng.uniform(0.2, 0.8)
-        out[s0:s0 + m, 0] += c * 0.05 * (1 - pan); out[s0:s0 + m, 1] += c * 0.05 * pan
+        out[s0 : s0 + m, 0] += c * 0.05 * (1 - pan)
+        out[s0 : s0 + m, 1] += c * 0.05 * pan
     return A.loop(out)
 
 
 def main():
-    S.takes_cat('training_count', count, 0, 'ui')
-    S.takes_cat('training_horn', horn, 0, 'signature')
-    S.takes_cat('training_dummy_hit', dummy_hit, 3, 'ui')
-    S.takes_cat('training_reset', reset, 0, 'ui')
-    S.takes_cat('training_bot_spawn', bot_spawn, 0, 'cast')
-    A.write_ogg('amb_training_wind', wind_bed(), 0.6)
-    A.write_ogg('amb_training_island', island_bed(), 0.5)
+    S.takes_cat("training_count", count, 0, "ui")
+    S.takes_cat("training_horn", horn, 0, "signature")
+    S.takes_cat("training_dummy_hit", dummy_hit, 3, "ui")
+    S.takes_cat("training_reset", reset, 0, "ui")
+    S.takes_cat("training_bot_spawn", bot_spawn, 0, "cast")
+    A.write_ogg("amb_training_wind", wind_bed(), 0.6)
+    A.write_ogg("amb_training_island", island_bed(), 0.5)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

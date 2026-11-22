@@ -4,7 +4,7 @@ One soft "lub-dub": two muffled thumps 0.17 s apart, the second a little higher 
 low sine that falls in pitch, a quiet second harmonic so small speakers still carry it, and a dull noise
 pat of the chest wall. It is felt more than heard. Three takes, each a hair different in pitch and timing.
 """
-import numpy as np
+
 import sfx_lib as S
 from sfx_lib import N, env, mix, at, lpf, noise
 
@@ -27,5 +27,5 @@ def heartbeat(i):
     return lpf(mix(lub, at(dub, gap)), 520)
 
 
-if __name__ == '__main__':
-    S.takes_cat('heartbeat', heartbeat, 3, 'ui')
+if __name__ == "__main__":
+    S.takes_cat("heartbeat", heartbeat, 3, "ui")

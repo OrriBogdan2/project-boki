@@ -5,18 +5,19 @@ extends "res://tools/vv_shots.gd"
 ## Files: <dir>/<hero>_miss_wall.png, <hero>_miss_air.png and MANIFEST_<hero>.txt.
 
 const HEROES := {"gunslinger": "vex", "archer": "lace", "mage": "sparkle"}
-const MISS_CROP := Vector2i(220, 150)         # px round the end point for a frame (scaled 2x)
-const AFTER_S := [0.0, 0.07, 0.14, 0.22, 0.32]   # s after the puff appears that a frame is taken
-const SHOT_H := 0.95                        # m: ground this far above home stops a shot fired at chest height
-const SCAN_M := 40                            # m to look along a direction for a wall
-const WALL_GAP := 6.0                         # m from the shooter to the wall
+const MISS_CROP := Vector2i(220, 150)  # px round the end point for a frame (scaled 2x)
+const AFTER_S := [0.0, 0.07, 0.14, 0.22, 0.32]  # s after the puff appears that a frame is taken
+const SHOT_H := 0.95  # m: ground this far above home stops a shot fired at chest height
+const SCAN_M := 40  # m to look along a direction for a wall
+const WALL_GAP := 6.0  # m from the shooter to the wall
 const DIRS := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]
-const FIRE_S := 0.12                          # s the button is held: one shot
-const WATCH_S := 2.5                          # s to wait for the shot to end
+const FIRE_S := 0.12  # s the button is held: one shot
+const WATCH_S := 2.5  # s to wait for the shot to end
 
 var end_pt := Vector3.ZERO
 var prev_img: Image
 var fxd: DJFx
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -48,20 +49,22 @@ func run(main_node: Node) -> void:
 	print("MISSSHOTS in %s" % dir)
 	main.get_tree().quit(0)
 
+
 ## A tile in front of a wall or rock with WALL_GAP tiles of level ground behind it: [shooter start, direction],
 ## or [] if the map has none.
 func _wall_spot() -> Array:
-	var W = m.world
-	for z in range(4, W.h - 4):
-		for x in range(4, W.w - 4):
-			if not W.is_block(x + 0.5, z + 0.5):
+	var w_v = m.world
+	for z in range(4, w_v.h - 4):
+		for x in range(4, w_v.w - 4):
+			if not w_v.is_block(x + 0.5, z + 0.5):
 				continue
 			for d in DIRS:
 				var start := Vector3(x + 0.5 - d.x * WALL_GAP, 0, z + 0.5 - d.y * WALL_GAP)
-				start.y = W.ground_at(start.x, start.z)
+				start.y = w_v.ground_at(start.x, start.z)
 				if _level_run(start, d):
 					return [start, d]
 	return []
+
 
 ## Level, open ground from `start` along d for WALL_GAP tiles, a tile either side too.
 func _level_run(start: Vector3, d: Vector2) -> bool:
@@ -75,6 +78,7 @@ func _level_run(start: Vector3, d: Vector2) -> bool:
 				return false
 	return true
 
+
 ## Metres from home along d to the first tile that stops a level shot (higher ground or a rock), or INF.
 func _wall_dist(d: Vector2) -> float:
 	for s in range(2, SCAN_M):
@@ -83,6 +87,7 @@ func _wall_dist(d: Vector2) -> float:
 		if m.world.ground_at(x, z) > home.y + SHOT_H or m.world.is_block(x, z):
 			return float(s)
 	return INF
+
 
 ## A direction with no wall for well past the weapon's range (the shot runs out in the air).
 func _open_dir() -> Vector2:
@@ -94,6 +99,7 @@ func _open_dir() -> Vector2:
 			far = w
 			best = d
 	return best
+
 
 func _miss(part: String, d: Vector2) -> void:
 	await _reset(7.0)
@@ -111,7 +117,7 @@ func _miss(part: String, d: Vector2) -> void:
 		P.teleport(from)
 	_aim(from + Vector3(d.x, 0, d.y) * 12.0)
 	cam_at = end_pt.lerp(from, 0.35)
-	var seen := {"t": -1.0, "taken": []}      # (a lambda copies plain variables, so its state lives in a dictionary)
+	var seen := {"t": -1.0, "taken": []}  # (a lambda copies plain variables, so its state lives in a dictionary)
 	var watch := func(t: float):
 		P.inp["fire"] = t < FIRE_S
 		var puff_t: float = seen["t"]
@@ -128,6 +134,7 @@ func _miss(part: String, d: Vector2) -> void:
 	await _go(WATCH_S, watch)
 	P.inp["fire"] = false
 	print("MISS %s %s puff_t %.2f frames %d" % [hero_name, part, seen["t"], seen["taken"].size()])
+
 
 func _frame(part: String, caption: String, img: Image) -> void:
 	if img == null:

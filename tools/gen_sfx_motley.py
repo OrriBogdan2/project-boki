@@ -37,8 +37,7 @@ import os, sys
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import (N, T, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, sub, tail,
-                     reflections, ring, grains, pad)
+from sfx_lib import (N, T, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, sub, ring, pad)
 
 S.reseed(6623)
 

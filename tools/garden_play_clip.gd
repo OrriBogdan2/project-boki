@@ -5,17 +5,25 @@ extends RefCounted
 ## last back); each game ends in a cheer. Writes <dir>/clip1.avi and <dir>/clip1.png. Run it on a GPU worker
 ## (jobq --needs gpu); recording reuses tools/gameplay_media.gd's child Godot. Never writes the save.
 
-const GAME_S := 7.0                 # s each game of tag lasts, so both end inside the clip
+const GAME_S := 7.0  # s each game of tag lasts, so both end inside the clip
 ## s and what happens: "tag0"/"tag1" a game starts for pair 0 (Ash, Crag) or 1 (Moss, Pip), "catch0"/"catch1" the
 ## chaser reaches the other, "squabble0"/"squabble1" the pair bumps tempers (four cues inside one 3 s window)
-const BEATS := [[1.0, "tag0"], [2.0, "tag1"], [4.5, "catch0"], [4.7, "catch1"], [5.0, "squabble0"],
-		[5.3, "squabble1"], [14.0, "squabble0"]]
-const STILL_AT := 6.0               # s: the still is saved
-const ZOOM := 0.5                   # the home camera's distance multiplier (closer than the default)
-const AWAY := Vector3(0.0, 0.0, 7.0)    # m from the Boki to the (hidden) player the camera follows
+const BEATS := [
+	[1.0, "tag0"],
+	[2.0, "tag1"],
+	[4.5, "catch0"],
+	[4.7, "catch1"],
+	[5.0, "squabble0"],
+	[5.3, "squabble1"],
+	[14.0, "squabble0"]
+]
+const STILL_AT := 6.0  # s: the still is saved
+const ZOOM := 0.5  # the home camera's distance multiplier (closer than the default)
+const AWAY := Vector3(0.0, 0.0, 7.0)  # m from the Boki to the (hidden) player the camera follows
 
 var main: Node
 var dir := "/tmp/media"
+
 
 func run(m: Node) -> void:
 	main = m
@@ -46,15 +54,21 @@ func run(m: Node) -> void:
 	seed(7)
 	var h = await _stage()
 	await _play(h, secs)
-	print("MEDIA_DONE garden_play frames=%d dropped=%d heard=%s"
-			% [Engine.get_frames_drawn(), h.life.sfx.dropped, GardenSfx.heard])
+	print(
+		(
+			"MEDIA_DONE garden_play frames=%d dropped=%d heard=%s"
+			% [Engine.get_frames_drawn(), h.life.sfx.dropped, GardenSfx.heard]
+		)
+	)
 	main.get_tree().quit(0)
+
 
 ## The base with four rested Boki together (two hot tempers), the camera on them.
 func _stage():
 	var d := Save.fresh()
-	var specs := [["cindle", "Ash", 0.95], ["basaltoad", "Crag", 0.95], ["burrlet", "Moss", 0.1],
-			["zapple", "Pip", 0.1]]
+	var specs := [
+		["cindle", "Ash", 0.95], ["basaltoad", "Crag", 0.95], ["burrlet", "Moss", 0.1], ["zapple", "Pip", 0.1]
+	]
 	for spec in specs:
 		var k := Save.new_kin(spec[0], spec[1])
 		k["traits"]["temper"] = spec[2]
@@ -89,6 +103,7 @@ func _stage():
 	h.cam.snap(mid)
 	return h
 
+
 ## Plays the beats at their times and lets the base run for secs.
 func _play(h, secs: float) -> void:
 	var t := 0.0
@@ -105,6 +120,7 @@ func _play(h, secs: float) -> void:
 		while next < BEATS.size() and t >= float(BEATS[next][0]):
 			_beat(h, String(BEATS[next][1]))
 			next += 1
+
 
 func _beat(h, what: String) -> void:
 	var pair: int = int(what.right(1))
@@ -123,6 +139,6 @@ func _beat(h, what: String) -> void:
 			var other: Dictionary = b if it == a else a
 			it["pos"] = other["pos"] + Vector3(0.4, 0, 0)
 			(it["node"] as Node3D).position = it["pos"]
-			h.life._tag_tick(it, it["life"])      # the catch lands now, not on the next 10 Hz look
+			h.life._tag_tick(it, it["life"])  # the catch lands now, not on the next 10 Hz look
 		"squabble":
 			h.life._squabble(a, b)

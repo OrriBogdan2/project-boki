@@ -11,15 +11,18 @@ extends RefCounted
 const RULES_PATH := "res://content/rules/hud_reveal.json"
 static var _groups: Dictionary = {}
 
+
 static func groups() -> Dictionary:
 	if _groups.is_empty():
 		var p = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
 		_groups = p.get("groups", {}) if typeof(p) == TYPE_DICTIONARY else {}
 	return _groups
 
+
 ## The expedition this match is for the save: 1 for the first.
 static func match_no() -> int:
 	return int(Save.d.get("matches", 0)) + 1
+
 
 ## Whether `key` draws now.
 static func on(m: Match, key: String) -> bool:
@@ -32,6 +35,7 @@ static func on(m: Match, key: String) -> bool:
 	var from := int(g.get("from_match", 1))
 	return from > 0 and match_no() >= from
 
+
 ## Whether this match stages the HUD at all.
 static func staged(m: Match) -> bool:
 	if Settings.get_v("hud_full") or not Save.d.has("hud_reveal"):
@@ -40,10 +44,12 @@ static func staged(m: Match) -> bool:
 		return false
 	return not (m.opts.get("training", false) or m.opts.get("tutorial", false) or m.opts.get("arena", false))
 
+
 ## A group's first event happened: it shows from now on (this save).
 static func see(key: String) -> void:
 	if Save.d.has("hud_reveal"):
 		Save.d["hud_reveal"][key] = true
+
 
 ## A new player in a staged match (a save under HudGroups.NEW_PLAYER_MATCHES expeditions): ExtractGoal points
 ## them only at the newcomer seats.

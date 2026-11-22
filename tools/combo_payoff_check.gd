@@ -39,14 +39,14 @@ func _pair(arch: String, via: String) -> void:
 	var tag := "%s%s" % [arch, " (" + via + ")" if via != "" else ""]
 	var r: Array = ac.setup(arch, 6.0, "", false)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var K: ArchKit = P.ak
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
+	var k: ArchKit = p.ak
 	if via == "chain":
-		(K as JuggernautKit).warchain._hook(T, T.pos)
+		(k as JuggernautKit).warchain._hook(t, t.pos)
 	else:
-		cm.apply(arch, K, T)
-	var d := K.combo_read(T)
+		cm.apply(arch, k, t)
+	var d := k.combo_read(t)
 	ok(
 		"%s: tag shows an icon and the time left" % tag,
 		(
@@ -57,38 +57,38 @@ func _pair(arch: String, via: String) -> void:
 		),
 		str(d)
 	)
-	T.flash_t = 0.0
-	Sfx.listener = P.pos  # the camera sets it each frame; a sound far from the origin is out of earshot
+	t.flash_t = 0.0
+	Sfx.listener = p.pos  # the camera sets it each frame; a sound far from the origin is out of earshot
 	var heard0 := int(Sfx.last_played.get(COMBO_SND, -1000))
 	await main.get_tree().create_timer(0.05).timeout  # past the sound's own repeat gap
-	_land(arch, via, ac, m, P, K, T)
-	var stamp := float(T.get_meta(ComboMark.PAY_KEY, -9.0))
+	_land(arch, via, ac, m, p, k, t)
+	var stamp := float(t.get_meta(ComboMark.PAY_KEY, -9.0))
 	ok(
 		"%s: the payoff flashes the body white" % tag,
-		absf(stamp - float(m.time)) < 0.1 and T.flash_t >= ComboMark.FLASH_BODY - 0.05,
-		"stamp %.2f time %.2f flash %.3f" % [stamp, m.time, T.flash_t]
+		absf(stamp - float(m.time)) < 0.1 and t.flash_t >= ComboMark.FLASH_BODY - 0.05,
+		"stamp %.2f time %.2f flash %.3f" % [stamp, m.time, t.flash_t]
 	)
 	ok("%s: the payoff plays the combo sound" % tag, int(Sfx.last_played.get(COMBO_SND, -1000)) > heard0)
 	ac.done(m)
 
 
-func _land(arch: String, via: String, a, m: Match, P: Hunter, K: ArchKit, T: Hunter) -> void:
+func _land(arch: String, via: String, a, m: Match, p: Hunter, k: ArchKit, t: Hunter) -> void:
 	match via:
 		"needle":  # Longneedle down the lane through a Dazed foe
-			a.aim_at(P, T.pos)
-			(K as GunslingerKit)._fire_needle()
+			a.aim_at(p, t.pos)
+			(k as GunslingerKit)._fire_needle()
 		"flashover":
-			(K as AshwickKit).stoke(T)  # Ablaze stoked again: Flashover
+			(k as AshwickKit).stoke(t)  # Ablaze stoked again: Flashover
 		"knock":  # the knock on a Chilled foe: Shatter a beat later
-			T.hp = 0.0
-			(K as RimewrightKit).on_deal(T, 1.0, {})
+			t.hp = 0.0
+			(k as RimewrightKit).on_deal(t, 1.0, {})
 			for i in 60:
-				if T.has_meta(ComboMark.PAY_KEY):
+				if t.has_meta(ComboMark.PAY_KEY):
 					break
 				a.step(m, 1.0 / 60.0)
 		"chain":
-			(K as JuggernautKit).warchain.pull()
+			(k as JuggernautKit).warchain.pull()
 		_:
-			cm.payoff(arch, P, K, T)
+			cm.payoff(arch, p, k, t)
 			if arch == "juggernaut":
 				a.step(m, 0.03)  # the knock lands a step after the hit

@@ -75,8 +75,8 @@ func _row(id: String) -> Image:
 	return row
 
 
-func _tile(vp: SubViewport, rig: BokiRig, s: Object, row: Image, clip: String, at: float, tile: int) -> void:
-	rig.set_clip(clip, 0.0)
+func _tile(vp: SubViewport, rig: BokiRig, s: Object, row: Image, clip_v: String, at: float, tile: int) -> void:
+	rig.set_clip(clip_v, 0.0)
 	rig.set_face("neutral")
 	rig.seek(at)
 	var img: Image = await s._grab(vp)

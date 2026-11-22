@@ -7,25 +7,26 @@ extends RefCounted
 ## the body is back on the run quickly: no long recovery, and running, the legs are not held by the land clip.
 
 const DT := 1.0 / 30.0
-const READ_AT := 0.1          # s after the press the take-off has to show
-const AGAIN_AT := 0.15        # s after the press, past the air fade: the rise clip alone
-const APEX_HALF := 0.15       # s either side of the apex the turn is read over
-const DIP_WINDOW := 0.15      # s after touchdown the absorb has to bottom out in
-const SETTLE_M := 0.02        # m: the hips this close to their run height count as recovered
-const RUN_REF := 0.3          # s of the run-up before the press whose lowest hips give the run height
+const READ_AT := 0.1  # s after the press the take-off has to show
+const AGAIN_AT := 0.15  # s after the press, past the air fade: the rise clip alone
+const APEX_HALF := 0.15  # s either side of the apex the turn is read over
+const DIP_WINDOW := 0.15  # s after touchdown the absorb has to bottom out in
+const SETTLE_M := 0.02  # m: the hips this close to their run height count as recovered
+const RUN_REF := 0.3  # s of the run-up before the press whose lowest hips give the run height
 
 var ids_seen := 0
+
 
 ## {off, again, apex, dip, dip_t, legs, back, held, settle} per way and variant, all in deg, m or s ("held": the most
 ## the land clip owned the body after touchdown; off, again and apex only mean something on the jump).
 static func measure(m: Node3D, sync: Node, clips: WardenClips, running: bool, way: String) -> Dictionary:
-	var shots := preload("res://tools/jump_land_shots.gd")
+	var JumpLandShots := preload("res://tools/jump_land_shots.gd")
 	var skel := WardenGlb.skeleton(m.get_node("Warden"))
 	var hips_bi := WardenSkeleton.find(skel, "hips")
-	var air: float = shots.air_time(way)
+	var air: float = JumpLandShots.air_time(way)
 	var r := {"again": 0.0, "held": 0.0}
 	var first_off: Array = []
-	for jump in (2 if way == "jump" else 1):
+	for jump in 2 if way == "jump" else 1:
 		var t := -0.6
 		var before: Array = []
 		var apex_in: Array = []
@@ -37,7 +38,7 @@ static func measure(m: Node3D, sync: Node, clips: WardenClips, running: bool, wa
 		var back := -1.0
 		var settle := -1.0
 		while t < air + 1.0:
-			var s: Dictionary = shots.arc(t, running, way)
+			var s: Dictionary = JumpLandShots.arc(t, running, way)
 			m.set_meta(WardenClips.STATE, s)
 			sync.call("_process", DT)
 			var y := skel.get_bone_global_pose(hips_bi).origin.y
@@ -80,6 +81,7 @@ static func measure(m: Node3D, sync: Node, clips: WardenClips, running: bool, wa
 		r["settle"] = settle
 	return r
 
+
 ## The rig-contract bones' rotations (the bones the clips key; the spring bones jiggle with their own history).
 static func _pose(skel: Skeleton3D) -> Array:
 	var out: Array = []
@@ -88,6 +90,7 @@ static func _pose(skel: Skeleton3D) -> Array:
 		if bi >= 0:
 			out.append(skel.get_bone_pose_rotation(bi))
 	return out
+
 
 ## deg: the bone that turned the most between two poses.
 static func _diff(a: Array, b: Array) -> float:

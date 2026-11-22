@@ -10,13 +10,16 @@ extends RefCounted
 
 const TABLE := "res://content/rules/sfx_world.json"
 # group 1 a played name, group 2 the stock fallback of an "sfx" key, group 3 HeroSfx.of's fallback
-const CUE_CALLS := "(?:^|[^a-z_])(?:sfx|cue|_cue|Sfx\\.play)\\(\\s*\"([a-z0-9_]*)\"" \
-		+ "|\\.get\\(\"sfx\",\\s*\"([a-z0-9_]+)\"\\)|HeroSfx\\.of\\([^,]+,\\s*\"[a-z_]+\",\\s*\"([a-z0-9_]+)\"\\)"
-const ARM := "^(\\t+)\"([a-z0-9_]+)\"(?:,\\s*\"[a-z0-9_]+\")*:"
+const CUE_CALLS := (
+	'(?:^|[^a-z_])(?:sfx|cue|_cue|Sfx\\.play)\\(\\s*"([a-z0-9_]*)"'
+	+ '|\\.get\\("sfx",\\s*"([a-z0-9_]+)"\\)|HeroSfx\\.of\\([^,]+,\\s*"[a-z_]+",\\s*"([a-z0-9_]+)"\\)'
+)
+const ARM := '^(\\t+)"([a-z0-9_]+)"(?:,\\s*"[a-z0-9_]+")*:'
 const FUNC := "^(?:static )?func ([a-z0-9_]+)"
 const EFFECTS := "res://scripts/combat/effects.gd"
 
 var ok: Callable
+
 
 func run(check_ok: Callable) -> void:
 	ok = check_ok
@@ -36,9 +39,11 @@ func run(check_ok: Callable) -> void:
 				_hole("mob voice", "v_" + String(k), {"v_" + String(k): true}, holes)
 		_ratchet(String(sys), holes, row.get("holes", []))
 
+
 ## Mob._begin_attack plays "v_" + kind as a mob winds up; a boss runs its own attacks and some kinds never attack.
 static func _winds_up(kind: String) -> bool:
 	return not ["none", "boss"].has(String(Data.MOBS[kind].get("attack", "none")))
+
 
 ## The sounds of the system's own sets in content/sfx (a set not on file yet owns nothing).
 func _own(sets: Array) -> Dictionary:
@@ -48,6 +53,7 @@ func _own(sets: Array) -> Dictionary:
 		if FileAccess.file_exists(path):
 			own.merge(JSON.parse_string(FileAccess.get_file_as_string(path)).get("sounds", {}))
 	return own
+
 
 ## [label, cue] for every literal cue in a file ("path" or "path#func" for one function's cues).
 ## The label is the file (without .gd), the function and, inside a match, the arm: "mob _strike/spit".
@@ -78,15 +84,17 @@ static func cues_in(entry: String) -> Array:
 			continue
 		for hit in re.search_all(line):
 			var sname := hit.get_string(1) + hit.get_string(2) + hit.get_string(3)
-			if sname != "" and not sname.ends_with("_"):     # a name built from a prefix is not a literal
+			if sname != "" and not sname.ends_with("_"):  # a name built from a prefix is not a literal
 				var where := "%s/%s" % [fn, arm] if arm != "" else fn
 				out.append(["%s %s" % [parts[0].get_file().get_basename(), where], sname])
 	return out
+
 
 func _hole(label: String, sname: String, own: Dictionary, holes: Array) -> void:
 	var hole := "%s:%s" % [label, sname]
 	if (not own.has(sname) or not Sfx.ensure(sname)) and not holes.has(hole):
 		holes.append(hole)
+
 
 ## An active glove built from effect blocks plays, per block, the stock sound Effects plays for that type
 ## (an effect's own "sfx" replaces the fallback).
@@ -103,6 +111,7 @@ func _glove_holes(own: Dictionary, holes: Array) -> void:
 			var t := String(e.get("type", ""))
 			for sname in by_type.get(t, []):
 				_hole("glove %s %s" % [gid, t], String(e.get("sfx", sname)), own, holes)
+
 
 ## Prints every hole; fails on a hole the table does not list, and on a listed one that is gone.
 func _ratchet(sys: String, holes: Array, known: Array) -> void:

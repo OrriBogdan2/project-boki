@@ -89,7 +89,9 @@ class GH:
 
     def login(self):
         if self._login is None:
-            self._login = os.environ.get("REGATE_GH_USER") or (self.api("user")["login"] if self.live else SLUG.split("/")[0])
+            self._login = os.environ.get("REGATE_GH_USER") or (
+                self.api("user")["login"] if self.live else SLUG.split("/")[0]
+            )
         return self._login
 
     def open_prs(self):
@@ -137,14 +139,31 @@ def workers():
 
 
 def ssh_cmd(ip, remote, timeout=60):
-    return run(["ssh", "-i", SSH_KEY, "-o", "BatchMode=yes", "-o", "ConnectTimeout=10",
-                "-o", "StrictHostKeyChecking=accept-new", f"boki@{ip}", remote], timeout=timeout)
+    return run(
+        [
+            "ssh",
+            "-i",
+            SSH_KEY,
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            "ConnectTimeout=10",
+            "-o",
+            "StrictHostKeyChecking=accept-new",
+            f"boki@{ip}",
+            remote,
+        ],
+        timeout=timeout,
+    )
 
 
 _STATUS = None
 
 
-CJB = shutil.which("claude-job") or ("/home/boki/bin/claude-job" if os.access("/home/boki/bin/claude-job", os.X_OK) else None)  # 11-14: cron PATH lacks ~/bin
+CJB = shutil.which("claude-job") or (
+    "/home/boki/bin/claude-job" if os.access("/home/boki/bin/claude-job", os.X_OK) else None
+)  # 11-14: cron PATH lacks ~/bin
+
 
 def claude_job_status():
     global _STATUS
@@ -161,11 +180,23 @@ def job_running(label):
     # 11-14: exact match on the job's label file; prompt-text grep made any job that MENTIONED the label an owner
     # (fix-main-reds-1114 named merge-driver-1114 -> #29/#57/#59 skipped forever after the real owner finished)
     dirs = sorted(CJ.glob("2026*-*"))[-400:]
-    ids = [label] if JOB_ID_RE.match(label) else [
-        d.name for d in dirs if (d / "label").exists() and (d / "label").read_text(errors="replace").split()[-1:] == [label]]
+    ids = (
+        [label]
+        if JOB_ID_RE.match(label)
+        else [
+            d.name
+            for d in dirs
+            if (d / "label").exists() and (d / "label").read_text(errors="replace").split()[-1:] == [label]
+        ]
+    )
     if not ids and not JOB_ID_RE.match(label):
-        ids = [d.name for d in dirs if (d / "prompt").exists() and not (d / "label").exists()
-               and label in (d / "prompt").read_text(errors="replace")[-12000:]]
+        ids = [
+            d.name
+            for d in dirs
+            if (d / "prompt").exists()
+            and not (d / "label").exists()
+            and label in (d / "prompt").read_text(errors="replace")[-12000:]
+        ]
     if not ids:
         return None
     for i in ids:
@@ -208,4 +239,3 @@ def inflight_list(st):
     # after a reload before 11-14b)
     st["cooldown"] = {str(k): v for k, v in (st.get("cooldown") or {}).items() if v > now()}
     return out
-

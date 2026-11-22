@@ -5,13 +5,14 @@ extends RefCounted
 ## stat icons the home glint shows (StatGlint.ICON). Same place and size for every game; one click closes it.
 ## `snap` the Boki before the game pays out, then `open` after it: the card shows the difference.
 
-const SIZE := Vector2(460, 320)        # px: fixed, so every game's card looks the same (fits 1280x720)
-const TOP_PX := 90.0                   # px from the top of the screen
-const MAX_BOKI := 3                    # rows of Boki that fit (a Relay Cup team)
-const MAX_PRIZE := 3                   # prize lines that fit (gems, the prize, the cup step)
-const ICON_PX := 18.0                  # px: a stat icon
-const NAME_PX := 120.0                 # px: the Boki name column
-const JOY_COL := Color("ff8fb0")       # the joy figure
+const SIZE := Vector2(460, 320)  # px: fixed, so every game's card looks the same (fits 1280x720)
+const TOP_PX := 90.0  # px from the top of the screen
+const MAX_BOKI := 3  # rows of Boki that fit (a Relay Cup team)
+const MAX_PRIZE := 3  # prize lines that fit (gems, the prize, the cup step)
+const ICON_PX := 18.0  # px: a stat icon
+const NAME_PX := 120.0  # px: the Boki name column
+const JOY_COL := Color("ff8fb0")  # the joy figure
+
 
 ## What each Boki is now: [{"rec", "joy", "stats"}], to compare against after the payout.
 static func snap(recs: Array) -> Array:
@@ -20,6 +21,7 @@ static func snap(recs: Array) -> Array:
 		Care.ensure(rec)
 		out.append({"rec": rec, "joy": float(rec["needs"]["joy"]), "stats": rec.get("stats", {}).duplicate()})
 	return out
+
 
 ## Shows the card on the home screen. `d`: {game, place, prize: [[text, colour]], before: snap()}.
 static func open(home, d: Dictionary) -> PanelContainer:
@@ -48,6 +50,7 @@ static func open(home, d: Dictionary) -> PanelContainer:
 	home.root_ui.add_child(card)
 	return card
 
+
 static func _boki_row(b: Dictionary) -> HBoxContainer:
 	var rec: Dictionary = b["rec"]
 	var row := UI.hbox(8)
@@ -64,6 +67,7 @@ static func _boki_row(b: Dictionary) -> HBoxContainer:
 			row.add_child(Icons.Glyph.new(StatGlint.ICON[s], col, ICON_PX))
 			row.add_child(UI.label("+%d" % rise, 14, col))
 	return row
+
 
 static func _on_input(event: InputEvent, card: Control) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:

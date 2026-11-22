@@ -6,26 +6,29 @@ extends RefCounted
 ## you hold the line; and a catch sting in the size of the catch. Everything else plays on the SFX bus.
 ## glint_fishing.gd calls tick() once a frame; `heard` counts each cue so --garden-sfx-check can assert them.
 
-const DB := -4.0                      # dB: the cues, a little above the garden minigames' -6
-const BITE_DB := 0.0                  # dB: the bite is the one cue that must be heard over the garden
-const BED_DB := -10.0                 # dB: the water bed, dull and quiet
-const REEL_DB := -8.0                 # dB: the ratchet
-const PLOP_DELAY := 0.3               # s from the whip to the bobber landing
+const DB := -4.0  # dB: the cues, a little above the garden minigames' -6
+const BITE_DB := 0.0  # dB: the bite is the one cue that must be heard over the garden
+const BED_DB := -10.0  # dB: the water bed, dull and quiet
+const REEL_DB := -8.0  # dB: the ratchet
+const PLOP_DELAY := 0.3  # s from the whip to the bobber landing
 const BED_BUS := "Ambience"
 const STATE := GlintFishing.Run.S
-const REEL_PITCH := Vector2(0.9, 1.2) # the ratchet's pitch at slack and at full tension
+const REEL_PITCH := Vector2(0.9, 1.2)  # the ratchet's pitch at slack and at full tension
 
-static var heard := {}                # cue name -> times played, for the checks
+static var heard := {}  # cue name -> times played, for the checks
+
 
 static func cue(sname: String, pos, vol_db := DB) -> void:
 	heard[sname] = int(heard.get(sname, 0)) + 1
 	Sfx.play(sname, pos, vol_db, 0.04)
+
 
 ## The catch sting's size: a rare glint is large, an item medium, a snack small.
 static func size_of(catch: Dictionary, rare: bool) -> String:
 	if rare:
 		return "large"
 	return "medium" if String(catch["kind"]) == "item" else "small"
+
 
 ## One call a frame after the run stepped: `was` is the state before the step, `was_ears` whether the ears were up,
 ## `at` where the line meets the water.
@@ -41,6 +44,7 @@ static func tick(home, run: GlintFishing.Run, was: STATE, was_ears: bool, at: Ve
 	_bed(run.state == STATE.WAIT, at)
 	_reel(run.state == STATE.REEL and run.held, run.tension, at)
 
+
 static func _bed(on: bool, at: Vector3) -> void:
 	if on:
 		if not Sfx.loop_on("glint_water"):
@@ -49,6 +53,7 @@ static func _bed(on: bool, at: Vector3) -> void:
 	else:
 		Sfx.loop_stop("glint_water")
 
+
 static func _reel(on: bool, tension: float, at: Vector3) -> void:
 	if on:
 		if not Sfx.loop_on("glint_reel"):
@@ -56,6 +61,7 @@ static func _reel(on: bool, tension: float, at: Vector3) -> void:
 		Sfx.loop_hold("glint_reel", "glint_reel", at, REEL_DB, lerpf(REEL_PITCH.x, REEL_PITCH.y, tension))
 	else:
 		Sfx.loop_stop("glint_reel")
+
 
 ## Fishing ended (or was left): both loops stop.
 static func stop() -> void:

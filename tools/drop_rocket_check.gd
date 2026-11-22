@@ -87,14 +87,14 @@ func _free_fall() -> void:
 	m.skydrop.detach(m.player)
 	for i in int(1.0 / Match.DT):
 		m.step(Match.DT)
-	var P: Hunter = m.player
-	P.render(Match.DT, 1.0)
-	ok(P.model.position == Vector3.ZERO, "jumping out lets go of the rocket (the body back on the hunter)")
-	ok(P.dropping and P.diving and P.rocket == null, "jumping out is a free fall")
-	var fall := -P.vel.y
+	var p: Hunter = m.player
+	p.render(Match.DT, 1.0)
+	ok(p.model.position == Vector3.ZERO, "jumping out lets go of the rocket (the body back on the hunter)")
+	ok(p.dropping and p.diving and p.rocket == null, "jumping out is a free fall")
+	var fall := -p.vel.y
 	var what := "the free fall (%.1f m/s) is slower than the rocket (%.1f m/s), still fast" % [fall, -r.vel.y]
 	ok(fall < -r.vel.y and fall > FAST_FALL, what)
-	ok(P.pos.y > r.pos.y + 5.0, "a second later you're above the rocket (%.1f m vs %.1f m)" % [P.pos.y, r.pos.y])
+	ok(p.pos.y > r.pos.y + 5.0, "a second later you're above the rocket (%.1f m vs %.1f m)" % [p.pos.y, r.pos.y])
 
 func _seats(r: DropRocket) -> void:
 	var feet: Array = []
@@ -115,18 +115,18 @@ func _jump_out_dist(glide: bool) -> float:
 	m.ship_jump(m.player)
 	for i in int(1.0 / Match.DT):
 		m.step(Match.DT)
-	var P: Hunter = m.player
-	var sd: Vector3 = m.ship_of(P)["dir"]
-	m.skydrop.detach(P)
-	var from := P.pos
+	var p: Hunter = m.player
+	var sd: Vector3 = m.ship_of(p)["dir"]
+	m.skydrop.detach(p)
+	var from := p.pos
 	if glide:
-		P.do_jump()
+		p.do_jump()
 	var t := 0.0
-	while t < 60.0 and P.dropping and P.pos.y > 0.0:
-		P.inp["move"] = Vector2(sd.x, sd.z).normalized()
+	while t < 60.0 and p.dropping and p.pos.y > 0.0:
+		p.inp["move"] = Vector2(sd.x, sd.z).normalized()
 		m.step(Match.DT)
 		t += Match.DT
-	return P.flat_dist(from)
+	return p.flat_dist(from)
 
 func _glide_further() -> void:
 	var fall := await _jump_out_dist(false)
@@ -135,15 +135,15 @@ func _glide_further() -> void:
 
 ## Where everyone stood after landing: on open ground, at ground height, apart.
 func _clean_landing(tag: String) -> void:
-	var W: World = m.world
+	var w: World = m.world
 	var sq := _squad()
 	for h in sq:
 		var hh: Hunter = h
 		if hh.out or hh.pos.y < -1.0:
 			ok(false, "%s: %s fell out" % [tag, hh.pname])
 			continue
-		var g: float = W.ground_at(hh.pos.x, hh.pos.z)
-		var open := not W.is_void(hh.pos.x, hh.pos.z) and not W.is_block(hh.pos.x, hh.pos.z)
+		var g: float = w.ground_at(hh.pos.x, hh.pos.z)
+		var open := not w.is_void(hh.pos.x, hh.pos.z) and not w.is_block(hh.pos.x, hh.pos.z)
 		var clean := open and absf(hh.pos.y - g) < 0.05
 		ok(clean, "%s: %s landed on open ground (y %.2f, ground %.2f)" % [tag, hh.pname, hh.pos.y, g])
 		for o in sq:
@@ -175,23 +175,23 @@ func _bot_leader() -> void:
 
 func _hud_lines() -> void:
 	await _start(6.0)
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	var jump := Settings.key_cap("jump")
-	ok(not DropHud.aboard(P), "aboard the ship, before launch: the full HUD")
-	m.ship_jump(P)
+	ok(not DropHud.aboard(p), "aboard the ship, before launch: the full HUD")
+	m.ship_jump(p)
 	var want := ["Steer with %s" % DropHud.move_keys(), "Jump out: %s" % jump]
-	ok(DropHud.aboard(P), "aboard the rocket: the HUD shows only the map (no health or ability bars)")
-	ok(DropHud.lines(m, P) == want, "the leader reads %s" % str(DropHud.lines(m, P)))
+	ok(DropHud.aboard(p), "aboard the rocket: the HUD shows only the map (no health or ability bars)")
+	ok(DropHud.lines(m, p) == want, "the leader reads %s" % str(DropHud.lines(m, p)))
 	var bot: Hunter = _squad().filter(func(h): return h.ctrl == "bot")[0]
-	m.skydrop.pass_lead(P, bot)
-	ok(DropHud.lines(m, P) == ["Jump out: %s" % jump], "a rider reads %s" % str(DropHud.lines(m, P)))
-	m.skydrop.detach(P)
+	m.skydrop.pass_lead(p, bot)
+	ok(DropHud.lines(m, p) == ["Jump out: %s" % jump], "a rider reads %s" % str(DropHud.lines(m, p)))
+	m.skydrop.detach(p)
 	m.step(Match.DT)
-	ok(not DropHud.aboard(P), "jumped out: the bars come back")
-	ok(DropHud.lines(m, P) == ["Glider: %s again" % jump], "free-falling reads %s" % str(DropHud.lines(m, P)))
-	P.do_jump()
+	ok(not DropHud.aboard(p), "jumped out: the bars come back")
+	ok(DropHud.lines(m, p) == ["Glider: %s again" % jump], "free-falling reads %s" % str(DropHud.lines(m, p)))
+	p.do_jump()
 	m.step(Match.DT)
-	ok(not P.diving and DropHud.lines(m, P).is_empty(), "the glider open: no drop line (%s)" % str(DropHud.lines(m, P)))
+	ok(not p.diving and DropHud.lines(m, p).is_empty(), "the glider open: no drop line (%s)" % str(DropHud.lines(m, p)))
 ## The squad's own rocket: launch, a hard turn, jumping out, the fall, the glider.
 func _own_sounds() -> void:
 	await _start(6.0)
@@ -211,25 +211,25 @@ func _own_sounds() -> void:
 	var swell := turned.x > calm.x + 2.0 and turned.y > calm.y + 0.03
 	ok(swell, "the thrust follows the steering: a hard turn %.1f dB, pitch %.2f (flying on %.1f dB, %.2f)"
 			% [turned.x, turned.y, calm.x, calm.y])
-	var P: Hunter = m.player
-	var fall_key := "drop_fall%d" % P.get_instance_id()
+	var p: Hunter = m.player
+	var fall_key := "drop_fall%d" % p.get_instance_id()
 	Sfx.last_played.clear()
-	m.skydrop.detach(P)
+	m.skydrop.detach(p)
 	_steps(Match.DT, Vector2.ZERO)
 	var cue := Sfx.last_played.has("rocket_jump") and not Sfx.last_played.has("glider_snap")
 	ok(cue, "jumping out plays the jump cue, no glider snap (the canopy is folded)")
-	var wind := Sfx.loop_on(fall_key) and not Sfx.loop_on("glider_wind%d" % P.get_instance_id())
+	var wind := Sfx.loop_on(fall_key) and not Sfx.loop_on("glider_wind%d" % p.get_instance_id())
 	ok(wind, "...and the free-fall wind, not the glider's")
-	var fast := Vector2(P.vel.length(), _loop_now(fall_key).x)
+	var fast := Vector2(p.vel.length(), _loop_now(fall_key).x)
 	_steps(1.2, Vector2.ZERO)
-	var slow := Vector2(P.vel.length(), _loop_now(fall_key).x)
+	var slow := Vector2(p.vel.length(), _loop_now(fall_key).x)
 	var follows := absf(fast.x - slow.x) > 2.0 and (fast.x - slow.x) * (fast.y - slow.y) > 0.0
 	ok(follows, "the wind follows your speed (%.0f m/s %.1f dB, %.0f m/s %.1f dB)" % [fast.x, fast.y, slow.x, slow.y])
 	Sfx.last_played.clear()
-	P.do_jump()
+	p.do_jump()
 	_steps(Match.DT, Vector2.ZERO)
 	var handed := not Sfx.loop_on(fall_key) and Sfx.last_played.has("glider_snap")
-	handed = handed and Sfx.loop_on("glider_wind%d" % P.get_instance_id())
+	handed = handed and Sfx.loop_on("glider_wind%d" % p.get_instance_id())
 	ok(handed, "the glider opens: the fall wind hands into its snap and wind")
 
 ## Another squad's rocket HEAR_M away: its thrust and its thud carry; then a solo's one-seat rocket.
@@ -284,8 +284,8 @@ func _steps(secs: float, steer: Vector2) -> void:
 func _loop_now(key: String) -> Vector2:
 	if not Sfx.loop_on(key):
 		return Vector2(-80.0, 0.0)
-	var L: Dictionary = Sfx.loops[key]
-	return Vector2(float(L["vol"]), (L["p"] as AudioStreamPlayer).pitch_scale)
+	var l: Dictionary = Sfx.loops[key]
+	return Vector2(float(l["vol"]), (l["p"] as AudioStreamPlayer).pitch_scale)
 
 func run(mn: Node) -> void:
 	main = mn
