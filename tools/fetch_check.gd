@@ -152,7 +152,7 @@ func _on_base() -> void:
 	Save.d = d
 	HomeLayout.ensure(Save.d)
 	var was: bool = FarmUnlocks.base_mode()
-	rules["base_mode"] = false      # the old farm: no mat
+	rules["base_mode"] = false  # the old farm: no mat
 	var off = await main._hb_home()
 	ok(off.hfetch == null, "off: no toss mat on the farm")
 	off.queue_free()

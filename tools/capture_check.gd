@@ -361,28 +361,28 @@ func _net() -> void:
 # ------------------------------------------------------------------ 8b. the carry-out slot, the 4-wisp cap, the mate
 func _slots() -> void:
 	_fresh()
-	var P := m.player
+	var pl := m.player
 	var cap := int(Capture.rules()["wisp_cap"])
-	var mate: Hunter = m.hunters.filter(func(h): return h != P)[0]
-	mate.team = P.team
+	var mate: Hunter = m.hunters.filter(func(h): return h != pl)[0]
+	mate.team = pl.team
 	mate.ctrl = "idle"
 	var rec := Save.new_kin("puddlet", "Claimed")
-	ok(Capture.room(P, rec) and Capture.mate_with_room(m, P, rec) == mate, "a free slot fits; a mate has room")
-	P.caught.append(rec)
+	ok(Capture.room(pl, rec) and Capture.mate_with_room(m, pl, rec) == mate, "a free slot fits; a mate has room")
+	pl.caught.append(rec)
 	var wild_k := wild()
-	var why := Capture.block_reason(P, wild_k)
+	var why := Capture.block_reason(pl, wild_k)
 	ok(why.contains(mate.pname), "full slot: the toast names the teammate with room (\"%s\")" % why)
 	var taken := Save.new_kin("zapple", "Taken")
 	taken["lost_from"] = "Someone"
-	ok(Capture.room(P, taken), "...a stolen Boki has its own slot")
-	P.caught.append(taken)
-	ok(not Capture.room(P, taken), "...one stolen slot: a second stolen Boki has no room")
-	ok(Capture.wisps(P) <= cap, "wisps %d never pass the cap %d" % [Capture.wisps(P), cap])
+	ok(Capture.room(pl, taken), "...a stolen Boki has its own slot")
+	pl.caught.append(taken)
+	ok(not Capture.room(pl, taken), "...one stolen slot: a second stolen Boki has no room")
+	ok(Capture.wisps(pl) <= cap, "wisps %d never pass the cap %d" % [Capture.wisps(pl), cap])
 	mate.caught.append(Save.new_kin("puddlet", "Mate"))
-	ok(Capture.mate_with_room(m, P, rec) == null, "no team pool: a full teammate is no help")
+	ok(Capture.mate_with_room(m, pl, rec) == null, "no team pool: a full teammate is no help")
 	# online: a client knows a teammate's slots from the snapshot row
 	mate.caught.clear()
-	var row := HunterNet.extra(P)
+	var row := HunterNet.extra(pl)
 	m.is_host = false
 	mate.remote = true
 	HunterNet.apply(mate, row)
@@ -392,28 +392,29 @@ func _slots() -> void:
 # ------------------------------------------------------------------ 8c. the first-time carry hints
 func _hints() -> void:
 	_fresh()
-	var P := m.player
+	var pl := m.player
 	Settings.v["tips"] = true
 	var seen: Dictionary = Save.d["tutorial"]
 	for key in [CarryHints.SWAP_KEY, CarryHints.CLAIM_KEY, CarryHints.FULL_KEY]:
 		seen.erase(key)
-	if P.kin2 == null:
-		m.give_kin(P, Save.new_kin("puddlet", "Second"))
-	P.kin.throw_cd = 0.0
-	ok(P.kin2 != null and CarryHints.swap(m).is_empty(), "swap hint: not while the lead can be summoned")
-	P.kin.throw_cd = 1.0
+	if pl.kin2 == null:
+		m.give_kin(pl, Save.new_kin("puddlet", "Second"))
+	pl.kin.throw_cd = 0.0
+	ok(pl.kin2 != null and CarryHints.swap(m).is_empty(), "swap hint: not while the lead can be summoned")
+	pl.kin.throw_cd = 1.0
 	var due := CarryHints.swap(m)
 	ok(due.size() == 2 and due[0] == CarryHints.SWAP_KEY, "swap hint: due once the lead's summon is on cooldown")
 	ok(String(due[1]).begins_with(Settings.key_cap("swap_kin")), "...and it names the swap key (\"%s\")" % str(due))
-	P.kin.throw_cd = 0.0
+	pl.kin.throw_cd = 0.0
 	ok(not seen.has(CarryHints.CLAIM_KEY), "claim hint: not before a claim")
-	m._catch(P, wild())
+	m._catch(pl, wild())
 	ok(seen.has(CarryHints.CLAIM_KEY), "claim hint: the first claim says it rides home and can be stolen")
-	var mate: Hunter = m.hunters.filter(func(h): return h != P)[0]
-	mate.team = P.team
-	ok(Capture.mate_with_room(m, P) == mate and not Capture.room(P), "setup: the slot is full and a teammate has room")
+	var mate: Hunter = m.hunters.filter(func(h): return h != pl)[0]
+	mate.team = pl.team
+	var mate_ok := Capture.mate_with_room(m, pl) == mate
+	ok(mate_ok and not Capture.room(pl), "setup: the slot is full and a teammate has room")
 	ok(not seen.has(CarryHints.FULL_KEY), "full hint: not before a scan is blocked")
-	Capture.full_note(m, P)
+	Capture.full_note(m, pl)
 	ok(seen.has(CarryHints.FULL_KEY), "full hint: the first blocked scan shows the teammate line as a hint")
 	Settings.v["tips"] = false
 	ok(not CarryHints.wanted(m), "hints off in settings: no carry hints")
