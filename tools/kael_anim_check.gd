@@ -9,6 +9,7 @@ const DT := 1.0 / 60.0
 var A: AKCheck
 var beats := {}            # clip -> {len, cock, peak, settle, v (speed per frame)}
 var leads := {}            # clip -> its "lead" (s skipped at the start; under zero: the first frame held)
+var maps := {}             # clip -> its "time" map ([[kit s, clip s]...]; replaces rate/lead/scale)
 var speeds := {}           # clip -> [its "rate", its "scale"] (clip s per kit s, before and after the lead)
 var shown := {}            # kit anim_ids seen in a row
 var lane := 0              # each kit row on a fresh strip of ground (a Searing Wave's fire stays)
@@ -60,6 +61,8 @@ func clips() -> void:
 			v.append(pts[i].distance_to(pts[i - 1]) / DT)
 		beats[km] = _beats(v, length, pts)
 		leads[km] = float(mv.get("lead", 0.0))
+		if mv.has("time"):
+			maps[km] = mv["time"]
 		speeds[km] = [float(mv.get("rate", 1.0)), float(mv.get("scale", 1.0))]
 		if km == "jug_lunge_wind":
 			wind_still = float(mv["hold_from"])
@@ -187,6 +190,13 @@ func _ev(what: String, r: Array) -> void:
 
 ## A clip time on the kit's move clock (WardenClips._move_clip: clip t = (kit t x rate + lead) x scale).
 func _kit_t(km: String, clip_t: float) -> float:
+	if maps.has(km):      # a "time" map: the kit second whose clip second it is (the map's inverse)
+		var pts: Array = maps[km]
+		for i in range(1, pts.size()):
+			if clip_t <= float(pts[i][1]):
+				return lerpf(float(pts[i - 1][0]), float(pts[i][0]),
+						inverse_lerp(float(pts[i - 1][1]), float(pts[i][1]), clip_t))
+		return float(pts[-1][0])
 	var rs: Array = speeds.get(km, [1.0, 1.0])
 	return (clip_t / float(rs[1]) - float(leads.get(km, 0.0))) / float(rs[0])
 
@@ -223,8 +233,10 @@ func _run(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> vo
 	var per_s := rate * run_steps / length
 	print("RUN at %.2f m/s: clip rate %.2f, %.2f footfalls/s (%.2f Hz stride)" % [spd, rate, per_s, per_s * 0.5])
 	var foot: Array = cl.d["loco"].get("foot_mps", [1.0, 1.0])
+	# (foot_mps is at the model's own scale: a match draws Kael bigger, so the gait layer divides that out)
+	var body_k := float(cl.root.get_meta("look_scale", cl.root.scale.y)) / absf(cl.root.scale.y)
 	A.ok("kael anim: running, the clip rate is the gait layer's (speed over foot speed) and no slower than keyed",
-			absf(rate - spd / float(foot[1])) <= 0.05 and per_s >= 3.0,
+			absf(rate - spd * body_k / float(foot[1])) <= 0.05 and per_s >= 3.0,
 			"rate %.2f, %.2f/s at %.2f m/s" % [rate, per_s, spd])
 	P.inp["move"] = Vector2.ZERO
 
