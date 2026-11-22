@@ -42,6 +42,7 @@ func run(main_node: Node) -> void:
 		main.get_tree().quit(0)
 		return
 	var tag := "%dp" % int(main.get_viewport().get_visible_rect().size.y)
+	await _frames(22)
 	await _shot("inv_pack_" + tag, "Backpack window with a full loadout")
 	var found: Array = m.hud.pack_panel.find_children("*", "LoadoutPanel", true, false)
 	if not found.is_empty():
@@ -55,8 +56,12 @@ func run(main_node: Node) -> void:
 	bx["gems"] = 14
 	m.boxes.append(bx)
 	m.hud.open_loot(bx)
-	await _frames(10)
+	await _frames(30)
 	await _shot("inv_loot_" + tag, "The deathbox window: the box on the left, what you wear and carry on the right")
+	m.hud.close_loot()
+	m.spawn_gear("vest", 3, p.pos + Vector3(1.5, 0, 0))
+	await _frames(30)
+	await _shot("inv_ground_" + tag, "Gear on the ground: name in its rarity colour, then its slot")
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for c in captions:
 		f.store_line(c)

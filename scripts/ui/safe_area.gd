@@ -6,14 +6,40 @@ extends RefCounted
 ## records, each draw is tagged with a group (`begin`) and the rects drawn under that tag are merged (`note`).
 
 const MARGIN := 12.0  # logical px kept clear on every side
+const MAX_ASPECT := 16.0 / 9.0  # widest the HUD spreads: wider screens keep it in a centred frame this shape
 
 static var recording := false
 static var seen := {}  # group -> Array of the Rect2s that group drew
 static var group := ""
+static var origin := Vector2.ZERO  # the canvas being drawn: where it sits on screen (HudPanels), for screen-px rects
+
+
+## The part of a screen of size `sz` the HUD and menus use: all of it up to MAX_ASPECT, a centred
+## MAX_ASPECT frame on wider screens (21:9, 32:9), so no group sits out at the far edges.
+static func frame(sz: Vector2) -> Rect2:
+	var w := minf(sz.x, sz.y * MAX_ASPECT)
+	return Rect2(Vector2((sz.x - w) * 0.5, 0.0), Vector2(w, sz.y))
 
 
 static func inner(sz: Vector2) -> Rect2:
-	return Rect2(Vector2(MARGIN, MARGIN), sz - Vector2(MARGIN, MARGIN) * 2.0)
+	return frame(sz).grow(-MARGIN)
+
+
+## A Control under `parent` (one that fills the screen) kept on `parent`'s frame as the window resizes: a
+## screen's corner groups go under it; things placed on the 3D world stay on `parent`.
+static func framed(parent: Control) -> Control:
+	var c := Control.new()
+	c.name = "Frame"
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.set_anchors_preset(Control.PRESET_FULL_RECT)
+	parent.add_child(c)
+	var fit := func() -> void:
+		var x := frame(parent.size).position.x
+		c.offset_left = x
+		c.offset_right = -x
+	parent.resized.connect(fit)
+	fit.call()
+	return c
 
 
 ## `r` moved the least that puts it inside the margin (anchoring a panel to the corner it hangs from).
@@ -39,11 +65,13 @@ static func note_as(group_name: String, r: Rect2) -> void:
 	if recording and group_name != "":
 		if not seen.has(group_name):
 			seen[group_name] = []
-		seen[group_name].append(HudScale.xf * r)
+		var on_screen := HudScale.xf * r
+		on_screen.position += origin
+		seen[group_name].append(on_screen)
 
 
 ## The groups (name -> Array of Rect2) found under `root`: its visible controls, looking inside any that fill the
-## screen (a full-rect backdrop or container) for the real ones.
+## screen or its frame (a full-rect backdrop or container, `framed`) for the real ones.
 static func groups_of(root: Node, sz: Vector2) -> Dictionary:
 	var out := {}
 	_collect(root, sz, out)
@@ -56,7 +84,7 @@ static func _collect(node: Node, sz: Vector2, out: Dictionary) -> void:
 		if c == null or not c.visible or c.size.x <= 0.0 or c.size.y <= 0.0:
 			continue
 		var r := c.get_global_rect()
-		if c is CenterContainer or (r.size.x >= sz.x * 0.9 and r.size.y >= sz.y * 0.9):
+		if c is CenterContainer or (r.size.x >= frame(sz).size.x * 0.9 and r.size.y >= sz.y * 0.9):
 			_collect(c, sz, out)
 		else:
 			out["%s#%d" % [_label(c), out.size()]] = [r]

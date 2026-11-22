@@ -33,6 +33,7 @@ func run(m: Node, c) -> void:
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)  # you are away: nobody comes to sit by you
 	_roam()
+	_vent()
 	_bridge()
 	_leap()
 	farm_rules["base_mode"] = false
@@ -126,7 +127,8 @@ func _roam() -> void:
 			still_up[uid] = float(still_up.get(uid, 0.0)) + DT if up and speed < BokiRig.WALK_SPEED else 0.0
 			if float(still_up[uid]) >= SETTLED:
 				var lift := float(k["fly"]["h"])
-				hover = Vector2(minf(hover.x, lift), maxf(hover.y, lift))
+				if not ZoneVents.over(k["pos"]):      # over a vent it holds vent_h (_vent)
+					hover = Vector2(minf(hover.x, lift), maxf(hover.y, lift))
 				if not petted:
 					petted = true
 					flares += _taken_lands(k, fliers)
@@ -150,6 +152,33 @@ func _roam() -> void:
 	)
 	if not petted:
 		check.ok(false, "fliers: one hovered long enough to be petted")
+
+
+## Over an updraft vent a roaming flier rises to vent_h and holds it; moved off it, it sinks back into its hover band.
+func _vent() -> void:
+	var k := _kin(FLIERS[0])
+	var n: Node3D = k["node"]
+	var R: Dictionary = BokiFly.rules()
+	var vents := ZoneVents.spots("ridge")
+	var band: Array = R["height"]
+	var t := 0.0
+	while not BaseLife.roams(k) and t < SIM_SECS:
+		_step([k])
+		t += DT
+	var free := BaseLife.roams(k) and not vents.is_empty()
+	check.ok(free, "fliers: one is free to roam over the ridge's %d vents" % vents.size())
+	k["vel"] = Vector3.ZERO
+	for i in int(R["vent_h"] / (float(R["vent_climb"]) * DT)) + 2:
+		home.fly.step(k, vents[0], n, DT)
+	var held := float(k["fly"]["h"])
+	var rose := "fliers: over a vent it rises to %.1f m (%.2f)" % [R["vent_h"], held]
+	check.ok(is_equal_approx(held, float(R["vent_h"])), rose)
+	for i in int(R["vent_h"] / (float(R["sink"]) * DT)) + 2:
+		home.fly.step(k, vents[0] + Vector3(6.0, 0, 0), n, DT)
+	var down := float(k["fly"]["h"])
+	var sank := "fliers: off it it sinks back to %.2f m, inside %s" % [down, band]
+	check.ok(down >= float(band[0]) and down <= float(band[1]), sank)
+	home.fly.land(k)
 
 
 ## Petted (the farm's hold) while it hovers, a flier is no longer roaming: it comes down with a flare and stands.
