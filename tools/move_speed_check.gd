@@ -88,9 +88,12 @@ func _gait(arch: String) -> void:
 		if h != p_v:
 			h.teleport(h.pos + Vector3(0, 0, 80))
 	var start := flat_lane(mt.world, p_v.pos, GAIT_LANE)
-	ok(absf(p_v.base_speed - gait_run) <= 0.001, "gait %-11s base_speed = %.3f m/s  data %.3f" % [arch, p_v.base_speed, gait_run])
+	ok(absf(p_v.base_speed - gait_run) <= 0.001,
+			"gait %-11s base_speed = %.3f m/s  data %.3f" % [arch, p_v.base_speed, gait_run])
 	var rows := [
-		["run", 1.0, false, gait_run], ["walk", WALK_TILT, false, gait_run * WALK_TILT], ["crouch", 1.0, true, gait_run * sneak]
+		["run", 1.0, false, gait_run],
+		["walk", WALK_TILT, false, gait_run * WALK_TILT],
+		["crouch", 1.0, true, gait_run * sneak]
 	]
 	for row in rows:
 		p_v.teleport(start)

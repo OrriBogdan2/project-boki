@@ -99,7 +99,7 @@ func _glide_up(m: Match, p_v: Hunter, home: Vector3) -> void:
 	p_v.grounded = false
 	m.step(DT)
 	m.step(DT)
-	p_v.coyote = 0.0           # the ground's grace would make the press a jump (and Space held from a jump never glides)
+	p_v.coyote = 0.0  # the ground's grace would make the press a jump (and Space held from a jump never glides)
 	p_v.inp["glide_press_only"] = true
 	drive(m, p_v, 0.3, func(i):
 		p_v.inp["glide"] = true
@@ -242,7 +242,8 @@ func _grimble(placed: bool) -> void:
 		t += DT
 	drive(m, p_v, 0.1, func(_i): pass)
 	if placed:
-		ok("Grimble (DECISIONS:82): a placed wall stops the Deep Reach", k_v.grapples == grapples and k_v.pull.is_empty(),
+		ok("Grimble (DECISIONS:82): a placed wall stops the Deep Reach",
+				k_v.grapples == grapples and k_v.pull.is_empty(),
 			"grapples +%d" % (k_v.grapples - grapples))
 	else:
 		ok("Grimble (DECISIONS:82): the Deep Reach passes a cliff face and hooks the foe behind it",
