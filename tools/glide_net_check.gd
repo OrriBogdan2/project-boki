@@ -35,7 +35,6 @@ var recording := false       # host: a drop is running
 func _relay() -> RelayServer:
 	var relay := RS.LagRelay.new()
 	relay.one_way = LINE_MS
-	relay.rng.seed = 80
 	return relay
 
 func _init() -> void:
