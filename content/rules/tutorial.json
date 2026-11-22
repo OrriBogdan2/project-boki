@@ -119,7 +119,7 @@
   "summon_warn": "Almost time. %s is getting tired.",
   "summon_back": "Back to a light. %s rests now.",
   "summon_knocked": "%s got beaten and flew back to you. It needs a longer rest.",
-  "steal": "A Hunter's Boki scatters when they go down: hold %F beside it to make it yours.",
+  "steal": "A downed Hunter's Boki scatters: hold %F beside it to take it.",
   "pack": "A dim light means %s rests (%B seconds); bright means ready",
   "glove": "Gloves need no points; %Q uses this one.",
   "hook": "It shoots from afar, and your glove drags it to your feet.",
