@@ -3,6 +3,7 @@ extends "res://tools/clip_shots.gd"
 ## them (Models.hunter + the model's pose node), scratch-tree version of the e28953f4e4f harness. Per hunter and
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
 ## deg); with --close the same poses from eye height and knee height: <clip>_<k>_eye.jpg, <clip>_<k>_knee.jpg.
+## --contract: native-flagged Hunters play their contract model; --video: see var video.
 ## marks.txt lists the model's kind (contract / native), tris and the state each clip was fed.
 
 const DT := 1.0 / 30.0
@@ -18,6 +19,8 @@ const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
 var native := false
+var video := false  # --video: every frame (30 fps) of idle 1.2 s, run 1.0 s, attack 0.6 s as v0000.jpg ...
+var vn := 0
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -29,6 +32,8 @@ func run(main: Node) -> void:
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a == "--video": video = true
+		if a == "--contract": WardenNative.contract_only = true  # the live contract model of a native-flagged Hunter
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -117,10 +122,14 @@ func _hunter(id: String, dir: String) -> void:
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
 	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
-	for clip in CLIPS:
+	for clip in (["idle", "run", "attack"] if video else CLIPS):
 		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
+		if video:
+			times = []
+			for k in int({"idle": 1.2, "run": 1.0, "attack": 0.6}[clip] / DT):
+				times.append(k * DT)
 		# settle: the pre-state (standing, or running for a hit/jump) for 25 frames, then the clip's own state
 		var s := _state(id, "idle" if clip != "dash" else "run", yaw, 0.0)
 		model.set_meta(WardenClips.STATE, s)
@@ -135,7 +144,8 @@ func _hunter(id: String, dir: String) -> void:
 			model.set_meta(WardenClips.STATE, s)
 			poser.call("_process", DT)
 			if want < times.size() and t + DT * 0.5 >= float(times[want]):
-				await _shoot(model, dir, "%s_%d" % [clip, want], bx)
+				await _shoot(model, dir, ("v%04d" % vn) if video else "%s_%d" % [clip, want], bx)
+				vn += 1
 				marks.append("%s %d t=%.3f state=%s" % [clip, want, t, str(s)])
 				want += 1
 		model.set_meta(WardenClips.STATE, {})
