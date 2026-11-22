@@ -157,6 +157,7 @@ static func hint_text(id: String) -> String:
 ## One tutorial line with its {tokens} filled: keys through Settings.key_cap, the food, the house cost.
 static func fill(raw: String) -> String:
 	var txt := (raw if base() else FarmTaskGuide.fill(raw)).replace("{build}", Settings.key_cap("build"))
+	txt = txt.replace("{toy_cost}", str(HomeLayout.price("toy_ball")[0]))
 	txt = txt.replace("{food}", Care.food_name(String(food().keys()[0])))
 	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))
 	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
@@ -165,6 +166,12 @@ static func fill(raw: String) -> String:
 ## What the spotlight lights for this step's current stage: {"hub": bar button id, "world": true}, or {}.
 static func spot(id: String) -> Dictionary:
 	return (step_def(id).get("spot", {}) as Dictionary).get(stage(id), {})
+
+
+## Build-list entries the current step's stage points at (a green glow on their tiles).
+static func marks() -> Array:
+	var id := current()
+	return [] if id == "" else (step_def(id).get("marks", {}) as Dictionary).get(stage(id), [])
 
 
 static func world_text(id: String) -> String:

@@ -85,6 +85,8 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
    in the Garden tab at 0 gems and is not mentioned by any step, yet it is the only food source that keeps the Boki fed and leans it toward
    a zone. Owner: `content/rules/farm_tutorial.json base steps`, `scripts/home/farm_task_guide.gd`. *Proposal: add a "Plant the snack
    patch" step before "Feed it".*
+   *Done on `ext/garden-free-toy-hint`: the toy step's line names both tabs (Play ball with its price, Snack patch free) and the two tiles glow green in
+   the Build bar while that step is open (`marks` in the step; `hl` on the entry). The ball is not free: it costs 12 of the 200 starting gems.*
    **Fixed (ext/farm-tut-patch-step):** the base tutorial is now five steps: meet, **Plant the snack patch** (build bar, Garden tab,
    the patch tile lit by the spotlight like the trough tile in the farm tutorial), feed, toy, head out. The step ticks when the patch
    is down (or the Boki has already been fed); the Boki stays at your side for it. `farm_task_guide.gd` is the farm path's job
