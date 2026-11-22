@@ -175,6 +175,9 @@ func _show(h: Ent, st: String, dt: float) -> void:
 		return                 # (carried and told on the same frame)
 	r["seen"] = _frame
 	r["t"] = float(r["t"]) + dt * float(r["pace"])
+	var tint := _caster_hex(h) if st == "gnd" else ""
+	if String(r.get("tint", "-")) != tint:
+		_tint(r, tint)
 	var n: Node3D = r["n"]
 	n.visible = true
 	n.global_position = h.pos
@@ -196,6 +199,35 @@ static func body_k(e: Ent) -> Vector2:
 		return Vector2(e.r / BODY_R, e.r * MOB_TALL_PER_R / BODY_TALL)
 	var g := maxf(model.scale.y, 0.05)
 	return Vector2(g * KIN_WIDE * float(model.get_meta("girth", 1.0)), g * KIN_TALL / BODY_TALL)
+
+## Grounded in its caster's colour when the kit named the caster (KitStatus meta "gnd_by": Sparkle's Skycall, pink),
+## "" for the data's amber (the Bola, the Warchain reel).
+func _caster_hex(e: Ent) -> String:
+	var by := String(e.get_meta("gnd_by", ""))
+	var ids: Variant = m.get("ents_by_id")
+	if by == "" or not (ids is Dictionary):
+		return ""
+	var c: Variant = (ids as Dictionary).get(by, null)
+	return AimKit.hero_col(c).to_html(false) if c is Hunter and is_instance_valid(c) else ""
+
+## Repaints a rig's parts: `hex` for its colour parts and that darkened for its dark ones, "" for the data's own
+## (a pooled rig goes back to amber for the next Bola).
+func _tint(r: Dictionary, hex: String) -> void:
+	r["tint"] = hex
+	var d: Dictionary = rules()[r["st"]]
+	var base := _mat(String(d["col"]))
+	var dark := _mat(String(d.get("dark", d["col"])))
+	for part: Node in (r["n"] as Node3D).find_children("*", "MeshInstance3D", true, false):
+		var mi := part as MeshInstance3D
+		if not mi.has_meta("sl_dark"):
+			if mi.material_override != base and mi.material_override != dark:
+				continue
+			mi.set_meta("sl_dark", mi.material_override == dark and dark != base)
+		var is_dark := bool(mi.get_meta("sl_dark"))
+		if hex == "":
+			mi.material_override = dark if is_dark else base
+		else:
+			mi.material_override = _mat(Color(hex).darkened(0.6).to_html(false) if is_dark else hex)
 
 # ------------------------------------------------------------------ rigs
 func _take(st: String, d: Dictionary) -> Node3D:
