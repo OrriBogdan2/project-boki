@@ -6,4 +6,5 @@ extends RefCounted
 
 const CHECKS := {
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
+	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # GPU: Hunters as the game plays them
 }
