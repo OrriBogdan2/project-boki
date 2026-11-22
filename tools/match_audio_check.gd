@@ -407,7 +407,19 @@ func _barks(m: Match, P: Hunter) -> void:
 	Sfx.last_played.clear()
 	KinNet.on_event(m, ["kcmd", "down", P.kin.nid, P.pos.x, P.pos.y, P.pos.z, ""])
 	heard = Sfx.last_played.has(bark_of.call(P, "boki"))
-	ok(B.plays.back() == ["boki", P.nid] and heard, "your Boki down: you call it")
+	ok(B.plays.has(["boki", P.nid]) and heard, "your Boki down: you call it")
+	ok(B.plays.back() == ["alert", P.nid] and Sfx.last_played.has(HunterBarks.ALERT), "...and hear the UI alert")
+	ok(Sfx.last_played.has("boki_downed"), "...and its own cry at the spot")
+	Sfx.last_played.clear()
+	m.time += 1.0
+	var n_alerts := B.plays.count(["alert", P.nid])
+	KinNet.on_event(m, ["kcmd", "down", P.kin.nid, P.pos.x, P.pos.y, P.pos.z, ""])
+	ok(B.plays.count(["alert", P.nid]) == n_alerts and not Sfx.last_played.has(HunterBarks.ALERT),
+			"a second down 1 s later: no second alert")
+	ok(Sfx.last_played.has("boki_downed"), "...but the cry still sounds")
+	m.time += HunterBarks.ALERT_GAP_S
+	B.boki_down(m, P.kin)
+	ok(B.plays.count(["alert", P.nid]) == n_alerts + 1, "a down after the gap: the alert sounds again")
 	var voiced := func(x): return x.team != P.team and x.ak != null and Sfx.ensure(bark_of.call(x, "boki"))
 	var other: Hunter = m.hunters.filter(voiced)[0]
 	var team := other.team
@@ -416,13 +428,17 @@ func _barks(m: Match, P: Hunter) -> void:
 	other.pos = P.pos + Vector3(40, 0, 0)
 	var before := B.plays.size()
 	B.boki_down(m, theirs)
-	ok(B.plays.size() == before, "a rival's Boki down: no call (%s)" % [B.plays])
+	ok(B.plays.size() == before, "a rival's Boki down: nothing (%s)" % [B.plays])
 	other.team = P.team
 	Sfx.last_played.clear()
 	B.boki_down(m, theirs)
-	ok(B.plays.back() == ["boki", other.nid] and Sfx.last_played.has(bark_of.call(other, "boki")),
-			"a teammate's Boki down 40 m away: the squad hears the teammate call it")
-	ok(B.plays.all(func(p): return p[0] == "boki" or p[1] == P.nid), "only \"Boki down\" is heard from another Hunter")
+	ok(B.plays.back() == ["tick", other.nid] and Sfx.last_played.has(HunterBarks.TICK), "a teammate's Boki: a tick")
+	ok(not Sfx.last_played.has(bark_of.call(other, "boki")) and not Sfx.last_played.has(HunterBarks.ALERT),
+			"...no call, no alert")
+	ok(HunterBarks.TICK_DB <= HunterBarks.ALERT_DB - 6.0, "...and the tick is well under your own alert")
+	var up := Sfx.last_played.size()
+	KinNet.on_event(m, ["kcmd", "scoop", P.kin.nid, P.pos.x, P.pos.y, P.pos.z, ""])
+	ok(Sfx.last_played.has("boki_revive"), "your Boki back up: the soft revive cue (%d cues before)" % up)
 	Settings.v["hunter_barks"] = false
 	m.time += HunterBarks.COOLDOWN_S + 0.1
 	before = B.plays.size()

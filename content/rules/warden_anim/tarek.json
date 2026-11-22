@@ -15,6 +15,16 @@
 		"tip": "weapon_muzzle"
 	},
 	"loco": {
+		"plants": {
+			"run_b": {"L": [0.317], "R": [0.05]},
+			"run_f": {"L": [0.167], "R": [0.45]},
+			"run_l": {"L": [0.167], "R": [0.433]},
+			"run_r": {"L": [0.167], "R": [0.433]},
+			"walk_b": {"L": [0.583], "R": [0.1]},
+			"walk_f": {"L": [0.583], "R": [0.1]},
+			"walk_l": {"L": [0.533], "R": [0.933]},
+			"walk_r": {"L": [0.483], "R": [0.05]}
+		},
 		"idle": "idle",
 		"stance": "stance",
 		"stance_after": 4.0,
@@ -31,10 +41,12 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.65, "cycle_s": 0.55, "stride": [1.5, 1.2], "foot_mps": [2.65, 5.0],
+		"run_speed": 4.65, "cycle_s": 0.55, "stride": [1.5, 1.0], "foot_mps": [2.89, 6.11], "back_foot_mps": [2.84, 6.55], "side_foot_mps": [1.24, 1.64],
 		"side_foot_mps": [1.0, 2.0], "arm_swing": {"L": 0.5, "R": 0.5}
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.16},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.16,
+		"plants": {"crouch_b": {"L": [0.317], "R": [0.65]}, "crouch_f": {"L": [0.317], "R": [0.65]}, "crouch_l": {"L": [0.317], "R": [0.65]}, "crouch_r": {"L": [0.317], "R": [0.65]}}
+	},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
@@ -67,6 +79,10 @@
 		"breah_leap": {
 			"clip": "rmb_leap",
 			"hold_from": 0.3
+		},
+		"breah_windup": {
+			"clip": "rmb_gather",
+			"hold_from": 0.16
 		},
 		"breah_slam": {
 			"clip": "rmb_slam",
@@ -160,5 +176,18 @@
 		"jaw",
 		"lip.L",
 		"lip.R"
+	],
+	"cancels": [
+		["breah_wind", 0.5, "breah_crouch"],
+		["breah_wind", 0.5, "breah_punch"],
+		["breah_spine_aim", 0.4, "stun"],
+		["breah_spine_aim", 0.4, ""],
+		["breah_crouch", 0.4, "breah_lunge"],
+		["breah_crouch", 0.4, "breah_leap"],
+		["breah_crouch", 0.3, ""],
+		["breah_crouch", 0.4, "breah_raise"],
+		["glide", 0.4, "breah_dive"],
+		["breah_raise", 0.1, "breah_punch"],
+		["breah_skate", 0.4, "breah_spine_aim"]
 	]
 }

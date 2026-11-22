@@ -65,6 +65,10 @@ locale/translations=PackedStringArray("res://translations/rebrand.en.po")
 
 [shader_globals]
 
+ink_px_h={
+"type": "float",
+"value": 720.0
+}
 vfx_noise={
 "type": "sampler2D",
 "value": "res://art/vfx/noise.png"
@@ -140,6 +144,18 @@ vis_ally_range={
 vis_dark={
 "type": "float",
 "value": 0.7
+}
+vis_amb={
+"type": "float",
+"value": 0.4
+}
+vis_haze={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+vis_haze_h={
+"type": "vec2",
+"value": Vector2(0, 0)
 }
 vis_reveals={
 "type": "float",

@@ -1,7 +1,8 @@
 extends RefCounted
 ## --bot-kit-use[=<arch>] [--kit-use-t=<s>] [--kit-use-seeds=a,b,c]: bot-vs-bot duels in the duel room,
 ## one Hunter at a time (both fighters play that Hunter), counting what the bots really press in each
-## slot: presses, holds, recasts and hits, plus dashes and glides (table in docs/BOT_KIT_USE.md).
+## slot: presses, holds, recasts and hits, plus dashes and glides (table in docs/BOT_KIT_USE.md). Both
+## fighters start at the ult level (Hunter.ULT_AT[0]), so the ultimate is open from the first round.
 ## Fails when a slot a bot should use is never used, a hold-only slot is only ever tapped, or a damage
 ## slot lands no hit in the first LAND_T s of more than MISS_OK of the duels (the seeds).
 ## With --kit-use-match: the ultimate and Boki use in a 10-trio match instead (tools/bot_ult_use.gd).
@@ -19,13 +20,14 @@ const MUST := {
 ## arch -> the hit counters of its damage slots besides LMB: each lands in every duel by LAND_T.
 const LANDS := {
 	"ashwick": ["ab:utility", "ab:k1"],      # Cinder Shot, Furnace Cloak
-	"tender": ["ab:utility"],      # Burrseed (her R heals: "ultimate" above)
+	"tender": ["ab:utility"],      # Burrseed (her ult needs an ally: NO_DUEL_ULT)
 	"dolm": ["ab:rmb", "ab:rock"],      # Quakefall, Stone Row rocks
 	"ostra": ["ab:rmb", "ab:e"],      # Shard Snap, Brimseed
 }
 const LAND_T := 90.0      # s into each duel by which every damage slot has landed once
 const MISS_OK := 1        # duels per slot that may miss LAND_T (main's eager ults leave one seed short now and then)
 const ALWAYS := ["lmb hit", "rmb press", "e", "ultimate", "dash", "glide"]       # every Hunter, every duel
+const NO_DUEL_ULT := ["tender"]      # Hearth Call needs an ally: no cast in a duel (--kit-use-match checks it)
 const COLS := ["lmb hit", "rmb press", "rmb hold", "rmb hit", "e", "e hit", "ultimate", "dash", "glide"]
 
 var bad := 0
@@ -66,6 +68,8 @@ func _duel(main: Node, arch: String, seeds: Array, secs: float) -> void:
 		m.duel.arch = arch
 		m.duel.spawn_bot()
 		var fighters: Array = [m.player, m.duel.bot]
+		for h in fighters:      # the ult opens at level ULT_AT[0]; duel knocks alone reach 3 to 4 in 120 s
+			h.gain_xp(float(Hunter.XP_TO[int(Hunter.ULT_AT[0]) - 1]) - h.xp)
 		var instant := float(Arch.def(arch).get("rmb", {}).get("hold", 0.0)) <= 0.0      # no hold: the press casts
 		var cb_use := func(who, id, slot): if who in fighters: _use(n, String(id), String(slot), instant)
 		var duel := {}      # this duel's hits up to LAND_T
@@ -138,8 +142,6 @@ func _totals(n: Dictionary, k: ArchKit) -> void:
 	if k is JuggernautKit:
 		_add(n, "lunge perfect", k.perfects)
 		_add(n, "chain reel", k.warchain.reels)
-	elif k is BulwarkKit:
-		_add(n, "shield slam", k.shield_slams)
 	elif k is DolmKit:
 		_add(n, "hops", k.hop.hops)
 		_add(n, "rocks raised", k.rocks_made)
@@ -169,11 +171,12 @@ func _report(arch: String, n: Dictionary) -> void:
 	var cells: Array = COLS.map(func(c): return str(int(n.get(c, 0))))
 	var extras: Array = []
 	for key in n.keys():
-		var shown: bool = key in MUST.get(arch, []) or key == "shield slam"
+		var shown: bool = key in MUST.get(arch, [])
 		if shown and not key in COLS:
 			extras.append("%s %d" % [key, n[key]])
 	print("KITUSE | %s | %s | %s |" % [arch, " | ".join(cells), ", ".join(extras)])
 	var want: Array = ALWAYS + MUST.get(arch, [])
+	if arch in NO_DUEL_ULT: want.erase("ultimate")
 	for key in want:
 		if int(n.get(key, 0)) <= 0:
 			print("KITUSE FAIL %s never uses '%s'" % [arch, key])

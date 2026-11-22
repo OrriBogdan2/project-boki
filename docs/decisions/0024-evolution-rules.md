@@ -10,7 +10,7 @@ It must evolve into the next species of its line at that species' own level, wit
 trade, stop at level 100, and never take a shape that has no model yet.
 
 ## Options
-1. An `evolve` key in each `content/kin_v2/<id>.json`. Clashes with the roster-109 branch adding
+1. An `evolve` key in each `content/kin/<id>.json`. Clashes with the roster-109 branch adding
    the same files, and the entries for species without data would have nowhere to live.
 2. One table, `content/rules/evolve.json`: species id -> `level` and `into` options (`path` by
    leading affinity, `item` an Ink, `trade`). Ids without data are the roster names in lower case.
@@ -29,3 +29,4 @@ a boss with `ink` in its def gives its Ink to the killer, and an extracted run f
 - No line uses trade yet (the owner named none); the condition works and is tested.
 - Inks have no use button yet (`Evo.use_ink` is the API); it needs Ermink and Jarmit in data.
 - Only the Sky Serpent has an Ink type (Wyrm); the Colossus and Brood Mother drop none.
+- Telling the player (`EvolveCard`): the first form change on a save shows one card (old and new form, why, stat bars, link to the Field Book page; `tutorial.first_evolve`), later ones a toast; a Boki held back by missing art is told once (`wait_told`). Saves that already evolved before this see the card on their next one.

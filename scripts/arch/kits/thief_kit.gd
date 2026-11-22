@@ -292,7 +292,7 @@ func _tick(dt: float) -> void:
 ## The aim line (your screen only): thin and pale lilac to the cursor, clamped to the bolt's range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
 func _tick_aim_line() -> void:
-	if not h.is_local() or h.wid != "arc_bolts" or busy() or KinMerge.active(h):
+	if not h.is_local() or h.wid != "arc_bolts" or busy():
 		AimKit.hide(h, "aim_glow")
 		return
 	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
@@ -362,8 +362,6 @@ func empowered_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "arc_bolts":
 		return false
-	if KinMerge.active(h):
-		return true
 	if held and not _fire_was:
 		bolt_buf = float(h.wpn.get("rate", 0.45))
 	else:
@@ -423,7 +421,7 @@ func _bolt() -> void:
 		chain.bolt_thrown(float(sd["life"]))
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
-		x["kb"] = 3.0
+		x["kb"] = float(dash_def().get("prime_kb", 0.0))      # 0: the card has no knock
 		x["heavy"] = true          # the empowered hit's own thud and hold (ImpactWeight.of_hit)
 		fx().ride(sd, "chakram_big", Color("c9a8ff"), EMP_PALE, 3.4, 0.7)
 		fx().star(muzzle, EMP_PALE, 0.9, 0.16)
@@ -712,9 +710,10 @@ func _tick_bola(dt: float) -> void:
 				bola["bounces"] = int(bola["bounces"]) - 1
 				bola_bounces += 1
 				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
-				m.sfx("click", p, -5.0, 1.4)
+				m.sfx("thief_bola_bounce", p, -5.0)
 				continue
 			MissFx.puff(m, MissFx.colour_of(h), p, true)
+			if bola["first"] == null: m.sfx("thief_bola_tie", p, -6.0)     # caught nobody: it ties off on itself
 			_end_bola(p)
 			return
 		p = q
@@ -744,6 +743,7 @@ func _tick_bola(dt: float) -> void:
 		if float(bola["left"]) <= 0.0:
 			if bola["first"] == null:
 				MissFx.puff(m, MissFx.colour_of(h), p, false)
+				m.sfx("thief_bola_tie", p, -6.0)
 			_end_bola(p)
 			return
 	bola["pos"] = p
@@ -860,6 +860,7 @@ func _throw_knife() -> void:
 		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("b890ff"), 1.6, 0.26)
 	fx().star(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("b890ff"), 0.7, 0.1)
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
+	m.sfx("thief_knife_whisk", h.pos, -6.0 if h.is_local() else -9.0)     # the blade spinning away
 
 ## The shot ended with no foe: in the barrier that stopped it, else on the ground (at the wall, or where aimed).
 func _stick_ground(at: Vector3, hit_wall: bool, land: Vector3) -> void:
@@ -889,7 +890,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("b890ff"), 0.8, 0.2)
-	m.sfx("thief_knife_stick", at, -6.0, 1.0)
+	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
@@ -983,7 +984,7 @@ func _shadow_step(tgt: Ent) -> void:
 	_blink(ground(at))
 	var dv := Vector2(tgt.pos.x - h.pos.x, tgt.pos.z - h.pos.z)
 	if dv.length() > 0.05: h.face = atan2(-dv.x, -dv.y)
-	m.sfx("swipe", h.pos, -4.0, 1.9)
+	m.sfx("thief_shadow_whisk", h.pos, -4.0)
 
 ## The blink: a near-instant jump with a chain of cyan afterimages from where she was to where she lands.
 func _blink(to: Vector3) -> void:
