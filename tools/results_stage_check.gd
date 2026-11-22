@@ -15,7 +15,6 @@ const CASES := [
 	[false, ["ashwick", "rimewright", "thief"], ["out", "left", "in"], ["wisp", "win", "lose"]],
 	[false, ["dredge", "ostra", "bulwark"], ["in", "in", "in"], ["lose", "lose", "lose"]],
 	[false, ["gunslinger", "juggernaut", "tender"], ["out", "out", "out"], ["wisp", "wisp", "wisp"]],
-	[false, ["gil"], ["in"], ["idle"]],
 ]
 const SETTLE_FRAMES := 4     # frames after the last model stands, for its clips to pick the beat
 
@@ -65,8 +64,8 @@ func _roster() -> void:
 	for h: Hunter in hunters:
 		h.free()
 
-## Every Hunter whose GLB has clips has a win and a lose beat among them. A GLB without clips (Gil's, today) has
-## no beats: HunterAnim poses its rig, and the stage stands it in its idle (the "idle" case).
+## Every Hunter whose GLB has clips has a win and a lose beat among them. A GLB without clips has no
+## beats: HunterAnim poses its rig, and the stage stands it in its idle.
 func _beats_exist() -> void:
 	var bad_before := bad
 	var clipless: Array = []
