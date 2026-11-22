@@ -610,6 +610,11 @@ func _build(d: Dictionary) -> void:
 			nm.kins.erase(h.kin)
 			h.kin.queue_free()
 			h.kin = null
+	for k: Kin in nm.kins.duplicate():      # the wild ones too: the roster moves which species rolls onto the strip
+		if k.owner_h == null:
+			k.dead = true
+			nm.kins.erase(k)
+			k.queue_free()
 	var P := nm.player
 	P.max_hp = 10000.0
 	P.hp = P.max_hp

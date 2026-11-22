@@ -25,7 +25,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	CombatBus.ability_used.connect(flow._on_used)
 	for hero in Arch.ORDER:
-		var m: Match = flow._match(main, hero, 79)
+		var m: Match = flow._match(main, hero)
 		for o in m.hunters:
 			if o != flow.hunter:
 				foe = o
@@ -45,8 +45,11 @@ func _trial(m: Match, hero: String, slot: String) -> void:
 	var ahead := Vector3(0, 0, -FOE_AT)
 	h.inp["aim"] = h.pos + ahead
 	foe.teleport(h.pos + ahead)
-	for kin in m.kins:
-		if kin.owner_h != h: kin.teleport(h.pos + Vector3(40, 0, 40))      # (a rival Boki walking up would shove you)
+	for kin in m.kins.duplicate():
+		if kin.owner_h != h:      # (a rival or wild Boki walking up would shove you, and a bite is damage the press did not do)
+			kin.dead = true
+			m.kins.erase(kin)
+			kin.queue_free()
 	foe.hp = foe.max_hp
 	foe.vel = Vector3.ZERO
 	_cool(h, k, slot)
