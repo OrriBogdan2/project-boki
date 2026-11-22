@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1ynde7ka8ogi"
-path="res://.godot/imported/gil_meshy_v95.jpg-dee0b4ce18a14c65f8f67d4568d59336.ctex"
+uid="uid://v40r3nrr3sbq"
+path="res://.godot/imported/gil_meshy_r6.jpg-1cedcaeebbd7cd2471b4e4a16d0af3ce.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "56b3b2cef3e127ac8d650f147e710f0e"
+"md5": "86e125f116c0d008d8ff0884b1b52adf"
 }
 
 [deps]
 
-source_file="res://art/wardens/gil/gil_meshy_v95.jpg"
-dest_files=["res://.godot/imported/gil_meshy_v95.jpg-dee0b4ce18a14c65f8f67d4568d59336.ctex"]
+source_file="res://art/wardens/gil/gil_meshy_r6.jpg"
+dest_files=["res://.godot/imported/gil_meshy_r6.jpg-1cedcaeebbd7cd2471b4e4a16d0af3ce.ctex"]
 
 [params]
 
