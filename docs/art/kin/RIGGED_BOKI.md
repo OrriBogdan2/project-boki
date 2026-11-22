@@ -29,7 +29,12 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
-Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. In a match the ability plays as
+Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend (the three starters also
+glide: `boki_clips.glide`, a 1.6 s loop carried through your glide, Vespyx spread like a flying squirrel, Prismander
+splayed flat with its tail sculling, Mycroll tucked into its cap; `BokiHomeClips` then builds no glide pose for them).
+A clip can go into the live .glb without the model source or Blender: `~/venv-img/bin/python tools/boki/glb_clip.py
+<id> <clip> --check=idle` appends it (the mesh bytes untouched) after rebuilding the baked idle to within 0.05 degrees;
+a clip that shows a hidden prop (the berry) still needs the Blender build. In a match the ability plays as
 `cast` (0.56 s, release at 0.2 s), retimed at load from the keyed one (`BokiSwing`; decision 0040): `Kin` holds the skill
 until the release frame. A Blender pass should key `cast` per species (same name and release time) and drop the retime.
 Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin, crouch, burst, sulk) are not baked: `BokiHomeClips` builds them when the rig
