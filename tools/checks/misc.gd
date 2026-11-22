@@ -6,4 +6,5 @@ extends RefCounted
 
 const CHECKS := {
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
+	"--turn-cost-check": ["res://tools/turn_cost_check.gd", "turn_cost_check", null],  # owner 11-11 momentum
 }
