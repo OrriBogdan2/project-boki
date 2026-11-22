@@ -285,6 +285,7 @@ func _hide_rig_weapon() -> void:
 	built_off = off_id
 	if id != 0:
 		WardenGlb._skinned_weapon(root)
+	WardenGlb._hide_shield(root)  # Breaker's procedural prow on the left hand: Meshy's mesh carries his shield
 	if off:
 		for mi in off.find_children("*", "GeometryInstance3D", true, false):
 			(mi as GeometryInstance3D).visible = false
