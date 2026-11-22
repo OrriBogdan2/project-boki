@@ -23,15 +23,15 @@ func ok(label: String, cond: bool, info := "") -> void:
 	ok_fn.call(label, cond, info)
 
 ## Clarity, each step of the waves: what HeroVfx is showing round him (its surface looks, by shader mode).
-func _scan_looks(K: DredgeKit) -> void:
-	for e: Dictionary in HeroVfx.of(K.m).live:
+func _scan_looks(k: DredgeKit) -> void:
+	for e: Dictionary in HeroVfx.of(k.m).live:
 		var mode := int(((e["mat"]) as ShaderMaterial).get_shader_parameter("mode"))
 		if mode == HeroVfx.MODES["sweep"]:
 			sweeps += 1
 		if mode == HeroVfx.MODES["flare"]:
 			widest_flash = maxf(widest_flash, (e["s0"] as Vector3).x)
-	for s: Dictionary in K.m.shots:
-		if s["by"] == K.h and (s["x"] as Dictionary).has("kx") and s["node"] != null:
+	for s: Dictionary in k.m.shots:
+		if s["by"] == k.h and (s["x"] as Dictionary).has("kx") and s["node"] != null:
 			plain_slugs += 1
 
 ## The gun's muzzle flash in the data (the fist flash of a wave may not be bigger).
@@ -39,9 +39,9 @@ func _gun_flash() -> float:
 	return float((HeroVfx.data("dredge")["moves"] as Dictionary)["shot"]["fx"][0]["size"])
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
-func _owed(P: Hunter) -> float:
-	var c: Dictionary = P.get_meta("bond_cast", {})
-	return float(c.get("got", 0.0)) if String(c.get("id", "")) == HeroUlt.cast_id(P.ak) else 0.0
+func _owed(p: Hunter) -> float:
+	var c: Dictionary = p.get_meta("bond_cast", {})
+	return float(c.get("got", 0.0)) if String(c.get("id", "")) == HeroUlt.cast_id(p.ak) else 0.0
 
 func run() -> void:
 	await _charge_and_waves()
@@ -49,48 +49,48 @@ func run() -> void:
 	await _guards()
 	await _burst()
 
-func _cast(P: Hunter, at: Vector3) -> DredgeBlast:
-	var K: DredgeKit = P.ak
-	K.cd["x"] = 0.0
-	ak.aim_at(P, at)
-	HunterKeys.ult_pressed(P)
-	return K.broadside
+func _cast(p: Hunter, at: Vector3) -> DredgeBlast:
+	var k: DredgeKit = p.ak
+	k.cd["x"] = 0.0
+	ak.aim_at(p, at)
+	HunterKeys.ult_pressed(p)
+	return k.broadside
 
 func _charge_and_waves() -> void:
 	var r: Array = ak.setup("dredge", 1.6, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var T2: Hunter = r[3]
+	var p: Hunter = r[1]
+	var t_v: Hunter = r[2]
+	var t2: Hunter = r[3]
 	var home: Vector3 = r[4]
-	var K: DredgeKit = P.ak
-	var B := K.broadside
-	T.teleport(home + Vector3(-6.0, 0, -5.0))
-	T2.teleport(home + Vector3(-6.0, 0, 5.0))
-	P.lvl = 5
-	_cast(P, home + Vector3(4, 0, 0))
-	ok("ult: no cast below level 6", not B.running() and float(K.cd["x"]) == 0.0 and B.casts == 0, "level %d" % P.lvl)
-	P.lvl = 6
+	var k: DredgeKit = p.ak
+	var b := k.broadside
+	t_v.teleport(home + Vector3(-6.0, 0, -5.0))
+	t2.teleport(home + Vector3(-6.0, 0, 5.0))
+	p.lvl = 5
+	_cast(p, home + Vector3(4, 0, 0))
+	ok("ult: no cast below level 6", not b.running() and float(k.cd["x"]) == 0.0 and b.casts == 0, "level %d" % p.lvl)
+	p.lvl = 6
 	# his walk first, to compare the slowed walk against
-	ak.step(m, 0.2, func(): P.inp["move"] = Vector2(0, 1))
-	var w0 := P.pos
-	ak.step(m, 0.3, func(): P.inp["move"] = Vector2(0, 1))
-	var run_v := P.flat_dist(w0) / 0.3
-	P.inp["move"] = Vector2.ZERO
+	ak.step(m, 0.2, func(): p.inp["move"] = Vector2(0, 1))
+	var w0 := p.pos
+	ak.step(m, 0.3, func(): p.inp["move"] = Vector2(0, 1))
+	var run_v := p.flat_dist(w0) / 0.3
+	p.inp["move"] = Vector2.ZERO
 	ak.step(m, 0.2)
-	P.teleport(home)
+	p.teleport(home)
 	var shots0: int = m.shot_n
-	_cast(P, home + Vector3(4, 0, 0))
+	_cast(p, home + Vector3(4, 0, 0))
 	ok(
 		"ult cast: the charge move plays, its own cooldown starts (21s)",
-		B.charging() and K.anim_id == "dr_blast" and absf(float(K.cd["x"]) - 21.0) < 0.2, "cd %.1f" % float(K.cd["x"])
+		b.charging() and k.anim_id == "dr_blast" and absf(float(k.cd["x"]) - 21.0) < 0.2, "cd %.1f" % float(k.cd["x"])
 	)
-	ak.step(m, 0.3, func(): P.inp["move"] = Vector2(0, 1))
-	var fan: Dictionary = AimKit.entry(P, "x_fan")
+	ak.step(m, 0.3, func(): p.inp["move"] = Vector2(0, 1))
+	var fan: Dictionary = AimKit.entry(p, "x_fan")
 	var len_a := float(fan.get("len", 0.0))
-	var p0 := P.pos
-	ak.step(m, 0.6, func(): P.inp["move"] = Vector2(0, 1))
-	var len_b := float(AimKit.entry(P, "x_fan").get("len", 0.0))
+	var p0 := p.pos
+	ak.step(m, 0.6, func(): p.inp["move"] = Vector2(0, 1))
+	var len_b := float(AimKit.entry(p, "x_fan").get("len", 0.0))
 	ok(
 		"ult telegraph: a 105 degree fan everyone sees, growing over the charge",
 		bool(fan.get("all", false)) and absf(float(fan.get("deg", 0.0)) - 105.0) < 0.5 and len_b > len_a + 0.5,
@@ -99,65 +99,65 @@ func _charge_and_waves() -> void:
 	var fan_col: Color = fan.get("col", Color.BLACK)
 	ok(
 		"ult clarity: the fan is his gold at AimKit's own fill (the bodies in it stay readable)",
-		fan_col.is_equal_approx(AimKit.hero_col(P)) and float(fan.get("alpha", 9.0)) <= 1.0,
+		fan_col.is_equal_approx(AimKit.hero_col(p)) and float(fan.get("alpha", 9.0)) <= 1.0,
 		"col %s alpha %.2f" % [fan_col.to_html(false), float(fan.get("alpha", 9.0))]
 	)
-	var charge_k := P.flat_dist(p0) / 0.6 / maxf(0.01, run_v)
+	var charge_k := p.flat_dist(p0) / 0.6 / maxf(0.01, run_v)
 	ok(
 		"ult: he walks slowly through the charge (about 30% of his speed)",
-		B.waves == 0 and charge_k > 0.2 and charge_k < 0.4, "%.2f of %.1f m/s" % [charge_k, run_v]
+		b.waves == 0 and charge_k > 0.2 and charge_k < 0.4, "%.2f of %.1f m/s" % [charge_k, run_v]
 	)
 	# the cursor swings round to the south: the fan turns with it, and the waves go that way
-	ak.aim_at(P, P.pos + Vector3(0, 0, 4.0))
+	ak.aim_at(p, p.pos + Vector3(0, 0, 4.0))
 	var walk_scan := func():
-		P.inp["move"] = Vector2(0, 1)
-		_scan_looks(K)
+		p.inp["move"] = Vector2(0, 1)
+		_scan_looks(k)
 	ak.step(m, 0.25, walk_scan)
-	var p1 := P.pos
+	var p1 := p.pos
 	ak.step(m, 0.4, walk_scan)
-	var fire_k := P.flat_dist(p1) / 0.4 / maxf(0.01, run_v)
-	var fdir: Vector2 = B.blast.get("dir", Vector2.ZERO)
+	var fire_k := p.flat_dist(p1) / 0.4 / maxf(0.01, run_v)
+	var fdir: Vector2 = b.blast.get("dir", Vector2.ZERO)
 	ok(
 		"ult: he walks slower still while the waves go (about 20%), and keeps turning to the cursor",
-		B.waves >= 1 and fire_k > 0.1 and fire_k < 0.3 and fdir.distance_to(Vector2(0, 1)) < 0.15,
+		b.waves >= 1 and fire_k > 0.1 and fire_k < 0.3 and fdir.distance_to(Vector2(0, 1)) < 0.15,
 		"%.2f, fan toward (%.2f, %.2f)" % [fire_k, fdir.x, fdir.y]
 	)
-	P.inp["move"] = Vector2.ZERO
-	ak.aim_at(P, P.pos + Vector3(4, 0, 0))
-	ak.step(m, 0.65, _scan_looks.bind(K))
+	p.inp["move"] = Vector2.ZERO
+	ak.aim_at(p, p.pos + Vector3(4, 0, 0))
+	ak.step(m, 0.65, _scan_looks.bind(k))
 	ok(
 		"ult clarity: no sweep over the fan, no plain sphere under a slug, a fist flash no bigger than the gun's",
-		B.waves == 2 and sweeps == 0 and plain_slugs == 0 and widest_flash > 0.0
+		b.waves == 2 and sweeps == 0 and plain_slugs == 0 and widest_flash > 0.0
 			and widest_flash <= _gun_flash() + 0.01,
 		"sweeps %d, plain slugs %d, widest flash %.2f m" % [sweeps, plain_slugs, widest_flash]
 	)
 	ok(
 		"ult: one press, two waves of six slugs through spawn_shot",
-		B.waves == 2 and m.shot_n - shots0 >= 12 and not B.running(),
-		"waves %d shots %d" % [B.waves, m.shot_n - shots0]
+		b.waves == 2 and m.shot_n - shots0 >= 12 and not b.running(),
+		"waves %d shots %d" % [b.waves, m.shot_n - shots0]
 	)
 	ok(
-		"ult bond: nothing for waves that hit nobody", _owed(P) == 0.0 and B.casts == 1,
-		"owed %.2f casts %d" % [_owed(P), B.casts]
+		"ult bond: nothing for waves that hit nobody", _owed(p) == 0.0 and b.casts == 1,
+		"owed %.2f casts %d" % [_owed(p), b.casts]
 	)
-	HunterKeys.ult_pressed(P)
-	ok("ult: the cooldown denies a new cast", not B.running() and B.casts == 1, "cd %.1f" % float(K.cd["x"]))
+	HunterKeys.ult_pressed(p)
+	ok("ult: the cooldown denies a new cast", not b.running() and b.casts == 1, "cd %.1f" % float(k.cd["x"]))
 	# point blank: every slug of both waves lands, with Anti-Heal; the waves 0.6s apart
-	P.teleport(home)
-	ak.fresh(T)
-	T.teleport(home + Vector3(1.6, 0, 0))
-	T.face = FACE_AWAY
+	p.teleport(home)
+	ak.fresh(t_v)
+	t_v.teleport(home + Vector3(1.6, 0, 0))
+	t_v.face = FACE_AWAY
 	var times: Array = []
-	_cast(P, T.pos)
-	var w := B.waves
+	_cast(p, t_v.pos)
+	var w := b.waves
 	var t := 0.0
 	while t < 2.3:
 		m.step(ak.DT)
 		t += ak.DT
-		if B.waves > w:
-			w = B.waves
+		if b.waves > w:
+			w = b.waves
 			times.append(t)
-	var hits: Array = B.last_wave_hits
+	var hits: Array = b.last_wave_hits
 	ok(
 		"ult beats: wave 1 at the end of the 1.1s charge, wave 2 0.6s later",
 		times.size() == 2 and absf(float(times[0]) - 1.1) < 0.05
@@ -168,40 +168,40 @@ func _charge_and_waves() -> void:
 		"ult payoff: point blank, all six slugs of each wave land",
 		hits.size() == 2 and int(hits[0]) == 6 and int(hits[1]) == 6, str(hits)
 	)
-	var per := float(K.x_def()["dmg"]) * K.power("x")
+	var per := float(k.x_def()["dmg"]) * k.power("x")
 	ok(
-		"ult payoff: 4 a slug, no back bonus (12 slugs, target facing away)", absf(ak.dmg(T) - per * 12.0) < 0.6,
-		"dmg %.1f expected %.1f" % [ak.dmg(T), per * 12.0]
+		"ult payoff: 4 a slug, no back bonus (12 slugs, target facing away)", absf(ak.dmg(t_v) - per * 12.0) < 0.6,
+		"dmg %.1f expected %.1f" % [ak.dmg(t_v), per * 12.0]
 	)
-	ok("ult payoff: the slugs leave Anti-Heal", T.blight_t > 0.0, "%.1fs" % T.blight_t)
+	ok("ult payoff: the slugs leave Anti-Heal", t_v.blight_t > 0.0, "%.1fs" % t_v.blight_t)
 	ok(
 		"ult bond: 12 slugs land, the cast still counts once (a hit: 0.6)",
-		absf(_owed(P) - 0.6) < 0.001, "owed %.2f" % _owed(P)
+		absf(_owed(p) - 0.6) < 0.001, "owed %.2f" % _owed(p)
 	)
 	# further out only the middle slugs reach
-	ak.fresh(T)
-	T.teleport(home + Vector3(4.6, 0, 0))
-	_cast(P, T.pos)
+	ak.fresh(t_v)
+	t_v.teleport(home + Vector3(4.6, 0, 0))
+	_cast(p, t_v.pos)
 	ak.step(m, 2.2)
-	hits = B.last_wave_hits
+	hits = b.last_wave_hits
 	ok(
 		"ult payoff: at 4.6m fewer slugs land (a shotgun fan, not a wall)",
 		hits.size() == 2 and int(hits[0]) > 0 and int(hits[0]) < 6, str(hits)
 	)
-	await _reel_combo(m, P, T, home)
+	await _reel_combo(m, p, t_v, home)
 	await ak.done(m)
 
 ## The Broadside's slugs are Explosive (source): they break a crate and a pot and light a keg in the fan.
 func _props() -> void:
 	var r: Array = ak.setup("dredge", 1.6, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var T2: Hunter = r[3]
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
+	var t2: Hunter = r[3]
 	var home: Vector3 = r[4]
-	P.lvl = 6
-	T.teleport(home + Vector3(-6.0, 0, -5.0))
-	T2.teleport(home + Vector3(-6.0, 0, 5.0))
+	p.lvl = 6
+	t.teleport(home + Vector3(-6.0, 0, -5.0))
+	t2.teleport(home + Vector3(-6.0, 0, 5.0))
 	var spots := {"crate": Vector3(3, 0, -1.2), "pot": Vector3(3, 0, 1.2), "keg": Vector3(4, 0, 0)}
 	var props := {}
 	for kind_s in spots:
@@ -209,7 +209,7 @@ func _props() -> void:
 		at.y = m.world.ground_at(at.x, at.z)
 		m._add_break(kind_s, at)
 		props[kind_s] = m.breaks[-1]
-	_cast(P, home + Vector3(4, 0, 0))
+	_cast(p, home + Vector3(4, 0, 0))
 	ak.step(m, 2.2)
 	ok(
 		"ult props: the slugs break a crate and a pot and light a keg (Explosive)",
@@ -218,83 +218,83 @@ func _props() -> void:
 	await ak.done(m)
 
 ## Deep Reach, the foe hauled to your feet stunned, then the Broadside: every slug lands.
-func _reel_combo(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
-	var K: DredgeKit = P.ak
-	ak.fresh(T)
-	T.teleport(home + Vector3(8.0, 0, 0))
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 1.0
-	ak.aim_at(P, T.pos)
-	ak.tap(m, P)
+func _reel_combo(m: Match, p: Hunter, t_v: Hunter, home: Vector3) -> void:
+	var k: DredgeKit = p.ak
+	ak.fresh(t_v)
+	t_v.teleport(home + Vector3(8.0, 0, 0))
+	k.cd["rmb"] = 0.0
+	k.ch_rmb = 1.0
+	ak.aim_at(p, t_v.pos)
+	ak.tap(m, p)
 	var t := 0.0
-	while t < 3.0 and (K.flying or not K.pull.is_empty()):
+	while t < 3.0 and (k.flying or not k.pull.is_empty()):
 		m.step(ak.DT)
 		t += ak.DT
-	_cast(P, T.pos)
+	_cast(p, t_v.pos)
 	ak.step(m, 2.2)
-	var hits: Array = K.broadside.last_wave_hits
+	var hits: Array = k.broadside.last_wave_hits
 	var n := int(hits[0]) + int(hits[1]) if hits.size() == 2 else 0
-	ok("ult combo: reel the foe in, then the Broadside lands (10+ slugs)", K.arrivals >= 1 and n >= 10, "slugs %d" % n)
+	ok("ult combo: reel the foe in, then the Broadside lands (10+ slugs)", k.arrivals >= 1 and n >= 10, "slugs %d" % n)
 
 ## A stun in the charge stops it (back in 8s); RMB, E and the barge are locked while it runs; a merge drops it.
 func _guards() -> void:
 	var r: Array = ak.setup("dredge", 1.6, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
 	var home: Vector3 = r[4]
-	var K: DredgeKit = P.ak
-	var B := K.broadside
-	_cast(P, T.pos)
+	var k: DredgeKit = p.ak
+	var b := k.broadside
+	_cast(p, t.pos)
 	ak.step(m, 0.4)
-	var g0 := K.grapples
-	var ch0 := K.ch_rmb
-	ak.tap(m, P)
-	P.ak.use_e()
-	var x0 := P.pos
-	P.dashes = P.max_dashes()
-	P.ak.on_dash(false)
+	var g0 := k.grapples
+	var ch0 := k.ch_rmb
+	ak.tap(m, p)
+	p.ak.use_e()
+	var x0 := p.pos
+	p.dashes = p.max_dashes()
+	p.ak.on_dash(false)
 	ak.step(m, 0.1)
 	ok(
 		"ult: RMB and E are locked while it runs; Shift barges at once and it runs on, its pose kept (item 51)",
-		K.ch_rmb == ch0 and K.grapples == g0 and K.wind <= 0.0 and P.flat_dist(x0) > 0.5 and B.charging()
-				and K.anim_id == "dr_blast",
-		"moved %.2f m, charging %s" % [P.pos.distance_to(x0), B.charging()]
+		k.ch_rmb == ch0 and k.grapples == g0 and k.wind <= 0.0 and p.flat_dist(x0) > 0.5 and b.charging()
+				and k.anim_id == "dr_blast",
+		"moved %.2f m, charging %s" % [p.pos.distance_to(x0), b.charging()]
 	)
-	P.stun_t = 0.5
+	p.stun_t = 0.5
 	ak.step(m, 0.05)
 	ok(
 		"ult: a stun in the charge stops it, back in 8s",
-		not B.running() and B.waves == 0 and float(K.cd["x"]) <= 8.0 and B.stopped == 1, "cd %.1f" % float(K.cd["x"])
+		not b.running() and b.waves == 0 and float(k.cd["x"]) <= 8.0 and b.stopped == 1, "cd %.1f" % float(k.cd["x"])
 	)
-	P.stun_t = 0.0
+	p.stun_t = 0.0
 	ak.step(m, 0.6)
-	var waves0 := B.waves
-	_cast(P, T.pos)
+	var waves0 := b.waves
+	_cast(p, t.pos)
 	ak.step(m, 0.3)
-	P.dashes = P.max_dashes()
-	P.do_dash()
+	p.dashes = p.max_dashes()
+	p.do_dash()
 	ak.step(m, 2.2)
-	ok("ult: barged out of in the charge, both waves still go", not B.running() and B.waves == waves0 + 2,
-			"waves +%d" % (B.waves - waves0))
+	ok("ult: barged out of in the charge, both waves still go", not b.running() and b.waves == waves0 + 2,
+			"waves +%d" % (b.waves - waves0))
 	ak.step(m, 0.6)
-	waves0 = B.waves
-	_cast(P, T.pos)
+	waves0 = b.waves
+	_cast(p, t.pos)
 	ak.step(m, 0.4)
-	ok("merge hold: the Broadside is charging before the merge", B.charging())
-	ok("merge hold: a merge is under way", ak.merge_now(P))
+	ok("merge hold: the Broadside is charging before the merge", b.charging())
+	ok("merge hold: a merge is under way", ak.merge_now(p))
 	ak.step(m, 1.8)
 	ok(
-		"merge hold: dredge's Broadside is dropped, no wave mid-merge", not B.running() and B.waves == waves0,
-		"waves %d" % (B.waves - waves0)
+		"merge hold: dredge's Broadside is dropped, no wave mid-merge", not b.running() and b.waves == waves0,
+		"waves %d" % (b.waves - waves0)
 	)
-	KinMerge.end(P, "test")
+	KinMerge.end(p, "test")
 	await ak.done(m)
 
 func _burst() -> void:
-	var res: Dictionary = await BURST.run(ak, "dredge", 1.6, func(m: Match, P: Hunter, T: Hunter):
-		T.face = FACE_AWAY
-		_cast(P, T.pos)
+	var res: Dictionary = await BURST.run(ak, "dredge", 1.6, func(m: Match, p: Hunter, t: Hunter):
+		t.face = FACE_AWAY
+		_cast(p, t.pos)
 		ak.step(m, 2.2))
 	var info := "ult %.0f, ult + merge %.0f of %d" % [res["ult"], res["total"], int(Data.CLASSES["light"]["hp"])]
 	ok(

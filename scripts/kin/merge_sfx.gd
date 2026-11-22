@@ -6,11 +6,13 @@ extends RefCounted
 ## rival's plays other_db quieter, from where it happens. A Boki with no form file has none of its own: play()
 ## says so and the caller keeps the shared sounds.
 
+
 ## The sound a form names for `kind`, or "" (no form, or a form without one).
-static func name_of(form_id: String, kind: String) -> String:
-	if form_id == "":
+static func name_of(form_id_v: String, kind: String) -> String:
+	if form_id_v == "":
 		return ""
-	return String((Content.merge_form(form_id).get("sound", {}) as Dictionary).get(kind, ""))
+	return String((Content.merge_form(form_id_v).get("sound", {}) as Dictionary).get(kind, ""))
+
 
 ## The merged hunter's form id: from the merge on its own game, from the snapshot (KinNet) on the others.
 static func form_id(h: Hunter) -> String:
@@ -18,10 +20,12 @@ static func form_id(h: Hunter) -> String:
 		return String(MergeForm.of(h)["id"])
 	return String(h.get_meta("mf_id", ""))
 
+
 ## How loud `kind` plays for this hunter's form: full for yours, quieter for anyone else's.
 static func level(h: Hunter, kind: String) -> float:
 	var d: Dictionary = MergeForm.data()["form_sfx"]
 	return float(d["db"][kind]) + (0.0 if h.is_local() else float(d["other_db"]))
+
 
 ## Plays the form's `kind` sound at `at` (the hunter when left out). False when the form has none.
 static func play(h: Hunter, kind: String, at := Vector3.INF) -> bool:
@@ -30,6 +34,7 @@ static func play(h: Hunter, kind: String, at := Vector3.INF) -> bool:
 		return false
 	h.m.sfx(sname, h.pos if at == Vector3.INF else at, level(h, kind))
 	return true
+
 
 ## The Effects context entry that makes the form's area hits play its hit instead of the shared one ({} if none).
 static func hit_ctx(h: Hunter) -> Dictionary:

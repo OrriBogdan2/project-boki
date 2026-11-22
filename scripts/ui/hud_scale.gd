@@ -8,7 +8,7 @@ extends RefCounted
 
 const MIN := 0.8
 const MAX := 1.3
-const GAP := 8.0          # logical px kept between a top cluster and the bottom one it grows toward
+const GAP := 8.0  # logical px kept between a top cluster and the bottom one it grows toward
 
 const TL := Vector2(0.0, 0.0)
 const TC := Vector2(0.5, 0.0)
@@ -16,13 +16,26 @@ const TR := Vector2(1.0, 0.0)
 const BL := Vector2(0.0, 1.0)
 const BC := Vector2(0.5, 1.0)
 const BR := Vector2(1.0, 1.0)
-const ANCHOR := {"top": TR, "feed": TR, "minimap": TL, "squad": TL, "boss": TC, "ways_strip": TC,
-		"vitals": BL, "abilities": BL, "kin": BL, "status": BC, "weapon": BR, "gear": BR, "perks": BC}
+const ANCHOR := {
+	"top": TR,
+	"feed": TR,
+	"minimap": TL,
+	"squad": TL,
+	"boss": TC,
+	"ways_strip": TC,
+	"vitals": BL,
+	"abilities": BL,
+	"kin": BL,
+	"status": BC,
+	"weapon": BR,
+	"gear": BR,
+	"perks": BC
+}
 
-static var xf := Transform2D.IDENTITY      # what the group being drawn is under (identity between passes)
+static var xf := Transform2D.IDENTITY  # what the group being drawn is under (identity between passes)
 static var _anchor := TL
 static var _hover_from := 0
-static var _ext := {}      # anchor -> the unscaled rect its groups covered in the last pass
+static var _ext := {}  # anchor -> the unscaled rect its groups covered in the last pass
 static var _next := {}
 ## anchor -> the screen rect its groups covered in the last pass, as drawn (scaled), and widget group -> the rect it
 ## covered since the pass before (SafeArea.note_as, drawn every frame): the room the camera's lean keeps you out of
@@ -31,8 +44,10 @@ static var drawn := {}
 static var _next_drawn := {}
 static var _overlays := {}
 
+
 static func setting() -> float:
 	return clampf(float(Settings.get_v("hud_scale")), MIN, MAX)
+
 
 ## Start drawing `group` on hud.c: its scale and the rects it registers follow its anchor. Returns the group
 ## that was being drawn, for a widget that hangs from somewhere else to hand back to.
@@ -49,6 +64,7 @@ static func begin(hud, group: String, sz: Vector2) -> String:
 	hud.c.draw_set_transform_matrix(xf)
 	return back
 
+
 ## The hover spots the group registered move with it; back to the plain canvas.
 static func close(hud) -> void:
 	for i in range(_hover_from, hud.hover_spots.size()):
@@ -57,11 +73,13 @@ static func close(hud) -> void:
 	xf = Transform2D.IDENTITY
 	hud.c.draw_set_transform_matrix(xf)
 
+
 static func pass_start() -> void:
 	_next.clear()
 	_next_drawn.clear()
 	_hover_from = 0
 	xf = Transform2D.IDENTITY
+
 
 static func pass_end() -> void:
 	_ext = _next.duplicate()
@@ -69,28 +87,34 @@ static func pass_end() -> void:
 	drawn.merge(_overlays)
 	_overlays.clear()
 
+
 ## A rect the current group drew (unscaled).
 static func grow(r: Rect2) -> void:
 	_next[_anchor] = (_next[_anchor] as Rect2).merge(r) if _next.has(_anchor) else r
 	var on := xf * r
 	_next_drawn[_anchor] = (_next_drawn[_anchor] as Rect2).merge(on) if _next_drawn.has(_anchor) else on
 
+
 ## A rect a widget outside the panels drew (SafeArea.note_as), as drawn.
 static func overlay(group: String, r: Rect2) -> void:
 	var on := xf * r
 	_overlays[group] = (_overlays[group] as Rect2).merge(on) if _overlays.has(group) else on
+
 
 # Things drawn outside the panels that keep clear of them (message lane, edge markers, the Blight line) give
 # way by the setting's growth (never below 100%: shrinking leaves room).
 static func up() -> float:
 	return maxf(1.0, setting())
 
+
 ## `px` measured in from a side margin, as it is once the HUD has grown.
 static func from_edge(px: float) -> float:
 	return SafeArea.MARGIN + (px - SafeArea.MARGIN) * up()
 
+
 static func from_bottom(y: float, sz: Vector2) -> float:
 	return sz.y - from_edge(sz.y - y)
+
 
 ## How far `r` (a centre-lane line: the Blight line, the Gate prompt) must rise, 0 or less, to stay clear of the
 ## bottom-left groups as they are once grown, where it would touch them sideways.
@@ -102,12 +126,14 @@ static func lift(r: Rect2, sz: Vector2) -> float:
 		return 0.0
 	return minf(grown.position.y - GAP - r.end.y, 0.0)
 
+
 ## How far `r` must move right (0 or more) to clear the bottom-left groups as they are once grown.
 static func nudge_right(r: Rect2, sz: Vector2) -> float:
 	var grown := _grown_bl(sz)
 	if not grown.intersects(r.grow(GAP)):
 		return 0.0
 	return maxf(grown.end.x + GAP - r.position.x, 0.0)
+
 
 static func _grown_bl(sz: Vector2) -> Rect2:
 	if not _ext.has(BL):
@@ -116,6 +142,7 @@ static func _grown_bl(sz: Vector2) -> Rect2:
 	var at := box.position + box.size * BL
 	var e: Rect2 = _ext[BL]
 	return Rect2(at + (e.position - at) * up(), e.size * up())
+
 
 static func _factor(box: Rect2) -> float:
 	var s := setting()

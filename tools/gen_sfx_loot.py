@@ -7,12 +7,13 @@ stings when it completes. Run from tools/: python3 gen_sfx_loot.py
               brighter with each step (rare 2 notes, epic 3, legendary 4 with a shimmer)
 Original synthesis, no samples; same soft palette as gen_sfx_ui.py.
 """
+
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, env, mix, at, lpf, bpf, noise
+from sfx_lib import N, T, mix, at, lpf
 
 S.reseed(5120)
-LOOP_S = 1.2     # s: both loops; every hum partial is a whole number of cycles in it so the seam is clean
+LOOP_S = 1.2  # s: both loops; every hum partial is a whole number of cycles in it so the seam is clean
 
 
 def creak_loop():
@@ -26,9 +27,9 @@ def latch_loop():
     d = LOOP_S
     t = T(d)
     hum = sum(g * np.sin(2 * np.pi * f * t) for f, g in ((100, 1.0), (200, 0.35), (300, 0.12)))
-    hum = hum * (0.65 + 0.35 * np.sin(np.pi * 2 * t / d) ** 2)        # two slow swells per loop
+    hum = hum * (0.65 + 0.35 * np.sin(np.pi * 2 * t / d) ** 2)  # two slow swells per loop
     tick = 6.0 * lpf(S.click(0.006, 1500, 5000, 0.002), 2600)
-    out = mix(hum, at(tick, 0.0), at(tick, d / 2))[:N(d)]
+    out = mix(hum, at(tick, 0.0), at(tick, d / 2))[: N(d)]
     return lpf(out, 1800)
 
 
@@ -42,12 +43,12 @@ def sting(freqs, step, decay, shimmer):
 
 
 def main():
-    S.save_loop('loot_creak', creak_loop(), 'loop')
-    S.save_loop('loot_latch', latch_loop(), 'loop')
-    S.save_cat('loot_rare', sting((660, 880), 0.11, 0.35, 0), 'cast')
-    S.save_cat('loot_epic', sting((523, 659, 880), 0.1, 0.4, 0), 'cast')
-    S.save_cat('loot_legend', sting((523, 659, 784, 1047), 0.09, 0.5, 0.35), 'cast')
+    S.save_loop("loot_creak", creak_loop(), "loop")
+    S.save_loop("loot_latch", latch_loop(), "loop")
+    S.save_cat("loot_rare", sting((660, 880), 0.11, 0.35, 0), "cast")
+    S.save_cat("loot_epic", sting((523, 659, 880), 0.1, 0.4, 0), "cast")
+    S.save_cat("loot_legend", sting((523, 659, 784, 1047), 0.09, 0.5, 0.35), "cast")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

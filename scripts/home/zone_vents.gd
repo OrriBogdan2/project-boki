@@ -7,13 +7,13 @@ extends RefCounted
 ## runners get a lift stretch there (BaseRace). Purely visual on the ground: nothing blocks or is walked into.
 ## Two MultiMesh batches (pads and columns), so the vents cost two draws however many there are.
 
-const PAD_R := 0.8             # m, the pad's radius
-const PAD_H := 0.06            # m, the pad's thickness
-const COLUMN_R := 0.55         # m, the column of air's radius
-const COLUMN_H := 3.0          # m, how high the column stands
+const PAD_R := 0.8  # m, the pad's radius
+const PAD_H := 0.06  # m, the pad's thickness
+const COLUMN_R := 0.55  # m, the column of air's radius
+const COLUMN_H := 3.0  # m, how high the column stands
 const PAD_COL := Color("f7e8a6")
 const COLUMN_COL := Color(0.96, 0.92, 0.7, 0.16)
-const JITTER := 0.6            # m: a flier that drifts to a vent stops within this of its middle
+const JITTER := 0.6  # m: a flier that drifts to a vent stops within this of its middle
 
 
 ## The zone's vents as ground points (y is 0), in the data's order.
@@ -33,8 +33,11 @@ static func over(p: Vector3) -> bool:
 ## A roaming flier's next goal: now and then a vent, otherwise `else_goal`.
 static func goal(k: Dictionary, else_goal: Vector3) -> Vector3:
 	var all := spots(GardenZones.here)
-	if all.is_empty() or not BokiFly.flier(String(k["rec"]["species"])) \
-			or randf() >= float(BokiFly.rules()["vent_pull"]):
+	if (
+		all.is_empty()
+		or not BokiFly.flier(String(k["rec"]["species"]))
+		or randf() >= float(BokiFly.rules()["vent_pull"])
+	):
 		return else_goal
 	return all[randi() % all.size()] + Vector3(randf_range(-JITTER, JITTER), 0.0, randf_range(-JITTER, JITTER))
 

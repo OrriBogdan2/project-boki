@@ -1,5 +1,6 @@
 """Absolute gate checks (tools/gate_absolute.txt): a red there fails the gate even when main is red too.
 Run: python3 ops/regate-bot/test_suite_speed_absolute.py"""
+
 import importlib.util
 import tempfile
 import types
@@ -26,9 +27,21 @@ class AbsoluteTest(unittest.TestCase):
 
     def test_red_on_both_is_a_fail_only_for_absolute(self):
         with tempfile.TemporaryDirectory() as d:
-            a = types.SimpleNamespace(main=d, merge=d, out=d, jobs=1, stall_min=1, godot="godot", timeout=5,
-                                      godot_args="", alert_file=str(Path(d) / "ALERT"), main_lazy=False,
-                                      no_cache=True, timeout_strikes=2, order="registry")
+            a = types.SimpleNamespace(
+                main=d,
+                merge=d,
+                out=d,
+                jobs=1,
+                stall_min=1,
+                godot="godot",
+                timeout=5,
+                godot_args="",
+                alert_file=str(Path(d) / "ALERT"),
+                main_lazy=False,
+                no_cache=True,
+                timeout_strikes=2,
+                order="registry",
+            )
             g = ss.Gate(a)
             g.main_flags = {"--abs-check", "--other-check"}
             g.absolute = ["--abs-check"]

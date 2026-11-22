@@ -1,15 +1,16 @@
 """Chop and mine sounds (docs/AUDIO.md): the farm's axe and pickaxe work. Run from tools/.
 
-  axe_bite     the blade biting into wood: a dull knock with a short woody ring (3 takes)
-  trunk_creak  the trunk straining; the game plays it pitched higher and louder on the last hits
-  tree_down    the felled tree: a whoosh of air, then the thud of the trunk landing
-  pick_strike  the pick head on stone: a sharp tick, a ring and a low knock (3 takes)
-  rock_crack   the stone splitting; the game plays it lower and louder as the boulder weakens
-  rock_break   the boulder giving way: a crack, a rumble and rubble settling
+axe_bite     the blade biting into wood: a dull knock with a short woody ring (3 takes)
+trunk_creak  the trunk straining; the game plays it pitched higher and louder on the last hits
+tree_down    the felled tree: a whoosh of air, then the thud of the trunk landing
+pick_strike  the pick head on stone: a sharp tick, a ring and a low knock (3 takes)
+rock_crack   the stone splitting; the game plays it lower and louder as the boulder weakens
+rock_break   the boulder giving way: a crack, a rumble and rubble settling
 """
+
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, env, mix, at, lpf, bpf, noise
+from sfx_lib import N, mix, at
 
 S.reseed(3302)
 
@@ -28,8 +29,11 @@ def creak():
 
 def tree_down():
     whoosh = S.hiss(0.6, 300, 1400, a=0.25, decay=0.3) * np.linspace(0.4, 1.0, N(0.6))
-    land = mix(S.kick(120, 42, 0.45, drop=0.06, decay=0.14, drive=2.2), S.tail(0.4, 500, 0.12),
-               0.5 * S.grains(0.3, 60, 800, 3500, fall=0.08))
+    land = mix(
+        S.kick(120, 42, 0.45, drop=0.06, decay=0.14, drive=2.2),
+        S.tail(0.4, 500, 0.12),
+        0.5 * S.grains(0.3, 60, 800, 3500, fall=0.08),
+    )
     return mix(0.7 * whoosh, at(land, 0.55))
 
 
@@ -49,14 +53,18 @@ def split():
 
 def rock_break():
     d = 0.9
-    return mix(S.crack(0.2, 600, 5000, 0.05), S.kick(90, 36, 0.6, drop=0.07, decay=0.2, drive=2.4),
-               S.tail(0.8, 700, 0.3, delay=0.03) * 0.6, 0.8 * S.grains(d, 140, 1000, 6000, fall=0.3))
+    return mix(
+        S.crack(0.2, 600, 5000, 0.05),
+        S.kick(90, 36, 0.6, drop=0.07, decay=0.2, drive=2.4),
+        S.tail(0.8, 700, 0.3, delay=0.03) * 0.6,
+        0.8 * S.grains(d, 140, 1000, 6000, fall=0.3),
+    )
 
 
-S.takes_cat('axe_bite', axe, 2, 'impact')
-S.save_cat('trunk_creak', creak(), 'cast')
-S.save_cat('tree_down', tree_down(), 'impact')
-S.takes_cat('pick_strike', pick, 2, 'impact')
-S.save_cat('rock_crack', split(), 'cast')
-S.save_cat('rock_break', rock_break(), 'impact')
-print('chop and mine sounds written')
+S.takes_cat("axe_bite", axe, 2, "impact")
+S.save_cat("trunk_creak", creak(), "cast")
+S.save_cat("tree_down", tree_down(), "impact")
+S.takes_cat("pick_strike", pick, 2, "impact")
+S.save_cat("rock_crack", split(), "cast")
+S.save_cat("rock_break", rock_break(), "impact")
+print("chop and mine sounds written")

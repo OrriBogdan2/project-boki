@@ -408,6 +408,11 @@ func _vireo_e() -> void:
 			"e_strike",
 			"E strike: lightning, the target dragged toward her, Grounded with shackle rings",
 			_on_target])
+	marks.append([1.5,
+			"full",
+			"e_grounded",
+			"E after the strike: Grounded, two thin pink binding rings and pink cords, no disc",
+			_on_target])
 	await _go(1.6, flick, marks)
 
 ## The animation-timing fixes (docs/heroes/mage.md 'Animation timing'): an RMB tap's throw lands on the bolt

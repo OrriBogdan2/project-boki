@@ -5,7 +5,7 @@ extends RefCounted
 ## "Two telegraph systems"). Needs a renderer.
 
 const DT := 1.0 / 60.0
-const FRAMES := [0.15, 0.4]          # s after each cast
+const FRAMES := [0.15, 0.4]  # s after each cast
 
 var main: Node
 var out := ""
@@ -18,48 +18,48 @@ func run(main_node: Node) -> void:
 			out = a.substr(12)
 	DirAccess.make_dir_recursive_absolute(out)
 	Save.no_write = true
-	var A = load("res://tools/archetype_check.gd").new()
-	A.main = main
-	var r: Array = A.setup("gil", 8.0)
+	var a_v = load("res://tools/archetype_check.gd").new()
+	a_v.main = main
+	var r: Array = a_v.setup("gil", 8.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-	_clear_view(m, P)
-	T.ctrl = "idle"
-	var cur := P.pos + Vector3(8.0, 0, 0)
-	P.inp["aim"] = cur + Vector3(0, 0.9, 0)
-	P.inp["aim_y"] = cur.y
+	_clear_view(m, p)
+	t.ctrl = "idle"
+	var cur := p.pos + Vector3(8.0, 0, 0)
+	p.inp["aim"] = cur + Vector3(0, 0.9, 0)
+	p.inp["aim_y"] = cur.y
 	for f in 20:
-		await _step(m, P)
-	var K = P.ak
-	K.bag.append("slime")
-	K.press_rmb()
-	await _shots(m, P, "rmb")
+		await _step(m, p)
+	var k = p.ak
+	k.bag.append("slime")
+	k.press_rmb()
+	await _shots(m, p, "rmb")
 	for f in 90:
-		await _step(m, P)
-	K.use_e()
+		await _step(m, p)
+	k.use_e()
 	for f in 30:
-		await _step(m, P)
-	K.e_recast()
-	await _shots(m, P, "e")
+		await _step(m, p)
+	k.e_recast()
+	await _shots(m, p, "e")
 	for f in 90:
-		await _step(m, P)
-	P.lvl = 6
-	K.cast_ult()
-	await _shots(m, P, "x")
+		await _step(m, p)
+	p.lvl = 6
+	k.cast_ult()
+	await _shots(m, p, "x")
 	print("GIL_TELE_SHOTS_DONE")
 	main.get_tree().quit(0)
 
 
 ## A frame saved at each of FRAMES after the press just made.
-func _shots(m: Match, P: Hunter, tag: String) -> void:
+func _shots(m: Match, p: Hunter, tag: String) -> void:
 	var t := 0.0
 	var shot := 0
 	for want in FRAMES:
 		while t < float(want):
-			await _step(m, P)
+			await _step(m, p)
 			t += DT
 		await RenderingServer.frame_post_draw
 		main.get_viewport().get_texture().get_image().save_png(out.path_join("%s_%02d.png" % [tag, shot]))
@@ -67,17 +67,17 @@ func _shots(m: Match, P: Hunter, tag: String) -> void:
 
 
 ## Trees and rocks would hide the ground: everything standing above it goes for the shot, but the hunters.
-func _clear_view(m: Match, P: Hunter) -> void:
+func _clear_view(m: Match, p: Hunter) -> void:
 	for g in m.find_children("*", "GeometryInstance3D", true, false):
 		var n := g as GeometryInstance3D
-		if P.is_ancestor_of(n):
+		if p.is_ancestor_of(n):
 			continue
-		if n.global_transform.origin.y > P.pos.y + 0.4 or n is MultiMeshInstance3D:
+		if n.global_transform.origin.y > p.pos.y + 0.4 or n is MultiMeshInstance3D:
 			n.visible = false
 
 
-func _step(m: Match, P: Hunter) -> void:
+func _step(m: Match, p: Hunter) -> void:
 	m.step(DT)
-	P.render(DT, 1.0)
-	m.cam.snap(P.pos)
+	p.render(DT, 1.0)
+	m.cam.snap(p.pos)
 	await main.get_tree().process_frame

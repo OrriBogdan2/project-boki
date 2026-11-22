@@ -1265,7 +1265,8 @@ func _move_player(d: float) -> void:
 		hv = Loco.dash_hv(dash_v, String(Save.d.get("arch", "")))
 		if dash_t <= 0.0 and not air: hv = HunterMove.dash_exit(hv, run)
 	elif gliding:
-		hv = Loco.glide_step(hv, mv * Hunter.GLIDE_SPEED, Hunter.GLIDE_SPEED, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
+		var gs := HunterMove.glide_cruise
+		hv = Loco.glide_step(hv, mv * gs, gs, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
 	elif air:
 		hv = Loco.air_step(hv, mv, run, d)
 	else:
@@ -1358,7 +1359,7 @@ func _move_player(d: float) -> void:
 	var st := Loco.S.DASHING if dash_t > 0.0 else (Loco.S.GLIDING if gliding else (Loco.S.AIRBORNE if air else Loco.S.GROUNDED))
 	loco.go(Loco.S.MANTLING if not lfl.is_empty() else st)
 	loco.tick(d)
-	Loco.report(loco, hv, pvy if air else 0.0, Hunter.GLIDE_SPEED if gliding else run)
+	Loco.report(loco, hv, pvy if air else 0.0, HunterMove.glide_cruise if gliding else run)
 	_glider_look()
 	player.position = ppos + Vector3(0, py - water.drop_y(), 0)
 	# face the mouse; with the mouse outside the window, face where you're walking
@@ -3109,6 +3110,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 			c2.add_child(l)
 		else:
 			c2.add_child(UI.para(String(ln[0]), 12, ln[1]))
+	HazardCounter.add_row(c2, String(rec["species"]))
 
 ## A sub-page of the card: everything the kin does in a match, in full. Back returns to the card.
 func _open_kin_match(rec: Dictionary) -> void:
@@ -3526,6 +3528,7 @@ func _play_evolutions() -> void:
 		if kk["rec"].get("pending_evo", []).size() > 0 and not kk.has("indoors"):
 			k = kk; break
 	if k.is_empty():
+		EvolveCard.tell_waiting(self, kins)
 		return
 	building_now = true
 	var rec: Dictionary = k["rec"]
@@ -3548,10 +3551,10 @@ func _play_evolutions() -> void:
 	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
 	Sfx.play("boki_evolve")
 	music.hold("lullaby", 25.0)
-	var tw := create_tween()
-	tw.tween_interval(0.4)
-	tw.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tw.tween_callback(func():
+	var tw_v := create_tween()
+	tw_v.tween_interval(0.4)
+	tw_v.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw_v.tween_callback(func():
 		# swap in the grown model
 		if not is_instance_valid(n):
 			building_now = false
@@ -4904,9 +4907,9 @@ func _open_feed(rec: Dictionary) -> void:
 		row.add_child(info)
 		row.add_child(UI.button("Feed", func(): _care_feed(rec, f), 100))
 		v.add_child(row)
-	for f in Care.FOODS:
+	for f in Care.foods_v:
 		var n := int(Save.d["items"].get(f, 0))
-		if n > 0: row_for.call(f, n, Care.FOODS[f]["desc"])
+		if n > 0: row_for.call(f, n, Care.foods_v[f]["desc"])
 	for f in Data.CROPS:
 		var n := int(Save.d["crops"].get(f, 0))
 		if n > 0:

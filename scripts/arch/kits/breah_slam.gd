@@ -120,9 +120,7 @@ func _tick_wind(dt: float) -> void:
 	wind_t += dt
 	h.vel.x = 0.0
 	h.vel.z = 0.0
-	# the circle stays up through the wind-up, where the hop will come down
-	var to := wind_dir.normalized() * float(sd()["hop"]) + wind_run * flight()
-	_circle(h.pos + Vector3(to.x, 0, to.y), wind_k)
+	_wind_circle()
 	if wind_t >= float(feel()["windup"]):
 		wind_t = -1.0
 		_take_off()
@@ -139,9 +137,9 @@ func _tick_hop(dt: float) -> void:
 		hop_on = false
 		return
 	hop_t += dt
-	var ease := float(feel()["ease"])
+	var ease_v := float(feel()["ease"])
 	var u := clampf(hop_t / flight(), 0.0, 1.0)
-	var v := hop_v * ease * (1.0 - pow(u, 1.0 / (ease - 1.0)))
+	var v := hop_v * ease_v * (1.0 - pow(u, 1.0 / (ease_v - 1.0)))
 	v += (h.inp["move"] as Vector2).limit_length(1.0) * float(feel()["nudge"])
 	if _blocked(v * dt):
 		hop_v = Vector2.ZERO
@@ -152,7 +150,7 @@ func _tick_hop(dt: float) -> void:
 	if h.vel.y < 0.0:
 		h.vel.y -= Hunter.H_GRAV * (float(feel()["fall_k"]) - 1.0) * dt
 	# the circle stays on the ground to the landing: where the eased hop comes down if the keys let go
-	var left := hop_v * flight() * _left(u, ease)
+	var left := hop_v * flight() * _left(u, ease_v)
 	_circle(h.pos + Vector3(left.x, 0, left.y), k.dive_k)
 
 
@@ -266,8 +264,15 @@ func fire(c: Dictionary) -> void:
 	h.vel.x = 0.0
 	h.vel.z = 0.0
 	k.play("breah_windup")
+	_wind_circle()
 	k.m.fx.dust(h.pos, 5)
 	k.m.sfx("br_crack", h.pos, -8.0, 0.8)
+
+
+## The circle held through the wind-up where the hop will land (_take_off's flight), so the tell never drops out.
+func _wind_circle() -> void:
+	var land_v := wind_dir.normalized() * float(sd()["hop"]) + wind_run * flight()
+	_circle(k.h.pos + Vector3(land_v.x, 0, land_v.y), wind_k)
 
 
 ## The hop into the circle's centre, both fists coming down as he lands there.
@@ -295,11 +300,11 @@ func _take_off() -> void:
 ## so the glider can still open from it (DolmKit._tick hands the arc over when glide is held).
 func arc(dist: float, up: float, dir: Vector2) -> void:
 	var h := k.h
-	var flight := _flight(up)
-	var v := dir.normalized() * dist / flight
+	var flight_v := _flight(up)
+	var v := dir.normalized() * dist / flight_v
 	h.vel = Vector3(v.x, up, v.y)
 	h.grounded = false
-	h.fly_t = flight
+	h.fly_t = flight_v
 
 
 ## The air dive's landing.

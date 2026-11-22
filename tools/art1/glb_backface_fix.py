@@ -7,6 +7,7 @@ triangle is tested by rays (RAYS directions in a cone on each side of it, RANGE 
 degenerate (not drawn), and the first pass also drops the needles/slivers/caps in --zone.
 Run: blender -b --factory-startup --python tools/art1/glb_backface_fix.py -- IN.glb OUT.glb [passes=3]
 Uses Blender only for its BVH ray cast. Prints what each pass flipped and dropped."""
+
 import json
 import struct
 import sys
@@ -16,18 +17,18 @@ from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 
 SKIN = "skin-v95"
-RAYS = 24            # rays per side
-RANGE = 0.6          # m: a ray that meets the mesh inside this is blocked
-OFFSET = 2e-4        # m: rays start this far off the triangle
-FLIP_GAP = 0.1       # back openness minus front openness above this: wound inside-out
-SHEET_OPEN = 0.3     # open this much on both sides: a floating sheet
-SLIVER = 40.0        # longest edge squared over area above this (and edge > SLIVER_EDGE): a needle of a triangle
-SLIVER_EDGE = 0.04   # m
-NEEDLE_EDGE = 0.04   # m: a tip vertex used by this one triangle only, with an edge longer than this
-SCRAP = 12           # tris: a piece this small and low (below SCRAP_Y), cut off from the body by the passes, goes too
-SCRAP_Y = 0.7        # m
-ZONE_Y = 0.45        # m: needles, slivers and caps are taken out below this height, on the right side (x > 0)
-CAP_FROM = 42700     # the swap's rip caps are the last triangles of the skin; the bones the caps of the right leg sit on
+RAYS = 24  # rays per side
+RANGE = 0.6  # m: a ray that meets the mesh inside this is blocked
+OFFSET = 2e-4  # m: rays start this far off the triangle
+FLIP_GAP = 0.1  # back openness minus front openness above this: wound inside-out
+SHEET_OPEN = 0.3  # open this much on both sides: a floating sheet
+SLIVER = 40.0  # longest edge squared over area above this (and edge > SLIVER_EDGE): a needle of a triangle
+SLIVER_EDGE = 0.04  # m
+NEEDLE_EDGE = 0.04  # m: a tip vertex used by this one triangle only, with an edge longer than this
+SCRAP = 12  # tris: a piece this small and low (below SCRAP_Y), cut off from the body by the passes, goes too
+SCRAP_Y = 0.7  # m
+ZONE_Y = 0.45  # m: needles, slivers and caps are taken out below this height, on the right side (x > 0)
+CAP_FROM = 42700  # the swap's rip caps are the last triangles of the skin; the bones the caps of the right leg sit on
 CAP_BONES = ("hook", "shin.R", "foot.R", "thigh.R")
 CT = {5121: np.uint8, 5123: np.uint16, 5125: np.uint32, 5126: np.float32}
 NC = {"SCALAR": 1, "VEC3": 3, "VEC4": 4}
@@ -42,7 +43,7 @@ def read(data, j, off, i):
 
 
 def write(data, start, arr):
-    data[start:start + arr.nbytes] = np.ascontiguousarray(arr).tobytes()
+    data[start : start + arr.nbytes] = np.ascontiguousarray(arr).tobytes()
 
 
 def openness(tree, pos, idx, rows):
@@ -61,8 +62,11 @@ def openness(tree, pos, idx, rows):
         v = np.cross(n, u)
         mid = (a + b + c) / 3
         for side, sg in ((0, 1), (1, -1)):
-            free = sum(tree.ray_cast(Vector(mid + n * sg * OFFSET),
-                                     Vector(u * d[0] + v * d[1] + n * d[2] * sg), RANGE)[0] is None for d in cone)
+            free = sum(
+                tree.ray_cast(Vector(mid + n * sg * OFFSET), Vector(u * d[0] + v * d[1] + n * d[2] * sg), RANGE)[0]
+                is None
+                for d in cone
+            )
             out[k, side] = free / RAYS
     return out
 
@@ -75,11 +79,11 @@ def shapes(pos, idx):
 
 
 def main():
-    src, dst = sys.argv[sys.argv.index("--") + 1:][:2]
-    passes = int((sys.argv[sys.argv.index("--") + 1:] + ["3"])[2])
+    src, dst = sys.argv[sys.argv.index("--") + 1 :][:2]
+    passes = int((sys.argv[sys.argv.index("--") + 1 :] + ["3"])[2])
     data = bytearray(open(src, "rb").read())
     jlen = struct.unpack("<I", data[12:16])[0]
-    j = json.loads(data[20:20 + jlen])
+    j = json.loads(data[20 : 20 + jlen])
     off = 20 + jlen + 8
     prims = []
     for p in j["meshes"][0]["primitives"]:
@@ -102,7 +106,9 @@ def main():
         verts = [pos] + [ps for ps, _ in others]
         base = np.cumsum([0] + [len(v) for v in verts])
         faces = [idx[live]] + [ix + base[k + 1] for k, (_, ix) in enumerate(others)]
-        tree = BVHTree.FromPolygons([tuple(v) for v in np.concatenate(verts)], [tuple(f) for f in np.concatenate(faces)])
+        tree = BVHTree.FromPolygons(
+            [tuple(v) for v in np.concatenate(verts)], [tuple(f) for f in np.concatenate(faces)]
+        )
         rows = np.nonzero(live)[0]
         op = openness(tree, pos, idx, rows)
         sheet = np.zeros(len(idx), bool)
@@ -118,8 +124,11 @@ def main():
         stay = np.unique(idx[~flip & ~gone & live].ravel())
         turned = np.setdiff1d(np.unique(idx[flip].ravel()), stay)
         normals[turned] = -normals[turned]
-        print("backface pass %d: flipped %d, dropped %d sheets + %d junk, %d normals turned"
-              % (rnd + 1, flip.sum(), sheet.sum(), (gone & ~sheet).sum(), len(turned)), flush=True)
+        print(
+            "backface pass %d: flipped %d, dropped %d sheets + %d junk, %d normals turned"
+            % (rnd + 1, flip.sum(), sheet.sum(), (gone & ~sheet).sum(), len(turned)),
+            flush=True,
+        )
     scraps = scrap(pos, idx)
     idx[scraps] = idx[scraps][:, [0, 0, 0]]
     print("backface: %d scrap triangles dropped" % scraps.sum())
@@ -158,7 +167,7 @@ def junk(pos, idx, main_bone, names, live):
     """Needles and slivers low on the right, tip vertices of one triangle with a long edge, and the rip caps of the right leg."""
     longest, area, mid = shapes(pos, idx)
     zone = (mid[:, 1] < ZONE_Y) & (mid[:, 0] > 0.0)
-    gone = ((longest ** 2 > SLIVER * np.maximum(area, 1e-12)) & (longest > SLIVER_EDGE) & zone) & live
+    gone = ((longest**2 > SLIVER * np.maximum(area, 1e-12)) & (longest > SLIVER_EDGE) & zone) & live
     key = np.round(pos / 1e-5).astype(np.int64)
     _, weld = np.unique(key, axis=0, return_inverse=True)
     weld = weld.ravel()

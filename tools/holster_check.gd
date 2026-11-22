@@ -5,14 +5,16 @@ extends RefCounted
 
 const HIP_AT := Vector3(0.18, 0.95, 0.0)
 const HAND_AT := Vector3(-0.45, 0.8, 0.35)
-const TOL := 0.001           # m
+const TOL := 0.001  # m
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("HOLSTER %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -37,7 +39,7 @@ func run(main: Node) -> void:
 	for k in [0.0, 0.5, 1.0]:
 		model.set_meta(WardenHolster.DRAW, k)
 		h.step()
-		at[k] = skel.get_bone_pose(gun).origin      # (gun has no parent: local is global)
+		at[k] = skel.get_bone_pose(gun).origin  # (gun has no parent: local is global)
 	ok(at[0.0].distance_to(HIP_AT) < TOL, "aim_k 0: the gun rides the hip socket %s" % at[0.0])
 	ok(at[1.0].distance_to(HAND_AT) < TOL, "aim_k 1: the gun is in the hand %s" % at[1.0])
 	ok(at[0.5].distance_to(HIP_AT.lerp(HAND_AT, 0.5)) < TOL, "aim_k 0.5: halfway through the draw")

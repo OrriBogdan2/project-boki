@@ -6,14 +6,15 @@ extends RefCounted
 ## and keeps facing outward, and each prop bobs on its own phase. The orbit is data here; nothing is baked.
 
 const PREFIX := "orbit_"
-const ORBIT_HZ := 0.12      # turns a second
-const BOB := 0.025          # m, each prop up and down
+const ORBIT_HZ := 0.12  # turns a second
+const BOB := 0.025  # m, each prop up and down
 const BOB_HZ := 0.5
-const LOOKERS := "orbit_stones"   # the orbit whose props are eyes (Tarek's seeing-stones)
-const LOOK_RATE := 7.0      # 1/s: how fast they turn to what they watch
-var look := Vector3.INF     # world point they watch (WardenGlb.ORBIT_LOOK), INF for none
-var pivots: Array = []      # [node, its rest transform, [prop, its rest position]...]
+const LOOKERS := "orbit_stones"  # the orbit whose props are eyes (Tarek's seeing-stones)
+const LOOK_RATE := 7.0  # 1/s: how fast they turn to what they watch
+var look := Vector3.INF  # world point they watch (WardenGlb.ORBIT_LOOK), INF for none
+var pivots: Array = []  # [node, its rest transform, [prop, its rest position]...]
 var t := 0.0
+
 
 func setup(glb: Node) -> void:
 	for n in glb.find_children(PREFIX + "*", "Node3D", true, false):
@@ -25,6 +26,7 @@ func setup(glb: Node) -> void:
 			if ch is Node3D:
 				props.append([ch, (ch as Node3D).position, (ch as Node3D).quaternion])
 		pivots.append([nd, nd.transform, props])
+
 
 func step(dt: float) -> void:
 	t += dt
@@ -38,6 +40,7 @@ func step(dt: float) -> void:
 			pr.position = (props[i][1] as Vector3) + Vector3.UP * BOB * sin(TAU * BOB_HZ * t + i * 2.1)
 			if nd.name == LOOKERS and pr.is_inside_tree():
 				_face(pr, props[i][2], dt)
+
 
 ## A seeing-stone's eye (-Z on the prop) turns toward what the kit is watching, then back to looking outward.
 func _face(pr: Node3D, rest: Quaternion, dt: float) -> void:
