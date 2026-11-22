@@ -18,6 +18,9 @@ extends RefCounted
 ##      initials; founding stores it, your clan and profile carry it, a forged one reads as none
 ##   10. last deeds: the newest extraction, raise or breed in the event log rides the profile; forged ones are
 ##      dropped or clamped; the member roll and an island visit show them
+##   12. clan chat (ClanChat): rows are cleaned (other clans', non-members', muted, flooding ones dropped, the
+##      tag is the clan's own); a line goes to the store with the tag and is rate-limited; only members read it;
+##      offline it echoes to you alone; the panel shows only in a clan
 ##   11. breeding loans (section 7): only a clan member lends, not the lead, one at a time; the Boki leaves the
 ##      roster but not the save; the clanmate sees the offer (forged ones dropped), takes it in, and the
 ##      Nook's side panel shows it; after the day it comes home with a memory line and the offer is gone
@@ -44,6 +47,10 @@ func _store(method: String, args: Array, cb: Callable) -> void:
 		"dbDel":
 			docs.erase(args[0])
 			cb.call("ok")
+		"dbAdd":
+			var id := "n%d" % docs.size()
+			docs[args[0] + "/" + id] = JSON.parse_string(args[1])
+			cb.call(id)
 		"dbQuery":
 			var q: Dictionary = JSON.parse_string(args[1])
 			var rows := []
@@ -98,8 +105,9 @@ func _joining() -> void:
 	ok(mine.get("role") == "member" and mine.get("guild") == "g1", "a roster doc is written on join")
 	docs["clanroster/g1_bob"] = {"guild": "g1", "role": "founder"}
 	var got := []
-	Social.clan_roster("g1", Social.clean_guild(docs["guilds/g1"]), func(r, _gone):
-		got.append_array(r.map(func(x): return x["id"])))
+	Social.clan_roster(
+		"g1", Social.clean_guild(docs["guilds/g1"]), func(r, _gone): got.append_array(r.map(func(x): return x["id"]))
+	)
 	ok(got == ["alice", "bob"], "the roster reads back both members")
 	ok(not Social.busy("guild"), "the join finished")
 
@@ -150,34 +158,53 @@ func _old_saves() -> void:
 	ok(Save.fresh()["clan"] == {}, "a new save starts with no clan")
 	DirAccess.remove_absolute(OLD_SAVE)
 
+
 func _tags() -> void:
-	var cases := {"wren": "WREN", "AB": "AB", "A": "", "ABCDE": "", "A1": "", "<b>": "", "NAZI": "", "BASS": "BASS",
-		"MOD": "", 7: ""}
+	var cases := {
+		"wren": "WREN",
+		"AB": "AB",
+		"A": "",
+		"ABCDE": "",
+		"A1": "",
+		"<b>": "",
+		"NAZI": "",
+		"BASS": "BASS",
+		"MOD": "",
+		7: ""
+	}
 	var got := {}
-	for k in cases: got[k] = ClanInfo.clean_tag(k)
+	for k in cases:
+		got[k] = ClanInfo.clean_tag(k)
 	ok(got == cases, "tags: 2-4 letters, A-Z, blocked words out (%s)" % [got])
-	ok(ClanInfo.tag_from_name("Reed Bank Rovers") == "RBR" and ClanInfo.tag_from_name("Moss") == "MOSS",
-		"a clan with no tag takes its initials, or its first letters")
+	ok(
+		ClanInfo.tag_from_name("Reed Bank Rovers") == "RBR" and ClanInfo.tag_from_name("Moss") == "MOSS",
+		"a clan with no tag takes its initials, or its first letters"
+	)
 	var forged_tag: String = Social.clean_guild({"name": "Old Pond", "tag": "<script>"})["tag"]
 	ok(forged_tag == "OP", "a forged tag falls back to the initials")
 	Save.d = Save.fresh()
 	Social.create_guild("Fern Hollow", "", "fh", func(_okk): pass)
 	var gid: String = Save.d["guild_id"]
-	ok(docs["guilds/" + gid]["tag"] == "FH" and Save.d["clan"]["tag"] == "FH",
-		"founding stores the tag; your clan carries it")
+	ok(
+		docs["guilds/" + gid]["tag"] == "FH" and Save.d["clan"]["tag"] == "FH",
+		"founding stores the tag; your clan carries it"
+	)
 	ok(ClanInfo.my_tag() == "FH" and Social.profile_doc()["tag"] == "FH", "...and so does your island snapshot")
 	ok(Social.clean_island({"name": "x", "tag": "S H"})["tag"] == "", "a forged snapshot tag reads as none")
-	ok(ClanInfo.tagged("Ivy", "FH") == "[FH] Ivy" and ClanInfo.tagged("Ivy", "") == "Ivy",
-		"the tag goes before the name")
+	ok(
+		ClanInfo.tagged("Ivy", "FH") == "[FH] Ivy" and ClanInfo.tagged("Ivy", "") == "Ivy",
+		"the tag goes before the name"
+	)
 	Social.leave_guild(func(): pass)
 	ok(ClanInfo.my_tag() == "", "leaving drops the tag")
+
 
 func _deeds() -> void:
 	Save.d = Save.fresh()
 	var sp: String = Data.common_kin()[0]
 	var egg := Save.new_kin(sp)
 	egg["parents"] = ["Mum", "Dad"]
-	egg["origin"] = {"how": "egg"}       # as Care makes a bred egg
+	egg["origin"] = {"how": "egg"}  # as Care makes a bred egg
 	Save.register(egg)
 	ok(ClanInfo.last_deed(Save.d["log"]).get("did") == "bred", "an egg of two parents hatching is a breed")
 	Save.register(Save.new_kin(sp), "wild")
@@ -197,6 +224,7 @@ func _deeds() -> void:
 	var kin := String(Data.KIN[sp]["name"])
 	var txt := ClanInfo.deed_text({"did": "bred", "t": now_s - 3 * 3600, "sp": sp}, now_s)
 	ok(txt == "bred a %s, 3 h ago" % kin, "the roll line reads '%s'" % txt)
+
 
 ## The member roll on the clan's isle and a visit to a member's island, both from the fake store.
 func _roll_and_visit(main: Node) -> void:
@@ -220,8 +248,10 @@ func _roll_and_visit(main: Node) -> void:
 	for i in 5:
 		await tree.process_frame
 	var lines: Array = town.get("panel_host").find_children("*", "Label", true, false).map(func(l): return l.text)
-	ok(lines.has("    made it out of a match, 2 min ago") and lines.count("    nothing yet") == 2,
-		"the roll shows what each member did last (%s)" % [lines])
+	ok(
+		lines.has("    made it out of a match, 2 min ago") and lines.count("    nothing yet") == 2,
+		"the roll shows what each member did last (%s)" % [lines]
+	)
 	var visit := Social.clean_island(docs["profiles/ann"])
 	Game.goto("home", {"visit": visit, "visit_id": "ann"})
 	var bar := ""
@@ -236,6 +266,7 @@ func _roll_and_visit(main: Node) -> void:
 	Game.goto("title")
 	for i in 30:
 		await tree.process_frame
+
 
 func _write(d: Dictionary) -> void:
 	var f := FileAccess.open(OLD_SAVE, FileAccess.WRITE)
@@ -264,6 +295,7 @@ func _showcase() -> void:
 	ok(out[0]["level"] == 999 and out[0]["trust"] == 100.0, "forged huge numbers are clamped")
 	ok(Social.clean_clanbase({"showcase": "lots"}, ids)["showcase"] == [], "a broken doc reads as an empty wall")
 
+
 func _board_rows() -> void:
 	var wk := ClanBoard.week_now()
 	var cap: Dictionary = ClanBoard.rules()["cap"]
@@ -284,8 +316,10 @@ func _board_rows() -> void:
 	ok(e["cup"] == cap["cup"] and e["final"] == 0 and e["extract"] == 0, "counts are clamped to the weekly caps")
 	ok(shares[1]["pts"] == 2 * int(pts["extract"]), "points are worked out, a stored score is ignored")
 	var b := ClanBoard.board(shares, 5)
-	ok(b["goal"] == maxi(int(ClanBoard.rules()["goal_min"]), 5 * int(ClanBoard.rules()["goal_per_member"])),
-		"the goal grows with the clan (%d)" % b["goal"])
+	ok(
+		b["goal"] == maxi(int(ClanBoard.rules()["goal_min"]), 5 * int(ClanBoard.rules()["goal_per_member"])),
+		"the goal grows with the clan (%d)" % b["goal"]
+	)
 
 	Save.d["guild_id"] = "g7"
 	var mine := "clanboard/g7_alice"
@@ -317,6 +351,7 @@ func _board_rows() -> void:
 	ok(not docs.has(mine) and docs.has("clanboard/g7_bob"), "leaving deletes only your board row")
 	ClanBoard.add("cup")
 	ok(not docs.has(mine), "outside a clan nothing is counted")
+
 
 func _base(main: Node) -> void:
 	var furn: String = Data.FURN.keys()[0]
@@ -361,7 +396,7 @@ func _base(main: Node) -> void:
 	var lines: Label3D = wall.get_node_or_null("ClanBoard/Top")
 	var top: String = lines.text if lines != null else ""
 	ok(top.begins_with("1. Ann") and top.contains("2. Ben") and not top.contains("Dan"), "the top three: %s" % [top])
-	Game.goto("title")      # leave the farm before quitting, so it frees cleanly
+	Game.goto("title")  # leave the farm before quitting, so it frees cleanly
 	for i in 30:
 		await tree.process_frame
 
@@ -428,6 +463,80 @@ func _loans(main: Node) -> void:
 	ok("waited a day for Bob" in line and home, "an untaken loan comes home after its day")
 
 
+func _chat_rows(rows: Array) -> Array:
+	return ClanChat.clean_rows(rows, "g7", ["alice", "bob"], "REED")
+
+
+func _chat() -> void:
+	MuteList.clear()
+	var long := "x".repeat(300)
+	var rows := [
+		_row("a", {"guild": "g7", "by": "bob", "name": "Bob", "text": "hi", "t": 1000, "tag": "FAKE"}),
+		_row("b", {"guild": "g8", "by": "bob", "name": "Bob", "text": "other clan", "t": 2000}),
+		_row("c", {"guild": "g7", "by": "eve", "name": "Eve", "text": "not a member", "t": 3000}),
+		_row("d", {"guild": "g7", "by": "bob", "name": "Bob", "text": "too soon", "t": 2500}),
+		_row("e", {"guild": "g7", "by": "alice", "name": "Alice", "text": long + "\n", "t": 9000}),
+		_row("f", {"guild": "g7", "by": "alice", "name": "Alice", "text": "   ", "t": 20000}),
+		_row("a", {"guild": "g7", "by": "bob", "name": "Bob", "text": "again", "t": 30000}),
+		_row("g", {"guild": "g7", "by": "bob", "name": "Bob", "text": 5, "t": 40000}),
+	]
+	var out := _chat_rows(rows)
+	var ids: Array = out.map(func(r): return r["id"])
+	ok(ids == ["a", "e"], "chat rows: other clan, non-member, flood, empty, repeat, non-text dropped (%s)" % [ids])
+	var clamped: bool = out[1]["text"].length() == Prematch.CHAT_MAX
+	ok(out[0]["tag"] == "REED" and clamped, "a forged tag shows as the clan's; long lines clamp")
+	MuteList.toggle("Bob")
+	ok(_chat_rows(rows).size() == 1, "a muted clanmate's line is dropped, the rest stay")
+	MuteList.clear()
+
+	Save.d["guild_id"] = "g7"
+	Save.d["clan"] = {"tag": "REED"}
+	Save.d["name"] = "Alice"
+	ClanChat._echo.clear()
+	ClanChat._last_sent = -1e18
+	var sent := [false]
+	var go := func(t: String, at: float) -> bool:
+		ClanChat.send(t, func(v: bool): sent[0] = v, at)
+		return sent[0]
+	ok(go.call("hello clan", 10000.0), "a line is sent")
+	var stored := docs.keys().filter(func(k): return String(k).begins_with("clanchat/"))
+	var doc: Dictionary = docs[stored[0]] if stored.size() == 1 else {}
+	var good: bool = doc.get("guild") == "g7" and doc.get("tag") == "REED" and doc.get("by") == "alice"
+	ok(good and doc.get("text") == "hello clan", "it lands in the store with the clan, tag and sender (%s)" % [doc])
+	ok(not go.call("too fast", 11000.0), "a second line 1 s later is refused")
+	ok(not go.call("   ", 20000.0), "an empty line is refused")
+	docs["clanchat/n99"] = {"guild": "g7", "by": "bob", "name": "Bob", "text": "hey", "t": 12000}
+	docs["clanchat/n98"] = {"guild": "g8", "by": "bob", "name": "Bob", "text": "elsewhere", "t": 12500}
+	docs["clanchat/n97"] = {"guild": "g7", "by": "eve", "name": "Eve", "text": "outsider", "t": 12600}
+	var shown := []
+	ClanChat.read("g7", ["alice", "bob"], func(l: Array): shown.assign(l.map(func(r): return r["text"])))
+	ok(shown == ["hello clan", "hey"], "a member reads the clan's lines only, oldest first (%s)" % [shown])
+	for i in 45:
+		go.call("line %d" % i, 30000.0 + i * 4000.0)
+	var mine := docs.keys().filter(func(k): return String(k).begins_with("clanchat/") and docs[k].get("by") == "alice")
+	ok(
+		mine.size() <= ClanChat.KEEP_MINE + 1,
+		"my lines in the store stay near %d (%d)" % [ClanChat.KEEP_MINE, mine.size()]
+	)
+
+	Social.ok = false
+	var before := docs.size()
+	ok(go.call("offline hello", 900000.0) and docs.size() == before, "offline: the line is sent but nothing is stored")
+	ClanChat.read("g7", [], func(l: Array): shown.assign(l.map(func(r): return r["text"])))
+	ok(shown == ["offline hello"], "offline: you read your own echo (%s)" % [shown])
+	Social.ok = true
+	var panel := VBoxContainer.new()
+	ClanChatPanel.side_rows(panel)
+	ok(panel.get_child_count() == 1, "the Nook panel shows the clan chat in a clan")
+	panel.free()
+	Save.d["guild_id"] = ""
+	panel = VBoxContainer.new()
+	ClanChatPanel.side_rows(panel)
+	ok(panel.get_child_count() == 0 and not go.call("no clan", 990000.0), "outside a clan: no panel, no sending")
+	panel.free()
+	Save.d = Save.fresh()
+
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -443,6 +552,7 @@ func run(main: Node) -> void:
 	_board_rows()
 	_tags()
 	_deeds()
+	_chat()
 	Save.d = Save.fresh()
 	await _base(main)
 	_loans(main)
