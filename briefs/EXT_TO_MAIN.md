@@ -10928,3 +10928,4 @@ READY ext/vfx-gil-smoke-ring 2b6d46558d365ab25d924e8761475b88c8e25d24 (Gil RMB/Z
 READY ext/sfx-overheat-lift-row bbad8835ec45f4c722af38ea90a18d0038f3c90e (overheated glider lift cue row green)
 READY ext/sfx-overheat-lift-row 2fc957841de4c94ae48fc3f6a6c0ba6a5efc93bf (overheated glider lift cue row green)
 READY ext/sfx-motley-last-three 81dffacaef11ff95617bc67190f61cb23f08a936 (Motley's three missing cues)
+READY ext/sfx-grimble-slug-hits 0331d9c219fd2df19bd326278acede33f0d1fdfa (Grimble slug hit sounds)
