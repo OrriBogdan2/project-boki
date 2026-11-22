@@ -25,10 +25,12 @@ const WANT := {
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("ULTRANK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -36,8 +38,19 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 22, "no_drop": true,
-		"arch": "thief", "cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 22,
+			"no_drop": true,
+			"arch": "thief",
+			"cls": Arch.weight("thief"),
+			"weapon": Arch.signature("thief")
+		}
+	)
 	var P: Hunter = m.player
 	P.ctrl = "local"
 	var bot: Hunter = null
@@ -54,6 +67,7 @@ func run(main: Node) -> void:
 	print("ULTRANK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## 1: the hero's X at R ranks 2 and 3 against the table; rank 1 is the JSON's own number.
 func _numbers(P: Hunter, id: String) -> void:
 	P.reclass(Arch.weight(id), id)
@@ -69,6 +83,7 @@ func _numbers(P: Hunter, id: String) -> void:
 			good = good and is_equal_approx(v, want)
 	ok(good, "%s ranks 1-3: %s" % [id, ", ".join(got)])
 
+
 ## 2: rank 3 waits for level 10, and the point there is the player's to place.
 func _player_picks(P: Hunter) -> void:
 	P.slot_lv = {"sec": 2, "dash": 2, "kin": 1, "ult": 2}
@@ -76,19 +91,28 @@ func _player_picks(P: Hunter) -> void:
 	P.skill_pts = 1
 	ok(not P.can_level("ult"), "R rank 3 is shut at level 9")
 	P.gain_xp(float(Hunter.XP_TO[9]) - P.xp + 1.0)
-	ok(P.lvl == 10 and P.skill_pts == 2 and int(P.slot_lv["ult"]) == 2,
-			"level 10: the player's points wait for a choice (R %d, %d points)" % [int(P.slot_lv["ult"]), P.skill_pts])
+	ok(
+		P.lvl == 10 and P.skill_pts == 2 and int(P.slot_lv["ult"]) == 2,
+		"level 10: the player's points wait for a choice (R %d, %d points)" % [int(P.slot_lv["ult"]), P.skill_pts]
+	)
 	ok(P.can_level("ult") and P.can_level("kin"), "level 10: R and E can both take the point")
-	ok(P.rank_text("r").begins_with("Rank 2 / 3") and P.rank_text("r").contains("19s"),
-			"R hover: rank 2 of 3, next rank's numbers (%s)" % P.rank_text("r"))
+	ok(
+		P.rank_text("r").begins_with("Rank 2 / 3") and P.rank_text("r").contains("19s"),
+		"R hover: rank 2 of 3, next rank's numbers (%s)" % P.rank_text("r")
+	)
 	P.level_slot("kin")
 	ok(int(P.slot_lv["ult"]) == 2 and int(P.slot_lv["kin"]) == 2, "a point put into E leaves R at rank 2")
 	var cd2 := HeroUlt.cooldown(P.ak)
 	P.level_slot("ult")
-	ok(int(P.slot_lv["ult"]) == 3 and P.skill_pts == 0 and not P.can_level("ult"),
-			"the player picked R rank 3, the cap")
-	ok(HeroUlt.cooldown(P.ak) < cd2 and int(HeroUlt.slot_info(P.ak)["level"]) == 3,
-			"rank 3 rests less (%.1fs -> %.1fs) and the X tile reads rank 3" % [cd2, HeroUlt.cooldown(P.ak)])
+	ok(
+		int(P.slot_lv["ult"]) == 3 and P.skill_pts == 0 and not P.can_level("ult"),
+		"the player picked R rank 3, the cap"
+	)
+	ok(
+		HeroUlt.cooldown(P.ak) < cd2 and int(HeroUlt.slot_info(P.ak)["level"]) == 3,
+		"rank 3 rests less (%.1fs -> %.1fs) and the X tile reads rank 3" % [cd2, HeroUlt.cooldown(P.ak)]
+	)
+
 
 ## 3: a bot spends rank 3 itself once every slot is at rank 2.
 func _bot_rank3(bot: Hunter) -> void:
@@ -98,5 +122,7 @@ func _bot_rank3(bot: Hunter) -> void:
 	bot.gain_xp(float(Hunter.XP_TO[8]) - bot.xp + 1.0)
 	ok(bot.lvl == 9 and int(bot.slot_lv["ult"]) == 2, "a bot at 9 has R rank 2 (%s)" % str(bot.slot_lv))
 	bot.gain_xp(float(Hunter.XP_TO[9]) - bot.xp + 1.0)
-	ok(bot.lvl == 10 and int(bot.slot_lv["ult"]) == 3 and bot.skill_pts == 0,
-			"a bot at 10 takes R rank 3 (%s)" % str(bot.slot_lv))
+	ok(
+		bot.lvl == 10 and int(bot.slot_lv["ult"]) == 3 and bot.skill_pts == 0,
+		"a bot at 10 takes R rank 3 (%s)" % str(bot.slot_lv)
+	)

@@ -4,7 +4,6 @@ extends RefCounted
 ## events), what the equal-footing save migration converted (EqualMigrate), and the Boki the market
 ## migration brought home (MarketSave).
 
-
 const STRAY := "A stray %s wandered in to stay."
 const STRAY_MORE := "Adopt more at the Shelter (the market stall)."
 ## A Boki starved: the lines under its "has died" card. `now` = it happened just now, not while you were away.
@@ -15,16 +14,22 @@ const DEATH_FEEDER := "A filled feeder keeps your Boki fed."
 const DEATH_SHRINE := "A Soul Shrine can bring a Boki back."
 const BACK_HOME := ["You took %s back!", "It's home again.", "It won't forget you came for it."]
 const EGG_HOME := ["Brought home %s!", "Off to the Incubator by the Nesting Nook.", "Eggs hatch one at a time."]
-const NO_BOKI_HOME := ["With no Boki left at home, %s let one go on credit.",
-	"It waited a long time and trusts you less now."]
+const NO_BOKI_HOME := [
+	"With no Boki left at home, %s let one go on credit.", "It waited a long time and trusts you less now."
+]
 const SNACKS := ["The snack patch grew %d extra snacks.", "%d are in the bowl, the rest in the pantry."]
 
 
 ## The farm-room notice for an old save, first time home since the Kin Burrow: `room` Boki out, `resting` asleep.
 static func burrow(room: int, resting: int) -> Array:
-	return ["The farm has room for %d Boki out at once." % room, "Your partner and closest Boki stayed out.",
-		"The other %d curled up in the Boki Burrow." % resting, "It is south of the market stall, by the pond.",
-		"Boki in the burrow don't get hungry.", "Swap them out any time, or expand the cottages."]
+	return [
+		"The farm has room for %d Boki out at once." % room,
+		"Your partner and closest Boki stayed out.",
+		"The other %d curled up in the Boki Burrow." % resting,
+		"It is south of the market stall, by the pond.",
+		"Boki in the burrow don't get hungry.",
+		"Swap them out any time, or expand the cottages."
+	]
 
 
 ## The lines under a Boki's "has died" card.
@@ -39,8 +44,15 @@ static func death(rec_name: String, away: bool, has_shrine: bool) -> Array:
 ## Every fixed notice line, for --tutorial-text-check: a bullet card line over 60 characters fails.
 static func fixed_lines() -> Array:
 	var out: Array = [STRAY % "Mossling", STRAY_MORE, DEATH_FEEDER, DEATH_SHRINE]
-	return out + burrow(8, 8) + death("Mossling", true, false) + fill(EGG_HOME, "a Rare Egg") \
-		+ fill(BACK_HOME, "Mossling") + fill(NO_BOKI_HOME, "Old Pell") + fill(SNACKS, 12)
+	return (
+		out
+		+ burrow(8, 8)
+		+ death("Mossling", true, false)
+		+ fill(EGG_HOME, "a Rare Egg")
+		+ fill(BACK_HOME, "Mossling")
+		+ fill(NO_BOKI_HOME, "Old Pell")
+		+ fill(SNACKS, 12)
+	)
 
 
 ## `lines` with `arg` put into every line that has a "%" slot.
@@ -57,9 +69,7 @@ static func toast_stray(home: Node, events: Array) -> void:
 				func():
 					if is_instance_valid(home) and home.is_inside_tree():
 						var species_name := String(Data.KIN[String(srec["species"])]["name"])
-						home._show_when_free(
-							[STRAY % species_name, STRAY_MORE]
-						)
+						home._show_when_free([STRAY % species_name, STRAY_MORE])
 			)
 
 
@@ -67,7 +77,7 @@ static func toast_stray(home: Node, events: Array) -> void:
 static func show_migration(home: Node) -> void:
 	var market = Save.d.get("market_notice", [])
 	if typeof(market) == TYPE_STRING and market != "":
-		market = [market]     # a save written before the notice became a list
+		market = [market]  # a save written before the notice became a list
 	if typeof(market) == TYPE_ARRAY and not market.is_empty():
 		Save.d.erase("market_notice")
 		_later(home, market, "Boki aren't sold any more")
