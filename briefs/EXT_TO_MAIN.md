@@ -10861,3 +10861,4 @@ READY ext/p14b-port-1118 5bfb42cca2 (P14 part 2 SFX re-merged with main: gen_sfx
 READY ext/hunter-tex-2k e2c677c4dfb27e9272bc09c80f522427c16d5410 (hunter 4K->2K textures, pack -96 MB; contains main 0b967858b9; size_budget re-measured 791.2 MB; warden_tex_guard 0 over 2048)
 READY ext/merge-lane-M7-1121 e854aa1010ee47c198a297b48fe30fd3ba43c661 (lane M7 bundle PR #588: 12 branches + main 1626f8a65f; replaces c30ffcb)
 READY ext/hunter-review-check d178d53959 (bulk-rebase: origin/main merged in mechanically, was 9b5a410e43; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/snack-first-60s b58ba57d6d (merged origin/main; save.gd conflict resolved keeping FirstObjective.migrate + snack_picks=1 for old saves; check --check, snack-patch, decor-tags clean)
