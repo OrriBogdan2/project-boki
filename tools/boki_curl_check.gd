@@ -42,6 +42,8 @@ func run(main: Node) -> void:
 			px = int(a.substr(7))
 		snap = snap or a == "--curl-snap"
 	if shots != "":
+		if main.get("fade") != null:
+			main.fade.reveal(0.01)
 		main.get_window().size = Vector2i(px, px)
 		main.get_viewport().size = Vector2i(px, px)
 	for id in ids:
@@ -89,6 +91,7 @@ func _fresh(main: Node, id: String) -> void:
 	for i in 110:
 		m.step(Match.DT)
 	if shots != "":
+		m.hud.visible = false
 		cam = Camera3D.new()
 		m.add_child(cam)
 		cam.make_current()
