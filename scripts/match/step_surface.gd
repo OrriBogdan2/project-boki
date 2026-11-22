@@ -1,6 +1,8 @@
 class_name StepSurface
 extends RefCounted
 ## What a Hunter's footstep sounds like (Juice.footstep): the surface underfoot and the cue for it.
+## Every step is pitched and levelled by the Hunter's weight class (WEIGHT_PITCH, WEIGHT_DB; Motley floats and
+## never steps, KMovesStone.gait).
 ## Surfaces: grass, stone, wood, snow (every Hunter has its own steps on these) and water and metal
 ## (shared steps per weight class: step_<surface>_<light|medium|heavy>, made by tools/gen_sfx_steps.py).
 ## Metal is the sky train's car decks, wood a plank bridge (World.bridge); the Hollow Crown's
@@ -9,7 +11,8 @@ extends RefCounted
 ## A Hunter's own "<arch>_step_<surface>" wins when it has one. docs/AUDIO.md lists each region.
 
 const SHARED := ["water", "metal"]  # surfaces with steps per weight class, not per Hunter
-const WEIGHT_DB := {"light": -1.5, "medium": 0.0, "heavy": 1.5}  # dB on those steps: heavier boots carry more
+const WEIGHT_DB := {"light": -1.5, "medium": 0.0, "heavy": 1.5}  # dB on every step: heavier boots carry more
+const WEIGHT_PITCH := {"light": 1.1, "medium": 1.0, "heavy": 0.88}  # pitch scale on every step: heavier is lower
 
 
 ## The surface under `pos` in match `m`.
@@ -37,9 +40,14 @@ static func cue(h: Hunter, surf: String) -> String:
 	return HeroSfx.of(h, "step_" + surf, shared)
 
 
-## The step's volume: `base` dB, plus the weight class's on the shared surfaces.
-static func vol_db(h: Hunter, surf: String, base: float) -> float:
-	return base + (float(WEIGHT_DB[weight_of(h.arch)]) if surf in SHARED else 0.0)
+## The step's volume: `base` dB plus the weight class's (every surface, and the foot's contact step).
+static func vol_db(h: Hunter, base: float) -> float:
+	return base + float(WEIGHT_DB[weight_of(h.arch)])
+
+
+## The step's pitch scale for h's weight class (light higher, heavy lower).
+static func pitch(h: Hunter) -> float:
+	return float(WEIGHT_PITCH[weight_of(h.arch)])
 
 
 static func weight_of(arch: String) -> String:
