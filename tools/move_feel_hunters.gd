@@ -127,13 +127,13 @@ func _glide_steer() -> Array:
 	return [cruise, -1.0]
 
 
-## A glider opened at `run` m/s (a run off a ledge) and held forward 2.5 s: [speed 0.5 s in, after 2.5 s, slowest].
-func _run_into_glide(run: float) -> Array:
+## A glider opened at `run_v` m/s (a run off a ledge) and held forward 2.5 s: [speed 0.5 s in, after 2.5 s, slowest].
+func _run_into_glide(run_v: float) -> Array:
 	c._glide_at(25.0)
-	hunter.vel = Vector3(run, 0.0, 0.0)
+	hunter.vel = Vector3(run_v, 0.0, 0.0)
 	hunter.inp["jump"] = true
 	var half := 0.0
-	var slowest := run
+	var slowest := run_v
 	for i in 150:
 		hunter.inp["glide"] = true
 		hunter.inp["move"] = Vector2(1, 0)
