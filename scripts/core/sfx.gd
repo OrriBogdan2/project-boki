@@ -226,6 +226,10 @@ const MIN_GAP := {
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
+## A Boki type's impact ki_<type> is the take set of its cast cue k_<type> (BokiImpact), with its own gap and cap.
+const IMPACT_PREFIX := "ki_"
+const IMPACT_PREFIX_OF := "k_"
+const IMPACT_GAP := 90
 const STACK_MS := 90
 const STACK_DB := 3.5
 ## The explosion category: the generic blast sounds (a Boki's burst or rider, an area hit, an ability blast) sit
@@ -264,7 +268,6 @@ var last_played := {}
 var cue_log = null
 var rng := RandomNumberGenerator.new()
 
-signal new_track(name: String)
 ## A one-shot started: where (null for UI), its dB before distance and pitch. SfxCast and the audio checks listen.
 signal played(sname: String, at: Variant, vol_db: float, pitch: float)
 var music: Array[AudioStreamPlayer] = []  # two players so tracks can crossfade
@@ -383,7 +386,6 @@ func play_music(name: String, fade := 1.5) -> void:
 			Save.d["music"] = []
 		Save.d["music"].append(name)
 		Save.save_game()
-		new_track.emit(name)
 	var old := music[music_i]
 	music_i = 1 - music_i
 	var nw := music[music_i]
@@ -393,12 +395,12 @@ func play_music(name: String, fade := 1.5) -> void:
 	var tw := create_tween().set_parallel(true)
 	_music_tw = tw
 	tw.tween_property(old, "volume_db", -80.0, fade).set_trans(Tween.TRANS_SINE)
-	tw.chain().tween_callback(old.stop)
 	if name != "":
 		nw.stream = _loop_stream("res://audio/music_%s.ogg" % name)
 		nw.volume_db = -40.0
 		nw.play()
 		tw.tween_property(nw, "volume_db", -9.0, fade).set_trans(Tween.TRANS_SINE)
+	tw.chain().tween_callback(old.stop)      # after both fades: chained before the fade-in, it waited for the fade-out
 
 
 func play_ambience(name: String) -> void:
@@ -700,6 +702,7 @@ func play(
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
 	if sname.contains("step_"):
 		gap = 25  # footsteps: several people can walk at once
+	if sname.begins_with(IMPACT_PREFIX): gap = IMPACT_GAP
 	var rk := voices.rank_of(pos, listener, mine)
 	if now - int(last_played.get(sname, -1000)) < gap:
 		voices.cut.emit(sname, rk, &"gap")
@@ -913,9 +916,10 @@ func _lazy(sname: String) -> bool:
 	if _lazy_miss.has(sname):
 		return false
 	var takes: Array = []
-	var paths: Array = ["res://audio/%s.wav" % sname]
+	var file := IMPACT_PREFIX_OF + sname.trim_prefix(IMPACT_PREFIX) if sname.begins_with(IMPACT_PREFIX) else sname
+	var paths: Array = ["res://audio/%s.wav" % file]
 	for i in range(1, 5):
-		paths.append("res://audio/%s_%d.wav" % [sname, i])
+		paths.append("res://audio/%s_%d.wav" % [file, i])
 	for path in paths:
 		if ResourceLoader.exists(path):
 			takes.append(load(path))

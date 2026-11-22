@@ -15,7 +15,7 @@ static func target(h, k: Dictionary) -> Vector3:
 	var id := FarmTutorial.current()
 	if id == "toy" and FarmTutorial.stage(id) == "watch":
 		return FarmTutorial.toy_spot()
-	if id in ["meet", "eat", "toy"]:
+	if id in ["meet", "patch", "eat", "toy"]:
 		return h.ppos       # it comes to you and stays at your side while you meet it, feed it and put a toy down
 	return h.guide.target(id) if id != "" else Vector3.INF
 

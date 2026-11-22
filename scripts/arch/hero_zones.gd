@@ -15,7 +15,7 @@ extends RefCounted
 ##   ["zone", "trade",  nid, x, y, z, r, secs]   Motley's Trade in flight: its landing sigil fills over secs
 ##   ["zone", "tradego", nid]                    the Trade was cut short: the sigil goes
 
-const ROCK_COL := Color("c98d4a")
+const ROCK_COL := KitLooks.RUNE_TEAL
 const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
 # m: a rock's top above its base (StoneStand: you stand on it), taller than a hunter's head; dolm.json rock.top
 const ROCK_TOP := 2.2
@@ -98,9 +98,8 @@ static func rock(
 	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true,
 	top := ROCK_TOP
 ) -> Dictionary:
-	var w: Dictionary = m.verbs.add_wall(
-		by, at, dir, {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#c98d4a"}, 1.0
-	)
+	var e := {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#" + ROCK_COL.to_html(false)}
+	var w: Dictionary = m.verbs.add_wall(by, at, dir, e, 1.0)
 	var old: Node3D = w["node"]
 	var n := RockLook.take(m)
 	var tall := top / ROCK_TOP
@@ -155,7 +154,7 @@ static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
 ## warn, rise: Verbs.add_bridge's crumble warning and heave-up (s; 0 = none).
 static func bridge(
 	m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true,
-	color := "#d9b27a", warn := 0.0, rise := 0.0
+	color := "#3e5560", warn := 0.0, rise := 0.0
 ) -> int:
 	var e := {"length": len_, "width": width, "time": time_, "color": color, "warn": warn, "rise": rise}
 	var n: int = m.verbs.add_bridge(by, from, dir, e)
@@ -240,7 +239,7 @@ static func net_in(m: Node, x: Array) -> void:
 			if x.size() < 11: return
 			var by2: Ent = m.ents_by_id.get(String(x[2]), null)
 			if by2 != null:
-				var tint := String(x[11]) if x.size() > 11 else "#d9b27a"
+				var tint := String(x[11]) if x.size() > 11 else "#3e5560"
 				var warn := float(x[12]) if x.size() > 13 else 0.0
 				var rise := float(x[13]) if x.size() > 13 else 0.0
 				bridge(
