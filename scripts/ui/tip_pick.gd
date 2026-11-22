@@ -10,11 +10,13 @@ static var last: Array = []
 static var _down_key := ""
 static var _down_tip := ""
 
+
 static func rules() -> Dictionary:
 	if _rules.is_empty():
 		var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/tips.json"))
 		_rules = d if d is Dictionary else {}
 	return _rules
+
 
 ## The triggers a run's counts raise, most pressing first. stats and used are the local Hunter's
 ## (stats, used), why is how it ended ("abyss"), time is seconds played. The habit triggers
@@ -36,6 +38,7 @@ static func triggers(stats: Dictionary, used: Dictionary, why: String, time: flo
 			out.append("few_glide")
 	return out
 
+
 ## Remembers what a finished expedition (Game.apply_result's r) says you missed. The tutorial run
 ## says nothing: it already teaches all of it.
 static func note_run(r: Dictionary) -> void:
@@ -55,6 +58,7 @@ static func text(id: String) -> String:
 static func for_loading(blight: bool, fusion := true) -> String:
 	return pick(last, blight, fusion)
 
+
 ## The tip under "You're down", chosen once per knock (the HUD asks every frame).
 static func for_downed(p: Hunter, time: float, blight: bool, fusion := true) -> String:
 	var key := "%d:%d" % [p.get_instance_id(), p.downs]
@@ -62,6 +66,7 @@ static func for_downed(p: Hunter, time: float, blight: bool, fusion := true) -> 
 		_down_key = key
 		_down_tip = pick(triggers(p.stats, p.used, "", time), blight, fusion)
 	return _down_tip
+
 
 ## The most relevant unseen tip for these triggers, else a random unseen one; marks it seen.
 static func pick(trig: Array, blight := true, fusion := true) -> String:
@@ -85,6 +90,7 @@ static func pick(trig: Array, blight := true, fusion := true) -> String:
 	seen.append(chosen["id"])
 	Save.d["tutorial"]["tips_seen"] = seen
 	return render(String(chosen["text"]))
+
 
 ## A tip's text with each {action} turned into that action's key.
 static func render(s: String) -> String:

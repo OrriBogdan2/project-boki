@@ -6,14 +6,16 @@ extends RefCounted
 ##   3. a hit that knocks a rival Hunter down raises the stronger knock tick, and every tick is gone in 0.12 s
 ## Never touches the save.
 
-const CAP_S := 0.12     # s: no tick may show longer than this
+const CAP_S := 0.12  # s: no tick may show longer than this
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("HITMARKER %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -30,8 +32,10 @@ func run(main: Node) -> void:
 	# ---------------------------------------------------------------- 1. one hit, one tick
 	var n := r.ticks
 	CombatBus.hit_landed.emit(P, foe, 10.0, ["primary"])
-	ok(r.ticks == n + 1 and r.tick_t > 0.0 and r.tick_t <= CAP_S and not r.tick_knock,
-		"a fake hit raises one tick (%d, %.2f s)" % [r.ticks - n, r.tick_t])
+	ok(
+		r.ticks == n + 1 and r.tick_t > 0.0 and r.tick_t <= CAP_S and not r.tick_knock,
+		"a fake hit raises one tick (%d, %.2f s)" % [r.ticks - n, r.tick_t]
+	)
 	_clear(r)
 	foe.hurt(10.0, P, {"src": "shot"})
 	ok(r.ticks == n + 2 and not r.tick_knock, "a real shot through Ent.hurt raises one more (%d)" % (r.ticks - n))
@@ -61,6 +65,7 @@ func run(main: Node) -> void:
 	ok(r.tick_t == 0.0, "it's gone within %.2f s" % CAP_S)
 	print("HITMARKER DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _clear(r: Reticle) -> void:
 	r.tick(1.0)
