@@ -10899,3 +10899,4 @@ READY ext/boki-own-clips-b ed13c072c6f820e707af4a99898ad6fea8c80346 (origin/main
 READY ext/combat-vex-cadence-settle 0f11878f55 (Vex rifle cadence settled)
 READY ext/farm-garden-only-pass 9a3e69c43e (garden-only 30 min pass clean)
 READY ext/spawn-at-muzzle 597314d8c7 (shots drawn from each hunter hand/weapon via content/vfx fire_from; 13-hunter audit table + --muzzle-check 14/14; MP4 from exported build)
+READY ext/anim-boki-back-curl-blend 1d0a21f166835a1060392cf59536003aefa30dc8 (Boki back-curl blends without a snap)
