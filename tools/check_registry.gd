@@ -26,7 +26,6 @@ const CHECKS := {
 	# out: watch and switch teammates
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],
 	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5
-	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],      # docs/decisions/0100
 	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],
 	"--camp-layout-check": ["res://tools/camp_layout_check.gd", "camp_layout_check", null],
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
@@ -739,8 +738,6 @@ const CHECKS := {
 	"--garden-only-pass-check": ["res://tools/garden_only_pass_check.gd", "garden_only_pass_check", null],
 	"--garden-first-day-check": ["res://tools/garden_first_day_check.gd", "garden_first_day_check", null],
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],  # trust from care
-	"--bond-pace-check": ["res://tools/bond_pace_check.gd", "bond_pace_check", null],  # FARM_LOOP: bond pace, taper
-	"--pet-react-check": ["res://tools/pet_react_check.gd", "pet_react_check", null],      # a pat by personality
 	"--pet-react-check": ["res://tools/pet_react_check.gd", "pet_react_check", null],  # a pat by personality
 	"--lean-snacks-check": ["res://tools/lean_snacks_check.gd", "lean_snacks_check", null],
 	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],  # day 1, 5
