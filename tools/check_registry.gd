@@ -1031,11 +1031,20 @@ static var _dupes: Array = []
 ## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run; --rng-seed=N seeds them
 ## from N instead, to prove a check does not lean on one stream (a branch that adds a draw shifts every later one).
 static func run(main: Node, args: PackedStringArray) -> bool:
+	var checks := all()
+	if not _dupes.is_empty():
+		printerr("CHECKREGISTRY FAIL: duplicate flags across tools/checks/*.gd and CHECKS: ", _dupes)
+		main.get_tree().quit(1)
+		return true
 	var flag := flag_in(args)
 	if flag == "":
 		return false
-	var e: Array = CHECKS[flag]
+	var e: Array = checks[flag]
+	Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
 	seed(hash(flag))
+	for a in args:
+		if String(a).begins_with("--rng-seed="):
+			seed(int(String(a).substr(11)))
 	var c = load(String(e[0])).new()
 	main.set_meta(String(e[1]), c)
 	if e[2] == null:
@@ -1047,32 +1056,11 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 
 ## The first registered check flag on the command line, "" if none (Settings uses it too).
 static func flag_in(args: PackedStringArray) -> String:
-	for flag in CHECKS:
+	var checks := all()
+	for flag in checks:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
 			return flag
 	return ""
-			var e: Array = CHECKS[flag]
-	var checks := all()
-	if not _dupes.is_empty():
-		printerr("CHECKREGISTRY FAIL: duplicate flags across tools/checks/*.gd and CHECKS: ", _dupes)
-		main.get_tree().quit(1)
-		return true
-	for flag in checks:
-		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
-			var e: Array = checks[flag]
-			Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
-			seed(hash(flag))
-			for a in args:
-				if String(a).begins_with("--rng-seed="):
-					seed(int(String(a).substr(11)))
-			var c = load(String(e[0])).new()
-			main.set_meta(String(e[1]), c)
-			if e[2] == null:
-				c.run(main)
-			else:
-				c.run(main, e[2])
-			return true
-	return false
 
 
 ## Every check, one lookup: the legacy CHECKS above plus the area files in tools/checks/. A flag present in two
