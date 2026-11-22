@@ -224,7 +224,8 @@ func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 		var fwd := Vector2(-sin(h.face), -cos(h.face))
 		if to.length() > 0.1 and fwd.dot(to.normalized()) > cos(deg_to_rad(70.0)):
 			on_block(dmg, by)
-			m.fx.flash(h.pos + Vector3(to.normalized().x * 0.6, 1.0, to.normalized().y * 0.6), res_col(), 0.4, 0.05)
+			var side := Vector3(to.normalized().x, 0.0, to.normalized().y)
+			Juice.blocked(m, h.pos + side * 0.6 + Vector3.UP, side, res_col())
 			o = o.duplicate()
 			o.erase("kb")
 			o.erase("lift")
