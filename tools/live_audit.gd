@@ -151,7 +151,8 @@ func _hunter(id: String, dir: String) -> void:
 			model.set_meta(WardenClips.STATE, s)
 			poser.call("_process", DT)
 			if want < times.size() and t + DT * 0.5 >= float(times[want]):
-				hand_at = poser.skel.global_transform * poser.skel.get_bone_global_pose(poser.hand).origin
+				if grip:  # (a native poser only: the contract one has no hand bone)
+					hand_at = poser.skel.global_transform * poser.skel.get_bone_global_pose(poser.hand).origin
 				await _shoot(model, dir, "%s_%d" % [clip, want], bx)
 				marks.append("%s %d t=%.3f state=%s" % [clip, want, t, str(s)])
 				want += 1
