@@ -18,10 +18,7 @@
 		"foot.R": "shin.R",
 		"x_breath": "hips"
 	},
-	"blade": {
-		"root": "anchor_blade_root",
-		"tip": "weapon_muzzle"
-	},
+	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
 	"loco": {
 		"plants": {
 			"run_b": {"L": [0.102], "R": [0.272]},
@@ -42,7 +39,7 @@
 		"run_speed": 4.6,
 		"run_cycle": 0.34,
 		"stride": [1.0, 1.0],
-		"foot_mps": [2.0, 4.4],
+		"foot_mps": [2.0, 5.6],
 		"foot_lock": [0.0, 1.0]
 	},
 	"crouch": {
@@ -50,14 +47,15 @@
 		"walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 1.13
+		"speed": 1.13,
+		"plants": {
+			"crouch_b": {"L": [0.25], "R": [0.2]},
+			"crouch_f": {"L": [0.217], "R": [0.517]},
+			"crouch_l": {"L": [0.25], "R": [0.55]},
+			"crouch_r": {"L": [0.25], "R": [0.533]}
+		}
 	},
-	"air": {
-		"rise": "rise",
-		"fall": "fall",
-		"glide": "glide",
-		"dive": "fall"
-	},
+	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {
 		"clip": "land",
 		"hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08},
@@ -85,12 +83,7 @@
 		"tm_rime_break": {"clip": "rime_break"},
 		"mf_xform": {"clip": "fusion"}
 	},
-	"lockin": {
-		"clip": "emote",
-		"from": 0.2,
-		"dur": 1.45,
-		"rate": 1.1
-	},
+	"lockin": {"clip": "emote", "from": 0.2, "dur": 1.45, "rate": 1.1},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -102,7 +95,24 @@
 		"stomp": "stomp",
 		"drink": "drink"
 	},
-	"flow": [["tm_dart_r", 0.14], ["tm_dart_l", 0.14], ["tm_dart_r", 0.14], ["tm_dart_heavy", 0.14], ["tm_skate_go", 0.14], ["tm_skate", 0.47], ["tm_beam", 0.22], ["tm_skate", 0.47], ["tm_skate_stop", 0.4], ["tm_spear_aim", 0.4], ["tm_spear", 0.44], ["tm_wall", 0.57], ["tm_freeze", 0.34], ["tm_rime", 0.17], ["tm_rime_hold", 0.8], ["tm_rime_crash", 0.34]],
+	"flow": [
+		["tm_dart_r", 0.14],
+		["tm_dart_l", 0.14],
+		["tm_dart_r", 0.14],
+		["tm_dart_heavy", 0.14],
+		["tm_skate_go", 0.14],
+		["tm_skate", 0.47],
+		["tm_beam", 0.22],
+		["tm_skate", 0.47],
+		["tm_skate_stop", 0.4],
+		["tm_spear_aim", 0.4],
+		["tm_spear", 0.44],
+		["tm_wall", 0.57],
+		["tm_freeze", 0.34],
+		["tm_rime", 0.17],
+		["tm_rime_hold", 0.8],
+		["tm_rime_crash", 0.34]
+	],
 	"still": ["rime", "rime_hold"],
 	"emotes": {
 		"truce": "g_flag",
@@ -114,16 +124,9 @@
 		"gg": "g_bow",
 		"refuse": "g_wag"
 	},
-	"turn": {
-		"dur": 0.2,
-		"lift": 0.62
-	},
-	"cc": {
-		"pull": 0.2,
-		"tug_hz": 1.0,
-		"twist": 0.2,
-		"bow": 0.25
-	},
+	"summon_call": {"call": "g_call_fling_r", "recall": "g_recall_r"},
+	"turn": {"dur": 0.2, "lift": 0.62},
+	"cc": {"pull": 0.2, "tug_hz": 1.0, "twist": 0.2, "bow": 0.25},
 	"climb": {
 		"doc": "A ledge rise plays the mantle clip by how far up the face he is: clip second `rise` is the hands on the lip, so the motion cannot lag the body (hunter.gd lfloat progress). A ledge float (dash off an edge) hangs `rise` s, then pulls up. The clip runs on to its end after the state, then the legs take over. The procedural list below stays the fallback for a model without the clips.",
 		"mantle": {"clip": "mantle", "rise": 0.28},
@@ -131,16 +134,29 @@
 	},
 	"procedural": ["ledge", "base", "wade", "swim"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"],
+	"cancels": [
+		["tm_spear_aim", 0.4, "tm_rime"],
+		["tm_spear_aim", 0.3, "tm_dart_r"],
+		["tm_spear_aim", 0.3, "tm_wall"],
+		["tm_spear", 0.05, "stun"],
+		["tm_rime_hold", 0.8, "tm_rime_break"],
+		["tm_rime_hold", 2.0, "tm_rime_crash"],
+		["tm_rime_hold", 0.8, ""],
+		["tm_rime_hold", 0.8, "tm_skate_go"],
+		["tm_skate", 0.3, "tm_rime"],
+		["tm_dart_r", 0.1, "tm_spear_aim"]
+	],
 	"beats": {
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
 		"board": {
-			"pose": {"head": [4, 0, -8], "upper_arm.R": [-10, 0, 65], "forearm.R": [-8, 0, 0], "upper_arm.L": [-10, 0, -65], "forearm.L": [-8, 0, 0]}
+			"pose": {
+				"head": [4, 0, -8],
+				"upper_arm.R": [-10, 0, 65],
+				"forearm.R": [-8, 0, 0],
+				"upper_arm.L": [-10, 0, -65],
+				"forearm.L": [-8, 0, 0]
+			}
 		}
-	},
-	"summon_call": {
-		"call": "g_call_fling_r",
-		"recall": "g_recall_r"
-	},
-	"cancels": [["tm_spear_aim", 0.4, "tm_rime"], ["tm_spear_aim", 0.3, "tm_dart_r"], ["tm_spear_aim", 0.3, "tm_wall"], ["tm_spear", 0.05, "stun"], ["tm_rime_hold", 0.8, "tm_rime_break"], ["tm_rime_hold", 2.0, "tm_rime_crash"], ["tm_rime_hold", 0.8, ""], ["tm_rime_hold", 0.8, "tm_skate_go"], ["tm_skate", 0.3, "tm_rime"], ["tm_dart_r", 0.1, "tm_spear_aim"]]
+	}
 }

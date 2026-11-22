@@ -79,10 +79,8 @@ func _cast_test(main: Node) -> void:
 	if k == null: return
 	var type := String(k.sp.get("type", ""))
 	ok(KinTypeFx.LOOKS.has(KinTypeFx.key(type)), "its type '%s' has an accent" % type)
-	k.wisp = false      # (a fresh match carries it as a wisp: a wisp casts nothing)
-	k.state = "active"
 	var before := m.fx.bi + m.fx.si + m.fx.rings.size()
 	k._cast("k1", k.pos + Vector3(3, 0, 0), true, k, 1.0)
-	for i in int(ceil((BokiSwing.CAST_WIND + Match.DT) / Match.DT)):      # a rigged Boki lets go on its cast clip's release frame
-		m.step(Match.DT)
+	if k.cast_do.is_valid():        # a rigged Boki winds up first and lets go on the cast clip's release frame
+		k.sim(BokiSwing.CAST_WIND + 0.02)
 	ok(m.fx.bi + m.fx.si + m.fx.rings.size() > before, "casting an ability plays the accent")

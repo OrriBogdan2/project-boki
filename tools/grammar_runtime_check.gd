@@ -40,10 +40,13 @@ func _grt_out(k: Kin, at: Vector3) -> void:
 	k.fly = {}
 	k.settle = 0.0
 	k.grounded = true
-	k.wind_do = Callable()       # a fresh Boki: no cast still winding up (BokiSwing.CAST_WIND)
-	k.wind_t = 0.0
-	k.cmd = "guard"              # holds where it stands: no hop home while a cast winds up (BokiSwing.CAST_WIND)
-	k.hold_at = at
+
+## A cast by hand, run through the wind-up a rigged Boki holds it for (BokiSwing.CAST_WIND), so it has let go.
+func _grt_cast(k: Kin, slot: String, at: Vector3) -> bool:
+	var cast := k.use_ability(slot, at)
+	while k.cast_do.is_valid():
+		k.m.step(Match.DT)
+	return cast
 
 func _grt_reset(T: Hunter) -> void:
 	T.hp = T.max_hp
@@ -70,12 +73,12 @@ func run(main_node: Node) -> void:
 	var k := _grt_kin(m, P, "cindle")
 	_grt_out(k, home + Vector3(1.0, 0, 0))
 	var d0 := k.flat_dist(T)
-	_grt("cindle E Stinger Hook cast", k.use_ability("k1", T.pos), "")
+	_grt("cindle E Stinger Hook cast", _grt_cast(k, "k1", T.pos), "")
 	_ac_run(m, 0.8)
 	_grt("cindle E hook yanks + poisons", k.flat_dist(T) < d0 - 2.0 and T.blight_t > 0.0 and T.burn_t > 0.0, "dist %.1f -> %.1f, blight %.1f burn %.1f" % [d0, k.flat_dist(T), T.blight_t, T.burn_t])
 	_grt_reset(T); T.teleport(home + Vector3(6, 0, 0))
 	_grt_out(k, home + Vector3(1.0, 0, 0))
-	var dash_ok := k.use_ability("k2", T.pos)
+	var dash_ok := _grt_cast(k, "k2", T.pos)
 	_ac_run(m, 0.6)
 	_grt("cindle auto Stinger Dash", dash_ok and T.hp < T.max_hp and T.burn_t > 0.0, "took %.0f burn %.1f" % [T.max_hp - T.hp, T.burn_t])
 	_grt_reset(T); T.teleport(home + Vector3(6, 0, 0))
@@ -83,20 +86,19 @@ func run(main_node: Node) -> void:
 	_grt_out(k, home + Vector3(1.0, 0, 0))
 	acc["top"] = 0.0
 	var g0 := T.pos.y
-	k.use_ability("k1", T.pos + Vector3(-1.0, 0, 0))
+	_grt_cast(k, "k1", T.pos + Vector3(-1.0, 0, 0))
 	_ac_run(m, 1.2, func(): acc["top"] = maxf(float(acc["top"]), T.pos.y - g0))
 	_grt("pebbit E Gravity Slam", T.hp < T.max_hp and float(acc["top"]) > 0.3, "took %.0f, rose %.2f" % [T.max_hp - T.hp, acc["top"]])
 	k.stow()
 	var nw := m.verbs.walls.size()
-	k.use_ability("k2", P.pos)
+	_grt_cast(k, "k2", P.pos)
 	_grt("pebbit auto Mass Guard wall", m.verbs.walls.size() == nw + 1 and bool(m.verbs.walls[-1]["follow"]), "%d walls" % m.verbs.walls.size())
 	_ac_run(m, 3.5)
 	_grt_reset(T)
 	T.teleport(home + Vector3(6, 0, 0))        # (the slam knocked it close: the shot must start past the wall)
 	k = _grt_kin(m, P, "puddlet")
 	_grt_out(k, home + Vector3(0.5, 0, 1.0))
-	k.use_ability("k1", home + Vector3(2.5, 0, 0))
-	_ac_run(m, BokiSwing.CAST_WIND + Match.DT)       # (a rigged Boki lets the skill go on its cast clip's release frame)
+	_grt_cast(k, "k1", home + Vector3(2.5, 0, 0))
 	var thp := T.hp; var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 20.0, 0.6, 0.15, Color.RED, {})
 	_ac_run(m, 0.6)
@@ -104,7 +106,7 @@ func run(main_node: Node) -> void:
 	k.stow()
 	P.shield = 0.0
 	var nm := m.verbs.mirrors.size()
-	k.use_ability("k2", P.pos)
+	_grt_cast(k, "k2", P.pos)
 	_grt("puddlet auto Refraction", P.shield >= 19.0 and m.verbs.mirrors.size() > nm, "shield %.0f, mirrors %d" % [P.shield, m.verbs.mirrors.size()])
 	_ac_run(m, 5.0)
 	_grt_reset(T)
@@ -112,8 +114,7 @@ func run(main_node: Node) -> void:
 	_grt_out(k, home + Vector3(1.0, 0, 0))
 	var ntr := m.verbs.traps.size()
 	var nf := m.fields.list.size()
-	k.use_ability("k1", T.pos + Vector3(-3.5, 0, 0))
-	_ac_run(m, BokiSwing.CAST_WIND + Match.DT)
+	_grt_cast(k, "k1", T.pos + Vector3(-3.5, 0, 0))
 	_grt("burrlet E Puffcap Mines: 3 traps", m.verbs.traps.size() - ntr == 3, "%d" % (m.verbs.traps.size() - ntr))
 	_ac_run(m, 0.8)
 	acc["root"] = 0.0
@@ -126,32 +127,32 @@ func run(main_node: Node) -> void:
 	_grt_reset(T); T.teleport(home + Vector3(6, 0, 0))
 	_grt_out(k, home + Vector3(2.0, 0, 0))
 	nf = m.fields.list.size()
-	k.use_ability("k2", T.pos)
+	_grt_cast(k, "k2", T.pos)
 	_ac_run(m, 1.0)
 	_grt("burrlet auto Spore Patch zone", m.fields.list.size() > nf and T.slow_t > 0.0 and T.hp < T.max_hp, "slow %.2f took %.0f" % [T.slow_t, T.max_hp - T.hp])
 	_ac_run(m, 3.5)
 	_grt_reset(T)
 	k = _grt_kin(m, P, "zapple")
 	_grt_out(k, home + Vector3(1.0, 0, 0))
-	k.use_ability("k1", T.pos)
-	_ac_run(m, BokiSwing.CAST_WIND + 0.05)
+	_grt_cast(k, "k1", T.pos)
+	_ac_run(m, 0.05)
 	_grt("zapple E Echo Chain stuns", T.stun_t > 0.2 and T.hp < T.max_hp, "stun %.2f took %.0f" % [T.stun_t, T.max_hp - T.hp])
 	_ac_run(m, 1.5)
 	_grt_reset(T)
 	k.stow()
 	P.crit_t = 0.0
-	k.use_ability("k2", P.pos)
+	_grt_cast(k, "k2", P.pos)
 	_grt("zapple auto Echolocate", T.reveal_t > 0.0 and P.crit_t > 0.0, "reveal %.1f crit %.1f" % [T.reveal_t, P.crit_t])
 	_grt_reset(T)
 	k = _grt_kin(m, P, "wisplet")
 	var pa := P.pos
-	k.use_ability("k1", T.pos)
+	_grt_cast(k, "k1", T.pos)
 	_ac_run(m, 0.6)
 	_grt("wisplet E Moon Mark marks the foe, you stay", P.flat_dist(pa) < 0.05 and T.vuln_t > 0.0 and T.reveal_t > 0.0,
 		"player moved %.2f" % P.flat_dist(pa))
 	P.teleport(home); T.teleport(home + Vector3(6, 0, 0)); _grt_reset(T)
 	_ac_run(m, 0.2)
-	k.use_ability("k2", P.pos)
+	_grt_cast(k, "k2", P.pos)
 	_grt("wisplet auto Moonlift lifts you", P.vel.y > 8.0, "vel.y %.1f" % P.vel.y)
 	_ac_run(m, 2.0)
 	P.teleport(home); P.vel = Vector3.ZERO
@@ -160,10 +161,10 @@ func run(main_node: Node) -> void:
 	for sp in ["cairnback", "hivara", "zephyrak"]:
 		k = _grt_kin(m, P, sp)
 		_grt_out(k, home + Vector3(1.0, 0, 0))
-		var a1 := k.use_ability("k1", T.pos)
+		var a1 := _grt_cast(k, "k1", T.pos)
 		_ac_run(m, 1.0)
 		_grt_out(k, home + Vector3(1.0, 0, 0))
-		var a2 := k.use_ability("k2", T.pos if sp != "cairnback" else P.pos)
+		var a2 := _grt_cast(k, "k2", T.pos if sp != "cairnback" else P.pos)
 		_ac_run(m, 1.0)
 		rare_ok = rare_ok and a1 and a2
 		acc[sp] = "%s E %s auto %s, took %.0f" % [sp, a1, a2, T.max_hp - T.hp]
@@ -266,11 +267,10 @@ func run(main_node: Node) -> void:
 	k = _grt_kin(m, P, "cindle")
 	P.slot_lv["kin"] = 0
 	_grt_out(k, home + Vector3(1.0, 0, 0))
-	var locked := not k.use_ability("k1", T.pos) and not k.use_ability("k2", T.pos)
+	var locked := not _grt_cast(k, "k1", T.pos) and not _grt_cast(k, "k2", T.pos)
 	P.slot_lv["kin"] = 1
 	_grt("locked Boki slot never casts", locked, "")
 	k.target = T
-	k.cmd = "follow"
 	k.runner.reset()
 	var used := {"k1": 0, "k2": 0}
 	for i in 60:
@@ -279,9 +279,9 @@ func run(main_node: Node) -> void:
 		k.brain.think_abilities(0.1)
 		if k.runner.charges("k1") < c1: used["k1"] += 1
 		if k.runner.charges("k2") < c2: used["k2"] += 1
-		_ac_run(m, BokiSwing.CAST_WIND + Match.DT)      # the wound-up cast releases; one winds up at a time, so the auto waits
 		k.runner.reset()
-		_grt_out(k, home + Vector3(1.0, 0, 0)); k.target = T; k.cmd = "follow"      # (its own AI, not the Guard hold)
+		k.cast_do = Callable()          # counted at the decision, not let go
+		_grt_out(k, home + Vector3(1.0, 0, 0)); k.target = T
 	_grt("your out Boki casts both its abilities itself", int(used["k1"]) > 0 and int(used["k2"]) > 0, "ability %d, auto %d" % [used["k1"], used["k2"]])
 	_ac_run(m, 1.0); _grt_reset(T)
 	# ---- 6. carry modes

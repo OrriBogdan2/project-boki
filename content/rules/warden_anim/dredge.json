@@ -19,15 +19,9 @@
 		"hoard": "hips",
 		"ball": "root"
 	},
-	"blade": {
-		"root": "anchor_gun_root",
-		"tip": "weapon_muzzle",
-		"bone": "gun"
-	},
-	"free_arm": {
-		"throw": "L",
-		"shot": "R"
-	},
+	"blade": {"root": "anchor_gun_root", "tip": "weapon_muzzle", "bone": "gun"},
+	"reach": {"bones": ["upper_arm.R", "forearm.R", "hand.R"], "grip": 0.35},
+	"free_arm": {"throw": "L", "shot": "R"},
 	"loco": {
 		"plants": {
 			"run_b": {"L": [0.3], "R": [0.617]},
@@ -58,14 +52,15 @@
 		"walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 2.42
+		"speed": 2.42,
+		"plants": {
+			"crouch_b": {"L": [0.233], "R": [0.483]},
+			"crouch_f": {"L": [0.233], "R": [0.483]},
+			"crouch_l": {"L": [0.233], "R": [0.483]},
+			"crouch_r": {"L": [0.233], "R": [0.483]}
+		}
 	},
-	"air": {
-		"rise": "jump",
-		"fall": "fall",
-		"glide": "glide",
-		"dive": "pounce"
-	},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "pounce"},
 	"land": {
 		"clip": "land",
 		"hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1},
@@ -102,11 +97,7 @@
 		"dr_land": {"clip": "land"},
 		"mf_xform": {"clip": "fusion"}
 	},
-	"lockin": {
-		"clip": "emote",
-		"dur": 1.45,
-		"rate": 1.0
-	},
+	"lockin": {"clip": "emote", "dur": 1.45, "rate": 1.0},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -118,7 +109,17 @@
 		"stomp": "stomp",
 		"drink": "drink"
 	},
-	"flow": [["dr_shot", 0.3], ["dr_lunge", 0.38], ["dr_shot", 0.3], ["dr_throw", 0.5], ["dr_reel", 0.5], ["dr_pullend", 0.36], ["dr_anchor", 0.7], ["dr_lunge", 0.38], ["dr_blast", 1.3]],
+	"flow": [
+		["dr_shot", 0.3],
+		["dr_lunge", 0.38],
+		["dr_shot", 0.3],
+		["dr_throw", 0.5],
+		["dr_reel", 0.5],
+		["dr_pullend", 0.36],
+		["dr_anchor", 0.7],
+		["dr_lunge", 0.38],
+		["dr_blast", 1.3]
+	],
 	"carry_stow": ["gun"],
 	"emotes": {
 		"truce": "g_flag",
@@ -130,37 +131,33 @@
 		"gg": "flex",
 		"refuse": "g_cross"
 	},
-	"cc": {
-		"pull": 0.22,
-		"tug_hz": 1.5,
-		"twist": 0.14,
-		"bow": 0.3
-	},
+	"summon_call": {"call": "g_call_fling_r", "recall": "g_recall_r"},
+	"cc": {"pull": 0.22, "tug_hz": 1.5, "twist": 0.14, "bow": 0.3},
 	"climb": {
 		"doc": "A ledge rise plays the mantle clip by how far up the face he is: clip second `rise` is the hands on the lip, so the motion cannot lag the body (hunter.gd lfloat progress). A ledge float (dash off an edge) hangs `rise` s, then pulls up. The clip runs on to its end after the state, then the legs take over. The procedural list below stays the fallback for a model without the clips.",
 		"mantle": {"clip": "mantle", "rise": 0.28},
 		"ledge": {"clip": "ledge", "rise": 0.3}
 	},
 	"procedural": ["ledge", "base", "wade", "swim"],
-	"recoil": {
-		"deg": 4.0,
-		"settle": 0.11
-	},
+	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "fingers2.L", "thumb.L", "brow", "lid", "jaw", "eye", "hoard", "gun"],
+	"cancels": [
+		["dr_dive", 0.3, "glide"],
+		["dr_blast", 0.5, "stun"],
+		["dr_reel", 0.5, ""],
+		["dr_anchor", 0.2, ""],
+		["dr_throw", 0.2, "dr_shot"],
+		["dr_throw", 0.3, "dr_anchor"],
+		["dr_anchor", 0.2, "dr_shot"],
+		["dr_reel", 0.5, "dr_pullend"],
+		["dr_blast", 0.5, ""],
+		["dr_lunge", 0.2, "dr_anchor"]
+	],
 	"beats": {
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
 		"board": {
 			"pose": {"head": [-8, 10, 0], "upper_arm.L": [-35, 0, -10], "forearm.L": [-125, 0, 0], "upper_arm.R": [20, 0, 15]}
 		}
-	},
-	"reach": {
-		"bones": ["upper_arm.R", "forearm.R", "hand.R"],
-		"grip": 0.35
-	},
-	"summon_call": {
-		"call": "g_call_fling_r",
-		"recall": "g_recall_r"
-	},
-	"cancels": [["dr_dive", 0.3, "glide"], ["dr_blast", 0.5, "stun"], ["dr_reel", 0.5, ""], ["dr_anchor", 0.2, ""], ["dr_throw", 0.2, "dr_shot"], ["dr_throw", 0.3, "dr_anchor"], ["dr_anchor", 0.2, "dr_shot"], ["dr_reel", 0.5, "dr_pullend"], ["dr_blast", 0.5, ""], ["dr_lunge", 0.2, "dr_anchor"]]
+	}
 }

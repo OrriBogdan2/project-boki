@@ -21,14 +21,8 @@
 		"jet.1": "foot.L",
 		"x_breath": "hips"
 	},
-	"blade": {
-		"root": "anchor_blade_root",
-		"tip": "weapon_muzzle"
-	},
-	"free_arm": {
-		"lance": "L",
-		"shot": "L"
-	},
+	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
+	"free_arm": {"lance": "L", "shot": "L"},
 	"loco": {
 		"plants": {
 			"run_b": {"L": [0.183], "R": [0.017]},
@@ -60,14 +54,15 @@
 		"walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 2.42
+		"speed": 2.42,
+		"plants": {
+			"crouch_b": {"L": [0.267], "R": [0.0]},
+			"crouch_f": {"L": [0.25], "R": [0.533]},
+			"crouch_l": {"L": [0.25], "R": [0.55]},
+			"crouch_r": {"L": [0.267], "R": [0.55]}
+		}
 	},
-	"air": {
-		"rise": "rise",
-		"fall": "fall",
-		"glide": "glide",
-		"dive": "hop"
-	},
+	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "hop"},
 	"land": {
 		"clip": "land",
 		"hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1},
@@ -95,16 +90,8 @@
 		"lw_jump": {"clip": "jump", "fade_out": 0.4},
 		"mf_xform": {"clip": "fusion", "fade": 0.18, "fade_out": 0.4}
 	},
-	"lockin": {
-		"clip": "emote",
-		"dur": 1.4,
-		"rate": 1.0
-	},
-	"act": {
-		"pat": "pet",
-		"feed": "give",
-		"cheer": "cheer"
-	},
+	"lockin": {"clip": "emote", "dur": 1.4, "rate": 1.0},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -126,24 +113,25 @@
 		"gg": "g_bow",
 		"refuse": "g_cross"
 	},
-	"cc": {
-		"pull": 0.16,
-		"tug_hz": 1.1,
-		"twist": 0.1,
-		"bow": 0.3
-	},
+	"summon_call": {"call": "g_call_fling_r", "recall": "g_recall_r"},
+	"cc": {"pull": 0.16, "tug_hz": 1.1, "twist": 0.1, "bow": 0.3},
 	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "fingers.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "jaw", "x_breath"],
+	"cancels": [
+		["as_lance", 0.6, "lw_jet"],
+		["lw_jet", 0.6, "lw_land"],
+		["lw_jet", 0.6, "lw_jump"],
+		["as_aim", 0.4, ""],
+		["as_lance", 0.6, ""],
+		["glide", 0.4, "as_shot"],
+		["glide", 0.4, "lw_jet"],
+		["as_leap", 0.2, "lw_jet"]
+	],
 	"beats": {
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
 		"board": {
 			"pose": {"head": [10, 0, 0], "upper_arm.R": [-30, 0, 0], "forearm.R": [-95, 0, 0], "upper_arm.L": [8, 0, -12]}
 		}
-	},
-	"summon_call": {
-		"call": "g_call_fling_r",
-		"recall": "g_recall_r"
-	},
-	"cancels": [["as_lance", 0.6, "lw_jet"], ["lw_jet", 0.6, "lw_land"], ["lw_jet", 0.6, "lw_jump"], ["as_aim", 0.4, ""], ["as_lance", 0.6, ""], ["glide", 0.4, "as_shot"], ["glide", 0.4, "lw_jet"], ["as_leap", 0.2, "lw_jet"]]
+	}
 }

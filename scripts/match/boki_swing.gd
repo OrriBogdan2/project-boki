@@ -1,34 +1,26 @@
 class_name BokiSwing
 extends RefCounted
-## The short clips a Boki plays when it attacks or casts in a match: "lunge" and "cast" (wind-up, release, recover).
-## Each species keeps its own keyed "attack" and "ability" (the Model Room and the shots play those); here they are
-## retimed at load so the release (the frame of the strike or the burst, found as the peak of the motion) lands
-## exactly WIND seconds in. Kin holds the bite or the skill for WIND, so the hit lands on the release frame.
-## A Blender pass can key these natively per species later: same names, same WIND, and this stops applying.
+## The short clip a Boki plays when it casts in a match: "cast" (wind-up, release, recover).
+## Each species keeps its own keyed "ability" (the Model Room and the shots play that); here it is retimed at load
+## so the release (the frame of the burst, found as the peak of the motion) lands exactly CAST_WIND seconds in.
+## Kin holds the skill for CAST_WIND, so it lands on the release frame. (The bite has its own: BokiRig.CONTACT.)
 
-const LUNGE_WIND := 0.12  # s from the start of the lunge to its release (the bite lands)
-const LUNGE_LEN := 0.42  # s the whole lunge lasts
-const CAST_WIND := 0.2  # s from the start of the cast to its release (the skill fires)
-const CAST_LEN := 0.56  # s the whole cast lasts
-const FROM := {"lunge": "attack", "cast": "ability"}
-const WIND := {"lunge": LUNGE_WIND, "cast": CAST_WIND}
-const LEN := {"lunge": LUNGE_LEN, "cast": CAST_LEN}
-const EARLY := 0.15  # the release is searched between this and LATE (x the keyed clip's length):
-const LATE := 0.6  # past that it is the follow-through, and the wind-up would be squeezed too hard
-const SAMPLE_S := 0.02  # s between the samples the peak of the motion is looked for in
-const MOVE_PER_M := 5.0  # rad of turning one metre of root travel counts as, finding the peak of the motion
+const CAST_WIND := 0.2        # s from the start of the cast to its release (the skill fires)
+const CAST_LEN := 0.56        # s the whole cast lasts
+const FROM := "ability"
+const EARLY := 0.15           # the release is searched between this and LATE (x the keyed clip's length):
+const LATE := 0.6             # past that it is the follow-through, and the wind-up would be squeezed too hard
+const SAMPLE_S := 0.02        # s between the samples the peak of the motion is looked for in
+const MOVE_PER_M := 5.0       # rad of turning one metre of root travel counts as, finding the peak of the motion
 
-
-## Adds "lunge" and "cast" to a rig's player once per library (the library is shared by every copy of the model).
-static func add_clips(player: AnimationPlayer) -> void:
+## Adds "cast" to a rig's player once per library (the library is shared by every copy of the model).
+static func add_clip(player: AnimationPlayer) -> void:
 	var lib := player.get_animation_library(player.get_animation_library_list()[0])
-	for id in FROM:
-		if not lib.has_animation(id):
-			var src := lib.get_animation(FROM[id])
-			var clip := retimed(src, release_of(src), WIND[id], LEN[id])
-			clip.loop_mode = Animation.LOOP_NONE
-			lib.add_animation(id, clip)
-
+	if not lib.has_animation("cast"):
+		var src := lib.get_animation(FROM)
+		var clip := retimed(src, release_of(src), CAST_WIND, CAST_LEN)
+		clip.loop_mode = Animation.LOOP_NONE
+		lib.add_animation("cast", clip)
 
 ## The time (s) of the peak of the motion in a keyed clip: the strike or the burst, sampled every SAMPLE_S and
 ## smoothed over three samples.
@@ -55,7 +47,6 @@ static func release_of(a: Animation) -> float:
 			best_v = v
 			best = i * SAMPLE_S
 	return best
-
 
 ## A copy of `a` with its keys moved so `release` lands at `wind` and the clip ends at `total` (all s).
 static func retimed(a: Animation, release: float, wind: float, total: float) -> Animation:

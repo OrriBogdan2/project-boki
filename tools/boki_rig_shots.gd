@@ -3,8 +3,6 @@ extends RefCounted
 ## Boki, in the engine (--normal-k=0 leaves a Meshy body's normal map out, for an A/B).
 ## <dir>/turntable.png, faces.png, coats.png, anim_<clip>.png (a strip of each clip), match.png (match camera),
 ## farm.png and farm_close.png (farm camera) and frames/<clip>/NNN.png for the GIFs (tools/boki/review_gifs.sh).
-## --anims-only --species=a,b,c --clips=cast,lunge: only the clip strips, one folder per species, and strip_<clip>.png
-## stacking them (one row each).
 ## Needs a renderer.
 
 const YAWS := 8
@@ -40,7 +38,7 @@ var out := ""
 var species := "cindle"
 var px := 512
 var clips: Array = CLIPS
-var anims_only := false
+var dex_dir := ""    # --dex-dir=<dir> with --sheet: also dex_sheet_N.png from <dir>/<id>.glb, same height
 
 func run(m: Node) -> void:
 	main = m
@@ -48,17 +46,12 @@ func run(m: Node) -> void:
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--species="): species = a.substr(10)
 		if a.begins_with("--px="): px = int(a.substr(5))
+		if a.begins_with("--dex-dir="): dex_dir = a.substr(10)
 		if a.begins_with("--normal-k="): BokiRig.normal_k = float(a.substr(11))
 		if a.begins_with("--clips="): clips = Array(a.substr(8).split(","))
-		if a == "--anims-only": anims_only = true
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-	if anims_only:
-		await _strips(species.split(","))
-		print("BOKI_RIG_SHOTS_DONE")
-		main.get_tree().quit()
-		return
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--sheet="):    # one picture a view of every species listed, named, in a grid
 			await _sheet(a.substr(8).split(","))
@@ -165,6 +158,7 @@ func _sheet(ids: PackedStringArray) -> void:
 	var rows := (ids.size() + SHEET_COLS - 1) / SHEET_COLS
 	for view in SHEET_YAWS.size():
 		var sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
+		var dex_sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
 		for n in ids.size():
 			species = ids[n]
 			var vp := _stage(Vector2i(px, px))
@@ -181,9 +175,62 @@ func _sheet(ids: PackedStringArray) -> void:
 			(kr[0] as Node3D).rotation.y = SHEET_YAWS[view]
 			var img: Image = await _grab(vp)
 			img.convert(Image.FORMAT_RGBA8)
-			sheet.blit_rect(img, Rect2i(0, 0, px, px), Vector2i(n % SHEET_COLS * px, n / SHEET_COLS * px))
+			var at := Vector2i(n % SHEET_COLS * px, n / SHEET_COLS * px)
+			sheet.blit_rect(img, Rect2i(0, 0, px, px), at)
+			if dex_dir != "":
+				var dex := _dex_model(species, _height(kr[1] as BokiRig))
+				if dex != null:
+					(kr[0] as Node3D).visible = false
+					vp.add_child(dex)
+					dex.rotation.y = SHEET_YAWS[view] - PI    # glTF models face +z, the game's face -z
+					var dex_img: Image = await _grab(vp)
+					dex_img.convert(Image.FORMAT_RGBA8)
+					dex_sheet.blit_rect(dex_img, Rect2i(0, 0, px, px), at)
 			vp.queue_free()
 		sheet.save_png(out.path_join("sheet_%d.png" % view))
+		if dex_dir != "":
+			dex_sheet.save_png(out.path_join("dex_sheet_%d.png" % view))
+
+
+## A model's box in its root's space (the model need not be in the tree).
+static func _box(root: Node3D) -> AABB:
+	var box := AABB()
+	var first := true
+	for n in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var xf := Transform3D.IDENTITY
+		var up: Node3D = mi
+		while up != root:
+			xf = up.transform * xf
+			up = up.get_parent() as Node3D
+		var b := xf * mi.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	return box
+
+
+func _height(rig: BokiRig) -> float:
+	return _box(rig.skeleton().get_parent() as Node3D).size.y
+
+
+## The dex model <dex_dir>/<id>.glb (a plain, undraco'd glb), stood on the ground and scaled to `height` m.
+func _dex_model(id: String, height: float) -> Node3D:
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	if doc.append_from_file(dex_dir.path_join(id + ".glb"), state) != OK:
+		return null
+	var holder := Node3D.new()
+	var model := doc.generate_scene(state)
+	holder.add_child(model)
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		for i in (n as MeshInstance3D).get_surface_override_material_count():
+			var mat := (n as MeshInstance3D).mesh.surface_get_material(i) as BaseMaterial3D
+			if mat != null:
+				mat.metallic = 0.0    # a Meshy glb is fully metallic: black without a sky to reflect
+	var box := _box(model)
+	model.scale = Vector3.ONE * height / box.size.y
+	model.position = Vector3(-box.get_center().x, -box.position.y, -box.get_center().z) * model.scale.y
+	return holder
 
 func _faces() -> void:
 	var vp := _stage(Vector2i(px, px), false)
@@ -321,21 +368,6 @@ func _anims() -> void:
 	for c in clips:
 		await _clip(vp, rig, String(c))
 	vp.queue_free()
-
-## The clip strips of several species, each in its own folder, then one sheet per clip with a row per species.
-func _strips(ids: PackedStringArray) -> void:
-	var base := out
-	for id in ids:
-		species = id
-		out = base.path_join(id)
-		DirAccess.make_dir_recursive_absolute(out)
-		await _anims()
-	for c in clips:
-		var sheet := Image.create(px * STRIP, px * ids.size(), false, Image.FORMAT_RGBA8)
-		for i in ids.size():
-			var row := Image.load_from_file(base.path_join(ids[i]).path_join("anim_%s.png" % c))
-			sheet.blit_rect(row, Rect2i(0, 0, px * STRIP, px), Vector2i(0, i * px))
-		sheet.save_png(base.path_join("strip_%s.png" % c))
 
 func _clip(vp: SubViewport, rig: BokiRig, c: String) -> void:
 	rig.set_clip(c, 0.0)

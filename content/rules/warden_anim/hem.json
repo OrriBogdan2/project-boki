@@ -23,11 +23,7 @@
 		"bow_s": "bow",
 		"arrow": "hips"
 	},
-	"blade": {
-		"root": "anchor_bow_root",
-		"tip": "weapon_muzzle",
-		"bone": "bow"
-	},
+	"blade": {"root": "anchor_bow_root", "tip": "weapon_muzzle", "bone": "bow"},
 	"loco": {
 		"plants": {
 			"run_b": {"L": [0.317], "R": [0.65]},
@@ -59,14 +55,15 @@
 		"walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 1.27
+		"speed": 1.27,
+		"plants": {
+			"crouch_b": {"L": [0.3], "R": [0.617]},
+			"crouch_f": {"L": [0.3], "R": [0.617]},
+			"crouch_l": {"L": [0.3], "R": [0.617]},
+			"crouch_r": {"L": [0.3], "R": [0.617]}
+		}
 	},
-	"air": {
-		"rise": "jump",
-		"fall": "fall",
-		"glide": "glide",
-		"dive": "dive"
-	},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
 	"land": {
 		"clip": "land",
 		"hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08},
@@ -97,16 +94,8 @@
 		"pin_ult_final": {"clip": "ult_final", "upper": true, "fade_out": 0.31},
 		"mf_xform": {"clip": "fusion", "fade": 0.18, "fade_out": 0.4}
 	},
-	"lockin": {
-		"clip": "draw",
-		"dur": 1.25,
-		"rate": 1.0
-	},
-	"act": {
-		"pat": "pet",
-		"feed": "give",
-		"cheer": "cheer"
-	},
+	"lockin": {"clip": "draw", "dur": 1.25, "rate": 1.0},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -129,25 +118,23 @@
 		"gg": "g_salute",
 		"refuse": "g_wag"
 	},
-	"cc": {
-		"pull": 0.18,
-		"tug_hz": 1.2,
-		"twist": 0.08,
-		"bow": 0.38
-	},
+	"summon_call": {"call": "g_call_point_l", "recall": "g_recall_l"},
+	"cc": {"pull": 0.18, "tug_hz": 1.2, "twist": 0.08, "bow": 0.38},
 	"heart_hand": "R",
 	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "fing_a1.R", "fing_a2.R", "fing_b1.R", "fing_b2.R", "thumb1.R", "thumb2.R", "bow", "bow_t", "bow_b", "bow_s", "arrow", "brow.L", "brow.R", "lid.L", "lid.R"],
+	"cancels": [
+		["arc_draw", 0.6, ""],
+		["arc_heavy_wind", 0.5, ""],
+		["pin_walk", 0.5, ""],
+		["glide", 0.4, "arc_heavy_wind"],
+		["glide", 0.4, "arc_hail"]
+	],
 	"beats": {
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
 		"board": {
 			"pose": {"head": [0, 30, 6], "upper_arm.L": [-20, 0, -20], "forearm.L": [-120, 0, 0], "upper_arm.R": [10, 0, 0]}
 		}
-	},
-	"summon_call": {
-		"call": "g_call_point_l",
-		"recall": "g_recall_l"
-	},
-	"cancels": [["arc_draw", 0.6, ""], ["arc_heavy_wind", 0.5, ""], ["pin_walk", 0.5, ""], ["glide", 0.4, "arc_heavy_wind"], ["glide", 0.4, "arc_hail"]]
+	}
 }
