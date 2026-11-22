@@ -819,6 +819,8 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
 	WaysOutHud.draw(self)
+	if not HudGroups.clock_shown(m):
+		return      # a save's first expedition: the clock waits for the first Ways Out beat or kill (HudReveal "beat_clock")
 	var left := m.length - m.time
 	var phase := "ISLANDS FALLING" if left < 30.0 else HeartHud.zone_line(m).to_upper()      # (the tide's clock)
 	var pc := BAD if left < 30.0 else SideColor.tone("tide_next")
@@ -952,8 +954,8 @@ func _keycap(center: Vector2, key: String, col: Color) -> void:
 	HudStyle.key_pill(c, center, key, col)
 
 ## One ability slot (HudSlot draws it; BokiHud's slots come through here too).
-func _ab_slot(id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float, cd_secs: float, ready: bool, charges := -1, max_ch := 0, label := "") -> void:
-	var on := ready and not AirLimits.drop_locked(m.player)      # greyed through the opening drop
+func _ab_slot(id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float, cd_secs: float, ready_v: bool, charges := -1, max_ch := 0, label := "") -> void:
+	var on := ready_v and not AirLimits.drop_locked(m.player)      # greyed through the opening drop
 	HudSlot.ab_slot(self, id, rect, icon, key, col, cd_frac, cd_secs, on, charges, max_ch, label)
 
 var guide_hidden := false
@@ -1165,8 +1167,8 @@ func r_lock_text(p: Hunter) -> String:
 	return "LV %d" % int(Hunter.ULT_AT[0])
 
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
-func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1.0, mx := 0) -> void:
-	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready and not AirLimits.drop_locked(m.player), ch, mx)
+func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready_v: bool, ch := -1.0, mx := 0) -> void:
+	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready_v and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.
 func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
@@ -1693,8 +1695,8 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 	if Settings.get_v("tips") and not Record.clean():
-		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true), m.tut == null and m.duo == null)
-		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip,
+		var tip_v := TipPick.for_downed(p, m.time, m.opts.get("blight", true), m.tut == null and m.duo == null)
+		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip_v,
 			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
 ## Dead, but your team's still in it.
@@ -2306,9 +2308,9 @@ func _dial_widget(ctr: Vector2, rad: float, L: Dictionary, big_one: bool) -> voi
 	for i in 6:
 		var ta := nd - dirn * i * 0.06
 		c.draw_line(ctr, ctr + Vector2(cos(ta), sin(ta)) * rad * 1.08, Color(1, 0.97, 0.85, 0.22 - i * 0.035), w * 0.7, true)
-	var tip := ctr + Vector2(cos(nd), sin(nd)) * rad * 1.12
-	c.draw_line(ctr, tip, Color(BAD, 0.95) if jam else Color("fff4d0"), w * 0.75, true)
-	c.draw_circle(tip, w * 0.6, Color("fff4d0") if not jam else BAD)
+	var tip_v := ctr + Vector2(cos(nd), sin(nd)) * rad * 1.12
+	c.draw_line(ctr, tip_v, Color(BAD, 0.95) if jam else Color("fff4d0"), w * 0.75, true)
+	c.draw_circle(tip_v, w * 0.6, Color("fff4d0") if not jam else BAD)
 	c.draw_circle(ctr, w * 0.9, col)
 	# the locks: one pip each, filled once open
 	var n := int(L["locks"])

@@ -10,7 +10,7 @@ every knock.
 |---|---|
 | Class title | the Unbroken |
 | Base character | Kael, male |
-| Personality | Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. The Blight burned white-hot cracks into his sword arm (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off. |
+| Personality | Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. His arms do not match. His sword hand is dark blood-red with ember-bright orange veins, and the demon in his blade changes whichever hand holds it. The first sword hand changed too far, so he swapped hands: once the demon let go, that arm settled into a slightly lighter red with white veins, and the new sword hand is going the same way. The Blight burned the veins into both arms (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off. |
 
 <!-- /gen:profile -->
 
