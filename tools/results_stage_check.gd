@@ -17,15 +17,18 @@ const CASES := [
 	[false, ["gunslinger", "juggernaut", "tender"], ["out", "out", "out"], ["wisp", "wisp", "wisp"]],
 	[false, ["<clipless>"], ["in"], ["idle"]],  # the first Hunter whose GLB has no clips (_beats_exist finds it)
 ]
-const SETTLE_FRAMES := 4     # frames after the last model stands, for its clips to pick the beat
+const SETTLE_FRAMES := 4  # frames after the last model stands, for its clips to pick the beat
 
 var bad := 0
-var _clipless: Array = []  # Hunters whose GLB has no clips, filled by _beats_exist
 var tree: SceneTree
+var _clipless: Array = []  # Hunters whose GLB has no clips, filled by _beats_exist
+
 
 func ok(cond: bool, what: String) -> void:
 	print("RESULTSTAGE %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node, mode := "check") -> void:
 	tree = main.get_tree()
@@ -41,14 +44,24 @@ func run(main: Node, mode := "check") -> void:
 		print("RESULTSTAGE DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
 
+
 ## A squad of `archs`, each with its Boki; `fates` gives each one "in", "out" (eliminated) or "left" (got out).
 func _squad(archs: Array, fates: Array = []) -> Array:
 	var out: Array = []
 	for i in archs.size():
 		var fate := String(fates[i]) if i < fates.size() else "in"
-		out.append({"arch": archs[i], "name": "H%d" % i, "you": i == 0, "kin": Save.new_kin("zapple"),
-				"eliminated": fate == "out", "extracted": fate == "left"})
+		out.append(
+			{
+				"arch": archs[i],
+				"name": "H%d" % i,
+				"you": i == 0,
+				"kin": Save.new_kin("zapple"),
+				"eliminated": fate == "out",
+				"extracted": fate == "left"
+			}
+		)
 	return out
+
 
 ## The roster the match hands the results: the player's team only, each member's "eliminated" and "extracted".
 func _roster() -> void:
@@ -60,11 +73,15 @@ func _roster() -> void:
 	hunters[1].out = true
 	hunters[2].extracted = true
 	var fates: Array = ResultsStage.roster(hunters, hunters[0]).map(
-			func(m): return [m["you"], m["eliminated"], m["extracted"]])
-	ok(fates == [[true, false, false], [false, true, false], [false, false, true]],
-			"the roster: the player's team, each one's eliminated and extracted (%s)" % [fates])
+		func(m): return [m["you"], m["eliminated"], m["extracted"]]
+	)
+	ok(
+		fates == [[true, false, false], [false, true, false], [false, false, true]],
+		"the roster: the player's team, each one's eliminated and extracted (%s)" % [fates]
+	)
 	for h: Hunter in hunters:
 		h.free()
+
 
 ## Every Hunter whose GLB has clips has a win and a lose beat among them. A GLB without clips (Gil's, today) has
 ## no beats: HunterAnim poses its rig, and the stage stands it in its idle (the "idle" case).
@@ -72,21 +89,27 @@ func _beats_exist() -> void:
 	var bad_before := bad
 	var clipless: Array = []
 	for id in Arch.ORDER:
-		var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "",
-				PlayerLook.neutral(), id)
+		var model := Models.hunter(
+			Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id
+		)
 		var sync := model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 		if sync == null or sync.clips == null:
 			clipless.append(id)
 		else:
 			var win: Dictionary = sync.clips.beats.get("win", {})
 			var lose: Dictionary = sync.clips.beats.get("lose", {})
-			ok(not win.is_empty() and not lose.is_empty(),
-					"%s: win %s, lose %s" % [id, win.get("clip", "-"), lose.get("clip", "-")])
+			ok(
+				not win.is_empty() and not lose.is_empty(),
+				"%s: win %s, lose %s" % [id, win.get("clip", "-"), lose.get("clip", "-")]
+			)
 		model.free()
 	_clipless = clipless
 	var with_clips := Arch.ORDER.size() - clipless.size()
-	ok(bad == bad_before and with_clips > 0,
-			"all %d Hunters with clips have a win and a lose beat (no clips: %s)" % [with_clips, ", ".join(clipless)])
+	ok(
+		bad == bad_before and with_clips > 0,
+		"all %d Hunters with clips have a win and a lose beat (no clips: %s)" % [with_clips, ", ".join(clipless)]
+	)
+
 
 ## What a model on the stage plays: "wisp" for a dimmed Wisp; its "win" or "lose" when the state asks for that
 ## beat and the clip on the beat's channel is the beat's own clip; "idle" for a model without clips that HunterAnim
@@ -107,12 +130,14 @@ func _playing(node: Node3D) -> String:
 	var on := clips.cur_u if bool(b["upper"]) else clips.cur
 	return beat if on == String(b["clip"]) else ""
 
+
 func _built(st: ResultsStage, n: int) -> bool:
 	for k in 900:
 		if st.built >= n:
 			return true
 		await tree.process_frame
 	return false
+
 
 ## Each case's stage: what every member plays, a Boki beside each winner, and every model freed with the stage.
 func _stages(main: Node) -> void:
@@ -123,7 +148,10 @@ func _stages(main: Node) -> void:
 				print("RESULTSTAGE skip the idle case: every Hunter has clips now")
 				continue
 			archs = [_clipless[0]]
-		var want: Array = c[3]
+		var want: Array = c[3].duplicate()
+		for i in archs.size():
+			if archs[i] in _clipless and want[i] != "wisp":
+				want[i] = "idle"  # a Hunter whose GLB has no clips is stood in its idle, whatever the beat
 		var label := "%s, %s" % ["got out" if c[0] else "did not", ", ".join(c[2])]
 		var st := ResultsStage.make(_squad(archs, c[2]), c[0])
 		main.add_child(st)
@@ -144,6 +172,7 @@ func _stages(main: Node) -> void:
 		var freed: bool = nodes.all(func(n): return not is_instance_valid(n))
 		ok(freed, "%s: closing frees all %d models" % [label, nodes.size()])
 
+
 ## The results screen itself: it carries the stage, and the stage goes with it.
 func _screen(main: Node) -> void:
 	var R = load("res://scripts/ui/results.gd")
@@ -161,19 +190,21 @@ func _screen(main: Node) -> void:
 		await tree.process_frame
 		ok(stages[0] == null or not is_instance_valid(stages[0]), "closing results frees the stage")
 
+
 func _shots(main: Node) -> void:
 	var out := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
 	DirAccess.make_dir_recursive_absolute(out)
 	main.get_window().size = Vector2i(1280, 720)
 	for k in 240:
-		await tree.process_frame     # (past the boot's loading screen)
+		await tree.process_frame  # (past the boot's loading screen)
 	for won in [true, false]:
 		var fates: Array = ["left", "left", "in"] if won else ["out", "in", "in"]
 		main.show_screen("results", {"extracted": won, "squad": _squad(["gunslinger", "juggernaut", "tender"], fates)})
 		for k in 90:
-			await tree.process_frame     # (past the fade)
+			await tree.process_frame  # (past the fade)
 		var boxes: Array = main.find_children("*", "SubViewportContainer", true, false)
 		var stages: Array = boxes.filter(func(c): return c is ResultsStage)
 		await _built(stages[-1], 3)
