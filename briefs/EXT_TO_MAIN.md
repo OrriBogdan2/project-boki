@@ -10932,3 +10932,4 @@ READY ext/sfx-grimble-slug-hits 0331d9c219fd2df19bd326278acede33f0d1fdfa (Grimbl
 READY ext/sfx-zone-slow-cue ab371d6f9ec203a3e5738fcb8769c859a4efc64a (zone/tick slows audible)
 READY ext/farm-tut-ends 971f645ae011aae777f948858a3b8fdcfd105ccd (supersedes 90c769dec7: origin/main merged in, only conflict scripts/home/home_toys.gd = kept both FarmTutorial.event("played") and main's _garden_xp; check's ends-alone test now marks main's new patch step; --check 0, --farm-tutorial-check 1 fail 'Goals card is one Next: line' = red on main too; health --strict only style-ratchet on files this branch doesn't touch + numpy missing for sfx loudness; no Net/save change)
 READY ext/vfx-ground-ring-audit a3ffed486c782308439d625477219db279bea77d (decorative ground rings cut in 11 kits)
+READY ext/tut-hint-once 046bc7e291 (first-time hints show once per save)
