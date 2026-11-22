@@ -488,6 +488,8 @@ const CHECKS := {
 	"--rock-feet-check": ["res://tools/rock_feet_check.gd", "rock_feet_check", null],      # Tenzo's feet on his rocks
 	"--foot-plant-shots": ["res://tools/foot_plant_check.gd", "foot_plant_check", "shots"],      # --shots-dir=<dir>
 	"--cast-pop-check": ["res://tools/cast_pop_check.gd", "cast_pop_check", null],      # move blends cross their gaps
+	"--land-weight-check": ["res://tools/land_weight_check.gd", "land_weight_check", null],  # landing squash by class
+	"--land-weight-shots": ["res://tools/land_weight_shots.gd", "land_weight_shots", null],  # landing by class (GPU)
 	"--stride-check": ["res://tools/stride_check.gd", "stride_check", null],      # run start and stop
 	"--stride-shots": ["res://tools/stride_shots.gd", "stride_shots", null],      # the stop from a run, before/after
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
@@ -815,7 +817,6 @@ const CHECKS := {
 	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],
 	"--net-leave-check": ["res://tools/net_leave_check.gd", "net_leave_check", null],      # 0061 dropped players
 	"--save-safe-check": ["res://tools/save_safe_check.gd", "save_safe_check", null],      # 0061 cut-off saves
-	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
 	"--tele-net-shots": ["res://tools/tele_net_shots.gd", "tele_net_shots", null],     # 2 games, GPU, --shots-dir=
 	"--reach-net-film": ["res://tools/reach_net_film.gd", "reach_net_film", null],     # 2 games, GPU, --shots-dir=
 	"--glide-net-check": ["res://tools/glide_net_check.gd", "glide_net_check", null],     # 2 games, relay

@@ -16,7 +16,9 @@ extends "res://tools/displace_net_check.gd"
 ## (AimNet, Net 0.24.6), asserted once per shape kind.
 ## Grimble's Deep Reach (Net 0.24.20): the host's Grimble hooks the guest's hunter and reels them in; on the guest his
 ## arm (the model's WardenReach.TIP) reaches out, as far, within a snapshot of the host's, and no plain shot flies.
-## Lines: RANIM ok|FAIL <what>, then the unlike casts.
+## Lines: RANIM ok|FAIL <what>, then the unlike casts. The registry splits the run into four flags
+## (tools/checks/net.gd: --remote-anim-1/2/3-check cast a third of ARCHS each, --remote-anim-rest-check the bosses, the
+## re-time and Grimble's reach; each under the gate's 300 s cap); the guest is started with --remote-anim-guest.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -26,6 +28,8 @@ const SETTLE := 1.6          # s after the release for the move to play out and 
 const HOLD := 0.8            # s a held key stays down
 const WALK := 3.6            # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
 const WASH_ON := 0.15        # the body tint (Ent.wash) counts as showing above this
+const REST := "rest"         # the shard with the bosses, the re-time and the reach row (no Hunter casts)
+const SHARDS := 3            # Hunter shards "1".."3": each casts its third of ARCHS
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
 const BOSSES := {"colossus": "slam", "serpent": "dash", "brood": "spit"}      # the attack each plays
 const BOSS_LOOPS := ["idle", "walk", "stagger", "sleep"]      # (not compared: the copy's gait may differ a step)
@@ -60,13 +64,20 @@ var tele := {}               # the watched hunter's `all` telegraphs this cast: 
 var tele_kinds := {}         # shape kind -> host telegraphs of that kind over every cast ("arch key: id")
 var tele_miss := {}          # shape kind -> the ones the guest never showed
 var retimes: Array = []      # [unix ms, s]: the watched move's clock jumped earlier, same id (a re-time)
+var archs: Array = ARCHS     # the Hunters this shard casts
+var rest := true             # this shard runs the bosses, the re-time and the reach row
 var last_at := [ "", 0.0 ]   # the watched kit's move id and anim_at at the last frame
 
 func _init() -> void:
 	tag = "RANIM"
-	guest_flag = "--remote-anim-check=guest"
+	guest_flag = "--remote-anim-guest"
 
-func run(main_node: Node) -> void:
+func run(main_node: Node, shard := "") -> void:
+	if shard != "":
+		rest = shard == REST
+		var n := ARCHS.size()
+		var i := int(shard) - 1
+		archs = [] if rest else ARCHS.slice(ceili(i * n / float(SHARDS)), ceili((i + 1) * n / float(SHARDS)))
 	main_node.get_tree().process_frame.connect(_sample)
 	await super.run(main_node)
 
@@ -76,23 +87,27 @@ func _host() -> void:
 	if G == null:
 		return _finish()
 	ok(Net.VERSION != "0.24.5", "the Net version moved on with the boss event (%s)" % Net.VERSION)
-	for kind in BOSSES:
-		await _boss(kind, String(BOSSES[kind]))
-	for arch in ARCHS:
+	if rest:
+		for kind in BOSSES:
+			await _boss(kind, String(BOSSES[kind]))
+	for arch in archs:
 		for key in KEYS:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
 				await _cast(G, arch, key, held)
 			if "%s %s" % [arch, key] in CUTS:
 				await _cast(G, arch, key, true, true)
-	_wash_rows_ok()
-	ok(not tele_kinds.is_empty(), "some cast draws an all telegraph (else none was compared)")
+	if "archer" in archs:
+		_wash_rows_ok()
+	if not archs.is_empty():
+		ok(not tele_kinds.is_empty(), "some cast draws an all telegraph (else none was compared)")
 	for kind in tele_kinds:
 		var drawn: int = tele_kinds[kind].size()
 		ok(not tele_miss.has(kind), "telegraph %s: all %d the host drew show on the guest" % [kind, drawn],
 			"missing: %s" % str(tele_miss.get(kind, [])))
-	await _ram_retime()
-	await _reach_row(G)
-	for arch in ARCHS:
+	if rest:
+		await _ram_retime()
+		await _reach_row(G)
+	for arch in archs:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
 			"unlike: %s" % str(unlike.get(arch, [])))

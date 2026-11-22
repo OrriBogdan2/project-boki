@@ -102,7 +102,7 @@ defaults aren't cited, since the data names no field for these windows.
 | glide_remote_open_lag (the other game's copy of a glide-button open mid-fall) | 0–5 steps / 8–74 ms | the same | <= 1 Net tick (0.1 s) | the owner's game opens it; the copy mirrors its snapshot (`--glide-hold-check`, `--glide-net-check`) |
 | glide_catch_t (terminal fall to sink rate) | 0.383s | 0.183s | <= 0.2s | [guide] opens "instantly"; the catch rate is ours, the source's fastest-fall clamp at the open is locked |
 | glide_start_vy (opened from a rising jump: the first glide step's fall) | rising on | 1.08 m/s | 0.85–1.4 | [reference data] GlideStartFallSpeedMin -85 uu/s: the open cuts the rise, never adds speed |
-| glide_speed | 6.5 m/s | 5.0 m/s | 4.5–5.5 | [reference data] MaxGlide 500 uu/s (item 163: ours was "too fast and controllable") |
+| glide_speed | 6.5 m/s | 5.8 m/s | 5.22–6.38 | [reference data] MaxGlide 500 uu/s (item 163: ours was "too fast and controllable") x `body_scale` 1.16 like the walk (decision 0061, 11-22: was 5.0, under the walk) |
 | glide_sink | 2.2 m/s | 1.4 m/s | 1.38–1.42 | hunter_move.json glide_sink; owner: "falls a bit faster"; no footage on disk to count (docs/MOVEMENT_PARITY.md) |
 | glide_turn90_t | 0.200s | 0.383s | 0.3–0.6s | [reference data] GlideTargetXYForce: a force, so turns have inertia (item 163) |
 | glide_reverse_t | 0.417s | 0.600s | 0.45–0.8s | [reference data] the same force brakes a reversal (item 163) |
@@ -111,7 +111,7 @@ defaults aren't cited, since the data names no field for these windows.
 | dashglide_open_speed (glider opened out of an air dash) | 6.9 m/s | 23.0 m/s | >= 12 | [wiki] momentum + speed |
 | dashglide_1s_speed | 8.5 m/s (11-15) | 11.6 m/s | >= 10.5 | [wiki] preserved; owner 11-13 "like the reference" (decision 0099) |
 | dashglide_2s_speed | 5.9 m/s (11-15) | 8.0 m/s | 7–9 | still fast, bleeding back |
-| dashglide_3s_speed | 5.2 m/s (11-15) | 6.3 m/s | <= 6.5 | [owner 11-08 item 9] back toward cruise |
+| dashglide_3s_over (speed over cruise 3 s after an air dash into a glide) | 0.2 m/s (11-15) | 1.23 m/s | <= 1.5 | [owner 11-08 item 9] back toward cruise (was the speed under 6.5, cruise 5.0 + 1.5; 1.33 then) |
 | feather_toggle_frames (let go, press again) | 1 | 1 | <= 1 | no toggle penalty |
 | feather_m vs feather_hold_m (distance before overheating, over the abyss) | 113.8m vs 44.6m (11-11) | 165.6m vs 44.6m | | |
 | feather_gain | 2.55x (11-11) | 3.71x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
@@ -151,6 +151,7 @@ defaults aren't cited, since the data names no field for these windows.
 | drop_glide_steer_t | 0.583s | 0.217s | <= 0.3s | [est] |
 | drop_land_dead_frames / land_dead_frames | 1 / 1 | 1 / 1 | <= 1 | no dead time |
 | land_squash | 0.00 | 0.16 | >= 0.05 | landing reads |
+| land squash by weight class (`content/rules/land_feel.json`, `--land-weight-check`) | light jump up in ~0.15 s (low crouch 0.1 s, up 0.05 s); heavy slam the deepest squash, ~0.5 s of low recovery | light hop 0.15 s, drop 0.24 s; medium hop 0.1 s, drop 0.3 s; heavy drop and dive depth 1, 0.5 s | measured per class: bottoms out at the data's depth, gone within a frame of its seconds | the footage cells also hold the .glb land clip for their seconds (WardenClips.land_play); medium and the other cells have no footage: the numbers the shared squash ran before [est]; no burst, ring or disc |
 | e2e_input_frames (key to sim, via Match._process) | 1 | 1 | <= 1 | |
 | e2e_render_frames (key to model moving) | 2 | 1 | <= 1 | no interpolation lag |
 | render_lag_m (model behind sim at a run) | 0.083m | 0.000m | <= 0.03m | |
@@ -193,7 +194,7 @@ Other checks:
 - **Glider:**
   - Steering is `Loco.glide_step()`:
     - 420°/s at cruise, in wider arcs above cruise (down to 45%).
-    - 16.25 m/s² toward where you steer ([reference data] GlideTargetXYForce 162,500 / Mass 100, `HunterMove.glide_accel`, decision 0027): a 90° turn ~0.38 s, a reversal ~0.6 s at cruise. Over-speed bleeds back (tuning.json glide.drag).
+    - 18.85 m/s² toward where you steer ([reference data] GlideTargetXYForce 162,500 / Mass 100 x `body_scale`, `HunterMove.glide_accel`, decisions 0027, 0061): a 90° turn ~0.38 s, a reversal ~0.6 s at cruise, the source's times. Over-speed bleeds back (tuning.json glide.drag).
     - Steering more than 115° against your heading brakes at 36 m/s². Letting go drifts.
   - Cruise 5.0 → 6.5 m/s and sink 2.2 → 1.4 m/s. The owner found the glide "falls a bit faster and feels weaker than REFERENCE".
   - The glider opens falling at least 0.85 m/s ([game data] GlideStartFallSpeedMin, `Loco.glide_start`, match and farm): a rising jump is cut at the open, no float-up, and the jump pad's own 2 m/s cap went with it. The canopy then catches a fall at 60 m/s² (ours: the source's matching fastest-fall clamp is locked; [guide] it opens "instantly").
@@ -372,6 +373,25 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **A press just after Shift counts as one in it:** within `dash_glide.grace` (0.15 s) the glider opens on the press, past the kit's wind-down (Brall's grace is 0.25 s, decision 0099). `--airdash-glide-check` presses mid-dash, the step after and 6 steps after for every hunter: opens on the press, no step changes speed by more than 4 m/s (the old cut lost 10-17), at least 70% of the dash's speed kept.
 - **Brall's chains don't drop a press (decision 0099, owner playtest 11-13):** a jump off the ground clears a move's wind-down (Rampage's, the Lunge's), so Rampage or a held Smash, a jump and a glide press opens on the press; the glide button arms through a lock as a second Space does and opens as the lock ends. `--airdash-glide-check` "Brall" rows (both keys); on 11-15 main 5 of the 6 failed (3 presses dropped, 2 opened 0.2 s late).
 - **The dive carries:** opening the glider under the lip turns 0.6 of the fall speed into forward speed (up to the glide max) and the deep spring adds 0.3 of it upward (`GlideLift.open_kick`); the high glide is unchanged (the drop there never turns into speed, 11-08).
+
+## Run into a glide at body scale (decision 0061 follow-up, `--move-feel-check` "run into glide" rows, 11-22)
+The walk runs at `body_scale` (5.16-5.63 m/s) but the glide cruise stayed at the source's 5.0 m/s, so a run into a
+glide slowed you. The cruise is now `HunterMove.glide_cruise` (`physics.glide_cruise` 5.0 x `body_scale` = 5.8
+m/s), the one value the match, the farm and indoors read, and the steer force (`glide_accel`) scales with it so the
+turn times hold. The glider still adds no speed at the open (DECISIONS 11-11): the run's speed carries in, then the
+glide force pulls it up to cruise. Per Hunter, a glider opened at a full run and held forward, at 60 Hz
+(`tools/move_feel_hunters.gd`; "source" is MaxGlide 500 over that Hunter's MoveSpeed):
+
+| Hunter | run m/s | before: 0.5 s / 2.5 s (x run) | after: 0.5 s / 2.5 s (x run) | source x run |
+|---|---|---|---|---|
+| bulwark | 5.626 | 5.43 / 5.09 (x0.904) | 5.80 / 5.80 (x1.031) | x1.031 |
+| ashwick, dolm, mage, dredge, thief, ostra | 5.394 | 5.27 / 5.05 (x0.937) | 5.80 / 5.80 (x1.075) | x1.075 |
+| gil | 5.336 | 5.23 / 5.00 (x0.937) | 5.80 / 5.80 (x1.087) | x1.087 |
+| archer, juggernaut, gunslinger, tender | 5.278 | 5.19 / 5.00 (x0.947) | 5.80 / 5.80 (x1.099) | x1.099 |
+| rimewright | 5.162 | 5.11 / 5.00 (x0.969) | 5.80 / 5.80 (x1.124) | x1.124 |
+
+Before (origin/main beba8a9e18) every Hunter lost 0.16-0.63 m/s on the open; after, none drops under its run and all
+reach cruise within 0.5 s. The camera distance is unchanged (an owner call).
 
 ## Slow and haste ramp (`--move-feel-check` slow_* / haste_* rows; docs/decisions/0022)
 
