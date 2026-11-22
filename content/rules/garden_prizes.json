@@ -19,11 +19,13 @@
 				"min_ratio": 1.1
 			}
 		],
-		"rounds_doc": "In order. A win counts for a round when the beaten Boki's stat total is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."
+		"stat_doc": "The cup compares the game's own stat (games.<id>.stat: speed, power, guard or focus; best = the backed Boki's highest stat, the one its trick shows off), not the stat total, so a player can aim for it. A game with no stat falls back to the total.",
+		"rounds_doc": "In order. A win counts for a round when the beaten Boki's stat (see stat_doc) is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."
 	},
 	"games": {
 		"dash": {
 			"name": "The Dash",
+			"stat": "speed",
 			"first": "zipseed",
 			"ribbon": "Dash Cup Ribbon",
 			"colour": "#f2c84a",
@@ -58,6 +60,7 @@
 		},
 		"shove": {
 			"name": "Stump Shove",
+			"stat": "power",
 			"first": "thumpnut",
 			"ribbon": "Stump Shove Cup Ribbon",
 			"colour": "#d9604a",
@@ -92,6 +95,7 @@
 		},
 		"seek": {
 			"name": "Seek",
+			"stat": "focus",
 			"first": "hushpearl",
 			"ribbon": "Seek Cup Ribbon",
 			"colour": "#8a6ad0",
@@ -126,6 +130,7 @@
 		},
 		"volley": {
 			"name": "Spark Volley",
+			"stat": "speed",
 			"first": "hushpearl",
 			"ribbon": "Spark Volley Cup Ribbon",
 			"colour": "#5ab8f0",
@@ -160,6 +165,7 @@
 		},
 		"show": {
 			"name": "Show Ring",
+			"stat": "best",
 			"first": "sunsap",
 			"ribbon": "Show Ring Cup Ribbon",
 			"colour": "#f08ac0",
@@ -194,6 +200,7 @@
 		},
 		"echo": {
 			"name": "Echo Steps",
+			"stat": "focus",
 			"first": "hushpearl",
 			"ribbon": "Echo Steps Cup Ribbon",
 			"colour": "#7ad0e0",
@@ -224,6 +231,7 @@
 		},
 		"relay": {
 			"name": "Relay Cup",
+			"stat": "speed",
 			"first": "zipseed",
 			"ribbon": "Relay Cup Ribbon",
 			"colour": "#4ad6b0",
@@ -253,6 +261,7 @@
 		},
 		"lantern": {
 			"name": "Lantern Match",
+			"stat": "focus",
 			"first": "hush_truffle",
 			"ribbon": "Lantern Match Cup Ribbon",
 			"colour": "#b48cff",
@@ -287,6 +296,7 @@
 		},
 		"kite": {
 			"name": "Kite Tow",
+			"stat": "speed",
 			"first": "zipseed",
 			"ribbon": "Kite Tow Cup Ribbon",
 			"colour": "#8fd3f4",
