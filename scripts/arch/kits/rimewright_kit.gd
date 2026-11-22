@@ -52,7 +52,7 @@ var rime := {}                 # Rimelock running: {t, at, creak, carry, face}
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
 var recover_until := 0.0       # match time the crash's recovery ends (0: not recovering)
-var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last DashFlow.BUFFER_S
+var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last Loco.press_buffer
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
@@ -108,6 +108,7 @@ func add_chill(t: Ent) -> void:
 	if t.remote: KitStatus.apply(t, "chl", float(chill[key]["left"]), 1.0, true, "", h.nid)
 	if fresh:
 		vfx("chill", t.pos)
+		StatusSfx.cue(t, "chill", h, float(d["passive"].get("chill_t", 4.0)))
 
 ## The Chill on `t`, for the ComboMark tag (one state, no stacks); the ring is the Chill left.
 func combo_read(t: Ent) -> Dictionary:
@@ -1290,7 +1291,7 @@ func _rime_crash(k: float) -> void:
 
 
 ## After the burst she settles for x.recover s (footage f57 -> f61, the tm_rime_crash clip's length): no walking
-## or casts. A press in its last DashFlow.BUFFER_S goes as it ends; an earlier one is refused. Shift skates out.
+## or casts. A press in its last Loco.press_buffer goes as it ends; an earlier one is refused. Shift skates out.
 func recovering() -> bool:
 	return recover_until > 0.0 and m.time < recover_until
 
@@ -1308,7 +1309,7 @@ func gate_inputs() -> void:
 			h.inp[key] = true
 		recover_buf.clear()
 		return
-	var buffering: bool = recover_until - m.time <= DashFlow.BUFFER_S
+	var buffering: bool = recover_until - m.time <= Loco.press_buffer
 	for key in RECOVER_KEYS:
 		if not h.inp.get(key, false):
 			continue

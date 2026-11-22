@@ -13,10 +13,12 @@ const SETTLE_FRAMES := 600
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("FIRSTGAMES %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -56,11 +58,13 @@ func run(m: Node) -> void:
 	print("FIRSTGAMES DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _key(action: String) -> InputEventAction:
 	var e := InputEventAction.new()
 	e.action = action
 	e.pressed = true
 	return e
+
 
 func _snap() -> Array:
 	var out: Array = [int(Save.d.get("gems", 0))]
@@ -68,12 +72,15 @@ func _snap() -> Array:
 		out.append([float(rec["needs"]["energy"]), rec.get("memory", []).size()])
 	return out
 
+
 func _keys_named(text: String) -> bool:
 	return text.contains(Settings.key_cap("interact")) and text.contains(Settings.key_cap("menu"))
+
 
 func _free(home) -> void:
 	for k in home.kins:
 		k["busy"] = false
+
 
 ## Stump Shove and Spark Volley: a timing-bar game that the practice ends at the first press.
 func _timed(home, game, flag: String, what: String) -> void:
@@ -88,7 +95,7 @@ func _timed(home, game, flag: String, what: String) -> void:
 	game.bar.m = game.bar.zone
 	var t := 0.0
 	while game.run != null and not game.run.call("can_" + ("shove" if what == "shove" else "call")) and t < 20.0:
-		game.tick(0.1)          # (a volley waits for the seed to come to your Boki)
+		game.tick(0.1)  # (a volley waits for the seed to come to your Boki)
 		t += 0.1
 	if game.run != null:
 		game.bar.m = game.bar.zone
@@ -106,6 +113,7 @@ func _timed(home, game, flag: String, what: String) -> void:
 	ok(skipped, "%s: Esc skips the practice, no cost" % what)
 	ok(Save.d["tutorial"].get(flag, false), "%s: a skipped practice does not come back" % what)
 	_free(home)
+
 
 func _seek(home, sk) -> void:
 	_free(home)
@@ -132,6 +140,7 @@ func _seek(home, sk) -> void:
 	ok(sk.state == BaseSeek.S.IDLE, "seek: Esc puts the scent back")
 	_free(home)
 
+
 func _gates() -> void:
 	var flags := ["first_shove", "first_seek", "first_volley"]
 	for f in flags:
@@ -141,6 +150,8 @@ func _gates() -> void:
 	ok(not FirstRound.due("first_shove", "shove"), "gates: tips off, no practice round")
 	Settings.v["tips"] = true
 	Save.remember(Save.d["roster"][0], "volley", "beat Ash 5 to 3 at Spark Volley")
-	ok(not FirstRound.due("first_volley", "volley") and FirstRound.due("first_seek", "seek"),
-			"gates: a Boki that remembers the game skips its practice (old saves)")
+	ok(
+		not FirstRound.due("first_volley", "volley") and FirstRound.due("first_seek", "seek"),
+		"gates: a Boki that remembers the game skips its practice (old saves)"
+	)
 	ok(FirstRound.line("x").count(Settings.key_cap("interact")) == 1, "gates: the line names the key once")
