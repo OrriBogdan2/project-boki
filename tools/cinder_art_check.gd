@@ -136,9 +136,7 @@ func run(main: Node) -> void:
 		spread = maxf(spread, (heels[0] as Vector3).distance_to(heels[1]))
 		tail_d = minf(tail_d, -(hv.anchor_pos(P, "tail") - P.pos).dot(fwd))
 		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.1   # (v2 tail curls)
-		var sk := P.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
-		var bi := sk.find_bone("jet.0")
-		jet_y = maxf(jet_y, sk.get_bone_pose_scale(bi).y)
+		jet_y = maxf(jet_y, WardenProps.stretch_of(P.model, "jet.0"))  # (the jet bone, or its part on Meshy's bones)
 		if kit.nozzle().distance_to(P.pos + fwd * 1.0) < 0.2:
 			stowed = false
 	ok(spread > 0.06, "two jets, one on each heel (%.2f m apart)" % spread)
