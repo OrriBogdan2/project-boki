@@ -10959,3 +10959,4 @@ READY ext/rpc6-settings-pollution-1117 5a941c9790 (bulk-rebase: origin/main merg
 READY ext/spawn-at-muzzle 21b03d04eb (bulk-rebase: origin/main merged in mechanically, was 597314d8c7; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/stuck-integ-1afe8a57 8a237b35e1 (bulk-rebase: origin/main merged in mechanically, was e869c30854; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/kit-number-golden 8c7cf038845 (conflict in tools/health.py resolved, both checks kept; kit golden re-blessed to 1512 numbers after main moved 31/removed 13/added 11; kit_number_golden --check OK, registry OK; health --strict red only on style ratchet long_line in tools/*.gd untouched by this branch)
+READY ext/tools-uid-files 5e800f58784 (merged origin/main; health.py keeps uid check + registry_lint, 10 more .gd.uid, Rules.md regen; gen_wiki --check OK; style ratchet red on main too)
