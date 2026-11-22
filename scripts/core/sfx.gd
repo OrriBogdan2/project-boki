@@ -146,8 +146,8 @@ const NAMES := [
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
-## The squad cues (you or a squadmate downs or finishes a rival, or a squadmate is downed): one dedicated voice, so footsteps and
-## the combat crowd never steal it, and no gap or stack cap thins it.
+## The squad cues (you or a squadmate downs or finishes a rival, or a squadmate is downed): one dedicated
+## voice, so footsteps and the combat crowd never steal it, and no gap or stack cap thins it.
 const CUES := ["knock_confirm", "knock_warn", "elim_confirm"]
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := [
@@ -587,7 +587,8 @@ func _process(delta: float) -> void:
 	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
-		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / float(amb_layers[n].get("fade", AMB_FADE)))
+		var step: float = full * delta / float(amb_layers[n].get("fade", AMB_FADE))
+		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, step)
 		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
 		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
 			ap.queue_free()
