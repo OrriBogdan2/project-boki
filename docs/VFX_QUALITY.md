@@ -332,6 +332,12 @@ or a cast with no area = cut. A fixed-size flash on a foe that was hit is hit fe
 | Sable | Encore rings (`thief_ult`), Bola wrap rings on held foes (`thief_kit`: who is held) | gameplay | kept |
 | Lace | no ring layer; the RMB bar, E arc wall and charge ring are aim previews | gameplay | kept |
 
+GPU strips after the cut (`--hero-vfx-reel`, jobq 20261122-071231-04549 Cinder, -32049 Grimble, -23864 Gil, -29461 Vex,
+-21003 Kael, -22995 Tenzo, -14895 Neve): `docs/shots/vfx-ground-ring-audit/` (Gil dash and Tidal
+Wave, Grimble E and hook, Vex E, Kael slam and wave, Tenzo rocks, Neve R, Cinder E). No ring on the swim, the lunge, the
+slam or the wind-ups; the kept area rings (Gil's surfacing, Kael's drop shock, Neve's rink) are still there. No before
+strips were filmed: the cut layers are in the diff.
+
 Net: 16 data layers (one whole move) and 2 code lines cut, none added. Sounds, timings and hit shapes are untouched.
 Left for the owner: the "hit flash" rows (Gil lunge, Vex RMB, Sparkle RMB, Motley orb, Grimble back bonus) are
 fixed-size flashes on a foe, not areas; the rule as written does not name hits, so they stay.
