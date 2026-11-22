@@ -8,7 +8,8 @@ extends RefCounted
 ## sword gripped in the contract's hanging hand sits in Meshy's A-pose hand. The contract's anchor empties on that bone
 ## ride the part (the blade tip on the blade). Data "stretch" {"kmove", "y", "rest"}: the parts' length along their
 ## bone while that kit move plays and otherwise (the contract's clips key the jet bones' scale: Flue Flight's long
-## flames, small ones at rest).
+## flames, small ones at rest). Data "shift" {bone: [x, y, z]}: m the part moves in Meshy's model space (seats a
+## torso part whose contract joint sits lower than Meshy's, Grimble's hoard).
 
 const PREFIX := "prop_"  # MeshInstance3D name: prop_<contract bone> ("jet.0" -> prop_jet_0: node names have no ".")
 const EASE := 10.0  # 1/s: how fast a part eases to its stretch
@@ -36,6 +37,9 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 			nb = WardenSkeleton.find(skel, String(p[3][0]))  # (a torso's short Hips -> Spine02 line would swing it)
 			if nb >= 0:
 				onto = Transform3D(Basis.IDENTITY, (to_m * skel.get_bone_global_rest(nb)).origin - (p[3][1] as Vector3))
+		var sh: Array = (d.get("shift", {}) as Dictionary).get(cb, [])  # data "shift": m, Meshy's model space
+		if sh.size() == 3:
+			onto.origin += Vector3(float(sh[0]), float(sh[1]), float(sh[2]))
 		if nb < 0 or onto.basis.determinant() == 0.0:
 			continue
 		var at := BoneAttachment3D.new()
