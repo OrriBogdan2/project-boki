@@ -11,25 +11,58 @@ extends Node3D
 ## drift = random sideways m/s, grav = m/s² down (negative floats up), size = particle scale, streak =
 ## drawn as a velocity-aligned spark (shaders/spark.gdshader) instead of a soft dot.
 const GROUPS := {
-	"rise": {"types": ["fire", "spore", "psychic", "fairy", "dark", "poison", "dragon", "wyrm"],
-		"life": 0.9, "rise": 0.9, "drift": 0.3, "grav": -0.5, "size": 1.0, "streak": false},
-	"drip": {"types": ["water", "ice", "rock"],
-		"life": 0.5, "rise": -0.5, "drift": 0.4, "grav": 9.0, "size": 1.1, "streak": false},
-	"flutter": {"types": ["grass", "bug", "normal", "flying"],
-		"life": 1.0, "rise": 0.4, "drift": 1.1, "grav": 1.2, "size": 1.0, "streak": false},
-	"zap": {"types": ["electric", "steel", "crystal", "sound"],
-		"life": 0.16, "rise": 0.0, "drift": 4.5, "grav": 0.0, "size": 1.0, "streak": true},
+	"rise":
+	{
+		"types": ["fire", "spore", "psychic", "fairy", "dark", "poison", "dragon", "wyrm"],
+		"life": 0.9,
+		"rise": 0.9,
+		"drift": 0.3,
+		"grav": -0.5,
+		"size": 1.0,
+		"streak": false
+	},
+	"drip":
+	{
+		"types": ["water", "ice", "rock"],
+		"life": 0.5,
+		"rise": -0.5,
+		"drift": 0.4,
+		"grav": 9.0,
+		"size": 1.1,
+		"streak": false
+	},
+	"flutter":
+	{
+		"types": ["grass", "bug", "normal", "flying"],
+		"life": 1.0,
+		"rise": 0.4,
+		"drift": 1.1,
+		"grav": 1.2,
+		"size": 1.0,
+		"streak": false
+	},
+	"zap":
+	{
+		"types": ["electric", "steel", "crystal", "sound"],
+		"life": 0.16,
+		"rise": 0.0,
+		"drift": 4.5,
+		"grav": 0.0,
+		"size": 1.0,
+		"streak": true
+	},
 }
-const INTERVAL := 0.07        # s between particles of one moving Boki at full quality
-const MIN_SPEED := 0.5        # m/s: slower than this is standing still
-const MAX_RANGE := 45.0       # m from the local player: further Boki leave no trail
-const POOL := 64              # live particles per group
-const WORLD_BOX := AABB(Vector3(-400, -50, -400), Vector3(800, 150, 800))   # particles are never culled by a tiny box
+const INTERVAL := 0.07  # s between particles of one moving Boki at full quality
+const MIN_SPEED := 0.5  # m/s: slower than this is standing still
+const MAX_RANGE := 45.0  # m from the local player: further Boki leave no trail
+const POOL := 64  # live particles per group
+const WORLD_BOX := AABB(Vector3(-400, -50, -400), Vector3(800, 150, 800))  # particles are never culled by a tiny box
 const HIDDEN_STATES := ["shoulder", "bench", "away", "fused", "downed", "dazed"]
 
-var emitted := 0              # particles emitted so far (checks read it)
-var _group_of := {}           # type -> group name
-var _emitters := {}           # group name -> GPUParticles3D
+var emitted := 0  # particles emitted so far (checks read it)
+var _group_of := {}  # type -> group name
+var _emitters := {}  # group name -> GPUParticles3D
+
 
 static func of(fx: Fx) -> KinTypeTrail:
 	var t := fx.get_node_or_null("KinTypeTrail") as KinTypeTrail
@@ -39,10 +72,12 @@ static func of(fx: Fx) -> KinTypeTrail:
 		fx.add_child(t)
 	return t
 
+
 ## The colour of a Boki's type, `fallback` for one with none.
 static func colour(type: String, fallback: Color) -> Color:
 	var look: Dictionary = KinTypeFx.LOOKS.get(KinTypeFx.key(type), {})
 	return Color(String(look["col"])) if not look.is_empty() else fallback
+
 
 func _ready() -> void:
 	var dot := QuadMesh.new()
@@ -82,6 +117,7 @@ func _ready() -> void:
 		for t: String in def["types"]:
 			_group_of[t] = g
 
+
 ## Called every frame by a Boki (Kin.render). `t` is its running timer: returns it advanced or reset.
 func tick(k: Kin, t: float, delta: float, quality: float) -> float:
 	var v := Vector2(k.vel.x, k.vel.z)
@@ -96,14 +132,22 @@ func tick(k: Kin, t: float, delta: float, quality: float) -> float:
 		_emit(group, k, v)
 	return 0.0
 
+
 func _emit(group: String, k: Kin, v: Vector2) -> void:
 	var def: Dictionary = GROUPS[group]
 	var p: GPUParticles3D = _emitters[group]
 	var drift := float(def["drift"])
 	var back := -v.normalized() * 0.3 * k.r
-	var at := k.pos + Vector3(back.x + randf_range(-0.2, 0.2), 0.15 + randf() * 0.4, back.y + randf_range(-0.2, 0.2))
-	var vel := Vector3(randf_range(-drift, drift), float(def["rise"]), randf_range(-drift, drift))
+	var vr := KitLooks.vis_rng  # looks roll on the looks generator, never the sim RNG
+	var jit := Vector3(vr.randf_range(-0.2, 0.2), 0.15 + vr.randf() * 0.4, vr.randf_range(-0.2, 0.2))
+	var at := k.pos + Vector3(back.x, 0.0, back.y) + jit
+	var vel := Vector3(vr.randf_range(-drift, drift), float(def["rise"]), vr.randf_range(-drift, drift))
 	var col := colour(String(k.sp.get("type", "")), Color.WHITE)
-	p.emit_particle(Transform3D(Basis.IDENTITY, p.to_local(at)), vel, col, Color.WHITE,
-		GPUParticles3D.EMIT_FLAG_POSITION | GPUParticles3D.EMIT_FLAG_VELOCITY | GPUParticles3D.EMIT_FLAG_COLOR)
+	p.emit_particle(
+		Transform3D(Basis.IDENTITY, p.to_local(at)),
+		vel,
+		col,
+		Color.WHITE,
+		GPUParticles3D.EMIT_FLAG_POSITION | GPUParticles3D.EMIT_FLAG_VELOCITY | GPUParticles3D.EMIT_FLAG_COLOR
+	)
 	emitted += 1

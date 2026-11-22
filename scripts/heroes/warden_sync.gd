@@ -9,6 +9,7 @@ var springs := WardenSprings.new()  # the spring_ bone chains (braids) swinging 
 var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 var orbits := WardenOrbits.new()    # the orbit_ props (seeing-stones) circling their bone
 var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
+var holster: WardenHolster    # the gun prop's hip and hand sockets (WardenHolster), or null
 var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 var head_look: WardenLookAt   # the head turns to the aim ahead of the body (WardenLookAt)
 var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
@@ -80,6 +81,7 @@ func use_clips(glb: Node3D, art_name: String) -> void:
 	sway = WardenSway.make(root, skel, dd.get("sway", {}))
 	flinch = WardenFlinch.make(root, skel) if clips else null
 	aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))
+	holster = WardenHolster.make(root, skel, dd.get("holster", {}), String(bl.get("bone", "")))
 	wall = WardenWall.make(root, skel) if clips else null
 	if clips:
 		_look_pose()
@@ -229,6 +231,8 @@ func _play(dt: float) -> void:
 	if sway:
 		sway.step(dt)
 	aim.step(1.0 - w)
+	if holster:
+		holster.step()
 	if wall:
 		wall.step(dt)
 	if w < 1.0:
