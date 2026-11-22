@@ -216,6 +216,11 @@ func label() -> String:
 	return "Play Fetch Cup (back %s)" % Save.active_kin().get("name", "your partner")
 
 
+## True while a round is on (GardenMusic ducks the music for it; every game in Home.games has this).
+func playing() -> bool:
+	return run != null
+
+
 func use() -> void:
 	var ks: Array = h.hrace.entrants()
 	if ks.size() < 2:
