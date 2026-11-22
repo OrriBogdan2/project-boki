@@ -10949,3 +10949,4 @@ READY ext/tut-sizes-playthrough 394516685eb6cd36ededdcf2b3fd1e9038e57786 (tutori
 READY ext/anim-stun-knock-v95 36098d4deb3 (stun/knock poses on v95)
 READY ext/tut-text-audit ed2865d295 (tutorial and hint text audit)
 READY ext/vfx-sparkle-bolt adc6e97295 (Sparkle LMB bolt readable)
+READY ext/anim-slice-hard-land fa676c0322e (slice hard landing)
