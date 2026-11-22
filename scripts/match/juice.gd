@@ -11,17 +11,22 @@ extends RefCounted
 ## global one, so a seeded match plays out exactly the same with or without these effects.
 
 const HIT_COL := Color("fff0d2")
-const HURT_COL := Color("ff7a5c")       # hits on you read hotter
-const RIVAL_HIT_DB := -13.0             # dB: a hit between two others, well under yours (-6 / crit -4)
-const RIVAL_PICKUP_DB := -14.0          # dB: another hunter picking something up, under yours (-8)
-const BOKI_NUM_K := 0.75                # a hit on a Boki prints its number this share of a Hunter's size
-const SHELL_FLASH_T := 0.12             # s a hit on armour keeps the body flash shell-coloured
-const BREAK_FLASH_T := 0.3              # s the body holds then fades its flash when the armour breaks
-const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
-const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
-const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
-const ARMOR_TICK_DB := -4.0             # dB: the attacker's "push now" tick (a high, short click, not the crack)
-const ARMOR_TICK_PITCH := 2.0           # the tick's pitch, well above the click's menu use
+const HURT_COL := Color("ff7a5c")  # hits on you read hotter
+const RIVAL_HIT_DB := -13.0  # dB: a hit between two others, well under yours (-6 / crit -4)
+const RIVAL_PICKUP_DB := -14.0  # dB: another hunter picking something up, under yours (-8)
+const BOKI_NUM_K := 0.75  # a hit on a Boki prints its number this share of a Hunter's size
+const SHELL_FLASH_T := 0.12  # s a hit on armour keeps the body flash shell-coloured
+const BREAK_FLASH_T := 0.3  # s the body holds then fades its flash when the armour breaks
+const FAR := 24.0  # beyond this from the player nothing is drawn for a hit
+const ARMOR_BREAK_DB := -3.0  # dB: the armour crack as heard from another Hunter's break
+const ARMOR_BREAK_DB_VICTIM := 2.0  # dB: the same crack on your own armour, louder so you know it's gone
+const ARMOR_TICK_DB := -4.0  # dB: the attacker's "push now" tick (a high, short click, not the crack)
+const ARMOR_TICK_PITCH := 2.0  # the tick's pitch, well above the click's menu use
+
+const ARMOR_UP_PITCH := 0.1  # pitch step per armour tier above Common (tier 1 plays at 0.9, tier 4 at 1.2)
+const ARMOR_UP_OWN_DB := -4.0  # dB: your own Hunter's tier-up (the fuller cue, no position)
+const ARMOR_UP_NEAR_DB := -8.0  # dB: a rival's (or mate's) tier-up; Sfx.play adds the distance falloff
+
 
 ## The flash colour of a hit by what it struck: a Boki rims in its type colour (the Field Book's, not
 ## the damage category's), so a squad fight tells a Boki from its Hunter; a Hunter keeps the white
@@ -30,6 +35,7 @@ static func flash_col(target: Ent, p: Hunter) -> Color:
 	if target is Kin:
 		return DexView.type_col(DexView.type_of((target as Kin).species))
 	return HURT_COL if target == p else HIT_COL
+
 
 ## Where on the target a hit from `by` lands (HitContact: its real contact point, clamped to its collider) and which
 ## way the sparks fly (on through it).
@@ -104,6 +110,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	elif target != p and credit != p and not typed:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
 
+
 ## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.
 static func rival_pickup(m: Match, h: Hunter) -> void:
 	m.sfx("pickup", h.pos, RIVAL_PICKUP_DB)
@@ -155,6 +162,7 @@ static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	if _squad_cue(m, h, credit, "elim_confirm", -3.0) and credit == m.player and m.hud:
 		m.hud.flash(Color(tc, 1.0), 0.14)
 
+
 ## The knock / finish cue, heard only by the attacker's squad (their team, so the local player hears it
 ## whenever a squadmate downs or finishes a rival). Returns whether it played.
 static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: float) -> bool:
@@ -162,6 +170,7 @@ static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: fl
 		return false
 	Sfx.play(cue, null, vol_db, 0.0)
 	return true
+
 
 ## Armor broken (Match.on_armor_break): the body cracks (it holds the shell's flash for BREAK_FLASH_T, then fades)
 ## and the shell falls off it in shards, with a glassy sound; no ring, no burst. A short freeze for whoever broke it
@@ -205,8 +214,8 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 		return
 	var col: Color = mb.md.get("color", Color.WHITE)
 	var c := mb.pos + Vector3(0, 0.6 + float(mb.r) * 0.5, 0)
-	var flash_col := kill_col(m, mb, credit, col.lerp(Color.WHITE, 0.5))
-	m.fx.flash(c, flash_col, 0.6 if not big else 1.1, 0.12 if not big else 0.18)
+	var flash_col_v := kill_col(m, mb, credit, col.lerp(Color.WHITE, 0.5))
+	m.fx.flash(c, flash_col_v, 0.6 if not big else 1.1, 0.12 if not big else 0.18)
 	m.fx.spark(
 		c,
 		Vector3.UP,
@@ -288,11 +297,6 @@ static func footstep(h: Hunter) -> void:
 		return
 	var surf := StepSurface.at(m, h.pos)
 	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, -13.0), StepSurface.vol_db(h, -17.0))
-
-
-const ARMOR_UP_PITCH := 0.1     # pitch step per armour tier above Common (tier 1 plays at 0.9, tier 4 at 1.2)
-const ARMOR_UP_OWN_DB := -4.0   # dB: your own Hunter's tier-up (the fuller cue, no position)
-const ARMOR_UP_NEAR_DB := -8.0  # dB: a rival's (or mate's) tier-up; Sfx.play adds the distance falloff
 
 
 ## The pitch of a tier's rise: higher tier, brighter.

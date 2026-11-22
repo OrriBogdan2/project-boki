@@ -65,11 +65,11 @@ static func fixes(rec: Dictionary) -> int:
 
 ## Misses a round this Boki's streak survives: its Sound type or lean.
 static func streak_saves(rec: Dictionary) -> int:
-	var R := rules()
+	var r_v := rules()
 	var ln := Evo.lean(rec)
-	var sound: bool = (R["sound_themes"] as Array).has(BaseShove.theme(rec)) \
-			or (ln[0] == "sound" and float(ln[1]) >= float(R["sound_lean"]))
-	return int(R["sound_saves"]) if sound else 0
+	var sound: bool = (r_v["sound_themes"] as Array).has(BaseShove.theme(rec)) \
+			or (ln[0] == "sound" and float(ln[1]) >= float(r_v["sound_lean"]))
+	return int(r_v["sound_saves"]) if sound else 0
 
 ## The chance the rival misses a step it copies.
 static func copy_miss(rec: Dictionary) -> float:
@@ -81,7 +81,7 @@ class Run:
 	enum S { CALL, ANSWER, SCORE, RESULT }
 	const TABLE := {S.CALL: [S.ANSWER], S.ANSWER: [S.CALL, S.SCORE], S.SCORE: [S.CALL, S.RESULT], S.RESULT: []}
 
-	var R: Dictionary
+	var r_x: Dictionary
 	var recs: Array
 	var versus := false
 	var practice := false           # the first dance's slow phrase: rules "practice" over the rest
@@ -108,15 +108,15 @@ class Run:
 	var end_t := 0.0                # s on the clock the dance ended
 
 	func _init(you: Dictionary, rival: Dictionary, r: RandomNumberGenerator, slow := false) -> void:
-		R = EchoSteps.rules()
+		r_x = EchoSteps.rules()
 		practice = slow
 		if practice:
-			R = R.duplicate()
-			R.merge(R["practice"], true)
+			r_x = r_x.duplicate()
+			r_x.merge(r_x["practice"], true)
 		recs = [you, rival]
 		versus = not rival.is_empty()
 		rng = r
-		beat_s = 60.0 / float(R["bpm"])
+		beat_s = 60.0 / float(r_x["bpm"])
 		window = EchoSteps.window_s(you)
 		_start_round(0)
 
@@ -133,7 +133,7 @@ class Run:
 		return b * beat_s
 
 	func you_lead() -> bool:
-		return not practice and round_i == (R["rounds"] as Array).size() - 1
+		return not practice and round_i == (r_x["rounds"] as Array).size() - 1
 
 	## Is it your turn to press: answering, or making the pattern in the last round.
 	func mine() -> bool:
@@ -157,12 +157,12 @@ class Run:
 		phrase = 0
 		fixes_left = EchoSteps.fixes(recs[YOU])
 		saves = [EchoSteps.streak_saves(recs[YOU]), EchoSteps.streak_saves(recs[RIVAL]) if versus else 0]
-		_start_call(b0 + int(R["count_in"]))
+		_start_call(b0 + int(r_x["count_in"]))
 
 	func _start_call(b: int) -> void:
-		var n := int(R["rounds"][round_i])
+		var n := int(r_x["rounds"][round_i])
 		first = b
-		end_beat = b + n + int(R["gap"])
+		end_beat = b + n + int(r_x["gap"])
 		pattern = []
 		for i in n:
 			pattern.append(-1 if you_lead() else rng.randi() % 4)
@@ -213,15 +213,15 @@ class Run:
 				go(S.ANSWER)
 				_start_answer()
 			S.ANSWER:
-				if phrase + 1 < int(R["phrases"]):
+				if phrase + 1 < int(r_x["phrases"]):
 					phrase += 1
 					go(S.CALL)
 					_start_call(end_beat)
 				else:
 					go(S.SCORE)
-					end_beat += int(R["score_beats"])
+					end_beat += int(r_x["score_beats"])
 			S.SCORE:
-				if round_i + 1 < (R["rounds"] as Array).size():
+				if round_i + 1 < (r_x["rounds"] as Array).size():
 					round_i += 1
 					go(S.CALL)
 					_start_round(end_beat)
@@ -273,36 +273,36 @@ class Run:
 			hits[side] += 1
 			streak[side] += 1
 			best[side] = maxi(best[side], streak[side])
-			score[side] += int(R["hit_pts"]) + int(R["streak_pts"]) * mini(streak[side] - 1, int(R["streak_cap"]))
+			score[side] += int(r_x["hit_pts"]) + int(r_x["streak_pts"]) * mini(streak[side] - 1, int(r_x["streak_cap"]))
 		events.append([kind, side, stone])
 		return kind
 
 ## Pays out a finished dance: joy, trust, memories, energy and gems. Returns what the card shows.
-static func settle(run: Run) -> Dictionary:
-	var R := rules()
-	var you: Dictionary = run.recs[YOU]
-	for rec in run.recs:
+static func settle(run_v: Run) -> Dictionary:
+	var r_v := rules()
+	var you: Dictionary = run_v.recs[YOU]
+	for rec in run_v.recs:
 		if not rec.is_empty():
-			Care.change(rec, "energy", -float(R["energy"]))
-	var res := {"score": run.score, "best": run.best[YOU]}
-	if run.versus:
-		var win: Dictionary = run.recs[run.winner()]
-		var lose: Dictionary = run.recs[1 - run.winner()]
-		Care.change(win, "joy", float(R["win_joy"]))
-		Care.change(lose, "joy", float(R["lose_joy"]))
-		Save.remember(win, "echo", "out-danced %s at Echo Steps" % lose["name"], float(R["win_trust"]))
+			Care.change(rec, "energy", -float(r_v["energy"]))
+	var res := {"score": run_v.score, "best": run_v.best[YOU]}
+	if run_v.versus:
+		var win: Dictionary = run_v.recs[run_v.winner()]
+		var lose: Dictionary = run_v.recs[1 - run_v.winner()]
+		Care.change(win, "joy", float(r_v["win_joy"]))
+		Care.change(lose, "joy", float(r_v["lose_joy"]))
+		Save.remember(win, "echo", "out-danced %s at Echo Steps" % lose["name"], float(r_v["win_trust"]))
 		Save.remember(lose, "echo", "lost Echo Steps to %s" % win["name"])
 		res.merge({"win": win, "lose": lose, "good": win == you})
-		res["prize"] = GardenPrizes.settle("echo", you, run.recs[RIVAL], win == you)
+		res["prize"] = GardenPrizes.settle("echo", you, run_v.recs[RIVAL], win == you)
 	else:
-		var good := float(run.hits[YOU]) >= float(R["solo_good"]) * float(run.beats[YOU])
+		var good := float(run_v.hits[YOU]) >= float(r_v["solo_good"]) * float(run_v.beats[YOU])
 		if good:
-			Care.change(you, "joy", float(R["win_joy"]))
-		var trust := float(R["win_trust"]) if good else 0.0
-		Save.remember(you, "echo", "danced Echo Steps for %d points" % run.score[YOU], trust)
+			Care.change(you, "joy", float(r_v["win_joy"]))
+		var trust := float(r_v["win_trust"]) if good else 0.0
+		Save.remember(you, "echo", "danced Echo Steps for %d points" % run_v.score[YOU], trust)
 		res["good"] = good
 		res["prize"] = GardenPrizes.settle("echo", you, {"stats": {}}, good)
-	res["gems"] = int(R["gems_win"]) if res["good"] else int(R["gems_ran"])
+	res["gems"] = int(r_v["gems_win"]) if res["good"] else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + res["gems"]
 	return res
 
@@ -436,22 +436,22 @@ func _begin(slow: bool) -> void:
 
 ## The notes and the bed: generated once a dance; the bed's position is the dance's clock.
 func _sound_up() -> void:
-	var R := rules()
+	var r_v := rules()
 	var beat := run.beat_s
 	if voices.is_empty():
 		for s in 4:
 			var v := AudioStreamPlayer.new()
 			v.bus = "SFX"
-			v.stream = tone(float(R["notes_hz"][s]), float(R["note_decay"]), float(R["note_s"]))
-			v.volume_db = float(R["note_db"])
+			v.stream = tone(float(r_v["notes_hz"][s]), float(r_v["note_decay"]), float(r_v["note_s"]))
+			v.volume_db = float(r_v["note_db"])
 			h.add_child(v)
 			voices.append(v)
 		bed = AudioStreamPlayer.new()
 		bed.bus = "SFX"
-		bed.volume_db = float(R["bed_db"])
+		bed.volume_db = float(r_v["bed_db"])
 		h.add_child(bed)
 	if bed_beat != beat:
-		bed.stream = tone(float(R["bed_hz"]), float(R["bed_decay"]), beat * 4.0, beat)
+		bed.stream = tone(float(r_v["bed_hz"]), float(r_v["bed_decay"]), beat * 4.0, beat)
 		bed_beat = beat
 	bar_s = beat * 4.0
 	clock = 0.0
@@ -506,12 +506,12 @@ func step_to(now: float, d: float) -> void:
 		_show(e, now)
 	run.events.clear()
 	cue.step(d)
-	var R := rules()
+	var r_v := rules()
 	for s in stones.size():
 		glow[s] = maxf(0.0, glow[s] - d)
 		var m: StandardMaterial3D = stones[s].material_override
-		m.emission_energy_multiplier = float(R["glow_energy"]) * glow[s] / float(R["glow_s"])
-		caps[s].modulate.a = maxf(KEY_DIM, glow[s] / float(R["glow_s"]))
+		m.emission_energy_multiplier = float(r_v["glow_energy"]) * glow[s] / float(r_v["glow_s"])
+		caps[s].modulate.a = maxf(KEY_DIM, glow[s] / float(r_v["glow_s"]))
 	_place(now)
 	if is_instance_valid(bar):
 		bar.queue_redraw()
@@ -695,13 +695,13 @@ func _end(finished: bool) -> void:
 
 func _card(res: Dictionary, before: Array) -> void:
 	var you: Dictionary = dancers[YOU]["rec"]
-	var place := "%s danced: %d points" % [you["name"], res["score"][YOU]]
+	var place_v := "%s danced: %d points" % [you["name"], res["score"][YOU]]
 	if res.has("win"):
 		var won := YOU if res["win"] == you else RIVAL
-		place = "%s wins, %d points to %d" % [res["win"]["name"], res["score"][won], res["score"][1 - won]]
+		place_v = "%s wins, %d points to %d" % [res["win"]["name"], res["score"][won], res["score"][1 - won]]
 	if is_instance_valid(card):
 		card.queue_free()
-	card = GameResultCard.open(h, {"game": "Echo Steps", "place": place, "before": before,
+	card = GameResultCard.open(h, {"game": "Echo Steps", "place": place_v, "before": before,
 			"prize": [["+%d gems, best streak %d" % [res["gems"], res["best"]], UI.GOLD]]
 				+ GardenPrizes.rows(res["prize"])})
 	card_t = float(rules()["card_s"])

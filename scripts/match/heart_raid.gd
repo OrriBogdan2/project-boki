@@ -20,66 +20,15 @@ extends RefCounted
 ## tells the others with ["hr", phase, wave, boss_nid] (on a change and every SYNC_S).
 
 enum P { WAVES, BOSS, HOLD, WON, LOST }
+
 const MODE := "heart_raid"  # the mode's name in content/rules/boki_modes.json (BokiModes)
 const RULES_PATH := "res://content/rules/heart_raid.json"
 const THINK_S := 0.5  # s between the director's looks (waves, steering, rally)
 const SYNC_S := 3.0  # s between the host's "hr" refreshes
 const COL := Color("ff7a5a")  # the raid's HUD accent (the Blight's ember)
 const SPREAD := 1.4  # m: a group's monsters stand this far apart round their gate
+
 static var _rules := {}
-
-
-static func rules() -> Dictionary:
-	if _rules.is_empty():
-		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
-	return _rules
-
-
-static func r(k: String) -> float:
-	return float(rules()[k])
-
-
-static func on(o: Dictionary) -> bool:
-	return bool(o.get("heart_raid", false))
-
-
-## The match options of a raid for a squad of `squad` (1 = truly solo) at a difficulty (rules "difficulty").
-static func opts(squad: int, difficulty := "normal") -> Dictionary:
-	var d := difficulty if rules()["difficulty"].has(difficulty) else "normal"
-	return {"heart_raid": true, "teams": 1, "squad": clampi(squad, 1, 4), "length": r("match_s"), "raid_diff": d}
-
-
-## --heart-raid=N or N:hard (with --match).
-static func from_arg(s: String) -> Dictionary:
-	var parts := s.split(":")
-	return opts(int(parts[0]), parts[1] if parts.size() > 1 else "normal")
-
-
-## The difficulty ladder, easiest first (boki_modes.json modes.heart_raid.difficulties).
-static func difficulties() -> Array:
-	return BokiModes.rules()["modes"][MODE]["difficulties"]
-
-
-static func diff_name(difficulty: String) -> String:
-	return String(rules()["difficulty"][difficulty]["name"])
-
-
-## The raid's Boki at a difficulty: its lines of boki_modes.json open there, as their game species, or (while a
-## line has no kin yet) its stand-in (rules "stand_ins"). Draw from it with BokiModes.draw (rarity tickets).
-static func boki(difficulty: String) -> Array:
-	var ladder := difficulties()
-	var lines: Dictionary = BokiModes.rules()["lines"]
-	var out := BokiModes.pool(MODE, ["common", "rare", "very_rare"], difficulty)
-	for line in rules()["stand_ins"]:
-		if not line.begins_with("_") and ladder.find(lines[line]["min_difficulty"]) <= ladder.find(difficulty):
-			out.append(String(rules()["stand_ins"][line]))
-	return out
-
-
-## The pool a wild or rare-spot Boki of a raid draws from (the Expedition draws through ModeBoki, main's).
-static func boki_for(o: Dictionary) -> Array:
-	return boki(String(o.get("raid_diff", "normal")))
-
 
 var m: Match
 var phase := P.WAVES
@@ -97,9 +46,62 @@ var foes: Array[Mob] = []  # wave monsters alive
 var sent := 0  # wave monsters spawned
 var boss_down := false  # the boss fell (the Heart's final seat is open)
 var trail: Array[String] = []  # "time what", every beat of the raid (the smoke check reads it)
+
 var _think := 0.0
 var _sync_t := 0.0
 var _rng := RandomNumberGenerator.new()
+
+
+static func rules() -> Dictionary:
+	if _rules.is_empty():
+		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
+	return _rules
+
+
+static func r(k: String) -> float:
+	return float(rules()[k])
+
+
+static func on(o: Dictionary) -> bool:
+	return bool(o.get("heart_raid", false))
+
+
+## The match options of a raid for a squad of `squad` (1 = truly solo) at a difficulty (rules "difficulty").
+static func opts(squad: int, difficulty_v := "normal") -> Dictionary:
+	var d := difficulty_v if rules()["difficulty"].has(difficulty_v) else "normal"
+	return {"heart_raid": true, "teams": 1, "squad": clampi(squad, 1, 4), "length": r("match_s"), "raid_diff": d}
+
+
+## --heart-raid=N or N:hard (with --match).
+static func from_arg(s: String) -> Dictionary:
+	var parts := s.split(":")
+	return opts(int(parts[0]), parts[1] if parts.size() > 1 else "normal")
+
+
+## The difficulty ladder, easiest first (boki_modes.json modes.heart_raid.difficulties).
+static func difficulties() -> Array:
+	return BokiModes.rules()["modes"][MODE]["difficulties"]
+
+
+static func diff_name(difficulty_v: String) -> String:
+	return String(rules()["difficulty"][difficulty_v]["name"])
+
+
+## The raid's Boki at a difficulty: its lines of boki_modes.json open there, as their game species, or (while a
+## line has no kin yet) its stand-in (rules "stand_ins"). Draw from it with BokiModes.draw (rarity tickets).
+static func boki(difficulty_v: String) -> Array:
+	var ladder := difficulties()
+	var lines: Dictionary = BokiModes.rules()["lines"]
+	var out := BokiModes.pool(MODE, ["common", "rare", "very_rare"], difficulty_v)
+	for line in rules()["stand_ins"]:
+		if not line.begins_with("_") and ladder.find(lines[line]["min_difficulty"]) <= ladder.find(difficulty_v):
+			out.append(String(rules()["stand_ins"][line]))
+	return out
+
+
+## The pool a wild or rare-spot Boki of a raid draws from (the Expedition draws through ModeBoki, main's).
+static func boki_for(o: Dictionary) -> Array:
+	return boki(String(o.get("raid_diff", "normal")))
 
 
 func _init(match_node: Match) -> void:
