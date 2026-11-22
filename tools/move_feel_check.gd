@@ -269,6 +269,7 @@ const T := {
 	],
 	# the source_scale test camera (off by default; bands from camera.json "source")
 	"source_view_across_m": ["~", [35.0, 39.0], "m", "ground across: the source's ~37 m"],
+	"dash_back_on_cursor_deg": ["<=", 5.0, "deg", "worst body angle off the cursor after a dash (home in 0.1 s)"],
 	"source_hunter_screen_pct": ["~", [8.3, 9.3], "%", "as hunter_screen_pct: the source's 90-100 px of 1080"],
 	"source_hunter_feet_below_pct": ["~", [1.5, 5.0], "%", "as hunter_feet_below_pct"],
 }
@@ -587,6 +588,7 @@ func run(main: Node) -> void:
 	bad += DIRS.new(m, flat, _reset).run()  # after _aim_rel: its rows disturb the aim_back state
 	_overheat()  # after every timed row: its ~9 s of level glide would move them
 	load("res://tools/move_feel_turn.gd").new(self).run()  # every kit's 180 stick flip at a run (~30 s, late too)
+	load("res://tools/move_feel_dash_turn.gd").new(self).run()  # every kit's body and LMB through a dash
 	load("res://tools/move_feel_hunters.gd").new(self).run()  # the movement review rows, every kit (late too)
 	await _no_fall_carry(main)  # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()  # one profile in every mode
