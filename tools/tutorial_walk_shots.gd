@@ -77,7 +77,10 @@ func _walk() -> void:
 		ok(not sid in ["pick_ult", "ult"], "%s is not a Fusion step" % sid)
 		ok(_clear(), "%s: the lane clears the strip, the check mark and the hunter" % sid)
 		var lanes := TutorialHud.lanes(m.hud.c.size)
-		ok(_inside(lanes["banner"]) and _inside(lanes["check"]), "%s: the strip and check mark are in the safe frame" % sid)
+		var safe := HudStyle.safe_rect(m.hud.c.size)
+		ok(safe.grow(1.0).encloses(lanes["banner"]) and safe.grow(1.0).encloses(lanes["check"]),
+				"%s: the strip and check mark are in the safe frame" % sid)
+		_sign(sid, safe)
 		shots += 1
 		_save("match_%02d_%s" % [shots, sid])
 	ok(shots >= Tutorial.steps().size() - 2, "the whole course ran (%d steps shot)" % shots)
@@ -135,16 +138,40 @@ func _garden() -> void:
 	await main.get_tree().process_frame
 
 
+## A gap step's sign, as drawn (nudged by its offset): inside the safe frame, clear of the HUD blocks and the strip.
+func _sign(sid: String, safe: Rect2) -> void:
+	var lab := m.tut.pad_sign(sid)
+	if lab == null or not lab.visible or m.cam.is_position_behind(lab.global_position):
+		return
+	var cam := m.cam
+	var w := (cam.global_basis.x * lab.offset.x + cam.global_basis.y * lab.offset.y) * lab.pixel_size
+	var shift := cam.unproject_position(lab.global_position + w) - cam.unproject_position(lab.global_position)
+	var raw := MsgLane.label_rect(lab, cam)
+	var box := Rect2(raw.position + shift, raw.size)
+	var hit := ""
+	for k in cam.hud_keep:
+		if box.intersects(cam.hud_keep[k]):
+			hit = str(k)
+	if box.intersects(TutorialStrip.rect(m.hud.c.size)):
+		hit = "strip"
+	ok(safe.grow(1.0).encloses(box) and hit == "", "%s: the sign %s is in the safe frame, clear of the HUD (%s)" % [sid, box, hit])
+
+
 ## The strip, the goals tracker and the skip row, whichever show, inside the safe frame (window pixels).
 func _audit_garden(home, id: String) -> void:
 	var g: FarmGuide = home.guide
 	var k: float = main.get_tree().root.content_scale_factor
-	var boxes := {"strip": g.hint_box, "tracker": g.tracker, "skip row": g.skip_row}
+	var boxes := {}
+	if g.hint_box.is_visible_in_tree():
+		var xf := g.hint_box.get_global_transform_with_canvas()
+		boxes["strip"] = Rect2(xf * g.hint_box.rect().position, g.hint_box.rect().size * xf.get_scale())
+	for c: Control in [g.tracker, g.skip_row]:
+		if c != null and c.is_visible_in_tree():
+			boxes[c.name] = c.get_global_rect()
+	if FarmSpotlight.showing():
+		boxes["spotlight card"] = FarmSpotlight._node._card.get_global_rect()
 	for what in boxes:
-		var c: Control = boxes[what]
-		if c == null or not c.is_visible_in_tree():
-			continue
-		var r := Rect2(c.get_global_rect().position * k, c.get_global_rect().size * k)
+		var r := Rect2(boxes[what].position * k, boxes[what].size * k)
 		ok(_inside(r), "garden %s: the %s %s is in the safe frame" % [id, what, r])
 
 

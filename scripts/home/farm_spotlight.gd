@@ -23,7 +23,6 @@ const BOKI_HEIGHT_M := 1.7       # m, how tall the cut-out round a Boki is
 const BOKI_MIN_PX := 64.0        # px, the smallest cut-out round a Boki (one far off)
 const CARD_GAP_PX := 24.0        # px between the cut-out and the hint card
 const CARD_WIDTH_PX := 340.0
-const SCREEN_EDGE_PX := 8.0
 
 const SHADER := """
 shader_type canvas_item;
@@ -251,8 +250,10 @@ func _place_card() -> void:
 	var room_above := r.get_center().y > size.y * 0.5
 	var y := r.position.y - _card.size.y - CARD_GAP_PX if room_above else r.end.y + CARD_GAP_PX
 	var x := r.get_center().x - _card.size.x * 0.5
-	_card.position = Vector2(_on_screen(x, size.x, _card.size.x), _on_screen(y, size.y, _card.size.y))
+	var safe := HudStyle.safe_rect(size)      # the card stays inside the safe frame, like the strip
+	_card.position = Vector2(_on_screen(x, safe.position.x, safe.end.x, _card.size.x),
+			_on_screen(y, safe.position.y, safe.end.y, _card.size.y))
 
-## `at` kept so a box `extent` long fits inside `limit`, with a margin.
-func _on_screen(at: float, limit: float, extent: float) -> float:
-	return clampf(at, SCREEN_EDGE_PX, maxf(SCREEN_EDGE_PX, limit - extent - SCREEN_EDGE_PX))
+## `at` kept so a box `extent` long fits between `lo` and `hi`.
+func _on_screen(at: float, lo: float, hi: float, extent: float) -> float:
+	return clampf(at, lo, maxf(lo, hi - extent))
