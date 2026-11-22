@@ -32,17 +32,29 @@ const OFF_PATH := 0.3         # m from the true path that counts as an overshoot
 const LIFT := 5.0             # m the glide phase teleports the Hunter up
 const NET_CAP := 4.0          # m in one frame: Ent.net_follow's snap distance, NetSmooth's SNAP_SPEED x 0.1 s
 const KITE_OFF := Vector3(12.0, 0, 0)   # m from the take-off to the Kitefall landing, inside the flat strip
+const MAX_LAG := 0.27         # s: NetSmooth's worst delay on this line: GAP + JITTER_MAX + the slowest packet + 10 ms
+const SEED := 82              # the line's draws
 const DN := preload("res://tools/displace_net_check.gd")
 
 ## The relay with a bad line: every send waits its one-way time; snapshots may be lost or overtaken.
 class LagRelay extends RelayServer:
-	var rng := RandomNumberGenerator.new()
+	var rngs := {}                # peer id -> the draws (loss, jitter) for what is sent to it
 	var wire: Array = []          # [due msec, peer id, message, fast]
 	var last_due := {}            # peer id -> due msec of the last message sent to it (they stay in order)
 	var dropped := 0
 	var one_way := ONE_WAY_MS     # ms: this line's one-way time (the move check sets it)
 
+	## Starts every peer's draws again, so what a send is dealt depends on its place in the run, not the clock.
+	func restart() -> void:
+		for id in rngs:
+			rngs[id].seed = SEED + rngs.keys().find(id)
+
 	func _send(id: int, d: Dictionary, fast := false) -> void:
+		var rng: RandomNumberGenerator = rngs.get(id, null)
+		if rng == null:
+			rng = RandomNumberGenerator.new()
+			rng.seed = SEED + rngs.size()
+			rngs[id] = rng
 		if fast and rng.randf() < LOSS:
 			dropped += 1
 			return
@@ -110,7 +122,6 @@ func _host() -> void:
 	dn.port = CheckChild.free_port(7990 + OS.get_process_id() % 40)
 	RenderingServer.render_loop_enabled = false
 	var relay := LagRelay.new()
-	relay.rng.seed = 80
 	relay.one_way = one_way_ms
 	relay.name = "Relay"
 	main.add_child(relay)
@@ -143,6 +154,9 @@ func _host() -> void:
 	ok(G != null, "the guest's game is sending")
 	await _host_run(2.0, "", [])      # the guest settles its clock and buffer
 	var truth: Array = []
+	Net.send_t = 0.0                   # the run starts on a send, and the line deals the same hand from here
+	Net.host_send_t = 0.0
+	relay.restart()
 	await _script(truth)
 	Net.lobby_emit("rs", {"c": "dump"})
 	var t2 := Time.get_ticks_msec()
@@ -307,7 +321,7 @@ func _report(truth: Array, drawn, lost: int) -> void:
 	ok(a["jerks"] <= 15, "the drawn speed changes only where the true one does", "%d jerks" % a["jerks"])
 	ok(a["backsteps"] == 0, "the drawn body never steps back", "%d backsteps" % a["backsteps"])
 	ok(a["overshoot"] == 0, "the drawn body stays on the true path", "max %.2f m off" % a["max_off"])
-	ok(lag < 0.25, "drawn at most 250 ms behind", "%.0f ms" % (lag * 1000.0))
+	ok(lag <= MAX_LAG, "drawn at most %.0f ms behind" % (MAX_LAG * 1000.0), "%.0f ms" % (lag * 1000.0))
 	var f: Dictionary = tot["fall"]
 	ok(f["n"] > 60 and f["max_step"] < NET_CAP, "Kitefall's fall is drawn as a drop, not a jump",
 		"%d frames, max step %.2f m" % [f["n"], f["max_step"]])
