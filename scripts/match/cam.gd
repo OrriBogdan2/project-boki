@@ -98,6 +98,13 @@ var cast_pan := Vector3.ZERO  # the framing at cast_k 1, taking over from the cu
 var scout_on := false
 var scout_k := 0.0            # 0 = the usual view, 1 = fully out toward the cursor
 var scout_pan := Vector3.ZERO # the framing at scout_k 1, taking over from the cursor pan and a cast
+## The HUD's drawn groups (HudScale.drawn: anchor -> viewport rect; MatchCam sets it, empty off a match): a lean
+## stops before you (HunterZone's box, feet to the overhead plate) come within HUD_GAP of one.
+var hud_keep := {}
+var lift := 0.0               # m your feet stand above the point the view follows (it trails below you when high up)
+const HUD_GAP := 8.0          # px kept between you and a HUD group
+const HUD_STEPS := 24         # samples along the lean for the first HUD touch...
+const HUD_HALVE := 10         # ...then halved this often between the last clear one and it
 
 var style_id := ""
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
@@ -174,7 +181,9 @@ func cast_view(dir: Vector2, zoom_k: float, reach: float) -> void:
 	cast_pan = Vector3(dir.x, 0.0, dir.y) * pan_by
 
 ## Metres the view can lean along `dir` at that zoom with you (feet and head) still EDGE inside the screen. Each
-## screen edge is a straight line on the ground in perspective, so every limit solves exactly: s * a <= b.
+## screen edge is a straight line on the ground in perspective, so every limit solves exactly: s * a <= b. Then the
+## HUD: the lean stops where your box (to the plate) would first leave the screen or come within HUD_GAP of one of its
+## groups (hud_keep).
 func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	var view := get_viewport().get_visible_rect().size
 	var d := dist * dist_mul * zoom * (1.0 + zoom_k)
@@ -184,12 +193,58 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	var sp := sin(pitch)
 	var cp := cos(pitch)
 	var room := INF
-	for h in [-rise, BODY_H - rise]:      # feet and head, against the point the view aims at
+	for h in [lift - rise, lift + BODY_H - rise]:      # feet and head, against the point the view aims at
 		var deep: float = d - h * sp            # the depth there, before the lean; the lean adds s * turned.y * cp
 		room = _under(room, absf(turned.x) - turned.y * cp * wide, deep * wide)      # the side edge
 		room = _under(room, turned.y * (sp - cp * t), deep * t - h * cp)            # the top edge
 		room = _under(room, -turned.y * (sp + cp * t), deep * t + h * cp)           # the bottom edge
-	return room - EDGE
+	room -= EDGE
+	if hud_keep.is_empty() or room <= 0.0:
+		return room
+	var plate := (char_lean() * Vector3(0.0, HunterZone.PLATE_UP * hunter_scale, 0.0)).rotated(Vector3.UP, -yaw)
+	plate.y += lift - rise
+	var lens_at := Vector3(d, t, wide)
+	var home := _box_at(0.0, plate, view, lens_at, turned)
+	var clear := 0.0
+	for i in range(1, HUD_STEPS + 1):
+		var s := room * i / HUD_STEPS
+		if _hud_hit(_box_at(s, plate, view, lens_at, turned), home, view):
+			for _j in HUD_HALVE:
+				var mid := (clear + s) * 0.5
+				if _hud_hit(_box_at(mid, plate, view, lens_at, turned), home, view):
+					s = mid
+				else:
+					clear = mid
+			return clear
+		clear = s
+	return room
+
+## Your screen box (HunterZone's: feet to the overhead `plate`, tipped by char_lean) with the view leaned `s` metres
+## along `turned`, in the frame `_cast_room` solves: `lens_at` is the view's distance from the point it aims at, the
+## tangent of half its vertical lens and that across.
+func _box_at(s: float, plate: Vector3, view: Vector2, lens_at: Vector3, turned: Vector2) -> Rect2:
+	var feet := _px_at(s, Vector3(0, lift - rise, 0), view, lens_at, turned)
+	return HunterZone.box(_px_at(s, plate, view, lens_at, turned), feet)
+
+## The screen px of `at` (metres from the point the view aims at: x to the right, z toward the camera) with the view
+## leaned `s` metres (see _box_at).
+func _px_at(s: float, at: Vector3, view: Vector2, lens_at: Vector3, turned: Vector2) -> Vector2:
+	var z := at.z - s * turned.y
+	var deep := lens_at.x - at.y * sin(pitch) - z * cos(pitch)
+	var up := at.y * cos(pitch) - z * sin(pitch)
+	return view * 0.5 * Vector2(1.0 + (at.x - s * turned.x) / (deep * lens_at.z), 1.0 - up / (deep * lens_at.y))
+
+## Does `box` leave the `view` or come within HUD_GAP of a HUD group (one it was already under or out of unleaned,
+## `home`, never stops it)? (The screen-edge solve keeps feet and head inside; this keeps the overhead plate too.)
+func _hud_hit(box: Rect2, home: Rect2, view: Vector2) -> bool:
+	var screen := Rect2(Vector2.ZERO, view)
+	if screen.encloses(home) and not screen.encloses(box):
+		return true
+	for k in hud_keep:
+		var r: Rect2 = (hud_keep[k] as Rect2).grow(HUD_GAP)
+		if r.intersects(box) and not r.intersects(home):
+			return true
+	return false
 
 ## The smaller of `room` and the largest s with s * a <= b (no limit when a <= 0).
 static func _under(room: float, a: float, b: float) -> float:
@@ -314,6 +369,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> voi
 	else:
 		flat = _trail_xz(flat, Vector2(want.x, want.z), Vector2(want.x - last_want.x, want.z - last_want.z), delta)
 	last_want = want
+	lift = p.y - want.y
 	var ny := lerpf(base.y, want.y, ky)
 	# a step (the ground just rose, or dropped under a body still easing onto it) eases; a fall or a landing does not
 	var step_down := is_finite(stand_y) and p.y > stand_y + STAND_TOL and p.y - stand_y < 1.5

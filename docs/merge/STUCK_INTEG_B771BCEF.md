@@ -500,7 +500,7 @@ LANDED-ELSEWHERE = 90%+ of its added text lines are already in the base (its int
 | ext/ui-w0246-layout-reds | STALE-SYSTEM (most added lines go to files main deleted: 4476gone vs 3688miss) |
 | ext/ui-waystone-keys | MERGED here (hints in the card tooltip) |
 | ext/ui-zone-next | STALE-SYSTEM (most added lines go to files main deleted: 221gone vs 180miss) |
-| ext/ult-ranks-rebased-rebased | NEEDS-PORT (114miss lines missing, 5% landed; top: scripts/arch/hero_ult.gd:15 docs/decisions/0022-ult-ranks.md:13; main has: check flags 0/1, new files 0/1) |
+| ext/ult-ranks-rebased-rebased | NEEDS-PORT (114miss lines missing, 5% landed; top: scripts/arch/hero_ult.gd:15 docs/decisions/0110-ult-ranks.md:13; main has: check flags 0/1, new files 0/1) |
 | ext/utility-parity-0246 | STALE-SYSTEM (most added lines go to files main deleted: 9074gone vs 5610miss) |
 | ext/verify-solos-pacing | STALE-SYSTEM (most added lines go to files main deleted: 2515gone vs 214miss) |
 | ext/verify-stomp-break-sweep | STALE-SYSTEM (most added lines go to files main deleted: 496gone vs 286miss) |

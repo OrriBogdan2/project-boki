@@ -126,7 +126,7 @@ func in_lava(f: Ent) -> bool:
 
 # ------------------------------------------------------------------ flight
 func _fly(dt: float) -> void:
-	if h.stun_t > 0.0 or h.downed or h.out or KinMerge.active(h):
+	if h.stun_t > 0.0 or h.downed or h.out:
 		_land()
 		KitWindup.broken(k, "x")
 		return

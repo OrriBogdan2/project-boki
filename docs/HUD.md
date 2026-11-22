@@ -1,5 +1,7 @@
 # In-match HUD: widget files and the shared style
 
+New sections go in `docs/HUD.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
+
 `scripts/ui/hud.gd` is wiring only (a frozen god file). The pieces that draw the fight-facing HUD live
 in their own files and share one look, `HudStyle`. Reference study and gap list: `hero-ref/HUD.md`
 (outside the repo, on the dev box).
@@ -8,14 +10,14 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 |---|---|
 | `hud_panels.gd` (`HudPanels`, one on `hud.panels`) | nothing of its own: the fixed panels (top bar, boss bar, kill feed, minimap, vitals, ability / weapon slots, gear, Boki card, squad, perks) draw on this canvas under `hud.c`, at most 20 times a second (item 94); world-anchored and mouse-following parts stay on `hud.c`, every frame. `hover_spots` fill here |
 | `hud_style.gd` (`HudStyle`) | colour roles, fonts, sizes, and the primitives: `seg_bar`, `strip`, `plate_frame`, `slot_frame`, `key_pill`, `count_badge`, `text` / `ctext`, `dmg_col` |
-| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: name (small) or status word, no level coin except a rival 2+ levels apart (warm with an up triangle above you, cool with a down triangle below: `LevelGap`), health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
-| `hud_reveal.gd` (`HudReveal`) | the staged HUD (DECISIONS 2026-11-08, design review 11-10 fix 8): one table, `content/rules/hud_reveal.json`, gives each group its first match (1: vitals, abilities, clock, Boki card, minimap; 4: counters, feed, gear, squad, perks, weather, plate name colours) or its first event (the Ways Out strip on the first open seat, kept in `Save.d.hud_reveal`). Tab shows all; so do Settings > Accessibility "Show full HUD", older saves (no `hud_reveal`) and every non-expedition match. Check: `--hud-reveal-check` |
+| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: name (small) or status word, no level coin except a rival 2+ levels apart (warm with an up triangle above you, cool with a down triangle below: `LevelGap`), health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour strip flashing white as it loses some, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
+| `hud_reveal.gd` (`HudReveal`) | the staged HUD (DECISIONS 2026-11-08, design review 11-10 fix 8): one table, `content/rules/hud_reveal.json`, gives each group its first match (`belt_spare`, `ult_tiles`: no match, they wait for a filled slot / level 6) (1: vitals, abilities, clock, Boki card, minimap; 4: counters, feed, gear, squad, perks, weather, plate name colours) or its first event (the Ways Out strip on the first open seat, kept in `Save.d.hud_reveal`). Tab shows all; so do Settings > Accessibility "Show full HUD", older saves (no `hud_reveal`) and every non-expedition match. Check: `--hud-reveal-check` |
 | `level_up_cue.gd` (`LevelUpCue`, one on `hud.lvl_cue`) | your level-up moment: a gold column with rising chevrons over your hero (0.8 s) and a card over the vitals saying what improved (health, ability power, the weapon step, the ultimate opening, points to spend), 2.6 s. Research and reasons: [LEVEL_UP.md](LEVEL_UP.md) |
 | `reticle.gd` (`Reticle`, one on `hud.reticle` for the tick) | the aiming reticle in the player's style (static `draw`), and the hit tick: four short strokes out of the reticle in the Hunter's colour (`AimKit.hero_col`) for 0.09 s on each hit you land on a foe's Hunter, Boki or a monster (`CombatBus.hit_landed`), longer and ringed for 0.12 s on a knock; none for misses, zone (DoT) ticks, your Boki's or teammates' hits (`--hit-marker-check`, `--hit-marker-shots`) |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
-| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge discs (2+ charges only: round discs on the top edge, the recharging one fills its ring; a ready charge shows the next one's countdown big in the middle, as the reference does, charges-sv-1116), key pill, rank pips (bottom edge, over the key pill), lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble) |
+| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge discs (2+ charges only: round discs on the top edge, the recharging one fills its ring; a ready charge shows the next one's countdown big in the middle, as the reference does, charges-sv-1116), key pill, rank pips (bottom edge, over the key pill), lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble), then rebinds E to mouse 4 and R to a letter and asserts the bar, tooltips and tutorial show the new caps |
 | `squad_frames.gd` (`SquadFrames`, drawn by `hud_panels.gd`) | the squad frames down the left edge in team modes, one row per squad member, you last (none in solo): round portrait with the run level on its lower-left (gold once the ultimate is open), a state label over the name, a thin armour bar over the health bar in one slanted frame. KNOCKED: pink label, red-tinted portrait, the bleed-out in the health row, a marker beside the row whose tail points at them. DEAD: grey cracked portrait, no bars (with the deathbox timer while they can be saved), and at the row's end the Hunter who finished them in a small red disc (`MateAlerts.killer`, read from `last_hit_by` when the row turns DEAD; none for a monster, the Blight or a fall). EXTRACTED and the drop's LEAD/SOLO use the same label. Sizes and colours are measured off the owner's reference: `scripts/ui/SQUAD_FRAMES_SPEC.md`. Check: `--hudref-check`; shots and film: `--team-boki-shots [--film]` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, lock |
 | `hunter_ult_tile.gd` (`HunterUltTile`) | the hero ultimate (R) on the ability row, one look for every hero in its ability colour: locked (padlock, LV 6), cooling (dim icon, sweep, countdown), blocked (off cooldown but stunned, downed or merged: a padlock over the dim icon), ready (`HudSlot.lit`: a steady lit rim and halo; a 0.6 s shine, white edge and a band of light, the moment it comes back from cooling or the level lock). Shots: `--ult-ready-shots` (GPU) |
@@ -28,16 +30,19 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): HudSlot's charge discs (2+ charges), a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `recast_cue.gd` (`RecastCue`) | two-step abilities, one language for every hunter (see below) |
 | `map_detail.gd` (`MapDetail`) | what the minimap draws: six default kinds (you, squad, Boki, nearest exit, Blight, pings); the rest (places, train, the hot zone ring, far exits, lairs, caches, beacons, rivals' boxes, ships, bounties, allies) show while Tab or the map key is held, while riding in, or once they matter (awake lair, scouted cache, lit beacon). One icon radius (`ICON_R`). The full map shows everything. `--minimap-check` counts the kinds; `--minimap-shots` takes 720p before/after crops |
+| `full_map.gd` (`FullMap`) names | one label pass per frame (`label`, `label_near`): region names first, each at the first try (its spot, then a line up or down, a little left or right, within its island) that clears every marker (spawn spots, ways out, the Heart, seat words, the hot zone caption); halt and Heart Gate names that would print over another are left off (the hover card names them); a countdown steps to a free line. `--map-names-check` runs it on real Hollow Crown matches |
 | `exit_mark.gd` (`ExitMark`) | the way to extract on both maps: one icon (disc and rising arrow) in three states, closed (grey), opening (ring fills, cyan), open (solid green, pulsing); the full map adds a pill with the timer ("OPENS 1:20", "OPENING 40%", "OPEN 0:12"); an opening or open one off the minimap pings on its edge. The same words feed the tooltip and the key |
 | `map_hover.gd` (`MapHover`) | full-map tooltips: rest the cursor 0.6 s on any marker (exits, ways-out seats, hunters, your Boki, spawns, shrines, lairs, beacons, boxes, halts, the train, ships, pings, places, the hot zone) and a card gives its name and one line. `--map-hover-check`; `--map-clear-shots` takes before/after shots |
 | `train_map.gd` (`TrainMap`, one on `hud.train_map`) | the sky train on both maps, one draw path (`draw`): the loop as a thin gold line, a small square per halt (named on the full map), the train as a chevron with its cars, and 'Next train: 0:24' at the halt nearest you (`SkyTrain.halt_eta`). On the minimap it is the `train` detail kind and shows by itself only while the loop is within 34 m of you. `--train-map-check` asserts halts, marker and countdown; `--train-map-shots` takes the shots (docs/train_map_shots/, on the 2x Hollow Crown) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `heart_hud.gd` (`HeartHud.zone_line`) | the zone clock, in the clock chip's middle under the minimap (where ISLANDS FALLING shows in the last 30 s, so it takes no room of its own): "CLOSES IN 0:30" before the Blight's tide starts to move, "CLOSING 7:12" while it closes, gone once the ring holds (`Heart.close_in` / `close_left`). Check: `--minimap-check` (zone rows); shots: `--zone-next-shots` (GPU) |
 | `quest_tracker.gd` (`QuestTracker`, drawn by `WaysOutHud.draw`) | Ways Out: while your squad is on a quest seat (sealed in with the Sealed Lair's boss, or charging the Uplink), a 28 px card under the strip, above the message lane: the quest in plain words, your progress (charge, or the boss's health taken off), the leading rival squad's progress on a quest seat as a thin second bar, the distance to the site. Hidden otherwise, when you are out, and while the boss bar is up. `--ways-out-hud-check` section 8 |
+| `objective_tracker.gd` (`ObjectiveTracker`, state in `scripts/match/first_objective.gd`) | the first expedition's next step: a card under the minimap's clock (one verb-first line, step pips, a tick when a step is done), a pin over the wild Boki or the outpost it names (an arrow on the screen edge when it is off screen; the running uplink keeps its own pin), and a ring on the minimap. Find a wild Boki, knock it out, scan it, go to the outpost, start the uplink, hold the yard, step into the lift. Runs until the save has got out of one expedition (`Save.d.tutorial.first_objective`). Numbers and words: `content/rules/first_objective.json`. Check: `--first-objective-check`; shots: `--first-objective-shots` |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 2 at once (1 in a fight), the most important first, short lives (2 s at most in a fight); a small (`toast_small`) line only shows on an empty lane and is dropped in a fight; a card slides aside off your hunter (`avoid`); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check`, `--hunter-zone-check` |
 | `top_stack.gd` (`TopStack`) | the top-centre of a real match is one column: Ways Out strip, then the one-line banner (the first-match guide, else the crouch hint), then the message lane. The lane sits under the banner and holds its lines while the banner is fresh (`Tutorial.CARD_T`; URGENT passes); the guide's Boki-key line takes the Boki-key hint's place (`Match.tip_once("ability")`). Check: `--prompt-queue-check` |
 | `hunter_zone.gd` (`HunterZone`) | the screen area over your own hunter (feet to plate): floating numbers and words (`Fx`), message cards and the knock banner slide sideways out of it, plate labels fade under it (`LabelSpacing`). Nothing prints over your hunter. Check: `--hunter-zone-check`; shots: `--hunter-zone-shots` |
-| `ops/hud-budget.json` | the combat HUD's absolute element budget (Control nodes, labels, toasts, banners, loot rows, drawn panels, total), the merge gate's "not more than today" bar. A change that adds a HUD element must raise it on purpose (owner OK). Check: `--hud-clutter-check` (`--hunter=<id>` plays one Hunter mid-cast and mid-ult with a Boki out and a teammate down; also fails if any HUD rect covers the hunter's screen box; saves a screenshot when run with a renderer) |
+| `ops/hud-budget.json` | the combat HUD's absolute element budget (Control nodes, labels, toasts, banners, loot rows, drawn panels, total), the merge gate's "not more than today" bar. A change that adds a HUD element must raise it on purpose (owner OK). Check: `--hud-clutter-check` (`--hunter=<id>` plays one Hunter mid-cast and mid-ult with a Boki out and a teammate down; `--all` plays all 13 Hunters mid-ult and mid-Fusion, a buff and a debuff on, at 1920x1080 and 1280x720 (`--moments`, `--sizes`, `--statuses` pick pieces); the drawn panels are counted once per distinct rect in the last frame that drew, not piled up over several redraws (that count swung 54 to 82 on one scene); also fails if any HUD rect covers the hunter's screen box; saves a screenshot when run with a renderer) |
+| `kill_feed.gd` (`KillFeed`, drawn by `HudPanels`) | the kill feed (`Match.feed`) in the squad frames' type: a row is the knocker's round face, the icon of what did it (the slot icon on their own bar, the weapon's for a plain hit, a stomp or a drop for a finish, a claw for a monster or the Blight), the victim's face; a knock tints the victim's face the knocked red, a finish greys and crosses it out; a Boki's kill shows its owner's face and a paw on the icon; a monster or the Blight shows its name instead of a face. Rows with your squad in them are outlined in your side's colour and lifted. At most 4 rows, 5 s then a 0.5 s fade, none wider than 280 px; any other line stays a text plate. Checks: `--hudref-check` (feed rows, section 10), `--safe-area-check` |
 | `loot_feed.gd` (`LootFeed`, one on `hud.loot`) | what you just picked up (gems, seeds, belt items, gear worn or packed off the ground): bottom right over the slot row, icon + name + count per row, the same thing again within 2 s adds to its row, at most 4 rows, each fades out by 3 s; its own pickup tick pitched by rarity, silent while the lane keeps its fight budget except Rare and up. Counts as the `loot` HUD group only while it has rows. Check: `--loot-feed-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips (the count beside them past a full row: Sable's uncapped Marks) and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it and their squad (side by side, each in their own colour) (Sable's Marks, Vex's Daze, Sparkle's Static, Cinder's Ignite levels, Neve's Chill, Meeko's Kindle stacks, Kael's Slam window and Warchain hold, Gil's splash marks toward a Beach). No state on a foe, no tag: Lace, Albert, Tenzo, Zed and Motley have none (their payoffs are instant hits or self buffs). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost (and when they went down, for the ally ping): one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
@@ -46,7 +51,6 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `channel_bar.gd` (`ChannelBar`, drawn by `hud_panels.gd` right after `HudVitals`) | an ally's Meeko is channelling Hearth Call on you: a slim gold bar with her portrait under your vitals, draining over the 5 s, gone the frame it ends or breaks (she is knocked, stunned or out of reach). Her game reads her kit; every other game reads the target nid and seconds left from the hunter row's tail (`HunterNet`, Net 0.24.6). Checks: `--hudref-check`, `--displace-net-check` (online row) |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
 | `self_cc_line.gd` (`SelfCcLine`) | crowd control on you: one line under your vitals (after the resource bar), each effect's word and a bar shrinking over its time in the plate's colour for it, worst first by the CC lockouts order (stun, Daze, root, Ground, Slow); the bar's full length is the longest time seen while it lasts. Check: `--clarity-check` section 5; shot: `--hudref-demo=busy` |
-| `knock_feed.gd` (`KnockFeed`, drawn by `hud_panels.gd` from `Match.feed`) | the kill feed, its own lane at the top right under the counters: a knock row is the knocker's name and face, the icon of the ability that landed it (the slot icon on the knocker's own bar, the weapon's for a plain hit, the Boki's ability; `knock` with nobody to credit), the knocked Hunter's face and name, a squad-colour bar at each end, and an outline in your side's colour when your squad is in it; other lines stay text plates. Up to 4 rows, 5 s each then a 0.5 s fade, none wider than 300 px (long names cut, long lines wrapped). Faces are the painted portraits, cut on a worker. Checks: `--knock-feed-check`, `--knock-feed-shots` (shots: `docs/shots/ui-knock-feed/`) |
 | `low_hp_cue.gd` (`LowHpCue`, one on `hud.lowhp`) | the local player's "one hit from down" cue: while (health + armour) / (max health + max armour) is under `start_share` in `content/rules/low_hp.json` (0.25), a soft heartbeat plays, faster the lower the share, and the screen edge glows red on each beat (five thin rings, no widget, calmed by Fewer flashes). Stops on a heal over the line, down or out. Check: `--sfx-set-check` |
 | `hudref_demo.gd` | `--hudref-demo=plates|wash|fight|busy` screenshot scenes |
 
@@ -153,8 +157,7 @@ Waiting for a quiet 3 s instead: the message lane (one card at a time), the armo
 | Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, one card at a time in a match (2 at home) | in a fight: only urgent lines show; the rest queue and show once 3 s pass without a hit (a hint keeps its own life); repeats already merge ("x3") |
 | Loot feed (`LootFeed`: ground pickups) | bottom right over the slot row, 230x23 px rows, 14 px | 3 s, 4 rows, repeats within 2 s merge | out of the lane; silent in a fight unless Rare+ |
 | Alive counter (`AliveCounter`) | top right, 78x44 px per counter, 26 px numbers | always | squad icon + squads left, person icon + players left (solos: players only); your kills / knocks / gems in a quieter row under it. Counts only, never names. The Ways Out strip no longer repeats squads left |
-| Kill feed | top right, 13 px plates | 6 s, 5 lines | unchanged: edge-anchored |
-| Kill feed (`KnockFeed`) | top right, its own lane under the counters, rows at most 266 px | 5 s and a 0.5 s fade, 4 rows | edge-anchored; knocks read as faces and an icon, not sentences |
+| Kill feed (`KillFeed`: knocks, finishes, Boki and monster kills as rows with faces and the icon) | top right, 13 px names, 30 px rows | 5.5 s (fades over the last 0.5 s), 4 rows | unchanged: edge-anchored; rows wrap or cut at 280 px |
 | Stomp line ("Standing on X") | was a boxed 15 px sentence under the crosshair | while standing on a wisp | a short 13 px line, no box |
 | Level-up | was a lane line top centre (3.2 s) and a gold full-screen wash on even levels | was 3.2 s | **one moment, by you:** the chime, a gold column over your hero (0.8 s), a card over the vitals naming what improved (2.6 s); no lane line, no wash (`--level-hud-check`) |
 | Kill / knock flashes (`Juice.kill`, you knocked) | full screen, 14-30% | 0.2-0.3 s | unchanged: brief, and about you |
@@ -184,17 +187,23 @@ Waiting for a quiet 3 s instead: the message lane (one card at a time), the armo
 ## Safe area
 
 - `SafeArea.MARGIN` (12 logical px) is kept clear on every side. The interface is laid out in logical pixels
-  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 1240x775
-  at 1024x640), so one margin fits every window. Anchor panels to the nearest corner or edge and, where a
-  panel hangs off a corner, `SafeArea.keep` it inside; never branch on the window size.
+  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 2560x720
+  at 5120x1440; 1240x775 at 1920x1200 and 1024x640), so one margin fits every window. Anchor panels to the
+  nearest corner or edge and, where a panel hangs off a corner, `SafeArea.keep` it inside; never branch on the
+  window size.
+- Wider than 16:9 (21:9, 32:9) the HUD keeps to `SafeArea.frame`, a centred 16:9 frame, so the corner groups sit
+  near the middle instead of out at the far edges (the world still fills the screen). `HudPanels` sizes itself
+  to the frame each frame (`SafeArea.origin` puts its rects back in screen px; hover tips convert from it), the
+  farm's corner groups (top chips, hub bar, Goals card) hang under `SafeArea.framed(root_ui)`, and the pick
+  screen widens its side margins to it. Things placed on the 3D world stay on the full screen.
 - The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
   the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
   margin (4% of the height) for the countdown banner.
-- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, a full kill feed
-  of knock rows and lines, and toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
-  2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
-  --shots-dir=<dir>` takes the same screens with a real renderer. `--knock-feed-check` holds the kill feed's lane
-  to the same rule at the five sizes with its longest rows and the two widest message cards up.
+- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
+  toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
+  2560x1080 (21:9), 5120x1440 (32:9), 1920x1200 (16:10) and 1024x640: every group inside the margin of the
+  frame, no two overlapping. `--safe-area-shots --size=WxH
+  --shots-dir=<dir>` takes the same screens with a real renderer.
 - The Ways Out widgets are checked the same way (`SafeArea.note_as` tags the ones drawn outside the panel pass), in
   nine states: strip locked, Heart unlocked, quest exit racing (its status line under the message lane), your
   uplink far off (edge marker), your squad on a quest (the quest tracker under the strip), the last way out (alive,
@@ -221,18 +230,30 @@ nothing else on screen:
   out of the window, one button per thing and every thing takeable, WORN in place, no perks, upgrade goes on, Esc).
 - Shots (GPU, `--inv-shots --shots-size=1920x1080`): [before](shots/loot-simple/before_1920x1080.jpg),
   [after](shots/loot-simple/after_1920x1080.jpg), [full backpack hold](shots/loot-simple/after_full_pack_1280x720.jpg).
+- Gear on the ground for a slot you already wear: a small card over the pickup prompt (`GroundCompare`, drawn
+  by `Hud._draw_prompt`) says "Replaces <worn piece>  ·  <slot>", then each changed number in green "(better)" or
+  red "(worse)" (`InvText.change_lines`, the same lines as the inventory cards). Empty slot or no gear: no card.
+  `--loot-full-check` covers it.
+
 ## Safe area
 
 - `SafeArea.MARGIN` (12 logical px) is kept clear on every side. The interface is laid out in logical pixels
-  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 1240x775
-  at 1024x640), so one margin fits every window. Anchor panels to the nearest corner or edge and, where a
-  panel hangs off a corner, `SafeArea.keep` it inside; never branch on the window size.
+  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 2560x720
+  at 5120x1440; 1240x775 at 1920x1200 and 1024x640), so one margin fits every window. Anchor panels to the
+  nearest corner or edge and, where a panel hangs off a corner, `SafeArea.keep` it inside; never branch on the
+  window size.
+- Wider than 16:9 (21:9, 32:9) the HUD keeps to `SafeArea.frame`, a centred 16:9 frame, so the corner groups sit
+  near the middle instead of out at the far edges (the world still fills the screen). `HudPanels` sizes itself
+  to the frame each frame (`SafeArea.origin` puts its rects back in screen px; hover tips convert from it), the
+  farm's corner groups (top chips, hub bar, Goals card) hang under `SafeArea.framed(root_ui)`, and the pick
+  screen widens its side margins to it. Things placed on the 3D world stay on the full screen.
 - The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
   the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
   margin (4% of the height) for the countdown banner.
 - `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
   toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
-  2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
+  2560x1080 (21:9), 5120x1440 (32:9), 1920x1200 (16:10) and 1024x640: every group inside the margin of the
+  frame, no two overlapping. `--safe-area-shots --size=WxH
   --shots-dir=<dir>` takes the same screens with a real renderer.
 - **Text size** (Settings > Accessibility: 100, 125, 150%, `Settings.TEXT_SIZES`) scales every font through
   `UI.fs(px)`: the menu theme, `UI.label`/`keycap`/`section`, and `TextCache` (so the HUD's `_text` and every
@@ -401,6 +422,13 @@ outpost until the lift opens"; `exit_none` when no seat is on offer), and while 
 starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `--first-match-guide-check`.
 
 ### Not fixed (suggestions, parity first)
+- Held back since 11-20 (`ext/hud-holdback`, `HudReveal` table): belt slots 3/4 while empty (`belt_spare`), the locked X tile and the
+  locked Merge (R) box until level 6 (`ult_tiles`); the Q/V glove slots and the gear row already draw nothing until a piece is worn
+  (`GripHud._glove`, `GearPanel.worn_any`); the clock strip's Dusk/Sight chip is the `weather` group (from match 4). Tab and "Show full HUD"
+  show them all. These hide tiles inside a block, so the group count (`HudGroups.on_screen`, folded by ext/ui-hud-groups-five: 5 at a
+  fresh landing) does not change; they cut what a new player has to read inside the abilities and belt blocks.
+- The kill feed's truce lines: the whole feed waits until match 4 (`feed`), and a truce you are not in is feed-only (Truce), so
+  a new player sees none of them.
 - A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
   the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line.
 - `HudGroups`' reveal rules (Ways Out strip, kit card) are still to be folded into `HudReveal`'s table.
@@ -462,3 +490,8 @@ Glide keeps its rule: a fresh press in the air opens it, letting go shuts it. Th
 wall kick are never glide taps. Kin pick-up shows the ring but is never taught (a tap there is a pat).
 The tutorials say HOLD and wait for one: the match glide step needs 0.6 s of gliding in one go, the farm's
 chop step needs one held chop besides the wood. Check: `--hold-teach-check`.
+### Folded until they matter (ext/ui-hud-groups-five)
+`--hud-groups-check` now counts what the HUD really draws: the first landing is 5 groups (was 9), the later moments 7-8 (were 11-12).
+The counters follow `HudReveal` (from the 4th expedition), the glider ring shows only while gliding or the meter is not full
+(`HudGroups.glider_shown`), and the belt waits until a held item could be used, then stays for the save (`BeltHud.shown`, `hud_reveal.json`
+"belt"). The clock strip counts with the minimap it hangs under. Shots: `docs/ui_hud_groups_five/`. Keys 1-4 work while the belt is folded.

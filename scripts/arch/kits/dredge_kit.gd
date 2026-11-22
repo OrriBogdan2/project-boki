@@ -22,7 +22,6 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const BARGE_HOLD := 0.18               # s a press inside a shove is held (main: 0.18; the shared window is 0.15)
 const SLUDGE := Color("5a4414")        # the dark-brass drips off the arm
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const FOLD_T := 0.033                  # s into the `lunge` clip where the ball is closed: a chained shove joins it here
@@ -222,7 +221,7 @@ func _drop_holds() -> void:
 ## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
 ## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
-	if h.wid != "shotgun" or KinMerge.active(h):
+	if h.wid != "shotgun":
 		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
@@ -711,7 +710,8 @@ func _quake(at: Vector3, fell: float) -> void:
 ## barge arrives, the smash rides the pounce and drops from where it ends, the fan follows him.
 func on_dash(use_ex: bool) -> bool:
 	if m.time < next_barge:
-		h.dash_buf = BARGE_HOLD              # held, never dropped: the next shove goes the step the gap ends
+		# held, never dropped: the next shove goes the step the gap ends (the shared window alone is shorter than the gap)
+		h.dash_buf = maxf(Loco.press_buffer, next_barge - m.time + CHAIN_GRACE)
 		return true
 	var dd := dash_def()
 	var dir := dash_dir()

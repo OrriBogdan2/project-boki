@@ -1,8 +1,9 @@
 extends RefCounted
-## --safe-area-check: the HUD and the main screens at five window sizes (1280x720, 1920x1080, 2560x1440,
-## 2560x1080 ultrawide, 1024x640), and at 720p and 1080p again at Text size 125% and 150%
+## --safe-area-check: the HUD and the main screens at seven window sizes (1280x720, 1920x1080, 2560x1440,
+## 2560x1080 21:9, 5120x1440 32:9, 1920x1200 16:10, 1024x640), and at 720p and 1080p again at Text size 125% and 150%
 ## (Settings.TEXT_SIZES). At each, no text is clipped (SafeArea.clipped), every group (a registered HUD panel,
-## or a top-level control of a screen) sits inside SafeArea's margin and no two groups of one screen overlap.
+## or a top-level control of a screen) sits inside SafeArea's margin of its frame (all of a 16:9 screen, a centred
+## 16:9 frame on wider ones) and no two groups of one screen overlap.
 ## The match HUD is read from SafeArea's registry; the pick (prematch), pause, results, farm HUD, expedition
 ## panel, settings, inventory and Field Book from their controls.
 ## The Ways Out widgets (the strip, its one line, the quest tracker, the Gate prompt, the uplink's status and the
@@ -12,7 +13,13 @@ extends RefCounted
 ## and size (<dir>/<W>x<H>_<text %>_<screen>.png) and a contact sheet of them.
 
 const SIZES := [
-	Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440), Vector2i(2560, 1080), Vector2i(1024, 640)
+	Vector2i(1280, 720),
+	Vector2i(1920, 1080),
+	Vector2i(2560, 1440),
+	Vector2i(2560, 1080),
+	Vector2i(5120, 1440),
+	Vector2i(1920, 1200),
+	Vector2i(1024, 640)
 ]
 const TEXT_WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080)]  # the windows that also run at 125% and 150%
 const RESULT := {
@@ -132,8 +139,8 @@ func _hud() -> void:
 	m.set_process(false)
 	main.current = m      # (the pause menu reads its options; the next screen frees it)
 	var rivals: Array = m.hunters.filter(func(h): return h.team != m.player.team)
-	KnockFeed.add(m, m.player, rivals[0], "snare")      # (a full feed: two knock rows and two lines)
-	KnockFeed.add(m, rivals[1], rivals[2], "quake")
+	KillFeed.knock(m, rivals[0], m.player, "snare")      # (a full feed: two knock rows and two lines)
+	KillFeed.knock(m, rivals[2], rivals[1], "quake")
 	for line in ["Team 3 is out", "Ember revived Pip"]:
 		m.add_feed(line)
 	m.hud.toast("Picked up a long-range rifle", Color.WHITE)

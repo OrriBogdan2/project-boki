@@ -3,13 +3,13 @@ extends RefCounted
 ## A downed Hunter reads at a glance, in the one colour rule (SideColor), with small precise marks
 ## instead of a big circle on the ground (docs/decisions/0019):
 ##   - round their Wisp, a compact ring: the bleed-out draining in their side colour (ally or rival),
-##     revive progress filling inside it, flashing over the last LOW_S seconds; red and pulsing while
+##     flashing over the last LOW_S seconds; red and pulsing while
 ##     an enemy stands on them (stomp)
 ##   - a knocked teammate gets a bigger ping instead of that ring (ally_ping): their red-tinted face
 ##     in a spiked ring that drains with their bleed-out, "ALLY KNOCKED" over their own plate; it pops in as
 ##     they go down (sizes measured off the reference, scripts/ui/SQUAD_FRAMES_SPEC.md)
-##   - only for a teammate close by (CUE_RANGE), the revive reach on the ground, thin, filling as they
-##     revive, and one line on the HUD saying to step onto the Wisp
+##   - revive progress is a short bar under the Wisp (no ground circle: it was clutter), and for a teammate
+##     close by (CUE_RANGE) one line on the HUD saying to step onto the Wisp
 ## Reviving is standing on the Wisp (Life), so there is no key to press.
 
 const MARK_UP := 0.45         # m over the feet: the Hunter Wisp's middle (WispLook hover)
@@ -23,6 +23,8 @@ const PING_RISE := 90.0       # px: the ping's centre over their plate's anchor 
 const PING_POP := 0.25        # s: the ping's pop-in (overshoots, then settles)
 const PING_RING := Color("3cb8f0")
 const PING_TEXT_PX := 14      # font px: ALLY KNOCKED
+const BAR_W := 40.0           # px: the revive bar under a Wisp
+const BAR_H := 6.0
 const BACK := Color(0.03, 0.04, 0.07, 0.55)
 
 ## Draws every visible downed Hunter's marks on the HUD canvas (`hud` gives the faces and knock times).
@@ -36,7 +38,6 @@ static func draw(c: Control, m: Match, hud) -> void:
 		var col := STOMP_RED if stomped else SideColor.of(m, o)
 		var mate := p != null and p != o and o.team == p.team and not p.out and not p.downed
 		if mate and not stomped and p.flat_dist(o) < CUE_RANGE:
-			_reach(c, m, o, col)
 			if p.flat_dist(o) > float(Life.R["revive_radius"]) and (cue == null or p.flat_dist(o) < p.flat_dist(cue)):
 				cue = o
 		if p != null and p != o and o.team == p.team:
@@ -44,7 +45,11 @@ static func draw(c: Control, m: Match, hud) -> void:
 		else:
 			var at3 := o.pos + Vector3(0, MARK_UP, 0)
 			if not m.cam.is_position_behind(at3):
-				badge(c, m.cam.unproject_position(at3), o, col, m.time, MARK_R)
+				var sp := m.cam.unproject_position(at3)
+				badge(c, sp, o, col, m.time, MARK_R, false)
+		var at3b := o.pos + Vector3(0, MARK_UP, 0)
+		if not m.cam.is_position_behind(at3b):
+			revive_bar(c, m.cam.unproject_position(at3b) + Vector2(0, MARK_R + 9.0), o)
 	if cue:
 		var sz := c.size
 		HudStyle.ctext(c, Vector2(sz.x * 0.5, sz.y * 0.8), "Step onto %s's wisp to revive" % cue.pname, 15,
@@ -52,7 +57,7 @@ static func draw(c: Control, m: Match, hud) -> void:
 
 ## The ring round a Wisp at screen point `at` (radius `r` px): bleed-out left in `col`, revive progress
 ## inside it; flashes while little time is left. The squad's offscreen arrows draw the same one.
-static func badge(c: CanvasItem, at: Vector2, o: Hunter, col: Color, time: float, r: float) -> void:
+static func badge(c: CanvasItem, at: Vector2, o: Hunter, col: Color, time: float, r: float, inner := true) -> void:
 	var f := bleed_frac(o)
 	var low := f * float(Life.R["bleed_out"]) < LOW_S
 	var a := 0.55 + 0.45 * sin(time * 12.0) if low or o.get_meta("stomped", false) else 1.0
@@ -60,16 +65,21 @@ static func badge(c: CanvasItem, at: Vector2, o: Hunter, col: Color, time: float
 	c.draw_arc(at, r, 0.0, TAU, 40, Color(col, 0.22), MARK_W, true)
 	if f > 0.0:
 		c.draw_arc(at, r, -PI * 0.5, -PI * 0.5 + TAU * f, 40, Color(col, a), MARK_W, true)
-	if o.revive > 0.0:
+	if inner and o.revive > 0.0:
 		var rv := clampf(o.revive, 0.0, 1.0)
 		c.draw_arc(at, r - MARK_W - 1.0, -PI * 0.5, -PI * 0.5 + TAU * rv, 40, HudStyle.REVIVE, MARK_W - 1.0, true)
 
-## The revive reach on the ground, for a teammate close by: thin, filling as the revive goes.
-static func _reach(c: Control, m: Match, o: Hunter, col: Color) -> void:
-	var rr: float = Life.R["revive_radius"]
-	ring(c, m.cam, o.pos, rr, Color(col, 0.4), 1.5)
-	if o.revive > 0.0:
-		ring(c, m.cam, o.pos, rr, Color(HudStyle.REVIVE, 0.9), 3.0, o.revive)
+## The revive bar under a Wisp while someone is bringing them back (the reference's bar, not a ground circle:
+## docs/COMBAT_CLARITY.md): a dark slot, the fill in the revive green, a bright tip so the fill's edge reads.
+static func revive_bar(c: CanvasItem, at: Vector2, o: Hunter) -> void:
+	if o.revive <= 0.0:
+		return
+	var f := clampf(o.revive, 0.0, 1.0)
+	var r := Rect2(at - Vector2(BAR_W * 0.5, BAR_H * 0.5), Vector2(BAR_W, BAR_H))
+	c.draw_rect(r.grow(2.0), Color(0.0, 0.0, 0.0, 0.7))
+	c.draw_rect(r, Color(HudStyle.REVIVE, 0.2))
+	c.draw_rect(Rect2(r.position, Vector2(BAR_W * f, BAR_H)), HudStyle.REVIVE)
+	c.draw_rect(Rect2(r.position + Vector2(maxf(0.0, BAR_W * f - 2.0), 0), Vector2(2.0, BAR_H)), Color(1, 1, 1, 0.9))
 
 ## A ring on the ground round `at` (radius `r` m), drawn as a screen polyline; `frac` < 1 draws an arc
 ## from `start` (radians), for progress.

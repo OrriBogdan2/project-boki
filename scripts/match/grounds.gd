@@ -31,6 +31,7 @@ var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layo
 var prompt: Label = null
 var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null
+var trial: TimeTrial = null   # the time-trial course on the open floor
 
 
 ## The map's "grounds" block ({} when this isn't the Training Grounds).
@@ -119,6 +120,8 @@ func build() -> void:
 	prompt.visible = false
 	_layer.add_child(prompt)
 	m.add_child(_layer)
+	trial = TimeTrial.new(m)
+	trial.build(_layer, self)
 
 
 ## One ring of pedestals round a perch's middle, one per id of the kind.
@@ -191,10 +194,12 @@ func _duel(at: Vector3) -> void:
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at
+	m.duel_hint = DuelRingHint.make(m)
 
 
-## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home.
-func tick() -> void:
+## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home,
+## run the time trial.
+func tick(dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null or prompt == null:
 		return
@@ -202,9 +207,11 @@ func tick() -> void:
 	if p.pos.y < FALL_Y and not p.downed:
 		p.teleport(a.home)
 		p.vel = Vector3.ZERO
+		trial.stop()
 		if m.hud:
 			m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
 		return
+	trial.tick(dt)
 	var best := -1
 	var bd := ACT_R
 	for i in stations.size():

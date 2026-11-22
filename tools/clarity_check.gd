@@ -6,11 +6,14 @@ extends RefCounted
 ## Who and what on the body (docs/COMBAT_CLARITY.md): other Hunters' silhouettes carry their side's edge,
 ## other people's ability looks lean to their side (SideColor.fx), crowd control stays on the body it holds (stars,
 ## tendrils, frost and a pulsing tint, BodyTell) and a cast glints the caster. Less text: in a fight only your own
-## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only.
+## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only. What sits on the Hunters in a bot
+## 3v3 of the slice Hunters (ClarityFight, 10 frames) stays within ClarityFight.BUDGET.
 ## Your own crowd control shows as a line under your vitals, worst first.
 
 const ARCH_CHECK := preload("res://tools/archetype_check.gd")
+const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
+const FIGHT_FRAMES := 10
 
 var bad := 0
 
@@ -87,8 +90,28 @@ func run(main: Node) -> void:
 	_cc_plate(m, foes[0], foes[1])
 	# ---------------------------------------------------------------- 5. your own crowd control under your vitals
 	_cc_self(m, P)
+	m.queue_free()
+	await main.get_tree().process_frame
+	await _fight_budget(main)
 	print("CLARITY done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The first ClarityFight fight: each BUDGET entry's element-Hunter pairs a frame, on average, within its budget.
+func _fight_budget(main: Node) -> void:
+	var pairs := {}
+	var count := func(fm: Match, _i: int) -> void:
+		for e in ClarityFight.tally(fm):
+			var k := "%s %s" % [e[0], e[1]]
+			for b: String in ClarityFight.BUDGET:
+				if k.begins_with(b):
+					pairs[b] = int(pairs.get(b, 0)) + int(e[2])
+	var fm: Match = await ClarityFight.play(main, ClarityFight.FIGHTS[0], FIGHT_FRAMES, count)
+	for b: String in ClarityFight.BUDGET:
+		var per := float(pairs.get(b, 0)) / FIGHT_FRAMES
+		var cap := float(ClarityFight.BUDGET[b])
+		ok(per <= cap, "3v3 fight: '%s' on a Hunter %.1f a frame (budget %.1f)" % [b, per, cap])
+	fm.queue_free()
+
 
 ## A stunned and a slowed dummy, then Ground and Daze (one of them a remote body, as the Net "kst" event
 ## leaves it): one icon per kind, each with its time left, shrinking, and nothing when nothing is active.

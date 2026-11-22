@@ -1,5 +1,5 @@
 extends RefCounted
-## --cast-lock-buffer-check (docs/decisions/0022-cc-exit-buffer.md, addendum): for every hero whose ult holds the
+## --cast-lock-buffer-check (docs/decisions/0118-cc-exit-buffer.md, addendum): for every hero whose ult holds the
 ## body in a cast lock (ArchKit.busy() beyond disabled(): Motley's Nightwell cast, Kael's Riposte guard and cleave,
 ## Vex's Kitefall), an RMB or E pressed LATE_S before the lock ends is held (DashFlow) and goes off once the lock
 ## lets it, never inside it; one pressed at the lock's start (outside Loco.press_buffer) is refused, not held for
@@ -11,7 +11,8 @@ const EARLY_AT := 2             # steps into the lock for the press that comes t
 const SETTLE := 20              # steps the ult may take to start its lock
 const LOCK_MAX := 600           # steps a lock may run before the check gives up on it
 const PAST := 0.4               # s past the lock's end we watch for the press
-const LOCKED := ["juggernaut", "mage", "ostra"]  # kits whose ult locks the body (Vex only slows, 11-18)
+# kits whose ult locks the body; Vex left it on main 5687b9120da (owner 11-17: her ult slows, never roots)
+const LOCKED := ["juggernaut", "mage", "ostra"]
 
 var bad := 0
 var skipped := 0

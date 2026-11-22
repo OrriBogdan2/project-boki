@@ -277,3 +277,10 @@ skin read orange. With `"rebake": true` (v95_swap.py `rebake_paint`) the low mes
 rig, clips and names are unchanged. Other picked masters with the same kind of atlas need the same key. GPU shots of a
 Hunter: `--clip-shots --yaw=0` (front: a negative `--dist`); a yaw other than 0 without a state twists the root bone, so the
 thighs turn against the hips and a sarong tears at the waist in the shot only.
+
+## Torn right foot, 2026-11-18 (ext/grimble-ingame-fix-1117)
+Cutting the floor puddle took the Meshy faces of Grimble's right foot with it: below the knee his right leg was a fan of
+shards that tore in every clip (the stretch check cannot see it; Blender renders of idle, run_f, throw, lunge and
+death can). The rig is mirror-symmetric, so `python3 tools/art1/glb_mirror_limb.py IN.glb OUT.glb --below 0.42`
+dropped the right leg's 575 triangles under 0.42 m and put the left shin and foot there, mirrored (534 tris, same UVs and
+paint, .L joints renamed .R). Stretch-check unchanged (mean of 52 clips 4.66, worst 8.52 ledge).

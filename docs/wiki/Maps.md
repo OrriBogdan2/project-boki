@@ -15,7 +15,7 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 
 ## Training Grounds
 
-The Training Grounds (--arena): the old Training Room (walled ring, dummies, sparring bot) in the middle of a big open floor, a duel ring to the east, five sky perches (Hunters, Gear, Belt items, Bots, Boki) reached by one-way pads and left by gliding, and the Movement Fields south of the floor over the Bench Bridge: two long dash lanes (91 m and 96 m), tier steps up 6 terraces, a four-step cliff (2 to 5 terraces) for mantles and wall kicks, and a stair up to a Glide Jump-off that glides to Cloud Isle. Pads fire up; glide back down.
+The Training Grounds (--arena): the old Training Room (walled ring, dummies, sparring bot) in the middle of a big open floor, a duel ring to the east, five sky perches (Hunters, Gear, Belt items, Bots, Boki) reached by one-way pads and left by gliding, and the Movement Fields south of the floor over the Bench Bridge: two long dash lanes (91 m and 96 m), tier steps up 6 terraces, a four-step cliff (2 to 5 terraces) for mantles and wall kicks, and a stair up to a Glide Jump-off that glides to Cloud Isle. Pads fire up; glide back down. West of the Training Room a time trial: ten gates between a start and a finish arch, with a dash, a wall kick up a short tower, a jump pad onto a tall one and a glide down; each Hunter keeps a personal best.
 
 ### Islands
 
@@ -115,6 +115,8 @@ Ground that changes the way across a region. Your active Boki's type (or, for de
 | Vaults | 3 | Frostgate Keep, The Lantern, Shrine Table, Moor Chapel, The Kilns |
 | Item caches | 7 | The Crown, Stormcrown Gaol, Frostgate, Highwatch, Larkhollow, Thornwood, Saltmere, Duskmoor, Stormbreak, Crown Shard, Thorn Shard, Ember Shard, Salt Shard, Cinder Steps |
 | Live boss lairs | 3 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
+
+**Legendary Boki:** a 20% chance per match that one of Cairnhorn, Hivara turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## Skyreach
