@@ -1,7 +1,5 @@
 # Kit parity audit: 12 Hunters against the source (main 7907d9afe, 2026-11-07; re-audit on ext/release-integ-0244c 23cc281bd, 2026-11-11; slice 0.24.5 mark on ext/integ-ways-out-0245 5d37d4833, 2026-11-11); 0.24.5 re-read on ext/release-integ-0245 272368589, 2026-11-11
 
-New sections go in `docs/KIT_PARITY.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
-
 PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2). Read-only for the first audit; the ranges table below changed four numbers (data only).
 
 ## Charges vs the source (charges-sv-1116, 2026-11-16)

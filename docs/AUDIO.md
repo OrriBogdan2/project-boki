@@ -1,7 +1,5 @@
 # Audio: sound sets, loudness and buses
 
-New sections go in `docs/AUDIO.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
-
 How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py`, `tools/gen_ambience.py` and `tools/gen_garden_ambience.py`.
 How the game's sound effects are made, named, levelled and played. Music is in `tools/compose.py`; ambience beds in `tools/gen_ambience.py` (below).
 

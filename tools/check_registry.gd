@@ -458,6 +458,7 @@ const CHECKS := {
 	"--warden-model-check": ["res://tools/warden_model_check.gd", "warden_model_check", null],      # the Warden models
 	"--warden-rig-json": ["res://tools/warden_rig_json.gd", "warden_rig_json", null],      # rig for the Blender build
 	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],      # .glb loader
+	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--warden-rest-check": ["res://tools/warden_rest_check.gd", "warden_rest_check", "check"],      # baked rig rests
 	"--warden-rest-bake": ["res://tools/warden_rest_check.gd", "warden_rest_check", "bake"],
 	"--warm-stamp-check": ["res://tools/warm_stamp_check.gd", "warm_stamp_check", null],  # warm-up kept on disk
@@ -509,6 +510,7 @@ const CHECKS := {
 	"--motley-card-shots": ["res://tools/motley_card_shots.gd", "motley_card_shots", null],      # the card vs him
 	"--parity-strip": ["res://tools/parity_strip.gd", "parity_strip", null],      # our move vs footage frames (GPU)
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
+	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],
 	"--edge-suspects": ["res://tools/edge_suspects_shots.gd", "edge_suspects_shots", null],      # GPU, render suspects
 	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],  # every Hunter gliding: turns, dive
 	"--turn-shots": ["res://tools/turn_shots.gd", "turn_shots", null],      # before/after strip of turning on the spot

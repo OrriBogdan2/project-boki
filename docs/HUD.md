@@ -1,7 +1,5 @@
 # In-match HUD: widget files and the shared style
 
-New sections go in `docs/HUD.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
-
 `scripts/ui/hud.gd` is wiring only (a frozen god file). The pieces that draw the fight-facing HUD live
 in their own files and share one look, `HudStyle`. Reference study and gap list: `hero-ref/HUD.md`
 (outside the repo, on the dev box).
