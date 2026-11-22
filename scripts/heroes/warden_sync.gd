@@ -28,6 +28,7 @@ var mood: WardenMood          # a face on glass and a hanging companion, when th
 var idle_break: WardenBreak   # the one beat this Hunter breaks a long idle with (WardenBreak), or null
 var companions: WardenCompanions   # floating companions cut out of the body (Meeko's sun and cloud), or null
 var hide_out: Array = []      # bone indices that shrink away while WardenGlb.CHAIN_OUT
+var gone: Array = []          # bone indices a look-only variant hides (WardenGlb.hidden_bones): shrunk every frame
 var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 var pace: RigPace             # how often the bones are posed (every frame but on GL over Metal)
@@ -73,6 +74,8 @@ func use_clips(glb: Node3D, art_name: String) -> void:
 		ch["own_rest"] = Array(dd.get("hang_own_rest", [])).any(func(n): return first.begins_with(String(n)))
 	for b in dd.get("hide_while_chain", []):
 		hide_out.append(WardenSkeleton.find(skel, String(b)))
+	for b in WardenGlb.hidden_bones(art_name):
+		gone.append(WardenSkeleton.find(skel, String(b)))
 	clips = WardenClips.make(root, glb, skel, art_name)
 	opener = WardenOpen.make(clips) if clips else null
 	sway = WardenSway.make(root, skel, dd.get("sway", {}))
@@ -143,6 +146,9 @@ func _process(dt: float) -> void:
 		sway.tumble(dt, orbits.pivots)
 	if bool(root.get_meta(WardenGlb.CHAIN_OUT, false)):
 		for bi in hide_out:
+			skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
+	for bi in gone:
+		if int(bi) >= 0:
 			skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
 
 ## A rig node's place on the body you see (world): its bone's pose back through the retarget.
