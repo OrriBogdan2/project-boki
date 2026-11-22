@@ -10964,3 +10964,4 @@ READY ext/merge-lane-N2-1122 9ee621f1b7428b71ea458380553cbf864a90cb96 (origin/ma
 READY ext/lace-vfx-data 36c1042ddb (origin/main merged; pin_fx.gd conflict resolved keeping the slimmed branch file, main's only change there was randf->KitLooks.vis_rng in fletch/lob/rain code this branch moves onto archer.json, no randf left in moved code; import ok, --check 0 failures, --lace-1111-check 0, --archer-combo-check 1 fail = same on main (Spirit Walk terrace), --hero-vfx-check gunslinger LMB only (untouched), health --strict red = same 28 style rows as main)
 READY ext/extra-clan-feed e53350f7166 (clan feed spec)
 READY ext/tutorial-mask-line 65a3e49267 (Mask line at first portal)
+READY ext/owner-notes-assert-a b25868cb5e (owner kit notes part 1)
