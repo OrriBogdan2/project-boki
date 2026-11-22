@@ -10941,3 +10941,4 @@ READY ext/ui-ability-rename-check cf6df8b66521aa3c80525ccfc14b24100db9cc85 (reti
 READY ext/ui-inventory-safe 08f61686b4b (inventory safe at 3 sizes)
 READY ext/extra-debt-tidy 377659646a (DEBT.md tidied)
 READY ext/ui-inventory-safe 82044e5e1d6 (inventory safe at 3 sizes)
+READY ext/parity-recheck-cinder 4fc822d9dc (Cinder parity re-check)
