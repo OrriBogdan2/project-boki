@@ -136,10 +136,9 @@ func _base_tutorial() -> void:
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
 	var last := FarmTutorial.hint_text("out")
-	var path_said: bool = last.contains("Wayseed") and last.contains("Boki that leans")
 	ok(
-		last.contains("Waystone") and path_said and not last.contains("\n"),
-		"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line"
+		last.contains("portal") and last.contains("Stay") and not last.contains("\n"),
+		"the last hint: the portal and Stay in one short line (the Waystone path is the hub's own hint)"
 	)
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")

@@ -161,7 +161,7 @@ func _tips() -> void:
 			"stagger": TipText.stagger("Brute")}
 	for k in lines:
 		_clean(lines[k], "first-time hint '%s'" % k)
-	ok(TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again in the air"),
+	ok(TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again to glide"),
 			"the first move hint names the rebound attack key and the glide wording")
 
 func _garden() -> void:

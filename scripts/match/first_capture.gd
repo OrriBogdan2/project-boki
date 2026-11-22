@@ -21,7 +21,7 @@ static func _in_range(p: Hunter, k: Kin) -> bool:
 	return p.flat_dist(k) < float(Capture.rules()["range"])
 
 static func hint_text(k: Kin) -> String:
-	return "%s  ·  %s  ·  Hold %s to capture it: it comes home with you if you get out" % [
+	return "%s  ·  %s  ·  Hold %s to capture it; get out to keep it" % [
 			k.sp["name"], String(k.sp["type"]).capitalize(), Settings.key_cap("interact")]
 
 ## Each frame from Match._tips: the hint at the first capturable wild Boki in range, then the marker's upkeep.
