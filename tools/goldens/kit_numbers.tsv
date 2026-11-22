@@ -154,10 +154,11 @@ archetypes/ashwick.json:resource.heal_knock	0.16
 archetypes/ashwick.json:resource.ignite_at	31
 archetypes/ashwick.json:resource.ignite_t	3.0
 archetypes/ashwick.json:resource.max	31
+archetypes/ashwick.json:rmb.cast	0.4
 archetypes/ashwick.json:rmb.charges	1
 archetypes/ashwick.json:rmb.cooldown	7.0
 archetypes/ashwick.json:rmb.dmg	13.0
-archetypes/ashwick.json:rmb.hold	0.15
+archetypes/ashwick.json:rmb.hold	0.0
 archetypes/ashwick.json:rmb.range	14.0
 archetypes/ashwick.json:rmb.rank3_charges	2
 archetypes/ashwick.json:rmb.size	0.3
@@ -881,6 +882,8 @@ archetypes/juggernaut.json:rmb.spin.radius	2.2
 archetypes/juggernaut.json:rmb.windup	0.6
 archetypes/juggernaut.json:x.block_k	0.2
 archetypes/juggernaut.json:x.blocks_max	2
+archetypes/juggernaut.json:x.carry_decay	1.6
+archetypes/juggernaut.json:x.carry_k	0.8
 archetypes/juggernaut.json:x.cooldown	36.0
 archetypes/juggernaut.json:x.dmg	43.0
 archetypes/juggernaut.json:x.guard	0.65
@@ -888,6 +891,8 @@ archetypes/juggernaut.json:x.heal	0.8
 archetypes/juggernaut.json:x.len	3.6
 archetypes/juggernaut.json:x.lunge	1.8
 archetypes/juggernaut.json:x.recover	0.35
+archetypes/juggernaut.json:x.rise_bonus	2.2
+archetypes/juggernaut.json:x.rise_min	1.0
 archetypes/juggernaut.json:x.strike_kb	0.0
 archetypes/juggernaut.json:x.strike_t	0.1
 archetypes/juggernaut.json:x.unlock	6

@@ -187,8 +187,8 @@ func _base_tutorial() -> void:
 	rules["base_mode"] = false
 
 
-## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a readable size (12 px is the
-## shrink floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
+## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a readable
+## size (12 px is the shrink floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
 func _banner_fits() -> void:
 	var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 	var worst := 99
@@ -218,7 +218,8 @@ func _base_ends_alone() -> void:
 		var g := int(Save.d["gems"])
 		FarmTutorial.event(what)
 		var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
-		ok(not FarmTutorial.active() and FarmTutorial.did("out") and paid, "%s ends the tutorial with the one reward" % what)
+		var done := not FarmTutorial.active() and FarmTutorial.did("out") and paid
+		ok(done, "%s ends the tutorial with the one reward" % what)
 		FarmTutorial.event(what)
 		ok(int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems")), "%s again pays nothing more" % what)
 

@@ -184,10 +184,10 @@ func _press(kind: String, hold: float, t: float, first: bool) -> void:
 ## A second press of the same input (a recast, the follow-up strike): `again` = [seconds in, input].
 func _again(kind: String) -> void:
 	match kind:
-		"e": P.ak.use_e()
-		"x": P.ak.cast_ult()
-		"rmb": P.ak.press_rmb()
-		"dash": P.do_dash()
+		"e": p.ak.use_e()
+		"x": p.ak.cast_ult()
+		"rmb": p.ak.press_rmb()
+		"dash": p.do_dash()
 
 func _release() -> void:
 	p.inp["fire"] = false
