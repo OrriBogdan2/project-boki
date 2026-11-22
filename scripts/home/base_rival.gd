@@ -35,6 +35,7 @@ static func pass_by(life: BaseLife, k: Dictionary) -> bool:
 			and life.machine(o).is_in(BaseLife.S.ROAM)
 			and life.h.world.island_of(o["pos"].x, o["pos"].z) == here
 		):
+			life._act("squabble", k, o)
 			_turn(life, k, o)
 			_turn(life, o, k)
 			return true
