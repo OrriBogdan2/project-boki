@@ -269,7 +269,7 @@ const T := {
 	],
 	# the source_scale test camera (off by default; bands from camera.json "source")
 	"source_view_across_m": ["~", [35.0, 39.0], "m", "ground across: the source's ~37 m"],
-	"dash_back_on_cursor_deg": ["<=", 5.0, "deg", "the worst body angle off the cursor after a dash: home inside 0.1 s"],
+	"dash_back_on_cursor_deg": ["<=", 5.0, "deg", "worst body angle off the cursor after a dash (home in 0.1 s)"],
 	"source_hunter_screen_pct": ["~", [8.3, 9.3], "%", "as hunter_screen_pct: the source's 90-100 px of 1080"],
 	"source_hunter_feet_below_pct": ["~", [1.5, 5.0], "%", "as hunter_feet_below_pct"],
 }
