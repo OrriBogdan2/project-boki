@@ -150,12 +150,12 @@ func toast(text: String, col: Color) -> void:
 	msgs.push(text, col)
 
 ## A first-time hint, in the lane for longer (Match._tip says each once); `near` "armor" puts it
-## next to the armour readout instead (ArmorHud.note).
-func tip(text: String, near := "") -> void:
+## next to the armour readout instead (ArmorHud.note); `life` is how long it stays, s.
+func tip(text: String, near := "", life := TIP_LIFE) -> void:
 	if Record.clean():
 		return
-	if near == "armor": set_meta("armor_note", [text, m.time + TIP_LIFE])
-	else: msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
+	if near == "armor": set_meta("armor_note", [text, m.time + life])
+	else: msgs.push(text, TIP_COL, MsgLane.NORMAL, life)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
 const MSG_FIGHT_S := 3.0   # s after you last took or landed a hit that the HUD keeps to its fight budget
@@ -818,6 +818,8 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
 	WaysOutHud.draw(self)
+	if not HudGroups.clock_shown(m):
+		return      # a save's first expedition: the clock waits for the first Ways Out beat or kill (HudReveal "beat_clock")
 	var left := m.length - m.time
 	var phase := "ISLANDS FALLING" if left < 30.0 else HeartHud.zone_line(m).to_upper()      # (the tide's clock)
 	var pc := BAD if left < 30.0 else SideColor.tone("tide_next")
