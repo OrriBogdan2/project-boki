@@ -815,7 +815,8 @@ const CHECKS := {
 	"--net-leave-check": ["res://tools/net_leave_check.gd", "net_leave_check", null],      # 0061 dropped players
 	"--save-safe-check": ["res://tools/save_safe_check.gd", "save_safe_check", null],      # 0061 cut-off saves
 	"--remote-anim-1-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "archer,ashwick,bulwark,dolm"],
-	"--remote-anim-2-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "dredge,gunslinger,juggernaut,mage"],
+	"--remote-anim-2-check":
+		["res://tools/remote_anim_check.gd", "remote_anim_check", "dredge,gunslinger,juggernaut,mage"],
 	"--remote-anim-3-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "ostra,rimewright,tender,thief"],
 	"--remote-anim-4-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "rest"],
 	"--remote-anim-guest": ["res://tools/remote_anim_check.gd", "remote_anim_check", ""],
