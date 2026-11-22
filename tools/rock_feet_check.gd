@@ -10,6 +10,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const GAP := 0.04              # m: the most a planted foot may float over or sink into the surface it stands on
+const EASE_FRAMES := 6        # frames FootPlant takes to bring the foot down after a step he walks off (not scored)
 const DOWN := 0.02             # m: the twin's lower ankle within this of its lowest nearby is the weight-bearing foot
 const STRIDE := 10             # frames either side looked at for that lowest (about a stride)
 const SETTLE := 30             # frames before measuring a stand (planting eases in at FootPlant.RATE)
@@ -110,12 +111,19 @@ func _score(what: String, how: Variant, settle: int, stop := Callable(), step :=
 	var jump := 0.0               # the drawn body's biggest move up or down in a grounded frame
 	var unplanted := 0            # grounded frames FootPlant left alone
 	var was := P.position.y
+	var drop_y := P.pos.y         # his height last frame (a step down he stays grounded on shows as a drop in it)
+	var easing := 0               # frames left of the foot's ease down after such a step: not scored
 	var edge := false             # the last frame was grounded and scored (the next one, airborne, takes it back)
 	for f in int(WALK_T / DT):
 		if stop.is_valid() and stop.call():
 			break
 		_frame(_move(how))
 		var grounded := P.grounded and P.pos.y - P.ground() <= 0.01
+		if grounded and P.pos.y < drop_y - 0.05:      # stepped down on foot (HunterMove.sticks): FootPlant eases the foot down
+			if not seen.is_empty():
+				seen.pop_back()
+			easing = EASE_FRAMES
+		drop_y = P.pos.y
 		if grounded:
 			jump = maxf(jump, absf(P.position.y - was))
 			unplanted += 1 if P.anim.feet.weight < 0.01 and P.anim.air_k < 0.01 else 0
@@ -126,6 +134,9 @@ func _score(what: String, how: Variant, settle: int, stop := Callable(), step :=
 			edge = false
 			continue
 		edge = true
+		if easing > 0:
+			easing -= 1
+			continue
 		var t_ank := _ankles(twin)
 		var low := 0 if (t_ank[0] as Vector3).y < (t_ank[1] as Vector3).y else 1
 		var clip: float = (t_ank[low] as Vector3).y - home.y

@@ -104,7 +104,9 @@ func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.blight_t = 0.0
 	P.belt = UtilityBelt.empty()
 	UtilityBelt.grant(P, "blight_flask", 1)
+	P.teleport(Vector3(P.pos.x, P.ground(), P.pos.z))      # (on the ground: the patch is flat, so the rival stands in it)
 	foe.teleport(P.pos + Vector3(4.0, 0, 0))
+	foe.teleport(Vector3(foe.pos.x, foe.ground(), foe.pos.z))
 	P.inp["aim"] = foe.pos
 	ok(UtilityBelt.use_id(P, "blight_flask"), "a Blight Flask is thrown")
 	_steps(m, 2.5, foe)

@@ -164,6 +164,10 @@ var cue: GardenCues.VolleyCue = null   # the landing ring and head-start flash w
 func _init(home) -> void:
 	h = home
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 ## The mat and the seed beside the Training post (none without one); called when fixtures move.
 func place() -> void:
 	if is_instance_valid(mat):

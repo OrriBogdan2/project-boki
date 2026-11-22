@@ -134,7 +134,10 @@ func _place_msgs() -> void:
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
 	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
-	msgs.keep_off = KillFeed.rects()      # a wide card slides aside of the kill feed's rows (right edge)
+	var to_lane := msgs.get_global_transform().affine_inverse() * c.get_global_transform()      # (the HUD canvas sits on the frame: an ultrawide offsets it)
+	msgs.keep_off.clear()
+	for r: Rect2 in KillFeed.rects():
+		msgs.keep_off.append(to_lane * r)      # a wide card slides aside of the kill feed's rows (right edge)
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 	else: TopStack.place(self)
 
