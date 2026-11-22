@@ -66,7 +66,7 @@ What the in-game kit card (K) says.
 | RMB: Burr Charge | Shoot a charge that Dazes; hitting a wall blasts a cone back. |
 | E: Longneedle | Stand still 0.6s, then fire a beam through walls and everything. |
 | Hunter ultimate: Cinderfall | A shell lands at your cursor after 1.6s, then burns the patch. |
-| Weapon: Quill Rifle | Full-auto rifle; Dazed foes take 90% more. |
+| Weapon: Quill Rifle | Full-auto rifle; Dazed foes take 76% more. |
 
 ### Abilities in full
 
