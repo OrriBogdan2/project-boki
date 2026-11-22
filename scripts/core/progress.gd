@@ -138,7 +138,7 @@ static func item_name(key: String) -> String:
 		"seed":
 			return "%s seeds" % Data.CROPS[p[1]]["name"]
 		"food":
-			return String(Care.FOODS[p[1]]["name"])
+			return String(Care.foods_v[p[1]]["name"])
 		"acc":
 			return String(Data.ACCS[p[1]]["name"])
 		"plots":

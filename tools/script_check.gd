@@ -1,6 +1,7 @@
 extends RefCounted
 ## --check: every script under res://scripts loads and can be instantiated.
 
+
 func run(main: Node) -> void:
 	var CheckT = load("res://tools/check.gd")
 	var bad := 0
