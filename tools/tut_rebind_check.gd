@@ -181,7 +181,7 @@ func _drill(m: Match) -> void:
 	for t in m.training.rows():
 		_clean(t[1], "training drill '%s'" % t[0])
 	var glide: Array = m.training.rows().filter(func(t): return t[0] == "glide")[0]
-	ok(glide[1].contains("again in the air"), "the glide drill is jump, again ('%s')" % glide[1])
+	ok(glide[1].contains("again in the air"), "the glide drill is jump, then press again in the air ('%s')" % glide[1])
 	var ult: Array = m.training.rows().filter(func(t): return t[0] == "ult")[0]
 	ok(ult[1].contains(Settings.key_cap("ultimate")), "the Fuse drill names the rebound key ('%s')" % ult[1])
 
