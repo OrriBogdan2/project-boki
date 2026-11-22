@@ -274,6 +274,7 @@ static func shown_torso(model: Node3D) -> Transform3D:
 	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
 	return sync.shown(torso) if sync and sync.clips else torso.global_transform
 
+
 ## The node that lays the procedural layers (flinch, wall kick, open reach) over a dressed Hunter's clips: the contract
 ## model's Sync (WardenSync), or a Meshy-native model's Native (WardenNative, docs/art/wardens/MESHY_NATIVE.md); null on
 ## a procedural model. Both carry `flinch`, `wall` and `opener`; only Sync carries `clips` (WardenClips).
@@ -283,6 +284,7 @@ static func layers(model: Node) -> Node:
 		return null
 	var s := w.get_node_or_null(^"Sync")
 	return s if s else w.get_node_or_null(^"Native")
+
 
 ## The .glb's armature, or null.
 static func skeleton(glb: Node) -> Skeleton3D:
