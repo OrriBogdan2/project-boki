@@ -87,7 +87,7 @@ func _price_row(cur: int, on_change: Callable) -> HBoxContainer:
 # ------------------------------------------------------------------ the Shelter
 func shelter(v: VBoxContainer) -> void:
 	_handed(v)
-	if Stalls.level() < 2:
+	if Stalls.level() < Shelter.open_level():
 		m.show_note(v)
 		return       # only here for a Boki handed to you
 	UI.subtitle(v, "Boki are never sold. Adopt one (the gems go to nobody), give one a new home (it pays nothing), "
