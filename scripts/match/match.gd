@@ -1776,7 +1776,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if credit == player and target != player and src != "burn":
 		if not BokiImpact.play(self, by, target, o, crit, "you"):
 			sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
-		if hud: hud.reticle.flavour(crit, armor_hit)      # (the tick CombatBus raised above: gold on a crit, pale on armour)
+		if hud:
+			hud.reticle.flavour(crit, armor_hit)  # the tick: gold on a crit, pale on armour
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
