@@ -354,9 +354,10 @@ Steps are how you hear a flank. Both layers of a Hunter's step (the plain contac
 - In game: `BokiCry.play(species_id)` (`scripts/ui/boki_cry.gd`), played when a Bokidex entry opens. Listening page: `python3 tools/cries_preview.py` writes `tools/cries_preview/index.html`.
 ## Held fire (`scripts/core/fire_sfx.gd`)
 A weapon under 0.15 s a round (`FireSfx.HELD_RATE`: the Quill Rifle, rifle, SMG, minigun, flamethrower's weapon row, and Neve's darts once they run that fast) plays its shot through `FireSfx.shot`, not one sample per round. At 0.08 s (about 12 rounds a second) the old path stacked 4 to 10 pool voices per Hunter.
-- **First shot of a burst** (a gap over 0.3 s): the base take, no pitch jitter, full level. **The rest**: the other three takes in turn (never the same twice running), pitch +-3%, volume +-1 dB, `Sfx.STACK_DB` under the first, which is the level the stacking rule gave them already.
+- **First shot of a burst** (a gap over 0.3 s): the base take, no pitch jitter, full level: the crack. **The rest**: the weapon's short **hold takes** (`<shot>_hold` + `_1`..`_3`, below) in turn, never the same twice running, pitch +-3%, volume +-1 dB, `FireSfx.HOLD_DB` (1 dB) under the first. A shot with no hold file goes round its other full takes `Sfx.STACK_DB` under the first, as before (the flamethrower's `lw_roar`).
+- **Hold takes**: 4 files per weapon, 0.11-0.17 s (the shots run 0.18-0.54 s): the same crack and kick as the shot with a 60 ms tail instead of the full report, peak -3.5 to -3.9 dBFS (the shots peak at -1), same loudness category. Written last in each weapon's own generator so the shots keep their noise: `gun_smg_hold`, `gun_rifle_hold`, `smg_hold` (the minigun's stock `smg`) in `tools/gen_sfx_guns.py`; `vn_rifle_hold` (Vex's rotary cannon) in `tools/gen_sfx_vex.py`; `rime_shard_hold` (Neve's darts) in `tools/gen_sfx_claire.py`. `sfx_lib.takes_hold` writes them. Sable's bolts and every other weapon run slower than `HELD_RATE`, so each round is its own shot and needs no hold take.
 - **Cap**: one emitter keeps at most 3 takes sounding (`FireSfx.VOICES`); a round that would be the 4th sounds nothing (the shot itself still fires). Four Hunters holding fire cost 12 pool voices, the SFX bus budget of `ext/sfx-voice-cap`. Neve's heavy darts and skating beams, and Cinder's hose (its roar already plays one breath a 0.4 s), keep their own path.
-- **`--sfx-set-check` section 18**: 3 s of fire every 80 ms per held-fire sound, plain path vs `FireSfx`; fails over 3 voices, a first shot that is not the base take, a repeated take, or fewer than 3 other takes.
+- **`--sfx-set-check` section 18**: 3 s of fire every 80 ms per held-fire sound, plain path vs `FireSfx`; fails over 3 voices, a first shot that is not the base take, a hold take that is not 0.2 s or under and 30% shorter than the shot, one that peaks over -3 dBFS or sits more than 3 dB off the shot's loudness, a repeated take, or fewer than 3 hold takes in the run (a weapon with no hold file: fewer than 3 other full takes).
 
 | 3 s at 80 ms (pool voices sounding at most; sustained peak / RMS, 20-seed offline mix of the takes) | before | after |
 |---|---|---|
@@ -365,7 +366,17 @@ A weapon under 0.15 s a round (`FireSfx.HELD_RATE`: the Quill Rifle, rifle, SMG,
 | rifle (0.64 s) | 10; -5.9 / -21.3 | 3; -6.5 / -28.1 |
 | hoar_fan `rime_shard` (0.24 s) | 4; -6.2 / -20.9 | 3; -7.3 / -24.1 |
 
-Whole-burst peak (the first shot) is unchanged to within 0.7 dB (-3.4 to -4.9 dBFS) and never clips; a hold is 3 to 7 dB lower in RMS, so it reads as a rattle with a crack on top rather than a smear. Not built: a shorter "hold" take per weapon (would let the cap pass every round; costs new files), and the voice priority table of `ext/sfx-voice-limits` (not on main; the cap here is per emitter and does not depend on it).
+Whole-burst peak (the first shot) is unchanged to within 0.7 dB (-3.4 to -4.9 dBFS) and never clips; a hold is 3 to 7 dB lower in RMS, so it reads as a rattle with a crack on top rather than a smear. With the hold takes (`python3 tools/hold_loudness.py`, an offline mix at each weapon's real rate, 3 s; sustained peak / RMS from 0.5 s on, rounds that sound out of rounds fired):
+
+| weapon (sound, rate) | full takes held (before) | hold takes (after) |
+|---|---|---|
+| Neve's darts (`rime_shard`, 0.08 s) | -8.2 / -24.7; 24 of 38 | -8.1 / -22.6; 38 of 38 |
+| minigun (`smg`, 0.10 s) | -5.3 / -27.1; 15 of 30 | -4.6 / -21.8; 30 of 30 |
+| Vex's rifle (`vn_rifle`, 0.08 s) | -5.3 / -22.8; 24 of 38 | -8.2 / -24.7; 37 of 38 |
+| rifle (`gun_rifle`, 0.13 s) | -4.7 / -23.8; 15 of 24 | -4.5 / -20.8; 24 of 24 |
+| SMG (`gun_smg`, 0.12 s) | -5.0 / -26.7; 25 of 25 | -4.6 / -25.0; 25 of 25 |
+
+The first shot's peak is untouched (the shots peak at -1 dBFS; a burst's whole peak is -1.1 to -4.1); every sustained peak and every hold file is under -3 dBFS. The cap now rarely bites (a 0.11 s take is over before the next round), so almost every round sounds. Vex's rifle is 2 dB quieter in RMS than before and tighter (its full takes carried a 0.2 s room and brass that smeared at 12 rounds a second). Not built: the voice priority table of `ext/sfx-voice-limits` (not on main; the cap here is per emitter and does not depend on it).
 
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
