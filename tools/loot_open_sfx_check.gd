@@ -34,6 +34,8 @@ func times(sting: String) -> int:
 func clear_stings() -> void:
 	Sfx.last_played.clear()
 	Sfx.recent.clear()
+	for p in Sfx.players:  # the same-sound voice cap counts sounding voices: earlier stings must not hold this one back
+		p.stop()
 
 
 func run(main_node: Node) -> void:

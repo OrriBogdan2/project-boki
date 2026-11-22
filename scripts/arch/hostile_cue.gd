@@ -37,3 +37,4 @@ static func net_in(m: Node, x: Array) -> void:
 static func play(you: Hunter, caster: Hunter) -> void:
 	if you != null and caster.team != you.team:
 		Sfx.play(NAME, caster.pos, DB)
+		Sfx.priority_cue(NAME)
