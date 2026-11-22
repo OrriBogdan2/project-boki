@@ -20,7 +20,8 @@ const ARROW_W := 0.53           # of the strip's height: the way-to-go arrow and
 const GAP := 8.0                # px kept under whatever already sits at the top-centre (`below`)
 const CHIME := "ui_open"        # the UI set's panel-drop sound, played once as a new objective's pulse starts
 const FIGHT_S := 3.0            # s after your last hurt that still counts as a fight (the chime ducks)
-static var chimes := 0          # chimes played so far (--tutorial-hud-check counts these: HUD panels share the CHIME sound)
+## Chimes played so far (--tutorial-hud-check counts these: HUD panels share the CHIME sound).
+static var chimes := 0
 
 ## Where the strip sits for a screen size: under the safe margin, and under `below` (the bottom of the
 ## Ways Out strip in a real match, WaysOutHud.bottom) when that is lower, so it never covers the zone clocks.
