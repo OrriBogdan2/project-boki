@@ -238,6 +238,7 @@ const CHECKS := {
 	"--match-profile": ["res://tools/match_profile.gd", "match_profile", null],      # GPU: a 30-hunter match, per phase
 	# draw calls, tris, shadow lights, frame ms
 	"--particle-budget-check": ["res://tools/particle_budget_check.gd", "particle_budget_check", null],  # fx_life
+	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],      # p99 vs tools/perf.tsv, GPU_HOST
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--prof-check": ["res://tools/prof_check.gd", "prof_check", null],      # Tracy hooks, docs/PERF.md
@@ -1013,6 +1014,7 @@ const CHECKS := {
 const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
+	"fight-p99-gpu": "--fight-p99-check --quality=medium --bench-view=1920x1080 --timing-strict",
 }
 
 ## Flags the gate leaves out: the whole run is part of the listed flags' runs (same script, a mode or an
