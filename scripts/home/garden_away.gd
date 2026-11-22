@@ -103,4 +103,4 @@ static func _patch_overflow(now: float) -> Array:
 			left -= put
 			bowl += put
 	var made := batches * (SnackPatch.rules()["snacks"] as Array).size()
-	return ["The snack patch grew %d extra snacks: %d in the feeder bowl, the rest in the pantry" % [made, bowl]]
+	return [HomeNotices.SNACKS[0] % made, HomeNotices.SNACKS[1] % bowl]
