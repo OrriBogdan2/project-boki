@@ -374,6 +374,7 @@ const CHECKS := {
 	"--sfx-silence-audit": ["res://tools/sfx_silence_audit.gd", "sfx_silence_audit", null],
 	# armour-break cues
 	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
+	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],  # 0022 ult ranks
 	"--status-sfx-check": ["res://tools/status_sfx_check.gd", "status_sfx_check", null],      # status cues and loops
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
