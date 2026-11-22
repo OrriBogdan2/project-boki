@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "arcestrel",
+	"name": "Arcestrel",
+	"theme": "storm",
+	"type2": "tempest",
+	"flavor": "Falcon with lightning-rod crest and coil talons.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kestrike",
+		"stage": 2,
+		"from": "kestrike"
+	}
+}
