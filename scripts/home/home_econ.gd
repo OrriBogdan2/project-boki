@@ -502,7 +502,7 @@ func open_feeder(f: Dictionary) -> void:
 		v.add_child(row0)
 	v.add_child(UI.section("Put in by hand"))
 	var any := false
-	for key in Care.FOODS.keys() + Data.CROPS.keys():
+	for key in Care.foods_v.keys() + Data.CROPS.keys():
 		var have := Econ.pantry(key)
 		if have <= 0: continue
 		any = true
