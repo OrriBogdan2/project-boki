@@ -166,6 +166,9 @@ func _nap_sounds(home) -> void:
 		lower = lower and BokiNapSfx.pitch_of(by_cm[i + 1]) <= BokiNapSfx.pitch_of(by_cm[i])
 	ok(lower, "a bigger Boki breathes lower (%s)" % [by_cm.map(func(r): return "%.2f" % BokiNapSfx.pitch_of(r))])
 	var sleeper: Dictionary = home.kins.filter(func(k): return float(k.get("nap_t", 0.0)) > 0.0)[0]
+	for key in Sfx.loops.keys():    # loops held by the 300 s of sim (wall-clock holds) are not this step's
+		if String(key).begins_with("nap:"):
+			Sfx.loop_stop(key)
 	Sfx.listener = sleeper["pos"]
 	home._move_kin(DT)
 	var on := Sfx.loops.keys().filter(func(key): return String(key).begins_with("nap:"))
@@ -264,6 +267,7 @@ func run(m: Node) -> void:
 		"a v11 save upgrades and its Boki gain an empty bonds map")
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
+	seed(11)         # the four Boki roll their own uids, sizes and traits: same four every run
 	var recs := _new_save()
 	var home = await main._hb_home()
 	ok(home.life != null, "base_mode on: the farm runs BaseLife")
