@@ -16,10 +16,13 @@ static func need(lv: int) -> int:
 	return roundi(float(c["base"]) * pow(float(lv), float(c["power"])))
 
 ## A kin's first feed, pat and game of fetch each day pays `care` once (rec.xp_day, a day number a
-## kind, lazy so old saves load); drill pays per training point. `now` is unix seconds (-1: the clock).
+## kind, lazy so old saves load); drill pays per training
+## point and a finished toy play pays `toy` every time. `now` is unix seconds (-1: the clock).
 static func give(rec: Dictionary, action: String, points := 0, now := -1.0) -> void:
 	var xp := int(rules()["drill_per_point"]) * points
-	if action != "drill":
+	if action == "toy":
+		xp = int(rules()["toy"])      # every finished play at a toy pays, no daily gate
+	elif action != "drill":
 		if not _first_today(rec, action, now):
 			return
 		xp = int(rules()["care"])

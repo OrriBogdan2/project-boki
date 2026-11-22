@@ -400,6 +400,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		var r := RandomNumberGenerator.new(); r.seed = int(d.get("mark_seed", 0))
 		var m0 := mats[0] as ShaderMaterial
 		m0.set_shader_parameter("mark_kind", int(mi["k"]))
+		m0.set_meta("mark_col", String(d.get("mark_col", "dark")))   # BokiRig's marks take its coat's own paint
 		m0.set_shader_parameter("mark_color", mc)
 		m0.set_shader_parameter("mark_seed", Vector3(r.randf_range(-50.0, 50.0), r.randf_range(-50.0, 50.0), r.randf_range(-50.0, 50.0)))
 		m0.set_shader_parameter("mark_scale", float(mi["scale"]) * r.randf_range(0.85, 1.2))

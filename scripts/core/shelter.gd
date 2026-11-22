@@ -38,6 +38,11 @@ static func cheapest() -> int:
 		best = mini(best, int(c["price"]))
 	return best
 
+## The stall level that opens the Shelter: 2, or base_open_level on a base_mode farm (a one-Boki garden save has
+## no other way to a second Boki on day one).
+static func open_level() -> int:
+	return int(_rules()["base_open_level"]) if FarmUnlocks.base_mode() else 2
+
 ## Everyone waiting today. A new day brings fresh strays; Boki put up by players stay until adopted.
 static func cards() -> Array:
 	var st := _st()
@@ -75,9 +80,9 @@ static func find(id: String) -> Dictionary:
 	return {}
 
 # ------------------------------------------------------------------ adopting
-## Open from stall level 2; the base has no Upgrades tab, so base_mode opens it from the start.
+## Open from open_level(): stall level 2, or base_open_level on a base_mode farm (no Upgrades tab there).
 static func open() -> bool:
-	return Stalls.level() >= 2 or FarmUnlocks.base_mode()
+	return Stalls.level() >= open_level()
 
 
 ## Adopts a Boki: the gems are destroyed and it comes home. {ok, why, rec}.

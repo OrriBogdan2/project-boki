@@ -67,7 +67,8 @@ func run(m: Node, mode := "check") -> void:
 	var card: BaseCard = home.root_ui.get_node("BaseCard")
 	home._refresh_top()
 	var off: Array = _chip_texts(home)
-	var shows_mats: bool = off.any(func(t): return t.contains("wood")) and off.has("3")
+	var mats_chip: Array = home.top_chips.get_children().filter(func(c): return c.tooltip_text.contains("Wood"))
+	var shows_mats: bool = not mats_chip.is_empty() and off.has("9") and off.has("3")      # one Materials chip: 5 + 4
 	ok(not FarmUnlocks.base_mode() and shows_mats,
 			"off: the mats and crop counters show: %s" % str(off))
 	await m.get_tree().process_frame
@@ -77,7 +78,7 @@ func run(m: Node, mode := "check") -> void:
 	Save.active_kin()["needs"]["food"] = 10.0
 	home._refresh_top()
 	var on: Array = _chip_texts(home)
-	ok(on.any(func(t): return t == "40") and not on.any(func(t): return t.contains("wood") or t.contains("stone")),
+	ok(on.any(func(t): return t == "40") and not on.has("9"),
 			"on: gems show, the mats counters are hidden: %s" % str(on))
 	ok(on.size() <= 2, "on: the top bar is the partner and gems only (%d chips)" % on.size())
 	card.t = 1.0
