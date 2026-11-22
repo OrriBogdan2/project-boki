@@ -56,6 +56,7 @@ const TURN_PLAN := [[0.0, Vector2.ZERO, "idle"], [0.6, Vector2(1, 0), "run"], [2
 		[4.2, Vector2.ZERO, "stop"], [5.4, Vector2(1, 0), "run"], [7.2, Vector2(-1, 0), "about"],
 		[9.0, Vector2.ZERO, "stop"]]
 const KITE_SWAY := 0.2           # rad: in "kite" the aim sways this far either way at 0.7 Hz (the foot-slide WOBBLE)
+var raid := "clear"             # the match's RaidLook (--raid=<look> on --hunter-gpu-shots)
 const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
 const FIGHT := "ashwick,juggernaut,gunslinger/archer,bulwark,mage"     # clip 1's squads, yours first
@@ -182,7 +183,7 @@ func _record(res: String) -> void:
 func _start(arch: String, kin: String, mobs := false) -> void:
 	Save.d["name"] = HeroTitle.base_name(arch)
 	var o := {"teams": 2, "squad": 3, "total": 1, "tier": 1, "seed": SEED, "length": 1e9, "no_drop": true,
-		"raid": "clear", "blight": false, "sim_keep": true, "demo_kin": kin, "demo_kin_lv": "8:95"}
+		"raid": raid, "blight": false, "sim_keep": true, "demo_kin": kin, "demo_kin_lv": "8:95"}
 	o.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
 	m = Match.new()
 	main.add_child(m)
