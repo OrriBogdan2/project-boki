@@ -180,8 +180,9 @@ func _ready_up(m: Match) -> void:
 	var k := hunter.ak
 	for i in QUIET_MAX:
 		# (a shot still out counts: a slow one, like Grimble's hook, would deny the next press)
+		# (a move's committed recovery: Vex's E and X; a kit's own cadence: Neve's burst pause would hold the next tap)
 		var busy := k.e_t > 0.0 or k.r_t > 0.0 or not k.fuse.is_empty() or k.rmb_down or k.ult_running() \
-				or _last_shot() >= 0 or k.commit_left() > 0.0      # (a move's committed recovery: Vex's E and X)
+				or _last_shot() >= 0 or k.commit_left() > 0.0 or k.fire_wait() > 0.0
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
@@ -402,9 +403,7 @@ const LAND_WAYS := {"hop": [6.8, false], "fall": [12.0, false], "glide": [2.5, t
 const LAND_AT := {0: "on the touchdown step of", 1: "on the first step after", 7: "in the absorb of"}
 const LAND_WATCH := 30          # steps a press has to act in
 ## Landing rows open at this merge ("<hero>:<press>:<way>:<steps in>" -> what); each fix removes its entry.
-const LAND_OPEN := {
-	"rimewright:lmb:fall:7": "never goes off 0.1 s into a fall's absorb (docs/DEBT.md)",
-}
+const LAND_OPEN := {}
 
 ## A dash and a jump (in the first slot's match) and the slot, pressed as he lands and in the absorb after it, act:
 ## a landing's absorb is the model's alone, never the keys'.
