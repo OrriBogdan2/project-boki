@@ -11,7 +11,7 @@ extends RefCounted
 
 const MAX_STEP_M := 0.15   # m: the root's biggest one-frame step, against your spot on the ground (not your run)
 const MAX_STEP_W := 0.5    # the curl pose weight's biggest one-frame step
-const CAM_OFF := Vector3(-4.5, 4.0, -6.5)   # m: the film's camera from between you and your Boki
+const CAM_OFF := Vector3(-2.2, 2.2, -3.4)   # m: the film's camera from between you and your Boki
 const MAX_FRAMES := 400   # steps: a glide that never lands stops the dump here
 const DEFAULT := ["pebbit", "goliathite"]   # two big forms: the lightest (1.4) and a heaviest (2.0)
 
@@ -177,7 +177,7 @@ func _dump(main: Node, id: String) -> void:
 
 ## A frame from a fixed spot behind and beside your run, high over the grass, on you and your Boki.
 func _grab(P: Hunter, k: Kin, path: String) -> void:
-	var at := (P.model.global_position + Vector3(0, 1.0, 0)).lerp(k.global_position, 0.5)
+	var at := (P.model.global_position + Vector3(0, 1.0, 0)).lerp(k.global_position, 0.7)
 	cam.global_position = at + CAM_OFF
 	cam.look_at(at)
 	await RenderingServer.frame_post_draw
