@@ -24,6 +24,9 @@ extends RefCounted
 ##  12. the garden whistle (base_whistle.gd): a tap is the short two-note whistle, a hold adds the longer rising one;
 ##      the called Boki answers once in its own voice: happy when trusting and glad, unsure when lukewarm, a huff
 ##      when sulky, nothing while it sleeps
+##  12. Boki moments in BaseLife: a snack from the pantry plays boki_eat once; a nap plays boki_sleep once, as it
+##      lies down (after its walk away from a rival), and nothing more while it sleeps; three lying down 0.1 s
+##      apart breathe once (Sfx.MIN_GAP)
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build
@@ -208,6 +211,7 @@ func _games() -> void:
 	_chimes(home)
 	GardenSfx.heard.clear()
 	_whistle(home)
+	_life(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -480,3 +484,64 @@ func _whistle(home) -> void:
 		ok(_total("kin_") == 0 and _total("garden_sulk_") == 0, "whistle: a sleeping Boki (joy %.0f) says nothing (%s)"
 				% [joy, GardenSfx.heard])
 	home.kins[0]["nap_t"] = 0.0
+## 1 when `sname` started since the last ask, else 0 (clears Sfx's own last start, so the next one counts).
+func _started(sname: String) -> int:
+	var n := 1 if Sfx.last_played.has(sname) else 0
+	Sfx.last_played.erase(sname)
+	Sfx.recent.erase(sname)
+	return n
+
+## Wakes every Boki into Roam, so none lies down beside another instead of where it is.
+func _wake_all(home) -> void:
+	for k in home.kins:
+		k["nap_t"] = 0.0
+		home.life.machine(k).go(BaseLife.S.ROAM, "check")
+
+## HomeVoice's gaps cleared and the listener on `k`: only Sfx's own MIN_GAP stands between its cues.
+func _hear(k: Dictionary) -> void:
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	Sfx.listener = k["pos"]
+
+## Synchronous throughout (OS.delay_msec for the real-time gaps), so no frame lets BaseLife move on its own.
+func _life(home) -> void:
+	var life: BaseLife = home.life
+	_wake_all(home)
+	var k: Dictionary = home.kins[0]
+	var rec: Dictionary = k["rec"]
+	for f in SnackPatch.snacks(Save.d):
+		Save.d["crops" if Data.CROPS.has(f) else "items"][f] = 1
+	rec["needs"]["food"] = 30.0
+	_hear(k)
+	_started("boki_eat")
+	k["life_eat"] = {"from": "pantry", "food": BaseFeed.pantry(rec), "at": k["pos"]}
+	BaseFeed.tick(home, k, 0.0)
+	var eats := _started("boki_eat")
+	BaseFeed.tick(home, k, 0.1)
+	eats += _started("boki_eat")
+	ok(Care.need(rec, "food") > 30.0 and eats == 1, "life: a snack from the pantry plays boki_eat once (%d)" % eats)
+	var unheld: Array = home.kins.filter(func(kk): return not BaseLife._taken(kk))      # (not held by a game's result)
+	ok(not unheld.is_empty(), "life: a Boki is free to nap")
+	if unheld.is_empty():
+		return
+	var sleeper: Dictionary = unheld[0]
+	_hear(sleeper)
+	_started("boki_sleep")
+	life._nap(sleeper, "tired")
+	var naps := _started("boki_sleep")
+	var walk := maxf(float(life.R["spot_walk"]), BaseLife.PILE_WALK) + 3.0     # s: the walk to a nap spot or a pile
+	for i in int(walk / 0.1):
+		_hear(sleeper)
+		life._tick(sleeper, 0.1)
+		naps += _started("boki_sleep")
+	ok(life.machine(sleeper).is_in(BaseLife.S.NAP) and float(sleeper["nap_t"]) > 0.0 and naps == 1,
+			"life: a nap plays boki_sleep once as it lies down, nothing more while it sleeps (%d)" % naps)
+	OS.delay_msec(500)
+	var starts := {}
+	for kk in home.kins:
+		_hear(kk)
+		life._lie_down(kk)
+		starts[int(Sfx.last_played.get("boki_sleep", -1))] = true
+		OS.delay_msec(100)
+	ok(starts.size() == 1 and not starts.has(-1),
+			"life: three lying down 0.1 s apart breathe once (%s)" % [starts.keys()])
