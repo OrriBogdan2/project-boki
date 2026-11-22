@@ -149,7 +149,23 @@ func _breah() -> void:
 	var lane_at := {}
 	var k_at := [0.0, 0.0]
 	P.inp["fire"] = true
-	step(m, 0.5, func(): P.inp["fire"] = true)
+	# PARITY (breah.md 0118, the gauntlet is cocked on the hold's first frame): the wind-up pose comes HOLD_POSE_T into
+	# the hold, before the 0.28 s tap window, while the lane and the charge still wait for it
+	var wind_at := [-1.0]
+	var lane_early := [false]
+	var held_t := [0.0]
+	step(m, 0.27, func():
+		P.inp["fire"] = true
+		held_t[0] += DT
+		if wind_at[0] < 0.0 and K.anim_id == "breah_wind": wind_at[0] = held_t[0]
+		if AimKit.shown(P, "punch"): lane_early[0] = true
+	)
+	ok(
+		"lmb hold: the wind-up shows from HOLD_POSE_T, before the tap window, the lane after it",
+		wind_at[0] >= ArchKit.HOLD_POSE_T - 0.001 and wind_at[0] < ArchKit.HOLD_POSE_T + 2.5 * DT and not lane_early[0],
+		"wind at %.3f s lane early %s" % [wind_at[0], lane_early[0]]
+	)
+	step(m, 0.23, func(): P.inp["fire"] = true)
 	k_at[0] = K.punch_k()
 	lane_at = AimKit.entry(P, "punch")
 	var ret := AimKit.reticle(P)
