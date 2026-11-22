@@ -103,6 +103,10 @@ func _dump(main: Node, id: String) -> void:
 	var k: Kin = P.kin
 	ok(k.big() and k.beside, "%s: big (mass %.1f), guarding at your side before the jump" % [id, k.ks.mass])
 	var body: Node3D = k.model.get_node("Body")
+	# the Hero clips' sync stepped with the sim, not by the wall clock while a frame is grabbed (as --glide-shots)
+	var sync := P.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+	if sync:
+		sync.set_process(false)
 	var last := Vector3.INF
 	var last_w := 0.0
 	var top := {"m": 0.0, "mf": 0, "w": 0.0, "wf": 0, "on": -1, "off": -1}
@@ -118,6 +122,8 @@ func _dump(main: Node, id: String) -> void:
 			P.do_jump()
 		m.step(Match.DT)
 		P.render(Match.DT, 1.0)
+		if sync:
+			sync._process(Match.DT)
 		if snap:
 			k.curl = 1.0 if k.state == "shoulder" and not k.beside else 0.0
 		k.render(Match.DT, 1.0)
