@@ -450,7 +450,7 @@ func _tick_skins(delta: float) -> void:
 				"spear": spin.rotate_z(delta * 6.0)
 				_: spin.rotate_z(delta * 3.0)
 
-func _tick_timed(e2: Dictionary, u: float, delta: float) -> void:
+func _tick_timed(e2: Dictionary, u: float, _delta: float) -> void:
 	var n2: Node3D = e2["n"]
 	match String(e2["kind"]):
 		"column":
