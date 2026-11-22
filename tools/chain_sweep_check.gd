@@ -10,49 +10,58 @@ extends "res://tools/dash_flow_check.gd"
 
 const HEROES := {"light": "archer", "medium": "gunslinger", "heavy": "bulwark"}
 const ACTIONS := ["dash", "jump", "glide", "wall_kick", "mantle", "lmb", "e"]
-const WATCH_NOW := 2            # steps: "the next step" (read the step it is made, the move shows within 2)
-const BUFFER_S := 1.0           # s: a buffered press starts within this of the press
-const SKY := 60.0               # m above the ground a rocket free fall starts
-const WALL_AT := 3              # tiles east of home the carved wall's face stands
-const WALL_RISE := 2            # terraces (1.6 m) the carved wall is
-const AT_WALL := 0.12           # m the wall pose stands off the face
-const OPEN_TRIES := 60          # steps a glider that a cast keeps shut gets to open
-const AIR_Y := 7.0              # m a plain air state starts above the ground
-const WALL_Y := 1.0             # m a wall pose in the air starts above the ground: under the lip
-const FIELDS := {"ice": "ice", "deep_water": "deep_water"}      # state -> terrain hazard kind
-const PLAIN_KIN := "cindle"     # venom: counters none of the hazards
+const WATCH_NOW := 2  # steps: "the next step" (read the step it is made, the move shows within 2)
+const BUFFER_S := 1.0  # s: a buffered press starts within this of the press
+const SKY := 60.0  # m above the ground a rocket free fall starts
+const WALL_AT := 3  # tiles east of home the carved wall's face stands
+const WALL_RISE := 2  # terraces (1.6 m) the carved wall is
+const AT_WALL := 0.12  # m the wall pose stands off the face
+const OPEN_TRIES := 60  # steps a glider that a cast keeps shut gets to open
+const AIR_Y := 7.0  # m a plain air state starts above the ground
+const WALL_Y := 1.0  # m a wall pose in the air starts above the ground: under the lip
+const FIELDS := {"ice": "ice", "deep_water": "deep_water"}  # state -> terrain hazard kind
+const PLAIN_KIN := "cindle"  # venom: counters none of the hazards
 
 ## Where a press is refused by a documented rule: "state/action" -> the rule. Everything else must start.
 const REFUSE := {
 	"ground/glide": "no glider off the ground (Hunter.can_glide); Space is the jump",
-	"ice/glide": "no glider off the ground", "deep_water/glide": "no glider off the ground",
+	"ice/glide": "no glider off the ground",
+	"deep_water/glide": "no glider off the ground",
 	"dash_ground/glide": "no glider off the ground",
-	"glide/jump": "already gliding: the press has nothing to open", "glide/glide": "already gliding",
-	"glide_ring/jump": "already gliding", "glide_ring/glide": "already gliding",
+	"glide/jump": "already gliding: the press has nothing to open",
+	"glide/glide": "already gliding",
+	"glide_ring/jump": "already gliding",
+	"glide_ring/glide": "already gliding",
 	"rocket_fall/wall_kick": "a dropping hunter never kicks (WallMoves.try_kick): Space pulls the glider",
 	"rocket_fall/dash": "no dash, attack or ability while dropping (ArchKit.locked, the drop's own rules)",
 	"rocket_fall/lmb": "no attack while dropping (ArchKit.locked)",
 	"rocket_fall/e": "no ability while dropping (ArchKit.locked)",
-	"glide/lmb": "no attack with the glider open (Hunter.can_fire)", "glide_ring/lmb": "no attack with the glider open",
+	"glide/lmb": "no attack with the glider open (Hunter.can_fire)",
+	"glide_ring/lmb": "no attack with the glider open",
 }
 ## Wall actions need a wall within reach: these states have none (a lane or the sky) or are on the ground.
 const NO_WALL := {
 	"ground/wall_kick": "a wall kick is an air move; on the ground Space is a jump",
-	"ice/wall_kick": "air move", "deep_water/wall_kick": "air move", "dash_ground/wall_kick": "air move",
-	"glide_ring/wall_kick": "no wall in an air lane", "glide_ring/mantle": "no wall in an air lane",
+	"ice/wall_kick": "air move",
+	"deep_water/wall_kick": "air move",
+	"dash_ground/wall_kick": "air move",
+	"glide_ring/wall_kick": "no wall in an air lane",
+	"glide_ring/mantle": "no wall in an air lane",
 	"rocket_fall/mantle": "no wall in the sky",
 }
 
 var mm: Match
-var face := Vector2.ZERO        # the carved wall's face (world x, z) in the fixture now under test
-var low_y := 0.0                # ground height under the wall's foot
-var results := {}               # "state/action/weight" -> "ok" | "FAIL" | "refused" | "n/a"
+var face := Vector2.ZERO  # the carved wall's face (world x, z) in the fixture now under test
+var low_y := 0.0  # ground height under the wall's foot
+var results := {}  # "state/action/weight" -> "ok" | "FAIL" | "refused" | "n/a"
 var note_n := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 		print("CHAIN FAIL %s" % what)
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -71,7 +80,7 @@ func run(main: Node) -> void:
 		await main.get_tree().process_frame
 		mm = _crown(main, hero)
 		var wet_states := ["ice", "deep_water"]
-		if not mm.air_rings.is_empty():     # (a map with no glide ring has no ring state to sweep)
+		if not mm.air_rings.is_empty():  # (a map with no glide ring has no ring state to sweep)
 			wet_states.append("glide_ring")
 		for st in wet_states:
 			_state_row(weight, hero, st)
@@ -84,6 +93,7 @@ func run(main: Node) -> void:
 	print("CHAIN DONE, failures: %d, refused by a documented rule: %d, n/a: %d" % [bad, refused, skipped])
 	main.get_tree().quit()
 
+
 ## --chain-sweep-check=<hero>,<hero> runs only those heroes.
 func _only() -> PackedStringArray:
 	for arg in OS.get_cmdline_user_args():
@@ -91,13 +101,27 @@ func _only() -> PackedStringArray:
 			return arg.get_slice("=", 1).split(",")
 	return PackedStringArray()
 
+
 # ------------------------------------------------------------------ fixtures
 ## The Hollow Crown (seed 5, the hazard check's), the hunter's Boki a plain one, god on.
 func _crown(main: Node, hero: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5, "no_drop": true, "demo_kin": PLAIN_KIN,
-		"cls": Arch.weight(hero), "arch": hero, "weapon": Arch.signature(hero), "god": true})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 5,
+			"no_drop": true,
+			"demo_kin": PLAIN_KIN,
+			"cls": Arch.weight(hero),
+			"arch": hero,
+			"weapon": Arch.signature(hero),
+			"god": true
+		}
+	)
 	m.set_process(false)
 	_clear_mobs(m)
 	hunter = m.player
@@ -109,6 +133,7 @@ func _crown(main: Node, hero: String) -> Match:
 			other.ctrl = "idle"
 			other.teleport(hunter.pos + Vector3(60, 0, 60))
 	return m
+
 
 ## A WALL_RISE terrace block WALL_AT tiles east of `home`, level ground round it: the wall the wall actions use.
 func _carve(m: Match, home: Vector3) -> Vector2:
@@ -128,6 +153,7 @@ func _carve(m: Match, home: Vector3) -> Vector2:
 	low_y = lv * World.LEVEL
 	return Vector2(x0 + float(WALL_AT), z0 + 0.5)
 
+
 ## The middle tile of the first hazard area of `kind`.
 func _field_home(kind: String) -> Vector3:
 	var tz := TerrainHazards.of(mm)
@@ -142,6 +168,7 @@ func _field_home(kind: String) -> Vector3:
 				best = q
 		return Vector3(best.x + 0.5, float(area["y"]), best.y + 0.5)
 	return Vector3.INF
+
 
 # ------------------------------------------------------------------ the sweep
 func _state_row(weight: String, hero: String, st: String) -> void:
@@ -179,6 +206,7 @@ func _state_row(weight: String, hero: String, st: String) -> void:
 			ok(false, label + ": the press was dropped (nothing started)")
 			results[key + "/" + weight] = "FAIL"
 
+
 ## On plain ground, with no move in progress, the action goes off here at all (some need a target, or ground).
 func _control(action: String) -> bool:
 	if action in ["wall_kick", "mantle", "glide"]:
@@ -197,14 +225,20 @@ func _control(action: String) -> bool:
 	set_meta("home", saved)
 	return false
 
+
 ## One trial: establish the state, press the action on the next step, watch BUFFER_S. Steps from the press to
 ## the start (0 = the same step's result), or -1 when nothing started.
 func _chain_trial(st: String, action: String) -> int:
 	_ready_up(mm)
 	var wall: bool = action in ["wall_kick", "mantle"]
 	if not _enter(st, wall):
-		ok(false, "%s %s: could not enter the state for %s (gliding %s, grounded %s, fuel %.2f, glide_cd %.2f)" % [
-			hunter.arch, st, action, hunter.gliding, hunter.grounded, hunter.glide_fuel, hunter.glide_cd])
+		ok(
+			false,
+			(
+				"%s %s: could not enter the state for %s (gliding %s, grounded %s, fuel %.2f, glide_cd %.2f)"
+				% [hunter.arch, st, action, hunter.gliding, hunter.grounded, hunter.glide_fuel, hunter.glide_cd]
+			)
+		)
 		return -2
 	var before := _snap()
 	var dash0 := hunter.ak.dash_press_at
@@ -217,12 +251,14 @@ func _chain_trial(st: String, action: String) -> int:
 			return i
 	return -1
 
+
 func _release() -> void:
 	for k in ["dash", "jump", "fire", "sig", "sec", "gear1", "glide_btn"]:
 		hunter.inp[k] = false
 	if hunter.gliding or hunter.dropping:
 		return
 	hunter.inp["glide"] = false
+
 
 func _press_action(action: String, st: String) -> void:
 	hunter.inp["glide_press_only"] = true
@@ -245,6 +281,7 @@ func _press_action(action: String, st: String) -> void:
 	if st == "rocket_fall" or action in ["wall_kick", "mantle"]:
 		hunter.inp["aim"] = hunter.pos + Vector3(1, 0.9, 0)
 
+
 ## What "the move started" means for each action, in the state's terms.
 func _started(action: String, st: String, before: Dictionary, dash0: float, vy0 := 0.0) -> bool:
 	match action:
@@ -259,15 +296,17 @@ func _started(action: String, st: String, before: Dictionary, dash0: float, vy0 
 		"wall_kick":
 			return WallMoves.scuffs > int(before.get("scuffs", 0)) or hunter.vel.y > vy0 + 1.0
 		"mantle":
-			return hunter.mantling() or hunter.pos.y > low_y + WALL_RISE * World.LEVEL - 0.1     # or up on the top
+			return hunter.mantling() or hunter.pos.y > low_y + WALL_RISE * World.LEVEL - 0.1  # or up on the top
 		_:
 			return _went_off(before, action)
+
 
 func _snap() -> Dictionary:
 	var s := super._snap()
 	s["jump_at"] = hunter.jump_at
 	s["scuffs"] = WallMoves.scuffs
 	return s
+
 
 # ------------------------------------------------------------------ states
 ## Puts the hunter in `st` (at the wall's foot for a wall action); true when the state holds this step.
@@ -314,17 +353,20 @@ func _enter(st: String, wall: bool) -> bool:
 			return _ring()
 	return false
 
+
 ## Keys held through the state: into the wall for a wall pose, none otherwise.
 func _keys_in(wall: bool) -> void:
 	hunter.inp["move"] = Vector2(1, 0) if wall else Vector2.ZERO
 	hunter.inp["glide_press_only"] = true
+
 
 func _rise(height: float) -> void:
 	hunter.pos += Vector3(0, height, 0)
 	hunter.grounded = false
 	hunter.coyote = 0.0
 	for i in 2:
-		mm.step(Match.DT)      # the locomotion state leaves GROUNDED (a glide from it is refused)
+		mm.step(Match.DT)  # the locomotion state leaves GROUNDED (a glide from it is refused)
+
 
 ## Fresh Space presses up in the air (kept held between): the glider opens, once a cast still winding down
 ## (a Longneedle channel) lets it.
@@ -336,6 +378,7 @@ func _open_glider() -> void:
 		if hunter.gliding:
 			break
 	hunter.inp["jump"] = false
+
 
 ## Flies into the first glide ring of the map and returns true the step after it took the hunter.
 func _ring() -> bool:

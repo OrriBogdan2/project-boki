@@ -704,7 +704,7 @@ func _quake(at: Vector3, fell: float) -> void:
 ## barge arrives, the smash rides the pounce and drops from where it ends, the fan follows him.
 func on_dash(use_ex: bool) -> bool:
 	if m.time < next_barge:
-		# held, never dropped: the next shove goes the step the gap ends (the shared window alone is shorter than the gap)
+		# held, never dropped: the next shove goes the step the gap ends (the shared window alone is shorter)
 		h.dash_buf = maxf(Loco.press_buffer, next_barge - m.time + CHAIN_GRACE)
 		return true
 	var dd := dash_def()

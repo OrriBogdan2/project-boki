@@ -28,7 +28,6 @@ var out_events: Array = []
 var sent_vel := Vector3.ZERO  # your velocity in the last snapshot
 var sent_move_at := -9.0  # the start time of your kit move in the last snapshot
 var send_t := 0.0
-var _kin_form := 0  # my Boki's wisp/shrink form last frame (kin_form_changed)
 var host_send_t := 0.0
 var seen := {}  # nid -> last time we heard about it
 var _msg_cb = null
@@ -40,6 +39,7 @@ var token := ""  # Discord access token from the launcher
 var deny_reason := ""  # why the server refused us, for the lobby to show
 var mm: NetMatchmaker = null  # matchmaker HTTP (--matchmaker=host:port, else the --server= host on 8080)
 var party: Party = null  # queueing alone or with friends through the matchmaker
+var _kin_form := 0  # my Boki's wisp/shrink form last frame (kin_form_changed)
 
 
 func _ready() -> void:

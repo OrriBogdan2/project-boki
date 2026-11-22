@@ -3,21 +3,36 @@ extends RefCounted
 ## every type walks along its own lane at the match camera so its trail (KinTypeTrail) can be read by eye:
 ## <dir>/trail_<n>.png. Then each lane's Boki is captured (Capture pop in its type colour): <dir>/pop_0.png.
 
-const SPEED := 2.0            # m/s the Boki walk
-const LANE := 2.2             # m between lanes
-const LANES := 5              # lanes per column
-const COLUMN := 9.0           # m between columns
-const SHOTS := [0.5, 1.0, 2.0]    # s of walking at each trail shot
+const SPEED := 2.0  # m/s the Boki walk
+const LANE := 2.2  # m between lanes
+const LANES := 5  # lanes per column
+const COLUMN := 9.0  # m between columns
+const SHOTS := [0.5, 1.0, 2.0]  # s of walking at each trail shot
 ## One species per type that has any (water, normal and dragon have none yet).
-const SPECIES := {"spore": "burrlet", "flying": "squalltross", "steel": "tuatrune", "poison": "velvorm",
-	"sound": "zapple", "rock": "basaltoad", "dark": "caecilith", "psychic": "casquebill", "fire": "cindowary",
-	"ice": "floenatee", "grass": "heatherhorn", "bug": "hivara", "electric": "kestrike", "fairy": "moonloris",
-	"crystal": "nacrolin"}
+const SPECIES := {
+	"spore": "burrlet",
+	"flying": "squalltross",
+	"steel": "tuatrune",
+	"poison": "velvorm",
+	"sound": "zapple",
+	"rock": "basaltoad",
+	"dark": "caecilith",
+	"psychic": "casquebill",
+	"fire": "cindowary",
+	"ice": "floenatee",
+	"grass": "heatherhorn",
+	"bug": "hivara",
+	"electric": "kestrike",
+	"fairy": "moonloris",
+	"crystal": "nacrolin"
+}
+
 
 func run(main: Node) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	var m := Match.new()
@@ -25,11 +40,13 @@ func run(main: Node) -> void:
 	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
+	if fade != null:
+		await fade.reveal(0.01)
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
-	if m.hud: m.hud.visible = false
+	if m.hud:
+		m.hud.visible = false
 	m.player.ctrl = "idle"
 	var kins: Array[Kin] = []
 	var start: Vector3 = m.player.pos + Vector3(-COLUMN - 3.0, 0, -LANE * (LANES - 1) * 0.5)

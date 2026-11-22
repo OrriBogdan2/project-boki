@@ -10,8 +10,9 @@ extends RefCounted
 const FLAG := "hazard_"
 const LEAD := "%s keeps you safe: cross it."
 
+
 ## Says the line for `kind` if the player has not seen it. Returns whether it showed.
-static func say(m: Match, tz: TerrainHazards, kind: String) -> bool:
+static func say(m: Match, _tz: TerrainHazards, kind: String) -> bool:
 	var seen: Dictionary = Save.d["tutorial"]
 	if m.hud == null or m.opts.get("tutorial", false) or not Settings.get_v("tips") or seen.get(FLAG + kind, false):
 		return false
@@ -21,6 +22,7 @@ static func say(m: Match, tz: TerrainHazards, kind: String) -> bool:
 		line += " " + LEAD % _name(lead)
 	m._tip(FLAG + kind, line)
 	return true
+
 
 static func _name(k: Kin) -> String:
 	return String(k.rec.get("name", k.sp.get("name", "Your Boki")))

@@ -15,9 +15,10 @@ extends RefCounted
 const DT := 1.0 / 60.0
 
 var bad := 0
-var _was_on := false
 var m: Match
 var main: Node
+
+var _was_on := false
 var _spot: Vector3  # each hero cycle starts here: the drift rows walk the Wisp 1.4 m a cycle, toward the abyss
 
 
@@ -555,11 +556,15 @@ func _summon() -> void:
 		"summon: a rebindable Summon action with a key cap (%s)" % Settings.key_cap("summon")
 	)
 	var radial0: int = m.fx.radial
-	ok(KinSummon.press(p) and not k.wisp and k.state == "active" and k.model.name != "BokiWisp",
-		"summon: the wisp bursts into the full Boki")
+	ok(
+		KinSummon.press(p) and not k.wisp and k.state == "active" and k.model.name != "BokiWisp",
+		"summon: the wisp bursts into the full Boki"
+	)
 	var pop := k.get_node_or_null(KinSummon.POP) as BokiWispPop
-	ok(pop != null and pop.out and not k.model.visible and m.fx.radial == radial0,
-		"...as a BokiWispPop burst, the walking model hidden, no burst or ring of sparks")
+	ok(
+		pop != null and pop.out and not k.model.visible and m.fx.radial == radial0,
+		"...as a BokiWispPop burst, the walking model hidden, no burst or ring of sparks"
+	)
 	pop._process(BokiWispPop.DURATION + 0.01)
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the walking Boki takes over")
 	var cs := {}
@@ -606,8 +611,10 @@ func _summon() -> void:
 	s.burst(s.dur)
 	p.downed = false
 	KinSummon.anim_state(p, cs)
-	ok(not k.wisp and float(cs["call_t"]) > 0.05,
-		"summon: a burst while the Hunter is down (the guardian) makes no gesture")
+	ok(
+		not k.wisp and float(cs["call_t"]) > 0.05,
+		"summon: a burst while the Hunter is down (the guardian) makes no gesture"
+	)
 	s.end()
 	_frames(KinSummon.SHRINK_S + 0.05)
 	s.cd = 0.0

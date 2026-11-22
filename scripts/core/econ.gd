@@ -262,7 +262,7 @@ static func put_in(f: Dictionary, key: String, n := 1) -> int:
 ## Food a hopper may take on its own, most plentiful first.
 static func _auto_food() -> String:
 	var best := ""; var bn := 0
-	for key in Care.FOODS.keys() + Data.CROPS.keys():
+	for key in Care.foods_v.keys() + Data.CROPS.keys():
 		if PANTRY_KEEP.has(key): continue
 		if pantry(key) > bn: bn = pantry(key); best = key
 	return best

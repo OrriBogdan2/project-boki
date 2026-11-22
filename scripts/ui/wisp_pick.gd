@@ -5,10 +5,11 @@ extends RefCounted
 ## wears it from now on. The worn one is marked; one you haven't earned is greyed and says how to get it.
 ## The preview is the real Wisp body in your colour, so every look keeps the round "person" outline.
 
-const PREVIEW := Vector2i(72, 72)     # px, one preview
-const CAM_BACK := 0.9                 # m, the camera's distance from the Wisp (frames the body and head)
-const BOB := 0.04                     # m, the preview's idle bob (the in-match bob is the look's own)
-const BOB_SECONDS := 1.6              # s, one bob
+const PREVIEW := Vector2i(72, 72)  # px, one preview
+const CAM_BACK := 0.9  # m, the camera's distance from the Wisp (frames the body and head)
+const BOB := 0.04  # m, the preview's idle bob (the in-match bob is the look's own)
+const BOB_SECONDS := 1.6  # s, one bob
+
 
 ## The picker: a title and one card per look. `on_change` runs after a new Wisp is worn (and saved).
 static func make(on_change: Callable) -> Control:
@@ -22,6 +23,7 @@ static func make(on_change: Callable) -> Control:
 	for id in WispLook.rules()["looks"]:
 		flow.add_child(card(String(id), on_change))
 	return v
+
 
 ## One look: preview over a choice button. The worn one is chosen, a locked one disabled and greyed.
 static func card(id: String, on_change: Callable) -> Control:
@@ -39,12 +41,14 @@ static func card(id: String, on_change: Callable) -> Control:
 		c.add_child(UI.label(WispLook.how(id), UI.T_SMALL, UI.MUTED))
 	return c
 
+
 static func _wear(id: String, on_change: Callable) -> void:
 	if not WispLook.equip(id):
 		return
 	Save.save_game()
 	Sfx.play("scan_pop", null, -10.0, 0.0, 1.2)
 	on_change.call()
+
 
 ## The Wisp body of a look in its own little world, bobbing; the rim is your colour.
 static func preview(look: Dictionary) -> SubViewportContainer:
@@ -65,6 +69,7 @@ static func preview(look: Dictionary) -> SubViewportContainer:
 	vp.add_child(cam)
 	wisp.tree_entered.connect(func(): _bob(wisp), CONNECT_ONE_SHOT)
 	return c
+
 
 static func _bob(wisp: Node3D) -> void:
 	var bob := wisp.create_tween().set_loops()

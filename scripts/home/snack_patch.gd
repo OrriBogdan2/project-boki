@@ -80,7 +80,7 @@ static func harvest(d: Dictionary, now: float) -> Array:
 		shelve(d, String(s))
 	return got
 
-## Puts n of a snack on the pantry shelf: crops (Data.CROPS) and prepared foods (Care.FOODS) have their own stores.
+## Puts n of a snack on the pantry shelf: crops (Data.CROPS) and prepared foods (Care.foods_v) have their own stores.
 static func shelve(d: Dictionary, snack: String, n := 1) -> void:
 	var store: Dictionary = d["crops"] if Data.CROPS.has(snack) else d["items"]
 	store[snack] = int(store.get(snack, 0)) + n

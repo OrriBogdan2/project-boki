@@ -4,16 +4,18 @@ extends RefCounted
 ## safely") on the home cards: the Boki card, its Field Book page and the expedition portal's carry pick.
 ## Read from content/rules/terrain_hazards.json (each kind's counter themes and kin); nothing is copied.
 
+
 ## The hazard kinds `spk` counters: its theme or its species is on the kind's counter list.
 static func kinds_of(spk: String) -> Array:
 	var theme := String(Data.KIN.get(spk, {}).get("theme", ""))
 	var out := []
 	var kinds: Dictionary = TerrainHazards.rules()["kinds"]
 	for kind in kinds:
-		var C: Dictionary = kinds[kind].get("counter", {})
-		if theme in C.get("themes", []) or spk in C.get("kin", []):
+		var c: Dictionary = kinds[kind].get("counter", {})
+		if theme in c.get("themes", []) or spk in c.get("kin", []):
 			out.append(kind)
 	return out
+
 
 ## "Walks the lava safely" ("Walks the lava and the ice safely"); empty when it counters nothing.
 static func line(spk: String) -> String:
@@ -21,6 +23,7 @@ static func line(spk: String) -> String:
 	for kind in kinds_of(spk):
 		nouns.append(String(TerrainHazards.kind_def(kind).get("noun", kind)))
 	return "" if nouns.is_empty() else "Walks %s safely" % " and ".join(nouns)
+
 
 ## The hazards' icons and the line in one row; adds nothing for a Boki that counters nothing.
 static func add_row(parent: Control, spk: String, px := 18.0, font := 12) -> void:

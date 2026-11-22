@@ -5,20 +5,23 @@ extends RefCounted
 
 const SETTLE_FRAMES := 600
 const COLS := 3
-const MAX_FRAMES := 2400          # frames; the longest wait for one game
-const ZOOM := 0.8                 # the home camera's wheel, all the way in
-const FADE_FRAMES := 90           # frames for the scene fade to clear
-const ASPECT := 0.5               # each frame is px wide and px * this tall
+const MAX_FRAMES := 2400  # frames; the longest wait for one game
+const ZOOM := 0.8  # the home camera's wheel, all the way in
+const FADE_FRAMES := 90  # frames for the scene fade to clear
+const ASPECT := 0.5  # each frame is px wide and px * this tall
 
 var main: Node
 var out := ""
 var px := 480
 
+
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): out = String(a).substr(12)
-		if String(a).begins_with("--px="): px = int(String(a).substr(5))
+		if String(a).begins_with("--shots-dir="):
+			out = String(a).substr(12)
+		if String(a).begins_with("--px="):
+			px = int(String(a).substr(5))
 	DirAccess.make_dir_recursive_absolute(out)
 	Save.no_write = true
 	var d := Save.fresh()
@@ -61,6 +64,7 @@ func run(m: Node) -> void:
 	print("GARDEN_CUE_SHOTS_DONE")
 	main.get_tree().quit()
 
+
 ## One frame of the live view, centred on `at` and showing `span` metres either side, into column `col`.
 func _grab(home, sheet: Image, col: int, at: Vector3, span: float) -> void:
 	home.cam.snap(at)
@@ -78,8 +82,10 @@ func _grab(home, sheet: Image, col: int, at: Vector3, span: float) -> void:
 	crop.convert(Image.FORMAT_RGBA8)
 	sheet.blit_rect(crop, Rect2i(0, 0, px, int(px * ASPECT)), Vector2i(col * px, 0))
 
+
 func _sheet() -> Image:
 	return Image.create(px * COLS, int(px * ASPECT), false, Image.FORMAT_RGBA8)
+
 
 ## Waits frames until `ready` is true (false when the game ends first or the wait runs out).
 func _until(ready: Callable, alive: Callable) -> bool:
@@ -90,6 +96,7 @@ func _until(ready: Callable, alive: Callable) -> bool:
 		await main.get_tree().process_frame
 		f += 1
 	return false
+
 
 func _dash(home) -> void:
 	var race: BaseRace = home.hrace
@@ -109,6 +116,7 @@ func _dash(home) -> void:
 	print("GARDEN_DASH lit=%d" % (race.cue.lit if race.cue != null else -1))
 	_stop(home, race)
 
+
 func _shove(home) -> void:
 	var sh: BaseShove = home.hshove
 	sh.use()
@@ -125,13 +133,14 @@ func _shove(home) -> void:
 	sheet.save_png(out.path_join("shove.png"))
 	_stop(home, sh)
 
+
 func _seek(home) -> void:
 	var sk: BaseSeek = home.hseek
 	sk.use()
 	home.ppos = home.kins[0]["pos"] + Vector3(7, 0, 0)
 	sk.use()
 	var sheet := _sheet()
-	var alive := func(): return sk.state == BaseSeek.S.HUNT
+	var _alive := func(): return sk.state == BaseSeek.S.HUNT
 	for col in COLS:
 		for f in 45:
 			await main.get_tree().process_frame
@@ -142,6 +151,7 @@ func _seek(home) -> void:
 	sheet.save_png(out.path_join("seek.png"))
 	print("GARDEN_SEEK dots=%d" % (sk.cue.shown[0] if sk.cue != null else -1))
 	_stop(home, sk)
+
 
 func _volley(home) -> void:
 	var vb: BaseVolley = home.hvolley
@@ -163,6 +173,7 @@ func _volley(home) -> void:
 			await main.get_tree().process_frame
 	sheet.save_png(out.path_join("volley.png"))
 	_stop(home, vb)
+
 
 ## Calls the game off with the menu key and frees its Boki for the next one.
 func _stop(home, game) -> void:

@@ -10,10 +10,12 @@ var bad := 0
 var fm: FullMap
 var m: Match
 
+
 func ok(cond: bool, what: String) -> void:
 	print("MAPHOVER %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -32,6 +34,7 @@ func run(main: Node) -> void:
 	print("MAPHOVER CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _dwell() -> void:
 	var h := MapHover.new()
 	var t0 := 10000
@@ -42,10 +45,12 @@ func _dwell() -> void:
 	ok(not h.rest("exit b", t0 + ms + 10), "moving to another marker restarts the wait")
 	ok(not h.rest("", t0 + ms * 3), "the card goes when the cursor leaves the marker")
 
+
 func _pick_at(world: Vector3) -> Dictionary:
 	var h := MapHover.new()
 	h.pick(fm, fm.to_screen(world))
 	return h.hit
+
 
 func _exits() -> void:
 	var xs: Array = m.exits.list
@@ -76,16 +81,22 @@ func _exits() -> void:
 	ok(opening != open and open != closed and opening != closed, "closed, opening and open are three colours")
 	x["state"] = "open"
 
+
 func _kinds() -> void:
 	var seen := {}
 	var n := 0
 	var spots: Array = []
-	for sh in m.shrines: spots.append(["shrine", sh["pos"]])
-	for L in m.lairs.list: spots.append(["lair", L["c"]])
-	for cnd in m.spawn_plan.cands: spots.append(["spawn", cnd["pos"]])
+	for sh in m.shrines:
+		spots.append(["shrine", sh["pos"]])
+	for l in m.lairs.list:
+		spots.append(["lair", l["c"]])
+	for cnd in m.spawn_plan.cands:
+		spots.append(["spawn", cnd["pos"]])
 	for lb in m.world.labels:
-		if String(lb["kind"]) != "rail": spots.append(["place " + String(lb["kind"]), lb["pos"]])
-	for hs in fm.hud.train_map.halts(m.skytrain): spots.append(["halt", Vector3(hs["pos"].x, 0, hs["pos"].y)])
+		if String(lb["kind"]) != "rail":
+			spots.append(["place " + String(lb["kind"]), lb["pos"]])
+	for hs in fm.hud.train_map.halts(m.skytrain):
+		spots.append(["halt", Vector3(hs["pos"].x, 0, hs["pos"].y)])
 	spots.append(["you", m.player.pos])
 	for s in spots:
 		var pv := fm.to_screen(s[1])

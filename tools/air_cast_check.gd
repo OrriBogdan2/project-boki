@@ -11,26 +11,28 @@ extends RefCounted
 
 const FLOW := preload("res://tools/dash_flow_check.gd")
 const SLOTS := ["lmb", "rmb", "e", "x"]
-const RUN_UP := 30              # steps running forward before the jump (full run speed)
-const APEX_MAX := 60            # steps: the jump's top comes within this (JUMP_V / H_GRAV is about 28)
-const WINDOW_S := 0.4           # s after the press that is measured (the plain jump lands 0.46 s after its top)
-const LAND_WATCH := 60          # steps after the window: a press that waited goes off on the landing
-const KEEP_TOL := 0.15          # share of the plain jump's horizontal speed: within it is "keep"
-const ZERO_K := 0.15            # below this share of the plain jump's speed is "zero"
-const HOVER_M := 0.05           # m: height held within this is "hover"
-const RISE_M := 0.1             # m above the top is "rise"
-const FALL_M := 0.15            # m: ending within this of the plain jump's height is "fall"
-const LOOK := Vector3(0, 0.9, -8)   # aim: ahead, along the run
+const RUN_UP := 30  # steps running forward before the jump (full run speed)
+const APEX_MAX := 60  # steps: the jump's top comes within this (JUMP_V / H_GRAV is about 28)
+const WINDOW_S := 0.4  # s after the press that is measured (the plain jump lands 0.46 s after its top)
+const LAND_WATCH := 60  # steps after the window: a press that waited goes off on the landing
+const KEEP_TOL := 0.15  # share of the plain jump's horizontal speed: within it is "keep"
+const ZERO_K := 0.15  # below this share of the plain jump's speed is "zero"
+const HOVER_M := 0.05  # m: height held within this is "hover"
+const RISE_M := 0.1  # m above the top is "rise"
+const FALL_M := 0.15  # m: ending within this of the plain jump's height is "fall"
+const LOOK := Vector3(0, 0.9, -8)  # aim: ahead, along the run
 
 var bad := 0
 var flow = FLOW.new()
 var h: Hunter
-var only := []                  # --air-cast-check=<id>,<id>: just those heroes
+var only := []  # --air-cast-check=<id>,<id>: just those heroes
+
 
 func ok(cond: bool, what: String) -> void:
 	print("AIRCAST %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -55,6 +57,7 @@ func run(main: Node) -> void:
 	print("AIRCAST DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
+
 ## Runs forward, jumps, and at the top presses `slot` ("" for none), keys held forward throughout. t: per step
 ## after the press, [horizontal speed, height above the top]; cast: "air" (it went off in the window), "landing" (it
 ## went off on the landing: the press waited) or "no" (it never did: dropped).
@@ -72,7 +75,7 @@ func _trace(m: Match, slot: String) -> Dictionary:
 	var top := h.pos.y
 	var out := []
 	var before: Dictionary = flow._snap()
-	h.ak.anim_id = ""             # a wind-up with no cooldown yet shows as its clip
+	h.ak.anim_id = ""  # a wind-up with no cooldown yet shows as its clip
 	if slot != "":
 		flow._press(slot)
 	var went := slot == ""
@@ -82,10 +85,10 @@ func _trace(m: Match, slot: String) -> Dictionary:
 		m.step(Match.DT)
 		_let_go()
 		went = went or _went(before, slot)
-		var moved := Vector2(h.pos.x - was.x, h.pos.z - was.z).length()     # (a kit may move pos, not vel)
+		var moved := Vector2(h.pos.x - was.x, h.pos.z - was.z).length()  # (a kit may move pos, not vel)
 		out.append([moved / Match.DT, h.pos.y - top])
 		if h.grounded:
-			break                     # only the air counts: landed early is a drop
+			break  # only the air counts: landed early is a drop
 	h.inp["move"] = Vector2.ZERO
 	var cast := "air" if went else "no"
 	for i in LAND_WATCH:
@@ -94,17 +97,21 @@ func _trace(m: Match, slot: String) -> Dictionary:
 		m.step(Match.DT)
 	return {"t": out, "cast": cast}
 
+
 func _went(before: Dictionary, slot: String) -> bool:
 	return flow._went_off(before, slot) or h.ak.anim_id != ""
+
 
 func _let_go() -> void:
 	for key in ["fire", "sec", "sig"]:
 		h.inp[key] = false
 
+
 func _steps(m: Match, n: int) -> void:
 	for i in n:
 		h.inp["aim"] = h.pos + LOOK
 		m.step(Match.DT)
+
 
 ## The trace against the plain jump's: the horizontal share's range (a share must last two steps: a one-step snap of
 ## the position is not a push), the height at the end and its peak, and the plain jump's height then.
@@ -121,6 +128,7 @@ func _sums(t: Array, plain: Array) -> Dictionary:
 		out["lo"] = minf(out["lo"], pair.max())
 		out["hi"] = maxf(out["hi"], pair.min())
 	return out
+
 
 ## "h/v", the row's words (see the top of the file).
 func _classify(t: Array, plain: Array) -> String:
@@ -143,7 +151,10 @@ func _classify(t: Array, plain: Array) -> String:
 		vk = "drop"
 	return "%s/%s" % [hk, vk]
 
+
 func _info(t: Array, plain: Array) -> String:
 	var d := _sums(t, plain)
-	return "h %.2f-%.2fx of a plain jump, height %+.2f m (plain %+.2f, peak %+.2f)" % [
-		d["lo"], d["hi"], d["end"], d["plain"], d["top"]]
+	return (
+		"h %.2f-%.2fx of a plain jump, height %+.2f m (plain %+.2f, peak %+.2f)"
+		% [d["lo"], d["hi"], d["end"], d["plain"], d["top"]]
+	)

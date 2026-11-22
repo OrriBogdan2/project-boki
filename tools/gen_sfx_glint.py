@@ -1,13 +1,14 @@
 """Glint Fishing's sounds (scripts/home/glint_sfx.gd, docs/AUDIO.md), our own synthesis. Run from tools/.
 
-  glint_cast        a line whip: a fast airy swish with a thin rising whistle
-  glint_plop        the bobber landing: a low water drop under a small splash of noise
-  glint_water       loop, soft lapping water for the wait (Ambience bus, quiet and dull so the bite stands out)
-  glint_bite        the cue to press: a sharp bright double tick over a high, ringing tug; most of its
-                    energy sits at 2-6 kHz, where the garden beds have little
-  glint_reel        loop, a reel ratchet: even dry clicks, seamless
-  glint_catch_small / _medium / _large   the catch sting: one, two or three rising bells over a splash
+glint_cast        a line whip: a fast airy swish with a thin rising whistle
+glint_plop        the bobber landing: a low water drop under a small splash of noise
+glint_water       loop, soft lapping water for the wait (Ambience bus, quiet and dull so the bite stands out)
+glint_bite        the cue to press: a sharp bright double tick over a high, ringing tug; most of its
+                  energy sits at 2-6 kHz, where the garden beds have little
+glint_reel        loop, a reel ratchet: even dry clicks, seamless
+glint_catch_small / _medium / _large   the catch sting: one, two or three rising bells over a splash
 """
+
 import numpy as np
 import sfx_lib as S
 from sfx_lib import N, T, env, mix, at, lpf, bpf
@@ -30,7 +31,7 @@ def plop(i):
 
 
 def water():
-    d = 4.0                                  # whole cycles of the 0.5 Hz lap, so it loops seamlessly
+    d = 4.0  # whole cycles of the 0.5 Hz lap, so it loops seamlessly
     t = T(d)
     bed = lpf(S.noise(d), 700) * (0.55 + 0.45 * np.sin(2 * np.pi * 0.5 * t))
     glints = bpf(S.noise(d), 1500, 3500) * 0.12 * (0.5 + 0.5 * np.sin(2 * np.pi * 1.0 * t + 1.0)) ** 3
@@ -46,12 +47,12 @@ def bite(i):
 
 
 def reel():
-    d = 0.5                                  # four clicks a half second
+    d = 0.5  # four clicks a half second
     out = np.zeros(N(d))
     click = mix(S.click(0.006, 1800, 5500, 0.004), lpf(S.noise(0.02), 900) * env(N(0.02), 0.0005, 0.006) * 0.5)
     for k in range(4):
         out = mix(out, at(click * (1.0 if k % 2 == 0 else 0.8), 0.125 * k))
-    return S.pad(out, d)[:N(d)]
+    return S.pad(out, d)[: N(d)]
 
 
 def catch(notes):
@@ -62,15 +63,15 @@ def catch(notes):
 
 
 def main():
-    S.takes_cat('glint_cast', lambda i: cast(), 2, 'ui')
-    S.takes_cat('glint_plop', plop, 2, 'ui')
-    S.save_loop('glint_water', water(), 'loop')
-    S.takes_cat('glint_bite', bite, 2, 'signature')
-    S.save_loop('glint_reel', reel(), 'loop', 0.02)
-    S.takes_cat('glint_catch_small', lambda i: catch((784.0,)), 0, 'boki')
-    S.takes_cat('glint_catch_medium', lambda i: catch((659.0, 880.0)), 0, 'boki')
-    S.takes_cat('glint_catch_large', lambda i: catch((523.0, 659.0, 1047.0)), 0, 'boki')
+    S.takes_cat("glint_cast", lambda i: cast(), 2, "ui")
+    S.takes_cat("glint_plop", plop, 2, "ui")
+    S.save_loop("glint_water", water(), "loop")
+    S.takes_cat("glint_bite", bite, 2, "signature")
+    S.save_loop("glint_reel", reel(), "loop", 0.02)
+    S.takes_cat("glint_catch_small", lambda i: catch((784.0,)), 0, "boki")
+    S.takes_cat("glint_catch_medium", lambda i: catch((659.0, 880.0)), 0, "boki")
+    S.takes_cat("glint_catch_large", lambda i: catch((523.0, 659.0, 1047.0)), 0, "boki")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
