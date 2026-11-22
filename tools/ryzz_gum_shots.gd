@@ -93,8 +93,12 @@ func _freeze(h: Node3D) -> void:
 ## The face's centre (m): a fixed lift over the head bone (the lips sit just below it, the crown 0.28 above it).
 func _face(h: Node3D) -> Vector3:
 	var skel := WardenGlb.skeleton(h.get_node("Warden"))
-	return skel.global_transform * skel.get_bone_global_pose(WardenSkeleton.find(skel, "head")).origin \
-		+ Vector3(0, 0.04, 0)
+	return skel.global_transform * skel.get_bone_global_pose(_head(skel)).origin + Vector3(0, 0.04, 0)
+
+## The head bone: the contract's `head`, or a Meshy-native rig's `Head`.
+func _head(skel: Skeleton3D) -> int:
+	var bi := WardenSkeleton.find(skel, "head")
+	return bi if bi >= 0 else skel.find_bone("Head")
 
 func _grab() -> Image:
 	await tree.process_frame
@@ -160,7 +164,7 @@ func _sweep() -> void:
 	clips.tree.active = false
 	var skel := WardenGlb.skeleton(glb)
 	var gum_bi := skel.find_bone("gum")
-	var head_bi := WardenSkeleton.find(skel, "head")
+	var head_bi := _head(skel)
 	var mi: MeshInstance3D
 	var verts := PackedVector3Array()
 	for n in skel.find_children("*", "MeshInstance3D", true, false):
@@ -199,7 +203,8 @@ func _sweep() -> void:
 			worst = maxf(worst, (cn - _centre(bind)).length())
 			for p in pts:
 				top = minf(top, crown.y - p.y)
-		rows.append("%s\t%.2f\t%.3f\t%.3f\t%.3f\t%.1f\t%.1f" % [nm, ln, ctr.x, ctr.y, ctr.z, top * 100.0, worst * 100.0])
+		rows.append("%s\t%.2f\t%.3f\t%.3f\t%.3f\t%.1f\t%.1f" % [nm, ln, ctr.x, ctr.y, ctr.z, top * 100.0,
+			worst * 100.0])
 	var f := FileAccess.open(out.path_join("%s_sweep.txt" % tag), FileAccess.WRITE)
 	f.store_string("\n".join(rows) + "\n")
 	f.close()
