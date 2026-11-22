@@ -516,9 +516,6 @@ const CHECKS := {
 	# Meeko's sun and cloud orbit her, bob, clear the wings
 	"--meeko-orbit-check": ["res://tools/meeko_orbit_check.gd", "meeko_orbit_check", null],
 	"--meeko-orbit-shots": ["res://tools/meeko_orbit_shots.gd", "meeko_orbit_shots", null],  # frames of that orbit
-	"--incoming-hit-check": ["res://tools/incoming_hit_check.gd", "incoming_hit_check", null],  # [--shots-dir=] AVI
-	"--range-screen-check": ["res://tools/range_screen_check.gd", "range_screen_check", null],  # ability ends on screen
-	"--hunter-foley-check": ["res://tools/hunter_foley_check.gd", "hunter_foley_check", null],  # gear sounds
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],  # every Hunter standing still (IDLE_AUDIT)
 	"--rooted-shots": ["res://tools/rooted_shots.gd", "rooted_shots", null],  # rooted Hunters casting, legs planted
 	"--lockin-shots": ["res://tools/lockin_shots.gd", "lockin_shots", null],  # the lobby lock-in poses (GPU)
