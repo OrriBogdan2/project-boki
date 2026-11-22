@@ -10981,3 +10981,4 @@ READY ext/extra-debt-tidy 96a4f81a81 (bulk-rebase: origin/main merged in mechani
 READY ext/parity-recheck-cinder 2a9ae9ad58 (bulk-rebase: origin/main merged in mechanically, was 4fc822d9dc; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-N2-1122 cfb62e3cea (bulk-rebase: origin/main merged in mechanically, was 9ee621f1b7; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/sfx-snack-patch 033e5bbd41 (merged origin/main; only snack_patch_check.gd conflicted, kept main's _first_batch plus the branch's _textures; --snack-patch-check 0 fail, --garden-sfx-check 0 fail, --check 0 fail; health --strict fails only on main's style-ratchet rows, none in this branch's files)
+READY ext/feel-cc-reread-1122 56bd4bb839bae9ba6dfad6b25a635b23262dd53e (CC table re-read)
