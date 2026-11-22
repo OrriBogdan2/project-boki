@@ -572,7 +572,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 
 ### Meeko heals: amounts, ticks, reach (ext/parity-meeko-heals, 2026-11-19)
 
-PARITY FIRST (DECISIONS 2026-11-07). Source: `briefs/supervive-data/supervive_kits.md` (Elluna, [D]), `briefs/hero-ref/mooshmoosh.md` (footage [F] and the thebackdash fine print, [D]), both on origin/ext/agent-briefs; the x5 Wisp factor is the wiki row in "Small mechanics" in docs/heroes/tender.md. Source health converts at 154/1285 (our / source mean Hunter health, docs/TTK.md). `[?]` = no number in the data; the footage shows no hurt ally (mooshmoosh.md:104, :211, :245), so these stay ours.
+PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the briefs branch` (Elluna, [D]), `briefs/hero-ref/mooshmoosh.md` (footage [F] and the thebackdash fine print, [D]), both on origin/ext/agent-briefs; the x5 Wisp factor is the wiki row in "Small mechanics" in docs/heroes/tender.md. Source health converts at 154/1285 (our / source mean Hunter health, docs/TTK.md). `[?]` = no number in the data; the footage shows no hurt ally (mooshmoosh.md:104, :211, :245), so these stay ours.
 
 | Heal | What | Source | Ours (tender.json) | Verdict |
 |---|---|---|---|---|
