@@ -125,6 +125,7 @@ func _states(main: Node, a: String) -> void:
 	await _orbits(main, a, nat)
 	if nat.d.has("weapon"):
 		_held(a, m, nat)
+	_contract_anchors(a, m, nat)
 	m.free()
 
 
@@ -173,6 +174,34 @@ func _lowest(nat: WardenNative, mesh: Mesh) -> Array:
 				if y < best[0]:
 					best = [y, "%s %.2fs" % [st, len * k / SAMPLES]]
 	return best
+
+
+## Each data contract anchor (Sparkle's rod tips) rides its Meshy bone near it, and a warden_look bloom on it draws
+## (a Bloom quad on the root follows it); far_hide pieces of the copied props stop at the match distance.
+func _contract_anchors(a: String, m: Node3D, nat: WardenNative) -> void:
+	var want: Dictionary = nat.d.get("contract_anchors", {})
+	var found := 0
+	for an in want:
+		var nd := WardenGlb.anchor(m, String(an))
+		var b := nat.skel.find_bone(String((want[an] as Array)[0]))
+		if nd and b >= 0:
+			var at := nat.skel.global_transform * nat.skel.get_bone_global_pose(b).origin
+			found += 1 if nd.global_position.distance_to(at) < 0.8 else 0
+	var blooms := 0  # (each bloom quad on the root has a BloomFollow under its anchor)
+	for an in want:
+		var nd := WardenGlb.anchor(m, String(an))
+		blooms += nd.find_children("BloomFollow*", "RemoteTransform3D", false, false).size() if nd else 0
+	ok(
+		found == want.size() and (want.is_empty() or blooms >= want.size()),
+		"%s: contract anchors ride Meshy's bones (%d of %d) with their blooms (%d)" % [a, found, want.size(), blooms]
+	)
+	var hidden := 0
+	var pieces := 0
+	for nm in WardenGlb.look(nat.art_id).get("far_hide", []):
+		for g in m.get_node("Warden").find_children(String(nm) + "*", "GeometryInstance3D", true, false):
+			pieces += 1
+			hidden += 1 if (g as GeometryInstance3D).visibility_range_end > 0.0 else 0
+	ok(hidden == pieces, "%s: far_hide pieces stop at the match distance (%d of %d)" % [a, hidden, pieces])
 
 
 ## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats").
