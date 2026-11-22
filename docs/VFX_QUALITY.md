@@ -156,8 +156,9 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 
 Snd, Motley and Gil (11-20, ext/sfx-motley-gil-bar, code read): 3 -> 4 each. Every ability's cast and hit are the
 Hunter's own and distinct, the Snap miss, the Trade's far end, an unpopped seed and the slime puddle's end have cues, and
-Gil's move looks play his own set instead of other Hunters' sounds (cue maps in docs/AUDIO.md). Not 5: Nightwell's close,
-Riptide's spout hit and the Tide lunge's cast still have none.
+Gil's move looks play his own set instead of other Hunters' sounds (cue maps in docs/AUDIO.md). Not 5 then: Nightwell's
+close, Riptide's spout hit and the Tide lunge's cast had none. Filled 11-21 (ext/sfx-motley-last-three: os_well_close,
+gil_spout_hit, gil_tide_lunge; the last two are Gil's), so Snd is 5 for both, pending the owner's ear.
 
 Reading it: every Hunter now sits at 23-29 (the 11-08 spread was 14-28), and the old worst four (Tenzo, Motley, Vex,
 Grimble) gained 9-10 each. The per-hero branches claimed a little more for their own hero (Vex 26, Lace 27, Sparkle 26,
