@@ -21,7 +21,7 @@ static func tick(h: Hunter, dt: float) -> void:
 	var was: bool = h.get_meta("ult_was", false)
 	h.set_meta("ult_was", h.ult_ready)
 	var alive := not h.downed and not h.out
-	var target := READY_LEVEL if h.ult_ready and alive and not KinMerge.active(h) else 0.0
+	var target := READY_LEVEL if h.ult_ready and alive else 0.0
 	if was and not h.ult_ready and alive:
 		h.ult_glow = 1.0                  # the cast: flash
 	else:

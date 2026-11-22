@@ -40,6 +40,8 @@ extends RefCounted
 ##  11. Sparkle's and Sable's ability beats: each new cast/travel/hit/end cue is in its set and plays on its own event
 ##      (tools/ability_beat_sfx_check.gd; two short training matches)
 ## Never touches the save.
+##  15. the creator and the clan screens: the creator's Random plays the dice, dragging you round ticks once per
+##      notch either way, and the guild registry's Found it, Join and Leave each play their own sound once
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
@@ -134,6 +136,7 @@ func run(main: Node) -> void:
 	_wired()
 	_fallback()
 	_ult_cues()
+	_creator_clans()
 	_nuke_fall()
 	_garden_names()
 	_garden()
@@ -167,6 +170,7 @@ func run(main: Node) -> void:
 	_low_hp()
 	_stomp_cues()
 	_voices()
+	_boki_impacts()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
@@ -1565,6 +1569,29 @@ func _voices() -> void:
 	HomeVoice._until.clear()
 	HomeVoice._last.clear()
 
+func _boki_impacts() -> void:
+	var r := BokiImpact.rules()
+	var types: Dictionary = r.get("types", {})
+	var bad := KinLib.TYPES.filter(func(t): return not _impact_ok(types, t))
+	ok(types.size() == 19 and bad.is_empty(), "each of the 19 types has impact ki_<type> on its cast set %s" % [bad])
+	var gone := KinLib.kin_ids().filter(func(id): return BokiImpact.cue_of(_type_of(id)) == "")
+	ok(gone.is_empty(), "every Boki species resolves to an impact %s" % str(gone))
+	ok(BokiImpact.cue_of("no_such_type") == "ki_normal", "an unknown type takes the default impact")
+	var kin := Kin.new()
+	var yes := [{"src": "kin", "ab": "k1"}, {"src": "kin", "ab": "zone"}]
+	var no := [{"src": "kin", "ab": "recall"}, {"src": "abil", "ab": "k1"}]
+	ok(yes.all(func(o): return BokiImpact.is_boki_ability_hit(kin, o)), "a Boki's k1 and zone hits get a type impact")
+	ok(not no.any(func(o): return BokiImpact.is_boki_ability_hit(kin, o)), "...its strike and a Hunter's do not")
+	kin.free()
+	var caps := [Sfx.IMPACT_GAP, Sfx.STACK_MAX]
+	ok(caps[0] >= 60 and caps[1] <= 4, "impacts keep their own gap (%d ms) and the stack cap (%d)" % caps)
+
+func _impact_ok(types: Dictionary, t: String) -> bool:
+	return String(types.get(t, "")) == "ki_" + t and not _takes("k_" + t).is_empty() and Sfx.ensure("ki_" + t)
+
+func _type_of(id: String) -> String:
+	return String(KinLib.species(id).get("type", ""))
+
 ## 10. What you can see you can hear: the cue at the side edge of the SUPERVIVE view (half of CamRig.style_across)
 ## is within -12 dB and on the clear bus, 10 m further is at least 4 dB quieter, past 30 m nothing plays.
 func _falloff() -> void:
@@ -1580,3 +1607,22 @@ func _falloff() -> void:
 	ok(clear, "a cue at the screen edge (%.1f m) is heard clearly (%.1f dB, clear bus)" % [edge, at_edge])
 	ok(off < at_edge - 4.0 and not is_nan(off), "...one 10 m off screen is still there but quieter (%.1f dB)" % off)
 	ok(is_nan(gone), "...and past ~30 m it is silent")
+
+## 15. The creator and the clan screens (the screens need a whole hatch or town, so their buttons are read from source).
+func _creator_clans() -> void:
+	Sfx.last_played.clear()
+	var acc := LookLocker.turn_notch(0.0, LookLocker.TURN_NOTCH * 0.5)
+	var quiet := Sfx.last_played.is_empty()
+	acc = LookLocker.turn_notch(acc, -LookLocker.TURN_NOTCH * 0.6)
+	ok(quiet and Sfx.last_played.keys() == ["ui_turn"] and acc < LookLocker.TURN_NOTCH * 0.2,
+		"dragging you round ticks once per notch, either way")
+	var locker_src := FileAccess.get_file_as_string("res://scripts/ui/look_locker.gd")
+	ok(locker_src.contains('UI.sounding(UI.ghost("Random", _random, 120, "swap"), "ui_dice")'),
+		"the creator's Random plays the dice")
+	var town_src := FileAccess.get_file_as_string("res://scripts/social/town.gd")
+	var once := true
+	for cue in ["ui_clan_found", "ui_clan_join"]:
+		once = once and town_src.count('Sfx.play("%s")' % cue) == 1
+	var leave_at := town_src.find('UI.button("Leave the guild"')
+	ok(once and town_src.find('"ui_clan_leave"', leave_at) > leave_at and not town_src.contains('Sfx.play("unlock")'),
+		"clan found, join and leave each play their own sound once")
