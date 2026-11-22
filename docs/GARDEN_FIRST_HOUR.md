@@ -85,6 +85,12 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
    in the Garden tab at 0 gems and is not mentioned by any step, yet it is the only food source that keeps the Boki fed and leans it toward
    a zone. Owner: `content/rules/farm_tutorial.json base steps`, `scripts/home/farm_task_guide.gd`. *Proposal: add a "Plant the snack
    patch" step before "Feed it".*
+   **Fixed (ext/farm-tut-patch-step):** the base tutorial is now five steps: meet, **Plant the snack patch** (build bar, Garden tab,
+   the patch tile lit by the spotlight like the trough tile in the farm tutorial), feed, toy, head out. The step ticks when the patch
+   is down (or the Boki has already been fed); the Boki stays at your side for it. `farm_task_guide.gd` is the farm path's job
+   guide and is retired in base mode, so it needed no change. Re-timed first hour: the patch is down at about 10 s of play (one
+   build-bar visit, free), so the 8-minute ripening clock starts about 5 s earlier than in the played run and the first meal and the
+   Feed and Toy lines still tick together at about 580 s; nothing else moves (item 8 is what would shorten that wait).
 10. **The tutorial never ends on its own.** Step 4 "Head out or stay" stays on the banner after an hour (shot 10), and its line runs past
     the 4/4 counter. Owner: `scripts/home/farm_tutorial.gd` `event` ("stay" is a button press only), banner width in
     `scripts/ui/`. *Proposal: finish the step when the first zone wakes or after the toy ticks, and wrap the banner text.*
