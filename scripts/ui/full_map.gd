@@ -241,7 +241,8 @@ func _plain_hint(sz: Vector2) -> void:
 	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), _plain_line(), 16, INK, hud.big)
 
 func _plain_line() -> String:
-	return "Press %s to jump  ·  hold %s for the legend and ways out" % [Settings.key_cap("jump"), Settings.key_cap("scores")]
+	var keys := [Settings.key_cap("jump"), Settings.key_cap("scores")]
+	return "Press %s to jump  ·  hold %s for the legend and ways out" % keys
 
 func _plain_pill(sz: Vector2) -> Rect2:
 	var w: float = hud.big.get_string_size(_plain_line(), HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0

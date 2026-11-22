@@ -1816,7 +1816,8 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -8), pv + Vector2(6, 3), pv + Vector2(-6, 3)]), Color(0, 0, 0, 0.6))
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6), pv + Vector2(4.5, 2), pv + Vector2(-4.5, 2)]), Color("9af0ff"))
 			if overview:
-				MapNames.put("%dm" % int(round(float(lb.get("height", 0.0)))), pv + Vector2(0, 15), 10, Color("c8f6ff"), body)
+				var metres := "%dm" % int(round(float(lb.get("height", 0.0))))
+				MapNames.put(metres, pv + Vector2(0, 15), 10, Color("c8f6ff"), body)
 			continue
 		if String(lb["kind"]) == "lair":
 			if overview:
