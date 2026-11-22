@@ -1,6 +1,6 @@
-"""Re-keys the clips of a built Boki .glb from its species' skeleton and clips module and writes it back, the body, face,
-skin and atlases as they are. For a scanned species whose raw Meshy model is not at hand (`build_boki.py` needs it for
-the bake): the .glb is read back into Blender, its actions are replaced by the module's CLIPS, it is exported again.
+"""Re-keys the clips of a built Boki .glb from its species' skeleton and clips module and writes it back, the body,
+face, skin and atlases as they are. For a scanned species whose raw Meshy model is not at hand (`build_boki.py`
+needs it for the bake): the .glb is read back into Blender, its actions are replaced by the module's CLIPS, it is exported again.
 A file that `auto_legs.py` gave real legs keeps its leg bones and its walk and run (the planted-paw trot): only the
 other clips are re-keyed, with the legs at rest as auto_legs keys them.
 
@@ -22,7 +22,8 @@ LEG_BONES = {12: ("fleg1", "fleg2", "fpaw", "hleg1", "hleg2", "hpaw"), 6: ("hleg
 
 
 def hidden_props(arm):
-    """Where the file keys its unused props (collapsed inside the body), read off its idle: `HIDE_AT` as the build had it."""
+    """Where the file keys its unused props (collapsed inside the body), read off its idle: `HIDE_AT` as the build
+    had it."""
     arm.animation_data.action = bpy.data.actions["idle"]
     bpy.context.scene.frame_set(1)
     out = {}
@@ -44,7 +45,8 @@ def main():
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     extra = {b.name for b in arm.data.bones} - set(anim.BONES)
     assert set(anim.BONES) <= {b.name for b in arm.data.bones}, "the file's skeleton is not the module's"
-    assert not extra or extra == {b + s for b in LEG_BONES.get(len(extra), ()) for s in (".L", ".R")}, "unknown bones %s" % extra
+    legs = {b + s for b in LEG_BONES.get(len(extra), ()) for s in (".L", ".R")}
+    assert not extra or extra == legs, "unknown bones %s" % extra
     keep = {"walk", "run"} if extra else set()      # auto_legs' trot: the module's walk and run would glide the paws
     boki_rig.HIDE_AT.clear()
     boki_rig.HIDE_AT.update(hidden_props(arm))
