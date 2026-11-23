@@ -51,6 +51,7 @@ func _steps(m: Match, secs: float, stay: Hunter = null) -> void:
 		if stay:
 			stay.pos = at
 			stay.vel = Vector3.ZERO
+			stay.inv_t = 0.0      # (a bot dashes out of a patch; its dash frames must not dodge the ticks under test)
 		m.step(Match.DT)
 
 func _banner(m: Match, P: Hunter, foe: Hunter) -> void:
