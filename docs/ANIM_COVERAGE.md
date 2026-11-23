@@ -117,6 +117,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
 | moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
+| opalisk | clip | shared | shared | clip | clip | clip | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
 | scaldamus | clip | shared | shared | clip | clip | clip | proc | proc |
 | sentrikat | clip | shared | shared | clip | clip | clip | proc | proc |
@@ -139,6 +140,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | marchleaf | clip | clip | clip | clip | clip | clip | proc | proc |
 | mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
+| orchisloth | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
 | thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
