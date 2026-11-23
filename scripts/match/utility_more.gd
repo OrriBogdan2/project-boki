@@ -53,8 +53,8 @@ static func _pad(h: Hunter, d: Dictionary) -> void:
 	h.m.add_child(n)
 	h.m.gpads.append({
 		"pos": at, "t": float(d.get("life", 20.0)), "arm": float(d.get("arm", 0.0)),
-		"after": float(d.get("after", 0.0)), "push": float(d.get("push", 6.0)),
-		"lift": float(d.get("lift", 17.0)), "col": d.get("col", Color.WHITE), "node": n, "cd": {},
+		"after": float(d.get("after", 0.0)), "push": float(d.get("push", UtilityUse.PAD_MIN_HV)),
+		"lift": float(d.get("lift", UtilityUse.PAD_VY)), "col": d.get("col", Color.WHITE), "node": n, "cd": {},
 	})
 	h.m.sfx("throw", h.pos, -2.0, 1.2)
 
@@ -79,13 +79,7 @@ static func pads(m: Node, dt: float) -> void:
 				gp["cd"][h.nid] = m.time + 1.0
 				if float(gp["after"]) > 0.0:
 					gp["t"] = minf(float(gp["t"]), float(gp["after"]))
-				var hv := Vector2(h.vel.x, h.vel.z)
-				var dir: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
-				var sp := maxf(hv.length(), float(gp["push"]))
-				h.vel = Vector3(dir.x * sp, float(gp["lift"]), dir.y * sp)
-				h.roll_t = 0.0      # a dash ends here, its speed carries
-				h.grounded = false
-				h.glide_cd = 0.0
+				UtilityUse.pad_launch(h, float(gp["lift"]), float(gp["push"]))
 				m.fx.burst(gp["pos"] + Vector3(0, 0.3, 0), gp["col"], 16, 5.0, 0.4, -2.0)
 				m.sfx("jump", h.pos, -2.0, 0.8)
 
