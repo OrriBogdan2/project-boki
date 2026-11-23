@@ -11123,3 +11123,4 @@ READY ext/anim-boki-own-clips-sttv 89043791d1 (merged origin/main, boki_anim_sho
 READY ext/merge-lane-n23b-1123 f8bfba50fc (origin/main merged; conflicts only tools/boki_anim_shots.gd (kept both --clips and --bred) and docs/KIT_PARITY.md (main's row); --check 0 failures; health --strict fails only style ratchet in 5 files identical to origin/main (save.gd, warden_props.gd, boss_check.gd, checks/combat.gd, checks/misc.gd); the branch's own READY checks (n23b: NEW-RED 0, export OK) still apply)
 READY ext/main-red-movefeel-style-1123 6648c91b8f3 (style ratchet green on main; --move-feel-check 14 fails+script error -> 3, knock tail left open)
 READY ext/toast-side-rail 59f47f282e (toasts to right rail; CLARITYTOAST 20/20 -> 0/20)
+READY ext/plate-status-declutter 1305163b7a (plates: status = icon row only, no CC word in the name slot; clarity-shots 0 CC words in 20/20 frames)
