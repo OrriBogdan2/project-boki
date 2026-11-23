@@ -329,7 +329,7 @@ func cast_wide() -> float:
 
 func rumble(amp: float, secs: float) -> void:
 	shake_amp = maxf(shake_amp, amp)
-	shake_left = maxf(shake_left, minf(secs, Shake.MAX_SECS))
+	shake_left = maxf(shake_left, minf(secs, Shake.door("max_secs")))
 
 
 ## The cursor lean for a cursor `rel` metres from you on the ground: a share of the distance past the
