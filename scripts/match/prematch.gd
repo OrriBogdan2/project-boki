@@ -54,7 +54,7 @@ func teach_line() -> String:
 		return ""
 	if pick == "":
 		return "Pick a Hunter before 0:00, or we pick one for you."
-	return "Your squad sees your pick. It locks in at 0:00."
+	return "It locks in at 0:00." if squad.size() == 1 else "Your squad sees your pick. It locks in at 0:00."
 
 ## A real expedition (offline or online), not training, the tutorial, the arena or a demo.
 static func expedition(o: Dictionary) -> bool:
