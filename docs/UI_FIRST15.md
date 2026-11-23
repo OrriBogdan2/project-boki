@@ -282,8 +282,8 @@ Not changed (still on screen, each one group): the key row (folds after 3 uses o
 `ExpFold.first_visit()` (`scripts/home/exp_fold.gd`): true while the first Where is the only one open (`extracts` below the second Where's unlock).
 Then the **expedition panel** shows the picked Relic, the open Where and Start; "All Relics (n)", "Locked drops (n)" and "More: Boki, match and modes"
 fold the other Relics, the locked Wheres, and Boki you bring, loadout, Match, Conditions and the Training Grounds / Play online links (the links
-move from the footer into that fold). The **Relics page** shows the picked and the open or ready Relics; "Locked Relics (n)" folds the rest. With a
-second Where open nothing is folded. The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
+move from the footer into that fold). The **Relics page** (Hunters screen) never folds: every Hunter shows, locked ones dim with their
+challenge progress (11-23: a new save showed one tile and a "Locked Relics" button; the owner read it as one Hunter). The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
 fits on one line. `--relics-fold-check` asserts the folds and that no Relic name is cut or wrapped at 1280x720 on either screen.
 
 Shots (1280x720, software renderer on rpc4, the same save as section 1): [expedition before](shots/ui-relics-grid/before_expedition.jpg) /
