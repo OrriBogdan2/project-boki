@@ -88,9 +88,11 @@ func _height(a: String) -> void:
 func _states(main: Node, a: String) -> void:
 	var m := _model(a)
 	var nat := m.get_node("Warden/Native") as WardenNative
+	# (the walk at 1.5 m/s, or half the speed this Hunter's walk hands over to the run: Meeko's is under 1.5)
+	var walk := minf(1.5, 0.5 * float(WardenNative.entry(WardenGlb.art(a)).get("run_from", 3.0)))
 	var cases := [
 		["idle", {"grounded": true}],
-		["walk", {"grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
+		["walk", {"grounded": true, "vel": Vector3(0.0, 0.0, -walk)}],
 		["run", {"grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}],
 		["jump", {"grounded": false, "vel": Vector3(0.0, 3.0, -4.0)}],
 		["crouch", {"grounded": true, "crouch": 1.0}],
