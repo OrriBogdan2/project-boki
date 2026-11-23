@@ -72,6 +72,7 @@ func _cast(m: Match, at_group: bool) -> void:
 	var mb := tu.camps.nearest()
 	var away := (p.pos - mb.pos) * Vector3(1, 0, 1)
 	away = away.normalized() if away.length() > 0.1 else Vector3(1, 0, 0)
+	away = _level_way(m, mb.pos, away, NEAR if at_group else FAR)
 	p.teleport(mb.pos + away * (NEAR if at_group else FAR))
 	p.vel = Vector3.ZERO
 	var misses := tu.aim.misses
@@ -84,6 +85,18 @@ func _cast(m: Match, at_group: bool) -> void:
 			(tu.camps.ledger[j]["mb"] as Mob).teleport(held[j])
 		if tu.aim.hit or tu.aim.misses > misses:
 			break
+
+
+## The first way out of `at` (from `way`, turning in 45 degree steps) whose ground `dist` off is level with the
+## group's: on a step above it a thrown E (Kael's Warchain) bites the step's lip instead of the group.
+func _level_way(m: Match, at: Vector3, way: Vector3, dist: float) -> Vector3:
+	var g0: float = m.world.ground_at(at.x, at.z)
+	for k in 8:
+		var w := way.rotated(Vector3.UP, k * PI / 4.0)
+		var q := at + w * dist
+		if absf(float(m.world.ground_at(q.x, q.z)) - g0) < 0.5:
+			return w
+	return way
 
 
 func _misses_then_hit(m: Match, hero: String) -> void:
