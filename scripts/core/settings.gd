@@ -53,8 +53,10 @@ const DEFAULTS := {
 	"kin_chatter": "normal",
 	"mod_mode": false,
 	"bot_diff": "auto",
-	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
-	"boki_wisps": false,
+	# Boki ride as wisps (KinWisp): in expeditions the perks are on while it rides with you, off while summoned.
+	# wisps_v 1: the default became on (a file from before it has the old default saved: load_file turns it on once)
+	"boki_wisps": true,
+	"wisps_v": 1,
 	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
 	"hold_done": {},
 	# how keys behave (Controls)
@@ -541,6 +543,8 @@ func load_file() -> ConfigFile:
 		# saves wrote "fullscreen: false" for anyone who never chose, so a windowed start looked like a choice: start over once
 		v["fullscreen"] = desktop_export
 		v["video_v"] = 5
+	if not cf.has_section_key("s", "wisps_v"):
+		v["boki_wisps"] = true  # (saves wrote the old default for everyone: an untouched toggle reads as off)
 	v["hud_scale"] = HudScale.setting()  # (saves from before HUD size load at 100%; hand edits stay in range)
 	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
 		v[SideColor.KEY] = "default"  # missing in older files, or a palette that is gone

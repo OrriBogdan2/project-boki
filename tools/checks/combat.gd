@@ -11,6 +11,8 @@ const CHECKS := {
 	"--move-speed-2-check": ["res://tools/move_speed_check.gd", "move_speed_check", "gil,gunslinger,juggernaut,mage"],
 	"--move-speed-3-check": ["res://tools/move_speed_check.gd", "move_speed_check", "ostra,rimewright,tender,thief"],
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
+	# Vex's Slipstep: one plain dash, no pips, no Second Wind
+	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 	"--arena-check": ["res://tools/arena_check.gd", "arena_check", null],  # the Arena, training's practice tools, the kit card
 	"--archetype-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # every archetype kit, controls, locks, infusion, feel
