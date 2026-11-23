@@ -154,7 +154,7 @@ func _heard() -> void:
 	ok(m.player.team == o.team, "(the wisp is the listener's own, so the chime is its)")
 
 
-## The stomp prompt (StompPick): the one closest downed enemy in reach, nothing for a teammate's wisp.
+## The stomp prompt (StompTarget): the one closest downed enemy in reach, nothing for a teammate's wisp.
 func _prompt() -> void:
 	_stage()
 	Life.end_stomp(m, s, "reset")
@@ -162,25 +162,25 @@ func _prompt() -> void:
 	var g := func(dx: float) -> Vector3: return Vector3(at.x + dx, m.world.ground_at(at.x + dx, at.z), at.z)
 	s.teleport(g.call(0.6))
 	f.teleport(g.call(0.7))
-	ok(StompPick.target(m, f) == null, "a teammate's downed wisp (%s) shows no stomp prompt" % o.pname)
-	ok(StompPick.target(m, s) == o, "an enemy wisp in reach is the stomp target")
-	var pr := StompPick.prompt(m, s, {})
+	ok(StompTarget.target(m, f) == null, "a teammate's downed wisp (%s) shows no stomp prompt" % o.pname)
+	ok(StompTarget.target(m, s) == o, "an enemy wisp in reach is the stomp target")
+	var pr := StompTarget.prompt(m, s, {})
 	var lab := String(pr.get("label", ""))
 	var short: bool = pr.get("kind", "") == "finish" and HoldPrompt.is_hold(lab) and lab.ends_with("to stomp")
 	ok(short, "its prompt is a short HoldPrompt hold (%s)" % lab)
-	ok(StompPick.prompt(m, f, {"kind": "x"}).get("kind", "") == "x", "no target leaves the prompt as it was")
+	ok(StompTarget.prompt(m, f, {"kind": "x"}).get("kind", "") == "x", "no target leaves the prompt as it was")
 	s.teleport(g.call(2.0))
-	ok(StompPick.target(m, s) == null, "outside stomp reach (2 m) there is no prompt")
+	ok(StompTarget.target(m, s) == null, "outside stomp reach (2 m) there is no prompt")
 	s.teleport(Vector3(at.x + 0.6, at.y + 2.0, at.z))
-	ok(StompPick.target(m, s) == null, "a wisp 2 m above or below is out of reach")
+	ok(StompTarget.target(m, s) == null, "a wisp 2 m above or below is out of reach")
 	m.knock(f, s, {})
 	s.teleport(g.call(0.6))
 	f.teleport(g.call(1.6))
-	ok(StompPick.target(m, s) == o, "two downed foes: the closer one (0.6 m, not 1.0 m) is the target")
+	ok(StompTarget.target(m, s) == o, "two downed foes: the closer one (0.6 m, not 1.0 m) is the target")
 	f.teleport(g.call(0.9))
-	ok(StompPick.target(m, s) == f, "two downed foes: the one at 0.3 m wins even if it is later in the list")
+	ok(StompTarget.target(m, s) == f, "two downed foes: the one at 0.3 m wins even if it is later in the list")
 	o.remote = true
-	ok(StompPick.target(m, s) == f, "a remote client's wisp is skipped")
+	ok(StompTarget.target(m, s) == f, "a remote client's wisp is skipped")
 	o.remote = false
 
 ## Last, since it kills the wisp: with no CC the animation finishes.
