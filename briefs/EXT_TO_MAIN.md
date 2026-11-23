@@ -11126,3 +11126,4 @@ READY ext/toast-side-rail 59f47f282e (toasts to right rail; CLARITYTOAST 20/20 -
 READY ext/plate-status-declutter 1305163b7a (plates: status = icon row only, no CC word in the name slot; clarity-shots 0 CC words in 20/20 frames)
 READY ext/main-red-movefeel-style-1123 bbf73b5bfd2 (main reds: style ratchet green, --move-feel-check 14 fails+script error -> 0; supersedes ext/knock-rows-green)
 READY ext/toast-side-rail 05c4c54d82 (toasts on right rail CLARITYTOAST 20/20->0/20; armour hint off LV row; merged main)
+READY ext/merge-lane-n23d-1123 3e5d001a20 (lane n23d bundle: tenzo-press-windup tut-hint-lines garden-market-no-match tut-goals-next kael-guard-edges anim-hit-react-dir anim-dash-drive-hold; 0 conflicts, targeted checks green or same-red as main)
