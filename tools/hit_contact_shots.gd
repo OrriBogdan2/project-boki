@@ -87,7 +87,7 @@ func _shot(arch: String, kind: String, t: Hunter) -> Image:
 		n += 1
 	await _step()
 	var img := main.get_viewport().get_texture().get_image()
-	var crop := img.get_region(Rect2i(img.get_size() / 2 - CROP / 2, CROP))
+	var crop := img.get_region(Rect2i(Vector2i(Vector2(img.get_size()) / 2.0) - Vector2i(Vector2(CROP) / 2.0), CROP))
 	crop.resize(CROP.x * 2, CROP.y * 2, Image.INTERPOLATE_NEAREST)
 	print("HITCONTACT %s on %s: hit after %d steps" % [arch, t.arch, n])
 	return crop
