@@ -182,6 +182,7 @@ func _dress_ember(s: Dictionary) -> void:
 	var from := Vector3(h.pos.x + d2.x * 0.5 + side.x, h.pos.y + 0.72, h.pos.z + d2.y * 0.5 + side.y)
 	s["pos"] = from
 	s["start"] = from
+	s["muzzle"] = HeroVfx.of(m).anchor_pos(h, "hand_r" if right else "hand_l")      # drawn out of that hand
 	var size_k: float = float(lmb_def()["size_k"]) if emp else 1.0
 	s["r"] = float(s["r"]) * size_k          # the hit grows with the look
 	lk().skin(s, "ember", {}, size_k)
@@ -416,6 +417,7 @@ func _throw_seed() -> void:
 		if e != null and e.team != h.team and not e.dead:
 			_stick(e)
 	var extra := {"src": "abil", "ab": "utility", "tracer": 0.0, "kb": 0.0, "kx": on_hit}
+	ShotOrigin.draw_from(extra, h, "rmb")      # out of her hand
 	m.spawn_shot(
 			h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5,
 			col_of(rmb_def()), extra)
@@ -783,7 +785,7 @@ func _start_call() -> bool:
 	stats["calls"] += 1
 	_call_loops(who)
 	play("mm_call")
-	m.sfx("tend_call", h.pos, -1.0, 1.0)
+	KitWindup.play(self, "x", "tend_call", -1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
 	vfx("call")
 	vfx("call_land", who.pos)
@@ -853,6 +855,7 @@ func _call_end(done: bool) -> void:
 	if not done or who == null:
 		stats["broken"] += 1
 		_call_snap(who)
+		KitWindup.broken(self, "x")
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return
