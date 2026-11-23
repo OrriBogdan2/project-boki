@@ -132,7 +132,7 @@ func use(it: Dictionary) -> void:
 		return
 	var w: World = h.world
 	tile = int(it["i"])
-	h.tw.begin(t, Vector3(tile % w.w + 0.5, 0, tile / w.w + 0.5), _hit, HunterTool.period(t) * 0.4)
+	h.tw.begin(t, Vector3(tile % w.w + 0.5, 0, int(tile / float(w.w)) + 0.5), _hit, HunterTool.period(t) * 0.4)
 
 func cancel() -> void:
 	h.tw.stop()
@@ -163,7 +163,7 @@ func _hit() -> bool:
 	if not h.hb.wild_t.has(tile):
 		return false
 	var w: World = h.world
-	var at := Vector3(tile % w.w + 0.5, 0, tile / w.w + 0.5)
+	var at := Vector3(tile % w.w + 0.5, 0, int(tile / float(w.w)) + 0.5)
 	var tree: bool = h.hb.wild_t[tile] == "tree"
 	var hits := int(damage.get(tile, 0)) + 1
 	damage[tile] = hits
@@ -220,13 +220,13 @@ func finish() -> int:
 	var w: World = h.world
 	var i := tile
 	var what := String(h.hb.wild_t.get(i, ""))
-	var at := Vector3(i % w.w + 0.5, 0, i / w.w + 0.5)
+	var at := Vector3(i % w.w + 0.5, 0, int(i / float(w.w)) + 0.5)
 	damage.erase(i)
 	if cracks.has(i):
 		(cracks[i] as Node3D).queue_free()
 		cracks.erase(i)
 	tile = -1
-	if not h.hb.clear_wild(Vector2i(i % w.w, i / w.w), float(REGROW.get(what, 900.0))):
+	if not h.hb.clear_wild(Vector2i(i % w.w, int(i / float(w.w))), float(REGROW.get(what, 900.0))):
 		return 0
 	h.hb.mesh_t = 0.05
 	h.hb.ver += 1
@@ -330,7 +330,7 @@ func beside(i: int, p: Vector3) -> Vector3:
 	var w: World = h.world
 	var best := Vector3.INF; var bd := 1e9
 	for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-		var x: int = i % w.w + dv.x; var z: int = i / w.w + dv.y
+		var x: int = i % w.w + dv.x; var z: int = int(i / float(w.w)) + dv.y
 		if not w.inb(x, z) or w.kind[w.idx(x, z)] != World.T_GROUND: continue
 		var q := Vector3(x + 0.5, 0, z + 0.5)
 		var dd := Vector2(q.x - p.x, q.z - p.z).length()
@@ -365,7 +365,8 @@ func demo(which: String) -> void:
 				h.hb.rotate_held()
 				var ti2 := nearest_wild(land + Vector3(0, 0, -7), "tree")
 				var w2: World = h.world
-				h.hb.debug_m = Vector2(ti2 % w2.w + 0.5, ti2 / w2.w + 2.0) if ti2 >= 0 else Vector2(land.x, land.z)
+				h.hb.debug_m = Vector2(ti2 % w2.w + 0.5, int(ti2 / float(w2.w)) + 2.0) if ti2 >= 0 \
+						else Vector2(land.x, land.z)
 			for mi in h.hb.ghost.find_children("*", "MeshInstance3D", true, false):
 				(mi as MeshInstance3D).transparency = 0.5
 			h.hb._build_bar()
@@ -383,7 +384,7 @@ func demo(which: String) -> void:
 			if ti < 0:
 				return
 			var w: World = h.world
-			var tp := Vector3(ti % w.w + 0.5, 0, ti / w.w + 0.5)
+			var tp := Vector3(ti % w.w + 0.5, 0, int(ti / float(w.w)) + 0.5)
 			if which == "chop":
 				# a tree you can stand south of (in front of it for the camera)
 				var st := Vector3.INF
@@ -418,7 +419,7 @@ func demo(which: String) -> void:
 			var rocks := nearest_wild(tp, "rock")
 			var garden := demo_place("seed_garden", cc + (cc - tp).normalized() * 3.0 + Vector3(-2, 0, 0), 0, 1.0)
 			var kiln := demo_place("kiln", cc + (cc - tp).normalized() * 3.0 + Vector3(2, 0, 0), 0, 1.0)
-			var quarry := demo_place("quarry", Vector3(rocks % w.w + 0.5, 0, rocks / w.w + 0.5), 0, 2.0) if rocks >= 0 else {}
+			var quarry := demo_place("quarry", Vector3(rocks % w.w + 0.5, 0, int(rocks / float(w.w)) + 0.5), 0, 2.0) if rocks >= 0 else {}
 			var roster: Array = Save.d["roster"]
 			var pairs := [[1, camp], [2, garden], [3, kiln]]
 			for p in pairs:
@@ -452,7 +453,7 @@ func _demo_busy(land: Vector3) -> void:
 	h.ppos = st + Vector3(0, 0, 2.0)
 	h.player.position = h.ppos
 	var w: World = h.world
-	var tree := Vector3(ti % w.w + 0.5, 0, ti / w.w + 0.5)
+	var tree := Vector3(ti % w.w + 0.5, 0, int(ti / float(w.w)) + 0.5)
 	h.cam.zoom_to = 0.8
 	h.cam.zoom = 0.8
 	h.cam.snap(st)

@@ -145,7 +145,7 @@ func _crop(at: Vector3) -> Image:
 	var img := main.get_viewport().get_texture().get_image()
 	var vp := main.get_viewport()
 	var c := vp.get_camera_3d().unproject_position(at) * Vector2(img.get_size()) / vp.get_visible_rect().size
-	var box := Rect2i(Vector2i(c) - Vector2i(CROP / 2, CROP / 2), Vector2i(CROP, CROP))
+	var box := Rect2i(Vector2i(c) - Vector2i(int(CROP / 2.0), int(CROP / 2.0)), Vector2i(CROP, CROP))
 	var out := Image.create(CROP, CROP, false, Image.FORMAT_RGB8)
 	img.convert(Image.FORMAT_RGB8)
 	out.blit_rect(img, box, Vector2i.ZERO)
