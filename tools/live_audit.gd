@@ -1,4 +1,5 @@
 extends "res://tools/clip_shots.gd"
+## --reel: instead, every 30 fps frame of idle, run, attack in sequence (reel_000.jpg ...) for an MP4.
 ## --live-audit --shots-dir=<dir> [--wardens=a,b] [--size=1024] [--close]: audit render of Hunters as the game plays
 ## them (Models.hunter + the model's pose node), scratch-tree version of the e28953f4e4f harness. Per hunter and
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
@@ -17,6 +18,8 @@ const SAMPLES := {"idle": [0.4, 1.0, 1.6], "run": [0.0, 0.12, 0.24], "dash": [0.
 const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
+var reel := false
+var reel_n := 0
 var native := false
 
 func run(main: Node) -> void:
@@ -29,6 +32,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a == "--reel": reel = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -117,24 +121,28 @@ func _hunter(id: String, dir: String) -> void:
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
 	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
-	for clip in CLIPS:
-		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+	for clip in (["idle", "run", "attack"] if reel else CLIPS):
+		var yaw := SIDE_YAW if clip == "run" and not close and not reel else THREE_Q_YAW
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
+		var reel_end: float = {"idle": 1.2, "run": 1.2, "attack": 0.9}.get(clip, 1.0)
 		# settle: the pre-state (standing, or running for a hit/jump) for 25 frames, then the clip's own state
 		var s := _state(id, "idle" if clip != "dash" else "run", yaw, 0.0)
 		model.set_meta(WardenClips.STATE, s)
 		for k in 25:
 			poser.call("_process", DT)
 		var n := 0
-		var steps := int(float(times[-1]) / DT) + 1
+		var steps := (int(reel_end / DT) + 1) if reel else (int(float(times[-1]) / DT) + 1)
 		var want := 0
 		for i in steps:
 			var t := i * DT
 			s = _state(id, clip, yaw, t)
 			model.set_meta(WardenClips.STATE, s)
 			poser.call("_process", DT)
-			if want < times.size() and t + DT * 0.5 >= float(times[want]):
+			if reel:
+				await _shoot(model, dir, "reel_%03d" % reel_n, bx)
+				reel_n += 1
+			elif want < times.size() and t + DT * 0.5 >= float(times[want]):
 				await _shoot(model, dir, "%s_%d" % [clip, want], bx)
 				marks.append("%s %d t=%.3f state=%s" % [clip, want, t, str(s)])
 				want += 1
