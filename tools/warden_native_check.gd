@@ -8,6 +8,8 @@ extends RefCounted
 
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
+const BLADE := 1.38  # Meshy units: a held sword's tip from the hand bone, along its Y (Kael's: warden_props)
+const PROBE := 1.0 / 240.0  # s: the step the move clips are swept at
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 
 var bad := 0
@@ -118,6 +120,7 @@ func _states(main: Node, a: String) -> void:
 	ok(anchors.size() == 3, "%s: the anchors ride Meshy's bones (%s)" % [a, str(anchors)])
 	_toon(a, m)
 	_crouch_arms(a, nat)
+	_moves(a, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
 	m.free()
@@ -155,6 +158,50 @@ func _crouch_arms(a: String, nat: WardenNative) -> void:
 	var ci := meshy.find_track(leg, rot)
 	var same_leg: bool = li >= 0 and ci >= 0 and mix.track_get_key_value(li, 0) == meshy.track_get_key_value(ci, 0)
 	ok(same_arm and same_leg, "%s: the crouch takes the %s's arms and keeps its own legs" % [a, from])
+
+
+## Each kit move's own clip (data "moves"; its clock is the kit's) is there, and its hit pose sits on the kit's hit
+## second (data "hit") within a frame: "peak" speed = the blade tip's fastest second, low = its lowest (first second
+## within 2 cm of it), reach = the first second it stands within 2 cm of its farthest from the hips.
+func _moves(a: String, nat: WardenNative) -> void:
+	for km: String in nat.moves:
+		var mv: Dictionary = nat.moves[km]
+		var clip := String(mv["clip"])
+		ok(nat.player.has_animation(clip), "%s: %s plays its own clip %s" % [a, km, clip])
+		if not mv.has("hit"):
+			continue
+		var length := nat.player.get_animation(clip).length
+		var tips: Array = []
+		var hips: Array = []
+		nat.player.play(clip)
+		for k in int(length / PROBE) + 1:
+			nat.player.seek(k * PROBE, true)
+			var hand := nat.skel.get_bone_global_pose(nat.hand)
+			tips.append(hand.origin + hand.basis.y * BLADE)
+			hips.append(nat.skel.get_bone_global_pose(nat.skel.find_bone("Hips")).origin)
+		var at := _peak(String(mv["peak"]), tips, hips) * PROBE
+		ok(
+			absf(at - float(mv["hit"])) <= 1.0 / 30.0 + 0.001,
+			"%s: %s's hit pose (%s) at %.3f s, the kit's hit %.3f s" % [a, km, mv["peak"], at, mv["hit"]]
+		)
+	nat.player.stop()
+
+
+func _peak(kind: String, tips: Array, hips: Array) -> int:
+	var score: Array = []
+	for k in tips.size():
+		match kind:
+			"speed":
+				score.append(0.0 if k == 0 else (tips[k] as Vector3).distance_to(tips[k - 1]))
+			"low":
+				score.append(-(tips[k] as Vector3).y)
+			_:
+				score.append((tips[k] as Vector3).distance_to(hips[k]))
+	var best: float = score.max()
+	for k in score.size():
+		if score[k] >= best - (0.0 if kind == "speed" else 0.02):
+			return k
+	return 0
 
 
 ## Only Meshy's model draws the body: no mesh of the hidden procedural rig (its weapon, the Offhand's second gauntlet
