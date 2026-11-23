@@ -224,9 +224,10 @@
 		"no_ink": ["moss", "brass", "scan", "shield"],
 		"painted": {"albedo": [1.0, 1.12, 1.1], "top_light": 0.2, "far_lift": 0.1, "fres": 0.35, "fres_tint": 0.8, "rim_far": 0.0, "rim_far_color": [0.3, 0.85, 0.8]},
 		"slots": {
-			"wood-shield": {"albedo": [0.95, 1.07, 0.78]},
+			"wood-shield": {"albedo": [1.1, 1.22, 0.9], "desat": 0.2, "top_light": 0.3},
+			"metal-chain": {"albedo": [2.3, 2.3, 2.4], "top_light": 0.6, "fres": 0.4, "fres_tint": 0.7},
 			"brass-compass": {"albedo": [0.62, 0.55, 0.42]},
-			"brass-fish": {"albedo": [2.6, 2.2, 1.9]},
+			"brass-fish": {"albedo": [1.5, 1.75, 1.6], "desat": 0.3},
 			"leather": {"fres": 0.2, "gloss": 0.0, "sheen": 0.0},
 			"metal": {"fres": 0.25, "fres_tint": 0.7, "gloss": 0.1, "sheen": 0.0},
 			"brass": {"fres": 0.3, "gloss": 0.05, "far_lift": 0.2},
