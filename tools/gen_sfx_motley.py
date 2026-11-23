@@ -22,6 +22,11 @@ low drone). His voice is a man's behind a mask: hollow, eerie, playful, a giggle
   ostra_hover (loop)           no footsteps, he floats: a soft low Void hum with a whisper on it while he moves
                                (HoverHum levels and pitches it with his speed)
   ostra_hurt/down/death        wordless voice
+  os_snap_fizz / os_trade_swap / os_seed_fizz   the ends (11-20): a Snap that hit no one, the bodies
+                               swapped where he left, a seed gone unpopped
+                               (`python3 gen_sfx_motley.py bar` writes only these and os_well_close)
+  os_well_close                Nightwell closing (11-21): the hum unwinds downward, the Void sighs out, two
+                               bent tines fall and the lid settles (it closes quietly, no blast)
 
 The os_* files were first written by tools/gen_pair_sfx.py; this script replaces them (content/sfx/
 ostra.json lists them under "replaces"). Original synthesis and an original tune, no samples.
@@ -32,8 +37,7 @@ import os, sys
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import (N, T, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, sub, tail,
-                     reflections, ring, grains, pad)
+from sfx_lib import (N, T, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, sub, ring, pad)
 
 S.reseed(6623)
 
@@ -394,6 +398,65 @@ def build_hover():
     S.save_loop('ostra_hover', hover(), 'loop')
 
 
+# ------------------------------------------------------------------ the bar pass (11-20): the ends
+def snap_fizz():
+    """Snap spent with no one hit: the spring sags out of the spear (a slack, falling boing), a hollow void
+    puff and two tines falling a tone (the joke that missed)."""
+    sag = spring(0.45, 170, 0.35, 9.0, 0.14) * 0.5 * np.linspace(1.0, 0.6, N(0.45))
+    puff = lpf(noise(0.3), 700) * env(N(0.3), 0.01, 0.08) * 0.6
+    fall = mix(at(tine(hz(81), 0.5, 0.18) * 0.3, 0.05), at(tine(hz(79) * 0.985, 0.6, 0.22) * 0.28, 0.17))
+    return pad(lpf(mix(soft(puff, 2.0), sag, fall), 7000), 0.8)
+
+
+def trade_swap():
+    """Trade: the bodies swapped at the spot he left. The arrival's bells run backwards into a void gulp and
+    a soft fold (the arrival rings out; this end sucks in)."""
+    d = 0.8
+    t0 = 0.32
+    back = bells(t0, 12, 1500, 2300, 0.55, t0 * 0.8)[::-1]
+    gulp = at(mix(sub(80, 40, 0.35, 0.08) * 0.6, kick(200, 70, 0.22, 0.01, 0.04, 2.0) * 0.6), t0)
+    fold = at(fo(lpf(noise(0.3), 900) * env(N(0.3), 0.004, 0.07) * 0.7), t0)
+    tail_ = at(fo(void(0.4, 350, 0.05) * 0.25), t0 + 0.02)
+    return pad(lpf(mix(soft(back, 20), gulp, fold, tail_), 8000), d)
+
+
+def seed_fizz():
+    """Brimseed gone unpopped (he went down): the crank unwinds, ticks slowing, and the box sighs shut."""
+    d = 0.8
+    ticks = mix(*[at(tick(1500 - 60 * k, 0.5 - 0.06 * k), 0.03 + 0.05 * k + 0.012 * k * k) for k in range(6)])
+    sigh = at(fo(void(0.45, 380, 0.2) * 0.4), 0.15)
+    lid = at(kick(170, 90, 0.12, 0.006, 0.02, 1.4) * 0.35, 0.62)
+    return pad(lpf(mix(ticks, sigh, lid), 7000), d)
+
+
+def well_close():
+    """Nightwell closing, quietly: the open well's hum unwinds down a fifth and fades, the Void sighs out of
+    the room, two bent tines fall and a small lid settles (the kit closes with no blast)."""
+    d = 1.1; t = T(d)
+    f = 110 * (0.5 + 0.5 * np.exp(-t / 0.35))
+    hum = np.sin(2 * np.pi * np.cumsum(f) / S.SR) + 0.5 * np.sin(2 * np.pi * np.cumsum(f * 1.5) / S.SR)
+    hum = S.sat(hum, 1.3) * 0.35 * env(N(d), 0.02, 0.8)
+    sigh = fo(lpf(noise(0.7), 500) * env(N(0.7), 0.05, 0.4) * 0.7)
+    fall = mix(at(tine(hz(77) * 0.985, 0.5, 0.2) * 0.25, 0.1), at(tine(hz(72) * 0.98, 0.6, 0.25) * 0.22, 0.28))
+    lid = at(kick(150, 80, 0.14, 0.008, 0.03, 1.4) * 0.4, 0.7)
+    return pad(lpf(mix(soft(hum, 10), sigh, fall, lid), 6500), d)
+
+
+def build_bar():
+    """Only the bar pass's files (a full run re-rolls every other file's noise)."""
+    S.reseed(6625)
+    S.save_cat('os_snap_fizz', snap_fizz(), 'cast')
+    S.save_cat('os_trade_swap', trade_swap(), 'impact')
+    S.save_cat('os_seed_fizz', seed_fizz(), 'cast')
+    S.reseed(6626)
+    S.save_cat('os_well_close', well_close(), 'cast')
+
+
 if __name__ == '__main__':
-    build_hover() if sys.argv[1:] == ['hover'] else build()
+    if sys.argv[1:] == ['hover']:
+        build_hover()
+    elif sys.argv[1:] == ['bar']:
+        build_bar()
+    else:
+        build()
     print('gen_sfx_motley: done')

@@ -1,0 +1,14 @@
+{
+	"id": "glaciyak",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/glaciyak.json.",
+	"shiny": {
+		"color": "#404b4a",
+		"belly": "#b8c8c8",
+		"glow": "#ffaa9f"
+	},
+	"work": {
+		"frost": 3,
+		"craft": 2,
+		"mend": 1
+	}
+}

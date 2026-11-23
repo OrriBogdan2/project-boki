@@ -8,7 +8,9 @@ extends RefCounted
 ## from how the bots use the slow kits, not mob numbers (doubling mob hp leaves it at 5-7x; see
 ## docs/EXPEDITION_SPEC.md "Camp clear pacing"). SPREAD_MAX is a ratchet: lower it toward BAND as
 ## the bots improve. Mob hp/damage live in Data.MOBS; never tune kit numbers for this.
-## --arch=<id> runs one Hunter (prints its rows, skips the band).
+## --arch=<id> runs one Hunter (prints its rows, skips the band). The registry splits the run into one flag per camp
+## (--camp-clear-<camp>-<level>-check): a shard runs every Hunter against one camp at one level, so each cell's
+## spread is still judged over all 12 Hunters and each shard stays under the gate's 300 s cap.
 
 const BAND := 1.6        # target: slowest median clear time / fastest, per camp and level
 const SPREAD_MAX := 14.0 # ratchet on that ratio (worst seen 11.9x on brute@5)
@@ -30,7 +32,7 @@ func ok(cond: bool, what: String) -> void:
 	print("CAMPCLEAR %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func run(main: Node) -> void:
+func run(main: Node, only_cell := "") -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
@@ -39,14 +41,14 @@ func run(main: Node) -> void:
 		if a.begins_with("--arch="): only = a.substr(7)
 	for arch in Arch.ids():
 		if only == "" or only == arch:
-			await _hero(main, String(arch))
+			await _hero(main, String(arch), only_cell)
 	if only == "":
 		_band()
 	print("CAMPCLEAR pve: 0 sourced modifiers applied, times unchanged (docs/CAMP_PARITY.md)")
 	print("CAMPCLEAR DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
-func _hero(main: Node, arch: String) -> void:
+func _hero(main: Node, arch: String, only_cell: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
@@ -60,6 +62,9 @@ func _hero(main: Node, arch: String) -> void:
 		while p.lvl < lv:
 			p.gain_xp(Hunter.XP_TO[p.lvl] - p.xp)
 		for camp in CAMPS:
+			if only_cell != "" and only_cell != "%s@%d" % [camp, lv]:
+				continue
+			seed(hash("%s %s %d" % [arch, camp, lv]))      # a cell rolls the same dice whichever shard runs it
 			var ts: Array = []
 			var dmg: Array = []
 			for i in REPS:

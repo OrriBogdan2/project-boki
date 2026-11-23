@@ -1,6 +1,6 @@
 # Project Boki abilities
 
-Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/hunter_abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities and merges (E, its auto active and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
+Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/hunter_abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities and merges (E, its auto active and the Merge) are the kin grammar: `content/kin`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
 
 This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.
 
@@ -15,7 +15,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
-| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Crushed | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
@@ -36,6 +36,7 @@ _The warden of high ground. Climbs, reads the field, pins people to walls._
 - **Passive: Red Thread.** Rivals under half health are seen through cover within 22m. Always on, no meter. A knock heals 18.
 - **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars, ability barriers and raised terrain don't stop you (you climb a ledge face and drop off the far side); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends inside a rock, tree or barrier you are put back where you went in; ending in a ledge sets you on top of it.
 - **RMB: Heavy Shot** (16s):
+  - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2. A quick tap does nothing and costs nothing.
   - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 - **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-10.8m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
   - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 8 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
@@ -85,13 +86,12 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 
 _The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
-- **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
+- **Passive: Crushed.** Any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
 - **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 - **RMB: Aegis** (6s):
   - tap: A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
   - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
   - in the air: Shield Surf: hold to block from the front while gliding.
-  - resource full: Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 - **E: Mending Ground** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, Q
 
@@ -102,7 +102,7 @@ The old class dashes and weapon RMBs below are kept as data (the verbs return as
 Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Sound (`RankSfx`, your own HUD only, so bots' and other players' ranks are silent): a new point gives a short rising chime 0.9 s after the level-up chime, once, never again while it waits (none if you spent it first); spending it plays a rising pair pitched by slot (RMB, Shift, E, R = C, D, E, G); the point that maxes a slot plays a soft bloom instead (`--rank-ui-check`). Bots spend by their kit's `order`. Per rank past the first:
 
 - damage +15% (`Effects.level_k`)
-- cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster
+- cooldown: a hero's own `rank_cd` row in `content/archetypes/<id>.json` (RMB `sec`, E `kin`, Shift `dash`, `air`), read by `ArchKit.cd_k` / `dash_k`; with no row, 10% shorter (RMB, Q via `Hunter.rank_cd_k`, E) and Shift dashes recharge 15% faster
 - each verb grows the numbers that define it (`Effects.RANK_GROW`): walls +20% health, +15% time, +10% length; mirrors +20% time; tethers +15% time, +20% snap stun; traps +15% time and root; zones +15% time, +10% radius; fissures +10% length; shots +10% range and +15% stun/root/slow; pulls +15% strength; chains +1 hop per rank; yanks and swaps +25% stun; bridges +20% time; cloaks/decoys/reveals +20-25% time; shields and heals +15%; blinks +10% distance; blink-strike crit window +25%
 - kin abilities grow through the core rank table `KinRules.RANK_GROW` (never through data), clamped to each part's bounds
 - the merge at rank 2 lasts 30% longer and its effects hit 15% harder
@@ -212,7 +212,7 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 
 ### Mycroll (Hedgehog + Toadstool, shoulder)
 
-- **E: Puffcap Mines** (trap, 10s): Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- **E: Puffcap Mines** (trap, 10s): Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - **Auto: Spore Patch** (zone, 11s): On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - **Throw (C)**: stuns what it hits; also root.
 - **Merge: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
@@ -286,7 +286,7 @@ Several verbs appear in more than one element, tuned to fit it:
 
 ## Blockers and crossers
 
-One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Deep Reach (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
+One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Deep Reach (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet). Every stop reads the same way: `Juice.blocked` (a deflect spark in the blocker's colour and a metallic tick, no damage number, no hurt flash), called from `BarrierRipple.hit` (shield, rock, ice and wall), Albert's Shield Charge guard and Kael's Riposte guard; `--barrier-hit-check` asserts it on three blockers.
 
 | Crosser | Class | shield | rock | ice | wall | guard |
 |---|---|---|---|---|---|---|

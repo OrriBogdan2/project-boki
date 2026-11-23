@@ -69,7 +69,8 @@ const DELIVERIES := {
 			"arm": ["float", 0.0, 2.0, 0.5, "s", "delay before it can fire"],
 			"duration": ["float", 2.0, 30.0, 15.0, "s", "how long it waits"],
 			"count": ["int", 1, 3, 1, "", "how many are placed"],
-			"spread": ["float", 0.0, 3.0, 1.5, "m", "distance between them when count > 1"]}},
+			"spread": ["float", 0.0, 3.0, 1.5, "m", "distance between them when count > 1"],
+			"max_live": ["int", 0, 12, 0, "", "most it keeps out at once (0 = no limit)"]}},
 	"wall": {"cost": 3, "doc": "a barrier that blocks enemy shots (yours pass); its effects apply to shots or foes that touch it", "events": ["on_end"],
 		"params": {
 			"origin": ["enum", ["caster", "owner", "aim"], null, "aim", "", ORIGIN_DOC],

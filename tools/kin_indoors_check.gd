@@ -34,6 +34,7 @@ func _step(home, secs: float, force_choice := false) -> void:
 		home._move_kin(0.25)
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	_new_save()
@@ -108,6 +109,7 @@ func run(m: Node) -> void:
 	home.queue_free()
 	await main.get_tree().process_frame
 	await _wants()
+	FarmUnlocks.rules()["base_mode"] = true
 	print("KININDOORS DONE, failures: %d" % bad)
 	main.get_tree().quit()
 

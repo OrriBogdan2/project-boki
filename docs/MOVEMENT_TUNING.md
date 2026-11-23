@@ -37,4 +37,4 @@ the last column; retune there, not in code.
 - A hit on a glider deals double damage and knocks it out of the air; spiking an overheated or sunk glider stuns it (0.7 s over ground).
 
 ## Still open
-Jump height by weapon, dash distance per weapon, overheated-glider damage, spike fall speed and jump-pad strength are our own picks: tune in `content/rules`, then rerun `--move-feel-check`.
+Jump height by weapon, dash distance per weapon, overheated-glider damage, spike fall speed and jump-pad strength are our own picks (no source number, `[?]` in hunter_move.json, sv/FEEL_NOTES.md "Still estimates"): tune in `content/rules`, then rerun `--move-feel-check`.

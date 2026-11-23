@@ -246,8 +246,9 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   a periodic Catmull-Rom, so every one closes on the seam in value and slope).
   - Idle 5 s: two bobs (compress, hang, overshoot, settle). The box leads by 2 frames, the hips ride it, the chest 3 and
     the head 5 frames behind, the hands 7 and 8. With no legs, the weight shift is the hips swaying side to side over
-    the spring. One breath per bob on a new `x_breath` bone (3 %, `posekit.add_breath`; the keys are in the script, but the v95 glb has no
-    such bone, so its track is dropped when the clips go on it: no breath yet).
+    the spring. One breath per bob on a new `x_breath` bone (3 %, `posekit.add_breath`). The v95 glb got the bone on 11-18 with
+    `tools/art1/glb_add_bone.py` (no Blender re-export: the node, its skin joint, the rib cage's weight off `hips` in z 1.06 to 1.40,
+    |x| < 0.21, as `ostra_anim.rib_cage`, and its idle and stance tracks from an `ostra_anim.py -- idle,stance --from` bake).
   - Hands low and loose; the right hand's fingers drum after each bob settles. The ripple's phase is the pose key `wph`,
     rounded to whole turns of a loop: that was the 11 to 16 deg finger pop.
   - Fidget at 2.55 to 3.8 s: the head rolls 43 deg, past natural, then snaps back with the grin pulled wide and the

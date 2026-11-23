@@ -119,11 +119,17 @@ What made the menus feel blocky, samey and hard to get through:
   Enter presses the panel's primary when nothing else has focus.
 
 - **Making yourself** (a new game, or the pause menu's Change your look) is the look locker
-  (`scripts/ui/look_locker.gd`, opened by `hatch.gd`): your model on a lit turntable (a carved Meshy dais,
-  `art/look/`), tabs Body / Hollow / Shroud / Glider each with its own camera shot, choices as tiles and swatches
-  that try themselves on while hovered, a pop on a pick, gliders in their rarity colour (`Gliders.rarity`). Drag
-  or A / D turns, the wheel zooms. `--look-locker-check` holds it; `--look-tour --shots-dir=<dir>` records it on a
-  GPU worker. Before / after of the Meshy dais, satchel and lantern: `docs/shots/customize-look-1/`.
+  (`scripts/ui/look_locker.gd`, opened by `hatch.gd`): your model on a turntable (a carved Meshy dais,
+  `art/look/`) in a lit set (`look_set.gd`: warm key with shadow, a rim in your glow's colour, a cool kicker, a top
+  light; a curved wall, standing stones at three depths and drifting motes behind you, blurred by the camera's soft
+  focus). Tabs Body / Hollow / Shroud / Glider: the camera swings round to each tab's shot and field of view (Body and
+  Shroud head to toe, Hollow on the face, Glider pulled back) while the rows fade in one by one. Named choices are
+  tiles with a picture of you wearing them (`look_thumbs.gd`: an offscreen stage, one picture a frame, kept by look;
+  it builds through the locker's one model maker, so any model works), colours are swatches; both try themselves on
+  while hovered and click on hover. A pick pops the model, plays a short emote, flares the rim light and rings the
+  dais. Gliders show in their rarity colour (`Gliders.rarity`). Drag or A / D turns, the wheel zooms. `--look-locker-check` holds it; `--look-tour --shots-dir=<dir>` records it on a
+  GPU worker. Before / after of the Meshy dais, satchel and lantern: `docs/shots/customize-look-1/`; of the set, tile pictures
+  and camera swings: `docs/shots/customize-v3-1119/`.
 
 ## 4. Helper API (`scripts/ui/ui.gd`, class `UI`)
 
@@ -143,6 +149,7 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 - `title(text, size=34, col=INK)` - Lilita One, one line.
 - `label(text, size=16, col=INK, font=null)` - wraps only past 48 characters.
 - `para(text, size=T_SMALL, col=MUTED)` - always wraps.
+- `wrapped(label, min_w=WRAP_MIN_W)` - makes any Label wrap and gives it a width floor (120 px by default, small enough for the 150 px cards; pass more where a line must stay wide, e.g. the name card's 300). `label` (past 48 characters) and `para` already do. A wrapping Label reports ~0 minimum width, so in a row or card sized by its content it got no room and broke one letter per line (the Name-your-Boki line); EXPAND_FILL only shares spare room, so never rely on it alone. Never set `autowrap_mode` by hand on a label that has no width from its parent: use `wrapped`. `--name-card-check` fails if a wrapping Label on the name card is under 200 px or breaks into a column.
 - `section(text, col)` - a spaced caps eyebrow over a group (pages keep it with what follows). Pink by default; pass a colour only when it means something (GOOD, a temper), never a blend toward grey (--uipolish-check).
 - `kv(key, value, col)` - a muted key on the left, the value on the right.
 
@@ -218,12 +225,22 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   Add a new garden panel to its `screens`.
 
 ## The Esc menu (DECISIONS 2026-11-08, "UI is too much for a new player")
-Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip the tutorial / Save
+Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip tutorial / Save
 and leave). More holds the rest: Change Hunter or Training Grounds (practice, where it applies), Controls,
 Inventory, Save files, Change your look, I'm stuck, Admin tools, Quit game. More is a page on the same
 panel stack; Back and Esc return to the menu. Labels are one plain line. `--pause-menu-check` holds the
 count (4 or fewer), that every old action is reachable, and the fit inside the title-safe margin at
 720p, 1080p and ultrawide.
+
+## The results screen (DECISIONS 2026-11-08, "UI is too much for a new player")
+The first view is at most four groups plus the way home, tagged `results_group` in `scripts/ui/results.gd`:
+the outcome (title, how you left or placed, placement pay, Heart reward), what you kept (gems, seeds,
+Boki, gear, what stayed in the deathbox), your Boki (level, trust, news) and progress (mastery and Relic
+goals). Empty groups are hidden. The three stat tiles (Hunters downed, Damage, Time), Kills, Damage taken,
+Times downed, Revives and the market notes sit behind More, a button beside Back to the farm that opens them
+and scrolls to them. `--results-five-check` holds the group count (5 or fewer) and that every number and
+reward is still in the screen; `--results-five-shots` takes the four screens (extracted, died, Heart,
+Ways Out) at 1280x720.
 
 ## Admin tools and the Test Zone (owner only)
 Admin tools (`, More > Admin tools, Mod mode, `--god`) open only for a debug build, the web artifact's owner,
