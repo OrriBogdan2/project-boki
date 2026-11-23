@@ -79,7 +79,7 @@ func _strip(
 		anim.update(DT, s)
 		if sync:
 			sync.call("_process", DT)
-		if step * frames / n == shot and shot < frames:
+		if int(step * frames / float(n)) == shot and shot < frames:
 			var hp := model.to_local(anim.hand_l.global_position) if anim.hand_l else Vector3.ZERO
 			print("UPOSE_HAND %s%s f%02d %s" % [mv, "_run" if running else "", shot, hp.snappedf(0.01)])
 			_aim()
