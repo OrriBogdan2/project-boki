@@ -2,66 +2,66 @@
  "tolerance_pct": 5,
  "platforms": {
   "Web": {
-   "total": 945922664,
+   "total": 1001855400,
    "categories": {
-    "textures": 753256946,
-    "models": 119718781,
-    "audio": 52730016,
-    "scripts": 14622079,
-    "other": 2257829,
-    "data": 1766560,
+    "textures": 806474258,
+    "models": 121834247,
+    "audio": 53097255,
+    "scripts": 14759428,
+    "other": 2274221,
+    "data": 1831505,
     "shaders": 231049,
     "fonts": 202850
    }
   },
   "Windows": {
-   "total": 945922664,
+   "total": 1001855400,
    "categories": {
-    "textures": 753256946,
-    "models": 119718781,
-    "audio": 52730016,
-    "scripts": 14622079,
-    "other": 2257829,
-    "data": 1766560,
+    "textures": 806474258,
+    "models": 121834247,
+    "audio": 53097255,
+    "scripts": 14759428,
+    "other": 2274221,
+    "data": 1831505,
     "shaders": 231049,
     "fonts": 202850
    }
   },
   "macOS": {
-   "total": 945922664,
+   "total": 1001855400,
    "categories": {
-    "textures": 753256946,
-    "models": 119718781,
-    "audio": 52730016,
-    "scripts": 14622079,
-    "other": 2257829,
-    "data": 1766560,
+    "textures": 806474258,
+    "models": 121834247,
+    "audio": 53097255,
+    "scripts": 14759428,
+    "other": 2274221,
+    "data": 1831505,
     "shaders": 231049,
     "fonts": 202850
    }
   },
   "Linux": {
-   "total": 945922664,
+   "total": 1001855400,
    "categories": {
-    "textures": 753256946,
-    "models": 119718781,
-    "audio": 52730016,
-    "scripts": 14622079,
-    "other": 2257829,
-    "data": 1766560,
+    "textures": 806474258,
+    "models": 121834247,
+    "audio": 53097255,
+    "scripts": 14759428,
+    "other": 2274221,
+    "data": 1831505,
     "shaders": 231049,
     "fonts": 202850
    }
   },
   "Linux Server": {
-   "total": 945922728,
+   "total": 1001855464,
    "categories": {
-    "textures": 753256946,
-    "models": 119718781,
-    "audio": 52730016,
-    "scripts": 14622079,
-    "other": 2257885,
-    "data": 1766560,
+    "textures": 806474258,
+    "models": 121834247,
+    "audio": 53097255,
+    "scripts": 14759428,
+    "other": 2274277,
+    "data": 1831505,
     "shaders": 231049,
     "fonts": 202850
    }
