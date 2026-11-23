@@ -214,6 +214,18 @@ def meeko_upper(b):
     seed0 = {**P("R", (0.1, -0.1, 0.4), (0.7, -0.4, -0.4)), **P("L", (0.1, -0.1, 0.4), (0.7, -0.4, -0.4)), **lean(0.1, 0.3, 0.0)}
     seed1 = {**P("R", (0.15, 0.0, 0.97), (0.6, -0.6, -0.1), (0.0, 0.5, 0.8), reach=0.6), **P("L", (0.15, 0.0, 0.97), (0.6, -0.6, -0.1), (0.0, 0.5, 0.8), reach=0.6), **lean(-0.1, 0.0, 0.0, (-0.1, 0.0, 0.0))}
     out["mk_u_seed"] = (0.55, False, [(0.0, wind, "lin"), (0.05, seed0, "out"), (0.12, seed1, "out"), (0.32, seed1, "lin"), (0.55, b.rest, "sm")])
+    # Hearthlight lit (mm_hearth): a crouch-bow gathering the light in both cupped hands low in front (0.08), both arms thrust
+    # straight up overhead as the rays rise (0.18), held up to 0.4, home by 0.65
+    gather = {**P("R", (0.05, -0.6, 0.4), (0.8, -0.4, -0.4), (0.0, 0.3, 1.0)), **P("L", (0.05, -0.6, 0.4), (0.8, -0.4, -0.4), (0.0, 0.3, 1.0)), **lean(0.35, 0.0, 0.0, (0.15, 0.0, 0.0))}
+    lift = {**P("R", (0.12, 0.98, 0.1), (0.8, 0.0, -0.6), (0.0, 1.0, 0.0), reach=0.6), **P("L", (0.12, 0.98, 0.1), (0.8, 0.0, -0.6), (0.0, 1.0, 0.0), reach=0.6), **lean(-0.18, 0.0, 0.0, (-0.35, 0.0, 0.0))}
+    lifted = {**lift, **P("R", (0.15, 0.94, 0.12), (0.8, 0.0, -0.6), (0.0, 1.0, 0.1)), **P("L", (0.15, 0.94, 0.12), (0.8, 0.0, -0.6), (0.0, 1.0, 0.1)), **lean(-0.12, 0.0, 0.0, (-0.3, 0.0, 0.0))}
+    out["mk_u_hearth"] = (0.65, False, [(0.0, b.rest, "lin"), (0.08, gather, "out"), (0.18, lift, "out"), (0.4, lifted, "lin"), (0.65, b.rest, "sm")])
+    # Hearthlight thrown (mm_toss): the right hand wound low behind with the torso turned away (0.06), an underhand fling up and
+    # out at the cursor with the torso unwound (0.12), the follow-through held to 0.26, home by 0.5
+    wind_t = {**P("R", (0.25, -0.65, -0.35), (0.8, -0.3, -0.6), (0.0, -0.3, -1.0)), **P("L", (0.3, -0.1, 0.4), (0.7, -0.5, -0.3), (0.0, 0.4, 0.9)), **lean(0.15, -0.55, 0.0)}
+    fling = {**P("R", (0.05, 0.35, 0.92), (0.5, -0.8, -0.1), (0.0, 0.6, 0.8), reach=0.6), **P("L", (0.35, -0.3, -0.1), (0.8, -0.4, -0.4), (0.0, -0.4, -0.9)), **lean(-0.12, 0.6, 0.0, (-0.15, 0.0, 0.0))}
+    follow = {**fling, **P("R", (0.05, 0.3, 0.9), (0.5, -0.8, -0.1), (0.0, 0.6, 0.8), reach=0.5), **lean(-0.08, 0.45, 0.0, (-0.1, 0.0, 0.0))}
+    out["mk_u_toss"] = (0.5, False, [(0.0, b.rest, "lin"), (0.06, wind_t, "out"), (0.12, fling, "out"), (0.26, follow, "lin"), (0.5, b.rest, "sm")])
     # Hearth Call: the hand pulled back low (0.1), thrust high and out as the plus bursts (0.2), an overshoot, then the channel
     # pose: one hand held high over the tether, the other out for balance (0.33)
     low = {**P("R", (0.3, -0.6, -0.2), (0.8, -0.3, -0.6)), **P("L", (0.5, -0.3, 0.1), (0.8, -0.5, -0.3)), **lean(0.15, -0.3, 0.0)}

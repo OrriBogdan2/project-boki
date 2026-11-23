@@ -76,6 +76,8 @@
 			"mm_shot_emp": {"clip": "mk_u_shot_emp", "upper": true},
 			"mm_seed_aim": {"clip": "mk_u_seed_aim", "hold": true, "upper": true},
 			"mm_seed": {"clip": "mk_u_seed", "upper": true},
+			"mm_hearth": {"clip": "mk_u_hearth", "upper": true},
+			"mm_toss": {"clip": "mk_u_toss", "upper": true},
 			"mm_call": {"clip": "mk_u_call", "hold": true, "upper": true},
 			"mm_call_hold": {"clip": "mk_u_call_hold", "then": "mk_u_call_hold", "upper": true},
 			"mm_call_end": {"clip": "mk_u_call_end", "upper": true}
