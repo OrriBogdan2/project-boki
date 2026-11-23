@@ -62,8 +62,24 @@ the parts' length as the contract clips key Cinder's jet bones (x0.06 at rest, x
 in Meshy's mesh (Meeko's sun and cloud, surfaces named as in `warden_anim/<art>.json` "companions") are cut out and
 circle her as on the contract path, the data's skeleton space carried onto Meshy's.
 
+## Own clips for kit moves (Cinder)
+A Hunter whose kit moves Meshy's one Attack does not fit gets its own clips on Meshy's skeleton: a clips-only `.glb`
+(`art/wardens/<art>/<art>_clips.glb`, an animation file, never the model) listed in data `clip_files`, played by data
+`kmoves` (kit move id -> {clip, then, hold, upper}; WardenNativeMoves). They run on the kit's own clock (state `kmove`,
+`kmove_t`), so the pose lands on the frame the kit fires. An `upper` clip keys only torso, head and arms and lies over
+the legs' clip (walk, run, idle, the air) at a weight that rises in 0.08 s and falls in 0.2 s; any other row is a
+full-body clip on the main player. Data `own_casts` stops her casts and recoils playing Meshy's swing.
+Cinder (hands, no weapon: DECISIONS 11-07), written by `tools/meshy/cinder_native_clips.py` (numpy FK and two-bone IK on
+Meshy's node tree, no Blender): `as_lance` the pilot's 0.34 s spool then the 8 Hz-bucking hold from her right palm,
+`as_lance_end` the let-go, `as_aim` the 0.4 s cast sighting along the arm (held), `as_shot` the push on the frame the bolt
+spawns (the palm already at the eye, the push 0.07 s in), `as_cloak` a tuck then both arms flung wide by 0.04 s,
+`lw_jet` the take-off crouch and spring (0.22 s, the kit's lift) then the leaning flight loop, `lw_land` the light landing.
+The fire leaves from `weapon_muzzle` on her right hand (the palm), which rides the posed bone. Checks:
+`--warden-native-check` (each row's clip, pose and hand-over), `--muzzle-check`; renders: `--clip-shots --warden=ashwick
+--states [--match] [--no-moves]` (`move_<id>_<stand|run>/`).
+
 ## Not on the native path (yet)
-Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Tenzo's
+Death, stun, ledge, glide, emote and the per-move clips of every Hunter but Cinder (Meshy gave six); the contract's per-hunter extras (Tenzo's
 ground rings, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
 
 ## Sable: hybrid rig (Meshy rig, scripted weight fixes)

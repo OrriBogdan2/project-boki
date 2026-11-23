@@ -161,11 +161,12 @@ func _process(dt: float) -> void:
 	var xt := float(s.get("extract_t", -1.0))
 	var mv := moves.pick(String(s.get("kmove", "")), float(s.get("kmove_t", 0.0))) if moves else {}  # (the kit's move)
 	var body_move := xt < 0.0 and not mv.is_empty() and not bool(mv["upper"])  # (its own full-body clip owns the body)
+	if not mv.is_empty():
+		attack_left = 0.0  # (a Meshy swing still playing from before gives way to the move)
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
 	elif body_move:
 		_attacked(s)  # (the counters move on: no Meshy swing after it)
-		attack_left = 0.0
 		_play_move(mv)
 	elif _attacked(s):
 		attack_left = _clip_len("attack") / float(d.get("attack_rate", 1.0))

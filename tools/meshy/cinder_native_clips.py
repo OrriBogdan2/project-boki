@@ -331,8 +331,8 @@ def clips():
     aim1 = P(wR=(0.11, 1.56, 0.58), poleR=(0.5, -0.9, -0.3), handR=(0.0, 0.1, 1.0), wL=(0.30, 0.98, 0.10), poleL=(0.5, -0.8, -0.6), **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)))
     out["cn_u_aim"] = (0.3, False, [(0.0, rest_pose(), "lin"), (0.1, aim0, "out"), (0.3, aim1, "sm")])
     sh0 = P(wR=(0.11, 1.57, 0.60), poleR=(0.5, -0.9, -0.3), handR=(0.0, 0.1, 1.0), wL=(0.30, 0.98, 0.10), poleL=(0.5, -0.8, -0.6), **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)))
-    push = P(wR=(0.10, 1.62, 0.76), poleR=(0.5, -0.9, -0.2), handR=(0.0, 0.18, 1.0), wL=(0.32, 1.0, 0.04), poleL=(0.5, -0.8, -0.6), **lean(-0.12, -0.3, 0.0, (-0.1, 0.3, 0.0)))
-    out["cn_u_shot"] = (0.5, False, [(0.0, sh0, "lin"), (0.07, push, "out"), (0.16, dict(push, wR=(0.10, 1.62, 0.72)), "sm"), (0.32, dict(aim1, **lean(0.06, -0.2, 0.0, (0.0, 0.2, 0.0))), "sm"), (0.5, rest_pose(), "sm")])
+    push = P(wR=(0.10, 1.62, 0.68), reachR=0.8, poleR=(0.5, -0.9, -0.2), handR=(0.0, 0.18, 1.0), wL=(0.32, 1.0, 0.04), poleL=(0.5, -0.8, -0.6), **lean(-0.12, -0.3, 0.0, (-0.1, 0.3, 0.0)))
+    out["cn_u_shot"] = (0.5, False, [(0.0, sh0, "lin"), (0.07, push, "out"), (0.16, dict(push, wR=(0.10, 1.62, 0.64)), "sm"), (0.32, dict(aim1, **lean(0.06, -0.2, 0.0, (0.0, 0.2, 0.0))), "sm"), (0.5, rest_pose(), "sm")])
     # ---- E, Furnace Cloak: a tuck for the blink, then everything flung wide on the blast frame ------------------
     tuck = P(wR=(0.14, 1.20, 0.30), poleR=(0.6, -0.8, -0.3), handR=(0.0, 0.0, 1.0), wL=(0.14, 1.20, 0.30), poleL=(0.6, -0.8, -0.3), hips=(0.0, -0.02, 0.0), **lean(0.28, 0.0, 0.0, (0.05, 0.0, 0.0)))
     wide = P(wR=(0.74, 1.54, 0.04), poleR=(0.1, -1.0, -0.3), handR=(1.0, 0.25, 0.0), twistR=0.0,
@@ -352,10 +352,10 @@ def flights():
     # take-off: down into a crouch as the ring bursts, then up on the two heel jets, leaning into it, arms back
     crouch = P(hips=(0.0, -0.17, 0.02), hips_rot=(0.28, 0.0, 0.0), aR=(aR[0], aR[1], aR[2]), aL=(aL[0], aL[1], aL[2]),
                wR=(0.26, 1.02, 0.24), poleR=(0.6, -0.6, -0.6), wL=(0.26, 1.02, 0.24), poleL=(0.6, -0.6, -0.6), **lean(0.1, 0.0, 0.0, (-0.15, 0.0, 0.0)))
-    hip_pitch = 0.9  # radians the body leans into the flight (the contract's 0.62 + 0.28 hips)
+    hip_pitch = 1.0  # radians the body leans into the flight (the contract's 0.62 + 0.28 hips)
     def fly(ph, a_back=0.0):
         hp = (hip_pitch, 0.0, 0.0)
-        return P(hips=(0.0, 0.30, 0.12), hips_rot=hp,
+        return P(hips=(0.0, 0.06, 0.06), hips_rot=hp,
                  aR=(0.13, 0.80, -0.50 - 0.04 * a_back), aL=(0.12, 0.84 + 0.04 * a_back, -0.46), footR=(0.0, -0.45, -0.9), footL=(0.0, -0.45, -0.9),
                  wR=(0.26, 1.22 + 0.2 * ph, -0.10), poleR=(0.7, 0.4, -0.2), wL=(0.28, 1.2 - 0.2 * ph, -0.08), poleL=(0.7, 0.4, -0.2),
                  **lean(-0.15, 0.0, 0.0, (-0.55, 0.0, 0.0)))
