@@ -64,7 +64,7 @@ const JL_DIP_M := 0.03         # m: and at least this far off a terrace drop or 
 const JL_DEEPER := 1.25        # ...which is this many times the hop's dip, same stance
 const JL_FREE_S := 0.2         # s: running, the land clip owns the legs at most this long (the source is up and
                                # moving ~0.15 s after any touchdown: the landing never holds the run)
-const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body standing (dur 0.4 + the loco fade)
+const JL_BACK_MAX := 0.7       # s: the longest a landing may own the body standing (a heavy: 0.5 s squash + loco fade)
 const JL_HEAVY_K := 1.0        # a heavy's drop crouch on screen is at least this times the mediums' median
 ## Heavies whose land clip is still shallower (docs/DEBT.md): "<id>" -> what. Each land rework removes its entry.
 const JL_HEAVY_OPEN := {
@@ -573,7 +573,8 @@ func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dicti
 				ok(r["dip"] <= -need and r["dip_t"] <= JumpLand.DIP_WINDOW,
 						"%s %s: the landing dips %.3f m (%s, at least %.3f), lowest at %.2f s"
 						% [id, tag, -r["dip"], "the deep crouch" if deep else "the hop's dip", need, r["dip_t"]])
-			var tier: Dictionary = ld.get("drop" if way != "jump" else "hop", {})
+			var tier := WardenClips.land_play(ld.get("drop" if way != "jump" else "hop", {}), Arch.weight(id),
+					1 if way == "jump" else 2)      # (the data's tier, as land_feel.json's footage cell plays it)
 			var hold := float(tier.get("moving", tier.get("dur", 0.0))) if running else float(tier.get("dur", 0.0))
 			var promise := hold + WardenClips.FADE_LOCO + JumpLand.DT
 			ok(r["back"] > 0.0 and r["back"] <= minf(promise, JL_BACK_MAX),
