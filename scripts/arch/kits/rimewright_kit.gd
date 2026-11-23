@@ -53,6 +53,8 @@ var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
 var recover_until := 0.0       # match time the crash's recovery ends (0: not recovering)
 var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last Loco.press_buffer
+var lmb_was := false           # the attack key was down last step
+var tap_buf := 0.0             # s a fresh LMB press that couldn't start the burst yet is kept (Loco.press_buffer)
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
@@ -255,8 +257,11 @@ func own_aim_line() -> bool:
 ## The source's burst (docs/heroes/rimewright.md, LMB): one hold is one burst, plain darts every wpn.rate for as
 ## long as the button stays down; the let-go ends it on wpn.heavy.n larger darts (double damage, faster, longer
 ## reach) at the same cadence, then wpn.barrage_cd before a fresh press (or the held button) starts the next.
-## A stun or the Rimelock drops the owed large darts and ends the burst.
-func lmb_override(held: bool, _dt: float) -> bool:
+## A stun or the Rimelock drops the owed large darts and ends the burst. A tap the burst can't take yet (its pause,
+## a landing step it can't fire on) waits Loco.press_buffer and goes as it opens, as a held press would.
+func lmb_override(held: bool, dt: float) -> bool:
+	tap_buf = Loco.press_buffer if held and not lmb_was else maxf(0.0, tap_buf - dt)
+	lmb_was = held
 	if not h.atk.can_fire() or not rime.is_empty():
 		if burst_i > 0:
 			_end_burst()
@@ -273,9 +278,14 @@ func lmb_override(held: bool, _dt: float) -> bool:
 		if tail == 0:
 			_end_burst()
 		return true
-	if held and m.time >= burst_open:
+	if (held or tap_buf > 0.0) and m.time >= burst_open:
+		tap_buf = 0.0
 		_throw_dart(false)
 	return true
+
+
+func fire_wait() -> float:
+	return maxf(0.0, maxf(seq_next, burst_open) - m.time) if burst_i == 0 else 1.0
 
 
 func _end_burst() -> void:
@@ -302,6 +312,7 @@ func _throw_dart(heavy: bool) -> void:
 	var rng := float(wd["range"]) * h.shot_range_k * _heavy_k("range_k", heavy)
 	h.shot_range_k = 1.0
 	var extra := {"src": "shot", "ab": "fan", "kb": float(wd["kb"]), "tracer": 1.0, "heavy": heavy}
+	ShotOrigin.draw_from(extra, h, "lmb")      # out of her casting hand
 	m.spawn_shot(
 		h,
 		start,
@@ -688,7 +699,7 @@ func rmb_charge_full() -> float:
 ## Held: the landing ring at the cursor (clamped to range); she draws both palms in to her chest and the
 ## spear forms between them, pointing at the cursor.
 func rmb_hold_tick(t: float) -> void:
-	if not rmb_ready() or busy():
+	if not rmb_ready() or busy() or not rime.is_empty():
 		return
 	var ld: Dictionary = rmb_def()["lance"]
 	AimKit.circle(
@@ -720,6 +731,12 @@ func _spear_at(ahead: float) -> Vector3:
 	var dir := h.aim_dir() * (SPEAR_AHEAD + ahead)
 	return h.position + Vector3(dir.x, SPEAR_Y, dir.y)
 
+## The statue casts nothing (item 65): an RMB press in Rimelock is refused, no charge spent.
+func press_rmb() -> void:
+	if not rime.is_empty():
+		h._ab_feedback("sec", "deny")
+		return
+	super()
 
 ## RMB let go: both palms drive forward (PUSH_T later the spear leaves them). A push, not a throw: no arm
 ## drawn back, no release flick.
@@ -727,6 +744,9 @@ func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	spear_aim = false
 	AimKit.hide(h, "rmb")
+	if not rime.is_empty():
+		h._ab_feedback("sec", "deny")      # held into the seal: let go in the statue, nothing goes
+		return
 	if not spend_rmb():
 		lk().drop("spear_prop")
 		if anim_id == "tm_spear_aim":
@@ -734,7 +754,7 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	throw_t = PUSH_T
 	play("tm_spear")
-	m.sfx("rime_spear_aim", h.pos, -4.0, 0.8)
+	KitWindup.play(self, "rmb", "rime_spear_aim", -4.0, 0.8)
 
 
 ## The push: the spear rides out on her palms until they are fully extended. A stun or the seal drops it.
@@ -743,6 +763,7 @@ func _tick_throw(dt: float) -> void:
 		return
 	if busy() or not rime.is_empty():
 		_drop_throw()
+		if busy(): KitWindup.broken(self, "rmb")
 		return
 	throw_t -= dt
 	_hold_spear(1.0, -0.25 * throw_t / PUSH_T)
