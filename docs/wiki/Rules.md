@@ -79,6 +79,29 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | voice_prefixes | ["v_"] |
 | big_event | {"sounds": ["ult_tag_foe", "heart_reveal", "heart_gate_open", "steal_won", "steal_lost"], "dip_db": -6.0, "in_s": 0.12, "hold_s": 0.3, "recover_s": 1.0} |
 
+## base_axes (`content/rules/base_axes.json`)
+
+Raising leans (docs/decisions/0102-raising-leans.md, scripts/home/base_axes.gd): care moves three personality axes, each -1..1 in rec['raised'] (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle); BaseLife.choose reads them. tools/garden_sim.py reads this same file for its care-style rows.
+
+| Setting | Value |
+|---|---|
+| steps | {"fed": {"busy": -0.04}, "petted": {"gentle": 0.06, "bold": -0.02}, "talked": {"bold": 0.04, "gentle": 0.02}, "played": {"busy": 0.09}, "trained": {"busy": 0.03, "gentle": -0.06, "bold": 0.03}, "pet_win": {"bold": 0.06}} |
+| steps_doc | per care kind (the Care.care_day kinds): axis change for the first such care of a farm day, in axis units. |
+| cap | 0.6 |
+| cap_doc | an axis never leaves -cap..cap, so the inborn traits still matter. |
+| weights | {"nap": {"busy": -0.6}, "play": {"busy": 0.6, "gentle": 0.2}, "chase": {"bold": 0.5, "gentle": -0.5}, "cling": {"bold": -0.6}} |
+| weights_doc | per activity: its odds in BaseLife.choose are times 1 + the sum of weight x axis (nap: a nap on a roaming think, play: a toy, chase: a game of tag, cling: staying beside you). |
+| mult | [0.4, 1.8] |
+| mult_doc | the least and most an activity's odds are scaled. |
+| nap_odds | 0.25 |
+| nap_odds_doc | chance a roaming Boki's think (2-5 s) turns into a nap per unit its nap scale is over 1: a Boki with no lean or a busy one never naps this way, a lazy one does now and then. |
+| band | 0.25 |
+| band_doc | an axis past +-band writes a journal line once, when it crosses. |
+| words | {"bold": ["bolder", "shyer"], "busy": ["livelier", "lazier"], "gentle": ["gentler", "rougher"]} |
+| words_doc | per axis: [line when it rises, line when it falls], written as 'is getting <word>'. |
+| styles | {"none": [], "feeder": ["fed"], "cuddler": ["fed", "petted", "talked"], "player": ["fed", "played"], "trainer": ["fed", "trained", "pet_win"]} |
+| styles_doc | care styles for --garden-sim-check: the kinds of care given every day for 10 days (the sim's own guess at how a player cares). |
+
 ## base_drift (`content/rules/base_drift.json`)
 
 Trait drift (GARDEN.md section 3, lever 3; scripts/home/base_drift.gd): with farm_build.json base_mode on, once per in-game day at home each Boki's four traits (0..1) move a small step toward the average of its friends (base life bonds at or above base_life friend_at). Rivals do not pull.
@@ -1330,8 +1353,8 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 | first_evo_level | 8 |
 | first_evo_level_doc | The first real form swap: Echolop's final (evo_paths.json zapple level 8). Also reported: level 4 (today's Evo.on_level form step) and 16 (the other branching finals). |
 | report_levels | [4, 8, 16] |
-| bands | {"form_lv4_day": [1, 10], "evolution_day": [3, 14], "budget_full_day": [7, 30], "stat_total": [216, 240], "gems_day": [43, 300], "joy": [50, 90]} |
-| bands_doc | Target bands, [low, high], every player must land inside (docs/GARDEN.md Balance). form_lv4_day: median day of the first form step (Evo.on_level, level 4, 600 XP); evolution_day: median day of the first real form swap (first_evo_level) on garden XP alone, so a home-only player still evolves (DECISIONS 2026-11-09); budget_full_day: when the 240 budget fills (only checked where it fills inside the month: never trivial); stat_total: total at the end of the month (90% of 240 or more: even five minutes a day nearly fills it); gems_day: mean gems earned a day (at least a weekly Wayseed, 300 / 7, so home-only players reach every zone; at most one a day); joy: mean joy over a visit (above sulky, below always full so toys and cares still matter). |
+| bands | {"form_lv4_day": [1, 10], "evolution_day": [3, 14], "budget_full_day": [7, 30], "stat_total": [216, 240], "gems_day": [43, 300], "joy": [40, 90]} |
+| bands_doc | Target bands, [low, high], every player must land inside (docs/GARDEN.md Balance). form_lv4_day: median day of the first form step (Evo.on_level, level 4, 600 XP); evolution_day: median day of the first real form swap (first_evo_level) on garden XP alone, so a home-only player still evolves (DECISIONS 2026-11-09); budget_full_day: when the 240 budget fills (only checked where it fills inside the month: never trivial); stat_total: total at the end of the month (90% of 240 or more: even five minutes a day nearly fills it); gems_day: mean gems earned a day (at least a weekly Wayseed, 300 / 7, so home-only players reach every zone; at most one a day); joy: mean joy over a visit (above the whistle's sulky_joy 25, below always full so toys and cares still matter; the low end was 50 until the farm joy tune cut toys joy_gain 10 to 3, which puts 5 to 30 minute visits at 40 to 48). |
 | joy_model | {"away": 30.0, "care": 6.0, "decay_per_min": 0.6} |
 | joy_model_doc | assume, copies of scripts/core/care.gd: a Boki away a day sits at the offline joy floor 30; each first care gives about 6 joy (Care.feed base); joy falls DECAY['joy'] 0.6 a minute. Toy joy_gain and joy_below are read from toys.json. |
 | garden_xp_unbuilt | {"care_kinds": 3, "wish": 3, "sunsap": 40} |
