@@ -219,12 +219,11 @@ func _breathe(t0: int) -> int:
 ## doubled an M5's warm-up (eight frames a batch, each ~30 ms with the map loaded; item 33).
 const BATCH := 4
 const BATCH_MIN := 2
-## The most stand-ins a batch grows to. Doubling without a cap reached batches of 32-64, and when such a batch met a
-## run of new pipelines it was a 1.5 s frame (RTX 4090, Forward+, jobq 120840): the next batch is also sized from the
-## last one's cost per stand-in. Forward+ builds each new pipeline as it first draws (~60 ms each from a cold cache on
-## the 4090, so a batch of 16 was still a 1 s frame, jobq 121543): there a batch stays small (BATCH_MAX_RD).
+## The most stand-ins a batch grows to (doubling went up to 512): one batch of cheap stand-ins says little about the
+## next. The next batch is also sized from the last one's cost per stand-in. On the RTX 4090 bench (Forward+, cold
+## cache) a batch of 4 still cost 320-360 ms now and then (the slow-batch note names them), and a cap of 4 cost 2.5 s
+## of load for ~2 fewer slow frames, so the cap stays at 16.
 const BATCH_MAX := 16
-const BATCH_MAX_RD := 4
 const FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
@@ -277,7 +276,6 @@ func _mob_stand_ins() -> Node3D:
 			for ps in particles:
 				var p := GPUParticles3D.new()
 				p.amount = 1
-				p.emitting = false      # (its stand-in emits, in a batch: all of them first ran in one 1 s frame)
 				p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
 				var pm := ShaderMaterial.new()
 				pm.shader = ps
@@ -302,7 +300,6 @@ func _mob_stand_ins() -> Node3D:
 		elif sh.get_mode() == Shader.MODE_PARTICLES:
 			var p := GPUParticles3D.new()
 			p.amount = 1
-			p.emitting = false
 			p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
 			var pm := ShaderMaterial.new()
 			pm.shader = sh
@@ -361,6 +358,15 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	# are all still there.
 	var keep_mask := m.cam.cull_mask
 	m.cam.cull_mask = LAYER
+	step = "sources"
+	var list: Array = await _sources(seen)
+	if not m.is_inside_tree():
+		return false
+	if list.is_empty():
+		m.cam.cull_mask = keep_mask
+		return true
+	var cb := m.cam.global_transform.basis
+	var front := m.cam.global_position - cb.z * 6.0
 	var wl := _lights()
 	# (a camera culls lights by their layers too: every light joins the stand-ins' layer meanwhile,
 	# or they'd all draw unlit)
@@ -375,16 +381,6 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		(l as Light3D).layers |= LAYER
 		if l is DirectionalLight3D:
 			(l as Light3D).light_cull_mask = LAYER
-	# (the lights first: _sources' frames draw too, and with the sun still casting the whole map's shadows the first of
-	# them built every material's shadow pipeline at once, a 1 s frame on the RTX 4090, jobq 122605)
-	if not await _env_in_steps():
-		return false
-	step = "sources"
-	var list: Array = await _sources(seen)
-	if not m.is_inside_tree():
-		return false
-	var cb := m.cam.global_transform.basis
-	var front := m.cam.global_position - cb.z * 6.0
 	step = "plain"
 	# what a frame costs with nothing new in it, to tell a batch's own cost from plain drawing
 	await m.get_tree().process_frame
@@ -398,8 +394,7 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	var setups := [[false, false]]
 	if RenderingServer.get_current_rendering_driver_name() == "opengl3":
 		setups = [[false, false], [true, false], [false, true], [true, true]]
-	var cap := BATCH_MAX if setups.size() > 1 else BATCH_MAX_RD
-	var n := mini(BATCH, cap)
+	var n := BATCH
 	var i := 0
 	var batches := 0
 	while i < list.size():
@@ -452,7 +447,7 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 			n = maxi(BATCH_MIN, n / 2)
 		elif extra < FRAME_MS * 0.6:
 			var fit := int(FRAME_MS / maxf(0.5, extra / batch.size()))
-			n = clampi(mini(n * 2, fit), BATCH_MIN, cap)
+			n = clampi(mini(n * 2, fit), BATCH_MIN, BATCH_MAX)
 	await m.get_tree().process_frame
 	for li in lights.size():
 		if is_instance_valid(lights[li]):
@@ -462,27 +457,6 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	m.cam.cull_mask = keep_mask
 	PerfLog.note("warm-up: %d stand-ins in %d batches" % [list.size(), batches])
 	return m.is_inside_tree()
-
-## The environment's effects, each building its pipelines the first frame it draws. All of them on the warm-up's
-## first 3D frames was a 0.5-1.1 s frame on the RTX 4090 (jobq 123125: the source scan, nothing of the match in view).
-const ENV_FX := ["ssao_enabled", "ssil_enabled", "ssr_enabled", "sdfgi_enabled", "glow_enabled", "fog_enabled",
-		"volumetric_fog_enabled", "adjustment_enabled"]
-
-## Turns the environment's effects off and back on one a frame, so each first draw gets a frame of its own.
-## False if the match went away meanwhile.
-func _env_in_steps() -> bool:
-	step = "environment"
-	var env: Environment = m.cam.environment if m.cam.environment else m.get_viewport().find_world_3d().environment
-	if env == null:
-		return true
-	var on: Array = ENV_FX.filter(func(f: String) -> bool: return bool(env.get(f)))
-	for f: String in on: env.set(f, false)
-	for f: String in on:
-		await m.get_tree().process_frame
-		if not m.is_inside_tree():
-			return false
-		env.set(f, true)
-	return true
 
 ## A batch slower than this names its stand-ins in the --load-check notes.
 const SLOW_BATCH_MS := 250.0
