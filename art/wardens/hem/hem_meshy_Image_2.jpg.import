@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://br42y0e7pobo0"
-path="res://.godot/imported/hem_meshy_Image_2.jpg-ab8c3055c822a0b2f567df433b43498b.ctex"
+path.s3tc="res://.godot/imported/hem_meshy_Image_2.jpg-ab8c3055c822a0b2f567df433b43498b.s3tc.ctex"
+path.etc2="res://.godot/imported/hem_meshy_Image_2.jpg-ab8c3055c822a0b2f567df433b43498b.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "aaeaefa90769c5b576ee047df1fced32"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/hem/hem_meshy_Image_2.jpg"
-dest_files=["res://.godot/imported/hem_meshy_Image_2.jpg-ab8c3055c822a0b2f567df433b43498b.ctex"]
+dest_files=["res://.godot/imported/hem_meshy_Image_2.jpg-ab8c3055c822a0b2f567df433b43498b.s3tc.ctex", "res://.godot/imported/hem_meshy_Image_2.jpg-ab8c3055c822a0b2f567df433b43498b.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

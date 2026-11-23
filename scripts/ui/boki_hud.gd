@@ -394,6 +394,8 @@ static func order_tip(h_v, p: Hunter) -> Array:
 	out.append(["Hold and flick: up Chase (stick to a foe), right Guard (hold this spot), down Return (back on you), left Follow (at your side).", h_v.INK, 14])
 	if k.ks and not k.ks.throw_effects.is_empty():
 		out.append(["Its Sic also: " + KinText.effects(k.ks.throw_effects), KinRules.effects_color(k.ks.throw_effects), 13])
+	if k.wisp or k.summon and k.summon.out():
+		out.append([KinSummon.perk_line(), h_v.MUTED, 13])
 	if k.ks:
 		out.append([KinText.carry(k.ks), KinRules.cat_color("sustain"), 13])
 		var off := KinText.carry_off(k.ks)
