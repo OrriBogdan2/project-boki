@@ -479,9 +479,9 @@ func char_lean() -> Basis:
 	return Basis(Vector3.RIGHT.rotated(Vector3.UP, yaw + Record.orbit_yaw), -a)
 
 
-## A body's basis: leaned toward the camera (char_lean), then turned to `face`, keeping its scale.
-func char_basis(face: float, scl: Vector3) -> Basis:
-	return char_lean() * Basis(Vector3.UP, face).scaled_local(scl)
+## A body's basis: leaned toward the camera (char_lean) unless `lean` is off, then turned to `face`, keeping its scale.
+func char_basis(face: float, scl: Vector3, lean := true) -> Basis:
+	return (char_lean() if lean else Basis()) * Basis(Vector3.UP, face).scaled_local(scl)
 
 
 ## The mouse's ray into the world: [origin, direction]. A ground-targeted move reads this, not inp["aim"] (that is the
