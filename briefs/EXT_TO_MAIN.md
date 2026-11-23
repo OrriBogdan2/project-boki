@@ -11174,3 +11174,4 @@ READY ext/vfx-boki-type-hits 8f8ed8b4acb0e5544d926e9320f574ac58311dbc (supersede
 READY ext/tut-playthrough-native 3632f025ddd4ebe819803bea8c299040bf5f18cd (tutorial finishes with every starter)
 READY ext/vision-fog-flat-dim-1123 0430b0f2b7 (supersedes 004a508e60; origin/main merged, 0 behind; only conflict tools/checks/vfx.gd kept both check entries; --check 0 failures, --vision-check 0, --fx-hunter-cap-check ok, health --strict OK after shortening a long comment)
 READY ext/vfx-summon-type-colour 903fcdcb36 (origin/main merged; only conflict tools/checks/vfx.gd, kept both check entries; import rc 0, --check 0 fail, --boki-wisp-check PASS, health --strict red only on sfx loudness (no numpy here); style ratchet clean)
+READY ext/anim-lace-native-clips e27ff53c5ff94234f17736f06e0c354a4dd82439 (Lace native bow clips)
