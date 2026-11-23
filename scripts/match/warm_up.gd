@@ -269,6 +269,7 @@ func _mob_stand_ins() -> Node3D:
 			for ps in particles:
 				var p := GPUParticles3D.new()
 				p.amount = 1
+				p.emitting = false      # (its stand-in emits, in a batch: all of them first ran in one 1 s frame)
 				p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
 				var pm := ShaderMaterial.new()
 				pm.shader = ps
@@ -293,6 +294,7 @@ func _mob_stand_ins() -> Node3D:
 		elif sh.get_mode() == Shader.MODE_PARTICLES:
 			var p := GPUParticles3D.new()
 			p.amount = 1
+			p.emitting = false
 			p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
 			var pm := ShaderMaterial.new()
 			pm.shader = sh
@@ -427,6 +429,8 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 				worst = maxf(worst, (now - t0) / 1000.0)
 				t0 = now
 		batches += 1
+		if worst > SLOW_BATCH_MS:
+			PerfLog.note("warm-up: slow batch %.0f ms: %s" % [worst, ", ".join(batch.map(_who))])
 		for px in pxs: (px as Node).queue_free()
 		i += batch.size()
 		progress.call(float(i) / list.size())
@@ -445,6 +449,15 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	m.cam.cull_mask = keep_mask
 	PerfLog.note("warm-up: %d stand-ins in %d batches" % [list.size(), batches])
 	return m.is_inside_tree()
+
+## A batch slower than this names its stand-ins in the --load-check notes.
+const SLOW_BATCH_MS := 250.0
+
+static func _who(src: Variant) -> String:
+	if not is_instance_valid(src):
+		return "?"
+	var gi := src as GeometryInstance3D
+	return "%s %s" % [(src as Node).name, _key(gi).left(60) if gi else ""]
 
 ## The render layer warm_up's stand-ins draw on (nothing else in the game uses it).
 const LAYER := 1 << 19
