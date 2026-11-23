@@ -65,7 +65,11 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var vp := SubViewport.new()
 	vp.own_world_3d = true
-	vp.msaa_3d = Viewport.MSAA_2X
+	# a live full-screen world: smoothed as the player's "Smooth edges" smooths the game's own view (a fixed 2x
+	# here made Very Low, the software-GL pick, draw 2 s a frame on llvmpipe, 171 ms without; KinPortrait's
+	# one-off renders keep theirs)
+	vp.msaa_3d = get_tree().root.msaa_3d
+	vp.screen_space_aa = get_tree().root.screen_space_aa
 	add_child(vp)
 	_w3 = Node3D.new()
 	vp.add_child(_w3)
