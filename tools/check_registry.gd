@@ -749,7 +749,6 @@ const CHECKS := {
 	"--hunter-flash-shots": ["res://tools/hunter_flash_shots.gd", "hunter_flash_shots", null],  # GPU
 	"--garden-first-15-check": ["res://tools/garden_first15_check.gd", "garden_first15_check", null],
 	"--garden-only-pass-check": ["res://tools/garden_only_pass_check.gd", "garden_only_pass_check", null],
-	"--goals-next-check": ["res://tools/goals_next_check.gd", "goals_next_check", null],
 	"--garden-first-day-check": ["res://tools/garden_first_day_check.gd", "garden_first_day_check", null],
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],  # trust from care
 	"--pet-react-check": ["res://tools/pet_react_check.gd", "pet_react_check", null],  # a pat by personality
@@ -974,7 +973,6 @@ const CHECKS := {
 	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],  # the rocket drop (GPU)
 	"--cinder-shift-video": ["res://tools/cinder_shift_video.gd", "cinder_shift_video", null],
 	"--tenzo-stone-video": ["res://tools/tenzo_stone_video.gd", "tenzo_stone_video", null],  # Tenzo E + R stone (GPU)
-	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
 	"--gil-rmb-video": ["res://tools/gil_rmb_video.gd", "gil_rmb_video", null],  # Gil RMB press + R leap-off (GPU)
 	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],  # hit strength
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
