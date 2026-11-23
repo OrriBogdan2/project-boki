@@ -1418,6 +1418,8 @@ Trust from care at the base (Care.trust_up). Petting, its habit food and winning
 | pet | 1 |
 | food | 2 |
 | win | 3 |
+| taper | {"free": 6, "step": 0.35, "floor": 0.05} |
+| taper_doc | Per-Boki daily taper on every trust gain (Care.trust_add: pets, habit food, wins, fetch, chats, hand feeding, minigame wins). The first free paid acts in a window (care.json care_day_s, opened by the first act) pay in full; act free+n pays 1 - step x n of its amount, never under floor. The window resets when care_day_s has passed, so a new garden day pays in full again. |
 | cooldown_h | 1 |
 | hour_s | 12.5 |
 | say | {"pet": "%s loved the scratches: trust up", "food": "%s loves %s: trust up", "win": "%s won with you: trust up"} |

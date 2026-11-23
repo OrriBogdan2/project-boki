@@ -638,7 +638,7 @@ func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> 
 		mem.append({"m": m, "kind": kind, "text": text})
 	while mem.size() > MAX_MEMORY:
 		mem.pop_front()
-	k["trust"] = clampf(float(k["trust"]) + trust_delta, 0.0, 100.0)
+	Care.trust_add(k, trust_delta, Time.get_unix_time_from_system())
 
 func has_building(b: String) -> bool:
 	return d.get("buildings", []).has(b)
