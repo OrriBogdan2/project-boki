@@ -83,7 +83,9 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	glb.name = "Warden"
 	glb.rotation.y = PI  # (Meshy faces +Z; a Hunter's model faces -Z)
 	model.add_child(glb)
-	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb)) * float(e.get("scale", 1.0))  # ("scale": a Hunter whose Meshy body reads smaller than the contract model's in the match frame)
+	var fit := _fit(model, WardenGlb.skeleton(glb))
+	var wide := float(e.get("wide", 1.0))  # "wide": a body that reads smaller than the contract model's in the match frame is widened (x, z) with its head height kept
+	glb.scale = Vector3(fit * wide, fit, fit * wide)
 	var nat := WardenNative.new()
 	nat.name = "Native"
 	nat.art_id = WardenGlb.art(arch)
