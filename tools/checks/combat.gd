@@ -5,6 +5,13 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
+	"--arena-check": ["res://tools/arena_check.gd", "arena_check", null],  # the Arena, training's practice tools, the kit card
+	"--archetype-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # every archetype kit, controls, locks, infusion, feel
+	"--kit-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # (same tool: the combo section)
+	"--mage-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # Sparkle's cross-ability interactions
+	"--gunslinger-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # Vex's cross-ability interactions
+	"--boss-check": ["res://tools/boss_check.gd", "boss_check", null],  # boss lairs: dial, wards, phases, the Rare Egg
 }
