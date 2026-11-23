@@ -81,7 +81,7 @@ as Meshy made them; only the vertex data is replaced) and packs it with `native_
 Sable weight fixes are not applied to these. Tenzo rides `orbit_stones`, Motley `orbit_cards`, both on `Head`.
 Every state plays one of the six clips (the same map as Sable's), so none can T-pose.
 
-## Grimble (dredge): goo arm, pack, coin cap (r7)
+## Grimble (dredge): goo arm, pack, coin cap (r7), tail chain and cleanup (r8)
 `art/wardens/dredge/dredge_meshy.glb` (skin-native, skin-goo, hoard pack, coin cap) is the r5 body re-skinned by
 `tools/meshy/dredge_reskin.py OUT R5 R3 [tail_arm]` (`--stretch FILE.glb` lists edges stretched >3x and over 6 cm).
 - Goo: one mesh, no cuts (r6 cut it at 0.8 m, which left floating pieces). Own vertex copies, Meshy's weights without
@@ -92,4 +92,15 @@ Every state plays one of the six clips (the same map as Sable's), so none can T-
 - Pack: rigid on the spine. Coin cap: texture hue-shifted orange to gold, 0.7x about the skull.
 Longest goo edge over Idle/Attack/run/walk/jump: 0.16 m idle, 0.20 run, 0.26 Attack at 0.5 s (1366 edges >3x and over
 6 cm there; r6 35 but cut in pieces); skin 0.22 m (as r6).
+r8, `tools/meshy/dredge_post.py OUT IN` on the r7 body (IN = the r7 glb, never the file it wrote; `--islands FILE` counts):
+- Islands: a body piece (skin, goo, leather pack) of under 1000 triangles that touches no other (1 mm) is deleted,
+  so the loose pink chunk and the torn shards are gone (skin and goo are one island each; the brass fittings and the
+  coin pile are many small pieces on purpose). The pale crescent Meshy fused to the right heel (skin triangles of
+  the goo's pale texture in a box beside the shin, 1197 triangles) is deleted too.
+- Tail chain: GooTail0..3 under `RightHand`, the goo below the hand weighted along them by height (it bends, never
+  shears against the hips). Each clip gets baked rotation keys for them: the first follows the hand, the rest keep
+  their rest direction (they hang) and take 60/50/50 % of the bone above's turn with a lag. Goo edges over 3x and
+  6 cm: Attack 0.5 s 113 (r7 1366), run 16, idle 0.
+- Attack: the head and upper-spine bend of Meshy's lunge is cut to 35 % (Spine02, Spine01, neck, Head keys).
+Grimble has no hit clip: a hit is the Hips flinch spring (WardenFlinch) over the playing clip.
 The gun's hip is data (`holster.hip.pos`, x +0.17 = his left, where the gauntlet draws it).

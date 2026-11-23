@@ -16,6 +16,7 @@ Runs on the r7 body (tools/meshy/dredge_reskin.py output) and writes the game gl
 Needs numpy and scipy (the venv).
 """
 
+import io
 import sys
 
 import dredge_reskin as rs
@@ -23,17 +24,23 @@ import native_pack as n
 import numpy as np
 import scipy.sparse as sp
 from scipy.sparse.csgraph import connected_components
+from PIL import Image
 from scipy.spatial import cKDTree
 
 ISLAND_TOL = 0.001  # m: vertices this close are one vertex (UV seams, decimation splits)
 MIN_TRIS = 1000  # an island of fewer triangles is a loose chunk (the body, goo, pack and cap are all far larger)
 CLEANED = ("skin-native", "skin-goo", "leather-pack")  # the primitives that must be one piece each
+BLADE_X, BLADE_Y = (-0.17, 0.02), (0.10, 0.62)  # m: the pale crescent Meshy fused to the right heel (skin, rest pose)
+BLADE_GROW = 0.06  # m: pale triangles this close to the crescent's body go with it (its root at the foot)
 HAND = "RightHand"
 CHAIN_Y = (0.97, 0.70, 0.43, 0.16)  # m: rest height of GooTail0..3 (the first is the hand's own origin)
 FADE_Y = 1.15  # m: the goo above this keeps its arm weights; between this and the hand it blends into GooTail0
-TAIL_FOLLOW = (1.0, 0.6, 0.5, 0.5)  # share of the bone above's turn each segment takes (the first is the hand's own); the rest it hangs
+# share of the bone above's turn each segment takes (the first is the hand's own); the rest it keeps hanging
+TAIL_FOLLOW = (1.0, 0.6, 0.5, 0.5)
 LAG = (0.0, 0.4, 0.5, 0.6)  # per frame carry-over of each segment's direction (a later swing down the chain)
 FPS = 30.0
+# the attack clip keeps this share of its head and upper-spine bend
+LUNGE_CLIP, LUNGE_BONES, LUNGE_KEEP = "Attack", ("Spine02", "Spine01", "neck", "Head"), 0.35
 
 
 def island_labels(pos, faces, tol=ISLAND_TOL):
@@ -53,6 +60,62 @@ def prim_faces(js, b, prim):
     dt = np.uint32 if ia["componentType"] == 5125 else np.uint16
     raw = np.frombuffer(n.view_bytes(js, b, ia["bufferView"]), dt, ia["count"], ia.get("byteOffset", 0))
     return raw.reshape(-1, 3).astype(np.int64)
+
+
+def pale_tris(js, b, prim, pos, faces):
+    """Triangles whose texture is the goo's pale pink (the crescent's colour; the skin proper is darker)."""
+    tex = js["materials"][prim["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    bv = js["bufferViews"][js["images"][js["textures"][tex]["source"]]["bufferView"]]
+    px = np.asarray(Image.open(io.BytesIO(b[bv.get("byteOffset", 0) :][: bv["byteLength"]])).convert("RGB"))
+    uv = n.floats(js, b, prim["attributes"]["TEXCOORD_0"])[faces].mean(1)
+    h, w = px.shape[:2]
+    c = px[(np.clip(uv[:, 1], 0, 0.999) * h).astype(int), (np.clip(uv[:, 0] % 1, 0, 0.999) * w).astype(int)].astype(int)
+    return (c[:, 0] > 170) & (c[:, 1] > 110) & (c[:, 2] > 150)
+
+
+def drop_blade(js, b, out):
+    """Deletes the pale crescent on the right heel (a sheet of skin rising beside the shin); returns its triangles."""
+    prim = js["meshes"][0]["primitives"][0]
+    pos = n.floats(js, b, prim["attributes"]["POSITION"])
+    f = prim_faces(js, b, prim)
+    pale = pale_tris(js, b, prim, pos, f)
+    c = pos[f].mean(1)
+    core = pale & (c[:, 0] > BLADE_X[0]) & (c[:, 0] < BLADE_X[1]) & (c[:, 1] > BLADE_Y[0]) & (c[:, 1] < BLADE_Y[1])
+    idx = np.flatnonzero(core)
+    lab = island_labels(pos, f[idx], 0.006)
+    body = np.zeros(len(f), bool)
+    body[idx[lab == np.bincount(lab).argmax()]] = True  # the crescent is the biggest pale piece in the box
+    near = cKDTree(pos[np.unique(f[body])]).query(c)[0] < BLADE_GROW
+    gone = body | (near & pale & (c[:, 1] > 0.02))
+    js["accessors"].append(
+        {"bufferView": out.add_view(f[~gone].astype(np.uint32).tobytes()), "componentType": 5125,
+         "count": int((~gone).sum()) * 3, "type": "SCALAR"}
+    )
+    prim["indices"] = len(js["accessors"]) - 1
+    return int(gone.sum())
+
+
+def slerp_to(q, rest, keep):
+    """Keys q (frames x xyzw) turned back toward the rest rotation: keep = 1 leaves them, 0 is the rest pose."""
+    q = q * np.where((q @ rest) < 0, -1.0, 1.0)[:, None]
+    d = np.clip(q @ rest, -1, 1)
+    th = np.arccos(d)
+    a = np.where(th < 1e-5, 1.0, np.sin(keep * th) / np.maximum(np.sin(th), 1e-9))
+    c = np.where(th < 1e-5, 1.0, np.sin((1 - keep) * th) / np.maximum(np.sin(th), 1e-9))
+    out = a[:, None] * q + c[:, None] * rest
+    return out / np.linalg.norm(out, axis=1, keepdims=True)
+
+
+def soften_lunge(js, b, out):
+    """Meshy's lunge folds the spine forward: the attack clip's bend turned back toward upright by 1 - LUNGE_KEEP."""
+    clip = next(a for a in js["animations"] if a["name"] == LUNGE_CLIP)
+    for ch in clip["channels"]:
+        node = js["nodes"][ch["target"]["node"]]
+        if node.get("name") in LUNGE_BONES and ch["target"]["path"] == "rotation":
+            smp = clip["samplers"][ch["sampler"]]
+            keys = n.floats(js, b, smp["output"]).astype(float)
+            rest = np.array(node.get("rotation", [0, 0, 0, 1]))
+            smp["output"] = out.add_floats(slerp_to(keys, rest, LUNGE_KEEP), "VEC4")
 
 
 def count_islands(path):
@@ -124,7 +187,7 @@ def goo_vertices(js, b):
 
 
 def chain_points(pos, hand):
-    """Rest origins of GooTail0..3 and the tip: the hand's own, then the goo's centre (x, z) in a slab at each height."""
+    """Rest origins of GooTail0..3 and the tip: the hand's, then the goo's centre (x, z) in a slab at each height."""
     pts = [hand]
     for y in CHAIN_Y[1:]:
         near = pos[np.abs(pos[:, 1] - y) < 0.06]
@@ -220,13 +283,20 @@ def add_tail_clips(js, out, baked, first):
     for a, (times, keys) in zip(js["animations"], baked):
         tin = out.add_floats(times, "SCALAR")
         for k in range(len(CHAIN_Y)):
-            a["samplers"].append({"input": tin, "output": out.add_floats(keys[:, k], "VEC4"), "interpolation": "LINEAR"})
+            smp = {"input": tin, "output": out.add_floats(keys[:, k], "VEC4"), "interpolation": "LINEAR"}
+            a["samplers"].append(smp)
             node = js["skins"][0]["joints"][first + k]
             a["channels"].append({"sampler": len(a["samplers"]) - 1, "target": {"node": node, "path": "rotation"}})
 
 
 def build(out_path, in_path):
     rig = rs.Rig(in_path)
+    out = n.Out(rig.js, rig.b)
+    blade = drop_blade(rig.js, rig.b, out)
+    soften_lunge(rig.js, rig.b, out)
+    rs.compact(out)
+    out.write(out_path)  # (each stage writes and reloads: a new index array lives in the new file's buffer)
+    rig = rs.Rig(out_path)
     out = n.Out(rig.js, rig.b)
     gone = drop_islands(rig.js, rig.b, out)
     rs.compact(out)
@@ -246,15 +316,16 @@ def build(out_path, in_path):
     nj, nw = rs.top4(rs.dense(joints, weights, first + len(CHAIN_Y)))
     gj, gw = new_goo_weights(joints[gv], weights[gv], pos[gv], first, ys)
     nj[gv], nw[gv] = gj, gw
-    ja = {"bufferView": out.add_view(nj.astype(np.uint16).tobytes()), "componentType": 5123, "count": len(nj), "type": "VEC4"}
-    js["accessors"].append(ja)
+    view = out.add_view(nj.astype(np.uint16).tobytes())
+    js["accessors"].append({"bufferView": view, "componentType": 5123, "count": len(nj), "type": "VEC4"})
     jacc, wacc = len(js["accessors"]) - 1, out.add_floats(nw, "VEC4")
     for p in prims[:2]:
         p["attributes"]["JOINTS_0"], p["attributes"]["WEIGHTS_0"] = jacc, wacc
     add_tail_clips(js, out, baked, first)
     rs.compact(out)
     out.write(out_path)
-    print(f"islands removed {gone[0]} ({gone[1]} tris), chain {np.round(rest_pts[:, 1], 2).tolist()} written {out_path}")
+    print(f"heel crescent {blade} tris, {gone[0]} islands ({gone[1]} tris), chain at {np.round(ys, 2).tolist()}")
+    print("written", out_path)
 
 
 if __name__ == "__main__":
