@@ -53,7 +53,7 @@ func _is_ground(w: World, i: int) -> bool:
 	return w.kind[i] == World.T_GROUND and not w.bridge.has(i) and w.island[i] >= 0
 
 func _on_hazard(w: World, i: int) -> bool:
-	var p := Vector2(i % w.w + 0.5, i / w.w + 0.5)
+	var p := Vector2(i % w.w + 0.5, int(i / float(w.w)) + 0.5)
 	return hazard_polys.any(func(poly): return Geometry2D.is_point_in_polygon(p, poly))
 
 func _shares(w: World, sd: int, T: Dictionary) -> void:
