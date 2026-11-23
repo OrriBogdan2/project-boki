@@ -46,6 +46,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(mn: Node, _arch := "") -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
 	var fresh: Dictionary = Save.d.duplicate(true)
