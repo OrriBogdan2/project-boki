@@ -4,17 +4,24 @@ extends RefCounted
 ## second pat, proud allows one pat and walks off, sleepy purrs and naps. Each shows its mood icon and pays
 ## joy and trust, spamming pays no more than the daily cap, the next farm day pays again, a visit pays nothing.
 
-class StubFx extends RefCounted:
+
+class StubFx:
+	extends RefCounted
+
 	func burst(_at: Vector3, _col: Color, _n: int, _speed: float) -> void:
 		pass
 
-class Stub extends RefCounted:
+
+class Stub:
+	extends RefCounted
 	var ppos := Vector3.ZERO
 	var verbs := HomeVerbs.new()
 	var fx := StubFx.new()
 	var toasts := 0
+
 	func _toast(_txt: String) -> void:
 		toasts += 1
+
 
 const TRAITS := {
 	"playful": {"bravery": 0.5, "temper": 0.3, "curiosity": 0.8},
@@ -27,9 +34,12 @@ const ICONS := {"playful": "♪", "proud": "★", "sleepy": "z"}
 var bad := 0
 var scene: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("PETREACT %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _boki(kd: String) -> Dictionary:
 	var rec := Save.new_kin("cindle", kd)
@@ -45,15 +55,19 @@ func _boki(kd: String) -> Dictionary:
 	scene.add_child(n)
 	return {"rec": rec, "node": n, "pos": Vector3(3, 0, 0), "goal": Vector3.INF, "t": 0.0}
 
+
 func _pat(s: Stub, k: Dictionary) -> Dictionary:
 	return PetReact.pet(s, k)
+
 
 func _icon(k: Dictionary) -> String:
 	var lbl := (k["node"] as Node3D).get_node_or_null("PetIcon") as Label3D
 	return lbl.text if lbl else ""
 
+
 func _joy(k: Dictionary) -> float:
 	return Care.need(k["rec"], "joy")
+
 
 func _next_day(rec: Dictionary) -> void:
 	var day := float(Content.rules("care")["care_day_s"])
@@ -61,13 +75,15 @@ func _next_day(rec: Dictionary) -> void:
 		rec["care_day"][kind] = float(rec["care_day"][kind]) - day - 1.0
 	rec["care_t"] = {}
 
+
 func _spam(s: Stub, kd: String) -> void:
 	var k := _boki(kd)
 	var cap := int(PetReact.rules()["kinds"][kd]["cap"])
 	var paid := 0
 	for _i in 12:
-		k["pet_at"] = Time.get_ticks_msec() / 1000.0      # a shy one is always on its second pat
-		if _pat(s, k)["paid"]: paid += 1
+		k["pet_at"] = Time.get_ticks_msec() / 1000.0  # a shy one is always on its second pat
+		if _pat(s, k)["paid"]:
+			paid += 1
 	ok(paid <= cap, "%s: 12 pats in a row pay %d time(s), the daily cap is %d" % [kd, paid, cap])
 	var trust := float(k["rec"]["trust"])
 	var joy := _joy(k)
@@ -76,11 +92,14 @@ func _spam(s: Stub, kd: String) -> void:
 	_next_day(k["rec"])
 	ok(_pat(s, k)["paid"], "%s: the next farm day pays again" % kd)
 
+
 func _pose(k: Dictionary) -> String:
 	return String((k["node"] as Node3D).get_meta("pose", ""))
 
+
 func _trust(k: Dictionary) -> float:
 	return float(k["rec"]["trust"]) - 10.0
+
 
 func run(m: Node) -> void:
 	Save.no_write = true

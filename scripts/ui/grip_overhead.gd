@@ -3,7 +3,8 @@ extends RefCounted
 ## Three small icons over every other hunter's nameplate, so rivals can read what they carry:
 ##   their two gloves (a frame in the glove's rarity colour, dimmed while it's on cooldown) and
 ##   their Boki's type badge (in the type colour; a soft glow when their bond meter is full: a
-##   Merge is coming. A deliberate tell, kept subtle).
+##   Merge is coming. A deliberate tell, kept subtle). In a fight (MusicDir.fight_on) only that glowing badge is
+##   drawn: the row was on every Hunter in 20 of 20 --clarity-shots fight frames (docs/COMBAT_CLARITY.md).
 ## Drawn with the nameplate (Hud._nameplate) in the row HudPlate leaves free under every plate
 ## (HudStyle.PLATE_ICON_ROW), so it moves and hides with it. Remote hunters' gloves, cooldowns and
 ## bond come over the net (GripNet). Look: HudStyle.
@@ -46,9 +47,13 @@ static func draw(hud, sp: Vector2, h) -> void:
 	var c: CanvasItem = hud.c
 	var cs := centres(sp)
 	var items := row(h)
+	var fight: bool = hud.m.music_dir != null and hud.m.music_dir.fight_on(hud.m)
 	for i in 3:
 		var it: Dictionary = items[i]
 		var ctr: Vector2 = cs[i]
+		if fight and not it["glow"]:
+			continue
+		SafeArea.note_as("grip_icons", Rect2(ctr - Vector2(ICON, ICON) * 0.5, Vector2(ICON, ICON)))
 		var a := 0.45 if it["dim"] else 1.0
 		if it["kind"] == "boki":
 			if String(it["id"]) == "":

@@ -205,7 +205,7 @@ func _front() -> void:
 	await until(func(): return String(hx.stage) == "name", 20.0, "the naming card")
 	await wait(1.0)
 	await shot("name_boki")
-	press("Tend the garden")
+	press("Skip tutorial")
 	await _wait_home()
 
 func _find_class(nd: Node, cname: String) -> Node:

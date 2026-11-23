@@ -73,14 +73,16 @@ const CATALOG := {
 	"blossom_tree": {"name": "Blossom tree", "cat": "Garden", "gems": 30, "block": true, "comfort": "wild"},
 	"lantern": {"name": "Lantern", "cat": "Lights", "gems": 15, "light": true, "block": true, "comfort": "bright"},
 	"lamp_post": {"name": "Lamp post", "cat": "Lights", "gems": 20, "light": true, "block": true, "comfort": "bright"},
-	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true, "top": 0.5, "comfort": "cosy"},
+	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true, "top": 0.5,
+			"comfort": "cosy"},
 	"kin_bed": {"name": "Boki bed", "cat": "Furniture", "gems": 15, "bed": true, "colour": true, "comfort": "cosy"},
 	"rug": {"name": "Picnic rug", "cat": "Furniture", "gems": 20, "size": [2, 2], "colour": true, "comfort": "cosy"},
 	"rug_long": {"name": "Long rug", "cat": "Furniture", "gems": 30, "size": [3, 2], "colour": true, "comfort": "cosy"},
 	"banner": {"name": "Banner", "cat": "Statues", "gems": 20, "colour": true, "comfort": "bright"},
 	"pillar": {"name": "Old pillar", "cat": "Statues", "gems": 40, "scrap": 2, "block": true, "comfort": "quiet"},
 	"kin_statue": {"name": "Boki statue", "cat": "Statues", "gems": 120, "scrap": 6, "block": true, "comfort": "quiet"},
-	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true, "comfort": "quiet"},
+	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true,
+			"comfort": "quiet"},
 	# the Boki base's playthings (HomeToys, content/rules/toys.json); the Base tab shows only while base_mode is on
 	"toy_ball": {"name": "Play ball", "cat": "Base", "gems": 12, "toy": true,
 		"desc": "A ball to chase and nudge. Trains Speed. Boki share it."},
@@ -165,16 +167,16 @@ static func fs(d: Dictionary) -> bool:
 	return int(of(d).get("fs", 0)) >= 1
 
 ## A brand new farm-start layout for a save (its own seed, so its own island).
-static func new_fs(d: Dictionary, seed := -1) -> Dictionary:
+static func new_fs(d: Dictionary, rng_seed := -1) -> Dictionary:
 	var L := fresh()
-	if seed <= 0:
+	if rng_seed <= 0:
 		var r := RandomNumberGenerator.new(); r.randomize()
-		seed = r.randi_range(1, 2147483646)
-	L["seed"] = seed
+		rng_seed = r.randi_range(1, 2147483646)
+	L["seed"] = rng_seed
 	L["fs"] = 1
 	L["fb"] = 1               # the farm-building pass: unlocks, construction sites, upgrades (FarmUnlocks, FarmSites)
 	L["made"] = true          # no "Make it home" suggestions: you choose where everything goes
-	L["sk"] = fs_scale(seed)
+	L["sk"] = fs_scale(rng_seed)
 	d["layout"] = L
 	# gems for a house and the essentials, and the first trough waits in storage to be set down
 	if not bool(d.get("fs_grant", false)):
@@ -380,19 +382,19 @@ static func lobe(level: int) -> Array:
 ## The home world: the islands from their definitions, then the main island's meadow grown out to
 ## the save's size. The original island's shape is untouched, so nothing that stood on it falls off.
 ## sk: a farm-start island's size scale (its layout's "sk"); 0 for the classic and procedural meadows.
-static func make_world(world: World, level: int, seed := 0, sk := 0.0) -> void:
+static func make_world(world: World, level: int, rng_seed := 0, sk := 0.0) -> void:
 	world.scatter_chunk = 1024      # the camera sees the whole home at once: one scatter batch per kind
 	# a farm-start island keeps only a small fixed heart round the portal: the rest is its own shape
 	var defs: Array = [["main", CORE_C, CORE_R] if sk <= 0.0 else ["main", FS_CORE_C, FS_CORE_R]]
 	for k in Data.ISLES:
 		defs.append([k, Data.ISLES[k]["c"], Data.ISLES[k]["r"]])
 	world.make_islands(SEED, W, H, defs)
-	grow_main(world, level, seed, sk)
+	grow_main(world, level, rng_seed, sk)
 	var spans := {}
 	# a farm-start island's ponds and cliffs (wild_fs) can't take a bridge's foot or its sign
 	var bad := {}
 	if sk > 0.0:
-		var wt := wild_fs(world, seed, sk, {})
+		var wt := wild_fs(world, rng_seed, sk, {})
 		for i in wt:
 			if String(wt[i]) in ["water", "cliff"]: bad[i] = true
 	for k in Data.ISLES:
@@ -501,15 +503,15 @@ static func bridge_span(world: World, k: String, bad := {}) -> Dictionary:
 		if not ends_ok: continue
 		var rect: Array = [lo2, b0b, hi2, b0b + 1] if horiz else [b0b, lo2, b0b + 1, hi2]
 		# the sign: on the main island, a step back from the bridge's foot, to one side
-		var sign := Vector2.INF
+		var sgn := Vector2.INF
 		for cand in [[foot + int(dir), b0b - 1], [foot + int(dir), b0b + 2], [foot, b0b - 1], [foot, b0b + 2], [foot + 2 * int(dir), b0b - 1], [foot + 2 * int(dir), b0b + 2]]:
 			var i: int = at.call(cand[0], cand[1])
 			if i >= 0 and world.island[i] == 0 and world.kind[i] == World.T_GROUND and level_ok.call(cand[0], cand[1]):
 				var along := float(cand[0]) + 0.5; var across := float(cand[1]) + (0.6 if cand[1] < b0b else 0.4)
-				sign = Vector2(along, across) if horiz else Vector2(across, along)
+				sgn = Vector2(along, across) if horiz else Vector2(across, along)
 				break
-		if sign == Vector2.INF: continue
-		return {"rect": rect, "sign": sign}
+		if sgn == Vector2.INF: continue
+		return {"rect": rect, "sign": sgn}
 	return fallback
 
 ## The bridge to isle k on this home world (bridge_span, worked out when the world was made).
@@ -521,12 +523,12 @@ static func isle_bridge(world: World, k: String) -> Dictionary:
 
 ## The meadow's outline. seed 0 is the classic island; any other seed gives its own shape: the
 ## meadow's size wobbles, its edge noise differs and one to three headlands bulge out of it.
-static func shape_of(level: int, seed: int) -> Array:
+static func shape_of(level: int, rng_seed: int) -> Array:
 	var lb := lobe(level)
 	var c: Vector2 = lb[0]; var rr: Vector2 = lb[1]
 	var bulges: Array = []
-	if seed != 0:
-		var r := RandomNumberGenerator.new(); r.seed = seed
+	if rng_seed != 0:
+		var r := RandomNumberGenerator.new(); r.seed = rng_seed
 		var j := Vector2(r.randf_range(-1.5, 2.5), r.randf_range(-1.0, 2.0))
 		rr += j; c += j
 		for k in r.randi_range(1, 3):
@@ -535,10 +537,10 @@ static func shape_of(level: int, seed: int) -> Array:
 			bulges.append([at, Vector2(r.randf_range(4.5, 7.5), r.randf_range(4.0, 6.5))])
 	return [c, rr, bulges]
 
-static func grow_main(world: World, level: int, seed := 0, sk := 0.0) -> void:
-	var shape := FastNoiseLite.new(); shape.seed = SEED if seed == 0 else seed; shape.frequency = 0.12
+static func grow_main(world: World, level: int, rng_seed := 0, sk := 0.0) -> void:
+	var shape := FastNoiseLite.new(); shape.seed = SEED if rng_seed == 0 else rng_seed; shape.frequency = 0.12
 	var drng := RandomNumberGenerator.new(); drng.seed = SEED + 3
-	var sh := shape_of(level, seed) if sk <= 0.0 else fs_shape(level, seed, sk)
+	var sh := shape_of(level, rng_seed) if sk <= 0.0 else fs_shape(level, rng_seed, sk)
 	var c: Vector2 = sh[0]; var rr: Vector2 = sh[1]
 	var bulges: Array = sh[2]
 	var cuts: Array = sh[3] if sh.size() > 3 else []
@@ -574,9 +576,9 @@ static func grow_main(world: World, level: int, seed := 0, sk := 0.0) -> void:
 				world.depth[i] = minf(world.depth[i], dep)
 
 ## Open ground on the main island (what you can build on, before anything is put down).
-static func main_tiles(level: int, seed := 0, sk := 0.0) -> int:
+static func main_tiles(level: int, rng_seed := 0, sk := 0.0) -> int:
 	var w := World.new()
-	make_world(w, level, seed, sk)
+	make_world(w, level, rng_seed, sk)
 	var n := 0
 	for i in w.kind.size():
 		if w.island[i] == 0 and w.kind[i] == World.T_GROUND: n += 1
@@ -585,12 +587,12 @@ static func main_tiles(level: int, seed := 0, sk := 0.0) -> int:
 
 static var _tiles := {}
 ## How many tiles the next expansion adds (cached: it builds two worlds to count).
-static func expand_gain(level: int, seed := 0, sk := 0.0) -> int:
+static func expand_gain(level: int, rng_seed := 0, sk := 0.0) -> int:
 	if level >= EXPAND.size():
 		return 0
 	for lv in [level, level + 1]:
-		if not _tiles.has(Vector2i(lv, seed)): _tiles[Vector2i(lv, seed)] = main_tiles(lv, seed, sk)
-	return int(_tiles[Vector2i(level + 1, seed)]) - int(_tiles[Vector2i(level, seed)])
+		if not _tiles.has(Vector2i(lv, rng_seed)): _tiles[Vector2i(lv, rng_seed)] = main_tiles(lv, rng_seed, sk)
+	return int(_tiles[Vector2i(level + 1, rng_seed)]) - int(_tiles[Vector2i(level, rng_seed)])
 
 # ------------------------------------------------------------------ farm-start islands
 ## Every farm-start island has about this much land before any expansion (the classic island's
@@ -619,8 +621,8 @@ static func _cut(p: Vector2, cuts: Array) -> bool:
 
 ## A farm-start meadow's outline: each seed leans its own way (wide or deep, nudged off centre),
 ## grows two to four headlands in any direction and, scaled by sk, has about FS_LAND tiles of land.
-static func fs_shape(level: int, seed: int, sk: float) -> Array:
-	var r := RandomNumberGenerator.new(); r.seed = seed * 31 + 7
+static func fs_shape(level: int, rng_seed: int, sk: float) -> Array:
+	var r := RandomNumberGenerator.new(); r.seed = rng_seed * 31 + 7
 	var base := LOBE_R0 + LOBE_STEP * level
 	var asp := r.randf_range(0.55, 1.7)
 	var rr := Vector2(base.x * sqrt(asp), base.y / sqrt(asp)) * sk
@@ -644,12 +646,12 @@ static func fs_shape(level: int, seed: int, sk: float) -> Array:
 	return [c, rr, bulges, cuts]
 
 ## The size scale that gives a seed's island about FS_LAND tiles (a few quick trial builds).
-static func fs_scale(seed: int) -> float:
+static func fs_scale(rng_seed: int) -> float:
 	var lo := 0.55; var hi := 1.5
 	var best := 1.0; var bd := 1e9
 	for i in 7:
 		var mid := (lo + hi) * 0.5
-		var n := main_tiles(0, seed, mid)
+		var n := main_tiles(0, rng_seed, mid)
 		if absf(n - FS_LAND) < bd: bd = absf(n - FS_LAND); best = mid
 		if n < FS_LAND: lo = mid
 		else: hi = mid
@@ -671,9 +673,9 @@ static func _fs_in(p: Vector2, sh: Array, pad := 0.0) -> bool:
 ## boulder field, plus a scatter of lone trees and rocks. Laid out on the unexpanded island (so
 ## growing it keeps them where they were) away from the landing by the portal; kept tiles are left
 ## out. Returns {tile index: "tree" | "rock" | "water" | "cliff"}.
-static func wild_fs(world: World, seed: int, sk: float, keep: Dictionary) -> Dictionary:
+static func wild_fs(world: World, rng_seed: int, sk: float, keep: Dictionary) -> Dictionary:
 	var out := {}
-	var plan := fs_plan(seed, sk)
+	var plan := fs_plan(rng_seed, sk)
 	for f in plan:
 		for t in f["tiles"]:
 			var v: Vector2i = t
@@ -688,12 +690,12 @@ static func wild_fs(world: World, seed: int, sk: float, keep: Dictionary) -> Dic
 
 static var _plans := {}
 ## A farm-start island's features (cached): [{kind, at: Vector2, tiles: [Vector2i], what: String or {Vector2i: String}}].
-static func fs_plan(seed: int, sk: float) -> Array:
-	var ck := "%d:%.3f" % [seed, sk]
+static func fs_plan(rng_seed: int, sk: float) -> Array:
+	var ck := "%d:%.3f" % [rng_seed, sk]
 	if _plans.has(ck):
 		return _plans[ck]
-	var sh := fs_shape(0, seed, sk)
-	var r := RandomNumberGenerator.new(); r.seed = seed + 9001
+	var sh := fs_shape(0, rng_seed, sk)
+	var r := RandomNumberGenerator.new(); r.seed = rng_seed + 9001
 	var land := Vector2(LANDING.x, LANDING.z)
 	var kinds: Array = ["grove", "rocks"]
 	var extra: Array = ["pond", "cliff", "stream", "grove", "rocks", "cliff", "pond"]
@@ -779,11 +781,11 @@ static func fs_plan(seed: int, sk: float) -> Array:
 ## A procedural home's wild land: copses of trees, boulders and a pond or a stream out in the
 ## meadow, away from the farm. Returns {tile index: "tree" | "rock" | "water"}; keep is a set of
 ## tile indices to leave alone (paths, kept-clear spots, lots). Deterministic for a seed.
-static func wild(world: World, seed: int, keep: Dictionary) -> Dictionary:
+static func wild(world: World, rng_seed: int, keep: Dictionary) -> Dictionary:
 	var out := {}
-	if seed == 0:
+	if rng_seed == 0:
 		return out
-	var r := RandomNumberGenerator.new(); r.seed = seed + 101
+	var r := RandomNumberGenerator.new(); r.seed = rng_seed + 101
 	var cand: Array = []
 	for i in world.kind.size():
 		if world.island[i] != 0 or world.kind[i] != World.T_GROUND or keep.has(i) or world.paint.has(i) or world.bridge.has(i):
@@ -924,10 +926,10 @@ static func open_up_fs(world: World, start: Vector2i, wild_t: Dictionary) -> Dic
 ## Feeders left out over what used to be ground (the Orchard Isle moved when the islands grew)
 ## go back to open ground near the pot.
 static func rescue_feeders(world: World) -> void:
-	var fs: Array = Save.d.get("feeders", [])
-	for f in fs:
+	var font_size: Array = Save.d.get("feeders", [])
+	for f in font_size:
 		var x := float(f.get("x", 0.0)); var z := float(f.get("z", 0.0))
 		if not world.inb(int(floor(x)), int(floor(z))) or world.is_void(x, z) or world.kind[world.idx(int(floor(x)), int(floor(z)))] != World.T_GROUND:
-			var others: Array = fs.filter(func(o): return o != f).map(func(o): return Vector3(float(o.get("x", 0.0)), 0, float(o.get("z", 0.0))))
+			var others: Array = font_size.filter(func(o): return o != f).map(func(o): return Vector3(float(o.get("x", 0.0)), 0, float(o.get("z", 0.0))))
 			var p := world.free_spot_near(Econ.FEEDER_START, others, 2.8, 0.5, 14.0)
 			f["x"] = snappedf(p.x, 0.1); f["z"] = snappedf(p.z, 0.1)

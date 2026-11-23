@@ -434,6 +434,21 @@ func _dredge_hook() -> void:
 			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
 	await _go(GAP)
 
+## Grimble's Shift: the barge rolls into a dummy 3 m out (the generic 6 m stops short), so the gold trail
+## and the contact flash where they meet ("dash" / "dash_hit" in content/vfx/dredge.json) both draw.
+func _dredge_dash() -> void:
+	await _reset(3.0)
+	var dash := func(t: float):
+		if _at(t, 0.15):
+			P.inp["move"] = Vector2(1, 0)
+			P.do_dash()
+		if t > 0.3:
+			P.inp["move"] = Vector2.ZERO
+		_aim(T.pos)
+	await _go(1.8, dash, _sheet("dash", "Shift, the barge into the dummy: the gold trail, the flash where they meet",
+			[0.18, 0.26, 0.32, 0.36, 0.4, 0.45, 0.55, 0.8, 1.2]), 2.5)
+	await _go(GAP)
+
 ## Grimble's R over a crowd (docs/COMBAT_CLARITY.md): the dummy, a Hunter and the Boki of both stand
 ## inside the fan (the Hunter on his side, so its Boki leaves him be): every body and nameplate must read through it.
 func _dredge_r() -> void:

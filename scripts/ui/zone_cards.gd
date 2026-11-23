@@ -33,7 +33,11 @@ static func open(h, here: String) -> void:
 			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), lines, func(): h.hway.hop(id),
 					"You are here" if id == here else "Go", id != here))
 		else:
-			var lines: Array = [UI.para(lock_line(id), 12, UI.MUTED)]
+			var lock := UI.para(lock_line(id), 12, UI.MUTED)
+			# Where each key comes from, on hover: the card itself keeps one line.
+			lock.tooltip_text = "\n".join(key_hints(id))
+			lock.mouse_filter = Control.MOUSE_FILTER_PASS
+			var lines: Array = [lock]
 			if here == GardenZones.HUB and h.hhints != null:
 				lines.append_array(HubFirstVisit.card_line(id))
 			var keys := GardenZones.keys_for(id)
@@ -42,7 +46,7 @@ static func open(h, here: String) -> void:
 			if ready:
 				pick = func(): h.hway.attune(id)
 			var card: Control = _card(String(z["name"]), UI.FAINT, lines, pick, "Wake it" if ready else "Locked", true)
-			card.tooltip_text = "\n".join(key_hints(id))     # where each key comes from, off the one-line card
+			card.tooltip_text = "\n".join(key_hints(id))  # where each key comes from, off the one-line card
 			row.add_child(card)
 
 ## The hub's games board: which game each zone hosts and whether it is open, this week's Dash twist and
@@ -111,7 +115,8 @@ static func key_hints(id: String) -> Array:
 				int(GardenZones.rules()["lean_key"])]
 	return ["From " + String(GardenZones.rules()["wayseed_from"]) % BlackMarket.seed_terms() + ".", lean]
 
-## An open zone's card body: its Boki with their moods, who woke it, today's game, its decor effects (DecorComfort) and your best at it.
+## An open zone's card body: its Boki with their moods, who woke it, today's game,
+## its decor effects (DecorComfort) and your best at it.
 static func _open_lines(id: String, tree: SceneTree) -> Array:
 	var out: Array = []
 	var res := GardenZones.residents(id)

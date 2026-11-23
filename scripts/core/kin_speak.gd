@@ -73,11 +73,12 @@ static func fill(species: String, pattern: String, rec := {}) -> String:
 	out = out.replace("{N}", String(rec.get("name", p["F"])))
 	return out.substr(0, 1).to_upper() + out.substr(1)
 
-## A line's {he} {his} {him} {himself} for a Boki's sex ("m", "f"; "" reads as they/their).
+## A line's {he} {his} {him} {himself}, and {He} {His} to start a sentence, for a Boki's sex ("m", "f"; "" is they).
 static func pronouns(text: String, sex: String) -> String:
 	var p := {"m": ["he", "his", "him", "himself"], "f": ["she", "her", "her", "herself"]}.get(
 			sex, ["they", "their", "them", "themself"]) as Array
 	var out := text.replace("{he}", p[0]).replace("{He}", String(p[0]).capitalize())
+	out = out.replace("{His}", String(p[1]).capitalize())
 	return out.replace("{his}", p[1]).replace("{him}", p[2]).replace("{himself}", p[3])
 
 ## The same for a save record, whose sex is read from its rolls.

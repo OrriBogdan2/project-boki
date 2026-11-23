@@ -60,8 +60,8 @@ static func cast_sfx(m: Node, id: String, at: Vector3, stock: String, vol: float
 	var own = ALL.get(id, {}).get("sfx", null)
 	if own == null:
 		m.sfx(stock, at, vol, pitch)
-	else:
-		m.sfx(String(own.get("cast", "")), at)
+	elif String(own.get("cast", "")) != "":
+		m.sfx(String(own["cast"]), at)
 
 ## Which slot a piece goes in: its "slot" key, else gloves by cooldown (0 the active slot, 1 passive).
 static func slot_of(id: String) -> int:

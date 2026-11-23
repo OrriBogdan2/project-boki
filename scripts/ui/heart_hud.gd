@@ -7,6 +7,8 @@ extends RefCounted
 ##   - the Blight's tide ring closing on the Heart, and the next ring it closes to (dashed);
 ##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
 ##     (the first time the tide closes, also an edge arrow to the ring for a few seconds: WaysHints)
+##   - the zone clock in the clock chip under the minimap (Hud._draw_clock_bar): "Closes in 0:30" before the tide
+##     moves, "Closing 7:12" (the time left) while it does.
 
 const TINT_COL := Color(0.55, 0.05, 0.22)
 const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
@@ -58,18 +60,29 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 		var a := (0.1 + 0.3 * hit) * (1.0 - i / 6.0)
 		var box := Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0)
 		hud.c.draw_rect(box, Color(TINT_COL, a), false, minf(sz.x, sz.y) * 0.03)
-	var per_s := Heart.tide_dmg(maxi(Heart.tide_stage(m), 0)) / Heart.r("tide_tick_s")
+	var per_s := Heart.tick_dmg(m) / Heart.r("tide_tick_s")
 	if WaysHints.arrow_due(m):
 		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), "The circle", Heart.col())
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
 	var at := Vector2(sz.x * 0.5, HudScale.from_bottom(sz.y * 0.8, sz))      # (clear of the bottom row, grown)
 	var lw := TextCache.width(hud.big, line, 18)
-	var vc := HudVitals.corner(hud, sz)
+	var vc: Vector2 = HudVitals.corner(hud, hud.panels.size) + hud.panels.position  # (in the panels' frame)
 	if at.x - lw * 0.5 < vc.x + 6.0:      # (it would touch the vitals block sideways: sit above it)
 		at.y = minf(at.y, vc.y - 12.0)
 	at.y += HudScale.lift(Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)), sz)
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
 	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
+
+## The zone clock's words: "Closes in 0:30" before the tide moves, "Closing 7:12" (the time left) while it
+## does, empty once the ring holds (or with no Heart).
+static func zone_line(m: Match) -> String:
+	if m.heart == null or m.heart.site == Vector3.INF:
+		return ""
+	var t := Heart.close_in(m)
+	if t > 0.0:
+		return "Closes in %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60]
+	t = Heart.close_left(m)
+	return "Closing %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60] if t > 0.0 else ""
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
@@ -103,16 +116,16 @@ static func full_map(fm) -> void:
 	var gv: Vector2 = fm.to_screen(ht.gate)
 	if area.has_point(gv):
 		gate_glyph(c, gv, 7.0, ht.carrier != null)
-		fm.hud._ctext(gv + Vector2(0, 18), "Heart Gate", 11, Heart.gate_col(), fm.hud.big)
+		fm.label("Heart Gate", gv + Vector2(0, 18), 11, Heart.gate_col())
 	var hv: Vector2 = fm.to_screen(ht.site)
 	if area.has_point(hv):
 		heart_glyph(c, hv, 9.0, ht, m.time)
-		fm.hud._ctext(hv + Vector2(0, -20), _word(ht), 12, Heart.col(), fm.hud.big)
+		fm.label_near(_word(ht), hv + Vector2(0, -20), 12, Heart.col(), -1.0)
 	if ht.carrier:
 		var cv: Vector2 = fm.to_screen(ht.carrier.pos)
 		if area.has_point(cv):
 			spark_glyph(c, cv, 7.0, m.time)
-			fm.hud._ctext(cv + Vector2(0, -16), "%s  ·  Heartspark" % ht.carrier.pname, 12, Heart.col(), fm.hud.big)
+			fm.label_near("%s  ·  Heartspark" % ht.carrier.pname, cv + Vector2(0, -16), 12, Heart.col(), -1.0)
 
 static func _word(ht: Heart) -> String:
 	match ht.state:

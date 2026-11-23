@@ -13,7 +13,7 @@ extends RefCounted
 ## and calls you over, and stays until you click.
 
 const TALK := "Hob"            # Home.panel_open while you talk: you stand still and no prompt shows
-const TALK_ZOOM := 0.8         # the home camera's zoom while you talk (Home.HOME_ZOOM after)
+const TALK_ZOOM := 0.8         # the home camera's zoom while you talk (the wheel's widest after)
 const FACE_K := 0.45           # how far the camera's focus moves from you toward him while you talk
 
 var hob: FarmHob
@@ -62,7 +62,10 @@ func start() -> void:
 	elif FarmTutorial.current() != "" and FarmTutorial.current() != "hob":
 		box.say(_step_lines(FarmTutorial.current()), box.close)
 	else:
-		box.say(_blueprint_lines(ids, first), _menu_choice)
+		var lines := _blueprint_lines(ids, first)
+		if hob.waiting():
+			lines.push_front({"text": hob.wait_line()})
+		box.say(lines, _menu_choice)
 
 func _step_lines(step: String) -> Array:
 	return [{"text": FarmTutorial.hint_text(step), "at": hob.h.guide.target(step) if hob.h.guide else Vector3.INF}]
@@ -125,7 +128,7 @@ func _after_beat(id: String) -> void:
 	var h = hob.h
 	if h.panel_open == TALK:
 		h.panel_open = ""
-	h.cam.zoom_to = h.HOME_ZOOM
+	h.cam.zoom_to = CamWheel.far()
 	_screen_clear(true)
 	h._refresh_top()
 
@@ -158,7 +161,7 @@ func _closed() -> void:
 	look.release()
 	if h.panel_open == TALK:
 		h.panel_open = ""
-	h.cam.zoom_to = h.HOME_ZOOM
+	h.cam.zoom_to = CamWheel.far()
 	_screen_clear(true)
 	if h.guide:
 		h.guide.refresh()
@@ -209,7 +212,7 @@ func _intro() -> void:
 	if intro_on:
 		if not look.active():
 			intro_on = false
-			h.cam.zoom_to = h.HOME_ZOOM
+			h.cam.zoom_to = CamWheel.far()
 		return
 	var tut: Dictionary = Save.d["tutorial"]
 	var clear: bool = h.panel_open == "" and not h.building_now and bool(tut.get("home", false))

@@ -24,10 +24,13 @@ back to their hunter, who keeps them for that down.
 Carry-passive stacking (Q8): `Hunter._refresh_kin_stats` sums your own Boki at 100 % and each stolen wisp at
 `passive_k` (x its carry_k, like your own), then clamps the one sum per stat at the carry cap (KinParts.OWNER_STATS).
 Soul echo (kept from ext/merge-lane-integ-1115): a grab adds to the dex entry's optional `echo` count (seen = true;
-Care.dex_mark). Left out: guardian interplay, bots grabbing, extraction bonus, HUD icons (backlog: Wisp line UI).
+Care.dex_mark). Left out: guardian interplay, bots grabbing, extraction bonus.
 
 ## Consequences
 - Net.VERSION 0.24.15: kin snapshot 28-30 = loose s, carrier id, stolen summon used; kcmd "wgrab"/"wsum" ask the
   Boki's own game.
 - match.gd +3 (interact, match end), hunter.gd +2, KinLoss and KinCommand skip a Boki whose wisp is not with its
   own hunter. `--wisp-steal-check` covers it, including the stacking rows.
+- HUD: up to two rows above the Boki box (`BokiHud.stolen_wisps`): the critter in its colours inside an ally-blue thief
+  ring, its carry passive at `passive_k`, the summon key while ready / "OUT 4s" / "USED". A teammate's squad row wears
+  a count badge (`TeamBoki`). It sits on the Boki box's group, so the HUD stays at five groups. `--stolen-hud-check`.
