@@ -109,6 +109,7 @@ class Rig:
                 self._walk(j)
         self.root = self.order[0]
         self.hips_t = np.array(js["nodes"][self.root].get("translation", [0, 0, 0]))
+        self.blade = None  # a weapon's axis in the right hand's frame (see ability_clips.gil), when the clips hold one
         self.local, self.off = {}, {}
         for j in self.joints:
             p = self.par.get(j)
@@ -146,7 +147,7 @@ def reach(rig, upper, fore, start, target, pole):
 
 def fk(rig, pose):
     """Local rotations, world positions and world rotations of every joint for a pose dict (turn, hips, ik, keep)."""
-    turn, keep, hold = pose.get("turn", {}), pose.get("keep", {}), pose.get("hold", {})
+    turn, keep, point = pose.get("turn", {}), pose.get("keep", {}), pose.get("point", {})
     ik = {u: (f, np.array(t, float), unit(pl)) for u, f, t, pl in pose.get("ik", [])}
     hip = rig.hips_t + np.array(pose.get("hips", (0, 0, 0)), float)
     W, P, L, fixed = {}, {}, {}, {}
@@ -168,8 +169,9 @@ def fk(rig, pose):
             w = euler(*turn[nm]) @ w
         if nm in keep:
             w = euler(*keep[nm]) @ rig.bind[j][:3, :3]
-        if nm in hold:
-            w = hold[nm] @ rig.bind[j][:3, :3]
+        if nm in point:  # a weapon laid along the hand: its local axis turned onto a world direction
+            axis, dr = point[nm]
+            w = arc(w @ axis, dr) @ w
         W[j] = w
         L[j] = pw.T @ w
     return L, P, W
@@ -178,7 +180,7 @@ def fk(rig, pose):
 BASE = dict(
     hx=0.0, hy=0.0, hz=0.0, yaw=0.0, lean=0.0, roll=0.0, spin=0.0, hyaw=0.0, hpitch=0.0,
     lho=0.35, lhu=-0.85, lhf=0.15, rho=0.35, rhu=-0.85, rhf=0.15, lpu=-0.6, rpu=-0.6,
-    lfo=0.0, lff=0.0, lfu=0.0, rfo=0.0, rff=0.0, rfu=0.0, lfy=0.0, rfy=0.0, lfp=0.0, rfp=0.0, gap=0.0, fb=0.0, hk=0.0, rwp=0.0, rwy=0.0, hl=0.0,
+    lfo=0.0, lff=0.0, lfu=0.0, rfo=0.0, rff=0.0, rfu=0.0, lfy=0.0, rfy=0.0, lfp=0.0, rfp=0.0, gap=0.0, fb=0.0, hk=0.0, bp=0.0, by=0.0, hl=0.0, hw=0.0,
 )  # fmt: skip
 SPLIT = {"Hips": 0.40, "Spine02": 0.22, "Spine01": 0.22, "Spine": 0.16}  # the share of the torso turn each takes
 
@@ -191,13 +193,14 @@ def build(rig, q):
     hx, hy, hz = q["hx"], q["hy"], q["hz"]
     sp = q["spin"]
     torso["Hips"] = (torso["Hips"][0] + q["hl"], torso["Hips"][1], torso["Hips"][2] + sp)  # (hl: more pitch on the hips)
-    torso["neck"] = ((q["hpitch"] - q["lean"] - q["hl"]) * 0.5, (q["hyaw"] - q["yaw"]) * 0.5, -(q["roll"] + sp) * 0.5)
+    torso["neck"] = ((q["hpitch"] - q["lean"] - q["hl"]) * 0.5, (q["hyaw"] - q["yaw"]) * 0.5, -q["roll"] * 0.5)  # (a cartwheel keeps the head on the body)
     torso["Head"] = torso["neck"]
     base = {"turn": torso, "hips": (hx, hy, hz)}
     P, W = fk(rig, base)[1:]
     sp_j = rig.id["Spine"]
     d = W[sp_j] @ rig.bind[sp_j][:3, :3].T  # the chest's turn since bind
-    f, s, u = d @ A, d @ S, d @ Y
+    dw = rot([0, 1, 0], q["yaw"]) if q["hw"] > 0.5 else d  # hw: hand points keep level while the chest leans
+    f, s, u = dw @ A, dw @ S, dw @ Y
     reach_len = rig.length("LeftArm") + rig.length("LeftForeArm")
     ik = []
     for side, sg, ab in (("Left", 1.0, "l"), ("Right", -1.0, "r")):
@@ -216,8 +219,8 @@ def build(rig, q):
         ik.append((side + "UpLeg", side + "Leg", (b + off) + q["fb"] * (body - (b + off)), dh @ A if q["fb"] else kn))
     pose = dict(base)
     pose["ik"] = ik
-    if q["hk"] > 0.5:  # the right hand holds its bind turn from the chest (a weapon laid along it keeps its line)
-        pose["hold"] = {"RightHand": euler(q["rwp"], q["rwy"], 0.0) @ d}
+    if q["hk"] > 0.5 and rig.blade is not None:  # the blade points where the chest does, bp deg up and by deg left
+        pose["point"] = {"RightHand": (rig.blade, d @ euler(-q["bp"], q["by"], 0.0) @ A)}
     if q["fb"] == 0.0:  # (a planted foot stays flat; on a body-following leg the foot turns with the shin)
         pose["keep"] = {"LeftFoot": (q["lfp"], q["lfy"], 0.0), "RightFoot": (q["rfp"], q["rfy"], 0.0)}
     return pose

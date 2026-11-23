@@ -201,20 +201,25 @@ def encore_keys(rest):
     return keys
 
 
+# The swordfish's line in the right hand's own frame: Meshy's Idle holds the hand hanging with the blade level and
+# forward (read off the Idle clip's first frame of gil_meshy.glb: the hand's turn then, taken back onto +Z).
+GIL_BLADE = (0.711, 0.423, 0.562)
+
+
 def gil():
     """Gil. A small fencer with a swordfish in the right hand. Contacts: a thrust every 0.32 s with the point at
     0.08 s, the Tide Lunge out at 0.08 s from the held draw, the potion leaves the hand at 0.15 s, Riptide's spin
     (up to 2 s, then the spout), Tidal Wave's 1 s ride (stance held, arms out), the swim (0.55 s) flat and fast."""
-    rest = pose(hk=1, rwp=80, hy=-0.01, lean=3, lho=0.4, lhu=-0.85, lhf=0.1, rho=0.4, rhu=-0.85, rhf=0.1, gap=0.03)
+    rest = pose(hk=1, hw=1, hy=-0.01, lean=3, lho=0.4, lhu=-0.85, lhf=0.1, rho=0.4, rhu=-0.85, rhf=0.1, gap=0.03)
     out = {}
     cock = over(rest, yaw=-22, lean=6, hy=-0.03, rho=0.3, rhu=-0.35, rhf=0.0, lho=0.4, lhu=-0.5, lhf=0.4)
-    stab = over(rest, yaw=24, lean=16, hy=-0.04, hz=0.1, rho=0.1, rhu=-0.05, rhf=1.0, lho=0.5, lhu=-0.55, lhf=-0.2, lff=0.2)
+    stab = over(rest, bp=16, yaw=24, lean=16, hy=-0.04, hz=0.1, rho=0.1, rhu=-0.05, rhf=1.0, lho=0.5, lhu=-0.55, lhf=-0.2, lff=0.2)
     out["gil_thrust"] = (
         0.32,
         [(0.0, cock, "lin"), (0.08, stab, "snap"), (0.16, over(stab, rhf=0.95), "smooth"), (0.32, rest, "smooth")],
     )
     draw = over(rest, yaw=-34, lean=10, hy=-0.08, rho=0.25, rhu=-0.3, rhf=-0.65, lho=0.4, lhu=-0.4, lhf=0.5, gap=0.08)
-    lunge = over(rest, yaw=30, lean=24, hy=-0.1, hz=0.25, rho=0.05, rhu=-0.05, rhf=1.05, lho=0.55, lhu=-0.6, lhf=-0.25, lff=0.4)
+    lunge = over(rest, bp=24, yaw=30, lean=24, hy=-0.1, hz=0.25, rho=0.05, rhu=-0.05, rhf=1.05, lho=0.55, lhu=-0.6, lhf=-0.25, lff=0.4)
     out["gil_lunge"] = (
         0.5,
         [(0.0, draw, "lin"), (0.08, lunge, "snap"), (0.22, over(lunge, rhf=0.98), "lin"), (0.5, rest, "smooth")],
@@ -234,7 +239,7 @@ def gil():
     out["gil_riptide"] = (2.0, spin)
     surf = over(rest, yaw=70, hy=-0.14, lean=10, rho=0.9, rhu=0.15, rhf=0.0, lho=0.9, lhu=0.1, lhf=0.1, gap=0.14, lff=0.0)
     out["gil_wave"] = (1.0, [(0.0, rest, "lin"), (0.15, surf, "smooth"), (0.85, over(surf, lean=14), "smooth"), (1.0, over(surf, lean=12), "lin")])
-    swim = over(rest, lean=30, hl=60, hpitch=-5, hy=-0.12, hz=0.1, rho=0.15, rhu=-0.95, rhf=-0.1, lho=0.15, lhu=-0.95, lhf=-0.1, fb=1.0)
+    swim = over(rest, bp=88, lean=30, hl=60, hpitch=-5, hy=-0.12, hz=0.1, rho=0.15, rhu=-0.1, rhf=-0.95, lho=0.15, lhu=-0.1, lhf=-0.95, fb=1.0)
     out["gil_swim"] = (0.55, [(0.0, rest, "lin"), (0.12, swim, "snap"), (0.55, over(swim, lean=34), "smooth")])
     return out
 
@@ -248,6 +253,8 @@ def main():
         sys.exit(__doc__)
     art = args[0]
     rig = Rig(os.path.join(ROOT, art, art + "_meshy.glb"))
+    if art == "gil":
+        rig.blade = GIL_BLADE
     clips = HUNTERS[art]()
     if "--sheet" in args:
         sheet(rig, clips, args[args.index("--sheet") + 1])
