@@ -599,12 +599,12 @@ func _weapon(a: String) -> void:
 ## A .glb shield (Breaker's prow) rides the left hand's Shield node in place of the procedural one.
 func _shield(a: String) -> void:
 	var m := _model(a)
-	var holder := m.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") as Node3D
-	var sh := holder.get_node_or_null(WardenGlb.SHIELD) as MeshInstance3D if holder else null
+	var holder_v := m.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") as Node3D
+	var sh := holder_v.get_node_or_null(WardenGlb.SHIELD) as MeshInstance3D if holder_v else null
 	if sh == null:
 		m.free()
 		return
-	var shown := holder.find_children("*", "MeshInstance3D", true, false).filter(
+	var shown := holder_v.find_children("*", "MeshInstance3D", true, false).filter(
 			func(mi): return (mi as Node3D).is_visible_in_tree() and mi != sh)
 	ok(shown.is_empty() and sh.transform.is_equal_approx(Transform3D.IDENTITY),
 			"%s holds its own shield on the left hand's Shield node (procedural parts left %s)"
@@ -655,7 +655,7 @@ func _body_meshes(m: Node) -> Array:
 ## Each ink shell is its body's skinned copy on the outline shader, and no surface of that body still wears
 ## the same ink as a pass (it would draw twice).
 func _ink_shells(m: Node, a: String) -> void:
-	var bad: Array = []
+	var bad_v: Array = []
 	var shells := WardenMerge.inks(m)
 	for shell: MeshInstance3D in shells:
 		var body := shell.get_parent() as MeshInstance3D
@@ -664,10 +664,10 @@ func _ink_shells(m: Node, a: String) -> void:
 				func(si): return body.get_active_material(si).next_pass == ink)
 		if ink == null or ink.shader != Models.OUTLINE or not _same_skin(shell.skin, body.skin) or twice \
 				or shell.get_node(shell.skeleton) != body.get_node(body.skeleton):
-			bad.append(shell.name)
-	ok(bad.is_empty(),
+			bad_v.append(shell.name)
+	ok(bad_v.is_empty(),
 			"%s: %d ink shells, each one draw for its body's line, skinned like it, ink not also a pass %s"
-			% [a, shells.size(), str(bad)])
+			% [a, shells.size(), str(bad_v)])
 
 ## Two skins with the same bind poses (WardenBulk thins each mesh's skin as its own copy, the ink shell's too).
 func _same_skin(a: Skin, b: Skin) -> bool:
