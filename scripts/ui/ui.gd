@@ -920,6 +920,8 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 	tabs_slot.visible = false
 	top.add_child(tabs_slot)
 	var body_text := vbox(GAP)
+	var help := label("", T_SMALL, MUTED)      # the fixed line over the footer (footer_help)
+	help.visible = false
 	var foot := hbox(10)
 	foot.visible = false
 	foot.alignment = BoxContainer.ALIGNMENT_END
@@ -944,6 +946,7 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		var fit := func() -> void:
 			if is_instance_valid(sc) and sc.is_inside_tree():
 				var chrome := top.get_combined_minimum_size().y + (foot.get_combined_minimum_size().y + GAP_BIG if foot.visible else 0.0)
+				chrome += help.get_combined_minimum_size().y + GAP_BIG if help.visible else 0.0
 				var vp := sc.get_viewport_rect().size
 				var room := vp.y - MENU_CHROME - HudStyle.safe_pad(vp).y * 2.0 - chrome
 				# held: the same on every tab
@@ -956,11 +959,13 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		body_text.set_meta("scroll", sc)
 	else:
 		outer.add_child(paged(body_text, MENU_CHROME, title_txt, top, width - PAD * 2.0, foot))
+	outer.add_child(help)
 	outer.add_child(foot)
 	body_text.set_meta("shell", p)
 	p.set_meta("key", title_txt)
 	p.set_meta("title", t); p.set_meta("sub", sub); p.set_meta("extra", extra)
 	p.set_meta("tabs", tabs_slot); p.set_meta("foot", foot); p.set_meta("foot_left", foot_left); p.set_meta("foot_right", foot_right)
+	p.set_meta("help", help)
 	var fitw := func():
 		if is_instance_valid(p) and p.is_inside_tree():
 			var vp := p.get_viewport_rect().size
@@ -1051,6 +1056,14 @@ static func footer(body_text: Control) -> HBoxContainer:
 		return h
 	(p.get_meta("foot") as Control).visible = true
 	return p.get_meta("foot_right")
+
+## The one fixed line over the footer, hidden until asked for. Set its text, never its height.
+static func footer_help(body_text: Control) -> Label:
+	var p := _shell_of(body_text)
+	if p == null: return label("")
+	var help: Label = p.get_meta("help")
+	help.visible = true
+	return help
 
 ## The footer's main button: primary, with an Enter keycap. Hosts press it on Enter when nothing
 ## else has focus (press_primary).
