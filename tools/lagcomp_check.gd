@@ -38,7 +38,7 @@ class LagRelay extends RelayServer:
 	func _half(id: int) -> int:
 		if not rtt.has(id):
 			rtt[id] = SHOOTER_RTT_MS if rtt.is_empty() else TARGET_RTT_MS
-		return int(rtt[id]) / 2
+		return int(int(rtt[id]) / 2.0)
 
 	func _hold(id: int, x, inbound: bool, fast: bool) -> void:
 		var key := [id, inbound, fast]

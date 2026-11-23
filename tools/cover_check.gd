@@ -53,7 +53,7 @@ func _is_ground(w: World, i: int) -> bool:
 	return w.kind[i] == World.T_GROUND and not w.bridge.has(i) and w.island[i] >= 0
 
 func _on_hazard(w: World, i: int) -> bool:
-	var p := Vector2(i % w.w + 0.5, i / w.w + 0.5)
+	var p := Vector2(i % w.w + 0.5, int(i / float(w.w)) + 0.5)
 	return hazard_polys.any(func(poly): return Geometry2D.is_point_in_polygon(p, poly))
 
 func _shares(w: World, sd: int, T: Dictionary) -> void:
@@ -95,11 +95,11 @@ func _components(w: World) -> Array:
 		seen[bi] = true
 		while not q.is_empty():
 			var cur: int = q.pop_back()
-			tiles.append(Vector2i(cur % w.w, cur / w.w))
+			tiles.append(Vector2i(cur % w.w, int(cur / float(w.w))))
 			for dz in [-1, 0, 1]:
 				for dx in [-1, 0, 1]:
 					var nx: int = cur % w.w + dx
-					var nz: int = cur / w.w + dz
+					var nz: int = int(cur / float(w.w)) + dz
 					if not w.inb(nx, nz): continue
 					var ni := w.idx(nx, nz)
 					if w.bush.has(ni) and not seen.has(ni) and w.kind[ni] == World.T_GROUND:
