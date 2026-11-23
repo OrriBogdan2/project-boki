@@ -61,7 +61,7 @@ static func tick(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> void:
 		"mind": done = _mind(life, k, m, dt)
 		"cheer": done = _cheer(life, k, c)
 		"fetch": done = _fetch(life, k, c)
-	if done or KinAvoid.shut(k) or m.since >= float(life.R["max"]["chore"]) or _stalled(k, c, m.since):
+	if done or KinAvoid.shut(k) or m.since >= float(life.r_v["max"]["chore"]) or _stalled(k, c, m.since):
 		m.go(BaseLife.S.ROAM, "%s done" % c["kind"] if done else "%s gave up" % c["kind"])
 
 ## Boxed in on the way (by a parked Boki beside a toy: it wobbles, so KinAvoid's pin test never fires) and no
@@ -106,7 +106,7 @@ static func _mind(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> bool:
 	if Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length() > AT_EGG:
 		return false
 	k["hop"] = float(k.get("hop", 0.0)) + dt * 4.0       # warms it, bobbing
-	if m.since < float(life.R["chore_mind"]):
+	if m.since < float(life.r_v["chore_mind"]):
 		return false
 	var left := float(egg.get("t", 0.0)) - Time.get_unix_time_from_system()
 	egg["t"] = float(egg["t"]) - maxf(0.0, left) * (1.0 - HATCH_CUT)
