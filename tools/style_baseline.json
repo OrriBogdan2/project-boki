@@ -536,6 +536,24 @@
 "nested_ternary": 10,
 "semicolon": 250
 },
+"scripts/match/models_bake.gd": {
+"nested_ternary": 1
+},
+"scripts/match/models_base.gd": {
+"nested_ternary": 1
+},
+"scripts/match/models_face.gd": {
+"nested_ternary": 2
+},
+"scripts/match/models_gear.gd": {
+"nested_ternary": 2
+},
+"scripts/match/models_hunter.gd": {
+"nested_ternary": 1
+},
+"scripts/match/models_kin.gd": {
+"long_line": 1
+},
 "scripts/match/music_dir.gd": {
 "nested_ternary": 1
 },
@@ -874,7 +892,7 @@
 "long_line": 2
 },
 "tools/hatch_check.gd": {
-"long_line": 9,
+"long_line": 10,
 "semicolon": 1
 },
 "tools/hero_check.gd": {

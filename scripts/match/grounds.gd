@@ -259,7 +259,7 @@ func use(i: int) -> void:
 func _stock(id: String) -> void:
 	var p: Hunter = m.player
 	if UtilityBelt.room_for(p, id) <= 0 and UtilityBelt.count(p, id) <= 0:
-		for _t in UtilityBelt.SLOTS:      # the next slot in turn that is not the tonic's or the armor kit's
+		for _t in UtilityBelt.SLOTS:  # the next slot in turn that is not the tonic's or the armor kit's
 			var k := _belt_turn % UtilityBelt.SLOTS
 			_belt_turn += 1
 			if UtilityBelt.reserved_id(k) == "":

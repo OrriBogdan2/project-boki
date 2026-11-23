@@ -170,9 +170,11 @@ static func settle(run_v: Run) -> Dictionary:
 func _init(home) -> void:
 	h = home
 
+
 ## True while a round is on (GardenMusic ducks the music for it).
 func playing() -> bool:
 	return run != null
+
 
 ## The mat and the seed beside the Training post (none without one); called when fixtures move.
 func place() -> void:
@@ -239,9 +241,6 @@ func use() -> void:
 	_place()
 	GardenSfx.countdown(h, mat.position)
 
-## True while a round is on (GardenMusic ducks the music for it).
-func playing() -> bool:
-	return run != null
 
 ## A press: true when the round took it.
 func input(event: InputEvent) -> bool:

@@ -73,7 +73,7 @@ func _label_boxes(m: Match) -> Array[Rect2]:
 func _numbers(m: Match, zone: Rect2) -> void:
 	var foe: Hunter = m.hunters.filter(func(x): return x != m.player)[0]
 	m.player.hp = m.player.max_hp
-	m.fx.damage_number(m.player, foe, 31.0, {}, m.player)      # damage you take: over your own head
+	m.fx.damage_number(m.player, foe, 31.0, {}, m.player)  # damage you take: over your own head
 	m.fx.healed(m.player, 12.0)
 	m.fx.word(m.player.pos + Vector3(0, 1.3, 0), "COMBO", Color.WHITE)
 	m.fx.number(m.player.pos + Vector3(0, 1.0, 0), 80.0, Color.RED, true)

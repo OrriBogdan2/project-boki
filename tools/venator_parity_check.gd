@@ -519,11 +519,11 @@ func _walk_speed(m: Match, p: Hunter) -> float:
 ## Her recipes played since `before` that lay a shape on the ground (a ring, a scorch, a vortex, a flame wall).
 static func _ground_looks(v: HeroVfx, before: Dictionary) -> Array:
 	var moves: Dictionary = HeroVfx.data("gunslinger")["moves"]
-	return V.plays.keys().filter(
+	return v.plays.keys().filter(
 		func(mv: String) -> bool:
 			var layers: Array = (moves.get(mv, {}) as Dictionary).get("fx", [])
 			return (
-				int(V.plays[mv]) > int(before.get(mv, 0))
+				int(v.plays[mv]) > int(before.get(mv, 0))
 				and layers.any(func(l: Dictionary) -> bool: return l["p"] in ["ring", "scorch", "vortex", "skirt"])
 			)
 	)

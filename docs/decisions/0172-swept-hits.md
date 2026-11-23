@@ -1,4 +1,4 @@
-# 0022: Swept hits for fast shots and dashes
+# 0172: Swept hits for fast shots and dashes
 
 - **Status:** accepted
 - **Date:** 2026-11-10

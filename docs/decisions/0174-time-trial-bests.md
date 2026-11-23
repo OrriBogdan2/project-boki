@@ -1,4 +1,4 @@
-# 0102: Time-trial personal bests in the save
+# 0174: Time-trial personal bests in the save
 
 - **Status:** accepted
 - **Date:** 2026-11-19

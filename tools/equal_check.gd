@@ -244,7 +244,8 @@ func _belt() -> void:
 	m.step(Match.DT)
 	for i in int((p_v.kit_len + 0.3) / Match.DT): m.step(Match.DT)
 	ok(p_v.armor_kits == 1 and absf(p_v.armor - p_v.max_armor * 0.8) < 0.5,
-			"a finished repair spends one kit and patches 80%% of a Common armor (%.0f/%.0f)" % [p_v.armor, p_v.max_armor])
+			"a finished repair spends one kit and patches 80%% of a Common armor (%.0f/%.0f)"
+			% [p_v.armor, p_v.max_armor])
 	p_v.armor_tier = 2
 	ok(is_equal_approx(UtilityUse.repair_frac(p_v), 0.3), "...and 30% of a Rare one (source 80/40/30)")
 	p_v.armor_tier = 0

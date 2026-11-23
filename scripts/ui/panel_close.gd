@@ -11,11 +11,13 @@ static var _open: Array[PanelClose] = []
 var panel: Control
 var on_close: Callable
 
+
 static func attach(p: Control, close: Callable) -> void:
 	var pc := PanelClose.new()
 	pc.panel = p
 	pc.on_close = close
 	p.add_child(pc)
+
 
 static func top() -> PanelClose:
 	var best: PanelClose = null
@@ -30,17 +32,21 @@ static func top() -> PanelClose:
 			best_layer = layer
 	return best
 
+
 ## Lets go of every action `ev` pressed, so the game never sees the press that closed a menu.
 static func release(ev: InputEvent) -> void:
 	for a in InputMap.get_actions():
 		if ev.is_action(a):
 			Input.action_release(a)
 
+
 func _enter_tree() -> void:
 	_open.append(self)
 
+
 func _exit_tree() -> void:
 	_open.erase(self)
+
 
 ## The right click, before anything else sees it (the match would cast with it).
 func _input(ev: InputEvent) -> void:
@@ -48,16 +54,18 @@ func _input(ev: InputEvent) -> void:
 	if mb == null or not mb.pressed or mb.button_index != MOUSE_BUTTON_RIGHT or top() != self:
 		return
 	if Overlay.listening != "":
-		return      # (a right click being bound to an action in Settings > Controls)
+		return  # (a right click being bound to an action in Settings > Controls)
 	# (the click's own position, in the panel's frame: the pointer can lag a synthetic or remapped click)
 	var at: Vector2 = panel.get_global_transform_with_canvas().affine_inverse() * mb.position
 	if not Rect2(Vector2.ZERO, panel.size).has_point(at):
 		_close(ev)
 
+
 ## Esc and the pad's B, after the screens' own uses of them (a key being rebound, a confirm box).
 func _unhandled_input(ev: InputEvent) -> void:
 	if top() == self and (ev.is_action_pressed("menu") or ev.is_action_pressed("ui_cancel")):
 		_close(ev)
+
 
 func _close(ev: InputEvent) -> void:
 	get_viewport().set_input_as_handled()

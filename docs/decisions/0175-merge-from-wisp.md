@@ -1,4 +1,4 @@
-# 0171: the merge works from the wisp
+# 0175: the merge works from the wisp
 
 - **Status:** accepted (behind the boki_wisps setting)
 - **Date:** 2026-11-10

@@ -120,7 +120,7 @@ func _score(what: String, how: Variant, settle: int, stop := Callable(), step :=
 			break
 		_frame(_move(how))
 		var grounded := P.grounded and P.pos.y - P.ground() <= 0.01
-		if grounded and P.pos.y < drop_y - 0.05:      # stepped down on foot (HunterMove.sticks): FootPlant eases the foot down
+		if grounded and P.pos.y < drop_y - 0.05:  # stepped down on foot (HunterMove.sticks): FootPlant eases the foot
 			if not seen.is_empty():
 				seen.pop_back()
 			easing = EASE_FRAMES

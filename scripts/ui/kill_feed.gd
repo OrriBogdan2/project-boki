@@ -109,14 +109,17 @@ static func _src(by: Ent, from: Hunter) -> String:
 		return ""
 	return "Blight" if by is Blight else String(by.kind).capitalize().replace("_", " ")
 
+
 ## Nothing drawn this frame (the feed is held back).
 static func clear() -> void:
 	shown.clear()
 	_screen.clear()
 
+
 ## The rows drawn last frame, in screen px (MsgLane keeps its cards off them; the rows are drawn under HudScale.xf).
 static func rects() -> Array[Rect2]:
 	return _screen.duplicate()
+
 
 ## Draws the feed down from Hud.feed_top at the safe margin's right edge, oldest on top.
 static func draw(h_v, sz: Vector2) -> void:

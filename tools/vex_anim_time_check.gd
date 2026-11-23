@@ -133,7 +133,7 @@ func _legs_walk(rec: Dictionary) -> bool:
 
 ## LMB: the round leaves and the move plays on the same frame (its kick is the next), a round every 0.12 s.
 func _lmb(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
-	c.ac.aim_at(p, home + Vector3(6.0, 0, 0))
+	c_v.ac.aim_at(p, home + Vector3(6.0, 0, 0))
 	p.ammo = 30
 	p.fire_cd = 0.0
 	k.anim_id = ""
@@ -141,7 +141,7 @@ func _lmb(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	p.inp["fire"] = true
 	var r := _time(m, p, k, "gunslinger_lmb", 0.3, func() -> bool: return p.shot_n > n0)
 	p.inp["fire"] = false
-	c.ok(
+	c_v.ok(
 		"Vex timing LMB: the round and its move leave on the press's frame, the clip is on within a frame",
 		(
 			float(r["hit"]) >= 0.0
@@ -166,7 +166,7 @@ func _rmb(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	var r := _time(
 		m, p, k, "gunslinger_rmb", 1.0, func() -> bool: return k.burrs.size() > n0, _walk_probe(p, 0.1, 0.35, walk)
 	)
-	c.ok(
+	c_v.ok(
 		"Vex timing RMB: fired on the press, the flick on within a frame, the hand back by 0.5 s + the fade",
 		(
 			float(r["hit"]) <= DT
@@ -176,7 +176,7 @@ func _rmb(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 		),
 		"in %.2f len %.2f out %.2f" % [r["in"], r["len"], r["out"]]
 	)
-	c.ok(
+	c_v.ok(
 		"Vex timing RMB: walking through it, the legs walk (the flick is upper body)",
 		_legs_walk(walk),
 		_walk_line("at 0.35", walk)
@@ -192,7 +192,7 @@ func _dash(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	p.do_dash()
 	p.inp["move"] = Vector2.ZERO
 	var r := _time(m, p, k, "gunslinger_dash", 1.6, func() -> bool: return k.slide.is_empty())
-	c.ok(
+	c_v.ok(
 		(
 			"Vex timing Shift tap: the skid ends before the clip's stand-up key, the clip runs 0.85 s, "
 			+ "legs back by 0.85 + the fade"
@@ -237,7 +237,7 @@ func _slide(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	for i in range(1, clock.size()):
 		wraps += 1 if clock[i] < clock[i - 1] - 0.05 else 0
 	var end := GunslingerKit.SLIDE_LOOP_FROM + GunslingerKit.SLIDE_LOOP_T
-	c.ok(
+	c_v.ok(
 		"Vex timing Shift held: she slides 0.73 s low (the clip loops its slide window) and stands up as it ends",
 		(
 			float(r["hit"]) > 0.7
@@ -273,7 +273,7 @@ func _needle(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) ->
 	k.use_e()
 	var r := _time(m, p, k, "gunslinger_e", 1.6, func() -> bool: return k.needle_hits > hits0, probe)
 	var lift := float(r["hit"]) + GunslingerKit.E_RECOVER
-	c.ok(
+	c_v.ok(
 		"Vex timing E: the beam fires at 0.63 s on the clip's fire key, the clip hands back as the hold lifts",
 		(
 			absf(float(r["hit"]) - 0.63) <= DT * 2
@@ -380,7 +380,7 @@ func _knock(m: Match, p: Hunter, k: GunslingerKit, t: Hunter) -> void:
 	var r := _time(m, p, k, "gunslinger_knock", 1.3, func() -> bool: return p.dashes >= 1.0)
 	t.downed = false
 	t.hp = t.max_hp
-	c.ok(
+	c_v.ok(
 		"Vex timing knock: the cue plays its 0.6 s and hands back",
 		(
 			absf(float(r["len"]) - 0.6) < CLIP_TOL

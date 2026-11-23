@@ -5,7 +5,7 @@ assists, items). Rival squads' stats, items and who is alive must NOT be shown; 
 who is still up. The owner thinks the source hid that too. Built in `scripts/ui/squad_board.gd`
 (`--scoreboard-check`); see docs/HUD.md.
 
-## What the source (SUPERVIVE) showed
+## What the source (the reference game) showed
 
 Researched 2026-11-11 from the official Steam patch notes (Steam News API, app 1283700) and the fan wiki.
 The wiki says official servers closed on 2026-02-25, so the game can't be checked live. Gameplay videos weren't watched
@@ -50,5 +50,3 @@ count what your own game saw (this was already true of knocks). Logged in docs/D
 [apr2]: https://store.steampowered.com/news/app/1283700/view/1795917897275785
 [p103]: https://store.steampowered.com/news/app/1283700/view/1809869179984309
 [s2]: https://store.steampowered.com/news/app/1283700/view/1814309641394166
-[wfeb5]: https://supervive.wiki.gg/wiki/Gold_+_Mobility_+_Discord_Patch
-[wlvl]: https://supervive.wiki.gg/wiki/Level

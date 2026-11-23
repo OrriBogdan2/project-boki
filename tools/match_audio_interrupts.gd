@@ -26,34 +26,34 @@ var c: RefCounted  # the match audio check (ok, _step)
 var team0 := 0  # the mate's own team (Meeko's call needs it on hers for a moment)
 
 
-func run(check: RefCounted, m: Match, P: Hunter, mate: Hunter) -> void:
+func run(check: RefCounted, m: Match, p_v: Hunter, mate: Hunter) -> void:
 	c = check
 	team0 = mate.team
-	var was := [P.cls, P.arch, P.ctrl]
-	P.ctrl = "local"  # the caster is you (the tick is yours), and no bot brain presses keys
-	var kin: Kin = P.kin  # (the check's downed Boki would start a rescue, which blocks firing: send it off)
+	var was := [p_v.cls, p_v.arch, p_v.ctrl]
+	p_v.ctrl = "local"  # the caster is you (the tick is yours), and no bot brain presses keys
+	var kin: Kin = p_v.kin  # (the check's downed Boki would start a rescue, which blocks firing: send it off)
 	if kin != null:
 		if kin.rescue_on:
-			KinDowned.stop(kin, P, "drop")
-		kin.pos = P.pos + Vector3(90, 0, 0)
+			KinDowned.stop(kin, p_v, "drop")
+		kin.pos = p_v.pos + Vector3(90, 0, 0)
 	for arch: String in SLOTS:
-		await _case(m, P, mate, arch, String(SLOTS[arch]))
-	P.reclass(was[0], was[1])
-	P.ctrl = was[2]
+		await _case(m, p_v, mate, arch, String(SLOTS[arch]))
+	p_v.reclass(was[0], was[1])
+	p_v.ctrl = was[2]
 
 
-func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> void:
-	P.stun_t = 0.0
-	P.reclass(Arch.weight(arch), arch)
-	P.unlock_all()
-	var k: ArchKit = P.ak
-	Sfx.listener = P.pos
+func _case(m: Match, p_v: Hunter, mate: Hunter, arch: String, slot: String) -> void:
+	p_v.stun_t = 0.0
+	p_v.reclass(Arch.weight(arch), arch)
+	p_v.unlock_all()
+	var k: ArchKit = p_v.ak
+	Sfx.listener = p_v.pos
 	Sfx.last_played.clear()
-	await _start(m, P, k, mate, arch, slot)
+	await _start(m, p_v, k, mate, arch, slot)
 	var held: Array = k.windups.get(slot, [])
 	var kids0 := Sfx.get_children()  # (taken after the cast: a channel's held loop is its own player on main)
 	c.ok(held.any(Sfx.sounding), "%s %s: the wind-up's voice plays (%s)" % [arch, slot, held])
-	P.stun_t = 0.6
+	p_v.stun_t = 0.6
 	var t := 0.0
 	var seen := []  # every loop's own player while the stun runs (a loop that starts and stops in it is not the cast's)
 	while k.windups.has(slot) and t < 0.3:
@@ -75,15 +75,18 @@ func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> voi
 	var own := Sfx.loops.values().map(func(l): return l["p"])
 	own.append_array(seen)
 	own.append(Sfx.get("_sting_p"))  # (made once, on the first sting, never per cast)
-	own.append_array(Sfx.amb_layers.values().map(func(l): return l["p"]))  # (ambience beds: where you stand, not the cast)
+	own.append_array(Sfx.amb_layers.values().map(func(l): return l["p"]))  # (ambience beds: where you stand)
 	var fresh := Sfx.get_children().filter(func(ch): return not ch in kids0 and not ch in own)
-	c.ok(fresh.is_empty(), "%s: no new player for the cast or the cut (%d %s)" % [arch, fresh.size(), fresh.map(func(ch): return "%s:%s" % [ch.name, ch.get("stream").resource_path if ch.get("stream") else ""])])
-	P.inp["fire"] = false
+	var named := fresh.map(
+		func(ch): return "%s:%s" % [ch.name, ch.get("stream").resource_path if ch.get("stream") else ""]
+	)
+	c.ok(fresh.is_empty(), "%s: no new player for the cast or the cut (%d %s)" % [arch, fresh.size(), named])
+	p_v.inp["fire"] = false
 	mate.team = team0
 
 
 ## Starts the arch's interruptible cast the way the kit does (the input, or the kit's own start).
-func _start(m: Match, P: Hunter, k: ArchKit, mate: Hunter, arch: String, slot: String) -> void:
+func _start(m: Match, p_v: Hunter, k: ArchKit, mate: Hunter, arch: String, slot: String) -> void:
 	match arch:
 		"bulwark":
 			(k as BulwarkKit).ult.cast()
@@ -96,14 +99,14 @@ func _start(m: Match, P: Hunter, k: ArchKit, mate: Hunter, arch: String, slot: S
 		"ashwick":
 			(k as AshwickKit).jet.start()
 		"tender":
-			mate.team = P.team
-			mate.pos = P.pos + Vector3(3, 0, 0)
-			P.inp["aim"] = mate.pos
+			mate.team = p_v.team
+			mate.pos = p_v.pos + Vector3(3, 0, 0)
+			p_v.inp["aim"] = mate.pos
 			(k as TenderKit)._start_call()
 		"archer", "dolm":
 			var t := 0.0
 			while not k.windups.has(slot) and t < HOLD:
-				P.inp["fire"] = true  # (a shot lets go of the key; the hold presses it every step)
+				p_v.inp["fire"] = true  # (a shot lets go of the key; the hold presses it every step)
 				m.step(Match.DT)
 				t += Match.DT
 	await m.get_tree().process_frame

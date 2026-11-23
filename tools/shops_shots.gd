@@ -6,6 +6,7 @@ var main: Node
 var m: Match
 var dir := ""
 
+
 func take(main_node: Node, out: String) -> void:
 	main = main_node
 	dir = out
@@ -41,11 +42,13 @@ func take(main_node: Node, out: String) -> void:
 	await _frames(20)
 	await _shot("full_map_legend")
 
+
 func _frames(count: int) -> void:
 	for i in count:
 		m.step(1.0 / 60.0)
 		m.cam.snap(m.player.pos)
 		await main.get_tree().process_frame
+
 
 func _shot(stem: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("shops_%s.png" % stem))

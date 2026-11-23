@@ -1,4 +1,4 @@
-# 0100: Merging only adds, every ability stays yours
+# 0173: Merging only adds, every ability stays yours
 
 - **Status:** accepted (owner rule of Nov 17 2026, after a tutorial and match playtest); finishes [0004](0004-merge-augments.md)
 - **Date:** 2026-11-17

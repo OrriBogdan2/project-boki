@@ -46,10 +46,7 @@ func _lane(m: Match) -> void:
 	m.hud.toast("Picked up a gem", Color.WHITE)
 	m.hud.tip("Hold F to open the chest")
 	lane._process(0.5)
-	ok(
-		lane.texts().is_empty() and lane.waiting() == 2,
-		"in a fight toasts and hints wait (%s)" % str(lane.texts())
-	)
+	ok(lane.texts().is_empty() and lane.waiting() == 2, "in a fight toasts and hints wait (%s)" % str(lane.texts()))
 	lane.push("Your Boki is down", Color.WHITE, MsgLane.URGENT)
 	lane._process(0.1)
 	ok(lane.texts() == ["Your Boki is down"], "an urgent line still shows (%s)" % str(lane.texts()))
@@ -61,10 +58,7 @@ func _lane(m: Match) -> void:
 	m.hud._place_msgs()
 	ok(not m.hud.in_fight(), "%.1f s without a hit ends the fight" % QUIET_S)
 	lane._process(0.1)
-	ok(
-		lane.texts().size() == 1 and lane.waiting() == 2,
-		"after it, one card at a time (%s)" % str(lane.texts())
-	)
+	ok(lane.texts().size() == 1 and lane.waiting() == 2, "after it, one card at a time (%s)" % str(lane.texts()))
 	var sz: Vector2 = m.hud.c.size
 	var centre := Rect2(sz * (1.0 - CENTRE) * 0.5, sz * CENTRE)
 	var worst := 0
@@ -74,13 +68,7 @@ func _lane(m: Match) -> void:
 			if r.intersects(centre) or r.intersects(HunterZone.rect(m)):
 				worst += 1
 		ok(lane.texts().size() <= 1, "second %d: at most one card (%d)" % [i, lane.texts().size()])
-	ok(
-		worst == 0,
-		(
-			"no card entered the centre %d%% or the hunter's zone (%d frames)"
-			% [int(CENTRE * 100.0), worst]
-		)
-	)
+	ok(worst == 0, "no card entered the centre %d%% or the hunter's zone (%d frames)" % [int(CENTRE * 100.0), worst])
 	ok(lane.count() == 0, "the queue drains (%d left)" % lane.count())
 	lane.clear()
 
@@ -102,10 +90,7 @@ func _names(m: Match) -> void:
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
 	foe.pos = m.player.pos + Vector3(3, 0, 0)  # well inside the old 9 m "close enough to read" range
 	var far: Vector2 = m.hud.c.size * 0.9
-	ok(
-		not m.hud._np_show_name(far, foe),
-		"a rival's name stays hidden with the mouse away, even up close"
-	)
+	ok(not m.hud._np_show_name(far, foe), "a rival's name stays hidden with the mouse away, even up close")
 	var near: Vector2 = m.hud.c.get_local_mouse_position()
 	ok(m.hud._np_show_name(near, foe), "... and shows under the mouse")
 	foe.downed = true
@@ -117,10 +102,7 @@ func _hover_card(m: Match) -> void:
 	var hv: HudHover = m.hud.hover
 	hv._wh_still = 1.0  # the cursor has rested long enough
 	m.player.hurt_at = m.time
-	ok(
-		hv.world_tip_waits(),
-		"the world hover card stays shut in a fight, even with the cursor resting"
-	)
+	ok(hv.world_tip_waits(), "the world hover card stays shut in a fight, even with the cursor resting")
 	m.time += QUIET_S
 	hv._wh_still = 1.0
 	ok(Record.clean() or not hv.world_tip_waits(), "... and opens again once it is quiet")

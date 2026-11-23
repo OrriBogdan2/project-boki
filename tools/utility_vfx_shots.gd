@@ -11,13 +11,14 @@ const DT := 1.0 / 60.0
 
 var main: Node
 var m: Match
-var P: Hunter
+var p_v: Hunter
 var rival: Hunter
 var dir := ""
-var focus := Vector3.ZERO       # the camera centres here: the effect, not the player
-var park := Vector3.ZERO        # solid ground far off where the rival waits
-const AIM := Vector3(-5.0, 0.0, 0.0)   # every cast lands this far from the player, in clear screen
+var focus := Vector3.ZERO  # the camera centres here: the effect, not the player
+var park := Vector3.ZERO  # solid ground far off where the rival waits
+const AIM := Vector3(-5.0, 0.0, 0.0)  # every cast lands this far from the player, in clear screen
 var lines: Array = []
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -38,16 +39,17 @@ func run(main_node: Node) -> void:
 	print("UVFXSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
+
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
-	P = m.player
+	p_v = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	rival = m.hunters.filter(func(x): return x != P)[0]
+	rival = m.hunters.filter(func(x): return x != p_v)[0]
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
@@ -55,16 +57,17 @@ func _setup() -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	if m.hud:
-		m.hud.visible = false     # the panels sit over the effects; the shots are about the ground
-	P.teleport(_roomy())
-	focus = P.pos
+		m.hud.visible = false  # the panels sit over the effects; the shots are about the ground
+	p_v.teleport(_roomy())
+	focus = p_v.pos
 	park = _roomy()
 	for k in 50:
-		if park.distance_to(P.pos) > 30.0:
+		if park.distance_to(p_v.pos) > 30.0:
 			break
 		park = _roomy()
 	rival.teleport(park)
 	await _go(0.4)
+
 
 ## Open, flat ground.
 func _roomy() -> Vector3:
@@ -79,13 +82,15 @@ func _roomy() -> Vector3:
 			return g
 	return m.world.random_ground()
 
+
 func _use(id: String) -> void:
-	P.hp = P.max_hp
-	P.belt = UtilityBelt.empty()
-	UtilityBelt.grant(P, id, 1)
-	P.inp["aim"] = P.pos + AIM
-	focus = P.pos + AIM * 0.5
-	UtilityBelt.use_id(P, id)
+	p_v.hp = p_v.max_hp
+	p_v.belt = UtilityBelt.empty()
+	UtilityBelt.grant(p_v, id, 1)
+	p_v.inp["aim"] = p_v.pos + AIM
+	focus = p_v.pos + AIM * 0.5
+	UtilityBelt.use_id(p_v, id)
+
 
 ## Nothing left over from the last item on the ground.
 func _clear() -> void:
@@ -93,31 +98,35 @@ func _clear() -> void:
 	for w in m.verbs.walls:
 		w["t"] = 0.0
 
+
 func _item(id: String, file: String, with_rival: bool, caption: String) -> void:
 	_clear()
 	await _go(0.2)
 	_use(id)
 	if with_rival:
-		rival.teleport(P.pos + AIM + Vector3(1.5, 0, 1.0))
+		rival.teleport(p_v.pos + AIM + Vector3(1.5, 0, 1.0))
 	await _go(0.5)
-	await _real(1.2)          # (the rings and orbits turn in real time)
+	await _real(1.2)  # (the rings and orbits turn in real time)
 	_take(file, caption)
 	if with_rival:
 		rival.teleport(park)
 	_clear()
 	await _go(0.2)
 
+
 func _skyfall() -> void:
 	_use("skyfall_charge")
-	focus = P.pos + AIM      # the whole 6 m circle on screen
-	await _go(0.6)           # (the fill follows match time)
+	focus = p_v.pos + AIM  # the whole 6 m circle on screen
+	await _go(0.6)  # (the fill follows match time)
 	_take("skyfall_start", "Skyfall, fuse start: rim up, disc begins to fill, warhead high")
 	await _go(3.8)
 	_take("skyfall_late", "Skyfall, last second: disc nearly fills the circle, rim blinks")
-	await _go(4.0)           # blast, then the 3 s burn zone runs out
+	await _go(4.0)  # blast, then the 3 s burn zone runs out
+
 
 func _real(secs: float) -> void:
 	await main.get_tree().create_timer(secs).timeout
+
 
 func _go(secs: float) -> void:
 	var t := 0.0
@@ -128,6 +137,7 @@ func _go(secs: float) -> void:
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
+
 
 func _take(file: String, caption: String) -> void:
 	var img := main.get_viewport().get_texture().get_image()

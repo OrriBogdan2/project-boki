@@ -7,9 +7,12 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SCOREBOARD %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -20,20 +23,20 @@ func run(main: Node) -> void:
 	m.set_process(false)
 	for h in m.hunters:
 		h.lives = 1
-	var P: Hunter = m.player
+	var p_v: Hunter = m.player
 	var s := SquadBoard.snapshot(m)
 	ok(m.hunters.size() == 30 and s["left"] == 10, "30 hunters: 10 squads left")
 	ok(s.keys().size() == 2 and s["crew"].size() == 3, "the board holds the count and your three hunters only")
-	var mine_only: bool = s["crew"].all(func(e): return e["h"].team == P.team)
+	var mine_only: bool = s["crew"].all(func(e): return e["h"].team == p_v.team)
 	ok(s["crew"][0]["me"] and mine_only, "you first, then your mates; no rivals")
 	ok(s["crew"].all(func(e): return e["status"] == SquadBoard.Status.ALIVE), "your squad reads alive")
-	var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
-	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
+	var foes: Array = m.hunters.filter(func(x): return x.team != p_v.team)
+	var mate: Hunter = m.hunters.filter(func(x): return x.team == p_v.team and x != p_v)[0]
 	# a rival knocked by you with your mate's help, and your mate knocked by a rival
 	DashReset.note(foes[0], mate)
-	m.knock(foes[0], P, {})
+	m.knock(foes[0], p_v, {})
 	m.knock(mate, foes[1], {})
-	m.eliminate(foes[0], P, "finished")
+	m.eliminate(foes[0], p_v, "finished")
 	s = SquadBoard.snapshot(m)
 	var me: Dictionary = s["crew"][0]
 	var mrow: Dictionary = s["crew"].filter(func(e): return e["h"] == mate)[0]
@@ -41,17 +44,17 @@ func run(main: Node) -> void:
 	ok(mrow["a"] == 1, "your mate's hit gives one assist for the knock and finish together (%d)" % mrow["a"])
 	ok(mrow["status"] == SquadBoard.Status.DOWNED, "your knocked mate reads downed")
 	ok(s["left"] == 10 and s["crew"].size() == 3, "a rival out: still 10 left, still only your three rows")
-	P.gear[2] = {"id": Gear.ids_for(2)[0], "rar": 2}
-	var crew_kin: Array = m.hunters.filter(func(x): return x.team == P.team and x.kin != null)
+	p_v.gear[2] = {"id": Gear.ids_for(2)[0], "rar": 2}
+	var crew_kin: Array = m.hunters.filter(func(x): return x.team == p_v.team and x.kin != null)
 	s = SquadBoard.snapshot(m)
 	ok(String(s["crew"][0]["gear"][2].get("id", "")) == Gear.ids_for(2)[0], "your row carries the gear you wear")
 	var boki_rows: int = s["crew"].filter(func(e): return not e["boki"].is_empty()).size()
 	ok(boki_rows == crew_kin.size(), "a Boki line for each hunter with one")
-	ok(P.kin == null or int(s["crew"][0]["boki"]["lvl"]) >= 1, "your Boki's level is on the board")
+	ok(p_v.kin == null or int(s["crew"][0]["boki"]["lvl"]) >= 1, "your Boki's level is on the board")
 	for h in m.hunters.filter(func(x): return x.team == foes[1].team):
-		m.eliminate(h, P, "finished")
+		m.eliminate(h, p_v, "finished")
 	s = SquadBoard.snapshot(m)
 	ok(s["left"] == 9, "a squad wipe: 9 left (%d)" % s["left"])
-	ok(s["crew"].all(func(e): return e["h"].team == P.team), "still no rival rows after the wipe")
+	ok(s["crew"].all(func(e): return e["h"].team == p_v.team), "still no rival rows after the wipe")
 	print("SCOREBOARD CHECK DONE, failures: ", bad)
 	main.get_tree().quit()

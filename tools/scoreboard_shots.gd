@@ -5,13 +5,15 @@ extends RefCounted
 ## (the whole screen) is written.
 
 const DT := 1.0 / 60.0
-const SETTLE_S := 7.0      # s played before the events: the region banner and arrival toasts are gone by then
-const RUN_S := 0.5         # s played with Tab held before the picture
+const SETTLE_S := 7.0  # s played before the events: the region banner and arrival toasts are gone by then
+const RUN_S := 0.5  # s played with Tab held before the picture
+
 
 func run(main: Node) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -24,23 +26,24 @@ func run(main: Node) -> void:
 	await m.start({"teams": 10, "squad": 3, "tier": 0, "length": 1e9, "seed": 31, "no_drop": true})
 	m.set_process(false)
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
+	if fade != null:
+		await fade.reveal(0.01)
 	for h in m.hunters:
 		h.lives = 1
 		h.ctrl = "idle"
 	await _play(m, main, SETTLE_S)
-	var P: Hunter = m.player
-	var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
-	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
+	var p_v: Hunter = m.player
+	var foes: Array = m.hunters.filter(func(x): return x.team != p_v.team)
+	var mates: Array = m.hunters.filter(func(x): return x.team == p_v.team and x != p_v)
 	for i in 3:
-		P.gear[i + 1] = {"id": Gear.ids_for(i + 1)[0], "rar": i + 1}
+		p_v.gear[i + 1] = {"id": Gear.ids_for(i + 1)[0], "rar": i + 1}
 	DashReset.note(foes[0], mates[0])
-	m.knock(foes[0], P, {})
-	m.eliminate(foes[0], P, "finished")
+	m.knock(foes[0], p_v, {})
+	m.eliminate(foes[0], p_v, "finished")
 	m.knock(mates[1], foes[3], {})
 	for h in m.hunters.filter(func(x): return x.team == foes[0].team):
-		m.eliminate(h, P, "finished")
-	P.dmg_done = 1240.0
+		m.eliminate(h, p_v, "finished")
+	p_v.dmg_done = 1240.0
 	mates[0].dmg_done = 610.0
 	Input.action_press("scores")
 	await _play(m, main, RUN_S)
@@ -50,10 +53,12 @@ func run(main: Node) -> void:
 	print("SCOREBOARDSHOTS ", dir)
 	main.get_tree().quit(0)
 
+
 func _play(m: Match, main: Node, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
-		for h in m.hunters: h.render(DT, 1.0)
+		for h in m.hunters:
+			h.render(DT, 1.0)
 		await main.get_tree().process_frame
 		t += DT

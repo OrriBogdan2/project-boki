@@ -8,4 +8,6 @@ const CHECKS := {
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
 	"--drop-merge-audit": ["res://tools/drop_merge_check.gd", "drop_merge_check", "audit"],  # ground audit, not gated
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
+	"--hearth-lamp-check": ["res://tools/hearth_lamp_check.gd", "hearth_lamp_check", null],  # Hearth Lamp
+	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],  # in-match shops, the map legend
 }
