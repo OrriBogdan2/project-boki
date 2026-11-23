@@ -43,11 +43,11 @@
 			"crouch_r": {"L": [0.317], "R": [0.65]}
 		}
 	},
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "exdash"},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "exdash", "fade_out": 0.25},
 	"land": {
 		"clip": "land",
-		"hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1},
-		"drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13}
+		"hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1, "fade": 0.2},
+		"drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13, "fade": 0.25}
 	},
 	"derive": {
 		"ult_recover": {
@@ -68,7 +68,13 @@
 			"scale": 1.38,
 			"upper": "moving"
 		},
-		"jug_slash_l": {"clip": "slash_l", "fade_out": 0.4, "air_legs": true, "strike": ["tip", "lmb/reach", "edge"], "scale": 1.38},
+		"jug_slash_l": {
+			"clip": "slash_l",
+			"fade_out": 0.4,
+			"air_legs": true,
+			"strike": ["tip", "lmb/reach", "edge"],
+			"scale": 1.38
+		},
 		"jug_wave_wind": {"clip": "wave_wind", "hold_from": 0.5, "fade": 0.25, "fade_out": 0.4, "air_legs": true},
 		"jug_wave": {"clip": "wave", "fade_out": 0.4, "air_legs": true, "lead": 0.03},
 		"jug_slam": {
@@ -175,7 +181,12 @@
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
 		"board": {
-			"pose": {"head": [-5, -40, 0], "upper_arm.R": [5, 0, 8], "forearm.R": [-22, 0, 0], "upper_arm.L": [8, 0, -6]}
+			"pose": {
+				"head": [-5, -40, 0],
+				"upper_arm.R": [5, 0, 8],
+				"forearm.R": [-22, 0, 0],
+				"upper_arm.L": [8, 0, -6]
+			}
 		}
 	},
 	"free_arm": {"slam": "L", "meteor": "L"}

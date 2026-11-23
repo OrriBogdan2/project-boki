@@ -77,9 +77,9 @@
 			"heading": true,
 			"turn_max": 3.2,
 			"fade_out": 0.4,
-			"rate": 1.6,
 			"strike": ["front", "ram", "edge"],
-			"dash": true
+			"dash": true,
+			"lead": 0.017
 		},
 		"lw_hop": {"clip": "hop", "heading": true, "turn_max": 3.2, "fade_out": 0.4, "air_clip": "hop", "dash": true},
 		"as_cloak": {"clip": "cloak", "fade_out": 0.4, "air_legs": true, "upper": "moving"},
@@ -149,7 +149,12 @@
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
 		"board": {
-			"pose": {"head": [10, 0, 0], "upper_arm.R": [-30, 0, 0], "forearm.R": [-95, 0, 0], "upper_arm.L": [8, 0, -12]}
+			"pose": {
+				"head": [10, 0, 0],
+				"upper_arm.R": [-30, 0, 0],
+				"forearm.R": [-95, 0, 0],
+				"upper_arm.L": [8, 0, -12]
+			}
 		}
 	}
 }

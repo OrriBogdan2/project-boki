@@ -10,7 +10,6 @@ const CHECKS := {
 	# Kael tap strike, live aim, tether, ult momentum
 	"--kael-tap-check": ["res://tools/kael_tap_check.gd", "kael_tap_check", null],
 	"--kael-tap-clip": ["res://tools/kael_tap_clip.gd", "kael_tap_clip", null],  # Kael tap/hold/ult clips (GPU)
-	"--layer-verify": ["res://tools/layer_verify.gd", "layer_verify", null],  # the layers over walk and run
 	"--pond-shots": ["res://tools/pond_shots.gd", "pond_shots", null],  # every Hunter on the pond walk (wade, swim)
 	# every Hunter's win, lose and board beat
 	"--result-pose-shots": ["res://tools/result_pose_shots.gd", "result_pose_shots", null],

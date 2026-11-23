@@ -770,11 +770,13 @@ func _start_slam(dk: float, rk: float, windup: float) -> void:
 	slam_w = {"t": windup, "t0": windup, "dk": dk, "rk": rk, "dir": h.aim_dir()}
 	play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
 	vfx("slam_tell")
+	KitWindup.keep(self, "rmb", HeroVfx.of(m).last_voice)
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
 	if h.stun_t > 0.0 or h.downed:
 		slam_w = {}          # interrupted
+		KitWindup.broken(self, "rmb")
 		return
 	# the short crimson strike cone ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]

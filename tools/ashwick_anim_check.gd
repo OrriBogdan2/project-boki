@@ -27,7 +27,7 @@ func run() -> void:
 	var home: Vector3 = r[4]
 	var k: AshwickKit = p.ak
 	var km: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MAP))["kmoves"]
-	var lens := _clip_lens(["cloak", "walk_f", "run_f"])
+	var lens := _clip_lens(["cloak", "run_f"])
 	# the ram into a foe: contact early, and the clip jumps to the struck pose then (not the free ram's 0.36)
 	t.teleport(home + Vector3(3.0, 0, 0))
 	ak.aim_at(p, t.pos)
@@ -66,31 +66,28 @@ func run() -> void:
 		k.anim_id == "lw_land" and km["lw_land"].get("upper") == "moving",
 		"%s %s" % [k.anim_id, km["lw_land"]]
 	)
-	# Furnace Cloak: the arms stay flung wide about 0.2 s, settled by 0.4 s, legs free while she walks
+	# Furnace Cloak: a quick arms-out flare, settled in 0.24 s (docs/heroes/ashwick.md), legs free while she walks
 	var ck: Array = KMovesPair.MOVES["as_cloak"]["keys"]
 	var wide := float(ck[2][0]) - float(ck[1][0])
 	var end := float(ck[-1][0])
-	# main's timing: the instant 0.15-0.25 s flare of owner item 11, keys 0.05/0.13/0.24 (no 0.2 s wide hold)
 	ok(
-		"timing: the cloak's arms flare and settle inside the 0.15-0.25 s flash of owner item 11",
+		"timing: the cloak's arms flare wide, settled by 0.24 s (the quick flare)",
 		(
-			wide >= 0.05
-			and end >= 0.15
-			and end <= 0.25
+			wide >= 0.06
+			and absf(end - 0.24) < 0.01
 			and absf(float(lens["cloak"]) - end) < 0.04
-			and k.CLOAK_POSE_T < end + 0.1
+			and k.CLOAK_POSE_T <= end + 0.08
 			and km["as_cloak"].get("upper") == "moving"
 		),
 		"wide %.2f s, end %.2f s, clip %.2f s" % [wide, end, float(lens["cloak"])]
 	)
-	# the run: a footfall every 0.12-0.2 s at her run speed (main's cinder.glb: walk_f 0.667 s is two run_f loops,
-	# so the walk no longer shares the run's cycle; each ring's own loops are one length, --clip-check)
+	# the run: a footfall every 0.14-0.2 s at her run speed (walk and run now have their own cycle lengths)
 	var rate := clampf(p.base_speed / 4.6, 0.6, 1.5)
 	var step := float(lens["run_f"]) / 2.0 / rate
 	ok(
-		"timing: a running step every 0.12-0.2 s ([F] quick short strides; main's 0.333 s run_f at her run speed)",
-		step >= 0.12 and step <= 0.2 and float(lens["walk_f"]) > 0.0,
-		"step %.3f s, walk %.3f run %.3f" % [step, float(lens["walk_f"]), float(lens["run_f"])]
+		"timing: a running step every 0.14-0.2 s ([F] quick short strides)",
+		step >= 0.14 and step <= 0.2,
+		"step %.3f s" % step
 	)
 
 

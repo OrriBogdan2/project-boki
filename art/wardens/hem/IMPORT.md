@@ -1,3 +1,15 @@
+# Hem (Lace): native Meshy model r4b (2026-11-22, ext/lace-native-r4)
+
+`hem_meshy.glb` is Lace on Meshy's own 66+2-joint rig, drawn by `scripts/heroes/warden_native.gd` when `hem.meshy_native`
+is on in `content/rules/warden_native.json` (off = the contract `hem.glb` below, unchanged). Source:
+`/home/boki/gens/native-next-1122/Lace/r4/glb/hem_meshy_lace_r4b.glb` (never edited in git). 71,050 tris, 6 clips
+(Idle walk run Jump_Run Attack Crouch_Walk_with_Torch), images extracted by Godot to `hem_meshy_*.jpg/png`.
+Body, head and bow are round 3's (PART-LOCK); the skirt is a Meshy image-to-3d skirt + retexture, weighted by position
+(Hips at the waist, thighs toward the hem, no shin/foot), +10% wide, back faces culled
+(Lace/r5/tools/build_r5.py, notes in Lace/r4/RESULT.md). Art gate run.Hajq: game view 7.2 vs live 3.5.
+Open polish: right-side skirt split in close-ups at run/dash/jump, skirt brighter than the deep-red ref and no slit,
+short hair, corset side texture, bow string through the chest in attack.
+
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)

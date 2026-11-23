@@ -1,8 +1,6 @@
 {
 	"doc": "Neve's hand-keyed clips (art/wardens/claire/claire.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Walk and run are a real stride and run (the pilot gait recipe); her skate is tm_skate (Rink Run).",
-	"blink": {
-		"turn": {"lid.R": [-0.82, 0.0, 0.0], "lid.L": [-0.82, 0.0, 0.0]}
-	},
+	"blink": {"turn": {"lid.R": [-0.82, 0.0, 0.0], "lid.L": [-0.82, 0.0, 0.0]}},
 	"skinned_weapon": true,
 	"carry_drop": ["hand.R"],
 	"extra_bones": {
@@ -58,8 +56,8 @@
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {
 		"clip": "land",
-		"hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08},
-		"drop": {"rate": 1.2, "dur": 0.33, "moving": 0.12}
+		"hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08, "fade": 0.25},
+		"drop": {"rate": 1.2, "dur": 0.33, "moving": 0.12, "fade": 0.25}
 	},
 	"kmoves": {
 		"tm_dart_r": {"clip": "dart_r", "upper": "moving", "air_legs": true},
@@ -133,7 +131,24 @@
 		"ledge": {"clip": "ledge", "rise": 0.3}
 	},
 	"procedural": ["ledge", "base", "wade", "swim"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R",
+		"fingers.L",
+		"thumb.L",
+		"brow.L",
+		"brow.R",
+		"lid.L",
+		"lid.R",
+		"mouth.L",
+		"mouth.R"
+	],
 	"cancels": [
 		["tm_spear_aim", 0.4, "tm_rime"],
 		["tm_spear_aim", 0.3, "tm_dart_r"],

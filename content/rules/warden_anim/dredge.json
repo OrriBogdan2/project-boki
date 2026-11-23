@@ -1,8 +1,6 @@
 {
 	"doc": "Grimble's hand-keyed clips (art/wardens/dredge/dredge.glb; id and files stay dredge) and which game state plays which (scripts/heroes/warden_clips.gd).",
-	"blink": {
-		"turn": {"lid": [0.0, -0.95, 0.0]}
-	},
+	"blink": {"turn": {"lid": [0.0, -0.95, 0.0]}},
 	"skinned_weapon": true,
 	"extra_bones": {
 		"foot.L": "shin.L",
@@ -60,7 +58,7 @@
 			"crouch_r": {"L": [0.233], "R": [0.483]}
 		}
 	},
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "pounce"},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "pounce", "fade_out": 0.25},
 	"land": {
 		"clip": "land",
 		"hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1},
@@ -140,7 +138,25 @@
 	},
 	"procedural": ["ledge", "base", "wade", "swim"],
 	"recoil": {"deg": 4.0, "settle": 0.11},
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "fingers2.L", "thumb.L", "brow", "lid", "jaw", "eye", "hoard", "gun"],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R",
+		"fingers.L",
+		"fingers2.L",
+		"thumb.L",
+		"brow",
+		"lid",
+		"jaw",
+		"eye",
+		"hoard",
+		"gun"
+	],
 	"cancels": [
 		["dr_dive", 0.3, "glide"],
 		["dr_blast", 0.5, "stun"],
@@ -157,7 +173,12 @@
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
 		"board": {
-			"pose": {"head": [-8, 10, 0], "upper_arm.L": [-35, 0, -10], "forearm.L": [-125, 0, 0], "upper_arm.R": [20, 0, 15]}
+			"pose": {
+				"head": [-8, 10, 0],
+				"upper_arm.L": [-35, 0, -10],
+				"forearm.L": [-125, 0, 0],
+				"upper_arm.R": [20, 0, 15]
+			}
 		}
 	}
 }

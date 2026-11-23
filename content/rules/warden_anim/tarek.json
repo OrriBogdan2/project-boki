@@ -2,7 +2,14 @@
 	"doc": "Tenzo's hand-keyed clips (art/wardens/tarek/tarek.glb) and which game state plays which (scripts/heroes/warden_clips.gd). His weapon is his fists: the rock bracers and hands are skinned in the body, the Gun node follows the right fist (blade).",
 	"skinned_weapon": true,
 	"legs_rigid": true,
-	"extra_bones": {"foot.L": "shin.L", "foot.R": "shin.R", "jaw": "head", "lip.L": "head", "lip.R": "head", "x_breath": "hips"},
+	"extra_bones": {
+		"foot.L": "shin.L",
+		"foot.R": "shin.R",
+		"jaw": "head",
+		"lip.L": "head",
+		"lip.R": "head",
+		"x_breath": "hips"
+	},
 	"blade": {"root": "anchor_wrist_R", "tip": "weapon_muzzle"},
 	"loco": {
 		"plants": {
@@ -45,16 +52,21 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
 	"land": {
 		"clip": "land",
-		"hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08},
-		"drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}
+		"hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08, "fade": 0.25},
+		"drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13, "fade": 0.25}
 	},
 	"kmoves": {
 		"breah_throw": {"clip": "lmb_throw", "upper": "moving", "air_legs": true},
 		"breah_wind": {"clip": "lmb_wind", "upper": "moving", "hold_from": 0.24, "air_legs": true},
-		"breah_punch": {"clip": "lmb_punch", "upper": "moving", "air_legs": true, "strike": ["hand.R", "lmb/punch/len", "start"]},
+		"breah_punch": {
+			"clip": "lmb_punch",
+			"upper": "moving",
+			"air_legs": true,
+			"strike": ["hand.R", "lmb/punch/len", "start"]
+		},
 		"breah_crouch": {"clip": "rmb_gather", "hold_from": 0.16},
 		"breah_windup": {"clip": "rmb_gather", "hold_from": 0.16},
-		"breah_leap": {"clip": "rmb_leap", "hold_from": 0.3},
+		"breah_leap": {"clip": "rmb_leap", "hold_from": 0.3, "fade_out": 0.6},
 		"breah_slam": {
 			"clip": "rmb_slam",
 			"strike": ["fist", "rmb/slam/reach", "ground"],
@@ -65,7 +77,13 @@
 		"breah_slam_land": {"clip": "rmb_land", "fade": 0.05, "time": [[0, 0.1], [0.14, 0.4], [0.75, 0.733]], "blend_out": 0.2},
 		"breah_lunge": {"clip": "rmb_lunge"},
 		"breah_leap_land": {"clip": "dash_land", "upper": "moving"},
-		"breah_exdash": {"clip": "dash_air", "heading": true, "turn_max": 3.2, "air_clip": "dash_air", "ground_clip": "dash_hop"},
+		"breah_exdash": {
+			"clip": "dash_air",
+			"heading": true,
+			"turn_max": 3.2,
+			"air_clip": "dash_air",
+			"ground_clip": "dash_hop"
+		},
 		"breah_raise": {"clip": "e_row", "upper": "moving", "air_legs": true},
 		"breah_sense": {"clip": "sense"},
 		"breah_spine_aim": {"clip": "x_aim", "hold_from": 0.12, "upper": "moving"},
@@ -130,7 +148,12 @@
 		"win": {"clip": "emote_toss"},
 		"lose": {"clip": "downed"},
 		"board": {
-			"pose": {"head": [8, 0, 8], "upper_arm.R": [-55, 0, 0], "forearm.R": [-15, 0, 0], "upper_arm.L": [-10, 0, -30]}
+			"pose": {
+				"head": [8, 0, 8],
+				"upper_arm.R": [-55, 0, 0],
+				"forearm.R": [-15, 0, 0],
+				"upper_arm.L": [-10, 0, -30]
+			}
 		}
 	},
 	"free_arm": {"lmb_throw": "L", "lmb_punch": "L"}

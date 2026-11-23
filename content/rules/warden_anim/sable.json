@@ -1,8 +1,6 @@
 {
 	"doc": "Sable's hand-keyed clips (art/wardens/sable/sable.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Twin flintlocks, one skinned to each hand; the Vault's flips and the Encore dance run on the kit's own clock. A move's fade key is its blend-in (default 0.1 s): the quick ones (whip, flip, knife) read from their first key.",
-	"blink": {
-		"turn": {"lid.R": [-0.82, 0.0, 0.0], "lid.L": [-0.82, 0.0, 0.0]}
-	},
+	"blink": {"turn": {"lid.R": [-0.82, 0.0, 0.0], "lid.L": [-0.82, 0.0, 0.0]}},
 	"skinned_weapon": true,
 	"carry_drop_surfaces": ["metal-v95b"],
 	"extra_bones": {
@@ -88,8 +86,8 @@
 		"drop": {"rate": 1.0, "dur": 0.33, "moving": 0.12}
 	},
 	"kmoves": {
-		"thf_lmb_r": {"clip": "lmb_r", "cut": 0.45, "upper": "moving", "air_legs": true},
-		"thf_lmb_l": {"clip": "lmb_l", "cut": 0.45, "upper": "moving", "air_legs": true},
+		"thf_lmb_r": {"clip": "lmb_r", "cut": 0.45, "upper": "moving", "air_legs": true, "fade_out": 0.6},
+		"thf_lmb_l": {"clip": "lmb_l", "cut": 0.45, "upper": "moving", "air_legs": true, "fade_out": 0.6},
 		"thf_primed": {"clip": "primed", "upper": "moving", "air_legs": true},
 		"thf_vault_r": {"clip": "vault_r", "heading": true, "heading_off": 1.5708, "turn_max": 3.2},
 		"thf_vault_l": {"clip": "vault_l", "heading": true, "heading_off": -1.5708, "turn_max": 3.2},
@@ -102,7 +100,7 @@
 		"thf_knife": {"clip": "knife", "air_legs": true, "strike": ["hand.R", "e/range", "throw"], "upper": "moving"},
 		"thf_arrive": {"clip": "arrive"},
 		"thf_encore": {"clip": "encore", "upper": "moving"},
-		"thf_encore_dance": {"clip": "encore_dance", "hold_from": 0.0, "upper": "moving", "air_legs": true},
+		"thf_encore_dance": {"clip": "encore_dance", "hold_from": 0.0, "upper": "moving", "air_legs": true, "fade_out": 0.6},
 		"thf_reset": {"clip": "reset", "upper": "moving", "air_legs": true},
 		"thf_flourish": {"clip": "flourish", "upper": "moving", "air_legs": true},
 		"mf_xform": {"clip": "fusion"}
@@ -164,7 +162,22 @@
 	},
 	"procedural": ["base", "wade", "swim"],
 	"recoil": {"deg": 3.0, "settle": 0.09},
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R",
+		"brow.L",
+		"brow.R",
+		"lid.L",
+		"lid.R",
+		"mouth.L",
+		"mouth.R"
+	],
 	"cancels": [
 		["thf_bola", 0.2, "stun"],
 		["thf_bola", 0.2, "thf_lmb_r"],
