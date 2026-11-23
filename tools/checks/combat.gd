@@ -9,4 +9,5 @@ const CHECKS := {
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
+	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],  # 0022 ult ranks
 }
