@@ -20,6 +20,8 @@ var close := false
 var film := false
 var film_clips: Array = ["idle", "run", "attack", "hit"]   # --clips=a,b: the clips a film plays
 var film_yaws: Array = [-PI, -PI / 2.0, 0.0]   # --yaws=deg,deg,..: a film plays every clip once at each of these yaws (front, side, back)
+var film_span := {"idle": 1.0, "run": 0.9, "attack": 1.0, "hit": 0.7}   # --spans=idle:4.0,hit:1.4: seconds each film clip plays
+var film_step := 2   # --fstep=4: a film shoots every Nth step (2 = 15 fps)
 var native := false
 var mfov := 8.0     # --mfov=14: the match camera's field of view (wider = the hunter sits smaller in the tile)
 var mpitch := 66.0  # --mpitch=57: the match camera's pitch in degrees (the game plays ~57)
@@ -44,6 +46,10 @@ func run(main: Node) -> void:
 		if a.begins_with("--cfit="): cfit = float(a.substr(7))
 		if a.begins_with("--clips="):
 			film_clips = Array(a.substr(8).split(",", false))
+		if a.begins_with("--spans="):
+			for kv in a.substr(8).split(",", false):
+				film_span[kv.get_slice(":", 0)] = float(kv.get_slice(":", 1))
+		if a.begins_with("--fstep="): film_step = maxi(1, int(a.substr(8)))
 		if a.begins_with("--yaws="):
 			film_yaws = []
 			for d in a.substr(7).split(",", false):
@@ -146,10 +152,10 @@ func _hunter(id: String, dir: String) -> void:
 		var tag: String = clip if not film else "%s_y%d" % [clip, pl[1]]
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
-		if film:       # every 2nd step (15 fps) over a clip's span
+		if film:       # every film_step-th step (2 = 15 fps) over a clip's span
 			times = []
-			for j in int(float({"idle": 1.0, "run": 0.9, "attack": 1.0, "hit": 0.7}[clip]) / (2.0 * DT)):
-				times.append(j * 2.0 * DT)
+			for j in int(float(film_span.get(clip, 1.0)) / (film_step * DT)):
+				times.append(j * film_step * DT)
 		# settle: the pre-state (standing, or running for a hit/jump) for 25 frames, then the clip's own state
 		var s := _state(id, "idle" if clip != "dash" else "run", yaw, 0.0)
 		model.set_meta(WardenClips.STATE, s)
