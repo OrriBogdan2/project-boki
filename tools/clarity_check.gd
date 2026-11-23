@@ -201,7 +201,7 @@ func _side_fx(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 func _melee_stack(m: Match, p: Hunter, ally: Hunter, foes: Array) -> void:
 	var at := p.pos
 	for h: Hunter in m.hunters:
-		h.teleport(at + Vector3(0.4 * float(m.hunters.find(h) % 3), 0, 0.4 * float(m.hunters.find(h) / 3)))
+		h.teleport(at + Vector3(0.4 * float(m.hunters.find(h) % 3), 0, 0.4 * float(int(m.hunters.find(h) / 3.0))))
 		if h.kin:
 			(h.kin as Kin).state = "active"
 			(h.kin as Kin).teleport(h.pos + Vector3(0.3, 0, 0))

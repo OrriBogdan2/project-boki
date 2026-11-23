@@ -103,7 +103,7 @@ static func other_line(how: String) -> String:
 		parts.append("%d %s" % [int(rw["goods"][g]), String(g).capitalize()])
 	var seat := "The early seat (the Gate)"
 	if early:
-		seat = "The final seat (%d:%02d, one squad)" % [int(rl["final_s"]) / 60, int(rl["final_s"]) % 60]
+		seat = "The final seat (%d:%02d, one squad)" % [int(int(rl["final_s"]) / 60.0), int(rl["final_s"]) % 60]
 	return "%s would have paid: %s." % [seat, ", ".join(parts)]
 
 ## One Boki you left behind, in one line.

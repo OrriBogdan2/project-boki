@@ -68,7 +68,7 @@ static func sphere(r: float, seg := 16) -> SphereMesh:
 	if hit:
 		return hit
 	var s := SphereMesh.new()
-	s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(8, sg / 2)
+	s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(8, int(sg / 2.0))
 	return _spheres.keep(key, s)
 
 static func capsule(r: float, h: float) -> CapsuleMesh:
@@ -2923,7 +2923,7 @@ static func building(id: String) -> Node3D:
 			part(body, box(1.3, 0.9, 0.08), wood, Vector3(0.65, 1.05, 0.66))
 			for k in 4:
 				var pc: Color = [Color("fff6c0"), Color("cfeaff"), Color("ffd6e0"), Color("e0ffd6")][k]
-				part(body, box(0.26, 0.3, 0.02), toon(pc, false), Vector3(0.38 + (k % 2) * 0.55, 1.22 - (k / 2) * 0.38, 0.71), Vector3.ONE, Vector3(0, 0, randf_range(-0.12, 0.12)))
+				part(body, box(0.26, 0.3, 0.02), toon(pc, false), Vector3(0.38 + (k % 2) * 0.55, 1.22 - (int(k / 2.0)) * 0.38, 0.71), Vector3.ONE, Vector3(0, 0, randf_range(-0.12, 0.12)))
 			part(body, cyl(0.03, 0.03, 1.0, 6), wood, Vector3(0.65, 0.3, 0.66))
 			for k in 5:
 				part(body, PrismMesh.new(), toon([Color("ffd23f"), Color("5ab0f0"), Color("e0607e"), Color("8fd16a"), Color("b48cf2")][k], false), Vector3(-1.2 + k * 0.6, 2.75 - absf(k - 2) * 0.12, -0.2), Vector3(0.22, 0.28, 0.04), Vector3(PI, 0, 0))
@@ -2981,7 +2981,7 @@ static func building(id: String) -> Node3D:
 			part(body, box(3.5, 0.08, 0.08), frame, Vector3(0, 1.8, -1.3))
 			part(body, box(3.5, 0.08, 0.08), frame, Vector3(0, 2.8, 0))
 			for i in 6:
-				var px := -1.2 + (i % 3) * 1.2; var pz := -0.6 + (i / 3) * 1.2
+				var px := -1.2 + (i % 3) * 1.2; var pz := -0.6 + (int(i / 3.0)) * 1.2
 				part(body, cyl(0.2, 0.16, 0.3, 8), toon(Color("b4553f")), Vector3(px, 0.35, pz))
 				part(body, sphere(0.3, 8), toon(Color("5aa04a")), Vector3(px, 0.75, pz), Vector3(1, 1.2, 1))
 		"dojo":
