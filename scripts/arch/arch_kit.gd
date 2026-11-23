@@ -725,7 +725,8 @@ static func _clamp_parts(sd: Dictionary) -> void:
 
 ## A cast context with this hunter as caster and owner, the kin as the kin.
 func cx(slot: String, ability: String, loc_aim: Vector3, extra := {}) -> Dictionary:
-	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
+	var pw: String = {"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)
+	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, power(pw), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
 	c["hero_col"] = Arch.color(id)
 	c["fire_from"] = slot      # its shots are drawn from the slot's hand or weapon (ShotOrigin.hand)
 	for k in extra:
@@ -1167,7 +1168,8 @@ func self_pips(n: int, lit: int, armed: bool, dt: float, lift := 0.0, grow := 1.
 		if armed: s *= 1.2 + 0.12 * sin(m.time * 10.0 + i)
 		dat.scale = Vector3.ONE * s
 		var c := res_col().lightened(0.2) if armed else res_col()
-		(dat.material_override as StandardMaterial3D).albedo_color = Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+		var pip_col := Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+		(dat.material_override as StandardMaterial3D).albedo_color = pip_col
 
 ## A flat, unlit, solid colour (pips and plates that must read as their colour, not glow white).
 static func solid_mat(c: Color) -> StandardMaterial3D:

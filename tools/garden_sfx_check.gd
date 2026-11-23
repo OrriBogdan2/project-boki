@@ -24,12 +24,12 @@ extends RefCounted
 ##  12. the garden whistle (base_whistle.gd): a tap is the short two-note whistle, a hold adds the longer rising one;
 ##      the called Boki answers once in its own voice: happy when trusting and glad, unsure when lukewarm, a huff
 ##      when sulky, nothing while it sleeps
-##  13. Boki moments in BaseLife: a snack from the pantry plays boki_eat once; a nap plays boki_sleep once, as it
-##      lies down (after its walk away from a rival), and nothing more while it sleeps; three lying down 0.1 s
-##      apart breathe once (Sfx.MIN_GAP)
-##  14. Boki at play (play_sfx.gd): one zone plays at most MAX_CUES cues per WINDOW_S however many Boki play, a
+##  13. Boki at play (play_sfx.gd): one zone plays at most MAX_CUES cues per WINDOW_S however many Boki play, a
 ##      cue over the cap is dropped, another zone has its own allowance (the tag, squabble and toy hooks are
 ##      --base-life-check's)
+##  14. Boki moments in BaseLife: a snack from the pantry plays boki_eat once; a nap plays boki_sleep once, as it
+##      lies down (after its walk away from a rival), and nothing more while it sleeps; three lying down 0.1 s
+##      apart breathe once (Sfx.MIN_GAP)
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build

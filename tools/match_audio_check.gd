@@ -449,7 +449,7 @@ func _steps(m: Match, p: Hunter) -> void:
 	)
 
 
-## The level (dB) of one step of h placed `d` m from P along x (h == P: where P stands), NAN when nothing played.
+## The level (dB) of one step of h placed `d` m from p_v along x (h == p_v: where p_v stands), NAN when nothing played.
 ## contact: the foot's plain step (StepReach.contact), else the surface step (Juice.footstep).
 func _step_db(h: Hunter, p: Hunter, d: float, contact: bool) -> float:
 	if h != p:
