@@ -11082,3 +11082,4 @@ READY ext/feel-boki-hit-tiers 0aabf1ffe2 (bulk-rebase: origin/main merged in mec
 READY ext/parity-recheck-sable-motley f452714364 (bulk-rebase: origin/main merged in mechanically, was 0a4f6cbd8f; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/parity-recheck-albert-neve b6de105287 (bulk-rebase: origin/main merged in mechanically, was f9a01e9491; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/parity-recheck-tenzo-sparkle 529f18a37f (bulk-rebase: origin/main merged in mechanically, was 7b4af68271; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/ui-inventory-safe 9ee2e149148258e75ebf0c3de419d02fd3e0477f (inventory safe at 3 sizes, merged with main: kept main's _full_pack plus the three-size sweep; --inventory-check 0 failures, --check 0, --garden-fit-check 0; health --strict fails only on camp_clear_check long_line, same on origin/main)
