@@ -375,6 +375,8 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var n := DashState.base_charges(dodge_def, cdat)
+	if ak and ak.single_dash():
+		return 1.0
 	return ak.dash_charges(n) if ak else n
 
 func dash_regen() -> float:
@@ -2558,6 +2560,8 @@ func perk_n(id: String) -> int:
 
 ## Can this perk still be offered to you (a free perk slot, not at its stack limit)?
 func perk_open(id: String) -> bool:
+	if id == "secondwind" and ak and ak.single_dash():
+		return false
 	var below_max := perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1))
 	return perks.size() < PerkOrbs.slots() and below_max and WeaponUps.fits(self, id)
 
