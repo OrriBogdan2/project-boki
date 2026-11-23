@@ -2,7 +2,7 @@ class_name ArchKit
 extends RefCounted
 ## One hunter's archetype kit at run time (docs/ARCHETYPES.md): the dash shape, the passive and
 ## its resource, the RMB router (tap / hold / airborne / during E / during R / resource full),
-## E, R (level 6, rank 2 at 9) and the Bonded R (bond full: the kin merges 0.2s after the ult's
+## E, R (level 6, rank 2 at 9, rank 3 at 10) and the Bonded R (bond full: the kin merges 0.2s after the ult's
 ## cast). Each archetype is a subclass (scripts/arch/kits/); this base holds the timers, the input
 ## router, the kin's infusion of the sockets, telegraphs and the shared helpers.
 ##
@@ -15,6 +15,8 @@ var d: Dictionary = {}
 var res := 0.0                 # the passive's resource (Marks live on targets instead)
 var res_wait := 0.0            # seconds left before it decays out of a fight
 var full_was := false
+var _x_rank := 0               # the R rank _x_ranked was built for (x_def)
+var _x_ranked: Dictionary = {}
 var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0, "x": 0.0}
 var ch_rmb := 1.0              # RMB charges
 var rmb_down := false          # RMB held since its press
@@ -37,6 +39,7 @@ var fx_t := 0.0
 var tell := ""                 # "" | "half" | "full": the resource tell enemies read
 var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
+var windups := {}              # slot -> the Sfx handles of its wind-up sounds, cut if the cast breaks (KitWindup)
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
 var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
@@ -73,7 +76,14 @@ const OWN_LOOK_SKIP := ["boom", "ping", "whoosh", "throw"]     # KinExec's deliv
 func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
 func r_def() -> Dictionary: return d.get("r", {})
-func x_def() -> Dictionary: return d.get("x", {})          # the hero ultimate on X (HeroUlt)
+## The hero ultimate on X (HeroUlt) at the hunter's R rank (its x.per_rank steps added; rebuilt on a new rank).
+func x_def() -> Dictionary:
+	var r := h.ability_level("ult")
+	if r != _x_rank:
+		_x_rank = r
+		_x_ranked = HeroUlt.ranked(d.get("x", {}), r)
+	return _x_ranked
+
 func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
@@ -121,6 +131,7 @@ func _drop_holds() -> void: pass
 ## state this hunter shows. Call this, not _drop_holds, so the shared telegraphs always go with the holds.
 func drop_holds() -> void:
 	_drop_holds()
+	KitWindup.drop_all(self)
 	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
@@ -830,9 +841,10 @@ func slot_info(slot: String) -> Dictionary:
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()
+			var pip_cap := 0 if single_dash() else int(dmax)
 			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
 			out.merge({"name": String(sd.get("name", "")), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
-				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": pip_cap, "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 ## The RMB's charges as a fraction: the whole ones plus how far the next one has recharged (the HUD's pip fill).
@@ -934,6 +946,8 @@ func dash_charges(class_n: float) -> float:
 
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
+## One plain dash with one cooldown: no charge pips, no Second Wind (Vex's Slipstep, owner 11-16).
+func single_dash() -> bool: return false
 
 ## A shot dodged through this hero's dash (kits that feed on it override).
 func on_perfect_dodge() -> void: pass

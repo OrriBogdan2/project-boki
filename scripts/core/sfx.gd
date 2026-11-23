@@ -174,6 +174,11 @@ const VOICES := [
 ]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {
+	"carry_swap_out": 200,
+	"carry_swap_in": 200,
+	"carry_claim": 200,
+	"carry_stolen": 400,
+	"carry_take": 200,
 	"scan_pop": 150,
 	"scan_pop_fine": 150,
 	"scan_pop_rare": 150,
@@ -246,6 +251,8 @@ const BLAST_PEAK_DB := -6.0
 const NEAR := 5.5
 const SPREAD := 8.0
 const FAR := 19.0
+const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a broken cast)
+
 ## Sounds behind terrain (see SfxOcclusion) go through the SFXMuffled bus (SfxMix.OCCLUDED_HZ / OCCLUDED_DB).
 var occlusion := SfxOcclusion.new()
 var skip: Array = []  # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
@@ -256,6 +263,9 @@ var streams := {}
 var players: Array[AudioStreamPlayer] = []
 var next := 0
 var voices := SfxVoices.new(POOL)  # who keeps a voice when the pool or the loops are full
+## A handle (from play) names one sound on one pool voice: starts * POOL + the voice, so a handle to a sound
+## that has ended, its voice gone on to another, cuts nothing.
+var starts := PackedInt32Array()  # per pool voice: how many sounds it has started
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
@@ -276,6 +286,7 @@ var music_name := ""
 var amb: AudioStreamPlayer
 var amb_name := ""
 var mix: SfxMix
+var _cut_tw: Array[Tween] = []  # per pool voice: its fade-out under way (cut)
 
 
 func _ready() -> void:
@@ -311,6 +322,8 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+	starts.resize(POOL)
+	_cut_tw.resize(POOL)
 	cue_voice = AudioStreamPlayer.new()
 	cue_voice.bus = "SFX"
 	add_child(cue_voice)
@@ -606,9 +619,9 @@ var _step_i := 0
 
 
 ## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
-func step(pos = null, vol := -16.0, reach := 0.0) -> void:
+func step(pos = null, vol := -16.0, reach := 0.0, pitch := 1.0) -> void:
 	_step_i = (_step_i + 1) % 3
-	play("step%d" % _step_i, pos, vol, 0.12, 1.0, reach)
+	play("step%d" % _step_i, pos, vol, 0.12, pitch, reach)
 
 
 func has(sname: String) -> bool:
@@ -643,6 +656,10 @@ func _voice(pos, rk: float, sname: String) -> AudioStreamPlayer:
 	if i < 0:
 		return null
 	next = (i + 1) % POOL
+	if _cut_tw[i] != null:
+		_cut_tw[i].kill()
+		_cut_tw[i] = null
+	starts[i] += 1
 	voices.rank[i] = rk
 	voices.sound[i] = sname
 	var p := players[i]
@@ -673,11 +690,26 @@ func play_sample(bus_name: String) -> void:
 	p.pitch_scale = 1.0
 	p.play()
 
+## Fades out the sound `handle` names (from play) if its voice still plays it: a wind-up whose cast was broken.
+func cut(handle: int, fade := CUT_FADE) -> void:
+	if not sounding(handle):
+		return
+	var p := players[handle % POOL]
+	var tw := p.create_tween()
+	tw.tween_property(p, "volume_db", -60.0, fade)
+	tw.tween_callback(p.stop)
+	_cut_tw[handle % POOL] = tw
+
+## Whether the sound `handle` names (from play) is still playing.
+func sounding(handle: int) -> bool:
+	var i := handle % POOL
+	return handle >= 0 and handle == starts[i] * POOL + i and players[i].playing
+
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the sound's own
 ## "reach", else hear_range). mine: your own sound played away from you (a hit tick on the one you hit), so the pool
 ## keeps it as it keeps your other sounds (SfxVoices). take: a given take of a sound that has several (FireSfx
-## round-robins them), else a random one that isn't the last.
+## round-robins them), else a random one that isn't the last. Returns a handle for cut, -1 when nothing played.
 func play(
 	sname: String,
 	pos = null,
@@ -687,17 +719,17 @@ func play(
 	reach := 0.0,
 	mine := false,
 	take := -1
-) -> void:
+) -> int:
 	if cue_log != null: cue_log.append([sname, pos, not sname in skip and ensure(sname)])
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
-		return
+		return -1
 	if sname in CUES:
 		cue_plays[sname] = int(cue_plays.get(sname, 0)) + 1
 		cue_voice.stream = streams[sname]
 		cue_voice.volume_db = vol_db
 		cue_voice.pitch_scale = pitch
 		cue_voice.play()
-		return
+		return -1
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
 	if sname.contains("step_"):
@@ -706,17 +738,17 @@ func play(
 	var rk := voices.rank_of(pos, listener, mine)
 	if now - int(last_played.get(sname, -1000)) < gap:
 		voices.cut.emit(sname, rk, &"gap")
-		return
+		return -1
 	var r := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
 	var v := vol_db + float(sound_gain.get(sname, 0.0)) + _distance_db(pos, r) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
-		return
+		return -1
 	var times: Array = recent.get(sname, [])
 	while not times.is_empty() and now - int(times[0]) > STACK_MS:
 		times.pop_front()
 	if times.size() >= STACK_MAX:
 		voices.cut.emit(sname, rk, &"stack")
-		return
+		return -1
 	v -= STACK_DB * times.size()
 	times.append(now)
 	recent[sname] = times
@@ -725,7 +757,8 @@ func play(
 		mix.big_event()
 	var p := _voice(pos, rk, sname)
 	if p == null:
-		return
+		return -1
+	var vi := players.find(p)
 	var st = streams[sname]
 	if st is Array:
 		# a different take from last time
@@ -740,13 +773,17 @@ func play(
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
 	played.emit(sname, pos, vol_db, pitch)
+	return starts[vi] * POOL + vi
 
 
 ## A distant sound every player hears, panned toward `at` as seen from the camera (a legendary's roar).
 ## Quiet vol_db up close, far_db from far_m metres out (no further): it carries, it doesn't fade away.
-func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m: float) -> void:
+## Returns the voice it plays on, or null (IncomingHitSfx keeps one voice for a flurry).
+func play_toward(
+	sname: String, at: Vector3, vol_db: float, far_db: float, far_m: float, pitch := 1.0
+) -> AudioStreamPlayer:
 	if not streams.has(sname) and not _lazy(sname):
-		return
+		return null
 	var cam := get_viewport().get_camera_3d()
 	var side := Vector2(at.x - listener.x, at.z - listener.z)
 	var pan := 0.0
@@ -757,13 +794,14 @@ func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m
 	(AudioServer.get_bus_effect(bus, 1) as AudioEffectPanner).pan = pan
 	var p := _voice(null, voices.rank_of(null, listener), sname)
 	if p == null:
-		return
+		return null
 	p.bus = "SFXPan"
 	var st = streams[sname]
 	p.stream = _once(st[rng.randi_range(0, st.size() - 1)] if st is Array else st)
 	p.volume_db = lerpf(vol_db, far_db, clampf(side.length() / far_m, 0.0, 1.0))
-	p.pitch_scale = 1.0
+	p.pitch_scale = pitch
 	p.play()
+	return p
 
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound

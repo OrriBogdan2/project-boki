@@ -11,6 +11,29 @@ class's, `ArchKit.dash_charges`). **Vex**'s Slipstep is one charge too (a medium
 `DredgeKit.extra_dashes()` to `dredge.json` `dash.charges`. Tenzo (Tetra +1 at an upgrade), Kael (Brall +1 at tier II),
 Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Vex's rifle falloff (100% to 50% over ten rounds, a pause starts over) now also thins the tracer, flash and impact (`content/vfx/gunslinger.json` `size_k`); her Longneedle yaw lock is 30 deg/s. Table: coord/reports/charges-sv-1116.md.
 
+## Ultimate ranks vs the source (ult-ranks-source, 2026-11-19)
+Source: briefs/supervive-data/supervive_kits.md (ext/agent-briefs), "R has II/III only" (line 4); owner 11-18: ultimates
+rank with level, R rank 3 at level 10 (decision 0022 option 2). Ours: `x.per_rank` in content/archetypes/<id>.json, read
+by `HeroUlt.ranked` through `ArchKit.x_def()`; rank text `rank2.ult` / `rank_next.ult` (the R hover and the rank pick).
+Cooldown steps = source seconds x our base / source base (0.5 s); damage steps = the source's % of our base. Before: every
+X was the same at R ranks 1 and 2 (rank 2 only lengthened the Merge) and R stopped at rank 2. Asserted by `--ult-rank-check`.
+
+| Hunter | Source R (line) | Source tiers II / III | Ours: rank 1 -> 2 -> 3 | Mark |
+|---|---|---|---|---|
+| Tenzo (`dolm`) | Tetraform 45s (109) | -5s, +2.5s terrain life, x2 | Basalt Spine cd 45 -> 40 -> 35s; wall 7 -> 9.5 -> 12s | match |
+| Lace (`archer`) | Virideth's Fury 60s (77) | +10% dmg, -5s, x2 | Starpiercer cd 60 -> 55 -> 50s; dmg 18 -> 19.8 -> 21.6; last 23.3 -> 25.63 -> 27.96 | match |
+| Cinder (`ashwick`) | Flight of the Firefox 45s (44) | -15s / +25% dmg | Flue Flight cd 36 -> 24 -> 24s; trail 4.5 -> 4.5 -> 5.625/s | match (cd scaled) |
+| Albert (`bulwark`) | Abyssalbreaker 50s (93) | +20% dmg, -5s, x2 | Faultline cd 40 -> 36 -> 32s; strike 4 -> 4.8 -> 5.6; dmg 18 -> 21.6 -> 25.2 | match (cd scaled) |
+| Grimble (`dredge`) | Slugwave 36s (61) | +20% dmg, -5s, x2 | Brass Broadside cd 21 -> 18 -> 15s; dmg 4 -> 4.8 -> 5.6 | match (cd scaled) |
+| Vex (`gunslinger`) | Summon Napalm 55s (52) | +20% dmg, -5s, x2 | Cinderfall cd 42 -> 38 -> 34s; dmg 24 -> 28.8 -> 33.6; fire 3.5 -> 4.2 -> 4.9/tick | match (cd scaled) |
+| Kael (`juggernaut`) | Volcanic Rebuke 45s (28) | +30 dmg, +5% AP, -5s, x2 | Gilded Riposte cd 36 -> 32 -> 28s; dmg 43 -> 48.6 -> 54.2 (+30/230) | partial: +5% AP [?] (our ult has no AP ratio) |
+| Sparkle (`mage`) | Thunderstorm 60s (69) | +50% impact dmg, -7.5s / -7.5s | Kitefall cd 42 -> 37 -> 32s; dmg 9 -> 13.5 -> 13.5 | match (cd scaled) |
+| Motley (`ostra`) | Singularity 70s (117) | -5s, x2 | Nightwell cd 70 -> 65 -> 60s | match |
+| Neve (`rimewright`) | Chilling Finale 80s (36) | +40% dmg, -10s / -10s | Rimelock cd 80 -> 70 -> 60s; dmg 18 -> 25.2 -> 25.2 | match |
+| Sable (`thief`) | Fusillade 50s (101) | +10% dmg, -5s, x2 | Encore cd 24 -> 21.5 -> 19s; dmg 4.5 -> 4.95 -> 5.4; rim 3.1 -> 3.41 -> 3.72 | match (cd scaled) |
+| Meeko (`tender`) | Elluna's channel heal 60s (13) | +25% heal, -5s, x2 | Hearth Call cd 46 -> 42 -> 38s; heal 5.3 -> 6.63 -> 7.95/s | match (cd scaled) |
+| Gil (`gil`) | none (ours) | [?] | Tidal Wave 90s at every rank (as before) | [?] kept |
+
 ## Still open: 0.24.5 re-read (ext/release-integ-0245 272368589 and the 0.24.6 waves, 2026-11-11)
 
 Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read against ext/release-integ-0245 272368589 (data and kit code, no number changed) and against the branches that moved since: the 0.24.6 waves (ext/w0246-*, by ancestry and their docs/MERGE_0246_*.md), the riders, aegis, guard-cut, range and anim-time branches, and the READY lines after the 0.24.4 audit. Marks: **done** `ext/<branch>` (the fix exists; *where* says which line carries it), **open** (no fix anywhere; a task below), **owner** (an owner call decides it, or the source cannot settle it so ours stands). "No line" = READY but on neither 0.24.5 nor a 0.24.6 wave. On 0.24.5 itself nothing below changed: every kit cooldown, rider and range reads as the 0.24.4 re-audit found it.
@@ -667,7 +690,7 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 | E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, 70 HP, E again freezes 6 s, cd 17 | match; 0.85x cd |
 | R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Rimelock: hold 3.5, skate carry .8 (owner), 40 dmg + 0.75 s stun, early recast cancels, cd 80 | match |
 | Dash | Hold, release stops, 13 s; ice islands over the abyss [D] | Skate 11.5 m/s (F 10 to 11), up to 1.6 s, early-release refund .6 (owner), ice ribbon in the air, cd 13 | match; refund owner |
-| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s, 8 darts shatter, knock shatters. **Chill slow removed** | match; closed `3bcb50eca` |
+| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s, 8 darts shatter, knock shatters. **Chill slow removed; Shatter burst slow removed** | match; closed `3bcb50eca`, Shatter slow `f6c93c7a59` |
 | Anim | Footage poses | 19 moves plus the fusion move, all on `claire.glb` (49 clips); v2 model `59ac7b48d` | match on coverage |
 | Body | 1.1 to 1.15 [F] | size 1.014 (1.56 m, owner height chart `4538174a8`) | differ (owner) |
 | LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight while skating | match; skate tracking owner question (gap 16) · **done** `ext/parity-neve-skate-home`, `ext/neve-dart-homing`: late homing while skating, asserted |
@@ -1381,3 +1404,6 @@ Why a cast: the lane always lasts exactly two frames, and the slot goes on coold
 held shot in the same source only goes on cooldown at the release. Full reading: docs/heroes/ashwick.md "RMB: cast or
 hold". Assumed `[?]`: the lane follows the aim through the cast; a stun drops the cast with the charge spent.
 
+## Stomp break sweep (`--stomp-break-sweep-check`)
+
+Every slot (LMB, RMB, E, R, Shift) of all 13 kits is cast at a bot that is mid-stomp (3 m away, key tapped, plus a table of pinned casts). The stomp must break if and only if a hard CC (stun, root, Ground, pull, knock or launch) had landed by then, and the wisp must live; a slow, Daze or plain damage never breaks it. No row breaks the rule on main. The pinned casts are the check's `EXPECT` list. Not reached by a generic tap (so not pinned): Ostra's and Gil's R, Gunslinger's R and Sable's E slow, Pip's delayed Burrseed root, and every wall stun.

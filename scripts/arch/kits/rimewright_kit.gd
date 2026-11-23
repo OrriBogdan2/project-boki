@@ -200,8 +200,6 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 				{
 				"src": "splinter",
 				"ab": "passive",
-				"slow": 1.2,
-				"slow_k": 0.3,
 				"tags": ["passive", "splinter"],
 				"payoff": true
 			}
@@ -369,14 +367,14 @@ func _play_dart(heavy: bool, side: float) -> void:
 		play("tm_dart_r" if side > 0.0 else "tm_dart_l")
 
 
-## Homing: late in its flight each dart (and each skating beam) turns toward the foe nearest the cursor (or,
-## with none there, the nearest one ahead of it, or else the cursor point itself).
+## Homing: late in its flight each dart (and each skating beam) bends toward the foe nearest the cursor, or else
+## toward the cursor point itself. A foe that is not at the cursor pulls on nothing: you have to aim.
 func _tick_darts(dt: float) -> void:
 	var wd: Dictionary = h.wpn
 	var turn := float(wd.get("turn", 7.0))
 	var aimp: Vector3 = h.inp.get("aim", h.pos)
 	var near_cur: Ent = null
-	var nd := float(wd.get("cursor_r", 3.5))
+	var nd := float(wd.get("cursor_r", 2.4))
 	for f in m.foes_of(h.team):
 		if not f.hittable():
 			continue
@@ -394,26 +392,11 @@ func _tick_darts(dt: float) -> void:
 		var want := Vector2.ZERO
 		if near_cur != null:
 			want = Vector2(near_cur.pos.x - p.x, near_cur.pos.z - p.z)
-		else:
-			var best: Ent = null
-			var bd := float(wd.get("acquire", 9.0))
-			for f in m.foes_of(h.team):
-				var to := Vector2(f.pos.x - p.x, f.pos.z - p.z)
-				if (
-					to.length() < bd
-						and to.length() > 0.3
-						and absf(v.angle_to(to)) < deg_to_rad(float(wd.get("cone_deg", 75.0)))
-					and f.hittable()
-				):
-					bd = to.length()
-					best = f
-			if best != null:
-				want = Vector2(best.pos.x - p.x, best.pos.z - p.z)
-			elif not bool(dd["passed"]):
-				want = Vector2(aimp.x - p.x, aimp.z - p.z)
-				if want.length() < 0.8 or v.dot(want) < 0.0:
-					dd["passed"] = true          # past the cursor: it flies on straight
-					want = Vector2.ZERO
+		elif not bool(dd["passed"]):
+			want = Vector2(aimp.x - p.x, aimp.z - p.z)
+			if want.length() < 0.8 or v.dot(want) < 0.0:
+				dd["passed"] = true          # past the cursor: it flies on straight
+				want = Vector2.ZERO
 		if want.length() < 0.05 or absf(v.angle_to(want)) > PI * 0.6:
 			continue             # nothing to chase, or it is already past it: it flies on
 		var rate := turn * _homing_k(s, want.length())
@@ -746,7 +729,7 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	throw_t = PUSH_T
 	play("tm_spear")
-	m.sfx("rime_spear_aim", h.pos, -4.0, 0.8)
+	KitWindup.play(self, "rmb", "rime_spear_aim", -4.0, 0.8)
 
 
 ## The push: the spear rides out on her palms until they are fully extended. A stun or the seal drops it.
@@ -755,6 +738,7 @@ func _tick_throw(dt: float) -> void:
 		return
 	if busy() or not rime.is_empty():
 		_drop_throw()
+		if busy(): KitWindup.broken(self, "rmb")
 		return
 	throw_t -= dt
 	_hold_spear(1.0, -0.25 * throw_t / PUSH_T)
@@ -1277,7 +1261,7 @@ func _rime_crash(k: float) -> void:
 		if not m.world.los(at, f.pos, at.y + 0.95):
 			continue
 		f.hurt(
-			float(xd["dmg"]) * power("ult") * k,
+			float(xd["dmg"]) * power("x") * k,
 			h,
 			{"src": "abil", "ab": "ult", "stun": stun, "dr": true, "payoff": true, "tags": ["ult", "rimelock"]}
 		)

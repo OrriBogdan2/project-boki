@@ -184,7 +184,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 				nk["name"] = Data.default_kin_name(String(nk["species"]))
 				nk["memory"] = []
 				nk.erase("lost_from")
-				Save.remember(nk, "caught", "was scanned by you out in the islands and brought home")
+				Save.remember(nk, "caught", CarryArrival.line(nk["origin"]["where"]))
 			else:
 				# a rival's kin you took home: it still misses them. One that loved its old hunter
 				# (trust 80+) pines for a good while and is very slow to bond with you
@@ -200,6 +200,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			d["roster"].append(nk)
 			Save.register(nk)         # serial, original trainer, the event log
 			KinBox.route_new(nk)      # the farm if there's room; a repeat species goes to the Kin Burrow
+			CarryArrival.pending.append(nk["uid"])
 			Care.dex_got(nk)
 			out["caught"].append(nk)
 	if won: Heart.settle(r, out)   # the Heartspark's rare egg and materials (heart.gd)
@@ -370,8 +371,7 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 
 ## XP a kin needs to go from level `lv` to the next (the curve is in content/rules/garden_xp.json).
 func xp_need(lv: int) -> int:
-	var c: Dictionary = GardenXp.rules()["curve"]
-	return int(c["per_level"]) * mini(lv, int(c["flat_from"]))
+	return GardenXp.need(lv)
 
 ## Gives a kin XP, runs each level up's evolution into `out`; returns the levels gained.
 func add_xp(k: Dictionary, xp: int, out: Dictionary) -> int:

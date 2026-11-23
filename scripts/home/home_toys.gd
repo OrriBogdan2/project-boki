@@ -217,7 +217,7 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 ## Two Boki at one toy change their bond by base_life.json's `key` (base life on only).
 func _bond(k: Dictionary, o: Dictionary, key: String) -> void:
 	if h.life:
-		h.life.add_bond(k["rec"], o["rec"], float(h.life.R[key]))
+		h.life.add_bond(k["rec"], o["rec"], float(h.life.r_v[key]))
 
 func _temper(k: Dictionary) -> float:
 	return float(k["rec"]["traits"].get("temper", 0.5))
@@ -238,6 +238,7 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	if h.life and gained > 0:
 		h.life.sfx.toy_done(rec, k["pos"])
 	GardenFirstDay.mark("toy", h)
+	FarmTutorial.event("played")
 	h._garden_xp(rec, "toy")      # play raises the Boki (docs/GARDEN_FIRST_HOUR.md item 7)
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)

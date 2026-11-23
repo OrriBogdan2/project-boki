@@ -3,8 +3,9 @@ extends ArchKit
 ## Sable (light, id "thief"): a port of SUPERVIVE's Shiv, matched to the footage (briefs/hero-ref/dancer.md),
 ## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours. docs/heroes/thief.md.
 ##
-## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
-##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
+## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies its full range (8.5m)
+##   along the aim, whatever the cursor distance, and fizzles at the end; a thin aim line shows that range, gold
+##   while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8 shown, no cap): each adds a flat +1.3 to your bolts on them. A knock or an assist heals you 25%.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
@@ -22,6 +23,7 @@ extends ArchKit
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
+const FLASH_HIT := 0.12        # s: the struck body's flash (Ent.hurt's own): 3 frames full, then a fade
 const BOLT_COL := Color("9a5cff")
 const BOLT_CORE := Color("e6d8ff")
 const FIZZLE := Color("8e48ff")    # a bolt running out at the cursor: a violet puff
@@ -289,13 +291,13 @@ func _tick(dt: float) -> void:
 	_tick_aim_line()
 	_net_glint(dt)
 
-## The aim line (your screen only): thin and pale lilac to the cursor, clamped to the bolt's range, with an
+## The aim line (your screen only): thin and pale lilac along the aim to the bolt's full range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
 func _tick_aim_line() -> void:
 	if not h.is_local() or h.wid != "arc_bolts" or busy():
 		AimKit.hide(h, "aim_glow")
 		return
-	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
+	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0), AimMode.MAX)
 	if primed_t > 0.0:
 		AimKit.line(h, "aim", {"to": to, "col": EMP_LINE, "alpha": 1.6, "lw": 0.13})
 		AimKit.line(h, "aim_glow", {"to": to, "col": EMP_LINE, "alpha": 0.35, "lw": 0.34, "arrow": false})
@@ -377,7 +379,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 func _bolt() -> void:
 	var emp := primed_t > 0.0
 	var n0: int = m.shots.size()
-	h.shot_aim = AimMode.CURSOR
 	h.atk.fire()
 	if m.shots.size() <= n0:
 		return
@@ -394,10 +395,10 @@ func _bolt() -> void:
 	var start: Vector3 = (sd["pos"] as Vector3) + side
 	var gun: Vector3 = sd.get("muzzle", sd["pos"]) + side      # where it's drawn from; it hits from the body
 	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
-	var to := AimMode.point(h, rng)
+	var to := AimMode.point(h, rng, AimMode.MAX)
 	var v := Vector2(to.x - start.x, to.z - start.z)
 	var spd := (sd["vel"] as Vector2).length()
-	var dist := clampf(v.length(), AimMode.MIN_D, rng)
+	var dist := v.length()
 	sd["pos"] = start
 	sd["prev"] = start
 	sd["start"] = start
@@ -444,6 +445,9 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	last_bolt_end = at
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
+	if e != null:
+		e.flash_tint = Arch.color(id)      # the struck body flashes in her colour
+		e.flash_t = maxf(e.flash_t, FLASH_HIT)
 	if e != null and emp:
 		fx().star(at, Color("d8c0ff"), 1.5, 0.24)
 		m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
@@ -636,7 +640,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	bola_cast = {"t": float(bd["cast"])}
 	play("thf_bola")                  # the whirl overhead through the wind-up, the sling at the end
-	m.sfx("dj_bola_whirl", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
+	KitWindup.play(self, "rmb", "dj_bola_whirl", -4.0 if h.is_local() else -8.0)
 
 func lane_len() -> float:
 	var bd: Dictionary = rmb_def()["bola"]
@@ -647,6 +651,7 @@ func _tick_bola_cast(dt: float) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	if busy():
 		bola_cast = {}
+		KitWindup.broken(self, "rmb")
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)

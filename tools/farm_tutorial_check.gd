@@ -66,6 +66,8 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	FarmUnlocks.rules()["base_mode"] = false      # sections 1-4 are the old farm's Hob and twelve steps
 	_hob_rules()
 	_tutorial_rules()
 	_tracker_rules()
@@ -73,6 +75,7 @@ func run(m: Node, mode := "") -> void:
 	await _spotlight()
 	await _build_spotlight()
 	await _farm2()
+	FarmUnlocks.rules()["base_mode"] = true
 	await _base_mode()
 	await _base_tutorial()
 	await _hub_first_visit()
@@ -84,7 +87,7 @@ func run(m: Node, mode := "") -> void:
 func _base_mode() -> void:
 	var home = await _home(1)
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(rules["base_mode"] == false and not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	rules["base_mode"] = false
 	home.hb.toggle()
 	var off: Array = home.hb._tabs()
 	var kept: bool = off.has("Work") and off.has("Upgrades") and home.hmk.tabs().has("Exchange")
@@ -107,7 +110,7 @@ func _base_mode() -> void:
 	home.hw.scan()
 	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
 	ok(not home.hw.jobs.any(func(j): return econ_kinds.has(String(j["kind"]))), "on: no wild, station or haul jobs")
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.hb.toggle()
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -116,6 +119,7 @@ func _base_mode() -> void:
 # ------------------------------------------------------------------ 6. the base tutorial (GARDEN.md section 8)
 func _base_tutorial() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
+	rules["base_mode"] = false
 	Save.d = _new_save()
 	HomeLayout.ensure(Save.d)
 	_stats()
@@ -136,11 +140,12 @@ func _base_tutorial() -> void:
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
 	var last := FarmTutorial.hint_text("out")
-	var path_said: bool = last.contains("Wayseed") and last.contains("Boki that leans")
+	var path_said: bool = last.contains("Wayseed") and last.contains("leaning Boki")
 	ok(
 		last.contains("Waystone") and path_said and not last.contains("\n"),
 		"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line"
 	)
+	_banner_fits()
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
@@ -181,8 +186,45 @@ func _base_tutorial() -> void:
 	FarmTutorial.event("stay")
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
 	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
+	_base_ends_alone()
 	await _base_world()
-	rules["base_mode"] = false
+
+
+## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a readable
+## size (12 px is the shrink floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
+func _banner_fits() -> void:
+	var font: Font = load("res://fonts/LilitaOne-Regular.ttf")
+	var worst := 99
+	var over := ""
+	for sz in [Vector2(1920, 1080), Vector2(1280, 720)]:
+		var r := TutorialStrip.rect(sz)
+		var line := {"text": "\u2713 Done!  " + FarmTutorial.hint_text("out"), "count": "4/4"}
+		var lay := TutorialStrip.layout(font, r, line)
+		worst = mini(worst, int(lay["text_px"]))
+		if float(lay["text_w"]) > float(lay["text_room"]):
+			over = "at %s" % str(sz)
+	ok(over == "" and worst >= 12, "the head out line fits the strip beside 4/4 (smallest %d px) %s" % [worst, over])
+
+
+## "Head out or stay" also ends on its own: a zone waking, or a Boki finishing a toy turn. Neither counts before
+## the toy step is done, and each pays the one reward once.
+func _base_ends_alone() -> void:
+	for what in ["wake", "played"]:
+		Save.d = _new_save()
+		HomeLayout.ensure(Save.d)
+		_stats()
+		FarmTutorial.event(what)
+		ok(FarmTutorial.done_count() == 0 and FarmTutorial.active(), "%s before the toy step counts for nothing" % what)
+		for id in ["meet", "patch", "eat", "toy"]:
+			FarmTutorial.mark(id)
+		ok(FarmTutorial.current() == "out", "%s: toy done, 'head out or stay' is the step" % what)
+		var g := int(Save.d["gems"])
+		FarmTutorial.event(what)
+		var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
+		ok(not FarmTutorial.active() and FarmTutorial.did("out") and paid,
+				"%s ends the tutorial with the one reward" % what)
+		FarmTutorial.event(what)
+		ok(int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems")), "%s again pays nothing more" % what)
 
 
 ## The hint line's Skip button is up (and not hidden behind a quiet guide).
