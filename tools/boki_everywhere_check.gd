@@ -14,6 +14,8 @@ extends RefCounted
 
 const PX := 512
 ## Species with data but no art/kin body yet (docs/art/kin/MESHY_BOKI_RECIPE.md): they must be the only FALLBACKs.
+## A Hunter stands about 4x the height of a Boki: the shot camera backs off by this much.
+const HUNTER_SCALE := 4.0
 const KNOWN_NO_MODEL := ["basaltoad", "cindowary"]
 
 var main: Node
@@ -71,7 +73,7 @@ func run(m: Node) -> void:
 			k.free()
 		reveal.queue_free()
 		await main.get_tree().process_frame
-	_hunters()
+	await _hunters()
 	print("BOKI_EVERYWHERE %s: %d of %d species and hunters off" % ["FAIL" if bad else "OK", bad, species.size()])
 	main.get_tree().quit(1 if bad else 0)
 
@@ -97,7 +99,10 @@ func _hunters() -> void:
 		)
 		if not dressed:
 			bad += 1
-		h.free()
+		if out != "" and DisplayServer.get_name() != "headless":
+			await _shot(h, out.path_join("hunter_%s_game.png" % arch), HUNTER_SCALE)
+		else:
+			h.free()
 
 
 func _tris(n: Node) -> int:
@@ -114,7 +119,7 @@ func _tris(n: Node) -> int:
 
 
 ## The model alone, front three-quarters, in a lit stage of its own.
-func _shot(k: Node3D, path: String) -> void:
+func _shot(k: Node3D, path: String, scale := 1.0) -> void:
 	var vp := SubViewport.new()
 	vp.size = Vector2i(PX, PX)
 	vp.own_world_3d = true
@@ -130,8 +135,8 @@ func _shot(k: Node3D, path: String) -> void:
 	vp.add_child(cam)
 	cam.make_current()
 	cam.fov = 24.0
-	cam.position = Vector3(0, 0.8, 3.3)
-	cam.look_at(Vector3(0, 0.42, 0))
+	cam.position = Vector3(0, 0.8, 3.3) * scale
+	cam.look_at(Vector3(0, 0.42, 0) * scale)
 	vp.add_child(k)
 	k.rotation.y = PI - 0.6
 	for i in 4:
