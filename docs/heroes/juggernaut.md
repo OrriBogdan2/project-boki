@@ -357,10 +357,14 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 11. **Invulnerable means everything but the abyss:** a fall still counts; damage over time is blocked too.
 12. **The bond:** paid when the cleave lands on a rival hunter (a hit, a knock or a kill, the best of the cast) by
     `HeroUlt.landed`, which calls the main session's `KinBond.from_ult` once it exists; a miss or a monster pays nothing.
-13. **Open, the guard's edges (guard check, 11-12):** the guard ends at 0.65 s, so a hit in the 0.1 s strike or the
-    recovery lands in full (the source says 0.65 s of invulnerability, nothing after). Crowd control that does not go
-    through a hit (Dredge's reel, a wall slam from a knock before the guard) is not asserted either way; no source row
-    covers it.
+13. **The guard's edges (closed, Nov 20, `ext/kael-guard-edges`):** the source says 0.65 s of invulnerability and
+    nothing after, and main matches it, so no code changed. A shot one tick inside 0.65 s is blocked; a hit one tick
+    past it (the 0.1 s strike, then the 0.35 s recovery) lands in full: damage, stun and knock, no block counted, no
+    +20% on the strike. Crowd control that does not go through a hit has no source row, so main's behaviour stays and
+    is ours, now asserted: a pull (Grimble's reel) is refused only while the guard stands (`Blockers.body_stops`),
+    never in the strike or recovery; a wall slam from a knock that began before the guard, landing inside it, loses
+    its 10 damage to the guard but keeps its 0.9 s stun (the slam sets the stun outside the hit). Asserts:
+    `juggernaut X guard edge: ...` (six rows, in `tools/dj_ult_check.gd`).
 
 ## Small mechanics
 
