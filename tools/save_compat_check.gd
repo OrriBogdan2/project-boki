@@ -93,11 +93,26 @@ func _check_save(p: String, n: String) -> void:
 			for k in ["name", "level", "species"]:
 				if raw["roster"][i].has(k):
 					_lost(raw["roster"][i][k], Save.d["roster"][i].get(k), "roster.%d.%s" % [i, k], lost)
+	lost = lost.filter(func(path): return not _evolved_on_load(raw, path))
 	if n.ends_with("_bred.json"):
 		var baby: Dictionary = Save.d["roster"][kin_n - 1]
 		ok(baby["dna"].has("accent") and baby["gifts"].has("accent"), "%s: the bred baby keeps its accent" % n)
 	ok(lost.is_empty(), "%s loses nothing%s" % [n, "" if lost.is_empty() else ": " + str(lost.slice(0, 6))])
 	Save.d = Save.fresh()
+
+
+## True for a roster species / form name the load changed on purpose: Evo.catch_up evolves a Boki that
+## reached its level while its next form had no art, once that art is in the game (the new form's
+## `was` holds the golden's species and try_evolve drops form_name/wait_told).
+func _evolved_on_load(raw: Dictionary, path: String) -> bool:
+	var m := RegEx.create_from_string("^roster\\.(\\d+)\\.(species|form_name|wait_told)$").search(path)
+	if m == null:
+		return false
+	var i := int(m.get_string(1))
+	var before: Dictionary = raw["roster"][i]
+	var was: Array = Save.d["roster"][i].get("was", [])
+	var n_was := (before.get("was", []) as Array).size()
+	return was.size() > n_was and String(was[n_was]) == String(before.get("species", ""))
 
 
 ## Every leaf of `before` that `after` lacks or holds differently, as a path (LOAD_REWRITES excepted).
