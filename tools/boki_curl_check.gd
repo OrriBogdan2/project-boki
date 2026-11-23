@@ -82,7 +82,7 @@ func _fresh(main: Node, id: String) -> void:
 	var w_v: World = m.world
 	var hi: int = w_v.idx(int(floor(p.pos.x)), int(floor(p.pos.z)))
 	var lv: int = int(w_v.level[hi]) if w_v.kind[hi] != World.T_VOID else 0
-	var z0 := w_v.h / 2
+	var z0 := int(w_v.h / 2.0)
 	for z in range(maxi(1, z0 - 10), mini(w_v.h - 1, z0 + 11)):
 		for x in range(1, w_v.w - 1):
 			var i: int = w_v.idx(x, z)
@@ -178,7 +178,7 @@ func _dump(main: Node, id: String) -> void:
 		last = rel
 		last_w = w
 		if shots != "" and f % 2 == 0:
-			await _grab(p, shots.path_join(id).path_join("f%03d.png" % (f / 2)))
+			await _grab(p, shots.path_join(id).path_join("f%03d.png" % int(f / 2.0)))
 		f += 1
 		t = f * Match.DT
 	print(

@@ -191,7 +191,7 @@ func _finish() -> void:
 
 
 func _match(part := "match") -> Array:
-	var m := await _start("match", {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101})
+	var m := await _start("match", {"teams": int(hunters / 2.0), "squad": 2, "total": hunters, "seed": 4101})
 	return await _play(m, part, [m.player], _bring_fight, FIGHT_AT)
 
 
@@ -692,7 +692,7 @@ func _avg(fl: Array, key: String) -> float:
 func _summary(part: String, fl: Array) -> void:
 	var w: Array = fl.map(func(f): return float(f["wall"]))
 	w.sort()
-	var cut := maxi(1, w.size() / 100)
+	var cut := maxi(1, int(w.size() / 100.0))
 	var low := 0.0
 	for k in cut:
 		low += float(w[w.size() - 1 - k])
@@ -868,7 +868,7 @@ func _meshes() -> void:
 		for si in mi.mesh.get_surface_count():
 			if mi.mesh is ArrayMesh:
 				var il := (mi.mesh as ArrayMesh).surface_get_array_index_len(si)
-				tris += (il if il > 0 else (mi.mesh as ArrayMesh).surface_get_array_len(si)) / 3
+				tris += int((il if il > 0 else (mi.mesh as ArrayMesh).surface_get_array_len(si)) / 3.0)
 		var key := String(mi.name).rstrip("0123456789@")
 		if key == "" or key.begins_with("@"):
 			var up := mi.get_parent()

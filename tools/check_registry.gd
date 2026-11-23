@@ -201,6 +201,7 @@ const CHECKS := {
 	# the Boki summon pad
 	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],  # --shots-dir=<dir>, GPU only
+	"--vex-cast-closeup": ["res://tools/vex_cast_closeup.gd", "vex_cast_closeup", null],  # Vex RMB / E close-up film
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--time-trial-check": ["res://tools/time_trial_check.gd", "time_trial_check", null],  # the Grounds course
 	"--ult-label-scan": ["res://tools/ult_label_scan.gd", "ult_label_scan", null],  # no bare number over an ult
@@ -474,8 +475,8 @@ const CHECKS := {
 	"--load-trim-check": ["res://tools/load_trim_check.gd", "load_trim_check", null],  # build.hunters trims
 	"--warden-blink-shots": ["res://tools/warden_blink_check.gd", "warden_blink_check", "shots"],  # --shots-dir=<dir>
 	"--build-threads-check": ["res://tools/build_threads_check.gd", "build_threads_check", null],
-	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
 	"--step-sync-check": ["res://tools/step_sync_check.gd", "step_sync_check", null],  # steps on loop plants
+	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
 	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],  # ability words
 	"--cancel-check": ["res://tools/cancel_check.gd", "cancel_check", null],  # every listed cancel hands over clean
 	"--slam-follow-check": ["res://tools/slam_follow_check.gd", "slam_follow_check", null],  # slam impact hold
