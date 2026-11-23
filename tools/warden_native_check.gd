@@ -25,7 +25,8 @@ const SLOT_CASES := {
 	"dash": [{}, {"rolling": true}, "idle"],
 	"glide": [{"grounded": false}, {"grounded": false, "gliding": true}, "jump"],
 	"land": [{}, {"feel": Vector2(0.8, 0.0)}, "idle"],
-	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0}, "idle"],
+	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0, "face": 0.0, "hit_dir": Vector2(0.0, -1.0)}, "idle"],
+	"hit_back": [{"hit_t": 99.0}, {"hit_t": 0.0, "face": 0.0, "hit_dir": Vector2(0.0, 1.0)}, "idle"],
 	"downed": [{}, {"fall": 0.5}, "idle"],
 	"stomp": [{}, {"stomp": 0.4}, "idle"],
 }
@@ -308,6 +309,7 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	await _feed(main, nat, m, {}, {"rolling": true})
 	var plays_it := nat.player.current_animation == SYNTH and _turned(nat) >= POSED_MIN
 	ok(plays_it, "%s: the slot plays the clips file's clip" % a)
+	nat.player.stop()  # (it is the current clip: removed while playing, the next frame logs an error)
 	nat.player.get_animation_library(&"").remove_animation(SYNTH)
 	nat.plays.erase("dash")
 	src.free()

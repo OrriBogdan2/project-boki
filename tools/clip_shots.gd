@@ -6,7 +6,7 @@ extends RefCounted
 ## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
-## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model
+## --states [--bare-slots: the state clips left out, the "before"]: the game states (STATE_SHOTS) one after another as the match hands them over, on any model
 ## (contract clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
@@ -21,6 +21,12 @@ const STATE_SHOTS := [
 	["jump", {"grounded": false, "vel": Vector3(0.0, 2.0, -4.0)}, 1.2],
 	["attack", {"grounded": true}, 1.6],
 	["crouch", {"grounded": true, "crouch": 1.0, "vel": Vector3(0.0, 0.0, -1.2)}, 1.5],
+	["dash", {"grounded": true, "rolling": true, "vel": Vector3(0.0, 0.0, -9.0)}, 0.8, "dash"],
+	["glide", {"grounded": false, "gliding": true, "vel": Vector3(0.0, -1.5, -6.0)}, 2.4],
+	["land", {"grounded": false, "vel": Vector3(0.0, -9.0, 0.0)}, 1.0, "land"],
+	["hit_front", {"grounded": true, "hit_t": 99.0, "hit_k": 3.0}, 1.0, "hit_front"],
+	["hit_back", {"grounded": true, "hit_t": 99.0, "hit_k": 3.0}, 1.0, "hit_back"],
+	["downed", {"grounded": true, "fall": 0.0}, 1.2, "downed"],
 ]
 var ground_col := Color("4f7a3e")
 var holder: Node3D
@@ -194,6 +200,9 @@ func _states(model: Node3D, fps: float, out: String) -> void:
 	if poser == null:
 		poser = model.get_node("Warden/Sync")
 	poser.set_process(false)
+	if OS.get_cmdline_user_args().has("--bare-slots") and poser.get("plays") != null:  # (the "before": no state clips)
+		for sl in ["dash", "glide", "land", "hit", "hit_back", "downed"]:
+			(poser.get("plays") as Dictionary).erase(sl)
 	var clips: WardenClips = poser.get("clips")
 	var kmove := ""
 	if clips:
@@ -208,10 +217,31 @@ func _states(model: Node3D, fps: float, out: String) -> void:
 				s["swing_n"] = 1
 				s["kmove"] = kmove
 				s["kmove_t"] = k / fps
+			if st.size() > 3:
+				_ramp(model, s, String(st[3]), k / fps)
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
+	model.set_meta(WardenClips.FEEL, Vector2.ZERO)
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
+
+
+## The counters a state turns on mid-shot, as HunterAnim moves them (t: s into the state): a dash is on from the start; a
+## landing is 0.4 s of fall, then touchdown (squash 0.8); a hit lands 0.2 s in, on the face's front or back; a knocked-down
+## beat (HunterFall, the class's seconds: light 0.4) runs 0..1.
+func _ramp(model: Node3D, s: Dictionary, ramp: String, t: float) -> void:
+	var yaw := model.rotation.y
+	var ahead := Vector2(sin(yaw), cos(yaw))
+	match ramp:
+		"land":
+			s["grounded"] = t >= 0.4
+			s["vel"] = Vector3(0.0, -9.0 if t < 0.4 else 0.0, 0.0)
+			model.set_meta(WardenClips.FEEL, Vector2(0.8, 0.0) if t >= 0.4 else Vector2.ZERO)
+		"hit_front", "hit_back":
+			s["hit_t"] = t - 0.2 if t >= 0.2 else 99.0
+			s["hit_dir"] = -ahead if ramp == "hit_front" else ahead
+		"downed":
+			s["fall"] = minf(t / 0.45, 1.0)
 
 
 func _grab(path: String) -> void:
