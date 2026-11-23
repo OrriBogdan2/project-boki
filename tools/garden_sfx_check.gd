@@ -223,6 +223,8 @@ func _games() -> void:
 	home._close_panel()
 	for k in home.kins:
 		k.erase("indoors")
+	# Boki at free play cue garden_go (tag) and cheers through the same library: off while the games are counted
+	home.life.sfx.mute = true
 	GardenSfx.heard.clear()
 	await _shove(home)
 	GardenSfx.heard.clear()
@@ -236,6 +238,7 @@ func _games() -> void:
 			k["rec"]["needs"]["energy"] = 90.0
 		GardenSfx.heard.clear()
 		await game.call(home)
+	home.life.sfx.mute = false
 	GardenSfx.heard.clear()
 	_chimes(home)
 	GardenSfx.heard.clear()
