@@ -33,8 +33,21 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 	Save.d["name"] = HeroTitle.base_name(archs[0])
 	var m := Match.new()
 	main.add_child(m)
-	var o := {"teams": 2, "squad": 3, "total": 1, "tier": 1, "seed": 5, "length": 1e9, "no_drop": true, "map": MAP,
-		"raid": "clear", "blight": false, "sim_keep": true, "demo_kin": KIN[0], "demo_kin_lv": "8:95"}
+	var o := {
+		"teams": 2,
+		"squad": 3,
+		"total": 1,
+		"tier": 1,
+		"seed": 5,
+		"length": 1e9,
+		"no_drop": true,
+		"map": MAP,
+		"raid": "clear",
+		"blight": false,
+		"sim_keep": true,
+		"demo_kin": KIN[0],
+		"demo_kin_lv": "8:95"
+	}
 	o.merge({"arch": archs[0], "cls": Arch.weight(archs[0]), "weapon": Arch.signature(archs[0])}, true)
 	await m.start(o)
 	m.set_process(false)
@@ -44,10 +57,10 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	var P := m.player
-	P.ctrl = "bot"
-	P.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
-	var base := P.pos
+	var p := m.player
+	p.ctrl = "bot"
+	p.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
+	var base := p.pos
 	for i in range(1, 6):
 		var side := 0 if i < 3 else 1
 		var at := base + Vector3(GAP * side + 1.4 * (side * 2 - 1), 0, 1.6 * (1 - 2 * (i % 2)))

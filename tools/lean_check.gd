@@ -1,6 +1,6 @@
 extends RefCounted
 ## --lean-check: food lean by type (scripts/core/lean.gd, farm_build.json base_mode + lean.json). Every
-## food has a type and every type's part is a real one. base_mode is off by default and then Evo.eat is
+## food has a type and every type's part is a real one. base_mode is on by default; off, Evo.eat is
 ## the old four-affinity lean. With it on, 3 Fire snacks (Emberberry) to a fresh Prismander (puddlet) raise
 ## its fire lean, shift its tint, show a mark after one meal, and its next form grows the Fire part (horns).
 ## Never touches the real save.
@@ -30,7 +30,7 @@ func _parts(root: Node3D) -> Array:
 func _data() -> void:
 	var types: Dictionary = Lean.rules()["types"]
 	ok(types.size() == 18, "18 types (%d)" % types.size())
-	var foods: Array = Data.CROPS.keys() + Care.FOODS.keys()
+	var foods: Array = Data.CROPS.keys() + Care.foods_v.keys()
 	var typed: Dictionary = Lean.rules()["foods"]
 	var untyped := foods.filter(func(f): return not types.has(String(typed.get(f, ""))))
 	ok(untyped.is_empty(), "every food has a type (%d foods; untyped: %s)" % [foods.size(), untyped])
@@ -98,10 +98,11 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	_data()
 	_anchors()
+	ok(Lean.on(), "base_mode is on by default")
+	FarmUnlocks.rules()["base_mode"] = false
 	ok(not Lean.on() and Evo.eat(Save.new_kin("puddlet"), "emberberry") == "fierce",
-		"base_mode is off by default and meals lean the old way")
+		"base_mode off: meals lean the old way")
 	FarmUnlocks.rules()["base_mode"] = true
 	_raise()
-	FarmUnlocks.rules()["base_mode"] = false
 	print("LEAN DONE, failures: %d" % bad)
 	main.get_tree().quit()

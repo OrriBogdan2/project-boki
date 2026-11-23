@@ -5,4 +5,5 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--sfx-priority-check": ["res://tools/sfx_priority_check.gd", "sfx_priority_check", null],  # enemy wind-ups
 }

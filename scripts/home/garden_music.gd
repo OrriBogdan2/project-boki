@@ -7,17 +7,19 @@ extends RefCounted
 ## A track picked in the music list (Sfx.music_lock) plays instead, and hold() gives a moment its own
 ## track for a while (a Boki evolving).
 
-const LOOK_S := 0.5           # s between looks at where you are and what is on
-const ISLAND_FADE_S := 2.5    # s: the crossfade as you cross a bridge off the garden
-const HOLD_FADE_S := 1.0      # s: the crossfade into a held or picked track
-const ISLANDS := ["orchard", "meadow", "summit"]   # islands with a theme of their own (World.island_id)
+const LOOK_S := 0.5  # s between looks at where you are and what is on
+const ISLAND_FADE_S := 2.5  # s: the crossfade as you cross a bridge off the garden
+const HOLD_FADE_S := 1.0  # s: the crossfade into a held or picked track
+const ISLANDS := ["orchard", "meadow", "summit"]  # islands with a theme of their own (World.island_id)
 
-var h                         # the Home screen
+var h  # the Home screen
 var _look_t := 0.0
 var _hold_t := 0.0
 
+
 func _init(home) -> void:
 	h = home
+
 
 ## The track of a garden zone, or of the hub by day or night.
 static func zone_track(zone: String, night: bool) -> String:
@@ -25,20 +27,24 @@ static func zone_track(zone: String, night: bool) -> String:
 		return String(GardenZones.rules()["hub_music"]["night" if night else "day"])
 	return String(GardenZones.info(zone)["music"])
 
+
 ## The track of an island of the home off the garden.
 static func island_track(isle: String, night: bool) -> String:
 	if isle in ISLANDS:
 		return isle
 	return "home_night" if night else "home_day"
 
+
 ## `track` plays for `seconds` before the music follows you again.
 func hold(track: String, seconds: float) -> void:
 	_hold_t = seconds
 	Sfx.play_music(track, HOLD_FADE_S)
 
+
 ## Looks again on the next tick (the music list let go of its track).
 func retune() -> void:
 	_look_t = 0.0
+
 
 func tick(dt: float) -> void:
 	_look_t -= dt
@@ -47,7 +53,7 @@ func tick(dt: float) -> void:
 		return
 	_look_t = LOOK_S
 	if h.games.any(func(g): return g.playing()):
-		Sfx.duck(LOOK_S * 2.0, float(GardenZones.rules()["music_duck_db"]))   # held while the game is on
+		Sfx.duck(LOOK_S * 2.0, float(GardenZones.rules()["music_duck_db"]))  # held while the game is on
 	if _hold_t > 0.0:
 		return
 	var night := sin((h.day_t - 0.25) * TAU) < -0.15

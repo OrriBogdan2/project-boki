@@ -45,6 +45,7 @@ var wall_stuns := 0
 var guard_punches := 0         # punches that launched a rock of ours and gave a Shardskin stack
 var rocks_made := 0
 var row_heard_t := -1.0       # s (m.time): when a Stone Row's rise was last heard
+var boulder_sd := {}           # the thrown boulder in flight: its tumble (br_boulder_fly) follows it
 var sight_pings := 0
 var landslides := 0            # Rock Hop's last rocks that rolled on
 var leap_lands := 0            # Rock Hop chains that ended in a crash
@@ -227,6 +228,8 @@ func _tick(dt: float) -> void:
 	slam.tick(dt)
 	spine.tick(dt)
 	_tick_sight(dt)
+	if not boulder_sd.is_empty():
+		Sfx.loop_hold(_fly_key(), "br_boulder_fly", boulder_sd["pos"], -8.0, 1.0)
 
 ## The pending air slam: it lands with her, or plunges if pressed in the air. After a hop, a leap or an air
 ## press the glider wins (item 26): holding glide drops the slam and hands the arc over, never dragging her
@@ -367,6 +370,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
+			if h.stun_t > 0.0 or h.downed: KitWindup.broken(self, "lmb")
 		return true
 	if slam.charging():
 		if pressed: slam.extend()            # a punch during the Quakefall charge carries her (and the circle) forward
@@ -394,7 +398,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			if anim_id != "breah_wind" or m.time - anim_at > 3.0: play("breah_wind")
 			_punch_tele(k)
 			HeroVfx.of(m).hold(h, "punch_charge", k)
-			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
+			if not KitLooks.of(m).holding("br_fist"): KitWindup.play(self, "lmb", "br_wind", -6.0)
 			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, COBALT.lerp(Color("9ad0ff"), k))
 	elif lmb_t >= 0.0:
 		# held as long as you like (the data: hold and release; no timeout), full stays full
@@ -444,6 +448,7 @@ func _boulder_fly() -> void:
 		{"kb": float(bd["kb"]), "tracer": 0.4, "kx": func(s, at, e, _why): _boulder_end(s, at, e)}
 	)
 	HeroVfx.of(m).trail(h, "rock_trail", KitLooks.of(m).skin(m.shots[-1], "boulder"))
+	boulder_sd = m.shots[-1]
 	m.sfx("br_throw", h.pos, -3.0, 1.0)
 	vfx("boulder_throw", start, dir)
 	Juice.shot(h, start, dir)
@@ -452,6 +457,9 @@ func _boulder_fly() -> void:
 ## foes beside the one it hit.
 func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
+	if is_same(s, boulder_sd):
+		boulder_sd = {}
+		Sfx.loop_stop(_fly_key())
 	var g := AimMode.ground(m, at)
 	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
 	vfx("boulder_hit", at, null, {"r": float(bd["splash"])})
@@ -460,6 +468,9 @@ func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 		if f == e: continue
 		splashes += 1
 		f.hurt(float(s["dmg"]) * float(bd["splash_k"]), h, {"src": "abil", "ab": "lmb"})
+
+func _fly_key() -> String:
+	return "boulder_fly_%d" % h.get_instance_id()
 
 ## The punch: a narrow lane toward the aim. Foes in it are thrown back (into a wall: stunned) and every
 ## rock in it flies, the ones lined up along the aim too, one after another.

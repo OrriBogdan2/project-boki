@@ -57,11 +57,11 @@ var side := 0.0
 func _slot(i: int) -> Vector3:
 	return lone if i == 0 else home + Vector3(-6.0, 0.0, 6.0)
 
-## True when a dummy standing `p` (x ahead, z aside, metres from the hero) loses health.
-func _hit(p: Vector2) -> bool:
+## True when a dummy standing `at` (x ahead, z aside, metres from the hero) loses health.
+func _hit(at: Vector2) -> bool:
 	for mb in m.mobs: mb.queue_free()      # (a monster respawned on the aim line would stop a bullet)
 	m.mobs.clear()
-	lone = home + Vector3(p.x, 0.0, p.y)
+	lone = home + Vector3(at.x, 0.0, at.y)
 	return _probe(arch, kind, hold, secs).has(0)
 
 ## The edge between a probe that hit (`a`) and one that missed (`b`), by halving four times.
@@ -115,52 +115,52 @@ func _vs_content(meas: Dictionary) -> void:
 	var mid: float = (float(meas["far"]) + float(meas["near"])) * 0.5
 	match [arch, kind, side]:
 		["gunslinger", "e", 0.0]:
-			_close("E range", float(meas["far"]) - rd, float(P.ak.e_def()["range"]), 0.15)
-			_close("E half width", float(meas["width"]) * 0.5 - rd, float(P.ak.e_def()["width"]), 0.15)
+			_close("E range", float(meas["far"]) - rd, float(p.ak.e_def()["range"]), 0.15)
+			_close("E half width", float(meas["width"]) * 0.5 - rd, float(p.ak.e_def()["width"]), 0.15)
 		["gunslinger", "x", 0.0]:
-			_close("R disc centre", mid, minf(float(P.ak.x_def()["range"]), 20.0), 0.15)
+			_close("R disc centre", mid, minf(float(p.ak.x_def()["range"]), 20.0), 0.15)
 			var span: float = float(meas["far"]) - float(meas["near"])
-			_close("R disc radius", span * 0.5 - rd, float(P.ak.x_def()["radius"]), 0.15)
+			_close("R disc radius", span * 0.5 - rd, float(p.ak.x_def()["radius"]), 0.15)
 		["juggernaut", "rmb", 0.0]:
-			var sl: Dictionary = P.ak.rmb_def()["slam"]      # a lane since the slam rework (len x width, full width)
+			var sl: Dictionary = p.ak.rmb_def()["slam"]      # a lane since the slam rework (len x width, full width)
 			_close("RMB slam reach", float(meas["far"]) - rd, float(sl["len"]), 0.15)
 			_close("RMB slam half width", float(meas["width"]) * 0.5 - rd, float(sl["width"]) * 0.5, 0.15)
 		["juggernaut", "x", 0.0]:
-			_close("R strip length", float(meas["far"]) - rd, float(P.ak.x_def()["len"]), 0.15)
-			_close("R strip half width", float(meas["width"]) * 0.5 - rd, float(P.ak.x_def()["width"]) * 0.5, 0.15)
+			_close("R strip length", float(meas["far"]) - rd, float(p.ak.x_def()["len"]), 0.15)
+			_close("R strip half width", float(meas["width"]) * 0.5 - rd, float(p.ak.x_def()["width"]) * 0.5, 0.15)
 		["archer", "e", 0.0]:
-			_close("E wall radius", mid, float(P.ak.e_def()["reach"]), 0.15)
-			_close("E wall arc", float(meas["arc"]), float(P.ak.e_def()["deg"]), 8.0)
+			_close("E wall radius", mid, float(p.ak.e_def()["reach"]), 0.15)
+			_close("E wall arc", float(meas["arc"]), float(p.ak.e_def()["deg"]), 8.0)
 		["ashwick", "e", 0.0]:
-			_close("E ring radius", float(meas["far"]) - rd, float(P.ak.e_def()["radius"]), 0.15)
+			_close("E ring radius", float(meas["far"]) - rd, float(p.ak.e_def()["radius"]), 0.15)
 		["bulwark", "lmb", 0.0]:
 			_close("hammer reach (+ its 0.9 m sweep)", float(meas["far"]) - rd - 0.9,
-				float(P.ak.lmb_def()["throw_range"]), 0.3)
+				float(p.ak.lmb_def()["throw_range"]), 0.3)
 		["bulwark", "lmb_hold", 0.0]:
 			# the swing's rays start at the body centre since ShotOrigin (main, 11-13) and 60 Hz steps carry
 			# a ray up to 0.67 m: the game reads about 0.8 m past the content number
 			_close("Crushing Blow reach (+ ray ~0.8)", float(meas["far"]) - rd - 0.8,
-				float(P.ak.lmb_def()["smash_reach"]), 0.25)
+				float(p.ak.lmb_def()["smash_reach"]), 0.25)
 		["bulwark", "x", 0.0]:
-			var fl: Dictionary = P.ak.x_def()
+			var fl: Dictionary = p.ak.x_def()
 			_close("R lane length", float(meas["far"]) - rd, float(fl["cells"]) * float(fl["cell_len"]), 0.3)
 			_close("R lane half width", float(meas["width"]) * 0.5 - rd, float(fl["width"]) * 0.5, 0.2)
 		["juggernaut", "dash", 0.0]:      # the run and the tip burst at its end
-			var dd: Dictionary = P.ak.dash_def()
+			var dd: Dictionary = p.ak.dash_def()
 			_close("dash reach (dist + tip_r)", float(meas["far"]) - rd, float(dd["dist"]) + float(dd["tip_r"]), 0.5)
 		["ashwick", "dash", 0.0]:      # a head-first ram that stops on the first foe: its body reaches dist ahead
-			_close("dash reach (dist + body)", float(meas["far"]) - rd, float(P.ak.dash_def()["dist"]) + P.r, 0.5)
+			_close("dash reach (dist + body)", float(meas["far"]) - rd, float(p.ak.dash_def()["dist"]) + p.r, 0.5)
 		["mage", "dash_hold", 0.0]:      # Wirerun hurts what the body crosses, padded by (width + 0.6) / 2 a side
-			var wd: Dictionary = P.ak.dash_def()
-			_close("Wirerun half lane", float(meas["width"]) * 0.5 - rd, P.r + (float(wd["width"]) + 0.6) * 0.5, 0.2)
+			var wd: Dictionary = p.ak.dash_def()
+			_close("Wirerun half lane", float(meas["width"]) * 0.5 - rd, p.r + (float(wd["width"]) + 0.6) * 0.5, 0.2)
 		["mage", "e", 0.0]:
-			_close("E circle centre", mid, float(P.ak.e_def()["reach"]), 0.2)
+			_close("E circle centre", mid, float(p.ak.e_def()["reach"]), 0.2)
 			_close("E circle radius", (float(meas["far"]) - float(meas["near"])) * 0.5 - rd,
-				float(P.ak.e_def()["radius"]), 0.2)
+				float(p.ak.e_def()["radius"]), 0.2)
 		["mage", "x", 0.0]:
-			_close("R circle centre", mid, float(P.ak.x_def()["range"]), 0.2)
+			_close("R circle centre", mid, float(p.ak.x_def()["range"]), 0.2)
 			_close("R circle radius", (float(meas["far"]) - float(meas["near"])) * 0.5 - rd,
-				float(P.ak.x_def()["radius"]), 0.2)
+				float(p.ak.x_def()["radius"]), 0.2)
 
 func run(main: Node) -> void:
 	Save.no_write = true
