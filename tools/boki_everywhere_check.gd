@@ -27,7 +27,8 @@ func run(m: Node) -> void:
 		if a.begins_with("--species="):
 			species = a.substr(10).split(",")
 		if a.begins_with("--pack="):
-			print("BOKI_EVERYWHERE load pack %s: %s" % [a.substr(7), ProjectSettings.load_resource_pack(a.substr(7), true)])
+			var loaded := ProjectSettings.load_resource_pack(a.substr(7), true)
+			print("BOKI_EVERYWHERE load pack %s: %s" % [a.substr(7), loaded])
 	var shots := out != "" and DisplayServer.get_name() != "headless"
 	if shots:
 		DirAccess.make_dir_recursive_absolute(out)
