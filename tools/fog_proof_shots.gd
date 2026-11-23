@@ -33,24 +33,36 @@ func run(mn: Node) -> void:
 	var P := m.player
 	for i in SPAWN_WAIT:
 		await main.get_tree().process_frame
-	var spot := _open_spot(m, P.pos)
-	P.teleport(spot)
+	var spawn := _open_spot(m, P.pos)
+	var spots := [["", spawn]]
+	for isl in m.world.islands:
+		if String(isl.get("biome", "")) == "meadow":
+			var c: Vector2 = isl["c"]
+			var q := _open_spot(m, Vector3(c.x, 0.0, c.y))
+			if m.world.biome_at(q.x, q.z) == "meadow":
+				spots.insert(0, ["", q])
+				spots[1][0] = "spawn_"
+				break
 	var out := []
-	for pitch_deg in [57.0, 28.0]:
-		m.cam.pitch = deg_to_rad(pitch_deg)
-		for f in SETTLE:
-			P.inp["move"] = Vector2.ZERO
-			P.inp["aim"] = P.pos + Vector3(cos(AIM) * 6.0, 0.9, sin(AIM) * 6.0)
-			main.get_viewport().warp_mouse(m.cam.unproject_position(P.inp["aim"]))
-			await main.get_tree().process_frame
-		var tag := "" if pitch_deg > 50.0 else "low_"
-		var on := await _grab(false)
-		var ref := await _grab(true)
-		on.save_png(dir.path_join(tag + "fog.png"))
-		ref.save_png(dir.path_join(tag + "ref.png"))
-		if tag == "":
-			out = _report(m, on, ref, P.pos, half)
-	out.append("SPOT biome=%s map=%s pos=%s" % [m.world.biome_at(P.pos.x, P.pos.z), m.map_name, str(P.pos)])
+	for sp in spots:
+		var pre: String = sp[0]
+		P.teleport(sp[1])
+		for pitch_deg in [57.0, 28.0]:
+			m.cam.pitch = deg_to_rad(pitch_deg)
+			for f in SETTLE:
+				P.inp["move"] = Vector2.ZERO
+				P.inp["aim"] = P.pos + Vector3(cos(AIM) * 6.0, 0.9, sin(AIM) * 6.0)
+				main.get_viewport().warp_mouse(m.cam.unproject_position(P.inp["aim"]))
+				await main.get_tree().process_frame
+			var tag: String = pre + ("" if pitch_deg > 50.0 else "low_")
+			var on := await _grab(false)
+			var ref := await _grab(true)
+			on.save_png(dir.path_join(tag + "fog.png"))
+			ref.save_png(dir.path_join(tag + "ref.png"))
+			if pitch_deg > 50.0:
+				out.append("== %s biome=%s map=%s pos=%s" % [
+					pre + "spot", m.world.biome_at(P.pos.x, P.pos.z), m.map_name, str(P.pos)])
+				out.append_array(_report(m, on, ref, P.pos, half))
 	var fl := FileAccess.open(dir.path_join("proof.txt"), FileAccess.WRITE)
 	for l in out:
 		print(l)
