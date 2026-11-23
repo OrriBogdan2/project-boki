@@ -6,8 +6,9 @@ extends RefCounted
 ## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
-## --states [--bare-slots: the state clips left out, the "before"]: the game states (STATE_SHOTS) one after another as the match hands them over, on any model
-## (contract clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s.
+## --states [--bare-slots: the state clips left out, the "before"]: the game states (STATE_SHOTS) one after another
+## as the match hands them over, on any model (contract clips or a Meshy-native one),
+## <dir>/states/f###.png every 1/fps s.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -226,9 +227,9 @@ func _states(model: Node3D, fps: float, out: String) -> void:
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
 
 
-## The counters a state turns on mid-shot, as HunterAnim moves them (t: s into the state): a dash is on from the start; a
-## landing is 0.4 s of fall, then touchdown (squash 0.8); a hit lands 0.2 s in, on the face's front or back; a knocked-down
-## beat (HunterFall, the class's seconds: light 0.4) runs 0..1.
+## The counters a state turns on mid-shot, as HunterAnim moves them (t: s into the state): a dash is on from the
+## start; a landing is 0.4 s of fall, then touchdown (squash 0.8); a hit lands 0.2 s in, on the face's front or back;
+## a knocked-down beat (HunterFall, the light class's 0.45 s) runs 0..1.
 func _ramp(model: Node3D, s: Dictionary, ramp: String, t: float) -> void:
 	var yaw := model.rotation.y
 	var ahead := Vector2(sin(yaw), cos(yaw))
