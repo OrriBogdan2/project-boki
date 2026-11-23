@@ -314,6 +314,7 @@ func _throw_dart(heavy: bool) -> void:
 	var rng := float(wd["range"]) * h.shot_range_k * _heavy_k("range_k", heavy)
 	h.shot_range_k = 1.0
 	var extra := {"src": "shot", "ab": "fan", "kb": float(wd["kb"]), "tracer": 1.0, "heavy": heavy}
+	ShotOrigin.draw_from(extra, h, "lmb")      # out of her casting hand
 	m.spawn_shot(
 		h,
 		start,
