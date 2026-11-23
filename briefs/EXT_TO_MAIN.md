@@ -11177,3 +11177,4 @@ READY ext/vfx-summon-type-colour 903fcdcb36 (origin/main merged; only conflict t
 READY ext/anim-lace-native-clips e27ff53c5ff94234f17736f06e0c354a4dd82439 (Lace native bow clips)
 READY ext/combat-native-hitbox-fit c07b4c7a978 (native Hunters: hitbox vs body)
 READY ext/ui-native-plate-height a9e2396efc (plates above native heads)
+READY ext/ship-intro-feet-sound-1123 e664227fe9d (skyship intro: riders upright + boots on deck, no abyss howl loop; --intro-deck-check; origin/main merged, misc.gd conflict resolved keeping both entries; intro-deck 0 fail, --check 0 fail; health.py --strict only red on tools/checks/vfx.gd long_line, identical to main)
