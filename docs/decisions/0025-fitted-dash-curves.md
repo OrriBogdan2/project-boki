@@ -29,7 +29,7 @@ of the dash. Rampage's short time makes its peak ~34 m/s. Fits and errors: sv/FE
 The same fit for the second batch: Oath (Albert's 360 Smash) and Shiv (Sable's ground Cartwheel; the kit's
 `VAULT_CURVE` moved into dash_feel.json) get a curve. Meeko's air glide already runs her kit's own measured curve
 (tender.json `dash.air`). Tenzo's Rock Hop, Grimble's barges and Sparkle's 40 m/s Wirerun keep their owner shapes;
-Meeko's ground hop has no footage and Motley's Swap is a teleport. Fits: docs/SUPERVIVE_FEEL.md.
+Meeko's ground hop has no footage and Motley's Swap is a teleport. Fits: sv/FEEL_NOTES.md.
 
 ## Addendum (2026-11-13, ext/sable-vault-exit)
 Shiv's fit ends on a 0.25 knot, but the footage's last samples (154, 140 px/s) stay over the 127-136 px/s hasted run.
