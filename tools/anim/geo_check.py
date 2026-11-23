@@ -9,17 +9,21 @@ numpy + scipy only (no Blender, no Godot); reads the .glb and never writes to it
 How it measures
 - PARTS: every skinned vertex goes to one body region by its dominant bone (bone name, else its nearest named
   ancestor): head, hair, torso, upper_arm/forearm/hand/thigh/shin/foot (_L/_R), outfit shells (skirt, scarf, cloth,
-  pauldron, tail...), props (weapon, shield, hammer...). Materials named skirt/cape/scarf/hair/sword/grip... override,
-  and large disconnected mesh islands inside one region become their own part (region.2).
-- CLIPPING: every pair of parts that is not anatomically joined (ADJACENT) is tested both ways every 2nd frame of
-  every clip (30 fps). A point of part A is inside part B when it sits behind the surface normal of B's nearest point;
-  the depth is that distance (the 3rd deepest point, so one stray vertex does not count). Cloth shells are only tested
-  as the sinking part (a leg under a skirt is not a clip). Held clips (loops and holds) are reported apart from the
-  fast transitions (HELD).
+  pauldron, tail...), props (weapon, shield, hammer...). Materials named skirt/cape/scarf/hair/sword... override.
+  The hand = one hand length (HAND_LEN of body height) past the wrist joint; what the hand bone carries further out is
+  prop:held_L/R (Sable's pistols). A body region keeps its main connected patch; stray patches (skin-weight bleed) join
+  the region around them. Large disconnected mesh islands become their own part (region.2).
+- CLIPPING: every pair of parts that is not anatomically joined (JOINED) is tested both ways every 2nd frame of every
+  clip (30 fps). A point of part A is inside part B when its exact closest point on B's triangles is behind B's surface,
+  is not on B's open cut rim (beside a sleeve opening is not inside), and going on inward reaches B's far wall (a
+  one-sided coat tail has none: behind it is not inside). Depth = that distance, the 3rd deepest point, up to
+  MAX_DEPTH. Cloth shells are only tested as the sinking part. Held clips (loops and holds) are reported apart (HELD).
+  Checked against Blender's own skinning (Sable Attack and run: 0.0 mm) and by eye in Blender renders (11-23).
 - FLAT HANDS: per hand, PCA of the hand's skinned vertices: thickness ratio = palm thickness / palm width (2-98
   percentile extents), at rest (bind pose) and at the clip frame with the lowest ratio; plus the thumb lobe (thumb
   vertices outside the hull of the rest of the hand in the palm plane) and finger separation (1 - area / hull area of
-  the hand's silhouette). FLAT = thickness ratio below FLAT_RATIO (calibrated on 11-23, docs/art/HUNTER_GEO_AUDIT.md).
+  the hand's silhouette). FLAT = finger separation below FLAT_SEP or thickness ratio below FLAT_RATIO; 'fingers-unrigged' (finger bones
+  that carry no mesh) is a warning (calibrated on 11-23, docs/art/HUNTER_GEO_AUDIT.md).
 Output per hunter: <key>.tsv (clip, frame, pair, depth_cm, flags), <key>.json (per part, for the hunter panel),
 one summary line. Exit code 0 = PASS, 1 = FAIL (held clip over 1 cm, FLAT hand, or worse than --compare)."""
 
@@ -41,15 +45,19 @@ FPS = 30
 STEP = 2  # every 2nd frame
 HELD_CM = 1.0  # held-pose clip deeper than this = FAIL
 SEEN_CM = 0.3  # shallower than this is not listed
-FLAT_RATIO = 0.6  # palm thickness / palm width below this = FLAT (calibrated, see the audit doc)
+FLAT_SEP = 0.2  # finger separation below this = FLAT: fused mitten (calibrated: Lace 0.11/0.15, Sparkle 0.51/0.54, Sable fist 0.24)
+FLAT_RATIO = 0.3  # hand thickness / width below this = FLAT: paper thin (Sparkle's slim open hand is 0.45)
 WORSE_CM = 0.3  # --compare: held depth this much deeper than live = worse
+WORSE_SEP = 0.05  # --compare: finger separation this much lower than live = worse
 WORSE_RATIO = 0.04  # --compare: thickness ratio this much lower than live = worse
 MAX_PTS = 3000  # sampled vertices per part (the clip test)
-HAND_LEN = 0.105  # hand length / body height: the hand = the arm's far end by that much
+HAND_LEN = 0.11  # hand length / body height: the hand = this far past the wrist joint
 ISLAND_MIN = 300  # vertices: a disconnected island this big is its own part
 PIVOT_R = 0.12  # m: points this near the hinge two parts share are not tested (a thigh at the hip)
-MAX_DEPTH = 0.12  # m: nothing is deeper inside another part than this
-K = 12  # surface neighbours that must agree a point is inside
+MAX_DEPTH = 0.25  # m: deepest point searched (a hand fully through a thigh is ~15 cm)
+WALL_REACH = 0.40  # m: how far inward a point looks for the part's far wall
+WALL_R = 0.015  # m: radius of that ray's search tube
+KT = 16  # nearest triangles (by centre) searched for a point's exact closest point
 DEEP_RANK = 3  # the 3rd deepest inside point is the pair's depth
 HELD = re.compile(
     r"^(idle|stance|crouch_(idle|f|b|l|r)|walk(_\w+)?|run(_\w+)?|glide|lmb_hold|rmb(_guard)?|guard_armed|downed|stun|"
@@ -272,16 +280,29 @@ def split_parts(rig, mesh):
         for word, name in MAT_WORDS.items():
             if word in low:
                 reg[k] = ("outfit:" + name) if name in ("skirt", "cape", "scarf") else ("hair" if name == "hair" else "prop:" + name)
-    for side in "LR":  # the hand is the arm's far end by geometry: Meshy's hand joint sits mid-forearm
+    H = np.ptp(mesh["pos"][:, 1])
+    jpos = np.linalg.inv(rig.ibm)[:, :3, 3]  # joint positions in the bind pose
+    for side in "LR":
+        # the hand = from the wrist joint one hand length (HAND_LEN of body height) along the forearm; what the hand
+        # bone carries further out (a pistol barrel, a blade) is a held prop, so the hand test measures the hand
         arm = np.isin(reg, ["%s_%s" % (r, side) for r in ("upper_arm", "forearm", "hand")])
-        fh0, up0 = np.isin(reg, ["forearm_" + side, "hand_" + side]), reg == "upper_arm_" + side
-        if fh0.sum() < 30 or up0.sum() < 30:
+        wrist = [k for k, n in enumerate(rig.names) if region_of(rig.j["nodes"][rig.joints[k]]["name"]) == ("hand", side)
+                 and re.search(r"hand$", re.sub(r"[._ ]?[lr]$", "", n.lower().replace("mixamorig:", "")))]
+        elbow = [k for k, n in enumerate(rig.names) if region_of(rig.j["nodes"][rig.joints[k]]["name"]) == ("forearm", side)]
+        if not wrist or not elbow or arm.sum() < 60:
             continue
-        axis = mesh["pos"][fh0].mean(0) - mesh["pos"][up0].mean(0)
-        proj = mesh["pos"] @ (axis / np.linalg.norm(axis))
-        far = proj >= np.percentile(proj[arm], 99.5) - HAND_LEN * np.ptp(mesh["pos"][:, 1])
-        reg[arm & far] = "hand_" + side
-        reg[arm & ~far & (reg == "hand_" + side)] = "forearm_" + side
+        w, e = jpos[wrist[0]], jpos[elbow[0]]
+        axis = (w - e) / max(np.linalg.norm(w - e), 1e-9)
+        proj = (mesh["pos"] - w) @ axis
+        was = reg == "hand_" + side
+        hand = arm & (proj >= -0.01 * H) & (proj <= HAND_LEN * H)
+        held = (was | arm) & (proj > HAND_LEN * H)
+        reg[was & (proj < -0.01 * H)] = "forearm_" + side
+        reg[hand] = "hand_" + side
+        if held.sum() >= 50:
+            reg[held] = "prop:held_" + side
+        else:
+            reg[held] = "hand_" + side
     # welded vertex ids (seams) so islands follow the surface, not the UV cuts
     key = np.round(mesh["pos"] * 1e4).astype(np.int64)
     _, weld = np.unique(key, axis=0, return_inverse=True)
@@ -291,6 +312,7 @@ def split_parts(rig, mesh):
                    shape=(weld.max() + 1,) * 2)
     _, comp = connected_components(g, directed=False)
     comp = comp[weld]  # whole-mesh island of each vertex: only a piece detached from the body is its own part
+    reg = absorb_strays(reg, weld, tr)
     size = np.bincount(comp)
     main = size.argmax()
     parts = {}
@@ -303,6 +325,48 @@ def split_parts(rig, mesh):
             rest = rest[comp[rest] != c]
         parts[r] = rest
     return {k: v for k, v in parts.items() if len(v) >= 20}
+
+
+BODY = ("head", "torso", "upper_arm", "forearm", "hand", "thigh", "shin", "foot")
+
+
+def absorb_strays(reg, weld, tr):
+    """Body regions keep only their main connected patch on the welded surface; a stray patch (Meshy's skin weights
+    bleed: belt bits at the hip skinned to the hand) joins the region that surrounds it most. Outfit, hair and prop
+    regions are left as they are (they are often many strips)."""
+    nv = weld.max() + 1
+    wreg = np.empty(nv, dtype=object)
+    wreg[weld] = reg  # welded duplicates share their weights in practice
+    e = np.r_[tr[:, [0, 1]], tr[:, [1, 2]], tr[:, [2, 0]]]
+    for _ in range(3):
+        same = wreg[e[:, 0]] == wreg[e[:, 1]]
+        g = coo_matrix((np.ones(same.sum()), (e[same, 0], e[same, 1])), shape=(nv, nv))
+        _, cc = connected_components(g, directed=False)
+        size = np.bincount(cc)
+        moved = 0
+        for r in sorted(set(wreg)):
+            if base_of(r)[0] not in BODY:
+                continue
+            ids = np.where(wreg == r)[0]
+            if not len(ids):
+                continue
+            keep = cc[ids][size[cc[ids]].argmax()]
+            stray = ids[cc[ids] != keep]
+            if not len(stray):
+                continue
+            mask = np.zeros(nv, bool)
+            mask[stray] = True
+            for c in np.unique(cc[stray]):
+                m = mask & (cc == c)
+                border = e[m[e[:, 0]] & ~m[e[:, 1]], 1]
+                votes = [x for x in wreg[border] if x != r]
+                if votes:
+                    vals, cnt = np.unique(np.array(votes, dtype=object), return_counts=True)
+                    wreg[m] = vals[cnt.argmax()]
+                    moved += 1
+        if not moved:
+            break
+    return wreg[weld]
 
 
 def base_of(part):
@@ -328,6 +392,10 @@ def joined(a, b):
             return True
         if x.startswith("outfit:") and (y in COMPONENT or y in LIMB_ROOTS):
             return True
+        if x.startswith("prop:held"):
+            if y in ("hand", "forearm") and sx == sy:
+                return True
+            continue
         if x.startswith("prop:") and y in ("hand", "torso"):
             return True
     return False
@@ -352,21 +420,117 @@ def skin_points(S, mesh, ids):
     return op, on / np.maximum(ln, 1e-9)
 
 
-def penetration(pa, pb, nb, tree_b):
-    """(depth m, centre) of pa inside surface pb (normals nb). A point is inside when it lies behind (the negative side
-    of the normal of) at least 90% of its K nearest surface points and straight along the inward normal of them (so
-    a point beside a sheet's edge, or far off, never counts); the depth is then the DEEP_RANK-th deepest such point.
-    (0, None) when none."""
-    d, q = tree_b.query(pa, k=K, distance_upper_bound=MAX_DEPTH)
-    ok = np.isfinite(d).all(1)
-    q = np.where(np.isfinite(d), q, 0)
-    sd = ((pa[:, None] - pb[q]) * nb[q]).sum(2)
-    mean_sd, mean_d = sd.mean(1), np.where(np.isfinite(d), d, 0).mean(1)
-    deep = np.where(ok & ((sd < 0).mean(1) >= 0.9) & (-mean_sd >= 0.8 * mean_d))[0]
-    if len(deep) < DEEP_RANK:
+def closest_on_tris(p, a, b, c):
+    """Exact closest points on triangles (a, b, c) [n, 3] to points p [n, 3] (Ericson 5.1.5): (point [n, 3],
+    barycentric [n, 3]). A zero barycentric weight means the closest point is on that corner's opposite edge."""
+    ab, ac, ap = b - a, c - a, p - a
+    d1, d2 = (ab * ap).sum(1), (ac * ap).sum(1)
+    bp = p - b
+    d3, d4 = (ab * bp).sum(1), (ac * bp).sum(1)
+    cp = p - c
+    d5, d6 = (ab * cp).sum(1), (ac * cp).sum(1)
+    va, vb, vc = d3 * d6 - d5 * d4, d5 * d2 - d1 * d6, d1 * d4 - d3 * d2
+    den = np.maximum(va + vb + vc, 1e-30)
+    bc = np.stack([va / den, vb / den, vc / den], 1)  # inside the face
+
+    def put(mask, w):
+        bc[mask] = w[mask]
+    z = np.zeros_like(d1)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t = np.clip(np.nan_to_num((d4 - d3) / ((d4 - d3) + (d5 - d6))), 0, 1)
+        put((va <= 0) & (d4 - d3 >= 0) & (d5 - d6 >= 0), np.stack([z, 1 - t, t], 1))  # edge bc
+        t = np.clip(np.nan_to_num(d2 / (d2 - d6)), 0, 1)
+        put((vb <= 0) & (d2 >= 0) & (d6 <= 0), np.stack([1 - t, z, t], 1))  # edge ac
+        t = np.clip(np.nan_to_num(d1 / (d1 - d3)), 0, 1)
+        put((vc <= 0) & (d1 >= 0) & (d3 <= 0), np.stack([1 - t, t, z], 1))  # edge ab
+    one = np.ones_like(d1)
+    put((d6 >= 0) & (d5 <= d6), np.stack([z, z, one], 1))  # corner c
+    put((d3 >= 0) & (d4 <= d3), np.stack([z, one, z], 1))  # corner b
+    put((d1 <= 0) & (d2 <= 0), np.stack([one, z, z], 1))  # corner a
+    return bc[:, :1] * a + bc[:, 1:2] * b + bc[:, 2:] * c, bc
+
+
+def part_faces(mesh, ids, weld):
+    """(triangles [T, 3] of global vertex ids wholly inside part `ids`, rim mask [T, 3] per corner and per opposite
+    edge): rim = on the part's open cut (an edge only one of the part's triangles uses, after welding UV seams)."""
+    inp = np.zeros(len(mesh["pos"]), bool)
+    inp[ids] = True
+    tri = mesh["tris"][inp[mesh["tris"]].all(1)]
+    if not len(tri):
+        return tri, np.zeros((0, 3), bool), np.zeros((0, 3), bool)
+    w = weld[tri]
+    e = np.sort(np.stack([w[:, [1, 2]], w[:, [2, 0]], w[:, [0, 1]]], 1), axis=2)  # edge opposite corner k
+    flat = e.reshape(-1, 2)
+    _, inv, cnt = np.unique(flat, axis=0, return_inverse=True, return_counts=True)
+    edge_rim = (cnt[inv.reshape(-1)] == 1).reshape(-1, 3)
+    rim_v = np.zeros(weld.max() + 1, bool)
+    rim_v[flat[(cnt[inv.reshape(-1)] == 1)].reshape(-1)] = True
+    return tri, rim_v[w], edge_rim
+
+
+def penetration(pa, P, N, face):
+    """(depth m, centre) of points pa inside part surface `face` = (triangles, corner rim, edge rim) posed at P, N.
+    A point is inside when its exact closest point on the part is behind the surface (against the interpolated
+    normal there, and mostly along it) and is not on the part's open cut rim (a point beside the opening of a
+    sleeve or a cut limb is not inside it). Depth = the DEEP_RANK-th deepest inside point. (0, None) when none."""
+    tri, vrim, erim = face
+    if len(tri) == 0 or len(pa) < DEEP_RANK:
         return 0.0, None
-    top = deep[np.argsort(mean_sd[deep])[:DEEP_RANK]]
-    return float(-mean_sd[top[-1]]), pa[top].mean(0)
+    cen = P[tri].mean(1)
+    tree = cKDTree(cen)
+    k = min(KT, len(tri))
+    d, q = tree.query(pa, k=k, distance_upper_bound=MAX_DEPTH + 0.05)
+    d, q = d.reshape(len(pa), -1), q.reshape(len(pa), -1)
+    near = np.isfinite(d[:, 0])
+    if near.sum() < DEEP_RANK:
+        return 0.0, None
+    pa, q, d = pa[near], q[near], d[near]
+    ok = np.isfinite(d)
+    q = np.where(ok, q, q[:, :1])
+    n, kk = q.shape
+    t = tri[q.reshape(-1)]
+    pp = np.repeat(pa, kk, axis=0)
+    cp, bc = closest_on_tris(pp, P[t[:, 0]], P[t[:, 1]], P[t[:, 2]])
+    dist = np.linalg.norm(pp - cp, axis=1).reshape(n, kk)
+    best = dist.argmin(1)
+    sel = np.arange(n) * kk + best
+    cp, bc, t, dist = cp[sel], bc[sel], t[sel], dist[np.arange(n), best]
+    tq = q[np.arange(n), best]
+    zero = bc <= 1e-6
+    corner = zero.sum(1) == 2  # closest = a corner
+    edge = zero.sum(1) == 1  # closest = an edge (opposite the zero corner)
+    on_rim = (corner & vrim[tq, bc.argmax(1)]) | (edge & erim[tq, zero.argmax(1)])
+    nrm = (bc[:, :, None] * N[t]).sum(1)
+    fn = np.cross(P[t[:, 1]] - P[t[:, 0]], P[t[:, 2]] - P[t[:, 0]])
+    fn /= np.maximum(np.linalg.norm(fn, axis=1, keepdims=True), 1e-12)
+    nrm = np.where(corner[:, None] | edge[:, None], nrm, np.where((fn * nrm).sum(1, keepdims=True) < 0, -fn, fn))
+    nrm /= np.maximum(np.linalg.norm(nrm, axis=1, keepdims=True), 1e-12)
+    sd = ((pa - cp) * nrm).sum(1)
+    inside = (~on_rim) & (sd < 0) & (-sd >= 0.7 * dist) & (dist <= MAX_DEPTH) & (dist > 1e-5)
+    if inside.sum() < DEEP_RANK:
+        return 0.0, None
+    # enclosed: going on inward from the point must reach the part's far wall (a surface facing the same way the
+    # ray runs). A single cloth sheet (a coat tail skinned to the thigh) has no far wall: behind it is not inside.
+    vids = np.unique(tri)
+    Pv, Nv = P[vids], N[vids]
+    tv = cKDTree(Pv)
+    deep = np.where(inside)[0]
+    deep = deep[np.argsort(-dist[deep])]
+    good = []
+    for i in deep:
+        ray = -nrm[i]
+        cand = tv.query_ball_point(pa[i] + ray * WALL_REACH / 2, WALL_REACH / 2 + WALL_R)
+        if cand:
+            v = Pv[cand] - pa[i]
+            along = v @ ray
+            off = np.linalg.norm(v - along[:, None] * ray, axis=1)
+            if ((along > 0.002) & (off < WALL_R) & (Nv[cand] @ ray > 0.3)).any():
+                good.append(i)
+                if len(good) == DEEP_RANK:
+                    break
+    if len(good) < DEEP_RANK:
+        return 0.0, None
+    return float(dist[good[-1]]), pa[good].mean(0)
 
 
 def hand_shape(pts, is_thumb):
@@ -409,6 +573,10 @@ class Check:
         self.dom = self.mesh["joints"][np.arange(len(self.mesh["pos"])), self.mesh["weights"].argmax(1)]
         self.pivot = {pair: self.pivot_joint(*pair) for pair in self.pairs}
         self.bind_pos = np.linalg.inv(self.rig.ibm)[:, :, 3]  # joint positions in the bind pose
+        key = np.round(self.mesh["pos"] * 1e4).astype(np.int64)
+        weld = np.unique(key, axis=0, return_inverse=True)[1].reshape(-1)
+        self.faces = {k: part_faces(self.mesh, v, weld) for k, v in self.parts.items() if k in {c for _, c in self.pairs}}
+        self.every = np.arange(len(self.mesh["pos"]))
         thumb = [k for k, n in enumerate(self.rig.names) if "thumb" in n.lower()]
         self.thumb_joint = set(thumb)
 
@@ -420,6 +588,12 @@ class Check:
             if len(ids) >= 30:
                 out["hand_" + side] = (ids, np.isin(self.dom[ids], list(self.thumb_joint)))
         return out
+
+    def finger_bones_unused(self, side):
+        """True when the rig has finger/thumb bones on this side and no vertex is mainly on any of them."""
+        fing = [k for k, n in enumerate(self.rig.names) if region_of(self.rig.j["nodes"][self.rig.joints[k]]["name"]) == ("hand", side)
+                and re.search(r"fing|thumb|index|middle|ring|pinky", n.lower())]
+        return bool(fing) and int(np.isin(self.dom, fing).sum()) < 20
 
     def pivot_joint(self, a, c):
         """Joint index of the nearest common ancestor of the two parts' main bones (the hinge they share), or None."""
@@ -435,22 +609,22 @@ class Check:
         common = next((n for n in ca if n in cc), None)
         return self.rig.joints.index(common) if common in self.rig.joints else None
 
-    def frame_clip(self, pts, nrm, jw):
-        """{(a, c): (depth m, centre)} of the pairs that clip at one posed frame (jw: joint world positions)."""
-        res, trees = {}, {}
+    def frame_clip(self, pts, jw, P, N):
+        """{(a, c): (depth m, centre)} of the pairs that clip at one posed frame (pts: sampled points per part,
+        jw: joint world positions, P/N: every vertex posed)."""
+        res = {}
         lo = {k: p.min(0) for k, p in pts.items()}
         hi = {k: p.max(0) for k, p in pts.items()}
         for a, c in self.pairs:
             if (lo[a] > hi[c] + 0.02).any() or (lo[c] > hi[a] + 0.02).any():
                 continue
-            if c not in trees:
-                trees[c] = cKDTree(pts[c])
             pa = pts[a]
             if self.pivot[(a, c)] is not None:  # not within the hinge they share (two thighs at the hip)
                 pa = pa[np.linalg.norm(pa - jw[self.pivot[(a, c)]], axis=1) > PIVOT_R]
-                if len(pa) < DEEP_RANK:
-                    continue
-            d, where = penetration(pa, pts[c], nrm[c], trees[c])
+            pa = pa[((pa >= lo[c] - 0.01) & (pa <= hi[c] + 0.01)).all(1)]
+            if len(pa) < DEEP_RANK:
+                continue
+            d, where = penetration(pa, P, N, self.faces[c])
             if d * 100 >= SEEN_CM:
                 res[(a, c)] = (d, where)
         return res
@@ -466,10 +640,9 @@ class Check:
             mats = self.rig.skin_mats(anim, T)
             held = cname == "rest" or bool(HELD.match(cname))
             for f in range(len(T)):
-                pts, nrm = {}, {}
-                for k, ids in self.sample.items():
-                    pts[k], nrm[k] = skin_points(mats[f], self.mesh, ids)
-                hit = self.frame_clip(pts, nrm, np.einsum("jik,jk->ji", mats[f], self.bind_pos)[:, :3])
+                P, N = skin_points(mats[f], self.mesh, self.every)
+                pts = {k: P[ids] for k, ids in self.sample.items()}
+                hit = self.frame_clip(pts, np.einsum("jik,jk->ji", mats[f], self.bind_pos)[:, :3], P, N)
                 for (a, c), (d, w) in hit.items():
                     flags = ("HELD" if held else "move") + (",OVER1CM" if d * 100 > HELD_CM else "")
                     rows.append((cname, f * STEP, a + ">" + c, round(d * 100, 2), flags))
@@ -511,16 +684,22 @@ def summarize(chk, rows, worst, hand):
     flat = {}
     for k, h in hand.items():
         rest, w = h["rest"], h["worst"]
-        flat[k] = rest["ratio"] < FLAT_RATIO or w["ratio"] < FLAT_RATIO
+        # the rest pose (a clip frame only re-blends the wrist): fused fingers or paper thin. Finger bones that carry no
+        # mesh (Vex: belt beads ride hand.L) are a warning only: then the hand test measures what the hand bone carries
+        rig_bad = chk.finger_bones_unused(k[-1])
+        flat[k] = rest["finger_sep"] < FLAT_SEP or rest["ratio"] < FLAT_RATIO
         parts.setdefault(k, {"clips_into": []}).update({"flat": bool(flat[k]), "thickness_ratio": rest["ratio"], "worst_ratio": w["ratio"],
                          "worst_at": "%s:%d" % (w["clip"], w["frame"]), "thumb_lobe": rest["thumb_lobe"],
-                         "finger_sep": rest["finger_sep"]})
-    hl = " | ".join("HAND %s %s %.2f" % (k.split("_")[-1], "FLAT" if flat[k] else "ok", hand[k]["rest"]["ratio"])
+                         "finger_sep": rest["finger_sep"],
+                         "finger_bones_unused": rig_bad})
+    hl = " | ".join("HAND %s %s sep %.2f ratio %.2f%s" % (k.split("_")[-1], "FLAT" if flat[k] else "ok", hand[k]["rest"]["finger_sep"],
+                                                     hand[k]["rest"]["ratio"], " fingers-unrigged" if parts[k]["finger_bones_unused"] else "")
                     for k in sorted(hand)) or "HAND none"
     line = "%s: CLIP worst %.1f cm in %d frames (held %d, held worst %.1f cm) | %s" % (
         chk.key, top, len(over), len(over_held), top_held, hl)
     stats = {"worst_cm": top, "held_worst_cm": top_held, "frames": len(over), "held_frames": len(over_held),
              "flat": flat, "ratios": {k: [hand[k]["rest"]["ratio"], hand[k]["worst"]["ratio"]] for k in hand},
+             "seps": {k: hand[k]["rest"]["finger_sep"] for k in hand},
              "pairs": {"%s>%s" % k: [round(e["held_max_cm"], 2), round(e["max_cm"], 2)] for k, e in agg.items()}}
     return line, parts, stats
 
@@ -546,7 +725,7 @@ def verdict(stats, live=None):
     why = []
     if stats["held_worst_cm"] > HELD_CM:
         why.append("held clip clips %.1f cm" % stats["held_worst_cm"])
-    why += ["hand %s FLAT (%.2f)" % (k, stats["ratios"][k][0]) for k, v in stats["flat"].items() if v]
+    why += ["hand %s FLAT (sep %.2f, ratio %.2f)" % (k, stats["seps"][k], stats["ratios"][k][0]) for k, v in stats["flat"].items() if v]
     if live:
         for pair, (held, _all) in stats["pairs"].items():
             if held > live["pairs"].get(pair, [0, 0])[0] + WORSE_CM and held > HELD_CM:
@@ -554,6 +733,9 @@ def verdict(stats, live=None):
         for k, (rest, worst) in stats["ratios"].items():
             if k in live["ratios"] and rest < live["ratios"][k][0] - WORSE_RATIO:
                 why.append("worse than live: hand %s ratio %.2f (live %.2f)" % (k, rest, live["ratios"][k][0]))
+        for k, sep in stats["seps"].items():
+            if k in live.get("seps", {}) and sep < live["seps"][k] - WORSE_SEP:
+                why.append("worse than live: hand %s finger separation %.2f (live %.2f)" % (k, sep, live["seps"][k]))
     return why
 
 
