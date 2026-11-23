@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bcedve3afedw6"
-path="res://.godot/imported/pip_meshy_Image_2.jpg-a45ec40cc47b182ac42934348348a237.ctex"
+path.s3tc="res://.godot/imported/pip_meshy_Image_2.jpg-a45ec40cc47b182ac42934348348a237.s3tc.ctex"
+path.etc2="res://.godot/imported/pip_meshy_Image_2.jpg-a45ec40cc47b182ac42934348348a237.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "bb943819f71d5359229ee829d0d3afb5"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/pip/pip_meshy_Image_2.jpg"
-dest_files=["res://.godot/imported/pip_meshy_Image_2.jpg-a45ec40cc47b182ac42934348348a237.ctex"]
+dest_files=["res://.godot/imported/pip_meshy_Image_2.jpg-a45ec40cc47b182ac42934348348a237.s3tc.ctex", "res://.godot/imported/pip_meshy_Image_2.jpg-a45ec40cc47b182ac42934348348a237.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
