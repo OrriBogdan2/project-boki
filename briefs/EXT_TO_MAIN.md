@@ -11159,3 +11159,4 @@ READY ext/merge-lane-n23e-1123 218aee2410fa41fa32bb7e4b56f5b96f393915e8 (lane n2
 READY ext/hatch-reveal-name-1123 00ce691f96 (hatch reveal: one Boki on greyed screen; name card beside Boki, box focused; shots in gens/hatch-name-1123)
 READY ext/anim-native-stride 122f74c14c6 (native Hunters: per-Hunter stride rates)
 READY ext/farm-boki-greet 92de2981f6 (garden Boki greet you)
+READY ext/anim-cinder-native-clips d18bf93c94 (Cinder native cast clips)
