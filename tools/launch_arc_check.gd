@@ -14,7 +14,7 @@ const DT := 1.0 / 60.0
 
 ## key -> [op, target, unit, note]. Ops: "<=", ">=", "~" (target [lo, hi]).
 const T := {
-	"pad_vy":              ["~", [16.9, 17.1], "m/s", "[?] no source number: ours, UtilityUse.PAD_VY"],
+	"pad_vy":              ["~", [16.9, 17.1], "m/s", "[?] no source number: ours, hunter_move.json jump_pad.vy"],
 	"pad_apex_m":          ["~", [9.0, 10.5], "m", "[?] PAD_VY^2 / 2g at [game data] gravity 14.7"],
 	"pad_apex_t":          ["~", [1.05, 1.25], "s", "PAD_VY / g"],
 	"pad_walk_hv":         ["~", [5.9, 6.1], "m/s", "[?] a walk-on leaves at the PAD_MIN_HV floor"],
