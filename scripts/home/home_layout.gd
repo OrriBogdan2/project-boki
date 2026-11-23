@@ -550,7 +550,7 @@ static func grow_main(world: World, level: int, rng_seed := 0, sk := 0.0) -> voi
 	var near := {}
 	for i in world.kind.size():
 		if world.island[i] > 0:
-			var x0 := i % world.w; var z0 := i / world.w
+			var x0 := i % world.w; var z0 := int(i / float(world.w))
 			for dz in range(-GAP, GAP + 1):
 				for dx in range(-GAP, GAP + 1):
 					near[(z0 + dz) * world.w + x0 + dx] = true
@@ -792,7 +792,7 @@ static func wild(world: World, rng_seed: int, keep: Dictionary) -> Dictionary:
 	for i in world.kind.size():
 		if world.island[i] != 0 or world.kind[i] != World.T_GROUND or keep.has(i) or world.paint.has(i) or world.bridge.has(i):
 			continue
-		var x := i % world.w; var z := i / world.w
+		var x := i % world.w; var z := int(i / float(world.w))
 		var dc := Vector2((x + 0.5 - CORE_C.x) / CORE_R.x, (z + 0.5 - CORE_C.y) / CORE_R.y).length()
 		if dc < 1.1 or world.edge_dist(x, z, 3) < 2:
 			continue
@@ -812,14 +812,14 @@ static func wild(world: World, rng_seed: int, keep: Dictionary) -> Dictionary:
 	# water: a round pond, or a stream winding in from the island's edge
 	var wi: int = cand[r.randi_range(0, cand.size() - 1)]
 	if r.randf() < 0.5:
-		var wx := wi % world.w; var wz := wi / world.w
+		var wx := wi % world.w; var wz := int(wi / float(world.w))
 		var pr := Vector2(r.randf_range(1.6, 2.8), r.randf_range(1.4, 2.4))
 		for dz in range(-3, 4):
 			for dx in range(-3, 4):
 				if Vector2(dx / pr.x, dz / pr.y).length() < 1.0 and ok_tile.call(wi + dz * world.w + dx):
 					out[wi + dz * world.w + dx] = "water"
 	else:
-		var p := Vector2(wi % world.w, wi / world.w)
+		var p := Vector2(wi % world.w, int(wi / float(world.w)))
 		var dir := Vector2.from_angle(r.randf() * TAU)
 		for s in r.randi_range(10, 18):
 			var ti := int(p.y) * world.w + int(p.x)

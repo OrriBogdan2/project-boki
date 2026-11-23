@@ -567,7 +567,7 @@ func _forest(secs: float) -> void:
 	back.reverse()
 	path.append_array(back)
 	p_v.teleport(_ground(path[0] + BEHIND))
-	_mark("walk trees=%d style=%s" % [path.size() / 2, style])
+	_mark("walk trees=%d style=%s" % [int(path.size() / 2.0), style])
 	var next := [0]
 	await _go(
 		secs,
