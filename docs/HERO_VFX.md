@@ -183,6 +183,13 @@ asserts coverage of all 18 types, distinct colours and shapes, the budget and a 
 20261109-130430 (most read; Electric/Steel lost, Rock/Bug faint, so those four were enlarged/lengthened and Rock darkened).
 The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge those on open grass.
 
+### Hit colour
+A hit a Boki lands (an ability, a strike, whatever it hits: Hunter, mob or another Boki) flashes and sparks in its own
+type colour, the Field Book's (`DexView.type_col`): one lookup in `Juice.flash_col(target, p, by)`, no new effect. A hit
+by anything else keeps the old by-target colour (a Boki target rims in its type, a Hunter white). Crit gold and armour
+blue still win in `Fx.impact`. `--boki-type-hit-check` reads the flash and spark of three types; `--boki-type-hit-shots
+--shots-dir=<dir>` (GPU) draws six in one strip.
+
 ### Movement trail and capture pop
 
 `KinTypeTrail` (`scripts/match/kin_type_trail.gd`) gives every **moving** summoned or wild Boki a light trail in its

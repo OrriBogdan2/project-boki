@@ -33,10 +33,13 @@ const ARMOR_UP_OWN_DB := -4.0  # dB: your own Hunter's tier-up (the fuller cue, 
 const ARMOR_UP_NEAR_DB := -8.0  # dB: a rival's (or mate's) tier-up; Sfx.play adds the distance falloff
 
 
-## The flash colour of a hit by what it struck: a Boki rims in its type colour (the Field Book's, not
-## the damage category's), so a squad fight tells a Boki from its Hunter; a Hunter keeps the white
-## (or, on you, the hot) flash; mobs and the rest keep theirs.
-static func flash_col(target: Ent, p: Hunter) -> Color:
+## The flash and spark colour of a hit: a Boki's own hit lands in its type colour (the Field Book's), whatever it
+## strikes, so a fire Boki's is ember and a tempest one teal; otherwise by what it struck: a Boki rims in its type
+## colour, so a squad fight tells a Boki from its Hunter; a Hunter keeps the white (or, on you, the hot) flash; mobs
+## and the rest keep theirs.
+static func flash_col(target: Ent, p: Hunter, by: Ent = null) -> Color:
+	if by is Kin:
+		return DexView.type_col(String((by as Kin).sp.get("type", "")))
 	if target is Kin:
 		return DexView.type_col(DexView.type_of((target as Kin).species))
 	return HURT_COL if target == p else HIT_COL
@@ -87,7 +90,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	var power := clampf(d / 14.0, 0.35, 3.0)
 	if not mine:
 		power *= 0.65
-	var col := flash_col(target, p)
+	var col := flash_col(target, p, by)
 	var ability := o.has("ab") and src != "kin"
 	if ability:
 		power = maxf(power, 1.3)  # an ability hit always lands big
