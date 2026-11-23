@@ -28,6 +28,10 @@ check: `--base-life-check`.
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
+- You come back (`scripts/home/base_greet.gd`, the Greet state, base_life.json `notice`): a roaming Boki that had you more than
+  `far_m` away for `away_s` and sees you within `near_m` rolls once: `chance` + `rank_chance` x its bond rank + `cling_chance` x
+  its cling. A hit looks at you for `look_s`; from bond rank `run_rank` (Close) it runs to you (`slot_m`), follows at its walk for
+  `follow_s`, then goes back to roaming. No UI. `--base-life-check` seeds a Wary look, a Close run and follow, and the rank weight.
 - Toys: one system, `HomeToys` (home_toys.gd, k["play"], toys.json). It picks, walks, plays, squabbles and shares;
   `BaseLife.choose` asks `HomeToys.pick(k, true)` when a Boki is bored or curious, and the machine shows Play while
   HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
