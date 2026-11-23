@@ -25,7 +25,7 @@ const CANCEL_OPEN := {
 	"tender mm_seed_aim@0.50>stun": "0.37 m into the stun pose",
 	"tender mm_call_hold@1.00>stun": "0.36 m into the stun pose",
 	"tender mm_call_hold@1.00>mm_skip": "0.19 m into the skip",
-	"thief thf_bola@0.20>stun": "0.50 m into the stun pose (main's thief clips; the branch's older merge passed without the row)",
+	"thief thf_bola@0.20>stun": "0.50 m into the stun pose (main's thief clips)",
 	"thief thf_encore_dance@0.80>thf_vault_r": "cartwheel cut into the vault, 0.35 m in a frame",
 }
 
