@@ -655,7 +655,7 @@ const CHECKS := {
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
 	"--tutorial-lane-check": ["res://tools/tutorial_lane_check.gd", "tutorial_lane_check", null],  # LMB first, no cover
-	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; 1080p frames
+	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; --size=WxH
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
 	# ADVISORY: pace flags (a beat over 45 s, a 5 s wait) never fail it; only a stall in the run does
 	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
@@ -824,8 +824,7 @@ const CHECKS := {
 	"--online-feel-1-check": ["res://tools/online_feel_check.gd", "online_feel_check", "gunslinger"],
 	"--online-feel-2-check": ["res://tools/online_feel_check.gd", "online_feel_check", "juggernaut"],
 	"--online-feel-3-check": ["res://tools/online_feel_check.gd", "online_feel_check", "rimewright"],
-	# the second game (not gated)
-	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],
+	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],  # the second game (not gated)
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],  # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
