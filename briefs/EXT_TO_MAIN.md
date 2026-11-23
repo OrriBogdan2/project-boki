@@ -11073,3 +11073,4 @@ READY ext/parity-recheck-tenzo-sparkle 7b4af68271507162c0fabe77eef4009e1738077b 
 READY ext/vfx-meeko-weak-col 63485c47a51633addf7cbc288f1e5901f5dcdb06 (Meeko VFX lift)
 READY ext/feel-last-estimates caadb7c0839fbb6d9a4ac7072eb459cf20416eb0 (sourced overheat/spike/jump-pad numbers)
 READY ext/merge-lane-n23a-1123 9b8f9854ae86157b991be30ab4c69be5d9d59a7e (merge lane n23a: 20 branches, NEW-RED 0 on 35 targeted flags, export OK)
+READY ext/lint-ratchet-main-1122 c51321ebd83 (merged main; baseline regenerated via check.sh --update, private-ref 60; run-time reads of renamed members fixed)
