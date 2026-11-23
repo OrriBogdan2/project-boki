@@ -2412,7 +2412,7 @@ func on_wall_slam(e: Ent, dir: Vector2) -> void:
 ## sight, tall grass hides you from anyone outside it, and crouching shrinks both distances.
 ## Firing or getting hit gives you away to anyone with a clear line, whichever way they face.
 const VIEW_RANGE := 24.0
-const VIEW_COS := 0.5          # 120 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same cone)
+const VIEW_COS := 0.7071       # 90 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same cone)
 const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
@@ -5584,7 +5584,7 @@ func _update_aim(alpha: float) -> void:
 	var to_max := String(p.wpn.get("aim", "")) == "max"
 	var dist := float(p.wpn["range"]) if to_max else minf(d.length(), float(p.wpn["range"]))
 	if dist > 0.6:
-		var dir := d.normalized()
+		var dir := p.aim_dir()      # the vision cone's centre (vis_dir), so the line always runs down it
 		var y := at.y + 0.95 * float(p.cdat["scale"])
 		var a := Vector3(at.x + dir.x * 0.6, y, at.z + dir.y * 0.6)
 		var b := Vector3(at.x + dir.x * dist, y, at.z + dir.y * dist)

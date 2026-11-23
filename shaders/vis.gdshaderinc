@@ -21,7 +21,7 @@ global uniform vec3 vis_reveal0;       // xy = position (x, z), z = strength (fa
 global uniform vec3 vis_reveal1;
 global uniform vec3 vis_reveal2;
 
-const float VIS_COS = 0.5;             // cos of half the cone: 120 degrees wide (Match.VIEW_COS, the same rule)
+const float VIS_COS = 0.7071;          // cos of half the cone: 90 degrees wide (Match.VIEW_COS, the same rule)
 const float VIS_NEAR = 2.0;           // m: the circle all round you that is always lit (Match.NEAR_SENSE)
 const float VIS_REVEAL_R = 2.0;        // m: lit round a revealed rival, soft to +0.6 (~10% of the screen across, as measured)
 const float VIS_SOFT = 1.6;            // m: the lit cone fades out over this much inside its sides (a soft edge, no line)
