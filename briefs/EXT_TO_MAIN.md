@@ -11066,3 +11066,4 @@ READY ext/anim-mob-coverage f1ca3fd0010eb4c86d23cd2228b2357f57cc873e (mob anim c
 READY ext/feel-boki-hit-tiers 6fe7ebdc95 (Boki hits on hit-feel tiers)
 READY ext/combat-cooldown-table e92ae32d6 (cooldown table for owner)
 READY ext/parity-recheck-grimble-meeko a8800d3b2300050f2afe0dadedae6921134f8bf5 (Grimble+Meeko parity re-check)
+READY ext/feel-grimble-reel-tap 75b6e3f47cbcc86b370a05f182914d96bc0c1d3d (Deep Reach reel keeps a tapped LMB)
