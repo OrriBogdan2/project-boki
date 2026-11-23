@@ -40,6 +40,8 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "glomwort": ("glomwort", "glomwort", "glomwort_anim"),
          "gibbelle": ("glomwort", "glomwort", "gibbelle_anim"),     # a scan (boki_scan) on the simplest rig there is
          "goliathite": ("glomwort", "glomwort", "glomwort_anim"),   # scans too: every lobe on root, the body rides it
+         "gibbelle": ("glomwort", "glomwort", "glomwort_anim"),     # a scan (boki_scan) on the simplest rig there is
+         "goliathite": ("glomwort", "glomwort", "goliathite_anim"),   # scans too: every lobe on root, the body rides it
          "hoarheron": ("glomwort", "glomwort", "glomwort_anim"),
          "floenatee": ("glomwort", "glomwort", "floenatee_anim"),
          **{i: ("glomwort",) * 2 + ("glomwort_anim",)

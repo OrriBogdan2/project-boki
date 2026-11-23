@@ -99,6 +99,8 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
 | duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
+| gibbelle | shared | shared | shared | shared | shared | shared | proc | proc |
+| glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
 | heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
 | kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -113,6 +115,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | goliathite | clip | shared | shared | shared | shared | shared | proc | proc |
+| floenatee | clip | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
 | limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
 | moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
@@ -133,6 +136,8 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | glaciyak | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
+| glomwort | clip | clip | clip | clip | clip | clip | proc | proc |
+| goliathite | clip | clip | clip | clip | clip | clip | proc | proc |
 | kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
 | kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
 | lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -156,6 +161,9 @@ Worst five, backlog-ready:
 - [anim] Boki glomwort (No. 17): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glomwort_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki heatherhorn (No. 19): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/heatherhorn_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki kilnbadger (No. 22): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/kilnbadger_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki gibbelle (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki glaciyak (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki heatherhorn (No. 19): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/heatherhorn_anim.py, rebuild the .glb, rerun --anim-coverage-check
 <!-- table:end -->
 
 ## Gaps, worst first
@@ -214,5 +222,7 @@ Worst five, backlog-ready:
    any Boki (scaldamus and sentrikat left it 11-20), but the shared set is the same wobble on a heron, an okapi and a
    rope wyrm. That includes glomwort,
    whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
+   any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. Glomwort (its clips re-targeted
+   onto the scan, which has no lobes or puffballs to move) and goliathite now play their own. Eat and
    sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
