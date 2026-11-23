@@ -7,7 +7,10 @@ extends RefCounted
 const CHECKS := {
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
 	"--turn-cost-check": ["res://tools/turn_cost_check.gd", "turn_cost_check", null],  # owner 11-11 momentum
+	"--cliff-mantle-meadow-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", 0],
+	"--cliff-mantle-dusk-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", 1],
 	"--drop-merge-audit": ["res://tools/drop_merge_check.gd", "drop_merge_check", "audit"],  # ground audit, not gated
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
+	"--grammar-check": ["res://tools/grammar_check.gd", "grammar_check", null],  # parse every kin grammar file (=<root> for another folder)
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
 }
