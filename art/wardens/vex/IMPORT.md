@@ -135,3 +135,10 @@ without --rehang (a fresh swap has no #360 hung fins).
   or joining the gun arm's skin to the hips' are deleted (the spikes). hunter_mesh_check spike_edges 188 -> 20, collapsed 42 -> 2,
   stretched tris 120 (as #360); tris 60095 -> 59574.
 Open: the gun cuff's torn tan edge is scan texture/shards, not deleted; the hand still touches the pocket flap at idle.
+
+Arms out of the body (11-23, r3, ext/vex-hands-1123): every clip's left hand sank 15-40 mm into her left thigh and hips
+(idle, dash, lmb, x, the cast clips) and the gun into her right thigh. `python3 -I tools/art1/glb_arm_clear.py
+vex.glb vex.glb vex.glb vex_cast_clips.glb vex_cast_clips.glb` swings upper_arm.L/R per key by the fewest degrees that
+clear it (spec `arm_clear`, run by v95_to_game.py after hand_rebind; needs numpy + scipy). 63 of 66 clip tracks clear to
+<= 3 mm; left: dash_ex (air dive) 36 mm, fusion 11 mm. The gun's cuff against the belt (hips) is not handled (a shoulder
+swing barely moves the elbow). Report: ~/gens/vex-hands-r2-1123/clear/c2.log.

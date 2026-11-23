@@ -1,7 +1,8 @@
 """A Hunter's current v95 master into the game, its own mesh, UVs and paint (no rebake): one command per Hunter.
 The master is ~/meshy/v95/CURRENT_OVERRIDES.txt's last line for the Hunter, else its current.json. The Warden's swap spec
 (art/wardens/src/*_v95.json whose `game` is the Hunter's .glb: joints, regions, anchors, `drop_mats`, `hand_rebind`: the side
-of a hand tools/art1/hand_rebind.py re-binds after the swap) runs in v95_swap.py's
+of a hand tools/art1/hand_rebind.py re-binds after the swap; `arm_clear`: the arms tools/art1/glb_arm_clear.py swings out of
+the thighs in every clip) runs in v95_swap.py's
 `keep_uv` mode on the Warden's current .glb (its rig, clips and kept props), then the .glb replaces it and Godot re-imports.
 Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--master GLB] [--weights meshy] [--no-import]
 A later Meshy pass promoted into v95 (v95-promote) reaches the game with the same command."""
@@ -146,6 +147,9 @@ def main():
     if spec.get("hand_rebind"):  # the hand the master holds off the rig's bones goes back on them (Vex 11-23)
         tool = os.path.join(REPO, "tools/art1/hand_rebind.py")
         subprocess.run([sys.executable, "-I", tool, out, out, "--side", spec["hand_rebind"]], check=True)
+    if spec.get("arm_clear"):  # the clips' arms swung out of the thighs and hips (Vex 11-23, tools/art1/glb_arm_clear.py)
+        tool = os.path.join(REPO, "tools/art1/glb_arm_clear.py")
+        subprocess.run([sys.executable, "-I", tool, out, out, out, "--arms", spec["arm_clear"]], check=True)
     shutil.copy(out, os.path.join(REPO, spec["game"]))
     if not a.no_import:
         subprocess.run(["godot", "--headless", "--path", REPO, "--import"], check=True)
