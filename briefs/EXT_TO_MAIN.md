@@ -11178,3 +11178,4 @@ READY ext/anim-lace-native-clips e27ff53c5ff94234f17736f06e0c354a4dd82439 (Lace 
 READY ext/combat-native-hitbox-fit c07b4c7a978 (native Hunters: hitbox vs body)
 READY ext/ui-native-plate-height a9e2396efc (plates above native heads)
 READY ext/ship-intro-feet-sound-1123 e664227fe9d (skyship intro: riders upright + boots on deck, no abyss howl loop; --intro-deck-check; origin/main merged, misc.gd conflict resolved keeping both entries; intro-deck 0 fail, --check 0 fail; health.py --strict only red on tools/checks/vfx.gd long_line, identical to main)
+READY ext/parity-recheck-tenzo-sparkle f65372cc5d (merged main; only conflict mage.json Wirerun desc: main's 'gains 1 Static' wording + branch's 18.3; --check 0, dolm-combo 0, tenzo-edge 0, hero-combo-check 1 red = Spirit Walk terrace (not touched here); health --strict fails only tools/checks/vfx.gd long_line, identical to main)
