@@ -1,6 +1,6 @@
 extends "res://tools/gameplay_media.gd"
 ## --camera-ab-shots --hero=<arch id> --shots-dir=<dir>: one Hunter in three staged moments, each shot under the
-## Supervive camera and the source_scale one (the flag, docs/CAMERA_AB.md), as <dir>/<hero>_<moment>_<style>.png:
+## Default camera and the source_scale one (the flag, docs/CAMERA_AB.md), as <dir>/<hero>_<moment>_<style>.png:
 ##   fight   open ground: the hero and a rival fighting at FIGHT_GAP
 ##   glide   a ledge drop: the hero runs off an edge over the abyss and glides
 ##   squads  three squads of three, SQUAD_GAP apart, the hero's in the middle of it
