@@ -35,7 +35,11 @@ var shown := {}
 ## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
 ## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET.
 static func plate_offset(h: Hunter) -> float:
-	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
+	return arch_offset(h.arch)
+
+## The same for an archetype id (--warden-native-check measures the head under it before any Hunter is built).
+static func arch_offset(arch: String) -> float:
+	return float(Arch.def(arch).get("plate_offset", PLATE_OFFSET))
 
 ## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
 ## body, not who it is or how hurt. Teammates, the downed and the revealed (Hunter.reveal_t) always show.
