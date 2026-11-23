@@ -13,6 +13,7 @@ const AWAY_S := 28800.0  # s: the simulated gap (8 hours)
 const FOE_RATIO := 1.1  # the rivals' Speed, over Pip's (a cup round needs 1.1)
 const STALL_S := 60.0  # game s a walk, nap or menu may take before it is a stall
 const FOOD_S := 120.0  # game s a hungry Boki may take to reach food (a play or a nap may finish first)
+const PLAIN_KEYS := ["rec", "node", "pos", "goal", "emote", "life", "pers", "say"]  # a kin entry's usual keys
 const PAIR_LEVEL := 8  # Grown: the level a Boki needs to pair
 
 var bad := 0
@@ -232,7 +233,8 @@ func _dash_and_cup(bb) -> void:
 		if bb.hrace.run != null:
 			ok(false, "race %d finished within %.0f s" % [races, GAME_S])
 			break
-		print("GDAY TIME dash race %d: %.1f s%s" % [races, t * TIME_SCALE, " (the practice lap, no card)" if races == 1 else ""])
+		var lap := "the practice lap, no card" if races == 1 else "paid"
+		print("GDAY TIME dash race %d: %.1f s (%s)" % [races, t * TIME_SCALE, lap])
 		if seen_card == "" and races > 1:  # race 1 is the first-race practice lap: it never pays and shows no card
 			seen_card = _labels(bb.hrace.card) if is_instance_valid(bb.hrace.card) else ""
 			Engine.time_scale = 1.0
@@ -318,24 +320,29 @@ func _food(bb) -> void:
 			last_t = t
 			for nm in hungry:
 				var kk: Dictionary = bb._kin_entry(_rec(nm))
-				trace[nm] = String(trace.get(nm, "")) + " " + bb.life.machine(kk).state_name().left(4) + ("*" if bb.life.night else "")
+				var st: String = bb.life.machine(kk).state_name().left(4)
+				trace[nm] = String(trace.get(nm, "")) + " " + st + ("*" if bb.life.night else "")
 		for nm in hungry:
 			if not fed.has(nm) and Care.need(_rec(nm), "food") > 40.0:
 				fed[nm] = t
 	for nm in hungry:
 		var secs: float = float(fed.get(nm, -1.0))
 		if secs < 0.0 and String(_rec(nm).get("likes", {}).get("hates", "")) == "emberberry":
-			note("%s hates Emberberry, the only snack in the bowl and the pantry: it stays hungry (by design, open)" % nm)
+			note("%s hates Emberberry, the only snack here: it stays hungry (by design, open)" % nm)
 			continue
 		_took("%s walks to the bowl and eats" % nm, secs, FOOD_S)
-		ok(secs >= 0.0 and secs <= STALL_S * 0.5, "%s reaches the bowl within %.0f s, asleep or not" % [nm, STALL_S * 0.5])
+		var limit := STALL_S * 0.5
+		ok(secs >= 0.0 and secs <= limit, "%s reaches the bowl within %.0f s, asleep or not" % [nm, limit])
 		if secs < 0.0 or secs > STALL_S * 0.5:
 			var k: Dictionary = bb._kin_entry(_rec(nm))
 			note(
-				"%s: keys %s t %.1f, likes %s, states per 10 s [%s ] (* night), now %s, life_eat %s, food %.0f, %.1f m from the bowl, busy %s, indoors %s"
+				(
+					"%s: keys %s t %.1f, likes %s, states per 10 s [%s ] (* night), now %s, life_eat %s, "
+					+ "food %.0f, %.1f m from the bowl, busy %s, indoors %s"
+				)
 				% [
 					nm,
-					str(k.keys().filter(func(x): return x not in ["rec", "node", "pos", "goal", "emote", "life", "pers", "say"])),
+					str(k.keys().filter(func(x): return x not in PLAIN_KEYS)),
 					float(k.get("t", 0.0)),
 					str(_rec(nm).get("likes", {})),
 					trace.get(nm, ""),
@@ -364,9 +371,11 @@ func _nap(bb) -> void:
 		k.erase(key)
 	bb._care_nap(rec)
 	Engine.time_scale = TIME_SCALE
-	var down: float = await _until(func(): return float(k.get("nap_t", 0.0)) > 0.0 or bb.life.machine(k).state_name() == "NAP", STALL_S)
+	var lying := func() -> bool: return float(k.get("nap_t", 0.0)) > 0.0 or bb.life.machine(k).state_name() == "NAP"
+	var down: float = await _until(lying, STALL_S)
 	_took("Rocky lies down for the nap (bed %s)" % k.has("bed"), down, STALL_S)
-	var up: float = await _until(func(): return Care.need(rec, "energy") > 50.0 and float(k.get("nap_t", 0.0)) <= 0.0, 120.0)
+	var rested := func() -> bool: return Care.need(rec, "energy") > 50.0 and float(k.get("nap_t", 0.0)) <= 0.0
+	var up: float = await _until(rested, 120.0)
 	_took("Rocky wakes rested (energy %.0f)" % Care.need(rec, "energy"), up, 120.0)
 	Engine.time_scale = 1.0
 
@@ -393,7 +402,9 @@ func _fetch(bb) -> void:
 	_took("the Fetch Cup round ends", secs, GAME_S)
 	if bb.hfetch.run != null:
 		bb.hfetch.input(_menu_key())  # a stalled round is left with the menu key
-	ok(is_instance_valid(bb.hfetch.card), "a Fetch Cup result card shows: %s" % (_labels(bb.hfetch.card).left(100) if is_instance_valid(bb.hfetch.card) else ""))
+	var shown := is_instance_valid(bb.hfetch.card)
+	var line := _labels(bb.hfetch.card).left(100) if shown else ""
+	ok(shown, "a Fetch Cup result card shows: %s" % line)
 	Engine.time_scale = 1.0
 	await _grab("fetch_card")
 	Engine.time_scale = TIME_SCALE
@@ -436,7 +447,8 @@ func _hatch(bb) -> void:
 	await _grab("hatch_card")
 	Engine.time_scale = TIME_SCALE
 	reveal._go()
-	var named: float = await _until(func(): return bb.panel_open == "" or bb.panel_open != "reveal" and bb.panel_host.get_child_count() > 0, STALL_S)
+	var naming := func() -> bool: return bb.panel_open != "reveal" and bb.panel_host.get_child_count() > 0
+	var named: float = await _until(naming, STALL_S)
 	_took("the naming card opens", named, STALL_S)
 	var step: Node = _find_step(bb.panel_host)
 	ok(step != null, "the naming step is on screen")
@@ -580,7 +592,8 @@ func _second_game(bb):
 			if cs.hshove.run != null and cs.hshove.run.can_shove():
 				_press(cs.hshove)
 		Engine.time_scale = 1.0
-		_took("the %sshove ends" % ("practice " if practice else ""), t if cs.hshove.run == null else -1.0, GAME_S)
+		var kind := "practice " if practice else ""
+		_took("the %sshove ends" % kind, -1.0 if cs.hshove.run != null else t, GAME_S)
 		if practice:
 			_rest_all()
 			await _until(func(): return cs.hrace.entrants().size() >= 2, STALL_S)
