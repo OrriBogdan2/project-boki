@@ -1,6 +1,6 @@
 // Sight: everyone on your team lights up a small circle around them and a wide wedge in front of them
 // (where they aim) out to their range; a rival who gave herself away lights a soft circle of her own. Walls and high ground cast sight shadows. Everything outside
-// what your team can see is greyed out like fog (no colour at all, dimmer, a light veil), so the lit space
+// what your team can see is a slight dark fog (a little dimmer, partly grey, never tinted), so the lit space
 // reads at a glance; the cone's sides are a soft fade, not a line. Set from Match; the numbers
 // are measured from the owner's reference in docs/specs/VISION_LOOK.md.
 global uniform float vis_on;
@@ -15,7 +15,8 @@ global uniform vec4 vis_ally0;     // xy = position (x, z), zw = aim direction
 global uniform vec4 vis_ally1;
 global uniform vec4 vis_ally2;
 global uniform float vis_ally_range;   // how far teammates see (the raid condition shortens it)
-global uniform float vis_dark;         // how dark it is outside sight (RaidLook.VIS_DARK; darker at night)
+global uniform float vis_dark;         // albedo scale outside sight (RaidLook.VIS_DARK; 1 = no dimming)
+global uniform float vis_greyness;     // share of the colour and of the light's tint pulled to grey (RaidLook.VIS_GREY; 0 = own, 1 = grey)
 global uniform float vis_reveals;      // rivals who gave themselves away (RevealLight, up to three)
 global uniform vec3 vis_reveal0;       // xy = position (x, z), z = strength (fades out as the reveal ends)
 global uniform vec3 vis_reveal1;
@@ -77,9 +78,12 @@ float vis_fog(vec3 wp) {
 	return 1.0 - lit;
 }
 
-// Outside sight: neutral grey fog, in every weather (owner 11-20: no blue behind you). The ground is pulled to its own
-// luma and a light neutral veil lifts the darks, then it is dimmed by vis_dark x VIS_DIM; the terrain, walls and grass
-// still read. Greying the albedo alone is not enough: the lighting tints it again (the blue ambient, the cool violet
+// Outside sight: a slight dark fog, partly grey, never tinted. Owner 11-23: "something in between the full grey and
+// the flat dim", "slight dark fog", grey not blue; owner 11-20: no blue behind you. Two numbers: the albedo is scaled
+// by vis_dark and pulled vis_greyness of the way to its own luma (neutral, no veil), so the ground keeps part of its
+// own colour. The light is greyed by the same share: the ground's own colour is lavender and the warm sun is what
+// makes it pink, so a part-grey albedo under a fully grey light came out blue (11-23 test, R-B -12). The lighting
+// tints the albedo again (the blue ambient, the cool violet
 // shadow side, the warm sun, then the x1.9 grade), so the lit shaders (terrain, grass, flora, wall, toon) also grey
 // their light where it is fogged: fragment() writes the fog share to vis_f, light() uses vis_grey(LIGHT_COLOR) and
 // vis_grey(tone), and vis_ao + vis_ambient swap the coloured ambient for the same amount of grey (AO takes the ambient
@@ -91,22 +95,21 @@ global uniform vec4 vis_haze;          // the env fog: rgb its colour x energy (
 global uniform vec2 vis_haze_h;        // the env fog's height and height density
 varying float vis_f;                   // fog share from fragment() for light()
 const vec3 VIS_LUMA = vec3(0.3, 0.59, 0.11);
-const float VIS_VEIL = 0.14;           // share of a mid-grey fog laid over it
-const float VIS_DIM = 0.84;            // a touch darker than the 11-18 fog (its cyan cut also took ~10% of the light)
 vec3 vis_grey(vec3 c, float fog) { return mix(c, vec3(dot(c, VIS_LUMA)), fog); }
 // The ambient swap is Forward+ only (desktop): the compatibility renderer (web, mobile) multiplies all light by AO, which
 // turned the fog black, and its ambient is not graded, so it stays grey without the swap.
 // The weather's haze (the env fog) is laid over after this and is coloured (blue-grey, navy at night), so where it is
 // fogged the emission also takes out in advance what the haze would add beyond its own grey: haze a over colour x
 // gives mix(x, h, a); x + a / (1 - a) x (grey(h) - h) gives mix(x, h, a) - h + grey(h). Same formula as the engine's
-// exponential fog (distance and height); `v` is VERTEX, `iv` INV_VIEW_MATRIX.
+// exponential fog (distance and height); `v` is VERTEX, `iv` INV_VIEW_MATRIX. The haze is taken out at the FULL fog share
+// (fog / vis_greyness) whatever vis_greyness is: a part-kept blue haze is what turned the part-grey fog mauve.
 vec3 vis_dehaze(float fog, vec3 v, mat4 iv) {
 	float a = 1.0 - exp(min(0.0, -length(v) * vis_haze.a));
 	if (abs(vis_haze_h.y) >= 0.0001) {
 		a = max(a, 1.0 - exp(min(0.0, ((iv * vec4(v, 1.0)).y - vis_haze_h.x) * vis_haze_h.y)));
 	}
 	a = min(a, 0.8);
-	return (vec3(dot(vis_haze.rgb, VIS_LUMA)) - vis_haze.rgb) * a / (1.0 - a) * fog;
+	return (vec3(dot(vis_haze.rgb, VIS_LUMA)) - vis_haze.rgb) * a / (1.0 - a) * min(fog / max(vis_greyness, 0.01), 1.0);
 }
 #if CURRENT_RENDERER == RENDERER_COMPATIBILITY
 float vis_ao(float fog) { return 1.0; }
@@ -117,6 +120,5 @@ vec3 vis_ambient(vec3 a, float fog, vec3 v, mat4 iv) { return a * fog * vis_amb 
 #endif
 vec3 vis_apply(vec3 c, float fog) {
 	if (vis_on < 0.5) { return c; }
-	vec3 dark = mix(vec3(dot(c, VIS_LUMA)), vec3(0.5), VIS_VEIL) * vis_dark * VIS_DIM;
-	return mix(c * 1.05, dark, fog);
+	return mix(c * 1.05, vis_grey(c, vis_greyness) * vis_dark, fog);
 }

@@ -4,6 +4,35 @@
 happened faster than a person plays. This file measures the same path with a human-pace drive. **Re-measured 2026-11-19 on main cb8ae58b30** (the Ways Out
 exits, the 20-step course); the one fix made is in section 4.
 
+## 0. Eight banner steps (`ext/tutorial-match-eight`, 2026-11-22)
+
+DECISIONS 2026-11-08: the match tutorial is about 8 steps; everything else is a one-line first-time hint. Counted on main `cc36e78ec9`
+with `--tutorial-check` (gunslinger, driven, instant reactions):
+
+| | Before | After |
+|---|---|---|
+| Steps in `content/rules/tutorial.json` | 23 | 23 (ids and course unchanged) |
+| Steps a run visits (Boki rides along; `ult`, `pick_ult` never apply) | 21 | 21 |
+| **Banner steps** (strip, check, sting, 0.6 s pause) | **21** | **8** |
+| Hint-only steps (one line in the message lane, once per save) | 0 | 13 |
+| Game time to the lift (driver, no reading) | 61.5 s | 55.5 s |
+
+Banner steps now: land, shoot, sec (the fight), dash, glide, gkey (send your Boki), kin (E), extract. A Boki that rides as a wisp
+gets `summon` in place of `gkey`. There is no chest on the course (the first-match guide has the chest line), so it is not a step.
+
+Hint-only (`"quiet"` in the rules file, `TutorialHints`): points, the three ability picks (made for you, the line says what was unlocked
+and on which key), exdash, wallkick, crouch, pack, glove, hook, ranks, wayout, uplink, defend. They keep their stop, camp, marker and
+Boki lead, so the course and the driver are unchanged; they lose the strip, the done check, the sting, the 0.6 s wait after, the 3.5 s
+"points" wait and the 20 s "ranks" wait. The line is said once per save (`tuth_<step>` in `Save.d.tutorial`) and again when the player
+stalls on it. The 6 s gain is the instant driver's; the human-pace figure in section 2 (134 s of course play) was not re-measured with
+`--tutorial-pace-check`.
+
+Checks on this branch (all 0 failures): `--tutorial-check` (gunslinger, juggernaut, archer:wisps), `--tutorial-fight-check`, `-hud-`, `-retry-`,
+`-lane-`, `-clean-`, `-idle-`, `-resume-`, `-text-`, `-skip-`, `-dead-air-`, `-playthrough-check`, `--duo-tutorial-check`. Check changes: the
+first pick is made for you (fight check), a hint step has no chime or banner width (hud check), and `--tutorial-check` asserts 7 to 9
+banner steps. One driver fix: `TutorialDrive` never cleared `sec_hold`, so a `sec` step that ended mid-hold left the right click held
+and the Juggernaut could not open its glider (main passed by timing luck; the shorter course exposed it).
+
 ## 1. How it was measured
 
 `godot --headless --path . -- --tutorial-pace-check` (tool: `tools/tutorial_pace_check.gd`, a subclass of `--new-player-flow-check`).

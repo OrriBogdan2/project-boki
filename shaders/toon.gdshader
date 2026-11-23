@@ -186,7 +186,7 @@ void fragment() {
 	float ember = canopy_ember(lpos.xz);
 	c = canopy_tint(c, ember);
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
-	vis_f = fog;
+	vis_f = fog * vis_greyness;
 	c = vis_apply(c, fog);
 	ALBEDO = mix(c, flash_color.rgb, flash);
 	// a faint rim everywhere (so silhouettes lift off dark ground even in shadow); the crisp,
