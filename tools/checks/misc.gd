@@ -9,4 +9,5 @@ const CHECKS := {
 	"--drop-merge-audit": ["res://tools/drop_merge_check.gd", "drop_merge_check", "audit"],  # ground audit, not gated
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # a native hunter vs the live one, GPU shots
+	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
 }
