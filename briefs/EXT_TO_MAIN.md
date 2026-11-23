@@ -11064,3 +11064,4 @@ READY ext/tut-sizes-playthrough 602688873b8c70b2c57118ba29b9e021b776c176 (tutori
 READY ext/feel-dash-buffer-source ab3ece677 (dash buffer from source)
 READY ext/anim-mob-coverage f1ca3fd0010eb4c86d23cd2228b2357f57cc873e (mob anim coverage table)
 READY ext/feel-boki-hit-tiers 6fe7ebdc95 (Boki hits on hit-feel tiers)
+READY ext/combat-cooldown-table e92ae32d6 (cooldown table for owner)
