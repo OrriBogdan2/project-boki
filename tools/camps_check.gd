@@ -1,11 +1,11 @@
 extends RefCounted
-## --camps-check: monster camps (scripts/match/camps.gd, docs/decisions/0100-camps-own-the-early-game.md).
-## Camps spawn on every camp spot at their size (one up in the hot zone), tagged. The last kill clears the
-## camp: one toast signal, one bundle where it fell, no drops of the monsters' own, and the clearing squad
-## is paid by KillXp. A cleared camp comes back once, one size up, 150 s later with nobody near, not after
-## 7:00, under the cap. Rolling no longer owns the comeback. Never touches the save.
+## --camps-check: the fixed camps (Camps, docs/CAMPS.md). Every camp spot is up with its monsters, the
+## monsters come from the spot alone (not Match.rng), a camp's XP is what its monsters pay and the
+## last hit's squad gets it, a cleared camp comes back on its clock with nobody near, and a bot goes
+## to the nearest standing camp it is strong enough for. Never touches the save.
 
 var bad := 0
+var m: Match
 
 
 func ok(cond: bool, what: String) -> void:
@@ -14,234 +14,110 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-func _match(main: Node, seed_v: int) -> Match:
-	var m := Match.new()
-	main.add_child(m)
-	m.start({"teams": 6, "squad": 3, "tier": 0, "length": 1e9, "seed": seed_v, "no_drop": true})
-	m.set_process(false)
-	return m
+func _spot(h: Hunter, at: Vector3) -> void:
+	h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	h.vel = Vector3.ZERO
+
+
+func _kill_all(cp: Dictionary, by: Hunter) -> void:
+	for mb in cp["mobs"]:
+		mb.hurt(mb.max_hp * 2.0, by, {})
 
 
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
-	var src := FileAccess.get_file_as_string("res://scripts/match/rolling.gd")
-	ok(
-		not ("CAMP_RESPAWN" in src or "_camp_respawns" in src or "note_camp" in src),
-		"Rolling no longer owns the camp comeback"
-	)
-	var m := _match(main, 5)
-	_spawn(m)
-	_clear(m)
-	_comeback(m)
-	_hot(main)
-	print("CAMPS DONE, failures: %d" % bad)
-	main.get_tree().quit(0 if bad == 0 else 1)
-
-
-func _camp_mobs(c: Dictionary) -> Array:
-	return (c["mobs"] as Array).filter(func(mb): return is_instance_valid(mb) and not mb.dead)
-
-
-func _spawn(m: Match) -> void:
-	var camps: Camps = m.camps
-	var n_spots := m.world.camp_spots.size()
-	ok(camps != null and camps.camps.size() == n_spots and n_spots > 4, "a camp on every camp spot (%d)" % n_spots)
-	var sized := true
-	var tagged := true
-	var seen := {}
-	for c in camps.camps:
-		var sd := Camps.size_def(int(c["size"]))
-		seen[sd["id"]] = true
-		sized = sized and (c["mobs"] as Array).size() == int(sd["n"]) and c["state"] == Camps.State.LIVE
-		for mb in c["mobs"]:
-			tagged = tagged and int(mb.get_meta("camp", -1)) == int(c["id"])
-	ok(sized, "each camp has its size's monster count and starts LIVE")
-	ok(tagged, "camp monsters carry their camp's id")
-	ok(seen.size() >= 2, "the map has several camp sizes (%s)" % ", ".join(seen.keys()))
-	var rows := camps.list()
-	ok(
-		rows.size() == camps.camps.size() and rows[0].has_all(["id", "pos", "size", "state", "back_t", "region"]),
-		"Camps.list() gives id, pos, size, state, back_t, region"
-	)
-
-
-## Clears a camp with hunter h; returns what it paid and dropped.
-func _kill_camp(m: Match, c: Dictionary, h: Hunter) -> Dictionary:
-	h.pos = (c["pos"] as Vector3) + Vector3(1, 0, 0)
-	var picks0 := m.pickups.size()
-	var w0 := m.wpicks.size()
-	var o0: int = (PerkOrbs.st(m)["list"] as Array).size()
-	var x0 := h.xp
-	var got := []
-	var on_clear := func(id, sq): got.append([id, sq])
-	m.camps.cleared.connect(on_clear)
-	var last: Mob = null
-	var kill_xp := 0.0
-	for mb in _camp_mobs(c):
-		last = mb
-		kill_xp += KillXp.xp_of(mb)
-		mb.hurt(1e6, h)
-	m.camps.cleared.disconnect(on_clear)
-	var armor := m.pickups.slice(picks0).filter(func(p): return String(p.get("kind", "")) == "armor")
-	return {
-		"xp": h.xp - x0,
-		"want_xp": kill_xp,
-		"got": got,
-		"picks": m.pickups.slice(picks0),
-		"armor": armor,
-		"w": m.wpicks.slice(w0),
-		"orbs": (PerkOrbs.st(m)["list"] as Array).size() - o0,
-		"last": last
-	}
-
-
-func _clear(m: Match) -> void:
-	var camps: Camps = m.camps
-	var pl: Hunter = m.player
+	m = Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true})
+	m.set_process(false)
+	var me: Hunter = m.player
+	me.set_arch("")
 	for h in m.hunters:
-		if h != pl:
-			h.pos = Vector3(-1e4, 0, -1e4)  # (nobody else near: they'd share the XP)
-	var by_size := {}
-	for c in camps.camps:
-		by_size[Camps.size_def(int(c["size"]))["id"]] = c
-	var seeds_vals := 0
-	for sid in by_size:
-		var c: Dictionary = by_size[sid]
-		var sd := Camps.size_def(int(c["size"]))
-		m.time = 30.0
-		var r := _kill_camp(m, c, pl)
-		ok(
-			absf(float(r["xp"]) - float(r["want_xp"])) < 0.5 and float(r["xp"]) > 0.0,
-			"%s: clearing it pays its monsters' kill XP (%d)" % [sid, int(r["xp"])]
-		)
-		ok(
-			r["got"].size() == 1 and int(r["got"][0][1]) == pl.team,
-			"%s: one cleared signal, for the clearing squad" % sid
-		)
-		ok(
-			c["state"] == Camps.State.CLEARED and absf(float(c["back_t"]) - 180.0) < 0.01,
-			"%s: CLEARED, back at +150 s" % sid
-		)
-		ok(
-			r["armor"].size() == 1 and int(r["armor"][0]["v"]) == int(sd["armor"]),
-			"%s: one armor drop of %d" % [sid, int(sd["armor"])]
-		)
-		var p_last: Vector3 = (r["last"] as Mob).pos
-		ok(
-			(
-				r["armor"].size() == 1
-				and Vector2(r["armor"][0]["pos"].x - p_last.x, r["armor"][0]["pos"].z - p_last.z).length() < 2.5
-			),
-			"%s: the bundle lands where the last monster fell" % sid
-		)
-		if float(sd["orb"]) >= 1.0 or float(sd["orb"]) <= 0.0:
-			ok(
-				int(r["orbs"]) == int(sd["orb"]),
-				"%s: %d perk orb(s) in the bundle (got %d)" % [sid, int(sd["orb"]), int(r["orbs"])]
-			)
-		var gear: Array = r["w"].filter(func(w): return w.has("gear") and String(w.get("gear", "")) != "")
-		var want_gear := 1 if sd.has("gear") else 0
-		ok(gear.size() == want_gear, "%s: %d gear piece(s)" % [sid, want_gear])
-		seeds_vals += r["picks"].filter(func(p): return String(p.get("kind", "")) == "seed").size()
-		seeds_vals += r["w"].filter(func(w): return w.has("val")).size()
-	ok(seeds_vals == 0, "camp monsters roll no seeds or treasure of their own")
-	# a stealer takes the last hit, its XP and the bundle; the first squad keeps what its own kills paid
-	var thief: Hunter = m.hunters.filter(func(h): return h.team != pl.team)[0]
-	var c2: Dictionary = {}
-	for c in camps.camps:
-		if c["state"] == Camps.State.LIVE and _camp_mobs(c).size() >= 2:
-			c2 = c
-			break
-	if not c2.is_empty():
-		pl.pos = (c2["pos"] as Vector3) + Vector3(1, 0, 0)
-		var ms := _camp_mobs(c2)
-		var px := pl.xp
-		for i in ms.size() - 1:
-			ms[i].hurt(1e6, pl)
-		var pgot := pl.xp - px
-		var tx := thief.xp
-		var r := _kill_camp(m, c2, thief)
-		ok(
-			r["got"].size() == 1 and int(r["got"][0][1]) == thief.team and thief.xp > tx,
-			"a stealer's last hit takes that kill's XP and the clear"
-		)
-		ok(absf(pl.xp - px - pgot) < 0.001 and pgot > 0.0, "the first squad keeps what its own kills paid")
-
-
-## One Camps tick now (it runs once a second).
-func _tick(camps: Camps) -> void:
-	camps._tick_t = 0.0
-	camps.tick(0.1)
-
-
-func _comeback(m: Match) -> void:
-	var camps: Camps = m.camps
-	var cl: Array = camps.camps.filter(func(c): return c["state"] == Camps.State.CLEARED)
-	ok(cl.size() >= 2, "cleared camps to bring back (%d)" % cl.size())
-	if cl.size() < 2:
-		return
-	var c: Dictionary = cl[0]
-	var s0 := int(c["size"])
-	var c2: Dictionary = cl[1]
-	var c2_back := float(c2["back_t"])
-	for o in cl.slice(1):
-		o["back_t"] = 1e9  # one camp at a time
-	for h in m.hunters:
-		h.pos = Vector3(-1e4, 0, -1e4)
-	m.time = float(c["back_t"]) - 5.0
-	_tick(camps)
-	ok(c["state"] == Camps.State.CLEARED, "not back before 150 s")
-	m.time = float(c["back_t"]) + 1.0
-	m.player.pos = (c["pos"] as Vector3) + Vector3(10, 0, 0)
-	_tick(camps)
-	ok(c["state"] == Camps.State.CLEARED, "not back with a Hunter within 30 m")
-	m.player.pos = Vector3(-1e4, 0, -1e4)
-	var len0 := m.length
-	m.length = m.time + 30.0
-	_tick(camps)
+		h.ctrl = "idle"
+		h.inp["move"] = Vector2.ZERO
+	var cps: Array = m.camps.list
+	# ---- 1. every camp spot is up
+	ok(not cps.is_empty() and cps.size() == m.world.camp_spots.size(), "one camp per camp spot (%d)" % cps.size())
+	var all_up := true
+	for cp in cps:
+		all_up = all_up and cp["mobs"].size() == cp["comp"].size() and cp["xp"] > 0.0
+	ok(all_up, "each camp stands with its monsters and pays XP")
+	# ---- 2. the monsters come from the spot alone
+	for k in 40:
+		m.rng.randf()
+	if m.biomes:
+		for k in 40:
+			m.biomes.rng.randf()
+	var fresh := Camps.new(m)
+	var same := true
+	for cp in cps:
+		var spot := {"pos": cp["pos"], "kind": cp["size"]}
+		same = same and fresh._comp(spot, Camps.dice_at(cp["pos"])) == cp["comp"]
+	ok(same, "a camp's monsters are the same whatever Match.rng has rolled")
+	# ---- 3. a clear pays the camp's XP to the last hit's squad
+	var cp: Dictionary = cps[0]
+	var foes: Array = m.hunters.filter(func(x): return x.team != me.team)
+	for h in foes:
+		_spot(h, m.world.spawns[-1])
+	_spot(me, cp["pos"])
+	me.xp = 0.0
+	_kill_all(cp, me)
+	ok(is_equal_approx(me.xp, cp["xp"]), "the camp's XP is paid on its kills (%.1f of %.1f)" % [me.xp, cp["xp"]])
+	# ---- 4. it comes back once, on its clock, with nobody near
+	ok(m.camps.comeback() == 0 and float(cp["cleared_at"]) > -1e8, "the clear is noted")
+	m.time += float(m.camps.cfg["back_s"]) + 1.0
+	ok(m.camps.comeback() == 0, "nobody near: it waits while a Hunter stands in it")
+	_spot(me, m.world.spawns[-1])
+	ok(m.camps.comeback() == 1 and not m.camps._all_dead(cp), "it returns after back_s with nobody near")
+	ok(m.camps.comeback() == 0, "and only once")
+	# ---- 5. bots farm what they can beat
+	var by_size := {"light": [], "normal": [], "heavy": []}
+	for c in cps:
+		by_size[c["size"]].append(c)
+	for c in cps:
+		if c["size"] != "heavy":
+			c["cleared_at"] = 0.0
+	if not by_size["heavy"].is_empty():
+		me.lvl = 1
+		ok(BotCamps.goal(m, me) == Vector3.INF, "a level 1 bot passes a Great Camp")
+		me.lvl = 4
+		ok(by_size["heavy"].any(func(c): return c["pos"] == BotCamps.goal(m, me)), "a level 4 bot goes to it")
+	for c in by_size["light"]:
+		c["cleared_at"] = -1e9
+	if not by_size["light"].is_empty():
+		me.lvl = 1
+		var g := BotCamps.goal(m, me)
+		ok(by_size["light"].any(func(c): return c["pos"] == g), "a level 1 bot goes to a Small Camp")
+	# ---- 6. rare Boki wait in Great Camps (SpawnPlan guarded picks)
+	var sp := m.spawn_plan
+	var guarded: Array = sp.of("rare_kin").filter(func(c): return c.has("camp")) if sp else []
+	var heavy_n := m.world.camp_spots.filter(func(c): return String(c.get("kind", "")) == "heavy").size()
+	print("CAMPS info %d Great Camp spots, %d guarded rare Boki" % [heavy_n, guarded.size()])
+	ok(heavy_n == 0 or guarded.size() == mini(2, heavy_n), "rare Boki are guarded by Great Camps")
 	ok(
-		c["state"] == Camps.State.CLEARED and not camps.safe_for(c["pos"], 60.0),
-		"not back where the Blight will be within 60 s"
-	)
-	m.length = len0
-	_tick(camps)
-	var want := mini(s0 + 1, Camps.rules()["sizes"].size() - 1)
-	ok(
-		(
-			c["state"] == Camps.State.RETURNING
-			and int(c["size"]) == want
-			and _camp_mobs(c).size() == int(Camps.size_def(want)["n"])
+		guarded.all(
+			func(c): return c["active"] and c["ref"] == null and m.world.camp_spots[c["camp"]]["kind"] == "heavy"
 		),
-		"back once at 150 s, one size up (%s)" % Camps.size_def(want)["id"]
+		"a guarded Boki is not out while its camp stands"
 	)
-	ok(camps.comebacks == 1, "one comeback counted")
-	var r := _kill_camp(m, c, m.player)
-	ok(c["state"] == Camps.State.SPENT and r["got"].size() == 1, "clearing it again pays and leaves it SPENT")
-	m.time += 1000.0
-	_tick(camps)
-	ok(c["state"] == Camps.State.SPENT and _camp_mobs(c).is_empty(), "a spent camp never comes back")
-	c2["back_t"] = c2_back
-	m.time = maxf(c2_back, float(Camps.rules()["back_until_s"])) + 1.0
-	_tick(camps)
-	ok(c2["state"] == Camps.State.SPENT, "no comeback after 7:00")
-
-
-## In the hot zone every camp is one size up from its spot's kind.
-func _hot(main: Node) -> void:
-	var checked := 0
-	var good := true
-	for s in [3, 9, 21]:
-		var m := _match(main, s)
-		var ks: Dictionary = Camps.rules()["kind_size"]
-		var ids: Array = Camps.rules()["sizes"].map(func(d): return d["id"])
-		for i in m.camps.camps.size():
-			var c: Dictionary = m.camps.camps[i]
-			var base: int = ids.find(ks.get(String(m.world.camp_spots[i].get("kind", "normal")), "camp"))
-			var hot: bool = m.biomes != null and int(c["region"]) >= 0 and int(c["region"]) == m.biomes.hot.hot
-			good = good and int(c["size"]) == (mini(base + 1, ids.size() - 1) if hot else base)
-			if hot:
-				checked += 1
-		m.queue_free()
-	ok(good and checked > 0, "hot-zone camps are one size up, the rest at their kind's size (%d hot)" % checked)
+	var shown := guarded.all(func(c): return sp.state_for(c, me.team) == "active")
+	ok(shown, "the map shows the guarded camps from the start")
+	# ---- 7. a late join finds camps picked over
+	var cleared: int = m.camps.picked_over(1.0, RandomNumberGenerator.new())
+	ok(
+		cleared == cps.size() and m.camps.live().is_empty(),
+		"a rolling start can find every camp cleared (%d)" % cleared
+	)
+	ok(
+		cps.all(func(c): return float(c["cleared_at"]) > -float(m.camps.cfg["back_s"]) - 1.0),
+		"cleared up to back_s ago"
+	)
+	# ---- 8. a cleared Great Camp frees its Boki
+	if sp:
+		ok(sp.free_guarded() == guarded.size(), "every cleared Great Camp frees its Boki (%d)" % guarded.size())
+		var wild := guarded.all(func(c): return c["ref"] is Kin and (c["ref"] as Kin).is_wild())
+		ok(wild, "the freed Boki is wild and catchable")
+	print("CAMPS done, %d fail" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)

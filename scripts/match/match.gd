@@ -50,6 +50,7 @@ var ktip: KnockTip = null           # the first-knock card, in a save's first tw
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var training := Training.new()   # the Training Grounds checklist and the train/balloon test hooks
+var camps: Camps = Camps.new(self)     # the map's fixed monster camps (see Camps)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -141,7 +142,6 @@ var _net_seen_rec := {}
 var _rev_out := {}
 var _net_rev_t := 0.0
 var _finish_now := false
-var camps: Camps = null         # the monster camps: sizes, clears, rewards, comebacks (scripts/match/camps.gd)
 var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): waves, join-in-progress, late-joiner levels (scripts/match/rolling.gd)
 var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
 var ships: Array = []           # the other drop waves' skyships (rolling sessions); `ship` is your own
@@ -387,8 +387,7 @@ func _start(o: Dictionary) -> void:
 	if tut: tut.setup()
 	await _stage("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false) and not opts.get("arena", false):
-		camps = Camps.new(self)      # (the tutorial brings its own monsters, one step at a time)
-		await camps.spawn_all()
+		await camps.spawn_all()        # the tutorial brings its own monsters, one step at a time
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
@@ -2151,7 +2150,6 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KillXp.pay(self, mb, credit)
-	if camps: camps.on_mob_dead(mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	XpHints.on_mob_dead(self, mb, credit, _o)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
@@ -2159,7 +2157,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	Juice.mob_dead(self, mb, credit, big_mob)
 	var loot: bool = not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false)
-	MobDrops.spill_later(self, MobDissolve.begin(self, mb), mb, credit, loot and not Camps.is_camp(mb))
+	MobDrops.spill_later(self, MobDissolve.begin(self, mb), mb, credit, loot)
 	if credit == player and player.kin and randf() < 0.15:
 		BokiChatter.say(self, player.kin, "kill")
 
@@ -3835,7 +3833,6 @@ func step(dt: float) -> void:
 		_update_ship(dt)
 	for s in ships:
 		_update_one_ship(s, dt)
-	if camps: camps.tick(dt)
 	if rolling:
 		rolling.tick(dt)
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
@@ -5158,7 +5155,6 @@ func _net_ev(x, from: String) -> void:
 			if who is Blight and not who.dead:
 				(who as Blight).burrow()
 		"nest": if blight: blight.nests.net(x)      # a Blight nest's stock and refill clock (BlightNests)
-		"campclr": Camps.show_clear(self, int(x[1]), int(x[2]), int(x[3]))
 		"mobdead":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Mob and not who.dead:

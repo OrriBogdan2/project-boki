@@ -596,7 +596,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moving := Vector2(vel.x, vel.z).length() >= STILL
 	var hold := float(land.get("moving", land.get("dur", 0.0))) if moving else float(land.get("dur", 0.0))
 	if land_t < hold and bool(s.get("grounded", true)):
-		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0))}
+		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0)),
+				"fade": float(land.get("fade", FADE)), "out": float(land.get("out", FADE_LOCO))}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	# (a chip hit is only WardenFlinch's lean over the body; the hit clip is a stagger's)
@@ -1035,12 +1036,17 @@ func _loco(s: Dictionary, dt: float) -> void:
 	_p("stance_w/blend_amount", stance_w)
 	var grounded := bool(s.get("grounded", true))
 	var gliding := bool(s.get("gliding", false)) or bool(s.get("diving", false))
-	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
+	# (data "air": {"fade_out": s}: the fall and glide poses let go of the body this slowly on touchdown, for a Hunter
+	# whose air pose is far from his landing's: `--cast-pop-check` POPDEG)
+	var air_out := float((d["air"] as Dictionary).get("fade_out", AIR_FADE))
+	var air_fade := air_out if grounded else AIR_FADE
+	var glide_fade := AIR_FADE if gliding else air_out
+	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / air_fade)
 	# (a move cast out of the glider: the glide pose holds while the move fades in over it, and goes to the fall pose
 	# under the move, so the arms make one motion, glider to cast, not glider to fall to cast)
 	var owned := maxf(act_w, up_w)
 	if owned <= 0.0 or owned >= 1.0 or gliding:
-		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
+		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / glide_fade)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)

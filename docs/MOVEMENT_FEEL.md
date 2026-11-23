@@ -582,7 +582,7 @@ No double buffering: a press is gathered, queued and applied in the same frame's
 - The check runs Vex, Albert and Sable on the Hollow Crown through the real frame: up and back down three raised terraces (laid on open ground, as the map joins its terraces with stairs) and a four-step flight. No frame-to-frame drawn y jump over 0.08 m, camera y over 0.05 m. Before: 0.80 m (drawn, the collision snap), and 0.18 m once eased at the old rate.
 
 ## Air velocity: kit casts add to it, never overwrite it (DECISIONS 11-08; the eight kits outside the slice)
-## Snag audit (`--snag-check`, decision 0022)
+## Snag audit (`--snag-<n>-check`, four flags, decision 0022)
 
 Rule (briefs/DECISIONS.md 2026-11-08): in the air WASD accelerates toward the keys, counter-steers hard and drag
 bleeds speed above the cap (`Loco.air_step`); nothing overwrites the air velocity. A kit move may still own it when

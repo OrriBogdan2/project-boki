@@ -865,23 +865,6 @@ How many Boki are out on the island at once; the rest sleep in the Boki Burrow (
 | scout | {"ease_in_s": 0.35, "ease_out_s": 0.25, "zoom": 0.25, "sight_mul": 1.25, "cone_deg": 30.0} |
 | source | {"pitch_deg": [64.0, 67.0], "fov_deg": [25.0, 34.0], "feet_below_pct": [3.0, 4.0], "ahead_per_behind": [1.46, 1.62], "side_per_ahead": [1.25, 1.35], "across_m": [35.0, 39.0], "hunter_screen_pct": [8.3, 9.3]} |
 
-## camps (`content/rules/camps.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | Monster camps (scripts/match/camps.gd, docs/decisions/0100-camps-own-the-early-game.md). kind_size: a map camp spot's layout kind -> its size. sizes, smallest first (the hot zone and a comeback are the next one up): name (player text), n monsters, big (the one big monster: the region's version of it), armor (the bundle's armor), orb (chance 0..1 of a perk orb, source 'camp'), gear (if set: one gear piece, this many rarity steps over the region's). small: the small kinds when a camp has no region table. A camp's XP is the sum of its monsters' kills (KillXp). back_s: a cleared camp comes back once, this long after its clear (s), if no Hunter is within back_clear_r (m) and the spot is safe for back_safe_s (s); none after back_until_s (match s). max_mobs: camp monsters alive at once. spread (m): how far monsters stand from the camp's centre. |
-| kind_size | {"light": "small", "normal": "camp", "heavy": "great"} |
-| sizes | [{"id": "small", "name": "Small Camp", "n": 2, "armor": 25, "orb": 0.0}, {"id": "camp", "name": "Camp", "n": 3, "big": "sentinel", "armor": 50, "orb": 0.5}, {"id": "great", "name": "Great Camp", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 0}, {"id": "chief", "name": "Camp Chief", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 1}] |
-| small | ["skitter", "spitter", "bomber"] |
-| back_s | 150 |
-| back_clear_r | 30 |
-| back_safe_s | 60 |
-| back_until_s | 420 |
-| max_mobs | 85 |
-| spread | 1.8 |
-
 ## capture (`content/rules/capture.json`)
 
 Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.
@@ -1848,6 +1831,17 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
 
+## kin_names (`content/rules/kin_names.json`)
+
+Naming a new Boki (scripts/core/kin_names.gd, scripts/ui/name_step.gd). The suggested name is a root from the species' own name (its first syllable, from content/kin) plus one of the endings. Typed names are checked against rude: any of these letters inside the name (case and spaces ignored) and the name is not kept.
+
+| Setting | Value |
+|---|---|
+| endings | ["y", "ie", "o", "a", "i", "et", "in", "le", "kin", "bit", "bo", "ly", "ny", "by", "bun", "bean", "dot", "nip", "puff", "let", "pip", "drop", "wick", "bell", "sprout"] |
+| max_len | 14 |
+| max_len_doc | Letters a name may have (the text box stops there). |
+| rude | ["fuck", "fuk", "phuck", "shit", "cunt", "twat", "wank", "slut", "whore", "bitch", "bastard", "nigg", "niga", "fag", "rape", "nazi", "hitler", "kkk", "porn", "dick", "cock", "penis", "vagina", "anal", "anus", "retard", "spic", "kike", "gook", "tits", "boob", "piss", "arse", "asshole", "sex", "dildo", "jizz", "cum"] |
+
 ## kit_parity (`content/rules/kit_parity.json`)
 
 
@@ -2135,13 +2129,13 @@ The talking NPCs drawn from a rigged Meshy model (NpcModel, art/npcs/<id>/<id>.g
 
 | Setting | Value |
 |---|---|
-| _doc | Perk orbs (scripts/match/perk_orbs.gd). slots: the most perks one hunter holds in a run (owner loadout, docs/decisions/0005-equal-footing.md), a stack counts as one; at the limit an orb stays on the ground. Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones, a cleared camp 1 (Camps). sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan. |
+| _doc | Perk orbs (scripts/match/perk_orbs.gd). slots: the most perks one hunter holds in a run (owner loadout, docs/decisions/0005-equal-footing.md), a stack counts as one; at the limit an orb stays on the ground. Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones. sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan. |
 | slots | 5 |
 | take_radius | 1.2 |
 | bot_radius | 16 |
 | fan_radius | 2.4 |
 | fan_spread | 0.7 |
-| sources | {"chest": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 1.5}}, "shrine": {"n": [1, 2], "lean": {"flat": 3.0, "weapon": 0.6, "kit": 1.5}}, "boss": {"n": [3, 3], "fan": true, "lean": {"flat": 1.0, "weapon": 4.0, "kit": 0.5}}, "brute": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 0.5}}, "camp": {"n": [1, 1], "lean": {"flat": 1.5, "weapon": 3.0, "kit": 1.0}}} |
+| sources | {"chest": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 1.5}}, "shrine": {"n": [1, 2], "lean": {"flat": 3.0, "weapon": 0.6, "kit": 1.5}}, "boss": {"n": [3, 3], "fan": true, "lean": {"flat": 1.0, "weapon": 4.0, "kit": 0.5}}, "brute": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 0.5}}} |
 | kinds | {"flat": ["secondwind", "featherfall", "tailwind", "toughskin", "quickhands", "scavenger", "keen", "fleet", "plating", "focus", "remedy", "overcharge"], "weapon": ["hotload", "deepmag", "quickfeed", "longreach", "brand_fire", "brand_frost", "brand_storm", "brand_venom", "brand_void"], "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]} |
 | weights | {"brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7, "overcharge": 0.6, "remedy": 0.8} |
 | bot_want | {"default": 1.5, "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6, "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0, "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0, "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2} |
@@ -2185,6 +2179,26 @@ Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each 
 | doc | Framing for the Wardens' painted portraits and splashes (Portraits, art/portraits). face: where the face's centre sits in the portrait, as fractions of its width and height; a small frame crops in on it. splash: the point a splash is cropped around (the Warden's head and shoulders), same units. |
 | face | {"bulwark": [0.52, 0.29], "archer": [0.46, 0.33], "juggernaut": [0.5, 0.33], "thief": [0.64, 0.46], "mage": [0.47, 0.27], "dolm": [0.47, 0.34], "gil": [0.55, 0.44], "ostra": [0.44, 0.47], "ashwick": [0.52, 0.47], "gunslinger": [0.41, 0.32], "tender": [0.48, 0.48], "rimewright": [0.49, 0.47], "dredge": [0.5, 0.4]} |
 | splash | {"bulwark": [0.49, 0.19], "archer": [0.52, 0.22], "juggernaut": [0.55, 0.26], "thief": [0.4, 0.27], "gil": [0.39, 0.3], "mage": [0.55, 0.22], "dolm": [0.34, 0.28], "ostra": [0.71, 0.25], "ashwick": [0.57, 0.3], "rimewright": [0.34, 0.3], "dredge": [0.64, 0.36], "gunslinger": [0.64, 0.19], "tender": [0.58, 0.35]} |
+
+## results_pose (`content/rules/results_pose.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The pose each Hunter holds on the results stage (scripts/ui/results_stage.gd): one clip of its own GLB, frozen at t seconds, a held strike or an idle beat that fits it. Keyed by Hunter id; a Hunter left out stands in the plain idle. |
+| gunslinger | {"clip": "lmb", "t": 0.2} |
+| juggernaut | {"clip": "slash_r", "t": 0.25} |
+| thief | {"clip": "flourish", "t": 0.4} |
+| ashwick | {"clip": "lance", "t": 0.3} |
+| rimewright | {"clip": "spear", "t": 0.3} |
+| archer | {"clip": "draw", "t": 1.2} |
+| dredge | {"clip": "flex", "t": 0.3} |
+| ostra | {"clip": "flurry", "t": 0.5} |
+| tender | {"clip": "hearth", "t": 0.5} |
+| mage | {"clip": "rmb_hold", "t": 0.5} |
+| dolm | {"clip": "lmb_punch", "t": 0.35} |
+| bulwark | {"clip": "rmb_guard", "t": 0.5} |
 
 ## revive (`content/rules/revive.json`)
 
@@ -2599,14 +2613,16 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 
 | Setting | Value |
 |---|---|
-| doc | Hunters drawn on Meshy's own skeleton and clips (scripts/heroes/warden_native.gd, docs/art/wardens/MESHY_NATIVE.md), keyed by art name. meshy_native: the switch (off = the contract model as before; Albert, Cinder, Meeko, Vex are listed off until their <art>_meshy.glb is packed and picked). Size: Meshy's head bone onto the rig's head pivot (WardenNative._fit). file: art/wardens/<art>/<art>_meshy.glb. clips: game state -> Meshy clip. walk_mps/run_mps/crouch_mps: m/s ground speed each loop plays at rate 1; run_from: m/s where the walk hands to the run; attack_rate, jump_rate: play rate of those one-shots. hand: Meshy's bone the weapon's aim node rides. anchors: anchor empty -> the Meshy bone it rides. crouch_arms_from: the crouch plays that state's clip on the arms (the bones below arm_roots, default LeftShoulder and RightShoulder): Meshy's crouch holds a torch out. toon (default true): the game's hero-toon pass on the surfaces. orbits: orbit node of the contract .glb -> the Meshy bone it rides (the props are copied from <art>.glb and turn as on the contract path: Tenzo's seeing-stones). |
-| ryzz | {"meshy_native": false} |
+| doc | Hunters drawn on Meshy's own skeleton and clips (scripts/heroes/warden_native.gd, docs/art/wardens/MESHY_NATIVE.md), keyed by art name. meshy_native: the switch (off = the contract model as before; Albert and Vex are listed off until their <art>_meshy.glb is packed and picked). Size: Meshy's head bone onto the rig's head pivot (WardenNative._fit). file: art/wardens/<art>/<art>_meshy.glb. clips: game state -> Meshy clip. walk_mps/run_mps/crouch_mps: m/s ground speed each loop plays at rate 1; run_from: m/s where the walk hands to the run; attack_rate, jump_rate: play rate of those one-shots. hand: Meshy's bone the weapon's aim node rides. anchors: anchor empty -> the Meshy bone it rides. crouch_arms_from: the crouch plays that state's clip on the arms (the bones below arm_roots, default LeftShoulder and RightShoulder): Meshy's crouch holds a torch out. toon (default true): the game's hero-toon pass on the surfaces. bones: contract bone -> this Hunter's Meshy bone, for WardenSkeleton.find (Cinder's heel jets on her feet; the 14 contract bones need none: WardenSkeleton.NATIVE). orbits: orbit node of the contract .glb -> the Meshy bone it rides (the props are copied from <art>.glb and turn as on the contract path: Tenzo's seeing-stones). props: contract bone -> material names of the contract model's parts Meshy's mesh lacks, hung on Meshy's bones (WardenProps: Kael's sword, Cinder's heel jets); tilt: contract bone -> degrees its part bends back toward the limb (Kael's blade: his contract rest holds it 47 deg ahead of the arm, his own idle clip bends the wrist; Meshy's clips do not). stretch {kmove, y, rest}: those parts' length along their bone while that kit move plays and otherwise (as the contract clips key Cinder's jet bones: x3 in Flue Flight, x0.06 at rest). |
+| ryzz | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
 | sable | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
-| tarek | {"meshy_native": false} |
+| tarek | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk", "orbits": {"orbit_stones": "Head"}} |
 | breaker | {"meshy_native": false} |
-| cinder | {"meshy_native": false} |
-| pip | {"meshy_native": false} |
+| cinder | {"meshy_native": true, "hand": "RightHand", "bones": {"jet.0": "RightFoot", "jet.1": "LeftFoot"}, "props": {"jet.0": ["flame-jet"], "jet.1": ["flame-jet"]}, "stretch": {"kmove": "lw_jet", "y": 3.0, "rest": 0.06}, "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
+| pip | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
 | vex | {"meshy_native": false} |
+| kael | {"meshy_native": true, "hand": "RightHand", "props": {"hand.R": ["metal-sword", "metal-sword_dk", "metal-sword_edge", "glow-sword", "leather-grip"]}, "tilt": {"hand.R": 47.0}, "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
+| ostra | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk", "orbits": {"orbit_cards": "Head"}} |
 
 ## warden_rest (`content/rules/warden_rest.json`)
 

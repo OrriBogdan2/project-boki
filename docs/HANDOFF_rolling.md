@@ -76,7 +76,7 @@ The feature is behind the match option `rolling`. The default fixed-length match
     - XP for knocking a hunter who is a higher level than you;
     - bots prefer bounty targets.
   - **Session events:**
-    - Cleared camps come back once, one size up, 150 s after the clear if nobody is near (Camps, docs/decisions/0100).
+    - Cleared camps come back after 240 s if nobody is near.
     - Meteor showers come every 6 session minutes.
   - **Per-squad stay:** bots leave based on their squad's planned stay (`Match.bot_time_left`,
     `Match.bot_past`).
