@@ -79,7 +79,8 @@ static func pads(m: Node, dt: float) -> void:
 				gp["cd"][h.nid] = m.time + 1.0
 				if float(gp.get("after", 0.0)) > 0.0:
 					gp["t"] = minf(float(gp["t"]), float(gp["after"]))
-				UtilityUse.pad_launch(h, float(gp.get("push", UtilityUse.PAD_MIN_HV)), float(gp.get("lift", UtilityUse.PAD_VY)))
+				var push := float(gp.get("push", UtilityUse.PAD_MIN_HV))
+				UtilityUse.pad_launch(h, push, float(gp.get("lift", UtilityUse.PAD_VY)))
 				m.fx.burst(gp["pos"] + Vector3(0, 0.3, 0), gp.get("col", Color("8ff0c8")), 16, 5.0, 0.4, -2.0)
 				m.sfx("jump", h.pos, -2.0, 0.8)
 

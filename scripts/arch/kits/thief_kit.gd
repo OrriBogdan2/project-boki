@@ -445,7 +445,7 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
 	if e != null:
-		e.flash_tint = Arch.color(id)      # the struck body's hit flash (Ent.hurt, the impact tiers) shows in her colour
+		e.flash_tint = Arch.color(id)  # the struck body's hit flash shows in her colour
 	if e != null and emp:
 		fx().star(at, Color("d8c0ff"), 1.5, 0.24)
 		m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)

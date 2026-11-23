@@ -23,7 +23,9 @@ static func extra(h: Hunter) -> Array:
 	var slots := Capture.slots(h)
 	var reach: Array = (h.ak as DredgeKit).net_reach() if h.ak is DredgeKit else []
 	var left := snappedf(maxf(0.0, ch[1]), 0.05)
-	return [TAG, h.lvl, SLOT_TAG, slots[0], slots[1], CHAN_TAG, ch[0], left, REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)]
+	return [
+		TAG, h.lvl, SLOT_TAG, slots[0], slots[1], CHAN_TAG, ch[0], left, REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)
+	]
 
 
 static func apply(h: Hunter, it: Array) -> void:
