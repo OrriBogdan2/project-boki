@@ -13,7 +13,7 @@ extends RefCounted
 ##      kills/knocks/gems row waits for the first kill, knock or gem or Tab; a veteran sees both as before
 ##   5. the glider ring only while you glide or the meter is not full; the belt only once a held item could be used
 ##      (then the save keeps it); the counters follow HudReveal ("counters", from the 4th expedition)
-##   5. the tutorial's HUD grows with its steps (HudReveal "tut_from"): minimap + vitals on the landing, the ability
+##   5b. the tutorial's HUD grows with its steps (HudReveal "tut_from"): minimap + vitals on the landing, the ability
 ##      row and weapon card from the shoot step, the Boki box from the G step, the belt from the loot step, no counters
 ##      (it draws none); never above TUT_MAX groups
 ##   6. the gear strip and the perk row count only once drawn (HudReveal "gear" / "perks", then an item held)
