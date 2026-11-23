@@ -155,6 +155,9 @@ const INK_MIN_PX := 0.4  # no line thinner than this many drawn pixels: it broke
 
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
+## Data names for empties a model still exports under an older name: Meeko's sun carries the empty her lantern
+## hung on (pip.glb; tools/art1/pip_companions.py moved it, the kits and clips still read it by that name).
+const ANCHOR_ALIAS := {"anchor_sun": "anchor_hang_lantern"}
 const FAR_HIDE_D := 13.0  # m from the camera: "far_hide" pieces stop being drawn
 const POSE_HELD := "pose_held"  # root meta: the frame the Hunter skipped its pose in (SimLod.pose_every)
 const ORBIT_LOOK := "orbit_look"  # root meta, a world point: the seeing-stones turn to it (DolmKit)
@@ -302,6 +305,7 @@ static func anchor(root: Node3D, anchor_name: String) -> Node3D:
 	var w := root.get_node_or_null("Warden")
 	if w == null:
 		return null
+	anchor_name = ANCHOR_ALIAS.get(anchor_name, anchor_name)
 	var an := w.find_child(anchor_name, true, false) as Node3D
 	if an == null:
 		# (one on the .glb's weapon, which the loader moved under the Gun: Hem's bow, Cinder's flame chamber)
@@ -607,11 +611,12 @@ static func look(nm: String) -> Dictionary:
 	return (_look as Dictionary).get(nm, {})
 
 
-## The look's "lights": a small OmniLight3D on each named anchor empty of the model (Pip's lantern glow), so a
+## The look's "lights": a small OmniLight3D on each named anchor empty of the model (Meeko's sun glow), so a
 ## prop that glows also lights what is round it: {"anchor", "colour" [r, g, b], "energy", "range"}.
 static func _lights(glb: Node, own: Dictionary) -> void:
 	for l in own.get("lights", []):
-		var at := glb.find_child(String(l.get("anchor", "")), true, false) as Node3D
+		var an := String(l.get("anchor", ""))
+		var at := glb.find_child(ANCHOR_ALIAS.get(an, an), true, false) as Node3D
 		if at == null:
 			continue
 		var om := OmniLight3D.new()

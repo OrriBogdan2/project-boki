@@ -11,7 +11,7 @@ var root: Node3D
 var skel: Skeleton3D
 var hips := -1
 var arms: Array = []
-var held := -1                  # the weapon's bone when no arm carries it (Pip's lantern on a pauldron, Grimble's gun)
+var held := -1                  # the weapon's bone when no arm carries it (Meeko's sun on a pauldron, Grimble's gun)
 var held_on_hips := false       # ...and the hips carry it (else it hangs off the root and swings about the hips)
 
 ## weapon: the Hero's data "blade" bone ("": the weapon rides an arm's bones).
