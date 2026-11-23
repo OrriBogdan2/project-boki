@@ -1,5 +1,5 @@
 extends RefCounted
-## --cast-lock-buffer-check (docs/decisions/0022-cc-exit-buffer.md, addendum): for every hero whose ult holds the
+## --cast-lock-buffer-check (docs/decisions/0118-cc-exit-buffer.md, addendum): for every hero whose ult holds the
 ## body in a cast lock (ArchKit.busy() beyond disabled(): Motley's Nightwell cast, Kael's Riposte guard and cleave,
 ## Vex's Kitefall), an RMB or E pressed LATE_S before the lock ends is held (DashFlow) and goes off once the lock
 ## lets it, never inside it; one pressed at the lock's start (outside Loco.press_buffer) is refused, not held for
