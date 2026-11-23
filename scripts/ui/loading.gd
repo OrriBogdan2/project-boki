@@ -167,6 +167,8 @@ func _draw() -> void:
 
 ## Your squad's portraits with their names under them, right-aligned to `p` (the names' baseline).
 func _squad_row(p: Vector2, px: float, a: float) -> void:
+	if party.size() < 2:
+		return  # solos: nobody to drop with
 	var gap := 18.0
 	var x := p.x - party.size() * px - (party.size() - 1) * gap
 	for mate in party:

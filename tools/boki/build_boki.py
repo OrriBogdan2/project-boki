@@ -39,12 +39,22 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "hivara": ("hivara", "hivara", "hivara_anim"),
          "glomwort": ("glomwort", "glomwort", "glomwort_anim"),
          "gibbelle": ("glomwort", "glomwort", "gibbelle_anim"),     # a scan (boki_scan) on the simplest rig there is
-         "goliathite": ("glomwort", "glomwort", "glomwort_anim"),   # scans too: every lobe on root, the body rides it
+         "goliathite": ("glomwort", "glomwort", "goliathite_anim"),   # scans too: every lobe on root, the body rides it
          "hoarheron": ("glomwort", "glomwort", "glomwort_anim"),
          "floenatee": ("glomwort", "glomwort", "floenatee_anim"),
          **{i: ("glomwort",) * 2 + ("glomwort_anim",)
            for i in boki_scan.AUTO if boki_scan.AUTO[i] is boki_scan.BORROWED},
+         "nacrolin": ("glomwort", "glomwort", "nacrolin_anim"),         # its own clips over the borrowed rig
+         "nimbostrich": ("glomwort", "glomwort", "nimbostrich_anim"),
          "glaciyak": ("glomwort", "glomwort", "glaciyak_anim"),      # its own clips over the borrowed rig
+         "heatherhorn": ("glomwort", "glomwort", "heatherhorn_anim"),
+         "kilnbadger": ("glomwort", "glomwort", "kilnbadger_anim"),
+         "limpetor": ("glomwort", "glomwort", "limpetor_anim"),     # their own clips over the borrowed rig
+         "moonloris": ("glomwort", "glomwort", "moonloris_anim"),
+         "opalisk": ("glomwort", "glomwort", "opalisk_anim"),        # its own clips over the borrowed rig
+         "orchisloth": ("glomwort", "glomwort", "orchisloth_anim"),
+         "scaldamus": ("glomwort", "glomwort", "scaldamus_anim"),    # its own clips over the borrowed rig
+         "sentrikat": ("glomwort", "glomwort", "sentrikat_anim"),
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
          "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
          "lodestick": ("lodestick", "lodestick", "lodestick_anim"),

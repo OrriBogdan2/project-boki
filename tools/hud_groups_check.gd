@@ -13,12 +13,19 @@ extends RefCounted
 ##      kills/knocks/gems row waits for the first kill, knock or gem or Tab; a veteran sees both as before
 ##   5. the glider ring only while you glide or the meter is not full; the belt only once a held item could be used
 ##      (then the save keeps it); the counters follow HudReveal ("counters", from the 4th expedition)
+##   5. the tutorial's HUD grows with its steps (HudReveal "tut_from"): minimap + vitals on the landing, the ability
+##      row and weapon card from the shoot step, the Boki box from the G step, the belt from the loot step, no counters
+##      (it draws none); never above TUT_MAX groups
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
 const COUNTS := {"landing": 5, "fight": 7, "heart": 8, "race": 8}      # groups, strip included where it shows
 const CLOCK := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # the clock strip: first beat or kill
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
+
+## The tutorial's groups from each step on: [first step id, count]; and the most it ever shows.
+const TUT_COUNTS := [["land", 2], ["shoot", 4], ["gkey", 5], ["glove", 6]]
+const TUT_MAX := 6
 
 var bad := 0
 
@@ -143,5 +150,36 @@ func run(main: Node) -> void:
 			await main.get_tree().process_frame
 	ok(true, "the real HUD drew all four moments")
 	m.queue_free()
+	await _tutorial(main)
 	print("HUDGROUPS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
+
+
+## 5. a tutorial match, stepped through the course: the groups at every step.
+func _tutorial(main: Node) -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
+	var tm := Match.new()
+	main.add_child(tm)
+	tm.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	tm.set_process(false)
+	var want := 0
+	var most := 0
+	for i in Tutorial.steps().size():
+		var sid := String(Tutorial.steps()[i][0])
+		tm.tut.step = i
+		tm.interact = {}
+		tm.hud.msgs.clear()
+		var g: Array = HudGroups.on_screen(tm.hud)
+		for t in TUT_COUNTS:
+			if sid == t[0]:
+				want = int(t[1])
+		most = maxi(most, g.size())
+		print("HUDGROUPS   tutorial %s: %d groups: %s" % [sid, g.size(), ", ".join(g)])
+		ok(g.size() == want, "tutorial %s: %d groups" % [sid, want])
+		ok(not g.has("counters"), "tutorial %s: no counters" % sid)
+	ok(most <= TUT_MAX, "the tutorial never shows more than %d groups (%d)" % [TUT_MAX, most])
+	tm.tut.step = Tutorial.step_index("land")
+	for i in 3:
+		await main.get_tree().process_frame      # the real HUD draws the first step
+	tm.queue_free()

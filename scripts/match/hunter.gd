@@ -375,6 +375,8 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var n := DashState.base_charges(dodge_def, cdat)
+	if ak and ak.single_dash():
+		return 1.0
 	return ak.dash_charges(n) if ak else n
 
 func dash_regen() -> float:
@@ -1369,6 +1371,8 @@ func heal(n: float) -> void:
 		return
 	if blight_t > 0.0:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
+	if sick_t > 0.0:
+		n *= Life.R["sickness_heal"]
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	m.fx.healed(self, hp - before)
@@ -2012,11 +2016,8 @@ func _fold_for_action() -> void:
 func _interrupt_consume() -> void:
 	if drink_t <= 0.0 and kit_t <= 0.0 and not box_reviving():
 		return
-	drink_t = 0.0
-	kit_t = 0.0
+	UtilityUse.spill(self)
 	BoxRevive.cancel(self)
-	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
-	m.sfx("crit", pos, -4.0, 0.7)
 
 ## Hold jump while falling to open the glider. It folds when you land, let go, dash, are stunned or spiked.
 var air_t := 0.0                # time since you left the ground
@@ -2362,11 +2363,11 @@ var gear_cd: Array = [0.0, 0.0, 0.0, 0.0]
 
 # ---- run levels: like Supervive, you start each run at level 1 with one skill point and every
 # ability locked. XP comes from knocks and lair bosses, never from time or from damage; each level gives a
-# point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9).
+# point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9, rank 3 at 10).
 const XP_TO := [0.0, 70.0, 170.0, 300.0, 460.0, 650.0, 870.0, 1120.0, 1400.0, 1710.0]   # total XP to reach level i+1
 const SLOTS := ["sec", "dash", "kin", "ult"]                  # the hero's own abilities; gloves never rank (Gloves)
-const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 2}
-const ULT_AT := [6, 9]
+const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 3}
+const ULT_AT := [6, 9, 10]  # run level each R rank opens at (0022)
 var lvl := 1
 var xp := 0.0
 var skill_pts := 1
@@ -2428,11 +2429,11 @@ func level_slot(slot: String) -> bool:
 func _bot_spend() -> void:
 	var order := ["sec", "dash", "kin", "sec", "kin", "dash", "sec", "kin", "dash"]
 	if ak:
-		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens (and
-		# any "gear" left in it: gloves don't rank)
+		# the archetype's recommended order (ARCHETYPES §6) without the R (ranks 1-2 as they open, rank 3 once
+		# every slot is rank 2) or any "gear" left in it (gloves don't rank)
 		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult" and SLOT_MAX.has(x)) + ["kin", "dash", "sec"]
 	while skill_pts > 0:
-		if can_level("ult"):
+		if can_level("ult") and (int(slot_lv["ult"]) < 2 or SLOTS.all(func(s): return int(slot_lv[s]) >= 2)):
 			level_slot("ult"); continue
 		var done := false
 		# follow the order as a list of ranks (sec 1, dash 1, kin 1, gear 1, sec 2, ...), so every slot
@@ -2559,6 +2560,8 @@ func perk_n(id: String) -> int:
 
 ## Can this perk still be offered to you (a free perk slot, not at its stack limit)?
 func perk_open(id: String) -> bool:
+	if id == "secondwind" and ak and ak.single_dash():
+		return false
 	var below_max := perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1))
 	return perks.size() < PerkOrbs.slots() and below_max and WeaponUps.fits(self, id)
 

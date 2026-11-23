@@ -489,7 +489,8 @@ func _show_field(b: Dictionary, key: String, at: Vector3, k: float, dt: float) -
 	b["motes"] = float(b["motes"]) + dt
 	if float(b["motes"]) >= float(fd["motes_every"]):
 		b["motes"] = 0.0
-		vfx("seed_field", at, null, {"r": r})
+		var life := float(fd["motes_every"]) + HeroVfxZone.FADE + HeroVfxZone.PAD
+		vfx("seed_field", at, null, {"r": r, "life": life, "follow": b["t"], "zone": key})
 
 ## tender.json's "field", its palette names turned into colours (read once).
 func field() -> Dictionary:
@@ -536,7 +537,7 @@ func cast_e() -> bool:
 	play("mm_hearth")
 	# the lantern plus over her hand and starlight flaring from the lantern, rising round her
 	lk().burst("plus", h.pos + Vector3(0, 1.9, 0), {"r": 0.9, "dur": 0.4})
-	vfx("hearth")
+	vfx("hearth", null, null, {"zone_r": hearth_r(), "life": _hearth_life(), "follow": h, "zone": "hearth"})
 	m.sfx("tend_hearth", h.pos, -2.0, 1.0)
 	m.sfx("tender_lantern_chime", h.pos, -4.0, 1.0)      # her lantern's star rings as she lifts it
 	return true
@@ -588,6 +589,21 @@ func hearth_center() -> Vector3:
 	return hearth["pos"]
 
 ## The ring's radius: on her (or a carried friend) the smaller ring, thrown the wider disc.
+## Who the Hearthlight is centred on: Pip, the mate it latched to, or no one (in flight or on the ground).
+func _hearth_on() -> Ent:
+	match String(hearth.get("mode", "self")):
+		"self":
+			return h
+		"latched":
+			var w = hearth.get("who")
+			return w if is_instance_valid(w) else null
+	return null
+
+## How long the other games draw the Hearthlight from one of its beats: to its end, or past the next beat (so
+## an early end goes there within a beat).
+func _hearth_life() -> float:
+	return minf(float(hearth["left"]), float(e_def()["every"]) + HeroVfxZone.FADE + HeroVfxZone.PAD)
+
 func hearth_r() -> float:
 	var ed := e_def()
 	return float(ed.get("thrown_radius", ed["radius"])) if bool(hearth.get("tossed", false)) else float(ed["radius"])
@@ -608,7 +624,7 @@ func _tick_hearth(dt: float) -> void:
 			break
 		if String(hearth["mode"]) == "flying" and dv.length() <= step:
 			hearth["mode"] = "ground"
-			vfx("hearth_land", to, null, {"r": hearth_r()})
+			vfx("hearth_land", to, null, {"r": hearth_r(), "life": _hearth_life(), "zone": "hearth"})
 			m.sfx("tend_land", to, -3.0, 1.0)
 	var c := hearth_center()
 	hearth["pos"] = c if String(hearth["mode"]) != "flying" else hearth["pos"]
@@ -632,7 +648,8 @@ func _tick_hearth(dt: float) -> void:
 		hearth["tick"] = float(hearth["tick"]) - every
 		var per := float(ed["over"]) / (float(ed["time"]) / every)
 		_pulse(c, per)
-		vfx("hearth_motes", c, null, {"r": hearth_r()})
+		var zone := {"r": hearth_r(), "life": _hearth_life(), "follow": _hearth_on(), "zone": "hearth"}
+		vfx("hearth_motes", c, null, zone)
 	hearth["boost"] = maxf(0.0, float(hearth["boost"]) - dt)
 	if float(hearth["left"]) <= 0.0:
 		_hearth_end(true)
@@ -787,7 +804,7 @@ func _start_call() -> bool:
 	play("mm_call")
 	KitWindup.play(self, "x", "tend_call", -1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
-	vfx("call")
+	vfx("call", null, null, {"r": float(x_def()["range"])})        # the ring is the tether's reach
 	vfx("call_land", who.pos)
 	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), AimKit.hero_col(h))
 	return true
