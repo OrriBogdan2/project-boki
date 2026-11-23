@@ -13,8 +13,9 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
   need only bones run on Meshy's bones through the one bone lookup `WardenSkeleton.find` (contract name -> Meshy bone,
   RIG_CONTRACT.md "Bone lookup"; data `bones` adds a Hunter's own): the hit flinch (WardenFlinch on `Spine02`), the
   wall kick's plant and push (WardenWall), the open channel's reach (WardenOpen.make_on) and the Heartspark carry
-  (WardenCarry.hold_mote). The clips advance by hand in `_process` (AnimationMixer manual mode), then the layers. Still
-  off: springs, look-at, drop pose, squash, blink, moods. `WardenGlb.layers(model)` is the layer node either way.
+  (WardenCarry.hold_mote). The clips advance by hand in `_process` (AnimationMixer manual mode), then the layers. The head's
+  look-at (WardenLookAt, LOOK_AT.md) runs on `Head`, with `neck` and `Spine02` taking a share. Still off: springs, drop
+  pose, squash, blink, moods. `WardenGlb.layers(model)` is the layer node either way.
 - Extract: the beat (`WardenClips.leave_t`, 0.7 s) plays Meshy's crouch for the dip, then its jump for the take-off.
 - Anchors from the contract `.glb` (every `anchor_*` and `weapon_muzzle*` data `anchors` does not place) ride the Meshy
   bone `find` names for their contract bone at the same offset from its head; one on a bone with no stand-in (a tail
@@ -61,6 +62,14 @@ The contract's anchors on that bone ride the part (the blade tip on the blade). 
 the parts' length as the contract clips key Cinder's jet bones (x0.06 at rest, x3 in Flue Flight). Floating companions
 in Meshy's mesh (Meeko's sun and cloud, surfaces named as in `warden_anim/<art>.json` "companions") are cut out and
 circle her as on the contract path, the data's skeleton space carried onto Meshy's.
+
+## Look-at on Meshy's bones
+`WardenLookAt.make(model, skel, true)`: the same layer, limits (70 deg yaw, 25 deg pitch) and smoothing as the contract path,
+laid after the clip and the air tilt. The turn is shared down Meshy's chain so the head's total turn is the contract's
+figure: the chest (`Spine02`, `WardenSkeleton.find "hips"`) takes 20% of the yaw, the neck (the head bone's parent) 30% of
+yaw and pitch, the head the rest. It is off for the same states as the contract path, and under Meshy's Attack clip (which
+plays for any swing, cast or kit move): the layer eases out as that clip takes the body (`owned`, over `FADE`) and back in
+after it, so it does not fight a clip that already turns the head. `--look-at-check` runs it on every native Hunter.
 
 ## Not on the native path (yet)
 Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Tenzo's
