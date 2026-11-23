@@ -1,14 +1,15 @@
 extends RefCounted
 ## --anim-coverage-check: which animation states each Hunter and Boki has as an authored clip, as a
 ## procedural pose, or not at all (docs/ANIM_COVERAGE.md). Read from content/rules/warden_anim/*.json, the .glb
-## clip lists and BokiRig. Regenerates the table between the markers in the doc; fails (and leaves the doc alone)
-## when a cell that was clip or proc goes to missing, or a row disappears. The Boki garden rows (every rigged .glb)
-## are tools/anim_coverage_boki.gd.
+## clip lists, BokiRig and MobAnim. Regenerates the table between the markers in the doc; fails (and leaves the doc
+## alone) when a cell that was clip or proc goes to missing, or a row disappears. The Boki garden rows (every
+## rigged .glb) are tools/anim_coverage_boki.gd, the mob rows tools/anim_coverage_mobs.gd.
 ## Never touches the save.
 
 const DOC := "res://docs/ANIM_COVERAGE.md"
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Garden := preload("res://tools/anim_coverage_boki.gd")
+const Mobs := preload("res://tools/anim_coverage_mobs.gd")
 const ANIM_DIR := "res://content/rules/warden_anim/"
 const BEGIN := "<!-- table:begin -->"
 const END := "<!-- table:end -->"
@@ -167,6 +168,8 @@ func _parse(text: String) -> Dictionary:
 func _cols(key: String) -> Array:
 	if key.begins_with("Hunters/"):
 		return HUNTER_COLS
+	if key.begins_with("Mobs/"):
+		return Mobs.COLS
 	return Garden.COLS if key.begins_with("Boki garden") else BOKI_COLS
 
 func run(main: Node) -> void:
@@ -186,7 +189,8 @@ func run(main: Node) -> void:
 		ranked[id] = garden[id]
 	var block := "%s\n### Hunters\n\n%s\n### Starter Boki\n\n%s\n### Boki garden states\n\n%s\n" % [
 		BEGIN, _table(HUNTER_COLS, hunters), _table(BOKI_COLS, bokis), _table(Garden.COLS, ranked)] \
-		+ "Worst five, backlog-ready:\n\n%s%s" % [Garden.backlog(garden, 5), END]
+		+ "Worst five, backlog-ready:\n\n%s%s" % [Garden.backlog(garden, 5), \
+		"\n### Mobs\n\n" + _table(Mobs.COLS, Mobs.rows()) + END]
 	var old := FileAccess.get_file_as_string(DOC)
 	var a := old.find(BEGIN)
 	var b := old.find(END)
