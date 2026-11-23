@@ -8,6 +8,8 @@ extends RefCounted
 ##   ice         low grip, a push slides far             / frost: full grip, it stops short
 ##   static      the next shock hurts and stuns          / storm: no damage, no stun
 ##   bramble     slowed and scratched                    / bloom: neither
+## and the body's move there (HazardMoves): every hunter in deep water swims, one without footing on ice says so,
+## a warded one doesn't,
 ## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), the guard ring on its
 ## edge (on only for a counter), and bots: they
 ## keep off a hazard their Boki can't handle (a path round the lava) and walk through one it can.
@@ -142,6 +144,8 @@ func _deep_water(ai: int, safe: bool) -> void:
 	await _run(0.3)
 	var spd := p_v.slow_mult(0.65) * (1.35 if p_v.haste_t > 0.0 else 1.0)
 	var hits := TerrainHazards.hit_mult(m, p_v)
+	var move := HazardMoves.of(p_v)
+	ok("deep water %s: the hunter swims" % _who(safe), move == HazardMoves.SWIM, str(move))
 	await _run(float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"]) + 1.5)
 	var lost := p_v.max_hp - p_v.hp
 	if safe:
@@ -162,6 +166,12 @@ func _ice(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(0.1)
 	var g := m.ground_grip(p_v.pos, p_v)
+	var want := HazardMoves.NONE if safe else HazardMoves.FOOTING
+	ok(
+		"ice %s: %s" % [_who(safe), "sure footing" if safe else "no footing (short stride, arms out)"],
+		HazardMoves.of(p_v) == want,
+		str(HazardMoves.of(p_v))
+	)
 	var from := p_v.pos
 	p_v.vel = Vector3(5.0, 0, 0)
 	await _run(0.5)
