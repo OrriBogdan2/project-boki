@@ -15,54 +15,69 @@ extends RefCounted
 ##   BRING -> TOSS   the next seed        -> DONE   the round's 60 s are up
 ## Run has no nodes, so --fetch-check (tools/fetch_check.gd) plays whole rounds headless.
 
-const MAT_OFF := Vector3(2.8, 0, -2.2)     # m from the Training post to the toss mat
-const MAT_R := 0.5                           # m, the mat's radius
-const LANE := 0.9                            # m each runner stands off the line of the toss
-const SEED_R := 0.1                          # m, the seed's radius
-const ARC := 1.2                             # m the seed rises in flight
-const REACH := 1.8                           # m from the mat to start a round
+const MAT_OFF := Vector3(2.8, 0, -2.2)  # m from the Training post to the toss mat
+const MAT_R := 0.5  # m, the mat's radius
+const LANE := 0.9  # m each runner stands off the line of the toss
+const SEED_R := 0.1  # m, the seed's radius
+const ARC := 1.2  # m the seed rises in flight
+const REACH := 1.8  # m from the mat to start a round
+
+# ------------------------------------------------------------------ on the base
+var h  # the Home screen
+var mat: Node3D = null
+var seed_node: MeshInstance3D = null
+var run: Run = null
+var pair: Array = []  # the home's kin entries: a, b
+var bar: TimingBar = null
+var card: Control = null
+var card_t := 0.0
+var cue: GardenCues.VolleyCue = null  # the landing ring and head-start flash while a round runs
+
 
 static func rules() -> Dictionary:
 	return Content.rules("base_fetch")
 
+
 ## Metres a second a Boki runs: 1.0 x the rules' pace for no Speed points and a plain mood.
 static func pace(rec: Dictionary) -> float:
-	var R := rules()
+	var r_v := rules()
 	var st: Dictionary = rec.get("stats", {})
-	var p := float(R["pace"]) * (1.0 + float(st.get("speed", 0)) * float(R["speed_per_point"]))
-	var mood: Array = R["mood"]
+	var p := float(r_v["pace"]) * (1.0 + float(st.get("speed", 0)) * float(r_v["speed_per_point"]))
+	var mood: Array = r_v["mood"]
 	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
-	return p * lerpf(1.0, float(R["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
+	return p * lerpf(1.0, float(r_v["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
+
 
 ## The chance a Boki fumbles the pick-up: less with Focus points.
 static func p_fumble(rec: Dictionary) -> float:
-	var R := rules()
-	return float(R["fumble"]) / (1.0 + float(rec.get("stats", {}).get("focus", 0)) * float(R["focus_per_point"]))
+	var r_v := rules()
+	return float(r_v["fumble"]) / (1.0 + float(rec.get("stats", {}).get("focus", 0)) * float(r_v["focus_per_point"]))
+
 
 ## The round itself, stepped in time. Sides are indexes 0 and 1 into recs.
 class Run:
 	enum S { TOSS, CHASE, BRING, DONE }
 	const TABLE := {S.TOSS: [S.CHASE], S.CHASE: [S.BRING], S.BRING: [S.TOSS, S.DONE], S.DONE: []}
 
-	var R: Dictionary
-	var recs: Array                 # two records
-	var backed := 0                 # index in recs: the Boki you back
+	var r_x: Dictionary
+	var recs: Array  # two records
+	var backed := 0  # index in recs: the Boki you back
 	var rng: RandomNumberGenerator
 	var state := S.TOSS
-	var state_t := 0.0              # s in this state
-	var refused := 0                # moves the TABLE turned down
+	var state_t := 0.0  # s in this state
+	var refused := 0  # moves the TABLE turned down
 	var t := 0.0
 	var score: Array = [0, 0]
-	var last := 0                   # the side that scored last
-	var dist := 0.0                 # m the seed in play went
-	var go: Array = [0.0, 0.0]      # s each side runs out to the seed
-	var lag: Array = [0.0, 0.0]     # s each side loses fumbling it (0 or fumble_s)
-	var head := ""                  # your call, "" until you press, then its grade until the next trip uses it
-	var called := false             # your one call is used
-	var tosses := 0                 # seeds thrown in the round
+	var last := 0  # the side that scored last
+	var dist := 0.0  # m the seed in play went
+	var go: Array = [0.0, 0.0]  # s each side runs out to the seed
+	var lag: Array = [0.0, 0.0]  # s each side loses fumbling it (0 or fumble_s)
+	var head := ""  # your call, "" until you press, then its grade until the next trip uses it
+	var called := false  # your one call is used
+	var tosses := 0  # seeds thrown in the round
 
 	func _init(pair: Array, back: int, r: RandomNumberGenerator) -> void:
-		R = BaseFetch.rules()
+		r_x = BaseFetch.rules()
 		recs = pair
 		backed = back
 		rng = r
@@ -102,7 +117,7 @@ class Run:
 		state_t += dt
 		match state:
 			S.TOSS:
-				if state_t >= float(R["toss_s"]):
+				if state_t >= float(r_x["toss_s"]):
 					move(S.CHASE)
 			S.CHASE:
 				if state_t >= minf(go[0] + lag[0], go[1] + lag[1]):
@@ -110,8 +125,8 @@ class Run:
 					score[last] += 1
 					move(S.BRING)
 			S.BRING:
-				if state_t >= float(R["bring_s"]):
-					if t >= float(R["round_s"]):
+				if state_t >= float(r_x["bring_s"]):
+					if t >= float(r_x["round_s"]):
 						move(S.DONE)
 					else:
 						move(S.TOSS)
@@ -120,49 +135,41 @@ class Run:
 	## Rolls the next seed: how far, and each side's trip.
 	func _toss() -> void:
 		tosses += 1
-		var d: Array = R["dist"]
+		var d: Array = r_x["dist"]
 		dist = rng.randf_range(float(d[0]), float(d[1]))
 		for i in 2:
 			var rec: Dictionary = recs[i]
-			var wob := float(R["wobble"])
+			var wob := float(r_x["wobble"])
 			go[i] = dist / BaseFetch.pace(rec) * (1.0 + rng.randf_range(-wob, wob))
-			lag[i] = float(R["fumble_s"]) if rng.randf() < BaseFetch.p_fumble(rec) else 0.0
+			lag[i] = float(r_x["fumble_s"]) if rng.randf() < BaseFetch.p_fumble(rec) else 0.0
 		if head != "":
-			go[backed] *= float(R["head_start"][head])
+			go[backed] *= float(r_x["head_start"][head])
 			head = ""
 
+
 ## Pays out a finished round: joy, trust, a memory each, energy and gems. Returns what the card shows.
-static func settle(run: Run) -> Dictionary:
-	var R := rules()
-	var win: Dictionary = run.recs[run.winner()]
-	var lose: Dictionary = run.recs[1 - run.winner()]
-	for rec in run.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]))
-	var wp: int = run.score[run.winner()]
-	var lp: int = run.score[1 - run.winner()]
-	MinigameHub.record("fetch", String(win["name"]))     # best Boki on the title's picker
-	Save.remember(win, "fetch", "beat %s %d to %d at Fetch Cup" % [lose["name"], wp, lp], float(R["win_trust"]))
+static func settle(run_v: Run) -> Dictionary:
+	var r_v := rules()
+	var win: Dictionary = run_v.recs[run_v.winner()]
+	var lose: Dictionary = run_v.recs[1 - run_v.winner()]
+	for rec in run_v.recs:
+		Care.change(rec, "energy", -float(r_v["energy"]))
+	Care.change(win, "joy", float(r_v["win_joy"]))
+	Care.change(lose, "joy", float(r_v["lose_joy"]))
+	var wp: int = run_v.score[run_v.winner()]
+	var lp: int = run_v.score[1 - run_v.winner()]
+	MinigameHub.record("fetch", String(win["name"]))  # best Boki on the title's picker
+	Save.remember(win, "fetch", "beat %s %d to %d at Fetch Cup" % [lose["name"], wp, lp], float(r_v["win_trust"]))
 	Save.remember(lose, "fetch", "lost Fetch Cup to %s, %d to %d" % [win["name"], lp, wp])
-	var backed_won: bool = run.recs[run.backed] == win
-	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	var backed_won: bool = run_v.recs[run_v.backed] == win
+	var gems := int(r_v["gems_win"]) if backed_won else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "score": [wp, lp]}
 
-# ------------------------------------------------------------------ on the base
-var h                          # the Home screen
-var mat: Node3D = null
-var seed_node: MeshInstance3D = null
-var run: Run = null
-var pair: Array = []           # the home's kin entries: a, b
-var bar: TimingBar = null
-var card: Control = null
-var card_t := 0.0
-var cue: GardenCues.VolleyCue = null   # the landing ring and head-start flash while a round runs
 
 func _init(home) -> void:
 	h = home
+
 
 ## The mat and the seed beside the Training post (none without one); called when fixtures move.
 func place() -> void:
@@ -196,6 +203,7 @@ func place() -> void:
 	seed_node.visible = false
 	mat.add_child(seed_node)
 
+
 func find(p2: Vector2) -> Dictionary:
 	if run != null or not is_instance_valid(mat):
 		return {}
@@ -203,8 +211,10 @@ func find(p2: Vector2) -> Dictionary:
 		return {}
 	return {"kind": "fetch"}
 
+
 func label() -> String:
 	return "Play Fetch Cup (back %s)" % Save.active_kin().get("name", "your partner")
+
 
 func use() -> void:
 	var ks: Array = h.hrace.entrants()
@@ -226,6 +236,10 @@ func use() -> void:
 	_place()
 	GardenSfx.countdown(h, mat.position)
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 ## A press: true when the round took it.
 func input(event: InputEvent) -> bool:
 	if run == null:
@@ -243,6 +257,7 @@ func input(event: InputEvent) -> bool:
 		cue.call_flash(pair[run.backed]["pos"])
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
+
 
 func tick(d: float) -> void:
 	if card_t > 0.0:
@@ -263,6 +278,7 @@ func tick(d: float) -> void:
 	if run.over():
 		_end(true)
 
+
 ## Metres out along the toss that a side has run: out while chasing, back with the seed after.
 func along(side: int) -> float:
 	match run.state:
@@ -272,6 +288,7 @@ func along(side: int) -> float:
 			var out: float = run.dist * clampf((run.go[side] + run.lag[side]) / maxf(run.go[side], 0.01), 0.0, 1.0)
 			return out * (1.0 - clampf(run.state_t / float(run.R["bring_s"]), 0.0, 1.0))
 	return 0.0
+
 
 ## The runners stand either side of the line of the toss; the seed flies out, waits, then rides home.
 func _place() -> void:
@@ -286,6 +303,7 @@ func _place() -> void:
 	seed_node.position = _seed_at()
 	_aim_cue()
 
+
 ## The ring sits where the seed lands; hidden once someone has it.
 func _aim_cue() -> void:
 	if run.state != Run.S.TOSS:
@@ -295,6 +313,7 @@ func _aim_cue() -> void:
 	var g: float = h._ground_h(land.x, land.z)
 	land.y = g if g > -50.0 else 0.0
 	cue.aim(land, clampf(run.state_t / float(run.R["toss_s"]), 0.0, 1.0), run.head != "")
+
 
 ## Where the seed is, relative to the mat: in the air on the toss, on the ground while chased, in the
 ## winner's mouth coming home.
@@ -306,6 +325,7 @@ func _seed_at() -> Vector3:
 		Run.S.CHASE:
 			return Vector3(0, SEED_R, run.dist)
 	return Vector3(0, 0.4, along(run.quicker()))
+
 
 func _end(finished: bool) -> void:
 	var res := settle(run) if finished else {}
@@ -325,15 +345,20 @@ func _end(finished: bool) -> void:
 	run = null
 	pair = []
 
+
 func _card(res: Dictionary) -> void:
 	var win: Dictionary = res["win"]
 	var lose: Dictionary = res["lose"]
 	var why := " for backing the winner" if res["backed_won"] else ""
 	if is_instance_valid(card):
 		card.queue_free()
-	card = BaseRace.result_card(h, [
-		["%s wins Fetch Cup, %d to %d!" % [win["name"], res["score"][0], res["score"][1]], 18, UI.ACCENT_HI],
-		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
-		["%s sulks: \"lost Fetch Cup to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]])
+	card = BaseRace.result_card(
+		h,
+		[
+			["%s wins Fetch Cup, %d to %d!" % [win["name"], res["score"][0], res["score"][1]], 18, UI.ACCENT_HI],
+			["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
+			['%s sulks: "lost Fetch Cup to %s"' % [lose["name"], win["name"]], 14, UI.MUTED],
+			["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]
+		]
+	)
 	card_t = float(rules()["card_s"])
