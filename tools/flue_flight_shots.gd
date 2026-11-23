@@ -58,7 +58,7 @@ func _flight(main: Node, dir: String) -> void:
 		if sync:
 			sync._process(Match.DT)
 		if step % EVERY == 0:
-			var i := step / EVERY
+			var i := int(step / float(EVERY))
 			print("FLUE_SHOT f%03d %-8s bank=%5.1f %s" % [i, k.anim_id, rad_to_deg(h.anim.glide_bank), _body(h)])
 			_aim(h, 180.0, 0.25)
 			await _grab(dir.path_join("back/f%03d.png" % i))

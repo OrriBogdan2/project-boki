@@ -234,7 +234,7 @@ func _row(key: String) -> Dictionary:
 static func _median(v: Array) -> float:
 	var w: Array = v.filter(func(x): return x >= 0.0)
 	w.sort()
-	return -1.0 if w.is_empty() else float(w[w.size() / 2])
+	return -1.0 if w.is_empty() else float(w[int(w.size() / 2.0)])
 
 static func _ms(t: float, t0: float) -> float:
 	return (t - t0) * 1000.0

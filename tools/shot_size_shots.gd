@@ -39,7 +39,7 @@ func run(main_node: Node, _mode: String) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	sv = SubViewport.new()
-	sv.size = Vector2i(res * 16 / 9, res)
+	sv.size = Vector2i(int(res * 16 / 9.0), res)
 	sv.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	eye = Camera3D.new()
 	sv.add_child(eye)

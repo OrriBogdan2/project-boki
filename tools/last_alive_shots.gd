@@ -85,6 +85,6 @@ func _go(secs: float) -> void:
 
 func _save() -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+	img.resize(FRAME_W, int(FRAME_W * img.get_height() / float(img.get_width())), Image.INTERPOLATE_BILINEAR)
 	img.save_jpg(dir.path_join("frames/%05d.jpg" % frames), 0.88)
 	frames += 1
