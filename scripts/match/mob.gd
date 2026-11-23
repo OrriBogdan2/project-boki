@@ -224,7 +224,6 @@ func sim(dt: float) -> void:
 		return
 	tick_status(dt)
 	StealReel.tick(self)
-	StealSfx.tick(self)
 	if remote:
 		st_t -= dt
 		net_follow(dt)
