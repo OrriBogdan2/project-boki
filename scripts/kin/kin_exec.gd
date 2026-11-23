@@ -465,7 +465,7 @@ static func _burst(st: StageSpec, cx: Dictionary) -> void:
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
 			if r > 2.0:      # a Boki's own burst never shakes its owner's camera (DASHES §5.5)
-				Shake.incoming_big(m, at, 0.3, cx["caster"])
+				Shake.incoming_big(m, at, 0.3, cx["owner"] if cx["owner"] else cx["caster"])
 		else:
 			m.sfx("ping", at, -2.0, 1.1)
 		_hit(st.effects, st, _foes_near(cx, at, r), cx, at, r)
