@@ -31,6 +31,8 @@ lines around straight-line code (an early `return` between them would leave the 
 `--perf-bench` is the only perf entry point. Its flags pick the part: none (the fixed load), `--tracy=<dir>`,
 `--bench-fight`, `--bench-ab`, `--bench-probe` (a scripted expedition, loading screen to fight, per phase:
 `tests/perf_probe.gd`) and `--bench-hunter-gpu` (Hunter model draw cost: `tools/perf/hunter_gpu.gd`).
+`--bench-fight` prints the match step and visual sections plus the engine wait (the rest of the frame: scene
+processing, animation, drawing). Its "match script" ms is the whole frame, so read the wait line to see if Match code is the cost.
 
 ## Capture (headless, real GPU)
 ```

@@ -20,6 +20,7 @@ var peak := {"n": 0, "by": {}, "t": 0.0, "nodes": 0}
 var made := {}  # "Class:name" -> nodes that entered the tree after the warm-up
 var kits := {}  # arch -> {n: particles over the quiet floor at its peak, made: nodes made}
 var counting := false
+var engine_us := 0  # us spent waiting on the engine's own frame (scene processing, animation, drawing)
 
 
 func _init(perf_bench) -> void:
@@ -75,8 +76,11 @@ func _step(n: int) -> void:
 		for h in m.hunters:
 			h.hp = h.max_hp
 		m.step(Match.DT)
+		m.acc -= Match.DT  # _process steps on its own clock: without this every frame ran two steps
 		m._process(Match.DT)
+		var t_wait := Time.get_ticks_usec()
 		await bench.main.get_tree().process_frame
+		engine_us += Time.get_ticks_usec() - t_wait
 
 
 func _particles() -> Dictionary:
@@ -149,6 +153,10 @@ func _camp() -> Array:
 			(h.kin as Kin).throw_to(mid)
 	made.clear()
 	counting = true
+	Match.prof.clear()
+	engine_us = 0
+	Match.vprof.clear()
+	Match.prof_on = true
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var f := 0
@@ -168,9 +176,22 @@ func _camp() -> Array:
 		last = now
 		if f % SAMPLE == 0:
 			_sample(f / 60.0)
+			last = Time.get_ticks_usec()  # (the particle count walks the tree: it stays out of the frame times)
 		f += 1
 	counting = false
+	Match.prof_on = false
+	print("BENCH fight engine wait (not Match code): %.2f ms per frame" % (engine_us / 1000.0 / fl.size()))
+	_print_sections(Match.prof, "step", fl.size())
+	_print_sections(Match.vprof, "visual", fl.size())
 	return fl
+
+
+## The costliest sections of the match step or visuals, ms per frame (Match._prof labels).
+static func _print_sections(by: Dictionary, what: String, frames: int) -> void:
+	var ks := by.keys()
+	ks.sort_custom(func(a, b): return by[a] > by[b])
+	var per := ks.slice(0, 12).map(func(k): return "%s %.2f" % [k, by[k] / 1000.0 / frames])
+	print("BENCH fight %s sections (ms per frame): %s" % [what, ", ".join(per)])
 
 
 func _sample(t: float) -> void:
