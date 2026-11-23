@@ -102,7 +102,8 @@ func _answer(home, k: Dictionary, trust: float, joy: float) -> Array:
 		var shot := main.get_viewport().get_texture().get_image()
 		shot.convert(Image.FORMAT_RGBA8)
 		var side := int(CROP / ZOOM)
-		var crop := shot.get_region(Rect2i(Vector2i(at) - Vector2i(Vector2(Vector2i(side, side)) / 2.0), Vector2i(side, side)))
+		var crop := shot.get_region(Rect2i(Vector2i(at) - Vector2i(Vector2(Vector2i(side, side)) / 2.0), Vector2i(side,
+				side)))
 		crop.resize(CROP, CROP, Image.INTERPOLATE_NEAREST)
 		crops.append(crop)
 	return crops

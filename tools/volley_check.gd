@@ -134,7 +134,8 @@ func _spike() -> void:
 	var moved := float(with_call - without) / EDGE_MATCHES
 	var what := "a great spike call moves the backed Boki's odds %d to %d%% (%+.0f points, under %d)"
 	ok(moved > 0.0 and moved < SPIKE_MAX,
-			what % [int(without * 100 / float(EDGE_MATCHES)), int(with_call * 100 / float(EDGE_MATCHES)), moved * 100.0, SPIKE_MAX * 100.0])
+			what % [int(without * 100 / float(EDGE_MATCHES)), int(with_call * 100 / float(EDGE_MATCHES)), moved * 100.0,
+					SPIKE_MAX * 100.0])
 
 func _machine() -> void:
 	var a := _kin("zapple", "A", 10, 10, 50.0, 50.0)

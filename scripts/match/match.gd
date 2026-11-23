@@ -4347,7 +4347,8 @@ func demo_shielded(e: Ent) -> bool:
 ## can be lost, what you extract is kept).
 const DEMO_SEED := 5
 static func demo_opts() -> Dictionary:
-	return {"teams": int(Data.MATCH_PLAYERS / 2.0), "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
+	return {"teams": int(Data.MATCH_PLAYERS / 2.0), "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1,
+			"seed": DEMO_SEED,
 		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true,
 		"live_lair": "The Thornhive"}     # (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
 

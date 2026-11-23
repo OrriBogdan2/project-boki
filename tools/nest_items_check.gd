@@ -114,7 +114,8 @@ func _locket() -> void:
 		_stock(0, 0, 0)
 		from_a += 1 if _egg(p[0], p[1], i)[1]["species"] == p[0]["species"] else 0
 	ok(worn == EGGS and used == EGGS, "Locket: %d of %d babies are the wearer's species, one used each" % [worn, EGGS])
-	ok(from_a > int(EGGS / 4.0) and from_a < int(EGGS * 3 / 4.0), "without a Locket it is about 50/50 (%d of %d)" % [from_a, EGGS])
+	ok(from_a > int(EGGS / 4.0) and from_a < int(EGGS * 3 / 4.0),
+			"without a Locket it is about 50/50 (%d of %d)" % [from_a, EGGS])
 
 func _shell() -> void:
 	var rng := RandomNumberGenerator.new()

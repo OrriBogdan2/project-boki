@@ -44,7 +44,8 @@ func _beat(m: Match, h: Hunter, tag := "") -> Array:
 		_frame(m, h)
 		if tag != "" and f % SHOT_EVERY == 0:
 			await RenderingServer.frame_post_draw
-			h.m.get_tree().root.get_texture().get_image().save_png("%s/%s_%02d.png" % [shots, tag, int(f / float(SHOT_EVERY))])
+			h.m.get_tree().root.get_texture().get_image().save_png("%s/%s_%02d.png" % [shots, tag,
+					int(f / float(SHOT_EVERY))])
 		if not h.visible:
 			break
 		shown = m.time - t0

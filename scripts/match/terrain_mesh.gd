@@ -441,7 +441,8 @@ func _cell(cx: int, cz: int) -> void:
 				p3.append(Vector3(pts[k].x, inf["rim"], pts[k].y)); lv.append(-1)
 			else:
 				var ti: int = inf
-				p3.append(Vector3(pts[k].x, under[ti], pts[k].y)); lv.append(vals[(int(ti / float(w)) + PAD) * pw + ti % w + PAD])
+				p3.append(Vector3(pts[k].x, under[ti], pts[k].y))
+				lv.append(vals[(int(ti / float(w)) + PAD) * pw + ti % w + PAD])
 		for k in range(1, p3.size() - 1):
 			_under_tri([p3[0], p3[k], p3[k + 1]], [lv[0], lv[k], lv[k + 1]], bio)
 	else:

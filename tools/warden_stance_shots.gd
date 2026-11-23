@@ -79,7 +79,8 @@ func _row(ids: Array, yaws: Array, stance: Array, cols := 0) -> void:
 		var id := String(ids[i])
 		var h := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", {}, id)
 		h.set_meta("anim_seed", 7)
-		h.position = Vector3((i % cols - (cols - 1) * 0.5) * GAP, 0, (int(i / float(cols)) - (rows - 1) * 0.5) * ROW_GAP)
+		h.position = Vector3((i % cols - (cols - 1) * 0.5) * GAP, 0,
+				(int(i / float(cols)) - (rows - 1) * 0.5) * ROW_GAP)
 		h.rotation.y = float(yaws[i])
 		holder.add_child(h)
 		var a := HunterAnim.new(h)
@@ -127,7 +128,8 @@ func _lineup_game(ids: Array) -> void:
 	big.resize(crop.get_width() * ENLARGE, crop.get_height() * ENLARGE, Image.INTERPOLATE_NEAREST)
 	var both := Image.create(big.get_width(), crop.get_height() + big.get_height() + 8, false, Image.FORMAT_RGBA8)
 	both.fill(Color("1c1a24"))
-	both.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()), Vector2i(int((both.get_width() - crop.get_width()) / 2.0), 0))
+	both.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()),
+			Vector2i(int((both.get_width() - crop.get_width()) / 2.0), 0))
 	both.blit_rect(big, Rect2i(Vector2i.ZERO, big.get_size()), Vector2i(0, crop.get_height() + 8))
 	var cam_at := "the match camera (pitch %d, %d m, fov %d)" % [CAM_PITCH, CAM_DIST, CAM_FOV]
 	_save(both, "lineup_game.png", "all 12 standing in their stances (two rows of six) at %s, " % cam_at

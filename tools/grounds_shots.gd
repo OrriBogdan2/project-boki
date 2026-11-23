@@ -140,7 +140,8 @@ func _perf(where: String) -> void:
 		objs += int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME))
 	var wall := float(Time.get_ticks_usec() - t0) / 1000.0 / float(frames)
 	var line := "GROUNDSPERF %-6s wall %.2f ms  gpu %.2f ms  cpu %.2f ms" % [where, wall, gpu / frames, cpu / frames]
-	line += "  draws %d  tris %d  objs %d" % [int(draws / float(frames)), int(tris / float(frames)), int(objs / float(frames))]
+	line += "  draws %d  tris %d  objs %d" % [int(draws / float(frames)), int(tris / float(frames)),
+			int(objs / float(frames))]
 	var nodes := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 	line += "  nodes %d  (%s)" % [nodes, RenderingServer.get_video_adapter_name()]
 	print(line)

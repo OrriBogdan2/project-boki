@@ -365,7 +365,8 @@ func demo(which: String) -> void:
 				h.hb.rotate_held()
 				var ti2 := nearest_wild(land + Vector3(0, 0, -7), "tree")
 				var w2: World = h.world
-				h.hb.debug_m = Vector2(ti2 % w2.w + 0.5, int(ti2 / float(w2.w)) + 2.0) if ti2 >= 0 else Vector2(land.x, land.z)
+				h.hb.debug_m = Vector2(ti2 % w2.w + 0.5, int(ti2 / float(w2.w)) + 2.0) if ti2 >= 0 \
+						else Vector2(land.x, land.z)
 			for mi in h.hb.ghost.find_children("*", "MeshInstance3D", true, false):
 				(mi as MeshInstance3D).transparency = 0.5
 			h.hb._build_bar()

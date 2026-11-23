@@ -141,7 +141,8 @@ static func _sheet(imgs: Array, path: String) -> void:
 	var sheet := Image.create(cw * imgs.size(), ch, false, Image.FORMAT_RGBA8)
 	for i in imgs.size():
 		var im: Image = imgs[i]
-		var x0 := maxi(0, int(im.get_width() / 2.0) - int(cw / 2.0)); var y0 := maxi(0, int(im.get_height() * 0.5) - int(ch / 2.0) - 20)
+		var x0 := maxi(0, int(im.get_width() / 2.0) - int(cw / 2.0))
+		var y0 := maxi(0, int(im.get_height() * 0.5) - int(ch / 2.0) - 20)
 		sheet.blit_rect(im, Rect2i(x0, y0, cw, ch), Vector2i(i * cw, 0))
 	sheet.save_png(path)
 	print("HEROSHEET ", path)

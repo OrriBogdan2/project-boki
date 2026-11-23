@@ -250,7 +250,8 @@ func run(m: Node) -> void:
 	hb = home.hb; hg = home.hg; w = home.world
 	var hw: HomeWork = home.hw
 	var tree2: int = hg.nearest_wild(home.spots["house"], "tree")
-	var camp: Dictionary = hg.demo_place("lumber_camp", Vector3(tree2 % w.w + 0.5, 0, int(tree2 / float(w.w)) + 0.5), 0, 2.0)
+	var camp: Dictionary = hg.demo_place("lumber_camp", Vector3(tree2 % w.w + 0.5, 0, int(tree2 / float(w.w)) + 0.5), 0,
+			2.0)
 	var garden: Dictionary = hg.demo_place("seed_garden", home.spots["house"] + Vector3(-4, 0, 6), 0)
 	var kiln: Dictionary = hg.demo_place("kiln", home.spots["house"] + Vector3(4, 0, 6), 0)
 	ok(not camp.is_empty() and not garden.is_empty() and not kiln.is_empty(), "a Lumber Camp by the trees, a Seed Garden and a Kiln go down")

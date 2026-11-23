@@ -173,7 +173,8 @@ func _shut_in(w: World, hb: HomeBuild) -> Array:
 			q.append(j)
 	var out: Array = []
 	for i in w.kind.size():
-		if w.island[i] == 0 and not hb._solid_tile(w, i) and not seen.has(i): out.append(Vector2i(i % w.w, int(i / float(w.w))))
+		if w.island[i] == 0 and not hb._solid_tile(w, i) and not seen.has(i): out.append(Vector2i(i % w.w,
+				int(i / float(w.w))))
 	return out
 
 ## A fresh save on the farm-start island of this seed, its Home loaded and paused (steps are driven here).

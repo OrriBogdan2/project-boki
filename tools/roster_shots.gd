@@ -27,7 +27,8 @@ func run(main: Node) -> void:
 	var vp := shots._stage(Vector2i(width, int(width * rows * ROW_GAP / (COLS * GAP))))
 	for i in order.size():
 		var k := Models.kin(order[i], Save.new_kin(order[i]))
-		k.position = Vector3((i % COLS - (COLS - 1) * 0.5) * GAP, 0, (int(i / float(COLS)) - (rows - 1) * 0.5) * ROW_GAP)
+		k.position = Vector3((i % COLS - (COLS - 1) * 0.5) * GAP, 0,
+				(int(i / float(COLS)) - (rows - 1) * 0.5) * ROW_GAP)
 		k.rotation.y = 0.0
 		vp.add_child(k)
 	var cam := Camera3D.new()

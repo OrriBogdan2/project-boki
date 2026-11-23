@@ -71,5 +71,6 @@ func _shot(main: Node, home, strip: Image, at_px: Vector2i) -> void:
 	var at := vp.get_camera_3d().unproject_position(home.player.global_position + Vector3(0, 0.6, -0.3))
 	var img := vp.get_texture().get_image()
 	img.convert(Image.FORMAT_RGBA8)
-	var r := Rect2i(Vector2i(at) - Vector2i(Vector2(CROP) / 2.0), CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+	var r := Rect2i(Vector2i(at) - Vector2i(Vector2(CROP) / 2.0), CROP).intersection(Rect2i(Vector2i.ZERO,
+			img.get_size()))
 	strip.blit_rect(img, r, at_px + (r.position - (Vector2i(at) - Vector2i(Vector2(CROP) / 2.0))))

@@ -180,7 +180,8 @@ func _game_strip(row: Array, animate := true) -> Image:
 		Image.FORMAT_RGBA8
 	)
 	out.fill(Color("1c1a24"))
-	out.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()), Vector2i(int((out.get_width() - crop.get_width()) / 2.0), 0))
+	out.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()),
+			Vector2i(int((out.get_width() - crop.get_width()) / 2.0), 0))
 	out.blit_rect(big, Rect2i(Vector2i.ZERO, big.get_size()), Vector2i(0, crop.get_height() + 8))
 	return _fit(out)
 

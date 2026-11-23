@@ -492,7 +492,8 @@ func _drop_on(d: Dictionary, where: String, onto, slot := -1) -> void:
 				(
 					("%s and %s traded places" % [rec["name"], other["name"]])
 					if not other.is_empty()
-					else "%s is in %s" % [rec["name"], KinBox.page_name(page if slot < 0 else int(slot / float(KinBox.PAGE)))]
+					else "%s is in %s" % [rec["name"],
+							KinBox.page_name(page if slot < 0 else int(slot / float(KinBox.PAGE)))]
 				)
 			)
 			return

@@ -599,7 +599,8 @@ func _place_stairs() -> void:
 		cands.shuffle()
 		var placed: Array = []      # every tile of every flight placed on this island
 		var flights := 0
-		var want := clampi(int(cells.size() / 45.0), 1, 6) if layout_id == "" else clampi(int(cells.size() / 220.0), 2, 8)
+		var want := clampi(int(cells.size() / 45.0), 1, 6) if layout_id == "" else clampi(int(cells.size() / 220.0), 2,
+				8)
 		var max_w := 3 if layout_id == "" else STAIR_MAX_W
 		for cd in cands:
 			if flights >= want: break
@@ -1333,7 +1334,8 @@ func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
 			if absf(xf.basis.x.y) > 0.001 or absf(xf.basis.z.y) > 0.001 or not (mi.mesh is ArrayMesh):
 				loose.append([mi, xf])
 				continue
-			var key := [Vector2i(int(int(xf.origin.x) / 32.0), int(int(xf.origin.z) / 32.0)), Models._mat_key(mi.material_override)]
+			var key := [Vector2i(int(int(xf.origin.x) / 32.0), int(int(xf.origin.z) / 32.0)),
+					Models._mat_key(mi.material_override)]
 			if not groups.has(key):
 				groups[key] = {"mat": mi.material_override, "parts": []}
 			var am := mi.mesh as ArrayMesh
