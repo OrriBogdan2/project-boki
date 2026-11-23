@@ -54,7 +54,7 @@ var camps: Camps = Camps.new(self)     # the map's fixed monster camps (see Camp
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
-var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
+var skydrop: DropSquad = null  # the planning phase before the ship sets off: drop leaders, formations (DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
 var acc := 0.0
@@ -1592,10 +1592,6 @@ func dmg_mult(h: Hunter) -> float:
 func sfx(n: String, p = null, vol := 0.0, pitch := 1.0, mine := false) -> void:
 	Sfx.play(n, p, vol, 0.07, pitch, 0.0, mine)
 
-## Legacy door for world events (a boss slam, a lair gate): a big hit at `at`, caused by nobody on your team. Shake.incoming_big is the real one.
-func shake(a: float, at: Vector3) -> void:
-	Shake.incoming_big(self, at, a)
-
 func direction_word(from: Vector3, to: Vector3) -> String:
 	var d := Vector2(to.x - from.x, to.z - from.z)
 	var a := rad_to_deg(atan2(d.y, d.x))
@@ -1813,8 +1809,10 @@ func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 			BokiChatter.say(self, h.kin, "owner_down")
 	_check_team(h.team)
 
+## Every offline freeze shares the player's cap (Feel.spend), charged for only the time it adds to a running one.
 func freeze_frame(t: float) -> void:
-	hitstop = maxf(hitstop, Feel.spend(player, t, time))      # every offline freeze shares the player's cap
+	var held := maxf(hitstop, 0.0)
+	hitstop = held + Feel.spend(player, maxf(0.0, t - held), time)
 
 ## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:

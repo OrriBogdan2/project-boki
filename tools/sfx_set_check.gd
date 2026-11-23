@@ -84,6 +84,8 @@ extends RefCounted
 ##      drops, and stops on a heal, a down or out
 ##  20. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
 ##      without taking a slot, and a need falling to urgent sulks once
+##  21. the carry cues (CarrySfx): every name it plays exists and has a MIN_GAP (the voice cap), the thief's
+##      take carries past hearing range to nearby squads, and the swap, claim, steal and deathbox paths call it
 ##  10. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
 ##      tools/sfx_world_cues.gd
 ## Reads the files only; never touches the save.
@@ -158,7 +160,6 @@ func run(main: Node) -> void:
 	_strip_chime()
 	_chop_mine()
 	_rarity_stings()
-	_carry()
 	await _call_loop(main)
 	await _encore_loop(main)
 	_hostile()
@@ -185,6 +186,7 @@ func run(main: Node) -> void:
 	_low_hp()
 	_stomp_cues()
 	_voices()
+	_carry()
 	_boki_impacts()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	preload("res://tools/sfx_bar_check.gd").new().run(ok)
@@ -413,7 +415,7 @@ func _garden_names() -> void:
 	var named := seen.size() >= 12 and silent.is_empty()
 	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
 
-## The carry cues: on file, capped, the take carrying, and wired where the swap, claim and steal happen.
+## 10. The carry cues: on file, capped, the take carrying, and wired where the swap, claim and steal happen.
 func _carry() -> void:
 	var re := RegEx.create_from_string("\"(carry_[a-z_]+)\"")
 	var names := []

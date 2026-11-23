@@ -23,7 +23,7 @@
 	"howto": ["Play: front-line tank; block with {secondary}, heal with {signature}.", "Combo: plant the hammer, then {signature} heals the ground.", "Avoid: fighting with the aegis down."],
 	"silhouette": "the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist",
 	"hint": {"lmb": "Tap {fire} to throw the hammer, tap again to call it back", "rmb": "Hold {secondary} to block shots from the front", "e": "Press {signature} for a healing light on your hammer", "dash": "Press {dash} for a spin smash; aegis up, a shield charge"},
-	"card": {"role_word": "Tank", "loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "dash": "Short dash ending in a spinning hit; with aegis up, Shield Charge.", "passive": "Knocking a foe into a wall or another foe stuns it.", "rmb": "Hold to block shots from the front; your dash key becomes Shield Charge.", "e": "Healing zone around your hammer for 4s, ending in a burst.", "x": "Plant and slam: the ground erupts down a lane, throwing foes up.", "weapons": {"tower_shield": "Tap throws the hammer, tap again recalls; hold to spin and slam."}, "chips": {"dash": ["24 dmg"], "e": ["18 burst"], "x": ["18 dmg"]}},
+	"card": {"role_word": "Tank", "loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "dash": "Short dash ending in a spinning hit; with aegis up, Shield Charge.", "passive": "Knocking a foe into a wall stuns it.", "rmb": "Hold to block shots from the front; your dash key becomes Shield Charge.", "e": "Healing zone around your hammer for 4s, ending in a burst.", "x": "Plant and slam: the ground erupts down a lane, throwing foes up.", "weapons": {"tower_shield": "Tap throws the hammer, tap again recalls; hold to spin and slam."}, "chips": {"dash": ["24 dmg"], "e": ["18 burst"], "x": ["18 dmg"]}},
 	"signature": "tower_shield",
 	"resource": {
 		"id": "crushed",
@@ -37,7 +37,7 @@
 	},
 	"passive": {
 		"name": "Crushed",
-		"desc": "Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 1.0 (8 damage)."
+		"desc": "Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall stuns it 1.0 (8 damage)."
 	},
 	"lmb": {
 		"tap": 0.2,
