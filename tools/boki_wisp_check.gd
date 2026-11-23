@@ -70,16 +70,19 @@ func _pop_types() -> void:
 			var rim := _pop_rim(String(seen[t]), 0.3, true)
 			var want := DexView.type_col(t)
 			var own := Shiny.col(String(seen[t]), {}, "glow")
-			print("BOKIWISP pop colour %s (%s): glow %s -> %s, type %s" % [t, seen[t], own.to_html(false), rim.to_html(false), want.to_html(false)])
-			ok(_dist(rim, want) <= _dist(own, want) * (1.0 - BokiWispPop.TINT) + 0.02, "%s pop flashes %s" % [seen[t], t])
+			var hex := [own, rim, want].map(func(c: Color) -> String: return c.to_html(false))
+			print("BOKIWISP pop colour %s (%s): glow %s -> %s, type %s" % [t, seen[t], hex[0], hex[1], hex[2]])
+			var near := _dist(own, want) * (1.0 - BokiWispPop.TINT) + 0.02
+			ok(_dist(rim, want) <= near, "%s pop flashes %s" % [seen[t], t])
 	for id in Data.KIN:
 		var own := Shiny.col(String(id), {}, "glow")
 		var want := DexView.type_col(DexView.type_of(String(id)))
 		var tag := String(id) + " pop colour"
+		var far := _dist(own, want) + 0.001
 		ok(_dist(_pop_rim(String(id), 0.0, true), own) < 0.02, tag + " starts on its own glow")
 		ok(_dist(_pop_rim(String(id), 1.0, true), own) < 0.02, tag + " ends on its own glow")
-		ok(_dist(_pop_rim(String(id), 0.3, true), want) <= _dist(own, want) + 0.001, tag + " moves to the type colour")
-		ok(_dist(_pop_rim(String(id), 0.4, false), want) <= _dist(own, want) + 0.001, tag + " fold moves to the type colour")
+		ok(_dist(_pop_rim(String(id), 0.3, true), want) <= far, tag + " moves to the type colour")
+		ok(_dist(_pop_rim(String(id), 0.4, false), want) <= far, tag + " fold moves to the type colour")
 
 func _pop_rim(id: String, u: float, burst: bool) -> Color:
 	var pop := BokiWispPop.new(id, {})
