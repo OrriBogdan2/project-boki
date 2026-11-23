@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bqxpd2m6dd76d"
-path="res://.godot/imported/moonloris_moonloris_atlas.webp-7b7656f7e7a1f5a63cffc805b5a4c5ad.ctex"
+path.bptc="res://.godot/imported/moonloris_moonloris_atlas.webp-7b7656f7e7a1f5a63cffc805b5a4c5ad.bptc.ctex"
+path.astc="res://.godot/imported/moonloris_moonloris_atlas.webp-7b7656f7e7a1f5a63cffc805b5a4c5ad.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2171e86566c3e085d01ff11dbb6d1fbf"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/moonloris/moonloris_moonloris_atlas.webp"
-dest_files=["res://.godot/imported/moonloris_moonloris_atlas.webp-7b7656f7e7a1f5a63cffc805b5a4c5ad.ctex"]
+dest_files=["res://.godot/imported/moonloris_moonloris_atlas.webp-7b7656f7e7a1f5a63cffc805b5a4c5ad.bptc.ctex", "res://.godot/imported/moonloris_moonloris_atlas.webp-7b7656f7e7a1f5a63cffc805b5a4c5ad.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
