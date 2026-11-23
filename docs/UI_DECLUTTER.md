@@ -15,6 +15,6 @@ Rule: **in a fight nothing floats or sits on the world as a word or a key letter
 | DRINKING / REPAIRING under your bars | the filling ring beside your head stays |
 | DOWN word in the knock burst | the rays stay; the downed plate shows the fall |
 
-Kept: nameplates and the worst-status word, the ability bar with key caps and "<KEY> AGAIN" on the slot, damage
+Kept: nameplates (the name only: a status is an icon in the plate row, never a word), the ability bar with key caps and "<KEY> AGAIN" on the slot, damage
 and heal numbers, objective markers, interaction prompts, one-time teaching toasts.
 Checks: `--plate-status-check`, `--recast-cue-check`, `--clarity-check`, `--hudref-check`.

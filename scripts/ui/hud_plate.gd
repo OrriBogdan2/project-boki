@@ -1,6 +1,6 @@
 class_name HudPlate
 extends RefCounted
-## Overhead plates (one per hunter): the name or a status word, the run level on a coin, health in
+## Overhead plates (one per hunter): the name, the run level on a coin, health in
 ## fixed-size segments with armour as a thin strip under it and shields as a pale fill past the end
 ## of health, a chip that holds then drains after a hit, a white flash on the frame when struck, an
 ## armour-break crack, the status row to the right, and a downed plate with a
@@ -8,7 +8,7 @@ extends RefCounted
 ## same chip tracker feeds the mob and boss bars and the squad list (chip_of), and the same status row
 ## (row, draw_row) sits under monster bars.
 ## Look and sizes: HudStyle. Layout around the anchor `sp` (the point over the head):
-##   name / status word ............ sp.y - 7
+##   name .......................... sp.y - 7
 ##   frame (armour + health) ....... sp.y .. sp.y + PAD*2 + HP_H + 1 + AR_H
 ##   status row (others) ........... right of the frame, on its vertical centre (row, draw_row)
 ##   loadout icon row (others) ..... sp.y + HudStyle.PLATE_ICON_ROW and down: left free here
@@ -40,7 +40,7 @@ var st := {}
 var now := 0.0
 var _prune_at := 0.0
 ## What the last draw showed for each nid (checks and tools read this): {segs, armor, shield,
-## downed, word, chip}
+## downed, row (the status row's items), chip}
 var shown := {}
 
 ## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
@@ -282,27 +282,17 @@ func _draw_plate(h_v, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	var has_ar := _armor(c, h, ar, s)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop, LevelGap.of(viewer, h))
-	# the name, or what's being done to them (stunned, rooted ...) in its colour, and the status row beside the plate
-	var sts := statuses(h)
-	var word := ""
-	var word_col := Color("9ae8ff")
-	for x in sts:
-		if String(x[2]) != "":
-			word = String(x[2])
-			word_col = x[1]
-			break
-	if word != "":
-		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, word_col)
-	elif show_name:
+	# the name; what's being done to them is the status row beside the plate (no word; the body shows it too)
+	if show_name:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
 		var nm := ClanInfo.tagged(h.pname, h.clan_tag)
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), nm, HudStyle.PLATE_NAME_FS, name_col)
-	var items := row(viewer, h, sts)
+	var items := row(viewer, h, statuses(h))
 	draw_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), items)
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, h_v.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
-		"word": word, "word_col": word_col, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"]), "row": items}
+		"chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"]), "row": items}
 
 ## An archetype's resource tell, readable from the other side: a glow at half, bright and quick at full.
 static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -> void:
@@ -339,15 +329,10 @@ func _draw_self(h_v, sp: Vector2, p: Hunter) -> void:
 	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, SideColor.you(), pop)
-	var sts := statuses(p)
-	var word := ""
-	if not sts.is_empty():
-		draw_row(c, Vector2(sp.x, frame.end.y + 18.0), row(p, p, sts), true)
-		word = String(sts[0][2])
-		if word != "":
-			HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, sts[0][1])
+	var items := row(p, p, statuses(p))
+	draw_row(c, Vector2(sp.x, frame.end.y + 18.0), items, true)
 	shown[p.nid] = {"segs": HudStyle.seg_count(p.max_hp), "armor": has_ar, "shield": p.shield > 0.0, "downed": false,
-		"word": word, "chip": ch, "lvl": p.lvl, "lvl_pop": float(s["lvl_pop"])}
+		"chip": ch, "lvl": p.lvl, "lvl_pop": float(s["lvl_pop"]), "row": items}
 
 static func _frame_rect(x0: float, y: float, w: float) -> Rect2:
 	var pad := HudStyle.PLATE_PAD
