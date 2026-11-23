@@ -11124,3 +11124,4 @@ READY ext/merge-lane-n23b-1123 f8bfba50fc (origin/main merged; conflicts only to
 READY ext/main-red-movefeel-style-1123 6648c91b8f3 (style ratchet green on main; --move-feel-check 14 fails+script error -> 3, knock tail left open)
 READY ext/toast-side-rail 59f47f282e (toasts to right rail; CLARITYTOAST 20/20 -> 0/20)
 READY ext/plate-status-declutter 1305163b7a (plates: status = icon row only, no CC word in the name slot; clarity-shots 0 CC words in 20/20 frames)
+READY ext/main-red-movefeel-style-1123 bbf73b5bfd2 (main reds: style ratchet green, --move-feel-check 14 fails+script error -> 0; supersedes ext/knock-rows-green)
