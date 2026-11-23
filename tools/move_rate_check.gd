@@ -1,5 +1,5 @@
 extends "res://tools/move_feel_check.gd"
-## --move-rate-check (docs/MOVEMENT_PARITY.md, docs/decisions/0048): the Hunter moves the same whatever the
+## --move-rate-check (sv/MOVEMENT_PARITY.md, docs/decisions/0048): the Hunter moves the same whatever the
 ## display's frame rate, in a match and on the farm. Each trial runs drawn frames of 1/30, 1/60 and 1/144 s
 ## through the real frame loops (Match._process, the farm's FarmStep.run) with real key presses, and measures:
 ## run speed and the distance of a 1 s run, the stop (and the stop from each Hunter's run speed, inside the
