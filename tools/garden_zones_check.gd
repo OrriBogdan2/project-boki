@@ -725,8 +725,8 @@ func _reveal_part(m: Node, hub) -> void:
 	hub.hway.place()
 	way = hub.hway.node
 	var ridge := GardenZones.ids().find("ridge")
-	ok(way.has_node("Lock%d" % ridge) and not way.has_node("Lock2") and way.get_node("Cap2").scale == Vector3.ONE,
-		"the next hub plays it for that zone only")
+	ok(way.has_node("Lock%d" % ridge) and not way.has_node("Lock2") and not way.has_node("Cap2"),
+		"the next hub plays it for that zone only (Cinderstep's lit stone and cap are merged into the Waystone)")
 	way.free()
 	hub.hway.place()
 	ok(not hub.hway.node.has_node("Lock%d" % ridge), "and never again")

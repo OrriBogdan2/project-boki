@@ -247,8 +247,9 @@ static func waystone(stones: Array) -> Node3D:
 		var lit: bool = stones[i]["open"]
 		var owed: bool = stones[i].get("owed", false)
 		var col := Color(stones[i]["colour"] if lit else STONE_DARK)
-		Models.part(n, Models.box(0.36, 1.25, 0.24), Models.toon(col, true, STONE_GLOW if lit else 0.0),
+		var st := Models.part(n, Models.box(0.36, 1.25, 0.24), Models.toon(col, true, STONE_GLOW if lit else 0.0),
 				at + Vector3(0, 0.62, 0), Vector3.ONE, Vector3(0, a, 0), "Stone%d" % i if owed else "")
+		st.set_meta("open", lit)
 		if lit:
 			var cap := Models.toon(col.lightened(0.4), false, 1.0)
 			var top := at + Vector3(0, 1.34, 0)
