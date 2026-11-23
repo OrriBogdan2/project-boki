@@ -208,7 +208,7 @@ func _breah() -> void:
 		p_held == 0 and K.punches == p0 + 1 and K.boulders == b0, "held %d punches %d boulders %d" % [p_held,
 			K.punches - p0, K.boulders - b0]
 	)
-	# a merge mid-hold ends it
+	# a merge mid-hold no longer ends it (docs/decisions/0100): letting go afterwards still throws the punch
 	reset.call()
 	P.inp["fire"] = true
 	step(m, 0.95, func(): P.inp["fire"] = true)
@@ -218,7 +218,8 @@ func _breah() -> void:
 	P.merge_st = {}
 	P.inp["fire"] = false
 	ok(
-		"lmb: a merge ends the hold with no punch", K.punches == punches0 and K.lmb_t < 0.0 and P.mel_hold == 0.0,
+		"lmb: a merge keeps the hold, the release still throws the punch",
+		K.punches == punches0 + 1 and K.lmb_t < 0.0 and P.mel_hold == 0.0,
 		"punches %d -> %d" % [punches0, K.punches]
 	)
 	# punch into a wall: stunned, stars over the head

@@ -47,7 +47,7 @@ func _hero(main: Node, holder: Node3D, arch: String) -> void:
 	if sk == null:
 		m.free()
 		return
-	var sync := w.get_node("Sync") as WardenGlb.Sync
+	var sync := WardenGlb.layers(m)      # (Sync, or Native on Meshy's own skeleton: WardenNative)
 	var an := HunterAnim.new(m)
 	var worst := {}
 	var st := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
@@ -63,7 +63,7 @@ func _hero(main: Node, holder: Node3D, arch: String) -> void:
 		var s2 := st.duplicate()
 		s2.merge(pose, true)
 		an.update(DT, s2)
-		sync._process(DT)
+		sync.call("_process", DT)
 		await main.get_tree().process_frame      # the anchor empties ride their bones from the next frame
 		for row: Array in EMITTERS[arch]:
 			var d := _off_bone(m, sk, arch, row, verts[row[2]])
@@ -106,12 +106,17 @@ func _emitter(m: Node3D, sk: Skeleton3D, arch: String, emitter: String) -> Vecto
 	var off: Array = a.get("off", [0.0, 0.0, 0.0])
 	return sk.global_transform * (sk.get_bone_global_pose(bi) * Vector3(off[0], off[1], off[2]))
 
-## The vertices `bone` carries (OWN of their weight or more), in the bone's own space (the skin's bind pose).
+## The vertices `bone` carries (OWN of their weight or more, or rigidly as a WardenProps part), in the bone's own
+## space (the skin's bind pose).
 func _bone_verts(w: Node, sk: Skeleton3D, bone: String) -> PackedVector3Array:
 	var part := sk.get_node_or_null(WardenCompanions.PREFIX + bone) as MeshInstance3D
 	if part != null:
 		return part.mesh.get_faces()
 	var out := PackedVector3Array()
+	var prop := WardenProps.part(sk, bone)  # (a contract part Meshy's mesh lacks, hung on the bone: Kael's sword)
+	if prop != null:
+		for v in prop.mesh.get_faces():
+			out.append(prop.transform * v)
 	var bi := WardenSkeleton.find(sk, bone)
 	for mi: MeshInstance3D in w.find_children("*", "MeshInstance3D", true, false):
 		if mi.skin == null or mi.mesh == null:

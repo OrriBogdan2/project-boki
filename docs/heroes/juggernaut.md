@@ -390,7 +390,7 @@ From the wiki's ability page and patch notes (reference notes) and the owner's n
 | The ult: 0.65s of invulnerability, then the strike | wiki R | yes (ult f33-f39) | Built: blocks every hit and its crowd control; asserted |
 | The ult heals for a share of the damage dealt (80% on the newer card) | wiki R, in-game card | n/a | Built (80%); asserted |
 | No heal while anti-healed | wiki patch 08.21.2024 | n/a | Built through blight (healing barely takes); asserted |
-| No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted |
+| No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted. Owner 11-08 (item 11) over the footage: the cast keeps his speed (80% of a run, easing off at 1.6/s; a rise of 1 m/s or more gets +2.2 m/s, a ledge rise hands over to it; `x.carry_k` and the rest); asserted (`tools/kael_tap_ult_check.gd`) |
 | Killing a living enemy with the ult resets it (data: "Killing a living enemy with it resets its CD"; footage: reusable at once after the kill) | wiki R, in-game card | yes (ult f99-f101) | Built: the cleave's own hit takes a hunter down (our lethal hit is a knock, the source's kill): cooldown to 0 at once, no other window. A plain hit resets nothing; a hunter already down takes nothing from it; a monster or a wisp resets nothing. Shared path: `HeroUlt.landed` names the result, `HeroUlt.reset` clears the cooldown; asserted |
 | A sweet-spot Execution Slam knock resets the ult | wiki RMB | n/a | Built (within 2s of the sweet spot); asserted |
 | No reset from monsters or wisps | wiki patch 22.01.25 | n/a | Built: hunters only |
@@ -639,9 +639,9 @@ Kael on origin/main d255acbee against the source (docs/KIT_PARITY.md Kael block,
 sv/briefs/kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (owner)**, **regressed**, **open**.
 `kit` is scripts/arch/kits/juggernaut_kit.gd, `chain` juggernaut_chain.gd, `ult` juggernaut_ult.gd, `drop`
 juggernaut_drop.gd, `json` content/archetypes/juggernaut.json, `flow` content/dash_flow/juggernaut.json.
-`--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main. Many Kael branches are unmerged (kael-lunge-length,
-kael-rmb-dash-turn, kael-riposte-knock, kael-ult-reset-rebased-rebased, kael-tap-ult-1108, kael-chain-length, gaps-juggernaut):
-their files were left alone, so rows they touch are listed, not fixed.
+`--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main (Nov 9). Nov 20: kael-lunge-length (`4ea2625c13`,
+`e738af1ca7`), kael-riposte-knock, kael-ult-reset and gaps-juggernaut are on main or their branches are gone; kael-rmb-dash-turn
+and kael-tap-ult-1108 are still not merged. Rows below say which.
 
 | Row | Verdict | Where | Note |
 |---|---|---|---|
@@ -655,7 +655,7 @@ their files were left alone, so rows they touch are listed, not fixed.
 | RMB hold: held indefinitely, never auto-fires | match | kit:546 (base arch_kit.gd:111 is 9s) | owner; asserted "jug parity rmb" |
 | RMB hold: perfect release | differ (owner) | kit:583, kit:769, json:26 | +20% distance, cue and ring; no source equivalent |
 | RMB hold: lane, magenta at full, pose only while held | match | kit:551, kit:680 | |
-| RMB hold: Lunge length 4.5 to 5.4 m | done (ext/kael-open-rows) | json:30 | [F] 2.5 to 3 bh (about 5 m) at any charge; DECISIONS 2026-11-11 a short lunge. See "Open rows closed, Nov 20" |
+| RMB hold: Lunge length 4.5 to 5.4 m | done `4ea2625c13` (ext/kael-open-rows, on main) | json:30 | [F] 2.5 to 3 bh (about 5 m) at any charge; DECISIONS 2026-11-11 a short lunge. See "Open rows closed, Nov 20" |
 | RMB hold: a miss doubles the cooldown | match | kit:787 | [W] |
 | RMB air: Meteor Drop at the cursor, own 7.2s slot, stun core | match | drop:62, drop:145, json:27 | 0.8x of the data's 9s |
 | RMB in the pull: Cinder Spin, blights | match | kit:909, json:29 | [D] |
@@ -677,7 +677,7 @@ their files were left alone, so rows they touch are listed, not fixed.
 | Hold rows: LMB and RMB keep through dash and jump | match | flow:71, flow:84 | [O] |
 | Into-jump: X locked | match | flow:97 | planted guard |
 | Clips: 21 kmoves, locomotion and states map to kael.glb clips | match | content/rules/warden_anim/kael.json:51 | all 49 clips resolve; KIT_PARITY still says "missing" (stale doc) |
-| Rank text: Warchain and dash cooldown numbers | regressed | json:42, json:43 | text says 9.5 / 8.3 / 5.9s and 9s, real 12.8 / 11.2 / 8.0s and 10.4s; juggernaut.json is in flight (kael-lunge-length, kael-rmb-dash-turn), left for the next pass |
+| Rank text: Warchain and dash cooldown numbers | done (checked 2026-11-20) | json:51 to json:53 | rank text now reads 12.8 / 11.2 / 8.0s Warchain and 10.4 / 8.8 / 6.4s dash, the real numbers |
 
 Fixed on this branch (docs only; the code was right): the Warchain per-slot row (cooldown 12.8s, not 9.5s), the state-machine
 row (no blight from the hook, as `--juggernaut-combo-check` already asserts), and the dash-on-knock row. No code change, so no
