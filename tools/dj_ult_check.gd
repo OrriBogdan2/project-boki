@@ -593,7 +593,7 @@ func _guard_pulls(m: Match, p: Hunter, t2: Hunter, home: Vector3) -> void:
 		while m.time - t0 < float(mark[1]):
 			m.step(a_x.DT)
 		seen[mark[0]] = Blockers.body_stops(p, t2)
-	a_x.ok("juggernaut X guard edge: a pull (Grimble's reel) is refused in the guard only, not in the strike or recovery",
+	a_x.ok("juggernaut X guard edge: a pull (Grimble's reel) is refused in the guard only, not in strike/recovery",
 			seen["guard"] and not seen["strike"] and not seen["recover"], str(seen))
 
 ## A knock from before the guard that reaches a wall inside it: ours (no source row), as main: the guard takes the

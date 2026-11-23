@@ -16,7 +16,7 @@ const SEED := 11
 const FRAMES := 6              # frames in the GPU strip
 const MARK_STEPS := 20         # steps per stage of the marks test: longer than a mark takes to fade (BokiWake.FADE_S)
 const WALK := Vector3(0, 0, -1.2)      # m/s: a wading walk along the stream's crossing
-const CROSS_X := HomeLayout.LANDING.x + 4.0   # m: the crossing column, east of the portal (the Black Market stands north-west)
+const CROSS_X := HomeLayout.LANDING.x + 4.0  # m: crossing column, east of the portal (the market is north-west)
 
 var bad := 0
 var main: Node
