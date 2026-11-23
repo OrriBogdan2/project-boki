@@ -97,6 +97,7 @@ func _death() -> void:
 	ok(k.summon.out() and not k.wisp and not f.downed, "damage alone does not end the summon")
 	var pings := _wisp_pings()
 	k.teleport(f.pos + Vector3(12, 0, 0))  # (killed away from its owner, so there is a flight)
+	_listen(k.pos)
 	k.hurt(k.max_hp * 5.0, p)
 	ok(
 		k.wisp and k.state == "shoulder" and not KinSteal.loose(k) and k.owner_h == f,
