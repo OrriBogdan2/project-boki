@@ -10,7 +10,6 @@ extends RefCounted
 ## help, and the materials are spent as it goes (FarmSites).
 
 const FACE_YOU_M := 9.0          # m: closer than this he turns to watch you come
-const PAUSED_LINE := "Paused while you were away"      # on a site's label for the first visit
 const SITE_REACH := 2.2          # m beyond the site's half-size you can keep hammering from
 
 var h
@@ -22,24 +21,10 @@ var call_t := 0.0
 var site_u := -1                 # the construction site you are hammering (deco uid)
 var pos := Vector3.INF           # where he is standing (or walking to)
 var spot := Vector3.INF          # his home spot with its clear ring (HobSpot), INF while he is not on the farm
-var paused: Array = []           # uids of sites that stood still during a run
-var panel_seen := false          # a panel has been open since you came back
 
 func _init(home) -> void:
 	h = home
 	chat = HobTalk.new(self)
-	var seen := float(Work.ensure().get("seen", 0.0))
-	note_return(Time.get_unix_time_from_system() - seen, seen > 0.0)
-
-## You are back after `away_s` seconds (`known`: the farm had been looked at before). Sites only
-## progress while you are here, so each unfinished one is marked paused for the first visit.
-func note_return(away_s: float, known: bool) -> void:
-	paused.clear()
-	panel_seen = false
-	if not known or away_s < Work.AWAY_MIN:
-		return
-	for e in FarmSites.sites():
-		paused.append(int(e["u"]))
 
 func rules() -> Dictionary:
 	return FarmBuilder.rules()
@@ -109,7 +94,6 @@ func sync() -> void:
 func tick(dt: float) -> void:
 	t += dt
 	_hammer(dt)
-	_clear_paused()
 	if not is_instance_valid(node):
 		return
 	_walk(dt)
@@ -123,15 +107,6 @@ func tick(dt: float) -> void:
 		if FarmBuilder.toast_due():
 			h._toast(String(rules()["toast"]))
 			Sfx.play("unlock", node.position, -8.0)
-
-## The line goes once a panel has opened and closed (the arrival card).
-func _clear_paused() -> void:
-	if paused.is_empty():
-		return
-	if h.panel_open != "":
-		panel_seen = true
-	elif panel_seen:
-		paused.clear()
 
 ## Walks to where he stands; there he hammers at a site, else waits facing you (or out over the farm).
 func _walk(dt: float) -> void:
@@ -208,8 +183,7 @@ func label(it: Dictionary) -> String:
 	if need != "":
 		return need
 	var nm := FarmUnlocks.name_of(String(e["id"])).to_lower()
-	var text := "Hold to hammer the %s (%d/%d)" % [nm, int(e["site"]["got"]), int(e["site"]["need"])]
-	return text + " · " + PAUSED_LINE if paused.has(int(e["u"])) else text
+	return "Hold to hammer the %s (%d/%d)" % [nm, int(e["site"]["got"]), int(e["site"]["need"])]
 
 ## Details on a site: its panel, where you send Boki to build it.
 func open_site(it: Dictionary) -> void:
@@ -237,7 +211,6 @@ func _land_swing() -> bool:
 	var e := FarmSites.entry(site_u)
 	if e.is_empty() or not FarmSites.has_site(e):
 		return false
-	paused.erase(site_u)      # the site is moving again
 	FarmSites.player_swing(h.hw, e)
 	FarmTutorial.event("swing")
 	h._refresh_top()

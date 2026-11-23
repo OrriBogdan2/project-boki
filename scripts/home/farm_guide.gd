@@ -33,7 +33,6 @@ func _init(home) -> void:
 func build_ui() -> void:
 	if h.root_ui == null:
 		return
-	BaseCard.attach(h)
 	refresh()
 
 ## Rebuilds the card and the hint now.
@@ -147,7 +146,7 @@ func toast_top() -> float:
 
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
-	if id == "":      # base mode too: the tutorial line keeps its Skip (--tutorial-skip-check)
+	if id == "":
 		_clear_hint()
 		return
 	if not is_instance_valid(hint_box):

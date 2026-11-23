@@ -7,12 +7,9 @@
 		"accent": "#7ad8ff"
 	},
 	"sound": {
-		"cast": "boki_form_stormwing_cast",
-		"travel": "boki_form_stormwing_travel",
-		"hit": "boki_form_stormwing_hit",
-		"cue": "electric",
 		"xform": "zap",
-		"pitch": 0.8
+		"pitch": 0.8,
+		"ult": "zap"
 	},
 	"look": {
 		"scale": 1.25,

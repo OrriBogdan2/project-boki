@@ -138,5 +138,5 @@ func show_clip(k: int) -> void:
 func pick(id: String) -> void:
 	if not choose.call(id):
 		return
-	UI.pick_taken()
+	Sfx.play("unlock", null, -6.0)
 	done.call(id)

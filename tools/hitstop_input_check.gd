@@ -10,7 +10,6 @@ extends RefCounted
 ## T4 freeze injected at its hit and the row says so. --hitstop-input-check=<id>,<id> runs only those heroes.
 ## Never touches the save.
 
-const INJECT_HOLD := 0.07         # s: the stand-in freeze when the hit never landed (the old tier-4 attacker hold)
 const LAND_WAIT := 150          # steps: the heavy hit lands within this (holds included)
 const WATCH_F := 90             # frames: the freeze and the tapped action both fit in this
 const SETTLE := 40              # steps before the hit: the fresh match's own hit-stop budget and pair window clear
@@ -29,7 +28,6 @@ const HEAVY := {
 	"archer": ["lmb", 20, 5.0],
 	"tender": ["lmb", 1, 4.0],
 	"thief": ["lmb", 1, 2.0],
-	"gil": ["lmb", 1, 2.0],            # a Fencer thrust (a held LMB is the Tide Lunge, not a chain)
 }
 const KEYS := {"dash": "dash", "lmb": "fire", "e": "signature", "jump": "jump"}      # tapped -> its input action
 const FWD := Vector3(0, 0, -1)       # the dummy stands where ready-up aims the hunter
@@ -51,9 +49,6 @@ func run(main: Node) -> void:
 	flow = load("res://tools/dash_flow_check.gd").new()
 	CombatBus.ability_used.connect(flow._on_used)
 	for hero in _heroes():
-		if not HEAVY.has(hero):
-			ok(false, "%s: no HEAVY row (add its top hit to the table)" % hero)
-			continue
 		for key in KEYS:
 			var inside: Array = await _trial(main, hero, key, true)
 			var after: Array = await _trial(main, hero, key, false)
@@ -162,10 +157,10 @@ func _land(m: Match, how: Array) -> String:
 			return "real"
 		if dummy.hp < hp0 - 0.01:
 			injected += 1
-			m.freeze_frame(float(INJECT_HOLD))
+			m.freeze_frame(float(Feel.HITSTOP[4][0]))
 			return "injected"
 	unlanded += 1
-	m.freeze_frame(float(INJECT_HOLD))
+	m.freeze_frame(float(Feel.HITSTOP[4][0]))
 	return "no hit"
 
 func _acted(before: Dictionary, key: String, dashes0: float, roll0: float, jump0: float) -> bool:

@@ -5,10 +5,9 @@ extends RefCounted
 
 const USES := 3      # presses of a key after which its hint goes
 ## id, the actions that count as a use, the key cap text ("" = the first action's key), the label
-## (the walk row shows all four keys)
 const KEYS := [
-	["walk", ["left", "right", "up", "down"], "", "walk"],
-	["jump", ["jump"], "", "jump"],
+	["walk", ["left", "right", "up", "down"], "W A S D", "walk"],
+	["jump", ["jump"], "Space", "jump"],
 	["interact", ["interact"], "", "use"],
 	["whistle", ["whistle"], "", "whistle"],
 	["build", ["build"], "", "build"],
@@ -52,8 +51,7 @@ func _rebuild(bits: int) -> void:
 	for i in KEYS.size():
 		if bits >> i & 1:
 			var k: Array = KEYS[i]
-			var cap := String(k[2]) if k[2] != "" else Settings.key_cap(String(k[1][0]))
-			pairs.append([Settings.move_caps(" ") if k[0] == "walk" else cap, k[3]])
+			pairs.append([String(k[2]) if k[2] != "" else Settings.key_cap(String(k[1][0])), k[3]])
 	row = UI.key_hints(pairs, 12, Color(1, 1, 1, 0.78))
 	box.add_child(row)
 	box.modulate.a = 0.85 if bits != 0 else 0.0      # nothing left to say: the pill goes clear

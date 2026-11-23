@@ -95,13 +95,7 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
 body-shaped capsule that faces the camera, so it reads from above) climbs the Hunter in 0.4 s in the new tier's colour (`Hunter.ARMOR_TIERS`), one per tier-up, for
 everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). None on an armour break; no ring, no burst.
 
-## Armour on the body (every Hunter and bot, not a recipe)
-`Juice.hit` flashes the body cyan (`Ent.SHELL_FLASH`) for a hit that lands on armour and white for one on health;
-`Juice.armor_break` holds the cyan flash for `BREAK_FLASH_T` and sheds shards. No ring or burst (a ground ring means gameplay).
-The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only=armour`. Check: `--hero-vfx-check`.
-
 ## Rules
-- **No ring, disc or burst on movement:** explosions are for things that truly explode (kegs, big ultimates, bosses). A dash, landing, wall kick, mantle or dash reset draws dust, ghosts, ribbons and `Fx.debris` specks that stay on the body, never `Fx.ring`/`Fx.burst`, a `flare`, `vortex` or `skirt` layer, or a ground `scorch` disc, unless the move itself is an area (Lantern Trade's circle, Rock Wall, the 360 Smash). `--move-fx-check` runs every Hunter through those moves and fails on any.
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`. Shared ground areas, telegraphs and
 - **Hunter colours stay apart:** every pair of archetype `color`s is at least 0.15 apart in OKLab
@@ -119,12 +113,6 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
   ambient motes; 1,847 before the pools); a kit's E and R alone add 0-195 (noisy run to run). Nodes made in the
   camp fight went 5,294 -> 2,351 (Fx 2,830 -> 132). Effects made mid-fight come from pools (Fx's FxPool, HeroVfx,
   VVFx, Thief's Mark pips).
-- **Particle budget per preset:** `Settings.QUALITY` has `fx` (amount x) and `fx_life` (lifetime x: 0.5 very low, 0.7
-  low, 1.0 from medium up). Fx bursts and sparks, the Hero VFX layers and the ambient emitters (`ParticleCount.tune`: island
-  ash, pickup motes, the ash storm, landmark and exit motes) follow them; High and Ultra are untouched. The ash storm
-  follows `fx` instead of `Settings.lite()`. `--particle-budget-check` (~1 min) builds a 30-Hunter match at each preset
-  and adds the worst a fight piles on (the full Fx pools and the Hero VFX cap): each preset under 4,000, each one down
-  draws less, High and Ultra draw the same.
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness

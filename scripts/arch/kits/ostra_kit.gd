@@ -69,11 +69,6 @@ func _setup() -> void:
 	well = OstraWell.new(self)
 
 # ------------------------------------------------------------------ X: Nightwell (OstraWell)
-## The loading screen's rehearsal: one of each of his KitLooks bodies in the pools (two sigils: the Trade's ends).
-func warm_fx(_at: Vector3) -> void:
-	KitLooks.of(m).prewarm({"aura": 1, "mote": 1, "star": 1, "sigil": 2, "dark": 1, "column": 1, "orb": 1, "spear": 1,
-		"crown": 1, "well_dome": 1})
-
 func cast_ult() -> bool: return HeroUlt.press(self, well.start)
 func has_ult() -> bool: return true
 func ult_running() -> bool: return well.running()
@@ -616,8 +611,7 @@ func _tick_seed(dt: float) -> void:
 		if float(seed["burn"]) <= 0.0:
 			seed["burn"] = float(ed["burn_every"])
 			for f in foes_in(seed["pos"], seed_radius()):
-				var burn := float(ed["burn"]) * float(ed["burn_every"]) * power("kin")
-				f.hurt(burn, h, {"src": "abil", "ab": "e", "tick": true})
+				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
 		_pop(false)
 	elif h.ctrl == "bot":
