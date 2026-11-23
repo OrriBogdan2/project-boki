@@ -46,7 +46,7 @@ func _init() -> void:
 		if not FileAccess.file_exists(splash):
 			splash = src.path_join(art + "_splash.png")
 		if FileAccess.file_exists(splash):
-			_write(splash, OUT + ak + "_splash.jpg", Vector2i(SPLASH_W, SPLASH_W * 9 / 16))
+			_write(splash, OUT + ak + "_splash.jpg", Vector2i(SPLASH_W, int(SPLASH_W * 9 / 16.0)))
 	quit()
 
 func _write(from: String, to: String, px: Vector2i) -> void:
@@ -55,9 +55,9 @@ func _write(from: String, to: String, px: Vector2i) -> void:
 		printerr("portrait_art: can't read %s" % from)
 		return
 	img.convert(Image.FORMAT_RGB8)
-	var keep := Vector2i(mini(img.get_width(), img.get_height() * px.x / px.y),
-			mini(img.get_height(), img.get_width() * px.y / px.x))
-	img = img.get_region(Rect2i((img.get_size() - keep) / 2, keep))   # centre-cut, never stretched
+	var keep := Vector2i(mini(img.get_width(), int(img.get_height() * px.x / float(px.y))),
+			mini(img.get_height(), int(img.get_width() * px.y / float(px.x))))
+	img = img.get_region(Rect2i(Vector2i(Vector2((img.get_size() - keep)) / 2.0), keep))   # centre-cut, never stretched
 	img.resize(px.x, px.y, Image.INTERPOLATE_LANCZOS)
 	img.save_jpg(ProjectSettings.globalize_path(to), QUALITY)
 	print("portrait_art: %s -> %s" % [from.get_file(), to])

@@ -499,7 +499,7 @@ func _glasswater_part(m: Node) -> void:
 		mats[(mi as MultiMeshInstance3D).material_override] = true
 		n += (mi as MultiMeshInstance3D).multimesh.instance_count
 	var want: int = int(B["scatter"]["crystal"]) + int(B["scatter"]["reed"]) + int(B["scatter"]["pebble"])
-	ok(batches.size() >= 3 and batches.size() <= 6 and mats.size() == 3 and n > want / 2,
+	ok(batches.size() >= 3 and batches.size() <= 6 and mats.size() == 3 and n > int(want / 2.0),
 		"the scatter is %d props in %d MultiMesh batches over 3 shared materials" % [n, batches.size()])
 	gw.hsp.tick(1.0)
 	ok(Save.d["zones"]["glasswater"]["patch"].has("t"), "the patch's timer is kept on the save")
