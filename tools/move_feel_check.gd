@@ -587,6 +587,7 @@ func run(main: Node) -> void:
 	_vault_exit()  # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	bad += DIRS.new(m, flat, _reset).run()  # after _aim_rel: its rows disturb the aim_back state
 	_overheat()  # after every timed row: its ~9 s of level glide would move them
+	load("res://tools/move_feel_estimates.gd").run(self)  # overheat burn, spike plunge, pad launch ([?] rows)
 	load("res://tools/move_feel_turn.gd").new(self).run()  # every kit's 180 stick flip at a run (~30 s, late too)
 	load("res://tools/move_feel_hunters.gd").new(self).run()  # the movement review rows, every kit (late too)
 	await _no_fall_carry(main)  # it frees the match
