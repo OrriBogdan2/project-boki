@@ -11145,3 +11145,4 @@ READY ext/feel-shake-table 654718dd380857914abeff335954fd6d7ddcf94b (screen shak
 READY ext/run-speeds-data 4a926ce662 (bulk-rebase: origin/main merged in mechanically, was d6e5038125; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/farm-race-stats 1f9a4bb8ef (garden race decided by raised stats)
 READY ext/ui-ability-rename-check 79d2d0f442 (retired ability names gone; merged main, conflicts resolved to main's coin wording)
+READY ext/ruin-walls-v1-drop 3390b58b7773edf29a6623a813cc51f003fea64e (origin/main merged; one modify/delete conflict on ruin_walls_v1.gd, kept deleted (main only changed int() division in it). --check 0 failures, health --strict OK)
