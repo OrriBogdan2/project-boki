@@ -54,7 +54,7 @@ var camps: Camps = Camps.new(self)     # the map's fixed monster camps (see Camp
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
-var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
+var skydrop: DropSquad = null  # the planning phase before the ship sets off: drop leaders, formations (DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
 var acc := 0.0
@@ -2193,11 +2193,11 @@ func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 		if auto and hud and not train.has("_auto_told"):
 			train["_auto_told"] = true
 
-func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
+func on_kin_swap(h: Hunter, now_k: Kin, was: Kin) -> void:
 	kstat["swap"] += 1
 	fx.burst(h.pos + Vector3(0, 1.5, 0), now_k.sp["color"], 18, 3.5, 0.5)
 	fx.ring(h.pos, 1.4, now_k.sp["color"], 0.3)
-	sfx("swap", h.pos, -4.0)
+	CarrySfx.swap(self, h, now_k, was)
 	if h == player:
 		train["_swapped"] = true
 		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
