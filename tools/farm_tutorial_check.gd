@@ -215,7 +215,7 @@ func _base_ends_alone() -> void:
 		_stats()
 		FarmTutorial.event(what)
 		ok(FarmTutorial.done_count() == 0 and FarmTutorial.active(), "%s before the toy step counts for nothing" % what)
-		for id in ["meet", "eat", "toy"]:
+		for id in ["meet", "patch", "eat", "toy"]:
 			FarmTutorial.mark(id)
 		ok(FarmTutorial.current() == "out", "%s: toy done, 'head out or stay' is the step" % what)
 		var g := int(Save.d["gems"])
