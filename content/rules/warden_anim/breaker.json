@@ -79,7 +79,7 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "dive"
+		"dive": "dive", "fade_out": 0.25
 	},
 	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
@@ -98,7 +98,7 @@
 			"upper": "moving",
 			"hold_from": 0.2,
 			"air_legs": true
-		},
+		, "fade_out": 0.6},
 		"bul_smash": {
 			"clip": "lmb_slam",
 			"air_legs": true,
@@ -108,7 +108,7 @@
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
-		},
+		, "fade_out": 0.6},
 		"bul_guard": {
 			"clip": "rmb_guard",
 			"upper": "moving",
@@ -118,6 +118,7 @@
 		"bul_break": {
 			"clip": "guard_break",
 			"upper": true
+		, "fade_out": 0.6
 		},
 		"bul_whirl": {"dash": true, 
 			"clip": "shift_whirl"
@@ -243,6 +244,7 @@
 		"speed": 1.65,
 		"plants": {"crouch_b": {"L": [0.3], "R": [0.0]}, "crouch_f": {"L": [0.3], "R": [0.25]}, "crouch_l": {"L": [0.283], "R": [0.583]}, "crouch_r": {"L": [0.283], "R": [0.583]}}
 	},
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["bul_smash_wind", 0.5, "bul_guard"],
 		["bul_smash_wind", 0.5, "bul_mend"],
