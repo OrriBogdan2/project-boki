@@ -138,14 +138,14 @@ func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2, root
 
 
 func _hud() -> void:
-	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES      # the whole HUD: a new save gets it staged (HudReveal)
+	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES  # the whole HUD: a new save gets it staged (HudReveal)
 	m = Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
 	m.set_process(false)
-	main.current = m      # (the pause menu reads its options; the next screen frees it)
+	main.current = m  # (the pause menu reads its options; the next screen frees it)
 	var rivals: Array = m.hunters.filter(func(h): return h.team != m.player.team)
-	KillFeed.knock(m, rivals[0], m.player, "snare")      # (a full feed: two knock rows and two lines)
+	KillFeed.knock(m, rivals[0], m.player, "snare")  # (a full feed: two knock rows and two lines)
 	KillFeed.knock(m, rivals[2], rivals[1], "quake")
 	for line in ["Team 3 is out", "Ember revived Pip"]:
 		m.add_feed(line)

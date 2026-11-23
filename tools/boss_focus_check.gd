@@ -56,7 +56,8 @@ func run(main: Node) -> void:
 	var p: Hunter = m.player
 	var b: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
 	keep = [p, b]
-	# (the bot's level rolls from the spawn order: pin it, an Easy one reaches 4.8 m, short of the player, and strafes loosely)
+	# (the bot's level rolls from the spawn order: pin it, an Easy one reaches 4.8 m, short of the player,
+	# and strafes loosely)
 	b.ai["diff"] = (Data.BOT_DIFF["medium"] as Dictionary).duplicate()
 	b.ai["skill"] = float(b.ai["diff"]["skill"])
 	for h in m.hunters:
@@ -77,7 +78,9 @@ func run(main: Node) -> void:
 	var outside: Vector3 = f["gate_c"] + Vector3(f["out"].x, 0, f["out"].y) * 6.0
 	_spot(p, outside + side * 2.5)
 	_spot(b, outside - side * 2.5)
-	b.ai["think"] = 0.05      # (it looks once the team's sight has seen the player (a few ticks), before a roaming bot walks out of it: sight ends near 5.5 m)
+	# (it looks once the team's sight has seen the player (a few ticks), before a roaming bot walks out of it:
+	# sight ends near 5.5 m)
+	b.ai["think"] = 0.05
 	# ---- 1. the control: outside the lair, the player is fair game
 	var went := false
 	for i in int(2.0 / Match.DT):

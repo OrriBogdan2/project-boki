@@ -300,7 +300,9 @@ func tier_up(h: Hunter, tier: int) -> void:
 
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
-var last_voice := -1           # the Sfx handle of the last sound a move started at once (KitWindup.keep)
+var last_voice := -1  # the Sfx handle of the last sound a move started at once (KitWindup.keep)
+
+
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
 	last_voice = -1
 	var k := float(o.get("k", 0.0))

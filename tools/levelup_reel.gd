@@ -7,14 +7,15 @@ extends RefCounted
 ## Prints LEVELUP_REEL_MARK lines with the frame each level-up lands on. Never writes the save.
 
 const DT := 1.0 / 60.0
-const FIGHT_S := 4.5           # s of fighting around each level-up
-const XP_SHORT := 25.0         # XP left to the next level when a fight starts (a few hits)
+const FIGHT_S := 4.5  # s of fighting around each level-up
+const XP_SHORT := 25.0  # XP left to the next level when a fight starts (a few hits)
 
 var main: Node
 var m: Match
-var P: Hunter
-var R: Hunter
+var p: Hunter
+var r: Hunter
 var frame := 0
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -23,11 +24,22 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true,
-			"arch": "archer", "cls": Arch.weight("archer"), "weapon": Arch.signature("archer")})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 12,
+			"no_drop": true,
+			"arch": "archer",
+			"cls": Arch.weight("archer"),
+			"weapon": Arch.signature("archer")
+		}
+	)
 	m.set_process(false)
-	P = m.player
-	R = m.hunters.filter(func(x): return x != P)[0]
+	p = m.player
+	r = m.hunters.filter(func(x): return x != p)[0]
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
@@ -39,37 +51,38 @@ func run(main_node: Node) -> void:
 		at = m.world.random_ground()
 		if not m.world.is_void(at.x + 7.0, at.z) and absf(m.world.ground_at(at.x + 7.0, at.z) - at.y) < 0.3:
 			break
-	P.teleport(at)
-	R.teleport(m.world.free_spot_near(at + Vector3(7, 0, 0), [], 1.0, 0.45, 2.0))
+	p.teleport(at)
+	r.teleport(m.world.free_spot_near(at + Vector3(7, 0, 0), [], 1.0, 0.45, 2.0))
 	await _fight(2)
 	await _fight(5)
 	print("LEVELUP_REEL done, %d frames" % frame)
 	main.get_tree().quit(0)
 
+
 ## Fight until `from` turns into `from + 1` on a hit, then a little after.
 func _fight(from: int) -> void:
-	P.lvl = from
-	P.xp = float(Hunter.XP_TO[from]) - XP_SHORT
-	P.hp = P.max_hp
-	R.hp = R.max_hp
-	R.ctrl = "idle"
+	p.lvl = from
+	p.xp = float(Hunter.XP_TO[from]) - XP_SHORT
+	p.hp = p.max_hp
+	r.hp = r.max_hp
+	r.ctrl = "idle"
 	var marked := false
 	var t := 0.0
 	while t < FIGHT_S:
-		P.inp["aim"] = R.pos
-		P.inp["fire"] = fmod(t, 0.9) < 0.6
-		P.inp["move"] = Vector2(0, 1 if fmod(t, 2.0) < 1.0 else -1) * 0.5
-		R.inp["aim"] = P.pos
-		R.inp["fire"] = fmod(t + 0.4, 1.1) < 0.5
+		p.inp["aim"] = r.pos
+		p.inp["fire"] = fmod(t, 0.9) < 0.6
+		p.inp["move"] = Vector2(0, 1 if fmod(t, 2.0) < 1.0 else -1) * 0.5
+		r.inp["aim"] = p.pos
+		r.inp["fire"] = fmod(t + 0.4, 1.1) < 0.5
 		m.step(DT)
-		m.cam.snap(P.pos)
+		m.cam.snap(p.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)
-		R.hp = maxf(R.hp, R.max_hp * 0.3)      # (keep the fight going)
-		P.hp = maxf(P.hp, P.max_hp * 0.4)
-		if not marked and P.lvl > from:
+		r.hp = maxf(r.hp, r.max_hp * 0.3)  # (keep the fight going)
+		p.hp = maxf(p.hp, p.max_hp * 0.4)
+		if not marked and p.lvl > from:
 			marked = true
-			print("LEVELUP_REEL_MARK %d -> %d at frame %d" % [from, P.lvl, frame])
+			print("LEVELUP_REEL_MARK %d -> %d at frame %d" % [from, p.lvl, frame])
 		t += DT
 		frame += 1
 		await main.get_tree().process_frame

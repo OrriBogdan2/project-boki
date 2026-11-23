@@ -513,8 +513,8 @@ func set_layers(want: Dictionary) -> void:
 ## A match leaving the tree (extract, death, quit, a rematch; Match._exit_tree): everything it started
 ## stops. The layered score and the place beds (abyss, ruins, AmbBeds) fade out (a screen asking for the
 ## "match" wind while it is already the current ambience returns early, so it would never clear them),
-## every keyed loop stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
-## next screen's play_music / play_ambience, which crossfade them.
+## every keyed loop stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left
+## to the next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
 	_cut_sting()
 	if not layers.is_empty():
@@ -716,8 +716,8 @@ func play_sample(bus_name: String) -> void:
 	p.play()
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
-## burst of the same sound is capped and stacked quieter (returns a handle for cut, -1 when nothing played). reach: metres this call carries (0: the sound's own
-## "reach", else hear_range). mine: your own sound played away from you (a hit tick on the one you hit), so the pool
+## burst of the same sound is capped and stacked quieter (returns a handle for cut, -1 when nothing played). reach:
+## metres this call carries (0: the sound's own "reach", else hear_range). mine: your own sound played away from you (a hit tick on the one you hit), so the pool
 ## keeps it as it keeps your other sounds (SfxVoices). take: a given take of a sound that has several (FireSfx
 ## round-robins them), else a random one that isn't the last.
 func play(

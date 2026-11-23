@@ -7,9 +7,12 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SCOREBOARD %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true

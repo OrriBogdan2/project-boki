@@ -112,11 +112,13 @@ static func enabled(opts: Dictionary) -> bool:
 static func tide_r(m_v: Match) -> float:
 	return ring_in(m_v, 0.0)
 
+
 ## The ring's radius `secs` seconds on (0 with no Heart).
 static func ring_in(m_v: Match, secs: float) -> float:
 	if m_v.heart == null:
 		return 0.0
 	return minf(m_v.heart.start_r, ring_at(m_v.sess_time() + secs, m_v.heart.ways_scale))
+
 
 ## The tide ring's radius t seconds into a match on a map of ways_scale k: tide_r0 (also before the tide
 ## moves) closing to tide_r1 by the last close, then the end phase closing on to end_r, held to the fall.
@@ -155,12 +157,14 @@ static func tide_out(m_v: Match, p: Vector3) -> float:
 static func next_r(m_v: Match, ahead := 1) -> float:
 	return ring_in(m_v, r("tide_next_s") * ahead)
 
+
 ## The play space a match on this layout starts with, in metres round the Heart: the map's play_space for
 ## the mode (solos when every squad is one Hunter, else trios), or the closing ring's first radius.
 static func start_r_of(layout: Dictionary, opts: Dictionary) -> float:
 	var mode := "solos" if int(opts.get("squad", 1)) == 1 else "trios"
 	var first := r("tide_r0") * float(layout.get("ways_scale", 1.0))
 	return minf(first, float(layout.get("play_space", {}).get(mode, first)))
+
 
 ## The points (spawns) inside the play space at the start, START_IN short of its edge, on a layout with an
 ## authored Heart; all of them if none are (or no Heart: training, tutorial, duel, arena).
@@ -171,6 +175,7 @@ static func in_play(layout: Dictionary, opts: Dictionary, points: Array) -> Arra
 	var edge := start_r_of(layout, opts) - START_IN
 	var inside := points.filter(func(p): return Vector2(p.x - c.x, p.z - c.y).length() <= edge)
 	return inside if not inside.is_empty() else points
+
 
 ## Seconds until the tide starts to close (0 once it has), and until it holds at its last ring (0 once it does).
 static func close_in(m_v: Match) -> float:

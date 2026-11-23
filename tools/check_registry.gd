@@ -291,7 +291,7 @@ const CHECKS := {
 	"--kin-form-check": ["res://tools/kin_form_check.gd", "kin_form_check", null],
 	"--gear-check": ["res://tools/gear_check.gd", "gear_check", null],
 	"--lair-lock-check": ["res://tools/lair_lock_check.gd", "lair_lock_check", null],
-	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],      # XP bar, level-up moment
+	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],  # XP bar, level-up moment
 	"--pack-ui-check": ["res://tools/pack_ui_check.gd", "pack_ui_check", null],
 	"--life-check": ["res://tools/life_check.gd", "life_check", null],
 	"--swim-check": ["res://tools/swim_check.gd", "swim_check", null],
@@ -811,7 +811,7 @@ const CHECKS := {
 	"--online-feel-1-check": ["res://tools/online_feel_check.gd", "online_feel_check", "gunslinger"],
 	"--online-feel-2-check": ["res://tools/online_feel_check.gd", "online_feel_check", "juggernaut"],
 	"--online-feel-3-check": ["res://tools/online_feel_check.gd", "online_feel_check", "rimewright"],
-	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],     # the second game (not gated)
+	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],  # the second game (not gated)
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],  # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status

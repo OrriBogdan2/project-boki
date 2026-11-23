@@ -5,13 +5,15 @@ extends RefCounted
 ## (the whole screen) is written.
 
 const DT := 1.0 / 60.0
-const SETTLE_S := 7.0      # s played before the events: the region banner and arrival toasts are gone by then
-const RUN_S := 0.5         # s played with Tab held before the picture
+const SETTLE_S := 7.0  # s played before the events: the region banner and arrival toasts are gone by then
+const RUN_S := 0.5  # s played with Tab held before the picture
+
 
 func run(main: Node) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -24,7 +26,8 @@ func run(main: Node) -> void:
 	await m.start({"teams": 10, "squad": 3, "tier": 0, "length": 1e9, "seed": 31, "no_drop": true})
 	m.set_process(false)
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
+	if fade != null:
+		await fade.reveal(0.01)
 	for h in m.hunters:
 		h.lives = 1
 		h.ctrl = "idle"
@@ -50,10 +53,12 @@ func run(main: Node) -> void:
 	print("SCOREBOARDSHOTS ", dir)
 	main.get_tree().quit(0)
 
+
 func _play(m: Match, main: Node, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
-		for h in m.hunters: h.render(DT, 1.0)
+		for h in m.hunters:
+			h.render(DT, 1.0)
 		await main.get_tree().process_frame
 		t += DT

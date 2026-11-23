@@ -3,7 +3,8 @@ extends RefCounted
 ## What an egg's card says about the Boki inside (the new-player egg pick): its picture, its name and
 ## its type. A mystery egg shows the same picture as a dark silhouette and no name, but its real type.
 
-const PIC := 72.0       # px: the portrait on the card
+const PIC := 72.0  # px: the portrait on the card
+
 
 ## species: what hatches. mystery: show a silhouette and "???" instead of the picture and name.
 static func build(species: String, mystery: bool, tree: SceneTree) -> Control:

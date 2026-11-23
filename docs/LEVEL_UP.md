@@ -17,8 +17,8 @@ Owner playtest 11-11: level-ups need to be clearer, with fewer pop-ups overall. 
   on this worker, and the UI guide we found does not cover levels. [ludo]
 
 Sources: [hero-ref] `briefs/hero-ref/HUD.md` on `origin/ext/agent-briefs` (sections 2 and 4); [data §7]
-`docs/SUPERVIVE_DATA.md` section 7; [deltias] deltiasgaming.com "Supervive: Experience and Level Caps Explained";
-[ludo] ludo.guide "User Interface (UI) Explained" (Supervive); [steamdb] Supervive patch notes on steamdb.info.
+the reference game's data notes, section 7; [deltias] deltiasgaming.com "Experience and Level Caps Explained";
+[ludo] ludo.guide "User Interface (UI) Explained" (reference game); [steamdb] the reference game's patch notes on steamdb.info.
 
 ## Ours, before (0.24.5)
 The level was a 26 px number on a coin at the portrait's corner, with a thin XP ring round it. The same level

@@ -6,12 +6,13 @@ extends RefCounted
 ## and times come from HudPlate.statuses, so your line and the plates agree. Drawn by HudVitals.
 
 const ORDER := ["STUNNED", "DAZED", "ROOTED", "GROUNDED", "SLOWED"]
-const FS := 10             # px: the name's font size
-const BAR_W := 44.0        # px: each effect's bar
-const BAR_H := 4.0         # px
-const GAP := 12.0          # px between one effect and the next
+const FS := 10  # px: the name's font size
+const BAR_W := 44.0  # px: each effect's bar
+const BAR_H := 4.0  # px
+const GAP := 12.0  # px between one effect and the next
 
-static var _full := {}     # word -> the longest time left seen while it lasts: the bar's full length
+static var _full := {}  # word -> the longest time left seen while it lasts: the bar's full length
+
 
 ## The effects on `p` now as [word, colour, seconds left, fraction left], highest priority first.
 static func entries(p: Ent) -> Array:
@@ -28,6 +29,7 @@ static func entries(p: Ent) -> Array:
 		_full[word] = maxf(float(_full.get(word, 0.0)), left)
 		out.append([word, on[word][1], left, left / maxf(0.01, float(_full[word]))])
 	return out
+
 
 ## The line from `at` (top left), at most `w` wide; an effect that would not fit is left off.
 static func draw(c: CanvasItem, at: Vector2, w: float, p: Hunter) -> void:
