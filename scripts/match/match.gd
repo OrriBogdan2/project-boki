@@ -2614,7 +2614,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 			halo.material_override.set_shader_parameter("color", look[2])
 		mi.scale = Vector3.ONE * vis_size
 		if not Oomph.legacy: vr = vis_size * 0.5
-		mi.global_position = at
+		mi.global_position = extra.get("hand", at)
 	var from := ShotOrigin.hit_from(by, at, v2, extra)      # the hit sweep starts at the body; `at` is the muzzle
 	life += ShotOrigin.extra_life(at, from, v2)
 	v2 = ShotOrigin.keep_reach(at, from, v2, extra)
@@ -2634,7 +2634,8 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		duel.note_shot(by)
 	shot_n += 1
 	var sd := {"vr": vr, "sid": shot_n, "pos": from, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": from, "start": from}
-	if from != at: sd["muzzle"] = at
+	var mouth: Vector3 = extra.get("hand", at)      # drawn from the hand or weapon it left (ShotOrigin.hand)
+	if from != mouth: sd["muzzle"] = mouth
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
@@ -2643,7 +2644,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
 		net_event(["s", _r(from.x), _r(from.y), _r(from.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
 	if by is Hunter and not extra.get("melee", false):
-		fx.flash(at, col.lightened(0.4), 0.22, 0.05)
+		fx.flash(mouth, col.lightened(0.4), 0.22, 0.05)
 		note_sound(by, at, "shot")
 
 func _update_shots(dt: float) -> void:

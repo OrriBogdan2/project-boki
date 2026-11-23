@@ -728,6 +728,7 @@ func cx(slot: String, ability: String, loc_aim: Vector3, extra := {}) -> Diction
 	var pw: String = {"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)
 	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, power(pw), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
 	c["hero_col"] = Arch.color(id)
+	c["fire_from"] = slot      # its shots are drawn from the slot's hand or weapon (ShotOrigin.hand)
 	for k in extra:
 		c[k] = extra[k]
 	return c
