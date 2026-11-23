@@ -12,4 +12,5 @@ const CHECKS := {
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
 	"--grammar-check": ["res://tools/grammar_check.gd", "grammar_check", null],  # parse every kin grammar file (=<root> for another folder)
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
+	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 }
