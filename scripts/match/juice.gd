@@ -102,13 +102,14 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
 	if ability:
 		AbilityFx.hit(m, target, by, d, o)
-	# sound layers on top of the weapon's hit Match plays (HeroSfx.hit_sound): armor rings, empowered and
-	# big hits thud
+	# sound layers on top of the weapon's hit Match plays (HeroSfx.hit_sound): armor rings, and the hit's
+	# own tier confirm (ImpactWeight.confirm)
 	if credit == p and target != p:
 		if armor:
 			m.sfx("armor_hit", target.pos, -9.0, 1.0, true)
-		if d >= 28.0 or o.get("heavy", false) or o.get("payoff", false):
-			m.sfx("hit_heavy", target.pos, -7.0, 1.0, true)
+		var w := ImpactWeight.of_hit(by, target, d, o)
+		if w != "":
+			m.sfx(ImpactWeight.confirm(w), target.pos, ImpactWeight.confirm_db(w), 1.0, true)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
 
