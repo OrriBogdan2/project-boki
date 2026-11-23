@@ -80,3 +80,11 @@ grafts it back into the rigged file by material name (`graft.py`: Meshy's node t
 as Meshy made them; only the vertex data is replaced) and packs it with `native_pack.py` (2048 atlas, 1024 maps). The
 Sable weight fixes are not applied to these. Tenzo rides `orbit_stones`, Motley `orbit_cards`, both on `Head`.
 Every state plays one of the six clips (the same map as Sable's), so none can T-pose.
+
+## Grimble (dredge): goo arm and pack skinning (r6)
+`art/wardens/dredge/dredge_meshy.glb` (skin-native, skin-goo, hoard pack, coin cap) is the r5 body re-skinned by
+`tools/meshy/dredge_reskin.py` (`--stretch FILE.glb` prints the torn-edge report). Meshy fused the goo arm's tail and
+puddle to the right shin, so the arm dragged a ribbon to the floor. Goo above 0.8 m rides the arm and torso bones,
+goo below it (tail, puddle, the shin contact) the leg bones; the cut between is goo on goo, capped, so no shin skin is
+exposed. The pack is rigid on the spine. Worst edge stretch over Idle/Attack/run/walk/jump: goo 330x -> 5x, pack 137x -> 3x,
+skin 31x -> 7x (r5 -> r6).
