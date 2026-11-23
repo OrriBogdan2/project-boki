@@ -11107,3 +11107,4 @@ READY ext/tutorial-low-preset e6365050ca850e08d281c1be3c29d86e0d7935f5 (tutorial
 READY ext/sfx-summon-burst d0b8235a0 (summon/recall sounds)
 READY ext/sfx-hit-tier-confirm 909115a645 (tiered hit confirm)
 READY ext/sfx-hold-takes aeda9fb8bc (bulk-rebase: origin/main merged in mechanically, was a43a177800; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/extra-race-hub-path 6b713babda (minigames near the hub)
