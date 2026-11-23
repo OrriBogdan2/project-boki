@@ -205,7 +205,7 @@ func _bring_watch() -> void:
 	var others := _others()
 	for i in others.size():
 		var h: Hunter = others[i]
-		var x := lerpf(WATCH_X.x, WATCH_X.y, float(i / 2) / maxf(1.0, others.size() / 2.0 - 1.0))
+		var x := lerpf(WATCH_X.x, WATCH_X.y, float(int(i / 2.0)) / maxf(1.0, others.size() / 2.0 - 1.0))
 		var want: Vector3 = me.pos + side * (x if i % 2 == 0 else -x) + fwd * float(i % 3 - 1) * 2.0
 		var at: Vector3 = m.world.free_spot_near(want, [], 0.6, 0.5, 6.0)
 		h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))

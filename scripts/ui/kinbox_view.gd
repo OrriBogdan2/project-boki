@@ -20,7 +20,7 @@ static var sel := ""
 static var confirm := ""  # uid waiting on "release?"
 static var renaming := false
 
-var home: Node = null
+var home: Home = null
 var v: VBoxContainer
 var summary: Label
 var farm_box: VBoxContainer
@@ -34,7 +34,7 @@ var msg: Label
 var _msg_t := 0
 
 
-static func open(h: Node) -> KinBoxView:
+static func open(h: Home) -> KinBoxView:
 	KinBox.ensure()
 	var kv := KinBoxView.new()
 	kv.home = h
@@ -210,9 +210,9 @@ func _done(t: String) -> void:
 	Sfx.play("click")
 	refresh()
 	_say(t)
-	if home and home.has_method("_spawn_kin"):
+	if home:
 		home._spawn_kin()
-	if home and home.has_method("_refresh_burrow"):
+	if home:
 		home._refresh_burrow()
 
 
@@ -269,7 +269,7 @@ func _build_farm(fk: Array) -> void:
 				else:
 					Sfx.play("unlock")
 					_done("The Boki Cottages grew: room for %d Boki on the farm" % KinBox.farm_cap())
-					if home and home.has_method("_refresh_top"):
+					if home:
 						home._refresh_top(),
 			FARM_COLS * CELL.x + 6
 		)
@@ -311,7 +311,7 @@ func _build_tabs(bk: Array) -> void:
 			_can_drop,
 			func(_pos, d):
 				var free := KinBox.free_slot({}, target)
-				if free < 0 or free / KinBox.PAGE != target:
+				if free < 0 or int(free / float(KinBox.PAGE)) != target:
 					_fail("%s is full" % KinBox.page_name(target))
 					return
 				_drop_on(d, "box", null, free)
@@ -492,7 +492,8 @@ func _drop_on(d: Dictionary, where: String, onto, slot := -1) -> void:
 				(
 					("%s and %s traded places" % [rec["name"], other["name"]])
 					if not other.is_empty()
-					else "%s is in %s" % [rec["name"], KinBox.page_name(page if slot < 0 else slot / KinBox.PAGE)]
+					else "%s is in %s" % [rec["name"],
+							KinBox.page_name(page if slot < 0 else int(slot / float(KinBox.PAGE)))]
 				)
 			)
 			return
@@ -627,7 +628,7 @@ func _build_detail() -> void:
 		UI.button(
 			"Details",
 			func():
-				if home and home.has_method("_open_kin"):
+				if home:
 					home._open_kin(r),
 			90
 		)
@@ -750,7 +751,7 @@ static func demo_roster() -> void:
 		r["trust"] = rng.randf_range(10.0, 90.0)
 		Evo.simulate(r, rng)
 		if i % 5 == 0:
-			r["mutations"] = [mids[(i / 5) % mids.size()]]
+			r["mutations"] = [mids[(int(i / 5.0)) % mids.size()]]
 		if i % 13 == 3:
 			r["shimmer"] = true
 		if i == 20:
@@ -779,7 +780,7 @@ static func demo_show(h: Node, which: String) -> void:
 					r["mutations"] = [list[i][0]]
 				r["shimmer"] = list[i][1]
 				var n := Models.kin(String(r["species"]), r)
-				n.position = base + Vector3((i % 6) * 2.0, 0, (i / 6) * 2.4)
+				n.position = base + Vector3((i % 6) * 2.0, 0, (int(i / 6.0)) * 2.4)
 				n.rotation.y = PI * 0.12
 				n.scale *= 1.25
 				h.add_child(n)

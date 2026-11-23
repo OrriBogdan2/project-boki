@@ -189,7 +189,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 |---|---|---|
 | 3 bolts + Storm Rod / Skycall | the 4th Static: sky bolt, Live | `--mage-combo-check` |
 | Wirerun through a Live foe | double hit + Blowout, Static spent, Wirerun back | `--mage-combo-check` |
-| Wirerun through a foe under 4 Static | plain hit, no reset | `--mage-combo-check` |
+| Wirerun through a foe under 4 Static | plain hit, +1 Static (tester note 11-19), no reset | `--mage-combo-check`, `--tester-feedback-check` |
 | Storm Rod, then an orb next to the foe | the orb adds no Static (it is only a pickup) | `--mage-combo-check` |
 | Walking over a resting orb | picks it up, the dash is back; an orb out of reach stays | `--mage-combo-check` |
 | Wirerun through an orb | 2 Static on everyone near it, no reset | `--mage-combo-check` |
@@ -242,6 +242,7 @@ Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is 
   A fresh glide-key press in the air (Space held never) cancels the charge or the streak the same way and opens the
   glider; it ends Kitefall's climb or hang too, with no strike (source patch 05.03.25: "Glider cancel the state").
 - An airborne Shift with a charge is a Wirerun too (height held); with no charge left it is the plain air dash.
+- Shift pressed during the streak with no charge back is dropped (tester 11-19: "a weird small dash" after the run, the 4.25 m plain dash); with the charge back (a Blowout or orb in the run) it plays a full Wirerun. A fresh press after the streak still gets the plain dash. `--tester-feedback-check` "joule: Shift mashed in the streak ...".
 - Skycall: press places, holding E drags (up to 1 s), the release commits; a tap drags away from Sparkle.
 - She can move while firing bolts and holding the rod (the footage only shows her standing).
 - Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak.
