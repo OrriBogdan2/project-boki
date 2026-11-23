@@ -11062,3 +11062,4 @@ READY ext/cinder-dash-clip 2cb8d978b8 (bulk-rebase: origin/main merged in mechan
 READY ext/sfx-enemy-priority 698f846e26 (merged origin/main, sfx.gd conflict resolved: main int-returning play kept + branch same-cap/wind-up duck; --sfx-priority-check moved to tools/checks/sfx.gd; --check 0 fail, --sfx-priority-check 0 fail, health --strict red only on main long_line in check_registry.gd)
 READY ext/tut-sizes-playthrough 602688873b8c70b2c57118ba29b9e021b776c176 (tutorials fit 720p to ultrawide; merged origin/main, only conflict tutorial_camps.gd took main's reap fix; --check 0 fails, --tutorial-walk-shots 118 PASS 0 FAIL at 1280x720, 3440x1440, 1024x600; health --strict red only on style ratchet tools/check_registry.gd long_line at line 817, same on origin/main)
 READY ext/feel-dash-buffer-source ab3ece677 (dash buffer from source)
+READY ext/anim-mob-coverage f1ca3fd0010eb4c86d23cd2228b2357f57cc873e (mob anim coverage table)
