@@ -40,6 +40,7 @@ const KO_TAIL_S := 1.5  # s shot 9 keeps playing after the Hunter dies (the enco
 
 var shot := 2
 var take := 1
+var hold_zoom := 0.0  # > 0: _step_frame holds the camera at this zoom (the kit shot)
 var hunter := Demo.DEFAULT_HUNTER
 var failed := false  # a shot that cannot be filmed on this build says so (fail()), and the take is dropped
 var marks := {}  # part -> the frame it started on (mark())
@@ -290,6 +291,10 @@ func _escape() -> void:
 func _step_frame(at: Vector3) -> void:
 	_purge()
 	m.step(1.0 / FPS)
+	if hold_zoom > 0.0:
+		m.cam.user_zoom = hold_zoom  # (the match camera re-reads the wheel's zoom each frame)
+		m.cam.zoom = hold_zoom
+		m.cam.zoom_to = hold_zoom
 	m.cam.snap(at)
 	for h in m.hunters:
 		h.render(1.0 / FPS, 1.0)
@@ -300,28 +305,46 @@ func _step_frame(at: Vector3) -> void:
 ## Stepped by hand at 1/60 s a frame (the base clips' way) so the abilities land on the rota exactly.
 func _kit() -> void:
 	Save.d["first_guide"] = 99
+	Settings.v["damage_numbers"] = false
 	await _start(hunter, "cindle")
 	m.length = m.time + CLOCK_LEFT_S
 	var me := m.player
 	me.ctrl = "idle"
-	var base := _roomy_ground(me.pos)
+	var off := _arg("--off=", "0,0").split(",")
+	var base := _roomy_ground(me.pos + Vector3(float(off[0]), 0, float(off[1])))
 	me.pos = base
 	var foe_arch := String(Arch.ids()[(Arch.ids().find(hunter) + 3) % Arch.ids().size()])
-	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(base + Vector3(KIT_GAP_M, 0, 0)))
+	foe_arch = _arg("--foe=", foe_arch)
+	var gap := float(_arg("--gap=", str(KIT_GAP_M)))
+	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(base + Vector3(gap, 0, 0)))
 	foe.ai = m.bot_brain.new_mind(m.rng, KIT_FOE_SKILL, m.bot_cfg)
 	squad_a = [me]
 	squad_b = [foe]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	_zoom(KIT_ZOOM)
+	var kz := float(_arg("--zoom=", str(KIT_ZOOM)))
+	m.set_meta("zoom_hold", kz)  # the match camera re-reads its zoom every frame; this holds it
+	hold_zoom = kz
+	m.objective = null  # no "Find a wild Boki" card under the minimap
+	m.set_meta("pitch_no_foe_plates", true)  # no numeral / BURNING plate over the foe (HudPlate.hidden)
+	_zoom(kz)
 	mark("kit")
 	var t := 0.0
 	while t < SECS[7]:
 		_purge()
+		m.hud.msgs.clear()
 		_kit_press(t, me, foe, base)
 		_step_frame(me.pos.lerp(foe.pos, 0.5))
 		await main.get_tree().process_frame
 		t += 1.0 / FPS
+
+
+## The value of the `--name=` user arg, else `dflt`.
+func _arg(name: String, dflt: String) -> String:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with(name):
+			return String(a).substr(name.length())
+	return dflt
 
 
 ## The ground nearest `p` with no void within KIT_ROOM_M (`p` itself when there is none that roomy nearby).
