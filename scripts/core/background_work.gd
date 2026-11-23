@@ -4,7 +4,6 @@ extends RefCounted
 ## Whatever is still out when the game quits is finished first: a quit with threads mid-read crashes the engine.
 
 static var _reads := {}       # path -> true while a threaded read is requested and not yet taken
-static var _queue: Array[String] = []   # read_ahead() paths not requested yet, in order
 static var _tasks := {}       # worker task id -> true while it is added and not yet joined
 static var _hooked := false
 
@@ -23,75 +22,10 @@ static func request(path: String) -> void:
 	ResourceLoader.load_threaded_request(path)
 	_reads[path] = true
 
-## Queues `path` to read on a loader thread once the reads queued before it are done: one at a time, a frame
-## apart. With a match's ~32 .glb reads out at once, the main thread's build stalled until they were all done and
-## the GL driver uploaded their textures and meshes in one frame (M5 GL 592 ms, item 33).
-static func read_ahead(path: String) -> void:
-	if _reads.has(path) or path in _queue:
-		return
-	_queue.append(path)
-	var tree := Engine.get_main_loop() as SceneTree
-	if not tree.process_frame.is_connected(_next_read):
-		tree.process_frame.connect(_next_read)
-	_next_read()
-
-## Whether `path` is queued or requested and not taken yet.
-static func asked(path: String) -> bool:
-	return _reads.has(path) or path in _queue
-
-## Whether `path` can be taken without waiting: not queued or still reading.
-static func done(path: String) -> bool:
-	var reading := ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS
-	return not reading and not path in _queue
-
-## The resource a request() or read_ahead() read; waits if it is still reading, and reads it now (on the main
-## thread) if it is not requested yet.
+## The resource a request() read; waits if it is still reading.
 static func take(path: String) -> Resource:
-	_queue.erase(path)
-	if not _reads.has(path):
-		return load(path)
 	_reads.erase(path)
 	return ResourceLoader.load_threaded_get(path)
-
-## Each frame: starts the next queued read once no read_ahead() read is still going.
-static func _next_read() -> void:
-	for p in _reads:
-		if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-			return
-	if _queue.is_empty():
-		(Engine.get_main_loop() as SceneTree).process_frame.disconnect(_next_read)
-		return
-	request(_queue.pop_front())
-
-## Shader files loaded ahead, a few a frame, from when the loading screen comes up (read_shaders), and kept for the
-## session. On Forward+ a shader's compile starts on the engine's worker threads as the file loads and the main thread
-## waits for it only where it is first used. The warm-up's stand-ins used to load all of res://shaders in a few frames,
-## and its first 3D frame then waited out every compile at once (4.9 s on the RTX 4090 bench, jobq 120255); loaded
-## at the start, they compile while the map builds.
-static var _shaders: Array = []
-static var _shader_q: Array[String] = []
-const SHADER_FRAME_US := 4000
-
-static func read_shaders(dir := "res://shaders") -> void:
-	if not _shader_q.is_empty() or not _shaders.is_empty():
-		return
-	for f in DirAccess.get_files_at(dir):
-		var p := dir + "/" + f.trim_suffix(".remap")
-		if p.ends_with(".gdshader"):
-			_shader_q.append(p)
-	var tree := Engine.get_main_loop() as SceneTree
-	if not _shader_q.is_empty() and not tree.process_frame.is_connected(_next_shaders):
-		tree.process_frame.connect(_next_shaders)
-
-static func _next_shaders() -> void:
-	if BuildThreads.running > 0:
-		return      # not while the build's GDScript jobs run on the pool (a crash in one, jobq 121046)
-	var t0 := Time.get_ticks_usec()
-	while not _shader_q.is_empty() and Time.get_ticks_usec() - t0 < SHADER_FRAME_US:
-		var sh := load(_shader_q.pop_front())
-		if sh: _shaders.append(sh)
-	if _shader_q.is_empty():
-		(Engine.get_main_loop() as SceneTree).process_frame.disconnect(_next_shaders)
 
 ## Runs `work` on a worker thread (join() collects it).
 static func add_task(work: Callable) -> int:
@@ -107,8 +41,6 @@ static func join(id: int) -> void:
 
 ## Finishes everything still out (what a quit runs).
 static func drain() -> void:
-	_queue.clear()
-	_shader_q.clear()
 	for id in _tasks.keys():
 		join(int(id))
 	for path in _reads.keys():
