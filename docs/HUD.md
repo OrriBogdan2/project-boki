@@ -118,7 +118,9 @@ for the squad rows). Verified 11-11:
 ## The inventory window (I)
 
 - `LoadoutPanel` (in `Hud._build_pack`): what you wear (two gloves with their keys Q and V, armor, boots), the four
-  utility slots with keys 1 to 4, your perks, then the backpack list. Every slot names its key.
+  utility slots with keys 1 to 4, your perks, then the backpack list. Every slot names its key; a belt stack shows
+  its count apart from its name. Each backpack thing is one line (icon, plain name, worth, Wear/Drop) so a full
+  6-slot pack shows whole at 1280x720; what it does is on its hover card, which also names the keys.
 - Point at a thing for a hover card (`InvTip`, words in `InvText`). A piece of gear is compared with what you wear
   in its slot (`GearCompare`): only the numbers that change, green when better and red when worse.
 - Press, hold and move a thing onto another slot (`SlotDrag`, `scripts/ui/slot_drag.gd`): a backpack piece onto
@@ -131,10 +133,9 @@ for the squad rows). Verified 11-11:
   row to wear it there (the one you wear: the two swap). Check: `--lpage-drag-check`.
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
-- Swap by dragging a backpack piece onto a slot (or a glove onto the other glove), or point and press Enter to
-  wear it (a worn piece: take it off) and Delete to drop it on the ground. The Wear and Drop buttons stay.
 - An open deathbox does not open this window: the loot window (below) shows what you carry itself.
-- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`).
+- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`); 0.24.5 pass at 1280x720 and
+  3440x1440 in docs/shots/ui-inventory.
 
 ## Pop-up budget
 
@@ -292,8 +293,8 @@ rival can steal a boss. The counterplay needs a readable line, drawn by `scripts
 - **Mark.** A gold diamond with a burst glyph and the word STEAL, right of the world bar (under the top bar's left
   end), only while a Hunter of your squad still in the match is within `KillXp.SHARE_R` (30 m) of the boss: close
   enough to be paid for the kill, so the squad that can steal (or must guard) sees it.
-- Read off the health every machine already sees: nothing synced, no stat or damage change. Camp Chiefs join when
-  the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
+- Read off the health every machine already sees: nothing synced. The reel on the first drop under the line
+  is `StealReel` (docs/CAMPS.md). Camp Chiefs join when the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
 
 ## Two-step abilities (RecastCue)
 
@@ -458,6 +459,14 @@ starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `
   `--tutorial-hud-check` fires a toast and a world prompt under a fresh strip and asserts one prompt shows.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
   never again after a dive; one prompt under a fresh strip), `--tutorial-strip-shots`.
+
+## Care line (CareLine)
+
+Standing next to a Boki on the farm puts the prompt over it (`CareLine.LINE_M` above its feet, kept on screen)
+as one line of the four care actions: pet (or what its want needs: tuck in, bath, brush), feed, play and pick up
+(held interact key; lead or let go when it applies), each with its live key. The one a tap of the interact key
+would do is lit and the rest greyed (`GREY_A`); Feed says "(no food)" when it is hungry and you have none. Talk
+and details stay on the hover card. Visiting another farm keeps the old bottom prompt. Check: `--care-prompt-check`.
 
 ## Hold prompts (HoldPrompt, HoldTeach)
 
