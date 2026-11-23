@@ -92,7 +92,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 ## (--reel-frames) the frame last drawn, scaled down to FRAME_W
 func _save_frame() -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+	img.resize(FRAME_W, int(FRAME_W * img.get_height() / float(img.get_width())), Image.INTERPOLATE_BILINEAR)
 	img.save_jpg(frame_dir.path_join("%05d.jpg" % frames), 0.88)
 	frames += 1
 

@@ -143,7 +143,7 @@ func _camp_spot(m: Match, home: Vector3, i: int) -> Vector3:
 func _median(xs: Array) -> float:
 	var s := xs.duplicate()
 	s.sort()
-	return float(s[s.size() / 2])
+	return float(s[int(s.size() / 2.0)])
 
 
 func _band() -> void:

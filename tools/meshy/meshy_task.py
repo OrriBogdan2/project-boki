@@ -8,7 +8,8 @@ repo, chmod 600). It is never printed or written anywhere else.
   meshy_task.py create OUT_DIR img1.png [img2 ...] [options]      one image: image-to-3d, 2-4: multi-image-to-3d
   meshy_task.py fetch OUT_DIR TASK_ID [--api multi-image-to-3d]
   meshy_task.py retexture OUT_DIR (TASK_ID | model.glb) front.png [more views] [--model meshy-7] [--original-uv]
-  meshy_task.py rig OUT_DIR TASK_ID [--height 1.7] [--no-fingers]   auto-rig, 5 credits; sends include_fingers unless --no-fingers
+  meshy_task.py rig OUT_DIR (TASK_ID | model.glb) [--height 1.7] [--no-fingers]   auto-rig, 5 credits (a task id sends
+      include_fingers unless --no-fingers; an uploaded .glb is rigged without finger bones: its 24-bone skin weights)
   meshy_task.py remesh OUT_DIR TASK_ID [--polycount 40000] [--topology quad]
   meshy_task.py edit OUT_DIR ref.png [more refs] --prompt "..." [--model nano-banana-pro]   image-to-image
 
@@ -134,6 +135,9 @@ def fetch(out, tid, api):
             download(u, os.path.join(out, "thumb_%s.png" % name))
     for i, u in enumerate(t.get("image_urls") or []):
         download(u, os.path.join(out, "image%d.png" % i))
+    for name, u in (t.get("result") or {}).items():  # (a rigging task: rigged_character.glb)
+        if name.endswith("_glb_url") and u:
+            download(u, os.path.join(out, name[: -len("_glb_url")] + ".glb"))
     print("done; credits", t.get("consumed_credits"), "->", out)
 
 
@@ -204,11 +208,16 @@ def edit(o):
 
 
 def rig(o):
-    """Humanoid auto-rig of a task's model (5 credits). Sends include_fingers (finger bones with Mixamo names;
-    separated fingers rig best, mitten hands get fewer bones) unless --no-fingers."""
-    body = {"input_task_id": o.task, "animation_type": "biped", "height_meters": o.height,
-            "include_fingers": not o.no_fingers}
-    post(o.out, "rigging", body, {"source": o.task})
+    """Humanoid auto-rig, 5 credits. A task id rigs that task's model and sends include_fingers (finger bones with
+    Mixamo names; separated fingers rig best, mitten hands get fewer bones) unless --no-fingers. A .glb is uploaded
+    (data URI; textured humanoid, <= 380k triangles, facing +Z) and rigged to Meshy's plain 24-bone skeleton with no
+    finger bones (v95_swap's `meshy_weights` maps those 24): OUT_DIR gets rigged_character.glb, the same mesh skinned."""
+    body = {"height_meters": o.height}
+    if o.source.lower().endswith(".glb"):
+        body["model_url"] = "data:application/octet-stream;base64," + base64.b64encode(open(o.source, "rb").read()).decode()
+    else:
+        body.update(input_task_id=o.source, animation_type="biped", include_fingers=not o.no_fingers)
+    post(o.out, "rigging", body, {"source": o.source})
 
 
 def remesh(o):
@@ -254,9 +263,9 @@ def main():
     e.add_argument("--aspect", default="1:1")
     g = sub.add_parser("rig")
     g.add_argument("out")
-    g.add_argument("task")
-    g.add_argument("--height", type=float, default=1.7)
-    g.add_argument("--no-fingers", action="store_true", help="include_fingers=false")
+    g.add_argument("source", help="a task id, or a .glb to upload")
+    g.add_argument("--height", type=float, default=1.7, help="the character's height (m)")
+    g.add_argument("--no-fingers", action="store_true", help="include_fingers=false (task ids)")
     m = sub.add_parser("remesh")
     m.add_argument("out")
     m.add_argument("task")

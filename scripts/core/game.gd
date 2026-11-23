@@ -276,7 +276,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 		out["kin"] = brought[0]
 	# the vault keeps a third of what you were carrying when you go down
 	if not won and Save.has_building("vault") and int(r.get("lost_gems", 0)) > 0:
-		out["vault_gems"] = int(r["lost_gems"]) / 3
+		out["vault_gems"] = int(int(r["lost_gems"]) / 3.0)
 		d["gems"] = int(d["gems"]) + out["vault_gems"]
 	# kin who stayed home rest in the cottages and train in the yard
 	var rest := (2.0 if Save.has_building("cottage") else 0.0) + (2.0 if Save.has_building("cottage2") else 0.0)

@@ -46,7 +46,7 @@ func ok(cond: bool, what: String) -> void:
 
 func _slot(i: int) -> Vector3:
 	if layout != "grid": return home + HitShapeZero.slot(layout, i, ring_r, pick)
-	return home + Vector3(1.0 + (i / NZ) * GRID, 0.0, (i % NZ) * GRID)
+	return home + Vector3(1.0 + (int(i / float(NZ))) * GRID, 0.0, (i % NZ) * GRID)
 
 func _clear_dummies() -> void:
 	for i in dummies.size():
