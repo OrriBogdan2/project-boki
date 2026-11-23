@@ -11,4 +11,5 @@ const CHECKS := {
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],  # 0022 ult ranks
+	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 }
