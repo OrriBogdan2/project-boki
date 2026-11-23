@@ -132,6 +132,7 @@ func _live(main: Node) -> void:
 	a.main = main
 	var r: Array = a.setup("juggernaut", 11.0)
 	var m: Match = r[0]
+	m.rng.seed = 1  # a seeded match: the lane's camps draw from m.rng, and the wrist miss sits 1 mm under REACH
 	var p: Hunter = r[1]
 	var home: Vector3 = r[4]
 	var sync := WardenGlb.layers(p.model)

@@ -79,7 +79,7 @@ func run(main: Node) -> void:
 	_spot(b, outside - side * 2.5)
 	# ---- 1. the control: outside the lair, the player is fair game
 	var went := false
-	P.reveal_t = 2.5      # (seen whichever way the bot faces: it only sees what is in front of it)
+	p.reveal_t = 2.5      # (seen whichever way the bot faces: it only sees what is in front of it)
 	for i in int(2.0 / Match.DT):
 		_step()
 		if b.ai["tgt"] == p:
