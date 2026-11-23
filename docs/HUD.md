@@ -16,7 +16,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `level_up_cue.gd` (`LevelUpCue`, one on `hud.lvl_cue`) | your level-up moment: a gold column with rising chevrons over your hero (0.8 s) and a card over the vitals saying what improved (health, ability power, the weapon step, the ultimate opening, points to spend), 2.6 s. Research and reasons: [LEVEL_UP.md](LEVEL_UP.md) |
 | `hud_reveal.gd` (`HudReveal`) | the staged HUD (DECISIONS 2026-11-08, design review 11-10 fix 8): one table, `content/rules/hud_reveal.json`, gives each group its first match (`belt_spare`, `ult_tiles`: no match, they wait for a filled slot / level 6) (1: vitals, abilities, Boki card, minimap; 4: counters, feed, gear, squad, perks, weather, plate name colours) or its first event (the Ways Out strip on the first open seat; the clock/status strip under the minimap on the first Ways Out beat or your first kill or knock, `HudGroups.clock_shown`; kept in `Save.d.hud_reveal`). Tab shows all; so do Settings > Accessibility "Show full HUD", older saves (no `hud_reveal`) and every non-expedition match. Check: `--hud-reveal-check` |
-| `reticle.gd` (`Reticle`, one on `hud.reticle` for the tick) | the aiming reticle in the player's style (static `draw`), and the hit tick: four short strokes out of the reticle in the Hunter's colour (`AimKit.hero_col`) for 0.09 s on each hit you land on a foe's Hunter, Boki or a monster (`CombatBus.hit_landed`), longer and ringed for 0.12 s on a knock; none for misses, zone (DoT) ticks, your Boki's or teammates' hits (`--hit-marker-check`, `--hit-marker-shots`) |
+| `reticle.gd` (`Reticle`, one on `hud.reticle` for the tick) | the aiming reticle in the player's style (static `draw`), and the hit tick: four thin strokes out of the reticle (white, gold on a crit, pale on armour; drawn by `ReticleHud`, `hud.ret`, from this state) for 0.09 s on each hit you land on a foe's Hunter, Boki or a monster (`CombatBus.hit_landed`), longer and ringed for 0.12 s on a knock or a crit (numbers: tuning.json "reticle"); none for misses, zone (DoT) ticks, your Boki's or teammates' hits (`--hit-marker-check`, `--hit-marker-shots`) |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
@@ -300,8 +300,9 @@ rival can steal a boss. The counterplay needs a readable line, drawn by `scripts
 - **Mark.** A gold diamond with a burst glyph and the word STEAL, right of the world bar (under the top bar's left
   end), only while a Hunter of your squad still in the match is within `KillXp.SHARE_R` (30 m) of the boss: close
   enough to be paid for the kill, so the squad that can steal (or must guard) sees it.
-- Read off the health every machine already sees: nothing synced, no stat or damage change. Camp Chiefs join when
-  the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
+- Read off the health every machine already sees: nothing synced. The reel on the first drop under the line
+  is `StealReel` (docs/CAMPS.md). Camp Chiefs join when the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
+
 ## Tab board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
 Holding Tab shows the squads-left count and YOUR squad only. Each hunter gets one strip, yours first with a teal outline and a gold name:
 portrait, name, alive / downed / out, kills / deaths / assists, damage, the four gear slots (`GearPanel.cell`) and the Boki (name, level
@@ -471,6 +472,14 @@ starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `
   `--tutorial-hud-check` fires a toast and a world prompt under a fresh strip and asserts one prompt shows.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
   never again after a dive; one prompt under a fresh strip), `--tutorial-strip-shots`.
+
+## Care line (CareLine)
+
+Standing next to a Boki on the farm puts the prompt over it (`CareLine.LINE_M` above its feet, kept on screen)
+as one line of the four care actions: pet (or what its want needs: tuck in, bath, brush), feed, play and pick up
+(held interact key; lead or let go when it applies), each with its live key. The one a tap of the interact key
+would do is lit and the rest greyed (`GREY_A`); Feed says "(no food)" when it is hungry and you have none. Talk
+and details stay on the hover card. Visiting another farm keeps the old bottom prompt. Check: `--care-prompt-check`.
 
 ## Hold prompts (HoldPrompt, HoldTeach)
 

@@ -33,7 +33,11 @@ static func open(h, here: String) -> void:
 			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), lines, func(): h.hway.hop(id),
 					"You are here" if id == here else "Go", id != here))
 		else:
-			var lines: Array = [UI.para(lock_line(id), 12, UI.MUTED)]
+			var lock := UI.para(lock_line(id), 12, UI.MUTED)
+			# Where each key comes from, on hover: the card itself keeps one line.
+			lock.tooltip_text = "\n".join(key_hints(id))
+			lock.mouse_filter = Control.MOUSE_FILTER_PASS
+			var lines: Array = [lock]
 			if here == GardenZones.HUB and h.hhints != null:
 				lines.append_array(HubFirstVisit.card_line(id))
 			var keys := GardenZones.keys_for(id)

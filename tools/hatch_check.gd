@@ -10,9 +10,9 @@ extends RefCounted
 ## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). The beat from the last knock
 ## to the Boki's card can be skipped with any key or click (HatchSkip): it lands on the same end state as
 ## waiting, shows a small "Press any key" pill after 1.5 s, and saves the same Boki. A pair's egg appearing in
-## the Nesting Nook (NestReveal) gets one ring, one small sparkle in its type colour and one wobble.
-## The naming line (NameStep): a suggestion from the species name, the dice, Keep, a rude name refused, skipping
-## keeps the suggestion, save and load, and your first catch named on the results screen. Never touches the real save.
+## the Nesting Nook (NestReveal) gets one ring, one small sparkle in its type colour and one wobble. The naming
+## line (NameStep): a suggestion from the species name, the dice, Keep, a rude name refused, skipping keeps the
+## suggestion, save and load, and your first catch named on the results screen. Never touches the real save.
 
 const MAX_FRAMES := 6000      # (a hang guard counted in frames, not seconds)
 var bad := 0

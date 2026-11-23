@@ -13,7 +13,6 @@ const TILE_H := 48.0
 const BADGE := 30.0
 const HEAD_H := 20.0       # the key-pill row of a tile: as tall with or without a key, so the names line up
 const ROW_H := 30.0        # one backpack line: a full pack fits a 720p window without scrolling
-const HINT := "Point at a thing:  Enter wears or takes it off  ·  Delete drops it  ·  or drag it onto a slot"
 
 var _m: Match
 var _p: Hunter
@@ -177,14 +176,14 @@ func _pack_list(v: VBoxContainer) -> Array:
 		rows.add_child(empty)
 	return [sc, rows]
 
-## One line: icon, plain name, worth, Wear (gear only) and Drop. What it does is on the hover card.
+## One line per item (LootHold.item_row) at ROW_H, so a full pack fits a 720p window. What it does is on the hover card.
 func _pack_row(i: int) -> PanelContainer:
 	var it: Dictionary = _p.pack[i]
 	var buttons: Array = []
 	if String(it.get("t", "")) == "gear":
 		buttons.append(["Wear", func(): _act(func(): _wear(i)), true, true])
 	buttons.append(["Drop", func(): _act(func(): Pack.drop_from_pack(_m, _p, i))])
-	var row := LootHold.item_row(it, buttons)
+	var row := LootHold.item_row(it, buttons, "", true)
 	_drag.add(row, {"inv": "pack", "i": i}, Loot.name_of(it), Loot.col_of(it))
 	_tip.attach(row, func(): return _lines("pack", i), func(): _hover = {"kind": "pack", "i": i}, func(): _hover = {})
 	_pack_rows.append(row)

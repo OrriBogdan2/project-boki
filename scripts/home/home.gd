@@ -2133,9 +2133,11 @@ func _find_interact() -> void:
 		return
 	prompt_box.visible = true
 	var pairs: Array = []
+	var on_kin := false      # the care line: over the Boki, not at the screen foot
 	if best["kind"] == "kin" and visit.is_empty():
-		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], ["Hold " + Settings.key_cap("interact"), "to pick up"]]
+		pairs = CareLine.pairs(self, best["k"])
 		if life: pairs = life.hand.pairs(pairs)
+		on_kin = true
 	else:
 		pairs = [hg.prompt_pair(best) if best["kind"] == "wild" else [Settings.key_cap("interact"), _label_for(best)]]
 		if best["kind"] == "site": pairs.append([Settings.key_cap("details"), "Assign Boki"])
@@ -2154,12 +2156,16 @@ func _find_interact() -> void:
 			l.add_theme_font_override("font", UI.big)
 			l.add_theme_font_size_override("font_size", UI.fs(18))
 			l.add_theme_color_override("font_color", UI.GOLD if one.get_index() == 0 else UI.INK)
+		CareLine.grey(row, pairs)
 		prompt_box.add_child(row)
 		prompt_box.reset_size()
 		prompt_box.modulate.a = 0.0
 		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
+	if on_kin:
+		CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp)
+		return
 	var py_at := minf(vp.y - 110.0, (root_ui.get_node("Hints") as Control).global_position.y - prompt_box.size.y - 6.0)
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
 	_keep_off_hub(prompt_box)
@@ -3485,7 +3491,7 @@ func _confirm_start() -> void:
 	var weak := hecon.refuse_reason()
 	if weak != "":
 		var wv := _new_panel("Too hungry to go", 560)
-		var wl := UI.label(weak, 15, UI.INK); wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var wl := UI.label(weak, 15, UI.INK); UI.wrapped(wl)
 		wv.add_child(wl)
 		var wr := UI.hbox(10)
 		wr.add_child(UI.primary("Feed it", func(): _open_feed(Save.active_kin()), 160))
@@ -4826,7 +4832,7 @@ func _name_baby(baby: Dictionary) -> void:
 		v.add_child(mr)
 	if KinBox.is_boxed(baby):
 		var bl := UI.label("Sent to the Boki Burrow (%s): you already have a %s out on the farm. Swap it out any time." % [KinBox.page_name(KinBox.page_of(baby)), sp["name"]] if KinBox.dup_on_farm(baby) else "Sent to the Boki Burrow (%s): the farm is full." % KinBox.page_name(KinBox.page_of(baby)), 14, Color("cdb8ff"))
-		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(bl)
 		v.add_child(bl)
 	var was_name := String(baby["name"])
 	var step := NameStep.new(baby["species"])      # (closing the panel keeps the suggestion)
