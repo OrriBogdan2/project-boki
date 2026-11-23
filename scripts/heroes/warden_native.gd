@@ -302,7 +302,8 @@ func _hit_slot(s: Dictionary) -> String:
 	var want := "hit_back" if back else "hit"
 	if plays.has(want):
 		return want
-	return "hit" if back and plays.has("hit") else ("hit_back" if plays.has("hit_back") else "")
+	var other := "hit" if back else "hit_back"
+	return other if plays.has(other) else ""
 
 
 func _new_hit(t: float) -> bool:
