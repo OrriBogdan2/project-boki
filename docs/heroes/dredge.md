@@ -20,7 +20,7 @@ ranks in the source or ours. R is left to decision 0022.
 | Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
 |---|---|---|---|---|---|---|
 | LMB Scattergun | none | none | none | - | - | - |
-| RMB Abyssal Hand (12s; [D] 18s) | -2.5s | -2.5s | -50% cooldown on an enemy hit | 10.3s | 8.7s; a foe hit takes half off | `rmb.refund` at sec rank 3 |
+| RMB Deep Reach (12s; [D] 18s) | -2.5s | -2.5s | -50% cooldown on an enemy hit | 10.3s | 8.7s; a foe hit takes half off | `rmb.refund` at sec rank 3 |
 | Shift Barge (10s; [D] 7s) and air pounce (12.5s; [D] 12.5s) | -1.25s (air -2s) | -1.25s (air -2s) | shot hits cut the dash cooldown (the source's bloom reset is gone: no bloom, owner 11-17) | 8.2s, air 10.5s | 6.4s, air 8.5s; each pellet hit trims 0.25s | `dash.cut`, `dash.air.rank_cut` |
 | E Anchor Drop (7s; [D] 12s) | +20% damage, -2.5s, +0.1s stun | +20% damage, -2.5s, +0.1s stun | +100% damage on a foe over the Abyss, +0.2s stun | 5.5s, damage +20%, stun +0.1s | 4.1s, damage +40%, stun +0.4s in all, double over the Abyss | `e.rank3_stun`, the abyss double at kin rank 3 |
 | Passive Salvage | none | none | none | - | - | - |
@@ -53,9 +53,9 @@ and cooldown numbers that already follow the ratios below. Numbers follow the so
 | X, Brass Broadside (ult, level 6) | tap | a 1.1s charge while a 105 degree, 5.9m fan grows on the ground in front (everyone sees it; it is the exact area, and it turns with his aim), then two waves 0.6s apart; he walks at 30% speed through the charge and 20% while the waves go (`x.charge_move`, `x.fire_move`, through `CastHold`), always turning to the cursor of six heavy brass slugs each (real shots): 4 a slug and Anti-Heal 3s. Point blank all twelve land, at 4.6m two a wave. A stun in the charge stops it (back in 8s). 21s | one press, two waves 0.6s apart, 6 slugs each with Anti-Heal, a fan telegraph, planted | 4 a slug, no back bonus: the burst cap (see Ult) |
 | R | | the Boki Merge (not a hero ability) | | |
 
-Rank 2 / 3: -10% cooldown steps (barge -15%). Rank 3 specials follow the source's last tier: the Deep Reach takes half its
+Rank steps are the tier table above (`rank_cd` / `rank_dmg`: cooldown x0.86 / x0.72 on the Deep Reach, x0.82 / x0.64 on the barge, x0.79 / x0.58 on the Anchor, Anchor damage +20% / +40%). Rank 3 specials follow the source's last tier: the Deep Reach takes half its
 cooldown off when it hits a foe; the barge's pellet hits trim 0.25s off the recharge; the
-Anchor does double damage on a foe over the abyss and adds 0.2s of stun (on top of its +15% damage and +0.1s stun a rank).
+Anchor does double damage on a foe over the abyss and adds 0.2s of stun (on top of its +0.1s a rank).
 Mismatch: the source's tiers 2 and 3 are each -2.5s on the Deep Reach (-1.25s on the barge, -2.5s +20% damage +0.1s stun on the
 Anchor), and ours has one shared step, so rank 3 stands for the source's tiers 3 and 4 together.
 
