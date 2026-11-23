@@ -5,54 +5,116 @@ extends Node
 signal changed(key: String)
 
 const PATH := "user://settings.cfg"
+
 ## The Interface size slider's range. The layout needs at least a 1100x640 space, 1/1.125 of the 1240x720
 ## it fits to the window, so the top stays under 1.125: a bigger setting could not grow the menus without
 ## pushing them off screen (playtest 11-13: the old 1.5 top did nothing past 115%).
 const UI_SCALE_MIN := 0.75
 const UI_SCALE_MAX := 1.1
-const WINDOW_MODE_RETRIES := 4      # frames after startup that re-ask for the saved window mode
+const WINDOW_MODE_RETRIES := 4  # frames after startup that re-ask for the saved window mode
 const DEFAULTS := {
 	# audio
 	# (volumes: slider positions, heard as Sfx.slider_db; audio_v 2 = that curve, see _migrate_volumes)
-	"master": 0.9, "music": 0.85, "sfx": 1.0, "voices": 1.0, "ambience": 0.9, "ui_sounds": 1.0, "audio_v": 2,
+	"master": 0.9,
+	"music": 0.85,
+	"sfx": 1.0,
+	"voices": 1.0,
+	"ambience": 0.9,
+	"ui_sounds": 1.0,
+	"audio_v": 2,
 	"mute_unfocused": false,
 	# music (Soundtrack): the style, Shuffle, and a hand-picked track id per place ("" = the style's)
-	"soundtrack": "classic", "music_shuffle": false, "track_menu": "", "track_base": "", "track_calm": "",
-	"track_tense": "", "track_final": "", "track_boss": "", "track_victory": "", "track_training": "",
+	"soundtrack": "classic",
+	"music_shuffle": false,
+	"track_menu": "",
+	"track_base": "",
+	"track_calm": "",
+	"track_tense": "",
+	"track_final": "",
+	"track_boss": "",
+	"track_victory": "",
+	"track_training": "",
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 5, "shadows": true, "ui_scale": 1.0, "hud_scale": 1.0, "show_fps": 0,
-	"quality": "auto", "quality_found": "",
+	"fullscreen": false,
+	"vsync": true,
+	"max_fps": 0,
+	"msaa": 0,
+	"video_v": 5,
+	"shadows": true,
+	"ui_scale": 1.0,
+	"hud_scale": 1.0,
+	"show_fps": 0,
+	"quality": "auto",
+	"quality_found": "",
 	# gameplay
-	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	"damage_numbers": true,
+	"tips": true,
+	"lobby_enabled": true,
+	"kin_chatter": "normal",
+	"mod_mode": false,
+	"bot_diff": "auto",
 	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
 	"boki_wisps": false,
 	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
 	"hold_done": {},
 	# how keys behave (Controls)
-	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
+	"cast_on_press": true,
+	"dash_to_cursor": false,
+	"crouch_toggle": false,
+	"move_readout": false,
 	"cursor_confine": true,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
-	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
+	"reticle_shape": "default",
+	"reticle_size": 1.0,
+	"reticle_col": "hunter",
+	"reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera
-	"depth_cues": true, "cam_style": "default", "cam_follow": "centred", "cam_lead": 1.0,
+	"depth_cues": true,
+	"cam_style": "default",
+	"cam_follow": "centred",
+	"cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a", "ult_ready_cue": true, "hunter_barks": true, "low_hp_pulse": true,
+	"reset_cue": "a",
+	"ult_ready_cue": true,
+	"hunter_barks": true,
+	"low_hp_pulse": true,
 	# accessibility
-	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0, "hud_full": false,
-	"colour_vision": "default",      # SideColor.ORDER
+	"screen_shake": 0.3,
+	"reduce_flashes": false,
+	"text_size": 1.0,
+	"hud_full": false,
+	"colour_vision": "default",  # SideColor.ORDER
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
-	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
+	"demo_weather": "random",
+	"demo_blight": true,
+	"demo_fresh": "normal",
+	"demo_all_masks": false,
+	"rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0, "keys7_v": 0,
+	"keys": {},
+	"keys_v": 2,
+	"keys2_v": 0,
+	"keys3_v": 0,
+	"keys4_v": 0,
+	"keys5_v": 0,
+	"keys6_v": 0,
+	"keys7_v": 0,
 }
+
 ## Text size choices (Settings > Accessibility): text is drawn at this multiple of its design size.
 const TEXT_SIZES := [1.0, 1.25, 1.5]
 
 ## The volume settings (Settings > Audio, in menu order) and the audio bus each one sets (Sfx._ready makes them).
 const BUSES := {
-	"master": "Master", "music": "Music", "sfx": "SFX", "voices": "Voice", "ambience": "Ambience", "ui_sounds": "UI",
+	"master": "Master",
+	"music": "Music",
+	"sfx": "SFX",
+	"voices": "Voice",
+	"ambience": "Ambience",
+	"ui_sounds": "UI",
 }
+
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
 ## Camera ids renamed 11-13 (they were a third-party name): an old settings.cfg value maps to the new id.
@@ -77,33 +139,252 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_model
 ##   far from the camera (m, 0: their own)
 ##   ·  occ: the outline on your side where cover hides it (OcclusionOutline)
 const QUALITY := {
-	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
-		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
-		"lod": 8.0, "grass": 0.15, "draw": 0.45,
-		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "fx_life": 0.5, "volfog": false, "light_m": 40.0, "occ": false},
-	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
-		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
-		"lod": 4.0, "grass": 0.4, "draw": 0.6,
-		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "fx_life": 0.7, "volfog": false, "light_m": 50.0, "occ": false},
-	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
-		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
-		"lod": 2.0, "grass": 0.7, "draw": 0.8,
-		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "fx_life": 1.0, "volfog": false, "light_m": 70.0, "occ": true},
-	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
-		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
-		"lod": 1.0, "grass": 1.0, "draw": 1.0,
-		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "fx_life": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
-	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
-		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
-		"lod": 0.5, "grass": 1.0, "draw": 1.6,
-		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "fx_life": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
+	"very_low":
+	{
+		"name": "Very Low",
+		"msaa": 0,
+		"shadows": false,
+		"px": 540,
+		"scale": 0.5,
+		"fxaa": false,
+		"steps": 2,
+		"unlit": true,
+		"lod": 8.0,
+		"grass": 0.15,
+		"draw": 0.45,
+		"shadow_k": 0.6,
+		"splits": 1,
+		"atlas": 1024,
+		"soft": 0,
+		"ssao": false,
+		"glow": false,
+		"clouds": 0,
+		"shafts": false,
+		"fx": 0.25,
+		"fx_life": 0.5,
+		"volfog": false,
+		"light_m": 40.0,
+		"occ": false
+	},
+	"low":
+	{
+		"name": "Low",
+		"msaa": 0,
+		"shadows": true,
+		"px": 900,
+		"scale": 0.77,
+		"fxaa": true,
+		"steps": 2,
+		"unlit": false,
+		"lod": 4.0,
+		"grass": 0.4,
+		"draw": 0.6,
+		"shadow_k": 0.45,
+		"splits": 1,
+		"atlas": 1024,
+		"soft": 0,
+		"ssao": false,
+		"glow": false,
+		"clouds": 0,
+		"shafts": false,
+		"fx": 0.45,
+		"fx_life": 0.7,
+		"volfog": false,
+		"light_m": 50.0,
+		"occ": false
+	},
+	"medium":
+	{
+		"name": "Medium",
+		"msaa": 0,
+		"shadows": true,
+		"px": 1080,
+		"scale": 1.0,
+		"fxaa": true,
+		"steps": 4,
+		"unlit": false,
+		"lod": 2.0,
+		"grass": 0.7,
+		"draw": 0.8,
+		"shadow_k": 0.6,
+		"splits": 2,
+		"atlas": 2048,
+		"soft": 1,
+		"ssao": false,
+		"glow": true,
+		"clouds": 1,
+		"shafts": true,
+		"fx": 0.7,
+		"fx_life": 1.0,
+		"volfog": false,
+		"light_m": 70.0,
+		"occ": true
+	},
+	"high":
+	{
+		"name": "High",
+		"msaa": 4,
+		"shadows": true,
+		"px": 0,
+		"scale": 1.0,
+		"fxaa": false,
+		"steps": 8,
+		"unlit": false,
+		"lod": 1.0,
+		"grass": 1.0,
+		"draw": 1.0,
+		"shadow_k": 1.0,
+		"splits": 4,
+		"atlas": 4096,
+		"soft": 3,
+		"ssao": true,
+		"glow": true,
+		"clouds": 2,
+		"shafts": true,
+		"fx": 1.0,
+		"fx_life": 1.0,
+		"volfog": true,
+		"light_m": 0.0,
+		"occ": true
+	},
+	"ultra":
+	{
+		"name": "Ultra",
+		"msaa": 4,
+		"shadows": true,
+		"px": 0,
+		"scale": 1.0,
+		"fxaa": false,
+		"steps": 8,
+		"unlit": false,
+		"lod": 0.5,
+		"grass": 1.0,
+		"draw": 1.6,
+		"shadow_k": 1.35,
+		"splits": 4,
+		"atlas": 4096,
+		"soft": 4,
+		"ssao": true,
+		"glow": true,
+		"clouds": 2,
+		"shafts": true,
+		"fx": 1.0,
+		"fx_life": 1.0,
+		"volfog": true,
+		"light_m": 0.0,
+		"occ": true
+	},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
+
+## Auto quality only: frame times measured while the first expedition loads (ms, the world on screen
+## from the skyship). Too slow for 60 fps steps the preset down once (twice when far too slow) and
+## remembers it.
+const BENCH_SLOW_MS := 20.0  # ms a frame: slower than this steps the preset down one
+const BENCH_FAR_MS := 45.0  # ms a frame: slower than this steps it down two
+
+## Bumped when the default kit changes enough that old custom bindings would be nonsense.
+const KEYS_V := 3
+
+## Rebindable actions, in the order the controls list shows them.
+const ACTIONS := [
+	["up", "Move up"],
+	["down", "Move down"],
+	["left", "Move left"],
+	["right", "Move right"],
+	["fire", "Weapon attack"],
+	["secondary", "Hunter ability"],
+	["dash", "Hunter dash"],
+	["jump", "Jump (hold to glide)"],
+	["glide", "Glide (hold in the air)"],
+	["crouch", "Sneak"],
+	["scout", "Look ahead (hold: the view leans out toward the cursor, you see further in a narrow cone)"],
+	["gear1", "Glove 1"],
+	["gear2", "Glove 2 (in a match; at home it plays fetch)"],
+	["signature", "Hunter utility"],
+	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
+	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
+	["hunter_ult", "Hunter ultimate"],
+	["ultimate", "Fuse with your Boki (needs a full bond meter)"],
+	["mate_look_1", "Look at teammate 1 (hold)"],
+	["mate_look_2", "Look at teammate 2 (hold)"],
+	["mate_look_3", "Look at teammate 3 (hold; 4-player squads)"],
+	["base", "Base to a teammate (squads)"],
+	["interact", "Use, scan, revive, pet"],
+	["util1", "Utility belt slot 1 (a tonic to start)"],
+	["util2", "Utility belt slot 2 (an armor kit to start)"],
+	["util3", "Utility belt slot 3"],
+	["util4", "Utility belt slot 4"],
+	["scores", "Scoreboard"],
+	["emote", "Emote wheel (hold, in a match)"],
+	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings)"],
+	["map", "Full map (click to ping)"],
+	["pass_lead", "Pass the drop lead"],
+	["separate", "Separate from the drop"],
+	["play", "Play fetch with a Boki"],
+	["talk", "Talk to a Boki"],
+	["details", "A Boki's details"],
+	["inventory", "Inventory"],
+	["goals", "Goals list: open and close (at home)"],
+	["fold_guide", "Fold the training guide away (training, duel)"],
+	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"],
+	["build", "Build mode at home / decorate indoors"],
+	["hero", "Relics: change your Relic (at home and in practice areas)"],
+	["rotate", "Turn a piece (build mode)"],
+	["store", "Put a piece away (build mode)"],
+	["undo", "Undo the last piece (build mode, with Ctrl)"],
+	["keep_placing", "Hold to keep placing (build mode)"],
+	["level_mod", "Hold with a slot key to level it"],
+	["kit_card", "Hunter kit card (hover a hunter)"],
+	["confirm", "Press the open panel's main button"],
+	["push_to_talk", "Push to talk (before a match)"],
+	["record", "Recording mode (again: hide the HUD)"],
+	["record_orbit", "Recording: slow camera orbit"],
+	["move_readout", "Movement readout (tuning)"],
+	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
+	["kin_chase", "Boki quick key: Chase"],
+	["kin_guard", "Boki quick key: Guard"],
+	["kin_return", "Boki quick key: Return"],
+	["kin_follow", "Boki quick key: Follow"],
+]
+
+## Seconds bots leave a fresh lander alone (Bot.fresh) with Settings > Demo > "Bots leave you be after
+## landing" on Longer.
+const DEMO_FRESH_T := 60.0
+
+const LIGHT_FADE_M := 8.0  # m over which a far lamp dims out (Settings q("light_m"))
+
+## Actions that only run at home (the garden) and ones that only run in a match.
+const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
+const MATCH_ONLY := ["gear2", "summon", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate", "scout"]
+
+## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
+## training-only actions, the lobby's push to talk).
+const SHARED_OK := [
+	["undo", "separate"],
+	["push_to_talk", "gear2"],
+	["push_to_talk", "play"],
+	["keep_placing", "dash"],
+	["goals", "throw"],
+	["fold_guide", "whistle"],
+	["details", "throw"],
+	["goals", "scout"]
+]
+
+## Short cap text for the mouse buttons (code_text has the long names for the Controls page). No spaces,
+## so a row of caps (UI.key_hints) never splits one into two.
+const MOUSE_CAPS := {1: "LMB", 2: "RMB", 3: "MMB", 4: "WHEEL-UP", 5: "WHEEL-DN", 8: "M4", 9: "M5"}
+
+var v: Dictionary = {}
+
+## Exported desktop builds open fullscreen until the player picks windowed; the editor and the browser start windowed.
+var desktop_export := OS.has_feature("template") and not OS.has_feature("web")
+
+var _defaults_keys := {}
+var _dirty := false
+var _started := false  # the bindings the game ships with, for "reset"
+var _quality_basics := false
+
 
 ## The preset in effect: the player's pick, or what auto-detect found for this machine.
 func quality() -> String:
@@ -113,21 +394,27 @@ func quality() -> String:
 	var found := String(v.get("quality_found", ""))
 	return found if QUALITY.has(found) else detect_quality()
 
+
 ## Settings > Video > Show frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
 ## (show_fps was a toggle before, so a saved true is the plain rate).
 func fps_mode() -> String:
 	match int(v.get("show_fps", 0)):
-		0: return ""
-		1: return "fps"
+		0:
+			return ""
+		1:
+			return "fps"
 	return "full"
+
 
 ## Very Low or Low: the presets that also thin out what isn't a knob (title-screen grass, storm streaks).
 func lite() -> bool:
 	return QUALITY_ORDER.find(quality()) <= QUALITY_ORDER.find("low")
 
+
 ## A knob of the preset in effect (see QUALITY).
 func q(key: String):
 	return QUALITY[quality()].get(key, QUALITY["high"][key])
+
 
 ## A first guess from the graphics adapter: software renderers get Very Low, integrated PC graphics
 ## (Intel, AMD APUs) Low, everything else Medium (the default the game is tuned to hold 60 fps at, Apple
@@ -142,19 +429,17 @@ func detect_quality() -> String:
 	var nm := RenderingServer.get_video_adapter_name().to_lower()
 	if RenderingServer.get_video_adapter_type() == RenderingDevice.DEVICE_TYPE_CPU:
 		return "very_low"
-	if nm.contains("llvmpipe") or nm.contains("swiftshader") or nm.contains("software"): return "very_low"
+	if nm.contains("llvmpipe") or nm.contains("swiftshader") or nm.contains("software"):
+		return "very_low"
 	if nm.contains("apple"):
 		return "medium"
 	if RenderingServer.get_video_adapter_type() == RenderingDevice.DEVICE_TYPE_INTEGRATED_GPU:
 		return "low"
-	if nm.contains("intel") and not nm.contains("arc"): return "low"
+	if nm.contains("intel") and not nm.contains("arc"):
+		return "low"
 	return "medium"
 
-## Auto quality only: frame times measured while the first expedition loads (ms, the world on screen
-## from the skyship). Too slow for 60 fps steps the preset down once (twice when far too slow) and
-## remembers it.
-const BENCH_SLOW_MS := 20.0     # ms a frame: slower than this steps the preset down one
-const BENCH_FAR_MS := 45.0      # ms a frame: slower than this steps it down two
+
 func note_benchmark(ms: float) -> void:
 	if String(v.get("quality", "auto")) != "auto" or String(v.get("quality_found", "")) != "":
 		return
@@ -162,53 +447,13 @@ func note_benchmark(ms: float) -> void:
 	var i := QUALITY_ORDER.find(cur)
 	if ms > BENCH_SLOW_MS and i > 0:
 		cur = QUALITY_ORDER[i - 1]
-		if ms > BENCH_FAR_MS and i > 1: cur = QUALITY_ORDER[i - 2]
+		if ms > BENCH_FAR_MS and i > 1:
+			cur = QUALITY_ORDER[i - 2]
 	v["quality_found"] = cur
 	apply("quality")
 	save()
 	print("Quality: auto picked %s (load benchmark %.1f ms a frame)" % [cur, ms])
 
-## Bumped when the default kit changes enough that old custom bindings would be nonsense.
-const KEYS_V := 3
-
-## Rebindable actions, in the order the controls list shows them.
-const ACTIONS := [
-	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
-	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["scout", "Look ahead (hold: the view leans out toward the cursor, you see further in a narrow cone)"],
-	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; at home it plays fetch)"], ["signature", "Hunter utility"],
-	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
-	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
-	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
-	["mate_look_1", "Look at teammate 1 (hold)"], ["mate_look_2", "Look at teammate 2 (hold)"],
-	["mate_look_3", "Look at teammate 3 (hold; 4-player squads)"],
-	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
-	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
-	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
-	["emote", "Emote wheel (hold, in a match)"],
-	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings)"],
-	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
-	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
-	["goals", "Goals list: open and close (at home)"], ["fold_guide", "Fold the training guide away (training, duel)"],
-	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
-	["store", "Put a piece away (build mode)"],
-	["undo", "Undo the last piece (build mode, with Ctrl)"], ["keep_placing", "Hold to keep placing (build mode)"],
-	["level_mod", "Hold with a slot key to level it"], ["kit_card", "Hunter kit card (hover a hunter)"],
-	["confirm", "Press the open panel's main button"], ["push_to_talk", "Push to talk (before a match)"],
-	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
-	["move_readout", "Movement readout (tuning)"],
-	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
-	["kin_chase", "Boki quick key: Chase"], ["kin_guard", "Boki quick key: Guard"],
-	["kin_return", "Boki quick key: Return"], ["kin_follow", "Boki quick key: Follow"],
-]
-
-var v: Dictionary = {}
-var _defaults_keys := {}
-var _dirty := false
-var _started := false       # the bindings the game ships with, for "reset"
-var _quality_basics := false
-## Exported desktop builds open fullscreen until the player picks windowed; the editor and the browser start windowed.
-var desktop_export := OS.has_feature("template") and not OS.has_feature("web")
 
 ## Renames old camera ids in a settings dictionary (CAM_IDS); unknown values are left for CamRig's fallback.
 static func migrate_cam(d: Dictionary) -> void:
@@ -225,14 +470,16 @@ func _ready() -> void:
 	_quality_basics = not cf.has_section_key("s", "quality")
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--quality="):
-			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
+			v["quality"] = a.substr(10)
+			_quality_basics = true  # tooling: try a preset without saving it
 	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
 		save.call_deferred()
 	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
-		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
+		v["crouch_toggle"] = true  # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
 	get_tree().node_added.connect(_on_node_added)
 	get_tree().root.size_changed.connect(_apply_ui_scale)
 	get_tree().root.size_changed.connect(_apply_render_scale)
+
 
 ## Reads the settings file over the defaults, bringing an older file up to date. Returns the file as read.
 func load_file() -> ConfigFile:
@@ -247,20 +494,22 @@ func load_file() -> ConfigFile:
 		# older saves kept a few settings inside the save file
 		var old: Dictionary = Save.d.get("settings", {})
 		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
-			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
+			if old.has(pair[0]):
+				v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
-		v["cam_follow"] = "centred"     # the centred follow becomes everyone's default once
+		v["cam_follow"] = "centred"  # the centred follow becomes everyone's default once
 	migrate_cam(v)
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
-		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
+		v["keys"] = {}  # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	KeyMigrate.run(v)
-	v["text_size"] = snap_text_size(v.get("text_size", 1.0))      # (a config from before the option has none: 100%)
+	v["text_size"] = snap_text_size(v.get("text_size", 1.0))  # (a config from before the option has none: 100%)
 	_migrate_belt_keys()
 	_migrate_volumes(cf)
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
-		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
+		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"):
+			v["msaa"] = 2 if OS.has_feature("web") else 4
 		v["video_v"] = 2
 	if int(v.get("video_v", 2)) < 3:
 		# Medium became the default (item 94): an automatic pick of High or Ultra steps down once; a hand pick stays
@@ -269,21 +518,24 @@ func load_file() -> ConfigFile:
 		v["video_v"] = 3
 	if int(v.get("video_v", 3)) < 4:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
-		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
+		if String(v.get("quality", "auto")) == "auto":
+			v["quality_found"] = ""
 		v["video_v"] = 4
 	if int(v.get("video_v", 4)) < 5:
 		# saves wrote "fullscreen: false" for anyone who never chose, so a windowed start looked like a choice: start over once
 		v["fullscreen"] = desktop_export
 		v["video_v"] = 5
-	v["hud_scale"] = HudScale.setting()      # (saves from before HUD size load at 100%; hand edits stay in range)
+	v["hud_scale"] = HudScale.setting()  # (saves from before HUD size load at 100%; hand edits stay in range)
 	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
-		v[SideColor.KEY] = "default"      # missing in older files, or a palette that is gone
-	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
+		v[SideColor.KEY] = "default"  # missing in older files, or a palette that is gone
+	if v.get("show_fps") is bool:
+		v["show_fps"] = int(v["show_fps"])  # (a toggle before the performance overlay)
 	if not cf.has_section_key("s", "voices"):
 		# voices and menu sounds came off the Effects bus onto their own: they start where Effects was
 		v["voices"] = v["sfx"]
 		v["ui_sounds"] = v["sfx"]
 	return cf
+
 
 ## The Text size choice nearest `x` (anything unreadable or out of range lands on 100%).
 static func snap_text_size(x: Variant) -> float:
@@ -295,13 +547,16 @@ static func snap_text_size(x: Variant) -> float:
 			best = s
 	return best
 
+
 ## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
 func _migrate_belt_keys() -> void:
 	var ks: Dictionary = v["keys"]
 	for pair in [["tonic", "util1"], ["armor_kit", "util2"]]:
 		if ks.has(pair[0]):
-			if not ks.has(pair[1]): ks[pair[1]] = ks[pair[0]]
+			if not ks.has(pair[1]):
+				ks[pair[1]] = ks[pair[0]]
 			ks.erase(pair[0])
+
 
 ## The volume sliders became perceptual (audio_v 2, Sfx.slider_db: gain = slider squared). A level saved
 ## before that moves its slider to where it sounds the same, so nobody's mix changes.
@@ -313,6 +568,7 @@ func _migrate_volumes(cf: ConfigFile) -> void:
 			v[k] = sqrt(clampf(float(v[k]), 0.0, 1.0))
 	v["audio_v"] = 2
 
+
 ## Called by Game once the input actions exist, so saved key bindings can replace them.
 func apply_all() -> void:
 	for a in ACTIONS:
@@ -322,14 +578,17 @@ func apply_all() -> void:
 	_started = true
 	_hold_window_mode()
 
+
 ## True while the window is fullscreen (the saved choice can lag it: a request the OS dropped, or Win+Down).
 static func window_is_fullscreen() -> bool:
 	var m := DisplayServer.window_get_mode()
 	return m == DisplayServer.WINDOW_MODE_FULLSCREEN or m == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
 
+
 ## Alt+Enter and F11 (and Settings > Fullscreen): flips the window as it is now and saves that as the choice.
 func toggle_fullscreen() -> void:
 	set_v("fullscreen", not window_is_fullscreen())
+
 
 ## The window may not be up yet when the first request is made (Windows drops it): ask again for a few frames.
 func _hold_window_mode() -> void:
@@ -338,22 +597,20 @@ func _hold_window_mode() -> void:
 		if bool(v["fullscreen"]) != window_is_fullscreen():
 			apply("fullscreen")
 
+
 ## A windowed start bigger than the screen's usable area (a 1280x720 window on a small or scaled laptop screen)
 ## would hang its bottom edge, and the buttons there, off the screen: shrink it to fit.
 func _fit_window_to_screen() -> void:
 	var usable := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
 	var deco := DisplayServer.window_get_size_with_decorations() - DisplayServer.window_get_size()
 	if usable.size.x <= 0:
-		return      # (headless: no screen)
+		return  # (headless: no screen)
 	var room := usable.size - deco
 	var win := DisplayServer.window_get_size()
 	if win.x > room.x or win.y > room.y:
 		DisplayServer.window_set_size(Vector2i(mini(win.x, room.x), mini(win.y, room.y)))
 		DisplayServer.window_set_position(usable.position)
 
-## Seconds bots leave a fresh lander alone (Bot.fresh) with Settings > Demo > "Bots leave you be after
-## landing" on Longer.
-const DEMO_FRESH_T := 60.0
 
 ## Settings > Demo applied to an offline match's options as it starts (Game.show_screen): the raid
 ## condition kept clear (RaidLook.pick reads opts["raid"]), the Blight off (BlightDir.enabled reads
@@ -368,8 +625,10 @@ func demo_opts(o: Dictionary) -> Dictionary:
 		o["fresh_t"] = DEMO_FRESH_T
 	return o
 
+
 func get_v(k: String):
 	return v.get(k, DEFAULTS.get(k))
+
 
 func set_v(k: String, val, write := true) -> void:
 	v[k] = val
@@ -379,21 +638,25 @@ func set_v(k: String, val, write := true) -> void:
 	else:
 		# dragging a slider: write once things settle instead of on every step
 		_dirty = true
-		get_tree().create_timer(0.6).timeout.connect(func():
-			if _dirty:
-				_dirty = false
-				save())
+		get_tree().create_timer(0.6).timeout.connect(
+			func():
+				if _dirty:
+					_dirty = false
+					save()
+		)
 	changed.emit(k)
+
 
 func save() -> void:
 	var cf := ConfigFile.new()
-	cf.load(PATH)          # keeps the other sections (the last save slot)
+	cf.load(PATH)  # keeps the other sections (the last save slot)
 	for k in REMOVED:
 		if cf.has_section_key("s", k):
 			cf.erase_section_key("s", k)
 	for k in v:
 		cf.set_value("s", k, v[k])
 	cf.save(PATH)
+
 
 func reset_all() -> void:
 	v = DEFAULTS.duplicate(true)
@@ -404,6 +667,7 @@ func reset_all() -> void:
 		apply(k)
 	save()
 	changed.emit("")
+
 
 func apply(k: String) -> void:
 	if BUSES.has(k):
@@ -422,23 +686,36 @@ func apply(k: String) -> void:
 				_fit_window_to_screen()
 		"vsync":
 			if not OS.has_feature("web"):
-				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if v[k] else DisplayServer.VSYNC_DISABLED)
-		"max_fps": Engine.max_fps = int(v[k])
+				DisplayServer.window_set_vsync_mode(
+					DisplayServer.VSYNC_ENABLED if v[k] else DisplayServer.VSYNC_DISABLED
+				)
+		"max_fps":
+			Engine.max_fps = int(v[k])
 		"msaa":
 			var m := int(v[k])
-			get_tree().root.msaa_3d = Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
+			get_tree().root.msaa_3d = (
+				Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
+			)
 			var fxaa: bool = m == 0 and bool(q("fxaa"))
-			get_tree().root.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if fxaa else Viewport.SCREEN_SPACE_AA_DISABLED
+			get_tree().root.screen_space_aa = (
+				Viewport.SCREEN_SPACE_AA_FXAA if fxaa else Viewport.SCREEN_SPACE_AA_DISABLED
+			)
+			_apply_render_scale()  # (the ink's pixel measure follows the smoothing)
 		"shadows":
 			for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
 				(n as DirectionalLight3D).shadow_enabled = bool(v[k]) and _casts(n as DirectionalLight3D)
 		"quality", "quality_found":
 			_apply_quality()
-		"ui_scale": _apply_ui_scale()
-		"text_size": UI.set_text_size(float(v[k]))
+		"ui_scale":
+			_apply_ui_scale()
+		"text_size":
+			UI.set_text_size(float(v[k]))
 		"rec_level":
 			# recording mode picked in Settings > Demo carries over to the next launch (--record overrides)
-			if not _started and not Array(OS.get_cmdline_user_args()).any(func(x): return String(x).begins_with("--record")):
+			if (
+				not _started
+				and not Array(OS.get_cmdline_user_args()).any(func(x): return String(x).begins_with("--record"))
+			):
 				Record.set_level(int(v[k]))
 		"keys":
 			# kin throw moved off right click when heroes got secondaries
@@ -446,6 +723,7 @@ func apply(k: String) -> void:
 				v[k].erase("throw")
 			for a in v[k]:
 				_bind(a, v[k][a])
+
 
 ## The interface is laid out for a 1280x720 window and scales with the window both ways: smaller
 ## windows (a laptop browser with its toolbars) shrink it so nothing ends up off screen, and big
@@ -459,6 +737,7 @@ func _apply_ui_scale() -> void:
 	var f := user * minf(win.y / 720.0, win.x / 1240.0)
 	if absf(get_tree().root.content_scale_factor - f) > 0.001:
 		get_tree().root.content_scale_factor = f
+
 
 ## Lights made later (every screen builds its own) follow the shadow setting too.
 func _on_node_added(n: Node) -> void:
@@ -474,10 +753,12 @@ func _on_node_added(n: Node) -> void:
 	elif n is WorldEnvironment and (n as WorldEnvironment).environment:
 		_env_quality((n as WorldEnvironment).environment)
 
+
 func _casts(dl: DirectionalLight3D) -> bool:
 	if not dl.has_meta("casts"):
 		dl.set_meta("casts", dl.shadow_enabled)
 	return bool(dl.get_meta("casts"))
+
 
 ## The preset's shadow distance and cascades on a light that casts shadows (its own distance is
 ## the High one).
@@ -493,7 +774,6 @@ func _shadow_quality(dl: DirectionalLight3D) -> void:
 	else:
 		dl.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if splits == 2 else mode0
 
-const LIGHT_FADE_M := 8.0       # m over which a far lamp dims out (Settings q("light_m"))
 
 ## Lamps and glows past the preset's light_m fade out (the engine then skips them); a light's own
 ## shorter fade stays.
@@ -517,6 +797,10 @@ func _apply_render_scale() -> void:
 	root.scaling_3d_scale = clampf(minf(float(px) / h if px > 0 else 1.0, float(q("scale"))), 0.25, 1.0)
 	var fsr := RenderingServer.get_current_rendering_method() != "gl_compatibility" and root.scaling_3d_scale < 0.999
 	root.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if fsr else Viewport.SCALING_3D_MODE_BILINEAR
+	# (outline.gdshader min_px: the 3D's drawn height; with no MSAA or FXAA to smooth it a line needs twice the width)
+	var smooth := int(v.get("msaa", 0)) > 0 or bool(q("fxaa"))
+	RenderingServer.global_shader_parameter_set("ink_px_h", h * root.scaling_3d_scale * (1.0 if smooth else 0.5))
+
 
 func _env_quality(e: Environment) -> void:
 	if not e.has_meta("ssao0"):
@@ -526,32 +810,39 @@ func _env_quality(e: Environment) -> void:
 	e.glow_enabled = bool(e.get_meta("glow0")) and bool(q("glow"))
 	if e.volumetric_fog_enabled or e.has_meta("vfog0"):
 		# volumetric light in the haze (the expedition's dusk) only on the presets that can afford it
-		if not e.has_meta("vfog0"): e.set_meta("vfog0", e.volumetric_fog_enabled)
+		if not e.has_meta("vfog0"):
+			e.set_meta("vfog0", e.volumetric_fog_enabled)
 		e.volumetric_fog_enabled = bool(e.get_meta("vfog0")) and bool(q("volfog"))
+
 
 ## Applies the preset in effect: its anti-aliasing and shadows (as if picked by hand), render scale,
 ## level of detail, shadow map size and filtering, lamp fade, and the lights and environments already in the scene. The
 ## world's own detail (grass, draw distance, cloud layers, particles) follows from the next expedition.
 func _apply_quality() -> void:
-	var Q: Dictionary = QUALITY[quality()]
+	var q_v: Dictionary = QUALITY[quality()]
 	if _started or _quality_basics:
 		_quality_basics = false
-		v["msaa"] = int(Q["msaa"]) if not OS.has_feature("web") else mini(int(Q["msaa"]), 2)
-		v["shadows"] = bool(Q["shadows"])
-		apply("msaa"); apply("shadows")
+		v["msaa"] = int(q_v["msaa"]) if not OS.has_feature("web") else mini(int(q_v["msaa"]), 2)
+		v["shadows"] = bool(q_v["shadows"])
+		apply("msaa")
+		apply("shadows")
 	var root := get_tree().root
 	_apply_render_scale()
-	root.mesh_lod_threshold = float(Q["lod"])
-	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(Q["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
-	Engine.max_physics_steps_per_frame = int(Q["steps"])
-	RenderingServer.directional_soft_shadow_filter_set_quality(int(Q["soft"]))
-	RenderingServer.directional_shadow_atlas_set_size(int(Q["atlas"]), true)
+	root.mesh_lod_threshold = float(q_v["lod"])
+	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(q_v["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
+	Engine.max_physics_steps_per_frame = int(q_v["steps"])
+	RenderingServer.directional_soft_shadow_filter_set_quality(int(q_v["soft"]))
+	RenderingServer.directional_shadow_atlas_set_size(int(q_v["atlas"]), true)
 	for n in root.find_children("*", "Light3D", true, false):
-		if n is OmniLight3D or n is SpotLight3D: _light_quality(n as Light3D)
+		if n is OmniLight3D or n is SpotLight3D:
+			_light_quality(n as Light3D)
 	for n in root.find_children("*", "DirectionalLight3D", true, false):
-		if (n as DirectionalLight3D).shadow_enabled: _shadow_quality(n as DirectionalLight3D)
+		if (n as DirectionalLight3D).shadow_enabled:
+			_shadow_quality(n as DirectionalLight3D)
 	for n in root.find_children("*", "WorldEnvironment", true, false):
-		if (n as WorldEnvironment).environment: _env_quality((n as WorldEnvironment).environment)
+		if (n as WorldEnvironment).environment:
+			_env_quality((n as WorldEnvironment).environment)
+
 
 func _input(event: InputEvent) -> void:
 	var k := event as InputEventKey
@@ -561,11 +852,13 @@ func _input(event: InputEvent) -> void:
 		toggle_fullscreen()
 		get_viewport().set_input_as_handled()
 
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and bool(v.get("mute_unfocused", false)):
 		AudioServer.set_bus_mute(0, true)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		AudioServer.set_bus_mute(0, false)
+
 
 # ------------------------------------------------------------------ key bindings
 func _events_to_list(evs: Array) -> Array:
@@ -577,6 +870,7 @@ func _events_to_list(evs: Array) -> Array:
 			out.append("mouse:%d" % (e as InputEventMouseButton).button_index)
 	return out
 
+
 func _bind(action: String, list: Array) -> void:
 	if not InputMap.has_action(action):
 		return
@@ -586,36 +880,48 @@ func _bind(action: String, list: Array) -> void:
 		if parts.size() != 2:
 			continue
 		if parts[0] == "key":
-			var e := InputEventKey.new(); e.physical_keycode = int(parts[1])
+			var e := InputEventKey.new()
+			e.physical_keycode = int(parts[1])
 			InputMap.action_add_event(action, e)
 		elif parts[0] == "mouse":
-			var m := InputEventMouseButton.new(); m.button_index = int(parts[1])
+			var m := InputEventMouseButton.new()
+			m.button_index = int(parts[1])
 			InputMap.action_add_event(action, m)
+
 
 ## The saved form of a key or mouse button ("key:69", "mouse:2"), or "" for anything else.
 func ev_code(ev: InputEvent) -> String:
-	if ev is InputEventKey: return "key:%d" % (ev as InputEventKey).physical_keycode
-	if ev is InputEventMouseButton: return "mouse:%d" % (ev as InputEventMouseButton).button_index
+	if ev is InputEventKey:
+		return "key:%d" % (ev as InputEventKey).physical_keycode
+	if ev is InputEventMouseButton:
+		return "mouse:%d" % (ev as InputEventMouseButton).button_index
 	return ""
+
 
 ## An action's two binding slots, [primary, secondary] ("" when a slot is empty).
 func slots(action: String) -> Array:
 	var list := _events_to_list(InputMap.action_get_events(action))
 	var saved: Array = v["keys"].get(action, [])
 	# (an empty primary is kept in the save as "", which InputMap can't hold)
-	if saved.size() >= 2 and String(saved[0]) == "": list.push_front("")
-	while list.size() < 2: list.append("")
+	if saved.size() >= 2 and String(saved[0]) == "":
+		list.push_front("")
+	while list.size() < 2:
+		list.append("")
 	return [String(list[0]), String(list[1])]
+
 
 func _set_slots(action: String, sl: Array) -> void:
 	var list: Array = [String(sl[0]), String(sl[1])]
-	if list[1] == "": list.resize(1)
-	if list.size() == 1 and list[0] == "": list = []
+	if list[1] == "":
+		list.resize(1)
+	if list.size() == 1 and list[0] == "":
+		list = []
 	_bind(action, list)
 	var keys: Dictionary = v["keys"]
 	keys[action] = list
 	save()
 	changed.emit("keys")
+
 
 ## Sets one binding slot of an action (0 primary, 1 secondary) to this key or mouse button.
 func rebind(action: String, ev: InputEvent, slot := 0) -> void:
@@ -626,10 +932,13 @@ func rebind(action: String, ev: InputEvent, slot := 0) -> void:
 	_put(sl, slot, s)
 	_set_slots(action, sl)
 
+
 ## Puts a key in one slot of a slots() pair, emptying the other slot if it held the same key.
 func _put(sl: Array, slot: int, code: String) -> void:
 	sl[slot] = code
-	if code != "" and sl[1 - slot] == code: sl[1 - slot] = ""
+	if code != "" and sl[1 - slot] == code:
+		sl[1 - slot] = ""
+
 
 ## Empties one binding slot.
 func clear_bind(action: String, slot: int) -> void:
@@ -637,39 +946,38 @@ func clear_bind(action: String, slot: int) -> void:
 	sl[slot] = ""
 	_set_slots(action, sl)
 
+
 ## Actions already on this key or button code: [[action, slot], ...].
 func holders(code: String, except := "") -> Array:
 	var out: Array = []
 	if code == "":
 		return out
 	for a in ACTIONS:
-		if a[0] == except: continue
+		if a[0] == except:
+			continue
 		var sl := slots(a[0])
 		for i in 2:
-			if sl[i] == code: out.append([a[0], i])
+			if sl[i] == code:
+				out.append([a[0], i])
 	return out
 
-## Actions that only run at home (the garden) and ones that only run in a match.
-const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
-const MATCH_ONLY := ["gear2", "summon", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate", "scout"]
-
-## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
-## training-only actions, the lobby's push to talk).
-const SHARED_OK := [["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
-		["goals", "throw"], ["fold_guide", "whistle"], ["details", "throw"], ["goals", "scout"]]
 
 ## Two actions may share a key only when they never run in the same place: one at home, the other in a match
 ## (or a pair listed in SHARED_OK).
 func can_share(a: String, b: String) -> bool:
-	if (a in HOME_ONLY and b in MATCH_ONLY) or (a in MATCH_ONLY and b in HOME_ONLY): return true
+	if (a in HOME_ONLY and b in MATCH_ONLY) or (a in MATCH_ONLY and b in HOME_ONLY):
+		return true
 	for p in SHARED_OK:
-		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
+		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a):
+			return true
 	return false
+
 
 ## Other rebindable actions that would clash with this key or button: [[action, slot], ...] (the
 ## ones that run somewhere else don't count).
 func conflicts(ev: InputEvent, except := "") -> Array:
 	return holders(ev_code(ev), except).filter(func(h): return not can_share(h[0], except))
+
 
 ## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
 ## what `action` had there instead, so none of them loses a key.
@@ -683,39 +991,49 @@ func swap_bind(action: String, slot: int, ev: InputEvent, owners: Array) -> void
 		_set_slots(o[0], theirs)
 	_set_slots(action, mine)
 
+
 ## True when an action has no key at all (the Controls page marks it red).
 func unbound(action: String) -> bool:
 	return slots(action) == ["", ""]
 
+
 func code_text(s: String) -> String:
 	var parts := s.split(":")
-	if parts.size() != 2: return ""
-	if parts[0] == "key": return OS.get_keycode_string(int(parts[1]))
-	return {1: "LMB", 2: "RMB", 3: "MMB", 4: "Wheel up", 5: "Wheel down", 8: "Mouse 4", 9: "Mouse 5"}.get(int(parts[1]), "Mouse %s" % parts[1])
+	if parts.size() != 2:
+		return ""
+	if parts[0] == "key":
+		return OS.get_keycode_string(int(parts[1]))
+	return {1: "LMB", 2: "RMB", 3: "MMB", 4: "Wheel up", 5: "Wheel down", 8: "Mouse 4", 9: "Mouse 5"}.get(
+		int(parts[1]), "Mouse %s" % parts[1]
+	)
+
 
 func binding_text(action: String) -> String:
 	var names: Array = []
 	for c in slots(action):
-		if c != "": names.append(code_text(c))
+		if c != "":
+			names.append(code_text(c))
 	return " / ".join(names) if names.size() > 0 else "unbound"
 
-## Short cap text for the mouse buttons (code_text has the long names for the Controls page). No spaces,
-## so a row of caps (UI.key_hints) never splits one into two.
-const MOUSE_CAPS := {1: "LMB", 2: "RMB", 3: "MMB", 4: "WHEEL-UP", 5: "WHEEL-DN", 8: "M4", 9: "M5"}
 
 ## One saved binding ("key:70", "mouse:8") as a cap: "F", "SPACE", "M4", "WHEEL-UP".
 func cap_text(code: String) -> String:
 	var parts := code.split(":")
-	if parts.size() != 2: return "?"
-	if parts[0] == "key": return OS.get_keycode_string(int(parts[1])).to_upper().replace(" ", "")
+	if parts.size() != 2:
+		return "?"
+	if parts[0] == "key":
+		return OS.get_keycode_string(int(parts[1])).to_upper().replace(" ", "")
 	return MOUSE_CAPS.get(int(parts[1]), "M%s" % parts[1])
+
 
 ## Both bindings, short ("R / X"), where a prompt has room for them.
 func key_caps(action: String) -> String:
 	var out: Array = []
 	for c in slots(action):
-		if c != "": out.append(cap_text(c))
+		if c != "":
+			out.append(cap_text(c))
 	return " / ".join(out) if out.size() > 0 else "?"
+
 
 ## Text with {action} tokens ("hold {interact} to scan") filled with those actions' key caps.
 func fill_keys(text: String) -> String:
@@ -723,9 +1041,11 @@ func fill_keys(text: String) -> String:
 		text = text.replace("{%s}" % a[0], key_cap(a[0]))
 	return text
 
+
 ## The four walking keys' caps in a row ("WASD"), joined by `sep`.
 func move_caps(sep := "") -> String:
 	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
+
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
 func key_cap(action: String) -> String:

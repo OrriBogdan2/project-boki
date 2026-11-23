@@ -30,7 +30,6 @@ const BURR_RIDE := 0.25              # m: the least height the charge keeps over
 const BURR_R := 0.15                 # m: the coin's own radius when it meets a placed wall
 const BURR_WALL_DEG := 50.0          # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
 const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
-const HIT_HOLD := 0.3                # s a struck foe's body stays lit (the generic hit flash is 0.12 s)
 const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of her cap and face
 const TUBE_UP := 0.16                # m above the gun's muzzle: the launcher tube, on a model without its empties
 const TUBE_FIRE := "launcher_fire"   # fixed on the cannon at the bell's firing spot: the charge leaves from here
@@ -172,7 +171,7 @@ func x_wind_left() -> float:
 	return maxf(0.0, x_wind_end - float(m.time))
 
 ## The source's recovery (E_RECOVER): she stands, and no ability, jump or Shift goes.
-## A press in the last DashFlow.BUFFER_S waits for the end (DashFlow.cc_left); one before it is dropped.
+## A press in the last Loco.press_buffer waits for the end (DashFlow.cc_left); one before it is dropped.
 func commit_left() -> float:
 	return maxf(0.0, commit_end - float(m.time))
 
@@ -180,7 +179,7 @@ func busy() -> bool:
 	return super.busy() or commit_left() > 0.0
 
 func gate_inputs() -> void:
-	if commit_left() > DashFlow.BUFFER_S:
+	if commit_left() > Loco.press_buffer:
 		h.inp["dash"] = false
 		h.inp["jump"] = false
 
@@ -579,7 +578,7 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 ## Only a charge that strikes a foe does this, so a hit can't be mistaken for a miss (a stick in terrain,
 ## with a dust puff): a hot ring round the foe, its body held lit, and for the thrower a ping.
 func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
-	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
+	victim.flash_t = maxf(victim.flash_t, ImpactWeight.flash_s(ImpactWeight.of_ability(h.arch, "rmb")))
 	vfx("rmb_hit", victim.pos, -dir, {"r": victim.r + 0.9})
 	if h == m.player and m.hud:
 		m.sfx("crit", at, -2.0, 0.8)
@@ -657,7 +656,7 @@ func cast_e() -> bool:
 	var ed := e_def()
 	needle = {"t": 0.0, "dir": h.aim_dir(), "push": _push_want()}
 	e_t = float(ed["charge"]) + 0.1
-	m.sfx("vn_ion_charge", h.pos, -3.0)
+	KitWindup.play(self, "e", "vn_ion_charge", -3.0)
 	play("gunslinger_e")
 	return true
 
@@ -686,6 +685,7 @@ func _tick_needle(dt: float) -> void:
 	needle["t"] = float(needle["t"]) + dt
 	if h.downed or h.stun_t > 0.0:
 		_end_needle()
+		KitWindup.broken(self, "e")
 		return
 	_turn_needle(dt)
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)

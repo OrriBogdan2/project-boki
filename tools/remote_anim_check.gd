@@ -14,7 +14,11 @@ extends "res://tools/displace_net_check.gd"
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Every AimKit `all` telegraph the host's hunter draws in a cast must show on the guest under its copy too
 ## (AimNet, Net 0.24.6), asserted once per shape kind.
-## Lines: RANIM ok|FAIL <what>, then the unlike casts.
+## Grimble's Deep Reach (Net 0.24.20): the host's Grimble hooks the guest's hunter and reels them in; on the guest his
+## arm (the model's WardenReach.TIP) reaches out, as far, within a snapshot of the host's, and no plain shot flies.
+## Lines: RANIM ok|FAIL <what>, then the unlike casts. The registry splits the run into four flags
+## (tools/checks/net.gd: --remote-anim-1/2/3-check cast a third of ARCHS each, --remote-anim-rest-check the bosses, the
+## re-time and Grimble's reach; each under the gate's 300 s cap); the guest is started with --remote-anim-guest.
 
 const LAG_TOL := 0.3  # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15  # s: a move replaced sooner than this never makes a snapshot
@@ -24,6 +28,8 @@ const SETTLE := 1.6  # s after the release for the move to play out and the snap
 const HOLD := 0.8  # s a held key stays down
 const WALK := 3.6  # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
 const WASH_ON := 0.15  # the body tint (Ent.wash) counts as showing above this
+const REST := "rest"  # the shard with the bosses, the re-time and the reach row (no Hunter casts)
+const SHARDS := 3  # Hunter shards "1".."3": each casts its third of ARCHS
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
 const BOSSES := {"colossus": "slam", "serpent": "dash", "brood": "spit"}  # the attack each plays
 const BOSS_LOOPS := ["idle", "walk", "stagger", "sleep"]  # (not compared: the copy's gait may differ a step)
@@ -61,6 +67,8 @@ var unlike := {}  # arch -> casts whose copy differs
 var played := {}  # arch -> casts that played any move
 var boss_nid := ""  # the boss both games log (the guest's copy of it)
 var cone_len := 0.0  # m: the longest ground cone the watched hunter showed since the mark
+var reach := {}  # the watched hunter's arm out since the mark: {from, to (unix ms), len (m, the farthest)}
+var balls := 0  # the most plain (cosmetic) shots this game had flying at once since the mark
 var wash_rows: Array = []  # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []  # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []  # ... and the guest's copy's
@@ -68,35 +76,45 @@ var tele := {}  # the watched hunter's `all` telegraphs this cast: id -> [shape 
 var tele_kinds := {}  # shape kind -> host telegraphs of that kind over every cast ("arch key: id")
 var tele_miss := {}  # shape kind -> the ones the guest never showed
 var retimes: Array = []  # [unix ms, s]: the watched move's clock jumped earlier, same id (a re-time)
+var archs: Array = ARCHS  # the Hunters this shard casts
+var rest := true  # this shard runs the bosses, the re-time and the reach row
 var last_at := ["", 0.0]  # the watched kit's move id and anim_at at the last frame
 
 
 func _init() -> void:
 	tag = "RANIM"
-	guest_flag = "--remote-anim-check=guest"
+	guest_flag = "--remote-anim-guest"
 
 
-func run(main_node: Node) -> void:
+func run(main_node: Node, shard := "") -> void:
+	if shard != "":
+		rest = shard == REST
+		var n_v := ARCHS.size()
+		var i := int(shard) - 1
+		archs = [] if rest else ARCHS.slice(ceili(i * n_v / float(SHARDS)), ceili((i + 1) * n_v / float(SHARDS)))
 	main_node.get_tree().process_frame.connect(_sample)
 	await super.run(main_node)
 
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	var G := await _host_up()
-	if G == null:
+	var g := await _host_up()
+	if g == null:
 		return _finish()
 	ok(Net.VERSION != "0.24.5", "the Net version moved on with the boss event (%s)" % Net.VERSION)
-	for kind in BOSSES:
-		await _boss(kind, String(BOSSES[kind]))
-	for arch in ARCHS:
+	if rest:
+		for kind in BOSSES:
+			await _boss(kind, String(BOSSES[kind]))
+	for arch in archs:
 		for key in KEYS:
 			for held in [false] if key in ["e", "r"] else [false, true]:
-				await _cast(G, arch, key, held)
+				await _cast(g, arch, key, held)
 			if "%s %s" % [arch, key] in CUTS:
-				await _cast(G, arch, key, true, true)
-	_wash_rows_ok()
-	ok(not tele_kinds.is_empty(), "some cast draws an all telegraph (else none was compared)")
+				await _cast(g, arch, key, true, true)
+	if "archer" in archs:
+		_wash_rows_ok()
+	if not archs.is_empty():
+		ok(not tele_kinds.is_empty(), "some cast draws an all telegraph (else none was compared)")
 	for kind in tele_kinds:
 		var drawn: int = tele_kinds[kind].size()
 		ok(
@@ -104,8 +122,10 @@ func _host() -> void:
 			"telegraph %s: all %d the host drew show on the guest" % [kind, drawn],
 			"missing: %s" % str(tele_miss.get(kind, []))
 		)
-	await _ram_retime()
-	for arch in ARCHS:
+	if rest:
+		await _ram_retime()
+		await _reach_row(g)
+	for arch in archs:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(
 			not unlike.has(arch),
@@ -117,9 +137,9 @@ func _host() -> void:
 
 ## One boss of `kind` on the host, asleep, woken, one attack, a phase change: the guest's copy plays the same.
 func _boss(kind: String, atk: String) -> void:
-	var P := m.player
-	P.reclass(Arch.weight("gunslinger"), "gunslinger")
-	P.teleport(home)
+	var p := m.player
+	p.reclass(Arch.weight("gunslinger"), "gunslinger")
+	p.teleport(home)
 	var at := home + BOSS_AT
 	var b := Boss.new()
 	var lair := {"c": at, "half": 14, "state": "awake", "col": Color.WHITE, "name": kind, "adds": []}
@@ -138,7 +158,7 @@ func _boss(kind: String, atk: String) -> void:
 	b.set_asleep(false)
 	b.awake_t = 0.0
 	await _run(2.0)
-	b.tgt = P
+	b.tgt = p
 	match atk:
 		"slam":
 			b._atk_slam()
@@ -187,21 +207,21 @@ func _first_k(rows: Array, move_name: String) -> float:
 	return -1.0
 
 
-func _cast(G: Hunter, arch: String, key: String, held: bool, cut := false) -> void:
-	var P := m.player
+func _cast(_g: Hunter, arch: String, key: String, held: bool, cut := false) -> void:
+	var p := m.player
 	var what := "%s %s%s" % [arch, key, " held" if held else ""]
 	if cut:
 		what = "%s %s cut" % [arch, key]
-	P.reclass(Arch.weight(arch), arch)
-	P.unlock_all()
-	P.lvl = 6
+	p.reclass(Arch.weight(arch), arch)
+	p.unlock_all()
+	p.lvl = 6
 	_kit(arch)
-	P.fire_cd = 0.0
-	P.ammo = int(P.wpn.get("mag", 12))
+	p.fire_cd = 0.0
+	p.ammo = int(p.wpn.get("mag", 12))
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "kit", "arch": arch})
 	await _reply()
-	_aim(P.pos + Vector3(6.0, 0, 0))
+	_aim(p.pos + Vector3(6.0, 0, 0))
 	await _run(0.3)
 	log_rows.clear()
 	wash_rows.clear()
@@ -247,52 +267,97 @@ func _cast(G: Hunter, arch: String, key: String, held: bool, cut := false) -> vo
 	print("%s %s  %d moves, worst lag %.2f s" % [tag, what, cmp["moves"], cmp["lag"]])
 
 
+## Grimble's Deep Reach on the guest: the host's Grimble hooks the guest's hunter 6 m out and reels them in.
+func _reach_row(g: Hunter) -> void:
+	var p := m.player
+	p.reclass(Arch.weight("dredge"), "dredge")
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "kit", "arch": "dredge"})
+	await _reply()
+	await _place(g, home + Vector3(6.0, 0, 0))
+	_kit("dredge")
+	_aim(g.pos)
+	reach = {}
+	balls = 0
+	Net.lobby_emit("ra", {"c": "mark"})
+	await _run(0.2)
+	p.inp["sec_hold"] = false
+	p.ak.press_rmb()
+	await _run(SETTLE + 1.0)
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "log"})
+	await _reply()
+	var theirs: Dictionary = replies[0].get("reach", {}) if not replies.is_empty() else {}
+	var lag_in := (float(theirs.get("from", 0)) - float(reach.get("from", 0))) / 1000.0
+	var lag_out := (float(theirs.get("to", 0)) - float(reach.get("to", 0))) / 1000.0
+	var len_h := float(reach.get("len", 0.0))
+	var len_g := float(theirs.get("len", 0.0))
+	var arrived := (p.ak as DredgeKit).arrivals
+	ok(
+		(
+			len_h > 3.0
+			and arrived > 0
+			and absf(len_g - len_h) < 0.6
+			and lag_in > -SKEW
+			and lag_in < LAG_TOL
+			and absf(lag_out) < LAG_TOL
+		),
+		"Grimble's Deep Reach: on the guest his arm reaches and holds as on the host",
+		"host %.2f m, guest %.2f m, in +%.2f s, out %+.2f s, arrivals %d" % [len_h, len_g, lag_in, lag_out, arrived]
+	)
+	var their_balls := int(replies[0].get("balls", -1)) if not replies.is_empty() else -1
+	ok(their_balls == 0, "Grimble's Deep Reach: the guest draws no plain shot for his hook", "%d" % their_balls)
+	var out_h := int(reach.get("to", 0)) - int(reach.get("from", 0))
+	var out_g := int(theirs.get("to", 0)) - int(theirs.get("from", 0))
+	print("%s reach host %.2f m %d ms, guest %.2f m %d ms" % [tag, len_h, out_h, len_g, out_g])
+
+
 ## Three tiles 4 m out on the cast line (+x of the hunter), set to `kind`.
 func _rocks(kind: int) -> void:
-	var W := m.world
+	var w := m.world
 	for dz in [-1, 0, 1]:
-		W.kind[W.idx(int(floor(m.player.pos.x + 4.0)), int(floor(m.player.pos.z)) + dz)] = kind
+		w.kind[w.idx(int(floor(m.player.pos.x + 4.0)), int(floor(m.player.pos.z)) + dz)] = kind
 
 
 ## One key for the kit: tapped (one step) or held for HOLD s (CUT_AT, then cut), then let go. E gets a flick of the
 ## aim (Sparkle's drag).
 func _press(key: String, held: bool, cut := false) -> void:
-	var P := m.player
+	var p := m.player
 	var secs := HOLD if held else DT
 	if cut:
 		secs = CUT_AT
-	var flick := P.pos + Vector3(6.0, 0, 4.0)
+	var flick := p.pos + Vector3(6.0, 0, 4.0)
 	match key:
 		"lmb":
-			P.inp["fire"] = true
+			p.inp["fire"] = true
 		"rmb":
-			P.inp["sec"] = true
+			p.inp["sec"] = true
 		"e":
-			P.inp["sig"] = true
+			p.inp["sig"] = true
 		"r":
-			P.inp["ult"] = true
+			p.inp["ult"] = true
 		"dash":
-			P.do_dash()
+			p.do_dash()
 	var t := 0.0
 	while t < maxf(secs, DT) - 0.0001:
 		if key == "rmb":
-			P.inp["sec_hold"] = held
+			p.inp["sec_hold"] = held
 		if key == "dash":
-			P.inp["dash_down"] = held
+			p.inp["dash_down"] = held
 		if key == "e" and t > 0.2:
 			_aim(flick)
 		await _run(DT)
 		t += DT
 		if key != "lmb" or not held:
-			P.inp["fire"] = false
-		P.inp["sec"] = false
+			p.inp["fire"] = false
+		p.inp["sec"] = false
 	if cut:
-		MergeAugment.drop_class_holds(P)
-		P.ak.drop_holds()
+		MergeAugment.drop_class_holds(p)
+		p.ak.drop_holds()
 	for k in ["fire", "sec_hold", "dash_down", "sig", "ult"]:
-		P.inp[k] = false
+		p.inp[k] = false
 	if key == "e":
-		_aim(P.pos + Vector3(6.0, 0, 0))
+		_aim(p.pos + Vector3(6.0, 0, 0))
 
 
 ## Every `all` telegraph the host's hunter drew this cast for MIN_LIFE or more showed on the guest under its
@@ -327,7 +392,7 @@ func _wash_rows_ok() -> void:
 ## Cinder's ram into a foe: the hit re-times as_leap onto its squash key (ArchKit.retime, about 0.23 s earlier,
 ## under the 0.3 s resync), and the guest's copy must move its clock by the same within LAG_TOL of the host's.
 func _ram_retime() -> void:
-	var P := m.player
+	var p := m.player
 	_kit("ashwick")
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "kit", "arch": "ashwick"})
@@ -338,7 +403,7 @@ func _ram_retime() -> void:
 	retimes.clear()
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
-	P.do_dash()
+	p.do_dash()
 	await _run(SETTLE)
 	var mine := retimes.duplicate()
 	replies.clear()
@@ -408,14 +473,14 @@ func _compare(mine: Array, theirs: Array) -> Dictionary:
 # ------------------------------------------------------------------ the guest
 func _on_msg(topic: String, data, from: String) -> void:
 	if topic == "ra" and typeof(data) == TYPE_DICTIONARY and m and m.player:
-		var R := _copy()
+		var r := _copy()
 		match String(data.get("c", "")):
 			"boss":
 				boss_nid = String(data["nid"])
 				Net.lobby_emit("dn_r", {"pos": [0, 0, 0]})
 			"kit":
-				if R:
-					R.reclass(Arch.weight(String(data["arch"])), String(data["arch"]))
+				if r:
+					r.reclass(Arch.weight(String(data["arch"])), String(data["arch"]))
 				Net.lobby_emit("dn_r", {"pos": [0, 0, 0]})
 			"mark":
 				log_rows.clear()
@@ -424,9 +489,11 @@ func _on_msg(topic: String, data, from: String) -> void:
 				tele.clear()
 				last_row = ["?", "?"]
 				cone_len = 0.0
+				reach = {}
+				balls = 0
 			"log":
 				var reply := {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes, "cone": cone_len}
-				reply["tele"] = tele
+				reply.merge({"tele": tele, "reach": reach, "balls": balls})
 				Net.lobby_emit("dn_r", reply)
 		return
 	super._on_msg(topic, data, from)
@@ -446,32 +513,45 @@ func _copy() -> Hunter:
 func _sample() -> void:
 	if m == null or m.player == null:
 		return
-	var B := m.ents_by_id.get(boss_nid, null) as Boss if boss_nid != "" else null
-	if B != null:
-		_sample_boss(B)
+	var b := m.ents_by_id.get(boss_nid, null) as Boss if boss_nid != "" else null
+	if b != null:
+		_sample_boss(b)
 		return
-	var H := _copy()
-	H.render(DT, 1.0)  # (Match's own render pass is off in the checks)
+	var h_v := _copy()
+	h_v.render(DT, 1.0)  # (Match's own render pass is off in the checks)
 	var aims := AimKit.layer(m)
 	for e: Dictionary in aims.entries.values():
-		if e["h"] == H and e["kind"] == "cone" and aims.live(e):
+		if e["h"] == h_v and e["kind"] == "cone" and aims.live(e):
 			cone_len = maxf(cone_len, float(e["len"]))
-	if H.ak == null or H.anim == null:
+	_reach_sample(h_v)
+	if h_v.ak == null or h_v.anim == null:
 		return
-	_tele_sample(H)
-	var shown := H.wash > WASH_ON
+	_tele_sample(h_v)
+	var shown := h_v.wash > WASH_ON
 	if wash_rows.is_empty() and shown or not wash_rows.is_empty() and shown != wash_rows[-1][1]:
 		wash_rows.append([int(Time.get_unix_time_from_system() * 1000.0), shown])
-	var jump: float = H.ak.anim_at - float(last_at[1])
-	if H.ak.anim_id == last_at[0] and jump < -0.02 and jump > -0.6:
+	var jump: float = h_v.ak.anim_at - float(last_at[1])
+	if h_v.ak.anim_id == last_at[0] and jump < -0.02 and jump > -0.6:
 		retimes.append([int(Time.get_unix_time_from_system() * 1000.0), snappedf(jump, 0.01)])
-	last_at = [H.ak.anim_id, H.ak.anim_at]
-	var row := [H.ak.anim_id, H.anim.km_id]
-	var restart: bool = H.anim.km_prev_t < last_prev_t - 0.001
-	last_prev_t = H.anim.km_prev_t
+	last_at = [h_v.ak.anim_id, h_v.ak.anim_at]
+	var row := [h_v.ak.anim_id, h_v.anim.km_id]
+	var restart: bool = h_v.anim.km_prev_t < last_prev_t - 0.001
+	last_prev_t = h_v.anim.km_prev_t
 	if row != last_row or restart:
 		last_row = row
 		log_rows.append([int(Time.get_unix_time_from_system() * 1000.0), row[0], row[1]])
+
+
+## Grimble's arm on the watched hunter (its model's WardenReach.TIP): when it is out and how far it reaches.
+func _reach_sample(h_v: Hunter) -> void:
+	balls = maxi(balls, m.shots.filter(func(s: Dictionary) -> bool: return s["x"].get("cos", false)).size())
+	var tip: Vector3 = h_v.model.get_meta(WardenReach.TIP, Vector3.INF) if h_v.model else Vector3.INF
+	if not tip.is_finite():
+		return
+	var ms := int(Time.get_unix_time_from_system() * 1000.0)
+	reach["from"] = reach.get("from", ms)
+	reach["to"] = ms
+	reach["len"] = maxf(float(reach.get("len", 0.0)), Vector2(tip.x - h_v.pos.x, tip.z - h_v.pos.z).length())
 
 
 ## The `all` telegraphs up under the watched hunter now (the host's own, the guest's copy's).
@@ -488,8 +568,8 @@ func _tele_sample(h: Hunter) -> void:
 
 
 ## A boss's frame: note a change of the BossAnim move it plays (the loops count as none).
-func _sample_boss(B: Boss) -> void:
-	B.render(DT, 1.0)
+func _sample_boss(b: Boss) -> void:
+	b.render(DT, 1.0)
 	var id: String = "" if BossAnim.cur_move in BOSS_LOOPS else BossAnim.cur_move
 	if last_row[1] != id:
 		last_row = ["", id]

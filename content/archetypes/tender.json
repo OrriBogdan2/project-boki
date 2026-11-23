@@ -38,7 +38,6 @@
 		"dur": 4.0,
 		"per_stack": 0.72,
 		"refund": 0.2,
-		"emp_idle": 1.0,
 		"falloff": 0.5,
 		"col": "#ffb347"
 	},
@@ -116,7 +115,7 @@
 		"again": "throw the ring to the cursor",
 		"short": "Hearth",
 		"icon": "tender_e",
-		"col": "#ffd27a",
+		"col": "#7fe08a",
 		"cooldown": 11.0,
 		"time": 2.5,
 		"radius": 2.6,
@@ -167,6 +166,7 @@
 		"dash_spent": "dash pip dark"
 	},
 	"lmb_note": "Ember Cast",
+	"lmb": {"wait": 1.0, "range_k": 1.25, "size_k": 1.5},
 	"x": {
 		"name": "Hearth Call",
 		"card_range": "range",

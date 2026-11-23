@@ -106,11 +106,11 @@ func _kill_one(m: Match, k: String) -> void:
 
 ## A lair boss plays its keyed death move (BossAnim.DEATH_S) and then dissolves the same way, over its 0.6 s.
 func _boss(m: Match) -> void:
-	var L: Dictionary = m.lairs.list[0]
-	m.lairs.activate(L)
-	if L["state"] == "sealed":
-		m.lairs.open(L, m.player, "dial")
-	var b: Boss = L["boss_mob"]
+	var l: Dictionary = m.lairs.list[0]
+	m.lairs.activate(l)
+	if l["state"] == "sealed":
+		m.lairs.open(l, m.player, "dial")
+	var b: Boss = l["boss_mob"]
 	b.set_asleep(false)
 	b.stagger_t = 0.0
 	b.invul_t = 0.0

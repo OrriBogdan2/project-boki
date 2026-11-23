@@ -176,7 +176,8 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.sfx("vv_static_full", f.pos, -2.0)
 		if swing: play("mage_live")
 	elif int(s["n"]) > was:
-		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
+		StatusSfx.cue(f, "static", h, float(rd["dur"]), int(s["n"]), true)     # the zap climbs with each stack
+	StatusSfx.loop_static(f, h, func() -> int: return spark_n(f))
 
 func combo_read(f: Ent) -> Dictionary:
 	var s = sparks.get(f.get_instance_id())
@@ -374,7 +375,7 @@ func on_dash(use_ex: bool) -> bool:
 	reset_dash_boost = false
 	play("mage_dash")
 	vfx("dash")                    # a bolt slams down onto her: the charging tell
-	m.sfx("vv_surge_charge", h.pos, -3.0)
+	KitWindup.play(self, "dash", "vv_surge_charge", -3.0)
 	return true
 
 ## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold, a Skycall
@@ -392,9 +393,10 @@ func _end_wire(refund: bool) -> void:
 	if wire.is_empty(): return
 	if refund: h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
 	wire = {}
-	if h.knock_t < 0.05 and h.loco.is_in(Loco.S.KNOCKED):
-		h.knock_t = 0.0         # the wire's own knocked state (a real knock lasts longer) ends with it, so the streak
-		h.loco.go(Loco.S.GROUNDED if h.grounded else Loco.S.AIRBORNE)       # is a dash a glide press can cancel
+	if h.knock_t < 0.05:
+		h.knock_t = 0.0         # the wire's own no-keys hold (a real knock lasts longer) ends with it: carried under
+		if h.loco.is_in(Loco.S.KNOCKED):      # the streak it would refuse the glider (HunterLoco._glide_ok), so the
+			h.loco.go(Loco.S.GROUNDED if h.grounded else Loco.S.AIRBORNE)      # streak is a dash a glide press cancels
 	AimKit.hide(h, "dash")
 	AimKit.hide(h, "dash_end")
 
@@ -414,6 +416,7 @@ func _tick_wire(dt: float) -> void:
 	var t := float(wire["t"])
 	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
+		KitWindup.broken(self, "dash")
 		return
 	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds
 	h.inp["move"] = Vector2.ZERO
@@ -487,12 +490,28 @@ func _tick_glide_cancel() -> void:
 	glide_key_was = key
 	if not fresh or h.grounded or h.glide_cd > 0.0 or h.shot_down or m.time - h.kb_t <= 0.4:
 		return
+	if not _wire_let_go() and ult.glide_out():
+		_let_go()
+
+## DECISIONS 11-08 "Shift cancels into glide instantly for every Hunter": a fresh glide press in the air (a second
+## Space too, which the glide key above never sees) ends the Wirerun's charge or streak the way Hunter._dash_into_glide
+## ends a dash, and the glider opens on that press. Kitefall's flight stays the glide key's only (into_jump.x).
+func glide_cancel() -> bool:
+	return m.time - h.kb_t > 0.4 and _wire_let_go()
+
+## Ends the Wirerun's charge or streak for the glider; false when neither is under way (a run with no press keeps
+## its full distance).
+func _wire_let_go() -> bool:
 	if not wire.is_empty():
 		_end_wire(false)
 	elif run_t > 0.0:
 		_cut_run()
-	elif not ult.glide_out():
-		return
+	else:
+		return false
+	_let_go()
+	return true
+
+func _let_go() -> void:
 	play("")
 	h.knock_t = 0.0                # the charge's own no-keys hold
 	h.loco.go(Loco.S.AIRBORNE)     # (that hold left the state Knocked, which may not open a glider)
@@ -535,6 +554,7 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
 	vfx("wire_hit", f.pos)        # a hit on the way, not a burst
+	m.sfx("mage_wire_hit", f.pos, -4.0)
 	if was_live and is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
@@ -677,7 +697,9 @@ func _coil(k: float) -> void:
 	run(stg, cx("rmb", "coilshot", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
 		if not done["hit"]:
 			done["hit"] = true
-			_coil_hit(f, dir, k)}))
+			_coil_hit(f, dir, k),
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
+			if e == null and not done["hit"]: m.sfx("mage_rod_fizzle", at, -5.0)}))
 	var thrown: bool = shots.size() > n0 and shots[-1]["by"] == h
 	vfx("rmb", h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6), dir, {"len": rng, "loose": not thrown})
 	if thrown:

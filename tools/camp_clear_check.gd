@@ -8,14 +8,16 @@ extends RefCounted
 ## from how the bots use the slow kits, not mob numbers (doubling mob hp leaves it at 5-7x; see
 ## docs/EXPEDITION_SPEC.md "Camp clear pacing"). SPREAD_MAX is a ratchet: lower it toward BAND as
 ## the bots improve. Mob hp/damage live in Data.MOBS; never tune kit numbers for this.
-## --arch=<id> runs one Hunter (prints its rows, skips the band).
+## --arch=<id> runs one Hunter (prints its rows, skips the band). The registry splits the run into one flag per camp
+## (--camp-clear-<camp>-<level>-check): a shard runs every Hunter against one camp at one level, so each cell's
+## spread is still judged over all 12 Hunters and each shard stays under the gate's 300 s cap.
 
-const BAND := 1.6  # target: slowest median clear time / fastest, per camp and level
-const SPREAD_MAX := 14.0  # ratchet on that ratio (worst seen 11.9x on brute@5)
-const REPS := 5  # trials per cell; the cell is their median
-const REST := 3.0  # s the hunter idles between trials (cooldowns tick, as between camps)
-const GAP := 6.0  # m from the hunter to the camp
-const TIMEOUT := 30.0  # s a trial may take; a timed-out trial counts as TIMEOUT
+const BAND := 1.6        # target: slowest median clear time / fastest, per camp and level
+const SPREAD_MAX := 14.0 # ratchet on that ratio (worst seen 11.9x on brute@5)
+const REPS := 5          # trials per cell; the cell is their median
+const REST := 3.0        # s the hunter idles between trials (cooldowns tick, as between camps)
+const GAP := 6.0         # m from the hunter to the camp
+const TIMEOUT := 30.0    # s a trial may take; a timed-out trial counts as TIMEOUT
 const LEVELS := [1, 5]
 const CAMPS := {
 	"skitter": ["skitter", "skitter"],
@@ -24,54 +26,35 @@ const CAMPS := {
 }
 
 var bad := 0
-var res := {}  # "camp@level" -> {arch: [median seconds, median damage]}
-
+var res := {}     # "camp@level" -> {arch: [median seconds, median damage]}
 
 func ok(cond: bool, what: String) -> void:
 	print("CAMPCLEAR %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond:
-		bad += 1
+	if not cond: bad += 1
 
-
-func run(main: Node) -> void:
+func run(main: Node, only_cell := "") -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
 	var only := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--arch="):
-			only = a.substr(7)
+		if a.begins_with("--arch="): only = a.substr(7)
 	for arch in Arch.ids():
 		if only == "" or only == arch:
-			await _hero(main, String(arch))
+			await _hero(main, String(arch), only_cell)
 	if only == "":
 		_band()
 	print("CAMPCLEAR pve: 0 sourced modifiers applied, times unchanged (docs/CAMP_PARITY.md)")
 	print("CAMPCLEAR DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
-
-func _hero(main: Node, arch: String) -> void:
+func _hero(main: Node, arch: String, only_cell: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	(
-		m
-		. start(
-			{
-				"teams": 1,
-				"squad": 1,
-				"tier": 0,
-				"length": 1e9,
-				"seed": 4242,
-				"no_drop": true,
-				"autoplay": true,
-				"blight": false,
-				"arch": arch,
-				"cls": Arch.weight(arch),
-				"weapon": Arch.signature(arch),
-			}
-		)
-	)
+	m.start({
+		"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "autoplay": true,
+		"blight": false, "arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch),
+	})
 	m.set_process(false)
 	var p: Hunter = m.player
 	var home := p.pos
@@ -79,6 +62,9 @@ func _hero(main: Node, arch: String) -> void:
 		while p.lvl < lv:
 			p.gain_xp(Hunter.XP_TO[p.lvl] - p.xp)
 		for camp in CAMPS:
+			if only_cell != "" and only_cell != "%s@%d" % [camp, lv]:
+				continue
+			seed(hash("%s %s %d" % [arch, camp, lv]))      # a cell rolls the same dice whichever shard runs it
 			var ts: Array = []
 			var dmg: Array = []
 			for i in REPS:
@@ -92,7 +78,6 @@ func _hero(main: Node, arch: String) -> void:
 			print("CAMPCLEAR row %s %s@%d %.1fs %d dmg (runs %s)" % [arch, camp, lv, cell[0], int(cell[1]), runs])
 	m.queue_free()
 	await main.get_tree().process_frame
-
 
 ## One alerted camp GAP m from home on the same level; returns [seconds to clear, damage taken].
 func _trial(m: Match, p: Hunter, home: Vector3, comp: Array, i: int) -> Array:
@@ -110,7 +95,6 @@ func _trial(m: Match, p: Hunter, home: Vector3, comp: Array, i: int) -> Array:
 	var made: Array = []
 	for kk in comp:
 		var mb := m.spawn_mob(kk, at)
-		mb.tgt = p
 		mb.aggro(p, "check")
 		made.append(mb)
 	var t0 := m.time
@@ -124,7 +108,6 @@ func _trial(m: Match, p: Hunter, home: Vector3, comp: Array, i: int) -> Array:
 			m.revive_hunter(p, p)
 	return [minf(m.time - t0, TIMEOUT), dmg]
 
-
 ## A clear spot GAP m from home, level with it and in its line of sight (turning a bit each trial).
 func _camp_spot(m: Match, home: Vector3, i: int) -> Vector3:
 	for k in 12:
@@ -134,12 +117,10 @@ func _camp_spot(m: Match, home: Vector3, i: int) -> Vector3:
 	ok(false, "no level camp spot near %s" % home)
 	return home + Vector3(GAP, 0, 0)
 
-
 func _median(xs: Array) -> float:
 	var s := xs.duplicate()
 	s.sort()
 	return float(s[s.size() / 2])
-
 
 func _band() -> void:
 	for key in res:

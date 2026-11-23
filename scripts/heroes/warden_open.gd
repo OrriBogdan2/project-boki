@@ -9,47 +9,68 @@ extends RefCounted
 ## comes; the hold reaches in again once the cause is gone. Gameplay never reads it.
 
 const KINDS := ["chest", "loot"]
-const LID := "open_lid"          # box root meta: the lid's top centre in the box's own space (lid_top caches it)
-const NEAR := 2.4                # m: the farthest box a holding Hunter can be opening (interact ranges are 1.5-1.6)
-const REACH_S := 0.25            # s: down and in
-const RETURN_S := 0.1            # s: back to the clips once the hold ends on its own
-const CAST_S := 0.3              # s after a cast that the pose stays off
-const HIT_S := 0.3               # s after a hit
-const STILL := 0.25              # m/s: as WardenClips.STILL; faster is a move
-const STEP_MAX := 0.45           # m: the most he shuffles in toward the box
-const DROP_MAX := 0.42           # of the leg's length: the deepest sink on the knees
-const LEAN_MAX := 0.95           # rad: the most the back bends over
-const ARM_K := 0.93              # of the arm's length: the farthest a hand is sent (a locked elbow reads stiff)
-const ARM_MIN := 0.45            # of the arm's length: the nearest (closer folds the arms into the chest)
-const SPREAD := 0.17             # m: each hand off the lid's centre, across
-const IN := 0.1                  # m: the hands lie this far in from the lid's centre toward him
-const ABOVE := 0.04              # m: and this far over its top (the palm's thickness under the wrist)
-const SHIN_K := 0.245 / 0.2      # the shin's length over the thigh's (RIG_STANDARD proportions: no foot bone)
-const RUMMAGE := 0.025           # m: the hands' stir on the lid while he holds
+const LID := "open_lid"  # box root meta: the lid's top centre in the box's own space (lid_top caches it)
+const NEAR := 2.4  # m: the farthest box a holding Hunter can be opening (interact ranges are 1.5-1.6)
+const REACH_S := 0.25  # s: down and in
+const RETURN_S := 0.1  # s: back to the clips once the hold ends on its own
+const CAST_S := 0.3  # s after a cast that the pose stays off
+const HIT_S := 0.3  # s after a hit
+const STILL := 0.25  # m/s: as WardenClips.STILL; faster is a move
+const STEP_MAX := 0.45  # m: the most he shuffles in toward the box
+const DROP_MAX := 0.42  # of the leg's length: the deepest sink on the knees
+const LEAN_MAX := 0.95  # rad: the most the back bends over
+const ARM_K := 0.93  # of the arm's length: the farthest a hand is sent (a locked elbow reads stiff)
+const ARM_MIN := 0.45  # of the arm's length: the nearest (closer folds the arms into the chest)
+const SPREAD := 0.17  # m: each hand off the lid's centre, across
+const IN := 0.1  # m: the hands lie this far in from the lid's centre toward him
+const ABOVE := 0.04  # m: and this far over its top (the palm's thickness under the wrist)
+const SHIN_K := 0.245 / 0.2  # the shin's length over the thigh's (RIG_STANDARD proportions: no foot bone)
+const RUMMAGE := 0.025  # m: the hands' stir on the lid while he holds
 const RUMMAGE_HZ := 2.2
-const KNEES := 0.5               # 0..1: how much of the dip goes on the knees rather than the back
+const KNEES := 0.5  # 0..1: how much of the dip goes on the knees rather than the back
 
-var clips: WardenClips
+var clips: WardenClips  # (null on Meshy's skeleton: `busy` stands in for clips.busy)
+var busy := false  # a Meshy-native model's attack clip owns the body (WardenNative)
 var skel: Skeleton3D
 var root: Node3D
-var w := 0.0                     # how much of the layer is on (the check reads it)
-var t := 0.0                     # s into this reach
-var plan := {}                   # {step, drop, lean} for this reach, in skeleton units
-var b := {}                      # contract bone name -> index
-var arm := 0.0                   # skeleton units: shoulder to wrist
+var w := 0.0  # how much of the layer is on (the check reads it)
+var t := 0.0  # s into this reach
+var plan := {}  # {step, drop, lean} for this reach, in skeleton units
+var b := {}  # contract bone name -> index
+var arm := 0.0  # skeleton units: shoulder to wrist
 var thigh := 0.0
 var shin := 0.0
-var layered: Array = []          # bone indices the layer moves
-var lid_w := Vector3.INF         # the lid last held (world): the way back still faces it
+var layered: Array = []  # bone indices the layer moves
+var lid_w := Vector3.INF  # the lid last held (world): the way back still faces it
+
 
 static func make(c: WardenClips) -> WardenOpen:
+	var o := make_on(c.root, c.skel)
+	if o:
+		o.clips = c
+	return o
+
+
+## The layer on any skeleton whose bones WardenSkeleton.find knows (the contract's, or Meshy's own: WardenNative,
+## which sets `busy` each frame); null when one is missing.
+static func make_on(model: Node3D, sk: Skeleton3D) -> WardenOpen:
 	var o := WardenOpen.new()
-	var sk := c.skel
-	o.clips = c
-	o.root = c.root
+	o.root = model
 	o.skel = sk
-	for nm in ["root", "hips", "thigh.L", "thigh.R", "shin.L", "shin.R", "upper_arm.L", "upper_arm.R",
-			"forearm.L", "forearm.R", "hand.L", "hand.R"]:
+	for nm in [
+		"root",
+		"hips",
+		"thigh.L",
+		"thigh.R",
+		"shin.L",
+		"shin.R",
+		"upper_arm.L",
+		"upper_arm.R",
+		"forearm.L",
+		"forearm.R",
+		"hand.L",
+		"hand.R"
+	]:
 		o.b[nm] = WardenSkeleton.find(sk, nm)
 		if int(o.b[nm]) < 0:
 			return null
@@ -61,6 +82,7 @@ static func make(c: WardenClips) -> WardenOpen:
 	o.thigh = rest.call("thigh.R").distance_to(rest.call("shin.R"))
 	o.shin = o.thigh * SHIN_K
 	return o
+
 
 ## The lid's top centre in world space, from the lid's own meshes (every chest model hangs a "Lid" under "Body").
 static func lid_top(box: Node3D) -> Vector3:
@@ -80,6 +102,7 @@ static func lid_top(box: Node3D) -> Vector3:
 		box.set_meta(LID, top)
 	return box.global_transform * (box.get_meta(LID) as Vector3)
 
+
 ## The lid a Hunter at `at` is opening: the nearest closed chest or full deathbox; INF when none is near.
 static func lid_near(m: Match, at: Vector3) -> Vector3:
 	var best: Node3D = null
@@ -93,6 +116,7 @@ static func lid_near(m: Match, at: Vector3) -> Vector3:
 			bd = dd
 			best = n
 	return lid_top(best) if best else Vector3.INF
+
 
 ## After the clips (and the rig mix) are on the bones: `on` is how much the clips own the body (1 - proc_w).
 func step(dt: float, on: float) -> void:
@@ -116,19 +140,28 @@ func step(dt: float, on: float) -> void:
 	if lid_w != Vector3.INF:
 		_pose(skel.global_transform.affine_inverse() * lid_w, w * on)
 
+
 ## A move, a dash, a cast, a hit, or anything else the clips play over the walk (clips.busy: a kit move, a stun, a
 ## landing): the pose goes this frame.
 func cancelled(s: Dictionary) -> bool:
 	var v: Vector3 = s.get("vel", Vector3.ZERO)
-	return clips.busy or Vector2(v.x, v.z).length() >= STILL or bool(s.get("rolling", false)) \
-			or float(s.get("cast", 99.0)) < CAST_S or float(s.get("hit_t", 99.0)) < HIT_S \
-			or not bool(s.get("grounded", true))
+	return (
+		(clips.busy if clips else busy)
+		or Vector2(v.x, v.z).length() >= STILL
+		or bool(s.get("rolling", false))
+		or float(s.get("cast", 99.0)) < CAST_S
+		or float(s.get("hit_t", 99.0)) < HIT_S
+		or not bool(s.get("grounded", true))
+	)
+
 
 func _g(nm: String) -> Transform3D:
 	return skel.get_bone_global_pose(int(b[nm]))
 
+
 func _put(nm: String, xf: Transform3D) -> void:
 	skel.set_bone_global_pose(int(b[nm]), xf)
+
 
 ## The whole pose at full weight in skeleton space, then each moved bone's local pose eased from the clips' by `k`.
 func _pose(lid: Vector3, k: float) -> void:
@@ -136,10 +169,10 @@ func _pose(lid: Vector3, k: float) -> void:
 	for bi in layered:
 		keep.append([skel.get_bone_pose_position(bi), skel.get_bone_pose_rotation(bi)])
 	var up := Vector3.UP
-	var unit := 1.0 / maxf(skel.global_basis.get_scale().y, 0.001)      # skeleton units per metre
+	var unit := 1.0 / maxf(skel.global_basis.get_scale().y, 0.001)  # skeleton units per metre
 	# turn the root to the box
 	var r := _g("root")
-	var right := (_g("upper_arm.R").origin - _g("upper_arm.L").origin)
+	var right := _g("upper_arm.R").origin - _g("upper_arm.L").origin
 	right.y = 0.0
 	var fwd := up.cross(right.normalized())
 	var to := lid - r.origin
@@ -149,10 +182,10 @@ func _pose(lid: Vector3, k: float) -> void:
 		fwd = to.normalized()
 	right = fwd.cross(up)
 	var tl := lid + (-fwd * IN - right * SPREAD + up * ABOVE) * unit
-	var tr := lid + (-fwd * IN + right * SPREAD + up * ABOVE) * unit
+	var trap := lid + (-fwd * IN + right * SPREAD + up * ABOVE) * unit
 	_put("root", r)
 	if plan.is_empty():
-		plan = _plan(fwd, right, tl, tr, unit)
+		plan = _plan(fwd, right, tl, trap, unit)
 	r.origin += fwd * float(plan["step"])
 	_put("root", r)
 	var soles := [_sole("L"), _sole("R")]
@@ -167,7 +200,7 @@ func _pose(lid: Vector3, k: float) -> void:
 	var stir := Vector3(sin(t * TAU * RUMMAGE_HZ), 0.0, cos(t * TAU * RUMMAGE_HZ * 0.5)) * RUMMAGE * unit
 	for i in 2:
 		var sd: String = ["L", "R"][i]
-		var aim: Vector3 = [tl, tr][i] + (stir if i == 0 else -stir)
+		var aim: Vector3 = [tl, trap][i] + (stir if i == 0 else -stir)
 		var sh := _g("upper_arm." + sd).origin
 		var pole := sh + (right * (1.0 if sd == "R" else -1.0) - fwd * 0.4 - up * 0.3) * arm
 		_ik("upper_arm." + sd, "forearm." + sd, aim, pole, -1.0, -1.0, false)
@@ -176,9 +209,10 @@ func _pose(lid: Vector3, k: float) -> void:
 		skel.set_bone_pose_position(bi, (keep[i][0] as Vector3).lerp(skel.get_bone_pose_position(bi), k))
 		skel.set_bone_pose_rotation(bi, (keep[i][1] as Quaternion).slerp(skel.get_bone_pose_rotation(bi), k))
 
+
 ## Step, drop and lean for this reach: the cheapest that brings both shoulders within reach of their hands' marks.
 ## Cheap is KNEES: toward 1 he sinks before he bends, toward 0 he bends before he sinks.
-func _plan(fwd: Vector3, right: Vector3, tl: Vector3, tr: Vector3, unit: float) -> Dictionary:
+func _plan(fwd: Vector3, right: Vector3, tl: Vector3, trap: Vector3, unit: float) -> Dictionary:
 	var hips := _g("hips").origin
 	var sl := _g("upper_arm.L").origin - hips
 	var sr := _g("upper_arm.R").origin - hips
@@ -195,7 +229,7 @@ func _plan(fwd: Vector3, right: Vector3, tl: Vector3, tr: Vector3, unit: float) 
 				var rot := Basis(right, -ln)
 				var base := hips + fwd * st - Vector3.UP * dr
 				var miss := 0.0
-				for p in [[sl, tl], [sr, tr]]:
+				for p in [[sl, tl], [sr, trap]]:
 					var dd: float = (base + rot * (p[0] as Vector3)).distance_to(p[1])
 					miss += maxf(dd - ARM_K * arm, 0.0) + maxf(ARM_MIN * arm - dd, 0.0)
 				# squared, so a bit of knees and a bit of back beats all of either
@@ -206,10 +240,12 @@ func _plan(fwd: Vector3, right: Vector3, tl: Vector3, tr: Vector3, unit: float) 
 					best = {"step": st, "drop": dr, "lean": ln}
 	return best
 
+
 ## Where the sole is: no foot bone, so the shin's own length down its Y (RIG_STANDARD).
 func _sole(sd: String) -> Vector3:
 	var g := _g("shin." + sd)
 	return g.origin + g.basis.y.normalized() * shin
+
 
 ## Two-bone IK in skeleton space: `upper` and `mid` turn so the chain's end (the wrist, or the sole) lands on `aim`,
 ## bending toward `pole`. Lengths < 0 are read off the bones; `sole` ends the chain at _sole, not a child bone.
@@ -233,6 +269,7 @@ func _ik(upper: String, mid: String, aim: Vector3, pole: Vector3, la: float, lb:
 	m = _g(mid).origin
 	end = _sole(mid.substr(mid.length() - 1)) if sole else _g("hand." + mid.substr(mid.length() - 1)).origin
 	_turn(mid, end - m, (a + axis * dist) - m)
+
 
 func _turn(nm: String, from: Vector3, to: Vector3) -> void:
 	if from.length() < 0.0001 or to.length() < 0.0001:
