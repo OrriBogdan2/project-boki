@@ -1,6 +1,7 @@
 extends RefCounted
-## --rig-hands-shots --glb=<file> --shots-dir=<dir> [--hands=RightHand,LeftHand] [--front=-z] [--curl=60] [--curl-axis=z]
-## [--tag=name]: stills of one rig .glb (no Hunter data, any rig): <tag>_game.png (the match camera, true pixels x4),
+## --rig-hands-shots --glb=<file> --shots-dir=<dir> [--hands=RightHand,LeftHand] [--front=-z] [--curl=60]
+## [--curl-axis=z] [--tag=name]: stills of one rig .glb (no Hunter data, any rig):
+## <tag>_game.png (the match camera, true pixels x4),
 ## <tag>_<hand>_front.png and <tag>_<hand>_side.png (eye level on each hand: fingers and what the hand holds).
 ## --curl closes the finger bones (Thumb/Index/Middle/Ring/Pinky joints) by that many degrees about their local axis.
 ## Needs a renderer (jobq --needs gpu). Used for the rig-pipeline before/after sheets (docs/art/wardens/V95_SWAP.md).
