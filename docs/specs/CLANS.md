@@ -83,7 +83,7 @@ Out of slice: breeding loans (section 7 has their own slice), officer tools, kic
 
 ## 7. Breeding loans
 
-DECISIONS 11-09: breeding is a main garden path, and some members stay home and raise. A loan lets a clanmate have your Boki in their Nook for a day. It is a **sleepover to a clanmate** (`Sleepover`, decision 0022-sleepovers): it reuses that away list, the one-day timer and the trip home.
+DECISIONS 11-09: breeding is a main garden path, and some members stay home and raise. A loan lets a clanmate have your Boki in their Nook for a day. It is a **sleepover to a clanmate** (`Sleepover`, decision 0127-sleepovers): it reuses that away list, the one-day timer and the trip home.
 
 - **Who can lend:** a clan member, any Boki a sleepover could take (not the lead Boki, never the last one at home, at most two away counting sleepovers), one loan open at a time. **To whom:** one clanmate you name (a member by profile, never yourself).
 - **One day:** the loan runs one garden day (`Sleepover.DAY_SECS`) from the offer. The clanmate takes it in (accepts) any time in that day. If nobody does, it waits out the day and comes home anyway.
