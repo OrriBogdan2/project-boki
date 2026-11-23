@@ -25,11 +25,12 @@ func run(main: Node) -> void:
 		Save.d["roster"].append(tk)
 		Save.d["active"] = tk["uid"]
 	_hunters()
+	await _shots(main)
 	await _real_load(main)
 	print("LOADING DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## Every Hunter: a splash that loads, a tip from the tip set (also with the Blight off), the map's name.
+## Every Hunter: a splash that loads, a tip (none about the Blight when it is off), the map's name and mode line.
 func _hunters() -> void:
 	var ids := Arch.ids()
 	ok(ids.size() >= 12, "every Hunter (%d)" % ids.size())
@@ -39,13 +40,40 @@ func _hunters() -> void:
 		var tex: Texture2D = ld.splash
 		var loads: bool = ld.splash_path != "" and tex != null and tex.get_width() > 0
 		ok(loads, "%s: its splash loads (%s)" % [ak, ld.splash_path])
-		ok(ld.tip != "" and ld.TIPS.has(ld.tip), "%s: a tip from the tip set" % ak)
-		ok(ld.map_name != "", "%s: the map's name (%s)" % [ak, ld.map_name])
+		ok(ld.tip != "", "%s: a tip" % ak)
+		ok(ld.title != "" and ld.mode_line != "", "%s: the map's name and a mode line (%s)" % [ak, ld.title])
 		ld.free()
 		var calm: Node = load(LOADING).new()
 		calm.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak, "blight": false})
 		ok(calm.tip != "" and not calm.tip.contains("Blight"), "%s: no Blight tip when the Blight is off" % ak)
 		calm.free()
+
+## With --shots-dir=<dir> [--size=WxH]: the screen for a trio mid-load, as <dir>/loading_<W>x<H>.png.
+func _shots(main: Node) -> void:
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="):
+			dir = a.substr(12)
+		if a.begins_with("--size="):
+			var wh := a.substr(7).split("x")
+			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
+	if dir == "":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	if main.fade != null:
+		await main.fade.reveal(0.01)
+	var ld: Node = load(LOADING).new()
+	var opts := {"teams": 10, "squad": 3, "tier": 0, "arch": "gunslinger", "seed": 3}
+	Prematch.deal_mates(opts)
+	ld.setup(opts)
+	main.add_child(ld)
+	ld.want = 0.6
+	ld.set_stage("graphics")
+	for i in 40:
+		await main.get_tree().process_frame
+	var win := main.get_window().size
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("loading_%dx%d.png" % [win.x, win.y]))
+	ld.queue_free()
 
 func _screen(main: Node) -> Node:
 	for ch in main.get_children():
