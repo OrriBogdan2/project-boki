@@ -111,5 +111,10 @@
 		"temper": "Unbothered",
 		"desc": "Something unbothered is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"fit": 1.07
 	}
 }

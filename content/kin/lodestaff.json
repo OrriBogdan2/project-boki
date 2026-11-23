@@ -110,5 +110,10 @@
 		"temper": "Still",
 		"desc": "Something still is in here.",
 		"play": "Slippery and full of tricks."
+	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"fit": 1.07
 	}
 }

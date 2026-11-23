@@ -120,5 +120,10 @@
 		"temper": "Steady",
 		"desc": "Far heavier than it looks. Loose pebbles roll toward it. Something steady is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"fit": 1.39
 	}
 }

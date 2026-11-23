@@ -4,7 +4,7 @@ class_name Unique
 ##
 ##   size     a bell curve (z-score, sd SIZE_SD of height); the tails are tagged XS and XL. Giant and
 ##            Tiny (Mutations) are the rarer extreme tier on top. Shown as cm / kg from the species'
-##            base size (content/kin_home/<id>.json "size": {cm, kg; fit scales the model to that height}).
+##            base size (content/kin/<id>.json "size": {cm, kg; fit scales the model to that height}).
 
 ##   girth    stocky or slender (weight, and a touch of width on the model)
 ##   head, limb, tail, ear   proportions, each a scalar about 1 (at most +-PROP_MAX)
@@ -87,7 +87,7 @@ const QUIRK_NAMES := {"tail_chase": "Chases its tail", "head_tilt": "Tilts its h
 const BIRTH_SHAPES := [["star", 1], ["heart", 1], ["crescent", 1], ["diamond", 1], ["dot", 1], ["swirl", 1]]
 const BIRTH_PLACES := [["left cheek", 1], ["right cheek", 1], ["brow", 1], ["left flank", 1], ["right flank", 1],
 	["back", 1], ["chest", 1]]
-## A species with no "size" in content/kin_home/<id>.json.
+## A species with no "size" in content/kin/<id>.json.
 const DEFAULT_SIZE := {"cm": 30.0, "kg": 3.0, "fit": 1.0}
 
 

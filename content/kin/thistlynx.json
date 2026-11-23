@@ -114,5 +114,10 @@
 		"temper": "Prickly",
 		"desc": "Something prickly is in here.",
 		"play": "Gets in close and hits hard."
+	},
+	"size": {
+		"cm": 50,
+		"kg": 8.0,
+		"fit": 1.1
 	}
 }

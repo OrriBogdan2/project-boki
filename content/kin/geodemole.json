@@ -113,5 +113,10 @@
 		"temper": "Shy",
 		"desc": "Something shy is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"size": {
+		"cm": 50,
+		"kg": 8.0,
+		"fit": 1.17
 	}
 }

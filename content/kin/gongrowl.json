@@ -113,5 +113,10 @@
 		"temper": "Joyful",
 		"desc": "Something joyful is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"size": {
+		"cm": 75,
+		"kg": 33.0,
+		"fit": 1.79
 	}
 }

@@ -120,5 +120,10 @@
 		"temper": "Frantic",
 		"desc": "Something frantic is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"fit": 1.3
 	}
 }

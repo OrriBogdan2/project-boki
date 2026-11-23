@@ -114,5 +114,10 @@
 		"temper": "Soft",
 		"desc": "Something soft is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"size": {
+		"cm": 54,
+		"kg": 16.2,
+		"fit": 1.31
 	}
 }

@@ -116,5 +116,10 @@
 		"temper": "Sly",
 		"desc": "Something sly is in here.",
 		"play": "Slippery and full of tricks."
+	},
+	"size": {
+		"cm": 60,
+		"kg": 20.0,
+		"fit": 1.31
 	}
 }

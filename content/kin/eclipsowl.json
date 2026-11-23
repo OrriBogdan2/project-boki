@@ -116,5 +116,10 @@
 		"temper": "Airy",
 		"desc": "Pale and faintly glowing. At night it floats a hair above the nest. Something airy is in here.",
 		"play": "Slippery and full of tricks."
+	},
+	"size": {
+		"cm": 44,
+		"kg": 3.2,
+		"fit": 1.07
 	}
 }

@@ -115,5 +115,10 @@
 		"temper": "Bright",
 		"desc": "Something bright is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"size": {
+		"cm": 54,
+		"kg": 9.5,
+		"fit": 1.52
 	}
 }

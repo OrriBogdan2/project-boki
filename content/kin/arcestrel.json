@@ -118,5 +118,10 @@
 		"temper": "Proud",
 		"desc": "Something proud is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"size": {
+		"cm": 50,
+		"kg": 8.0,
+		"fit": 1.27
 	}
 }

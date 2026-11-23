@@ -119,5 +119,10 @@
 		"temper": "Lazy",
 		"desc": "Something lazy is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"size": {
+		"cm": 82,
+		"kg": 67.0,
+		"fit": 1.71
 	}
 }

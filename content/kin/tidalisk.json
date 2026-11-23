@@ -110,5 +110,10 @@
 		"temper": "Showy",
 		"desc": "Something showy is in here.",
 		"play": "Slippery and full of tricks."
+	},
+	"size": {
+		"cm": 67,
+		"kg": 17.0,
+		"fit": 1.63
 	}
 }

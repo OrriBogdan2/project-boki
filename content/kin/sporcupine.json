@@ -114,5 +114,10 @@
 		"temper": "Curious",
 		"desc": "Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"size": {
+		"cm": 34,
+		"kg": 5.1,
+		"fit": 0.83
 	}
 }

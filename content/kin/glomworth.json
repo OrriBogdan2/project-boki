@@ -113,5 +113,10 @@
 		"temper": "Curious",
 		"desc": "Something curious is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"fit": 1.1
 	}
 }

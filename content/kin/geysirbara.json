@@ -116,5 +116,10 @@
 		"temper": "Calm",
 		"desc": "Something calm is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"size": {
+		"cm": 94,
+		"kg": 135.5,
+		"fit": 2.07
 	}
 }

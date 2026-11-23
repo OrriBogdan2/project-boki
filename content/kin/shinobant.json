@@ -110,5 +110,10 @@
 		"temper": "Dutiful",
 		"desc": "Something dutiful is in here.",
 		"play": "Gets in close and hits hard."
+	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"fit": 0.81
 	}
 }

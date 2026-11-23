@@ -10,11 +10,5 @@
 		"belly": "#d1e192",
 		"color": "#919c65",
 		"glow": "#e8ff90"
-	},
-	"size": {
-		"cm": 44,
-		"kg": 9.0,
-		"fit": 1.09,
-		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

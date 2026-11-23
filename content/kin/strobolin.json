@@ -119,5 +119,10 @@
 		"temper": "Timid",
 		"desc": "Something timid is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"size": {
+		"cm": 107,
+		"kg": 70.0,
+		"fit": 1.71
 	}
 }

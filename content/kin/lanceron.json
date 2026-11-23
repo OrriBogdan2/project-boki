@@ -125,5 +125,10 @@
 		"temper": "Patient",
 		"desc": "Something patient is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"size": {
+		"cm": 60,
+		"kg": 20.0,
+		"fit": 1.5
 	}
 }

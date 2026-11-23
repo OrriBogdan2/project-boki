@@ -121,5 +121,10 @@
 		"temper": "Kind",
 		"desc": "Something kind is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"size": {
+		"cm": 82,
+		"kg": 67.0,
+		"fit": 1.99
 	}
 }

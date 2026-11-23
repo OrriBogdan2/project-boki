@@ -115,5 +115,10 @@
 		"temper": "Hyper",
 		"desc": "Deep blue and humming. Tap it and it taps back. Something restless is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"size": {
+		"cm": 64,
+		"kg": 10.3,
+		"fit": 1.55
 	}
 }

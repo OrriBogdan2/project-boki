@@ -120,5 +120,10 @@
 		"temper": "Steady",
 		"desc": "Something steady is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"size": {
+		"cm": 94,
+		"kg": 135.5,
+		"fit": 1.71
 	}
 }

@@ -119,5 +119,10 @@
 		"temper": "Skittish",
 		"desc": "Something skittish is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"size": {
+		"cm": 94,
+		"kg": 135.5,
+		"fit": 1.71
 	}
 }

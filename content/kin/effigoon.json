@@ -119,5 +119,10 @@
 		"temper": "Earnest",
 		"desc": "Something earnest is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"size": {
+		"cm": 73,
+		"kg": 54.0,
+		"fit": 1.77
 	}
 }

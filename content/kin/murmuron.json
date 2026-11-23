@@ -118,5 +118,10 @@
 		"temper": "Sociable",
 		"desc": "Something sociable is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"size": {
+		"cm": 54,
+		"kg": 16.2,
+		"fit": 1.31
 	}
 }

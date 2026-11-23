@@ -112,5 +112,10 @@
 		"temper": "Gentle",
 		"desc": "Pink and glassy. It throws little rainbows when it rocks. Something gentle is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"size": {
+		"cm": 40,
+		"kg": 6.6,
+		"fit": 0.97
 	}
 }

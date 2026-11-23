@@ -119,5 +119,10 @@
 		"temper": "Gentle",
 		"desc": "Something gentle is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"size": {
+		"cm": 85,
+		"kg": 108.0,
+		"fit": 1.71
 	}
 }

@@ -115,5 +115,10 @@
 		"temper": "Bold",
 		"desc": "A dark plum shell beaded with green droplets. It hisses when you lean close. Something bold is in here.",
 		"play": "Gets in close and hits hard."
+	},
+	"size": {
+		"cm": 52,
+		"kg": 13.5,
+		"fit": 1.52
 	}
 }
