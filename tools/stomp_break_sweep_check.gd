@@ -58,6 +58,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	CombatBus.ability_used.connect(flow._on_used)
 	var only := OS.get_environment("SWEEP_ONLY").split(",", false)
@@ -137,8 +138,10 @@ func _reset(m: Match, h: Hunter, foe: Hunter, w: Hunter, dist: float) -> void:
 			x.teleport(h.pos + Vector3(80, 0, 80))
 	if w.downed:
 		m.revive_hunter(w, null)
-	for kk in [w.kin, w.kin2]:
-		if kk:
+	# (the stomper's and the wisp's Boki are out too: the stomper's carry passive, a knockback resist of 0.5 on some
+	# species, halves every push and would turn on or off with the species the match dealt the bot)
+	for kk in [w.kin, w.kin2, foe.kin, foe.kin2]:
+		if is_instance_valid(kk):
 			(kk as Kin).dead = true
 	var hk = h.kin  # (untyped first: it may have been freed)
 	if is_instance_valid(hk) and (hk as Kin).state == "downed":
