@@ -251,7 +251,7 @@ _Stoat_ (`ermink`). A stoat whose tail is a calligraphy brush, its cream coat as
 |  |  |
 |---|---|
 | Type | Wild |
-| Body | small, reach 1.3, mass 0.8; about 30 cm, 0.3 kg on average |
+| Body | small, reach 1.3, mass 0.8 |
 | Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
 | Personality | bravery 0.6, loyalty 0.6, temper 0.4, curiosity 0.9 |
 | Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
