@@ -195,11 +195,16 @@ var _stage_done_ms := 0.0
 ## Inside a long build step under the loading screen: lets a frame draw once the step has had the
 ## CPU for PerfLog.SLICE_MS, so the spinner keeps turning. Built in one go (checks, tools) it never
 ## waits, and waiting changes nothing the build computes.
-func _slice() -> void:
-	if _stage_cb.is_valid() and is_inside_tree() and PerfLog.slice_due():
+func _slice(now := false) -> void:
+	if _stage_cb.is_valid() and is_inside_tree() and (now or PerfLog.slice_due()):
 		PerfLog.wait_begin()
 		await get_tree().process_frame
 		PerfLog.wait_end()
+
+## Reads a Warden's model (a first use is 100-200 ms) on a frame of its own, so no frame holds it and the hunter's build.
+func _warm_model(arch: String) -> void:
+	if WardenGlb.warm(arch):
+		await _slice(true)
 
 ## One build step finished: log it, and when building under the loading screen let a frame draw.
 func _stage(label: String) -> void:
@@ -597,20 +602,41 @@ func _spawn_pads_and_exits() -> void:
 	lairs = Lairs.new()
 	lairs.setup(self)
 
-func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String, kin_rec: Dictionary, at: Vector3, kit := {}, kin_rec2 := {}) -> Hunter:
-	var h := Hunter.new()
+## A hunter's class and kit with the random parts rolled: [cls, kit]. A bot (weapon "?") gets an archetype of
+## its class and a weapon from its family. Rolled kits pass through unchanged, so make_hunter can take them again.
+func resolve_class_kit(id: String, team: int, cls: String, ctrl: String, kit: Dictionary) -> Array:
 	if cls == "" or not Data.CLASSES.has(cls):
 		cls = ["light", "medium", "heavy"][rng.randi_range(0, 2)]
 	if String(kit.get("weapon", "")) == "?":
 		kit = kit.duplicate()
-		# bots get an archetype of their class, and a weapon from its family
 		if ctrl != "local" and String(kit.get("arch", "")) in ["", "?"]:
 			var squad_archs := hunters.filter(func(o): return o.team == team).map(func(o): return o.arch)
-			kit["arch"] = Arch.pick_for(cls, "%s|%s" % [id, str(seed_val)], squad_archs)
+			kit["arch"] = Arch.pick_for(cls, "%s|%s" % [id, seed_val], squad_archs)
 		var pool: Array = Data.CLASSES[cls]["weapons"]
 		if Arch.exists(String(kit.get("arch", ""))) and Arch.weight(String(kit["arch"])) == cls:
 			pool = Arch.weapons(String(kit["arch"]))
 		kit["weapon"] = pool[rng.randi_range(0, pool.size() - 1)]
+	return [cls, kit]
+
+## Brings a hunter's kin out at its side. Its model is 70-150 ms to build, so a build under the loading screen
+## gives it a frame of its own (spawn_bot).
+func attach_kin(h: Hunter, kin_rec: Dictionary, at: Vector3) -> void:
+	var k := Kin.new()
+	k.init_kin(self, h.nid + "k", kin_rec["species"], kin_rec, h)
+	add_child(k)
+	k.teleport(at + Vector3(1.0, 0, 0.7))        # out at your side (KinFollow)
+	kins.append(k)
+	ents_by_id[k.nid] = k
+	h.kin = k
+	h.apply_kin_bonus()        # its owner bonus points (max health, armor, shield, regen, speed)
+	if Mutations.owner_stat(kin_rec, "armor") > 0.0:
+		h.refresh_gear(); h.armor = h.max_armor      # a Crystal kin hardens its hunter's armor
+
+func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String, kin_rec: Dictionary, at: Vector3, kit := {}, kin_rec2 := {}) -> Hunter:
+	var h := Hunter.new()
+	var pick := resolve_class_kit(id, team, cls, ctrl, kit)
+	cls = pick[0]
+	kit = pick[1]
 	h.init_hunter(self, id, team, cls, pname, ctrl, kit)
 	h.lives = 99 if (opts.get("tutorial", false) or opts.get("training", false)) else int(T.get("lives", 2))
 	if opts.get("training", false) or opts.get("duel", false) or opts.get("sandbox", false) or opts.get("unlocked", false):
@@ -623,16 +649,7 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 	hunters.append(h)
 	ents_by_id[id] = h
 	if not kin_rec.is_empty():
-		var k := Kin.new()
-		k.init_kin(self, id + "k", kin_rec["species"], kin_rec, h)
-		add_child(k)
-		k.teleport(at + Vector3(1.0, 0, 0.7))        # out at your side (KinFollow)
-		kins.append(k)
-		ents_by_id[k.nid] = k
-		h.kin = k
-		h.apply_kin_bonus()        # its owner bonus points (max health, armor, shield, regen, speed)
-		if Mutations.owner_stat(kin_rec, "armor") > 0.0:
-			h.refresh_gear(); h.armor = h.max_armor      # a Crystal kin hardens its hunter's armor
+		attach_kin(h, kin_rec, at)
 	if TWO_KIN and not kin_rec2.is_empty() and not kin_rec.is_empty():
 		# (retired) everyone brought two kin: the second waited on the bench until you swapped
 		var k2 := Kin.new()
@@ -745,7 +762,7 @@ func _spawn_hunters() -> void:
 		for s in squad:
 			if made >= total and not (t == 0 and s == 0):
 				break
-			await _slice()
+			await _slice(true)
 			made += 1
 			var at := base
 			if s > 0:
@@ -767,7 +784,11 @@ func _spawn_hunters() -> void:
 						rec["level"] = int(lt[0])
 						if lt.size() > 1: rec["trust"] = float(lt[1])
 					rec2 = Save.new_kin(String(ids[(ids.find(rec["species"]) + 1) % ids.size()]), "", kin_seed("demo"))
-				player = make_hunter("p0", 0, String(opts.get("cls", Data.class_of_save())), Save.d.get("name", "Hunter"), "bot" if opts.get("autoplay", false) else "local", rec, at, my_kit(), rec2)
+				await _warm_model(String(my_kit()["arch"]))
+				player = make_hunter("p0", 0, String(opts.get("cls", Data.class_of_save())), Save.d.get("name", "Hunter"), "bot" if opts.get("autoplay", false) else "local", {}, at, my_kit(), rec2)
+				await _slice(true)
+				if not rec.is_empty():
+					attach_kin(player, rec, at)
 				if opts.get("autoplay", false):
 					player.ai = bot_brain.new_mind(rng, 0.7)
 				at = PolishTools.stairs_start(self, at)     # test: --at-stairs[=N|E|W|S|N]
@@ -784,12 +805,16 @@ func _spawn_hunters() -> void:
 				_start_drop(player, at)
 				continue
 			var mate: Dictionary = mates[s - 1] if t == 0 and s > 0 and s <= mates.size() else {}
-			var h := make_bot(t, at, names, mate)
+			var plan := plan_bot(t, names, mate)
+			await _warm_model(String(plan["kit"].get("arch", "")))
+			var h := spawn_bot(plan, at)
+			await _slice(true)
+			finish_bot(h, plan, at)
 			_start_drop(h, at)
 
-## A rival bot hunter for squad t, standing at `at` (the drop is up to the caller). `mate`: your
-## squadmate the lobby dealt ({name, arch}, see Prematch.deal_mates), else a random one.
-func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
+## The rolls for a rival bot hunter of squad t, ready for spawn_bot(). `mate`: your squadmate the lobby dealt
+## ({name, arch}, see Prematch.deal_mates), else a random one.
+func plan_bot(t: int, names: Array, mate := {}) -> Dictionary:
 	var bk := bot_kit()
 	var bname := "Bot"
 	if not mate.is_empty():
@@ -804,10 +829,26 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 		bname = String(held["holder"])
 		brec = (held["rec"] as Dictionary).duplicate(true)
 		names.erase(bname)
-	var cls := Arch.weight(String(bk.get("arch", "")))
 	var own_kin := bot_kin_record() if rng.randf() < 0.6 else {}
-	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, own_kin)
-	if not held.is_empty() and h.kin:
+	var id := next_id("b")
+	var pick := resolve_class_kit(id, t, Arch.weight(String(bk.get("arch", ""))), "bot", bk)
+	return {"team": t, "id": id, "name": bname, "kin": brec, "held": held, "cls": pick[0], "kit": pick[1], "own_kin": own_kin}
+
+## A rival bot hunter for squad t, standing at `at` (the drop is up to the caller).
+func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
+	var plan := plan_bot(t, names, mate)
+	return finish_bot(spawn_bot(plan, at), plan, at)
+
+## The bot hunter of a plan_bot() plan, without its kin (finish_bot brings it out).
+func spawn_bot(plan: Dictionary, at: Vector3) -> Hunter:
+	return make_hunter(String(plan["id"]), int(plan["team"]), String(plan["cls"]), String(plan["name"]), "bot", {}, at, plan["kit"], plan["own_kin"])
+
+## A spawned bot's kin, mind and pack.
+func finish_bot(h: Hunter, plan: Dictionary, at: Vector3) -> Hunter:
+	var brec: Dictionary = plan["kin"]
+	if not brec.is_empty():
+		attach_kin(h, brec, at)
+	if not (plan["held"] as Dictionary).is_empty() and h.kin:
 		(h.kin as Kin).lost_uid = String(brec.get("uid", ""))
 		(h.kin as Kin).lost_from = "you"
 		tracked.append({"kin": h.kin, "holder": h})

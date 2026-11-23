@@ -529,6 +529,14 @@ static func fetch_for(opts: Dictionary) -> void:
 			fetch(String(a))
 
 
+## Reads a Warden's model now when no loader thread has it; true when that took the main thread.
+static func warm(arch: String) -> bool:
+	if not uses_model(arch) or _scenes.has(path(arch)) or BackgroundWork.asked(path(arch)):
+		return false
+	_scene(arch)
+	return true
+
+
 ## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
 static func fetched(arch: String) -> bool:
 	fetch(arch)
