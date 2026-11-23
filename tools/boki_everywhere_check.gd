@@ -101,6 +101,28 @@ func _hunters() -> void:
 			await _shot(h, out.path_join("hunter_%s_game.png" % arch), true)
 		else:
 			h.free()
+	await _town_peers()
+
+
+## Other players in town (town.gd _on_peers): each presence row with "a" must wear that Hunter's .glb; a row from an
+## older client (no "a") wears its class's default Hunter.
+func _town_peers() -> void:
+	var town: Node3D = load("res://scripts/social/town.gd").new()
+	town.world = World.new()
+	var rows: Array = []
+	for arch in Arch.ORDER:
+		rows.append({"id": arch, "p": {"x": 1, "z": 1, "h": Arch.weight(arch), "a": arch}})
+	rows.append({"id": "old", "p": {"x": 1, "z": 1, "h": "heavy"}})
+	town._on_peers(rows)
+	for id in town.others:
+		var want := WardenGlb.path(Arch.default_for("heavy") if id == "old" else String(id))
+		var w: Node = town.others[id]["node"].find_child("Warden", true, false)
+		var got := w.scene_file_path if w else "FALLBACK"
+		print("HUNTER_EVERYWHERE town_peer %s glb=%s ok=%s" % [id, got, got == want])
+		if got != want:
+			bad += 1
+	town.world.free()
+	town.free()
 
 
 func _tris(n: Node) -> int:

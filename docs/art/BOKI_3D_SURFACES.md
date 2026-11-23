@@ -22,11 +22,12 @@ Every 3D Boki is `Models.kin(species, rec)` -> `KinModels.build` -> `BokiRig.has
 
 ## Hunter: `Models.hunter(..., arch)` -> `WardenGlb.dress`
 
-A Hunter wears its .glb only when `arch` is passed (empty arch = the procedural body). With arch: match (`hunter.gd`),
-home, interior, town (you), results (`results_stage.gd`), hunter select and lobby (`portraits.gd`, `preview_build.gd`),
-prologue Boki scene. Without arch (procedural on purpose or by lack of data):
+An empty `arch` takes the look's arch, else the class default (`HeroKit.arch_for`), so it still wears a .glb, just maybe
+not the right one. Passed the real arch: match (`hunter.gd`), home, interior, town (you, and other players: presence
+sends `a` since 11-23; before that every peer showed its class's default Hunter, and an older client still does),
+results (`results_stage.gd`), hunter select and lobby (`portraits.gd`, `preview_build.gd`), prologue Boki scene.
+Without arch (procedural on purpose or by lack of data):
 
 - `mask_moment.gd`: you, unmasked, shown with your own face.
 - `look_locker.gd`: the look editor edits the procedural body's face and hair.
-- `town.gd` (other players): the net packet carries the class, not the arch (a Net change).
 - `prologue.gd`: the sky crowd of class dummies.
