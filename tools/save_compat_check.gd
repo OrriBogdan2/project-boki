@@ -179,7 +179,7 @@ func _capture(out: String) -> void:
 	farm["extracts"] = 5
 	farm["items"] = {"tonic": 3}
 	farm["seeds"] = {"tidebloom": 4}
-	farm["roster"][0]["raised"] = {"bold": 0.4, "busy": -0.3, "gentle": 0.6}      # a raised lean (BaseAxes)
+	farm["roster"][0]["raised"] = {"bold": 0.4, "busy": -0.3, "gentle": 0.6}  # a raised lean (BaseAxes)
 	_write(out + "/save_v%d_fresh.json" % Save.VERSION, JSON.stringify(Save.fresh()))
 	_write(out + "/save_v%d_farm.json" % Save.VERSION, JSON.stringify(farm))
 	Settings.v["master"] = 0.5

@@ -256,7 +256,7 @@ func choose(k: Dictionary) -> void:
 			return
 	var play := 0.2 + float(traits.get("curiosity", 0.5)) * 0.3
 	if (bored or randf() < play * BaseAxes.mult(rec, "play")) and h.toys.pick(k, true):
-		m.go(S.PLAY, "toy")      # HomeToys has it now: the walk, the play and the squabbles are its
+		m.go(S.PLAY, "toy")  # HomeToys has it now: the walk, the play and the squabbles are its
 		return
 	if bored:
 		_nap(k, "bored")

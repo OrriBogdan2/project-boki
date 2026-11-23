@@ -17,10 +17,10 @@ func ok(label: String, cond: bool, info := "") -> void:
 
 ## Steps `secs` with `each` (Callable(i) -> void) setting the keys each frame, after the one-frame keys clear.
 ## Mobs are cleared each step, as in step(): a spawn beside the hunter would stop a dash or eat a shot.
-func drive(m: Match, P: Hunter, secs: float, each: Callable) -> void:
+func drive(m: Match, hu: Hunter, secs: float, each: Callable) -> void:
 	for i in int(secs / DT):
 		for k in ["fire", "sec", "dash", "jump", "sig", "util1", "gear1", "kin_ab"]:
-			P.inp[k] = false
+			hu.inp[k] = false
 		each.call(i)
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
@@ -31,169 +31,169 @@ func drive(m: Match, P: Hunter, secs: float, each: Callable) -> void:
 func _cinder() -> void:
 	var r := setup("ashwick", 16.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: AshwickKit = P.ak
+	var hu: Hunter = r[1]
+	var kt: AshwickKit = hu.ak
 	var at: Vector3 = r[4] + Vector3(16, 0, 0)
-	UtilityBelt.set_slot(P, 0, "tonic", 3)
-	P.gear[0] = {"id": "blink", "rar": 1}
-	P.gear_cd = [0.0, 0.0]
-	K.cd["x"] = 0.0
-	K.cd["e"] = 0.0
-	aim_at(P, at)
-	HunterKeys.ult_pressed(P)
-	drive(m, P, 0.3, func(_i): aim_at(P, at))
-	var J := K.jet
-	var puffs := K.hose.emitted
-	var charges := K.ch_rmb
-	var dashes := P.dashes
+	UtilityBelt.set_slot(hu, 0, "tonic", 3)
+	hu.gear[0] = {"id": "blink", "rar": 1}
+	hu.gear_cd = [0.0, 0.0]
+	kt.cd["x"] = 0.0
+	kt.cd["e"] = 0.0
+	aim_at(hu, at)
+	HunterKeys.ult_pressed(hu)
+	drive(m, hu, 0.3, func(_i): aim_at(hu, at))
+	var jt := kt.jet
+	var puffs := kt.hose.emitted
+	var charges := kt.ch_rmb
+	var dashes := hu.dashes
 	var shots := m.shots.size()
 	for key in ["fire", "sec", "dash", "util1", "gear1", "kin_ab"]:
-		drive(m, P, 0.15, func(i):
-			aim_at(P, at)
-			P.inp[key] = key == "fire" or i == 0
-			P.inp["sec_hold"] = key == "sec")
-	P.inp["sec_hold"] = false
+		drive(m, hu, 0.15, func(i):
+			aim_at(hu, at)
+			hu.inp[key] = key == "fire" or i == 0
+			hu.inp["sec_hold"] = key == "sec")
+	hu.inp["sec_hold"] = false
 	ok("Cinder Flue Flight (DECISIONS:83): LMB, RMB, Shift, utility, glove and C are refused",
-		J.running() and K.hose.emitted == puffs and K.ch_rmb == charges and m.shots.size() == shots
-		and P.dashes == dashes and P.ex_cd == 0.0 and int(P.belt[0]["n"]) == 3 and float(P.gear_cd[0]) == 0.0,
-		"flying %s puffs +%d rmb %.1f->%.1f shots +%d dashes %.1f->%.1f tonic %s glove cd %.1f" % [J.running(),
-		K.hose.emitted - puffs, charges, K.ch_rmb, m.shots.size() - shots, dashes, P.dashes, P.belt[0]["n"],
-		float(P.gear_cd[0])])
-	var cloaks := K.cloaks
-	drive(m, P, 0.1, func(i): P.inp["sig"] = i == 0)
+		jt.running() and kt.hose.emitted == puffs and kt.ch_rmb == charges and m.shots.size() == shots
+		and hu.dashes == dashes and hu.ex_cd == 0.0 and int(hu.belt[0]["n"]) == 3 and float(hu.gear_cd[0]) == 0.0,
+		"flying %s puffs +%d rmb %.1f->%.1f shots +%d dashes %.1f->%.1f tonic %s glove cd %.1f" % [jt.running(),
+		kt.hose.emitted - puffs, charges, kt.ch_rmb, m.shots.size() - shots, dashes, hu.dashes, hu.belt[0]["n"],
+		float(hu.gear_cd[0])])
+	var cloaks := kt.cloaks
+	drive(m, hu, 0.1, func(i): hu.inp["sig"] = i == 0)
 	ok("Cinder Flue Flight (DECISIONS:83): E (Furnace Cloak) still works, the flight goes on",
-		K.cloaks == cloaks + 1 and J.running(), "cloaks +%d" % (K.cloaks - cloaks))
+		kt.cloaks == cloaks + 1 and jt.running(), "cloaks +%d" % (kt.cloaks - cloaks))
 	await done(m)
 
 ## DECISIONS:78 "Ostra ult: about a 1 s cast lock (like the source), then he moves freely while Nightwell runs."
 func _motley() -> void:
 	var r := setup("ostra", 7.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: OstraKit = P.ak
+	var hu: Hunter = r[1]
+	var kt: OstraKit = hu.ak
 	var home: Vector3 = r[4]
-	K.cd["x"] = 0.0
-	aim_at(P, home + Vector3(6, 0, 0))
-	HunterKeys.ult_pressed(P)
+	kt.cd["x"] = 0.0
+	aim_at(hu, home + Vector3(6, 0, 0))
+	HunterKeys.ult_pressed(hu)
 	var freed := -1.0
 	var t := 0.0
 	while t < 2.0 and freed < 0.0:
-		drive(m, P, DT, func(_i): P.inp["move"] = Vector2(-1, 0))
+		drive(m, hu, DT, func(_i): hu.inp["move"] = Vector2(-1, 0))
 		t += DT
-		if Vector2(P.pos.x - home.x, P.pos.z - home.z).length() > 0.1:
+		if Vector2(hu.pos.x - home.x, hu.pos.z - home.z).length() > 0.1:
 			freed = t
-	var from := P.pos
-	drive(m, P, 0.5, func(_i): P.inp["move"] = Vector2(-1, 0))
-	var speed := Vector2(P.pos.x - from.x, P.pos.z - from.z).length() / 0.5
-	P.inp["move"] = Vector2.ZERO
+	var from := hu.pos
+	drive(m, hu, 0.5, func(_i): hu.inp["move"] = Vector2(-1, 0))
+	var speed := Vector2(hu.pos.x - from.x, hu.pos.z - from.z).length() / 0.5
+	hu.inp["move"] = Vector2.ZERO
 	ok("Motley Nightwell (DECISIONS:78): about 1 s of cast lock, then he walks out",
 		freed >= LOCK_S[0] and freed <= LOCK_S[1], "first step at %.2fs" % freed)
 	ok("Motley Nightwell (DECISIONS:78): free at >= 90% run speed while the well runs",
-		speed >= 0.9 * P.base_speed and K.well.running(), "%.2f of %.2f m/s" % [speed, P.base_speed])
+		speed >= 0.9 * hu.base_speed and kt.well.running(), "%.2f of %.2f m/s" % [speed, hu.base_speed])
 	await done(m)
 
-## Starts `P` gliding high over the strip with a player's keys (a fresh Space press in the air).
-func _glide_up(m: Match, P: Hunter, home: Vector3) -> void:
-	P.teleport(home + Vector3(0, 12.0, 0))
-	P.vel = Vector3.ZERO
-	P.grounded = false
+## Starts `hu` gliding high over the strip with a player's keys (a fresh Space press in the air).
+func _glide_up(m: Match, hu: Hunter, home: Vector3) -> void:
+	hu.teleport(home + Vector3(0, 12.0, 0))
+	hu.vel = Vector3.ZERO
+	hu.grounded = false
 	m.step(DT)
 	m.step(DT)
-	P.coyote = 0.0           # the ground's grace would make the press a jump (and Space held from a jump never glides)
-	P.inp["glide_press_only"] = true
-	drive(m, P, 0.3, func(i):
-		P.inp["glide"] = true
-		P.inp["jump"] = i == 0)
+	hu.coyote = 0.0           # the ground's grace would make the press a jump (and Space held from a jump never glides)
+	hu.inp["glide_press_only"] = true
+	drive(m, hu, 0.3, func(i):
+		hu.inp["glide"] = true
+		hu.inp["jump"] = i == 0)
 
 ## DECISIONS:74 "Tarek can use RMB/slam out of a glide, as the source does. The glider never blocks it."
 func _tenzo() -> void:
 	var r := setup("dolm", 8.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: DolmKit = P.ak
-	_glide_up(m, P, r[4])
-	var was := P.gliding
-	var slams := K.slams
-	drive(m, P, DT, func(_i): P.inp["sec"] = true)
-	var folded := not P.gliding and K.dive
+	var hu: Hunter = r[1]
+	var kt: DolmKit = hu.ak
+	_glide_up(m, hu, r[4])
+	var was := hu.gliding
+	var slams := kt.slams
+	drive(m, hu, DT, func(_i): hu.inp["sec"] = true)
+	var folded := not hu.gliding and kt.dive
 	var t := 0.0
-	while not P.grounded and t < 4.0:
-		drive(m, P, DT, func(_i): pass)       # Space stays held: the glider must not take the slam back
+	while not hu.grounded and t < 4.0:
+		drive(m, hu, DT, func(_i): pass)       # Space stays held: the glider must not take the slam back
 		t += DT
-	drive(m, P, 0.3, func(_i): pass)
-	P.inp["glide"] = false
+	drive(m, hu, 0.3, func(_i): pass)
+	hu.inp["glide"] = false
 	ok("Tenzo (DECISIONS:74): RMB out of a glide folds it and slams on landing",
-		was and folded and K.slams == slams + 1, "gliding %s folded %s slams +%d" % [was, folded, K.slams - slams])
+		was and folded and kt.slams == slams + 1, "gliding %s folded %s slams +%d" % [was, folded, kt.slams - slams])
 	await done(m)
 
 ## DECISIONS:70 "Kael: RMB held indefinitely, with a perfect release". Returns how far the Lunge carried him.
-func _kael_lunge(m: Match, P: Hunter, home: Vector3, perfect: bool) -> float:
-	var K: JuggernautKit = P.ak
-	P.teleport(home)
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = float(K.rmb_charges())
-	P.inp["sec_hold"] = true
-	drive(m, P, 1.2, func(i): P.inp["sec"] = i == 0)
-	while (K.perfect_window(K.rmb_t) >= 0) != perfect:
-		drive(m, P, DT, func(_i): pass)
-	var from := P.pos
-	P.inp["sec_hold"] = false
-	drive(m, P, 0.8, func(_i): pass)
-	return Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+func _kael_lunge(m: Match, hu: Hunter, home: Vector3, perfect: bool) -> float:
+	var kt: JuggernautKit = hu.ak
+	hu.teleport(home)
+	kt.cd["rmb"] = 0.0
+	kt.ch_rmb = float(kt.rmb_charges())
+	hu.inp["sec_hold"] = true
+	drive(m, hu, 1.2, func(i): hu.inp["sec"] = i == 0)
+	while (kt.perfect_window(kt.rmb_t) >= 0) != perfect:
+		drive(m, hu, DT, func(_i): pass)
+	var from := hu.pos
+	hu.inp["sec_hold"] = false
+	drive(m, hu, 0.8, func(_i): pass)
+	return Vector2(hu.pos.x - from.x, hu.pos.z - from.z).length()
 
 func _kael() -> void:
 	var r := setup("juggernaut", 30.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: JuggernautKit = P.ak
+	var hu: Hunter = r[1]
+	var kt: JuggernautKit = hu.ak
 	var home: Vector3 = r[4]
-	P.inp["sec_hold"] = true
-	drive(m, P, 12.0, func(i): P.inp["sec"] = i == 0)
+	hu.inp["sec_hold"] = true
+	drive(m, hu, 12.0, func(i): hu.inp["sec"] = i == 0)
 	ok("Kael (DECISIONS:70): RMB held 12 s is still charging (no auto-release)",
-		K.rmb_down and K.anim_id == "jug_lunge_wind", "held %.1fs anim %s" % [K.rmb_t, K.anim_id])
-	P.inp["sec_hold"] = false
-	drive(m, P, 1.0, func(_i): pass)
-	var perfects := K.perfects
-	var hit := _kael_lunge(m, P, home, true)
-	var got := K.perfects - perfects
-	var plain := _kael_lunge(m, P, home, false)
+		kt.rmb_down and kt.anim_id == "jug_lunge_wind", "held %.1fs anim %s" % [kt.rmb_t, kt.anim_id])
+	hu.inp["sec_hold"] = false
+	drive(m, hu, 1.0, func(_i): pass)
+	var perfects := kt.perfects
+	var hit := _kael_lunge(m, hu, home, true)
+	var got := kt.perfects - perfects
+	var plain := _kael_lunge(m, hu, home, false)
 	ok("Kael (DECISIONS:70): a release in the window is a perfect Lunge (further), one outside is not",
-		got == 1 and K.perfects == perfects + 1 and hit > plain * 1.1,
-		"perfects +%d, %.2fm vs %.2fm" % [K.perfects - perfects, hit, plain])
+		got == 1 and kt.perfects == perfects + 1 and hit > plain * 1.1,
+		"perfects +%d, %.2fm vs %.2fm" % [kt.perfects - perfects, hit, plain])
 	await done(m)
 
 ## DECISIONS:317 "Neve: darts semi-home while skating too" (and :77, they "home in toward the end of their flight").
 func _neve() -> void:
 	var r := setup("rimewright", 8.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var K: RimewrightKit = P.ak
+	var hu: Hunter = r[1]
+	var foe_h: Hunter = r[2]
+	var kt: RimewrightKit = hu.ak
 	var home: Vector3 = r[4]
 	var cursor := home + Vector3(8, 0, 0)
-	T.teleport(home + Vector3(8, 0, 2.5))      # off the aim line, inside the cursor's reach (wpn.cursor_r)
+	foe_h.teleport(home + Vector3(8, 0, 2.5))      # off the aim line, inside the cursor's reach (wpn.cursor_r)
 	var seen := {"dart": {}, "v0": Vector2.ZERO, "skating": false}      # (a lambda can't assign the caller's locals)
-	drive(m, P, 0.6, func(i):
-		P.inp["move"] = Vector2(0, -1)
-		P.inp["dash"] = i == 0
-		P.inp["dash_down"] = true
-		P.inp["fire"] = i > 2
-		aim_at(P, cursor)
-		if seen["dart"].is_empty() and not K.darts.is_empty():
-			seen["dart"] = K.darts[0]["s"]
+	drive(m, hu, 0.6, func(i):
+		hu.inp["move"] = Vector2(0, -1)
+		hu.inp["dash"] = i == 0
+		hu.inp["dash_down"] = true
+		hu.inp["fire"] = i > 2
+		aim_at(hu, cursor)
+		if seen["dart"].is_empty() and not kt.darts.is_empty():
+			seen["dart"] = kt.darts[0]["s"]
 			seen["v0"] = seen["dart"]["vel"]
-			seen["skating"] = K.in_dash()
+			seen["skating"] = kt.in_dash()
 		)
 	var dart: Dictionary = seen["dart"]
 	var v0: Vector2 = seen["v0"]
 	var skating: bool = seen["skating"]
 	for k in ["move", "dash_down", "fire"]:
-		P.inp[k] = Vector2.ZERO if k == "move" else false
+		hu.inp[k] = Vector2.ZERO if k == "move" else false
 	var out_ok := not dart.is_empty() and absf(rad_to_deg(v0.angle_to(Vector2(1, 0)))) < 25.0
 	var turn := 0.0 if dart.is_empty() else rad_to_deg(v0.angle_to(dart["vel"]))
 	ok("Neve (DECISIONS:317): a skating beam flies out on the aim, then curves in onto the foe",
-		skating and K.stats["beams"] > 0 and out_ok and turn > 5.0,
-		"skating %s beams %d out %.0f deg, turned %.1f deg toward the foe" % [skating, K.stats["beams"],
+		skating and kt.stats["beams"] > 0 and out_ok and turn > 5.0,
+		"skating %s beams %d out %.0f deg, turned %.1f deg toward the foe" % [skating, kt.stats["beams"],
 		rad_to_deg(v0.angle_to(Vector2(1, 0))), turn])
 	await done(m)
 
@@ -202,19 +202,19 @@ func _neve() -> void:
 func _vex() -> void:
 	var r := setup("gunslinger", 12.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: GunslingerKit = P.ak
-	var charges := K.ch_rmb
+	var hu: Hunter = r[1]
+	var kt: GunslingerKit = hu.ak
+	var charges := kt.ch_rmb
 	var seen := {"lane": false, "held": false}
-	P.inp["sec_hold"] = true
-	drive(m, P, DT, func(_i): P.inp["sec"] = true)
-	var on_press := K.burrs.size() == 1 and K.ch_rmb == charges - 1.0
-	drive(m, P, 1.0, func(_i):
-		seen["lane"] = seen["lane"] or AimKit.shown(P, "rmb")
-		seen["held"] = seen["held"] or K.rmb_down)
+	hu.inp["sec_hold"] = true
+	drive(m, hu, DT, func(_i): hu.inp["sec"] = true)
+	var on_press := kt.burrs.size() == 1 and kt.ch_rmb == charges - 1.0
+	drive(m, hu, 1.0, func(_i):
+		seen["lane"] = seen["lane"] or AimKit.shown(hu, "rmb")
+		seen["held"] = seen["held"] or kt.rmb_down)
 	var lane: bool = seen["lane"]
 	var held: bool = seen["held"]
-	P.inp["sec_hold"] = false
+	hu.inp["sec_hold"] = false
 	ok("Vex (DECISIONS:80): RMB goes on the press, holding it shows no lane and holds nothing",
 		on_press and not lane and not held, "on press %s lane %s held %s" % [on_press, lane, held])
 	await done(m)
@@ -223,30 +223,30 @@ func _vex() -> void:
 func _grimble(placed: bool) -> void:
 	var r := setup("dredge", 8.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var K: DredgeKit = P.ak
+	var hu: Hunter = r[1]
+	var foe_h: Hunter = r[2]
+	var kt: DredgeKit = hu.ak
 	var home: Vector3 = r[4]
-	var W = m.world
+	var wld = m.world
 	if placed:
-		m.verbs.add_wall(T, home + Vector3(4, 0, 0), Vector2(-1, 0), {"length": 8.0, "hp": 999.0, "time": 30.0,
+		m.verbs.add_wall(foe_h, home + Vector3(4, 0, 0), Vector2(-1, 0), {"length": 8.0, "hp": 999.0, "time": 30.0,
 			"block": "all"}, 1.0)
 	else:
 		for dz in range(-6, 7):
-			W.level[W.idx(int(floor(home.x)) + 4, int(floor(home.z)) + dz)] = int(r[5]) + 4
-	var grapples := K.grapples
-	drive(m, P, DT, func(_i): P.inp["sec"] = true)
+			wld.level[wld.idx(int(floor(home.x)) + 4, int(floor(home.z)) + dz)] = int(r[5]) + 4
+	var grapples := kt.grapples
+	drive(m, hu, DT, func(_i): hu.inp["sec"] = true)
 	var t := 0.0
-	while K.flying and t < 1.5:
-		drive(m, P, DT, func(_i): pass)
+	while kt.flying and t < 1.5:
+		drive(m, hu, DT, func(_i): pass)
 		t += DT
-	drive(m, P, 0.1, func(_i): pass)
+	drive(m, hu, 0.1, func(_i): pass)
 	if placed:
-		ok("Grimble (DECISIONS:82): a placed wall stops the Deep Reach", K.grapples == grapples and K.pull.is_empty(),
-			"grapples +%d" % (K.grapples - grapples))
+		ok("Grimble (DECISIONS:82): a placed wall stops the Deep Reach", kt.grapples == grapples and kt.pull.is_empty(),
+			"grapples +%d" % (kt.grapples - grapples))
 	else:
 		ok("Grimble (DECISIONS:82): the Deep Reach passes a cliff face and hooks the foe behind it",
-			K.grapples == grapples + 1, "grapples +%d" % (K.grapples - grapples))
+			kt.grapples == grapples + 1, "grapples +%d" % (kt.grapples - grapples))
 	await done(m)
 
 ## DECISIONS:370-371 "holding Space NEVER opens the glider ... Holding Space from the jump ... must never glide".
@@ -254,77 +254,77 @@ func _grimble(placed: bool) -> void:
 func _glide(arch: String) -> void:
 	var r := setup(arch, 20.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	P.inp["glide_press_only"] = true
+	var hu: Hunter = r[1]
+	hu.inp["glide_press_only"] = true
 	var t := {"held": 0.0, "fresh": 0.0}      # s the glider was open in each scenario
-	drive(m, P, GLIDE_S, func(i):
-		P.inp["glide"] = true
-		P.inp["jump"] = i == 0
-		t["held"] += DT if P.gliding else 0.0)
-	P.inp["glide"] = false
-	drive(m, P, 1.0, func(_i): pass)
-	drive(m, P, GLIDE_S, func(i):
-		P.inp["glide"] = i == 0 or i >= 12
-		P.inp["jump"] = i == 0 or i == 12
-		t["fresh"] += DT if P.gliding else 0.0)
-	P.inp["glide"] = false
+	drive(m, hu, GLIDE_S, func(i):
+		hu.inp["glide"] = true
+		hu.inp["jump"] = i == 0
+		t["held"] += DT if hu.gliding else 0.0)
+	hu.inp["glide"] = false
+	drive(m, hu, 1.0, func(_i): pass)
+	drive(m, hu, GLIDE_S, func(i):
+		hu.inp["glide"] = i == 0 or i >= 12
+		hu.inp["jump"] = i == 0 or i == 12
+		t["fresh"] += DT if hu.gliding else 0.0)
+	hu.inp["glide"] = false
 	ok("%s (DECISIONS:370): Space held from the jump never glides; a second press does" % arch,
 		t["held"] == 0.0 and t["fresh"] > 0.3, "held %.2fs, second press %.2fs" % [t["held"], t["fresh"]])
 	await done(m)
 
 ## DECISIONS 2026-11-11, the owner's combat/UI call, "Kael LMB has no knockback". Both LMB hits (the quick slash and the
 ## Searing Wave) must damage the dummy and leave it where it stood with no knock in flight (knock distance 0).
-func _fire_at(P: Hunter, at: Vector3) -> void:
-	P.inp["fire"] = true
-	aim_at(P, at)
+func _fire_at(hu: Hunter, at: Vector3) -> void:
+	hu.inp["fire"] = true
+	aim_at(hu, at)
 
 ## Presses RMB on step 0 only (a tap), aimed at `at`.
-func _tap_at(P: Hunter, i: int, at: Vector3) -> void:
-	P.inp["sec"] = i == 0
-	aim_at(P, at)
+func _tap_at(hu: Hunter, i: int, at: Vector3) -> void:
+	hu.inp["sec"] = i == 0
+	aim_at(hu, at)
 
 func _kael_lmb_noknock() -> void:
 	var r := setup("juggernaut", 2.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var hu: Hunter = r[1]
+	var foe_h: Hunter = r[2]
 	var home: Vector3 = r[4]
-	var K: JuggernautKit = P.ak
-	var hp0 := T.hp
-	var at := T.pos
+	var kt: JuggernautKit = hu.ak
+	var hp0 := foe_h.hp
+	var at := foe_h.pos
 	var worst_knock := 0.0
-	drive(m, P, 0.1, func(_i): _fire_at(P, T.pos))
+	drive(m, hu, 0.1, func(_i): _fire_at(hu, foe_h.pos))
 	for i in int(0.8 / DT):
-		P.inp["fire"] = false
+		hu.inp["fire"] = false
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
 		m.step(DT)
-		worst_knock = maxf(worst_knock, T.knock_t)
-	var slide := Vector2(T.pos.x - at.x, T.pos.z - at.z).length()
+		worst_knock = maxf(worst_knock, foe_h.knock_t)
+	var slide := Vector2(foe_h.pos.x - at.x, foe_h.pos.z - at.z).length()
 	ok("Kael LMB (11-11): the quick slash hurts the target and knocks it back 0 m",
-		T.hp < hp0 and slide < 0.01 and worst_knock == 0.0, "dmg %.1f, moved %.3fm, knock_t %.2f"
-			% [hp0 - T.hp, slide, worst_knock])
+		foe_h.hp < hp0 and slide < 0.01 and worst_knock == 0.0, "dmg %.1f, moved %.3fm, knock_t %.2f"
+			% [hp0 - foe_h.hp, slide, worst_knock])
 	# the Searing Wave: held to full, let go, through a target 5 m out
-	P.teleport(home)
-	P.vel = Vector3.ZERO
-	T.teleport(home + Vector3(5.0, 0, 0))
-	K.cd["lmb"] = 0.0
-	P.fire_cd = 0.0
-	drive(m, P, 0.1, func(_i): pass)
-	hp0 = T.hp
-	at = T.pos
-	drive(m, P, 1.2, func(_i): _fire_at(P, T.pos))
+	hu.teleport(home)
+	hu.vel = Vector3.ZERO
+	foe_h.teleport(home + Vector3(5.0, 0, 0))
+	kt.cd["lmb"] = 0.0
+	hu.fire_cd = 0.0
+	drive(m, hu, 0.1, func(_i): pass)
+	hp0 = foe_h.hp
+	at = foe_h.pos
+	drive(m, hu, 1.2, func(_i): _fire_at(hu, foe_h.pos))
 	worst_knock = 0.0
 	for i in int(1.0 / DT):
-		P.inp["fire"] = false
+		hu.inp["fire"] = false
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
 		m.step(DT)
-		worst_knock = maxf(worst_knock, T.knock_t)
-	slide = Vector2(T.pos.x - at.x, T.pos.z - at.z).length()
+		worst_knock = maxf(worst_knock, foe_h.knock_t)
+	slide = Vector2(foe_h.pos.x - at.x, foe_h.pos.z - at.z).length()
 	ok("Kael LMB (11-11): the Searing Wave hurts the target and knocks it back 0 m",
-		T.hp < hp0 and slide < 0.01 and worst_knock == 0.0, "dmg %.1f, moved %.3fm, knock_t %.2f"
-			% [hp0 - T.hp, slide, worst_knock])
+		foe_h.hp < hp0 and slide < 0.01 and worst_knock == 0.0, "dmg %.1f, moved %.3fm, knock_t %.2f"
+			% [hp0 - foe_h.hp, slide, worst_knock])
 	await done(m)
 
 ## Fires Kael's RMB tap (the Finishing Slam) at a dummy on the axis, with a second dummy `lat` m to the side at the
@@ -332,23 +332,23 @@ func _kael_lmb_noknock() -> void:
 func _slam_at(lat: float, range_m: float) -> Array:
 	var r := setup("juggernaut", range_m, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var T2: Hunter = r[3]
+	var hu: Hunter = r[1]
+	var foe_h: Hunter = r[2]
+	var foe_h2: Hunter = r[3]
 	var home: Vector3 = r[4]
-	T2.teleport(home + Vector3(range_m, 0, lat))
-	var K: JuggernautKit = P.ak
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = float(K.rmb_charges())
+	foe_h2.teleport(home + Vector3(range_m, 0, lat))
+	var kt: JuggernautKit = hu.ak
+	kt.cd["rmb"] = 0.0
+	kt.ch_rmb = float(kt.rmb_charges())
 	for i in 5:
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
 		m.step(DT)
-	var h1 := T.hp
-	var h2 := T2.hp
-	P.inp["sec_hold"] = false
-	drive(m, P, 1.2, func(i): _tap_at(P, i, home + Vector3(range_m, 0, 0)))
-	var out := [h1 - T.hp, h2 - T2.hp]
+	var h1 := foe_h.hp
+	var h2 := foe_h2.hp
+	hu.inp["sec_hold"] = false
+	drive(m, hu, 1.2, func(i): _tap_at(hu, i, home + Vector3(range_m, 0, 0)))
+	var out := [h1 - foe_h.hp, h2 - foe_h2.hp]
 	await done(m)
 	return out
 
@@ -376,29 +376,29 @@ func _kael_rmb_lane() -> void:
 	# the Lunge: a straight thrust along the aim into the first foe, one off to the side untouched
 	var r := setup("juggernaut", 5.0, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var T2: Hunter = r[3]
+	var hu: Hunter = r[1]
+	var foe_h: Hunter = r[2]
+	var foe_h2: Hunter = r[3]
 	var home: Vector3 = r[4]
-	T2.teleport(home + Vector3(2.5, 0, 3.0))
-	var K: JuggernautKit = P.ak
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = float(K.rmb_charges())
-	var h1 := T.hp
-	var h2 := T2.hp
-	P.inp["sec_hold"] = true
-	drive(m, P, 0.5, func(i): _tap_at(P, i, T.pos))
-	P.inp["sec_hold"] = false
+	foe_h2.teleport(home + Vector3(2.5, 0, 3.0))
+	var kt: JuggernautKit = hu.ak
+	kt.cd["rmb"] = 0.0
+	kt.ch_rmb = float(kt.rmb_charges())
+	var h1 := foe_h.hp
+	var h2 := foe_h2.hp
+	hu.inp["sec_hold"] = true
+	drive(m, hu, 0.5, func(i): _tap_at(hu, i, foe_h.pos))
+	hu.inp["sec_hold"] = false
 	var drift := 0.0
 	for i in int(1.0 / DT):
-		for k in ["fire", "sec", "dash", "jump"]: P.inp[k] = false
+		for k in ["fire", "sec", "dash", "jump"]: hu.inp[k] = false
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
 		m.step(DT)
-		drift = maxf(drift, absf(P.pos.z - home.z))
+		drift = maxf(drift, absf(hu.pos.z - home.z))
 	ok("Kael RMB (11-11): the hold's Lunge thrusts straight into the foe on its line, not the one beside it",
-		T.hp < h1 and T2.hp == h2 and drift < 0.2, "hit %.1f, side foe %.1f, sideways drift %.2f m"
-			% [h1 - T.hp, h2 - T2.hp, drift])
+		foe_h.hp < h1 and foe_h2.hp == h2 and drift < 0.2, "hit %.1f, side foe %.1f, sideways drift %.2f m"
+			% [h1 - foe_h.hp, h2 - foe_h2.hp, drift])
 	await done(m)
 
 ## DECISIONS 2026-11-11, owner combat/UI: "Albert is the biggest Hunter by only ~10-15%, Kael smaller too": the
