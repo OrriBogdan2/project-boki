@@ -34,7 +34,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.6, "stride": [1.5, 1.2], "bob": [0.5, 0.5], "foot_mps": [1.41, 3.48], "back_foot_mps": [1.62, 3.78], "side_foot_mps": [1.21, 3.02], "arm_swing": {"L": 0.5}, "start_phase": 0.75, "start_blend": {"s": 0.3, "bones": ["upper_arm.R", "forearm.R", "hand.R"]}
+		"run_speed": 4.6, "stride": [1.5, 1.2], "bob": [0.5, 0.5], "foot_mps": [1.41, 3.6], "back_foot_mps": [1.62, 3.78], "side_foot_mps": [1.21, 3.02], "arm_swing": {"L": 0.5}, "start_phase": 0.75, "start_blend": {"s": 0.3, "bones": ["upper_arm.R", "forearm.R", "hand.R"]}
 	},
 	"crouch": {
 		"idle": "crouch_idle",
@@ -46,15 +46,16 @@
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 2.42
+		"speed": 2.42,
+		"plants": {"crouch_b": {"L": [0.317], "R": [0.65]}, "crouch_f": {"L": [0.317], "R": [0.65]}, "crouch_l": {"L": [0.317], "R": [0.65]}, "crouch_r": {"L": [0.317], "R": [0.65]}}
 	},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "exdash"
+		"dive": "exdash", "fade_out": 0.25
 	},
-	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13}},
+	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1, "fade": 0.2}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13, "fade": 0.25}},
 	"derive": {
 		"ult_recover": {
 			"from": "riposte",
@@ -90,6 +91,7 @@
 		, "air_legs": true},
 		"jug_slam": {
 			"clip": "slam",
+			"fade": 0.3,
 			"time": [[0, 0], [0.6, 0.6], [0.7, 0.633], [1.15, 1.133]],
 			"blend_out": 0.45
 		},

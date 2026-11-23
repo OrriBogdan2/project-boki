@@ -171,7 +171,7 @@ func x_wind_left() -> float:
 	return maxf(0.0, x_wind_end - float(m.time))
 
 ## The source's recovery (E_RECOVER): she stands, and no ability, jump or Shift goes.
-## A press in the last DashFlow.BUFFER_S waits for the end (DashFlow.cc_left); one before it is dropped.
+## A press in the last Loco.press_buffer waits for the end (DashFlow.cc_left); one before it is dropped.
 func commit_left() -> float:
 	return maxf(0.0, commit_end - float(m.time))
 
@@ -179,7 +179,7 @@ func busy() -> bool:
 	return super.busy() or commit_left() > 0.0
 
 func gate_inputs() -> void:
-	if commit_left() > DashFlow.BUFFER_S:
+	if commit_left() > Loco.press_buffer:
 		h.inp["dash"] = false
 		h.inp["jump"] = false
 
@@ -656,7 +656,7 @@ func cast_e() -> bool:
 	var ed := e_def()
 	needle = {"t": 0.0, "dir": h.aim_dir(), "push": _push_want()}
 	e_t = float(ed["charge"]) + 0.1
-	m.sfx("vn_ion_charge", h.pos, -3.0)
+	KitWindup.play(self, "e", "vn_ion_charge", -3.0)
 	play("gunslinger_e")
 	return true
 
@@ -685,6 +685,7 @@ func _tick_needle(dt: float) -> void:
 	needle["t"] = float(needle["t"]) + dt
 	if h.downed or h.stun_t > 0.0:
 		_end_needle()
+		KitWindup.broken(self, "e")
 		return
 	_turn_needle(dt)
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)

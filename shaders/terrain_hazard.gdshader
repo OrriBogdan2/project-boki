@@ -5,6 +5,9 @@ shader_type spatial;
 // 0 lava (glowing cracks under a dark crust, slow churn), 1 deep water (darker toward the middle,
 // drifting ripples), 2 ice (glassy, white cracks), 3 static flats (dark slate, yellow veins that
 // brighten with charge before a shock), 4 bramble (dark tangled ground; the thorns are props).
+// Edge: a thin dark line just outside the outline, the bright rim, and a soft glow band inside, so the
+// area starts clearly on any ground. When the player's Boki counters the kind (guard), a slow-breathing
+// ring in that Boki's glow runs inside the rim: the one in-world "you can cross this" cue.
 render_mode cull_disabled, depth_draw_opaque;
 #include "res://shaders/vis.gdshaderinc"
 uniform sampler2D sdf : filter_linear, repeat_disable;
@@ -17,6 +20,10 @@ uniform vec4 col_edge : source_color;
 uniform float glow = 0.0;        // how much the surface lights itself
 uniform float alpha = 1.0;
 uniform float charge = 0.0;      // static flats: 0..1 while a shock builds up
+uniform float guard = 0.0;       // 1 while the player's Boki counters this kind
+uniform vec4 col_guard : source_color = vec4(1.0);
+const float OUTLINE_M = 0.14;    // m of dark line just outside the outline
+const float GLOW_M = 1.3;        // m the soft edge glow reaches inside the rim
 varying vec3 wpos;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -34,8 +41,9 @@ void vertex() {
 }
 
 void fragment() {
-	float d = texture(sdf, (wpos.xz - origin) / size).r;
-	if (d < 0.0) { discard; }
+	float d0 = texture(sdf, (wpos.xz - origin) / size).r;
+	if (d0 < -OUTLINE_M) { discard; }
+	float d = max(d0, 0.0);
 	float deep = smoothstep(0.2, 3.5, d);
 	float edge = 1.0 - smoothstep(0.12, 0.45, d);
 	vec2 p = wpos.xz;
@@ -68,10 +76,21 @@ void fragment() {
 		float tang = vnoise(p * 2.5) * 0.6 + vnoise(p * 6.0) * 0.4;
 		c *= 0.7 + tang * 0.5;
 	}
-	// the edge: a bright rim so the area's outline reads from the camera
+	// the edge: a soft glow band, a bright rim, a dark line outside: the outline reads on any ground
+	float band = 1.0 - smoothstep(0.3, GLOW_M, d);
+	c = mix(c, col_edge.rgb, band * 0.3);
 	c = mix(c, col_edge.rgb, edge * 0.85);
-	em += col_edge.rgb * edge * max(glow, 0.35);
-	a = mix(a, 1.0, edge);
+	em += col_edge.rgb * (band * 0.15 + edge) * max(glow, 0.35);
+	a = mix(a, 1.0, max(edge, band * 0.5));
+	// the guard ring: where a countering Boki's glow breathes along the rim
+	float ring = (1.0 - smoothstep(0.0, 0.1, abs(d - 0.7))) * guard * (0.65 + 0.35 * sin(TIME * 2.5));
+	c = mix(c, mix(col_guard.rgb, vec3(1.0), 0.5), ring);
+	em += col_guard.rgb * ring * 0.8;
+	if (d0 < 0.0) {
+		c = col_deep.rgb * 0.25;
+		em = vec3(0.0);
+		a = 1.0;
+	}
 	float fog = vis_fog(wpos);
 	ALBEDO = vis_apply(c, fog);
 	EMISSION = em * (1.0 - fog * 0.7);

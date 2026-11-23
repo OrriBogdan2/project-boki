@@ -26,8 +26,18 @@ func _match(opts: Dictionary) -> Match:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	var o := {"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-			"demo_kin": "pebbit", "weapon": "rifle", "cls": "medium"}
+	var o := {
+		"training": true,
+		"teams": 2,
+		"squad": 1,
+		"tier": 0,
+		"length": 1e9,
+		"seed": 4242,
+		"no_drop": true,
+		"demo_kin": "pebbit",
+		"weapon": "rifle",
+		"cls": "medium"
+	}
 	o.merge(opts, true)
 	m.start(o)
 	m.set_process(false)
@@ -69,8 +79,10 @@ func run(mn: Node) -> void:
 func _off() -> void:
 	var p := _ready_player()
 	ok(not KinMerge.ready(p) and KinMerge.plan(p) == "" and not KinMerge.can_cast(p), "off: a full meter is not ready")
-	ok(not KinMerge.press(p) and not KinMerge.cast(p) and not KinMerge.surge(p),
-			"off: press, cast and surge start nothing")
+	ok(
+		not KinMerge.press(p) and not KinMerge.cast(p) and not KinMerge.surge(p),
+		"off: press, cast and surge start nothing"
+	)
 	p.inp["ult"] = true
 	_run_for(0.5)
 	ok(p.merge_st.is_empty() and KinMerge.deny_text(p) == "", "off: the X input does nothing and says nothing")
@@ -79,8 +91,10 @@ func _off() -> void:
 	ok(not bool(p.inp["ult"]) or p.merge_st.is_empty(), "off: the bot's merge call starts nothing")
 	p.inp["ult"] = false
 	p.ult = 0.0
-	ok(KinBond.add(p, 0.5, "ult_hit") == 0.0 and KinBond.add(p, 0.5, KinBond.FIGHT) == 0.0 and p.ult == 0.0,
-			"off: the bond meter does not fill (hits or fighting)")
+	ok(
+		KinBond.add(p, 0.5, "ult_hit") == 0.0 and KinBond.add(p, 0.5, KinBond.FIGHT) == 0.0 and p.ult == 0.0,
+		"off: the bond meter does not fill (hits or fighting)"
+	)
 	p.skill_pts = 3
 	p.lvl = 9
 	ok(not p.can_level("ult"), "off: no skill point can go into the Fusion slot")
@@ -105,18 +119,24 @@ func _off_match() -> void:
 
 
 func _off_text() -> void:
-	ok(not TipText.ability(true).contains("fuse") and not TipText.ability(false).contains("bond"),
-			"off: the Boki tip is silent")
+	ok(
+		not TipText.ability(true).contains("fuse") and not TipText.ability(false).contains("bond"),
+		"off: the Boki tip is silent"
+	)
 	var tips_seen := {}
 	for i in 60:
 		Save.d["tutorial"]["tips_seen"] = []
 		tips_seen[TipPick.pick(["no_summon"])] = true
-	ok(not tips_seen.keys().any(func(t): return String(t).contains("fuses you")),
-			"off: no loading tip about the bond fuse")
+	ok(
+		not tips_seen.keys().any(func(t): return String(t).contains("fuses you")),
+		"off: no loading tip about the bond fuse"
+	)
 	Save.d["matches"] = 20
 	ok(not WordsView.visible().any(func(w): return w["term"] == "Fusion"), "off: the Words page has no Fusion")
-	ok(not KitCard.card_slots("bulwark").has("r") and not HunterViewer.slots_for("bulwark").has("r"),
-			"off: the kit card has no Fusion row")
+	ok(
+		not KitCard.card_slots("bulwark").has("r") and not HunterViewer.slots_for("bulwark").has("r"),
+		"off: the kit card has no Fusion row"
+	)
 	ok(not ClassCard.kit_tip("bulwark").contains("Fusion"), "off: the class tooltip has no Fusion")
 	ok(not _controls_text().contains("ultimate"), "off: the controls card has no Fusion row")
 	ok(not _has_action_row("ultimate"), "off: the keybind list has no Fusion row")
@@ -124,10 +144,14 @@ func _off_text() -> void:
 
 func _off_tutorial() -> void:
 	var tu := _tutorial()
-	ok(not tu.applies("pick_ult") and not tu.applies("ult") and tu.applies("pick_kin"),
-			"off: the tutorial skips its Fusion steps")
-	ok(TutorialCamps.of(m.player) != null and not TutorialCamps.of(m.player).may_level("ult"),
-			"off: no tutorial point goes to Fusion")
+	ok(
+		not tu.applies("pick_ult") and not tu.applies("ult") and tu.applies("pick_kin"),
+		"off: the tutorial skips its Fusion steps"
+	)
+	ok(
+		TutorialCamps.of(m.player) != null and not TutorialCamps.of(m.player).may_level("ult"),
+		"off: no tutorial point goes to Fusion"
+	)
 
 
 # ------------------------------------------------------------------ 3. on
@@ -147,8 +171,10 @@ func _on() -> void:
 	p.lvl = 9
 	ok(p.can_level("ult"), "on: a skill point can go into the Fusion slot")
 	Save.d["matches"] = 20
-	ok(TipText.ability(true).contains("fuses") and WordsView.visible().any(func(w): return w["term"] == "Fusion"),
-			"on: tip and word are back")
+	ok(
+		TipText.ability(true).contains("fuses") and WordsView.visible().any(func(w): return w["term"] == "Fusion"),
+		"on: tip and word are back"
+	)
 	ok(KitCard.card_slots("bulwark").has("r") and ClassCard.kit_tip("bulwark").contains("Fusion"), "on: cards show it")
 	ok(_controls_text().contains("ultimate") and _has_action_row("ultimate"), "on: controls and keybinds list it")
 	var tu := _tutorial()
@@ -157,8 +183,10 @@ func _on() -> void:
 	for i in 60:
 		Save.d["tutorial"]["tips_seen"] = []
 		tut_tips[TipPick.pick(["no_summon"], true, false)] = true
-	ok(not tut_tips.keys().any(func(t): return String(t).contains("fuses you")),
-			"on: no loading/downed tip in the tutorials mentions the fuse")
+	ok(
+		not tut_tips.keys().any(func(t): return String(t).contains("fuses you")),
+		"on: no loading/downed tip in the tutorials mentions the fuse"
+	)
 
 
 # ------------------------------------------------------------------ helpers
