@@ -5,6 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
 	"--combat-calm-check": ["res://tools/combat_calm_check.gd", "combat_calm_check", null],  # fight HUD
 	"--combat-hud-shots": ["res://tools/combat_hud_shots.gd", "combat_hud_shots", null],  # GPU
 	"--levelup-reel": ["res://tools/levelup_reel.gd", "levelup_reel", null],  # movie writer: a level-up mid-fight

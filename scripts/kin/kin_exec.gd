@@ -292,6 +292,7 @@ static func _shoot(st: StageSpec, cx: Dictionary, start: Vector3, dv: Vector2, s
 	if bool(p.get("rope", false)):
 		extra["rope"] = true
 		extra["deco"] = "hook"
+	ShotOrigin.draw_from(extra, cx["caster"], String(cx.get("fire_from", "")))      # the slot's hand or weapon
 	m.spawn_shot(cx["caster"], start, dv * spd, 0.0, rng / spd, size, col, extra)
 
 ## What a projectile does when it touches someone ("pass" or "hit") and when it ends.
