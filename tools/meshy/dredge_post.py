@@ -12,8 +12,13 @@ Runs on the r7 body (tools/meshy/dredge_reskin.py output) and writes the game gl
   every clip: each segment keeps its rest direction (it hangs) and follows the bone above it by only TAIL_FOLLOW,
   with a lag that grows down the chain, so a swung arm drags the tail round instead of stretching it.
 
+- r11 (`--r11`, on the r10 glb): Meshy hoard pack (open chest) replaces the bedroll (swap_pack); the open shoulder socket
+  is domed (cap_shoulder); stray head/spine weights on the goo go to RightArm (clean_goo_weights); the chain's keys
+  keep the forearm's twist (TAIL_TWIST, rebake_tail), which was the flat-ribbon collapse.
+
   python3 tools/meshy/dredge_post.py OUT.glb IN.glb
   python3 tools/meshy/dredge_post.py --islands FILE.glb
+  python3 tools/meshy/dredge_post.py --r11 OUT.glb IN_R10.glb [PACK.glb]   # r11 stages on the r10 glb (never build() twice)
 
 Needs numpy and scipy (the venv).
 """
@@ -43,6 +48,19 @@ FADE_Y = 1.35  # m: the goo above this keeps its arm weights; between this and t
 # share of the bone above's turn each segment takes (the first is the hand's own); the rest it keeps hanging
 TAIL_FOLLOW = (1.0, 0.6, 0.5, 0.5)
 LAG = (0.0, 0.4, 0.5, 0.6)  # per frame carry-over of each segment's direction (a later swing down the chain)
+# r11: share of the hand's twist (turn about the arm's own axis) each segment keeps. Swing-only bones (r10) met the
+# forearm's full twist inside the blend zone and the goo tube collapsed to a sheet (a twisted ellipse at 90 deg)
+TAIL_TWIST = (1.0, 0.8, 0.55, 0.3)
+TWIST_FROM = "RightForeArm"  # the bone whose twist the chain takes up (the hand's own twist is the wrist's: too much)
+# r11: Meshy's goo carries head and spine weights near the shoulder (it follows the head and tears off the arm: the
+# worst stretch edges in the attack). Those go to RightArm; this share of RightShoulder's weight goes there too.
+STRAY = ("headfront", "Head", "neck", "head_end", "Spine", "Spine01", "Spine02", "Hips")
+SHOULDER_TO_ARM = 0.5
+# r11 pack: scale of the Meshy hoard (m; its box is about 1.65 x 1.45 x 1.9 m), the x of its centre, the height of its
+# base, the z of the back surface it leans on, the texture size
+SOCKET_BOX = (np.array([-0.3, 1.2, -0.5]), np.array([-0.05, 1.7, 0.1]))  # m: the open shoulder socket (rest pose)
+SOCKET_MIN, SOCKET_RINGS, SOCKET_BULGE = 100, 4, 0.05
+PACK_SCALE, PACK_X, PACK_BOTTOM, PACK_BACK_Z, PACK_TEX = 0.45, -0.02, 1.15, -0.25, 1024
 FPS = 30.0
 # the attack clip keeps this share of its head and upper-spine bend
 # r10 right foot: replaced below FOOT_CUT (m) by the mirrored left one; FOOT_MID: |x| beyond which a triangle is a leg's
@@ -583,10 +601,25 @@ def clip_times(rig, clip):
     return np.unique(np.r_[np.arange(0, top, 1 / FPS), top])
 
 
+def axis_turn(axis, ang):
+    """Rotation matrix about unit vector axis by ang (Rodrigues)."""
+    a = axis / np.linalg.norm(axis)
+    k = np.array([[0, -a[2], a[1]], [a[2], 0, -a[0]], [-a[1], a[0], 0]])
+    return np.eye(3) + np.sin(ang) * k + (1 - np.cos(ang)) * k @ k
+
+
+def twist_angle(carry, axis):
+    """The angle of the hand's turn about axis once its swing (axis onto carry @ axis) is taken out."""
+    tz = arc(axis, carry @ axis).T @ carry
+    v = np.array([tz[2, 1] - tz[1, 2], tz[0, 2] - tz[2, 0], tz[1, 0] - tz[0, 1]]) / 2
+    return float(np.arctan2(v @ axis, (np.trace(tz) - 1) / 2))
+
+
 def tail_keys(rig, clip, rest_pts):
     """Local rotation keys (frames x bones x xyzw) of the chain in one clip (two passes round, so a loop is settled)."""
     ih = rig.names.index(HAND)
     r0, _ = rest_world(rig, HAND)
+    it, rt0 = rig.names.index(TWIST_FROM), rest_world(rig, TWIST_FROM)[0]
     seg = rest_pts[1:] - rest_pts[:-1]
     length = np.linalg.norm(seg, axis=1)
     rest_dir = seg / length[:, None]
@@ -599,6 +632,9 @@ def tail_keys(rig, clip, rest_pts):
             rh = world[:3, :3]
             rh = rh / np.linalg.norm(rh, axis=0)
             carry = rh @ r0.T  # the hand's turn since rest
+            wt = rig.pose(clip, t)[it] @ np.linalg.inv(rig.ibm[it])
+            wt = wt[:3, :3] / np.linalg.norm(wt[:3, :3], axis=0)
+            ang = twist_angle(wt @ rt0.T, rest_dir[0])
             prev = carry
             for k in range(len(seg)):
                 follow = prev @ rest_dir[k]
@@ -606,7 +642,7 @@ def tail_keys(rig, clip, rest_pts):
                 u /= np.linalg.norm(u)
                 held[k] = LAG[k] * held[k] + (1 - LAG[k]) * u
                 held[k] /= np.linalg.norm(held[k])
-                q = arc(rest_dir[k], held[k])
+                q = axis_turn(held[k], ang * TAIL_TWIST[k]) @ arc(rest_dir[k], held[k])
                 keys[ti, k] = mat_quat(r0.T @ prev.T @ q @ r0)
                 prev = q
     return times, keys
@@ -642,6 +678,190 @@ def add_tail_clips(js, out, baked, first):
             a["samplers"].append(smp)
             node = js["skins"][0]["joints"][first + k]
             a["channels"].append({"sampler": len(a["samplers"]) - 1, "target": {"node": node, "path": "rotation"}})
+
+
+def rebake_tail(js, b, out, rig):  # r11 stage
+    """r11, on an r10 file (chain already in): the chain's keys baked again (twist kept); the old samplers' outputs are
+    swapped, nothing else moves. (Never re-run build() on a file it already wrote: the chain bones would double.)"""
+    first = rig.names.index("GooTail0")
+    pos = n.floats(js, b, js["meshes"][0]["primitives"][0]["attributes"]["POSITION"])
+    rest_pts = chain_points(pos[goo_vertices(js, b)], rest_world(rig, HAND)[1])
+    for a in js["animations"]:
+        _, keys = tail_keys(rig, a["name"], rest_pts)
+        for k in range(len(CHAIN_Y)):
+            ch = [c for c in a["channels"] if c["target"]["node"] == rig.joints[first + k]][0]
+            a["samplers"][ch["sampler"]]["output"] = out.add_floats(keys[:, k], "VEC4")
+
+
+def clean_goo_weights(js, b, out, rig):
+    """r11: stray head/spine weights and half of the shoulder's weight on the goo move to RightArm (one share per
+    vertex, so a cross-section stays rigid and the tube does not collapse where those bones turn differently)."""
+    prims = js["meshes"][0]["primitives"]
+    gv = goo_vertices(js, b)
+    _, joints, weights = rig.verts(0)
+    d = rs.dense(joints, weights, len(rig.names))
+    ix = rig.names.index
+    stray = [ix(x) for x in STRAY]
+    arm, sh = ix("RightArm"), ix("RightShoulder")
+    g = d[gv]
+    g[:, arm] += g[:, stray].sum(1) + SHOULDER_TO_ARM * g[:, sh]
+    g[:, stray] = 0
+    g[:, sh] *= 1 - SHOULDER_TO_ARM
+    d[gv] = g
+    nj, nw = rs.top4(d)
+    rest = np.ones(len(nj), bool)
+    rest[gv] = False
+    nj[rest], nw[rest] = joints[rest], weights[rest]  # everything but the goo keeps its own rows
+    js["accessors"].append({"bufferView": out.add_view(nj.astype(np.uint16).tobytes()), "componentType": 5123, "count": len(nj), "type": "VEC4"})
+    jacc, wacc = len(js["accessors"]) - 1, out.add_floats(nw, "VEC4")
+    for p in prims[:2]:
+        p["attributes"]["JOINTS_0"], p["attributes"]["WEIGHTS_0"] = jacc, wacc
+
+
+def swap_pack(js, b, out, rig, pack_path):
+    """r11: the leather bedroll and brass clasps (contract hoard) are replaced by Meshy's hoard pack (an image-to-3D of
+    the turnaround's stacked chests, barrels, shield and lantern with the top chest open and full of coins, decimated in
+    Blender to PACK_TRIS): turned about y so its flat back faces the hero's back, scaled and set on the spine, one rigid
+    blend of the spine bones (as the old pack)."""
+    pj, pb = n.load(pack_path)
+    pp = pj["meshes"][0]["primitives"][0]
+    at = pp["attributes"]
+    P, N, UV = (n.floats(pj, pb, at[k]) for k in ("POSITION", "NORMAL", "TEXCOORD_0"))
+    F = prim_faces(pj, pb, pp)
+    lo, hi = P.min(0), P.max(0)
+    ctr = np.array([(lo[0] + hi[0]) / 2, lo[1], (lo[2] + hi[2]) / 2])
+    P = (P - ctr) * np.array([-1.0, 1.0, -1.0]) * PACK_SCALE  # 180 deg about y
+    N = N * np.array([-1.0, 1.0, -1.0])
+    depth = (hi[2] - lo[2]) * PACK_SCALE
+    P += np.array([PACK_X, PACK_BOTTOM, PACK_BACK_Z - depth / 2])
+    jn, wt = rs.pack_weights(P, rig.names)
+    tex = pj["materials"][pp["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    img = pj["images"][pj["textures"][tex]["source"]]
+    im = Image.open(io.BytesIO(bytes(n.view_bytes(pj, pb, img["bufferView"])))).convert("RGB")
+    im.thumbnail((PACK_TEX, PACK_TEX))
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=90)
+    js["images"].append({"bufferView": out.add_view(buf.getvalue()), "mimeType": "image/jpeg"})
+    js["textures"].append({"source": len(js["images"]) - 1})
+    js["materials"].append({"name": "pack-meshy", "doubleSided": True, "pbrMetallicRoughness": {
+        "baseColorTexture": {"index": len(js["textures"]) - 1}, "metallicFactor": 0.0, "roughnessFactor": 0.75}})
+    attrs = {"POSITION": out.add_floats(P, "VEC3"), "NORMAL": out.add_floats(N, "VEC3"),
+             "TEXCOORD_0": out.add_floats(UV, "VEC2"), "WEIGHTS_0": out.add_floats(wt, "VEC4")}
+    js["accessors"][attrs["POSITION"]].update(min=P.min(0).tolist(), max=P.max(0).tolist())
+    js["accessors"].append({"bufferView": out.add_view(jn.astype(np.uint16).tobytes()), "componentType": 5123,
+                            "count": len(P), "type": "VEC4"})
+    attrs["JOINTS_0"] = len(js["accessors"]) - 1
+    f = F.astype(np.uint32)  # a turn keeps the winding
+    js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
+    prims = js["meshes"][0]["primitives"]
+    keep = [p for p in prims if js["materials"][p["material"]]["name"] not in ("leather-pack", "brass-pack")]
+    keep.append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
+    js["meshes"][0]["primitives"] = keep
+    return len(F)
+
+
+def cap_shoulder(js, b, out, rig):
+    """r11: Meshy cut the right arm off the torso and left its socket open (the goo hid it at rest; once the arm swung
+    it showed as a black torn patch on the back/shoulder: the game's ink hull behind the hole). The open rim in
+    SOCKET_BOX gets a dome (SOCKET_RINGS rings toward its centre, bulging outward by SOCKET_BULGE) skinned and
+    textured like the nearest rim vertex, appended to the shared vertex arrays."""
+    prim = js["meshes"][0]["primitives"][0]
+    att = prim["attributes"]
+    arr = read_attrs(js, b, att)
+    pos, f = arr["POSITION"], prim_faces(js, b, prim)
+    first_goo = goo_vertices(js, b).min()
+    q = np.round(pos / ISLAND_TOL).astype(np.int64)
+    w = np.unique(q, axis=0, return_inverse=True)[1].ravel()
+    fs = w[f[(f < first_goo).all(1)]]
+    e = np.sort(np.concatenate([fs[:, [0, 1]], fs[:, [1, 2]], fs[:, [2, 0]]]), 1)
+    u, c = np.unique(e, axis=0, return_counts=True)
+    bd = u[c == 1]
+    rep = np.zeros(w.max() + 1, np.int64)
+    rep[w[::-1]] = np.arange(len(w))[::-1]  # first vertex index of each welded position
+    lo, hi = SOCKET_BOX
+    inside = ((pos[rep[bd]] >= lo) & (pos[rep[bd]] <= hi)).all(2).all(1)
+    bd = bd[inside]
+    ids = np.unique(bd)
+    slot = {v: i for i, v in enumerate(ids)}
+    g = sp.coo_matrix((np.ones(len(bd)), ([slot[x] for x in bd[:, 0]], [slot[x] for x in bd[:, 1]])), (len(ids),) * 2)
+    lab = connected_components(g, directed=False)[1]
+    new = {k: [] for k in arr}
+    tris, base, total = [], len(pos), 0
+    for l in range(lab.max() + 1):
+        vs = rep[ids[lab == l]]
+        if len(vs) < SOCKET_MIN:
+            continue
+        p = pos[vs]
+        ctr = p.mean(0)
+        ax = np.linalg.svd(p - ctr)[2]
+        out_n = ax[2] if ax[2][0] < 0 else -ax[2]  # the opening faces away from the body (-x)
+        order = vs[np.argsort(np.arctan2((p - ctr) @ ax[1], (p - ctr) @ ax[0]))]
+        po = pos[order]
+        for r in range(1, SOCKET_RINGS + 1):
+            k = r / (SOCKET_RINGS + 1)
+            P = ctr + (po - ctr) * (1 - k) + out_n * SOCKET_BULGE * np.sin(np.pi / 2 * k)
+            for key, arrv in arr.items():
+                piece = arrv[order].copy()
+                if key == "POSITION":
+                    piece = P
+                elif key == "NORMAL":
+                    piece = np.tile(out_n, (len(order), 1)) * k + piece * (1 - k)
+                    piece /= np.linalg.norm(piece, axis=1, keepdims=True)
+                new[key].append(piece)
+        top = ctr + out_n * SOCKET_BULGE
+        near = order[np.argmin(np.linalg.norm(po - ctr, axis=1))]
+        for key, arrv in arr.items():
+            piece = arrv[[near]].copy()
+            if key == "POSITION":
+                piece = top[None]
+            elif key == "NORMAL":
+                piece = out_n[None].astype(np.float32)
+            new[key].append(piece)
+        n_pts, m = len(order), SOCKET_RINGS
+        ring_id = [order] + [base + total + n_pts * (r - 1) + np.arange(n_pts) for r in range(1, m + 1)]
+        apex = base + total + n_pts * m
+        quads = []
+        for r in range(m):
+            a_, b_ = ring_id[r], ring_id[r + 1]
+            for i in range(n_pts):
+                j = (i + 1) % n_pts
+                quads += [(a_[i], a_[j], b_[j]), (a_[i], b_[j], b_[i])]
+        for i in range(n_pts):
+            quads.append((ring_id[m][i], ring_id[m][(i + 1) % n_pts], apex))
+        tr = np.array(quads, np.int64)
+        allp = np.concatenate([pos, np.concatenate([x for x in new["POSITION"]])])
+        nrm = np.cross(allp[tr[:, 1]] - allp[tr[:, 0]], allp[tr[:, 2]] - allp[tr[:, 0]])
+        flip = (nrm @ out_n) < 0
+        tr[flip] = tr[flip][:, ::-1]
+        tris.append(tr)
+        total += n_pts * m + 1
+        print("socket loop", len(order), "verts at", ctr.round(2), "ring dia", np.ptp(po, 0).round(2))
+    if not tris:
+        return "no loop found"
+    append_attrs(js, out, att, arr, new)
+    full = np.concatenate([f.astype(np.uint32)] + [t.astype(np.uint32) for t in tris])
+    js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+    prim["indices"] = len(js["accessors"]) - 1
+    return int(sum(len(t) for t in tris))
+
+
+def rebuild_r11(out_path, in_path, pack_path=None):
+    """The r11 stages on an r10 glb; each one writes the file and the next reloads it (new arrays live in the new
+    file's buffer)."""
+    stages = [("shoulder socket cap (tris)", cap_shoulder),
+              ("goo weights", clean_goo_weights), ("tail keys", rebake_tail)]
+    if pack_path:
+        stages.insert(0, ("pack tris", lambda js, b, out, rig: swap_pack(js, b, out, rig, pack_path)))
+    src = in_path
+    for name, fn in stages:
+        rig = rs.Rig(src)
+        out = n.Out(rig.js, rig.b)
+        res = fn(rig.js, rig.b, out, rig)
+        rs.compact(out)
+        out.write(out_path)
+        src = out_path
+        print(name, res if res is not None else "ok")
+    print("written", out_path)
 
 
 def build(out_path, in_path):
@@ -705,5 +925,7 @@ def build(out_path, in_path):
 if __name__ == "__main__":
     if sys.argv[1] == "--islands":
         count_islands(sys.argv[2])
+    elif sys.argv[1] == "--r11":
+        rebuild_r11(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else None)
     else:
         build(sys.argv[1], sys.argv[2])

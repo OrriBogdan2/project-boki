@@ -111,5 +111,11 @@ r10 (same tool):
 - Attack: the lean that the Hips still pitched in (Head over Spine02, 38 deg at the slam, idle 10) past 12 deg is
   cut by 60 % with a counter-turn of Spine02 about the side axis: peak 21 deg, legs keep their plant.
 - Goo: the arm-to-tail blend runs from 1.35 m (was 1.15): Attack 0.5 s 33 long edges (r9 109), run 0 (16).
+r11 (`dredge_post.py --r11 OUT IN_R10 PACK`, PACK = Meshy image-to-3D of the turnaround's hoard with the top chest open, decimated to
+14k tris in Blender, export only): the goo's tail chain keeps the forearm's twist (swing-only bones met the forearm's twist in the
+blend zone and the tube collapsed to a ribbon; flat clusters at Attack 0.5 s 31 -> 5, stretched edges 49 -> 0), head/spine weights on the
+goo move to RightArm, the open shoulder socket gets a dome (it showed as a black patch once the arm swung), and the hoard pack
+replaces the leather bedroll (rigid on the spine).
+
 Grimble has no hit clip: a hit is the Hips flinch spring (WardenFlinch) over the playing clip.
 The gun's hip is data (`holster.hip.pos`, x +0.17 = his left, where the gauntlet draws it).
