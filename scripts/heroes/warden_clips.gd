@@ -99,6 +99,7 @@ var climb_was := ""          # "mantle" or "ledge" while the climb state runs; e
 var climb_live := false      # the state is still on
 var hit_seen := 99.0
 var last_emote := ""
+var beats := {}              # "beats": the win, lose and board beats the .glb can play (WardenBeats)
 var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
 var torso_turn := 0.0        # rad the hips (the torso) turn with it: all of it for a "heading" move, none on the aim
 var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
@@ -228,6 +229,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	lib = clips
+	WardenClipFile.add(lib, glb, sk, d.get("clip_files", []))
 	WardenDerive.add(lib, d.get("derive", {}))
 	var contract: Array = []
 	for b in WardenGlb.BONES:
@@ -248,6 +250,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 		_retime_run(float(d["loco"]["run_cycle"]))
 	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values() \
 			+ (d.get("summon_call", {}) as Dictionary).values())
+	beats = WardenBeats.build(lib, d.get("beats", {}))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -566,6 +569,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var lock := float(s.get("lockin_t", -1.0))
 	if lock >= 0.0 and d.has("lockin"):
 		return _lockin_at(lock)
+	var bt := String(s.get("beat", ""))
+	if beats.has(bt):
+		var b: Dictionary = beats[bt]
+		var length := lib.get_animation(String(b["clip"])).length
+		return {"clip": b["clip"], "t": WardenBeats.time_of(length, float(b["loop_from"]), float(s.get("beat_t", 0.0))),
+				"upper": b["upper"]}
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		var clip := String((d.get("emotes", {}) as Dictionary).get(em, st["emote"]))
@@ -588,7 +597,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moving := Vector2(vel.x, vel.z).length() >= STILL
 	var hold := float(land.get("moving", land.get("dur", 0.0))) if moving else float(land.get("dur", 0.0))
 	if land_t < hold and bool(s.get("grounded", true)):
-		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0))}
+		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0)),
+				"fade": float(land.get("fade", FADE)), "out": float(land.get("out", FADE_LOCO))}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	# (a chip hit is only WardenFlinch's lean over the body; the hit clip is a stagger's)
@@ -762,8 +772,8 @@ func step(dt: float) -> void:
 		cur_ut = tu
 		_p("seek_u%s/seek_request" % "ab"[chan_u], tu)
 		out_fade = float(want.get("out", FADE_LOCO))
-		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		var back_u := float(want.get("blend_out", 0.0))
+		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		up_w = move_toward(up_w, 0.0, dt / back_u) if back_u > 0.0 else \
 				move_toward(maxf(up_w, act_w), 1.0, dt / float(want.get("fade", FADE)))
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
@@ -817,6 +827,7 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	_ease_start(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
+	loco_k *= 1.0 - proc_w     # (a swim is the rig's: no stride or arm swing over it)
 	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
 	steps.step(loco_k > 0.5 and bool(s.get("grounded", true)), loco_pos)
@@ -968,13 +979,17 @@ func _aim_twist(flat: Vector2, face: float, k: float) -> Vector2:
 ## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
 ## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
 func _air_tilt() -> void:
-	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
-	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
+	air_tilt(root, skel, root_bi)
+
+## The air tilt on any skeleton's root bone `bi` (a Meshy-native model's too: WardenNative), after its clip posed it.
+static func air_tilt(model: Node3D, sk: Skeleton3D, bi: int) -> void:
+	var q: Quaternion = model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	if bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
 		return
 	var b := Basis(q)
-	var to_skel := skel.global_transform.affine_inverse() * root.global_transform
+	var to_skel := sk.global_transform.affine_inverse() * model.global_transform
 	var turn_v := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
-	skel.set_bone_global_pose(root_bi, turn_v * skel.get_bone_global_pose(root_bi))
+	sk.set_bone_global_pose(bi, turn_v * sk.get_bone_global_pose(bi))
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = _vel(s)
@@ -1007,6 +1022,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	loco_goal = goal
 	loco_pos = _ease(loco_pos, goal, 12.0, dt)
 	_p("loco/blend_position", loco_pos)
+	gait.footing(dt, s.get("footing", {}))
 	var ring := _walk_ring()
 	var out := loco_pos.length()
 	var moving := _out_of_idle(out, ring, goal.length(), spd)
@@ -1023,12 +1039,17 @@ func _loco(s: Dictionary, dt: float) -> void:
 	_p("stance_w/blend_amount", stance_w)
 	var grounded := bool(s.get("grounded", true))
 	var gliding := bool(s.get("gliding", false)) or bool(s.get("diving", false))
-	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
+	# (data "air": {"fade_out": s}: the fall and glide poses let go of the body this slowly on touchdown, for a Hunter
+	# whose air pose is far from his landing's: `--cast-pop-check` POPDEG)
+	var air_out := float((d["air"] as Dictionary).get("fade_out", AIR_FADE))
+	var air_fade := air_out if grounded else AIR_FADE
+	var glide_fade := AIR_FADE if gliding else air_out
+	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / air_fade)
 	# (a move cast out of the glider: the glide pose holds while the move fades in over it, and goes to the fall pose
 	# under the move, so the arms make one motion, glider to cast, not glider to fall to cast)
 	var owned := maxf(act_w, up_w)
 	if owned <= 0.0 or owned >= 1.0 or gliding:
-		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
+		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / glide_fade)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)

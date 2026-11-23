@@ -20,6 +20,11 @@ extends RefCounted
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
+##   [--bench-probe]  (only the scripted expedition a player gets: loading screen, planning map, skyship ride, drop,
+##   a fight; per-phase frame costs and hitches. tests/perf_probe.gd: --probe-out= --probe-quick --probe-squad=
+##   --probe-teams= --probe-full)
+##   [--bench-hunter-gpu]  (only what the Hunter models cost to draw: six Hunters and four Boki in idle at the match
+##   camera; tools/perf/hunter_gpu.gd: --wardens=a,b --tiers=n,25k,40k --bench-secs=8; needs a real GPU)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -94,6 +99,13 @@ var vp: RID
 
 
 func run(main_node: Node) -> void:
+	var args := OS.get_cmdline_user_args()
+	if "--bench-probe" in args:      # the two own-setup parts: their window, save and camera, not setup()'s
+		main_node.add_child(load("res://tests/perf_probe.gd").new())
+		return
+	if "--bench-hunter-gpu" in args:
+		await load("res://tools/perf/hunter_gpu.gd").new().run(main_node)
+		return
 	setup(main_node)
 	if tracy_dir != "":
 		await _tracy_match()
@@ -179,7 +191,7 @@ func _finish() -> void:
 
 
 func _match(part := "match") -> Array:
-	var m := await _start("match", {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101})
+	var m := await _start("match", {"teams": int(hunters / 2.0), "squad": 2, "total": hunters, "seed": 4101})
 	return await _play(m, part, [m.player], _bring_fight, FIGHT_AT)
 
 
@@ -654,8 +666,7 @@ func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	)
 	return f
 
-
-## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as --perf-probe does.
+## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as tests/perf_probe.gd does.
 func _hook_hud(m: Match) -> void:
 	var h = m.hud
 	var cb := Callable(h, "_draw_all")
@@ -680,7 +691,7 @@ func _avg(fl: Array, key: String) -> float:
 func _summary(part: String, fl: Array) -> void:
 	var w: Array = fl.map(func(f): return float(f["wall"]))
 	w.sort()
-	var cut := maxi(1, w.size() / 100)
+	var cut := maxi(1, int(w.size() / 100.0))
 	var low := 0.0
 	for k in cut:
 		low += float(w[w.size() - 1 - k])
@@ -856,7 +867,7 @@ func _meshes() -> void:
 		for si in mi.mesh.get_surface_count():
 			if mi.mesh is ArrayMesh:
 				var il := (mi.mesh as ArrayMesh).surface_get_array_index_len(si)
-				tris += (il if il > 0 else (mi.mesh as ArrayMesh).surface_get_array_len(si)) / 3
+				tris += int((il if il > 0 else (mi.mesh as ArrayMesh).surface_get_array_len(si)) / 3.0)
 		var key := String(mi.name).rstrip("0123456789@")
 		if key == "" or key.begins_with("@"):
 			var up := mi.get_parent()
