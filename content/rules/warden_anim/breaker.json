@@ -135,6 +135,7 @@
 		"gg": "g_salute",
 		"refuse": "g_cross"
 	},
+	"summon_call": {"call": "g_call_slam_r", "recall": "g_recall_r"},
 	"turn": {"dur": 0.34, "lift": 0.36},
 	"cc": {"pull": 0.22, "tug_hz": 0.8, "twist": 0.05, "bow": 0.2},
 	"procedural": ["base", "wade", "swim"],
@@ -206,7 +207,6 @@
 			}
 		}
 	},
-	"summon_call": {"call": "g_call_slam_r", "recall": "g_recall_r"},
 	"cancels": [
 		["bul_smash_wind", 0.5, "bul_guard"],
 		["bul_smash_wind", 0.5, "bul_mend"],

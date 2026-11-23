@@ -162,8 +162,9 @@ static func _settled(clips: WardenClips, dd: Dictionary, st: String) -> bool:
 	if float(mv.get("cut", 1e9)) <= SOURCE_FRAME or (mv.has("clip") and clips.move_len(mv) <= SOURCE_FRAME):
 		return true
 	# (a move with a "blend_out" that is already inside it by the window's end is giving the body back to the legs
-	# as its data says: slam follow-through)
-	if mv.has("blend_out") and clips.move_len(mv) - SOURCE_FRAME <= float(mv["blend_out"]):
+	# as its data says: slam follow-through; with a "time" map, its last key is the clip's end)
+	if mv.has("blend_out") and (clips.move_len(mv) - SOURCE_FRAME <= float(mv["blend_out"]) \
+			or (mv.has("time") and float(mv["time"][-1][0]) - SOURCE_FRAME <= float(mv["blend_out"]))):
 		return true
 	var clips_of: Array = [_clip_of(dd, st), mv.get("alt", "")]
 	var on_up: bool = clips.up_w >= 0.999 and absf(clips.xf_u - clips.chan_u) < 0.001 and clips.cur_u in clips_of

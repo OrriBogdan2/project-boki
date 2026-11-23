@@ -131,6 +131,18 @@
 		"lip.L",
 		"lip.R"
 	],
+	"beats": {
+		"win": {"clip": "emote_toss"},
+		"lose": {"clip": "downed"},
+		"board": {
+			"pose": {
+				"head": [8, 0, 8],
+				"upper_arm.R": [-55, 0, 0],
+				"forearm.R": [-15, 0, 0],
+				"upper_arm.L": [-10, 0, -30]
+			}
+		}
+	},
 	"cancels": [
 		["breah_wind", 0.5, "breah_crouch"],
 		["breah_wind", 0.5, "breah_punch"],
@@ -144,17 +156,5 @@
 		["breah_raise", 0.1, "breah_punch"],
 		["breah_skate", 0.4, "breah_spine_aim"]
 	],
-	"beats": {
-		"win": {"clip": "emote_toss"},
-		"lose": {"clip": "downed"},
-		"board": {
-			"pose": {
-				"head": [8, 0, 8],
-				"upper_arm.R": [-55, 0, 0],
-				"forearm.R": [-15, 0, 0],
-				"upper_arm.L": [-10, 0, -30]
-			}
-		}
-	},
 	"free_arm": {"lmb_throw": "L", "lmb_punch": "L"}
 }

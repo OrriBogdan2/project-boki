@@ -1,6 +1,7 @@
 class_name HunterSwim
 extends RefCounted
-## A Hunter in water (HunterAnim state keys "wade" and "swim", from HomeWater.anim_state()). Wading is the run
+## A Hunter in water (HunterAnim state keys "wade" and "swim", from HomeWater.anim_state() at home and
+## HazardMoves.anim_state() in a match). Wading is the run
 ## cycle with the knees hauled up out of the water. Swimming is a crawl: the legs flutter and each hand the kit
 ## lets go of strokes round in turn, at a rate that follows the swim speed, so the stroke matches how fast you move.
 ## A hand the kit keeps on its weapon stays there (the weapon rides as on a run); a Warden's own clips stand

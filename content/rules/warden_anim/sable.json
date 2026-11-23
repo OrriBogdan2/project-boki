@@ -178,6 +178,19 @@
 		"mouth.L",
 		"mouth.R"
 	],
+	"beats": {
+		"win": {"clip": "emote"},
+		"lose": {"clip": "downed"},
+		"board": {
+			"pose": {
+				"head": [0, -45, -6],
+				"upper_arm.R": [10, 0, 0],
+				"upper_arm.L": [10, 0, 0],
+				"forearm.R": [-70, 0, 0],
+				"forearm.L": [-70, 0, 0]
+			}
+		}
+	},
 	"cancels": [
 		["thf_bola", 0.2, "stun"],
 		["thf_bola", 0.2, "thf_lmb_r"],
@@ -191,18 +204,5 @@
 		["thf_lmb_r", 0.1, "thf_lmb_l"],
 		["thf_vault_f", 0.2, "thf_encore"]
 	],
-	"carry_drop": ["hand.L", "hand.R"],
-	"beats": {
-		"win": {"clip": "emote"},
-		"lose": {"clip": "downed"},
-		"board": {
-			"pose": {
-				"head": [0, -45, -6],
-				"upper_arm.R": [10, 0, 0],
-				"upper_arm.L": [10, 0, 0],
-				"forearm.R": [-70, 0, 0],
-				"forearm.L": [-70, 0, 0]
-			}
-		}
-	}
+	"carry_drop": ["hand.L", "hand.R"]
 }

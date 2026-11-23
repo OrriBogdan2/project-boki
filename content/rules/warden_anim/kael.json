@@ -160,6 +160,18 @@
 	"skinned_weapon": true,
 	"carry_drop": ["hand.R"],
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
+	"beats": {
+		"win": {"clip": "emote"},
+		"lose": {"clip": "downed"},
+		"board": {
+			"pose": {
+				"head": [-5, -40, 0],
+				"upper_arm.R": [5, 0, 8],
+				"forearm.R": [-22, 0, 0],
+				"upper_arm.L": [8, 0, -6]
+			}
+		}
+	},
 	"cancels": [
 		["jug_wave_wind", 0.5, ""],
 		["jug_lunge_wind", 0.5, ""],
@@ -177,17 +189,5 @@
 		["jug_slash_r", 0.2, "jug_slam"],
 		["jug_wave_wind", 0.5, "stun"]
 	],
-	"beats": {
-		"win": {"clip": "emote"},
-		"lose": {"clip": "downed"},
-		"board": {
-			"pose": {
-				"head": [-5, -40, 0],
-				"upper_arm.R": [5, 0, 8],
-				"forearm.R": [-22, 0, 0],
-				"upper_arm.L": [8, 0, -6]
-			}
-		}
-	},
 	"free_arm": {"slam": "L", "meteor": "L"}
 }

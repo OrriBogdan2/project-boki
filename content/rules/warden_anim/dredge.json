@@ -136,7 +136,7 @@
 		"mantle": {"clip": "mantle", "rise": 0.28},
 		"ledge": {"clip": "ledge", "rise": 0.3}
 	},
-	"procedural": ["ledge", "base", "wade", "swim"],
+	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
 	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": [
 		"hips",
@@ -157,18 +157,6 @@
 		"hoard",
 		"gun"
 	],
-	"cancels": [
-		["dr_dive", 0.3, "glide"],
-		["dr_blast", 0.5, "stun"],
-		["dr_reel", 0.5, ""],
-		["dr_anchor", 0.2, ""],
-		["dr_throw", 0.2, "dr_shot"],
-		["dr_throw", 0.3, "dr_anchor"],
-		["dr_anchor", 0.2, "dr_shot"],
-		["dr_reel", 0.5, "dr_pullend"],
-		["dr_blast", 0.5, ""],
-		["dr_lunge", 0.2, "dr_anchor"]
-	],
 	"beats": {
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
@@ -180,5 +168,17 @@
 				"upper_arm.R": [20, 0, 15]
 			}
 		}
-	}
+	},
+	"cancels": [
+		["dr_dive", 0.3, "glide"],
+		["dr_blast", 0.5, "stun"],
+		["dr_reel", 0.5, ""],
+		["dr_anchor", 0.2, ""],
+		["dr_throw", 0.2, "dr_shot"],
+		["dr_throw", 0.3, "dr_anchor"],
+		["dr_anchor", 0.2, "dr_shot"],
+		["dr_reel", 0.5, "dr_pullend"],
+		["dr_blast", 0.5, ""],
+		["dr_lunge", 0.2, "dr_anchor"]
+	]
 }

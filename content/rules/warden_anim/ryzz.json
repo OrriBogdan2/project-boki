@@ -1,8 +1,6 @@
 {
 	"doc": "Sparkle's hand-keyed clips (art/wardens/ryzz/ryzz.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Hands-free: no weapon on the .glb; the index fingers carry the FX points (weapon_muzzle on the right, anchor_finger_L on the left), the rods carry anchor_rod_0..3.",
-	"blink": {
-		"turn": {"lid.R": [-0.82, 0.0, 0.0], "lid.L": [-0.82, 0.0, 0.0]}
-	},
+	"blink": {"turn": {"lid.R": [-0.82, 0.0, 0.0], "lid.L": [-0.82, 0.0, 0.0]}},
 	"skinned_weapon": true,
 	"extra_bones": {
 		"lid.L": "head",
@@ -136,7 +134,53 @@
 	"summon_call": {"call": "g_call_fling_r", "recall": "g_recall_r"},
 	"cc": {"pull": 0.22, "tug_hz": 2.0, "twist": 0.18, "bow": 0.2},
 	"procedural": ["base", "wade", "swim"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "index.L", "index2.L", "curl.L", "curl2.L", "thumb.L", "index.R", "index2.R", "curl.R", "curl2.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R", "gum", "rod.0", "rod.1", "rod.2", "rod.3", "rodlit.0", "rodlit.1", "rodlit.2", "rodlit.3"],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R",
+		"index.L",
+		"index2.L",
+		"curl.L",
+		"curl2.L",
+		"thumb.L",
+		"index.R",
+		"index2.R",
+		"curl.R",
+		"curl2.R",
+		"thumb.R",
+		"brow.L",
+		"brow.R",
+		"lid.L",
+		"lid.R",
+		"mouth.L",
+		"mouth.R",
+		"gum",
+		"rod.0",
+		"rod.1",
+		"rod.2",
+		"rod.3",
+		"rodlit.0",
+		"rodlit.1",
+		"rodlit.2",
+		"rodlit.3"
+	],
+	"beats": {
+		"win": {"clip": "emote"},
+		"lose": {"clip": "downed"},
+		"board": {
+			"pose": {
+				"head": [25, 0, 0],
+				"upper_arm.R": [-10, 0, 150],
+				"upper_arm.L": [0, 0, -15],
+				"forearm.L": [0, 0, 70]
+			}
+		}
+	},
 	"cancels": [
 		["mage_dash", 0.4, "stun"],
 		["mage_dash", 0.4, "mage_dash_go"],
@@ -148,12 +192,5 @@
 		["mage_dash", 0.4, "mage_lmb_r"],
 		["glide", 0.4, "mage_e"],
 		["mage_x_dive", 0.2, "mage_x_land"]
-	],
-	"beats": {
-		"win": {"clip": "emote"},
-		"lose": {"clip": "downed"},
-		"board": {
-			"pose": {"head": [25, 0, 0], "upper_arm.R": [-10, 0, 150], "upper_arm.L": [0, 0, -15], "forearm.L": [0, 0, 70]}
-		}
-	}
+	]
 }

@@ -130,7 +130,7 @@
 		"mantle": {"clip": "mantle", "rise": 0.28},
 		"ledge": {"clip": "ledge", "rise": 0.3}
 	},
-	"procedural": ["ledge", "base", "wade", "swim"],
+	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
 	"upper": [
 		"hips",
 		"head",
@@ -149,18 +149,6 @@
 		"mouth.L",
 		"mouth.R"
 	],
-	"cancels": [
-		["tm_spear_aim", 0.4, "tm_rime"],
-		["tm_spear_aim", 0.3, "tm_dart_r"],
-		["tm_spear_aim", 0.3, "tm_wall"],
-		["tm_spear", 0.05, "stun"],
-		["tm_rime_hold", 0.8, "tm_rime_break"],
-		["tm_rime_hold", 2.0, "tm_rime_crash"],
-		["tm_rime_hold", 0.8, ""],
-		["tm_rime_hold", 0.8, "tm_skate_go"],
-		["tm_skate", 0.3, "tm_rime"],
-		["tm_dart_r", 0.1, "tm_spear_aim"]
-	],
 	"beats": {
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
@@ -173,5 +161,17 @@
 				"forearm.L": [-8, 0, 0]
 			}
 		}
-	}
+	},
+	"cancels": [
+		["tm_spear_aim", 0.4, "tm_rime"],
+		["tm_spear_aim", 0.3, "tm_dart_r"],
+		["tm_spear_aim", 0.3, "tm_wall"],
+		["tm_spear", 0.05, "stun"],
+		["tm_rime_hold", 0.8, "tm_rime_break"],
+		["tm_rime_hold", 2.0, "tm_rime_crash"],
+		["tm_rime_hold", 0.8, ""],
+		["tm_rime_hold", 0.8, "tm_skate_go"],
+		["tm_skate", 0.3, "tm_rime"],
+		["tm_dart_r", 0.1, "tm_spear_aim"]
+	]
 }

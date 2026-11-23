@@ -155,13 +155,6 @@
 		"lid.L",
 		"lid.R"
 	],
-	"cancels": [
-		["arc_draw", 0.6, ""],
-		["arc_heavy_wind", 0.5, ""],
-		["pin_walk", 0.5, ""],
-		["glide", 0.4, "arc_heavy_wind"],
-		["glide", 0.4, "arc_hail"]
-	],
 	"beats": {
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
@@ -173,5 +166,12 @@
 				"upper_arm.R": [10, 0, 0]
 			}
 		}
-	}
+	},
+	"cancels": [
+		["arc_draw", 0.6, ""],
+		["arc_heavy_wind", 0.5, ""],
+		["pin_walk", 0.5, ""],
+		["glide", 0.4, "arc_heavy_wind"],
+		["glide", 0.4, "arc_hail"]
+	]
 }
