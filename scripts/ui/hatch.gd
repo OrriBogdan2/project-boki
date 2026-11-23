@@ -645,7 +645,7 @@ func _show_name() -> void:
 	var name_row := UI.hbox(8)
 	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
-	var step := NameStep.new(sp_id, "")      # (either path card below keeps the name)
+	var step := NameStep.new(sp_id, "")      # (both ways on below keep the name)
 	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(step)
 	v.add_child(name_row)

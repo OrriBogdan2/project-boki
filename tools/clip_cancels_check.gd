@@ -17,6 +17,7 @@ const CANCEL_OPEN := {
 	"juggernaut jug_reel@0.30>jug_spin": "1.16 m, the spin's first pose is far from the reel",
 	"juggernaut jug_lunge_wind@0.50>jug_lunge":
 	"0.79 m: the lunge holds its upright frame 0 for its 0.45 s lead (Kael retime), far from the wind-up hold",
+	"ashwick as_lance@0.60>lw_jet": "0.30 m into the jet's first pose (the dash clip lead retime)",
 	"bulwark bul_smash_wind@0.50>bul_ult_wind": "hammer from the wind-up hold to overhead, 0.74 m in a frame",
 	"bulwark bul_lumber@0.20>bul_ult_wind": "0.50 m into the ult wind-up",
 	"dredge dr_blast@0.50>stun": "0.60 m into the stun pose",

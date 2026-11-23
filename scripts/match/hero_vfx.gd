@@ -89,6 +89,7 @@ static var _xray: Shader = null  # SURFACE drawn over walls and rock: an "xray" 
 
 var m: Node
 var pools := {}  # kind -> nodes made for it
+var last_voice := -1  # the Sfx handle of the last sound a move started at once (KitWindup.keep)
 var live: Array = []  # shader looks running: {node, mat, t, dur, s0, s1, kind; cut, h; on, off}
 var ribbons: Array = []  # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
 var motes: Array = []  # one-shot emitters running: {node, t, dur, n}
@@ -300,7 +301,6 @@ func tier_up(h: Hunter, tier: int) -> void:
 
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
-var last_voice := -1           # the Sfx handle of the last sound a move started at once (KitWindup.keep)
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
 	last_voice = -1
 	var k := float(o.get("k", 0.0))
