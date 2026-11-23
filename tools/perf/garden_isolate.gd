@@ -1,14 +1,17 @@
 extends RefCounted
-## --bench-garden --bench-isolate: where a garden part's frame goes. On the part just measured (Boki out, UI shown)
-## the same scene is timed again with one cost removed at a time: the Boki hidden (no draw, no rig step), their rigs
-## paused (no animation, still drawn), their shadows off, and the 10 Hz-and-up kin script (Home._move_kin) timed
-## alone. "BENCH isolate" lines: frame p50 / p95 ms and the saving against the first "as is". "every frame" is the
-## crowd easing of RigPace off, run between two "as is" so a drifting machine shows.
+## --bench-garden --bench-isolate: where a garden part's frame goes. On the part just measured (Boki out) the same
+## scene is timed again, the screen UI shown as a player has it, with one cost changed at a time: the screen UI
+## hidden ("no ui"), the crowd easing of RigPace off ("every frame": every rig steps every frame, the way it was),
+## the Boki's shadows off, their rigs paused (no animation, still drawn), the Boki hidden. "as is" is timed several
+## times so a drifting machine shows. "BENCH isolate" lines: frame p50 / p95 ms and the saving against the first
+## "as is". The kin script (Home._move_kin) is timed alone.
 
 const DT := 1.0 / 60.0
 const WARM := 20
-const FRAMES := 240
-const MODES := ["as is", "every frame", "as is", "every frame", "no shadows", "rigs paused", "boki hidden"]
+const FRAMES := 300
+const MODES := [
+	"as is", "no ui", "as is", "no ui", "every frame", "as is", "every frame", "no shadows", "rigs paused", "boki hidden"
+]
 
 var main: Node
 var _crowd_from := RigPace.crowd_from
@@ -18,13 +21,15 @@ func _init(main_node: Node) -> void:
 	main = main_node
 
 
-func run(part: String) -> void:
+func run(part: String, ui_was: Array) -> void:
 	var home = main.current
+	for u in ui_was:  # the player sees the screen UI: every mode but "no ui" is timed with it
+		u[0].visible = u[1]
 	var base := 0.0
 	for mode in MODES:
-		_apply(home, mode, true)
+		_apply(home, mode, true, ui_was)
 		var w := await _sample()
-		_apply(home, mode, false)
+		_apply(home, mode, false, ui_was)
 		if base == 0.0:
 			base = w[0]
 		print(
@@ -50,7 +55,10 @@ func _sample() -> Array:
 	return [fl[int((fl.size() - 1) * 0.5)], fl[int((fl.size() - 1) * 0.95)]]
 
 
-func _apply(home, mode: String, on: bool) -> void:
+func _apply(home, mode: String, on: bool, ui_was: Array) -> void:
+	if mode == "no ui":
+		for u in ui_was:
+			u[0].visible = u[1] and not on
 	for k in home.kins:
 		var n := k["node"] as Node3D
 		match mode:

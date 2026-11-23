@@ -87,6 +87,7 @@ var pipes_draw := 0  # pipelines built at draw time so far (the hitch lines prin
 var out_path := ""
 var zone := ""
 var boki_counts: Array = [BOKI_OUT]  # --bench-boki=a,b,c: Boki out in each garden zone part
+var ui_was: Array = []  # [node, visible] of the screen UI _budget hid (--bench-isolate shows it again)
 var isolate := false  # --bench-isolate: each zone part also gets the cost split (tools/perf/garden_isolate.gd)
 var garden_only := false  # --bench-garden: the zone parts and the hub only
 var tracy_dir := ""
@@ -505,7 +506,7 @@ func _zone(id: String, boki := BOKI_OUT) -> void:
 	var part := "zone_" + id + ("" if boki == BOKI_OUT else "_b%d" % boki)
 	await _farm(part, {"zone": id})
 	if isolate:
-		await load("res://tools/perf/garden_isolate.gd").new(main).run(part)
+		await load("res://tools/perf/garden_isolate.gd").new(main).run(part, ui_was)
 
 
 ## --bench-garden: every --bench-zone zone with each --bench-boki count out, then the hub (nobody lives there, so
@@ -529,8 +530,10 @@ func _budget(part: String, fl: Array) -> void:
 		var all := main.get_tree().root.find_children("*", cls, true, false)
 		emit += all.filter(func(n): return n.emitting and n.is_visible_in_tree()).size()
 	var home = main.current
+	ui_was = [[home.root_ui, home.root_ui.visible]]
 	home.root_ui.visible = false
 	for cl in home.find_children("*", "CanvasLayer", true, false):
+		ui_was.append([cl, cl.visible])
 		cl.visible = false
 	for i in 8:
 		await main.get_tree().process_frame
