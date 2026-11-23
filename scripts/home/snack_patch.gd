@@ -64,6 +64,14 @@ static func grow_secs() -> float:
 		base = minf(base, float(rules()["first_grow_secs"]))
 	return base * DecorComfort.value("bright", "grow", 1.0)
 
+## The crunch a snack makes when picked: "crisp", "juicy", "hard" or "soft", by its lean type (pick_textures).
+static func texture(snack: String) -> String:
+	var type := Lean.key_of(snack)
+	for t in rules()["pick_textures"]:
+		if (rules()["pick_textures"][t] as Array).has(type):
+			return String(t)
+	return "crisp"
+
 ## Picks the ripe snacks into the pantry. Returns the snack ids picked ([] when not ripe).
 static func harvest(d: Dictionary, now: float) -> Array:
 	var e := entry(d)
@@ -121,11 +129,14 @@ func tick(d: float) -> void:
 	if now_ripe != _ripe:
 		_ripe = now_ripe
 		h.hb.apply(false)          # redraws the patch in its new stage
+		if now_ripe and not _on_it(e):
+			GardenSfx.snack_ripe(HomeLayout.deco_center(e))
 	if now_ripe and _on_it(e):
 		var got := harvest(Save.d, now)
 		_ripe = false
 		h.hb.apply(false)
 		h._toast("Picked: " + ", ".join(got.map(func(s): return Care.food_name(s))))
+		GardenSfx.snack_pick(h, HomeLayout.deco_center(e), got)
 		h.fx.burst(HomeLayout.deco_center(e) + Vector3(0, 0.5, 0), Color("ffe08a"), 10, 1.5, 0.4)
 
 func _on_it(e: Dictionary) -> bool:

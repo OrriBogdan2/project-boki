@@ -46,13 +46,16 @@ The garden's moments (SFX_AUDIT row 22), each its own cue instead of the stock u
   garden_visit_out a wild visitor leaving: a two-chirp goodbye falling away and a last rustle
   garden_season    entering the zone that is in season: two plucks and a sparkle up to a short bell (D5-G5-B6)
   garden_evolve    the evolution scene's change: a rising shimmer swelling into a G major bell chord
+  garden_snack_ripe  the snack patch ripening while you are in the zone: two soft bell notes, B5 then G6
+  garden_snack_crisp / _juicy / _hard / _soft   a snack picked, by its texture: a crisp bite and a pluck up, a
+                   wet bite and a bubble pop, two hard knocks, a soft muffled puff and a low "mm"
 Kite Tow and Lantern Match (Glint Fishing has its own, gen_sfx_glint.py):
   kite_flap        Kite Tow's Space: a cloth snap and flutter climbing   kite_ring   through a ring: swish, two plucks
   kite_updraft     a vent refunds a flap: warm air rising and a chime     kite_finish   landing: flutter, twang, bells
   lantern_flip     a glowcap opens with a soft rising fwip   lantern_match   two caps ring together
   lantern_miss     two out-of-tune notes dimming and a "pff"   lantern_win    a glint round the ring, a bell, a cheer
 Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd, home_chimes.gd, garden_prizes.gd
-and garden_visitor.gd.
+garden_visitor.gd and snack_patch.gd.
 """
 import numpy as np
 import sfx_lib as S
@@ -577,6 +580,39 @@ def season(i):
     return B.soft(B.room(mix(*plucks, *sparkle, bell), 0.5), 6000)
 
 
+# ---------------------------------------------------------------- the snack patch
+def snack_ripe(i):
+    """A batch is ripe: two soft bell notes, B5 then G6, quiet enough to sit under the garden."""
+    notes = [at(0.5 * S.chime(f * j(i, 0.005), 0.6, 0.3), 0.11 * k) for k, f in enumerate([988, 1568])]
+    return B.soft(B.room(mix(*notes), 0.4), 6000)
+
+
+def snack_crisp(i):
+    """A crisp bite (a berry, a root, a kernel): bright grit and a short pluck up."""
+    return B.soft(B.room(mix(crunch(0.08, 1800 * j(i, 0.05), 7000), at(0.5 * pluck(1047 * j(i, 0.02), 0.2, 0.07), 0.05)),
+                         0.3), 6500)
+
+
+def snack_juicy(i):
+    """A wet bite (a bloom, a melon, a plum): a soft crunch and a bubble popping out of it."""
+    pop = at(0.5 * B.bubble(620 * j(i, 0.05), 0.07), 0.05)
+    return B.soft(B.room(mix(0.8 * crunch(0.07, 900, 3600), pop), 0.3), 5200)
+
+
+def snack_hard(i):
+    """A hard bite (a nut, a crisp, a candy): two dull knocks, the second with a glassy tick."""
+    knocks = mix(wood_tick(300 * j(i, 0.04), 0.07), at(0.8 * wood_tick(260, 0.07), 0.1))
+    tick = at(0.3 * glint(2300 * j(i, 0.02), 0.06), 0.1)
+    return B.soft(B.room(mix(knocks, tick), 0.3), 4800)
+
+
+def snack_soft(i):
+    """A soft bite (a bun, a jelly, a mushroom): a muffled puff and a low pleased "mm"."""
+    puff = lpf(noise(0.1), 1800) * env(N(0.1), 0.004, 0.04) * 0.6
+    mm = at(0.3 * B.vowel(300 * j(i, 0.03), 340, 0.25, 'mm', 1.2, breath=0.1), 0.05)
+    return B.soft(B.room(mix(puff, mm), 0.3), 4200)
+
+
 # ---------------------------------------------------------------- kite tow
 def flutter(d, rate=22.0, lo=500, hi=2600):
     """Cloth in the wind: band noise beaten by a fast flutter."""
@@ -720,6 +756,9 @@ def main():
     S.takes_cat('garden_visit_in', visit_in, 2, 'boki')
     S.takes_cat('garden_visit_out', visit_out, 1, 'boki')
     S.takes_cat('garden_season', season, 0, 'boki')
+    S.takes_cat('garden_snack_ripe', snack_ripe, 1, 'boki')
+    for texture, fn in [('crisp', snack_crisp), ('juicy', snack_juicy), ('hard', snack_hard), ('soft', snack_soft)]:
+        S.takes_cat('garden_snack_' + texture, fn, 2, 'boki')
     S.takes_cat('kite_flap', kite_flap, 2, 'step')
     S.takes_cat('kite_ring', kite_ring, 2, 'ui')
     S.takes_cat('kite_updraft', kite_updraft, 1, 'boki')

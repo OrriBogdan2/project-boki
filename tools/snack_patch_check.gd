@@ -36,6 +36,7 @@ func run(m: Node) -> void:
 	rules["base_mode"] = true
 	_rules_and_save()
 	_first_batch()
+	_textures()
 	_ridge()
 	await _in_the_garden()
 	_market()
@@ -107,6 +108,20 @@ func _first_batch() -> void:
 			"loading an older save file (no counter) keeps 480 s, no second starter gift")
 	Save.d = keep
 
+## Every lean type picks with exactly one crunch texture, and the start garden's snacks do not all share one.
+func _textures() -> void:
+	var typed := {}
+	for t in SnackPatch.rules()["pick_textures"]:
+		for ty in SnackPatch.rules()["pick_textures"][t]:
+			typed[ty] = int(typed.get(ty, 0)) + 1
+	var types: Array = Content.rules("lean")["types"].keys()
+	ok(types.all(func(ty): return typed.get(ty, 0) == 1) and typed.size() == types.size(),
+			"every lean type is in exactly one pick texture")
+	var apart := {}
+	for sn in SnackPatch.rules()["snacks"]:
+		apart[SnackPatch.texture(String(sn))] = true
+	ok(apart.size() >= 2, "the start garden's snacks do not all crunch alike: %s" % str(apart.keys()))
+
 ## On Kitewind Ridge the patch grows the ridge's four types (Flying, Electric, Fairy, Sound), crops and foods alike.
 func _ridge() -> void:
 	Save.d = _save()
@@ -146,13 +161,25 @@ func _in_the_garden() -> void:
 	var c := HomeLayout.deco_center(e)
 	home.ppos = c + Vector3(4.0, 0, 0)
 	home.hsp.tick(1.0)
+	var heard := GardenSfx.heard.duplicate()
+	ok(int(heard.get("garden_snack_ripe", 0)) == 1, "it ripens while you are in the zone: one soft chime")
 	var none: bool = (Save.d["crops"] as Dictionary).get("emberberry", 0) == _save()["crops"].get("emberberry", 0)
 	ok(none, "ripe, walking past does not pick it")
 	home.ppos = c
 	home.hsp.tick(1.0)
+	ok(int(GardenSfx.heard.get("garden_snack_ripe", 0)) == 1, "standing ripe, no second chime and none for the pick-up")
+	await main.get_tree().create_timer(0.6).timeout
 	var all := (SnackPatch.rules()["snacks"] as Array).all(func(s): return int(Save.d["crops"].get(s, 0)) >= 1)
 	var now := Time.get_unix_time_from_system()
 	ok(all and not SnackPatch.ripe(SnackPatch.entry(Save.d), now), "walking over the ripe patch picks all four")
+	var want := {}
+	for sn in SnackPatch.snacks(Save.d):
+		want["garden_snack_" + SnackPatch.texture(String(sn))] = true
+	var once := true
+	for cue_name in ["crisp", "juicy", "hard", "soft"]:
+		var n := int(GardenSfx.heard.get("garden_snack_" + cue_name, 0)) - int(heard.get("garden_snack_" + cue_name, 0))
+		once = once and n == (1 if want.has("garden_snack_" + cue_name) else 0)
+	ok(once and want.size() > 1, "the pick-up crunches once for each texture in the batch: %s" % str(want.keys()))
 	home.queue_free()
 	await main.get_tree().process_frame
 
