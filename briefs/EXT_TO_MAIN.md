@@ -11190,3 +11190,4 @@ READY ext/stuck-integ-5a53049c ca8fee01f9 (supersedes: the 2d7e824 READY of this
 READY ext/neve-shatter-slow 8b79aeb9dc (bulk-rebase: origin/main merged in mechanically, was d84cef3c87; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/boki-hunter-3d-audit-1123 0ce70424358 (PR #748: town peers wear their own Hunter glb + boki-everywhere-check over 50 species/13 hunters/14 town peers)
 READY ext/tut-goals-next 2b8f69c1efa9de1998c118729b69c36a75a58318 (PR #552: merged origin/main 16a7f85f1f; goals-next check moved to tools/checks/tutorial.gd + base_mode=false; long-line comments wrapped; goals-next/garden-first-15/garden-first-day/new-player-flow green, farm-tutorial red same as main)
+READY ext/kael-guard-edges 4932b4565d055a927384212cf884a6ad5c2b79b8 (PR #551: merged origin/main 16a7f85f1f; code already matches main, branch = guard-edge asserts + docs; juggernaut-combo-check green incl. 6 guard-edge rows, --check 0)
