@@ -35,6 +35,7 @@ func _spot(h: Hunter, at: Vector3) -> void:
 
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
@@ -56,11 +57,18 @@ func run(main: Node) -> void:
 	var p: Hunter = m.player
 	var b: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
 	keep = [p, b]
+	# (the bot's level rolls from the spawn order: pin it, an Easy one reaches 4.8 m, short of the player, and
+	# strafes loosely)
+	b.ai["diff"] = (Data.BOT_DIFF["medium"] as Dictionary).duplicate()
+	b.ai["skill"] = float(b.ai["diff"]["skill"])
 	for h in m.hunters:
 		h.ctrl = "bot" if h == b else "idle"
 		h.inp["move"] = Vector2.ZERO
 		if not keep.has(h):
 			h.out = true
+	var diff: Dictionary = (b.ai["diff"] as Dictionary).duplicate()
+	diff["aggro"] = 1.0  # (a timid roll would cut its reach under the 5 m the control stands at)
+	b.ai["diff"] = diff
 	for l in m.lairs.list:
 		m.lairs.activate(l)
 	var f: Dictionary = m.lairs.list[0]
@@ -80,11 +88,14 @@ func run(main: Node) -> void:
 	var boss: Boss = m.lairs.boss_of(f)
 	var side := Vector3(-f["out"].y, 0, f["out"].x)
 	var outside: Vector3 = f["gate_c"] + Vector3(f["out"].x, 0, f["out"].y) * 6.0
-	# (4 m apart: inside even a low-aggro bot's reach, 8 m x 0.6 = 4.8 m; its difficulty is a random draw)
-	_spot(p, outside + side * 2.0)
-	_spot(b, outside - side * 2.0)
+	_spot(p, outside + side * 2.5)
+	_spot(b, outside - side * 2.5)
+	# (it looks once the team's sight has seen the player (a few ticks), before a roaming bot walks out of it:
+	# sight ends near 5.5 m)
+	b.ai["think"] = 0.05
 	# ---- 1. the control: outside the lair, the player is fair game
 	var went := false
+	p.reveal_t = 2.5      # (seen whichever way the bot faces: it only sees what is in front of it)
 	for i in int(2.0 / Match.DT):
 		# (the player keeps firing, so the bot sees them whichever way its roam faces: its roam goal is a random
 		# draw that camp spawns shift, and from behind a player 4 m away is outside the view cone)
@@ -99,6 +110,7 @@ func run(main: Node) -> void:
 	)
 	# ---- 2. sealed in: the boss only (a hit from before the seal doesn't count)
 	b.hurt(2.0, p, {"src": "shot"})
+	p.reveal_t = TURN_T  # (a shot gives the shooter away, whichever way the bot faces)
 	# (off the bot's line to the boss: a shot through the boss would hit the player)
 	_spot(p, f["c"] + Vector3(-side.z, 0.0, side.x) * 5.0)  # (5 m: a shot at the boss splashes 2.5 m)
 	_spot(b, f["c"] - side * 2.5)
@@ -131,7 +143,7 @@ func run(main: Node) -> void:
 			+ ", nor do it or its Boki hit them"
 		)
 	)
-	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (100 * on_boss / maxi(1, n)))
+	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (int(100 * on_boss / float(maxi(1, n)))))
 	# ---- 3. the player starts it inside the seal: the bot fights back
 	# beside the bot, inside its near sense: the scripted hit has no shot to reveal where it came from, and a
 	# bot only turns on a rival it can see (its sight wedge faces the boss; 11-21)

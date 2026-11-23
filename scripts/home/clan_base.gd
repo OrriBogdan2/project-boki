@@ -76,7 +76,7 @@ static func corners(gid: String, members: Array, roll: Array) -> Array:
 		seeds[r["id"]] = r["corner_seed"]
 	var sorted := members.slice(0, Social.CLAN_CAP)
 	sorted.sort_custom(func(a, b): return String(a["id"]) < String(b["id"]))
-	var per := clampi(KIN_BUDGET / maxi(1, sorted.size()), 1, KIN_PER_CORNER)
+	var per := clampi(int(KIN_BUDGET / float(maxi(1, sorted.size()))), 1, KIN_PER_CORNER)
 	var taken := {}
 	var out: Array = []
 	for m in sorted:

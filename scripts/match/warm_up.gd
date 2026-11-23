@@ -143,7 +143,7 @@ func run(progress := Callable()) -> void:
 	times.sort()
 	if not times.is_empty():
 		var setup := WarmStamp.setup_id()
-		Settings.note_benchmark(float(times[times.size() / 2]))
+		Settings.note_benchmark(float(times[int(times.size() / 2.0)]))
 		# a first launch's auto quality can step down here (shadows, MSAA, very low's unshaded draw): the game goes
 		# on, and comes back, at the new settings. The stand-ins draw once more under them, still behind the
 		# loading screen, with a new soft-dot one (FxDot's low-settings shader: the first Boki wisp of play
@@ -310,6 +310,11 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	var plain := (Time.get_ticks_usec() - t0) / 1000.0
 	if not m.is_inside_tree():
 		return false
+	# (only the Compatibility renderer compiles a variant per light setup; Forward+ and Mobile shade lights from
+	# clusters in one shader, so there one setup is enough: a quarter of the frames a batch takes)
+	var setups := [[false, false]]
+	if RenderingServer.get_current_rendering_driver_name() == "opengl3":
+		setups = [[false, false], [true, false], [false, true], [true, true]]
 	var n := BATCH
 	var i := 0
 	var batches := 0
@@ -327,13 +332,13 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 			m.add_child(px)
 			_to_layer(px)
 			var gx := (float(k % cols) / maxf(1.0, cols - 1) - 0.5) * 2.4
-			var gy := (float(k / cols) / maxf(1.0, cols - 1) - 0.5) * 1.4
+			var gy := (float(int(k / float(cols))) / maxf(1.0, cols - 1) - 0.5) * 1.4
 			px.global_transform = Transform3D(cb.scaled(Vector3.ONE * 0.04), front + cb.x * gx + cb.y * gy)
 			pxs.append(px)
 		var worst := 0.0
 		# two frames under each light setup (with one, a variant or two still slips through to the
 		# ride: --hitch-check from a cold shader cache)
-		for setup in [[false, false], [true, false], [false, true], [true, true]]:
+		for setup in setups:
 			wl[0].visible = setup[0]
 			wl[1].visible = setup[1]
 			for _f in 2:
@@ -349,7 +354,7 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		progress.call(float(i) / list.size())
 		var extra := worst - plain
 		if extra > FRAME_MS:
-			n = maxi(BATCH_MIN, n / 2)
+			n = maxi(BATCH_MIN, int(n / 2.0))
 		elif extra < FRAME_MS * 0.6:
 			n = mini(n * 2, 512)
 	await m.get_tree().process_frame

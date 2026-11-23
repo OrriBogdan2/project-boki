@@ -54,7 +54,7 @@ var camps: Camps = Camps.new(self)     # the map's fixed monster camps (see Camp
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
-var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
+var skydrop: DropSquad = null  # the planning phase before the ship sets off: drop leaders, formations (DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
 var acc := 0.0
@@ -1083,7 +1083,7 @@ func _spawn_breakables() -> void:
 		for row in [[-2.4, 0.0], [-4.6, 1.3], [0.0, 1.3], [2.4, 0.0], [4.6, 1.3]]:
 			# across the row from the middle out: 0, 2.6, -2.6, 5.2 ... (or 1.3, -1.3, 3.9 ... staggered)
 			for k in 6:
-				var x := (float(row[1]) + float((k + (1 if row[1] == 0.0 else 0)) / 2) * 2.6) * (1.0 if k % 2 == 0 else -1.0)
+				var x := (float(row[1]) + float(int((k + (1 if row[1] == 0.0 else 0)) / 2.0)) * 2.6) * (1.0 if k % 2 == 0 else -1.0)
 				if Vector2(x, float(row[0])).length() <= 6.2:
 					spots.append(Vector3(x, 0, float(row[0])))
 		var used: Array = [Vector3(-2.0, 0, 1.2), Vector3(-2.6, 0, 2.2), Vector3(1.4, 0, 1.6), Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(0, 0, 4.0)]
@@ -1592,10 +1592,6 @@ func dmg_mult(h: Hunter) -> float:
 func sfx(n: String, p = null, vol := 0.0, pitch := 1.0, mine := false) -> void:
 	Sfx.play(n, p, vol, 0.07, pitch, 0.0, mine)
 
-## Legacy door for world events (a boss slam, a lair gate): a big hit at `at`, caused by nobody on your team. Shake.incoming_big is the real one.
-func shake(a: float, at: Vector3) -> void:
-	Shake.incoming_big(self, at, a)
-
 func direction_word(from: Vector3, to: Vector3) -> String:
 	var d := Vector2(to.x - from.x, to.z - from.z)
 	var a := rad_to_deg(atan2(d.y, d.x))
@@ -1813,8 +1809,10 @@ func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 			BokiChatter.say(self, h.kin, "owner_down")
 	_check_team(h.team)
 
+## Every offline freeze shares the player's cap (Feel.spend), charged for only the time it adds to a running one.
 func freeze_frame(t: float) -> void:
-	hitstop = maxf(hitstop, Feel.spend(player, t, time))      # every offline freeze shares the player's cap
+	var held := maxf(hitstop, 0.0)
+	hitstop = held + Feel.spend(player, maxf(0.0, t - held), time)
 
 ## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:
@@ -1933,7 +1931,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	elif not world.is_void(h.pos.x, h.pos.z) and not h.remote:
 		var n := mini(10, int(ceil(h.gems / 5.0)))
 		for i in n:
-			drop("gem", h.pos + Vector3(0, 0.5, 0), maxi(1, h.gems / maxi(1, n)))
+			drop("gem", h.pos + Vector3(0, 0.5, 0), maxi(1, int(h.gems / float(maxi(1, n)))))
 		for s in h.seeds:
 			drop("seed", h.pos + Vector3(0, 0.5, 0), int(h.seeds[s]), s)
 		for rec in h.caught:
@@ -2017,7 +2015,7 @@ func _lose_life(h: Hunter, by: Ent, why: String) -> void:
 			var n := mini(5, lose)
 			for i in n:
 				# the last pile takes the remainder so nothing is lost to rounding
-				drop("gem", h.pos + Vector3(0, 0.5, 0), (lose / n) + (lose % n if i == n - 1 else 0))
+				drop("gem", h.pos + Vector3(0, 0.5, 0), (int(lose / float(n))) + (lose % n if i == n - 1 else 0))
 	elif lose > 0:
 		h.lost_gems += lose
 	h.gems -= lose
@@ -2195,11 +2193,11 @@ func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 		if auto and hud and not train.has("_auto_told"):
 			train["_auto_told"] = true
 
-func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
+func on_kin_swap(h: Hunter, now_k: Kin, was: Kin) -> void:
 	kstat["swap"] += 1
 	fx.burst(h.pos + Vector3(0, 1.5, 0), now_k.sp["color"], 18, 3.5, 0.5)
 	fx.ring(h.pos, 1.4, now_k.sp["color"], 0.3)
-	sfx("swap", h.pos, -4.0)
+	CarrySfx.swap(self, h, now_k, was)
 	if h == player:
 		train["_swapped"] = true
 		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
@@ -3657,7 +3655,7 @@ func step(dt: float) -> void:
 		player.inp["crouch"] = opts.get("crouch_demo", false)
 	if opts.get("wall_behind", false) and player and time < 0.05:
 		for wi in world.walls:
-			var wx: int = int(wi) % world.w; var wz: int = int(wi) / world.w
+			var wx: int = int(wi) % world.w; var wz: int = int(int(wi) / float(world.w))
 			var gi := world.idx(wx, wz - 1)
 			if world.kind[gi] == World.T_GROUND and world.walls.has(world.idx(wx + 1, wz)) and world.walls.has(world.idx(wx - 1, wz)):
 				player.teleport(Vector3(wx + 0.5, world.ground_at(wx + 0.5, wz - 0.5), wz - 0.5))
@@ -3666,7 +3664,7 @@ func step(dt: float) -> void:
 		# stand in grass right beside a wall, with a rival hiding in grass nearby
 		var spot := Vector3.INF; var rival_spot := Vector3.INF
 		for bi in world.bush:
-			var bx: int = int(bi) % world.w; var bz: int = int(bi) / world.w
+			var bx: int = int(bi) % world.w; var bz: int = int(int(bi) / float(world.w))
 			var near_wall := false
 			for dz in range(-2, 3):
 				for dx in range(-2, 3):
@@ -4005,7 +4003,7 @@ func _hold_demo() -> void:
 		var i := 0
 		for h in hunters:
 			h.ctrl = "idle"; h.inp["move"] = Vector2.ZERO
-			var col := i % 4; var row := i / 4
+			var col := i % 4; var row := int(i / 4.0)
 			var at := base + Vector3((col - 1.5) * 2.4, 0, row * 2.6)
 			at = world.free_spot_near(at, [], 0.6, 0.5, 3.0)
 			h.teleport(Vector3(at.x, world.ground_at(at.x, at.z), at.z))
@@ -4347,7 +4345,8 @@ func demo_shielded(e: Ent) -> bool:
 ## can be lost, what you extract is kept).
 const DEMO_SEED := 5
 static func demo_opts() -> Dictionary:
-	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
+	return {"teams": int(Data.MATCH_PLAYERS / 2.0), "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1,
+			"seed": DEMO_SEED,
 		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true,
 		"live_lair": "The Thornhive"}     # (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
 
@@ -5235,7 +5234,7 @@ func _net_ev(x, from: String) -> void:
 					var gems := int(x[4])
 					var n := mini(10, int(ceil(gems / 5.0)))
 					for i in n:
-						drop("gem", at + Vector3(0, 0.5, 0), maxi(1, gems / maxi(1, n)))
+						drop("gem", at + Vector3(0, 0.5, 0), maxi(1, int(gems / float(maxi(1, n)))))
 					for s in x[5]:
 						drop("seed", at + Vector3(0, 0.5, 0), int(x[5][s]), s)
 					for rec in x[6]:
