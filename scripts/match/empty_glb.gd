@@ -60,7 +60,8 @@ static func dress(root: Node3D, appearance: Dictionary, lk: Dictionary) -> void:
 	if not bool(root.get_meta("glb", false)):
 		return
 	_hide_body(root.get_node("Rig") as Node3D)
-	_into_hood(root, KEYS.find(k))
+	var size := EmptyFrame.factor(Unmasked.clean(appearance), "head") / EmptyFrame.factor(rest_look(k), "head")
+	_into_hood(root, KEYS.find(k), size)
 	_dye(root.get_node("Warden") as Node3D, Unmasked.clean(appearance))
 
 
@@ -74,12 +75,13 @@ static func _hide_body(n: Node3D) -> void:
 		_hide_body(c as Node3D)
 
 
-## The void head (the procedural Head and the hollow shell on it) scaled and moved onto the model's painted egg.
-static func _into_hood(root: Node3D, sex: int) -> void:
+## The void head (the procedural Head and the hollow shell on it) scaled and moved onto the model's painted egg;
+## `size` is the look's head-size slider against the rest look's, so the slider still sizes the head in the hood.
+static func _into_hood(root: Node3D, sex: int, size: float) -> void:
 	var head := root.get_node("Rig/Torso/HeadPivot/Head") as Node3D
 	var hollow := head.get_node("Hollow") as MeshInstance3D
 	var box := WardenGlb.model_xf(root, hollow) * hollow.get_aabb()
-	head.scale *= float(EGG[sex][1]) * EGG_COVER / box.size.y
+	head.scale *= float(EGG[sex][1]) * EGG_COVER * size / box.size.y
 	box = WardenGlb.model_xf(root, hollow) * hollow.get_aabb()
 	var pivot := WardenGlb.model_xf(root, head.get_parent() as Node3D)
 	head.position += pivot.basis.inverse() * (EGG[sex][0] - box.get_center())
