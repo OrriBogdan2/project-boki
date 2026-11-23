@@ -11,6 +11,8 @@ extends RefCounted
 ##   "radius": [x, z]      the ellipse's half widths (side, front-back)
 ##   "period": s per turn, "dir": 1 or -1, "wobble": [rad, s]: the speed's slow swing
 ##   "bob": m, "lag": 1/s of the ease behind her, "trail_max": m the centre may fall behind
+##   "avoid": [{"bone", "r"}]: spheres on her head and hands (contract bone names, r in metres) a part is pushed out of
+##     when a lunge or an ult pose brings them to it (the push opens at once, eases off); "clear_min": the gap checks want
 ##   "face": "forward" (as modelled) or "outward", "sway_deg": a slow yaw, "lean_deg": a roll into the turn
 ##   "list": [{"id", "surfaces": [material names], "at": [x, y, z] the part's centre at rest, "phase_deg" (0 = her
 ##     right), "bob_period", "bob_phase", "bone": the bone it was skinned to, "anchors": [empties that ride it]}]
@@ -33,11 +35,14 @@ class Part:
 	var bone := -1                    # the bone its anchors were on
 	var anchors: Array = []           # [empty, its rest position relative to the part's centre, the bone it rides]
 	var pos := Vector3.ZERO           # last placed (skeleton space)
+	var radius := 0.0                 # the part's furthest vertex from its centre (skeleton space)
+	var push := Vector3.ZERO          # how far the avoid spheres moved it off its circle
 
 var skel: Skeleton3D
 var d: Dictionary
 var parts: Array = []
 var centre_bone := -1
+var avoid: Array = []               # [bone index, radius (skeleton space)]: spheres the parts keep out of
 var centre_off := Vector3.ZERO      # circle centre minus the bone's rest origin
 var centre := Vector3.ZERO          # the eased centre (world)
 var axes := Basis.IDENTITY          # the data's skeleton axes on this skeleton (`frame`'s basis)
@@ -77,6 +82,9 @@ static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary, frame := Trans
 		part.id = String(p["id"])
 		var pc := (cut["parts"] as Dictionary)[part.id] as Array
 		part.rest = pc[1]
+		for si in (pc[0] as ArrayMesh).get_surface_count():
+			for v: Vector3 in (pc[0] as ArrayMesh).surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+				part.radius = maxf(part.radius, v.length())
 		part.node = MeshInstance3D.new()
 		part.node.name = PREFIX + part.id
 		part.node.mesh = pc[0]
@@ -99,6 +107,11 @@ static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary, frame := Trans
 	wc.centre_bone = WardenSkeleton.find(sk, String(dd.get("bone", "hips")))
 	var origin := sk.get_bone_global_rest(wc.centre_bone).origin if wc.centre_bone >= 0 else Vector3.ZERO
 	wc.centre_off = frame * Vector3(c[0], c[1], c[2]) - origin
+	var sc := frame.basis.y.length()
+	for av in dd.get("avoid", []):
+		var bi := WardenSkeleton.find(sk, String(av["bone"]))
+		if bi >= 0:
+			wc.avoid.append([bi, float(av["r"]) * sc])
 	return wc
 
 ## The body mesh without the companions' surfaces and one unskinned mesh per companion, cut once per .glb.
@@ -164,6 +177,20 @@ func spot(c: Vector3, a: float, bob_y: float) -> Vector3:
 	var r: Array = d.get("radius", [0.5, 0.4])
 	return c + axes * Vector3(float(r[0]) * cos(a), bob_y, -float(r[1]) * sin(a))
 
+## `at` moved out of the avoid spheres (head, hands) by the part's own size: the push opens at once and eases off.
+func _clear(p: Part, at: Vector3, dt: float) -> Vector3:
+	var q := at
+	for _pass in 2:
+		for av in avoid:
+			var c := skel.get_bone_global_pose(int(av[0])).origin
+			var d := q - c
+			var need := float(av[1]) + p.radius
+			if d.length() < need:
+				q = c + (d.normalized() if d.length() > 0.001 else Vector3.UP) * need
+	var off := q - at
+	p.push = off if off.length() >= p.push.length() else p.push.lerp(off, 1.0 - exp(-10.0 * dt))
+	return at + p.push
+
 func angle(p: Part, time: float) -> float:
 	var w: Array = d.get("wobble", [0.0, 1.0])
 	var a := float(d.get("dir", 1)) * TAU * time / float(d.get("period", 4.0))
@@ -199,7 +226,7 @@ func step(dt: float) -> void:
 	for p in parts:
 		var part := p as Part
 		var a := angle(part, t)
-		part.pos = spot(c_s, a, bob(part, t))
+		part.pos = _clear(part, spot(c_s, a, bob(part, t)), dt)
 		var roll := Basis(Vector3.FORWARD, lean * cos(2.0 * a + part.bob_phase))
 		var bas: Basis
 		if outward:
