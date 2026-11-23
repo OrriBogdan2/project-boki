@@ -35,6 +35,7 @@ func _spot(h: Hunter, at: Vector3) -> void:
 
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
