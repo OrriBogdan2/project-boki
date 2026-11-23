@@ -59,7 +59,7 @@ func _choice(body: VBoxContainer, title: String, blurb: String, cb: Callable, ic
 	txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	txt.add_child(UI.label(title, UI.T_BODY, UI.INK, UI.semi))
 	var sub := UI.label(blurb, 13, UI.MUTED)
-	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(sub)
 	txt.add_child(sub)
 	h.add_child(txt)
 	h.add_child(UI.button("Go", cb, 90, icon))

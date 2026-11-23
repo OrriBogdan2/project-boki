@@ -11,6 +11,7 @@ const MAX_CUES := 3  # most cues one zone plays inside WINDOW_S
 
 var now := 0.0  # s since the base loaded (BaseLife.step feeds it)
 var dropped := 0  # cues the cap held back, for the checks
+var mute := false  # checks only: free play stays silent while a check counts a minigame's own cues
 var _times := {}  # zone -> the times (now) of its cues still inside the window
 
 
@@ -44,6 +45,8 @@ func toy_done(rec: Dictionary, pos: Vector3) -> void:
 
 
 func _cue(sname: String, rec: Dictionary, pos: Vector3) -> void:
+	if mute:
+		return
 	var zone := GardenZones.here
 	var recent: Array = _times.get(zone, []).filter(func(t): return now - float(t) < WINDOW_S)
 	if recent.size() >= MAX_CUES:
