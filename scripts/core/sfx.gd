@@ -174,6 +174,11 @@ const VOICES := [
 ]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {
+	"carry_swap_out": 200,
+	"carry_swap_in": 200,
+	"carry_claim": 200,
+	"carry_stolen": 400,
+	"carry_take": 200,
 	"scan_pop": 150,
 	"scan_pop_fine": 150,
 	"scan_pop_rare": 150,
@@ -222,7 +227,11 @@ const MIN_GAP := {
 	"steal_won": 400,
 	"steal_lost": 400,
 	"training_dummy_hit": 70,
-	"armor_up": 120
+	"armor_up": 120,
+	"boki_downed": 150,
+	"boki_revive": 300,
+	"boki_eat": 150,
+	"boki_sleep": 400,
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
