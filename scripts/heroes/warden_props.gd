@@ -20,10 +20,10 @@ var nodes: Array = []  # the parts (MeshInstance3D) riding Meshy's bones
 var stretch: Dictionary = {}
 
 
-## Hangs `art`'s contract parts (data `d` "props": contract bone -> material names; "tilt", "scale", "grip" {contract
-## bone: {part: [x,y,z] in the part's frame, bone: [x,y,z] in the Meshy bone's, turn: [x,y,z] rad}}, "stretch")
-## on `skel` (Meshy's; `to_m`: it -> the Hunter's model). Returns the live parts (empty when the contract .glb has
-## none of them).
+## Hangs `art`'s contract parts (data `d` "props": contract bone -> material names; "tilt", "scale",
+## "grip" {contract bone: {part: [x,y,z] in the part's frame, bone: [x,y,z] in the Meshy bone's,
+## turn: [x,y,z] rad}}, "stretch") on `skel`
+## (Meshy's; `to_m`: it -> the Hunter's model). Returns the live parts (empty when the contract .glb has none of them).
 static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionary) -> WardenProps:
 	var want: Dictionary = d.get("props", {})
 	var stretch_d: Dictionary = d.get("stretch", {})
