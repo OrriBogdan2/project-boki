@@ -25,10 +25,9 @@ func _part_wait() -> void:
 	var cast := func(t: float):
 		P.inp["fire"] = (t > 0.1 and t < 0.15) or (t > 0.5 and t < 0.55) or (t > 2.2 and t < 2.25)
 		_aim(T.pos)
-	var wait_sheet := _sheet(
-			"wait", "LMB: two short embers, a pause with the ready flare, then the bigger ember reaches",
-			[0.2, 0.55, 1.4, 1.6, 2.3, 2.4, 2.5, 2.65, 3.0], func(): return (P.pos + T.pos) * 0.5)
-	await _go(3.2, cast, wait_sheet, 2.0)
+	var wait_note := "LMB: two short embers, a pause with the ready flare, then the bigger ember reaches"
+	await _go(3.2, cast, _sheet("wait", wait_note,
+		[0.2, 0.55, 1.4, 1.6, 2.3, 2.4, 2.5, 2.65, 3.0], func(): return (P.pos + T.pos) * 0.5), 2.0)
 	await _go(GAP)
 
 func _part_dash() -> void:

@@ -265,7 +265,7 @@ func _kin_card(s: Dictionary, det: Control) -> Control:
 		kv.add_child(UI.label(String(s["trust_why"]), 14, UI.GOOD))
 	if String(s.get("kin_say", "")) != "":
 		var say := UI.label("\u201c%s\u201d" % String(s["kin_say"]), 16, UI.INK)
-		say.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(say)
 		kv.add_child(say)
 	var tw := create_tween()
 	tw.tween_interval(1.0)
@@ -315,7 +315,7 @@ func _details_toggle(det: Control, sc: ScrollContainer) -> Button:
 
 func _note(txt: String, col: Color) -> Label:
 	var l := UI.label(HomeNotices.bullet(txt), 15, col)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	return l
 
 ## Several short bullets under one another, one colour.

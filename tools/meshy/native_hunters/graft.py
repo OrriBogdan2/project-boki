@@ -5,7 +5,6 @@ vertex data is dropped.
   python3 graft.py OUT.glb IN.glb DECIMATED.glb
 """
 
-import json
 import sys
 
 import numpy as np
