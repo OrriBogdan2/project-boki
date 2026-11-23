@@ -46,8 +46,8 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "exdash", "fade_out": 0.25},
 	"land": {
 		"clip": "land",
-		"hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1, "fade": 0.2},
-		"drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13, "fade": 0.25}
+		"hop": {"w": 0.5, "rate": 1.4, "dur": 0.24, "moving": 0.14, "fade": 0.2},
+		"drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13, "fade": 0.16}
 	},
 	"derive": {
 		"ult_recover": {
@@ -105,7 +105,7 @@
 		"jug_haul_wind": {"clip": "haul_wind", "hold_from": 0.15, "fade": 0.15, "fade_out": 0.4},
 		"jug_haulslam": {"clip": "haulslam", "fade_out": 0.4},
 		"jug_guard": {"clip": "guard", "hold_from": 0.2, "fade_out": 0.4},
-		"jug_riposte": {"clip": "riposte", "fade_out": 0.4, "lead": -0.08, "strike": ["tip", "x/len", "edge"]},
+		"jug_riposte": {"clip": "riposte", "fade": 0.35, "fade_out": 0.4, "lead": -0.08, "strike": ["tip", "x/len", "edge"]},
 		"jug_ult_recover": {"clip": "ult_recover", "upper": "moving", "fade": 0.14, "fade_out": 0.4},
 		"jug_roar": {"clip": "roar", "upper": true, "fade": 0.12, "fade_out": 0.4},
 		"mf_xform": {"clip": "fusion", "fade": 0.18, "fade_out": 0.4}

@@ -64,7 +64,7 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive", "fade_out": 0.25},
 	"land": {
 		"clip": "land",
-		"hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08},
+		"hop": {"w": 0.8, "rate": 1.5, "dur": 0.2, "moving": 0.12},
 		"drop": {"rate": 1.2, "dur": 0.33, "moving": 0.12}
 	},
 	"kmoves": {
@@ -85,7 +85,7 @@
 		},
 		"arc_heavy": {"clip": "heavy", "upper": "moving", "fade_out": 0.4, "air_legs": true},
 		"arc_hail": {"clip": "hail", "upper": true, "fade": 0.12, "fade_out": 0.36},
-		"pin_roll": {"clip": "roll", "heading": true, "turn_max": 3.2, "fade_out": 0.4, "dash": true},
+		"pin_roll": {"clip": "roll", "fit": 0.36, "heading": true, "turn_max": 3.2, "fade_out": 0.4, "dash": true},
 		"pin_walk": {"clip": "spirit", "hold_from": 0.2, "upper": true, "fade": 0.2, "fade_out": 0.4},
 		"pin_flick": {
 			"clip": "flick",
