@@ -186,6 +186,17 @@ func _unreachable(m: Match, sid: String) -> String:
 	return out
 
 
+## The Mask line (DECISIONS, Identity and Masks): the first Relic moment explains the Mask in one short line, in
+## current words only (Hunter, Relic, Fusion, Wisp), none of the retired ones.
+func _mask_line() -> void:
+	var line := String(Content.rules("lore").get("mask_line", ""))
+	ok(line == "This Mask holds a fallen Hunter. Put it on, and you become them.", "the Mask line's words: '%s'" % line)
+	var short := line.length() > 0 and line.length() < 80 and "\n" not in line
+	ok(short, "the Mask line is one short line, no wall of text (%d chars)" % line.length())
+	var old_words := ["Warden", "Mantle", "Bearer", "Merge", "Unmasked"].filter(func(w): return line.contains(w))
+	ok(old_words.is_empty(), "the Mask line uses no retired word %s" % str(old_words))
+
+
 ## The kit's lines: ability and key named, no rifle or ammo talk, no unfilled %tokens.
 func _words(p: Hunter, seen: Dictionary) -> void:
 	var all := ""
@@ -194,6 +205,7 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 		all += " " + String(seen[sid]["text"]) + " " + String(seen[sid]["detail"])
 		banners += " " + String(seen[sid]["text"])
 	ok(not RegEx.create_from_string("%[A-Za-z]").search(all), "no unfilled token in any line")
+	_mask_line()
 	var low := banners.to_lower()  # (a detail may quote the kit's own card: Vex does have a rifle)
 	var hit := KIT_WORDS.filter(func(w): return low.contains(w))
 	ok(hit.is_empty(), "no line assumes ammo or a rifle %s" % str(hit))
