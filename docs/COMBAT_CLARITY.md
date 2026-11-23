@@ -90,3 +90,13 @@ Shared things still noisy in the films: Boki ability names (`Stinger Hook`, `Pri
 and other Boki's bubbles ("Echolope: behind you!") are now off in a fight (above). Still open: the "Hold F to
 stomp" prompt over a downed fight (the downed rework on `ext/wisp-clarity-1112` changes it); Boki rings and the
 Hunters' cast rings stack under a melee (fixed: Ground order, above).
+
+## Hunter against the ground (11-23)
+`--clarity-shots` prints `CLARITYCONTRAST <n> over <k> frames` for the bot 3v3 on the Hollow Crown
+(`tools/clarity_contrast.gd`). Each fight frame is drawn twice, as played and with every Hunter and Boki hidden; a pixel
+that differs is a Hunter's. Along each Hunter's silhouette the score is the RGB distance (0-100) from its edge pixel to the
+bare ground beside it; a frame's score is the mean over its Hunters. Baseline on main 766df68c91 (real models, GPU,
+two runs): 18.1 and 18.2. The fight is on the Salt Shard (`storm_s`, biome storm), and the pink comes from the storm
+top colours under the peach sun and Look's 1.9x saturation. Tried on all five Stormbreak islands: slate 16.5, dark teal-slate
+18.7, sage 19.6 (tan, no pink); sage plus a doubled, whitened `rim_far` 15.7. Runs of one scene differ by up to ~15%, so none
+beats the baseline: the +30% goal is open.
