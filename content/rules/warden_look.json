@@ -12,7 +12,7 @@
 		"no_ink": ["ngun", "narm", "nring"],
 		"slots": {
 			"nbody": {"rim_far": 0.0, "fres": 0.0, "far_lift": 0.0, "sss": 0.0, "light_neutral_warm": 1.0, "desat": 0.15},
-			"ngun": {"rim_far": 0.0, "fres": 0.0, "far_lift": 0.1, "sss": 0.0, "light_neutral_warm": 1.0, "desat": 0.5},
+			"ngun": {"rim_far": 0.0, "fres": 0.0, "far_lift": 0.1, "sss": 0.0, "light_neutral_warm": 1.0, "desat": 0.45},
 			"skin": {
 				"top_light": 0.45,
 				"fres": 0.2,
