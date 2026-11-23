@@ -11059,3 +11059,4 @@ READY ext/flinch-sub-amount 253a3bba07 (bulk-rebase: origin/main merged in mecha
 READY ext/anim-coverage-stomp 7d2f9f0ad9 (bulk-rebase: origin/main merged in mechanically, was d71cb51e9b; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/lace-dash-clip 7214f3af24 (bulk-rebase: origin/main merged in mechanically, was adf680504f; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/cinder-dash-clip 2cb8d978b8 (bulk-rebase: origin/main merged in mechanically, was 498f09accd; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/sfx-enemy-priority 698f846e26 (merged origin/main, sfx.gd conflict resolved: main int-returning play kept + branch same-cap/wind-up duck; --sfx-priority-check moved to tools/checks/sfx.gd; --check 0 fail, --sfx-priority-check 0 fail, health --strict red only on main long_line in check_registry.gd)
