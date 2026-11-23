@@ -24,11 +24,13 @@ const FADE_IN := 0.12  # s from the press the loco may still show (WardenClips.F
 const ENTRY_S := 0.25  # s from the travel's start: the clip may still be reaching its drive pose
 const TAIL_S := 0.1  # s before the travel's end: the recovery may begin on the curve's slow tail
 const HOLD_RATE := 20.0  # rad/s over the sim frames: past the entry the drive pose holds until the travel ends
-const SPINS := ["vault_r", "vault_l", "vault_f", "vault_b", "vault_twist", "shift_whirl"]  # clip names
-# a cartwheel or whirl: the turn is the travel, so it has no drive pose to hold
+## Clip names of a cartwheel or whirl: the turn is the travel, so it has no drive pose to hold.
+const SPINS := ["vault_r", "vault_l", "vault_f", "vault_b", "vault_twist", "shift_whirl"]
 const AFTER_S := 0.6  # s after the travel the hand-over is watched
-const STRIKE_AT_STOP := {"juggernaut": "lunge"}  # a clip whose strike is the stop (JuggernautKit.LUNGE_COIL_T): its
-const STRIKE_S := 0.07  # fastest pose frame is within this of the travel's end at any length
+## A clip whose strike is the stop (JuggernautKit.LUNGE_COIL_T): its fastest pose frame is within STRIKE_S of the
+## travel's end at any length.
+const STRIKE_AT_STOP := {"juggernaut": "lunge"}
+const STRIKE_S := 0.07  # s
 const FEET := [["foot.L", "shin.L"], ["foot.R", "shin.R"]]
 const JOINTS := ["root", "hips", "upper_arm.L", "upper_arm.R", "thigh.L", "thigh.R"]
 
