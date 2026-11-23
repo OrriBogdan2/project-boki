@@ -6,4 +6,5 @@ extends RefCounted
 
 const CHECKS := {
 	"--quill-mag-check": ["res://tools/quill_mag_check.gd", "quill_mag_check", null],  # Vex: low drum hits soft
+	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 }
