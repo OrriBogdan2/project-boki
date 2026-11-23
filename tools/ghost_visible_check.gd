@@ -71,7 +71,7 @@ func _shots() -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	FarmTutorial.skip()
-	if not is_instance_valid(home.hob.node):       # (no stall or house site in this bare farm: stand him by the player)
+	if not is_instance_valid(home.hob.node):  # (no stall or house site in this bare farm: stand him by the player)
 		home.hob.node = HobModel.new()
 		home.add_child(home.hob.node)
 		home.hob.pos = home.player.position + Vector3(2, 0, 0)
