@@ -11210,3 +11210,4 @@ READY ext/anim-native-move-states 389f601c80 (bulk-rebase: origin/main merged in
 READY ext/parity-recheck-tenzo-sparkle b749ca459a (bulk-rebase: origin/main merged in mechanically, was f65372cc5d; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/anim-tenzo-motley-sable-gil-native 8b38905f73 (bulk-rebase: origin/main merged in mechanically, was 19a8525d88; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/anim-sparkle-neve-meeko-native 267bc5b663 (bulk-rebase: origin/main merged in mechanically, was f48c52be4a; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/old-names-lint 3f45e19ce6 (merged origin/main; retired hunter names lint in health + Albert idle line)
