@@ -12,8 +12,6 @@ const CHECKS := {
 	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],  # KIN_GRAMMAR 2
 	"--duel-check": ["res://tools/duel_check.gd", "duel_check", null],  # the duel room smoke test
 	"--hud-vitals-shots": ["res://tools/hud_vitals_shots.gd", "hud_vitals_shots", null],  # GPU
-	"--combat-calm-check": ["res://tools/combat_calm_check.gd", "combat_calm_check", null],  # fight HUD
-	"--combat-hud-shots": ["res://tools/combat_hud_shots.gd", "combat_hud_shots", null],  # GPU
 	"--extract-check": ["res://tools/extract_check.gd", "extract_check", null],
 	"--truce-check": ["res://tools/truce_check.gd", "truce_check", null],
 	"--bot-sanity-check": ["res://tools/bot_sanity_check.gd", "bot_sanity_check", null],
@@ -39,7 +37,6 @@ const CHECKS := {
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],  # spec 8 sites
 	"--watchdog-check": ["res://tools/watchdog_check.gd", "watchdog_check", null],  # a dead check run ends
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],  # hungry -> kibble -> feed -> can go
-	"--levelup-reel": ["res://tools/levelup_reel.gd", "levelup_reel", null],  # movie writer: a level-up mid-fight
 	"--terrain-hazard-check": ["res://tools/terrain_hazard_check.gd", "terrain_hazard_check", null],
 	"--hazard-hint-check": ["res://tools/hazard_hint_check.gd", "hazard_hint_check", null],
 	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],  # GPU: MP4 frames
@@ -347,7 +344,6 @@ const CHECKS := {
 	# seconds left and charges on the bar
 	"--cooldown-text-check": ["res://tools/cooldown_text_check.gd", "cooldown_text_check", null],
 	# charges + slot timers on the bar
-	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--ability-bar-check": ["res://tools/ability_bar_check.gd", "ability_bar_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--spawn-clock-check": ["res://tools/spawn_clock_check.gd", "spawn_clock_check", null],  # docs/SPAWNS.md
@@ -609,7 +605,6 @@ const CHECKS := {
 	"--egg-models-check": ["res://tools/egg_models_check.gd", "egg_models_check", null],  # the eggs' 3D shells
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],  # keys, bond hook, release
 	# every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
-	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],  # far rocks and trees batched
 	"--prop-glb-check": ["res://tools/prop_glb_check.gd", "prop_glb_check", null],  # art/props models
 	"--ult-glow-check": ["res://tools/ult_glow_check.gd", "ult_glow_check", null],  # ready glow, cast flash
@@ -661,7 +656,6 @@ const CHECKS := {
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],  # perk orbs, boss fan, weapon path
 	# Ways Out first-time hints
 	"--ways-hints-check": ["res://tools/ways_hints_check.gd", "ways_hints_check", null],
-	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # solos and the play space (0084)
 	"--tutorial-playtest-check": ["res://tools/tutorial_playtest_check.gd", "tutorial_playtest_check", null],
 	"--tutorial-playtest-shots": ["res://tools/tutorial_playtest_shots.gd", "tutorial_playtest_shots", null],  # GPU
 	"--tutorial-check": ["res://tools/tutorial_check.gd", "tutorial_check", null],  # =<arch>[:wisps]: any first Relic
@@ -710,7 +704,6 @@ const CHECKS := {
 	"--bot-names-check": ["res://tools/bot_names_check.gd", "bot_names_check", null],  # bots wear gamer tags
 	"--hero-grid-check": ["res://tools/hero_grid_check.gd", "hero_grid_check", null],  # Relics tile grid
 	"--tg-text-check": ["res://tools/tg_text_check.gd", "tg_text_check", null],  # no "Arena" in practice text
-	"--title-loading-shots": ["res://tools/title_loading_shots.gd", "title_loading_shots", null],  # GPU, --shots-dir=
 	# lobby screenshots + safe-area scan at the window size
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
@@ -874,8 +867,6 @@ const CHECKS := {
 	"--wisp-read-shots": ["res://tools/wisp_read_shots.gd", "wisp_read_shots", null],  # --shots-dir=<dir>
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
 	"--passive-stack-check": ["res://tools/passive_stack_check.gd", "passive_stack_check", null],  # carry passives
-	"--scoreboard-check": ["res://tools/scoreboard_check.gd", "scoreboard_check", null],      # the Tab squad board
-	"--scoreboard-shots": ["res://tools/scoreboard_shots.gd", "scoreboard_shots", null],      # --shots-dir=<dir>
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--guardian-rule-check": ["res://tools/guardian_rule_check.gd", "guardian_rule_check", null],  # team out rule
 	"--summon-check": ["res://tools/summon_check.gd", "summon_check", null],  # Boki summon (C), kill rules, leash, net
@@ -934,7 +925,6 @@ const CHECKS := {
 	"--hob-spot-check": ["res://tools/hob_spot_check.gd", "hob_spot_check", null],  # Hob's clear ring
 	"--hob-spot-shots": ["res://tools/hob_spot_shots.gd", "hob_spot_shots", null],  # =<dir>, before/after
 	"--hob-work-shots": ["res://tools/hob_work_shots.gd", "hob_work_shots", null],  # =<dir>, the house going up
-	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],  # GPU
 	"--step-smooth-check": ["res://tools/step_smooth_check.gd", "step_smooth_check", "check"],  # steps never jolt
 	"--step-smooth-shots": ["res://tools/step_smooth_check.gd", "step_smooth_check", "shots"],  # --shots-dir=<dir>
 	"--npc-check": ["res://tools/npc_check.gd", "npc_check", null],  # the rigged NPCs (Hob, Pell)

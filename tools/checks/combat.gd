@@ -4,4 +4,7 @@ extends RefCounted
 ## One entry per line, and a flag may appear in only ONE file (CheckRegistry.all() fails loudly on a duplicate).
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
-const CHECKS := {}
+const CHECKS := {
+	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
+	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
+}

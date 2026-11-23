@@ -4,4 +4,12 @@ extends RefCounted
 ## One entry per line, and a flag may appear in only ONE file (CheckRegistry.all() fails loudly on a duplicate).
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
-const CHECKS := {}
+const CHECKS := {
+	"--combat-calm-check": ["res://tools/combat_calm_check.gd", "combat_calm_check", null],  # fight HUD
+	"--combat-hud-shots": ["res://tools/combat_hud_shots.gd", "combat_hud_shots", null],  # GPU
+	"--levelup-reel": ["res://tools/levelup_reel.gd", "levelup_reel", null],  # movie writer: a level-up mid-fight
+	"--title-loading-shots": ["res://tools/title_loading_shots.gd", "title_loading_shots", null],  # GPU, --shots-dir=
+	"--scoreboard-check": ["res://tools/scoreboard_check.gd", "scoreboard_check", null],  # the Tab squad board
+	"--scoreboard-shots": ["res://tools/scoreboard_shots.gd", "scoreboard_shots", null],  # --shots-dir=<dir>
+	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],  # GPU
+}
