@@ -226,6 +226,7 @@
 		"painted": {"albedo": [1.0, 1.08, 1.0], "top_light": 0.2, "far_lift": 0.1, "fres": 0.35, "fres_tint": 0.8, "rim_far": 0.0, "rim_far_color": [0.3, 0.85, 0.8]},
 		"slots": {
 			"wood-shield": {"albedo": [1.22, 1.2, 1.15], "desat": 0.45, "top_light": 0.3},
+			"wood-body": {"desat": 0.4},
 			"metal-chain": {"albedo": [2.3, 2.3, 2.4], "top_light": 0.6, "fres": 0.4, "fres_tint": 0.7},
 			"brass-compass": {"albedo": [0.62, 0.55, 0.42]},
 			"brass-fish": {"albedo": [1.7, 1.9, 1.75], "desat": 0.3, "top_light": 0.3},
