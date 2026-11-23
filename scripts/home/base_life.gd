@@ -145,7 +145,12 @@ func machine(k: Dictionary) -> Fsm:
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.EAT, func(_to: int) -> void: FeedBowl.end(k))
 		m.on_exit(S.REACT, func(_to: int) -> void: _done_looking(k))
-		m.on_exit(S.DONE, func(_to: int) -> void: BaseHandFeed.clear(k))
+		m.on_exit(
+			S.DONE,
+			func(_to: int) -> void:
+				k["doze_ok"] = _clock + float(r_v["doze_rest"])  # fresh from your hand: awake for a second offer
+				BaseHandFeed.clear(k)
+		)
 		k["life"] = m
 	return k["life"]
 
@@ -241,7 +246,7 @@ func choose(k: Dictionary) -> void:
 	if BaseShy.keep_to_edge(h, k):
 		return
 	if not night and _clock >= float(k.get("doze_ok", 0.0)) and randf() < _doze(k):
-		_nap(k, "dozy")      # a nap for company, not only when tired: the pile forms where a friend already lies
+		_nap(k, "dozy")  # a nap for company, not only when tired: the pile forms where a friend already lies
 		return
 	var near := _near(k)
 	_greet(k, near)
@@ -742,6 +747,7 @@ func _greet(k: Dictionary, near: Array) -> void:
 		_act("greet", k, best)
 		note_parent(k, best, "said hello to")
 
+
 ## Chance a roaming Boki lies down for a day nap: a little on its own, more when a Boki it gets on with lies close by.
 func _doze(k: Dictionary) -> float:
 	var top := float(r_v["pile_at"])
@@ -772,6 +778,7 @@ func _cheer_friends() -> void:
 		if two.size() == 2 and not (HomeChimes.asleep(two[0]) or HomeChimes.asleep(two[1])):
 			GardenSfx.cue("garden_friends", (two[0]["pos"] + two[1]["pos"]) * 0.5)
 	befriended.clear()
+
 
 ## A social act a player could see: counted by kind and logged with the farm's clock and who took part.
 func _act(kind: String, a: Dictionary, b: Dictionary = {}) -> void:

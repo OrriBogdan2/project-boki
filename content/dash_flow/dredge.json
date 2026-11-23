@@ -37,5 +37,40 @@
 		"rmb": {"h": "keep", "v": "hover", "ours": "the hand flies while his height holds and the jump's speed carries (a standstill drifts at 20%)", "source": "Footage f121-123: keeps moving, body planted (dredge.md 'Reel parity'); the air not shown. Owner playtest 11-10 (ext/dredge-rmb f9b5d2002): a jump back with the hand keeps its speed", "verdict": "owner 11-10"},
 		"e": {"h": "zero", "v": "drop", "ours": "the Anchor Drop drives him straight down", "source": "Data: slam fist down (sv/briefs/kits.md:60); whether it drives him down from the air is not shown (hero-ref/dredge.md:244)", "verdict": "[?]"},
 		"x": {"h": "slow", "v": "fall", "ours": "the charge's 30% walk brakes the jump's speed (the kit steers as on the ground)", "source": "Data: two waves, no move speed (sv/briefs/kits.md:61); footage: cast on the ground only", "verdict": "[?]"}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "Grasp, then Iron Smash on the target stunned at your feet is the source combo (briefs/hero-ref/dredge.md:98,140): ours fires. Matches."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] The source combo is Grasp, then Kaiju Blast once the pull lands (briefs/hero-ref/dredge.md:275); a press while the arm is still out is not shown. Ours since main: X goes through the arm's flight (commit b8253ec76a: the wiki's only lock is while it pulls; the data card has none on the throw)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129)."},
+			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129)."},
+			"x": {"windup": "drop", "recovery": "fire", "source": "[?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129)."}
+		},
+		"x": {
+			"at": [0.05, 1.9],
+			"lmb": {"windup": "queue", "windup_wait": 1.03, "recovery": "drop", "source": "[?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266)."},
+			"lmb_hold": {"windup": "queue", "windup_wait": 1.03, "recovery": "fire", "source": "[?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266)."},
+			"rmb": {"windup": "drop", "recovery": "drop", "source": "[?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266)."},
+			"e": {"windup": "drop", "recovery": "drop", "source": "[?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266)."}
+		}
 	}
 }
