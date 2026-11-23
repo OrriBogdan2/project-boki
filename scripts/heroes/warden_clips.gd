@@ -811,6 +811,7 @@ func step(dt: float) -> void:
 	_p("act_u/blend_amount", xf_u)
 	_p("upper/blend_amount", up_w)
 	_p("flinch/add_amount", flinch_w)
+	_p("flinch_delta/sub_amount", 1.0)  # (Sub2 defaults to 0)
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
 	if d.has("crouch"):

@@ -23,6 +23,7 @@ const KEYS := {
 	"gkey": "throw",
 	"summon": "summon",
 	"pack": "summon",
+	"steal": "interact",
 	"hook": "gear1",
 	"ult": "ultimate",
 	"uplink": "interact",
@@ -62,6 +63,7 @@ const KIT_KEY := {
 
 const CARD_T := 1.5  # s a new step's panel counts as fresh: messages, bubbles and the scout hint wait
 const NAG_T := 8.0  # s without progress before the panel pulses and the Boki says it once more
+const NAG_QUICK := {"crouch": 4.0, "glove": 4.0}  # s: the same for a step that is one key or one walk (no thinking)
 const INTRO_T := 2.0  # s the first-time intro card stays up (any key closes it sooner)
 const SPOT_T := 5.0  # s the lookout shows the glove it spotted
 const POINTS_T := 3.5  # s the "one ability point" line stands before the first pick
@@ -69,7 +71,7 @@ const DONE_T := 0.9  # s of the step-done sting
 const LOOKOUT_R := 5.0  # m from the stop: the whole top (3.6 m radius) and its rim count
 const LOOKOUT_DROP := 1.2  # m: how far under the top you may stand and still be up on it (the cliff is 2.4 m)
 const SEND_R := 5.0  # m: a Boki leap that lands this near a monster counts as sent at it
-const CROUCH_HOLD := 1.5  # s of crouching at the lookout
+const CROUCH_HOLD := 0.8  # s of crouching at the lookout
 const RANK_WAIT_T := 20.0  # s before the ranks step moves on by itself
 const DOWN_T := 3.0  # s a downed player lies there before the tutorial picks them up (the fight goes on)
 const FAR_SCOUT := 38.0  # m: a target this far off gets "crouch to scout ahead"
@@ -110,6 +112,7 @@ var hits := 0  # your weapon hits on a monster this step
 var seen := {}  # what this run has used: sec, fire, dash, kick, boki, kin, glove, ult (the checks)
 var camps: TutorialCamps
 var sm: TutorialSummon  # the two summon steps, for a Boki that rides as a wisp
+var st: TutorialSteal  # the steal step, the same
 var crouch_t := 0.0
 var rmb_t_prev := 0.0
 var pell: TutorialPell = null  # the guide, by each stop (TutorialPell)
@@ -129,12 +132,21 @@ static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
 
 
+## Where a step id sits in the course (a long way off for an id that is not in it).
+static func step_index(sid: String) -> int:
+	for i in steps().size():
+		if steps()[i][0] == sid:
+			return i
+	return 1 << 20
+
+
 func _init(match_node: Match) -> void:
 	m = match_node
 	intro = not match_node.opts.get("tut_test", false) and not Save.d["tutorial"].get("tut_intro", false)
 	_course = World.load_layout("tutorial").get("course", {})
 	camps = TutorialCamps.new(self)
 	sm = TutorialSummon.new(self)
+	st = TutorialSteal.new(self)
 
 
 # ------------------------------------------------------------------ the course
@@ -241,7 +253,7 @@ func applies(sid: String) -> bool:
 			return false
 		"gkey":
 			return m.player.kin != null and not sm.active()
-		"summon", "pack":
+		"summon", "pack", "steal":
 			return sm.active()
 	return true
 
@@ -270,7 +282,7 @@ func update(dt: float) -> void:
 	if m.hud:
 		m.hud.msgs.hold = card_up()  # messages wait while the banner is up
 	var sid := id()
-	camps.update()
+	camps.update(dt)
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
 	if got != got_seen:
@@ -313,6 +325,7 @@ func _finish(sid: String) -> void:
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
 	if resumed:
+		camps.told = true  # (a resumed run saw the first camp's countdown: its camps come at once)
 		_restore()
 	_enter()
 
@@ -435,6 +448,7 @@ func _enter() -> void:
 	hits = 0
 	used0 = p.used.duplicate()
 	sm.begin()
+	st.begin()
 	kicks0 = int(p.stats.get("wall_kicks", 0))
 	if p.kin:
 		throws0 = p.kin.st_throws
@@ -450,6 +464,8 @@ func _enter() -> void:
 			if ground_item().is_empty():  # (a retry finds the glove still lying there)
 				m.spawn_gear("grapple", 1, stop("pickup"), "", false)
 				m.wpicks[-1]["tut"] = true
+		"steal":
+			st.spawn()
 		"wayout":
 			var o := outpost()
 			if not o.is_empty():
@@ -531,7 +547,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			return flag and near.call(5.0)
 		"wallkick":
 			seen["kick"] = seen.get("kick", false) or int(p.stats.get("wall_kicks", 0)) > kicks0
-			return on_lookout()
+			return seen["kick"] and on_lookout()      # (a jump and a ledge catch can climb it too: that does not count)
 		"crouch":
 			if p.crouch and on_lookout():
 				crouch_t += dt
@@ -552,6 +568,8 @@ func _is_done(sid: String, dt: float) -> bool:
 			return sm.summon_done(dt)
 		"pack":
 			return sm.pack_done()
+		"steal":
+			return st.done(dt)
 		"kin":
 			got = int(p.used.get("k1", 0)) - int(used0.get("k1", 0))
 			flag = got > 0
@@ -609,7 +627,7 @@ func _boki_sent() -> bool:
 	return false
 
 
-## Standing on the lookout's top (the wall kick's goal and the scouting spot).
+## Standing on the lookout's top (the wall kick step ends here after a kick, and the scouting spot).
 func on_lookout() -> bool:
 	var p := m.player
 	return p.grounded and _dist(stop("crouch")) < LOOKOUT_R and p.pos.y > stop("crouch").y - LOOKOUT_DROP
@@ -672,6 +690,8 @@ func goal(sid: String) -> Vector3:
 			if best == null:
 				best = camps.nearest()
 			return best.pos if best else Vector3.INF
+		"steal":
+			return st.goal()
 		"wayout", "uplink", "defend", "extract":
 			var o := outpost()
 			return o["pos"] if not o.is_empty() else Vector3.INF
@@ -715,7 +735,7 @@ func _stall(dt: float) -> void:
 			stall_t = 0.0
 	if id() == "defend" and not outpost().is_empty() and m.exits.in_yard(outpost(), m.player):
 		stall_t = 0.0  # (holding the circle while the capture runs is the progress)
-	if stall_t >= NAG_T and wait <= 0.0:
+	if stall_t >= float(NAG_QUICK.get(id(), NAG_T)) and wait <= 0.0:
 		stall_t = 0.0
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
 		nag_t = 2.5
@@ -788,6 +808,8 @@ func _words() -> void:
 		line = String(alt["sec_hold"])
 	elif sid in ["summon", "pack"] and sm.alt_key(sid) != "":
 		line = String(alt[sm.alt_key(sid)])
+	elif sid == "steal" and st.got:
+		line = String(alt["steal_got"])
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()

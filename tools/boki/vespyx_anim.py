@@ -2,7 +2,7 @@
 import boki_clips
 import vespyx
 from boki_clips import LOOK_UP, add, ear_pose, s, seq, tail_wave, TAU
-from boki_clips import SHARED, idle, run
+from boki_clips import SHARED, glide, idle, run
 from boki_gait import four_legs, planted
 from vespyx import SIDES, STING_C, TAIL_PTS
 
@@ -193,5 +193,7 @@ CLIPS.update({
     "eat": (2.0, True, eat),
     "chop": (1.1, True, chop),
     "mine": (1.0, True, mine),
+    # a flying squirrel's star: legs spread wide, forelegs reaching, the ringed tail streaming and rippling
+    "glide": (1.6, True, lambda t: glide(t, 0.55, 0.75, 0.6, 0.12, tail_up=0.15, tail_amp=0.05, tail_side=0.06)),
 })
 HIDE_AT = {"prop_berry": (0, -0.09, 0.40)}

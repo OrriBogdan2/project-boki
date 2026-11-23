@@ -34,6 +34,7 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_combo_e_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -68,7 +69,7 @@ func _hook_hold() -> void:
 	ak.step(m, 0.2)
 	var walk := p.flat_dist(p0) / 0.2
 	ak.tap(m, p)
-	ak.step(m, 0.05)
+	ak.step(m, 0.1)  # let the walk settle to the slow first (the brake from a run takes ~0.1 s)
 	p0 = p.pos
 	ak.step(m, 0.25)
 	var crawl := p.flat_dist(p0) / 0.25
@@ -175,16 +176,19 @@ func _slam_tell() -> void:
 	var lands := absf(float(fist["life"]) * float(fist["fall"]) - float(ed["windup"])) < 0.01
 	var fist_up: bool = HeroVfx.of(m).plays.get("anchor_fist", 0) == 1 and lands
 	ok(
-		"anchor tell: an outline (no fill) of the hit cone for all; the fist lands on the slam",
+		"anchor tell: a soft gold wedge of the hit cone for all (lit front = the wind-up); fist lands on the slam",
 		AimKit.shown(p, "e_tell") and bool(tell.get("all", false))
 			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
 			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
-			and bool(tell.get("outline", false)) and float(tell.get("fill", -1.0)) < 0.0
+			and bool(tell.get("soft", false)) and float(tell.get("fill", -1.0)) > 0.0
+			and float(tell.get("fill", 2.0)) < 1.0
+			and (tell.get("col", Color.BLACK) as Color).is_equal_approx(Color("ffc832"))
 			and fist_up and ak.dmg(t) == 0.0,
-		"len %.1f deg %.0f outline %s fist %s" % [
-			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), tell.get("outline"), fist_up]
+		"len %.1f deg %.0f fill %.2f fist %s" % [
+			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)),
+			float(tell.get("fill", -1.0)), fist_up]
 	)
-	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
+	# the cone stays put with him: wait out the wind-up, then place the foes in the cone
 	while k.wind > 0.03:
 		ak.step(m, ak.DT)
 	t.teleport(p.pos + in_off)
@@ -489,7 +493,8 @@ func _all() -> void:
 	ok("reel: a second Deep Reach is denied", k.grapples == 1)
 	k.cd["e"] = 0.0
 	p.ak.use_e()
-	ok("reel: E is denied while reeling", k.anchors == 0 and k.wind <= 0.0)
+	ok("reel: E is not cast while reeling (it waits for the arrival)", k.anchors == 0 and k.wind <= 0.0 and k.e_queued)
+	k.e_queued = false  # (this check casts its own Anchor after the arrival, below)
 	ok("reel: the gun is locked", not k.can_shoot())
 	var pos0 := p.pos
 	ak.aim_at(p, t.pos)
@@ -524,8 +529,8 @@ func _all() -> void:
 	var early_dmg: float = ak.dmg(t) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast",
-		early == 0 and early_dmg == 0.0 and k.anchors == 1 and p.flat_dist(at0) > 0.8 and p.flat_dist(at0) < 2.0,
+		"anchor: he stays put, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and k.anchors == 1 and p.flat_dist(at0) < 0.3,
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, p.flat_dist(at0)]
 	)
 	ok(
@@ -597,6 +602,44 @@ func _all() -> void:
 	)
 	m.verbs.walls.erase(wall)
 	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
+	# --- owner rule, placed walls: Tenzo's ridge (his rocks) and Albert's raised shield stop the Hand too
+	reset.call()
+	var rock: Dictionary = HeroZones.rock(m, t, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Tenzo ridge: a rock of his stops the Deep Reach, no hook and no damage behind it",
+		not rock.is_empty() and k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	m.verbs.walls.erase(rock)
+	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
+	reset.call()
+	var al: Hunter = m.make_hunter(
+		"AL", t.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"}
+	)
+	al.set_arch("bulwark")
+	al.max_hp = 1e9
+	al.hp = al.max_hp
+	ak.aim_at(al, p.pos)
+	m.step(ak.DT)
+	(al.ak as BulwarkKit)._raise()
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Albert shield: his raised aegis stops the Deep Reach, no hook and no damage behind it",
+		k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	for pw in m.verbs.walls.duplicate():
+		if pw.get("by") == al:
+			m.verbs.walls.erase(pw)
+			if is_instance_valid(pw.get("node")): (pw["node"] as Node).queue_free()
+	al.queue_free()
+	m.hunters.erase(al)
+	m.step(ak.DT)
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
 	for dz in range(-1, 2):

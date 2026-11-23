@@ -44,6 +44,10 @@ const E_RECOVER := 0.6               # s she is held after the beam: the source'
                                      # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
                                      # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
 
+const SLIDE_RATE := 1.25             # clip s per kit s of the dash clip (gunslinger_dash "rate" in vex.json)
+const SLIDE_LOOP_FROM := 0.367 / SLIDE_RATE    # kit s: the dash clip's slide loop (clip 0.367-0.5, three keys): a held
+const SLIDE_LOOP_T := 0.133 / SLIDE_RATE       # slide replays it from here, one period at a time (the drive pose), and
+                                               # she stands up (the clip's recovery) only once the slide ends
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []      # their nodes, reused
@@ -133,8 +137,6 @@ func fires_in_glide() -> bool:
 func shows_charge_ball() -> bool:
 	return false                   # the Longneedle charges an ember orb at the muzzle instead
 
-const SLIDE_LOOP_FROM := 0.367       # s: the dash clip's slide loop (three keys): a held slide replays it from here,
-const SLIDE_LOOP_T := 0.133          # s: one period at a time, so she stands up as the skid ends
 const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
                                      # is over to the clips (the kit's anim_id is read as long as it is set)
 
@@ -302,6 +304,8 @@ func _faded_now() -> float:
 	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
 
 # ------------------------------------------------------------------ dash: Slipstep
+func single_dash() -> bool: return true
+
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if use_ex and h.dashes >= 1.0 and not h.grounded:

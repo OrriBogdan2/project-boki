@@ -51,6 +51,9 @@ var drip_at := 0.0              # the next sludge drip
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
 var wind := 0.0                 # hold: the Anchor's wind-up left
+var e_queued := false           # E pressed while reeling a foe: the Anchor Drop goes the moment it arrives, at it
+var e_at := Vector2.ZERO        # (cast_e) the direction a queued Anchor Drop locks to: the hauled foe
+var e_plant := false            # a queued Anchor Drop winding up: he stands planted over the hauled foe
 var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the telegraph is that exact cone)
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
@@ -170,7 +173,9 @@ func move_k() -> float:
 		return hook_hold.slow_k           # a slow walk while the hand flies out (mid-jump: his run-up)
 	if not pull.is_empty():
 		return float(rmb_def()["fly_slow"])   # braced side-on while he reels (footage), a shuffle that still swings it
-	return 0.7 if wind > 0.0 else 1.0
+	if wind > 0.0:
+		return 0.0 if e_plant else 0.7      # the hook-into-slam stands planted; a fresh Anchor walks at 70%
+	return 1.0
 
 # ------------------------------------------------------------------ tick
 func _tick(dt: float) -> void:
@@ -206,6 +211,7 @@ func _tick(dt: float) -> void:
 ## hook in the air (it grabs nothing).
 func _drop_holds() -> void:
 	wind = 0.0
+	e_plant = false
 	AimKit.hide(h, "e_tell")
 	dive = {}
 	flying = false
@@ -353,6 +359,7 @@ func _launch_hook() -> void:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
 		(hook_sd["x"] as Dictionary)["pierce_terrain"] = true
+		(hook_sd["x"] as Dictionary)["block_class"] = "reach"      # (Blockers: a placed ridge or shield stops it)
 
 ## The hook in flight: his arm stretched out to it. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.
@@ -507,7 +514,17 @@ func _end_pull(arrived: bool) -> void:
 		arrivals += 1
 		var rdf := rmb_def()
 		if not ally:
+			# the foe stays stunned through the Anchor's wind-up: Deep Reach then Anchor Drop is a sure stun
+			(f as Ent).stun_t = maxf((f as Ent).stun_t, float(rdf["arrive_stun"]))
 			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
+	var queued := e_queued
+	e_queued = false
+	if queued and arrived and not ally and is_instance_valid(f) and not (f as Ent).dead:
+		var to := Vector2((f as Ent).pos.x - h.pos.x, (f as Ent).pos.z - h.pos.z)
+		e_at = to.normalized() if to.length() > 0.05 else h.aim_dir()
+		use_e()
+		e_at = Vector2.ZERO
+		e_plant = wind > 0.0
 
 # ------------------------------------------------------------------ E: Anchor Drop
 func cast_e() -> bool:
@@ -520,16 +537,18 @@ func cast_e() -> bool:
 		_start_dive(height)
 		return true
 	wind = float(ed["windup"])
-	slam_dir = h.aim_dir()
+	e_plant = false
+	slam_dir = e_at if e_at != Vector2.ZERO else h.aim_dir()
 	play("dr_anchor")
 	KitWindup.play(self, "e", "dr_anchor_wind", -3.0)
-	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
-	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
+	vfx("anchor_fist", h.pos, slam_dir, {"r": float(ed["radius"])})
 	return true
 
 func use_e() -> void:
 	if not pull.is_empty():
-		h._ab_feedback("k1", "deny")          # only the barge works while reeling
+		# only the barge works while reeling (wiki); an E on a foe waits for the arrival, so hook into slam lands
+		e_queued = not bool(pull.get("ally", false)) and float(cd["e"]) <= 0.0
+		if not e_queued: h._ab_feedback("k1", "deny")
 		return
 	super.use_e()
 
@@ -540,36 +559,26 @@ func _tick_wind(dt: float) -> void:
 	wind -= dt
 	if h.stun_t > 0.0 or h.downed:
 		wind = 0.0
+		e_plant = false
 		AimKit.hide(h, "e_tell")
 		KitWindup.broken(self, "e")
 		return
 	h.face = atan2(-slam_dir.x, -slam_dir.y)
-	_hop(ed, float(ed["windup"]) - wind)
 	var k := 1.0 - wind / float(ed["windup"])
 	AimKit.cone(h, "e_tell", slam_tell(k))
 	if wind <= 0.0:
 		wind = 0.0
+		e_plant = false
 		AimKit.hide(h, "e_tell")
 		_anchor()
 
-## The hop of the footage's second frame (0222): he springs about one body height forward along the locked slam
-## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
-## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
-func _hop(ed: Dictionary, t: float) -> void:
-	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
-		return
-	if not h.grounded or h.roll_t > 0.0:
-		return
-	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
-	h.vel.x = v.x
-	h.vel.z = v.y
-
-## The slam's telegraph at progress `k`: a thin outline of the cone (radius, angle, locked direction) the slam hits.
+## The slam's telegraph at progress `k`: the cone (radius, angle, locked direction) the slam hits:
+## a lit coin-gold rim over a faint inside, its bright front (k of the reach) reaching the rim on the slam frame.
 func slam_tell(k: float) -> Dictionary:
 	var ed := e_def()
 	return {
-		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "outline": true,
-		"all": true, "col": anchor_col(), "alpha": 1.8, "hot": 0.5 * k
+		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "soft": true, "fill": k,
+		"all": true, "col": HeroVfx.of(m).color(h, "gold"), "hot": 0.5 * k
 	}
 
 ## The slam: his fist into the ground in front, on this frame: the cone's damage and stun, cracks, dust and a
@@ -591,7 +600,7 @@ func _anchor() -> void:
 	var fist := ground(h.pos + Vector3(dd.x, 0, dd.y) * 1.1)
 	vfx("anchor_slam", ground(h.pos), dd, {"r": float(ed["radius"])})
 	m.fx.burst(fist + Vector3(0, 0.2, 0), Color("c8b8a0"), 18, 5.0, 0.45, 10.0, 1.3, Vector3(dd.x, 0.8, dd.y), 70.0)
-	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "alpha": 0.7}, true))
+	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "hot": 1.0}, true))
 	m.later(0.06, _anchor_dust.bind(at))
 	m.sfx("dr_anchor", h.pos, -1.0, 1.0)
 	if not h.grounded and not over_void and not h.gliding:

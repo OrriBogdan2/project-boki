@@ -5,7 +5,8 @@ extends RefCounted
 ## two stolen wisps ("Hands full"); a thief going down scatters them; the owner takes theirs back once revived; an
 ## ungrabbed wisp goes home and stays; match end sends every stolen wisp home; the kin snapshot carries the
 ## carrier. The passive rows are the carry-passive stacking (own Boki 100 %, stolen at passive_k, clamped at the
-## carry cap). Prints PASS/FAIL.
+## carry cap. The grab cues: a rival taking your or your squad's wisp sting you (steal_lost), the thief hears a
+## softer pickup, nobody else (or a squadmate's take) hears anything. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -39,6 +40,7 @@ func run(main_node: Node) -> void:
 		h.inp["move"] = Vector2.ZERO
 	_frames(0.3)
 	_steal()
+	_cues()
 	m.queue_free()
 	print("WSTEAL %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -208,3 +210,41 @@ func _stack(p: Hunter, stat: String, theirs: float, cap: float) -> void:
 	ks.carry_passives = keep
 	pk.carry_k = ck
 	_frames(0.05)
+
+
+func _revive_all() -> void:
+	for h in m.hunters:
+		if h.downed:
+			m.revive_hunter(h, null)
+	_frames(0.2)
+
+
+## The cues a grab plays in this game (the player's): the sound names logged by Sfx.cue_log in one grab.
+func _grab_cues(victim: Hunter, thief: Hunter) -> Array:
+	_revive_all()
+	Sfx.cue_log = []
+	m.knock(victim, null, {})
+	_frames(0.1)
+	var k: Kin = victim.kin
+	var got := KinSteal.grab(k, thief)
+	var names: Array = Sfx.cue_log.map(func(c: Array): return c[0])
+	Sfx.cue_log = null
+	ok(got and KinSteal.stolen(k), "cues: %s's wisp grabbed by %s" % [victim.pname, thief.pname])
+	return names
+
+
+func _cues() -> void:
+	var p: Hunter = m.player
+	var mate: Hunter = m.hunters.filter(func(h: Hunter): return h.team == p.team and h != p)[0]
+	var foe: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p.team)[0]
+	var n := _grab_cues(mate, foe)
+	ok("steal_lost" in n and not "pickup" in n, "cues: a rival takes a squadmate's wisp: the sting (%s)" % [n])
+	n = _grab_cues(p, foe)
+	ok("steal_lost" in n and not "pickup" in n, "cues: a rival takes yours: the sting (%s)" % [n])
+	n = _grab_cues(foe, p)
+	ok("pickup" in n and not "steal_lost" in n, "cues: you take a rival's: the softer pickup, no sting (%s)" % [n])
+	n = _grab_cues(p, mate)
+	ok(not "steal_lost" in n and not "pickup" in n, "cues: a squadmate takes yours: no sting, no pickup (%s)" % [n])
+	var foe2: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p.team and h != foe)[0]
+	n = _grab_cues(foe, foe2)
+	ok(not "steal_lost" in n and not "pickup" in n, "cues: a rival takes a rival squadmate's: silence (%s)" % [n])

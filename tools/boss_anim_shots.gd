@@ -138,7 +138,7 @@ func _boss(dir: String, id: String) -> void:
 		if row_name != "wake":
 			b._clear_attack()
 			b.stagger_t = 0.0
-		b.dormant = row_name == "wake"
+		b.set_asleep(row_name == "wake")
 		b.awake_t = 5.0
 		await _frames(30)
 		_trigger(b, row_name)

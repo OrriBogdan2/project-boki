@@ -11,7 +11,7 @@ extends RefCounted
 ## At the end it folds back into the wisp, which stays dim until the cooldown is over. Summon again while
 ## it is out sends it back early (full cooldown). One summon at a time: your own Boki, or a stolen wisp's one
 ## summon while yours rests or is gone (KinSteal.press).
-## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
+## Numbers: content/rules/boki_summon.json (role x size table, per-species overrides). HUD ring: BokiHud.summon_ring.
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
 const SHRINK_S := BokiWispPop.DURATION  # s: the fold back into the wisp
@@ -49,10 +49,13 @@ static func rules() -> Dictionary:
 	return Content.rules("boki_summon")
 
 
-## [window, cooldown] in seconds for a species, from its role and size (the table in the rules).
+## [window, cooldown] in seconds for a species: its own entry in the rules' species table, else from its role
+## and size (the table in the rules).
 static func times(ks: KinSpec) -> Vector2:
 	var cell: Array = rules()["fallback"]
-	if ks:
+	if ks and rules()["species"].has(ks.id):
+		cell = rules()["species"][ks.id]["times"]
+	elif ks:
 		var row: Dictionary = rules()["table"].get(String(ks.ai.get("role", "")), {})
 		cell = row.get(ks.size, cell)
 	return Vector2(float(cell[0]), float(cell[1]))

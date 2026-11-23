@@ -508,7 +508,7 @@ func _ready_rest() -> void:
 				get_tree().create_timer(0.3).timeout.connect(func():
 					var before := sc.scroll_vertical
 					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
-					Save.d["exp_rolling"] = not Save.d.get("exp_rolling", false)
+					Save.d["exp_mode"] = "solos" if Data.saved_mode() == "trios" else "trios"
 					_open_expedition()
 					get_tree().create_timer(0.5).timeout.connect(func():
 						var sc2 := _panel_scroll()
@@ -3238,6 +3238,7 @@ func _open_kin(rec: Dictionary) -> void:
 			var ln := Evo.lean(rec)
 			if String(ln[0]) != "":
 				var lean_t := "Its meals lean it %s: %d%%" % [Lean.face(ln[0])["name"], int(100.0 * float(ln[1]))]
+				lean_t += Lean.size_note(rec)
 				c1.add_child(UI.label(lean_t, UI.T_SMALL, Lean.face(ln[0])["tint"]))
 			EvoPathView.block(rec, c1, func(): _open_kin(rec))
 			var tot := 0.0
@@ -3510,9 +3511,7 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
+	var o := Data.mode_opts(Data.saved_mode())      # its squads and hunters (bots fill the places nobody took)
 	if raid_squad > 0:
 		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
 	o["tier"] = exp_tier

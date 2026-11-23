@@ -5,7 +5,7 @@
 "semicolon": 8
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 26,
+"long_line": 25,
 "nested_ternary": 2,
 "semicolon": 6
 },

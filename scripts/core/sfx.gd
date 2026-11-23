@@ -91,6 +91,7 @@ const NAMES := [
 	"armor_up",
 	"armor_up_own",
 	"knock_confirm",
+	"knock_warn",
 	"extract_ok",
 	"elim_confirm",
 	"ab_throw",
@@ -145,9 +146,9 @@ const NAMES := [
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
-## The squad cues (you or a squadmate downs or finishes a rival): one dedicated voice, so footsteps and
-## the combat crowd never steal it, and no gap or stack cap thins it.
-const CUES := ["knock_confirm", "elim_confirm"]
+## The squad cues (you or a squadmate downs or finishes a rival, or a squadmate is downed): one dedicated voice, so
+## footsteps and the combat crowd never steal it, and no gap or stack cap thins it.
+const CUES := ["knock_confirm", "knock_warn", "elim_confirm"]
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := [
 	"v_skitter",
@@ -174,6 +175,11 @@ const VOICES := [
 ]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {
+	"carry_swap_out": 200,
+	"carry_swap_in": 200,
+	"carry_claim": 200,
+	"carry_stolen": 400,
+	"carry_take": 200,
 	"scan_pop": 150,
 	"scan_pop_fine": 150,
 	"scan_pop_rare": 150,
@@ -255,6 +261,8 @@ const BLAST_PEAK_DB := -6.0
 const NEAR := 5.5
 const SPREAD := 8.0
 const FAR := 19.0
+const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a broken cast)
+
 ## Sounds behind terrain (see SfxOcclusion) go through the SFXMuffled bus (SfxMix.OCCLUDED_HZ / OCCLUDED_DB).
 var occlusion := SfxOcclusion.new()
 var skip: Array = []  # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
@@ -268,8 +276,6 @@ var voices := SfxVoices.new(POOL)  # who keeps a voice when the pool or the loop
 ## A handle (from play) names one sound on one pool voice: starts * POOL + the voice, so a handle to a sound
 ## that has ended, its voice gone on to another, cuts nothing.
 var starts := PackedInt32Array()  # per pool voice: how many sounds it has started
-var _cut_tw: Array[Tween] = []  # per pool voice: its fade-out under way (cut)
-const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a broken cast)
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
@@ -290,6 +296,7 @@ var music_name := ""
 var amb: AudioStreamPlayer
 var amb_name := ""
 var mix: SfxMix
+var _cut_tw: Array[Tween] = []  # per pool voice: its fade-out under way (cut)
 
 
 func _ready() -> void:
@@ -565,11 +572,12 @@ func _stop_layers(fade: float) -> void:
 ## Extra ambience beds on top of the main one (wind over the abyss, ruins, the garden's time-of-day
 ## and pond beds), each faded to a level by where you are; created on first use, freed once faded
 ## to nothing, stopped together by clear_amb_layers.
-var amb_layers := {}  # name -> {p, want}
+var amb_layers := {}  # name -> {p, want, fade}  (fade: seconds from silent to full)
+const AMB_FADE := 2.5
 const MATCH_BEDS := ["abyss", "ruins"]  # MusicDir's beds; other amb_layers are the farm's
 
 
-func amb_layer(name: String, level: float) -> void:
+func amb_layer(name: String, level: float, fade_s := AMB_FADE) -> void:
 	if not amb_layers.has(name):
 		if level <= 0.001 or not ResourceLoader.exists("res://audio/amb_%s.ogg" % name):
 			return
@@ -579,8 +587,9 @@ func amb_layer(name: String, level: float) -> void:
 		p.volume_db = -60.0
 		add_child(p)
 		p.play()
-		amb_layers[name] = {"p": p, "want": 0.0}
+		amb_layers[name] = {"p": p, "want": 0.0, "fade": fade_s}
 	amb_layers[name]["want"] = clampf(level, 0.0, 1.0)
+	amb_layers[name]["fade"] = maxf(fade_s, 0.05)
 
 
 func clear_amb_layers(fade := 1.0) -> void:
@@ -599,7 +608,8 @@ func _process(delta: float) -> void:
 	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
-		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / 2.5)
+		var fade_s: float = float(amb_layers[n].get("fade", AMB_FADE))
+		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / fade_s)
 		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
 		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
 			ap.queue_free()
@@ -622,9 +632,9 @@ var _step_i := 0
 
 
 ## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
-func step(pos = null, vol := -16.0, reach := 0.0) -> void:
+func step(pos = null, vol := -16.0, reach := 0.0, pitch := 1.0) -> void:
 	_step_i = (_step_i + 1) % 3
-	play("step%d" % _step_i, pos, vol, 0.12, 1.0, reach)
+	play("step%d" % _step_i, pos, vol, 0.12, pitch, reach)
 
 
 func has(sname: String) -> bool:
@@ -826,9 +836,12 @@ func _same_full(sname: String, rk: float) -> bool:
 
 ## A distant sound every player hears, panned toward `at` as seen from the camera (a legendary's roar).
 ## Quiet vol_db up close, far_db from far_m metres out (no further): it carries, it doesn't fade away.
-func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m: float) -> void:
+## Returns the voice it plays on, or null (IncomingHitSfx keeps one voice for a flurry).
+func play_toward(
+	sname: String, at: Vector3, vol_db: float, far_db: float, far_m: float, pitch := 1.0
+) -> AudioStreamPlayer:
 	if not streams.has(sname) and not _lazy(sname):
-		return
+		return null
 	var cam := get_viewport().get_camera_3d()
 	var side := Vector2(at.x - listener.x, at.z - listener.z)
 	var pan := 0.0
@@ -839,13 +852,14 @@ func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m
 	(AudioServer.get_bus_effect(bus, 1) as AudioEffectPanner).pan = pan
 	var p := _voice(null, voices.rank_of(null, listener), sname)
 	if p == null:
-		return
+		return null
 	p.bus = "SFXPan"
 	var st = streams[sname]
 	p.stream = _once(st[rng.randi_range(0, st.size() - 1)] if st is Array else st)
 	p.volume_db = lerpf(vol_db, far_db, clampf(side.length() / far_m, 0.0, 1.0))
-	p.pitch_scale = 1.0
+	p.pitch_scale = pitch
 	p.play()
+	return p
 
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound

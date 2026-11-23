@@ -905,154 +905,242 @@
 				]
 			}
 		},
-		"kilnbadger": {
+		"caecilith": {
 			"fidget": {
-				"note": "anvil headbutt: a grumpy lunge at nothing, the anvil rings",
+				"note": "sly glance: the head lifts and peeks left then right, a zip of a wriggle runs down the serpent chain",
 				"at": 0.3,
-				"dur": 1.3,
+				"dur": 1.7,
 				"rows": [
 					[
-						"spine",
+						"head",
 						"x",
-						-0.2,
+						0.3,
 						0,
 						0
 					],
 					[
 						"head",
-						"x",
-						-0.5,
-						0,
-						0
-					],
-					[
-						"hips",
-						"x",
-						0.1,
-						0,
-						0
-					],
-					[
-						"root",
-						"z",
-						0.03,
-						6,
-						0
-					]
-				]
-			},
-			"breath": {
-				"len": 2.2,
-				"amp": 1.8
-			}
-		},
-		"lilybara": {
-			"fidget": {
-				"note": "bath sigh: head sinks, ears droop, sprout tail sways",
-				"at": 0.3,
-				"dur": 2.0,
-				"rows": [
-					[
-						"head",
-						"x",
-						-0.3,
-						0,
+						"y",
+						0.55,
+						1,
 						0
 					],
 					[
 						"neck",
 						"x",
-						-0.1,
+						0.15,
 						0,
 						0
 					],
 					[
 						"spine",
-						"x",
-						-0.06,
-						0,
-						0
-					],
-					[
-						"ear1.*",
-						"z",
-						-0.4,
-						0,
-						0
+						"y",
+						0.1,
+						1,
+						0.25
 					],
 					[
 						"tail*",
 						"y",
-						0.35,
-						1,
+						0.7,
+						3,
 						0
 					]
 				]
 			},
 			"breath": {
 				"len": 3.6,
-				"amp": 2.2,
-				"calm": true
+				"amp": 2.0
 			}
 		},
-		"limpetor": {
+		"casquebill": {
 			"fidget": {
-				"note": "clamp-grind: the shell turns on the ground, the head stays put",
+				"note": "bill clack: the head snaps down four times, disagreeing, chest drawn up",
 				"at": 0.3,
-				"dur": 2.0,
+				"dur": 1.4,
 				"rows": [
 					[
-						"root",
-						"y",
-						0.25,
-						0,
-						0
-					],
-					[
 						"head",
-						"y",
-						-0.25,
-						0,
+						"x",
+						-0.3,
+						4,
 						0
 					],
 					[
 						"spine",
 						"x",
-						-0.05,
+						0.07,
 						0,
 						0
+					],
+					[
+						"hips",
+						"x",
+						-0.03,
+						4,
+						0.25
 					]
 				]
 			},
 			"breath": {
 				"len": 3.8,
-				"amp": 1.4
+				"amp": 1.8
 			}
 		},
-		"moonloris": {
+		"duskapi": {
 			"fidget": {
-				"note": "sleepy nod: head sinks, jerks awake, drifts down again",
+				"note": "shy look-over: the head peeks left then right and ducks, graceful and ready to vanish",
 				"at": 0.3,
-				"dur": 2.2,
+				"dur": 1.6,
+				"rows": [
+					[
+						"head",
+						"y",
+						0.5,
+						1,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.15,
+						0,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.14,
+						1,
+						0.1
+					],
+					[
+						"hips",
+						"y",
+						-0.05,
+						1,
+						0.1
+					]
+				]
+			},
+			"breath": {
+				"len": 3.0,
+				"amp": 2.2
+			}
+		},
+		"floenatee": {
+			"fidget": {
+				"note": "low hum: the head lifts to sing, the whole body rolls slow and rumbles through the boots",
+				"at": 0.3,
+				"dur": 1.9,
 				"rows": [
 					[
 						"head",
 						"x",
-						-0.5,
-						1.5,
+						0.25,
+						0,
 						0
 					],
 					[
-						"neck",
-						"x",
-						-0.15,
-						1.5,
+						"root",
+						"z",
+						0.07,
+						2,
 						0
 					],
 					[
 						"spine",
 						"x",
-						-0.06,
+						0.05,
+						6,
+						0
+					],
+					[
+						"hips",
+						"z",
+						-0.05,
+						2,
+						0.25
+					]
+				]
+			},
+			"breath": {
+				"len": 4.6,
+				"amp": 3.0
+			}
+		},
+		"gibbelle": {
+			"fidget": {
+				"note": "bell swing: the belly bell rocks like a clapper, head thrown back to sing",
+				"at": 0.3,
+				"dur": 1.5,
+				"rows": [
+					[
+						"hips",
+						"z",
+						0.2,
+						2,
+						0
+					],
+					[
+						"spine",
+						"z",
+						-0.14,
+						2,
+						0.25
+					],
+					[
+						"head",
+						"x",
+						0.3,
+						0,
+						0
+					],
+					[
+						"head",
+						"z",
+						0.12,
+						2,
+						0.5
+					]
+				]
+			},
+			"breath": {
+				"len": 2.4,
+				"amp": 2.4
+			}
+		},
+		"glaciyak": {
+			"fidget": {
+				"note": "frost snort: two heavy snorts, head bobbing and the shoulders heaving",
+				"at": 0.3,
+				"dur": 1.4,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.3,
+						2,
+						0
+					],
+					[
+						"spine",
+						"x",
+						0.08,
+						2,
+						0.1
+					],
+					[
+						"hips",
+						"x",
+						-0.04,
+						2,
+						0.2
+					],
+					[
+						"head",
+						"y",
+						0.08,
 						0,
 						0
 					]
@@ -1060,96 +1148,55 @@
 			},
 			"breath": {
 				"len": 4.0,
-				"amp": 1.6
+				"amp": 3.0
 			}
 		},
-		"moundvark": {
+		"goliathite": {
 			"fidget": {
-				"note": "listens to the spire: head turns back to it, nose twitching",
+				"note": "face polish: it leans in and rubs the marble face side to side, proud",
 				"at": 0.3,
 				"dur": 1.8,
 				"rows": [
 					[
 						"head",
 						"y",
-						0.55,
-						0,
-						0
-					],
-					[
-						"neck",
-						"y",
-						0.2,
-						0,
+						0.28,
+						3,
 						0
 					],
 					[
 						"head",
 						"x",
-						0.2,
+						-0.2,
 						0,
-						0
-					],
-					[
-						"head",
-						"x",
-						0.08,
-						5,
-						0
-					],
-					[
-						"spine",
-						"y",
-						0.1,
-						0,
-						0
-					]
-				]
-			},
-			"breath": {
-				"len": 3.2,
-				"amp": 1.6
-			}
-		},
-		"murmurling": {
-			"fidget": {
-				"note": "mimic: cocks its head, then bobs twice to a footstep it heard",
-				"at": 0.3,
-				"dur": 1.4,
-				"rows": [
-					[
-						"head",
-						"z",
-						0.35,
-						0,
-						0
-					],
-					[
-						"head",
-						"x",
-						0.2,
-						2,
 						0
 					],
 					[
 						"spine",
 						"x",
-						-0.08,
-						2,
+						-0.1,
+						0,
 						0
+					],
+					[
+						"root",
+						"x",
+						-0.03,
+						3,
+						0.25
 					]
 				]
 			},
 			"breath": {
-				"len": 1.6,
+				"len": 5.0,
 				"amp": 2.0
 			}
 		},
-		"nacrolin": {
+		"heatherhorn": {
 			"fidget": {
-				"note": "half-curl: head tucks, back rounds, a timid tremble, then a peek",
+				"note": "graze: the head drops to the grass and chews, the shoulders settle",
 				"at": 0.3,
-				"dur": 2.0,
+				"dur": 1.9,
 				"rows": [
 					[
 						"head",
@@ -1159,120 +1206,65 @@
 						0
 					],
 					[
-						"neck",
-						"x",
-						-0.2,
-						0,
+						"head",
+						"y",
+						0.08,
+						6,
 						0
 					],
 					[
 						"spine",
 						"x",
-						-0.25,
+						-0.12,
 						0,
 						0
 					],
 					[
 						"hips",
 						"x",
-						0.15,
+						0.04,
 						0,
 						0
-					],
-					[
-						"root",
-						"z",
-						0.05,
-						6,
-						0
 					]
 				]
 			},
 			"breath": {
-				"len": 2.4,
-				"amp": 1.5
+				"len": 3.6,
+				"amp": 2.4
 			}
 		},
-		"nimbostrich": {
+		"hoarheron": {
 			"fidget": {
-				"note": "impatient jitter: two darting looks and a fast rock on its toes",
-				"at": 0.3,
-				"dur": 1.2,
-				"rows": [
-					[
-						"head",
-						"y",
-						0.45,
-						2,
-						0
-					],
-					[
-						"neck",
-						"y",
-						0.18,
-						2,
-						0.05
-					],
-					[
-						"root",
-						"x",
-						0.06,
-						6,
-						0
-					],
-					[
-						"hips",
-						"x",
-						0.08,
-						6,
-						0.25
-					]
-				]
-			},
-			"breath": {
-				"len": 1.6,
-				"amp": 1.8
-			}
-		},
-		"opalisk": {
-			"fidget": {
-				"note": "show-off then startle: chest out, chin up, then a flinch at its own bubble",
+				"note": "ice-pick strike: it draws the head back, still, then jabs down; the body leans in",
 				"at": 0.3,
 				"dur": 1.6,
 				"rows": [
 					[
+						"head",
+						"x",
+						0.38,
+						1,
+						0
+					],
+					[
 						"spine",
 						"x",
-						0.2,
-						0,
-						0
-					],
-					[
-						"head",
-						"x",
-						0.4,
+						-0.1,
 						1,
 						0
 					],
 					[
-						"neck",
+						"hips",
 						"x",
-						0.1,
+						0.04,
 						1,
-						0
-					],
-					[
-						"head",
-						"z",
-						0.2,
-						2,
-						0
+						0.5
 					]
 				]
 			},
 			"breath": {
-				"len": 1.9,
-				"amp": 2.2
+				"len": 4.4,
+				"amp": 1.4
 			}
 		},
 		"orchisloth": {
@@ -1667,242 +1659,154 @@
 				"calm": true
 			}
 		},
-		"caecilith": {
+		"kilnbadger": {
 			"fidget": {
-				"note": "sly glance: the head lifts and peeks left then right, a zip of a wriggle runs down the serpent chain",
+				"note": "anvil headbutt: a grumpy lunge at nothing, the anvil rings",
 				"at": 0.3,
-				"dur": 1.7,
+				"dur": 1.3,
 				"rows": [
 					[
-						"head",
-						"x",
-						0.3,
-						0,
-						0
-					],
-					[
-						"head",
-						"y",
-						0.55,
-						1,
-						0
-					],
-					[
-						"neck",
-						"x",
-						0.15,
-						0,
-						0
-					],
-					[
 						"spine",
-						"y",
+						"x",
+						-0.2,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.5,
+						0,
+						0
+					],
+					[
+						"hips",
+						"x",
 						0.1,
-						1,
-						0.25
-					],
-					[
-						"tail*",
-						"y",
-						0.7,
-						3,
-						0
-					]
-				]
-			},
-			"breath": {
-				"len": 3.6,
-				"amp": 2.0
-			}
-		},
-		"casquebill": {
-			"fidget": {
-				"note": "bill clack: the head snaps down four times, disagreeing, chest drawn up",
-				"at": 0.3,
-				"dur": 1.4,
-				"rows": [
-					[
-						"head",
-						"x",
-						-0.3,
-						4,
-						0
-					],
-					[
-						"spine",
-						"x",
-						0.07,
-						0,
-						0
-					],
-					[
-						"hips",
-						"x",
-						-0.03,
-						4,
-						0.25
-					]
-				]
-			},
-			"breath": {
-				"len": 3.8,
-				"amp": 1.8
-			}
-		},
-		"duskapi": {
-			"fidget": {
-				"note": "shy look-over: the head peeks left then right and ducks, graceful and ready to vanish",
-				"at": 0.3,
-				"dur": 1.6,
-				"rows": [
-					[
-						"head",
-						"y",
-						0.5,
-						1,
-						0
-					],
-					[
-						"head",
-						"x",
-						-0.15,
-						0,
-						0
-					],
-					[
-						"spine",
-						"y",
-						0.14,
-						1,
-						0.1
-					],
-					[
-						"hips",
-						"y",
-						-0.05,
-						1,
-						0.1
-					]
-				]
-			},
-			"breath": {
-				"len": 3.0,
-				"amp": 2.2
-			}
-		},
-		"floenatee": {
-			"fidget": {
-				"note": "low hum: the head lifts to sing, the whole body rolls slow and rumbles through the boots",
-				"at": 0.3,
-				"dur": 1.9,
-				"rows": [
-					[
-						"head",
-						"x",
-						0.25,
 						0,
 						0
 					],
 					[
 						"root",
 						"z",
-						0.07,
-						2,
-						0
-					],
-					[
-						"spine",
-						"x",
-						0.05,
+						0.03,
 						6,
 						0
-					],
-					[
-						"hips",
-						"z",
-						-0.05,
-						2,
-						0.25
 					]
 				]
 			},
 			"breath": {
-				"len": 4.6,
-				"amp": 3.0
+				"len": 2.2,
+				"amp": 1.8
 			}
 		},
-		"gibbelle": {
+		"lilybara": {
 			"fidget": {
-				"note": "bell swing: the belly bell rocks like a clapper, head thrown back to sing",
+				"note": "bath sigh: head sinks, ears droop, sprout tail sways",
 				"at": 0.3,
-				"dur": 1.5,
-				"rows": [
-					[
-						"hips",
-						"z",
-						0.2,
-						2,
-						0
-					],
-					[
-						"spine",
-						"z",
-						-0.14,
-						2,
-						0.25
-					],
-					[
-						"head",
-						"x",
-						0.3,
-						0,
-						0
-					],
-					[
-						"head",
-						"z",
-						0.12,
-						2,
-						0.5
-					]
-				]
-			},
-			"breath": {
-				"len": 2.4,
-				"amp": 2.4
-			}
-		},
-		"glaciyak": {
-			"fidget": {
-				"note": "frost snort: two heavy snorts, head bobbing and the shoulders heaving",
-				"at": 0.3,
-				"dur": 1.4,
+				"dur": 2.0,
 				"rows": [
 					[
 						"head",
 						"x",
 						-0.3,
-						2,
+						0,
+						0
+					],
+					[
+						"neck",
+						"x",
+						-0.1,
+						0,
 						0
 					],
 					[
 						"spine",
 						"x",
-						0.08,
-						2,
-						0.1
+						-0.06,
+						0,
+						0
 					],
 					[
-						"hips",
-						"x",
-						-0.04,
-						2,
-						0.2
+						"ear1.*",
+						"z",
+						-0.4,
+						0,
+						0
+					],
+					[
+						"tail*",
+						"y",
+						0.35,
+						1,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.6,
+				"amp": 2.2,
+				"calm": true
+			}
+		},
+		"limpetor": {
+			"fidget": {
+				"note": "clamp-grind: the shell turns on the ground, the head stays put",
+				"at": 0.3,
+				"dur": 2.0,
+				"rows": [
+					[
+						"root",
+						"y",
+						0.25,
+						0,
+						0
 					],
 					[
 						"head",
 						"y",
-						0.08,
+						-0.25,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.05,
+						0,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.8,
+				"amp": 1.4
+			}
+		},
+		"moonloris": {
+			"fidget": {
+				"note": "sleepy nod: head sinks, jerks awake, drifts down again",
+				"at": 0.3,
+				"dur": 2.2,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.5,
+						1.5,
+						0
+					],
+					[
+						"neck",
+						"x",
+						-0.15,
+						1.5,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.06,
 						0,
 						0
 					]
@@ -1910,55 +1814,96 @@
 			},
 			"breath": {
 				"len": 4.0,
-				"amp": 3.0
+				"amp": 1.6
 			}
 		},
-		"goliathite": {
+		"moundvark": {
 			"fidget": {
-				"note": "face polish: it leans in and rubs the marble face side to side, proud",
+				"note": "listens to the spire: head turns back to it, nose twitching",
 				"at": 0.3,
 				"dur": 1.8,
 				"rows": [
 					[
 						"head",
 						"y",
-						0.28,
-						3,
+						0.55,
+						0,
+						0
+					],
+					[
+						"neck",
+						"y",
+						0.2,
+						0,
 						0
 					],
 					[
 						"head",
 						"x",
-						-0.2,
+						0.2,
 						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.08,
+						5,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.1,
+						0,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.2,
+				"amp": 1.6
+			}
+		},
+		"murmurling": {
+			"fidget": {
+				"note": "mimic: cocks its head, then bobs twice to a footstep it heard",
+				"at": 0.3,
+				"dur": 1.4,
+				"rows": [
+					[
+						"head",
+						"z",
+						0.35,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.2,
+						2,
 						0
 					],
 					[
 						"spine",
 						"x",
-						-0.1,
-						0,
+						-0.08,
+						2,
 						0
-					],
-					[
-						"root",
-						"x",
-						-0.03,
-						3,
-						0.25
 					]
 				]
 			},
 			"breath": {
-				"len": 5.0,
+				"len": 1.6,
 				"amp": 2.0
 			}
 		},
-		"heatherhorn": {
+		"nacrolin": {
 			"fidget": {
-				"note": "graze: the head drops to the grass and chews, the shoulders settle",
+				"note": "half-curl: head tucks, back rounds, a timid tremble, then a peek",
 				"at": 0.3,
-				"dur": 1.9,
+				"dur": 2.0,
 				"rows": [
 					[
 						"head",
@@ -1968,65 +1913,120 @@
 						0
 					],
 					[
+						"neck",
+						"x",
+						-0.2,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.25,
+						0,
+						0
+					],
+					[
+						"hips",
+						"x",
+						0.15,
+						0,
+						0
+					],
+					[
+						"root",
+						"z",
+						0.05,
+						6,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 2.4,
+				"amp": 1.5
+			}
+		},
+		"nimbostrich": {
+			"fidget": {
+				"note": "impatient jitter: two darting looks and a fast rock on its toes",
+				"at": 0.3,
+				"dur": 1.2,
+				"rows": [
+					[
 						"head",
 						"y",
-						0.08,
+						0.45,
+						2,
+						0
+					],
+					[
+						"neck",
+						"y",
+						0.18,
+						2,
+						0.05
+					],
+					[
+						"root",
+						"x",
+						0.06,
 						6,
 						0
 					],
 					[
-						"spine",
-						"x",
-						-0.12,
-						0,
-						0
-					],
-					[
 						"hips",
 						"x",
-						0.04,
-						0,
-						0
+						0.08,
+						6,
+						0.25
 					]
 				]
 			},
 			"breath": {
-				"len": 3.6,
-				"amp": 2.4
+				"len": 1.6,
+				"amp": 1.8
 			}
 		},
-		"hoarheron": {
+		"opalisk": {
 			"fidget": {
-				"note": "ice-pick strike: it draws the head back, still, then jabs down; the body leans in",
+				"note": "show-off then startle: chest out, chin up, then a flinch at its own bubble",
 				"at": 0.3,
 				"dur": 1.6,
 				"rows": [
 					[
-						"head",
-						"x",
-						0.38,
-						1,
-						0
-					],
-					[
 						"spine",
 						"x",
-						-0.1,
+						0.2,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.4,
 						1,
 						0
 					],
 					[
-						"hips",
+						"neck",
 						"x",
-						0.04,
+						0.1,
 						1,
-						0.5
+						0
+					],
+					[
+						"head",
+						"z",
+						0.2,
+						2,
+						0
 					]
 				]
 			},
 			"breath": {
-				"len": 4.4,
-				"amp": 1.4
+				"len": 1.9,
+				"amp": 2.2
 			}
 		}
 	}

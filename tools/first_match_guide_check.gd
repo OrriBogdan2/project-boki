@@ -22,6 +22,7 @@ func run(mn: Node) -> void:
 		_walk(id)
 	_mates()
 	_first_ult()
+	_first_summon()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -244,3 +245,34 @@ func _first_ult() -> void:
 			continue
 		var line := FirstUltHint.short_line(String(xd.get("desc", "")))
 		ok(line != "" and line.length() <= FirstUltHint.LINE_MAX + 1, "%s: a short line (%s)" % [f, line])
+
+# ------------------------------------------------------------------ 6. the first-summon hint
+func _first_summon() -> void:
+	m = Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle",
+			"no_drop": true, "boki_wisps": true})
+	m.set_process(false)
+	var p: Hunter = m.player
+	var k: Kin = p.kin
+	var seen: Dictionary = Save.d["tutorial"]
+	seen.erase("first_summon")
+	seen.erase("ability")
+	p.downed = false
+	p.dropping = false
+	p.riding = false
+	m._tip_t = 20.0
+	ok(k != null and k.wisp and k.summon != null, "the Boki rides as a wisp")
+	k.summon.cd = 5.0
+	m._tips()
+	ok(not seen.has("first_summon"), "resting: no summon hint")
+	k.summon.cd = 0.0
+	var before: int = m.hud.msgs.count()
+	m._tips()
+	var want := "Press %s to call %s out for %d s, then it rests %d s" % [Settings.key_cap("summon"),
+			k.rec.get("name", "your Boki"), roundi(k.summon.dur), roundi(k.summon.cd_base)]
+	ok(TipText.summon(k) == want, "the key cap, the name and both times (%s)" % want)
+	ok(bool(seen.get("first_summon", false)) and m.hud.msgs.count() > before, "ready: one hint through the lane")
+	before = m.hud.msgs.count()
+	m._tips()
+	ok(m.hud.msgs.count() == before, "once per save: no second line")

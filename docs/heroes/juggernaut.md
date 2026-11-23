@@ -503,7 +503,7 @@ clip through its strike).
 | `jug_wave` | the blast fires on release | 0.07 / 0.033 / 0.60 | lead 0.03: strike 0.037 | fixed; asserted |
 | `jug_slam` | 0.6 s wind-up, blade cocked low, then the strike [f155-158] | 0.60 / 0.583 / 1.13 | same | matches; asserted |
 | `jug_lunge_wind` (held) | lane grows 0.6-0.8 s to full [f121-127] | pose from the hold threshold (0.3), held from 0.45 | same | matches; asserted (never on a tap) |
-| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48 | fixed; asserted |
+| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48; a longer Lunge (full, perfect, a miss) holds the coil to its stop (`JuggernautKit.LUNGE_COIL_T`) | fixed; asserted |
 | `jug_meteor` (held hang, then the dive) | hang, then straight down [f263-288] | dive 0.22 / kit dive 0.083 | lead 0.14: dive 0.077 | fixed; asserted |
 | `jug_meteor_land` | impact cloud [f288], a 0.5 s rise | 0.15 / 0.000 / 0.50 | lead 0.13: impact 0.02 | fixed; asserted |
 | `jug_dash` | about 2 bh in 0.2 s, hit at the end [f387-401] | 0.156 / 0.233 / 0.27 at rate 1.6 | rate 1.6, lead -0.12: the first pose holds through the 0.07 s wind-up, strike 0.231, clip ends 0.34 (dash stops 0.42) | fixed; asserted |
@@ -617,7 +617,7 @@ The sword tip is the point that jumps: idle, rest stance and walk carry the blad
 | `jug_wave` | the blast fires on release | 0.07 / 0.033 / 0.60 | lead 0.03: strike 0.037 | fixed; asserted |
 | `jug_slam` | **3.43** weapon | **3.43** weapon | **2.67** weapon | **2.67** weapon | 0.10 / 0.16 | 0.30 / 0.40 |
 | `jug_lunge_wind` | **3.43** weapon | **3.08** weapon | **2.67** weapon | **3.33** weapon | 0.18 / 0.16 | 0.18 / 0.40 |
-| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48 | fixed; asserted |
+| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48; a longer Lunge (full, perfect, a miss) holds the coil to its stop (`JuggernautKit.LUNGE_COIL_T`) | fixed; asserted |
 | `jug_meteor` | **3.43** weapon | **3.15** weapon | **2.67** weapon | **1.64** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
 | `jug_meteor_land` | impact cloud [f288], a 0.5 s rise | 0.15 / 0.000 / 0.50 | lead 0.13: impact 0.02 | fixed; asserted |
 | `jug_dash` | about 2 bh in 0.2 s, hit at the end [f387-401] | 0.156 / 0.233 / 0.27 at rate 1.6 | rate 1.6, lead -0.12: the first pose holds through the 0.07 s wind-up, strike 0.231, clip ends 0.34 (dash stops 0.42) | fixed; asserted |
@@ -639,9 +639,9 @@ Kael on origin/main d255acbee against the source (docs/KIT_PARITY.md Kael block,
 sv/briefs/kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (owner)**, **regressed**, **open**.
 `kit` is scripts/arch/kits/juggernaut_kit.gd, `chain` juggernaut_chain.gd, `ult` juggernaut_ult.gd, `drop`
 juggernaut_drop.gd, `json` content/archetypes/juggernaut.json, `flow` content/dash_flow/juggernaut.json.
-`--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main. Many Kael branches are unmerged (kael-lunge-length,
-kael-rmb-dash-turn, kael-riposte-knock, kael-ult-reset-rebased-rebased, kael-tap-ult-1108, kael-chain-length, gaps-juggernaut):
-their files were left alone, so rows they touch are listed, not fixed.
+`--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main (Nov 9). Nov 20: kael-lunge-length (`4ea2625c13`,
+`e738af1ca7`), kael-riposte-knock, kael-ult-reset and gaps-juggernaut are on main or their branches are gone; kael-rmb-dash-turn
+and kael-tap-ult-1108 are still not merged. Rows below say which.
 
 | Row | Verdict | Where | Note |
 |---|---|---|---|
@@ -655,7 +655,7 @@ their files were left alone, so rows they touch are listed, not fixed.
 | RMB hold: held indefinitely, never auto-fires | match | kit:546 (base arch_kit.gd:111 is 9s) | owner; asserted "jug parity rmb" |
 | RMB hold: perfect release | differ (owner) | kit:583, kit:769, json:26 | +20% distance, cue and ring; no source equivalent |
 | RMB hold: lane, magenta at full, pose only while held | match | kit:551, kit:680 | |
-| RMB hold: Lunge length 4.5 to 5.4 m | done (ext/kael-open-rows) | json:30 | [F] 2.5 to 3 bh (about 5 m) at any charge; DECISIONS 2026-11-11 a short lunge. See "Open rows closed, Nov 20" |
+| RMB hold: Lunge length 4.5 to 5.4 m | done `4ea2625c13` (ext/kael-open-rows, on main) | json:30 | [F] 2.5 to 3 bh (about 5 m) at any charge; DECISIONS 2026-11-11 a short lunge. See "Open rows closed, Nov 20" |
 | RMB hold: a miss doubles the cooldown | match | kit:787 | [W] |
 | RMB air: Meteor Drop at the cursor, own 7.2s slot, stun core | match | drop:62, drop:145, json:27 | 0.8x of the data's 9s |
 | RMB in the pull: Cinder Spin, blights | match | kit:909, json:29 | [D] |
@@ -677,7 +677,7 @@ their files were left alone, so rows they touch are listed, not fixed.
 | Hold rows: LMB and RMB keep through dash and jump | match | flow:71, flow:84 | [O] |
 | Into-jump: X locked | match | flow:97 | planted guard |
 | Clips: 21 kmoves, locomotion and states map to kael.glb clips | match | content/rules/warden_anim/kael.json:51 | all 49 clips resolve; KIT_PARITY still says "missing" (stale doc) |
-| Rank text: Warchain and dash cooldown numbers | regressed | json:42, json:43 | text says 9.5 / 8.3 / 5.9s and 9s, real 12.8 / 11.2 / 8.0s and 10.4s; juggernaut.json is in flight (kael-lunge-length, kael-rmb-dash-turn), left for the next pass |
+| Rank text: Warchain and dash cooldown numbers | done (checked 2026-11-20) | json:51 to json:53 | rank text now reads 12.8 / 11.2 / 8.0s Warchain and 10.4 / 8.8 / 6.4s dash, the real numbers |
 
 Fixed on this branch (docs only; the code was right): the Warchain per-slot row (cooldown 12.8s, not 9.5s), the state-machine
 row (no blight from the hook, as `--juggernaut-combo-check` already asserts), and the dash-on-knock row. No code change, so no

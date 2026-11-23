@@ -57,12 +57,12 @@ static var befriended: Array = []  # [uid, uid] pairs whose bond just reached fr
 var h  # the home (home.gd): kins, world, day_t, ppos, emotes
 var r_v: Dictionary  # content/rules/base_life.json
 var night := false
-var acts := {}  # kind (play, nap, greet, squabble) -> how many a watcher has seen
-var act_log: PackedStringArray = []  # "12s play Ash Crag", one line per social act (--base-life-check reads it)
 var whistle: BaseWhistle  # the whistle: your partner comes, hold for the nearest other Boki
 var hand: BaseHandFeed  # the selected snack, and feeding from your hand
 var sfx := PlaySfx.new()  # the quiet cues of free play (tag, squabbles), capped per zone
 
+var acts := {}  # kind (play, nap, greet, squabble) -> how many a watcher has seen
+var act_log: PackedStringArray = []  # "12s play Ash Crag", one line per social act (--base-life-check reads it)
 var _acc := 0.0
 var _clock := 0.0  # s of farm life stepped so far
 var _day_t := -1.0  # the farm's day clock at the last tick (a drop means a new day)
@@ -243,6 +243,10 @@ func choose(k: Dictionary) -> void:
 	if Mentor.is_mentor(rec):
 		_mentor(k)
 		return
+	var lazy := float(Content.rules("base_axes")["nap_odds"]) * (BaseAxes.mult(rec, "nap") - 1.0)
+	if lazy > 0.0 and randf() < lazy:
+		_nap(k, "lazy")
+		return
 	if BaseShy.keep_to_edge(h, k):
 		return
 	if not night and _clock >= float(k.get("doze_ok", 0.0)) and randf() < _doze(k):
@@ -263,17 +267,21 @@ func choose(k: Dictionary) -> void:
 	if randf() < float(r_v["chore_chance"]) and _chore(k):
 		return
 	var mate := _mate(k, near)
-	if not mate.is_empty() and (bored or randf() < float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5):
-		_tag(k, mate)
-		return
-	if (bored or randf() < 0.2 + float(traits.get("curiosity", 0.5)) * 0.3) and h.toys.pick(k, true):
+	if not mate.is_empty():
+		var chase := float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5
+		if bored or randf() < chase * BaseAxes.mult(rec, "chase"):
+			_tag(k, mate)
+			return
+	var play := 0.2 + float(traits.get("curiosity", 0.5)) * 0.3
+	if (bored or randf() < play * BaseAxes.mult(rec, "play")) and h.toys.pick(k, true):
 		m.go(S.PLAY, "toy")  # HomeToys has it now: the walk, the play and the squabbles are its
 		return
 	if bored:
 		_nap(k, "bored")
 		return
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
-	if randf() < float(pers.get("cling", 0.25)) and h.world.island_of(h.ppos.x, h.ppos.z) == here:
+	var cling := float(pers.get("cling", 0.25)) * BaseAxes.mult(rec, "cling")
+	if randf() < cling and h.world.island_of(h.ppos.x, h.ppos.z) == here:
 		k["goal"] = h._seat(k, h.ppos, 1.5)
 	else:
 		k["goal"] = h.world.random_ground(maxi(here, 0))
@@ -751,10 +759,10 @@ func _greet(k: Dictionary, near: Array) -> void:
 ## Chance a roaming Boki lies down for a day nap: a little on its own, more when a Boki it gets on with lies close by.
 func _doze(k: Dictionary) -> float:
 	var top := float(r_v["pile_at"])
-	var pile := _near(k, true, float(r_v["pile_reach"])).any(
+	var near_pile := _near(k, true, float(r_v["pile_reach"])).any(
 		func(o): return (o["life"] as Fsm).is_in(S.NAP) and regard(k, o, float(r_v["parent_weight"])) >= top
 	)
-	return float(r_v["doze"]) + (float(r_v["doze_pile"]) if pile else 0.0)
+	return float(r_v["doze"]) + (float(r_v["doze_pile"]) if near_pile else 0.0)
 
 
 ## Two hot tempers that meet may squabble: the chance grows with how far their summed temper is over 1.0.

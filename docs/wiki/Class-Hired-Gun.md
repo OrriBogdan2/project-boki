@@ -66,13 +66,13 @@ What the in-game kit card (K) says.
 | RMB: Burr Charge | Shoot a charge that Dazes; hitting a wall blasts a cone back. |
 | E: Longneedle | Stand still 0.6s, then fire a beam through walls and everything. |
 | Hunter ultimate: Cinderfall | A shell lands at your cursor after 1.6s, then burns the patch. |
-| Weapon: Quill Rifle | Full-auto rifle; Dazed foes take 90% more. |
+| Weapon: Quill Rifle | Full-auto rifle; Dazed foes take 76% more. |
 
 ### Abilities in full
 
 **Hot Streak (passive).** Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold).
 
-**Slipstep (dash, Shift, 8.5s cooldown).** Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.
+**Slipstep (dash, Shift, 8.5s cooldown).** Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and uses the same single dash.
 
 **Burr Charge (RMB, 6.5s cooldown).**
 
@@ -92,6 +92,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 6.5s -> 5.4s. | cooldown 6.5s -> 4.3s; it resets when you knock a hunter. |
 | Dash (Shift) | recharge 8.5s -> 7.4s. | recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends. |
 | E | damage +20%. | damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2). |
+| R (ultimate) | Cinderfall cooldown 42s -> 38s, damage 24 -> 28.8, fire damage 3.5 -> 4.2. The Fusion lasts 30% longer. | Cinderfall cooldown 42s -> 34s, damage 24 -> 33.6, fire damage 3.5 -> 4.9. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 

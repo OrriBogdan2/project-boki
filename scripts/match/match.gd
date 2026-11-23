@@ -7,6 +7,7 @@ const DT := 1.0 / 60.0
 
 var opts := {}
 var world: World
+var layout := {}              # the authored map's data (empty on a generated one)
 var skytrain: SkyTrain = null   # the loop train, on maps that have one
 var fx: Fx
 var cam: CamRig
@@ -326,7 +327,7 @@ func _start(o: Dictionary) -> void:
 	add_child(world)
 	Sfx.occlusion.world = world
 	# real expeditions are on a hand-made map, and so is the tutorial (a small calm one); training keeps a generated one
-	var layout := {}
+	layout = {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
 	if big and not o.get("procedural", false) and not "--procgen" in OS.get_cmdline_user_args():
 		layout = WideLayout.pick(o, rolling != null, tier)     # a rolling session gets the wide Skyreach; otherwise the expedition map
@@ -694,9 +695,10 @@ func bot_kin_record() -> Dictionary:
 func _spawn_hunters() -> void:
 	var n_teams := int(opts.get("teams", 4))
 	var squad := int(opts.get("squad", 1))
-	# one starting island per squad, spread out as far as possible
+	# one starting island per squad, spread out as far as possible, inside the play space the match starts with
+	var spawns: Array = Heart.in_play(layout, opts, world.spawns)
 	var by_isl := {}
-	for sp in world.spawns:
+	for sp in spawns:
 		var ii := world.island_of(sp.x, sp.z)
 		if not by_isl.has(ii): by_isl[ii] = sp
 	var pool: Array = by_isl.values()
@@ -713,7 +715,7 @@ func _spawn_hunters() -> void:
 		spots.append(pool[best]); pool.remove_at(best)
 	# more squads than islands: share the bigger islands, still as far apart as possible
 	if spots.size() < n_teams:
-		var rest: Array = world.spawns.filter(func(q): return not spots.has(q))
+		var rest: Array = spawns.filter(func(q): return not spots.has(q))
 		while spots.size() < n_teams and rest.size() > 0:
 			var best := 0; var bd := -1.0
 			for i in rest.size():
@@ -722,7 +724,7 @@ func _spawn_hunters() -> void:
 				if dmin > bd: bd = dmin; best = i
 			spots.append(rest[best]); rest.remove_at(best)
 	if spots.is_empty():
-		spots = world.spawns.duplicate()
+		spots = spawns.duplicate()
 	if tut:
 		spots = [tut.stop("land")]
 	var taken: Array = [Save.d.get("name", "Hunter")]
@@ -1627,7 +1629,7 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunte
 	PingInput.make_room(self, h)
 	pings.append({"pos": p, "col": PingInput.color(kind), "t": 0.0, "by": h, "team": h.team,
 		"life": PingInput.life(kind), "kind": kind, "foe": foe})
-	if player and h.team == player.team:
+	if player and h.team == player.team and Life.has_mates(self, h):
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
 		net_event(["sping", h.nid, p.x, p.y, p.z, kind, foe.nid if foe else ""])
@@ -1676,7 +1678,7 @@ func kin_ping(k: Kin, p: Vector3, col: Color, label: String) -> Dictionary:
 			pings.erase(pg); break
 	var pg := {"pos": p, "col": col, "t": 0.0, "life": 5.0, "kin": k, "label": label, "team": k.team}
 	pings.append(pg)
-	if k.owner_h == player or (player and k.team == player.team):
+	if (k.owner_h == player or (player and k.team == player.team)) and Life.has_mates(self, player):
 		sfx("ping", null, -9.0, 1.3)
 	return pg
 
@@ -2195,11 +2197,11 @@ func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 		if auto and hud and not train.has("_auto_told"):
 			train["_auto_told"] = true
 
-func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
+func on_kin_swap(h: Hunter, now_k: Kin, was: Kin) -> void:
 	kstat["swap"] += 1
 	fx.burst(h.pos + Vector3(0, 1.5, 0), now_k.sp["color"], 18, 3.5, 0.5)
 	fx.ring(h.pos, 1.4, now_k.sp["color"], 0.3)
-	sfx("swap", h.pos, -4.0)
+	CarrySfx.swap(self, h, now_k, was)
 	if h == player:
 		train["_swapped"] = true
 		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
@@ -2686,6 +2688,7 @@ func _update_shots(dt: float) -> void:
 				p.y = float(sx["y0"]) + float(sx["dy"]) * clampf(trav / float(sx["dyd"]), 0.0, 1.0)
 			# domes stop shots fired at them from outside
 			if _dome_blocks(s, p):
+				s["prop"] = true
 				_shot_end(s, p, null)
 				hit = true; break
 			var gp := world.ground_at(p.x, p.z)      # terrain and rocks
@@ -2722,6 +2725,7 @@ func _update_shots(dt: float) -> void:
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
 					brk.hit(bh, s["by"])
+				s["prop"] = true
 				_shot_end(s, p, null)
 				hit = true; break
 			for e in near:
@@ -2867,6 +2871,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 		s["node"].visible = false
 	if e == null:
 		MissFx.shot_ended(self, s, at, why)
+	MissFx.shot_landed(self, s, at, e, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
@@ -2938,7 +2943,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at}      # at: the contact (HitContact); pg: the volley id (a kit reads it)
+	# pg: the volley id (a kit reads it); at: the contact (HitContact); from: where it was fired (IncomingHitSfx plays a hit on you from there)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at, "from": s["start"]}
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -4123,8 +4129,7 @@ func _update_interact(dt: float) -> void:
 						best = {"kind": "revive", "ent": o, "label": "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname, "col": Color("ff6a5a")}
 					else:
 						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  stay on the wisp" % o.pname, "col": Color("9ee2a0")}
-			elif not o.remote:
-				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
+		best = StompTarget.prompt(self, h, best)
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
 		# 1b. deathboxes: bring a teammate back while their soul is there, or take everything
@@ -4270,6 +4275,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
 	rec["caught_at"] = where_at(k.pos)       # provenance: where it was caught (Save.register)
+	rec["caught_at"]["hunter"] = HeroTitle.base_name(h.arch)      # and who carried it out
 	if k.lost_from != "":
 		# someone's lost kin: it keeps who it is, and we remember who has it now
 		rec["lost_from"] = k.lost_from
@@ -4290,7 +4296,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 		net_event(["caught", k.nid, h.nid, rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
 	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
-		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
+		Capture.announce(self, h, rec)
 		if player.kin and player.kin.state != "downed":
 			BokiChatter.say(self, player.kin, "caught")
 
@@ -4560,6 +4566,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
+	KinSteal.on_extract(self, h)
 	_check_last()
 
 func _update_rules(dt: float) -> void:
@@ -4668,6 +4675,7 @@ func _finish() -> void:
 			player.kin.comp.on_loss()
 		if player.kin:
 			r["kin_say"] = BokiChatter.line(player.kin, "extract" if result.get("extracted", false) else "comfort")
+		r["wisps_home"] = KinSteal.carried_home      # stolen wisps you carried: the results say they go home
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
@@ -4984,12 +4992,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
-			var st: int = int(it[8])
-			if st >= 0 and st < MOB_STATES.size():
-				if mb.st == "idle" and st == 1: MobNotice.woke(mb)
-				mb.st = MOB_STATES[st]
+			mb.follow(int(it[8]), it[12])
 			mb.atk_dir = Vector2(it[10], it[11])
-			mb.st_t = it[12]
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
@@ -5061,6 +5065,7 @@ func _net_ev(x, from: String) -> void:
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"xp": KillXp.net_in(self, x)
+		"stomp": Life.net_stomp(self, x)      # a stomp began or ended in another game
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			var by: Ent = ents_by_id.get(String(x[2]), null)
@@ -5255,7 +5260,7 @@ func _net_ev(x, from: String) -> void:
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
-				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
+				Capture.announce(self, player, rec)
 			var cap = ents_by_id.get(String(x[2]), null)
 			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
 			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:
@@ -5371,9 +5376,13 @@ func _tips() -> void:
 	if heart_tip: _tip(heart_tip[0], heart_tip[1])
 	var ex := ExpeditionTips.next(self)
 	if ex: _tip(ex[0], ex[1])
+	var carry := CarryHints.swap(self)
+	if carry: _tip(carry[0], carry[1])
 	var k: Kin = player.kin
 	if k == null:
 		return
+	var call := TipText.summon(k)
+	if call != "": _tip("first_summon", call)
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])

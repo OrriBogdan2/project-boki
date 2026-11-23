@@ -47,15 +47,25 @@ garden minutes of either player; it arrives at trust 50. The player works the st
 goes to whoever is being raised. "Friends" is the first time trust is 50 or more on both (the starter's trust
 climbs 1 a pet and 2 a meal, one of each per 12.5 s).
 
+Re-measured 2026-11-22 on main 0a0db9747cc (after ext/garden-xp-pace, toy XP, snack patch and minigame-fair; no number
+changed: `--garden-pace-check` and `tools/garden_sim.py` print the same values as before those merges, because the
+play model reads only care, drill, game XP and the level curve, none of which moved). Minutes of play:
+
 | Player (shipped numbers) | Second Boki | Grown (starter) | Friends | First egg |
 |---|---|---|---|---|
 | Garden-only | 5 min | 190 min (3.2 h) | 33 min | 386 min (6.4 h) |
 | 1 expedition a session | 29 min | 190 min (3.2 h) | 108 min | 389 min (6.5 h) |
 
 The model plays care (once a kind a day, so mostly from the training yard) and runs; it does not play the garden
-games (the sim in `tools/garden_sim.py` has those). Re-measured after the XP rework (care once a day, games paid,
-halved curve: 50 x level); the first version of this table, on the old per-action XP and the 100 x level curve, was
-2230 and 1266 min.
+games. `tools/garden_sim.py` has those and counts days (visitor as the second Boki, friends not charged, so about a
+day early), first egg day, median of 200 seeds: 30 min a day (+2 runs) day 4; home only 30 min day 5; home only
+20 min day 6; 5 min a day (+1 run) day 8; home only 5 min day 11. (The sim's Lv 8 days are 2, 3, 3, 4 and 7.)
+
+**Largest single wait: the starter's climb to Grown, 190 min of the 386.** The second Boki (5 to 29 min) and
+friends (33 to 108 min) overlap it or are small; the visitor's own Grown climb is the other half of the egg wait.
+Knob: `content/rules/garden_xp.json`, key `curve.per_level` (30: XP from level n to n + 1 is 30 x n). The other
+levers on the same wait are `care` (15) and `play`/`win`/`first_win` (5/8/60) in the same file, or the Nook's Grown
+level (`breed_options` there, data only). Nothing is applied.
 
 The 30 minute target is still missed (half a day to a day of play for the egg): a Grown Boki needs 1400 XP, and the
 Nook needs two. The second Boki and friends are not the bottleneck (minutes); only levels are. That is why no
@@ -72,6 +82,8 @@ Data-only options (`breed_options` in content/rules/garden_xp.json, read by the 
 
 Even the best option is 4 to 6 hours of play to a first egg. A 30 minute egg needs both a far larger XP rate and a
 Grown level near 2 (roughly 10x the XP, or a Nook that takes Youngling kin); that is a design call.
+Food shapes the body too (`Lean.size`, `content/rules/lean.json` `size`): at full lean a heavy type (Rock, Dragon, Steel) swells up to 15% and a light one (Bug, Flying, Fairy) slims up to 15%, in step with the tint, by lean strength. `Evo.dress` applies it as the model's `evo_scale`; the Boki card's lean line says it (", 8% bigger"). `--feed-check` feeds ten meals each way; `--lean-shots --foods=pebblenut,sapjelly --meals=10` shows it.
+
 ## Base-only breeding
 
 Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
@@ -94,6 +106,11 @@ Chew, Zipseed, Hushpearl) with `lair_drop.chance` in `content/rules/garden_items
 the feed menu with the exact preview. The use writes the Boki card's journal line (`CareJournal` -> `JournalCard`):
 "ate Thumpnut: Power +3 (4 to 7)". `--garden-items-check` (loot part) proves the whole path; `--loot-nudge-shots` shows the card.
 
+The first time you come home with a garden item kind you never had, the nearest free Boki (not the most curious) walks up
+(`ComeLook` kind `item`, flag `loot_react_<id>` in Save.d tutorial, so once per kind per save and no migration), reacts by its
+traits (curious sniffs, timid hides and says `look_shy`, the rest puff up and say `look_item`) and its journal keeps one line:
+"sniffed the new Thumpnut". No pop-up. `--come-look-check` (two kinds, then plain loot) and a react row in `--garden-day-played-check`.
+
 ## Balance: 30 days for four players
 
 `python3 tools/garden_sim.py` plays 30 garden days, 200 seeds each, for four players (5 minutes plus a run, 30 minutes plus two runs, home only 30, home only 5) on the live care, prize, item, evolution, toy and race rules (`content/rules/garden_sim.json` holds the sim's own guesses). Every number must sit inside `bands` in that file; `--garden-sim-check` and the brief `briefs/design/GARDEN_MODERN_BALANCE.md` (tables regenerated with `--write`) keep it so.
@@ -105,7 +122,7 @@ the feed menu with the exact preview. The use writes the Boki card's journal lin
 | Budget of 240 full, day (where it fills) | 7 to 30 | Never trivial |
 | Stat total on day 30 | 216 to 240 | Even five minutes a day nearly fills it |
 | Gems a day | 43 to 300 | At least a weekly Wayseed (300 / 7) so home-only players reach every zone; at most one a day |
-| Joy, mean over a visit | 50 to 90 | Above sulky, never always full |
+| Joy, mean over a visit | 40 to 90 | Above the whistle's sulky joy (25), never always full (toys give 3 joy since the farm joy tune) |
 
 Before (the stack as it stood) and after, per player (before / after):
 
@@ -141,6 +158,22 @@ tutorial and never starts an expedition; it logs every line that points at an ex
 new one) plus a read of the garden code. Text and order nags are fixed on this branch (below). These
 need a design call:
 
+**Re-run on main 11-22 (ext/farm-garden-only-pass).** The check had rotted: `--garden-first-15-check` still
+took the first Relic after "Skip tutorial", but the pick now waits for the first portal use, so the bot read a
+freed screen and the 30 minutes never ran (and exit 1). Fixed. Run for real it found two new nags, both
+Goals rows only a match can fill: the played Hunter's mastery row ("Fly through 10 air rings") and the farm
+milestones ("Defeat a boss in a lair"). Both rows now wait for the first match while `base_mode` is on
+(`GoalTracker._home_only`); open question 2 below is closed for `mastery`, the `unlock` rows stay. The run also
+showed `BaseFetch` had no `playing()`, so `GardenMusic.tick` errored every 0.5 s with Fetch Cup in `Home.games`
+(zone music never switched): added. Result: 0 nags, 0 script errors, exit 0.
+
+**Zones open after 30 min of garden-only play: 1 of 5** (the start zone; `Black Market placed false, matches 0`).
+The Black Market is the only blocker left. A zone opens with two keys, a Wayseed and a leaning Boki
+(`GardenZones.keys`); a Wayseed comes from only two places, the Black Market's weekly stock (the building is
+placed once `matches >= 1`, `home.gd _fs_arrivals`) or a lair (an expedition). Nothing else gates a zone.
+`--garden-unlock-pace-check` passes (garden player: 2nd zone day 3, 5th day 12) because it buys the Wayseed
+without the building. Open question 1 is still the fix.
+
 1. **Old Pell's Black Market never stands on a new island.** `home.gd _fs_arrivals` places it (and the
    Challenge House) only once `matches >= 1`. The zone cards say a Wayseed comes from the Black Market
    (`black_market.gd` stocks one for the next locked zone every `wayseed_days`), so a player who never
@@ -149,7 +182,7 @@ need a design call:
    Fix options: (a) in base mode `_fs_arrivals` places the Black Market straight away (one condition;
    the Challenge House stays after the first expedition); (b) a Wayseed stall at the hub's Waystone.
    Default if nobody decides: (a).
-2. **Hunter unlock goals in the Goals card.** Eleven Hunters unlock by match challenges ("Knock 3 enemies
+2. **Hunter unlock goals in the Goals card.** (`mastery` rows and farm milestones now wait for the first match; only `unlock` is left.) Eleven Hunters unlock by match challenges ("Knock 3 enemies
    into walls") and show as `unlock` rows after the home rows. A Boki at the level cap loses its
    "Raise ... to level N" row, and then the first line of the card is one of these. Options: hide the
    `unlock` and `mastery` rows while the save has no match; or show them as "away" rows. Default: keep.
@@ -200,6 +233,10 @@ change on: its new colour or the path token. Interact there gives the item; walk
 hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
+
+## A Boki carried home from a match (`CarryArrival`)
+
+DECISIONS 2026-11-11 "carry 2 in, 1 extra out": the Boki you claim in a match rides out in the carry-out slot. When it comes home it is an event, not a list entry: it stands at the arrival point (where you appear), up to three residents come to look (`ComeLook`, same as any new Boki), its memory gets `came home from <map> with <Hunter>` (the Hunter's base name, stored in `origin.where.hunter`), and a short card says where it came from and where it went. If the garden already has its out-cap (`KinBox.farm_cap()`) the Boki goes to the Burrow, nobody walks over, and the card says so. The pending list lives in memory only: a game closed between the results screen and the garden keeps the memory line and loses the card. No save migration (`origin.where.hunter` is read with a default). Check: `--come-look-check`.
 
 ## Fishing derby
 `scripts/home/fishing_derby.gd`: at the Glint Fishing rock (when the shared store answers) you choose to fish alone or race

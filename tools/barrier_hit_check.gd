@@ -71,7 +71,7 @@ func _probe(who: String, m: Match, T: Hunter, wall: Dictionary, tag: String) -> 
 	var col: Color = wall["col"]
 	var ticks: Array = []
 	var hits: Array = []
-	var on_tick := func(n: String, _at, _db, _pitch) -> void: if n == Juice.BLOCK_TICK: ticks.append(n)
+	var on_tick := func(snd: String, _at, _db, _pitch) -> void: if snd == Juice.BLOCK_TICK: ticks.append(snd)
 	var on_hit := func(_by, _target, _d, _tags) -> void: hits.append(1)
 	Sfx.played.connect(on_tick)
 	CombatBus.hit_landed.connect(on_hit)

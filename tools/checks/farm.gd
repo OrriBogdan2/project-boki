@@ -5,5 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--bond-pace-check": ["res://tools/bond_pace_check.gd", "bond_pace_check", null],  # bond pace, taper
 	"--care-prompt-check": ["res://tools/care_prompt_check.gd", "care_prompt_check", null],  # the care line over a Boki
+	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 }

@@ -11,9 +11,11 @@ const MISS_RATE := 0.3     # share of 0.5 s aim windows that land MISS_OFF to th
 const MISS_OFF := 3.0      # m a missed aim is off the target
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
-const KEYS := [      # the action inputs
-		"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
+const LOOKOUT_OFF := 7.0     # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
+const KEYS := [      # the action inputs (sec_hold too: a step ending mid-hold must not hold a charge for ever)
+		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
+static var _retreat := false   # a wall kick step bot that got up without a kick, walking off to retry
 static var human := false
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input
 static var idle := false         # this frame the player did nothing (no stick, no key, no Boki command)
@@ -82,7 +84,16 @@ static func drive(m: Match) -> void:
 					p.inp["jump"] = press     # the second press opens it
 					p.inp["glide"] = p.gliding or press     # holding only keeps it open
 		"wallkick":
-			goto.call(tu.stop("crouch"), 0.4)
+			var top := tu.stop("crouch")
+			if tu.on_lookout() and not tu.seen.get("kick", false):
+				_retreat = true      # (up without a kick: walk off the cliff and kick up it)
+			var back := top - Vector3(LOOKOUT_OFF, 0.0, 0.0)
+			if _retreat and p.flat_dist(back) < 1.0:
+				_retreat = false
+			if _retreat:
+				goto.call(back)
+			else:
+				goto.call(tu.stop("crouch"), 0.4)
 			_kick_up(m, tu.stop("crouch").y)
 		"crouch":
 			goto.call(dest, 0.4)
@@ -97,6 +108,11 @@ static func drive(m: Match) -> void:
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult":
 			_fight(m, tu, goto)
+		"steal":
+			var wisp := tu.st.goal()
+			if wisp != Vector3.INF:
+				goto.call(wisp, 0.4)
+				p.inp["interact"] = p.flat_dist(wisp) < 1.0 and tu.st.foe.downed
 		"ranks":
 			for slot in ["sec", "dash", "kin"]:
 				p.level_slot(slot)
@@ -142,13 +158,6 @@ static func _aim_at(m: Match, at: Vector3) -> Vector3:
 	if human and fmod(m.time, MISS_WINDOW) < Match.DT:
 		_miss = _rng.randf() < MISS_RATE
 	return at + Vector3(MISS_OFF if human and _miss else 0.0, 0.9, 0)
-
-## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
-## take-off on, or the mantle climbs a low cliff first and the kick never counts).
-static func _kick_up(m: Match, top_y: float) -> void:
-	var p := m.player
-	if not p.grounded and p.pos.y < top_y - 0.2:
-		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
 
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
@@ -213,6 +222,14 @@ static func fire_key(m: Match) -> bool:
 	if p.wpn.get("melee", false):
 		return fmod(m.time, 0.5) < 0.1
 	return true
+
+## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
+## take-off on, or the mantle climbs a low cliff first and the kick never counts).
+static func _kick_up(m: Match, top_y: float) -> void:
+	var p := m.player
+	if not p.grounded and p.pos.y < top_y - 0.2:
+		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
+
 
 ## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:

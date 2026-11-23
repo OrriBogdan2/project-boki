@@ -67,26 +67,19 @@ func thief(a) -> void:
 	a_x.ok("dancer LMB: bolts hit and stack Marks (one per hit)",
 			a_x.dmg(t_v) >= 20.0 and k.marks_on(t_v) == 3, "took %.0f marks %d" % [a_x.dmg(t_v), k.marks_on(t_v)])
 	var hv := HeroVfx.of(m)
-	a_x.ok("dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
-			int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
-			"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)])
-	a_x.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
-			AimKit.shown(p_v, "aim") and (AimKit.entry(p_v, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
-	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
-	var spot := home + Vector3(-4.0, 0, -3.0)
-	a_x.aim_at(p_v, spot)
-	p_v.fire_cd = 0.0
-	var fz := k.fizzles
-	p_v.inp["fire"] = true
-	m.step(a_x.DT)
-	p_v.inp["fire"] = false
-	a_x.step(m, 0.5)
-	var off := Vector2(k.last_bolt_end.x - spot.x, k.last_bolt_end.z - spot.z).length()
-	a_x.ok("dancer LMB: a bolt lands at the cursor and fizzles (cursor-placed)",
-			k.fizzles == fz + 1 and off < 0.75, "%.2f m off the cursor" % off)
+	a_x.ok(
+		"dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
+		int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
+		"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)]
+	)
+	a_x.ok(
+		"dancer LMB: the aim line is pale lilac",
+		AimKit.shown(p_v, "aim") and (AimKit.entry(p_v, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC)
+	)
+	# a bolt with nothing in its way flies its full range whatever the cursor (--tester-feedback-check)
 	a_x.aim_at(p_v, home + Vector3(-30.0, 0, 0))
 	p_v.fire_cd = 0.0
-	fz = k.fizzles
+	var fz := k.fizzles
 	p_v.inp["fire"] = true
 	m.step(a_x.DT)
 	p_v.inp["fire"] = false
@@ -869,6 +862,13 @@ func juggernaut(a) -> void:
 	a_x.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes its full length",
 			float(k.cd["rmb"]) > 3.0 and p_v.flat_dist(home) > far - 0.4,
 			"cd %.1f moved %.1f" % [float(k.cd["rmb"]), p_v.flat_dist(home)])
+	# DECISIONS 11-11 (briefs/DECISIONS.md:602): "Kael RMB is a straight-line thrust with a short forward lunge, not
+	# a cone": the tap is the lane asserted above; the hold's lunge runs dead along the aim, a few metres at most
+	var off_aim := absf(p_v.pos.z - home.z)
+	var fwd := p_v.pos.x - home.x
+	var reach := far * float(k.rmb_def()["lunge"]["perfect_k"]) + 0.1
+	a_x.ok("juggernaut RMB (DECISIONS:602): the lunge is a straight short thrust along the aim (aside %.2f, fwd %.1f)"
+			% [off_aim, fwd], off_aim < 0.1 and fwd > 0.0 and p_v.flat_dist(home) <= reach)
 	# air: the down slam, its hit circle just ahead of where he lands; it slows, the centre takes more and is stunned
 	var dd: Dictionary = k.rmb_def()["drop"]
 	var ahead := float(dd["ahead"])

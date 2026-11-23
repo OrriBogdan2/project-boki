@@ -99,6 +99,22 @@ func _table() -> void:
 		var up := t.x / (t.x + t.y)
 		worst = worst and up >= float(band[0]) and up <= float(band[1])
 	ok(worst, "table: every species' window / (window + cooldown) is inside the uptime band")
+	var own: Dictionary = KinSummon.rules()["species"]
+	var inside := true
+	for id in own:
+		var c: Array = own[id]["times"]
+		var u := float(c[0]) / (float(c[0]) + float(c[1]))
+		inside = inside and u >= float(band[0]) and u <= float(band[1]) and String(own[id]["why"]) != ""
+	ok(inside and own.size() == 7, "species: the 7 own windows fit the band, with reasons")
+	var cindle := KinSummon.times(KinLib.kin("cindle"))
+	ok(cindle == Vector2(7, 58), "species: Cindle's own window beats its role x size cell (8, 60)")
+	var role_cell: Array = KinSummon.rules()["table"]["support"]["small"]
+	var puddlet := KinSummon.times(KinLib.kin("puddlet"))
+	ok(puddlet == Vector2(20, 90) and puddlet != Vector2(role_cell[0], role_cell[1]), "species: Puddlet's own wins")
+	ok(k.summon.dur == 7.0 and k.summon.cd_base == 58.0, "species: the live Cindle (and the HUD ring) runs 7/58 s")
+	var row := DexView.summon_text("cindle")
+	ok(row == "Summon 7 s / rest 58 s", "species: the Field Book row shows '%s'" % row)
+	ok(not own.has("pebbit"), "species: the others still use the table")
 
 
 func _press() -> void:
