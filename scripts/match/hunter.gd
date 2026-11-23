@@ -2794,7 +2794,7 @@ func render(delta: float, alpha: float) -> void:
 	HunterWisp.tick(self, delta)
 	UltGlow.tick(self, delta)
 	var body_face := HunterFall.face_of(self)      # a knocked-down body keeps facing the way it fell
-	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale)     # leaned toward the camera (CamRig.char_lean)
+	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale, not SkyDeck.upright(self))     # (CamRig.char_lean)
 	else: model.rotation.y = body_face
 	if out and has_meta("fling"):
 		# hit by the sky train: the body is flung tumbling through the air for a moment, then gone
@@ -2810,7 +2810,7 @@ func render(delta: float, alpha: float) -> void:
 		model.rotation = Vector3(0, face, 0)
 		if m.cam: model.basis = m.cam.char_basis(face, model.scale)
 	# riding a mount: you sit up on its back
-	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
+	var ride := (kin as Kin).ride_height() if mounted() and not downed else SkyDeck.lift(self)
 	model.position.y = lerpf(model.position.y, ride - HazardMoves.sink(self), minf(1.0, delta * 12.0))
 	if rocket:
 		rocket.seat(self)
