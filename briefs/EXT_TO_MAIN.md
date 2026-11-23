@@ -11160,3 +11160,4 @@ READY ext/hatch-reveal-name-1123 00ce691f96 (hatch reveal: one Boki on greyed sc
 READY ext/anim-native-stride 122f74c14c6 (native Hunters: per-Hunter stride rates)
 READY ext/farm-boki-greet 92de2981f6 (garden Boki greet you)
 READY ext/anim-cinder-native-clips d18bf93c94 (Cinder native cast clips)
+READY ext/anim-native-look-at 78565d941c (native Hunters: look-at back on)
