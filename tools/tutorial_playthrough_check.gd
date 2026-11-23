@@ -75,7 +75,10 @@ func _course_tick(m: Match) -> void:
 ## Wall-clock seconds since the start, by phase: where a slow (loaded) box spends the suite's 1200 s.
 func _took(phase: String, t0: int) -> void:
 	var s := (Time.get_ticks_msec() - t0) / 1000.0
-	print("TUTPLAY time %s at %.0f s (wall clock, %d frames)" % [phase, s, Engine.get_process_frames()])
+	var up := Time.get_ticks_msec() / 1000.0  # (since the engine started: the boot before run() shows too)
+	print(
+		"TUTPLAY time %s at %.0f s (wall clock, %.0f s uptime, %d frames)" % [phase, s, up, Engine.get_process_frames()]
+	)
 
 
 func _close_step() -> void:
