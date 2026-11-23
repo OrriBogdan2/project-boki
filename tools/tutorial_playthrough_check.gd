@@ -6,7 +6,7 @@ extends "res://tools/new_player_flow_check.gd"
 ## are --new-player-flow-check's, so a stall there fails too. Seconds are game time, the same on any box.
 
 const STEP_LIMIT_S := 40.0  # s of game time one step may take (the flow check's own limit is 45)
-const TIME_SCALE := 4.0  # the hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
+const TIME_SCALE := 4.0  # the prologue, hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
 
 var step_id := ""
 var step_s := 0.0
@@ -26,10 +26,12 @@ func run(m: Node) -> void:
 	_took("prologue", t0)
 	await _hatch()
 	_took("hatch", t0)
+	# (back to 1x before the match: its load is real work, not tweens, and at 4x a loaded box burned the 60 s
+	# stall budget in 15 s of wall clock; the course itself is stepped by m.step(Match.DT), so scale-free)
+	Engine.time_scale = 1.0
 	await _tutorial_match()
 	_end()
 	_took("course", t0)
-	Engine.time_scale = 1.0
 	if not stalled:
 		await _garden()
 		_took("garden", t0)
