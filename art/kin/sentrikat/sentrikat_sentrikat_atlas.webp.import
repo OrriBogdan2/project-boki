@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwxn6m6lrc8dd"
-path="res://.godot/imported/sentrikat_sentrikat_atlas.webp-7d656a3e182237f385cf2f3ac5180a5a.ctex"
+path.bptc="res://.godot/imported/sentrikat_sentrikat_atlas.webp-7d656a3e182237f385cf2f3ac5180a5a.bptc.ctex"
+path.astc="res://.godot/imported/sentrikat_sentrikat_atlas.webp-7d656a3e182237f385cf2f3ac5180a5a.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c0bdc5b27eb5d9789cfa55596e452eef"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/sentrikat/sentrikat_sentrikat_atlas.webp"
-dest_files=["res://.godot/imported/sentrikat_sentrikat_atlas.webp-7d656a3e182237f385cf2f3ac5180a5a.ctex"]
+dest_files=["res://.godot/imported/sentrikat_sentrikat_atlas.webp-7d656a3e182237f385cf2f3ac5180a5a.bptc.ctex", "res://.godot/imported/sentrikat_sentrikat_atlas.webp-7d656a3e182237f385cf2f3ac5180a5a.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

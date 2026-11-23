@@ -12,6 +12,7 @@ cursor state plus `MANIFEST.txt`).
 | `aim_shapes.gd` (`AimShapes`) | The shape builders and the quiet default look |
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
+| `scripts/ui/reticle.gd`, `reticle_hud.gd` (`Reticle`, `ReticleHud`) | The cursor reticle under them: the broken ring that opens with bloom, the dot in the Hunter's accent (`Arch.color`, the Hunter's own colour: Vex green, Sparkle pink, Tenzo blue), the ammo / resource / charge arcs, the hit tick (raised by `hud.reticle`, one per landed hit, gold on a crit, longer on a knock). Thin strokes with a dark edge; numbers in `content/rules/tuning.json` "reticle" |
 | `aim_reach.gd` (`AimReach`) | The range preview of a ground-target slot: a faint max-range ring and the landing disc |
 
 Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
@@ -311,7 +312,7 @@ Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace'
 1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
 footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.
 
-## 6. Online: `all` telegraphs on other games (Net 0.24.6, docs/decisions/0061-telegraph-net.md)
+## 6. Online: `all` telegraphs on other games (Net 0.24.6, docs/decisions/0151-telegraph-net.md)
 
 Remote hunters are puppets: their kits run only on their owner's game. `AimNet` (scripts/match/aim/aim_net.gd)
 sends every `all` entry AimDraw is given for a hunter this game runs (the player, the host's bots) as the

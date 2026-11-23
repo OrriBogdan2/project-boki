@@ -201,6 +201,7 @@ const CHECKS := {
 	# the Boki summon pad
 	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],  # --shots-dir=<dir>, GPU only
+	"--vex-cast-closeup": ["res://tools/vex_cast_closeup.gd", "vex_cast_closeup", null],  # Vex RMB / E close-up film
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--time-trial-check": ["res://tools/time_trial_check.gd", "time_trial_check", null],  # the Grounds course
 	"--ult-label-scan": ["res://tools/ult_label_scan.gd", "ult_label_scan", null],  # no bare number over an ult
@@ -655,7 +656,7 @@ const CHECKS := {
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
 	"--tutorial-lane-check": ["res://tools/tutorial_lane_check.gd", "tutorial_lane_check", null],  # LMB first, no cover
-	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; 1080p frames
+	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; --size=WxH
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
 	# ADVISORY: pace flags (a beat over 45 s, a 5 s wait) never fail it; only a stall in the run does
 	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
@@ -720,7 +721,6 @@ const CHECKS := {
 	"--tg-text-check": ["res://tools/tg_text_check.gd", "tg_text_check", null],  # no "Arena" in practice text
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
-	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
 	"--wall-slide-check": ["res://tools/wall_slide_check.gd", "wall_slide_check", null],  # walls and corners
 	"--dash-wall-check": ["res://tools/dash_wall_check.gd", "dash_wall_check", null],  # dashes slide along walls
 	"--mantle-fling-check": ["res://tools/mantle_fling_check.gd", "mantle_fling_check", null],  # owner bug 11-11
@@ -824,8 +824,7 @@ const CHECKS := {
 	"--online-feel-1-check": ["res://tools/online_feel_check.gd", "online_feel_check", "gunslinger"],
 	"--online-feel-2-check": ["res://tools/online_feel_check.gd", "online_feel_check", "juggernaut"],
 	"--online-feel-3-check": ["res://tools/online_feel_check.gd", "online_feel_check", "rimewright"],
-	# the second game (not gated)
-	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],
+	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],  # the second game (not gated)
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],  # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status

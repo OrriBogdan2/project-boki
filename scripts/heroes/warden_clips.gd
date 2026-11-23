@@ -99,6 +99,7 @@ var climb_was := ""          # "mantle" or "ledge" while the climb state runs; e
 var climb_live := false      # the state is still on
 var hit_seen := 99.0
 var last_emote := ""
+var beats := {}              # "beats": the win, lose and board beats the .glb can play (WardenBeats)
 var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
 var torso_turn := 0.0        # rad the hips (the torso) turn with it: all of it for a "heading" move, none on the aim
 var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
@@ -228,6 +229,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	lib = clips
+	WardenClipFile.add(lib, glb, sk, d.get("clip_files", []))
 	WardenDerive.add(lib, d.get("derive", {}))
 	var contract: Array = []
 	for b in WardenGlb.BONES:
@@ -248,6 +250,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 		_retime_run(float(d["loco"]["run_cycle"]))
 	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values() \
 			+ (d.get("summon_call", {}) as Dictionary).values())
+	beats = WardenBeats.build(lib, d.get("beats", {}))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -566,6 +569,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var lock := float(s.get("lockin_t", -1.0))
 	if lock >= 0.0 and d.has("lockin"):
 		return _lockin_at(lock)
+	var bt := String(s.get("beat", ""))
+	if beats.has(bt):
+		var b: Dictionary = beats[bt]
+		var length := lib.get_animation(String(b["clip"])).length
+		return {"clip": b["clip"], "t": WardenBeats.time_of(length, float(b["loop_from"]), float(s.get("beat_t", 0.0))),
+				"upper": b["upper"]}
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		var clip := String((d.get("emotes", {}) as Dictionary).get(em, st["emote"]))
@@ -763,8 +772,8 @@ func step(dt: float) -> void:
 		cur_ut = tu
 		_p("seek_u%s/seek_request" % "ab"[chan_u], tu)
 		out_fade = float(want.get("out", FADE_LOCO))
-		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		var back_u := float(want.get("blend_out", 0.0))
+		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		up_w = move_toward(up_w, 0.0, dt / back_u) if back_u > 0.0 else \
 				move_toward(maxf(up_w, act_w), 1.0, dt / float(want.get("fade", FADE)))
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
@@ -818,6 +827,7 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	_ease_start(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
+	loco_k *= 1.0 - proc_w     # (a swim is the rig's: no stride or arm swing over it)
 	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
 	steps.step(loco_k > 0.5 and bool(s.get("grounded", true)), loco_pos)
@@ -1012,6 +1022,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	loco_goal = goal
 	loco_pos = _ease(loco_pos, goal, 12.0, dt)
 	_p("loco/blend_position", loco_pos)
+	gait.footing(dt, s.get("footing", {}))
 	var ring := _walk_ring()
 	var out := loco_pos.length()
 	var moving := _out_of_idle(out, ring, goal.length(), spd)

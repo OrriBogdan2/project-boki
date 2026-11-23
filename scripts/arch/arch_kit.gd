@@ -333,7 +333,7 @@ func busy() -> bool:
 	return disabled()
 
 ## The kit's own cast lock (its ult planting the body) refuses a press of `slot` now: DashFlow holds the press for
-## the lock's end (docs/decisions/0022-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
+## the lock's end (docs/decisions/0118-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
 func lock_refuses(_slot: String) -> bool:
 	return busy() and not disabled()
 
@@ -725,7 +725,8 @@ static func _clamp_parts(sd: Dictionary) -> void:
 
 ## A cast context with this hunter as caster and owner, the kin as the kin.
 func cx(slot: String, ability: String, loc_aim: Vector3, extra := {}) -> Dictionary:
-	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
+	var pw: String = {"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)
+	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, power(pw), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
 	c["hero_col"] = Arch.color(id)
 	c["fire_from"] = slot      # its shots are drawn from the slot's hand or weapon (ShotOrigin.hand)
 	for k in extra:
@@ -833,9 +834,10 @@ func slot_info(slot: String) -> Dictionary:
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()
+			var pip_cap := 0 if single_dash() else int(dmax)
 			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
 			out.merge({"name": String(sd.get("name", "")), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
-				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": pip_cap, "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 ## The RMB's charges as a fraction: the whole ones plus how far the next one has recharged (the HUD's pip fill).
@@ -937,6 +939,8 @@ func dash_charges(class_n: float) -> float:
 
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
+## One plain dash with one cooldown: no charge pips, no Second Wind (Vex's Slipstep, owner 11-16).
+func single_dash() -> bool: return false
 
 ## A shot dodged through this hero's dash (kits that feed on it override).
 func on_perfect_dodge() -> void: pass
@@ -1164,7 +1168,8 @@ func self_pips(n: int, lit: int, armed: bool, dt: float, lift := 0.0, grow := 1.
 		if armed: s *= 1.2 + 0.12 * sin(m.time * 10.0 + i)
 		dat.scale = Vector3.ONE * s
 		var c := res_col().lightened(0.2) if armed else res_col()
-		(dat.material_override as StandardMaterial3D).albedo_color = Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+		var pip_col := Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+		(dat.material_override as StandardMaterial3D).albedo_color = pip_col
 
 ## A flat, unlit, solid colour (pips and plates that must read as their colour, not glow white).
 static func solid_mat(c: Color) -> StandardMaterial3D:

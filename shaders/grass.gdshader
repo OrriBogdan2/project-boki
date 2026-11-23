@@ -26,7 +26,7 @@ void fragment() {
 	vec3 base = COLOR.rgb * mix(vec3(0.92, 0.98, 1.05), vec3(1.07, 1.04, 0.88), vnoise(org.xz * 0.11));
 	vec3 c = base * mix(vec3(0.5, 0.55, 0.6), tip_tint.rgb, tipk);
 	c += base * smoothstep(0.7, 1.0, tipk) * 0.1;
-	vis_f = vis_fog(wpos);
+	vis_f = vis_fog(wpos) * vis_greyness;
 	c = vis_apply(c, vis_f);
 	ALBEDO = c;
 	AO = vis_ao(vis_f);                      // out of sight: the coloured ambient out, its grey back in (vis.gdshaderinc)

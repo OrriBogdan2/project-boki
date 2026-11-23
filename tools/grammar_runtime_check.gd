@@ -87,6 +87,7 @@ func _grt_spec(d: Dictionary) -> AbilitySpec:
 
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	var r: Array
 	var m: Match
