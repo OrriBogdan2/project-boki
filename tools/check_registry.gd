@@ -510,7 +510,6 @@ const CHECKS := {
 	"--parity-strip": ["res://tools/parity_strip.gd", "parity_strip", null],  # our move vs footage frames (GPU)
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],  # a Hero's hand-keyed clips, frame by frame
 	"--edge-suspects": ["res://tools/edge_suspects_shots.gd", "edge_suspects_shots", null],  # GPU, render suspects
-	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],
 	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],  # every Hunter gliding: turns, dive
 	"--turn-shots": ["res://tools/turn_shots.gd", "turn_shots", null],  # before/after strip of turning on the spot
 	"--flue-flight-shots": ["res://tools/flue_flight_shots.gd", "flue_flight_shots", null],  # Cinder's Flue Flight
