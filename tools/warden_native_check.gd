@@ -140,12 +140,22 @@ func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
 		nat.player.current_animation != swing and nat.moves.shown == "cn_u_lance_loop" and nat.moves.weight >= 1.0,
 		"%s: the lance holds its own clip over Meshy's idle (no swing; %s)" % [a, nat.moves.shown]
 	)
-	ok(held["hand"].z < -0.3 and held["hand"].y > 0.8, "%s: the lance's hand is held out ahead (%s)" % [a, held["hand"]])
+	ok(held["hand"].z < -0.2 and held["hand"].y > 0.8, "%s: the lance's hand is held out ahead (%s)" % [a, held["hand"]])
+	s["vel"] = Vector3(0.0, 0.0, -4.6)
+	var leg := nat.skel.find_bone("LeftUpLeg")
+	_at(m, nat, s, "as_lance", 0.6)
+	var stride := nat.skel.get_bone_pose_rotation(leg)
+	_at(m, nat, s, "as_lance", 0.7)
+	ok(
+		nat.player.current_animation == String(nat.plays["run"]) and not stride.is_equal_approx(nat.skel.get_bone_pose_rotation(leg)),
+		"%s: the legs keep running under the lance (%s)" % [a, nat.player.current_animation]
+	)
+	s.erase("vel")
 	var sight := _at(m, nat, s, "as_aim", 0.35)
 	ok(sight["hand"].y > held["hand"].y + 0.1, "%s: the sighting hand rises to the eye (%.2f over %.2f)" % [a, sight["hand"].y, held["hand"].y])
 	var fire := _at(m, nat, s, "as_shot", 0.0)
 	var push := _at(m, nat, s, "as_shot", 0.1)
-	ok(fire["muzzle"].z < -0.3 and fire["muzzle"].y > 1.0, "%s: the bolt leaves her palm on its frame (%s)" % [a, fire["muzzle"]])
+	ok(fire["muzzle"].z < -0.2 and fire["muzzle"].y > 1.0, "%s: the bolt leaves her palm on its frame (%s)" % [a, fire["muzzle"]])
 	ok(push["hand"].z < fire["hand"].z - 0.03, "%s: the palm pushes on past the bolt's frame (%.2f to %.2f)" % [a, fire["hand"].z, push["hand"].z])
 	var blast := _at(m, nat, s, "as_cloak", 0.05)
 	ok(blast["span"] > 1.0 and blast["span"] > before["span"] + 0.4, "%s: both arms wide on the blast frame (%.2f m across)" % [a, blast["span"]])

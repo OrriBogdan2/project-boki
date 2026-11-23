@@ -9,19 +9,19 @@ extends RefCounted
 
 const FADE_IN := 0.08  # s: an upper clip's weight rises
 const FADE_OUT := 0.2  # s: and falls when the move is over
+const REST_DOT := 0.9999  # a key this close to the bone's rest (|dot| of the two turns) leaves it at rest
 
 var rows: Dictionary = {}  # kit move id -> its row
 var anims: Dictionary = {}  # clip name -> Animation
-var over: AnimationPlayer  # plays the upper clips (never advanced: seeked to the kit's clock)
 var skel: Skeleton3D
 var weight := 0.0
 var shown := ""  # the upper clip last laid over the legs
 var shown_t := 0.0  # and its time (it holds while the weight falls)
-var keyed: Dictionary = {}  # upper clip -> its bones (indices)
+var keyed: Dictionary = {}  # upper clip -> [[bone index, rotation track]]
 
 
 ## The moves of `d` for Meshy's skeleton `skel` under `glb`, whose main player is `player`; null when the data has none.
-## Full-body clips join the main player's library, upper clips a second player beside it.
+## Full-body clips join the main player's library; upper clips stay here.
 static func make(glb: Node3D, player: AnimationPlayer, skel_in: Skeleton3D, d: Dictionary) -> WardenNativeMoves:
 	if not d.has("kmoves"):
 		return null
@@ -31,25 +31,18 @@ static func make(glb: Node3D, player: AnimationPlayer, skel_in: Skeleton3D, d: D
 	mv.anims = WardenClipFile.read(glb.get_path_to(skel_in), d.get("clip_files", []))
 	var first := player.get_animation(player.get_animation_list()[0])
 	var lib := player.get_animation_library(player.find_animation_library(first))
-	mv.over = AnimationPlayer.new()
-	mv.over.name = "Moves"
-	mv.over.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
-	var upper := AnimationLibrary.new()
 	for row: Dictionary in mv.rows.values():
 		for key in ["clip", "then"]:
-			if row.has(key):
-				var clip := String(row[key])
-				var anim: Animation = mv.anims[clip]
-				if key == "then":
-					anim.loop_mode = Animation.LOOP_LINEAR
-				var into := upper if bool(row.get("upper", false)) else lib
-				if not into.has_animation(clip):
-					into.add_animation(clip, anim)
-	mv.over.add_animation_library(&"", upper)
-	player.get_parent().add_child(mv.over)
-	mv.over.root_node = player.root_node
-	for clip in upper.get_animation_list():
-		mv.keyed[clip] = mv._bones(upper.get_animation(clip))
+			if not row.has(key):
+				continue
+			var clip := String(row[key])
+			var anim: Animation = mv.anims[clip]
+			if key == "then":
+				anim.loop_mode = Animation.LOOP_LINEAR
+			if bool(row.get("upper", false)):
+				mv.keyed[clip] = mv._bones(anim)
+			elif not lib.has_animation(clip):
+				lib.add_animation(clip, anim)
 	return mv
 
 
@@ -85,23 +78,27 @@ func lay(mv: Dictionary, dt: float) -> void:
 	weight = move_toward(weight, float(on), dt / fade)
 	if weight <= 0.0 or shown == "":
 		return
-	var bones: Array = keyed[shown]
-	var base: Array = []
-	for b: int in bones:
-		base.append(skel.get_bone_pose_rotation(b))
-	if over.current_animation != shown:
-		over.play(shown)
-	over.seek(shown_t, true)
-	for i in bones.size():
-		var b: int = bones[i]
-		skel.set_bone_pose_rotation(b, (base[i] as Quaternion).slerp(skel.get_bone_pose_rotation(b), weight))
+	var anim := anims[shown] as Animation
+	for key: Array in keyed[shown]:
+		var base := skel.get_bone_pose_rotation(key[0])
+		skel.set_bone_pose_rotation(key[0], base.slerp(anim.rotation_track_interpolate(key[1], shown_t), weight))
 
 
-## The bones a clip keys (indices on the skeleton).
+## The bones a clip moves: [bone index on the skeleton, rotation track]. (The import fills the clip with a track of
+## every other bone held at its rest: those stay with the legs' clip.)
 func _bones(anim: Animation) -> Array:
 	var out: Array = []
 	for t in anim.get_track_count():
 		var b := skel.find_bone(anim.track_get_path(t).get_concatenated_subnames())
-		if anim.track_get_type(t) == Animation.TYPE_ROTATION_3D and b >= 0:
-			out.append(b)
+		if b >= 0 and anim.track_get_type(t) == Animation.TYPE_ROTATION_3D and _moves_bone(anim, t, b):
+			out.append([b, t])
 	return out
+
+
+## Whether any key of rotation track `t` is off the rest of bone `b`.
+func _moves_bone(anim: Animation, t: int, b: int) -> bool:
+	var rest := skel.get_bone_rest(b).basis.get_rotation_quaternion()
+	for k in anim.track_get_key_count(t):
+		if absf((anim.track_get_key_value(t, k) as Quaternion).dot(rest)) < REST_DOT:
+			return true
+	return false

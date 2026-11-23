@@ -316,10 +316,10 @@ def clips():
     # Right arm: elbow tucked at the hip, forearm out, palm forward at chest height; the left arm stays loose, bracing a little.
     pole_back = (0.5, -0.8, -0.7)
     spool = P(wR=(0.22, 1.18, 0.36), poleR=(0.5, -0.9, -0.5), handR=(0.0, 0.1, 1.0), wL=(0.30, 1.0, 0.1), poleL=(0.5, -0.8, -0.6), **lean(0.12, -0.2, 0.0, (-0.1, 0.1, 0.0)))
-    snap = P(wR=(0.16, 1.28, 0.58), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.15, 1.0), wL=(0.34, 0.98, 0.04), poleL=(0.5, -0.8, -0.6), **lean(0.06, -0.3, 0.0, (-0.05, 0.12, 0.0)))
-    kick = P(wR=(0.17, 1.26, 0.50), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.2, 1.0), wL=(0.34, 1.0, 0.02), poleL=(0.5, -0.8, -0.6), **lean(-0.04, -0.3, 0.0, (-0.08, 0.12, 0.0)))
-    held = P(wR=(0.16, 1.27, 0.54), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.17, 1.0), wL=(0.34, 0.99, 0.03), poleL=(0.5, -0.8, -0.6), **lean(0.02, -0.3, 0.0, (-0.07, 0.12, 0.0)))
-    buck = P(wR=(0.16, 1.30, 0.50), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.25, 1.0), wL=(0.34, 1.01, 0.01), poleL=(0.5, -0.8, -0.6), **lean(-0.04, -0.32, 0.0, (-0.06, 0.12, 0.0)))
+    snap = P(reachR=0.4, wR=(0.16, 1.28, 0.58), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.15, 1.0), wL=(0.34, 0.98, 0.04), poleL=(0.5, -0.8, -0.6), **lean(0.06, -0.3, 0.0, (-0.05, 0.12, 0.0)))
+    kick = P(reachR=0.4, wR=(0.17, 1.26, 0.50), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.2, 1.0), wL=(0.34, 1.0, 0.02), poleL=(0.5, -0.8, -0.6), **lean(-0.04, -0.3, 0.0, (-0.08, 0.12, 0.0)))
+    held = P(reachR=0.4, wR=(0.16, 1.27, 0.54), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.17, 1.0), wL=(0.34, 0.99, 0.03), poleL=(0.5, -0.8, -0.6), **lean(0.02, -0.3, 0.0, (-0.07, 0.12, 0.0)))
+    buck = P(reachR=0.4, wR=(0.16, 1.30, 0.50), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.25, 1.0), wL=(0.34, 1.01, 0.01), poleL=(0.5, -0.8, -0.6), **lean(-0.04, -0.32, 0.0, (-0.06, 0.12, 0.0)))
     # (the clip starts 0.1 s into the key hold and the roar 0.2 s: the arm is out by 0.1 s, the kick is the roar)
     out["cn_u_lance"] = (0.26, False, [(0.0, rest_pose(), "lin"), (0.05, spool, "out"), (0.1, snap, "out"), (0.16, kick, "out"), (0.26, held, "sm")])
     # the hold (loops 0.5 s at 8 Hz-ish bucking, the same first and last pose)
@@ -329,9 +329,9 @@ def clips():
     out["cn_u_lance_end"] = (0.3, False, [(0.0, held, "lin"), (0.08, dict(snap, **{}), "out"), (0.3, rest_pose(), "sm")])
     # ---- RMB: the palm up to the eye, sighting along the arm (the cast's 0.4 s), then the push on the bolt frame --
     aim0 = P(wR=(0.16, 1.40, 0.40), poleR=(0.5, -0.9, -0.4), handR=(0.0, 0.3, 1.0), wL=(0.30, 1.0, 0.12), poleL=(0.5, -0.8, -0.6), **lean(0.06, -0.3, 0.0, (0.0, 0.3, 0.0)))
-    aim1 = P(wR=(0.11, 1.56, 0.58), poleR=(0.5, -0.9, -0.3), handR=(0.0, 0.1, 1.0), wL=(0.30, 0.98, 0.10), poleL=(0.5, -0.8, -0.6), **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)))
+    aim1 = P(reachR=0.3, wR=(0.11, 1.56, 0.58), poleR=(0.5, -0.9, -0.3), handR=(0.0, 0.1, 1.0), wL=(0.30, 0.98, 0.10), poleL=(0.5, -0.8, -0.6), **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)))
     out["cn_u_aim"] = (0.3, False, [(0.0, rest_pose(), "lin"), (0.1, aim0, "out"), (0.3, aim1, "sm")])
-    sh0 = P(wR=(0.11, 1.57, 0.60), poleR=(0.5, -0.9, -0.3), handR=(0.0, 0.1, 1.0), wL=(0.30, 0.98, 0.10), poleL=(0.5, -0.8, -0.6), **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)))
+    sh0 = P(reachR=0.3, wR=(0.11, 1.57, 0.60), poleR=(0.5, -0.9, -0.3), handR=(0.0, 0.1, 1.0), wL=(0.30, 0.98, 0.10), poleL=(0.5, -0.8, -0.6), **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)))
     push = P(wR=(0.10, 1.62, 0.68), reachR=0.8, poleR=(0.5, -0.9, -0.2), handR=(0.0, 0.18, 1.0), wL=(0.32, 1.0, 0.04), poleL=(0.5, -0.8, -0.6), **lean(-0.12, -0.3, 0.0, (-0.1, 0.3, 0.0)))
     out["cn_u_shot"] = (0.5, False, [(0.0, sh0, "lin"), (0.07, push, "out"), (0.16, dict(push, wR=(0.10, 1.62, 0.64)), "sm"), (0.32, dict(aim1, **lean(0.06, -0.2, 0.0, (0.0, 0.2, 0.0))), "sm"), (0.5, rest_pose(), "sm")])
     # ---- E, Furnace Cloak: a tuck for the blink, then everything flung wide on the blast frame ------------------
