@@ -31,7 +31,7 @@ func run(main: Node) -> void:
 	root.add_child(sun)
 	var cam := Camera3D.new()
 	root.add_child(cam)
-	cam.position = Vector3(0, 0.1, 2.4)
+	cam.position = Vector3(0, -0.1, 1.5)
 	cam.look_at(Vector3(0, -0.2, 0))
 	cam.current = true
 	var seen := {}

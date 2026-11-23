@@ -34,6 +34,7 @@ const FOLD_WISP_FROM := 0.2  # the wisp starts to swell where the Boki folds
 const FOLD_ZIP_FROM := 0.55  # then it zips up to the shoulder
 const BACK := 1.7
 const TINT := 0.85  # how far the glow goes to the type colour at its fullest (0 none, 1 all)
+const FLASH := 0.6  # how far the whole wisp body goes to the tinted glow at the fullest
 const TINT_RISE := 0.2  # the tint is at full from here to TINT_HOLD, as fractions of DURATION
 const TINT_HOLD := 0.5  # overshoot of the Boki's growth
 
@@ -100,14 +101,20 @@ func pose(u: float, burst: bool) -> void:
 
 ## The glow colour at progress u: its own, lifted toward the type colour while the wisp is at its fullest.
 func glow_at(u: float, burst: bool) -> Color:
-	var k := smoothstep(0.0, TINT_RISE, u) * (1.0 - smoothstep(TINT_HOLD, 1.0, u)) if burst \
+	return _glow.lerp(type_col, TINT * _k(u, burst))
+
+
+## 0..1: how far the light is tinted at progress u.
+func _k(u: float, burst: bool) -> float:
+	return smoothstep(0.0, TINT_RISE, u) * (1.0 - smoothstep(TINT_HOLD, 1.0, u)) if burst \
 		else smoothstep(FOLD_WISP_FROM, FOLD_ZIP_FROM, u) * (1.0 - smoothstep(FOLD_ZIP_FROM, 1.0, u))
-	return _glow.lerp(type_col, TINT * k)
 
 
 func _tint(u: float, burst: bool) -> void:
 	var c := glow_at(u, burst)
-	(wisp.get_node("Body") as GeometryInstance3D).set_instance_shader_parameter("rim_col", c)
+	var body := wisp.get_node("Body") as GeometryInstance3D
+	body.set_instance_shader_parameter("rim_col", c)
+	body.set_instance_shader_parameter("flash", FLASH * _k(u, burst))
 	(wisp.get_node("Trail") as CPUParticles3D).color = c.lightened(BokiWispLook.TRAIL_LIGHTEN)
 
 
