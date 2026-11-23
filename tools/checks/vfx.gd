@@ -6,6 +6,8 @@ extends RefCounted
 
 const CHECKS := {
 	"--muzzle-check": ["res://tools/muzzle_check.gd", "muzzle_check", null],  # shots leave the weapon or hand
+	# GPU: sight fog on/off, same frame
+	"--fog-ab-shots": ["res://tools/fog_ab_shots.gd", "fog_ab_shots", null],
 	# glow spheres near a Hunter are capped
 	"--fx-hunter-cap-check": ["res://tools/fx_hunter_cap_check.gd", "fx_hunter_cap_check", null],
 }
