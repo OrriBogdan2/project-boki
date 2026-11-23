@@ -1122,6 +1122,7 @@ archetypes/rimewright.json:e.travel_min	4.5
 archetypes/rimewright.json:model_glow.strength	2.2
 archetypes/rimewright.json:passive.chill_t	4.0
 archetypes/rimewright.json:passive.fan_hits	8
+archetypes/rimewright.json:passive.fan_r	2.4
 archetypes/rimewright.json:passive.fan_splinter	60.0
 archetypes/rimewright.json:passive.splinter_delay	0.4
 archetypes/rimewright.json:passive.splinter_dmg	37.0
