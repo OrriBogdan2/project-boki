@@ -282,7 +282,7 @@ func update(dt: float) -> void:
 	if m.hud:
 		m.hud.msgs.hold = card_up()  # messages wait while the banner is up
 	var sid := id()
-	camps.update()
+	camps.update(dt)
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
 	if got != got_seen:
@@ -325,6 +325,7 @@ func _finish(sid: String) -> void:
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
 	if resumed:
+		camps.told = true  # (a resumed run saw the first camp's countdown: its camps come at once)
 		_restore()
 	_enter()
 
