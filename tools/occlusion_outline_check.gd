@@ -1,6 +1,7 @@
 extends RefCounted
 ## --occlusion-outline-check: your side (you behind a cliff, your teammate, your Boki) wears the cover
-## outline in its side colour, a rival only while in sight (red), an unseen rival never; Low takes it off.
+## outline in its side colour, a rival only while in sight (red), an unseen rival never; Low takes it off. The
+## same overlay draws the dark ground rim on an uncovered silhouette (CLARITYCONTRAST in --clarity-shots measures it).
 ## --occlusion-outline-shots --shots-dir=<dir> (needs a GPU renderer): on the Hollow Crown, you and a
 ## teammate stand behind a cliff, two trees and the stone covers it has (ruin pillars, walls, boulders)
 ## with a rival beside you, once with the outline (<cover>_on.png) and once without (<cover>_off.png),
@@ -62,6 +63,10 @@ func _check() -> void:
 	_expect("a rival in sight wears it in red", _covered(rival) and _tint(rival) == SideColor.foe())
 	rival.unseen = true
 	await _go(0.1)
+	var code: String = (preload("res://shaders/occlusion_outline.gdshader") as Shader).code  # (no defaults headless)
+	var found := RegEx.create_from_string("rim_alpha = ([0-9.]+)").search(code)
+	var rim := found.get_string(1).to_float() if found else 0.0
+	_expect("it draws the ground rim too (rim_alpha %.2f)" % rim, rim > 0.5)
 	_expect("an unseen rival does not", not _covered(rival))
 	_expect("but your side still does", _covered(P) and _covered(mate))
 	rival.unseen = false
