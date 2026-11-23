@@ -177,6 +177,7 @@
 		"lip.L",
 		"lip.R"
 	],
+	"beats": {"win": {"clip": "emote_toss"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["breah_wind", 0.5, "breah_crouch"],
 		["breah_wind", 0.5, "breah_punch"],

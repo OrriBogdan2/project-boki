@@ -70,6 +70,12 @@ func _face(a: Vector2i, d: Vector2i) -> Dictionary:
 		kind = "sheer"
 	elif w.stairs.has(ib):
 		kind = "stair_side"
+	if kind == "stair_side":
+		# a flight's side grows along it: only a lip that is level across the body's width is a ledge of one height
+		var sv := Vector2(d.y, d.x) * 0.4
+		for sgn in [-1.0, 1.0]:
+			if absf(w.ground_at(edge.x + dv.x + sv.x * sgn, edge.y + dv.y + sv.y * sgn) - ga - hb) > 0.1:
+				return {}
 	hb = snappedf(hb, 0.4 if kind == "stair_side" else 0.01)
 	return {
 		"kind": kind,

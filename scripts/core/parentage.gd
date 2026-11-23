@@ -5,8 +5,9 @@ class_name Parentage
 
 const BOTH := -1     # a gift both parents share: the same kind, or a mutation each carried
 
-## What each parent gave: {"species": i, "lean": i, "food": i, "play": i, "muts": {id: i}} with i the
-## parent (0 = a, 1 = b, as in rec["parents"]) or BOTH. A kind of gift the baby didn't get has no key.
+## What each parent gave: {"species": i, "pattern": i, "accent": i, "lean": i, "food": i, "play": i,
+## "muts": {id: i}} with i the parent (0 = a, 1 = b, as in rec["parents"]) or BOTH. A kind of gift the baby
+## didn't get has no key; pattern and accent (its coat's marks and their colour) are added by Unique.bred_coat.
 static func gifts(a: Dictionary, b: Dictionary, baby: Dictionary, a_food: bool) -> Dictionary:
 	var g := {"food": _side(a_food), "play": _side(not a_food)}
 	g["species"] = BOTH if a["species"] == b["species"] else _side(baby["species"] == a["species"])

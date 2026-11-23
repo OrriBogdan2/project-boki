@@ -203,6 +203,9 @@ func _nap_sounds(home) -> void:
 		if String(key).begins_with("nap:"):
 			Sfx.loop_stop(key)
 	Sfx.listener = sleeper["pos"]
+	# holds from earlier steps lapse on the wall clock (250 ms), not on these fixed steps
+	for key in Sfx.loops.keys():
+		if String(key).begins_with("nap:"): Sfx.loop_stop(key)
 	home._move_kin(DT)
 	var on := Sfx.loops.keys().filter(func(key): return String(key).begins_with("nap:"))
 	ok(
@@ -260,6 +263,8 @@ func _spots_part(home, center: Vector3) -> void:
 	var cz := int(center.z)
 	zone["nap"] = [["sunny rock", cx + 4, cz], ["under a tree", cx - 4, cz + 3]]
 	var life: BaseLife = home.life
+	life.r_v["doze"] = 0.0      # these places are for tired naps: a random company doze would send a Boki elsewhere
+	life.r_v["doze_pile"] = 0.0
 	seed(11)
 	home.day_t = 0.4
 	for k in home.kins:
