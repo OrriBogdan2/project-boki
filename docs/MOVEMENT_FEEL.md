@@ -715,7 +715,7 @@ Parity pass (DECISIONS 2026-11-07). Sources: sv/briefs/physics.md, SOURCE_UTILIT
 
 | | Source | Ours (measured) | Tag |
 |---|---|---|---|
-| Pad launch speed | not published or decoded | 17 m/s up (`UtilityUse.PAD_VY`) | [?] |
+| Pad launch speed | not published or decoded | 17 m/s up (hunter_move.json `jump_pad.vy`) | [?] |
 | Pad apex | not published | 9.7 m at 1.15 s, back to pad height after ~2.3 s | [?] (gravity [game data] 14.7) |
 | Pad sideways speed | launches whatever walks onto it | what you brought, at least 6 m/s (`PAD_MIN_HV`; toward your aim if you stood still) | [?] floor |
 | Dash into the pad | keeps the forward momentum, plus a small boost | **was: the dash held you level and ran over the pad, no launch.** Now the pad ends the dash and keeps its speed (10.5 of 10.7 m/s), 1.6x the walk-on's travel | [wiki] fixed; boost size [?], not added |
@@ -1525,3 +1525,9 @@ Feet (`tools/anim_audit_turn.gd`, mean of 8 flips through the stride, the slide 
 | thief | 23% | 83% | 65% | 64% | 37% |
 
 Every Hunter but bulwark's held flip (79 to 88%) slides less; the steady run is unchanged (it bounds what any lock can do: archer's own run slides 98%). In game (`--gameplay-media --media-clip=15 --media-loco=turn --media-log`, world feet at 30 fps) gunslinger's flip went 72 to 50% (held) and 84 to 59% (flipped). No Hunter is under `MAX_SLIDE` 25% on both yet, so the audit prints OPEN lines and fails past `TURN_CEIL` 125% (today's worst, archer flipped 117%, plus a margin). Backlog: "run turn slide" (the loops' own run and backpedal slide; bulwark's held flip).
+
+## Last three estimates (searched 11-23)
+Glider damage while overheated, spike plunge speed and jump-pad launch have no source number, so all three stay ours, tagged `[?]` in `content/rules/hunter_move.json` and pinned by `--move-feel-check` (tools/move_feel_estimates.gd).
+- Overheat burn 3.5% of max health a second (`overheat_burn`): the data notes say only "damage over time"; no clip shows an overheated glider.
+- Spike plunge 6 m/s at least (`glide_spike.fall_vy`): "stun + plummet" is all the data says; no clip shows a spike.
+- Pad launch 17 m/s up, at least 6 m/s on (`jump_pad.vy`, `min_hv`): only arm time and lifetime are sourced; no clip shows a launch.
