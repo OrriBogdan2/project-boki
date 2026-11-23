@@ -3,6 +3,7 @@ extends "res://tools/clip_shots.gd"
 ## them (Models.hunter + the model's pose node), scratch-tree version of the e28953f4e4f harness. Per hunter and
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
 ## deg); with --close the same poses from eye height and knee height: <clip>_<k>_eye.jpg, <clip>_<k>_knee.jpg.
+## --film shoots every 2nd step of each clip, --yaw=DEG picks the view, --clips=a,b the clips.
 ## marks.txt lists the model's kind (contract / native), tris and the state each clip was fed.
 
 const DT := 1.0 / 30.0
@@ -19,7 +20,7 @@ const SAMPLES := {
 	"run": [0.0, 0.12, 0.24],
 	"dash": [0.0, 0.1, 0.2],
 	"glide": [0.2, 0.6, 1.0],
-	"jump": [0.05, 0.3, 0.6],
+	"jump": [0.2, 0.6, 1.0, 1.4],
 	"attack": [0.1, 0.25, 0.45],
 	"hit": [0.05, 0.15, 0.35]
 }
@@ -29,6 +30,8 @@ const FILM := {"idle": 1.6, "run": 0.9, "dash": 0.5, "glide": 1.0, "hit": 0.6, "
 var close := false
 var film := false
 var native := false
+var yaw_deg := INF  # --yaw=DEG: every clip from this yaw (0 = back to the camera, 180 = face on, -90 = side)
+var only: PackedStringArray = []  # --clips=a,b: just these clips
 
 
 func run(main: Node) -> void:
@@ -47,6 +50,10 @@ func run(main: Node) -> void:
 			close = true
 		if a == "--film":
 			film = true
+		if a.begins_with("--yaw="):
+			yaw_deg = float(a.substr(6))
+		if a.begins_with("--clips="):
+			only = a.substr(8).split(",", false)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -147,7 +154,11 @@ func _hunter(id: String, dir: String) -> void:
 	var kind := "native" if native else "contract"
 	marks.append("kind %s glb %s tris %d body_h %.2f" % [kind, WardenGlb.path(id), bx[2], bx[1]])
 	for clip in FILM.keys() if film else CLIPS:
+		if not only.is_empty() and not only.has(clip):
+			continue
 		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+		if yaw_deg != INF:
+			yaw = deg_to_rad(yaw_deg)
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
 		if film:  # every 2nd step (15 fps) over a clip's span
