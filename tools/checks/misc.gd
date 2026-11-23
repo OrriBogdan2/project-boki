@@ -8,4 +8,5 @@ const CHECKS := {
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
 	"--drop-merge-audit": ["res://tools/drop_merge_check.gd", "drop_merge_check", "audit"],  # ground audit, not gated
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
+	"--tester-feedback-check": ["res://tools/tester_feedback_check.gd", "tester_feedback_check", null],  # tester 11-19
 }

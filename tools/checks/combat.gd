@@ -5,8 +5,6 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
-	# tester 11-19 kit notes
-	"--tester-feedback-check": ["res://tools/tester_feedback_check.gd", "tester_feedback_check", null],
 	"--hearth-lamp-check": ["res://tools/hearth_lamp_check.gd", "hearth_lamp_check", null],  # Hearth Lamp revive beacon
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 }
