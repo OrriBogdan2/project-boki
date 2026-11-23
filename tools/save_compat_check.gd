@@ -91,6 +91,9 @@ func _check_save(p: String, n: String) -> void:
 				_lost(raw[k], Save.d.get(k), k, lost)
 		for i in (raw["roster"] as Array).size():
 			for k in ["name", "level", "species"]:
+				# a Boki whose next form got its art evolves on load (Evo.catch_up): the old species is kept in "was"
+				if k == "species" and (Save.d["roster"][i].get("was", []) as Array).has(raw["roster"][i].get(k)):
+					continue
 				if raw["roster"][i].has(k):
 					_lost(raw["roster"][i][k], Save.d["roster"][i].get(k), "roster.%d.%s" % [i, k], lost)
 	if n.ends_with("_bred.json"):
