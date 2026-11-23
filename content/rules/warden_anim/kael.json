@@ -53,9 +53,9 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "exdash"
+		"dive": "exdash", "fade_out": 0.25
 	},
-	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13}},
+	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1, "fade": 0.2}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13, "fade": 0.25}},
 	"derive": {
 		"ult_recover": {
 			"from": "riposte",
@@ -91,6 +91,7 @@
 		, "air_legs": true},
 		"jug_slam": {
 			"clip": "slam",
+			"fade": 0.3,
 			"time": [[0, 0], [0.6, 0.6], [0.7, 0.633], [1.15, 1.133]],
 			"blend_out": 0.45
 		},

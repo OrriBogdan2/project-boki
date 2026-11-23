@@ -66,6 +66,7 @@ var team_land := {}                # team -> match time its first hunter landed
 var team_stay := {}                # team -> seconds it means to stay out (bots)
 var median := 1.0
 var _med_t := 0.0
+var _camp_t := 0.0
 var bounty_cd := {}                # hunter nid -> match time it may carry a bounty again
 var _names: Array = []
 var stats := {"joined": 0, "prepop": 0, "prepop_dead": 0, "landed": 0, "floors": [], "catchup_xp": 0.0, "xp_all": 0.0,
@@ -277,7 +278,7 @@ func after_setup() -> void:
 			continue
 		if rng.randf() < frac:
 			_empty_chest(c); opened += 1
-	var cleared: int = m.camps.picked_over(frac, rng) if m.camps else 0      # (some come back soon: Camps)
+	var cleared := m.camps.picked_over(frac, rng)
 	if m.blight:
 		for team in team_land:
 			m.blight.land_at[team] = float(team_land[team])
@@ -397,6 +398,10 @@ func tick(dt: float) -> void:
 		_update_median()
 		_update_bounties()
 		_track()
+	_camp_t -= dt
+	if _camp_t <= 0.0:
+		_camp_t = 5.0
+		m.camps.comeback()
 
 func _wave_in_air(w: Dictionary) -> bool:
 	var teams: Array = w["teams"]
