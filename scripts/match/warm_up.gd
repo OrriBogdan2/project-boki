@@ -213,8 +213,10 @@ const BATCH := 4
 const BATCH_MIN := 2
 ## The most stand-ins a batch grows to. Doubling without a cap reached batches of 32-64, and when such a batch met a
 ## run of new pipelines it was a 1.5 s frame (RTX 4090, Forward+, jobq 120840): the next batch is also sized from the
-## last one's cost per stand-in.
+## last one's cost per stand-in. Forward+ builds each new pipeline as it first draws (~60 ms each from a cold cache on
+## the 4090, so a batch of 16 was still a 1 s frame, jobq 121543): there a batch stays small (BATCH_MAX_RD).
 const BATCH_MAX := 16
+const BATCH_MAX_RD := 4
 const FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
@@ -383,7 +385,8 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	var setups := [[false, false]]
 	if RenderingServer.get_current_rendering_driver_name() == "opengl3":
 		setups = [[false, false], [true, false], [false, true], [true, true]]
-	var n := BATCH
+	var cap := BATCH_MAX if setups.size() > 1 else BATCH_MAX_RD
+	var n := mini(BATCH, cap)
 	var i := 0
 	var batches := 0
 	while i < list.size():
@@ -432,7 +435,7 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 			n = maxi(BATCH_MIN, n / 2)
 		elif extra < FRAME_MS * 0.6:
 			var fit := int(FRAME_MS / maxf(0.5, extra / batch.size()))
-			n = clampi(mini(n * 2, fit), BATCH_MIN, BATCH_MAX)
+			n = clampi(mini(n * 2, fit), BATCH_MIN, cap)
 	await m.get_tree().process_frame
 	for li in lights.size():
 		if is_instance_valid(lights[li]):
