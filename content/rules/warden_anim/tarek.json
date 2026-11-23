@@ -41,7 +41,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.65, "cycle_s": 0.55, "stride": [1.5, 1.2], "foot_mps": [2.89, 6.3], "back_foot_mps": [2.84, 6.55], "side_foot_mps": [1.24, 1.64],
+		"run_speed": 4.65, "cycle_s": 0.55, "stride": [1.5, 1.0], "foot_mps": [2.89, 6.11], "back_foot_mps": [2.84, 6.55], "side_foot_mps": [1.24, 1.64],
 		"side_foot_mps": [1.0, 2.0], "arm_swing": {"L": 0.5, "R": 0.5}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.16,
@@ -53,7 +53,7 @@
 		"glide": "glide",
 		"dive": "dive"
 	},
-	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
+	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08, "fade": 0.25}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13, "fade": 0.25}},
 	"kmoves": {
 		"breah_throw": {
 			"clip": "lmb_throw",
@@ -79,6 +79,10 @@
 		"breah_leap": {
 			"clip": "rmb_leap",
 			"hold_from": 0.3
+		, "fade_out": 0.6},
+		"breah_windup": {
+			"clip": "rmb_gather",
+			"hold_from": 0.16
 		},
 		"breah_slam": {
 			"clip": "rmb_slam",
@@ -173,6 +177,7 @@
 		"lip.L",
 		"lip.R"
 	],
+	"beats": {"win": {"clip": "emote_toss"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["breah_wind", 0.5, "breah_crouch"],
 		["breah_wind", 0.5, "breah_punch"],

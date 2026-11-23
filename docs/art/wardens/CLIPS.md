@@ -38,7 +38,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; one landing `clip` timed two ways by the fall speed (`HunterAnim.land_tier`: under
   4 m/s, a kerb, nothing plays; a plain jump's 6.8 m/s is the `hop`; 8.5 m/s up, a terrace drop, or any glide's end, is
   the `drop`). Each tier: `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body
-  standing, `moving` s while he runs on (default `dur`), `rate` times the clip's speed (default 1). The source is up and
+  standing, `moving` s while he runs on (default `dur`), `rate` times the clip's speed (default 1), `fade` / `out` s the clip blends in and back to the legs (default 0.1 / 0.16; `--cast-pop-check` POPDEG, [LAND_BLEND_POPS.md](../anim_audit/LAND_BLEND_POPS.md)); `air.fade_out` s the fall and glide poses take to let go on touchdown (default 0.12). The source is up and
   moving ~0.15 s after any touchdown, so `moving` stays near 0.1. `--clip-check` measures the jump, the drop, a glide's
   end and a kerb through the clips (take-off, apex, dip, legs back, recovery: the JL rows); `--jump-land-shots --way=`
   films them at the match camera (docs/art/anim_audit/LANDING_WEIGHT.md).
@@ -90,6 +90,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   step. No key: 0.26 s, 0.5 rad. No feet (`rig_root`): no step.
 - `cc` (scripts/heroes/warden_cc.gd): how the Hero fights crowd control, laid over the clips and in and out in 0.1 s. A stun plays the `stun` state (its sway loop); a root keeps the legs planted on the idle while the torso pulls (`pull` rad of lean, `tug_hz` tugs a second, `twist` rad of wring); Grounded drops into the `crouch` layer (no dip) and bows the head `bow` rad at the cords. `--clip-check` asserts all three for every Hero.
 - `climb` (mantle, ledge): {clip, `rise`}. A ledge rise (Hunter `_rise_k`, 0 at the start of the face, 1 at the lip) seeks the mantle clip to progress x `rise` s, so the hands meet the lip when the body does; a ledge float (dash off an edge) hangs `rise` s; either then runs on to the clip's end unless a move, the glider or death takes over. Keyed with `tools/art1/glb_climb_clips.py` (no Blender). A model without the clips (or the key) plays the procedural pose.
+- `beats`: the result beats (`scripts/heroes/warden_beats.gd`), win / lose: `{clip}` (an existing clip: win is each Hunter's own emote, lose its downed clip), `loop_from` (s, 0) where it loops once played, `upper` (false: the legs go to the clip too). The results card's stage plays them through the state keys `beat` and `beat_t`.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 - `blink`: the lids' closed pose off their rest, `turn` {bone: axis x angle, rad} or `move` {bone: m}, in the bone's own frame. WardenBlink closes them over the clip every 2-6 s in close-ups only ([BLINK.md](BLINK.md)).
 - No wall clip: a wall kick or bounce keeps the air's rise or fall, and `WardenWall` (`scripts/heroes/warden_wall.gd`) plants

@@ -21,7 +21,6 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
-const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
 const HOLD_POSE_T := 0.1       # s a key is down before a hold clip shows (a tap of up to 4 steps never shows one)
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
@@ -38,6 +37,7 @@ var fx_t := 0.0
 var tell := ""                 # "" | "half" | "full": the resource tell enemies read
 var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
+var windups := {}              # slot -> the Sfx handles of its wind-up sounds, cut if the cast breaks (KitWindup)
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
 var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
@@ -122,6 +122,7 @@ func _drop_holds() -> void: pass
 ## state this hunter shows. Call this, not _drop_holds, so the shared telegraphs always go with the holds.
 func drop_holds() -> void:
 	_drop_holds()
+	KitWindup.drop_all(self)
 	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
@@ -152,8 +153,8 @@ func e_recast_at() -> Vector3: return h.pos           # where E's recast acts (t
 ## The base reports the Boki combo setups (Combos) this hunter or its Boki put on a foe.
 func combo_marks(out: Array) -> void:
 	for f in m.foes_of(h.team):
-		for id in f.marks:
-			var mk: Dictionary = f.marks[id]
+		for ent_id in f.marks:
+			var mk: Dictionary = f.marks[ent_id]
 			var left := float(mk["until"]) - float(m.time)
 			if mk["owner"] == h and left > 0.0:
 				out.append(RecastCue.mark(f, 0, left, float(mk["window"]), true))
@@ -179,7 +180,7 @@ func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against
 func move_k() -> float: return 1.0
 ## The kit's own move-speed burst as a share of run speed; it adds to the others (HunterMove.speed_bonus).
 func speed_bonus() -> float: return 0.0
-## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
+## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last Loco.press_buffer.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
@@ -187,6 +188,8 @@ func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's 
 func fire_ok() -> bool: return true
 ## The attack key, if this kit runs the weapon's attack itself (true = handled; HunterAttack.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
+## s until the kit's own attack cadence (a burst's pause, its next dart) lets a fresh tap go at once (0: now).
+func fire_wait() -> float: return 0.0
 ## Whether the attack key is holding now (a draw, a charge, a hose): the held-fire checks read it, kits with their
 ## own hold set it.
 func lmb_holding() -> bool: return h.draw_t >= 0.0 or h.mel_hold > 0.0
@@ -217,8 +220,6 @@ func sound_tick(_dt: float) -> void:
 	pass
 
 func tick(dt: float) -> void:
-	if KinMerge.transforming(h):
-		drop_holds()
 	if not h.wpn.get("ammo", true):
 		h.ammo = int(h.wpn["mag"])        # a weapon with no ammo (Data.weapon_stats): nothing ever runs dry
 	var rate := 1.0 + h.gear_stat("cdr")
@@ -265,7 +266,7 @@ func tick(dt: float) -> void:
 	_tick_charge(dt)
 	_tick_recast(dt)
 
-## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+## An early recast press waits Loco.press_buffer for its window to open (armed), then goes; the local hunter's cues.
 func _tick_recast(dt: float) -> void:
 	if not recast_buf.is_empty():
 		var w := recast_window()
@@ -281,7 +282,7 @@ func _tick_recast(dt: float) -> void:
 		RecastCue.track(self, dt)
 
 func buffer_recast(slot_id: String) -> void:
-	recast_buf[slot_id] = RECAST_BUFFER
+	recast_buf[slot_id] = Loco.press_buffer
 
 func held(which: String) -> bool:
 	match which:
@@ -296,7 +297,7 @@ func _r_end() -> void: pass
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
 ## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
-## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+## its last Loco.press_buffer for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
 func lock_left() -> float: return 0.0
 ## A slot's body-turn rule from the kit JSON's "turn" block (the table in docs/heroes/dash_interactions.md): for
 ## the "early" window (wind-up, channel) and the "late" one (release), "free", "locked" or a cap in deg/s.
@@ -324,8 +325,17 @@ func glide_cancel() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
-func busy() -> bool:
+## The body can't act at all (down, out, stunned...). A kit's busy() beyond this is its own cast lock.
+func disabled() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0
+
+func busy() -> bool:
+	return disabled()
+
+## The kit's own cast lock (its ult planting the body) refuses a press of `slot` now: DashFlow holds the press for
+## the lock's end (docs/decisions/0022-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
+func lock_refuses(_slot: String) -> bool:
+	return busy() and not disabled()
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
@@ -714,9 +724,11 @@ static func _clamp_parts(sd: Dictionary) -> void:
 			_clamp_parts(sub)
 
 ## A cast context with this hunter as caster and owner, the kin as the kin.
-func cx(slot: String, ability: String, aim: Vector3, extra := {}) -> Dictionary:
-	var c := KinExec.make_cx(m, h, h.kin, h, aim, power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
+func cx(slot: String, ability: String, loc_aim: Vector3, extra := {}) -> Dictionary:
+	var pw: String = {"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)
+	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, power(pw), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
 	c["hero_col"] = Arch.color(id)
+	c["fire_from"] = slot      # its shots are drawn from the slot's hand or weapon (ShotOrigin.hand)
 	for k in extra:
 		c[k] = extra[k]
 	return c
@@ -853,35 +865,35 @@ const NET_RETIMES := 5
 const NET_RESYNC := 0.3        # s: a resend whose age is off by more than this restarts the copy (latency, the snap)
 const NET_CLEAR := "-"
 
-static func net_move(h: Hunter) -> Array:
-	var k: ArchKit = h.ak
+static func net_move(hnt: Hunter) -> Array:
+	var k: ArchKit = hnt.ak
 	if k == null:
 		return ["", 0.0]
 	if k.anim_id == "":
 		return [NET_CLEAR, 0.0]
-	if h.m.time - k.anim_at > NET_MOVE_LIFE:
+	if hnt.m.time - k.anim_at > NET_MOVE_LIFE:
 		return ["", 0.0]
-	return [k.anim_id, snappedf(h.m.time - k.anim_at, NET_AGE_SNAP) + NET_RETIME_STEP * (k.anim_rt % NET_RETIMES)]
+	return [k.anim_id, snappedf(hnt.m.time - k.anim_at, NET_AGE_SNAP) + NET_RETIME_STEP * (k.anim_rt % NET_RETIMES)]
 
 ## A remote hunter's move starts when the id changes, the sender played or re-timed it again, or its clock says
 ## it restarted, then plays on locally like any kit move; NET_CLEAR ends it. Old hosts send nothing and the
 ## hunter just keeps its weapon poses.
-static func apply_net_move(h: Hunter, it: Array) -> void:
-	if h.ak == null or it.size() <= NET_MOVE_AT + 1:
+static func apply_net_move(hnt: Hunter, it: Array) -> void:
+	if hnt.ak == null or it.size() <= NET_MOVE_AT + 1:
 		return
-	var id := String(it[NET_MOVE_AT])
-	if id == "":
+	var ent_id := String(it[NET_MOVE_AT])
+	if ent_id == "":
 		return
-	if id == NET_CLEAR:
-		h.ak.anim_id = ""
+	if ent_id == NET_CLEAR:
+		hnt.ak.anim_id = ""
 		return
 	var wire := float(it[NET_MOVE_AT + 1])
 	var rt := roundi(fposmod(wire, NET_AGE_SNAP) / NET_RETIME_STEP) % NET_RETIMES
 	var age := wire - NET_RETIME_STEP * rt
-	var k: ArchKit = h.ak
-	if k.anim_id != id or k.anim_rt != rt or absf((h.m.time - k.anim_at) - age) > NET_RESYNC:
-		k.anim_id = id
-		k.anim_at = h.m.time - age
+	var k: ArchKit = hnt.ak
+	if k.anim_id != ent_id or k.anim_rt != rt or absf((hnt.m.time - k.anim_at) - age) > NET_RESYNC:
+		k.anim_id = ent_id
+		k.anim_at = hnt.m.time - age
 		k.anim_rt = rt
 
 ## Moves the playing move's clock to `at` (a hit that jumps the move to its impact key); other games follow it
@@ -1024,8 +1036,8 @@ func hand_pos(right: bool) -> Vector3:
 		hand = h.anim.hand_r if right else h.anim.hand_l
 	if hand != null and is_instance_valid(hand) and hand.is_inside_tree():
 		return hand.global_position
-	var d := h.aim_dir()
-	return h.pos + Vector3(d.x * 0.4, 1.3 * float(h.cdat.get("scale", 1.0)), d.y * 0.4)
+	var dat := h.aim_dir()
+	return h.pos + Vector3(dat.x * 0.4, 1.3 * float(h.cdat.get("scale", 1.0)), dat.y * 0.4)
 
 ## A node that follows the hunter in world space (top_level child, so it dies with the hunter).
 func own_node() -> Node3D:
@@ -1058,8 +1070,8 @@ func net_bolt(a: Vector3, b: Vector3, col: Color) -> void:
 ## The velocity the hunter snapshot reports: the body's own, or what a kit move that places the body itself
 ## (holding vel at zero so the physics leaves it alone) reports instead, so NetSmooth on the other game
 ## draws the move instead of a jump.
-static func net_vel(h: Hunter) -> Vector3:
-	return h.ak.move_vel() if h.ak else h.vel
+static func net_vel(hnt: Hunter) -> Vector3:
+	return hnt.ak.move_vel() if hnt.ak else hnt.vel
 
 func move_vel() -> Vector3:
 	return h.vel
@@ -1118,13 +1130,13 @@ func self_pips(n: int, lit: int, armed: bool, dt: float, lift := 0.0, grow := 1.
 		var node := own_node()
 		var ds: Array = []
 		for i in n:
-			var d := MeshInstance3D.new()
-			d.mesh = Models.box(0.17, 0.17, 0.17)
-			d.material_override = solid_mat(res_col())
-			d.rotation = Vector3(0.0, 0.0, PI * 0.25)
-			d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			node.add_child(d)
-			ds.append(d)
+			var dat := MeshInstance3D.new()
+			dat.mesh = Models.box(0.17, 0.17, 0.17)
+			dat.material_override = solid_mat(res_col())
+			dat.rotation = Vector3(0.0, 0.0, PI * 0.25)
+			dat.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			node.add_child(dat)
+			ds.append(dat)
 		spips = {"node": node, "d": ds, "lit": 0, "pop": 0.0}
 	var node: Node3D = spips["node"]
 	if not is_instance_valid(node):
@@ -1145,15 +1157,16 @@ func self_pips(n: int, lit: int, armed: bool, dt: float, lift := 0.0, grow := 1.
 	var ds: Array = spips["d"]
 	var rad := (0.22 + 0.06 * ds.size()) * grow
 	for i in ds.size():
-		var d: MeshInstance3D = ds[i]
+		var dat: MeshInstance3D = ds[i]
 		var ang := a + TAU * i / float(ds.size())
-		d.position = Vector3(cos(ang) * rad, 0.0, sin(ang) * rad)
+		dat.position = Vector3(cos(ang) * rad, 0.0, sin(ang) * rad)
 		var on := i < lit
 		var s := grow * ((1.0 + float(spips["pop"]) * 0.6) if on else 0.6)
 		if armed: s *= 1.2 + 0.12 * sin(m.time * 10.0 + i)
-		d.scale = Vector3.ONE * s
+		dat.scale = Vector3.ONE * s
 		var c := res_col().lightened(0.2) if armed else res_col()
-		(d.material_override as StandardMaterial3D).albedo_color = Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+		var pip_col := Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+		(dat.material_override as StandardMaterial3D).albedo_color = pip_col
 
 ## A flat, unlit, solid colour (pips and plates that must read as their colour, not glow white).
 static func solid_mat(c: Color) -> StandardMaterial3D:
@@ -1255,9 +1268,9 @@ func _tick_charge(dt: float) -> void:
 		m.fx.telegraph_progress(ring2, k)
 	var g2: Node3D = chg.get("glow")
 	if g2 and is_instance_valid(g2):
-		var d := h.aim_dir()
+		var dat := h.aim_dir()
 		g2.visible = tells_visible() and shows_charge_ball()
-		g2.global_position = h.position + Vector3(d.x * 0.6, 1.05 * float(h.cdat.get("scale", 1.0)), d.y * 0.6)
+		g2.global_position = h.position + Vector3(dat.x * 0.6, 1.05 * float(h.cdat.get("scale", 1.0)), dat.y * 0.6)
 		var full_pulse := (0.3 * sin(m.time * 30.0)) if bool(chg["full"]) else 0.0
 		g2.scale = Vector3.ONE * (0.25 + 1.35 * k + full_pulse)
 	# the wind-up voice: ticks that climb in pitch and volume and come faster as it fills
@@ -1278,8 +1291,8 @@ func _charge_full_tick(col: Color) -> void:
 	var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
 	m.sfx("ab_ready", h.pos, -3.0 if h.is_local() else -7.0, float(v[2]) * 0.6)
 	m.sfx(String(v[0]), h.pos, -4.0, float(v[2]) * 1.15)
-	var d := h.aim_dir()
-	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.05, d.y * 0.6), col.lightened(0.4), 0.9, 0.08)
+	var dat := h.aim_dir()
+	m.fx.flash(h.pos + Vector3(dat.x * 0.6, 1.05, dat.y * 0.6), col.lightened(0.4), 0.9, 0.08)
 	m.fx.body_glow(h.pos, col)
 
 ## Let go: the ring and glow go, and the release punches in proportion to the charge.

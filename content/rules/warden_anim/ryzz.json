@@ -20,7 +20,7 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.8, "stride": [1.5, 1.5], "foot_mps": [1.65, 4.99], "back_foot_mps": [1.83, 5.87], "side_foot_mps": [1.74, 5.3], "start_phase": 0.72
+		"walk_speed": 2.2, "run_speed": 4.8, "stride": [1.5, 1.5], "foot_mps": [1.65, 4.6], "back_foot_mps": [1.83, 5.87], "side_foot_mps": [1.74, 5.3], "start_phase": 0.72
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.65,
 		"plants": {"crouch_b": {"L": [0.25], "R": [0.0]}, "crouch_f": {"L": [0.25], "R": [0.5]}, "crouch_l": {"L": [0.25], "R": [0.517]}, "crouch_r": {"L": [0.25], "R": [0.517]}}
@@ -44,6 +44,7 @@
 	"cc": {"pull": 0.22, "tug_hz": 2.0, "twist": 0.18, "bow": 0.2},
 	"procedural": ["base"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "index.L", "index2.L", "curl.L", "curl2.L", "thumb.L", "index.R", "index2.R", "curl.R", "curl2.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R", "gum", "rod.0", "rod.1", "rod.2", "rod.3", "rodlit.0", "rodlit.1", "rodlit.2", "rodlit.3"],
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["mage_dash", 0.4, "stun"],
 		["mage_dash", 0.4, "mage_dash_go"],
