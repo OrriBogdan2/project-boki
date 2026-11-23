@@ -81,10 +81,15 @@ as Meshy made them; only the vertex data is replaced) and packs it with `native_
 Sable weight fixes are not applied to these. Tenzo rides `orbit_stones`, Motley `orbit_cards`, both on `Head`.
 Every state plays one of the six clips (the same map as Sable's), so none can T-pose.
 
-## Grimble (dredge): goo arm and pack skinning (r6)
+## Grimble (dredge): goo arm, pack, coin cap (r7)
 `art/wardens/dredge/dredge_meshy.glb` (skin-native, skin-goo, hoard pack, coin cap) is the r5 body re-skinned by
-`tools/meshy/dredge_reskin.py` (`--stretch FILE.glb` prints the torn-edge report). Meshy fused the goo arm's tail and
-puddle to the right shin, so the arm dragged a ribbon to the floor. Goo above 0.8 m rides the arm and torso bones,
-goo below it (tail, puddle, the shin contact) the leg bones; the cut between is goo on goo, capped, so no shin skin is
-exposed. The pack is rigid on the spine. Worst edge stretch over Idle/Attack/run/walk/jump: goo 330x -> 5x, pack 137x -> 3x,
-skin 31x -> 7x (r5 -> r6).
+`tools/meshy/dredge_reskin.py OUT R5 R3 [tail_arm]` (`--stretch FILE.glb` lists edges stretched >3x and over 6 cm).
+- Goo: one mesh, no cuts (r6 cut it at 0.8 m, which left floating pieces). Own vertex copies, Meshy's weights without
+  any leg bone, one weight per welded position (UV seams used to tear), a blend from the arm chain (above 0.9 m) to
+  the hips (below 0.3 m; `tail_arm` is the share of arm motion its end keeps), so the tail stays near the floor.
+- Skin: the shin Meshy fused the goo to carries no arm weight. The skin around its holes (they show black ink hull
+  once the goo moves off them) gets an inside-out lining 4 mm behind it, on the same bones.
+- Pack: rigid on the spine. Coin cap: texture hue-shifted orange to gold, 0.7x about the skull.
+Longest goo edge over Idle/Attack/run/walk/jump: 0.16 m idle, 0.20 run, 0.26 Attack at 0.5 s (1366 edges >3x and over
+6 cm there; r6 35 but cut in pieces); skin 0.22 m (as r6).
+The gun's hip is data (`holster.hip.pos`, x +0.17 = his left, where the gauntlet draws it).

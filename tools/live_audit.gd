@@ -1,5 +1,6 @@
 extends "res://tools/clip_shots.gd"
-## --live-audit --shots-dir=<dir> [--wardens=a,b] [--size=1024] [--close] [--seq: idle, run, attack, hit at 30 fps]:
+## --live-audit --shots-dir=<dir> [--wardens=a,b] [--size=1024] [--close] [--yaw=<deg>]
+## [--seq: idle, run, attack, hit at 30 fps]:
 ## audit render of Hunters as the game plays
 ## them (Models.hunter + the model's pose node), scratch-tree version of the e28953f4e4f harness. Per hunter and
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
@@ -27,6 +28,7 @@ const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
 var seq := false
+var yaw_turn := NAN  # --yaw=<deg>: every clip from this turn (front, side, back views)
 var grip := false  # --grip: the gun hand up close, one shot a sample (grip strip)
 var hand_at := Vector3.ZERO
 var native := false
@@ -50,6 +52,8 @@ func run(main: Node) -> void:
 			seq = true
 		if a == "--grip":
 			grip = true
+		if a.begins_with("--yaw="):
+			yaw_turn = deg_to_rad(float(a.substr(6)))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -172,6 +176,8 @@ func _hunter(id: String, dir: String) -> void:
 	)
 	for clip in ["idle", "run", "attack", "hit"] if seq else CLIPS:
 		var yaw := SIDE_YAW if clip == "run" and not close and not seq else THREE_Q_YAW
+		if not is_nan(yaw_turn):
+			yaw = yaw_turn
 		model.rotation.y = yaw
 		# (HunterAnim's aim_k: the gun in hand while he fires)
 		model.set_meta(WardenHolster.DRAW, 1.0 if clip == "attack" else 0.0)
