@@ -242,9 +242,11 @@ func use() -> void:
 	_place()
 	GardenSfx.countdown(h, mat.position)
 
+
 ## True while a round is on (GardenMusic ducks the music for it).
 func playing() -> bool:
 	return run != null
+
 
 ## A press: true when the round took it.
 func input(event: InputEvent) -> bool:
@@ -292,7 +294,7 @@ func along(side: int) -> float:
 			return run.dist * clampf(run.state_t / run.go[side], 0.0, 1.0)
 		Run.S.BRING:
 			var out: float = run.dist * clampf((run.go[side] + run.lag[side]) / maxf(run.go[side], 0.01), 0.0, 1.0)
-			return out * (1.0 - clampf(run.state_t / float(run.R["bring_s"]), 0.0, 1.0))
+			return out * (1.0 - clampf(run.state_t / float(run.r_x["bring_s"]), 0.0, 1.0))
 	return 0.0
 
 
@@ -318,7 +320,7 @@ func _aim_cue() -> void:
 	var land: Vector3 = mat.position + Vector3(0, 0, run.dist)
 	var g: float = h._ground_h(land.x, land.z)
 	land.y = g if g > -50.0 else 0.0
-	cue.aim(land, clampf(run.state_t / float(run.R["toss_s"]), 0.0, 1.0), run.head != "")
+	cue.aim(land, clampf(run.state_t / float(run.r_x["toss_s"]), 0.0, 1.0), run.head != "")
 
 
 ## Where the seed is, relative to the mat: in the air on the toss, on the ground while chased, in the
@@ -326,7 +328,7 @@ func _aim_cue() -> void:
 func _seed_at() -> Vector3:
 	match run.state:
 		Run.S.TOSS:
-			var u := clampf(run.state_t / float(run.R["toss_s"]), 0.0, 1.0)
+			var u := clampf(run.state_t / float(run.r_x["toss_s"]), 0.0, 1.0)
 			return Vector3(0, 0.5 + sin(u * PI) * ARC, run.dist * u)
 		Run.S.CHASE:
 			return Vector3(0, SEED_R, run.dist)
