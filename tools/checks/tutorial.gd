@@ -7,4 +7,5 @@ extends RefCounted
 const CHECKS := {
 	# every first-time hint shows once per save: three matches with a save and load between
 	"--hint-once-check": ["res://tools/hint_once_check.gd", "hint_once_check", null],
+	"--tut-first-evolve-check": ["res://tools/tut_first_evolve_check.gd", "tut_first_evolve_check", null],
 }
