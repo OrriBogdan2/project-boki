@@ -417,7 +417,8 @@ func _ink_drops(types: Array) -> void:
 	m.queue_free()
 
 
-## Bred babies roll their own sex, 50/50, whatever their parents' sexes.
+## Bred babies roll their own sex, 50/50, whatever their parents' sexes. (The baby's species is fixed to one with an even
+## share: a random one can be a kind that leans female, BokiQuirks.female_share, which skews the split.)
 func _sex() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
@@ -428,7 +429,7 @@ func _sex() -> void:
 		b["dna"]["sex"] = pair[1]
 		var f := 0
 		for i in SEX_BABIES:
-			if String(Care.breed(a, b, rng)["dna"]["sex"]) == "f":
+			if String(Care.breed(a, b, rng, "cindle")["dna"]["sex"]) == "f":
 				f += 1
 		var share := float(f) / SEX_BABIES
 		ok(
