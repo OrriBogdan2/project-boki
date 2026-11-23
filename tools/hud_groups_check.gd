@@ -16,6 +16,7 @@ extends RefCounted
 ##   5. the tutorial's HUD grows with its steps (HudReveal "tut_from"): minimap + vitals on the landing, the ability
 ##      row and weapon card from the shoot step, the Boki box from the G step, the belt from the loot step, no counters
 ##      (it draws none); never above TUT_MAX groups
+##   6. the gear strip and the perk row count only once drawn (HudReveal "gear" / "perks", then an item held)
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
@@ -140,6 +141,20 @@ func run(main: Node) -> void:
 	ok(not HudGroups.new_player(), "a save with %d expeditions is not new" % HudGroups.NEW_PLAYER_MATCHES)
 	ok(on_screen_has(hud, "kit") and HudGroups.own_numbers_shown(p, false),
 		"veteran: kit card and own numbers as before")
+	# 6. the gear strip and the perk row are counted only once drawn (HudReveal "gear" / "perks", then an item)
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"),
+		"veteran with no gear and no perk: neither strip")
+	Save.d["matches"] = 0
+	p.gear[2] = {"id": String(Gear.ALL.keys()[0]), "rar": 0}
+	p.perks.append(String(Data.PERKS.keys()[0]))
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"),
+		"new player with gear and a perk: held back (HudReveal)")
+	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES
+	ok(on_screen_has(hud, "gear") and on_screen_has(hud, "perks"),
+		"veteran with gear and a perk: both strips")
+	p.gear[2] = {}
+	p.perks.clear()
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"), "back to nothing held: neither strip")
 	for i in 3:
 		await main.get_tree().process_frame      # the real HUD draws the veteran's own-numbers row too
 	Save.d["matches"] = 0
