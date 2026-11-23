@@ -19,6 +19,10 @@ const KEEP := ["Head", "Aura"]
 ## (the procedural head is about twice its size).
 const EGG := [[Vector3(0.0, 1.242, -0.09), 0.264], [Vector3(0.0, 1.235, -0.11), 0.25]]
 const EGG_COVER := 1.06  # x the egg's height: the void shell just covers the painted egg
+## The frame each model was fitted on, by sex as KEYS (the Average body before EmptyFrame's sliders: its build width
+## and shoulders' spread; the female's default build is now 0.95, which moved her arms 15 mm off the model's bones).
+## Its rest look is that frame, so its bones match the rig; every slider frame, the default too, reshapes it from there.
+const FIT := {"build": [1.0, 1.0], "shoulders": [0.85, 1.1]}
 
 
 ## The .glb this Empty look wears ("" for the procedural Empty).
@@ -31,11 +35,18 @@ static func key(appearance: Dictionary) -> String:
 	return k if WardenGlb.has_model(k) else ""
 
 
-## The look a model key's rig rest is measured in (WardenGlb.measure_rest): the default Empty of that sex.
+## The look a model key's rig rest is measured in (WardenGlb.measure_rest): the default Empty of that sex, its
+## frame as the model was fitted (FIT).
 static func rest_look(k: String) -> Dictionary:
 	var lk := Unmasked.default_look()
-	lk["gender"] = KEYS.find(k)
+	var sex := KEYS.find(k)
+	lk["gender"] = sex
 	lk["shroud"] = CUT
+	var frame: Dictionary = lk["frame"]
+	for key in FIT:
+		var span: Array = EmptyFrame.rules()["frame"][key]["f" if sex == 0 else "m"]
+		frame[key] = inverse_lerp(float(span[0]), float(span[1]), float(FIT[key][sex]))
+	lk["frame"] = EmptyFrame.clean(frame)
 	return lk
 
 
