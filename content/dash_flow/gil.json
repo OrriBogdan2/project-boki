@@ -39,5 +39,40 @@
 		"rmb": {"h": "keep", "v": "fall", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"},
 		"e": {"h": "slow", "v": "fall", "ours": "Riptide is a planted spin", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"},
 		"x": {"h": "push", "v": "hover", "ours": "Tidal Wave: he rides the wave down its line", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."}
+		},
+		"x": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015)."},
+			"e": {"windup": "drop", "recovery": "drop", "source": "[?] Ours: Gil is our own Hunter, no source row. Tidal Wave is his movement: he rides it, untargetable, until it lands (into_dash.x: lock); GilKit.cast_e refuses a Riptide spin while the wave runs, as on_dash refuses Shift."}
+		}
 	}
 }

@@ -454,7 +454,7 @@ func _show_pick() -> void:
 		v.add_child(dl)
 		if i == chosen:
 			var pl := UI.label(d["play"], 13, UI.INK)
-			pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			UI.wrapped(pl)
 			v.add_child(pl)
 		var ii := i
 		v.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -525,7 +525,7 @@ func _start_hatch() -> void:
 	var v := UI.vbox(10); card.add_child(v)
 	var knock := "Click (or press %s) to knock. The Boki inside wakes a little more."
 	var l := UI.label(knock % Settings.key_cap("jump"), 15)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	v.add_child(l)
 	warm_bar = Control.new()
 	warm_bar.custom_minimum_size = Vector2(420, 16)
@@ -641,10 +641,11 @@ func _show_name() -> void:
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
 	var sex_row := UI.hbox(8)
 	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
-	# (a long line wraps, so it must be given the row's width: in an HBox with no expand it shrank to ~0 wide
-	# and wrapped one letter per line, a column running off the top of the screen)
 	var sex_line := UI.para("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
 		"A babbler for now; any name you give will stick."], 16, UI.MUTED)
+	# (a wrapping Label asks for ~0 width: with no floor, a row that did not hand it room broke it one letter
+	# per line, a column running off the top of the screen; the floor holds even if the row stops expanding)
+	UI.wrapped(sex_line, 300.0)
 	sex_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sex_row.add_child(sex_line)
 	v.add_child(sex_row)
@@ -652,24 +653,10 @@ func _show_name() -> void:
 	var name_row := UI.hbox(8)
 	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_row.add_child(ne)
+	var step := NameStep.new(sp_id, "")      # (both ways on below keep the name)
+	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_row.add_child(step)
 	v.add_child(name_row)
-	# a few ideas, and a button for a fresh handful
-	var picks := UI.hbox(6)
-	var fill_picks := func(self_ref: Callable) -> void:
-		for ch in picks.get_children(): ch.queue_free()
-		var il := UI.label("Ideas", 13, UI.MUTED); il.custom_minimum_size.x = 120; il.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		picks.add_child(il)
-		var pool: Array = Data.KIN_NAMES.duplicate(); pool.shuffle()
-		for nm in pool.slice(0, 4):
-			var n2: String = nm
-			picks.add_child(UI.button(n2, func(): ne.text = n2; ne.caret_column = n2.length()))
-		var more := UI.button("More", func(): self_ref.call(self_ref))
-		more.flat = true
-		picks.add_child(more)
-	fill_picks.call(fill_picks)
-	v.add_child(picks)
 	var you_row := UI.hbox(8)
 	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
 	you_row.add_child(yl)
@@ -678,17 +665,17 @@ func _show_name() -> void:
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
 	btns.add_child(_path_card("Tutorial", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, ne.text, ye.text, true), true))
+			func(): _finish(sp_id, step.chosen(), ye.text, true), true))
 	btns.add_child(_path_card("Skip tutorial", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, ne.text, ye.text, false), false))
+			func(): _finish(sp_id, step.chosen(), ye.text, false), false))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
 	# Enter in either box is the same as "Skip tutorial"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ne.grab_focus()
-	ne.select_all()
+	step.box.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	step.box.grab_focus()
+	step.box.select_all()
 
 ## One of the two ways on from the naming card: a button and a line under it, one click.
 ## The main way is bright; the other is a flat grey button.
