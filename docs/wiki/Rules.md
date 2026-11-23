@@ -35,7 +35,7 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | stomp_commit | 0.2 | hold interact this long on an enemy wisp to start the stomp... |
 | stomp_time | 2.4 | ...then you're locked in for this long, three stomps and done |
 | stomp_cycle | 0.7 | one foot-lift-and-slam |
-| kin_revive_time | 6 | your kin pulling you up (as long as Supervive's Guardian Angel self-revive) |
+| kin_revive_time | 6 | your kin pulling you up (as long as the reference game's self-revive) |
 | box_revive_hp | 0.25 | same as a wisp revive |
 | soul_time | 90 | box revive window |
 | loot_time | 1 | bots: hold interact to take everything from a box (you get a loot window) |
@@ -868,6 +868,19 @@ How many Boki are out on the island at once; the rest sleep in the Boki Burrow (
 | scout | {"ease_in_s": 0.35, "ease_out_s": 0.25, "zoom": 0.25, "sight_mul": 1.25, "cone_deg": 30.0} |
 | source | {"pitch_deg": [64.0, 67.0], "fov_deg": [25.0, 34.0], "feet_below_pct": [3.0, 4.0], "ahead_per_behind": [1.46, 1.62], "side_per_ahead": [1.25, 1.35], "across_m": [35.0, 39.0], "hunter_screen_pct": [8.3, 9.3]} |
 
+## camps (`content/rules/camps.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Monster camps (scripts/match/camps.gd, docs/CAMPS.md). Every camp spot on the map is one of three sizes by its layout kind: light = Small Camp, normal = Camp, heavy = Great Camp. lvl: the level a bot wants before it goes for the camp (bots farm small camps first). n and big: monsters in a camp from a region table, and the one big monster a Great Camp always has. fixed: the monsters of a Great Camp with no region table. A camp's monsters are picked by a dice seeded from its spot alone, so the same camp holds the same monsters every match. back_s: a cleared camp comes back once this many seconds after its clear, if no Hunter is within back_clear_r metres (rolling sessions only). spread: how far (m) the monsters stand from the camp's centre. |
+| sizes | {"light": {"name": "Small Camp", "lvl": 1, "n": 2}, "normal": {"name": "Camp", "lvl": 2, "n": 3}, "heavy": {"name": "Great Camp", "lvl": 4, "n": 4, "big": ["brute", "sentinel"], "fixed": ["brute", "spitter", "skitter", "sentinel"]}} |
+| back_s | 240 |
+| back_clear_r | 22 |
+| spread | 1.8 |
+| bot_camp_share | 0.85 |
+
 ## capture (`content/rules/capture.json`)
 
 Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.
@@ -1008,7 +1021,7 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 
 | Setting | Value |
 |---|---|
-| doc | Dash feel (Shift) on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Parity first (DECISIONS 2026-11-07): a kit whose dash numbers are the source's measured dash runs them as-is (the default, 1.0 / 1.0): Vex, Hem, Cinder, Pip, Bjorn and Sable. Owner, Nov 2: dashes were too fast and too far in general, Sparkle's (Ryzz, mage) should go further. That rule stays only on the kits whose dash has no source number: Zedran's Rampage (owner 113.8), Grimble's Barge (owner 23:40) and Tarek's Rock Hop (owner item 111) at x0.85 distance, x1.15 time; Ryzz's Wirerun lane is the owner's own (item 70), so only its time is scaled. Claire's Skate and Ostra's Lantern Trade never pass through it. moves (optional): the feel per Shift move, by the name the kit passes to travel() ({"feel": name}): a move on a x1 kit with no source figure of its own still runs the owner's x0.85 / x1.15 (Albert's Shield Charge, wind-up short dash and lumber; the class long dash out of charges for Vex, Lace (her flick), Sparkle, Sable and Gil); the hunter's dist and time cover every other move. A long dash runs the class's ex_dist / ex_time (Hunter.dash_with) times its move's feel, so Kael's and Tenzo's long dashes pass "long" too and get their hunter's x0.85 / x1.15. The felt table is asserted in --move-feel-check (docs/KIT_PARITY.md gap 4). Gil runs his own numbers (x1). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (docs/SUPERVIVE_FEEL.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. thief's curve is her Cartwheel, on the ground and from a jump (the air one then carries on under air drag to the landing); bulwark's is the 360 Smash only. dolm has none: its Rock Hop is a leap (owner item 111) and the footage's only ground dash is a push it does not have; Claire's Skate is held, so its start is her own dash.ramp (fitted, docs/KIT_PARITY.md gap 4). |
+| doc | Dash feel (Shift) on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Parity first (DECISIONS 2026-11-07): a kit whose dash numbers are the source's measured dash runs them as-is (the default, 1.0 / 1.0): Vex, Hem, Cinder, Pip, Bjorn and Sable. Owner, Nov 2: dashes were too fast and too far in general, Sparkle's (Ryzz, mage) should go further. That rule stays only on the kits whose dash has no source number: Zedran's Rampage (owner 113.8), Grimble's Barge (owner 23:40) and Tarek's Rock Hop (owner item 111) at x0.85 distance, x1.15 time; Ryzz's Wirerun lane is the owner's own (item 70), so only its time is scaled. Claire's Skate and Ostra's Lantern Trade never pass through it. moves (optional): the feel per Shift move, by the name the kit passes to travel() ({"feel": name}): a move on a x1 kit with no source figure of its own still runs the owner's x0.85 / x1.15 (Albert's Shield Charge, wind-up short dash and lumber; the class long dash out of charges for Vex, Lace (her flick), Sparkle, Sable and Gil); the hunter's dist and time cover every other move. A long dash runs the class's ex_dist / ex_time (Hunter.dash_with) times its move's feel, so Kael's and Tenzo's long dashes pass "long" too and get their hunter's x0.85 / x1.15. The felt table is asserted in --move-feel-check (docs/KIT_PARITY.md gap 4). Gil runs his own numbers (x1). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (sv/FEEL_NOTES.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. thief's curve is her Cartwheel, on the ground and from a jump (the air one then carries on under air drag to the landing); bulwark's is the 360 Smash only. dolm has none: its Rock Hop is a leap (owner item 111) and the footage's only ground dash is a push it does not have; Claire's Skate is held, so its start is her own dash.ramp (fitted, docs/KIT_PARITY.md gap 4). |
 | default | {"dist": 1.0, "time": 1.0} |
 | juggernaut | {"dist": 0.85, "time": 1.15, "curve": [[0, 0.12], [0.27, 1.73], [0.29, 1.73], [1, 0.28]]} |
 | dredge | {"dist": 0.85, "time": 1.15, "curve": [[0, 1.42], [0.32, 1.35], [0.4, 1.03], [1, 0.5]]} |
@@ -1467,7 +1480,7 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | ratchet | {"medium": {"hub": {"draws": 310, "objects": 520}, "zone_cinderstep": {"frame_ms": 19.5}, "zone_ridge": {"frame_ms": 18.0}}, "low": {"hub": {"draws": 300, "objects": 560}}} |
 | ratchet_doc | Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one. |
 | budget_doc | What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column. |
-| wayseed_from | Old Pell's Black Market (a new Wayseed every few days), or a lair of a matching type on a run |
+| wayseed_from | a lair of a matching type on a run, or Old Pell at the Black Market (one every %d days, %d gems) |
 
 ## gear (`content/rules/gear.json`)
 
@@ -1835,6 +1848,17 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | auto_rate_per_aggression | 0.6 |
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
+
+## kin_names (`content/rules/kin_names.json`)
+
+Naming a new Boki (scripts/core/kin_names.gd, scripts/ui/name_step.gd). The suggested name is a root from the species' own name (its first syllable, from content/kin) plus one of the endings. Typed names are checked against rude: any of these letters inside the name (case and spaces ignored) and the name is not kept.
+
+| Setting | Value |
+|---|---|
+| endings | ["y", "ie", "o", "a", "i", "et", "in", "le", "kin", "bit", "bo", "ly", "ny", "by", "bun", "bean", "dot", "nip", "puff", "let", "pip", "drop", "wick", "bell", "sprout"] |
+| max_len | 14 |
+| max_len_doc | Letters a name may have (the text box stops there). |
+| rude | ["fuck", "fuk", "phuck", "shit", "cunt", "twat", "wank", "slut", "whore", "bitch", "bastard", "nigg", "niga", "fag", "rape", "nazi", "hitler", "kkk", "porn", "dick", "cock", "penis", "vagina", "anal", "anus", "retard", "spic", "kike", "gook", "tits", "boob", "piss", "arse", "asshole", "sex", "dildo", "jizz", "cum"] |
 
 ## kit_parity (`content/rules/kit_parity.json`)
 
@@ -2466,8 +2490,10 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 
 | Setting | Value |
 |---|---|
-| _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. Looks only: no stat or damage changes. |
+| _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. prize: the monster kinds with a kill window (StealReel); reel: seconds the first drop under the line stands open, no attacks, normal damage. |
 | at | 0.25 |
+| prize | ["brute", "glimmer", "warden", "colossus", "serpent", "brood"] |
+| reel | 1.2 |
 
 ## step_biomes (`content/rules/step_biomes.json`)
 
@@ -2604,6 +2630,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | dash_glide | {"ease_t": 0.07, "grace": {"default": 0.15, "juggernaut": 0.25}} |
 | dash_speed | {"archer": 0.7} |
 | sources | {"doc": "Where each glide/air number comes from (SUPERVIVE_FEEL.md 'Footage pass', Nov 12 2026). Notes only, nothing here is read as a number. Trust order: owner > game data > wiki > footage.", "glide_cruise": "SETTLED 5.0 m/s x body_scale = 5.8 m/s (HunterMove.glide_cruise): [game data] MaxGlide 500 uu/s; [footage] ~5 m/s, run pace. Agree; at our body scale like the walk (decision 0061).", "glide_base_speeds": "Not determinable (GlideInitial*/TargetXY* encrypted): glide.drag/drag_steer/max are ours. No player glide start in the hero-ref clips; Elluna 706.8 s dash-into-glide still decaying (11 -> 8 m/s) when the track ends.", "glide_gravity": "Not determinable (GlideGravityFactor encrypted): Hunter.GLIDE_SINK 1.4 m/s is ours; footage shows only the height hold (Tom Kick ~14 s level) and lift (Zik ~1 s back up).", "glide_braking": "Not determinable (GlideBraking* encrypted): glide.coast and glide.brake/brake_deg are ours. Tetra guide 300 s and showcase 1174 s frame-stepped: no player let-go or back-key brake.", "hoop_boost": "Not determinable (GlideBoost* encrypted): no hoop or jetstream in any hero-ref clip.", "jump_hold": "Not determinable: a key hold is not visible on screen. Owner: fixed jump, Space held never opens the glider.", "air_dash": "Per Hunter (AirDashSpeedMultiplier/Clamp encrypted): Shiv ~1.7x ground (8.4 m / 0.95 s, dancer.md 303.8-304.5 s, 0129-0134), carried to the landing; Elluna 11-15 m / 0.8-1.1 s (mooshmoosh.md 731.1/706.8/735.9/745.1 s) = tender dash.air; Kingpin card 'further', air_k 1.35 est; the other nine: Not determinable, no air dash in their clips."} |
+| reticle | {"_about": "The cursor reticle (scripts/ui/reticle.gd, reticle_hud.gd). px at size 1 unless a key says otherwise.", "ring_r": 6.0, "dot_r": 1.4, "line_w": 1.3, "cross_len": 5.0, "cross_gap": 3.0, "edge_w": 1.2, "edge_a": 0.6, "arc_gap_rad": 0.32, "spread_max": 16.0, "charge_r": 13.0, "ammo_r": 16.0, "res_r": 22.0, "arc_w": 2.0, "arc_w_full": 2.6, "track_a": 0.4, "low_ammo_frac": 0.25, "low_ammo_pulse_hz": 3.0, "flare_s": 0.18, "flare_grow": 7.0, "hit_s": 0.09, "hit_knock_s": 0.12, "hit_gap": 3.5, "hit_len": 4.5, "hit_len_crit": 7.5, "hit_w": 1.5, "hit_w_crit": 2.0, "hit_pop": 3.0, "hit_ring_flash": 0.85, "crit_pulse_grow": 9.0, "col_hit": "ffffff", "col_crit": "ffd23f", "col_armor": "dfe9f7", "col_armor_crit": "cfefff", "col_low": "ff6a5a", "col_warm_up": "ffb34d"} |
 | lace | {"_note": "Lace's bow feel (PinDraw), owner 11-08: perfect_window_s = how long after a draw stage comes up a release is still perfect (the source's is about 0.15 s; the owner asked for about 0.2 s more); perfect_glow_rim / perfect_glow_col = the toon rim amount and hex colour on her body and bow while the window is open; perfect_payoff_rim / perfect_payoff_s = the stronger rim and its length in s on a perfect release.", "perfect_window_s": 0.35, "perfect_glow_rim": 1.2, "perfect_glow_col": "ffd36a", "perfect_payoff_rim": 2.4, "perfect_payoff_s": 0.16} |
 | tenzo | {"_note": "Tenzo (dolm). r_floor: the slab of rock ground his R (Basalt Spine) raises under him on the press, the same frame (BreahSpine.floor_under): r m round him (abyss tiles only turn to ground), time s it lasts, warn s of cracks and shake before it crumbles, rise s the slab takes to heave up (the ground is solid at once), col its stone. rmb: Quakefall's held hop (BreahSlam): windup s planted in a deep crouch before take-off, hop_up m/s up off the ground, fall_k the gravity multiplier on the way down (a thrown stone drops hard), ease how much faster than its average the hop leaves the ground (its ground speed eases to nil at the landing), carry the share of his run the hop keeps, nudge m/s the move keys bend its ground speed by, dive_hang s he hangs at the top of an air press before the plunge, dive_acc m/s^2 the plunge speeds up at toward its cap.", "r_floor": {"r": 1.6, "time": 6.0, "warn": 1.5, "rise": 0.12, "col": "#3e5560"}, "rmb": {"windup": 0.16, "hop_up": 6.0, "fall_k": 1.4, "ease": 1.5, "carry": 0.25, "nudge": 1.2, "dive_hang": 0.1, "dive_acc": 70.0}} |
 

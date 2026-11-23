@@ -23,6 +23,7 @@ func _frame(m: Match, h: Hunter) -> void:
 		sync.call("_process", DT)
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	A = load("res://tools/archetype_check.gd").new()
 	A.main = main

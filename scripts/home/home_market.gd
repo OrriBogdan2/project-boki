@@ -40,12 +40,15 @@ static func tab_level(tab_name: String) -> int:
 		return Shelter.open_level()
 	return int(TABS.filter(func(t): return t[0] == tab_name)[0][1])
 
-## The tabs this stall's level opens.
+## The tabs this stall's level opens (the Shelter also in base_mode, Shelter.open; no Exchange there).
 func tabs() -> Array:
 	var lv := Stalls.level()
-	var no_exchange := FarmUnlocks.base_mode()
-	var out := TABS.filter(func(t): return tab_level(String(t[0])) <= lv and not (no_exchange and t[0] == "Exchange")) \
-			.map(func(t): return String(t[0]))
+	var base := FarmUnlocks.base_mode()
+	var shown := func(t) -> bool:
+		if base and t[0] == "Exchange":
+			return false
+		return tab_level(String(t[0])) <= lv
+	var out := TABS.filter(shown).map(func(t): return String(t[0]))
 	if not out.has("Shelter") and not TransferPost.inbox.is_empty():
 		out.append("Shelter")      # a Boki handed to you waits there, at any stall level
 	return out
@@ -92,7 +95,7 @@ func show_note(v: VBoxContainer) -> void:
 	if note == "":
 		return
 	var nl := UI.label(note, 14, note_col)
-	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(nl)
 	v.add_child(nl)
 	note = ""
 
@@ -103,7 +106,7 @@ func _next_level(v: VBoxContainer) -> void:
 		return
 	var nxt := String(Goods.rules()["stall"]["levels"][str(lv + 1)])
 	var l := UI.para("Upgrade the stall (build mode, Upgrades) and it opens: %s." % nxt, 12, UI.FAINT)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	v.add_child(UI.spacer(4))
 	v.add_child(l)
 

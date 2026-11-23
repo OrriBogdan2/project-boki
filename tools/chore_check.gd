@@ -67,7 +67,7 @@ func run(m: Node) -> void:
 	home.ppos = Vector3(-500, 0, -500)
 	var center: Vector3 = home.world.random_ground(0)
 	d["layout"]["deco"].append({"id": "training_post", "u": 990001, "px": center.x + 3.0, "pz": center.z})
-	home.life.R["chore_chance"] = 1.0      # a chore whenever one can run: the check is about the chores, not the dice
+	home.life.r_v["chore_chance"] = 1.0      # a chore whenever one can run: the check is about the chores, not the dice
 	d["layout"]["deco"].append({"id": "toy_ball", "u": 990003, "px": center.x + 6.0, "pz": center.z})
 	var patch_at: Vector3 = home.world.free_spot_near(center + Vector3(-3, 0, 3), [], 1.0)      # on the Bokis' island
 	d["layout"]["deco"].append({"id": SnackPatch.ID, "u": 990004, "px": patch_at.x, "pz": patch_at.z,
@@ -123,7 +123,7 @@ func _hub_part(d: Dictionary) -> void:
 	ok(hub != null and is_instance_valid(hub.nest), "the hub loads with the egg in its Nook")
 	if hub == null:
 		return
-	hub.life.R["chore_chance"] = 1.0
+	hub.life.r_v["chore_chance"] = 1.0
 	hub.ppos = Vector3(-500, 0, -500)
 	var left0 := float(d["egg"]["t"]) - Time.get_unix_time_from_system()
 	var s := _sim(hub)

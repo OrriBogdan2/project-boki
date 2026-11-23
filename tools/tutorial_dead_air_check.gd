@@ -39,6 +39,7 @@ func _lines(m: Match) -> Array[String]:
 	return m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t)
 
 func run(mn: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = mn
 	Save.no_write = true
 	for who in STARTERS:
