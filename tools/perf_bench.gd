@@ -17,6 +17,7 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
+##   [--bench-hub]  (only the hub part, with its budget and draw owners)
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
@@ -116,6 +117,10 @@ func run(main_node: Node) -> void:
 		return
 	if "--bench-ab" in OS.get_cmdline_user_args():
 		await _ab()
+		_finish()
+		return
+	if "--bench-hub" in args:
+		await _farm("hub", {"zone": GardenZones.HUB})
 		_finish()
 		return
 	await _match()
@@ -889,10 +894,12 @@ func _meshes() -> void:
 	_owners()
 
 
-## Draw passes per piece of the open scene (its direct children, the grouping the draw fixes work on): a
-## visible mesh or MultiMesh costs one pass per surface, two where its material has an outline next_pass.
+## Draw passes per piece of the open scene (its direct children and where they stand, the grouping the draw fixes
+## work on): a mesh or MultiMesh the camera can see costs one pass per surface, two where its material has an outline
+## next_pass. Copies sharing a mesh and material draw as one instanced call, so only the first is charged.
 func _owners() -> void:
 	var by := {}
+	var seen := {}
 	var scene: Node = main.current
 	for n in scene.find_children("*", "GeometryInstance3D", true, false):
 		var gi := n as GeometryInstance3D
@@ -903,17 +910,31 @@ func _owners() -> void:
 			mesh = gi.multimesh.mesh
 		if mesh == null or not gi.is_visible_in_tree():
 			continue
+		var cam := main.get_viewport().get_camera_3d()
+		var box := gi.global_transform * gi.get_aabb()
+		if cam and not cam.is_position_in_frustum(box.get_center()) and not cam.is_position_in_frustum(box.position):
+			continue      # (a rough cull: the draws are what the camera sees)
 		var passes := 0
 		for si in mesh.get_surface_count():
 			var mat: Material = gi.material_override if gi.material_override else mesh.surface_get_material(si)
+			var pair := [mesh, mat]
+			if seen.has(pair):
+				continue
+			seen[pair] = true
 			passes += 2 if mat and mat.next_pass else 1
 		var top: Node = gi
 		var under: Node = gi  # the level below `top`: the home's world root holds most pieces
 		while top.get_parent() != scene:
 			under = top
 			top = top.get_parent()
-		var key := "%s/%s" % [String(top.name).rstrip("0123456789@"), String(under.name).rstrip("0123456789@")]
+		var at: Vector3 = (top as Node3D).global_position if top is Node3D else Vector3.ZERO
+		var key := "%s@%d,%d/%s" % [_base(top), roundi(at.x), roundi(at.z), _base(under)]
 		by[key] = int(by.get(key, 0)) + passes
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
-	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 20).map(func(k): return "%s %d" % [k, by[k]])))
+	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 40).map(func(k): return "%s %d" % [k, by[k]])))
+
+
+## A node's name without Godot's auto-numbering.
+func _base(n: Node) -> String:
+	return String(n.name).rstrip("0123456789@")

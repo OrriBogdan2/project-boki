@@ -775,7 +775,8 @@ func _build_lots() -> void:
 		var at := _rect_center(rc)
 		var holder := Node3D.new(); holder.position = at; holder.rotation.y = int(pl["r"]) * PI * 0.5; add_child(holder)
 		var built := _has_b(b)
-		holder.add_child(Models.building(b) if built else FarmLots.look(b, _d()))
+		if not HubLayout.is_hub(visit):      # (the hub holds none: a side isle's lots would float in its void)
+			holder.add_child(Models.building(b) if built else FarmLots.look(b, _d()))
 		lots[b] = {"node": holder, "built": built, "at": at, "door": HomeLayout.door_at(b, int(pl["x"]), int(pl["z"]), int(pl["r"]))}
 		if not HomeLayout.placed(b, _d()):
 			# a farm-start lot you haven't marked out yet (build mode, Buildings)

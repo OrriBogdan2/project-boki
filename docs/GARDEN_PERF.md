@@ -156,3 +156,20 @@ Ratchet: hub draws 520 -> 310 (Medium), 370 -> 300 (Low). Objects stay at 520 / 
 counts more draws for the same scene) was not available to this job: its hub number is unmeasured since the 495 above.
 Still over the 200 target: the partner's rig (37), the terrain and its far scenery (39), the Waystone (22), the stall
 (20), the Nook (19), the portal (18) and the incubator's brazier and embers (42).
+
+## Hub draws, second pass (ext/farm-hub-draws, 2026-11-23): 286 -> 270, target 200 not reached
+Task: hub draws to 200 or less on rp2g. The 684 in the focus baseline (20261122-083514-a2) is the hub frame with the
+screen UI at 1080p; the number `--perf-bench` judges (UI hidden) was 286 on rp2g at Medium (job 20261123-113739-18003).
+- `--perf-bench --bench-hub` runs only the hub part (80 s; the full bench ran past the 20 min cap on rp2g).
+- The owner list (`BENCH draw passes by owner`) now counts only what the camera sees and charges a mesh+material pair
+  once, so it adds up to the draws (about 245 passes for 270 draws) and names each fixture by where it stands.
+- Fix: the hub built a building-site model for every lot of Data.BUILDINGS; the side isles' lots always count as
+  placed, so six of them (about 16 draws, 190 nodes) floated in the void. The hub holds no lots now (`Home._build_lots`):
+  286 -> 270 draws, 530 -> 498 objects, 946 -> 759 nodes (jobq 20261123-114921-15080 vs 20261123-113739-18003).
+- Tried and dropped: merging the far drifting rocks and islets into one mesh per material (`World._decorate`). They sit
+  outside the view, so draws did not move (270 -> 272); reverted.
+- What the 270 are (in view, passes): the partner's rig 35, Burrow 22, world scatter 21, Stall 20, Nook 17 and its
+  Incubator 35, Waystone 26, portal and board about 25. Each fixture still draws one mesh per colour (two with the
+  outline). The way to 200 is one mesh and one material per fixture (vertex colours in the toon material, shared
+  outline), which changes how every fixture is painted; not started.
+Ratchet: hub draws 310 -> 295 (Medium), 300 -> 290 (Low), with the margin rp1-0 counts above rp2g.
