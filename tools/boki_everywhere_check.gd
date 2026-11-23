@@ -11,6 +11,9 @@ extends RefCounted
 ## show FALLBACK (the check fails when one gets a .glb without leaving the list). The same run lists every Hunter
 ## (Arch.ORDER): its drawn .glb, and whether Models.hunter(arch) dressed in it (HUNTER_EVERYWHERE lines).
 ## Surface map: docs/art/BOKI_3D_SURFACES.md.
+## --pack=<abs .pck>: load an exported pck over res:// first (for a GPU box that can only run the tree; the strict
+## form is still `godot --main-pack <pck>`). --surfaces (with --shots-dir): also the real farm (the demo farm save,
+## all three starters on it) as farm.png and each listed species' Field Book page as dex_<sp>.png.
 
 const PX := 512
 ## Species with data but no art/kin body yet (docs/art/kin/MESHY_BOKI_RECIPE.md): they must be the only FALLBACKs.
@@ -29,6 +32,9 @@ func run(m: Node) -> void:
 			out = a.substr(12)
 		if a.begins_with("--species="):
 			species = a.substr(10).split(",")
+		if a.begins_with("--pack="):
+			var loaded := ProjectSettings.load_resource_pack(a.substr(7), true)
+			print("BOKI_EVERYWHERE load pack %s: %s" % [a.substr(7), loaded])
 	if species.is_empty():
 		species = PackedStringArray(Data.KIN.keys())
 		species.sort()
@@ -72,6 +78,8 @@ func run(m: Node) -> void:
 		reveal.queue_free()
 		await main.get_tree().process_frame
 	await _hunters()
+	if shots and OS.get_cmdline_user_args().has("--surfaces"):
+		await _surfaces()
 	print("BOKI_EVERYWHERE %s: %d of %d species and hunters off" % ["FAIL" if bad else "OK", bad, species.size()])
 	main.get_tree().quit(1 if bad else 0)
 
@@ -184,7 +192,23 @@ func _frame(k: Node3D, cam: Camera3D) -> void:
 	cam.look_at(mid)
 
 
-func _grab_window(path: String) -> void:
-	for i in 30:  # the card's intro plays a moment before the Boki is in view
+## The farm and the Field Book pages, as the player sees them (demo farm save, never written).
+func _surfaces() -> void:
+	Demo.setup("farm")
+	main.show_screen("home", {})
+	await _grab_window(out.path_join("farm.png"), 150)
+	for sp in species:
+		Overlay.shot_demo(PackedStringArray(["dex", sp]))
+		await _grab_window(out.path_join("dex_%s.png" % sp), 60)
+		Overlay.close()
+
+
+func _grab_window(path: String, frames := 30) -> void:
+	for i in frames:  # the card's intro plays a moment before the Boki is in view
 		await RenderingServer.frame_post_draw
+	if main.get("fade") != null:
+		main.fade.reveal(0.0)  # the boot splash would otherwise cover the window (its logo fades in 0.25 s)
+	# frames run uncapped on a GPU box: wait real time too, for the logo fade and the card's intro
+	await main.get_tree().create_timer(1.0).timeout
+	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(path)
