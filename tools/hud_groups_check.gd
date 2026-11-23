@@ -143,7 +143,7 @@ func run(main: Node) -> void:
 	p.perks.append(String(Data.PERKS.keys()[0]))
 	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"),
 		"new player with gear and a perk: held back (HudReveal)")
-	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES
+	Save.d["matches"] = int(HudReveal.groups()["gear"]["from_match"]) - 1  # (the save's next match shows the gear)
 	ok(on_screen_has(hud, "gear") and on_screen_has(hud, "perks"),
 		"veteran with gear and a perk: both strips")
 	p.gear[2] = {}
