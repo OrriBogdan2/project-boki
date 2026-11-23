@@ -32,12 +32,13 @@ static func place(h) -> void:
 ## never sit over the fight in the top centre or over the HUD's level and HP (docs/COMBAT_CLARITY.md).
 static func rail(h) -> void:
 	var sz: Vector2 = h.c.size
-	var pad := HudStyle.safe_pad(sz)
+	var fr := SafeArea.frame(sz)   # (on 21:9 and wider the corner groups keep to a centred 16:9 frame)
+	var pad := HudStyle.safe_pad(fr.size)
 	var y: float = maxf(h.feed_top, pad.y)
 	if not KillFeed.shown.is_empty():
 		y = maxf(y, (KillFeed.shown.back()["rect"] as Rect2).end.y + KillFeed.GAP)
-	h.msgs.right_edge = sz.x - pad.x
-	h.msgs.max_w = sz.x * RAIL_W
+	h.msgs.right_edge = fr.end.x - pad.x
+	h.msgs.max_w = fr.size.x * RAIL_W
 	h.msgs.top = maxf(h.msgs.top, y)
 
 
