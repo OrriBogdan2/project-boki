@@ -223,6 +223,8 @@ static func fetch_all() -> void:
 
 
 static func path(arch: String) -> String:
+	if WardenNative.on(arch):
+		return WardenNative.file(arch)
 	var nm := art(arch)
 	return "%s/%s/%s.glb" % [DIR, nm, nm]
 
@@ -266,11 +268,27 @@ static func uses_model(arch: String) -> bool:
 
 
 ## Where the rig's torso shows, world: on a Hero playing clips, the torso of the body you see (its hips bone, back
-## through the retarget); else the rig's own. A Boki riding on you sits on it (Kin), so it keeps its seat on that body.
+## through the retarget; a Meshy-native model's torso bone, WardenNative); else the rig's own. A Boki riding on you
+## sits on it (Kin), so it keeps its seat on that body.
 static func shown_torso(model: Node3D) -> Transform3D:
 	var torso := model.get_node(^"Rig/Torso") as Node3D
 	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
+	if sync == null:
+		var nat := model.get_node_or_null(^"Warden/Native") as WardenNative
+		if nat:
+			return nat.shown_torso()
 	return sync.shown(torso) if sync and sync.clips else torso.global_transform
+
+
+## The node that lays the procedural layers (flinch, wall kick, open reach) over a dressed Hunter's clips: the contract
+## model's Sync (WardenSync), or a Meshy-native model's Native (WardenNative, docs/art/wardens/MESHY_NATIVE.md); null on
+## a procedural model. Both carry `flinch`, `wall` and `opener`; only Sync carries `clips` (WardenClips).
+static func layers(model: Node) -> Node:
+	var w := model.get_node_or_null(^"Warden") if model else null
+	if w == null:
+		return null
+	var s := w.get_node_or_null(^"Sync")
+	return s if s else w.get_node_or_null(^"Native")
 
 
 ## The .glb's armature, or null.
@@ -301,6 +319,9 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("glb", false)
 	root.set_meta("rig_rest", WardenSkeleton.rig_rest(root))
 	if not will_dress(arch):
+		return
+	if WardenNative.on(arch):
+		WardenNative.dress(root, arch, _scene(arch), lk)
 		return
 	var rest := neutral_rest(arch)
 	var glb := _scene(arch).instantiate() as Node3D
@@ -340,9 +361,10 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 
 
 ## Whether a build of this Warden is drawn from its .glb (Models.hunter then drops the procedural body's
-## loose parts instead of merging meshes nobody sees). The rig check runs once per model file.
+## loose parts instead of merging meshes nobody sees). The rig check runs once per model file; a Meshy-native model
+## (WardenNative) is not on the contract and skips it.
 static func will_dress(arch: String) -> bool:
-	return not _measuring and uses_model(arch) and misfits(arch).is_empty()
+	return not _measuring and uses_model(arch) and (WardenNative.on(arch) or misfits(arch).is_empty())
 
 
 static func misfits(arch: String) -> Array:

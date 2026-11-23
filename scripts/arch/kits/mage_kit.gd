@@ -376,7 +376,7 @@ func on_dash(use_ex: bool) -> bool:
 	reset_dash_boost = false
 	play("mage_dash")
 	vfx("dash")                    # a bolt slams down onto her: the charging tell
-	m.sfx("vv_surge_charge", h.pos, -3.0)
+	KitWindup.play(self, "dash", "vv_surge_charge", -3.0)
 	return true
 
 ## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold, a Skycall
@@ -417,6 +417,7 @@ func _tick_wire(dt: float) -> void:
 	var t := float(wire["t"])
 	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
+		KitWindup.broken(self, "dash")
 		return
 	if not h.grounded and bool(h.inp.get("jump", false)) and h.knock_t <= dt * HOLD_KNOCK:
 		# Space in the air hold (DECISIONS 11-08, Shift cancels into glide for every Hunter): cut, the charge stays
