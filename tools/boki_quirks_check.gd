@@ -32,6 +32,7 @@ func _female_share(species: String) -> float:
 	return float(fem) / SEEDS
 
 func run(main: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	Save.no_write = true
 	_data()
 	_sexes()

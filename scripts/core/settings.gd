@@ -66,7 +66,7 @@ const DEFAULTS := {
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
 	"reticle_shape": "default",
 	"reticle_size": 1.0,
-	"reticle_col": "white",
+	"reticle_col": "hunter",
 	"reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera

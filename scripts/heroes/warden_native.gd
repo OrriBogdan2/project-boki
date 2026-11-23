@@ -50,7 +50,9 @@ var opener: WardenOpen
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkeleton.find "hips": Spine02)
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
-var mouth: Array = []  # [Meshy bone, offset in it]: the copied weapon_muzzle, where the Gun's Muzzle sits each frame
+var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
+var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
+var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 
 
 ## The art's entry in warden_native.json ({} when it has none).
@@ -138,7 +140,12 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		skel.add_child(at)
 	gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	_add_orbits(glb)
+	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
+	props = WardenProps.carry(art_id, skel, to_m, d)
 	_copy_anchors(glb)
+	var c_xf: Transform3D = WardenProps.contract(art_id).get("sk_m", Transform3D.IDENTITY)
+	companions = WardenCompanions.detach(glb, skel, WardenClips.data(art_id), to_m.affine_inverse() * c_xf)
+	mouth = skel.find_child(WardenGlb.WEAPON_MUZZLE, true, false) as Node3D
 	model.set_meta(WardenClips.DEATH_T, 0.0)  # (the extract beat plays, WardenClips.leave_t; no death clip to hold)
 	_play("idle", 1.0)
 
@@ -165,12 +172,14 @@ func _process(dt: float) -> void:
 		flinch.step(dt)
 	if wall:
 		wall.step(dt)
+	props.step(dt, String(s.get("kmove", "")))
+	if companions:
+		companions.step(dt)
 	if gun and gun.is_inside_tree() and hand >= 0:
 		gun.global_position = hand_position()
 		var mz := gun.get_node_or_null(^"Muzzle") as Node3D
-		if mz and not mouth.is_empty():  # (as WardenSync puts it on a skinned weapon's mouth: Cinder's palm)
-			var on := skel.get_bone_global_pose(int(mouth[0])) * (mouth[1] as Transform3D)
-			mz.global_position = skel.global_transform * on.origin
+		if mz and mouth:  # (as WardenSync puts it on a skinned weapon's mouth: Cinder's palm)
+			mz.global_position = _now(mouth)
 	for f in followers:
 		var b: int = f[1]
 		(f[0] as Node3D).position = (skel.get_bone_global_pose(b).origin - skel.get_bone_global_rest(b).origin)
@@ -189,6 +198,19 @@ func _heart(on: bool, dt: float) -> void:
 	var fwd := float(d.get("carry_fwd", cd.get("carry_fwd", WardenCarry.REACH_FWD)))
 	var side := String(d.get("heart_hand", cd.get("heart_hand", "L")))
 	root.set_meta(WardenCarry.MOTE, WardenCarry.hold_mote(skel, root, heart_w, side, fwd))
+
+
+## Where empty `nd` (on a bone attachment, maybe under a part) is this frame (world), from the pose the clip just set.
+func _now(nd: Node3D) -> Vector3:
+	var xf := Transform3D.IDENTITY
+	var n: Node = nd
+	while n is Node3D and not (n is BoneAttachment3D):
+		xf = (n as Node3D).transform * xf
+		n = n.get_parent()
+	if not (n is BoneAttachment3D):
+		return nd.global_position
+	var bi := skel.find_bone((n as BoneAttachment3D).bone_name)
+	return (skel.global_transform * skel.get_bone_global_pose(bi) * xf).origin
 
 
 ## Where the rig's torso shows, world (WardenGlb.shown_torso): Meshy's torso bone as its clip and the air tilt posed
@@ -387,10 +409,11 @@ func _orbit(orb: String) -> Array:
 
 ## The contract model's anchor empties (anchor_*, weapon_muzzle*: the points the kits and VFX read, Cinder's palms,
 ## tail tip and heel jets, Kael's blade tip) that data "anchors" does not place. Each rides the Meshy bone that plays
-## the part of its contract bone, or of the nearest ancestor bone Meshy has a stand-in for (WardenSkeleton.find: a
-## blade bone's hand), in that bone's own frame at the same distance in metres (the bone frames, not the model, carry
-## it over: Meshy's rest is a T-pose, the contract's arms hang). One with no such bone (a tail spring off the hips is
-## still found through the hips; a loose one) rides the Meshy bone nearest where it sits on the contract model.
+## the part of its contract bone, or of the nearest ancestor bone Meshy has a stand-in for (WardenSkeleton.find).
+## On its own bone's stand-in it keeps that bone's frame at the same distance in metres (the bone frames, not the
+## model, carry it over: Meshy's rest is a T-pose, the contract's arms hang); on a parent's (a tail spring, a
+## pauldron: the torso, whose rest the two models share) or on the nearest bone (a loose one) it keeps where it sits
+## on the contract model.
 func _copy_anchors(glb: Node3D) -> void:
 	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
 	var inv := to_m.affine_inverse()
@@ -409,6 +432,7 @@ func _copy_anchors(glb: Node3D) -> void:
 				break
 		if nb < 0:
 			nb = _nearest(inv * (a[2] as Transform3D).origin)
+		if nb >= 0 and WardenSkeleton.find(skel, String(a[1][0][0])) != nb:  # (on a parent: where it sits on the model)
 			local = skel.get_bone_global_rest(nb).affine_inverse() * inv * (a[2] as Transform3D)
 		var at := BoneAttachment3D.new()
 		at.name = "bone_%s" % a[0]
@@ -418,8 +442,6 @@ func _copy_anchors(glb: Node3D) -> void:
 		e.name = String(a[0])
 		e.transform = local
 		at.add_child(e)
-		if e.name == WardenGlb.WEAPON_MUZZLE:
-			mouth = [nb, e.transform]
 
 
 ## The bone whose rest head is nearest `p` (skeleton space).

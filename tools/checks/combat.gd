@@ -5,5 +5,5 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
-	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # docs/decisions/0100
+	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 }
