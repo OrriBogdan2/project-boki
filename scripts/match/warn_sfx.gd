@@ -2,14 +2,15 @@ class_name WarnSfx
 extends RefCounted
 ## Warning sounds nobody should miss (docs/AUDIO.md): a heartbeat under low health and the uplink lift's countdown tick.
 
-const LOW_HP := 0.25          # share of max health under which the heartbeat runs
-const BEAT_S := Vector2(1.1, 0.6)   # s between beats at LOW_HP and at 0 health
-const BEAT_DB := -4.0         # dB: soft, it sits under the fight
-const COUNT_S := 10           # s: the countdown ticks once a second for this long before a lift shuts
+const LOW_HP := 0.25  # share of max health under which the heartbeat runs
+const BEAT_S := Vector2(1.1, 0.6)  # s between beats at LOW_HP and at 0 health
+const BEAT_DB := -4.0  # dB: soft, it sits under the fight
+const COUNT_S := 10  # s: the countdown ticks once a second for this long before a lift shuts
 const TICK_DB := -2.0
-const TICK_PITCH := Vector2(1.0, 1.5)   # first and last tick of the countdown
+const TICK_PITCH := Vector2(1.0, 1.5)  # first and last tick of the countdown
 
-static var beat_in := 0.0     # s until the next beat (the local hunter's only)
+static var beat_in := 0.0  # s until the next beat (the local hunter's only)
+
 
 ## The local hunter's heartbeat: faster the lower the health; it stops as soon as they are healed, downed or out.
 static func low_hp(h: Hunter, dt: float) -> void:
@@ -21,6 +22,7 @@ static func low_hp(h: Hunter, dt: float) -> void:
 		return
 	beat_in = lerpf(BEAT_S.y, BEAT_S.x, h.hp / (h.max_hp * LOW_HP))
 	Sfx.play("warn_heartbeat", null, BEAT_DB)
+
 
 ## One tick a second, rising in pitch, for the last COUNT_S seconds of an exit's timer `t`
 ## (x["count"] remembers the last second ticked). Your squad's exit ticks at UI level, a rival's from `at`.

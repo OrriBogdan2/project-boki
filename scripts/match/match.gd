@@ -50,6 +50,7 @@ var ktip: KnockTip = null           # the first-knock card, in a save's first tw
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var training := Training.new()   # the Training Grounds checklist and the train/balloon test hooks
+var camps: Camps = Camps.new(self)     # the map's fixed monster camps (see Camps)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -185,7 +186,7 @@ static func take_prefetched(path: String) -> Resource:
 		if r != null:
 			return r
 	return load(path)
-## Roughly how long each step takes (ms, measured with --perf-probe), for the loading bar.
+## Roughly how long each step takes (ms, measured with --perf-bench --bench-probe), for the loading bar.
 const STAGE_MS := {"build.generate": 250, "world.terrain": 450, "world.roots": 40, "world.scatter_plan": 350, "world.scatter_batches": 250,
 	"world.walls": 650, "world.grass": 450, "world.sky": 60, "world.landmarks": 120, "world.air": 20, "build.systems": 40, "build.pads_exits": 80,
 	"build.hunters": 250, "build.mobs": 200, "build.chests": 60, "build.spawns": 200, "build.hud": 150, "build.finish": 30}
@@ -225,7 +226,7 @@ func warm_up(progress := Callable()) -> void:
 	SpanLooks.of(self).warm()      # bridge slabs and platform pads (a frost glove's first bridge: 8-10 ms)
 	await WarmUp.new(self).run(progress)
 
-## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
+## Tooling (--perf-bench --bench-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
 static var prof := {}
 var _prof_t := 0
@@ -386,7 +387,7 @@ func _start(o: Dictionary) -> void:
 	if tut: tut.setup()
 	await _stage("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false) and not opts.get("arena", false):
-		await _spawn_mobs()        # the tutorial brings its own monsters, one step at a time
+		await camps.spawn_all()        # the tutorial brings its own monsters, one step at a time
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
@@ -966,43 +967,6 @@ func _apply_treat(k: Kin) -> void:
 		"treat_hardy": k.max_hp *= 1.4; k.hp = k.max_hp
 		"treat_calm": k.trust = minf(100.0, k.trust + 12.0)
 
-func _spawn_mobs() -> void:
-	if net_on and not is_host:
-		return
-	for c in world.camp_spots:
-		await _slice()
-		var p: Vector3 = c["pos"]
-		var comp: Array
-		match String(c.get("kind", "normal")):
-			"heavy": comp = ["brute", "spitter", "skitter", "sentinel"]
-			"light":
-				var lr := rng.randf()
-				comp = ["skitter", "skitter"] if lr < 0.4 else (["spitter", "skitter"] if lr < 0.7 else ["bomber", "skitter"])
-			_:
-				var nr := rng.randf()
-				if nr < 0.15 * tier + 0.2:
-					comp = ["brute", "skitter", "bomber"]
-				elif nr < 0.5:
-					comp = ["skitter", "bomber", "spitter"]
-				elif nr < 0.75:
-					comp = ["sentinel", "skitter", "skitter"]
-				else:
-					comp = ["spitter", "skitter", "bomber"]
-		# a camp in a biome region spawns from that region's table instead
-		var bcomp: Array = biomes.camp_comp(c) if biomes else []
-		if not bcomp.is_empty(): comp = bcomp
-		var made: Array = []
-		for kk in comp:
-			var q := p
-			for _t in 20:
-				var cand := p + Vector3(rng.randf_range(-1.8, 1.8), 0, rng.randf_range(-1.8, 1.8))
-				if not world.is_void(cand.x, cand.z) and not world.is_block(cand.x, cand.z):
-					q = Vector3(cand.x, world.ground_at(cand.x, cand.z), cand.z); break
-			var smb := spawn_mob(kk, q)
-			if biomes: biomes.dress(smb)
-			made.append(smb)
-		if rolling: rolling.note_camp(p, comp, made)     # (cleared camps come back in a rolling session)
-
 func spawn_mob(kk: String, at: Vector3) -> Mob:
 	at = _clear_spot(at)
 	var mb := Mob.new()
@@ -1444,7 +1408,7 @@ func _update_rings(dt: float) -> void:
 			var d: Vector2 = hv.normalized() if hv.length() > 1.0 else rd
 			if absf(d.dot(rd)) > 0.5:
 				d = rd if d.dot(rd) > 0.0 else -rd    # line up with the ring
-			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Loco.glide_max)
+			var spd := minf(maxf(hv.length(), HunterMove.glide_cruise) + 4.0, Loco.glide_max)
 			h.vel.x = d.x * spd; h.vel.z = d.y * spd
 			h.vel.y = maxf(h.vel.y, 2.0)
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)

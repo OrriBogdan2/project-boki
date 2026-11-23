@@ -98,7 +98,9 @@ static func rock(
 	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true,
 	top := ROCK_TOP
 ) -> Dictionary:
-	var e := {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#" + ROCK_COL.to_html(false)}
+	var e := {
+		"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#" + ROCK_COL.to_html(false)
+	}
 	var w: Dictionary = m.verbs.add_wall(by, at, dir, e, 1.0)
 	var old: Node3D = w["node"]
 	var n := RockLook.take(m)
@@ -172,9 +174,6 @@ static func bridge(
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
-## The seed: a teal glass globe on the ground with a slow swirl (shaders/void_glass), clear inside and lit at its
-## rim (docs/VFX_QUALITY.md zone rule: SEED_A x (SEED_BODY + 0.1) at the centre), growing to its full width, with a
-## teal rim ring. Ostra's own shape; no other zone looks like it.
 const SEED_R0 := 0.08                 # share of full size a fresh seed starts at (a speck, never zero)
 
 ## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
@@ -186,6 +185,9 @@ static func seed_r(rmax: float, grow: float, t: float) -> float:
 static func seed_size(n: Node3D, r: float) -> void:
 	n.scale = Vector3.ONE * r
 
+## The seed: a teal glass globe on the ground with a slow swirl (shaders/void_glass), clear inside and lit at its
+## rim (docs/VFX_QUALITY.md zone rule: SEED_A x (SEED_BODY + 0.1) at the centre), growing to its full width, with a
+## teal rim ring. Ostra's own shape; no other zone looks like it.
 static func seed_visual(
 	m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color, remote := false
 ) -> Node3D:

@@ -111,37 +111,37 @@ func _files() -> void:
 # ------------------------------------------------------------------ 2. each event once
 func _calls(main: Node) -> void:
 	var m := _match(main, 8301)
-	var A: HeartSfx = m.heart.audio
+	var a: HeartSfx = m.heart.audio
 	var me: int = m.player.team
 	var rival := _other_team(m)
 	for i in 10:
-		A.call_out("open", "lair")
+		a.call_out("open", "lair")
 	ok(
 		_n(m, "ways_open") == 1 and _said(m, "The Sealed Lair is open"),
 		"a seat opening: one cue and one line under spam"
 	)
-	A.call_out("open", "uplink")
+	a.call_out("open", "uplink")
 	ok(_n(m, "ways_open") == 2, "...another seat opening is its own call")
 	for i in 10:
-		A.call_out("start", "lair", rival)
+		a.call_out("start", "lair", rival)
 	ok(_n(m, "ways_start") == 1 and _said(m, "started the Sealed Lair"), "a squad starting a seat: once under spam")
-	A.call_out("start", "lair", me)
+	a.call_out("start", "lair", me)
 	ok(
 		_n(m, "ways_start") == 2 and _said(m, "Your squad started the Sealed Lair"),
 		"...a different squad starting does sound"
 	)
 	m.time += HeartSfx.START_GAP_S + 1.0
-	A.call_out("start", "lair", rival)
+	a.call_out("start", "lair", rival)
 	ok(_n(m, "ways_start") == 3, "...and the same squad again after %.0f s" % HeartSfx.START_GAP_S)
 	for i in 10:
-		A.call_out("taken", "lair", rival)
+		a.call_out("taken", "lair", rival)
 	ok(
 		_n(m, "ways_taken_other") == 1 and _n(m, "ways_taken_own") == 0,
 		"a seat taken by another squad: the other-squad sting, once"
 	)
 	ok(_said(m, "left by the Sealed Lair. 3 ways out left."), "...the line counts the ways out left")
 	for i in 10:
-		A.call_out("taken", "uplink", me)
+		a.call_out("taken", "uplink", me)
 	ok(
 		_n(m, "ways_taken_own") == 1 and _said(m, "Your squad left by the Uplink. 2 ways out left."),
 		"your squad's seat: the own sting, once"
@@ -149,8 +149,8 @@ func _calls(main: Node) -> void:
 	m.queue_free()
 	# the 30 s warning
 	m = _match(main, 8302)
-	A = m.heart.audio
-	A.call_out("open", "uplink")
+	a = m.heart.audio
+	a.call_out("open", "uplink")
 	var shut := float(rl["quest"]["uplink_shut_s"])
 	var warn := float(rl["quest"]["warn_before_shut_s"])
 	_to(m, shut - warn - 1.0)
@@ -165,13 +165,13 @@ func _calls(main: Node) -> void:
 	m.queue_free()
 	# the last way out
 	m = _match(main, 8303)
-	A = m.heart.audio
+	a = m.heart.audio
 	m.heart.state = Heart.S.FINAL
-	A.call_out("taken", "lair", me)
-	A.call_out("taken", "uplink", me)
+	a.call_out("taken", "lair", me)
+	a.call_out("taken", "uplink", me)
 	_run(m, 3.0)
 	ok(_n(m, "ways_last") == 0, "two ways out left is no last way out")
-	A.call_out("taken", "early", _other_team(m))
+	a.call_out("taken", "early", _other_team(m))
 	ok(_n(m, "ways_last") == 0, "...and it waits behind the taken sting")
 	_run(m, HeartSfx.LAST_DELAY_S + 1.0)
 	_run(m, 5.0)
@@ -182,23 +182,23 @@ func _calls(main: Node) -> void:
 # ------------------------------------------------------------------ 3. the Heart makes its calls
 func _heart(main: Node) -> void:
 	var m := _match(main, 8304)
-	var H: Heart = m.heart
+	var h_v: Heart = m.heart
 	var p: Hunter = m.player
 	_to(m, float(rl["wake_s"]))
 	ok(
-		H.state == Heart.S.CHARGING and _n(m, "ways_open") == 1 and _said(m, "The Heart Gate is open"),
+		h_v.state == Heart.S.CHARGING and _n(m, "ways_open") == 1 and _said(m, "The Heart Gate is open"),
 		"the Heart waking opens the early seat: one call"
 	)
 	_run(m, float(rl["charge_s"]) + 0.5)
-	p.teleport(m.world.free_spot_near(H.site + Vector3(1, 0, 0), [], 1.0, 0.45, 6.0))
-	H._pick(p)
+	p.teleport(m.world.free_spot_near(h_v.site + Vector3(1, 0, 0), [], 1.0, 0.45, 6.0))
+	h_v._pick(p)
 	m.step(Match.DT)
 	ok(
 		_n(m, "heart_take") == 1 and _n(m, "heart_reveal") == 0 and _n(m, "ways_start") == 0,
 		"taking the Heartspark: the taker's own sting, no call on top"
 	)
-	p.teleport(H.gate)
-	H._gate_done(p)
+	p.teleport(h_v.gate)
+	h_v._gate_done(p)
 	m.step(Match.DT)
 	ok(
 		_n(m, "ways_taken_own") == 1 and _n(m, "heart_extract") == 1 and _said(m, "Your squad left by the Heart Gate"),
@@ -206,43 +206,43 @@ func _heart(main: Node) -> void:
 	)
 	m.queue_free()
 	m = _match(main, 8305)
-	H = m.heart
+	h_v = m.heart
 	p = m.player
 	_to(m, float(rl["final_s"]))
 	ok(
-		H.state == Heart.S.FINAL and _n(m, "ways_open") == 1 and _said(m, "The Heart is open"),
+		h_v.state == Heart.S.FINAL and _n(m, "ways_open") == 1 and _said(m, "The Heart is open"),
 		"the final seat opening: one call"
 	)
 	for i in 3:
-		p.teleport(m.world.free_spot_near(H.site + Vector3(1.5, 0, 0), [], 1.0, 0.45, 1.5))
+		p.teleport(m.world.free_spot_near(h_v.site + Vector3(1.5, 0, 0), [], 1.0, 0.45, 1.5))
 		m.step(Match.DT)
 	ok(
-		H.final_team == p.team and _n(m, "ways_start") == 1 and _said(m, "Your squad started the Heart"),
+		h_v.final_team == p.team and _n(m, "ways_start") == 1 and _said(m, "Your squad started the Heart"),
 		"holding the ring starts the final seat: one call"
 	)
 	for i in int(float(rl["final_hold_s"]) / Match.DT) + 60:
-		p.teleport(m.world.free_spot_near(H.site + Vector3(1.5, 0, 0), [], 1.0, 0.45, 1.5))
+		p.teleport(m.world.free_spot_near(h_v.site + Vector3(1.5, 0, 0), [], 1.0, 0.45, 1.5))
 		m.step(Match.DT)
 	ok(
-		H.state == Heart.S.DONE and _n(m, "ways_taken_own") == 1 and _n(m, "ways_start") == 1,
+		h_v.state == Heart.S.DONE and _n(m, "ways_taken_own") == 1 and _n(m, "ways_start") == 1,
 		"the ring filling: taken once, no second start"
 	)
-	ok(H.refused == 0, "no refused edges")
+	ok(h_v.refused == 0, "no refused edges")
 	m.queue_free()
 	# another squad takes the early seat while you watch
 	m = _match(main, 8306)
-	H = m.heart
+	h_v = m.heart
 	_to(m, float(rl["wake_s"]))
 	_run(m, float(rl["charge_s"]) + 0.5)
 	# a standing rival: by now idle hunters go down now and then (no hitter),
 	# so which one is up at the pick is luck of the spawns
 	var rival: Hunter = m.hunters.filter(func(h): return h.team != m.player.team and not h.downed and not h.out)[0]
-	rival.teleport(m.world.free_spot_near(H.site + Vector3(1, 0, 0), [], 1.0, 0.45, 6.0))
-	H._pick(rival)
+	rival.teleport(m.world.free_spot_near(h_v.site + Vector3(1, 0, 0), [], 1.0, 0.45, 6.0))
+	h_v._pick(rival)
 	m.step(Match.DT)
 	ok(_n(m, "heart_reveal") == 1 and _n(m, "heart_take") == 0, "a rival taking the Heartspark: the reveal sting, once")
-	rival.teleport(H.gate)
-	H._gate_done(rival)
+	rival.teleport(h_v.gate)
+	h_v._gate_done(rival)
 	m.step(Match.DT)
 	ok(
 		_n(m, "ways_taken_other") == 1 and _n(m, "ways_taken_own") == 0,
@@ -256,10 +256,10 @@ func _net(main: Node) -> void:
 	var cli := _match(main, 8307)
 	cli.net_on = true
 	cli.is_host = false
-	var C: Heart = cli.heart
+	var c: Heart = cli.heart
 	var rival := _other_team(cli)
 	for i in 3:
-		C.net_in(JSON.parse_string(JSON.stringify(["ht", "take", Heart.HOW_EARLY, rival])))
+		c.net_in(JSON.parse_string(JSON.stringify(["ht", "take", Heart.HOW_EARLY, rival])))
 	ok(
 		_n(cli, "ways_taken_other") == 1 and _said(cli, "left by the Heart Gate"),
 		"a client told of a seat taken: the call, once"
@@ -272,14 +272,14 @@ func _net(main: Node) -> void:
 ## The whole seconds a seat ticked over its last seconds before session second `shut`: only the Heart's
 ## sounds run (the seats stay as the caller set them).
 func _count_down(m: Match, seat: String, shut: float) -> Array:
-	var A: HeartSfx = m.heart.audio
-	A.ticks.clear()
-	A._ticked.clear()
+	var a: HeartSfx = m.heart.audio
+	a.ticks.clear()
+	a._ticked.clear()
 	m.time = shut - HeartSfx.TICK_FROM_S - 1.0 - m.sess_t0
 	for i in int((HeartSfx.TICK_FROM_S + 2.0) / Match.DT):
 		m.time += Match.DT
-		A.update()
-	return A.ticks.filter(func(t): return t[0] == seat).map(func(t): return t[1])
+		a.update()
+	return a.ticks.filter(func(t): return t[0] == seat).map(func(t): return t[1])
 
 
 func _ticks(main: Node) -> void:
@@ -353,34 +353,34 @@ func _quest(main: Node) -> void:
 	ok(lens.all(func(l): return l > 0.3 and l < 2.5), "the four quest stings are short sounds %s" % [lens])
 	Sfx.reset_scene_audio()  # the Heart matches above leave their seats' loops held (the check never idles)
 	var m := _match(main, 8308)
-	var Q: QuestSeats = m.exits.seats
-	var A: QuestSfx = Q.audio
+	var q: QuestSeats = m.exits.seats
+	var a: QuestSfx = q.audio
 	var me: int = m.player.team
-	var U: QuestSeat = Q.uplink
-	var L: QuestSeat = Q.lair
-	ok(U != null and L != null, "the match has both quest seats")
+	var u: QuestSeat = q.uplink
+	var l_v: QuestSeat = q.lair
+	ok(u != null and l_v != null, "the match has both quest seats")
 	for h in m.hunters:
 		if h.team == me:
-			h.teleport(m.world.free_spot_near(U.site() + Vector3(25, 0, 0), [], 1.0, 0.45, 10.0))
-	A.update()
+			h.teleport(m.world.free_spot_near(u.site() + Vector3(25, 0, 0), [], 1.0, 0.45, 10.0))
+	a.update()
 	ok(not Sfx.loop_on("quest_site_uplink"), "a locked seat has no site loop")
-	_move(m, U, QuestSeat.S.OPEN)
-	ok(Sfx.loop_on("quest_site_uplink") and A.cues.is_empty(), "an open seat hums at its site, no sting")
+	_move(m, u, QuestSeat.S.OPEN)
+	ok(Sfx.loop_on("quest_site_uplink") and a.cues.is_empty(), "an open seat hums at its site, no sting")
 	for i in 5:
-		_move(m, U, QuestSeat.S.IN_USE, me)
+		_move(m, u, QuestSeat.S.IN_USE, me)
 	ok(_q(m, "quest_take") == 1, "your squad takes on the Uplink: quest_take, once")
-	_move(m, U, QuestSeat.S.TAKEN, me)
+	_move(m, u, QuestSeat.S.TAKEN, me)
 	ok(_q(m, "quest_win") == 1 and _q(m, "quest_lose") == 0, "...and takes it: quest_win, once")
-	_move(m, U, QuestSeat.S.TAKEN, me)
+	_move(m, u, QuestSeat.S.TAKEN, me)
 	ok(_q(m, "quest_win") == 1, "...not again on the next tick")
 	OS.delay_msec(Sfx.HOLD_MS + 50)
 	Sfx._drop_stale_holds()
 	ok(not Sfx.loop_on("quest_site_uplink"), "the site loop ends once the seat is taken")
 	# your squad loses its hold; a rival on the other seat races yours
-	_move(m, L, QuestSeat.S.OPEN)
-	_move(m, L, QuestSeat.S.IN_USE, me)
+	_move(m, l_v, QuestSeat.S.OPEN)
+	_move(m, l_v, QuestSeat.S.IN_USE, me)
 	ok(_q(m, "quest_take") == 2, "your squad sealed in with the lair's boss: quest_take")
-	_move(m, L, QuestSeat.S.OPEN)
+	_move(m, l_v, QuestSeat.S.OPEN)
 	ok(_q(m, "quest_lose") == 1, "the boss fight lost (the seat opens again): quest_lose, once")
 	m.queue_free()
 	_rival(main)
@@ -389,40 +389,40 @@ func _quest(main: Node) -> void:
 
 func _rival(main: Node) -> void:
 	var m := _match(main, 8309)
-	var Q: QuestSeats = m.exits.seats
+	var q: QuestSeats = m.exits.seats
 	var me: int = m.player.team
 	var rival := _other_team(m)
-	var U: QuestSeat = Q.uplink
-	var L: QuestSeat = Q.lair
+	var u: QuestSeat = q.uplink
+	var l: QuestSeat = q.lair
 	for h in m.hunters:
-		h.teleport(m.world.free_spot_near(U.site() + Vector3(25, 0, 0), [], 1.0, 0.45, 10.0))
-	_move(m, U, QuestSeat.S.IN_USE, rival, 0.9)
+		h.teleport(m.world.free_spot_near(u.site() + Vector3(25, 0, 0), [], 1.0, 0.45, 10.0))
+	_move(m, u, QuestSeat.S.IN_USE, rival, 0.9)
 	ok(_q(m, "quest_rival_rise") == 0, "a rival past 75 % while your squad is on no quest: silence")
-	_move(m, L, QuestSeat.S.IN_USE, me)
-	_move(m, U, QuestSeat.S.IN_USE, rival, 0.9)
+	_move(m, l, QuestSeat.S.IN_USE, me)
+	_move(m, u, QuestSeat.S.IN_USE, rival, 0.9)
 	for i in 5:
-		_move(m, U, QuestSeat.S.IN_USE, rival, 0.95)
+		_move(m, u, QuestSeat.S.IN_USE, rival, 0.95)
 	ok(
 		_q(m, "quest_rival_rise") == 1,
 		"a rival past 75 % of its quest while yours holds the lair: the rising cue, once"
 	)
-	_move(m, U, QuestSeat.S.IN_USE, rival, 0.4)
-	_move(m, U, QuestSeat.S.IN_USE, rival, 0.8)
+	_move(m, u, QuestSeat.S.IN_USE, rival, 0.4)
+	_move(m, u, QuestSeat.S.IN_USE, rival, 0.8)
 	ok(_q(m, "quest_rival_rise") == 2, "...again only after it fell back under 50 %")
-	_move(m, U, QuestSeat.S.TAKEN, rival)
+	_move(m, u, QuestSeat.S.TAKEN, rival)
 	ok(_q(m, "quest_lose") == 0, "a rival taking the other seat is not your squad's loss")
 	m.queue_free()
 	# contesting a rival's uplink in its yard, then it is taken from you
 	m = _match(main, 8310)
-	Q = m.exits.seats
-	U = Q.uplink
+	q = m.exits.seats
+	u = q.uplink
 	me = m.player.team
 	rival = _other_team(m)
-	_move(m, U, QuestSeat.S.IN_USE, rival, 0.5)
-	m.player.teleport(U.site())
-	_move(m, U, QuestSeat.S.IN_USE, rival, 0.76)
+	_move(m, u, QuestSeat.S.IN_USE, rival, 0.5)
+	m.player.teleport(u.site())
+	_move(m, u, QuestSeat.S.IN_USE, rival, 0.76)
 	ok(_q(m, "quest_rival_rise") == 1, "in a rival's uplink yard as it passes 75 %: the rising cue")
-	_move(m, U, QuestSeat.S.TAKEN, rival)
+	_move(m, u, QuestSeat.S.TAKEN, rival)
 	ok(_q(m, "quest_lose") == 1 and _q(m, "quest_win") == 0, "...and it is taken from you: quest_lose")
 	# a client mirrors the host's take
 	var cli := _match(main, 8311)
@@ -441,23 +441,23 @@ func _rival(main: Node) -> void:
 ## The host's own moves sound: your squad starts the real uplink, charges it full, and the lift opens.
 func _quest_host(main: Node) -> void:
 	var m := _match(main, 8312)
-	var U: QuestSeat = m.exits.seats.uplink
+	var u: QuestSeat = m.exits.seats.uplink
 	var p: Hunter = m.player
-	_to(m, U.open_s + 1.0)
-	p.teleport(U.site())
-	m.exits._start(U.ref, p)
+	_to(m, u.open_s + 1.0)
+	p.teleport(u.site())
+	m.exits._start(u.ref, p)
 	for i in 3:
 		m.step(Match.DT)
 	ok(
-		U.state == QuestSeat.S.IN_USE and _q(m, "quest_take") == 1,
+		u.state == QuestSeat.S.IN_USE and _q(m, "quest_take") == 1,
 		"the host starting the Uplink for your squad: quest_take"
 	)
-	U.ref["prog"] = 1.0
+	u.ref["prog"] = 1.0
 	for i in 30:
-		p.teleport(U.site())
+		p.teleport(u.site())
 		m.step(Match.DT)
 	ok(
-		U.state == QuestSeat.S.TAKEN and _q(m, "quest_win") == 1,
-		"the charge full and the lift open: quest_win (%s)" % [U.trail]
+		u.state == QuestSeat.S.TAKEN and _q(m, "quest_win") == 1,
+		"the charge full and the lift open: quest_win (%s)" % [u.trail]
 	)
 	m.queue_free()

@@ -188,6 +188,7 @@ const MIN_GAP := {
 	"break_wood": 40,
 	"break_clay": 40,
 	"break_metal": 40,
+	"hostile_cast": 100,
 	"tell_foe": 120,
 	"keg_fuse": 80,
 	"keg_blast": 100,
@@ -226,7 +227,6 @@ const MIN_GAP := {
 	"steal_won": 400,
 	"steal_lost": 400,
 	"training_dummy_hit": 70,
-	"hostile_cast": 100,
 	"armor_up": 120,
 	"boki_downed": 150,
 	"boki_revive": 300,
@@ -248,7 +248,7 @@ const STACK_DB := 3.5
 const BLAST := ["boom", "ab_blast", "ab_slam"]
 const BLAST_DB := -7.0
 const BLAST_PEAK_DB := -6.0
-## Distance falloff, sized to the match view (SUPERVIVE camera, ~37 m across, so ~18.5 m to the side edge): what you
+## Distance falloff, sized to the match view (the target camera, ~37 m across, so ~18.5 m to the side edge): what you
 ## can see you can hear. Full volume within NEAR metres, then a gentle roll-off (SPREAD is the metres per
 ## doubling-ish step: 1 + (d - NEAR) / SPREAD); muffled beyond FAR (just past the side edge); silent past hear_range
 ## (30 m: ~10 m off screen, fading from 0.7 of it). Docs: AUDIO.md "Falloff".

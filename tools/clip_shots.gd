@@ -6,11 +6,22 @@ extends RefCounted
 ## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
+## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model
+## (contract clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 const ClipCheck := preload("res://tools/clip_check.gd")
 
+## --states: [state, the match's state for it (WardenClips.STATE), s it is held]
+const STATE_SHOTS := [
+	["idle", {"grounded": true}, 2.0],
+	["walk", {"grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}, 1.5],
+	["run", {"grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}, 1.5],
+	["jump", {"grounded": false, "vel": Vector3(0.0, 2.0, -4.0)}, 1.2],
+	["attack", {"grounded": true}, 1.6],
+	["crouch", {"grounded": true, "crouch": 1.0, "vel": Vector3(0.0, 0.0, -1.2)}, 1.5],
+]
 var ground_col := Color("4f7a3e")
 var holder: Node3D
 var cam: Camera3D
@@ -88,7 +99,12 @@ func run(main: Node) -> void:
 		cam.position = Vector3(0, at_y + 0.25, dist)
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
-		await tree.process_frame  # (past the title's fade)
+		await tree.process_frame       # (past the title's fade)
+	if OS.get_cmdline_user_args().has("--states"):
+		await _states(model, fps, out)
+		print("CLIP_SHOTS_DONE")
+		tree.quit()
+		return
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
@@ -168,6 +184,34 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 			s.erase("kmove")
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
+
+## --states: each STATE_SHOTS state fed to the model's pose node for its seconds; the attack is the kit's first move
+## (contract clips) and one swing (a Meshy-native model).
+func _states(model: Node3D, fps: float, out: String) -> void:
+	var dir := out.path_join("states")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var poser := model.get_node_or_null("Warden/Native")
+	if poser == null:
+		poser = model.get_node("Warden/Sync")
+	poser.set_process(false)
+	var clips: WardenClips = poser.get("clips")
+	var kmove := ""
+	if clips:
+		kmove = String((clips.d.get("kmoves", {}) as Dictionary).keys().front())
+	var i := 0
+	for st in STATE_SHOTS:
+		var s: Dictionary = (st[1] as Dictionary).duplicate()
+		s["face"] = model.rotation.y
+		model.set_meta(WardenClips.STATE, s)
+		for k in int(float(st[2]) * fps):
+			if st[0] == "attack":
+				s["swing_n"] = 1
+				s["kmove"] = kmove
+				s["kmove_t"] = k / fps
+			poser.call("_process", 1.0 / fps)
+			await _grab(dir.path_join("f%03d.png" % i))
+			i += 1
+	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
 
 
 func _grab(path: String) -> void:

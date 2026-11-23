@@ -67,6 +67,12 @@ on the A swatch [62,78,85]. Runes are masked out and keep their emission.
 - Re-running `v95_swap` on this rig drops the split. The recolour scripts (grade.py, gamesplit.py, armprim.py) and their
   inputs are in /home/boki/meshy/tenzo-arm-3d-1113/ (NOTES.md, work/).
 
+walk and run b, l, r, fl, fr, bl, br (2026-11-11): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/tarek/tarek.glb OUT.glb 2.2 5.0`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/tarek/tarek.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`
+(judge: docs/art/wardens/dirloops/JUDGE.md).
+
+Merge of origin/main (2026-11-13): tarek.glb is main's v95 model; the 16 walk/run clips (f, b, l, r, fl, fr, bl, br; pilot-length rings, pelvis on the forward loop) were put back with `python3 tools/art1/glb_add_clips.py art/wardens/tarek/tarek.glb <branch glb> walk_f,...,run_br` (same rig, rest pose checked equal).
+
 The strikes lmb_punch and lmb_throw are keyed at 60 fps (`bake(fps=60)`; tools/art1/fine_export.py exports them at that rate and splices
 them in), so the .glb.import keeps `animation/fps=60`. Clips only, with no raw files: import the shipped .glb in Blender
 (bone_heuristic BLENDER, actions dropped, the armature named `Armature`) as WORK, run the clip script on it, and splice
