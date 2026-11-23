@@ -21,6 +21,10 @@ var film := false
 var film_clips: Array = ["idle", "run", "attack", "hit"]   # --clips=a,b: the clips a film plays
 var film_yaws: Array = [-PI, -PI / 2.0, 0.0]   # --yaws=deg,deg,..: a film plays every clip once at each of these yaws (front, side, back)
 var native := false
+var mfov := 8.0     # --mfov=14: the match camera's field of view (wider = the hunter sits smaller in the tile)
+var mpitch := 66.0  # --mpitch=57: the match camera's pitch in degrees (the game plays ~57)
+var cfit := 0.85   # --cfit=0.6: the share of the close view's frame the body height fills (lower = more room for a long hammer and a wide shield)
+var mdist := 23.0   # --mdist: its distance to the hunter
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -34,6 +38,10 @@ func run(main: Node) -> void:
 		if a == "--close": close = true
 		if a == "--contract": WardenNative.contract_only = true      # LIVE: the contract model as main plays it
 		if a == "--film": film = true
+		if a.begins_with("--mfov="): mfov = float(a.substr(7))
+		if a.begins_with("--mpitch="): mpitch = float(a.substr(9))
+		if a.begins_with("--mdist="): mdist = float(a.substr(8))
+		if a.begins_with("--cfit="): cfit = float(a.substr(7))
 		if a.begins_with("--clips="):
 			film_clips = Array(a.substr(8).split(",", false))
 		if a.begins_with("--yaws="):
@@ -52,8 +60,8 @@ func run(main: Node) -> void:
 	tree.quit()
 
 func _match_cam() -> void:
-	cam.fov = 8.0
-	cam.position = Vector3(0, 21.0, 9.4)
+	cam.fov = mfov
+	cam.position = Vector3(0, mdist * sin(deg_to_rad(mpitch)), mdist * cos(deg_to_rad(mpitch))) + Vector3(0, 0.8, 0)
 	cam.look_at(Vector3(0, 0.8, 0))
 
 ## The body's world box (visible meshes under Warden) -> [bottom y, height, tris].
@@ -78,7 +86,7 @@ func _body_box(model: Node3D) -> Array:
 func _close_cam(bx: Array, knee: bool) -> void:
 	var h := float(bx[1])
 	var cy: float = float(bx[0]) + h * 0.5
-	var dist := h / (0.85 * 2.0 * tan(deg_to_rad(15.0)))
+	var dist := h / (cfit * 2.0 * tan(deg_to_rad(15.0)))
 	cam.fov = 30.0
 	cam.position = Vector3(0, float(bx[0]) + h * (0.3 if knee else 0.88), dist)
 	cam.look_at(Vector3(0, cy, 0))
@@ -127,7 +135,7 @@ func _hunter(id: String, dir: String) -> void:
 	poser.set_process(false)
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
-	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
+	marks.append("kind %s glb %s tris %d body_h %.2f bottom_y %.3f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1], bx[0]])
 	var plays: Array = []   # [clip, yaw index, yaw]
 	for clip in (film_clips if film else CLIPS):
 		for yi in (film_yaws.size() if film else 1):
