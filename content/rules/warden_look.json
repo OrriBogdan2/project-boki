@@ -230,6 +230,8 @@
 			"wood-helmet": {"desat": 0.5, "albedo": [0.86, 0.88, 0.8]},
 			"wood-fist": {"desat": 0.6, "albedo": [1.05, 1.1, 1.12], "fres": 0.2},
 			"wood-boot": {"desat": 0.5, "albedo": [1.15, 1.12, 1.12], "fres": 0.1},
+			"cloth-sail": {"desat": 0.25, "albedo": [1.0, 0.98, 0.92], "fres": 0.15},
+			"wood-glass": {"desat": 0.45, "albedo": [0.97, 1.0, 1.0]},
 			"glow-face": {"glow": 0.9},
 			"metal-chain": {"albedo": [2.3, 2.3, 2.4], "top_light": 0.6, "fres": 0.4, "fres_tint": 0.7},
 			"brass-compass": {"albedo": [0.62, 0.55, 0.42]},
