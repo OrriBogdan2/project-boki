@@ -72,7 +72,7 @@ gl_compatibility): 20261111-090952-22488 -> 20261111-091010-11716.
 | Hushwood | 357 / 17.2 | 326 / 16.4 | 325 / 7.0 | 301 / 7.0 |
 | Kitewind Ridge | 469 / 17.6 | 301 / 17.3 | 434 / 7.0 | 256 / 7.0 |
 
-Every zone is now under 350 draws on both machines; the ratchet keeps only what is still over: the hub (see "Hub draws" below for the current numbers) and the M5 frame of
+Every zone is now under 350 draws on both machines; the ratchet keeps only what is still over: the M5 frame of
 Cinderstep and Ridge (17-18 ms at a 640x360 window, near the 60 Hz line on both sides of the fixes, so the frame is
 not draw-bound there). Objects, nodes, emitters and base_life are within budget everywhere.
 
@@ -173,3 +173,32 @@ screen UI at 1080p; the number `--perf-bench` judges (UI hidden) was 286 on rp2g
   outline). The way to 200 is one mesh and one material per fixture (vertex colours in the toon material, shared
   outline), which changes how every fixture is painted; not started.
 Ratchet: hub draws 310 -> 295 (Medium), 300 -> 290 (Low), with the margin rp1-0 counts above rp2g.
+
+## Hub draws, third pass (ext/farm-hub-draws, 2026-11-23): 270 -> 178, under the 200 target
+The way named above: one mesh per look, not per colour. `PaintMerge` (scripts/match/paint_merge.gd) merges a static
+prop's unnamed toon parts as `Models.merge_static` does, but bakes each plain part's albedo into its vertex colours,
+so parts that differ only in colour merge into one mesh with one shared material (`use_vertex_color` + `color_srgb`
+in toon.gdshader: the colour stays sRGB in the vertex and is turned linear as the albedo is, so 8-bit vertex colour
+loses nothing). Parts with their own vertex colours, a texture or markings merge as before.
+- PaintMerged: the burrow, stall, Nesting Nook, Incubator (cradle, shelf, embers), the Waystone, the games board,
+  the ferry post, the signpost and every decoration (`HomeBuild._sync_deco`: the house and the rest).
+- Parts no code looks up lost their names so they merge: the burrow's door, frame, knob and window frames, the
+  Waystone's ring, inlay, lock looks and the stones not owed a reveal (`ZoneReveal` only needs the owed stone and
+  cap), the board's posts and tabs. The portal's eight runes and its feet share one material each.
+- Kept apart: the burrow's squashed mound, turf and lantern. Merged, their normals turn with the squash
+  (`MeshArrays.merged` turns normals by the basis, as SurfaceTool does) and they shade darker on top.
+- No look change: the prop lineup (`--prop-draws-check --shots-dir`, 1600x600, GPU) differs in 7 pixels of 960k
+  (mean 0.003 of 255), jobq 20261123-135435-01742 vs 20261123-135845-26509.
+
+GPU rp2g (RTX 4090, forward_plus, 640x360, UI hidden), `--perf-bench --bench-hub --bench-farm=3`, draws:
+
+| quality | before (jobq) | after (jobq) |
+|---|---|---|
+| Medium | 270 (20261123-134632-01773) | 178 (20261123-135904-19674) |
+| Low | 260 (20261123-134523-26277) | 170 (20261123-135918-27216) |
+
+Objects 381 -> 391 at Medium (named parts now merged count once; within 500). Props alone (`--prop-draws-check`,
+GPU): stall L1 20 -> 8, L3 38 -> 18, nook 17 -> 7, incubator 171 -> 155, burrow 37 -> 16; the check holds them.
+The hub meets its budget at both presets, so its ratchet entries are gone. What is left (in view, passes): the
+partner's rig 35, world scatter about 21, the Waystone 9, Incubator 17, burrow 11. The M5 (gl_compatibility) was
+not measured.
