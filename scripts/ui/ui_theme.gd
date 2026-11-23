@@ -8,9 +8,10 @@ extends RefCounted
 ## UI.install() merges it into the engine's default theme once at startup, so every Control in the
 ## game (menus, popups, tooltips) gets this look without a screen setting it. docs/UI_DESIGN.md.
 
-const LIP := 2                 # px of the darker face under raised buttons
+const LIP := 2  # px of the darker face under raised buttons
 const PRIMARY_LIP := 3
-const TICKET := Color("3a1446")    # the ticket stub's dark plum face (magenta rim, pink label)
+const TICKET := Color("3a1446")  # the ticket stub's dark plum face (magenta rim, pink label)
+
 
 ## The whole Theme. Call through UI.theme(), which keeps the one instance.
 static func build() -> Theme:
@@ -27,6 +28,7 @@ static func build() -> Theme:
 	_toggles_and_sliders(t)
 	return t
 
+
 ## The stock focus mark (keyboard and pad): a faint accent wash and an accent underline, drawn inside
 ## the control's own rect so it never pokes past a panel edge.
 static func ring(rad := UI.R_CTRL) -> StyleBoxFlat:
@@ -34,6 +36,7 @@ static func ring(rad := UI.R_CTRL) -> StyleBoxFlat:
 	f.border_color = UI.ACCENT_HI
 	f.border_width_bottom = 2
 	return f
+
 
 ## A raised button face with its lip; `down` is the pressed face (sunk onto the lip, the label
 ## moving with it, so the button's size never changes).
@@ -49,6 +52,7 @@ static func face(fill: Color, edge := Color(0, 0, 0, 0), lip := LIP, down := fal
 	f.content_margin_bottom = 8.0 + float(lip) - sink
 	return f
 
+
 ## A torn button face (UiTorn): `glow` lights the neon edge, `down` nudges the label down a pixel
 ## (the size never changes). `magenta` runs the whole edge magenta (primary, picked).
 static func torn(fill: Color, glow := 0.0, edge := Color(0, 0, 0, 0), down := false, magenta := false) -> UiTorn:
@@ -62,6 +66,7 @@ static func torn(fill: Color, glow := 0.0, edge := Color(0, 0, 0, 0), down := fa
 		f.content_margin_bottom = 8.0
 	return f
 
+
 static func _states(t: Theme, type: String, n: StyleBox, h: StyleBox, p: StyleBox, d: StyleBox) -> void:
 	# a built-in class (Button, OptionButton) already inherits by class; only our own names are variations
 	if not ClassDB.class_exists(type):
@@ -73,6 +78,7 @@ static func _states(t: Theme, type: String, n: StyleBox, h: StyleBox, p: StyleBo
 	t.set_stylebox("hover_pressed", type, p)
 	t.set_stylebox("disabled", type, d)
 
+
 static func _font_cols(t: Theme, type: String, col: Color, hover: Color, off: Color) -> void:
 	t.set_color("font_color", type, col)
 	t.set_color("font_focus_color", type, col)
@@ -80,6 +86,7 @@ static func _font_cols(t: Theme, type: String, col: Color, hover: Color, off: Co
 	t.set_color("font_pressed_color", type, hover)
 	t.set_color("font_hover_pressed_color", type, hover)
 	t.set_color("font_disabled_color", type, off)
+
 
 ## The plain Button is the secondary tier: a quiet raised slab, so the one filled (primary) button
 ## on a screen is obviously the thing to press. OptionButton shares it.
@@ -97,25 +104,41 @@ static func _buttons(t: Theme) -> void:
 		_font_cols(t, type, UI.INK, Color.WHITE, UI.FAINT)
 	t.set_color("font_pressed_color", "Button", UI.ACCENT_HI)
 
+
 static func _primary_and_danger(t: Theme) -> void:
 	var a := UI.ACCENT
-	_states(t, "Primary", ticket(TICKET, 1.0), ticket(TICKET.lightened(0.08), 1.7),
-		ticket(TICKET.darkened(0.2), 1.3, true), ticket(Color(TICKET, 0.5), 0.0))
+	_states(
+		t,
+		"Primary",
+		ticket(TICKET, 1.0),
+		ticket(TICKET.lightened(0.08), 1.7),
+		ticket(TICKET.darkened(0.2), 1.3, true),
+		ticket(Color(TICKET, 0.5), 0.0)
+	)
 	_font_cols(t, "Primary", UI.ACCENT_HI, Color.WHITE, Color(1, 1, 1, 0.35))
 	var bad := UI.BAD
-	_states(t, "Danger", torn(bad.darkened(0.66), 0.0, Color(bad, 0.6)),
+	_states(
+		t,
+		"Danger",
+		torn(bad.darkened(0.66), 0.0, Color(bad, 0.6)),
 		torn(bad.darkened(0.5), 0.0, Color(bad, 0.95)),
 		torn(bad.darkened(0.6), 0.0, bad, true),
-		torn(Color(bad.darkened(0.7), 0.5)))
+		torn(Color(bad.darkened(0.7), 0.5))
+	)
 	_font_cols(t, "Danger", Color("ffc2b8"), Color.WHITE, UI.FAINT)
 	# the picked option in a row of choices: an accent-tinted slab with an accent edge
-	_states(t, "Chosen", torn(TICKET, 0.8, Color(a, 0.7), false, true),
+	_states(
+		t,
+		"Chosen",
+		torn(TICKET, 0.8, Color(a, 0.7), false, true),
 		torn(TICKET.lightened(0.06), 1.4, a, false, true),
 		torn(TICKET.darkened(0.15), 1.0, a, true, true),
-		torn(Color(TICKET, 0.6), 0.0, Color(a, 0.3)))
+		torn(Color(TICKET, 0.6), 0.0, Color(a, 0.3))
+	)
 	_font_cols(t, "Chosen", UI.ACCENT_HI, Color.WHITE, Color(UI.ACCENT_HI, 0.5))
 	for type in ["Primary", "Danger", "Chosen"]:
 		t.set_stylebox("focus", type, ring())
+
 
 ## The ticket stub: the one primary button (and the title's main entry), notched at both sides,
 ## the whole rim magenta.
@@ -126,13 +149,20 @@ static func ticket(fill: Color, glow: float, down := false) -> UiTorn:
 	f.content_margin_right = 24.0
 	return f
 
+
 ## Text-only buttons (small or rare actions) and the round icon button (close, back).
 static func _quiet_buttons(t: Theme) -> void:
 	# Ghost rests as a dark glass pill with a thin light rim, so it reads on a bright scene, a dark one
 	# or no panel at all, yet stays plainer than Primary (no accent fill, no neon at rest)
 	var rim := Color(1, 1, 1, 0.32)
-	_states(t, "Ghost", _ghost_face(0.6, rim), _ghost_face(0.78, Color(1, 1, 1, 0.55), 0.7),
-		_ghost_face(0.85, Color(1, 1, 1, 0.4), 0.0, true), _ghost_face(0.3, Color(1, 1, 1, 0.14)))
+	_states(
+		t,
+		"Ghost",
+		_ghost_face(0.6, rim),
+		_ghost_face(0.78, Color(1, 1, 1, 0.55), 0.7),
+		_ghost_face(0.85, Color(1, 1, 1, 0.4), 0.0, true),
+		_ghost_face(0.3, Color(1, 1, 1, 0.14))
+	)
 	_font_cols(t, "Ghost", UI.INK.darkened(0.1), Color.WHITE, UI.FAINT)
 	t.set_stylebox("focus", "Ghost", ring())
 	var round_none := StyleBoxEmpty.new()
@@ -140,10 +170,17 @@ static func _quiet_buttons(t: Theme) -> void:
 	round_none.content_margin_right = 8
 	round_none.content_margin_top = 8
 	round_none.content_margin_bottom = 8
-	_states(t, "IconBtn", round_none, UiFrame.raised(Color(1, 1, 1, 0.1), UI.R_PILL).padded(8, 8),
-		UiFrame.sunk(Color(0, 0, 0, 0.25), UI.R_PILL).padded(8, 8), round_none)
+	_states(
+		t,
+		"IconBtn",
+		round_none,
+		UiFrame.raised(Color(1, 1, 1, 0.1), UI.R_PILL).padded(8, 8),
+		UiFrame.sunk(Color(0, 0, 0, 0.25), UI.R_PILL).padded(8, 8),
+		round_none
+	)
 	_font_cols(t, "IconBtn", UI.MUTED, Color.WHITE, UI.FAINT)
 	t.set_stylebox("focus", "IconBtn", ring(UI.R_PILL))
+
 
 ## One state of the quiet button: a translucent near-black torn box with a thin light rim.
 static func _ghost_face(alpha: float, rim: Color, glow := 0.0, down := false) -> UiTorn:
@@ -154,6 +191,7 @@ static func _ghost_face(alpha: float, rim: Color, glow := 0.0, down := false) ->
 		f.content_margin_top = 9.0
 		f.content_margin_bottom = 7.0
 	return f
+
 
 ## Segmented tabs (segments in a recessed track, the picked one raised with an accent line) and
 ## selectable tiles.
@@ -190,6 +228,7 @@ static func _tabs_and_tiles(t: Theme) -> void:
 	for type in ["Tile", "TileOn"]:
 		t.set_stylebox("focus", type, ring(UI.R_CARD + 3))
 
+
 ## The title screen: big menu entries (words until you point at one, then a torn dark strip with
 ## the neon edge lights under it) and its one call to action, a ticket stub.
 static func _front_menu(t: Theme) -> void:
@@ -217,13 +256,14 @@ static func _front_menu(t: Theme) -> void:
 	var main_n := _menu_main(TICKET, 1.1, false)
 	var main_h := _menu_main(TICKET.lightened(0.08), 1.8, false)
 	_states(t, "MenuMain", main_n, main_h, _menu_main(TICKET.darkened(0.2), 1.4, true), main_n)
-	t.set_stylebox("focus", "MenuMain", StyleBoxEmpty.new())      # lit by its hover ticket instead, as the items
+	t.set_stylebox("focus", "MenuMain", StyleBoxEmpty.new())  # lit by its hover ticket instead, as the items
 	t.set_font("font", "MenuMain", UI.big)
 	t.set_font_size("font_size", "MenuMain", UI.fs(28))
 	_font_cols(t, "MenuMain", UI.ACCENT_HI, Color.WHITE, Color(UI.ACCENT_HI, 0.5))
 	t.set_constant("outline_size", "MenuMain", 6)
 	t.set_color("font_outline_color", "MenuMain", Color(0.1, 0.02, 0.12, 0.7))
 	t.set_constant("h_separation", "MenuMain", 12)
+
 
 static func _menu_main(fill: Color, glow: float, down: bool) -> UiTorn:
 	var f := ticket(fill, glow, down)
@@ -233,6 +273,7 @@ static func _menu_main(fill: Color, glow: float, down: bool) -> UiTorn:
 	f.content_margin_top += 5.0
 	f.content_margin_bottom += 5.0
 	return f
+
 
 ## Text boxes, labels, drop-down lists, tooltips and separators.
 static func _inputs(t: Theme) -> void:
@@ -264,6 +305,7 @@ static func _inputs(t: Theme) -> void:
 	t.set_stylebox("separator", "HSeparator", UiFrame._flat(UI.LINE, 1))
 	t.set_constant("separation", "HSeparator", 6)
 
+
 ## Panels: a black-violet torn sheet with speckle and runes in its border band and the teal-to-
 ## magenta neon edge. Scroll bars stay thin and quiet; progress bars are a recess with a lit fill.
 static func _panels(t: Theme) -> void:
@@ -289,6 +331,7 @@ static func _panels(t: Theme) -> void:
 	var pfill := UiFrame.raised(UI.ACCENT, 5)
 	pfill.lit = 0.25
 	t.set_stylebox("fill", "ProgressBar", pfill)
+
 
 ## Sliders (a recessed track, a lit accent fill, a cream knob with a ring) and the on/off switch.
 static func _toggles_and_sliders(t: Theme) -> void:
@@ -319,6 +362,7 @@ static func _toggles_and_sliders(t: Theme) -> void:
 	_font_cols(t, "CheckButton", UI.INK, Color.WHITE, UI.FAINT)
 	t.set_color("font_pressed_color", "CheckButton", UI.INK)
 
+
 ## A slider knob: a cream disc with a coloured ring and a soft shadow under it.
 static func _knob(d: int, col: Color, ring_col: Color) -> ImageTexture:
 	var img := Image.create(d, d + 2, false, Image.FORMAT_RGBA8)
@@ -338,6 +382,7 @@ static func _knob(d: int, col: Color, ring_col: Color) -> ImageTexture:
 				px = px.blend(Color(face_col, cover))
 			img.set_pixel(x, y, px)
 	return ImageTexture.create_from_image(img)
+
 
 ## The on/off switch: a recessed capsule (accent and lit when on) and a knob that sits on it.
 static func _switch(on: bool, off_state := false) -> ImageTexture:
