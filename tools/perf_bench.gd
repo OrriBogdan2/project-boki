@@ -17,6 +17,8 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
+##   [--bench-garden] [--bench-boki=10,20,30]  (only the garden: each --bench-zone zone with each Boki count out, then
+##   the hub; frame p50/p95 per part, docs/GARDEN_PERF.md. Budget lines are FAIL-checked only at 9 Boki)
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
@@ -84,6 +86,8 @@ var base_secs := 60.0
 var pipes_draw := 0  # pipelines built at draw time so far (the hitch lines print each frame's new ones)
 var out_path := ""
 var zone := ""
+var boki_counts: Array = [BOKI_OUT]  # --bench-boki=a,b,c: Boki out in each garden zone part
+var garden_only := false  # --bench-garden: the zone parts and the hub only
 var tracy_dir := ""
 var hunters := 6
 var trios := 0  # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
@@ -118,6 +122,10 @@ func run(main_node: Node) -> void:
 		await _ab()
 		_finish()
 		return
+	if garden_only:
+		await _garden()
+		_finish()
+		return
 	await _match()
 	await _heart_final()
 	await _farm("farm", {})
@@ -127,7 +135,8 @@ func run(main_node: Node) -> void:
 	if zone == "all":
 		zones = GardenZones.built()
 	for id in zones:
-		await _zone(id)
+		for n in boki_counts:
+			await _zone(id, n)
 	_finish()
 
 
@@ -148,6 +157,10 @@ func setup(main_node: Node) -> void:
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="):
 			zone = a.substr(13)
+		if a.begins_with("--bench-boki="):
+			boki_counts = Array(a.substr(13).split(",")).map(func(x): return int(x))
+		if a == "--bench-garden":
+			garden_only = true
 		if a.begins_with("--tracy="):
 			tracy_dir = a.substr(8)
 		if a.begins_with("--bench-hunters="):
@@ -475,18 +488,28 @@ func _frames(part: String) -> void:
 
 
 ## A garden zone with nine Boki out (GARDEN.md 10.6: 6 residents, the partner, 2 visitors), as a farm part.
-func _zone(id: String) -> void:
+func _zone(id: String, boki := BOKI_OUT) -> void:
 	var nav := NavCheck.new()
 	nav.main = main
 	nav.zone = "" if id == GardenZones.start() else id
 	FarmUnlocks.rules()["base_mode"] = true
 	nav._save()
-	for i in BOKI_OUT - Save.d["roster"].size():
+	for i in boki - Save.d["roster"].size():
 		var rec := Save.new_kin(VISITORS[i % VISITORS.size()], "V%d" % i)
 		Care.ensure(rec)
 		rec["zone"] = id
 		Save.d["roster"].append(rec)
-	await _farm("zone_" + id, {"zone": id})
+	await _farm("zone_" + id + ("" if boki == BOKI_OUT else "_b%d" % boki), {"zone": id})
+
+
+## --bench-garden: every --bench-zone zone with each --bench-boki count out, then the hub (nobody lives there, so
+## its cost does not move with the count: it runs once with the biggest roster saved, all of them in the zone).
+func _garden() -> void:
+	var ids: Array = [zone] if zone != "" and zone != "all" else GardenZones.built()
+	for id in ids:
+		for n in boki_counts:
+			await _zone(id, n)
+	await _farm("hub", {"zone": GardenZones.HUB})
 
 
 ## A part against GARDEN.md 10.6 (the hub against its own column). Draws and objects are the scene itself: the
@@ -532,6 +555,8 @@ func _budget(part: String, fl: Array) -> void:
 		elif over:
 			verdict = "over target, held at %.1f" % limit
 		print("BENCH budget %s %s: %.2f of %.1f %s" % [part, k, got[k], b[k], verdict])
+	if home.kins.size() > BOKI_OUT:  # the budget is for nine Boki out: a bigger crowd is measured, not judged
+		bad = false
 	failed = failed or bad
 	print("BENCH budget %s: %s" % [part, "FAIL" if bad else "ok"])
 
