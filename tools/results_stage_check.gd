@@ -149,6 +149,7 @@ func _stages(main: Node) -> void:
 				continue
 			archs = [_clipless[0]]
 		var want: Array = c[3].duplicate()
+		var winners: int = want.count("win")  # (a clipless winner stands in its idle but keeps its Boki)
 		for i in archs.size():
 			if archs[i] in _clipless and want[i] != "wisp":
 				want[i] = "idle"  # a Hunter whose GLB has no clips is stood in its idle, whatever the beat
@@ -164,7 +165,7 @@ func _stages(main: Node) -> void:
 		for pair: Array in st._bodies:
 			plays[pair[0]] = _playing(pair[1])
 		ok(got and plays == want, "%s: plays %s (want %s)" % [label, ", ".join(plays), ", ".join(want)])
-		ok(st._kins.size() == want.count("win"), "%s: %d Boki, one beside each winner" % [label, st._kins.size()])
+		ok(st._kins.size() == winners, "%s: %d Boki, one beside each winner" % [label, st._kins.size()])
 		var nodes: Array = st._bodies.map(func(b): return b[1]) + st._kins
 		st.queue_free()
 		await tree.process_frame
