@@ -61,7 +61,7 @@ What the in-game kit card (K) says.
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
 | Passive: Salvage | Knocks and assists add health, up to 10 stacks. |
 | Dash: Barge | A short low lunge where you move; a pounce in the air. |
-| RMB: Deep Reach | An abyssal arm grabs the first body and reels it in, stunned. Follow with E: a sure stun. |
+| RMB: Deep Reach | An abyssal arm grabs the first body and reels it in, stunned. Follow with Anchor Drop: a sure stun. |
 | E: Anchor Drop | Slam your fist into the ground ahead: damage and a long stun. |
 | Hunter ultimate: Brass Broadside | Charge a fan while walking slowly, then two waves of brass slugs. |
 | Weapon: Shotgun | Seven slugs, 6m out: all seven fly in a tight group along your aim; rear hits hurt more. |
@@ -88,7 +88,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 |---|---|---|
 | RMB | cooldown 12s -> 10.3s. | cooldown 12s -> 8.7s; hitting a foe takes half of it off. |
 | Dash (Shift) | recharge 10s -> 8.2s per charge; the air pounce 12.5s -> 10.5s. | recharge 10s -> 6.4s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge. |
-| E | cooldown 7s -> 5.5s, damage +20%, stun +0.1s. | cooldown 7s -> 4.1s, damage +40%, stun +0.4s in all (0.1s a rank, 0.2s more); double damage on a foe over the abyss. |
+| E | cooldown 7s -> 5.5s, damage +20%, stun +0.1s. | cooldown 7s -> 4.1s, damage +40%, stun +0.1s a rank and 0.2s more at rank 3; double damage on a foe over the abyss. |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).
 
