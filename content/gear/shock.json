@@ -24,7 +24,8 @@
    "size": 0.25,
    "deco": "orb",
    "color": "b48cff",
-   "sfx": "gl_vortex",
+   "sfx": "throw",
+   "pitch": 0.6,
    "on_end": [
     {
      "type": "telegraph",
@@ -38,8 +39,7 @@
      "at": "here",
      "radius": 3.5,
      "strength": 8,
-     "color": "b48cff",
-     "sfx": "gl_vortex_pull"
+     "color": "b48cff"
     },
     {
      "type": "pull",
@@ -65,11 +65,9 @@
      "lift": 6,
      "kb": 2,
      "delay": 1.0,
-     "color": "d4b8ff",
-     "sfx": "gl_vortex_blast"
+     "color": "d4b8ff"
     }
    ]
   }
- ],
- "sfx": {}
+ ]
 }

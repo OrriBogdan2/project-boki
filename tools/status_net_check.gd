@@ -38,21 +38,23 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	port = CheckChild.free_port(7930 + OS.get_process_id() % 60)
+	port = 7930 + OS.get_process_id() % 60
 	dir = ProjectSettings.globalize_path("user://status_net")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var relay := RelayServer.new()
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
-	CheckChild.hold(relay.peer, START_S)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	guest_pid = CheckChild.start("%s --dn-port=%d" % [GUEST_ARG, port], dir.path_join("guest.log"))
+	var cmd := "cd '%s' && %s --headless -- %s --dn-port=%d > '%s' 2>&1" % [
+		ProjectSettings.globalize_path("res://"), GODOT, GUEST_ARG, port, dir.path_join("guest.log")]
+	OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 		for id in Net.peers:
 			if String(id) != Net.me: other = String(id)
+		_read_pid()
 	ok(other != "", "the guest joins the relay", other)
 	if other == "":
 		return _end()
@@ -62,9 +64,8 @@ func _host() -> void:
 	Net.lobby_emit("dn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
-	var t1 := CheckClock.own_msec(guest_pid)
-	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
-			and OS.is_process_running(guest_pid)):
+	var t1 := Time.get_ticks_msec()
+	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
 	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
@@ -80,6 +81,7 @@ func _host() -> void:
 func _end() -> void:
 	Net.lobby_emit("dn", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
+	_read_pid()
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
 	print("STATNET DONE, %d checks, failures: %d" % [n, bad])

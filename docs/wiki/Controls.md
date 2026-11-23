@@ -2,8 +2,8 @@
 
 Every key can be rebound in **Settings > Controls**. Some keys mean different things at home and in a
 match: **B** is build mode at home and "base to a teammate" in a squad; **T** talks to a Boki at home
-is Fusion in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and sends or calls back
-your Boki in a match; **R** turns a piece in build mode and reloads in a match.
+is Fusion in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and casts your Boki's
+ability in a match; **R** turns a piece in build mode and reloads in a match.
 
 ## In a match
 
@@ -74,12 +74,12 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Q | Glove 1 | `gear1` | yes |
 | V / Mouse 4 | Glove 2 (in a match; at home it plays fetch) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
-| C | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
+| G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |
-| Space | Jump (hold to glide) | `jump` | yes |
-| Mouse 5 | Glide (hold in the air) | `glide` | yes |
+| Space | Jump (press again in the air to glide) | `jump` | yes |
+| Mouse 5 | Open glider (in the air) | `glide` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
 | X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
