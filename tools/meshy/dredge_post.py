@@ -1300,6 +1300,35 @@ def add_straps(js, b, out, rig):
 
 
 
+# r15: Meshy's run/walk/jump swing the right (goo) arm up past the chest and the tail chain follows the hand, so the goo
+# lay over the torso like a sash in run/dash/jump (art-gate r13/r14). Those clips' right-arm keys are turned back toward
+# the Idle clip's first-frame pose (keep ARM_KEEP of the swing); the tail is then baked again (gather_tail).
+ARM_CLIPS, ARM_BONES, ARM_KEEP = ("run", "walk", "Jump_Run", "Crouch_Walk_with_Torch"), \
+    ("RightShoulder", "RightArm", "RightForeArm", "RightHand"), float(__import__("os").environ.get("ARM_KEEP", "0.3"))
+
+
+def calm_goo_arm(js, b, out, rig):  # r15 stage (re-running it calms the swing again: run it once per source file)
+    idle = next(a for a in js["animations"] if a["name"] == "Idle")
+    target = {}
+    for ch in idle["channels"]:
+        node = js["nodes"][ch["target"]["node"]]
+        if node.get("name") in ARM_BONES and ch["target"]["path"] == "rotation":
+            target[ch["target"]["node"]] = n.floats(js, b, idle["samplers"][ch["sampler"]]["output"])[0].astype(float)
+    done = 0
+    for a in js["animations"]:
+        if a["name"] not in ARM_CLIPS:
+            continue
+        for ch in a["channels"]:
+            t = target.get(ch["target"]["node"])
+            if t is None or ch["target"]["path"] != "rotation":
+                continue
+            smp = a["samplers"][ch["sampler"]]
+            keys = n.floats(js, b, smp["output"]).astype(float)
+            smp["output"] = out.add_floats(slerp_to(keys, t / np.linalg.norm(t), ARM_KEEP), "VEC4")
+            done += 1
+    return f"{done} right-arm tracks kept {ARM_KEEP} of their swing"
+
+
 def rebuild_r11(out_path, in_path, pack_path=None):
     """The r11 stages on an r10 glb; each one writes the file and the next reloads it (new arrays live in the new
     file's buffer)."""
@@ -1394,6 +1423,8 @@ if __name__ == "__main__":
         st.append(("straps tris", add_straps))
         st += [("face winding", orient_faces), ("strap ink", strap_ink)]
         rebuild_stages(sys.argv[2], sys.argv[3], st)
+    elif sys.argv[1] == "--r15":  # r15: calm the goo arm's swing in run/walk/jump, then the tail baked again
+        rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", calm_goo_arm), ("tail gather", gather_tail)])
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
