@@ -300,6 +300,7 @@
 		"root": "anchor_blade_root",
 		"tip": "weapon_muzzle"
 	},
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["jug_wave_wind", 0.5, ""],
 		["jug_lunge_wind", 0.5, ""],
