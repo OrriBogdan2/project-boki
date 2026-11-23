@@ -526,7 +526,11 @@ func _channel(m: Match, hud, p: Hunter) -> void:
 	m._net_apply(m_v, row)
 	await hud.panels.draw
 	ok(ChannelBar.shown.has(m_v.nid), "another machine: the snapshot's target and seconds left bring it back")
-	m._net_apply(m_v, row.slice(0, row.size() - 2) + ["", 0.0])
+	var bare := row.duplicate()
+	# the tail's channel target and seconds left (not its last two fields: the hazard move rides after them)
+	bare[bare.size() - HunterNet.TAIL + 3] = ""
+	bare[bare.size() - HunterNet.TAIL + 4] = 0.0
+	m._net_apply(m_v, bare)
 	await hud.panels.draw
 	ok(ChannelBar.shown.is_empty(), "a snapshot with no channel: the bar is gone")
 	ChannelBar.store(m_v, p.nid, 0.05)
