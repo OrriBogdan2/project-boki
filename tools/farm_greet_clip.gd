@@ -13,7 +13,8 @@ const FAR_M := 16.0  # m: where you stand off
 const WALK := 3.2  # m/s you walk
 const DAY_T := 0.45  # farm clock: mid-morning all film long
 const DEADLINE_S := 120.0  # s of film at most
-const ZOOM := 1.2  # camera zoom, as --base-demo
+const ZOOM := 0.7  # camera zoom: closer than --base-demo (1.2) so the Boki read
+const HOLD_S := 20.0  # s a staged Boki stands before it picks something to do
 const WATCH_S := 9.0  # s of watching the runners
 const SPECS := [["cindle", "Ash", 0.0], ["burrlet", "Moss", 60.0], ["zapple", "Pip", 95.0]]  # species, name, trust
 
@@ -96,7 +97,7 @@ func _stage(h, mid: Vector3) -> void:
 		k["pos"] = h.world.free_spot_near(mid + Vector3(float(i) * 2.0 - 2.0, 0, 0), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
 		k["goal"] = k["pos"]
-		k["t"] = 4.0
+		k["t"] = HOLD_S
 
 
 func _walk(h, goal: Vector3) -> void:
