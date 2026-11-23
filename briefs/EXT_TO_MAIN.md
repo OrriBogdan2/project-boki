@@ -11198,3 +11198,4 @@ READY ext/merge-lane-n23c-1123 b9abf529e4 (lane n23c bundle, 11 branches, PR #71
 READY ext/salvage-old-prs-1123 71f410c0ce6ae8a64fa99d7382c57d7afba66951 (salvage: outline ink-mask fix, live_audit tool, rig-test tooling+doc; no models)
 READY ext/boki-hunter-3d-audit-1123 32499cfe316 (PR #748: merged origin/main d166454966; tools/boki_everywhere_check.gd conflicts resolved = main's --pack/--surfaces/real-time grab + branch's all-species/hunter/town-peer pass; --check 0, --boki-everywhere-check OK 0 of 50 species and hunters off, health --strict OK; supersedes 0ce70424358)
 READY ext/salvage-299-1123 2d897ea47eb1d611fd66d92ad78e83f2c60bd5fa (salvage #299: results-stage-check exits 1 on failures, main hides 5 FAILs; boss-focus-check 3 m spacing)
+READY ext/salvage-old-prs-1123 e1d5c1d44cd (PR #759: salvage from #665/#541: outline ink-mask discard, --live-audit tool, rig-test tooling + doc; no models; main merged in)
