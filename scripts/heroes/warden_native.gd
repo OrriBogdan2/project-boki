@@ -3,9 +3,10 @@ extends Node
 ## A Hunter drawn on Meshy's own skeleton and playing Meshy's own clips (docs/art/wardens/MESHY_NATIVE.md). Only the
 ## Hunters switched on in content/rules/warden_native.json ("meshy_native") take this path; every other one keeps the
 ## contract model (WardenGlb, WardenSync, WardenClips) untouched. Meshy's bones are never renamed, retargeted or merged
-## onto the contract: the clips play on them as Meshy keyed them, and the contract's procedural bone layers (springs,
-## orbits, carry, look-at, drop pose, squash) are not built. The contract's anchor empties hang on Meshy's bones as
-## BoneAttachment3D nodes (data "anchors"), and the weapon's aim node rides Meshy's hand bone. HunterAnim still runs
+## onto the contract: the clips play on them as Meshy keyed them; of the contract's procedural bone layers the springs
+## and look-at are not built, the drop pose and the landing squash are (on WardenSkeleton.find's stand-ins). The
+## contract's anchor empties hang on Meshy's bones as BoneAttachment3D nodes (data "anchors"), and the weapon's aim
+## node rides Meshy's hand bone. HunterAnim still runs
 ## on the hidden rig and hands over its state (WardenClips.STATE) each frame. The surfaces take the game's hero-toon
 ## pass (WardenGlb._toon: shading, ink, hit flashes) like every other Hunter's, unless data "toon" is false.
 
@@ -43,10 +44,12 @@ var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
-## flinch, the wall kick's plant and push, the open channel's reach. Null when a bone is missing.
+## flinch, the wall kick's plant and push, the open channel's reach, the drop's ride and skydive poses. Null when a
+## bone is missing. The landing squash (WardenClips.lay_feel) goes on last, as on the contract path.
 var flinch: WardenFlinch
 var wall: WardenWall
 var opener: WardenOpen
+var drop_pose: WardenDropPose
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkeleton.find "hips": Spine02)
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
@@ -124,6 +127,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	flinch = WardenFlinch.make(model, skel)
 	wall = WardenWall.make(model, skel)
 	opener = WardenOpen.make_on(model, skel)
+	drop_pose = WardenDropPose.make(model, skel)
 	if d.has("crouch_arms_from"):
 		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
@@ -162,8 +166,10 @@ func _process(dt: float) -> void:
 		_play("attack", float(d.get("attack_rate", 1.0)), true)
 	elif attack_left <= 0.0:
 		_loco(s)
+	var hips := WardenSkeleton.find(skel, "root")
+	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
-	WardenClips.air_tilt(root, skel, WardenSkeleton.find(skel, "root"))  # (the glider's bank, the dive's pitch)
+	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
 		opener.busy = attack_left > 0.0 and attack_move  # (as clips.busy: a kit move's clip owns the body)
@@ -172,6 +178,10 @@ func _process(dt: float) -> void:
 		flinch.step(dt)
 	if wall:
 		wall.step(dt)
+	if drop_pose:
+		drop_pose.step(dt)
+	var land: Vector2 = root.get_meta(WardenClips.FEEL, Vector2.ZERO)  # (HunterAnim's land_k by weight class)
+	WardenClips.lay_feel(root, skel, hips, land.x * WardenClips.LAND_SQUASH, 0.0)
 	props.step(dt, String(s.get("kmove", "")))
 	if companions:
 		companions.step(dt)
