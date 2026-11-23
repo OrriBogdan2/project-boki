@@ -1150,7 +1150,7 @@
 			"word": "Ooh",
 			"acts": [
 				"(sniffs it all over)",
-				"(pokes it with a paw)",
+				"(paws at it)",
 				"(puffs up, thrilled)",
 				"(circles it, wide-eyed)"
 			],
@@ -1163,7 +1163,11 @@
 					"Is that for me?",
 					"Where did you get it?",
 					"I want one too!",
-					"What does it do?"
+					"What does it do?",
+					"Is it safe?",
+					"So shiny and new!",
+					"Look what you found!",
+					"Can we keep it?"
 				]
 			}
 		},
