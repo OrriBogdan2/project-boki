@@ -34,7 +34,8 @@ func _save() -> void:
 	FarmUnlocks.rules()["base_mode"] = true
 	var d := Save.fresh()
 	for i in CAST.size():
-		var rec := Save.new_kin(CAST[i], "B%d" % i)
+		var rec := Save.new_kin(CAST[i], "B%d" % i, SEED + i)  # seeded: dna and IVs from the seed, not the clock
+		rec["uid"] = "nav%d" % i  # the clock-made uid fixes each Boki's seat round the player
 		Care.ensure(rec)
 		if zone != "":
 			rec["zone"] = zone

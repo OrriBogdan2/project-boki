@@ -479,4 +479,3 @@ func _rumble_db() -> float:
 	if not Sfx.loop_on(TideSfx.FRONT_KEY):
 		return -99.0
 	return (Sfx.loops[TideSfx.FRONT_KEY]["p"] as AudioStreamPlayer).volume_db
-
