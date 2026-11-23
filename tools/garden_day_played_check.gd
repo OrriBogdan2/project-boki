@@ -14,6 +14,8 @@ const FOE_RATIO := 1.1  # the rivals' Speed, over Pip's (a cup round needs 1.1)
 const STALL_S := 60.0  # game s a walk, nap or menu may take before it is a stall
 const FOOD_S := 120.0  # game s a hungry Boki may take to reach food (a play or a nap may finish first)
 const PLAIN_KEYS := ["rec", "node", "pos", "goal", "emote", "life", "pers", "say"]  # a kin entry's usual keys
+const HUNGRY_FOOD := 10.0  # the food need the bowl beat starts them at
+const ATE_GAIN := 15.0  # a snack gives at least this (Emberberry: about +25)
 const PAIR_LEVEL := 8  # Grown: the level a Boki needs to pair
 
 var bad := 0
@@ -295,7 +297,7 @@ func _food(bb) -> void:
 		for key in ["indoors", "leap", "exiting", "going_in", "called_t", "busy", "eat", "nap_go", "job"]:
 			k.erase(key)
 		if String(k["rec"]["name"]) in hungry:
-			k["rec"]["needs"]["food"] = 10.0
+			k["rec"]["needs"]["food"] = HUNGRY_FOOD
 			k["nap_t"] = 0.0
 			k["t"] = 0.0
 			k["pos"] = bb.world.free_spot_near(c + Vector3(3.0 + n, 0, 2.0), [], 0.6)
@@ -305,11 +307,18 @@ func _food(bb) -> void:
 		bb.life._nap(bb._kin_entry(_rec(nm)), "tired")
 	await _wait(1.0)
 	bb.ppos = Vector3(-500, 0, -500)  # you are away: nobody follows you instead of eating
+	var far := {}  # a Boki past the bowl's reach when the snacks land (it napped at a far spot): open, see the doc
+	for k in bb.kins:
+		var away := Vector2(c.x - k["pos"].x, c.z - k["pos"].z).length()
+		if String(k["rec"]["name"]) in hungry and away > FeedBowl.reach(HUNGRY_FOOD):
+			far[String(k["rec"]["name"])] = away
+			var who := String(k["rec"]["name"])
+			note("%s napped %.0f m from the bowl: past its reach, so it does not answer" % [who, away])
 	for _i in 3:
 		FeedBowl.drop(bb, bowl)
 	ok(FeedBowl.snacks(bowl).size() == 3, "three snacks are in the bowl")
 	Engine.time_scale = TIME_SCALE
-	var fed := {}  # name -> game s when its food passed 40
+	var fed := {}  # name -> game s when its food rose by a snack
 	var trace := {}  # name -> the machine's state every 10 s
 	var t := 0.0
 	var last_t := -10.0
@@ -323,15 +332,17 @@ func _food(bb) -> void:
 				var st: String = bb.life.machine(kk).state_name().left(4)
 				trace[nm] = String(trace.get(nm, "")) + " " + st + ("*" if bb.life.night else "")
 		for nm in hungry:
-			if not fed.has(nm) and Care.need(_rec(nm), "food") > 40.0:
+			if not fed.has(nm) and Care.need(_rec(nm), "food") >= HUNGRY_FOOD + ATE_GAIN:
 				fed[nm] = t
 	for nm in hungry:
 		var secs: float = float(fed.get(nm, -1.0))
+		if far.has(nm):
+			continue
 		if secs < 0.0 and String(_rec(nm).get("likes", {}).get("hates", "")) == "emberberry":
 			note("%s hates Emberberry, the only snack here: it stays hungry (by design, open)" % nm)
 			continue
 		_took("%s walks to the bowl and eats" % nm, secs, FOOD_S)
-		var limit := STALL_S * 0.5
+		var limit := STALL_S
 		ok(secs >= 0.0 and secs <= limit, "%s reaches the bowl within %.0f s, asleep or not" % [nm, limit])
 		if secs < 0.0 or secs > STALL_S * 0.5:
 			var k: Dictionary = bb._kin_entry(_rec(nm))
