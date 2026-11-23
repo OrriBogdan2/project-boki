@@ -166,6 +166,8 @@ func _assists(m: Match, p: Hunter, mates: Array, foes: Array) -> void:
 	ok(cues.size() == n0 + 1 and cues[-1][1] == "assist", "(j) with the assist cue (%s)" % str(cues.slice(n0)))
 
 	# (k) a 2-charge dash gains exactly one charge (the kit's dash.charges set to 2 for it)
+	if p.ak and p.ak.single_dash():      # Vex's dash is one charge by design: use a kit that can hold several
+		p.reclass(Arch.weight("dredge"), "dredge", Arch.signature("dredge"))
 	var dd: Dictionary = p.ak.dash_def() if p.ak else {}
 	var had: Variant = dd.get("charges")
 	dd["charges"] = 2
