@@ -129,3 +129,62 @@ The fixed part shows in every zone: Beam 40 -> 20, Zone + ZoneFill cards gone, t
 counts move only by live Boki bursts (Hushwood had 4 small bursts in the after frame). Draws are within run noise
 (Ridge +11 is Boki in frame). `docs/shots/garden-clarity/<part>.jpg` are these GPU frames, left before, right after.
 (Before also exits with a core dump at cleanup, rc 134, after all shots and numbers are written; after exits 0.)
+
+## 30 Boki, real GPU (ext/farm-garden-perf-30, 2026-11-23)
+After the zones, hub, rival beats and new clips. `jobq submit --needs gpu --only rp1-1 --tree <tree> --out bench -- --perf-bench
+--bench-garden --bench-secs=5 --bench-farm=15 --bench-zone=cinderstep --bench-boki=10,20,30 --bench-view=1920x1080
+--quality=<medium|low> [--bench-isolate]`. rp1-1 = RTX 4090, Vulkan (forward_plus), 1920x1080, Low at 3d_scale 0.77.
+Cinderstep is the busiest zone (most emitters and draws in the earlier tables). The hub has nobody living in it
+(`ZoneAway`), so it is one run and does not move with the count. New: `--bench-garden`, `--bench-boki=a,b,c` (budget
+lines are judged at 9 Boki only), `--bench-isolate` (`tools/perf/garden_isolate.gd`). Frame p50 / p95 ms, UI shown
+(the part's own `BENCH <part> frames:` line):
+
+| part | Medium before | Medium after | Low before | target |
+|---|---|---|---|---|
+| hub | 11.8 / 13.9 | 12.2 / 15.6 | 11.5 / 15.1 | 16.7 (60 fps) |
+| Cinderstep 10 Boki | 17.9 / 22.1 | 19.2 / 22.9 | 17.3 / 20.8 | 16.7 medium, 33 low |
+| Cinderstep 20 Boki | 26.7 / 30.1 | 24.5 / 30.8 | 26.4 / 30.4 | same |
+| Cinderstep 30 Boki | 34.9 / 39.4 | 30.3 / 37.2 | 33.4 / 39.4 | same |
+
+Before = origin/main 05d78b9e87 (jobq 20261123-090432-27983 medium, 20261123-090449-14296 low); after = this branch
+(20261123-094722-00163 medium). Draws at 10 / 20 / 30 Boki: 472 / 552 / 634 (Medium, with UI).
+
+Verdict: **over target.** Medium misses 60 fps at 10 Boki already (about 18-19 ms) and reaches about 33 fps at 30;
+Low meets 30 fps only up to 20 Boki and sits at the line at 30 (33-34 ms). The hub is fine. The numbers are CPU-bound:
+Medium and Low are within 1-2 ms of each other and the GPU time is 2-6 ms.
+
+Run noise on this pod is large: the same scene in "as is" drifts 2-3 ms inside one run, and runs differ by 1-3 ms, so
+only the same-run ABAB below counts as proof of a change; a single before/after frame time does not.
+
+### Where it goes (`--bench-isolate`, Medium and Low, same run, p50 ms)
+Cinderstep, with 10 / 20 / 30 Boki. "boki hidden" = no Boki drawn or stepped; "kin script" = `Home._move_kin` timed alone.
+| cost | 10 | 20 | 30 |
+|---|---|---|---|
+| all Boki (hidden saves) | 4.6-5.5 | 5.2-6.5 | 6.1-8.7 |
+| rigs paused (animation scripts + skeleton) | 3.6-5.7 | 3.1-4.5 | 3.0-3.5 |
+| Boki shadows off | 0.2-3 | ~0 | ~0 |
+| screen UI hidden | 1-1.5 | ~1 | ~0-1.5 |
+| `Home._move_kin` script | 1.4-2.4 | 3.7-4.7 | 5.5-8.4 |
+
+So: Boki cost 0.45-0.5 ms each at 10 and about 0.25 ms each at 30 (the rig is the first ~5 ms and saturates), the kin script
+grows faster than the count (about n squared), shadows and the UI are not the cost. What stays when every Boki is hidden is
+~12-14 ms for the island itself (the hub, with nobody, is 10-12 ms): that floor is what keeps Medium over 16.7 ms
+and is the next job (not traced here: 1000 nodes, 650 draws, sky, world scripts).
+
+### Fixes (cheapest big ones, all keep behaviour)
+1. `RigPace.crowd` (`scripts/perf/rig_pace.gd`, `BokiRig._process`): in a home with more than 6 Boki out and below Ultra,
+   a rig off the camera's focus runs its whole step (clip pick, flex, flinch, face, skeleton) every other frame with the
+   time it held back, as the Metal path already did for the skeleton. The rig within 1.5 m of the focus keeps every frame.
+   Matches never set `crowd`, so pets there are unchanged. Same-run ABAB (eased vs `RigPace.crowd_from = 999`, p50 ms):
+   30 Boki 33.4 / 35.6 vs 37.4 / 37.3 (Medium, 20261123-093328-05005), 20 Boki 24.5-25.6 vs 26.6-27.0 and 30 Boki
+   31.3-32.1 vs 34.1-34.7 (Medium after); 10 Boki 0-1 ms (inside the noise). Gain: 2-5 ms at 20-30 Boki.
+2. `Home._separate_kin`: the pair loop asked `_kin_r` and `BaseLife.pile` for every pair; pairs past touching range
+   (`pile` is 0.35, so never more than the two radii) now skip first. Identical pushes, fewer calls.
+3. `KinAvoid.around`: tested `parked()` (the dear one) on every Boki before the range check; range first now.
+   `Home._move_kin` at 30 Boki: 5.7-8.4 ms before, 5.6 ms after (noisy: the kin script is timed by wall clock).
+
+### Held
+- The 60 fps Medium target is not met even at 10 Boki: the island floor (~12 ms with nobody drawn) is the next cost.
+- The kin script is still about n squared at 30 Boki (`kins.filter` in the idle choice, `HomeWork`, `life.step`).
+- `--perf-budget-check` and `--boki-rig-check`'s "fliers: hovering they hold 0.5 to 1.5 m up" fail on origin/main too
+  (the second is the same with the new easing switched off).
