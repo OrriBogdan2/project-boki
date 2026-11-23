@@ -25,9 +25,10 @@ const WEIGHTS := {"clear": 0.42, "dusk": 0.18, "night": 0.14, "ash": 0.12, "fog"
 const SIGHT := {"clear": 1.0, "day": 1.0, "dusk": 0.85, "night": 0.6, "ash": 0.72, "fog": 0.62}
 ## How much bolder and more numerous the Blight is (BlightDir).
 const BLIGHT := {"clear": 1.0, "day": 1.0, "dusk": 1.12, "night": 1.4, "ash": 1.25, "fog": 1.2}
-## Outside-of-sight darkening (the vis shader's "dark" multiplier after its blue mix; 0.7 is the usual: about
-## 0.38 of the lit brightness on GPU, docs/specs/VISION_LOOK.md; the darker conditions keep the same ratios to it).
-const VIS_DARK := {"clear": 0.7, "day": 0.7, "dusk": 0.63, "night": 0.48, "ash": 0.6, "fog": 0.57}
+## Outside-of-sight darkening (the vis shader's grey fog multiplier; 0.7 is the usual, docs/specs/VISION_LOOK.md; the
+## darker conditions keep about the same ratios to it, night and ash set so the grey fog's luma on GPU stays 0-10% under
+## what each weather showed before it went grey).
+const VIS_DARK := {"clear": 0.7, "day": 0.7, "dusk": 0.63, "night": 0.5, "ash": 0.58, "fog": 0.57}
 const NAMES := {"clear": "Clear evening", "day": "Overcast day", "dusk": "Dusk", "night": "Night", "ash": "Ash storm", "fog": "Fog"}
 const BLURBS := {
 	"clear": "Good light. You see far, and so does everything else.",
@@ -81,11 +82,27 @@ static func pick(opts: Dictionary, seed_val := 0) -> String:
 		if o != "": return o
 	return roll(seed_val) if rolls(opts) else "clear"
 
-## Applies a condition over the tier's base look (Look.environment) and key light.
-static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, T: Dictionary, cond: String) -> void:
+## Applies a condition over the tier's base look (Look.environment) and key light, then sets `vis_amb` and
+## `vis_haze` from the ambient and env fog it ends with, so the fog outside sight comes out grey under them
+## (shaders/vis.gdshaderinc).
+static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, t: Dictionary, cond: String) -> void:
+	_apply(e, sun, fill, t, cond)
+	RenderingServer.global_shader_parameter_set("vis_amb", vis_amb(e))
+	var h := e.fog_light_color.srgb_to_linear() * e.fog_light_energy
+	var on := 1.0 if e.fog_enabled else 0.0
+	RenderingServer.global_shader_parameter_set("vis_haze", Vector4(h.r, h.g, h.b, e.fog_density * on))
+	RenderingServer.global_shader_parameter_set("vis_haze_h", Vector2(e.fog_height, e.fog_height_density * on))
+
+## The ambient light's luma x energy (linear): what the fog outside sight gets back as grey for the ambient it drops.
+static func vis_amb(e: Environment) -> float:
+	var c := e.ambient_light_color.srgb_to_linear()
+	return (c.r * 0.3 + c.g * 0.59 + c.b * 0.11) * e.ambient_light_energy
+
+static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, t: Dictionary,
+		cond: String) -> void:
 	var sm := e.sky.sky_material as ShaderMaterial if e.sky else null
 	var full := Look.full_renderer()
-	var cl: Array = T["clouds"]
+	var cl: Array = t["clouds"]
 	match cond:
 		"day":
 			# overcast daylight: flatter, a little cooler, still muted
@@ -175,7 +192,7 @@ static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLigh
 
 ## Dusk: the clear evening an hour later. The sun is under the islands, the sky deep violet with an
 ## ember rim, the light low and red, the haze heavier.
-static func _dusk(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, sm: ShaderMaterial, full: bool) -> void:
+static func _dusk(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, sm: ShaderMaterial, _full: bool) -> void:
 	if sm:
 		sm.set_shader_parameter("top", Color("06060f"))
 		sm.set_shader_parameter("mid", Color("1a1430"))

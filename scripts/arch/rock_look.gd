@@ -1,9 +1,8 @@
 class_name RockLook
 extends RefCounted
 ## What Tarek's raised rocks look like (Stone Row, Basalt Spine; owner item 67): a craggy crown of tapered
-## columns of cold cobalt slate like his stone arm (his stones are cobalt, never grey or warm), the
-## main one peaking at HeroZones.ROCK_TOP (you stand there), pale sunlit slate on the upward faces that read from
-## the match camera, a cobalt rim (KitLooks.basalt_mat, as his thrown rocks), thin cobalt cracks in the ground at
+## columns in blue slate like his arm, the main one peaking at HeroZones.ROCK_TOP (you stand there), pale sunlit
+## upward faces that read from the match camera, teal light on the edges, thin teal cracks in the ground at
 ## the foot that cool off, and a soft shadow on the ground. They heave up with dust and a short rumble and,
 ## broken or timed out, crack and crumble into the ground. No other wall in the game looks like it.
 ## The rules (collision, climbing, Net) stay in HeroZones and StoneStand.
@@ -12,10 +11,9 @@ const TOP := HeroZones.ROCK_TOP
 const CRACK_T := 0.6  # s: a fresh rock's ground cracks cool off
 const CRACK_A := 0.95  # a fresh rock's cracks' alpha (cool fades it; a reused rock gets it back)
 const CRUMBLE_T := 0.34  # s: a broken rock slumps into the ground
-const STONE := Color("1a2438")  # cobalt-black in the cracks and shadows
-const STONE_HI := Color("3e5784")  # cobalt slate on the faces (his arm's stone)
-const CAP := Color("93aee0")  # the upward faces, in the sun: what the match camera sees most
-const RIM := 0.4
+const CRACK_COL := Color(KitLooks.RUNE_TEAL, CRACK_A)  # the ground cracks: the rune teal of his arm
+const RIM := 0.22
+const HEAT := 0.05  # thin teal cracks, like the runes on his arm: the stone stays slate
 const RUMBLE_GAP := 0.09  # s: a ridge of rocks rumbles as one, not nine times over
 const SIDES := 6
 # a crag's rings going up: [share of its height, share of its base radius]
@@ -81,8 +79,7 @@ static func _fresh(n: Node3D) -> void:
 			(c as Node3D).visible = true
 			for mi in c.get_children():
 				((mi as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter(
-					"color", Color(0.35, 0.6, 1.0, CRACK_A)
-				)
+					"color", CRACK_COL)
 		elif c.name.begins_with("Col"):
 			_stand(c as Node3D, i)
 			i += 1
@@ -119,10 +116,7 @@ static func upright(n: Node3D) -> void:
 ## The soft ground shadow: from the match camera it plants the rock on the ground.
 static func _shadow(n: Node3D) -> void:
 	var s := Models.part(
-		n,
-		Models.cyl(1.0, 1.0, 0.01, 18),
-		KitLooks.shade_mat(Color(0.05, 0.03, 0.02, 0.34)),
-		Vector3(0.06, 0.03, 0.03),
+		n, Models.cyl(1.0, 1.0, 0.01, 18), KitLooks.shade_mat(Color(0.02, 0.03, 0.05, 0.34)), Vector3(0.06, 0.03, 0.03),
 		Vector3(0.95, 1.0, 0.68)
 	)
 	s.name = "Shadow"
@@ -166,11 +160,8 @@ static func _crag(i: int) -> Array:
 		for v in [rings[-1][s], rings[-1][(s + 1) % SIDES], peak]:
 			st.add_vertex(v)
 	st.generate_normals()
-	var mt := KitLooks.basalt_mat(float(i) * 1.7)
-	mt.set_shader_parameter("stone", STONE)
-	mt.set_shader_parameter("stone_hi", STONE_HI)
-	mt.set_shader_parameter("rim", RIM)
-	mt.set_shader_parameter("cap_col", CAP)
+	var mt := KitLooks.slate_mat(HEAT, float(i) * 1.7, RIM)
+	mt.set_shader_parameter("cap_col", KitLooks.SLATE_CAP)  # the sunlit upward faces: what the match camera sees most
 	mt.set_shader_parameter("cap", 1.0)
 	_crags[i] = [st.commit(), mt]
 	return _crags[i]
@@ -183,14 +174,10 @@ static func _cracks(n: Node3D) -> void:
 	n.add_child(cracks)
 	for i in 7:
 		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
-		var len_ := 0.35 + KitLooks.vis_rng.randf() * 0.45
+		var len_v := 0.35 + KitLooks.vis_rng.randf() * 0.45
 		Models.part(
-			cracks,
-			Models.box(0.035, 0.012, len_),
-			KitLooks.shade_mat(Color(0.35, 0.6, 1.0, CRACK_A)),
-			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_ * 0.5),
-			Vector3.ONE,
-			Vector3(0, -a + PI * 0.5, 0)
+			cracks, Models.box(0.035, 0.012, len_v), KitLooks.shade_mat(CRACK_COL),
+			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_v * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
 		)
 	for mi in cracks.get_children():
 		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

@@ -85,6 +85,19 @@ NEW=$(git -C "$CT" rev-parse HEAD)
 log "merged: ${NEW:0:10}"
 fi
 
+# 1b. style ratchet (tools/style_gate.py, seconds, before the imports): a file/rule the PR makes worse than main allows is RED.
+# main allows max(its baseline, its current count): main's old regressions do not block, the PR's own --update does not help.
+# main's copy of the script runs when it has one (a PR cannot loosen the gate for itself); a tree with neither skips the step.
+SG="$MT/tools/style_gate.py"; [ -f "$SG" ] || SG="$CT/tools/style_gate.py"
+if [ -f "$SG" ]; then
+	STYLE=$(python3 "$SG" "$MT" "$CT" 2>&1); SRC=$?
+	log "style ratchet rc=$SRC ($SG)"
+	[ "$SRC" = 0 ] || finish RED "style ratchet: $(echo "$STYLE" | wc -l) file/rule(s) worse than main" \
+		"REGATE RED ${NEW} (not pushed): $BRANCH makes the style ratchet (tools/style_lint.py, docs/STYLE.md) worse than origin/main ${MAIN:0:10}; fix these lines (\`python3 tools/style_lint.py --file <path>\` lists them):
+$(echo "$STYLE" | head -20)
+[regate-bot pr=$PR head=${HEAD_SHA:0:10} main=${MAIN:0:10}]"
+fi
+
 # 2. import both trees (compile gate)
 imp() {  # imp TREE NAME : import, count parse errors
 	flock -w 1800 /home/boki/cj/.godot-import.lock timeout 1200 godot --headless --path "$1" --import > "$OUT/import_$2.log" 2>&1

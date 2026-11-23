@@ -30,4 +30,7 @@ picked short of what it would hop into (BreahHop.spot_for), and off Neve's wall 
   about cos^2 (2026-11-13: Bulwark's fitted 360 Smash hands over at 0.66 of its mean, 13% at 80 degrees over the
   whole window, 17.4% at the dash's end). A face shorter than the dash's share (Ryzz at 80 degrees past a 1.3 m
   Tenzo rock or a prop) is left round its end by the corner slip: those tries only assert it passed the end, free.
+- 2026-11-19 (play probe): no body may overlap the wall on any step of a try, except in Lace's Spirit Walk, which
+  passes rocks and barriers by design (PinSpirit; Shift is her walk, not a stop or slide). The check holds her walk
+  into each barrier and asserts she is out of it once it ends. The probe's `through_wall` ignores her walk frames.
 - No Net or save change: each game steps its own hunter.

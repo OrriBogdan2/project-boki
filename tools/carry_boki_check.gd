@@ -23,7 +23,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func _species_of_weight(lo: float, hi: float) -> String:
-	for f in DirAccess.get_files_at("res://content/kin"):
+	for f in DirAccess.get_files_at("res://content/kin_home"):
 		var id := f.get_basename()
 		var kg := float(Unique.base_size(id)["kg"])
 		if f.ends_with(".json") and kg > lo and kg <= hi:
@@ -93,6 +93,7 @@ func _walk(k: Dictionary, secs: float) -> float:
 	return far
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	seed(RNG_SEED)

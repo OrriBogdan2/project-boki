@@ -173,15 +173,23 @@ func _breed_table(pace: Dictionary) -> void:
 			print(row % ([o["id"], o["grown_lv"], who] + at))
 	for k in XP_KEYS: r[k] = saved[k]
 
+## All the XP a kin holds, counting the levels it spent (two feeds can be a level up: xp drops back).
+func _earned(rec: Dictionary) -> int:
+	var t := int(rec["xp"])
+	for lv in range(1, int(rec["level"])):
+		t += Game.xp_need(lv)
+	return t
+
 ## The live rows: care pays once a kind a day, the four games pay play / win / first win, the curve.
 func _check_rows() -> void:
 	var rec := _kin()
 	var care := int(GardenXp.rules()["care"])
+	var base := _earned(rec)
 	GardenXp.give(rec, "feed", 0, 100.0)
 	GardenXp.give(rec, "feed", 0, 200.0)
-	ok(int(rec["xp"]) == care, "a second feed the same day pays nothing (%d xp)" % int(rec["xp"]))
+	ok(_earned(rec) - base == care, "a second feed the same day pays nothing (%d xp)" % (_earned(rec) - base))
 	GardenXp.give(rec, "feed", 0, 90000.0)
-	ok(int(rec["xp"]) == 2 * care, "the next day's first feed pays again (%d xp)" % int(rec["xp"]))
+	ok(_earned(rec) - base == 2 * care, "the next day's first feed pays again (%d xp)" % (_earned(rec) - base))
 	rec["xp"] = 0
 	rec["level"] = 10      # high enough that no row levels it up
 	var r: Dictionary = GardenXp.rules()
@@ -195,14 +203,18 @@ func _check_rows() -> void:
 	GardenXp.play("relay", rec, true, true)
 	ok(int(rec["xp"]) == 0, "a game not in the list pays no XP")
 	var c: Dictionary = r["curve"]
-	var flat := int(c["flat_from"])
-	ok(Game.xp_need(1) == int(c["per_level"]) and Game.xp_need(flat + 30) == Game.xp_need(flat),
-			"Game.xp_need follows the curve (%d at level 1, flat from level %d)" % [Game.xp_need(1), flat])
+	ok(Game.xp_need(1) == int(c["base"]) and Game.xp_need(4) == roundi(float(c["base"]) * pow(4.0, float(c["power"]))),
+			"Game.xp_need follows the curve round(%d x L^%s): %d at Lv 1, %d at Lv 4"
+			% [int(c["base"]), str(c["power"]), Game.xp_need(1), Game.xp_need(4)])
 
 func run(m: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	rng.seed = 4242
+	# The pace model is the old-farm rules (no sulky floors, the DECAY joy pace): base_mode is on by default now
+	# (farm_build.json), so it is switched off here and put back at the end.
+	var was_base: bool = FarmUnlocks.base_mode()
+	FarmUnlocks.rules()["base_mode"] = false
 	var pace: Dictionary = GardenXp.rules()["pace"]
 	var garden := minutes_garden_only()
 	var runner := minutes_runner(pace)
@@ -217,5 +229,6 @@ func run(m: Node) -> void:
 	ok(int(rec["xp"]) > 0, "a farm action gives XP")
 	_check_rows()
 	_breed_table(pace)
+	FarmUnlocks.rules()["base_mode"] = was_base
 	print("PACE CHECK DONE, failures: ", bad)
 	m.get_tree().quit()

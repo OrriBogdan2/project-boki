@@ -7,7 +7,8 @@ extends RefCounted
 const RUN_UP := 0.5          # s running back before the jump or the throw
 const CARRY_MIN := 0.9       # share of the throw's speed still there at the miss, and of the miss's at the landing
 const BRAKE_T := 0.3         # s on the ground after landing, keys let go (braking as after a plain jump)
-const BRACE_T := 0.2         # s after the throw for the run to brake down to the brace (at body_scale the run is faster, so it takes ~0.15 s)
+# s after the throw for the run to brake down to the brace (at body_scale the run is faster, so it takes ~0.15 s)
+const BRACE_T := 0.2
 
 var ak = null
 var ok_fn: Callable

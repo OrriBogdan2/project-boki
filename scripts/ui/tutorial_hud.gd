@@ -13,7 +13,7 @@ const MINT := TutorialStrip.MINT
 const GOLD := TutorialStrip.GOLD
 const PANEL := TutorialStrip.PANEL
 
-const FIGHT_PROMPTS := ["revive", "finish", "stomping", "boxrev"]     # Match.interact kinds that never wait
+const FIGHT_PROMPTS := ["revive", "finish", "stomping", "boxrev"]  # Match.interact kinds that never wait
 
 
 ## The lanes: the strip, the check mark and the message column (Rect2 each), for a screen size.
@@ -28,9 +28,11 @@ static func lanes(sz: Vector2) -> Dictionary:
 		"intro": Rect2(Vector2(sz.x * 0.3, sz.y * 0.36), Vector2(sz.x * 0.4, sz.y * 0.28)),
 	}
 
+
 ## The world prompt (Hud._draw_prompt) may show: no fresh panel is up, or it is one a fight needs.
 static func prompt_shows(m: Match) -> bool:
 	return m.tut == null or not m.tut.card_up() or String(m.interact.get("kind", "")) in FIGHT_PROMPTS
+
 
 static func draw(h, sz: Vector2) -> void:
 	var tu: Tutorial = h.m.tut
@@ -44,11 +46,28 @@ static func draw(h, sz: Vector2) -> void:
 	if tu.target != Vector3.INF and h.m.cam and h.m.player:
 		dir = MarkerDir.off_dir(h.m.cam, sz, tu.target, h.m.player.pos)
 	_bar(h, r, tu, dir)
+	_keep_sign_clear(h, sz, tu)
 	_pick_ring(h, tu)
 	if not tu.card_up():
 		_extras(h, r, tu)
 	if tu.done_t > 0.0:
 		_check(h, lanes(sz)["check"], tu.done_t / Tutorial.DONE_T)
+
+
+## A gap step's sign (a label in the world) stays inside the safe frame, off the HUD blocks, the strip and the
+## hunter: the pad it stands over can sit under them. (HUD rects are in the HUD frame, a centred 16:9 area on a
+## wider screen; the label is placed in screen px: `off` takes one into the other.)
+static func _keep_sign_clear(h, sz: Vector2, tu: Tutorial) -> void:
+	var sign3 := tu.pad_sign(tu.id())
+	if sign3 == null or h.m.cam == null:
+		return
+	var off := SafeArea.frame(h.m.get_viewport().get_visible_rect().size).position
+	var avoid: Array = [HunterZone.rect(h.m)]
+	for r: Rect2 in h.m.cam.hud_keep.values() + [TutorialStrip.rect(sz)]:
+		avoid.append(Rect2(r.position + off, r.size))
+	var safe := HudStyle.safe_rect(sz)
+	LabelFit.fit(sign3, h.m.cam, Rect2(safe.position + off, safe.size), avoid)
+
 
 ## The step's one line in the strip: key cap on the left, on the right the counter and, while the target's
 ## pin isn't on screen, an arrow pointing the way with the distance. A nag re-pulses it. (The plain-words
@@ -61,6 +80,7 @@ static func _bar(h, r: Rect2, tu: Tutorial, dir: Vector2) -> void:
 	var age := fposmod(tu.card_t, 0.4) if tu.nag_t > 0.0 else tu.card_t
 	TutorialStrip.paint(h.c, h.big, r, line, age)
 
+
 ## The scout hint under the panel and the outpost's defend bar just under its edge.
 static func _extras(h, r: Rect2, tu: Tutorial) -> void:
 	var hint := tu.scout_hint()
@@ -71,6 +91,7 @@ static func _extras(h, r: Rect2, tu: Tutorial) -> void:
 		if not o.is_empty():
 			var br := Rect2(Vector2(r.position.x + 20.0, r.end.y + 6.0), Vector2(r.size.x - 40.0, 6.0))
 			h._bar(br, clampf(float(o["prog"]), 0.0, 1.0), ExitModels.UPLINK)
+
 
 ## A pick step: a pulsing gold ring on the one skill slot that can take the point, an arrow dropping onto it.
 ## The slot's rect is the one the HUD drew it at (RankMarks.face), so the ring follows the row wherever it sits.
@@ -88,6 +109,7 @@ static func _pick_ring(h, tu: Tutorial) -> void:
 	var s := rad * 0.5
 	h.c.draw_colored_polygon(PackedVector2Array([tip, tip + Vector2(-s, -s * 1.2), tip + Vector2(s, -s * 1.2)]), GOLD)
 
+
 ## The first-time intro: short, over a light dim, and the rest of the HUD stays away.
 static func _intro(h, sz: Vector2, tu: Tutorial) -> void:
 	h.c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0, 0, 0, 0.5 * clampf(1.0 - (tu.intro_t - 1.6) / 0.4, 0.0, 1.0)))
@@ -99,6 +121,7 @@ static func _intro(h, sz: Vector2, tu: Tutorial) -> void:
 	h._ctext(Vector2(cx, y + r.size.y * 0.62), "Follow your Boki and the marker", int(sz.y * 0.04), Color.WHITE, h.big)
 	h._ctext(Vector2(cx, y + r.size.y * 0.86), "Press any key", int(sz.y * 0.028), Color(1, 1, 1, 0.75), h.big)
 
+
 ## A small check beside the panel when a step is done: it fades, it does not pop over the screen.
 static func _check(h, r: Rect2, k: float) -> void:
 	var col := Color(MINT, clampf(k * 1.5, 0.0, 1.0))
@@ -109,9 +132,11 @@ static func _check(h, r: Rect2, k: float) -> void:
 		pts[i] = c + pts[i] * s
 	h.c.draw_polyline(pts, col, 5.0, true)
 
+
 ## During the tutorial the message lane is the top-right column, clear of the panel
 ## (Hud holds it while the panel is fresh).
 static func place_msgs(lane: MsgLane, sz: Vector2) -> void:
 	var r: Rect2 = lanes(sz)["toast"]
 	lane.top = r.position.y
 	lane.right_edge = r.end.x
+	lane.max_w = r.size.x  # (a long line wraps inside the column, never under the strip)

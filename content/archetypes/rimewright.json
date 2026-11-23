@@ -8,7 +8,7 @@
 	"role": "Rimewright",
 	"weight": "light",
 	"body": {
-		"size": 1.014,
+		"size": 1.11,
 		"bulk": 1.0,
 		"hit_r": 0.395, "hit_h": 1.66, "body_r": 0.38,
 		"head": 0.6,
@@ -23,6 +23,7 @@
 	"howto": ["Play: mid-range ice; darts Chill, hold {dash} to skate.", "Combo: land 8 darts on one foe to Shatter their Chill.", "Avoid: standing still in the open; keep skating."],
 	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
 
+	"hint": {"lmb": "Hold {fire} for darts that curve onto the foe at the cursor", "rmb": "Press {secondary} to push an ice spear that bursts later", "e": "Press {signature} to slide an ice wall, again to freeze it", "dash": "Hold {dash} to skate; your darts fly straight and thick"},
 	"card": {"role_word": "Controller", "loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "dash": "Hold to skate; darts fly straight and hit twice as hard.", "passive": "Hits Chill; 8 darts or a knock on a Chilled foe Shatters.", "rmb": "Ice spear: hits and slows where it lands, then bursts after 1.8s.", "e": "An ice wall slides to the cursor, shoving foes; use it again to freeze it.", "x": "Sealed, invulnerable, rooted; cracks open at 3.3s to stun.", "weapons": {"hoar_fan": "Hold for slow homing darts; big ones every few shots."}, "chips": {"rmb": ["18 hit", "22 burst"], "x": ["18 dmg"]}},
 	"signature": "hoar_fan",
 	"resource": {
@@ -54,8 +55,8 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold the dash key to skate at 10.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
-		"steer": 3.6,
+		"desc": "Hold the dash key to skate at 10.5 m/s where you move, for up to 1.6s, carving wide curves with the move keys; you carry on over ledges. Let go and you glide to a stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
+		"steer": 1.6,
 		"skate_dart_dmg_k": 2.0,
 		"ice_gap": 0.2,
 		"ice_look": 2.0,
@@ -63,9 +64,9 @@
 		"ice_width": 1.6,
 		"ice_time": 5.0,
 		"ice_col": "#bff0ff",
-		"ramp": 0.2,
+		"ramp": 0.12,
 		"air_fall": 1.5,
-		"stop": 0.15
+		"slide_out": 0.7
 	},
 	"rmb": {
 		"ground": {"range": "lance.range", "r": "lance.zone_r"},
@@ -146,7 +147,7 @@
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:286 'she turns to face the cursor and fires while skating'; :274 turns in about 0.1 s"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:50 a tap that lands at the cursor; no turn limit shown"},
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:20 a tap, the wall travels toward the cursor; no turn limit shown"},
-		"e_recast": {"early": "free", "late": "free", "source": "data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "data: recast freezes the wall (private reports repo, sv/DATA.md); no turn limit shown"},
 		"x": {"early": "locked", "late": "locked", "source": "briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65)"},
 		"x_recast": {"early": "locked", "late": "free", "source": "briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out"}
 	},
@@ -156,7 +157,7 @@
 	"rank2": {"sec": "Rank 2: cooldown 10.2s -> 8.7s, damage +15%.", "dash": "Rank 2: recharge 13s -> 11.5s.", "kin": "Rank 2: cooldown 17s -> 14.9s."},
 	"rank_next": {"sec": "Rank 3: cooldown 10.2s -> 7.2s, damage +30%; the detonation hits 45% harder.", "dash": "Rank 3: recharge 13s -> 10s; a Skate over the Abyss lays ice underfoot that holds for 5s.", "kin": "Rank 3: cooldown 17s -> 12.8s; the wall is 40 points tougher."},
 	"tells": {
-		"half": "a frost glow on foes that grows with each dart",
+		"half": "ice shards stuck in the foe, one more with each dart, gone on the Shatter or when the stacks run out",
 		"full": "at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
 		"dash_spent": "skate blades dark, dash pip dark"
 	},
@@ -180,7 +181,7 @@
 		"stun": 0.75,
 		"recover": 0.4,
 		"zone_slow": 0.35,
-		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.47m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed 35%. Its cracks glow brighter as it builds; at 3.3s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.47m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, easing to a stop over 0.8s, no steering), then you are rooted; recast (or {dash}) to break out early. Foes in it are Chilled and slowed 35%. Its cracks glow brighter as it builds; at 3.3s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
 	},
 	"src": {
 		"lmb": "[D] [O] (owner question (gap 16) (cd/dmg/range/timing: KIT_PARITY row)",
