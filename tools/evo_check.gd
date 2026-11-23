@@ -325,7 +325,7 @@ func _migrate() -> void:
 	)
 	var names := [Evo.form_name(a), Evo.form_name(b), Evo.form_name(lost)]
 	ok(
-		names == ["Cindrend", "Prismander", "Burrward"] and a["was"] == [],
+		names == ["Vesrend", "Prismander", "Mycward"] and a["was"] == [],
 		"migrate: old form names kept %s" % str(names)
 	)
 	ok(
