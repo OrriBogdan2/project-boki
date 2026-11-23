@@ -38,10 +38,15 @@ func run(m: Node) -> void:
 	for i in cycles:
 		var build_ms: int = await _expedition(4101 + i * 17)
 		await _home()
+		# the species cache grows with each Boki first seen, up to the roster (above): a cache, not a leak, so it
+		# is emptied before the counts (89 rigged kin: a new seed meets ~4.5 new species a match, ~100 objects each)
+		var rig_n := BokiRig._scenes.size()
+		BokiRig._scenes.clear()
+		await main.get_tree().process_frame
 		var row := _counts()
 		row["build_ms"] = build_ms
 		rows.append(row)
-		print("REPEAT cycle %d: %s" % [i + 1, _fmt(row)])
+		print("REPEAT cycle %d: %s (rig species cached %d)" % [i + 1, _fmt(row), rig_n])
 	_judge(rows)
 	_rebuild_same()
 	print("REPEAT %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
