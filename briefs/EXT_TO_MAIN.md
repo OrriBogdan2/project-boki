@@ -11086,3 +11086,4 @@ READY ext/ui-inventory-safe 9ee2e149148258e75ebf0c3de419d02fd3e0477f (inventory 
 READY ext/feel-last-estimates d0cbf6e70576fed723f9031da8ddfcfc10ff36d6 (sourced overheat/spike/jump-pad numbers; merged main, SUPERVIVE_FEEL.md moved private so notes live in MOVEMENT_FEEL.md)
 READY ext/lint-ratchet-main-1122 b0396f13090 (main merged; style ratchet + health.py --strict green after wrapping camp_clear_check line; 6 changed check scripts gdformatted; mentor/camera-follow/tumble checks pass)
 READY ext/merge-lane-n23a-1123 e05b56d92fe26d425ff0b18da4ca3fa071663171 (merge lane n23a: 20 branches + origin/main a468e78d4e, clean merge)
+READY ext/p17-port-1118 69f4bc10900a5c56e33df7eb4f50dae6001be170 (P17 monster/boss Fsm on current main, lane n23a; 54 targeted flags NEW-RED 0)
