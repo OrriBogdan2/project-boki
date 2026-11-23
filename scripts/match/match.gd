@@ -344,6 +344,7 @@ func _start(o: Dictionary) -> void:
 	await world.build_meshes()
 	RaidLook.tune_world(world, raid)
 	if DepthCues.k() > 0.0: add_child(DepthCues.new(self))
+	add_child(FxHunterCap.new(self))
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
@@ -520,7 +521,8 @@ func _build_env() -> void:
 	raid = RaidLook.pick(opts, seed_val)
 	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
 	sight_k = float(RaidLook.SIGHT.get(raid, 1.0))
-	RenderingServer.global_shader_parameter_set("vis_dark", 1.0 if "--shot-bright" in OS.get_cmdline_user_args() else float(RaidLook.VIS_DARK.get(raid, 0.7)))     # (--shot-bright: map screenshots without the sight shading)
+	RenderingServer.global_shader_parameter_set("vis_dark", 1.0 if "--shot-bright" in OS.get_cmdline_user_args() else RaidLook.VIS_DARK)     # (--shot-bright: map screenshots without the sight shading)
+	RenderingServer.global_shader_parameter_set("vis_greyness", RaidLook.VIS_GREY)
 	RenderingServer.global_shader_parameter_set("vis_ally_range", VIEW_RANGE * sight_k)
 	raid_fx = RaidLook.storm_fx(raid)
 	if raid_fx:
