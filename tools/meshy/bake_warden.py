@@ -11,10 +11,13 @@ Decimating that mesh with its UVs kept (r2) smears the texture across the crumbs
     the real surface; the head's islands scaled `head_uv` times (more texels on the face); packed.
  4. Bake the dense mesh's base colour onto them (Cycles, selected to active, as emission: no light baked
     in), each island's edge extended `margin_px` into the gaps.
- 5. Export the low mesh and its texture (atlas.png beside it) as a .glb in Meshy's frame and pose:
+ 5. With `normal` {size, cage, ray} (px, m, m): the dense mesh's sculpt as a tangent-space normal map on the same
+    UVs (normal.png beside the atlas; wrong hits flattened). It rides the UVs through the fit's posing, so the
+    low mesh should already be the shipped count (`tris` <= the fit's max_tris: no second decimation).
+ 6. Export the low mesh and its texture (atlas.png beside it) as a .glb in Meshy's frame and pose:
     fit_warden.py's `body_glb`.
 The spec (art/wardens/src/<name>_bake.json): high, out, tris, head {centre, r}, head_tris, head_uv, uv_smooth,
-uv_angle, uv_margin, tex, cage, ray, margin_px, floater_verts.
+uv_angle, uv_margin, tex, cage, ray, margin_px, floater_verts, normal.
 """
 import json
 import math
@@ -25,6 +28,11 @@ import bmesh
 import bpy
 import numpy as np
 from mathutils import Vector
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "art1"))
+import warden_kit as WK  # noqa: E402
+from paintkit import clean_normal  # noqa: E402
 
 
 def log(*a):
@@ -44,13 +52,13 @@ def import_dense(path):
     for m in meshes:
         m.select_set(True)
     bpy.context.view_layer.objects.active = meshes[0]
+    rest = [o for o in new if o.type != "MESH"]     # (the joined meshes are freed by the join itself)
     if len(meshes) > 1:
         bpy.ops.object.join()
     ob = bpy.context.view_layer.objects.active
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    for o in new:
-        if o.name in bpy.data.objects and o is not ob:
-            bpy.data.objects.remove(o)
+    for o in rest:
+        bpy.data.objects.remove(o)
     ob.name = "High"
     return ob
 
@@ -58,7 +66,12 @@ def import_dense(path):
 def base_image(ob, socket="Base Color"):
     """The image feeding the first material's `socket` ("Emission Color": a Meshy master's emission map), through
     any mix or factor nodes the glTF importer put between, or None."""
-    bsdf = next(n for n in ob.data.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    return mat_image(ob.data.materials[0], socket)
+
+
+def mat_image(m, socket="Base Color"):
+    """base_image for one material."""
+    bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
     todo = [l.from_node for l in bsdf.inputs[socket].links]
     while todo:
         n = todo.pop(0)
@@ -72,11 +85,18 @@ def tris(ob):
     return sum(len(p.vertices) - 2 for p in ob.data.polygons)
 
 
-def make_low(high, n_tris, floater_verts, head=None, head_tris=0):
-    """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated with no UV limits.
-    With a head budget, in two passes: the body to n_tris - head_tris with the head (`head`: centre, r) held,
-    then the head to head_tris with the body held (left to itself the collapse keeps ~5k of 36k on the head,
-    and the monocle and the strands over the face come out jagged)."""
+SEAM_WEIGHT = 0.05  # keep_uv: a UV-seam vertex's collapse weight (1 = free; 0 holds it, and then 60k is out of reach)
+
+
+def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False, hands=(), hand_tris=0):
+    """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated
+    (`keep_uv`: its materials and UVs kept, the collapse carries the UVs along, so the master's own paint fits it;
+    the UV-seam vertices collapse last (`_seam_weights`): the collapse drags a seam's UVs and tears cheeks and hair).
+    With a head budget and/or hand budgets, in passes: the body to what is left of n_tris with each region (`head`:
+    centre, r; `hands`: [{centre, r, axis, others}, ...] (`_region_weight`), each given `hand_tris`) held, then each region alone down to its budget
+    with everything else held (left to itself the collapse keeps ~5k of 36k on the head, and the monocle and the
+    strands over the face come out jagged, and ~0.5% of the triangles on a hand: fingers flatten to a mitten).
+    A region that has fewer triangles than its budget is left as it is."""
     me = high.data.copy()
     low = bpy.data.objects.new("Low", me)
     bpy.context.scene.collection.objects.link(low)
@@ -86,29 +106,135 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0):
     _drop_small_parts(bm, floater_verts)
     bm.to_mesh(me)
     bm.free()
-    me.materials.clear()
-    while me.uv_layers:
+    while me.uv_layers and not keep_uv:
         me.uv_layers.remove(me.uv_layers[0])
+    if not keep_uv:
+        me.materials.clear()
     bpy.ops.object.select_all(action="DESELECT")
     bpy.context.view_layer.objects.active = low
     low.select_set(True)
-    if not head or head_tris <= 0:
-        _decimate(low, n_tris / max(tris(low), 1), None)
+    seam = _seam_weights(me) if keep_uv else 1.0
+    regions = ([(head, head_tris)] if head and head_tris > 0 else []) + [(h, hand_tris) for h in hands if hand_tris > 0]
+    if not regions:
+        group = None
+        if keep_uv:
+            group = "seam"
+            g = low.vertex_groups.new(name=group)
+            for i, w in enumerate(seam):
+                g.add([i], float(w), "REPLACE")
+        _decimate(low, n_tris / max(tris(low), 1), group)
+        low.vertex_groups.clear()
     else:
-        c, r = Vector(head["centre"]), float(head["r"])
-        co = np.array([v.co[:] for v in me.vertices])
-        inside = np.clip((r * 1.03 - np.linalg.norm(co - np.array(c), axis=1)) / (r * 0.06), 0.0, 1.0)
-        for name, w in (("body", 1.0 - inside), ("head", inside)):
+        co = _coords(me)
+        inside = [_region_weight(co, rg) for rg, _ in regions]
+        groups = [("body", (1.0 - np.maximum.reduce(inside)) * seam)] + [
+            ("region%d" % i, w * seam) for i, w in enumerate(inside)
+        ]
+        for name, w in groups:
             g = low.vertex_groups.new(name=name)
             for i in np.nonzero(w > 0.0)[0]:
                 g.add([int(i)], float(w[i]), "REPLACE")
-        n_head = sum(1 for p in me.polygons if (p.center - c).length < r)
+        held = sum(_tris_in(me, rg) for rg, _ in regions)
         # (a held region doesn't count: the ratio is of the whole mesh)
-        _decimate(low, (n_head + n_tris - head_tris) / tris(low), "body")
-        _decimate(low, n_tris / tris(low), "head")
+        _decimate(low, (held + n_tris - sum(b for _, b in regions)) / tris(low), "body")
+        for i, (rg, budget) in enumerate(regions):
+            have = _tris_in(low.data, rg)
+            _decimate(low, (tris(low) - max(0, have - budget)) / tris(low), "region%d" % i)
+            log("region %d: %d -> %d tris (budget %d)" % (i, have, _tris_in(low.data, rg), budget))
         low.vertex_groups.clear()
+    _unfold(low)
     log("low: %d -> %d tris" % (tris(high), tris(low)))
     return low
+
+
+def _coords(me):
+    co = np.empty(len(me.vertices) * 3, np.float32)
+    me.vertices.foreach_get("co", co)
+    return co.reshape(-1, 3).astype(float)
+
+
+def _seg_dist(co, a, b):
+    """Per point: its distance to the segment a-b."""
+    a, b = np.asarray(a, float), np.asarray(b, float)
+    d = b - a
+    t = np.clip((co - a) @ d / max(float(d @ d), 1e-12), 0.0, 1.0)
+    return np.linalg.norm(co - (a + t[:, None] * d), axis=1)
+
+
+def _region_weight(co, rg):
+    """Per vertex: 1 inside the region's ball (`centre`, `r`; a soft 6% edge), 0 outside. With an `axis` [a, b, r] (a
+    hand: elbow to finger tips, its thickness) and `others` [[a, b, r], ...] (thighs, spine), only the vertices nearer
+    the axis' surface than any other's: a hand that hangs by the hip leaves the thigh and the skirt out of its budget."""
+    c, r = np.asarray(rg["centre"], float), float(rg["r"])
+    w = np.clip((r * 1.03 - np.linalg.norm(co - c, axis=1)) / (r * 0.06), 0.0, 1.0)
+    if rg.get("axis") and rg.get("others"):
+        a, b, ra = rg["axis"]
+        own = _seg_dist(co, a, b) - ra
+        w *= own < np.minimum.reduce([_seg_dist(co, oa, ob) - ro for oa, ob, ro in rg["others"]])
+    return w
+
+
+def _tris_in(me, rg):
+    """The triangles of mesh `me` in region `rg` (their corners' mean weight over 0.5)."""
+    w = _region_weight(_coords(me), rg)
+    vi = np.empty(len(me.loops), dtype=np.int32)
+    me.loops.foreach_get("vertex_index", vi)
+    start = np.empty(len(me.polygons), dtype=np.int32)
+    total = np.empty(len(me.polygons), dtype=np.int32)
+    me.polygons.foreach_get("loop_start", start)
+    me.polygons.foreach_get("loop_total", total)
+    if not len(start):
+        return 0
+    inside = np.add.reduceat(w[vi], start) > 0.5 * total
+    return int((total[inside] - 2).sum())
+
+
+def _seam_weights(me):
+    """Per vertex: SEAM_WEIGHT where its corners' UVs differ (a UV seam; the weld left one vertex there), else 1.
+    (Decimate's `delimit` = UV is for the planar mode only: in a collapse it changes nothing.)"""
+    n = len(me.loops)
+    uv = np.empty(n * 2, np.float32)
+    me.uv_layers[0].data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    vi = np.empty(n, np.int32)
+    me.loops.foreach_get("vertex_index", vi)
+    lo = np.full((len(me.vertices), 2), 9e9, np.float32)
+    hi = np.full((len(me.vertices), 2), -9e9, np.float32)
+    np.minimum.at(lo, vi, uv)
+    np.maximum.at(hi, vi, uv)
+    seam = ((hi - lo) > 1e-6).any(axis=1)
+    log("seams: %d of %d verts weighted %.2f" % (seam.sum(), len(seam), SEAM_WEIGHT))
+    return np.where(seam, SEAM_WEIGHT, 1.0)
+
+
+def _unfold(ob, passes=24):
+    """The collapse leaves a few triangles flipped back over their neighbours (Motley's 60k body: 27, four of them
+    10-17 cm slivers at the collar that read as stray shards floating off him). Each one whose neighbours mostly
+    face the other way (2 of 3 below -0.5) has its corners moved to the mean of their neighbours, until none is
+    left. Only positions move: no vertex, face or UV changes, so no holes or loose bits."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+
+    def flipped():
+        bm.normal_update()
+        out = []
+        for f in bm.faces:
+            ns = [g for e in f.edges for g in e.link_faces if g is not f]
+            if ns and sum(1 for g in ns if f.normal.dot(g.normal) < -0.5) >= min(2, len(ns)):
+                out.append(f)
+        return out
+
+    bad = flipped()
+    first = len(bad)
+    for _ in range(passes):
+        if not bad:
+            break
+        vs = {v for f in bad for v in f.verts}
+        bmesh.ops.smooth_vert(bm, verts=list(vs), factor=1.0, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+        bad = flipped()
+    bm.to_mesh(ob.data)
+    bm.free()
+    log("unfold: %d flipped triangles -> %d" % (first, len(bad)))
 
 
 def _decimate(ob, ratio, group):
@@ -294,10 +420,12 @@ def _islands(bm, lay):
 
 def bake_colour(high, low, size, cage, ray, margin_px, src=None):
     """The dense mesh's base colour, or its `src` image, (as emission, so nothing of the scene's light) onto the low mesh's UVs."""
+    own = src is None       # the base colour: each material its own image (a Meshy part joined in, Meeko's wings)
     src = src or base_image(high)
     for m in high.data.materials:
         nt = m.node_tree
-        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src), None)
+        img = (mat_image(m) or src) if own else src
+        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == img), None)
         em = nt.nodes.new("ShaderNodeEmission")
         if tex:
             tex.interpolation = "Cubic"
@@ -330,6 +458,22 @@ def bake_colour(high, low, size, cage, ray, margin_px, src=None):
     return img
 
 
+def bake_normal(high, low, nspec, path):
+    """The dense mesh's sculpt onto the low mesh's UVs: normal.png beside the .glb (lossless: a JPEG's blocks read as
+    dents under the toon ramp)."""
+    size = int(nspec.get("size", 2048))
+    px = np.ones((size, size, 4), np.float32)
+    px[..., :3] = WK.bake_normal(low, [high], size, float(nspec.get("cage", 0.005)), float(nspec.get("ray", 0.012)))
+    wrong = clean_normal(px[..., :3])
+    img = bpy.data.images.new("normal", size, size)
+    img.colorspace_settings.name = "Non-Color"
+    img.pixels.foreach_set(px.ravel())
+    img.filepath_raw = os.path.join(os.path.dirname(path), "normal.png")
+    img.file_format = "PNG"
+    img.save()
+    log("normal baked %dx%d, wrong hits flattened %.4f" % (size, size, wrong))
+
+
 def export(low, img, path):
     img.name = "atlas"          # (the fit's .glb then writes it as <name>_atlas.jpg)
     img.filepath_raw = os.path.join(os.path.dirname(path), "atlas.png")
@@ -359,6 +503,8 @@ def main():
            float(spec.get("uv_angle", 66.0)), int(spec.get("uv_smooth", 30)))
     img = bake_colour(high, low, int(spec.get("tex", 4096)), float(spec.get("cage", 0.008)),
                             float(spec.get("ray", 0.03)), int(spec.get("margin_px", 16)))
+    if spec.get("normal"):
+        bake_normal(high, low, spec["normal"], os.path.expanduser(spec["out"]))
     export(low, img, os.path.expanduser(spec["out"]))
     if spec.get("blend"):
         bpy.ops.wm.save_as_mainfile(filepath=os.path.expanduser(spec["blend"]))

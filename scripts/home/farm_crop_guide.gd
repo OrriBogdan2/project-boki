@@ -22,7 +22,7 @@ static func growing() -> Dictionary:
 		var stage := int(d["stage"])
 		if stage >= grow:
 			continue
-		var per := stage_time(Data.WATER_TIME)
+		var per := FarmWater.stage_s(Save.d, "plots", i)
 		var wt := float(d.get("wt", 0.0))
 		var into := clampf(now - wt, 0.0, per) if wt > 0.0 else 0.0
 		var left := float(grow - stage) * per - into

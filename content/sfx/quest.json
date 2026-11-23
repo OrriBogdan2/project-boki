@@ -1,0 +1,20 @@
+{
+ "group": "quest",
+ "name": "Quest seats",
+ "script": "tools/gen_sfx_quest.py",
+ "sounds": {
+  "quest_take": "ui",
+  "quest_rival_rise": "ui",
+  "quest_win": "ui",
+  "quest_lose": "ui",
+  "quest_site": "loop"
+ },
+ "reach": {
+  "quest_site": 30
+ },
+ "loops": [
+  "quest_site"
+ ],
+ "signature": [],
+ "replaces": []
+}

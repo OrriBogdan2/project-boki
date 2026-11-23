@@ -1,0 +1,31 @@
+{
+ "rigs": {
+  "breaker": {"model": "res://glb/breaker.glb",
+   "arm_fix": {"ours": "idle", "calib": "res://glb/albert_idle_v2__albert_anim.glb", "chain": ["upper_arm.L", "forearm.L"]}},
+  "hem": {"model": "res://glb/hem.glb"}
+ },
+ "clips": {
+  "faultline_clean": {"rig": "breaker", "raw": "res://glb/albert_heavy_v3__albert_anim.glb",
+   "warp": [[0.85, 0.0], [1.45, 0.30], [1.7, 0.36], [2.08, 0.42], [2.15, 0.55], [2.6, 0.95]],
+   "yaw": {"at": 2.1}, "floor": "clamp"},
+  "whirl_hold_clean": {"rig": "breaker", "raw": "res://glb/albert_whirl_v2__albert_anim.glb",
+   "warp": [[0.0, 0.0], [0.5, 0.2], [1.0, 0.635], [0.5, 1.07]],
+   "yaw": "auto", "floor": "clamp",
+   "ik": [{"chain": ["upper_arm.R", "forearm.R", "hand.R"], "on": "head", "offset": [0.0, 0.3, 0.0],
+           "orbit": {"r": 0.3, "turns": 1.0}, "from": 0.2, "to": 1.07}]},
+  "whirl_slam_clean": {"rig": "breaker", "raw": "res://glb/albert_whirl_v2__albert_anim.glb",
+   "warp": [[3.0, 0.0], [3.4, 0.1], [3.7, 0.3], [4.0, 0.5]],
+   "yaw": {"at": 3.4}, "floor": "clamp"},
+  "shot_draw_clean": {"rig": "hem", "raw": "res://glb/lace_light_v3__lace_anim.glb",
+   "warp": [[0.0, 0.0], [0.6, 0.9], [1.0, 1.15], [1.4, 1.27]],
+   "yaw": {"at": 1.0, "from": "hand.R", "to": "hand.L", "ours": ["draw", 1.15]}, "floor": "clamp",
+   "carry": [{"bone": "bow_s", "hand": "hand.R", "ours": "draw", "at": 1.15, "from": 0.35, "to": 1.27},
+             {"bone": "arrow", "hand": "hand.R", "ours": "draw", "at": 1.15, "from": 0.2, "to": 1.27}]},
+  "shot_loose_clean": {"rig": "hem", "raw": "res://glb/lace_light_v3__lace_anim.glb",
+   "warp": [[2.3, 0.0], [2.45, 0.06], [2.6, 0.2], [3.0, 0.43]],
+   "yaw": {"at": 1.0, "from": "hand.R", "to": "hand.L", "ours": ["draw", 1.15]}, "floor": "clamp"},
+  "death_clean": {"rig": "hem", "raw": "res://glb/lace_death_v3__lace_anim.glb",
+   "warp": [[2.2, 0.0], [2.5, 0.3], [3.3, 0.8], [3.9, 1.5]],
+   "yaw": "auto", "floor": "clamp"}
+ }
+}

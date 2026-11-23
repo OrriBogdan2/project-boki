@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. data: a ball, post, tub, warm stone and dig patch in the Base category, each with a stat Care knows
 ##   2. lean: Flying and Rock Boki weigh the post up, Water, Ice and Crystal the tub
 ##   3. off: with base_mode off (the shipped default) nothing plays
-##   4. on: a placed ball is used by an idle Boki within 60 s, a second Boki joins, the stat rises
+##   4. on: a placed ball is used by an idle Boki within 60 s, a second joins, the stat rises, each play pays XP
 ##   5. a squabble between two hot tempers, the stat cap, and the rest pose
 ##   6. each toy placed alone: a fitting Boki uses it within 60 s and its stat rises; a dig turns up a snack
 ##   7. only a ball for 3 days: it is the favourite, shown on the card, picked first, and a baby inherits it
@@ -91,9 +91,12 @@ func run(m: Node) -> void:
 	home.hb.toggle()
 	ok(home.hb._tabs().has("Base"), "base_mode on: the build bar has a Base tab")
 	home.hb.cat = "Base"
-	ok(home.hb._tab_items().size() == 5, "and it offers all five toys")
+	var base_toys: Array = home.hb._tab_items().filter(
+		func(e): return HomeLayout.CATALOG.get(String(e.get("id", "")), {}).get("toy", false))
+	ok(base_toys.size() == 5, "and it offers all five toys (the Feeding bowl sits in the tab too)")
 	home.hb.toggle()
 	var speed0 := int(home.kins[0]["rec"]["stats"]["speed"]) + int(home.kins[1]["rec"]["stats"]["speed"])
+	var xp0 := int(home.kins[0]["rec"]["xp"]) + int(home.kins[1]["rec"]["xp"])
 	var first_t := -1.0
 	var second_t := -1.0
 	var posed := false
@@ -106,9 +109,10 @@ func run(m: Node) -> void:
 		var shared: bool = now.size() >= 2 and now[0]["play"]["u"] == now[1]["play"]["u"]
 		if first_t >= 0.0 and second_t < 0.0 and shared:
 			second_t = i * 0.05
-		if now.size() >= 1:      # a plain body tilts, a rigged one plays the clip; both name the pose
+		if now.size() >= 1:      # a plain body tilts, a rigged one plays the toy's clip (kact); some toys name a pose
 			var pn: Node3D = now[0]["node"]
-			posed = posed or pn.get_node("Body").rotation != Vector3.ZERO or String(pn.get_meta("pose", "")) != ""
+			var acting := String(pn.get_meta("kact", "")) != "" or String(pn.get_meta("pose", "")) != ""
+			posed = posed or pn.get_node("Body").rotation != Vector3.ZERO or acting
 		if i % 200 == 0: await main.get_tree().process_frame
 		if second_t >= 0.0 and i * 0.05 > second_t + 15.0: break
 	ok(first_t >= 0.0 and first_t <= 60.0, "a Boki walked to a toy and played within 60 s (%.1f s)" % first_t)
@@ -122,11 +126,22 @@ func run(m: Node) -> void:
 			+ int(home.kins[0]["rec"]["stats"]["power"]) + int(home.kins[1]["rec"]["stats"]["power"]) \
 			+ int(home.kins[0]["rec"]["stats"]["focus"]) + int(home.kins[1]["rec"]["stats"]["focus"]) - speed0
 	ok(gained >= 1, "play trained a stat (+%d)" % gained)
+	var xp_gain := int(home.kins[0]["rec"]["xp"]) + int(home.kins[1]["rec"]["xp"]) - xp0
+	var per := int(GardenXp.rules()["toy"])
+	ok(per > 0 and xp_gain >= per and xp_gain % per == 0,
+			"each finished play gave the Boki the toy XP (+%d xp, %d a play)" % [xp_gain, per])
+	var probe := {"xp": 0, "level": 1}
+	GardenXp.give(probe, "toy")
+	GardenXp.give(probe, "toy")
+	ok(int(probe["xp"]) == 2 * per, "a toy pays every play, not once a day (%d xp)" % int(probe["xp"]))
 	# 5. squabble, cap, pose
 	var a: Dictionary = home.kins[0]
 	var b: Dictionary = home.kins[1]
-	for k in [a, b]:
-		k.erase("play")
+	for k in [a, b]:      # awake and free: a nap, chase or errand left from the soak above would stop the play
+		for busy in ["play", "bath", "chase", "job", "fetch", "eat", "called_t", "going_in", "busy"]:
+			k.erase(busy)
+		k["nap_t"] = 0.0
+		k["hold_t"] = 0.0
 		k["t"] = 30.0
 		k["rec"]["traits"]["temper"] = 0.95
 	var u := int(toys.toys()[0]["u"])
@@ -136,7 +151,7 @@ func run(m: Node) -> void:
 	a["pos"] = tp + Vector3(1.0, 0, 0)
 	b["pos"] = toys._spot(b, toys.toys()[0])
 	toys.step(b, 0.05)
-	ok(not b.has("play") and a.has("play") and float(b["huff_t"]) > 0.0,
+	ok(not b.has("play") and a.has("play") and float(b.get("huff_t", 0.0)) > 0.0,
 			"two hot tempers squabble: the newcomer huffs off, the first plays on")
 	var power_toy := String(toys.toys()[1]["id"])
 	var rec: Dictionary = a["rec"]
@@ -147,6 +162,14 @@ func run(m: Node) -> void:
 	ok(int(rec["stats"][stat]) == Care.stat_cap(rec) and not a.has("play"), "a trained-out stat stays at its cap")
 	ok(String((a["node"] as Node3D).get_meta("pose", "")) == "" and posed,
 			"the play pose is set while playing and cleared after")
+	a["hold_t"] = 1.0      # a pat holds it still and gives it joy: a rigged Boki plays its pet clip, then lets go
+	a["joy_t"] = 0.9
+	toys.pose(a, a["node"], 0.05)
+	var petting := String((a["node"] as Node3D).get_meta("kact", ""))
+	a["hold_t"] = 0.0
+	toys.pose(a, a["node"], 0.05)
+	ok(petting == "pet" and String((a["node"] as Node3D).get_meta("kact", "")) == "",
+			"a pat plays the pet clip and lets go after (%s)" % petting)
 	home.queue_free()
 	await main.get_tree().process_frame
 	for f in FITTING:

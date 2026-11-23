@@ -9,7 +9,7 @@ extends RefCounted
 ##   --arena-demo=pr_payoff_dr / pr_payoff_as   the payoff moments
 ##   moves: dr_shot dr_throw dr_reel dr_anchor dr_dive dr_lunge dr_pounce dr_flex
 ##          as_lance as_sweep as_shot as_leap lw_hop as_cloak lw_stoke lw_stoke_lance
-##          lw_jet dr_blast (the X ultimates), dr_rock (the Abyssal Hand hauling a foe over a rock)
+##          lw_jet dr_blast (the X ultimates), dr_rock (the Deep Reach hauling a foe over a rock)
 ## A move's optional fourth entry is its strip zoom (the hose and the rope need the wider gameplay view).
 
 const MOVES := {
@@ -84,7 +84,6 @@ static func _tick_move(A: Arena, w: String, t: float, dt: float) -> float:
 	if not full and spec.size() > 3: zoom = float(spec[3])
 	if t < 0.05:
 		Engine.time_scale = DEMO_TIME_SCALE
-		_warm_looks(m, D.pos)
 		if P.arch != String(spec[0]) or P.wid != String(spec[1]): A.set_arch(String(spec[0]), String(spec[1]))
 		A.set_kin("")
 		P.teleport(D.pos + Vector3(-4.0, 0, 0))
@@ -202,16 +201,8 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 				K.stoke(D)
 				K.stoke(D)
 
-## Shows each effect shader once, tiny, before the move, so their first-use compile hitch can't jump the clock
-## of the frames that matter.
-static func _warm_looks(m: Node, at: Vector3) -> void:
-	var fx := LDFx.of(m)
-	fx.anchor_drop(at, 0.0, 0.05)
-	fx.orb(at, Color.BLACK, Color.BLACK, 0.01, 0.05)
-	fx.wave(at, 0.01, Color.BLACK, 0.05)
-
 ## Puts the dummy behind the nearest rock or prop round the hunter, on the far side along the same line,
-## so the Abyssal Hand has to fly over it and drag the dummy back across it.
+## so the Deep Reach has to fly over it and drag the dummy back across it.
 static func _behind_rock(A: Arena, D: Hunter) -> void:
 	var W = A.m.world
 	for ring in range(3, 10):

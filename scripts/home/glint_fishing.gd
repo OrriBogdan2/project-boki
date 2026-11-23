@@ -7,6 +7,7 @@ extends RefCounted
 ## go to keep the line's tension inside the band while the glint pulls (Power widens the band) until it
 ## is landed. A sign by the rock lists what is biting today (the day number picks it); a Water lean
 ## doubles rare glints. Catches are banked like garden prizes: this is the item tap for home players.
+## At the rock you can also race a friend's stored catch instead (fishing_derby.gd): the same five casts.
 ## Tuning: content/rules/glint_fishing.json.
 ##
 ## One explicit state machine (briefs/STATE_MACHINES.md), Run.state: only Run.go() writes it, and a
@@ -25,6 +26,11 @@ const ROCK_R := 0.7               # m, the rock's radius
 const GLINT_R := 0.08             # m, a glint's radius
 const LINE_W := 0.015             # m, the line's thickness
 const ROD_UP := 0.6               # m above the ground the line leaves your Boki
+const SEAT_M := 2.0               # m from you your partner sits, side-on to the cast
+const CALL_S := 8.0               # s your partner has to walk over before it is set down at its seat
+const LEAN_RAD := 0.3             # rad your partner leans toward the bobber on a bite
+const CHEER_S := [0.9, 1.6]       # s of cheering hops for a common, a rare catch
+const HOP_M := [0.26, 0.5]        # m the hop lifts the Boki for a common, a rare catch
 
 static func rules() -> Dictionary:
 	return Content.rules("glint_fishing")
@@ -44,8 +50,8 @@ static func _stat(rec: Dictionary, s: String) -> float:
 
 ## Chance one glint is rare: doubled for a Boki whose leading lean is Water.
 static func rare_chance(rec: Dictionary) -> float:
-	var R := rules()
-	return float(R["rare"]) * (float(R["water_rare"]) if Evo.lean(rec)[0] == "water" else 1.0)
+	var r_v := rules()
+	return float(r_v["rare"]) * (float(r_v["water_rare"]) if Evo.lean(rec)[0] == "water" else 1.0)
 
 ## A list entry can bite only once what it pays exists (an item id in the catalog, a food in Data.CROPS).
 static func can_bite(e: Dictionary) -> bool:
@@ -100,7 +106,7 @@ class Run:
 			S.SHOW: [S.AIM, S.DONE], S.DONE: []}
 	const JOLT_K := 0.4             # a jolt moves the tension by pull times this at once
 
-	var R: Dictionary
+	var r_x: Dictionary
 	var rec: Dictionary             # your Boki
 	var rng: RandomNumberGenerator
 	var sign_list: Array            # today's common catches
@@ -123,7 +129,7 @@ class Run:
 	var casts: Array = []           # one {how, catch} a cast: how = caught, miss, early, late or slip
 
 	func _init(who: Dictionary, day: int, r: RandomNumberGenerator) -> void:
-		R = GlintFishing.rules()
+		r_x = GlintFishing.rules()
 		rec = who
 		rng = r
 		sign_list = GlintFishing.biting(day)
@@ -144,12 +150,22 @@ class Run:
 
 	## m out from the rock the cast lands if you let go now: it swings near_m to far_m and back.
 	func reach() -> float:
-		var u := pingpong(swing / float(R["swing_s"]), 1.0)
-		return lerpf(float(R["near_m"]), float(R["far_m"]), u)
+		var u := pingpong(swing / float(r_x["swing_s"]), 1.0)
+		return lerpf(float(r_x["near_m"]), float(r_x["far_m"]), u)
 
 	## True while your Boki's ears are up (the bite is coming, or here).
 	func ears() -> bool:
 		return state == S.WAIT and state_t >= bite_t - warn
+
+	## True from the bite on (the moment to press), until the cast ends.
+	func bitten() -> bool:
+		return state == S.WAIT and state_t >= bite_t
+
+	## How far the waiting rings have closed: 0 until the ears go up, 1 at the bite.
+	func close_k() -> float:
+		if not ears():
+			return 0.0
+		return clampf((state_t - (bite_t - warn)) / warn, 0.0, 1.0)
 
 	func half_band() -> float:
 		return GlintFishing.band(rec)
@@ -176,13 +192,13 @@ class Run:
 						_hook()
 					else:
 						_end_cast("early")
-				elif state_t > bite_t + float(R["late_s"]):
+				elif state_t > bite_t + float(r_x["late_s"]):
 					_end_cast("late")
 			S.REEL:
 				_reel(dt, hold)
 			S.SHOW:
-				if state_t >= float(R["show_s"]):
-					if casts.size() >= int(R["casts"]) or t >= float(R["max_s"]):
+				if state_t >= float(r_x["show_s"]):
+					if casts.size() >= int(r_x["casts"]) or t >= float(r_x["max_s"]):
 						go(S.DONE)
 					else:
 						_lay_glints()
@@ -193,15 +209,15 @@ class Run:
 		glints = []
 		swing = 0.0
 		hooked = -1
-		var n := int(R["glints"])
-		var near := float(R["near_m"])
-		var stretch := (float(R["far_m"]) - near) / n
-		var aim := float(R["aim_m"])
+		var n := int(r_x["glints"])
+		var near := float(r_x["near_m"])
+		var stretch := (float(r_x["far_m"]) - near) / n
+		var aim := float(r_x["aim_m"])
 		var rare_list := GlintFishing.rares()
 		for i in n:
 			var rare := not rare_list.is_empty() and rng.randf() < GlintFishing.rare_chance(rec)
 			var d := near + stretch * i + rng.randf_range(aim * 0.5, maxf(aim * 0.5, stretch - aim * 0.5))
-			var side := rng.randf_range(-1.0, 1.0) * float(R["spread_m"])
+			var side := rng.randf_range(-1.0, 1.0) * float(r_x["spread_m"])
 			var c := GlintFishing.pick(rare_list if rare else sign_list, rng)
 			glints.append({"d": d, "side": side, "rare": rare, "catch": c})
 
@@ -210,13 +226,13 @@ class Run:
 		var best := -1
 		for i in glints.size():
 			var off := absf(float(glints[i]["d"]) - d)
-			if off <= float(R["aim_m"]) and (best < 0 or off < absf(float(glints[best]["d"]) - d)):
+			if off <= float(r_x["aim_m"]) and (best < 0 or off < absf(float(glints[best]["d"]) - d)):
 				best = i
 		if best < 0:
 			_end_cast("miss")
 			return
 		hooked = best
-		var w: Array = R["wait_s"]
+		var w: Array = r_x["wait_s"]
 		bite_t = rng.randf_range(float(w[0]), float(w[1]))
 		go(S.WAIT)
 
@@ -228,32 +244,32 @@ class Run:
 		go(S.REEL)
 
 	func _swell() -> void:
-		var s: Array = R["pull_s"]
+		var s: Array = r_x["pull_s"]
 		swell_t = 0.0
 		swell_len = rng.randf_range(float(s[0]), float(s[1]))
 		pull_dir = -1.0 if rng.randf() < 0.5 else 1.0
-		if rng.randf() < float(R["jolt"]):
+		if rng.randf() < float(r_x["jolt"]):
 			tension = clampf(tension + pull_dir * _pull() * JOLT_K, 0.0, 1.0)
 
 	## Tension per second the glint drags at the top of a swell.
 	func _pull() -> float:
-		var k := float(R["rare_pull"]) if glints[hooked]["rare"] else 1.0
-		return float(R["pull"]) * k
+		var k := float(r_x["rare_pull"]) if glints[hooked]["rare"] else 1.0
+		return float(r_x["pull"]) * k
 
 	func _reel(dt: float, hold: bool) -> void:
 		swell_t += dt
 		if swell_t >= swell_len:
 			_swell()
 		var drag := pull_dir * _pull() * sin(PI * swell_t / swell_len)
-		tension = clampf(tension + (float(R["rise"]) if hold else -float(R["fall"])) * dt + drag * dt, 0.0, 1.0)
+		tension = clampf(tension + (float(r_x["rise"]) if hold else -float(r_x["fall"])) * dt + drag * dt, 0.0, 1.0)
 		if absf(tension - 0.5) <= half_band():
 			in_band_t += dt
 			slip_t = 0.0
 		else:
 			slip_t += dt
-		if in_band_t >= float(R["land_s"]):
+		if in_band_t >= float(r_x["land_s"]):
 			_end_cast("caught")
-		elif slip_t >= float(R["slip_s"]):
+		elif slip_t >= float(r_x["slip_s"]):
 			_end_cast("slip")
 
 	func _end_cast(how: String) -> void:
@@ -263,13 +279,14 @@ class Run:
 
 ## Pays out a finished session: banks each catch, joy for each and trust if any, energy, a memory line.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var r_v := rules()
 	var got := run.caught()
 	for e in got:
 		GardenPrizes.bank(e)
-	Care.change(run.rec, "energy", -float(R["energy"]))
-	Care.change(run.rec, "joy", float(R["joy"]) * got.size())
-	var trust := float(R["trust"]) if not got.is_empty() else 0.0
+	Care.change(run.rec, "energy", -float(r_v["energy"]))
+	Care.change(run.rec, "joy", float(r_v["joy"]) * got.size())
+	var trust := float(r_v["trust"]) if not got.is_empty() else 0.0
+	FishingDerby.record(run)
 	Save.remember(run.rec, "fishing", "landed %d of %d glints off the rock" % [got.size(), run.casts.size()], trust)
 	return {"got": got, "casts": run.casts.size()}
 
@@ -279,10 +296,12 @@ var spot: Dictionary = {}      # this zone's rock (glint_fishing.json spots), {}
 var rock: Node3D = null
 var glint_nodes: Array = []    # MeshInstance3D, one per glint
 var bobber: MeshInstance3D = null
+var fx: GlintFx = null         # the looks on the water (glint_fx.gd)
 var line: MeshInstance3D = null
 var mats: Dictionary = {}      # common, rare: the glints' two shared materials
 var run: Run = null
 var who: Dictionary = {}       # the home's kin entry fishing with you
+var foe: Dictionary = {}       # the friend's stored catch this session races ({} when fishing alone)
 var holding := false
 var last := Run.S.DONE         # the state the view last drew
 var bar: ColorRect = null
@@ -290,6 +309,10 @@ var marker: ColorRect = null
 var band_rect: ColorRect = null
 var card: Control = null
 var card_t := 0.0
+var slot := Vector3.ZERO       # your partner's seat, from you
+var cheer := 0.0               # s of cheering left
+var cheer_len := 1.0           # s the cheer began with
+var cheer_hop := 0.0           # m, its hop
 
 func _init(home) -> void:
 	h = home
@@ -340,6 +363,7 @@ func place() -> void:
 	line.material_override = BaseRace.mat(Color("eeeeee"))
 	line.visible = false
 	rock.add_child(line)
+	fx = GlintFx.new(rock)
 
 static func _glow(c: Color) -> StandardMaterial3D:
 	var m := BaseRace.mat(c)
@@ -363,20 +387,48 @@ func use() -> void:
 	if ks.is_empty():
 		h._toast("Glint Fishing needs your partner rested and out here")
 		return
-	who = ks[0]
-	who["busy"] = true
+	if not ComeLook.at_leisure(ks[0]):
+		h._toast("%s is asleep or busy right now" % ak["name"])
+		return
+	if Social.ok:
+		FishingDerby.choose(h, day_of(Time.get_unix_time_from_system()), _begin.bind(ks[0]))
+	else:
+		_begin({}, ks[0])
+
+## Starts the session with your partner `kin`, alone or racing the friend `rival`.
+func _begin(rival: Dictionary, kin: Dictionary) -> void:
+	who = kin
+	foe = rival
+	_call_over()
 	var dice := RandomNumberGenerator.new()
 	dice.randomize()
-	run = Run.new(ak, day_of(Time.get_unix_time_from_system()), dice)
+	run = Run.new(Save.active_kin(), day_of(Time.get_unix_time_from_system()), dice)
 	holding = false
 	last = Run.S.DONE
 	_open_bar()
-	var at := _water(0.0, -ROCK_R - 0.3)
-	at.y = maxf(0.0, h._ground_h(at.x, at.z))
-	who["node"].position = at
-	who["node"].rotation.y = atan2(_dir().x, _dir().y)
-	who["pos"] = at
 	h._toast("Hold %s to swing the cast, let go on a glint" % Settings.key_cap("interact"))
+
+## Your partner walks over (the whistle's follow) to sit SEAT_M from you, on the side it already is.
+func _call_over() -> void:
+	var side := Vector3(-_dir().y, 0.0, _dir().x)
+	if side.dot(who["pos"] - h.ppos) < 0.0:
+		side = -side
+	slot = h.world.free_spot_near(h.ppos + side * SEAT_M) - h.ppos
+	who["called_t"] = CALL_S
+	who["call_slot"] = slot
+
+## Once it has walked over (or run out of time), it stays at its seat for the session.
+func _seated() -> void:
+	if who.get("busy", false) or who.has("called_t"):
+		return
+	who["busy"] = true
+	who["vel"] = Vector3.ZERO
+	who["pos"] = h.ppos + slot
+	(who["node"] as Node3D).position = who["pos"]
+
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
 
 ## A press or release: true when fishing took it.
 func input(event: InputEvent) -> bool:
@@ -401,24 +453,36 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	var was_ears := run.ears()
+	var was_bitten := run.bitten()
+	var was := last
 	run.step(d, holding)
+	_seated()
 	if run.ears() and not was_ears:
 		h._emote(who, "!", true)
-		Sfx.play("ping", null, -6.0)
+	if run.state == Run.S.WAIT and run.state_t >= run.bite_t and run.state_t - d < run.bite_t:
+		h.verbs.play("bite")
 	if run.state != last:
 		_entered(run.state)
 	_draw_water()
+	_draw_fx(d, was_bitten)
+	if who.get("busy", false):
+		_pose(d)
+	GlintSfx.tick(h, run, was, was_ears, _sfx_at())
 	if run.over():
 		_end(true)
 
 func _entered(s: Run.S) -> void:
+	var from := last
 	last = s
+	fx.hide_wait()
 	bar.visible = s == Run.S.REEL
+	h.verbs.hold("reel" if s == Run.S.REEL else "wait")
+	if from == Run.S.AIM:
+		h.verbs.play("cast")
 	match s:
 		Run.S.WAIT:
-			Sfx.play("splash", null, -10.0)
+			fx.play("plop", _water(float(run.glints[run.hooked]["d"]), 0.0) - rock.position)
 		Run.S.REEL:
-			Sfx.play("splash", null, -4.0)
 			h._toast("Hooked! Hold and let go to keep the line in the band")
 		Run.S.SHOW:
 			var c: Dictionary = run.casts[-1]
@@ -427,8 +491,49 @@ func _entered(s: Run.S) -> void:
 			var got: String = lines.get(c["how"], "")
 			if c["how"] == "caught":
 				got = "Landed %s!" % GardenPrizes.entry_name(c["catch"])
+				h.verbs.play("land")
 			h._toast("Cast %d of %d: %s" % [run.casts.size(), int(rules()["casts"]), got])
 			h._emote(who, "♥" if c["how"] == "caught" else "…", true)
+			_show_fx(c)
+			if c["how"] == "caught":
+				_cheer(c["rare"])
+
+## The cast's ending: a plop where it fell into empty water, a glint on a catch (sized by what came up).
+func _show_fx(c: Dictionary) -> void:
+	if c["how"] == "miss":
+		fx.play("plop", bobber.position)
+	elif c["how"] == "caught":
+		fx.play("catch", bobber.position, GlintFx.catch_size_key(c["catch"], c["rare"]))
+
+## Waiting: the rings close in as the ears go up; the bite splashes once.
+func _draw_fx(d: float, was_bitten: bool) -> void:
+	if run.state == Run.S.WAIT:
+		fx.wait_rings(bobber.position, run.close_k())
+		if run.bitten() and not was_bitten:
+			fx.play("bite", bobber.position)
+	fx.tick(d)
+
+## A catch: hops for joy, higher and longer for a rare one.
+func _cheer(rare: bool) -> void:
+	cheer_len = CHEER_S[int(rare)]
+	cheer = cheer_len
+	cheer_hop = HOP_M[int(rare)]
+	Sfx.play("kin_happy", who["pos"], -10.0, 0.15, Unique.voice(who["rec"]))
+
+## Your partner looks at the bobber (or the water ahead), leans in while the ears are up, and hops when cheering.
+func _pose(d: float) -> void:
+	var n: Node3D = who["node"]
+	var body: Node3D = n.get_node("Body")
+	var at := bobber.global_position if bobber.visible else _water(float(rules()["near_m"]), 0.0)
+	var k := minf(1.0, d * 8.0)
+	n.rotation.y = lerp_angle(n.rotation.y, atan2(n.position.x - at.x, n.position.z - at.z), k)
+	body.rotation.x = lerpf(body.rotation.x, -LEAN_RAD if run.ears() else 0.0, k)
+	cheer = maxf(0.0, cheer - d)
+	body.position.y = absf(sin(cheer * 10.0)) * cheer_hop * cheer / cheer_len
+
+## Where the line meets the water, for the sounds: the bobber while it shows, else where the swing was let go.
+func _sfx_at() -> Vector3:
+	return bobber.global_position if bobber.visible else _water(run.reach(), 0.0)
 
 ## m along the cast and m to its side, from the rock, as a point on the water.
 func _water(along: float, side: float) -> Vector3:
@@ -460,7 +565,7 @@ func _draw_water() -> void:
 		return
 	bobber.position = _water(out, 0.0) - rock.position
 	if line.visible:
-		var tip: Vector3 = who["node"].position + Vector3(0, ROD_UP, 0) - rock.position
+		var tip := _line_start() - rock.position
 		line.position = (tip + bobber.position) * 0.5
 		line.scale = Vector3(1, 1, tip.distance_to(bobber.position))
 		line.look_at(bobber.global_position)
@@ -469,6 +574,13 @@ func _draw_water() -> void:
 		band_rect.position.x = w * (0.5 - run.half_band())
 		band_rect.size.x = w * run.half_band() * 2.0
 		marker.position.x = w * run.tension - marker.size.x * 0.5
+
+## Where the line leaves: your rod's tip, or your Boki's reach while the rod is away.
+func _line_start() -> Vector3:
+	var rod_tip := HunterRod.tip(h.p_anim) if h.p_anim != null else null
+	if rod_tip != null:
+		return rod_tip.global_position
+	return who["node"].position + Vector3(0, ROD_UP, 0)
 
 ## The tension bar: the band in green, the line's tension as a white marker.
 func _open_bar() -> void:
@@ -490,28 +602,44 @@ func _open_bar() -> void:
 	h.root_ui.add_child(bar)
 
 func _end(finished: bool) -> void:
+	var before := GameResultCard.snap([run.rec])
 	var res := settle(run) if finished else {}
+	if finished and not foe.is_empty():
+		res["derby"] = FishingDerby.settle(foe, run, day_of(Time.get_unix_time_from_system()))
 	who["busy"] = false
 	who["t"] = 1.5
+	who.erase("called_t")
+	var body: Node3D = who["node"].get_node("Body")
+	body.rotation.x = 0.0
+	body.position.y = 0.0
+	cheer = 0.0
+	GlintSfx.stop()
+	h.verbs.hold("")
 	if is_instance_valid(bar):
 		bar.queue_free()
 	for g in glint_nodes:
 		g.visible = false
 	bobber.visible = false
 	line.visible = false
+	fx.hide_all()
 	if finished:
-		_card(res)
+		_card(res, before)
 		Save.save_game()
+		Social.publish_profile()
 	run = null
 	who = {}
+	foe = {}
 
-func _card(res: Dictionary) -> void:
+func _card(res: Dictionary, before: Array) -> void:
 	if is_instance_valid(card):
 		card.queue_free()
-	var rows: Array = [["Glint Fishing: %d of %d landed" % [res["got"].size(), res["casts"]], 18, UI.ACCENT_HI]]
+	var prize: Array = []
+	if res.has("derby"):
+		prize.append(FishingDerby.card_line(foe, res["derby"]))
 	for e in res["got"]:
-		rows.append([GardenPrizes.entry_name(e), 14, UI.GOLD if String(e["kind"]) == "item" else UI.INK])
-	if res["got"].is_empty():
-		rows.append(["Nothing this time. The glints come back tomorrow, and so does the sign.", 14, UI.MUTED])
-	card = BaseRace.result_card(h, rows)
+		prize.append([GardenPrizes.entry_name(e), UI.GOLD if String(e["kind"]) == "item" else UI.INK])
+	if prize.is_empty():
+		prize.append(["Nothing this time. The glints come back tomorrow.", UI.MUTED])
+	card = GameResultCard.open(h, {"game": "Glint Fishing", "before": before, "prize": prize,
+			"place": "%d of %d landed" % [res["got"].size(), res["casts"]]})
 	card_t = float(rules()["card_s"])

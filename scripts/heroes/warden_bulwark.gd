@@ -8,15 +8,16 @@ extends RefCounted
 ## icicles hanging off it. His prow shield and ice-cased oar are his weapon (PinBjornWeapons).
 ## HeroGear.dress hands him over; c is HeroGear's context.
 
-const COAT := Color("3a5874")         # drowned coat
-const COAT_DARK := Color("2a3f56")    # the hood's lining, the coat's turn-ups
-const FUR := Color("94795f")          # seal fur
-const IRON := Color("66717d")         # ship iron
-const GLOVE := Color("98a2ae")        # ship iron, a shade lighter on the gauntlets so they read
-const BOOT := Color("6e4a33")         # oiled leather
+const COAT := Color("3a5874")  # drowned coat
+const COAT_DARK := Color("2a3f56")  # the hood's lining, the coat's turn-ups
+const FUR := Color("94795f")  # seal fur
+const IRON := Color("66717d")  # ship iron
+const GLOVE := Color("98a2ae")  # ship iron, a shade lighter on the gauntlets so they read
+const BOOT := Color("6e4a33")  # oiled leather
 const TROUSERS := Color("2b3442")
 const BEARD := Color("5c5c68")
 const BELT := Color("5a3c28")
+
 
 static func dress(c: Dictionary) -> void:
 	var t: Node3D = c["torso"]
@@ -24,10 +25,16 @@ static func dress(c: Dictionary) -> void:
 	WardenKit.recolour(c, "pants", TROUSERS)
 	WardenKit.recolour(c, "leather", BOOT)
 	WardenKit.recolour(c, "steel", GLOVE)
-	WardenKit.recolour(c, "gold", IRON)       # the belt buckle: ship iron, not gold
-	var m := {"coat": WardenKit.cloth(c, COAT), "lining": WardenKit.cloth(c, COAT_DARK), "fur": WardenKit.fur(c, FUR),
-		"iron": WardenKit.metal(c, IRON, 0.55), "rime": WardenKit.rime(), "belt": WardenKit.cloth(c, BELT, 2),
-		"beard": WardenKit.fur(c, BEARD)}
+	WardenKit.recolour(c, "gold", IRON)  # the belt buckle: ship iron, not gold
+	var m := {
+		"coat": WardenKit.cloth(c, COAT),
+		"lining": WardenKit.cloth(c, COAT_DARK),
+		"fur": WardenKit.fur(c, FUR),
+		"iron": WardenKit.metal(c, IRON, 0.55),
+		"rime": WardenKit.rime(),
+		"belt": WardenKit.cloth(c, BELT, 2),
+		"beard": WardenKit.fur(c, BEARD)
+	}
 	_coat(c, t, m)
 	_shoulders(c, m)
 	_arms(c, m)
@@ -35,6 +42,7 @@ static func dress(c: Dictionary) -> void:
 	if not bool(c["bare"]):
 		_hood(c, m)
 	_face(c, m)
+
 
 ## The greatcoat: iron toggles down the chest, then long skirts split at the front that hang to
 ## mid-shin, their hem crusted with rime and hung with icicles; the big fur collar over it all.
@@ -53,16 +61,10 @@ static func _coat(c: Dictionary, t: Node3D, m: Dictionary) -> void:
 	var a1 := 1.71
 	var key := "wb_coat|%.3f" % r0
 	Models.part(
-		sk,
-		HeroKit.drape(key, r0, r0 * 1.28, h, a0, a1, 6.0, 0.05, 0.0, 0.1, 0.02),
-		m["coat"],
-		Vector3(0, -0.01, 0)
+		sk, HeroKit.drape(key, r0, r0 * 1.28, h, a0, a1, 6.0, 0.05, 0.0, 0.1, 0.02), m["coat"], Vector3(0, -0.01, 0)
 	)
 	Models.part(
-		sk,
-		HeroKit.drape_hem(key, r0, r0 * 1.28, h, a0, a1, 6.0, 0.05, 0.0, 0.1, 0.12),
-		m["rime"],
-		Vector3(0, -0.01, 0)
+		sk, HeroKit.drape_hem(key, r0, r0 * 1.28, h, a0, a1, 6.0, 0.05, 0.0, 0.1, 0.12), m["rime"], Vector3(0, -0.01, 0)
 	)
 	WardenKit.icicles(sk, m["rime"], -h * 1.02, r0 * 1.24, r0 * 1.24 * 0.92, 22, 0.075, 0.71, 0.79)
 	# the seal-fur collar: lumpy rolls round the back of the neck and over both shoulders, opening at
@@ -73,6 +75,7 @@ static func _coat(c: Dictionary, t: Node3D, m: Dictionary) -> void:
 		var r := lerpf(0.22, 0.13, end * end)
 		var at := Vector3(cos(a) * 0.23 * cw, 0.62 - 0.1 * end * end, sin(a) * 0.2 * bw + 0.02)
 		Models.part(t, HeroKit.lumpy("wb_fur%d" % (k % 3), Vector3(r, r * 0.72, r), 4.0, 0.12, k * 0.7), m["fur"], at)
+
 
 ## Rime-crusted iron plates on the shoulders under the fur, frost on top and icicles on the edge.
 static func _shoulders(c: Dictionary, m: Dictionary) -> void:
@@ -108,6 +111,7 @@ static func _shoulders(c: Dictionary, m: Dictionary) -> void:
 			Vector3(-0.02 * sx, 0.1, 0.0)
 		)
 
+
 ## Fur cuffs at the wrists and rime grown over the backs of the iron gauntlets.
 static func _arms(c: Dictionary, m: Dictionary) -> void:
 	for sd in ["L", "R"]:
@@ -118,13 +122,9 @@ static func _arms(c: Dictionary, m: Dictionary) -> void:
 		for k in 3:
 			var at := Vector3((k - 1) * 0.028, -0.02 - (k % 2) * 0.02, 0.05)
 			Models.part(
-				hand,
-				Models.crystal(0.018, 0.06, 5),
-				m["rime"],
-				at,
-				Vector3.ONE,
-				Vector3(0.9, 0.3 * (k - 1), 0)
+				hand, Models.crystal(0.018, 0.06, 5), m["rime"], at, Vector3.ONE, Vector3(0.9, 0.3 * (k - 1), 0)
 			)
+
 
 ## Fur-topped boots: a fat fur roll round each boot top.
 static func _boots(c: Dictionary, m: Dictionary) -> void:
@@ -132,11 +132,13 @@ static func _boots(c: Dictionary, m: Dictionary) -> void:
 		var kn: Node3D = c["knees"][sd]
 		WardenKit.fur_roll(kn, m["fur"], "boot", Vector3(0, -0.06, 0.0), 0.085, 0.045, 6.0)
 
+
 ## The hood worn back over his bald crown: it frames the head from behind and falls onto the collar.
 static func _hood(c: Dictionary, m: Dictionary) -> void:
 	var g: Node3D = c["gear"]
 	var hk: String = c["hk"]
 	Models.part(g, HeroGear.hood_mesh("wb_hood", hk, 0.075, 1.5, 1.45, 2.2, 0.0, 0.12, 0.024), m["coat"], HeroGear.HC)
+
 
 ## His face over the shared one: bushy brows, a walrus moustache, a laughing open mouth, and a beard
 ## that grows thick along the jaw and parts into two forks bound in iron rings.
@@ -159,7 +161,7 @@ static func _face(c: Dictionary, m: Dictionary) -> void:
 		var th := lerpf(-1.35, 1.35, k / 8.0)
 		var d := Vector3(sin(th) * cos(-0.62), sin(-0.62), -cos(th) * cos(-0.62))
 		var root: Vector3 = HeroKit.head_pt(d, s) + d * 0.01
-		var sx := signf(th) if absf(th) > 0.05 else 1.0      # (the middle clump leans right)
+		var sx := signf(th) if absf(th) > 0.05 else 1.0  # (the middle clump leans right)
 		var reach := lerpf(0.42, 0.24, absf(th) / 1.35)
 		var tip := Vector3(0.06 * sx, -reach, -0.36 + absf(th) * 0.06)
 		var mid := root.lerp(tip, 0.5) + Vector3(0, 0.02, -0.04)
@@ -178,10 +180,7 @@ static func _face(c: Dictionary, m: Dictionary) -> void:
 		Vector3(1.35, 0.7, 0.45)
 	)
 	Models.part(
-		g,
-		Models.box(0.062, 0.012, 0.012),
-		Models.toon(Color("f4ecdc"), false),
-		hc + Vector3(0, -0.084, -0.246)
+		g, Models.box(0.062, 0.012, 0.012), Models.toon(Color("f4ecdc"), false), hc + Vector3(0, -0.084, -0.246)
 	)
 	# the two forks, each bound near its tip with an iron ring
 	for sx in [-1.0, 1.0]:
@@ -189,7 +188,8 @@ static func _face(c: Dictionary, m: Dictionary) -> void:
 			hc + Vector3(0.03 * sx, -0.22, -0.24),
 			hc + Vector3(0.05 * sx, -0.32, -0.31),
 			hc + Vector3(0.06 * sx, -0.42, -0.36),
-			hc + Vector3(0.055 * sx, -0.5, -0.36)]
+			hc + Vector3(0.055 * sx, -0.5, -0.36)
+		]
 		Models.part(g, HeroKit.lock_mesh("wb_fork%d" % int(sx), pts, 0.075, 0.6, Vector3.FORWARD, 0.8, 0.3), m["beard"])
 		Models.part(
 			g,
@@ -204,11 +204,10 @@ static func _face(c: Dictionary, m: Dictionary) -> void:
 			hc + Vector3(0.008 * sx, -0.045, -0.255),
 			hc + Vector3(0.06 * sx, -0.06, -0.25),
 			hc + Vector3(0.11 * sx, -0.09, -0.22),
-			hc + Vector3(0.13 * sx, -0.13, -0.19)]
+			hc + Vector3(0.13 * sx, -0.13, -0.19)
+		]
 		Models.part(
-			g,
-			HeroKit.lock_mesh("wb_moust%d" % int(sx), mo, 0.036, 0.75, Vector3.FORWARD, 0.85, 0.5),
-			m["beard"]
+			g, HeroKit.lock_mesh("wb_moust%d" % int(sx), mo, 0.036, 0.75, Vector3.FORWARD, 0.85, 0.5), m["beard"]
 		)
 		# brows: bushy, lifted at the outer ends
 		var br := [

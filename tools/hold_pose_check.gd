@@ -5,14 +5,17 @@ extends "res://tools/dash_flow_check.gd"
 ## made in a ground or air dash and let go before the dash ends (DashFlow replays it at the end), one made on its
 ## last step, one in the glider, and a long hold let go in a dash or in the air. Then it counts the seconds the
 ## kit's move sits on a hold clip, or the draw and charge state stays up, with every key up. More than
-## POSE_SLACK is a failure. Prints the hold moves no trial brought up, so a silent pass can be told from a miss.
+## POSE_SLACK is a failure. A tap of 1, 2 or 4 fixed steps may not show a hold clip on any frame the key is
+## still down (ArchKit.HOLD_POSE_T: a hold clip comes after the press, not on it). Prints the hold moves no
+## trial brought up, so a silent pass can be told from a miss.
 
 const POSE_SLACK := 0.25        # s: a hold pose may outlast the key by the clip's own recovery, no more
 const WATCH_S := 2.5            # s watched after the key goes up
 const SHORT_S := 0.15           # s: a short press
 const HELD_S := 0.7             # s: a hold, past every tap and charge threshold
 const RELEASE_STEPS := 5        # steps into the dash the held key goes up
-const SCENARIOS := ["tap", "short", "dash buffered", "dash late", "air dash buffered", "glide",
+const TAP_STEPS := {"tap 1": 1, "tap 2": 2, "tap 4": 4}       # fixed steps the key stays down
+const SCENARIOS := ["tap 1", "tap 2", "tap 4", "short", "dash buffered", "dash late", "air dash buffered", "glide",
 		"held into dash", "held in air"]
 const KEYS := {"lmb": ["fire"], "rmb": ["sec", "sec_hold"], "e": ["sig"], "x": ["x_down"]}
 ## Hold clips no key holds: a dash or dive pose, a timed cast or an ultimate's own run. They end by their clock.
@@ -21,6 +24,10 @@ const NOT_HELD := [
 	"thf_encore_dance", "thf_exdash", "pin_walk", "dr_reel", "dr_dive", "breah_skate", "breah_dive",
 	"ostra_swap_air", "ostra_snap_wind", "ostra_well",
 ]
+
+## Tap-pose exceptions (hero -> hold clip): the clip shows on the press on purpose, listed in the READY line.
+## Archer: the owner rule "the arrow nocks within 0.05 s of the press" (pin_bjorn_owner_check).
+const TAP_POSE_OPEN := {"archer": "arc_draw"}
 
 var reached := {}               # hold clip ids the trials brought up at all, key down or up
 var hold_ids := {}              # kmove id -> true, of the hero under test (its art file's "hold_from" moves)
@@ -67,8 +74,8 @@ func _tap(slot: String) -> void:
 
 ## One step with `slot`'s key still down ("": none). Presses are one-step, and DashFlow's replayed LMB is a tap
 ## too, so nothing but `slot` keeps a key down. With no key down, adds the step to `seen` (name -> s) while a
-## hold clip, a bow draw or a sword charge is up.
-func _step(m: Match, slot: String, seen: Dictionary) -> void:
+## hold clip, a bow draw or a sword charge is up. A `tap` step (key down) counts only a hold clip.
+func _step(m: Match, slot: String, seen: Dictionary, tap := false) -> void:
 	m.step(Match.DT)
 	hunter.inp["sec"] = false
 	hunter.inp["sig"] = false
@@ -77,6 +84,8 @@ func _step(m: Match, slot: String, seen: Dictionary) -> void:
 	var id := hunter.ak.anim_id
 	reached[id] = true
 	if slot != "":
+		if tap and hold_ids.has(id):
+			seen["tap " + id] = float(seen.get("tap " + id, 0.0)) + Match.DT
 		return
 	var up := {"draw_t": hunter.draw_t > 0.0, "mel_hold": hunter.mel_hold > 0.0, id: hold_ids.has(id)}
 	for name in up:
@@ -110,11 +119,15 @@ func _scenario(m: Match, hero: String, slot: String, sc: String) -> void:
 			_step(m, slot, seen)
 	elif not held:
 		_tap(slot)
-		for i in 1 if sc == "tap" else int(SHORT_S / Match.DT):
-			_step(m, slot, seen)
+		var n: int = TAP_STEPS.get(sc, int(SHORT_S / Match.DT))
+		for i in n:
+			_step(m, slot, seen, TAP_STEPS.has(sc))
 	_keys(slot, false)
 	for i in int(WATCH_S / Match.DT):
 		_step(m, "", seen)
 	for name in seen:
-		var what := "%s %s %s: %s up %.2f s with the key up" % [hero, slot, sc, name, seen[name]]
-		ok(float(seen[name]) <= POSE_SLACK, what)
+		var what := "%s %s %s: %s up %.2f s with the key up or a tap's" % [hero, slot, sc, name, seen[name]]
+		if name == "tap " + TAP_POSE_OPEN.get(hero, ""):
+			continue
+		var slack := 0.0 if name.begins_with("tap ") else POSE_SLACK
+		ok(float(seen[name]) <= slack, what)

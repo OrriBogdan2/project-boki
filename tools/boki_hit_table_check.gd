@@ -95,6 +95,7 @@ func _kit(a: String, kind: String) -> Dictionary:
 
 func _reset(m: Match, P: Hunter, t: Ent, home: Vector3, spot: Vector3, hp_k: float) -> void:
 	P.inp["fire"] = false
+	_still(t)      # (a summoned Boki would bite its foe in the first tail steps, staggering Cinder's hose)
 	ak.step(m, TAIL)
 	for w in m.verbs.walls.duplicate():      # the last slot's rocks and walls go, so each slot starts clean
 		if w.get("by") == P: m.verbs._break_wall(w)

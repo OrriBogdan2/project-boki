@@ -97,7 +97,7 @@ func _default() -> void:
 	ok(ids.size() == 5 and listed, "five quick keys are in the Controls list")
 	ok(ids.all(func(a): return InputMap.has_action(a) and Settings.slots(a) == ["", ""]), "...and all start unbound")
 	var bare: bool = KinKeys.card_lines(Color.WHITE).is_empty()
-	ok(Settings.key_cap("throw") == "G" and bare, "a new player sees only G (nothing on the kit card)")
+	ok(Settings.key_cap("throw") == "C" and bare, "a new player sees only C (nothing on the kit card)")
 
 func _bound() -> void:
 	for a in KEYS:
@@ -145,6 +145,11 @@ func _summon() -> void:
 	var tapped: bool = bool(k.fly.get("sic", false)) or k.state == "flying"
 	ok(sent and tapped, "the summon key sends the Boki out like a G tap (key %s, tap %s)" % [sent, tapped])
 	_run(0.5)
+	# a Boki mid-cast (wound up, or dashing) can't be called off it: let the skill finish, then call it back
+	var waited := 0.0
+	while (k.cast_do.is_valid() or bool(k.fly.get("rush", false))) and waited < 2.0:
+		_run(0.05)
+		waited += 0.05
 	_press(["kin_summon"])
 	_run(0.3)
 	var home: bool = k.state in ["returning", "shoulder"] or not KinCommand.is_away(P, k)

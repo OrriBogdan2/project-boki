@@ -48,7 +48,7 @@ Most content (Boki, abilities, items, maps) is JSON under `content/`: see `CONTE
 
 ## Rules
 
-- **No assets from other games.** No models, textures, sounds, music or data files taken from SUPERVIVE
+- **No assets from other games.** No models, textures, sounds, music or data files taken from the reference
   or any other game. Reference values from public sources (wikis, patch notes, measured footage) are
   fine and go in `docs/`. Mechanics may be inspired by other games ([Inspirations](Inspirations.md));
   names, art, sound and text must be our own.

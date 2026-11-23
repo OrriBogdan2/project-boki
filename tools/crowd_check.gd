@@ -59,7 +59,7 @@ func _napping(main: Node) -> void:
 			k.pos = far
 		mb._nap = 0.0
 		_ok(mb._napping(0.01), "napping: alone, the camp sleeps")
-		# the ship's deck height over it (SHIP_Y 70 m less ~10 m of ground)
+		# a ship overhead (well under SHIP_Y, so higher still is quieter)
 		m.player.pos = mb.pos + Vector3(2.0, 60.0, 0.0)
 		_ok(mb._napping(Mob.NAP_CHECK), "napping: the ship overhead does not wake it")
 		m.player.pos = mb.pos + Vector3(4.0, 0.0, 0.0)

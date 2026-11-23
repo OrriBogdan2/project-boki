@@ -4,7 +4,7 @@ extends RefCounted
 ## three needs of your Boki (the same four KinWants shows as bubbles) become wishes on one card. A wish is granted
 ## when that need is back up, however it got there; it gives trust and a small item, all of them give gems.
 ## Missing a day costs nothing: the next day picks fresh ones.
-## Save.d["wishes"] = {day, list: [{uid, need, done}], bonus}.
+## Save.d["wishes"] = {day, list: [{uid, need, done}], bonus, seen (on the arrival card today)}.
 
 static var _check_in := 0.0
 const CHECK_EVERY := 1.0       # seconds between looks at the wishes
@@ -88,24 +88,20 @@ static func tick(h: Node, d: float) -> void:
 	for line in check(Time.get_unix_time_from_system()):
 		h._toast(line)
 
-## The card on arriving: today's wishes with a tick on the granted ones; nothing once all are granted.
-static func arrive(h: Node) -> void:
-	if not FarmUnlocks.base_mode() or not h.visit.is_empty():
-		return
+## The wishes for the arrival card: the open ones as lines, once a garden day (the first arrival), none after that
+## or once all are granted. The tip about the rewards goes on the first card only.
+static func card_lines() -> Array:
 	var w := today(Time.get_unix_time_from_system())
-	if (w["list"] as Array).is_empty() or w["bonus"]:
-		return
-	h.arrivals.add(func():
-		var v: VBoxContainer = h._new_panel("Today's wishes", 520)
-		fill(v, w))
-
-static func fill(v: VBoxContainer, w: Dictionary) -> void:
+	if w.get("seen", false) or w["bonus"]:
+		return []
+	w["seen"] = true
 	var r := rules()
+	var out: Array = []
 	for wish in w["list"]:
 		var rec := _rec(String(wish["uid"]))
-		var ask := String(r["ask"][wish["need"]]) % (rec["name"] if not rec.is_empty() else "A Boki")
-		var done: bool = wish["done"]
-		var mark := "✔ " if done else "• "
-		v.add_child(UI.label(mark + ask, 15, UI.MUTED if done else UI.INK))
-	var tip := "Grant one for trust and a snack; all %d give %d gems. Miss a day and nothing is lost."
-	v.add_child(UI.label(tip % [int(r["count"]), int(r["bonus_gems"])], 13, UI.MUTED))
+		if not wish["done"]:
+			out.append(String(r["ask"][wish["need"]]) % (rec["name"] if not rec.is_empty() else "A Boki"))
+	if not out.is_empty() and not Save.d.get("wishes_told", false):
+		Save.d["wishes_told"] = true
+		out.append(String(r["tip"]) % [int(r["count"]), int(r["bonus_gems"])])
+	return out

@@ -18,5 +18,6 @@
   "time": 1.6,
   "move": 0.45,
   "src": "none: the wiki only says a short cast. Ours, kept until footage gives numbers. See docs/CONSUMABLES.md"
- }
+ },
+ "move": "place"
 }

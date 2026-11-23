@@ -32,7 +32,9 @@ static func warden(arch: String) -> Dictionary:
 		var spec: Dictionary = (rules()["tint"][k] as Dictionary).duplicate()
 		spec.merge(w.get("tint", {}).get(k, {}), true)
 		tints[k] = spec
-	return {"gender": String(w.get("gender", "male")), "race": race,
+	# the base character's gender lives in the archetype JSON, not in the Warden block
+	var g := String(Arch.def(arch if all.has(arch) else FALLBACK_WARDEN).get("gender", "male"))
+	return {"gender": g, "race": race,
 		"face": maxi(0, Models.LOOK_FACES.find(String(w.get("face", "")))),
 		"hair": maxi(0, Models.hair_styles(race).find(String(w.get("hair", "")))),
 		"detail": maxi(0, Models.LOOK_DETAILS.find(String(w.get("detail", "None")))),

@@ -7,13 +7,16 @@ extends Node3D
 ## your face now) and makes its first sound in its own voice. Then it climbs out. Used for the
 ## first egg and for eggs from the nest.
 ##
-## Quiet on purpose (docs/POSITIONING.md): no light beams, bursts, flashes or rarity colours. What
-## makes a Boki rare shows on the Boki itself (its colours, markings, how it moves).
+## The shell is the egg family's 3D model (EggModels: the kin's type, or rare, or mystery). Quiet on
+## purpose otherwise (docs/POSITIONING.md): no light beams, bursts, flashes or rarity badges. What makes
+## a Boki rare shows on the Boki itself (its colours, markings, how it moves).
 
 signal popped(kin: Node3D)     # the kin has just appeared
 signal done                    # the kin has hopped out and the shell is gone
 
 const STEP := TAU / 36.0       # spacing of the zigzag crack around the middle
+const CHIRP_TYPES := ["venom", "prism", "spore"]    # the starter types that have their own first chirp
+const DARK_SHELL := 0.3        # luminance (0..1): below it a dark crack would not show, so it glows
 
 var species := "cindle"
 var rec: Dictionary = {}
@@ -32,51 +35,42 @@ var cracks: Node3D
 var peek: Node3D
 var eyes: Node3D
 var shell_mat: ShaderMaterial
+var rim_mat: ShaderMaterial    # the broken rim's teeth and the falling chips: the shell's main colour
 var crack_mat: ShaderMaterial
-var col := Color.WHITE
 var kin_node: Node3D
 var running := false
-var shell_col := Color(0, 0, 0, 0)     # set to override the species colours
+var beat: Tween                # what plays now: the egg's own beat, then the Boki's hop out
+var kind := ""                         # the egg family (EggModels); empty: the kin's type
 var look_at_pos := Vector3.INF         # who it imprints on (default: the camera, i.e. you)
-var spot_col := Color(0, 0, 0, 0)
 
 func _init(sp_id: String, fx_ref: Fx, radius := 0.32, middle := 0.42, kin_size := 1.0, kin_rec := {}) -> void:
 	species = sp_id; fx = fx_ref; r = radius; cy = middle; kin_scale = kin_size; rec = kin_rec
 
 func _ready() -> void:
-	var sp: Dictionary = Data.KIN[species]
-	col = Color(sp["color"]).lightened(0.15) if shell_col.a <= 0.0 else shell_col
-	var spot: Color = sp["belly"] if spot_col.a <= 0.0 else spot_col
+	if kind == "":
+		kind = EggModels.kind_of(species)
 	rx = r * 0.92
 	ry = r * 1.25
-	shell_mat = Models.toon(col)
+	shell_mat = EggModels.material(kind)
+	rim_mat = Models.toon(EggModels.TINT[kind])
 	crack_mat = Models.toon(Color(0.16, 0.1, 0.08), false)
+	if EggModels.TINT[kind].get_luminance() < DARK_SHELL:
+		crack_mat = Models.toon(Color("ffe2a8"), false, 0.8)     # a dark shell cracks to the warm light inside
 	body = Node3D.new(); body.name = "Body"; add_child(body)
 	cup = _half(false)
 	cap = _half(true)
 	cracks = Node3D.new(); body.add_child(cracks)
-	var spot_mat := Models.toon(spot)
-	var rng := RandomNumberGenerator.new(); rng.seed = int(col.r * 1000) + species.length()
-	for i in 7:
-		var a := rng.randf() * TAU
-		var lat := rng.randf_range(-0.9, 1.0)
-		if absf(lat) < 0.22: lat = 0.35 * signf(lat + 0.001)
-		if lat > 0.15 and absf(wrapf(a - PI * 0.5, -PI, PI)) < 0.8:
-			a += PI * 0.6          # keep the front clear for the peek hole
-		var s := Models.part(cap if lat > 0.0 else cup, Models.sphere(r * 0.19, 8), spot_mat, _surf(a, lat, 1.0) - Vector3(0, cy, 0), Vector3(1, 1, 0.6))
-		s.basis = Basis.looking_at(_normal(a, lat), Vector3.UP) * Basis.from_scale(Vector3(1, 1, 0.6))
 
-## One half of the shell: a dome, with a jagged rim that only shows once it has split.
+## One half of the shell: the model's half, with a jagged rim that only shows once it has split.
 func _half(top: bool) -> Node3D:
 	var n := Node3D.new(); n.name = "Cap" if top else "Cup"
 	n.position = Vector3(0, cy, 0)        # each half turns about the egg's middle
 	body.add_child(n)
-	var hm := SphereMesh.new(); hm.radius = r; hm.height = r; hm.is_hemisphere = true
-	hm.radial_segments = 20; hm.rings = 8
-	var dome := Models.part(n, hm, shell_mat, Vector3.ZERO, Vector3(0.92, 1.25, 0.92))
+	var half := EggModels.half(kind, n.name, shell_mat, 2.0 * ry)
+	half.position.y = -ry                 # the model stands on its bottom; its cut is at half height
+	n.add_child(half)
 	if not top:
-		dome.rotation.x = PI
-		var inside := Models.part(n, Models.cyl(rx * 0.96, rx * 0.96, 0.01, 20), Models.toon(col.darkened(0.45), false), Vector3(0, -0.006, 0))
+		var inside := Models.part(n, Models.cyl(rx * 0.96, rx * 0.96, 0.01, 20), Models.toon(EggModels.TINT[kind].darkened(0.45), false), Vector3(0, -0.006, 0))
 		inside.name = "Inside"
 		inside.visible = false
 	var teeth := Node3D.new(); teeth.name = "Teeth"; teeth.visible = false; n.add_child(teeth)
@@ -86,7 +80,7 @@ func _half(top: bool) -> Node3D:
 		var a := PI * 0.5 + k * STEP
 		var t := MeshInstance3D.new()
 		t.mesh = Models.box(r * 0.26, r * 0.26, 0.012)
-		t.material_override = shell_mat
+		t.material_override = rim_mat
 		t.basis = Basis.looking_at(_normal(a, 0.0), Vector3.UP) * Basis(Vector3(0, 0, 1), PI * 0.25)
 		t.position = _surf(a, 0.0, 0.995) - Vector3(0, cy, 0)
 		teeth.add_child(t)
@@ -128,18 +122,47 @@ func _gp(local: Vector3) -> Vector3:
 	return global_transform * local
 
 func _sfx(n: String, vol := 0.0, pitch := 1.0) -> void:
-	if n.begins_with("kin_"): pitch *= Unique.voice(rec)     # the hatchling's own voice
+	if n.begins_with("kin_"):     # the hatchling's own voice: its species' cue for that mood
+		pitch *= Unique.voice(rec)
+		n = KinVoice.cue(species, n.trim_prefix("kin_"))
+	elif n.contains("chirp"):
+		pitch *= Unique.voice(rec)
 	Sfx.play(n, null, vol, 0.08, pitch)
 
+## A hatch stage's sound: wobble, crack_1, crack_2, pop (the mystery egg has its own set).
+func _cue(stage: String, vol := 0.0, pitch := 1.0) -> void:
+	_sfx("hatch_%s%s" % ["mystery_" if kind == "mystery" else "", stage], vol, pitch)
+
+## The first chirp: one per starter type, the mystery egg's own, any other Boki says its happy sound.
+func _first_chirp() -> void:
+	var type := String(Data.KIN[species].get("type", ""))
+	if kind == "mystery":
+		_sfx("hatch_mystery_chirp", -4.0)
+	elif type in CHIRP_TYPES:
+		_sfx("hatch_chirp_" + type, -4.0)
+	else:
+		_sfx("kin_happy", -6.0, 1.05)
+
 # ------------------------------------------------------------------ the hatch
+## Jumps to the end of the beat: the shell open, the Boki out and facing you (popped and done fire).
+func skip() -> void:
+	if not running or not beat.is_valid():
+		return
+	if kin_node == null:
+		beat.kill()
+		body.rotation.z = 0.0
+		_pop()
+	beat.custom_step(60.0)
+
 func start() -> void:
 	if running:
 		return
 	running = true
-	var tw := create_tween()
+	beat = create_tween()
+	var tw := beat
 	# 1: two curious wiggles
 	for dir in [1.0, -1.0]:
-		tw.tween_callback(_sfx.bind("hover", -8.0, 0.8 + 0.2 * dir))
+		tw.tween_callback(_cue.bind("wobble", -6.0, 0.9 + 0.1 * dir))
 		tw.tween_property(body, "rotation:z", 0.2 * dir, 0.24).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 		tw.tween_property(body, "rotation:z", 0.0, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.tween_interval(0.3)
@@ -148,7 +171,7 @@ func start() -> void:
 	tw.tween_callback(func():
 		_crack(-2, 2)
 		_chips(_zig(0), 5)
-		_sfx("build", -4.0, 1.9))
+		_cue("crack_1"))
 	tw.tween_interval(0.6)
 	_shiver(tw, 4, 0.05, 0.05)
 	tw.tween_interval(0.45)
@@ -160,7 +183,7 @@ func start() -> void:
 		_crack(-6, -2); _crack(2, 6)
 		_seg(_zig(1), _surf(PI * 0.5 + 1.4 * STEP, 0.36)); _seg(_surf(PI * 0.5 + 1.4 * STEP, 0.36), _surf(PI * 0.5 + 0.7 * STEP, 0.55))
 		_chips(_zig(-4), 4); _chips(_zig(4), 4)
-		_sfx("build", -2.0, 1.6))
+		_cue("crack_2"))
 	tw.tween_interval(0.7)
 	# 4: a chip pops out and someone peeks through
 	tw.tween_callback(_open_peek)
@@ -177,8 +200,7 @@ func start() -> void:
 	tw.tween_interval(0.35)
 	# 5: the crack runs all the way round
 	tw.tween_callback(func():
-		_crack(6, 30)
-		_sfx("build", -3.0, 1.3))
+		_crack(6, 30))
 	_shiver(tw, 6, 0.07, 0.055)
 	tw.tween_property(body, "scale", Vector3(1.12, 0.84, 1.12), 0.16).set_trans(Tween.TRANS_SINE)
 	tw.tween_callback(_pop)
@@ -222,7 +244,7 @@ func _open_peek() -> void:
 	tw.tween_interval(0.18)
 	tw.tween_property(eyes, "scale", Vector3.ONE, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	# the chip that came out tumbles away
-	var chip := Models.part(get_parent(), Models.sphere(r * 0.2, 8), shell_mat, _gp(_surf(a, lat, 1.05)), Vector3(1, 0.8, 0.35))
+	var chip := Models.part(get_parent(), Models.sphere(r * 0.2, 8), rim_mat, _gp(_surf(a, lat, 1.05)), Vector3(1, 0.8, 0.35))
 	var land := _gp(_surf(a, lat, 1.05)) + Vector3(0.25, 0, 0.45)
 	land.y = global_position.y + 0.03
 	var ct := create_tween().set_parallel(true)
@@ -236,7 +258,6 @@ func _open_peek() -> void:
 	cyt.tween_property(chip, "scale", Vector3.ZERO, 0.3)
 	cyt.tween_callback(chip.queue_free)
 	_chips(_surf(a, lat), 4)
-	_sfx("build", -2.0, 2.2)
 	_sfx("kin_unsure", -10.0, 1.35)
 
 func _blink() -> void:
@@ -266,7 +287,8 @@ func _pop() -> void:
 	var k := r / 0.32
 	# a few bits of shell, nothing more
 	_chips(Vector3(0, cy, 0), 6)
-	_sfx("build", -4.0, 1.05)
+	_cue("pop")
+	RaritySting.play(RaritySting.tier(species, rec))
 	# the top tips off to one side and the whole shell shrinks away: gone about 0.8s after the pop
 	var side := Vector3(-0.75, 0, 0.25) * k
 	ct_tip(cap, side, k)
@@ -285,7 +307,8 @@ func _pop() -> void:
 	var ks := kin_scale
 	kin_node.scale = Vector3.ONE * 0.8 * ks
 	var out := global_position + Vector3(0.0, 0.0, hop_out) * k * 1.3
-	var kt := create_tween()
+	beat = create_tween()
+	var kt := beat
 	# 0.0: pops up, stretching, out of the cup and onto the ground
 	kt.tween_callback(_sfx.bind("jump", -10.0, 1.6))
 	kt.tween_property(kin_node, "scale", Vector3(0.95, 1.12, 0.95) * ks, 0.12).set_trans(Tween.TRANS_SINE)
@@ -303,7 +326,7 @@ func _pop() -> void:
 	kt.tween_property(kin_node, "rotation:y", face_you, 0.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	kt.tween_callback(func():
 		_look_up(0.28)
-		_sfx("kin_happy", -6.0, 1.05)
+		_first_chirp()
 		popped.emit(kin_node))
 	_bounce(kt, ks, out.y, 0.22)
 	_bounce(kt, ks, out.y, 0.14)

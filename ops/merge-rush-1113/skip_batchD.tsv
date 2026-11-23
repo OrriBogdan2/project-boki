@@ -1,0 +1,104 @@
+# merge rush batch D skips (job 20261113-225134-a3): branch sha reason
+ext/anim-cc-body dac0b57091f410c843c29dff5dc0a022c652f1a6 conflict vs main 96d778d036 + batch D: scripts/heroes/warden_clips.gd scripts/heroes/warden_gait.gd
+ext/anim-meeko-loops-length 3edfdccbd041d8218cafddb23e59e97fe3507621 conflict vs main 96d778d036 + batch D: art/wardens/pip/pip.glb tools/anim_audit.gd tools/foot_slide_check.gd
+ext/anim-slice-cast-pops e41c699785e91d088df7d5acd365beac025b8d9f conflict vs main 96d778d036 + batch D: content/rules/warden_anim/cinder.json content/rules/warden_anim/hem.json content/rules/warden_anim/kael.json content/rules/warden_anim/vex.json scripts/heroes/warden_clips.gd tools/ashwick_combo_check.gd
+ext/boki-key-c-main 509aea3c7fd35b3c85e135fb6c147cec096abd28 conflict vs main 96d778d036 + batch D: scripts/core/settings.gd
+ext/carry-two-1111 3eb90614ed63341b74df3746bc896975b9e312e2 conflict vs main 96d778d036 + batch D: scripts/core/game.gd scripts/core/settings.gd
+ext/cinder-flue-clips 1dee9f2e844affa6ce219952e8d4950d8555073a conflict vs main 96d778d036 + batch D: scripts/heroes/warden_clips.gd tools/ashwick_combo_check.gd
+ext/combat-blight-endgame f0ab1e38f51651df396324e36113d82a9500b6b4 conflict vs main 96d778d036 + batch D: scripts/match/blight_dir.gd scripts/ui/heart_hud.gd
+ext/combat-mob-boss-fsm c83dc994e5e4fddeddc85d30f0d27bc8f976384a conflict vs main 96d778d036 + batch D: scripts/match/blight.gd
+ext/combat-steal-window-tell f1a82ab384be9474f0d571e4ed207f3f3e5244da conflict vs main 96d778d036 + batch D: scripts/core/net.gd
+ext/combat-vex-cone-net 780ff4e6dfa2a97c66b1a6869a3c4189be1f46d5 conflict vs main 96d778d036 + batch D: scripts/arch/kits/gunslinger_kit.gd scripts/core/net.gd
+ext/duel-ring-port 8b1a7c712476199bd8682f3baa7b86d2e1029794 conflict vs main 96d778d036 + batch D: scripts/ui/lobby.gd
+ext/farm-toys-joy-tune f1fcf7e7e64e3308efb8dc7e5eb74e635049004c conflict vs main 96d778d036 + batch D: tools/garden_soak.gd
+ext/farm-transfer-transport 2430f4ff4d0c11067310a7fdedeb55f0fbcb2b31 conflict vs main 96d778d036 + batch D: scripts/core/social.gd
+ext/feel-air-ring-boost 64ffa6ef81af84e09f1bcbd04ec4a406c4f1a06d conflict vs main 96d778d036 + batch D: scripts/ui/map_detail.gd tools/minimap_check.gd
+ext/feel-dash-jump-keep de3a9b567f8acfc4a735162a6b2f58310d7f8838 conflict vs main 96d778d036 + batch D: tools/crouch_check.gd
+ext/feel-glide-sink-heat a7488ad714571f3aef7a0c87be942d0aa14aa853 conflict vs main 96d778d036 + batch D: tools/crouch_check.gd tools/move_feel_check.gd
+ext/feel-golden-determinism b0aea5114f6fbd61adc28497819d45b3c9d7f22e conflict vs main 96d778d036 + batch D: tools/crouch_check.gd
+ext/feel-hit-marker ae55bcf4f248532d7d570ed6f26545352d18a924 conflict vs main 96d778d036 + batch D: scripts/ui/hud.gd
+ext/feel-home-fixed-step 2ea93e99b850468a9b495c0c5564f387ce23a73a conflict vs main 96d778d036 + batch D: tools/crouch_check.gd
+ext/feel-mini-mantle 84146e20205886b2c6cd0bf025b9fab93191d051 conflict vs main 96d778d036 + batch D: tools/crouch_check.gd
+ext/feel-neve-statue-time 6ea56c0ddd23d81cbf62f0c05e610286908a0ad8 conflict vs main 96d778d036 + batch D: tools/care_ult_check.gd
+ext/feel-one-profile-check 25a2584aff2db8fa5ff66db0b844619e5f208235 conflict vs main 96d778d036 + batch D: tools/move_feel_check.gd
+ext/feel-ranges-on-screen 23eac5342ebbf3decce329006ec922e170295cc7 conflict vs main 96d778d036 + batch D: content/rules/camera.json scripts/ui/hatch.gd tools/perf_bench.gd
+ext/feel-scout-cam 880cdeb8ad5908633e45f2ace7246a91250b3015 conflict vs main 96d778d036 + batch D: content/rules/camera.json scripts/core/settings.gd scripts/match/cam.gd
+ext/feel-stop-slide 6798dcf2c657adb336a7f6b6111e76a78bf103c3 conflict vs main 96d778d036 + batch D: tools/crouch_check.gd
+ext/feel-wasd-screen fd782b80f06b0161353a774320147a413dd5e8e3 conflict vs main 96d778d036 + batch D: tools/move_feel_check.gd
+ext/fix-title-buttons-1113 362c751085c2bd5584457d6f1c5931f3067df6e9 conflict vs main 96d778d036 + batch D: scripts/ui/title.gd
+ext/fold-anim-boki-1112 76dce7e148436a010ce7d97e6622dee0266e0390 conflict vs main 96d778d036 + batch D: art/kin/cindle/cindle.glb scripts/match/boki_rig.gd tools/boki/lunowl_anim.py tools/boki/vespyx_anim.py tools/boki_anim_audit.gd
+ext/fold-anim-time-1112 c022d44fe26ab3f8477fc0ea83b66867ea1ac82a conflict vs main 96d778d036 + batch D: content/archetypes/dolm.json scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/gunslinger_kit.gd scripts/heroes/warden_clips.gd tools/vex_anim_time_check.gd tools/warden_clips_check.gd
+ext/fold-feel-dash-1112 9c5db0708cdd131310fe2a0cecaac5568fc6d93b conflict vs main 96d778d036 + batch D: content/dash_flow/archer.json content/dash_flow/ashwick.json content/dash_flow/bulwark.json content/dash_flow/dolm.json content/dash_flow/dredge.json content/dash_flow/gunslinger.json
+ext/fold-tut-first-1112 5e5f434125459f6a095d3a6b82daa9bbb85ed4f7 conflict vs main 96d778d036 + batch D: scripts/match/match.gd tools/first_match_guide_check.gd
+ext/gate-speed-1111 214ea64d879b6d9f3932278728d5fdce6a0fe087 conflict vs main 96d778d036 + batch D: tools/displace_net_check.gd tools/perf_throttle_check.gd
+ext/glide-smooth-1111 a9b5dc3ed16e02cb2b2f111080197e4bfc39595b conflict vs main 96d778d036 + batch D: content/rules/tuning.json scripts/match/glide_lift.gd tools/airdash_glide_check.gd tools/gameplay_media.gd tools/glide_hold_check.gd
+ext/grimble-barge-chain 30aa4f9c1584befb86970e2c043bb18f7102f76a conflict vs main 96d778d036 + batch D: scripts/arch/kits/gunslinger_kit.gd tools/move_feel_check.gd
+ext/heal-knock-source-rebased d9b716ba232c7886ea90f5a383ef1a4c5624bfd1 conflict vs main 96d778d036 + batch D: tools/ashwick_combo_check.gd
+ext/lace-playtest-1108 5b590e6aa544a3c2d11071714a197d61062bebc0 conflict vs main 96d778d036 + batch D: content/rules/tuning.json content/rules/warden_anim/hem.json
+ext/levelup-clear-1111 2b9c7c706939aea3545c31bbe35ff9c6745fae70 conflict vs main 96d778d036 + batch D: scripts/ui/hud.gd
+ext/match-cam-wide-1112 a72fd53625b8d75fa13c1e010c4261d208fb87af conflict vs main 96d778d036 + batch D: content/rules/camera.json scripts/arch/kits/vv_fx.gd scripts/core/net.gd scripts/match/match.gd scripts/ui/hatch.gd tools/perf_bench.gd
+ext/momentum-1111 144c5ebbe26943d04da5b156772c5c8a353f1f97 conflict vs main 96d778d036 + batch D: content/rules/hunter_move.json
+ext/parity-kael-chain-states 53e9e6c7c7caeaa0acde4759b88d0d550606d5b9 conflict vs main 96d778d036 + batch D: content/archetypes/juggernaut.json
+ext/parity-ranges-footage 44e2b527faa11d5e0deddecab399c737bf5a6c14 conflict vs main 96d778d036 + batch D: content/rules/kit_parity.json
+ext/parity-ttk-cinder-neve c801255746fcb680f981de65534b503b8a0fa31d conflict vs main 96d778d036 + batch D: content/archetypes/rimewright.json tools/ashwick_combo_check.gd
+ext/perf-heart-final fc28a3056f9603ade8fc2aa496469988ae429979 conflict vs main 96d778d036 + batch D: scripts/match/bot.gd tools/perf_bench.gd
+ext/physics-unify-1111 09a35a82e4c3e0b68cee3a0ead666eeccc392a44 conflict vs main 96d778d036 + batch D: content/rules/hunter_move.json
+ext/remote-smooth-reds ad13d16b9a5b6d42abca62ec631822ae906d8fa6 conflict vs main 96d778d036 + batch D: scripts/match/net_smooth.gd
+ext/revive-source-numbers e58937c843fc98b67f6773b5df6e7a8447805f1d conflict vs main 96d778d036 + batch D: scripts/match/life.gd
+ext/sable-vault-exit 288acc3d91097d7d0f8725f05e9fd95ef5345a12 conflict vs main 96d778d036 + batch D: tools/move_feel_check.gd
+ext/sable-vault-riders 8db04769e197a975ca68a365be7a02caa8c7f6a2 conflict vs main 96d778d036 + batch D: content/archetypes/thief.json
+ext/sfx-air-rings 1252ec2c0af67f6de53647425e7f5e43aba70ef5 conflict vs main 96d778d036 + batch D: scripts/ui/map_detail.gd tools/minimap_check.gd
+ext/sfx-boki-landings cf5d4f5a352573f6a74681fa0de169e2e339373d conflict vs main 96d778d036 + batch D: scripts/match/kin_downed.gd
+ext/sfx-closing-zone 9e89f7ba2d6785d27d9f77d73d1e991e3a6b72c2 conflict vs main 96d778d036 + batch D: tools/gameplay_media.gd
+ext/sfx-garden-items ef53d9170e99f7bba108a7188e3331c0a1f6e0e6 conflict vs main 96d778d036 + batch D: content/rules/garden_items.json scripts/core/garden_items.gd scripts/home/garden_prizes.gd scripts/home/home_chimes.gd tools/garden_items_check.gd tools/garden_prizes_check.gd
+ext/sfx-incoming-hit-dir 8ade80608673c12ffc732e95fda6a0dfda38c5bb conflict vs main 96d778d036 + batch D: scripts/core/sfx.gd tools/match_audio_check.gd
+ext/sfx-interrupt-cut a39d57b525e7cc8d442cd1a90d6da730e6c7b49e conflict vs main 96d778d036 + batch D: scripts/core/sfx.gd tools/match_audio_check.gd
+ext/sfx-last-alive fa2eae3b01551cb889450f79a67b028040159d6e conflict vs main 96d778d036 + batch D: scripts/core/sfx.gd
+ext/sfx-listener-hunter c7f89e9dafa10a18df829ed4f158b82362975928 conflict vs main 96d778d036 + batch D: scripts/core/sfx.gd
+ext/sfx-raid-cues 79ef100fdd18288aa1c0a4d8eeaf5f257bc9ca51 conflict vs main 96d778d036 + batch D: scripts/match/kin_downed.gd
+ext/sfx-silence-audit 6820dc966d59cad73441634167a04d32e99a83c1 conflict vs main 96d778d036 + batch D: scripts/match/kin_downed.gd
+ext/sfx-silence-audit-coverage 91e06f503ee0e5172fea54fce5d0eae3ef9aa4ce conflict vs main 96d778d036 + batch D: scripts/match/kin_downed.gd
+ext/sfx-voice-cap f4e085cdda62706d037409b10ea9292e79e3e47a conflict vs main 96d778d036 + batch D: scripts/core/sfx.gd
+ext/sfx-voice-priority 861c730c8db8d922e20828a7969a3300ba55faa7 conflict vs main 96d778d036 + batch D: scripts/core/sfx.gd scripts/match/juice.gd
+ext/split-hunter 93dc12ff4b2eaaa4982fce7a3ee26507327c0f8e conflict vs main 96d778d036 + batch D: scripts/arch/kits/bulwark_kit.gd tools/venator_parity_check.gd
+ext/status-net-per-caster 84d5c589d23135d8b7e6adda05fdbded3ceeb809 conflict vs main 96d778d036 + batch D: scripts/core/net.gd
+ext/stuck-integ-606e9a98 d63f0aacaa6659ad6c3ccc076755fc63c2f3dd1d conflict vs main 96d778d036 + batch D: art/kin/mossgrade/mossgrade.glb art/kin/zapple/zapple.glb art/wardens/breaker/breaker.glb art/wardens/gil/gil.glb content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/sv-names-1113 7f9a32d985804e1ed32963f9ca604bdc50523dbd conflict vs main 96d778d036 + batch D: content/archetypes/dolm.json content/archetypes/gil.json content/rules/camera.json docs/parity_reel/README.md
+ext/teach-hold f4d19ce0deab972e9d3194130288f576b36b481b conflict vs main 96d778d036 + batch D: scripts/match/match.gd tools/farm_tutorial_check.gd
+ext/tenzo-playtest-1108 5093900f97663fe7e62ca89110c2352e930d1540 conflict vs main 96d778d036 + batch D: content/archetypes/dolm.json content/rules/tuning.json scripts/arch/kits/breah_slam.gd
+ext/tut-air-rings b3989286cef0db8429323afbe835797885f48e84 conflict vs main 96d778d036 + batch D: scripts/ui/map_detail.gd tools/minimap_check.gd
+ext/tut-creator-first-pass fc0a08f99f67f415b569ff243deadf5a06876b39 conflict vs main 96d778d036 + batch D: scripts/ui/hatch.gd
+ext/tut-kael-starter bd4e3262a5b161e5771a3b93791c3ceb3ec8df6c conflict vs main 96d778d036 + batch D: tools/first_match_guide_check.gd
+ext/tut-lead-swap-hint b2ea25277f54842a753d4f71cdb7b9b7bfae5be0 conflict vs main 96d778d036 + batch D: scripts/core/game.gd scripts/core/settings.gd
+ext/tut-live-keys f15f0451f1ce63e12379c9bad5e4f43ed9d9f989 conflict vs main 96d778d036 + batch D: content/archetypes/juggernaut.json content/archetypes/thief.json scripts/match/match.gd
+ext/tut-zone-first c147eb8652741c77d7e661d6040961ac3cf82ff0 conflict vs main 96d778d036 + batch D: content/rules/first_match_guide.json scripts/match/first_match_guide.gd
+ext/ui-boki-box-hazard 6f7a3a124fa88691a883361f2ecc1187296aa7df conflict vs main 96d778d036 + batch D: scripts/core/game.gd scripts/core/settings.gd
+ext/ui-card-numbers 3fa4aab843ca73e63921938dd094256ec15cefad conflict vs main 96d778d036 + batch D: content/archetypes/mage.json content/archetypes/rimewright.json
+ext/ui-glossary-pass 6dd1a7301f39e358170061a2fe90e4f4d1270f9c conflict vs main 96d778d036 + batch D: scripts/ui/full_map.gd
+ext/ui-hazard-map daea794491c397369367ea9b6d65471b47d7d9e8 conflict vs main 96d778d036 + batch D: scripts/ui/map_detail.gd
+ext/ui-loot-feed 010dbbca434f9cd63abb61b739053d9e3673afd4 conflict vs main 96d778d036 + batch D: scripts/ui/hud.gd
+ext/ui-mask-preview-warm 1224d653494f07c77ea07fcc20d245facffa5c56 conflict vs main 96d778d036 + batch D: scripts/match/hero_kit.gd scripts/match/models.gd
+ext/ui-minigame-picker-0245 9f4aca323ba76349f37ca3370e53463917a18e86 conflict vs main 96d778d036 + batch D: scripts/home/home.gd
+ext/ui-quest-tracker 89ef4c9a0999402221dddb6b446fc458f5ffe623 conflict vs main 96d778d036 + batch D: scripts/ui/heart_hud.gd scripts/ui/prematch_view.gd scripts/ui/ways_out_hud.gd
+ext/ui-safe-area-one 0aabee479eabebb67c26bf40de25d9373ef654e4 conflict vs main 96d778d036 + batch D: scripts/ui/hud.gd scripts/ui/prematch_view.gd scripts/ui/ui.gd tools/hudref_check.gd tools/prematch_check.gd tools/prematch_shots.gd
+ext/ui-words-cut-match 3a89aa778c49fe89ffab52fa3612788ab473f577 conflict vs main 96d778d036 + batch D: scripts/match/kin.gd
+ext/vex-greenfire-1108 961a8fc076b5324c70e130e3688bfa2f5e5d6e77 conflict vs main 96d778d036 + batch D: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/gunslinger_ult.gd
+ext/vfx-garden-item-apply 7aa44920925c65a0a6cd13ac912a48ce58542675 conflict vs main 96d778d036 + batch D: scripts/core/garden_items.gd scripts/home/home.gd
+ext/vfx-heal-read-1111 932501faf44a6c1f813018f514782241d3b461e1 conflict vs main 96d778d036 + batch D: content/vfx/juggernaut.json
+ext/vfx-meeko-hit-hearth a049904d948d80a786bb9ae4da2baf3a5079f680 conflict vs main 96d778d036 + batch D: content/archetypes/thief.json content/vfx/tender.json content/weapons/quill_rifle.json scripts/arch/kits/breah_slam.gd scripts/arch/kits/dolm_kit.gd scripts/arch/kits/gunslinger_kit.gd
+ext/vfx-neve-statue-break 6a98e4a0a72b8526fe507f9def318f02206b9e41 conflict vs main 96d778d036 + batch D: tools/hero_vfx_check.gd
+ext/vfx-sable-ring-grow 749d5b23a3884c43bce7b76ca34f138cb7310f1b conflict vs main 96d778d036 + batch D: content/archetypes/thief.json tools/dj_ult_check.gd
+ext/vfx-telegraph-net 0bd77bdbb95680358781e0fd74c97f8b8778e60e conflict vs main 96d778d036 + batch D: scripts/core/net.gd
+ext/vfx-tenzo-dust-thin ffb6a4297c0130fe8d57f508a0ad95be9a758d2a conflict vs main 96d778d036 + batch D: content/archetypes/dolm.json scripts/arch/kits/breah_slam.gd scripts/arch/kits/dolm_kit.gd scripts/arch/kits/kit_looks.gd tools/hero_vfx_check.gd
+ext/vfx-vex-precast-slab 50f4da8d941a53e92f7459203f0259b4a3278e55 conflict vs main 96d778d036 + batch D: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/gunslinger_ult.gd scripts/arch/kits/vv_fx.gd shaders/vv_fx.gdshader tools/hero_combo_check.gd
+ext/vfx-ways-out-read 0b57998df948d7fbd220360b22414152d7a5926d conflict vs main 96d778d036 + batch D: scripts/ui/heart_hud.gd scripts/ui/ways_out_map.gd
+ext/vfx-zone-fill-meeko-sable f2c5eef22c3980e3ac8cb64f18a307ccbbe19f26 conflict vs main 96d778d036 + batch D: tools/dj_ult_check.gd
+ext/wisp-look-1112 6daa83a689f229c726a7a524ab6e20fa53b4a6d6 conflict vs main 96d778d036 + batch D: content/rules/wisp_looks.json scripts/match/hunter_wisp.gd tools/wisp_check.gd
+ext/wisp-summon-key-c 6eb9d4c2d1756fa377f78ba0cb09d8f321aa3ab1 conflict vs main 96d778d036 + batch D: scripts/core/net.gd scripts/core/settings.gd scripts/core/sfx.gd scripts/match/match.gd tools/gear_check.gd tools/glove_band_check.gd
+ext/airdash-anims-1108 3ea315cfd75965af31ccc361a701d6467fd3b0f1 conflict vs main df5464db04 (PR #58): scripts/heroes/warden_clips.gd
+ext/blight-nests e15bc99b4a196596dc81a3f74a60f133e9d928eb conflict vs main df5464db04 (PR #58): scripts/core/net.gd scripts/match/blight.gd tools/blight_nest_check.gd
+ext/combat-daze-status 62364756685aa7ec4479bec9f5138f52b44c3e58 conflict vs main df5464db04 (PR #58): scripts/arch/kits/gunslinger_kit.gd
+ext/combat-raid-balance fd5a8cc7cfea0116454663600e0daa8a944d688a conflict vs main df5464db04 (PR #58): scripts/match/boss.gd
+ext/combat-ttk-five 07b911c7c4dd904c0dc975edc14425210802b824 conflict vs main df5464db04 (PR #58): content/rules/kit_parity.json
+ext/extra-clan-breeding-loans 8e31d52141e0d00108a1452507dfc51a86a1cfae conflict vs main df5464db04 (PR #58): scripts/core/net.gd
+ext/parity-ranges-slice afea90e6af03d4c692272b9be5207074463a6c4e conflict vs main df5464db04 (PR #58): content/rules/kit_parity.json

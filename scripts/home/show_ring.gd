@@ -21,24 +21,28 @@ const LURE_SIDE := 0.9                        # m from the walk line to each lur
 const STRAY_S := 1.2                          # s either side of a lure over which it veers toward it
 const ROUND_MAX := 10.0                       # points a round gives at most
 const TRICK_PRESSES := 3
+const TOTAL_DELAY := 1.4                      # s after the Bond score that both totals pop: as it fades
+const TOTAL_SPREAD := 0.8                     # m each total sits out from the pair's middle, so they never overlap
+const POSE_S := 1.0                           # s the pair hold their pose when the judges look (BokiHomeClips "pose")
+const BOW_S := 1.2                            # s of the bow the second place takes (BokiHomeClips "bow")
 
 static func rules() -> Dictionary:
 	return Content.rules("show_ring")
 
 ## Look, part by part (joy, clean, lean, parts, aura, keepsakes): points that add up to 10 at most.
 static func look(rec: Dictionary) -> Dictionary:
-	var L: Dictionary = rules()["look"]
+	var l: Dictionary = rules()["look"]
 	var levels := 0
 	for m in rec.get("muts", []):
 		levels += int(m["lv"])
 	var aura := String(rec.get("aura", "")) != ""
 	return {
-		"joy": float(L["joy"]) * Care.need(rec, "joy") / 100.0,
-		"clean": float(L["clean"]) * Care.need(rec, "clean") / 100.0,
-		"lean": float(L["lean"]) * _lean_share(rec),
-		"parts": minf(float(L["parts"]), float(levels)),
-		"aura": float(L["aura"]) if aura else 0.0,
-		"keepsakes": minf(float(L["keepsakes"]), float(rec.get("ribbons", {}).size())),
+		"joy": float(l["joy"]) * Care.need(rec, "joy") / 100.0,
+		"clean": float(l["clean"]) * Care.need(rec, "clean") / 100.0,
+		"lean": float(l["lean"]) * _lean_share(rec),
+		"parts": minf(float(l["parts"]), float(levels)),
+		"aura": float(l["aura"]) if aura else 0.0,
+		"keepsakes": minf(float(l["keepsakes"]), float(rec.get("ribbons", {}).size())),
 	}
 
 ## 1 at a full lean, 0.5 at half or more, else 0.
@@ -67,19 +71,19 @@ static func trick_of(rec: Dictionary) -> Dictionary:
 
 ## Trick points: the three presses' grades plus a little for the trick's stat.
 static func trick(rec: Dictionary, grades: Array) -> float:
-	var R := rules()
+	var r := rules()
 	var pts := 0.0
 	for g in grades:
-		pts += float(R["press"][g])
+		pts += float(r["press"][g])
 	var stat := float(rec["stats"].get(best_stat(rec), 0))
-	return pts + minf(1.0, stat * float(R["stat_per_point"]))
+	return pts + minf(1.0, stat * float(r["stat_per_point"]))
 
 ## How far a lure pulls it off the walk (0..1) before your call: trust and loyalty shrink it.
 static func pull(rec: Dictionary, lure: Dictionary) -> float:
-	var R := rules()
+	var r := rules()
 	var trust := float(rec.get("trust", 0.0)) / 100.0
 	var loyal := float(rec.get("traits", {}).get("loyalty", 0.5))
-	var shrink := trust * float(R["trust_shrink"]) + loyal * float(R["loyal_shrink"])
+	var shrink := trust * float(r["trust_shrink"]) + loyal * float(r["loyal_shrink"])
 	return float(lure["pull"]) * maxf(0.0, 1.0 - shrink)
 
 ## How far it strays at a lure after a call graded `grade` (great, good or miss).
@@ -96,10 +100,10 @@ static func bond(rec: Dictionary, calls: Array) -> float:
 
 ## A call `off` seconds from the moment it is level with a lure.
 static func call_grade(off: float) -> String:
-	var R := rules()
-	if absf(off) <= float(R["call_great"]):
+	var r := rules()
+	if absf(off) <= float(r["call_great"]):
 		return "great"
-	return "good" if absf(off) <= float(R["call_good"]) else "miss"
+	return "good" if absf(off) <= float(r["call_good"]) else "miss"
 
 ## The three tastes the judges post in a given week.
 static func tastes(week: int) -> Array:
@@ -110,11 +114,11 @@ static func tastes(week: int) -> Array:
 	return out
 
 static func fits(rec: Dictionary, taste: Dictionary) -> bool:
-	var R := rules()
+	var r := rules()
 	if String(taste["kind"]) == "trait":
-		return float(rec.get("traits", {}).get(taste["id"], 0.0)) >= float(R["taste_trait"])
+		return float(rec.get("traits", {}).get(taste["id"], 0.0)) >= float(r["taste_trait"])
 	var ln := Evo.lean(rec)
-	return String(ln[0]) == String(taste["id"]) and float(ln[1]) >= float(R["half_lean"])
+	return String(ln[0]) == String(taste["id"]) and float(ln[1]) >= float(r["half_lean"])
 
 ## The bench: retired mentors in the roster first, then the stand-in judges, three in all.
 static func judges(roster: Array) -> Array:
@@ -156,7 +160,7 @@ static func score(rec: Dictionary, grades: Array, calls: Array, week: int) -> Di
 ## The show itself, stepped in time: Look, Trick, Bond, then the judges.
 class Run:
 	enum Phase { LOOK, TRICK, BOND, JUDGE, DONE }
-	var R: Dictionary
+	var r_v: Dictionary
 	var recs: Array                 # two records: a (index 0) and b (index 1)
 	var backed := 0                 # index in recs: the Boki you show
 	var week := 0
@@ -168,11 +172,11 @@ class Run:
 	var paid := false               # settle has paid this show
 
 	func _init(pair: Array, back: int, week_no: int) -> void:
-		R = ShowRing.rules()
+		r_v = ShowRing.rules()
 		recs = pair
 		backed = back
 		week = week_no
-		calls.resize((R["lures"] as Array).size())
+		calls.resize((r_v["lures"] as Array).size())
 		calls.fill("")
 
 	func over() -> bool:
@@ -188,14 +192,14 @@ class Run:
 
 	## s into the walk at which it is level with lure i.
 	func lure_t(i: int) -> float:
-		return float(R["lures"][i]["at"]) * float(R["walk_s"])
+		return float(r_v["lures"][i]["at"]) * float(r_v["walk_s"])
 
 	## Your call during the walk: graded against the nearest lure not yet called. Returns its index or -1.
 	func call_out() -> int:
 		if phase != Phase.BOND:
 			return -1
 		for i in calls.size():
-			if calls[i] == "" and absf(t - lure_t(i)) <= float(R["call_good"]):
+			if calls[i] == "" and absf(t - lure_t(i)) <= float(r_v["call_good"]):
 				calls[i] = ShowRing.call_grade(t - lure_t(i))
 				return i
 		return -1
@@ -205,21 +209,21 @@ class Run:
 		total_t += dt
 		match phase:
 			Phase.LOOK:
-				if t >= float(R["look_s"]):
+				if t >= float(r_v["look_s"]):
 					_next()
 			Phase.TRICK:
-				if t >= float(R["trick_s"]):
+				if t >= float(r_v["trick_s"]):
 					while grades.size() < ShowRing.TRICK_PRESSES:
 						grades.append("miss")
 					_next()
 			Phase.BOND:
 				for i in calls.size():
-					if calls[i] == "" and t > lure_t(i) + float(R["call_good"]):
+					if calls[i] == "" and t > lure_t(i) + float(r_v["call_good"]):
 						calls[i] = "miss"
-				if t >= float(R["walk_s"]):
+				if t >= float(r_v["walk_s"]):
 					_next()
 			Phase.JUDGE:
-				if t >= float(R["judge_s"]):
+				if t >= float(r_v["judge_s"]):
 					_next()
 
 	func _next() -> void:
@@ -246,27 +250,38 @@ class Run:
 			return 0 if float(s[0]["look"]) >= float(s[1]["look"]) else 1
 		return 0 if float(s[0]["total"]) > float(s[1]["total"]) else 1
 
+## The ribbon your shown Boki takes: "gold" for the win, else "silver" or "bronze" by its total, else "part".
+static func placing(won: bool, total: float) -> String:
+	var at: Dictionary = rules()["ribbon_at"]
+	if won:
+		return "gold"
+	if total >= float(at["silver"]):
+		return "silver"
+	return "bronze" if total >= float(at["bronze"]) else "part"
+
 ## Pays out a finished show once: joy, trust, a memory each, energy, gems and the prize roll.
 ## Returns what the card shows, or {} when this show was already paid.
 static func settle(run: Run) -> Dictionary:
 	if run.paid:
 		return {}
 	run.paid = true
-	var R := rules()
+	var r := rules()
 	var win: Dictionary = run.recs[run.winner()]
 	var lose: Dictionary = run.recs[1 - run.winner()]
 	for rec in run.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]))
-	Save.remember(win, "show", "won the Show Ring over %s" % lose["name"], float(R["win_trust"]))
+		Care.change(rec, "energy", -float(r["energy"]))
+	Care.change(win, "joy", float(r["win_joy"]))
+	Care.change(lose, "joy", float(r["lose_joy"]))
+	Save.remember(win, "show", "won the Show Ring over %s" % lose["name"], float(r["win_trust"]))
 	Save.remember(lose, "show", "came second to %s in the Show Ring" % win["name"])
 	var backed_won: bool = run.recs[run.backed] == win
-	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	var gems := int(r["gems_win"]) if backed_won else int(r["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var prize := GardenPrizes.settle("show", run.recs[run.backed], run.recs[1 - run.backed], backed_won)
+	var scores := run.scores()
+	var mine: Dictionary = scores[run.backed]
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize,
-			"scores": run.scores()}
+			"scores": scores, "mine": mine, "placing": placing(backed_won, float(mine["total"]))}
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
@@ -280,6 +295,9 @@ var walk_to := Vector3.ZERO
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var acts: Array = []           # [node, s left] for each Boki playing a show clip (its kact meta)
+var marks: ShowMarks = null    # the result's judge marks and ribbon (show_marks.gd)
+var cue: GardenCues.PopCue = null   # each round's score popping over the Boki while a show runs
 
 func _init(home) -> void:
 	h = home
@@ -350,12 +368,19 @@ func use() -> void:
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
 	var week := GardenPrizes.week_of(Time.get_unix_time_from_system())
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, week)
+	if is_instance_valid(marks):
+		marks.queue_free()
 	board.text = board_text(week)
+	cue = GardenCues.PopCue.new(h)
 	_enter()
 	GardenSfx.countdown(h, stage.position)
 
 func _shown() -> Dictionary:
 	return pair[run.backed]
+
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
 
 ## A press: true when the show took it.
 func input(event: InputEvent) -> bool:
@@ -371,7 +396,7 @@ func input(event: InputEvent) -> bool:
 		run.press_trick(r)
 		_cheer(r)
 		if not run.can_trick():
-			_after_step()
+			_after_step(Run.Phase.TRICK)
 	elif run.phase == Run.Phase.BOND:
 		var i := run.call_out()
 		if i >= 0:
@@ -382,7 +407,28 @@ func _cheer(grade: String) -> void:
 	GardenSfx.crowd(grade, _shown()["pos"])
 	h._emote(_shown(), {"great": "★", "good": "♪", "miss": "?"}[grade], true)
 
+## The Boki plays a rig clip for `secs` (BokiHomeClips); _step_acts hands it back to its own motion.
+func _act(k: Dictionary, clip: String, secs: float) -> void:
+	if k.is_empty():
+		return
+	(k["node"] as Node3D).set_meta("kact", clip)
+	acts.append([k["node"], secs])
+
+func _step_acts(d: float) -> void:
+	for a in acts:
+		a[1] -= d
+		if a[1] <= 0.0 and is_instance_valid(a[0]):
+			(a[0] as Node3D).remove_meta("kact")
+	acts = acts.filter(func(a: Array) -> bool: return a[1] > 0.0)
+
+func _clear_acts() -> void:
+	for a in acts:
+		if is_instance_valid(a[0]):
+			(a[0] as Node3D).remove_meta("kact")
+	acts = []
+
 func tick(d: float) -> void:
+	_step_acts(d)
 	if card_t > 0.0 and run == null:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
@@ -391,25 +437,49 @@ func tick(d: float) -> void:
 		return
 	var was := run.phase
 	run.step(d)
+	cue.step(d)
 	if run.phase != was:
-		_after_step()
+		_after_step(was)
 		return
 	if run.phase == Run.Phase.TRICK:
 		bar.step(d)
 	_place_pair(d)
 
-## After the round changes: set up the next one, or end the show.
-func _after_step() -> void:
+## The judges' score for the round that just ended pops over your Boki; after the walk both totals follow
+## where the two stand to be judged.
+func _pop(ended: Run.Phase) -> void:
+	var shown: Dictionary = run.recs[run.backed]
+	var at: Vector3 = pair[run.backed]["pos"]
+	var col := GardenCues.type_colour(shown)
+	match ended:
+		Run.Phase.LOOK:
+			cue.pop(at, "Look %.1f" % sum(look(shown)), col)
+		Run.Phase.TRICK:
+			cue.pop(at, "Trick %.1f" % trick(shown, run.grades), col)
+		Run.Phase.BOND:
+			cue.pop(at, "Bond %.1f" % bond(shown, run.calls), col)
+			var s := run.scores()
+			var mid: Vector3 = (pair[0]["pos"] + pair[1]["pos"]) * 0.5
+			for i in 2:
+				var out: Vector3 = (pair[i]["pos"] - mid).normalized() * TOTAL_SPREAD
+				var tone := GardenCues.type_colour(run.recs[i])
+				cue.pop(pair[i]["pos"] + out, "%.1f" % float(s[i]["total"]), tone, TOTAL_DELAY)
+
+## After the round `ended`: the show ends, or the next round is set up (the Boki in place) and the
+## ended round's score pops over them.
+func _after_step(ended: Run.Phase) -> void:
 	if run.over():
 		_end(true)
-	else:
-		_enter()
+		return
+	_enter()
+	_pop(ended)
 
 ## Sets up the round the run is in: its card, the bar or the walk.
 func _enter() -> void:
 	if bar != null:
 		bar.close()
 	_clear_lures()
+	_clear_acts()
 	var shown: Dictionary = run.recs[run.backed]
 	var key := Settings.key_cap("interact")
 	match run.phase:
@@ -425,8 +495,11 @@ func _enter() -> void:
 			_round_card([["Bond: %s walks to you" % shown["name"], 18, UI.ACCENT_HI],
 					["Press %s as it passes a snack, a toy and its rival" % key, 14, UI.INK]])
 			_lay_walk()
+			_act(_shown(), "strut", float(rules()["walk_s"]))
 		Run.Phase.JUDGE:
 			_round_card(_judge_rows())
+			for k in pair:
+				_act(k, "pose", POSE_S)
 			GardenSfx.reveal(h, stage.position)
 	_place_pair(0.0)
 
@@ -541,31 +614,40 @@ func _walk_pos() -> Vector3:
 	return p
 
 func _end(finished: bool) -> void:
+	var before := GameResultCard.snap(run.recs)
 	var res := settle(run) if finished else {}
+	var shown := _shown()
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
 	if bar != null:
 		bar.close()
 	_clear_lures()
+	cue.clear()
+	cue = null
+	_clear_acts()
 	if is_instance_valid(card):
 		card.queue_free()
 	if finished:
-		_card(res)
+		_card(res, before)
+		_act(h._kin_entry(res["win"]), "hop", float(rules()["card_s"]))
+		_act(h._kin_entry(res["lose"]), "bow", BOW_S)
 		GardenSfx.result(h, res)
+		if is_instance_valid(marks):
+			marks.queue_free()
+		marks = ShowMarks.new(shown, stage.position, res["mine"], res["placing"])
+		h.root_ui.add_child(marks)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
 	run = null
 	pair = []
 
-func _card(res: Dictionary) -> void:
-	var win: Dictionary = res["win"]
-	var lose: Dictionary = res["lose"]
+func _card(res: Dictionary, before: Array) -> void:
+	var won: int = run.winner()
+	var totals: Array = res["scores"]
 	var why := " for showing the winner" if res["backed_won"] else ""
-	card = BaseRace.result_card(h, [
-		["%s wins the Show Ring!" % win["name"], 18, UI.ACCENT_HI],
-		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
-		["%s sulks: \"came second to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + GardenPrizes.rows(res["prize"], 14))
+	card = GameResultCard.open(h, {"game": "Show Ring", "before": before,
+			"place": "%s wins, %.1f to %.1f" % [res["win"]["name"], totals[won]["total"], totals[1 - won]["total"]],
+			"prize": [["+%d gems%s" % [res["gems"], why], UI.GOLD]] + GardenPrizes.rows(res["prize"])})
 	card_t = float(rules()["card_s"])

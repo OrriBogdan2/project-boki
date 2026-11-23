@@ -84,8 +84,8 @@ Gloves and boots stay; the V glove slot starts empty. A one-time farm notice lis
 
 **Perk orbs (ext/perkorbs, note 0006).** Chests, shrines and bosses drop perk orbs you walk into (no
 1/2/3 prompt); bosses drop a fan of three that fades for you only; bots walk to orbs; orbs sync like
-wpicks; the old kit passives (field_kit, magpie, satchel, spyglass, tinker_roll) become perks; a
-fixed per-hero weapon path on even levels.
+wpicks; the old kit passives (field_kit, magpie, satchel, spyglass, tinker_roll) become perks. (A fixed
+per-hero weapon path on even levels shipped with it and was retired again, see 0006.)
 
 **Keys and cover (ext/keys-cover, note 0007).** One chest type opened by keys; key carriers per region
 with a seeded stream; the bush mimic; hiding cover on The Hollow Crown by biome.
@@ -95,8 +95,11 @@ utility via `UtilityBelt.grant` and `UtilityBelt.price_of`, weapon perks) and th
 
 **Loadout layout (owner, 15:25).** The full layout is: 2 gloves (Q, V), 2 charms (a new minor item
 kind, not on a key), boots, 4 utility slots (1-4), up to 5 perk orbs, and no upgrading of anything.
-Built so far: gloves, boots, the belt on 1-4, backpacks, no ranks. Not built yet: charms (a follow-up;
-old minor glove-like items map to charms then).
+Built so far: gloves, boots, the belt on 1-4, backpacks, no ranks, and the 5-perk limit
+(`content/rules/perk_orbs.json` "slots", gated in `Hunter.perk_open`; at the limit an orb stays on the ground).
+`--backpack-check` counts every type at home and in a match. Not built yet: charms (a follow-up; old minor
+glove-like items map to charms then; the check prints a GAP line until they exist). Armor is still a worn
+slot the layout does not list (11-20: left as is, removing it is a design call).
 
 ## The split and where parts meet
 - loadout owns utility definitions (`content/utility/`, `UtilityBelt`, `UtilityUse`), bring-in

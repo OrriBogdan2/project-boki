@@ -4,10 +4,13 @@ extends RefCounted
 ##   2. every other kind waits for a hold (Tab or the map key), or for its own reason to matter
 ##   3. the draw code gates only kinds MapDetail lists, and every detail kind is gated somewhere
 ##   4. in a match: the nearest exit and an awake lair matter, a far exit and a dormant lair do not
+##   5. the full map's key (MapKey) lists exactly the kinds on the map now, and the minimap never draws it
+##   6. the zone clock (in the clock chip under the minimap): "Closes in 0:30" before the tide moves, the
+##      time left while it does, empty once it holds
 ## Never touches the save.
 
 const EXPECT_DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
-const GATED_FILES := ["res://scripts/ui/hud.gd", "res://scripts/ui/revive_hud.gd"]
+const GATED_FILES := ["res://scripts/ui/hud.gd", "res://scripts/ui/revive_hud.gd", "res://scripts/ui/nest_map.gd"]
 
 var bad := 0
 
@@ -21,6 +24,7 @@ func run(main: Node) -> void:
 	_kinds()
 	_source()
 	await _match(main)
+	await _zone(main)
 	print("MINIMAP CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -72,3 +76,55 @@ func _match(main: Node) -> void:
 		ok(not MapDetail.lair_matters(m, L), "a dormant lair waits for a hold")
 		L["state"] = "awake"
 		ok(MapDetail.lair_matters(m, L), "an awake lair shows by itself")
+	_key(m)
+
+func _key(m: Match) -> void:
+	var tm := TrainMap.new()
+	var all := MapKey.kinds(m, tm)
+	var mate := MapKey._mate(m)
+	ok(mate != null and "squad" in all and "exit" in all, "a fresh match's key: %s" % ", ".join(all))
+	ok(("hot" in all) == not m.biomes.hot.zone.is_empty(), "hot zone listed only when the map has one")
+	var halts: bool = m.skytrain != null and not tm.halts(m.skytrain).is_empty()
+	ok(("stop" in all) == halts, "train stops listed only when the map has them")
+	var ways: bool = WaysOutMap.sites(m).any(func(v: Vector3): return v != Vector3.INF)
+	ok(("way" in all) == ways, "ways out listed only when the map has them")
+	ok(all.all(func(k): return MapKey._word(k) != k), "every listed kind has a word")
+	mate.out = true
+	ok(not "squad" in MapKey.kinds(m, tm), "a squadmate who is out leaves the key")
+	mate.out = false
+	var kin: Kin = m.player.kin
+	if kin != null:
+		kin.state = "flying"
+		ok("boki" in MapKey.kinds(m, tm), "your Boki, out and about, is in the key")
+		kin.state = "downed"
+		ok(not "boki" in MapKey.kinds(m, tm), "your Boki, down, is not")
+	var zone: Array = m.biomes.hot.zone
+	m.biomes.hot.zone = []
+	ok(not "hot" in MapKey.kinds(m, tm), "no hot zone, no row")
+	m.biomes.hot.zone = zone
+	var exits: Array = m.exits.list
+	m.exits.list = []
+	ok(not "exit" in MapKey.kinds(m, tm), "no exits, no row")
+	m.exits.list = exits
+	var gated := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
+	ok(not gated.contains("MapKey"), "the minimap (hud.gd) never draws the key")
+	var full := FileAccess.get_file_as_string("res://scripts/ui/full_map.gd")
+	ok(full.contains("MapKey.draw"), "the full map draws the key")
+
+func _zone(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "heart": true})
+	m.set_process(false)
+	var start := Heart.r("tide_start_s")
+	var held := start + Heart.r("tide_close_s")
+	m.sess_t0 = 60.0 - m.time
+	ok(HeartHud.zone_line(m) == "Closes in 0:30", "30 s before the tide moves: '%s'" % HeartHud.zone_line(m))
+	m.sess_t0 = start + 75.0 - m.time
+	var left := int(held - start - 75.0)
+	ok(HeartHud.zone_line(m) == "Closing %d:%02d" % [left / 60, left % 60],
+		"while it closes: '%s'" % HeartHud.zone_line(m))
+	m.sess_t0 = held + 5.0 - m.time
+	ok(HeartHud.zone_line(m).is_empty(), "once the ring holds there is no clock")
+	m.queue_free()
+	print("MINIMAP CHECK ZONE DONE, failures: ", bad)

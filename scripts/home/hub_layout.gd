@@ -55,5 +55,11 @@ static func template() -> Dictionary:
 	L["b"]["shrine"] = SHRINE.duplicate()
 	return L
 
+## Does the hub hold catalog piece `id` instead of layout `L`? With the garden on, the hub's house, Nook (with
+## its Incubator), stall and Burrow are the only ones: the save's own layout (the start zone's) builds none of
+## them. An older layout may still list some; they stay on the save for the farm with the garden off.
+static func holds(L: Dictionary, id: String) -> bool:
+	return FarmUnlocks.base_mode() and is_same(L, Save.d.get("layout")) and DECO.any(func(f): return f[0] == id)
+
 static func is_hub(d: Dictionary) -> bool:
 	return bool(d.get("hub", false))

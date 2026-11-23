@@ -1,0 +1,14 @@
+{
+	"group": "shield",
+	"name": "Shields",
+	"script": "tools/gen_sfx_shield.py",
+	"sounds": {
+		"shield_ward_hit": "impact",
+		"shield_ward_break": "impact",
+		"shield_cloak_hit": "impact",
+		"shield_cloak_break": "impact",
+		"shield_molten_hit": "impact",
+		"shield_molten_break": "impact"
+	},
+	"reach": {"shield_ward_break": 30, "shield_cloak_break": 30, "shield_molten_break": 30}
+}

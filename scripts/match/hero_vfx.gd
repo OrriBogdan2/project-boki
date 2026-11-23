@@ -13,45 +13,99 @@ extends Node3D
 const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
-const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
-	"ring": 8}
-const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
+const MODES := {
+	"sweep": 0,
+	"scorch": 1,
+	"skirt": 2,
+	"flare": 3,
+	"ribbon": 4,
+	"thread": 5,
+	"bolt": 6,
+	"vortex": 7,
+	"ring": 8,
+	"sheen": 9,
+	"fist": 10,
+	"portal": 11
+}
+const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7, "plus": 8}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
-const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
-const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
-	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
-const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
-const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
-const MAX_LIVE := 420          # GPU particles alive at once across the match
-const LOD_NEAR := 20.0         # m from the camera focus: full detail
-const LOD_FAR := 34.0          # m: nothing is drawn beyond this
-const LOD_MID_K := 0.5         # share of the particles between the two
-const ALLY_K := 0.6            # an ally's effects, so yours and the enemy's stay on top
-const HOLD_LINGER := 0.15      # s a hold outlives its last ask
-const RIBBON_SAMPLES := 18     # points a mesh trail keeps
-const RIBBON_WAVES := 11.0     # rad along a trail's "wave" (a thread trailing in the air)
-const ARC_SEGS := 24           # segments of a sweep's arc mesh
-const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its outer one
-const SCORCH_LIFT := 0.06       # m a ground look floats, clear of the ground mesh
-const PREWARM_LIFE := 30.0     # s a loading-screen stand-in particle lives (it must outlast the slowest loading frames)
-const SEED_MAX := 8.0          # a look's noise offset (small: the sine hash loses precision on big inputs)
+const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2, "pool": 3}
 
-static var _data := {}         # arch -> its content/vfx data ({} when the Hero has none yet)
+## nodes per kind at most; "ribbon" also holds the drop rockets' streaks, one a squad in the air (up to 10), and
+## the tracers riding Vex's rounds (6)
+const POOL := {
+	"sweep": 10,
+	"scorch": 10,
+	"skirt": 8,
+	"flare": 20,
+	"ribbon": 26,
+	"thread": 18,
+	"bolt": 12,
+	"vortex": 4,
+	"ring": 6,
+	"sheen": 6,
+	"fist": 3,
+	"portal": 4,
+	"xray": 2,
+	"ember": 12,
+	"smoke": 6,
+	"chunk": 4,
+	"shard": 6,
+	"card": 4,
+	"coin": 4,
+	"star": 6,
+	"drop": 6,
+	"plus": 4
+}
+const AMOUNT := {
+	"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32, "plus": 12
+}
+const TRAIL_MAX := 2.0  # s a projectile's trail may follow it
+const MAX_LIVE := 420  # GPU particles alive at once across the match
+const LOD_NEAR := 20.0  # m from the camera focus: full detail
+const LOD_FAR := 34.0  # m: nothing is drawn beyond this
+const LOD_MID_K := 0.5  # share of the particles between the two
+const PEAK := Color(1.0, 1.0, 1.0, 0.5)  # a fire's hottest part: halfway to white (a palette's "peak" in its place)
+const ALLY_K := 0.6  # an ally's effects, so yours and the enemy's stay on top
+const HOLD_LINGER := 0.15  # s a hold outlives its last ask
+const HELD_LIFE := 0.85  # share of its life a held surface waits at (a pool's fade starts here)
+const RIBBON_SAMPLES := 18  # points a mesh trail keeps
+const STREAK_STEP := 1.0 / 30.0  # s between a streak's points, so it is as long at any frame rate
+const STREAK_MAX := 30.0  # s a streak may follow its node (it ends with the node; this is a safety net)
+const STREAK_HOT := 0.6  # share of white in a streak's hot core
+const STREAK_CHAR := 0.45  # how much darker than its colour a streak's spent tail gets
+const RIBBON_WAVES := 11.0  # rad along a trail's "wave" (a thread trailing in the air)
+const ARC_SEGS := 24  # segments of a sweep's arc mesh
+const SWEEP_INNER := 0.35  # the arc mesh's inner radius, as a share of its outer one
+const SCORCH_LIFT := 0.06  # m a ground look floats, clear of the ground mesh
+const PREWARM_LIFE := 30.0  # s a loading-screen stand-in particle lives (it must outlast the slowest loading frames)
+const SHEEN_LIFE := 0.4  # s the armour tier-up sheen takes to sweep up the body
+const SHEEN_SIZE := 2.2  # m square, facing the camera: the band climbs a body-shaped capsule inside it
+const SHEEN_LIFT := 0.95  # m above the feet the square is centred (a Hunter's mid-body)
+const SEED_MAX := 8.0  # a look's noise offset (small: the sine hash loses precision on big inputs)
+
+static var _data := {}  # arch -> its content/vfx data ({} when the Hero has none yet)
+static var _xray: Shader = null  # SURFACE drawn over walls and rock: an "xray" string (an arm inside a cliff)
 
 var m: Node
-var pools := {}                # kind -> nodes made for it
-var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind}
-var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, pts}
-var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
-var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
-var live_n := 0                # GPU particles alive (asked for) now
-var made := 0                  # nodes made so far (tests: it stops growing once warm)
-var plays := {}                # (tests) move -> times played
-var _arcs := {}                # arc degrees -> arc mesh
+var pools := {}  # kind -> nodes made for it
+var last_voice := -1  # the Sfx handle of the last sound a move started at once (KitWindup.keep)
+var live: Array = []  # shader looks running: {node, mat, t, dur, s0, s1, kind; cut, h; on, off}
+var ribbons: Array = []  # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
+var motes: Array = []  # one-shot emitters running: {node, t, dur, n}
+var holds := {}  # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
+var live_n := 0  # GPU particles alive (asked for) now
+var made := 0  # nodes made so far (tests: it stops growing once warm)
+var plays := {}  # (tests) move -> times played
+var scarves := HeroScarf.new(self)  # the cloth ends some Heroes trail (data "scarf")
+
+# shader seeds only: a look never draws from the global randf the sim uses
+var _look_rng := RandomNumberGenerator.new()
+var _arcs := {}  # arc degrees -> arc mesh
 var _cyl: ArrayMesh
-var _warming: Array = []       # the loading screen's stand-ins (prewarm)
-var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)
-var scarves := HeroScarf.new(self)   # the cloth ends some Heroes trail (data "scarf")
+var _warming: Array = []  # the loading screen's stand-ins (prewarm)
+var _anchors := {}  # "<model id>/<anchor>" -> the node found for it (null: none)
+
 
 static func of(match_node: Node) -> HeroVfx:
 	if match_node.has_meta("hero_vfx"):
@@ -65,6 +119,7 @@ static func of(match_node: Node) -> HeroVfx:
 	match_node.set_meta("hero_vfx", n)
 	return n
 
+
 ## A Hero's data (empty until it has a content/vfx file).
 static func data(arch: String) -> Dictionary:
 	if not _data.has(arch):
@@ -73,12 +128,14 @@ static func data(arch: String) -> Dictionary:
 		_data[arch] = parsed if parsed is Dictionary else {}
 	return _data[arch]
 
+
 ## Swaps in a Hero's data (checks and the reel: a synthetic recipe set); an empty dictionary reloads the file.
 static func set_data(arch: String, d: Dictionary) -> void:
 	if d.is_empty():
 		_data.erase(arch)
 	else:
 		_data[arch] = d
+
 
 ## Every Hero that has a data file.
 static func heroes() -> Array:
@@ -88,6 +145,7 @@ static func heroes() -> Array:
 			out.append(f.get_basename())
 	return out
 
+
 ## The viewer's share of an effect: yours and enemies' at full, allies' dimmer.
 func view_k(h: Hunter) -> float:
 	var viewer: Variant = m.get("player")
@@ -95,12 +153,14 @@ func view_k(h: Hunter) -> float:
 		return 1.0
 	return ALLY_K
 
+
 ## The detail share at a spot from the camera focus: 1 near, LOD_MID_K further, 0 past LOD_FAR.
 func lod_at(at: Vector3) -> float:
 	var dist := Vector2(at.x - Sfx.listener.x, at.z - Sfx.listener.z).length()
 	if dist > LOD_FAR:
 		return 0.0
 	return 1.0 if dist <= LOD_NEAR else LOD_MID_K
+
 
 ## Where a named FX anchor is now. In order: a node on the model (the .glb's anchor empties; the first of the data's
 ## "nodes" that exists), a point in the Gun's space ("gun": any model holds its weapon there), else an offset from
@@ -123,6 +183,7 @@ func anchor_pos(h: Hunter, anchor_name: String) -> Vector3:
 	var aim := h.aim_dir()
 	return h.pos + Vector3(aim.x * body.z - aim.y * body.x, body.y, aim.y * body.z + aim.x * body.x)
 
+
 func _anchor_node(h: Hunter, anchor_name: String, a: Dictionary) -> Node3D:
 	if h.model == null or not h.model.is_inside_tree():
 		return null
@@ -137,6 +198,7 @@ func _anchor_node(h: Hunter, anchor_name: String, a: Dictionary) -> Node3D:
 			_anchors[key] = an
 			return an
 	return null
+
 
 ## A point on one of the model's contract bones (docs/RIG_STANDARD.md: "hand.R", "head", ...), `off` in the bone's
 ## own space; INF on a model without a skeleton or that bone (the bone index is looked up once per model).
@@ -154,11 +216,14 @@ func _bone_pos(h: Hunter, bone: String, off: Vector3) -> Vector3:
 	var sk2: Skeleton3D = hit[0]
 	return sk2.global_transform * (sk2.get_bone_global_pose(int(hit[1])) * off)
 
+
 static func _vec(v: Array) -> Vector3:
 	return Vector3(float(v[0]), float(v[1]), float(v[2]))
 
+
 func _rec(h: Hunter, move: String) -> Dictionary:
 	return (data(h.arch).get("moves", {}) as Dictionary).get(move, {})
+
 
 ## A moment of a Hero's kit: its sounds and its looks. `o` fills the sizes the data leaves to the kit (see _num:
 ## "r", "len", "w"), "k" is the move's charge 0..1, "flip" mirrors a sweep, a true key in `o` turns on the layers
@@ -169,9 +234,21 @@ func play(h: Hunter, move: String, at: Vector3, dir: Vector2, o := {}) -> void:
 		return
 	plays[move] = int(plays.get(move, 0)) + 1
 	if bool(rec.get("net", true)) and m.get("net_on") and not h.remote:
-		m.net_fx(["hvfx", h.nid, move, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.01), snappedf(dir.y, 0.01),
-				snappedf(float(o.get("k", 0.0)), 0.01), snappedf(float(o.get("len", 0.0)), 0.1),
-				snappedf(float(o.get("r", 0.0)), 0.1)])
+		m.net_fx(
+			[
+				"hvfx",
+				h.nid,
+				move,
+				m._r(at.x),
+				m._r(at.y),
+				m._r(at.z),
+				snappedf(dir.x, 0.01),
+				snappedf(dir.y, 0.01),
+				snappedf(float(o.get("k", 0.0)), 0.01),
+				snappedf(float(o.get("len", 0.0)), 0.1),
+				snappedf(float(o.get("r", 0.0)), 0.1)
+			]
+		)
 	_sounds(rec, h, at, o)
 	var lod := lod_at(at)
 	if lod <= 0.0 or (h.unseen and h != m.get("player")):
@@ -185,15 +262,47 @@ func play(h: Hunter, move: String, at: Vector3, dir: Vector2, o := {}) -> void:
 		else:
 			_layer(layer, h, at, dir, o, lod)
 
+
 ## The same moment arriving from another game (["fx", "hvfx", ...]: other players' games don't run this kit).
 func net_in(x: Array) -> void:
 	var who: Variant = m.ents_by_id.get(String(x[2]), null)
-	if who is Hunter:
-		play(who, String(x[3]), Vector3(x[4], x[5], x[6]), Vector2(x[7], x[8]),
-				{"k": float(x[9]), "len": float(x[10]), "r": float(x[11])})
+	if who is Hunter and String(x[3]) == "armor_up":
+		tier_up(who, int(x[9]))
+	elif who is Hunter:
+		play(
+			who,
+			String(x[3]),
+			Vector3(x[4], x[5], x[6]),
+			Vector2(x[7], x[8]),
+			{"k": float(x[9]), "len": float(x[10]), "r": float(x[11])}
+		)
+
+
+## Armor went up a tier: one sheen in the new tier's colour sweeps up the body, for everyone to read (a rival just got
+## tougher). Not a recipe: the colour is the tier's, so the tier rides the net message's charge slot.
+func tier_up(h: Hunter, tier: int) -> void:
+	plays["armor_up"] = int(plays.get("armor_up", 0)) + 1
+	if m.get("net_on") and not h.remote:
+		m.net_fx(["hvfx", h.nid, "armor_up", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 0.0, 0.0, tier, 0.0, 0.0])
+	if lod_at(h.pos) <= 0.0 or (h.unseen and h != m.get("player")):
+		return
+	var mi: MeshInstance3D = _take("sheen", _surface_node.bind("sheen"))
+	var mt: ShaderMaterial = mi.material_override
+	var col: Color = Hunter.ARMOR_TIERS[tier][1]
+	mt.set_shader_parameter("col", col)
+	mt.set_shader_parameter("col2", col.lerp(Color.WHITE, 0.6))
+	mt.set_shader_parameter("life", 0.0)
+	mt.set_shader_parameter("gain", view_k(h))
+	var s := Vector3.ONE * SHEEN_SIZE
+	mi.global_transform = Transform3D(Basis.from_scale(s), h.pos + Vector3(0, SHEEN_LIFT, 0))
+	live.append(
+		{"node": mi, "mat": mt, "t": 0.0, "dur": SHEEN_LIFE, "b": Basis.IDENTITY, "s0": s, "s1": s, "follow": h}
+	)
+
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
+	last_voice = -1
 	var k := float(o.get("k", 0.0))
 	for s: Dictionary in rec.get("sfx", []):
 		if not _wanted(s, o):
@@ -202,17 +311,19 @@ func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
 		var pitch := float(s.get("pitch", 1.0)) + float(s.get("pitch_k", 0.0)) * k + float(o.get("pitch", 0.0))
 		var pos: Variant = h.pos if s.get("at") == "h" else at
 		if s.get("at") == "all":
-			pos = null          # heard anywhere on the map
+			pos = null  # heard anywhere on the map
 		var delay := float(s.get("delay", 0.0))
 		if delay > 0.0:
 			m.later(delay, Sfx.play.bind(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch))
 		else:
-			Sfx.play(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch)
+			last_voice = Sfx.play(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch)
+
 
 static func _wanted(entry: Dictionary, o: Dictionary) -> bool:
 	if entry.has("when") and not o.get(String(entry["when"]), false):
 		return false
 	return not (entry.has("unless") and o.get(String(entry["unless"]), false))
+
 
 ## A size in the data: a number, or the name of what the kit passed in `o`, scaled by "<key>_x" and by the charge
 ## with "<key>_k" (1.5: half as big again at full).
@@ -224,10 +335,17 @@ func _num(layer: Dictionary, key: String, o: Dictionary, fallback := 1.0) -> flo
 		n *= 1.0 + float(layer[key + "_k"]) * float(o.get("k", 0.0))
 	return n
 
+
+## A colour of the Hero's palette (its data file), for the looks a kit places itself.
+func color(h: Hunter, key: String) -> Color:
+	return _pal(h, key, key)
+
+
 func _pal(h: Hunter, name_or_hex: Variant, fallback: String) -> Color:
 	var pal: Dictionary = data(h.arch).get("palette", {})
 	var key := String(name_or_hex) if name_or_hex != null else fallback
 	return Color(String(pal.get(key, key)))
+
 
 func _where(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o := {}) -> Vector3:
 	var from := String(layer.get("at", "here"))
@@ -239,6 +357,7 @@ func _where(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o := {}) ->
 	var fwd := _num(layer, "fwd", o, 0.0)
 	return p + Vector3(dir.x * fwd, float(layer.get("y", 0.0)), dir.y * fwd)
 
+
 func _layer(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o: Dictionary, lod: float) -> void:
 	if not is_instance_valid(h):
 		return
@@ -248,11 +367,12 @@ func _layer(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o: Dictiona
 			_ribbon(layer, h, o)
 		elif kind == "bolt":
 			var from := _where(layer, h, at, dir, o)
-			_bolt(layer, h, from, _bolt_end(layer, h, from, dir, o), o)
+			_bolt(layer, h, from, _bolt_end(layer, h, at, from, dir, o), o)
 		else:
 			_surface(kind, layer, h, _where(layer, h, at, dir, o), dir, o)
 	else:
 		_burst(kind, layer, h, _where(layer, h, at, dir, o), dir, o, lod)
+
 
 # ------------------------------------------------------------------ pooled nodes
 func _take(kind: String, build: Callable) -> Node3D:
@@ -274,6 +394,7 @@ func _take(kind: String, build: Callable) -> Node3D:
 	_drop_entry(old)
 	return old
 
+
 func _drop_entry(node: Node3D) -> void:
 	for list: Array in [live, ribbons]:
 		for e in list:
@@ -292,6 +413,7 @@ func _drop_entry(node: Node3D) -> void:
 				(holds[key]["layers"] as Array).erase(lay)
 				return
 
+
 func _surface_node(kind: String) -> Node3D:
 	var mi := MeshInstance3D.new()
 	var mt := ShaderMaterial.new()
@@ -306,7 +428,7 @@ func _surface_node(kind: String) -> Node3D:
 			mi.mesh = plane
 		"skirt":
 			mi.mesh = _cylinder()
-		"flare":
+		"flare", "sheen", "portal":
 			var quad := QuadMesh.new()
 			quad.size = Vector2.ONE
 			mi.mesh = quad
@@ -314,8 +436,10 @@ func _surface_node(kind: String) -> Node3D:
 		"bolt":
 			var strip := QuadMesh.new()
 			strip.size = Vector2.ONE
-			strip.center_offset = Vector3(0.5, 0, 0)          # from the origin along +X: A at 0, B at 1
+			strip.center_offset = Vector3(0.5, 0, 0)  # from the origin along +X: A at 0, B at 1
 			mi.mesh = strip
+		"fist":
+			mi.mesh = HeroVfxFist.fist_mesh()
 		"vortex", "ring":
 			var disc := PlaneMesh.new()
 			disc.size = Vector2.ONE
@@ -324,6 +448,7 @@ func _surface_node(kind: String) -> Node3D:
 			mi.mesh = ImmediateMesh.new()
 			mi.extra_cull_margin = 16.0
 	return mi
+
 
 ## A unit arc in the ground plane centred on +Z: UV.x along it, UV.y from the outer edge to the inner.
 func _arc(deg: float) -> ArrayMesh:
@@ -343,6 +468,7 @@ func _arc(deg: float) -> ArrayMesh:
 	_arcs[key] = st.commit()
 	return _arcs[key]
 
+
 ## An open unit cylinder: UV.x round it, UV.y from the foot to the top.
 func _cylinder() -> ArrayMesh:
 	if _cyl:
@@ -360,6 +486,7 @@ func _cylinder() -> ArrayMesh:
 	_cyl = st.commit()
 	return _cyl
 
+
 ## One of every kind held up at `at` on the loading screen (Match.warm_up, once per view, then prewarm_end), so the
 ## first cast compiles nothing. Particles have to run and a trail needs a surface, or their shaders are never built.
 func prewarm(at: Vector3) -> void:
@@ -370,6 +497,7 @@ func prewarm(at: Vector3) -> void:
 		node.global_transform = Transform3D(Basis.IDENTITY, Vector3.ZERO if node.get_meta("strip", false) else at)
 	scarves.prewarm(at)
 
+
 func prewarm_end() -> void:
 	for node: Node3D in _warming:
 		node.visible = false
@@ -378,21 +506,23 @@ func prewarm_end() -> void:
 	_warming.clear()
 	scarves.prewarm_end()
 
+
 func _prewarm_node(kind: String) -> Node3D:
-	if not MODES.has(kind):
+	if not MODES.has(kind) and kind != "xray":
 		var p: GPUParticles3D = _take(kind, _mote_node.bind(kind))
 		p.amount_ratio = 2.0 / float(AMOUNT[kind])
 		p.lifetime = PREWARM_LIFE
 		p.one_shot = false
-		p.emitting = true          # (a finished one-shot isn't drawn, and a loading frame can outlast its life)
+		p.emitting = true  # (a finished one-shot isn't drawn, and a loading frame can outlast its life)
 		return p
-	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
+	var mi: MeshInstance3D = _take(kind, (_string_build if kind == "xray" else _surface_node).bind(kind))
 	if kind == "sweep":
 		mi.mesh = _arc(120.0)
-	elif kind == "ribbon":
+	elif kind in ["ribbon", "xray"]:
 		_prewarm_strip(mi.mesh)
 		mi.set_meta("strip", true)
 	return mi
+
 
 func _prewarm_strip(mesh: ImmediateMesh) -> void:
 	mesh.clear_surfaces()
@@ -402,7 +532,8 @@ func _prewarm_strip(mesh: ImmediateMesh) -> void:
 		mesh.surface_add_vertex(Vector3(float(i), 0.0, float(i % 2)) * 0.01)
 	mesh.surface_end()
 
-func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary) -> void:
+
+func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary) -> Dictionary:
 	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
 	var mt: ShaderMaterial = mi.material_override
 	var yaw := atan2(dir.x, dir.y) + deg_to_rad(float(layer.get("yaw", 0.0)))
@@ -413,14 +544,19 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	match kind:
 		"sweep":
 			mi.mesh = _arc(float(layer.get("arc", 120.0)))
-			b = b * Basis(Vector3(0, 0, 1), deg_to_rad(float(layer.get("tilt", 0.0))))
+			var cam := get_viewport().get_camera_3d()
+			b = b * Basis(Vector3(0, 0, 1), sweep_roll(layer, b, cam.global_basis.z if cam else Vector3.UP))
 			var flip: bool = o.get("flip", false) != bool(layer.get("flip", false))
 			s0 = Vector3(-extent if flip else extent, extent, extent)
 			s1 = s0
+			var dur := _num(layer, "life", o, 0.4)
+			mt.set_shader_parameter("head_t", clampf(_num(layer, "turn", o, 0.28 * dur) / dur, 0.05, 1.0))
+			mt.set_shader_parameter("band", float(layer.get("band", 0.0)))
 		"scorch":
 			var sh := String(layer.get("shape", "disc"))
 			mt.set_shader_parameter("shape", SCORCH_SHAPES[sh])
 			mt.set_shader_parameter("stitch", bool(layer.get("stitch", false)))
+			mt.set_shader_parameter("pool_band", float(layer.get("band", 1.0)))
 			if sh == "lane":
 				var ln := _num(layer, "len", o, 4.0)
 				var w := _num(layer, "w", o, 1.5)
@@ -447,43 +583,92 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 		"flare":
 			s0 = Vector3.ONE * extent
 			s1 = s0 * float(layer.get("grow", 1.2))
+		"fist":
+			b = b * Basis(Vector3.RIGHT, deg_to_rad(float(layer.get("pitch", 0.0))))
+			mt.set_shader_parameter("fall", float(layer.get("fall", 0.5)))
+			mt.set_shader_parameter("drop", _num(layer, "drop", o, 3.0) / extent)
 		"vortex", "ring":
 			s0 = Vector3(extent * 2.0, 1.0, extent * 2.0)
 			s1 = s0 * float(layer.get("grow", 1.0))
 			p.y += SCORCH_LIFT
 			mt.set_shader_parameter("spin", float(layer.get("spin", 1.0)))
+			mt.set_shader_parameter("rim_only", bool(layer.get("thin", false)))
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
-	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1})
+	var e := {"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1}
+	if layer.get("ride", false):  # it rides on the Hero (an anchor goes with the clip: a hop, a lunge)
+		e.merge({"ride": h, "layer": layer, "dir": dir, "off": p - _where(layer, h, h.pos, dir)})
+	if layer.has("cut"):
+		e["cut"] = float(layer["cut"])
+		e["h"] = h
+	if o.get("on") is Node3D:
+		e["on"] = o["on"]
+		e["off"] = p - (o["on"] as Node3D).global_position
+	live.append(e)
+	return e
+
+
+## A sweep's roll about its aim (rad): the layer's "tilt", turned by up to its "lean" (deg) toward `back` (the
+## camera's back axis) so a crescent stood up along the aim never shows edge-on.
+static func sweep_roll(layer: Dictionary, b: Basis, back: Vector3) -> float:
+	var tilt := deg_to_rad(float(layer.get("tilt", 0.0)))
+	var lean := deg_to_rad(float(layer.get("lean", 0.0)))
+	var c := b.transposed() * back
+	return tilt + clampf(wrapf(atan2(-c.x, c.y) - tilt, -PI * 0.5, PI * 0.5), -lean, lean)
+
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
-	mt.set_shader_parameter("seed", randf() * SEED_MAX)
+	var peak: Variant = data(h.arch).get("palette", {}).get("peak")
+	mt.set_shader_parameter("peak", Color(String(peak)) if peak != null else PEAK)
+	mt.set_shader_parameter("seed", _look_rng.randf() * SEED_MAX)
+	mt.set_shader_parameter("clean_streak", bool(layer.get("streak", false)))
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
+	mt.set_shader_parameter("soft", bool(layer.get("soft", false)))  # (M_RIBBON: a soft sparkly glow)
 
+
+## A mesh trail; its "head" (m across, "head_len" times as long) is a bright tip drawn on the newest point.
 func _ribbon(layer: Dictionary, h: Hunter, o: Dictionary) -> void:
 	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
 	var mt: ShaderMaterial = mi.material_override
 	_paint(mt, layer, h)
 	mi.global_transform = Transform3D.IDENTITY
 	(mi.mesh as ImmediateMesh).clear_surfaces()
-	ribbons.append({"node": mi, "mat": mt, "h": h, "anchor": String(layer.get("at", "chest")), "t": 0.0,
-			"dur": _num(layer, "life", o, 0.3), "tail": float(layer.get("tail", 0.2)),
-			"width": _num(layer, "size", o, 0.4), "wave": float(layer.get("wave", 0.0)),
-			"follow": o.get("follow") if layer.get("follow", false) else null, "pts": []})
+	ribbons.append(
+		{
+			"node": mi,
+			"mat": mt,
+			"h": h,
+			"anchor": String(layer.get("at", "chest")),
+			"t": 0.0,
+			"dur": _num(layer, "life", o, 0.3),
+			"tail": float(layer.get("tail", 0.2)),
+			"width": _num(layer, "size", o, 0.4),
+			"wave": float(layer.get("wave", 0.0)),
+			"head": float(layer.get("head", 0.0)),
+			"head_len": float(layer.get("head_len", 1.0)),
+			"follow": o.get("follow") if layer.get("follow", false) else null,
+			"pts": []
+		}
+	)
 
-## Where a bolt ends: the kit's `o.to`, else a named anchor ("to"), else `len` metres along the aim.
-func _bolt_end(layer: Dictionary, h: Hunter, from: Vector3, dir: Vector2, o: Dictionary) -> Vector3:
+
+## Where a bolt ends: the kit's `o.to`, else the move's point `to_y` m up ("to": "here": a bolt out of the sky), else a
+## named anchor ("to"), else `len` metres along the aim.
+func _bolt_end(layer: Dictionary, h: Hunter, at: Vector3, from: Vector3, dir: Vector2, o: Dictionary) -> Vector3:
 	if o.get("to") is Vector3:
 		return o["to"]
+	if layer.get("to") == "here":
+		return at + Vector3(0, _num(layer, "to_y", o, 0.0), 0)
 	if layer.has("to"):
 		return anchor_pos(h, String(layer["to"]))
 	var ln := _num(layer, "len", o, 3.0)
 	return from + Vector3(dir.x, 0, dir.y) * ln
+
 
 ## A strip from `a` to `b` turned to face the camera: lightning (the layer's "jag") or a taut thread.
 func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) -> void:
@@ -494,6 +679,7 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 	var mt: ShaderMaterial = mi.material_override
 	_paint(mt, layer, h)
 	mt.set_shader_parameter("jag", float(layer.get("jag", 0.0)))
+	mt.set_shader_parameter("core_w", float(layer.get("core", 0.0)))
 	var cam := get_viewport().get_camera_3d()
 	var view := -cam.global_basis.z if cam else Vector3.DOWN
 	var side := span.cross(view).normalized()
@@ -502,25 +688,92 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 	var width := _num(layer, "size", o, 0.25)
 	var b0 := Basis(span, side * width, span.cross(side).normalized() * width)
 	mi.global_transform = Transform3D(b0, a)
-	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.25), "b": b0,
-			"s0": Vector3.ONE, "s1": Vector3.ONE})
+	live.append(
+		{
+			"node": mi,
+			"mat": mt,
+			"t": 0.0,
+			"dur": _num(layer, "life", o, 0.25),
+			"b": b0,
+			"s0": Vector3.ONE,
+			"s1": Vector3.ONE
+		}
+	)
+
 
 ## A mesh trail that follows a projectile (its node) until it is gone, hidden, or TRAIL_MAX runs out: tracers,
-## needles, thrown charges. The move's "ribbon" layers give its look; nothing else of the move plays.
-func trail(h: Hunter, move: String, follow: Node3D) -> void:
+## needles, thrown charges. The move's "ribbon" layers give its look; nothing else of the move plays. Its "end" names
+## a move played where the trail stopped.
+func trail(h: Hunter, move: String, follow: Node3D, o := {}) -> void:
 	var rec := _rec(h, move)
 	if rec.is_empty() or follow == null or lod_at(follow.global_position) <= 0.0:
 		return
 	if h.unseen and h != m.get("player"):
 		return
 	plays[move] = int(plays.get(move, 0)) + 1
+	var end_move := String(rec.get("end", ""))
 	for layer: Dictionary in rec.get("fx", []):
 		if String(layer.get("p", "")) != "ribbon":
 			continue
-		_ribbon(layer, h, {})
+		_ribbon(layer, h, o)
 		var e: Dictionary = ribbons[-1]
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)
+		e["end"] = end_move
+		end_move = ""  # (it plays once, off the first trail)
+	if not bool(rec.get("round", true)):
+		_unlit_round(follow)
+
+
+## A shot's own glow and halo go dark under a trail that is the whole round ("round": false). The node stays shown,
+## so the trail keeps following it and the pool doesn't hand it out; spawn_shot repaints both when it is reused.
+func _unlit_round(node: Node3D) -> void:
+	for part: Node in [node, node.get_node_or_null("Halo")]:
+		var mt := (part as MeshInstance3D).material_override as ShaderMaterial if part is MeshInstance3D else null
+		if mt:
+			mt.set_shader_parameter("color", Color(0, 0, 0, 0))
+
+
+## A pooled shot node handed to a new round (spawn_shot) in the step the last one landed in, so it never showed
+## hidden: the trails following it end here, or they would ride the new round from the old one's landing spot.
+func reused(node: Node3D) -> void:
+	for e: Dictionary in ribbons:
+		if e.get("follow") == node:
+			e["dur"] = minf(float(e["dur"]), float(e["t"]))  # (no new points: the tail runs out where it is)
+			e["follow"] = null
+
+
+## A trail in one colour behind something that is not a Hero's (the drop rocket's exhaust): a ribbon from the same
+## pool, `width` m at its head, each point lasting `tail` s, following `follow` until it is hidden or freed.
+func streak(follow: Node3D, col: Color, width: float, tail: float) -> void:
+	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
+	var mt: ShaderMaterial = mi.material_override
+	mt.set_shader_parameter("col", col)
+	mt.set_shader_parameter("col2", col.lerp(Color.WHITE, STREAK_HOT))
+	mt.set_shader_parameter("col3", col.darkened(STREAK_CHAR))
+	mt.set_shader_parameter("seed", _look_rng.randf() * SEED_MAX)
+	mt.set_shader_parameter("life", 0.0)
+	mt.set_shader_parameter("gain", 1.0)
+	mi.global_transform = Transform3D.IDENTITY
+	(mi.mesh as ImmediateMesh).clear_surfaces()
+	ribbons.append(
+		{
+			"node": mi,
+			"mat": mt,
+			"h": null,
+			"anchor": "",
+			"t": 0.0,
+			"dur": STREAK_MAX,
+			"tail": tail,
+			"width": width,
+			"wave": 0.0,
+			"head": 0.0,
+			"follow": follow,
+			"step": STREAK_STEP,
+			"pts": []
+		}
+	)
+
 
 func _mote_node(kind: String) -> Node3D:
 	var p := GPUParticles3D.new()
@@ -542,9 +795,11 @@ func _mote_node(kind: String) -> Node3D:
 	p.draw_pass_1 = quad
 	return p
 
+
 ## Sets an emitter up from a layer; returns how many particles it was allowed.
-func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter, way: Vector3, o: Dictionary,
-		lod: float) -> int:
+func _aim_emitter(
+	p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter, way: Vector3, o: Dictionary, lod: float
+) -> int:
 	var pm: ShaderMaterial = p.process_material
 	var mt: ShaderMaterial = (p.draw_pass_1 as QuadMesh).material
 	var form := String(layer.get("shape", "ball"))
@@ -552,8 +807,14 @@ func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter,
 	pm.set_shader_parameter("radius", _num(layer, "radius", o, 0.2))
 	pm.set_shader_parameter("span", way * _num(layer, "len", o, 1.0))
 	if form == "arc":
-		pm.set_shader_parameter("span", Vector3(deg_to_rad(_num(layer, "arc", o, 120.0)) * 0.5,
-				atan2(float(o.get("dir_x", 0.0)), float(o.get("dir_y", 1.0))), _num(layer, "w", o, 1.0)))
+		pm.set_shader_parameter(
+			"span",
+			Vector3(
+				deg_to_rad(_num(layer, "arc", o, 120.0)) * 0.5,
+				atan2(float(o.get("dir_x", 0.0)), float(o.get("dir_y", 1.0))),
+				_num(layer, "w", o, 1.0)
+			)
+		)
 	pm.set_shader_parameter("dir", way if form != "line" else Vector3.UP)
 	pm.set_shader_parameter("spread", float(layer.get("spread", 0.5)))
 	pm.set_shader_parameter("speed", _num(layer, "speed", o, 3.0))
@@ -565,13 +826,14 @@ func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter,
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "smoke" if kind == "smoke" else "char"))
 	mt.set_shader_parameter("stretch", float(layer.get("stretch", 0.05)))
-	mt.set_shader_parameter("gain", view_k(h))
+	mt.set_shader_parameter("gain", float(layer.get("gain", 1.0)) * view_k(h))
 	var want := _num(layer, "n", o, 12.0) * float(Settings.q("fx")) * lod * view_k(h)
 	var room := maxi(0, MAX_LIVE - live_n)
 	var n := mini(mini(int(want), int(AMOUNT[kind])), room)
 	p.amount_ratio = float(n) / float(AMOUNT[kind])
-	p.lifetime = _num(layer, "life", o, 0.5)
+	p.lifetime = _num(layer, "life", o, 0.5) * float(Settings.q("fx_life"))
 	return n
+
 
 func _way(layer: Dictionary, dir: Vector2) -> Vector3:
 	var flat := Vector3(dir.x, 0, dir.y)
@@ -579,10 +841,14 @@ func _way(layer: Dictionary, dir: Vector2) -> Vector3:
 	if flat.length() <= 0.01:
 		return Vector3.UP
 	match String(layer.get("way", "up")):
-		"fwd": return (flat + up).normalized()
-		"back": return (-flat + up).normalized()
-		"along": return flat.normalized()
+		"fwd":
+			return (flat + up).normalized()
+		"back":
+			return (-flat + up).normalized()
+		"along":
+			return flat.normalized()
 	return Vector3.UP
+
 
 func _burst(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary, lod: float) -> void:
 	var node: GPUParticles3D = _take(kind, _mote_node.bind(kind))
@@ -596,6 +862,7 @@ func _burst(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2
 	node.restart()
 	live_n += n
 	motes.append({"node": node, "t": 0.0, "dur": node.lifetime * 1.1, "n": n})
+
 
 ## A look that stays on the Hero until the kit hides it (the first "skirt" layer of `move`, seated on the body and
 ## not pooled: one per hunter, freed with the kit's nodes).
@@ -611,14 +878,19 @@ func shell(h: Hunter, move: String) -> MeshInstance3D:
 	h.add_child(mi)
 	return mi
 
+
 # ------------------------------------------------------------------ holds
 ## Something that lasts while the kit keeps asking, once per tick: a blade heating, a body burning. It follows its
-## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended.
+## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended. A surface
+## layer (a cast's dark ring) waits at HELD_LIFE of its life while asked, then runs out the rest.
 func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 	var key := "%d/%s" % [h.get_instance_id(), move]
 	if holds.has(key):
 		holds[key]["last"] = m.time
 		holds[key]["k"] = k
+		holds[key]["pts"] = extra.get("pts")
+		if extra.has("at"):  # (a zone that follows something: its emitters move with it)
+			holds[key]["at"] = extra["at"]
 		return
 	var rec := _rec(h, move)
 	var lod := lod_at(h.pos)
@@ -635,9 +907,14 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		if lod < 1.0 and bool(layer.get("near", false)):
 			continue
 		var kind := String(layer["p"])
+		if MODES.has(kind):
+			var e := _surface(kind, layer, h, _where(layer, h, o.get("at", h.pos), aim, o), aim, o)
+			layers.append({"node": e["node"], "layer": layer, "n": 0, "surface": e})
+			continue
 		if kind == "string":
 			if not _model_has(h, String(layer.get("skip_if", ""))):
-				layers.append({"node": _string_node(layer, h), "layer": layer, "n": 0})
+				var string_kind := "xray" if layer.get("xray", false) else "ribbon"
+				layers.append({"node": _string_node(layer, h, string_kind), "layer": layer, "n": 0})
 			continue
 		var node: GPUParticles3D = _take(kind, _mote_node.bind(kind))
 		var n := _aim_emitter(node, kind, layer, h, _way(layer, aim), o, lod)
@@ -650,7 +927,14 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		node.emitting = true
 		live_n += n
 		layers.append({"node": node, "layer": layer, "n": n})
-	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at")}
+	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at"), "pts": extra.get("pts")}
+
+
+## (checks) whether h's hold of move is running now (asked within HOLD_LINGER).
+func holding(h: Hunter, move: String) -> bool:
+	var e: Dictionary = holds.get("%d/%s" % [h.get_instance_id(), move], {})
+	return not e.is_empty() and m.time - float(e["last"]) <= HOLD_LINGER
+
 
 func _tick_holds() -> void:
 	for key: String in holds.keys():
@@ -663,13 +947,17 @@ func _tick_holds() -> void:
 		var hunter: Hunter = h
 		var aim := hunter.aim_dir()
 		for lay: Dictionary in e["layers"]:
-			if lay["node"] is GPUParticles3D:
+			if lay.has("surface"):
+				var s: Dictionary = lay["surface"]
+				s["t"] = minf(float(s["t"]), float(s["dur"]) * HELD_LIFE)
+			elif lay["node"] is GPUParticles3D:
 				var node := lay["node"] as GPUParticles3D
 				var base: Vector3 = hunter.pos if e["at"] == null else e["at"]
 				node.global_position = _where(lay["layer"], hunter, base, aim)
 				_reaim(node, lay["layer"], aim)
 			else:
-				_draw_string(lay, hunter)
+				_draw_string(lay, hunter, e["pts"])
+
 
 ## A hold's emitter turned to the aim now, so a stream along it follows a sweep (the particles already out keep
 ## their own way, as a hose's fire does).
@@ -682,23 +970,37 @@ func _reaim(p: GPUParticles3D, layer: Dictionary, aim: Vector2) -> void:
 	if String(layer.get("shape", "ball")) != "line":
 		pm.set_shader_parameter("dir", way)
 
+
 func _end_hold(e: Dictionary) -> void:
 	for lay: Dictionary in e["layers"]:
 		var node: Node3D = lay["node"]
 		if node is GPUParticles3D:
 			(node as GPUParticles3D).emitting = false
 			motes.append({"node": node, "t": 0.0, "dur": (node as GPUParticles3D).lifetime * 1.1, "n": lay["n"]})
-		else:
+		elif not lay.has("surface"):  # (a surface runs out the rest of its life)
 			node.visible = false
 
-## A thin glowing line through named anchors (a bowstring): a mesh trail node drawn fresh from them each frame.
-func _string_node(layer: Dictionary, h: Hunter) -> Node3D:
-	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
+
+## A thin glowing line through named anchors (a bowstring), or through the points the kit's hold passes ("pts"): a
+## mesh trail node drawn fresh each frame. An "xray" one draws over walls and rock.
+func _string_node(layer: Dictionary, h: Hunter, kind: String) -> Node3D:
+	var mi: MeshInstance3D = _take(kind, _string_build.bind(kind))
 	_paint(mi.material_override, layer, h)
 	mi.global_transform = Transform3D.IDENTITY
 	return mi
 
-func _draw_string(lay: Dictionary, h: Hunter) -> void:
+
+func _string_build(kind: String) -> MeshInstance3D:
+	var mi: MeshInstance3D = _surface_node("ribbon")
+	if kind == "xray":
+		if _xray == null:
+			_xray = Shader.new()
+			_xray.code = SURFACE.code.replace("render_mode ", "render_mode depth_test_disabled, ")
+		(mi.material_override as ShaderMaterial).shader = _xray
+	return mi
+
+
+func _draw_string(lay: Dictionary, h: Hunter, given: Variant) -> void:
 	var mesh: ImmediateMesh = (lay["node"] as MeshInstance3D).mesh
 	mesh.clear_surfaces()
 	var cam := get_viewport().get_camera_3d()
@@ -707,7 +1009,9 @@ func _draw_string(lay: Dictionary, h: Hunter) -> void:
 	var layer: Dictionary = lay["layer"]
 	var half := float(layer.get("size", 0.05)) * 0.5
 	var view := -cam.global_basis.z
-	var pts: Array = (layer["through"] as Array).map(func(a): return anchor_pos(h, String(a)))
+	var pts: Array = given if given is Array else []
+	if pts.is_empty():
+		pts = (layer["through"] as Array).map(func(a): return anchor_pos(h, String(a)))
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in pts.size():
 		var along: Vector3 = pts[mini(i + 1, pts.size() - 1)] - pts[maxi(i - 1, 0)]
@@ -718,9 +1022,11 @@ func _draw_string(lay: Dictionary, h: Hunter) -> void:
 		mesh.surface_add_vertex(pts[i] - side)
 	mesh.surface_end()
 
+
 ## True when the Hero's model has this node ("" is never there): a look can stand down for one built in.
 func _model_has(h: Hunter, node_name: String) -> bool:
 	return node_name != "" and h.model != null and WardenGlb.anchor(h.model, node_name) != null
+
 
 # ------------------------------------------------------------------ the running looks
 func _process(delta: float) -> void:
@@ -730,11 +1036,18 @@ func _process(delta: float) -> void:
 		var e: Dictionary = live[i]
 		e["t"] = float(e["t"]) + delta
 		var u := float(e["t"]) / float(e["dur"])
-		if u >= 1.0:
+		if u >= 1.0 or (e.has("cut") and u < float(e["cut"]) and _stopped(e["h"])):
 			(e["node"] as Node3D).visible = false
 			live.remove_at(i)
 			continue
 		(e["mat"] as ShaderMaterial).set_shader_parameter("life", u)
+		if e.has("ride") and is_instance_valid(e["ride"]):
+			var r: Hunter = e["ride"]
+			(e["node"] as Node3D).global_position = _where(e["layer"], r, r.pos, e["dir"]) + (e["off"] as Vector3)
+		if e.has("follow") and is_instance_valid(e["follow"]):
+			(e["node"] as Node3D).global_position = (e["follow"] as Hunter).pos + Vector3(0, SHEEN_LIFT, 0)
+		if e.has("on") and is_instance_valid(e["on"]):
+			(e["node"] as Node3D).global_position = (e["on"] as Node3D).global_position + (e["off"] as Vector3)
 		if e["s0"] != e["s1"]:
 			var ease_out := 1.0 - (1.0 - u) * (1.0 - u)
 			var now_scale: Vector3 = (e["s0"] as Vector3).lerp(e["s1"], ease_out)
@@ -751,6 +1064,13 @@ func _process(delta: float) -> void:
 			(ribbons[i]["node"] as Node3D).visible = false
 			ribbons.remove_at(i)
 
+
+## A "cut" layer goes the moment its hunter is stunned, downed or gone before that share of its life (a wind-up
+## the stun stopped: the move never comes).
+func _stopped(h: Variant) -> bool:
+	return not is_instance_valid(h) or (h as Hunter).stun_t > 0.0 or (h as Hunter).downed
+
+
 ## One mesh trail's frame: it samples its anchor while it runs, then the tail runs out. False once it's gone.
 func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 	var h: Variant = e["h"]
@@ -758,20 +1078,48 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 	var now := float(e["t"])
 	var pts: Array = e["pts"]
 	var follow: Variant = e["follow"]
-	if follow != null and (not is_instance_valid(follow) or not (follow as Node3D).visible):
-		e["dur"] = minf(float(e["dur"]), now)      # what it follows is gone: the tail runs out
-	elif now <= float(e["dur"]) and is_instance_valid(h):
+	var follows := typeof(follow) == TYPE_OBJECT  # (a freed node still is one, though it == null)
+	if follows and (not is_instance_valid(follow) or not (follow as Node3D).visible):
+		e["dur"] = minf(float(e["dur"]), now)  # what it follows is gone: the tail runs out
+		_trail_end(e, pts)
+	elif now <= float(e["dur"]) and (follows or is_instance_valid(h)):
 		var followed: Node3D = follow
-		pts.push_front([followed.global_position if followed else anchor_pos(h, String(e["anchor"])), now])
-		if pts.size() > RIBBON_SAMPLES:
+		var at := followed.global_position if followed else anchor_pos(h, String(e["anchor"]))
+		var step := float(e.get("step", 0.0))
+		if pts.size() > 1 and now - (pts[1] as Vector4).w < step:
+			pts[0] = Vector4(at.x, at.y, at.z, now)  # a streak keeps a point a step: only its head moves on
+		else:
+			pts.push_front(Vector4(at.x, at.y, at.z, now))  # (a sample is a value: no allocation per frame)
+		if step == 0.0 and pts.size() > RIBBON_SAMPLES:
 			pts.pop_back()
 	var tail := float(e["tail"])
-	while not pts.is_empty() and now - float(pts[-1][1]) > tail:
+	while not pts.is_empty() and now - (pts[-1] as Vector4).w > tail:
+		if pts.size() > 1 and now - (pts[-2] as Vector4).w < tail:
+			# the oldest point is clipped back to exactly `tail` old, not dropped: a tail shorter than a frame
+			# (a fast tracer at 30 fps) keeps its length instead of vanishing
+			var newer: Vector4 = pts[-2]
+			var oldest: Vector4 = pts[-1]
+			var k := (now - tail - oldest.w) / maxf(newer.w - oldest.w, 1e-5)
+			var q := _at(oldest).lerp(_at(newer), k)
+			pts[-1] = Vector4(q.x, q.y, q.z, now - tail)
+			break
 		pts.pop_back()
 	if pts.is_empty() and now > float(e["dur"]):
 		return false
 	_draw_ribbon(e, pts, now, tail)
 	return true
+
+
+## A trail's shot is gone: its recipe's "end" move plays where it stopped, facing the way it flew (a bolt's splinters).
+func _trail_end(e: Dictionary, pts: Array) -> void:
+	if String(e.get("end", "")) == "" or pts.is_empty() or not is_instance_valid(e["h"]):
+		return
+	var at := _at(pts[0])
+	var back := _at(pts[mini(1, pts.size() - 1)])
+	var way := Vector2(at.x - back.x, at.z - back.z)
+	play(e["h"], e["end"], at, way.normalized() if way.length() > 0.01 else (e["h"] as Hunter).aim_dir())
+	e["end"] = ""
+
 
 func _draw_ribbon(e: Dictionary, pts: Array, now: float, tail: float) -> void:
 	var mesh: ImmediateMesh = (e["node"] as MeshInstance3D).mesh
@@ -781,18 +1129,47 @@ func _draw_ribbon(e: Dictionary, pts: Array, now: float, tail: float) -> void:
 		return
 	var view := -cam.global_basis.z
 	var width := float(e["width"])
+	var last := Vector3.ZERO
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in pts.size():
-		var p: Vector3 = pts[i][0]
-		var q: Vector3 = pts[mini(i + 1, pts.size() - 1)][0]
-		var r: Vector3 = pts[maxi(i - 1, 0)][0]
-		var along := (q - r).normalized()
+		var p := _at(pts[i])
+		var born := (pts[i] as Vector4).w
+		var along := (_at(pts[mini(i + 1, pts.size() - 1)]) - _at(pts[maxi(i - 1, 0)])).normalized()
 		var side := along.cross(view).normalized()
-		var age := clampf((now - float(pts[i][1])) / tail, 0.0, 1.0)
+		var age := clampf((now - born) / tail, 0.0, 1.0)
 		var half := width * (1.0 - age) * 0.5
-		p += side * float(e["wave"]) * age * sin(age * RIBBON_WAVES + float(pts[i][1]) * 9.0)
+		p += side * float(e["wave"]) * age * sin(age * RIBBON_WAVES + born * 9.0)
 		mesh.surface_set_uv(Vector2(age, 0.0))
 		mesh.surface_add_vertex(p + side * half)
 		mesh.surface_set_uv(Vector2(age, 1.0))
-		mesh.surface_add_vertex(p - side * half)
+		last = p - side * half
+		mesh.surface_add_vertex(last)
+	if float(e["head"]) > 0.0:
+		_draw_head(e, mesh, pts, now, view, last)
 	mesh.surface_end()
+
+
+## The trail's bright head on its newest point: a quad facing the camera, head_len times as long along the flight as it
+## is wide, joined after the strip by degenerate triangles; UV.x -2..-1 tells the shader it is the head. It shrinks
+## away while the tail runs out.
+func _draw_head(e: Dictionary, mesh: ImmediateMesh, pts: Array, now: float, view: Vector3, last: Vector3) -> void:
+	var across := float(e["head"]) * (1.0 - clampf((now - float(e["dur"])) / float(e["tail"]), 0.0, 1.0))
+	if across <= 0.0:
+		return
+	var p := _at(pts[0])
+	var fwd := (p - _at(pts[1])).normalized()
+	var side := fwd.cross(view).normalized() * across * 0.5
+	fwd *= across * float(e["head_len"]) * 0.5
+	mesh.surface_add_vertex(last)
+	for i in 4:
+		var x := -1.0 if i < 2 else 1.0
+		var y := -1.0 if i % 2 == 0 else 1.0
+		var corner := p + fwd * x + side * y
+		mesh.surface_set_uv(Vector2(-1.5 + x * 0.5, 0.5 + y * 0.5))
+		if i == 0:
+			mesh.surface_add_vertex(corner)  # (twice: the last degenerate triangle of the join)
+		mesh.surface_add_vertex(corner)
+
+
+static func _at(sample: Vector4) -> Vector3:
+	return Vector3(sample.x, sample.y, sample.z)

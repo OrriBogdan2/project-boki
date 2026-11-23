@@ -12,7 +12,7 @@
 |---|---|
 | `farm` | The farm in the morning: grown Boki walking around, crops ripe, farm buildings up, tools unlocked |
 | `match` | The title screen's Demo match: a full 20-hunter bot lobby on The Dusk Isles, clear weather, your Hunter dropping in with a Boki |
-| `training` | The Training Area, your Hunter picked, dummies out |
+| `training` | The Training Grounds (the one the title and the farm open), your Hunter picked |
 | `care` | The farm with every Boki hungry: they walk to the trough and eat, the care and feeding scene |
 | `tier2` | An expedition on the highest tier (The Hollow), full bot lobby, your Hunter picked |
 
@@ -35,3 +35,5 @@ From the editor build on Linux: `godot --path . -- --demo=match --hunter=mage`.
 ## Check
 
 `godot --headless --path . -- --demo-check` boots every preset for a few seconds and asserts the state above, that the demo save is never written and that your save file is byte for byte unchanged. Errors print as `SCRIPT ERROR`.
+
+For agent-played reel footage (1080p60, scripted shots on a GPU worker) see [PITCH_REEL.md](PITCH_REEL.md).

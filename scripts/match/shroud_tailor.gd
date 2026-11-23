@@ -5,6 +5,13 @@ extends RefCounted
 ## with it; `bone`, `from` and `reach` hang it from a cloth spring, the far end moving most.
 
 const TONES := ["body", "alt", "trim"]
+## How each body's cloth is cut, whatever the style: [height (m, torso space), reach (m), x the width there]. Hers
+## comes in at the shoulders and waist and out over the hips; his is broad across the shoulders over lean hips.
+const FIGURE := {
+	true: [[0.5, 0.1, 0.94], [0.26, 0.09, 0.86], [0.0, 0.1, 1.09]],
+	false: [[0.47, 0.11, 1.1], [0.02, 0.14, 0.94]],
+}
+const NECK := {true: 0.85, false: 1.1}      # x the collar's girth: her slimmer neck, his thicker one
 static var _baked := {}
 
 var c: Dictionary
@@ -141,13 +148,15 @@ func _bake_tone(list: Array) -> ArrayMesh:
 			hi = maxf(hi, q.y)
 		for i in pts.size():
 			var p: Vector3 = xf * pts[i]
+			var w := _weigh(p, pc[1])
+			p = _fit(p, w)
 			vs.append(p)
 			ns.append((xf.basis * (src[Mesh.ARRAY_NORMAL] as PackedVector3Array)[i]).normalized())
 			uvs.append((src[Mesh.ARRAY_TEX_UV] as PackedVector2Array)[i])
 			uv2.append(Vector2(lo, hi))
 			var col: Variant = src[Mesh.ARRAY_COLOR]
 			cols.append(Color.WHITE if col == null else (col as PackedColorArray)[i])
-			_top4(_weigh(p, pc[1]), bones, weights)
+			_top4(w, bones, weights)
 		for j in (src[Mesh.ARRAY_INDEX] as PackedInt32Array):
 			idx.append(base + j)
 	var arrs := []
@@ -167,6 +176,19 @@ func _bake_tone(list: Array) -> ArrayMesh:
 	var far := EmptySlim.reduce(arrs, EmptySlim.LOD_KEEP)
 	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs, [], {} if far.is_empty() else {0.05: far})
 	return am
+
+## How much wider the cloth is cut at height y for this body (FIGURE).
+func girth(y: float) -> float:
+	var k := 1.0
+	for f in FIGURE[fem]:
+		k += (float(f[2]) - 1.0) * exp(-pow((y - float(f[0])) / float(f[1]), 2.0))
+	return k
+
+## A cloth vertex taken in or let out to the body's figure; cloth that rides an arm (a sleeve) stays round the arm.
+func _fit(p: Vector3, w: PackedFloat32Array) -> Vector3:
+	var arm := w[ShroudSkin.ARM_L] + w[ShroudSkin.ARM_R] + w[ShroudSkin.ELBOW_L] + w[ShroudSkin.ELBOW_R]
+	var k := lerpf(girth(p.y), 1.0, smoothstep(0.4, 0.8, arm))
+	return Vector3(p.x * k, p.y, p.z * lerpf(1.0, k, 0.5))
 
 ## How much a cloth vertex follows each bone. legs: cloth below the hip follows the leg on its side, more toward
 ## the hem, the lower part with the knee (so a kicked-back shin keeps its cloth). arms: cloth within reach of an

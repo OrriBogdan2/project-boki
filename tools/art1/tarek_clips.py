@@ -12,6 +12,7 @@ import bpy
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fistkit as A  # noqa: E402
+import fine_export  # noqa: E402
 
 a = sys.argv[sys.argv.index("--") + 1:]
 OUT_BLEND, OUT_GLB = a[0], a[1]
@@ -371,7 +372,20 @@ DOWNED = m(LOOSE, pos=(0, 0.02, -0.62), hips=(-26, 4, 6), head=(30, 6, 0), hr=ha
            fr=(AX + 0.08, -0.34, AZ + 0.04), fl=(-AX - 0.08, 0.0, AZ), fra=-60.0, fla=-10.0, frt=0.0, flt=0.0, kr=(0.3, 1, 0), kl=(-0.3, 1, 0), lip=-0.7, jaw=0.32, fing_r=1.0, fing_l=0.6)
 C.bake("downed", 1.8, [(0, DOWNED), (1.8, {})], over=breathe(1.8, 2.2), loop=True)
 REV = m(DOWNED, pos=(0, 0.0, -0.46), hips=(-14, 0, 0), head=(2, 0, 0), hr=hand(0.1, 0.34, -0.3), hl=lhand(0.1, 0.34, -0.3), lip=0.1, jaw=0.1, fing_l=1.0)
-C.bake("revive", 1.2, [(0, REV), (1.2, {})], over=breathe(0.9, 2.0), loop=True)
+# revive: kneeling over a friend, both stone fists pressing their chest in two heavy pushes (the Life.R revive is 4 s: a steady loop)
+REV_P = m(REV, pos=(0, 0.02, -0.5), hips=(-22, 0, 0), head=(8, 0, 0), hr=hand(0.1, 0.34, -0.38), hl=lhand(0.1, 0.34, -0.38), jaw=0.2)
+C.bake("revive", 1.2, [(0, REV), (0.2, m(REV_P, e="in")), (0.4, m(REV, e="out")), (0.6, REV), (0.8, m(REV_P, e="in")), (1.0, m(REV, e="out")), (1.2, REV)], over=breathe(1.2, 1.0), loop=True)
+# stomp (one cycle = Life.R stomp_cycle 0.7 s, the stone boot lands at 0.7 of it): the weight rocks back onto the left leg, the right knee lifts
+# high with the fists drawn up, hangs a beat, then the whole of him comes down through the boot
+ST0 = m(STANCE, hr=hand(0.1, 0.12, -0.34), hl=lhand(0.06, 0.28, -0.34), jaw=0.15, lip=-0.6)
+ST1 = m(ST0, pos=(-0.03, -0.02, -0.08), hips=(-6, 0, 4), head=(-2, -4, 12), fr=(AX + 0.04, 0.05, AZ + 0.18), fra=-20.0, frt=-10.0, kr=(0.4, 1, 0))
+ST2 = m(ST1, pos=(-0.03, -0.02, -0.02), hips=(-2, 0, 6), head=(-10, -4, 12), hr=hand(0.14, 0.1, -0.26), hl=lhand(0.1, 0.2, -0.28), fr=(AX + 0.05, 0.16, AZ + 0.34), fra=-30.0, jaw=0.4, lip=-1.0)
+ST3 = m(ST0, pos=(0.02, 0.03, -0.2), hips=(-24, 2, 2), head=(14, -4, 10), hr=hand(0.12, 0.26, -0.5), hl=lhand(0.08, 0.34, -0.5), fr=(AX + 0.08, 0.16, AZ), fra=0.0, frt=-18.0, jaw=0.7, lip=-1.0)
+C.bake("stomp", 0.7, [(0, ST0), (0.16, m(ST1, e="out")), (0.38, m(ST2, e="out")), (0.49, m(ST3, e="in")), (0.58, m(ST3, pos=(0.02, 0.02, -0.15), hips=(-16, 1, 3)), ), (0.7, ST0)], loop=True)
+# drink (Hunter.DRINK_TIME 1.1 s): the left fist brings the flask up under his chin, his head tips back, a long swallow, the flask lowers with a grunt of satisfaction
+DR1 = m(LOOSE, hl=lhand(0.0, 0.2, -0.05), hips=(-2, -2.5, -4), head=(-3, 5, 7), fing_l=1.0, thumb_l=1.0)
+DR2 = m(DR1, hl=lhand(-0.04, 0.16, 0.1), hips=(2, -2, -4), head=(-24, 4, 6), jaw=0.3, lip=0.4)
+C.bake("drink", 1.1, [(0, LOOSE), (0.22, m(DR1, e="out")), (0.36, DR2), (0.8, m(DR2, head=(-28, 4, 6))), (0.9, m(DR1, head=(4, 5, 7), jaw=0.5, lip=0.8), ), (1.1, LOOSE)])
 # death: buckles to the knees, falls on his side; ends lying still (a one-shot: DeathFX keeps the last frame)
 SIDE = m(DOWNED, pos=(0.62, 0.0, 0.2), rot=(0, -84, 0), hips=(-6, 0, 0), head=(6, 10, 0), hr=hand(0.3, 0.3, -0.5), hl=lhand(0.3, -0.1, -0.5), fr=(0.66, -0.12, 0.3), fl=(0.56, 0.18, 0.13), fra=0.0, fla=0.0, fing_r=0.3, fing_l=0.3, jaw=0.2, lip=0.0)
 C.bake("death", 1.6, [(0, LOOSE), (0.16, m(LOOSE, pos=(0, -0.05, -0.1), hips=(14, 0, 4), head=(-20, 0, 0), jaw=0.6, lip=-1.0, fing_r=0.1, fing_l=0.1, e="snap")),
@@ -383,7 +397,7 @@ COCK = m(STANCE, pos=(0.02, -0.06, -0.16), hips=(-6, 8, -38), head=(4, -6, 40), 
 FLUNG = m(STANCE, pos=(-0.02, 0.1, -0.12), hips=(-20, -6, 34), head=(12, 0, -28), hr=hand(-0.06, 0.66, -0.08), hl=lhand(0.2, -0.22, -0.4), er=(0.7, -0.7, 0.1), lip=0.5, jaw=0.5, fing_r=0.05, thumb_r=0.1,
           fr=(AX + 0.12, -0.3, AZ), fl=(-AX - 0.1, 0.32, AZ), fra=-30.0)
 THRU = m(FLUNG, hips=(-24, -4, 46), hr=hand(-0.3, 0.42, -0.34), hl=lhand(0.24, -0.26, -0.42), fing_r=0.5)
-C.bake("lmb_throw", 0.55, [(0, STANCE), (0.07, m(COCK, e="out")), (0.13, m(FLUNG, e="lin")), (0.24, THRU), (0.55, STANCE)])
+C.bake("lmb_throw", 0.55, [(0, STANCE), (0.07, m(COCK, e="out")), (0.13, m(FLUNG, e="lin")), (0.24, THRU), (0.55, STANCE)], fps=60)
 # LMB hold, the wind: sunk and twisted far, the right fist behind the hip, the left forearm up; it holds, trembling
 WIND = m(STANCE, pos=(0.03, -0.1, -0.24), hips=(-12, 8, -44), head=(8, -8, 44), hr=hand(0.24, -0.5, -0.46), hl=lhand(-0.02, 0.36, 0.06), el=(-0.8, 0.0, -0.7), lip=-0.8, jaw=0.08,
          fr=(AX + 0.14, -0.34, AZ), fl=(-AX - 0.12, 0.3, AZ), fra=-18.0)
@@ -402,7 +416,7 @@ C.bake("lmb_wind", 0.64, [(0, STANCE), (0.1, m(WIND, e="out")), (0.24, m(WIND, p
 PUNCH = m(STANCE, pos=(0, 0.3, -0.12), rot=(0, 0, 8), hips=(-26, -4, 30), head=(14, 0, -24), hr=hand(-0.06, 0.74, 0.02), hl=lhand(0.2, -0.3, -0.34), er=(0.8, -0.5, 0.1), lip=0.2, jaw=0.75,
           fr=(AX + 0.12, -0.5, AZ + 0.02), fl=(-AX - 0.1, 0.52, AZ), fra=-38.0, flt=0.0, frt=-10.0)
 OVER = m(PUNCH, pos=(0, 0.38, -0.14), hips=(-32, -6, 42), hr=hand(-0.12, 0.78, -0.04), head=(18, 0, -34))
-C.bake("lmb_punch", 0.6, [(0, WIND), (0.05, m(PUNCH, e="lin")), (0.12, OVER), (0.3, m(PUNCH, pos=(0, 0.2, -0.14), hips=(-20, -2, 12), hr=hand(0.02, 0.5, -0.1))), (0.6, STANCE)])
+C.bake("lmb_punch", 0.6, [(0, WIND), (0.05, m(PUNCH, e="lin")), (0.12, OVER), (0.3, m(PUNCH, pos=(0, 0.2, -0.14), hips=(-20, -2, 12), hr=hand(0.02, 0.5, -0.1))), (0.6, STANCE)], fps=60)
 # RMB hold: a low gather, both fists drawn in at the hips
 GATHER = m(STANCE, pos=(0, -0.04, -0.34), rot=(0, 0, 0), hips=(-24, 0, 0), head=(18, 0, 0), hr=hand(0.0, 0.2, -0.52), hl=lhand(0.0, 0.2, -0.52), er=(0.9, -0.5, 0), el=(-0.9, -0.5, 0),
            fr=(AX + 0.16, -0.06, AZ), fl=(-AX - 0.16, 0.06, AZ), frt=-16.0, flt=16.0, fra=0.0, fla=0.0, kr=(0.6, 1, 0), kl=(-0.6, 1, 0), lip=-0.7, jaw=0.06)
@@ -446,10 +460,10 @@ C.bake("e_row", 0.95, [(0, STANCE), (0.06, m(REAR, e="out")), (0.18, m(SMASH, po
 # X held, Basalt Spine: sunk wide, both fists out at the ground; he leans along the ridge being dragged
 SPAIM = m(GATHER, pos=(0, 0, -0.44), hips=(-16, 0, 0), head=(10, 0, 0), hr=hand(0.5, 0.14, -0.62), hl=lhand(0.5, 0.14, -0.62), er=(0.5, -0.6, 0.6), el=(-0.5, -0.6, 0.6), fr=(AX + 0.3, -0.04, AZ), fl=(-AX - 0.3, 0.04, AZ), jaw=0.1, lip=-0.5)
 C.bake("x_aim", 0.62, [(0, STANCE), (0.12, m(SPAIM, e="out")), (0.32, m(SPAIM, pos=(0, 0, -0.46))), (0.62, m(SPAIM, pos=(0, 0, -0.44)))], over=tremble)
-# X let go (1.0): fists up (0.05), driven down (0.1, the cracks), held through the 0.2 s cracks and 0.4 s rise, heaved up
-# as the ridge stands (0.7)
-C.bake("x_spine", 1.0, [(0, SPAIM), (0.05, m(REAR, pos=(0, 0, -0.12), hr=hand(0.0, 0.2, 0.5), hl=lhand(0.0, 0.2, 0.5), e="out")), (0.1, m(SMASH, pos=(0, 0.04, -0.58), hr=hand(0.0, 0.56, -0.74), hl=lhand(0.0, 0.56, -0.74), e="snap")),
-                        (0.55, m(SMASH, pos=(0, 0.04, -0.54), hr=hand(0.0, 0.56, -0.7), hl=lhand(0.0, 0.56, -0.7))), (0.7, m(HEAVE, e="out")), (1.0, STANCE)])
+# X let go (1.4): fists up (0.05), driven down (0.1, the cracks), held through the 0.2 s cracks and 0.8 s rise to 0.95, heaved up
+# as the ridge stands (1.0 = x.tell + x.rise), back to stance by 1.4
+C.bake("x_spine", 1.4, [(0, SPAIM), (0.05, m(REAR, pos=(0, 0, -0.12), hr=hand(0.0, 0.2, 0.5), hl=lhand(0.0, 0.2, 0.5), e="out")), (0.1, m(SMASH, pos=(0, 0.04, -0.58), hr=hand(0.0, 0.56, -0.74), hl=lhand(0.0, 0.56, -0.74), e="snap")),
+                        (0.95, m(SMASH, pos=(0, 0.04, -0.54), hr=hand(0.0, 0.56, -0.7), hl=lhand(0.0, 0.56, -0.7))), (1.0, m(HEAVE, e="out")), (1.4, STANCE)])
 # Tremor Sense: a palm flat on the ground, the head cocked at what it feels, the other fist up
 SENSE = m(GATHER, pos=(0, 0.02, -0.5), hips=(-34, 0, 10), head=(14, 16, -24), hr=hand(-0.04, 0.5, -0.66), hl=lhand(0.0, 0.3, -0.16), er=(0.8, -0.4, 0.2), el=(-0.7, -0.3, -0.6), fing_r=0.0, thumb_r=0.0, wr=(-50, 0, 0), lip=0.5, jaw=0.05)
 C.bake("sense", 0.75, [(0, STANCE), (0.12, m(SENSE, e="out")), (0.45, SENSE), (0.75, STANCE)])
@@ -496,9 +510,10 @@ if OUT_GLB != "-":
         st = tr.strips.new(act.name, 0, act)
         tr.mute = False
     bpy.ops.object.select_all(action="SELECT")
-    bpy.ops.export_scene.gltf(filepath=OUT_GLB, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
-                              export_animation_mode="NLA_TRACKS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=93, export_extras=False, export_force_sampling=False,
-                              export_frame_range=False, export_optimize_animation_size=False, export_def_bones=False, export_bake_animation=False)
+    fine_export.export(arm, C.rates, OUT_GLB, dict(
+        export_format="GLB", use_selection=True, export_apply=False, export_animations=True, export_animation_mode="NLA_TRACKS",
+        export_skins=True, export_yup=True, export_materials="EXPORT", export_image_format="JPEG", export_jpeg_quality=93,
+        export_extras=False, export_force_sampling=False, export_frame_range=False, export_optimize_animation_size=False,
+        export_def_bones=False, export_bake_animation=False))
     print("exported", os.path.getsize(OUT_GLB))
 print("clips", json.dumps(C.lengths))

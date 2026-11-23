@@ -15,4 +15,4 @@ Two lines each took save v12 for something else. 0.24.4 (the release line) ships
 Option 2, Save.VERSION 13 (the shaping items step of the garden-items line, its v13 -> v14, folds into v12 -> v13 as `Care.ensure` on every Boki). `Evo.migrate` is idempotent (it clamps levels and skips a Boki that already has `was`), the bonds step only adds a missing key, and `GardenZones.migrate` only adds the zone fields, so running v11 -> v12 again inside v12 -> v13 is safe for every v12 save from either line.
 
 ## Consequences
-scripts/core/save.gd only. No Net change. Checks: the garden line's zone/raising checks and the release line's save/evo checks load saves through the same chain.
+scripts/core/save.gd only. No Net change. Checks: the garden line's zone/raising checks and the release line's save/evo checks load saves through the same chain; `--old-saves-check` loads real 0.24.2, 0.24.3 and 0.24.4 saves (tools/fixtures/save_chain) and opens the garden on each.

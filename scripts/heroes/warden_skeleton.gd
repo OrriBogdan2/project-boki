@@ -7,20 +7,61 @@ extends RefCounted
 
 ## Each bone's parent (root has none). Thighs hang from root: the legs are not under the hips in the rig.
 const PARENT := {
-	"root": "", "hips": "root", "head": "hips",
-	"upper_arm.L": "hips", "forearm.L": "upper_arm.L", "hand.L": "forearm.L",
-	"upper_arm.R": "hips", "forearm.R": "upper_arm.R", "hand.R": "forearm.R",
-	"thigh.L": "root", "shin.L": "thigh.L", "thigh.R": "root", "shin.R": "thigh.R",
-	"pauldron.L": "hips", "pauldron.R": "hips", "skirt": "hips", "cape": "hips", "scarf": "hips",
-	"tail": "hips", "wings": "hips",
+	"root": "",
+	"hips": "root",
+	"head": "hips",
+	"upper_arm.L": "hips",
+	"forearm.L": "upper_arm.L",
+	"hand.L": "forearm.L",
+	"upper_arm.R": "hips",
+	"forearm.R": "upper_arm.R",
+	"hand.R": "forearm.R",
+	"thigh.L": "root",
+	"shin.L": "thigh.L",
+	"thigh.R": "root",
+	"shin.R": "thigh.R",
+	"pauldron.L": "hips",
+	"pauldron.R": "hips",
+	"skirt": "hips",
+	"cape": "hips",
+	"scarf": "hips",
+	"tail": "hips",
+	"wings": "hips",
 }
 ## The joint each limb bone points at (its Y axis); the hand and shin carry on in their parent's line.
 const POINTS_AT := {
-	"upper_arm.L": "forearm.L", "forearm.L": "hand.L", "upper_arm.R": "forearm.R", "forearm.R": "hand.R",
-	"thigh.L": "shin.L", "thigh.R": "shin.R",
+	"upper_arm.L": "forearm.L",
+	"forearm.L": "hand.L",
+	"upper_arm.R": "forearm.R",
+	"forearm.R": "hand.R",
+	"thigh.L": "shin.L",
+	"thigh.R": "shin.R",
 }
 const CARRY_ON := {"hand.L": "forearm.L", "hand.R": "forearm.R", "shin.L": "thigh.L", "shin.R": "thigh.R"}
-const REST_TOL := 0.01         # m a .glb bone's head may sit from its rig node
+const REST_TOL := 0.01  # m a .glb bone's head may sit from its rig node
+## Contract bone -> the bone of Meshy's auto-rig that plays its part (docs/art/wardens/MESHY_NATIVE.md "Bone
+## lookup"). Meshy: Hips > Spine02 > Spine01 > Spine > neck > Head, arms from Left/RightShoulder, legs from Hips;
+## Left/Right are the character's own sides, as the contract's .L/.R. "hips" is the contract's torso (Rig/Torso: the
+## head and arms hang from it, the legs do not), so Spine02, the first bone above Meshy's pelvis.
+const NATIVE := {
+	"root": "Hips",
+	"hips": "Spine02",
+	"head": "Head",
+	"upper_arm.L": "LeftArm",
+	"forearm.L": "LeftForeArm",
+	"hand.L": "LeftHand",
+	"upper_arm.R": "RightArm",
+	"forearm.R": "RightForeArm",
+	"hand.R": "RightHand",
+	"thigh.L": "LeftUpLeg",
+	"shin.L": "LeftLeg",
+	"thigh.R": "RightUpLeg",
+	"shin.R": "RightLeg",
+	"foot.L": "LeftFoot",
+	"foot.R": "RightFoot",
+}
+const BONE_MAP := "contract_bones"  # Skeleton3D meta: contract bone -> this Hunter's Meshy bone (beats NATIVE)
+
 
 ## Model-space rest transform of every rig node a bone follows (the procedural model as Models.hunter has
 ## built it, before HunterAnim's rest pose). Read once when the hunter is dressed.
@@ -31,6 +72,7 @@ static func rig_rest(root: Node3D) -> Dictionary:
 		if nd != null:
 			out[b] = WardenGlb.model_xf(root, nd)
 	return out
+
 
 ## The contract armature for a rig rest (rig_rest): bones in parent-first order, unit-scale rests.
 static func build(rest: Dictionary) -> Skeleton3D:
@@ -51,6 +93,7 @@ static func build(rest: Dictionary) -> Skeleton3D:
 		sk.set_bone_pose(bi, local)
 	return sk
 
+
 ## Y along the limb toward the next joint (a hand or shin keeps its parent's line); other bones stand up.
 static func _basis(b: String, rest: Dictionary) -> Basis:
 	var from := (rest[b] as Transform3D).origin
@@ -66,10 +109,27 @@ static func _basis(b: String, rest: Dictionary) -> Basis:
 	x = x.normalized()
 	return Basis(x, y, x.cross(y)).orthonormalized()
 
-## A contract bone in an imported armature: glTF tools write "upper_arm.L" as "upper_arm_L". -1 if absent.
+
+## A contract bone in an imported armature: glTF tools write "upper_arm.L" as "upper_arm_L". On Meshy's own skeleton
+## (WardenNative, which never renames its bones) the bone that plays that part (NATIVE). -1 if absent.
+## The one bone lookup of game code and checks: a contract rig finds its own bone first, so it is unchanged.
+## A Hunter's own stand-ins (skeleton meta BONE_MAP, set from warden_native.json "bones": Cinder's heel jets on her
+## feet) come before NATIVE.
 static func find(sk: Skeleton3D, bone: String) -> int:
+	var bi := own(sk, bone)
+	if bi >= 0:
+		return bi
+	var mine: Dictionary = sk.get_meta(BONE_MAP, {})
+	if mine.has(bone):
+		return sk.find_bone(String(mine[bone]))
+	return sk.find_bone(String(NATIVE[bone])) if NATIVE.has(bone) else -1
+
+
+## The contract bone itself (no Meshy stand-in): what the rig-fit test (mismatches) reads. -1 if absent.
+static func own(sk: Skeleton3D, bone: String) -> int:
 	var bi := sk.find_bone(bone)
 	return bi if bi >= 0 else sk.find_bone(bone.replace(".", "_"))
+
 
 ## What keeps `sk` from being the contract armature for `rest`: a missing bone, a wrong parent, or a bone
 ## whose head is off its rig node; and, for a Warden with variant bones (`extra`: bone -> parent, WardenGlb.EXTRA),
@@ -77,23 +137,63 @@ static func find(sk: Skeleton3D, bone: String) -> int:
 static func mismatches(sk: Skeleton3D, rest: Dictionary, extra := {}) -> Array:
 	var out: Array = []
 	for b in extra:
-		var bi := find(sk, b)
+		var bi := own(sk, b)
 		if bi < 0:
 			out.append("variant bone %s missing" % b)
-		elif sk.get_bone_parent(bi) != find(sk, String(extra[b])):
+		elif sk.get_bone_parent(bi) != own(sk, String(extra[b])):
 			out.append("variant bone %s's parent is not %s" % [b, extra[b]])
 	for b in WardenGlb.BONES:
-		var bi := find(sk, b)
+		var bi := own(sk, b)
 		if bi < 0:
 			if not b in WardenGlb.OPTIONAL and rest.has(b):
 				out.append("%s missing" % b)
 			continue
 		var par := String(PARENT[b])
 		var pi := sk.get_bone_parent(bi)
-		if par != "" and (pi < 0 or pi != find(sk, par)):
+		if par != "" and (pi < 0 or pi != own(sk, par)):
 			out.append("%s's parent is not %s" % [b, par])
 		if rest.has(b):
 			var off := sk.get_bone_global_rest(bi).origin.distance_to((rest[b] as Transform3D).origin)
 			if off > REST_TOL:
 				out.append("%s sits %.3f m off its rig node" % [b, off])
 	return out
+
+
+## The ankle in the skeleton's space: the shin's first child bone (the foot), or a thigh's length down the shin.
+static func ankle(sk: Skeleton3D, _thigh: int, shin: int) -> Vector3:
+	var kids := sk.get_bone_children(shin)
+	var tip := Vector3(0.0, sk.get_bone_rest(shin).origin.length(), 0.0)
+	if not kids.is_empty():
+		tip = sk.get_bone_rest(kids[0]).origin
+	return sk.get_bone_global_pose(shin) * tip
+
+
+## Two-bone IK on the skeleton (its space; FootPlant's and the gait's foot lock): turns the thigh and shin bones so
+## the ankle reaches tgt, the knee bending in the plane the clip bent it in; the foot keeps the clip's turn.
+static func reach_bones(sk: Skeleton3D, thigh: int, shin: int, tgt: Vector3) -> void:
+	var tp := sk.get_bone_global_pose(thigh)
+	var sp := sk.get_bone_global_pose(shin)
+	var kids := sk.get_bone_children(shin)
+	var foot := kids[0] if not kids.is_empty() else -1
+	var fp := sk.get_bone_global_pose(foot) if foot >= 0 else Transform3D.IDENTITY
+	var hip := tp.origin
+	var knee := sp.origin
+	var ankle_v := WardenSkeleton.ankle(sk, thigh, shin)
+	var upper := hip.distance_to(knee)
+	var lower := knee.distance_to(ankle_v)
+	var to := tgt - hip
+	var span := clampf(to.length(), absf(upper - lower) + 0.001, upper + lower - 0.001)
+	var dir := to.normalized()
+	var side := (knee - hip) - dir * (knee - hip).dot(dir)
+	if side.length_squared() < 1e-8:
+		side = tp.basis.z - dir * tp.basis.z.dot(dir)
+	side = side.normalized()
+	var ca := clampf((upper * upper + span * span - lower * lower) / (2.0 * upper * span), -1.0, 1.0)
+	var knee_to := hip + dir * (upper * ca) + side * (upper * sqrt(1.0 - ca * ca))
+	var turn_t := Basis(Quaternion((knee - hip).normalized(), (knee_to - hip).normalized()))
+	sk.set_bone_global_pose(thigh, Transform3D(turn_t * tp.basis, hip))
+	var shin_dir := turn_t * (ankle_v - knee)
+	var turn_s := Basis(Quaternion(shin_dir.normalized(), (hip + dir * span - knee_to).normalized()))
+	sk.set_bone_global_pose(shin, Transform3D(turn_s * turn_t * sp.basis, knee_to))
+	if foot >= 0:
+		sk.set_bone_global_pose(foot, Transform3D(fp.basis, sk.get_bone_global_pose(foot).origin))

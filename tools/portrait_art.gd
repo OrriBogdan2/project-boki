@@ -17,7 +17,7 @@ const QUALITY := 0.88         # JPEG quality: no visible banding on the painted 
 const ART_NAMES := {
 	"bulwark": "breaker", "archer": "lisette", "juggernaut": "kael", "thief": "sable", "mage": "ryzz",
 	"dolm": "tarek", "ostra": "motley", "ashwick": "cinder", "gunslinger": "vex", "tender": "pip",
-	"rimewright": "claire", "dredge": "grimble",
+	"rimewright": "claire", "dredge": "grimble", "gil": "gill",
 }
 
 func _init() -> void:

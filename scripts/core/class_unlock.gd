@@ -15,7 +15,8 @@ extends RefCounted
 ## first expedition (old saves)], second: [the second-Relic choices still to pick from], second_ready: bool (the
 ## first expedition is done, so the pick is on offer), fresh: [just opened, not announced], told: int (ready unlocks
 ## already announced), reveal: [ids], seen: [ids], stats: {stat: n} (every expedition),
-## hunters: {id: {stat: n}} (expeditions played as that Hunter)}. No "classes" key reads as all open.
+## hunters: {id: {stat: n}} (expeditions played as that Hunter, with "matches" and
+## "damage"; HunterStats shows them)}. No "classes" key reads as all open.
 # "mask" in code = "Relic" in game, owner 2026-11-07 (also the setting key demo_all_masks)
 
 const RULES_PATH := "res://content/rules/class_unlock.json"
@@ -100,6 +101,10 @@ static func open_ids() -> Array:
 # ---- the starter pick (Lace, Kael or Vex), then the second Relic: 1 of 3 after the first expedition
 static func starters() -> Array:
 	return (rules().get("starters", []) as Array).filter(func(a): return Arch.exists(String(a)))
+
+## A starter the pickers tag "Start here": until the save has played `start_here_matches` matches.
+static func start_here(id: String) -> bool:
+	return starters().has(id) and int(Save.d.get("matches", 0)) < int(rules().get("start_here_matches", 0))
 
 static func picks_needed() -> int:
 	return int(rules().get("starter_picks", 1))
@@ -195,6 +200,8 @@ static func match_counts(r: Dictionary) -> Dictionary:
 		if typeof(ms[k]) == TYPE_INT:
 			out[k] = int(ms[k])
 	var escaped := bool(r.get("extracted", false))
+	out["matches"] = 1
+	out["damage"] = int(r.get("damage", 0))
 	out["knocks"] = int(r.get("knocks", 0))
 	out["revives"] = int(r.get("revives", 0))
 	out["extracts"] = 1 if escaped else 0
@@ -268,10 +275,21 @@ static func status(id: String) -> String:
 		return "progress"
 	return "locked"
 
+## The one plain line on a locked Hunter at home: the second Hunter waits for the first finished
+## expedition (said outright, a garden-only player has no other hint); the rest show their challenge.
+static func locked_line(id: String) -> String:
+	if is_open(id):
+		return ""
+	if is_bonus(id):
+		return "Finish an expedition to choose your second Hunter"
+	return challenge_text(id)
+
 ## What it takes, in one line with its counter, for a locked Hunter's card.
 static func requirement(id: String) -> String:
 	if is_open(id):
 		return ""
+	if needs_starters() and starters().has(id):
+		return "Pick it as your first Relic"
 	if (state().get("second", []) as Array).has(id):
 		var names := second_picks().map(func(a): return Arch.name_of(String(a), true))
 		return "One of %s opens after your first expedition" % ", ".join(names)
@@ -282,7 +300,7 @@ static func requirement(id: String) -> String:
 	var gp := challenge_progress(id)
 	var line := "%s (%d/%d)" % [challenge_text(id), int(gp["have"]), int(gp["need"])]
 	if open_ids().size() < open_needed(id):
-		line += ", once %d Relics are open" % open_needed(id)
+		line += "  ·  after %d Relics" % open_needed(id)
 	return line
 
 ## Unlocks a ready Hunter (the end of the hold). Returns false if it isn't ready.

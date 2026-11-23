@@ -5,26 +5,32 @@ extends Control
 ## or makes it). Messages stack down a fixed column under `top`, so two never sit on top of each other;
 ## a repeat of one on show or waiting merges into it ("Ember  x3"); at most MAX_SHOWN show at once
 ## (FIGHT_SHOWN in a fight, see `fight`) and the rest wait, the most important first; each lives a
-## short while (FIGHT_LIFE at most in a fight). A low-priority line that waits too long is dropped.
+## short while (FIGHT_LIFE at most in a fight). A low-priority line only shows on an empty lane (never
+## beside another card), is dropped outright in a fight, and is dropped if it waits too long.
+## URGENT is for what a fight needs now (your Boki is down, you are being stomped): it alone passes `hold`.
 
-enum { LOW, NORMAL, HIGH }
-const MAX_SHOWN := 3
-const LIFE := [1.8, 2.4, 3.2]   # s on show for LOW, NORMAL, HIGH, fades included
-const PX := [15, 17, 20]        # font px for LOW, NORMAL, HIGH
+enum { LOW, NORMAL, HIGH, URGENT }
+const MAX_SHOWN := 2
+const LIFE := [1.8, 2.4, 3.2, 3.2]   # s on show for LOW, NORMAL, HIGH, URGENT, fades included
+const PX := [15, 17, 20, 20]         # font px for LOW, NORMAL, HIGH, URGENT
 const STALE := 3.0              # s a LOW line may wait before it's dropped
 const WAIT_CAP := 6             # lines waiting at most: past it the oldest of the lowest priority goes
 const FADE_IN := 0.15           # s
 const FADE_OUT := 0.35          # s
+const CARD_PAD_X := 12          # px of padding either side of a card's line
 const GAP := 6.0                # px between two cards
 const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when one goes
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
-const FIGHT_SHOWN := 2          # lines on show at most while the player is in a fight
+const FIGHT_SHOWN := 1          # lines on show at most while the player is in a fight
 const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint's own life aside)
 
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
+var max_w := 0.0                ## px: the widest a card gets (the tutorial's column); 0: WIDE of the screen
+var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
 var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
-var hold := false:              ## true: nothing new comes in (the tutorial banner has the floor)
+var one_hint := false           ## true: one hint (own-life line) on show at a time (a match's TopStack sets it)
+var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
 		_promote()
@@ -46,7 +52,7 @@ static func of(host: Control) -> MsgLane:
 
 ## Puts a line in the lane. `life` 0 uses the priority's own; a hint passes a longer one.
 func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
-	if text == "":
+	if text == "" or (prio == LOW and fight):
 		return
 	for e in _shown:
 		if e["text"] == text:
@@ -143,13 +149,24 @@ func _process(delta: float) -> void:
 	_promote()
 	_layout(delta)
 
-## Moves waiting lines onto free rows, the most important first (oldest first within a priority).
+## Moves waiting lines onto free rows, the most important first (oldest first within a priority);
+## while `hold` is on only URGENT lines move. With `one_hint` on, one hint (a line with its own life) at a time:
+## the next waits for it (a home or scripted beat's lines still stack).
 func _promote() -> void:
-	while not hold and not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
-		var best := 0
+	while not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
+		var hint_up := one_hint and _shown.any(func(e: Dictionary) -> bool: return bool(e["own_life"]))
+		var best := -1
 		for i in _waiting.size():
-			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
+			if hint_up and bool(_waiting[i]["own_life"]):
+				continue
+			if best < 0 or int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
 				best = i
+		if best < 0:
+			return
+		if hold and int(_waiting[best]["prio"]) < URGENT:
+			return
+		if int(_waiting[best]["prio"]) == LOW and not _shown.is_empty():
+			return
 		var e: Dictionary = _waiting.pop_at(best)
 		e["box"] = _card(e)
 		add_child(e["box"])
@@ -168,6 +185,7 @@ func _layout(delta: float) -> void:
 		var y := want if not e.has("placed") else lerpf(box.position.y, want, k)
 		e["placed"] = true
 		y = maxf(y, above + GAP)
+		x += HunterZone.slide(Rect2(Vector2(x, y), box.size), avoid)
 		box.position = Vector2(x, y)
 		above = y + box.size.y
 		want += box.size.y + GAP
@@ -186,7 +204,7 @@ func _card(e: Dictionary) -> PanelContainer:
 	var c := UI.glass(8, UI.R_CARD)
 	var f := c.get_theme_stylebox("panel") as UiFrame
 	f.edge = Color(e["col"], 0.35)
-	f.padded(12, 3)
+	f.padded(CARD_PAD_X, 3)
 	var l := UI.label(_label_text(e), px, e["col"], UI.big)
 	l.add_theme_constant_override("outline_size", 4)
 	l.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.08, 0.6))
@@ -205,8 +223,10 @@ func _bump(e: Dictionary) -> void:
 
 ## The label as wide as its line, up to WIDE of the screen (past that it wraps).
 func _fit(l: Label, px: int) -> void:
-	var natural := UI.big.get_string_size(l.text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	var natural := TextCache.width(UI.big, l.text, px)
 	var widest := get_viewport_rect().size.x * WIDE if is_inside_tree() else 600.0
+	if max_w > 0.0:
+		widest = minf(widest, max_w - 2.0 * CARD_PAD_X)
 	l.custom_minimum_size.x = minf(natural + 2.0, widest)
 
 func _label_text(e: Dictionary) -> String:

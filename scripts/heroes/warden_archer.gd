@@ -98,7 +98,7 @@ static func _cloak(c: Dictionary, m: Dictionary) -> void:
 	var t: Node3D = c["torso"]
 	var bw: float = c["bw"]
 	var cw: float = c["cw"]
-	var cape := Models._pivot(t, "Cape", Vector3(0, 0.56, 0.24 * bw))
+	var cape := t.get_node("Cape") as Node3D      # (HunterBody.pivots)
 	var at := Vector3(0, 0.02, -0.24 * bw)
 	var scl := Vector3(cw, 1.0, bw)
 	var tilt := Vector3(0.05, 0, -0.06)

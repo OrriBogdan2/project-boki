@@ -14,18 +14,19 @@ func orbs(main_node: Node) -> void:
 	await _through_walls()
 	await _glow_and_chime()
 	await _weapon_kept()
+	await _no_kit_tick_when_down()
 
 ## Fires one orb `wait` seconds after the last and returns its shot, with the kit's charge at the shot.
-func _fire_after(m: Match, P: Hunter, K: OstraKit, wait: float) -> Dictionary:
-	K.last_shot_t = m.time - wait
-	K._set_charge(K.wait_charge())
-	var k := K.charge
-	var sfx := String(P.wpn["sfx"])      # the release sound the shot will play
-	var shots0 := P.shot_n
-	P.fire_cd = 0.0
-	step(m, 0.05, func(): P.inp["fire"] = P.shot_n == shots0)
-	P.inp["fire"] = false
-	var mine: Array = m.shots.filter(func(s): return s["by"] == P)
+func _fire_after(m: Match, p: Hunter, k_v: OstraKit, wait: float) -> Dictionary:
+	k_v.last_shot_t = m.time - wait
+	k_v._set_charge(k_v.wait_charge())
+	var k := k_v.charge
+	var sfx := String(p.wpn["sfx"])      # the release sound the shot will play
+	var shots0 := p.shot_n
+	p.fire_cd = 0.0
+	step(m, 0.05, func(): p.inp["fire"] = p.shot_n == shots0)
+	p.inp["fire"] = false
+	var mine: Array = m.shots.filter(func(s): return s["by"] == p)
 	var sd: Dictionary = mine[-1] if not mine.is_empty() else {}      # (point blank it has already hit)
 	return {"s": sd, "k": k, "sfx": sfx, "skin": _skin_of(m, sd) if not sd.is_empty() else {}}
 
@@ -45,13 +46,13 @@ func _rises(rows: Array, key: String) -> bool:
 func _charge_curve() -> void:
 	var r := setup("ostra", 12.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: OstraKit = P.ak
-	aim_at(P, r[2].pos)
-	var base := float(K.base_wpn.get("dmg", P.wpn["dmg"]))
+	var p: Hunter = r[1]
+	var k: OstraKit = p.ak
+	aim_at(p, r[2].pos)
+	var base := float(k.base_wpn.get("dmg", p.wpn["dmg"]))
 	var rows: Array = []
 	for w in WAITS:
-		var f := _fire_after(m, P, K, w)
+		var f := _fire_after(m, p, k, w)
 		var sd: Dictionary = f["s"]
 		var skin: Dictionary = f["skin"]
 		var sn := skin["n"] as Node3D
@@ -104,21 +105,21 @@ func _two_looks_ok(q: Dictionary) -> bool:
 func _held_fire() -> void:
 	var r := setup("ostra", 12.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: OstraKit = P.ak
-	aim_at(P, r[2].pos)
+	var p: Hunter = r[1]
+	var k: OstraKit = p.ak
+	aim_at(p, r[2].pos)
 	step(m, 0.05)
-	var plain := float(K.base_wpn["dmg"])
+	var plain := float(k.base_wpn["dmg"])
 	var seen := {}
 	var dmgs: Array = []
-	K.last_shot_t = m.time
+	k.last_shot_t = m.time
 	step(m, 3.0, func():
-		P.inp["fire"] = true
+		p.inp["fire"] = true
 		for s in m.shots:
-			if s["by"] == P and not seen.has(s["sid"]):
+			if s["by"] == p and not seen.has(s["sid"]):
 				seen[s["sid"]] = true
 				dmgs.append(float(s["dmg"])))
-	P.inp["fire"] = false
+	p.inp["fire"] = false
 	ok(
 		"held fire: every orb in the stream is plain",
 		dmgs.size() >= 4 and dmgs.all(func(d): return absf(d - plain) < 0.01), str(dmgs)
@@ -128,74 +129,74 @@ func _held_fire() -> void:
 func _full_slows() -> void:
 	var r := setup("ostra", 8.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var K: OstraKit = P.ak
-	var hit_at := T.pos
-	aim_at(P, hit_at)
-	_fire_after(m, P, K, 1.3)
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
+	var k: OstraKit = p.ak
+	var hit_at := t.pos
+	aim_at(p, hit_at)
+	_fire_after(m, p, k, 1.3)
 	step(m, 0.6)
-	ok("slow: a nearly full orb hits but doesn't slow", dmg(T) > 11.0 and T.slow_t <= 0.0, "%.1f" % dmg(T))
-	fresh(T)
-	_fire_after(m, P, K, 1.4)
+	ok("slow: a nearly full orb hits but doesn't slow", dmg(t) > 11.0 and t.slow_t <= 0.0, "%.1f" % dmg(t))
+	fresh(t)
+	_fire_after(m, p, k, 1.4)
 	step(m, 0.6)
 	ok(
-		"slow: a full orb slows (10% for 1.5s, the data's values)",
-		T.slow_t > 0.5 and absf(T.slow_k - float(K.lmb_def()["prime_slow"])) < 0.001, "slow %.2f" % T.slow_t
+		"slow: a full orb slows (6% for 1.5s, the in-game card)",
+		t.slow_t > 0.5 and absf(t.slow_k - float(k.lmb_def()["prime_slow"])) < 0.001, "slow %.2f" % t.slow_t
 	)
 	step(m, 2.0)
-	fresh(T)
-	aim_at(P, hit_at + Vector3(0, 0, 5.0))
-	_fire_after(m, P, K, 1.4)
-	aim_at(P, hit_at)
-	_fire_after(m, P, K, 0.6)
+	fresh(t)
+	aim_at(p, hit_at + Vector3(0, 0, 5.0))
+	_fire_after(m, p, k, 1.4)
+	aim_at(p, hit_at)
+	_fire_after(m, p, k, 0.6)
 	step(m, 0.6)
 	ok(
 		"slow: a plain orb right after a full one that missed doesn't slow",
-		dmg(T) > 5.0 and T.slow_t <= 0.0, "took %.1f slow %.2f" % [dmg(T), T.slow_t]
+		dmg(t) > 5.0 and t.slow_t <= 0.0, "took %.1f slow %.2f" % [dmg(t), t.slow_t]
 	)
 	await done(m)
 	r = setup("ostra", 1.2)
 	m = r[0]
-	P = r[1]
-	T = r[2]
-	K = P.ak
-	aim_at(P, T.pos)
-	_fire_after(m, P, K, 1.4)
+	p = r[1]
+	t = r[2]
+	k = p.ak
+	aim_at(p, t.pos)
+	_fire_after(m, p, k, 1.4)
 	step(m, 0.3)
-	ok("slow: a full orb fired point blank still slows", dmg(T) > 11.0 and T.slow_t > 0.5, "slow %.2f" % T.slow_t)
+	ok("slow: a full orb fired point blank still slows", dmg(t) > 11.0 and t.slow_t > 0.5, "slow %.2f" % t.slow_t)
 	await done(m)
 
 ## A rock row between him and the dummy: every charge passes it, also fired with him pressed against it.
 func _through_walls() -> void:
 	var r := setup("ostra", 6.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
 	var home: Vector3 = r[3]
-	var K: OstraKit = P.ak
-	var W = m.world
+	var k: OstraKit = p.ak
+	var w = m.world
 	var wx := int(floor(home.x)) + 3
 	for dz in range(-2, 3):
-		W.kind[W.idx(wx, int(floor(home.z)) + dz)] = World.T_BLOCK
-	aim_at(P, T.pos)
-	P.teleport(Vector3(float(wx) - 0.45, P.pos.y, P.pos.z))
-	aim_at(P, T.pos)
-	fresh(T)
-	_fire_after(m, P, K, 0.6)
+		w.kind[w.idx(wx, int(floor(home.z)) + dz)] = World.T_BLOCK
+	aim_at(p, t.pos)
+	p.teleport(Vector3(float(wx) - 0.45, p.pos.y, p.pos.z))
+	aim_at(p, t.pos)
+	fresh(t)
+	_fire_after(m, p, k, 0.6)
 	step(m, 0.6)
-	ok("walls: fired pressed against the rock, a plain orb still passes", dmg(T) > 5.0, "took %.1f" % dmg(T))
-	await _net_copy(m, P, T, K)
+	ok("walls: fired pressed against the rock, a plain orb still passes", dmg(t) > 5.0, "took %.1f" % dmg(t))
+	await _net_copy(m, p, t, k)
 	await done(m)
 
 ## What other games get: the "s" event carries the full size and the pierce kind, and the copy it makes crosses
 ## the same rock (through the wire's JSON, as Net sends it).
-func _net_copy(m: Match, P: Hunter, T: Hunter, K: OstraKit) -> void:
-	P.teleport(P.pos + Vector3(-3.0, 0, 0))
-	aim_at(P, T.pos)
+func _net_copy(m: Match, p: Hunter, t: Hunter, k: OstraKit) -> void:
+	p.teleport(p.pos + Vector3(-3.0, 0, 0))
+	aim_at(p, t.pos)
 	Net.out_events.clear()
 	m.net_on = true
-	_fire_after(m, P, K, 1.4)
+	_fire_after(m, p, k, 1.4)
 	m.net_on = false
 	var sent: Array = Net.out_events.filter(func(e): return e[0] == "s")
 	Net.out_events.clear()
@@ -203,7 +204,7 @@ func _net_copy(m: Match, P: Hunter, T: Hunter, K: OstraKit) -> void:
 	if sent.is_empty():
 		return
 	var ev: Array = JSON.parse_string(JSON.stringify(sent[0]))
-	var full_r := float(K.base_wpn["size"]) * K.orb_size_k(1.0)
+	var full_r := float(k.base_wpn["size"]) * k.orb_size_k(1.0)
 	ok("net: the event sends the pierce kind", int(ev[11]) == 2, "kind %s" % str(ev[11]))
 	ok("net: the event sends the charged size", absf(float(ev[7]) - full_r) < 0.01, "%.2f" % float(ev[7]))
 	var shots0 := m.shots.size()
@@ -213,7 +214,7 @@ func _net_copy(m: Match, P: Hunter, T: Hunter, K: OstraKit) -> void:
 		m.shots.size() == shots0 + 1 and bool(m.shots[-1]["x"].get("pierce_terrain", false))
 	)
 	var copy: Dictionary = m.shots[-1]
-	var wall_x := P.pos.x + 3.0      # (he was moved 3m back from a spot right at the rock)
+	var wall_x := p.pos.x + 3.0      # (he was moved 3m back from a spot right at the rock)
 	step(m, 0.25)
 	var past := float(copy["pos"].x)
 	ok("net: the copy flies past the rock", past > wall_x + 1.0, "x %.1f, rock %.1f" % [past, wall_x])
@@ -221,15 +222,15 @@ func _net_copy(m: Match, P: Hunter, T: Hunter, K: OstraKit) -> void:
 func _glow_and_chime() -> void:
 	var r := setup("ostra", 12.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: OstraKit = P.ak
-	aim_at(P, r[2].pos)
-	_fire_after(m, P, K, 0.0)
+	var p: Hunter = r[1]
+	var k: OstraKit = p.ak
+	aim_at(p, r[2].pos)
+	_fire_after(m, p, k, 0.0)
 	var looks := KitLooks.of(m)
-	ok("glow: none right after a shot", not looks.holding("os_charge"), "charge %.2f" % K.charge)
-	var chimes := K.full_chimes
+	ok("glow: none right after a shot", not looks.holding("os_charge"), "charge %.2f" % k.charge)
+	var chimes := k.full_chimes
 	var sizes: Array = []
-	K.last_shot_t = m.time
+	k.last_shot_t = m.time
 	for t in 8:
 		step(m, 0.2)
 		if looks.holding("os_charge"):
@@ -239,30 +240,70 @@ func _glow_and_chime() -> void:
 	)
 	ok(
 		"glow: it sits on his hand",
-		(looks.held["os_charge"]["n"] as Node3D).global_position.distance_to(P.ak.hand_pos(true)) < 0.05
+		(looks.held["os_charge"]["n"] as Node3D).global_position.distance_to(p.ak.hand_pos(true)) < 0.05
 	)
-	ok("chime: once on reaching full", K.full_chimes == chimes + 1, "%d" % (K.full_chimes - chimes))
+	ok("chime: once on reaching full", k.full_chimes == chimes + 1, "%d" % (k.full_chimes - chimes))
 	step(m, 1.0)
-	ok("chime: not again while it waits", K.full_chimes == chimes + 1)
+	ok("chime: not again while it waits", k.full_chimes == chimes + 1)
 	await done(m)
 
 ## The charge lives on a copy of the weapon: an upgrade re-bases it, and the kit hands back what it was given.
 func _weapon_kept() -> void:
 	var r := setup("ostra", 12.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: OstraKit = P.ak
+	var p: Hunter = r[1]
+	var k: OstraKit = p.ak
 	step(m, 0.1)
-	var plain := float(K.base_wpn["dmg"])
+	var plain := float(k.base_wpn["dmg"])
 	var up := Data.weapon_stats("tether_lantern")
 	up["dmg"] = plain * 2.0
-	P.wpn = up
-	K.last_shot_t = m.time
+	p.wpn = up
+	k.last_shot_t = m.time
 	step(m, 0.1)
-	ok("weapon: an upgrade becomes the new plain orb", absf(float(P.wpn["dmg"]) - plain * 2.0) < 0.01)
-	K.last_shot_t = m.time - 2.0
+	ok("weapon: an upgrade becomes the new plain orb", absf(float(p.wpn["dmg"]) - plain * 2.0) < 0.01)
+	k.last_shot_t = m.time - 2.0
 	step(m, 0.1)
-	ok("weapon: ...and the charge builds on it", float(P.wpn["dmg"]) > plain * 2.5, "%.1f" % float(P.wpn["dmg"]))
-	K.teardown()
-	ok("weapon: teardown leaves the weapon as loaded", absf(float(P.wpn["dmg"]) - plain * 2.0) < 0.01)
+	ok("weapon: ...and the charge builds on it", float(p.wpn["dmg"]) > plain * 2.5, "%.1f" % float(p.wpn["dmg"]))
+	k.teardown()
+	ok("weapon: teardown leaves the weapon as loaded", absf(float(p.wpn["dmg"]) - plain * 2.0) < 0.01)
 	await done(m)
+
+## A downed Hunter is a Wisp: Motley's kit draws no charge motes or aura and builds no charge, and starts its wait over
+## on revive. The same look scan over all 12 kits is reported (NOTE) only; the other kits are not fixed here.
+func _no_kit_tick_when_down() -> void:
+	var r := setup("ostra", 12.0)
+	var m: Match = r[0]
+	var p: Hunter = r[1]
+	var k: OstraKit = p.ak
+	var looks := KitLooks.of(m)
+	k.last_shot_t = m.time - 3.0
+	step(m, 0.1)
+	ok("wisp kit: a charge shows before the down", looks.holding("os_charge") and k.charge >= 1.0)
+	m.knock(p, null, {})
+	step(m, 0.3)
+	ok("wisp kit: downed: no motes held", not looks.held.has("os_charge") and not looks.held.has("os_aura"))
+	ok("wisp kit: downed: no charge built", k.charge == 0.0 and k.wait_charge() < 0.05, "%.2f" % k.charge)
+	m.revive_hunter(p, p)
+	step(m, 0.2)
+	ok("wisp kit: revive: the wait starts over", k.charge == 0.0 and not looks.holding("os_charge"))
+	step(m, 3.0)
+	ok("wisp kit: revive: the charge builds again", k.charge >= 1.0 and looks.holding("os_charge"))
+	step(m, 3.0)
+	m.eliminate(p, null, "test", true)
+	step(m, 0.3)
+	ok("wisp kit: out: no motes held", p.out and not looks.held.has("os_charge") and k.charge == 0.0)
+	await done(m)
+	for arch in Arch.ids():
+		var q := setup(arch, 12.0)
+		var qm: Match = q[0]
+		var qh: Hunter = q[1]
+		step(qm, 3.0)
+		qm.knock(qh, null, {})
+		step(qm, 0.2)
+		var live := 0
+		for key in KitLooks.of(qm).held.keys():
+			var hd: Dictionary = KitLooks.of(qm).held[key]
+			if hd["ent"] == qh and float(hd["t"]) >= qm.time - 0.1: live += 1
+		if arch == "ostra": ok("wisp kit: ostra: no look still updating", live == 0)
+		else: print("PAIRCHECK NOTE %s: %d kit looks still updating while downed" % [arch, live])
+		await done(qm)

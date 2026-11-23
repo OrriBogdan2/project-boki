@@ -51,19 +51,23 @@ static func text(e: Dictionary) -> String:
 
 ## The card lines for arriving home: `work` (what the stations made), every Boki's lines newer than the
 ## last arrival ("Pip: ate ..."), oldest first, then the away gifts and any egg ready.
-## With two zones open the lines sit under their zone's name (ZoneAway). Moves the mark to now.
+## With two zones open the lines sit under their zone's name (ZoneAway), the away gifts and toy lines under
+## the zone arrived in. The journal mark (away_seen) is shared; the gifts and toys use the zone's own mark.
 static func arrival(work: Array = []) -> Array:
 	var now := Time.get_unix_time_from_system()
 	var since := float(Save.d.get("away_seen", 0.0))
 	Save.d["away_seen"] = now
+	var zone := GardenZones.current()
+	var zone_since := GardenAway.mark(zone, since, now)
 	var found: Array = []
 	for rec in Save.d["roster"]:
 		for e in rec.get("journal", []):
 			if float(e["t"]) > since:
 				found.append([float(e["t"]), GardenZones.zone_of(rec), "%s: %s" % [rec["name"], text(e)]])
 	found.sort_custom(func(a, b): return a[0] < b[0])
+	for line in GardenAway.arrive(zone_since, now, zone):
+		found.append([now, zone, line])      # after the sorted journal lines, under the zone arrived in
 	var out := ZoneAway.grouped(work, found)
-	out.append_array(GardenAway.arrive(since, now))
 	for egg in Incubator.ready_eggs():
 		out.append("A %s is ready to hatch" % Incubator.egg_name(egg))
 	out.append_array(GardenVisitor.arrival_lines(now))

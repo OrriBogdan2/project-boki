@@ -1,0 +1,15 @@
+{
+ "group": "last_alive",
+ "name": "Last one up",
+ "script": "tools/gen_sfx_last_alive.py",
+ "sounds": {
+  "last_alive_start": "cast",
+  "last_alive_bed": "loop",
+  "last_alive_end": "cast"
+ },
+ "loops": [
+  "last_alive_bed"
+ ],
+ "signature": [],
+ "replaces": []
+}

@@ -2,6 +2,12 @@ extends RefCounted
 ## --boki-anim-shots --shots-dir=<dir> --boki=a,b [--tag=after]: side-view strips of a rigged Boki moving through
 ## the live BokiRig (it reads its own speed, picks the clip and rate), over floor bars 0.4 m apart so a sliding
 ## foot slides against them: <dir>/<id>_<tag>.png, one row per speed (a home wander, then its match speed).
+## --seam=<clip>[,<clip>] instead (one per --boki id, the last repeats): one row at the garden camera, a frame each
+## 1/30 s across the clip's loop wrap, played in place; "setoff": the Boki stands, then sets off at a stroll (the
+## idle-to-walk hand-over). <dir>/<id>_<clip>_<tag>.png.
+## --video instead: a state tour per --boki id (idle, a stroll, a run at its match speed, stop, attack, hit, faint,
+## revive, a trot), side view over the floor bars, one jpg a 1/30 s in <dir>/<id>_<tag>/NNNN.jpg for
+## `ffmpeg -framerate 30 -i %04d.jpg` (jobq returns the out dir, not a movie).
 ## For a before strip, run the same tool on the old tree. Needs a renderer.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
@@ -13,20 +19,51 @@ const FRAME_S := 0.1             # s between the frames of a strip
 const PX := 256
 const POST_SPACING := 0.4        # m between floor posts
 const POST_COUNT := 60
+const SEAM_FRAMES := 10
+const SEAM_PX := 224             # crop around the Boki at the garden camera, of a 1920x1080 view
+const STROLL := 1.5              # m/s: the audit's idle-to-walk speed (boki_anim_audit HOME_SPEEDS[0])
+const VIDEO_PX := Vector2i(960, 540)
+const VIDEO_CAM := Vector3(2.6, 0.4, 0.0)    # m from the Boki, to its side
+const TROT := 3.0                # m/s: the tour's last leg, a speed between the stroll and the run
+## The state tour: label, seconds, move speed (-1: the species' match speed), the metas the game sets for it.
+const TOUR := [
+	{"s": "idle", "t": 1.2}, {"s": "walk 1.5 m/s", "t": 2.0, "v": STROLL}, {"s": "run", "t": 1.8, "v": -1.0},
+	{"s": "stop", "t": 1.0}, {"s": "attack", "t": 1.0, "metas": {"kstate": "attack"}}, {"s": "idle", "t": 0.4},
+	{"s": "hit", "t": 0.8, "hit": true}, {"s": "faint", "t": 1.6, "metas": {"kdown": true}},
+	{"s": "revive", "t": 1.4}, {"s": "trot 3 m/s", "t": 1.0, "v": TROT},
+]
 
 func run(main: Node) -> void:
 	var out := ""
 	var ids: Array = []
 	var tag := "after"
+	var seams: Array = []
+	var video := false
 	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--seam="): seams = Array(a.substr(7).split(",", false))
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--boki="): ids = Array(a.substr(7).split(",", false))
+		if a == "--video": video = true
 		if a.begins_with("--tag="): tag = a.substr(6)
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	var shots := Shots.new()
 	shots.main = main
+	if not seams.is_empty():
+		for i in ids.size():
+			var what := String(seams[mini(i, seams.size() - 1)])
+			var row: Image = await _seam(shots, String(ids[i]), what)
+			row.save_png(out.path_join("%s_%s_%s.png" % [ids[i], what, tag]))
+		print("BOKI_ANIM_SHOTS_DONE ", ids.size())
+		main.get_tree().quit()
+		return
+	if video:
+		for id in ids:
+			await _video(shots, String(id), out.path_join("%s_%s" % [id, tag]))
+		print("BOKI_ANIM_SHOTS_DONE ", ids.size())
+		main.get_tree().quit()
+		return
 	var vp: SubViewport = shots._stage(Vector2i(PX, PX))
 	_posts(vp)
 	var cam := Camera3D.new()
@@ -59,14 +96,12 @@ func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, ro
 	vp.add_child(k)
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	rig.set_process(false)
-	rig.player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	k.position = Vector3.ZERO
 	rig._pos_prev = k.global_position
 	var steps := int(round(FRAME_S / DT))
 	for i in int(WARM_S / DT) + steps * FRAMES:
 		k.position.z -= v * DT
 		rig._process(DT)
-		rig.player.advance(DT)
 		cam.position = k.position + Vector3(3.0, 0.45, 0)
 		cam.look_at(k.position + Vector3(0, 0.3, 0))
 		var f := i - int(WARM_S / DT)
@@ -77,3 +112,84 @@ func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, ro
 			img.convert(Image.FORMAT_RGBA8)
 			sheet.blit_rect(img, Rect2i(0, 0, PX, PX), Vector2i((f / steps) * PX, row * PX))
 	k.queue_free()
+
+## One row at the garden camera (Shots' farm close-up): frames DT apart across `what`'s wrap, or the set-off.
+func _seam(shots: Shots, id: String, what: String) -> Image:
+	var vp: SubViewport = shots._stage(Vector2i(1920, 1080))
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.make_current()
+	cam.fov = Shots.MATCH_FOV
+	var pitch := deg_to_rad(Shots.MATCH_PITCH)
+	cam.position = Vector3(0, sin(pitch), cos(pitch)) * Shots.FARM_CLOSE_DIST
+	cam.rotation = Vector3(-pitch, 0, 0)
+	var k := Shots.rigged_kin(id)
+	vp.add_child(k)
+	var facing := Basis(Vector3.UP, PI * 0.6)
+	k.basis = Basis(Vector3.RIGHT, -Shots.LEAN) * facing * Basis.from_scale(Vector3.ONE * Shots.FARM_BOKI_SCALE)
+	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+	rig.set_process(false)
+	rig.player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	var lead := int(WARM_S / DT)
+	if what == "setoff":
+		rig._pos_prev = k.global_position
+	else:
+		rig.set_clip(what, 0.0)
+		rig.player.seek(rig.player.get_animation(what).length - SEAM_FRAMES / 2 * DT, true)
+		lead = 0
+	var sheet := Image.create(SEAM_PX * SEAM_FRAMES, SEAM_PX, false, Image.FORMAT_RGBA8)
+	for i in lead + SEAM_FRAMES:
+		if what == "setoff":
+			if i >= lead:
+				k.position += facing * Vector3.FORWARD * STROLL * DT
+			rig._process(DT)
+		rig.player.advance(DT)
+		if i < lead:
+			continue
+		var img: Image = await shots._grab(vp)
+		img.convert(Image.FORMAT_RGBA8)
+		var mid := Vector2i(cam.unproject_position(k.position + Vector3(0, 0.5 * Shots.FARM_BOKI_SCALE, 0)))
+		var at := mid - Vector2i(SEAM_PX, SEAM_PX) / 2
+		sheet.blit_rect(img, Rect2i(at, Vector2i(SEAM_PX, SEAM_PX)), Vector2i((i - lead) * SEAM_PX, 0))
+	vp.queue_free()
+	return sheet
+
+## The TOUR as jpg frames in `dir`: the Boki moves through the live BokiRig (clip, rate and blends from what it does).
+func _video(shots: Shots, id: String, dir: String) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var vp: SubViewport = shots._stage(VIDEO_PX)
+	_posts(vp)
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.make_current()
+	cam.fov = 30.0
+	var label := Label.new()
+	label.add_theme_font_size_override("font_size", 28)
+	vp.add_child(label)
+	var k := Shots.rigged_kin(id)
+	vp.add_child(k)
+	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+	rig.set_process(false)
+	rig._pos_prev = k.global_position
+	var ks := KinLib.kin(id)
+	var match_v: float = KinLib.stat_value("kin_speed", KinLib.points(ks, {}) if ks else {})
+	var n := 0
+	for seg: Dictionary in TOUR:
+		label.text = "%s  %s" % [id, seg["s"]]
+		var v: float = seg.get("v", 0.0)
+		v = match_v if v < 0.0 else v
+		for key: String in ["kstate", "kdown"]:
+			k.remove_meta(key)
+		for key: String in seg.get("metas", {}):
+			k.set_meta(key, seg["metas"][key])
+		if seg.get("hit", false):
+			KinFlinch.hit(k, Vector3(0, 0, 1), 0.3, 1.0)
+		for i in int(float(seg["t"]) / DT):
+			k.position.z -= v * DT
+			rig._process(DT)
+			cam.position = k.position + VIDEO_CAM
+			cam.look_at(k.position + Vector3(0, 0.3, 0))
+			await RenderingServer.frame_post_draw
+			vp.get_texture().get_image().save_jpg(dir.path_join("%04d.jpg" % n), 0.9)
+			n += 1
+	vp.queue_free()

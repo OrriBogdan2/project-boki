@@ -23,7 +23,7 @@ const SHOTS := [
 	["vee_open", 6.0, 3.0, false, "Draw V opening 25 degrees at k 0.3, a glint riding the line (Lisette LMB draw toward Empowered)"],
 	["vee_closed", 6.0, 3.0, false, "Draw V closed into one bright line at k 1 (Lisette Empowered ready)"],
 	["cone_fill", 6.0, 4.0, false, "Filled cone from a stuck point back out, filling over its fuse, seen by all (Vex wall cone)"],
-	["cone_edges", 6.0, 3.0, false, "Cone edges only: a 30 degree spread out to the slug range (Grimble LMB Buckshot)"],
+	["cone_edges", 6.0, 3.0, false, "Cone edges only: a 30 degree spread to a range (old Grimble LMB)"],
 	["circle_landing", 6.5, 3.5, false, "Landing circle at the cursor with four ticks, plus the thin aim line (Vex R Mini Nuke placement)"],
 	["sweet_spot", 6.0, 2.5, false, "Slam circle a hop ahead with the inner sweet-spot ring growing, k 0.5 (Tarek RMB Volcano Crusher)"],
 	["arc_wall", 6.0, 4.0, false, "Curved arc wall at the cursor distance, 120 degrees in 7 panels (Lisette E Rain of Arrows)"],
@@ -33,6 +33,7 @@ const SHOTS := [
 	["foe_view", 6.0, 5.0, false, "A foe's \"all\" telegraph tinted hostile (their slam ring); their own aim lane is not drawn for you"],
 	["reticle_charge", 5.0, 2.5, true, "Cursor charge ring at 60%, hero colour"],
 	["reticle_flare", 5.0, 2.5, true, "Cursor full-charge flare: a ring snapping out and a glint"],
+	["reticle_body", 5.0, 0.0, true, "The ring round the hero at 60% (at: body), white: Kael's blast"],
 	["reticle_perfect", 5.0, 2.5, true, "Cursor perfect-window star flash, gold, 0.12 s"],
 ]
 
@@ -125,6 +126,7 @@ func _show(what: String) -> void:
 			AimKit.circle(T, "a", {"self": true, "r": 2.3, "fill": 0.6, "all": true, "col": col("juggernaut")})
 			AimKit.lane(T, "b", {"dir": Vector2(-1, 0)})
 		"reticle_charge": AimKit.charge(P, 0.6, {"col": col("archer")})
+		"reticle_body": AimKit.charge(P, 0.6, {"col": Color.WHITE, "at": "body"})
 		"reticle_flare":
 			AimKit.charge(P, 1.0, {"col": col("archer"), "flare": false})
 			AimKit.flare(P, {"col2": Color("ffffff")})
@@ -146,7 +148,7 @@ func _shot(what: String, aim_d: float, lead: float, zoom: bool, caption: String)
 	img.save_png(dir.path_join(file))
 	lines.append("aimkit|%s|%s" % [file, caption])
 	if zoom:
-		var c := L.reticle.cursor(P)
+		var c := L.reticle.body(P) if what == "reticle_body" else L.reticle.cursor(P)
 		var sz := Vector2i(180, 120)
 		var rg := Rect2i(Vector2i(int(c.x) - sz.x / 2, int(c.y) - sz.y / 2), sz).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 		var crop := img.get_region(rg)

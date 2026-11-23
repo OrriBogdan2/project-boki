@@ -60,11 +60,11 @@ func run(main_node: Node) -> void:
 		await fade.reveal(0.01)
 	home._move_player(0.001)
 	var hb := Rect2i(sz.x / 2 - 200, sz.y - 190, 400, 190)
-	home.dash_charges = float(home._dodge()["charges"])
+	home.dash.charges = float(home._dodge()["charges"])
 	await _grab("home_2_charges", hb)
-	home.dash_charges = 1.45
+	home.dash.charges = 1.45
 	await _grab("home_1_recharging", hb)
-	home.dash_charges = 0.3
-	home.ex_cd = 6.0
+	home.dash.charges = 0.3
+	home.dash.ex_cd = 6.0
 	await _grab("home_0_charges", hb)
 	main.get_tree().quit(0)

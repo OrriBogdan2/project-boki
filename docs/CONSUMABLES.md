@@ -2,7 +2,7 @@
 
 PARITY FIRST (briefs/DECISIONS.md, 2026-11-07). Every belt item (keys 1-4), what we do, what the source does, and the verdict. Numbers live in `content/utility/*.json` (the `channel` block of the tonic and armor kit, with its citation); the check is `--airheal-check`.
 
-Evidence: **[W]** the item's wiki page (supervive.wiki.gg, raw wikitext read Nov 9 2026), **[D]** docs/SUPERVIVE_DATA.md, **[S]** docs/SOURCE_UTILITIES.md. The briefs on ext/agent-briefs (supervive-data, hero-ref 5 fps sheets) hold no consumable footage or numbers: the only hit is the HUD sheet (item slots with counts on number keys). So **move speed while using, and whether dash, jump or abilities cancel, are not published anywhere we have.** Footage is the open question for those rows.
+Evidence: **[W]** the item's wiki page (the community wiki, raw wikitext read Nov 9 2026), **[D]** sv/DATA.md, **[S]** docs/SOURCE_UTILITIES.md. The briefs on ext/agent-briefs (sv/briefs, hero-ref 5 fps sheets) hold no consumable footage or numbers: the only hit is the HUD sheet (item slots with counts on number keys). So **move speed while using, and whether dash, jump or abilities cancel, are not published anywhere we have.** Footage is the open question for those rows.
 
 HP scale: source hunters have 880-1,596 HP (median 1,030) [D]; ours 124/145/193 (light/medium/heavy). About 7.2x.
 
@@ -38,6 +38,8 @@ HP scale: source hunters have 880-1,596 HP (median 1,030) [D]; ours 124/145/193 
 | Chest key, Rift key | instant | Gold Key / Evil Key | have / differs (S) |
 
 None of those have a published use time or slow in the source either, so nothing there is a clear mismatch beyond what [S] already lists.
+
+First-time tips (`scripts/match/belt_tips.gd`, `--belt-tips-check`): the first ground pickup of each belt item shows one line, "<name> on <key>: <first sentence of its desc>", once per save (`Save.d.tutorial.belt_<id>`). The tonic and armor kit, which every hunter starts with, show theirs the first time health drops under 40% and the first time armor breaks. Chest keys have none. Real matches only (the `Match._tips` rules: not in the tutorial or with tips off).
 
 ## Ideas of ours (not built)
 

@@ -4,15 +4,19 @@ class_name Bond
 ## Merge (the bond meter, `ult`, 0..1 on the hunter). Your Boki's hits mark a foe for a few seconds, and your
 ## own hits on a marked foe fill the meter faster.
 
+
 static func rules() -> Dictionary:
 	return Content.rules("bond")
+
 
 static func add(h: Hunter, amount: float) -> void:
 	if h == null or h.out or amount <= 0.0:
 		return
 	# IVS: the active kin's Bond IV fills the meter up to 10% faster (Care.iv_mult)
-	if h.kin is Kin: amount *= Care.iv_mult((h.kin as Kin).rec, "bond")
+	if h.kin is Kin:
+		amount *= Care.iv_mult((h.kin as Kin).rec, "bond")
 	KinBond.add(h, amount * (1.3 if h.perk_n("overcharge") > 0 else 1.0), KinBond.FIGHT)
+
 
 ## Connected to CombatBus.hit_landed by the match.
 static func on_hit(attacker: Node, target: Node, amount: float, _tags: Array) -> void:
@@ -35,11 +39,12 @@ static func on_hit(attacker: Node, target: Node, amount: float, _tags: Array) ->
 	if bool(rl.get("kin_required", true)) and not h.has_kin_ready():
 		return
 	if target is Mob:
-		rate *= float(rl.get("mob_factor", 0.6))     # fighting other hunters fills it faster than farming monsters
+		rate *= float(rl.get("mob_factor", 0.6))  # fighting other hunters fills it faster than farming monsters
 	var add_v := minf(amount * rate, float(rl.get("max_per_hit", 0.06)))
 	if attacker is Kin and target.hp <= 0.0:
 		add_v += float(rl.get("kin_ko", 0.1))
 	add(h, add_v)
+
 
 ## How much faster your hit on `target` fills the meter: the bond rate times marked_factor while your
 ## Boki has hit it in the last mark_s seconds.
@@ -48,6 +53,7 @@ static func marked_k(h: Hunter, target: Node) -> float:
 	if k == null or not is_instance_valid(k) or not (target is Ent):
 		return 1.0
 	return float(rules().get("marked_factor", 2.0)) if float(k.marked.get((target as Ent).nid, 0.0)) > h.m.time else 1.0
+
 
 static func passive(h: Hunter, dt: float) -> void:
 	if h.has_kin_ready():

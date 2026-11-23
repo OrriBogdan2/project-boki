@@ -4,6 +4,7 @@ the figure fills it), each figure centred, nothing mirrored (RECIPE_95.md step 2
 VIEWS.json: {"views": [{"name": "front", "x0": 0, "x1": 528, "kill": [[x0, y0, x1, y1], ...]}, ...]} (sheet px;
 "kill": a neighbour's pixels to paint out with the grey), or {"auto": ["front", "tq", "side", "back"]}: the
 figures found as runs of non-grey columns, left to right (check the result: touching figures merge)."""
+import argparse
 import json
 import os
 import sys
@@ -28,9 +29,14 @@ def runs(cols, min_w=8, gap=6):
 
 
 def main(a):
-    sheet = imgio.load(a[0])
-    out = a[1]
-    spec = json.load(open(a[2]))
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("sheet", help="the turnaround sheet")
+    ap.add_argument("out_dir", help="where the crops are written")
+    ap.add_argument("views", help="the VIEWS.json (see above)")
+    args = ap.parse_args(a)
+    sheet = imgio.load(args.sheet)
+    out = args.out_dir
+    spec = json.load(open(args.views))
     os.makedirs(out, exist_ok=True)
     h, w = sheet.shape[:2]
     bg = np.median(sheet[5:30, 5:30].reshape(-1, 3), axis=0)
@@ -65,4 +71,5 @@ def main(a):
     json.dump(boxes, open(os.path.join(out, "crops.json"), "w"), indent=1)
 
 
-main(sys.argv[1:])
+if __name__ == "__main__":
+    main(sys.argv[1:])

@@ -1,13 +1,16 @@
 extends RefCounted
 ## --mantle-clip --shots-dir=<dir>: item 185b's before/after clips on the Hollow Crown, at the match camera,
 ## 15 fps: <dir>/<case>/f000.png... for a running jump into a two-terrace face (jump), a jump and air dash
-## into one (dash) and a fall below an island rim heading back in (abyss). The faces and approaches are
-## --cliff-mantle-check's. Prints "MCLIP <case> topped|missed in <speed> lip <speed>". Needs a renderer
-## (jobq --needs gpu). Never touches the save.
+## into one (dash), a fall below an island rim heading back in (abyss) and a launch glancing into a two-terrace
+## face at FLING_DEG off it at FLING_SPEED (fling: owner bug 11-11, --mantle-fling-check). The faces and the
+## other approaches are --cliff-mantle-check's. Prints "MCLIP <case> topped|missed in <speed> lip <speed>".
+## Needs a renderer (jobq --needs gpu). Never touches the save.
 
 const STEPS_PER_FRAME := 4       # 60 Hz steps per 15 fps frame
 const CLIP_S := 1.6
-const CASES := [["jump", "jump_0", 2], ["dash", "jump_dash", 2], ["abyss", "abyss", 0]]
+const CASES := [["jump", "jump_0", 2], ["dash", "jump_dash", 2], ["abyss", "abyss", 0], ["fling", "fly", 2]]
+const FLING_DEG := 65.0          # off straight into the face
+const FLING_SPEED := 19.0        # m/s: a dash's speed, as a launch or a knock carries you
 
 var main: Node
 var chk
@@ -65,12 +68,18 @@ func _clip(m: Match, f: Dictionary, mode: String, out: String, label: String) ->
 	var a: Vector2i = f["a"]
 	var face := Vector2(a.x + 0.5, a.y + 0.5) + dv * 0.5
 	var top := float(f["la"] + f["rise"]) * World.LEVEL
-	if not chk._setup(f, mode, face, dv, top):
+	if mode == "fly":
+		dv = dv.rotated(deg_to_rad(FLING_DEG))
+		var st := face - dv * FLING_SPEED * 0.12 - Vector2(d) * h.r
+		chk._reset(Vector3(st.x, top - 0.5, st.y), false)
+		h.vel = Vector3(dv.x, 0.0, dv.y) * FLING_SPEED
+		h.last_gy = top - World.LEVEL
+	elif not chk._setup(f, mode, face, dv, top):
 		print("MCLIP %s: can't stand at the start" % label)
 		return
 	for i in 20:
 		await _frame(m)          # the camera settles on the start
-	var jumped := mode == "abyss"
+	var jumped := mode in ["abyss", "fly"]
 	var dashed := mode != "jump_dash"
 	var vin := 0.0
 	var vlip := 0.0
@@ -95,7 +104,8 @@ func _clip(m: Match, f: Dictionary, mode: String, out: String, label: String) ->
 			t += Match.DT
 			if vin == 0.0 and (to_face < h.r + 0.35 or not h.lfloat.is_empty()):
 				vin = hv
-			if not topped and vin > 0.0 and h.pos.y >= top - 0.15 and (Vector2(h.pos.x, h.pos.z) - face).dot(dv) > 0.3:
+			var over := h.pos.y >= top - 0.15 and (Vector2(h.pos.x, h.pos.z) - face).dot(dv) > 0.3
+			if not topped and vin > 0.0 and over and h.lfloat.is_empty():     # (after the rise hands back)
 				topped = true
 				vlip = Vector2(h.vel.x, h.vel.z).length()
 		await _frame(m)

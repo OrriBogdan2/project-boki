@@ -36,10 +36,11 @@ const GOAL_KINDS := {
 ## Keys that would make a reward more than a look ("stat" in a goal is what it counts, not a reward).
 const POWER_KEYS := ["hp", "health", "dmg", "damage", "speed", "cooldown", "cd", "perk", "ability", "rank",
 		"armor", "power", "mult", "bonus", "level", "xp", "glide", "lift", "drag", "fall"]
-## The only ways gameplay code may touch a glider skin: draw it (mesh, or its merged sheet and paint), trail it,
+## The only ways gameplay code may touch a glider skin: draw it (its canopy and that canopy's material), trail it,
 ## play its sound.
-const GLIDER_CALLS := ["Gliders.mesh", "Gliders.sheet", "Gliders.paint", "Gliders.trail",
-		"Gliders.sound", "Gliders.equipped", "Gliders.LIST"]
+const GLIDER_CALLS := ["Gliders.dress", "Gliders.canopy_material", "Gliders.canopy", "Gliders.trail",
+		"Gliders.sound", "Gliders.equipped", "Gliders.LIST", "Gliders.glide_cue", "Gliders.skin_of",
+		"Gliders.DEFAULT_SNAP", "Gliders.DEFAULT_WIND"]
 
 var bad := 0
 var n := 0
@@ -357,7 +358,7 @@ func _challenges() -> void:
 	var tender_stat := String(ClassUnlock.challenge("tender")["stat"])
 	Game.apply_result(result("archer", true, {}, {tender_stat: int(ClassUnlock.challenge("tender")["target"])}))
 	ok(bool(ClassUnlock.challenge_progress("tender")["done"]) and ClassUnlock.status("tender") == "progress"
-			and ClassUnlock.requirement("tender").contains("Relics are open"),
+			and ClassUnlock.requirement("tender").contains("after %d Relics" % ClassUnlock.open_needed("tender")),
 					"a hard challenge done early still waits for %d open Hunters" % ClassUnlock.open_needed("tender"))
 	var c := ClassUnlock.state()
 	for a in ["thief", "mage", "dredge"]: (c["open"] as Array).append(a)
@@ -499,14 +500,14 @@ func _new_game_flow(tree: SceneTree) -> void:
 	enter.pressed = true
 	hx._unhandled_input(enter)
 	for i in 6: await tree.process_frame
-	ok(hx.stage == "create" and hx.create_box != null, "Enter takes it to making yourself (stage %s)" % hx.stage)
+	ok(hx.stage == "create" and hx.locker != null, "Enter takes it to making yourself (stage %s)" % hx.stage)
 	hx._looks_good()
 	for i in 6: await tree.process_frame
 	ok(hx.stage == "pick" and ClassUnlock.needs_starters(),
 			"then straight to the egg pick, with no Relic pick before it (stage %s)" % hx.stage)
 	ok(_find_meta(hx, "starter_pick") == null and not _any_text(hx.root_ui, "Choose your first Relic"),
 			"there is no Relic pick screen at all")
-	ok(hx.create_box == null and hx.preview == null and Unmasked.is_look(Save.d["look"]),
+	ok(hx.locker == null and Unmasked.is_look(Save.d["look"]),
 			"the creator is behind us and the save holds your Empty look")
 	await shot(tree, "egg_pick", 30)
 	hx.queue_free()
@@ -536,8 +537,8 @@ func _viewer(tree: SceneTree) -> void:
 	layer.add_child(host)
 	var v := HunterViewer.make("juggernaut", Vector2(220, 300))
 	host.add_child(v)
-	var t0 := Time.get_ticks_msec()
-	while v.model == null and Time.get_ticks_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
+	var t0 := CheckClock.own_msec()
+	while v.model == null and CheckClock.own_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
 		await tree.process_frame
 	v.set_process(false)       # (stepped by hand below)
 	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r" and x != "x") + ["x", "r"]
@@ -689,6 +690,20 @@ func _home(tree: SceneTree) -> void:
 	ok(ml != null and _count_meta(ml, "mastery_goal") == ClassUnlock.mastery("thief").size(),
 			"and its mastery goals with their rewards")
 	await shot(tree, "hunters_screen", 50)
+	# --- a garden-only save (first Relic picked, no expedition yet): the second-Relic choices say what they wait for
+	var keep_save: Dictionary = Save.d.duplicate(true)
+	new_save()
+	ClassUnlock.choose_starters([FIRST])
+	HomeClasses.open(hm, "juggernaut")
+	await tree.process_frame
+	var plain := "Finish an expedition to choose your second Hunter"
+	ok(ClassUnlock.locked_line("juggernaut") == plain
+			and ClassUnlock.locked_line("thief") == ClassUnlock.challenge_text("thief"),
+			"a waiting second Hunter's line is plain; a challenge Hunter's line is its challenge")
+	var n_lines := _count_meta(hm.panel_host, "locked_line")
+	ok(n_lines >= SECOND.size() + 1 and _any_text(hm.panel_host, plain),
+			"the Relics screen shows that line on each waiting tile and under the viewer (%d)" % n_lines)
+	Save.d = keep_save
 	# --- an open Hunter with a mastery glider earned: the glider pick
 	HomeClasses.open(hm, "archer")
 	await tree.process_frame

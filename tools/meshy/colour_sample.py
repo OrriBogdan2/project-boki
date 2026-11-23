@@ -3,6 +3,7 @@
   python3 -I tools/meshy/colour_sample.py --compare A.png B.png x0,y0,x1,y1     (skin-like pixels picked in A)
 filter: green, skin, brass, grey, dark (or none). Prints the region's hue/sat/value range and its p5..p95 colours by
 luminance (a ramp, dark to light)."""
+import argparse
 import os
 import sys
 
@@ -65,12 +66,20 @@ def compare(a_path, b_path, box):
 
 
 def main(a):
-    if a[0] == "--compare":
-        return compare(a[1], a[2], [int(x) for x in a[3].split(",")])
-    im = imgio.load(a[0])
-    for spec in a[1:]:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("image", nargs="?", help="the image to sample")
+    ap.add_argument("regions", nargs="*", metavar="name:x0,y0,x1,y1[:filter]", help="regions to report")
+    ap.add_argument("--compare", nargs=3, metavar=("A", "B", "BOX"), help="compare A and B over BOX x0,y0,x1,y1 (skin-like pixels picked in A)")
+    args = ap.parse_args(a)
+    if args.compare:
+        return compare(args.compare[0], args.compare[1], [int(x) for x in args.compare[2].split(",")])
+    if not args.image:
+        ap.error("IMAGE is required without --compare")
+    im = imgio.load(args.image)
+    for spec in args.regions:
         parts = spec.split(":")
         region(im, parts[0], [int(x) for x in parts[1].split(",")], parts[2] if len(parts) > 2 else "")
 
 
-main(sys.argv[1:])
+if __name__ == "__main__":
+    main(sys.argv[1:])

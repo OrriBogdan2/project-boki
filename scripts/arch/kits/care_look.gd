@@ -5,8 +5,8 @@ extends RefCounted
 ##   Pip: the starlit comet, the burr orb, the Burrseed root disc, light column and root beam, the lantern
 ##   plus, the Hearthlight disc with its floating lantern and the Kindle foot glow.
 ##   Claire: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
-##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the frost glow, the skate's
-##   ice plates, her air dash's frost streaks and the Rink Wall's ice pillars.
+##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the ice shards stuck in a foe, her air
+##   dash's frost streaks and the Rink Wall's ice pillars. The skate's ice plates are IceStrip (one MultiMesh).
 ## Three shaders of our own: shaders/care_disc.gdshader, care_ice.gdshader, care_glow.gdshader.
 ## Shots: skin(s, kind) hides the shared round (its drawn radius only; the hit radius is unchanged) and
 ## rides a pooled node on it; when the shot ends the node goes back and the kind's impact plays.
@@ -18,6 +18,12 @@ const ICE: Shader = preload("res://shaders/care_ice.gdshader")
 const GLOW: Shader = preload("res://shaders/care_glow.gdshader")
 const KEEP := 0.1             # s a held look stays after its last refresh
 const CAP := 24               # per kind: past this the oldest live one is reused
+const SHARDS := 7             # ice shards a foe can carry: one per dart stack short of the 8-dart Shatter
+const SHARD_LEN := 0.62       # m, one shard: long enough to read at match zoom
+const SHARD_POP := 0.15       # s a new shard takes to punch in
+## every look _build makes (prewarm builds one of each at load)
+const KINDS := ["ember", "burr", "shard", "beam", "spear", "plus", "column", "beam_root", "disc", "flare", "zone",
+	"kindle", "hearth", "spikes", "shell", "shards", "slab", "wall"]
 
 var m: Node
 var h: Hunter
@@ -27,6 +33,7 @@ var skins: Array = []         # {s: shot, n: Node3D, kind}
 var live: Array = []          # {n, kind, t, dur, at, p}
 var held := {}                # key -> {n, kind, last, p}
 var made := 0                 # nodes built (tests: stays flat while firing)
+var strip: IceStrip = null    # the skate's ice plates, one MultiMesh (built on the first plate)
 
 func _init(match_node: Node, hunter: Hunter) -> void:
 	m = match_node
@@ -36,6 +43,12 @@ func _init(match_node: Node, hunter: Hunter) -> void:
 	root.top_level = true
 	m.add_child(root)
 
+## The loading screen's rehearsal (ArchKit.warm_fx, from Match.warm_up): one of every look built and put in its
+## pool, so the first shot makes nothing mid-fight and warm_up's scan draws them all (Pip's first LMB: 220 ms).
+func prewarm() -> void:
+	for kind: String in KINDS:
+		_give(kind, _build(kind))
+
 func teardown() -> void:
 	if is_instance_valid(root):
 		root.queue_free()
@@ -43,6 +56,7 @@ func teardown() -> void:
 	live.clear()
 	held.clear()
 	free_pool.clear()
+	strip = null
 
 # ------------------------------------------------------------------ materials
 static func ice_mat(c: Color, a := 0.75, glow := 0.0, edge := Color(0, 0, 0, 0)) -> ShaderMaterial:
@@ -97,13 +111,14 @@ func _build(kind: String) -> Node3D:
 	n.name = kind
 	match kind:
 		"ember":
-			# a mote of her lantern's star: a 0.52 m teardrop comet head of soft gold with a near-white core, a
-			# pastel pink halo and a wide 2 m gold tail, so it reads in flight at gameplay zoom (starlight, not fire)
-			var head := Models.sphere(0.26, 12)
-			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.7)))
-			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.08)))
-			_off(Models.part(n, Models.sphere(0.46, 10), orb_mat(Color("f6a6c8", 0.5)), Vector3.ZERO))
-			_tail(n, 0.5, 2.0, Color("ffe0a0", 1.0))
+			# a comet to follow at the match camera (source: Moon Shot, a bright head with a long trail): a 0.7 m
+			# gold teardrop with a near-white core, an ember halo and a 0.8 m wide, 3.4 m long gold tail (her hurts are
+			# embers, content/vfx/tender.json; her heals are leaf green)
+			var head := Models.sphere(0.34, 12)
+			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.8)))
+			_off(Models.part(n, Models.sphere(0.2, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.1)))
+			_off(Models.part(n, Models.sphere(0.6, 10), orb_mat(Color("ffb45a", 0.5)), Vector3.ZERO))
+			_tail(n, 0.8, 3.4, Color("ffe0a0", 1.0))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -118,6 +133,13 @@ func _build(kind: String) -> Node3D:
 						sp, Models.cyl(0.0, 0.035, 0.16, 5), Models.toon(Color("e6f2a0"), true, 0.9), dv * 0.18))
 				sm.basis = Basis(Quaternion(Vector3.UP, dv.normalized()))
 			_off(Models.part(n, Models.sphere(0.34, 10), orb_mat(Color("c8e07a", 0.3)), Vector3.ZERO))
+			# the rune ring (source: Bound by Fate): a violet hoop 0.9 m across, square to the flight
+			var ring_pm := PlaneMesh.new()
+			ring_pm.size = Vector2(0.9, 0.9)
+			var rune_mat := disc_mat(Color("a070ff", 0.9), Color("e0c8ff"), 0.0)
+			rune_mat.set_shader_parameter("fill", 0.35)
+			rune_mat.set_shader_parameter("rim_w", 0.16)
+			_off(Models.part(n, ring_pm, rune_mat, Vector3.ZERO)).rotation = Vector3(PI * 0.5, 0, 0)
 			_tail(n, 0.22, 1.4, Color("e8f6b8", 0.55))
 		"shard":
 			# an ice dart: a long ice-blue four-sided crystal with dark teal edges, tip first, and a short
@@ -160,8 +182,8 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(n, Models.box(0.32, 1.2, 0.12), orb_mat(Color(gc, 0.9)), Vector3.ZERO))
 			_off(Models.part(n, Models.box(1.2, 0.32, 0.12), orb_mat(Color(gc, 0.9)), Vector3.ZERO))
 			_off(Models.part(n, Models.sphere(0.75, 12), orb_mat(Color(gc.lightened(0.3), 0.3)), Vector3.ZERO))
-		"column", "beam_root":
-			# upright light planes (a column falls over a foe; the root beam holds)
+		"column":
+			# upright light planes (a column falls over a foe)
 			for i in 3:
 				var pm2 := PlaneMesh.new()
 				pm2.size = Vector2(1.0, 3.0)
@@ -206,17 +228,24 @@ func _build(kind: String) -> Node3D:
 						n, Models.crystal(0.16, 1.1 - 0.12 * (i % 3), 5), ice_mat(Color("bff7ef"), 0.55, 0.2),
 						Vector3(cos(a6) * 0.32, 0.6 + 0.12 * (i % 2), sin(a6) * 0.32)))
 				s2.basis = Basis(Quaternion(Vector3.UP, Vector3(cos(a6) * 0.35, 1.0, sin(a6) * 0.35).normalized()))
-		"frost":
-			_off(Models.part(n, Models.capsule(0.42, 1.5), orb_mat(Color("2fb0e0", 0.55)), Vector3(0, 0.8, 0)))
-		"slab":
-			# a plate of ice laid under her blades
-			_off(Models.part(
-					n, Models.box(1.0, 0.05, 0.7), ice_mat(Color("bff7ef"), 0.7, 0.35, Color("e8ffff")),
-					Vector3(0, 0.04, 0)))
+		"shards":
+			_build_shards(n)
 		"wall":
 			_build_wall(n)
 	root.add_child(n)
 	return n
+
+## Ice shards stuck in a body, tips out: one per dart stack (keep shows the first n). Spread round the body by
+## the golden angle at staggered heights, so any count reads from the match camera.
+func _build_shards(n: Node3D) -> void:
+	var mat := ice_mat(Color("6fd8ff"), 0.95, 0.2, Color("e8ffff"))
+	for i in SHARDS:
+		var a := float(i) * 2.39996
+		var out := Vector3(cos(a), 0.55 - 0.25 * float(i % 3), sin(a)).normalized()
+		var tip := Vector3(cos(a) * 0.3, 0.55 + 0.17 * float(i % 4), sin(a) * 0.3)
+		var s := _off(Models.part(n, Models.crystal(0.09, SHARD_LEN - 0.04 * float(i % 3), 4), mat, tip))
+		s.basis = Basis(Quaternion(Vector3.UP, out))
+		s.position += out * SHARD_LEN * 0.3
 
 ## The Hearthlight's lantern: a small caged lantern of light floating over the disc's middle, with a halo.
 func _build_lamp(n: Node3D) -> void:
@@ -354,7 +383,7 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 		"ember":
 			m.fx.flash(at, Color("fff0c0"), 0.6, 0.07)
 			m.fx.spark(at, back, Color("ffd27a"), 8, 6.0, 70.0, 0.25, 6.0)
-			burst("star", at, {"col": Color("9a6aff"), "rim": Color("e0c8ff"), "r": 0.8, "dur": 0.22})
+			burst("star", at, {"col": Color("ff8c32"), "rim": Color("fff0c8"), "r": 0.8, "dur": 0.22})
 		"shard":
 			m.fx.flash(at, Color("9af0ff"), 0.5, 0.06)
 			m.fx.spark(at, back, Color("6fd8f0"), 7, 7.0, 80.0, 0.22, 12.0, 0.9)
@@ -407,10 +436,9 @@ func _style(e: Dictionary, k: float) -> void:
 			n.scale = Vector3.ONE * r * pop
 			n.rotation.y = k * 1.2
 			_tint(n, col, fade)
-		"column", "beam_root":
-			var w := r * (1.0 if String(e["fx"]) == "column" else 0.45)
-			n.scale = Vector3(w, lerpf(1.4, 1.0, pop) if String(e["fx"]) == "column" else 1.0, w)
-			_tint(n, col, fade * (0.9 if String(e["fx"]) == "column" else 0.6 + 0.2 * sin(k * 40.0)))
+		"column":
+			n.scale = Vector3(r, lerpf(1.4, 1.0, pop), r)
+			_tint(n, col, fade * 0.9)
 		"flare", "star":
 			n.scale = Vector3.ONE * r * lerpf(0.4, 1.0, sqrt(k))
 			_disc(n, col, p.get("rim", col.lightened(0.5)), fade, float(p.get("pattern", 0.0)), -1.0, k * 2.0)
@@ -431,12 +459,6 @@ func _style(e: Dictionary, k: float) -> void:
 			n.scale = Vector3.ONE * lerpf(
 					0.4, 1.0, _out_back(clampf(k * 6.0, 0.0, 1.0))) * (1.0 - 0.3 * smoothstep(0.8, 1.0, k))
 			_tint(n, col, 1.0 - smoothstep(0.8, 1.0, k))
-		"slab":
-			var dv4: Vector2 = p.get("dir", Vector2(0, -1))
-			n.rotation = Vector3(0, atan2(-dv4.x, -dv4.y), 0)
-			var forms := lerpf(0.6, 1.0, clampf(k * 15.0, 0.0, 1.0))          # frozen in under the blade at once
-			n.scale = Vector3(r * forms, 1.0, r * forms)
-			_tint(n, Color.WHITE, 1.0 - smoothstep(0.3, 1.0, k))
 		_:
 			n.scale = Vector3.ONE * r
 			_tint(n, col, fade)
@@ -489,9 +511,8 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 	match kind:
 		"wall":
 			_place_wall(n, p)
-		"frost":
-			n.scale = Vector3.ONE * float(p.get("r", 1.0))
-			_tint(n, Color.WHITE, float(p.get("a", 1.0)))
+		"shards":
+			_show_shards(n, p)
 		"spear":
 			n.global_transform = p["xf"]          # the held spear, placed by the kit in her raised hand
 			(n.get_node("Tail") as Node3D).visible = false
@@ -503,7 +524,10 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 					n, col, p.get("rim", col.lightened(0.4)), float(p.get("a", 1.0)), float(p.get("pattern", 0.0)),
 					float(p.get("sweep", -1.0)), float(p.get("spin", 0.0)))
 			var dm := n.get_node_or_null("Disc") as MeshInstance3D
-			if dm: (dm.material_override as ShaderMaterial).set_shader_parameter("fill", float(p.get("fill", 1.0)))
+			if dm:
+				var dsm := dm.material_override as ShaderMaterial
+				dsm.set_shader_parameter("fill", float(p.get("fill", 1.0)))
+				dsm.set_shader_parameter("rim_w", float(p.get("rim_w", 0.08)))
 			var lamp := n.get_node_or_null("Lamp") as Node3D
 			if lamp:
 				lamp.scale = Vector3(1.0 / maxf(0.1, r), 1.0, 1.0 / maxf(0.1, r))
@@ -514,6 +538,22 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 				sp.rotation.y = m.time * 2.6
 				sp.position.y = 0.9 + 0.08 * sin(m.time * 3.0)
 				sp.scale = Vector3.ONE / maxf(0.3, r) * 1.6
+
+## The first p.n shards out (the newest pops in over SHARD_POP s since p.pop), sized to the body (p.r) and
+## glowing brighter as the count nears the Shatter; p.a fades them as the stacks run out.
+func _show_shards(n: Node3D, p: Dictionary) -> void:
+	n.scale = Vector3.ONE * float(p.get("r", 1.0))
+	var shown := int(p.get("n", 0))
+	var grow := _out_back(clampf(float(p.get("pop", 1.0)) / SHARD_POP, 0.0, 1.0))
+	var i := 0
+	for c in n.get_children():
+		var mi := c as MeshInstance3D
+		mi.visible = i < shown
+		mi.scale = Vector3.ONE * (maxf(0.05, grow) if i == shown - 1 else 1.0)
+		i += 1
+	var mt := (n.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
+	mt.set_shader_parameter("glow", 0.2 + 0.8 * float(shown) / float(SHARDS))
+	mt.set_shader_parameter("alpha", float(p.get("a", 1.0)))
 
 func drop(key: String) -> void:
 	var e: Dictionary = held.get(key, {})
@@ -561,9 +601,17 @@ func _place_wall(n: Node3D, p: Dictionary) -> void:
 
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
+	if strip != null:
+		strip.tick(m.time)
 	_tick_skins(dt)
 	_tick_live(dt)
 	_tick_held()
+
+## The skate's ice strip, built the first time a plate is laid.
+func ice_strip(cap: int) -> IceStrip:
+	if strip == null:
+		strip = IceStrip.new(root, cap)
+	return strip
 
 ## Live nodes right now (tests: pooled, so this stays bounded).
 func node_count() -> int:

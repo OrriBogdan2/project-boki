@@ -15,7 +15,6 @@ extends RefCounted
 ##   the body rises onto the toe to push off and comes down again in the air); swing: how high the swinging foot's
 ##   arc goes (it kicks up fast behind, so the leg can reach it as the body moves on).
 
-const THIGH := Vector3(0.0, -FootPlant.KNEE, 0.0)
 const SOLE: Array = FootPlant.SOLE
 const HEEL_Z: float = (FootPlant.SOLE[0] as Vector3).z
 const REACH_MARGIN := 0.01   # m: a ground point nearer than this to the leg's full stretch ends the stance early
@@ -25,6 +24,7 @@ const FLAT_U := 0.3          # of the stance: the foot is flat and the hips at t
 const RISE_U := 0.7          # of the stance: the heel is up and the hips at their "lift" height from here on
 const KICK := 0.7            # the swing arc's time warp: height ~ sin(pi * w^KICK), up fast behind, down slowly ahead
 const LAND_T := 0.03         # s: the landing foot brakes from the body's pace to a standstill over this long
+const LAND_CLEAR := 0.03     # m: the landing foot is this high as it starts to brake and touches only as it stops
 const STAND_LIFT := 0.5      # x the arc height for a standing re-step
 const ROLL_TOL := 0.0005     # m: a sole point this much lower than the one on the ground takes the ground over
 const ON_RATE := 10.0        # /s: how fast the planted legs take over on landing
@@ -32,11 +32,14 @@ const OFF_RATE := 6.0        # /s: and let go when the body leaves the ground
 const MOVE_RATE := 10.0      # /s: how fast the hips go from their standing height to the gait's, and back
 const STAND_Z := 0.06        # m: standing, the heel settles this far behind the hip (the hip over the sole)
 const STAND_STEP := 0.25     # s: a standing re-step (the body turned too far for a planted foot)
+const FIT_STEPS := 24        # bisection steps that fit the knee of a leg with its own z scale (2e-7 rad)
+const CROUCH_DROP := 0.05    # m at the rig's size: how far the hips sink over a full crouch
 
 ## One leg's state: planted on its world anchor, or swinging to its landing pose.
 class Leg:
 	var pivot: Vector3           # the hip joint in the legs' space
 	var side := 1.0              # -1 left, 1 right: which way the foot splays
+	var zk := 1.0                # the leg node's z scale (a woman's legs are 0.9): the boot is that much shorter
 	var planted := false
 	var anchor := Vector3.ZERO   # world: the heel's ground point (the other sole points lie flat ahead of it)
 	var pose := Vector3.ZERO     # hip x, knee x, leg-out z (rad)
@@ -51,6 +54,8 @@ var legs: Node3D
 var left := Leg.new()
 var right := Leg.new()
 var gait_k := 0.0            # 1: these legs; 0: HunterAnim's own legs
+var crouch := 0.0            # 0..1: HunterAnim's crouch, set each frame before step: it lowers the hip heights
+var squat := 0.0             # m: a garden move lowers the hips this far over the planted feet (HunterVerbs.squat)
 var ph := 0.0                # the walk phase HunterAnim's arms and torso follow: the left leg's cycle
 var landed := false          # a foot came down this frame
 var hl := 0.0
@@ -78,6 +83,8 @@ func _init(legs_node: Node3D, gait: Dictionary) -> void:
 	left.pivot = (legs.get_node("LegL") as Node3D).position
 	right.pivot = (legs.get_node("LegR") as Node3D).position
 	left.side = -1.0
+	left.zk = (legs.get_node("LegL") as Node3D).scale.z
+	right.zk = (legs.get_node("LegR") as Node3D).scale.z
 	_step = gait.get("step", _step)
 	_stance = float(gait.get("stance", _stance))
 	_strike = float(gait.get("strike", _strike))
@@ -91,9 +98,10 @@ func _init(legs_node: Node3D, gait: Dictionary) -> void:
 ## Hip height over the ground through a stance: the strike height, the flat height by FLAT_U, the lift height
 ## from RISE_U on, eased between.
 func _hip_h(u: float) -> float:
+	var sink := crouch * CROUCH_DROP
 	if u <= FLAT_U:
-		return lerpf(float(_hip[0]), float(_hip[1]), smoothstep(0.0, FLAT_U, u))
-	return lerpf(float(_hip[1]), float(_hip[2]), smoothstep(FLAT_U, RISE_U, u))
+		return lerpf(float(_hip[0]), float(_hip[1]), smoothstep(0.0, FLAT_U, u)) - sink
+	return lerpf(float(_hip[1]), float(_hip[2]), smoothstep(FLAT_U, RISE_U, u)) - sink
 
 ## Advances the legs a frame: `on` while the feet have ground under them, `moving` as HunterAnim sees it, `vel` the
 ## body's world velocity, `own` HunterAnim's own legs [hl, hr, kl, kr, wl, wr] these blend over. Reads the legs'
@@ -184,7 +192,8 @@ func _stance_frame(leg: Leg, inv: Transform3D, dir: float, step_len: float, spd:
 	var a := inv * leg.anchor
 	leg.u = (a.z - _strike) / _stance
 	var target := Vector3(a.x, 0.0, a.z)
-	var hip_h := lerpf(float(_hip[1]), _hip_h(leg.u), _move_k)      # standing: the flat-footed height
+	# standing: flat-footed
+	var hip_h := lerpf(float(_hip[1]) - crouch * CROUCH_DROP, _hip_h(leg.u), _move_k) - squat
 	while _too_far(leg, a, hip_h) and leg.contact < SOLE.size() - 1:
 		leg.contact += 1      # the heel comes up: the boot rolls on to the next sole point
 	var done := (dir > 0.0 and leg.u >= 1.0) or (dir < 0.0 and leg.u <= 0.0)
@@ -207,9 +216,18 @@ func _stance_frame(leg: Leg, inv: Transform3D, dir: float, step_len: float, spd:
 ## True when the leg cannot stretch from the hip at `hip_h` to its contact sole point's ground spot (`a` the
 ## heel's, in the legs' space).
 func _too_far(leg: Leg, a: Vector3, hip_h: float) -> bool:
-	var sole: Vector3 = SOLE[leg.contact]
-	var hip_to_ground := Vector3(a.x - leg.pivot.x, hip_h, a.z + sole.z - HEEL_Z).length()
-	return hip_to_ground > FootPlant.KNEE + sole.length() - REACH_MARGIN
+	var hip_to_ground := Vector3(a.x - leg.pivot.x, hip_h, a.z + (SOLE[leg.contact] as Vector3).z - HEEL_Z).length()
+	return hip_to_ground > _stretch(leg, leg.contact) - REACH_MARGIN
+
+## The knee at which the leg is longest to a sole point: the thigh and the boot's own line one straight line
+## (the knee never bends forward, so the heel's stops at 0).
+func _straight(sole: Vector3) -> float:
+	return minf(wrapf(PI - atan2(sole.z, sole.y), -PI, PI), 0.0)
+
+## The longest the leg gets to sole point `contact`.
+func _stretch(leg: Leg, contact: int) -> float:
+	var sole: Vector3 = SOLE[contact]
+	return FootPlant.at(sole, _straight(sole), leg.zk).length()
 
 ## A leg leaves the ground for a swing of `dur` seconds.
 func _lift(leg: Leg, dur: float, inv: Transform3D) -> void:
@@ -240,6 +258,8 @@ func _swing_frame(leg: Leg, dt: float, dir: float, xf: Transform3D, inv: Transfo
 		s = 1.0 + over - pace / (2.0 * brake) * (w - 1.0 + brake) * (w - 1.0 + brake)
 	var at := Vector2(lerpf(leg.from.x, land.x, smoothstep(0.0, 1.0, w)), lerpf(leg.from.y, land.y, s))
 	var arc := _swing * lerpf(STAND_LIFT, 1.0, _move_k) * sin(PI * pow(w, lerpf(1.0, KICK, _move_k)))
+	if w > 1.0 - brake:
+		arc += LAND_CLEAR * (1.0 - (w - 1.0 + brake) / brake)      # still braking, so still off the ground
 	var depth := _hip_now - arc
 	if w > 0.5:
 		leg.contact = 0      # coming down to land: the heel rides the arc unless that pose hangs the toe lower
@@ -256,31 +276,40 @@ func _swing_frame(leg: Leg, dt: float, dir: float, xf: Transform3D, inv: Transfo
 ## The boot's lowest sole point for a pose: [index into SOLE, its position in the legs' space].
 func _lowest(leg: Leg, pose: Vector3) -> Array:
 	var hip := Basis.from_euler(Vector3(pose.x, 0.0, pose.z))
-	var shin := Basis(Vector3.RIGHT, pose.y)
 	var best := 0
 	var low := Vector3.ZERO
 	for i in SOLE.size():
-		var p: Vector3 = leg.pivot + hip * (THIGH + shin * (SOLE[i] as Vector3))
+		var p: Vector3 = leg.pivot + hip * FootPlant.at(SOLE[i], pose.y, leg.zk)
 		if i == 0 or p.y < low.y:
 			best = i
 			low = p
 	return [best, low]
 
 ## The hip, knee and leg-out angles that put sole point `contact` on its ground point (`target` is the heel's,
-## each sole point lies flat ahead of it) with the hip `hip_h` above it. Closed form for this rig: the knee bends
-## about the thigh's own axis, so thigh and boot are one planar chain whose length sets the knee (bent back, the
-## knee ahead of the hip-to-sole line); the leg-out angle tips that chain onto the point's side, the hip swings it
-## to the point. Out of reach, the leg points at it.
+## each sole point lies flat ahead of it) with the hip `hip_h` above it. The knee bends about the thigh's own axis,
+## so thigh and boot are one planar chain, bent back, and its length sets the knee (bisected: the leg node may have
+## its own z scale, a woman's 0.9, which shortens the boot's length along z); the leg-out angle tips that chain onto
+## the point's side, the hip swings it to the point. Out of reach, the leg points at it.
 func _solve(leg: Leg, contact: int, target: Vector3, hip_h: float) -> Vector3:
 	var sole: Vector3 = SOLE[contact]
 	var to := Vector3(target.x - leg.pivot.x, -hip_h, target.z + sole.z - HEEL_Z)
-	var l1 := FootPlant.KNEE
-	var l2 := sole.length()
-	var bend := acos(clampf((l1 * l1 + l2 * l2 - to.length_squared()) / (2.0 * l1 * l2), -1.0, 1.0))
-	var sole_dir := atan2(sole.z, sole.y)
-	var knee := minf(wrapf(bend - sole_dir, -PI, PI), wrapf(-bend - sole_dir, -PI, PI))
-	knee = minf(knee, 0.0)
-	var chain := THIGH + Basis(Vector3.RIGHT, knee) * sole
+	var knee := _fit_knee(leg.zk, sole, to.length_squared())
+	var chain := FootPlant.at(sole, knee, leg.zk)
 	var out := asin(clampf(-to.x / chain.y, -1.0, 1.0))
 	var hip := wrapf(atan2(to.z, to.y) - atan2(chain.z, chain.y * cos(out)), -PI, PI)
 	return Vector3(hip, knee, out)
+
+## The knee at which a leg of z scale `zk` has its sole point `sole` the squared distance `d2` from the hip:
+## between the folded boot and the straight leg the distance only grows. Out of reach, the straight leg.
+func _fit_knee(zk: float, sole: Vector3, d2: float) -> float:
+	var hi := _straight(sole)
+	if d2 >= FootPlant.at(sole, hi, zk).length_squared():
+		return hi
+	var lo := -PI
+	for _i in FIT_STEPS:
+		var mid := 0.5 * (lo + hi)
+		if FootPlant.at(sole, mid, zk).length_squared() > d2:
+			hi = mid
+		else:
+			lo = mid
+	return 0.5 * (lo + hi)

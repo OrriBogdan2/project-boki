@@ -44,12 +44,13 @@ static func element_of(species: String) -> String:
 static func say(rec: Dictionary, trigger_id: String, now_s := -1.0) -> String:
 	var species := String(rec.get("species", ""))
 	var id := String(rec.get("uid", species))
-	return line(id, trigger_id, species, Care.speech(rec), now_s)
+	return line(id, trigger_id, species, Care.speech(rec), now_s, [], Unique.sex(rec))
 
 ## The line itself: boki_id keys its memory and cooldown; stage is its Care.speech level; extra are
-## its own personal lines (used when they fit the word cap and are one sentence).
+## its own personal lines (used when they fit the word cap and are one sentence); sex ("m"/"f")
+## fills the {his}/{he} in its actions.
 static func line(boki_id: String, trigger_id: String, species: String, stage: int, now_s := -1.0,
-		extra: Array = []) -> String:
+		extra: Array = [], sex := "") -> String:
 	var t := trigger(trigger_id)
 	if t.is_empty():
 		return ""
@@ -70,7 +71,7 @@ static func line(boki_id: String, trigger_id: String, species: String, stage: in
 	while recent.size() > int(tuning("no_repeat")):
 		recent.pop_front()
 	_recent[boki_id] = recent
-	return s
+	return KinSpeak.pronouns(s, sex)
 
 ## Everything a grown Boki might say for a trigger: the general lines, its element's, and its own.
 static func grown_pool(t: Dictionary, element: String, extra: Array = []) -> Array:

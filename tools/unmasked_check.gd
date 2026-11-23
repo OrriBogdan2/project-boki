@@ -9,6 +9,11 @@ extends RefCounted
 ## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
 
 const FOOT_TOLERANCE := 0.02     # m: how far the lowest foot point may sit above or below the ground
+## The slider values the feet are tested at (low, middle, high), for height and for build.
+const FRAME_STEPS := [0.0, 0.5, 1.0]
+## [sex, height step, build step] (indices into FRAME_STEPS) of the bodies that stood highest (2.1 to 2.8 cm) while
+## EmptyGait solved a woman's legs (leg node z scale 0.9) as if they were unscaled: each is its own row.
+const WORST_FEET := [[0, 2, 1], [0, 2, 2], [0, 1, 0], [0, 1, 1]]
 
 var bad := 0
 
@@ -64,8 +69,9 @@ func _old_looks() -> void:
 	ok(Unmasked.clean({}) == Unmasked.default_look(), "no look gives the default")
 	var old := {"race": 2, "gender": 0, "body": 2, "face": 4, "skin": 5, "outfit": 1, "hair": 3, "glider": "kite"}
 	var u := Unmasked.clean(old)
-	var want := [0, 2, 2, Unmasked.HOLLOW_FROM_EYES[4], Unmasked.GHOST_FROM_BROWS[4]]
-	var got := [u["gender"], u["build"], u["height"], u["hollow"], u["ghost"]]
+	var want := [0, EmptyFrame.OLD_STEPS[2], EmptyFrame.OLD_STEPS[2], Unmasked.HOLLOW_FROM_EYES[4],
+		Unmasked.GHOST_FROM_BROWS[4]]
+	var got := [u["gender"], u["frame"]["build"], u["frame"]["height"], u["hollow"], u["ghost"]]
 	ok(got == want and not u.has("eyes") and not u.has("brows") and not u.has("blush"),
 		"an old Stoneborn sturdy fierce look keeps sex and build, reads tall, its face a hollow (%s)" % str(got))
 	var marks_look := {"unmasked": true, "gender": 1, "eyes": 2, "brows": 1, "blush": 2, "outfit": 3, "colour": 4}
@@ -105,8 +111,8 @@ func _model(main: Node) -> void:
 	var base := _build(Unmasked.default_look())
 	var rig_ok := String(base.get_meta("race")) == "human" and String(base.get_meta("arch")) == "unmasked"
 	ok(rig_ok, "it is the human rig with no hunter's gear (arch %s)" % base.get_meta("arch"))
-	var tall := _build({"unmasked": true, "height": 2})
-	var short := _build({"unmasked": true, "height": 0})
+	var tall := _build({"unmasked": true, "frame": {"height": 1.0}})
+	var short := _build({"unmasked": true, "frame": {"height": 0.0}})
 	var tops := [_top(short), _top(base), _top(tall)]
 	ok(tops[2] > tops[1] * 1.07 and tops[1] > tops[0] * 1.07,
 		"height changes how tall the model stands, by about a tenth a step (%.2f / %.2f / %.2f m)" % tops)
@@ -126,18 +132,46 @@ func _model(main: Node) -> void:
 	ok(int(sm.get_shader_parameter("shape")) == 2 and int(sm.get_shader_parameter("ghost")) == 3
 		and (sm.get_shader_parameter("glow") as Color).is_equal_approx(Unmasked.GLOWS[2]),
 		"the hollow's shape, ghost features and glow follow the look")
+	var drawn := 0
+	for g in Unmasked.GHOSTS.size():
+		var m := _build({"unmasked": true, "ghost": g})
+		var gm: ShaderMaterial = (m.find_child("Hollow", true, false) as MeshInstance3D).material_override
+		drawn += int(int(gm.get_shader_parameter("ghost")) == g)
+		m.free()
+	var names := {}
+	for g in Unmasked.GHOSTS:
+		names[g] = true
+	ok(Unmasked.GHOSTS.size() >= 10 and names.size() == Unmasked.GHOSTS.size() and drawn == names.size(),
+		"%d distinct ghost face marks, each one reaching the void shader" % drawn)
 	var woman := _build({"unmasked": true, "gender": 0})
 	var man := _build({"unmasked": true, "gender": 1})
 	var w_sh := (woman.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
 	var m_sh := (man.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
-	var flare := _width(woman.get_node("Rig/Torso/ShroudBones")) > _width(man.get_node("Rig/Torso/ShroudBones"))
-	ok(absf(w_sh) < absf(m_sh) * 0.9 and flare,
-		"a woman has narrower shoulders and a shroud that flares wider at the hem")
+	var hem := -0.35       # m, torso space: just above the cloak's hem
+	var her_flare := _cloth_at(woman, hem) / _cloth_at(woman, 0.47)
+	var flare := her_flare > _cloth_at(man, hem) / _cloth_at(man, 0.47) * 1.15
+	ok(absf(w_sh) < absf(m_sh) * 0.8 and flare,
+		"a woman has much narrower shoulders (%.2f / %.2f m) and a shroud that flares out more below them"
+		% [w_sh, m_sh])
+	var her := _build({"unmasked": true, "gender": 0, "shroud": 1})      # (Wrap: no hood over the crown)
+	var him := _build({"unmasked": true, "gender": 1, "shroud": 1})
+	var gap := _top(him) - _top(her)
+	ok(gap > 0.06 and gap < 0.08, "she stands %.3f m shorter (6 to 8 cm; %.2f / %.2f m)" % [gap, _top(her), _top(him)])
+	her.free()
+	him.free()
+	var w_fig := [_cloth_at(woman, 0.47), _cloth_at(woman, 0.26), _cloth_at(woman, 0.0)]
+	var m_fig := [_cloth_at(man, 0.47), _cloth_at(man, 0.26), _cloth_at(man, 0.0)]
+	ok(m_fig[0] / m_fig[2] > w_fig[0] / w_fig[2] * 1.2 and w_fig[1] / w_fig[2] < m_fig[1] / m_fig[2] * 0.9,
+		"the cloth is cut to the figure: his shoulders broad over his hips, her waist in over fuller hips "
+		+ "(shoulders, waist, hips: %.2f %.2f %.2f / %.2f %.2f %.2f m)" % (m_fig + w_fig))
+	var st: Dictionary = Content.rules(WardenStance.RULES)
 	ok(String(woman.get_meta("stance")) == "empty_f" and String(man.get_meta("stance")) == "empty_m"
-		and WardenStance.new("empty_f").has_stance() and WardenStance.new("empty_m").has_stance(),
-		"and her own stance (weight on one hip); his is square")
-	var slight := _build({"unmasked": true, "build": 0})
-	var sturdy := _build({"unmasked": true, "build": 2})
+		and WardenStance.new("empty_f").has_stance() and WardenStance.new("empty_m").has_stance()
+		and float(st["empty_f"]["pose"]["hip"]) > 3.0 * float(st["empty_m"]["pose"]["hip"])
+		and float(st["empty_m"]["gait"]["width"]) > 2.0 * float(st["empty_f"]["gait"]["width"]),
+		"and her own stance (weight on one hip, feet close); his is square and wide")
+	var slight := _build({"unmasked": true, "frame": {"build": 0.0}})
+	var sturdy := _build({"unmasked": true, "frame": {"build": 1.0}})
 	ok(_width(sturdy) > _width(base) * 1.08 and _width(base) > _width(slight) * 1.06,
 		"build changes the body's mass (%.2f / %.2f / %.2f m wide)" % [_width(slight), _width(base), _width(sturdy)])
 	for n in [styled, woman, man, slight, sturdy]:
@@ -158,6 +192,15 @@ func _anim(main: Node) -> void:
 		await main.get_tree().process_frame
 	ok(is_instance_valid(base), "the hunter animations run on it")
 	base.queue_free()
+
+## The shroud's cloth width round height y (m, torso space).
+func _cloth_at(m: Node3D, y: float) -> float:
+	var cloth := m.get_node("Rig/Torso/ShroudBones/ClothBody") as MeshInstance3D
+	var half := 0.0
+	for v in cloth.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array:
+		if absf(v.y - y) < 0.03:
+			half = maxf(half, absf(v.x))
+	return half * 2.0
 
 ## The top of a model's meshes, in metres (its height as built).
 func _top(m: Node3D) -> float:
@@ -234,12 +277,15 @@ func _sole_y(m: Node3D) -> float:
 ## Item 81: at every height, build and sex the soles rest on the ground, standing and across a walk cycle.
 func _feet(main: Node) -> void:
 	var worst := 0.0
+	var worst_body := ""
 	var cases := 0
+	var per := {}
 	var tree := main.get_tree()
 	for g in 2:
-		for h in Unmasked.HEIGHTS.size():
-			for b in Unmasked.BUILDS.size():
-				var m := _build({"unmasked": true, "gender": g, "height": h, "build": b})
+		for h in FRAME_STEPS.size():
+			for b in FRAME_STEPS.size():
+				var frame := {"height": FRAME_STEPS[h], "build": FRAME_STEPS[b]}
+				var m := _build({"unmasked": true, "gender": g, "frame": frame})
 				main.add_child(m)
 				var anim := HunterAnim.new(m)
 				var lows := []
@@ -249,13 +295,21 @@ func _feet(main: Node) -> void:
 						"vel": Vector3(0, 0, -3.5) if walking else Vector3.ZERO})
 					if i == 59 or (walking and i % 4 == 0):
 						lows.append(_sole_y(m))
+				var body_worst := 0.0
 				for y in lows:
-					worst = maxf(worst, absf(y))
+					body_worst = maxf(body_worst, absf(y))
+				per[[g, h, b]] = body_worst
+				if body_worst > worst:
+					worst = body_worst
+					worst_body = "sex %d height %d build %d" % [g, h, b]
 				cases += 1
 				m.free()
 				await tree.process_frame
 	ok(worst <= FOOT_TOLERANCE, ("feet stay on the ground at min/mid/max height, every build and both sexes, idle and "
-		+ "walking (%d bodies, worst %.1f cm)") % [cases, worst * 100.0])
+		+ "walking (%d bodies, worst %.1f cm, %s)") % [cases, worst * 100.0, worst_body])
+	for body in WORST_FEET:
+		ok(float(per[body]) <= FOOT_TOLERANCE, "%s, height %.1f, build %.1f: feet on the ground (%.1f cm)" % [
+			Unmasked.SEXES[body[0]], FRAME_STEPS[body[1]], FRAME_STEPS[body[2]], float(per[body]) * 100.0])
 
 ## Items 79b and 80: an older Empty (a skin colour, an outfit, motes) loads as one with a shroud and an aura.
 func _shroud_migration() -> void:
@@ -289,11 +343,11 @@ func _shroud() -> void:
 	ok(not wine.is_equal_approx(_coat(other)) and absf(wine.h - Unmasked.COLOURS[5].h) < 0.05,
 		"the shroud colour sets the cloth's colour")
 	var hand := cloak.find_child("Hand", true, false)
-	var hand_dark := false
+	var hand_void := false
 	for mi in hand.find_children("*", "MeshInstance3D", false, false):
-		var c: Variant = ((mi as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("albedo")
-		hand_dark = hand_dark or (c is Color and (c as Color).v < 0.12)
-	ok(hand_dark, "the hands are void-dark: no skin colour on them")
+		var mat := (mi as MeshInstance3D).material_override as ShaderMaterial
+		hand_void = hand_void or mat.shader == EmptyVoid.VOID_BODY
+	ok(hand_void, "the hands are void: no skin colour on them")
 	var wrapped := _build({"unmasked": true, "shroud": 1})
 	var tatters := _build({"unmasked": true, "shroud": 2})
 	var shapes := [_shape_of(cloak), _shape_of(wrapped), _shape_of(tatters)]

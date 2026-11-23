@@ -19,6 +19,7 @@ extends RefCounted
 ##   depth    followup depth                                hits   {n}: units touched by this delivery (MAX_HITS)
 
 const MOVERS := ["dash", "leap", "blink"]
+const SPIKE_VY := -16.0      # m/s: a spiked airborne foe falls at least this fast (Displace.spike)
 
 ## Does the ability move the body that casts it (a dash, leap or blink)? A Boki on you does those itself.
 static func moves_caster(ab: AbilitySpec) -> bool:
@@ -29,8 +30,25 @@ static func moves_caster(ab: AbilitySpec) -> bool:
 
 ## A fresh context for a cast.
 static func make_cx(m: Node, caster: Ent, kin: Ent, owner: Ent, aim: Vector3, power: float, slot: String, ability_id: String, chain: Array = []) -> Dictionary:
-	return {"m": m, "caster": caster, "kin": kin, "owner": owner, "team": int(caster.team) if caster else -1, "aim": aim,
+	var cx := {"m": m, "caster": caster, "kin": kin, "owner": owner, "team": int(caster.team) if caster else -1, "aim": aim,
 		"power": power, "slot": slot, "ability": ability_id, "chain": chain + [ability_id], "depth": 1, "k": 1.0}
+	# Every cast a Hunter makes draws in that Hunter's slot colour, whichever path built the context
+	# (a kit, a merge, a hand-built stage); the category colours stay for Boki and generic casts.
+	if is_hunter_cast(cx):
+		cx["hero_col"] = Arch.color((caster as Hunter).arch)
+	return cx
+
+## Is this cast a Hunter's (a Hunter with an archetype as the caster)? Such a cast never reaches the
+## generic category colours (--hero-vfx-check pins it).
+static func is_hunter_cast(cx: Dictionary) -> bool:
+	var who = cx.get("caster")
+	return who is Hunter and (who as Hunter).arch != ""
+
+## The generic colour a cast falls back to (Boki and generic casts only). A Hunter's cast must never get
+## here: make_cx sets "hero_col" for it, so this asserts if some path built its context another way.
+static func generic_col(cx: Dictionary, col: Color) -> Color:
+	assert(not is_hunter_cast(cx), "a Hunter's cast fell back to the generic category colour (no hero_col)")
+	return col
 
 ## Casts every top-level stage of an ability.
 static func cast(ab: AbilitySpec, cx: Dictionary) -> void:
@@ -103,7 +121,7 @@ static func _enemy_area(st: StageSpec, cx: Dictionary) -> bool:
 	return d.type in ["burst", "zone"] and String(d.params.get("origin", "")) == "aim" and float(d.params.get("radius", 0.0)) >= 1.4
 
 static func _telegraph(m: Node, at: Vector3, r: float, col: Color, t: float) -> void:
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(col, 0.9))
+	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(col, 0.9), SideColor.ORDER_FOE)
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
 	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
@@ -112,6 +130,8 @@ static func _telegraph(m: Node, at: Vector3, r: float, col: Color, t: float) -> 
 static func _origin(st: StageSpec, cx: Dictionary) -> Vector3:
 	if cx.has("at_fixed"):
 		return cx["at_fixed"]
+	if cx.has("muzzle"):
+		return cx["muzzle"]
 	var d := st.delivery
 	var caster: Ent = cx["caster"]
 	match String(d.params.get("origin", "caster")):
@@ -167,12 +187,12 @@ static func _color(st: StageSpec, cx: Dictionary) -> Color:
 	if cx.has("hero_col"):
 		return cx["hero_col"]
 	if not st.effects.is_empty():
-		return KinRules.effects_color(st.effects)
+		return generic_col(cx, KinRules.effects_color(st.effects))
 	for ev in st.then:
 		for sub in st.then[ev]:
 			if not (sub as StageSpec).effects.is_empty():
-				return KinRules.effects_color((sub as StageSpec).effects)
-	return KinRules.cat_color("sustain" if st.delivery.type == "wall" else "utility")
+				return generic_col(cx, KinRules.effects_color((sub as StageSpec).effects))
+	return generic_col(cx, KinRules.cat_color("sustain" if st.delivery.type == "wall" else "utility"))
 
 static func _height(u) -> float:
 	if u is Hunter: return 0.95
@@ -248,6 +268,8 @@ static func _projectile(st: StageSpec, cx: Dictionary) -> void:
 		var dv := Vector2(cos(a), sin(a))
 		var lead := 0.6 if unit else 0.2
 		var start := Vector3(from.x + dv.x * lead, y, from.z + dv.y * lead)
+		if cx.has("muzzle"):
+			start = cx["muzzle"]          # (cx "muzzle": the exact point a weapon's mouth sits at, from the animation)
 		_shoot(st, cx, start, dv, spd, rng, size, col, {"hits": 0, "bounce": int(bounce.params["count"]) if bounce else 0, "seen": {}}, hits)
 	if not cx.get("silent", false):
 		m.sfx("throw", from, -3.0, 1.15)
@@ -265,6 +287,8 @@ static func _shoot(st: StageSpec, cx: Dictionary, start: Vector3, dv: Vector2, s
 		extra["bounce"] = int(cx["wall_bounce"])      # ricochets off walls (an archetype's trick shot)
 	if cx.has("shot_crit"):
 		extra["crit"] = true
+	if cx.get("drawn", false):
+		extra["drawn"] = true      # the kit draws it (Grimble's arm): no ball, and no "s" copy for other games
 	if bool(p.get("rope", false)):
 		extra["rope"] = true
 		extra["deco"] = "hook"
@@ -350,12 +374,19 @@ static func _cone(st: StageSpec, cx: Dictionary) -> void:
 	var r := float(p["radius"])
 	var cosv := cos(deg_to_rad(float(p["angle"])) * 0.5)
 	var col := _color(st, cx)
+	# a kit's strike lane (cx "lane_w", m): the wedge becomes a strip that wide over the same reach
+	var lane_w := float(cx.get("lane_w", 0.0))
 	m.fx.cone(from, dir, r, col)
 	m.sfx("whoosh", from, -4.0, 0.9)
 	var foes: Array = []
 	for f in m.foes_of(int(cx["team"])):
+		if not f.hittable() or absf(f.pos.y - from.y) >= 2.2:
+			continue
 		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
-		if f.hittable() and to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(dir) > cosv) and absf(f.pos.y - from.y) < 2.2:
+		if lane_w > 0.0:
+			if AimMode.in_lane(from, dir, r, lane_w, f.pos, f.r):
+				foes.append(f)
+		elif to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(dir) > cosv):
 			foes.append(f)
 	var hit := _hit(st.effects, st, foes, cx, from, r)
 	for f in hit:
@@ -432,7 +463,8 @@ static func _burst(st: StageSpec, cx: Dictionary) -> void:
 		if r <= KinParts.BIG_RADIUS:
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
-			if r > 2.0: m.shake(0.3, at)
+			if r > 2.0:      # a Boki's own burst never shakes its owner's camera (DASHES §5.5)
+				Shake.incoming_big(m, at, 0.3, cx["caster"])
 		else:
 			m.sfx("ping", at, -2.0, 1.1)
 		_hit(st.effects, st, _foes_near(cx, at, r), cx, at, r)
@@ -513,7 +545,8 @@ static func _trap(st: StageSpec, cx: Dictionary) -> void:
 			_then(st, "on_trigger", cx, tat, d, f)
 		var end := func(tat: Vector3) -> void:
 			if is_instance_valid(cx["caster"]): _then(st, "on_end", cx, tat, d)
-		m.verbs.add_trap(cx["caster"], q, {"radius": float(p["radius"]), "arm": float(p["arm"]), "time": float(p["duration"]), "color": col.to_html(false), "kx": fire, "kx_end": end}, {})
+		m.verbs.add_trap(cx["caster"], q, {"radius": float(p["radius"]), "arm": float(p["arm"]), "time": float(p["duration"]), "color": col.to_html(false), "kx": fire, "kx_end": end,
+			"max_live": int(p.get("max_live", 0)), "group": String(cx.get("ability", ""))}, {})
 
 static func _wall(st: StageSpec, cx: Dictionary) -> void:
 	var m: Node = cx["m"]
@@ -778,8 +811,7 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 		if float(spike.params["stun"]) > 0.0:
 			o["stun"] = maxf(float(o.get("stun", 0.0)), float(spike.params["stun"]))
 		o.erase("lift")
-		m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", KinRules.cat_color("control"), true)
-		f.vel.y = -16.0
+		m.displace.spike(f, SPIKE_VY, by)
 	# a hook's yank goes first (then the hit, so its stun lands on the way in)
 	for e in post:
 		if e.type == "pull" and float(e.params["gap"]) > 0.0:
@@ -794,7 +826,7 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 	if cats.has("control"):
 		col = KinRules.cat_color("control")
 	elif cats.has("damage"):
-		col = cx.get("hero_col", KinRules.cat_color("damage"))
+		col = cx["hero_col"] if cx.has("hero_col") else generic_col(cx, KinRules.cat_color("damage"))
 	m.fx.burst(f.pos + Vector3(0, 0.8, 0), col, 6, 2.5, 0.3)
 	# an archetype ability's own follow-up on what it hit (Marks, Shadow Step windows, wall pins)
 	var cb = cx.get("on_foe")
@@ -828,15 +860,13 @@ static func _post(e: PartSpec, f: Ent, cx: Dictionary, center: Vector3, k: float
 				var dest := _ground(m, Vector3(p2.x, anchor.y, p2.y), anchor.y)
 				m.verbs.yank(f, dest, clampf(rel.length() / maxf(4.0, float(pr["strength"])), 0.14, 0.42), 0.8)
 				m.fx.bolt(anchor + Vector3(0, 1.0, 0), f.pos + Vector3(0, 0.9, 0), KinRules.cat_color("control"))
-				m.fx.word(f.pos + Vector3(0, 2.0, 0), "HOOKED", KinRules.cat_color("control"), false)
 				m.sfx("grab", anchor, -1.0, 1.1)
 			elif rel.length() > 0.4:
 				var r := maxf(1.0, float(cx.get("_radius", 4.0)))
-				f.impulse(rel.normalized() * float(pr["strength"]) * k * clampf(rel.length() / r + 0.3, 0.4, 1.0), 1.0)
+				var kb := rel.normalized() * float(pr["strength"]) * k * clampf(rel.length() / r + 0.3, 0.4, 1.0)
+				m.displace.knock(f, kb, 1.0)
 		"mark":
 			KinRules.mark(f, String(pr["mode"]), float(pr["duration"]), float(pr["amount"]))
-			if String(pr["mode"]) == "reveal":
-				m.fx.ring(f.pos, 1.2, KinRules.cat_color("utility"), 0.6)
 
 ## The friendly effects of a delivery event: on the owner, the kin itself or allies near it.
 static func apply_friends(effs: Array, cx: Dictionary, center: Vector3, radius: float) -> void:
@@ -877,9 +907,8 @@ static func _friend(e: PartSpec, t: Ent, cx: Dictionary, center: Vector3) -> voi
 	match e.type:
 		"shield":
 			if "shield" in t:
-				t.set("shield", maxf(float(t.get("shield")), float(pr["amount"]) * k * weak))
+				ShieldSrc.give(t, float(pr["amount"]) * k * weak, ShieldSrc.BOKI)
 				if "shield_t" in t: t.set("shield_t", maxf(float(t.get("shield_t")), float(pr["duration"])))
-			m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
 			m.sfx("shield", t.pos, -3.0)
 		"heal":
 			var amt := float(pr["amount"]) * k * weak

@@ -181,7 +181,7 @@ static func _thief(c: Dictionary) -> void:
 		_p(t, Models.box(0.022, 0.05, 0.012), m["leather"], at, Vector3.ONE, Vector3(0, 0, rr + PI * 0.5))
 		_p(t, HeroKit.loft("thief_knife", [Vector3(0, 0.0, 0), Vector3(0, 0.045, 0.0), Vector3(0, 0.085, 0.004)], [Vector2(0.016, 0.004), Vector2(0.014, 0.004), Vector2(0.001, 0.001)], 6, Vector3.FORWARD, 1.0), m["steel"], at + Basis(Vector3.BACK, rr + PI * 0.5) * Vector3(0.02, 0.0, 0), Vector3.ONE, Vector3(0, 0, rr + PI * 0.5 - PI * 0.5))
 	# the mantle off the left shoulder, and two long split cloak tails behind
-	var cape := Models._pivot(t, "Cape", Vector3(0, 0.56, 0.24 * bw))
+	var cape := t.get_node("Cape") as Node3D      # (HunterBody.pivots)
 	_p(cape, HeroKit.drape("thief_cape", 0.25, 0.36, 0.3, 0.12, 0.56, 5.0, 0.08, 0.05, -0.35, 0.016), hood_m, Vector3(0, 0.0, -0.24 * bw), Vector3(cw, 1.0, bw), Vector3(0.05, 0, 0))
 	_p(cape, HeroKit.drape_hem("thief_cape", 0.25, 0.36, 0.3, 0.12, 0.56, 5.0, 0.08, 0.05, -0.35, 0.05), m["acc"], Vector3(0, 0.0, -0.24 * bw), Vector3(cw, 1.0, bw), Vector3(0.05, 0, 0))
 	for sx in [-1.0, 1.0]:
@@ -191,7 +191,7 @@ static func _thief(c: Dictionary) -> void:
 		_p(cape, HeroKit.loft("thief_ctailh%d" % int(sx), pts.slice(2), [Vector2(0.078, 0.016), Vector2(0.006, 0.006)], 8, Vector3.BACK, 1.0), m["acc"], Vector3(0, 0, 0.004))
 	_p(cape, HeroKit.loft("thief_capetie", [Vector3(-0.28, 0.0, -0.06), Vector3(0, 0.01, 0.03), Vector3(0.26, 0.0, -0.06)], [Vector2(0.03, 0.015), Vector2(0.032, 0.016), Vector2(0.03, 0.015)], 8, Vector3.BACK), m["leather"], Vector3.ZERO, Vector3(cw, 1.0, 1.0))
 	# the scarf: its tails stream behind in the team colour
-	var scarf := Models._pivot(t, "Scarf", Vector3(0, 0.6, 0.18 * bw))
+	var scarf := t.get_node("Scarf") as Node3D      # (HunterBody.pivots)
 	for sx in [-1.0, 1.0]:
 		_p(scarf, HeroKit.lock_mesh("thief_scarf2%d" % int(sx), [Vector3(0.05 * sx, 0.0, 0.0), Vector3(0.09 * sx, -0.08, 0.16), Vector3(0.13 * sx, -0.2, 0.3 + 0.04 * sx), Vector3(0.16 * sx, -0.32, 0.4)], 0.09, 0.16, Vector3.BACK, 0.8, 0.5), m["acc"])
 	# a reversed knife across the small of the back, and pouches on the hips
@@ -321,7 +321,7 @@ static func _gunslinger(c: Dictionary) -> void:
 		_p(sk, HeroKit.drape_hem(key, r0, r1, 0.34, a0, a1, 8.0, 0.06, 0.02, 0.1, 0.06), m["trim"], Vector3(0, -0.02, 0.01))
 	_tp(c, "mar_vest", 0.69, 0.81, 0.16, 0.86, 0.01, m["shirt"], 0.012)
 	# the scarf: wound at the throat, two long ends streaming behind (the animation sways "Scarf")
-	var scarf := Models._pivot(t, "Scarf", Vector3(0, 0.6, 0.18 * bw))
+	var scarf := t.get_node("Scarf") as Node3D      # (HunterBody.pivots)
 	_p(t, HeroKit.mantle("mar_scarf_wrap", 0.13, 0.13, 0.05, 5.0), team, Vector3(0, 0.67, -0.01))
 	for sx in [-1.0, 1.0]:
 		_p(scarf, HeroKit.lock_mesh("mar_scarf%d" % int(sx), [Vector3(0.03 * sx, 0.06, 0.0), Vector3(0.08 * sx, -0.04, 0.16), Vector3(0.12 * sx, -0.2, 0.36), Vector3(0.14 * sx, -0.4, 0.5)], 0.09, 0.2, Vector3.BACK, 0.8, 0.4), team)

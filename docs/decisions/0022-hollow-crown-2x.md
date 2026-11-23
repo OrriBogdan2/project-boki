@@ -41,12 +41,22 @@ MAX_NODES, because cross-island trips on the bigger land ran out of nodes.
   19/31/32 ms, load 11.7/13.0/13.8 s. (Superseded by the GPU pass below: capped at 30.)
 - Load still grows with the hunter count: each hunter model takes ~120 ms (GPU box) to build, and a
   Warden with a 3D model builds the whole procedural body first, then hides it (docs/DEBT.md).
+  Fixed 11-12: a .glb Warden builds only its rig and the kept pieces (`HunterBody` holds the body);
+  build.hunters 1.70-1.84 -> 1.27-1.29 s headless (--load-check, 6 Hunters, rpc1 under load), 2.15 -> 1.52 s
+  with --perf-bench on an RTX 4090 (jobq 20261112-040207-15565 / 20261112-023127-31663, worker rp1-3).
   Alternative not taken: 30 hunters (loses squads-per-area parity for ~0.8 s).
 - Flat pass (job 20261108-121503-a4): an idle camp naps (Mob.NAP_M 36 m, 3D, looked at every 0.5 s);
   a Warden's .glb scene is loaded once a session and prefetched on a thread with the HUD; a bot aboard
   the sky ship picks nothing; a calm bot past SimLod.THINK_FAR_M (90 m) chooses half as often; shots
   gather their possible targets once a step, not every 0.25 m. `--crowd-check` covers the naps, the
   scene cache and the colours.
+- Per-step pass (2026-11-11, ext/perf-frame-1111): `World.occupy` samples the ground from a const table
+  (nine Vector2s a call, every body twice a step, were a third of a slide); Hunter and Kin cooldowns
+  count down directly (`HunterCooldowns`), not by name through set()/get(); the lair seal sweep walks
+  the entities without a bodies array; a bot re-tests line of sight to the same target every
+  Bot.LOS_RECHECK_S (0.1 s), a new target at once. (A 10 Hz foe scan for an idle Boki was tried and
+  dropped: `--bot-sanity-check` flagged bots flipping their facing far more often with it.)
+  `--perf-throttle-check` covers the line-of-sight cache.
 - The generator now fails a rock over the void, and `sc_rocks` moves touching rocks as one group so
   an L-shaped boulder doesn't split under the scale.
 - GPU pass, pc-MRROBOTO, `--perf-probe` (ms a frame; load and steps in s). Main is ext/map-parity-integ at

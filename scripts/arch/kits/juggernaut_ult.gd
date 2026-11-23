@@ -5,11 +5,11 @@ extends RefCounted
 ## blade upright and his body flaring gold, taking no damage and no crowd control (each hit he blocks rings
 ## out and makes the answer harder, up to two). Then he lunges 1.8m and cleaves up through the strip ahead
 ## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals. Taking a hunter
-## down with it (the source's "killing a living enemy": our lethal hit is a knock; a hunter already down takes
-## nothing from it, and a monster or a wisp doesn't count) makes it ready again at once. Landing it on a
-## rival hunter fills the bond meter (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). A chain
-## still held pulls him through it: E in the guard or the cleave hauls him along the chain, the guard up, and
-## the cleave goes into the hooked foe as he reaches them. Owned by JuggernautKit.
+## down with it, or killing a monster or a foe Boki with it (the source's "killing a living enemy": our lethal hit
+## on a hunter is a knock; a hunter already down takes nothing from it, and a wisp doesn't count) makes it ready
+## again at once. Landing it on a rival hunter fills the bond meter (HeroUlt.landed: a hit, a knock or a kill, the
+## best of the cast). A chain still held pulls him through it: E in the guard or the cleave hauls him along the
+## chain, the guard up, and the cleave goes into the hooked foe as he reaches them. Owned by JuggernautKit.
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)
 const LANE_COL := Color("ffb820")      # the strip ahead: his gold
@@ -24,6 +24,8 @@ var blocked := 0                       # hits blocked over the run
 var resets := 0                        # knocks that made it ready again
 var last_dealt := 0.0
 var last_healed := 0.0
+var vel_before := Vector3.ZERO      # (readout) his velocity at the cast, before and after the guard took it
+var vel_after := Vector3.ZERO
 
 func _init(kit: JuggernautKit) -> void:
 	k = kit
@@ -45,20 +47,46 @@ func move_k() -> float:
 		"recover": return 0.5
 	return 1.0
 
+## Seconds until the cleave lands and frees him (0: not planted). A guard held for a hauled foe counts its own length.
+func lock_left() -> float:
+	var d := data()
+	match String(st.get("phase", "")):
+		"guard": return maxf(0.0, float(d["guard"]) - float(st["t"])) + float(d["strike_t"])
+		"strike": return float(d["strike_t"]) - float(st["t"])
+	return 0.0
+
 ## X pressed: the guard goes up at once.
 func start() -> void:
 	var h := k.h
 	casts += 1
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
+	_keep_momentum()
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
 	k.vfx("guard_tell")
+
+## The cast keeps his motion: x.carry_k of his run goes on into the guard, easing off at
+## x.carry_decay per s, and an upward speed of x.rise_min m/s or more (a jump, a launch, a ledge rise) gets
+## x.rise_bonus m/s on top instead of being zeroed.
+func _keep_momentum() -> void:
+	var h := k.h
+	var d := data()
+	vel_before = h.vel
+	var carry := Vector2(h.vel.x, h.vel.z) * float(d["carry_k"])
+	st["carry"] = carry
+	h.vel.x = carry.x
+	h.vel.z = carry.y
+	if h.vel.y >= float(d["rise_min"]):
+		h.vel.y += float(d["rise_bonus"])
+		h.lfloat = {}               # mid-mantle: the ledge rise rewrites vel.y each tick; the boost takes over
+		st["rising"] = true
+	vel_after = h.vel
 
 ## E on a held chain, planted in the guard or the cleave. In the guard the pull goes now; the cleave's own moment
 ## takes it as the cleave lands.
 func pull_through() -> void:
 	if guarding():
+		st["carry"] = Vector2.ZERO        # the pull takes his motion over from the cast's carry
 		k.warchain.pull()
 		k.play("jug_guard")
 	else:
@@ -66,6 +94,8 @@ func pull_through() -> void:
 
 ## A merge or a knock ends it at once, with no strike.
 func drop() -> void:
+	if String(st.get("phase", "")) == "recover":
+		k.play("")               # (a jump or Shift cuts the recovery clip on the press frame)
 	st = {}
 	_show_glow(false)
 	AimKit.hide(k.h, "ult")
@@ -81,7 +111,7 @@ func tick(dt: float) -> void:
 	st["t"] = float(st["t"]) + dt
 	match String(st["phase"]):
 		"guard":
-			_tick_guard(d)
+			_tick_guard(d, dt)
 		"strike":
 			if float(st["t"]) >= float(d["strike_t"]):
 				_land(d)
@@ -90,13 +120,19 @@ func tick(dt: float) -> void:
 				drop()
 			elif not h.grounded:
 				drop()               # a jump moves him out of it (Shift drops it in JuggernautKit.on_dash)
-				k.play("")           # the jump's own pose eases in over the follow-through
 
-## The guard: planted (no jumping off either), the strip ahead follows the aim, gold sparks rise off him.
-func _tick_guard(d: Dictionary) -> void:
+## The guard: planted (no jumping off either; the speed it was cast at carries on), the strip ahead follows the
+## aim, gold sparks rise off him.
+func _tick_guard(d: Dictionary, dt: float) -> void:
 	var h := k.h
-	if h.vel.y > 0.0:
+	if h.vel.y > 0.0 and not st.has("rising"):
 		h.vel.y = 0.0          # no jumping off the guard (it lands straight back)
+	var carry: Vector2 = st["carry"]
+	if carry.length() > 0.05:
+		carry *= maxf(0.0, 1.0 - float(d["carry_decay"]) * dt)
+		st["carry"] = carry
+		h.vel.x = carry.x
+		h.vel.z = carry.y
 	var aim := h.aim_dir()
 	var chain := k.warchain
 	if chain.pulling():
@@ -137,6 +173,7 @@ func _land(d: Dictionary) -> void:
 	var from: Vector3 = h.pos if pulled else st["from"]
 	st["phase"] = "recover"
 	st["t"] = 0.0
+	k.play("jug_ult_recover")
 	if not pulled:
 		h.roll_t = 0.0
 	var blocks := int(st["blocks"])
@@ -148,13 +185,16 @@ func _land(d: Dictionary) -> void:
 			continue
 		if not AimMode.in_lane(from, dir, float(d["len"]), float(d["width"]), f.pos, f.r):
 			continue
-		var hit := {"src": "abil", "ab": "ult", "tags": ["riposte"], "kb": dir * 6.0, "crit": true}
+		var hit := {"src": "abil", "ab": "ult", "tags": ["riposte"], "crit": true,
+				"kb": dir * float(d.get("strike_kb", 0.0))}
 		var dealt: float = f.hurt(dmg, h, hit)
 		if dealt <= 0.0:
 			continue
 		last_dealt += dealt
-		_impact(f, dir, dealt)
-		if HeroUlt.landed(k, f) in ["knock", "kill"]:
+		_impact(f, dir)
+		# a hunter taken down (knock or kill) or any other foe killed (a monster, a foe Boki): the source's "killing a
+		# living enemy"; its footage resets on a dummy kill (hero-ref/juggernaut.md f99-f101)
+		if HeroUlt.landed(k, f) in ["knock", "kill"] or (not (f is Hunter) and f.dead):
 			_reset()
 	if last_dealt > 0.0:
 		strikes += 1
@@ -166,18 +206,16 @@ func _land(d: Dictionary) -> void:
 	if st.get("pull_next", false) and k.warchain.hooked():
 		k.warchain.pull()
 
-## On someone hit: the gold impact cloud, the hit-stop and a heavy shake.
-func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
+## On someone hit: the gold impact cloud and a heavy shake for those near (the hit's own weight holds it).
+func _impact(f: Ent, dir: Vector2) -> void:
 	var h := k.h
 	k.vfx("riposte_hit", f.pos, dir)
-	Feel.hitstop(k.m, h, f, dealt, {"melee": true, "payoff": true, "heavy": true})
-	Shake.incoming_big(k.m, f.pos, 0.6, h)
+	Shake.incoming_big(k.m, f.pos, ImpactWeight.shake("heavy"), h)
 
-## A hunter who was up and went down to the cleave: it is ready again at once.
+## A hunter who was up and went down to the cleave, or a monster it killed: it is ready again at once.
 func _reset() -> void:
 	resets += 1
 	HeroUlt.reset(k)
-	k.m.fx.word(k.h.pos + Vector3(0, 2.6, 0), "RIPOSTE READY", GOLD, true)
 	k.vfx("riposte_reset")
 
 ## A hit arriving during the guard: blocked (no damage, no crowd control). A fall into the abyss still
@@ -193,9 +231,9 @@ func block(by: Ent, o: Dictionary) -> bool:
 		st["blocks"] = mini(int(st["blocks"]) + 1, int(data()["blocks_max"]))
 		var from := by.pos if by != null and is_instance_valid(by) else h.pos + Vector3(0, 0, -1)
 		var to := Vector3(from.x - h.pos.x, 0.3, from.z - h.pos.z).normalized()
-		k.vfx("guard_block", h.pos + Vector3(0, 1.2, 0) + to * 0.5, Vector2(to.x, to.z).normalized(),
-				{"pitch": 0.08 * float(st["blocks"])})
-		k.m.fx.word(h.pos + Vector3(0, 2.3, 0), "BLOCKED", GOLD, false)
+		var at := h.pos + Vector3(0, 1.2, 0) + to * 0.5
+		k.vfx("guard_block", at, Vector2(to.x, to.z).normalized())
+		Juice.blocked(k.m, at, to, GOLD, 1.0 + 0.08 * float(st["blocks"]))
 	return true
 
 ## The gold shell over him while he guards (one node per hunter, shown and hidden).

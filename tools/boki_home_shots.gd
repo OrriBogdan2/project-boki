@@ -1,13 +1,14 @@
 extends RefCounted
 ## --boki-home-shots --shots-dir=<dir> [--species=cindle,kestrike,selenfin,hivara] [--px=256]: one sheet per
-## home or garden-game state (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin;
-## BokiHomeClips): a row per species, FRAMES over the
+## home or garden-game state (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin,
+## strut, pose, bow; BokiHomeClips): a row per species, FRAMES over the
 ## clip, in the engine. Needs a renderer.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const STATES := ["settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"rush", "brace", "dodge", "stonehop", "spin"]
-const ONE_SHOT := ["settle", "wake", "rush", "brace", "dodge", "stonehop", "spin"]       # clips that end, not loop
+	"rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow"]
+# clips that end, not loop
+const ONE_SHOT := ["settle", "wake", "rush", "brace", "dodge", "stonehop", "spin", "pose", "bow"]
 const FRAMES := 6
 var species := ["cindle", "kestrike", "selenfin", "hivara"]
 

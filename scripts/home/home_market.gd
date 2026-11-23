@@ -2,16 +2,18 @@ class_name HomeMarket
 extends RefCounted
 ## The market stall's panel (docs/decisions/0013-market.md): one panel, its tabs by the stall's
 ## level (Stalls.level). L1: the Vendor (goods for Boki and the Hunter, seeds, farm, house, selling
-## crops) and the Tradewind Exchange (materials, Exchange). L2 adds the Shelter, your own stall and
-## market search; L3 the Auction House (those four tabs are HomeTrade). Opened from the stall, the
-## hub bar's Market button and --open=shop[:boki|hunter|seeds|farm|home|sell] / exchange[:item] / shelter / stall / search / auctions.
+## crops), the Relics (which Hunters are yours and how to open the rest: MarketRelics) and the
+## Tradewind Exchange (materials, Exchange). L2 adds the Shelter (it shows up earlier while a Boki handed
+## to you waits), your own stall and market search; L3 the Auction House (those four tabs are HomeTrade).
+## Opened from the stall, the hub bar's Market button and --open=shop[:boki|hunter|seeds|farm|home|sell] /
+## relics / exchange[:item] / shelter / stall / search / auctions.
 
 ## [tab, the stall level that opens it]
-const TABS := [["Vendor", 1], ["Exchange", 1], ["Shelter", 2], ["My stall", 2], ["Search", 2], ["Auctions", 3]]
+const TABS := [["Vendor", 1], ["Relics", 1], ["Exchange", 1], ["Shelter", 2], ["My stall", 2], ["Search", 2], ["Auctions", 3]]
 const VENDOR_TABS := ["Boki", "Hunter", "Seeds", "Farm", "Home", "Sell"]
 const HUNTER_GROUPS := {"drink": "Healing", "mend": "Healing", "repair": "Armor"}    # belt item use -> section
 const OPEN_NAMES := {"shop": "Vendor", "exchange": "Exchange", "shelter": "Shelter", "stall": "My stall",
-	"search": "Search", "auctions": "Auctions"}
+	"search": "Search", "auctions": "Auctions", "relics": "Relics"}
 const PANEL := "Market stall"
 const WIDTH := 900.0
 const HOLD_H := 470.0         # px: every tab the same height
@@ -32,12 +34,21 @@ func _init(home, spawn_kin_cb: Callable) -> void:
 	spawn_kin = spawn_kin_cb
 	trade = HomeTrade.new(self)
 
+## The stall level a tab opens at.
+static func tab_level(tab_name: String) -> int:
+	if tab_name == "Shelter":
+		return Shelter.open_level()
+	return int(TABS.filter(func(t): return t[0] == tab_name)[0][1])
+
 ## The tabs this stall's level opens.
 func tabs() -> Array:
 	var lv := Stalls.level()
 	var no_exchange := FarmUnlocks.base_mode()
-	return TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
+	var out := TABS.filter(func(t): return tab_level(String(t[0])) <= lv and not (no_exchange and t[0] == "Exchange")) \
 			.map(func(t): return String(t[0]))
+	if not out.has("Shelter") and not TransferPost.inbox.is_empty():
+		out.append("Shelter")      # a Boki handed to you waits there, at any stall level
+	return out
 
 ## The vendor's tabs: base_mode has no Seeds (the snack patch has none) and no Sell.
 static func vendor_tabs() -> Array:
@@ -64,6 +75,7 @@ func open(which := "") -> void:
 	UI.shell_tabs(v, tabs(), tab, func(t): open(t))
 	match tab:
 		"Vendor": _vendor(v)
+		"Relics": MarketRelics.build(v)
 		"Exchange": _exchange(v)
 		"Shelter": trade.shelter(v)
 		"My stall": trade.stall(v)
@@ -80,7 +92,7 @@ func show_note(v: VBoxContainer) -> void:
 	if note == "":
 		return
 	var nl := UI.label(note, 14, note_col)
-	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(nl)
 	v.add_child(nl)
 	note = ""
 
@@ -91,7 +103,7 @@ func _next_level(v: VBoxContainer) -> void:
 		return
 	var nxt := String(Goods.rules()["stall"]["levels"][str(lv + 1)])
 	var l := UI.para("Upgrade the stall (build mode, Upgrades) and it opens: %s." % nxt, 12, UI.FAINT)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	v.add_child(UI.spacer(4))
 	v.add_child(l)
 
@@ -100,7 +112,7 @@ func _next_level(v: VBoxContainer) -> void:
 ## section headers. Some only go on sale once you've made it out of enough expeditions or finished a
 ## challenge; wear and utility restock by rarity (Stalls.vendor_has).
 func _vendor(v: VBoxContainer) -> void:
-	UI.subtitle(v, "Goods for your Boki, your Hunter, the farm and the house")
+	UI.subtitle(v, "")      # (the tabs below say what is on sale)
 	var row := UI.hbox(6)
 	for t in vendor_tabs():
 		var tt: String = t
@@ -142,7 +154,7 @@ func _seed_goods() -> Array:
 		var cd: Dictionary = Data.CROPS[c]
 		var ck: String = c
 		var have := "have %d" % int(Save.d.get("seeds", {}).get(c, 0))
-		goods.append(["seed:" + c, "%s seeds" % cd["name"], "Plant on a farm plot. " + String(cd["desc"]),
+		goods.append(["seed:" + c, "%s seeds" % cd["name"], String(cd["desc"]),
 			int(cd["price"]), cd["color"], func():
 				Save.add_seed(ck, 1)
 				FarmTutorial.event("buy"), have])
@@ -150,8 +162,8 @@ func _seed_goods() -> Array:
 
 func _boki_food() -> Array:
 	var goods: Array = []
-	for f in Care.FOODS:
-		var fd: Dictionary = Care.FOODS[f]
+	for f in Care.foods_v:
+		var fd: Dictionary = Care.foods_v[f]
 		var fk: String = f
 		var desc := "Boki eat this. Feed it from a Boki's card. " + String(fd["desc"])
 		goods.append(["food:" + f, fd["name"], desc, int(fd["price"]), Color("ffb36a"),
@@ -222,7 +234,7 @@ func _vendor_card(g: Array) -> Control:
 	var col: Color = Color(g[4])
 	var card := UI.card(UI.CARD if is_open else Color(UI.NIGHT_HI, 0.9), 10, 12)
 	card.custom_minimum_size = Vector2(404, 0)
-	card.tooltip_text = String(g[2]) + ("" if is_open else "\n" + Progress.req_text(key))
+	card.tooltip_text = String(g[2])      # (a locked one says what opens it on the card itself)
 	var hr := UI.hbox(10)
 	card.add_child(hr)
 	var icons := {"seed": "seed", "food": "heart", "tonic": "tonic", "acc": "paw", "furn": "home", "plots": "seed",
@@ -235,7 +247,7 @@ func _vendor_card(g: Array) -> Control:
 	nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var top := UI.hbox(6)
 	var nm := UI.label(String(g[1]), UI.T_BODY, UI.INK if is_open else UI.MUTED, UI.semi)
-	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nm)
 	if is_open and String(g[6]) != "":
@@ -244,7 +256,7 @@ func _vendor_card(g: Array) -> Control:
 	var d := UI.label(Progress.req_text(key), 12, Color("ffb3a8"))
 	if is_open: d = UI.label(String(g[2]), 12, UI.MUTED)
 	d.autowrap_mode = TextServer.AUTOWRAP_OFF
-	d.clip_text = true
+	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(d)
 	hr.add_child(nv)
@@ -302,8 +314,7 @@ func _vendor_sell(v: VBoxContainer) -> void:
 
 # ------------------------------------------------------------------ the Exchange
 func _exchange(v: VBoxContainer) -> void:
-	UI.subtitle(v, "Tradewind Exchange: post a price for wood, stone, scrap, crops, food and tonics. "
-		+ "Offers match the best price first; each sale pays a %d%% tax." % int(Exchange.TAX * 100))
+	UI.subtitle(v, "Post a price; the best offer sells first. Each sale pays %d%% tax." % int(Exchange.TAX * 100))
 	var tabs_row := HFlowContainer.new()
 	tabs_row.add_theme_constant_override("h_separation", 6)
 	tabs_row.add_theme_constant_override("v_separation", 6)

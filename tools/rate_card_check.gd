@@ -54,5 +54,7 @@ func run(main: Node) -> void:
 	ok(b["minutes_played"] >= 10.0 and String(b["player"]) != "", "payload has minutes_played and player")
 	ok(JSON.stringify(b).length() < 2048, "payload fits the 2 KB limit")
 	DirAccess.remove_absolute(Feedback.path)
+	# A static lambda still holding the check's locals at exit corrupts the heap (abort 134).
+	Feedback.poster = Callable()
 	print("RATECARD DONE, failures: ", bad)
 	main.get_tree().quit()

@@ -20,9 +20,9 @@ You bring **one Boki** per expedition. It walks beside you and fights with you; 
 
 - **C** is its own ability, cast from wherever your Boki is: on you (Return) it casts through you, out in the world it casts where it stands. It also has an **auto ability** it uses
   on its own when the moment is right (Settings can turn that off).
-- **G**: with your Boki at your side, tap to **Sic** it at the cursor: it leaps there and its
+- **C**: with your Boki at your side, tap to **Sic** it at the cursor: it leaps there and its
   landing staggers whatever it lands on. With it away, tap to **Call back**: it leaps to your side and hits
-  anything along the path (only within a set range; farther out it comes back on its own). **Hold G** for the
+  anything along the path (only within a set range; farther out it comes back on its own). **Hold C** for the
   order wheel and flick toward one: **Chase** (go for what is under the cursor), **Guard** (hold this spot),
   **Return** (back onto you: shoulder or pack; a big Boki guards at your side, never under you) or **Follow** (the default: beside you). A Boki you are
   carrying only gives its carried bonuses on **Return**, so choose between a fighting partner and a perk.
@@ -110,12 +110,12 @@ it, and its number among its kind.
 
 - **Scanning.** Wild Boki are rare on expeditions, and rare-Boki spots are rolled each match (they show
   as "?" on the map until someone sees them). Knock a wild Boki out, then hold **F** beside it for a
-  moment: a 4 second scan starts on its own. You can't move or shoot while it runs, a dash cancels it,
-  and anything that stuns, roots or knocks you back interrupts it (plain damage does not). Rivals can see
-  the beam and hear it. It goes into your **box** as a capsule (3 at a time; release one in the
-  backpack to make room) and comes home with you only if you **extract**. It never joins the fight: you
-  always have exactly one active Boki. Every Boki you glimpse is written into the **Field Book**, with
-  where you saw it.
+  moment: a 4 second scan starts on its own. You can't move or shoot while it runs, **Space** (or a
+  dash) cancels it, and anything that stuns, roots or knocks you back interrupts it (plain damage does
+  not). Rivals can see the beam and hear it. It goes into your **box** as a capsule (3 at a time;
+  release one in the backpack to make room) and comes home with you only if you **extract**. It never
+  joins the fight: you always have exactly one active Boki. Every Boki you glimpse is written into the
+  **Field Book**, with where you saw it.
 - **Breeding.** Two Grown Boki who are friends and rested from their last egg can leave an egg in
   the **Nesting Nook** (one egg at a time). It hatches after your next expedition, or in about ten
   minutes at home. The baby mixes its parents' personalities, takes 3 of its 5 IVs from them, can
@@ -126,6 +126,10 @@ it, and its number among its kind.
   for 2 expeditions or about 8 minutes at home; an Ember Boki at the brazier doubles that, and Ember
   Coals from the Kiln add as much again. It hatches a rare species with 3 IVs of 26 or better.
 - **Your first egg** is one of three starters (or the mystery egg): see [Getting started](Getting-Started.md).
+- **Reading an egg.** An egg wears its type's shell: plates with glowing seams in the type's colour and
+  the type's emblem on the front (a flame for Ember, a snowflake for Frost, and so on). A Rare Egg is
+  gold with a glowing ring round its middle in the colour of the Boki inside. The mystery egg is void
+  black with oil-slick bands and a question mark cracked into its shell.
 
 The farm only has room for so many Boki (6 at first, more with expansions); the rest sleep in the
 **Boki Burrow**, a box of pages you can sort and move Boki in and out of.

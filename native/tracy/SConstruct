@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+# Builds the Tracy zones extension. Run through tools/perf/build_tracy.sh, which fetches the pinned
+# godot-cpp and Tracy and passes their folders in (godot_cpp=, tracy=).
+import os
+
+godot_cpp = ARGUMENTS.get("godot_cpp", "")
+tracy = ARGUMENTS.get("tracy", "")
+env = SConscript(os.path.join(godot_cpp, "SConstruct"))
+
+env.Append(CPPPATH=["src", os.path.join(tracy, "public")])
+# On demand: no cost and no socket until tracy-capture connects. Localhost only. No sampling or
+# context switches (those need root); the zones are all we read.
+# Port 18086, not Tracy's 8086: a test box may already serve something on 8086 (tools/perf_tracy.gd uses the same).
+env.Append(CPPDEFINES=["TRACY_PORT=18086", "TRACY_ENABLE", "TRACY_ON_DEMAND", "TRACY_ONLY_LOCALHOST", "TRACY_NO_BROADCAST", "TRACY_NO_SAMPLING",
+	"TRACY_NO_CONTEXT_SWITCH", "TRACY_NO_SYSTEM_TRACING", "TRACY_NO_VSYNC_CAPTURE", "TRACY_NO_CALLSTACK",
+	"TRACY_NO_CODE_TRANSFER", "TRACY_NO_FRAME_IMAGE", "TRACY_NO_CRASH_HANDLER"])
+# Our own libstdc++ and Tracy symbols stay inside the library: the engine binary carries its own copies.
+env.Append(LINKFLAGS=["-Wl,-Bsymbolic", "-Wl,--exclude-libs,ALL"])
+
+sources = Glob("src/*.cpp") + [os.path.join(tracy, "public", "TracyClient.cpp")]
+library = env.SharedLibrary("build/libtracy_zones{}{}".format(env["suffix"], env["SHLIBSUFFIX"]), source=sources)
+Default(library)

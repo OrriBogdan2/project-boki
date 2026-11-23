@@ -18,6 +18,7 @@
 		"item_doc": "The small item a granted wish puts in the pantry (Save.d items).",
 		"bonus_gems": 6,
 		"bonus_doc": "Gems for all the wishes of the day (the Sunsap of GARDEN_MODERN.md 1.2 stands in until the item engine is merged).",
+		"tip": "Grant one for trust and a snack; all %d give %d gems. Miss a day and nothing is lost.",
 		"ask": {
 			"food": "%s is hungry for a meal",
 			"energy": "%s would love a nap",

@@ -16,7 +16,7 @@ const TICKET := Color("3a1446")    # the ticket stub's dark plum face (magenta r
 static func build() -> Theme:
 	var t := Theme.new()
 	t.default_font = UI.body
-	t.default_font_size = 16
+	t.default_font_size = UI.fs(16)
 	_buttons(t)
 	_primary_and_danger(t)
 	_quiet_buttons(t)
@@ -27,16 +27,12 @@ static func build() -> Theme:
 	_toggles_and_sliders(t)
 	return t
 
-## The stock focus ring: a 2 px teal outline just outside the control (keyboard and pad only).
-static func ring(rad := UI.R_CTRL + 3) -> StyleBoxFlat:
-	var f := UiFrame._flat(Color(0, 0, 0, 0), rad)
-	f.draw_center = false
-	f.border_color = Color(UI.NEON_A, 0.95)
-	f.set_border_width_all(2)
-	f.expand_margin_left = 3
-	f.expand_margin_right = 3
-	f.expand_margin_top = 3
-	f.expand_margin_bottom = 3
+## The stock focus mark (keyboard and pad): a faint accent wash and an accent underline, drawn inside
+## the control's own rect so it never pokes past a panel edge.
+static func ring(rad := UI.R_CTRL) -> StyleBoxFlat:
+	var f := UiFrame._flat(Color(UI.ACCENT, 0.14), rad)
+	f.border_color = UI.ACCENT_HI
+	f.border_width_bottom = 2
 	return f
 
 ## A raised button face with its lip; `down` is the pressed face (sunk onto the lip, the label
@@ -67,7 +63,8 @@ static func torn(fill: Color, glow := 0.0, edge := Color(0, 0, 0, 0), down := fa
 	return f
 
 static func _states(t: Theme, type: String, n: StyleBox, h: StyleBox, p: StyleBox, d: StyleBox) -> void:
-	if type != "Button":
+	# a built-in class (Button, OptionButton) already inherits by class; only our own names are variations
+	if not ClassDB.class_exists(type):
 		t.add_type(type)
 		t.set_type_variation(type, "Button")
 	t.set_stylebox("normal", type, n)
@@ -95,7 +92,7 @@ static func _buttons(t: Theme) -> void:
 		_states(t, type, n, h, p, d)
 		t.set_stylebox("focus", type, ring())
 		t.set_font("font", type, UI.semi)
-		t.set_font_size("font_size", type, UI.T_BODY)
+		t.set_font_size("font_size", type, UI.fs(UI.T_BODY))
 		t.set_constant("h_separation", type, 8)
 		_font_cols(t, type, UI.INK, Color.WHITE, UI.FAINT)
 	t.set_color("font_pressed_color", "Button", UI.ACCENT_HI)
@@ -203,7 +200,7 @@ static func _front_menu(t: Theme) -> void:
 	_states(t, "MenuItem", item, item_h, item_p, item)
 	t.set_stylebox("focus", "MenuItem", StyleBoxEmpty.new())
 	t.set_font("font", "MenuItem", UI.big)
-	t.set_font_size("font_size", "MenuItem", 25)
+	t.set_font_size("font_size", "MenuItem", UI.fs(25))
 	_font_cols(t, "MenuItem", Color(UI.INK, 0.8), Color.WHITE, Color(UI.INK, 0.3))
 	t.set_color("font_focus_color", "MenuItem", Color.WHITE)
 	t.set_color("font_pressed_color", "MenuItem", UI.ACCENT_HI)
@@ -213,15 +210,9 @@ static func _front_menu(t: Theme) -> void:
 	var main_n := _menu_main(TICKET, 1.1, false)
 	var main_h := _menu_main(TICKET.lightened(0.08), 1.8, false)
 	_states(t, "MenuMain", main_n, main_h, _menu_main(TICKET.darkened(0.2), 1.4, true), main_n)
-	var main_f := ring(17)
-	main_f.border_color = Color(UI.NEON_A, 0.9)
-	main_f.expand_margin_left = 4
-	main_f.expand_margin_right = 4
-	main_f.expand_margin_top = 4
-	main_f.expand_margin_bottom = 4
-	t.set_stylebox("focus", "MenuMain", main_f)
+	t.set_stylebox("focus", "MenuMain", StyleBoxEmpty.new())      # lit by its hover ticket instead, as the items
 	t.set_font("font", "MenuMain", UI.big)
-	t.set_font_size("font_size", "MenuMain", 28)
+	t.set_font_size("font_size", "MenuMain", UI.fs(28))
 	_font_cols(t, "MenuMain", UI.ACCENT_HI, Color.WHITE, Color(UI.ACCENT_HI, 0.5))
 	t.set_constant("outline_size", "MenuMain", 6)
 	t.set_color("font_outline_color", "MenuMain", Color(0.1, 0.02, 0.12, 0.7))
@@ -255,14 +246,14 @@ static func _inputs(t: Theme) -> void:
 	t.set_stylebox("hover", "PopupMenu", UiTorn.make(Color(UI.ACCENT, 0.24), 2.0))
 	t.set_color("font_color", "PopupMenu", UI.INK)
 	t.set_color("font_hover_color", "PopupMenu", Color.WHITE)
-	t.set_font_size("font_size", "PopupMenu", UI.T_BODY)
+	t.set_font_size("font_size", "PopupMenu", UI.fs(UI.T_BODY))
 	t.set_constant("v_separation", "PopupMenu", 8)
 	var tp := UiTorn.make(UI.SURFACE.lightened(0.02), 2.0, 0.5)
 	tp.shadow = 10
 	tp.padded(12, 8)
 	t.set_stylebox("panel", "TooltipPanel", tp)
 	t.set_color("font_color", "TooltipLabel", UI.INK)
-	t.set_font_size("font_size", "TooltipLabel", UI.T_SMALL)
+	t.set_font_size("font_size", "TooltipLabel", UI.fs(UI.T_SMALL))
 	t.set_stylebox("separator", "HSeparator", UiFrame._flat(UI.LINE, 1))
 	t.set_constant("separation", "HSeparator", 6)
 
@@ -317,7 +308,7 @@ static func _toggles_and_sliders(t: Theme) -> void:
 		t.set_stylebox(st, "CheckButton", empty)
 	t.set_stylebox("focus", "CheckButton", ring(14))
 	t.set_font("font", "CheckButton", UI.body)
-	t.set_font_size("font_size", "CheckButton", UI.T_BODY)
+	t.set_font_size("font_size", "CheckButton", UI.fs(UI.T_BODY))
 	_font_cols(t, "CheckButton", UI.INK, Color.WHITE, UI.FAINT)
 	t.set_color("font_pressed_color", "CheckButton", UI.INK)
 

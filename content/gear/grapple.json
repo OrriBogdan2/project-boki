@@ -25,22 +25,24 @@
    "rope": true,
    "deco": "hook",
    "color": "e8c06a",
-   "sfx": "throw",
-   "pitch": 0.8,
+   "sfx": "gl_hook",
    "on_hit": [
     {
      "type": "yank",
      "gap": 1.3,
      "stun": 0.3,
-     "color": "e8c06a"
+     "color": "e8c06a",
+     "sfx": "gl_hook_catch"
     }
    ],
    "on_wall": [
     {
      "type": "zip",
-     "color": "e8c06a"
+     "color": "e8c06a",
+     "sfx": "gl_hook_bite"
     }
    ]
   }
- ]
+ ],
+ "sfx": {}
 }

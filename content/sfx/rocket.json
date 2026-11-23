@@ -1,0 +1,12 @@
+{
+ "group": "rocket",
+ "name": "Squad rocket drop",
+ "script": "tools/gen_sfx_rocket.py",
+ "sounds": {
+  "rocket_ignite": "cast", "rocket_ride": "loop", "rocket_jump": "dash", "drop_fall_wind": "loop",
+  "rocket_land": "impact"
+ },
+ "signature": [],
+ "reach": {"rocket_ignite": 70, "rocket_ride": 70, "rocket_land": 60},
+ "loops": ["rocket_ride", "drop_fall_wind"]
+}

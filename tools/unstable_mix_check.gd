@@ -25,12 +25,15 @@ func _by_theme() -> Dictionary:
 	return out
 
 func _preview_text(a: Dictionary, b: Dictionary) -> String:
-	var dv := VBoxContainer.new()
-	NookRules.preview(dv, a, b)
-	var all := ""
-	for l in dv.get_children(): all += (l as Label).text + "\n"
-	dv.free()
+	var card := NookPreview.card(a, b, null)
+	var all := _labels(card)
+	card.free()
 	return all
+
+func _labels(n: Node) -> String:
+	var t := (n as Label).text + "\n" if n is Label else ""
+	for c in n.get_children(): t += _labels(c)
+	return t
 
 func run(m: Node) -> void:
 	Save.no_write = true

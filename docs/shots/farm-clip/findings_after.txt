@@ -1,0 +1,3 @@
+FARMCLIP 47 props staged
+FARMCLIP ok   no clipping found (0 findings)
+FARMCLIP DONE 0

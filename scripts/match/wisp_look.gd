@@ -41,11 +41,31 @@ static func _merged(base: Dictionary, over: Dictionary) -> Dictionary:
 ## The id the local player wears, from their saved look.
 static func equipped() -> String:
 	var id := String(Save.d.get("look", {}).get("wisp", ""))
-	return id if (rules()["looks"] as Dictionary).has(id) else String(rules()["default"])
+	return id if owned(id) else String(rules()["default"])
 
-## Wear a Wisp from now on. False for an id with no look.
+## Whether the local player may wear a look: it has no "unlock", or its "stat:n" is reached (Progress.stat,
+## the glider skins' rule). "how" in the entry says it in words.
+static func owned(id: String) -> bool:
+	var looks: Dictionary = rules()["looks"]
+	if not looks.has(id):
+		return false
+	var unlock := String(looks[id].get("unlock", ""))
+	if unlock == "":
+		return true
+	var part := unlock.split(":")
+	return Progress.stat(part[0]) >= int(part[1])
+
+## How a locked look is earned, with its progress ("" when owned).
+static func how(id: String) -> String:
+	if owned(id):
+		return ""
+	var look: Dictionary = rules()["looks"][id]
+	var part := String(look["unlock"]).split(":")
+	return "%s (%d/%s)" % [String(look.get("how", "")), mini(Progress.stat(part[0]), int(part[1])), part[1]]
+
+## Wear a Wisp from now on. False for an id with no look or one you don't own.
 static func equip(id: String) -> bool:
-	if not (rules()["looks"] as Dictionary).has(id):
+	if not owned(id):
 		return false
 	if not Save.d.has("look"):
 		Save.d["look"] = Unmasked.default_look()

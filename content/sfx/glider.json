@@ -4,8 +4,13 @@
  "script": "tools/gen_sfx_glider.py",
  "sounds": {
   "glider_snap": "cast", "glider_wind": "loop", "glider_dive": "cast",
-  "glider_crackle": "fire", "glider_burn": "loop", "glider_hiss": "loop", "glider_fold": "dash"
+  "glider_crackle": "fire", "glider_burn": "loop", "glider_hiss": "loop", "glider_fold": "dash",
+  "glider_wind_leaf": "loop", "glider_wind_moth": "loop", "glider_wind_bat": "loop", "glider_wind_glass": "loop",
+  "glider_wind_fire": "loop", "glider_wind_static": "loop", "glider_wind_soft": "loop", "glider_wind_paper": "loop"
  },
  "signature": [],
- "loops": ["glider_wind", "glider_burn", "glider_hiss"]
+ "loops": [
+  "glider_wind", "glider_burn", "glider_hiss", "glider_wind_leaf", "glider_wind_moth", "glider_wind_bat",
+  "glider_wind_glass", "glider_wind_fire", "glider_wind_static", "glider_wind_soft", "glider_wind_paper"
+ ]
 }

@@ -21,6 +21,7 @@ static func fill(v: VBoxContainer, changed: Callable) -> void:
 			cv.add_child(UI.label("Will use: %s" % plan["text"], 13, UI.GOOD))
 			cv.add_child(UI.button("Mix", func():
 				GardenRecipes.mix(r)
+				BowlSfx.mixed(r, plan["take"])
 				Save.save_game()
 				changed.call(), 120))
 		v.add_child(card)

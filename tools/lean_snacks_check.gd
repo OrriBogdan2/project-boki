@@ -40,7 +40,7 @@ func _types_and_zones() -> void:
 func _foods() -> void:
 	var tint_gap := 0.0
 	for s in Lean.rules()["foods"]:
-		var def: Dictionary = Care.FOODS.get(s, Data.CROPS.get(s, {}))
+		var def: Dictionary = Care.foods_v.get(s, Data.CROPS.get(s, {}))
 		ok(not def.is_empty() and Care.food_name(s) != s, "%s is a real food named %s" % [s, Care.food_name(s)])
 		var t := String(Lean.rules()["foods"][s])
 		ok(Lean.key_of(s) == ("" if t == "normal" else t), "%s leans a Boki to %s" % [s, t])
@@ -79,4 +79,6 @@ func _patch() -> void:
 	e["rot"] = 0
 	var ridge: Array = SnackPatch.harvest(Save.d, 3.0e9)
 	var own: Array = SnackPatch.rules()["zone_snacks"]["ridge"]
-	ok(ridge == own, "a ridge patch grows exactly its zone's list (%s)" % str(ridge))
+	var season := GardenSeasons.snack(3.0e9)
+	ok(ridge == (own if own.has(season) else own + [season]),
+			"a ridge patch grows exactly its zone's list and the season's snack (%s)" % str(ridge))

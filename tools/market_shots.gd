@@ -130,9 +130,10 @@ func _panels() -> void:
 	home.hbm.open("ransom")
 	await _shot("10_black_market_ransom",
 		"Black Market, Ransom tab: a Boki nobody came for, its asking price, haggling and paying", true)
+	home.hbm.more[String(bun["uid"])] = true
 	home.hbm.open("captured")
 	await _shot("11_black_market_captured",
-		"Black Market, Captured: an offer and a message to the rival who has yours", true)
+		"Black Market, Captured with More open: offer slider, message to the captor, Pay in full", true)
 	home.hbm.open("rare")
 	await _shot("12_black_market_rare",
 		"Black Market, Rare stock: a few rare and epic pieces a day, priced as a gem sink", true)

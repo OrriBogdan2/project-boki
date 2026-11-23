@@ -10,8 +10,9 @@ const SHELL_KEEP := 0.5             # of the void shell's: it is the silhouette 
 const LOD_KEEP := 0.45              # of those again, at a distance
 const MIN_TRIS := 40                # a part this small is left alone
 const MAX_ERROR := 0.05             # how far the reduction may move a surface (of the part's size)
-## Parts that keep their triangles: the cloth is reduced when it is baked, and these are not the body.
-const SKIP := ["ShroudBones", "Glider", "Gun", "TeamRing"]
+## Parts that keep their triangles: the cloth is reduced when it is baked, the Meshy props in Blender, and these
+## are not the body.
+const SKIP := ["ShroudBones", "Glider", "Gun", "TeamRing", LookProps.NODE]
 
 static func apply(model: Node3D) -> void:
 	var head := model.find_child("Head", true, false) as MeshInstance3D

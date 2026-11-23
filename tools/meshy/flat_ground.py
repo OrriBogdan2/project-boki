@@ -3,6 +3,7 @@ flood fill, so a pale translucent fin inside the figure is kept) becomes the bor
 leaves the art's own lighter rectangle and floor band behind it, which Meshy can model as a slab.
 Blender's Python (numpy):
   python3 -I tools/meshy/flat_ground.py IN.png OUT.png [tol 0.07] [sat_max 0.09] [dark 0.25: how far below the backdrop a grey still counts, e.g. a floor shadow]"""
+import argparse
 import os
 import sys
 
@@ -12,10 +13,15 @@ import imgio  # noqa: E402
 
 
 def main(a):
-    im = imgio.load(a[0])
-    tol = float(a[2]) if len(a) > 2 else 0.07
-    sat_max = float(a[3]) if len(a) > 3 else 0.09
-    dark = float(a[4]) if len(a) > 4 else 0.25
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("src", help="the edited view")
+    ap.add_argument("dst", help="the flattened PNG to write")
+    ap.add_argument("tol", nargs="?", type=float, default=0.07, help="grey tolerance (default 0.07)")
+    ap.add_argument("sat_max", nargs="?", type=float, default=0.09, help="most saturated pixel that still counts as grey (default 0.09)")
+    ap.add_argument("dark", nargs="?", type=float, default=0.25, help="how far below the backdrop a grey still counts (default 0.25)")
+    args = ap.parse_args(a)
+    im = imgio.load(args.src)
+    tol, sat_max, dark = args.tol, args.sat_max, args.dark
     h, w = im.shape[:2]
     border = np.concatenate([im[:4].reshape(-1, 3), im[-4:].reshape(-1, 3), im[:, :4].reshape(-1, 3), im[:, -4:].reshape(-1, 3)])
     bg = np.median(border, axis=0)
@@ -40,8 +46,8 @@ def main(a):
         reach = grow
     out = im.copy()
     out[reach] = bg
-    imgio.save(out, a[1])
-    print("FLATGROUND %s: %.1f%% flattened to %s" % (os.path.basename(a[1]), 100.0 * reach.mean(), np.round(bg * 255).astype(int)))
+    imgio.save(out, args.dst)
+    print("FLATGROUND %s: %.1f%% flattened to %s" % (os.path.basename(args.dst), 100.0 * reach.mean(), np.round(bg * 255).astype(int)))
 
 
 if __name__ == "__main__":

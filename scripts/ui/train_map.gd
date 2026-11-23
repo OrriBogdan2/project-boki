@@ -65,7 +65,8 @@ func near(st: SkyTrain, me: Hunter) -> bool:
 	return false
 
 ## Draws the loop, its halts and the train into `inner` (screen) showing `view` (world) at `k` px per m.
-## `named`: halt names (the full map); the nearest halt always carries its countdown. `hud` is the Hud.
+## `named`: halt names (the full map; a name that would print over another is left off, the hover card names
+## it); the nearest halt always carries its countdown. `hud` is the Hud.
 func draw(hud, st: SkyTrain, inner: Rect2, view: Rect2, k: float, named: bool) -> void:
 	_sync(st)
 	var to_screen := func(p: Vector2) -> Vector2:
@@ -82,6 +83,13 @@ func _draw_line(hud, inner: Rect2, to_screen: Callable) -> void:
 		if hud._mm_has(inner, a) and hud._mm_has(inner, b):
 			hud.c.draw_line(a, b, Color(GOLD, UNDER_ALPHA if _under[i] else LINE_ALPHA), LINE_W, true)
 
+## A halt's icon: a gold square on a dark halo (the map key draws it too).
+static func halt_glyph(c: Control, pv: Vector2) -> void:
+	var halo := Vector2.ONE * (HALT_R + 1.0)
+	c.draw_rect(Rect2(pv - halo, halo * 2.0), Color(0, 0, 0, 0.6))
+	var half := Vector2.ONE * HALT_R
+	c.draw_rect(Rect2(pv - half, half * 2.0), GOLD)
+
 func _draw_halts(hud, st: SkyTrain, inner: Rect2, to_screen: Callable, named: bool) -> void:
 	var me = hud.m.player
 	var mine := -1
@@ -91,17 +99,16 @@ func _draw_halts(hud, st: SkyTrain, inner: Rect2, to_screen: Callable, named: bo
 		var pv: Vector2 = to_screen.call(_halts[i]["pos"])
 		if not hud._mm_has(inner, pv, 6.0):
 			continue
-		var halo := Vector2.ONE * (HALT_R + 1.0)
-		hud.c.draw_rect(Rect2(pv - halo, halo * 2.0), Color(0, 0, 0, 0.6))
-		var half := Vector2.ONE * HALT_R
-		hud.c.draw_rect(Rect2(pv - half, half * 2.0), GOLD)
+		halt_glyph(hud.c, pv)
 		var y := 15.0
-		if named:
-			hud._ctext(pv + Vector2(0, y), _halts[i]["name"], 10, HALT_NAME, hud.big)
+		if named and hud.full_map.label(_halts[i]["name"], pv + Vector2(0, y), 10, HALT_NAME):
 			y += 12.0
 		if i == mine:
-			var secs := st.halt_eta(_halts[i]["s"])
-			hud._ctext(pv + Vector2(0, y), eta_text(secs), 10, GOLD, hud.big)
+			var eta := eta_text(st.halt_eta(_halts[i]["s"]))
+			if named:
+				hud.full_map.label_near(eta, pv + Vector2(0, y), 10, GOLD)
+			else:
+				hud._ctext(pv + Vector2(0, y), eta, 10, GOLD, hud.big)
 
 ## One marker for the train (a chevron on its heading) and a dot for each car behind it.
 func _draw_train(hud, st: SkyTrain, inner: Rect2, to_screen: Callable) -> void:

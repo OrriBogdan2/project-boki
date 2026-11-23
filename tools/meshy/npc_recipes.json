@@ -1,0 +1,78 @@
+{
+  "hob": {
+    "anims": [
+      "hob_anim.glb",
+      "hob_idles.glb"
+    ],
+    "tex": 2048,
+    "clips": {
+      "Idle_3": "idle",
+      "Talk_Passionately": "talk",
+      "Big_Wave_Hello": "wave",
+      "Casual_Walk": "walk",
+      "Call_Gesture": "point",
+      "Heavy_Hammer_Swing": "hammer"
+    },
+    "props": {
+      "mallet": {
+        "glb": "mallet.glb",
+        "size": 1.15,
+        "bone": "Spine",
+        "at": [
+          -0.16,
+          0.36,
+          1.18
+        ],
+        "rot": [
+          90,
+          -125,
+          0
+        ],
+        "clips": {
+          "hammer": {
+            "bone": "RightHand",
+            "at": [
+              -0.7,
+              -0.46,
+              0.76
+            ],
+            "rot": [
+              90,
+              0,
+              -90
+            ]
+          }
+        },
+        "faces": 1000
+      }
+    }
+  },
+  "pell": {
+    "anims": [
+      "pell_anim.glb",
+      "pell_idles.glb"
+    ],
+    "tex": 2048,
+    "clips": {
+      "Idle_3": "idle",
+      "Talk_with_Hands_Open": "talk",
+      "Wave_One_Hand": "wave",
+      "Casual_Walk": "walk",
+      "Talk_with_Right_Hand_Open": "point"
+    },
+    "props": {
+      "lantern": {
+        "glb": "lantern.glb",
+        "size": 0.36,
+        "bone": "LeftHand",
+        "at": [
+          0.64,
+          -0.07,
+          0.46
+        ],
+        "hang": true,
+        "faces": 1000
+      }
+    }
+  }
+}

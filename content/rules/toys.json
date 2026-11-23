@@ -1,10 +1,10 @@
 {
 	"desc": "The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Each toy has the clip a rigged Boki plays at it (BokiHomeClips, set as the kact meta). Units: seconds, tiles, 0..1 trait values, joy points.",
-	"joy_below": 85.0,
+	"joy_below": 90.0,
 	"pick_chance": 0.5,
 	"play_secs": [8.0, 12.0],
 	"go_timeout": 20.0,
-	"joy_gain": 10.0,
+	"joy_gain": 3.0,
 	"stat_gain": 1,
 	"max_players": 2,
 	"fav_after": 3,

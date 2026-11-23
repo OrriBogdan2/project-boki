@@ -1,8 +1,9 @@
 extends RefCounted
 ## --cover-check: the Hollow Crown's hiding cover (docs/decisions/0009-keys-and-cover.md; the map is
 ## built by tools/make_hollowcrown.py). For several match seeds it builds the real world and checks:
-##   1. the share of walkable ground in tall grass, per biome, against content/rules/keys.json "cover",
-##      and the order bloom > meadow > gloom > storm and ember > frost (the shares are printed)
+##   1. the share of walkable ground in tall grass (bare hazard areas aren't ground it grows on), per biome,
+##      against content/rules/keys.json "cover", and the order bloom > meadow > gloom > storm and
+##      ember > frost (the shares are printed)
 ##   2. cover comes as patches (no single tufts), never on stairs, bridges or their edges, landing drop
 ##      circles, or the foot of an exit
 ##   3. in the bush biomes every extraction point has a patch in sight, and chests and camps in bloom
@@ -16,6 +17,7 @@ var fails := 0
 var n := 0
 const BUSH_BIOMES := ["bloom", "meadow", "gloom", "storm"]
 const ORDER := ["bloom", "meadow", "gloom", "storm", "ember", "frost"]
+var hazard_polys: Array = []      # the map's bare terrain hazard outlines (TerrainHazards): no grass there
 
 func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
@@ -26,6 +28,12 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	var L := World.load_layout("hollowcrown")
+	for D in L.get("islands", []):
+		for A in D.get("hazard_areas", []):
+			if A["kind"] == "bramble": continue      # (grass grows in the bramble: make_hollowcrown GRASSY_HAZARDS)
+			var poly := PackedVector2Array()
+			for q in A["poly"]: poly.append(Vector2(float(q[0]), float(q[1])))
+			hazard_polys.append(poly)
 	var T: Dictionary = KeyRun.rules()["cover"]["biome_targets"]
 	for sd in [3, 5, 9, 12, 21]:
 		var w := World.new()
@@ -44,11 +52,15 @@ func run(main_node: Node) -> void:
 func _is_ground(w: World, i: int) -> bool:
 	return w.kind[i] == World.T_GROUND and not w.bridge.has(i) and w.island[i] >= 0
 
+func _on_hazard(w: World, i: int) -> bool:
+	var p := Vector2(i % w.w + 0.5, i / w.w + 0.5)
+	return hazard_polys.any(func(poly): return Geometry2D.is_point_in_polygon(p, poly))
+
 func _shares(w: World, sd: int, T: Dictionary) -> void:
 	var ground := {}
 	var bush := {}
 	for i in w.w * w.h:
-		if not _is_ground(w, i): continue
+		if not _is_ground(w, i) or _on_hazard(w, i): continue
 		var b := String(w.islands[w.island[i]].get("biome", ""))
 		ground[b] = int(ground.get(b, 0)) + 1
 		if w.bush.has(i): bush[b] = int(bush.get(b, 0)) + 1
@@ -193,6 +205,11 @@ func _ambush(w: World, sd: int) -> void:
 			"%d of %d" % [near, tot])
 
 # ------------------------------------------------------------------ 4. paths stay open
+## m: the A* leg tests pairs this close. A Boki asks KinPath for a way to its Hunter or quarry within its
+## leash (boki_system.json, 30 m at most); the Hollow Crown 2.0's big islands put landings and chests
+## 150 m apart, past what the capped search was ever meant to cross (the bush-free walk still covers them).
+const A_STAR_M := 100.0
+
 func _paths(w: World, sd: int) -> void:
 	var cut: Array = []
 	var no_path := 0
@@ -212,9 +229,9 @@ func _paths(w: World, sd: int) -> void:
 				pairs += 1
 				if not _free_walk(w, s, g): cut.append("%s -> (%d,%d)" % [w.islands[ii].get("id", ii), g.x, g.z])
 				# the A* is windowed and capped, so a climb up a plateau's stairs is out of its reach:
-				# same-height pairs only
-				if absf(s.y - g.y) < 0.5 and KinPath.find(w, s, g, 14).is_empty() \
-						and Vector2(s.x - g.x, s.z - g.z).length() > 1.5:
+				# same-height pairs only, and no farther apart than A_STAR_M
+				var apart := Vector2(s.x - g.x, s.z - g.z).length()
+				if absf(s.y - g.y) < 0.5 and apart > 1.5 and apart <= A_STAR_M and KinPath.find(w, s, g, 14).is_empty():
 					no_path += 1
 					lost.append("(%d,%d)->(%d,%d)" % [s.x, s.z, g.x, g.z])
 	ok("seed %d: bush never closes a path (%d landing walks)" % [sd, pairs], cut.is_empty(), ", ".join(cut.slice(0, 4)))

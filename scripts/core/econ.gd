@@ -78,8 +78,11 @@ static func _store(it: Dictionary) -> void:
 		# a boss's egg goes onto the Incubator's shelf by the Nesting Nook (and into its cradle if that's empty)
 		Incubator.add(String(it.get("sp", "")), String(it.get("boss", "")))
 		return
-	if Loot.is_wayseed(it):
-		Save.add_item(String(it["id"]), 1)      # a bag item: the Waystone looks for it there (GardenZones)
+	if Loot.is_ink(it):
+		Goods.give(Loot.ink_key(it))      # an Ink is a good: it goes to the farm's goods, where Boki use it
+		return
+	if Loot.is_bag_item(it):
+		Save.add_item(String(it["id"]), 1)      # the garden bag: the Waystone and the feed menu look there
 		return
 	if String(it.get("t", "")) == "val":
 		var vd: Dictionary = Save.d["valuables"]
@@ -259,14 +262,18 @@ static func put_in(f: Dictionary, key: String, n := 1) -> int:
 ## Food a hopper may take on its own, most plentiful first.
 static func _auto_food() -> String:
 	var best := ""; var bn := 0
-	for key in Care.FOODS.keys() + Data.CROPS.keys():
+	for key in Care.foods_v.keys() + Data.CROPS.keys():
 		if PANTRY_KEEP.has(key): continue
 		if pantry(key) > bn: bn = pantry(key); best = key
 	return best
 
+## Does this feeder top itself up: a hopper or banquet, or any trough set down by water (FarmWater)?
+static func self_fills(f: Dictionary) -> bool:
+	return bool(fdef(f)["auto"]) or FarmWater.near_feeder(Save.d, f)
+
 ## A self-filling feeder below half tops itself up from the pantry. Returns how many it took.
 static func auto_refill(f: Dictionary) -> int:
-	if not fdef(f)["auto"] or not f.get("auto", true) or fill(f) > int(fdef(f)["cap"]) / 2:
+	if not self_fills(f) or not f.get("auto", true) or fill(f) > int(fdef(f)["cap"]) / 2:
 		return 0
 	var got := 0
 	while room_in(f) > 0:

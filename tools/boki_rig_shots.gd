@@ -1,10 +1,13 @@
 extends RefCounted
-## --boki-rig-shots --shots-dir=<dir> [--species=cindle] [--px=512]: the review sheets of a rigged Boki, in the engine.
+## --boki-rig-shots --shots-dir=<dir> [--species=cindle] [--px=512] [--normal-k=1]: the review sheets of a rigged
+## Boki, in the engine (--normal-k=0 leaves a Meshy body's normal map out, for an A/B).
 ## <dir>/turntable.png, faces.png, coats.png, anim_<clip>.png (a strip of each clip), match.png (match camera),
 ## farm.png and farm_close.png (farm camera) and frames/<clip>/NNN.png for the GIFs (tools/boki/review_gifs.sh).
 ## Needs a renderer.
 
 const YAWS := 8
+const SHEET_COLS := 6
+const SHEET_YAWS := [PI - 0.6, PI - PI / 2.0]    # front three-quarters, side
 const STRIP := 6
 const FACES := ["neutral", "happy", "sad", "sleepy", "angry", "bliss"]
 const COATS := [
@@ -23,7 +26,7 @@ const MATCH_PITCH := 66.0
 const MATCH_DIST := 23.0
 const MATCH_FOV := 32.0
 const FARM_BOKI_SCALE := 1.7        # Home's farm scale
-const FARM_DIST := 33.6             # 23 m x the farm's framing (1.216) x HOME_ZOOM (1.2)
+const FARM_DIST := 33.6             # 23 m x the farm's framing (1.216) x the old arrival zoom (1.2)
 const FARM_CLOSE_DIST := 22.4       # the wheel all the way in (0.8)
 const ENLARGE := 4
 const FUSION_PART_K := 1.3            # merge_forms "part_k" of the fallback forms
@@ -35,6 +38,7 @@ var out := ""
 var species := "cindle"
 var px := 512
 var clips: Array = CLIPS
+var dex_dir := ""    # --dex-dir=<dir> with --sheet: also dex_sheet_N.png from <dir>/<id>.glb, same height
 
 func run(m: Node) -> void:
 	main = m
@@ -42,10 +46,18 @@ func run(m: Node) -> void:
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--species="): species = a.substr(10)
 		if a.begins_with("--px="): px = int(a.substr(5))
+		if a.begins_with("--dex-dir="): dex_dir = a.substr(10)
+		if a.begins_with("--normal-k="): BokiRig.normal_k = float(a.substr(11))
 		if a.begins_with("--clips="): clips = Array(a.substr(8).split(","))
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--sheet="):    # one picture a view of every species listed, named, in a grid
+			await _sheet(a.substr(8).split(","))
+			print("BOKI_RIG_SHOTS_DONE")
+			main.get_tree().quit()
+			return
 	await _turntable()
 	await _faces()
 	await _coats()
@@ -139,6 +151,86 @@ func _turntable() -> void:
 		img.save_png(out.path_join("frames_turn_%d.png" % i))
 	sheet.save_png(out.path_join("turntable.png"))
 	vp.queue_free()
+
+## The contact sheet: <dir>/sheet_<view>.png, a cell a species (its name on it), SHEET_COLS to a row, from the front
+## three-quarters and the side, standing (idle), as the game builds it.
+func _sheet(ids: PackedStringArray) -> void:
+	var rows := (ids.size() + SHEET_COLS - 1) / SHEET_COLS
+	for view in SHEET_YAWS.size():
+		var sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
+		var dex_sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
+		for n in ids.size():
+			species = ids[n]
+			var vp := _stage(Vector2i(px, px))
+			var cam := _close_cam(vp)
+			cam.position = Vector3(0, 0.8, 3.3)
+			cam.look_at(Vector3(0, 0.42, 0))
+			var tag := Label.new()
+			tag.text = species
+			tag.add_theme_font_size_override("font_size", px / 16)
+			vp.add_child(tag)
+			var kr := _kin(vp)
+			await RenderingServer.frame_post_draw
+			(kr[1] as BokiRig).seek(0.5)
+			(kr[0] as Node3D).rotation.y = SHEET_YAWS[view]
+			var img: Image = await _grab(vp)
+			img.convert(Image.FORMAT_RGBA8)
+			var at := Vector2i(n % SHEET_COLS * px, n / SHEET_COLS * px)
+			sheet.blit_rect(img, Rect2i(0, 0, px, px), at)
+			if dex_dir != "":
+				var dex := _dex_model(species, _height(kr[1] as BokiRig))
+				if dex != null:
+					(kr[0] as Node3D).visible = false
+					vp.add_child(dex)
+					dex.rotation.y = SHEET_YAWS[view] - PI    # glTF models face +z, the game's face -z
+					var dex_img: Image = await _grab(vp)
+					dex_img.convert(Image.FORMAT_RGBA8)
+					dex_sheet.blit_rect(dex_img, Rect2i(0, 0, px, px), at)
+			vp.queue_free()
+		sheet.save_png(out.path_join("sheet_%d.png" % view))
+		if dex_dir != "":
+			dex_sheet.save_png(out.path_join("dex_sheet_%d.png" % view))
+
+
+## A model's box in its root's space (the model need not be in the tree).
+static func _box(root: Node3D) -> AABB:
+	var box := AABB()
+	var first := true
+	for n in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var xf := Transform3D.IDENTITY
+		var up: Node3D = mi
+		while up != root:
+			xf = up.transform * xf
+			up = up.get_parent() as Node3D
+		var b := xf * mi.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	return box
+
+
+func _height(rig: BokiRig) -> float:
+	return _box(rig.skeleton().get_parent() as Node3D).size.y
+
+
+## The dex model <dex_dir>/<id>.glb (a plain, undraco'd glb), stood on the ground and scaled to `height` m.
+func _dex_model(id: String, height: float) -> Node3D:
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	if doc.append_from_file(dex_dir.path_join(id + ".glb"), state) != OK:
+		return null
+	var holder := Node3D.new()
+	var model := doc.generate_scene(state)
+	holder.add_child(model)
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		for i in (n as MeshInstance3D).get_surface_override_material_count():
+			var mat := (n as MeshInstance3D).mesh.surface_get_material(i) as BaseMaterial3D
+			if mat != null:
+				mat.metallic = 0.0    # a Meshy glb is fully metallic: black without a sky to reflect
+	var box := _box(model)
+	model.scale = Vector3.ONE * height / box.size.y
+	model.position = Vector3(-box.get_center().x, -box.position.y, -box.get_center().z) * model.scale.y
+	return holder
 
 func _faces() -> void:
 	var vp := _stage(Vector2i(px, px), false)

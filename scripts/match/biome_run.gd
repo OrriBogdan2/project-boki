@@ -32,7 +32,9 @@ var pending: Array = []             # delayed effects {t, fn}
 var hz_ent: Ent = null              # stands in for "the environment" as a damage source (never credited)
 var player_biome := ""
 var hot: HotZone = null             # the regions' own loot and this match's hot drop zone
+var terrain: TerrainHazards = null  # the map's lava, deep water, ice, static and bramble areas
 var rng := RandomNumberGenerator.new()
+var air: Array[CPUParticles3D] = []  # decorate's ambient emitters, paused beyond the draw distance (tick)
 
 func _init(match_node: Node) -> void:
 	m = match_node
@@ -68,7 +70,7 @@ func _danger(p: Vector3) -> int:
 # ------------------------------------------------------------------ spawning
 ## The monsters for a camp, from its region's table: base monster kinds, weighted. Empty when the
 ## camp isn't in a biome (the match's own mix is used then).
-func camp_comp(c: Dictionary) -> Array:
+func camp_comp(c: Dictionary, dice := rng) -> Array:
 	var B := _biome(c["pos"])
 	var mobs: Array = B.get("mobs", [])
 	if mobs.is_empty():
@@ -84,13 +86,13 @@ func camp_comp(c: Dictionary) -> Array:
 			if String(e["kind"]) in ["brute", "sentinel"]:
 				out.append(String(e["kind"])); break
 	while out.size() < n:
-		out.append(String(_pick(mobs)["kind"]))
+		out.append(String(_pick(mobs, dice)["kind"]))
 	return out
 
-func _pick(entries: Array) -> Dictionary:
+func _pick(entries: Array, dice := rng) -> Dictionary:
 	var tot := 0.0
 	for e in entries: tot += float(e.get("w", 1.0))
-	var r := rng.randf() * tot
+	var r := dice.randf() * tot
 	for e in entries:
 		r -= float(e.get("w", 1.0))
 		if r <= 0.0: return e
@@ -98,8 +100,9 @@ func _pick(entries: Array) -> Dictionary:
 
 ## Makes a freshly spawned monster belong to its region: the region's version of it (name, colour,
 ## stats), a rarity, and mutations from the region's list. Rarity climbs with the tier and with how
-## dangerous the island is; rarer monsters roll more mutations.
-func dress(mb: Mob) -> void:
+## dangerous the island is; rarer monsters roll more mutations. `dice` is the camp's own dice when it
+## stands in one (Camps), so the same camp holds the same rarities every match.
+func dress(mb: Mob, dice := rng) -> void:
 	if mb == null or mb.mkind in ["warden", "glimmer"]:
 		return
 	var B := _biome(mb.pos)
@@ -119,7 +122,7 @@ func dress(mb: Mob) -> void:
 	var lift := float(int(m.tier) + _danger(mb.pos)) * float(B.get("danger_mult", 1.0))
 	var wts := [60.0 - lift * 12.0, 25.0 + lift * 4.0, 11.0 + lift * 5.0, 4.0 + lift * 3.0]
 	var ri := 0
-	var roll: float = rng.randf() * (float(wts[0]) + float(wts[1]) + float(wts[2]) + float(wts[3]))
+	var roll: float = dice.randf() * (float(wts[0]) + float(wts[1]) + float(wts[2]) + float(wts[3]))
 	for i in 4:
 		roll -= maxf(1.0, wts[i])
 		if roll <= 0.0: ri = i; break
@@ -130,13 +133,13 @@ func dress(mb: Mob) -> void:
 	var mm := float(B.get("mutation_mult", 1.0))
 	if not pool.is_empty():
 		var want := 0
-		if rng.randf() < float(R["mut"]) * mm: want = 1
-		if want == 1 and int(R["max_mut"]) > 1 and rng.randf() < (0.35 if ri == 2 else 0.75) * mm: want = 2
+		if dice.randf() < float(R["mut"]) * mm: want = 1
+		if want == 1 and int(R["max_mut"]) > 1 and dice.randf() < (0.35 if ri == 2 else 0.75) * mm: want = 2
 		var keys: Array = pool.keys()
 		for _k in want:
 			var tot := 0.0
 			for k in keys: if not muts.has(k): tot += float(pool[k])
-			var r := rng.randf() * tot
+			var r := dice.randf() * tot
 			for k in keys:
 				if muts.has(k): continue
 				r -= float(pool[k])
@@ -161,7 +164,7 @@ func dress(mb: Mob) -> void:
 	mb.md = md
 	mb.set_meta("rarity", ri)
 	mb.set_meta("muts", muts)
-	mb.set_meta("mut_t", rng.randf_range(2.0, 4.0))
+	mb.set_meta("mut_t", dice.randf_range(2.0, 4.0))
 	_recolor(mb, Color(md["color"]))
 	var s := float(R["scale"])
 	if s != 1.0:
@@ -225,6 +228,7 @@ func _decorate_mob(mb: Mob, R: Dictionary, muts: Array) -> void:
 		if k in ["armored", "swift"]: continue
 		var p := CPUParticles3D.new()
 		p.amount = 10; p.lifetime = 1.0; p.preprocess = 1.0
+		ParticleCount.tune(p)
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = 0.6
 		p.direction = Vector3.UP; p.spread = 30.0; p.initial_velocity_min = 0.4; p.initial_velocity_max = 1.2
 		p.gravity = Vector3.ZERO
@@ -326,6 +330,10 @@ func tick(dt: float) -> void:
 		if muts.has("void") and mb.tgt and mb.st == "chase" and mb.flat_dist(mb.tgt) > 3.5:
 			_blink(mb)
 	_tick_hazards(dt)
+	var cam: Camera3D = m.get_viewport().get_camera_3d() if m.is_inside_tree() else null
+	if cam:
+		ParticleCount.pace(air, cam.global_position)
+	terrain.tick(dt)
 	_tick_region_banner()
 
 ## A void monster marks where it's going, then blinks there.
@@ -349,6 +357,7 @@ func _blink(mb: Mob) -> void:
 # ------------------------------------------------------------------ traps and hazards
 ## Places each region's traps on its islands, away from exits, points of interest and the edges.
 func place_hazards() -> void:
+	terrain = TerrainHazards.new(m)
 	var taken: Array = []
 	for p in w.portal_spots: taken.append(p)
 	for c in w.chest_spots: taken.append(c["pos"])
@@ -439,12 +448,15 @@ func _add_hazard(kind: String, p: Vector3) -> void:
 			n.add_child(rim)
 	hazards.append(hz)
 
-## How much grip the ground has at p (1 normal, low on ice), for the hunter's footing.
-func grip(p: Vector3) -> float:
+## How much grip the ground has at p for h (1 normal, low on ice; a frost Boki keeps its hunter's
+## footing on ice sheets and patches alike).
+func grip(p: Vector3, h: Hunter = null) -> float:
+	if h != null and terrain.guards(h, "ice"):
+		return 1.0
 	for hz in hazards:
 		if hz["kind"] == "ice_patch" and Vector2(p.x - hz["pos"].x, p.z - hz["pos"].z).length() < float(hz["r"]) and absf(p.y - hz["pos"].y) < 0.3:
-			return 0.12
-	return 1.0
+			return float(TerrainHazards.kind_def("ice")["effect"]["grip"])
+	return terrain.grip(p, h)
 
 func _near_hunter(p: Vector3, d: float) -> Hunter:
 	var best: Hunter = null; var bd := d
@@ -583,7 +595,8 @@ func decorate() -> void:
 		var c: Vector2 = w.islands[ii]["c"]
 		var r := float(w.islands[ii]["r"]) * 1.1
 		var p := CPUParticles3D.new()
-		p.amount = maxi(6, int(clampf(r * 4.0, 20, 70) * float(Settings.q("fx")))); p.lifetime = 5.0; p.preprocess = 5.0
+		p.amount = int(clampf(r * 4.0, 20, 70)); p.lifetime = 5.0; p.preprocess = 5.0
+		ParticleCount.tune(p)
 		p.visibility_range_end = 110.0 * float(Settings.q("draw"))
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(r, 2.5, r)
 		p.mesh = Models.sphere(0.06, 4)
@@ -610,6 +623,7 @@ func decorate() -> void:
 			p.material_override = Models.glow_mat(Color(col, minf(col.a, 0.8)))
 		m.add_child(p)
 		p.global_position = Vector3(c.x, 3.5, c.y)
+		air.append(p)
 
 ## Soft painted particles instead of plain dots: a camera-facing glow with a bright core that fades
 ## in and out (embers flicker and rise, snow is crisp and white, sparks streak, bloom spores are

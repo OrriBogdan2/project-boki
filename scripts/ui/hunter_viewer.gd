@@ -14,7 +14,7 @@ extends PanelContainer
 signal slot_changed(slot: String)
 
 const RULES_PATH := "res://content/rules/hunter_viewer.json"
-const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility",
+const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Ability", "e": "Utility",
 		"x": "Ultimate", "r": "Fusion with your Boki"}
 ## The input action behind each slot, so the key caps follow the player's bindings.
 const SLOT_ACTIONS := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult",
@@ -28,11 +28,15 @@ var id := ""
 var stage_size := Vector2(220, 300)
 var clip_size := Vector2(200, 112)
 var clip_cols := 2
+var with_lines := true        # false: ability key and name only (the first Relic's page)
 var slots: Array = []
 var slot_i := 0
 var power_k := 0.0            # 0..1 while the unlock is held (HoldUnlock)
 var burst_t := -1.0           # s since the reveal burst, -1 when none
 var spin_t := 0.0             # s the stage has run
+var stage_only := false       # just the stage, standing front on (the lobby): no header, clips or frame
+var lockin_t := -1.0          # s into the lock-in pose (-1: not playing)
+var lockin_len := 0.0         # s the pose runs
 
 var vp: SubViewport
 var pivot: Node3D
@@ -48,22 +52,16 @@ var _body: Control            # everything but the stage, rebuilt when the Hunte
 var _cols: HBoxContainer
 
 ## The abilities shown, in order. "x" (the Hunter's own ultimate on R) shows once a Hunter's data has an
-## "x" entry; "r", the Boki Fusion, is always last.
+## "x" entry; "r", the Boki Fusion, is last while it is on.
 static func slots_for(hunter_id: String) -> Array:
 	var out: Array = KitCard.slots_of(hunter_id).filter(func(s): return s != "r" and s != "x")
 	if Arch.def(hunter_id).has("x"): out.append("x")
-	out.append("r")
+	if MergeForm.enabled(): out.append("r")
 	return out
 
-## A slot's name, icon, colour and plain line (KitCard's, plus the X ultimate from its own data).
+## A slot's name, icon, colour and plain line (KitCard's, which has the X ultimate too).
 static func slot_info(hunter_id: String, slot: String) -> Dictionary:
-	if slot != "x":
-		return KitCard.slot_text(hunter_id, slot)
-	var d := Arch.def(hunter_id)
-	var xd: Dictionary = d.get("x", {})
-	return {"name": String(xd.get("name", "")), "icon": String(xd.get("icon", "burst")),
-			"col": Color(String(xd.get("col", "#ffffff"))), "tag": "", "line": String(d.get("card", {}).get("x",
-			xd.get("desc", "")))}
+	return KitCard.slot_text(hunter_id, slot)
 
 ## The key a slot is on, from the player's own bindings ("auto" for the passive).
 static func key_for(slot: String) -> String:
@@ -83,12 +81,19 @@ static func rules() -> Dictionary:
 	return _rules
 
 static func make(hunter_id: String, stage_px := Vector2(220, 300), clip_px := Vector2(200, 112),
-		cols := 2) -> HunterViewer:
+		cols := 2, lines := true) -> HunterViewer:
 	var v := HunterViewer.new()
+	v.with_lines = lines
 	v.id = hunter_id
 	v.stage_size = stage_px
 	v.clip_size = clip_px
 	v.clip_cols = cols
+	return v
+
+## Just the Hunter's stage, for the pre-match lobby: no turntable, it stands facing front (`play_lockin` for the pose).
+static func make_stage(hunter_id: String, stage_px: Vector2) -> HunterViewer:
+	var v := make(hunter_id, stage_px)
+	v.stage_only = true
 	return v
 
 ## The kit moves a slot plays, from the rules (only ids the animation knows).
@@ -112,8 +117,12 @@ static func stat_line(hunter_id: String) -> String:
 			("  ·  " + w) if w != "" else ""]
 
 func _ready() -> void:
-	add_theme_stylebox_override("panel", _frame(Arch.color(id)))
 	set_meta("hunter_viewer", id)
+	if stage_only:
+		add_theme_stylebox_override("panel", StyleBoxEmpty.new())      # no frame or padding: just the stage
+		add_child(_stage(Arch.color(id)))
+		return
+	add_theme_stylebox_override("panel", _frame(Arch.color(id)))
 	slots = slots_for(id)
 	_cols = UI.hbox(14)
 	if stage_size != Vector2.ZERO:      # (the Relic moment shows the Hunter in the world instead)
@@ -127,10 +136,11 @@ func set_hunter(hunter_id: String) -> void:
 		return
 	id = hunter_id
 	var col := Arch.color(id)
-	slots = slots_for(id)
-	add_theme_stylebox_override("panel", _frame(col))
 	set_meta("hunter_viewer", id)
-	_rebuild_body()
+	if not stage_only:
+		slots = slots_for(id)
+		add_theme_stylebox_override("panel", _frame(col))
+		_rebuild_body()
 	if pivot == null:
 		return
 	if model:
@@ -168,9 +178,10 @@ func _rebuild_body() -> void:
 	lines.custom_minimum_size.x = clip_size.x
 	for s in slots:
 		var slot := String(s)
-		var row: Control = AbilityClip.make(id, slot, clip_size) if slot in CLIP_SLOTS else _line(slot, col)
+		var row: Control = AbilityClip.make(id, slot, clip_size, with_lines) if slot in CLIP_SLOTS else _line(slot, col)
 		row.set_meta("slot", slot)
 		row.mouse_entered.connect(select.bind(rows.size()))
+		AbilityCard.hover(row, id, slot)
 		rows.append(row)
 		(grid if slot in CLIP_SLOTS else lines).add_child(row)
 	# the one-line abilities fill the grid's last gap when there is one, else go under it
@@ -203,9 +214,10 @@ func _line(slot: String, col: Color) -> Control:
 	nl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	r.add_child(nl)
 	v.add_child(r)
-	var ln := UI.para(AbilityClip.line_for(id, slot), 12, UI.MUTED)
-	ln.custom_minimum_size.x = clip_size.x
-	v.add_child(ln)
+	if with_lines:
+		var ln := UI.para(AbilityClip.line_for(id, slot), 12, UI.MUTED)
+		ln.custom_minimum_size.x = clip_size.x
+		v.add_child(ln)
 	return v
 
 # ------------------------------------------------------------------ the stage
@@ -296,6 +308,11 @@ func _build_model() -> void:
 	anim = HunterAnim.new(model)
 	_aim_camera()
 
+## The Hunter's lock-in pose (data "lockin" in its warden_anim file), from the start; back to its idle after.
+func play_lockin() -> void:
+	lockin_t = 0.0
+	lockin_len = WardenClips.lockin_dur(WardenGlb.art(id))
+
 func _aim_camera() -> void:
 	var s := model.scale.y
 	cam.transform = Transform3D(Basis(), Vector3(-1.0, 1.45, -5.3) * s).looking_at(Vector3(0, 0.95 * s, 0), Vector3.UP)
@@ -330,8 +347,12 @@ func tick(dt: float) -> void:
 	if model == null:
 		return
 	spin_t += dt
-	pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (1.0 - power_k)
+	if not stage_only:
+		pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (1.0 - power_k)
 	var s := {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(id)}
+	if lockin_t >= 0.0:
+		s["lockin_t"] = lockin_t
+		lockin_t = lockin_t + dt if lockin_t + dt < lockin_len else -1.0
 	if power_k > 0.0:
 		s["crouch"] = 0.55 * power_k
 		s["cast_slot"] = "ult"

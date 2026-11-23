@@ -10,6 +10,7 @@ SPEC: {"in": png, "out": png, and any of
       each eye magnified about its centre with a soft falloff to r (no seam), and its pale-blue iris lifted toward
       white-blue by `glow` (a glowing eye at the match camera), or tinted toward `iris` (hex, `iris_k`, `iris_r`)}.
 Image coordinates are the sheet's own pixels (row 0 at the top)."""
+import argparse
 import json
 import os
 import sys
@@ -128,7 +129,9 @@ def eye(im, e):
 
 
 def main():
-    spec = json.load(open(sys.argv[1]))
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("spec", help="the SPEC.json (see above)")
+    spec = json.load(open(ap.parse_args().spec))
     im = imgio.load(os.path.expanduser(spec["in"]))
     for e in spec.get("eyes", []):
         im = eye(im, e)

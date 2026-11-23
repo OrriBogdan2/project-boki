@@ -1,6 +1,6 @@
 class_name HomeBelt
 extends RefCounted
-## The utility belt on the farm: choosing what goes on keys 1, 2 and 3 for the next expedition (rows in
+## The utility belt on the farm: choosing what goes on keys 1 to 4 for the next expedition (rows in
 ## the expedition panel), and the armory's Utility tab that lists your stash. What you pick leaves the
 ## stash when you set out (Equal.take_belt), up to the cap for the difficulty tier; everyone also gets
 ## the everyday issue (two tonics, two armor kits). Gloves and boots are chosen in HomeEcon.
@@ -49,7 +49,7 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 		var nm := UI.label("%d:  %s" % [i + 1, slot_text(id, tier)], 14,
 				UtilityBelt.col_of(id) if id != "" else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nm.tooltip_text = String(UtilityBelt.def(id).get("desc",
 				"")) if id != "" else "Leave this slot for something you find"
 		nm.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -67,7 +67,7 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 	var cap_line := "You can bring up to %s on this difficulty; " % _cap_text(tier)
 	cap_line += "what you bring is lost if you go down."
 	var note := UI.label(cap_line, 12, UI.MUTED)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(note)
 	parent.add_child(note)
 
 static func _cap_text(tier: int) -> String:
@@ -84,7 +84,7 @@ static func stash(v: VBoxContainer) -> void:
 		info.add_child(UI.label("%s  ×%d" % [UtilityBelt.name_of(id), Equal.stash_of(id)], 16, UtilityBelt.col_of(id),
 				UI.semi))
 		var d := UI.label(String(UtilityBelt.def(id).get("desc", "")), 12, UI.MUTED)
-		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(d)
 		info.add_child(d)
 		r.add_child(info)
 		var caps: Array = []

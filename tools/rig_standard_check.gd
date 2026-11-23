@@ -19,8 +19,8 @@ const NO_SEAT := ["palm"]
 const PREFIX := {"bulwark": "bul_", "archer": "arc_", "gunslinger": "gunslinger_", "mage": "mage_", "thief": "thf_",
 	"dolm": "breah_", "ostra": "ostra_", "rimewright": "tm_", "ashwick": "as_", "juggernaut": "jug", "dredge": "dr_",
 	"tender": "mm_", "gil": ""}      # (Gil has no keyed moves yet: his rig plays the generic poses)
-const MOVE_TABLES := [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
-	KMovesCare.MOVES, KMovesPair.MOVES]
+const MOVE_TABLES := [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES,
+	KMovesStone.MOVES, KMovesCare.MOVES, KMovesPair.MOVES]
 
 var bad := 0
 var holder: Node3D
@@ -33,6 +33,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	tree = main.get_tree()
 	verbose = OS.get_cmdline_user_args().has("--verbose")

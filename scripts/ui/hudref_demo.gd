@@ -4,7 +4,7 @@ extends RefCounted
 ## known states so before/after pictures line up. Match calls tick() every step while the option is on.
 ##   plates: five rivals in a row in front of you, one per plate state (full; just hit, showing the
 ##           chip; armoured with a shield; low and slowed; downed), your abilities unlocked with one
-##           cooling down. Everyone else stands still.
+##           cooling down, and a heal shield on you (the vitals' shield strip). Everyone else stands still.
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
 ##   busy:   the fight setup, and at BUSY_AT a burst of popups at once (an ally knocked, a level-up,
 ##           a hint, toasts and a repeat): shoot it with --shot-time a little after BUSY_AT.
@@ -22,6 +22,10 @@ static func tick(m) -> void:
 	if mode == "" or m.player == null or m.time < 0.05:
 		return
 	var P: Hunter = m.player
+	if mode == "plates" and m.has_meta("hudref_set"):
+		# face the row every frame: the 120 degree sight cone hides plates of rivals behind you, and a headless run
+		# has no pointer to aim with (the windowed picture gets the same aim from the pointer at the bottom edge)
+		P.inp["aim"] = P.pos + Vector3(0, 0.9, 4.4)
 	if not m.has_meta("hudref_set"):
 		m.set_meta("hudref_set", true)
 		Settings.set_v("kin_chatter", "quiet", false)
@@ -101,6 +105,8 @@ static func _plates(m, P: Hunter) -> void:
 		h.lvl = 3 + i
 	P.hp = P.max_hp * 0.62
 	P.armor = P.max_armor * 0.5
+	ShieldSrc.give(P, 40.0, ShieldSrc.HEAL)
+	P.shield_t = 30.0
 	if P.ak and P.ak.cd.has("e"): P.ak.cd["e"] = 6.4
 	if foes.size() < 5:
 		return
@@ -134,7 +140,7 @@ static func _busy(m, P: Hunter) -> void:
 		if h != P and h.team == P.team:
 			m.knock(h, m.hunters.filter(func(x): return x.team != P.team)[0], {})
 			break
-	m.hud.level_up(8, {})
+	m.hud.level_up(8)
 	m.hud.tip("Hold %s to scan  ·  4s, rivals hear it" % Settings.key_cap("interact"))
 	m.hud.toast("Bramble Isle", Color("f2c84a"))
 	for i in 3:

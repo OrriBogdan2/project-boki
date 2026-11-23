@@ -33,7 +33,7 @@ func _boki(power: int) -> Dictionary:
 	return rec
 
 func _tables() -> void:
-	ok(GardenPrizes.ids().size() == 6, "six games: dash, shove, seek, volley, show, relay")
+	ok(GardenPrizes.ids().size() == 9, "nine games: dash, shove, seek, volley, show, echo, relay, lantern, kite")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	for id in GardenPrizes.ids():
@@ -92,7 +92,38 @@ func _cup() -> void:
 	for foe_power in [19, 21, 23]:
 		later.append(GardenPrizes.settle("shove", me, _boki(foe_power), true, t + WEEK, rng))
 	ok(GardenPrizes.ribbon_count(me, "shove") == 2 and later[2]["ribbon"], "the next week's Crown grants again")
+	_echo_crown(rng, t + 5.0 * WEEK)
+	_own_stat(rng, t + 7.0 * WEEK)
 	_loss_and_games(rng, t + 3.0 * WEEK)
+
+## The cup compares the game's own stat (Speed for the Dash), not the stat total.
+func _own_stat(rng: RandomNumberGenerator, t: float) -> void:
+	Save.d = Save.fresh()
+	var me := _boki(20)
+	me["stats"]["speed"] = 60
+	var big := _boki(40)                      # a far bigger total, but slower than Pip
+	big["stats"]["speed"] = 30
+	var fast := _boki(5)                      # a small total, but 1.15x Pip's Speed
+	fast["stats"]["speed"] = 69
+	ok(GardenPrizes.cup_stat("dash", me) == "speed" and GardenPrizes.cup_stat("shove", me) == "power",
+			"the Dash runs on Speed, the Shove on Power")
+	ok(GardenPrizes.cup_stat("show", me) == "speed", "the Show compares the backed Boki's best stat")
+	var r1 := GardenPrizes.settle("dash", me, big, true, t, rng)
+	ok(r1["round"] == "", "Dash: a bigger total with less Speed is no round")
+	var r2 := GardenPrizes.settle("dash", me, fast, true, t, rng)
+	ok(r2["round"] == "Sprout", "Dash: a faster rival is a round, total or not")
+	var pick := GardenPrizes.strongest([me, big, fast], me, "dash")
+	ok(pick == fast, "the Dash rival is the fastest, not the biggest total")
+	ok(GardenPrizes.strongest([me, big, fast], me) == big, "...with no game named it is still the biggest total")
+
+## Echo Steps' first Crown also gives Chimegrass; the next one does not.
+func _echo_crown(rng: RandomNumberGenerator, t: float) -> void:
+	var me := _boki(20)
+	for week in 2:
+		for foe_power in [19, 21, 23]:
+			GardenPrizes.settle("echo", me, _boki(foe_power), true, t + week * WEEK, rng)
+		ok(int(Save.d["items"].get("chimegrass", 0)) == 1, "Echo Steps Crown %d: Chimegrass once in all" % (week + 1))
+	ok(GardenPrizes.ribbon_count(me, "echo") == 2, "...and the Echo Steps Cup Ribbon each time")
 
 func _loss_and_games(rng: RandomNumberGenerator, t: float) -> void:
 	var me := _boki(20)
@@ -125,5 +156,5 @@ func _visible() -> void:
 			"the board lists table, first-win item and cup for each game")
 	board.free()
 	var rows := GardenPrizes.rows({"game": "dash", "items": [{"kind": "snack", "id": "puffcorn"}], "first": true,
-			"round": "", "ribbon": true, "reset": false})
+			"round": "", "ribbon": true, "reset": false, "keepsake": ""})
 	ok(rows.size() == 2, "a Crown result card shows the prize and the ribbon")

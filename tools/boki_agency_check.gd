@@ -8,6 +8,10 @@ const CASTS := 20
 const STEP_S := 0.25             # s simulated after each cast
 const POS_TOL := 0.02            # m the idle hunter may drift
 const VEL_TOL := 0.05            # m/s
+const HOOK_S := 1.5              # s simulated after a hook: the yank lands, then the foe's leftover speed would show
+const FOE_MASS := 1.0            # a real Hunter's body mass: the body push between hunters is live
+const GUARD_JUMP_S := 0.3        # s into a jump when the guarding Boki's feet are read
+const GUARD_FEET_TOL := 0.05     # m a guarding Boki's feet may sit off its own ground
 
 var bad := 0
 var m: Match
@@ -18,7 +22,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond: bad += 1
 
 ## A training match with `species` bonded, on a levelled strip; a foe 6 m in front, the rest far off.
-func _fresh(species: String) -> Hunter:
+func _fresh(species: String, foe_mass := 0.001) -> Hunter:
 	if m: m.queue_free()
 	m = Match.new()
 	main.add_child(m)
@@ -53,7 +57,7 @@ func _fresh(species: String) -> Hunter:
 			h.hp = h.max_hp
 			# a foe hooked into you is not a Boki moving you: only you are under test
 			h.cdat = h.cdat.duplicate()
-			h.cdat["mass"] = 0.001
+			h.cdat["mass"] = foe_mass
 			foe_set = true
 	for q: Kin in m.kins:
 		if q.owner_h != P:
@@ -134,6 +138,54 @@ func _abilities() -> void:
 				var what := "%s (%s, Boki %s) x%d" % [ab_id, sp, where, CASTS]
 				ok(w.x <= POS_TOL and w.y <= VEL_TOL, "%s: you never move (%s)" % [what, _drift(w)])
 
+## A carried Stinger Hook yanks a foe of real mass to you: it lands at the hook's spot with no speed left, so
+## it neither slides into you nor pushes you.
+func _hook() -> void:
+	var P := _fresh("cindle", FOE_MASS)
+	P.kin.stow()
+	P.kin.brain.think_t = 1e9
+	var foe := _foe(P)
+	P.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
+	P.kin.use_ability("k1", foe.pos)
+	var home := P.pos
+	var drift := 0.0
+	var speed := 0.0
+	var t := 0.0
+	while t < HOOK_S:
+		_step()
+		t += Match.DT
+		drift = maxf(drift, Vector2(P.pos.x - home.x, P.pos.z - home.z).length())
+		if t > 0.6: speed = maxf(speed, Vector2(foe.vel.x, foe.vel.z).length())
+	var gap := foe.flat_dist(P)
+	ok(gap < 2.0, "hook on a real-mass foe: it was yanked to you (%.2f m away)" % gap)
+	ok(speed <= VEL_TOL, "hook on a real-mass foe: it lands with no speed left (%.2f m/s)" % speed)
+	ok(drift <= POS_TOL, "hook on a real-mass foe: you never move (drift %.3f m)" % drift)
+
+## A big Boki guarding at your side stays on the ground when you jump: its feet follow its own ground.
+func _guard() -> void:
+	var P := _fresh("pebbit")
+	var k: Kin = P.kin
+	k.cmd = "follow"
+	k.state = "active"
+	k.teleport(P.pos + Vector3(-1.5, 0, 1.5))
+	KinCommand.order(P, "return")
+	_settle()
+	for i in 30:
+		_step()
+	var ground := P.pos.y
+	P.do_jump()
+	var up := 0.0
+	var feet := 0.0
+	var t := 0.0
+	while t < GUARD_JUMP_S:
+		_step()
+		t += Match.DT
+		up = maxf(up, P.pos.y - ground)
+		feet = maxf(feet, absf(k.seen_pos().y - ground))
+	ok(k.big() and k.beside, "guard: a big Boki on Return stands beside you (big %s, beside %s)" % [k.big(), k.beside])
+	ok(up > 0.3, "guard: you are in the air (%.2f m up)" % up)
+	ok(feet <= GUARD_FEET_TOL, "guard: its feet stay on its own ground while you jump (worst %.2f m off)" % feet)
+
 func _fusions() -> void:
 	var seen := {}
 	var ids: Array = Data.KIN.keys()
@@ -161,6 +213,8 @@ func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	_abilities()
+	_hook()
+	_guard()
 	_fusions()
 	if m: m.queue_free()
 	print("BOKIAGENCY DONE, failures: %d" % bad)

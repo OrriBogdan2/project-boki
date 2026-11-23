@@ -1,7 +1,8 @@
 extends RefCounted
 ## --ways-out-hud-shots --shots-dir=<dir>: the Ways Out strip and the Heart Gate prompt on the real HUD (GPU, under
 ## xvfb with a renderer). strip_1_locked ... strip_5_late are the strip as the match runs (full frame, so the strip
-## is seen beside the minimap and the clock); gate_prompt is the carrier at the Heart Gate.
+## is seen beside the minimap and the clock); gate_prompt is the carrier at the Heart Gate; quest_tracker is your
+## squad charging the Uplink 50 m off while a rival squad is sealed in the Sealed Lair (the tracker under the strip).
 
 var main: Node
 var m: Match
@@ -40,45 +41,78 @@ func run(main_node: Node) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	var P: Hunter = m.player
-	var H: Heart = m.heart
+	var p: Hunter = m.player
+	var h_v: Heart = m.heart
 	var q: Dictionary = Heart.rules()["quest"]
 	for h in m.hunters:
 		h.ctrl = "idle"
-	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
-	var foe2: Hunter = m.hunters.filter(func(h): return h.team != P.team and h.team != foe.team)[0]
-	P.teleport(m.world.free_spot_near(H.site + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
+	var foe2: Hunter = m.hunters.filter(func(h): return h.team != p.team and h.team != foe.team)[0]
+	p.teleport(m.world.free_spot_near(h_v.site + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))
 	m.sess_t0 = 30.0 - m.time
 	await _grab("strip_1_locked")
 	m.sess_t0 = float(q["lair_open_s"]) + 40.0 - m.time
-	H.charge = 40.0
-	H._force(Heart.S.CHARGING, "shots")
+	h_v.charge = 40.0
+	h_v._force(Heart.S.CHARGING, "shots")
 	await _grab("strip_2_lair_open")
 	m.sess_t0 = Heart.r("wake_s") + Heart.r("charge_s") + 20.0 - m.time
-	H.charge = Heart.r("charge_s")
-	H._force(Heart.S.READY, "charged")
-	H.carrier = foe
-	H._force(Heart.S.CARRIED, "shots")
+	h_v.charge = Heart.r("charge_s")
+	h_v._force(Heart.S.READY, "charged")
+	h_v.carrier = foe
+	h_v._force(Heart.S.CARRIED, "shots")
 	if not m.lairs.list.is_empty():
 		m.lairs.list[0]["flown"] = [foe2]
 	await _grab("strip_3_in_use")
-	H.carrier = null
-	H.early_team = foe.team
+	h_v.carrier = null
+	h_v.early_team = foe.team
 	m.sess_t0 = float(q["uplink_shut_s"]) + 10.0 - m.time
 	await _grab("strip_4_taken_lost")
-	H._force(Heart.S.FINAL, "shots")
-	H.final_team = P.team
-	H.final_prog = 0.4
+	h_v._force(Heart.S.FINAL, "shots")
+	h_v.final_team = p.team
+	h_v.final_prog = 0.4
 	m.sess_t0 = Heart.r("final_s") + 30.0 - m.time
 	await _grab("strip_5_late")
-	H.early_team = -1
-	H.final_team = -1
-	H.final_prog = 0.0
-	H.state = Heart.S.CARRIED
-	H.carrier = P
-	P.teleport(H.gate)
-	P.inp["interact"] = true
-	H.hold(P, H.interact_for(P), 1.7)
-	m.interact = H.interact_for(P)
+	h_v.early_team = -1
+	h_v.final_team = -1
+	h_v.final_prog = 0.0
+	h_v.state = Heart.S.CARRIED
+	h_v.carrier = p
+	p.teleport(h_v.gate)
+	p.inp["interact"] = true
+	h_v.hold(p, h_v.interact_for(p), 1.7)
+	m.interact = h_v.interact_for(p)
 	await _grab("gate_prompt")
+	await _tracker_shot(foe2)
 	main.get_tree().quit(0)
+
+## Your squad on the Uplink at 62%, `rival`'s squad sealed in the Sealed Lair with its boss at 70%, you 50 m from the
+## outpost. The seats are forced and the lair and outpost set to match, so the host's moves (m.step) keep them.
+func _tracker_shot(rival: Hunter) -> void:
+	var p: Hunter = m.player
+	var h: Heart = m.heart
+	var qs: QuestSeats = m.exits.seats
+	var l_v: Dictionary = qs.lair.ref
+	var x: Dictionary = qs.uplink_x()
+	p.inp["interact"] = false
+	m.interact = {}
+	h.carrier = null
+	h._force(Heart.S.READY, "shots")
+	m.sess_t0 = float(Heart.rules()["quest"]["uplink_open_s"]) + 10.0 - m.time
+	for l in m.lairs.list:
+		l["flown"] = []
+	if m.lairs.boss_of(l_v) == null:
+		l_v["active"] = false
+		m.lairs.activate(l_v)      # (run() cleared the monsters: a fresh boss)
+	var b: Boss = m.lairs.boss_of(l_v)
+	b.hp = b.max_hp * 0.7
+	l_v["state"] = "awake"
+	l_v["locked"] = true
+	l_v["lock_at"] = m.time
+	l_v["sealed_in"] = [rival]
+	qs.lair._force(QuestSeat.S.IN_USE, "shots", rival.team)
+	x["state"] = "charging"
+	x["team"] = p.team
+	x["prog"] = 0.62
+	qs.uplink._force(QuestSeat.S.IN_USE, "shots", p.team)
+	p.teleport(m.world.free_spot_near(x["pos"] + Vector3(50, 0, 0), [], 1.0, 0.45, 6.0))
+	await _grab("quest_tracker")

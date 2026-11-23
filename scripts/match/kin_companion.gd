@@ -27,7 +27,6 @@ const CATS := {
 	"hunter": [90, 10.0, "threat"],
 	"low_hp": [85, 22.0, "care"],
 	"collapse": [84, 50.0, "path"],
-	"cover": [75, 25.0, "care"],
 	"boss": [70, 45.0, "threat"],
 	"egg": [66, 30.0, "find"],
 	"pack": [60, 18.0, "threat"],
@@ -45,7 +44,7 @@ const LABELS := {"behind": "Behind you!", "sniper": "Sniper", "hunter": "Hunter"
 	"egg": "Rare Egg", "loot": "Loot", "wild": "Wild Boki", "exit": "Way out", "collapse": "Way out"}
 ## What its body does for each callout (KinPuppet reads the pose).
 const POSES := {"behind": "growl", "sniper": "alert", "hunter": "growl", "pack": "growl", "boss": "alert", "egg": "point",
-	"loot": "point", "wild": "point", "exit": "beckon", "collapse": "beckon", "low_hp": "whine", "cover": "guard", "goad": "cheer"}
+	"loot": "point", "wild": "point", "exit": "beckon", "collapse": "beckon", "low_hp": "whine", "goad": "cheer"}
 
 var k: Kin
 var m
@@ -69,8 +68,10 @@ var ping_follow: Ent = null
 var side := 1.0             # which flank it walks on
 var guide := {}             # the tutorial step it's leading: {id, to, t, said, demo_t}
 var demo := {}              # a little demonstration it's doing: {kind, t}
-var lead_dir := Vector2.ZERO
-var lead_t := 0.0
+var lead_hold := false      # standing and looking back at you on a tutorial lead (arrived, or waiting for you)
+var lead_pos := Vector3.INF  # a wisp's floating spot while it leads (TutorialLead.wisp_step); INF when on your shoulder
+var lead_stall := 0.0       # s it has stood still while trying to lead (an edge or a wall on the straight way)
+var lead_off := 0.0         # s left falling in beside you after such a stall (TutorialLead.on)
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -290,8 +291,6 @@ func _best_callout() -> Dictionary:
 	# looking after you
 	if not o.downed and o.hp < o.max_hp * 0.35:
 		cands.append({"cat": "low_hp", "at": o.pos, "key": ""})
-	if not o.downed and not o.wpn.get("melee", false) and o.reload_t > 0.0 and threat is Hunter:
-		cands.append({"cat": "cover", "at": threat.pos, "key": ""})
 	if nature() == "bold" and threat is Hunter and threat.hp < threat.max_hp * 0.4 and not (threat as Hunter).downed:
 		cands.append({"cat": "goad", "at": threat.pos, "key": ""})
 	# the most important one that's allowed
@@ -409,6 +408,7 @@ func on_owner_hit(d: float, by: Ent) -> void:
 	if d >= o.max_hp * 0.12 and yelp_cd <= 0.0 and not o.downed:
 		yelp_cd = 7.0
 		history.append({"t": m.time, "cat": "yelp", "pri": 0})
+		m.sfx(KinVoice.cue(k.species, "hurt"), k.pos, -6.0, Unique.voice(k.rec))
 		var txt := BokiChatter.line(k, "yelp")
 		if txt != "":
 			m.kin_bark(k, txt, "yelp")
@@ -534,7 +534,7 @@ static func demo_tick(m, mode: String) -> void:
 				p.down_hp = 1e6
 			if p.downed:
 				p.revive = minf(p.revive, 0.35)
-				if k.state in ["reviving", "active"]:
+				if k.state in ["wisp", "active"]:
 					if not m.bubbles.any(func(b): return b["ent"] == k):
 						m.kin_bark(k, BokiChatter.line(k, "owner_down"), "owner_down")
 					_hold_bubble(m, k)
@@ -555,12 +555,6 @@ func heel_spot() -> Vector3:
 	var fwd := aim_dir()
 	var sd := Vector2(-fwd.y, fwd.x) * side
 	var offs: Array = []
-	if guide.size() > 0 and lead_dir != Vector2.ZERO:
-		var gto: Vector3 = guide.get("to", Vector3.INF)
-		var gd := Vector2(gto.x - o.pos.x, gto.z - o.pos.z).length() if gto != Vector3.INF else 99.0
-		var ahead := clampf(gd - 1.2, 1.2, 8.0)
-		for kk in [1.0, 0.75, 0.5, 0.3]:
-			offs.append(lead_dir * ahead * kk)
 	if threat and is_instance_valid(threat) and not threat.dead:
 		var to := Vector2(threat.pos.x - o.pos.x, threat.pos.z - o.pos.z)
 		if to.length() > 0.5:
@@ -582,53 +576,33 @@ func _ground_ok(p: Vector3, y0: float) -> bool:
 		return false
 	return absf(w.ground_at(p.x, p.z) - y0) < 0.75
 
-## Is it leading the way right now (tutorial)? Then the HUD can drop its own arrow.
+## Is it leading the way right now (tutorial)? On a step with a lead goal, not once you ran past it or while it
+## rejoins you after a stall (TutorialLead.on). The checks read it to know a Boki is guiding.
 func leading() -> bool:
-	if guide.size() == 0 or lead_dir == Vector2.ZERO or h() == null or k.state not in ["shoulder", "active"]:
+	var to := TutorialLead.goal(k)
+	if to == Vector3.INF or h() == null or lead_off > 0.0:
 		return false
-	var kp := k.seen_pos()
-	var rel := Vector2(kp.x - h().pos.x, kp.z - h().pos.z)
-	return rel.length() < 9.0 and rel.dot(lead_dir) > 0.8
+	return not TutorialLead.passed(k.seen_pos(), h().pos, to)
 
 # ------------------------------------------------------------------ the tutorial guide
 ## Match._update_tutorial tells it every step what the step is about.
 func tut(id: String, to: Vector3) -> void:
 	if guide.get("id", "") != id:
 		guide = {"id": id, "to": to, "t": 0.0, "said": false, "demo_t": 0.4}
-		lead_dir = Vector2.ZERO
-		lead_t = 0.0
-		if to != Vector3.INF and h() and Tutorial.leads(id):
-			# off it goes straight away, the straight way first (the walked path comes on the next look)
-			guide["dir"] = Vector2(to.x - h().pos.x, to.z - h().pos.z).normalized()
-			lead_dir = guide["dir"]
-			lead_t = 0.4
 	guide["to"] = to
 
-## Stalled: it runs back to you and says the step again (the card and marker pulse too).
+## Stalled: it says the step again (the card and marker pulse too).
 func nag() -> void:
 	if guide.size() == 0:
 		return
 	guide["said"] = false
-	guide["back_t"] = 2.5
 	pose = "beckon"
 	pose_t = 2.0
 
 func _tut_tick() -> void:
-	var o := h()
 	var id := String(guide["id"])
 	var to: Vector3 = guide["to"]
 	guide["t"] = float(guide["t"]) + 0.4
-	# which way to go: straight there, or the way a bot would walk it (bridges, gaps)
-	lead_dir = Vector2.ZERO
-	guide["back_t"] = maxf(0.0, float(guide.get("back_t", 0.0)) - 0.4)
-	var back := float(guide["back_t"]) > 0.0       # (just nagged: it runs back to you first)
-	if to != Vector3.INF and not back and o.flat_dist(to) > 2.5 and Tutorial.leads(id):
-		lead_t -= 0.4
-		if lead_t <= 0.0:
-			lead_t = 0.8
-			var pd: Vector2 = m.bot_brain._path_dir(m, o, to)
-			guide["dir"] = pd if pd.length() > 0.1 else Vector2(to.x - o.pos.x, to.z - o.pos.z).normalized()
-		lead_dir = guide.get("dir", Vector2.ZERO)
 	# a hint in its own voice when the step starts, and again if you seem stuck
 	var t := float(guide["t"])
 	if not guide["said"] and not (m.tut and m.tut.card_up()):

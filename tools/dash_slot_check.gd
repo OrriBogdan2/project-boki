@@ -2,7 +2,8 @@ extends RefCounted
 ## --dash-slot-check: the dash slot (DashSlot), one component at home and in a match. Checks, with the real
 ## HUD and the real Home: a pip per charge from the kit and class data for all twelve archetypes (plus the
 ## air-dash diamond where the kit has one); the recharging pip's fill and the countdown follow the
-## recharge timer; a charge returning flashes the slot and ticks (own bar only, not on first sight);
+## recharge timer; a charge returning flashes the slot and plays one quiet ab_ready cue, ducked in a fight
+## (own bar only, not on first sight);
 ## the key cap comes from Settings.key_cap; an empty press shakes it red; the overhead plates no longer
 ## carry a dash bar; and the farm draws the very same slot from its own copy of the same numbers, with
 ## no separate farm-only dash display left. Never touches the save.
@@ -57,12 +58,13 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 		P.unlock_all()
 		P.dashes = P.max_dashes()
 		await _drawn(m.hud)
-		var want := int(Content.class_dodge(Arch.weight(a)).charges) + int(P.ak.extra_dashes() if P.ak else 0.0)
+		var want := int(P.max_dashes())
+		var discs := want if want > 1 else 0          # a one-charge dash draws no charge discs (the source)
 		var air := P.ak == null or P.ak.has_long_dash()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
 		var pips: Array = sh.get("pips", [])
-		ok(pips.size() == want and pips.all(func(f): return f == 1.0) and (float(sh.get("air", -1.0)) >= 0.0) == air,
-			"%s: %d pips, all full = %d charges, air dash %s" % [a, pips.size(), want, air])
+		ok(pips.size() == discs and pips.all(func(f): return f == 1.0) and (float(sh.get("air", -1.0)) >= 0.0) == air,
+			"%s: %d discs, all full, for %d charges, air dash %s" % [a, pips.size(), want, air])
 	P.reclass(Arch.weight("juggernaut"), "juggernaut", Arch.signature("juggernaut"))
 	P.unlock_all()
 	var regen: float = P.dash_regen()
@@ -100,12 +102,17 @@ func _flash_and_tick(m: Match, P: Hunter, hid: int) -> void:
 	P.dashes = 0.9
 	await _drawn(m.hud)
 	hud.ready_flash.erase("dash")
-	var tick0: int = int(Sfx.last_played.get("click", -1000))
+	var heard: Array = []
+	Sfx.cue_log = heard
 	P.dashes = 1.0
 	await _drawn(m.hud)
+	await _drawn(m.hud)
+	Sfx.cue_log = null
+	var cues := heard.filter(func(c): return c[0] == DashSlot.REFILL_SOUND).size()
 	var flash := float(hud.ready_flash.get("dash", 0.0))
 	ok(flash > 0.1, "a charge returning flashes the slot (%.2fs left)" % flash)
-	ok(int(Sfx.last_played.get("click", -1000)) > tick0 or Sfx.streams.is_empty(), "... and ticks softly")
+	ok(cues == 1, "... with one quiet ab_ready cue for the one charge, not one per redraw (%d)" % cues)
+	ok(DashSlot.REFILL_VOL <= -15.0 and DashSlot.REFILL_DUCK_DB < 0.0, "... under the dash, ducked in a fight")
 	hud.ready_flash.erase("dash")
 	DashSlot._was.erase(hid)
 	P.dashes = 2.0
@@ -158,22 +165,22 @@ func _home_slot() -> void:
 	home.set_process(false)
 	home.set_physics_process(false)
 	for case in [[float(cap), 0.0], [float(cap - 1) + 0.4, 0.0], [0.0, 3.0]]:
-		home.dash_charges = case[0]
-		home.ex_cd = case[1]
+		home.dash.charges = case[0]
+		home.dash.ex_cd = case[1]
 		await _frames()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
 		var pips: Array = sh.get("pips", [])
 		var fl := floorf(float(case[0]))
 		var left: float = 0.0 if int(fl) >= cap else (1.0 - (float(case[0]) - fl)) * regen
-		var right: bool = pips.size() == cap
+		var right: bool = pips.size() == (cap if cap > 1 else 0)
 		for i in pips.size():
 			right = right and absf(float(pips[i]) - clampf(float(case[0]) - float(i), 0.0, 1.0)) < 0.001
 		ok(right and (left == 0.0 or sh["text"] == HudSlot.cd_text(left)),
 			"farm at %.1f charges: pips %s, countdown '%s' (%.2fs)" % [float(case[0]), pips, sh.get("text", ""), left])
 		var cap_txt := Settings.key_cap("dash")
 		ok(HudSlot.shown_keys.get("dash", "") == cap_txt, "the farm's slot shows the dash key '%s'" % cap_txt)
-	home.dash_charges = 0.0
-	home.ex_cd = 0.0
+	home.dash.charges = 0.0
+	home.dash.ex_cd = 0.0
 	slot.slot_fx.erase("dash")
 	home.dash_t = 0.0
 	slot.deny()

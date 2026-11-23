@@ -4,8 +4,7 @@ extends RefCounted
 ## farm_build.json base_mode on. A stump stands by the Training post. Press interact at it and two
 ## rested Boki out on the base (your partner and the next one) push on it from opposite sides until
 ## one is shoved off balance. Push comes from Power, held off by the other's Guard; mood and trust
-## nudge it, a species theme that beats the other's gives a 10% edge (content/rules/base_shove.json
-## "beats"). You back your partner and press once on the Training post's timing bar for a burst of
+## nudge it. You back your partner and press once on the Training post's timing bar for a burst of
 ## push. The winner gains joy, trust and you a few gems; the loser sulks and remembers.
 ## Tuning: content/rules/base_shove.json. Run is the bout itself (no nodes), so --shove-check
 ## (tools/shove_check.gd) runs it headless.
@@ -18,6 +17,7 @@ const SLIDE := 0.5                            # m the pair slides along the push
 const TILT := 0.5                             # rad the stump leans at full balance
 const CREAK_AT := 0.5                         # balance (0..1) at which the stump first creaks
 const REACH := 1.6                            # m from the stump to start a bout
+const FIRST := "first_shove"                  # Save.d.tutorial: the practice bout ran (FirstRound)
 
 static func rules() -> Dictionary:
 	return Content.rules("base_shove")
@@ -25,19 +25,15 @@ static func rules() -> Dictionary:
 static func theme(rec: Dictionary) -> String:
 	return String(Data.KIN.get(String(rec.get("species", "")), {}).get("theme", ""))
 
-## Does a's species theme beat b's?
-static func has_edge(a: Dictionary, b: Dictionary) -> bool:
-	return rules()["beats"].get(theme(a), []).has(theme(b))
-
 ## What a Boki pushes with against another, before the wobble and your press.
-static func push(rec: Dictionary, foe: Dictionary) -> float:
-	var R := rules()
+static func push(rec: Dictionary) -> float:
+	var r_v := rules()
 	var power := float(rec.get("stats", {}).get("power", 0))
-	var mood: Array = R["mood"]
-	var p := float(R["push"]) * (1.0 + power * float(R["power_per_point"]))
+	var mood: Array = r_v["mood"]
+	var p := float(r_v["push"]) * (1.0 + power * float(r_v["power_per_point"]))
 	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
-	p *= lerpf(1.0, float(R["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
-	return p * (float(R["edge"]) if has_edge(rec, foe) else 1.0)
+	p *= lerpf(1.0, float(r_v["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
+	return p
 
 ## How firmly it holds against a push.
 static func hold(rec: Dictionary) -> float:
@@ -45,11 +41,11 @@ static func hold(rec: Dictionary) -> float:
 
 ## a's net drift over b's: above 0 the expected winner is a, below 0 it is b.
 static func expected(a: Dictionary, b: Dictionary) -> float:
-	return push(a, b) / hold(b) - push(b, a) / hold(a)
+	return push(a) / hold(b) - push(b) / hold(a)
 
 ## The bout itself: the stump's balance, stepped in time. balance runs -1 (b wins) to 1 (a wins).
 class Run:
-	var R: Dictionary
+	var r_x: Dictionary
 	var recs: Array                 # two records: a (index 0) and b (index 1)
 	var backed := 0                 # index in recs: the Boki you back
 	var rng: RandomNumberGenerator
@@ -61,25 +57,27 @@ class Run:
 	var boost := 1.0                # your press, on the backed Boki's push
 	var boost_t := 0.0              # s of boost left
 	var base: Array = []            # each side's push over the other's hold
+	var wobble: float               # +- fraction of each side's push roll: the rules', or the twist's
 
-	func _init(pair: Array, back: int, r: RandomNumberGenerator) -> void:
-		R = BaseShove.rules()
+	func _init(pair: Array, back: int, r: RandomNumberGenerator, tw := {}) -> void:
+		r_x = BaseShove.rules()
 		recs = pair
 		backed = back
 		rng = r
+		wobble = float(tw.get("wobble", r_x["wobble"]))
 		for i in 2:
-			base.append(BaseShove.push(recs[i], recs[1 - i]) / BaseShove.hold(recs[1 - i]))
+			base.append(BaseShove.push(recs[i]) / BaseShove.hold(recs[1 - i]))
 
 	func can_shove() -> bool:
 		return not shoved and not over()
 
 	func shove(grade: String) -> void:
 		shoved = true
-		boost = float(R["shove"][grade])
-		boost_t = float(R["shove_s"])
+		boost = float(r_x["shove"][grade])
+		boost_t = float(r_x["shove_s"])
 
 	func over() -> bool:
-		return absf(balance) >= 1.0 or t >= float(R["max_s"])
+		return absf(balance) >= 1.0 or t >= float(r_x["max_s"])
 
 	## 0 or 1: who stands, by the balance (a on a dead level).
 	func winner() -> int:
@@ -89,9 +87,9 @@ class Run:
 		t += dt
 		roll_t -= dt
 		if roll_t <= 0.0:
-			roll_t = float(R["wobble_s"])
+			roll_t = float(r_x["wobble_s"])
 			for i in 2:
-				roll[i] = rng.randf_range(1.0 - float(R["wobble"]), 1.0 + float(R["wobble"]))
+				roll[i] = rng.randf_range(1.0 - wobble, 1.0 + wobble)
 		var force: Array = []
 		for i in 2:
 			var f := float(base[i]) * float(roll[i])
@@ -99,22 +97,22 @@ class Run:
 				f *= boost
 			force.append(f)
 		boost_t = maxf(0.0, boost_t - dt)
-		balance = clampf(balance + (float(force[0]) - float(force[1])) * float(R["rate"]) * dt, -1.0, 1.0)
+		balance = clampf(balance + (float(force[0]) - float(force[1])) * float(r_x["rate"]) * dt, -1.0, 1.0)
 
 ## Pays out a finished bout: joy, trust, a memory each, energy and gems. Returns what the card shows.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var r_v := rules()
 	var win: Dictionary = run.recs[run.winner()]
 	var lose: Dictionary = run.recs[1 - run.winner()]
 	for rec in run.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]))
+		Care.change(rec, "energy", -float(r_v["energy"]))
+	Care.change(win, "joy", float(r_v["win_joy"]))
+	Care.change(lose, "joy", float(r_v["lose_joy"]))
 	MinigameHub.record("shove", String(win["name"]))     # best Boki on the title's picker
-	Save.remember(win, "shove", "shoved %s off the stump" % lose["name"], float(R["win_trust"]))
+	Save.remember(win, "shove", "shoved %s off the stump" % lose["name"], float(r_v["win_trust"]))
 	Save.remember(lose, "shove", "lost the Stump Shove to %s" % win["name"])
 	var backed_won: bool = run.recs[run.backed] == win
-	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	var gems := int(r_v["gems_win"]) if backed_won else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var prize := GardenPrizes.settle("shove", run.recs[run.backed], run.recs[1 - run.backed], backed_won)
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize}
@@ -128,6 +126,8 @@ var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
 var creaked := false           # the lean creak has played this bout
+var cue: GardenCues.ShoveCue = null   # the push meter over the stump while a bout runs
+var practice := false          # the first practice bout: ends at the first press, no gain, no cost
 
 func _init(home) -> void:
 	h = home
@@ -142,12 +142,12 @@ func place() -> void:
 	if is_instance_valid(stump):
 		stump.queue_free()
 	stump = null
-	var S := spot()
-	if S.is_empty() and h.YARD_AT.x < -100.0:
+	var s := spot()
+	if s.is_empty() and h.YARD_AT.x < -100.0:
 		return
 	stump = Node3D.new()
 	stump.name = "Stump"
-	stump.position = h.YARD_AT + STUMP_OFF if S.is_empty() else Vector3(S[0], 0.0, S[1])
+	stump.position = h.YARD_AT + STUMP_OFF if s.is_empty() else Vector3(s[0], 0.0, s[1])
 	h.add_child(stump)
 	var trunk := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
@@ -187,14 +187,23 @@ func use() -> void:
 	for k in pair:
 		k["busy"] = true
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
-	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new())
+	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new(), BaseRace.tweak("shove"))
 	run.rng.randomize()
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to shove" % Settings.key_cap("interact"))
 	bar.lbl.text = "Shove with %s" % run.recs[run.backed]["name"]
+	practice = FirstRound.due(FIRST, "shove")
+	if practice:
+		FirstRound.take(FIRST)
+		bar.lbl.text = FirstRound.line("when the marker is in the gold to shove")
 	_place_pair()
 	creaked = false
 	GardenSfx.countdown(h, stump.position)
+	cue = GardenCues.ShoveCue.new(h, stump.position + Vector3(0, STUMP_H, 0))
+
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
 
 ## A press: true when the bout took it.
 func input(event: InputEvent) -> bool:
@@ -211,6 +220,9 @@ func input(event: InputEvent) -> bool:
 		GardenSfx.crowd(r, stump.position)
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
+		if practice:
+			h._toast("That's a shove: gold pushes hardest. " + FirstRound.DONE)
+			_end(false)
 	return true
 
 func tick(d: float) -> void:
@@ -224,6 +236,7 @@ func tick(d: float) -> void:
 	if not run.shoved:
 		bar.step(d)
 	_place_pair()
+	cue.update(run.balance)
 	_hear_strain()
 	if run.over():
 		_end(true)
@@ -251,11 +264,15 @@ func _place_pair() -> void:
 	stump.rotation.z = -run.balance * TILT
 
 func _end(finished: bool) -> void:
+	finished = finished and not practice      # a practice bout never pays out
+	practice = false
 	var res := settle(run) if finished else {}
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
 	bar.close()
+	cue.clear()
+	cue = null
 	stump.rotation.z = 0.0
 	Sfx.loop_stop("shove_strain")
 	if finished:

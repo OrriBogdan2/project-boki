@@ -7,6 +7,8 @@ extends RefCounted
 ##      itself (through Match._gather_input) places one; a ping from the net keeps its kind
 ##   3. the drop: on the planning map a ping lands on the map point; dropping, it lands on the ground
 ##      under the cursor, and the bot teammate takes it
+##   4. loot pings are gold, ground pings white; a player keeps PingInput.CAP pings; an enemy ping follows
+##      its hunter and is gone after ENEMY_T; Alt+click pings without shooting; "sping" through JSON on a peer
 ## Never touches the save.
 
 var bad := 0
@@ -37,13 +39,13 @@ func _has_mouse(action: String, b: int) -> bool:
 # ------------------------------------------------------------------ 1. keys
 func _keys() -> void:
 	ok(_has_mouse("ping", MOUSE_BUTTON_MIDDLE), "middle mouse pings")
-	ok(not _has_mouse("throw", MOUSE_BUTTON_MIDDLE) and Settings.key_cap("throw") == "G", "G alone sends the Boki")
+	ok(not _has_mouse("throw", MOUSE_BUTTON_MIDDLE) and Settings.key_cap("throw") == "C", "C alone sends the Boki")
 	ok(Settings.ACTIONS.any(func(a): return a[0] == "ping"), "ping is in the rebindable list")
 
 func _migration() -> void:
 	var g := "key:%d" % KEY_G
 	var mmb := "mouse:%d" % MOUSE_BUTTON_MIDDLE
-	var steps := {"keys2_v": 1, "keys3_v": 1, "keys4_v": 1}
+	var steps := {"keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys7_v": 1}
 	var both := {"keys": {"throw": [g, mmb]}}
 	both.merge(steps)
 	KeyMigrate.run(both)
@@ -51,7 +53,7 @@ func _migration() -> void:
 	var only := {"keys": {"throw": [mmb]}}
 	only.merge(steps)
 	KeyMigrate.run(only)
-	ok(not only["keys"].has("throw"), "saved MMB alone on throw: throw goes back to G")
+	ok(not only["keys"].has("throw"), "saved MMB alone on throw: throw goes back to its default")
 	var taken := {"keys": {"emote": [mmb]}}
 	taken.merge(steps)
 	KeyMigrate.run(taken)
@@ -87,51 +89,106 @@ func _screen(at: Vector3) -> Vector2:
 
 func _world() -> void:
 	await _start({"no_drop": true})
-	var P := m.player
+	var p := m.player
 	var mate := _mate()
 	ok(mate != null, "a bot teammate")
-	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
 	for h in m.hunters:
-		if h.team != P.team:
+		if h.team != p.team:
 			h.ctrl = "idle"      # (the bot teammate stays a bot: only bots take squad pings as goals)
-	var spot := m.world.free_spot_near(P.pos + Vector3(5, 0, 0), [], 1.0, 0.5, 8.0)
+	var spot := m.world.free_spot_near(p.pos + Vector3(5, 0, 0), [], 1.0, 0.5, 8.0)
 	foe.teleport(spot)
 	foe.unseen = false
 	foe.visible = true
-	m.cam.snap(P.pos)
+	m.cam.snap(p.pos)
 	var kind := PingInput.place_world(m, _screen(foe.pos + Vector3(0, 0.9, 0)))
 	var pg := _my_ping()
 	ok(kind == "enemy" and pg.get("kind") == "enemy", "on an enemy: an enemy ping (%s)" % kind)
-	ok((pg["col"] as Color).is_equal_approx(PingInput.ENEMY_COL), "it is red")
-	ok(PingInput.label(pg, P) == "Enemy", "one word over it: %s" % PingInput.label(pg, P))
+	ok((pg["col"] as Color).is_equal_approx(SideColor.foe()), "it is red")
+	ok(PingInput.label(pg, p) == "Enemy", "one word over it: %s" % PingInput.label(pg, p))
 	ok(_goal_is(mate, pg), "the bot teammate takes it as its ping goal")
 	# loot: a deathbox, its owner moved away
 	var box := Life.drop_box(m, foe, "test")
-	foe.teleport(m.world.free_spot_near(P.pos + Vector3(-30, 0, -30), [], 1.0, 0.5, 20.0))
+	foe.teleport(m.world.free_spot_near(p.pos + Vector3(-30, 0, -30), [], 1.0, 0.5, 20.0))
 	kind = PingInput.place_world(m, _screen(box["pos"] + Vector3(0, 0.5, 0)))
 	pg = _my_ping()
-	ok(kind == "loot" and PingInput.label(pg, P) == "Loot", "on a deathbox: a loot ping (%s)" % kind)
+	ok(kind == "loot" and PingInput.label(pg, p) == "Loot", "on a deathbox: a loot ping (%s)" % kind)
 	ok(Vector2(pg["pos"].x, pg["pos"].z).distance_to(Vector2(box["pos"].x, box["pos"].z)) < 0.1, "on the box")
 	# bare ground, away from anything
-	_clear_near(P.pos + Vector3(0, 0, 6))
-	var ground: Vector3 = P.pos + Vector3(0, 0, 6)
+	_clear_near(p.pos + Vector3(0, 0, 6))
+	var ground: Vector3 = p.pos + Vector3(0, 0, 6)
 	ground.y = m.world.ground_at(ground.x, ground.z)
 	kind = PingInput.place_world(m, _screen(ground))
 	pg = _my_ping()
 	var off := Vector2(pg["pos"].x - ground.x, pg["pos"].z - ground.z).length()
 	ok(kind == "spot" and pg.get("kind") == "", "on the ground: a plain spot (%s)" % kind)
 	ok(off < 0.6, "under the cursor (%.2f m off)" % off)
-	ok(PingInput.label(pg, P) == "Your ping" and _goal_is(mate, pg), "your own spot, and the bot takes it")
+	ok(PingInput.label(pg, p) == "Your ping" and _goal_is(mate, pg), "your own spot, and the bot takes it")
 	# the key itself
-	m.unping(P, true)
+	m.unping(p, true)
 	Input.action_press("ping")
 	m._gather_input()
 	Input.action_release("ping")
 	ok(not _my_ping().is_empty(), "the ping key places a ping")
 	# a ping from the net keeps its kind
-	m.squad_ping(mate, P.pos, true, "loot")
+	m.squad_ping(mate, p.pos, true, "loot")
 	var theirs: Array = m.pings.filter(func(q): return q.get("by") == mate)
 	ok(theirs.size() == 1 and theirs[0]["kind"] == "loot", "a ping from the net keeps its kind")
+	_kinds_and_life(p, mate, foe, spot)
+
+## 4. colours by kind, the cap, the enemy ping following its hunter and expiring, Alt+click, the Net round trip.
+func _kinds_and_life(p: Hunter, _mate_v: Hunter, foe: Hunter, spot: Vector3) -> void:
+	m.pings.clear()
+	foe.teleport(spot)
+	m.squad_ping(p, p.pos, false, "loot")
+	ok((_my_ping()["col"] as Color).is_equal_approx(PingInput.LOOT_COL), "a loot ping is gold")
+	m.squad_ping(p, p.pos)
+	ok((_my_ping()["col"] as Color).is_equal_approx(PingInput.SPOT_COL), "a ground ping is white")
+	m.squad_ping(p, foe.pos, false, "enemy", foe)
+	var mine: Array = m.pings.filter(func(q): return q.get("by") == p)
+	ok(mine.size() == PingInput.CAP and mine[0]["kind"] == "" and mine[1]["kind"] == "enemy",
+		"a third ping drops the oldest: %d kept" % mine.size())
+	foe.teleport(m.world.free_spot_near(spot + Vector3(0, 0, 4), [], 1.0, 0.5, 8.0))
+	PingInput.tick(m, 1.0)
+	var pg := _my_ping()
+	ok(Vector2(pg["pos"].x - foe.pos.x, pg["pos"].z - foe.pos.z).length() < 0.01, "the enemy ping follows its hunter")
+	PingInput.tick(m, PingInput.ENEMY_T - 0.9)
+	ok(pg not in m.pings and m.pings.filter(func(q): return q.get("by") == p).size() == 1,
+		"it is gone after %.0f s, the ground ping stays" % PingInput.ENEMY_T)
+	PingInput.tick(m, Match.SQUAD_PING_T)
+	var left := m.pings.filter(func(q): return q.get("by") == p)
+	ok(left.is_empty(), "the ground ping is gone after %.0f s" % Match.SQUAD_PING_T)
+	# Alt+click pings and does not shoot
+	var alt := InputEventKey.new()
+	alt.keycode = KEY_ALT
+	alt.physical_keycode = KEY_ALT
+	alt.pressed = true
+	Input.parse_input_event(alt)
+	Input.flush_buffered_events()
+	Input.action_press("fire")
+	m._gather_input()
+	ok(not _my_ping().is_empty() and not p.inp["fire"], "Alt+click pings and does not shoot")
+	Input.action_release("fire")
+	alt.pressed = false
+	Input.parse_input_event(alt)
+	Input.flush_buffered_events()
+	# the Net round trip: what the pinger sends, through JSON, played on a peer
+	m.pings.clear()
+	var saved: Array = Net.out_events.duplicate()
+	Net.out_events.clear()
+	m.net_on = true
+	m.squad_ping(p, foe.pos, false, "enemy", foe)
+	var sent: Array = JSON.parse_string(JSON.stringify(Net.out_events))
+	m.net_on = false
+	Net.out_events = saved
+	m.pings.clear()
+	for e in sent:
+		m._net_ev(e, "peer")
+	var got: Array = m.pings.filter(func(q): return q.get("by") == p)
+	var one: Dictionary = got[0] if got.size() == 1 else {}
+	ok(one.get("kind") == "enemy" and one.get("foe") == foe, "Net: the peer gets the enemy ping on the same hunter")
+	ok(float(one.get("life", 0.0)) == PingInput.ENEMY_T, "Net: it lasts %.0f s there too" % PingInput.ENEMY_T)
+	m.pings.clear()
 
 ## Wpicks, boxes, chests and crates near `at` move far off, so a plain ground ping is not taken for loot.
 func _clear_near(at: Vector3) -> void:
@@ -147,7 +204,7 @@ func _goal_is(b: Hunter, pg: Dictionary) -> bool:
 # ------------------------------------------------------------------ 3. the drop
 func _drop() -> void:
 	await _start({})
-	var P := m.player
+	var p := m.player
 	var mate := _mate()
 	for i in 3:
 		m.step(Match.DT)
@@ -165,15 +222,15 @@ func _drop() -> void:
 	PingInput.place_map(m, fm.rect.position - Vector2(30, 30))
 	ok(_my_ping() == pg, "off the map: nothing moves")
 	m.skydrop.planning = false
-	m.ship_jump(P, true)
+	m.ship_jump(p, true)
 	for i in 30:
 		m.step(Match.DT)
-	ok(P.dropping, "dropping")
-	m.cam.snap(P.pos)
-	var sp := m.cam.unproject_position(P.pos)
+	ok(p.rocket != null, "riding the squad rocket down")
+	m.cam.snap(p.pos)
+	var sp := m.cam.unproject_position(p.pos)
 	var kind := PingInput.place_world(m, sp + Vector2(60, 40))
 	pg = _my_ping()
-	ok(kind == "spot" and not pg.is_empty(), "dropping: a ping under the cursor (%s)" % kind)
+	ok(kind == "spot" and not pg.is_empty(), "in the rocket: a ping under the cursor (%s)" % kind)
 	var gy := m.world.ground_at(pg["pos"].x, pg["pos"].z)
 	ok(m.world.is_void(pg["pos"].x, pg["pos"].z) or absf(pg["pos"].y - gy) < 0.01, "on the ground, not in the air")
 	ok(mate == null or _goal_is(mate, pg), "the bot teammate takes the landing spot")

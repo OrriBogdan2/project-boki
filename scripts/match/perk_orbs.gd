@@ -21,6 +21,10 @@ static func rules() -> Dictionary:
 		_rules = d if d is Dictionary else {}
 	return _rules
 
+## The most perks a hunter holds in a run (content/rules/perk_orbs.json "slots").
+static func slots() -> int:
+	return int(rules().get("slots", 5))
+
 ## The match's orb state, kept on the match itself: {list, fan (fan id -> {nid: true}), n, rng, icons, peers (count)}.
 static func st(m) -> Dictionary:
 	if not m.has_meta("perk_orbs"):
@@ -257,7 +261,6 @@ static func grant(h, perk: String) -> bool:
 		m.fx.ring(h.pos, 1.6, pd["col"], 0.35)
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), pd["col"], 16, 3.2, 0.5, -2.0)
 		if h == m.player:
-			m.fx.word(h.pos + Vector3(0, 2.4, 0), String(pd["name"]).to_upper(), pd["col"], true)
 			if m.hud:
 				m.hud.toast("%s  ·  %s" % [pd["name"], pd["desc"]], pd["col"])
 	return true

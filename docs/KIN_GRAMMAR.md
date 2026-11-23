@@ -43,7 +43,7 @@ The rules that keep it safe:
 content/abilities_v2/<id>.json   AbilitySpec   one ability
 content/merges_v2/<id>.json      MergeSpec     a bond ultimate (the merge)
 content/evolution_v2/<id>.json   EvolutionNode one evolution step (shared or kin-specific)
-content/kin_v2/<id>.json         KinSpec       one kin species
+content/kin/<id>.json         KinSpec       one kin species
 ```
 
 A file's name must match its `id`. Check everything with:
@@ -129,7 +129,7 @@ name a preset; the preset fills its numbers and the file can still override any 
 asked for an optional preset on the AbilityDef. A whole-ability preset is ambiguous when an ability
 has two damage effects, so presets live on parts.)
 
-## KinSpec (`content/kin_v2/<id>.json`)
+## KinSpec (`content/kin/<id>.json`)
 
 | field | required | meaning |
 |---|---|---|
@@ -226,7 +226,7 @@ exist and stay within bounds.
 
 - **Library.** `KinLib` loads `res://content` through the checker once. A file with errors is skipped
   (with a warning), and so is a kin whose ability or merge was skipped: the live game only runs
-  content that passed. `Data.KIN` is built from `kin_v2` (`KinLib.species`); `content/kin/<id>.json`
+  content that passed. `Data.KIN` is built from `kin` (`KinLib.species`); `content/kin_home/<id>.json`
   now holds only home and economy data (rare/boss egg, work elements, shiny palette).
 - **Stats.** Kin health, damage and speed are `base + points x per_point` after evolution's
   budget-neutral stat shifts (`KinLib.points`). Levels add `KinRules.LEVEL_GROWTH` (3%) per level to
@@ -298,7 +298,7 @@ growth, mutation and care (`Kin.init_kin`), and the Bond IV speeds every fill of
 |---|---|
 | shoulder | as before: rides your shoulder, its carry passives and shot riders work once it has settled |
 | perch | sits on your pack; same passive rules. Its throw is a **dive**: it rises off your pack and comes straight down on the spot (11 m reach, strikes only as it lands, a little wider). Lunowl's perch also gives +20% glide |
-| mount | a big kin (body mass over `follow.shoulder_max_mass`): on the Return order it guards at your side (`KinFollow.guard_tick`), `guard_side_m` from you on the flank it holds, the other flank when that one is blocked, never closer than `guard_min_m` and never below your feet. -15% damage taken and half knockback (Gravadillo). When you glide or cross a gap it curls up into a ball on your back and its passives pause until you land. Only its giant Fusion form is ridden (`carry.mount` speed and jump apply then) |
+| mount | a big kin (body mass over `follow.shoulder_max_mass`): on the Return order it guards at your side (`KinFollow.guard_tick`), `guard_side_m` from you on the flank it holds, the other flank when that one is blocked, never closer than `guard_min_m`, and on its own ground when you jump. -15% damage taken and half knockback (Gravadillo). When you glide or cross a gap it curls up into a ball on your back and its passives pause until you land. Only its giant Fusion form is ridden (`carry.mount` speed and jump apply then) |
 
 Carry passives and merge passives feed one place, `Hunter.owner_stat`, capped at the carry or
 merge maximum: move speed, jumps, air dodges, glide, dodge charges and regen, armor (wears slower),
@@ -323,7 +323,7 @@ you separate), or when the shell breaks; then a short cooldown before it can go 
 **With archetypes (docs/ARCHETYPES.md §5, option C, built):** R is the archetype's ultimate. When the
 bond meter is full the next R is *Bonded*: the ult casts with its own tell, its kin sockets run at
 the bonded budget (x1.3, `KinParts.MERGED_SCALE`), and 0.2 s later `KinMerge.cast` starts the merge
-as above (one T5 hitstop for the caster, a column tell and BONDED on the R slot while the bond is
+as above (one T5 hitstop for the caster, a column tell and the bonded rim on the R slot while the bond is
 full). The bond is spent and the ult goes on its own cooldown. While merged, every archetype socket
 the kin fills runs at x1.3 (`ArchKit.budget_k`) and the merge's shot riders, passives and pulses run
 as before; the `merged` patch on `active` now applies to the kin's own ability on C (the kin still
@@ -381,7 +381,7 @@ hand-coded mechanic from the reviewed list · **core** = stays in core code, not
 | rock_guard | Gravadillo, auto (owner) | wall at owner, offset 1.2, follow, 120 hp, 3 s (blocks shots, no effects) | yes |
 | prism_wall | Prismander, E | wall at aim, 4 m, 140 hp, 4.5 s → reflect (mirror) | yes |
 | refraction | Prismander, auto (owner) | burst r0 at owner → reflect on owner 1 s, shield 20 | yes |
-| puffcap_mines | Mycroll, E | trap x3 at aim; on_trigger: burst 1.8 → damage 8, root 1.4 (snare); zone 1.8, 3 s → damage 2 a tick, slow 0.8 | yes |
+| puffcap_mines | Mycroll, E | trap x3 at aim (8 s, max_live 3); on_trigger: burst 1.8 → damage 8, root 1.4 (snare); zone 1.8, 3 s → damage 2 a tick, slow 0.8 | yes |
 | thorn_patch | Mycroll, auto | zone 2.6, 4 s → damage 4 a tick, slow 0.8; cue foes_clumped | yes |
 | chain_spark | Echolop, E | beam (seek) 7 m → damage 14, stun 0.4 (jolt); chain 2 jumps; repeat (echo) | yes |
 | echolocate | Echolop, auto (owner) | burst r18 at owner → mark reveal 3 s, buff crit 1.5 s on owner (uses the big-area utility rule) | yes |
@@ -494,6 +494,7 @@ s seconds, m/s, hp, deg degrees, x a fraction or multiplier.
 |  |  | duration | 2 | 30 | 15 | s |
 |  |  | count | 1 | 3 | 1 |  |
 |  |  | spread | 0 | 3 | 1.5 | m |
+|  |  | max_live | 0 | 12 | 0 |  |
 | **wall** | a barrier that blocks enemy shots (yours pass); its effects apply to shots or foes that touch it · then: on_end | origin | caster/owner/aim |  | aim |  |
 |  |  | length | 1 | 8 | 4 | m |
 |  |  | hp | 20 | 300 | 120 | hp |

@@ -1,27 +1,47 @@
-// Sight, as in Supervive: everyone on your team lights up a small circle around them and a cone in
-// front of them (where they aim). Walls and high ground cast sight shadows. Everything outside what
-// your team can see is darkened and cooled, so the lit space reads at a glance. Set from Match.
+// Sight: everyone on your team lights up a small circle around them and a wide wedge in front of them
+// (where they aim) out to their range; a rival who gave herself away lights a soft circle of her own. Walls and high ground cast sight shadows. Everything outside
+// what your team can see is greyed out like fog (no colour at all, dimmer, a light veil), so the lit space
+// reads at a glance; the cone's sides are a soft fade, not a line. Set from Match; the numbers
+// are measured from the owner's reference in docs/specs/VISION_LOOK.md.
 global uniform float vis_on;
 global uniform vec3 vis_focus;
 global uniform vec2 vis_dir;
 global uniform vec2 vis_size;
 global uniform sampler2D vis_blocks : filter_linear;
 global uniform float vis_range;
+global uniform vec2 vis_scout;     // the held far look (ScoutLook): x extra share of range inside the cone, y its half-angle's cosine
 global uniform float vis_allies;
 global uniform vec4 vis_ally0;     // xy = position (x, z), zw = aim direction
 global uniform vec4 vis_ally1;
 global uniform vec4 vis_ally2;
 global uniform float vis_ally_range;   // how far teammates see (the raid condition shortens it)
-global uniform float vis_dark;         // how dark it is outside sight (0.7; darker at night)
+global uniform float vis_dark;         // how dark it is outside sight (RaidLook.VIS_DARK; darker at night)
+global uniform float vis_reveals;      // rivals who gave themselves away (RevealLight, up to three)
+global uniform vec3 vis_reveal0;       // xy = position (x, z), z = strength (fades out as the reveal ends)
+global uniform vec3 vis_reveal1;
+global uniform vec3 vis_reveal2;
 
-// How lit a point is by one viewer: 1 inside the circle or the unblocked cone, 0 outside.
-float vis_one(vec2 eye, vec2 dir, float range, vec2 wp, int max_steps) {
+const float VIS_COS = 0.5;             // cos of half the cone: 120 degrees wide (Match.VIEW_COS, the same rule)
+const float VIS_NEAR = 2.0;           // m: the circle all round you that is always lit (Match.NEAR_SENSE)
+const float VIS_REVEAL_R = 2.0;        // m: lit round a revealed rival, soft to +0.6 (~10% of the screen across, as measured)
+const float VIS_SOFT = 1.6;            // m: the lit cone fades out over this much inside its sides (a soft edge, no line)
+
+// Metres from the wedge's nearer side, along the ground: negative inside the wedge, positive outside.
+float vis_side(vec2 d, float dist, vec2 dir) {
+	float a = acos(clamp(dot(d / max(dist, 0.001), dir), -1.0, 1.0)) - acos(VIS_COS);
+	return dist * sin(clamp(a, -1.5707, 1.5707));
+}
+
+// How lit a point is by one viewer: 1 inside the circle or the unblocked cone, 0 outside. `scout` reaches
+// that share further inside the far look's narrow cone (0 for teammates).
+float vis_one(vec2 eye, vec2 dir, float range, float scout, vec2 wp, int max_steps) {
 	vec2 d = wp - eye;
 	float dist = length(d);
-	float near_v = 1.0 - smoothstep(3.2, 4.2, dist);
+	float near_v = 1.0 - smoothstep(VIS_NEAR, VIS_NEAR + 0.6, dist);
 	if (near_v >= 1.0) { return 1.0; }
 	float c = dot(d / max(dist, 0.001), dir);
-	float cone = smoothstep(0.55, 0.66, c) * (1.0 - smoothstep(range - 2.5, range + 0.5, dist));
+	float reach = range * (1.0 + scout * smoothstep(vis_scout.y - 0.006, vis_scout.y + 0.006, c));
+	float cone = (1.0 - smoothstep(-VIS_SOFT, 0.0, vis_side(d, dist, dir))) * (1.0 - smoothstep(reach - 2.5, reach + 0.5, dist));
 	if (cone > 0.001) {
 		// sight shadows: march toward the point through a smoothed map of what blocks sight
 		float steps = clamp(floor(dist / 0.4), 1.0, float(max_steps));
@@ -40,22 +60,63 @@ float vis_one(vec2 eye, vec2 dir, float range, vec2 wp, int max_steps) {
 	return max(near_v, cone);
 }
 
+// A revealed rival's own soft circle (RevealLight): no sight shadows, it is her light, not your view.
+float vis_reveal(vec3 r, vec2 wp) {
+	return r.z * (1.0 - smoothstep(VIS_REVEAL_R, VIS_REVEAL_R + 0.6, distance(wp, r.xy)));
+}
+
 float vis_fog(vec3 wp) {
 	if (vis_on < 0.5) { return 0.0; }
-	float lit = vis_one(vis_focus.xz, vis_dir, vis_range, wp.xz, 60);
-	if (lit < 0.999 && vis_allies > 0.5) { lit = max(lit, vis_one(vis_ally0.xy, vis_ally0.zw, vis_ally_range, wp.xz, 28)); }
-	if (lit < 0.999 && vis_allies > 1.5) { lit = max(lit, vis_one(vis_ally1.xy, vis_ally1.zw, vis_ally_range, wp.xz, 28)); }
-	if (lit < 0.999 && vis_allies > 2.5) { lit = max(lit, vis_one(vis_ally2.xy, vis_ally2.zw, vis_ally_range, wp.xz, 28)); }
+	float lit = vis_one(vis_focus.xz, vis_dir, vis_range, vis_scout.x, wp.xz, 60);
+	if (lit < 0.999 && vis_allies > 0.5) { lit = max(lit, vis_one(vis_ally0.xy, vis_ally0.zw, vis_ally_range, 0.0, wp.xz, 28)); }
+	if (lit < 0.999 && vis_allies > 1.5) { lit = max(lit, vis_one(vis_ally1.xy, vis_ally1.zw, vis_ally_range, 0.0, wp.xz, 28)); }
+	if (lit < 0.999 && vis_allies > 2.5) { lit = max(lit, vis_one(vis_ally2.xy, vis_ally2.zw, vis_ally_range, 0.0, wp.xz, 28)); }
+	if (lit < 0.999 && vis_reveals > 0.5) { lit = max(lit, vis_reveal(vis_reveal0, wp.xz)); }
+	if (lit < 0.999 && vis_reveals > 1.5) { lit = max(lit, vis_reveal(vis_reveal1, wp.xz)); }
+	if (lit < 0.999 && vis_reveals > 2.5) { lit = max(lit, vis_reveal(vis_reveal2, wp.xz)); }
 	return 1.0 - lit;
 }
 
-// Outside sight: darker, cooler and greyer, but still readable (the scene has to read on camera:
-// was 42% brightness and 60% grey, now 70% (vis_dark, RaidLook.VIS_DARK) and 40%; the old values turned everything outside the cone near black). Inside: a
-// touch brighter, so the lit space pops. What's hidden stays hidden either way: rival hunters and
-// Boki out of sight aren't drawn at all (Match._update_vision), this only shades the world.
+// Outside sight: neutral grey fog, in every weather (owner 11-20: no blue behind you). The ground is pulled to its own
+// luma and a light neutral veil lifts the darks, then it is dimmed by vis_dark x VIS_DIM; the terrain, walls and grass
+// still read. Greying the albedo alone is not enough: the lighting tints it again (the blue ambient, the cool violet
+// shadow side, the warm sun, then the x1.9 grade), so the lit shaders (terrain, grass, flora, wall, toon) also grey
+// their light where it is fogged: fragment() writes the fog share to vis_f, light() uses vis_grey(LIGHT_COLOR) and
+// vis_grey(tone), and vis_ao + vis_ambient swap the coloured ambient for the same amount of grey (AO takes the ambient
+// out, emission puts back its luma) and takes out the weather haze's colour (vis_dehaze). Inside: a touch brighter, so the lit space pops. What's hidden stays hidden
+// either way: rival hunters and Boki out of sight aren't drawn at all (Match._update_vision), this only shades the
+// world. Check: --vision-check (asserts the fog colour is grey); GPU numbers in docs/specs/VISION_LOOK.md.
+global uniform float vis_amb;          // the ambient light's luma x energy, linear (RaidLook.apply)
+global uniform vec4 vis_haze;          // the env fog: rgb its colour x energy (linear), a its density (RaidLook.apply)
+global uniform vec2 vis_haze_h;        // the env fog's height and height density
+varying float vis_f;                   // fog share from fragment() for light()
+const vec3 VIS_LUMA = vec3(0.3, 0.59, 0.11);
+const float VIS_VEIL = 0.14;           // share of a mid-grey fog laid over it
+const float VIS_DIM = 0.84;            // a touch darker than the 11-18 fog (its cyan cut also took ~10% of the light)
+vec3 vis_grey(vec3 c, float fog) { return mix(c, vec3(dot(c, VIS_LUMA)), fog); }
+// The ambient swap is Forward+ only (desktop): the compatibility renderer (web, mobile) multiplies all light by AO, which
+// turned the fog black, and its ambient is not graded, so it stays grey without the swap.
+// The weather's haze (the env fog) is laid over after this and is coloured (blue-grey, navy at night), so where it is
+// fogged the emission also takes out in advance what the haze would add beyond its own grey: haze a over colour x
+// gives mix(x, h, a); x + a / (1 - a) x (grey(h) - h) gives mix(x, h, a) - h + grey(h). Same formula as the engine's
+// exponential fog (distance and height); `v` is VERTEX, `iv` INV_VIEW_MATRIX.
+vec3 vis_dehaze(float fog, vec3 v, mat4 iv) {
+	float a = 1.0 - exp(min(0.0, -length(v) * vis_haze.a));
+	if (abs(vis_haze_h.y) >= 0.0001) {
+		a = max(a, 1.0 - exp(min(0.0, ((iv * vec4(v, 1.0)).y - vis_haze_h.x) * vis_haze_h.y)));
+	}
+	a = min(a, 0.8);
+	return (vec3(dot(vis_haze.rgb, VIS_LUMA)) - vis_haze.rgb) * a / (1.0 - a) * fog;
+}
+#if CURRENT_RENDERER == RENDERER_COMPATIBILITY
+float vis_ao(float fog) { return 1.0; }
+vec3 vis_ambient(vec3 a, float fog, vec3 v, mat4 iv) { return vis_dehaze(fog, v, iv); }
+#else
+float vis_ao(float fog) { return 1.0 - fog; }
+vec3 vis_ambient(vec3 a, float fog, vec3 v, mat4 iv) { return a * fog * vis_amb + vis_dehaze(fog, v, iv); }
+#endif
 vec3 vis_apply(vec3 c, float fog) {
 	if (vis_on < 0.5) { return c; }
-	vec3 grey = vec3(dot(c, vec3(0.3, 0.59, 0.11))) * vec3(0.7, 0.76, 0.98);
-	vec3 dark = mix(c, grey, 0.4) * vis_dark;
+	vec3 dark = mix(vec3(dot(c, VIS_LUMA)), vec3(0.5), VIS_VEIL) * vis_dark * VIS_DIM;
 	return mix(c * 1.05, dark, fog);
 }

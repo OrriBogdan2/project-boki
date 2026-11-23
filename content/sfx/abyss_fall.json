@@ -1,0 +1,10 @@
+{
+ "group": "abyss_fall",
+ "name": "Abyss fall",
+ "script": "tools/gen_sfx_abyss_fall.py",
+ "sounds": {
+  "abyss_wind": "loop", "abyss_warn": "cast", "abyss_lift": "cast", "abyss_cry": "grunt"
+ },
+ "signature": [],
+ "loops": ["abyss_wind"]
+}

@@ -4,9 +4,10 @@ extends RefCounted
 ##      expected push wins 60 to 80% of them (a game, not a dice roll and not a certainty)
 ##   2. the timed press: the backed Boki's win share with a great press at the start against none,
 ##      over many bouts of evenly matched Boki, moves by more than 0 and under 15 points
-##   3. the type edge: a theme in "beats" gives 10% push, never both ways between two themes
+##   3. types are labels: Boki of different themes with the same stats are exactly level
 ##   4. a settled bout: the winner's joy and trust go up, the loser's joy down, both remember it, gems
-##   5. on the base: no stump with base_mode off; with it on, a bout runs to a result card
+##   5. on the base: no stump with base_mode off; with it on, a bout runs to a result card;
+##      the push meter appears over the stump, fills toward the stronger Boki and is gone at the end
 ## Never touches the real save.
 
 const BOUTS := 50
@@ -31,7 +32,7 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	_stronger()
 	_press()
-	_edge()
+	_types()
 	_settle()
 	await _on_base()
 	print("SHOVE DONE, failures: %d" % bad)
@@ -99,23 +100,15 @@ func _press() -> void:
 	ok(moved > 0.0 and moved < PRESS_MAX,
 			what % [without * 100 / PRESS_BOUTS, with_press * 100 / PRESS_BOUTS, moved * 100.0, PRESS_MAX * 100.0])
 
-func _edge() -> void:
-	var beats: Dictionary = BaseShove.rules()["beats"]
-	var mutual := 0
-	for t in beats:
-		for u in beats[t]:
-			if beats.get(u, []).has(t):
-				mutual += 1
-	ok(mutual == 0, "no theme beats one that beats it")
+func _types() -> void:
 	var by_theme := {}
 	for id in Data.KIN:
 		by_theme[String(Data.KIN[id].get("theme", ""))] = id
 	var a := _kin(by_theme["ember"], "A", 10, 10, 50.0, 50.0)
 	var b := _kin(by_theme["frost"], "B", 10, 10, 50.0, 50.0)
-	ok(BaseShove.has_edge(a, b) and not BaseShove.has_edge(b, a), "ember beats frost and not the other way")
 	var plain := _kin(by_theme["stone"], "P", 10, 10, 50.0, 50.0)
-	var ratio := BaseShove.push(a, b) / BaseShove.push(a, plain)
-	ok(absf(ratio - 1.1) < 0.001, "the edge is 10%% of push (x%.3f)" % ratio)
+	ok(absf(BaseShove.push(a) - BaseShove.push(plain)) < 0.0001 and absf(BaseShove.expected(a, b)) < 0.0001,
+			"species themes change no push: equal Boki are level (%+.4f)" % BaseShove.expected(a, b))
 
 func _settle() -> void:
 	Save.d = Save.fresh()
@@ -142,6 +135,8 @@ func _on_base() -> void:
 			k["starter"] = true
 			d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
+	for f in ["first_shove", "first_seek", "first_volley"]:      # past the practice rounds (FirstRound)
+		d["tutorial"][f] = true
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
@@ -165,11 +160,19 @@ func _on_base() -> void:
 			k.erase("indoors")
 		sh.use()
 		ok(sh.run != null and sh.pair.size() == 2, "on: a bout starts with two Boki")
+		ok(sh.cue != null and sh.cue.power == 0.0, "cue: a level push meter appears over the stump")
 		var t := 0.0
+		var peak := 0.0
+		var leans_to_stronger := true
 		while sh.run != null and t < float(BaseShove.rules()["max_s"]) + 5.0:
 			sh.tick(0.1)
 			t += 0.1
+			if sh.cue != null:
+				peak = maxf(peak, sh.cue.power)
+				leans_to_stronger = leans_to_stronger and sh.cue.side == (0 if sh.run.balance >= 0.0 else 1)
 		ok(sh.run == null and is_instance_valid(sh.card), "on: the bout ends with a result card (%.1f s)" % t)
+		ok(peak > 0.0 and leans_to_stronger, "cue: the meter filled (%.2f) toward the stronger Boki" % peak)
+		ok(sh.cue == null, "cue: the meter is gone when the bout ends")
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

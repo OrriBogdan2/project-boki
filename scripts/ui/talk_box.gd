@@ -6,7 +6,7 @@ extends CanvasLayer
 ## what he talks about. show_extra() puts something to choose from in the box's place (the Mask offer); while
 ## it is up the lines don't advance.
 ##
-##   var box := TalkBox.open(home, "Hob Brackenridge", HobModel.portrait(112.0))
+##   var box := TalkBox.open(home, "Hob Brackenridge", HobModel.face(112.0))
 ##   box.say([{"text": "Hello!"}], func(): box.close())
 
 signal line_shown(i: int, line: Dictionary)
@@ -18,6 +18,7 @@ const CHARS_PER_S := 55.0      # how fast a line types out
 
 var lines: Array = []
 var i := -1
+var frozen := false            # the speaker's side holds the lines (its camera is moving)
 var then := Callable()
 var panel: PanelContainer
 var text: Label
@@ -81,7 +82,7 @@ func say(new_lines: Array, after := Callable()) -> void:
 
 ## The next line (or the rest of this one, while it is still typing).
 func advance() -> void:
-	if extra.get_child_count() > 0:
+	if frozen or extra.get_child_count() > 0:
 		return
 	if _type_tw and _type_tw.is_running():
 		_type_tw.kill()

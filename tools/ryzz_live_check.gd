@@ -44,6 +44,7 @@ func _run(m: Match, P: Hunter, frames: int, seen: Dictionary) -> float:
 	return top
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	A = load("res://tools/archetype_check.gd").new()
 	A.main = main
@@ -65,7 +66,8 @@ func run(main: Node) -> void:
 		_run(m, P, 54, seen)
 	ok(seen.has("lmb_l") and seen.has("lmb_r"), "the finger bolts play lmb_l and lmb_r")
 	# item 139: nothing but the model is drawn (the old wrist coil and forearm rings read as a gun); the bolts leave the
-	# fingertip of the hand that fires, left then right
+	# fingertip of the hand that fires, left then right (0.25 m: her body size went 1.098 -> 1.235 with the
+	# hunter-heights pass, so the same hand sits 12-22 % further out; previously 0.2 m)
 	var strays: Array = []
 	for mi in P.model.find_children("*", "MeshInstance3D", true, false):
 		var n := String(P.model.get_path_to(mi))
@@ -99,7 +101,7 @@ func run(main: Node) -> void:
 		else:
 			worst = 99.0
 	ok(sides == ["L", "R", "L", "R"] or sides == ["R", "L", "R", "L"], "the bolts alternate hands: %s" % str(sides))
-	ok(worst < 0.2, "each bolt leaves its firing fingertip (worst %.3f m)" % worst)
+	ok(worst < 0.25, "each bolt leaves its firing fingertip (worst %.3f m)" % worst)
 	var calm := _flare(P)
 	P.grounded = true          # (in the air the rod goes on the press, with no hold)
 	P.gliding = false
@@ -137,5 +139,31 @@ func run(main: Node) -> void:
 		dead_seen = dead_seen or _clips(P).cur == "death"
 		was_visible = was_visible or P.visible
 	ok(dead_seen and was_visible, "a knock-out stays on screen and plays the death clip")
+	_no_gum(main, K)
 	print("RYZZ_LIVE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## The look-only variant ryzz_nogum (--warden-variant=ryzz_nogum): the shipped model, its gum bone shrunk away in
+## idle and in the gum clip, and no gum fidget.
+func _no_gum(main: Node, kit: MageKit) -> void:
+	WardenGlb._variants = {"ryzz": "ryzz_nogum"}
+	var model := Models.hunter(
+		Arch.weight("mage"), Data.TEAM_COLORS[0], Arch.signature("mage"), "", PlayerLook.neutral(), "mage"
+	)
+	main.add_child(model)
+	var sync: Node = model.get_node("Warden/Sync")
+	sync.set_process(false)
+	var sk := WardenGlb.skeleton(model.get_node("Warden"))
+	var bi := WardenSkeleton.find(sk, "gum")
+	var top := 0.0
+	model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true})
+	for f in 40:
+		(sync.get("clips") as WardenClips).force = {"clip": "gum", "t": f * DT} if f >= 20 else {}
+		sync.call("_process", DT)
+		top = maxf(top, sk.get_bone_global_pose(bi).basis.get_scale().x if bi >= 0 else 1.0)
+	var shipped := WardenGlb.art("mage") == "ryzz"
+	ok(shipped and bi >= 0 and top < 0.01, "ryzz_nogum: the shipped model, gum hidden (%.3f)" % top)
+	ok(not kit.gum.blow(), "ryzz_nogum: no gum fidget")
+	model.free()
+	WardenGlb._variants = null

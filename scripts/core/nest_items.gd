@@ -83,7 +83,7 @@ static func lay(egg: Dictionary, a: Dictionary, b: Dictionary) -> void:
 	var p := plan(a, b)
 	egg["inherit"] = p["inherit"]
 	if p["species"] != "":
-		egg["sp"] = p["species"]
+		egg["sp"] = Data.egg_species(String(p["species"]))
 	var used := {"gifts": threads(), "species": int(p["species"] != ""), "habit": int(not p["habit_from"].is_empty())}
 	if used["habit"] > 0:
 		egg["habit"] = p["habit_from"]["uid"]

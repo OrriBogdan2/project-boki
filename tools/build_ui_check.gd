@@ -158,8 +158,51 @@ func _farm() -> void:
 		"the Storage tab lists it with its count")
 	ok(hb.undo_last() and _decos("bench").size() == 1, "Undo brings it back")
 	hb.toggle()
+	_upgrade_shortcut(hb)
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## Hovering a placed building shows its level and an Upgrade key; the key opens the Upgrades tab on its row.
+func _upgrade_shortcut(hb: HomeBuild) -> void:
+	var placed: Array = []
+	for id in ["lumber_camp", "quarry", "storage_chest", "training_post", "job_board", "cook_pot", "market_stall"]:
+		hb.toggle()
+		hb.take(id)
+		if hb.held.is_empty():
+			hb._drop_held()
+			hb.toggle()
+			continue
+		_put(hb, _spot(hb, hb.held, HomeLayout.size_of(id, 0)))
+		placed.append(id)
+	hb.toggle()
+	ok(placed.size() >= 4, "upgradable buildings stand on the farm (%s)" % ", ".join(placed))
+	var last: String = placed[placed.size() - 1]
+	var piece: Dictionary = _decos(last)[0]
+	var tag := "d:%d" % int(piece["u"])
+	var centre := HomeLayout.deco_center(piece)
+	var name_of := String(HomeLayout.CATALOG[last]["name"])
+	hb.debug_m = Vector2(centre.x, centre.z)
+	hb.tick(0.016)
+	var card := _card_text(hb)
+	ok(hb.keys.tag.visible and card.has(name_of) and card.has("Level 1") and card.has("Upgrade"),
+		"hovering a placed building shows its name, level and an Upgrade button (%s)" % ", ".join(card))
+	var key := Settings.key_cap("interact")
+	ok(card.has(key), "the button's key text is the interact key ('%s')" % key)
+	hb.bar.left_pad = 700.0      # a narrow bar: two tiles a page, so the last row is not on the first
+	ok(FarmBuildUi.show_upgrade(hb, tag) and hb.cat == "Upgrades", "the shortcut opens the Upgrades tab")
+	var row := hb._tab_items().find_custom(func(e: Dictionary) -> bool: return int(e.get("uid", 0)) == int(piece["u"]))
+	var page_of: int = row / hb.bar.tiles_per_page()
+	ok(row >= 0 and hb.bar.focus_uid == int(piece["u"]) and hb.bar.page > 0 and hb.bar.page == page_of,
+		"on the page of the %s's row (row %d, page %d)" % [name_of, row, hb.bar.page])
+	piece["t"] = 3
+	hb.tick(0.016)
+	card = _card_text(hb)
+	ok(card.has("Max") and not card.has("Upgrade") and not FarmBuildUi.show_upgrade(hb, tag),
+		"a building with no upgrade left says Max and the key does nothing")
+	hb.toggle()
+
+func _card_text(hb: HomeBuild) -> Array:
+	return hb.keys.tag.find_children("*", "Label", true, false).map(func(l: Label) -> String: return l.text)
 
 # ------------------------------------------------------------------ the house
 func _house_save(old: bool) -> void:

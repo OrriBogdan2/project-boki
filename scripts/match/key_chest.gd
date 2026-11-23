@@ -51,13 +51,18 @@ static func show_all(m: Match, on: bool) -> void:
 		if n is Node3D and is_instance_valid(n):
 			(n as Node3D).visible = on
 
+## True when `h` opens locked chest `c` with a key: one press of interact, no hold (a free chest is held open).
+static func keyed(h: Hunter, c: Dictionary) -> bool:
+	return not bool(c.get("free", false)) and h.chest_keys > 0
+
+
 ## What the interact prompt says and does beside chest `c` for hunter `h`.
 static func prompt(h: Hunter, c: Dictionary) -> Dictionary:
 	var k := Settings.key_cap("interact")
-	if bool(c.get("free", false)) or h.chest_keys > 0:
-		return {
-				"kind": "chest", "chest": c,
-				"label": "Hold %s to open%s" % [k, "" if bool(c.get("free", false)) else "  ·  uses 1 key"]}
+	if keyed(h, c):
+		return {"kind": "chest", "chest": c, "label": "%s to open  ·  uses 1 key" % k}
+	if bool(c.get("free", false)):
+		return {"kind": "chest", "chest": c, "label": "Hold %s to open" % k}
 	return {
 			"kind": "locked", "chest": c, "label": "Locked  ·  needs a key  ·  monsters with a key glint carry them",
 			"col": Color("ffb0a0")}

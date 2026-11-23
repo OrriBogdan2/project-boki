@@ -25,8 +25,22 @@ uniform float glow_k = 1.3;
 uniform float glow_px = 1.4;    // (pixels of a 720 px tall view)
 uniform float glow_near = 7.0;
 uniform float glow_far = 14.0;
+// A shield's shell (ShieldLook): 0 to 1 fades the line from shell_from (the model's own ink colour) into color and
+// thins it to SHELL_THIN of its width; above 1 (the pulse before the shield expires) it also brightens and swells.
+// 1 for every other ink: color at full width.
+uniform float shell = 1.0;
+uniform vec4 shell_from : source_color = vec4(0.08, 0.065, 0.12, 1.0);
+const float SHELL_THIN = 0.4;
+const float SHELL_SWELL = 0.6;
 const float INK_ROOM = 0.02;
+// A painted Hunter's line (WardenGlb): none where it would be narrower than min_px pixels of the 3D as actually drawn
+// (ink_px_h: the window's height x the render scale, halved with no anti-aliasing: Settings). Thinner than that the
+// shell only lands on a pixel here and there and reads as dark specks and a shredded edge, as on Very Low (the 3D at
+// half size, nothing smoothing it).
+uniform float min_px = 0.0;
+global uniform float ink_px_h;
 varying float far_d;
+varying float line_px;
 void vertex() {
 	float d = -(MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).z;
 	// one pixel of a 720 px tall view at d, in metres (perspective; an orthographic camera's is constant), and the
@@ -42,6 +56,9 @@ void vertex() {
 		if (ink_mask) { w = min(w, COLOR.a * INK_ROOM); }
 		w *= 1.0 - far_thin * smoothstep(8.0, 18.0, d);
 	}
+	w *= mix(SHELL_THIN, 1.0, min(shell, 1.0)) * (1.0 + SHELL_SWELL * max(shell - 1.0, 0.0));
+	line_px = w * length(MODEL_MATRIX[0].xyz) * abs(PROJECTION_MATRIX[1][1]) * max(ink_px_h, 1.0)
+		/ (PROJECTION_MATRIX[3][3] > 0.5 ? 2.0 : 2.0 * d);
 	VERTEX += NORMAL * w;
 }
 void fragment() {
@@ -50,6 +67,7 @@ void fragment() {
 		ALBEDO = min(texture(glow_tex, UV).rgb * glow_col.rgb * glow_k, vec3(1.0));
 	} else {
 		if (far_cut > 0.0 && smoothstep(8.0, 18.0, far_d) >= far_cut) { discard; }
-		ALBEDO = color.rgb;
+		if (line_px < min_px) { discard; }
+		ALBEDO = mix(mix(shell_from.rgb, color.rgb, min(shell, 1.0)), vec3(1.0), max(shell - 1.0, 0.0));
 	}
 }

@@ -22,15 +22,17 @@ static func stock() -> Array:
 	return st["stock"]
 
 ## Keeps the stock's one Wayseed right: none for a zone that has opened since, one for the next
-## locked zone (the same one all week) unless this week's is already bought.
+## locked zone whose Wayseed you do not hold (the same one all week, Glasswater first) unless this week's is
+## already bought.
 static func _hold_seed(st: Dictionary) -> void:
 	var stock: Array = st["stock"]
 	stock.assign(stock.filter(func(e): return not _stale_seed(String(e["key"]))))
-	var locked: Array = GardenZones.ids().filter(func(z): return not GardenZones.is_open(z))
+	var locked: Array = GardenZones.ids().filter(
+			func(z): return not GardenZones.is_open(z) and not GardenZones.keys_for(z)["seed"])
 	if locked.is_empty() or not FarmUnlocks.base_mode() or int(st.get("seed_week", -1)) == _week() \
 			or stock.any(func(e): return is_seed(String(e["key"]))):
 		return
-	stock.append({"id": MarketSave.next_id(), "key": "seed:" + String(locked[_week() % locked.size()]),
+	stock.append({"id": MarketSave.next_id(), "key": "seed:" + String(locked[0]),
 		"price": int(_rules()["wayseed_price"])})
 
 static func _stale_seed(key: String) -> bool:
@@ -52,9 +54,8 @@ static func _roll(day: String) -> Array:
 		var key := String(pool.pop_at(rng.randi_range(0, pool.size() - 1)))
 		var k := rng.randf_range(float(_rules()["price_lo"]), float(_rules()["price_hi"]))
 		out.append({"id": MarketSave.next_id(), "key": key, "price": int(ceil(Goods.ref_of(key) * k))})
-	var rares: Array = Data.KIN.keys().filter(func(sp): return Data.is_rare(String(sp)))
-	if not rares.is_empty() and rng.randf() < float(_rules()["egg_chance"]):
-		var species := String(rares[rng.randi_range(0, rares.size() - 1)])
+	if rng.randf() < float(_rules()["egg_chance"]):
+		var species := Data.egg_species("", rng)
 		out.append({"id": MarketSave.next_id(), "key": "egg:" + species, "price": int(_rules()["egg_price"])})
 	return out
 

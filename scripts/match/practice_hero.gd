@@ -13,7 +13,7 @@ static func toggle(p: Practice) -> void:
 static func open(p: Practice) -> void:
 	var body := _show(p, "Relics", 860, func(): close(p), "Done", "heroes")
 	UI.subtitle(body, "Who you play here and on expeditions. Your Boki stays. "
-			+ "Hover a Hunter for its kit, K for the full kit card.")
+			+ "Hover a Hunter for its kit, %s for the full kit card." % Settings.key_cap("kit_card"))
 	var grid := HeroGrid.build(body, func(ak: String): pick(p, ak), func(ak: String): kit(p, ak),
 			func(ak: String): p.hover_arch = ak, false)
 	p.picker.set_meta("grid", grid)
@@ -33,7 +33,7 @@ static func close(p: Practice) -> void:
 	p.picker_page = ""
 	p.hover_arch = ""
 	p.m.paused = false
-	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	CursorMode.aim()
 
 ## Plays `ak`: saved as your expedition pick, and your hunter here turns into it.
 static func pick(p: Practice, ak: String) -> void:
@@ -58,7 +58,7 @@ static func _swap(m: Match, P: Hunter, ak: String) -> void:
 	m.fx.ring(P.pos, 1.8, Arch.color(ak), 0.4)
 	m.fx.burst(P.pos + Vector3(0, 1.0, 0), Arch.color(ak), 18, 3.5, 0.5)
 	m.sfx("unlock", null, -6.0, 1.1)
-	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(ak), String(Arch.def(ak).get("card", {}).get("loop", ""))], Arch.color(ak))
+	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(ak), AbilityText.loop(ak)], Arch.color(ak))
 
 ## (Re)builds the picker layer with one titled panel and returns its body to fill.
 static func _show(p: Practice, title: String, width: float, on_close: Callable, close_txt: String, page: String) -> VBoxContainer:
@@ -70,7 +70,7 @@ static func _show(p: Practice, title: String, width: float, on_close: Callable, 
 	p.picker.layer = 40
 	p.m.add_child(p.picker)
 	p.m.paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	p.picker.add_child(root)

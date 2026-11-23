@@ -133,6 +133,8 @@ func tick(d: float) -> void:
 		var was := String(told.get(rec["uid"], ""))
 		if st != was:
 			told[rec["uid"]] = st
+			if st == "" and Care.STARVE_INFO.has(was) and not h._kin_entry(rec).is_empty():
+				KinAiling.perk_up(h, h._kin_entry(rec))
 			if st != "":
 				var k: Dictionary = h._kin_entry(rec)
 				if not k.is_empty():
@@ -149,8 +151,7 @@ func _kin_died(rec: Dictionary, g: Dictionary) -> void:
 		h.kins.erase(k)
 	build_graves()
 	Save.save_game()
-	_notice("%s has died" % g["name"], ["%s starved. It had nothing to eat for days." % g["name"],
-		"Its grave is in the graveyard, east of the farm.", "Keep a feeder filled so it never happens again." + (" A Soul Shrine can bring a Boki back." if not Save.has_building("shrine") else "")])
+	_notice("%s has died" % g["name"], HomeNotices.death(g["name"], false, Save.has_building("shrine")))
 
 # ------------------------------------------------------------------ what you can walk up to
 ## The nearest feeder, grave or the graveyard gate if it's closer than bd, as an interact entry.
@@ -164,6 +165,12 @@ func find(p2: Vector2, bd: float) -> Dictionary:
 		var fp := _fpos(f)
 		var dd := p2.distance_to(Vector2(fp.x, fp.z))
 		if dd < 1.7 and dd < bd: bd = dd; best = {"kind": "feeder", "f": f}
+	for e in FeedBowl.bowls(h):
+		var bp := FeedBowl.at(e)
+		var bowl_d := p2.distance_to(Vector2(bp.x, bp.z))
+		if bowl_d < FeedBowl.PICK_R and bowl_d < bd:
+			bd = bowl_d
+			best = {"kind": "bowl", "e": e}
 	for g in gnodes:
 		var gp: Vector3 = (g as Node3D).position
 		var dd := p2.distance_to(Vector2(gp.x, gp.z + 0.6))
@@ -181,6 +188,7 @@ func label(it: Dictionary) -> String:
 		"feeder":
 			var f: Dictionary = it["f"]
 			return "%s  ·  %d/%d meals" % [Econ.fdef(f)["name"], Econ.fill(f), int(Econ.fdef(f)["cap"])]
+		"bowl": return FeedBowl.label(it["e"])
 		"grave": return "Visit %s's grave" % it["g"]["name"]
 		"graveyard": return "The graveyard  ·  %d resting" % Econ.graves().size()
 	return ""
@@ -189,6 +197,7 @@ func use(it: Dictionary) -> void:
 	match String(it["kind"]):
 		"place": place()
 		"feeder": open_feeder(it["f"])
+		"bowl": FeedBowl.drop(h, it["e"])
 		"grave": open_grave(it["g"])
 		"graveyard": open_graveyard()
 
@@ -264,6 +273,7 @@ func feed_step(k: Dictionary, d: float) -> bool:
 			k["goal"] = sp
 			if Vector2(sp.x - pos.x, sp.z - pos.z).length() < 0.4:
 				e["phase"] = "eat"; e["t"] = 2.6
+				HomeVoice.say(k["rec"], "boki_eat", pos)
 				k["hold_t"] = 0.3
 				(k["node"] as Node3D).rotation.y = atan2(-(c.x - pos.x), -(c.z - pos.z))
 		"eat":
@@ -291,7 +301,7 @@ func feed_step(k: Dictionary, d: float) -> bool:
 					if res.get("new", false): h._toast("%s loves %s!" % [rec["name"], Care.food_name(String(res["food"]))])
 				else:
 					h._emote(k, "♪")
-				Sfx.play("pickup", c, -16.0, 0.1, 1.4)
+				Sfx.play("boki_eat", c, -8.0, 0.1, Unique.voice(rec))
 				# eats until it's had enough, if there's still food
 				if Care.need(rec, "food") < Econ.HUNGRY_AT and Econ.fill(f) > 0:
 					k["eat"] = {"fid": String(f["id"]), "seat": int(e["seat"]), "phase": "go", "t": 0.0}
@@ -448,7 +458,7 @@ func open_feeder(f: Dictionary) -> void:
 		var parts: Array = []
 		for key in counts: parts.append("%s ×%d" % [Care.food_name(key), counts[key]])
 		var il := UI.label("In it: " + ", ".join(parts), 14, UI.INK)
-		il.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(il)
 		v.add_child(il)
 	var hungry: Array = KinBox.farm().filter(func(r): return Care.need(r, "food") < Econ.HUNGRY_AT).map(func(r): return String(r["name"]))
 	v.add_child(UI.label(("Hungry now: " + ", ".join(hungry)) if not hungry.is_empty() else "Nobody's hungry right now.", 13, Color("ffb070") if not hungry.is_empty() else UI.GOOD))
@@ -468,9 +478,8 @@ func open_feeder(f: Dictionary) -> void:
 	fill_b.disabled = Econ.room_in(f) <= 0
 	fill_b.tooltip_text = "Fills it with kibble and everyday crops from your pantry (never treats or rare crops)"
 	UI.footer(v).add_child(fill_b)
-	UI.with_key(fill_b, "Enter")
 	(v.get_meta("shell") as Control).set_meta("primary", fill_b)
-	if fd["auto"]:
+	if Econ.self_fills(f):
 		var on: bool = f.get("auto", true)
 		var ab := CheckButton.new()
 		ab.text = "Refills itself from your pantry"
@@ -485,7 +494,7 @@ func open_feeder(f: Dictionary) -> void:
 		v.add_child(row0)
 	v.add_child(UI.section("Put in by hand"))
 	var any := false
-	for key in Care.FOODS.keys() + Data.CROPS.keys():
+	for key in Care.foods_v.keys() + Data.CROPS.keys():
 		var have := Econ.pantry(key)
 		if have <= 0: continue
 		any = true
@@ -555,13 +564,13 @@ func show_away() -> void:
 			if String(told.get(e["rec"]["uid"], "")) == String(e["stage"]):
 				continue      # already told you about this stage (it's in the Boki's card and the log)
 			var info: Array = Care.STARVE_INFO[String(e["stage"])]
-			lines.append("%s: %s. %s" % [e["rec"]["name"], String(info[0]).to_lower(), info[1]])
+			lines.append("%s: %s." % [e["rec"]["name"], String(info[0]).to_lower()])
+			for part in String(info[1]).trim_suffix(".").split(". "):
+				lines.append("  %s." % part)
 			told[e["rec"]["uid"]] = String(e["stage"])
 	away = []
 	for g in died:
-		_notice("%s has died" % g["name"], ["%s starved while you were away. It had nothing to eat for days." % g["name"],
-			"Its grave is in the graveyard, east of the farm. You can visit it there.",
-			"A filled feeder keeps your Boki fed while you're gone." + (" A Soul Shrine can bring a Boki back, a little changed." if not Save.has_building("shrine") else "")])
+		_notice("%s has died" % g["name"], HomeNotices.death(g["name"], true, Save.has_building("shrine")))
 	if not lines.is_empty():
 		lines.append("Fill a feeder (by the cooking pot), or feed them from their card.")
 		_notice("Your Boki are starving", lines)
@@ -570,8 +579,8 @@ func _notice(title: String, lines: Array) -> void:
 	h.arrivals.add(func():
 		var v: VBoxContainer = h._new_panel(title, 560)
 		for l in lines:
-			var lb := UI.label(String(l), 15, UI.INK)
-			lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			var lb := UI.label(HomeNotices.bullet(String(l)), 15, UI.INK)
+			UI.wrapped(lb)
 			v.add_child(lb))
 
 ## Why your partner can't come out (starving too long), or "".
@@ -624,7 +633,7 @@ func open_grave(g: Dictionary) -> void:
 		v.add_child(UI.label("Not much. It hadn't been with you long.", 14, UI.MUTED))
 	for i in range(mem.size() - 1, -1, -1):
 		var ml := UI.label("·  It %s." % String(mem[i].get("text", "")), 14, UI.INK)
-		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(ml)
 		v.add_child(ml)
 	v.add_child(UI.section("Its soul"))
 	_soul_row(v, g)
@@ -633,7 +642,7 @@ func open_grave(g: Dictionary) -> void:
 func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 	if not Save.has_building("shrine"):
 		var l := UI.label("A Soul Shrine could keep its soul, and one day bring it back. Build one beside the graveyard (it needs a Soul Ember from a vault or a Watcher).", 13, UI.MUTED)
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(l)
 		v.add_child(l)
 		return
 	var r := UI.hbox(10)
@@ -660,7 +669,7 @@ func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 			r.add_child(UI.label(why2, 12, Color("ffb0a0")))
 	v.add_child(r)
 	var note := UI.label("A Boki brought back is still itself, but not quite: its personality shifts, it loses a couple of levels and some trust, it keeps only a few memories, its tastes change, and it has a ghostly shimmer and a new title.", 12, UI.MUTED)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(note)
 	v.add_child(note)
 
 func _revive(g: Dictionary) -> void:
@@ -674,14 +683,13 @@ func _revive(g: Dictionary) -> void:
 	h._refresh_top()
 	var at: Vector3 = h.lots["shrine"]["at"] if h.lots.has("shrine") else h.ppos
 	h.fx.burst(at + Vector3(0, 1.4, 0), Color("bff8ec"), 40, 4.0, 1.2, -1.0)
-	h.fx.ring(at, 3.0, Color("9ff0e0"), 0.6)
 	Sfx.play("unlock")
 	var ke: Dictionary = h._kin_entry(rec)
 	if not ke.is_empty():
 		ke["pos"] = at + Vector3(0, 0, 2.0); (ke["node"] as Node3D).position = ke["pos"]; ke["hold_t"] = 3.0
 		h._emote(ke, "!", true)
-	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. It knows you, but it isn't quite the same." % rec["name"],
-		"Level %d now, and a %s nature. It'll have new favourite foods to find out." % [int(rec["level"]), Care.nature(rec).to_lower()]])
+	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. %s knows you, but isn't quite the same." % [rec["name"], KinSpeak.about(rec, "{He}")],
+		KinSpeak.about(rec, "Level %d now, and a %s nature. {He}'ll have new favourite foods to find out.") % [int(rec["level"]), Care.nature(rec).to_lower()]])
 
 # ------------------------------------------------------------------ the Soul Shrine
 func open_shrine() -> void:
@@ -732,43 +740,13 @@ func open_shrine() -> void:
 		cv.add_child(r)
 		v.add_child(card)
 
-## The empty lot: what the shrine needs before you can build it.
-func open_shrine_lot() -> void:
-	var bd: Dictionary = Data.BUILDINGS["shrine"]
-	var v: VBoxContainer = h._new_panel("Build the Soul Shrine", 520)
-	UI.subtitle(v, String(bd["desc"]))
-	var ex := int(Save.d.get("extracts", 0))
-	v.add_child(UI.section("What it needs"))
-	var need := func(ok: bool, txt: String) -> void:
-		var r := UI.hbox(10)
-		r.add_child(UI.IconDot.new("check" if ok else "lock", UI.GOOD if ok else UI.FAINT, 16.0))
-		r.add_child(UI.label(txt, UI.T_BODY, UI.INK if ok else UI.MUTED))
-		v.add_child(r)
-	need.call(ex >= 3, "3 successful expeditions  (%d)" % ex)
-	need.call(Econ.embers() > 0, "A Soul Ember to light it  (%d)" % Econ.embers())
-	need.call(int(Save.d["gems"]) >= int(bd["cost"]), "%d gems  (you have %d)" % [int(bd["cost"]), int(Save.d["gems"])])
-	var why := Econ.shrine_why()
-	var btn := UI.primary("Build it", func():
-		if Econ.shrine_why() != "" or Save.has_building("shrine"): return
-		Econ.use_ember()
-		Save.d["gems"] = int(Save.d["gems"]) - int(bd["cost"])
-		Save.d["buildings"].append("shrine")
-		Save.save_game()
-		h._close_panel()
-		h._construct("shrine"), 200)
-	btn.disabled = why != ""
-	btn.tooltip_text = why
-	v.add_child(btn)
-	if why != "":
-		v.add_child(UI.label(why, 13, Color("ffb0a0")))
-
 # ------------------------------------------------------------------ the Armory
 ## The armory's tabs: gear by slot (Gear.SLOTS indexes), gloves covering both glove slots, then the
 ## utility stash and treasure. (Armor is found in the match, not stored: Equal.)
 const ARM_TABS := {"Gloves": [0, 1], "Boots": [3]}
 
 func open_armory() -> void:
-	var v: VBoxContainer = h._new_panel("Armory", 960, true)
+	var v: VBoxContainer = h._new_panel("Gear Shed", 960, true)
 	var items: Array = Econ.armory().duplicate()
 	items.sort_custom(func(a, b): return Loot.value(a) > Loot.value(b))
 	var counts := {"Treasure": _treasure_n(), "Utility": _utility_n(), "Backpacks": HomeBackpacks.count()}
@@ -837,7 +815,7 @@ func _upgrade_btn(which: String, what: String, now: int, caps: Array) -> Control
 		h._refresh_top()
 		open_armory(), 0, "plus")
 	b.disabled = int(Save.d["gems"]) < int(c[0]) or int(Save.d.get("scrap", 0)) < int(c[1])
-	b.tooltip_text = "More room in the armory: %d gems and %d scrap" % [int(c[0]), int(c[1])]
+	b.tooltip_text = "More room in the gear shed: %d gems and %d scrap" % [int(c[0]), int(c[1])]
 	return b
 
 func _loadout_line() -> String:
@@ -845,7 +823,7 @@ func _loadout_line() -> String:
 	for sl in Econ.LOADOUT_SLOTS:
 		var g := Econ.loadout(sl)
 		if not g.is_empty(): bits.append(Loot.name_of(g))
-	return ", ".join(bits) if not bits.is_empty() else "nothing from the armory"
+	return ", ".join(bits) if not bits.is_empty() else "nothing from the gear shed"
 
 func _in_loadout(it: Dictionary) -> String:
 	for s in Econ.LOADOUT_SLOTS:
@@ -886,11 +864,11 @@ func _detail(it: Dictionary) -> Control:
 	var rn := String(Data.RARITY[Loot.rar_of(it)]["name"])
 	col.add_child(UI.label("%s %s  ·  worth %d" % [rn, Gear.slot_name(String(it.get("id", ""))).to_lower(), Loot.value(it)], 14, UI.MUTED))
 	var gl := UI.label(Loot.sub_of(it), 14, UI.INK)
-	gl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(gl)
 	col.add_child(gl)
 	var gdesc := String(Gear.ALL.get(String(it["id"]), {}).get("desc", ""))
 	if gdesc != "":
-		var gd2 := UI.label(gdesc, 13, UI.MUTED); gd2.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var gd2 := UI.label(gdesc, 13, UI.MUTED); UI.wrapped(gd2)
 		col.add_child(gd2)
 	var slot := Econ.gear_slot(it)
 	var on := _in_loadout(it) != ""
@@ -959,7 +937,7 @@ func _treasure(v: VBoxContainer) -> void:
 	var vd: Dictionary = Save.d.get("valuables", {})
 	if vd.is_empty():
 		var el := UI.label("No treasure yet. Coins, pearls, idols and crown shards from chests, Watchers and rival hunters' boxes end up here to sell.", 15, UI.MUTED)
-		el.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(el)
 		v.add_child(el)
 		return
 	var total := 0
@@ -988,13 +966,13 @@ func _treasure(v: VBoxContainer) -> void:
 			Sfx.play("unlock"); h._toast("+%d gems" % g); Save.save_game(); h._refresh_top(); open_armory(), 380))
 
 # ------------------------------------------------------------------ the expedition panel
-## "From your armory" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
+## "From your gear shed" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
 func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 	HomeBelt.rows(parent, reopen, h.exp_tier)
 	HomeBackpacks.row(parent, reopen, h.exp_tier)
 	if not Save.has_building("armory") and Econ.armory().is_empty():
 		return
-	parent.add_child(UI.section("From your armory  (gloves and boots)"))
+	parent.add_child(UI.section("From your gear shed  (gloves and boots)"))
 	var held := 0
 	for slot in Econ.LOADOUT_SLOTS:
 		var si := int(String(slot).substr(4))
@@ -1011,7 +989,7 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 		var row := UI.hbox(8); card.add_child(row)
 		var nm := UI.label("%s:  %s" % [Gear.WORN_NAMES[si], Loot.name_of(cur) if not cur.is_empty() else "none"], 14, Loot.col_of(cur) if not cur.is_empty() else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nm.tooltip_text = Loot.sub_of(cur) if not cur.is_empty() else ""
 		nm.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(nm)
