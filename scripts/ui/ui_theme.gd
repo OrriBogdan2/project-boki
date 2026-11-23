@@ -128,15 +128,12 @@ static func ticket(fill: Color, glow: float, down := false) -> UiTorn:
 
 ## Text-only buttons (small or rare actions) and the round icon button (close, back).
 static func _quiet_buttons(t: Theme) -> void:
-	var none := StyleBoxEmpty.new()
-	none.content_margin_left = 12
-	none.content_margin_right = 12
-	none.content_margin_top = 8
-	none.content_margin_bottom = 8
-	var gh := UiTorn.make(Color(1, 1, 1, 0.05), 2.0, 0.5)
-	var gp := UiTorn.make(Color(0, 0, 0, 0.2), 2.0, 0.7)
-	_states(t, "Ghost", none, gh.padded(12, 8), gp.padded(12, 8), none)
-	_font_cols(t, "Ghost", UI.MUTED, Color.WHITE, UI.FAINT)
+	# Ghost rests as a dark glass pill with a thin light rim, so it reads on a bright scene, a dark one
+	# or no panel at all, yet stays plainer than Primary (no accent fill, no neon at rest)
+	var rim := Color(1, 1, 1, 0.32)
+	_states(t, "Ghost", _ghost_face(0.6, rim), _ghost_face(0.78, Color(1, 1, 1, 0.55), 0.7),
+		_ghost_face(0.85, Color(1, 1, 1, 0.4), 0.0, true), _ghost_face(0.3, Color(1, 1, 1, 0.14)))
+	_font_cols(t, "Ghost", UI.INK.darkened(0.1), Color.WHITE, UI.FAINT)
 	t.set_stylebox("focus", "Ghost", ring())
 	var round_none := StyleBoxEmpty.new()
 	round_none.content_margin_left = 8
@@ -147,6 +144,16 @@ static func _quiet_buttons(t: Theme) -> void:
 		UiFrame.sunk(Color(0, 0, 0, 0.25), UI.R_PILL).padded(8, 8), round_none)
 	_font_cols(t, "IconBtn", UI.MUTED, Color.WHITE, UI.FAINT)
 	t.set_stylebox("focus", "IconBtn", ring(UI.R_PILL))
+
+## One state of the quiet button: a translucent near-black torn box with a thin light rim.
+static func _ghost_face(alpha: float, rim: Color, glow := 0.0, down := false) -> UiTorn:
+	var f := UiTorn.make(Color(0.05, 0.03, 0.1, alpha), 2.0, glow)
+	f.edge = rim
+	f.padded(12, 8)
+	if down:
+		f.content_margin_top = 9.0
+		f.content_margin_bottom = 7.0
+	return f
 
 ## Segmented tabs (segments in a recessed track, the picked one raised with an accent line) and
 ## selectable tiles.
