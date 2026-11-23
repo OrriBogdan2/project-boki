@@ -324,14 +324,20 @@ func _food(bb) -> void:
 				fed[nm] = t
 	for nm in hungry:
 		var secs: float = float(fed.get(nm, -1.0))
+		if secs < 0.0 and String(_rec(nm).get("likes", {}).get("hates", "")) == "emberberry":
+			note("%s hates Emberberry, the only snack in the bowl and the pantry: it stays hungry (by design, open)" % nm)
+			continue
 		_took("%s walks to the bowl and eats" % nm, secs, FOOD_S)
 		ok(secs >= 0.0 and secs <= STALL_S * 0.5, "%s reaches the bowl within %.0f s, asleep or not" % [nm, STALL_S * 0.5])
 		if secs < 0.0 or secs > STALL_S * 0.5:
 			var k: Dictionary = bb._kin_entry(_rec(nm))
 			note(
-				"%s: states per 10 s [%s ] (* night), now %s, life_eat %s, food %.0f, %.1f m from the bowl, busy %s, indoors %s"
+				"%s: keys %s t %.1f, likes %s, states per 10 s [%s ] (* night), now %s, life_eat %s, food %.0f, %.1f m from the bowl, busy %s, indoors %s"
 				% [
 					nm,
+					str(k.keys().filter(func(x): return x not in ["rec", "node", "pos", "goal", "emote", "life", "pers", "say"])),
+					float(k.get("t", 0.0)),
+					str(_rec(nm).get("likes", {})),
 					trace.get(nm, ""),
 					bb.life.machine(k).state_name(),
 					str(k.get("life_eat", {})),
