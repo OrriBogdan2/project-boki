@@ -1,4 +1,4 @@
-# 0173: a fed Boki always goes on the expedition
+# 0177: a fed Boki always goes on the expedition
 
 - **Status:** accepted
 - **Date:** 2026-11-23
