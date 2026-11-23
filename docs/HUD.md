@@ -292,8 +292,8 @@ rival can steal a boss. The counterplay needs a readable line, drawn by `scripts
 - **Mark.** A gold diamond with a burst glyph and the word STEAL, right of the world bar (under the top bar's left
   end), only while a Hunter of your squad still in the match is within `KillXp.SHARE_R` (30 m) of the boss: close
   enough to be paid for the kill, so the squad that can steal (or must guard) sees it.
-- Read off the health every machine already sees: nothing synced, no stat or damage change. Camp Chiefs join when
-  the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
+- Read off the health every machine already sees: nothing synced. The reel on the first drop under the line
+  is `StealReel` (docs/CAMPS.md). Camp Chiefs join when the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
 
 ## Two-step abilities (RecastCue)
 
@@ -458,6 +458,14 @@ starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `
   `--tutorial-hud-check` fires a toast and a world prompt under a fresh strip and asserts one prompt shows.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
   never again after a dive; one prompt under a fresh strip), `--tutorial-strip-shots`.
+
+## Care line (CareLine)
+
+Standing next to a Boki on the farm puts the prompt over it (`CareLine.LINE_M` above its feet, kept on screen)
+as one line of the four care actions: pet (or what its want needs: tuck in, bath, brush), feed, play and pick up
+(held interact key; lead or let go when it applies), each with its live key. The one a tap of the interact key
+would do is lit and the rest greyed (`GREY_A`); Feed says "(no food)" when it is hungry and you have none. Talk
+and details stay on the hover card. Visiting another farm keeps the old bottom prompt. Check: `--care-prompt-check`.
 
 ## Hold prompts (HoldPrompt, HoldTeach)
 
