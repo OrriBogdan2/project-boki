@@ -54,8 +54,10 @@ func run(main: Node, dir: String) -> void:
 		at = vp.get_camera_3d().unproject_position(home.player.global_position + Vector3(0, 0.9, 0))
 		var img := vp.get_texture().get_image()
 		img.convert(Image.FORMAT_RGBA8)
-		var r := Rect2i(Vector2i(at) - CROP / 2, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
-		strip.blit_rect(img, r, Vector2i(taken * CROP.x, 0) + (r.position - (Vector2i(at) - CROP / 2)))
+		var r := Rect2i(Vector2i(at) - Vector2i(Vector2(CROP) / 2.0), CROP).intersection(Rect2i(Vector2i.ZERO,
+				img.get_size()))
+		strip.blit_rect(img, r, Vector2i(taken * CROP.x, 0)
+				+ (r.position - (Vector2i(at) - Vector2i(Vector2(CROP) / 2.0))))
 		print("GLINTFISH strip %d %s %s" % [taken, home.verbs.act, home.verbs.stance])
 		taken += 1
 	home.verbs.hold("")
