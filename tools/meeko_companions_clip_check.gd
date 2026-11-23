@@ -1,7 +1,8 @@
 extends RefCounted
 ## --meeko-companions-clip-check: Meeko's sun and raincloud against the POSED body (the live Meshy model, CPU-skinned
 ## from the clip that plays), in every state her native clips cover: idle, walk, run, dash (a 14 m/s burst: the ring snaps
-## and trails), crouch, jump, attack, the ult move (mm_call plays the attack clip) and a kit shot. Every 3rd frame, every
+## and trails), crouch, jump, attack, the ult move (mm_call plays the attack clip), a kit shot, a
+## heavy hit flinch from four sides and the dead pose. Every 3rd frame, every
 ## companion vertex against the body's vertices (every 5th), each bucketed by the part of her its main bone belongs to
 ## (head, arms, hands, spine, hips, legs; Meshy's unnamed Bone_nnn chains are the wings, ears and tail), and the sun
 ## against the cloud. Passes when each pair stays >= the data's clear_min (warden_anim/pip.json companions.clear_min)
@@ -24,6 +25,9 @@ const STATES := {
 	"jump": [{"grounded": false, "vel": Vector3(3.0, 0, 0)}, 0.0],
 	"attack": [{"kmove": "mm_shot_r", "swing": true}, 0.0],
 	"ult": [{"kmove": "mm_call", "swing": true}, 0.0],
+	# a heavy hit every 0.5 s from the front, right, back and left in turn (WardenFlinch leans her away from it)
+	"hit": [{"hit": 2.0}, 0.0],
+	"death": [{"dead": true}, 0.0],
 }
 const KEYS := ["hand", "forearm", "arm", "shoulder", "head", "neck", "spine", "hips", "leg", "foot", "toe"]
 
@@ -80,6 +84,12 @@ func run(main: Node) -> void:
 					swing += 1
 				s["swing_n"] = swing
 				s.erase("swing")
+			if s.has("hit"):
+				var beat := int(f * DT / 0.5)
+				s["hit_t"] = fmod(f * DT, 0.5)
+				s["hit_k"] = s["hit"]
+				s["hit_dir"] = Vector2.from_angle(beat * PI * 0.5)
+				s.erase("hit")
 			m.set_meta(WardenClips.STATE, s)
 			m.global_position += vel * DT
 			sync.call("_process", DT)

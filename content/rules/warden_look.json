@@ -639,6 +639,19 @@
 				"far_alpha": 1.9,
 				"far_edge": 0.6
 			},
+			"cloth-cloud": {
+				"light_neutral_warm": 1.0,
+				"light_neutral": 0.6,
+				"shadow_tint": [0.84, 0.86, 1.0],
+				"shade": 0.92,
+				"far_lift": 0.3,
+				"top_light": 0.2,
+				"glow": 0.18
+			},
+			"glow-sun": {
+				"glow": 0.75,
+				"albedo": [1.0, 0.8, 0.2, 1.0]
+			},
 			"skin-face": {
 				"fres": 0.03,
 				"top_light": 0.1,
