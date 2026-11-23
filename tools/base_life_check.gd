@@ -7,14 +7,16 @@ extends RefCounted
 ## breathe and yawn (BokiNapSfx, _nap_sounds). Then nap spots: a tired Boki walks to a free one, its friend lies
 ## down beside it, a third takes another. Then raising leans (_axes_part). Never touches the real save.
 
-const SIM_SECS := 600.0      # 10 simulated minutes
-const DT := 0.25             # s per farm step (the machines tick at 10 Hz inside it)
-const NIGHT_AT := 480.0      # s: the last two minutes are night
-const ARRIVE_AT := 20.0      # s: the fourth Boki comes out
-const LONGEST := 90.0        # s: no state but Nap may last longer
-const LET_GO_MIN_FRAMES := 5   # frames the breath check waits at least, however slow they run
-const ISLAND_SEED := 11      # the farm-start island: a random one moved the nap spots and what the walk runs into
-const LET_GO_MS := 1500      # ms of real time a woken Boki's breathing loop may take to stop
+const SIM_SECS := 600.0  # 10 simulated minutes
+const DT := 0.25  # s per farm step (the machines tick at 10 Hz inside it)
+const SEEN_BY := 300.0  # s (5 game minutes): a watcher has seen every social act (BaseLife.acts) by now
+const SEEN_KINDS := ["play", "nap", "greet", "squabble"]
+const NIGHT_AT := 480.0  # s: the last two minutes are night
+const ARRIVE_AT := 20.0  # s: the fourth Boki comes out
+const LONGEST := 90.0  # s: no state but Nap may last longer
+const LET_GO_MIN_FRAMES := 5  # frames the breath check waits at least, however slow they run
+const ISLAND_SEED := 11  # the farm-start island: a random one moved the nap spots and what the walk runs into
+const LET_GO_MS := 1500  # ms of real time a woken Boki's breathing loop may take to stop
 
 var bad := 0
 var main: Node
@@ -31,13 +33,14 @@ func _new_save() -> Array:
 	var recs: Array = []
 	var hot := 0.95  # temper of the two that squabble
 	var calm := 0.1
-	var specs := [["cindle", "Ash", hot], ["basaltoad", "Crag", hot],
-		["burrlet", "Moss", calm], ["zapple", "Pip", calm]]
-	seed(7)      # the same four Boki every run: traits, IVs and DNA from these dice, not from the run before
+	var specs := [
+		["cindle", "Ash", hot], ["basaltoad", "Crag", hot], ["burrlet", "Moss", calm], ["zapple", "Pip", calm]
+	]
+	seed(7)  # the same four Boki every run: traits, IVs and DNA from these dice, not from the run before
 	for i in specs.size():
 		var spec: Array = specs[i]
 		var rec := Save.new_kin(spec[0], spec[1], 700 + i)
-		rec["uid"] = "bl%d" % i       # new_id is clock-based; bonds are keyed by uid
+		rec["uid"] = "bl%d" % i  # new_id is clock-based; bonds are keyed by uid
 		rec["traits"]["temper"] = spec[2]
 		recs.append(rec)
 	recs[0]["starter"] = true
@@ -88,8 +91,10 @@ func _rival_beat(home) -> void:
 	var fa: Fsm = a["life"]
 	var fb: Fsm = b["life"]
 	var facing := is_same(a["life_at"], b) and is_same(b["life_at"], a)
-	ok(fa.is_in(BaseLife.S.REACT) and fb.is_in(BaseLife.S.REACT) and facing,
-		"rivals passing within %.1f m both turn to each other (React)" % float(r["pass_m"]))
+	ok(
+		fa.is_in(BaseLife.S.REACT) and fb.is_in(BaseLife.S.REACT) and facing,
+		"rivals passing within %.1f m both turn to each other (React)" % float(r["pass_m"])
+	)
 	ok(float(a["huff_t"]) > 0.0 and float(b["huff_t"]) > 0.0, "both play the growl clip")
 	var after := (
 		int(GardenSfx.heard.get("garden_sulk_small", 0))
@@ -101,8 +106,10 @@ func _rival_beat(home) -> void:
 	var gap := BaseLife._dist(a, b)
 	for i in int(float(r["beat_s"]) / 0.1) + 2:
 		home.life.step(0.1)
-	ok(fa.is_in(BaseLife.S.ROAM) and fb.is_in(BaseLife.S.ROAM) and not a.has("life_rival"),
-		"the beat ends in %.1f s" % float(r["beat_s"]))
+	ok(
+		fa.is_in(BaseLife.S.ROAM) and fb.is_in(BaseLife.S.ROAM) and not a.has("life_rival"),
+		"the beat ends in %.1f s" % float(r["beat_s"])
+	)
 	ok(Vector2(a["goal"].x - b["pos"].x, a["goal"].z - b["pos"].z).length() > gap, "it walks on, away from the other")
 	home.life.step(0.2)
 	ok(not fa.is_in(BaseLife.S.REACT), "no repeat inside the cooldown (%.0f s)" % float(r["cooldown_s"]))
@@ -110,6 +117,7 @@ func _rival_beat(home) -> void:
 		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
 	home.life._tag(a, b)
 	ok(not fa.is_in(BaseLife.S.PLAY_WITH) and not fb.is_in(BaseLife.S.PLAY_WITH), "rivals never play tag together")
+
 
 ## Free play sounds (PlaySfx): a tag starts, a catch, a cheer when it runs out, a huff for a squabble; each once, quiet,
 ## and a zone plays at most MAX_CUES of them inside WINDOW_S however many Boki play.
@@ -119,20 +127,24 @@ func _play_sounds(home) -> void:
 	var b: Dictionary = home.kins[1]
 	life.sfx = PlaySfx.new()
 	for k in [a, b]:
-		k["rec"]["traits"]["temper"] = 0.0      # no squabble by chance
+		k["rec"]["traits"]["temper"] = 0.0  # no squabble by chance
 		k.erase("life_at")
 		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
 	BaseLife.add_bond(a["rec"], b["rec"], 0.5 - BaseLife.bond(a["rec"], b["rec"]))
 	b["pos"] = a["pos"] + Vector3(0.5, 0, 0)
 	var gos := _cues("garden_go")
 	life._tag(a, b)
-	ok(_cues("garden_go") == gos + 1 and (a["life"] as Fsm).is_in(BaseLife.S.PLAY_WITH),
-			"a tag starting plays one go cue")
+	ok(
+		_cues("garden_go") == gos + 1 and (a["life"] as Fsm).is_in(BaseLife.S.PLAY_WITH),
+		"a tag starting plays one go cue"
+	)
 	life.sfx.tick(PlaySfx.WINDOW_S)
 	var scuffs := _cues("tumble_push")
 	life._tag_tick(a, a["life"])
-	ok(_cues("tumble_push") == scuffs + 1 and b.get("life_it", false),
-			"a catch plays one scuff and passes the chase on")
+	ok(
+		_cues("tumble_push") == scuffs + 1 and b.get("life_it", false),
+		"a catch plays one scuff and passes the chase on"
+	)
 	life.sfx.tick(PlaySfx.WINDOW_S)
 	a["life_for"] = 0.0
 	var cheers := _cues("garden_cheer_good")
@@ -149,8 +161,10 @@ func _play_sounds(home) -> void:
 	var played := _cues("garden_go")
 	for i in 10:
 		life.sfx.tag_start(a["rec"], a["pos"])
-	ok(_cues("garden_go") - played == PlaySfx.MAX_CUES and life.sfx.dropped - was == 10 - PlaySfx.MAX_CUES,
-		"ten Boki starting at once play %d cues in a zone window, the rest held back" % PlaySfx.MAX_CUES)
+	ok(
+		_cues("garden_go") - played == PlaySfx.MAX_CUES and life.sfx.dropped - was == 10 - PlaySfx.MAX_CUES,
+		"ten Boki starting at once play %d cues in a zone window, the rest held back" % PlaySfx.MAX_CUES
+	)
 	var here := GardenZones.here
 	GardenZones.here = "other_zone"
 	life.sfx.tag_start(a["rec"], a["pos"])
@@ -160,8 +174,10 @@ func _play_sounds(home) -> void:
 	life.sfx.tag_start(a["rec"], a["pos"])
 	ok(_cues("garden_go") - played == PlaySfx.MAX_CUES + 2, "the allowance comes back once the window has passed")
 
+
 func _cues(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
+
 
 ## BokiNapSfx: of 30 Boki asleep around you only the nearest few breathe, within the loop's reach; a bigger
 ## Boki breathes lower; the night's sleepers breathe near you, and at dawn they yawn and the woken ones' loops let go.
@@ -223,6 +239,7 @@ func _awake_breaths(home) -> Array:
 	)
 	return Sfx.loops.keys().filter(func(key): return key in awake)
 
+
 ## The nap part's two spot tiles (_spots_part) are open ground on center's island.
 func _nap_ground(w, center: Vector3) -> bool:
 	var cx := int(center.x)
@@ -233,6 +250,7 @@ func _nap_ground(w, center: Vector3) -> bool:
 		if w.is_void(x, z) or w.is_block(x, z) or w.island_of(x, z) != w.island_of(center.x, center.z):
 			return false
 	return true
+
 
 ## Nap spots (garden_zones.json nap, set here around the gathering place: the farm island is random).
 func _spots_part(home, center: Vector3) -> void:
@@ -368,6 +386,7 @@ func run(m: Node) -> void:
 	)
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
+	seed(11)  # the four Boki roll their own uids, sizes and traits: same four every run
 	var recs := _new_save()
 	var home = await main._hb_home()
 	ok(home.life != null, "base_mode on: the farm runs BaseLife")
@@ -378,7 +397,7 @@ func run(m: Node) -> void:
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)  # you are away: nobody clings to you
 	var center: Vector3 = home.world.random_ground(0)
-	for _i in 60:      # (the nap part puts its two spots 4 m either side: open ground here, whatever the draws before)
+	for _i in 60:  # (the nap part puts its two spots 4 m either side: open ground here, whatever the draws before)
 		if _nap_ground(home.world, center):
 			break
 		center = home.world.random_ground(0)
@@ -392,6 +411,7 @@ func run(m: Node) -> void:
 	var pip_awake := 0
 	var refused := 0
 	var t := 0.0
+	var seen_early := {}  # social act -> how many had happened by SEEN_BY
 	while t < SIM_SECS:
 		if t < ARRIVE_AT and t + DT >= ARRIVE_AT:
 			for kk in home.kins:
@@ -403,6 +423,9 @@ func run(m: Node) -> void:
 			home.day_t = 0.0
 		home._move_kin(DT)
 		t += DT
+		if seen_early.is_empty() and t >= SEEN_BY:
+			seen_early = home.life.acts.duplicate()
+			print("BASELIFE acts to %.0f s: %s\n%s" % [t, seen_early, "\n".join(home.life.act_log)])
 		for k in home.kins:
 			if not k.has("life"):
 				continue
@@ -442,6 +465,11 @@ func run(m: Node) -> void:
 		pip_awake >= night_frames * 0.5,
 		"the nocturnal Zapple stays up at night (%d of %d frames)" % [pip_awake, night_frames]
 	)
+	for kind in SEEN_KINDS:
+		ok(
+			int(seen_early.get(kind, 0)) >= 1,
+			"a watcher sees %s within %.0f s (%d times)" % [kind, SEEN_BY, int(seen_early.get(kind, 0))]
+		)
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
 	await _nap_sounds(home)
 	_spots_part(home, center)
