@@ -11181,3 +11181,4 @@ READY ext/ship-intro-feet-sound-1123 e664227fe9d (skyship intro: riders upright 
 READY ext/parity-recheck-tenzo-sparkle f65372cc5d (merged main; only conflict mage.json Wirerun desc: main's 'gains 1 Static' wording + branch's 18.3; --check 0, dolm-combo 0, tenzo-edge 0, hero-combo-check 1 red = Spirit Walk terrace (not touched here); health --strict fails only tools/checks/vfx.gd long_line, identical to main)
 READY ext/farm-boki-self-feed bf09b23b4113d34c5f32c1b594c9ada3a9ae6d6e (garden Boki eat on their own)
 READY ext/clarity-check-flake a3988546520fe3afe7c093b589b176c0124a975b (clarity-check grip_icons flake: sample only fight frames; 8/19 pass before, 10/10 after under load)
+READY ext/anim-sparkle-neve-meeko-native b1dad83dc2e (Sparkle/Neve/Meeko native ability clips)
