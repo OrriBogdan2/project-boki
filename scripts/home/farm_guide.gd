@@ -366,7 +366,7 @@ func _nearest_wild(what: String) -> Vector3:
 	for i in h.hb.wild_t:
 		if String(h.hb.wild_t[i]) != what:
 			continue
-		var at := Vector3(int(i) % w.w + 0.5, 0, int(i) / w.w + 0.5)
+		var at := Vector3(int(i) % w.w + 0.5, 0, int(int(i) / float(w.w)) + 0.5)
 		var d := Vector2(at.x - h.ppos.x, at.z - h.ppos.z).length()
 		if d < best:
 			best = d

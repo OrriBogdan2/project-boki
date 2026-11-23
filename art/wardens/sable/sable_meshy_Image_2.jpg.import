@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bcv3k3ybj43s6"
-path="res://.godot/imported/sable_meshy_Image_2.jpg-143ecb50b39868206c3d5da93ca17a18.ctex"
+path.s3tc="res://.godot/imported/sable_meshy_Image_2.jpg-143ecb50b39868206c3d5da93ca17a18.s3tc.ctex"
+path.etc2="res://.godot/imported/sable_meshy_Image_2.jpg-143ecb50b39868206c3d5da93ca17a18.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ad84f5329e3802af0907e57a85e19057"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/sable/sable_meshy_Image_2.jpg"
-dest_files=["res://.godot/imported/sable_meshy_Image_2.jpg-143ecb50b39868206c3d5da93ca17a18.ctex"]
+dest_files=["res://.godot/imported/sable_meshy_Image_2.jpg-143ecb50b39868206c3d5da93ca17a18.s3tc.ctex", "res://.godot/imported/sable_meshy_Image_2.jpg-143ecb50b39868206c3d5da93ca17a18.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

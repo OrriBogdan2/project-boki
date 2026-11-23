@@ -458,7 +458,7 @@ func _ready_rest() -> void:
 	var roster: Array = _farm_kin() if not fs else []
 	for i in mini(roster.size(), 6):
 		var bed := Models.kin_bed(Data.KIN[roster[i]["species"]]["color"])
-		bed.position = Vector3(33.4 + (i % 3) * 1.1, 0, 27.6 + (i / 3) * 1.1)
+		bed.position = Vector3(33.4 + (i % 3) * 1.1, 0, 27.6 + (int(i / 3.0)) * 1.1)
 		add_child(bed)
 	await _slice()
 	_build_lots()
@@ -701,10 +701,10 @@ func _ready_rest() -> void:
 		var sps: Array = Data.common_kin()
 		for i in 12:
 			var rr := Save.new_kin(sps[i % sps.size()])
-			rr["level"] = [1, 4, 8, 12, 16, 22][i / 2]
+			rr["level"] = [1, 4, 8, 12, 16, 22][int(i / 2.0)]
 			Evo.simulate(rr, lr)
 			var kn := Models.kin(rr["species"], rr)
-			kn.position = Vector3(33.5 + (i % 6) * 1.7, 0, 32.5 + (i / 6) * 1.8)
+			kn.position = Vector3(33.5 + (i % 6) * 1.7, 0, 32.5 + (int(i / 6.0)) * 1.8)
 			kn.rotation.y = PI * 0.1
 			kn.scale *= 1.3
 			add_child(kn)
@@ -949,13 +949,13 @@ func _build_plots() -> void:
 func _plot_spots(cap: int) -> Array:
 	var out: Array = []
 	if not fs:
-		for i in cap: out.append(Vector3(44.2 + (i % 2) * 2.2, 0, 30.8 + (i / 2) * 2.0))
+		for i in cap: out.append(Vector3(44.2 + (i % 2) * 2.2, 0, 30.8 + (int(i / 2.0)) * 2.0))
 		return out
 	for e in HomeLayout.fixtures(_d(), "farm"):
 		var c := HomeLayout.deco_center(e)
 		for j in 4:
 			if out.size() >= cap: break
-			out.append(c + Vector3(-1.1 + (j % 2) * 2.2, 0, -1.0 + (j / 2) * 2.0).rotated(Vector3.UP, int(e.get("r", 0)) * PI * 0.5))
+			out.append(c + Vector3(-1.1 + (j % 2) * 2.2, 0, -1.0 + (int(j / 2.0)) * 2.0).rotated(Vector3.UP, int(e.get("r", 0)) * PI * 0.5))
 	return out
 
 func _plot_node(arr: String, i: int) -> Node3D:
@@ -1008,7 +1008,7 @@ func add_kin(rec: Dictionary, isl: int, slot := -1) -> Dictionary:
 	n.add_child(lbl)
 	var kd := {"rec": rec, "node": n, "pos": at, "vel": Vector3.ZERO, "goal": Vector3.INF, "t": randf() * 3.0, "emote": lbl, "emote_t": 0.0, "hop": randf() * 6.0, "pers": _personality(rec)}
 	if isl == 0 and slot >= 0 and slot < 6:
-		kd["bed"] = Vector3(32.9 + (slot % 3) * 1.6, 0, 27.2 + (slot / 3) * 1.6)
+		kd["bed"] = Vector3(32.9 + (slot % 3) * 1.6, 0, 27.2 + (int(slot / 3.0)) * 1.6)
 	kins.append(kd)
 	return kd
 
@@ -4961,14 +4961,14 @@ func _personality(rec: Dictionary) -> Dictionary:
 		"rest": lerpf(1.6, 0.7, hot * 0.5 + cur * 0.5),
 		"chatty": lerpf(0.35, 1.3, hot * 0.5 + cur * 0.5),
 		"haunt": h % 7,
-		"quirk": KinHabit.HABITS[(h / 7) % KinHabit.HABITS.size()],
+		"quirk": KinHabit.HABITS[(int(h / 7.0)) % KinHabit.HABITS.size()],
 	}
 
 ## A spot in a ring around a place, different for every kin, so a crowd fans out instead of piling up.
 func _seat(k: Dictionary, center: Vector3, r := 1.4) -> Vector3:
 	var i := maxi(0, kins.find(k))
 	var a := float(i) * 2.39996 + float(absi(String(k["rec"]["uid"]).hash()) % 100) * 0.013
-	var rr := r + float(i / 6) * 0.9
+	var rr := r + float(int(i / 6.0)) * 0.9
 	var p := center + Vector3(cos(a) * rr, 0, sin(a) * rr)
 	if world.is_void(p.x, p.z) or world.occupy(p.x, p.z, 0.3, 0.0, true) != 0.0:
 		return world.free_spot_near(p, kins.map(func(o): return o["pos"]), 1.0)
