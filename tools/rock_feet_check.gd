@@ -111,16 +111,24 @@ func _score(what: String, how: Variant, settle: int, stop := Callable(), step :=
 	var jump := 0.0               # the drawn body's biggest move up or down in a grounded frame
 	var unplanted := 0            # grounded frames FootPlant left alone
 	var was := P.position.y
+	var body_y := P.pos.y
 	var edge := false             # the last frame was grounded and scored (the next one, airborne, takes it back)
 	for f in int(WALK_T / DT):
 		if stop.is_valid() and stop.call():
 			break
 		_frame(_move(how))
+		if P.pos.y < body_y - StoneStand.POP and edge and not seen.is_empty():
+			seen.pop_back()       # a drop he stays on (HunterMove.step_down): the frame he left the rock on
+			edge = false
+		body_y = P.pos.y
 		var grounded := P.grounded and P.pos.y - P.ground() <= 0.01
 		if grounded:
 			jump = maxf(jump, absf(P.position.y - was))
 			unplanted += 1 if P.anim.feet.weight < 0.01 and P.anim.air_k < 0.01 else 0
 		was = P.position.y
+		if grounded and P.position.y - P.pos.y > GAP:
+			edge = false  # the drawn body still eases down that drop (StepSmooth); FootPlant takes over below GAP
+			continue
 		if not grounded:
 			if edge and not seen.is_empty():
 				seen.pop_back()       # the frame he stepped off the rock on: FootPlant let go of it as he left
