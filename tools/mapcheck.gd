@@ -112,7 +112,7 @@ func run_authored(id: String, seeds: Array) -> void:
 		for i in w.kind.size(): if w.kind[i] != World.T_VOID: tiles += 1
 		if sd == seeds[0]:
 			print("AUTHORED %s: islands=%d ground=%d sheer=%d lip=%d pads=%d links=%d winds=%d updrafts=%d portals=%d spawns=%d chests=%d camps=%d shrines=%d labels=%d ms=%d" % [id, n, tiles, w.sheer.size(), w.lip.size(), w.pads.size(), w.links.size(), w.winds.size(), w.updrafts.size(), w.portal_spots.size(), w.spawns.size(), w.chest_spots.size(), w.camp_spots.size(), w.shrine_spots.size(), w.labels.size(), ms])
-			print("  spawn islands %d, nearest-neighbour spacing min %.1f median %.1f" % [by.size(), dmins[0] if dmins.size() > 0 else 0.0, dmins[dmins.size() / 2] if dmins.size() > 0 else 0.0])
+			print("  spawn islands %d, nearest-neighbour spacing min %.1f median %.1f" % [by.size(), dmins[0] if dmins.size() > 0 else 0.0, dmins[int(dmins.size() / 2.0)] if dmins.size() > 0 else 0.0])
 		if not probs.is_empty():
 			bad += 1
 			print("MAP BAD seed=%d: %s" % [sd, "; ".join(probs)])
