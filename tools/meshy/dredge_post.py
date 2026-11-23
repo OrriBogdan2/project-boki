@@ -1329,6 +1329,107 @@ def calm_goo_arm(js, b, out, rig):  # r15 stage (re-running it calms the swing a
     return f"{done} right-arm tracks kept {ARM_KEEP} of their swing"
 
 
+# r16: the Idle clip stands (it was a side-on fighting stance: the chest turned up to 88 deg off the facing, hunched),
+# and Jump_Run, which also plays for the glide, becomes a held leaping pose instead of a run cycle.
+IDLE_KEEP = {"Spine": 0.5, "Spine01": 0.5, "Spine02": 0.5, "neck": 0.25, "Head": 0.25}  # share of Idle's own sway kept
+JUMP_TURNS = (  # (bone, degrees about the world X axis; the model faces +Z, so a negative turn lifts a thigh forward)
+    ("LeftUpLeg", -48), ("LeftLeg", 82), ("LeftFoot", -20),
+    ("RightUpLeg", -48), ("RightLeg", 82), ("RightFoot", -20),
+    ("Spine", 6), ("Spine01", 4),
+)
+JUMP_SWAY = 3.0  # degrees the thighs rock either way over the clip (it loops: the glide holds it)
+
+
+def _track(js, b, a, node, path):
+    for c in a["channels"]:
+        if c["target"]["node"] == node and c["target"]["path"] == path:
+            return c, n.floats(js, b, a["samplers"][c["sampler"]]["output"]).astype(float)
+    return None, None
+
+
+def _clip(js, name):
+    return next(a for a in js["animations"] if a["name"] == name)
+
+
+def fix_idle(js, b, out, rig):  # r16 stage: run once per source file
+    from scipy.spatial.transform import Rotation as Rot
+    idle, walk = _clip(js, "Idle"), _clip(js, "walk")
+    done = 0
+    for ch in idle["channels"]:
+        node, path = ch["target"]["node"], ch["target"]["path"]
+        nm = js["nodes"][node].get("name", "")
+        if nm in ARM_BONES or nm.startswith("GooTail") or path == "scale":
+            continue
+        _, own = _track(js, b, idle, node, path)
+        _, base = _track(js, b, walk, node, path)
+        if base is None:
+            continue
+        if path == "translation":  # Hips: the walk's standing height, Idle's own bob
+            vals = base[0][None, :] + (own - own.mean(0))
+        else:
+            keep = IDLE_KEEP.get(nm, 0.0)
+            q0 = Rot.from_quat(base[0])
+            if keep:
+                m = Rot.from_quat(own).mean()
+                dev = (m.inv() * Rot.from_quat(own)).as_rotvec() * keep
+                vals = (q0 * Rot.from_rotvec(dev)).as_quat()
+            else:
+                vals = np.repeat(base[0][None, :], len(own), 0)
+        idle["samplers"][ch["sampler"]]["output"] = out.add_floats(vals, "VEC3" if path == "translation" else "VEC4")
+        done += 1
+    return f"{done} Idle tracks stand on the walk's neutral frame"
+
+
+def fix_jump(js, b, out, rig):  # r16 stage: run once per source file
+    from scipy.spatial.transform import Rotation as Rot
+    jump, walk, idle = _clip(js, "Jump_Run"), _clip(js, "walk"), _clip(js, "Idle")
+    par = {c: i for i, nd in enumerate(js["nodes"]) for c in nd.get("children", [])}
+    name = {js["nodes"][i].get("name"): i for i in range(len(js["nodes"]))}
+    loc = {}
+    for nm, i in name.items():  # local rotation of every bone: the walk's neutral frame; Idle's goo arm
+        a = idle if nm in ARM_BONES else walk
+        _, k = _track(js, b, a, i, "rotation")
+        loc[i] = Rot.from_quat(k[0]) if k is not None else Rot.from_quat(js["nodes"][i].get("rotation", [0, 0, 0, 1]))
+
+    def world(i):
+        return (world(par[i]) * loc[i]) if i in par else loc[i]
+
+    for nm, deg in JUMP_TURNS:  # parent first: each turn is made in the world frame of the already turned parent
+        i = name[nm]
+        pw = world(par[i]) if i in par else Rot.identity()
+        loc[i] = pw.inv() * Rot.from_rotvec([np.radians(deg), 0, 0]) * pw * loc[i]
+    frames = len(n.floats(js, b, jump["samplers"][0]["output"]))
+    ph = np.sin(np.linspace(0, 2 * np.pi, frames, endpoint=False))
+    sway = {"LeftUpLeg": JUMP_SWAY, "RightUpLeg": -JUMP_SWAY}
+    done = 0
+    for ch in jump["channels"]:
+        node, path = ch["target"]["node"], ch["target"]["path"]
+        nm = js["nodes"][node].get("name", "")
+        if nm.startswith("GooTail") or nm not in name:
+            continue
+        smp = jump["samplers"][ch["sampler"]]
+        if path == "rotation":
+            q = loc[node]
+            if nm in sway:  # a thigh rocks about the model's X axis (child bones follow)
+                pw = world(par[node])
+                qs = [(pw.inv() * Rot.from_rotvec([np.radians(sway[nm] * p), 0, 0]) * pw * q).as_quat() for p in ph]
+            else:
+                qs = [q.as_quat()] * frames
+            vals = np.array(qs)
+        elif path == "translation":
+            _, k = _track(js, b, walk, node, "translation")
+            if k is None:
+                continue
+            vals = np.repeat(k[0][None, :], frames, 0)
+            if nm == "Hips":
+                vals[:, 1] += 0.02 * ph
+        else:
+            continue
+        smp["output"] = out.add_floats(vals, "VEC3" if path == "translation" else "VEC4")
+        done += 1
+    return f"{done} Jump_Run tracks hold the leap pose"
+
+
 def rebuild_r11(out_path, in_path, pack_path=None):
     """The r11 stages on an r10 glb; each one writes the file and the next reloads it (new arrays live in the new
     file's buffer)."""
@@ -1425,6 +1526,8 @@ if __name__ == "__main__":
         rebuild_stages(sys.argv[2], sys.argv[3], st)
     elif sys.argv[1] == "--r15":  # r15: calm the goo arm's swing in run/walk/jump, then the tail baked again
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", calm_goo_arm), ("tail gather", gather_tail)])
+    elif sys.argv[1] == "--r16":  # r16: standing Idle, held jump/glide pose, then the tail baked again
+        rebuild_stages(sys.argv[2], sys.argv[3], [("idle", fix_idle), ("jump", fix_jump), ("tail gather", gather_tail)])
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
