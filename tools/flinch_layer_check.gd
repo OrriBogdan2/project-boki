@@ -120,7 +120,10 @@ func _procedural(id: String) -> void:
 		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 		m.set_meta("anim_seed", 1)
 		holder.add_child(m)
-		var sync := m.get_node_or_null("Warden/Sync")
+		var sync := WardenGlb.layers(m)      # (Sync, or Native on Meshy's own skeleton: WardenNative)
+		if sync == null or sync.get("flinch") == null:
+			ok(false, "%s: wears a flinch layer" % id)
+			return
 		var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "hit_t": 99.0}
 		m.set_meta(WardenClips.STATE, s)
 		sync.set_process(false)
