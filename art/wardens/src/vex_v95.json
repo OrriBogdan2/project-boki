@@ -9,6 +9,7 @@
  "tex": 2048,
  "uv_margin": 0.002,
  "keep": ["coin"],
+ "hand_rebind": "L",
  "joints": {
   "pelvis": [0.01, -0.12, 0.98],
   "neck": [0.02, -0.16, 1.62],
