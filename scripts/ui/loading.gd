@@ -68,6 +68,7 @@ func _grad(cols: Array, offs: Array) -> GradientTexture2D:
 
 func setup(opts: Dictionary) -> void:
 	layer = 45
+	BackgroundWork.read_shaders()      # their compiles run on worker threads while the match builds
 	tier = clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
 	T = Data.TIERS[tier]
 	if opts.get("tutorial", false):

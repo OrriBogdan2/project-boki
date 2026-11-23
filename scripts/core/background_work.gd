@@ -63,6 +63,34 @@ static func _next_read() -> void:
 		return
 	request(_queue.pop_front())
 
+## Shader files loaded ahead, a few a frame, from when the loading screen comes up (read_shaders), and kept for the
+## session. On Forward+ a shader's compile starts on the engine's worker threads as the file loads and the main thread
+## waits for it only where it is first used. The warm-up's stand-ins used to load all of res://shaders in a few frames,
+## and its first 3D frame then waited out every compile at once (4.9 s on the RTX 4090 bench, jobq 120255); loaded
+## at the start, they compile while the map builds.
+static var _shaders: Array = []
+static var _shader_q: Array[String] = []
+const SHADER_FRAME_US := 4000
+
+static func read_shaders(dir := "res://shaders") -> void:
+	if not _shader_q.is_empty() or not _shaders.is_empty():
+		return
+	for f in DirAccess.get_files_at(dir):
+		var p := dir + "/" + f.trim_suffix(".remap")
+		if p.ends_with(".gdshader"):
+			_shader_q.append(p)
+	var tree := Engine.get_main_loop() as SceneTree
+	if not _shader_q.is_empty() and not tree.process_frame.is_connected(_next_shaders):
+		tree.process_frame.connect(_next_shaders)
+
+static func _next_shaders() -> void:
+	var t0 := Time.get_ticks_usec()
+	while not _shader_q.is_empty() and Time.get_ticks_usec() - t0 < SHADER_FRAME_US:
+		var sh := load(_shader_q.pop_front())
+		if sh: _shaders.append(sh)
+	if _shader_q.is_empty():
+		(Engine.get_main_loop() as SceneTree).process_frame.disconnect(_next_shaders)
+
 ## Runs `work` on a worker thread (join() collects it).
 static func add_task(work: Callable) -> int:
 	_hook_quit()
@@ -78,6 +106,7 @@ static func join(id: int) -> void:
 ## Finishes everything still out (what a quit runs).
 static func drain() -> void:
 	_queue.clear()
+	_shader_q.clear()
 	for id in _tasks.keys():
 		join(int(id))
 	for path in _reads.keys():
