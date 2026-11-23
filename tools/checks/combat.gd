@@ -6,4 +6,5 @@ extends RefCounted
 
 const CHECKS := {
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
+	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 }
