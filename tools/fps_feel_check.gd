@@ -27,6 +27,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	Save.no_write = true
 	Save.d = Save.fresh()
 	var apex_target := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
