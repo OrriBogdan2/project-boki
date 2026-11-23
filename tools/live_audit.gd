@@ -1,6 +1,6 @@
 extends "res://tools/clip_shots.gd"
 ## --live-audit --shots-dir=<dir> [--wardens=a,b] [--size=1024] [--close] [--yaw=<deg>]
-## [--seq: idle, run, attack, hit at 30 fps]:
+## [--seq: idle, run, dash, attack, hit at 30 fps]:
 ## audit render of Hunters as the game plays
 ## them (Models.hunter + the model's pose node), scratch-tree version of the e28953f4e4f harness. Per hunter and
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
@@ -174,7 +174,7 @@ func _hunter(id: String, dir: String) -> void:
 	marks.append(
 		"kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]]
 	)
-	for clip in ["idle", "run", "attack", "hit"] if seq else CLIPS:
+	for clip in ["idle", "run", "dash", "attack", "hit"] if seq else CLIPS:
 		var yaw := SIDE_YAW if clip == "run" and not close and not seq else THREE_Q_YAW
 		if not is_nan(yaw_turn):
 			yaw = yaw_turn
@@ -184,7 +184,7 @@ func _hunter(id: String, dir: String) -> void:
 		var times: Array = SAMPLES[clip]
 		if seq:
 			times = []
-			for q in int({"idle": 1.5, "run": 1.6, "attack": 1.2, "hit": 1.0}[clip] * 30.0):
+			for q in int({"idle": 1.5, "run": 1.6, "dash": 0.6, "attack": 1.2, "hit": 1.0}[clip] * 30.0):
 				times.append(q * DT)
 		# settle: the pre-state (standing, or running for a hit/jump) for 25 frames, then the clip's own state
 		var s := _state(id, "idle" if clip != "dash" else "run", yaw, 0.0)
