@@ -3,8 +3,8 @@ extends RefCounted
 ## game plays it (jobq --needs gpu). Spawned beside the still player (god mode, kin off), it is cropped once per
 ## state: mob_pose_<kind>.png = idle | walk | windup (its last frame) | strike, left to right (blank: never seen).
 
-const CROP := 340         # px, the square around the monster
-const WAIT_S := 14.0      # s a monster gets to show all four states
+const CROP := 340  # px, the square around the monster
+const WAIT_S := 14.0  # s a monster gets to show all four states
 const ORDER := ["idle", "walk", "windup", "strike"]
 
 var main: Node
@@ -51,20 +51,20 @@ func setup(mn: Node) -> Array:
 		k.dead = true
 		k.visible = false
 	m.hud.visible = false
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	var best := Vector2.INF
 	for isl in m.world.islands:  # the island the player starts on: step 8 m in from its edge
 		var c2: Vector2 = isl["c"]
-		if c2.distance_to(Vector2(P.pos.x, P.pos.z)) < best.distance_to(Vector2(P.pos.x, P.pos.z)):
+		if c2.distance_to(Vector2(p.pos.x, p.pos.z)) < best.distance_to(Vector2(p.pos.x, p.pos.z)):
 			best = c2
 	if best != Vector2.INF:
-		var to := (best - Vector2(P.pos.x, P.pos.z)).limit_length(8.0)
-		var q := Vector2(P.pos.x, P.pos.z) + to
+		var to := (best - Vector2(p.pos.x, p.pos.z)).limit_length(8.0)
+		var q := Vector2(p.pos.x, p.pos.z) + to
 		if not m.world.is_void(q.x, q.y) and not m.world.is_block(q.x, q.y):
-			P.teleport(Vector3(q.x, m.world.ground_at(q.x, q.y) + 1.0, q.y))
+			p.teleport(Vector3(q.x, m.world.ground_at(q.x, q.y) + 1.0, q.y))
 	m.cam.user_zoom = float(CamWheel.rules()["min"])  # the wheel's closest view
 	await _frames(30)
-	P.process_mode = Node.PROCESS_MODE_DISABLED  # the player stands still and never fires back
+	p.process_mode = Node.PROCESS_MODE_DISABLED  # the player stands still and never fires back
 	return kinds
 
 
@@ -74,10 +74,10 @@ func _frames(n: int) -> void:
 
 
 func _case(dir: String, kind: String) -> void:
-	var P: Hunter = m.player
-	m.cam.focus = P.pos
+	var p: Hunter = m.player
+	m.cam.focus = p.pos
 	await _frames(60)
-	var mb := m.spawn_mob(kind, _ground(P.pos, 4.5))
+	var mb := m.spawn_mob(kind, _ground(p.pos, 4.5))
 	var strip := Image.create(CROP * ORDER.size(), CROP, false, Image.FORMAT_RGBA8)
 	var got := {}
 	var t0 := m.time
@@ -103,7 +103,7 @@ func _case(dir: String, kind: String) -> void:
 		elif s == MobAnim.STRIKE and MobAnim.phase_of(mb, s, 0.0) > 0.15:
 			nm = "strike"
 		if not got.has("windup") and wind_img == null and mb.st in ["idle", "chase"] and t > 5.0:
-			mb.tgt = P
+			mb.tgt = p
 			mb._begin_attack()  # a held-off monster (engaged cap, hiding) still shows its attack
 		if nm == "" or got.has(nm):
 			continue
@@ -145,4 +145,3 @@ func _ground(at: Vector3, d: float) -> Vector3:
 		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
 			return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
 	return at + Vector3(0, 0, -d)
-
