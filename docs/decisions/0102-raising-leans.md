@@ -21,6 +21,6 @@ fixed small amount and ten days of one style are a clean row in `--garden-sim-ch
 its nap, play, chase (tag) and cling odds by `BaseAxes.mult` (rules `weights`). Crossing +-`band` writes one journal line.
 
 ## Consequences
-Save v22 -> v23 (`BaseAxes.migrate` gives every kin the zero lean). Golden `save_v23_*`. No Net change (a farm
+Save v23 -> v24 (`BaseAxes.migrate` gives every kin the zero lean). Golden `save_v24_*`. No Net change (a farm
 record, never synced). Checks: `--base-life-check` (axes part), `--garden-sim-check` (a row per care style after
 10 days), `--save-compat-check`.

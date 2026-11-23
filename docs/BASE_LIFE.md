@@ -70,7 +70,7 @@ check: `--base-life-check`.
 - Raising leans (`docs/decisions/0102-raising-leans.md`; `scripts/home/base_axes.gd`, `content/rules/base_axes.json`,
   checks `--base-life-check` and `--garden-sim-check`): the first care of each kind in a farm day (`Care.care_day`)
   steps three axes saved in `rec["raised"]` (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle, each -1..1,
-  capped at `cap`; save v23 gives old Boki the zero lean). `BaseLife.choose` scales its odds by `BaseAxes.mult`: a
+  capped at `cap`; save v24 gives old Boki the zero lean). `BaseLife.choose` scales its odds by `BaseAxes.mult`: a
   lazy Boki naps on its own now and then, a busy one plays toys more, a bold or rough one chases (tag) more and clings
   to you less. Crossing +-`band` writes a journal line ("is getting bolder"). `--garden-sim-check` has a row per care
   style after 10 days (briefs/design/GARDEN_MODERN_BALANCE.md). Not done: the idle habit poses (`KinHabit`) do not
