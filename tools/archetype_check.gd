@@ -574,7 +574,8 @@ func _burr_terrain(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vecto
 		tap(m, P)
 		step(m, 0.8)
 		return K.direct_hits - hits
-	shape.call(func(dx: int) -> int: return clampi((dx - 2) / 2, 0, 2), [3, 5], -1)      # flights on tiles 3 and 5
+	shape.call(func(dx: int) -> int: return clampi(int((dx - 2) / 2.0), 0, 2), [3, 5],
+			-1)      # flights on tiles 3 and 5
 	var top := Vector3(home.x + 8.0, (lv + 2) * World.LEVEL, home.z)
 	var climbed: int = shoot.call(top)
 	var info := "hits %d took %.0f" % [climbed, dmg(T)]
