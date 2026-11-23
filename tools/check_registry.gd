@@ -446,6 +446,7 @@ const CHECKS := {
 	"--scout-cam-shots": ["res://tools/scout_cam_check.gd", "scout_cam_check", "shots"],
 	"--sable-wings-check": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "check"],  # wings vs body
 	"--sable-wings-shots": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "shots"],  # --shots-dir=<dir>
+	"--meeko-companions-shots": ["res://tools/meeko_companions_shots.gd", "meeko_companions_shots", null],  # --shots-dir=<dir> (GPU)
 	"--hunter-gpu-shots": ["res://tools/hunter_gpu_shots.gd", "hunter_gpu_shots", null],
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],  # no ring/disc/burst on movement
 	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
@@ -525,6 +526,7 @@ const CHECKS := {
 	"--turn-shots": ["res://tools/turn_shots.gd", "turn_shots", null],  # before/after strip of turning on the spot
 	"--flue-flight-shots": ["res://tools/flue_flight_shots.gd", "flue_flight_shots", null],  # Cinder's Flue Flight
 	# Meeko's sun and cloud orbit her, bob, clear the wings
+	"--meeko-companions-clip-check": ["res://tools/meeko_companions_clip_check.gd", "meeko_companions_clip_check", null],  # sun/cloud vs the posed body, every state
 	"--meeko-orbit-check": ["res://tools/meeko_orbit_check.gd", "meeko_orbit_check", null],
 	"--meeko-orbit-shots": ["res://tools/meeko_orbit_shots.gd", "meeko_orbit_shots", null],  # frames of that orbit
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],  # every Hunter standing still (IDLE_AUDIT)
