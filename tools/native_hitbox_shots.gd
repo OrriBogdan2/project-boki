@@ -20,6 +20,11 @@ func run(main: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	main.get_window().size = VIEW
 	main.get_viewport().size = VIEW
+	for ui in main.get_children():
+		if ui is CanvasLayer:  # (the title screen and its fade: only the stage shows)
+			(ui as CanvasLayer).visible = false
+		elif ui is Control:
+			(ui as Control).visible = false
 	holder = Node3D.new()
 	main.add_child(holder)
 	_stage()
@@ -27,12 +32,12 @@ func run(main: Node) -> void:
 		if not WardenNative.on(a):
 			continue
 		var m := await stand(main, a)
-		m.rotation.y = PI  # (the model faces -Z: PI turns it to the front camera)
 		var r := measure(m, a)
 		print(row(a, r))
 		var box := _hurtbox(r.ring, r.hit_h)
 		for k in SETTLE:
 			await main.get_tree().process_frame
+		m.rotation.y = _toward_camera(m)
 		for view in ["front", "side"]:
 			cam.position = Vector3(0, MID_Y, 8) if view == "front" else Vector3(8, MID_Y, 0)
 			cam.rotation = Vector3.ZERO if view == "front" else Vector3(0, PI * 0.5, 0)
@@ -42,6 +47,14 @@ func run(main: Node) -> void:
 		m.queue_free()
 	print("NATIVEHITBOX SHOTS DONE")
 	main.get_tree().quit()
+
+
+## The turn that puts the way the idle pose looks (Meshy's head to its face bone) toward the front camera, +Z.
+func _toward_camera(m: Node3D) -> float:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var to_face := sk.global_transform * sk.get_bone_global_pose(sk.find_bone("headfront")).origin
+	to_face -= sk.global_transform * sk.get_bone_global_pose(sk.find_bone("Head")).origin
+	return m.rotation.y - atan2(to_face.x, to_face.z)
 
 
 func _stage() -> void:
