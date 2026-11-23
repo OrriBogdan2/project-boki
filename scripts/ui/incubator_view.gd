@@ -23,7 +23,7 @@ static func build(home: Home, v: VBoxContainer, reopen: Callable, hatch: Callabl
 	var rate := Incubator.rate(home.hinc.warmed() if home.hinc else false)
 	var why: Array = []
 	if not warm.is_empty(): why.append("%s at the brazier" % warm["name"])
-	if Incubator.coal_left() > 0.0: why.append("Ember Coals, %d:%02d left" % [int(Incubator.coal_left()) / 60, int(Incubator.coal_left()) % 60])
+	if Incubator.coal_left() > 0.0: why.append("Ember Coals, %d:%02d left" % [int(int(Incubator.coal_left()) / 60.0), int(Incubator.coal_left()) % 60])
 	var rl := UI.label(("Warming at %sx: %s" % [str(snappedf(rate, 0.1)).trim_suffix(".0"), ", ".join(why)]) if not why.is_empty() else "Warming at 1x", UI.T_BODY, Color("ffb07a") if rate > 1.0 else UI.INK, UI.semi)
 	rl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(rl)

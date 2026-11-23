@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bcyy5q7tjq7sf"
-path="res://.godot/imported/nacrolin_nacrolin_normal.webp-369ad280d731cacca4d71c9407a572e8.ctex"
+path.bptc="res://.godot/imported/nacrolin_nacrolin_normal.webp-369ad280d731cacca4d71c9407a572e8.bptc.ctex"
+path.astc="res://.godot/imported/nacrolin_nacrolin_normal.webp-369ad280d731cacca4d71c9407a572e8.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "326d0efc9ba3b02caee8d9b50a1451a4"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/nacrolin/nacrolin_nacrolin_normal.webp"
-dest_files=["res://.godot/imported/nacrolin_nacrolin_normal.webp-369ad280d731cacca4d71c9407a572e8.ctex"]
+dest_files=["res://.godot/imported/nacrolin_nacrolin_normal.webp-369ad280d731cacca4d71c9407a572e8.bptc.ctex", "res://.godot/imported/nacrolin_nacrolin_normal.webp-369ad280d731cacca4d71c9407a572e8.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
