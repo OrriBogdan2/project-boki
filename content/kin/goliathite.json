@@ -7,7 +7,6 @@
 		"Marble statue face"
 	],
 	"theme": "stone",
-	"type2": "swarm",
 	"flavor": "A beetle the size of a cart whose shell is a marble statue's face; Effigeetle splits open down the nose when Effigeetle flies you across the gap. Earnest and hard-working, a gentle giant; polishes Effigeetle's face when Effigeetle is proud of you.",
 	"colors": {
 		"body": "#e8e4dc",
@@ -121,9 +120,15 @@
 		"desc": "Something earnest is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "locked",
 		"line": "goliathite",
 		"stage": 1
-	}
+	},
+	"type2": "swarm"
 }

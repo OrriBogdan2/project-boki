@@ -7,7 +7,6 @@
 		"Quartz geode"
 	],
 	"theme": "stone",
-	"type2": "prism",
 	"flavor": "A star-nosed mole whose back is a split geode full of quartz. Glintmole feels the ground shake long before you do.",
 	"colors": {
 		"body": "#5b4a5e",
@@ -115,9 +114,15 @@
 		"desc": "Something shy is in here.",
 		"play": "Pins foes down and breaks up their pushes."
 	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "glintmole",
 		"stage": 1
-	}
+	},
+	"type2": "prism"
 }

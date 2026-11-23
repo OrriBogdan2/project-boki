@@ -7,7 +7,6 @@
 		"Stinging nettle"
 	],
 	"theme": "venom",
-	"type2": "bloom",
 	"flavor": "A lynx kitten whose ear tufts and tail are stinging nettle. Pet Nettlynx the wrong way and you'll know.",
 	"colors": {
 		"body": "#8a9a4a",
@@ -116,9 +115,15 @@
 		"desc": "Something prickly is in here.",
 		"play": "Gets in close and hits hard."
 	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "nettlynx",
 		"stage": 1
-	}
+	},
+	"type2": "bloom"
 }

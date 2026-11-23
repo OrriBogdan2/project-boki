@@ -7,7 +7,6 @@
 		"Thunderhead and copper coil"
 	],
 	"theme": "storm",
-	"type2": "tempest",
 	"flavor": "A thundercloud ostrich in rubber boots; ride Boltstrich and your hair stands up. Skittish and fast, afraid of nothing but boredom; races anything that moves.",
 	"colors": {
 		"body": "#5a5a6a",
@@ -121,10 +120,16 @@
 		"desc": "Something skittish is in here.",
 		"play": "Fast, darting and always on the move."
 	},
+	"size": {
+		"cm": 70,
+		"kg": 60.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "fizzlet",
 		"stage": 2,
 		"from": "fizzlet"
-	}
+	},
+	"type2": "tempest"
 }

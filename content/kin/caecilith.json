@@ -7,7 +7,6 @@
 		"Giant zipper"
 	],
 	"theme": "dark",
-	"type2": "stone",
 	"flavor": "A worm that unzips the ground: Zippelith dives into a seam, zips the seam shut behind Zippelith, and comes up somewhere else. Secretive and sly; loves surprises, appears where you least expect Zippelith, grinning.",
 	"colors": {
 		"body": "#2a2630",
@@ -113,10 +112,16 @@
 		"desc": "Something sly is in here.",
 		"play": "Slippery and full of tricks."
 	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "locked",
 		"line": "zipling",
 		"stage": 2,
 		"from": "zipling"
-	}
+	},
+	"type2": "stone"
 }

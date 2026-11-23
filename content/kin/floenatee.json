@@ -7,7 +7,6 @@
 		"Antique icebox"
 	],
 	"theme": "frost",
-	"type2": "tide",
 	"flavor": "A manatee carrying an old icebox on Frigatee's back; your loot stays cold in Frigatee's drawers until someone kicks them open. Kind and slow, everyone's friend; hums low songs you feel through your boots.",
 	"colors": {
 		"body": "#8aa0b0",
@@ -123,10 +122,16 @@
 		"desc": "Something kind is in here.",
 		"play": "Keeps you alive and patched up."
 	},
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "coolatee",
 		"stage": 2,
 		"from": "coolatee"
-	}
+	},
+	"type2": "tide"
 }

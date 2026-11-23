@@ -7,7 +7,6 @@
 		"Lodestone"
 	],
 	"theme": "gravity",
-	"type2": "dark",
 	"flavor": "A stick insect made of dark lodestone twigs. Things drift toward Lodestick, and Lodestick drifts toward nothing.",
 	"colors": {
 		"body": "#3c3a50",
@@ -112,9 +111,15 @@
 		"desc": "Something still is in here.",
 		"play": "Slippery and full of tricks."
 	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "lodestick",
 		"stage": 1
-	}
+	},
+	"type2": "dark"
 }

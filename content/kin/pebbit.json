@@ -7,7 +7,6 @@
 		"Rhino beetle"
 	],
 	"theme": "gravity",
-	"type2": "swarm",
 	"flavor": "An armadillo with a rhino beetle's horn. Gravadillo rolls up in heavy plates and bends gravity to slam foes down.",
 	"colors": {
 		"body": "#3c4058",
@@ -122,9 +121,15 @@
 		"desc": "Far heavier than it looks. Loose pebbles roll toward it. Something steady is in here.",
 		"play": "Slow and tough. Pulls foes in and slams them down."
 	},
+	"size": {
+		"cm": 30,
+		"kg": 7.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "pebbit",
 		"stage": 1
-	}
+	},
+	"type2": "swarm"
 }

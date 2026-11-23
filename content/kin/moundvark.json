@@ -7,7 +7,6 @@
 		"Termite clay spire"
 	],
 	"theme": "swarm",
-	"type2": "stone",
 	"flavor": "An aardvark with a termite cathedral on Spirevark's back; climb the spire and shoot from the belfry. Easy-going and nosy; talks to Spirevark's termites more than to you.",
 	"colors": {
 		"body": "#a07a5a",
@@ -121,9 +120,15 @@
 		"desc": "Something nosy is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "moundvark",
 		"stage": 1
-	}
+	},
+	"type2": "stone"
 }

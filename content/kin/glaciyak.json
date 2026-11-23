@@ -7,7 +7,6 @@
 		"Icebreaker prow"
 	],
 	"theme": "frost",
-	"type2": "titan",
 	"flavor": "A yak with an icebreaker's iron prow for horns; Prowyak ploughs through the snow and anything standing in the way. Steady and warm-hearted; snorts frost when Prowyak laughs.",
 	"colors": {
 		"body": "#4a4440",
@@ -122,10 +121,16 @@
 		"desc": "Something steady is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"size": {
+		"cm": 70,
+		"kg": 60.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "kayak",
 		"stage": 2,
 		"from": "kayak"
-	}
+	},
+	"type2": "titan"
 }

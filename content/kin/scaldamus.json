@@ -7,7 +7,6 @@
 		"Steam locomotive"
 	],
 	"theme": "ember",
-	"type2": "titan",
 	"flavor": "A hippo that is half steam engine: smokestack ears, a boiler belly, a cowcatcher jaw, and Chuggamus charges like a runaway train. Lazy until crossed, then unstoppable; yawns steam at you to say Chuggamus likes you.",
 	"colors": {
 		"body": "#6a4a4a",
@@ -122,10 +121,16 @@
 		"desc": "Something lazy is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "locked",
 		"line": "teapotamus",
 		"stage": 3,
 		"from": "puffamus"
-	}
+	},
+	"type2": "titan"
 }

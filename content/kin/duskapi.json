@@ -7,7 +7,6 @@
 		"Brass candelabra"
 	],
 	"theme": "ghost",
-	"type2": "ember",
 	"flavor": "An okapi with a candelabra for horns; snuff the candles and Snuffapi is gone, leaving a smoke copy behind. Shy and graceful, vanishes when strangers come; trusts one rider and only one.",
 	"colors": {
 		"body": "#3a2a3a",
@@ -118,10 +117,16 @@
 		"desc": "Something shy is in here.",
 		"play": "Slippery and full of tricks."
 	},
+	"size": {
+		"cm": 70,
+		"kg": 60.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "wickapi",
 		"stage": 2,
 		"from": "wickapi"
-	}
+	},
+	"type2": "ember"
 }

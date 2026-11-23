@@ -7,7 +7,6 @@
 		"Riveted iron shield"
 	],
 	"theme": "stone",
-	"type2": "tide",
 	"flavor": "A giant limpet whose shell is a riveted iron shield; Buckleron clamps to the ground and the whole squad shoots from behind Buckleron. Stubborn as rock and proud of that; grudgingly fond of whoever hides behind Buckleron.",
 	"colors": {
 		"body": "#7a7a7a",
@@ -121,9 +120,15 @@
 		"desc": "Something stubborn is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "limpetor",
 		"stage": 1
-	}
+	},
+	"type2": "tide"
 }

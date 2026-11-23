@@ -7,7 +7,6 @@
 		"Pan-pipes"
 	],
 	"theme": "swarm",
-	"type2": "echo",
 	"flavor": "A starling with pan-pipes for a tail; every note Murmurling plays flies off as another tiny bird. Sociable, noisy, lonely in a second; mimics your footsteps.",
 	"colors": {
 		"body": "#2a3a4a",
@@ -121,9 +120,15 @@
 		"desc": "Something sociable is in here.",
 		"play": "Fast, darting and always on the move."
 	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "murmurling",
 		"stage": 1
-	}
+	},
+	"type2": "echo"
 }

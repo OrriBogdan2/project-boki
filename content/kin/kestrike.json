@@ -7,7 +7,6 @@
 		"Copper lightning rod"
 	],
 	"theme": "storm",
-	"type2": "tempest",
 	"flavor": "A kestrel with a copper crest that draws lightning. Kestrike hangs still in the wind, then strikes like the bolt Kestrike caught.",
 	"colors": {
 		"body": "#b5653a",
@@ -121,9 +120,15 @@
 		"desc": "Something proud is in here.",
 		"play": "Fast, darting and always on the move."
 	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "kestrike",
 		"stage": 1
-	}
+	},
+	"type2": "tempest"
 }

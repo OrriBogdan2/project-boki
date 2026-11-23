@@ -7,7 +7,6 @@
 		"Stone cottage garden"
 	],
 	"theme": "bloom",
-	"type2": "wild",
 	"flavor": "A highland cow with a walled garden on Crofthorn's back; you ride sitting on the garden wall. Gentle and stubborn, grazes mid-fight; bellows proudly when you climb on.",
 	"colors": {
 		"body": "#b8643a",
@@ -121,9 +120,15 @@
 		"desc": "Something gentle is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"size": {
+		"cm": 70,
+		"kg": 60.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "heatherhorn",
 		"stage": 1
-	}
+	},
+	"type2": "wild"
 }

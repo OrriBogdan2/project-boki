@@ -115,6 +115,11 @@
 		"desc": "Soft, earthy, dusted with spores.",
 		"play": "Roots foes with spores. Curious."
 	},
+	"size": {
+		"cm": 22,
+		"kg": 1.6,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "locked",
 		"line": "burrlet",

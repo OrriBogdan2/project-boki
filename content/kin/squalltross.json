@@ -7,7 +7,6 @@
 		"Patched ship sails"
 	],
 	"theme": "tempest",
-	"type2": "tide",
 	"flavor": "An albatross with patched ship sails for wings; grab the rigging under Canvastross and Canvastross carries you across the gap. Easygoing, fearless, a wanderer; restless when Canvastross has not seen the sea.",
 	"colors": {
 		"body": "#e8ecf0",
@@ -122,10 +121,16 @@
 		"desc": "Something wandering is in here.",
 		"play": "Fast, darting and always on the move."
 	},
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "locked",
 		"line": "kerchick",
 		"stage": 3,
 		"from": "jibbatross"
-	}
+	},
+	"type2": "tide"
 }

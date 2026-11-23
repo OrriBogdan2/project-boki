@@ -7,7 +7,6 @@
 		"Glass greenhouse"
 	],
 	"theme": "bloom",
-	"type2": "prism",
 	"flavor": "A sloth carrying a little glass greenhouse on Terrasloth's back with orchids inside; Terrasloth opens the glass as a wall and the mist heals you. Gentle and dreamy; waters Terrasloth's orchids mid-fight.",
 	"colors": {
 		"body": "#9a8a6a",
@@ -113,9 +112,15 @@
 		"desc": "Something gentle is in here.",
 		"play": "Keeps you alive and patched up."
 	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "orchisloth",
 		"stage": 1
-	}
+	},
+	"type2": "prism"
 }

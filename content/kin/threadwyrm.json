@@ -7,7 +7,6 @@
 		"Knotted hemp rope"
 	],
 	"theme": "spore",
-	"type2": "wyrm",
 	"flavor": "A rope snake with mushroom caps growing from Knotwyrm's knots; lay Knotwyrm across a path and whoever steps over Knotwyrm gets rooted. Quiet, thoughtful, an old soul; likes damp shade and long naps.",
 	"colors": {
 		"body": "#8a6a4a",
@@ -115,9 +114,15 @@
 		"desc": "Something thoughtful is in here.",
 		"play": "Pins foes down and breaks up their pushes."
 	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "threadwyrm",
 		"stage": 1
-	}
+	},
+	"type2": "wyrm"
 }

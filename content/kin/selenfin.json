@@ -7,7 +7,6 @@
 		"Moonstone"
 	],
 	"theme": "lunar",
-	"type2": "tide",
 	"flavor": "A silver hatchetfish that swims through the air, a moonstone glowing in Selenfin's keel. Where Selenfin floats, wounds close.",
 	"colors": {
 		"body": "#c8d0e0",
@@ -113,9 +112,15 @@
 		"desc": "Something serene is in here.",
 		"play": "Keeps you alive and patched up."
 	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "selenfin",
 		"stage": 1
-	}
+	},
+	"type2": "tide"
 }

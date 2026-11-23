@@ -7,7 +7,6 @@
 		"Soap bubble"
 	],
 	"theme": "prism",
-	"type2": "tide",
 	"flavor": "A lizard that blows a soap-bubble twin and runs while you pop the bubble. A show-off that startles easily; runs first, poses later.",
 	"colors": {
 		"body": "#5ab8a0",
@@ -112,9 +111,15 @@
 		"desc": "Something showy is in here.",
 		"play": "Slippery and full of tricks."
 	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "locked",
 		"line": "opalisk",
 		"stage": 1
-	}
+	},
+	"type2": "tide"
 }

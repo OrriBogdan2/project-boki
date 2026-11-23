@@ -6,7 +6,6 @@
 		"Axolotl"
 	],
 	"theme": "prism",
-	"type2": "tide",
 	"flavor": "An axolotl whose frills grew into living crystal. Prismander bends light into shields and dazzling beams.",
 	"colors": {
 		"body": "#f0a6d6",
@@ -113,9 +112,15 @@
 		"desc": "Pink, glassy. Throws little rainbows.",
 		"play": "Shields you, dazzles foes. Gentle."
 	},
+	"size": {
+		"cm": 26,
+		"kg": 2.1,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "puddlet",
 		"stage": 1
-	}
+	},
+	"type2": "tide"
 }

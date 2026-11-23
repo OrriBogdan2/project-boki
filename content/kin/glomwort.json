@@ -7,7 +7,6 @@
 		"Puffball"
 	],
 	"theme": "spore",
-	"type2": "venom",
 	"flavor": "A yellow slime mold that creeps like a net and fruits little puffballs. Step on one and the spores hold you fast.",
 	"colors": {
 		"body": "#e0c03a",
@@ -115,9 +114,15 @@
 		"desc": "Something curious is in here.",
 		"play": "Pins foes down and breaks up their pushes."
 	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
 	"roster": {
 		"art": "todo",
 		"line": "glomwort",
 		"stage": 1
-	}
+	},
+	"type2": "venom"
 }
