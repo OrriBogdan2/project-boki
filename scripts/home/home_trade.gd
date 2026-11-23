@@ -345,7 +345,7 @@ func _lot_pick(have: Array) -> HBoxContainer:
 
 func _lot_card(lot: Dictionary) -> Control:
 	var left := int(lot["ends"]) - MarketSave.now()
-	var when := ("%dh %02dm left" % [left / 3600, (left % 3600) / 60]) if left >= 60 else "ending now"
+	var when := ("%dh %02dm left" % [int(left / 3600.0), int((left % 3600) / 60.0)]) if left >= 60 else "ending now"
 	var mine := String(lot["seller"]) == "you"
 	var winning := String(lot["bidder"]) == "you"
 	var top := "no bids yet"

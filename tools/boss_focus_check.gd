@@ -35,6 +35,7 @@ func _spot(h: Hunter, at: Vector3) -> void:
 
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
@@ -131,7 +132,7 @@ func run(main: Node) -> void:
 			+ ", nor do it or its Boki hit them"
 		)
 	)
-	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (100 * on_boss / maxi(1, n)))
+	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (int(100 * on_boss / float(maxi(1, n)))))
 	# ---- 3. the player starts it inside the seal: the bot fights back
 	# beside the bot, inside its near sense: the scripted hit has no shot to reveal where it came from, and a
 	# bot only turns on a rival it can see (its sight wedge faces the boss; 11-21)
