@@ -130,7 +130,7 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_model
 ##   px: tallest 3D render in pixels (0: native); a bigger window renders the 3D smaller and FSR scales it
 ##   up (see _apply_render_scale), so a retina or 4K screen doesn't cost 2-4x the pixels  ·  scale: the most
 ##   of the window's size the 3D renders at (0.77 Low, 0.5 Very Low)  ·  fxaa: edge smoothing when MSAA is off
-##   ·  steps: physics catch-up steps a frame (Engine.max_physics_steps_per_frame)  ·  unlit: no lighting at all
+##   ·  unlit: no lighting at all
 ##   ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass and flowers kept  ·  draw: draw distance
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
@@ -147,7 +147,6 @@ const QUALITY := {
 		"px": 540,
 		"scale": 0.5,
 		"fxaa": false,
-		"steps": 2,
 		"unlit": true,
 		"lod": 8.0,
 		"grass": 0.15,
@@ -174,7 +173,6 @@ const QUALITY := {
 		"px": 900,
 		"scale": 0.77,
 		"fxaa": true,
-		"steps": 2,
 		"unlit": false,
 		"lod": 4.0,
 		"grass": 0.4,
@@ -201,7 +199,6 @@ const QUALITY := {
 		"px": 1080,
 		"scale": 1.0,
 		"fxaa": true,
-		"steps": 4,
 		"unlit": false,
 		"lod": 2.0,
 		"grass": 0.7,
@@ -228,7 +225,6 @@ const QUALITY := {
 		"px": 0,
 		"scale": 1.0,
 		"fxaa": false,
-		"steps": 8,
 		"unlit": false,
 		"lod": 1.0,
 		"grass": 1.0,
@@ -255,7 +251,6 @@ const QUALITY := {
 		"px": 0,
 		"scale": 1.0,
 		"fxaa": false,
-		"steps": 8,
 		"unlit": false,
 		"lod": 0.5,
 		"grass": 1.0,
@@ -851,7 +846,6 @@ func _apply_quality() -> void:
 	_apply_render_scale()
 	root.mesh_lod_threshold = float(q_v["lod"])
 	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(q_v["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
-	Engine.max_physics_steps_per_frame = int(q_v["steps"])
 	RenderingServer.directional_soft_shadow_filter_set_quality(int(q_v["soft"]))
 	RenderingServer.directional_shadow_atlas_set_size(int(q_v["atlas"]), true)
 	for n in root.find_children("*", "Light3D", true, false):
