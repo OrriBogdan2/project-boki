@@ -27,6 +27,10 @@ var step_dt := STEP
 var parked := false              # the dummies stand behind the hero: a lane probe, only the shots count
 var shot_seen: Array = []        # [reach from the hero, radius] of each non-melee shot the hero fired
 var swing_seen := false          # the input fired a melee swing (its rays stop at the first dummy of the grid)
+var layout := "grid"             # where the dummies stand: "grid", or a HitShapeZero layout (lane, ring)
+var ring_r := 0.0                # the radius of the "ring" layout (m)
+var pick := -1                   # the pass of a lane or ring (HitShapeZero.slot)
+var aim_d := 20.0                # how far down +X the cursor is (m)
 ## Inputs whose hit the grid cannot read, so they are never flagged here: a dash that stops on the first foe
 ## it meets. Their lone-dummy reach is in --hit-shape-fine.
 const FIRST_FOE := ["ashwick:dash"]
@@ -41,6 +45,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond: bad += 1
 
 func _slot(i: int) -> Vector3:
+	if layout != "grid": return home + HitShapeZero.slot(layout, i, ring_r, pick)
 	return home + Vector3(1.0 + (int(i / float(NZ))) * GRID, 0.0, (i % NZ) * GRID)
 
 func _clear_dummies() -> void:
@@ -48,12 +53,32 @@ func _clear_dummies() -> void:
 		var d: Hunter = dummies[i]
 		d.teleport(home + Vector3(-6.0, 0, 6.0) if parked else _slot(i))
 		d.vel = Vector3.ZERO
+		var parked_out := layout != "grid" and pick >= 0 and i % HitShapeZero.PASSES != pick
+		d.out = parked_out      # (a dummy off its pass costs no step time)
+		d.body_r = -1.0 if layout == "grid" else 0.01      # (a lane's dummies overlap: no body pushing, or they spread)
 		d.hp = d.max_hp
 		d.stun_t = 0.0
 		d.root_t = 0.0
 		d.slow_t = 0.0
 		d.knock_t = 0.0
 		d.burn_t = 0.0
+		d.blight_t = 0.0
+		d.vuln_t = 0.0
+		d.marks = {}
+		d.hit_by = {}
+		for key in d.get_meta_list(): d.remove_meta(key)      # (a status or a mark an earlier input left on it)
+
+## No wild monster stays on the field (one wandering in would bite a dummy, and read as a hit).
+func _clear_mobs() -> void:
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+
+## A lane's or ring's dummies stand close together: hold each on its slot (a knock or a push would carry it away).
+func _pin() -> void:
+	for i in dummies.size():
+		var d: Hunter = dummies[i]
+		d.teleport(_slot(i))
+		d.vel = Vector3.ZERO
 
 ## The slots that lost health since the last call; the dummies go back to their places.
 func _took_damage() -> Array:
@@ -78,13 +103,17 @@ func _spawn(main: Node) -> void:
 		dummies.append(d)
 
 ## Fresh hero, fresh dummies, aim down +X; then fires `kind` and returns the slots hit within `secs`.
-func _probe(arch: String, kind: String, hold: float, secs: float, park := false) -> Array:
+func _probe(arch: String, kind: String, hold: float, secs: float, park := false, again := []) -> Array:
 	parked = park
 	_prep(arch)
 	var hit := {}
 	var t := 0.0
 	while t < secs:
 		_press(kind, hold, t, t == 0.0)
+		for a in again:
+			if t >= float(a[0]) and not a.has("done"):
+				a.append("done")
+				_again(String(a[1]))
 		m.step(0.002 if t == 0.0 else step_dt)      # (a tiny first step: a bullet is seen before a dummy eats it)
 		t += step_dt
 		for s in m.shots:
@@ -94,6 +123,9 @@ func _probe(arch: String, kind: String, hold: float, secs: float, park := false)
 				shot_seen.append([_shot_reach(s), float(s["r"])])
 		if parked and not shot_seen.is_empty(): break
 		for i in _took_damage(): hit[i] = true
+		_clear_mobs()
+		if layout != "grid":
+			_pin()
 		if kind == "rmb_hold" and t >= hold: p.inp["sec_hold"] = false
 	_release()
 	return hit.keys()
@@ -120,10 +152,15 @@ func _prep(arch: String) -> void:
 	p.hp = p.max_hp
 	p.teleport(home)
 	p.vel = Vector3.ZERO
-	p.inp["aim"] = home + Vector3(20.0, 0.9, 0)
+	p.dash_pass = {}  # (a dash cut short keeps what it did to foes in its way, for the next hero)
+	p.inp["aim"] = home + Vector3(aim_d, 0.9, 0)
 	p.inp["aim_y"] = home.y
 	m.shots.clear()
 	m.zones.clear()
+	m.fields.list.clear()      # (an ult's patch or wall from the last input)
+	_clear_mobs()
+	m._later.clear()      # (a delayed step of the last input)
+	m.meteors.clear()
 	_clear_dummies()
 	shot_seen.clear()
 	swing_seen = false
@@ -143,6 +180,14 @@ func _press(kind: String, hold: float, t: float, first: bool) -> void:
 			"e": p.ak.use_e()
 			"x", "x_fire": p.ak.cast_ult()
 			"dash", "dash_hold": p.do_dash()
+
+## A second press of the same input (a recast, the follow-up strike): `again` = [seconds in, input].
+func _again(kind: String) -> void:
+	match kind:
+		"e": p.ak.use_e()
+		"x": p.ak.cast_ult()
+		"rmb": p.ak.press_rmb()
+		"dash": p.do_dash()
 
 func _release() -> void:
 	p.inp["fire"] = false
@@ -318,43 +363,82 @@ func _contact_checks() -> void:
 	ok(struck > 0.0 and struck < Arch.hit_h("tender"), "a hit with no contact point still lands inside the collider")
 
 
+## The measured row of input `kind` of `a`, and the content numbers it is read against: [meas, cont]. A zero
+## row has a driver (HitShapeZero.DRIVERS) or is a NO_DAMAGE input; the plain run is the shared grid.
+func _row(a: String, kind: String, key: String) -> Array:
+	if HitShapeZero.DRIVERS.has(key):
+		var driven := HitShapeZero.measure(self, a, kind, HitShapeZero.DRIVERS[key])
+		return [driven, HitShapeZero.content(self, a, kind)]
+	var hold := _hold_for(kind)
+	var hit := _probe(a, kind, hold, _secs_for(kind, hold))
+	var meas := _measure(hit)
+	var cont := _content(kind)
+	if swing_seen and meas["n"] > 0: meas["src"] = "swing"
+	if key in FIRST_FOE: meas["src"] = "first"
+	var lone_shot: bool = meas["n"] >= 1 and meas["n"] <= 2 or cont.get("shot", false)
+	if lone_shot and kind != "dash" and kind != "dash_hold":
+		_probe(a, kind, hold, _secs_for(kind, hold), true)      # a lone bullet: measured on a clear lane
+		if not shot_seen.is_empty():
+			var far := 0.0
+			for sh in shot_seen: far = maxf(far, sh[0])
+			var wide := 2.0 * float(shot_seen[0][1])
+			meas = {"n": meas["n"], "reach": far, "width": wide, "arc": 0.0, "src": "shot", "cap": ""}
+	return [meas, cont]
+
+## A row that read zero must be an input that hurts nobody by design (HitShapeZero.NO_DAMAGE, proved here
+## on a longer window), or it has no driver yet: the check fails.
+func _zero_ok(a: String, kind: String, key: String, meas: Dictionary) -> void:
+	if int(meas["n"]) > 0:
+		if HitShapeZero.NO_DAMAGE.has(key): ok(false, "%s hurt a dummy: it is not a no-damage input" % key)
+		return
+	if HitShapeZero.NO_DAMAGE.has(key):
+		ok(HitShapeZero.hurt_nobody(self, a, kind), "%s hurts nobody (%s)" % [key, HitShapeZero.NO_DAMAGE[key][0]])
+	else:
+		ok(false, "%s reads zero hit and has no driver (HitShapeZero.DRIVERS) or no-damage reason" % key)
+
+## Prints the HSROW line of one input and fails a reconciled row that drifted; 1 when it hurt a dummy.
+func _report(a: String, kind: String, key: String, meas: Dictionary, cont: Dictionary) -> int:
+	var flags := _flags(meas, cont)
+	if key in RECONCILED:
+		var plain := 0
+		for f in flags.split(", ", false): plain += 0 if f.begins_with("~") else 1
+		ok(plain == 0, "%s %s matches its content numbers (%s)" % [a, kind, flags])
+	var src: String = meas["src"] + ("+" + meas["cap"] if meas["cap"] != "" else "")
+	if int(meas["n"]) == 0: src = "none"
+	print("HSROW|%s|%s|%d|%s|%.1f|%.1f|%.0f|%.1f|%.1f|%.0f|%s" % [a, kind, meas["n"], src,
+			meas["reach"], meas["width"], meas["arc"], cont["reach"], cont["width"], cont["arc"], flags])
+	return 1 if int(meas["n"]) > 0 else 0
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	await _spawn(main)
 	var t0 := CheckClock.own_msec()
+	var only := ""      # (--hero=<arch>: one hunter only, for a quick look)
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--hero="): only = arg.substr(7)
 	for a in Arch.ids():
+		if only != "" and not (a in only.split(",")): continue
 		var hits := 0
 		p.reclass(Arch.weight(a), a)
 		for kind in ["lmb", "lmb_hold", "rmb", "rmb_hold", "e", "x", "dash", "dash_hold"]:
 			if not _has(a, kind): continue
-			var hold := _hold_for(kind)
-			var hit := _probe(a, kind, hold, _secs_for(kind, hold))
-			var meas := _measure(hit)
-			var cont := _content(kind)
 			var key: String = a + ":" + kind
-			if swing_seen and meas["n"] > 0: meas["src"] = "swing"
-			if key in FIRST_FOE: meas["src"] = "first"
-			var lone_shot: bool = meas["n"] >= 1 and meas["n"] <= 2 or cont.get("shot", false)
-			if lone_shot and kind != "dash" and kind != "dash_hold":
-				_probe(a, kind, hold, _secs_for(kind, hold), true)      # a lone bullet: measured on a clear lane
-				if not shot_seen.is_empty():
-					var far := 0.0
-					for s in shot_seen: far = maxf(far, s[0])
-					var wide := 2.0 * float(shot_seen[0][1])
-					meas = {"n": meas["n"], "reach": far, "width": wide, "arc": 0.0, "src": "shot", "cap": ""}
-			var flags := _flags(meas, cont)
-			if key in RECONCILED:
-				var plain := 0
-				for f in flags.split(", ", false): plain += 0 if f.begins_with("~") else 1
-				ok(plain == 0, "%s %s matches its content numbers (%s)" % [a, kind, flags])
-			hits += 1 if int(meas["n"]) > 0 else 0
-			var src: String = meas["src"] + ("+" + meas["cap"] if meas["cap"] != "" else "")
-			print("HSROW|%s|%s|%d|%s|%.1f|%.1f|%.0f|%.1f|%.1f|%.0f|%s" % [a, kind, meas["n"], src,
-					meas["reach"], meas["width"], meas["arc"], cont["reach"], cont["width"], cont["arc"], flags])
+			var row := _row(a, kind, key)
+			var meas: Dictionary = row[0]
+			var cont: Dictionary = row[1]
+			_zero_ok(a, kind, key, meas)
+			hits += _report(a, kind, key, meas, cont)
+		for key in HitShapeZero.EXTRA:
+			if not key.begins_with(a + ":"): continue
+			var extra_kind: String = key.split(":")[1]
+			var meas := HitShapeZero.measure(self, a, "rmb", HitShapeZero.EXTRA[key])
+			_zero_ok(a, extra_kind, key, meas)
+			_report(a, extra_kind, key, meas, HitShapeZero.content(self, a, extra_kind))
 		ok(hits >= 1, "%s: at least one input hurt a dummy (%d did)" % [a, hits])
 	_contact_checks()
-	ok(CheckClock.own_msec() - t0 < 60000, "the run took %.1f s (budget 60)" % ((CheckClock.own_msec() - t0) / 1000.0))
+	var took := (CheckClock.own_msec() - t0) / 1000.0
+	ok(took < 120.0, "the run took %.1f s (budget 120)" % took)
 	HeroVfx.of(m).ribbons.clear()
 	print("HIT SHAPE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

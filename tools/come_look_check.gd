@@ -139,6 +139,45 @@ func _newcomer(rare: bool) -> void:
 	var same := others.keys().all(func(nm): return _mem_size(nm) == others[nm])
 	ok(same, "%s: nobody else wrote a line" % tag)
 
+## You come home: the expeditions count goes up and the farm looks.
+func _trip() -> void:
+	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1
+	FarmChatter._look_t = 0.0
+	FarmChatter.tick(home, 0.01)
+
+## You bring home the first `id`; `who`, the nearest Boki (not the most curious), alone walks up and reacts with
+## `pose`, says a line and keeps one journal line with `verb`; nobody writes a memory line and the flag is set.
+func _item_home(id: String, who: String, pose: String, verb: String) -> void:
+	_gather(home.ppos)
+	var k := _entry(who)
+	for key in ComeLook.BUSY + ["busy"]:  # the base life may have sent it to a toy or a meal since _gather
+		k.erase(key)
+	k["pos"] = home.world.free_spot_near(home.ppos + Vector3(1.5, 0, 0))
+	(k["node"] as Node3D).position = k["pos"]
+	var mem := _mem_size(who)
+	var jr: int = (k["rec"].get("journal", []) as Array).size()
+	Save.d["items"][id] = 1
+	_trip()
+	ComeLook.tick(home, 0.01)  # the look takes hold before the base life thinks again (it sets k["look"])
+	var tag := "new %s" % id
+	ok(ComeLook._looks.size() == 1 and ComeLook._looks[0]["kind"] == "item" and ComeLook._looks[0]["k"] == k,
+		"%s: only the nearest Boki (%s) walks up (%d)" % [tag, who, ComeLook._looks.size()])
+	var res := _watch(home.ppos)
+	ok(res["pose"].get(who, "") == pose and res["spoke"].has(who),
+		"%s: %s does a %s and says a line" % [tag, who, pose])
+	# the item's own line, among those written since (a Boki's own errand may close with a line of its own meanwhile)
+	var mine: Array = []
+	for e in (k["rec"].get("journal", []) as Array).slice(jr):
+		var t := CareJournal.text(e)
+		if t.begins_with(verb) and t.contains(GardenItems.item_name(id)):
+			mine.append(t)
+	ok(mine.size() == 1, "%s: one journal line %s" % [tag, mine])
+	var seen: bool = Save.d["tutorial"].get(ComeLook.ITEM_KEY + id, false)
+	var mem_new: Array = (k["rec"]["memory"] as Array).slice(mem).filter(
+		func(e): return String(e["text"]).containsn(GardenItems.item_name(id)) or String(e["text"]).containsn(id)
+	)
+	ok(mem_new.is_empty() and seen, "%s: no memory line about it, kind marked seen (%s)" % [tag, mem_new])
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -199,5 +238,14 @@ func run(m: Node) -> void:
 	FarmChatter._look_t = 0.0
 	FarmChatter.tick(home, 0.01)
 	ok(ComeLook._looks.is_empty(), "the same trip is not news twice")
+	# ------------------------------------------------ a garden item kind you never had: the nearest Boki, once
+	await _item_home("thumpnut", "C", "puff", "puffed up at")
+	await _item_home("zipseed", "D", "hide", "hid from")
+	Save.d["items"]["thumpnut"] = 2
+	_gather(home.ppos)
+	_trip()
+	ok(ComeLook._looks.size() == 3 and ComeLook._looks[0]["kind"] == "loot",
+		"a Thumpnut again: plain loot news, not a second item look")
+	_watch(home.ppos)
 	print("COMELOOK done, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

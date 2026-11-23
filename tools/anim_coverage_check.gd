@@ -145,6 +145,22 @@ func _boki_air(main: Node, id: String) -> void:
 		id, rig._state_clip()])
 	k.free()
 
+## The live rig's munch and nap are its own eat and sleep clips when those pass BokiClipCover, else the built ones.
+func _boki_eat_sleep(main: Node, id: String) -> void:
+	var k: Node3D = Shots.rigged_kin(id)
+	main.add_child(k)
+	await main.get_tree().process_frame
+	var player := (k.get_node("Body/Flex/BokiRig") as BokiRig).player
+	var idle := player.get_animation("idle")
+	for pair in [["munch", "eat", false], ["nap", "sleep", true]]:
+		var played := player.get_animation(pair[0])
+		var baked := player.get_animation(pair[1])
+		var own := BokiClipCover.passes(baked, idle, pair[2])
+		var same := played.length == baked.length and is_equal_approx(
+			BokiClipCover.motion(BokiClipCover.sample(played)), BokiClipCover.motion(BokiClipCover.sample(baked)))
+		ok(same == own, "%s: %s is %s as it is: %s, passes: %s" % [id, pair[0], pair[1], same, own])
+	k.free()
+
 func _table(cols: Array, rows: Dictionary) -> String:
 	var s := "| | %s |\n|---|%s\n" % [" | ".join(cols), "---|".repeat(cols.size())]
 	for r in rows:
@@ -179,6 +195,7 @@ func run(main: Node) -> void:
 	var bokis := {}
 	for id in ["burrlet", "cindle", "puddlet"]:
 		bokis[id] = _boki_row(id)
+		await _boki_eat_sleep(main, id)
 		await _boki_air(main, id)
 	hunters.sort()
 	var ranked := {}
