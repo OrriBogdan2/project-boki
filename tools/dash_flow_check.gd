@@ -9,8 +9,8 @@ extends RefCounted
 ## row needs a reason and a source; the list per hero prints at the end (the hero agents' worklist). Landings
 ## (_landings): a dash, a jump and every slot pressed as he lands from a hop, a fall, a glide or a dive is never lost
 ## and, from the first step on the ground, acts as soon as it does standing.
-## It walks DashFlow.SLOTS for every hero, so rows added later are covered. --dash-flow-check=<id>,<id> runs only
-## those heroes. Never touches the save.
+## It walks DashFlow.SLOTS for every hero, so rows added later are covered. The registry splits the heroes into four
+## flags (--dash-flow-<n>-check) so each stays under the gate's 300 s cap. Never touches the save.
 
 const QUIET_MAX := 900  # steps: the last trial's ability (an ult, a zone) winds down first
 const DASH_WAIT := 40  # steps: a dash with a wind-up shows up within this
@@ -91,12 +91,12 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-
-func run(main: Node) -> void:
+## The whole check over `heroes`; the registry runs it in four shards (tools/dash_flow_shard_check.gd).
+func run_heroes(main: Node, heroes: Array) -> void:
 	for r in SOURCE_ROWS:
 		var row := DashFlow.row_of(r[0], r[2], r[1] == "air")
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
-	for hero in _heroes():
+	for hero in heroes:
 		await check_hero(main, hero)
 	await _one_window(main)
 	_print_exceptions()
@@ -130,15 +130,6 @@ func _hero(main: Node, hero: String, rows: bool) -> int:
 		await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(_on_used)
 	return bad
-
-
-## Every hero, or the ones named in --dash-flow-check=<id>,<id>.
-func _heroes() -> Array:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--dash-flow-check=") and arg.length() > 18:
-			return arg.get_slice("=", 1).split(",")
-	return Arch.ORDER
-
 
 func _on_used(caster: Node, _ability: String, slot: String) -> void:
 	if caster == hunter:
