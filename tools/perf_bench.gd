@@ -18,7 +18,7 @@ extends RefCounted
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
 ##   [--bench-garden] [--bench-boki=10,20,30]  (only the garden: each --bench-zone zone with each Boki count out, then
-##   the hub; frame p50/p95 per part, docs/GARDEN_PERF.md. Budget lines are FAIL-checked only at 9 Boki)
+##   the hub; --bench-isolate adds the cost split per zone part; frame p50/p95 per part, docs/GARDEN_PERF.md. Budget lines are FAIL-checked only at 9 Boki)
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
@@ -87,6 +87,7 @@ var pipes_draw := 0  # pipelines built at draw time so far (the hitch lines prin
 var out_path := ""
 var zone := ""
 var boki_counts: Array = [BOKI_OUT]  # --bench-boki=a,b,c: Boki out in each garden zone part
+var isolate := false  # --bench-isolate: each zone part also gets the cost split (tools/perf/garden_isolate.gd)
 var garden_only := false  # --bench-garden: the zone parts and the hub only
 var tracy_dir := ""
 var hunters := 6
@@ -159,6 +160,8 @@ func setup(main_node: Node) -> void:
 			zone = a.substr(13)
 		if a.begins_with("--bench-boki="):
 			boki_counts = Array(a.substr(13).split(",")).map(func(x): return int(x))
+		if a == "--bench-isolate":
+			isolate = true
 		if a == "--bench-garden":
 			garden_only = true
 		if a.begins_with("--tracy="):
@@ -499,7 +502,10 @@ func _zone(id: String, boki := BOKI_OUT) -> void:
 		Care.ensure(rec)
 		rec["zone"] = id
 		Save.d["roster"].append(rec)
-	await _farm("zone_" + id + ("" if boki == BOKI_OUT else "_b%d" % boki), {"zone": id})
+	var part := "zone_" + id + ("" if boki == BOKI_OUT else "_b%d" % boki)
+	await _farm(part, {"zone": id})
+	if isolate:
+		await load("res://tools/perf/garden_isolate.gd").new(main).run(part)
 
 
 ## --bench-garden: every --bench-zone zone with each --bench-boki count out, then the hub (nobody lives there, so
@@ -544,19 +550,20 @@ func _budget(part: String, fl: Array) -> void:
 	print("BENCH %s boki out: %d, draws with the UI: %.0f" % [part, home.kins.size(), _avg(fl, "draws")])
 	var held: Dictionary = GardenZones.rules()["ratchet"].get(Settings.quality(), {}).get(part, {})
 	var bad := false
+	var judged: bool = home.kins.size() <= BOKI_OUT  # a bigger crowd is measured, not judged
 	for k in got:
 		var over: bool = float(got[k]) > float(b[k])
 		var limit: float = float(held.get(k, b[k]))  # a measured ceiling stands in until the target is met
 		var good: bool = float(got[k]) <= limit
-		bad = bad or not good
+		bad = bad or (not good and judged)
 		var verdict := "ok"
-		if not good:
+		if not good and not judged:
+			verdict = "over (%d Boki, not judged)" % home.kins.size()
+		elif not good:
 			verdict = "FAIL (past the held %.1f)" % limit
 		elif over:
 			verdict = "over target, held at %.1f" % limit
 		print("BENCH budget %s %s: %.2f of %.1f %s" % [part, k, got[k], b[k], verdict])
-	if home.kins.size() > BOKI_OUT:  # the budget is for nine Boki out: a bigger crowd is measured, not judged
-		bad = false
 	failed = failed or bad
 	print("BENCH budget %s: %s" % [part, "FAIL" if bad else "ok"])
 

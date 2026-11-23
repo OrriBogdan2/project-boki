@@ -1148,6 +1148,7 @@ func _see_through() -> void:
 	SeeThrough.update(cam, player.global_position, b)
 
 func _exit_tree() -> void:
+	RigPace.crowd = 0
 	ZoneLayout.leave()
 	SeeThrough.off()
 	Sfx.clear_amb_layers()
@@ -1399,6 +1400,7 @@ func _move_kin(d: float) -> void:
 	_separate_kin(d)
 	if life: life.step(d)
 	nap_sound.step(kins, d)
+	RigPace.crowd = kins.size()
 	for k in kins:
 		if k.get("busy", false):
 			fly.land(k)

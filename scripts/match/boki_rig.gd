@@ -1257,7 +1257,8 @@ func _process(dt: float) -> void:
 	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
-	var t := pace.step(dt)
+	var near := RigPace.crowd > RigPace.CROWD and pace.every == 1 and RigPace.is_lead(get_viewport(), root.global_position)
+	var t := pace.step(dt, near)  # (a crowded home: the rig at the camera's focus keeps every frame)
 	if t > 0.0:
 		_face_step(t)
 		advance(t)

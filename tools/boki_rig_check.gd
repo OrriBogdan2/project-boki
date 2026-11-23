@@ -291,6 +291,14 @@ func _stepping(main: Node, rig: BokiRig) -> void:
 	var clip_s := rig.player.current_animation_position + rig.pace.held  # (plus what waits for its next step)
 	ok(absf(clip_s - 0.01 * frames) < 0.0001, "and kept up with the time: %.3f s of clip" % clip_s)
 	rig.pace.every = 1
+	# a crowded home (more than RigPace.CROWD Boki out) steps its rigs every EVERY frames below Ultra
+	var calm: int = rig.pace._gap()
+	RigPace.crowd = RigPace.CROWD + 1
+	var crowded: int = rig.pace._gap()
+	RigPace.crowd = 0
+	var want := 1 if Settings.quality() == "ultra" else RigPace.EVERY
+	ok(calm == 1 or RigPace.dear(), "a home with few Boki steps every frame (%d)" % calm)
+	ok(crowded == want or RigPace.dear(), "a crowded home steps every %d frames (want %d)" % [crowded, want])
 	rig.set_process(true)
 
 
