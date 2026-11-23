@@ -6,6 +6,8 @@ extends RefCounted
 
 const CHECKS := {
 	"--hearth-lamp-check": ["res://tools/hearth_lamp_check.gd", "hearth_lamp_check", null],  # Hearth Lamp revive beacon
+	# Vex's Slipstep: one plain dash, no pips, no Second Wind
+	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 	"--arena-check": ["res://tools/arena_check.gd", "arena_check", null],  # the Arena, training's practice tools, the kit card
 	"--archetype-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # every archetype kit, controls, locks, infusion, feel

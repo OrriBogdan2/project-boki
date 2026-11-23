@@ -35,6 +35,7 @@ func _spot(h: Hunter, at: Vector3) -> void:
 
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
@@ -65,6 +66,9 @@ func run(main: Node) -> void:
 		h.inp["move"] = Vector2.ZERO
 		if not keep.has(h):
 			h.out = true
+	var diff: Dictionary = (b.ai["diff"] as Dictionary).duplicate()
+	diff["aggro"] = 1.0  # (a timid roll would cut its reach under the 5 m the control stands at)
+	b.ai["diff"] = diff
 	for l in m.lairs.list:
 		m.lairs.activate(l)
 	var f: Dictionary = m.lairs.list[0]
@@ -83,16 +87,19 @@ func run(main: Node) -> void:
 	b.ai["think"] = 0.05
 	# ---- 1. the control: outside the lair, the player is fair game
 	var went := false
+	p.reveal_t = 2.5      # (seen whichever way the bot faces: it only sees what is in front of it)
 	for i in int(2.0 / Match.DT):
 		_step()
 		if b.ai["tgt"] == p:
 			went = true
+	p.reveal_t = 0.0
 	ok(
 		boss.dormant and m.lairs.boss_fight(b).is_empty() and went,
 		"outside the lair, boss asleep: the bot goes for the player 5 m away"
 	)
 	# ---- 2. sealed in: the boss only (a hit from before the seal doesn't count)
 	b.hurt(2.0, p, {"src": "shot"})
+	p.reveal_t = TURN_T  # (a shot gives the shooter away, whichever way the bot faces)
 	# (off the bot's line to the boss: a shot through the boss would hit the player)
 	_spot(p, f["c"] + Vector3(-side.z, 0.0, side.x) * 5.0)  # (5 m: a shot at the boss splashes 2.5 m)
 	_spot(b, f["c"] - side * 2.5)
