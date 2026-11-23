@@ -40,7 +40,6 @@ static func drive(m: Match) -> void:
 	var p := m.player
 	for k in KEYS:
 		p.inp[k] = false
-	p.inp["sec_hold"] = false     # (a step that ends mid-hold must let go: a stuck hold charges forever)
 	p.inp["move"] = Vector2.ZERO
 	_acted = false
 	if human:

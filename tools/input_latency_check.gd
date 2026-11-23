@@ -17,6 +17,7 @@ const ACTION := {"lmb": "fire", "rmb": "secondary", "e": "signature", "dash": "d
 const WINDUP := {
 	"juggernaut": {
 		"rmb": [TAP + 1, "tap/hold, the tap's Finishing Slam starts on the release (heroes/juggernaut.md)"],
+		"lmb": [TAP + 1, "press = slash series, hold = blast: the tap acts on the release (MOVEMENT_FEEL lmb-spam)"],
 	},
 	"dolm": {
 		"rmb": [TAP + 1, "tap/hold, owner item 61: a tap shows nothing, lands on the release (heroes/dolm.md)"],
