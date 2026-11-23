@@ -11054,3 +11054,8 @@ READY ext/ruin-walls-v1-drop 2ce1c5cb50 (delete ruin_walls_v1.gd + --art1 preloa
 READY ext/branch-reaper 0e216d28b3c (tools/branch_reaper.sh: delete merged ext/* branches; ran once, 829 deleted)
 READY ext/cj-dedup-guard c2c0a6b49e (jobq submit dedupe: apply_dedupe.py + selftest 11/11; install on hetzner per ops/jobq-dedupe/INSTALL.md)
 READY ext/feel-cast-into-cast-reland 61c88f9196bbc924c99a4b4b41b54b552ed240f6 (cast-into-cast buffering re-landed)
+READY ext/owner-kit-notes-b a02208ac2a (bulk-rebase: origin/main merged in mechanically, was 915b1aa745; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/flinch-sub-amount 253a3bba07 (bulk-rebase: origin/main merged in mechanically, was c79040a2a3; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/anim-coverage-stomp 7d2f9f0ad9 (bulk-rebase: origin/main merged in mechanically, was d71cb51e9b; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/lace-dash-clip 7214f3af24 (bulk-rebase: origin/main merged in mechanically, was adf680504f; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/cinder-dash-clip 2cb8d978b8 (bulk-rebase: origin/main merged in mechanically, was 498f09accd; union 1 gen 0 files; the branch's own READY checks still apply)
