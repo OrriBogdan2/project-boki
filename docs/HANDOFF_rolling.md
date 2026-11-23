@@ -76,7 +76,7 @@ The feature is behind the match option `rolling`. The default fixed-length match
     - XP for knocking a hunter who is a higher level than you;
     - bots prefer bounty targets.
   - **Session events:**
-    - Cleared camps come back once, one size up, 150 s after the clear if nobody is near (Camps, docs/decisions/0100).
+    - Cleared camps come back after 240 s if nobody is near.
     - Meteor showers come every 6 session minutes.
   - **Per-squad stay:** bots leave based on their squad's planned stay (`Match.bot_time_left`,
     `Match.bot_past`).
@@ -86,7 +86,7 @@ The feature is behind the match option `rolling`. The default fixed-length match
   - New `board()`.
   - New: `ship_of(h)` and `ship_pos_of(s)`.
   - `plan_jump`, `ship_jump` and `_update_one_ship` now handle several ships.
-  - Hooks call into Rolling from: plan in `_start`, the spawn, `Camps.spawn_all`,
+  - Hooks call into Rolling from: plan in `_start`, the spawn, `_spawn_mobs` (`note_camp`),
     `after_setup`, `step` (`tick`/`demo`), `on_drop_landed`, `knock`, the meteor and event timing,
     `_check_last` and `_finish` (`r["rolling"]`).
   - `opts.sim_keep` stops the match from ending when the player is done.
