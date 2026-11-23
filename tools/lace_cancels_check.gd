@@ -8,35 +8,47 @@ extends "res://tools/pin_bjorn_owner_check.gd"
 
 ## [file path to a row, the mode it runs]: the rows the source can't settle.
 const UNSETTLED := [
-	[["dash", "ground", "lmb"], "fire"], [["dash", "ground", "rmb"], "fire"], [["dash", "ground", "e"], "fire"],
-	[["dash", "ground", "x"], "fire"], [["dash", "ground", "q"], "fire"],
-	[["dash", "air", "lmb"], "fire"], [["dash", "air", "rmb"], "fire"], [["dash", "air", "e"], "fire"],
-	[["dash", "air", "x"], "fire"], [["dash", "air", "q"], "fire"],
-	[["into_dash", "rmb"], "fire"], [["into_dash", "e"], "fire"],
-	[["hold", "rmb", "ground"], "keep"], [["hold", "rmb", "air"], "keep"], [["hold", "rmb", "jump"], "keep"],
+	[["dash", "ground", "lmb"], "fire"],
+	[["dash", "ground", "rmb"], "fire"],
+	[["dash", "ground", "e"], "fire"],
+	[["dash", "ground", "x"], "fire"],
+	[["dash", "ground", "q"], "fire"],
+	[["dash", "air", "lmb"], "fire"],
+	[["dash", "air", "rmb"], "fire"],
+	[["dash", "air", "e"], "fire"],
+	[["dash", "air", "x"], "fire"],
+	[["dash", "air", "q"], "fire"],
+	[["into_dash", "rmb"], "fire"],
+	[["into_dash", "e"], "fire"],
+	[["hold", "rmb", "ground"], "keep"],
+	[["hold", "rmb", "air"], "keep"],
+	[["hold", "rmb", "jump"], "keep"],
 ]
-const HOLD_S := 0.5             # s: a draw or a Heavy Shot hold well under way before the second press
+const HOLD_S := 0.5  # s: a draw or a Heavy Shot hold well under way before the second press
+
 
 func cancels() -> void:
 	_rows()
 	var r := setup("archer", 7.0, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var K: ArcherKit = P.ak
-	P.equip("longbow", 0)
-	P.lvl = 6
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
+	var k: ArcherKit = p.ak
+	p.equip("longbow", 0)
+	p.lvl = 6
 	step(m, 0.3)
-	_during_draw(m, P, T, K)
-	_during_heavy(m, P, T, K)
-	_during_walk(m, P, T, K)
+	_during_draw(m, p, t, k)
+	_during_heavy(m, p, t, k)
+	_during_walk(m, p, t, k)
 	await done(m)
+
 
 func _row(path: Array) -> Dictionary:
 	var at: Variant = DashFlow.file_of("archer")
 	for key in path:
 		at = (at as Dictionary).get(key, {})
 	return at
+
 
 func _rows() -> void:
 	var file := DashFlow.file_of("archer")
@@ -49,11 +61,16 @@ func _rows() -> void:
 		var row := _row(u[0])
 		if not (String(row.get("source", "")).begins_with("[?]") and String(row.get("mode", "")) == u[1]):
 			off.append("/".join(u[0]))
-	ok("lace cancels: the %d rows no source settles are [?] and run item 51's default" % UNSETTLED.size(),
-		off.is_empty(), str(off))
-	var named := ["ground", "air", "jump"].all(func(mv):
-		return String(_row(["hold", "lmb", mv]).get("source", "")).contains("item 51"))
+	ok(
+		"lace cancels: the %d rows no source settles are [?] and run item 51's default" % UNSETTLED.size(),
+		off.is_empty(),
+		str(off)
+	)
+	var named := ["ground", "air", "jump"].all(
+		func(mv): return String(_row(["hold", "lmb", mv]).get("source", "")).contains("item 51")
+	)
 	ok("lace cancels: the draw through a jump or a dash is the owner's (item 51 names it)", named)
+
 
 ## The leaf rows under `node` (dicts with a mode) that have no source.
 func _bare_rows(node: Dictionary, path: String, out: Array) -> void:
@@ -65,110 +82,140 @@ func _bare_rows(node: Dictionary, path: String, out: Array) -> void:
 		if node[key] is Dictionary:
 			_bare_rows(node[key], path + "/" + String(key), out)
 
-func _start_draw(m: Match, P: Hunter, T: Hunter) -> void:
-	step(m, 1.2)
-	ready_bow(P)
-	step(m, HOLD_S, press_at.bind(P, T.pos))
 
-func _start_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
+func _start_draw(m: Match, p: Hunter, t: Hunter) -> void:
 	step(m, 1.2)
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 2.0
-	P.inp["sec_hold"] = true
-	K.press_rmb()
-	step(m, HOLD_S, rmb_at.bind(P, T.pos))
+	ready_bow(p)
+	step(m, HOLD_S, press_at.bind(p, t.pos))
 
-func _let_go_all(m: Match, P: Hunter, K: ArcherKit) -> void:
-	P.inp["fire"] = false
-	P.inp["sec_hold"] = false
+
+func _start_heavy(m: Match, p: Hunter, t: Hunter, k: ArcherKit) -> void:
+	step(m, 1.2)
+	k.cd["rmb"] = 0.0
+	k.ch_rmb = 2.0
+	p.inp["sec_hold"] = true
+	k.press_rmb()
+	step(m, HOLD_S, rmb_at.bind(p, t.pos))
+
+
+func _let_go_all(m: Match, p: Hunter, k: ArcherKit) -> void:
+	p.inp["fire"] = false
+	p.inp["sec_hold"] = false
 	step(m, 0.6)
-	K.ult.end()
+	k.ult.end()
+
 
 ## The draw, then E (both: the wall goes up, the draw keeps charging) and then X (the cast drops the draw with
 ## no arrow; the held button nocks the first empowered shot at once).
-func _during_draw(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
-	_start_draw(m, P, T)
-	var t0 := P.draw_t
-	cast_e_at(P, K, T.pos)
-	step(m, 0.2, press_at.bind(P, T.pos))
-	ok("lace cancels: draw > E: the wall goes up and the draw keeps charging",
-		float(K.cd["e"]) > 0.0 and P.draw_t > t0 + 0.15, "e cd %.1f draw %.2f -> %.2f" % [K.cd["e"], t0, P.draw_t])
-	_let_go_all(m, P, K)
-	_start_draw(m, P, T)
-	var loosed0 := K.draw.loosed_at
-	K.cd["x"] = 0.0
-	P.inp["fire"] = true
-	press_x(m, P)
-	step(m, 0.1, press_at.bind(P, T.pos))
-	ok("lace cancels: draw > X: the draw is dropped with no arrow, the held button nocks an empowered shot",
-		K.ult.active() and P.draw_t < 0.0 and K.draw.loosed_at == loosed0 and K.ult.nock_t >= 0.0,
-		"ult %s draw %.2f loosed %s nock %.2f" % [K.ult.active(), P.draw_t, K.draw.loosed_at != loosed0, K.ult.nock_t])
-	_let_go_all(m, P, K)
+func _during_draw(m: Match, p: Hunter, t: Hunter, k: ArcherKit) -> void:
+	_start_draw(m, p, t)
+	var t0 := p.draw_t
+	cast_e_at(p, k, t.pos)
+	step(m, 0.2, press_at.bind(p, t.pos))
+	ok(
+		"lace cancels: draw > E: the wall goes up and the draw keeps charging",
+		float(k.cd["e"]) > 0.0 and p.draw_t > t0 + 0.15,
+		"e cd %.1f draw %.2f -> %.2f" % [k.cd["e"], t0, p.draw_t]
+	)
+	_let_go_all(m, p, k)
+	_start_draw(m, p, t)
+	var loosed0 := k.draw.loosed_at
+	k.cd["x"] = 0.0
+	p.inp["fire"] = true
+	press_x(m, p)
+	step(m, 0.1, press_at.bind(p, t.pos))
+	ok(
+		"lace cancels: draw > X: the draw is dropped with no arrow, the held button nocks an empowered shot",
+		k.ult.active() and p.draw_t < 0.0 and k.draw.loosed_at == loosed0 and k.ult.nock_t >= 0.0,
+		"ult %s draw %.2f loosed %s nock %.2f" % [k.ult.active(), p.draw_t, k.draw.loosed_at != loosed0, k.ult.nock_t]
+	)
+	_let_go_all(m, p, k)
+
 
 ## The Heavy Shot held, then E, X and Shift: each goes at once and the hold carries on.
-func _during_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
-	_start_heavy(m, P, T, K)
-	cast_e_at(P, K, T.pos)
-	step(m, 0.1, rmb_at.bind(P, T.pos))
-	ok("lace cancels: Heavy Shot held > E: the wall goes up, the hold carries on",
-		float(K.cd["e"]) > 0.0 and K.rmb_down and K.pin_aim, "e cd %.1f held %s" % [K.cd["e"], K.rmb_down])
-	_let_go_all(m, P, K)
-	_start_heavy(m, P, T, K)
-	K.cd["x"] = 0.0
-	press_x(m, P)
-	step(m, 0.1, rmb_at.bind(P, T.pos))
-	ok("lace cancels: Heavy Shot held > X: three shots empowered, the hold carries on",
-		K.ult.active() and K.rmb_down, "ult %s held %s" % [K.ult.active(), K.rmb_down])
-	_let_go_all(m, P, K)
-	_start_heavy(m, P, T, K)
-	P.dashes = P.max_dashes()
-	P.do_dash()
-	var rolling := P.roll_t > 0.0
-	step(m, 0.35, rmb_at.bind(P, T.pos))
-	ok("lace cancels: Heavy Shot held > Shift: she rolls at once, the hold carries through (into_dash.rmb)",
-		rolling and K.rmb_down, "rolling %s held %s" % [rolling, K.rmb_down])
-	_let_go_all(m, P, K)
-	K.spirit.end("time")
+func _during_heavy(m: Match, p: Hunter, t: Hunter, k: ArcherKit) -> void:
+	_start_heavy(m, p, t, k)
+	cast_e_at(p, k, t.pos)
+	step(m, 0.1, rmb_at.bind(p, t.pos))
+	ok(
+		"lace cancels: Heavy Shot held > E: the wall goes up, the hold carries on",
+		float(k.cd["e"]) > 0.0 and k.rmb_down and k.pin_aim,
+		"e cd %.1f held %s" % [k.cd["e"], k.rmb_down]
+	)
+	_let_go_all(m, p, k)
+	_start_heavy(m, p, t, k)
+	k.cd["x"] = 0.0
+	press_x(m, p)
+	step(m, 0.1, rmb_at.bind(p, t.pos))
+	ok(
+		"lace cancels: Heavy Shot held > X: three shots empowered, the hold carries on",
+		k.ult.active() and k.rmb_down,
+		"ult %s held %s" % [k.ult.active(), k.rmb_down]
+	)
+	_let_go_all(m, p, k)
+	_start_heavy(m, p, t, k)
+	p.dashes = p.max_dashes()
+	p.do_dash()
+	var rolling := p.roll_t > 0.0
+	step(m, 0.35, rmb_at.bind(p, t.pos))
+	ok(
+		"lace cancels: Heavy Shot held > Shift: she rolls at once, the hold carries through (into_dash.rmb)",
+		rolling and k.rmb_down,
+		"rolling %s held %s" % [rolling, k.rmb_down]
+	)
+	_let_go_all(m, p, k)
+	k.spirit.end("time")
+
 
 ## Spirit Walk under way (the roll over), then each slot: it goes and she walks on.
-func _walk(m: Match, P: Hunter, K: ArcherKit) -> bool:
+func _walk(m: Match, p: Hunter, k: ArcherKit) -> bool:
 	step(m, 1.2)
-	K.spirit.end("time")
-	P.dashes = P.max_dashes()
-	P.do_dash()
+	k.spirit.end("time")
+	p.dashes = p.max_dashes()
+	p.do_dash()
 	step(m, 0.4)
-	return K.spirit.active() and P.roll_t <= 0.0
+	return k.spirit.active() and p.roll_t <= 0.0
 
-func _during_walk(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
-	var walking := _walk(m, P, K)
-	ready_bow(P)
-	var loosed0 := K.draw.loosed_at
-	step(m, 0.3, press_at.bind(P, T.pos))
-	P.inp["fire"] = false
+
+func _during_walk(m: Match, p: Hunter, t: Hunter, k: ArcherKit) -> void:
+	var walking := _walk(m, p, k)
+	ready_bow(p)
+	var loosed0 := k.draw.loosed_at
+	step(m, 0.3, press_at.bind(p, t.pos))
+	p.inp["fire"] = false
 	step(m, 0.1)
-	ok("lace cancels: Spirit Walk > LMB: she draws and looses, still walking",
-		walking and K.draw.loosed_at > loosed0 and K.spirit.active(), "walking %s loosed %s on %s"
-			% [walking, K.draw.loosed_at > loosed0, K.spirit.active()])
-	walking = _walk(m, P, K)
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 2.0
-	P.inp["sec_hold"] = true
-	K.press_rmb()
-	step(m, 0.3, rmb_at.bind(P, T.pos))
-	ok("lace cancels: Spirit Walk > RMB: the Heavy Shot draws, still walking",
-		walking and K.rmb_down and K.spirit.active(),
-		"walking %s held %s on %s" % [walking, K.rmb_down, K.spirit.active()])
-	_let_go_all(m, P, K)
-	walking = _walk(m, P, K)
-	cast_e_at(P, K, T.pos)
+	ok(
+		"lace cancels: Spirit Walk > LMB: she draws and looses, still walking",
+		walking and k.draw.loosed_at > loosed0 and k.spirit.active(),
+		"walking %s loosed %s on %s" % [walking, k.draw.loosed_at > loosed0, k.spirit.active()]
+	)
+	walking = _walk(m, p, k)
+	k.cd["rmb"] = 0.0
+	k.ch_rmb = 2.0
+	p.inp["sec_hold"] = true
+	k.press_rmb()
+	step(m, 0.3, rmb_at.bind(p, t.pos))
+	ok(
+		"lace cancels: Spirit Walk > RMB: the Heavy Shot draws, still walking",
+		walking and k.rmb_down and k.spirit.active(),
+		"walking %s held %s on %s" % [walking, k.rmb_down, k.spirit.active()]
+	)
+	_let_go_all(m, p, k)
+	walking = _walk(m, p, k)
+	cast_e_at(p, k, t.pos)
 	step(m, 0.1)
-	ok("lace cancels: Spirit Walk > E: the wall goes up, still walking",
-		walking and float(K.cd["e"]) > 0.0 and K.spirit.active(), "walking %s on %s" % [walking, K.spirit.active()])
-	walking = _walk(m, P, K)
-	K.cd["x"] = 0.0
-	press_x(m, P)
-	ok("lace cancels: Spirit Walk > X: three shots empowered, still walking",
-		walking and K.ult.active() and K.spirit.active(), "walking %s ult %s on %s"
-			% [walking, K.ult.active(), K.spirit.active()])
-	K.ult.end()
-	K.spirit.end("time")
+	ok(
+		"lace cancels: Spirit Walk > E: the wall goes up, still walking",
+		walking and float(k.cd["e"]) > 0.0 and k.spirit.active(),
+		"walking %s on %s" % [walking, k.spirit.active()]
+	)
+	walking = _walk(m, p, k)
+	k.cd["x"] = 0.0
+	press_x(m, p)
+	ok(
+		"lace cancels: Spirit Walk > X: three shots empowered, still walking",
+		walking and k.ult.active() and k.spirit.active(),
+		"walking %s ult %s on %s" % [walking, k.ult.active(), k.spirit.active()]
+	)
+	k.ult.end()
+	k.spirit.end("time")

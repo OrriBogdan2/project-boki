@@ -2,7 +2,7 @@ class_name Hunter
 extends Ent
 ## A player or bot hunter: movement, weapon, dash, jump, ledge grab, class signature, downed state.
 
-# Supervive feel (see docs/SUPERVIVE_FEEL.md): near-instant ground control, momentum that carries in
+# Target feel (see sv/FEEL_NOTES.md): near-instant ground control, momentum that carries in
 # the air and in the glider. Air, fall and glide-height tunables are in content/rules/hunter_move.json.
 const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^2, the same up and down
 # ---- movement feel (movefeel, Oct 31 2026): every value and its source is in docs/MOVEMENT_FEEL.md,
@@ -50,7 +50,6 @@ const LEDGE_REACH := 2.8
 const LEDGE_CD := 0.45
 const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
-const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
 # The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
 # itself near the ground (or earlier on jump) for a slower, floatier last stretch.
 const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
@@ -895,7 +894,7 @@ func _dash_into_glide() -> bool:
 	roll_t = 0.0
 	glide_cd = 0.0
 	shove = {}
-	if Vector2(vel.x, vel.z).length() > GLIDE_SPEED * 1.25:
+	if Vector2(vel.x, vel.z).length() > HunterMove.glide_cruise * 1.25:
 		_glide_boost_fx()
 	return true
 
@@ -1672,7 +1671,7 @@ func _physics(dt: float) -> void:
 		# the glider keeps the speed you bring into it (a dash or a pad into a glide carries) and
 		# drifts on when you let go of the keys
 		var hot_k := HunterMove.overheat_speed if glide_fuel <= 0.001 else 1.0
-		var gs := GLIDE_SPEED * hot_k * (1.0 + gear_stat("glide_speed"))
+		var gs := HunterMove.glide_cruise * hot_k * (1.0 + gear_stat("glide_speed"))
 		var carry := Loco.glide_carry(arch) * (1.0 + gear_stat("glide_speed"))
 		if loco.since > 0.0:     # the step the glider opens keeps your velocity exactly (item 8)
 			var base := glide_lift.unswoop(hv)     # the swoop rides on top of the glide's steering
@@ -1935,7 +1934,7 @@ func _physics(dt: float) -> void:
 	_try_ledge_grab(dt)
 	moves.settle(dt)
 	if is_local():
-		Loco.report(loco, Vector2(vel.x, vel.z), vel.y, GLIDE_SPEED if gliding else spd)
+		Loco.report(loco, Vector2(vel.x, vel.z), vel.y, HunterMove.glide_cruise if gliding else spd)
 	if _in_abyss():
 		fall_out()
 
@@ -2855,7 +2854,7 @@ func render(delta: float, alpha: float) -> void:
 	elif gliding:
 		wind_t -= delta
 		# (movefeel) carrying a dash's momentum: a dense streak trail and afterimages until it bleeds off
-		var boosted := boost_fx_t > 0.0 and spd > GLIDE_SPEED * 1.25 and not dropping
+		var boosted := boost_fx_t > 0.0 and spd > HunterMove.glide_cruise * 1.25 and not dropping
 		boost_fx_t = maxf(0.0, boost_fx_t - delta) if boosted else 0.0
 		if wind_t <= 0.0:
 			wind_t = 0.035 if boosted else 0.09

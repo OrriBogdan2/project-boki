@@ -5,11 +5,11 @@ extends RefCounted
 ## five samples of the gum's vertices in the head bone's frame (centre, top below the crown, drift from bind).
 
 const STATES := ["bind", "idle", "run", "attack"]
-const VIEWS := {"front": [0.0, 15.0], "3q": [40.0, 10.0], "profile": [90.0, 0.0]}   # [yaw deg, camera above deg]
-const FRAMES := 80          # steps before a pose is shot
-const SAMPLES := 5          # per clip, 0 .. 100 %
-const CROP := 520           # px of a close-up
-const GAME_PITCH := 66.0    # the match camera (CamRig STYLES "default")
+const VIEWS := {"front": [0.0, 15.0], "3q": [40.0, 10.0], "profile": [90.0, 0.0]}  # [yaw deg, camera above deg]
+const FRAMES := 80  # steps before a pose is shot
+const SAMPLES := 5  # per clip, 0 .. 100 %
+const CROP := 520  # px of a close-up
+const GAME_PITCH := 66.0  # the match camera (CamRig STYLES "default")
 const GAME_DIST := 23.0
 const GAME_FOV := 32.0
 
@@ -18,6 +18,7 @@ var cam: Camera3D
 var holder: Node3D
 var tag := "after"
 var out := ""
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -31,7 +32,7 @@ func run(main: Node) -> void:
 		main.fade.reveal(0.01)
 	_stage(main)
 	for k in 90:
-		await tree.process_frame     # (the loading cover is gone before the first shot)
+		await tree.process_frame  # (the loading cover is gone before the first shot)
 	for st in STATES:
 		await _state(String(st))
 	var probe := _hunter()
@@ -42,12 +43,14 @@ func run(main: Node) -> void:
 	print("RYZZ_GUM_SHOTS_DONE")
 	tree.quit()
 
+
 func _stage(main: Node) -> void:
 	holder = Node3D.new()
 	main.add_child(holder)
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
-		"stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ground := MeshInstance3D.new()
@@ -60,12 +63,15 @@ func _stage(main: Node) -> void:
 	holder.add_child(cam)
 	cam.make_current()
 
+
 func _hunter() -> Node3D:
-	var h := Models.hunter(Arch.weight("mage"), Data.TEAM_COLORS[0], Arch.signature("mage"), "", PlayerLook.neutral(),
-		"mage")
+	var h := Models.hunter(
+		Arch.weight("mage"), Data.TEAM_COLORS[0], Arch.signature("mage"), "", PlayerLook.neutral(), "mage"
+	)
 	h.rotation.y = PI
 	holder.add_child(h)
 	return h
+
 
 func _drive(an: HunterAnim, h: Node3D, st: String, frames: int) -> void:
 	var fwd := Vector3(-sin(h.rotation.y), 0, -cos(h.rotation.y))
@@ -79,6 +85,7 @@ func _drive(an: HunterAnim, h: Node3D, st: String, frames: int) -> void:
 		an.update(1.0 / 60.0, s)
 		await tree.process_frame
 
+
 ## Stops the clips and rests every bone: the bind pose (a contract model: WardenSync and its tree; a native one: its
 ## AnimationPlayer).
 func _freeze(h: Node3D) -> void:
@@ -90,15 +97,18 @@ func _freeze(h: Node3D) -> void:
 		(ap as AnimationPlayer).active = false
 	WardenGlb.skeleton(h.get_node("Warden")).reset_bone_poses()
 
+
 ## The face's centre (m): a fixed lift over the head bone (the lips sit just below it, the crown 0.28 above it).
 func _face(h: Node3D) -> Vector3:
 	var skel := WardenGlb.skeleton(h.get_node("Warden"))
 	return skel.global_transform * skel.get_bone_global_pose(_head(skel)).origin + Vector3(0, 0.04, 0)
 
+
 ## The head bone: the contract's `head`, or a Meshy-native rig's `Head`.
 func _head(skel: Skeleton3D) -> int:
 	var bi := WardenSkeleton.find(skel, "head")
 	return bi if bi >= 0 else skel.find_bone("Head")
+
 
 func _grab() -> Image:
 	await tree.process_frame
@@ -106,6 +116,7 @@ func _grab() -> Image:
 	var img := tree.root.get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGBA8)
 	return img
+
 
 func _state(st: String) -> void:
 	var h := _hunter()
@@ -127,7 +138,8 @@ func _state(st: String) -> void:
 		var img := await _grab()
 		var m := (img.get_height() - CROP) / 2
 		img.get_region(Rect2i((img.get_width() - CROP) / 2, m, CROP, CROP)).save_png(
-			out.path_join("%s_%s_%s.png" % [tag, st, v]))
+			out.path_join("%s_%s_%s.png" % [tag, st, v])
+		)
 	if st == "idle" or st == "run":
 		var p := deg_to_rad(GAME_PITCH)
 		cam.fov = GAME_FOV
@@ -143,15 +155,18 @@ func _state(st: String) -> void:
 	h.queue_free()
 	await tree.process_frame
 
+
 ## The gum's vertices (surface of 138, skinned whole to the bone `gum`) in the head bone's frame, metres.
-func _gum_pts(skel: Skeleton3D, gum_bi: int, head_bi: int, mi: MeshInstance3D, verts: PackedVector3Array,
-		inv_bind: Transform3D) -> PackedVector3Array:
+func _gum_pts(
+	skel: Skeleton3D, gum_bi: int, head_bi: int, mi: MeshInstance3D, verts: PackedVector3Array, inv_bind: Transform3D
+) -> PackedVector3Array:
 	var to_head := (skel.global_transform * skel.get_bone_global_pose(head_bi)).affine_inverse()
 	var gum_w := skel.global_transform * skel.get_bone_global_pose(gum_bi) * inv_bind
 	var pts := PackedVector3Array()
 	for v in verts:
 		pts.append(to_head * (gum_w * (mi.transform * v)))
 	return pts
+
 
 func _sweep() -> void:
 	var h := _hunter()
@@ -178,8 +193,10 @@ func _sweep() -> void:
 	for i in mi.skin.get_bind_count():
 		if mi.skin.get_bind_name(i) == "gum" or mi.skin.get_bind_bone(i) == gum_bi:
 			inv_bind = mi.skin.get_bind_pose(i)
-	var crown := (skel.global_transform * skel.get_bone_global_pose(head_bi)).affine_inverse() \
+	var crown := (
+		(skel.global_transform * skel.get_bone_global_pose(head_bi)).affine_inverse()
 		* WardenGlb.anchor(h, "anchor_head_top").global_position
+	)
 	skel.reset_bone_poses()
 	var bind := _gum_pts(skel, gum_bi, head_bi, mi, verts, inv_bind)
 	var ap := AnimationPlayer.new()
@@ -203,18 +220,21 @@ func _sweep() -> void:
 			worst = maxf(worst, (cn - _centre(bind)).length())
 			for p in pts:
 				top = minf(top, crown.y - p.y)
-		rows.append("%s\t%.2f\t%.3f\t%.3f\t%.3f\t%.1f\t%.1f" % [nm, ln, ctr.x, ctr.y, ctr.z, top * 100.0,
-			worst * 100.0])
+		rows.append(
+			"%s\t%.2f\t%.3f\t%.3f\t%.3f\t%.1f\t%.1f" % [nm, ln, ctr.x, ctr.y, ctr.z, top * 100.0, worst * 100.0]
+		)
 	var f := FileAccess.open(out.path_join("%s_sweep.txt" % tag), FileAccess.WRITE)
 	f.store_string("\n".join(rows) + "\n")
 	f.close()
 	h.queue_free()
+
 
 func _centre(pts: PackedVector3Array) -> Vector3:
 	var s := Vector3.ZERO
 	for p in pts:
 		s += p
 	return s / pts.size()
+
 
 func _stat(pts: PackedVector3Array, crown: Vector3) -> String:
 	var c := _centre(pts)

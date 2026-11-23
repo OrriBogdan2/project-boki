@@ -93,6 +93,7 @@ func _walk(k: Dictionary, secs: float) -> float:
 	return far
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	seed(RNG_SEED)
@@ -161,7 +162,8 @@ func _hold_lifts(k: Dictionary) -> void:
 	var tap := {"kind": "kin", "k": k}
 	var frame := func(): await main.get_tree().process_frame
 	k["hold_t"] = 0.0
-	InteractGate.reset()   # home._process disarms the gate while its world is not free; the check drives the key by hand
+	# home._process disarms the gate while its world is not free; the check drives the key by hand
+	InteractGate.reset()
 	Input.action_press("interact")
 	c.tick(STEP, tap, true)
 	await frame.call()
