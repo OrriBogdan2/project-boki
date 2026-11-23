@@ -8,5 +8,5 @@ const CHECKS := {
 	"--muzzle-check": ["res://tools/muzzle_check.gd", "muzzle_check", null],  # shots leave the weapon or hand
 	"--boki-type-hit-check": ["res://tools/boki_type_hit_check.gd", "boki_type_hit_check", "check"],  # Juice.flash_col
 	"--boki-type-hit-shots": ["res://tools/boki_type_hit_check.gd", "boki_type_hit_check", "shots"],  # --shots-dir
-	"--fx-hunter-cap-check": ["res://tools/fx_hunter_cap_check.gd", "fx_hunter_cap_check", null],  # glow spheres near a Hunter are capped
+	"--fx-hunter-cap-check": ["res://tools/fx_hunter_cap_check.gd", "fx_hunter_cap_check", null],  # Hunter glow cap
 }
