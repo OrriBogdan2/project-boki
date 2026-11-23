@@ -65,8 +65,8 @@ func _play(main: Node, id: String) -> void:
 		if tu.id() == "pick_sec" and not forced:
 			forced = true
 			var p := m.player
-			var only: bool = p.can_level("sec") and not p.can_level("dash") and not p.can_level("kin")
-			ok(only and not p.can_level("ult"), id + ": the first pick can only be the right click")
+			var only: bool = int(p.slot_lv["sec"]) == 1 and not p.can_level("dash") and not p.can_level("kin")
+			ok(only and not p.can_level("ult"), id + ": the first pick (made for you) is the right click, no other")
 			p.gain_xp(500.0)
 			ok(p.lvl == 1, id + ": XP from anything but the camps is ignored")
 		if tu.id() in FIGHT_STEPS:
