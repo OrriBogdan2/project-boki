@@ -270,7 +270,7 @@ func _connect() -> bool:
 func _build(d: Dictionary) -> void:
 	var nm := Match.new()
 	main.add_child(nm)
-	nm.start(LobbyScreen.duel_match(d))
+	await nm.start(LobbyScreen.duel_match(d))
 	nm.set_process(false)
 	m = nm
 
