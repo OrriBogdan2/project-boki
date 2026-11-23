@@ -1,6 +1,6 @@
 extends RefCounted
 ## --prematch-shots --size=WxH --shots-dir=<dir>: the pre-match lobby at the window's size, four moments
-## (full 30 s, after the first chat line, 4 s left in the red pulse, locked in), as <dir>/<W>x<H>_<moment>.png,
+## (full turn, after the first chat line, 4 s left in the red pulse, locked in), as <dir>/<W>x<H>_<moment>.png,
 ## and the controls outside the safe margin. Run once per size with a real renderer:
 ## godot -- --prematch-shots --size=1280x720 --shots-dir=out (--size resizes the window).
 
