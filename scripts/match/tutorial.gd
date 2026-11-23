@@ -597,8 +597,10 @@ func _boki_sent() -> bool:
 	if k == null or k.state == "downed" or k.st_throws > throws0:
 		return true
 	for e: Dictionary in camps.ledger:
+		if not is_instance_valid(e["mb"]):
+			continue
 		var mb: Mob = e["mb"]
-		if not is_instance_valid(mb) or mb.dead:
+		if mb.dead:
 			continue
 		if k.target == mb or mb.tgt == k:
 			return true
@@ -669,7 +671,7 @@ func goal(sid: String) -> Vector3:
 			var best := camps.nearest("sentinel" if sid == "hook" else "")
 			if best == null:
 				best = camps.nearest()
-			return best.pos if best else Vector3.INF
+			return best.pos if best else camps.last_at  # (a camp felled with you on the edge respawns once you're back)
 		"wayout", "uplink", "defend", "extract":
 			var o := outpost()
 			return o["pos"] if not o.is_empty() else Vector3.INF
