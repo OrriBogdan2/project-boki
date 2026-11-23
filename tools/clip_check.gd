@@ -200,7 +200,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		if mesh == null or not mesh is ArrayMesh:
 			continue
 		for si in mesh.get_surface_count():
-			tris += (mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+			tris += int((mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3.0)
 	ok(tris > 0 and tris <= TRI_BUDGET, "%s: %d tris, weapon included (budget %d)" % [id, tris, TRI_BUDGET])
 	var missing: Array = []
 	var named: Array = _named(dd)
@@ -1018,7 +1018,7 @@ func _flinch(id: String) -> void:
 	var still := await _run_hit(id, 0.0, chip, 0.0)
 	var stagger := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 4.0)
 	var stagger_still := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 0.0)
-	var mid := hit.size() / 3
+	var mid := int(hit.size() / 3.0)
 	ok(float(still[mid]["act"]) <= 0.0, "%s: a chip hit standing still flinches the upper body only" % id)
 	ok(float(stagger[mid]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
 	ok(float(stagger_still[mid]["act"]) > 0.5, "%s: a stagger standing still takes the whole body" % id)

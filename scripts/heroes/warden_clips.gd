@@ -234,6 +234,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	lib = clips
+	WardenClipFile.add(lib, glb, sk, d.get("clip_files", []))
 	WardenDerive.add(lib, d.get("derive", {}))
 	var contract: Array = []
 	for b in WardenGlb.BONES:

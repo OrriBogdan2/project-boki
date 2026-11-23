@@ -192,7 +192,7 @@ func _upgrade_shortcut(hb: HomeBuild) -> void:
 	hb.bar.left_pad = 700.0      # a narrow bar: two tiles a page, so the last row is not on the first
 	ok(FarmBuildUi.show_upgrade(hb, tag) and hb.cat == "Upgrades", "the shortcut opens the Upgrades tab")
 	var row := hb._tab_items().find_custom(func(e: Dictionary) -> bool: return int(e.get("uid", 0)) == int(piece["u"]))
-	var page_of: int = row / hb.bar.tiles_per_page()
+	var page_of: int = int(row / float(hb.bar.tiles_per_page()))
 	ok(row >= 0 and hb.bar.focus_uid == int(piece["u"]) and hb.bar.page > 0 and hb.bar.page == page_of,
 		"on the page of the %s's row (row %d, page %d)" % [name_of, row, hb.bar.page])
 	piece["t"] = 3
