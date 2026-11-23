@@ -134,8 +134,7 @@ for the squad rows). Verified 11-11:
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
 - An open deathbox does not open this window: the loot window (below) shows what you carry itself.
-- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`); 0.24.5 pass at 1280x720 and
-  3440x1440 in docs/shots/ui-inventory.
+- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`). `--inventory-check` also sweeps a full loadout at 1280x720, 1920x1080 and 3440x1440 (safe margin, clipping, every slot reachable); `--garden-fit-check` covers the garden Boki card at the same sizes. 0.24.5 pass at 1280x720 and 3440x1440 in docs/shots/ui-inventory.
 
 ## Pop-up budget
 
