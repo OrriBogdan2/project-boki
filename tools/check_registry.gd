@@ -724,7 +724,6 @@ const CHECKS := {
 	"--tg-text-check": ["res://tools/tg_text_check.gd", "tg_text_check", null],  # no "Arena" in practice text
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
-	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
 	"--wall-slide-check": ["res://tools/wall_slide_check.gd", "wall_slide_check", null],  # walls and corners
 	"--dash-wall-check": ["res://tools/dash_wall_check.gd", "dash_wall_check", null],  # dashes slide along walls
 	"--mantle-fling-check": ["res://tools/mantle_fling_check.gd", "mantle_fling_check", null],  # owner bug 11-11

@@ -175,6 +175,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if sid == "sec":
 		_rmb(m, tu)
 	if best == null:
+		if sid == "summon" or sid == "pack":
+			_summon(m, tu)      # (the monster fell in a window called back early: the Boki still comes out again)
 		return
 	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)

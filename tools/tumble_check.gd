@@ -386,7 +386,6 @@ func _bout_start(tb: BaseTumble) -> bool:
 	var n := int(BaseTumble.rules()["exchanges"])
 	return tb.run != null and tb.run.state == "intro" and int(tb.run.r_x["exchanges"]) == n
 
-
 func _menu() -> InputEventAction:
 	var e := InputEventAction.new()
 	e.action = "menu"
@@ -416,10 +415,8 @@ func _teach(tb: BaseTumble, home) -> void:
 	)
 	ok(tri.size() == 1, "teach: the card draws the Rush/Brace/Dodge triangle")
 	var r_v := BaseTumble.rules()
-	ok(
-		tb.run != null and int(tb.run.r_x["exchanges"]) == 1 and float(tb.run.r_x["pick_s"]) > float(r_v["pick_s"]),
-		"teach: practice is one exchange with a longer pick window"
-	)
+	ok(tb.run != null and int(tb.run.r_x["exchanges"]) == 1 and float(tb.run.r_x["pick_s"]) > float(r_v["pick_s"]),
+			"teach: practice is one exchange with a longer pick window")
 	var lines := {}
 	var bar_speed := 0.0
 	var honest := false

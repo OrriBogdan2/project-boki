@@ -21,7 +21,8 @@ const NOT_ROWS := [
 	"bot_diff",
 	"audio_v",
 	"keys7_v",
-	"hold_done"
+	"hold_done",
+	"wisps_v",
 ]
 
 var bad := 0
