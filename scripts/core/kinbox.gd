@@ -138,7 +138,7 @@ static func rename(p: int, nm: String) -> void:
 	Save.d["box"]["names"][p] = nm
 
 static func page_of(rec: Dictionary) -> int:
-	return int(rec.get("box_slot", 0)) / PAGE
+	return int(int(rec.get("box_slot", 0)) / float(PAGE))
 
 ## Which box cell a kin is in, or -1.
 static func at(slot: int) -> Dictionary:

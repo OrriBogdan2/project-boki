@@ -33,7 +33,7 @@ static func station(id: String, e: Dictionary, rng: RandomNumberGenerator) -> No
 					n,
 					Models.box(0.2, 0.17, 0.02),
 					Models.toon(c.lerp(Color.WHITE, 0.35), false),
-					Vector3(-0.3 + (i % 3) * 0.3, 1.2 - (i / 3) * 0.26, 0.07),
+					Vector3(-0.3 + (i % 3) * 0.3, 1.2 - (int(i / 3.0)) * 0.26, 0.07),
 					Vector3.ONE,
 					Vector3(0, 0, rng.randf_range(-0.15, 0.15))
 				)
@@ -57,7 +57,7 @@ static func station(id: String, e: Dictionary, rng: RandomNumberGenerator) -> No
 						logs,
 						Models.cyl(0.11, 0.11, 0.8, 10),
 						Models.toon(Color("9a6a40")),
-						Vector3(0, 0.12 + (i / 3) * 0.2, -0.22 + (i % 3) * 0.22 + (i / 3) * 0.11),
+						Vector3(0, 0.12 + (int(i / 3.0)) * 0.2, -0.22 + (i % 3) * 0.22 + (int(i / 3.0)) * 0.11),
 						Vector3.ONE,
 						Vector3(0, 0, PI / 2)
 					)
@@ -235,7 +235,7 @@ static func station(id: String, e: Dictionary, rng: RandomNumberGenerator) -> No
 			sprout.name = "Sprouts"
 			n.add_child(sprout)
 			for i in 9:
-				var sp := Vector3(-0.5 + (i % 3) * 0.5, 0.36, -0.45 + (i / 3) * 0.45)
+				var sp := Vector3(-0.5 + (i % 3) * 0.5, 0.36, -0.45 + (int(i / 3.0)) * 0.45)
 				Models.part(
 					sprout, Models.cyl(0.02, 0.025, 0.16, 5), Models.toon(Color("5aa04a")), sp + Vector3(0, 0.08, 0)
 				)
@@ -286,7 +286,7 @@ static func station(id: String, e: Dictionary, rng: RandomNumberGenerator) -> No
 					n,
 					Models.cyl(0.07, 0.07, 0.42, 8),
 					Models.toon(Color("9a6a40")),
-					Vector3(0.36, 0.08 + (i / 2) * 0.13, -0.2 + (i % 2) * 0.16 + (i / 2) * 0.08),
+					Vector3(0.36, 0.08 + (int(i / 2.0)) * 0.13, -0.2 + (i % 2) * 0.16 + (int(i / 2.0)) * 0.08),
 					Vector3.ONE,
 					Vector3(PI / 2, 0, 0)
 				)
