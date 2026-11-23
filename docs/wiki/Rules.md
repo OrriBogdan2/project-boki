@@ -865,6 +865,19 @@ How many Boki are out on the island at once; the rest sleep in the Boki Burrow (
 | scout | {"ease_in_s": 0.35, "ease_out_s": 0.25, "zoom": 0.25, "sight_mul": 1.25, "cone_deg": 30.0} |
 | source | {"pitch_deg": [64.0, 67.0], "fov_deg": [25.0, 34.0], "feet_below_pct": [3.0, 4.0], "ahead_per_behind": [1.46, 1.62], "side_per_ahead": [1.25, 1.35], "across_m": [35.0, 39.0], "hunter_screen_pct": [8.3, 9.3]} |
 
+## camps (`content/rules/camps.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Monster camps (scripts/match/camps.gd, docs/CAMPS.md). Every camp spot on the map is one of three sizes by its layout kind: light = Small Camp, normal = Camp, heavy = Great Camp. lvl: the level a bot wants before it goes for the camp (bots farm small camps first). n and big: monsters in a camp from a region table, and the one big monster a Great Camp always has. fixed: the monsters of a Great Camp with no region table. A camp's monsters are picked by a dice seeded from its spot alone, so the same camp holds the same monsters every match. back_s: a cleared camp comes back once this many seconds after its clear, if no Hunter is within back_clear_r metres (rolling sessions only). spread: how far (m) the monsters stand from the camp's centre. |
+| sizes | {"light": {"name": "Small Camp", "lvl": 1, "n": 2}, "normal": {"name": "Camp", "lvl": 2, "n": 3}, "heavy": {"name": "Great Camp", "lvl": 4, "n": 4, "big": ["brute", "sentinel"], "fixed": ["brute", "spitter", "skitter", "sentinel"]}} |
+| back_s | 240 |
+| back_clear_r | 22 |
+| spread | 1.8 |
+| bot_camp_share | 0.85 |
+
 ## capture (`content/rules/capture.json`)
 
 Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.
@@ -1462,7 +1475,7 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | ratchet | {"medium": {"hub": {"draws": 520, "objects": 520}, "zone_cinderstep": {"frame_ms": 19.5}, "zone_ridge": {"frame_ms": 18.0}}, "low": {"hub": {"draws": 370, "objects": 560}}} |
 | ratchet_doc | Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one. |
 | budget_doc | What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column. |
-| wayseed_from | Old Pell's Black Market (a new Wayseed every few days), or a lair of a matching type on a run |
+| wayseed_from | a lair of a matching type on a run, or Old Pell at the Black Market (one every %d days, %d gems) |
 
 ## gear (`content/rules/gear.json`)
 
@@ -2387,8 +2400,10 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 
 | Setting | Value |
 |---|---|
-| _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. Looks only: no stat or damage changes. |
+| _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. prize: the monster kinds with a kill window (StealReel); reel: seconds the first drop under the line stands open, no attacks, normal damage. |
 | at | 0.25 |
+| prize | ["brute", "glimmer", "warden", "colossus", "serpent", "brood"] |
+| reel | 1.2 |
 
 ## stomps (`content/rules/stomps.json`)
 
