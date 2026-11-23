@@ -91,6 +91,7 @@ func _fights(main: Node, dir: String) -> void:
 	var frames := {}  # "kind what" -> frames it was on a Hunter
 	var contrast := PackedFloat32Array()  # each frame's Hunter-vs-ground contrast (ClarityContrast)
 	var no_rim := PackedFloat32Array()  # the same frames with the ground rim off (occlusion_outline rim_alpha 0)
+	var chatter := [0]  # frames with fight-time Boki text (callout pins, others' lines): 0 is the rule
 	main.get_window().size = FIGHT_PX
 	for f in ClarityFight.FIGHTS.size():
 		var on_frame := func(fm: Match, i: int) -> void:
@@ -102,6 +103,7 @@ func _fights(main: Node, dir: String) -> void:
 					contrast.append(score.x)
 					no_rim.append(score.y)
 			var seen := {}
+			chatter[0] += int(BokiChatter.drawn > 0)
 			for e in ClarityFight.tally(fm):
 				rows.append("%d\t%d\t%s\t%s\t%d" % [f, i, e[0], e[1], e[2]])
 				seen["%s %s" % [e[0], e[1]]] = true
@@ -119,6 +121,8 @@ func _fights(main: Node, dir: String) -> void:
 		print("CLARITYCONTRAST %.2f over %d frames (rim off %.2f, %+.0f%%)" % [on, contrast.size(), off, gain])
 	var keys := frames.keys()
 	keys.sort_custom(func(a, b): return frames[a] > frames[b])
+	var n_frames := FIGHT_FRAMES * ClarityFight.FIGHTS.size()
+	print("CLARITYCHATTER %d/%d frames with fight-time Boki text" % [chatter[0], n_frames])
 	for k: String in keys.slice(0, 40):
 		print("CLARITYTOP %d/%d %s" % [frames[k], FIGHT_FRAMES * ClarityFight.FIGHTS.size(), k])
 

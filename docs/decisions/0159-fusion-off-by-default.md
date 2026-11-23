@@ -1,4 +1,4 @@
-# 0101: Fusion off by default (11-18), code kept
+# 0159: Fusion off by default (11-18), code kept
 
 - **Status:** accepted
 - **Date:** 2026-11-18
