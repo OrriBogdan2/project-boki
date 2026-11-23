@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cct28rwwwgj3u"
-path="res://.godot/imported/nettlynx_nettlynx_normal.webp-c13d528f5ed33e7c7d9e599daba08436.ctex"
+path.bptc="res://.godot/imported/nettlynx_nettlynx_normal.webp-c13d528f5ed33e7c7d9e599daba08436.bptc.ctex"
+path.astc="res://.godot/imported/nettlynx_nettlynx_normal.webp-c13d528f5ed33e7c7d9e599daba08436.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "26960f2cb34719b74e5a4072605a606c"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/nettlynx/nettlynx_nettlynx_normal.webp"
-dest_files=["res://.godot/imported/nettlynx_nettlynx_normal.webp-c13d528f5ed33e7c7d9e599daba08436.ctex"]
+dest_files=["res://.godot/imported/nettlynx_nettlynx_normal.webp-c13d528f5ed33e7c7d9e599daba08436.bptc.ctex", "res://.godot/imported/nettlynx_nettlynx_normal.webp-c13d528f5ed33e7c7d9e599daba08436.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
