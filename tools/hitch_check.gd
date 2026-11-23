@@ -446,6 +446,16 @@ func _finish_load() -> void:
 	for f in ranked.slice(0, 12):
 		lines.append("LOAD   %7.0f %7.0f %7.0f %6.0f %5.0f  c%-3d %-22s %s%s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), float(f["proc"]), float(f["phys"]), int(f["compiles"]), String(f["stage"]),
 			", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])), String(f["slice"])])
+	if trace:
+		# every slow frame in order (ms into the load): the top 12 above miss the long tail
+		lines.append("LOAD all slow frames in order (at ms, wall, render, compiles, stage, slice):")
+		var at := 0.0
+		for f in fl:
+			at += float(f["wall"])
+			if (float(f["cpu"]) if cpu_only else float(f["wall"])) > budget:
+				var mks := ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))
+				lines.append("LOAD   @%6.0f %6.0f %6.0f c%-3d %-20s %s%s" % [at, float(f["wall"]),
+					float(f["render"]), int(f["compiles"]), String(f["stage"]), mks, String(f["slice"])])
 	var steps := {}
 	for mk in PerfLog.marks:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
