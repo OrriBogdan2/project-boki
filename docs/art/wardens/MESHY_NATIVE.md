@@ -22,6 +22,16 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 - HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
   idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack`, crouch
   `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
+- Own move clips (data `clip_files` + `moves`, 11-23, Kael first): a clips-only file beside the model
+  (`art/wardens/<art>/<art>_clips.glb`, the rig's nodes with no mesh; WardenClipFile adds its clips to Meshy's library
+  by bone name) holds clips keyed on Meshy's skeleton, and `moves` maps a kit move (`kmove`) to one: `clip`, `hold`
+  (stays on its last pose while the kit holds the move), `fade`, and for the check `hit` (the kit's hit second) with
+  `peak` (`speed`, `low`, `reach`: how the clip's hit pose is measured). The clip's clock is the kit's (`kmove_t`),
+  so its hit pose lands on the kit's hit. A move with no entry still plays `Attack`. Kael's are made by
+  `python3 -I tools/art1/kael_native_clips.py` (poses as body-frame numbers: hips, chest, feet, sword hand and blade
+  direction, solved with two-bone IK by `tools/art1/meshy_rig.py`; the blade runs along the right hand bone). Timing and
+  poses: docs/heroes/juggernaut.md "Native clips". `--warden-native-check` sweeps each clip and asserts the hit pose
+  within one frame of the kit's hit; `--clip-shots --states` presses each mapped move (`--attack-only`: before).
 - Crouch arms (`crouch_arms_from`): Meshy's only crouch holds a torch out in front, which read in game as Sable's
   pistol and Tenzo's stone arm floating off the body. The crouch plays a copy (`<clip>_arms`, added beside Meshy's
   clips at load) whose arm bones (every bone below Meshy's `LeftShoulder`/`RightShoulder`, data `arm_roots`) take

@@ -254,9 +254,9 @@ func _loco(s: Dictionary) -> void:
 		_play("idle", 1.0)
 
 
-## A kit move with its own clip (data "moves") plays it at the kit's clock: clip second = seconds since the move began, so
-## its hit pose lands on the kit's hit. A "hold" move stays on its last pose while the kit holds the move. True while the
-## clip owns the body.
+## A kit move with its own clip (data "moves") plays it on the kit's clock: clip second = seconds since the move began,
+## so its hit pose lands on the kit's hit. A "hold" move stays on its last pose while the kit holds the move. True while
+## the clip owns the body.
 func _own_move(s: Dictionary, dt: float) -> bool:
 	var km := String(s.get("kmove", ""))
 	var mv: Dictionary = moves.get(km, {})
