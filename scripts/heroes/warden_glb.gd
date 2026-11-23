@@ -136,7 +136,10 @@ static func fetch_all() -> void:
 		fetch(a)
 
 static func path(arch: String) -> String:
-	var nm := art(arch)
+	var nm := String(ART.get(arch, arch))   # RENDER TREE ONLY: a variant swaps the glb file, data stays the base art's
+	var v := variant(nm)
+	if v != "" and ResourceLoader.exists("%s/%s/%s.glb" % [DIR, v, v]):
+		nm = v
 	return "%s/%s/%s.glb" % [DIR, nm, nm]
 
 ## The folder and file name of a Warden's model: its art name, or a design variant picked for it. A variant is
@@ -146,8 +149,7 @@ static func path(arch: String) -> String:
 ## shipped model.
 static func art(arch: String) -> String:
 	var nm := String(ART.get(arch, arch))
-	var v := variant(nm)
-	return v if v != "" and ResourceLoader.exists("%s/%s/%s.glb" % [DIR, v, v]) else nm
+	return nm
 
 ## The variant `--warden-variant=` picks for an art name ("" for none).
 static func variant(nm: String) -> String:
