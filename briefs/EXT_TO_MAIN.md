@@ -11142,3 +11142,4 @@ READY ext/extra-godot-errors 1f7ec4bf6834722b6e2494444626c66a6ca9c4e1 (Godot ERR
 READY ext/combat-lagcomp-flake e5d2e3ae0a6a699faa8cc6dc66acd4d3ec0317c6 (lagcomp-check flake fixed)
 READY ext/anim-kael-native-clips b35ca0dd04 (Kael native per-ability clips)
 READY ext/feel-shake-table 654718dd380857914abeff335954fd6d7ddcf94b (screen shake table vs source)
+READY ext/run-speeds-data 4a926ce662 (bulk-rebase: origin/main merged in mechanically, was d6e5038125; union 1 gen 0 files; the branch's own READY checks still apply)
