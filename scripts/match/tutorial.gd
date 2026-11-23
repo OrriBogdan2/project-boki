@@ -680,7 +680,7 @@ func goal(sid: String) -> Vector3:
 			var best := camps.nearest("sentinel" if sid == "hook" else "")
 			if best == null:
 				best = camps.nearest()
-			return best.pos if best else Vector3.INF
+			return best.pos if best else camps.last_at  # (a camp felled with you on the edge respawns once you're back)
 		"steal":
 			return st.goal()
 		"wayout", "uplink", "defend", "extract":

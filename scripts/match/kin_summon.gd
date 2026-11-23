@@ -70,6 +70,11 @@ static func card_line(window: float) -> String:
 	return out_v
 
 
+## The one plain line for the perks rule (Field Book card, Boki tooltip), with the Summon key's cap.
+static func perk_line() -> String:
+	return String(rules()["perk_line"]) % Settings.key_cap("summon")
+
+
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
@@ -159,6 +164,7 @@ func killed(by: Ent) -> bool:
 	elif foe and (o.downed or o.out):
 		KinSteal.break_loose(k, at)  # its owner is down: anyone may grab it
 	else:
+		k.m.sfx("boki_downed", at, -4.0)          # (a loose one says it as it breaks loose)
 		k.back_home = true
 		fly_len = maxf(0.1, Vector2(at.x - o.pos.x, at.z - o.pos.z).length() / float(rules()["home_speed"]))
 		fly = fly_len
