@@ -1,4 +1,4 @@
-## Sable and Motley re-check on main 5a246f9696 (2026-11-23, branch ext/parity-recheck-sable-motley)
+## Sable and Motley re-check on main d49f4f321d (2026-11-23, branch ext/parity-recheck-sable-motley)
 
 Every Sable (`thief`, source ref-thief) and Motley (`ostra`, source Void) row of this file and of `docs/heroes/{thief,ostra}.md` was re-read against `content/archetypes/{thief,ostra}.json`, `content/weapons/{arc_bolts,tether_lantern}.json`, `content/rules/{dash_feel,kit_parity,hunter_move}.json`, the kits (`thief_kit.gd`, `ostra_kit.gd`) and the commits to them since the last full read (11-12, main 88b06b9e7), with the 11-15..11-22 merges as the focus. This note supersedes the stale numbers in the older rows above (listed under "Rows now stale").
 
@@ -32,12 +32,12 @@ Sable: "E 14 m" (now 15), "Bola ... two foes stun .9 + 13" (+6.1), "Encore r 2.3
 
 ### Checks
 
-| Check | Main 5a246f9696 | This branch |
+| Check | Main (5a246f9696, d49f4f321d for health and wiki) | This branch |
 |---|---|---|
 | `--thief-combo-check` (`--dancer-combo-check`) | 193 checks, 3 failures (Vault recharge 5, Cartwheel 4.5 m, stride 2.3 Hz) | 193 checks, 1 failure (stride, drift 10) |
 | `--ostra-combo-check` | 279 checks, 0 failures | 279, 0 |
 | `--card-numbers-check` | 344, 0 | 344, 0 |
 | `--kit-parity-check` | 0 failures | 0 failures (one row more: `thief dash.cd` 5.0) |
 | `--move-feel-check` | 19 failures | 15 failures (Sable curve rows fixed; the rest are other heroes and the walking brake, as on Lace's 11-22 branch) |
-| `python3 tools/health.py --strict` | red: `check_registry.gd` long_line 0 to 1 (`66d289323f`, 11-22) | green: the comment is shortened |
+| `python3 tools/health.py --strict` | red: `check_registry.gd` long_line 0 to 1 (`66d289323f`, 11-22), then `camp_clear_check.gd` 0 to 1 on d49f4f321d | green: both comments shortened |
 | `python3 tools/gen_wiki.py --check` | out of date `Rules.md` | clean |
