@@ -99,7 +99,7 @@ func _shots() -> void:
 	var off := m.cam.global_position - P.pos      # the camera's fixed offset from what it follows
 	m.hud.visible = false
 	var covers := {"cliff": _cliff_spot(off), "tree": _prop_spot(off, m.world.tree_spots)}
-	covers["tree2"] = _prop_spot(off, m.world.tree_spots.slice(m.world.tree_spots.size() / 2))
+	covers["tree2"] = _prop_spot(off, m.world.tree_spots.slice(int(m.world.tree_spots.size() / 2.0)))
 	var stone := _stone_spots()
 	for k in stone:      # low stone covers: stand right behind them or they hide nothing
 		covers[k] = _prop_spot(off, stone[k], STONE_BEHIND)
@@ -175,7 +175,7 @@ func _stone_spots() -> Dictionary:
 		if w.kind[i] != World.T_BLOCK:
 			continue
 		var x := i % w.w
-		var z := i / w.w
+		var z := int(i / float(w.w))
 		var foot := Vector3(x + 0.5, w.ground_at(x + 0.5, z + 0.5), z + 0.5)
 		if w.props.get(i, "") == "ruin":
 			by["pillar"].append(foot)
