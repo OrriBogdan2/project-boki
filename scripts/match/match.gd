@@ -1740,6 +1740,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if credit == player and target != player and src != "burn":
 		if not BokiImpact.play(self, by, target, o, crit, "you"):
 			sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
+		if hud:
+			hud.reticle.flavour(crit, armor_hit)  # the tick: gold on a crit, pale on armour
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
@@ -2395,6 +2397,8 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 func on_armor_break(h: Hunter, by: Ent) -> void:
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	Juice.armor_break(self, h, credit)
+	if credit == player and hud:
+		hud.reticle.flavour(true, true)
 
 ## Knocked into a wall: stunned for a moment, which is the whole point of knockback near walls.
 func on_wall_slam(e: Ent, dir: Vector2) -> void:
