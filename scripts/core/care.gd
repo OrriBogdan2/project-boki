@@ -517,12 +517,35 @@ static func trust_up(rec: Dictionary, kind: String, now_s: float, food := "", mu
 	if now_s < float(last.get(kind, -1.0e9)) + float(r["cooldown_h"]) * float(r["hour_s"]):
 		return ""
 	var was := float(rec.get("trust", 0.0))
-	rec["trust"] = clampf(was + float(r[kind]) * mul, 0.0, 100.0)
-	if float(rec["trust"]) <= was:
+	if trust_add(rec, float(r[kind]) * mul, now_s) <= 0.0:
 		return ""
 	last[kind] = now_s
 	rec["care_t"] = last
 	return String(r["say"][kind]) % ([rec["name"], food_name(food)] if kind == "food" else [rec["name"]])
+
+## Trust a paid act adds after the day's taper (garden_trust.json taper): the first `free` acts of a
+## Boki in one window pay in full, each one after that pays `step` less of its amount, down to `floor`.
+## The window (rec.trust_acts) opens at its first act and closes after care.json care_day_s, so it resets
+## with the garden day. A loss passes through untaxed. Returns the trust actually added.
+static func trust_add(rec: Dictionary, amount: float, now_s: float) -> float:
+	var was := float(rec.get("trust", 0.0))
+	if amount > 0.0:
+		amount *= trust_taper(rec, now_s)
+	rec["trust"] = clampf(was + amount, 0.0, 100.0)
+	return float(rec["trust"]) - was
+
+## The share (0..1) the next paid act of the day pays; counts the act when trust is not full.
+static func trust_taper(rec: Dictionary, now_s: float) -> float:
+	if float(rec.get("trust", 0.0)) >= 100.0:
+		return 1.0
+	var T: Dictionary = Content.rules("garden_trust")["taper"]
+	var w: Dictionary = rec.get_or_add("trust_acts", {"t0": now_s, "n": 0})
+	if now_s - float(w["t0"]) >= float(Content.rules("care")["care_day_s"]) or now_s < float(w["t0"]):
+		w["t0"] = now_s
+		w["n"] = 0
+	var over := int(w["n"]) - int(T["free"])
+	w["n"] = int(w["n"]) + 1
+	return 1.0 if over < 0 else maxf(float(T["floor"]), 1.0 - float(T["step"]) * float(over + 1))
 
 # ------------------------------------------------------------------ IVs
 ## A fresh set of IVs, each 0 to 31.
@@ -658,6 +681,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
 	baby["gifts"] = Parentage.gifts(a, b, baby, _inherit_habits(baby, a, b, rng))
+	baby["gifts"].merge(Unique.bred_coat(baby, a, b, maxi(int(baby["gifts"]["species"]), 0)))
 	if UnstableMix.unstable(a, b): UnstableMix.mark(baby)
 	var lean := head_start(a, b)
 	if not lean.is_empty(): baby["lean"] = lean
