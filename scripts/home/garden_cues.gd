@@ -14,17 +14,19 @@ extends RefCounted
 ## pools below and take the Boki's type colour. --garden-cue-shots takes the pictures, --garden-games-clip the
 ## clips, --garden-games-vfx-check times them.
 
-const TEAL := Color("3fe0d0")        # neon edge, first side
-const MAGENTA := Color("ff3fd0")     # neon edge, second side and the spike
-const VOID := Color("2a1c40")        # an unlit cue
-const BRIGHT := 0.9                  # alpha of a lit cue
-const DIM := 0.55                    # alpha of an unlit cue
-const MISS := Color("6a6478")        # a missed beat or a fumbled pass: dull, so a hit stands out
-const LIFT := 1.7                    # m over a Boki's feet a cue floats: above its emote (1.25 m)
+const TEAL := Color("3fe0d0")  # neon edge, first side
+const MAGENTA := Color("ff3fd0")  # neon edge, second side and the spike
+const VOID := Color("2a1c40")  # an unlit cue
+const BRIGHT := 0.9  # alpha of a lit cue
+const DIM := 0.55  # alpha of an unlit cue
+const MISS := Color("6a6478")  # a missed beat or a fumbled pass: dull, so a hit stands out
+const LIFT := 1.7  # m over a Boki's feet a cue floats: above its emote (1.25 m)
+
 
 ## The Boki's type colour (the Field Book's), for the cues that belong to one Boki.
 static func type_colour(rec: Dictionary) -> Color:
 	return DexView.type_col(DexView.type_of(String(rec.get("species", ""))))
+
 
 ## An unlit, see-through material: plain alpha, so the violet and teal read on bright day ground too.
 ## `on_top` draws it over everything, for the cues that float among the Boki.
@@ -37,8 +39,10 @@ static func glow(c: Color, alpha: float, on_top := false) -> StandardMaterial3D:
 	m.albedo_color = Color(c.r, c.g, c.b, alpha)
 	return m
 
+
 static func tint(m: StandardMaterial3D, c: Color, alpha: float) -> void:
 	m.albedo_color = Color(c.r, c.g, c.b, alpha)
+
 
 static func piece(parent: Node3D, mesh: Mesh, m: StandardMaterial3D, at: Vector3) -> MeshInstance3D:
 	var n := MeshInstance3D.new()
@@ -48,6 +52,7 @@ static func piece(parent: Node3D, mesh: Mesh, m: StandardMaterial3D, at: Vector3
 	parent.add_child(n)
 	return n
 
+
 static func ring(inner: float, outer: float) -> TorusMesh:
 	var t := TorusMesh.new()
 	t.inner_radius = inner
@@ -56,10 +61,12 @@ static func ring(inner: float, outer: float) -> TorusMesh:
 	t.ring_segments = 4
 	return t
 
+
 static func box(dims: Vector3) -> BoxMesh:
 	var b := BoxMesh.new()
 	b.size = dims
 	return b
+
 
 ## The cue's own root under the home, so clear() frees all of it at once.
 static func root_in(parent: Node3D, label: String) -> Node3D:
@@ -68,18 +75,19 @@ static func root_in(parent: Node3D, label: String) -> Node3D:
 	parent.add_child(r)
 	return r
 
+
 ## The Dash: marks at the stretch boundaries (where you cheer) and the finish line at the start.
 class DashCue:
 	extends RefCounted
-	const POST_H := 1.1                 # m, a mark's beam
-	const RING_IN := 0.38               # m, a mark's ring
+	const POST_H := 1.1  # m, a mark's beam
+	const RING_IN := 0.38  # m, a mark's ring
 	const RING_OUT := 0.5
-	const LINE_DEPTH := 0.16            # m, the finish line along the track
-	const PULSE := 6.0                  # rad/s the next mark breathes at
+	const LINE_DEPTH := 0.16  # m, the finish line along the track
+	const PULSE := 6.0  # rad/s the next mark breathes at
 
 	var root: Node3D
-	var mats: Array = []                # per mark: the glow material
-	var lit := 0                        # marks your Boki has reached
+	var mats: Array = []  # per mark: the glow material
+	var lit := 0  # marks your Boki has reached
 	var t := 0.0
 
 	func _init(parent: Node3D, marks: Array, finish: Vector3, track_w: float) -> void:
@@ -113,19 +121,20 @@ class DashCue:
 	func clear() -> void:
 		root.queue_free()
 
+
 ## The Stump Shove: a bar over the stump; the fill runs from the middle toward whoever is stronger.
 class ShoveCue:
 	extends RefCounted
-	const HALF := 0.6                   # m, half the bar
-	const HEIGHT := 1.25                # m over the stump's foot
-	const THICK := 0.09                 # m
-	const TILT := 0.3                   # rad the bar dips at full balance
+	const HALF := 0.6  # m, half the bar
+	const HEIGHT := 1.25  # m over the stump's foot
+	const THICK := 0.09  # m
+	const TILT := 0.3  # rad the bar dips at full balance
 
 	var root: Node3D
 	var fill: MeshInstance3D
 	var fill_mat: StandardMaterial3D
-	var side := 0                       # the side the fill runs toward (0 on a level bar)
-	var power := 0.0                    # 0..1: how far the fill runs
+	var side := 0  # the side the fill runs toward (0 on a level bar)
+	var power := 0.0  # 0..1: how far the fill runs
 
 	func _init(parent: Node3D, stump_at: Vector3) -> void:
 		root = GardenCues.root_in(parent, "ShoveCue")
@@ -151,20 +160,21 @@ class ShoveCue:
 	func clear() -> void:
 		root.queue_free()
 
+
 ## Seek: dots drift from the hidden scent toward each hunter; the better its nose, the brighter its trail.
 class SeekCue:
 	extends RefCounted
-	const DOTS := 8                     # per hunter
-	const REACH := 4.0                  # m the trail runs from the scent at most
-	const DOT_R := 0.2                  # m
-	const DRIFT := 0.5                  # trail lengths per s the dots move out
-	const MAX_ALPHA := 0.85             # the trail of a perfect nose
+	const DOTS := 8  # per hunter
+	const REACH := 4.0  # m the trail runs from the scent at most
+	const DOT_R := 0.2  # m
+	const DRIFT := 0.5  # trail lengths per s the dots move out
+	const MAX_ALPHA := 0.85  # the trail of a perfect nose
 
 	var root: Node3D
-	var dots: Array = []                # per hunter: its DOTS meshes
-	var mats: Array = []                # per hunter: its glow material
-	var strength: Array = [0.0, 0.0]    # per hunter: the trail's alpha before the fade along it
-	var shown: Array = [0, 0]           # per hunter: dots on the ground now
+	var dots: Array = []  # per hunter: its DOTS meshes
+	var mats: Array = []  # per hunter: its glow material
+	var strength: Array = [0.0, 0.0]  # per hunter: the trail's alpha before the fade along it
+	var shown: Array = [0, 0]  # per hunter: dots on the ground now
 	var t := 0.0
 
 	func _init(parent: Node3D) -> void:
@@ -204,23 +214,24 @@ class SeekCue:
 	func clear() -> void:
 		root.queue_free()
 
+
 ## Spark Volley: a ring where the seed will land, and a flash at the Boki whose spike you called.
 class VolleyCue:
 	extends RefCounted
-	const RING_IN := 0.3                # m
+	const RING_IN := 0.3  # m
 	const RING_OUT := 0.4
-	const FAR := 1.8                    # the ring's scale when the seed has just left
-	const FLASH_S := 0.4                # s the spike flash lasts
-	const FLASH_R := 1.2                # m the flash grows to
-	const BRIGHT_RING := 0.8            # alpha of the ring at touchdown and of the flash's first frame
+	const FAR := 1.8  # the ring's scale when the seed has just left
+	const FLASH_S := 0.4  # s the spike flash lasts
+	const FLASH_R := 1.2  # m the flash grows to
+	const BRIGHT_RING := 0.8  # alpha of the ring at touchdown and of the flash's first frame
 
 	var root: Node3D
 	var landing: MeshInstance3D
 	var landing_mat: StandardMaterial3D
 	var flash: MeshInstance3D
 	var flash_mat: StandardMaterial3D
-	var flash_t := 0.0                  # s of flash left
-	var spiked := false                 # the seed in the air is a spike
+	var flash_t := 0.0  # s of flash left
+	var spiked := false  # the seed in the air is a spike
 
 	func _init(parent: Node3D) -> void:
 		root = GardenCues.root_in(parent, "VolleyCue")
@@ -261,16 +272,17 @@ class VolleyCue:
 	func clear() -> void:
 		root.queue_free()
 
+
 ## A few rings reused in turn, the oldest first: each grows from `from` to `to` times its size and fades out
 ## over its life. `spawns` counts them and `last_at`/`last_col` keep the newest, for the checks.
 class Bursts:
 	extends RefCounted
-	var nodes: Array = []               # MeshInstance3D per ring
-	var mats: Array = []                # its glow material
-	var age: Array = []                 # s since it spawned
-	var life: Array = []                # s it lasts (0: idle)
-	var grow: Array = []                # [from, to] scale
-	var tone: Array = []                # its colour, alpha at spawn
+	var nodes: Array = []  # MeshInstance3D per ring
+	var mats: Array = []  # its glow material
+	var age: Array = []  # s since it spawned
+	var life: Array = []  # s it lasts (0: idle)
+	var grow: Array = []  # [from, to] scale
+	var tone: Array = []  # its colour, alpha at spawn
 	var next := 0
 	var spawns := 0
 	var last_at := Vector3.ZERO
@@ -315,19 +327,20 @@ class Bursts:
 				life[i] = 0.0
 				nodes[i].visible = false
 
+
 ## Echo Steps: the lead's stone lights on its beat in the lead's type colour; on a beat you answer a ring
 ## round all four stones keeps time without giving the stone away. A hit flashes bright, a miss dull and inward.
 class EchoCue:
 	extends RefCounted
-	const BEAT_S := 0.3                 # s a beat ring lasts
-	const FLASH_S := 0.45               # s a hit or miss flash lasts
-	const UP := Vector3(0, 0.16, 0)     # m over a stone's foot: on its top
+	const BEAT_S := 0.3  # s a beat ring lasts
+	const FLASH_S := 0.45  # s a hit or miss flash lasts
+	const UP := Vector3(0, 0.16, 0)  # m over a stone's foot: on its top
 
 	var root: Node3D
 	var middle := Vector3.ZERO
-	var beats: Bursts                   # a stone's beat
-	var pulses: Bursts                  # the beat you answer, round the stones
-	var flashes: Bursts                 # hits and misses
+	var beats: Bursts  # a stone's beat
+	var pulses: Bursts  # the beat you answer, round the stones
+	var flashes: Bursts  # hits and misses
 
 	func _init(parent: Node3D, at: Vector3, reach: float) -> void:
 		root = GardenCues.root_in(parent, "EchoCue")
@@ -356,23 +369,24 @@ class EchoCue:
 	func clear() -> void:
 		root.queue_free()
 
+
 ## Tumble: the rival's tell over its head while the tell lasts: Rush a double chevron toward your Boki, Brace a
 ## shield, Dodge a hoop. A tell is only probably true, so the icon is never solid: its alpha is the chance it
 ## is honest and it sways more the less sure it is.
 class TumbleTellCue:
 	extends RefCounted
-	const POP_S := 0.12                 # s the icon takes to grow in
-	const SWAY := 0.5                   # rad of sway at a coin-flip tell, none at a sure one
-	const SWAY_RATE := 5.0              # rad/s
-	const SIZE := 1.5                   # the icon's scale: about 0.55 m across, a Boki's head
+	const POP_S := 0.12  # s the icon takes to grow in
+	const SWAY := 0.5  # rad of sway at a coin-flip tell, none at a sure one
+	const SWAY_RATE := 5.0  # rad/s
+	const SIZE := 1.5  # the icon's scale: about 0.55 m across, a Boki's head
 
-	var root: Node3D                    # faces the camera and sways
-	var pivot: Node3D                   # grows the icon in
-	var icons := {}                     # move -> its Node3D
+	var root: Node3D  # faces the camera and sways
+	var pivot: Node3D  # grows the icon in
+	var icons := {}  # move -> its Node3D
 	var mat: StandardMaterial3D
-	var face: StandardMaterial3D        # the band across the shield
-	var shown := ""                     # the move on show ("" for none)
-	var sure := 0.0                     # the chance the tell on show is honest
+	var face: StandardMaterial3D  # the band across the shield
+	var shown := ""  # the move on show ("" for none)
+	var sure := 0.0  # the chance the tell on show is honest
 	var t := 0.0
 
 	func _init(parent: Node3D, col: Color) -> void:
@@ -382,8 +396,9 @@ class TumbleTellCue:
 		var rush := Node3D.new()
 		for x in [-0.12, 0.12]:
 			for y in [-1.0, 1.0]:
-				var bar := GardenCues.piece(rush, GardenCues.box(Vector3(0.26, 0.07, 0.04)), mat,
-						Vector3(x, y * 0.085, 0))
+				var bar := GardenCues.piece(
+					rush, GardenCues.box(Vector3(0.26, 0.07, 0.04)), mat, Vector3(x, y * 0.085, 0)
+				)
 				bar.rotation.z = -y * 0.7
 		var brace := Node3D.new()
 		GardenCues.piece(brace, GardenCues.box(Vector3(0.36, 0.44, 0.04)), mat, Vector3.ZERO)
@@ -429,18 +444,19 @@ class TumbleTellCue:
 	func clear() -> void:
 		root.queue_free()
 
+
 ## The Relay Cup: a glowing baton over each team's runner in the runner's type colour. At a hand-off a ring
 ## bursts at the Boki taking it, bright on a clean pass, dull on a fumble, and the baton blinks while it fumbles.
 class BatonCue:
 	extends RefCounted
-	const SPIN := 2.5                   # rad/s the baton turns
-	const BLINK := 14.0                 # rad/s it blinks while the runner takes it
-	const BURST_S := 0.6                # s a hand-off ring lasts
+	const SPIN := 2.5  # rad/s the baton turns
+	const BLINK := 14.0  # rad/s it blinks while the runner takes it
+	const BURST_S := 0.6  # s a hand-off ring lasts
 
 	var root: Node3D
-	var batons: Array = []              # per team
+	var batons: Array = []  # per team
 	var mats: Array = []
-	var legs := [0, 0]                  # the leg each baton is on
+	var legs := [0, 0]  # the leg each baton is on
 	var rings: Bursts
 	var t := 0.0
 
@@ -477,17 +493,18 @@ class BatonCue:
 	func clear() -> void:
 		root.queue_free()
 
+
 ## Show Ring: a round's score pops over the Boki in its type colour, grows in, rises and fades.
 class PopCue:
 	extends RefCounted
-	const LIFE := 1.8                   # s a pop shows
-	const POP_S := 0.15                 # s it grows in
-	const RISE := 0.6                   # m it rises over its life
+	const LIFE := 1.8  # s a pop shows
+	const POP_S := 0.15  # s it grows in
+	const RISE := 0.6  # m it rises over its life
 
 	var root: Node3D
-	var labels: Array = []              # Label3D pool
-	var age: Array = []                 # s since it popped (negative: still waiting)
-	var from: Array = []                # where it popped
+	var labels: Array = []  # Label3D pool
+	var age: Array = []  # s since it popped (negative: still waiting)
+	var from: Array = []  # where it popped
 	var next := 0
 	var spawns := 0
 	var last_text := ""

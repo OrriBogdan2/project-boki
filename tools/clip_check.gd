@@ -84,6 +84,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
@@ -210,7 +211,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_standing(id, dd, clips)
 	_rings(id, dd, clips)
 	_emotes(id, dd, clips)
+	_summon_call(id, dd, clips)
 	_jump_land(id, m, sync, clips, dd)
+	_beats(id, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -275,8 +278,30 @@ func _feel(id: String, m: Node3D, sync: Node, clips: WardenClips, on_rig: bool) 
 
 ## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
 ## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
+
+
+## The result beats (WardenBeats): win and lose each map to a clip the .glb plays that is its own (no two beats share
+## one), and the state's "beat" picks it.
+func _beats(id: String, clips: WardenClips) -> void:
+	var mapped := 0
+	var picked := 0
+	var used: Array = []
+	for nm in WardenBeats.NAMES:
+		var b: Dictionary = clips.beats.get(nm, {})
+		mapped += 1 if not b.is_empty() else 0
+		var pick := clips._pick({"beat": nm, "beat_t": 0.7}, 0.0)
+		picked += 1 if not b.is_empty() and pick.get("clip", "") == b["clip"] else 0
+		if not b.is_empty():
+			used.append(b["clip"])
+	ok(mapped == 2 and picked == 2 and used[0] != used[1],
+			"%s: win and lose mapped to own clips (%d, %d picked: %s)" % [id, mapped, picked, str(used)])
+
+
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
+	for b in (dd.get("beats", {}) as Dictionary).values():
+		if b.has("clip"):
+			out.append(b["clip"])
 	for mv in (dd.get("kmoves", {}) as Dictionary).values():
 		out.append(mv["clip"])
 		if mv.has("alt"):
@@ -432,15 +457,15 @@ func _rings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 func _emotes(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var map: Dictionary = dd.get("emotes", {})
 	var seen := {}
-	var bad: Array = []
+	var bad_v: Array = []
 	for e in Truce.EMOTES:
 		var clip := String(map.get(e["id"], ""))
 		if not clips.lib.has_animation(clip) or clips.lib.get_animation(clip).length > Truce.BUBBLE_T:
-			bad.append(e["id"])
+			bad_v.append(e["id"])
 		seen[clip] = true
 	var n := Truce.EMOTES.size()
-	ok(bad.is_empty() and seen.size() == n, "%s: %d wheel emotes, %d clips, within %.1f s (bad %s)"
-			% [id, n, seen.size(), Truce.BUBBLE_T, str(bad)])
+	ok(bad_v.is_empty() and seen.size() == n, "%s: %d wheel emotes, %d clips, within %.1f s (bad %s)"
+			% [id, n, seen.size(), Truce.BUBBLE_T, str(bad_v)])
 	var wrong: Array = []
 	for e in Truce.EMOTES:
 		var clip := String(map.get(e["id"], ""))
@@ -450,6 +475,29 @@ func _emotes(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			wrong.append(e["id"])
 	ok(wrong.is_empty(), "%s: emotes play upper-body moving, full-body standing, then end (wrong %s)"
 			% [id, str(wrong)])
+
+## The summon call and recall (warden_anim "summon_call", KinSummon.anim_state): about 0.3 s each, keying only upper
+## bones, on the upper layer so he runs and aims under it; never over a kit move; nothing of it once it has ended.
+func _summon_call(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	var sc: Dictionary = dd.get("summon_call", {})
+	var bad_v: Array = []
+	for kind in ["call", "recall"]:
+		var clip := String(sc.get(kind, ""))
+		var anim := clips.lib.get_animation(clip) if clips.lib.has_animation(clip) else null
+		if anim == null or absf(anim.length - 0.32) > 0.05 or not _keys_upper(anim, dd):
+			bad_v.append(kind)
+			continue
+		var s := {"call": kind, "call_t": 0.1, "vel": Vector3(0, 0, -4)}
+		var run_v := clips._pick(s, 0.0)
+		s["kmove"] = String((dd.get("kmoves", {}) as Dictionary).keys()[0]) if dd.has("kmoves") else ""
+		var cast := clips._pick(s, 0.0) if s["kmove"] != "" else {}
+		s.erase("kmove")
+		s["call_t"] = anim.length + 0.01
+		if run_v.get("clip", "") != clip or not bool(run_v.get("upper", false)) or cast.get("clip", "") == clip \
+				or clips._pick(s, 0.0).get("clip", "") == clip:
+			bad_v.append(kind)
+	ok(bad_v.is_empty(), "%s: summon call and recall are ~0.3 s upper-body gestures, not over a cast, then end (bad %s)"
+			% [id, str(bad_v)])
 
 ## The state's emote picks this clip: standing on its own layer, moving on the upper one, and not after its end.
 func _emote_plays(clips: WardenClips, emote: String, clip: String) -> bool:
@@ -548,6 +596,15 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			continue
 		var end_t := float(def["keys"][-1][0])
 		var length := float(moves[km].get("fit", clips.lib.get_animation(String(moves[km]["clip"])).length))
+		var pts: Array = moves[km].get("time", [])
+		if not pts.is_empty():     # ("time": the clip ends at its last kit point; the map stays on the clip, in order)
+			var on := true
+			for i in pts.size():
+				var c := float(pts[i][1])
+				on = on and c >= 0.0 and c <= clips.lib.get_animation(String(moves[km]["clip"])).length + 0.001 \
+						and (i == 0 or pts[i][0] > pts[i - 1][0])
+			ok(on, "%s %s: the time map stays on the clip, in order" % [id, km])
+			length = float(pts[-1][0])
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
 		if off > worst:
 			worst = off

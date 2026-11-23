@@ -1,5 +1,5 @@
 extends RefCounted
-## --boki-everywhere-check [--species=cindle,glintmole,kindlewren,nettlynx] [--shots-dir=<abs dir>]: is a Boki the
+## --boki-everywhere-check [--species=cindle,...,umbrathere] [--shots-dir=<abs dir>]: is a Boki the
 ## player meets its rigged Meshy model (BokiRig) or the old primitive body (KinModels' fallback)? Meant to run
 ## from an exported .pck (godot --main-pack <pck>), where a missing import remap would make has() false.
 ## Per species it prints the .glb, has(), and whether Models.kin (every place a 3D Boki is shown: wild, your
@@ -12,7 +12,7 @@ const PX := 512
 
 var main: Node
 var out := ""
-var species: PackedStringArray = ["cindle", "glintmole", "kindlewren", "nettlynx"]
+var species: PackedStringArray = ["cindle", "glintmole", "kindlewren", "nettlynx", "lilybara", "umbrathere"]
 var bad := 0
 
 

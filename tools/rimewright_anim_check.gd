@@ -8,6 +8,7 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const TOL := 0.03          # s: two frames at 60 fps
 const SOURCE_FRAME := 0.2  # s: the footage's resolution (tamsin.md)
+const SLIDE_OUT_MAX := 0.35  # s: the owner's slide-out after a skate (11-11) may run past the footage's stop
 ## The clip's hit pose (s into the clip; tools/art1/claire_clips.py) and the hand that makes it: the flick, the sling,
 ## the thrust, the palms fully out, the shove, the stamp, the clench.
 const HIT_KEY := {
@@ -150,7 +151,9 @@ func _skate() -> void:
 	while Vector2(P.vel.x, P.vel.z).length() > 0.5 and t < 1.0:
 		step(m, DT)
 		t += DT
-	ok("anim skate: it stops within 0.2 s of letting go (footage: 0.1-0.2 s)", t <= SOURCE_FRAME + TOL, "%.2f s" % t)
+	ok(
+			"anim skate: it slides to a stop 0.2-0.35 s after letting go (the owner's slide-out; footage 0.1-0.2 s)",
+			t > SOURCE_FRAME - TOL and t <= SLIDE_OUT_MAX, "%.2f s" % t)
 	var go := KMovesCare.length("tm_skate_go")
 	ok("anim skate: the push-off clip is as long as the ramp", absf(go - float(dd["ramp"])) <= 0.05)
 
@@ -178,7 +181,7 @@ func _rime() -> void:
 	_recover(m, P, K)
 	_recover_dash()
 
-## In the recovery she walks and casts nothing; an E pressed in its last DashFlow.BUFFER_S goes as it ends.
+## In the recovery she walks and casts nothing; an E pressed in its last Loco.press_buffer goes as it ends.
 func _recover(m: Match, P: Hunter, K: RimewrightKit) -> void:
 	var end: float = K.recover_until
 	var at := P.pos
@@ -188,7 +191,7 @@ func _recover(m: Match, P: Hunter, K: RimewrightKit) -> void:
 	_step_firing(m, P)
 	P.inp["sig"] = false
 	var early_e := float(K.cd["e"]) > 0.0
-	while m.time < end - DashFlow.BUFFER_S + DT:
+	while m.time < end - Loco.press_buffer + DT:
 		_step_firing(m, P)
 	P.inp["sig"] = true
 	_step_firing(m, P)

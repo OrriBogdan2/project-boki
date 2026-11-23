@@ -42,6 +42,25 @@ Checked by `--clarity-check` (side edges per viewer, the side lean, the shot hal
 and off, the cast glint and ring, Boki bubbles and ability names in and out of a fight); the X band by
 `--dolm-combo-check` and `--aimkit-check`.
 
+## What sits on a Hunter (11-20, stabilize sprint: declutter only)
+`--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
+Lace / Cinder, Vex, Kael and Cinder, Lace, Vex / Lace, Cinder, Kael), 10 frames a fight, and counts every element over
+or within one body width of each Hunter's screen box (`HunterZone.rect_of`): world words, numbers, icons, rings and
+effects, and the HUD's world marks recorded through `SafeArea.note_as` (plates, the glove row, combo badges, the merge
+timer, Boki status). The Hunters' and Boki's own bodies (skinned meshes, model glows, the blob shadow) are not counted.
+Frames covered of 20 (element-Hunter pairs), headless count, before -> after:
+| element | before | after | gameplay? |
+|---|---|---|---|
+| nameplates | 20 (450) | 20 (414) | yes: health |
+| glove + Boki-type icons under other Hunters' plates (`GripOverhead`) | 20 (322) | 15 (70) | no in a fight: only the merge-ready glow stays |
+| ownership rings (`SideRings`) | 20 (240) | 20 (218) | yes |
+| your damage numbers (`Fx.number`) | 17 (137) | 17 (130) | yes, already only yours |
+| merge look's ground ring (`MergeLook`) | 13 (68) | 0 | no: cut, a ground ring means gameplay |
+| merge form's name over the head (`BokiHud.form_overhead`) | 12 (68) | 0 | no: a floating word; the timer and shell bars stay |
+| your Boki's ability name ("Stinger Hook") | 1 (3) | 1 (3) | kept (DECISIONS 11-11) |
+`--clarity-check` holds the fight to `ClarityFight.BUDGET` (element-Hunter pairs a frame): no words but your own
+Boki's ability name, no world icons, the glove row at most 6 (was 16), no merge ground ring.
+
 ## Films
 `docs/shots/combat-clarity/fight_3v3_a.mp4` (Tenzo, Sparkle, Lace vs Kael, Cinder, Vex) and `fight_3v3_b.mp4` (Meeko,
 Albert, Neve vs Grimble, Motley, Sable): the same seeded 3v3 before (left, main 272368589) and after (right), at the
@@ -56,9 +75,9 @@ Grade: clear / unclear, worst first. "Shared" = fixed or helped by this pass; th
 |---|---|---|---|
 | Grimble (dredge) | clear-ish | ult fixed: the fan is the true area in his gold (`#ffc832`) at AimKit's low fill, the crescent that swept the fan each wave is cut, each slug draws only its own orb (Match's plain sphere and its 3 m halo went under it), the wave flash at his fists 0.6 m (was 1.9 m) and a slug's hit glow 0.4 m (was 0.9 m); still four colours across the kit | ult on `ext/combat-grimble-ult-clarity` (stills `docs/shots/combat-grimble-ult-clarity/`), the rest per-Hunter |
 | Motley (ostra) | unclear | several large violet well discs at once, no edge to tell whose (now leaning red/blue via shared telegraphs only where they go through ArchKit/AimKit); indigo vs teal signature | per-Hunter job |
-| Meeko (tender) | unclear | big gold seed rings and teal ult dome fill the ground under everyone; heals and hurts look alike | per-Hunter job |
+| Meeko (tender) | unclear | big gold seed rings and teal ult dome fill the ground under everyone; heals and hurts look alike | ext/vfx-meeko-heal-hurt: heals leaf green rising, hurts embers falling; Hearthlight and root field at most 0.25 inside to the rim, the bloom a rim swirl (docs/shots/vfx-meeko-heal-hurt/) |
 | Sable (thief) | unclear | LMB hits barely show; her X discs are pale | per-Hunter job |
-| Albert (bulwark) | unclear | gold E box and the big gold ring under him read as one blob with Meeko's | per-Hunter job |
+| Albert (bulwark) | clear-ish | the gold box was his aegis: now gold plates with an ivory rim, no dark cubes; his E disc is an ivory rim with a soft centre, Meeko's rings are leaf green | `ext/vfx-albert-e-slab` (strips `docs/shots/vfx-albert-e-slab/`) |
 | Sparkle (mage) | unclear | Kitefall's range disc washes the ground pink-violet; the Storm Rod lane is a thin cyan line next to pink orbs | fixed on READY `ext/vfx-sparkle-ult-local` (disc gone, lightning pink) and `ext/vfx-sparkle-casts`, not merged |
 | Tenzo (dolm) | clear-ish | Stone Row rocks read as objects; Quakefall's slam ring is plain and the X spine's line is thin at match zoom | X: the cracks now sit on their true band (this pass); slam and the cracks' scorch on READY `ext/vfx-tenzo-data`, not merged |
 | Vex (gunslinger) | clear-ish | the lime body reads; LMB tracers are faint | per-Hunter job |

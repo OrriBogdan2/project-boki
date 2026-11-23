@@ -349,6 +349,9 @@ func _mage() -> void:
 			absf(l1 - 13.0) < 0.01 and absf(l2 - 13.0) < 0.01 and bool(AimKit.entry(P, "rmb").get("rails", false)),
 			"%.1f / %.1f" % [l1, l2])
 	ok("Storm Rod full at 1s: the body flash", K.rod_full and K.charge_fulls >= 1)
+	var rd: Dictionary = K.rmb_def()
+	ok("Storm Rod held: self-slow %.0f%% once ramped in (move_k)" % (float(rd["self_slow"]) * 100.0),
+			absf(K.move_k() - (1.0 - float(rd["self_slow"]))) < 0.001, "%.2f" % K.move_k())
 	var x0 := T.pos.x
 	P.inp["sec_hold"] = false
 	m.step(DT)
@@ -501,6 +504,18 @@ func _mage() -> void:
 	ok("Skycall: 1 Static (data), Grounded, dragged toward you",
 			K.spark_n(T) == 1 and KitStatus.grounded(T) and ac.dmg(T) >= 15.0 and T.pos.x < tx0 - 0.5,
 			"sparks %d moved %.1f" % [K.spark_n(T), T.pos.x - tx0])
+	var ring := AimKit.entry(P, "gnd%d" % T.get_instance_id())
+	var ring2 := AimKit.entry(P, "gnd2%d" % T.get_instance_id())
+	var sl := StatusLooks.of(m)
+	sl.tick(0.0)
+	var cords: Dictionary = sl.rigs.get("%d/gnd" % T.get_instance_id(), {})
+	var pink := AimKit.hero_col(P).to_html(false)
+	var ring_ok := not ring.is_empty() and not ring2.is_empty() and bool(ring2.get("dashed", false))
+	var ring_col := (ring.get("col", Color.BLACK) as Color).to_html(false)
+	ring_ok = ring_ok and bool(ring.get("all", false)) and ring_col == pink and float(ring.get("band", 0.0)) > 0.0
+	ok("Skycall's Grounded: two thin pink binding rings (one dashed, seen by all, no fill), pink cords, no amber disc",
+			ring_ok and String(cords.get("tint", "")) == pink,
+			"rings %s/%s tint %s" % [not ring.is_empty(), not ring2.is_empty(), cords.get("tint", "-")])
 	ac.step(m, 0.9)
 	ok("Skycall: the drag is a modest slide (about 3.4 m)",
 			absf((tx0 - T.pos.x) - 3.4) < 0.5, "%.1f m" % (tx0 - T.pos.x))
@@ -588,7 +603,7 @@ func _mage() -> void:
 	m.step(DT)
 	ok("dash table: Wirerun is rolling and DashFlow says LMB fires (the source is silent), E fires",
 			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
-			and absf(DashFlow.BUFFER_S - 0.15) < 0.001)
+			and absf(Loco.press_buffer - 0.15) < 0.001)
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
