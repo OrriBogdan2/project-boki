@@ -11132,3 +11132,4 @@ READY ext/hunter-review-check cc580a649d (bulk-rebase: origin/main merged in mec
 READY ext/ui-results-boki-line 7b14388973 (bulk-rebase: origin/main merged in mechanically, was a882ed986c; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-n23e-1123 b2c4faf132eae115ceeef04bed907a236b32aa0e (lane n23e bundle: kael-lmb-press + N1-1122 + M3-1121, PRs #538 #641 #569)
 READY ext/plate-status-declutter 65c6534463 (plate status words -> plate icon row; clarity-shots 0/20 CC-word frames vs main 19-20/20; hudref armour-crack race fixed; clarity-check guards plate words)
+READY ext/farm-hub-draws 58b41b3036 (hub draws 270->178 Medium, 260->170 Low on rp2g: PaintMerge bakes colours into vertex colours so static props merge by look; no look change)
