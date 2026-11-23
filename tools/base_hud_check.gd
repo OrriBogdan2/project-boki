@@ -63,6 +63,7 @@ func _shots(m: Node, home) -> void:
 
 
 func run(m: Node, mode := "check") -> void:
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	var home = await _home(m)
 	if mode == "shots":
 		await _shots(m, home)

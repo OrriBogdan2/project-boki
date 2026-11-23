@@ -503,7 +503,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var wind := float(rmb_def()["snap"]["wind"])
 	snap = {"t": wind, "T": wind}
 	play("ostra_snap_wind")
-	m.sfx("os_snap_wind", h.pos, -5.0, 1.0)
+	KitWindup.play(self, "rmb", "os_snap_wind", -5.0)
 
 func _tick_snap(dt: float) -> void:
 	snap["t"] = float(snap["t"]) - dt
@@ -511,6 +511,7 @@ func _tick_snap(dt: float) -> void:
 	KitLooks.of(m).hold_on("os_snaporb", "dark", h, _hand(), lerpf(0.5, 1.3, grown))
 	if h.downed or h.stun_t > 0.0:
 		snap = {}
+		KitWindup.broken(self, "rmb")
 		return
 	if float(snap["t"]) <= 0.0:
 		snap = {}
@@ -527,13 +528,12 @@ func _snap_release() -> void:
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
 	var spd := float(sn["speed"])
 	var rng := AimMode.dist(h, float(sn["range"]), AimMode.MAX)
-	m.spawn_shot(
-		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), SEA,
-		{"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
-	)
+	var extra := {"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
+	ShotOrigin.draw_from(extra, h, "rmb")      # out of her orb hand
+	m.spawn_shot(h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), SEA, extra)
 	HeroVfx.of(m).trail(h, "snap_trail", KitLooks.of(m).skin(m.shots[-1], "spear"))
 	_boost(float(sn["boost"]["cast"]))
-	vfx("snap_cast", start, dir)
+	vfx("snap_cast", extra.get("hand", start), dir)
 	AimKit.hide(h, "snap")
 
 ## The bundle stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. The stun reads on
