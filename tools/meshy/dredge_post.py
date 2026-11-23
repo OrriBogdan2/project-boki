@@ -20,6 +20,7 @@ Runs on the r7 body (tools/meshy/dredge_reskin.py output) and writes the game gl
   python3 tools/meshy/dredge_post.py --islands FILE.glb
   python3 tools/meshy/dredge_post.py --r11 OUT.glb IN_R10.glb [PACK.glb]   # r11 stages on the r10 glb (never build() twice)
   python3 tools/meshy/dredge_post.py --r12 OUT.glb IN_R11.glb   # r12 tail gather (re-runnable on its own output)
+  python3 tools/meshy/dredge_post.py --r13 OUT.glb IN_R12.glb [PACK.glb [UNDER.glb]]   # r13: skin weights, goo puddle, rim caps, retextured pack, straps
 
 Needs numpy and scipy (the venv).
 """
@@ -770,7 +771,37 @@ def clean_goo_weights(js, b, out, rig):
         p["attributes"]["JOINTS_0"], p["attributes"]["WEIGHTS_0"] = jacc, wacc
 
 
-def swap_pack(js, b, out, rig, pack_path):
+UNDER_COLOUR = (0.12, 0.06, 0.025)  # r13: linear colour of the pack underlay (dark wood)
+PILE_LOW = 0.2  # r13: share of the pack's height below which gold-textured triangles (the coin pile Meshy spilled round
+# the base of the stack) are dropped: it hung under the pack in the game as a ragged orange clump
+
+
+def cut_pile(F, P, UV, img, lo, hi):
+    """Drops the triangles in the lowest PILE_LOW of the pack whose texel (at the UV centroid) is gold."""
+    cen = P[F].mean(1)
+    low = cen[:, 1] < lo[1] + PILE_LOW * (hi[1] - lo[1])
+    uv = UV[F].mean(1)
+    w, h = img.size
+    px = np.asarray(img.resize((w // 4, h // 4)))
+    xi = np.clip((uv[:, 0] % 1.0 * px.shape[1]).astype(int), 0, px.shape[1] - 1)
+    yi = np.clip((uv[:, 1] % 1.0 * px.shape[0]).astype(int), 0, px.shape[0] - 1)
+    r, g, b_ = (px[yi, xi, k].astype(float) for k in range(3))
+    mx, mn = np.maximum(np.maximum(r, g), b_), np.minimum(np.minimum(r, g), b_)
+    hue = np.where(mx == r, 60 * ((g - b_) / np.maximum(mx - mn, 1)), np.where(mx == g, 60 * (2 + (b_ - r) / np.maximum(mx - mn, 1)), 0))
+    gold = (hue > 29) & (hue < 60) & ((mx - mn) / np.maximum(mx, 1) > 0.5) & (mx > 60)  # this pack's coins sit at 30-40 deg, its wood at 20-26
+    drop = low & gold
+    F = F[~drop]
+    # loose shards (what the decimation left of the planks at the base): tiny islands anywhere, small ones in the bottom 40 %
+    lab = island_labels(P, F)
+    size = np.bincount(lab)
+    cen = P[F].mean(1)
+    base = cen[:, 1] < lo[1] + 0.4 * (hi[1] - lo[1])
+    shard = (size[lab] < 6) | ((size[lab] < 30) & (cen[:, 1] < lo[1] + 0.3 * (hi[1] - lo[1])))
+    print("pile cut:", int(drop.sum()), "triangles; shards dropped:", int(shard.sum()), "of", len(F), "islands <6:", int((size < 6).sum()), "<30:", int((size < 30).sum()), "of", len(size))
+    return F[~shard]
+
+
+def swap_pack(js, b, out, rig, pack_path, under_path=None):
     """r11: the leather bedroll and brass clasps (contract hoard) are replaced by Meshy's hoard pack (an image-to-3D of
     the turnaround's stacked chests, barrels, shield and lantern with the top chest open and full of coins, decimated in
     Blender to PACK_TRIS): turned about y so its flat back faces the hero's back, scaled and set on the spine, one rigid
@@ -781,6 +812,9 @@ def swap_pack(js, b, out, rig, pack_path):
     P, N, UV = (n.floats(pj, pb, at[k]) for k in ("POSITION", "NORMAL", "TEXCOORD_0"))
     F = prim_faces(pj, pb, pp)
     lo, hi = P.min(0), P.max(0)
+    tex0 = pj["materials"][pp["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    big = Image.open(io.BytesIO(bytes(n.view_bytes(pj, pb, pj["images"][pj["textures"][tex0]["source"]]["bufferView"])))).convert("RGB")
+    F = cut_pile(F, P, UV, big, lo, hi)
     ctr = np.array([(lo[0] + hi[0]) / 2, lo[1], (lo[2] + hi[2]) / 2])
     P = (P - ctr) * np.array([-1.0, 1.0, -1.0]) * PACK_SCALE  # 180 deg about y
     N = N * np.array([-1.0, 1.0, -1.0])
@@ -806,8 +840,28 @@ def swap_pack(js, b, out, rig, pack_path):
     f = F.astype(np.uint32)  # a turn keeps the winding
     js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
     prims = js["meshes"][0]["primitives"]
-    keep = [p for p in prims if js["materials"][p["material"]]["name"] not in ("leather-pack", "brass-pack")]
+    keep = [p for p in prims if js["materials"][p["material"]]["name"] not in ("leather-pack", "brass-pack", "pack-meshy", "pack-under")]
     keep.append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
+    if under_path:  # r13: a closed brown shell just inside the pack (voxel remesh, Blender): cracks in Meshy's planks show wood, not the ink hull
+        uj, ub = n.load(under_path)
+        up = uj["meshes"][0]["primitives"][0]
+        UP, UN = (n.floats(uj, ub, up["attributes"][k]) for k in ("POSITION", "NORMAL"))
+        UF = prim_faces(uj, ub, up).astype(np.uint32)
+        UF = UF[UP[UF].mean(1)[:, 1] >= lo[1] + PILE_LOW * (hi[1] - lo[1])]  # none under the cut pile
+        UP = (UP - ctr) * np.array([-1.0, 1.0, -1.0]) * PACK_SCALE
+        UN = UN * np.array([-1.0, 1.0, -1.0])
+        UP += np.array([PACK_X, PACK_BOTTOM, PACK_BACK_Z - depth / 2])
+        ujn, uwt = rs.pack_weights(UP, rig.names)
+        js["materials"].append({"name": "pack-under", "doubleSided": True, "pbrMetallicRoughness": {
+            "baseColorFactor": list(UNDER_COLOUR) + [1.0], "metallicFactor": 0.0, "roughnessFactor": 0.9}})
+        ua = {"POSITION": out.add_floats(UP.astype(np.float32), "VEC3"), "NORMAL": out.add_floats(UN.astype(np.float32), "VEC3"),
+              "WEIGHTS_0": out.add_floats(uwt, "VEC4")}
+        js["accessors"][ua["POSITION"]].update(min=UP.min(0).tolist(), max=UP.max(0).tolist())
+        js["accessors"].append({"bufferView": out.add_view(ujn.astype(np.uint16).tobytes()), "componentType": 5123,
+                                "count": len(UP), "type": "VEC4"})
+        ua["JOINTS_0"] = len(js["accessors"]) - 1
+        js["accessors"].append({"bufferView": out.add_view(UF.tobytes()), "componentType": 5125, "count": int(UF.size), "type": "SCALAR"})
+        keep.append({"attributes": ua, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
     js["meshes"][0]["primitives"] = keep
     return len(F)
 
@@ -897,6 +951,250 @@ def cap_shoulder(js, b, out, rig):
     return int(sum(len(t) for t in tris))
 
 
+# r13: open rims capped with a dome, per prim: (name, prim index, (box lo, box hi) on the loop centre in rest pose,
+# smallest loop, largest diameter, direction of the dome: a unit vector, or None = along the rim's mean normal)
+CAPS = (
+    ("goo mouth at the shoulder", 1, ((-0.3, 1.2, -0.5), (-0.05, 1.9, 0.2)), 100, 0.6, (1.0, 0.0, 0.0), 3),
+    ("skin crack on the shoulder top", 0, ((-0.3, 1.55, -0.45), (-0.05, 1.9, 0.0)), 40, 0.6, None, 3),
+    ("goo tip end", 1, ((-1.0, 0.03, -1.0), (1.0, 0.25, 1.0)), 12, 0.9, (0.0, -1.0, 0.0), 3, 0.05),
+    ("hip", 0, ((-0.45, 0.6, -0.5), (0.25, 1.1, 0.1)), 40, 0.3, None, 3),
+    ("foot soles", 0, ((-0.6, -0.1, -0.5), (0.6, 0.2, 0.5)), 30, 0.3, None, 3),
+    # every small hole left in Meshy's skin and goo (toe gaps, tears at the hip): a fan fill from the rim's centre
+    ("small skin holes", 0, ((-1.0, -0.2, -1.0), (1.0, 2.0, 1.0)), 6, 0.06, None, 0),
+    ("small goo holes", 1, ((-1.0, -0.2, -1.0), (1.0, 2.0, 1.0)), 6, 0.06, None, 0),
+)
+PUDDLE_Y = 0.08  # m: goo triangles lower than this (rest pose) are dropped: the flat puddle round the foot that swung up as a ring
+CAP_BULGE = 0.2  # a dome rises CAP_BULGE x the rim's thin width (m), at most CAP_MAX; rings: per CAPS entry (0 = a fan fill)
+CAP_MAX = 0.05
+
+
+WELD_GOO = False  # r13: the goo's seams keep their weights (welding them pulled the tail into spikes)
+
+
+def weld_weights(js, b, out, rig):
+    """r13: vertices at one rest position (Meshy splits them along UV seams and every cut) get one skin weight set (the
+    first vertex's). Split vertices carried slightly different weights, so a seam opened as a black tear once a bone
+    turned: the toes of the foot, the neck, the hip."""
+    prims = js["meshes"][0]["primitives"]
+    att = prims[0]["attributes"]
+    arr = read_attrs(js, b, att)
+    pos, J, W = arr["POSITION"], arr["JOINTS_0"], arr["WEIGHTS_0"]
+    q = np.round(pos / ISLAND_TOL).astype(np.int64)
+    goo = np.zeros(len(pos), np.int64)
+    goo[goo_vertices(js, b)] = 1  # the goo is its own sleeve: its vertices only group with each other
+    q = np.concatenate([q, goo[:, None]], 1)
+    _, first, inv = np.unique(q, axis=0, return_index=True, return_inverse=True)
+    inv = inv.ravel()
+    J2, W2 = J[first][inv], W[first][inv]
+    if not WELD_GOO:
+        J2[goo == 1], W2[goo == 1] = J[goo == 1], W[goo == 1]
+    diff = (np.abs(W2 - W).sum(1) > 0.02) | (J2 != J).any(1) & (W > 0.02).any(1)
+    old = att["JOINTS_0"]
+    jacc = len(js["accessors"])
+    js["accessors"].append({"bufferView": out.add_view(J2.astype(np.uint16).tobytes()), "componentType": 5123, "count": len(J2), "type": "VEC4"})
+    wacc = out.add_floats(W2.astype(np.float32), "VEC4")
+    for p in prims:
+        if p["attributes"].get("JOINTS_0") == old:
+            p["attributes"]["JOINTS_0"], p["attributes"]["WEIGHTS_0"] = jacc, wacc
+    return "%d of %d vertices took their position group's weights" % (int(diff.sum()), len(pos))
+
+
+def prim_texture(js, b, pi):
+    """The base-colour image of primitive pi, as an RGB PIL image (downscaled to 512)."""
+    mat = js["materials"][js["meshes"][0]["primitives"][pi]["material"]]
+    img = js["images"][js["textures"][mat["pbrMetallicRoughness"]["baseColorTexture"]["index"]]["source"]]
+    im = Image.open(io.BytesIO(bytes(n.view_bytes(js, b, img["bufferView"])))).convert("RGB")
+    im.thumbnail((512, 512))
+    return im
+
+
+def trim_puddle(js, b, out, rig):
+    """r13: drops the goo's flat puddle round the foot (rest-pose triangles below PUDDLE_Y)."""
+    prim = js["meshes"][0]["primitives"][1]
+    pos = read_attrs(js, b, prim["attributes"])["POSITION"]
+    f = prim_faces(js, b, prim)
+    keep = pos[f].mean(1)[:, 1] >= PUDDLE_Y
+    full = f[keep].astype(np.uint32)
+    js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+    prim["indices"] = len(js["accessors"]) - 1
+    return "%d goo triangles dropped" % int((~keep).sum())
+
+
+def cap_rims(js, b, out, rig):
+    """r13: every open rim listed in CAPS gets a dome (rings toward the centre, bulging outward), skinned and textured
+    like its rim vertices. The goo's mouth at the shoulder (a flat D cut where the arm was parted from the torso) was the
+    black slit at the neck: once the arm swung, the game's ink hull behind the open sleeve showed black."""
+    prims = js["meshes"][0]["primitives"]
+    att = prims[0]["attributes"]
+    arr = read_attrs(js, b, att)
+    pos, nrm = arr["POSITION"], arr["NORMAL"]
+    new = {k: [] for k in arr}
+    add = {0: [], 1: []}
+    base, total = len(pos), 0
+    report = []
+    capped = set()
+    for name, pi, (lo, hi), minv, maxd, d, m, *fixed in CAPS:
+        f = prim_faces(js, b, prims[pi])
+        used = np.unique(f)
+        q = np.round(pos[used] / ISLAND_TOL).astype(np.int64)
+        uq, inv = np.unique(q, axis=0, return_inverse=True)
+        w = np.zeros(len(pos), np.int64)
+        w[used] = inv.ravel()
+        rep = np.zeros(len(uq), np.int64)
+        rep[w[used][::-1]] = used[::-1]
+        fs = w[f]
+        e = np.sort(np.concatenate([fs[:, [0, 1]], fs[:, [1, 2]], fs[:, [2, 0]]]), 1)
+        e = e[e[:, 0] != e[:, 1]]
+        u, c = np.unique(e, axis=0, return_counts=True)
+        bd = u[c == 1]
+        ids = np.unique(bd)
+        slot = {v: i for i, v in enumerate(ids)}
+        g = sp.coo_matrix((np.ones(len(bd)), ([slot[x] for x in bd[:, 0]], [slot[x] for x in bd[:, 1]])), (len(ids),) * 2)
+        lab = connected_components(g, directed=False)[1]
+        n_caps = 0
+        for l in range(lab.max() + 1):
+            vs = rep[ids[lab == l]]
+            if len(vs) < minv:
+                continue
+            if capped.intersection(vs.tolist()):
+                continue
+            p = pos[vs]
+            ctr = p.mean(0)
+            if not ((ctr >= np.array(lo)) & (ctr <= np.array(hi))).all():
+                continue
+            ax = np.linalg.svd(p - ctr)[2]
+            if np.ptp((p - ctr) @ ax[0]) > maxd:
+                continue
+            width = np.ptp((p - ctr) @ ax[1])
+            if d is None:
+                out_n = ax[2] if ax[2] @ nrm[vs].mean(0) >= 0 else -ax[2]
+            else:
+                out_n = np.array(d)
+            bulge = fixed[0] if fixed else min(CAP_MAX, CAP_BULGE * max(width, 0.01))
+            order = vs[np.argsort(np.arctan2((p - ctr) @ ax[1], (p - ctr) @ ax[0]))]
+            po = pos[order]
+            near = order[np.argmin(np.linalg.norm(po - ctr, axis=1))]
+            if fixed and "TEXCOORD_0" in arr:  # a dome that shows one colour: the darkest texel on its rim
+                tex = prim_texture(js, b, pi)
+                uvs = arr["TEXCOORD_0"][order]
+                lum = np.asarray(tex)[np.clip((uvs[:, 1] % 1 * tex.size[1]).astype(int), 0, tex.size[1] - 1),
+                                      np.clip((uvs[:, 0] % 1 * tex.size[0]).astype(int), 0, tex.size[0] - 1)].astype(float).sum(1)
+                near = order[np.argmin(lum)]
+            n_pts = len(order)
+            capped.update(vs.tolist())
+            for r in range(1, m + 1):
+                k = r / (m + 1)
+                P = ctr + (po - ctr) * (1 - k) + out_n * bulge * np.sin(np.pi / 2 * k)
+                for key, arrv in arr.items():
+                    piece = arrv[order].copy()
+                    if key == "POSITION":
+                        piece = P
+                    elif key == "NORMAL":
+                        piece = np.tile(out_n, (n_pts, 1)) * k + piece * (1 - k)
+                        piece /= np.linalg.norm(piece, axis=1, keepdims=True)
+                    elif key.startswith("TEXCOORD") and m > 0 and fixed:  # one texel for the whole dome: no streaks along the rim
+                        piece = np.tile(arrv[near], (n_pts, 1))
+                    new[key].append(piece)
+            for key, arrv in arr.items():
+                piece = arrv[[near]].copy()
+                if key == "POSITION":
+                    piece = (ctr + out_n * bulge)[None]
+                elif key == "NORMAL":
+                    piece = out_n[None].astype(np.float32)
+                new[key].append(piece)
+            ring_id = [order] + [base + total + n_pts * (r - 1) + np.arange(n_pts) for r in range(1, m + 1)]
+            apex = base + total + n_pts * m
+            quads = []
+            for r in range(m):
+                a_, b_ = ring_id[r], ring_id[r + 1]
+                for i in range(n_pts):
+                    j = (i + 1) % n_pts
+                    quads += [(a_[i], a_[j], b_[j]), (a_[i], b_[j], b_[i])]
+            for i in range(n_pts):
+                quads.append((ring_id[m][i], ring_id[m][(i + 1) % n_pts], apex))
+            tr = np.array(quads, np.int64)
+            allp = np.concatenate([pos, np.concatenate(new["POSITION"])])
+            nn = np.cross(allp[tr[:, 1]] - allp[tr[:, 0]], allp[tr[:, 2]] - allp[tr[:, 0]])
+            flip = (nn @ out_n) < 0
+            tr[flip] = tr[flip][:, ::-1]
+            add[pi].append(tr)
+            total += n_pts * m + 1
+            n_caps += 1
+            print("cap", name, n_pts, "verts at", ctr.round(2), "dia", round(float(np.ptp((p - ctr) @ ax[0])), 2), "bulge", round(float(bulge), 3))
+        report.append("%s %d" % (name, n_caps))
+    if not total:
+        return "no loop found"
+    append_attrs(js, out, att, arr, new)
+    prims = js["meshes"][0]["primitives"]
+    for pi, trs in add.items():
+        if not trs:
+            continue
+        full = np.concatenate([prim_faces(js, b, prims[pi]).astype(np.uint32)] + [t.astype(np.uint32) for t in trs])
+        js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+        prims[pi]["indices"] = len(js["accessors"]) - 1
+    return "; ".join(report) + ", %d new vertices" % total
+
+
+
+# r13: the two shoulder straps (the pack's carry straps, which the r11 swap of the bedroll took away): ribbons that
+# follow the torso from the pack's back over each shoulder crest and down the chest to the belt line. Waypoints are
+# (y, z) of the torso surface in the rest pose at |x| = STRAP_X, already offset outward by STRAP_LIFT.
+STRAP_X, STRAP_W, STRAP_LIFT = 0.17, 0.085, 0.014
+STRAP_PATH = ((1.22, -0.37), (1.32, -0.395), (1.45, -0.40), (1.56, -0.395), (1.65, -0.33), (1.71, -0.22),
+              (1.70, -0.10), (1.64, -0.02), (1.55, 0.045), (1.45, 0.06), (1.36, 0.02), (1.28, -0.05), (1.20, -0.10))
+STRAP_COLOUR = (0.22, 0.11, 0.045)
+
+
+def catmull(pts, k):
+    p = np.vstack([pts[0], pts, pts[-1]])
+    out = []
+    for i in range(1, len(p) - 2):
+        for t in np.linspace(0, 1, k, endpoint=False):
+            out.append(0.5 * ((2 * p[i]) + (-p[i - 1] + p[i + 1]) * t + (2 * p[i - 1] - 5 * p[i] + 4 * p[i + 1] - p[i + 2]) * t * t
+                              + (-p[i - 1] + 3 * p[i] - 3 * p[i + 1] + p[i + 2]) * t ** 3))
+    out.append(p[-2])
+    return np.array(out)
+
+
+def add_straps(js, b, out, rig):
+    """r13: both shoulder straps as one primitive (flat leather colour, rigid on the spine like the pack)."""
+    path = catmull(np.array(STRAP_PATH), 6)
+    d = np.gradient(path, axis=0)
+    nrm = np.stack([d[:, 1], -d[:, 0]], 1)  # outward normal in (y, z): perpendicular to the path
+    nrm /= np.linalg.norm(nrm, axis=1, keepdims=True)
+    mid = path.mean(0)
+    flip = ((path - mid) * nrm).sum(1).mean() < 0
+    nrm = -nrm if flip else nrm
+    P, N, F = [], [], []
+    for side in (-1, 1):
+        x0 = side * STRAP_X
+        base = len(P)
+        for (y, z), (ny, nz) in zip(path, nrm):
+            for dx in (-STRAP_W / 2, STRAP_W / 2):
+                P.append([x0 + dx, y + ny * STRAP_LIFT, z + nz * STRAP_LIFT])
+                N.append([0.0, ny, nz])
+        for i in range(len(path) - 1):
+            a0, a1, b0, b1 = base + 2 * i, base + 2 * i + 1, base + 2 * i + 2, base + 2 * i + 3
+            F += [(a0, a1, b1), (a0, b1, b0)]
+    P, N, F = np.array(P, np.float32), np.array(N, np.float32), np.array(F, np.uint32)
+    tn = np.cross(P[F[:, 1]] - P[F[:, 0]], P[F[:, 2]] - P[F[:, 0]])
+    F[(tn * N[F[:, 0]]).sum(1) < 0] = F[(tn * N[F[:, 0]]).sum(1) < 0][:, ::-1]  # faces turned outward
+    jn, wt = rs.pack_weights(P, rig.names)
+    js["materials"].append({"name": "strap-leather", "doubleSided": True, "pbrMetallicRoughness": {
+        "baseColorFactor": list(STRAP_COLOUR) + [1.0], "metallicFactor": 0.0, "roughnessFactor": 0.8}})
+    attrs = {"POSITION": out.add_floats(P, "VEC3"), "NORMAL": out.add_floats(N, "VEC3"), "WEIGHTS_0": out.add_floats(wt, "VEC4")}
+    js["accessors"][attrs["POSITION"]].update(min=P.min(0).tolist(), max=P.max(0).tolist())
+    js["accessors"].append({"bufferView": out.add_view(jn.astype(np.uint16).tobytes()), "componentType": 5123,
+                            "count": len(P), "type": "VEC4"})
+    attrs["JOINTS_0"] = len(js["accessors"]) - 1
+    js["accessors"].append({"bufferView": out.add_view(F.tobytes()), "componentType": 5125, "count": int(F.size), "type": "SCALAR"})
+    prims = js["meshes"][0]["primitives"]
+    prims[:] = [p for p in prims if js["materials"][p["material"]]["name"] != "strap-leather"]
+    prims.append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
+    return len(F)
+
+
+
 def rebuild_r11(out_path, in_path, pack_path=None):
     """The r11 stages on an r10 glb; each one writes the file and the next reloads it (new arrays live in the new
     file's buffer)."""
@@ -982,6 +1280,14 @@ def build(out_path, in_path):
 if __name__ == "__main__":
     if sys.argv[1] == "--islands":
         count_islands(sys.argv[2])
+    elif sys.argv[1] == "--r13":  # the r13 stages on the r12 glb
+        pk = sys.argv[4] if len(sys.argv) > 4 else None
+        un = sys.argv[5] if len(sys.argv) > 5 else None
+        st = [("weights", weld_weights), ("puddle", trim_puddle), ("rim caps", cap_rims)]
+        if pk:
+            st.append(("pack tris", lambda js, b, out, rig: swap_pack(js, b, out, rig, pk, un)))
+        st.append(("straps tris", add_straps))
+        rebuild_stages(sys.argv[2], sys.argv[3], st)
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
