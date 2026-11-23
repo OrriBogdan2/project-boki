@@ -46,7 +46,9 @@ func run(main: Node) -> void:
 
 func _stage() -> void:
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ground := MeshInstance3D.new()

@@ -36,7 +36,7 @@ func run(main: Node) -> void:
 		var r := measure(m, a)
 		print(row(a, r))
 		ok(absf(r.height / r.want - 1.0) <= TOL, "%s: body %.2f m vs chart height %.2f m" % [a, r.height, r.want])
-		ok(absf(r.feet) <= FEET_TOL, "%s: feet at %+.3f m (Ostra's hover of %.2f m rides on top)" % [a, r.feet, r.hover])
+		ok(absf(r.feet) <= FEET_TOL, "%s: feet at %+.3f m" % [a, r.feet])
 		m.queue_free()
 	print("NATIVEHITBOX DONE %d checks, %d failed" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -79,7 +79,7 @@ func measure(m: Node3D, a: String) -> Dictionary:
 	var cls: Dictionary = Data.CLASSES[Arch.weight(a)]
 	var hit_h := Arch.hit_h(a)
 	return {
-		"height": h, "feet": lo.y, "hover": hover, "head": _bone_y(m, sk, "head"), "shoulder": sx1 - sx0, "reach": reach,
+		"height": h, "feet": lo.y, "head": _bone_y(m, sk, "head"), "shoulder": sx1 - sx0, "reach": reach,
 		"width": hi.x - lo.x, "depth": hi.z - lo.z, "hit_h": hit_h,
 		"want": hit_h * float(chart.get("height_3d", chart["height"])) / float(chart["height"]),
 		"ring": Arch.hit_r(a, cls) + Match.HIT_SLACK,
@@ -87,19 +87,21 @@ func measure(m: Node3D, a: String) -> Dictionary:
 
 
 func row(a: String, r: Dictionary) -> String:
-	return (
-		"NATIVE_HITBOX %s | height %.2f | hit_h %.2f | want %.2f | %+.0f%% | head bone %.2f | feet %+.2f | shoulder %.2f | ring %.2f | "
-		% [a, r.height, r.hit_h, r.want, 100.0 * (r.height / r.want - 1.0), r.head, r.feet, r.shoulder, 2.0 * r.ring]
-		+ "reach %.2f | %+.0f%% | width %.2f | depth %.2f" % [r.reach, 100.0 * (r.reach / r.ring - 1.0), r.width, r.depth]
-	)
+	var body := "height %.2f | hit_h %.2f | want %.2f | %+.0f%% | head bone %.2f | feet %+.2f" % [
+		r.height, r.hit_h, r.want, 100.0 * (r.height / r.want - 1.0), r.head, r.feet
+	]
+	var ring := "shoulder %.2f | ring %.2f | reach %.2f | %+.0f%% | width %.2f | depth %.2f" % [
+		r.shoulder, 2.0 * r.ring, r.reach, 100.0 * (r.reach / r.ring - 1.0), r.width, r.depth
+	]
+	return "NATIVE_HITBOX %s | %s | %s" % [a, body, ring]
 
 
 func _bone_y(m: Node3D, sk: Skeleton3D, bone: String) -> float:
 	return (sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, bone))).origin.y - m.global_position.y
 
 
-## Every vertex of the body's visible meshes (the Hunter's model, no ring, weapon, orbits or companions), skinned by the skeleton's pose, in the
-## metres from the model's origin (the ground under the Hunter).
+## Every vertex of the body's visible meshes (the Hunter's model, no ring, weapon, orbits or companions), skinned by
+## the skeleton's pose, in metres from the model's origin (the ground under the Hunter).
 func _points(m: Node3D) -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for mi in m.find_children("*", "MeshInstance3D", true, false):
@@ -123,7 +125,9 @@ func _points(m: Node3D) -> PackedVector3Array:
 				continue
 			var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES] if arr[Mesh.ARRAY_BONES] != null else PackedInt32Array()
-			var wts: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS] if arr[Mesh.ARRAY_WEIGHTS] != null else PackedFloat32Array()
+			var wts := PackedFloat32Array()
+			if arr[Mesh.ARRAY_WEIGHTS] != null:
+				wts = arr[Mesh.ARRAY_WEIGHTS]
 			var per := int(bones.size() / float(maxi(verts.size(), 1)))
 			for v in verts.size():
 				var pos := mesh.global_transform * verts[v]
