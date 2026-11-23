@@ -111,7 +111,11 @@ func run(main_node: Node) -> void:
 	ok(arm.shield > 0.0 and bool(as_v.get("shield", false)) and HudPlate.shield_frac(arm) > 0.0,
 		"a shielded rival's plate draws the shield past their health (%.2f of the bar)" % HudPlate.shield_frac(arm))
 	arm.armor = 0.0
-	await main.get_tree().process_frame
+	arm.reveal_t = 3.0      # seen however the headless camera faces: an unseen rival's plate is not drawn
+	for i in 60:            # vision refreshes every 0.05s; wait for the first draw after the drop
+		await main.get_tree().process_frame
+		if float(_state(hud, arm).get("armor", 1.0)) <= 0.5:
+			break
 	ok(float(_state(hud, arm).get("brk", 0.0)) > 0.0, "armour hitting zero cracks the strip")
 	await _check_strip(p)
 	# ---------------------------------------------------------------- 4. downed, and status words
