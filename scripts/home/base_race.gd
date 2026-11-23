@@ -9,7 +9,8 @@ extends RefCounted
 ## from trained Speed, joy, and a lean on its own stretch (the Tide knack swims, wings glide the gap);
 ## friends run side by side, rivals bump.
 ## The runners crouch on the line through the countdown, burst off it, and celebrate or sulk at the line (RaceBeats).
-## The result card names what carried the winner ("Speed carried it", carried()); the winner gains joy and trust, the last one home sulks, you get a few gems,
+## The result card names what carried the winner (carried(): "Speed carried it"). The winner gains joy and
+## trust, the last one home sulks, you get a few gems,
 ## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
 ## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
 ## on, "Train" runs a solo lap of the same loop (solo()); each cheer adds to Speed, see settle_solo().
