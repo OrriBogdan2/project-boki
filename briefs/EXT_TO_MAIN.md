@@ -11176,3 +11176,4 @@ READY ext/vision-fog-flat-dim-1123 0430b0f2b7 (supersedes 004a508e60; origin/mai
 READY ext/vfx-summon-type-colour 903fcdcb36 (origin/main merged; only conflict tools/checks/vfx.gd, kept both check entries; import rc 0, --check 0 fail, --boki-wisp-check PASS, health --strict red only on sfx loudness (no numpy here); style ratchet clean)
 READY ext/anim-lace-native-clips e27ff53c5ff94234f17736f06e0c354a4dd82439 (Lace native bow clips)
 READY ext/combat-native-hitbox-fit c07b4c7a978 (native Hunters: hitbox vs body)
+READY ext/ui-native-plate-height a9e2396efc (plates above native heads)
