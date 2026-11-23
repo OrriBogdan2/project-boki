@@ -36,8 +36,8 @@ func run(main: Node) -> void:
 	var cam := CamRig.new()
 	vp.add_child(cam)
 	cam.use_style("default")
-	var start := float(CamRig.RULES["zoom"]["max"])      # the view a match starts at (the widest)
-	var zooms: Array = [start, float(CamRig.RULES["zoom"]["min"])]
+	var start := CamWheel.far()  # the view a match starts at (the wheel's widest)
+	var zooms: Array = [start, CamWheel.near()]
 	print("RANGESCREEN table | Hunter | Slot | Reach m (data key) | ways off screen, Hunter centred, per view at")
 	print("RANGESCREEN table | zoom %.1f / %.1f (4 views) | with the lean |" % [zooms[0], zooms[1]])
 	for r in rows:
