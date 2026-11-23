@@ -26,7 +26,7 @@
 "semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 7,
+"long_line": 6,
 "nested_ternary": 1
 },
 "scripts/arch/kits/ostra_kit.gd": {
@@ -190,9 +190,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 158,
+"long_line": 155,
 "nested_ternary": 24,
-"semicolon": 222
+"semicolon": 220
 },
 "scripts/home/home_build.gd": {
 "long_line": 55,
@@ -301,9 +301,9 @@
 "semicolon": 2
 },
 "scripts/main.gd": {
-"long_line": 145,
-"nested_ternary": 3,
-"semicolon": 107
+"long_line": 54,
+"nested_ternary": 2,
+"semicolon": 55
 },
 "scripts/match/abilities.gd": {
 "long_line": 1
@@ -325,8 +325,7 @@
 "long_line": 2
 },
 "scripts/match/aim/aim_reticle.gd": {
-"long_line": 1,
-"nested_ternary": 1
+"long_line": 1
 },
 "scripts/match/aim/aim_shapes.gd": {
 "long_line": 2,
@@ -365,7 +364,7 @@
 "long_line": 1
 },
 "scripts/match/bot.gd": {
-"long_line": 20,
+"long_line": 19,
 "semicolon": 48
 },
 "scripts/match/bot_kin.gd": {
@@ -511,9 +510,9 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 3,
-"long_line": 186,
-"nested_ternary": 15,
-"semicolon": 124
+"long_line": 184,
+"nested_ternary": 14,
+"semicolon": 123
 },
 "scripts/match/merge_look.gd": {
 "long_line": 4
@@ -571,7 +570,7 @@
 "history_comment": 1,
 "long_line": 13,
 "nested_ternary": 1,
-"semicolon": 19
+"semicolon": 16
 },
 "scripts/match/ruin_walls.gd": {
 "long_line": 19,
@@ -661,9 +660,9 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 26,
+"long_line": 24,
 "nested_ternary": 2,
-"semicolon": 57
+"semicolon": 53
 },
 "scripts/ui/hero_grid.gd": {
 "long_line": 2,
@@ -675,8 +674,8 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 104,
-"nested_ternary": 19,
+"long_line": 103,
+"nested_ternary": 17,
 "semicolon": 24
 },
 "scripts/ui/hud_hover.gd": {
@@ -814,8 +813,13 @@
 "semicolon": 16
 },
 "tools/boki_system_check.gd": {
-"long_line": 32,
+"long_line": 31,
 "semicolon": 15
+},
+"tools/boss_check.gd": {
+"long_line": 88,
+"nested_ternary": 1,
+"semicolon": 52
 },
 "tools/bot_sanity_check.gd": {
 "long_line": 2
