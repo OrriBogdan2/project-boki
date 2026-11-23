@@ -30,6 +30,9 @@ var player: AnimationPlayer
 var d: Dictionary
 var art_id := ""  # the Hunter's art (its contract .glb carries the orbit props)
 var plays: Dictionary  # game state -> the clip it plays (data "clips"; the crouch can be its arms-swapped copy)
+var moves: Dictionary  # kit move -> {clip, hold, fade}: its own clip (data "moves"), played on the kit's clock
+var move_cur := ""  # the kit move whose clip owns the body, "" when none
+var move_kt := 0.0  # its kit clock last frame (a clock that runs back is the move pressed again)
 var skel: Skeleton3D
 var hand := -1  # Meshy's weapon-hand bone (data "hand"): the rig's Gun follows it
 var gun: Node3D
@@ -114,6 +117,10 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	process_priority = 10  # (after Match renders the hunters: HunterAnim.update)
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	plays = (d["clips"] as Dictionary).duplicate()
+	moves = d.get("moves", {})
+	if d.has("clip_files"):  # (clips-only files: Hero moves keyed on Meshy's skeleton, beside the .glb)
+		var lib_name := player.find_animation_library(player.get_animation(String(plays["idle"])))
+		WardenClipFile.add(player.get_animation_library(lib_name), glb, WardenGlb.skeleton(glb), d["clip_files"])
 	for st in LOOPS:
 		player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
 	skel = WardenGlb.skeleton(glb)
@@ -155,9 +162,12 @@ func _process(dt: float) -> void:
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
 	attack_left -= dt
 	var xt := float(s.get("extract_t", -1.0))
+	var swung := _attacked(s)  # (read every frame: the counters must not lag a move that covers a swing)
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
-	elif _attacked(s):
+	elif _own_move(s, dt):
+		pass
+	elif swung:
 		attack_left = _clip_len("attack") / float(d.get("attack_rate", 1.0))
 		_play("attack", float(d.get("attack_rate", 1.0)), true)
 	elif attack_left <= 0.0:
@@ -242,6 +252,33 @@ func _loco(s: Dictionary) -> void:
 		_play("walk", _rate(ground, "walk_mps", RATE_MIN))
 	else:
 		_play("idle", 1.0)
+
+
+## A kit move with its own clip (data "moves") plays it at the kit's clock: clip second = seconds since the move began, so
+## its hit pose lands on the kit's hit. A "hold" move stays on its last pose while the kit holds the move. True while the
+## clip owns the body.
+func _own_move(s: Dictionary, dt: float) -> bool:
+	var km := String(s.get("kmove", ""))
+	var mv: Dictionary = moves.get(km, {})
+	if mv.is_empty():
+		move_cur = ""
+		return false
+	var kt := float(s.get("kmove_t", 0.0))
+	var length := player.get_animation(String(mv["clip"])).length
+	var hold := bool(mv.get("hold", false))
+	if not hold and kt >= length:
+		move_cur = km
+		return false
+	if km != move_cur or kt < move_kt:
+		player.play(String(mv["clip"]), float(mv.get("fade", FADE)))
+		cur = "move:" + km
+	move_cur = km
+	move_kt = kt
+	attack_move = true
+	attack_left = maxf(length - kt, 0.1) if not hold else 0.1
+	player.speed_scale = 1.0
+	player.seek(maxf(minf(kt, length - 0.02) - dt, 0.0), false)  # (advance(dt) lands the clip on kt)
+	return true
 
 
 ## A new hit, cast or kit move this frame (state counters moved on since the last frame; a swing count that drops back,

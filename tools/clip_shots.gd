@@ -13,6 +13,8 @@ extends RefCounted
 
 const ClipCheck := preload("res://tools/clip_check.gd")
 
+## --states on a Meshy-native Hero also presses each kit move of its data "moves" (<dir>/states/ continues; the log
+## line MOVE names the frames); --attack-only first drops those clips, so every move plays the one attack clip (before).
 ## --states: [state, the match's state for it (WardenClips.STATE), s it is held]
 const STATE_SHOTS := [
 	["idle", {"grounded": true}, 2.0],
@@ -212,6 +214,32 @@ func _states(model: Node3D, fps: float, out: String) -> void:
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
+	var native := poser as WardenNative
+	if native == null:
+		return
+	var names: Array = native.moves.keys()
+	if OS.get_cmdline_user_args().has("--attack-only"):
+		native.moves = {}
+	for km: String in names:
+		var length: float = native.player.get_animation(String(native.d["moves"][km]["clip"])).length
+		var s := {"grounded": true, "face": model.rotation.y}
+		model.set_meta(WardenClips.STATE, s)
+		for k in int(0.3 * fps):
+			poser.call("_process", 1.0 / fps)
+		var first := i
+		for k in int((length + 0.35) * fps):
+			s["swing_n"] = 1
+			s["kmove"] = km
+			s["kmove_t"] = k / fps
+			poser.call("_process", 1.0 / fps)
+			await _grab(dir.path_join("f%03d.png" % i))
+			i += 1
+		s.erase("kmove")
+		for k in int(0.4 * fps):
+			poser.call("_process", 1.0 / fps)
+			await _grab(dir.path_join("f%03d.png" % i))
+			i += 1
+		print("MOVE %s f%03d-f%03d (clip %.2f s, every 1/%d s)" % [km, first, i - 1, length, int(fps)])
 
 
 func _grab(path: String) -> void:
