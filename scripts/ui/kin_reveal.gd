@@ -133,6 +133,7 @@ func _build() -> void:
 	kin.rotation.y = PI + 0.9      # glancing off to one side, until it notices you
 	kin.position.y = 0.06
 	turn.add_child(kin)
+	Fogless.apply(kin)
 	var pt: CPUParticles3D = kin.get_node_or_null("Aura")
 	if pt: pt.emitting = true
 	if rec.get("shimmer", false):

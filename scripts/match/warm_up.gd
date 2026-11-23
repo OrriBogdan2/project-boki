@@ -51,6 +51,8 @@ func run(progress := Callable()) -> void:
 				break
 		break
 	if m.player: m.player.warm_marker()      # and the hit-marker balloon over a Hunter
+	if m.ways_vfx: m.ways_vfx.prebuild()     # and the way-out seats' beacons (built on the match's first tick)
+	if m.fx: KinTypeTrail.of(m.fx)     # and the Boki type trails (made when the first Boki is drawn)
 	var seen := WarmStamp.warm_keys()      # what an earlier launch drew and the disk caches still hold
 	var stamped := seen.size()
 	var t0 := Time.get_ticks_msec()
@@ -142,10 +144,16 @@ func run(progress := Callable()) -> void:
 	if not times.is_empty():
 		var setup := WarmStamp.setup_id()
 		Settings.note_benchmark(float(times[times.size() / 2]))
-		# a first launch's auto quality can step down here (shadows, MSAA): the game goes on, and comes back, at
-		# the new settings. The stamp follows them: the same shader code, only pipelines differ, and those
-		# build as this match draws them (else the next launch redrew every stand-in)
+		# a first launch's auto quality can step down here (shadows, MSAA, very low's unshaded draw): the game goes
+		# on, and comes back, at the new settings. The stand-ins draw once more under them, still behind the
+		# loading screen, with a new soft-dot one (FxDot's low-settings shader: the first Boki wisp of play
+		# compiled it), and the stamp follows the new settings
 		if WarmStamp.setup_id() != setup:
+			var dot := _dot_stand_in()
+			m.add_child(dot)
+			dot.position = Vector3(0, MOB_DEPTH, 0)
+			await _batches(func(_f: float) -> void: pass, {})
+			if is_instance_valid(dot): dot.queue_free()
 			WarmStamp.save(seen)
 	await DashPace.rehearse(m)
 	PerfLog.skip()
@@ -200,7 +208,41 @@ func _mob_stand_ins() -> Node3D:
 				p.process_material = pm
 				p.draw_pass_1 = _fx_quad(sh)
 				holder.add_child(p)
+	# and every shader file on a quad (a particle one in an emitter): a material made only when first needed (the
+	# last-alive aura, a downed hunter's wisp, a kit's ice strip) compiled its shader mid-match. Those the match
+	# already has share their key and add nothing; a later launch's stamp skips the rest.
+	for f in DirAccess.get_files_at("res://shaders"):
+		var fn := f.trim_suffix(".remap")
+		var sh: Shader = load("res://shaders/" + fn) as Shader if fn.ends_with(".gdshader") else null
+		if sh == null:
+			continue
+		if sh.get_mode() == Shader.MODE_SPATIAL:
+			var mi := MeshInstance3D.new()
+			mi.mesh = _fx_quad(sh)
+			holder.add_child(mi)
+		elif sh.get_mode() == Shader.MODE_PARTICLES:
+			var p := GPUParticles3D.new()
+			p.amount = 1
+			p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
+			var pm := ShaderMaterial.new()
+			pm.shader = sh
+			p.process_material = pm
+			p.draw_pass_1 = QuadMesh.new()
+			holder.add_child(p)
+	# and a squad's drop rocket (built at launch, in the ride), and the soft dot's particles
+	holder.add_child(DropRocket.model(Color.WHITE))
+	holder.add_child(_dot_stand_in())
 	return holder
+
+## Particles drawn with FxDot's material (a Boki wisp's trail): its shader is made again with other code when the
+## settings go low (Settings.lite), so after a quality step the redraw needs a new one of these.
+func _dot_stand_in() -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.amount = 1
+	p.emitting = false
+	p.mesh = QuadMesh.new()
+	p.material_override = FxDot.material()
+	return p
 
 func _fx_quad(sh: Shader) -> QuadMesh:
 	var q := QuadMesh.new()
@@ -416,10 +458,11 @@ static func _mat_key(mt: Material) -> String:
 	if mt is ShaderMaterial:
 		var sh: Shader = (mt as ShaderMaterial).shader
 		s = "sh" + _code_hash(sh)
-	elif mt is BaseMaterial3D:
-		# the generated shader depends on its switches and modes and on which textures are set,
-		# not on colours and amounts
-		s = "std"
+	else:
+		# a generated shader (StandardMaterial3D, ParticleProcessMaterial...) depends on its switches and modes and
+		# on which textures are set, not on colours and amounts (keyed by class alone, every particle process
+		# material after the first was left out, and compiled when its emitter first ran mid-match)
+		s = "std" if mt is BaseMaterial3D else mt.get_class()
 		for pr in mt.get_property_list():
 			if not (int(pr["usage"]) & PROPERTY_USAGE_STORAGE):
 				continue
@@ -428,8 +471,6 @@ static func _mat_key(mt: Material) -> String:
 				s += "%d" % int(mt.get(pr["name"]))
 			elif t == TYPE_OBJECT:
 				s += "1" if mt.get(pr["name"]) is Texture else "0"
-	else:
-		s = mt.get_class()
 	if mt.next_pass:
 		s += ">" + _mat_key(mt.next_pass)
 	_mat_keys[id] = s

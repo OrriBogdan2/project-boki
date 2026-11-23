@@ -1,11 +1,14 @@
 extends RefCounted
 ## --garden-first-day-check: the first-day list in the Goals tracker (GardenFirstDay).
 ##   1. a fresh save has the list; a save from before it, and a replayed tutorial, have none
-##   2. the tracker shows its five lines first, in order, ticked ones last; the card is hidden when done
+##   2. the tracker shows its lines first (pair only once a Boki is Grown), in order, ticked ones last; the card is
+##      hidden when done
 ##   3. ticks are once-only, an unknown id does nothing, the reward is paid once, then the list is gone
 ##   4. a bot plays a fresh base: feeds a Boki, plays at a toy, runs a race, naps in a pile and pairs two
 ##      Boki in the Nook, and the list finishes by itself
-##   5. the screen stays quiet (GardenHudGroups): day 1 in the hub and two zones shows at most 5 HUD groups and one
+##   5. a fresh base_mode save with one Boki gets a second one at once: the Shelter is open at market stall level 1 and
+##      a stray costs less than the first-entry gems, so the three lines that need company (race, nap, pair) can be done
+##   6. the screen stays quiet (GardenHudGroups): day 1 in the hub and two zones shows at most 5 HUD groups and one
 ##      arrival card; day 5 (a journal, today's wishes) shows one arrival card, the wishes riding on the away card
 ## Never touches the real save.
 
@@ -41,6 +44,7 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	_list()
+	_second_boki()
 	await _bot()
 	await _screens()
 	print("FIRSTDAY DONE, failures: %d" % bad)
@@ -63,7 +67,7 @@ func _list() -> void:
 	var ids := _ids()
 	ok(ids.size() == 5 and ids == ["feed", "toy", "race", "nap", "pair"], "five lines: feed, toy, race, nap, pair")
 	Save.d = Save.fresh()
-	ok(GardenFirstDay.active() and GardenFirstDay.rows().size() == 5, "a fresh save has the list")
+	ok(GardenFirstDay.active() and GardenFirstDay.rows().size() == 4, "a fresh save has the list, without 'pair'")
 	var kibble := int(Save.d["items"].get("kibble", 0))
 	ok(kibble >= 1 and kibble == int(GardenFirstDay.rules()["start_items"]["kibble"]),
 			"a fresh bag holds the starting kibble, so 'Feed your Boki' has food (%d)" % kibble)
@@ -73,6 +77,7 @@ func _list() -> void:
 	ok(not GardenFirstDay.active() and GardenFirstDay.rows().is_empty(), "a save from before it has none")
 	GardenFirstDay.mark("feed")
 	ok(not old["tutorial"].has("gfd"), "and a tick does not start it")
+	_pair_after_grown()
 	Save.d = _fresh_save()
 	Save.d["tutorial"] = Save.fresh()["tutorial"]      # (a fresh save's list, with two Boki: the pair lines show)
 	var rows := GoalTracker.lines()
@@ -100,6 +105,60 @@ func _list() -> void:
 	ok(int(Save.d["gems"]) == gems0 + reward, "and nothing more later")
 	ok(not GardenFirstDay.active() and GardenFirstDay.rows().is_empty(), "the list is gone when done")
 	ok(not GoalTracker.lines().any(func(r): return r["source"] == "first_day"), "and so are its tracker lines")
+
+## Pairing needs Grown (level 8): the 'pair' line shows only once a Boki in the roster is Grown, so day one never
+## asks for something it cannot do.
+func _pair_after_grown() -> void:
+	var pair_shown := func() -> bool: return GardenFirstDay.rows().any(func(r): return r["text"] == _pair_text())
+	Save.d = _fresh_save()
+	Save.d["tutorial"] = Save.fresh()["tutorial"]
+	for k in Save.d["roster"]:
+		k["level"] = 1
+	ok(GardenFirstDay.rows().size() == 4 and not pair_shown.call(), "two level-1 Boki: no 'pair' line (4 lines)")
+	ok(not GoalTracker.lines().any(func(r): return r["text"] == _pair_text()), "and none in the tracker")
+	Save.d["roster"][0]["level"] = NookRules.GROWN_LV - 1
+	ok(not pair_shown.call(), "level %d (one short of Grown): still no 'pair' line" % (NookRules.GROWN_LV - 1))
+	Save.d["roster"][0]["level"] = NookRules.GROWN_LV
+	ok(pair_shown.call() and GardenFirstDay.rows().size() == 5,
+			"a Grown Boki (level %d): the 'pair' line shows" % NookRules.GROWN_LV)
+	ok(GoalTracker.lines().any(func(r): return r["text"] == _pair_text()), "and the tracker lists it")
+
+## DECISIONS 2026-11-11: a player with few gems can always adopt. Three of the five first-day lines need a second Boki,
+## so a one-Boki base_mode save must be able to adopt a stray from the Shelter on day one (stall level 1).
+func _second_boki() -> void:
+	var rules: Dictionary = Content.rules("farm_build")
+	var was: bool = rules.get("base_mode", false)
+	rules["base_mode"] = true
+	Save.d = Save.fresh()
+	var starter := Save.new_kin("zapple", "Pip")
+	starter["starter"] = true
+	Save.d["roster"].append(starter)
+	Save.d["active"] = starter["uid"]
+	Save.d["tutorial"] = Save.fresh()["tutorial"]
+	Save.d["gems"] = maxi(int(Save.d["gems"]), HomeLayout.FS_GEMS)      # the first farm entry floors gems
+	HomeLayout.ensure(Save.d)
+	var hm := HomeMarket.new(null, Callable())
+	ok(Stalls.level() == 1 and hm.tabs().has("Shelter"),
+			"second Boki: a level-1 stall already opens the Shelter %s" % str(hm.tabs()))
+	var purse := int(Save.d["gems"])
+	ok(Shelter.cards().size() >= 1 and Shelter.cheapest() <= purse,
+			"second Boki: a stray (%d gems) is on offer and the purse (%d) pays it" % [Shelter.cheapest(), purse])
+	ok(GardenFirstDay.rows().size() == 4, "second Boki: one Boki, so race, nap and pair wait: 4 lines")
+	var cid := String(Shelter.cards()[0]["id"])
+	var r := Shelter.adopt(cid)
+	ok(bool(r["ok"]) and Save.d["roster"].size() == 2,
+			"second Boki: adopting the stray gives a second Boki (%s)" % str(r["why"]))
+	ok(GoalTracker.lines().filter(func(l): return l["source"] == "first_day").size() >= 4,
+			"second Boki: the first-day list is still on and now holds the lines that need company")
+	rules["base_mode"] = false
+	ok(Shelter.open_level() == 2, "second Boki: off base_mode the Shelter opens at stall level 2")
+	rules["base_mode"] = was
+
+func _pair_text() -> String:
+	for r in GardenFirstDay.rules()["rows"]:
+		if String(r["id"]) == "pair":
+			return String(r["text"])
+	return ""
 
 ## A bot on a real fresh base does the five things.
 func _bot() -> void:

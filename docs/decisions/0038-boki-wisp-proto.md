@@ -31,3 +31,7 @@ Alternative noted: keep the kin's ability/merge castable from the wisp; left for
   With the wisps off, a walking Boki carried by order cues the same way. Your own Boki's first cue (within 6 s)
   gives one Match tip, "<Boki>'s <passive>: <what it does>" from its carry data (`WispProc.tip`, once per save
   in `Save.d.tutorial.proc`, real matches only), and the wisp flashes again so the eye finds it.
+- Read at the match camera (2026-11-20, `--wisp-read-shots`, docs/shots/wisp-read/): a carried wisp's ring is hidden, so its
+  rim takes the side colour (SideColor: you, squad, rival; one instance uniform, set when the colour changes), it is drawn
+  at the downed form's 1.5x (about 37 px against 25) and orbits at 0.8 m. Same mesh, material and sparkles: draw calls are
+  unchanged (762 before and after).

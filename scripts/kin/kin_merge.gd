@@ -13,7 +13,8 @@ extends RefCounted
 ##     Boki is a wisp again. The merge never adds to or resets a summon cooldown
 ##   - phase "xform": ~0.7s, invulnerable, the Boki leaps into you and the form pops in (MergeXform)
 ##   - phase "live": for the form's duration you keep your own hero's abilities and the form augments them
-##     (MergeAugment), C is off, and R again (after a short lock) fires the form's ultimate, which ends the merge.
+##     (MergeAugment), every input still works (docs/decisions/0100), and R again (after a short lock) fires the
+##     form's ultimate, which ends the merge.
 ##     The shell (MergeShell) takes the damage first; when it breaks the merge ends without the ultimate. A Boki
 ##     without a form file keeps the stat merge (passives, pulses), the type's LMB rider and dash trail, and a basic burst as its ultimate.
 ##   - it ends when time runs out, with the ultimate, early if you're knocked or the Boki is lost. Time out or
@@ -40,9 +41,12 @@ static func transforming(h: Hunter) -> bool:
 	var k = h.kin if h else null
 	return k != null and is_instance_valid(k) and (k as Kin).state == "flying_home" and bool((k as Kin).fly.get("merge", false))
 
-## Is the meter full and the slot ready (not counting where the Boki is)?
+## Is the meter full and the slot ready (not counting where the Boki is)? Never while Fusion is off
+## (MergeForm.enabled): every start (X, bots, the Boki's own call, the tutorial) goes through here.
 static func ready(h: Hunter) -> bool:
-	if h == null or h.ult < 1.0 or h.downed or h.out or h.riding or h.dropping or active(h) or h.merge_cd > 0.0:
+	if not MergeForm.enabled() or h == null or h.ult < 1.0 or h.downed or h.out or h.riding or h.dropping:
+		return false
+	if active(h) or h.merge_cd > 0.0:
 		return false
 	return int(h.slot_lv.get("ult", 0)) > 0
 
@@ -85,6 +89,8 @@ static func press(h: Hunter) -> bool:
 
 ## Why R did nothing, for the HUD toast ("" when there is nothing to say).
 static func deny_text(h: Hunter) -> String:
+	if not MergeForm.enabled():
+		return ""
 	if active(h):
 		return (h.merge_st["kit"] as MergeKit).ult_text() if h.merge_st["kit"] != null else ""
 	if h.merge_cd > 0.0 or int(h.slot_lv.get("ult", 0)) <= 0:

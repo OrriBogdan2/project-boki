@@ -10,11 +10,19 @@ static func rules() -> Dictionary:
 		_rules = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/garden_xp.json"))
 	return _rules
 
+## XP a kin needs to go from level `lv` to the next: round(base x lv^power) (the "curve" row; Game.xp_need).
+static func need(lv: int) -> int:
+	var c: Dictionary = rules()["curve"]
+	return roundi(float(c["base"]) * pow(float(lv), float(c["power"])))
+
 ## A kin's first feed, pat and game of fetch each day pays `care` once (rec.xp_day, a day number a
-## kind, lazy so old saves load); drill pays per training point. `now` is unix seconds (-1: the clock).
+## kind, lazy so old saves load); drill pays per training
+## point and a finished toy play pays `toy` every time. `now` is unix seconds (-1: the clock).
 static func give(rec: Dictionary, action: String, points := 0, now := -1.0) -> void:
 	var xp := int(rules()["drill_per_point"]) * points
-	if action != "drill":
+	if action == "toy":
+		xp = int(rules()["toy"])      # every finished play at a toy pays, no daily gate
+	elif action != "drill":
 		if not _first_today(rec, action, now):
 			return
 		xp = int(rules()["care"])

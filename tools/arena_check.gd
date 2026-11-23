@@ -22,6 +22,7 @@ func step(m: Match, secs: float) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	Content.rules("merge_forms")["fusion_enabled"] = true      # (the cards and bots here use Fusion)
 	await _arena()
 	await _breaker_whirl()
 	await _cards()
@@ -586,10 +587,10 @@ func _loadout() -> void:
 	ok("loadout strip: six kit tiles (the hunter ultimate has its own X tile)", tiles == 6, str(tiles))
 	st.queue_free()
 	# the real expedition panel at home carries the strip
-	var Home = load("res://scripts/home/home.gd")
+	var home_node = load("res://scripts/home/home.gd")
 	ok(
 		"home has the kit card",
-		Home != null and (Home as Script).get_script_method_list().any(
+		home_node != null and (home_node as Script).get_script_method_list().any(
 			func(md): return String(md["name"]) == "_open_kit_card"
 		)
 	)

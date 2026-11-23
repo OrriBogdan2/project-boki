@@ -2,7 +2,8 @@ extends RefCounted
 ## --support-check: the support pair (Pip the Tender, Claire the Rimewright). Ally heals, downed
 ## teammates (heal, carry, drop, revive), the dash through a teammate, and that the Rink Wall gives the
 ## squad nothing (no heal or shield). --tender-combo-check and --rimewright-combo-check also run each
-## hero's combos (tools/care_combo_check.gd). Mode: "all" | "tender" | "rimewright". Prints SUPPORT PASS/FAIL.
+## hero's combos (tools/care_combo_check.gd). Mode: "all" | "tender" | "rimewright" | "neve"
+## (tools/neve_feel_check.gd). Prints SUPPORT PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -77,6 +78,7 @@ func down(m: Match, A: Hunter) -> void:
 	A.down_hp = 60.0
 
 func run(mn: Node, md := "all") -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = mn
 	mode = md
 	Save.no_write = true
@@ -88,6 +90,8 @@ func run(mn: Node, md := "all") -> void:
 	carry.sc = self
 	var anims = load("res://tools/rimewright_anim_check.gd").new()
 	anims.sc = self
+	var feel = load("res://tools/neve_feel_check.gd").new()
+	feel.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
 		await _ranks("tender")
@@ -103,6 +107,8 @@ func run(mn: Node, md := "all") -> void:
 		await ults.rimewright()
 		await anims.rimewright()
 		await ults.burst_cap()
+	if mode in ["all", "rimewright", "neve"]:
+		await feel.run_all()
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

@@ -10,7 +10,7 @@ extends RefCounted
 ## Online: the kin snapshot carries the flag (KinNet), so other games show the wisp too.
 
 const SHOULDER_Y := 1.45  # m above the hunter's feet when their rig has no shoulder bone
-const ORBIT_R := 0.6  # m from the hunter's middle
+const ORBIT_R := 0.8  # m from the hunter's middle: beside the body at the match camera, not over it
 const ORBIT_HZ := 0.35  # laps per second: quick enough to read as alive, slow enough to read as a shape
 
 
@@ -66,6 +66,7 @@ static func ride(k: Kin, dt: float) -> bool:
 		return false
 	k.pos = k.owner_h.pos + Vector3(0, 1.5, 0)
 	k.prev = k.pos
+	TutorialLead.wisp_step(k, dt)  # (the match tutorial: it floats on ahead to the step's goal, a look only)
 	return true
 
 
@@ -87,12 +88,17 @@ static func render(k: Kin) -> bool:
 	var sh := o.model.get_node_or_null("Rig/Torso/Shoulder") as Node3D
 	var y := sh.global_position.y if sh else o.position.y + SHOULDER_Y
 	var a: float = TAU * (k.m.time * ORBIT_HZ + float(k.model.get_meta("phase", 0.0)))
-	k.global_position = Vector3(o.position.x + cos(a) * ORBIT_R, y, o.position.z + sin(a) * ORBIT_R)
+	var mid: Vector3 = o.position  # (leading in the tutorial: it orbits a spot out ahead, still a look only)
+	if k.comp and k.comp.lead_pos != Vector3.INF:
+		mid = k.comp.lead_pos
+		y += mid.y - o.position.y
+	k.global_position = Vector3(mid.x + cos(a) * ORBIT_R, y, mid.z + sin(a) * ORBIT_R)
 	if k.summon and k.summon.fly > 0.0:
 		k.global_position = k.summon.streak(k.global_position)
 		k.m.fx.burst(k.global_position, k.sp.get("glow", k.sp["color"]), 1, 0.4)
-	k.model.rotation.y = atan2(sin(a), -cos(a))
-	k.model.scale = Vector3.ONE
+	k.model.rotation.y = k.face if mid != o.position else atan2(sin(a), -cos(a))
+	k.model.scale = Vector3.ONE * KinWispForm.SIZE
+	BokiWispLook.side(k.model, SideColor.of(k.m, k))
 	BokiWispLook.pose(k.model, k.m.time)
 	WispProc.watch(k)
 	return true

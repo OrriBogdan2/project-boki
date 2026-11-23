@@ -11,9 +11,7 @@ const MISS_RATE := 0.3  # share of 0.5 s aim windows that land MISS_OFF to the s
 const MISS_OFF := 3.0  # m a missed aim is off the target
 const MISS_WINDOW := 0.5  # s one aim roll holds
 
-const KEYS := [  # the action inputs
-	"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"
-]
+const KEYS := ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]  # the action inputs
 
 static var human := false
 static var reading_t := 0.0  # s of reading and reacting still to go before the next input
@@ -99,7 +97,9 @@ static func drive(m: Match) -> void:
 				if sid == "exdash" and p.vel.y < 0.5:
 					p.inp["dash"] = true
 				if sid == "glide":
-					p.inp["glide"] = true
+					var press: bool = not p.gliding and p.coyote <= 0.0 and p.can_glide()
+					p.inp["jump"] = press  # the second press opens it
+					p.inp["glide"] = p.gliding or press  # holding only keeps it open
 		"wallkick":
 			goto.call(tu.stop("crouch"), 0.4)
 			_kick_up(m, tu.stop("crouch").y)
@@ -203,6 +203,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	match sid:
 		"shoot":
 			p.inp["fire"] = fire_key(m)
+		"sec":
+			p.inp["fire"] = bool(tu.seen.get("sec", false)) and fire_key(m)  # (the cast first, then the rest)
 		"gkey":
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)  # a tap sends it when it is beside you, a tap calls it back when it is out
@@ -222,15 +224,22 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 			p.inp["fire"] = tu.flag and fire_key(m)
 			p.inp["sig"] = tu.flag and int(m.time * 2.0) % 2 == 0
 
+
 ## The Summon key: out of the wisp whenever it is ready (the first window, once, is called back early).
 static func _summon(m: Match, tu: Tutorial) -> void:
 	var s: KinSummon = m.player.kin.summon
-	if s.left > 0.0 and not recalled_once and tu.id() == "summon" and tu.sm.phase == TutorialSummon.OUT \
-			and s.left < s.dur - 1.0:
+	if (
+		s.left > 0.0
+		and not recalled_once
+		and tu.id() == "summon"
+		and tu.sm.phase == TutorialSummon.OUT
+		and s.left < s.dur - 1.0
+	):
 		recalled_once = true
 		KinSummon.press(m.player)
 	elif not s.out() and s.cd <= 0.0:
 		KinSummon.press(m.player)
+
 
 ## The attack key as a player works each weapon: a bow is drawn to its first stage then let go, a blade is
 ## tapped (a hold would charge it), a gun is held.
