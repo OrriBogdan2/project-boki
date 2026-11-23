@@ -128,6 +128,7 @@ func _grab_window(path: String, frames := 30) -> void:
 		await RenderingServer.frame_post_draw
 	if main.get("fade") != null:
 		main.fade.reveal(0.0)  # the boot splash would otherwise cover the window (its logo fades in 0.25 s)
-		for i in 30:
-			await RenderingServer.frame_post_draw
+	# frames run uncapped on a GPU box: wait real time too, for the logo fade and the card's intro
+	await main.get_tree().create_timer(1.0).timeout
+	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(path)
