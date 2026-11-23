@@ -66,6 +66,7 @@ func _callouts(k: Kin) -> Array:
 	return k.comp.history.filter(func(e): return KinCompanion.CATS.has(String(e["cat"])) and not e.get("net", false))
 
 func run(mn: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
 	Settings.set_v("kin_chatter", "normal", false)

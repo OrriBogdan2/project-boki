@@ -36,6 +36,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--tutorial-playtest-check="):
 			arch = a.substr(26)

@@ -99,6 +99,25 @@ func run(m: Node) -> void:
 	ok(leans == 20, "the lean gift names the parent with the stronger lean (%d of 20)" % leans)
 	ok(words == 20, "the hatch card marks the kind, the lean and both habits with their parent (%d of 20)" % words)
 	ok(stats == 20, "its best inherited stat is marked with the parent it came from (%d of 20)" % stats)
+	# ---- the model: a coat pattern from one parent, in the colour of the parent that gave the other kind
+	a["dna"]["mark"] = "stripes"
+	b["dna"]["mark"] = "plain"
+	var pair := [a, b]
+	var striped := 0
+	var coloured := 0
+	for i in 20:
+		var kid := Care.breed(a, b, rng)
+		var other: Dictionary = pair[1 - int(kid["gifts"]["species"])]
+		var hue := Unique.tint(Shiny.body(other), Unique.of(other)).to_html(false)
+		if kid["dna"]["mark"] == "stripes" and kid["gifts"]["pattern"] == 0: striped += 1
+		if kid["dna"].get("accent", "") == hue and kid["gifts"]["accent"] == 1 - kid["gifts"]["species"]: coloured += 1
+	ok(striped == 20, "the baby wears the striped parent's pattern, credited to it (%d of 20)" % striped)
+	ok(coloured == 20, "its pattern is in the other kind's body colour, credited to that parent (%d of 20)" % coloured)
+	var plain_pair := Care.breed(_kin("cindle", "P", 8), _kin("puddlet", "Q", 8), rng)
+	var plain_dna: Dictionary = plain_pair["dna"]
+	ok(plain_dna["mark"] != "plain" and plain_dna.has("accent"), "two plain-coated parents still give a coat")
+	var card := Care.breed(a, b, rng)
+	ok(_trait(card, "Pattern colour").has("col") and _trait(card, "Coat pattern").has("val"), "the card lists both")
 	var twin := Care.breed(_kin("cindle", "X", 8), _kin("cindle", "Y", 8), rng)
 	var twin_kind := int(_trait(twin, "Kind and colour")["from"])
 	var both: bool = twin["gifts"]["species"] == Parentage.BOTH and twin_kind == Parentage.BOTH
