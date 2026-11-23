@@ -150,7 +150,7 @@ func _lead_in(sname: String) -> float:
 			ch = b.decode_u16(i + 10)
 			rate = b.decode_u32(i + 12)
 		elif id == "data":
-			at = _loud_at(b.slice(i + 8, i + 8 + n), ch * 2, rate / 100)
+			at = _loud_at(b.slice(i + 8, i + 8 + n), ch * 2, int(rate / 100.0))
 			break
 		i += 8 + n + (n & 1)
 	lead_in[sname] = at

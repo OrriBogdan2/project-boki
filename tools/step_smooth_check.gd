@@ -152,9 +152,9 @@ func _crop(main: Node) -> Image:
 	var img := main.get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGBA8)   # the viewport gives RGB8; blit_rect needs matching formats
 	var at := Vector2i(m.cam.unproject_position(P.position + Vector3(0, 0.9, 0)))
-	var r := Rect2i(at - CROP / 2, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+	var r := Rect2i(at - Vector2i(Vector2(CROP) / 2.0), CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 	var out := Image.create(CROP.x, CROP.y, false, Image.FORMAT_RGBA8)
-	out.blit_rect(img, r, r.position - (at - CROP / 2))
+	out.blit_rect(img, r, r.position - (at - Vector2i(Vector2(CROP) / 2.0)))
 	return out
 
 func _start_at(a: Vector3) -> void:

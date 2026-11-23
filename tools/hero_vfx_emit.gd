@@ -167,7 +167,7 @@ func _bone_verts(w: Node, sk: Skeleton3D, bone: String) -> PackedVector3Array:
 			var pos: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES]
 			var wts: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
-			var per := bones.size() / maxi(pos.size(), 1)
+			var per := int(bones.size() / float(maxi(pos.size(), 1)))
 			for i in pos.size():
 				for j in per:
 					var bind := bones[i * per + j]
