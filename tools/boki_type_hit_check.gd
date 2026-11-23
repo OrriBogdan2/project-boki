@@ -17,7 +17,8 @@ const SAMPLE := {  # species -> its theme, three of them are read in the check, 
 }
 const READ := ["cindowary", "squalltross", "floenatee"]
 const SPARK_WHITE := 0.3  # how far Fx.impact lightens the spark toward white
-const SHOT_FRAME := 3  # frames after the hit the strip is taken at (the flash holds ~6)
+const STRIP_ASPECT := 0.3  # strip height over width
+const SHOT_FRAME := 2  # frames after the hit the strip is taken at (the flash holds ~6)
 
 var bad := 0
 var main: Node
@@ -140,9 +141,10 @@ func _shots() -> void:
 		await main.get_tree().process_frame
 	var img: Image = main.get_viewport().get_texture().get_image()
 	var cam := main.get_viewport().get_camera_3d()
-	var tl := cam.unproject_position(home + Vector3(-6.5, 3.0, 6))
-	var br := cam.unproject_position(home + Vector3(6.5, 0.0, 6))
-	var rg := Rect2i(Vector2i(tl), Vector2i(br - tl)).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+	var mid := cam.unproject_position(home + Vector3(0, 1.0, 6))
+	var half := (cam.unproject_position(home + Vector3(6.5, 1.0, 6)) - mid).x
+	var box := Vector2(half, half * STRIP_ASPECT)
+	var rg := Rect2i(Vector2i(mid - box), Vector2i(box * 2.0)).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 	var crop := img.get_region(rg)
 	crop.resize(1600, int(crop.get_height() * 1600.0 / crop.get_width()), Image.INTERPOLATE_LANCZOS)
 	crop.save_png(dir.path_join("type_hits.png"))
