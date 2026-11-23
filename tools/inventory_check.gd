@@ -251,14 +251,10 @@ func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 		"looting: one window, what you wear marked in place above your backpack (no second inventory window)"
 	)
 	var inside: Rect2 = m.hud.loot_panel.get_global_rect().grow(1.0)
-	var out: Array = (
-		m.hud.loot_panel
-		. find_children("*", "Control", true, false)
-		. filter(
-			func(c):
-				return (c as Control).is_visible_in_tree() and not inside.encloses((c as Control).get_global_rect())
-		)
-	)
+	var out: Array = []
+	for c: Control in m.hud.loot_panel.find_children("*", "Control", true, false):
+		if c.is_visible_in_tree() and not inside.encloses(c.get_global_rect()):
+			out.append(c)
 	ok(out.is_empty(), "nothing in the deathbox window runs past its edge (%d out)" % out.size())
 	m.hud.close_loot()
 
