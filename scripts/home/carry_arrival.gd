@@ -1,6 +1,6 @@
 class_name CarryArrival
 extends RefCounted
-## A Boki you scanned in a match and carried out comes home as an event (DECISIONS "carry 2 in, 1 extra out",
+## A Boki you claimed in a match and carried out comes home as an event (DECISIONS "carry 2 in, 1 extra out",
 ## GARDEN.md section 4): it stands at the arrival point, the residents come to look (ComeLook), it keeps one
 ## memory line, and a short card says where it came from and where it went. One in the Burrow (the garden's
 ## out-cap was full) gets the card too, and the card says so.
