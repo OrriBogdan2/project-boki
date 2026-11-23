@@ -548,6 +548,8 @@ static func order_tip(h_v, p: Hunter) -> Array:
 		out.append(
 			["Its Sic also: " + KinText.effects(k.ks.throw_effects), KinRules.effects_color(k.ks.throw_effects), 13]
 		)
+	if k.wisp or k.summon and k.summon.out():
+		out.append([KinSummon.perk_line(), h_v.MUTED, 13])
 	if k.ks:
 		out.append([KinText.carry(k.ks), KinRules.cat_color("sustain"), 13])
 		var off := KinText.carry_off(k.ks)

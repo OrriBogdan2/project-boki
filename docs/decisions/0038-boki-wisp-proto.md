@@ -16,7 +16,7 @@ Summon, steal and the ult wait on briefs/boki-art/WISP_DESIGN_OPEN.md.
    machine, KinTactics and KinCompanion, and render draws the `BokiWispLook` model on an orbit.
 
 ## Decision
-Option 2. Setting `boki_wisps` (default off; Settings > Gameplay > Boki), read per game for its own Boki and
+Option 2. Setting `boki_wisps` (default on since 2026-11-22, decision 0172; Settings > Gameplay > Boki), read per game for its own Boki and
 bots; match opts can force it (`--perf-bench --boki-wisps`). Never in the tutorial. A wisp takes no orders,
 throws or hits; its ability and the merge go off through you (see R and E below). Left behind (its
 hunter goes out in a risky match) it turns back into the walking Boki and the loss rules run unchanged.

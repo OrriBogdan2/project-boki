@@ -172,6 +172,7 @@ func _heroes() -> Array:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	for arch in _heroes():
 		for slot in SLOTS:
 			var m := _match(main, arch)

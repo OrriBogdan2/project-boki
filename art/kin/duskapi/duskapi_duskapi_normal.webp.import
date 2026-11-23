@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c5a1i7a3g70gf"
-path="res://.godot/imported/duskapi_duskapi_normal.webp-d03d1400d6f66aeaf65b9fd756809f55.ctex"
+path.bptc="res://.godot/imported/duskapi_duskapi_normal.webp-d03d1400d6f66aeaf65b9fd756809f55.bptc.ctex"
+path.astc="res://.godot/imported/duskapi_duskapi_normal.webp-d03d1400d6f66aeaf65b9fd756809f55.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0606b373c6425aa8a448361c4a85545c"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/duskapi/duskapi_duskapi_normal.webp"
-dest_files=["res://.godot/imported/duskapi_duskapi_normal.webp-d03d1400d6f66aeaf65b9fd756809f55.ctex"]
+dest_files=["res://.godot/imported/duskapi_duskapi_normal.webp-d03d1400d6f66aeaf65b9fd756809f55.bptc.ctex", "res://.godot/imported/duskapi_duskapi_normal.webp-d03d1400d6f66aeaf65b9fd756809f55.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

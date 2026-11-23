@@ -256,6 +256,10 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	if BokiQuirks.sex_note(spk) != "":
 		_fact(info, "egg", "Sexes", BokiQuirks.sex_note(spk))
 	info.add_child(summon_row(spk))
+	var perks := UI.para(KinSummon.perk_line(), UI.T_SMALL, UI.MUTED)
+	perks.name = "PerkLine"
+	perks.custom_minimum_size.x = 360
+	info.add_child(perks)
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)

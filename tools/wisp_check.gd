@@ -34,6 +34,7 @@ func run(main_node: Node) -> void:
 	_bleed_out()
 	_teammate()
 	_boki_wisps()
+	_wisps_migration()
 	_summon_data()
 	_summon()
 	_net_form()
@@ -432,10 +433,27 @@ func _picker() -> void:
 	WispLook.equip("default")
 
 
-## The Boki wisp prototype: the setting's default leaves the walking Boki; on, the Boki rides as a wisp.
+## A settings file from before the default flipped (no wisps_v) loads with wisps on; a later hand-off stays off.
+func _wisps_migration() -> void:
+	var cf := ConfigFile.new()
+	cf.set_value("s", "boki_wisps", false)
+	cf.save(Settings.PATH)
+	Settings.load_file()
+	var flipped: bool = Settings.v["boki_wisps"] and Settings.v["wisps_v"] == 1
+	ok(flipped, "Boki wisps: an old file's saved 'off' reads as on once")
+	cf.set_value("s", "wisps_v", 1)
+	cf.save(Settings.PATH)
+	Settings.load_file()
+	ok(Settings.v["boki_wisps"] == false, "Boki wisps: a file with wisps_v keeps its off")
+	DirAccess.remove_absolute(Settings.PATH)
+	Settings.load_file()
+	ok(Settings.v["boki_wisps"] == true, "Boki wisps: no file at all is on")
+
+
+## Boki wisps: off leaves the walking Boki; on (the default), the Boki rides as a wisp.
 func _boki_wisps() -> void:
 	var base := {"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle"}
-	ok(Settings.DEFAULTS["boki_wisps"] == false, "Boki wisps: the setting is off by default")
+	ok(Settings.DEFAULTS["boki_wisps"] == true, "Boki wisps: the setting is on by default")
 	_start(base.merged({"boki_wisps": false}))
 	_frames(0.3)
 	var walker: Kin = m.player.kin

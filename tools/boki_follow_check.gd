@@ -92,6 +92,7 @@ func mob_at(kind: String, at: Vector3) -> Mob:
 	return mb
 
 func run(mn: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
 	CombatBus.hit_landed.connect(_on_hit)
