@@ -120,7 +120,7 @@ func _states(main: Node, a: String) -> void:
 		m.set_meta(WardenClips.STATE, c[1])
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
-		var want := String(nat.plays[c[0]])
+		var want := String(nat.plays["lmb" if c[0] == "attack" and nat.plays.has("lmb") else c[0]])
 		var sk := nat.skel
 		var up := (
 			sk.get_bone_global_pose(sk.find_bone("Head")).origin.y
@@ -252,6 +252,15 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var all_there: bool = named.all(func(sl): return nat.plays.has(sl))
 	ok(all_there, "%s: every clip slot the data names has its clip (%s)" % [a, named])
 	var pick := String(nat.d["clips"]["crouch"])  # (Meshy's clip no fallback plays)
+	for sl in named:  # (a Hunter's own clip: it plays on its move, posed, and ends within its length)
+		var own := String(nat.plays[sl])
+		await _feed(main, nat, m, SLOT_CASES[sl][0], SLOT_CASES[sl][1])
+		var posed := _turned(nat)
+		var len := nat.player.get_animation(own).length
+		ok(
+			nat.player.current_animation == own and posed >= POSED_MIN and len > 0.2,
+			"%s: slot %s plays its own clip %s (%.2f s, %d bones posed)" % [a, sl, own, len, posed]
+		)
 	for sl in SLOT_CASES:
 		var c: Array = SLOT_CASES[sl]
 		if not nat.plays.has(sl):

@@ -13,6 +13,17 @@ extends RefCounted
 
 const ClipCheck := preload("res://tools/clip_check.gd")
 
+## --states on a Meshy-native Hunter then plays each clip slot its data names: [slot, the state that starts it].
+## The log line SLOT names its frames (a held slot, dash and glide, runs while its state does).
+const SLOT_SHOTS := [
+	["lmb", {"swing_n": 1}],
+	["lmb_hold", {"swing_n": 1, "combo": -1}],
+	["rmb", {"cast": 0.0, "cast_slot": "secondary"}],
+	["e", {"cast": 0.0, "cast_slot": "utility"}],
+	["r", {"cast": 0.0, "cast_slot": "ult"}],
+	["dash", {"rolling": true}],
+	["glide", {"gliding": true}],
+]
 ## --states: [state, the match's state for it (WardenClips.STATE), s it is held]
 const STATE_SHOTS := [
 	["idle", {"grounded": true}, 2.0],
@@ -212,6 +223,39 @@ func _states(model: Node3D, fps: float, out: String) -> void:
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
+	var native := poser as WardenNative
+	if native:
+		await _slot_shots(native, model, fps, dir, i)
+
+
+## --states, native: each slot of data "clips" from SLOT_SHOTS pressed once on the stand (held slots run 1 s).
+func _slot_shots(native: WardenNative, model: Node3D, fps: float, dir: String, first: int) -> void:
+	var i := first
+	var press := 0
+	for sl in SLOT_SHOTS:
+		var slot: String = sl[0]
+		if not native.plays.has(slot) or not (native.d["clips"] as Dictionary).has(slot):
+			continue
+		var held := slot in ["dash", "glide"]
+		var s := {"grounded": true, "face": model.rotation.y}
+		model.set_meta(WardenClips.STATE, s)
+		for k in int(0.3 * fps):
+			native.call("_process", 1.0 / fps)
+		var from := i
+		var length := 1.0 if held else native.player.get_animation(String(native.plays[slot])).length
+		for k in int((length + 0.4) * fps):
+			if k == 0 or held:
+				s.merge(sl[1], true)
+			if k == 0 and s.has("swing_n"):
+				press += 1  # (a swing counts up: the next press is a new one)
+			if s.has("swing_n"):
+				s["swing_n"] = press
+			if not held and k > 0 and s.has("cast"):
+				s["cast"] = 5.0
+			native.call("_process", 1.0 / fps)
+			await _grab(dir.path_join("f%03d.png" % i))
+			i += 1
+		print("SLOT %s f%03d-f%03d (clip %.2f s, every 1/%d s)" % [slot, from, i - 1, length, int(fps)])
 
 
 func _grab(path: String) -> void:
