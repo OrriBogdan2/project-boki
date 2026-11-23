@@ -122,7 +122,7 @@ func _pair_after_grown() -> void:
 	ok(pair_shown.call() and GardenFirstDay.rows().size() == 5,
 			"a Grown Boki (level %d): the 'pair' line shows" % NookRules.GROWN_LV)
 	var cap_was: int = GoalTracker.cfg()["max"]
-	GoalTracker.cfg()["max"] = 99      # (the card shows three: the pair line is the fifth open line, read off the whole list)
+	GoalTracker.cfg()["max"] = 99      # (the card shows three: the pair line is read off the whole list)
 	var listed := GoalTracker.lines().any(func(r): return r["text"] == _pair_text())
 	GoalTracker.cfg()["max"] = cap_was
 	ok(listed, "and the tracker lists it")
