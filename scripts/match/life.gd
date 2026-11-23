@@ -48,7 +48,7 @@ static func box_value(b: Dictionary) -> int:
 	v += (b["caught"] as Array).size() * 15
 	for st in (b.get("belt", []) as Array): v += int(st["n"]) * 4
 	for c in Pack._box_things(b):
-		v += Loot.value(c["it"]) / 2
+		v += int(Loot.value(c["it"]) / 2.0)
 	return v
 
 static func box_color(b: Dictionary) -> Color:
@@ -375,6 +375,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 				else:
 					h.caught.append(rec)
+					CarrySfx.from_box(m, h, b)
 					if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 						h.stolen_carry = true
 		"belt":
@@ -476,6 +477,7 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 			left.append(rec)               # the box is full: this capsule stays in the deathbox
 			continue
 		h.caught.append(rec)
+		CarrySfx.from_box(m, h, b)
 		if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 			h.stolen_carry = true
 	if not left.is_empty():

@@ -58,7 +58,7 @@ func _own_flight(m: Match, K: OstraKit, sigil: Node3D, land: Vector3) -> Array:
 	)
 	ok("swap mark: the fill only rises, no jumps", _smooth(fills), "max step %.3f" % _max_step(fills))
 	ok("swap mark: it sits on the landing point (0.3 m)", off < ON_SPOT, "%.2f m" % off)
-	return [snappedf(fills[0], 0.001), snappedf(fills[fills.size() / 2], 0.01), snappedf(fills[-1], 0.001)]
+	return [snappedf(fills[0], 0.001), snappedf(fills[int(fills.size() / 2.0)], 0.01), snappedf(fills[-1], 0.001)]
 
 
 ## A rival's game: the same "trade" event builds the sigil, which fills on its own over the flight.

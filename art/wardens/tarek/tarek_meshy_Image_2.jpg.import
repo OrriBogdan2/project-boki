@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://8qa4hawvdld4"
-path="res://.godot/imported/tarek_meshy_Image_2.jpg-4ad6a499e2723c1dc1f6863d7d53815e.ctex"
+path.s3tc="res://.godot/imported/tarek_meshy_Image_2.jpg-4ad6a499e2723c1dc1f6863d7d53815e.s3tc.ctex"
+path.etc2="res://.godot/imported/tarek_meshy_Image_2.jpg-4ad6a499e2723c1dc1f6863d7d53815e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "1544a7e77e0805deab9239b3824c434e"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/tarek/tarek_meshy_Image_2.jpg"
-dest_files=["res://.godot/imported/tarek_meshy_Image_2.jpg-4ad6a499e2723c1dc1f6863d7d53815e.ctex"]
+dest_files=["res://.godot/imported/tarek_meshy_Image_2.jpg-4ad6a499e2723c1dc1f6863d7d53815e.s3tc.ctex", "res://.godot/imported/tarek_meshy_Image_2.jpg-4ad6a499e2723c1dc1f6863d7d53815e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
