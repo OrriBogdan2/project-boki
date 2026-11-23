@@ -21,6 +21,7 @@ func ok(label: String, cond: bool, info := "") -> void:
 
 func run() -> void:
 	await _reel()
+	await _tap()
 	await _miss()
 
 ## A foe 9 m out: the arm's out-speed, the reel's curve and time, the stop, and what both sides can do meanwhile.
@@ -112,6 +113,46 @@ func _reel() -> void:
 	ak.step(m, float(K.rmb_def()["arrive_stun"]) + 0.05)
 	ok("reel parity: ... and acts again after it", T.stun_t <= 0.0, "stun %.2f" % T.stun_t)
 	ok("reel parity: Grimble can't jump or start the X while he reels", not jumped and not acted)
+	await ak.done(m)
+
+## LMB tapped 0.2 s into the 1 s reel: the gun stays locked, and the tap fires one volley within a step of the
+## arrival (DECISIONS: every interaction is chainable; no press is lost), not a stream.
+func _tap() -> void:
+	var r: Array = ak.setup("dredge", CATCH)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var K: DredgeKit = P.ak
+	P.ammo = int(P.wpn["mag"])
+	ak.aim_at(P, T.pos)
+	ak.tap(m, P)
+	var t := 0.0
+	while K.pull.is_empty() and t < 1.5:
+		m.step(ak.DT)
+		t += ak.DT
+	var shots0 := P.shot_n
+	var tap_at := roundi(0.2 / ak.DT)      # the step 0.2 s into the reel
+	var n := 0
+	var tr := 0.0
+	var mid := 0
+	while not K.pull.is_empty() and tr < 3.0:
+		P.inp["fire"] = n == tap_at
+		m.step(ak.DT)
+		n += 1
+		tr += ak.DT
+		if not K.pull.is_empty():
+			mid = P.shot_n - shots0
+	P.inp["fire"] = false
+	var steps := 0
+	while P.shot_n == shots0 + mid and steps < 10:
+		m.step(ak.DT)
+		steps += 1
+	ak.step(m, 0.6)
+	ok(
+		"reel: an LMB tapped 0.2 s into a 1 s reel fires one volley within one step of the arrival",
+		K.arrivals == 1 and mid == 0 and steps <= 1 and P.shot_n - shots0 == 1,
+		"reel %.2f s, shots mid-reel %d, fired %d step(s) after it, shots %d" % [tr, mid, steps, P.shot_n - shots0]
+	)
 	await ak.done(m)
 
 ## A miss: the arm flies its full 11.5 m and snaps back, the full cooldown is spent (no refund, even at rank 3),
