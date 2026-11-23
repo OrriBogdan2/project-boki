@@ -928,7 +928,7 @@ func _owners() -> void:
 			under = top
 			top = top.get_parent()
 		var at: Vector3 = (top as Node3D).global_position if top is Node3D else Vector3.ZERO
-		var key := "%s@%d,%d/%s" % [_base(top), roundi(at.x), roundi(at.z), _base(under)]
+		var key := "%s@%d,%d/%s" % [_plain_name(top), roundi(at.x), roundi(at.z), _plain_name(under)]
 		by[key] = int(by.get(key, 0)) + passes
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
@@ -936,5 +936,5 @@ func _owners() -> void:
 
 
 ## A node's name without Godot's auto-numbering.
-func _base(n: Node) -> String:
+func _plain_name(n: Node) -> String:
 	return String(n.name).rstrip("0123456789@")
