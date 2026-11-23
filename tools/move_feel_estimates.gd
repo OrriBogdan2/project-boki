@@ -1,5 +1,5 @@
 extends RefCounted
-## --move-feel-check's last three estimates (docs/SUPERVIVE_FEEL.md "Still estimates"): the overheated glider's
+## --move-feel-check's last three estimates (sv/FEEL_NOTES.md "Still estimates"): the overheated glider's
 ## burn, the heat spike's plunge and the Spring pad's launch, each through the game's own path. None has a
 ## source number (sv/DATA.md 4, 5 and 9 name them with no value; sv/briefs/physics.md lists SpikeSlamForceZ and
 ## the overheat penalty effects undecoded; the only pad use on camera, venator.md Mini Nuke f103, is not on disk
