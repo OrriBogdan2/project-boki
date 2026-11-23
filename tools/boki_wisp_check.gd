@@ -79,7 +79,8 @@ func _pop_types() -> void:
 		var want := DexView.type_col(DexView.type_of(String(id)))
 		var tag := String(id) + " pop colour"
 		var far := _dist(own, want) + 0.001
-		ok(_pop_flash(String(id), 0.0) == 0.0 and _pop_flash(String(id), 1.0) == 0.0, tag + " body flash is off at both ends")
+		var ends := _pop_flash(String(id), 0.0) + _pop_flash(String(id), 1.0)
+		ok(ends == 0.0, tag + " body flash is off at both ends")
 		ok(_pop_flash(String(id), 0.3) > 0.3, tag + " body flash is up when the wisp swells")
 		ok(_dist(_pop_rim(String(id), 0.0, true), own) < 0.02, tag + " starts on its own glow")
 		ok(_dist(_pop_rim(String(id), 1.0, true), own) < 0.02, tag + " ends on its own glow")
