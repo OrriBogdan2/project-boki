@@ -143,7 +143,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
    `TutorialResume.OUTPOST_START`, "goexit", a step the Ways Out course no longer has, so it fell back to step 0 and
    landing resumed again for ever. A player who quit after `wayout`, `uplink` or `defend` and pressed Continue was
    locked there the same way. Now it resumes at `wayout`. `--tutorial-resume-check` checks that every beat resumes past the landing
-   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left were "missing kick" for all three, now 3 of 3; done: the lookout rim is sheer, see the lookout bullet in section 2).
+   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left are "missing kick" for all three, now 3 of 3).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
@@ -262,11 +262,6 @@ The owner's first-match playtest on the PC build, and what each fix is:
   `SEND_R` of a monster, or the Boki on one; a tutorial Boki never refuses a send (`Kin.consider_throw`).
 - **The lookout (`crouch`).** `Tutorial.on_lookout` counts the whole top and its rim (`LOOKOUT_R`, `LOOKOUT_DROP`); the
   check crouches at all four far edges and at the foot of the cliff.
-- **The lookout takes a wall kick, nothing else.** A jump into a 2.4 m cliff used to mantle it (the aerial ledge rise
-  reaches 1.5 m above your feet, 2.4 m for Lace and Kael, whose jump peaks 1.57 m), so a player or the bot could skip the
-  lesson (`--tutorial-fight-check`: "missing kick", every run on 11-20). The Lookout Isle now has `"sheer_cliffs": true`
-  (`GroundShapes.sheer_cliffs`): the top tiles of its terraces are smooth sheer rims, which nothing can mantle from the air.
-  The wall kick still climbs it (jump, then jump again at the wall), and ledges everywhere else are unchanged.
 - **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
   half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
   `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.

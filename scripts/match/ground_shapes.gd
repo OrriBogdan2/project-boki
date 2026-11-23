@@ -118,14 +118,3 @@ static func island(def: Dictionary, w: int, h: int, seed: int) -> Dictionary:
 			lvs[k] = lv
 			d0s[k] = d0
 	return {"x0": x0, "x1": x1, "z0": z0, "z1": z1, "cols": cols, "lv": lvs, "d0": d0s}
-
-## An island flagged "sheer_cliffs": every top tile of its terraces that has lower ground beside it is a smooth
-## sheer rim (World.sheer), so its cliff can't be mantled from a jump and only a wall kick climbs it.
-static func sheer_cliffs(w: World, cells: Array) -> void:
-	for c: Vector2i in cells:
-		var lv := w.level[w.idx(c.x, c.y)]
-		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-			var n: Vector2i = c + d
-			if w.inb(n.x, n.y) and w.kind[w.idx(n.x, n.y)] == World.T_GROUND and w.level[w.idx(n.x, n.y)] < lv:
-				w.sheer[w.idx(c.x, c.y)] = true
-				break
