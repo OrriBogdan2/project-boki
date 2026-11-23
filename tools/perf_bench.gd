@@ -20,54 +20,92 @@ extends RefCounted
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
+##   [--bench-probe]  (only the scripted expedition a player gets: loading screen, planning map, skyship ride, drop,
+##   a fight; per-phase frame costs and hitches. tests/perf_probe.gd: --probe-out= --probe-quick --probe-squad=
+##   --probe-teams= --probe-full)
+##   [--bench-hunter-gpu]  (only what the Hunter models cost to draw: six Hunters and four Boki in idle at the match
+##   camera; tools/perf/hunter_gpu.gd: --wardens=a,b --tiers=n,25k,40k --bench-secs=8; needs a real GPU)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
-var view := Vector2i(640, 360)     # small window: a software rasterizer's fill time; counts are the same
-const FIGHT_AT := 8.0               # s: when the fight is brought to you
-const BASE_RACE_AT := 10.0          # s into the base part: the Dash starts
-const SLOW_MS := 50.0               # ms: the DECISIONS 2026-11-08 ceiling for a frame after warm-up
-const WARM_S := 3.0                 # s of the base part treated as warm-up
-const SECTION_FRAMES := 120         # frames the base part's step timing samples
-const POSE_SAMPLE := 30            # frames between the timed poses of --bench-trios
-const POSE_BANDS := [20.0, 40.0, 80.0]   # m (flat) from the camera focus: the bands of the "BENCH pose" lines
+const FIGHT_AT := 8.0  # s: when the fight is brought to you
+const BASE_RACE_AT := 10.0  # s into the base part: the Dash starts
+const SLOW_MS := 50.0  # ms: the DECISIONS 2026-11-08 ceiling for a frame after warm-up
+const WARM_S := 3.0  # s of the base part treated as warm-up
+const SECTION_FRAMES := 120  # frames the base part's step timing samples
+const POSE_SAMPLE := 30  # frames between the timed poses of --bench-trios
+const POSE_BANDS := [20.0, 40.0, 80.0]  # m (flat) from the camera focus: the bands of the "BENCH pose" lines
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
-const HEART_SQUADS := 8             # LIMITED_WAY_OUTS.md risk 3: up to 8 squads (24 Hunters) on the Heart's island
-const HEART_NEAR := 2.0             # m from the Heart: the nearest a squad stands (the ring is 6 m)
-const HEART_FAR := 14.0             # m from the Heart: the farthest, still well inside the last tide ring (34 m)
-const BLIGHT_AT := 22.0             # m from the Heart the Blight claws out: past the squads, inside the tide
-const HEART_BLIGHT := ["bl_skitter", "bl_skitter", "bl_warden", "bl_skitter", "bl_skitter", "bl_skitter",
-	"bl_warden", "bl_skitter"]
+const HEART_SQUADS := 8  # LIMITED_WAY_OUTS.md risk 3: up to 8 squads (24 Hunters) on the Heart's island
+const HEART_NEAR := 2.0  # m from the Heart: the nearest a squad stands (the ring is 6 m)
+const HEART_FAR := 14.0  # m from the Heart: the farthest, still well inside the last tide ring (34 m)
+const BLIGHT_AT := 22.0  # m from the Heart the Blight claws out: past the squads, inside the tide
+const HEART_BLIGHT := [
+	"bl_skitter", "bl_skitter", "bl_warden", "bl_skitter", "bl_skitter", "bl_skitter", "bl_warden", "bl_skitter"
+]
 
-const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 visitors
-const VISITORS := ["zapple", "burrlet", "cindle"]   # species of the Boki past the nav sweep's six
-const LIFE_STEPS := 100          # 10 Hz base_life steps timed for the script line (10 s of base life)
+const BOKI_OUT := 9  # GARDEN.md 10.6: 6 residents + partner + 2 visitors
+const VISITORS := ["zapple", "burrlet", "cindle"]  # species of the Boki past the nav sweep's six
+const LIFE_STEPS := 100  # 10 Hz base_life steps timed for the script line (10 s of base life)
 const NavCheck := preload("res://tools/garden_nav_check.gd")
 const PerfTracy := preload("res://tools/perf_tracy.gd")
+const AB_WARMUP_S := 5.0  # --bench-ab: the first this many s of each run are left out of its numbers
+const HITCH_MS := 100.0
+
+const FX_SHADERS := [  # the see-through light and glow shaders ("card" lines of the vfx inventory)
+	"glow",
+	"ring",
+	"mote",
+	"spark",
+	"light_shaft",
+	"waterfall",
+	"updraft",
+	"wind",
+	"seat_beam",
+	"exit_beam",
+	"glowball",
+	"fx_dot",
+	"care_glow",
+	"care_disc",
+	"care_ice",
+	"cloud_puff",
+	"kin_aura",
+	"boki_wisp",
+	"wisp_core",
+	"blob_shadow"
+]
+
+var view := Vector2i(640, 360)  # small window: a software rasterizer's fill time; counts are the same
 
 var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var base_secs := 60.0
-var pipes_draw := 0      # pipelines built at draw time so far (the hitch lines print each frame's new ones)
+var pipes_draw := 0  # pipelines built at draw time so far (the hitch lines print each frame's new ones)
 var out_path := ""
 var zone := ""
 var tracy_dir := ""
 var hunters := 6
-var trios := 0           # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
-var pose_us := {}        # "kind band on|off" -> [us, poses] (--bench-trios)
-var rigs_posed := Vector2i.ZERO   # Hero rigs posed, Hero rigs there, summed over the frames (--bench-trios)
-var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
-var failed := false      # a budget line said FAIL: the exit code carries it
-var wisps := ""          # --boki-wisps=on|off: the match opts' boki_wisps ("": the setting decides)
-const AB_WARMUP_S := 5.0 # --bench-ab: the first this many s of each run are left out of its numbers
+var trios := 0  # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
+var pose_us := {}  # "kind band on|off" -> [us, poses] (--bench-trios)
+var rigs_posed := Vector2i.ZERO  # Hero rigs posed, Hero rigs there, summed over the frames (--bench-trios)
+var shots_dir := ""  # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
+var failed := false  # a budget line said FAIL: the exit code carries it
+var wisps := ""  # --boki-wisps=on|off: the match opts' boki_wisps ("": the setting decides)
 var rows := PackedStringArray()
 var hud_us := 0
-var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
-const HITCH_MS := 100.0
+var added := {}  # node name -> count, nodes that entered the tree this frame (named on a hitch)
 var vp: RID
 
+
 func run(main_node: Node) -> void:
+	var args := OS.get_cmdline_user_args()
+	if "--bench-probe" in args:      # the two own-setup parts: their window, save and camera, not setup()'s
+		main_node.add_child(load("res://tests/perf_probe.gd").new())
+		return
+	if "--bench-hunter-gpu" in args:
+		await load("res://tools/perf/hunter_gpu.gd").new().run(main_node)
+		return
 	setup(main_node)
 	if tracy_dir != "":
 		await _tracy_match()
@@ -86,28 +124,40 @@ func run(main_node: Node) -> void:
 	await _base()
 	await _farm("hub", {"zone": GardenZones.HUB})
 	var zones: Array = [zone] if zone != "" else []
-	if zone == "all": zones = GardenZones.built()
+	if zone == "all":
+		zones = GardenZones.built()
 	for id in zones:
 		await _zone(id)
 	_finish()
+
 
 ## Reads the --bench-* arguments and sizes the window; --perf-budget-check shares it.
 func setup(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
-		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
-		if a.begins_with("--bench-base="): base_secs = float(a.substr(13))
-		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a.begins_with("--bench-secs="):
+			secs = float(a.substr(13))
+		if a.begins_with("--bench-farm="):
+			farm_secs = float(a.substr(13))
+		if a.begins_with("--bench-base="):
+			base_secs = float(a.substr(13))
+		if a.begins_with("--bench-out="):
+			out_path = a.substr(12)
 		if a.begins_with("--bench-view="):
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
-		if a.begins_with("--bench-zone="): zone = a.substr(13)
-		if a.begins_with("--tracy="): tracy_dir = a.substr(8)
-		if a.begins_with("--bench-hunters="): hunters = int(a.substr(16))
-		if a.begins_with("--bench-trios="): trios = int(a.substr(14))
-		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
-		if a.begins_with("--boki-wisps="): wisps = a.substr(13)
+		if a.begins_with("--bench-zone="):
+			zone = a.substr(13)
+		if a.begins_with("--tracy="):
+			tracy_dir = a.substr(8)
+		if a.begins_with("--bench-hunters="):
+			hunters = int(a.substr(16))
+		if a.begins_with("--bench-trios="):
+			trios = int(a.substr(14))
+		if a.begins_with("--bench-shots="):
+			shots_dir = a.substr(14)
+		if a.begins_with("--boki-wisps="):
+			wisps = a.substr(13)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -117,19 +167,33 @@ func setup(main_node: Node) -> void:
 	main.get_tree().node_added.connect(count_node)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,gpu_ms,draws,tris,objects,nodes")
 
+
 func _finish() -> void:
 	var win := main.get_window()
-	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
-		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
-		win.size.y, win.scaling_3d_scale])
+	print(
+		(
+			"BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f"
+			% [
+				Settings.quality(),
+				RenderingServer.get_current_rendering_method(),
+				RenderingServer.get_video_adapter_name(),
+				win.size.x,
+				win.size.y,
+				win.scaling_3d_scale
+			]
+		)
+	)
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
-		if fa: fa.store_string("\n".join(rows) + "\n")
+		if fa:
+			fa.store_string("\n".join(rows) + "\n")
 	main.get_tree().quit(1 if failed else 0)
+
 
 func _match(part := "match") -> Array:
 	var m := await _start("match", {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101})
 	return await _play(m, part, [m.player], _bring_fight, FIGHT_AT)
+
 
 ## --bench-ab (from ext/wisp-gpu-ab): walking pets, wisps, walking pets again, the same seed and autoplay path each
 ## time in one process, so the A/B shares one GPU; the repeat shows run-order drift.
@@ -137,6 +201,7 @@ func _ab() -> void:
 	for r in [["pets_1", "off"], ["wisps", "on"], ["pets_2", "off"]]:
 		wisps = r[1]
 		_ab_line(r[0], await _match(r[0]))
+
 
 ## Mean, p95 and worst wall ms and draws after the warm-up, and the count of frames over 50 ms.
 func _ab_line(part: String, fl: Array) -> void:
@@ -148,19 +213,26 @@ func _ab_line(part: String, fl: Array) -> void:
 	if w.is_empty():
 		return
 	var mean := 0.0
-	for x in w: mean += x / w.size()
+	for x in w:
+		mean += x / w.size()
 	w.sort()
 	var over := w.filter(func(x): return x > 50.0).size()
-	print("BENCH AB %s boki_wisps=%s after %.0f s warm-up: %d frames, mean %.2f ms, p95 %.2f ms, worst %.2f ms, "
-		% [part, wisps, AB_WARMUP_S, w.size(), mean, w[int((w.size() - 1) * 0.95)], w[-1]]
-		+ "draws %.0f, over 50 ms: %d" % [draws / w.size(), over])
+	print(
+		(
+			(
+				"BENCH AB %s boki_wisps=%s after %.0f s warm-up: %d frames, mean %.2f ms, p95 %.2f ms, worst %.2f ms, "
+				% [part, wisps, AB_WARMUP_S, w.size(), mean, w[int((w.size() - 1) * 0.95)], w[-1]]
+			)
+			+ "draws %.0f, over 50 ms: %d" % [draws / w.size(), over]
+		)
+	)
+
 
 ## LIMITED_WAY_OUTS.md risk 3: the final with HEART_SQUADS squads and their Boki in and around the Heart ring
 ## (the tide closed to its last ring) and the Blight clawing out just past them.
 func _heart_final() -> void:
-	var m := await _start("heart_final", {"teams": HEART_SQUADS, "squad": 3, "total": HEART_SQUADS * 3,
-		"seed": 4102})
-	m.time = Heart.r("final_s")      # the ring opens on the Heart's next tick; the tide is at its last ring
+	var m := await _start("heart_final", {"teams": HEART_SQUADS, "squad": 3, "total": HEART_SQUADS * 3, "seed": 4102})
+	m.time = Heart.r("final_s")  # the ring opens on the Heart's next tick; the tide is at its last ring
 	var site := m.heart.site
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 4102
@@ -175,6 +247,7 @@ func _heart_final() -> void:
 		var at: Vector3 = m.world.free_spot_near(site + Vector3(cos(a), 0, sin(a)) * BLIGHT_AT, [], 1.0, 0.5, 8.0)
 		m.blight.spawn(HEART_BLIGHT[i], at, m.blight.level_here(at))
 	await _play(m, "heart_final", m.hunters, Callable(), 0.0)
+
 
 ## Starts an expedition from the bench's base options plus `extra` and waits until it plays.
 func _start(part: String, extra: Dictionary) -> Match:
@@ -209,6 +282,7 @@ func _start(part: String, extra: Dictionary) -> Match:
 	_hook_hud(m)
 	return m
 
+
 ## Steps the match by hand for `secs` of match time, logging every frame as `part`. Hunters in `keep` stay
 ## at full health (the fight must not end the run: "god" stops nothing once a rival stomps you); `stage`
 ## runs once at `stage_at` s of match time.
@@ -230,7 +304,7 @@ func _play(m: Match, part: String, keep: Array, stage: Callable, stage_at: float
 			staged = true
 		var t0 := Time.get_ticks_usec()
 		m.step(DT)
-		m.acc -= DT      # _process steps on its own clock: without this every frame ran two steps
+		m.acc -= DT  # _process steps on its own clock: without this every frame ran two steps
 		m._process(DT)
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		if trios > 0:
@@ -242,14 +316,18 @@ func _play(m: Match, part: String, keep: Array, stage: Callable, stage_at: float
 		# pipelines the renderer built at draw time this frame (a stall: a shader or pipeline the warm-up missed)
 		var pd := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW)
 		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
-			print("BENCH hitch t=%.2f %.0f ms (script %.1f, pipelines at draw %d), new nodes: %s" % [m.time, wall,
-				script_ms, pd - pipes_draw, added])
+			print(
+				(
+					"BENCH hitch t=%.2f %.0f ms (script %.1f, pipelines at draw %d), new nodes: %s"
+					% [m.time, wall, script_ms, pd - pipes_draw, added]
+				)
+			)
 		pipes_draw = pd
 		added.clear()
 		last = now
 		if trios > 0 and fl.size() % POSE_SAMPLE == 0:
 			_pose_sample(m)
-			last = Time.get_ticks_usec()      # (the timed poses stay out of the frame times)
+			last = Time.get_ticks_usec()  # (the timed poses stay out of the frame times)
 	_summary(part, fl)
 	if trios > 0:
 		_pose_lines(m, fl.size())
@@ -266,6 +344,7 @@ func _play(m: Match, part: String, keep: Array, stage: Callable, stage_at: float
 	Match.prof_on = false
 	return fl
 
+
 ## The match part alone under tracy-capture; the exit code says whether the zones were exported.
 func _tracy_match() -> void:
 	var cap := PerfTracy.new()
@@ -274,6 +353,7 @@ func _tracy_match() -> void:
 		await _match()
 		failed = not await cap.finish(main.get_tree())
 	_finish()
+
 
 ## One extra pose of every Hunter and rigged Boki, timed and filed by distance band and on or off screen: HunterAnim,
 ## the Hero clips and springs (WardenGlb.Sync) or the Boki clip, and the skeleton they write.
@@ -302,6 +382,7 @@ func _pose_sample(m: Match) -> void:
 			(sk as Skeleton3D).force_update_all_bone_transforms()
 		_pose_file(m, "boki", k.pos, t0)
 
+
 ## Hero rigs (WardenGlb.Sync) that pose this frame: those whose Hunter did not hold theirs (WardenGlb.POSE_HELD).
 func _count_rigs(m: Match) -> void:
 	for h in m.hunters:
@@ -309,6 +390,7 @@ func _count_rigs(m: Match) -> void:
 			rigs_posed.y += 1
 			if int(h.model.get_meta(WardenGlb.POSE_HELD, -1)) != Engine.get_process_frames():
 				rigs_posed.x += 1
+
 
 func _pose_file(m: Match, kind: String, at: Vector3, t0: int) -> void:
 	var us := Time.get_ticks_usec() - t0
@@ -322,46 +404,57 @@ func _pose_file(m: Match, kind: String, at: Vector3, t0: int) -> void:
 	var acc: Array = pose_us.get(key, [0, 0])
 	pose_us[key] = [int(acc[0]) + us, int(acc[1]) + 1]
 
+
 ## "BENCH pose" lines: us per pose by band, the poses filed, and the share of characters in it.
 func _pose_lines(m: Match, frames: int) -> void:
 	var ks := pose_us.keys()
 	ks.sort()
 	var all := 0
-	for k in ks: all += int(pose_us[k][1])
+	for k in ks:
+		all += int(pose_us[k][1])
 	for k in ks:
 		var acc: Array = pose_us[k]
-		print("BENCH pose %s: %.0f us per pose, %d poses (%.0f%%)" % [k, float(acc[0]) / acc[1], acc[1],
-			100.0 * acc[1] / maxf(1.0, all)])
+		print(
+			(
+				"BENCH pose %s: %.0f us per pose, %d poses (%.0f%%)"
+				% [k, float(acc[0]) / acc[1], acc[1], 100.0 * acc[1] / maxf(1.0, all)]
+			)
+		)
 	print("BENCH pose hunters %d, boki %d, camera zoom %.2f" % [m.hunters.size(), m.kins.size(), m.cam.zoom])
 	var n := maxf(1.0, frames)
 	print("BENCH pose Hero rigs posed per frame: %.1f of %.1f" % [rigs_posed.x / n, rigs_posed.y / n])
 
+
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
 func _bring_fight(m: Match) -> void:
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	var n := 0
 	for h in m.hunters:
-		if h.team != P.team and n < 2:
-			h.teleport(P.pos + Vector3(5.0 + n * 2.0, 0.0, 3.0 - n * 6.0))
+		if h.team != p.team and n < 2:
+			h.teleport(p.pos + Vector3(5.0 + n * 2.0, 0.0, 3.0 - n * 6.0))
 			n += 1
 	for i in MOBS.size():
 		var a := TAU * i / MOBS.size()
-		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 6.0, [], 1.0, 0.5, 6.0)
+		var at: Vector3 = m.world.free_spot_near(p.pos + Vector3(cos(a), 0, sin(a)) * 6.0, [], 1.0, 0.5, 6.0)
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 
+
 func _farm(part: String, params: Dictionary) -> void:
-	if part == "hub": Content.rules("farm_build")["base_mode"] = true      # the hub only exists in base mode
+	if part == "hub":
+		Content.rules("farm_build")["base_mode"] = true  # the hub only exists in base mode
 	var was = main.current
 	Game.goto("home", params)
 	while main.current == was or main.current == null or main.current.get("root_ui") == null or main.fade.covered:
-		await main.get_tree().process_frame      # the home is built and the ink wipe is off it
+		await main.get_tree().process_frame  # the home is built and the ink wipe is off it
 	for i in 30:
 		await main.get_tree().process_frame
 	await _frames(part)
-	if part == "hub":      # same scene, horizon hidden: the islands' own cost (GARDEN 10.7 step 9)
+	if part == "hub":  # same scene, horizon hidden: the islands' own cost (GARDEN 10.7 step 9)
 		for n in Game.main.current.get_children():
-			if String(n.name).begins_with("Horizon_"): n.visible = false
+			if String(n.name).begins_with("Horizon_"):
+				n.visible = false
 		await _frames("hub_bare")
+
 
 func _frames(part: String) -> void:
 	var fl: Array = []
@@ -380,6 +473,7 @@ func _frames(part: String) -> void:
 		await _budget(part, fl)
 		_vfx_inventory(part)
 
+
 ## A garden zone with nine Boki out (GARDEN.md 10.6: 6 residents, the partner, 2 visitors), as a farm part.
 func _zone(id: String) -> void:
 	var nav := NavCheck.new()
@@ -394,12 +488,13 @@ func _zone(id: String) -> void:
 		Save.d["roster"].append(rec)
 	await _farm("zone_" + id, {"zone": id})
 
+
 ## A part against GARDEN.md 10.6 (the hub against its own column). Draws and objects are the scene itself: the
 ## screen UI (a quarter to a half of a frame's draws, the same in every scene) is hidden for a few frames and
 ## read then. Nodes and the emitting particle systems are the whole tree's; the frame is the average of the run;
 ## base_life is the cost of one 10 Hz step with every Boki out, timed apart from the frame.
 func _budget(part: String, fl: Array) -> void:
-	var B: Dictionary = GardenZones.rules()["budget_hub" if part == "hub" else "budget"]
+	var b: Dictionary = GardenZones.rules()["budget_hub" if part == "hub" else "budget"]
 	var emit := 0
 	for cls in ["GPUParticles3D", "CPUParticles3D"]:
 		var all := main.get_tree().root.find_children("*", cls, true, false)
@@ -413,24 +508,33 @@ func _budget(part: String, fl: Array) -> void:
 	if shots_dir != "":
 		DirAccess.make_dir_recursive_absolute(shots_dir)
 		main.get_viewport().get_texture().get_image().save_jpg("%s/%s.jpg" % [shots_dir, part], 0.9)
-	var got := {"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+	var got := {
+		"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
-		"nodes": _peak(fl, "nodes"), "emitters": emit, "frame_ms": _avg(fl, "wall"), "base_life_ms": _life_ms(home)}
-	if Settings.quality() == "low": B = B.merged({"frame_ms": B["frame_ms_low"]}, true)
+		"nodes": _peak(fl, "nodes"),
+		"emitters": emit,
+		"frame_ms": _avg(fl, "wall"),
+		"base_life_ms": _life_ms(home)
+	}
+	if Settings.quality() == "low":
+		b = b.merged({"frame_ms": b["frame_ms_low"]}, true)
 	print("BENCH %s boki out: %d, draws with the UI: %.0f" % [part, home.kins.size(), _avg(fl, "draws")])
 	var held: Dictionary = GardenZones.rules()["ratchet"].get(Settings.quality(), {}).get(part, {})
 	var bad := false
 	for k in got:
-		var over: bool = float(got[k]) > float(B[k])
-		var limit: float = float(held.get(k, B[k]))      # a measured ceiling stands in until the target is met
+		var over: bool = float(got[k]) > float(b[k])
+		var limit: float = float(held.get(k, b[k]))  # a measured ceiling stands in until the target is met
 		var good: bool = float(got[k]) <= limit
 		bad = bad or not good
 		var verdict := "ok"
-		if not good: verdict = "FAIL (past the held %.1f)" % limit
-		elif over: verdict = "over target, held at %.1f" % limit
-		print("BENCH budget %s %s: %.2f of %.1f %s" % [part, k, got[k], B[k], verdict])
+		if not good:
+			verdict = "FAIL (past the held %.1f)" % limit
+		elif over:
+			verdict = "over target, held at %.1f" % limit
+		print("BENCH budget %s %s: %.2f of %.1f %s" % [part, k, got[k], b[k], verdict])
 	failed = failed or bad
 	print("BENCH budget %s: %s" % [part, "FAIL" if bad else "ok"])
+
 
 ## ms per 10 Hz BaseLife step with the home's Boki out (0 where the home has no base life, like the hub).
 func _life_ms(home) -> float:
@@ -441,10 +545,13 @@ func _life_ms(home) -> float:
 		home.life.step(1.0 / 10.0)
 	return (Time.get_ticks_usec() - t0) / 1000.0 / LIFE_STEPS
 
+
 func _peak(fl: Array, key: String) -> float:
 	var m := 0.0
-	for f in fl: m = maxf(m, float(f[key]))
+	for f in fl:
+		m = maxf(m, float(f[key]))
 	return m
+
 
 ## The base demo played for base_secs: the garden's Boki on their own (toys, snacks, naps) and a Dash.
 func _base() -> void:
@@ -462,7 +569,7 @@ func _base() -> void:
 	var raced := false
 	hud_us = 0
 	var slow := PackedStringArray()
-	while t < base_secs:      # real seconds: the garden runs on the frame's own delta
+	while t < base_secs:  # real seconds: the garden runs on the frame's own delta
 		if not raced and t >= BASE_RACE_AT:
 			home.hrace.use()
 			raced = true
@@ -471,7 +578,7 @@ func _base() -> void:
 		var now := Time.get_ticks_usec()
 		fl.append(_frame("base", fl.size(), (now - last) / 1000.0, 0.0))
 		if fl[-1]["wall"] > SLOW_MS and t > WARM_S:
-			slow.append("%.1fs %.0fms" % [t, fl[-1]["wall"]])      # (printed at the end: a print can stall a frame)
+			slow.append("%.1fs %.0fms" % [t, fl[-1]["wall"]])  # (printed at the end: a print can stall a frame)
 		last = now
 		t += fl[-1]["wall"] / 1000.0
 	_summary("base", fl)
@@ -479,13 +586,27 @@ func _base() -> void:
 	await _sections(home)
 	_meshes()
 
+
 ## The costliest per-frame steps of the garden: home._process off, its steps timed by hand for SECTION_FRAMES.
 func _sections(home) -> void:
-	var steps := {"sky": home._update_sky, "hover": func(_d): home._update_hover(), "move_kin": home._move_kin,
-		"care": home._care_tick, "separate": home._separate_kin, "life": home.life.step, "econ": home.hecon.tick,
-		"race": home.hrace.tick, "shove": home.hshove.tick,
-		"seek": home.hseek.tick, "volley": home.hvolley.tick, "bubbles": home._update_bubbles, "gather": home.hg.tick,
-		"snack": home.hsp.tick, "work": home.hw.tick, "incub": home.hinc.tick}
+	var steps := {
+		"sky": home._update_sky,
+		"hover": func(_d): home._update_hover(),
+		"move_kin": home._move_kin,
+		"care": home._care_tick,
+		"separate": home._separate_kin,
+		"life": home.life.step,
+		"econ": home.hecon.tick,
+		"race": home.hrace.tick,
+		"shove": home.hshove.tick,
+		"seek": home.hseek.tick,
+		"volley": home.hvolley.tick,
+		"bubbles": home._update_bubbles,
+		"gather": home.hg.tick,
+		"snack": home.hsp.tick,
+		"work": home.hw.tick,
+		"incub": home.hinc.tick
+	}
 	var us := {}
 	home.set_process(false)
 	for i in SECTION_FRAMES:
@@ -500,79 +621,151 @@ func _sections(home) -> void:
 	var top := ks.slice(0, 8).map(func(k): return "%s %.2f" % [k, us[k] / 1000.0 / SECTION_FRAMES])
 	print("BENCH base steps (ms per frame): " + ", ".join(top))
 
+
 func count_node(n: Node) -> void:
 	var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
 	added[k] = int(added.get(k, 0)) + 1
+
 
 ## One frame's row in the CSV (the brawl's frames too).
 func add_row(part: String, i: int, wall: float, script_ms: float) -> void:
 	_frame(part, i, wall, script_ms)
 
+
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
-	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+	var f := {
+		"wall": wall,
+		"script": script_ms,
+		"proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		"hud": hud_us / 1000.0,
 		"rcpu": RenderingServer.viewport_get_measured_render_time_cpu(vp) + RenderingServer.get_frame_setup_time_cpu(),
 		"gpu": RenderingServer.viewport_get_measured_render_time_gpu(vp),
 		"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"tris": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 		"objs": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
-		"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))}
-	rows.append("%s,%d,%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%d" % [part, i, wall, script_ms, f["proc"], f["hud"],
-		f["rcpu"], f["gpu"], f["draws"], f["tris"], f["objs"], f["nodes"]])
+		"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
+	}
+	rows.append(
+		(
+			"%s,%d,%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%d"
+			% [
+				part,
+				i,
+				wall,
+				script_ms,
+				f["proc"],
+				f["hud"],
+				f["rcpu"],
+				f["gpu"],
+				f["draws"],
+				f["tris"],
+				f["objs"],
+				f["nodes"]
+			]
+		)
+	)
 	return f
 
-## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as --perf-probe does.
+## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as tests/perf_probe.gd does.
 func _hook_hud(m: Match) -> void:
 	var h = m.hud
 	var cb := Callable(h, "_draw_all")
 	if h.c.draw.is_connected(cb):
 		h.c.draw.disconnect(cb)
-		h.c.draw.connect(func():
-			var t0 := Time.get_ticks_usec()
-			h._draw_all()
-			hud_us = Time.get_ticks_usec() - t0 + h.panels.used_us      # (the panel canvas: HudPanels)
-			h.panels.used_us = 0)
+		h.c.draw.connect(
+			func():
+				var t0 := Time.get_ticks_usec()
+				h._draw_all()
+				hud_us = Time.get_ticks_usec() - t0 + h.panels.used_us  # (the panel canvas: HudPanels)
+				h.panels.used_us = 0
+		)
+
 
 func _avg(fl: Array, key: String) -> float:
 	var s := 0.0
-	for f in fl: s += float(f[key])
+	for f in fl:
+		s += float(f[key])
 	return s / maxf(1.0, fl.size())
+
 
 func _summary(part: String, fl: Array) -> void:
 	var w: Array = fl.map(func(f): return float(f["wall"]))
 	w.sort()
 	var cut := maxi(1, w.size() / 100)
 	var low := 0.0
-	for k in cut: low += float(w[w.size() - 1 - k])
+	for k in cut:
+		low += float(w[w.size() - 1 - k])
 	low /= cut
 	var sc: Array = fl.map(func(f): return float(f["script"]))
 	sc.sort()
 	var p99 := float(w[int((w.size() - 1) * 0.99)])
 	var sc99 := float(sc[int((sc.size() - 1) * 0.99)])
 	var slow := w.filter(func(x): return x > SLOW_MS).size()
-	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), max %.1f ms, over %.0f ms: %d" % [
-		part, fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w[-1], SLOW_MS, slow])
+	print(
+		(
+			"BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), max %.1f ms, over %.0f ms: %d"
+			% [part, fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w[-1], SLOW_MS, slow]
+		)
+	)
 	# (where the slow frames fall: a warm-up tail, a first fight's new effects, or spread over the run)
 	var at: Array = []
 	for i in fl.size():
 		if float(fl[i]["wall"]) > SLOW_MS and at.size() < 60:
 			at.append("%.1f" % (i * DT))
-	print("BENCH %s frames: p50 %.1f ms, p95 %.1f ms, p99 %.1f ms; over %.0f ms at s: %s" % [part,
-		float(w[int((w.size() - 1) * 0.5)]), float(w[int((w.size() - 1) * 0.95)]), p99, SLOW_MS, " ".join(at)])
-	var cpu_line := "BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, " + \
-		"render cpu %.2f ms, gpu %.2f ms"
-	print(cpu_line % [
-		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu"), _avg(fl, "gpu")])
-	print("BENCH %s scene: draws %.0f, tris %.0fk, objs %.0f, nodes %.0f, fx %d, lights %d, shadowed %d, casters %d" % [
-		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
-		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights(), _casters()])
+	print(
+		(
+			"BENCH %s frames: p50 %.1f ms, p95 %.1f ms, p99 %.1f ms; over %.0f ms at s: %s"
+			% [
+				part,
+				float(w[int((w.size() - 1) * 0.5)]),
+				float(w[int((w.size() - 1) * 0.95)]),
+				p99,
+				SLOW_MS,
+				" ".join(at)
+			]
+		)
+	)
+	var cpu_line := (
+		"BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, "
+		+ "render cpu %.2f ms, gpu %.2f ms"
+	)
+	print(
+		(
+			cpu_line
+			% [part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu"), _avg(fl, "gpu")]
+		)
+	)
+	print(
+		(
+			"BENCH %s scene: draws %.0f, tris %.0fk, objs %.0f, nodes %.0f, fx %d, lights %d, shadowed %d, casters %d"
+			% [
+				part,
+				_avg(fl, "draws"),
+				_avg(fl, "tris") / 1000.0,
+				_avg(fl, "objs"),
+				_avg(fl, "nodes"),
+				_count("GPUParticles3D") + _count("CPUParticles3D"),
+				_count("Light3D"),
+				_shadow_lights(),
+				_casters()
+			]
+		)
+	)
 	var mem_line := "BENCH %s memory: textures %.0f MB, buffers %.0f MB, static %.0f MB, resources %d, orphan nodes %d"
-	print(mem_line % [part,
-		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
-		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
-		Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
-		Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT),
-		Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)])
+	print(
+		(
+			mem_line
+			% [
+				part,
+				Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
+				Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
+				Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+				Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT),
+				Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
+			]
+		)
+	)
+
 
 ## Particle systems still emitting (a GPU one simulates every frame even off screen), by owner name.
 func _emitters() -> void:
@@ -586,8 +779,16 @@ func _emitters() -> void:
 			by[key] = int(by.get(key, 0)) + 1
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
-	print("BENCH emitting particles (%d): %s" % [by.values().reduce(func(a, b): return a + b, 0),
-		", ".join(ks.slice(0, 10).map(func(k): return "%s %d" % [k, by[k]]))])
+	print(
+		(
+			"BENCH emitting particles (%d): %s"
+			% [
+				by.values().reduce(func(a, b): return a + b, 0),
+				", ".join(ks.slice(0, 10).map(func(k): return "%s %d" % [k, by[k]]))
+			]
+		)
+	)
+
 
 ## Every particle system, Decal and see-through glow card of the part, grouped by owner path (the keep/cut list
 ## in docs/GARDEN_PERF.md starts from these lines): "BENCH vfx <part> <kind> <owner/name> xN (emitting or shown)".
@@ -606,10 +807,6 @@ func _vfx_inventory(part: String) -> void:
 	for k in ks:
 		print("BENCH vfx %s %s x%d" % [part, k, by[k]])
 
-const FX_SHADERS := [      # the see-through light and glow shaders ("card" lines of the vfx inventory)
-	"glow", "ring", "mote", "spark", "light_shaft", "waterfall", "updraft", "wind", "seat_beam", "exit_beam",
-	"glowball", "fx_dot", "care_glow", "care_disc", "care_ice", "cloud_puff", "kin_aura", "boki_wisp", "wisp_core",
-	"blob_shadow"]
 
 func _vfx_kind(n: Node3D) -> String:
 	if n is GPUParticles3D or n is CPUParticles3D:
@@ -624,13 +821,14 @@ func _vfx_kind(n: Node3D) -> String:
 		mesh = (n as MeshInstance3D).mesh
 	elif n is MultiMeshInstance3D and (n as MultiMeshInstance3D).multimesh != null:
 		mesh = (n as MultiMeshInstance3D).multimesh.mesh
-	for i in (mesh.get_surface_count() if mesh != null else 0):
+	for i in mesh.get_surface_count() if mesh != null else 0:
 		mats.append(mesh.surface_get_material(i))
 	for m in mats:
 		var sm := m as ShaderMaterial
 		if sm != null and sm.shader != null and sm.shader.resource_path.get_file().get_basename() in FX_SHADERS:
 			return "card:" + sm.shader.resource_path.get_file().get_basename()
 	return ""
+
 
 func _owner_path(n: Node) -> String:
 	var names := PackedStringArray()
@@ -642,17 +840,21 @@ func _owner_path(n: Node) -> String:
 	names.reverse()
 	return "/".join(names)
 
+
 func _count(cls: String) -> int:
 	return main.get_tree().root.find_children("*", cls, true, false).size()
+
 
 func _casters() -> int:
 	var all := main.get_tree().root.find_children("*", "MeshInstance3D", true, false)
 	var on := GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return all.filter(func(m): return m.cast_shadow != on and m.is_visible_in_tree()).size()
 
+
 func _shadow_lights() -> int:
 	var lights := main.get_tree().root.find_children("*", "Light3D", true, false)
 	return lights.filter(func(l): return (l as Light3D).shadow_enabled and (l as Light3D).is_visible_in_tree()).size()
+
 
 ## The heaviest meshes in the scene (visible instances x triangles), grouped by mesh resource.
 func _meshes() -> void:
@@ -677,13 +879,15 @@ func _meshes() -> void:
 		var g: Array = by.get(key, [0, 0, 0])
 		g[0] += 1
 		g[1] += tris
-		if mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF: g[2] += 1
+		if mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+			g[2] += 1
 		by[key] = g
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a][1] > by[b][1])
 	var top := ks.slice(0, 12).map(func(k): return "%s: %d, %.1fk, %d" % [k, by[k][0], by[k][1] / 1000.0, by[k][2]])
 	print("BENCH heaviest meshes (name: instances, total tris k, shadow casters): " + ", ".join(top))
 	_owners()
+
 
 ## Draw passes per piece of the open scene (its direct children, the grouping the draw fixes work on): a
 ## visible mesh or MultiMesh costs one pass per surface, two where its material has an outline next_pass.
@@ -704,7 +908,7 @@ func _owners() -> void:
 			var mat: Material = gi.material_override if gi.material_override else mesh.surface_get_material(si)
 			passes += 2 if mat and mat.next_pass else 1
 		var top: Node = gi
-		var under: Node = gi      # the level below `top`: the home's world root holds most pieces
+		var under: Node = gi  # the level below `top`: the home's world root holds most pieces
 		while top.get_parent() != scene:
 			under = top
 			top = top.get_parent()

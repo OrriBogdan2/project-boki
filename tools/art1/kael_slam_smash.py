@@ -15,6 +15,7 @@ Run:
   blender -b --factory-startup --python tools/art1/kael_slam_smash.py -- art/wardens/kael/kael.glb OUT_slam.glb
   python3 tools/art1/glb_add_clips.py art/wardens/kael/kael.glb OUT_slam.glb =slam
 """
+
 import math
 import sys
 
@@ -55,8 +56,11 @@ for p in body.data.polygons:
     if p.material_index in sword_mats:
         vs.update(p.vertices)
 rest_h = arm.data.bones["hand.R"].matrix_local.inverted() @ body.matrix_world
-pts = [rest_h @ body.data.vertices[i].co for i in vs
-       if any(g.group == gi and g.weight > 0.5 for g in body.data.vertices[i].groups)]
+pts = [
+    rest_h @ body.data.vertices[i].co
+    for i in vs
+    if any(g.group == gi and g.weight > 0.5 for g in body.data.vertices[i].groups)
+]
 along = [(p - a_root).dot(BLADE) for p in pts]
 TIP = a_root + BLADE * max(along)
 # thinnest axis across the blade: try directions perpendicular to BLADE, keep the one with the least spread
@@ -91,13 +95,29 @@ def vlerp(a, b, u):
 # --------------------------------------------------------------------------- the beats
 W0 = READY_M["hand.R"].translation.copy()
 B0 = (READY_M["hand.R"].to_3x3() @ BLADE).normalized()
-PHI0 = math.degrees(math.atan2(B0.y, B0.z))           # sagittal angle of the blade: 0 up, +90 ahead, -90 behind
+PHI0 = math.degrees(math.atan2(B0.y, B0.z))  # sagittal angle of the blade: 0 up, +90 ahead, -90 behind
 FOOT_L0 = READY_M["shin.L"] @ Vector((0, arm.data.bones["shin.L"].length, 0))
 FOOT_R0 = READY_M["shin.R"] @ Vector((0, arm.data.bones["shin.R"].length, 0))
 HL0 = READY_M["hand.L"].translation.copy()
 
-RAISE = {"t": 0.20, "W": Vector((0.07, -0.03, 1.58)), "phi": -35.0, "lean": 9.0, "drop": 0.03, "fwd": -0.03, "yaw": -6.0}
-LOAD = {"t": 0.48, "W": Vector((0.08, -0.10, 1.55)), "phi": -112.0, "lean": 22.0, "drop": 0.08, "fwd": -0.06, "yaw": -12.0}
+RAISE = {
+    "t": 0.20,
+    "W": Vector((0.07, -0.03, 1.58)),
+    "phi": -35.0,
+    "lean": 9.0,
+    "drop": 0.03,
+    "fwd": -0.03,
+    "yaw": -6.0,
+}
+LOAD = {
+    "t": 0.48,
+    "W": Vector((0.08, -0.10, 1.55)),
+    "phi": -112.0,
+    "lean": 22.0,
+    "drop": 0.08,
+    "fwd": -0.06,
+    "yaw": -12.0,
+}
 HIT = {"t": IMPACT, "W": Vector((0.04, 0.50, 0.62)), "phi": 116.0, "lean": -38.0, "drop": 0.17, "fwd": 0.10, "yaw": 4.0}
 SETTLE = {"t": 0.70, "dW": Vector((0, 0.01, -0.02)), "lean": -41.0, "drop": 0.20}
 HOLD_END = 0.78
@@ -111,7 +131,7 @@ def beat(t):
     c = {"ready_w": 0.0, "lw": 1.0}
     if t <= RAISE["t"]:
         u = t / RAISE["t"]
-        e = 1 - (1 - u) ** 2                                       # ease-out: the raise snaps up
+        e = 1 - (1 - u) ** 2  # ease-out: the raise snaps up
         c["W"] = vlerp(W0, RAISE["W"], e) + Vector((0, 0.06, 0.05)) * math.sin(math.pi * e)
         c["phi"] = lerp(PHI0, RAISE["phi"], e)
         for k in ("lean", "drop", "fwd", "yaw"):
@@ -128,7 +148,7 @@ def beat(t):
         c["fl"], c["fr"] = FOOT_L0, BACK_R
     elif t <= IMPACT:
         u = (t - LOAD["t"]) / (IMPACT - LOAD["t"])
-        e = u * u                                                  # ease-in: fastest at the impact
+        e = u * u  # ease-in: fastest at the impact
         c["phi"] = lerp(LOAD["phi"], HIT["phi"], e)
         c["W"] = vlerp(LOAD["W"], HIT["W"], ss(e)) + Vector((0, 0.10, 0.10)) * math.sin(math.pi * e)
         for k in ("lean", "drop", "fwd", "yaw"):
@@ -234,8 +254,9 @@ def pose(t):
     # legs to the feet targets, knees ahead
     for side, f in (("L", c["fl"]), ("R", c["fr"])):
         sh = P["shin." + side]
-        two_bone("thigh." + side, "shin." + side, lambda sh=sh: sh.tail, f,
-                 Vector((0.3 if side == "R" else -0.3, 1.0, 0.0)))
+        two_bone(
+            "thigh." + side, "shin." + side, lambda sh=sh: sh.tail, f, Vector((0.3 if side == "R" else -0.3, 1.0, 0.0))
+        )
     tip = P["hand.R"].matrix @ TIP
     # blend to the ready pose at the start and the end
     out = {}
@@ -255,19 +276,21 @@ prev = {}
 for f in range(nf + 1):
     t = f / FPS
     if f % 2 and not 0.40 <= t <= 0.72:
-        continue                                          # 30 keys/s, 60 through the arc and the impact
+        continue  # 30 keys/s, 60 through the arc and the impact
     out, tip = pose(t)
     if f % 6 == 0 or abs(t - IMPACT) < 1e-6:
-        print("SMASH t=%.2f tip (%.2f, %.2f, %.2f) grip %s" % (t, tip.x, tip.y, tip.z,
-              tuple(round(x, 2) for x in P["hand.R"].head)))
+        print(
+            "SMASH t=%.2f tip (%.2f, %.2f, %.2f) grip %s"
+            % (t, tip.x, tip.y, tip.z, tuple(round(x, 2) for x in P["hand.R"].head))
+        )
     for b in P:
         loc, rot = out[b.name]
         if b.name in prev and rot.dot(prev[b.name]) < 0:
-            rot.negate()                                  # (no flips between keys)
+            rot.negate()  # (no flips between keys)
         prev[b.name] = rot
         b.location, b.rotation_quaternion = loc, rot
         if b.name == "root":
-            b.keyframe_insert("location", frame=f)        # (only the root moves; every other head stays put)
+            b.keyframe_insert("location", frame=f)  # (only the root moves; every other head stays put)
         b.keyframe_insert("rotation_quaternion", frame=f)
 for fc in act.fcurves:
     for k in fc.keyframe_points:
@@ -281,7 +304,14 @@ act.name = "slam"
 for o in bpy.data.objects:
     o.select_set(o == arm)
 bpy.context.scene.frame_start, bpy.context.scene.frame_end = 0, nf
-bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", use_selection=True, export_animations=True,
-                          export_animation_mode="ACTIONS", export_force_sampling=False, export_skins=True,
-                          export_optimize_animation_size=False)
+bpy.ops.export_scene.gltf(
+    filepath=OUT,
+    export_format="GLB",
+    use_selection=True,
+    export_animations=True,
+    export_animation_mode="ACTIONS",
+    export_force_sampling=False,
+    export_skins=True,
+    export_optimize_animation_size=False,
+)
 print("SMASH wrote", OUT)

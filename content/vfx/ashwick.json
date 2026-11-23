@@ -4,6 +4,7 @@
 		"smoke": "#8a7a70", "soot": "#5a4c46", "pilot": "#6fe8ff", "halo": "#6a5aff",
 		"flame": "#ff7a1a"
 	},
+	"fire_from": {"rmb": "nozzle"},
 	"anchors": {
 		"nozzle": {"nodes": ["anchor_flame", "weapon_muzzle"], "gun": [0.0, 0.02, -0.75], "body": [0.15, 0.9, 1.3]},
 		"palm_l": {"nodes": ["weapon_muzzle_l"], "body": [-0.15, 0.9, 0.5]},
@@ -66,6 +67,11 @@
 				"c": "main", "c2": "hot", "c3": "red"},
 			{"p": "ember", "at": "nozzle", "n": 2, "n_k": 3.0, "shape": "gather", "radius": 0.4, "speed": 2.0, "life": 0.2,
 				"size": 0.05, "c": "hot", "c2": "white", "c3": "main"}
+		]},
+		"shot_cast": {"fx": [
+			{"p": "flare", "at": "nozzle", "y": 0.2, "size": 0.7, "grow": 1.3, "life": 0.16, "c": "red", "c2": "white", "c3": "flame"},
+			{"p": "ember", "at": "nozzle", "y": 0.2, "n": 10, "shape": "gather", "radius": 0.5, "speed": 2.4, "life": 0.22,
+				"size": 0.06, "c": "flame", "c2": "white", "c3": "red"}
 		]},
 		"shot": {"fx": [
 			{"p": "flare", "at": "nozzle", "y": 0.2, "size": 1.1, "grow": 1.3, "life": 0.14, "c": "flame", "c2": "white", "c3": "red"},
