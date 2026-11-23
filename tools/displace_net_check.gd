@@ -80,7 +80,7 @@ func _host_up() -> Hunter:
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	CheckChild.hold(relay.peer, START_S)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	guest_pid = CheckChild.start("%s --dn-port=%d" % [guest_flag, port], dir.path_join("guest.log"))
+	guest_pid = _start_guest()
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
@@ -107,6 +107,10 @@ func _host_up() -> Hunter:
 			Net.lobby_emit("dn", {"c": "start", "d": d})
 	ok(g != null and g.remote and g.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
 	return g if g != null and g.net_t >= 0.0 else null
+
+## The guest game, headless (a subclass that screenshots on the guest starts it drawing).
+func _start_guest() -> int:
+	return CheckChild.start("%s --dn-port=%d" % [guest_flag, port], dir.path_join("guest.log"))
 
 func _host() -> void:
 	var g := await _host_up()
