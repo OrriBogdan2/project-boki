@@ -314,6 +314,7 @@ func _throw_dart(heavy: bool) -> void:
 	var rng := float(wd["range"]) * h.shot_range_k * _heavy_k("range_k", heavy)
 	h.shot_range_k = 1.0
 	var extra := {"src": "shot", "ab": "fan", "kb": float(wd["kb"]), "tracer": 1.0, "heavy": heavy}
+	ShotOrigin.draw_from(extra, h, "lmb")      # out of her casting hand
 	m.spawn_shot(
 		h,
 		start,
@@ -746,7 +747,7 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	throw_t = PUSH_T
 	play("tm_spear")
-	m.sfx("rime_spear_aim", h.pos, -4.0, 0.8)
+	KitWindup.play(self, "rmb", "rime_spear_aim", -4.0, 0.8)
 
 
 ## The push: the spear rides out on her palms until they are fully extended. A stun or the seal drops it.
@@ -755,6 +756,7 @@ func _tick_throw(dt: float) -> void:
 		return
 	if busy() or not rime.is_empty():
 		_drop_throw()
+		if busy(): KitWindup.broken(self, "rmb")
 		return
 	throw_t -= dt
 	_hold_spear(1.0, -0.25 * throw_t / PUSH_T)
