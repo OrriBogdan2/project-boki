@@ -185,7 +185,7 @@ func _slam_tell() -> void:
 		"len %.1f deg %.0f outline %s fist %s" % [
 			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), tell.get("outline"), fist_up]
 	)
-	# the cone stays put with him: wait out the wind-up, then place the foes in the cone
+	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while k.wind > 0.03:
 		ak.step(m, ak.DT)
 	t.teleport(p.pos + in_off)
@@ -490,7 +490,8 @@ func _all() -> void:
 	ok("reel: a second Deep Reach is denied", k.grapples == 1)
 	k.cd["e"] = 0.0
 	p.ak.use_e()
-	ok("reel: E is denied while reeling", k.anchors == 0 and k.wind <= 0.0)
+	ok("reel: E is not cast while reeling (it waits for the arrival)", k.anchors == 0 and k.wind <= 0.0 and k.e_queued)
+	k.e_queued = false  # (this check casts its own Anchor after the arrival, below)
 	ok("reel: the gun is locked", not k.can_shoot())
 	var pos0 := p.pos
 	ak.aim_at(p, t.pos)
@@ -525,8 +526,8 @@ func _all() -> void:
 	var early_dmg: float = ak.dmg(t) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: he stays put, the damage lands on the slam frame (~0.38s), not at the cast",
-		early == 0 and early_dmg == 0.0 and k.anchors == 1 and p.flat_dist(at0) < 0.3,
+		"anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and k.anchors == 1 and p.flat_dist(at0) > 0.8 and p.flat_dist(at0) < 2.0,
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, p.flat_dist(at0)]
 	)
 	ok(
