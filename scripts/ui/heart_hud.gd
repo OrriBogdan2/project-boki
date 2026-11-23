@@ -80,9 +80,9 @@ static func zone_line(m: Match) -> String:
 		return ""
 	var t := Heart.close_in(m)
 	if t > 0.0:
-		return "Closes in %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60]
+		return "Closes in %d:%02d" % [int(int(ceil(t)) / 60.0), int(ceil(t)) % 60]
 	t = Heart.close_left(m)
-	return "Closing %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60] if t > 0.0 else ""
+	return "Closing %d:%02d" % [int(int(ceil(t)) / 60.0), int(ceil(t)) % 60] if t > 0.0 else ""
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
