@@ -48,7 +48,7 @@ func run(main_node: Node) -> void:
 	main.add_child(m)
 	# a grown Boki (level 12, trust 95) talks in full lines, so its hint names the hazard
 	await m.start(
-		{"teams": 2, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "demo_kin": PLAIN, "demo_kin_lv": "12:95"}
+		{"teams": 2, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "no_heart": true, "demo_kin": PLAIN, "demo_kin_lv": "12:95"}
 	)
 	m.set_process(false)
 	tz = TerrainHazards.of(m)

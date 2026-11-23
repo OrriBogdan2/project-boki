@@ -24,7 +24,7 @@ func run(m: Node, c) -> void:
 	main = m
 	check = c
 	Save.no_write = true
-	seed(6)  # (the roaming seconds swing 12-48 s per seed as the lane draws more random numbers per BaseLife choice)
+	seed(6)  # (3 and 7 no longer roam 30 s: the lane draws more random numbers per BaseLife choice; 6 roams 37 s)
 	var farm_rules: Dictionary = Content.rules("farm_build")
 	farm_rules["base_mode"] = true
 	_new_save()
@@ -137,7 +137,7 @@ func _roam() -> void:
 					flares += _taken_lands(k, fliers)
 	var band: Array = BokiFly.rules()["height"]
 	check.ok(
-		roam_s >= SIM_SECS * 0.1 and air_s >= roam_s * 0.9,
+		roam_s >= SIM_SECS * 0.25 and air_s >= roam_s * 0.9,
 		"fliers: roaming on Kitewind Ridge they are up (%.0f of %.0f s)" % [air_s, roam_s]
 	)
 	check.ok(
