@@ -62,7 +62,7 @@ static func _pad(h: Hunter, d: Dictionary) -> void:
 static func pads(m: Node, dt: float) -> void:
 	for gp in m.gpads.duplicate():
 		gp["t"] = float(gp["t"]) - dt
-		gp["arm"] = float(gp["arm"]) - dt
+		gp["arm"] = float(gp.get("arm", 0.0)) - dt
 		if float(gp["t"]) <= 0.0:
 			(gp["node"] as Node3D).queue_free()
 			m.gpads.erase(gp)
@@ -77,16 +77,10 @@ static func pads(m: Node, dt: float) -> void:
 			var on_pad: bool = h.flat_dist(gp["pos"]) < PAD_R and absf(h.pos.y - float(gp["pos"].y)) < 0.6
 			if on_pad and float(gp["cd"].get(h.nid, -9.0)) < m.time:
 				gp["cd"][h.nid] = m.time + 1.0
-				if float(gp["after"]) > 0.0:
+				if float(gp.get("after", 0.0)) > 0.0:
 					gp["t"] = minf(float(gp["t"]), float(gp["after"]))
-				var hv := Vector2(h.vel.x, h.vel.z)
-				var dir: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
-				var sp := maxf(hv.length(), float(gp["push"]))
-				h.vel = Vector3(dir.x * sp, float(gp["lift"]), dir.y * sp)
-				h.roll_t = 0.0      # a dash ends here, its speed carries
-				h.grounded = false
-				h.glide_cd = 0.0
-				m.fx.burst(gp["pos"] + Vector3(0, 0.3, 0), gp["col"], 16, 5.0, 0.4, -2.0)
+				UtilityUse.pad_launch(h, float(gp.get("push", UtilityUse.PAD_MIN_HV)), float(gp.get("lift", UtilityUse.PAD_VY)))
+				m.fx.burst(gp["pos"] + Vector3(0, 0.3, 0), gp.get("col", Color("8ff0c8")), 16, 5.0, 0.4, -2.0)
 				m.sfx("jump", h.pos, -2.0, 0.8)
 
 # ------------------------------------------------------------------ fields
