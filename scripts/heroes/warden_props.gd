@@ -232,7 +232,7 @@ static func _rigid(arr: Array, bind: int, pose: Transform3D) -> Array:
 	var pos: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 	var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES]
 	var wts: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
-	var per := bones.size() / maxi(pos.size(), 1)
+	var per := int(bones.size() / float(maxi(pos.size(), 1)))
 	var mine := PackedByteArray()
 	mine.resize(pos.size())
 	for i in pos.size():
