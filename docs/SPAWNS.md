@@ -6,8 +6,9 @@ or world marker plus a countdown). This page lists every spawn path in `scripts/
 (audit of 2026-11-12, `ext/combat-spawn-audit`), what is random about it, and what the player sees
 before it appears. `--spawn-clock-check` asserts the rows marked **fixed**.
 
-Monster camps (first spawn `match.gd _spawn_mobs`, comebacks `rolling.gd _camp_respawns`) are
-covered by `ext/predictable-camps-1111` (docs/CAMPS.md there) and are not repeated here.
+Monster camps (`Camps`, `scripts/match/camps.gd`, docs/CAMPS.md) are **fixed**: each camp spot holds the same
+monsters, rarities and offsets in every match (a dice seeded by the spot alone), and a cleared camp
+comes back on a clock (rolling sessions).
 
 | Spawner | File:line | Random (place / time / type) | Seen before it appears | Verdict |
 |---|---|---|---|---|
