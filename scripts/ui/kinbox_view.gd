@@ -210,9 +210,9 @@ func _done(t: String) -> void:
 	Sfx.play("click")
 	refresh()
 	_say(t)
-	if home and home.has_method("_spawn_kin"):
+	if home:
 		home._spawn_kin()
-	if home and home.has_method("_refresh_burrow"):
+	if home:
 		home._refresh_burrow()
 
 
@@ -269,7 +269,7 @@ func _build_farm(fk: Array) -> void:
 				else:
 					Sfx.play("unlock")
 					_done("The Boki Cottages grew: room for %d Boki on the farm" % KinBox.farm_cap())
-					if home and home.has_method("_refresh_top"):
+					if home:
 						home._refresh_top(),
 			FARM_COLS * CELL.x + 6
 		)
@@ -627,7 +627,7 @@ func _build_detail() -> void:
 		UI.button(
 			"Details",
 			func():
-				if home and home.has_method("_open_kin"):
+				if home:
 					home._open_kin(r),
 			90
 		)

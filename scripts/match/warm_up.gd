@@ -310,6 +310,11 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	var plain := (Time.get_ticks_usec() - t0) / 1000.0
 	if not m.is_inside_tree():
 		return false
+	# (only the Compatibility renderer compiles a variant per light setup; Forward+ and Mobile shade lights from
+	# clusters in one shader, so there one setup is enough: a quarter of the frames a batch takes)
+	var setups := [[false, false]]
+	if RenderingServer.get_current_rendering_driver_name() == "opengl3":
+		setups = [[false, false], [true, false], [false, true], [true, true]]
 	var n := BATCH
 	var i := 0
 	var batches := 0
@@ -333,7 +338,7 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		var worst := 0.0
 		# two frames under each light setup (with one, a variant or two still slips through to the
 		# ride: --hitch-check from a cold shader cache)
-		for setup in [[false, false], [true, false], [false, true], [true, true]]:
+		for setup in setups:
 			wl[0].visible = setup[0]
 			wl[1].visible = setup[1]
 			for _f in 2:

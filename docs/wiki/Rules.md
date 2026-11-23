@@ -307,6 +307,19 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 | spot_reach_doc | m: the farthest nap spot a Boki about to nap walks to; past it, or with every spot taken, it naps where it stands. |
 | tired_at | 25 |
 | tired_at_doc | energy need below which a Boki naps by day. |
+| greet_at | 0.15 |
+| greet_at_doc | the least liking (bond, plus the parent weight) at which a roaming Boki waves hello to one close by: Boki that get on greet before they are friends (friend_at). |
+| greet_chance | 0.9 |
+| greet_chance_doc | chance a roaming Boki that chooses waves hello when a Boki it likes (greet_at) is close by (a heart). |
+| doze | 0.06 |
+| doze_pile | 0.5 |
+| doze_doc | chance, each time a roaming Boki chooses by day, that it lies down for a nap although it is not tired; doze_pile is added while a Boki it does not dislike (pile_at) naps within pile_reach m, so the nap becomes a pile. |
+| doze_rest | 60 |
+| doze_rest_doc | s after a Boki wakes before it may doze again, so one nap does not set off a chain of piles. |
+| pile_reach | 12 |
+| pile_reach_doc | m: how far away a Boki about to nap looks for a napping one to lie beside (the walk is PILE_WALK s at most). |
+| pile_at | 0 |
+| pile_at_doc | the least liking (bond, plus the parent weight) for a dozing Boki (one that is not tired) to lie beside a napping one, and for napping side by side to grow a bond: Boki that have hardly met huddle too, which is how they become friends; rivals do not make up asleep. |
 | near | 6 |
 | near_doc | m within which another Boki counts as close: a play mate, a rival to stare at, a pile to join. |
 | pile | 0.35 |
@@ -2218,26 +2231,6 @@ Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each 
 | face | {"bulwark": [0.52, 0.29], "archer": [0.46, 0.33], "juggernaut": [0.5, 0.33], "thief": [0.64, 0.46], "mage": [0.47, 0.27], "dolm": [0.47, 0.34], "gil": [0.55, 0.44], "ostra": [0.44, 0.47], "ashwick": [0.52, 0.47], "gunslinger": [0.41, 0.32], "tender": [0.48, 0.48], "rimewright": [0.49, 0.47], "dredge": [0.5, 0.4]} |
 | splash | {"bulwark": [0.49, 0.19], "archer": [0.52, 0.22], "juggernaut": [0.55, 0.26], "thief": [0.4, 0.27], "gil": [0.39, 0.3], "mage": [0.55, 0.22], "dolm": [0.34, 0.28], "ostra": [0.71, 0.25], "ashwick": [0.57, 0.3], "rimewright": [0.34, 0.3], "dredge": [0.64, 0.36], "gunslinger": [0.64, 0.19], "tender": [0.58, 0.35]} |
 
-## results_pose (`content/rules/results_pose.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | The pose each Hunter holds on the results stage (scripts/ui/results_stage.gd): one clip of its own GLB, frozen at t seconds, a held strike or an idle beat that fits it. Keyed by Hunter id; a Hunter left out stands in the plain idle. |
-| gunslinger | {"clip": "lmb", "t": 0.2} |
-| juggernaut | {"clip": "slash_r", "t": 0.25} |
-| thief | {"clip": "flourish", "t": 0.4} |
-| ashwick | {"clip": "lance", "t": 0.3} |
-| rimewright | {"clip": "spear", "t": 0.3} |
-| archer | {"clip": "draw", "t": 1.2} |
-| dredge | {"clip": "flex", "t": 0.3} |
-| ostra | {"clip": "flurry", "t": 0.5} |
-| tender | {"clip": "hearth", "t": 0.5} |
-| mage | {"clip": "rmb_hold", "t": 0.5} |
-| dolm | {"clip": "lmb_punch", "t": 0.35} |
-| bulwark | {"clip": "rmb_guard", "t": 0.5} |
-
 ## revive (`content/rules/revive.json`)
 
 
@@ -2461,12 +2454,12 @@ What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind
 
 ## terrain_hazards (`content/rules/terrain_hazards.json`)
 
-Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). look: the surface shader (shaders/terrain_hazard.gdshader).
+Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). look: the surface shader (shaders/terrain_hazard.gdshader). moves: how a hunter the ground beats moves on it (HazardMoves); in deep water every hunter swims, a counter or not.
 
 | Setting | Value |
 |---|---|
 | hint | {"near_m": 8.0, "every_s": 0.5, "again_s": 30.0} |
-| kinds | {"lava": {"icon": "fireball", "name": "Lava Field", "tip": "Lava Field ahead: it burns anyone standing in it.", "noun": "the lava", "hurts": "burning", "effect": {"burn_dps": 9.0, "burn_linger_s": 1.2}, "counter": {"themes": ["ember"], "kin": []}, "look": {"mode": 0, "deep": "ff5a14", "shallow": "3a1610", "edge": "ffb04a", "glow": 2.2, "alpha": 1.0}}, "deep_water": {"icon": "wave", "name": "Deep Water", "tip": "Deep water ahead: it slows you, weakens your hits and runs you out of breath.", "noun": "deep water", "hurts": "slow, weak hits, short of breath", "effect": {"speed": 0.55, "dmg_out": 0.6, "breath_s": 6.0, "drown_dps": 8.0, "swim_haste": true}, "counter": {"themes": [], "kin": ["lilybara", "floenatee", "spatewader", "puddlet", "selenfin", "zephyrak"]}, "look": {"mode": 1, "deep": "123a7a", "shallow": "3a8ac0", "edge": "d8f4ff", "glow": 0.15, "alpha": 0.82}}, "ice": {"icon": "gem", "name": "Ice Sheet", "tip": "Ice sheet ahead: there is no grip, so you slide.", "noun": "the ice", "hurts": "no footing", "effect": {"grip": 0.12}, "counter": {"themes": ["frost"], "kin": []}, "look": {"mode": 2, "deep": "9fd8f0", "shallow": "e6f8ff", "edge": "ffffff", "glow": 0.25, "alpha": 0.9}}, "static": {"icon": "shock", "name": "Static Flats", "tip": "Static Flats ahead: they shock and stun every few seconds.", "noun": "the static", "hurts": "shocks", "effect": {"every_s": 3.2, "warn_s": 0.9, "dmg": 9.0, "stun_s": 0.35}, "counter": {"themes": ["storm", "tempest"], "kin": []}, "look": {"mode": 3, "deep": "2a2a3a", "shallow": "4a4a60", "edge": "fff27a", "glow": 1.6, "alpha": 1.0}}, "bramble": {"icon": "thornwake", "name": "Bramble", "tip": "Bramble ahead: it slows you and scratches.", "noun": "the thorns", "hurts": "slow, scratches", "effect": {"speed": 0.6, "dps": 3.0}, "counter": {"themes": ["bloom", "spore"], "kin": []}, "look": {"mode": 4, "deep": "2e3a1a", "shallow": "4a3a22", "edge": "8ac04a", "glow": 0.0, "alpha": 1.0}}} |
+| kinds | {"lava": {"icon": "fireball", "name": "Lava Field", "tip": "Lava Field ahead: it burns anyone standing in it.", "noun": "the lava", "hurts": "burning", "effect": {"burn_dps": 9.0, "burn_linger_s": 1.2}, "counter": {"themes": ["ember"], "kin": []}, "look": {"mode": 0, "deep": "ff5a14", "shallow": "3a1610", "edge": "ffb04a", "glow": 2.2, "alpha": 1.0}}, "deep_water": {"icon": "wave", "name": "Deep Water", "tip": "Deep water ahead: it slows you, weakens your hits and runs you out of breath.", "noun": "deep water", "hurts": "slow, weak hits, short of breath", "effect": {"speed": 0.55, "dmg_out": 0.6, "breath_s": 6.0, "drown_dps": 8.0, "swim_haste": true}, "counter": {"themes": [], "kin": ["lilybara", "floenatee", "spatewader", "puddlet", "selenfin", "zephyrak"]}, "look": {"mode": 1, "deep": "123a7a", "shallow": "3a8ac0", "edge": "d8f4ff", "glow": 0.15, "alpha": 0.82}}, "ice": {"icon": "gem", "name": "Ice Sheet", "tip": "Ice sheet ahead: there is no grip, so you slide.", "noun": "the ice", "hurts": "no footing", "effect": {"grip": 0.12}, "moves": {"doc": "How a hunter without footing moves on it (HazardMoves -> the anim state 'footing' -> WardenGait): stride x the run's thigh swing, cadence x the clip rate, arms_out rad the free arms (loco arm_swing) lift out from the side.", "stride": 0.6, "cadence": 1.2, "arms_out": 0.45}, "counter": {"themes": ["frost"], "kin": []}, "look": {"mode": 2, "deep": "9fd8f0", "shallow": "e6f8ff", "edge": "ffffff", "glow": 0.25, "alpha": 0.9}}, "static": {"icon": "shock", "name": "Static Flats", "tip": "Static Flats ahead: they shock and stun every few seconds.", "noun": "the static", "hurts": "shocks", "effect": {"every_s": 3.2, "warn_s": 0.9, "dmg": 9.0, "stun_s": 0.35}, "counter": {"themes": ["storm", "tempest"], "kin": []}, "look": {"mode": 3, "deep": "2a2a3a", "shallow": "4a4a60", "edge": "fff27a", "glow": 1.6, "alpha": 1.0}}, "bramble": {"icon": "thornwake", "name": "Bramble", "tip": "Bramble ahead: it slows you and scratches.", "noun": "the thorns", "hurts": "slow, scratches", "effect": {"speed": 0.6, "dps": 3.0}, "counter": {"themes": ["bloom", "spore"], "kin": []}, "look": {"mode": 4, "deep": "2e3a1a", "shallow": "4a3a22", "edge": "8ac04a", "glow": 0.0, "alpha": 1.0}}} |
 
 ## timed_spawns (`content/rules/timed_spawns.json`)
 
@@ -2654,14 +2647,18 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 
 | Setting | Value |
 |---|---|
-| doc | Hunters drawn on Meshy's own skeleton and clips (scripts/heroes/warden_native.gd, docs/art/wardens/MESHY_NATIVE.md), keyed by art name. meshy_native: the switch (off = the contract model as before; Albert, Cinder, Meeko, Vex are listed off until their <art>_meshy.glb is packed and picked). Size: Meshy's head bone onto the rig's head pivot (WardenNative._fit). file: art/wardens/<art>/<art>_meshy.glb. clips: game state -> Meshy clip. walk_mps/run_mps/crouch_mps: m/s ground speed each loop plays at rate 1; run_from: m/s where the walk hands to the run; attack_rate, jump_rate: play rate of those one-shots. hand: Meshy's bone the weapon's aim node rides. anchors: anchor empty -> the Meshy bone it rides. crouch_arms_from: the crouch plays that state's clip on the arms (the bones below arm_roots, default LeftShoulder and RightShoulder): Meshy's crouch holds a torch out. toon (default true): the game's hero-toon pass on the surfaces. orbits: orbit node of the contract .glb -> the Meshy bone it rides (the props are copied from <art>.glb and turn as on the contract path: Tenzo's seeing-stones). |
-| ryzz | {"meshy_native": false} |
+| doc | Hunters drawn on Meshy's own skeleton and clips (scripts/heroes/warden_native.gd, docs/art/wardens/MESHY_NATIVE.md), keyed by art name. meshy_native: the switch (off = the contract model as before; Albert and Vex are listed off until their <art>_meshy.glb is packed and picked). Size: Meshy's head bone onto the rig's head pivot (WardenNative._fit). file: art/wardens/<art>/<art>_meshy.glb. clips: game state -> Meshy clip. walk_mps/run_mps/crouch_mps: m/s ground speed each loop plays at rate 1; run_from: m/s where the walk hands to the run; attack_rate, jump_rate: play rate of those one-shots. hand: Meshy's bone the weapon's aim node rides. anchors: anchor empty -> the Meshy bone it rides. crouch_arms_from: the crouch plays that state's clip on the arms (the bones below arm_roots, default LeftShoulder and RightShoulder): Meshy's crouch holds a torch out. toon (default true): the game's hero-toon pass on the surfaces. bones: contract bone -> this Hunter's Meshy bone, for WardenSkeleton.find (Cinder's heel jets on her feet; the 14 contract bones need none: WardenSkeleton.NATIVE). orbits: orbit node of the contract .glb -> the Meshy bone it rides (the props are copied from <art>.glb and turn as on the contract path: Tenzo's seeing-stones). props: contract bone -> material names of the contract model's parts Meshy's mesh lacks, hung on Meshy's bones (WardenProps: Kael's sword, Cinder's heel jets); tilt: contract bone -> degrees its part bends back toward the limb (Kael's blade: his contract rest holds it 47 deg ahead of the arm, his own idle clip bends the wrist; Meshy's clips do not). stretch {kmove, y, rest}: those parts' length along their bone while that kit move plays and otherwise (as the contract clips key Cinder's jet bones: x3 in Flue Flight, x0.06 at rest). |
+| ryzz | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
 | sable | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
-| tarek | {"meshy_native": false} |
+| tarek | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk", "orbits": {"orbit_stones": "Head"}} |
 | breaker | {"meshy_native": false} |
-| cinder | {"meshy_native": false} |
-| pip | {"meshy_native": false} |
+| cinder | {"meshy_native": true, "hand": "RightHand", "bones": {"jet.0": "RightFoot", "jet.1": "LeftFoot"}, "props": {"jet.0": ["flame-jet"], "jet.1": ["flame-jet"]}, "stretch": {"kmove": "lw_jet", "y": 3.0, "rest": 0.06}, "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
+| pip | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
 | vex | {"meshy_native": false} |
+| hem | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 1.4, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
+| kael | {"meshy_native": true, "hand": "RightHand", "props": {"hand.R": ["metal-sword", "metal-sword_dk", "metal-sword_edge", "glow-sword", "leather-grip"]}, "tilt": {"hand.R": 47.0}, "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
+| gil | {"meshy_native": true, "hand": "RightHand", "props": {"hand.R": ["metal-swordfish"]}, "tilt": {"hand.R": -45.0}, "scale": {"hand.R": [1.6, 2.0, 2.2]}, "grip": {"hand.R": {"part": [-0.08, -0.03, 0.0], "bone": [0.007, 0.115, 0.003], "turn": [-0.045, -0.233, 0.169]}}, "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
+| ostra | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk", "orbits": {"orbit_cards": "Head"}} |
 
 ## warden_rest (`content/rules/warden_rest.json`)
 

@@ -227,7 +227,7 @@ Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the B
 | Motley | RMB range | 13 | hit after about 3 h; bundle crosses 6 h (10.8) in a frame, max not seen | not determinable: no miss to max range in the clip (sheet open question) |
 | Neve | RMB range, zone, burst | 12, 2.2, 2.7 | lands at the cursor, clamp and rings not measured | [?] (owner: travel time grows with distance) · **open** |
 | Neve | E width, slide | 1.8 to 4.5, to 16.2 | narrow to ~2.5 h (4.5), slide not measured | width match; slide [?] · **open** |
-| Neve | R rink radius | 8.3 (was 7.2; this row said match) | 4 bh (7.2) | differ +15% · **owner** (11-08, c05e9d3a5) |
+| Neve | R rink radius | 7.47 (7.2 +15% owner 11-08, then -10% owner 11-11, `3d4a2d1999`; this row said 8.3 until 11-23) | 4 bh (7.2) | differ +4% · **owner** |
 | Motley | RMB range | 13 | bundle seen over 6 h (10.8), max not seen | [?] · **open** |
 | Motley | E seed radius | 3.2 | 1.8 h (3.2) | match |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), cast 2-3 bh away | radius match; range not determinable: cast only on a near dummy, the clamp is never reached |
@@ -636,35 +636,19 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 ## Neve (`rimewright`, source Celeste)
 ## Neve (`rimewright`, source Celeste; was Claire)
 
-**0.24.5:** rimewright-combo 116/0. Chill 4 s with no slow and the late skating homing stand. Open: E cd 17 vs 20 (ext/cooldown-parity-verify).
+**Re-checked 2026-11-23 on main 5a246f9696** (rimewright-combo 161/0; what moved since 11-12: `docs/KIT_PARITY.d/1123-albert-neve-recheck.md`). One current row per slot replaces the stack of superseded rows (70 HP wall, skate 11.5, Rimelock 3.5 s / 40 / 8.3, "Chill + 15% slow").
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold, semi-homing, 3 heavy at end of burst, 0.5 s barrage cd [D]; one uniform stream while held [F] | Hold = one burst of plain darts (0.18 s), 3 large on the let-go, 0.5 s pause; skating: beams, semi-homing, 2x damage | match (burst); skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skating beams semi-homing (owner, gap 16 done) |
-| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large darts; they leave along the aim, then curve onto the foe at the cursor over 35 to 70% of the flight. **Skating beams home the same way** after leaving straight on the aim | match; gap 16 closed `e5c73480c` (bend assert pending `ext/parity-neve-skate-home` 9b65ea7f1) |
-| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Ice Spear: pushed out to the cursor (12 m), 18 dmg, 2.2 m slow zone 35%, bursts 22 (= 190/156 x hit 18) at 1.8 s, 2 charges, cd 10.2 | differ (owner: push-like release); 0.85x cd |
+| LMB | Hold, semi-homing, 3 heavy at end of burst, 0.5 s barrage cd [D]; one uniform stream while held [F] | Hold = one burst of plain darts (0.18 s, 4 dmg), 3 large on the let-go (x2 damage), 0.5 s pause; darts leave along the aim and curve onto the foe at the cursor over 35 to 70% of the flight; skating: beams (x2 damage, `dash.skate_dart_dmg_k`) that home the same way; a tap the burst cannot take yet is buffered (`b53f5b0328`, 11-22) | match; skating x2 is the wiki's number (footage 1.6x, no data number) |
+| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Ice Spear: pushed out to the cursor (12 m, 18 m/s), 18 dmg, 2.2 m slow zone 35%, bursts 22 in 2.7 m at 1.8 s (= 190/156 x the hit), 2 charges, cd 10.2 | differ (owner: push-like release); 0.85x cd (gap 10, owner row) |
 | Q | none | glove | ours |
-| E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, 70 HP, E again freezes 6 s, cd 17 | match; 0.85x cd |
-| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Rimelock: hold 3.5, skate carry .8 (owner), 40 dmg + 0.75 s stun, early recast cancels, cd 80 | match |
-| Dash | Hold, release stops, 13 s; ice islands over the abyss [D] | Skate 11.5 m/s (F 10 to 11), up to 1.6 s, early-release refund .6 (owner), ice ribbon in the air, cd 13 | match; refund owner |
-| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s, 8 darts shatter, knock shatters. **Chill slow removed** | match; closed `3bcb50eca` |
-| Anim | Footage poses | 19 moves plus the fusion move, all on `claire.glb` (49 clips); v2 model `59ac7b48d` | match on coverage |
-| Body | 1.1 to 1.15 [F] | size 1.014 (1.56 m, owner height chart `4538174a8`) | differ (owner) |
-| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight while skating | match; skate tracking owner question (gap 16) · **done** `ext/parity-neve-skate-home`, `ext/neve-dart-homing`: late homing while skating, asserted |
-| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2; detonation 22 = 190/156 x hit 18 | differ (owner) · **owner** |
-| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight, 2x damage while skating | match; skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skate tracking owner question (gap 16) |
-| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
-| Q | none | glove | ours |
-| E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd |
-| R | Invulnerable Slowing zone 3.5 s with periodic Shatter stacks, explode, stun, cancel, 80 s [D] | Hold 3.5, flat 35% slow (no ramp), carry .8 x1.05 speed (owner), rink 4 bh +15% (owner), body as ice, cd 80; crash 18 = 155/156 x spear hit 18 | match; +15% radius, +5% slide (owner 11-08); the periodic Shatter stacks are not built (no period in [D]) |
-| Dash | Hold, release stops, 13 s [D] | 10.5 m/s (F 10-11, the mean), 1.6 s, early-release refund .6 (owner) | match; refund owner |
-| Passive | Chill 4 s, shatter on knock [D] | Chill + 15% slow (ours) | differ: slow ours |
-| E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd · cd **open** (gap 10) |
-| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Hold 3.5, carry .8 x1.05 speed (owner), rink 4 bh +15% (owner), body as ice, cd 80 | match; +15% radius, +5% slide (owner 11-08) · **owner** |
-| Dash | Hold, release stops, 13 s [D] | 11.5 m/s (F 10-11), 1.6 s, early-release refund .6 (owner) | match; refund owner |
-| Passive | Chill 4 s, shatter on knock [D] | Chill + 15% slow (ours) | differ: slow ours · **done** `ext/parity-no-riders` (main): slow cut; `ext/neve-chill-shatter` asserts Chill 4 s and the knock Shatter |
-| Anim | Footage poses | 19 moves, all on `claire.glb` (49) | match on coverage |
-| Body | 1.1-1.15 [F] | size 1.15 | match |
+| E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, **200 HP** (owner 11-08), E again freezes 6 s, cd 17 | match; 0.85x cd (gap 10, owner row) |
+| R | Invulnerable Slowing zone 3.5 s with periodic Shatter stacks, explode, stun, cancel, 80 s [D] | Rimelock: hold **3.3** (footage 3.2 to 3.4), flat 35% slow (no ramp), skate carry .8 x1.05 (owner 11-08), rink **7.47 m** (4 bh +15% owner 11-08, then -10% owner 11-11; was written 8.3 here), crash **18** = 155/156 x the spear hit + 0.75 s stun, cd 80 | match; radius and carry owner; periodic Shatter stacks not built (no period in [D]) |
+| Dash | Hold, release stops, 13 s; ice islands over the abyss [D] | Skate 10.5 m/s (F 10 to 11, the mean), ramp 0.12 s (11-20), up to 1.6 s, early-release refund .6 (owner), ice ribbon in the air, cd 13 | match; refund owner |
+| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s with no slow, 8 darts Shatter (60 in 2.4 m), a knock on a Chilled foe Shatters 0.4 s later (37 in 3 m) | match |
+| Anim | Footage poses | 19 moves plus the fusion move, all on `claire.glb` (49 clips) | match on coverage |
+| Body | 1.1 to 1.15 [F] | size 1.11 (head tops follow the height chart, `3a50a38abb`) | differ (owner) |
 
 ## Motley (`ostra`, source Void)
 ## Motley (`ostra`, source Void; was Ostra)
@@ -695,32 +679,18 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 ## Albert (`bulwark`, source Oath)
 ## Albert (`bulwark`, source Oath; was Bjorn)
 
-**0.24.5:** bulwark-combo 166/0. Throw rate 0.45 and E zone 2.3 m stand (the E row's r 3.5 is stale text). Open: Guard meter and Shield Slam, Crushing Blow stun 0.4, aegis routing (ext/albert-parity-verify, ext/parity-albert-blow-stun, ext/combat-albert-aegis-input); R cd 40 vs 50 (ext/cooldown-parity-verify).
+**Re-checked 2026-11-23 on main 5a246f9696** (bulwark-combo 197/0; list of what moved since 11-12: `docs/KIT_PARITY.d/1123-albert-neve-recheck.md`). The stack of superseded rows that stood here (E r 3.5, Guard meter and Shield Slam "open", blow stun 0.4, "branch ready") is replaced by one current row per slot.
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Throw + recall; hold charged swing [D] | Tap throws and recalls (cadence **.45**), hold is the source's wind-up, swing 36 to 66. Owner-kept: walks 55% while charging (#59), 1.5 to 1.8 m step + 4 m perfect launch (#30, #49) | match; riders differ (owner). Cadence `1eecee8c3`, hold `e625aa8e0`, hold-walk assert `9c336682d` |
-| RMB | Hold shield, front block, Shift = bash, 6 s [D] | Aegis hold .1, 160 HP, Shield Charge on Shift, cd 6 | match; routing `[?]` |
-| LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .45 (1eecee8c3), walks 55% vs stands | differ (owner); cadence matches (gap 12 closed) |
-| LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .45 (done), walks 55% vs stands | differ (owner) |
-| RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6 | match; routing `[?]` |
-| LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .48 vs .45, walks 55% vs stands | differ (owner); cadence S fix (gap 12) · **owner**; cadence **done** `ext/parity-mossy-cadence` (main): `throw_rate` 0.45 |
-| RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6 | match; routing `[?]` · **open** on the candidate (`ext/mossy-shield-bash`, `ext/parity-aegis-block` merged); closed on ext/combat-albert-aegis-input (branch ready) |
+| LMB | Throw + recall; hold charged swing [D] | Tap throws (clamped 9 m, at least 2.5 m) and recalls, 12 / 12, cadence **.45** (`lmb.throw_rate`); hold 1.25 s = swing 36 to 66, no stun of its own. Owner-kept: walks 55% while charging (#59), lunge 1.4 to 2.4 m (decision 0061), perfect launch 4 m (#30, #49) | match; riders differ (owner) |
+| RMB | Hold shield, front block, Shift = bash, 6 s [D] | Aegis hold .1, 160 HP (+25% a rank), block arc 140, drawn as the layered `AegisWall` (chord 4.2 m, 1.7 m tall; look only, 11-20 to 11-22), boop on LMB 2.8 m no damage (owner 11-09), Shield Charge on Shift: 4.2 m, 12 dmg, push 11, own 6 s cooldown, spends no dash charge | match; routing closed (`ext/combat-albert-aegis-input`) |
 | Q | none | glove | ours |
-| E | Zone around hammer, burst, Wisps, 8 s @IV [D] | Mending Ground: r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
-| R | Fissure stun, AoE, heavy Slow, 50 s [D] | Faultline: 4 cells, stun .5, cd 40 | match; 0.8x cd |
-| Dash | Spin Dash 8 s, knock [D] | 360 Smash 3.5 m, cd 8 | match |
-| Passive | Wall knock Stuns [D] | Crushed built. **Guard meter and Shield Slam still on main** | differ (gap 15): pending `ext/parity-bulwark-guardcut` b2e942eb4 (also in `ext/misc-ready-integ` 55446e046) |
+| E | Zone around hammer, burst, Wisps, 8 s @IV [D] | Mending Ground: r **2.3** (the old r 3.5 is gone), delay 1, 4 s, 2 every 0.5 s, burst 18, cd 12 / 8 | match |
+| R | Fissure stun, AoE, heavy Slow, 50 s [D] | Faultline: 4 cells of 4 m, stun .5, 18 + slow 50%, cd 40 (0.8x, gap 10 owner row); lane **5.5** wide (source 4.5; owner 11-09 feel brief, decision 0061), 1.2 m hop in the wind-up | match; lane width owner |
+| Dash | Spin Dash 8 s, knock [D] | 360 Smash 3.5 m / 0.17 s, 24 dmg, push 7, cd 8, **one charge** (`dash.charges` 1, was the heavy class's 2; `1ff0d92e81`, 11-16) | match |
+| Passive | Wall knock Stuns [D] | Crushed: 1.0 s stun and 8 damage on a knock into a wall (walls only). **No Guard meter and no Shield Slam**: cut again 11-20 (`4ce1bd2953`, owner 11-07), `--kit-parity-check` fails if either returns | match |
 | Anim | Footage poses | 17 moves plus the fusion move, all on `breaker.glb` (48 clips) | match on coverage |
-| E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
-| R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd · cd **open** (gap 10) |
-| E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 2.3, delay 1, 4 s, burst, cd 12/8 | match |
-| R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd |
-| Dash | Spin Dash 8 s, knock [D] | Whirl 3.5 m/.17 s (F), off the dash feel, cd 8 | match |
-| Passive | Wall knock Stuns [D] | Built; **Guard meter, Shield Slam invented** | differ (gap 15); owner question open · **open**: Guard and `resource.slam` still in `bulwark.json`; branch ready: ext/parity-bulwark-guardcut (owner 11-07 said cut) |
-| Dash | Spin Dash 8 s, knock [D] | Whirl 3.5 m, cd 8; rank 3 refunds the Bash; Bash 12 | match |
-| Passive | Wall knock Stuns [D] | Built; **Guard meter, Shield Slam invented** | differ (gap 15); owner question open |
-| Anim | Footage poses | 17 moves, all on `breaker.glb` (48) | match on coverage |
 
 ## Sparkle (`mage`, source Joule)
 ## Sparkle (`mage`, source Joule; was Ryzz)
