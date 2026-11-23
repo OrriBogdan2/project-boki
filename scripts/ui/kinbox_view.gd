@@ -33,6 +33,7 @@ var msg: Label
 
 var _msg_t := 0
 
+
 static func open(h: Home) -> KinBoxView:
 	KinBox.ensure()
 	var kv := KinBoxView.new()
