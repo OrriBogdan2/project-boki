@@ -42,5 +42,5 @@ Not moved since 11-12 (re-read, same): Albert throw 12 / 12, range 9, Crushing B
 | `--rimewright-combo-check` | 161 checks, 0 failures | 161, 0 failures |
 | `--card-numbers-check` | 344, 0 failures | 344, 0 failures (a first try with "2.4m" in the card text and no data field failed: 1 failure, fixed by the `fan_r` field) |
 | `--kit-parity-check` | 0 failures | 0 failures |
-| `python3 tools/health.py --strict` | red: `tools/check_registry.gd` long_line 0 -> 1 (`66d289323f`) | OK |
-| `python3 tools/gen_wiki.py --check` | red: `docs/wiki/Rules.md` out of date | OK |
+| `python3 tools/health.py --strict` | red: `tools/check_registry.gd` long_line 0 -> 1 (`66d289323f`); on d49f4f321d red again, `tools/camp_clear_check.gd` long_line | OK (both comments rewrapped) |
+| `python3 tools/gen_wiki.py --check` | red: `docs/wiki/Rules.md` out of date (and `Boki-Growth.md` on d49f4f321d) | OK (regenerated) |
