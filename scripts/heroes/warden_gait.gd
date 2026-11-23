@@ -170,7 +170,12 @@ func apply(dt: float, legs_k: float, arm_k: float, stand_k: float) -> void:
 	for r in arms:
 		var arm_p := _pitch(skel.get_bone_global_pose(r[3]).origin - skel.get_bone_global_pose(r[0]).origin)
 		var leg_p := _pitch(skel.get_bone_global_pose(r[2]).basis.y)
-		r[5] = arm_p if is_nan(r[5]) else lerp_angle(r[5], arm_p, a)  # (a first frame is its own mean)
+		# (a first frame is its own mean. A clip that owns the arm - a bow drawn over the run - is not the arm's mean
+		# pose: the mean stands still while the swing is off, or the arm whips round to it when the move ends)
+		if is_nan(r[5]):
+			r[5] = arm_p
+		elif arm_w > 0.0:
+			r[5] = lerp_angle(r[5], arm_p, a)
 		r[6] = leg_p if is_nan(r[6]) else lerp_angle(r[6], leg_p, a)
 		if arm_w <= 0.0:
 			continue
