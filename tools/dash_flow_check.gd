@@ -57,9 +57,7 @@ const LAND_AT := {0: "on the touchdown step of", 1: "on the first step after", 7
 const LAND_WATCH := 30  # steps a press has to act in
 
 ## Landing rows open at this merge ("<hero>:<press>:<way>:<steps in>" -> what); each fix removes its entry.
-const LAND_OPEN := {
-	"rimewright:lmb:fall:7": "never goes off 0.1 s into a fall's absorb (docs/DEBT.md)",
-}
+const LAND_OPEN := {}
 
 # ------------------------------------------------------------------ combos with Shift and jump (item 51)
 const ACT_S := 0.1  # s: owner rule, a jump or Shift out of an ability's recovery acts within this
@@ -259,8 +257,9 @@ func _ready_up(m: Match) -> void:
 			or k.rmb_down
 			or k.ult_running()
 			or _last_shot() >= 0
-			or k.commit_left() > 0.0
-		)  # (a move's committed recovery: Vex's E and X)
+			or k.commit_left() > 0.0  # (a move's committed recovery: Vex's E and X)
+			or k.fire_wait() > 0.0  # (a kit's own cadence: Neve's burst pause would hold the next tap)
+		)
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
