@@ -8,6 +8,7 @@ copy, so every new number below is tied to one already in the code. [?] = the so
 |---|---|---|---|
 | Neglect | never kills: `natural_death: false` (DECISIONS 11-08) | died after 72 h unfed (day 4) | sick at worst; clock capped at 72 h; meals bring it back (content/rules/care.json) |
 | Bond from care | petting, favourite food, playing raise trust (GARDEN 3.3) | once per expedition: a stay-home Boki stopped at ~+5 | once a farm day per kind (care_day_s 300 = DAY_LEN) [?]; a week of farm days reaches Close |
+| Bond taper | trust is the long meter; one session should not max a Boki (GARDEN 2-3) | pets were capped (1-3 a farm day) but habit food and minigame wins paid in full without limit: a grinder reached Soulbound in 7 min | every Boki: the first 6 trust acts a farm day pay in full, each after pays 35% less of its amount, floor 5% (garden_trust.json `taper`, Care.trust_add); the window opens at the first act and resets after care_day_s. Grinder 7 -> 30 min to Soulbound, balanced day unchanged (43 min); `--bond-pace-check` |
 | Play | play trains a stat (GARDEN 3.2) | fetch: joy only | fetch +1 Speed while energy >= 35 (the Training post's tired line) [?] |
 | Food | changes look within 1-2 feedings (GARDEN 3.1) | affinity +6, nothing visible before level 4 | lean tint up to 0.3 (forms 0.1 each), 2 meals = 62%, last meals decide [?] |
 | Bond rank | readable rules, trust is the long meter (GARDEN 2-3) | ranks changed silently | rank-up moment: heart, line, card with the perk and the next rank |
