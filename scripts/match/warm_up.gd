@@ -3,6 +3,8 @@ extends RefCounted
 ## The loading screen's last step (Match.warm_up): draws what the match will draw, so the GPU builds its
 ## shaders before play.
 
+## The step run() is on (--load-check --hitch-trace prints it on each slow frame).
+static var step := ""
 var m: Match
 
 func _init(match_node: Match) -> void:
@@ -87,6 +89,7 @@ func run(progress := Callable()) -> void:
 	if not m.is_inside_tree():
 		vp.disable_3d = had_3d
 		return
+	step = "mob stand-ins"
 	var mob_warm: Node3D = await _mob_stand_ins()
 	if not m.is_inside_tree():
 		vp.disable_3d = had_3d
@@ -94,6 +97,7 @@ func run(progress := Callable()) -> void:
 	var aim_warm := _aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
 	vp.disable_3d = had_3d
 	PerfLog.mark("warm.stand_ins")
+	step = "batches"
 	var batched: bool = await _batches(batch_cb, seen)
 	var t_first := Time.get_ticks_msec()
 	PerfLog.mark("warm.batches")
@@ -106,6 +110,7 @@ func run(progress := Callable()) -> void:
 		var sm: MeshInstance3D = m.shot_pool[i]
 		sm.visible = true
 		shown.append(sm)
+	step = "views"
 	for vi in views.size():
 		var v: Array = views[vi]
 		var at: Vector3 = v[1]
@@ -152,6 +157,7 @@ func run(progress := Callable()) -> void:
 		swoosh = m.fx.get_child(m.fx.get_child_count() - 1).duplicate(0)
 		m.add_child(swoosh)
 		(swoosh as Node3D).global_position = late_at
+	step = "late"
 	batched = await _batches(late_cb, seen)
 	if not batched:
 		return
@@ -168,6 +174,7 @@ func run(progress := Callable()) -> void:
 			% [t_first - t0, t_views - t_first, t_end - t_views, stamped, seen.size()])
 	WarmStamp.save(seen)
 	PerfLog.mark("build.warm_up")
+	step = "bench"
 	# the benchmark: a few frames of the opening view
 	var times: Array = []
 	var last := Time.get_ticks_usec()
@@ -191,6 +198,7 @@ func run(progress := Callable()) -> void:
 			await _batches(func(_f: float) -> void: pass, {})
 			if is_instance_valid(dot): dot.queue_free()
 			WarmStamp.save(seen)
+	step = "rehearse"
 	await DashPace.rehearse(m)
 	PerfLog.skip()
 
@@ -369,11 +377,15 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 			(l as Light3D).light_cull_mask = LAYER
 	# (the lights first: _sources' frames draw too, and with the sun still casting the whole map's shadows the first of
 	# them built every material's shadow pipeline at once, a 1 s frame on the RTX 4090, jobq 122605)
+	if not await _env_in_steps():
+		return false
+	step = "sources"
 	var list: Array = await _sources(seen)
 	if not m.is_inside_tree():
 		return false
 	var cb := m.cam.global_transform.basis
 	var front := m.cam.global_position - cb.z * 6.0
+	step = "plain"
 	# what a frame costs with nothing new in it, to tell a batch's own cost from plain drawing
 	await m.get_tree().process_frame
 	var t0 := Time.get_ticks_usec()
@@ -393,6 +405,7 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	while i < list.size():
 		var batch: Array = list.slice(i, mini(i + n, list.size()))
 		t0 = Time.get_ticks_usec()
+		step = "make %d" % batches
 		var pxs: Array = []
 		var cols := int(ceil(sqrt(float(batch.size()))))
 		for k in batch.size():
@@ -412,6 +425,7 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 			var gy := (float(k / cols) / maxf(1.0, cols - 1) - 0.5) * 1.4
 			px.global_transform = Transform3D(cb.scaled(Vector3.ONE * 0.04), front + cb.x * gx + cb.y * gy)
 			pxs.append(px)
+		step = "draw %d (%d)" % [batches, batch.size()]
 		for px in pxs: (px as Node3D).visible = true
 		t0 = Time.get_ticks_usec()
 		var worst := 0.0
@@ -448,6 +462,27 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	m.cam.cull_mask = keep_mask
 	PerfLog.note("warm-up: %d stand-ins in %d batches" % [list.size(), batches])
 	return m.is_inside_tree()
+
+## The environment's effects, each building its pipelines the first frame it draws. All of them on the warm-up's
+## first 3D frames was a 0.5-1.1 s frame on the RTX 4090 (jobq 123125: the source scan, nothing of the match in view).
+const ENV_FX := ["ssao_enabled", "ssil_enabled", "ssr_enabled", "sdfgi_enabled", "glow_enabled", "fog_enabled",
+		"volumetric_fog_enabled", "adjustment_enabled"]
+
+## Turns the environment's effects off and back on one a frame, so each first draw gets a frame of its own.
+## False if the match went away meanwhile.
+func _env_in_steps() -> bool:
+	step = "environment"
+	var env: Environment = m.cam.environment if m.cam.environment else m.get_viewport().find_world_3d().environment
+	if env == null:
+		return true
+	var on: Array = ENV_FX.filter(func(f: String) -> bool: return bool(env.get(f)))
+	for f: String in on: env.set(f, false)
+	for f: String in on:
+		await m.get_tree().process_frame
+		if not m.is_inside_tree():
+			return false
+		env.set(f, true)
+	return true
 
 ## A batch slower than this names its stand-ins in the --load-check notes.
 const SLOW_BATCH_MS := 250.0
