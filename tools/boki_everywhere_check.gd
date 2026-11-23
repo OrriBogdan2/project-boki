@@ -79,12 +79,20 @@ func run(m: Node) -> void:
 ## Every Hunter: Models.hunter(arch), as the match, home and lobby build it, must wear its .glb (a "Warden" node).
 func _hunters() -> void:
 	for arch in Arch.ORDER:
-		var h := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
+		var h := Models.hunter(
+			Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch
+		)
 		var dressed := h.find_child("Warden", true, false) != null
 		print(
 			(
 				"HUNTER_EVERYWHERE %s glb=%s exists=%s native=%s dressed=%s"
-				% [arch, WardenGlb.path(arch), WardenGlb.has_model(arch), WardenNative.on(arch), "glb" if dressed else "FALLBACK"]
+				% [
+					arch,
+					WardenGlb.path(arch),
+					WardenGlb.has_model(arch),
+					WardenNative.on(arch),
+					"glb" if dressed else "FALLBACK"
+				]
 			)
 		)
 		if not dressed:
