@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cbwiluacqvak0"
-path="res://.godot/imported/ostra_meshy_comp_B.jpg-17d6f26d1008096cb5ff81c3f8a9c892.ctex"
+path.bptc="res://.godot/imported/ostra_meshy_comp_B.jpg-17d6f26d1008096cb5ff81c3f8a9c892.bptc.ctex"
+path.astc="res://.godot/imported/ostra_meshy_comp_B.jpg-17d6f26d1008096cb5ff81c3f8a9c892.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ed695e7dffadefb3eba761a3c93a3d99"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/ostra/ostra_meshy_comp_B.jpg"
-dest_files=["res://.godot/imported/ostra_meshy_comp_B.jpg-17d6f26d1008096cb5ff81c3f8a9c892.ctex"]
+dest_files=["res://.godot/imported/ostra_meshy_comp_B.jpg-17d6f26d1008096cb5ff81c3f8a9c892.bptc.ctex", "res://.godot/imported/ostra_meshy_comp_B.jpg-17d6f26d1008096cb5ff81c3f8a9c892.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
