@@ -113,7 +113,63 @@ g("commit", "-qm", "dup b")
 dmain = g("rev-parse", "HEAD")
 ok, why, _ = rc.carry_check(dpr, dpr, dmain)
 assert not ok and "class_name Dup" in why, why
+# 11-23 guard noise: a local var main renamed, or a word in a comment, is no coupling; a res:// path to a changed file is
+g("checkout", "-qb", "nb", lib)
+(Path(T) / "lib.gd").write_text("func old_api():\n\tvar out = 1\n\tpass\nvar keep = 1\n")
+g("add", "lib.gd")
+g("commit", "-qm", "local var")
+nb = g("rev-parse", "HEAD")
+g("checkout", "-qb", "nmain", nb)
+(Path(T) / "lib.gd").write_text("func old_api():\n\tvar res = 1\n\tpass\nvar keep = 1\n")
+g("add", "lib.gd")
+g("commit", "-qm", "rename the local")
+nmain = g("rev-parse", "HEAD")
+g("checkout", "-qb", "npr", nb)
+(Path(T) / "use2.gd").write_text("func go():\n\tvar out = 2  # keep the out\n")
+g("add", "use2.gd")
+g("commit", "-qm", "own local named out")
+npr = g("rev-parse", "HEAD")
+ok, why, _ = rc.carry_check(npr, npr, nmain)
+assert ok, why
+(Path(T) / "use2.gd").write_text('const L = preload("res://lib.gd")\n')
+g("add", "use2.gd")
+g("commit", "-qm", "loads lib.gd")
+npr2 = g("rev-parse", "HEAD")
+ok, why, _ = rc.carry_check(npr2, npr2, nmain)
+assert not ok and "coupled: lib" in why, why
+# registry: both sides edit other keys (add, drop) -> carried; the same key on both sides or a non-entry line -> re-gated
+reg = Path(T) / "tools" / "check_registry.gd"
+reg.parent.mkdir(exist_ok=True)
+
+
+def regc(branch, start, lines, msg):
+    g("checkout", "-qB", branch, start)
+    reg.write_text("const CHECKS := {\n" + "".join(f'\t"{k}": [1],\n' for k in lines) + "}\n")
+    g("add", str(reg))
+    g("commit", "-qm", msg)
+    return g("rev-parse", "HEAD")
+
+
+r0 = regc("r0", lib, ["--a", "--b", "--c"], "registry")
+rmain = regc("rmain", r0, ["--a", "--b", "--c", "--m"], "main adds --m")
+rpr = regc("rpr", r0, ["--p", "--a", "--b", "--c"], "PR adds --p")
+ok, why, _ = rc.carry_check(rpr, rpr, rmain)
+assert ok and "loose" in why, why
+rpr2 = regc("rpr2", r0, ["--a", "--c", "--p", "--m"], "PR drops --b, adds --m")
+assert not rc.carry_check(rpr2, rpr2, rmain)[0]
+rpr4 = regc("rpr4", r0, ["--a", "--c"], "PR drops --b")
+ok, why, _ = rc.carry_check(rpr4, rpr4, rmain)
+assert ok, why
+g("checkout", "-qB", "rpr5", r0)
+reg.write_text(reg.read_text().replace("const CHECKS := {", "const CHECKS: Dictionary = {"))
+g("add", str(reg))
+g("commit", "-qm", "PR edits a code line")
+rpr5 = g("rev-parse", "HEAD")
+assert not rc.carry_check(rpr5, rpr5, rmain)[0]
+rpr3 = regc("rpr3", r0, ["--m", "--a", "--b", "--c"], "PR adds --m too")
+assert not rc.carry_check(rpr3, rpr3, rmain)[0]
 rc.LOOSE = False
+assert not rc.carry_check(rpr, rpr, rmain)[0]
 assert not rc.carry_check(pr, pr, m1)[0]
 g("checkout", "-q", "main")
 # fallback merge (git < 2.38): same tree as --write-tree would give, conflicts -> None

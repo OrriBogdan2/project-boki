@@ -151,28 +151,43 @@ def selected(old, commit):
 # across the two deltas). REGATE_CARRY_LOOSE=0 = off (strict per-check rule only).
 LOOSE = os.environ.get("REGATE_CARRY_LOOSE", "1") != "0"
 CODE_GLOBS = ("*.gd", "*.tscn", "*.tres", "*.gdshader")
-DEF_RE = re.compile(r"^\s*(?:@\w+(?:\([^)]*\))?\s+)*(?:static\s+)?(func|signal|const|var|enum|class_name|class)\s+(\w+)")
+# top-level defs only (no indent): a local `var out` inside a func is no API (11-23 replay: 'out', 'from', 'along' false hits)
+DEF_RE = re.compile(r"^(?:@\w+(?:\([^)]*\))?\s+)*(?:static\s+)?(func|signal|const|var|enum|class_name|class)\s+(\w+)")
 TOKEN_RE = re.compile(r"[A-Za-z]\w{2,}")
+PATH_RE = re.compile(r"/(\w+)\.(?:gd|tscn|tres|gdshader)\b")
+# registries of one-line entries ("--flag": [...]): both sides editing different keys is not an overlap
+KEYED_REGISTRIES = ("tools/check_registry.gd",)
+KEY_RE = re.compile(r'^\s*"([^"]+)"\s*:')
 
 
-def _pascal(stem):
-    return "".join(w.capitalize() for w in stem.split("_"))
+def _code(ln):
+    """The line without its # comment (a # inside a string is kept)."""
+    q = None
+    for i, ch in enumerate(ln):
+        if q:
+            q = None if ch == q else q
+        elif ch in "\"'":
+            q = ch
+        elif ch == "#":
+            return ln[:i]
+    return ln
 
 
 def delta_symbols(a, b):
-    """Code delta a..b -> dict(add=identifiers on added lines, rem=names of defs removed/changed (func, signal, const, var,
-    enum, class), stems=names of changed code files (snake + Pascal), cls=class_names added). Private (_x) names are left out."""
+    """Code delta a..b -> dict(add=identifiers on added lines (comments left out), paths=file stems named by res:// paths
+    on added lines, rem=names of top-level defs removed/changed, stems=stems of changed code files, cls=class_names
+    added). Private (_x) names are left out."""
     out = git("diff", "-U0", "--no-color", "--no-ext-diff", "--no-renames", a, b, "--", *CODE_GLOBS, timeout=300)
-    d = dict(add=set(), rem=set(), stems=set(), cls=set())
+    d = dict(add=set(), paths=set(), rem=set(), stems=set(), cls=set())
     if out is None:
         return None
     for ln in out.split("\n"):
         if ln.startswith("+++ ") or ln.startswith("--- "):
             if ln[4:] != "/dev/null":
-                stem = Path(ln[4:]).stem
-                d["stems"] |= {stem, _pascal(stem)}
+                d["stems"].add(Path(ln[4:]).stem)
         elif ln[:1] == "+":
-            d["add"].update(TOKEN_RE.findall(ln))
+            d["add"].update(TOKEN_RE.findall(_code(ln[1:])))
+            d["paths"].update(PATH_RE.findall(ln))
             m = DEF_RE.match(ln[1:])
             if m and m.group(1) == "class_name":
                 d["cls"].add(m.group(2))
@@ -180,24 +195,47 @@ def delta_symbols(a, b):
             m = DEF_RE.match(ln[1:])
             if m and not m.group(2).startswith("_"):
                 d["rem"].add(m.group(2))
-    d["stems"] = {x for x in d["stems"] if len(x) > 2}
     return d
 
 
 def coupled(base, gated, main):
-    """-> (True, why) when the PR's code delta and main's code delta reference each other: one side removed/changed a def
-    (or changed a file) whose name the other side's added lines use, or both added the same class_name."""
+    """-> (True, why) when the PR's code delta and main's code delta reference each other: one side removed/changed a
+    top-level def whose name the other side's added code uses, or changed a file the other side's added lines load by
+    path, or both added the same class_name."""
     pr, mn = delta_symbols(base, gated), delta_symbols(base, main)
     if pr is None or mn is None:
         return True, "cannot read the code deltas"
     for a, b, who in ((mn, pr, "main changed it, the PR uses it"), (pr, mn, "the PR changed it, main uses it")):
-        hit = sorted((a["rem"] | a["stems"]) & b["add"])
+        hit = sorted((a["rem"] & b["add"]) | (a["stems"] & b["paths"]))
         if hit:
             return True, f"coupled: {hit[0]} ({who})"
     dup = sorted(pr["cls"] & mn["cls"])
     if dup:
         return True, f"coupled: class_name {dup[0]} added on both sides"
     return False, ""
+
+
+def keys_disjoint(base, gated, main, f):
+    """True when each side's edits to f (an KEYED_REGISTRIES registry) are entry lines or comments only and the two sides touch
+    no common key (11-23 replay: moved/re-commented entries, not only appends)."""
+    keys = []
+    for tip in (gated, main):
+        out = git("diff", "-U0", "--no-color", base, tip, "--", f)
+        if out is None:
+            return False
+        ks = set()
+        for ln in out.split("\n"):
+            if ln[:1] not in "+-" or ln.startswith(("+++", "---")):
+                continue
+            body = ln[1:].strip()
+            if not body or body.startswith("#"):
+                continue
+            m = KEY_RE.match(body)
+            if not m:
+                return False
+            ks.add(m.group(1))
+        keys.append(ks)
+    return not (keys[0] & keys[1])
 
 
 def carry_check(head, gated, main):
@@ -212,6 +250,8 @@ def carry_check(head, gated, main):
     if pr is None or mn is None:
         return False, "cannot diff against the gated sha", None
     both = {f for f in pr & mn if not INERT.search(f)}  # 11-15: docs/briefs/.md edited on both sides feed no check
+    if LOOSE:  # 11-23: two PRs each editing other check lines of the registry (40 of 177 same-head re-gates in 3 days)
+        both = {f for f in both if f not in KEYED_REGISTRIES or not keys_disjoint(base, gated, main, f)}
     if both:
         return False, f"{len(both)} files changed by both (e.g. {sorted(both)[0]})", None
     tree = merge_tree(head, main)
@@ -332,13 +372,43 @@ def replay(runs_dir):
     return rows
 
 
+def history(since, until, ref="origin/main"):
+    """Replay from git alone (no bot logs needed): every regate-bot merge C reachable from ref in [since, until) is one
+    re-gate; head = gated = C^1, main = C^2. same = C^1 is itself a regate-bot merge (the PR head surely did not change).
+    Yields rows dict(c, same, strict, loose, why) one by one (a 3-day window is ~400 merges, ~1-3 s each)."""
+    out = git("log", ref, f"--since={since}", f"--until={until}", "--grep=(regate-bot", "--format=%H %P|%s") or ""
+    msg = dict((ln.split(" ", 1)[0], ln.split("|", 1)[1]) for ln in out.split("\n") if "|" in ln)
+    for c, s in msg.items():
+        if "carried" in s or "cached" in s:
+            continue
+        p1, p2 = (git("rev-parse", f"{c}^1"), git("rev-parse", f"{c}^2"))
+        if not (p1 and p2):
+            continue
+        prev = git("log", "-1", "--format=%s", p1) or ""
+        LAST.clear()
+        ok, why, _ = carry_check(p1, p1, p2)
+        yield dict(c=c, same="(regate-bot" in prev, loose=ok, strict=ok and not why.startswith("loose"), why=why)
+
+
 if __name__ == "__main__":
     import argparse
 
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["replay"])
+    ap.add_argument("cmd", choices=["replay", "history"])
     ap.add_argument("--runs", default=str(STATE_DIR / "runs"))
+    ap.add_argument("--since", default="3 days ago")
+    ap.add_argument("--until", default="now")
     a = ap.parse_args()
+    if a.cmd == "history":
+        rows = []
+        for r in history(a.since, a.until):
+            rows.append(r)
+            print(f"{r['c'][:10]} same={'Y' if r['same'] else 'n'} strict={'Y' if r['strict'] else 'n'} "
+                  f"loose={'Y' if r['loose'] else 'n'} {r['why'][:100]}", flush=True)
+        for label, sub in (("all", rows), ("same-head", [r for r in rows if r["same"]])):
+            n, st, lo = len(sub), sum(r["strict"] for r in sub), sum(r["loose"] for r in sub)
+            print(f"history {label}: {n} re-gates, strict carries {st}, loose carries {lo}, left to run {n - lo}")
+        sys.exit(0)
     rows = replay(a.runs)
     for r in rows:
         tag = "CARRY" if r.get("new") else ("CACHE" if r.get("cache") else "-")
