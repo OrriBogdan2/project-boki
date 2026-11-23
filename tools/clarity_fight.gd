@@ -19,6 +19,7 @@ const NEAR_K := 1.0  # body widths round a Hunter's screen box that count as on 
 ## Plates, ownership rings, telegraphs and your own damage numbers are gameplay and not held here.
 const BUDGET := {
 	"text": 1.0,  # words on a Hunter: only your own Boki's ability name, now and then (no callout words)
+	"text plate": 0.0,  # no status word on a standing Hunter's plate: a status is an icon in the plate's row
 	"icon": 0.0,  # no world icon (Sprite3D) on a Hunter
 	"hud grip_icons": 6.0,  # in a fight the glove row shows only the merge-ready glow
 	"ring merge_look": 0.0,  # a ground ring means gameplay: the merge look wears none
@@ -118,6 +119,11 @@ static func tally(m: Match) -> Array:
 			var on := _on(zones, r)
 			if on > 0:
 				out.append(["hud", g, on])
+	if m.hud:  # a word drawn on a standing Hunter's plate (in place of the name) is a floating word on them too
+		for h: Hunter in m.hunters:
+			var sh: Dictionary = m.hud.plates.shown.get(h.nid, {})
+			if not h.out and not bool(sh.get("downed", true)) and String(sh.get("word", "")) != "":
+				out.append(["text", "plate '%s'" % sh["word"], 1])
 	return out
 
 
