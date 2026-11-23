@@ -27,7 +27,7 @@ static func pass_by(life: BaseLife, k: Dictionary) -> bool:
 	for o in life.h.kins:
 		if o == k or not o.has("life") or o.has("rival_cd") or BaseLife._taken(o):
 			continue
-		var rivals := BaseLife.bond(k["rec"], o["rec"]) <= float(life.R["rival_at"])
+		var rivals := BaseLife.bond(k["rec"], o["rec"]) <= float(life.r_v["rival_at"])
 		var here: int = life.h.world.island_of(k["pos"].x, k["pos"].z)
 		if (
 			rivals
