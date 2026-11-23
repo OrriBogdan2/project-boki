@@ -4806,6 +4806,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide_i
 			(ke["node"] as Node3D).position = ke["pos"]
 		# a closer look (its card, and turning it round), then naming
 		var rv := KinReveal.new(baby["species"], baby)
+		if not ke.is_empty(): rv.twin = ke["node"]
 		add_child(rv)
 		panel_open = "reveal"; building_now = true      # hold the hunter still while you turn it round
 		rv.proceed.connect(func():
@@ -4837,6 +4838,7 @@ func _name_baby(baby: Dictionary) -> void:
 	var was_name := String(baby["name"])
 	var step := NameStep.new(baby["species"])      # (closing the panel keeps the suggestion)
 	v.add_child(step)
+	step.focus()
 	step.named.connect(func(nm: String, kept: bool):
 		baby["name"] = nm
 		if nm != was_name: Save.log_event("renamed", baby, {"from": was_name})
