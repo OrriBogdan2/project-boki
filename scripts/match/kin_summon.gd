@@ -67,6 +67,11 @@ static func card_line(window: float) -> String:
 	return out_v
 
 
+## The one plain line for the perks rule (Field Book card, Boki tooltip), with the Summon key's cap.
+static func perk_line() -> String:
+	return String(rules()["perk_line"]) % Settings.key_cap("summon")
+
+
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
