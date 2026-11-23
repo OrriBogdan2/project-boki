@@ -1520,6 +1520,7 @@ func _dash_curves() -> void:
 	var cls_was := p_v.cls
 	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief", "dredge", "mage", "ashwick"]:
 		p_v.reclass(Arch.weight(id), id)
+		_steps(30)  # a swapped kit settles first: Sable's Cartwheel ends on touching ground if it starts aloft
 		_reset(flat + Vector3(-3.0, 0, 0))
 		p_v.inp["move"] = Vector2(1, 0)
 		p_v.inp["dash"] = true
@@ -1840,7 +1841,7 @@ func _vault_exit() -> void:
 			m.step(DT)
 			p_v.inp["dash"] = false
 			var v := _hv(p_v).length()
-			var run_v := p_v.base_speed * p_v.ak.move_k()
+			var run_v := p_v.base_speed * (p_v.ak.move_k() + p_v.ak.speed_bonus())
 			peak = maxf(peak, v)
 			if v < peak and v < run_v - 0.05:
 				slow += 1
