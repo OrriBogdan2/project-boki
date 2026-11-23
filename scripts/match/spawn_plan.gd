@@ -11,6 +11,9 @@ extends RefCounted
 ##  - Everything else (rare kin, item caches) shows as a faint "?" at every possible spot. What's
 ##    really there is revealed for your squad once one of you gets eyes on it (line of sight, or flying
 ##    low over it on the drop): either the live marker, or a dim cross for an empty spot.
+##  - Guarded picks (docs/CAMPS.md): a category's "guarded" count of its picks (rare kin: 2) wait in
+##    Great Camps outside the hot zone instead, shown on the map from the start; the Boki floats free at
+##    the camp's centre once the camp is cleared (host: free_guarded).
 ##  - Whatever is taken (a vault opened, a rare kin caught or killed) shows as spent for everyone who
 ##    knows the spot.
 ##
@@ -27,7 +30,15 @@ const CATS := {
 	{"name": "Boss lair", "shape": "skull", "col": Color("ff5a4a"), "announce": true, "pick": [1, 1], "order": 0},
 	"vault": {"name": "Vault", "shape": "vault", "col": Color("f2c84a"), "announce": true, "pick": [2, 2], "order": 1},
 	"rare_kin":
-	{"name": "Rare Boki", "shape": "paw", "col": Color("ff9be8"), "announce": false, "pick": [3, 3], "order": 2},
+	{
+		"name": "Rare Boki",
+		"shape": "paw",
+		"col": Color("ff9be8"),
+		"announce": false,
+		"pick": [3, 3],
+		"order": 2,
+		"guarded": 2
+	},
 	"cache":
 	{"name": "Item cache", "shape": "crate", "col": Color("8fd8ff"), "announce": false, "pick": [4, 4], "order": 3},
 }
@@ -42,7 +53,9 @@ const SIGHT_BOUND_K := 1.25 * 1.5  # sneak range bonus x headroom for sight gear
 
 var m: Match
 var cats := {}  # id -> def (CATS plus anything registered)
-var cands: Array = []  # {id, cat, i, pos: Vector3, name, active, ref, taken, known: {team: true}}
+# {id, cat, i, pos: Vector3, name, active, ref, taken, known: {team: true}}; a guarded pick also has
+# camp: its camp_spots index
+var cands: Array = []
 var spawners := {}  # cat id -> Callable(plan, cand) -> handle
 var takers := {}  # cat id -> Callable(cand) -> bool (is it spent?)
 var rolled := false
@@ -235,6 +248,7 @@ func roll(seed_val: int) -> void:
 		var pool: Array = of(cat)
 		var pk: Array = cats[cat].get("pick", [1, 1])
 		var n := clampi(r.randi_range(int(pk[0]), int(pk[1])), 0, pool.size())
+		n -= _guard(cat, mini(int(cats[cat].get("guarded", 0)), n), r)
 		if cat == "cache":
 			n = KeyChest.kept(n)  # caches are chests too: the same share as the map's
 		# shuffle with our own generator (Array.shuffle uses the global one)
@@ -249,14 +263,57 @@ func roll(seed_val: int) -> void:
 	rolled = true
 
 
+## g picks of cat in Great Camps outside the hot zone, each a new candidate at its camp's centre (every
+## game rolls the same: the layout's camp spots and the seeded hot zone). Returns how many found a camp.
+func _guard(cat: String, g: int, r: RandomNumberGenerator) -> int:
+	if g <= 0:
+		return 0
+	var hot: HotZone = m.biomes.hot if m.biomes else null
+	var spots: Array = []
+	for i in m.world.camp_spots.size():
+		var spot: Dictionary = m.world.camp_spots[i]
+		var in_hot := hot != null and hot.hot >= 0 and hot.region_at(spot["pos"]) == hot.hot
+		if String(spot.get("kind", "")) == "heavy" and not in_hot:
+			spots.append(i)
+	for i in range(spots.size() - 1, 0, -1):
+		var j := r.randi_range(0, i)
+		var t = spots[i]
+		spots[i] = spots[j]
+		spots[j] = t
+	for si in spots.slice(0, g):
+		var spot: Dictionary = m.world.camp_spots[si]
+		var ii := int(spot.get("island", -1))
+		var isl_name := String(m.world.islands[ii].get("name", "")) if ii >= 0 and ii < m.world.islands.size() else ""
+		var c := add_candidate(cat, spot["pos"], isl_name)
+		c["camp"] = si
+		c["active"] = true
+	return mini(g, spots.size())
+
+
+## A guarded rare Boki floats free at its camp's centre once its camp has no monster standing (host
+## only, like all wild kin; a picked-over camp in a late rolling start frees it at once). Returns how many.
+func free_guarded() -> int:
+	if (m.net_on and not m.is_host) or m.camps == null:
+		return 0
+	var freed := 0
+	for c in cands:
+		var ci := int(c.get("camp", -1))
+		if ci >= 0 and c["ref"] == null and ci < m.camps.list.size() and m.camps.cleared(ci):
+			var r := RandomNumberGenerator.new()
+			r.seed = m.seed_val * 53 + 17 * ci + 11
+			c["ref"] = _spawn_rare(c["pos"], r)
+			freed += 1
+	return freed
+
+
 ## Spawns what's live: vault chests, item caches, rare kin (host only, like all wild kin), and
 ## whatever a registered spawner brings.
 func spawn_all() -> void:
 	var wr := RandomNumberGenerator.new()
 	wr.seed = m.seed_val * 53 + 11
 	for c in cands:
-		if not c["active"]:
-			continue
+		if not c["active"] or c.has("camp"):
+			continue  # (a guarded pick waits for its camp's clear: free_guarded)
 		await m._slice()  # under the loading screen, a frame now and then
 		var p: Vector3 = c["pos"]
 		match String(c["cat"]):
@@ -304,6 +361,7 @@ func tick(dt: float) -> void:
 		if Legendary.due(self):
 			legend_kin = Legendary.arrive(m, legend, of("rare_kin"))
 		presence.tick(m)
+		free_guarded()
 	if cands.is_empty():
 		return
 	_teams.clear()  # team -> its hunters on the ground (one pass, not one per spot)
@@ -375,7 +433,7 @@ func _is_taken(c: Dictionary) -> bool:
 ## How a candidate looks to a squad: "unknown" (a faint ?), "active", "empty" or "taken".
 func state_for(c: Dictionary, team: int) -> String:
 	var def: Dictionary = cats.get(c["cat"], {})
-	var knows: bool = def.get("announce", false) or (c["known"] as Dictionary).has(team) or team < -1
+	var knows: bool = def.get("announce", false) or c.has("camp") or (c["known"] as Dictionary).has(team) or team < -1
 	if not knows:
 		return "unknown"
 	if not c["active"]:

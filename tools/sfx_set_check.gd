@@ -329,7 +329,7 @@ func _vfx_own() -> void:
 ## files the set lists under "kit_files" (paths under scripts/arch/kits/). A wind-up's sound goes through
 ## KitWindup.play(kit, "slot", "name", ...), so those names count too.
 func _kit_names(arch: String, extra: Array) -> void:
-	var re := RegEx.create_from_string("(?:\\.sfx\\(|KitWindup\\.play\\(\\w+, \"\\w+\", )\"([a-z0-9_]+)\"")
+	var re := RegEx.create_from_string('(?:\\.sfx\\(|KitWindup\\.play\\(\\w+, "\\w+", )"([a-z0-9_]+)"')
 	var silent := []
 	for f in ["%s_kit.gd" % arch] + extra:
 		var path := "res://scripts/arch/kits/" + String(f)
