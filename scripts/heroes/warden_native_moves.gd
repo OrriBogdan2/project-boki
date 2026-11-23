@@ -29,7 +29,8 @@ static func make(glb: Node3D, player: AnimationPlayer, skel_in: Skeleton3D, d: D
 	mv.rows = d["kmoves"]
 	mv.skel = skel_in
 	mv.anims = WardenClipFile.read(glb.get_path_to(skel_in), d.get("clip_files", []))
-	var lib := player.get_animation_library(player.find_animation_library(player.get_animation(player.get_animation_list()[0])))
+	var first := player.get_animation(player.get_animation_list()[0])
+	var lib := player.get_animation_library(player.find_animation_library(first))
 	mv.over = AnimationPlayer.new()
 	mv.over.name = "Moves"
 	mv.over.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
@@ -80,7 +81,8 @@ func lay(mv: Dictionary, dt: float) -> void:
 	if on:
 		shown = String(mv["clip"])
 		shown_t = float(mv["t"])
-	weight = move_toward(weight, 1.0 if on else 0.0, dt / (FADE_IN if on else FADE_OUT))
+	var fade := FADE_IN if on else FADE_OUT
+	weight = move_toward(weight, float(on), dt / fade)
 	if weight <= 0.0 or shown == "":
 		return
 	var bones: Array = keyed[shown]
