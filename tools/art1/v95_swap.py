@@ -63,6 +63,7 @@ for _sd, _side in (("R", "Right"), ("L", "Left")):
     MESHY.update({_side + "Shoulder": "hips", _side + "Arm": "upper_arm." + _sd, _side + "ForeArm": "forearm." + _sd,
                   _side + "Hand": "hand." + _sd, _side + "UpLeg": "thigh." + _sd, _side + "Leg": "shin." + _sd,
                   _side + "Foot": "foot." + _sd, _side + "ToeBase": "foot." + _sd})
+FINGER = re.compile(r"^(Left|Right)Hand(Thumb|Index|Middle|Ring|Pinky)\d$")     # Meshy's finger joints (include_fingers)
 PELVIS_RAMP = 0.4            # of the thigh's length below the hip joint: a thigh's weight above it is the hips', fading out over this
 RIGID_SHARE = 0.7            # a loose piece with this share of its weight on one bone rides that bone whole
 ARM = ("upper_arm", "forearm", "hand")
@@ -129,18 +130,33 @@ def kept_parts(old, bones, mats):
     return ob
 
 
-def weapon_report(old):
-    """Prints what the swap does with held weapons: the game glb's own weapon pieces (meshes and empties other than the body,
-    they stay as nodes of the export) and the faces of the old body mesh on weapon bones that `keep` does not carry (dropped:
-    the master has to bring that weapon, or the bone goes in `keep`)."""
+def weapon_piece(old):
+    """Keeps what the game's body mesh carries on weapon bones that `keep` does not list (Grimble's `gun`) as a mesh of
+    its own, still skinned to those bones: it rides the hand socket on the game rig's bind pose, so the rest
+    transform is the game's. The spec's `master_weapons` bones are skipped (the master brings that weapon). Also prints
+    the game glb's own weapon pieces (meshes and empties other than the body: they stay as nodes of the export)."""
     pieces = sorted(o.name for o in bpy.data.objects if o is not old and o.type in ("MESH", "EMPTY") and WEAPON.match(o.name))
     name = {g.index: g.name for g in old.vertex_groups}
-    lost = {}
+    skip = set(SPEC.get("keep", [])) | set(SPEC.get("master_weapons", []))
+    top = {}
     for p in old.data.polygons:
-        top = [name[max(old.data.vertices[i].groups, key=lambda e: e.weight).group] for i in p.vertices if old.data.vertices[i].groups]
-        if top and WEAPON.match(top[0]) and top[0] not in SPEC.get("keep", []):
-            lost[top[0]] = lost.get(top[0], 0) + 1
-    print("SWAP weapons: kept nodes", pieces, "; old body faces dropped on weapon bones", lost, flush=True)
+        t = [name[max(old.data.vertices[i].groups, key=lambda e: e.weight).group] for i in p.vertices if old.data.vertices[i].groups]
+        if t and WEAPON.match(t[0]) and t[0] not in skip:
+            top[p.index] = t[0]
+    carried = {}
+    for bone in sorted(set(top.values())):
+        ob = old.copy()
+        ob.data = old.data.copy()
+        ob.name = bone
+        bpy.context.scene.collection.objects.link(ob)
+        bm = bmesh.new()
+        bm.from_mesh(ob.data)
+        bm.faces.ensure_lookup_table()
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if top.get(f.index) != bone], context="FACES")
+        bm.to_mesh(ob.data)
+        bm.free()
+        carried[bone] = len(ob.data.polygons)
+    print("SWAP weapons: kept nodes", pieces, "; carried as their own mesh, skinned to the weapon bone", carried, flush=True)
 
 
 def uv_density(ob):
@@ -681,7 +697,21 @@ def meshy_weights(low, arm, P):
         return bone if bone in arm.data.bones else bone.replace("foot", "shin")
 
     j, bin_ = glb_add_clips.read(meshy_rig(low))
-    to = [[ours(b) for b in MESHY[j["nodes"][n]["name"]].split()] for n in j["skins"][0]["joints"]]
+    up = {c: n for n, nd in enumerate(j["nodes"]) for c in nd.get("children", [])}
+
+    def target(n):
+        """MESHY's bone(s) for Meshy joint `n`. A finger joint's weight goes to its hand's bone, a thumb's to the game
+        rig's own thumb bone (thumb1.R, thumb.R) where it has one; any other joint MESHY lacks (a head chain's Bone_027, a
+        tip's *_End) takes its parent's."""
+        name = j["nodes"][n]["name"].removeprefix("mixamorig:")
+        f = FINGER.match(name)
+        if f:
+            sd = "R" if f[1] == "Right" else "L"
+            own = next((b for b in ("thumb1." + sd, "thumb." + sd) if b in arm.data.bones), None) if f[2] == "Thumb" else None
+            return own or MESHY[f[1] + "Hand"]
+        return MESHY[name] if name in MESHY else target(up[n])
+
+    to = [[ours(b) for b in target(n).split()] for n in j["skins"][0]["joints"]]
     names = sorted({b for bs in to for b in bs})
     R, M = [], []
     for pr in (pr for me in j["meshes"] for pr in me["primitives"]):
@@ -1032,7 +1062,7 @@ def main():
             o.data.color_attributes.remove(c)
         o.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
     old_name = old.name
-    weapon_report(old)
+    weapon_piece(old)
     bpy.data.objects.remove(old)
     for n in SPEC.get("drop_meshes", []):     # the game glb's own meshes the master replaces (Gil's scripted tail and fin)
         if n in bpy.data.objects and bpy.data.objects[n].type == "MESH":

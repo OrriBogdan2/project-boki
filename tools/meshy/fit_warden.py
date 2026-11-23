@@ -339,11 +339,18 @@ def _collapse_only(ob, free, cut):
     ob.vertex_groups.remove(ob.vertex_groups["_dec"])
 
 
+# The decimate's protected shares of max_tris (the spec's "region_budget" replaces them, false: one uniform collapse).
+# Hands cover the weapon's grip (the weapon is its own mesh, held by the hand and its fingers); a head that is a
+# separate rigid piece has no "head" group on the body, so its region is empty.
+DEFAULT_REGIONS = [{"name": "hands", "groups": ["hand.L", "hand.R", "fingers.L", "fingers.R"], "share": 0.08},
+                   {"name": "head", "groups": ["head"], "share": 0.30}]
+
+
 def decimate_regions(ob, max_tris, regions):
-    """OPT-IN budgeted decimate (spec "region_budget": [{"name", "groups": [vertex groups], "share": fraction of
-    max_tris}, ...], e.g. head 0.45, hands 0.08). A uniform collapse starves the hands, so each region is
-    collapsed alone down to its share (everything else pinned), then the rest down to max_tris. A region = the
-    triangles whose vertices all weigh > 0.5 in its groups. decimate() (the default) is untouched."""
+    """Budgeted decimate (regions: [{"name", "groups": [vertex groups], "share": fraction of max_tris}, ...]). A uniform
+    collapse starves the hands and the face, so each region is collapsed alone down to its share (everything else
+    pinned), then the rest down to max_tris. A region = the triangles whose vertices all weigh > 0.5 in its groups;
+    one with fewer triangles than its share keeps them all."""
     for r in regions:
         names = r["groups"]
         have = _tris_in(ob, _group_weight(ob, names))
@@ -3574,10 +3581,12 @@ def main():
     if head:
         _apply_armature(head)
     apply_pose(ob, fit)
-    if spec.get("region_budget"):       # (opt-in, off by default: head/hands each get a protected share)
-        decimate_regions(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0), spec["region_budget"])
+    budget = spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0)
+    regions = spec.get("region_budget", DEFAULT_REGIONS)
+    if regions:
+        decimate_regions(ob, budget, regions)
     else:
-        decimate(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0))
+        decimate(ob, budget)
     if spec.get("lengthen"):
         lengthen(ob, img, spec["lengthen"])
     ob.name = "Body"

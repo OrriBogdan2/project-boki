@@ -69,7 +69,7 @@ wide in her bow stance; Kael's master sword and the game's sword both show in hi
 `python3 tools/art1/glb_regions.py <glb>...` reports per-region triangles (head, hand per side, forearm, weapon bones ...)
 and finger bones of a game .glb (exit 1 when a hand holds under 6%). On main's 13 Hunters a hand held 0.0-11% (most
 0.4-3%) while the head held 27-58%: a uniform collapse spends the budget on the big smooth areas.
-1. **Rig** (`meshy_task.py rig OUT TASK [--no-fingers]`): sends `include_fingers`. The game skeleton stays `hand.*`
+1. **Rig** (`meshy_task.py rig OUT (TASK | model.glb) [--no-fingers]`): sends `include_fingers` for a task id and an uploaded .glb alike (11-23: the upload path sent none and got 24 joints; with it, 70 joints, a 5-finger chain per hand plus `*_End` tips; `meshy_weights` maps a finger to its hand's bone, a thumb to the game rig's `thumb1.R`/`thumb.R` where it has one, any other joint MESHY lacks to its parent's). The game skeleton stays `hand.*`
    plus the Warden's own extra bones (RIG_CONTRACT: more bones are fine and follow their parent; Hem, Sparkle, Albert and
    Motley already carry finger chains). No per-finger chain is added for the rest: no clip moves a finger, so a chain
    only costs skin_relax time. Meshy's finger joints are a reference for where a chain would go.
@@ -79,11 +79,12 @@ and finger bones of a game .glb (exit 1 when a hand holds under 6%). On main's 1
    A hand sphere holds only what is nearer the forearm-to-finger-tip line than the thighs and trunk (`LIMB_R`): Cinder's,
    Kael's and Tarek's hands hang within a sphere's reach of the thigh (11%, 4%, 7% of a thigh's surface fell inside).
    Before/after (11-21, two dense Sparkle Meshy bodies, 1.36-1.39M tris, to 60k, head 45%): a hand 0.8-1.0% -> 8.9%.
-   `fit_warden.py`'s `region_budget` (opt-in spec key) does the same for the non-keep_uv fit.
+   `fit_warden.py` does the same for the non-keep_uv fit by default (hands 8%, a body-weighted head 30%; spec `region_budget` replaces the shares, `false` goes back to one uniform collapse).
 3. **Geometry**: multi-image tasks cap at 2k; `meshy_task.py create OUT front.png side.png ... --detail-image front.png`
    adds a single-image 4k task into `OUT/detail` (the hand and head shapes a 2k mesh smooths). Compare the two, take the
    hands/head shapes you like into a body pass; a detail pass is not a replacement body (one view, no back).
-4. **Weapons**: the game .glb's weapon pieces (Hem's bow and arrow, Albert's hammer: meshes and empties of their own) are re-imported and exported with the swap; Hem's bow, 896 triangles, comes through unchanged. What a swap does lose: faces of the old body mesh on a weapon bone that `keep` does not list (Grimble's `gun`). The swap now prints that count ("SWAP weapons: ..."): list the bone in `keep` when it is not the master's own.
+4. **Weapons**: the game .glb's weapon pieces (Hem's bow and arrow, Albert's hammer: meshes and empties of their own) are re-imported and exported with the swap; Hem's bow, 896 triangles, comes through unchanged. What a swap does lose: faces of the old body mesh on a weapon bone that `keep` does not list (Grimble's `gun`). Since 11-23 the swap carries those faces itself (`weapon_piece`): a mesh of its own named after the bone, still skinned to it, so it rides the hand socket on the game rig's bind pose (Albert's `x_shield`, 625 faces, was dropped before). A bone the master brings its own weapon for goes in the spec's `master_weapons` (skipped); `keep` still joins a bone's faces into the body.
+5. **Game-code fit layers** (grip IK, `bone_scale`, `weapon_scale`/`weapon_offset`): a Meshy-native Hunter (`content/rules/warden_native.json`) never builds them (WardenNative plays Meshy's clips; HunterAnim's grip IK runs on the hidden rig only, the weapon rides Meshy's hand bone); `bone_scale` and the look data keys are per-Hunter data, absent = off.
 
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
