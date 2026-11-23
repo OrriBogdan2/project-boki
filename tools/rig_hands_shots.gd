@@ -45,6 +45,8 @@ func run(main: Node) -> void:
 		push_error("rig-hands-shots: no file " + glb)
 		tree.quit(1)
 		return
+	if main.get("fade") != null:
+		main.fade.reveal(0.01)
 	DirAccess.make_dir_recursive_absolute(out)
 	var holder := Node3D.new()
 	main.add_child(holder)
@@ -119,6 +121,8 @@ func _frames(n: int) -> void:
 
 
 func _grab() -> Image:
+	for layer in tree.root.find_children("*", "CanvasLayer", true, false):  # (the title splash, the menus)
+		(layer as CanvasLayer).visible = false
 	var img := tree.root.get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGBA8)
 	return img
