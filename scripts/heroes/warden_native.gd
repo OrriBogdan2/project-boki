@@ -382,16 +382,18 @@ func _add_orbits(glb: Node3D) -> void:
 		skel.add_child(at)
 		var nd := src[0] as Node3D
 		var sk_m := glb.transform * WardenGlb.model_xf(glb, skel)
-		var ride := sk_m * skel.get_bone_global_rest(b)  # (the bone it rides here vs the contract bone it rides there)
-		var shift := ride.origin - (src[2] as Transform3D).origin
+		var ride := sk_m * skel.get_bone_global_rest(b)  # (Meshy's bone vs the contract's: the head for a head orbit,
+		var ref := src[2] if String(want[orb]) == "Head" else src[3]  # the bone it rides there for any other)
+		var shift := ride.origin - (ref as Transform3D).origin
 		nd.transform = (sk_m.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D))
 		at.add_child(nd)
 		followers.append([at, b])
 	orbits.setup(skel)
 
 
-## The orbit node `orb` of this Hunter's contract model (a copy), its rest in model space and the
-## rest of the contract bone it rides ([] if none). The contract .glb is loaded (ResourceLoader keeps it) and instanced only for the copy.
+## The orbit node `orb` of this Hunter's contract model (a copy), its rest in model space, the contract head's and the
+## rest of the contract bone it rides ([] if none). The contract .glb is loaded (ResourceLoader keeps it) and instanced
+## only for the copy.
 func _orbit(orb: String) -> Array:
 	var path := "%s/%s/%s.glb" % [WardenGlb.DIR, art_id, art_id]
 	if not ResourceLoader.exists(path):
@@ -404,7 +406,9 @@ func _orbit(orb: String) -> Array:
 	if csk and at and csk.find_bone(at.bone_name) >= 0:
 		var sk_m := WardenGlb.model_xf(con, csk)
 		var rest := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name)) * nd.transform
-		out = [nd.duplicate() as Node3D, rest, sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name))]
+		var bone := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name))
+		var head := sk_m * csk.get_bone_global_rest(WardenSkeleton.find(csk, "head"))
+		out = [nd.duplicate() as Node3D, rest, head, bone]
 	con.free()
 	return out
 
