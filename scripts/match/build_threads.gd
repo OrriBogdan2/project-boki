@@ -6,6 +6,8 @@ extends RefCounted
 ## world (its grids and the layout) and build into data of their own, which is the caller's again once
 ## wait() returns.
 
+## Groups started and not yet collected (BackgroundWork's shader reads wait them out).
+static var running := 0
 var results: Array = []
 var _world: World
 var _gid := -1
@@ -17,6 +19,7 @@ static func start(world: World, job: Callable, n: int) -> BuildThreads:
 	bt.results.resize(n)
 	if n > 0:
 		bt._gid = WorkerThreadPool.add_group_task(bt._run.bind(job), n, -1, true, "match build")
+		running += 1
 	return bt
 
 func _run(i: int, job: Callable) -> void:
@@ -34,4 +37,6 @@ func wait() -> Array:
 			await _world.get_tree().process_frame
 			PerfLog.frame_drawn()
 	WorkerThreadPool.wait_for_group_task_completion(_gid)
+	_gid = -1
+	running -= 1
 	return results

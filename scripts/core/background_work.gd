@@ -84,6 +84,8 @@ static func read_shaders(dir := "res://shaders") -> void:
 		tree.process_frame.connect(_next_shaders)
 
 static func _next_shaders() -> void:
+	if BuildThreads.running > 0:
+		return      # not while the build's GDScript jobs run on the pool (a crash in one, jobq 121046)
 	var t0 := Time.get_ticks_usec()
 	while not _shader_q.is_empty() and Time.get_ticks_usec() - t0 < SHADER_FRAME_US:
 		var sh := load(_shader_q.pop_front())
