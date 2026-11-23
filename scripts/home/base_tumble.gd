@@ -280,7 +280,7 @@ func _start() -> void:
 	rng.randomize()
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], rng)
 	if teach != null:
-		run.R = TumbleTeach.rules()
+		run.r_x = TumbleTeach.rules()
 	cue = GardenCues.TumbleTellCue.new(h, GardenCues.type_colour(pair[1]["rec"]))
 	seen = ""
 	shown_pos = 0.0
@@ -444,7 +444,7 @@ func _sync_panel() -> void:
 	want_lbl.text = "%s wants to %s" % [mine, moves[run.want]["name"]]
 	var ahead := mine if run.pos > 0.0 else theirs
 	var lead := "level" if run.pos == 0.0 else "%s %.1f steps up" % [ahead, absf(run.pos)]
-	var n := int(run.R["exchanges"])
+	var n := int(run.r_x["exchanges"])
 	score_lbl.text = "Exchange %d of %d, %s" % [mini(run.played + 1, n), n, lead]
 
 func _close_bar() -> void:
