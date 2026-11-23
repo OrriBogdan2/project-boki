@@ -26,10 +26,15 @@ func run(host: Node) -> void:
 	Save.d["active"] = rec["uid"]
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
+	m.start({"teams": 2, "squad": 2, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
 	m.set_process(false)
 	var P: Hunter = m.player
-	var foe: Hunter = m.hunters.filter(func(x): return x != P)[0]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]      # (a squad of two: a downed hunter with a live mate
+										# is not a wiped team, so it stays downed under the banner)
+	_land(m, P, foe)
+	for x in m.hunters:      # (the mates only keep the banner's team from being wiped: they stand still, stunned)
+		if x != P and x != foe:
+			x.stun_t = 1e6
 	hazards = m.fields.list.size()      # the map's own hazard fields, there from the start
 	_banner(m, P, foe)
 	_skyfall(m, P, foe)
@@ -37,12 +42,31 @@ func run(host: Node) -> void:
 	print("UTIL DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
 
-## The most seconds any field on the map has left (a fire patch or a blight patch is the longest one standing).
-func _longest(m: Match) -> float:
+## The most seconds any field `by` cast has left (a fire patch or a blight patch is the longest one standing; the map's
+## hazards and a bot's own long fields are not the item under test).
+func _longest(m: Match, by: Hunter) -> float:
 	var best := 0.0
 	for f in m.fields.list:
-		best = maxf(best, float(f.get("t", 0.0)))
+		if f.get("caster") == by:
+			best = maxf(best, float(f.get("t", 0.0)))
 	return best
+
+## A match starts with every hunter dropping in from the sky, and a dropping hunter takes no damage: steps the match until
+## both are down (a test that hurts one in the air would hit nothing, depending on how long the drop took).
+func _land(m: Match, P: Hunter, foe: Hunter) -> void:
+	var guard := int(120.0 / Match.DT)
+	while (P.dropping or foe.dropping or not P.grounded or not foe.grounded) and guard > 0:
+		m.step(Match.DT)
+		guard -= 1
+	ok(not P.dropping and not foe.dropping, "both hunters have landed (%.0f s in)" % m.time)
+	P.inv_t = 0.0
+	foe.inv_t = 0.0
+
+## Stands `h` on the ground, still: a match can start with the hunters in the air (an item's blast or a knock-out
+## needs them where the test puts them).
+func _ground(h: Hunter) -> void:
+	h.teleport(Vector3(h.pos.x, h.ground(), h.pos.z))
+	h.vel = Vector3.ZERO
 
 ## Steps the match; the rival stays on its spot (a bot walks off a telegraph, and the blast must find it).
 func _steps(m: Match, secs: float, stay: Hunter = null) -> void:
@@ -55,6 +79,7 @@ func _steps(m: Match, secs: float, stay: Hunter = null) -> void:
 		m.step(Match.DT)
 
 func _banner(m: Match, P: Hunter, foe: Hunter) -> void:
+	_ground(P)
 	P.belt = UtilityBelt.empty()
 	UtilityBelt.grant(P, "bounty_banner", 1)
 	P.lives = 3
@@ -85,7 +110,9 @@ func _skyfall(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.inv_t = 0.0
 	P.belt = UtilityBelt.empty()
 	UtilityBelt.grant(P, "skyfall_charge", 1)
+	_ground(P)
 	foe.teleport(P.pos + Vector3(6.0, 0, 0))
+	_ground(foe)
 	P.inp["aim"] = foe.pos
 	ok(UtilityBelt.use_id(P, "skyfall_charge"), "a Skyfall Charge is called")
 	_steps(m, 4.5, foe)
@@ -93,7 +120,7 @@ func _skyfall(m: Match, P: Hunter, foe: Hunter) -> void:
 	_steps(m, 1.0, foe)
 	ok(foe.downed or foe.out or foe.dead, "the blast knocks a full-health rival outright (hp %.0f)" % foe.hp)
 	ok(m.fields.list.size() > hazards, "then the ground burns (a fire patch)")
-	var left := _longest(m)
+	var left := _longest(m, P)
 	ok(left > 2.0 and left <= 3.0, "...for 3 s (%.1f s left a beat in)" % left)
 
 func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
@@ -105,13 +132,13 @@ func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.blight_t = 0.0
 	P.belt = UtilityBelt.empty()
 	UtilityBelt.grant(P, "blight_flask", 1)
+	_ground(P)
 	foe.teleport(P.pos + Vector3(4.0, 0, 0))
-	foe.teleport(Vector3(foe.pos.x, foe.ground(), foe.pos.z))      # (P still hovers where the banner test downed it)
-	foe.vel = Vector3.ZERO
+	_ground(foe)
 	P.inp["aim"] = foe.pos
 	ok(UtilityBelt.use_id(P, "blight_flask"), "a Blight Flask is thrown")
 	_steps(m, 2.5, foe)
 	ok(foe.blight_t > 0.0 and foe.hp + foe.armor < foe.max_hp + foe.max_armor,
 			"a rival in the patch is blighted and hurt")
-	var left := _longest(m)
+	var left := _longest(m, P)
 	ok(left > 36.0 and left <= 38.0, "the patch lasts 40 s (%.1f s left 2.5 s in)" % left)
