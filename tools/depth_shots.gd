@@ -81,7 +81,7 @@ func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i, fire 
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": seed_v, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": seed_v, "no_drop": true})
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs: mb.queue_free()

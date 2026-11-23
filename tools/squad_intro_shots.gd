@@ -26,7 +26,7 @@ func run(mn: Node) -> void:
 	SquadIntro._last_lineup = ""
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242, "squad_intro": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242, "squad_intro": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)      # the boot splash stays up when a check starts the match by hand

@@ -47,7 +47,7 @@ func take(main_node: Node, out: String) -> void:
 	o.merge(Match.arena_opts("gunslinger"), true)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs: mb.queue_free()

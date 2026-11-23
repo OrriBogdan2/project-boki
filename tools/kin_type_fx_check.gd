@@ -64,7 +64,7 @@ func run(main: Node) -> void:
 	KinTypeFx.play(fx, "none", Vector3.ZERO, Vector2.RIGHT)
 	ok(fx.bi == bi0 and fx.si == si0 + 1, "an unknown type plays nothing")
 	fx.queue_free()
-	await _cast_test(main)
+	_cast_test(main)
 	print("KINTYPEFX DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

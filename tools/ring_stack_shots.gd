@@ -26,7 +26,7 @@ func run(main_node: Node) -> void:
 	var o := {"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:

@@ -41,7 +41,7 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 3, "squad": 1, "tier": 0, "seed": 7, "no_drop": true})
+	m.start({"teams": 3, "squad": 1, "tier": 0, "seed": 7, "no_drop": true})
 	m.set_process(false)
 	_chests(m)
 	_boxes(m)

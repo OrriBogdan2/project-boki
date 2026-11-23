@@ -765,7 +765,7 @@ func _arena(tree: SceneTree) -> void:
 	new_save(["archer"])
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("ashwick"))
+	m.start(Match.arena_opts("ashwick"))
 	m.set_process(false)
 	var P: Hunter = m.player
 	ok(P != null and P.arch == "ashwick" and m.arena != null, "the Arena starts you as a locked Hunter")

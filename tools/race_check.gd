@@ -295,8 +295,8 @@ func _on_base() -> void:
 		ok(nodes.all(func(n: Node3D) -> bool: return not n.has_meta("kact")) \
 				and race.beats.kins.all(func(k: Dictionary) -> bool: return not k["busy"]),
 				"on: each runner is let go once its finish clips are played (%.1f s after)" % left)
-		await _practice(home)
-		await _solo(home)
+		_practice(home)
+		_solo(home)
 		var wall: Array = Save.d.get("showcase", [])
 		var game := String(BaseRace.twist()["game"])
 		var pinned: bool = wall.size() == 1 and wall[0]["twist"] == BaseRace.twist()["name"]
@@ -304,7 +304,7 @@ func _on_base() -> void:
 		var rec: Dictionary = home.kins[0]["rec"]
 		ok(race.pin(rec, game) and not race.pin(rec, game + "x"), "on: only a win in this week's event game is pinned")
 		ok(is_instance_valid(race.wall) and race.wall.get_child_count() > 1, "on: the wall shows the frame")
-	await _drill(home)
+	_drill(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -386,13 +386,13 @@ func _solo(home) -> void:
 	rec["needs"]["joy"] = 50.0
 	rec["stats"]["speed"] = 10
 	var perfect: int = int(BaseRace.rules()["train"]["great"]) * 3
-	await _lap(home, false)
+	_lap(home, false)
 	ok(home.hrace.cue == null, "cue: a solo lap clears its marks")
 	ok(int(rec["stats"]["speed"]) == 10 and is_instance_valid(home.hrace.card),
 			"solo: a lap of missed cheers adds no Speed")
 	rec["needs"]["energy"] = 90.0
 	var mem: int = rec.get("memory", []).size()
-	await _lap(home, true)
+	_lap(home, true)
 	ok(int(rec["stats"]["speed"]) == 10 + perfect,
 			"solo: three perfect cheers add %d Speed (now %d)" % [perfect, rec["stats"]["speed"]])
 	var mems: Array = rec["memory"]
@@ -400,12 +400,12 @@ func _solo(home) -> void:
 			"solo: the lap is a journal line (\"%s\")" % mems[-1]["text"])
 	ok(float(rec["needs"]["energy"]) < 90.0, "solo: the lap costs energy")
 	rec["stats"]["speed"] = Care.stat_cap(rec)
-	await _lap(home, true)
+	_lap(home, true)
 	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == Care.stat_cap(rec),
 			"solo: at the level cap there is no lap")
 	rec["stats"]["speed"] = 10
 	rec["needs"]["energy"] = 5.0
-	await _lap(home, true)
+	_lap(home, true)
 	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == 10, "solo: a worn-out Boki does not start")
 	rec["needs"]["energy"] = 90.0
 

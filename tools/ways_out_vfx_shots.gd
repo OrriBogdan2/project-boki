@@ -90,7 +90,7 @@ func _setup() -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "heart": true, "god": true})
+	m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "heart": true, "god": true})
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:

@@ -266,7 +266,7 @@ func _start(arch: String, kin: String, mobs := false) -> void:
 	o.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:

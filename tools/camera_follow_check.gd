@@ -43,7 +43,7 @@ func run(mn: Node, mode: String) -> void:
 	Save.d = Save.fresh()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "map": "skyreach", "no_drop": true,
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "map": "skyreach", "no_drop": true,
 			"god": true, "tut_test": true})
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()

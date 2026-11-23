@@ -94,7 +94,7 @@ func _host_up() -> Hunter:
 		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
 		{"peer": other, "team": 1, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}]}
 	Net.lobby_emit("dn", {"c": "start", "d": d})
-	await _build(d)
+	_build(d)
 	var g: Hunter = m.ents_by_id.get("P" + other, null)
 	var t1 := CheckClock.own_msec(guest_pid)
 	var said := t1
@@ -587,7 +587,7 @@ func _build(d: Dictionary) -> void:
 		"cls": "medium"}
 	if not d.is_empty():
 		o["net"] = d
-	await nm.start(o)
+	nm.start(o)
 	nm.set_process(false)
 	var w: World = nm.world
 	var sp: Vector3 = w.spawns[0]

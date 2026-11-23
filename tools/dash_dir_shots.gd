@@ -40,7 +40,7 @@ func run(main: Node) -> void:
 func _hunter(main: Node, arch: String, out: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
+	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
 		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
 	m.set_process(false)
 	m.hud.visible = false

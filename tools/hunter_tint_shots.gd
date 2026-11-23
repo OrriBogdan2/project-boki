@@ -129,7 +129,7 @@ func _select() -> void:
 func _match(lit_only := false) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "god": true, "length": 1e9})
+	m.start({"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "god": true, "length": 1e9})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()

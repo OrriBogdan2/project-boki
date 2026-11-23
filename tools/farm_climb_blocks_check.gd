@@ -63,7 +63,7 @@ func run(main: Node) -> void:
 		if not solid.has(id) and not HomeLayout.CATALOG[id].has("brush") and not HomeLayout.blocks(String(id)):
 			_walk_over(hm, String(id), c)
 	_all_blocked(hm)
-	await _boki(hm, c)
+	_boki(hm, c)
 	hm.queue_free()
 	await tree.process_frame
 	print("FCLIMBBLK DONE, failures: %d" % bad)
@@ -125,7 +125,7 @@ func _kind(hm, id: String, c: Vector2i) -> void:
 	ok(stands, "%s: its %d tile(s) stand you at %.1f m" % [id, cells.size(), top])
 	var at := Vector2(c.x - RUN_UP + 0.5 - 0.5, c.y + 0.5)  # heading east into the west face
 	ok(await _climb(hm, at, top), "%s: a running jump tops it (%.1f m)" % [id, top])
-	ok(await _walk_off(hm, Vector2(c.x + 0.5, c.y + 0.5)), "%s: from the top you walk off onto the meadow" % id)
+	ok(_walk_off(hm, Vector2(c.x + 0.5, c.y + 0.5)), "%s: from the top you walk off onto the meadow" % id)
 	var sz := HomeLayout.size_of(id, 0)
 	for nm in BOKI_SIZES:
 		_boki_size(hm, hm.kins[0], BOKI_SIZES[nm])

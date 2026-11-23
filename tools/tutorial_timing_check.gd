@@ -25,7 +25,7 @@ func run(m: Node) -> void:
 	await _prologue()
 	await _hatch()
 	var home = await _tutorial_match()
-	await _farm_tutorial(home)
+	_farm_tutorial(home)
 	await _second_relic(home)
 	await _first_expedition(home)
 	await _garden_first_day()

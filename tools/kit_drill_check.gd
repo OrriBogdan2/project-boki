@@ -104,7 +104,7 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 	Save.d = d
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(OPTS.duplicate())
+	m.start(OPTS.duplicate())
 	m.set_process(false)
 	for i in 3: await tree.process_frame
 	var kd := Practice.of(m).get_node_or_null(KitDrill.NAME) as KitDrill
@@ -124,7 +124,7 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 	await tree.process_frame
 	var again := Match.new()
 	main.add_child(again)
-	await again.start(OPTS.duplicate())
+	again.start(OPTS.duplicate())
 	again.set_process(false)
 	ok(Practice.of(again).get_node_or_null(KitDrill.NAME) == null, "%s: never shown again" % tag)
 	again.queue_free()
@@ -137,7 +137,7 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 func _recast(main: Node, tree: SceneTree) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("ostra"))
+	m.start(Match.arena_opts("ostra"))
 	m.set_process(false)
 	for i in 3: await tree.process_frame
 	var d := Practice.of(m).recast
@@ -190,7 +190,7 @@ func _recast(main: Node, tree: SceneTree) -> void:
 	await tree.process_frame
 	var g := Match.new()
 	main.add_child(g)
-	await g.start(Match.arena_opts("gunslinger"))
+	g.start(Match.arena_opts("gunslinger"))
 	g.set_process(false)
 	for i in 3: await tree.process_frame
 	var gd := Practice.of(g).recast
@@ -205,7 +205,7 @@ func _recast(main: Node, tree: SceneTree) -> void:
 func _late(main: Node, tree: SceneTree) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("thief"))
+	m.start(Match.arena_opts("thief"))
 	m.set_process(false)
 	for i in 3: await tree.process_frame
 	var d := Practice.of(m).recast

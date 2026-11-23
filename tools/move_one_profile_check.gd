@@ -120,7 +120,7 @@ func _match_mode(mode: String, _rules: Dictionary) -> Dictionary:
 			o = Match.duel_opts()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()

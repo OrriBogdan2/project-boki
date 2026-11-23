@@ -25,7 +25,7 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	Save.no_write = true
 	for id in STARTERS:
-		await _play(main, id)
+		_play(main, id)
 	print("TUTFIGHT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

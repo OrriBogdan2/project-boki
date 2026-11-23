@@ -15,10 +15,10 @@ func run(a) -> void:
 	P.lvl = maxi(P.lvl, 6)
 	P.slot_lv["ult"] = 1
 	var home: Vector3 = r[4]
-	await slam_rows(m, P, home)
-	await move_rows(m, P, home)
-	await riposte_rows(m, P, home)
-	await slash_rows(m, P, home)
+	slam_rows(m, P, home)
+	move_rows(m, P, home)
+	riposte_rows(m, P, home)
+	slash_rows(m, P, home)
 	await A.done(m)
 
 

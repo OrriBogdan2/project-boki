@@ -83,7 +83,7 @@ func _host() -> void:
 	them["peer"] = other
 	var d := LobbyScreen.duel_start({"peer": Net.me, "name": "Host", "duel": 1}, them)
 	Net.lobby_emit("do", {"c": "start", "d": d})
-	await _build(d)
+	_build(d)
 	var rival: Hunter = m.ents_by_id.get("P" + other, null)
 	var t1 := Time.get_ticks_msec()
 	while (rival == null or rival.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
@@ -270,7 +270,7 @@ func _connect() -> bool:
 func _build(d: Dictionary) -> void:
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start(LobbyScreen.duel_match(d))
+	nm.start(LobbyScreen.duel_match(d))
 	nm.set_process(false)
 	m = nm
 

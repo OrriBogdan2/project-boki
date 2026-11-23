@@ -31,7 +31,7 @@ func run(main_node: Node) -> void:
 		await fade.reveal(0.01)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "god": true, "length": 1e9})
+	m.start({"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "god": true, "length": 1e9})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()

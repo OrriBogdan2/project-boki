@@ -32,7 +32,7 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 1, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "god": true})
+	m.start({"teams": 1, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "god": true})
 	m.set_process(false)
 	var spot := _open_spot(m)
 	_data()

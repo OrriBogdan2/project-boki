@@ -137,7 +137,7 @@ func _host() -> void:
 		await _finish()
 		return
 	Net.lobby_emit("dn", {"c": "start", "d": _start_dict()})
-	await _build(_start_dict())
+	_build(_start_dict())
 	var G: Hunter = m.ents_by_id.get("P" + peer_id, null)
 	t0 = CheckClock.own_msec(guest_pid)
 	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t0 < START_S * 1000.0

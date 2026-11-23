@@ -321,7 +321,7 @@ func _contact_checks() -> void:
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
-	await _spawn(main)
+	_spawn(main)
 	var t0 := CheckClock.own_msec()
 	for a in Arch.ids():
 		var hits := 0
