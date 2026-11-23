@@ -11170,3 +11170,4 @@ READY ext/pitch-reel-no-foe-text - recorder: kit shot films with no game text ov
 READY ext/anim-coverage-native 4db6050eb3 (anim coverage counts native clips)
 READY ext/merge-lane-n23e-1123 fefdfdb2e1 (bulk-rebase: origin/main merged in mechanically, was 218aee2410; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/sfx-native-steps 650f9a4ce5 (footsteps follow native foot plants)
+READY ext/vfx-boki-type-hits 8f8ed8b4acb0e5544d926e9320f574ac58311dbc (supersedes 742de2ad33; origin/main merged, 0 behind; only conflict tools/checks/vfx.gd kept both check entries; --check 0 failures, --boki-type-hit-check 0, --fx-hunter-cap-check 0, health --strict OK after shortening main's 138-col fx-hunter-cap line)
