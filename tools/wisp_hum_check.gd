@@ -60,7 +60,7 @@ func run(main_node: Node) -> void:
 func _sound_file() -> void:
 	var file := FileAccess.get_file_as_bytes("res://audio/wisp_hum.wav")
 	var b := file.slice(44)
-	var n := b.size() / 2
+	var n := int(b.size() / 2.0)
 	var crossings := 0
 	for i in range(1, n):
 		if (b.decode_s16(i * 2 - 2) < 0) != (b.decode_s16(i * 2) < 0):

@@ -239,7 +239,7 @@ func tail() -> void:
 			if shots_dir != "" and (fr - press_fr) % SHOT_EVERY == 0:
 				var img := get_viewport().get_texture().get_image()
 				if img:
-					img.resize(img.get_width() / 2, img.get_height() / 2)
+					img.resize(int(img.get_width() / 2.0), int(img.get_height() / 2.0))
 					img.save_png("%s/%s_%d_%03d.png" % [shots_dir, arch, use, fr - press_fr])
 			if t_s >= (maxf(0.08, float(seq[use][1])) if seq[use][0] == "dash" else 0.08):
 				Input.action_release("dash")
@@ -314,7 +314,7 @@ func _judge() -> void:
 			continue
 		var walls: Array = fs.map(func(e): return float(e["wall"]))
 		walls.sort()
-		var med: float = walls[walls.size() / 2]
+		var med: float = walls[int(walls.size() / 2.0)]
 		var worst := 0.0
 		var comp := 0
 		# (a stall shows on the frame after the one it was drawn for: the dash's own frames and one more)

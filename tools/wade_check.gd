@@ -242,7 +242,7 @@ func _strip(dir: String, zc: int) -> void:
 	var strip := Image.create(w * FRAMES, h, false, frames[0].get_format())
 	for i in FRAMES:
 		strip.blit_rect(frames[i], Rect2i(0, 0, w, h), Vector2i(w * i, 0))
-	strip.resize(w * FRAMES / 2, h / 2)
+	strip.resize(int(w * FRAMES / 2.0), int(h / 2.0))
 	strip.save_png(dir + "/wade_strip.png")
 	home.set_process(false)
 
