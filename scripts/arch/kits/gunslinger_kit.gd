@@ -299,6 +299,8 @@ func _faded_now() -> float:
 	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
 
 # ------------------------------------------------------------------ dash: Slipstep
+func single_dash() -> bool: return true
+
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if use_ex and h.dashes >= 1.0 and not h.grounded:
