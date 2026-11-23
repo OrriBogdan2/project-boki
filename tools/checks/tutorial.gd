@@ -6,4 +6,5 @@ extends RefCounted
 
 const CHECKS := {
 	"--hint-once-check": ["res://tools/hint_once_check.gd", "hint_once_check", null],
+	"--tut-first-evolve-check": ["res://tools/tut_first_evolve_check.gd", "tut_first_evolve_check", null],
 }

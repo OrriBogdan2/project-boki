@@ -10,4 +10,5 @@ const CHECKS := {
 	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # solos and the play space (0084)
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
 	"--tester-feedback-check": ["res://tools/tester_feedback_check.gd", "tester_feedback_check", null],  # tester 11-19
+	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
 }
