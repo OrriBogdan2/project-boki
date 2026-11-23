@@ -4,30 +4,31 @@ extends RefCounted
 ## range; RMB, E, R, dash: the largest range-like number in the slot's data; plus Cinder's flight), the Hunter
 ## stands at the camera focus (the screen's centre, feet a little below it) and the slot's end, `reach` metres
 ## out along the aim up, down, left and right on the ground, is projected through the match camera at the
-## start view (the widest wheel zoom) and the closest wheel zoom, at 1280x720, 1920x1080, 2560x1080 and 1024x768
-## (the lens is vertical, so
+## default and the closest wheel zoom, at 1280x720, 1920x1080, 2560x1080 and 1024x768 (the lens is vertical, so
 ## 4:3 shows less width and 21:9 more). It prints one table row per slot (docs/MOVEMENT_FEEL.md, "Ability ranges
 ## on screen") with the ways whose end is off screen, and once more with the view leaning toward the end as the
 ## cursor held there makes it. Ranges are source data and stay as they are, so off-screen ends are reported, not
 ## failed. It fails when a Hunter has no rows (the data drifted), or when a range up to 18 m (half the source's
-## 37 m across) has its end off screen left or right at 1920x1080 at the start view.
+## 37 m across) has its end off screen left or right at 1920x1080 at the default zoom (the wheel's widest).
 
 const VIEWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1080), Vector2i(1024, 768)]
-const EDGE_PX := 20.0      # CamRig.on_screen's margin: an end closer to the edge than this is off
+const EDGE_PX := 20.0  # CamRig.on_screen's margin: an end closer to the edge than this is off
 const DIRS := {"up": Vector3(0, 0, -1), "down": Vector3(0, 0, 1), "left": Vector3(-1, 0, 0), "right": Vector3(1, 0, 0)}
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
 ## data keys that name a distance in metres (matched on the whole key or its last word, "wave_range", "air_dist")
 const REACH_KEYS := ["range", "reach", "dist", "distance", "length", "len", "travel", "rmax", "tether_max"]
-const SIDE_OK_M := 18.0     # m: the widest range the source's 37 m across is meant to hold left and right
-const MIN_REACH := 5.0     # m: nearer ends are on screen in any view the camera has
+const SIDE_OK_M := 18.0  # m: the widest range the source's 37 m across is meant to hold left and right
+const MIN_REACH := 5.0  # m: nearer ends are on screen in any view the camera has
 
 var bad := 0
-var rows: Array = []        # [hunter, slot, what, reach]
+var rows: Array = []  # [hunter, slot, what, reach]
+
 
 func ok(cond: bool, what: String) -> void:
 	print("RANGESCREEN %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	_collect()
@@ -35,11 +36,15 @@ func run(main: Node) -> void:
 	main.add_child(vp)
 	var cam := CamRig.new()
 	vp.add_child(cam)
-	cam.use_style("default")
-	var start := float(CamRig.rules["zoom"]["max"])      # the view a match starts at (the widest)
-	var zooms: Array = [start, float(CamRig.rules["zoom"]["min"])]
+	cam.use_style("supervive")
+	var zooms: Array = [float(CamRig.rules["zoom"]["max"]), float(CamRig.rules["zoom"]["min"])]
 	print("RANGESCREEN table | Hunter | Slot | Reach m (data key) | ways off screen, Hunter centred, per view at")
-	print("RANGESCREEN table | zoom %.1f / %.1f (4 views) | with the lean |" % [zooms[0], zooms[1]])
+	print(
+		(
+			"RANGESCREEN table | zoom %.1f (default) / %.2f (1280x720, 1920x1080, 2560x1080, 1024x768) | lean |"
+			% [zooms[0], zooms[1]]
+		)
+	)
 	for r in rows:
 		var cells: Array = []
 		for v in VIEWS:
@@ -51,18 +56,21 @@ func run(main: Node) -> void:
 				per.append(_ways_off(cam, float(r[3]), v))
 			cells.append(" / ".join(per))
 		vp.size = VIEWS[1]
-		cam.zoom = start
+		cam.zoom = zooms[0]
 		cam.snap(Vector3.ZERO)
 		var leaned := _ways_off(cam, float(r[3]), VIEWS[1], true)
 		print("RANGESCREEN row | %s | %s | %.1f (%s) | %s | %s |" % [r[0], r[1], r[3], r[2], " ; ".join(cells), leaned])
 		if float(r[3]) <= SIDE_OK_M:
 			cam.snap(Vector3.ZERO)
 			var off := _ways_off(cam, float(r[3]), VIEWS[1])
-			ok(not (off.contains("left") or off.contains("right")),
-					"%s %s %.1f m: left and right stay on screen at 1920x1080, zoom %.1f" % [r[0], r[1], r[3], start])
+			ok(
+				not (off.contains("left") or off.contains("right")),
+				"%s %s %.1f m: left and right stay on screen at 1920x1080, the default zoom" % [r[0], r[1], r[3]]
+			)
 	vp.queue_free()
 	print("RANGESCREEN CHECK DONE, %d rows, failures: %d" % [rows.size(), bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## "up down" style list of the ways whose end is off screen ("-" none); `lean`: the view leans toward the end
 ## (CamRig.lean_to: what the cursor held at the end does) instead of keeping you at the centre.
@@ -75,6 +83,7 @@ func _ways_off(cam: CamRig, reach: float, v: Vector2i, lean := false) -> String:
 		if not _on(cam, end, v):
 			out.append(dn)
 	return " ".join(out) if not out.is_empty() else "-"
+
 
 ## Every Hunter's reaching slots, read from its data.
 func _collect() -> void:
@@ -97,10 +106,12 @@ func _collect() -> void:
 			_add(title, "x", "flight speed x time", float(x["speed"]) * float(x["time"]))
 		ok(rows.size() > first, "%s has aimed slot rows" % title)
 
+
 func _add(hunter: String, slot: String, what: String, reach: float) -> void:
 	var same := func(r: Array) -> bool: return r[0] == hunter and r[1] == slot and is_equal_approx(float(r[3]), reach)
 	if reach >= MIN_REACH and not rows.any(same):
 		rows.append([hunter, slot, what, reach])
+
 
 func _scan(o: Variant, path: String, out: Array) -> void:
 	if o is Dictionary:
@@ -110,14 +121,17 @@ func _scan(o: Variant, path: String, out: Array) -> void:
 		for i in o.size():
 			_scan_value(o[i], path + "[%d]" % i, path.get_slice(".", path.get_slice_count(".") - 1), out)
 
+
 func _scan_value(v: Variant, path: String, key: String, out: Array) -> void:
 	if (v is float or v is int) and _is_reach(key):
 		out.append([path, float(v)])
 	else:
 		_scan(v, path, out)
 
+
 func _is_reach(key: String) -> bool:
 	return REACH_KEYS.has(key) or REACH_KEYS.has(key.get_slice("_", key.get_slice_count("_") - 1))
+
 
 func _on(cam: CamRig, at: Vector3, v: Vector2i) -> bool:
 	if cam.is_position_behind(at):
