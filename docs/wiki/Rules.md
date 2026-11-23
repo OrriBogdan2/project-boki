@@ -35,7 +35,7 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | stomp_commit | 0.2 | hold interact this long on an enemy wisp to start the stomp... |
 | stomp_time | 2.4 | ...then you're locked in for this long, three stomps and done |
 | stomp_cycle | 0.7 | one foot-lift-and-slam |
-| kin_revive_time | 6 | your kin pulling you up (as long as Supervive's Guardian Angel self-revive) |
+| kin_revive_time | 6 | your kin pulling you up (as long as the reference game's self-revive) |
 | box_revive_hp | 0.25 | same as a wisp revive |
 | soul_time | 90 | box revive window |
 | loot_time | 1 | bots: hold interact to take everything from a box (you get a loot window) |
@@ -865,6 +865,19 @@ How many Boki are out on the island at once; the rest sleep in the Boki Burrow (
 | scout | {"ease_in_s": 0.35, "ease_out_s": 0.25, "zoom": 0.25, "sight_mul": 1.25, "cone_deg": 30.0} |
 | source | {"pitch_deg": [64.0, 67.0], "fov_deg": [25.0, 34.0], "feet_below_pct": [3.0, 4.0], "ahead_per_behind": [1.46, 1.62], "side_per_ahead": [1.25, 1.35], "across_m": [35.0, 39.0], "hunter_screen_pct": [8.3, 9.3]} |
 
+## camps (`content/rules/camps.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Monster camps (scripts/match/camps.gd, docs/CAMPS.md). Every camp spot on the map is one of three sizes by its layout kind: light = Small Camp, normal = Camp, heavy = Great Camp. lvl: the level a bot wants before it goes for the camp (bots farm small camps first). n and big: monsters in a camp from a region table, and the one big monster a Great Camp always has. fixed: the monsters of a Great Camp with no region table. A camp's monsters are picked by a dice seeded from its spot alone, so the same camp holds the same monsters every match. back_s: a cleared camp comes back once this many seconds after its clear, if no Hunter is within back_clear_r metres (rolling sessions only). spread: how far (m) the monsters stand from the camp's centre. |
+| sizes | {"light": {"name": "Small Camp", "lvl": 1, "n": 2}, "normal": {"name": "Camp", "lvl": 2, "n": 3}, "heavy": {"name": "Great Camp", "lvl": 4, "n": 4, "big": ["brute", "sentinel"], "fixed": ["brute", "spitter", "skitter", "sentinel"]}} |
+| back_s | 240 |
+| back_clear_r | 22 |
+| spread | 1.8 |
+| bot_camp_share | 0.85 |
+
 ## capture (`content/rules/capture.json`)
 
 Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.
@@ -1005,7 +1018,7 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 
 | Setting | Value |
 |---|---|
-| doc | Dash feel (Shift) on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Parity first (DECISIONS 2026-11-07): a kit whose dash numbers are the source's measured dash runs them as-is (the default, 1.0 / 1.0): Vex, Hem, Cinder, Pip, Bjorn and Sable. Owner, Nov 2: dashes were too fast and too far in general, Sparkle's (Ryzz, mage) should go further. That rule stays only on the kits whose dash has no source number: Zedran's Rampage (owner 113.8), Grimble's Barge (owner 23:40) and Tarek's Rock Hop (owner item 111) at x0.85 distance, x1.15 time; Ryzz's Wirerun lane is the owner's own (item 70), so only its time is scaled. Claire's Skate and Ostra's Lantern Trade never pass through it. moves (optional): the feel per Shift move, by the name the kit passes to travel() ({"feel": name}): a move on a x1 kit with no source figure of its own still runs the owner's x0.85 / x1.15 (Albert's Shield Charge, wind-up short dash and lumber; the class long dash out of charges for Vex, Lace (her flick), Sparkle, Sable and Gil); the hunter's dist and time cover every other move. A long dash runs the class's ex_dist / ex_time (Hunter.dash_with) times its move's feel, so Kael's and Tenzo's long dashes pass "long" too and get their hunter's x0.85 / x1.15. The felt table is asserted in --move-feel-check (docs/KIT_PARITY.md gap 4). Gil runs his own numbers (x1). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (docs/SUPERVIVE_FEEL.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. thief's curve is her Cartwheel, on the ground and from a jump (the air one then carries on under air drag to the landing); bulwark's is the 360 Smash only. dolm has none: its Rock Hop is a leap (owner item 111) and the footage's only ground dash is a push it does not have; Claire's Skate is held, so its start is her own dash.ramp (fitted, docs/KIT_PARITY.md gap 4). |
+| doc | Dash feel (Shift) on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Parity first (DECISIONS 2026-11-07): a kit whose dash numbers are the source's measured dash runs them as-is (the default, 1.0 / 1.0): Vex, Hem, Cinder, Pip, Bjorn and Sable. Owner, Nov 2: dashes were too fast and too far in general, Sparkle's (Ryzz, mage) should go further. That rule stays only on the kits whose dash has no source number: Zedran's Rampage (owner 113.8), Grimble's Barge (owner 23:40) and Tarek's Rock Hop (owner item 111) at x0.85 distance, x1.15 time; Ryzz's Wirerun lane is the owner's own (item 70), so only its time is scaled. Claire's Skate and Ostra's Lantern Trade never pass through it. moves (optional): the feel per Shift move, by the name the kit passes to travel() ({"feel": name}): a move on a x1 kit with no source figure of its own still runs the owner's x0.85 / x1.15 (Albert's Shield Charge, wind-up short dash and lumber; the class long dash out of charges for Vex, Lace (her flick), Sparkle, Sable and Gil); the hunter's dist and time cover every other move. A long dash runs the class's ex_dist / ex_time (Hunter.dash_with) times its move's feel, so Kael's and Tenzo's long dashes pass "long" too and get their hunter's x0.85 / x1.15. The felt table is asserted in --move-feel-check (docs/KIT_PARITY.md gap 4). Gil runs his own numbers (x1). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (sv/FEEL_NOTES.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. thief's curve is her Cartwheel, on the ground and from a jump (the air one then carries on under air drag to the landing); bulwark's is the 360 Smash only. dolm has none: its Rock Hop is a leap (owner item 111) and the footage's only ground dash is a push it does not have; Claire's Skate is held, so its start is her own dash.ramp (fitted, docs/KIT_PARITY.md gap 4). |
 | default | {"dist": 1.0, "time": 1.0} |
 | juggernaut | {"dist": 0.85, "time": 1.15, "curve": [[0, 0.12], [0.27, 1.73], [0.29, 1.73], [1, 0.28]]} |
 | dredge | {"dist": 0.85, "time": 1.15, "curve": [[0, 1.42], [0.32, 1.35], [0.4, 1.03], [1, 0.5]]} |
@@ -1462,7 +1475,7 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | ratchet | {"medium": {"hub": {"draws": 520, "objects": 520}, "zone_cinderstep": {"frame_ms": 19.5}, "zone_ridge": {"frame_ms": 18.0}}, "low": {"hub": {"draws": 370, "objects": 560}}} |
 | ratchet_doc | Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one. |
 | budget_doc | What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column. |
-| wayseed_from | Old Pell's Black Market (a new Wayseed every few days), or a lair of a matching type on a run |
+| wayseed_from | a lair of a matching type on a run, or Old Pell at the Black Market (one every %d days, %d gems) |
 
 ## gear (`content/rules/gear.json`)
 
@@ -2387,8 +2400,10 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 
 | Setting | Value |
 |---|---|
-| _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. Looks only: no stat or damage changes. |
+| _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. prize: the monster kinds with a kill window (StealReel); reel: seconds the first drop under the line stands open, no attacks, normal damage. |
 | at | 0.25 |
+| prize | ["brute", "glimmer", "warden", "colossus", "serpent", "brood"] |
+| reel | 1.2 |
 
 ## stomps (`content/rules/stomps.json`)
 
