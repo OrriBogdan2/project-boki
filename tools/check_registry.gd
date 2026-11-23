@@ -25,8 +25,13 @@ const CHECKS := {
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],  # the Heart early seat (0023, 0051)
 	# out: watch and switch teammates
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],
-	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5
-	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],
+	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5, one flag per camp and level (under the gate's 300 s cap)
+	"--camp-clear-skitter-1-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "skitter@1"],
+	"--camp-clear-skitter-5-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "skitter@5"],
+	"--camp-clear-spitter-1-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "spitter@1"],
+	"--camp-clear-spitter-5-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "spitter@5"],
+	"--camp-clear-brute-1-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "brute@1"],
+	"--camp-clear-brute-5-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "brute@5"],
 	"--camp-layout-check": ["res://tools/camp_layout_check.gd", "camp_layout_check", null],
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
 	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],  # no lair "you fell"
