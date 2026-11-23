@@ -360,11 +360,11 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 			rough.append("%s (not in the set)" % sname)
 			continue
 		var data := _data(takes[0])
-		var n := data.size() / 2
+		var n := int(data.size() / 2.0)
 		var first := data.decode_s16(0) / 32768.0
 		var last := data.decode_s16((n - 1) * 2) / 32768.0
 		var mid := 0.0
-		for k in range(n / 2, n / 2 + 200):
+		for k in range(int(n / 2.0), int(n / 2.0) + 200):
 			mid = maxf(mid, absf(data.decode_s16(k * 2) / 32768.0))
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
@@ -469,7 +469,7 @@ func _ult_cues() -> void:
 func _nuke_fall() -> void:
 	var delay := float(Arch.def("gunslinger")["x"]["delay"])
 	var b := FileAccess.get_file_as_bytes("res://audio/vn_nuke_fall.wav")
-	var secs := float(_data("res://audio/vn_nuke_fall.wav").size() / 2) / float(b.decode_u32(24))
+	var secs := float(int(_data("res://audio/vn_nuke_fall.wav").size() / 2.0)) / float(b.decode_u32(24))
 	var what := "vn_nuke_fall is %.3f s, the fall is %.2f s (within %.0f ms)"
 	ok(absf(secs - delay) <= FALL_TOL_S, what % [secs, delay, FALL_TOL_S * 1000.0])
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
@@ -1385,7 +1385,7 @@ func _rank_cues() -> void:
 ## Seconds to the last sample above 2% of the peak, in a mono 44.1 kHz wav (as tools/sfx_lib.py writes them).
 func _audible_secs(path: String) -> float:
 	var data := _data(path)
-	var n := data.size() / 2
+	var n := int(data.size() / 2.0)
 	var pk := 0.0
 	for k in n:
 		pk = maxf(pk, absf(data.decode_s16(k * 2)))
@@ -1528,7 +1528,7 @@ func _takes(sname: String) -> Array:
 ## Peak and RMS (dBFS) of a 16-bit PCM wav; RMS over samples above 2% of the peak, as tools/sfx_lib.py levels.
 func _measure(path: String) -> Dictionary:
 	var data := _data(path)
-	var n := data.size() / 2
+	var n := int(data.size() / 2.0)
 	var pk := 0.0
 	for k in n:
 		pk = maxf(pk, absf(data.decode_s16(k * 2) / 32768.0))
@@ -1751,7 +1751,7 @@ func _stomp_cues() -> void:
 		"stomp: wind-up, finish and crack are in their set and played positionally by Life %s" % [off]
 	)
 	var data := _data("res://audio/stomp_windup.wav")
-	var half := data.size() / 4
+	var half := int(data.size() / 4.0)
 	var e := [0.0, 0.0]
 	for k in half * 2:
 		e[int(k >= half)] += pow(data.decode_s16(k * 2) / 32768.0, 2)
