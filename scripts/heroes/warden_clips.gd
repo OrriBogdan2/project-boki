@@ -891,6 +891,7 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	_ease_start(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
+	loco_k *= 1.0 - proc_w     # (a swim is the rig's: no stride or arm swing over it)
 	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
 	steps.step(loco_k > 0.5 and bool(s.get("grounded", true)), loco_pos)
@@ -1099,6 +1100,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	loco_goal = goal
 	loco_pos = _ease(loco_pos, goal, 12.0, dt)
 	_p("loco/blend_position", loco_pos)
+	gait.footing(dt, s.get("footing", {}))
 	var ring := _walk_ring()
 	var out := loco_pos.length()
 	var moving := _out_of_idle(out, ring, goal.length(), spd)
