@@ -11138,3 +11138,4 @@ READY ext/clarity-contrast 4509ef88a660 (Hunter dark ground rim via OcclusionOut
 READY ext/stuck-integ-e804806c a6e6af891f (supersedes: own READY e4b69f8e85, anim-select-poses-v95 boki-own-clips-c boki-own-clips-e boki-own-clips-f boki-own-clips-g boki-own-clips-h lace-dash-clip neve-shatter-slow sfx-boki-command-chirps sfx-hunter-footsteps stomp-prompt-declutter vfx-grimble-wedges, ult-ranks-source, ui-ability-bar-charges; + origin/main dae69e1c59; briefs/ tree and claire.glb refit dropped; NEW-RED 0 on registry/ability-bar/ult-rank/hit-shape/camera-follow/archetype vs main)
 READY ext/anim-native-move-clips 3e60f5e8222a28c024887acff08cfd50f814cafc (native Hunters: per-move clip slots)
 READY ext/parity-recheck-vex-kael 21c13150c0a1488e2a3cb02cb13794926edacf21 (Vex and Kael parity re-check)
+READY ext/extra-godot-errors 1f7ec4bf6834722b6e2494444626c66a6ca9c4e1 (Godot ERROR lines fixed)
