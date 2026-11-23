@@ -188,6 +188,8 @@ func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's 
 func fire_ok() -> bool: return true
 ## The attack key, if this kit runs the weapon's attack itself (true = handled; HunterAttack.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
+## s until the kit's own attack cadence (a burst's pause, its next dart) lets a fresh tap go at once (0: now).
+func fire_wait() -> float: return 0.0
 ## Whether the attack key is holding now (a draw, a charge, a hose): the held-fire checks read it, kits with their
 ## own hold set it.
 func lmb_holding() -> bool: return h.draw_t >= 0.0 or h.mel_hold > 0.0
