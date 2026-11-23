@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bfh5rqwx74uij"
-path="res://.godot/imported/hem_meshy_tex0_base_color.png-11d351ba54bd9350ce8d30dc917e7c8d.ctex"
+path.bptc="res://.godot/imported/hem_meshy_tex0_base_color.png-11d351ba54bd9350ce8d30dc917e7c8d.bptc.ctex"
+path.astc="res://.godot/imported/hem_meshy_tex0_base_color.png-11d351ba54bd9350ce8d30dc917e7c8d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "dbafa1fa19066b76882583c244613c39"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/hem/hem_meshy_tex0_base_color.png"
-dest_files=["res://.godot/imported/hem_meshy_tex0_base_color.png-11d351ba54bd9350ce8d30dc917e7c8d.ctex"]
+dest_files=["res://.godot/imported/hem_meshy_tex0_base_color.png-11d351ba54bd9350ce8d30dc917e7c8d.bptc.ctex", "res://.godot/imported/hem_meshy_tex0_base_color.png-11d351ba54bd9350ce8d30dc917e7c8d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
