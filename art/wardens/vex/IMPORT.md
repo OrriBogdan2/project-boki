@@ -114,3 +114,24 @@ Fix: `python3 -I tools/art1/hand_rebind.py in.glb out.glb --turn 0.75 --no-thumb
   idle, run, shoot, coin flick (Vex has no reload clip), dash): /home/boki/gens/vex-hands-1123/final/.
 Open: #360's fin split leaves a black jagged gap on the right hip in run/shoot close-ups (was tan blade fins); a pipeline hook
 (v95_to_game running hand_rebind) needs a hand selection that does not depend on #360's graph cut.
+
+## Left hand r2 11-23 (ext/vex-hands-1123, same branch): volume, thumb, no disc, no hip hole, no hip spikes
+Owner 11-23 art-gate FAIL on round 1: flat claw hand, dark disc on the wrist, hand in the thigh, black hole at the right hip
+(#360's fin split), spikes on the gun arm. One command from #360's glb (b9489518d6e) and live (origin/main's vex.glb):
+`python3 -I tools/art1/hand_rebind.py n360.glb vex.glb --rehang live.glb` (defaults: turn 0.75, swing -10 deg, out 3 cm,
+palm x3, fingers x2, spikes 6 cm). v95_to_game.py runs it after the swap when the spec has `hand_rebind` (vex_v95.json: "L"),
+without --rehang (a fresh swap has no #360 hung fins).
+- Volume: the palm and fingers grow along the palm normal from their inner face (the thigh side) by 3x / 2x, in 1.5 cm cells;
+  the wrist tube stays. Palm thickness / width (same window on every glb, tools measure in the job folder):
+  live 21.7 / 98.1 mm = 0.22, round 1 25.2 / 97.9 = 0.26, r2 30.7 / 95.7 = 0.32; fingers 13.8 -> 25.2 mm.
+- Thumb: a capsule from the palm's thumb-side edge to the most lateral vertex goes on thumb.L (53 verts); palm hand.L; the
+  fingers (819) fingers.L; all by depth along the bone axis, so the clips' finger curls move them.
+- Dark disc: it was the scan's dark-brown palm and cuff texels (UV islands of the hand; not the coin, not geometry). The 335
+  dark palm/wrist vertices take one flat skin texel and the 413 dark cuff ones the sleeve's tan: UV only, no atlas pixel changes.
+- Clipping: the hand moves 3 cm off the thigh and fans 10 deg about the wrist. Vertices >= 4 mm inside the other part (my pair
+  check, bind-relative, 9 clips x 8 frames): left hand x left thigh 187 -> 117, left hand x torso 0 -> 0.
+- Right hip: #360's tan fins left a black hole when the arm moved. The 388 short fin triangles (375 own vertices) take live's
+  hip weights again (the hole closes, no stretch: only vertices no other triangle uses) and 521 triangles with an edge >= 6 cm
+  or joining the gun arm's skin to the hips' are deleted (the spikes). hunter_mesh_check spike_edges 188 -> 20, collapsed 42 -> 2,
+  stretched tris 120 (as #360); tris 60095 -> 59574.
+Open: the gun cuff's torn tan edge is scan texture/shards, not deleted; the hand still touches the pocket flap at idle.
