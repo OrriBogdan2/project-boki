@@ -38,6 +38,10 @@ func run(m: Node) -> void:
 		DirAccess.make_dir_recursive_absolute(out)
 	else:
 		out = ""
+	if out == "":
+		# (no shots: a small window. Software GL draws every frame of 8 places, 1100-1200 s at 1280x720 on the
+		# loaded suite box, near the 1200 s cap; what it counts, rigs in the tree, doesn't depend on the size)
+		main.get_window().size = Vector2i(480, 270)
 	Save.no_write = true
 	var rec := _record()
 	Save.d = Save.fresh()
@@ -148,6 +152,8 @@ func _record() -> Dictionary:
 
 
 func _place(label: String, screen: String, opts: Dictionary) -> void:
+	var t0 := Time.get_ticks_msec()
+	var f0 := Engine.get_process_frames()
 	main.show_screen(screen, opts)
 	for i in 600:  # a farm or a match takes a while to build: up to 600 frames until a rigged Boki shows
 		await main.get_tree().process_frame
@@ -161,6 +167,7 @@ func _place(label: String, screen: String, opts: Dictionary) -> void:
 	for i in 240:
 		await main.get_tree().process_frame
 	_report(label)
+	print("VESPYX_TIME %s %d ms, %d frames" % [label, Time.get_ticks_msec() - t0, Engine.get_process_frames() - f0])
 	await _grab(label)
 
 

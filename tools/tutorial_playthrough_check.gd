@@ -21,13 +21,18 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	main.get_window().size = Vector2i(1280, 720)
 	Engine.time_scale = TIME_SCALE
+	var t0 := Time.get_ticks_msec()
 	await _prologue()
+	_took("prologue", t0)
 	await _hatch()
+	_took("hatch", t0)
 	await _tutorial_match()
 	_end()
+	_took("course", t0)
 	Engine.time_scale = 1.0
 	if not stalled:
 		await _garden()
+		_took("garden", t0)
 	print("TUTPLAY STEPS: " + ", ".join(rows))
 	print("TUTPLAY DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
@@ -63,6 +68,12 @@ func _course_tick(m: Match) -> void:
 		print("TUTPLAY STEPS: " + ", ".join(rows))
 		print("TUTPLAY DONE, failures: %d" % bad)
 		tree.quit(1)
+
+
+## Wall-clock seconds since the start, by phase: where a slow (loaded) box spends the suite's 1200 s.
+func _took(phase: String, t0: int) -> void:
+	var s := (Time.get_ticks_msec() - t0) / 1000.0
+	print("TUTPLAY time %s at %.0f s (wall clock, %d frames)" % [phase, s, Engine.get_process_frames()])
 
 
 func _close_step() -> void:
