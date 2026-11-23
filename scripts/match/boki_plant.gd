@@ -93,7 +93,7 @@ func _leg(skel: Skeleton3D, paw: int, tracks: Dictionary) -> Leg:
 		var foot := _bone_at(skel, paw, tracks, i * _h).origin
 		path.append(_to_model * foot)
 		hung.append(body.affine_inverse() * foot)
-	var each := SAMPLES / _steps_per_loop(hung)
+	var each := int(SAMPLES / float(_steps_per_loop(hung)))
 	var front := 0
 	var back := 0
 	for i in each:
@@ -180,7 +180,7 @@ func _stance_time(skel: Skeleton3D, leg: Leg, part: float) -> float:
 	var hi := leg.reach.size() - 1
 	var goal := lerpf((body * leg.reach[lo]).z, (body * leg.reach[hi]).z, part)
 	while hi - lo > 1:
-		var mid := (lo + hi) / 2
+		var mid := int((lo + hi) / 2.0)
 		if (body * leg.reach[mid]).z < goal:
 			lo = mid
 		else:
