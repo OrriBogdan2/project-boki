@@ -22,6 +22,11 @@ extends RefCounted
 ##   covers the sliced build and the warm-up; without it, autoplay builds the match in one frame)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
+##   [--bench-probe]  (only the scripted expedition a player gets: loading screen, planning map, skyship ride, drop,
+##   a fight; per-phase frame costs and hitches. tests/perf_probe.gd: --probe-out= --probe-quick --probe-squad=
+##   --probe-teams= --probe-full)
+##   [--bench-hunter-gpu]  (only what the Hunter models cost to draw: six Hunters and four Boki in idle at the match
+##   camera; tools/perf/hunter_gpu.gd: --wardens=a,b --tiers=n,25k,40k --bench-secs=8; needs a real GPU)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -97,6 +102,13 @@ var vp: RID
 
 
 func run(main_node: Node) -> void:
+	var args := OS.get_cmdline_user_args()
+	if "--bench-probe" in args:      # the two own-setup parts: their window, save and camera, not setup()'s
+		main_node.add_child(load("res://tests/perf_probe.gd").new())
+		return
+	if "--bench-hunter-gpu" in args:
+		await load("res://tools/perf/hunter_gpu.gd").new().run(main_node)
+		return
 	setup(main_node)
 	if tracy_dir != "":
 		await _tracy_match()
@@ -686,8 +698,7 @@ func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	)
 	return f
 
-
-## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as --perf-probe does.
+## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as tests/perf_probe.gd does.
 func _hook_hud(m: Match) -> void:
 	var h = m.hud
 	var cb := Callable(h, "_draw_all")

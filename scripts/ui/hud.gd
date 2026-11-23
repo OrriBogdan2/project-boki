@@ -8,7 +8,8 @@ var panels: HudPanels
 var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
-var reticle: Reticle        # the hit tick round the cursor (the reticle itself draws statically)
+var reticle: Reticle        # the hit tick's state: raised by every landed hit of yours (CombatBus), dealt_at for the fight budget
+var ret: ReticleHud         # draws the cursor reticle, its aim arcs and the hit tick from `reticle`
 var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
 var lowhp := LowHpCue.new()      # the low-health heartbeat and edge glow
@@ -43,6 +44,7 @@ const GOLD := Color("f2c84a")
 func setup(match_node: Match) -> void:
 	m = match_node
 	reticle = Reticle.new(m)
+	ret = ReticleHud.new(reticle)
 	layer = 5
 	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
 	panels = HudPanels.make(self)       # the fixed panels, under c, redrawn 20 times a second
@@ -1632,47 +1634,20 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			_ctext(Vector2(sz.x * 0.5, sy + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
 
 func _draw_crosshair(p: Hunter) -> void:
-	var mp := c.get_local_mouse_position()
-	# the reticle (the player's style) opens with per-shot bloom and the minigun's spread
-	var spread := p.recoil * 4.0 + p.wbloom * 1.2
-	if p.wpn.has("tighten_from_deg") and p.spin > 0.0:
-		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
-	Reticle.draw(c, mp, spread)
+	var mp := c.get_local_mouse_position() if ret.pin == Vector2.INF else ret.pin
+	ret.draw(c, p, mp, m.time)
 	if p.ak and p.ak.has_meter():
-		# the archetype resource as an arc hugging the crosshair
-		var rf := p.ak.res_frac()
-		var rc := p.ak.res_col()
-		c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
-		if rf > 0.0:
-			c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76 * rf, 24, Color(rc, 0.95 if p.ak.tell == "full" else 0.7), 3.0 if p.ak.tell == "full" else 2.0, true)
-		# the payoff is armed (FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the arc
+		# the payoff is armed (FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the resource arc
 		var rl := p.ak.ready_label()
 		if rl != "":
 			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
-			_ctext(mp + Vector2(0, Reticle.RES_R + 16.0), rl, 13, Color(rc.lightened(0.2), 0.75 + 0.25 * pk), big)
+			_ctext(mp + Vector2(0, Reticle.t("res_r") + 16.0), rl, 13, Color(p.ak.res_col().lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
 		if ph and not ph.unseen:
 			_flag(mp + Vector2(-58, 30), 0.7, Color("f4f1e6"))
 			_ctext(mp + Vector2(6, 36), "Truce with %s  ·  shooting breaks it" % ph.pname, 13, Color("f4f1e6"), big)
-	var ck := p.atk.charge_k()
-	if ck > 0.0:
-		# a sword's charge: fills, then flashes when it's ready to release
-		var full := ck >= 1.0
-		_arc(mp, Reticle.CHARGE_R, ck, Color("fff3b0") if not full or int(m.time * 10.0) % 2 == 0 else Color.WHITE, 4.0 if full else 3.0)
-	elif p.warm_t > 0.0:
-		_arc(mp, Reticle.CHARGE_R, 1.0 - p.warm_t / maxf(0.01, float(p.wpn.get("warmup", 0.6))), p.wpn["color"], 3.0)
-	elif p.wpn.has("spin_up") and p.spin > 0.0 and p.spin < 1.0:
-		_arc(mp, Reticle.CHARGE_R, p.spin, Color("ffb34d"), 3.0)
-	elif p.wpn.get("melee", false):
-		pass
-	else:
-		# ammo left, as a thin ring that empties as you fire
-		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
-		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
-		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76 * af, 24, Color(1, 1, 1, 0.75) if af > 0.25 else Color(HP_LOW, 0.9), 2.0, true)
-	reticle.draw_tick(c, mp)
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
@@ -2059,9 +2034,6 @@ func _build_pack() -> void:
 	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
 	if not p.caught.is_empty():
 		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
-	var hint := UI.para(LoadoutPanel.HINT, 12)
-	hint.custom_minimum_size.x = LootHold.WIDTH - 28.0
-	v.add_child(hint)
 	add_child(pc)
 	pack_panel = pc
 	_fit_panel(pc, sl[0], sl[1])
