@@ -29,6 +29,9 @@ func begin() -> void:
 	if foe == null:
 		return
 	var m := tu.m
+	for h in m.hunters:
+		if not h.stomp.is_empty() and h.stomp["o"] == foe:
+			Life.end_stomp(m, h, "gone")  # (a stomp on the dummy must not outlive it)
 	m.hunters.erase(foe)
 	m.ents_by_id.erase(foe.nid)
 	if foe.kin:
