@@ -11103,3 +11103,4 @@ READY ext/vfx-boki-type-hits 742de2ad33aef6c45d28a543aa1cb57bf63b234b (Boki type
 READY ext/sfx-match-borrowed-four f7fd29eb9c (own match-event sounds)
 READY ext/vfx-summon-type-colour 0d39d53bfb (summon pop type colour)
 READY ext/farm-offline-cap 1b32a89bd2 (offline progress cap)
+READY ext/tutorial-low-preset e6365050ca850e08d281c1be3c29d86e0d7935f5 (tutorial at 30 fps)
