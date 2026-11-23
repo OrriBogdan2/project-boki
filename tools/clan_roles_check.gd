@@ -1,5 +1,5 @@
 extends "res://tools/clan_check.gd"
-## --clan-roles-check: clan ranks (docs/specs/CLANS.md 2, docs/decisions/0022-clans.md), on clan_check's fake store.
+## --clan-roles-check: clan ranks (docs/specs/CLANS.md 2, docs/decisions/0124-clans.md), on clan_check's fake store.
 ##   1. only the founder makes officers and members and hands the founder role to an officer (who takes the guild
 ##      doc's founder field; the old founder becomes an officer); forged ranks and officer lists change nothing
 ##   2. founder and officers remove only those below them; forged removals remove nobody; the removed member's
