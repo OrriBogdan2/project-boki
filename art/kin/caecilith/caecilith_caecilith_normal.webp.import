@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2vbjha6a3i82"
-path="res://.godot/imported/caecilith_caecilith_normal.webp-e5e5d79d4a3efe8b6e5267133be79f98.ctex"
+path.bptc="res://.godot/imported/caecilith_caecilith_normal.webp-e5e5d79d4a3efe8b6e5267133be79f98.bptc.ctex"
+path.astc="res://.godot/imported/caecilith_caecilith_normal.webp-e5e5d79d4a3efe8b6e5267133be79f98.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "185633633acf140054b320bb5bf1a288"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/caecilith/caecilith_caecilith_normal.webp"
-dest_files=["res://.godot/imported/caecilith_caecilith_normal.webp-e5e5d79d4a3efe8b6e5267133be79f98.ctex"]
+dest_files=["res://.godot/imported/caecilith_caecilith_normal.webp-e5e5d79d4a3efe8b6e5267133be79f98.bptc.ctex", "res://.godot/imported/caecilith_caecilith_normal.webp-e5e5d79d4a3efe8b6e5267133be79f98.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -22,4 +22,6 @@ static func _play(m: Node, h: Hunter) -> void:
 	var rival: bool = m.player != null and h.team != m.player.team
 	m.sfx(h.arch + "_ult_cue", h.pos, DB)
 	m.sfx("ult_tag_foe" if rival else "ult_tag_ally", h.pos, DB)
+	if rival:
+		Sfx.priority_cue("ult_tag_foe")
 	HostileCue.play(m.player, h)

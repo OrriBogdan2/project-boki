@@ -30,7 +30,7 @@ static func open(h: Node, note := "") -> void:
 	if note != "":
 		msg.text = note
 		msg.add_theme_color_override("font_color", UI.GOLD)
-	msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(msg)
 	msg.name = "Hint"
 	v.add_child(msg)
 	v.add_child(UI.ghost("All Boki...", func():
