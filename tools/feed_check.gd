@@ -85,13 +85,13 @@ func _case(trough: bool) -> void:
 	await main.get_tree().process_frame  # the previous panel is only queue_freed: let it go first
 	var btns := _feed_buttons(home.panel_host)
 	ok(btns.size() == 1 and not _says_nothing(home.panel_host), "%s: the panel offers the kibble" % tag)
-	ok(home.hecon.refuse_reason() != "", "%s: too weak to go while starving" % tag)
+	ok(home.hecon.partner_too_weak(), "%s: too weak to go while starving" % tag)
 	var food0 := Care.need(k, "food")
 	if btns.size() == 1:
 		(btns[0] as Button).pressed.emit()
 	var food1 := Care.need(k, "food")
 	ok(Econ.pantry("kibble") == 1 and food1 > food0, "%s: feeding eats a kibble, food %d -> %d" % [tag, food0, food1])
-	ok(home.hecon.refuse_reason() == "", "%s: it can go on an expedition again" % tag)
+	ok(not home.hecon.partner_too_weak(), "%s: it can go on an expedition again" % tag)
 	home.queue_free()
 
 
