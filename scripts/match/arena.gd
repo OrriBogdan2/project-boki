@@ -224,7 +224,9 @@ func tick(dt: float) -> void:
 		p_v.dashes = p_v.max_dashes(); p_v.ex_cd = 0.0
 		p_v.sig_cd = 0.0
 		# a self-refilling drum (`refill_after`, the quill rifle) still drains: its burst rule stays testable
-		if p_v.ammo < int(p_v.wpn["mag"]) and not p_v.wpn.get("melee", false) and not p_v.wpn.has("refill_after"): p_v.ammo = int(p_v.wpn["mag"])
+		var refills: bool = p_v.wpn.has("refill_after")
+		if p_v.ammo < int(p_v.wpn["mag"]) and not p_v.wpn.get("melee", false) and not refills:
+			p_v.ammo = int(p_v.wpn["mag"])
 	if ult_on and int(p_v.slot_lv.get("ult", 0)) <= 0:
 		_apply_ult()
 	if p_v.downed and layout == "arena":

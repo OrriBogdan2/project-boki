@@ -3372,7 +3372,7 @@ func step(dt: float) -> void:
 	time += dt
 	if Game.god and player and not player.out:
 		# admin god mode: full health, endless ammo, nothing on cooldown; a self-refilling drum (`refill_after`,
-		# the quill rifle) still drains, so its burst rule plays as in a real match (owner 11-17)
+		# the quill rifle) still drains, so its burst rule plays as in a real match
 		player.hp = player.max_hp
 		if not player.wpn.has("refill_after"): player.ammo = int(player.wpn["mag"])
 		player.sig_cd = 0.0
