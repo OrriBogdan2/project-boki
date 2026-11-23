@@ -10,7 +10,7 @@ extends RefCounted
 ## Draws per model as measured on 11-11 (before the merges: chest with its padlocks 37, key 10,
 ## stall L1 32, L3 69, nook 60, incubator 235, burrow 67). The stall, nook, incubator and burrow are PaintMerged
 ## (one mesh per painted look, not per colour).
-const MAX_DRAWS := {"chest": 29, "key": 6, "stall1": 8, "stall3": 18, "nook": 7, "incubator": 155, "burrow": 14}
+const MAX_DRAWS := {"chest": 29, "key": 6, "stall1": 8, "stall3": 18, "nook": 7, "incubator": 155, "burrow": 16}
 
 var fails := 0
 
@@ -35,7 +35,7 @@ func run(main: Node) -> void:
 	ok(names.all(func(nm): return inc.has_node(nm)), "incubator keeps its %d named nodes" % names.size())
 	ok(inc.get_node("C0/P0") is MeshInstance3D, "a cradle's pebble is still its own mesh (it lights up)")
 	var bur: Node3D = models["burrow"]
-	var bur_names := ["Glow", "Window0", "Window5"]
+	var bur_names := ["Mound", "Turf", "Lantern", "Glow", "Window0", "Window5"]
 	ok(bur_names.all(func(nm): return bur.has_node(nm)), "burrow keeps its named parts")
 	var ch: Node3D = models["chest"]
 	ok(ch.has_node("Body/Lock") and ch.has_node("LockTag"), "a locked chest wears both padlocks")

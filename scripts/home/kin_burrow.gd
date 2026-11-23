@@ -18,8 +18,8 @@ static func model(sleepers := 0) -> Node3D:
 	var glow := Models.toon(LILAC, false, 1.3)
 	var dim := Models.toon(Color("4a4258"), false, 0.1)
 	# the mound: earth below, a thick cap of turf, a few tufts and stones
-	Models.part(root, Models.sphere(1.25, 18), earth, Vector3(0, 0.15, 0), Vector3(1.25, 0.72, 1.0))
-	Models.part(root, Models.sphere(1.24, 18), turf, Vector3(0, 0.36, 0.06), Vector3(1.22, 0.62, 0.98))
+	Models.part(root, Models.sphere(1.25, 18), earth, Vector3(0, 0.15, 0), Vector3(1.25, 0.72, 1.0), Vector3.ZERO, "Mound")
+	Models.part(root, Models.sphere(1.24, 18), turf, Vector3(0, 0.36, 0.06), Vector3(1.22, 0.62, 0.98), Vector3.ZERO, "Turf")
 	for t in [[Vector3(-0.7, 1.05, 0.2), 0.22], [Vector3(0.55, 1.12, -0.1), 0.26], [Vector3(0.1, 1.2, 0.4), 0.18], [Vector3(-0.2, 1.16, -0.45), 0.2]]:
 		Models.part(root, Models.sphere(float(t[1]), 10), turf2, t[0], Vector3(1.0, 0.7, 1.0))
 	for st in [Vector3(-1.35, 0.08, -0.55), Vector3(1.4, 0.06, -0.4), Vector3(-1.1, 0.06, -0.95), Vector3(1.05, 0.05, -1.0)]:
@@ -56,7 +56,7 @@ static func model(sleepers := 0) -> Node3D:
 	Models.part(root, Models.box(0.36, 0.05, 0.05), wood, post_at + Vector3(-0.15, 1.28, 0))
 	Models.part(root, Models.cyl(0.01, 0.01, 0.16, 4), dark, post_at + Vector3(-0.28, 1.18, 0))
 	var lantern_m := glow if sleepers > 0 else Models.toon(Color("e8d8a0"), false, 0.5)
-	Models.part(root, Models.sphere(0.1, 10), lantern_m, post_at + Vector3(-0.28, 1.03, 0), Vector3(1.0, 1.25, 1.0))
+	Models.part(root, Models.sphere(0.1, 10), lantern_m, post_at + Vector3(-0.28, 1.03, 0), Vector3(1.0, 1.25, 1.0), Vector3.ZERO, "Lantern")
 	Models.part(root, Models.cyl(0.06, 0.1, 0.05, 8), dark, post_at + Vector3(-0.28, 1.15, 0))
 	var light := OmniLight3D.new()
 	light.light_color = LILAC if sleepers > 0 else Color("ffd9a0")
@@ -67,7 +67,9 @@ static func model(sleepers := 0) -> Node3D:
 	root.add_child(light)
 	# a flat stone step in front of the door
 	Models.part(root, Models.cyl(0.42, 0.46, 0.08, 16), stone, Vector3(0, 0.04, 1.5), Vector3(1.3, 1.0, 0.8))
-	PaintMerge.node(root)      # the unnamed parts: a mesh per painted look
+	# the unnamed parts: a mesh per painted look. The squashed mound, turf and lantern stay their own meshes: merged,
+	# their normals turn with the squash and they shade darker on top (MeshArrays.merged).
+	PaintMerge.node(root)
 	return root
 
 ## Lights the right number of windows for how many kin sleep inside.
