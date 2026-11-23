@@ -11102,3 +11102,4 @@ READY ext/stuck-integ-ed6637f4 e4812ab715 (supersedes: ext/stuck-integ-ed6637f4 
 READY ext/vfx-boki-type-hits 742de2ad33aef6c45d28a543aa1cb57bf63b234b (Boki type hit colours)
 READY ext/sfx-match-borrowed-four f7fd29eb9c (own match-event sounds)
 READY ext/vfx-summon-type-colour 0d39d53bfb (summon pop type colour)
+READY ext/farm-offline-cap 1b32a89bd2 (offline progress cap)
