@@ -6,4 +6,5 @@ extends RefCounted
 
 const CHECKS := {
 	"--hearth-lamp-check": ["res://tools/hearth_lamp_check.gd", "hearth_lamp_check", null],  # Hearth Lamp revive beacon
+	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 }
