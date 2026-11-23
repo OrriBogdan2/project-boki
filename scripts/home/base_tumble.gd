@@ -280,7 +280,7 @@ func _start() -> void:
 	rng.randomize()
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], rng)
 	if teach != null:
-		run.R = TumbleTeach.rules()
+		run.r_x = TumbleTeach.rules()
 	cue = GardenCues.TumbleTellCue.new(h, GardenCues.type_colour(pair[1]["rec"]))
 	seen = ""
 	shown_pos = 0.0
