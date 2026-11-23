@@ -2,8 +2,8 @@ class_name ImpactWeight
 extends RefCounted
 ## How heavy a hit lands (docs/DASHES_AND_ABILITY_FEEL.md §5.4): light (a poke), solid (a real hit) or
 ## heavy (an ult or a slam), each with a fixed hit-stop and shake (content/rules/impact_weight.json).
-## A Hunter's ability hit takes its ability's tier from the rules; anything else (a Boki, a monster,
-## the world) gets one from what the hit did. Feel applies the hit-stop, Shake the shake.
+## A Hunter's ability hit takes its ability's tier from the rules, a Boki's hit its basic or ability tier;
+## anything else (a monster, the world) gets one from what the hit did. Feel applies the hit-stop, Shake the shake.
 
 const TIERS := ["light", "solid", "heavy"]
 ## The kits' "ab" hit tags that name a Hunter slot; any other tag is its own ability key (a kit's rock, fan...).
@@ -38,6 +38,11 @@ static func of_ability(arch: String, ability: String) -> String:
 	return String((rules["hunters"] as Dictionary).get(arch, {}).get(ability, ""))
 
 
+## The tier of a Boki's hit: its ability (a tagged hit: a cast, the throw, the recall) or its basic bite.
+static func of_boki(ability: bool) -> String:
+	return String((rules["boki"] as Dictionary)["ability" if ability else "basic"])
+
+
 ## The tier of one hit ("" = no hit-stop or shake: a tick, a slow-only touch, a world hit).
 static func of_hit(by: Ent, target: Ent, d: float, o: Dictionary) -> String:
 	if String(o.get("src", "")) in NO_WEIGHT_SRC or o.get("tick", false):
@@ -51,6 +56,8 @@ static func of_hit(by: Ent, target: Ent, d: float, o: Dictionary) -> String:
 	if not big and (d <= 0.0 or float(o.get("slow", 0.0)) > 0.0):
 		return ""  # a slow-only touch or a zone tick that slows
 	var w := of_ability((by as Hunter).arch, ability_of(o)) if by is Hunter else ""
+	if by is Kin:
+		w = of_boki(String(o.get("ab", "")) != "")
 	if w == "":
 		w = "solid" if big else "light"
 	if o.get("heavy", false) and w != "heavy":
