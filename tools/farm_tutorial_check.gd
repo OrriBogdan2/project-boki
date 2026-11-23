@@ -63,6 +63,9 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-spot-shots="):
 			await load("res://tools/farm_spot_shots.gd").new().run(m, String(a).substr(18))
 			return
+		if a == "--tutorial-low-fps":
+			await load("res://tools/farm_tutorial_low_fps.gd").new().run(m)
+			return
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
