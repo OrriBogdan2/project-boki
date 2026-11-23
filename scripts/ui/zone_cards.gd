@@ -47,16 +47,19 @@ static func open(h, here: String) -> void:
 				pick = func(): h.hway.attune(id)
 			row.add_child(_card(String(z["name"]), UI.FAINT, lines, pick, "Wake it" if ready else "Locked", true))
 
-## The hub's games board: which game each zone hosts and whether it is open, this week's Dash twist and
-## the showcase wall's winners.
+## The hub's games board: every game of every open zone as one button (a press travels there and starts it,
+## MinigameHub.start), the sleeping zones, this week's Dash twist and the showcase wall's winners.
 static func board(h) -> void:
 	var v: VBoxContainer = h._new_panel("Games board", 420.0)
-	for id in GardenZones.ids():
-		var z := GardenZones.info(id)
-		var open := GardenZones.is_open(id)
+	for g in MinigameHub.listed(h):
+		var zone := String(GardenZones.info(String(g["zone"]))["name"])
+		var b := UI.ghost("%s · %s" % [g["name"], zone], func(): MinigameHub.start(h, g), 380.0)
+		b.tooltip_text = "%s\n%s" % [g["rule"], MinigameHub.summary(String(g["id"]))]
+		v.add_child(b)
+	for id in GardenZones.ids().filter(func(id): return not GardenZones.is_open(id)):
 		var row := UI.hbox(10)
-		row.add_child(UI.label(String(z["name"]), 15, Color(String(z["colour"])) if open else UI.FAINT))
-		row.add_child(UI.label(String(z["game"]), 13, UI.INK) if open else UI.label("asleep", 13, UI.MUTED))
+		row.add_child(UI.label(String(GardenZones.info(id)["name"]), 15, UI.FAINT))
+		row.add_child(UI.label("asleep", 13, UI.MUTED))
 		v.add_child(row)
 	var tw := BaseRace.twist()
 	v.add_child(UI.label("This week: %s. %s" % [tw["name"], tw["note"]], 14, UI.GOLD))
