@@ -46,6 +46,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(mn: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
 	var fresh: Dictionary = Save.d.duplicate(true)
@@ -608,14 +609,14 @@ func _framing(arch: String) -> void:
 		var share := float(row[1]) / maxf(1.0, float(row[0]))
 		var px: Array = row[2]
 		px.sort()
-		var tall := "-" if px.is_empty() else "%.0f / %.0f" % [px[0], px[px.size() / 2]]
+		var tall := "-" if px.is_empty() else "%.0f / %.0f" % [px[0], px[int(px.size() / 2.0)]]
 		print("TUTHUD frame %s | %s | %.0f%% | %s" % [arch, sid, share * 100.0, tall])
 		if sid in Tutorial.WALK_LEAD:
 			ok(row[3], "%s %s: the place you walk to is on screen when you get there" % [arch, sid])
 		else:
 			ok(share >= ON_SHARE, "%s %s: its thing is on screen %.0f%% of the step" % [arch, sid, share * 100.0])
 		if not px.is_empty():
-			ok(float(px[px.size() / 2]) >= MIN_PX, "%s %s: drawn %s px tall" % [arch, sid, tall])
+			ok(float(px[int(px.size() / 2.0)]) >= MIN_PX, "%s %s: drawn %s px tall" % [arch, sid, tall])
 	ok(fm.player.extracted, arch + ": the framing run finishes the course")
 	fm.queue_free()
 

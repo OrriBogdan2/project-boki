@@ -108,7 +108,7 @@ static func shell(key: String, fn: Callable, cols: int, rows: int, thick: float,
 			var p: Vector3 = outer[k]; var n: Vector3 = nrm[k]
 			var a: float = aos[k] * (1.0 if side == 0 else inner_ao)
 			verts.append(p if side == 0 else p - n * thick); norms.append(n if side == 0 else -n)
-			uvs.append(Vector2(float(k % W) / cols, float(k / W) / rows)); cs.append(Color(a, a, a))
+			uvs.append(Vector2(float(k % W) / cols, float(int(k / float(W))) / rows)); cs.append(Color(a, a, a))
 		for j in rows:
 			for i in cols:
 				var a0 := base + j * W + i
