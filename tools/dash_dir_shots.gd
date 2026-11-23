@@ -105,7 +105,7 @@ func _dash(m: Match, h: Hunter, sync: Node, at: Array, dir: String, out: String)
 			sync.call("_process", Match.DT)
 		if i % EVERY != 0:
 			continue
-		var fr := i / EVERY
+		var fr := int(i / float(EVERY))
 		var off := rad_to_deg(wrapf(h.face - atan2(-h.roll_dir.x, -h.roll_dir.y), -PI, PI))
 		var turn := rad_to_deg(cl.head_turn) if cl else 0.0
 		var clip := cl.cur if cl else "proc"
