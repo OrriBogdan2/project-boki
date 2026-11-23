@@ -161,5 +161,15 @@ Videos studied: TheSixGame's full walkthrough (60fps), Ryan Lemur's Celeste guid
 ## Still estimates
 - Jump height: I didn't find a clean plain jump in any of the videos.
 - Dash distance per weapon.
-- Glider damage while overheated, spike plummet speed, and the jump pad's launch strength.
+- Glider damage while overheated, spike plummet speed, and the jump pad's launch strength: searched 11-23, no source
+  number, so all three stay ours and are tagged `[?]` in `content/rules/hunter_move.json`. `--move-feel-check`
+  pins them (tools/move_feel_estimates.gd). What was checked:
+  - Overheat burn 3.5% of max health a second (`overheat_burn`): sv/DATA.md 5 says only "damage over time";
+    sv/briefs/physics.md names the overheat penalty effects without values; no hero-ref clip shows an overheated glider.
+  - Spike plunge 6 m/s at least (`glide_spike.fall_vy`): sv/DATA.md 4 says "stun + plummet"; SpikeSlamForceZ
+    is named, not decoded; no hero-ref clip shows a spike.
+  - Pad launch 17 m/s up, at least 6 m/s on (`jump_pad.vy`, `min_hv`, moved out of UtilityUse): the wiki and
+    sv/DATA.md 9 give the arm time and lifetime only. The one pad use on camera is venator.md Mini Nuke cast 2,
+    f103 (10 fps ult cut, about 569 s), and those frames (/home/claude/svvid) are no longer on disk to measure.
+    Hero-ref notes for vireo (0050) and venator (0227-0255) show the pad but never a launch.
 
