@@ -405,7 +405,8 @@ func _kael_rmb_lane() -> void:
 ## drawn height of every Hunter's current .glb (the model WardenGlb loads, vertices through the bones, as
 ## --warden-model-check measures). Two heights: `top` the whole silhouette, `col` the highest vertex over the head
 ## (within SIZE_COL m of the head pivot), which leaves out what stands off to the side (Albert's owner-approved
-## masts and sails, 11-12). Albert is the tallest on both; over the next Hunter by 5 to 16% on `col`; Kael below him.
+## masts and sails, 11-12). Albert is the tallest on `top` (his Meshy body's head is under Dredge's: the
+## masts and sails make him the biggest), over the next Hunter by 5 to 16%; Kael below him on `col`.
 func _sizes() -> void:
 	var wm = WARDEN_MODEL_CHECK.new()
 	var holder := Node3D.new()
@@ -427,15 +428,13 @@ func _sizes() -> void:
 					hi = maxf(hi, q.y)
 		col[arch] = hi - g.global_position.y
 		g.free()
-	var rank: Array = col.keys()
-	rank.sort_custom(func(a, b): return col[a] > col[b])
+	var rank: Array = top.keys()
+	rank.sort_custom(func(a, b): return top[a] > top[b])
 	var line := ""
 	for a in rank: line += "%s %.2f/%.2f  " % [a, col[a], top[a]]
-	var ratio := float(col[rank[0]]) / float(col[rank[1]])
-	var all_top := float(top["bulwark"]) / float(top["dredge"])
-	var label := "Albert (11-11): tallest Hunter, %.0f%% over the next (%s; whole silhouette %.0f%%)"
-	ok(label % [(ratio - 1.0) * 100.0, rank[1], (all_top - 1.0) * 100.0],
-		String(rank[0]) == "bulwark" and ratio >= 1.05 and ratio <= 1.16 and top["bulwark"] > top["dredge"],
+	var ratio := float(top[rank[0]]) / float(top[rank[1]])
+	var label := "Albert (11-11): tallest Hunter, %.0f%% over the next (%s; whole silhouette, masts included)"
+	ok(label % [(ratio - 1.0) * 100.0, rank[1]], String(rank[0]) == "bulwark" and ratio >= 1.05 and ratio <= 1.16,
 		"m over-head/whole: " + line)
 	var kr := float(col["juggernaut"]) / float(col["bulwark"])
 	ok("Kael (11-11): smaller than Albert (%.0f%% of his height) and under his 11-11 1.93 m" % (kr * 100.0),

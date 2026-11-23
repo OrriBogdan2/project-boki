@@ -66,6 +66,7 @@ const FIXED := {
 const KNOWN := {
 	"archer": {"e": ["pin_rain"]},
 	"ashwick": {"lhold": ["ashwick_tank_hiss", "lw_roar"], "e": ["lw_shield"], "r": ["lw_jet", "lw_jet_land"]},
+	"bulwark": {"lmb": ["bjorn_throw"]},  # (Meshy-native Albert: his clip hand is under STRIKE_MIN; the kit releases it)
 	"dolm": {"lhold": ["br_punch", "dolm_rock_crunch"], "hold": ["dolm_rock_crunch"], "r": ["br_spine", "br_slam"]},
 	"dredge":
 	{"rmb": ["dredge_coin_jingle", "dr_let_go"], "hold": ["dredge_coin_jingle", "dr_let_go"], "r": ["dr_blast_end"]},
