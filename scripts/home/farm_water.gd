@@ -51,7 +51,7 @@ static func near_entry(d: Dictionary, e: Dictionary) -> bool:
 ## Is plot i (Save.d.plots, four to each patch in the order they were put down) by water?
 static func plot_near(d: Dictionary, i: int) -> bool:
 	var fx := HomeLayout.fixtures(d, "farm")
-	var p := i / 4
+	var p := int(i / 4.0)
 	return p < fx.size() and near_entry(d, fx[p])
 
 ## Is a trough (a Save.d feeders entry) by water?
