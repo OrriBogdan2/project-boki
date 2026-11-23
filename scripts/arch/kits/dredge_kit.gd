@@ -75,6 +75,8 @@ var volleys := 0
 var last_quake_k := 0.0         # (tests) the height bonus of the last air smash
 var _down_seen := false
 var _stab_at := -9.0
+var _lmb_was := false
+var _reel_tap := false          # an LMB tapped mid-reel: one volley the step the reel lets go
 
 func _setup() -> void:
 	st["base_hp"] = h.max_hp
@@ -159,6 +161,20 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 
 func can_shoot() -> bool:
 	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
+
+## The gun is locked while he reels (can_shoot); a held LMB fires the step it ends, and a tap inside it is kept to
+## that step too, one volley (the input-buffer rule, Loco.press_buffer; the reel has a fixed end, so it waits it out).
+func lmb_override(held: bool, _dt: float) -> bool:
+	if held and not _lmb_was and not pull.is_empty():
+		_reel_tap = true
+	_lmb_was = held
+	if not _reel_tap or not pull.is_empty():
+		return false
+	_reel_tap = false
+	if held:
+		return false                      # still held: the gun fires on its own
+	h.atk.fire()                          # (a stun that ended the reel refuses it: HunterAttack.can_fire)
+	return true
 
 func hovering() -> bool:
 	return broadside.running() or (hook_hold != null and not hook_aloft)
