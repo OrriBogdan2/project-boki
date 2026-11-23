@@ -230,6 +230,14 @@ static func fire_key(m: Match) -> bool:
 		return fmod(m.time, 0.5) < 0.1
 	return true
 
+## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
+## take-off on, or the mantle climbs a low cliff first and the kick never counts).
+static func _kick_up(m: Match, top_y: float) -> void:
+	var p := m.player
+	if not p.grounded and p.pos.y < top_y - 0.2:
+		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
+
+
 ## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:
 	var ph := fmod(tu.t, 2.0)
