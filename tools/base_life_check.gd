@@ -9,6 +9,8 @@ extends RefCounted
 
 const SIM_SECS := 600.0  # 10 simulated minutes
 const DT := 0.25  # s per farm step (the machines tick at 10 Hz inside it)
+const SEEN_BY := 300.0  # s (5 game minutes): a watcher has seen every social act (BaseLife.acts) by now
+const SEEN_KINDS := ["play", "nap", "greet", "squabble"]
 const NIGHT_AT := 480.0  # s: the last two minutes are night
 const ARRIVE_AT := 20.0  # s: the fourth Boki comes out
 const LONGEST := 90.0  # s: no state but Nap may last longer
@@ -384,6 +386,7 @@ func run(m: Node) -> void:
 	)
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
+	seed(11)  # the four Boki roll their own uids, sizes and traits: same four every run
 	var recs := _new_save()
 	var home = await main._hb_home()
 	ok(home.life != null, "base_mode on: the farm runs BaseLife")
@@ -408,6 +411,7 @@ func run(m: Node) -> void:
 	var pip_awake := 0
 	var refused := 0
 	var t := 0.0
+	var seen_early := {}  # social act -> how many had happened by SEEN_BY
 	while t < SIM_SECS:
 		if t < ARRIVE_AT and t + DT >= ARRIVE_AT:
 			for kk in home.kins:
@@ -419,6 +423,9 @@ func run(m: Node) -> void:
 			home.day_t = 0.0
 		home._move_kin(DT)
 		t += DT
+		if seen_early.is_empty() and t >= SEEN_BY:
+			seen_early = home.life.acts.duplicate()
+			print("BASELIFE acts to %.0f s: %s\n%s" % [t, seen_early, "\n".join(home.life.act_log)])
 		for k in home.kins:
 			if not k.has("life"):
 				continue
@@ -458,6 +465,11 @@ func run(m: Node) -> void:
 		pip_awake >= night_frames * 0.5,
 		"the nocturnal Zapple stays up at night (%d of %d frames)" % [pip_awake, night_frames]
 	)
+	for kind in SEEN_KINDS:
+		ok(
+			int(seen_early.get(kind, 0)) >= 1,
+			"a watcher sees %s within %.0f s (%d times)" % [kind, SEEN_BY, int(seen_early.get(kind, 0))]
+		)
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
 	await _nap_sounds(home)
 	_spots_part(home, center)

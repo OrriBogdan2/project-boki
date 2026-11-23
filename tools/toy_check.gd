@@ -50,7 +50,8 @@ func run(m: Node) -> void:
 		return HomeLayout.CATALOG[id]["cat"] == "Base" and Care.STATS.has(String(R["toys"][id]["stat"]))
 	ok(ids.all(in_base),
 			"all five toys are in the Base category, each training a Care stat")
-	ok(not FarmUnlocks.rules()["base_mode"], "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.rules()["base_mode"], "base_mode is on in the shipped rules")
+	FarmUnlocks.rules()["base_mode"] = false
 	Save.d = _new_save()
 	var lay := HomeLayout.ensure(Save.d)
 	_place(lay)
@@ -166,7 +167,7 @@ func run(m: Node) -> void:
 	for f in FITTING:
 		await _alone(String(f[0]), String(f[1]))
 	await _favourite()
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = true
 	print("TOY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
