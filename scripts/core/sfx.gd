@@ -283,6 +283,7 @@ var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sf
 ## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
 var sound_gain := {}
 var last_played := {}
+var foe_next := false       # play_foe is playing: _bus_for sends the voice to SFXFoe
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
 var cue_log = null
 var rng := RandomNumberGenerator.new()
@@ -677,12 +678,21 @@ func _voice(pos, rk: float, sname: String) -> AudioStreamPlayer:
 ## Which bus a sound at pos plays on: muffled behind terrain, low-passed when far, else its own kind's bus
 ## (SfxMix.bus_for). No position (a cue for you alone): its kind's bus, never muffled.
 func _bus_for(pos, sname := "") -> StringName:
+	if foe_next and pos != null and not occlusion.blocked(pos, listener):
+		return &"SFXFoe"
 	if pos == null:
 		return mix.bus_for(sname, false, false)
 	var muffled: bool = occlusion.blocked(pos, listener)
 	var far: bool = Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
 	return mix.bus_for(sname, muffled, far)
 
+
+## An enemy's ultimate cue (UltCue): the same sound as `play`, on the SFXFoe bus (SFX's compressor, no far
+## low-pass, so it carries out to its reach) unless terrain muffles it. A teammate's goes through `play`.
+func play_foe(sname: String, pos: Vector3, vol_db := 0.0) -> void:
+	foe_next = true
+	play(sname, pos, vol_db)
+	foe_next = false
 
 ## Settings > Audio: a short sound through one bus when its slider is let go, to hear the new level.
 func play_sample(bus_name: String) -> void:

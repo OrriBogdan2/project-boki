@@ -228,8 +228,19 @@ func _ult_cues(m: Match, p: Hunter) -> void:
 	Sfx.listener = p.pos
 	r.pos = p.pos + Vector3(40, 0, 0)
 	Sfx.last_played.clear()
+	var dbs := {}
+	var grab := func(sname: String, _at, db: float, _pitch: float): dbs[sname] = db
+	Sfx.played.connect(grab)
+	for pl in Sfx.players:
+		pl.stop()
+	var terrain: World = Sfx.occlusion.world       # the bus is the point here: open ground, nothing muffles it
+	Sfx.occlusion.world = null
 	UltCue.cast(r.ak)
+	Sfx.occlusion.world = terrain
+	var foe_voices := Sfx.players.filter(func(pl): return pl.playing and pl.bus == &"SFXFoe").size()
 	var heard := Sfx.last_played.has(r.arch + "_ult_cue") and Sfx.last_played.has("ult_tag_foe")
+	ok(foe_voices == 2 and dbs.get(r.arch + "_ult_cue") == UltCue.DB_FOE and dbs.get("ult_tag_foe") == UltCue.DB_FOE,
+			"a rival's ultimate cue and tag play on the SFXFoe bus at DB_FOE (%d voices)" % foe_voices)
 	ok(heard and not Sfx.last_played.has("ult_tag_ally"),
 			"a rival's ultimate 40 m away is heard, with the rival tag (%s)" % [Sfx.last_played.keys()])
 	r.pos = p.pos + Vector3(70, 0, 0)
@@ -237,9 +248,16 @@ func _ult_cues(m: Match, p: Hunter) -> void:
 	UltCue.cast(r.ak)
 	ok(Sfx.last_played.is_empty(), "...and 70 m away it is out of earshot")
 	Sfx.last_played.clear()
+	dbs.clear()
+	for pl in Sfx.players:
+		pl.stop()
 	UltCue.cast(p.ak)
+	Sfx.played.disconnect(grab)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(p.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
+	ok(dbs.get("ult_tag_ally") == UltCue.DB and UltCue.DB_FOE > UltCue.DB
+			and Sfx.players.filter(func(pl): return pl.playing and pl.bus == &"SFXFoe").is_empty(),
+			"...at UltCue.DB, under a rival's, on the plain SFX buses")
 
 ## Each kind of sound plays on its own bus, set up in one place (SfxMix.BUSES).
 func _buses() -> void:
