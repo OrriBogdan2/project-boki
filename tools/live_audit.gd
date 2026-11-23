@@ -101,6 +101,14 @@ func _close_cam(bx: Array, knee: bool) -> void:
 	cam.look_at(Vector3(0, cy, 0))
 
 
+## Face close-up: fov 30 from 0.9 m at head height (frame about 0.48 m tall).
+func _face_cam(bx: Array) -> void:
+	var yh: float = float(bx[0]) + float(bx[1]) * 0.84
+	cam.fov = 30.0
+	cam.position = Vector3(-0.05, yh, 1.15)
+	cam.look_at(Vector3(-0.05, yh, 0))
+
+
 func _forward(yaw: float) -> Vector3:
 	return Vector3(-sin(yaw), 0.0, -cos(yaw))
 
@@ -197,6 +205,10 @@ func _shoot(_model: Node3D, dir: String, name: String, bx: Array) -> void:
 			await RenderingServer.frame_post_draw
 			var shot := "%s_%s.jpg" % [name, "knee" if knee else "eye"]
 			tree.root.get_texture().get_image().save_jpg(dir.path_join(shot), 0.93)
+		_face_cam(bx)
+		await RenderingServer.frame_post_draw
+		await RenderingServer.frame_post_draw
+		tree.root.get_texture().get_image().save_jpg(dir.path_join("%s_face.jpg" % name), 0.93)
 	else:
 		_match_cam()
 		await RenderingServer.frame_post_draw
