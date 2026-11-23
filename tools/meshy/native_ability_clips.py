@@ -215,10 +215,10 @@ def meeko_upper(b):
     seed1 = {**P("R", (0.15, 0.0, 0.97), (0.6, -0.6, -0.1), (0.0, 0.5, 0.8), reach=0.6), **P("L", (0.15, 0.0, 0.97), (0.6, -0.6, -0.1), (0.0, 0.5, 0.8), reach=0.6), **lean(-0.1, 0.0, 0.0, (-0.1, 0.0, 0.0))}
     out["mk_u_seed"] = (0.55, False, [(0.0, wind, "lin"), (0.05, seed0, "out"), (0.12, seed1, "out"), (0.32, seed1, "lin"), (0.55, b.rest, "sm")])
     # Hearthlight lit (mm_hearth): a crouch-bow gathering the light in both cupped hands low in front (0.08), both arms thrust
-    # straight up overhead as the rays rise (0.18), held up to 0.4, home by 0.65
+    # up overhead in a V held forward of her big head so the hands clear it as the rays rise (0.18), held up to 0.4, home by 0.65
     gather = {**P("R", (0.05, -0.6, 0.4), (0.8, -0.4, -0.4), (0.0, 0.3, 1.0)), **P("L", (0.05, -0.6, 0.4), (0.8, -0.4, -0.4), (0.0, 0.3, 1.0)), **lean(0.35, 0.0, 0.0, (0.15, 0.0, 0.0))}
-    lift = {**P("R", (0.12, 0.98, 0.1), (0.8, 0.0, -0.6), (0.0, 1.0, 0.0), reach=0.6), **P("L", (0.12, 0.98, 0.1), (0.8, 0.0, -0.6), (0.0, 1.0, 0.0), reach=0.6), **lean(-0.18, 0.0, 0.0, (-0.35, 0.0, 0.0))}
-    lifted = {**lift, **P("R", (0.15, 0.94, 0.12), (0.8, 0.0, -0.6), (0.0, 1.0, 0.1)), **P("L", (0.15, 0.94, 0.12), (0.8, 0.0, -0.6), (0.0, 1.0, 0.1)), **lean(-0.12, 0.0, 0.0, (-0.3, 0.0, 0.0))}
+    lift = {**P("R", (0.42, 0.82, 0.38), (0.9, 0.0, -0.4), (0.3, 1.0, 0.3), reach=0.6), **P("L", (0.42, 0.82, 0.38), (0.9, 0.0, -0.4), (0.3, 1.0, 0.3), reach=0.6), **lean(-0.04, 0.0, 0.0, (-0.25, 0.0, 0.0))}
+    lifted = {**lift, **P("R", (0.45, 0.8, 0.36), (0.9, 0.0, -0.4), (0.3, 1.0, 0.3)), **P("L", (0.45, 0.8, 0.36), (0.9, 0.0, -0.4), (0.3, 1.0, 0.3)), **lean(-0.02, 0.0, 0.0, (-0.2, 0.0, 0.0))}
     out["mk_u_hearth"] = (0.65, False, [(0.0, b.rest, "lin"), (0.08, gather, "out"), (0.18, lift, "out"), (0.4, lifted, "lin"), (0.65, b.rest, "sm")])
     # Hearthlight thrown (mm_toss): the right hand wound low behind with the torso turned away (0.06), an underhand fling up and
     # out at the cursor with the torso unwound (0.12), the follow-through held to 0.26, home by 0.5
