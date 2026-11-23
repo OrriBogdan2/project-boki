@@ -132,7 +132,7 @@
 		]},
 		"e_count": {"fx": [
 			{"p": "scorch", "shape": "pool", "band": 0.2, "size": "r", "life": "t", "c": "core", "c2": "hot", "c3": "main"},
-			{"p": "skirt", "size": 0.4, "from": 1.5, "tall": 3.5, "life": "t2", "c": "core", "c2": "hot", "c3": "main"}
+			{"p": "skirt", "size": 0.28, "from": 1.2, "tall": 3.5, "life": "t2", "c": "core", "c2": "main", "c3": "deep"}
 		]},
 		"e_strike": {"fx": [
 			{"p": "bolt", "y": 9.0, "fwd": 0.3, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.0, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"},
