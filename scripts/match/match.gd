@@ -201,8 +201,11 @@ func _slice(now := false) -> void:
 		await get_tree().process_frame
 		PerfLog.wait_end()
 
-## Reads a Warden's model (a first use is 100-200 ms) on a frame of its own, so no frame holds it and the hunter's build.
+## Reads a Warden's model on frames of its own, each texture (WardenGlb.parts) and then the scene, so no frame holds it all.
 func _warm_model(arch: String) -> void:
+	for p in WardenGlb.parts(arch):
+		WardenGlb.read_part(p)
+		await _slice(true)
 	if WardenGlb.warm(arch):
 		await _slice(true)
 

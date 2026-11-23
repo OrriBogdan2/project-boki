@@ -534,7 +534,27 @@ static func warm(arch: String) -> bool:
 	if not uses_model(arch) or _scenes.has(path(arch)) or BackgroundWork.asked(path(arch)):
 		return false
 	_scene(arch)
+	_parts_held.clear()
 	return true
+
+
+## The files a Warden's model reads before its scene (its 4096 px textures: on the RTX 4090 bench one model's read
+## was a 500-850 ms frame, nearly all of it GPU uploads), not read yet. Match._warm_model reads them a frame each
+## (read_part), then the scene finds them in the cache. [] when warm() has nothing to do.
+static func parts(arch: String) -> Array:
+	var out: Array = []
+	if not uses_model(arch) or _scenes.has(path(arch)) or BackgroundWork.asked(path(arch)):
+		return out
+	for d in ResourceLoader.get_dependencies(path(arch)):
+		var dp := d.get_slice("::", 2) if d.contains("::") else d
+		if dp != "" and not ResourceLoader.has_cached(dp):
+			out.append(dp)
+	return out
+
+static var _parts_held: Array = []  # read_part's resources, held (so cached) until warm() reads the scene
+
+static func read_part(p: String) -> void:
+	_parts_held.append(load(p))
 
 
 ## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
