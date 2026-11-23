@@ -170,7 +170,7 @@ static func _entry(h, u: int) -> Dictionary:
 
 ## Reached the ring: a rival already at the bowl means a stare-down first.
 static func _arrive(h, k: Dictionary, e: Dictionary, since: float) -> void:
-	var rival_at := float(h.life.R["rival_at"])
+	var rival_at := float(h.life.r_v["rival_at"])
 	var rival := _crowd(h, e).filter(
 		func(o): return o != k and phase(o) != "go" and BaseLife.bond(k["rec"], o["rec"]) <= rival_at
 	)
