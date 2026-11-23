@@ -97,7 +97,7 @@ func _wins(speed: int, focus: int) -> int:
 	return wins
 
 func _stats() -> void:
-	var level := EDGE_MATCHES / 2
+	var level := int(EDGE_MATCHES / 2.0)
 	var even := _wins(0, 0)
 	var fast := _wins(30, 0)
 	var sharp := _wins(0, 30)
@@ -134,7 +134,8 @@ func _spike() -> void:
 	var moved := float(with_call - without) / EDGE_MATCHES
 	var what := "a great spike call moves the backed Boki's odds %d to %d%% (%+.0f points, under %d)"
 	ok(moved > 0.0 and moved < SPIKE_MAX,
-			what % [without * 100 / EDGE_MATCHES, with_call * 100 / EDGE_MATCHES, moved * 100.0, SPIKE_MAX * 100.0])
+			what % [int(without * 100 / float(EDGE_MATCHES)), int(with_call * 100 / float(EDGE_MATCHES)), moved * 100.0,
+					SPIKE_MAX * 100.0])
 
 func _machine() -> void:
 	var a := _kin("zapple", "A", 10, 10, 50.0, 50.0)
@@ -165,7 +166,7 @@ func _format() -> void:
 		ok(timed_out == 0, "format %s: every match ends with the winner on %d" % [t["id"], target])
 		var bigger: bool = target > int(BaseVolley.rules()["to_win"])
 		var what := "format %s: a bigger target takes more points (%d of %d longer)"
-		ok(bigger == (longer > FORMAT_MATCHES / 2), what % [t["id"], longer, FORMAT_MATCHES])
+		ok(bigger == (longer > int(FORMAT_MATCHES / 2.0)), what % [t["id"], longer, FORMAT_MATCHES])
 
 func _settle() -> void:
 	Save.d = Save.fresh()
@@ -197,7 +198,7 @@ func _on_base() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
-	rules["base_mode"] = false
+	rules["base_mode"] = false      # base_mode is on in the shipped rules; the "off" half walks the old farm
 	var off = await main._hb_home()
 	ok(off.hvolley == null, "off: no volley log on the farm")
 	off.queue_free()

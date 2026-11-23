@@ -334,8 +334,10 @@ func _hands(r: BaseKite.Run) -> void:
 		r.off = float(r.rings[r.next]) + (0.0 if r.next % 2 == 1 else float(BaseKite.rules()["max_off"]))
 	r.vel = 0.0
 
+
 func _heard(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
+
 
 ## The flight's sounds (garden_sfx.gd), once per event: a flap per Space, an updraft per flap a vent gave back,
 ## a ring chime per ring passed, the crowd's "aww" per ring missed, one landing, a fanfare only on a win.
@@ -350,6 +352,7 @@ func _sounds(r: BaseKite.Run, foe: Dictionary, flapped: int) -> void:
 		if String(k).begins_with("garden_win_"):
 			wins += int(GardenSfx.heard[k])
 	ok(_heard("kite_finish") == 1 and wins == (1 if won else 0), "sound: one landing, a fanfare only on a win")
+
 
 ## Three Boki on a stock farm (a Training post) whose island has the given theme.
 func _on_base(theme: String) -> void:

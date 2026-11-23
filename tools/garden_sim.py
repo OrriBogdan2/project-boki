@@ -117,8 +117,11 @@ class Boki:
 
 
 def need(curve, level):
-    """XP from level to level + 1: round(base x level ^ power)."""
-    return round(curve["base"] * level ** curve["power"])
+    """XP from level to level + 1: round(base x level^power), or per_level x level, flat from flat_from on (null: never)."""
+    if "base" in curve:
+        return round(curve["base"] * level ** curve["power"])
+    flat = curve["flat_from"]
+    return curve["per_level"] * (min(level, flat) if flat else level)
 
 
 def win_p(sim, ratio):

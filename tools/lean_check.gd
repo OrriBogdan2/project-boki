@@ -100,8 +100,8 @@ func run(main: Node) -> void:
 	_anchors()
 	ok(Lean.on(), "base_mode is on by default")
 	FarmUnlocks.rules()["base_mode"] = false
-	var old_lean: String = Evo.eat(Save.new_kin("puddlet"), "emberberry")
-	ok(not Lean.on() and old_lean == "fierce", "base_mode off: meals lean the old way")
+	ok(not Lean.on() and Evo.eat(Save.new_kin("puddlet"), "emberberry") == "fierce",
+		"base_mode off: meals lean the old way")
 	FarmUnlocks.rules()["base_mode"] = true
 	_raise()
 	print("LEAN DONE, failures: %d" % bad)

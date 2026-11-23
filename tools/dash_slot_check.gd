@@ -26,6 +26,7 @@ func _drawn(hud) -> void:
 	await main.get_tree().process_frame
 
 func run(main_node: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -51,7 +52,8 @@ func run(main_node: Node) -> void:
 	print("DASH SLOT CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## 1 + 2: pips == charges for every archetype, the recharging pip and the countdown follow the timer.
+## 1 + 2: pips == charges for every archetype (a one-dash kit draws none), the recharging pip and the countdown
+## follow the timer.
 func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 	for a in Arch.ORDER:
 		P.reclass(Arch.weight(a), a, Arch.signature(a))
@@ -147,8 +149,7 @@ func _home_slot() -> void:
 	var k := Save.new_kin("zapple", "Pip")
 	Save.d["roster"].append(k)
 	Save.d["active"] = k["uid"]
-	# the garden (base_mode) shows the slot from the first dash on
-	Save.d["tutorial"] = {"home": true, "day1_done": true, HomeDashSlot.USED_KEY: true}
+	Save.d["tutorial"] = {"home": true, "day1_done": true}
 	Econ.ensure()
 	var home = await main._hb_home()
 	ok(not ("dash_pips" in home), "the farm's own overhead dash pips are gone")

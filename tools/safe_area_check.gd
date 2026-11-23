@@ -78,6 +78,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(mn: Node, mode: String) -> void:
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = mn
 	Save.no_write = true
 	for a in OS.get_cmdline_user_args():
@@ -300,8 +301,6 @@ func _farm() -> void:
 		await main.get_tree().create_timer(0.35).timeout  # the Hints row steps off the hub every 0.2 s
 		if home.hover_box:
 			home.hover_box.hide()  # (the Boki hover card follows the mouse, here (0, 0): not a layout panel)
-		if is_instance_valid(FarmSpotlight._node):      # (the tutorial spotlight rings a bar button on purpose: an overlay)
-			FarmSpotlight._node.hide()
 		await _judge("farm", win, SafeArea.groups_of(home.root_ui, sz), sz, home.root_ui)
 		home._open_expedition()
 		await main.get_tree().create_timer(0.8).timeout

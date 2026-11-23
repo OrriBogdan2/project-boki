@@ -31,9 +31,9 @@ func _has_job(hw, kind: String) -> bool:
 	return hw.jobs.any(func(j): return String(j["kind"]) == kind)
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
-	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (the shipped rules have the garden on)
 	# ---------------------------------------------------------------- 1. elements as data
 	var sp_ok := true
 	var lines: Array = []

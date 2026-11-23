@@ -222,7 +222,7 @@ func _formats() -> void:
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
 	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
-	rules["base_mode"] = false
+	rules["base_mode"] = false      # the "off" half walks the old farm
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 70.0)
@@ -535,7 +535,6 @@ func _vent_stretch() -> void:
 ## In each built zone's own Home (the start zone's is the farm, below): a race post, and the loop lies on
 ## land clear of its toys and props without a step the ground can't take.
 func _zone_tracks() -> void:
-	var was := FarmUnlocks.base_mode()
 	FarmUnlocks.rules()["base_mode"] = true
 	for z in GardenZones.ids():
 		if not ZoneLayout.built(z) or z == GardenZones.start():
@@ -558,7 +557,7 @@ func _zone_tracks() -> void:
 			_footing(z, home, race)
 		home.queue_free()
 		await main.get_tree().process_frame
-	FarmUnlocks.rules()["base_mode"] = was      # back to the shipped value for _on_base
+	FarmUnlocks.rules()["base_mode"] = true
 
 func _footing(z: String, home: Node, race: BaseRace) -> void:
 	var taken := {}

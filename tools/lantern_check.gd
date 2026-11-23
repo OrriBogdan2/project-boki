@@ -242,7 +242,6 @@ func _machine() -> void:
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
-	rules["base_mode"] = false      # the old farm first (the shipped rules have it on)
 	var d := Save.fresh()
 	for i in 2:
 		var k := _kin(["Pip", "Ash"][i], 10)
@@ -254,6 +253,7 @@ func _on_base() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
+	rules["base_mode"] = false      # base_mode is on in the shipped rules; the "off" half walks the old farm
 	var off = await main._hb_home()
 	ok(off.hlantern == null, "off: no glowcap ring on the farm")
 	off.queue_free()
@@ -292,6 +292,6 @@ func _on_base() -> void:
 		home._close_panel()
 		lm.tick(0.1)
 		ok(lm.state == LanternMatch.S.IDLE and home.hrace.entrants().size() == 2, "on: closing the panel calls it off")
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame

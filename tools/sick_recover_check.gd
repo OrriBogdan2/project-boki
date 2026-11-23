@@ -18,8 +18,8 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	Save.no_write = true
-	FarmUnlocks.rules()["base_mode"] = false      # the farm's hunger and sickness (the garden never starves a Boki)
 	Save.d = Save.fresh()
 	Econ.ensure()
 	ok(not bool(Content.rules("care")["natural_death"]), "care.json natural_death is off")

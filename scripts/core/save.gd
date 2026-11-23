@@ -8,7 +8,7 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 23
+const VERSION := 22
 const UNNAMED := "Hunter"      # the name of a player who never typed one (the results line then drops it)
 const MAX_MEMORY := 40
 const SLOTS := 6
@@ -19,7 +19,7 @@ const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
 		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
 		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19",
-		19: "_migrate_19_to_20", 20: "_migrate_20_to_21", 21: "_migrate_21_to_22", 22: "_migrate_22_to_23"}
+		19: "_migrate_19_to_20", 20: "_migrate_20_to_21", 21: "_migrate_21_to_22"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -382,10 +382,6 @@ func _migrate_20_to_21(data: Dictionary) -> void:
 func _migrate_21_to_22(data: Dictionary) -> void:
 	TimeTrial.migrate(data)
 
-## v22 -> v23: the Boki XP curve (Game.xp_need); saved XP keeps its share of the level.
-func _migrate_22_to_23(data: Dictionary) -> void:
-	Evo.migrate_xp(data)
-
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
 ## and a one-time notice lists it all (EqualMigrate).
@@ -547,11 +543,28 @@ var no_write := _tool_run()   # headless checks play with a save without touchin
 ## from the very first frame (other autoloads may save while starting up).
 static func _tool_run() -> bool:
 	for a in OS.get_cmdline_user_args():
-		if a == "--no-save" or a == "--archetype-check":
+		if a == "--no-save" or NO_SAVE_FLAGS.has(a):
 			return true
-		if String(a).begins_with("--shot=") or String(a).begins_with("--demo="):
-			return true
+		for pre in ["--shot=", "--demo=", "--arena-shot=", "--rolling-shot="]:
+			if String(a).begins_with(pre):
+				return true
 	return false
+## Checks that play on a copy of the save (they used to be listed in main.gd).
+const NO_SAVE_FLAGS := [
+	"--archetype-check",
+	"--kit-combo-check",
+	"--mage-combo-check",
+	"--gunslinger-combo-check",
+	"--zone-check",
+	"--dolm-combo-check",
+	"--ostra-combo-check",
+	"--hero-combo-check",
+	"--archer-combo-check",
+	"--bulwark-combo-check",
+	"--arena-check",
+	"--dredge-combo-check",
+	"--ashwick-combo-check",
+]
 var newer := false            # the slot holds a save from a newer game: never overwrite it
 
 func save_game() -> void:
@@ -624,7 +637,7 @@ func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> 
 		mem.append({"m": m, "kind": kind, "text": text})
 	while mem.size() > MAX_MEMORY:
 		mem.pop_front()
-	k["trust"] = clampf(float(k["trust"]) + trust_delta, 0.0, 100.0)
+	Care.trust_add(k, trust_delta, Time.get_unix_time_from_system())
 
 func has_building(b: String) -> bool:
 	return d.get("buildings", []).has(b)

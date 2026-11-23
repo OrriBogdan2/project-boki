@@ -92,7 +92,7 @@ func _queue() -> void:
 
 func _chips() -> void:
 	var was := FarmUnlocks.base_mode()
-	FarmUnlocks.rules()["base_mode"] = false      # the farm's counters (the garden hides empty ones)
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm's counters
 	Save.d["tutorial"] = {"hatched": true}      # a new player: the welcome not seen yet
 	Save.d["items"] = {}
 	Save.d["crops"] = {}

@@ -87,7 +87,7 @@ func _patch() -> void:
 	var bowl := {"id": "f1", "kind": "trough", "food": [], "auto": false}
 	d["feeders"] = [bowl]
 	var grow := float(SnackPatch.rules()["grow_secs"])
-	var patch := {"id": SnackPatch.ID, "u": 2, "x": 0, "y": 0, "r": 0, SnackPatch.RIPE_KEY: now - 6.0 * grow}
+	var patch := {"id": SnackPatch.ID, "u": 2, "x": 0, "y": 0, "r": 0, "t": now - 6.0 * grow}
 	HomeLayout.of(d)["deco"].append(patch)
 	var snacks: Array = SnackPatch.rules()["snacks"]
 	var made := int(GardenAway.rules()["patch_overflow_max"]) * snacks.size()

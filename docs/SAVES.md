@@ -7,14 +7,15 @@ save marked "from a newer game", a lost kin or field, or a key `Settings` no lon
 | golden | written by | what the check asserts |
 |---|---|---|
 | `save_v<N>_*.json` | `Save.save_game` (slots `kinfall_save*.json`, the profile is inside) | loads through `Save.load_from`, upgrades to `Save.VERSION`, writes no `.bak`, keeps every kin and every field. A golden at the current version must lose nothing (only `LOAD_REWRITES` fields may change); an older one keeps its names, counts and numbers (`MIGRATED_KEYS`) |
+| `save_v<N>_bred.json` | the farm golden plus one `Care.breed` baby | the same checks, and the baby keeps `dna.accent` and `gifts.accent` (a bred coat; older Boki have none and look as before) |
 | `settings.cfg` | `Settings.save` (+ the last slot from `Save.use_slot`) | every key is in `Settings.DEFAULTS` or `REMOVED`; values, key bindings and the slot survive |
 | `feedback.json` | `Feedback` | `Feedback._load` reads minutes, answered versions and the queue back |
 | `warm_stamp.json` | `WarmStamp.save` (a cache; a stale one is ignored) | the file still has its fields |
 
-`save_v1.json` is the oldest format (hand-made, v1); `save_v22_*` (v22: the Boki XP curve, on top of v21's first-time Hunter hints, v20's per-Hunter stats and
-main's v15-v19 chain: drills, tutorial resume, clans, XP hints, sleepovers) are the newest pair: `save_v22_fresh.json` is a new save, `save_v22_farm.json` a
+`save_v1.json` is the oldest format (hand-made, v1); `save_v20_*` (v20: per-Hunter stats, on top of main's v15-v19
+chain: drills, tutorial resume, clans, XP hints, sleepovers) are the newest pair: `save_v20_fresh.json` is a new save, `save_v20_farm.json` a
 populated farm (kin, bonds, incubator egg, home layout). `save_v15_*` are dev saves from the integ-1113-D1 line, whose v15 was the
-per-Hunter stats step (main's v15 is the drills); they load through v15 -> v22 like any v15 file.
+per-Hunter stats step (main's v15 is the drills); they load through v15 -> v20 like any v15 file.
 
 ## Changing a format on purpose
 Per AGENTS.md section 4 an old save must still load, so a format change ships with a migration:
