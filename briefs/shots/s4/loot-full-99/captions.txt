@@ -1,3 +1,0 @@
-hold_window.png: Deathbox with a full backpack: the box (things that do not fit outlined red), your backpack beside it, the clicked old coin held in red, Swap and Drop on each of yours
-after_swap.png: After swapping: your Boki Idol is now in the box, the old coin in your backpack
-ground_full.png: A ground item with a full backpack: the incoming item outlined red above your things

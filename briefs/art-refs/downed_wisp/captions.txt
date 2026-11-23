@@ -1,9 +1,0 @@
-wisp_0_hero.png: The hero standing, before the knock
-wisp_1_pop_a.png: Pop-in, first frames: the flash and the ring where the hero was
-wisp_2_pop_b.png: Pop-in settling: the puff drifts off, the Wisp grows to size
-wisp_3_idle.png: The Wisp idling: bob and flicker, the hero model is hidden
-wisp_4_moving.png: The Wisp drifting: it leans into the move and sheds a trail
-wisp_5_mate.png: A teammate's Wisp beside yours (the default look, tinted by team)
-wisp_6_revive_a.png: Revive: the Wisp brightens as the hero pops back in, small and squashed
-wisp_7_revive_b.png: The hero scaling up, the Wisp fading
-wisp_8_hero.png: The hero back at full size, no Wisp
