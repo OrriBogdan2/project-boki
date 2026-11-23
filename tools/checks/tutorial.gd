@@ -4,4 +4,6 @@ extends RefCounted
 ## One entry per line, and a flag may appear in only ONE file (CheckRegistry.all() fails loudly on a duplicate).
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
-const CHECKS := {}
+const CHECKS := {
+	"--tut-first-evolve-check": ["res://tools/tut_first_evolve_check.gd", "tut_first_evolve_check", null],
+}

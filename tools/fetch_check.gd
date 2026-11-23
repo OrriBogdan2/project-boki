@@ -151,6 +151,8 @@ func _on_base() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
+	var was: bool = FarmUnlocks.base_mode()
+	rules["base_mode"] = false  # the old farm: no mat
 	var off = await main._hb_home()
 	ok(off.hfetch == null, "off: no toss mat on the farm")
 	off.queue_free()
@@ -179,6 +181,6 @@ func _on_base() -> void:
 			ring = ring or (fb.cue != null and fb.cue.landing.visible)
 		ok(fb.run == null and is_instance_valid(fb.card), "on: the round ends with a result card (%.1f s)" % t)
 		ok(ring and fb.cue == null, "cue: the landing ring showed on the tosses and is gone at the end")
-	rules["base_mode"] = false
+	rules["base_mode"] = was
 	home.queue_free()
 	await main.get_tree().process_frame

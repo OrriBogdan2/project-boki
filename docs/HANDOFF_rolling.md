@@ -86,7 +86,7 @@ The feature is behind the match option `rolling`. The default fixed-length match
   - New `board()`.
   - New: `ship_of(h)` and `ship_pos_of(s)`.
   - `plan_jump`, `ship_jump` and `_update_one_ship` now handle several ships.
-  - Hooks call into Rolling from: plan in `_start`, the spawn, `_spawn_mobs` (`note_camp`),
+  - Hooks call into Rolling from: plan in `_start`, the spawn, `Camps.spawn_all`,
     `after_setup`, `step` (`tick`/`demo`), `on_drop_landed`, `knock`, the meteor and event timing,
     `_check_last` and `_finish` (`r["rolling"]`).
   - `opts.sim_keep` stops the match from ending when the player is done.
