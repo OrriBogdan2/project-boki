@@ -3,6 +3,7 @@ extends RefCounted
 ## A Boki's lines in a match (BokiLines): its talking level, its element and any personal lines the
 ## AI wrote for it pick the words, and Match.kin_bark shows them over its head.
 
+
 ## Its line for a trigger ("" while it's on cooldown). A Boki that barely trusts you grumbles instead
 ## of reviving you; one with no save record (a bot's or a wild one) talks freely.
 static func line(k: Kin, trigger_id: String) -> String:
@@ -12,6 +13,7 @@ static func line(k: Kin, trigger_id: String) -> String:
 	var stage := Care.speech(k.rec) if k.rec.size() > 0 else 3
 	var id := String(k.rec.get("uid", "kin%d" % k.get_instance_id()))
 	return BokiLines.line(id, t, k.species, stage, -1.0, k.lines.get(t, []))
+
 
 ## Says a trigger's line over the Boki, if it has one to say right now (inside a Fusion it's quiet).
 ## fill: placeholders in the line and what replaces them ("%H" -> "the lava").
@@ -26,9 +28,11 @@ static func say(m: Match, k: Kin, trigger_id: String, fill := {}) -> void:
 	if txt != "":
 		m.kin_bark(k, txt, trigger_id)
 
+
 ## Is the line over this Boki's head drawn? In a fight only your own Boki's are: the rest print over the fight.
 static func heard(m: Match, k: Kin) -> bool:
 	return k.owner_h == m.player or m.music_dir == null or not m.music_dir.fight_on(m)
+
 
 ## Tutorial hints in its own voice, by step (grown speech, then what a hatchling does instead).
 const TUT_HINT := {
@@ -52,11 +56,12 @@ const TUT_HINT := {
 	"ult": ["Fuse with me! We fight as one!", "(glows brighter, pressed against you)"],
 	"ranks": ["Spare points! Make something stronger!", "(points at the gold plus)"],
 	"wayout": ["Follow me, the outpost is this way!", "(runs ahead toward the outpost and waits)"],
-	"uplink": ["Stay in the circle till it's yours. Step out and it slips back!",
-		"(sits in the circle, looking at you)"],
+	"uplink":
+	["Stay in the circle till it's yours. Step out and it slips back!", "(sits in the circle, looking at you)"],
 	"defend": ["Here they come! Stay inside the circle!", "(bristles at the walls)"],
 	"extract": ["We did it! Into the light!", "(bounces toward the light)"],
 }
+
 
 ## Its hint for a tutorial step.
 static func tut_hint(k: Kin, id: String) -> String:
