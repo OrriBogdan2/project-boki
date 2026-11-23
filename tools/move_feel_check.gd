@@ -26,7 +26,7 @@ const T := {
 	"ground_input_frames": ["<=", 1.0, "frames", "press to velocity change, same sim step"],
 	"ground_t95": ["<=", 0.10, "s", "[game data] MaxAcceleration 4700-5400 uu/s2: top speed in ~0.09s"],
 	"ground_stop_t": ["~", [0.12, 0.25], "s", "[game data] braking 2220 uu/s2, friction 1 x2: SV ~0.18s"],
-	"ground_stop_dist": ["~", [0.27, 0.4], "m", "[game data] UE's walking brake: 0.28-0.39m at 30-144 fps"],
+	"ground_stop_dist": ["~", [0.31, 0.47], "m", "[game data] UE's brake 0.28-0.39m x body_scale 1.16 (0061)"],
 	"brake_vs_ue_err": ["<=", 0.0001, "m/s", "HunterMove.brake against UE's ApplyVelocityBraking"],
 	"ground_reverse_t": ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t": ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
@@ -593,7 +593,6 @@ func run(main: Node) -> void:
 	load("res://tools/move_feel_hunters.gd").new(self).run()  # the movement review rows, every kit (late too)
 	await _no_fall_carry(main)  # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()  # one profile in every mode
-	_vault_exit()  # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -692,7 +691,17 @@ func _haste() -> void:
 			p_v.haste_t = 5.0
 			p_v.add_buff("move_speed", 0.15, 5.0)
 	)
-	rec("haste_two_bonus_x", two / plain)
+	# (the bonuses add: measured from a run the 7.0 m/s cap leaves room over, 1.5 x our 5.28 m/s would clip at it)
+	var base := p_v.base_speed
+	var low := _run_speed(func() -> void: p_v.base_speed = 4.0)
+	var low_two := _run_speed(
+		func() -> void:
+			p_v.base_speed = 4.0
+			p_v.haste_t = 5.0
+			p_v.add_buff("move_speed", 0.15, 5.0)
+	)
+	p_v.base_speed = base
+	rec("haste_two_bonus_x", low_two / low)
 	var slowed := _run_speed(
 		func() -> void:
 			p_v.haste_t = 5.0
@@ -1524,6 +1533,7 @@ func _dash_curves() -> void:
 	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief", "dredge", "mage", "ashwick"]:
 		p_v.reclass(Arch.weight(id), id)
 		_steps(30)  # a swapped kit settles first: Sable's Cartwheel ends on touching ground if it starts aloft
+		m._later.clear()  # (the last kit's delayed hit, Albert's spin on arrival, must not fire on this kit)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		p_v.inp["move"] = Vector2(1, 0)
 		p_v.inp["dash"] = true
@@ -1844,7 +1854,7 @@ func _vault_exit() -> void:
 			m.step(DT)
 			p_v.inp["dash"] = false
 			var v := _hv(p_v).length()
-			var run_v := p_v.base_speed * (p_v.ak.move_k() + p_v.ak.speed_bonus())
+			var run_v := p_v.base_speed * (p_v.ak.move_k() + p_v.ak.speed_bonus())  # (her hasted run: the Vault's +18%)
 			peak = maxf(peak, v)
 			if v < peak and v < run_v - 0.05:
 				slow += 1
@@ -2062,7 +2072,7 @@ func _abyss_depths(g: Vector3, d: Vector2) -> void:
 	var kill := _kill_y()
 	p_v.pos.y = lerpf(lip - 0.5, kill, 0.5)
 	rec("abyss_tint_half", FX.danger(p_v))
-	p_v.pos.y = kill + 0.5
+	p_v.pos.y = kill + 0.1  # (right before the line: the 11-17 depth curve is 0.94 half a metre above it)
 	rec("abyss_tint_end", FX.danger(p_v))
 	p_v.pos.y = lerpf(lip - 0.5, kill, 0.5)
 	p_v.vel.y = 4.0
@@ -2796,8 +2806,10 @@ func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
 	rec("source_view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
-	rec("source_hunter_screen_pct", now[1] / vh * 100.0)
-	rec("source_hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
+	# (shares of a 16:9 screen's height, as the reference rows above: the window here is not 16:9)
+	var h16 := vh * tan(deg_to_rad(cam.lens) * 0.5) / tan(deg_to_rad(cam.fov) * 0.5)
+	rec("source_hunter_screen_pct", now[1] / h16 * 100.0)
+	rec("source_hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / h16 * 100.0)
 	var shot_from := 0.95 * float(p_v.cdat["scale"])
 	var hit_top := m.shot_band(p_v).y - m.shot_stance_y(p_v)
 	print(
@@ -2812,7 +2824,7 @@ func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 	ref.free()
 	for id in FRAME_HEROES:
 		var hm := _stand_in(id, PlayerLook.neutral())
-		print("MFEEL source framing %s: %.2f%% of screen height" % [id, _model_span(cam, hm)[1] / vh * 100.0])
+		print("MFEEL source framing %s: %.2f%% of screen height" % [id, _model_span(cam, hm)[1] / h16 * 100.0])
 		hm.free()
 	cam.use_style("default")
 	p_v.render(DT, 1.0)
