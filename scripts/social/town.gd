@@ -270,8 +270,8 @@ func _send_presence(d: float) -> void:
 	if js == null:
 		return
 	var ak := Save.active_kin()
-	js.hubPresence(JSON.stringify({"n": String(Save.d.get("name", "Hunter")).substr(0, 16), "h": Data.class_of_save(), "a": Arch.of_save(),
-		"x": snappedf(ppos.x, 0.01), "z": snappedf(ppos.z, 0.01), "f": snappedf(pface, 0.01), "k": ak.get("species", "")}))
+	js.hubPresence(JSON.stringify({"n": String(Save.d.get("name", "Hunter")).substr(0, 16), "h": Data.class_of_save(),
+		"a": Arch.of_save(), "x": snappedf(ppos.x, 0.01), "z": snappedf(ppos.z, 0.01), "f": snappedf(pface, 0.01), "k": ak.get("species", "")}))
 
 func _on_peers(arr: Array) -> void:
 	var seen := {}
