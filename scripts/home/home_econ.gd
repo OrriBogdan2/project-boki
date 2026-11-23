@@ -583,13 +583,13 @@ func _notice(title: String, lines: Array) -> void:
 			UI.wrapped(lb)
 			v.add_child(lb))
 
-## Why your partner can't come out (starving too long), or "".
+## Why your partner can't come out (starving too long and nothing in its belly), or "".
 func refuse_reason() -> String:
 	var ak := Save.active_kin()
 	if ak.is_empty():
 		return ""
-	if Care.starve_h(ak) >= Care.STARVE["refuse"]:
-		return "%s is too weak from hunger to come. Feed it (or fill a feeder) first, or pick another partner." % ak["name"]
+	if Care.refuses_to_go(ak):
+		return "%s is too weak from hunger and its belly is empty. Give it one meal and it will come, or pick another partner." % ak["name"]
 	return ""
 
 # ------------------------------------------------------------------ the graveyard
