@@ -7,5 +7,5 @@ extends RefCounted
 const CHECKS := {
 	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
 	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],  # GPU
-}
 	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],      # in-match shops, the map legend
+}
