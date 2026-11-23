@@ -27,12 +27,12 @@ static func theme(rec: Dictionary) -> String:
 
 ## What a Boki pushes with against another, before the wobble and your press.
 static func push(rec: Dictionary) -> float:
-	var R := rules()
+	var r_v := rules()
 	var power := float(rec.get("stats", {}).get("power", 0))
-	var mood: Array = R["mood"]
-	var p := float(R["push"]) * (1.0 + power * float(R["power_per_point"]))
+	var mood: Array = r_v["mood"]
+	var p := float(r_v["push"]) * (1.0 + power * float(r_v["power_per_point"]))
 	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
-	p *= lerpf(1.0, float(R["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
+	p *= lerpf(1.0, float(r_v["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
 	return p
 
 ## How firmly it holds against a push.
@@ -45,7 +45,7 @@ static func expected(a: Dictionary, b: Dictionary) -> float:
 
 ## The bout itself: the stump's balance, stepped in time. balance runs -1 (b wins) to 1 (a wins).
 class Run:
-	var R: Dictionary
+	var r_x: Dictionary
 	var recs: Array                 # two records: a (index 0) and b (index 1)
 	var backed := 0                 # index in recs: the Boki you back
 	var rng: RandomNumberGenerator
@@ -60,11 +60,11 @@ class Run:
 	var wobble: float               # +- fraction of each side's push roll: the rules', or the twist's
 
 	func _init(pair: Array, back: int, r: RandomNumberGenerator, tw := {}) -> void:
-		R = BaseShove.rules()
+		r_x = BaseShove.rules()
 		recs = pair
 		backed = back
 		rng = r
-		wobble = float(tw.get("wobble", R["wobble"]))
+		wobble = float(tw.get("wobble", r_x["wobble"]))
 		for i in 2:
 			base.append(BaseShove.push(recs[i]) / BaseShove.hold(recs[1 - i]))
 
@@ -73,11 +73,11 @@ class Run:
 
 	func shove(grade: String) -> void:
 		shoved = true
-		boost = float(R["shove"][grade])
-		boost_t = float(R["shove_s"])
+		boost = float(r_x["shove"][grade])
+		boost_t = float(r_x["shove_s"])
 
 	func over() -> bool:
-		return absf(balance) >= 1.0 or t >= float(R["max_s"])
+		return absf(balance) >= 1.0 or t >= float(r_x["max_s"])
 
 	## 0 or 1: who stands, by the balance (a on a dead level).
 	func winner() -> int:
@@ -87,7 +87,7 @@ class Run:
 		t += dt
 		roll_t -= dt
 		if roll_t <= 0.0:
-			roll_t = float(R["wobble_s"])
+			roll_t = float(r_x["wobble_s"])
 			for i in 2:
 				roll[i] = rng.randf_range(1.0 - wobble, 1.0 + wobble)
 		var force: Array = []
@@ -97,22 +97,22 @@ class Run:
 				f *= boost
 			force.append(f)
 		boost_t = maxf(0.0, boost_t - dt)
-		balance = clampf(balance + (float(force[0]) - float(force[1])) * float(R["rate"]) * dt, -1.0, 1.0)
+		balance = clampf(balance + (float(force[0]) - float(force[1])) * float(r_x["rate"]) * dt, -1.0, 1.0)
 
 ## Pays out a finished bout: joy, trust, a memory each, energy and gems. Returns what the card shows.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var r_v := rules()
 	var win: Dictionary = run.recs[run.winner()]
 	var lose: Dictionary = run.recs[1 - run.winner()]
 	for rec in run.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]))
+		Care.change(rec, "energy", -float(r_v["energy"]))
+	Care.change(win, "joy", float(r_v["win_joy"]))
+	Care.change(lose, "joy", float(r_v["lose_joy"]))
 	MinigameHub.record("shove", String(win["name"]))     # best Boki on the title's picker
-	Save.remember(win, "shove", "shoved %s off the stump" % lose["name"], float(R["win_trust"]))
+	Save.remember(win, "shove", "shoved %s off the stump" % lose["name"], float(r_v["win_trust"]))
 	Save.remember(lose, "shove", "lost the Stump Shove to %s" % win["name"])
 	var backed_won: bool = run.recs[run.backed] == win
-	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	var gems := int(r_v["gems_win"]) if backed_won else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var prize := GardenPrizes.settle("shove", run.recs[run.backed], run.recs[1 - run.backed], backed_won)
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize}
@@ -142,12 +142,12 @@ func place() -> void:
 	if is_instance_valid(stump):
 		stump.queue_free()
 	stump = null
-	var S := spot()
-	if S.is_empty() and h.YARD_AT.x < -100.0:
+	var s := spot()
+	if s.is_empty() and h.YARD_AT.x < -100.0:
 		return
 	stump = Node3D.new()
 	stump.name = "Stump"
-	stump.position = h.YARD_AT + STUMP_OFF if S.is_empty() else Vector3(S[0], 0.0, S[1])
+	stump.position = h.YARD_AT + STUMP_OFF if s.is_empty() else Vector3(s[0], 0.0, s[1])
 	h.add_child(stump)
 	var trunk := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
