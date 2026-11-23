@@ -353,14 +353,6 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	# are all still there.
 	var keep_mask := m.cam.cull_mask
 	m.cam.cull_mask = LAYER
-	var list: Array = await _sources(seen)
-	if not m.is_inside_tree():
-		return false
-	if list.is_empty():
-		m.cam.cull_mask = keep_mask
-		return true
-	var cb := m.cam.global_transform.basis
-	var front := m.cam.global_position - cb.z * 6.0
 	var wl := _lights()
 	# (a camera culls lights by their layers too: every light joins the stand-ins' layer meanwhile,
 	# or they'd all draw unlit)
@@ -375,6 +367,13 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		(l as Light3D).layers |= LAYER
 		if l is DirectionalLight3D:
 			(l as Light3D).light_cull_mask = LAYER
+	# (the lights first: _sources' frames draw too, and with the sun still casting the whole map's shadows the first of
+	# them built every material's shadow pipeline at once, a 1 s frame on the RTX 4090, jobq 122605)
+	var list: Array = await _sources(seen)
+	if not m.is_inside_tree():
+		return false
+	var cb := m.cam.global_transform.basis
+	var front := m.cam.global_position - cb.z * 6.0
 	# what a frame costs with nothing new in it, to tell a batch's own cost from plain drawing
 	await m.get_tree().process_frame
 	var t0 := Time.get_ticks_usec()
