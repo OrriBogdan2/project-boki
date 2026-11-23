@@ -869,7 +869,7 @@ words, not a number. So nothing changed in the kits. The table's numbers come fr
   slide (3.4 m vs 7.2 m), Tenzo's full punch (4.43 m vs 5.4 m), Vex's recoil (1.56 m vs 0.9 m). Each needs an owner call
   or a sharper clip before it changes.
 - `docs/MOVEMENT_FEEL.md` "Knock arc" was stale (push 12 rests at 5.12 m, push 9 at 3.07); the table and the
-  `knock_lace_04_m`, `knock_sparkle_04_m` and `knock_done_04` asserts now match the sweep (ext/knock-rows-green).
+  `knock_lace_04_m`, `knock_sparkle_04_m` and `knock_done_04` asserts now match the sweep; `knock_done_04` (>= 0.85, footage) is asserted on Storm Rod, the Joule spear's knock.
 
 ## Moving while casting: the slice four (main 88b06b9e7, 2026-11-12)
 
