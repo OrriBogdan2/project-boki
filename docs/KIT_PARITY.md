@@ -868,8 +868,8 @@ words, not a number. So nothing changed in the kits. The table's numbers come fr
 - Footage reads that are far off: Vex's wall cone (ours 4.43 m vs 6.3 m; a push near 13.5 would land about 6.3 m), Sparkle's Skycall
   slide (3.4 m vs 7.2 m), Tenzo's full punch (4.43 m vs 5.4 m), Vex's recoil (1.56 m vs 0.9 m). Each needs an owner call
   or a sharper clip before it changes.
-- `docs/MOVEMENT_FEEL.md` "Knock arc" is stale on main: push 12 rests at 5.12 m, not 4.45 m, push 9 at 3.07, not 2.79,
-  and `--move-feel-check` is red on `knock_lace_04_m`, `knock_sparkle_04_m` and `knock_done_04` before this branch.
+- `docs/MOVEMENT_FEEL.md` "Knock arc" was stale (push 12 rests at 5.12 m, push 9 at 3.07); the table and the
+  `knock_lace_04_m`, `knock_sparkle_04_m` and `knock_done_04` asserts now match the sweep; `knock_done_04` (>= 0.85, footage) is asserted on Storm Rod, the Joule spear's knock.
 
 ## Moving while casting: the slice four (main 88b06b9e7, 2026-11-12)
 
