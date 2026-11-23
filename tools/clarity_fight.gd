@@ -87,6 +87,7 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		if t >= next:
 			SafeArea.seen.clear()  # the HUD's drawn marks (plates, icons, badges) are recorded for tally()
 			SafeArea.recording = true
+			BokiChatter.drawn = 0  # fight-time Boki text the HUD draws this frame
 			m.hud.c.queue_redraw()
 			m.hud.panels.queue_redraw()
 			await main.get_tree().process_frame

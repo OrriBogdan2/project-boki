@@ -26,14 +26,33 @@ static func say(m: Match, k: Kin, trigger_id: String, fill := {}) -> void:
 	if txt != "":
 		m.kin_bark(k, txt, trigger_id)
 
+## Fight-time Boki text the HUD let through (callout pins, others' lines; --clarity-shots counts it per frame).
+static var drawn := 0
+
 ## Is the line over this Boki's head drawn? In a fight only your own Boki's are: the rest print over the fight.
 static func heard(m: Match, k: Kin) -> bool:
-	return k.owner_h == m.player or calm(m)
+	if k.owner_h == m.player:
+		return true
+	var ok := calm(m)
+	drawn += int(ok)
+	return ok
 
 
-## No fight on for the player: Boki callout pins ("Behind you! · 3m") and other Bokis' lines are drawn.
+## Is a Boki callout pin ("Behind you! · 3m") drawn? Not while your squad fights. Counted in `drawn`.
+static func pin_shown(m: Match) -> bool:
+	var ok := calm(m)
+	drawn += int(ok)
+	return ok
+
+
+## No fight on for you or a living squadmate: Boki callout pins and other Bokis' lines are drawn.
 static func calm(m: Match) -> bool:
-	return m.music_dir == null or not m.music_dir.fight_on(m)
+	if m.player == null:
+		return true
+	for h: Hunter in m.hunters:
+		if h.team == m.player.team and not h.dead and InCombat.is_in(h):
+			return false
+	return true
 
 ## Tutorial hints in its own voice, by step (grown speech, then what a hatchling does instead).
 const TUT_HINT := {
