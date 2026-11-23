@@ -245,6 +245,7 @@
 		"speed": 1.65,
 		"plants": {"crouch_b": {"L": [0.3], "R": [0.0]}, "crouch_f": {"L": [0.3], "R": [0.25]}, "crouch_l": {"L": [0.283], "R": [0.583]}, "crouch_r": {"L": [0.283], "R": [0.583]}}
 	},
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["bul_smash_wind", 0.5, "bul_guard"],
 		["bul_smash_wind", 0.5, "bul_mend"],

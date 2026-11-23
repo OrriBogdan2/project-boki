@@ -62,6 +62,7 @@
 	"cc": {"pull": 0.26, "tug_hz": 2.6, "twist": 0.15, "bow": 0.3},
 	"procedural": ["ledge", "mantle", "base", "swim"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "lid.L", "lid.R", "jaw", "ear.L", "ear.R", "wing.L", "wing.R"],
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["mm_seed_aim", 0.5, "stun"],
 		["mm_seed_aim", 0.5, ""],
