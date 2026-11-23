@@ -141,7 +141,7 @@ lines are judged at 9 Boki only), `--bench-isolate` (`tools/perf/garden_isolate.
 
 | part | Medium before | Medium after | Low before | target |
 |---|---|---|---|---|
-| hub | 11.8 / 13.9 | 12.2 / 15.6 | 11.5 / 15.1 | 16.7 (60 fps) |
+| hub | 11.8 / 13.7 | 12.2 / 15.6 | 11.5 / 15.1 | 16.7 (60 fps) |
 | Cinderstep 10 Boki | 17.9 / 22.1 | 19.2 / 22.9 | 17.3 / 20.8 | 16.7 medium, 33 low |
 | Cinderstep 20 Boki | 26.7 / 30.1 | 24.5 / 30.8 | 26.4 / 30.4 | same |
 | Cinderstep 30 Boki | 34.9 / 39.4 | 30.3 / 37.2 | 33.4 / 39.4 | same |
@@ -186,5 +186,6 @@ and is the next job (not traced here: 1000 nodes, 650 draws, sky, world scripts)
 ### Held
 - The 60 fps Medium target is not met even at 10 Boki: the island floor (~12 ms with nobody drawn) is the next cost.
 - The kin script is still about n squared at 30 Boki (`kins.filter` in the idle choice, `HomeWork`, `life.step`).
-- `--perf-budget-check` and `--boki-rig-check`'s "fliers: hovering they hold 0.5 to 1.5 m up" fail on origin/main too
-  (the second is the same with the new easing switched off).
+- `--boki-rig-check`'s "fliers: hovering they hold 0.5 to 1.5 m up" fails here with the new easing switched off too
+  (`crowd_from = 999`, which is main's behaviour), so it is not from this change; not run against a main worktree.
+  `--perf-budget-check` timed out at 900 s on software GL here (no result).
