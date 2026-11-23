@@ -65,6 +65,9 @@ func _shot_dist(m: Match, P: Hunter) -> float:
 		var mz: Vector3 = s["muzzle"]
 		var st: Vector3 = s["start"]
 		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+		if (s["x"] as Dictionary).has("hand"):
+			# the drawn muzzle is the hand (ShotOrigin.draw_from); the sim still launches 0.6 m ahead of the body
+			lead = 0.6
 	return float(s["life0"]) * (s["vel"] as Vector2).length() - lead
 
 func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
