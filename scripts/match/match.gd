@@ -4118,7 +4118,7 @@ func _update_interact(dt: float) -> void:
 						best = {"kind": "revive", "ent": o, "label": "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname, "col": Color("ff6a5a")}
 					else:
 						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  stay on the wisp" % o.pname, "col": Color("9ee2a0")}
-		best = StompPick.prompt(self, h, best)
+		best = StompTarget.prompt(self, h, best)
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
 		# 1b. deathboxes: bring a teammate back while their soul is there, or take everything
