@@ -38,6 +38,7 @@ func _lines(m: Match) -> Array[String]:
 
 func run(mn: Node) -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = mn
 	Save.no_write = true
 	for who in STARTERS:

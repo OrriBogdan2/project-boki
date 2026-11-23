@@ -39,6 +39,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -332,7 +333,7 @@ func _on_base() -> void:
 ## A real bout has just started: a run in its intro with the bout's own exchange count.
 func _bout_start(tb: BaseTumble) -> bool:
 	var n := int(BaseTumble.rules()["exchanges"])
-	return tb.run != null and tb.run.state == "intro" and int(tb.run.R["exchanges"]) == n
+	return tb.run != null and tb.run.state == "intro" and int(tb.run.r_x["exchanges"]) == n
 
 func _menu() -> InputEventAction:
 	var e := InputEventAction.new()
@@ -357,7 +358,7 @@ func _teach(tb: BaseTumble, home) -> void:
 			func(c): return c is TumbleTeach.Triangle) if tb.teach != null else []
 	ok(tri.size() == 1, "teach: the card draws the Rush/Brace/Dodge triangle")
 	var r_v := BaseTumble.rules()
-	ok(tb.run != null and int(tb.run.R["exchanges"]) == 1 and float(tb.run.R["pick_s"]) > float(r_v["pick_s"]),
+	ok(tb.run != null and int(tb.run.r_x["exchanges"]) == 1 and float(tb.run.r_x["pick_s"]) > float(r_v["pick_s"]),
 			"teach: practice is one exchange with a longer pick window")
 	var lines := {}
 	var bar_speed := 0.0
