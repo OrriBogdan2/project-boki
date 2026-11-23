@@ -46,6 +46,11 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
 crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
 `--warden-glb-check` counts native Hunters apart. Renders: `--clip-shots --warden=<arch> --states [--match]`.
+Online: each `--remote-anim-1|2|3|rest-check` shard ends with a native row (Lace, Kael, Sable, Gil): through the
+online-feel proxy at 100 ms each way, the other player's copy plays the same state and clip as the owner's (idle,
+walk, run, air, attack, crouch, the extract beat) in order, at the same pace per state, with no stalled loop and no
+one-frame snap of the hand. A freshly dressed model reads its first filled state as the baseline (no phantom attack
+from old counters) and poses its idle at once (no rest T-pose frame).
 
 ## Weapons and orbit props
 Meshy's mesh carries the weapons (Sable's two pistols, Tenzo's one stone arm), so the rig's Gun and HunterAnim's
