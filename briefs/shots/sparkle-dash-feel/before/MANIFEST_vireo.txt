@@ -1,0 +1,14 @@
+vireo/v2/polish|vireo_anim_dash.png|Shift: the charging crouch, the streak (her gold-teal after-images), re-forming on arrival
+vireo/v2/polish|vireo_dash_aim_mid.png|Shift held: rails out to max, the ticked end ring partway (the cursor plays no part)
+vireo/v2/polish|vireo_dash_aim_mid_close.png|Shift held: rails out to max, the ticked end ring partway (the cursor plays no part) (close-up)
+vireo/v2/polish|vireo_dash_aim_full.png|Shift held to full: the end ring at 8.5m, past the 3m cursor
+vireo/v2/polish|vireo_dash_aim_full_close.png|Shift held to full: the end ring at 8.5m, past the 3m cursor (close-up)
+vireo/v2/polish|vireo_dash_run.png|Shift released: a lightning streak, the body a trail of her own gold-teal after-images
+vireo/v2/polish|vireo_dash_run_close.png|Shift released: a lightning streak, the body a trail of her own gold-teal after-images (close-up)
+vireo/v2/polish|vireo_dash_arrive.png|Shift arrival: she re-forms with a dust puff (no ring or burst: the hits are along the way)
+vireo/v2/polish|vireo_dash_arrive_close.png|Shift arrival: she re-forms with a dust puff (no ring or burst: the hits are along the way) (close-up)
+vireo/v2/polish|vireo_anim_dash_ex.png|Air dash (her base dash variant): the tuck, the forward tumble, her teal after-images, the landing
+vireo/v2/polish|vireo_dash_ex.png|Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak
+vireo/v2/polish|vireo_dash_ex_close.png|Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak (close-up)
+vireo/v2/polish|vireo_blowout.png|Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her
+vireo/v2/polish|vireo_blowout_close.png|Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her (close-up)

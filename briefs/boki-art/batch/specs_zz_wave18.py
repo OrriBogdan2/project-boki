@@ -1,0 +1,19 @@
+# Round 18 (22:50 ET): panel group 5 (seats A+C agree; B pending, all clear rejects except Howlop).
+XE('howlop_e','Howlop','howlop_r_1.jpg',"lower the body into a flat stalking crouch with the head thrust forward, bring back the hare: a rounder muzzle with a split hare lip and buck-tooth incisors in front of the sabre fangs and a fluffy cottontail tuft at the base of the whip tail, and make the sound rings thinner and behind the head.")
+X('gongibbon_f2','Gongibbon (female)',T+'Gongibbon.jpg',"make it the female form: keep the dark gibbon with the white face ring and the gong grown into the chest fur exactly as it is (no cord, chain or necklace, no tiara), make the fur a warmer grey-brown, the limbs slightly slimmer, the gong a little smaller and the mallet tail finer and curled.",runs=3)
+V('geysirbara_r2','Geysirbara',T+'Soakybara.jpg','final',
+ "A low, sprawling, wide-bodied capybara-turtle volcano three times the size of image 1, belly to the ground with its stubby legs splayed out, its back built up into a terraced sinter cone with several short steaming vent spouts along a ridged spine (no single tall plume), a stumpy tail, cracked pale sinter crust with glowing hot water in the cracks, and a heavy grumpy jaw with steam from its nostrils."+ONE+F,
+ "heavy-lidded, grumpy eyes and a slow, stubborn frown","sinter cream and volcanic grey, with a hot-water teal accent","a tall geyser plume, a pool on its back, standing like image 1",'tide','tough')
+V('glaciatee_r','Glaciatee',T+'Frigatee.jpg','final',
+ "A towering, hump-backed walrus-iceberg three times the size of image 1, rearing its chest up on thick ice-pillar front flippers, its whole torso a faceted glacier block with a round brass vault door grown into its chest (the rim fused into the ice, no bands or straps), long icicle tusks and a frosty moustache."+ONE+F,
+ "calm, deep, heavy-lidded eyes and a slow, gentle smile","cream and glacier blue, with a brass accent","lying belly-down like image 1, bands, straps, a door stuck on its side",'frost','tough')
+V('glaivyx_r2','Glaivyx',E+'Vespox.jpg','final',
+ "A low, very wide scorpion-fox built like a crab tank, its broad flat chitin carapace growing out of the fur at the seams, short thick legs splayed sideways, a small fox head sunk between two oversized crushing pincers, and one huge curved scythe-blade tail arched high over its back."+ONE+F,
+ "narrow, smouldering green eyes and a grim, confident frown","dark plum and gunmetal, with a toxic-green accent","standing upright, a person-like torso, worn armour plates, a thin whip tail",'venom','tough')
+V('gongrowl_r','Gongrowl',T+'Gongibbon.jpg','final',
+ "A huge, stylised knuckle-walking silverback ape with an oversized head, whose spine and shoulder blades rise into two horn-like bronze ridges with a big round gong disc grown between them as part of its back, its forearms thickening into solid bronze-capped mallet knuckles. No straps, frames, cuffs, pauldrons or held mallets."+ONE+ALL4+F,
+ "deep-set, fierce eyes and a booming roar","dark grey and bronze, with a gold accent","a backpack frame, straps, armour, held mallets, a lanky gibbon",'echo','tough')
+V('jibbatross_r','Jibbatross',T+'Canvastross.jpg','final',
+ "A lean, forward-leaning albatross mid-stride, its wings half-folded and swept back like furled jib sails with the canvas grown as feather membrane between dark wooden wing bones, long wind-streamer tail feathers (not ribbons), hooked iron tips on its beak and wing joints."+ONE+F,
+ "droopy gold eyes in dark patches and a cocky young-deckhand scowl","white and canvas cream, with an iron-grey accent","stiff vertical wings, ribbons tied through grommets, a saddle, ropes, a mast",'tempest','fast')
+PRIORITY=PRIORITY+['howlop_e','gongibbon_f2','geysirbara_r2','glaciatee_r','glaivyx_r2','gongrowl_r','jibbatross_r']

@@ -1,0 +1,21 @@
+PROBE renderer=forward_plus size=(1280.0, 720.0) msaa=0 shadows=true quality=auto
+PROBE load total 18510 ms over 213 frames; worst frame 1786 ms
+PROBE build steps total 16824 ms: build.hunters 8625, build.spawns 1615, build.warm_up 1524, build.mobs 892, build.chests 817, world.terrain 701, build.generate 557, world.scatter_plan 529, world.walls 445, build.pads_exits 347, world.grass 260, build.systems 105, world.roots 86, map.bake 86
+PROBE phase     frames wall_avg wall_p95 wall_max   script  scr_max    rcpu     hud     draws  prims_k
+PROBE first         31     26.8     28.4     37.6     2.46    11.21    2.56   15.41 2562/2564     2280
+PROBE planning      75     27.7     29.9     49.1     0.40     0.82    2.75   15.68 2785/2803     2407
+PROBE ride         145     87.1    127.1    148.1    11.11    21.25    2.30   11.76 1788/2296     1667
+PROBE drop          89     78.6     84.9    138.3    18.58    24.13    3.02   12.05 2347/2705     3051
+PROBE land         151     38.6     43.2     92.6    21.53    39.74    2.32    8.10 1913/2396     2689
+PROBE map           60     39.6     42.4     45.1    18.44    21.34    2.56   12.14 2367/2395     2644
+PROBE fight        301     37.8     40.9    222.3    20.11    35.21    2.55    8.41 2212/2316     2618
+PROBE worst frames (wall ms, script ms, render cpu ms, phase, sim t, build steps inside):
+PROBE     222.3   17.61     3.2 hud   9.1 fight     t= 22.4 
+PROBE     148.1   17.49     2.3 hud  11.2 ride      t=  9.8 
+PROBE     144.2   13.28     2.0 hud  12.5 ride      t=  6.7 
+PROBE     141.1   20.44     3.1 hud  11.8 ride      t=  6.6 
+PROBE     138.3   17.03     6.6 hud  16.7 drop      t= 14.4 
+PROBE     135.3   13.01     1.6 hud  11.2 ride      t= 11.7 
+PROBE     131.8   17.58     1.9 hud  10.4 ride      t= 13.1 
+PROBE     129.9   17.61     1.6 hud  10.2 ride      t= 12.9 
+PROBE memory: textures 1187.9 MB, buffers 207.7 MB, video 1603.8 MB, static 564.8 MB, objects 25029, nodes 10323
