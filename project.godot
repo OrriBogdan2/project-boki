@@ -145,18 +145,6 @@ vis_dark={
 "type": "float",
 "value": 0.7
 }
-vis_amb={
-"type": "float",
-"value": 0.4
-}
-vis_haze={
-"type": "vec4",
-"value": Vector4(0, 0, 0, 0)
-}
-vis_haze_h={
-"type": "vec2",
-"value": Vector2(0, 0)
-}
 vis_reveals={
 "type": "float",
 "value": 0.0

@@ -186,21 +186,18 @@ void fragment() {
 	float ember = canopy_ember(lpos.xz);
 	c = canopy_tint(c, ember);
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
-	vis_f = fog;
 	c = vis_apply(c, fog);
 	ALBEDO = mix(c, flash_color.rgb, flash);
 	// a faint rim everywhere (so silhouettes lift off dark ground even in shadow); the crisp,
 	// light-facing rim is added per light below
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	EMISSION = canopy_glow(ember) * (1.0 - fog) + flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow;
-	AO = vis_ao(vis_f);                      // out of sight: the coloured ambient out, its grey back in (vis.gdshaderinc)
-	EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }
 
 void light() {
-	vec3 lc = vis_grey(LIGHT_COLOR, vis_f);     // out of sight: grey light, grey shadow side, no ambient cast (vis.gdshaderinc)
+	vec3 lc = LIGHT_COLOR;
 	if (!LIGHT_IS_DIRECTIONAL) {
 		// lamps and glows: plain falloff. (The cel shade floor below is only for the sun; on a lamp
 		// it lit whole screen clusters at once, which showed up as blocky squares at night.)
@@ -216,11 +213,11 @@ void light() {
 		// warm light bleeding through just past the terminator, like skin or fur
 		float term = smoothstep(-0.34, 0.02, ndl) * (1.0 - smoothstep(0.02, 0.32, ndl)) * mix(0.35, 1.0, ATTENUATION);
 		tone += sss_color.rgb * term * sss;
-		DIFFUSE_LIGHT += ALBEDO * lc / PI * vis_grey(tone, vis_f);
+		DIFFUSE_LIGHT += ALBEDO * lc / PI * tone;
 		// a crisp rim on the edge that faces this light (key light rims gold, the fill rims cool)
 		float fres = 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0);
 		float rim_l = smoothstep(0.7, 0.8, fres) * smoothstep(-0.25, 0.45, ndl);
-		DIFFUSE_LIGHT += vis_grey(rim_color.rgb, vis_f) * lc * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, ATTENUATION);
+		DIFFUSE_LIGHT += rim_color.rgb * lc * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, ATTENUATION);
 		vec3 hv = normalize(LIGHT + VIEW);
 		float nh = max(dot(NORMAL, hv), 0.0);
 		SPECULAR_LIGHT += lc * pow(nh, 16.0) * sheen * band;

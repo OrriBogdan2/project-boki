@@ -171,8 +171,8 @@ func _reveal(m: Match) -> void:
 		return
 	ok(false, "an open spot %.0f degrees off your aim (seed 5101)" % AWAY_DEG)
 
-## No blue (or any hue) outside sight: the fog colour multiplies by greys only, and each lit world shader writes the
-## fog share for light(), greys the light colour and the cool shadow tint there, and swaps the ambient for its grey.
+## Outside sight is the same colours, a little darker: vis_apply only scales by one number, no world shader
+## greys or tints its light, and the haze behind you (env fog) is grey in every weather.
 func _grey_fog(m: Match) -> void:
 	var src := FileAccess.get_file_as_string("res://shaders/vis.gdshaderinc")
 	var at := src.find("vec3 vis_apply(")
@@ -180,20 +180,22 @@ func _grey_fog(m: Match) -> void:
 	var tints := 0
 	var re := RegEx.create_from_string("vec3\\(([-0-9.]+), *([-0-9.]+), *([-0-9.]+)\\)")
 	for r in re.search_all(body):
-		var x := float(r.get_string(1))
-		if not (is_equal_approx(x, float(r.get_string(2))) and is_equal_approx(x, float(r.get_string(3)))):
-			tints += 1
-	ok(at >= 0 and tints == 0 and not src.contains("VIS_COOL"),
-		"the fog colour is grey: no tint in vis_apply (%d)" % tints)
+		tints += 1
+	ok(at >= 0 and tints == 0 and body.contains("c * mix(1.0, vis_dark, fog)") and not body.contains("VIS_LUMA"),
+		"the fog only scales the colour by one number: no tint, no grey in vis_apply (%d)" % tints)
+	var vf := RegEx.create_from_string("\\bvis_f\\b")
 	for n in FOG_LIT:
-		var s := FileAccess.get_file_as_string("res://shaders/%s.gdshader" % n)
-		var light := s.substr(s.find("void light()"))
-		var greyed := s.contains("vis_f = ") and light.contains("vis_grey(LIGHT_COLOR, vis_f)") \
-			and not light.contains("* LIGHT_COLOR")
-		var tone_ok := not light.contains("* tone;") and not light.contains("DIFFUSE_LIGHT += rim_color")
-		var amb_ok := s.contains("AO = vis_ao(vis_f)") \
-			and s.contains("EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX)")
-		ok(greyed and tone_ok and amb_ok,
-			"%s greys its light, shadow tint, ambient and haze outside sight" % n)
-	var amb := RaidLook.vis_amb(m.env.environment)
-	ok(amb > 0.05 and amb < 2.0, "the ambient's grey is set for the fog (vis_amb %.3f)" % amb)
+		var sh := FileAccess.get_file_as_string("res://shaders/%s.gdshader" % n)
+		var swapped := sh.contains("vis_grey") or sh.contains("vis_ao") or sh.contains("vis_ambient")
+		ok(not (swapped or vf.search(sh) != null), "%s keeps its own light outside sight (no grey swap)" % n)
+	var dim: float = RaidLook.VIS_DARK
+	ok(dim >= 0.6 and dim <= 0.85, "the dim is slight (albedo x%.2f)" % dim)
+	for cond in RaidLook.CONDITIONS:
+		var e := m.env.environment.duplicate() as Environment
+		RaidLook.apply(e, DirectionalLight3D.new(), null, m.T, cond)
+		var f := e.fog_light_color
+		var grey := is_equal_approx(f.r, f.g) and is_equal_approx(f.g, f.b)
+		ok(grey, "the haze colour is grey in %s weather (%s)" % [cond, f.to_html(false)])
+	var fc := m.env.environment.fog_light_color
+	var fc_grey := absf(fc.r - fc.g) < 0.002 and absf(fc.g - fc.b) < 0.002
+	ok(fc_grey, "the haze behind you is grey, no blue (%s)" % fc.to_html(false))
