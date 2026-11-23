@@ -11,6 +11,7 @@ const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
 const FIGHT_FRAMES := 10
 const FIGHT_PX := Vector2i(1920, 1080)  # the fight frames' size (the window: stretch is off)
+const TOASTS := ["Fever is lit", "Bond full!  R: Venom Fusion"]  # the two the baseline found over the top centre
 const RUN_S := 1.6         # s the scene plays before the picture (the downed teammate's Boki reacts)
 
 func run(main: Node) -> void:
@@ -87,9 +88,21 @@ func run(main: Node) -> void:
 func _fights(main: Node, dir: String) -> void:
 	var rows := PackedStringArray(["fight\tframe\tkind\twhat\thunters"])
 	var frames := {}  # "kind what" -> frames it was on a Hunter
+	var toasts := [0, 0]  # frames with a toast card on show, and of those in the top-centre third of the screen
 	main.get_window().size = FIGHT_PX
 	for f in ClarityFight.FIGHTS.size():
 		var on_frame := func(fm: Match, i: int) -> void:
+			var lane: MsgLane = fm.hud.msgs
+			lane.clear()
+			fm.hud.toast(TOASTS[i % TOASTS.size()], Color("ffd23f"))      # a toast is up on every frame
+			var sz: Vector2 = fm.hud.c.size
+			var third := Rect2(sz.x / 3.0, 0.0, sz.x / 3.0, sz.y / 3.0)
+			if not lane.rects().is_empty():
+				toasts[0] += 1
+				if lane.rects().any(func(r: Rect2) -> bool: return r.intersects(third)):
+					toasts[1] += 1
+			for _k in 12:      # the card fades in
+				await fm.get_tree().process_frame
 			var img := fm.get_viewport().get_texture().get_image()
 			if img:
 				img.save_png(dir.path_join("fight%d_%d.png" % [f, i]))
@@ -108,3 +121,5 @@ func _fights(main: Node, dir: String) -> void:
 	keys.sort_custom(func(a, b): return frames[a] > frames[b])
 	for k: String in keys.slice(0, 40):
 		print("CLARITYTOP %d/%d %s" % [frames[k], FIGHT_FRAMES * ClarityFight.FIGHTS.size(), k])
+	var total := FIGHT_FRAMES * ClarityFight.FIGHTS.size()
+	print("CLARITYTOAST %d/%d frames with a toast in the top-centre third (%d up)" % [toasts[1], total, toasts[0]])
