@@ -72,8 +72,7 @@ gl_compatibility): 20261111-090952-22488 -> 20261111-091010-11716.
 | Hushwood | 357 / 17.2 | 326 / 16.4 | 325 / 7.0 | 301 / 7.0 |
 | Kitewind Ridge | 469 / 17.6 | 301 / 17.3 | 434 / 7.0 | 256 / 7.0 |
 
-Every zone is now under 350 draws on both machines; the ratchet keeps only what is still over: the hub (M5 520,
-Low 370 held from rp1-0, which MRROBOTO's 470 is past: a different machine, not loosened) and the M5 frame of
+Every zone is now under 350 draws on both machines; the ratchet keeps only what is still over: the hub (see "Hub draws" below for the current numbers) and the M5 frame of
 Cinderstep and Ridge (17-18 ms at a 640x360 window, near the 60 Hz line on both sides of the fixes, so the frame is
 not draw-bound there). Objects, nodes, emitters and base_life are within budget everywhere.
 
@@ -129,3 +128,31 @@ The fixed part shows in every zone: Beam 40 -> 20, Zone + ZoneFill cards gone, t
 counts move only by live Boki bursts (Hushwood had 4 small bursts in the after frame). Draws are within run noise
 (Ridge +11 is Boki in frame). `docs/shots/garden-clarity/<part>.jpg` are these GPU frames, left before, right after.
 (Before also exits with a core dump at cleanup, rc 134, after all shots and numbers are written; after exits 0.)
+
+## Hub draws (ext/farm-hub-draws, 2026-11-22)
+Task: the hub under 350 draws at Medium and Low. Since the numbers above, merged work (zone draw fixes, merged
+fixtures) had already brought it to 335 (Medium) and 330 (Low) on current main; the held 520 / 370 were stale. This
+branch cuts it further and holds the new numbers.
+
+What costs draws in the hub is distinct mesh + material pairs, not objects: Godot draws identical ones as one
+instanced call (merging the incubator's 30 pebbles into one mesh per cradle changed nothing: objects -49, draws +4,
+reverted). Switching every shadow caster off saves 8 draws, so shadows are not the lever either. Hiding each piece in
+turn (temporary probe, not committed) found the pieces whose copies each had their own mesh:
+- Incubator: the eight cradles were eight separately merged meshes (stone, nest, grate) of the same shape. One cradle is
+  built and merged (`IncubatorCradle`), the others are `duplicate()`s that share its meshes: 68 -> 42 draws.
+- Burrow: six window frames were six identical tori, now one shared mesh: 34 -> 24 draws.
+No look changes at any preset (same meshes, same materials).
+
+GPU, `--perf-bench --bench-secs=3 --bench-farm=8`, same machine type both sides (RTX 4090, forward_plus, 640x360,
+UI hidden), draws / objects / frame ms. Before = 0a0db9747c (jobq 20261122-050834-16169 Medium, 20261122-050847-04902
+Low), after = this branch (20261122-061648-29848 Medium, 20261122-061649-02178 Low):
+
+| quality | before | after |
+|---|---|---|
+| Medium | 335 / 436 / 5.8 | 300 / 435 / 2.5 |
+| Low | 330 / 431 / 5.2 | 292 / 427 / 2.0 |
+
+Ratchet: hub draws 520 -> 310 (Medium), 370 -> 300 (Low). Objects stay at 520 / 560. The M5 (gl_compatibility, which
+counts more draws for the same scene) was not available to this job: its hub number is unmeasured since the 495 above.
+Still over the 200 target: the partner's rig (37), the terrain and its far scenery (39), the Waystone (22), the stall
+(20), the Nook (19), the portal (18) and the incubator's brazier and embers (42).

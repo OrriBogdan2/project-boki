@@ -943,7 +943,7 @@ def gen_buffer_windows(flows):
          "`--move-feel-check` asserts 0.10 s lands a jump and 0.15 s does not.", "[?] kept"],
         ["Recast press before its window", _const_s("scripts/arch/arch_kit.gd", "RECAST_BUFFER"),
          "Owner 11-08 two-step abilities (docs/INPUT_MODES.md).", "same as the shared window"],
-        ["Kael, a slash or Smash in a heavy move or the ult's guard", _const_s("scripts/arch/kits/juggernaut_kit.gd", "BUFFER"),
+        ["Kael, a slash or Smash in a heavy move or the ult's guard", _press_buffer(),
          "It was 0.12 s with no source (\"ours, no footage\", docs/heroes/juggernaut.md); now the shared window, "
          "`--dash-flow-check` asserts it.", "fixed: the shared window"],
     ]

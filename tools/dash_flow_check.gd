@@ -96,6 +96,7 @@ func run_heroes(main: Node, heroes: Array) -> void:
 	for r in SOURCE_ROWS:
 		var row := DashFlow.row_of(r[0], r[2], r[1] == "air")
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
+	ok(Loco.press_buffer == 0.15, "the shared press window Loco.press_buffer is 0.15 s (Kael's too)")
 	for hero in heroes:
 		await check_hero(main, hero)
 	await _one_window(main)

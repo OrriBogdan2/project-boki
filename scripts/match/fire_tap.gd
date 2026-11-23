@@ -19,7 +19,8 @@ static func down(h: Hunter, allowed: bool) -> bool:
 	return allowed and (held or bool(h.inp.get(TAP, false)))
 
 
-## From Hunter.sim, as it clears the other press keys: a tap was down for that one step only.
+## From Hunter.sim, as it clears the other press keys: a tap was down for that one step only
+## (a key still held stays down).
 static func stepped(h: Hunter) -> void:
 	if h != null and h.inp.get(TAP, false):
 		h.inp[TAP] = false
