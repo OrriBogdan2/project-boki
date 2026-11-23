@@ -219,14 +219,14 @@ func _states(model: Node3D, fps: float, out: String) -> void:
 ## --states on a Meshy-native model, then each kit move it has a clip for (data "kmoves"), pressed standing: its clip's
 ## length (a hold loop: one and a half laps) and 0.3 s of the move gone (the walk clips back, the loop with it).
 func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) -> int:
-	var moves = poser.get("moves")
+	var moves: WardenNativeMoves = poser.get("moves")
 	if moves == null:
 		return i
 	for km in moves.moves:
 		var mv: Dictionary = moves.moves[km]
-		var len_s := poser.player.get_animation(String(poser.plays[WardenNativeMoves.KEY % km])).length
+		var len_s: float = poser.player.get_animation(String(poser.plays[WardenNativeMoves.KEY % km])).length
 		var hold := float(mv.get("hold_from", -1.0))
-		var secs := len_s if hold < 0.0 else hold + 1.5 * (len_s - hold)
+		var secs: float = len_s if hold < 0.0 else hold + 1.5 * (len_s - hold)
 		for k in int((secs + 0.3) * fps):
 			var s := {"grounded": true, "face": model.rotation.y}
 			if k / fps < secs:
