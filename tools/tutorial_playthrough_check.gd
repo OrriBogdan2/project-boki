@@ -6,7 +6,7 @@ extends "res://tools/new_player_flow_check.gd"
 ## are --new-player-flow-check's, so a stall there fails too. Seconds are game time, the same on any box.
 
 const STEP_LIMIT_S := 40.0  # s of game time one step may take (the flow check's own limit is 45)
-const TIME_SCALE := 4.0  # the prologue, hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
+const TIME_SCALE := 4.0  # prologue, hatch and Relic screens wait out real-time tweens (33 s); game time unchanged
 
 var step_id := ""
 var step_s := 0.0
