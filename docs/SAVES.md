@@ -7,6 +7,7 @@ save marked "from a newer game", a lost kin or field, or a key `Settings` no lon
 | golden | written by | what the check asserts |
 |---|---|---|
 | `save_v<N>_*.json` | `Save.save_game` (slots `kinfall_save*.json`, the profile is inside) | loads through `Save.load_from`, upgrades to `Save.VERSION`, writes no `.bak`, keeps every kin and every field. A golden at the current version must lose nothing (only `LOAD_REWRITES` fields may change); an older one keeps its names, counts and numbers (`MIGRATED_KEYS`) |
+| `save_v<N>_bred.json` | the farm golden plus one `Care.breed` baby | the same checks, and the baby keeps `dna.accent` and `gifts.accent` (a bred coat; older Boki have none and look as before) |
 | `settings.cfg` | `Settings.save` (+ the last slot from `Save.use_slot`) | every key is in `Settings.DEFAULTS` or `REMOVED`; values, key bindings and the slot survive |
 | `feedback.json` | `Feedback` | `Feedback._load` reads minutes, answered versions and the queue back |
 | `warm_stamp.json` | `WarmStamp.save` (a cache; a stale one is ignored) | the file still has its fields |
