@@ -150,24 +150,33 @@ func _trip() -> void:
 func _item_home(id: String, who: String, pose: String, verb: String) -> void:
 	_gather(home.ppos)
 	var k := _entry(who)
+	for key in ComeLook.BUSY + ["busy"]:  # the base life may have sent it to a toy or a meal since _gather
+		k.erase(key)
 	k["pos"] = home.world.free_spot_near(home.ppos + Vector3(1.5, 0, 0))
 	(k["node"] as Node3D).position = k["pos"]
 	var mem := _mem_size(who)
 	var jr: int = (k["rec"].get("journal", []) as Array).size()
 	Save.d["items"][id] = 1
 	_trip()
+	ComeLook.tick(home, 0.01)  # the look takes hold before the base life thinks again (it sets k["look"])
 	var tag := "new %s" % id
 	ok(ComeLook._looks.size() == 1 and ComeLook._looks[0]["kind"] == "item" and ComeLook._looks[0]["k"] == k,
 		"%s: only the nearest Boki (%s) walks up (%d)" % [tag, who, ComeLook._looks.size()])
 	var res := _watch(home.ppos)
 	ok(res["pose"].get(who, "") == pose and res["spoke"].has(who),
 		"%s: %s does a %s and says a line" % [tag, who, pose])
-	var line := CareJournal.text(k["rec"]["journal"][-1]) if not k["rec"].get("journal", []).is_empty() else ""
-	var named := line.contains(GardenItems.item_name(id))
-	ok((k["rec"]["journal"] as Array).size() == jr + 1 and line.begins_with(verb) and named,
-		"%s: one journal line '%s'" % [tag, line])
+	# the item's own line, among those written since (a Boki's own errand may close with a line of its own meanwhile)
+	var mine: Array = []
+	for e in (k["rec"].get("journal", []) as Array).slice(jr):
+		var t := CareJournal.text(e)
+		if t.begins_with(verb) and t.contains(GardenItems.item_name(id)):
+			mine.append(t)
+	ok(mine.size() == 1, "%s: one journal line %s" % [tag, mine])
 	var seen: bool = Save.d["tutorial"].get(ComeLook.ITEM_KEY + id, false)
-	ok(_mem_size(who) == mem and seen, "%s: no memory line, kind marked seen" % tag)
+	var mem_new: Array = (k["rec"]["memory"] as Array).slice(mem).filter(
+		func(e): return String(e["text"]).containsn(GardenItems.item_name(id)) or String(e["text"]).containsn(id)
+	)
+	ok(mem_new.is_empty() and seen, "%s: no memory line about it, kind marked seen (%s)" % [tag, mem_new])
 
 func run(m: Node) -> void:
 	main = m
