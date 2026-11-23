@@ -13,5 +13,6 @@ const CHECKS := {
 	"--stretch-5-check": ["res://tools/stretch_check.gd", "stretch_check", "archer,mage"],
 	"--stretch-6-check": ["res://tools/stretch_check.gd", "stretch_check", "dolm,ostra"],
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
+	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],  # GPU: posed hunter clip frames, --geo-dir= --shots-dir=
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 }
