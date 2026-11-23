@@ -22,6 +22,8 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 
 ### ext/sfx-motley (ostra)
 - Synthesised, no samples.
+### ext/sfx-motley-gil-bar (ostra, gil)
+- Synthesised, no samples, no CC0 sources needed (`tools/gen_sfx_motley.py bar`: os_snap_fizz, os_trade_swap, os_seed_fizz, os_well_close; `tools/gen_sfx_gil.py bar`: gil_tide_hit, gil_slime_dry, gil_spout_hit, gil_tide_lunge).
 
 ### ext/sfx-cinder (ashwick)
 - Synthesised, no samples.
@@ -36,13 +38,19 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 - Synthesised, no samples.
 
 ### ext/sfx-sable (thief)
-- Synthesised, no samples.
+- Synthesised, no samples. ext/sfx-sparkle-sable-bar added thief_knife_whisk, thief_knife_ground, thief_shadow_whisk,
+  thief_bola_bounce, thief_bola_tie, thief_encore_end: synthesised in `tools/gen_sfx_sable.py`, CC0 (no outside source).
 
 ### ext/sfx-ryzz (mage)
-- Synthesised, no samples.
+- Synthesised, no samples. ext/sfx-sparkle-sable-bar added mage_miss, mage_wire_hit, mage_rod_fizzle, mage_sky_ground:
+  synthesised in `tools/gen_sfx_ryzz.py`, CC0 (no outside source).
 
 ### ext/sfx-tarek (dolm)
 - Synthesised, no samples.
+
+### ext/sfx-tenzo-grimble-bar (Tenzo and Grimble ability bar)
+- Synthesised, no samples, CC0 (`tools/gen_sfx_ability_bar.py`: dolm_hit_rock, dolm_hit_rmb, dolm_hit_dash,
+  dolm_hit_r, br_boulder_fly, dredge_hit_rmb, dredge_hit_e, dredge_hit_r, dr_reach_fly, dr_let_go, dr_blast_end).
 
 ### ext/sfx-boki
 - Synthesised, no samples.

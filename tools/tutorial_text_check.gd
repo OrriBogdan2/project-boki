@@ -5,6 +5,8 @@ extends RefCounted
 ## letters or digits, and not use a jargon word before the step that introduces it.
 
 const MAX_WORDS := 12
+## A notice card line (every line gets a bullet from HomeNotices.bullet) stays short: bullets, not paragraphs.
+const MAX_NOTICE_CHARS := 60
 ## term -> the step id that introduces it ("" = never introduced by the tutorial, so never allowed). The Fusion
 ## step and its unlock name the Ultimate (R) and the Fusion (X) as two things.
 const JARGON := {"fuse": "pick_ult", "relic": "expedition", "kin": "", "rank": "rank", "daze": "",
@@ -58,5 +60,7 @@ func run(m: Node) -> void:
 		for h in r["hints"]:
 			out.append(["hint " + h, r["hints"][h]])
 		return out)
+	for line in HomeNotices.fixed_lines():
+		ok(String(line).length() <= MAX_NOTICE_CHARS, "notice line over %d chars: %s" % [MAX_NOTICE_CHARS, line])
 	print("TUTTEXT %s (%d problems)" % ["ok" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(1 if bad > 0 else 0)

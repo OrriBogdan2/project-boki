@@ -1,0 +1,14 @@
+{
+	"id": "glomwort",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/glomwort.json.",
+	"shiny": {
+		"color": "#32ade8",
+		"belly": "#b0e3ff",
+		"glow": "#e03f5f"
+	},
+	"work": {
+		"bloom": 3,
+		"mend": 2,
+		"ranch": 1
+	}
+}

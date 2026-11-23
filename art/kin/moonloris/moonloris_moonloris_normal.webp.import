@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://diocbvaav67lt"
-path="res://.godot/imported/moonloris_moonloris_normal.webp-d792e82b5f535813adde8d0664c67fc6.ctex"
+path.bptc="res://.godot/imported/moonloris_moonloris_normal.webp-d792e82b5f535813adde8d0664c67fc6.bptc.ctex"
+path.astc="res://.godot/imported/moonloris_moonloris_normal.webp-d792e82b5f535813adde8d0664c67fc6.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "68f8b308c7c06a44751c820585542bfa"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/moonloris/moonloris_moonloris_normal.webp"
-dest_files=["res://.godot/imported/moonloris_moonloris_normal.webp-d792e82b5f535813adde8d0664c67fc6.ctex"]
+dest_files=["res://.godot/imported/moonloris_moonloris_normal.webp-d792e82b5f535813adde8d0664c67fc6.bptc.ctex", "res://.godot/imported/moonloris_moonloris_normal.webp-d792e82b5f535813adde8d0664c67fc6.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

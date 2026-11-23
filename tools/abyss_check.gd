@@ -345,7 +345,7 @@ func _edge_knocks(e: Dictionary) -> void:
 		var what := "hard knock off an island, glide held, heat %.0f%%: opens %.2fs in, knock %.2fs"
 		ok(good, what % [(1.0 - fuel) * 100.0, t_open, kt])
 	h.inp["glide"] = false
-	# an overheated glider still lifts you out, at about half strength
+	# an overheated glider lifts you out as strongly as a cool one
 	var peaks := {}
 	for fuel in [1.0, 0.0]:
 		for dp in [7.0, 12.0]:
@@ -368,13 +368,13 @@ func _edge_knocks(e: Dictionary) -> void:
 					break
 			peaks[[fuel, dp]] = [peak, t_up]
 	h.inp["glide"] = false
-	var halves := true
+	var same := true
 	for dp in [7.0, 12.0]:
 		var r: float = float(peaks[[0.0, dp]][0]) / float(peaks[[1.0, dp]][0])
-		halves = halves and r > 0.4 and r < 0.65 and float(peaks[[0.0, dp]][1]) > 0.0
+		same = same and absf(r - 1.0) < 0.02 and float(peaks[[0.0, dp]][1]) > 0.0
 	var shown := [peaks[[0.0, 7.0]][0], peaks[[1.0, 7.0]][0], peaks[[0.0, 12.0]][0], peaks[[1.0, 12.0]][0]]
-	var lift_what := "overheated glider lifts at half strength from 7m and 12m (peak %.1f vs %.1f, %.1f vs %.1f m/s)"
-	ok(halves, lift_what % shown)
+	var lift_what := "overheated glider lifts like a cool one from 7m and 12m (peak %.1f vs %.1f, %.1f vs %.1f m/s)"
+	ok(same, lift_what % shown)
 	# a shove off the edge is never blocked: a bot's edge guard only holds a walk
 	var went := 0
 	var n := 0
@@ -518,7 +518,7 @@ func _home(main: Node) -> void:
 					if did_climb: grabbed_deep += 1
 					if back: lost += 1
 					lost_low = maxf(lost_low, top - low)
-	var near_n := n * 2 / 3
+	var near_n := int(n * 2 / 3.0)
 	ok(climbed == near_n, "home: caught the island's side from below and pulled up %d of %d" % [climbed, near_n])
 	ok(grabbed_deep == 0 and lost == n - near_n and lost_low < World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA + 2.0, "home: deeper, you slide off and the wind sets you back at the same point of no return as out there: %d of %d, deepest %.1fm" % [lost, n - near_n, lost_low])
 	ok(inside < 0.05, "home: never inside or under the island (deepest %.2fm)" % inside)
@@ -564,7 +564,7 @@ func _open_lane(reach := LANE) -> Vector3:
 
 
 # ---------------------------------------------------------------- 9. the fall's sounds
-## Steps off a rim with no keys, then opens the glider (cool, or overheated at half lift) once the warning
+## Steps off a rim with no keys, then opens the glider (cool or overheated) once the warning
 ## plays. Logs the first step each cue comes on and the wind's level and pitch each step of the drop.
 func _fall_cues(e: Dictionary) -> void:
 	var dir: Vector2 = e["dir"]

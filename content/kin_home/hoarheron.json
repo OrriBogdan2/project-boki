@@ -1,0 +1,15 @@
+{
+	"id": "hoarheron",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/hoarheron.json.",
+	"shiny": {
+		"color": "#ba9a98",
+		"belly": "#f7eeee",
+		"glow": "#ffaa9f",
+		"wing": "#e0c8c8"
+	},
+	"work": {
+		"frost": 3,
+		"craft": 2,
+		"mend": 1
+	}
+}

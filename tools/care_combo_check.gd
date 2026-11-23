@@ -5,6 +5,7 @@ extends RefCounted
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
 const TTIME := preload("res://tools/tender_anim_time_check.gd")   # Meeko's move timing against the footage frames
+const OLD_RANGE := 13.5       # m the ember flew before the owner's 11-17 cut
 const SHOT_OUT := 0.6          # m a shot starts ahead of her (Hunter.fire); it ends at its range from her
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
@@ -79,8 +80,8 @@ func _skate_feel() -> void:
 	var late: Vector2 = K.rinkrun.get("dir", Vector2.ZERO)
 	var turned := rad_to_deg(absf(Vector2(1, 0).angle_to(late)))
 	ok(
-			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying and scraping off the edge",
-			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
+			"tm Shift: she steers the skate into a wide curve (not a snap) with ice spraying and scraping off the edge",
+			K.rinkrunning() and turned > 25.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 10.0
 				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2 and int(K.skate_snd.stats["carve"]) >= 2,
 			"turned %.0f deg, %d carve scrapes" % [turned, int(K.skate_snd.stats["carve"])])
 	ok(
@@ -964,7 +965,8 @@ func tender() -> void:
 			AimMode.mode_of(P) == AimMode.MAX
 			and reaches.all(func(x: float) -> bool: return absf(x - SHOT_OUT - rng) < 0.05),
 			"range %.1f reach %s" % [rng, reaches])
-	ok("mm LMB: the range is the footage's 7-8 bh (12.6-14.4 m)", rng >= 12.6 and rng <= 14.4, "%.1f m" % rng)
+	ok("mm LMB: a tap flies half the old 13.5 m (owner 11-17)", absf(rng - OLD_RANGE * 0.5) <= OLD_RANGE * 0.05,
+			"%.2f m" % rng)
 	ok(
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
@@ -982,7 +984,11 @@ func tender() -> void:
 	P.inp["fire"] = true
 	step(m, 0.3)
 	var made0: int = K.lk().made
-	step(m, 1.8)
+	var foe_at := P.pos + Vector3(P.aim_dir().x, 0.0, P.aim_dir().y) * 5.0          # inside the short ember's reach
+	for _i in 18:          # put back each beat: the ember's knockback would push him out of reach
+		step(m, 0.1)
+		T.teleport(foe_at)
+		T.vel = Vector3.ZERO
 	P.inp["fire"] = false
 	ok(
 			"mm passive: embers Kindle the foe and no ring is drawn under them (a stack is not an area)",
@@ -1008,20 +1014,28 @@ func tender() -> void:
 			white and K.number_col(T, HudStyle.HIT, shot) == HudStyle.CRIT
 			and K.number_col(T, HudStyle.HIT, {"src": "abil"}) == HudStyle.HIT)
 	K.kind.clear()
-	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
+	# --- the idle crook: after lmb.wait s the next ember is Empowered: 1.25x the tap's reach, a bigger hit, a ready cue
+	var tap_size := float(P.wpn["size"])
 	step(m, 1.3)
-	ok(
-			"mm LMB: Empowered adds nothing the source doesn't name (no range or refund rider)",
-			P.shot_range_k == 1.0 and not res.has("emp_range") and not res.has("emp_refund"),
-			"range_k %.2f" % P.shot_range_k)
+	ok("mm LMB: the wait cue plays once and the next ember is queued 1.25x further",
+			K.ready_shown and absf(P.shot_range_k - 1.25) < 0.001, "range_k %.2f" % P.shot_range_k)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
+	sc.aim_at(P, P.pos + Vector3(0, 0, 14.0))
 	P.inp["fire"] = true
 	step(m, 0.05)
 	P.inp["fire"] = false
+	var emp_sh: Array = _mine(m, P)
+	var emp_reach := float(emp_sh[-1]["life0"]) * (emp_sh[-1]["vel"] as Vector2).length() - SHOT_OUT
 	ok(
 			"mm LMB: after a pause the next ember is Empowered (its own move)",
 			K.stats["emp"] > e0 and K.anim_id == "mm_shot_emp", "emp %d anim %s" % [K.stats["emp"], K.anim_id])
+	ok("mm LMB: the waited ember flies 0.625x the old range (+-5%) and the tap range after it is back",
+			absf(emp_reach - OLD_RANGE * 0.625) <= OLD_RANGE * 0.625 * 0.05 and P.shot_range_k == 1.0,
+			"reach %.2f m" % emp_reach)
+	var emp_r := float(emp_sh[-1]["r"])
+	ok("mm LMB: the waited ember has a bigger hit than the tap",
+			emp_r > tap_size * 1.4 and not K.ready_shown, "r %.2f vs tap %.2f" % [emp_r, tap_size])
 	step(m, 0.6)
 	# --- Burrseed (items 118 and 23): a press, a quick fixed wind-up, the throw by itself on the aim of that moment
 	K.kind.clear()
@@ -1691,11 +1705,11 @@ func rimewright() -> void:
 			T.max_hp - T.hp >= thrown_dmg * 0.75,
 			"dealt %.0f of %.0f" % [T.max_hp - T.hp, thrown_dmg])
 	ok("tm LMB: darts alternate hands with their own flick moves", K.stats["darts"] >= 7)
-	# the badges carry no label (DECISIONS 11-11): the FAN badge is the mark on this foe
+	# no overhead badge for her: the shards on this foe are the read
 	var fan: Array = (P.ak.cue.get("marks", []) as Array).filter(func(mk): return mk["e"] == T)
 	ok(
-			"tm passive: the stacks show on your FAN badge (the frost glow on the foe is for the others)",
-			(fan.size() == 1 and not K.lk().showing("frost%d" % T.get_instance_id())) or K.splinter_log > 0)
+			"tm passive: the ice shards in the foe count the stacks (no badge for her, owner 11-11)",
+			(fan.is_empty() and K.lk().showing("shards%d" % T.get_instance_id())) or K.splinter_log > 0)
 	await _free(m)
 	await _late_homing()
 	# --- 8 darts on one foe Shatter them for about 15 darts' worth, with the spikes
@@ -1843,7 +1857,7 @@ func rimewright() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.1)
 	ok(
-			"tm Shift: letting go stops with a hockey stop (a ground pose; no disc) and refunds part of the charge",
+			"tm Shift: letting go slides out into the stop (a ground pose; no disc) and refunds part of the charge",
 			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == ("tm_skate_stop" if P.grounded else "")
 				and _no_disc(m), "dashes %.2f grounded %s" % [P.dashes, P.grounded])
 	await _free(m)

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cqmp1acg4yfyc"
-path="res://.godot/imported/murmurling_murmurling_atlas.webp-39d71956e774f14ab2396ab5acf6793b.ctex"
+path.bptc="res://.godot/imported/murmurling_murmurling_atlas.webp-39d71956e774f14ab2396ab5acf6793b.bptc.ctex"
+path.astc="res://.godot/imported/murmurling_murmurling_atlas.webp-39d71956e774f14ab2396ab5acf6793b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "418e16638e18b7495b8e30bf34711509"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/murmurling/murmurling_murmurling_atlas.webp"
-dest_files=["res://.godot/imported/murmurling_murmurling_atlas.webp-39d71956e774f14ab2396ab5acf6793b.ctex"]
+dest_files=["res://.godot/imported/murmurling_murmurling_atlas.webp-39d71956e774f14ab2396ab5acf6793b.bptc.ctex", "res://.godot/imported/murmurling_murmurling_atlas.webp-39d71956e774f14ab2396ab5acf6793b.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

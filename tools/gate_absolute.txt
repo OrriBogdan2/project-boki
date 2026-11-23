@@ -1,0 +1,5 @@
+# ABSOLUTE gate checks (DECISIONS 2026-11-19, stabilize sprint): one flag per line, '#' starts a comment.
+# The gate always runs these (even when the branch did not touch their inputs) and fails on a red here
+# even when main is red too, so they must stay green on main. Read by suite_speed.py (regate-bot,
+# merge-candidate) and suite-fast.sh from the tree being gated. Keep the list short and fast (< 2 min each).
+--tutorial-playthrough-check

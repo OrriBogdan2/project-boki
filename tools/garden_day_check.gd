@@ -59,6 +59,8 @@ func _day(zone: String) -> void:
 	home.day_t = DAY_START
 	var wall := Time.get_ticks_msec()
 	var t := 0.0
+	home.set_process(false)  # the day is stepped here: Home's own _process would add wall-clock steps in every frame
+	_reseed(0)
 	while t < DAY_SECS:
 		home.day_t = fmod(home.day_t + DT / home.DAY_LEN, 1.0)
 		home._move_kin(DT)
@@ -68,6 +70,7 @@ func _day(zone: String) -> void:
 		_watch(label, t)
 		if int(t / DT) % FRAME_EVERY == 0:
 			await main.get_tree().process_frame  # deferred frees and timers (the puffs) run
+			_reseed(int(t / DT))
 	var secs := float(Time.get_ticks_msec() - wall) / 1000.0
 	print("GARDENDAY %s: %.0f s of game time in %.1f s of wall time" % [label, t, secs])
 	_states(label, zone)
@@ -75,6 +78,13 @@ func _day(zone: String) -> void:
 	FarmUnlocks.rules()["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
+
+## Both random streams (the global one and the world's own, which picks the walk goals) start the same on every run;
+## the frames between steps draw from them a box-dependent number of times, so each frame is followed by a reseed.
+func _reseed(step: int) -> void:
+	seed(SEED + step)
+	home.world.rng.seed = SEED + step
 
 
 ## The three toys and the snack patch round the landing (the base demo's spots).
