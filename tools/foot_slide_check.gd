@@ -169,7 +169,7 @@ func _step_line(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, id: S
 		var mesh := (mi as MeshInstance3D).mesh as ArrayMesh
 		if (mi as MeshInstance3D).is_visible_in_tree() and mesh:
 			for si in mesh.get_surface_count():
-				tris += mesh.surface_get_array_index_len(si) / 3
+				tris += int(mesh.surface_get_array_index_len(si) / 3.0)
 	var fmt := "STEP %-10s %s tris %d run %.2f m/s cycle %.3f s stride %.2f m rate %.2f (%.1f steps/s) slide %+.1f"
 	print((fmt + " cm/step (%d steps)") % [id, WardenGlb.path(id), tris, spd, cycle, stride, rate, 2.0 * rate / cycle,
 			st[0], st[2]])
@@ -327,4 +327,4 @@ func _skate(m: Node3D, sync: Node, sk: Skeleton3D, spd: float) -> float:
 		was = now
 	m.set_meta(WardenClips.STATE, {})
 	shares.sort()
-	return shares[shares.size() / 2]
+	return shares[int(shares.size() / 2.0)]

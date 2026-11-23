@@ -3,7 +3,7 @@
 Owner, 11-11: "more distinctions between male/female, more clothing options (naked with just a body outline and the
 void thing ... then they can put on outfits), way more customization". The brief (11-11): the base body is a
 featureless void silhouette with an outline, non-anatomical; stronger M/F frames; layered outfits where every slot can
-be empty. Lore and names stay as in `docs/decisions/0016-the-unmasked.md` (player text says "the Empty").
+be empty. Lore and names stay as in `docs/decisions/0105-the-unmasked.md` (player text says "the Empty").
 
 The creator itself is the LookLocker (`scripts/ui/look_locker.gd`, opened by `hatch.gd`); this work extends it.
 

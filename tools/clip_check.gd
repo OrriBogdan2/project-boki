@@ -197,7 +197,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		if mesh == null or not mesh is ArrayMesh:
 			continue
 		for si in mesh.get_surface_count():
-			tris += (mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+			tris += int((mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3.0)
 	ok(tris > 0 and tris <= TRI_BUDGET, "%s: %d tris, weapon included (budget %d)" % [id, tris, TRI_BUDGET])
 	var missing: Array = []
 	var named: Array = _named(dd)
@@ -248,6 +248,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	m.free()
 	_turn(id)
 	await _cc(id, dd)
+	await _footing(id, dd)
 
 ## HunterAnim's FEEL over the clips: a landing flattens him, a run start tips him forward over his feet, and both
 ## leave nothing behind once they're over (the root's size isn't keyed, so it must not build up). A root on the Rig
@@ -995,7 +996,7 @@ func _flinch(id: String) -> void:
 	var still := await _run_hit(id, 0.0, chip, 0.0)
 	var stagger := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 4.0)
 	var stagger_still := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 0.0)
-	var mid := hit.size() / 3
+	var mid := int(hit.size() / 3.0)
 	ok(float(still[mid]["act"]) <= 0.0, "%s: a chip hit standing still flinches the upper body only" % id)
 	ok(float(stagger[mid]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
 	ok(float(stagger_still[mid]["act"]) > 0.5, "%s: a stagger standing still takes the whole body" % id)
@@ -1105,6 +1106,51 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 		out.append({"legs": legs, "hand": hand.global_position, "act": clips.act_w})
 		t += DT
 	m.free()
+	return out
+
+## On ice with no footing (HazardMoves' "footing": the ice kind's "moves" in terrain_hazards.json) the run's stride is
+## shorter and each free arm (loco "arm_swing") rides out from the side, against the same run on sure ground.
+func _footing(id: String, dd: Dictionary) -> void:
+	var sure := await _run_gait(id, {})
+	var ice := await _run_gait(id, TerrainHazards.kind_def("ice")["moves"])
+	var legs := KMovesStone.gait(id) > 0.5      # (a hoverer's legs barely walk: no stride to shorten)
+	ok(not legs or float(ice["stride"]) < 0.9 * float(sure["stride"]),
+			"%s: on ice the stride is shorter (swing %.2f rad, %.2f on sure)" % [id, ice["stride"], sure["stride"]])
+	for side in (dd["loco"] as Dictionary).get("arm_swing", {}):
+		var gain := float(ice[side]) - float(sure[side])
+		ok(gain >= 0.1, "%s: on ice the free arm %s rides out (hand %.2f arm lengths further out)" % [id, side, gain])
+
+## 2 s of a run at 4 m/s with this "footing": the left thigh's swing (rad) and, per side, how far out from its
+## shoulder the hand rides on average (in arm lengths).
+func _run_gait(id: String, footing: Dictionary) -> Dictionary:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	m.set_meta("anim_seed", 1)
+	holder.add_child(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true, "fired": 99.0,
+			"footing": footing})
+	var thigh := WardenSkeleton.find(sk, "thigh.L")
+	var swing := Vector2(INF, -INF)
+	var out := {"L": 0.0, "R": 0.0}
+	var frames := 0
+	for i in 60:
+		sync.call("_process", DT)
+		if i < 15:
+			continue
+		var dir := sk.get_bone_global_pose(thigh).basis.y
+		var pitch := atan2(-dir.z, -dir.y)
+		swing = Vector2(minf(swing.x, pitch), maxf(swing.y, pitch))
+		frames += 1
+		for side in out:
+			var sh := sk.get_bone_global_pose(WardenSkeleton.find(sk, "upper_arm." + side)).origin
+			var hand := sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + side)).origin
+			out[side] += (hand.x - sh.x) * signf(sh.x) / maxf(0.01, hand.distance_to(sh))
+	m.free()
+	for side in out:
+		out[side] /= maxf(1, frames)
+	out["stride"] = swing.y - swing.x
 	return out
 
 ## The rescue carry (WardenCarry): the walk legs stay on the clips, both wrists come in round the socket the Boki

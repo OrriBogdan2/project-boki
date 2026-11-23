@@ -21,7 +21,7 @@ static func open(h) -> void:
 		"Hold out through %d waves, bring down %s, then hold the Heart ring to win."
 		% [(rl["waves"] as Array).size(), rl["boss"]["name"]]
 	)
-	var mins := int(HeartRaid.r("match_s")) / 60
+	var mins := int(int(HeartRaid.r("match_s")) / 60.0)
 	var lose := " If your squad falls, or the islands fall at %d:00, the raid is lost." % mins
 	v.add_child(UI.para(goal + lose, UI.T_SMALL, UI.MUTED))
 	var row := UI.hbox(6)

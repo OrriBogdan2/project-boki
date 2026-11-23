@@ -220,7 +220,7 @@ func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: fl
 	lr.add_child(lab)
 	col.add_child(lr)
 	var show := func(x: float) -> void:
-		num.text = ("%d:%02d" % [int(x) / 60, int(x) % 60]) if fmt == "time" else str(int(round(x)))
+		num.text = ("%d:%02d" % [int(int(x) / 60.0), int(x) % 60]) if fmt == "time" else str(int(round(x)))
 	var tw := create_tween()
 	tw.tween_interval(delay)
 	tw.tween_method(show, 0.0, value, clampf(0.4 + value * 0.01, 0.5, 1.1)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
