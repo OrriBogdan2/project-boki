@@ -37,3 +37,4 @@ Care.dex_mark). Left out: guardian interplay, bots grabbing, extraction bonus.
 - Results: `KinSteal.carried_home` keeps the wisps the player carried at match end (`r["wisps_home"]`); the results
   Boki block lists each as "<name>  going home" next to the XP and bond lines of your own Boki (`ResultsBokiLines`,
   `--results-boki-line-check`).
+- `--passive-stack-check` covers the Q8 stacking (own 100 %, stolen 50 %, clamp at the carry cap, 2 stolen, passives leave on escape or match end).
