@@ -26,6 +26,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(m: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true

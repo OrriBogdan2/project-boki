@@ -178,7 +178,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
 			var tid := t.get_instance_id()
-			var fan_r := float(pd["splinter_r"]) * 0.8
+			var fan_r := float(pd["fan_r"])  # m, the 8-dart Shatter (0.8 x the knock Shatter's radius)
 			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
 
 
@@ -701,7 +701,7 @@ func rmb_charge_full() -> float:
 ## Held: the landing ring at the cursor (clamped to range); she draws both palms in to her chest and the
 ## spear forms between them, pointing at the cursor.
 func rmb_hold_tick(t: float) -> void:
-	if not rmb_ready() or busy():
+	if not rmb_ready() or busy() or not rime.is_empty():
 		return
 	var ld: Dictionary = rmb_def()["lance"]
 	AimKit.circle(
@@ -733,6 +733,12 @@ func _spear_at(ahead: float) -> Vector3:
 	var dir := h.aim_dir() * (SPEAR_AHEAD + ahead)
 	return h.position + Vector3(dir.x, SPEAR_Y, dir.y)
 
+## The statue casts nothing (item 65): an RMB press in Rimelock is refused, no charge spent.
+func press_rmb() -> void:
+	if not rime.is_empty():
+		h._ab_feedback("sec", "deny")
+		return
+	super()
 
 ## RMB let go: both palms drive forward (PUSH_T later the spear leaves them). A push, not a throw: no arm
 ## drawn back, no release flick.
@@ -740,6 +746,9 @@ func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	spear_aim = false
 	AimKit.hide(h, "rmb")
+	if not rime.is_empty():
+		h._ab_feedback("sec", "deny")      # held into the seal: let go in the statue, nothing goes
+		return
 	if not spend_rmb():
 		lk().drop("spear_prop")
 		if anim_id == "tm_spear_aim":
