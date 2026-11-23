@@ -92,7 +92,7 @@ func _room_to_side(rock: int) -> bool:
 
 func _rock_center(i: int) -> Vector3:
 	var w: World = home.world
-	return Vector3(i % w.w + 0.5, 0, i / w.w + 0.5)
+	return Vector3(i % w.w + 0.5, 0, int(i / float(w.w)) + 0.5)
 
 ## The Boki in front of you, between you and the boulder.
 func _block(rock: int, pet: Dictionary, ahead := IN_FRONT, side := OFF_LANE) -> void:

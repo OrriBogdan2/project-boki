@@ -278,7 +278,7 @@ static func stride(steps: Array, length: float) -> float:
 	if all.is_empty():
 		return 0.0
 	all.sort()
-	return all[all.size() / 2] / (length / SAMPLES)
+	return all[int(all.size() / 2.0)] / (length / SAMPLES)
 
 ## The worst foot's mean slip against the ground while it is down, as a share of the move speed, when the body moves
 ## at `v` m/s and the clip plays at `rate`. A planted foot that goes back at half the body's speed slips 50%.
@@ -305,7 +305,7 @@ static func start(rig: BokiRig, clip: String) -> float:
 		jumps.append(_jump(poses[i], poses[i + 1]))
 	var first: float = jumps[0]
 	jumps.sort()
-	return first / maxf(jumps[jumps.size() / 2], 0.0001)
+	return first / maxf(jumps[int(jumps.size() / 2.0)], 0.0001)
 
 ## The loop seam: the sharpest change in any bone's motion (its step's change from one sample to the next: a jump, a
 ## stop or a turn) across the wrap, over the sharpest inside the clip. At most 1 the loop point is no rougher than
