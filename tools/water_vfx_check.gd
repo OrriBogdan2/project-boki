@@ -231,7 +231,7 @@ func _film(main: Node, hm, hero: String) -> void:
 				ok(false, "%s film: no frame to read back (not a GPU run?)" % hero)
 				Engine.time_scale = 1.0
 				return
-			img.resize(img.get_width() * 3 / 4, img.get_height() * 3 / 4, Image.INTERPOLATE_BILINEAR)
+			img.resize(int(img.get_width() * 3 / 4.0), int(img.get_height() * 3 / 4.0), Image.INTERPOLATE_BILINEAR)
 			frames.append(img)
 	Engine.time_scale = 1.0
 	_press(Vector2.ZERO)

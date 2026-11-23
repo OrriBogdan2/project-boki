@@ -878,7 +878,7 @@ func _lock_steps(m: Match, slot: String, in_air: bool) -> int:
 	if at_hi != "now":
 		return -hi
 	while hi - lo > 1:
-		var mid := (lo + hi) / 2
+		var mid := int((lo + hi) / 2.0)
 		if _space_at(m, slot, in_air, mid) == "now":
 			hi = mid
 		else:
