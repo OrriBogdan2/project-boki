@@ -769,7 +769,6 @@ const CHECKS := {
 	"--train-drill-check": ["res://tools/train_drill_check.gd", "train_drill_check", null],  # Train, no post
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],  # also --farmbuild-shots=<dir>
 	"--come-look-check": ["res://tools/come_look_check.gd", "come_look_check", null],  # news at home
-	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # trios / solos (decision 0084)
 	"--boki-lines-check": ["res://tools/boki_lines_check.gd", "boki_lines_check", null],  # Boki talk (item 105)
 	"--boki-talk-shots": ["res://tools/boki_talk_shots.gd", "boki_talk_shots", null],  # --shots-dir=<dir>
 	"--build-ui-check": ["res://tools/build_ui_check.gd", "build_ui_check", null],  # also --build-ui-shots=<dir>
