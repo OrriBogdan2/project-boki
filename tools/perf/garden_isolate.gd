@@ -2,14 +2,16 @@ extends RefCounted
 ## --bench-garden --bench-isolate: where a garden part's frame goes. On the part just measured (Boki out, UI shown)
 ## the same scene is timed again with one cost removed at a time: the Boki hidden (no draw, no rig step), their rigs
 ## paused (no animation, still drawn), their shadows off, and the 10 Hz-and-up kin script (Home._move_kin) timed
-## alone. "BENCH isolate" lines: frame p50 / p95 ms and the saving against the untouched scene.
+## alone. "BENCH isolate" lines: frame p50 / p95 ms and the saving against the first "as is". "every frame" is the
+## crowd easing of RigPace off, run between two "as is" so a drifting machine shows.
 
 const DT := 1.0 / 60.0
 const WARM := 20
-const FRAMES := 180
-const MODES := ["as is", "no shadows", "rigs paused", "boki hidden"]
+const FRAMES := 240
+const MODES := ["as is", "every frame", "as is", "every frame", "no shadows", "rigs paused", "boki hidden"]
 
 var main: Node
+var _crowd_from := RigPace.crowd_from
 
 
 func _init(main_node: Node) -> void:
@@ -23,7 +25,7 @@ func run(part: String) -> void:
 		_apply(home, mode, true)
 		var w := await _sample()
 		_apply(home, mode, false)
-		if mode == "as is":
+		if base == 0.0:
 			base = w[0]
 		print(
 			"BENCH isolate %s %s: p50 %.1f ms, p95 %.1f ms, saves %.1f ms of p50" % [part, mode, w[0], w[1], base - w[0]]
@@ -56,6 +58,8 @@ func _apply(home, mode: String, on: bool) -> void:
 				n.visible = not on
 			"rigs paused":
 				n.process_mode = Node.PROCESS_MODE_DISABLED if on else Node.PROCESS_MODE_INHERIT
+			"every frame":  # what the home did before RigPace.crowd_from: every rig steps every frame
+				RigPace.crowd_from = 999 if on else _crowd_from
 			"no shadows":
 				for mi in n.find_children("*", "GeometryInstance3D", true, false):
 					var g := mi as GeometryInstance3D

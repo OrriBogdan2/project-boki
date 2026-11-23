@@ -7,9 +7,9 @@ extends RefCounted
 ## else every rig steps every frame (but see `crowd`), but a Warden whose Hunter SimLod.pose_every holds (WardenGlb.POSE_HELD).
 
 const EVERY := 2            # frames between two steps of a rig where re-skinning is dear
-const CROWD := 6            # Boki out in a home: past this, a rig off the camera's focus steps every EVERY frames
 const LEAD_M := 1.5         # m (flat) from the camera's focus: a rig this close is the one you play, every frame
 
+static var crowd_from := 6  # Boki out in a home: past this, a rig off the camera's focus steps every EVERY frames
 static var crowd := 0       # Boki out in the home now (Home sets it; 0 elsewhere: a match's pets keep every frame)
 
 var every := 1              # frames between steps for this rig (EVERY where re-skinning is dear)
@@ -37,7 +37,7 @@ func step(dt: float, lead := false) -> float:
 ## Frames between steps now: `every`, or EVERY in a crowded home below Ultra (a garden of 10-30 Boki: the rigs are the
 ## top cost, GARDEN_PERF.md).
 func _gap() -> int:
-	if every == 1 and crowd > CROWD and Settings.quality() != "ultra":
+	if every == 1 and crowd > crowd_from and Settings.quality() != "ultra":
 		return EVERY
 	return every
 
