@@ -5,6 +5,9 @@ carry_check(head, gated, main)   a stale GATE GREEN PR whose merge with main can
                                  and suite_speed `select` (the engine's own file->check map) picks ZERO checks for main's
                                  delta. Then regate-run would only import + export, so the bot pushes the merge commit
                                  and posts "GATE GREEN <sha> (carried, no overlap)" itself.
+                                 11-23 loose rule: when the per-check rule cannot prove it (ALL / checks read both sides) the
+                                 PR is still carried if no file in its diff changed on main and the two code deltas are not
+                                 coupled (coupled() = removed/changed defs or file names the other side's new lines use).
 cache_get/cache_put              suite verdict per (candidate tree, main tree): an identical pair never runs twice.
                                  ~/cj/regate-bot/cache/<key>.json; GREEN only (a RED may be a flake, it is re-gated).
 train_plan(rows, main)           3+ stale PRs: one chain of merge commits (each merged into the previous tip); one gate of
@@ -142,6 +145,61 @@ def selected(old, commit):
     return lines[1:]
 
 
+# 11-23 loose carry: a stale GREEN whose files are disjoint from main's delta is carried even when the per-check rule cannot
+# prove it (main's delta feeds ALL checks, or a check reads both sides): 233 re-gates / 177 gate-h in 3 days re-tested a PR
+# whose own files main never touched (focus-1122 BASELINE lane 1). Safety net = the coupling guard below (API/stem references
+# across the two deltas). REGATE_CARRY_LOOSE=0 = off (strict per-check rule only).
+LOOSE = os.environ.get("REGATE_CARRY_LOOSE", "1") != "0"
+CODE_GLOBS = ("*.gd", "*.tscn", "*.tres", "*.gdshader")
+DEF_RE = re.compile(r"^\s*(?:@\w+(?:\([^)]*\))?\s+)*(?:static\s+)?(func|signal|const|var|enum|class_name|class)\s+(\w+)")
+TOKEN_RE = re.compile(r"[A-Za-z]\w{2,}")
+
+
+def _pascal(stem):
+    return "".join(w.capitalize() for w in stem.split("_"))
+
+
+def delta_symbols(a, b):
+    """Code delta a..b -> dict(add=identifiers on added lines, rem=names of defs removed/changed (func, signal, const, var,
+    enum, class), stems=names of changed code files (snake + Pascal), cls=class_names added). Private (_x) names are left out."""
+    out = git("diff", "-U0", "--no-color", "--no-ext-diff", "--no-renames", a, b, "--", *CODE_GLOBS, timeout=300)
+    d = dict(add=set(), rem=set(), stems=set(), cls=set())
+    if out is None:
+        return None
+    for ln in out.split("\n"):
+        if ln.startswith("+++ ") or ln.startswith("--- "):
+            if ln[4:] != "/dev/null":
+                stem = Path(ln[4:]).stem
+                d["stems"] |= {stem, _pascal(stem)}
+        elif ln[:1] == "+":
+            d["add"].update(TOKEN_RE.findall(ln))
+            m = DEF_RE.match(ln[1:])
+            if m and m.group(1) == "class_name":
+                d["cls"].add(m.group(2))
+        elif ln[:1] == "-":
+            m = DEF_RE.match(ln[1:])
+            if m and not m.group(2).startswith("_"):
+                d["rem"].add(m.group(2))
+    d["stems"] = {x for x in d["stems"] if len(x) > 2}
+    return d
+
+
+def coupled(base, gated, main):
+    """-> (True, why) when the PR's code delta and main's code delta reference each other: one side removed/changed a def
+    (or changed a file) whose name the other side's added lines use, or both added the same class_name."""
+    pr, mn = delta_symbols(base, gated), delta_symbols(base, main)
+    if pr is None or mn is None:
+        return True, "cannot read the code deltas"
+    for a, b, who in ((mn, pr, "main changed it, the PR uses it"), (pr, mn, "the PR changed it, main uses it")):
+        hit = sorted((a["rem"] | a["stems"]) & b["add"])
+        if hit:
+            return True, f"coupled: {hit[0]} ({who})"
+    dup = sorted(pr["cls"] & mn["cls"])
+    if dup:
+        return True, f"coupled: class_name {dup[0]} added on both sides"
+    return False, ""
+
+
 def carry_check(head, gated, main):
     """-> (ok, why, merge commit or None). Every doubt answers no (the PR is then re-gated as before).
     Rule (11-15, per check): X = checks whose inputs changed between the green (gated) and the merge commit, Y = checks
@@ -159,24 +217,39 @@ def carry_check(head, gated, main):
     tree = merge_tree(head, main)
     if not tree:
         return False, "merge-tree conflicts", None
-    commit = commit_merge(tree, head, main, f"Merge origin/main {main[:10]} into PR (regate-bot, carried)")
+    # head already holds main (a bulk rebase, a driver job): the head itself is the merge, no extra commit
+    commit = head if is_ancestor(main, head) else commit_merge(tree, head, main, f"Merge origin/main {main[:10]} into PR (regate-bot, carried)")
     if not commit:
         return False, "commit-tree failed", None
     x = selected(gated, commit)
     LAST["x"] = x
+    no = None
     if x is None:
-        return False, "main's delta feeds ALL checks (shared or untied file)", None
-    y = selected(main, commit) if x else []
-    if y is None:
-        return False, "the PR's delta feeds ALL checks", None
-    hit = sorted(set(x) & set(y))
-    if hit:
-        return False, f"{len(hit)} checks read both sides (e.g. {hit[0]})", None
-    return (
-        True,
-        f"no overlap ({len(pr)} PR files, {len(mn)} main files; {len(x)} checks see main, {len(y)} see the PR, 0 both)",
-        commit,
-    )
+        no = "main's delta feeds ALL checks (shared or untied file)"
+    else:
+        y = selected(main, commit) if x else []
+        if y is None:
+            no = "the PR's delta feeds ALL checks"
+        else:
+            hit = sorted(set(x) & set(y))
+            if hit:
+                no = f"{len(hit)} checks read both sides (e.g. {hit[0]})"
+    if no is None:
+        return (
+            True,
+            f"no overlap ({len(pr)} PR files, {len(mn)} main files; {len(x)} checks see main, {len(y)} see the PR, 0 both)",
+            commit,
+        )
+    if LOOSE:
+        bad, why = coupled(base, gated, main)
+        if not bad:
+            return (
+                True,
+                f"loose, no PR file changed on main ({len(pr)} PR files, {len(mn)} main files, code deltas not coupled; per-check rule said: {no})",
+                commit,
+            )
+        no += "; " + why
+    return False, no, None
 
 
 # ---- suite result cache

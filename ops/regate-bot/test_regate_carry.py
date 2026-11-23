@@ -36,6 +36,7 @@ g("add", "b.gd")
 pr = commit("pr.txt", "pr\n", "pr")
 g("checkout", "-q", "main")
 m1 = commit("m1.txt", "m1\n", "main 1")
+rc.LOOSE = False  # strict per-check rule first; the loose rule is tested below
 rc.selected = lambda gated, commit: []  # no check reads main's delta
 ok, why, c = rc.carry_check(pr, pr, m1)
 assert ok and c and g("rev-parse", c + "^1") == pr and g("rev-parse", c + "^2") == m1, (ok, why)
@@ -68,6 +69,53 @@ sel.update({True: ["--a-check"], False: None})
 assert not rc.carry_check(pr, pr, m1)[0]
 sel.update({True: None, False: []})
 assert not rc.carry_check(pr, pr, m1)[0]
+# 11-23 loose rule: files disjoint + code deltas not coupled -> carried even when the per-check rule cannot prove it
+rc.LOOSE = True
+sel.update({True: ["--a-check"], False: None})  # the PR's delta feeds ALL checks: strict says no
+ok, why, c2 = rc.carry_check(pr, pr, m1)
+assert ok and c2 and "loose" in why, why
+sel.update({True: None, False: []})  # main's delta feeds ALL checks
+assert rc.carry_check(pr, pr, m1)[0]
+ok, why, _ = rc.carry_check(pr, pr, m2)  # same file edited on both sides: never carried, loose or not
+assert not ok and "both" in why, why
+# head already holds main: the head itself is the merge (no extra commit)
+ok, why, c3 = rc.carry_check(c, c, m1)
+assert ok and c3 == c, (ok, why)
+# coupling guard: main removes a func the PR calls / the PR changes a file main uses / the same class_name added twice
+g("checkout", "-qb", "cb", base)
+(Path(T) / "lib.gd").write_text("func old_api():\n\tpass\nvar keep = 1\n")
+g("add", "lib.gd")
+g("commit", "-qm", "lib")
+lib = g("rev-parse", "HEAD")
+g("checkout", "-qb", "cpr", lib)
+(Path(T) / "user.gd").write_text("func go():\n\told_api()\n")
+g("add", "user.gd")
+g("commit", "-qm", "user calls old_api")
+cpr = g("rev-parse", "HEAD")
+g("checkout", "-q", "cb")
+(Path(T) / "lib.gd").write_text("func new_api(x):\n\tpass\nvar keep = 1\n")
+g("add", "lib.gd")
+g("commit", "-qm", "rename old_api")
+cmain = g("rev-parse", "HEAD")
+sel.update({True: ["--a-check"], False: None})
+ok, why, _ = rc.carry_check(cpr, cpr, cmain)
+assert not ok and "coupled: old_api" in why, why
+g("checkout", "-q", "cb")
+g("checkout", "-qb", "cpr2", lib)
+(Path(T) / "other.gd").write_text("class_name Dup\n")
+g("add", "other.gd")
+g("commit", "-qm", "dup a")
+dpr = g("rev-parse", "HEAD")
+g("checkout", "-qb", "cmain2", lib)
+(Path(T) / "other2.gd").write_text("class_name Dup\nvar z = 1\n")
+g("add", "other2.gd")
+g("commit", "-qm", "dup b")
+dmain = g("rev-parse", "HEAD")
+ok, why, _ = rc.carry_check(dpr, dpr, dmain)
+assert not ok and "class_name Dup" in why, why
+rc.LOOSE = False
+assert not rc.carry_check(pr, pr, m1)[0]
+g("checkout", "-q", "main")
 # fallback merge (git < 2.38): same tree as --write-tree would give, conflicts -> None
 real = rc.run
 rc.run = lambda cmd, **kw: (
