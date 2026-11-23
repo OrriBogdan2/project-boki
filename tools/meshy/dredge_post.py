@@ -21,6 +21,8 @@ Runs on the r7 body (tools/meshy/dredge_reskin.py output) and writes the game gl
   python3 tools/meshy/dredge_post.py --r11 OUT.glb IN_R10.glb [PACK.glb]   # r11 stages on the r10 glb (never build() twice)
   python3 tools/meshy/dredge_post.py --r12 OUT.glb IN_R11.glb   # r12 tail gather (re-runnable on its own output)
   python3 tools/meshy/dredge_post.py --r13 OUT.glb IN_R12.glb [PACK.glb [UNDER.glb]]   # r13: skin weights, goo puddle, rim caps, retextured pack, straps
+                                                     # r13b (same flag): rim caps split into simple cycles wound like their rims, faces
+                                                     # below 1.2 m wound to their normals, strap ink room 0 (PACK = r13/pack/rt2/glb.glb)
 
 Needs numpy and scipy (the venv).
 """
@@ -966,6 +968,7 @@ CAPS = (
 PUDDLE_Y = 0.08  # m: goo triangles lower than this (rest pose) are dropped: the flat puddle round the foot that swung up as a ring
 CAP_BULGE = 0.2  # a dome rises CAP_BULGE x the rim's thin width (m), at most CAP_MAX; rings: per CAPS entry (0 = a fan fill)
 CAP_MAX = 0.05
+LEGACY_CAPS = ("goo mouth at the shoulder", "skin crack on the shoulder top")  # r13b: kept exactly as r13 built them
 
 
 WELD_GOO = False  # r13: the goo's seams keep their weights (welding them pulled the tail into spikes)
@@ -1020,6 +1023,38 @@ def trim_puddle(js, b, out, rig):
     return "%d goo triangles dropped" % int((~keep).sum())
 
 
+def rim_cycles(dedges, ring):
+    """r13b: the directed rim edges (each in its kept face's direction) of one rim, split into simple cycles: walk the
+    out-edges; where the walk meets a vertex already on its path, that stretch is one cycle (a figure-8 rim gives two).
+    A walk that dead-ends (the faces round it disagree on winding) is dropped."""
+    outs = {}
+    for a_, b_ in dedges:
+        if a_ in ring:
+            outs.setdefault(a_, []).append(b_)
+    cycles = []
+    while True:
+        start = next((v for v, o in outs.items() if o), None)
+        if start is None:
+            return cycles
+        path, at = [start], {start: 0}
+        while True:
+            o = outs.get(path[-1])
+            if not o:
+                break
+            nx = o.pop()
+            if nx in at:
+                i = at[nx]
+                cycles.append(path[i:])
+                for v in path[i:]:
+                    at.pop(v, None)
+                path = path[:i]
+                if not path:
+                    break
+                continue
+            at[nx] = len(path)
+            path.append(nx)
+
+
 def cap_rims(js, b, out, rig):
     """r13: every open rim listed in CAPS gets a dome (rings toward the centre, bulging outward), skinned and textured
     like its rim vertices. The goo's mouth at the shoulder (a flat D cut where the arm was parted from the torso) was the
@@ -1033,6 +1068,7 @@ def cap_rims(js, b, out, rig):
     base, total = len(pos), 0
     report = []
     capped = set()
+    clash = 0
     for name, pi, (lo, hi), minv, maxd, d, m, *fixed in CAPS:
         f = prim_faces(js, b, prims[pi])
         used = np.unique(f)
@@ -1051,6 +1087,10 @@ def cap_rims(js, b, out, rig):
         slot = {v: i for i, v in enumerate(ids)}
         g = sp.coo_matrix((np.ones(len(bd)), ([slot[x] for x in bd[:, 0]], [slot[x] for x in bd[:, 1]])), (len(ids),) * 2)
         lab = connected_components(g, directed=False)[1]
+        de = np.concatenate([fs[:, [0, 1]], fs[:, [1, 2]], fs[:, [2, 0]]])
+        bset = set(map(tuple, bd.tolist()))
+        dbd = [tuple(e_) for e_ in de.tolist() if e_[0] != e_[1] and tuple(sorted(e_)) in bset]  # rim edges, face direction
+        todo = []
         n_caps = 0
         for l in range(lab.max() + 1):
             vs = rep[ids[lab == l]]
@@ -1065,25 +1105,52 @@ def cap_rims(js, b, out, rig):
             ax = np.linalg.svd(p - ctr)[2]
             if np.ptp((p - ctr) @ ax[0]) > maxd:
                 continue
-            width = np.ptp((p - ctr) @ ax[1])
-            if d is None:
-                out_n = ax[2] if ax[2] @ nrm[vs].mean(0) >= 0 else -ax[2]
+            # r13b: the rim is split into simple cycles along the kept faces' own edge direction (a rim that pinches
+            # through one vertex is a figure 8: one angle-sorted dome over it folded over itself), and each cycle's fill
+            # runs against that direction, so it always winds like its neighbours. r13 sorted the rim by angle and
+            # turned each fill triangle by out_n: skin faces with clashing winding 1,105 -> 14,827 (r12 -> r13), the
+            # black toe/hip flecks (the culled side showing the ink shell)
+            ring = set(ids[lab == l].tolist())
+            if name in LEGACY_CAPS:  # r13's one angle-sorted dome, its triangles turned by out_n (the closed neck slit)
+                ang = np.arctan2((p - ctr) @ ax[1], (p - ctr) @ ax[0])
+                todo.append((None, name, pi, m, d, fixed, vs[np.argsort(ang)]))
             else:
-                out_n = np.array(d)
+                todo.extend([(c_, name, pi, m, d, fixed, vs) for c_ in rim_cycles(dbd, ring) if len(c_) >= 3])
+            capped.update(vs.tolist())
+            n_caps += 1
+        for cyc, name, pi_, m, d, fixed, vs in todo:
+            legacy = cyc is None
+            order = vs if legacy else rep[np.array(cyc)][::-1]  # against the kept faces' direction: the fill's own winding
+            p = pos[order]
+            ctr = p.mean(0)
+            ax = np.linalg.svd(p - ctr)[2]
+            width = np.ptp((p - ctr) @ ax[1]) if len(order) > 2 else 0.0
+            av = np.cross(p - ctr, np.roll(p, -1, 0) - ctr).sum(0)
+            wn = av / max(np.linalg.norm(av), 1e-12)  # the fill's normal from its winding
+            if legacy and d is None:
+                out_n = ax[2] if ax[2] @ nrm[order].mean(0) >= 0 else -ax[2]
+            elif d is None:  # the dome rises along the rim's own (Meshy) normals; orient_faces winds it to match
+                mn = nrm[order].mean(0)
+                out_n = wn if wn @ mn >= 0 else -wn
+            else:
+                out_n = np.array(d, float)
+                clash += int(wn @ out_n < 0)
             bulge = fixed[0] if fixed else min(CAP_MAX, CAP_BULGE * max(width, 0.01))
-            order = vs[np.argsort(np.arctan2((p - ctr) @ ax[1], (p - ctr) @ ax[0]))]
+            if len(order) < 6:
+                m_ = 0
+            else:
+                m_ = m
             po = pos[order]
             near = order[np.argmin(np.linalg.norm(po - ctr, axis=1))]
             if fixed and "TEXCOORD_0" in arr:  # a dome that shows one colour: the darkest texel on its rim
-                tex = prim_texture(js, b, pi)
+                tex = prim_texture(js, b, pi_)
                 uvs = arr["TEXCOORD_0"][order]
                 lum = np.asarray(tex)[np.clip((uvs[:, 1] % 1 * tex.size[1]).astype(int), 0, tex.size[1] - 1),
                                       np.clip((uvs[:, 0] % 1 * tex.size[0]).astype(int), 0, tex.size[0] - 1)].astype(float).sum(1)
                 near = order[np.argmin(lum)]
             n_pts = len(order)
-            capped.update(vs.tolist())
-            for r in range(1, m + 1):
-                k = r / (m + 1)
+            for r in range(1, m_ + 1):
+                k = r / (m_ + 1)
                 P = ctr + (po - ctr) * (1 - k) + out_n * bulge * np.sin(np.pi / 2 * k)
                 for key, arrv in arr.items():
                     piece = arrv[order].copy()
@@ -1092,7 +1159,7 @@ def cap_rims(js, b, out, rig):
                     elif key == "NORMAL":
                         piece = np.tile(out_n, (n_pts, 1)) * k + piece * (1 - k)
                         piece /= np.linalg.norm(piece, axis=1, keepdims=True)
-                    elif key.startswith("TEXCOORD") and m > 0 and fixed:  # one texel for the whole dome: no streaks along the rim
+                    elif key.startswith("TEXCOORD") and m_ > 0 and fixed:  # one texel for the whole dome: no streaks along the rim
                         piece = np.tile(arrv[near], (n_pts, 1))
                     new[key].append(piece)
             for key, arrv in arr.items():
@@ -1102,25 +1169,26 @@ def cap_rims(js, b, out, rig):
                 elif key == "NORMAL":
                     piece = out_n[None].astype(np.float32)
                 new[key].append(piece)
-            ring_id = [order] + [base + total + n_pts * (r - 1) + np.arange(n_pts) for r in range(1, m + 1)]
-            apex = base + total + n_pts * m
+            ring_id = [order] + [base + total + n_pts * (r - 1) + np.arange(n_pts) for r in range(1, m_ + 1)]
+            apex = base + total + n_pts * m_
             quads = []
-            for r in range(m):
+            for r in range(m_):
                 a_, b_ = ring_id[r], ring_id[r + 1]
                 for i in range(n_pts):
                     j = (i + 1) % n_pts
                     quads += [(a_[i], a_[j], b_[j]), (a_[i], b_[j], b_[i])]
             for i in range(n_pts):
-                quads.append((ring_id[m][i], ring_id[m][(i + 1) % n_pts], apex))
+                quads.append((ring_id[m_][i], ring_id[m_][(i + 1) % n_pts], apex))
             tr = np.array(quads, np.int64)
-            allp = np.concatenate([pos, np.concatenate(new["POSITION"])])
-            nn = np.cross(allp[tr[:, 1]] - allp[tr[:, 0]], allp[tr[:, 2]] - allp[tr[:, 0]])
-            flip = (nn @ out_n) < 0
-            tr[flip] = tr[flip][:, ::-1]
-            add[pi].append(tr)
-            total += n_pts * m + 1
-            n_caps += 1
-            print("cap", name, n_pts, "verts at", ctr.round(2), "dia", round(float(np.ptp((p - ctr) @ ax[0])), 2), "bulge", round(float(bulge), 3))
+            if legacy:
+                allp = np.concatenate([pos, np.concatenate(new["POSITION"])])
+                nn = np.cross(allp[tr[:, 1]] - allp[tr[:, 0]], allp[tr[:, 2]] - allp[tr[:, 0]])
+                flip = (nn @ out_n) < 0
+                tr[flip] = tr[flip][:, ::-1]
+            add[pi_].append(tr)
+            total += n_pts * m_ + 1
+            if m_:
+                print("cap", name, n_pts, "verts at", ctr.round(2), "dia", round(float(np.ptp((p - ctr) @ ax[0])), 2), "bulge", round(float(bulge), 3))
         report.append("%s %d" % (name, n_caps))
     if not total:
         return "no loop found"
@@ -1132,8 +1200,45 @@ def cap_rims(js, b, out, rig):
         full = np.concatenate([prim_faces(js, b, prims[pi]).astype(np.uint32)] + [t.astype(np.uint32) for t in trs])
         js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
         prims[pi]["indices"] = len(js["accessors"]) - 1
-    return "; ".join(report) + ", %d new vertices" % total
+    return "; ".join(report) + ", %d new vertices, %d fixed-direction caps against their winding" % (total, clash)
 
+
+
+ORIENT_TOP = 1.2  # m (rest pose): above this (the goo mouth, its cap and the shoulder) turning faces reopened black slits
+
+
+def orient_faces(js, b, out, rig):
+    """r13b: every body material is double-sided, and Godot draws a face wound against its normals as a back face
+    (its normal negated: the toon light's dark side) while the ink shell (cull front) shows black over it. Meshy's skin
+    has 1,676 such faces (r12) and r13's caps raised that to 5,996: the black toe, hip and shoulder flecks. Each skin
+    and goo face below ORIENT_TOP whose winding normal points against the sum of its vertex normals is turned round."""
+    prims = js["meshes"][0]["primitives"]
+    pos = n.floats(js, b, prims[0]["attributes"]["POSITION"])
+    nrm = n.floats(js, b, prims[0]["attributes"]["NORMAL"])
+    res = []
+    for pi in (0, 1):
+        f = prim_faces(js, b, prims[pi]).astype(np.uint32).copy()
+        fn = np.cross(pos[f[:, 1]] - pos[f[:, 0]], pos[f[:, 2]] - pos[f[:, 0]])
+        bad = ((fn * nrm[f].sum(1)).sum(1) < 0) & (pos[f].mean(1)[:, 1] < ORIENT_TOP)
+        f[bad] = f[bad][:, ::-1]
+        js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
+        prims[pi]["indices"] = len(js["accessors"]) - 1
+        res.append("%s %d of %d" % (js["materials"][prims[pi]["material"]]["name"], int(bad.sum()), len(f)))
+    return "faces turned to their normals: " + ", ".join(res)
+
+
+def strap_ink(js, b, out, rig):
+    """r13b: the straps are a one-layer ribbon; with no COLOR_0 the game's ink shell grows the full 0.02 m and is seen
+    from behind as a black slab (the black line at the strap/shoulder in attack and hit). Room 0, native_ink's rule
+    for an open sheet."""
+    for p in js["meshes"][0]["primitives"]:
+        if js["materials"][p["material"]]["name"] == "strap-leather":
+            cnt = js["accessors"][p["attributes"]["POSITION"]]["count"]
+            col = np.ones((cnt, 4), np.float32)
+            col[:, 3] = 0.0
+            p["attributes"]["COLOR_0"] = out.add_floats(col, "VEC4")
+            return "strap ink room 0 on %d vertices" % cnt
+    return "no strap"
 
 
 # r13: the two shoulder straps (the pack's carry straps, which the r11 swap of the bedroll took away): ribbons that
@@ -1287,6 +1392,7 @@ if __name__ == "__main__":
         if pk:
             st.append(("pack tris", lambda js, b, out, rig: swap_pack(js, b, out, rig, pk, un)))
         st.append(("straps tris", add_straps))
+        st += [("face winding", orient_faces), ("strap ink", strap_ink)]
         rebuild_stages(sys.argv[2], sys.argv[3], st)
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
