@@ -291,3 +291,11 @@ shards that tore in every clip (the stretch check cannot see it; Blender renders
 death can). The rig is mirror-symmetric, so `python3 tools/art1/glb_mirror_limb.py IN.glb OUT.glb --below 0.42`
 dropped the right leg's 575 triangles under 0.42 m and put the left shin and foot there, mirrored (534 tris, same UVs and
 paint, .L joints renamed .R). Stretch-check unchanged (mean of 52 clips 4.66, worst 8.52 ledge).
+
+## Rig pipeline faults, 11-23 (ext/rig-pipeline-faults-1123): before/after stills
+Scratch copies only (no hunter .glb touched), real GPU, `--rig-hands-shots` (match camera and eye-level hand views). Grey = the pipeline as it was, green = with the fixes.
+- `docs/art/wardens/rig_faults_1123/fault1_fingers.jpg`: Kael's Meshy body rigged through the .glb upload, fingers curled 70 deg: 24 joints (no finger bones, the hand stays flat) vs 70 joints (a fist).
+- `fault2_decimate.jpg`: the same body 80k -> 12k triangles: hands 296 -> 992 triangles, head 2002 -> 3885 (`fit_warden.DEFAULT_REGIONS`; the uniform collapse gave the hands 13% of what they had).
+- `fault3_weapon.jpg`: Albert's game .glb with the body mesh stood in for the swap's new body: the 625 `x_shield` faces are gone (grey) vs carried as their own mesh (green, shield beside the left hand).
+Not run: a full `v95_swap` on a real master (masters are not on this worker), so the hand-ball and weapon pieces are proved as functions on scratch copies.
+
