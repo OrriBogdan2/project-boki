@@ -10,6 +10,7 @@ extends ArchKit
 ## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
 ## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
 
+const SLOT_PINK := Color("ff5ab4")   # her ability slot colour (docs/VFX_QUALITY.md palette)
 const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
 const DEEP_PINK := Color("e0148c")   # the aim kit whitens its accent: this lands as a rich hot pink
@@ -769,9 +770,9 @@ func _build_mote() -> Node3D:
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var lt := OmniLight3D.new()
-	lt.light_color = PINK
+	lt.light_color = SLOT_PINK       # her slot pink (#ff5ab4): the haze on the ground stays pink, not orange
 	lt.omni_range = 2.4
-	lt.light_energy = 1.2
+	lt.light_energy = 0.6
 	n.add_child(lt)
 	mote_pool.append(n)
 	return n
