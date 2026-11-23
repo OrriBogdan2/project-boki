@@ -68,6 +68,14 @@ func run(main: Node) -> void:
 		if is_instance_valid(g) and not g.dead:
 			g.dead = true
 			g.visible = false
+	# (no wild Boki about: a bot goes for one it sees, and which ones a seed puts near the lair shifts with every
+	# change to what the match builds first)
+	for k in m.kins.duplicate():
+		if k.is_wild():
+			k.dead = true
+			m.kins.erase(k)
+			m.ents_by_id.erase(k.nid)
+			k.queue_free()
 	m.lairs.open(f, p, "dial")
 	var boss: Boss = m.lairs.boss_of(f)
 	var side := Vector3(-f["out"].y, 0, f["out"].x)
