@@ -211,6 +211,10 @@ func _breathe(t0: int) -> int:
 ## doubled an M5's warm-up (eight frames a batch, each ~30 ms with the map loaded; item 33).
 const BATCH := 4
 const BATCH_MIN := 2
+## The most stand-ins a batch grows to. Doubling without a cap reached batches of 32-64, and when such a batch met a
+## run of new pipelines it was a 1.5 s frame (RTX 4090, Forward+, jobq 120840): the next batch is also sized from the
+## last one's cost per stand-in.
+const BATCH_MAX := 16
 const FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
@@ -427,7 +431,8 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		if extra > FRAME_MS:
 			n = maxi(BATCH_MIN, n / 2)
 		elif extra < FRAME_MS * 0.6:
-			n = mini(n * 2, 512)
+			var fit := int(FRAME_MS / maxf(0.5, extra / batch.size()))
+			n = clampi(mini(n * 2, fit), BATCH_MIN, BATCH_MAX)
 	await m.get_tree().process_frame
 	for li in lights.size():
 		if is_instance_valid(lights[li]):
