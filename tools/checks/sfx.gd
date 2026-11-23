@@ -6,4 +6,5 @@ extends RefCounted
 
 const CHECKS := {
 	"--sfx-priority-check": ["res://tools/sfx_priority_check.gd", "sfx_priority_check", null],  # enemy wind-ups
+	"--incoming-hit-check": ["res://tools/incoming_hit_check.gd", "incoming_hit_check", null],  # hit_in cue
 }
