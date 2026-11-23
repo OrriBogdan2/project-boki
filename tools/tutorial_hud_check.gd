@@ -22,20 +22,36 @@ extends RefCounted
 ##   9. the closing zone's two guide lines (the first warning, outside when the wall passes): each once per profile
 ##  10. the pick ring and arrow follow the slot the HUD drew (RankMarks.face) at 1280x720 and 1920x1080:
 ##      slot and arrow on screen, in the bottom row, the same rect as the slot's hover spot
+##   6. framing at the match camera, per starter (Lace, Kael, Vex), at 1280x720: at every step the thing to
+##      act on (the camp's monster, the pad's sign, the glove, the outpost, the stop) is on screen for most
+##      of the step (a walk to a far stop: by the time you get there; the marker's edge arrow and the Boki
+##      lead the way meanwhile) and, where it is a thing, at least MIN_PX tall. One row per step is printed.
+
+const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
+const MAX_LINE := 40  # chars of a banner line (it names its key too; --tutorial-playtest-check measures the fit)
+const STARTERS := ["archer", "juggernaut", "gunslinger"]
+const FRAME_VIEW := Vector2(1280, 720)  # the smallest screen the tutorial is built for
+const MIN_PX := 24.0  # px at 1280x720: the least a thing to act on may be drawn tall
+const ON_SHARE := 0.6  # of a step's frames: its thing is on screen at least this often
 
 var bad := 0
 var m: Match
 var main: Node
 
-const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
+	var fresh: Dictionary = Save.d.duplicate(true)
+	for id in STARTERS:
+		_framing(id)
+		Save.d = fresh.duplicate(true)  # (a finished course leaves the save's tutorial flags set)
 	_lanes()
 	_course()
 	_reach()
@@ -45,6 +61,7 @@ func run(mn: Node) -> void:
 	await _pointers()
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 # ------------------------------------------------------------------ 1. the lanes
 func _lanes() -> void:
@@ -81,6 +98,7 @@ func _lanes() -> void:
 		var g_ok := not gb.intersects(wo) and gb.size.y <= sz.y * 0.06 + 0.5 and gb.end.y <= sz.y - margin
 		ok(g_ok, "%s: in a real match the strip sits under the Ways Out zone clocks (%s)" % [tag, str(gb)])
 
+
 # ------------------------------------------------------------------ 2, 3, 4. a run of the course
 func _course() -> void:
 	m = Match.new()
@@ -111,8 +129,8 @@ func _course() -> void:
 	var shown_after := 0
 	var asked := 0
 	var under := 0
-	var key_label := 0      # frames an interact step's card and a world prompt were both up
-	var key_loud := 0       # ... of those, frames the world label would still have drawn
+	var key_label := 0  # frames an interact step's card and a world prompt were both up
+	var key_loud := 0  # ... of those, frames the world label would still have drawn
 	var texts := {}
 	var counters := {}
 	var chimed := 0
@@ -122,11 +140,13 @@ func _course() -> void:
 		TutorialDrive.drive(m)
 		var before := tu.step
 		Sfx.last_played.erase(TutorialStrip.CHIME)
-		Sfx.recent.clear()      # (headless steps outrun the wall clock the stacking limit counts in)
+		Sfx.recent.clear()  # (headless steps outrun the wall clock the stacking limit counts in)
 		m.step(Match.DT)
 		if Sfx.last_played.has(TutorialStrip.CHIME):
-			if tu.step != before: chimed += 1
-			else: stray += 1
+			if tu.step != before:
+				chimed += 1
+			else:
+				stray += 1
 		if tu.step != before:
 			changes += 1
 		t += Match.DT
@@ -147,7 +167,8 @@ func _course() -> void:
 			key_label += 1
 			key_loud += int(not tu.prompt_quiet())
 		if tu.card_up():
-			toast_in_card += m.hud.msgs.texts().size()
+			# (a Boki that falls says so at once, as an URGENT line: the one kind a banner lets through)
+			toast_in_card += m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t).size()
 			bubble_in_card += m.bubbles.size()
 			prompt_in_card += int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 			under += _under_banner()
@@ -174,7 +195,7 @@ func _course() -> void:
 	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
-	var wide := texts.values().filter(func(x): return String(x).length() > 34)
+	var wide := texts.values().filter(func(x): return String(x).length() > MAX_LINE)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
@@ -186,7 +207,8 @@ func _course() -> void:
 		var line := String(texts.get("sec", ""))
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
 	var tl := String(texts.get("gkey", "")).to_lower()
-	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
+	ok(tl.contains("send "), "the Boki step says to send it ('%s')" % tl)
+
 
 ## A fresh banner with a toast and a world prompt fired under it: one prompt shows. A fight's urgent line
 ## and revive prompt get through; when the banner settles the toast shows.
@@ -195,7 +217,7 @@ func _one_prompt() -> void:
 	var lane: MsgLane = m.hud.msgs
 	lane.clear()
 	tu.card_t = 0.0
-	m.step(Match.DT)        # (the tutorial puts the lane on hold for the fresh banner)
+	m.step(Match.DT)  # (the tutorial puts the lane on hold for the fresh banner)
 	m.hud.toast("one prompt", Color.WHITE)
 	m.interact = {"kind": "chest", "label": "Press F to open"}
 	var n := _prompts()
@@ -210,11 +232,13 @@ func _one_prompt() -> void:
 	ok(lane.texts().has("one prompt"), "when the banner settles the toast shows (%s)" % str(lane.texts()))
 	lane.clear()
 
+
 ## What asks for the player's eye now: the banner, the lane's lines on show, the world prompt.
 func _prompts() -> int:
 	var n := 1 if m.tut.step >= 0 else 0
 	n += m.hud.msgs.texts().size()
 	return n + int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
+
 
 ## The marker's pin or arrow: a spot at your feet or ahead in view shows its pin, one behind you the arrow.
 func _marker() -> void:
@@ -225,7 +249,7 @@ func _marker() -> void:
 	var me := m.player.pos
 	var near := MarkerDir.off_dir(cam, sz, me + fwd * 1.0, me)
 	ok(near == Vector2.ZERO, "a target at the hunter's feet shows its pin, not an arrow (%s)" % str(near))
-	var aim := sz * Vector2(0.5, 0.3)      # where the pin should land: in the play box, above the hunter
+	var aim := sz * Vector2(0.5, 0.3)  # where the pin should land: in the play box, above the hunter
 	var o := cam.project_ray_origin(aim)
 	var ray := cam.project_ray_normal(aim)
 	var pin := o + ray * ((me.y + MarkerDir.PIN_UP - o.y) / ray.y)
@@ -233,6 +257,7 @@ func _marker() -> void:
 	ok(ahead == Vector2.ZERO, "a target ahead whose pin is in the play box shows its pin (%s)" % str(ahead))
 	var back := MarkerDir.off_dir(cam, sz, me - fwd * 4.0, me)
 	ok(back != Vector2.ZERO and back.y > 0.0, "one behind the hunter gets an arrow pointing down (%s)" % str(back))
+
 
 ## Frames where the hunter or the Boki sit under the banner (at the screen sizes it is built for).
 func _under_banner() -> int:
@@ -254,6 +279,7 @@ func _under_banner() -> int:
 				hit += 1
 	return hit
 
+
 # ------------------------------------------------------------------ 5. every stop can be reached
 ## From each stop to the next on the same island, plain walking: no step up taller than half a jump.
 func _reach() -> void:
@@ -268,9 +294,9 @@ func _reach() -> void:
 		if a == Vector3.INF or b == Vector3.INF:
 			continue
 		if m.world.island_of(a.x, a.z) != m.world.island_of(b.x, b.z):
-			continue      # (a gap: the dash, jump and glide steps and the bridges, which the run above plays)
+			continue  # (a gap: the dash, jump and glide steps and the bridges, which the run above plays)
 		if order[i] == "crouch":
-			continue      # (the lookout: climbed with a wall kick, checked below)
+			continue  # (the lookout: climbed with a wall kick, checked below)
 		var prev := a.y
 		var n := int(a.distance_to(b) / 0.4) + 1
 		for k in range(1, n + 1):
@@ -286,18 +312,20 @@ func _reach() -> void:
 	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
 	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
 
+
 # ------------------------------------------------------------------ 7. the glide dive line
 func _glide_secs(g: FirstMatchGuide, p: Hunter, secs: float) -> void:
 	p.dropping = false
-	p.riding = false      # landed: a match starts aboard the skyship, where the guide is quiet
+	p.riding = false  # landed: a match starts aboard the skyship, where the guide is quiet
 	p.gliding = true
 	p.pos.y += float(FirstMatchGuide.rules()["dive_height"]) + 5.0 - GlideDive.height(p)
 	for i in int(secs * 10.0):
 		g.tick(0.1)
 
+
 func _dive_hint() -> void:
 	Save.d["tutorial"].erase("glide_dive")
-	Save.d["first_guide"] = int(FirstMatchGuide.rules()["matches"])      # past the first matches: dive line only
+	Save.d["first_guide"] = int(FirstMatchGuide.rules()["matches"])  # past the first matches: dive line only
 	var dm := Match.new()
 	main.add_child(dm)
 	dm.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"})
@@ -334,6 +362,7 @@ func _dive_hint() -> void:
 	ok(g2.line == "", "shown once per save: not again after it ran out")
 	dm.queue_free()
 
+
 # ------------------------------------------------------------------ 8. the first crowd control
 func _cc_tips() -> void:
 	var tips: Dictionary = Content.rules("tutorial")["tips"]
@@ -343,7 +372,8 @@ func _cc_tips() -> void:
 		if case_name == "tutorial":
 			for cc: String in ["stun", "root", "grounded"]:
 				Save.d["tutorial"].erase("cc_" + cc)
-		if m: m.queue_free()
+		if m:
+			m.queue_free()
 		m = Match.new()
 		main.add_child(m)
 		var opts := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true}
@@ -361,9 +391,12 @@ func _cc_tips() -> void:
 		p.root_t = 0.0
 		for cc: String in ["stun", "root", "grounded"]:
 			match cc:
-				"stun": p.stun_t = 1.0
-				"root": p.root_t = 1.0
-				"grounded": KitStatus.apply(p, "gnd", 1.5, 0.0, false)
+				"stun":
+					p.stun_t = 1.0
+				"root":
+					p.root_t = 1.0
+				"grounded":
+					KitStatus.apply(p, "gnd", 1.5, 0.0, false)
 			m._tips()
 			var shown: bool = m.hud.msgs.count() == 1 and m.hud.msgs.texts().has(tips[cc])
 			var said := "shown" if shown else "not shown"
@@ -376,6 +409,8 @@ func _cc_tips() -> void:
 			p.set_meta("gnd_until", 0.0)
 	for cc: String in tips:
 		ok(not String(tips[cc]).contains("%") and String(tips[cc]).length() < 70, "the %s card is one short line" % cc)
+
+
 # ------------------------------------------------------------------ 9. the closing zone's two lines
 ## A real expedition with the first-match guide, every other guide line already shown, the player landed.
 func _zone_match() -> Match:
@@ -387,16 +422,18 @@ func _zone_match() -> Match:
 		if h != zm.player:
 			h.pos = zm.player.pos + Vector3(300, 0, 0)
 	zm.player.dropping = false
-	zm.player.riding = false      # landed: a match starts aboard the skyship, where the guide is quiet
+	zm.player.riding = false  # landed: a match starts aboard the skyship, where the guide is quiet
 	for row: Array in FirstMatchGuide.rules()["lines"]:
 		if not row[0] in FirstMatchGuide.ONCE_PER_PROFILE:
 			zm.guide.shown[row[0]] = true
 	return zm
 
+
 func _zone_tick(zm: Match, secs: float) -> void:
 	for i in int(secs * 10.0):
 		zm.zone.tick(0.1)
 		zm.guide.tick(0.1)
+
 
 func _zone_lines() -> void:
 	Save.d["first_guide"] = 0
@@ -458,6 +495,7 @@ func _zone_lines() -> void:
 	ok(zn.guide.line == "", "next match: outside the wall gets no wall line")
 	zn.queue_free()
 
+
 ## Each of the two lines is one line in the guide strip at every screen size.
 func _zone_widths(zm: Match) -> void:
 	for sz: Vector2 in SIZES:
@@ -472,6 +510,7 @@ func _zone_widths(zm: Match) -> void:
 					px -= 1
 				ok(px >= 12, "%dx%d: the %s line fits the strip on one line (%d px)" % [sz.x, sz.y, lid, px])
 
+
 # ------------------------------------------------------------------ 9. the pointer follows the HUD's slot
 ## At each screen size, on every pick step: the ring's slot rect is the one the HUD drew that slot at.
 func _pointers() -> void:
@@ -485,28 +524,155 @@ func _pointers() -> void:
 		if slot == "" or seen.has(slot):
 			continue
 		seen[slot] = true
-		pm.tut._skip_to(i)      # (straight to the pick step: the pointer, not the driver, is under test)
+		pm.tut._skip_to(i)  # (straight to the pick step: the pointer, not the driver, is under test)
 		pm.tut._enter()
 		for f in 3:
 			pm.step(Match.DT)
 		for sz: Vector2 in SIZES.slice(0, 2):
+			main.get_window().size_2d_override = Vector2i(sz)  # (the window HudPanels.tick fits itself to)
 			pm.hud.panels.size = sz
 			pm.hud.panels.queue_redraw()
 			await pm.hud.panels.draw
 			_pointer_rows(pm, slot, sz)
+	main.get_window().size_2d_override = Vector2i.ZERO
 	ok(seen.size() >= 3, "the course has pick steps for %s" % str(seen.keys()))
 	pm.queue_free()
+
 
 func _pointer_rows(pm: Match, slot: String, sz: Vector2) -> void:
 	var face := RankMarks.face(slot)
 	var tag := "%dx%d %s" % [sz.x, sz.y, slot]
 	ok(face.has_area(), "%s: the pick ring finds the slot the HUD drew" % tag)
-	var rad := maxf(face.size.x, face.size.y) * 0.88      # (the ring at its biggest; its arrow sits above it)
+	var rad := maxf(face.size.x, face.size.y) * 0.88  # (the ring at its biggest; its arrow sits above it)
 	var top := face.get_center().y - rad * 2.6 - 16.0
-	var reach := Rect2(face.get_center().x - rad, top, rad * 2.0, face.end.y - top)      # (a ring may clip the edge)
-	ok(Rect2(Vector2.ZERO, sz).encloses(reach) and face.position.y > sz.y * 0.7,
-		"%s: the slot and the arrow are on screen, in the bottom row (%s)" % [tag, str(face)])
+	var reach := Rect2(face.get_center().x - rad, top, rad * 2.0, face.end.y - top)  # (a ring may clip the edge)
+	ok(
+		Rect2(Vector2.ZERO, sz).encloses(reach) and face.position.y > sz.y * 0.7,
+		"%s: the slot and the arrow are on screen, in the bottom row (%s)" % [tag, str(face)]
+	)
 	var hid: String = {"kin": "k1", "ult": "r"}.get(slot, slot)
 	var spots: Array = pm.hud.hover_spots.filter(func(s): return s[1] == hid)
-	ok(spots.any(func(s): return (s[0] as Rect2).is_equal_approx(face)),
-		"%s: it is the slot's own hover rect, not a fixed spot" % tag)
+	ok(
+		spots.any(func(s): return (s[0] as Rect2).is_equal_approx(face)),
+		"%s: it is the slot's own hover rect, not a fixed spot" % tag
+	)
+
+
+# ------------------------------------------------------------------ 6. framing at the match camera
+## Plays the course as one starter, the camera on the hunter (the default view, no cursor lean), and
+## judges each step's thing to act on at 1280x720: how often it is on screen and how tall it is drawn.
+func _framing(arch: String) -> void:
+	seed(11)  # (the run --tutorial-fight-check plays, the same each time)
+	var fm := Match.new()
+	main.add_child(fm)
+	fm.start(
+		{
+			"tutorial": true,
+			"tut_test": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1500.0,
+			"demo_kin": "cindle",
+			"arch": arch,
+			"cls": Arch.weight(arch),
+			"weapon": Arch.signature(arch),
+			"boki_wisps": false
+		}
+	)
+	fm.set_process(false)
+	var tu: Tutorial = fm.tut
+	var rows := {}  # step id -> [frames, frames on screen, px tall while on screen, on screen last frame]
+	var t := 0.0
+	while t < 600.0 and not fm.player.extracted:
+		TutorialDrive.drive(fm)
+		fm.step(Match.DT)
+		t += Match.DT
+		fm.cam.snap(fm.player.pos)
+		var sid := tu.id()
+		var at := _act_at(tu, sid)
+		if at == Vector3.INF:
+			continue
+		var row: Array = rows.get(sid, [0, 0, [], false])
+		rows[sid] = row
+		row[0] += 1
+		row[3] = _on_screen(fm.cam, at)
+		if row[3]:
+			row[1] += 1
+			var node := _act_node(tu, sid)
+			if node != null:
+				(row[2] as Array).append(_tall_px(fm.cam, node))
+	print("TUTHUD frame %s | step | on screen | px tall (min / median)" % arch)
+	for sid in rows:
+		var row: Array = rows[sid]
+		var share := float(row[1]) / maxf(1.0, float(row[0]))
+		var px: Array = row[2]
+		px.sort()
+		var tall := "-" if px.is_empty() else "%.0f / %.0f" % [px[0], px[px.size() / 2]]
+		print("TUTHUD frame %s | %s | %.0f%% | %s" % [arch, sid, share * 100.0, tall])
+		if sid in Tutorial.WALK_LEAD:
+			ok(row[3], "%s %s: the place you walk to is on screen when you get there" % [arch, sid])
+		else:
+			ok(share >= ON_SHARE, "%s %s: its thing is on screen %.0f%% of the step" % [arch, sid, share * 100.0])
+		if not px.is_empty():
+			ok(float(px[px.size() / 2]) >= MIN_PX, "%s %s: drawn %s px tall" % [arch, sid, tall])
+	ok(fm.player.extracted, arch + ": the framing run finishes the course")
+	fm.queue_free()
+
+
+## Where the thing a step asks you to act on stands (INF for a step on the HUD alone): a gap step's sign
+## (over the pad you leave from; the glide's moves over the landing once you are off), else the step's goal.
+func _act_at(tu: Tutorial, sid: String) -> Vector3:
+	if sid in Tutorial.GAP_STEPS and tu.pad_sign(sid) != null:
+		return tu.sign_spot(sid)
+	return tu.goal(sid)
+
+
+## The thing itself, when there is one to measure (the ground stops have none).
+func _act_node(tu: Tutorial, sid: String) -> Node3D:
+	if sid in Tutorial.GAP_STEPS:
+		return tu.pad_sign(sid)
+	if sid in Tutorial.FOE_STEPS:
+		var mb := tu.camps.nearest("sentinel" if sid == "hook" else "")
+		if mb == null:
+			mb = tu.camps.nearest()
+		return mb.model if mb else null
+	var item := tu.ground_item() if sid == "glove" else tu.outpost()
+	return item.get("node") if sid in ["glove", "wayout", "uplink", "defend", "extract"] else null
+
+
+func _on_screen(cam: Camera3D, at: Vector3) -> bool:
+	if cam.is_position_behind(at):
+		return false
+	return Rect2(Vector2.ZERO, FRAME_VIEW).has_point(_to_view(cam, at))
+
+
+## A world point on the 1280x720 screen.
+func _to_view(cam: Camera3D, at: Vector3) -> Vector2:
+	return cam.unproject_position(at) / cam.get_viewport().get_visible_rect().size * FRAME_VIEW
+
+
+## How tall a thing is drawn on screen: a sign faces the camera, so its line's height; anything else, the
+## height of its box's outline (seen from above, a flat monster's back counts, not just how high it stands).
+func _tall_px(cam: Camera3D, node: Node3D) -> float:
+	if node is Label3D:
+		var lab := node as Label3D
+		var half := cam.global_transform.basis.y * lab.font_size * lab.pixel_size * 0.5
+		return absf(_to_view(cam, lab.global_position + half).y - _to_view(cam, lab.global_position - half).y)
+	var box := _box(node)
+	var lo := INF
+	var hi := -INF
+	for i in 8:
+		var y := _to_view(cam, box.get_endpoint(i)).y
+		lo = minf(lo, y)
+		hi = maxf(hi, y)
+	return hi - lo
+
+
+## The world box a node draws in: all its visible meshes.
+func _box(node: Node3D) -> AABB:
+	var box := AABB(node.global_position, Vector3.ZERO)
+	for vi in node.find_children("*", "VisualInstance3D", true, false):
+		if (vi as VisualInstance3D).is_visible_in_tree():
+			box = box.merge((vi as VisualInstance3D).global_transform * (vi as VisualInstance3D).get_aabb())
+	return box

@@ -30,7 +30,6 @@ const BURR_RIDE := 0.25              # m: the least height the charge keeps over
 const BURR_R := 0.15                 # m: the coin's own radius when it meets a placed wall
 const BURR_WALL_DEG := 50.0          # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
 const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
-const HIT_HOLD := 0.3                # s a struck foe's body stays lit (the generic hit flash is 0.12 s)
 const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of her cap and face
 const TUBE_UP := 0.16                # m above the gun's muzzle: the launcher tube, on a model without its empties
 const TUBE_FIRE := "launcher_fire"   # fixed on the cannon at the bell's firing spot: the charge leaves from here
@@ -218,7 +217,7 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
 		return
 	if String(o.get("src", "")) == "shot" and not o.has("ab"):
-		vfx("shot_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t))
+		vfx("shot_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t), {"k": _faded_now()})
 	if res > 0.0:
 		h.heal(dmg * fever_k())
 	if o.has("ab") and String(o.get("ab")) != "dodge":
@@ -249,8 +248,9 @@ func _tick_lmb() -> void:
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
 			var mouth := _gun_muzzle()
-			vfx("shot", mouth.global_position if mouth else sd["start"], sd["vel"] as Vector2)
-			HeroVfx.of(m).trail(h, "shot_trail", sd["node"])
+			var faded := {"k": _faded(float((sd["x"] as Dictionary).get("sus_k", 1.0)))}
+			vfx("shot", mouth.global_position if mouth else sd["start"], sd["vel"] as Vector2, faded)
+			HeroVfx.of(m).trail(h, "shot_trail", sd["node"], faded)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
@@ -288,6 +288,18 @@ func _tick_mag(dt: float) -> void:
 	var add := int(refill_part)
 	refill_part -= float(add)
 	h.ammo = mini(mag, h.ammo + add)
+
+## How far a round's damage has decayed toward the rifle's sustained floor: 0 at full damage, 1 once the string is
+## past its first ten rounds. The shot, trail and hit looks (content/vfx/gunslinger.json) shrink by it ("size_k").
+func _faded(sus_k: float) -> float:
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	return clampf((1.0 - sus_k) / loss, 0.0, 1.0) if loss > 0.0 else 0.0
+
+## The decay of the round landing now: a hit does not carry its round's sus_k, so this reads the string's count
+## (a round or two ahead at most).
+func _faded_now() -> float:
+	var rounds := float(h.wpn.get("sustain_rounds", 10))
+	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
 
 # ------------------------------------------------------------------ dash: Slipstep
 func single_dash() -> bool: return true
@@ -568,7 +580,7 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 ## Only a charge that strikes a foe does this, so a hit can't be mistaken for a miss (a stick in terrain,
 ## with a dust puff): a hot ring round the foe, its body held lit, and for the thrower a ping.
 func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
-	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
+	victim.flash_t = maxf(victim.flash_t, ImpactWeight.flash_s(ImpactWeight.of_ability(h.arch, "rmb")))
 	vfx("rmb_hit", victim.pos, -dir, {"r": victim.r + 0.9})
 	if h == m.player and m.hud:
 		m.sfx("crit", at, -2.0, 0.8)

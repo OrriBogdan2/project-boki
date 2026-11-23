@@ -1,5 +1,5 @@
 extends CanvasLayer
-## (movefeel) The abyss, for the local player only. As in the owner's reference footage, the moment
+## The abyss, for the local player only. As in the owner's reference footage, the moment
 ## you're falling below island level the whole view goes a saturated magenta/rose, deepening toward
 ## crimson-magenta the lower you go; only right at the point of no return does it darken and close
 ## in at the edges with a heartbeat. It lets go as the glider lifts you back up (see danger). The HUD adds the heartbeat sounds

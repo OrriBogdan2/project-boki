@@ -108,9 +108,18 @@ func _start(lid: String, p: Hunter) -> void:
 		Save.d["tutorial"]["glide_dive"] = true      # shown once: a missed line is not repeated
 	if lid == "send":
 		m.tip_once("ability")      # the same lesson as the Boki-key hint: one voice, not two
+	if lid == "exit":
+		txt = _exit_text(txt)
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
 	line = TutorialText.fill(txt, p).replace("%s", who).replace("%B", Settings.key_cap("base"))
 	TutorialStrip.chime(m)
+
+## The exit line names the way out the top-centre goal line points at, so the guide, the line and the map agree.
+func _exit_text(txt: String) -> String:
+	var i := ExtractGoal.pick(m, HudReveal.newcomer(m))
+	if i < 0:
+		return String(rules()["exit_none"])
+	return txt.replace("%X", WaysOutMap.WORDS[i]).replace("%H", ExtractGoal.how(i))
 
 func _left() -> float:
 	return (m.length - m.time) / m.length
@@ -171,12 +180,19 @@ func draw(h, sz: Vector2) -> void:
 
 ## Where the banner line sits at age `t` (under the Ways Out strip and the ship's countdown line).
 static func strip_rect(mt: Match, sz: Vector2, t := INF) -> Rect2:
-	var below := WaysOutHud.bottom(mt)
-	if mt.skydrop and mt.skydrop.planning:
-		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
-	return TutorialStrip.shown(sz, t, below)
+	return TutorialStrip.shown(sz, t, _below(mt))
 
 ## One banner line, faded in over its first quarter second (the crouch hint draws through this too).
 static func draw_line(h, sz: Vector2, text: String, t: float) -> void:
 	if text != "":
 		TutorialStrip.paint(h.c, h.big, strip_rect(h.m, sz, t), {"text": text}, t, clampf(t / 0.25, 0.0, 1.0))
+
+## Where the line's strip ends (0 with no line up): the message column starts under it, never behind it.
+func bottom(sz: Vector2) -> float:
+	return TutorialStrip.rect(sz, _below(m)).end.y + MsgLane.GAP if line != "" else 0.0
+
+static func _below(mm: Match) -> float:
+	var below := WaysOutHud.bottom(mm)
+	if mm.skydrop and mm.skydrop.planning:
+		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
+	return below

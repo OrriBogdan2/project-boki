@@ -16,6 +16,7 @@
 	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
 	"howto": ["Play: long-range bow; hold {fire} to draw, release to loose.", "Combo: {secondary} into a wall pins and stuns the foe.", "Avoid: overdrawing; past full draw the damage halves."],
 	"silhouette": "the long weapon over the shoulder",
+	"hint": {"lmb": "Hold {fire} to draw, release on the flash", "rmb": "Hold {secondary} for a Heavy Shot that pins foes to walls", "e": "Press {signature} to rain arrows in a wall at the cursor", "dash": "Press {dash} to roll, then walk through rocks as a spirit"},
 	"card": {"role_word": "Marksman", "loop": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.", "role": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.", "dash": "Roll, then 2.8s walking through rocks, trees and barriers.", "passive": "Rivals under half health show through cover.", "rmb": "Hold, release: a heavy arrow that knocks back and pins to walls.", "e": "Rain arrows on a wall at the cursor: damage, slow, anti-heal burn.", "x": "Your next 3 shots skip the draw and pierce; the third finishes.", "weapons": {"longbow": "Hold to draw; release on the flash for a faster next draw."}, "chips": {"rmb": ["16-30 dmg"], "e": ["5 per tick"], "x": ["18 dmg"]}},
 	"signature": "longbow",
 	"resource": {
@@ -130,10 +131,10 @@
 		"width": 0.5,
 		"dmg": 18.0,
 		"final_dmg": 23.3,
-		"kb": 4.0,
+		"kb": 2.0,
 		"shred": 10.0,
 		"execute": 0.12,
-		"desc": "Press: a big arrow leaves your bow at once, and your next 2 presses within 6s loose another (1s apart, no draw). Each flies 18m, pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health."
+		"desc": "Press: a big arrow leaves your bow at once, and your next 2 presses within 6s loose another (1s apart, no draw). Each flies 18m, pierces every foe and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health."
 	},
 	"order": [
 		"sec",

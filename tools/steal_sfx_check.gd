@@ -1,6 +1,6 @@
 extends RefCounted
 ## --steal-sfx-check: the prize-monster cues (StealSfx, ticked in Mob.sim / Boss.sim). An elite cries once (its
-## voice kind's steal_cry_<kind>) the first frame it is at or under StealSfx.CRY_AT of its health and never again;
+## voice kind's steal_cry_<kind>) the first frame it is at or under StealTell.at() of its health and never again;
 ## each new reel (stagger) plays steal_reel once; a plain monster plays neither; the files exist. Never touches
 ## the save.
 
@@ -56,7 +56,7 @@ func run(main: Node) -> void:
 	elite.hp = elite.max_hp * 0.5
 	_frames(elite, 5)
 	ok(_heard("steal_cry_skitter") == 0, "(a) no cry at half health")
-	elite.hp = elite.max_hp * StealSfx.CRY_AT
+	elite.hp = elite.max_hp * StealTell.at()
 	_frames(elite, 5)
 	ok(_heard("steal_cry_skitter") == 1, "(a) one cry at the quarter mark (%d)" % _heard("steal_cry_skitter"))
 	_clear()

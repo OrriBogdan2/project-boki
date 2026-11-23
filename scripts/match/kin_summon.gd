@@ -7,15 +7,17 @@ extends RefCounted
 ## by a rival hunter it flies home and shows its owner to the killer's squad for a moment, with a longer cooldown;
 ## killed while its owner is downed it is a loose wisp there (KinSteal); killed by a monster it just goes home
 ## (decision 0045: the one PvE difference, besides monsters never grabbing wisps).
-## At the end it shrinks back into the wisp, which stays dim until the cooldown is over. Summon again while
+## The burst out of the wisp and the fold back in are BokiWispPop (soft light only: no explosion, ring or disc).
+## At the end it folds back into the wisp, which stays dim until the cooldown is over. Summon again while
 ## it is out sends it back early (full cooldown). One summon at a time: your own Boki, or a stolen wisp's one
 ## summon while yours rests or is gone (KinSteal.press).
 ## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
-const BURST_S := 0.3  # s: the bloom from wisp to full size
-const SHRINK_S := 0.35  # s: the shrink back into the wisp
-const BURST_FROM := 0.3  # its size at the start of the bloom and the end of the shrink (x its own)
+const SHRINK_S := BokiWispPop.DURATION  # s: the fold back into the wisp
+const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
+const CALL_AT := "summon_call_at"  # meta on the Hunter: match time of the last call or recall gesture
+const CALL_K := "summon_call_k"  # meta on the Hunter: which ("call" on the burst, "recall" on the fold)
 
 var k: Kin
 var dur := 10.0  # s: this species' window
@@ -23,7 +25,6 @@ var cd_base := 60.0  # s: this species' cooldown
 var left := 0.0  # s of the window left (0: a wisp, or shrinking)
 var win := 0.0  # s: the window it started with (the most `left` seen), for SummonRing
 var shrink := 0.0  # s of the shrink back left
-var grow := 0.0  # s of the bloom left (drawing only)
 var cd := 0.0  # s until it can be summoned again
 var cd_full := 1.0  # s: the cooldown now running (longer after a rival's kill), for the HUD ring
 var fly := 0.0  # s of the flight home left after a kill (drawing only)
@@ -31,6 +32,8 @@ var fly_len := 1.0  # s: that flight in all
 var fly_from := Vector3.ZERO  # where it was killed
 var rival: Hunter = null  # the last rival hunter who damaged it while out
 var rival_t := -1e9  # Match.time of that hit
+
+var _folding := false  # drawing: a fold pop has started for this shrink
 
 
 func _init(kin: Kin) -> void:
@@ -55,6 +58,15 @@ static func times(ks: KinSpec) -> Vector2:
 	return Vector2(float(cell[0]), float(cell[1]))
 
 
+## The cards' plain line for a window ("Short summon, strong"): the last card_lines entry whose from (s) it reaches.
+static func card_line(window: float) -> String:
+	var out_v := ""
+	for cl in rules()["card_lines"]:
+		if window >= float(cl[0]):
+			out_v = String(cl[1])
+	return out_v
+
+
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
@@ -69,19 +81,19 @@ func leash(aggression: float) -> float:
 static func press(h: Hunter) -> bool:
 	if h.downed or h.out or h.riding or h.dropping:
 		return false
-	var k: Kin = h.kin
-	if k == null or k.summon == null or k.owner_h != h:
+	var k_v: Kin = h.kin
+	if k_v == null or k_v.summon == null or k_v.owner_h != h:
 		return KinSteal.press(h)  # (your own Boki is gone or stolen: a stolen wisp's one summon)
-	var s := k.summon
+	var s := k_v.summon
 	if s.left > 0.0:
 		s.end()
 		return true
-	if not k.wisp:
+	if not k_v.wisp:
 		return KinSteal.press(h)
 	if s.cd > 0.0:
 		if KinSteal.press(h):
 			return true
-		KinCommand.say(h, "%s gathers itself: %d s" % [k.rec.get("name", "Your Boki"), ceili(s.cd)], Color("a2a8bb"))
+		KinCommand.say(h, "%s gathers itself: %d s" % [k_v.rec.get("name", "Your Boki"), ceili(s.cd)], Color("a2a8bb"))
 		return false
 	s.burst(s.dur)
 	return true
@@ -97,6 +109,16 @@ func burst(window: float) -> void:
 	k.fly = {}
 	k.vel = Vector3.ZERO
 	left = window
+
+
+## R fused the Boki into its hunter (KinMerge): a window still running is over, with the full cooldown of
+## sending it back early. A wisp's cooldown is left as it is: the merge is a separate resource.
+func fused() -> void:
+	if out():
+		left = 0.0
+		shrink = 0.0
+		cd = cd_base
+		cd_full = cd_base
 
 
 ## The window is over (timer or sent back early): the shrink starts.
@@ -174,7 +196,6 @@ static func show_reveal(m: Match, at: Vector3, team: int) -> void:
 ## The fixed step (own Boki only; a remote one reads the snapshot).
 func tick(dt: float) -> void:
 	cd = maxf(0.0, cd - dt)
-	grow = maxf(0.0, grow - dt)
 	fly = maxf(0.0, fly - dt)
 	var o := k.owner_h
 	if left > 0.0:
@@ -183,7 +204,7 @@ func tick(dt: float) -> void:
 			end()
 		elif o and k.flat_dist(o) > float(rules()["rebloom_dist"]):
 			k.teleport(KinFollow.side_spot(k))  # you dashed or glided off: it re-blooms beside you
-			popped(false)
+			popped(false, false)
 	elif shrink > 0.0 and k.state != "fused":
 		shrink -= dt
 		if shrink > 0.0:
@@ -194,16 +215,53 @@ func tick(dt: float) -> void:
 			_back(cd_base)
 
 
-## The bloom (into the Boki) or the puff (back into the wisp), on every game (KinWisp.set_wisp).
-func popped(to_wisp: bool) -> void:
-	var glow: Color = k.sp.get("glow", k.sp["color"])
-	if to_wisp:
-		k.m.fx.burst(k.pos + Vector3(0, 0.6, 0), glow, 8, 2.0)
-	else:
-		k.m.fx.burst(k.pos + Vector3(0, 0.6, 0), glow, 18, 3.5)
-		grow = BURST_S
-		k.m.fx.ring(k.pos, 1.4, Color(glow, 0.8), 0.3)
+## The burst (into the Boki) or the fold (back into the wisp), on every game (KinWisp.set_wisp). A fold already
+## playing through the shrink carries on; one that never shrank (killed, or a late snapshot) folds from here.
+func popped(to_wisp: bool, gesture := true) -> void:
+	if not to_wisp:
+		_pop(true, false)
+		if gesture:
+			_call("call")
 		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
+	elif _folding:
+		_drop_pop()
+	else:
+		_pop(false, true)
+	_folding = false
+
+
+## A BokiWispPop over the kin: its wisp home at the hunter's shoulder, the Boki's feet where the kin stands
+## now. stowing: the kin is about to move to the shoulder itself (KinSummon._back), so the pop sits on it.
+func _pop(burst_v: bool, stowing: bool) -> void:
+	_drop_pop()
+	var o := k.owner_h
+	if o == null or k.model == null:
+		return
+	var pop := BokiWispPop.new(k.species, k.rec)
+	pop.name = POP
+	var shoulder := o.pos + Vector3(0, 1.5, 0) - k.pos
+	pop.position = Vector3.ZERO if stowing else shoulder
+	pop.stand = -shoulder
+	pop.rotation.y = k.model.rotation.y
+	pop.finished.connect(_popped)
+	k.add_child(pop)
+	k.model.visible = false
+	pop.play(burst_v)
+
+
+## The burst ended: the walking Boki takes over. A fold holds its last pose until the wisp flag flips.
+func _popped(burst_v: bool) -> void:
+	if burst_v or k.wisp:
+		_drop_pop()
+
+
+func _drop_pop() -> void:
+	var pop := k.get_node_or_null(POP)
+	if pop:
+		k.remove_child(pop)
+		pop.queue_free()
+	if k.model:
+		k.model.visible = true
 
 
 func _back(cool: float) -> void:
@@ -217,16 +275,33 @@ func _back(cool: float) -> void:
 	k.scale = Vector3.ONE
 
 
-## Its size through the bloom and the shrink, and the wisp dim while it rests.
+## The fold starts with the shrink (here, so other games start it from the snapshot too), and the wisp is dim
+## while it rests.
 func render() -> void:
-	var f := 1.0
-	if grow > 0.0:
-		f = lerpf(1.0, BURST_FROM, grow / BURST_S)
-	elif shrink > 0.0:
-		f = lerpf(BURST_FROM, 1.0, shrink / SHRINK_S)
-	k.scale = Vector3.ONE * f
+	if shrink > 0.0 and not k.wisp and not _folding:
+		_folding = true
+		_pop(false, false)
+		_call("recall")
+	elif _folding and shrink <= 0.0 and not k.wisp:
+		_folding = false  # left behind mid-fold: it stays the walking Boki
+		_drop_pop()
 	if k.wisp and k.model:
 		BokiWispLook.dim(k.model, cd > 0.0)
+
+
+## The Hunter's gesture (warden_anim "summon_call", WardenClips' upper layer): a call on the burst, a recall on the
+## fold. Not on a re-bloom, not while downed (the guardian), not after a kill. Drawing only: the pop has happened.
+func _call(kind: String) -> void:
+	var o := k.owner_h
+	if o and not o.downed and not o.out:
+		o.set_meta(CALL_AT, k.m.time)
+		o.set_meta(CALL_K, kind)
+
+
+## The gesture's kind and age for the Hunter's anim state (WardenClips reads call and call_t).
+static func anim_state(h: Hunter, s: Dictionary) -> void:
+	s["call"] = String(h.get_meta(CALL_K, ""))
+	s["call_t"] = h.m.time - float(h.get_meta(CALL_AT, -99.0))
 
 
 ## Where the wisp is drawn while it streaks home after a kill: from where it fell towards `target`.

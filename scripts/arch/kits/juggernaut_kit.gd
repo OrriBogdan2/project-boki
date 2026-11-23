@@ -335,9 +335,6 @@ func lmb_holding() -> bool: return lmb_t >= 0.0
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
-	if KinMerge.active(h):
-		lmb_was = false         # merged, the form owns the attack key (a charge from before must not go off)
-		return true
 	if riposte.move_k() <= 0.0:
 		# planted in the guard or the cleave: a slash press is kept for Loco.press_buffer and swings as the cleave lands
 		if held and not lmb_was: lmb_buf = Loco.press_buffer
@@ -346,16 +343,15 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
-	# (a merge ends the charge: letting go of it must not swing a wave mid-transformation); a press while a
-	# pull, a dash or a Meteor Drop holds the blade is kept for Loco.press_buffer and swings when it's free
-	if not h.atk.can_fire() or KinMerge.transforming(h) or meteor.running():
+	# a press while a pull, a dash or a Meteor Drop holds the blade is kept for Loco.press_buffer, then swings
+	if not h.atk.can_fire() or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
 		# (a press in a dash is DashFlow's to hold)
-		if pressed and not KinMerge.transforming(h) and not in_dash(): lmb_buf = Loco.press_buffer
+		if pressed and not in_dash(): lmb_buf = Loco.press_buffer
 		return true
 	if h.ctrl != "local":
 		# a bot: slashes up close, sometimes a Searing Wave from mid range
@@ -406,7 +402,7 @@ func _wave_preview() -> void:
 
 ## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
 func _hold_waits() -> bool:
-	return flow.pauses_hold("lmb") and not KinMerge.transforming(h) and not meteor.running()
+	return flow.pauses_hold("lmb") and not meteor.running()
 
 ## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing); no knockback.
 func _slash() -> void:
@@ -691,7 +687,7 @@ func _rmb_waits() -> bool:
 ## A Smash winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
 ## Meteor Drop's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
 func _pull_waits() -> bool:
-	return not slam_w.is_empty() or not lunge.is_empty() or meteor.airborne()
+	return (not slam_w.is_empty() and not _slam_young()) or not lunge.is_empty() or meteor.airborne()
 
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:
@@ -860,10 +856,11 @@ func _tick_lunge() -> void:
 			if was_chain:
 				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
+			var leffs: Array = [{"type": "damage", "amount": dmg}]
+			if float(ld["push"]) > 0.0:
+				leffs.append({"type": "push", "strength": float(ld["push"]), "from": "caster"})
 			var stg := stage("rmb",
-					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
-							"effects": [{"type": "damage", "amount": dmg},
-									{"type": "push", "strength": float(ld["push"]), "from": "caster"}]},
+					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0}, "effects": leffs},
 					{"hit": "add", "mod": "add"})
 			var c := cx("rmb", "lunge", f.pos, {"at": f.pos})
 			KinExec.apply_foe(stg.effects, f, c, f.pos, stg)
@@ -907,6 +904,24 @@ func _chain_lunge(k: float) -> void:
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
 
+## A Slam wound up less than Loco.press_buffer ago: the pull takes it over as a Cinder Spin instead of waiting for it.
+func _slam_young() -> bool:
+	return not slam_w.is_empty() and float(rmb_def()["windup"]) - float(slam_w["t"]) <= Loco.press_buffer
+
+## The pull starting with a Smash pressed just before it (still down, or a young Slam): that press is the
+## Cinder Spin (the spin wins over the Slam; a Smash held longer, charging, is the Haul Slam: arm_haul).
+func spin_early() -> bool:
+	if _slam_young():
+		slam_w = {}                 # (its charge is spent: the spin is that Smash)
+		last_variant = "during_e"
+		_spin()
+		return true
+	if not rmb_down or rmb_ctx.get("air", false) or rmb_t >= Loco.press_buffer:
+		return false
+	rmb_ctx["e"] = true
+	_release_rmb()
+	return true
+
 ## The pull starting with the Lunge charging: the charge becomes a Haul Slam for the arrival.
 func arm_haul() -> void:
 	if not rmb_down or rmb_ctx.get("air", false):
@@ -939,9 +954,11 @@ func _haul_land(k: float) -> void:
 	haul = {}
 	haul_slams += 1
 	var at := h.pos
+	var heffs: Array = [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()}]
+	if float(hd["push"]) > 0.0:
+		heffs.append({"type": "push", "strength": float(hd["push"])})
 	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])},
-		"effects": [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()},
-				{"type": "push", "strength": float(hd["push"])}]})
+			"effects": heffs})
 	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true}))
 	play("jug_haulslam")
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
@@ -950,7 +967,7 @@ func _haul_land(k: float) -> void:
 ## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready and not dashing, and the
 ## ring round the body while the Searing Wave charges.
 func _tick_tells() -> void:
-	if not h.is_local() or busy() or KinMerge.active(h):
+	if not h.is_local() or busy():
 		return
 	var sl: Dictionary = rmb_def()["slam"]
 	if rmb_ready():

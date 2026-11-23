@@ -8,7 +8,7 @@ extends RefCounted
 ## touches the real save.
 
 const TRACKED := ["xp", "level", "path", "stay", "lean", "loose", "hold", "traits", "drift"]
-const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
+const SPECS := [["cindle", 2, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
 
 var bad := 0
 var main: Node
@@ -35,10 +35,12 @@ func _snap(rec: Dictionary) -> String:
 	return JSON.stringify(t)
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	Save.d = Save.fresh()
 	_rules()
+	_growth()
 	for spec in SPECS:
 		_samples(_boki(spec[0], spec[1], spec[2]))
 	for id in GardenItems.ids().filter(GardenItems.fed):
@@ -67,6 +69,29 @@ func _rules() -> void:
 		q = q or "?" in String(GardenItems.preview(rec, id)["text"])
 	ok(not q, "no preview line hides its effect behind a question mark")
 
+## Raised stats show as body size (StatBudget.growth -> Evo.dress evo_scale): none fresh, more with more points, capped.
+func _growth() -> void:
+	var rec := Save.new_kin("cindle", "Grow")
+	rec["level"] = 20
+	var fresh := StatBudget.growth(rec)
+	var kin := Models.kin(rec["species"])
+	Evo.dress(kin, rec)
+	var plain := float(kin.get_meta("evo_scale", 1.0))
+	rec["stats"] = {"power": 60, "guard": 60, "speed": 60, "focus": 60}
+	var big := StatBudget.growth(rec)
+	var kin2 := Models.kin(rec["species"])
+	Evo.dress(kin2, rec)
+	ok(fresh == 0.0 and plain == 1.0, "a fresh Boki shows no growth")
+	var most := float(StatBudget.rules()["grow_max"])
+	ok(big > 0.0 and big <= most, "a raised Boki grows, never past grow_max (%.3f)" % big)
+	ok(is_equal_approx(float(kin2.get_meta("evo_scale", 1.0)), 1.0 + big), "the model carries the growth as evo_scale")
+	# a stat bite flags look, so the farm rebuilds the model and the size shows on the spot
+	var bite := Save.new_kin("cindle", "Bite")
+	bite["level"] = 20
+	Save.d["items"]["thumpnut"] = 1
+	var res := GardenItems.use(bite, "thumpnut")
+	ok(res["ok"] and res["look"], "a stat bite flags look (the model is rebuilt at its new size)")
+
 func _samples(rec: Dictionary) -> void:
 	var who := String(rec["species"])
 	for id in GardenItems.ids():
@@ -94,7 +119,11 @@ func _samples(rec: Dictionary) -> void:
 			if not moved.has("stats." + s):
 				exact = exact and int(probe["stats"][s]) == int(rec["stats"][s])
 		ok(exact, "%s on %s: apply does exactly the preview (%s)" % [id, who, pv["text"]])
-		var named := lines.size() == jn + 1 and CareJournal.text(lines.back()).contains(GardenItems.item_name(id))
+		# a level-up the item causes (xp) adds its own evolution line (a mutation) next to the item's one
+		var fresh: Array = lines.slice(jn).filter(
+			func(l): return CareJournal.text(l).contains(GardenItems.item_name(id))
+		)
+		var named: bool = fresh.size() == 1 and (lines.size() == jn + 1 or pv["deltas"].has("level"))
 		ok(named, "%s on %s: one journal line names it" % [id, who])
 
 func _tokens_and_stay() -> void:
@@ -110,7 +139,8 @@ func _tokens_and_stay() -> void:
 	ok(GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
-	rec["level"] = int(Evo.rules()["lines"]["cindle"]["level"])      # its line's form level (evolve.json)
+	# its line's form level (evolve.json), at least 6: a form with no art yet grows a part only at level % 4 == 2
+	rec["level"] = maxi(int(Evo.rules()["lines"]["cindle"]["level"]), 6)
 	ok(not Evo.on_level(rec.duplicate(true)).is_empty(),
 			"level %d changes it (a form, or a part while the form has no art)" % rec["level"])
 	GardenItems.apply(rec, "stayleaf")

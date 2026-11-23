@@ -39,7 +39,7 @@ this branch. Each takes the next free number when it lands, in this order, and a
 | Planned | Branch | Its old number | Step |
 |---|---|---|---|
 | v19 -> v20 | ext/tutorials-cut line (ext/tutorial-beats-7-8-rebased, ext/first-hints-check, ...) | v11 -> v12 or v12 -> v13 | `FirstTimeHint.migrate` |
-| v20 -> v21 | ext/hunter-first-hints | v13 -> v14 | `HunterHints.migrate` |
+| v20 -> v21 | ext/hunter-first-hints-port (landed on main's v20 = HunterStats) | v13 -> v14 | `HunterHints.migrate` |
 | v21 -> v22 | ext/wisp-cosmetics | v12 -> v13 | `BokiWispCosmetics.migrate` |
 | v22 -> v23 | ext/tut-first-breed | v12 -> v13 | `FirstBreed.migrate` |
 | v23 -> v24 | ext/farm-boki-xp-curve | v13 -> v14 | `Evo.migrate_xp` (saved XP keeps its share of the level) |

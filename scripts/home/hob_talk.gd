@@ -62,7 +62,10 @@ func start() -> void:
 	elif FarmTutorial.current() != "" and FarmTutorial.current() != "hob":
 		box.say(_step_lines(FarmTutorial.current()), box.close)
 	else:
-		box.say(_blueprint_lines(ids, first), _menu_choice)
+		var lines := _blueprint_lines(ids, first)
+		if hob.waiting():
+			lines.push_front({"text": hob.wait_line()})
+		box.say(lines, _menu_choice)
 
 func _step_lines(step: String) -> Array:
 	return [{"text": FarmTutorial.hint_text(step), "at": hob.h.guide.target(step) if hob.h.guide else Vector3.INF}]

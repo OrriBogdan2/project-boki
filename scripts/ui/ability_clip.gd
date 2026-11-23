@@ -10,15 +10,17 @@ extends PanelContainer
 ##
 ##   add_child(AbilityClip.make("gunslinger", "rmb", Vector2(230, 130)))
 
-const LOOP_S := 2.8            # s: one loop of the clip
-const ACT_AT := 0.35           # s: when the ability goes off in the loop
+const LOOP_S := 2.8  # s: one loop of the clip
+const ACT_AT := 0.35  # s: when the ability goes off in the loop
 const HUNTER_AT := Vector3(-1.5, 0.0, 0.0)
 const DUMMY_AT := Vector3(1.7, 0.0, 0.0)
 const MELEE_AT := Vector3(0.55, 0.0, 0.0)  # where a melee Hunter stands to swing at the dummy
-const LINE_CHARS := 64         # the fallback line's length, cut at a word
+const LINE_CHARS := 64  # the fallback line's length, cut at a word
+
 ## The effect each delivery reads as (an archetype's "clip" block can name its own per slot in "fx").
 const FX_BY_DELIVERY := {"projectile": "bolt", "cone": "cone", "zone": "zone", "wall": "wall"}
-static var _paren: RegEx        # "(...)" asides cut from a fallback line, compiled once
+
+static var _paren: RegEx  # "(...)" asides cut from a fallback line, compiled once
 
 var id := ""
 var slot := ""
@@ -26,29 +28,34 @@ var stage_size := Vector2(230, 130)
 var fx := ""
 var t := 0.0
 var col := Color.WHITE
-var playing := true            # play() sets it: the clip in focus plays, the others hold still
+var playing := true  # play() sets it: the clip in focus plays, the others hold still
 var vp: SubViewport
 var model: Node3D
 var anim: HunterAnim
 var dummy: Node3D
+var with_line := true  # false: key and name only, no sentence under them
+
 var _cam: Camera3D
 var _view: TextureRect
-var _still: Control            # the ability's icon on the empty stage until the clip is built
+var _still: Control  # the ability's icon on the empty stage until the clip is built
 var _moves: Array = []
 var _melee := false
-var _parts := {}               # the effect's meshes, made once and shown or hidden each frame
+var _parts := {}  # the effect's meshes, made once and shown or hidden each frame
 var _sparks: CPUParticles3D
 var _number: Label3D
-var _hits: Array = []          # loop times the dummy is struck
+var _hits: Array = []  # loop times the dummy is struck
 var _hit_i := 0
 var _flinch := 0.0
 
-static func make(hunter_id: String, ability: String, px := Vector2(230, 130)) -> AbilityClip:
+
+static func make(hunter_id: String, ability: String, px := Vector2(230, 130), line := true) -> AbilityClip:
 	var c := AbilityClip.new()
+	c.with_line = line
 	c.id = hunter_id
 	c.slot = ability
 	c.stage_size = px
 	return c
+
 
 ## The effect a slot plays: the archetype's own "clip" choice, else one from how the ability is delivered.
 static func fx_for(hunter_id: String, ability: String) -> String:
@@ -70,6 +77,7 @@ static func fx_for(hunter_id: String, ability: String) -> String:
 		return "beam" if float(sd.get("range", 0.0)) >= 8.0 else "nova"
 	return String(FX_BY_DELIVERY.get(how, "nova"))
 
+
 ## One short line for the clip: the archetype's own ("clip" > "lines"), else the first clause of its card text.
 static func line_for(hunter_id: String, ability: String) -> String:
 	var d := Arch.def(hunter_id)
@@ -89,6 +97,7 @@ static func line_for(hunter_id: String, ability: String) -> String:
 		text = text.substr(0, text.rfind(" ", LINE_CHARS)) + "..."
 	return text.trim_suffix(".").capitalize().substr(0, 1) + text.trim_suffix(".").substr(1) + "."
 
+
 func _ready() -> void:
 	var info := HunterViewer.slot_info(id, slot)
 	col = Color(info["col"]).lerp(Arch.color(id), 0.3)
@@ -107,10 +116,12 @@ func _ready() -> void:
 	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(nm)
 	v.add_child(head)
-	var ln := UI.para(line_for(id, slot), 12, UI.MUTED)
-	ln.custom_minimum_size = Vector2(stage_size.x, 0)
-	v.add_child(ln)
-	t = fmod(float(hash(id + slot) % 1000) / 1000.0 * LOOP_S, LOOP_S)     # clips side by side don't beat together
+	if with_line:
+		var ln := UI.para(line_for(id, slot), 12, UI.MUTED)
+		ln.custom_minimum_size = Vector2(stage_size.x, 0)
+		v.add_child(ln)
+	t = fmod(float(hash(id + slot) % 1000) / 1000.0 * LOOP_S, LOOP_S)  # clips side by side don't beat together
+
 
 # ------------------------------------------------------------------ the stage
 func _stage() -> Control:
@@ -140,16 +151,19 @@ func _stage() -> Control:
 	holder.resized.connect(func(): _fit(holder))
 	return holder
 
+
 ## Plays the clip (its scene is built on a later frame the first time) or holds it on a still frame.
 func play(on: bool) -> void:
 	playing = on
 	if model:
 		vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if on else SubViewport.UPDATE_ONCE
 
+
 ## Starts the loop over from its first frame.
 func restart() -> void:
 	t = 0.0
 	_hit_i = 0
+
 
 ## Builds the clip's scene now (the playing clip does it on its own turn; checks call it to step a clip by hand).
 func build() -> void:
@@ -160,10 +174,12 @@ func build() -> void:
 	_view.visible = true
 	vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if playing else SubViewport.UPDATE_ONCE
 
+
 ## The viewport renders at the screen's real pixels (the UI may be scaled up), so the clip stays sharp.
 func _fit(holder: Control) -> void:
 	var k := get_tree().root.content_scale_factor if is_inside_tree() else 1.0
 	vp.size = Vector2i((holder.size * maxf(k, 1.0)).round())
+
 
 func _build_world() -> void:
 	var env := WorldEnvironment.new()
@@ -202,6 +218,7 @@ func _build_world() -> void:
 	_cam.transform = Transform3D(Basis(), mid + Vector3(0.0, 0.9, 5.0)).looking_at(mid, Vector3.UP)
 	_cam.current = true
 
+
 func _floor() -> void:
 	var disc := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
@@ -221,6 +238,7 @@ func _floor() -> void:
 	lane.position.y = 0.01
 	vp.add_child(lane)
 
+
 ## A straw training dummy on a post, with a target painted on its chest.
 func _dummy() -> Node3D:
 	var root := Node3D.new()
@@ -232,10 +250,15 @@ func _dummy() -> Node3D:
 	Models.part(root, Models.sphere(0.2, 14), straw, Vector3(0, 1.48, 0))
 	Models.part(root, Models.cyl(0.03, 0.03, 0.9, 6), wood, Vector3(0, 1.1, 0), Vector3.ONE, Vector3(0, 0, PI / 2))
 	for k in 2:
-		var ring := Models.part(root, Models.cyl(0.17 - k * 0.08, 0.17 - k * 0.08, 0.02, 18),
-				Models.toon(Color("d84a3a") if k == 0 else Color("f3eee2")), Vector3(-0.235 - k * 0.003, 1.0, 0))
+		var ring := Models.part(
+			root,
+			Models.cyl(0.17 - k * 0.08, 0.17 - k * 0.08, 0.02, 18),
+			Models.toon(Color("d84a3a") if k == 0 else Color("f3eee2")),
+			Vector3(-0.235 - k * 0.003, 1.0, 0)
+		)
 		ring.rotation.z = PI / 2
 	return root
+
 
 ## The effect pieces: one of each, reused every loop (no nodes made while it plays).
 func _effects() -> void:
@@ -299,6 +322,7 @@ func _effects() -> void:
 	vp.add_child(_number)
 	_hits = _hit_times()
 
+
 ## When the dummy is struck in the loop, for this effect.
 func _hit_times() -> Array:
 	match fx:
@@ -320,12 +344,14 @@ func _hit_times() -> Array:
 			return [ACT_AT + 0.3, ACT_AT + 0.6, ACT_AT + 0.9]
 	return []
 
+
 # ------------------------------------------------------------------ playing it
 func _process(dt: float) -> void:
 	if model == null and playing and PreviewBuild.turn(id):
 		build()
 	if playing:
 		tick(minf(dt, 0.1))
+
 
 ## One step of the clip (also stepped straight by checks).
 func tick(dt: float) -> void:
@@ -346,6 +372,7 @@ func tick(dt: float) -> void:
 	_number.modulate.a = move_toward(_number.modulate.a, 0.0, dt * 1.6)
 	_show_fx()
 
+
 ## Where the Hunter stands now: still, sliding through a dash, or stepped up to the dummy to swing.
 func _hunter_pos() -> Vector3:
 	var home := MELEE_AT if fx == "swing" or (fx == "cone" and _melee) else HUNTER_AT
@@ -357,6 +384,7 @@ func _hunter_pos() -> Vector3:
 		var kick := clampf((t - ACT_AT - 0.75) / 0.12, 0.0, 1.0) * (1.0 - clampf((t - ACT_AT - 1.2) / 0.6, 0.0, 1.0))
 		return home - Vector3(0.35 * kick, 0, 0)
 	return home
+
 
 ## The animation state: the kit's own move when it has one, else the weapon's swing or shots, or a cast.
 func _state() -> Dictionary:
@@ -394,6 +422,7 @@ func _state() -> Dictionary:
 			s["cast"] = mt
 	return s
 
+
 ## The dummy is struck: sparks, a flinch, the damage rising off it.
 func _hit() -> void:
 	if fx in ["heal", "tether", "wall", "dash"]:
@@ -408,6 +437,7 @@ func _hit() -> void:
 		_number.modulate.a = 1.0
 		_number.visible = true
 
+
 ## The hit's damage from the ability's own numbers (0 when it has none to show).
 func _damage() -> int:
 	if slot == "lmb":
@@ -421,6 +451,7 @@ func _damage() -> int:
 			return int(sub["hit_dmg"])
 	return 0
 
+
 func _place(nm: String, from: Vector3, to: Vector3, width: float, height := 0.0) -> void:
 	var mi: MeshInstance3D = _parts[nm]
 	var d := to - from
@@ -430,6 +461,7 @@ func _place(nm: String, from: Vector3, to: Vector3, width: float, height := 0.0)
 	var up := Vector3.UP if absf(d.normalized().y) < 0.9 else Vector3.BACK
 	var spot := Transform3D(Basis.looking_at(d.normalized(), up), (from + to) * 0.5)
 	mi.transform = spot.scaled_local(Vector3(width, maxf(height, width), d.length()))
+
 
 func _show_fx() -> void:
 	for p in _parts.values():
@@ -491,12 +523,14 @@ func _show_fx() -> void:
 				var tail := HUNTER_AT + Vector3(0, 0.7, 0)
 				_place("trail", tail, _hunter_pos() + Vector3(-0.2, 0.7, 0), 0.5 * (1.0 - mt / 0.6), 0.9)
 
+
 func _disc(nm: String, at: Vector3, radius: float, alpha: float) -> void:
 	var mi: MeshInstance3D = _parts[nm]
 	mi.visible = radius > 0.01
 	mi.position = at + Vector3(0, 0.03, 0)
 	mi.scale = Vector3(radius, 1.0, radius)
 	(mi.material_override as ShaderMaterial).set_shader_parameter("color", Color(col, clampf(alpha, 0.0, 1.0)))
+
 
 ## A soft flash at a hit: it swells and fades over k = 0..1.
 func _burst(at: Vector3, k: float, big: float) -> void:
