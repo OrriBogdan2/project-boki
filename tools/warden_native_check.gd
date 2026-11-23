@@ -303,6 +303,9 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	var sp := AnimationPlayer.new()
 	sp.add_animation_library(&"", lib)
 	src.add_child(sp)
+	var own_dash: Variant = nat.plays.get("dash")  # (a Hunter's own dash clip comes back below)
+	nat.player.stop()  # (the library changes while nothing plays: a clip fading out of a library edit crashes)
+	nat.cur = ""
 	nat.plays["dash"] = SYNTH
 	nat.borrow(src)
 	var got := nat.player.get_animation(SYNTH) if nat.player.has_animation(SYNTH) else null
@@ -317,6 +320,10 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	await _feed(main, nat, m, {}, {"rolling": true})
 	var plays_it := nat.player.current_animation == SYNTH and _turned(nat) >= POSED_MIN
 	ok(plays_it, "%s: the slot plays the clips file's clip" % a)
+	nat.player.stop()
+	nat.cur = ""
 	nat.player.get_animation_library(&"").remove_animation(SYNTH)
 	nat.plays.erase("dash")
+	if own_dash != null:
+		nat.plays["dash"] = own_dash
 	src.free()

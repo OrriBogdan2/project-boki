@@ -8,6 +8,7 @@ clips' own contact times in content/rules/warden_anim/<art>.json and from the ki
 The clip names carry the art's prefix; content/rules/warden_native.json maps them to slots.
 """
 
+import math
 import os
 import sys
 
@@ -91,15 +92,151 @@ def tarek():
 
 
 def ostra():
-    return {}
+    """Motley. She stands on her jack-in-the-box, so the feet stay planted and the arms and spine do the casting.
+    Contacts: orb out at 0.06 s (the hot orb's lead), Shard Snap's flick at 0.12 s, the Brimseed leaves the hand at
+    its 0.25 s drop, Nightwell's 1.0 s tell: a locked cast (turn held after 0.25 s) that ends in the palms driven
+    down as the well opens (docs/heroes/ostra.md)."""
+    rest = pose(hy=-0.01, lean=3, lho=0.38, lhu=-0.85, lhf=0.1, rho=0.38, rhu=-0.85, rhf=0.1)
+    out = {}
+    pull = over(rest, yaw=-14, lean=-3, rho=0.2, rhu=-0.25, rhf=0.1, lho=0.35, lhu=-0.7, lhf=0.1)
+    toss = over(rest, yaw=12, lean=7, rho=0.1, rhu=-0.05, rhf=1.0, lho=0.4, lhu=-0.75, lhf=-0.1, hyaw=0)
+    out["ostra_orb"] = (
+        0.4,
+        [(0.0, pull, "lin"), (0.06, toss, "snap"), (0.18, over(toss, rhu=-0.12, rhf=0.9), "smooth"), (0.4, rest, "smooth")],
+    )
+    both = over(rest, lean=-5, rho=0.12, rhu=-0.2, rhf=0.2, lho=0.12, lhu=-0.2, lhf=0.2)
+    burst = over(rest, lean=10, rho=0.22, rhu=0.0, rhf=1.0, lho=0.22, lhu=0.0, lhf=1.0, hy=-0.03)
+    out["ostra_orb_hot"] = (
+        0.5,
+        [(0.0, both, "lin"), (0.05, burst, "snap"), (0.2, over(burst, rhf=0.9, lhf=0.9), "smooth"), (0.5, rest, "smooth")],
+    )
+    raise_ = over(rest, yaw=-10, rho=0.3, rhu=0.55, rhf=0.15, lho=0.4, lhu=-0.7, lhf=0.1)
+    flick = over(rest, yaw=14, lean=6, rho=0.45, rhu=0.1, rhf=0.9, lho=0.4, lhu=-0.7, lhf=0.1)
+    out["ostra_snap"] = (
+        0.5,
+        [(0.0, raise_, "lin"), (0.12, flick, "snap"), (0.26, over(flick, rhu=0.0, rho=0.55), "smooth"), (0.5, rest, "smooth")],
+    )
+    back = over(rest, yaw=-18, lean=14, hy=-0.04, rho=0.3, rhu=-0.75, rhf=-0.45, lho=0.4, lhu=-0.6, lhf=0.35)
+    scoop = over(rest, yaw=16, lean=24, hy=-0.05, rho=0.2, rhu=-0.55, rhf=0.9, lho=0.45, lhu=-0.6, lhf=-0.1)
+    out["ostra_seed"] = (
+        0.8,
+        [
+            (0.0, rest, "lin"), (0.12, back, "smooth"), (0.25, scoop, "snap"),
+            (0.42, over(scoop, rhu=-0.35, lean=18), "smooth"), (0.8, rest, "smooth"),
+        ],
+    )  # fmt: skip
+    cup = over(rest, lean=-8, rho=0.5, rhu=0.7, rhf=0.1, lho=0.5, lhu=0.7, lhf=0.1, hpitch=-14)
+    dome = over(rest, lean=-14, rho=0.18, rhu=0.95, rhf=0.2, lho=0.18, lhu=0.95, lhf=0.2, hpitch=-18)
+    shake = over(dome, rho=0.16, lho=0.2, lean=-12)
+    slam = over(rest, lean=24, hy=-0.07, rho=0.25, rhu=-0.55, rhf=0.85, lho=0.25, lhu=-0.55, lhf=0.85)
+    out["ostra_well"] = (
+        1.0,
+        [
+            (0.0, rest, "lin"), (0.25, cup, "smooth"), (0.5, dome, "smooth"), (0.65, shake, "smooth"),
+            (0.8, dome, "smooth"), (0.92, slam, "in"), (1.0, over(slam, lean=22), "smooth"),
+        ],
+    )  # fmt: skip
+    return out
 
 
 def sable():
-    return {}
+    """Sable. Daggers, the Bola and the Vault cartwheel. Contacts: the dagger leaves at 0.1 s (the contract's
+    thf_lmb_r cut is 0.45 s), the Bola after one whirl at 0.24 s (the kit throws on the press), Shadow Knife at
+    0.1 s, the Vault 0.48 s, Encore 2 s (ring 0.4 s, a blade every 0.2 s). The Vault is a sideways cartwheel to her
+    right: the body rolls about her forward axis, the hands take the ground one after the other (the clip is in
+    place, so the contact sweeps back along her side as the game carries her), the legs follow the body."""
+    rest = pose(hy=-0.02, lean=2, lho=0.38, lhu=-0.85, lhf=0.1, rho=0.38, rhu=-0.85, rhf=0.1, gap=0.04)
+    out = {}
+    cock = over(rest, yaw=-24, lean=4, rho=0.35, rhu=0.25, rhf=0.0, lho=0.35, lhu=-0.55, lhf=0.3)
+    flick = over(rest, yaw=22, lean=10, rho=0.2, rhu=0.1, rhf=1.0, lho=0.5, lhu=-0.6, lhf=-0.1, lff=0.1)
+    out["sable_dagger"] = (
+        0.45,
+        [(0.0, cock, "lin"), (0.1, flick, "snap"), (0.2, over(flick, rhu=0.0), "smooth"), (0.45, rest, "smooth")],
+    )
+    out["sable_knife"] = (
+        0.47,
+        [
+            (0.0, over(cock, rhu=0.7, rhf=-0.2, yaw=-30), "lin"), (0.1, over(flick, rhu=0.35, yaw=26, lean=12), "snap"),
+            (0.22, over(flick, rhu=0.2), "smooth"), (0.47, rest, "smooth"),
+        ],
+    )  # fmt: skip
+    whirl = []  # the bola over her head in the right hand, one turn in 0.2 s (a circle in her side plane)
+    for k in range(9):
+        a = math.radians(-90 + 45 * k)
+        h = dict(rho=0.3 + 0.35 * math.sin(a), rhu=0.5 - 0.4 * math.cos(a), rhf=0.1, yaw=-8 + 2 * k)
+        whirl.append((0.02 + 0.025 * k, over(rest, **h), "lin"))
+    throw = over(rest, yaw=26, lean=14, rho=0.25, rhu=0.2, rhf=1.0, lho=0.5, lhu=-0.6, lhf=-0.1, lff=0.1)
+    out["sable_bola"] = (
+        0.73,
+        [(0.0, rest, "lin")] + whirl + [(0.24, throw, "snap"), (0.36, over(throw, rhu=0.1), "smooth"), (0.73, rest, "smooth")],
+    )  # fmt: skip
+    # Vault: crouch and tip over, hands down one after the other, legs over the head, back on her feet at 0.48 s
+    load = over(rest, hy=-0.1, lean=6, roll=-6, rho=0.55, rhu=0.7, rhf=0.1, lho=0.55, lhu=0.7, lhf=0.1)
+    q1 = over(rest, spin=90, hy=0.02, fb=1.0, rho=0.2, rhu=0.95, rhf=0.2, lho=0.5, lhu=0.55, lhf=0.1, lfo=0.15, rfo=0.15)
+    q2 = over(q1, spin=180, hy=0.06, rho=0.3, rhu=0.7, lho=0.2, lhu=0.95, lfo=0.3, rfo=0.3, lfu=0.0, rfu=0.0)
+    q3 = over(q2, spin=270, hy=0.02, rho=0.45, rhu=0.55, lho=0.2, lhu=0.95)
+    land = over(rest, spin=360, hy=-0.12, fb=1.0, lho=0.45, lhu=0.5, rho=0.45, rhu=0.5)
+    out["sable_vault"] = (
+        0.48,
+        [
+            (0.0, load, "lin"), (0.08, q1, "smooth"), (0.19, q2, "lin"), (0.3, q3, "lin"),
+            (0.4, land, "smooth"), (0.48, over(rest, spin=360, hy=-0.06), "smooth"),
+        ],
+    )  # fmt: skip
+    out["sable_encore"] = (2.0, encore_keys(rest))
+    return out
+
+
+def encore_keys(rest):
+    """Encore: a pirouette and a blade from alternate hands every 0.2 s (10 in 2 s), two turns, the legs turn with her."""
+    keys = [(0.0, rest, "lin")]
+    for k in range(10):
+        t = 0.2 * k
+        right = k % 2 == 0
+        arm = dict(rho=1.0, rhu=0.1, rhf=0.3, lho=0.5, lhu=-0.35, lhf=0.1) if right else dict(
+            lho=1.0, lhu=0.1, lhf=0.3, rho=0.5, rhu=-0.35, rhf=0.1
+        )
+        keys.append((t + 0.1, over(rest, yaw=720 * (t + 0.1) / 2.0, fb=1.0, hy=-0.05, lean=4, **arm), "lin"))
+    keys.append((2.0, over(rest, yaw=720, fb=1.0), "smooth"))
+    return keys
 
 
 def gil():
-    return {}
+    """Gil. A small fencer with a swordfish in the right hand. Contacts: a thrust every 0.32 s with the point at
+    0.08 s, the Tide Lunge out at 0.08 s from the held draw, the potion leaves the hand at 0.15 s, Riptide's spin
+    (up to 2 s, then the spout), Tidal Wave's 1 s ride (stance held, arms out), the swim (0.55 s) flat and fast."""
+    rest = pose(hk=1, rwp=80, hy=-0.01, lean=3, lho=0.4, lhu=-0.85, lhf=0.1, rho=0.4, rhu=-0.85, rhf=0.1, gap=0.03)
+    out = {}
+    cock = over(rest, yaw=-22, lean=6, hy=-0.03, rho=0.3, rhu=-0.35, rhf=0.0, lho=0.4, lhu=-0.5, lhf=0.4)
+    stab = over(rest, yaw=24, lean=16, hy=-0.04, hz=0.1, rho=0.1, rhu=-0.05, rhf=1.0, lho=0.5, lhu=-0.55, lhf=-0.2, lff=0.2)
+    out["gil_thrust"] = (
+        0.32,
+        [(0.0, cock, "lin"), (0.08, stab, "snap"), (0.16, over(stab, rhf=0.95), "smooth"), (0.32, rest, "smooth")],
+    )
+    draw = over(rest, yaw=-34, lean=10, hy=-0.08, rho=0.25, rhu=-0.3, rhf=-0.65, lho=0.4, lhu=-0.4, lhf=0.5, gap=0.08)
+    lunge = over(rest, yaw=30, lean=24, hy=-0.1, hz=0.25, rho=0.05, rhu=-0.05, rhf=1.05, lho=0.55, lhu=-0.6, lhf=-0.25, lff=0.4)
+    out["gil_lunge"] = (
+        0.5,
+        [(0.0, draw, "lin"), (0.08, lunge, "snap"), (0.22, over(lunge, rhf=0.98), "lin"), (0.5, rest, "smooth")],
+    )
+    dip = over(rest, yaw=-10, lean=8, lho=0.45, lhu=-0.8, lhf=0.1, rho=0.35, rhu=-0.45, rhf=0.35)
+    back = over(rest, yaw=-26, lean=-2, rho=0.45, rhu=0.7, rhf=-0.35, lho=0.4, lhu=-0.6, lhf=0.3)
+    toss = over(rest, yaw=24, lean=14, rho=0.25, rhu=0.4, rhf=0.95, lho=0.45, lhu=-0.6, lhf=-0.1)
+    out["gil_potion"] = (
+        0.45,
+        [(0.0, dip, "lin"), (0.08, back, "smooth"), (0.15, toss, "snap"), (0.28, over(toss, rhu=0.2), "smooth"), (0.45, rest, "smooth")],
+    )  # fmt: skip
+    spin = [(0.0, rest, "lin"), (0.1, over(rest, hy=-0.05, rho=0.95, rhu=0.15, rhf=0.1, lho=0.7, lhu=0.0, lhf=0.1), "smooth")]
+    for k in range(1, 8):
+        t = 0.1 + 0.2 * k
+        spin.append((t, over(spin[1][1], yaw=1080 * (t - 0.1) / 1.9, fb=1.0), "lin"))
+    spin += [(1.9, over(spin[1][1], yaw=1080, fb=1.0), "lin"), (2.0, over(rest, yaw=1080, hy=-0.04, lean=10, rho=0.2, rhu=0.0, rhf=1.0, lho=0.3, lhu=0.0, lhf=0.9, fb=1.0), "snap")]
+    out["gil_riptide"] = (2.0, spin)
+    surf = over(rest, yaw=70, hy=-0.14, lean=10, rho=0.9, rhu=0.15, rhf=0.0, lho=0.9, lhu=0.1, lhf=0.1, gap=0.14, lff=0.0)
+    out["gil_wave"] = (1.0, [(0.0, rest, "lin"), (0.15, surf, "smooth"), (0.85, over(surf, lean=14), "smooth"), (1.0, over(surf, lean=12), "lin")])
+    swim = over(rest, lean=30, hl=60, hpitch=-5, hy=-0.12, hz=0.1, rho=0.15, rhu=-0.95, rhf=-0.1, lho=0.15, lhu=-0.95, lhf=-0.1, fb=1.0)
+    out["gil_swim"] = (0.55, [(0.0, rest, "lin"), (0.12, swim, "snap"), (0.55, over(swim, lean=34), "smooth")])
+    return out
 
 
 HUNTERS = {"tarek": tarek, "ostra": ostra, "sable": sable, "gil": gil}

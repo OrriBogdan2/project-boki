@@ -13,7 +13,9 @@ extends RefCounted
 
 const ClipCheck := preload("res://tools/clip_check.gd")
 
-## --states on a Meshy-native Hunter then plays each clip slot its data names: [slot, the state that starts it].
+## --states on a Meshy-native Hunter then plays each clip slot its data names: [slot, the state that starts it]
+## (--attack-only first drops those clips: every move plays the one attack clip, the "before"; --before-after plays
+## each slot with its clip, then every slot with the attack clip: log lines SLOT then BEFORE).
 ## The log line SLOT names its frames (a held slot, dash and glide, runs while its state does).
 const SLOT_SHOTS := [
 	["lmb", {"swing_n": 1}],
@@ -110,7 +112,7 @@ func run(main: Node) -> void:
 		cam.position = Vector3(0, at_y + 0.25, dist)
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
-		await tree.process_frame       # (past the title's fade)
+		await tree.process_frame  # (past the title's fade)
 	if OS.get_cmdline_user_args().has("--states"):
 		await _states(model, fps, out)
 		print("CLIP_SHOTS_DONE")
@@ -196,6 +198,7 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
 
+
 ## --states: each STATE_SHOTS state fed to the model's pose node for its seconds; the attack is the kit's first move
 ## (contract clips) and one swing (a Meshy-native model).
 func _states(model: Node3D, fps: float, out: String) -> void:
@@ -230,11 +233,29 @@ func _states(model: Node3D, fps: float, out: String) -> void:
 
 ## --states, native: each slot of data "clips" from SLOT_SHOTS pressed once on the stand (held slots run 1 s).
 func _slot_shots(native: WardenNative, model: Node3D, fps: float, dir: String, first: int) -> void:
+	var args := OS.get_cmdline_user_args()
+	var named: Array = (
+		SLOT_SHOTS.map(func(sl): return sl[0]).filter(func(sl): return (native.d["clips"] as Dictionary).has(sl))
+	)
+	var kept: Dictionary = native.plays.duplicate()
+	var next := first
+	for before in [false, true] if args.has("--before-after") else [args.has("--attack-only")]:
+		native.plays = kept.duplicate()
+		if before:  # (every move plays Meshy's one attack clip)
+			for slot: String in named:
+				native.plays.erase(slot)
+		next = await _slot_pass(native, model, fps, dir, next, named, "BEFORE" if before else "SLOT")
+
+
+## One pass over the slots: each pressed once on the stand; returns the next frame number.
+func _slot_pass(
+	native: WardenNative, model: Node3D, fps: float, dir: String, first: int, named: Array, label: String
+) -> int:
 	var i := first
-	var press := 0
+	var press := first  # (a swing counts up and the frame number only grows: every press is a new swing)
 	for sl in SLOT_SHOTS:
 		var slot: String = sl[0]
-		if not native.plays.has(slot) or not (native.d["clips"] as Dictionary).has(slot):
+		if not slot in named:
 			continue
 		var held := slot in ["dash", "glide"]
 		var s := {"grounded": true, "face": model.rotation.y}
@@ -242,12 +263,20 @@ func _slot_shots(native: WardenNative, model: Node3D, fps: float, dir: String, f
 		for k in int(0.3 * fps):
 			native.call("_process", 1.0 / fps)
 		var from := i
-		var length := 1.0 if held else native.player.get_animation(String(native.plays[slot])).length
+		var clip := String(native.plays.get(slot, native.plays["attack"]))
+		var length := (
+			1.0
+			if held
+			else (
+				native.player.get_animation(clip).length
+				/ (1.0 if native.plays.has(slot) else float(native.d.get("attack_rate", 1.0)))
+			)
+		)
 		for k in int((length + 0.4) * fps):
 			if k == 0 or held:
 				s.merge(sl[1], true)
 			if k == 0 and s.has("swing_n"):
-				press += 1  # (a swing counts up: the next press is a new one)
+				press += 1
 			if s.has("swing_n"):
 				s["swing_n"] = press
 			if not held and k > 0 and s.has("cast"):
@@ -255,7 +284,8 @@ func _slot_shots(native: WardenNative, model: Node3D, fps: float, dir: String, f
 			native.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
-		print("SLOT %s f%03d-f%03d (clip %.2f s, every 1/%d s)" % [slot, from, i - 1, length, int(fps)])
+		print("%s %s f%03d-f%03d (clip %.2f s, every 1/%d s)" % [label, slot, from, i - 1, length, int(fps)])
+	return i
 
 
 func _grab(path: String) -> void:

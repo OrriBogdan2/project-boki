@@ -146,7 +146,7 @@ def reach(rig, upper, fore, start, target, pole):
 
 def fk(rig, pose):
     """Local rotations, world positions and world rotations of every joint for a pose dict (turn, hips, ik, keep)."""
-    turn, keep = pose.get("turn", {}), pose.get("keep", {})
+    turn, keep, hold = pose.get("turn", {}), pose.get("keep", {}), pose.get("hold", {})
     ik = {u: (f, np.array(t, float), unit(pl)) for u, f, t, pl in pose.get("ik", [])}
     hip = rig.hips_t + np.array(pose.get("hips", (0, 0, 0)), float)
     W, P, L, fixed = {}, {}, {}, {}
@@ -168,6 +168,8 @@ def fk(rig, pose):
             w = euler(*turn[nm]) @ w
         if nm in keep:
             w = euler(*keep[nm]) @ rig.bind[j][:3, :3]
+        if nm in hold:
+            w = hold[nm] @ rig.bind[j][:3, :3]
         W[j] = w
         L[j] = pw.T @ w
     return L, P, W
@@ -176,7 +178,7 @@ def fk(rig, pose):
 BASE = dict(
     hx=0.0, hy=0.0, hz=0.0, yaw=0.0, lean=0.0, roll=0.0, spin=0.0, hyaw=0.0, hpitch=0.0,
     lho=0.35, lhu=-0.85, lhf=0.15, rho=0.35, rhu=-0.85, rhf=0.15, lpu=-0.6, rpu=-0.6,
-    lfo=0.0, lff=0.0, lfu=0.0, rfo=0.0, rff=0.0, rfu=0.0, lfy=0.0, rfy=0.0, lfp=0.0, rfp=0.0, gap=0.0,
+    lfo=0.0, lff=0.0, lfu=0.0, rfo=0.0, rff=0.0, rfu=0.0, lfy=0.0, rfy=0.0, lfp=0.0, rfp=0.0, gap=0.0, fb=0.0, hk=0.0, rwp=0.0, rwy=0.0, hl=0.0,
 )  # fmt: skip
 SPLIT = {"Hips": 0.40, "Spine02": 0.22, "Spine01": 0.22, "Spine": 0.16}  # the share of the torso turn each takes
 
@@ -188,8 +190,8 @@ def build(rig, q):
     torso = {k: (q["lean"] * v, q["yaw"] * v, q["roll"] * v) for k, v in SPLIT.items()}
     hx, hy, hz = q["hx"], q["hy"], q["hz"]
     sp = q["spin"]
-    torso["Hips"] = (torso["Hips"][0], torso["Hips"][1], torso["Hips"][2] + sp)
-    torso["neck"] = ((q["hpitch"] - q["lean"]) * 0.5, (q["hyaw"] - q["yaw"]) * 0.5, -(q["roll"] + sp) * 0.5)
+    torso["Hips"] = (torso["Hips"][0] + q["hl"], torso["Hips"][1], torso["Hips"][2] + sp)  # (hl: more pitch on the hips)
+    torso["neck"] = ((q["hpitch"] - q["lean"] - q["hl"]) * 0.5, (q["hyaw"] - q["yaw"]) * 0.5, -(q["roll"] + sp) * 0.5)
     torso["Head"] = torso["neck"]
     base = {"turn": torso, "hips": (hx, hy, hz)}
     P, W = fk(rig, base)[1:]
@@ -204,20 +206,20 @@ def build(rig, q):
         tgt = sh + (s * sg * o + u * up + f * fw) * reach_len
         pole = s * sg * 0.6 + u * q[ab + "pu"] - f * 0.4
         ik.append((side + "Arm", side + "ForeArm", tgt, pole))
-    yaw_all = q["yaw"] * 0.5
-    kn = rot([0, 1, 0], yaw_all) @ A
+    kn = rot([0, 1, 0], q["yaw"] * 0.5) @ A
+    dh = W[rig.root] @ rig.bind[rig.root][:3, :3].T  # the hips' turn since bind: a leg that follows the body (fb)
     for side, sg, ab in (("Left", 1.0, "l"), ("Right", -1.0, "r")):
         b = rig.pos(side + "Foot")
         off = np.array([sg * q[ab + "fo"] + sg * q["gap"], q[ab + "fu"], q[ab + "ff"]])
-        ik.append((side + "UpLeg", side + "Leg", b + off, kn))
-    # the leg IK needs the hips' final place: reach() runs inside fk, from the posed hip joints
+        up_leg = rig.pos(side + "UpLeg")
+        body = P[rig.id[side + "UpLeg"]] + dh @ (b - up_leg + off)
+        ik.append((side + "UpLeg", side + "Leg", (b + off) + q["fb"] * (body - (b + off)), dh @ A if q["fb"] else kn))
     pose = dict(base)
-    pose["ik"] = [(a, b, t, p) for a, b, t, p in ik]
-    # (the foot IK entries above name upper, fore, target, pole; reach() reads the lower bone from the rig)
-    pose["keep"] = {
-        "LeftFoot": (q["lfp"], q["lfy"], 0.0),
-        "RightFoot": (q["rfp"], q["rfy"], 0.0),
-    }
+    pose["ik"] = ik
+    if q["hk"] > 0.5:  # the right hand holds its bind turn from the chest (a weapon laid along it keeps its line)
+        pose["hold"] = {"RightHand": euler(q["rwp"], q["rwy"], 0.0) @ d}
+    if q["fb"] == 0.0:  # (a planted foot stays flat; on a body-following leg the foot turns with the shin)
+        pose["keep"] = {"LeftFoot": (q["lfp"], q["lfy"], 0.0), "RightFoot": (q["rfp"], q["rfy"], 0.0)}
     return pose
 
 
