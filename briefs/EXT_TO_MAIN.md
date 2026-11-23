@@ -11146,3 +11146,4 @@ READY ext/run-speeds-data 4a926ce662 (bulk-rebase: origin/main merged in mechani
 READY ext/farm-race-stats 1f9a4bb8ef (garden race decided by raised stats)
 READY ext/ui-ability-rename-check 79d2d0f442 (retired ability names gone; merged main, conflicts resolved to main's coin wording)
 READY ext/ruin-walls-v1-drop 3390b58b7773edf29a6623a813cc51f003fea64e (origin/main merged; one modify/delete conflict on ruin_walls_v1.gd, kept deleted (main only changed int() division in it). --check 0 failures, health --strict OK)
+READY ext/parity-recheck-sable-motley 2b3d22b438 (origin/main merged; one conflict in tools/move_feel_check.gd: kept main's m._later.clear plus the branch's 30 settling steps, main's run_v; --check 0, --thief-combo-check 193/0, --kit-parity-check 0, --move-feel-check 0 failures, health --strict OK)
