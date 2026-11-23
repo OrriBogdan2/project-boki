@@ -98,7 +98,7 @@ static func run(c) -> void:
 ## Distance over time on open ground, the step the keys come back, and how far the body gets while a wall
 ## would still count as a slam (Hunter: inside 0.6 s of the knock and faster than 8 m/s).
 static func _arc(c, push: float, lift := -1.0) -> Dictionary:
-	var body: Hunter = c.P
+	var body: Hunter = c.p_v
 	c._reset(c.flat + Vector3(-3.0, 0, 0))
 	var x0 := body.pos.x
 	c.m.displace.knock(body, Vector2(push, 0.0), lift)
@@ -124,7 +124,7 @@ static func _arc(c, push: float, lift := -1.0) -> Dictionary:
 ## The step a cliff WALL_GAP ahead stuns the knocked body (-1: no slam). The cliff is raised for the test
 ## and put back.
 static func _wall_frame(c, push: float) -> int:
-	var body: Hunter = c.P
+	var body: Hunter = c.p_v
 	var world: World = c.w
 	var at: Vector3 = c.flat + Vector3(-3.0, 0, 0)
 	var face := int(floor(at.x + WALL_GAP))
