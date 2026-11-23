@@ -8,6 +8,7 @@ extends RefCounted
 ## the ranking (frames covered per element) is printed as CLARITYTOP lines.
 
 const ClarityFight := preload("res://tools/clarity_fight.gd")
+const ClarityContrast := preload("res://tools/clarity_contrast.gd")
 const DT := 1.0 / 60.0
 const FIGHT_FRAMES := 10
 const FIGHT_PX := Vector2i(1920, 1080)  # the fight frames' size (the window: stretch is off)
@@ -87,12 +88,16 @@ func run(main: Node) -> void:
 func _fights(main: Node, dir: String) -> void:
 	var rows := PackedStringArray(["fight\tframe\tkind\twhat\thunters"])
 	var frames := {}  # "kind what" -> frames it was on a Hunter
+	var contrast := PackedFloat32Array()  # each frame's Hunter-vs-ground contrast (ClarityContrast)
 	main.get_window().size = FIGHT_PX
 	for f in ClarityFight.FIGHTS.size():
 		var on_frame := func(fm: Match, i: int) -> void:
 			var img := fm.get_viewport().get_texture().get_image()
 			if img:
 				img.save_png(dir.path_join("fight%d_%d.png" % [f, i]))
+				var score := await _contrast(fm, img)
+				if score >= 0.0:
+					contrast.append(score)
 			var seen := {}
 			for e in ClarityFight.tally(fm):
 				rows.append("%d\t%d\t%s\t%s\t%d" % [f, i, e[0], e[1], e[2]])
@@ -104,7 +109,36 @@ func _fights(main: Node, dir: String) -> void:
 		await main.get_tree().process_frame
 	var tsv := FileAccess.open(dir.path_join("clarity_fight.tsv"), FileAccess.WRITE)
 	tsv.store_string("\n".join(rows) + "\n")
+	if not contrast.is_empty():
+		print("CLARITYCONTRAST %.2f over %d frames" % [_mean(contrast), contrast.size()])
 	var keys := frames.keys()
 	keys.sort_custom(func(a, b): return frames[a] > frames[b])
 	for k: String in keys.slice(0, 40):
 		print("CLARITYTOP %d/%d %s" % [frames[k], FIGHT_FRAMES * ClarityFight.FIGHTS.size(), k])
+
+
+## The frame's Hunter-vs-ground contrast: `img` against the same frame with every Hunter and Boki hidden.
+func _contrast(fm: Match, img: Image) -> float:
+	var boxes: Array[Rect2] = []
+	var hidden: Array[Node3D] = []
+	for h: Hunter in fm.hunters:
+		var z := HunterZone.rect_of(fm, h)
+		if z.has_area():
+			boxes.append(z)
+		hidden.append(h)
+	hidden.append_array(fm.kins)
+	var was := hidden.map(func(n: Node3D): return n.visible)
+	for n in hidden:
+		n.visible = false
+	await RenderingServer.frame_post_draw
+	var bare := fm.get_viewport().get_texture().get_image()
+	for i in hidden.size():
+		hidden[i].visible = was[i]
+	return ClarityContrast.frame_score(img, bare, boxes)
+
+
+func _mean(a: PackedFloat32Array) -> float:
+	var s := 0.0
+	for v in a:
+		s += v
+	return s / a.size()
