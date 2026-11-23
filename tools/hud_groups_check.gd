@@ -13,6 +13,7 @@ extends RefCounted
 ##      kills/knocks/gems row waits for the first kill, knock or gem or Tab; a veteran sees both as before
 ##   5. the glider ring only while you glide or the meter is not full; the belt only once a held item could be used
 ##      (then the save keeps it); the counters follow HudReveal ("counters", from the 4th expedition)
+##   6. the gear strip and the perk row count only once drawn (HudReveal "gear" / "perks", then an item held)
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
@@ -133,6 +134,20 @@ func run(main: Node) -> void:
 	ok(not HudGroups.new_player(), "a save with %d expeditions is not new" % HudGroups.NEW_PLAYER_MATCHES)
 	ok(on_screen_has(hud, "kit") and HudGroups.own_numbers_shown(p, false),
 		"veteran: kit card and own numbers as before")
+	# 6. the gear strip and the perk row are counted only once drawn (HudReveal "gear" / "perks", then an item)
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"),
+		"veteran with no gear and no perk: neither strip")
+	Save.d["matches"] = 0
+	p.gear[2] = {"id": String(Gear.ALL.keys()[0]), "rar": 0}
+	p.perks.append(String(Data.PERKS.keys()[0]))
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"),
+		"new player with gear and a perk: held back (HudReveal)")
+	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES
+	ok(on_screen_has(hud, "gear") and on_screen_has(hud, "perks"),
+		"veteran with gear and a perk: both strips")
+	p.gear[2] = {}
+	p.perks.clear()
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"), "back to nothing held: neither strip")
 	for i in 3:
 		await main.get_tree().process_frame      # the real HUD draws the veteran's own-numbers row too
 	Save.d["matches"] = 0
