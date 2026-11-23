@@ -375,6 +375,8 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var n := DashState.base_charges(dodge_def, cdat)
+	if ak and ak.single_dash():
+		return 1.0
 	return ak.dash_charges(n) if ak else n
 
 func dash_regen() -> float:
@@ -2558,6 +2560,8 @@ func perk_n(id: String) -> int:
 
 ## Can this perk still be offered to you (a free perk slot, not at its stack limit)?
 func perk_open(id: String) -> bool:
+	if id == "secondwind" and ak and ak.single_dash():
+		return false
 	var below_max := perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1))
 	return perks.size() < PerkOrbs.slots() and below_max and WeaponUps.fits(self, id)
 
@@ -2696,6 +2700,7 @@ func _anim_state(stretch: float) -> void:
 	wall_moves.anim_state(self, s)
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
+	HazardMoves.anim_state(self, s)
 	KinSummon.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
@@ -2805,7 +2810,7 @@ func render(delta: float, alpha: float) -> void:
 		if m.cam: model.basis = m.cam.char_basis(face, model.scale)
 	# riding a mount: you sit up on its back
 	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
-	model.position.y = lerpf(model.position.y, ride, minf(1.0, delta * 12.0))
+	model.position.y = lerpf(model.position.y, ride - HazardMoves.sink(self), minf(1.0, delta * 12.0))
 	if rocket:
 		rocket.seat(self)
 	if remote:

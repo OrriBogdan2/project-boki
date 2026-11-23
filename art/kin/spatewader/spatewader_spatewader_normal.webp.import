@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dfu43rwkpghs8"
-path="res://.godot/imported/spatewader_spatewader_normal.webp-9cd850bfd639a753e409ad139025f93d.ctex"
+path.bptc="res://.godot/imported/spatewader_spatewader_normal.webp-9cd850bfd639a753e409ad139025f93d.bptc.ctex"
+path.astc="res://.godot/imported/spatewader_spatewader_normal.webp-9cd850bfd639a753e409ad139025f93d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8dcfca80348b983f18747d6c284a5ee0"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/spatewader/spatewader_spatewader_normal.webp"
-dest_files=["res://.godot/imported/spatewader_spatewader_normal.webp-9cd850bfd639a753e409ad139025f93d.ctex"]
+dest_files=["res://.godot/imported/spatewader_spatewader_normal.webp-9cd850bfd639a753e409ad139025f93d.bptc.ctex", "res://.godot/imported/spatewader_spatewader_normal.webp-9cd850bfd639a753e409ad139025f93d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
