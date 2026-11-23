@@ -12,7 +12,9 @@ extends RefCounted
 ##   7. the hit-feel table (DASHES_AND_ABILITY_FEEL.md §5.4): in 4, the lightest hit an LMB / RMB / X lands on
 ##      the dummy is its rules tier (TIER_OK lists the explained exceptions), the dummy never flashes longer than
 ##      a tier's flash and your own camera never shakes; one HITFEEL row per Hunter (LMB light, RMB heavy, X ult);
-##   8. no kit file sets its own hit-stop, body flash or shake number: they come from the tiers.
+##   8. every freeze of your game, whoever asks (Match.freeze_frame: an armor break, a parry, a Boki's strike),
+##      shares that cap, and one asked while another runs costs only the time it adds.
+##   9. no kit file sets its own hit-stop, body flash or shake number: they come from the tiers.
 ## Reuses the dash-flow check's training match and slot presses. Never touches the save.
 
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
