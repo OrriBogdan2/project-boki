@@ -399,7 +399,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> voi
 	var at_y := minf(p.y, stand_y)
 	var want := Vector3(p.x, maxf(maxf(at_y * 0.6, at_y - 4.0), p.y - 4.0), p.z)
 	if p.y < 0.0:
-		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
+		want.y = p.y  # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
 	# soft only while the view rises (a lift, an updraft): standing or coming down it stays on you, so a fall
 	# never reads as sliding back on screen and a landing doesn't drift on; recording mode has its own rates
 	var tight := (is_finite(stand_y) and p.y <= stand_y + STAND_TOL) or want.y < base.y

@@ -182,6 +182,7 @@ func _dress_ember(s: Dictionary) -> void:
 	var from := Vector3(h.pos.x + d2.x * 0.5 + side.x, h.pos.y + 0.72, h.pos.z + d2.y * 0.5 + side.y)
 	s["pos"] = from
 	s["start"] = from
+	s["muzzle"] = HeroVfx.of(m).anchor_pos(h, "hand_r" if right else "hand_l")      # drawn out of that hand
 	var size_k: float = float(lmb_def()["size_k"]) if emp else 1.0
 	s["r"] = float(s["r"]) * size_k          # the hit grows with the look
 	lk().skin(s, "ember", {}, size_k)
@@ -416,6 +417,7 @@ func _throw_seed() -> void:
 		if e != null and e.team != h.team and not e.dead:
 			_stick(e)
 	var extra := {"src": "abil", "ab": "utility", "tracer": 0.0, "kb": 0.0, "kx": on_hit}
+	ShotOrigin.draw_from(extra, h, "rmb")      # out of her hand
 	m.spawn_shot(
 			h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5,
 			col_of(rmb_def()), extra)

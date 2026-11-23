@@ -13,7 +13,6 @@ const TILE_H := 48.0
 const BADGE := 30.0
 const HEAD_H := 20.0       # the key-pill row of a tile: as tall with or without a key, so the names line up
 const ROW_H := 30.0        # one backpack line: a full pack fits a 720p window without scrolling
-const HINT := "Point at a thing:  Enter wears or takes it off  ·  Delete drops it  ·  or drag it onto a slot"
 
 var _m: Match
 var _p: Hunter
