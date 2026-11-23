@@ -71,7 +71,7 @@ func _case(trough: bool) -> void:
 	HomeLayout.ensure(Save.d)
 	if trough:
 		Econ.ensure()
-	k["needs"]["food"] = 5.0
+	k["needs"]["food"] = 0.0  # an empty belly: a long-starved kin is only refused while it is empty
 	k["starve"] = (Care.STARVE["refuse"] + 0.5) * 3600.0
 	var home = await main._hb_home()
 	var t0 := CheckClock.own_msec()  # the home builds its UI in frame slices: CPU work, not game time
@@ -94,7 +94,34 @@ func _case(trough: bool) -> void:
 	var food1 := Care.need(k, "food")
 	ok(Econ.pantry("kibble") == 1 and food1 > food0, "%s: feeding eats a kibble, food %d -> %d" % [tag, food0, food1])
 	ok(home.hecon.refuse_reason() == "", "%s: it can go on an expedition again" % tag)
+	await _long_starved(home, k, tag)
 	home.queue_free()
+
+
+## Owner rule 11-23: a kin starved for 40 h (clock far over the 18 h refusal) goes out after one meal, though
+## the starve clock has barely moved; the expedition path itself opens the risk confirm, not "Too hungry to go".
+func _long_starved(home: Node, k: Dictionary, tag: String) -> void:
+	Exchange.post("buy", "kibble", 2, Exchange.best("kibble", "sell"))
+	k["needs"]["food"] = 0.0
+	k["starve"] = 40.0 * 3600.0
+	home.exp_tier = int(KinLoss.rules()["loss_min_tier"])  # a risky tier: the confirm panel opens, no match starts
+	home._confirm_start()
+	ok(home.panel_open == "Too hungry to go", "%s: 40 h starved, empty belly: the expedition says too hungry" % tag)
+	ok(home.hecon.refuse_reason().contains("one meal"), "%s: the message says what to do" % tag)
+	home._open_feed(k)
+	await home.get_tree().process_frame
+	var btns := _feed_buttons(home.panel_host)
+	ok(btns.size() == 1, "%s: the feed panel offers the kibble" % tag)
+	if btns.size() == 1:
+		(btns[0] as Button).pressed.emit()
+	var clock := Care.starve_h(k)
+	ok(clock > Care.STARVE["refuse"], "%s: after the meal the starve clock is still %.1f h" % [tag, clock])
+	ok(Care.need(k, "food") > 20.0, "%s: the food bar shows fed (%d)" % [tag, Care.need(k, "food")])
+	ok(home.hecon.refuse_reason() == "", "%s: one meal and the 40 h starved kin can go" % tag)
+	home._confirm_start()
+	ok(home.panel_open != "Too hungry to go", "%s: the expedition path no longer says too hungry" % tag)
+	k["needs"]["food"] = 0.0
+	ok(home.hecon.refuse_reason() != "", "%s: an empty belly again is refused again" % tag)
 
 
 func _bowl_boki(sp: String, nm: String, bravery: float, food: float) -> Dictionary:
