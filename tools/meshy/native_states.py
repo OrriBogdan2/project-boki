@@ -8,7 +8,7 @@ SPEC.json (tools/meshy/native_states.json): "classes" (light, medium, heavy) -> 
 "hunters" -> {class, dash_s}. SRC_DIR holds one Meshy animate download per library action id (aNNN/animation_glb.glb,
 30 fps, all made on one rig task). Per slot: the source second range from..to is resampled over `secs` (the game's own
 number for that state); `pingpong` makes a loop (the glide); `in_place` takes the ground drift out of the hips (the game
-moves the body); translations are scaled by this skeleton's hips height over the source's. The file keeps the base's
+moves the body); every cut starts with the hips over the origin; translations are scaled by this skeleton's hips height over the source's. The file keeps the base's
 nodes and skin (no mesh, material or image): the game lays the clips on its skeleton by bone name.
 """
 
@@ -80,8 +80,10 @@ def cut(out, anim, spec, hips, scale):
         path = c["target"]["path"]
         r = sample(t, v, q, path == "rotation")
         if path == "translation":
-            if c["target"]["node"] == hips and spec.get("in_place"):
-                r = r - np.array([1.0, 0.0, 1.0]) * np.linspace(0, 1, n)[:, None] * (r[-1] - r[0])
+            if c["target"]["node"] == hips:
+                if spec.get("in_place"):
+                    r = r - np.array([1.0, 0.0, 1.0]) * np.linspace(0, 1, n)[:, None] * (r[-1] - r[0])
+                r = r - np.array([1.0, 0.0, 1.0]) * r[0]  # (the source stood somewhere on its map: start at the origin)
             r = r * scale
         samps.append(
             {"input": out.add_floats(xs, "SCALAR"), "output": out.add_floats(r, typ), "interpolation": "LINEAR"}
