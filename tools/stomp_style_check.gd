@@ -79,6 +79,8 @@ func _picker(main: Node) -> void:
 func _pose(main: Node) -> void:
 	var clip_id := ""
 	for a in Arch.ids():
+		if WardenNative.on(String(a)):
+			continue  # (Meshy's own skeleton plays its own clips, no Warden/Sync: --warden-native-check)
 		var st: Dictionary = WardenClips.data(WardenGlb.art(String(a))).get("states", {})
 		if st.has("stomp"):
 			clip_id = String(a)
