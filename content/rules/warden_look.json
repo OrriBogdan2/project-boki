@@ -575,7 +575,7 @@
 			{"anchor": "anchor_lamp_r", "color": [1.0, 0.78, 0.3], "strength": 1.6, "px": 2.6, "near_d": 7.0, "far_d": 14.0}
 		],
 		"closeup": {"fov": 36.0, "up": -0.3},
-		"no_ink": ["glass", "goo", "skin-goo"]
+		"no_ink": ["glass", "goo", "skin-goo", "strap"]
 	},
 	"gil": {"painted": {"far_lift": 0.0}},
 	"pip": {
