@@ -39,6 +39,7 @@ var fx_t := 0.0
 var tell := ""                 # "" | "half" | "full": the resource tell enemies read
 var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
+var windups := {}              # slot -> the Sfx handles of its wind-up sounds, cut if the cast breaks (KitWindup)
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
 var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
@@ -130,6 +131,7 @@ func _drop_holds() -> void: pass
 ## state this hunter shows. Call this, not _drop_holds, so the shared telegraphs always go with the holds.
 func drop_holds() -> void:
 	_drop_holds()
+	KitWindup.drop_all(self)
 	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
@@ -195,6 +197,8 @@ func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's 
 func fire_ok() -> bool: return true
 ## The attack key, if this kit runs the weapon's attack itself (true = handled; HunterAttack.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
+## s until the kit's own attack cadence (a burst's pause, its next dart) lets a fresh tap go at once (0: now).
+func fire_wait() -> float: return 0.0
 ## Whether the attack key is holding now (a draw, a charge, a hose): the held-fire checks read it, kits with their
 ## own hold set it.
 func lmb_holding() -> bool: return h.draw_t >= 0.0 or h.mel_hold > 0.0
@@ -732,6 +736,7 @@ static func _clamp_parts(sd: Dictionary) -> void:
 func cx(slot: String, ability: String, loc_aim: Vector3, extra := {}) -> Dictionary:
 	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
 	c["hero_col"] = Arch.color(id)
+	c["fire_from"] = slot      # its shots are drawn from the slot's hand or weapon (ShotOrigin.hand)
 	for k in extra:
 		c[k] = extra[k]
 	return c
