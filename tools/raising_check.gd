@@ -193,9 +193,18 @@ func run(m: Node) -> void:
 			Save.remember(rec, "played", "played fetch with you on the farm", 1.5)
 	ok(int(Save.d["matches"]) == 0 and Care.bond_index(rec) >= 2,
 		"a week of farm days of care, no expedition: %s (trust %.0f)" % [Care.bond(rec)[1], float(rec["trust"])])
+	var heard: Array = []
+	var log_cue := func(n, _at, _db, _p): heard.append(n)
+	Sfx.played.connect(log_cue)
+	k["busy"] = false      # the fetch trains above can leave it mid-game; this tick is about the rank
+	var bond_cues := int(GardenSfx.heard.get("garden_bond_up", 0))
 	KinBondMoment.tick(home)
+	Sfx.played.disconnect(log_cue)
 	ok(home.panel_open == "Ember is now Close" and int(rec["bond_seen"]) == 2,
 		"reaching Close plays its moment: \"%s\"" % home.panel_open)
+	ok(heard.count("garden_bond_up") == 1 and int(GardenSfx.heard.get("garden_bond_up", 0)) == bond_cues + 1
+		and not heard.has("unlock") and not heard.has("garden_friends"),
+		"a rank-up plays one rising chime of its own, no stock unlock (%s)" % [heard])
 	home._close_panel()
 	KinBondMoment.tick(home)
 	ok(home.panel_open == "", "and only once")
