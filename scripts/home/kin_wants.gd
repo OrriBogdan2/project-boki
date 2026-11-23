@@ -46,7 +46,7 @@ static func best_food(rec: Dictionary) -> String:
 				return String(f)
 	if have.call(String(likes["food"])) > 0:
 		return String(likes["food"])
-	for f in Data.CROPS.keys() + Care.FOODS.keys():
+	for f in Data.CROPS.keys() + Care.foods_v.keys():
 		if f != likes["hates"] and have.call(String(f)) > 0:
 			return String(f)
 	return ""

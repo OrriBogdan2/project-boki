@@ -12,12 +12,17 @@ tools/sfx_lib.py levels), averaged over a sound's takes, plus the gain the game 
 sfx_levels.json and Sfx.BLAST_DB for the blast sounds. A sound more than tolerance_db from its category's
 median level is an outlier. Fix one with "gain_db" (data), never by editing the .wav.
 """
+
 import glob, json, os, re, sys, wave
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TABLES = [("scripts/core/sfx.gd", "NAMES"), ("scripts/core/sfx.gd", "VOICES"),
-          ("scripts/core/sfx_kits.gd", "NAMES"), ("scripts/arch/kits/vv_sfx.gd", "NAMES")]
+TABLES = [
+    ("scripts/core/sfx.gd", "NAMES"),
+    ("scripts/core/sfx.gd", "VOICES"),
+    ("scripts/core/sfx_kits.gd", "NAMES"),
+    ("scripts/arch/kits/vv_sfx.gd", "NAMES"),
+]
 
 
 def read(rel):
@@ -92,17 +97,32 @@ def audit():
 
 
 def table(levels, rows, groups, medians, outliers):
-    out = ["| category | sounds | median level | target RMS | quietest | loudest | max peak | outliers (accepted) |",
-           "|---|---|---|---|---|---|---|---|"]
+    out = [
+        "| category | sounds | median level | target RMS | quietest | loudest | max peak | outliers (accepted) |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
     for c in sorted(groups, key=lambda c: -medians[c]):
         names = sorted(groups[c], key=lambda n: rows[n]["level"])
         lo, hi = names[0], names[-1]
         bad = [n for n in names if n in outliers]
         ok = sum(1 for n in bad if n in levels["outliers_ok"])
         target = levels["cats"].get(c)
-        out.append("| %s | %d | %.1f | %s | %s %.1f | %s %.1f | %.1f | %d (%d) |" % (
-            c, len(names), medians[c], "%.1f" % target if target is not None else "-", lo, rows[lo]["level"],
-            hi, rows[hi]["level"], max(rows[n]["peak"] + rows[n]["gain"] for n in names), len(bad), ok))
+        out.append(
+            "| %s | %d | %.1f | %s | %s %.1f | %s %.1f | %.1f | %d (%d) |"
+            % (
+                c,
+                len(names),
+                medians[c],
+                "%.1f" % target if target is not None else "-",
+                lo,
+                rows[lo]["level"],
+                hi,
+                rows[hi]["level"],
+                max(rows[n]["peak"] + rows[n]["gain"] for n in names),
+                len(bad),
+                ok,
+            )
+        )
     return "\n".join(out)
 
 
@@ -192,22 +212,30 @@ def main():
         print()
         for n, d in sorted(outliers.items(), key=lambda kv: -abs(kv[1])):
             r = rows[n]
-            print("%-24s %-12s %+5.1f dB  rms %.1f gain %+.1f peak %.1f%s" % (
-                n, r["cat"], d, r["rms"], r["gain"], r["peak"], "  (accepted)" if n in levels["outliers_ok"] else ""))
+            print(
+                "%-24s %-12s %+5.1f dB  rms %.1f gain %+.1f peak %.1f%s"
+                % (n, r["cat"], d, r["rms"], r["gain"], r["peak"], "  (accepted)" if n in levels["outliers_ok"] else "")
+            )
     for n in missing:
         print("NO CATEGORY OR FILE: " + n)
     for n in stale:
         print("STALE outliers_ok entry (now within %.0f dB, remove it): %s" % (levels["tolerance_db"], n))
     for n, d in sorted(fresh.items()):
-        print("OUTLIER %s (%s) %+.1f dB from its category median: set gain_db in content/rules/sfx_levels.json" % (
-            n, rows[n]["cat"], d))
+        print(
+            "OUTLIER %s (%s) %+.1f dB from its category median: set gain_db in content/rules/sfx_levels.json"
+            % (n, rows[n]["cat"], d)
+        )
     for n in sorted(n for n, r in rows.items() if r["gain"] > 0 and r["peak"] + r["gain"] > levels["peak_db"]):
-        print("GAIN CLIPS %s: peak %.1f + gain %+.1f is past the %.0f dBFS ceiling" % (
-            n, rows[n]["peak"], rows[n]["gain"], levels["peak_db"]))
+        print(
+            "GAIN CLIPS %s: peak %.1f + gain %+.1f is past the %.0f dBFS ceiling"
+            % (n, rows[n]["peak"], rows[n]["gain"], levels["peak_db"])
+        )
         missing.append(n)
     bad = len(fresh) + len(missing) + len(stale)
-    print("sfx loudness: %d sounds, %d categories, %d outliers (%d accepted), %s" % (
-        len(rows), len(groups), len(outliers), len(outliers) - len(fresh), "FAIL" if bad else "OK"))
+    print(
+        "sfx loudness: %d sounds, %d categories, %d outliers (%d accepted), %s"
+        % (len(rows), len(groups), len(outliers), len(outliers) - len(fresh), "FAIL" if bad else "OK")
+    )
     if "--check" in sys.argv and bad:
         sys.exit(1)
 
