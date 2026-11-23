@@ -114,7 +114,8 @@ func _locket() -> void:
 		_stock(0, 0, 0)
 		from_a += 1 if _egg(p[0], p[1], i)[1]["species"] == p[0]["species"] else 0
 	ok(worn == EGGS and used == EGGS, "Locket: %d of %d babies are the wearer's species, one used each" % [worn, EGGS])
-	ok(from_a > EGGS / 4 and from_a < EGGS * 3 / 4, "without a Locket it is about 50/50 (%d of %d)" % [from_a, EGGS])
+	ok(from_a > int(EGGS / 4.0) and from_a < int(EGGS * 3 / 4.0),
+			"without a Locket it is about 50/50 (%d of %d)" % [from_a, EGGS])
 
 func _shell() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -137,7 +138,7 @@ func _shell() -> void:
 		_stock(0, 0, 0)
 		plain += int(_has_habit(_egg(p[0], p[1], i)[1], wearer, top))
 	ok(exact == EGGS and used == EGGS, "Shell: %d of %d babies have the wearer's habit and top trait" % [exact, EGGS])
-	ok(plain < EGGS / 10, "without a Shell that exact match is rare (%d of %d)" % [plain, EGGS])
+	ok(plain < int(EGGS / 10.0), "without a Shell that exact match is rare (%d of %d)" % [plain, EGGS])
 
 func _down() -> void:
 	Save.d = Save.fresh()
