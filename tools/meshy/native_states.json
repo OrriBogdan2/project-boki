@@ -7,7 +7,7 @@
 			"land": {"src": 460, "from": 2.3, "to": 3.2, "secs": 0.24, "in_place": true},
 			"hit": {"src": 174, "from": 0.5, "to": 1.1, "secs": 0.42, "in_place": true},
 			"hit_back": {"src": 416, "from": 0.14, "to": 0.9, "secs": 0.42, "in_place": true},
-			"downed": {"src": 183, "from": 1.85, "to": 3.0, "secs": 0.4, "in_place": true}
+			"downed": {"src": 183, "from": 1.9, "to": 3.1, "secs": 0.4, "in_place": true}
 		},
 		"medium": {
 			"dash": {"src": 510, "from": 0.0, "to": 0.67, "in_place": true},
@@ -15,7 +15,7 @@
 			"land": {"src": 508, "from": 1.7, "to": 2.4, "secs": 0.3, "in_place": true},
 			"hit": {"src": 179, "from": 0.2, "to": 0.9, "secs": 0.42, "in_place": true},
 			"hit_back": {"src": 416, "from": 0.14, "to": 0.9, "secs": 0.42, "in_place": true},
-			"downed": {"src": 366, "from": 0.4, "to": 1.3, "secs": 0.45, "in_place": true}
+			"downed": {"src": 366, "from": 0.4, "to": 1.1, "secs": 0.45, "in_place": true}
 		},
 		"heavy": {
 			"dash": {"src": 512, "from": 0.0, "to": 0.53, "in_place": true},
@@ -23,7 +23,7 @@
 			"land": {"src": 382, "from": 1.95, "to": 2.77, "secs": 0.5, "in_place": true},
 			"hit": {"src": 171, "from": 0.3, "to": 1.2, "secs": 0.42, "in_place": true},
 			"hit_back": {"src": 416, "from": 0.14, "to": 0.9, "secs": 0.42, "in_place": true},
-			"downed": {"src": 185, "from": 2.0, "to": 3.6, "secs": 0.5, "in_place": true}
+			"downed": {"src": 185, "from": 2.0, "to": 3.8, "secs": 0.5, "in_place": true}
 		}
 	},
 	"hunters": {
