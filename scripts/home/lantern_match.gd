@@ -382,6 +382,10 @@ func _pick(i: int) -> void:
 func playing() -> bool:
 	return state == S.PLAY
 
+## Home's _unhandled_input asks every base game; the board is clicked through its own panel, so nothing to take here.
+func input(_event: InputEvent) -> bool:
+	return false
+
 func tick(d: float) -> void:
 	state_t += d
 	match state:

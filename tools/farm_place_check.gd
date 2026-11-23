@@ -30,8 +30,11 @@ func run(m: Node) -> void:
 		main.fade.reveal(0.05)
 	main.get_tree().root.size = Vector2i(1280, 720)
 	await _enter()
+	# the placing spotlight and the relic gate belong to the old farm's twelve steps, not the base tutorial
+	FarmUnlocks.rules()["base_mode"] = false
 	await _modal()
 	await _relic()
+	FarmUnlocks.rules()["base_mode"] = true
 	await _hunger()
 	print("FPLACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
