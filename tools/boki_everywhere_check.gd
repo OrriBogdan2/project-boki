@@ -14,8 +14,8 @@ extends RefCounted
 
 const PX := 512
 ## Species with data but no art/kin body yet (docs/art/kin/MESHY_BOKI_RECIPE.md): they must be the only FALLBACKs.
-## A Hunter stands about 4x the height of a Boki: the shot camera backs off by this much.
-const HUNTER_SCALE := 4.0
+## A Hunter is taller than a Boki: the shot camera backs off by this much.
+const HUNTER_SCALE := 1.7
 const KNOWN_NO_MODEL := ["basaltoad", "cindowary"]
 
 var main: Node
