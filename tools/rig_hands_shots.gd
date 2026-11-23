@@ -41,6 +41,10 @@ func run(main: Node) -> void:
 			curl = float(a.substr(7))
 		if a.begins_with("--curl-axis="):
 			axis = {"x": Vector3.RIGHT, "y": Vector3.UP, "z": Vector3.BACK}[a.substr(12)]
+	if not FileAccess.file_exists(glb):
+		push_error("rig-hands-shots: no file " + glb)
+		tree.quit(1)
+		return
 	DirAccess.make_dir_recursive_absolute(out)
 	var holder := Node3D.new()
 	main.add_child(holder)
