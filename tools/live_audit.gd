@@ -18,6 +18,8 @@ const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
 var film := false
+var film_clips: Array = ["idle", "run", "attack", "hit"]   # --clips=a,b: the clips a film plays
+var film_yaws: Array = [-PI, -PI / 2.0, 0.0]   # --yaws=deg,deg,..: a film plays every clip once at each of these yaws (front, side, back)
 var native := false
 
 func run(main: Node) -> void:
@@ -32,6 +34,12 @@ func run(main: Node) -> void:
 		if a == "--close": close = true
 		if a == "--contract": WardenNative.contract_only = true      # LIVE: the contract model as main plays it
 		if a == "--film": film = true
+		if a.begins_with("--clips="):
+			film_clips = Array(a.substr(8).split(",", false))
+		if a.begins_with("--yaws="):
+			film_yaws = []
+			for d in a.substr(7).split(",", false):
+				film_yaws.append(deg_to_rad(float(d)))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -120,13 +128,19 @@ func _hunter(id: String, dir: String) -> void:
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
 	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
-	for clip in (["idle", "run", "attack"] if film else CLIPS):
-		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+	var plays: Array = []   # [clip, yaw index, yaw]
+	for clip in (film_clips if film else CLIPS):
+		for yi in (film_yaws.size() if film else 1):
+			plays.append([clip, yi, float(film_yaws[yi]) if film else (SIDE_YAW if clip == "run" and not close else THREE_Q_YAW)])
+	for pl in plays:
+		var clip: String = pl[0]
+		var yaw: float = pl[2]
+		var tag: String = clip if not film else "%s_y%d" % [clip, pl[1]]
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
 		if film:       # every 2nd step (15 fps) over a clip's span
 			times = []
-			for j in int(float({"idle": 1.6, "run": 0.9, "attack": 1.0}[clip]) / (2.0 * DT)):
+			for j in int(float({"idle": 1.0, "run": 0.9, "attack": 1.0, "hit": 0.7}[clip]) / (2.0 * DT)):
 				times.append(j * 2.0 * DT)
 		# settle: the pre-state (standing, or running for a hit/jump) for 25 frames, then the clip's own state
 		var s := _state(id, "idle" if clip != "dash" else "run", yaw, 0.0)
@@ -142,8 +156,8 @@ func _hunter(id: String, dir: String) -> void:
 			model.set_meta(WardenClips.STATE, s)
 			poser.call("_process", DT)
 			if want < times.size() and t + DT * 0.5 >= float(times[want]):
-				await _shoot(model, dir, "%s_%d" % [clip, want], bx)
-				marks.append("%s %d t=%.3f state=%s" % [clip, want, t, str(s)])
+				await _shoot(model, dir, "%s_%d" % [tag, want], bx)
+				marks.append("%s %d t=%.3f state=%s" % [tag, want, t, str(s)])
 				want += 1
 		model.set_meta(WardenClips.STATE, {})
 	var f := FileAccess.open(dir.path_join("marks.txt"), FileAccess.WRITE)
@@ -153,7 +167,7 @@ func _hunter(id: String, dir: String) -> void:
 
 func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
 	if close:
-		for knee in [false, true]:
+		for knee in ([false] if film else [false, true]):
 			_close_cam(bx, knee)
 			await RenderingServer.frame_post_draw
 			await RenderingServer.frame_post_draw
