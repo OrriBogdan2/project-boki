@@ -70,7 +70,7 @@ A Hunter whose kit moves Meshy's one Attack does not fit gets its own clips on M
 the legs' clip (walk, run, idle, the air) at a weight that rises in 0.08 s and falls in 0.2 s; any other row is a
 full-body clip on the main player. Data `own_casts` stops her casts and recoils playing Meshy's swing.
 Cinder (hands, no weapon: DECISIONS 11-07), written by `tools/meshy/cinder_native_clips.py` (numpy FK and two-bone IK on
-Meshy's node tree, no Blender): `as_lance` the pilot's 0.34 s spool then the 8 Hz-bucking hold from her right palm,
+Meshy's node tree, no Blender): `as_lance` the pilot's 0.26 s spool then the 8 Hz-bucking hold from her right palm,
 `as_lance_end` the let-go, `as_aim` the 0.4 s cast sighting along the arm (held), `as_shot` the push on the frame the bolt
 spawns (the palm already at the eye, the push 0.07 s in), `as_cloak` a tuck then both arms flung wide by 0.04 s,
 `lw_jet` the take-off crouch and spring (0.22 s, the kit's lift) then the leaning flight loop, `lw_land` the light landing.

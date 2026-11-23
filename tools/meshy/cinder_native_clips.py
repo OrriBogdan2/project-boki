@@ -5,7 +5,7 @@ with two-bone IK for the arms and (full-body clips) legs, and written as rotatio
 rest pose, in Meshy's node space (tracks match the game's skeleton by bone name).
 Upper clips (names starting cn_u_) key only the torso, head and arms: the game lays them over the walk, run or idle
 (data "kmoves" in content/rules/warden_native.json). Full clips (cn_f_) key every joint.
-Timings are the kit's: LMB spool 0.34 s then a hold; Cinder Shot cast 0.4 s then the push on the frame the bolt spawns;
+Timings are the kit's: LMB spool 0.26 s (the roar at 0.1 s) then a hold; Cinder Shot cast 0.4 s then the push on the frame the bolt spawns;
 Furnace Cloak blast on the first frame (arms-wide peak by 0.05 s); Flue Flight lift 0.22 s then the flight loop; light landing.
 Run: python3 -I tools/meshy/cinder_native_clips.py [--shot] [out.glb]   (--shot prints the wrist and palm of each key)"""
 
@@ -320,7 +320,8 @@ def clips():
     kick = P(wR=(0.17, 1.26, 0.50), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.2, 1.0), wL=(0.34, 1.0, 0.02), poleL=(0.5, -0.8, -0.6), **lean(-0.04, -0.3, 0.0, (-0.08, 0.12, 0.0)))
     held = P(wR=(0.16, 1.27, 0.54), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.17, 1.0), wL=(0.34, 0.99, 0.03), poleL=(0.5, -0.8, -0.6), **lean(0.02, -0.3, 0.0, (-0.07, 0.12, 0.0)))
     buck = P(wR=(0.16, 1.30, 0.50), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.25, 1.0), wL=(0.34, 1.01, 0.01), poleL=(0.5, -0.8, -0.6), **lean(-0.04, -0.32, 0.0, (-0.06, 0.12, 0.0)))
-    out["cn_u_lance"] = (0.34, False, [(0.0, rest_pose(), "lin"), (0.1, spool, "out"), (0.2, snap, "out"), (0.27, kick, "out"), (0.34, held, "sm")])
+    # (the clip starts 0.1 s into the key hold and the roar 0.2 s: the arm is out by 0.1 s, the kick is the roar)
+    out["cn_u_lance"] = (0.26, False, [(0.0, rest_pose(), "lin"), (0.05, spool, "out"), (0.1, snap, "out"), (0.16, kick, "out"), (0.26, held, "sm")])
     # the hold (loops 0.5 s at 8 Hz-ish bucking, the same first and last pose)
     out["cn_u_lance_loop"] = (0.5, True, [(0.0, held, "lin"), (0.0625, buck, "lin"), (0.125, held, "lin"), (0.1875, buck, "lin"), (0.25, held, "lin"),
                                           (0.3125, buck, "lin"), (0.375, held, "lin"), (0.4375, buck, "lin"), (0.5, held, "lin")])
@@ -354,8 +355,8 @@ def flights():
                wR=(0.26, 1.02, 0.24), poleR=(0.6, -0.6, -0.6), wL=(0.26, 1.02, 0.24), poleL=(0.6, -0.6, -0.6), **lean(0.1, 0.0, 0.0, (-0.15, 0.0, 0.0)))
     hip_pitch = 1.0  # radians the body leans into the flight (the contract's 0.62 + 0.28 hips)
     def fly(ph, a_back=0.0):
-        hp = (hip_pitch, 0.0, 0.0)
-        return P(hips=(0.0, 0.06, 0.06), hips_rot=hp,
+        hp = (hip_pitch + 0.06 * ph, 0.0, 0.08 * ph)
+        return P(hips=(0.0, 0.06 + 0.05 * ph, 0.06), hips_rot=hp,
                  aR=(0.13, 0.80, -0.50 - 0.04 * a_back), aL=(0.12, 0.84 + 0.04 * a_back, -0.46), footR=(0.0, -0.45, -0.9), footL=(0.0, -0.45, -0.9),
                  wR=(0.26, 1.22 + 0.2 * ph, -0.10), poleR=(0.7, 0.4, -0.2), wL=(0.28, 1.2 - 0.2 * ph, -0.08), poleL=(0.7, 0.4, -0.2),
                  **lean(-0.15, 0.0, 0.0, (-0.55, 0.0, 0.0)))
@@ -363,7 +364,8 @@ def flights():
     f1 = fly(0.4, 0.5)
     f2 = fly(-0.3, 1.0)
     f3 = fly(0.2, 0.0)
-    out["cn_f_takeoff"] = (0.22, False, [(0.0, rest_pose(), "lin"), (0.08, crouch, "out"), (0.22, f0, "out")])
+    # (the kit starts the clip 0.12 s in: it lands up and flying 0.1 s after the press, so the crouch is the first frame seen)
+    out["cn_f_takeoff"] = (0.22, False, [(0.0, rest_pose(), "lin"), (0.12, crouch, "out"), (0.22, f0, "out")])
     out["cn_f_fly"] = (0.78, True, [(0.0, f0, "lin"), (0.23, f1, "lin"), (0.5, f2, "lin"), (0.78, f0, "lin")])
     fl0 = dict(f0, hips_rot=(0.4, 0.0, 0.0))
     sq = P(hips=(0.0, -0.07, 0.0), hips_rot=(0.12, 0.0, 0.0), **lean(0.1, 0.0, 0.0, (-0.1, 0.0, 0.0)),
