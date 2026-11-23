@@ -6,4 +6,5 @@ extends RefCounted
 
 const CHECKS := {
 	"--cc-measure-check": ["res://tools/cc_measure_check.gd", "cc_measure_check", null],
+	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 }
