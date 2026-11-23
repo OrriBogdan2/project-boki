@@ -29,7 +29,7 @@ var top := 100.0                ## px from the top of the screen where the colum
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var max_w := 0.0                ## px: the widest a card gets (the tutorial's column); 0: WIDE of the screen
 var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
-var keep_off: Array[Rect2] = [] ## other HUD blocks a card slides aside of (the kill feed's rows)
+var keep_off: Array[Rect2] = [] ## other HUD blocks a card drops below (the kill feed's rows)
 var fight := false              ## true while the player is in a fight (Hud sets it): only URGENT, fewer, shorter lines
 var max_shown := MAX_SHOWN      ## lines on show at once (a match's TopStack sets 1: one card at a time)
 var one_hint := false           ## true: one hint (own-life line) on show at a time (a match's TopStack sets it)
@@ -190,8 +190,9 @@ func _layout(delta: float) -> void:
 		e["placed"] = true
 		y = maxf(y, above + GAP)
 		x += HunterZone.slide(Rect2(Vector2(x, y), box.size), avoid)
-		for r: Rect2 in keep_off:
-			x += HunterZone.slide(Rect2(Vector2(x, y), box.size), r)
+		for r: Rect2 in keep_off:  # (below, not aside: aside ran a wide card into the minimap on an ultrawide frame)
+			if Rect2(Vector2(x, y), box.size).intersects(r):
+				y = r.end.y + GAP
 		box.position = Vector2(x, y)
 		above = y + box.size.y
 		want += box.size.y + GAP

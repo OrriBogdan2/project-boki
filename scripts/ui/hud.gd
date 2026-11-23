@@ -137,7 +137,7 @@ func _place_msgs() -> void:
 	var to_lane := msgs.get_global_transform().affine_inverse() * c.get_global_transform()      # (the HUD canvas sits on the frame: an ultrawide offsets it)
 	msgs.keep_off.clear()
 	for r: Rect2 in KillFeed.rects():
-		msgs.keep_off.append(to_lane * r)      # a wide card slides aside of the kill feed's rows (right edge)
+		msgs.keep_off.append(to_lane * r)      # a card drops below the kill feed's rows (right edge)
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 	else: TopStack.place(self)
 

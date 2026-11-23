@@ -6,5 +6,4 @@ extends RefCounted
 
 const CHECKS := {
 	"--incoming-hit-check": ["res://tools/incoming_hit_check.gd", "incoming_hit_check", null],  # hit_in cue
-	"--steal-sfx-check": ["res://tools/steal_sfx_check.gd", "steal_sfx_check", null],  # StealSfx: prize cry + reel thud
 }

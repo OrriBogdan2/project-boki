@@ -106,6 +106,9 @@ func _skyfall(m: Match, p_v: Hunter, foe: Hunter) -> void:
 
 
 func _blight(m: Match, p_v: Hunter, foe: Hunter) -> void:
+	for z: Dictionary in m.fields.list:  # (the fire patch before is put out: its burn would down the rival first)
+		z["t"] = 0.0
+	m.step(Match.DT)
 	foe.out = false
 	foe.downed = false
 	foe.dead = false
