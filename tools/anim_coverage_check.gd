@@ -64,6 +64,17 @@ func _move(d: Dictionary, clips: Array, pattern: String, flag := "") -> bool:
 			return true
 	return false
 
+## Stomp: the clip WardenClips plays on the game's phase (states.stomp) when the glb has it; "proc"
+## (HunterAnim.stomp_k) when nothing is mapped; "missing" (and a FAIL line) when the mapped clip is not in the glb.
+func _stomp(art: String, st: Dictionary, clips: Array) -> String:
+	var v: Variant = st.get("stomp", "")
+	if not (v is String) or v == "":
+		return "proc"
+	if clips.has(v):
+		return "clip"
+	print("MISSING stomp clip '%s' in art/wardens/%s/%s.glb" % [v, art, art])
+	return "missing"
+
 func _hunter_row(art: String) -> Array:
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ANIM_DIR + art + ".json"))
 	var src := String(d.get("clips_from", art)) if _glb_clips("res://art/wardens/%s/%s.glb" % [art, art]).is_empty() \
@@ -96,7 +107,8 @@ func _hunter_row(art: String) -> Array:
 		_cell(attacks > 0), _cell(hit_ok),
 		_cell(clips.has(st.get("dead", "")), false), _cell(clips.has(air.get("rise", ""))), _cell(clips.has(land_clip)),
 		_cell(clips.has(air.get("glide", "")) and not "gliding" in procs), _cell(_move(d, clips, DASH_RE, "dash")),
-		_cell(_move(d, clips, CAST_RE)), "proc", _cell(walk_ok and run_ok), _cell(_has(clips, crouch.get("idle", ""))),
+		_cell(_move(d, clips, CAST_RE)), _stomp(src, st, clips), _cell(walk_ok and run_ok),
+		_cell(_has(clips, crouch.get("idle", ""))),
 		_cell(upper)]
 
 ## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits, landings and dashes
