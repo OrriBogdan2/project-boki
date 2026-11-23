@@ -1,10 +1,12 @@
-"""Grimble (dredge) native r8: loose islands deleted, the goo's tail hung on a bone chain.
+"""Grimble (dredge) native r8-r9: loose islands deleted, cut holes closed, the goo's tail hung on a bone chain.
 
 Runs on the r7 body (tools/meshy/dredge_reskin.py output) and writes the game glb:
 
 - islands: every group of triangles that touches no other (vertices within ISLAND_TOL) and has fewer than MIN_TRIS
   triangles is deleted, per body primitive (skin, goo, leather pack; the brass fittings and the coin pile are made of
   many small pieces on purpose). `--islands FILE` counts them (the proof of "0 loose islands").
+- holes (r9): Meshy grew the heel crescent out of the calf and left open slits on the calf's back; every open
+  boundary loop that touches the cut or lies in CALF_BOX (and is on a piece that stays) gets a skin-coloured dome.
 - tail chain: four bones (GooTail0..3) under RightHand at the goo's own centre line, the goo below the hand weighted
   along them by height (hat weights, so it bends between two bones and never shears against the hips). Baked into
   every clip: each segment keeps its rest direction (it hangs) and follows the bone above it by only TAIL_FOLLOW,
@@ -31,6 +33,9 @@ ISLAND_TOL = 0.001  # m: vertices this close are one vertex (UV seams, decimatio
 MIN_TRIS = 1000  # an island of fewer triangles is a loose chunk (the body, goo, pack and cap are all far larger)
 CLEANED = ("skin-native", "skin-goo", "leather-pack")  # the primitives that must be one piece each
 BLADE_X, BLADE_Y = (-0.17, 0.02), (0.10, 0.62)  # m: the pale crescent Meshy fused to the right heel (skin, rest pose)
+CALF_BOX = (np.array([-0.32, 0.15, -0.36]), np.array([0.0, 0.6, -0.12]))  # m: right calf, back half (rest pose)
+# holes closed after the cut: dome rings (big loops), bulge (share of the radius), smallest loop filled
+FILL_RINGS, FILL_BULGE, FILL_MIN = 4, 0.25, 6
 BLADE_GROW = 0.06  # m: pale triangles this close to the crescent's body go with it (its root at the foot)
 HAND = "RightHand"
 CHAIN_Y = (0.97, 0.70, 0.43, 0.16)  # m: rest height of GooTail0..3 (the first is the hand's own origin)
@@ -87,12 +92,139 @@ def drop_blade(js, b, out):
     body[idx[lab == np.bincount(lab).argmax()]] = True  # the crescent is the biggest pale piece in the box
     near = cKDTree(pos[np.unique(f[body])]).query(c)[0] < BLADE_GROW
     gone = body | (near & pale & (c[:, 1] > 0.02))
+    patch, holes = fill_cut(js, b, out, prim, pos, f, gone)
+    keep = np.concatenate([f[~gone], patch])
     js["accessors"].append(
-        {"bufferView": out.add_view(f[~gone].astype(np.uint32).tobytes()), "componentType": 5125,
-         "count": int((~gone).sum()) * 3, "type": "SCALAR"}
+        {"bufferView": out.add_view(keep.astype(np.uint32).tobytes()), "componentType": 5125,
+         "count": len(keep) * 3, "type": "SCALAR"}
     )
     prim["indices"] = len(js["accessors"]) - 1
-    return int(gone.sum())
+    return int(gone.sum()), holes
+
+
+def rim_loops(f, gone, w, pos):
+    """The cut's rim: every open boundary of the kept triangles (welded) that touches a deleted triangle, as
+    loops of real vertices (taken from the kept side), ordered by walking, or by angle round the loop's centre
+    where the boundary is not one clean cycle."""
+    kf = f[~gone]
+    e = np.concatenate([kf[:, [0, 1]], kf[:, [1, 2]], kf[:, [2, 0]]])
+    ew = np.sort(w[e], 1)
+    u, inv, cnt = np.unique(ew, axis=0, return_inverse=True, return_counts=True)
+    bd = cnt[inv.ravel()] == 1
+    m = int(w.max()) + 1
+    k, lab = connected_components(sp.coo_matrix((np.ones(bd.sum()), (ew[bd, 0], ew[bd, 1])), (m, m)), directed=False)
+    cutv = np.zeros(m, bool)
+    cutv[w[f[gone]].ravel()] = True
+    rep = {}
+    for (a, b_) in e[bd]:
+        rep.setdefault(w[a], a), rep.setdefault(w[b_], b_)
+    nb = {}
+    for wa, wb in ew[bd]:
+        nb.setdefault(wa, []).append(wb), nb.setdefault(wb, []).append(wa)
+    bv = np.unique(ew[bd])
+    isl = island_labels(pos, kf)  # a loop on a piece the island pass will delete is left open
+    big = np.zeros(m, bool)
+    big[w[kf[np.bincount(isl)[isl] >= MIN_TRIS]].ravel()] = True
+    loops = []
+    p0 = np.zeros((m, 3))
+    p0[w] = pos
+    inbox = np.all((p0 > CALF_BOX[0]) & (p0 < CALF_BOX[1]), 1)  # Meshy's own open slits on the back of the calf
+    for l in np.unique(lab[bv[cutv[bv] | inbox[bv]]]):
+        vs = bv[lab[bv] == l]
+        if len(vs) < FILL_MIN or not big[vs].all():
+            continue
+        loop, prev, cur = [vs[0]], None, vs[0]
+        while len(loop) <= len(vs):
+            nxt = [x for x in nb[cur] if x != prev]
+            if len(nb[cur]) != 2 or not nxt or nxt[0] == vs[0]:
+                break
+            prev, cur = cur, nxt[0]
+            loop.append(cur)
+        if len(loop) != len(vs) or any(len(nb[x]) != 2 for x in vs):  # not a clean cycle: order by angle
+            p = pos[[rep[x] for x in vs]]
+            c = p.mean(0)
+            ax = np.linalg.svd(p - c)[2]
+            ang = np.arctan2((p - c) @ ax[1], (p - c) @ ax[0])
+            loop = list(vs[np.argsort(ang)])
+        loops.append([rep[x] for x in loop])
+    return loops
+
+
+def fill_cut(js, b, out, prim, pos, f, gone):
+    """Closes the holes the deletion opened (Meshy grew the crescent out of the calf, no skin is left under it):
+    each rim loop gets a dome of FILL_RINGS rings bulging along the rim's normal, skinned like the nearest rim
+    vertex and coloured by one skin texel (the median rim colour), appended to the shared vertex arrays."""
+    att = prim["attributes"]
+    q = np.round(pos / ISLAND_TOL).astype(np.int64)
+    w = np.unique(q, axis=0, return_inverse=True)[1].ravel()
+    loops = rim_loops(f, gone, w, pos)
+    arr = {k: (n.floats(js, b, a) if js["accessors"][a]["componentType"] == 5126 else
+               np.frombuffer(n.view_bytes(js, b, js["accessors"][a]["bufferView"]), np.uint16,
+                             js["accessors"][a]["count"] * 4).reshape(-1, 4).copy()) for k, a in att.items()}
+    tex = js["materials"][prim["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    bv = js["bufferViews"][js["images"][js["textures"][tex]["source"]]["bufferView"]]
+    px = np.asarray(Image.open(io.BytesIO(b[bv.get("byteOffset", 0):][: bv["byteLength"]])).convert("RGB")).astype(int)
+    h, wd = px.shape[:2]
+    new = {k: [] for k in arr}
+    base, tris = len(pos), []
+    for loop in loops:
+        r = np.array(loop)
+        rings_n = 1 if len(r) < 16 else 2 if len(r) < 60 else FILL_RINGS
+        uv = arr["TEXCOORD_0"][r]
+        col = px[(np.clip(uv[:, 1], 0, 0.999) * h).astype(int), (np.clip(uv[:, 0] % 1, 0, 0.999) * wd).astype(int)]
+        skin_uv = uv[np.argmin(np.abs(col - np.median(col, 0)).sum(1))]
+        p = pos[r]
+        c = p.mean(0)
+        nrm = arr["NORMAL"][r].mean(0)
+        nrm /= np.linalg.norm(nrm)
+        rad = np.linalg.norm(p - c, axis=1).mean()
+        rings = []
+        for k in range(rings_n + 1):  # ring 0 is a copy of the rim (new uv), the last ring is the centre
+            t = k / rings_n
+            ring = p * (1 - t) + c * t + nrm * FILL_BULGE * rad * np.sqrt(max(0.0, 1 - (1 - t) ** 2))
+            rings.append(ring[:1] if k == rings_n else ring)
+        pts = np.concatenate(rings)
+        near = r[cKDTree(p).query(pts)[1]]
+        for k in arr:
+            v = arr[k][near].copy()
+            if k == "POSITION":
+                v = pts
+            elif k == "NORMAL":
+                v = np.repeat(nrm[None], len(pts), 0)
+            elif k == "TEXCOORD_0":
+                v = np.repeat(skin_uv[None], len(pts), 0)
+            new[k].append(v)
+        m = len(r)
+        idx = [base + k * m + np.arange(m) for k in range(rings_n)] + [np.array([base + rings_n * m])]
+        for k in range(rings_n):
+            a0, a1 = idx[k], np.roll(idx[k], -1)
+            if k == rings_n - 1:
+                tris += [np.stack([a0, a1, np.repeat(idx[-1], m)], 1)]
+            else:
+                b0, b1 = idx[k + 1], np.roll(idx[k + 1], -1)
+                tris += [np.stack([a0, a1, b1], 1), np.stack([a0, b1, b0], 1)]
+        lt = np.concatenate(tris[-(2 * rings_n - 1):]) - base
+        fn = np.cross(pts[lt[:, 1]] - pts[lt[:, 0]], pts[lt[:, 2]] - pts[lt[:, 0]]).sum(0)
+        if fn @ nrm < 0:  # wound against the skin: flip this loop's triangles
+            for j in range(len(tris) - (2 * rings_n - 1), len(tris)):
+                tris[j] = tris[j][:, [0, 2, 1]]
+        base += len(pts)
+    if not loops:
+        return np.zeros((0, 3), np.int64), 0
+    for k, a in att.items():
+        full = np.concatenate([arr[k]] + new[k])
+        if js["accessors"][a]["componentType"] == 5126:
+            acc = out.add_floats(full, js["accessors"][a]["type"])
+            if k == "POSITION":
+                js["accessors"][acc]["min"], js["accessors"][acc]["max"] = full.min(0).tolist(), full.max(0).tolist()
+        else:
+            js["accessors"].append({"bufferView": out.add_view(full.astype(np.uint16).tobytes()),
+                                    "componentType": 5123, "count": len(full), "type": "VEC4"})
+            acc = len(js["accessors"]) - 1
+        for p2 in js["meshes"][0]["primitives"]:  # the goo shares the skin's vertex arrays
+            if p2["attributes"].get(k) == a:
+                p2["attributes"][k] = acc
+    return np.concatenate(tris), len(loops)
 
 
 def slerp_to(q, rest, keep):
@@ -292,7 +424,7 @@ def add_tail_clips(js, out, baked, first):
 def build(out_path, in_path):
     rig = rs.Rig(in_path)
     out = n.Out(rig.js, rig.b)
-    blade = drop_blade(rig.js, rig.b, out)
+    blade, holes = drop_blade(rig.js, rig.b, out)
     soften_lunge(rig.js, rig.b, out)
     rs.compact(out)
     out.write(out_path)  # (each stage writes and reloads: a new index array lives in the new file's buffer)
@@ -324,7 +456,8 @@ def build(out_path, in_path):
     add_tail_clips(js, out, baked, first)
     rs.compact(out)
     out.write(out_path)
-    print(f"heel crescent {blade} tris, {gone[0]} islands ({gone[1]} tris), chain at {np.round(ys, 2).tolist()}")
+    print(f"heel crescent {blade} tris ({holes} holes filled), {gone[0]} islands ({gone[1]} tris), "
+          f"chain at {np.round(ys, 2).tolist()}")
     print("written", out_path)
 
 
