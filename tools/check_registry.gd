@@ -25,8 +25,13 @@ const CHECKS := {
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],  # the Heart early seat (0023, 0051)
 	# out: watch and switch teammates
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],
-	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5
-	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],
+	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5, one flag per camp and level (under the gate's 300 s cap)
+	"--camp-clear-skitter-1-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "skitter@1"],
+	"--camp-clear-skitter-5-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "skitter@5"],
+	"--camp-clear-spitter-1-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "spitter@1"],
+	"--camp-clear-spitter-5-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "spitter@5"],
+	"--camp-clear-brute-1-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "brute@1"],
+	"--camp-clear-brute-5-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "brute@5"],
 	"--camp-layout-check": ["res://tools/camp_layout_check.gd", "camp_layout_check", null],
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
 	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],  # no lair "you fell"
@@ -369,7 +374,12 @@ const CHECKS := {
 	"--dash-streak-shots": ["res://tools/dash_streak_shots.gd", "dash_streak_shots", null],
 	# a press in another ability's wind-up or recovery (the Cast into cast tables)
 	"--cast-into-cast-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", null],
-	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],  # dash -> ability rows
+	# dash -> ability rows, in four shards (each under the gate's 300 s cap)
+	"--dash-flow-1-check":
+		["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "archer,juggernaut,gunslinger,bulwark"],
+	"--dash-flow-2-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "rimewright,ashwick,dolm"],
+	"--dash-flow-3-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "mage,dredge,tender"],
+	"--dash-flow-4-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "thief,ostra,gil"],
 	"--glide-trail-check": ["res://tools/glide_trail_check.gd", "glide_trail_check", null],
 	"--glide-trail-shots": ["res://tools/glide_trail_shots.gd", "glide_trail_shots", null],
 	# cast at a jump's top: momentum per slot
@@ -605,7 +615,10 @@ const CHECKS := {
 	"--egg-models-check": ["res://tools/egg_models_check.gd", "egg_models_check", null],  # the eggs' 3D shells
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],  # keys, bond hook, release
 	# every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
-	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
+	"--snag-1-check": ["res://tools/snag_check.gd", "snag_check", "archer,juggernaut,gunslinger"],
+	"--snag-2-check": ["res://tools/snag_check.gd", "snag_check", "bulwark,rimewright,ashwick"],
+	"--snag-3-check": ["res://tools/snag_check.gd", "snag_check", "dolm,mage,dredge"],
+	"--snag-4-check": ["res://tools/snag_check.gd", "snag_check", "tender,thief,ostra,gil"],
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],  # far rocks and trees batched
 	"--prop-glb-check": ["res://tools/prop_glb_check.gd", "prop_glb_check", null],  # art/props models
 	"--ult-glow-check": ["res://tools/ult_glow_check.gd", "ult_glow_check", null],  # ready glow, cast flash
@@ -642,7 +655,7 @@ const CHECKS := {
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
 	"--tutorial-lane-check": ["res://tools/tutorial_lane_check.gd", "tutorial_lane_check", null],  # LMB first, no cover
-	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; 1080p frames
+	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; --size=WxH
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
 	# ADVISORY: pace flags (a beat over 45 s, a 5 s wait) never fail it; only a stall in the run does
 	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
@@ -811,7 +824,8 @@ const CHECKS := {
 	"--online-feel-1-check": ["res://tools/online_feel_check.gd", "online_feel_check", "gunslinger"],
 	"--online-feel-2-check": ["res://tools/online_feel_check.gd", "online_feel_check", "juggernaut"],
 	"--online-feel-3-check": ["res://tools/online_feel_check.gd", "online_feel_check", "rimewright"],
-	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],     # the second game (not gated)
+	# the second game (not gated)
+	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],  # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
