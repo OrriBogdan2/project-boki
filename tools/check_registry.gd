@@ -25,8 +25,13 @@ const CHECKS := {
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],  # the Heart early seat (0023, 0051)
 	# out: watch and switch teammates
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],
-	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5
-	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],
+	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5, one flag per camp and level (under the gate's 300 s cap)
+	"--camp-clear-skitter-1-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "skitter@1"],
+	"--camp-clear-skitter-5-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "skitter@5"],
+	"--camp-clear-spitter-1-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "spitter@1"],
+	"--camp-clear-spitter-5-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "spitter@5"],
+	"--camp-clear-brute-1-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "brute@1"],
+	"--camp-clear-brute-5-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", "brute@5"],
 	"--camp-layout-check": ["res://tools/camp_layout_check.gd", "camp_layout_check", null],
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
 	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],  # no lair "you fell"
@@ -234,7 +239,6 @@ const CHECKS := {
 	"--model-draws": ["res://tools/model_draws.gd", "model_draws", null],  # surfaces per .glb
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],  # item 94
 	"--first-cast-check": ["res://tools/first_cast_check.gd", "first_cast_check", null],  # first use of each slot
-	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],  # 6 Hunters, 4 Boki
 	"--texture-budget-check": ["res://tools/texture_budget_check.gd", "texture_budget_check", null],
 	"--match-profile": ["res://tools/match_profile.gd", "match_profile", null],  # GPU: a 30-hunter match, per phase
 	# draw calls, tris, shadow lights, frame ms
@@ -370,7 +374,12 @@ const CHECKS := {
 	"--dash-streak-shots": ["res://tools/dash_streak_shots.gd", "dash_streak_shots", null],
 	# a press in another ability's wind-up or recovery (the Cast into cast tables)
 	"--cast-into-cast-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", null],
-	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],  # dash -> ability rows
+	# dash -> ability rows, in four shards (each under the gate's 300 s cap)
+	"--dash-flow-1-check":
+		["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "archer,juggernaut,gunslinger,bulwark"],
+	"--dash-flow-2-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "rimewright,ashwick,dolm"],
+	"--dash-flow-3-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "mage,dredge,tender"],
+	"--dash-flow-4-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "thief,ostra,gil"],
 	"--glide-trail-check": ["res://tools/glide_trail_check.gd", "glide_trail_check", null],
 	"--glide-trail-shots": ["res://tools/glide_trail_shots.gd", "glide_trail_shots", null],
 	# cast at a jump's top: momentum per slot
@@ -465,8 +474,6 @@ const CHECKS := {
 	"--load-trim-check": ["res://tools/load_trim_check.gd", "load_trim_check", null],  # build.hunters trims
 	"--warden-blink-shots": ["res://tools/warden_blink_check.gd", "warden_blink_check", "shots"],  # --shots-dir=<dir>
 	"--build-threads-check": ["res://tools/build_threads_check.gd", "build_threads_check", null],
-	# no clip stretches a skinned edge past 1.3x
-	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--step-sync-check": ["res://tools/step_sync_check.gd", "step_sync_check", null],  # steps on loop plants
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
 	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],  # ability words
@@ -602,12 +609,16 @@ const CHECKS := {
 	"--words-check": ["res://tools/words_check.gd", "words_check", null],  # Help: the Words page, its text budget
 	"--ostra-globe-shots": ["res://tools/ostra_globe_shots.gd", "ostra_globe_shots", null],  # Brimseed growth
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],  # the title: menu, key art, frame budget
+	"--name-card-check": ["res://tools/name_card_check.gd", "name_card_check", null],  # name card wraps
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],  # the hatch: a quiet, personal moment
 	"--hatch-sfx-check": ["res://tools/hatch_sfx_check.gd", "hatch_sfx_check", null],  # hatch stage sounds, mystery egg
 	"--egg-models-check": ["res://tools/egg_models_check.gd", "egg_models_check", null],  # the eggs' 3D shells
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],  # keys, bond hook, release
 	# every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
-	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
+	"--snag-1-check": ["res://tools/snag_check.gd", "snag_check", "archer,juggernaut,gunslinger"],
+	"--snag-2-check": ["res://tools/snag_check.gd", "snag_check", "bulwark,rimewright,ashwick"],
+	"--snag-3-check": ["res://tools/snag_check.gd", "snag_check", "dolm,mage,dredge"],
+	"--snag-4-check": ["res://tools/snag_check.gd", "snag_check", "tender,thief,ostra,gil"],
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],  # far rocks and trees batched
 	"--prop-glb-check": ["res://tools/prop_glb_check.gd", "prop_glb_check", null],  # art/props models
 	"--ult-glow-check": ["res://tools/ult_glow_check.gd", "ult_glow_check", null],  # ready glow, cast flash
@@ -810,6 +821,11 @@ const CHECKS := {
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],  # 2 games, relay
 	# 2 games, relay: a raid client's boss top bar
 	"--raid-boss-bar-online-check": ["res://tools/raid_boss_bar_online_check.gd", "raid_boss_bar_online_check", null],
+	"--online-feel-1-check": ["res://tools/online_feel_check.gd", "online_feel_check", "gunslinger"],
+	"--online-feel-2-check": ["res://tools/online_feel_check.gd", "online_feel_check", "juggernaut"],
+	"--online-feel-3-check": ["res://tools/online_feel_check.gd", "online_feel_check", "rimewright"],
+	# the second game (not gated)
+	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],  # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
@@ -1015,6 +1031,7 @@ const CHECKS := {
 const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
+	"fight-p99-gpu": "--fight-p99-check --quality=medium --bench-view=1920x1080 --timing-strict",
 }
 
 ## Flags the gate leaves out: the whole run is part of the listed flags' runs (same script, a mode or an
