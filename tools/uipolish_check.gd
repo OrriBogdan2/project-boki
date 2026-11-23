@@ -158,7 +158,9 @@ func _settings_read(src: Dictionary) -> void:
 
 func _removed(src: Dictionary) -> void:
 	for k in Settings.REMOVED:
-		var reads: Array = _uses(src, String(k)).filter(func(p): return p != "scripts/core/settings.gd" and p != IMPACT_TIERS)
+		var reads: Array = _uses(src, String(k)).filter(
+			func(p): return p != "scripts/core/settings.gd" and p != IMPACT_TIERS
+		)
 		var gone := not Settings.DEFAULTS.has(k) and not Settings.v.has(k)
 		ok("removed '%s': not a setting, nothing reads it" % k, gone and reads.is_empty(), str(reads))
 		ok("removed '%s': get_v gives nothing (off)" % k, Settings.get_v(String(k)) == null)
