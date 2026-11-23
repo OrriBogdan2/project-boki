@@ -15,10 +15,10 @@ var back: Callable
 var _key := ""
 var _clock := 0.0
 
-## Whole meals still needed before `rec` stops being too weak to come (0 when it already can).
+## Meals still needed before `rec` stops being too weak to come: 0 when it can, else 1 (owner rule 11-23: any
+## meal that fills the belly lifts the refusal at once, Care.refuses_to_go, even while the starve clock is high).
 static func meals_needed(rec: Dictionary) -> int:
-	var over := Care.starve_h(rec) - Care.STARVE["refuse"]
-	return 0 if over < 0.0 else int(floor(over / Care.MEAL_H)) + 1
+	return 1 if Care.refuses_to_go(rec) else 0
 
 ## How fed it is, 0..1 (a Boki that has starved the whole of STARVE["dead"] hours is at 0).
 static func fed_level(rec: Dictionary) -> float:
@@ -84,7 +84,7 @@ func _rebuild() -> void:
 		head = "%s needs %d more meal%s." % [nm, need, "" if need == 1 else "s"]
 	add_child(UI.label(head, 17, UI.GOOD if need == 0 else UI.INK, UI.big))
 	add_child(_Bar.new(fed_level(rec), line_level(), need == 0))
-	add_child(UI.para("It can come once the bar passes the line." if need > 0 else "Ready when you are.", UI.T_SMALL))
+	add_child(UI.para("One meal in its belly and it can come." if need > 0 else "Ready when you are.", UI.T_SMALL))
 	var row := UI.hbox(10)
 	var main_b: Button = null           # what Enter presses
 	if need == 0:

@@ -591,10 +591,19 @@ func _notice(title: String, lines: Array) -> void:
 			UI.wrapped(lb)
 			v.add_child(lb))
 
-## Is your partner too weak from hunger to come out? (HungerGate says how many meals it needs.)
+## Is your partner too weak from hunger to come out? (Care.refuses_to_go: long starved AND an empty belly.)
 func partner_too_weak() -> bool:
 	var ak := Save.active_kin()
-	return not ak.is_empty() and HungerGate.meals_needed(ak) > 0
+	return not ak.is_empty() and Care.refuses_to_go(ak)
+
+## Why your partner can't come out (starving too long and nothing in its belly), or "".
+func refuse_reason() -> String:
+	var ak := Save.active_kin()
+	if ak.is_empty():
+		return ""
+	if Care.refuses_to_go(ak):
+		return "%s is too weak from hunger and its belly is empty. Give it one meal and it will come, or pick another partner." % ak["name"]
+	return ""
 
 # ------------------------------------------------------------------ the graveyard
 func open_graveyard() -> void:

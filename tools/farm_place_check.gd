@@ -267,42 +267,37 @@ func _hunger() -> void:
 	var rec: Dictionary = Save.active_kin()
 	rec["starve"] = 24.0 * 3600.0
 	Care.ensure(rec)
-	rec["needs"]["food"] = 5.0               # a day without food: an empty belly (not "full right now")
+	rec["needs"]["food"] = 0.0               # a day without food: an empty belly (refuses_to_go needs food <= 0.5)
 	var crops: Array = Data.CROPS.keys()
 	rec["likes"]["food"] = crops[0]          # likes are seeded from the random uid: pin them so kibble is never
 	rec["likes"]["hates"] = crops[1]         # the hated food (refused) nor the loved one (fills more)
 	Save.d["items"]["kibble"] = 5
-	ok(HungerGate.meals_needed(rec) == 2, "24 h of starving: two meals (%d)" % HungerGate.meals_needed(rec))
+	ok(HungerGate.meals_needed(rec) == 1, "24 h of starving, empty belly: one meal (%d)" % HungerGate.meals_needed(rec))
 	home._confirm_start()
 	await _frames(2)
 	var gate := _find_gate(home)
-	await _shot("hunger_1_needs_two", 0.3)
+	await _shot("hunger_1_needs_one", 0.3)
 	ok(gate != null and home.panel_open == "Too hungry to go", "the Too hungry panel is up with the gate")
-	ok(_texts(gate).any(func(t): return t.contains("needs 2 more meals")),
+	ok(_texts(gate).any(func(t): return t.contains("needs 1 more meal.")),
 		"it says exactly what it needs: %s" % [_texts(gate)])
 	ok(_button(gate, "Go") == null, "no Go while it is too hungry")
 	var feed := _button(gate, "Feed")
 	ok(feed != null and not feed.disabled, "a Feed button is right there")
 	feed.pressed.emit()
 	await _frames(2)
-	await _shot("hunger_2_one_meal_left", 0.2)
-	ok(_texts(gate).any(func(t): return t.contains("needs 1 more meal.")), "one meal in: the count drops live")
-	ok(home.panel_open == "Too hungry to go", "the panel is still the same one")
-	rec["needs"]["food"] = 10.0
-	_button(gate, "Feed").pressed.emit()
-	await _frames(2)
 	ok(HungerGate.meals_needed(rec) == 0 and _button(gate, "Go") != null, "past the line: Go is offered, no reopening")
-	ok(Save.d["items"]["kibble"] == 3, "two kibble were used")
+	ok(Save.d["items"]["kibble"] == 4, "one kibble was used")
 	var enter_b: Button = _primary(home)
 	ok(enter_b != null and enter_b.text == "Go" and not enter_b.disabled, "Enter would press Go")
 	# something else feeding it (a feeder) also moves the gate without a click
 	home._close_panel()
 	rec["starve"] = 20.0 * 3600.0
+	rec["needs"]["food"] = 0.0
 	home._confirm_start()
 	await _frames(2)
 	gate = _find_gate(home)
 	ok(_texts(gate).any(func(t): return t.contains("needs 1 more meal.")), "20 h: one meal")
-	Care.fed(rec)
+	rec["needs"]["food"] = 60.0
 	await _frames(60)
 	ok(_button(gate, "Go") != null, "fed from elsewhere: the gate notices on its own")
 	home._close_panel()

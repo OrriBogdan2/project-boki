@@ -24,7 +24,7 @@ const MEAL_H := 4.0       # h of starving one meal takes off the clock
 const STARVE_INFO := {
 	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
 	"weak": ["Weak from hunger", "Slow and weak. Feed it, let it nap or keep a friend close."],
-	"refuse": ["Too weak to go out", "Too weak for expeditions. Feed it, let it nap; a Puffcorn snack works fastest."],
+	"refuse": ["Very weak from hunger", "No expedition on an empty belly. One meal and it comes along."],
 	"sick": ["Sick from hunger", "Sick and drooping. Feed it, nap, keep a friend close; one Puffcorn snack cures it."],
 }
 ## Getting better, in starve-seconds undone per second while it is fed (food over 20): a meal's worth,
@@ -281,6 +281,11 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0, help :=
 		st = maxf(0.0, st - secs * (RECOVER_FED + help))
 	if st > 0.0: rec["starve"] = st
 	else: rec.erase("starve")
+
+## True when hunger keeps it home from an expedition: a long-starved kin with an empty belly. Any meal that
+## fills the bar lifts it at once, even while the starve clock is still high (the clock heals over hours).
+static func refuses_to_go(rec: Dictionary) -> bool:
+	return starve_h(rec) >= STARVE["refuse"] and need(rec, "food") <= 0.5
 
 ## True while it is weak or sick from hunger (the cures above apply).
 static func ailing(rec: Dictionary) -> bool:
