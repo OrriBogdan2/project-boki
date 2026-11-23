@@ -62,7 +62,8 @@ class Body:
 
 
 def lean(spine=0.0, twist=0.0, tilt=0.0, head=(0.0, 0.0, 0.0)):
-    return C.lean(spine, twist, tilt, head)
+    """Torso lean; `twist` is positive when her right shoulder comes forward (the rig's own sign is the other way)."""
+    return C.lean(spine, -twist, tilt, head)
 
 
 def mirror(side):

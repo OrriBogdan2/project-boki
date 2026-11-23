@@ -16,6 +16,28 @@ const TURNED := 0.03  # rad: a bone this far off its rest is posed
 const SYNTH := "Zz_Clip"  # the test clip a synthetic clips file carries
 ## Slot -> [state before, state that starts it, the clip today's game plays for it]. A cast's state names its cast
 ## slot, which HunterAnim's counters turn into a new cast (cast 5 -> 0).
+const OWN_BEATS := {
+	"mage": [
+		["mage_lmb_r", 0.0, 0.06, "RightHand", 0.2, -9.0],
+		["mage_lmb_l", 0.0, 0.06, "LeftHand", 0.1, -9.0],
+		["mage_rmb_hold", 0.0, 0.12, "RightHand", -9.0, 0.3],
+		["mage_rmb", 0.06, 0.16, "RightHand", 0.3, -9.0],
+		["mage_e", 0.0, 0.3, "LeftHand", -9.0, 0.5],
+	],
+	"rimewright": [
+		["tm_dart_r", 0.0, 0.07, "RightHand", 0.1, -9.0],
+		["tm_dart_l", 0.0, 0.07, "LeftHand", 0.05, -9.0],
+		["tm_beam", 0.0, 0.04, "RightHand", 0.2, -9.0],
+		["tm_spear", 0.0, 0.1, "RightHand", 0.1, -9.0],
+		["tm_wall", 0.2, 0.24, "RightHand", 0.2, -9.0],
+	],
+	"tender": [
+		["mm_shot_r", 0.0, 0.08, "RightHand", 0.1, -9.0],
+		["mm_shot_l", 0.0, 0.08, "LeftHand", 0.1, -9.0],
+		["mm_seed", 0.0, 0.12, "LeftHand", 0.08, -9.0],
+		["mm_call", 0.1, 0.2, "RightHand", -9.0, 0.5],
+	],
+}
 const SLOT_CASES := {
 	"lmb": [{"swing_n": 0}, {"swing_n": 1, "combo": 0}, "attack"],
 	"lmb_hold": [{"swing_n": 0}, {"swing_n": 1, "combo": -1}, "attack"],
@@ -152,6 +174,9 @@ func _states(main: Node, a: String) -> void:
 func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
 	if nat.moves == null:
 		return
+	_own_rows(a, m, nat)
+	if not nat.moves.has_row("as_lance"):
+		return
 	var s := {"grounded": true}
 	m.set_meta(WardenClips.STATE, s)
 	var mv := nat.moves
@@ -201,6 +226,43 @@ func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
 	_at(m, nat, s, "", 0.0)
 	clip = nat.player.current_animation
 	ok(clip != "cn_f_land", "%s: back to the legs' own clip (%s)" % [a, clip])
+
+
+## Every row of a Hunter's own kit moves plays its clip (a layer over the legs, or the whole body), and the hand lands
+## where the move's beat says: OWN_BEATS rows [kit move, clip s from, clip s to, bone, out m, up m]: the bone has gone
+## at least that far ahead of the body (or off its chest) and up between the two.
+func _own_rows(a: String, m: Node3D, nat: WardenNative) -> void:
+	var s := {"grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	var mv := nat.moves
+	var swing := String(nat.plays["attack"])
+	var layered := 0
+	for km in mv.rows:
+		var row: Dictionary = mv.rows[km]
+		if bool(row.get("upper", false)):
+			layered += 1
+		var t: float = mv.anims[String(row["clip"])].length * 0.5
+		_at(m, nat, s, km, t)
+		var plays: bool = nat.cur == "move:%s" % row["clip"]
+		if bool(row.get("upper", false)):
+			plays = mv.weight >= 1.0 and mv.shown == String(row["clip"])
+		ok(plays and nat.player.current_animation != swing, "%s: %s plays %s, not the swing" % [a, km, row["clip"]])
+	ok(layered > 0, "%s: %d of its moves are layers over the legs" % [a, layered])
+	for b: Array in OWN_BEATS.get(a, []):
+		_at(m, nat, s, b[0], b[1])
+		var from := _bone_in(m, nat, b[3])
+		var far_from := from.distance_to(_bone_in(m, nat, "Spine02"))
+		_at(m, nat, s, b[0], b[2])
+		var to := _bone_in(m, nat, b[3])
+		var off_chest := to.distance_to(_bone_in(m, nat, "Spine02")) - far_from
+		var out := maxf(from.z - to.z, off_chest)  # (ahead, or farther off the chest)
+		var up := to.y - from.y
+		ok(
+			out >= b[4] and up >= b[5],
+			"%s: %s %s goes %.2f m out, %.2f up (%s to %s s)" % [a, b[0], b[3], out, up, b[1], b[2]]
+		)
+	_at(m, nat, s, "", 0.0)
+	_at(m, nat, s, "", 0.0)
 
 
 ## The state with kit move `km` `kt` s in, run on 0.1 s twice: the right hand, the muzzle (model frame: forward is -Z),
@@ -333,6 +395,8 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var all_there: bool = named.all(func(sl): return nat.plays.has(sl))
 	ok(all_there, "%s: every clip slot the data names has its clip (%s)" % [a, named])
 	var pick := String(nat.d["clips"]["crouch"])  # (Meshy's clip no fallback plays)
+	var own := nat.own_casts  # (a hand caster's casts play no swing: the slots are tried as if they did)
+	nat.own_casts = false
 	for sl in SLOT_CASES:
 		var c: Array = SLOT_CASES[sl]
 		if not nat.plays.has(sl):
@@ -355,6 +419,7 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	await _feed(main, nat, m, {"swing_n": 0}, {"swing_n": 1, "combo": -1})
 	ok(nat.player.current_animation == pick, "%s: a charged swing takes lmb without lmb_hold" % a)
 	nat.plays.erase("lmb")
+	nat.own_casts = own
 	await _synthetic_clips(main, a, m, nat)
 
 
