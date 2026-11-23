@@ -11085,3 +11085,4 @@ READY ext/parity-recheck-tenzo-sparkle 529f18a37f (bulk-rebase: origin/main merg
 READY ext/ui-inventory-safe 9ee2e149148258e75ebf0c3de419d02fd3e0477f (inventory safe at 3 sizes, merged with main: kept main's _full_pack plus the three-size sweep; --inventory-check 0 failures, --check 0, --garden-fit-check 0; health --strict fails only on camp_clear_check long_line, same on origin/main)
 READY ext/feel-last-estimates d0cbf6e70576fed723f9031da8ddfcfc10ff36d6 (sourced overheat/spike/jump-pad numbers; merged main, SUPERVIVE_FEEL.md moved private so notes live in MOVEMENT_FEEL.md)
 READY ext/lint-ratchet-main-1122 b0396f13090 (main merged; style ratchet + health.py --strict green after wrapping camp_clear_check line; 6 changed check scripts gdformatted; mentor/camera-follow/tumble checks pass)
+READY ext/merge-lane-n23a-1123 e05b56d92fe26d425ff0b18da4ca3fa071663171 (merge lane n23a: 20 branches + origin/main a468e78d4e, clean merge)
