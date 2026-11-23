@@ -74,6 +74,7 @@ func _match(main: Node, seed_v: int, map: String, final_n: int) -> Dictionary:
 			minute += 60.0
 			row["alive"].append(_alive(m))
 		if _alive(m) == 0:
+			_final_look(m, row)      # (the last squads fell between two looks: that settles it too)
 			break
 	_look(m, row)
 	var out := {}
@@ -127,13 +128,13 @@ func _to_final(m: Match) -> void:
 ## leaves no attacker (Ent.hurt sets last_hit_by null) and hurts only outside the ring.
 func _downs(m: Match, row: Dictionary) -> void:
 	var t := m.sess_time()
-	var tr := Heart.tide_r(m)
+	var trap := Heart.tide_r(m)
 	for h in m.hunters:
 		var id := String(h.nid)
 		var d: float = h.flat_dist(m.heart.site)
 		if not (h.downed or h.out):
 			_gone.erase(id)
-			if tr <= 0.0 or d <= tr:
+			if trap <= 0.0 or d <= trap:
 				_in_t[id] = t
 			continue
 		if _gone.has(id) or h.extracted:
@@ -143,7 +144,7 @@ func _downs(m: Match, row: Dictionary) -> void:
 			continue
 		var by: Variant = h.last_hit_by
 		var mob := is_instance_valid(by) and by is Blight
-		if mob or (by == null and tr > 0.0 and d > tr):
+		if mob or (by == null and trap > 0.0 and d > trap):
 			row["bl_downs"] += 1
 			var in_fight := t - float(_in_t.get(id, -INF)) <= CATCH_S and float(row["settle"]) < 0.0
 			var note := ""
@@ -151,7 +152,7 @@ func _downs(m: Match, row: Dictionary) -> void:
 				row["bl_zone"] += 1
 				note = " (in the safe ring, final on)"
 			print("WAYS blight_down seed %d %s t%d by %s at %.0f m, ring %.0f m%s" % [row["seed"], _clock(t), h.team,
-				"mob" if mob else "tide", d, tr, note])
+				"mob" if mob else "tide", d, trap, note])
 
 ## The final: when it was settled (one squad left or the seat taken, never the islands' fall) and how long
 ## the squads still in stood apart.

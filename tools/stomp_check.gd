@@ -4,6 +4,8 @@ extends RefCounted
 ## (stuns, Ground, roots, wall stuns, the Nightwell pull, Snap, Rimelock, the Bola pair, Anchor, a reel) lands
 ## on a stomper a second in and must cancel it with the wisp alive; slows and Daze must not. A CC is checked
 ## by the channel it travels (hurt opts, KitStatus, a Displace tow, a knock), with the kit's real numbers.
+## Its sounds: one stomp_windup per stomp, one stomp_crack per hard-CC break (none for a soft one), one
+## stomp_finish on the kill.
 ## Prints STOMP ok/FAIL and a STOMPCHECK PASS/FAIL line.
 
 const DT := 1.0 / 60.0
@@ -14,6 +16,7 @@ var main: Node
 var s: Hunter        # the stomper
 var o: Hunter        # the wisp under its feet
 var f: Hunter        # a foe of the stomper, who lands the CC
+var cues := {}       # stomp_* sound -> times played (Sfx.cue_log) since the last _stage
 
 func ok(cond: bool, what: String) -> void:
 	print("STOMP %s %s" % ["ok  " if cond else "FAIL", what])
@@ -65,7 +68,7 @@ func _hard() -> Array:
 		["Hem Heartpiercer wall stun 1.2", stun.call(1.2)], ["Tarek punch wall stun 0.9", stun.call(0.9)],
 		["Tarek Volcano slam stun 1.2", stun.call(1.2)], ["Claire Rimelock stun 0.75", stun.call(0.75)],
 		["Ostra Snap stun 1.8", stun.call(1.8)], ["Albert Crush stun 1.0", stun.call(1.0)],
-		["Albert Shield Slam stun 0.6", stun.call(0.6)], ["Albert Crushing Blow stun 0.4", stun.call(0.4)],
+		["Albert Crushing Blow stun 0.4", stun.call(0.4)],
 		["Ryzz Storm Rod wall stun 0.8", stun.call(0.8)], ["Sable Bola pair stun 0.9", stun.call(0.9)],
 		["Grimble Anchor stun 1.1", stun.call(1.1)],
 		["Pip Burrseed root 1.1", func(): s.hurt(1.0, f, {"src": "abil", "root": 1.1})],
@@ -127,18 +130,22 @@ func _stage() -> void:
 		m.knock(o, f, {})
 	o.down_hp = float(Data.MATCH["down_hp"])
 	s.hp = s.max_hp
+	Sfx.cue_log = []
 	Life.start_stomp(m, s, o)
 	_step(1.0)         # a second in: the animation is under way, the first foot has come down
 
 func _baseline() -> void:
 	_stage()
 	ok(not s.stomp.is_empty() and int(s.stomp["hits"]) >= 1, "a stomp a second in is running with a foot down")
+	ok(_cues() == {"stomp_windup": 1}, "the stomp's start plays the wind-up once at the stomper (%s)" % [cues])
 
 ## Last, since it kills the wisp: with no CC the animation finishes.
 func _finish() -> void:
 	_stage()
 	_step(Life.R["stomp_time"])
 	ok(s.stomp.is_empty() and o.out, "with no CC the animation finishes and the wisp dies")
+	ok(_cues() == {"stomp_windup": 1, "stomp_finish": 1}, "the kill plays the finish thud once, no crack (%s)" % [cues])
+	Sfx.cue_log = null
 
 func _row(what: String, cc: Callable, cancels: bool) -> void:
 	_stage()
@@ -146,7 +153,18 @@ func _row(what: String, cc: Callable, cancels: bool) -> void:
 	_step(0.25)
 	var running := not s.stomp.is_empty()
 	var alive := o.downed and not o.out
+	var crack := int(_cues().get("stomp_crack", 0))
 	if cancels:
-		ok(not running and alive, "%s cancels the stomp and the wisp lives" % what)
+		ok(not running and alive and crack == 1, "%s cancels the stomp, the wisp lives, one crack" % what)
 	else:
-		ok(running and alive, "%s does not cancel the stomp" % what)
+		ok(running and alive and crack == 0, "%s does not cancel the stomp, no crack" % what)
+
+## The stomp_* cues played since _stage, with the count of each, read from Sfx.cue_log; the position of each
+## must be set (positional: heard by anyone in reach, both squads).
+func _cues() -> Dictionary:
+	cues = {}
+	for row in Sfx.cue_log:
+		var n := String(row[0])
+		if n.begins_with("stomp_"):
+			cues[n] = int(cues.get(n, 0)) + 1 if row[1] is Vector3 else -99
+	return cues

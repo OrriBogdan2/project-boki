@@ -287,16 +287,15 @@ func _squads() -> Dictionary:
 		out[h.team].append(h)
 	return out
 
-## Idle Skitters far from everyone burrow home (back into their nest's stock, BlightNests.home). In the end phase
-## every Blight creature inside the ring does (Heart.end_phase: the final circle is squad against squad).
+## Idle Skitters far from everyone burrow home (back into their nest's stock, BlightNests.home). In the end
+## phase every Blight inside the ring does, but its nests (Heart.end_phase: the final circle is squad against squad).
 func _despawn_tick() -> void:
 	var clear := Heart.end_phase(m)
 	for b in m.mobs:
-		if not (b is Blight) or b.dead:
+		if not (b is Blight) or b.dead or b.mkind == "bl_nest":
 			continue
 		var bb: Blight = b
-		if clear and bb.mkind != "bl_nest" and Heart.tide_out(m, bb.pos) <= 0.0:
-			nests.home(bb)
+		if clear and Heart.tide_out(m, bb.pos) <= 0.0:
 			bb.burrow()
 			continue
 		if bb.mkind != "bl_skitter" or bb.st != "idle" or bb.heard != Vector3.INF or bb.idle_t < 20.0:

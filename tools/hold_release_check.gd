@@ -104,7 +104,8 @@ static func _whirl(A, ev: String, which := "") -> Dictionary:
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
-	var up := [false]      # RMB / E ends the hold with the button let go: a button still down starts a fresh hold (--held-fire-resume-check)
+	# RMB / E ends the hold with the button let go: a button still down starts a fresh hold (--held-fire-resume-check)
+	var up := [false]
 	var held := func():
 		P.inp["fire"] = not up[0]
 		A.aim_at(P, T.pos)

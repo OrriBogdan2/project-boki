@@ -4,59 +4,82 @@ extends Node3D
 ## The simulation writes `pos`; the visual node is moved toward it every rendered frame.
 
 const GRAV := 30.0
+const FLASH_FADE := 0.07  # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
+const SHELL_FLASH := Color(0.62, 0.86, 1.0)  # the armour's flash on the body: the HUD's cyan strip
 
-var m: Node = null          # the Match
+var m: Node = null  # the Match
 var nid := ""
 var team := -1
 var kind := ""
 var pos := Vector3.ZERO
 var prev := Vector3.ZERO
 var vel := Vector3.ZERO
-var r := 0.4          # the hurtbox: shots and abilities hit inside it
-var body_r := -1.0    # the body's collision radius against walls and other bodies; -1 = same as r
+var r := 0.4  # the hurtbox: shots and abilities hit inside it
+var body_r := -1.0  # the body's collision radius against walls and other bodies; -1 = same as r
 var hp := 100.0
 var max_hp := 100.0
 var grounded := true
 var dead := false
-var face := 0.0             # yaw the model looks toward
+var face := 0.0  # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
-var shell_t := 0.0            # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
-var freeze_t := 0.0         # visual hit-pause
+var shell_t := 0.0  # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
+var freeze_t := 0.0  # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
 var burn_by: Ent = null
-var dot_tick_at := -1.0     # Match time of the last burn tick (the body pulses on it, DotLook)
+var dot_tick_at := -1.0  # Match time of the last burn tick (the body pulses on it, DotLook)
 var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
-var net_cc := 0               # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
-var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
-var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
+var net_cc := 0  # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
+var net_dead_t := -1.0  # (a remote Boki) when its caught event landed: older snapshots are stale
+var guard_t := 0.0  # taking less damage for a moment (Rock Guard)
+var blight_t := 0.0  # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0
-var slow_k := 0.0           # how much speed the current slow takes away (0 = the body's usual slow)
-var blight_k := 0.6         # how much healing the current blight cuts
-var vuln_t := 0.0           # a vulnerable mark: takes vuln_k more damage (never above KinRules.VULN_MAX)
+var slow_k := 0.0  # how much speed the current slow takes away (0 = the body's usual slow)
+var blight_k := 0.6  # how much healing the current blight cuts
+var vuln_t := 0.0  # a vulnerable mark: takes vuln_k more damage (never above KinRules.VULN_MAX)
 var vuln_k := 0.0
-var dr := {}                # diminishing returns on crowd control: kind -> [applications, last time]
-var dr_stun := false        # the running stun counts toward the immunity that follows it
-var cc_immune_t := 0.0      # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
-var marks := {}             # combo setups on this body: combo id -> {team, owner, until, window}
-var squash := 0.0           # landing / hit squash for the model
-var remote := false         # driven by another player's game
+var dr := {}  # diminishing returns on crowd control: kind -> [applications, last time]
+var dr_stun := false  # the running stun counts toward the immunity that follows it
+var cc_immune_t := 0.0  # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
+var marks := {}  # combo setups on this body: combo id -> {team, owner, until, window}
+var squash := 0.0  # landing / hit squash for the model
+var remote := false  # driven by another player's game
 var last_hit_by: Ent = null
-var combat_at := -99.0      # match time it last dealt or took fight damage (InCombat)
-var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
+var combat_at := -99.0  # match time it last dealt or took fight damage (InCombat)
+var hit_by := {}  # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
 var net_seen := 0.0
-var net_buf: NetSmooth = null   # remote Hunters: drawn a little behind, smoothly between snapshots
+var net_buf: NetSmooth = null  # remote Hunters: drawn a little behind, smoothly between snapshots
+
+var kb_time := -9.0
+
+var bump_top := 0.0  # top of what the last slide() ran into (KnockWall.tall: a wall, or just a step)
+
+## Called every rendered frame. alpha blends between the last two simulation steps.
+var lod_dt := 0.0  # frame time a far-away entity's visuals skipped (Match renders it less often)
+var wash := 0.0  # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
+var wash_col := Color.WHITE
+
+## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
+## springs back; during a hit's freeze the model holds where it was and shivers along that line.
+var flinch := Vector3.ZERO
+
+var _flash_set := -1.0
+var _flash_col := Color.WHITE
+var _flash_n := -1
+var _held := Vector3.INF
+
 
 func setup(match_node: Node, id: String) -> void:
 	m = match_node
 	nid = id
+
 
 func set_model(n: Node3D) -> void:
 	if model:
@@ -65,10 +88,12 @@ func set_model(n: Node3D) -> void:
 	add_child(n)
 	mats = n.get_meta("mats", [])
 
+
 func teleport(p: Vector3) -> void:
 	pos = p
 	prev = p
 	position = p
+
 
 func ground() -> float:
 	var g: float = m.world.ground_at(pos.x, pos.z)
@@ -80,14 +105,17 @@ func ground() -> float:
 			g = d
 	return StoneStand.top_under(m.world.dyn_walls, pos, hull_r(), g)
 
+
 ## The radius this body takes up against walls, rocks and other bodies (its hurtbox is `r`).
 func hull_r() -> float:
 	return r if body_r < 0.0 else body_r
+
 
 ## The height shots and blasts aim at to hit this body. (A hunter who has dropped below an
 ## island's lip is hit through the balloon floating at ground level above them.)
 func hit_y() -> float:
 	return pos.y
+
 
 func over_void() -> bool:
 	if not m.world.is_void(pos.x, pos.z):
@@ -98,19 +126,24 @@ func over_void() -> bool:
 	# a standable rock under the feet is ground (Tarek's Basalt Spine over the abyss)
 	return StoneStand.top_under(m.world.dyn_walls, pos, hull_r(), World.VOID) <= World.VOID + 1.0
 
+
 func flat_dist(o) -> float:
 	var p: Vector3 = o.pos if o is Ent else o
 	return Vector2(p.x - pos.x, p.z - pos.z).length()
+
 
 func dir_to(o) -> Vector2:
 	var p: Vector3 = o.pos if o is Ent else o
 	return Vector2(p.x - pos.x, p.z - pos.z).normalized()
 
+
 func alive() -> bool:
 	return not dead
 
+
 func hittable() -> bool:
 	return not dead
+
 
 ## Generic damage. opts: kb (Vector2 impulse), lift, crit, src ("shot","kin","mob","boom","fall"), burn, slow, root
 func hurt(dmg: float, by: Ent, opts := {}) -> float:
@@ -123,15 +156,15 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 			mt.player_engaged = true
 		if mt.demo_shielded(self):
 			return 0.0
-		dmg *= TerrainHazards.hit_mult(mt, by)     # wading in deep water, your hits are weaker
+		dmg *= TerrainHazards.hit_mult(mt, by)  # wading in deep water, your hits are weaker
 	InCombat.on_hit(self, by, opts)
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
 			if opts.get("src", "") == "wisp":
-				return 0.0     # a Wisp drain is no hit: no flash, no damage credit (the owner's game drains down_hp)
+				return 0.0  # a Wisp drain is no hit: no flash, no damage credit (the owner's game drains down_hp)
 			StatusLooks.of(m).from_hit(self, opts)
-			flash_t = 0.12
+			flash_t = ImpactWeight.flash_s("")
 			m.on_damage(self, by, dmg, opts)
 			return dmg
 		return 0.0
@@ -150,7 +183,8 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	var mk = get("ak")
 	if mk:
 		var io: Array = mk.incoming(by, dmg, opts)
-		dmg = float(io[0]); opts = io[1]
+		dmg = float(io[0])
+		opts = io[1]
 		if dmg <= 0.0:
 			return 0.0
 	var d := _mitigate(dmg, by, opts)
@@ -159,8 +193,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	hp -= d
 	last_hit_by = by
 	_took(d, by)
-	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	if not opts.get("tick", false):       # a zone's periodic tick: no hit squash, only the flash (Feel skips its hold too)
+	flash_t = maxf(flash_t, ImpactWeight.flash_s(""))  # (a combo payoff may have set it longer)
+	# a zone's periodic tick: no hit squash, only the flash (Feel skips its hold too)
+	if not opts.get("tick", false):
 		squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
@@ -173,7 +208,8 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		cc_k = 0.5
 		opts = opts.duplicate()
 		for st0 in ["slow", "root", "stun"]:
-			if opts.has(st0): opts[st0] = float(opts[st0]) * cc_k
+			if opts.has(st0):
+				opts[st0] = float(opts[st0]) * cc_k
 	# crowd control from abilities ("dr" in opts) has diminishing returns per target (KinRules)
 	var use_dr := bool(opts.get("dr", false))
 	if use_dr:
@@ -183,7 +219,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
 	var cc_cue := CcSfx.fresh_on_hit(self, opts)
 	if opts.get("burn", 0.0) > 0.0:
-		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
+		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0)))
+		burn_dps = maxf(burn_dps, float(opts["burn"]))
+		burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
 		var sk := float(opts.get("slow_k", 0.0))
 		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk
@@ -192,9 +230,11 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		root_t = maxf(root_t, float(opts["root"]))
 	if opts.get("blight", 0.0) > 0.0:
 		blight_t = maxf(blight_t, float(opts["blight"]))
+		StatusSfx.cue(self, "antiheal", by, blight_t)
 	if opts.get("stun", 0.0) > 0.0:
 		stun_t = maxf(stun_t, float(opts["stun"]))
-		if use_dr: dr_stun = true
+		if use_dr:
+			dr_stun = true
 	CcSfx.play(self, cc_cue)
 	for st in ["stun", "root", "slow", "burn"]:
 		if float(opts.get(st, 0.0)) > 0.0:
@@ -205,16 +245,20 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		var kn = by.kin if by is Hunter and by.kin else (by if by is Kin else null)
 		if kn:
 			kn.st_hits += 1
-			if hp <= 0.0: kn.st_kos += 1
+			if hp <= 0.0:
+				kn.st_kos += 1
 	if hp <= 0.0:
 		_on_zero(by, opts)
 	return d
 
+
 func _took(_d: float, _by: Ent) -> void:
 	pass
 
+
 func _mitigate(dmg: float, _by: Ent, _opts: Dictionary) -> float:
 	return dmg
+
 
 ## Diminishing returns (KinRules.DR_STEPS): how long a stun, root or slow of `dur` really lasts on
 ## this body, counting it. A stun or root right after a stun doesn't land at all (cc_immune_t).
@@ -231,12 +275,13 @@ func cc_dr(kind: String, dur: float) -> float:
 	var steps: Array = KinRules.DR_STEPS[kind]
 	var n := int(st[0])
 	if kind == "slow" and slow_t > 0.0 and n > 0:
-		n -= 1                 # a refresh of the same slow
+		n -= 1  # a refresh of the same slow
 	else:
 		st[0] = n + 1
 	st[1] = now
 	dr[kind] = st
 	return dur * float(steps[mini(n, steps.size() - 1)])
+
 
 ## Speed multiplier from a slow: its own strength if it has one, else this body's usual slow.
 func slow_mult(usual: float) -> float:
@@ -244,27 +289,31 @@ func slow_mult(usual: float) -> float:
 		return 1.0
 	return 1.0 - slow_k if slow_k > 0.0 else usual
 
+
 func _on_zero(_by: Ent, _opts: Dictionary) -> void:
 	die()
+
 
 func die() -> void:
 	dead = true
 
+
 func mass() -> float:
 	return 1.0
 
-var kb_time := -9.0
 
 func impulse(kb: Vector2, lift := -1.0) -> void:
 	var ms := mass()
-	if kb.length() / ms > 4.0 and m: kb_time = m.time
+	if kb.length() / ms > 4.0 and m:
+		kb_time = m.time
 	vel.x += kb.x / ms
 	vel.z += kb.y / ms
 	var s := kb.length() / ms
-	if lift > 0.0 or s > 6.0:      # (a lift of 0 is no lift, the same as none)
+	if lift > 0.0 or s > 6.0:  # (a lift of 0 is no lift, the same as none)
 		var up := lift / ms if lift > 0.0 else s * 0.45
 		vel.y = maxf(vel.y, minf(9.0, up))
 		grounded = false
+
 
 ## Gravity and landing for bodies that don't need hunter physics.
 func body_vertical(dt: float) -> void:
@@ -286,10 +335,10 @@ func body_vertical(dt: float) -> void:
 	if pos.y < -40.0 or (not grounded and g <= World.VOID + 1.0 and pos.y < m.world.abyss_floor(pos.x, pos.z)):
 		fall_out()
 
+
 func fall_out() -> void:
 	m.on_fell(self)
 
-var bump_top := 0.0          # top of what the last slide() ran into (KnockWall.tall: a wall, or just a step)
 
 ## Horizontal move with walls and rocks; returns true if it bumped something.
 func slide(dt: float, guard := false) -> bool:
@@ -303,7 +352,8 @@ func slide(dt: float, guard := false) -> bool:
 		var hv := Vector2(vel.x, vel.z)
 		if hv.dot(bn) < 0.0:
 			hv -= bn * hv.dot(bn)
-			vel.x = hv.x; vel.z = hv.y
+			vel.x = hv.x
+			vel.z = hv.y
 		tgt = po
 		bumped = true
 		bump_top = pos.y + World.BLOCK_H
@@ -312,35 +362,47 @@ func slide(dt: float, guard := false) -> bool:
 	if b1 == 0.0:
 		pos.x = nx
 	else:
-		vel.x *= -0.1; bumped = true
+		vel.x *= -0.1
+		bumped = true
 		bump_top = maxf(bump_top, b1)
 	var nz := tgt.y
 	var b2: float = m.world.occupy(pos.x, nz, hull_r(), pos.y, guard)
 	if b2 == 0.0:
 		pos.z = nz
 	else:
-		vel.z *= -0.1; bumped = true
+		vel.z *= -0.1
+		bumped = true
 		bump_top = maxf(bump_top, b2)
 	return bumped
 
+
 func tick_status(dt: float) -> void:
-	if flash_t > 0.0: flash_t -= dt
-	if shell_t > 0.0: shell_t -= dt
-	if freeze_t > 0.0: freeze_t -= dt
+	if flash_t > 0.0:
+		flash_t -= dt
+	if shell_t > 0.0:
+		shell_t -= dt
+	if freeze_t > 0.0:
+		freeze_t -= dt
 	if slow_t > 0.0:
 		slow_t -= dt
-		if slow_t <= 0.0: slow_k = 0.0
-	if root_t > 0.0: root_t -= dt
-	if cc_immune_t > 0.0: cc_immune_t -= dt
-	if vuln_t > 0.0: vuln_t -= dt
+		if slow_t <= 0.0:
+			slow_k = 0.0
+	if root_t > 0.0:
+		root_t -= dt
+	if cc_immune_t > 0.0:
+		cc_immune_t -= dt
+	if vuln_t > 0.0:
+		vuln_t -= dt
 	if stun_t > 0.0:
 		stun_t -= dt
 		if stun_t <= 0.0 and dr_stun:
 			# coming out of an ability's stun: a moment where nothing can stun or root you again
 			dr_stun = false
 			cc_immune_t = KinRules.STUN_IMMUNE
-	if guard_t > 0.0: guard_t -= dt
-	if blight_t > 0.0: blight_t -= dt
+	if guard_t > 0.0:
+		guard_t -= dt
+	if blight_t > 0.0:
+		blight_t -= dt
 	if burn_t > 0.0 and not dead:
 		burn_t -= dt
 		var ticked := int(burn_t * 4.0) != int((burn_t + dt) * 4.0)
@@ -353,6 +415,7 @@ func tick_status(dt: float) -> void:
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
 
+
 ## The burn's tick number: Fx.damage_number's tick kind, only for burns that involve you; it rolls
 ## with the burner's other ticks on this body.
 func _burn_number() -> void:
@@ -360,6 +423,7 @@ func _burn_number() -> void:
 	if mt:
 		var by: Ent = burn_by if is_instance_valid(burn_by) else null
 		mt.fx.damage_number(self, by, burn_dps * 0.25, {"src": "burn"}, mt.player)
+
 
 ## Proxies glide toward the last position their owner reported.
 func net_follow(dt: float) -> void:
@@ -377,15 +441,7 @@ func net_follow(dt: float) -> void:
 		pos = pos.lerp(tgt, 1.0 - exp(-14.0 * dt))
 	vel = net_vel
 
-## Called every rendered frame. alpha blends between the last two simulation steps.
-var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
-var _flash_set := -1.0
-var _flash_col := Color.WHITE
-const FLASH_FADE := 0.07    # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
-const SHELL_FLASH := Color(0.62, 0.86, 1.0)     # the armour's flash on the body: the HUD's cyan strip
-var _flash_n := -1
-var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
-var wash_col := Color.WHITE
+
 ## Tints the body: the hit flash (white; the shell's cyan while shell_t runs), else the wash (Spirit Walk),
 ## else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
@@ -406,16 +462,15 @@ func show_flash(hit: float) -> void:
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
 			mt.set_shader_parameter("flash_color", fc)
-## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
-## springs back; during a hit's freeze the model holds where it was and shivers along that line.
-var flinch := Vector3.ZERO
-var _held := Vector3.INF
+
+
 func render(delta: float, alpha: float) -> void:
 	if freeze_t <= 0.0 or _held == Vector3.INF:
 		_held = prev.lerp(pos, alpha)
 	if flinch.length_squared() > 0.0001:
 		var fo := flinch
-		if freeze_t > 0.0: fo *= 1.0 if (Engine.get_frames_drawn() & 1) == 0 else -0.6
+		if freeze_t > 0.0:
+			fo *= 1.0 if (Engine.get_frames_drawn() & 1) == 0 else -0.6
 		position = _held + fo
 		flinch *= exp(-delta * 16.0)
 	else:

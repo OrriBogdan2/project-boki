@@ -39,6 +39,8 @@ static func _column(title: String, sub: String, col: Color, rows: Array) -> VBox
 	c.custom_minimum_size.x = 330
 	c.add_child(UI.section(title if sub == "" else "%s: %s" % [title, sub]))
 	for r in rows:
+		if "ultimate" in r[1] and not MergeForm.enabled():
+			continue       # (the Fusion row: X is reserved while Fusion is off)
 		c.add_child(_row(r[0], r[1], r[2], col))
 	return c
 

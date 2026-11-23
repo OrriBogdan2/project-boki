@@ -28,6 +28,7 @@ var id := ""
 var stage_size := Vector2(220, 300)
 var clip_size := Vector2(200, 112)
 var clip_cols := 2
+var with_lines := true        # false: ability key and name only (the first Relic's page)
 var slots: Array = []
 var slot_i := 0
 var power_k := 0.0            # 0..1 while the unlock is held (HoldUnlock)
@@ -51,22 +52,16 @@ var _body: Control            # everything but the stage, rebuilt when the Hunte
 var _cols: HBoxContainer
 
 ## The abilities shown, in order. "x" (the Hunter's own ultimate on R) shows once a Hunter's data has an
-## "x" entry; "r", the Boki Fusion, is always last.
+## "x" entry; "r", the Boki Fusion, is last while it is on.
 static func slots_for(hunter_id: String) -> Array:
 	var out: Array = KitCard.slots_of(hunter_id).filter(func(s): return s != "r" and s != "x")
 	if Arch.def(hunter_id).has("x"): out.append("x")
-	out.append("r")
+	if MergeForm.enabled(): out.append("r")
 	return out
 
-## A slot's name, icon, colour and plain line (KitCard's, plus the X ultimate from its own data).
+## A slot's name, icon, colour and plain line (KitCard's, which has the X ultimate too).
 static func slot_info(hunter_id: String, slot: String) -> Dictionary:
-	if slot != "x":
-		return KitCard.slot_text(hunter_id, slot)
-	var d := Arch.def(hunter_id)
-	var xd: Dictionary = d.get("x", {})
-	return {"name": String(xd.get("name", "")), "icon": String(xd.get("icon", "burst")),
-			"col": Color(String(xd.get("col", "#ffffff"))), "tag": "", "line": String(d.get("card", {}).get("x",
-			xd.get("desc", "")))}
+	return KitCard.slot_text(hunter_id, slot)
 
 ## The key a slot is on, from the player's own bindings ("auto" for the passive).
 static func key_for(slot: String) -> String:
@@ -86,8 +81,9 @@ static func rules() -> Dictionary:
 	return _rules
 
 static func make(hunter_id: String, stage_px := Vector2(220, 300), clip_px := Vector2(200, 112),
-		cols := 2) -> HunterViewer:
+		cols := 2, lines := true) -> HunterViewer:
 	var v := HunterViewer.new()
+	v.with_lines = lines
 	v.id = hunter_id
 	v.stage_size = stage_px
 	v.clip_size = clip_px
@@ -182,7 +178,7 @@ func _rebuild_body() -> void:
 	lines.custom_minimum_size.x = clip_size.x
 	for s in slots:
 		var slot := String(s)
-		var row: Control = AbilityClip.make(id, slot, clip_size) if slot in CLIP_SLOTS else _line(slot, col)
+		var row: Control = AbilityClip.make(id, slot, clip_size, with_lines) if slot in CLIP_SLOTS else _line(slot, col)
 		row.set_meta("slot", slot)
 		row.mouse_entered.connect(select.bind(rows.size()))
 		AbilityCard.hover(row, id, slot)
@@ -218,9 +214,10 @@ func _line(slot: String, col: Color) -> Control:
 	nl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	r.add_child(nl)
 	v.add_child(r)
-	var ln := UI.para(AbilityClip.line_for(id, slot), 12, UI.MUTED)
-	ln.custom_minimum_size.x = clip_size.x
-	v.add_child(ln)
+	if with_lines:
+		var ln := UI.para(AbilityClip.line_for(id, slot), 12, UI.MUTED)
+		ln.custom_minimum_size.x = clip_size.x
+		v.add_child(ln)
 	return v
 
 # ------------------------------------------------------------------ the stage

@@ -13,13 +13,12 @@ var atk_dir := Vector2.ZERO
 var atk_at := Vector3.ZERO
 var tele: Node3D = null
 var cd := 0.0
-var cried := false  # its quarter-health cry has played here (StealSfx)
-var reel_heard := false  # it was reeling last frame here, so the reel thud plays once a stagger (StealSfx)
 var wander := Vector3.INF
 var lunge_hit := {}
 var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
+var held := false  # a tutorial dummy: it stands at its camp and notices nobody until something hurts it
 var team_hit := {}  # team -> match time of its latest hit that left this alive (XpHints: who was fighting it)
 var noticed_at := -INF  # match time of this monster's last notice cue (MobNotice)
 var death_t := 0.0
@@ -31,6 +30,9 @@ const STAGGER_DMG := 2.5
 var stag_open := 0.0
 var stag_next := 0.0
 var stagger_t := 0.0
+var stagger_mult := STAGGER_DMG  # damage taken while staggered (1 in a kill-window reel)
+var win_cried := false  # the kill window's cry sounded here (StealReel)
+var win_reeled := false  # the kill window's reel already happened (StealReel)
 var stag_ring: MeshInstance3D = null
 var stag_stars: Node3D = null  # a treasure kin slips away if nobody hurts it for a while
 
@@ -105,13 +107,15 @@ func _cancel_tele() -> void:
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if not remote and not dead and d > 0.0:
 		if stagger_t > 0.0:
-			d *= STAGGER_DMG
+			d *= stagger_mult
 		elif stag_open > 0.0 and opts.has("ab"):
 			d += max_hp * float(md.get("stag_k", 0.08 if mkind == "warden" else 0.2))
 			_stagger(by, opts)
 	var dealt := super.hurt(d, by, opts)
 	if dealt > 0.0:
 		calm_t = 0.0
+		held = false
+		StealReel.on_hurt(self)
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
 		m.lairs.on_ward_hit(self, by)
 	if dealt > 0.0 and by and not dead:
@@ -134,7 +138,18 @@ func _took(d: float, by: Ent) -> void:
 		damage_by[dealer.team] = float(damage_by.get(dealer.team, 0.0)) + d
 
 
+## A kill-window reel (StealReel): the stagger's stillness without its bonus damage or refund.
+func reel() -> void:
+	stagger_mult = 1.0
+	stagger_t = StealReel.reel_time()
+	stun_t = maxf(stun_t, stagger_t)
+	_cancel_tele()
+	st = "recover"
+	st_t = stagger_t
+
+
 func _stagger(by: Ent, opts: Dictionary) -> void:
+	stagger_mult = STAGGER_DMG
 	stagger_t = 2.2 if mkind == "warden" or md.get("boss", false) else 3.0
 	stun_t = maxf(stun_t, stagger_t)
 	stag_open = 0.0
@@ -208,7 +223,7 @@ func sim(dt: float) -> void:
 	if dead:
 		return
 	tick_status(dt)
-	StealSfx.tick(self)
+	StealReel.tick(self)
 	if remote:
 		st_t -= dt
 		net_follow(dt)
@@ -239,14 +254,14 @@ func sim(dt: float) -> void:
 	var wish := Vector2.ZERO
 	match st:
 		"idle":
-			if randf() < dt * 2.0:
+			if randf() < dt * 2.0 and not held:
 				tgt = _find_target()
 				if tgt:
 					st = "chase"
 					MobNotice.woke(self)
 			if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
 				var a := randf() * TAU
-				var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
+				var q := camp + Vector3(cos(a), 0, sin(a)) * (0.0 if held else randf_range(0.5, 3.0))
 				if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
 					wander = q
 			if wander != Vector3.INF:
@@ -523,7 +538,8 @@ func render(delta: float, alpha: float) -> void:
 	model.rotation.y = face
 	var spd := Vector2(vel.x, vel.z).length()
 	var moving := spd > 0.3
-	anim += delta * (2.0 + minf(spd, 6.0) * 1.8 if moving else 2.0)
+	if moving:
+		anim += spd * delta * TAU / float(MobAnim.STRIDE_M.get(MobAnim.base_kind(mkind), 2.0))
 	var body: Node3D = model.get_node("Body")
 	var wind := MobAnim.windup_k(st_t, float(md["windup"])) if st == "windup" else 0.0
 	# shared body language: lean back and gather while winding up, shiver as it is about to go,

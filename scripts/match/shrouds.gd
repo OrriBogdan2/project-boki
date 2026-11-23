@@ -6,7 +6,7 @@ extends RefCounted
 ##
 ## The creator wires rows from this file alone. Each look key below is optional; a missing or bad value falls back
 ## to the style's default (Shrouds.settings), so old saves keep working:
-##   look["shroud"]     index into STYLES (0 Hooded Cloak, 1 Wrap and 2 Tatters are the old Cloak, Wrap and Tatters)
+##   look["shroud"]     NONE, or index into STYLES (0 Hooded Cloak, 1 Wrap and 2 Tatters are the old ones)
 ##   look["hood"]       0 down, 1 up; only where has_hood(style)
 ##   look["trim"]       index into TRIMS
 ##   look["accent"]     -1 for a shade of the shroud colour, else index into Unmasked.COLOURS
@@ -42,17 +42,20 @@ const ROWS := [
 	["accessory", "Accessory", ACCESSORIES],
 ]
 const NO_ACCENT := -1
+const NONE := -1               # look["shroud"] for no cloak: the bare void body shows (an accessory may still be worn)
 
 static func has_hood(style: int) -> bool:
 	return int(_style(style)["hood"]) >= 0
 
 static func _style(style: int) -> Dictionary:
+	if style == NONE:
+		return {"hood": -1, "fit": STYLES[0]["fit"]}      # (an accessory on a bare body sits where a cloak's would)
 	return STYLES[clampi(style, 0, STYLES.size() - 1)]
 
 ## The shroud part of a look with every value in range and each missing one at its default.
 static func settings(lk: Dictionary) -> Dictionary:
-	var style := clampi(_i(lk.get("shroud"), 0), 0, STYLES.size() - 1)
-	var dflt := int(STYLES[style]["hood"])
+	var style := clampi(_i(lk.get("shroud"), 0), NONE, STYLES.size() - 1)
+	var dflt := int(_style(style)["hood"])
 	var hood := -1 if dflt < 0 else clampi(_i(lk.get("hood"), dflt), 0, 1)
 	var accent := clampi(_i(lk.get("accent"), NO_ACCENT), NO_ACCENT, Unmasked.COLOURS.size() - 1)
 	return {"style": style, "hood": hood, "trim": clampi(_i(lk.get("trim"), 0), 0, TRIMS.size() - 1), "accent": accent,
@@ -65,11 +68,15 @@ static func _i(v: Variant, fallback: int) -> int:
 ## tone under a ShroudSkin, the pieces that ride a single joint (wraps, hood, accessories) are parts of that joint.
 static func dress(c: Dictionary, lk: Dictionary) -> void:
 	var set_ := settings(lk)
+	var style := int(set_["style"])
+	if style == NONE and int(set_["accessory"]) == 0:
+		return
 	var t := ShroudTailor.new(c, set_)
 	t.bulk = float(Unmasked.race(lk)["bulk"])
-	ShroudCuts.cut(t, int(set_["style"]), int(set_["hood"]) == 1)
-	ShroudExtras.trim(t, int(set_["trim"]))
-	var fit: Dictionary = STYLES[set_["style"]]["fit"].duplicate()
+	if style != NONE:
+		ShroudCuts.cut(t, style, int(set_["hood"]) == 1)
+		ShroudExtras.trim(t, int(set_["trim"]))
+	var fit: Dictionary = _style(style)["fit"].duplicate()
 	fit["chest"] *= lerpf(1.0, t.girth(0.38), 0.5)      # (in front: the cloth's depth takes half the figure)
 	fit["waist"] *= t.girth(float(fit["belt"]))           # (the cloth under it is cut to ShroudTailor.FIGURE)
 	ShroudExtras.accessory(t, int(set_["accessory"]), fit)

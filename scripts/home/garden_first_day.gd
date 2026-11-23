@@ -18,11 +18,14 @@ static func did(id: String) -> bool:
 	return typeof(st) == TYPE_DICTIONARY and bool(st["did"].get(id, false))
 
 ## The rows for the tracker, in list order with the ticked ones last: {text, done, two}. "two" lines need a
-## second Boki, so they wait in the list until the roster has two.
+## second Boki, so they wait in the list until the roster has two. A "needs_grown" row (pairing) is left out
+## until a Boki in the roster is Grown (NookRules.GROWN_LV): a new player cannot do it on day one.
 static func rows() -> Array:
 	if not active():
 		return []
-	var all: Array = (rules()["rows"] as Array).map(
+	var grown: bool = (Save.d["roster"] as Array).any(func(k): return int(k["level"]) >= NookRules.GROWN_LV)
+	var all: Array = (rules()["rows"] as Array).filter(
+			func(r): return grown or did(String(r["id"])) or not bool(r.get("needs_grown", false))).map(
 			func(r): return {"text": String(r["text"]), "done": did(String(r["id"])), "two": bool(r.get("two", false))})
 	return all.filter(func(r): return not r["done"]) + all.filter(func(r): return r["done"])
 

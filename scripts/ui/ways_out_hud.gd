@@ -111,6 +111,7 @@ static func draw(hud) -> void:
 		HeartRaidHud.draw(hud)      # a raid has one way out, the Heart ring: its own strip
 		return
 	var c: Control = hud.c
+	var newcomer := HudReveal.newcomer(m)
 	var back := HudScale.begin(hud, "ways_strip", c.size)      # (drawn in the minimap's bar, hangs from the top centre)
 	var sd := seats(m)
 	if not HudReveal.on(m, "seat_pips"):
@@ -119,12 +120,17 @@ static func draw(hud) -> void:
 		HudReveal.see("seat_pips")      # the first open seat: the strip stays from now on
 	var w := CELL.x * 4.0
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, top_y(c.size)), Vector2(w, CELL.y))
-	SafeArea.note_as("ways_strip", r)
-	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
-	for i in 4:
-		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
+	if newcomer:
+		ExtractGoal.draw(hud, r.position.y, true)      # a new player gets the one line, not the four seats
+	else:
+		SafeArea.note_as("ways_strip", r)
+		c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
+		for i in 4:
+			_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
 	QuestTracker.draw(hud, r)
+	if not newcomer:
+		ExtractGoal.draw(hud, r.end.y + QuestTracker.GAP, false)      # where to go and how, until you are on a quest
 	HudScale.begin(hud, back, c.size)
 
 static func _any_open(sd: Array) -> bool:

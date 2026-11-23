@@ -137,7 +137,7 @@ workers, base medium 2, easy 3, expert 3; branch medium 4, easy 3, expert 4.
   at a spot it cannot reach (the `assist` facing twitch from the first pass).
 - **Roam wobble**: one sanity run flagged a follower with goal `roam` turning on the spot for 25 s. It was walking
   onto a squad lead that was busy, or to the lead's leftover wander spot. A follower now follows the lead's live
-  roam goal, and within 6 m of a busy lead it waits on one spot (`roam` joins the goals a bot stops on).
+  roam goal, and within 6 m of a busy lead it waits beside it, 1.5-3.5 s on each spot 2.5-4.5 m out, then another (`roam` joins the goals a bot stops on; 11-18: holding the spot it walked up to froze it 14 s at a time beside a player who stopped).
 
 | Measure (mean per expedition) | Medium base | branch | Easy base | branch | Expert base | branch |
 |---|---|---|---|---|---|---|

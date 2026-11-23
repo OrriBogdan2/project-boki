@@ -16,7 +16,7 @@ const BAR_H := 4.0  # px: your squad's bar
 const RIVAL_H := 2.0  # px: the leading rival's bar, 2 px under yours
 const FS := 12  # font px of the words and the numbers
 const LABEL_FS := 11  # font px of the seat's name
-const WORDS := {"lair": ["SEALED LAIR", "Defeat the boss"], "uplink": ["UPLINK", "Hold the yard to charge it"]}
+const WORDS := {"lair": ["SEALED LAIR", "Defeat the boss"], "uplink": ["UPLINK", "Hold the outpost to charge it"]}
 
 
 ## The quest seat this squad is on now, or null (also outside Ways Out).
