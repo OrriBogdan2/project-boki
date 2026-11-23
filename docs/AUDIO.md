@@ -584,6 +584,23 @@ Backlog (not done; near = within 24 m, per 150 s run): `pickup <hunter> [you]` 1
 | `amb_water` | on the shore islands (`AmbBeds.WATER_ISLANDS`: Saltmere), over that island's own bed |
 | `amb_gust`, `amb_rain` | the raid condition (`AmbBeds.GUST` / `RAIN`): ash storm is all gust, dusk and fog bring rain |
 | `amb_blight` | a low rumble that follows `BlightDir.level` where you stand (up toward the core, up with the session's age) and climbs in the last 90 s before the islands fall |
+### Region ambience (Hollow Crown)
+Each region of `content/maps/hollowcrown.json` (made by `tools/make_hollowcrown.py`) has its own place bed, from the library (no new audio), in `content/rules/region_ambience.json` and read by `AmbBeds` (`scripts/match/amb_beds.gd`). The same nine-sample vote as above picks it, so a border is a crossfade by position, and every place bed takes `fade_s` = 3.5 s to come or go (`Sfx.amb_layer(name, level, fade_s)`; the garden's beds keep the 2.5 s default). A map with no regions (Skyreach, the arenas, the tutorial) keeps the by-style `amb_meadow` / `amb_cliffs` vote.
+
+| region | bed | why |
+|---|---|---|
+| The Crown (`crown`) | `amb_zone_hub` | a low hum under the walled citadel |
+| Frostgate (`frostgate`) | `amb_zone_glasswater` | still ice ticking, the frozen shelf |
+| Cinder Steps (`cinder`) | `amb_zone_cinderstep` | warm cracks and embers, forge country |
+| Stormbreak (`storm`) | `amb_cliffs` | wind on bare shards over the Hollow |
+| Thornwood (`thorn`) | `amb_zone_hushwood` | moss-soft hush, echoing knocks in the trees |
+| Larkhollow (`lark`) | `amb_meadow` | the open plain |
+| Highwatch (`highwatch`) | `amb_zone_ridge` | high wind and humming stones |
+| Duskmoor (`duskmoor`) | `amb_ruins` | the ruin maze |
+| Saltmere (`saltmere`) | `amb_pond` | still lagoon water (`amb_water` still sits on top) |
+
+Inside the Blight (past the tide ring, `Heart.tide_out` 0 at the ring to 1 forty metres in) the place beds fall to `blight_k` = 0.4 of their level, so `amb_blight`'s rumble carries the place; `amb_gust` and `amb_rain` are weather and are not lowered. `--match-audio-check` asserts every layout region has a bed with a file and no stale entry, that standing in each island its region's bed is loudest, the 3-4 s fade (the old bed at half a fade and gone after it, the new one up), and the Blight level; `--sfx-set-check` section 15 asserts the files exist.
+
 ## Breakables and chests (`content/sfx/breakables.json`, `tools/gen_sfx_breakables.py`)
 Wired in `scripts/match/breakables.gd` and `chest_loot.gd`. The names live in the rules, and `--sfx-set-check` (item 11) asserts every material, powder keg and chest tier resolves to its own sound; `--breakables-check` (item 6) and `--keys-check` hear them play.
 - **Breaks**: one sound per material in 3 takes (`Sfx` plays a different take each time), `content/rules/breakables.json` `debris.<material>.sound`: `break_wood` (crate, barrel), `break_clay` (pot), `break_metal` (a keg's hoops and staves, under its blast).
