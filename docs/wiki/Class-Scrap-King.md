@@ -61,7 +61,7 @@ What the in-game kit card (K) says.
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
 | Passive: Salvage | Knocks and assists add health, up to 10 stacks. |
 | Dash: Barge | A short low lunge where you move; a pounce in the air. |
-| RMB: Deep Reach | An abyssal arm grabs the first body and reels it in, stunned. Follow with Anchor Drop: a sure stun. |
+| RMB: Deep Reach | Abyssal arm reels a foe in, stunned: Anchor Drop stuns for sure. |
 | E: Anchor Drop | Slam your fist into the ground ahead: damage and a long stun. |
 | Hunter ultimate: Brass Broadside | Charge a fan while walking slowly, then two waves of brass slugs. |
 | Weapon: Shotgun | Seven slugs, 6m out: all seven fly in a tight group along your aim; rear hits hurt more. |
