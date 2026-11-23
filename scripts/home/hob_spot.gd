@@ -80,7 +80,7 @@ static func free_tiles(h) -> PackedByteArray:
 ## The tile and its eight neighbours are bare open ground (nothing to clip into), not kept clear for a fixture.
 static func _open_round(hb: HomeBuild, w: World, i: int) -> bool:
 	var x := i % w.w
-	var z := i / w.w
+	var z := int(i / float(w.w))
 	if hb.reserved.has(i) or not hb._isle_ok(i):
 		return false
 	for dz in range(-1, 2):
@@ -100,7 +100,7 @@ static func _nearest(w: World, free: PackedByteArray, from: Vector3) -> Vector3:
 	for i in free.size():
 		if free[i] != 1:
 			continue
-		var t := Vector3(i % w.w + 0.5, 0, i / w.w + 0.5)
+		var t := Vector3(i % w.w + 0.5, 0, int(i / float(w.w)) + 0.5)
 		var d := Vector2(t.x - from.x, t.z - from.z).length_squared()
 		if d < best_d:
 			best = t
