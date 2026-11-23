@@ -14,8 +14,6 @@ extends RefCounted
 
 const PX := 512
 ## Species with data but no art/kin body yet (docs/art/kin/MESHY_BOKI_RECIPE.md): they must be the only FALLBACKs.
-## A Hunter is taller than a Boki: the shot camera backs off by this much.
-const HUNTER_SCALE := 1.7
 const KNOWN_NO_MODEL := ["basaltoad", "cindowary"]
 
 var main: Node
@@ -100,7 +98,7 @@ func _hunters() -> void:
 		if not dressed:
 			bad += 1
 		if out != "" and DisplayServer.get_name() != "headless":
-			await _shot(h, out.path_join("hunter_%s_game.png" % arch), HUNTER_SCALE)
+			await _shot(h, out.path_join("hunter_%s_game.png" % arch), true)
 		else:
 			h.free()
 
@@ -119,7 +117,7 @@ func _tris(n: Node) -> int:
 
 
 ## The model alone, front three-quarters, in a lit stage of its own.
-func _shot(k: Node3D, path: String, scale := 1.0) -> void:
+func _shot(k: Node3D, path: String, fit := false) -> void:
 	var vp := SubViewport.new()
 	vp.size = Vector2i(PX, PX)
 	vp.own_world_3d = true
@@ -135,14 +133,33 @@ func _shot(k: Node3D, path: String, scale := 1.0) -> void:
 	vp.add_child(cam)
 	cam.make_current()
 	cam.fov = 24.0
-	cam.position = Vector3(0, 0.8, 3.3) * scale
-	cam.look_at(Vector3(0, 0.42, 0) * scale)
+	cam.position = Vector3(0, 0.8, 3.3)
+	cam.look_at(Vector3(0, 0.42, 0))
 	vp.add_child(k)
 	k.rotation.y = PI - 0.6
+	if fit:
+		_frame(k, cam)
 	for i in 4:
 		await RenderingServer.frame_post_draw
 	vp.get_texture().get_image().save_png(path)
 	vp.queue_free()
+
+
+## Backs the camera off to fit what is drawn of `k` (a Hunter is taller than a Boki, an Albert wider than both).
+func _frame(k: Node3D, cam: Camera3D) -> void:
+	var box := AABB()
+	var first := true
+	for mi in k.find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if not m.is_visible_in_tree() or m.mesh == null:
+			continue
+		var b := m.global_transform * m.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	var h := maxf(box.size.y, box.size.x) * 1.15
+	var mid := box.get_center()
+	cam.position = mid + Vector3(0, h * 0.1, h * 2.7)
+	cam.look_at(mid)
 
 
 func _grab_window(path: String) -> void:
