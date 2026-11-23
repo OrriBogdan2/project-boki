@@ -248,6 +248,29 @@ Vex's Cinderfall plays `vn_nuke_fall` at the landing point on the cast: a whistl
 
 `--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 32 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 16 m, half of gunfire) (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
+## Ability bar (a set's `"bar"`, `tools/sfx_bar_check.gd`)
+A Hunter set may list, per ability (`lmb`, `rmb`, `e`, `shift`, `r`), the sound of its **cast**, **travel**, **hit**
+and **end** (`""` where the move has no such beat) and the `ab` its hits carry. `--sfx-set-check` section 16 holds it:
+every named sound is in the set (or `SfxKits.NAMES`) with a file and played by the kit, every ability has a cast, the hit is what
+`HeroSfx.hit_sound` plays for that `ab`, and no two abilities of a Hunter share a hit. An ability hit plays
+`<arch>_hit_<slot>` when the Hunter has one (`HeroSfx.HIT_SLOT`: utility/rmb, k1/e, dash, ult/x/r, Tenzo's
+`rock`), else `<arch>_hit`. Tenzo and Grimble (VFX_QUALITY Snd 3) were the first; their new cues are made by
+`tools/gen_sfx_ability_bar.py` and sit at their category level (impact -16, Grimble heavy_impact -14.5, loop -21,
+cast -18). Bold = added by that pass.
+
+| Hunter | ability | cast | travel | hit | end |
+|---|---|---|---|---|---|
+| Tenzo | LMB boulder (hold: punch) | br_throw (br_wind) | **br_boulder_fly** (loop on the boulder) | dolm_hit (stone fist) | br_boulder_hit |
+| Tenzo | RMB slam | br_shove | br_leap | **dolm_hit_rmb** (deep thump, low crunch) | br_slam |
+| Tenzo | E Stone Row (its rocks punched) | br_crack | br_launch | **dolm_hit_rock** (rock shattering) | br_burst |
+| Tenzo | Shift hop | dolm_dash | br_rise | **dolm_hit_dash** (flat stamp, skid) | br_roll |
+| Tenzo | R Basalt Spine | br_raise | br_rumble | **dolm_hit_r** (glassy basalt crack) | br_slam |
+| Grimble | LMB blunderbuss | dr_shot | - (6 m slugs, no flight to hear) | dredge_hit (scrap slug) | - |
+| Grimble | RMB Deep Reach | dr_throw | **dr_reach_fly** (chain loop on the hand) | **dredge_hit_rmb** (hook tchk, chain snap) | **dr_let_go** (miss or reel done) |
+| Grimble | E Anchor Drop | dr_anchor_wind | dr_dive (air) | **dredge_hit_e** (big iron clang) | dr_anchor |
+| Grimble | Shift barge | dr_barge | - | - (no damage) | - |
+| Grimble | R Brass Broadside | dr_blast_charge | dr_blast (each wave) | **dredge_hit_r** (brass ping) | **dr_blast_end** (casings fall) |
+
 ## Ability cue maps: Motley and Gil (11-20, ext/sfx-motley-gil-bar)
 Which beat of each ability has its own cue (content/vfx/<arch>.json "sfx", or the kit's `m.sfx`). New this pass in
 bold; every hit is the Hunter's own file, and `--sfx-set-check` fails a move look that plays another Hunter's sound.
@@ -341,6 +364,9 @@ Whole-burst peak (the first shot) is unchanged to within 0.7 dB (-3.4 to -4.9 dB
 
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
+
+## Broken casts (`scripts/arch/kit_windup.gd`)
+`Sfx.play` returns a handle to its pool voice (-1 when nothing played); `Sfx.cut(handle)` fades just that sound out (`CUT_FADE` 0.05 s) if the voice still plays it, `Sfx.sounding(handle)` says whether it does. A kit plays an interruptible wind-up's sound through `KitWindup.play(kit, slot, name, db)` (or `KitWindup.keep` for a HeroVfx move's, `HeroVfx.last_voice`); where a stun or a knock breaks the cast it calls `KitWindup.broken(kit, slot)`: the wind-up voice stops and the caster hears `cast_broken` (ui set, `tools/gen_sfx_ui.py`). One per kit: Albert's Faultline plant, Grimble's Anchor Drop, Vex's Longneedle, Kael's Finishing Slam, Motley's Shard Snap, Sparkle's Wirerun, Meeko's Hearth Call, Sable's Bola, Neve's spear push, Cinder's Flue Flight, Lace's bow draw, Tenzo's Quake Fist. `--match-audio-check` breaks each and wants its voice silent within 0.1 s.
 
 ## Rival telegraph wind-ups
 You hear where a rival's ability will land before it lands. `TellCue` (scripts/arch/tell_cue.gd) plays `tell_foe` (a dry low tick and a short buzzing swell, unlike any cast sound or team tag) at the centre of a ground telegraph a rival Hunter shows everyone, the moment it starts: `ArchKit.tele_circle`/`tele_lane`, and AimKit areas (circle, lane, cone, arc wall, span, swap) with `all`, on the first step `AimDraw.put` gets them (a refresh plays nothing). Bigger areas play lower and louder: 3 m² and under at -10 dB and pitch 1.15, 40 m² and over at -3 dB and 0.8, under the ult cues. Yours and your team's play nothing; ultimates (the R fuse, `ult_running`, AimKit ids starting `x`/`ult`) are UltCue's. It goes through `Sfx.play` with a 120 ms `MIN_GAP`, so the stacking cap and the voice pool hold. Local only: kits run in their owner's game, so it covers bots and local rivals; an online rival's telegraph has no cue yet. Sound: `tools/gen_sfx_ult_cues.py`, in `content/sfx/ult_cues.json`. `--match-audio-check` asserts where and how it plays and what is silent; `--sfx-set-check` that it exists and is wired.
@@ -588,7 +614,7 @@ The 19 types and their files: normal `ki_normal` (`k_normal*.wav`), fire `ki_fir
 `--sfx-set-check` row 11 asserts all 19 map to an existing cast set Sfx loads, every species resolves, the slot filter, and the caps; `--sfx-silence-audit` plays all 19 types through `Juice.hit` (the impact, not the shared `hit`) and asserts every `hit kin>*` ability row (k1 / k2 / zone, 10+ events) shows a `ki_*` cue.
 
 ## Falloff (`Sfx.NEAR/SPREAD/FAR/hear_range`)
-All match sounds go through `Sfx._distance_db`; the numbers live in one place at the top of `scripts/core/sfx.gd`. There is one 2D pool (no 3D players), so the "max distance" of the SFX bus is `hear_range` and its "unit size" is NEAR (full level inside it) plus SPREAD (the roll-off is -20 log10(1 + (d - NEAR) / SPREAD)); SFXFar (the muffled send into SFX) starts at FAR. The view is the source's: what you see you hear, off-screen threats are quieter but there. The SUPERVIVE view is 37 m across (`Cam.style_across`), so the side edge is 18.5 m (the top and bottom edges ~10 m; the widest wheel zoom ~26 m). The old numbers were sized to the 23.5 m view (edge 11.75 m).
+All match sounds go through `Sfx._distance_db`; the numbers live in one place at the top of `scripts/core/sfx.gd`. There is one 2D pool (no 3D players), so the "max distance" of the SFX bus is `hear_range` and its "unit size" is NEAR (full level inside it) plus SPREAD (the roll-off is -20 log10(1 + (d - NEAR) / SPREAD)); SFXFar (the muffled send into SFX) starts at FAR. The view is the source's: what you see you hear, off-screen threats are quieter but there. The the reference game view is 37 m across (`Cam.style_across`), so the side edge is 18.5 m (the top and bottom edges ~10 m; the widest wheel zoom ~26 m). The old numbers were sized to the 23.5 m view (edge 11.75 m).
 - NEAR 3.5 -> 5.5 m, SPREAD 5 -> 8 m, FAR 9 -> 19 m (muffling now starts just past the side edge), hear_range 22 -> 30 m (the edge fade still starts at 0.7 of it). `scan_call` reach 11 -> 15 m (stays half of hear range).
 - Unchanged: a sound's own `reach` (ult cues 60 m), the scan hum's 26 m, hidden rivals' footsteps (`Juice.footstep` still skips rivals past 14 m and unseen ones; `Sfx.step` volumes as before).
 

@@ -220,7 +220,7 @@ func _move_feel(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 		t += 1.0 / 60.0
 		var v := Vector2(P.pos.x - q.x, P.pos.z - q.z).length() * 60.0
 		q = P.pos
-		if J.running() and t > 0.03:
+		if J.running() and t > float(K.x_def()["lift_t"]) + 0.03:      # (he hangs lift_t at the ring first)
 			slow = minf(slow, v)
 			fast = maxf(fast, v)
 	var dir: Vector2 = Vector2(P.pos.x - home.x, P.pos.z - home.z).normalized()
