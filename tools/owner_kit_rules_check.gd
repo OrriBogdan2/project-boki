@@ -168,7 +168,7 @@ func _neve() -> void:
 	var K: RimewrightKit = P.ak
 	var home: Vector3 = r[4]
 	var cursor := home + Vector3(8, 0, 0)
-	T.teleport(home + Vector3(8, 0, 2.5))      # off the aim line, inside the cursor's reach (wpn.cursor_r)
+	T.teleport(home + Vector3(8, 0, 1.8))      # off the aim line, inside the cursor's reach (wpn.cursor_r)
 	var seen := {"dart": {}, "v0": Vector2.ZERO, "skating": false}      # (a lambda can't assign the caller's locals)
 	drive(m, P, 0.6, func(i):
 		P.inp["move"] = Vector2(0, -1)
