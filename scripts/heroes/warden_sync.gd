@@ -142,7 +142,7 @@ func _process(dt: float) -> void:
 	springs.step(dt)
 	if companions:
 		companions.step(dt)  # (before the blade: the sun's FX points ride it)
-	apply_blade()  # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
+	apply_blade()  # (again: a weapon on a part that moved this frame: Meeko's sun on its orbit)
 	orbits.look = root.get_meta(WardenGlb.ORBIT_LOOK, Vector3.INF)
 	orbits.step(dt)
 	if mood:
