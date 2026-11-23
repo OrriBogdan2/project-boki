@@ -11187,3 +11187,4 @@ READY ext/anim-tenzo-motley-sable-gil-native 19a8525d88 (Tenzo/Motley/Sable/Gil 
 READY ext/anim-sparkle-neve-meeko-native b8fc66023c2 (Sparkle/Neve/Meeko native ability clips)
 READY ext/starter-face-refit ae60d341763 (Prismander+Mycroll eyes back on the head; DRAFT, needs visual check)
 READY ext/stuck-integ-5a53049c ca8fee01f9 (supersedes: the 2d7e824 READY of this branch and its 23 merged branches; PR #743; +5 gate fixes: save-compat catch-up evolve, Data.wild_kin (no art-less wild Boki), Kael 0.928 = 1.92 m, match-repeat rig-cache, vfx registry line; full gate 660 flags + delta 78 flags: NEW-RED 0, export 1526 MB x5, health OK; garden-nav flake also on main 1/16)
+READY ext/neve-shatter-slow 8b79aeb9dc (bulk-rebase: origin/main merged in mechanically, was d84cef3c87; union 1 gen 0 files; the branch's own READY checks still apply)
