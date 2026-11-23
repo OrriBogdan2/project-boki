@@ -6,4 +6,5 @@ extends RefCounted
 
 const CHECKS := {
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
+	"--combat-calm-check": ["res://tools/combat_calm_check.gd", "combat_calm_check", null],  # fight HUD
 }
