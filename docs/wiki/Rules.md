@@ -2405,6 +2405,16 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 | prize | ["brute", "glimmer", "warden", "colossus", "serpent", "brood"] |
 | reel | 1.2 |
 
+## step_biomes (`content/rules/step_biomes.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | StepSurface (scripts/match/step_surface.gd): which of the four step sets every Hunter has (grass, stone, wood, snow) a bare ground tile plays, by World.style_at (its island's authored biome, or its region on a generated map). Bridges (wood), stairs, paint and non-ground tiles (stone) and the sky train (metal) are decided before this. No new sounds: ash (ember) and the dark crystal ground (gloom) are stone; storm's wet fern-and-reed ground stays grass. |
+| default | grass |
+| styles | {"meadow": "grass", "bloom": "grass", "storm": "grass", "frost": "snow", "ember": "stone", "gloom": "stone"} |
+
 ## stomps (`content/rules/stomps.json`)
 
 
