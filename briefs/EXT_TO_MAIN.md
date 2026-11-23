@@ -11161,3 +11161,4 @@ READY ext/anim-native-stride 122f74c14c6 (native Hunters: per-Hunter stride rate
 READY ext/farm-boki-greet 92de2981f6 (garden Boki greet you)
 READY ext/anim-cinder-native-clips d18bf93c94 (Cinder native cast clips)
 READY ext/anim-native-look-at 78565d941c (native Hunters: look-at back on)
+READY ext/anim-native-move-states 644061f4be (native dash/glide/land/hit/downed clips)
