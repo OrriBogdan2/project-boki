@@ -147,7 +147,7 @@ func _chain(m: Match, spot: Vector3) -> void:
 	step(m, float(ex["chain_fuse"]) + 0.1)
 	ok("the chained keg blew a beat later", second["dead"])
 
-## The sounds `act` starts (Sfx's play log, cleared first so no repeat gap, stack limit or same-sound voice cap holds one back).
+## The sounds `act` starts (Sfx play log, cleared first so no repeat gap, stack limit or voice cap holds one back).
 func _heard(act: Callable) -> Array:
 	Sfx.last_played.clear()
 	Sfx.recent.clear()
