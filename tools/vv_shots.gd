@@ -192,7 +192,7 @@ func _take(kind: String, file: String, caption: String, focus: Callable) -> void
 func _crop(img: Image, at: Vector3, px: Vector2i, zoom: float) -> Image:
 	var cam := main.get_viewport().get_camera_3d()
 	var c := cam.unproject_position(at)
-	var corner := Vector2i(int(c.x) - px.x / 2, int(c.y) - px.y / 2)
+	var corner := Vector2i(int(c.x) - int(px.x / 2.0), int(c.y) - int(px.y / 2.0))
 	var rg := Rect2i(corner, px).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 	var crop := img.get_region(rg)
 	crop.resize(int(px.x * zoom), int(px.y * zoom), Image.INTERPOLATE_BILINEAR)

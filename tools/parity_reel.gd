@@ -151,7 +151,7 @@ func _close_cam() -> void:
 
 func _save_frame() -> void:
 	steps += 1
-	if steps % (60 / FRAME_FPS) == 0:
+	if steps % (int(60 / float(FRAME_FPS))) == 0:
 		super._save_frame()
 
 # ------------------------------------------------------------------ the parts
@@ -392,7 +392,7 @@ func _p_mantle() -> void:
 	if rims.is_empty():
 		print("REEL_MANTLE no rim")
 		return
-	var f: Dictionary = rims[rims.size() / 2]
+	var f: Dictionary = rims[int(rims.size() / 2.0)]
 	var dv := Vector2(f["d"])
 	var a: Vector2i = f["a"]
 	var face := Vector2(a.x + 0.5, a.y + 0.5) + dv * 0.5
