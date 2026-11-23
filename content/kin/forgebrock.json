@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "forgebrock",
+	"name": "Forgebrock",
+	"theme": "ember",
+	"type2": "titan",
+	"flavor": "Bigger forge badger, hammer-head paws, furnace chest.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "tinbrock",
+		"stage": 3,
+		"from": "kilnbadger"
+	}
+}

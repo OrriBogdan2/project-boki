@@ -31,6 +31,7 @@ const TYPES := {
 	"frost": {"name": "Frost", "col": Color("a6eeff"), "ink": Color("2a5a7a")},
 	"bloom": {"name": "Bloom", "col": Color("6fd86a")},
 	"storm": {"name": "Storm", "col": Color("5f7fb8")},
+	"wild": {"name": "Normal", "col": Color("e8d9a8")},
 }
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0

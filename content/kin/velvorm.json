@@ -114,5 +114,10 @@
 		"temper": "Soft",
 		"desc": "Something soft is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "velvorm",
+		"stage": 1
 	}
 }

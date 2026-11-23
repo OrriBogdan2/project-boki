@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. the rules: Rush beats Dodge beats Brace beats Rush, one step or two on a 20+ lead, a clash moves the
 ##      lower push half a step, the 10% follow bonus, an untouched pick goes with the want
 ##   2. the read: the higher Focus sees the honest tell about 7 in 10, the other about 5 in 10
-##   3. 200 seeded bouts with a simulated player (reads the tell, follows its Boki, or picks at random):
+##   3. 400 seeded bouts with a simulated player (reads the tell, follows its Boki, or picks at random):
 ##      60 to 75 s on average; 30 more points of Power, Guard, Speed or Focus each end bouts further forward
 ##      (the push is what stats size, and a mean position is far less noisy than a win share) and win no fewer
 ##   4. no dominant move: always Rush, always Brace and always Dodge win within a few points of each other's
@@ -15,7 +15,7 @@ extends RefCounted
 ##      again after that; skip (the menu key) goes straight to the bout
 ## Never touches the real save.
 
-const BOUTS := 200
+const BOUTS := 400
 const SEED := 20261110
 const DT := 1.0 / 30.0           # s per step
 const LEN_LOW := 60.0            # s, the shortest average bout

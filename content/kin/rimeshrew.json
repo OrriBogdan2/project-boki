@@ -115,5 +115,10 @@
 		"temper": "Frantic",
 		"desc": "Something frantic is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "rimeshrew",
+		"stage": 1
 	}
 }

@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "lunink",
+	"name": "Lunink",
+	"theme": "lunar",
+	"flavor": "Silver ink, crescent strokes, moth-feather ears.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "ermink",
+		"stage": 2,
+		"from": "ermink",
+		"ink": "lunar"
+	}
+}

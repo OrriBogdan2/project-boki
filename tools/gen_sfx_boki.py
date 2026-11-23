@@ -452,15 +452,16 @@ SPECIES_VOICE = {
     'threadwyrm': ('uh', (1, 1.12, 0.84)),    # a soft call that winds up and coils back
     'tuatrune': ('oh', (1, 1.33, 1.33)),      # a solid step up a fourth, held like a lock clicking shut
     'velvorm': ('eh', (1, 0.79, 0.94)),       # a gurgle dipping down a pipe
+    'ermink': ('ee', (1, 1.19, 1.59)),        # a quick, curious trill that skips up and over
 }
 
 
 def species_data(sp):
     """(weight kg, theme, curiosity, temper) of a species from its content files."""
-    home = json.load(open(os.path.join(ROOT, 'content', 'kin', sp + '.json')))
-    v2 = json.load(open(os.path.join(ROOT, 'content', 'kin', sp + '.json')))
-    pers = v2['personality']
-    return home['size']['kg'], v2['theme'], pers['curiosity'], pers['temper']
+    home = json.load(open(os.path.join(ROOT, 'content', 'kin_home', sp + '.json')))
+    kin = json.load(open(os.path.join(ROOT, 'content', 'kin', sp + '.json')))
+    pers = kin['personality']
+    return home['size']['kg'], kin['theme'], pers['curiosity'], pers['temper']
 
 
 def texture(kind, d, f, amt):
