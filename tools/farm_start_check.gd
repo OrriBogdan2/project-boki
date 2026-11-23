@@ -47,6 +47,7 @@ func _spot(hb: HomeBuild, p: Vector3, min_d := 0.0) -> Array:
 	return []
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	var t0 := Time.get_ticks_msec()
