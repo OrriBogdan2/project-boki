@@ -101,8 +101,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
 | heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
 | kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
-| limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
-| moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
 | nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -116,6 +114,8 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | goliathite | clip | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
+| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
+| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
 | scaldamus | clip | shared | shared | clip | clip | clip | proc | proc |
