@@ -527,6 +527,103 @@ The tide ring closing on the Heart decides who gets out, so it is heard before i
 ## The garden's ambience (`scripts/home/home_ambience.gd`)
 One bed for the part of the day on the home clock (`Home.day_t`): `amb_garden_morning` birds (0.2-0.4), `amb_garden_midday` a quiet hush (0.4-0.6), `amb_garden_evening` insects (0.6-0.8), `amb_garden_night` a slow wind; `amb_rain` while it rains. `amb_pond` comes up as you near water (full within 2 tiles, silent past 9, from `layout["water"]`). The beds go through `Sfx.amb_layer`, so they sit on the **Ambience** bus and follow its volume setting; a bed fades out as the next fades in over 20 s. At most 3 loops sound at once (the pond steps out during a crossfade), and the garden never plays `amb_match` (the title's wind). `Sfx` frees a bed once it has faded to nothing. Under them sits the bed of the zone you are in (GARDEN.md 10.2), `amb_zone_<zone>`, up in 3 s and kept: `hub` a quiet Waystone hum, `bramblebank` stream and nap-tree leaves, `glasswater` still pools and ice ticks, `cinderstep` warm cracks and embers, `hushwood` moss-soft hush with echoing knocks, `ridge` wind and humming stones. Hushwood's rule has `"clock": 0.7`, so its time-of-day bed stays at dusk. A hop plays `garden_hop` (0.64 s, swelling for the 0.5 s `hop_fade_s` light-up) from `HubWaystone.hop`; `GardenZones.wake(id)` opens a zone and plays `garden_wake`, once (the unlock step calls it). Regenerate the beds with `tools/gen_garden_ambience.py`, the two sounds with `tools/gen_sfx_garden.py`; `--garden-audio-check` asserts the zone beds, the hop and the wake. `--sfx-set-check` section 7 asserts all of this.
 
+## Ability sounds (`--sfx-set-check` section 21)
+Every ability of the 13 Hunters plays its own sound: LMB (held), RMB (held), E, Shift (the dash) and R (the ultimate) are each pressed once in a real match at a dummy 3 m away (`tools/sfx_ability_rows.gd`, which logs `Sfx.cue_log`). A move is **silent** when no sound of its Hunter's own set (`content/sfx/<arch>.json`, plus `<arch>_ult_cue` for R) is heard, and a move that hurts the dummy needs an own sound within 100 ms of the damage; a shared stock cue (`hit`, `ab_hit`, `splash`, another Hunter's `jug_ting`) alone counts as silence and fails the check. The columns below split what is heard by when it is first heard: **cast** before the first damage (or in the first 0.35 s), **hit** within 100 ms after it, **end** later (a landing, a burst, a wall dropping). A blank cast means the move's first sound is its hit (a beam, a cloak); a blank hit means it does no damage (a dash, a shield, a seed). Each passive that has a proc moment is listed too (`PROCS` in the tool): its sound exists and the script or `content/vfx` file that plays it names it.
+
+Fills (library sounds only, nothing generated):
+- Gil's `content/vfx/gil.json` borrowed other Hunters' and stock sounds (`jug_ting`, `br_rise`, `dr_dive`, `mage_zap`, `swipe`, `splash`, `ab_throw`, `drip`) and left his own set (`gil_toss`, `gil_pop_*`, `gil_spin`, `gil_spout`, `gil_wave`, `gil_wave_land`, `gil_surface`, `gil_beached`, `gil_thrust_hit`) unplayed. Each vfx move now plays its own sound at -2 to -9 dB, the level of the other kits' own vfx sounds (median -3 dB); the dive has none of its own because `gil_dash` already plays on the press.
+- Vex's Fever lighting (Hot Streak) had no sound: `vn_stim` at -9 dB and pitch 1.3 (`FEVER_DB`; a knock keeps it at -3 dB, pitch 1).
+- Tenzo's Shardskin stack had no sound: `br_raise` at -8 dB and pitch 1.3 (`SHARD_DB`).
+
+Before and after (only the cells that changed; every other Hunter's cells were already heard in their own set):
+
+| Hunter | Move | Before | After |
+|---|---|---|---|
+| Gil | LMB hit | `slash_hit`, `jug_lunge_hit` (Kael's), `hit_blade` | `gil_thrust_hit` |
+| Gil | RMB cast | **silent**: `ab_throw` (shared) | `gil_toss` |
+| Gil | RMB hit | **silent**: `mage_zap` (Sparkle's), `boom`, `hit`, `drip` | `gil_pop_<kind>` (thunder, slime, air, fire, Zeep) |
+| Gil | E cast | `swipe`, `splash` (shared) | `gil_spin` per spin tick |
+| Gil | E recast, hit | `splash`, `br_rise` (Tenzo's), `hit` | `gil_spout` |
+| Gil | Shift end, hit | `splash`, `br_rise` (Tenzo's), `hit` | `gil_surface` |
+| Gil | Shift cast | `gil_dash` + `splash`, `dr_dive` (Grimble's) | `gil_dash` |
+| Gil | R cast | `gil_dash` + `splash`, `br_rumble` (Tenzo's), `swim` | `gil_wave` |
+| Gil | R end | `splash`, `shield` (shared) | `gil_wave_land` |
+| Gil | passive Beached | `splash`, `ab_stun` (shared) | `gil_beached` (+ `pay_flashpoint`) |
+| Vex | passive Fever lit | silent | `vn_stim` (quiet) |
+| Tenzo | passive Shardskin stack | silent | `br_raise` (quiet) |
+
+Passives with no proc moment: Lace's Red Thread (rivals under half health seen through cover; a wall climb).
+
+All 65 moves after (the check prints these as `ABILITY` rows):
+
+| Hunter | Move | Ability | Cast | Hit | End |
+|---|---|---|---|---|---|
+| Lace | LMB | longbow | `pin_draw` | `archer_thread_twang`, `pin_loose`, `pin_arrow_hit`, `archer_hit` | - |
+| Lace | RMB | Heavy Shot | `pin_heavy_draw` | `pin_heavy`, `pin_heavy_burst`, `archer_hit`, `pin_heavy_hit` | - |
+| Lace | E | Hail Wall | `pin_hail` | `pin_rain`, `pin_patter`, `archer_hit` | - |
+| Lace | Shift | Spirit Walk | `archer_dash`, `pin_spirit` | - | `pin_spirit_end` |
+| Lace | R | Starpiercer | `pin_ult_beam`, `pin_ult_cast`, `archer_ult_cue` | `pin_super_hit`, `archer_hit` | - |
+| Cinder | LMB | flamethrower | `lw_pilot`, `lw_roar` | `ashwick_hit`, `ashwick_tank_hiss` | - |
+| Cinder | RMB | Cinder Shot | - | `lw_bolt`, `ashwick_hit`, `lw_bolt_hit`, `as_ignite` | - |
+| Cinder | E | Furnace Cloak | - | `lw_shield`, `ashwick_cloak_hit`, `ashwick_hit` | - |
+| Cinder | Shift | Soot Ram | `ashwick_dash`, `lw_bash` | `ashwick_hit`, `lw_bash_hit` | - |
+| Cinder | R | Flue Flight | `ashwick_dash`, `lw_jet`, `ashwick_ult_cue` | `lw_trail`, `ashwick_hit` | `lw_jet_land`, `as_ignite`, `lw_blaze` |
+| Albert | LMB | tower shield | `bjorn_spin` | `bulwark_dash`, `bjorn_slam`, `bulwark_hit` | - |
+| Albert | RMB | Aegis | `bjorn_shield_up`, `bulwark_hull_creak` | - | - |
+| Albert | E | Mending Ground | `bjorn_purify` | - | `bjorn_purify_burst` |
+| Albert | Shift | 360 Smash | `bulwark_dash`, `bjorn_spin`, `bjorn_whirl` | `bulwark_hit` | - |
+| Albert | R | Faultline | `bjorn_ult_wind`, `bulwark_ult_cue` | `bjorn_ult_slam`, `bjorn_ult_rumble`, `bulwark_hit`, `bjorn_ult_quake` | `bjorn_slam`, `bjorn_ult_crackle` |
+| Tenzo | LMB | rubble fists | `br_wind` | `dolm_rock_crunch`, `br_punch`, `dolm_hit` | - |
+| Tenzo | RMB | Quakefall | `dolm_rock_crunch` | `br_crack`, `br_leap`, `br_slam`, `dolm_hit` | - |
+| Tenzo | E | Stone Row | `br_crack`, `br_raise` | - | - |
+| Tenzo | Shift | Rock Hop | `br_rise`, `br_leap`, `br_slam` | `dolm_hit` | `br_launch`, `br_roll`, `br_burst` |
+| Tenzo | R | Basalt Spine | `dolm_ult_cue`, `br_crack` | `dolm_hit` | `br_slam` |
+| Grimble | LMB | shotgun | `dr_shot` | `dredge_hit` | - |
+| Grimble | RMB | Deep Reach | `dr_throw` | `dredge_hit`, `dr_grab`, `dr_reel` | `dredge_coin_jingle` |
+| Grimble | E | Anchor Drop | `dr_anchor_wind` | `dredge_hit`, `dr_anchor` | - |
+| Grimble | Shift | Barge | `dredge_dash`, `dr_barge`, `dredge_junk_clatter` | - | - |
+| Grimble | R | Brass Broadside | `dr_blast_charge`, `dredge_ult_cue` | `dr_blast`, `dredge_hit` | - |
+| Gil | LMB | swordfish | `gil_thrust` | `gil_thrust_hit` | `gil_dash`, `gil_surface` |
+| Gil | RMB | Grab Bag | `gil_toss` | `gil_pop_air`, `gil_recast_tick` | - |
+| Gil | E | Riptide | `gil_spin` | `gil_recast_tick`, `gil_spout` | - |
+| Gil | Shift | Ground Swim | `gil_dash` | `gil_surface` | - |
+| Gil | R | Tidal Wave | `gil_dash`, `gil_wave`, `gil_ult_cue` | - | `gil_wave_land` |
+| Vex | LMB | quill rifle | `vn_rifle` | `gunslinger_hit` | - |
+| Vex | RMB | Burr Charge | `gunslinger_grenade_thunk` | `vn_stim`, `gunslinger_hit`, `vn_blast` | - |
+| Vex | E | Longneedle | `vn_ion_charge` | `vn_ion_fire`, `vn_stim`, `gunslinger_hit` | - |
+| Vex | Shift | Slipstep | `gunslinger_dash`, `vn_slide` | - | - |
+| Vex | R | Cinderfall | `vn_nuke_fall`, `gunslinger_ult_cue`, `vn_nuke_fire` | `vn_nuke_boom`, `vn_nuke_burn`, `vn_stim` | `gunslinger_hit` |
+| Kael | LMB | greatsword | `jug_ting` | `jug_wave`, `juggernaut_blade_hiss`, `juggernaut_hit` | - |
+| Kael | RMB | Smash | `jug_ting`, `jug_charge` | `juggernaut_dash`, `juggernaut_hit`, `jug_lunge_hit` | - |
+| Kael | E | Warchain | `jug_chain`, `juggernaut_chain_rattle` | `juggernaut_hit`, `juggernaut_chain_bite`, `jug_taut` | - |
+| Kael | Shift | Rampage | `jug_charge`, `juggernaut_dash` | `juggernaut_hit` | - |
+| Kael | R | Gilded Riposte | `jug_guard`, `juggernaut_ult_cue` | `juggernaut_dash`, `jug_riposte`, `juggernaut_heal` | - |
+| Sparkle | LMB | coilcaster | `vv_bolt` | `mage_zap`, `mage_hit` | - |
+| Sparkle | RMB | Storm Rod | `vv_rod_summon` | `vv_rod_throw`, `mage_hit`, `mage_zap`, `mage_rod_hit`, `vv_orb` | - |
+| Sparkle | E | Skycall | `vv_sky_place`, `vv_sky_count` | `vv_sky_strike`, `mage_hit`, `mage_zap` | - |
+| Sparkle | Shift | Wirerun | `vv_surge_charge`, `mage_dash`, `vv_surge_go` | `mage_hit` | `mage_bubble_pop` |
+| Sparkle | R | Kitefall | `vv_ult_charge`, `mage_ult_cue`, `vv_ult_rise` | `vv_ult_hum`, `vv_ult_crack`, `vv_ult_slam`, `mage_hit`, `mage_zap` | - |
+| Motley | LMB | tether lantern | `os_orb_hot` | `ostra_hit` | `os_prime` |
+| Motley | RMB | Shard Snap | `os_snap_wind`, `os_snap` | `os_snap_hit`, `ostra_hit` | - |
+| Motley | E | Brimseed | `os_seed` | - | `ostra_music_box` |
+| Motley | Shift | Lantern Trade | `os_swap_lob` | - | `os_swap` |
+| Motley | R | Nightwell | `os_well`, `ostra_ult_cue` | `os_well_hum`, `ostra_hit` | - |
+| Neve | LMB | hoar fan | `rime_shard` | `rimewright_hit` | - |
+| Neve | RMB | Ice Spear | `rime_spear_aim` | `rime_lance`, `rime_zone`, `rimewright_chime`, `rimewright_hit` | `rime_burst`, `rime_splinter` |
+| Neve | E | Rink Wall | `rime_wall_tell`, `rime_wall` | `rimewright_hit` | - |
+| Neve | Shift | Skate | `rimewright_dash`, `rimewright_skate_glide`, `rimewright_skate_scrape`, `rime_stop`, `rimewright_skate_hiss` | - | - |
+| Neve | R | Rimelock | `rime_lock`, `rimewright_ult_cue` | `rime_creak`, `rimewright_hit`, `rime_crash` | - |
+| Meeko | LMB | lantern crook | `tend_ember` | `tender_hit` | - |
+| Meeko | RMB | Burrseed | `tend_seed_aim` | `tend_seed`, `tend_stick`, `tender_hit` | `tend_root` |
+| Meeko | E | Hearthlight | `tend_hearth`, `tender_lantern_chime` | - | `tend_flare` |
+| Meeko | Shift | Relay Step | `tender_dash`, `tend_hop` | - | - |
+| Meeko | R | Hearth Call | `tend_call_loop`, `tend_call`, `tender_ult_cue` | - | `tend_arrive`, `tender_cheer` |
+| Sable | LMB | arc bolts | `dj_bolt` | `thief_hit` | - |
+| Sable | RMB | Bola | `dj_bola_whirl` | `dj_bola_throw`, `thief_hit`, `dj_bola_wrap` | - |
+| Sable | E | Shadow Knife | `dj_knife_throw` | `thief_hit`, `thief_knife_stick` | - |
+| Sable | Shift | Vault | `thief_dash` | - | `thief_cock` |
+| Sable | R | Encore | `dj_encore`, `dj_encore_rise`, `thief_ult_cue` | `dj_blade`, `dj_encore_whirr`, `thief_hit`, `dj_encore_hit` | - |
+
 ## Silence audit (`--sfx-silence-audit`)
 Which game events play nothing, or only a shared cue? `Sfx.cue_log` (null = off, nothing runs in a shipped game) records every `play()` / `loop_start()` as `[name, pos, found]`. The check `tools/sfx_silence_audit.gd` runs a seeded 10-trio bot match headless (seed 31, 150 s, `--audit-secs=`, `--audit-seed=`, `--audit-out=<tsv>`, `--audit-arch=<id>`, `--audit-throw`), picks events up from `CombatBus` (hit, cast, status, Boki throw/recall) and by polling state (knock, out, level, pickup, recast window open/close, exit step, Boki state, extract), and pairs each with the cues played within 6 m in its own or the next step. It prints the events ranked by `none` (no cue) plus `shared` (only generic names no `content/sfx` set owns), and every cue asked for that has no file (`MISSING`). Caveats: the pairing is by place and time, so `shared` can include a neighbour's cue (`none` is solid); a cue culled by distance still counts (this is wiring, not hearing range); `[you]` is only the autoplay player's own Hunter, so rows mostly read `[other]`. An event with every place more than `Juice.FAR` (24 m) from the player reads `[far]` (for a hit, its target: `Juice.hit` draws and plays nothing that far, by design) and is ranked last; `SILENCE TOTAL` gives the none / none + shared sums within and beyond 24 m. A Boki event's places are its owner and the Boki (its cues play at the Boki). The models are not processed in this hand-stepped match, so a cue placed on a model anchor (Lace's Heavy Shot from the bow's mouth) can lag metres off; those are proved by a direct probe in the check instead.
 
