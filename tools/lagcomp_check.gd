@@ -15,7 +15,6 @@ extends RefCounted
 ##              projectile catch-up), for comparison only: nothing in the game resolves hits this way
 ## Lines: LAGCOMP ok|FAIL <what>, LAGCOMP row <case> <numbers>; the guest prints LAGCOMP guest pid=<pid>.
 
-const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
 const START_S := 240.0        # s for the guest to come up and build its match
 const SHOOTER_RTT_MS := 100   # ms the relay adds to the shooter's round trip
@@ -80,6 +79,9 @@ var copies: Array = []         # guest: [wall s, x, z, vx, vz, life, r] of each 
 var seen_sid := {}
 var dumped := false
 var turn_t := 0.0              # guest: s until the strafe turns
+var shot_mps := 0.0            # host: speed of the shooter's last shot (m/s), for the lead
+var seen_at := Vector3.INF     # host: the target's drawn position last frame
+var drawn_v := Vector3.ZERO    # host: its drawn velocity, smoothed
 
 func ok(cond: bool, what: String, info := "") -> void:
 	print("LAGCOMP %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
@@ -95,8 +97,7 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a == "--lagcomp-check=guest": guest = true
 		if a.begins_with("--lc-port="): dn.port = int(a.substr(10))
-	dir = ProjectSettings.globalize_path("user://lagcomp")
-	DirAccess.make_dir_recursive_absolute(dir)
+		if a.begins_with("--lc-dir="): dir = a.substr(9)   # the guest writes its record where its host reads it
 	Net.message.connect(_on_msg)
 	CombatBus.hit_landed.connect(_on_hit)
 	if guest:
@@ -106,15 +107,19 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the shooter (and the relay)
 func _host() -> void:
-	dn.port = 7870 + OS.get_process_id() % 40
+	# A port nothing holds and a folder of this run's own: checks beside it on the box (the gate runs several,
+	# other worktrees share user://) must not take its port, overwrite its record or have their guest killed.
+	dn.port = CheckChild.free_port(7870 + OS.get_process_id() % 40)
+	dir = ProjectSettings.globalize_path("user://lagcomp").path_join("p%d" % dn.port)
+	DirAccess.make_dir_recursive_absolute(dir)
 	var relay := LagRelay.new()
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
+	CheckChild.hold(relay.peer, START_S)
 	ok(await dn._connect(), "the shooter is on the relay")
-	var cmd := "cd '%s' && %s --headless -- --lagcomp-check=guest --lc-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, dn.port, dir.path_join("guest.log")]
-	OS.create_process("/bin/sh", ["-c", cmd])
+	guest_pid = CheckChild.start("--lagcomp-check=guest --lc-port=%d '--lc-dir=%s'" % [dn.port, dir],
+			dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
@@ -155,6 +160,8 @@ func _case(G: Hunter, what: String, arch: String) -> void:
 	hits.clear()
 	seen_sid.clear()
 	dumped = false
+	shot_mps = 0.0
+	seen_at = Vector3.INF
 	Net.lobby_emit("lc", {"c": "strafe", "at": _lane()})
 	await _host_run(1.5, G)
 	if arch == "gunslinger":
@@ -164,12 +171,14 @@ func _case(G: Hunter, what: String, arch: String) -> void:
 	else:
 		for i in VOLLEYS:
 			for k in P.ak.cd: P.ak.cd[k] = 0.0
+			P.ak.ch_rmb = float(P.ak.rmb_charges())   # a charge each volley (else every other press is denied)
 			P.inp["sec_hold"] = true
 			P.ak.press_rmb()
 			await _host_run(float(HOLD_S[arch]), G)
 			P.inp["sec_hold"] = false
 			await _host_run(0.9, G)
 	await _host_run(1.0, G)
+	DirAccess.remove_absolute(dir.path_join("target.json"))
 	Net.lobby_emit("lc", {"c": "dump"})
 	var t0 := Time.get_ticks_msec()
 	while not dumped and Time.get_ticks_msec() - t0 < 20000:
@@ -188,15 +197,29 @@ func _host_run(secs: float, G: Hunter) -> void:
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
 		if G:
-			m.player.inp["aim"] = G.pos + Vector3(0, 0.9, 0)
+			m.player.inp["aim"] = _lead(G) + Vector3(0, 0.9, 0)
 			m.player.inp["aim_y"] = G.pos.y
 		m.step(DT)
 		t += DT
 		for s in m.shots:
 			if s["by"] == m.player and not seen_sid.has(s["sid"]) and not s["x"].get("cos", false):
 				seen_sid[s["sid"]] = true
+				shot_mps = (s["vel"] as Vector2).length()
 				shots.append([Time.get_unix_time_from_system(), s["sid"]])
 		await main.get_tree().process_frame
+
+## Where to aim: the drawn body led by its drawn velocity over the last shot's flight, as a player would, so
+## enough shots hit on the shooter's screen for the comparison to mean something (a dead-on aim at a strafing
+## body hit 0 to 3 of 6). What the shooter's screen calls a hit is still the only thing compared.
+func _lead(G: Hunter) -> Vector3:
+	var p := G.pos
+	if seen_at != Vector3.INF:
+		drawn_v = drawn_v.lerp((p - seen_at) / DT, 0.3)
+	seen_at = p
+	if shot_mps <= 0.0:
+		return p
+	var t := m.player.pos.distance_to(p) / shot_mps
+	return p + Vector3(drawn_v.x, 0.0, drawn_v.z) * t
 
 func _on_hit(by: Node, target: Node, _amount: float, _tags: Array) -> void:
 	if m == null or not (target is Hunter):
@@ -265,10 +288,6 @@ static func _copy_hits(cp: Array, pth: Array, body_r: float, ff: float) -> bool:
 func _finish() -> void:
 	Net.lobby_emit("lc", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	var p := dir.path_join("guest.log")
-	if FileAccess.file_exists(p):
-		for line in FileAccess.get_file_as_string(p).split("\n"):
-			if line.begins_with("LAGCOMP guest pid="): guest_pid = int(line.get_slice("=", 1))
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
 	print("LAGCOMP DONE, failures: ", bad)
