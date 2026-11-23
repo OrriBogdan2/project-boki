@@ -9,4 +9,5 @@ const CHECKS := {
 	"--drop-merge-audit": ["res://tools/drop_merge_check.gd", "drop_merge_check", "audit"],  # ground audit, not gated
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
 	"--grammar-check": ["res://tools/grammar_check.gd", "grammar_check", null],  # parse every kin grammar file (=<root> for another folder)
+	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
 }
