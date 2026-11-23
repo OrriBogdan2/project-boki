@@ -13,6 +13,7 @@ Code:
 | Inborn rolls, size, the model dressing, the match trade-off | `scripts/core/unique.gd` (`Unique`) |
 | Ids, provenance, the event log, save migrations | `scripts/core/save.gd` (`Save`) |
 | Breeding (lineage, inherited rolls), Rare Eggs (origin) | `scripts/core/care.gd` |
+| A bred baby's coat: a parent's pattern in the other parent's colour (`dna.accent`, `gifts.pattern/accent`) | `Unique.bred_coat`, `scripts/ui/hatch_parents.gd` |
 | A pair's egg appearing in the Nook (glow ring, type-colour sparkles, one wobble) | `scripts/home/nest_reveal.gd` (`NestReveal`, `--hatch-check`, `--nest-demo=egg`) |
 | Coat marks | `shaders/toon.gdshader` (`mark_*` uniforms) |
 | Idle habits, girth | `scripts/match/kin_puppet.gd` |
