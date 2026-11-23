@@ -927,7 +927,7 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 
 | Setting | Value |
 |---|---|
-| _doc | Bonus chest keys on top of the carrier quota (docs/decisions/0007-keys-and-cover.md, scripts/match/key_bonus.gd). Odds are chances per source; a {odds, two} source gives 2 keys on 'two' of its hits. Scaled x1.2 when the Hollow Crown went from 25 to 30 chests, to keep the share, then x0.6 with rules/keys.json chest.keep. Low on purpose, so a spare key feels like luck. Rolled on the keys' own seeded stream (seed_add), so no other loot shifts. Target: 20-30% more keys than chests on an average match (--keys-check measures it). Keys are never sold in shops. The odds follow rules/keys.json chest.keep, so spare keys stay 20-30% of the chests (the --keys-check surplus). |
+| _doc | Bonus chest keys on top of the carrier quota (docs/decisions/0009-keys-and-cover.md, scripts/match/key_bonus.gd). Odds are chances per source; a {odds, two} source gives 2 keys on 'two' of its hits. Scaled x1.2 when the Hollow Crown went from 25 to 30 chests, to keep the share, then x0.6 with rules/keys.json chest.keep. Low on purpose, so a spare key feels like luck. Rolled on the keys' own seeded stream (seed_add), so no other loot shifts. Target: 20-30% more keys than chests on an average match (--keys-check measures it). Keys are never sold in shops. The odds follow rules/keys.json chest.keep, so spare keys stay 20-30% of the chests (the --keys-check surplus). |
 | seed_add | 977 |
 | boss | {"odds": 0.288, "two": 0.25} |
 | elite | {"odds": 0.18, "two": 0.15} |
@@ -1160,7 +1160,7 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 
 ## farm_builder (`content/rules/farm_builder.json`)
 
-Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.md). He stands by the market stall (and works at the house while it goes up); walk up and press interact to talk face to face ('talk'). Blueprints with a level or milestone in farm_build.json unlock for real only once Hob has drawn them up, so a level-up or milestone makes a 'new blueprints' toast and a mark over his head. Everything with no entry there is on offer from the start.
+Hob Brackenridge, the farm's builder (docs/decisions/0104-farm-builder-tutorial.md). He stands by the market stall (and works at the house while it goes up); walk up and press interact to talk face to face ('talk'). Blueprints with a level or milestone in farm_build.json unlock for real only once Hob has drawn them up, so a level-up or milestone makes a 'new blueprints' toast and a mark over his head. Everything with no entry there is on offer from the start.
 
 | Setting | Value |
 |---|---|
@@ -1432,7 +1432,7 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 
 ## garden_zones (`content/rules/garden_zones.json`)
 
-The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), loves (two favoured types and a nature, see affinity), trait (Care trait it matches), game (what its card says is played there), play (its minigames.json id, for your best on the card) and wayseed_from (where the card says the Wayseed comes from); nap: [kind, tile x, tile z] the spots a Boki about to nap walks to, one Boki on each and a friend beside it (BaseLife; a spot moves up to 3 m to open ground, so the start zone's own island keeps them; the hub and zones without an island have none). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel (only Glasswater has one), clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind: crystal, reed, pebble, terrace, crack; shore = tiles the crystals and reeds crowd the channel), vents [x, z] metres of the updraft vents (scripts/home/zone_vents.gd; only Kitewind Ridge; the first stands on the Dash's track).
+The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0120-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), loves (two favoured types and a nature, see affinity), trait (Care trait it matches), game (what its card says is played there), play (its minigames.json id, for your best on the card) and wayseed_from (where the card says the Wayseed comes from); nap: [kind, tile x, tile z] the spots a Boki about to nap walks to, one Boki on each and a friend beside it (BaseLife; a spot moves up to 3 m to open ground, so the start zone's own island keeps them; the hub and zones without an island have none). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel (only Glasswater has one), clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind: crystal, reed, pebble, terrace, crack; shore = tiles the crystals and reeds crowd the channel), vents [x, z] metres of the updraft vents (scripts/home/zone_vents.gd; only Kitewind Ridge; the first stands on the Dash's track).
 
 | Setting | Value |
 |---|---|
@@ -1821,7 +1821,7 @@ The Incubator (scripts/core/incubator.gd, decision 0080). An egg in a cradle hat
 
 | Setting | Value |
 |---|---|
-| _doc | Chests, keys and the bush mimic (docs/decisions/0007-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
+| _doc | Chests, keys and the bush mimic (docs/decisions/0009-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
 | chest | {"keep": 0.6, "keep_doc": "Share of the map's chests and of the item caches a match places (owner 11-10: about 40% fewer). Vaults are not cut. KeyChest.thin drops the most crowded map chests first. Change it with the bonus key odds in chest_keys.json (the --keys-check surplus).", "hold_s": 1.1, "gems": [7, 9], "gem_base": 4, "seed_odds": 0.85, "valuable_odds": 0.7, "valuable_tier": 1, "tonic_odds": 0.7, "table": "chest", "tier_bonus": [0, 0, 1], "soul_ember_min_bonus": 2, "soul_ember_odds": 0.3, "creak": ["chest_creak_plain", "chest_creak_rich", "chest_creak_grand"], "creak_doc": "The lid's sound as it opens, by the chest's tier: its rarity bonus (ChestLoot.rarity_bonus: the region's bonus, a dangerous area's step and the match tier's). The last one plays for anything richer."} |
 | keys | {"seed_mul": 7717, "seed_add": 31, "no_carry": ["ward", "glimmer", "warden", "sentinel"], "glint_h": 1.9, "cap": 3, "cap_doc": "Chest keys one hunter can hold (a belt stack). Past it a key stays on the ground, glinting."} |
 | shrubling | {"count": [1, 3], "biomes": ["bloom", "meadow", "gloom", "storm"], "min_patches": 3, "sprint_r": 18.0, "min_gap": 22.0, "landing_clear": 14.0, "exit_clear": 10.0, "hp": 26.0, "tier_hp": 0.5, "relax_r": 7.0, "alert_t": 0.4, "flee_speed": 6.5, "weave_amp": 0.5, "weave_amp_seen": 0.95, "weave_hz": 1.7, "repath_s": 0.7, "hide_clear_r": 8.5, "hide_los_r": 5.0, "dive_t": 0.35, "expose_s": 1.2, "tell_s": [5.0, 10.0], "grounded_speed": 0.55, "gems": 6} |
@@ -2081,7 +2081,7 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | Setting | Value |
 |---|---|
 | fusion_enabled | False |
-| fusion_enabled_doc | docs/decisions/0101: Fusion is off by default (11-18). false: the Fusion key, bots and the Boki never start a Fusion and no screen mentions it; all fusion code and content stay. true switches it back on. |
+| fusion_enabled_doc | docs/decisions/0159: Fusion is off by default (11-18). false: the Fusion key, bots and the Boki never start a Fusion and no screen mentions it; all fusion code and content stay. true switches it back on. |
 | xform_s | 0.7 |
 | xform_contact_s | 0.45 |
 | ult_lock_s | 1.5 |
@@ -2330,7 +2330,7 @@ Show Ring, a judged show on a small stage near the Training post (briefs/design/
 
 | Setting | Value |
 |---|---|
-| _doc | The closing zone (scripts/match/shrink_zone.gd, docs/decisions/0060-shrinking-zone.md). Times in seconds for a match length_ref s long (they scale with the match's own length); radii in m for a map map_ref m across (they scale with the map's size). final_lean: how far (share of the final radius) the final circle leans from its exit into the exit's island. start_pad: m the first circle reaches past the farthest map corner. drift: each earlier circle's centre moves this share (min, max) of its room toward the map's middle. warn_s: the kin and the feed warn this long before each close. bot_lead_s: bots head inside the next circle this long before it starts closing. tick_s: outside damage lands in ticks this long. Each phase: hold for wait, then close to r over shrink; from that close on, standing outside costs the damage of its stage: the closing-circle curve in content/rules/heart.json (tide_dmg, linear between stages 0, 1, 2 and 10) as a share of the Hunter's own max health a second, so a full-health Hunter lasts as many seconds as at the source (stage 0 nudges, the last stage kills in a few seconds). |
+| _doc | The closing zone (scripts/match/shrink_zone.gd, docs/decisions/0138-shrinking-zone.md). Times in seconds for a match length_ref s long (they scale with the match's own length); radii in m for a map map_ref m across (they scale with the map's size). final_lean: how far (share of the final radius) the final circle leans from its exit into the exit's island. start_pad: m the first circle reaches past the farthest map corner. drift: each earlier circle's centre moves this share (min, max) of its room toward the map's middle. warn_s: the kin and the feed warn this long before each close. bot_lead_s: bots head inside the next circle this long before it starts closing. tick_s: outside damage lands in ticks this long. Each phase: hold for wait, then close to r over shrink; from that close on, standing outside costs the damage of its stage: the closing-circle curve in content/rules/heart.json (tide_dmg, linear between stages 0, 1, 2 and 10) as a share of the Hunter's own max health a second, so a full-health Hunter lasts as many seconds as at the source (stage 0 nudges, the last stage kills in a few seconds). |
 | length_ref | 612 |
 | map_ref | 305 |
 | final_lean | 0.55 |
@@ -2437,7 +2437,7 @@ What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind
 
 ## terrain_hazards (`content/rules/terrain_hazards.json`)
 
-Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). look: the surface shader (shaders/terrain_hazard.gdshader).
+Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0139-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). look: the surface shader (shaders/terrain_hazard.gdshader).
 
 | Setting | Value |
 |---|---|
@@ -2599,7 +2599,7 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 
 | Setting | Value |
 |---|---|
-| doc | Diminishing returns for chained wall kicks (WallMoves, decision 0100, owner 11-13: a reduced move per jump). curve: the share of a kick's rise and push-off a kick keeps, by its place in the chain (kick 1, kick 2, then the last entry for every later kick). The chain is the kicks since your feet last touched the ground; landing resets it. HOP_CLIMB_CAP still stops a hop that starts too high. |
+| doc | Diminishing returns for chained wall kicks (WallMoves, decision 0158, owner 11-13: a reduced move per jump). curve: the share of a kick's rise and push-off a kick keeps, by its place in the chain (kick 1, kick 2, then the last entry for every later kick). The chain is the kicks since your feet last touched the ground; landing resets it. HOP_CLIMB_CAP still stops a hop that starts too high. |
 | curve | [1.0, 0.6, 0.3] |
 
 ## warden_look (`content/rules/warden_look.json`)
