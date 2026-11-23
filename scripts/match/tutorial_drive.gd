@@ -97,6 +97,11 @@ static func drive(m: Match) -> void:
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult":
 			_fight(m, tu, goto)
+		"steal":
+			var wisp := tu.st.goal()
+			if wisp != Vector3.INF:
+				goto.call(wisp, 0.4)
+				p.inp["interact"] = p.flat_dist(wisp) < 1.0 and tu.st.foe.downed
 		"ranks":
 			for slot in ["sec", "dash", "kin"]:
 				p.level_slot(slot)
