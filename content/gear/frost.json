@@ -19,9 +19,7 @@
    "length": 10,
    "width": 1.5,
    "time": 7,
-   "color": "bff0ff",
-   "sfx": "gl_ice"
+   "color": "bff0ff"
   }
- ],
- "sfx": {}
+ ]
 }

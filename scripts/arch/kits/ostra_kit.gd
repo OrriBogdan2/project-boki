@@ -611,8 +611,7 @@ func _tick_seed(dt: float) -> void:
 		if float(seed["burn"]) <= 0.0:
 			seed["burn"] = float(ed["burn_every"])
 			for f in foes_in(seed["pos"], seed_radius()):
-				var burn := float(ed["burn"]) * float(ed["burn_every"]) * power("kin")
-				f.hurt(burn, h, {"src": "abil", "ab": "e", "tick": true})
+				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
 		_pop(false)
 	elif h.ctrl == "bot":

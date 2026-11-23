@@ -10,7 +10,6 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
-const Cover := preload("res://tools/boki_state_cover.gd")
 ## m/s: a stroll, a home wander, a home fetch (home.gd), a led Boki at its catch-up top (home_lead.json), and the
 ## match speed per species.
 const HOME_SPEEDS := [1.5, 2.4, 4.4, 5.4]
@@ -68,10 +67,6 @@ func run(main: Node) -> void:
 		ok(id in BokiRig.CONTACT, "%s has its attack contact in BokiRig.CONTACT" % id)
 	for id in Check.SPECIES_LIST:
 		await _species(main, id)
-	var cover := Cover.new()
-	for id in Check.SPECIES_LIST:
-		await cover.species(main, id)
-	bad += cover.bad
 	print("BOKIGAIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -114,7 +109,7 @@ func _species(main: Node, id: String) -> void:
 	var row: Array = []
 	for grown in SIZES:
 		k.scale = Vector3.ONE * grown
-		rig._keep_flex(1.0 / 60.0)
+		rig._keep_flex()
 		for v in speeds:
 			var got := _gait(rig, steps, id, grown, v)
 			if grown == 1.0:

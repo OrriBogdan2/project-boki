@@ -23,13 +23,11 @@
   {
    "type": "cloak",
    "time": 1.5,
-   "color": "f2e6cf",
-   "sfx": "gl_decoy"
+   "color": "f2e6cf"
   },
   {
    "type": "haste",
    "time": 1.5
   }
- ],
- "sfx": {}
+ ]
 }
