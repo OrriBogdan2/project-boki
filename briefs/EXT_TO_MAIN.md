@@ -11166,3 +11166,4 @@ READY ext/ship-intro-feet-sound-1123 6c616b0345e (skyship intro: riders upright 
 READY ext/merge-lane-n23c-1123 680a6bf485 (lane n23c bundle: 11 ported branches, NEW-RED 0 after dropping kael-lmb-press and ingame-scale-1119, export dry-run OK 1060 MB +1.9%)
 READY ext/suite-load-robust-1119 678f1b4ff2aa8bd3509273f51effa73b8eadc8d9 (suite checks load-robust: results island MSAA follows settings, Boki cooldown on match time, playthrough load budget, low-fps tap trial)
 READY ext/vision-fog-flat-dim-1123 004a508e608 (sight fog is a flat slight dim: no grey, no blue; before/after GPU proof)
+READY ext/pitch-reel-no-foe-text - recorder: kit shot films with no game text over foes (plates, badges, reticle label, Static numerals), held zoom; v10 pitch videos at /mnt/HC_Volume_107406663/offload/coord_recordings/dylan-1122/v10/out (clean+text), RESULT_v10.md, answer.md
