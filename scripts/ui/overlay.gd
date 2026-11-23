@@ -856,7 +856,7 @@ func _row(v: VBoxContainer, label_txt: String, hint := "", key := "") -> HBoxCon
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var head := UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi)
-	head.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # a long action name wraps, never widens the panel
+	UI.wrapped(head)  # a long action name wraps, never widens the panel
 	lc.add_child(head)
 	if hint != "":
 		lc.add_child(UI.para(hint, UI.T_SMALL - 1, UI.MUTED))

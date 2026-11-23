@@ -50,6 +50,8 @@ const T_CAPS := 12       # section eyebrows (Rubik bold, spaced)
 const GAP := 12          # between things in a group
 const GAP_BIG := 20      # between groups
 const PAD := 26          # inside a panel
+const WRAP_MIN_W := 120.0      # least width of a wrapping Label: ~16 characters, never a column of letters
+                               # (not more: it must fit inside the narrow fixed cards, 150 px zone and cradle cards)
 
 static var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 static var body: Font = preload("res://fonts/Rubik.ttf")
@@ -156,22 +158,31 @@ static func label(text: String, size := 16, col := INK, font: Font = null) -> La
 	l.add_theme_color_override("font_color", col)
 	if font:
 		l.add_theme_font_override("font", font)
-	# short labels sit on one line; only real sentences wrap
-	l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	# short labels sit on one line; only real sentences wrap (see wrapped)
 	if text.length() > 48:
-		wrap_text(l)
+		wrapped(l)
+	else:
+		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	return l
 
-## Body text that wraps: the usual muted line under a heading.
-static func para(text: String, size := T_SMALL, col := MUTED) -> Label:
-	return wrap_text(label(text, size, col))
+## Makes a label wrap, with a minimum width. A wrapping Label reports ~0 minimum width (it can break at any
+## letter), so a row or card sized by its content gave it nothing and it broke one letter per line
+## (the Name-your-Boki line); EXPAND_FILL only shares out spare room, and there is none. min_w is the floor.
+static func wrapped(l: Label, min_w := WRAP_MIN_W) -> Label:
+	wrap_text(l)
+	l.custom_minimum_size.x = maxf(l.custom_minimum_size.x, min_w)
+	return l
 
 ## Makes l wrap at words and take the row's free width: a wrapping label has no width of its own, so in a row
-## without it it collapses to one letter per line (the Soul Shrine's vertical text).
+## without it it collapses to one letter per line (the Soul Shrine's vertical text). wrapped() adds a floor.
 static func wrap_text(l: Label) -> Label:
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return l
+
+## Body text that wraps: the usual muted line under a heading.
+static func para(text: String, size := T_SMALL, col := MUTED) -> Label:
+	return wrapped(label(text, size, col))
 
 static func title(text: String, size := 34, col := INK) -> Label:
 	var l := label(text, size, col, big)

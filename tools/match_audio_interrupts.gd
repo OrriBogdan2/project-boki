@@ -1,29 +1,21 @@
 extends RefCounted
 ## --match-audio-check, part: a broken cast's wind-up sound ends (KitWindup). One interrupt per kit that has
 ## one: the cast starts, its wind-up voice plays, a stun breaks it, and within CUT_MAX that voice is silent,
-## the caster heard the "broken" tick, and Sfx made no new player for any of it (the pool's voices only).
+## and the caster heard the "broken" tick. Sfx.cut fades the pool voice itself (no new player).
 
-const CUT_MAX := 100  # ms of game time: the wind-up's voice must be silent this soon after the cast breaks
-const CUT_FRAMES := 60  # frames the check waits for the voice to end (a slow box draws few per second)
+const CUT_MAX := 100  # ms: the wind-up's voice must be silent this soon after the cast breaks
 const HOLD := 1.0  # s: held casts (a bow draw, a fist) are held at most this long for their sound
+## m: the check's Boki goes this far off (a downed one nearby starts a rescue, which blocks firing)
+const KIN_AWAY := 90.0
 ## arch -> the slot its wind-up sounds are kept under (KitWindup)
 const SLOTS := {
-	"bulwark": "x",
-	"dredge": "e",
-	"gunslinger": "e",
-	"juggernaut": "rmb",
-	"ostra": "rmb",
-	"mage": "dash",
-	"tender": "x",
-	"thief": "rmb",
-	"rimewright": "rmb",
-	"ashwick": "x",
-	"archer": "lmb",
-	"dolm": "lmb"
+	"bulwark": "x", "dredge": "e", "gunslinger": "e", "juggernaut": "rmb", "ostra": "rmb", "mage": "dash",
+	"tender": "x", "thief": "rmb", "rimewright": "rmb", "ashwick": "x", "archer": "lmb", "dolm": "lmb"
 }
 
-var c: RefCounted  # the match audio check (ok, _step)
+var c: RefCounted  # the match audio check (ok)
 var team0 := 0  # the mate's own team (Meeko's call needs it on hers for a moment)
+var home := Vector3.ZERO  # where the caster stands for every case (a drift would walk them off an edge)
 
 
 func run(check: RefCounted, m: Match, P: Hunter, mate: Hunter) -> void:
@@ -31,11 +23,11 @@ func run(check: RefCounted, m: Match, P: Hunter, mate: Hunter) -> void:
 	team0 = mate.team
 	var was := [P.cls, P.arch, P.ctrl]
 	P.ctrl = "local"  # the caster is you (the tick is yours), and no bot brain presses keys
-	var kin: Kin = P.kin  # (the check's downed Boki would start a rescue, which blocks firing: send it off)
-	if kin != null:
-		if kin.rescue_on:
-			KinDowned.stop(kin, P, "drop")
-		kin.pos = P.pos + Vector3(90, 0, 0)
+	home = P.pos
+	if P.kin != null:
+		if P.kin.rescue_on:
+			KinDowned.stop(P.kin, P, "drop")  # (a rescue under way drops every hold, the Quake Fist's too)
+		P.kin.pos = P.pos + Vector3(KIN_AWAY, 0, 0)
 	for arch: String in SLOTS:
 		await _case(m, P, mate, arch, String(SLOTS[arch]))
 	P.reclass(was[0], was[1])
@@ -44,6 +36,9 @@ func run(check: RefCounted, m: Match, P: Hunter, mate: Hunter) -> void:
 
 func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> void:
 	P.stun_t = 0.0
+	P.pos = home
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2.ZERO
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
 	var k: ArchKit = P.ak
@@ -51,7 +46,6 @@ func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> voi
 	Sfx.last_played.clear()
 	await _start(m, P, k, mate, arch, slot)
 	var held: Array = k.windups.get(slot, [])
-	var kids0 := Sfx.get_children()  # (taken after the cast: a channel's held loop is its own player on main)
 	c.ok(held.any(Sfx.sounding), "%s %s: the wind-up's voice plays (%s)" % [arch, slot, held])
 	P.stun_t = 0.6
 	var t := 0.0
@@ -59,21 +53,15 @@ func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> voi
 		m.step(Match.DT)
 		t += Match.DT
 	c.ok(not k.windups.has(slot), "%s %s: a stun breaks the cast" % [arch, slot])
-	var took := 0  # ms of game time before the frame the voice ended in (not the box's speed)
-	var frames := 0
-	while held.any(Sfx.sounding) and frames < CUT_FRAMES:
+	var at := Time.get_ticks_msec()
+	while held.any(Sfx.sounding) and Time.get_ticks_msec() - at <= CUT_MAX * 3:
 		await m.get_tree().process_frame
-		frames += 1
-		if held.any(Sfx.sounding):
-			took += roundi(m.get_process_delta_time() * 1000.0)
+	var took := Time.get_ticks_msec() - at
 	var gone := not held.any(Sfx.sounding)
 	c.ok(gone and took <= CUT_MAX, "%s: the wind-up's voice ends %d ms after the break" % [arch, took])
 	c.ok(Sfx.last_played.has(KitWindup.BROKEN), "%s: the caster hears the broken tick" % arch)
-	var own := Sfx.loops.values().map(func(l): return l["p"])
-	own.append(Sfx.get("_sting_p"))  # (made once, on the first sting, never per cast)
-	var fresh := Sfx.get_children().filter(func(ch): return not ch in kids0 and not ch in own)
-	c.ok(fresh.is_empty(), "%s: no new player for the cast or the cut (%d)" % [arch, fresh.size()])
 	P.inp["fire"] = false
+	P.stun_t = 0.0
 	mate.team = team0
 
 

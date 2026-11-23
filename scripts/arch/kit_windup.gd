@@ -5,7 +5,7 @@ class_name KitWindup
 ## (Sfx.cut, no new player) and gives the caster a small "broken" tick. Checked in --match-audio-check.
 
 const BROKEN := "cast_broken"  # content/sfx/ui.json, tools/gen_sfx_ui.py
-const BROKEN_DB := -8.0  # dB: a small UI tick under the INTERRUPTED word, only the caster hears it
+const BROKEN_DB := -8.0  # dB: a small UI tick, only the caster hears it
 
 
 ## Plays the wind-up sound at the caster and keeps its handle under the slot (with any still ringing).
@@ -20,10 +20,21 @@ static func keep(k: ArchKit, slot: String, handle: int) -> void:
 	k.windups[slot] = held
 
 
-## The slot's cast was broken: its wind-up sounds stop with a short fade; the caster hears the tick.
+## The slot's cast was broken: its wind-up sounds stop with a short fade; the caster hears the tick (only when
+## the cast had got as far as its sound).
 static func broken(k: ArchKit, slot: String) -> void:
+	if not k.windups.has(slot):
+		return
 	for handle: int in k.windups.get(slot, []):
 		Sfx.cut(handle)
 	k.windups.erase(slot)
 	if k.h.is_local():
 		Sfx.play(BROKEN, null, BROKEN_DB, 0.04)
+
+
+## Every wind-up sound of the kit stops, with no tick (ArchKit.drop_holds: a merge, a rescue, being out).
+static func drop_all(k: ArchKit) -> void:
+	for slot: String in k.windups:
+		for handle: int in k.windups[slot]:
+			Sfx.cut(handle)
+	k.windups.clear()

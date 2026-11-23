@@ -270,6 +270,11 @@ var starts := PackedInt32Array()       # per pool voice: how many sounds it has 
 var _cut_tw: Array[Tween] = []         # per pool voice: its fade-out under way (cut)
 const CUT_FADE := 0.05                 # s: a cut sound fades this fast, so it doesn't click (a broken cast)
 var voices := SfxVoices.new(POOL)  # who keeps a voice when the pool or the loops are full
+## A handle (from play) names one sound on one pool voice: starts * POOL + the voice, so a handle to a sound
+## that has ended, its voice gone on to another, cuts nothing.
+var starts := PackedInt32Array()  # per pool voice: how many sounds it has started
+var _cut_tw: Array[Tween] = []  # per pool voice: its fade-out under way (cut)
+const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a broken cast)
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
@@ -658,6 +663,10 @@ func _voice(pos, rk: float, sname: String) -> AudioStreamPlayer:
 	if i < 0:
 		return null
 	next = (i + 1) % POOL
+	if _cut_tw[i] != null:
+		_cut_tw[i].kill()
+		_cut_tw[i] = null
+	starts[i] += 1
 	voices.rank[i] = rk
 	voices.sound[i] = sname
 	if _cut_tw[i] != null:
@@ -715,11 +724,26 @@ func play_sample(bus_name: String) -> void:
 	p.pitch_scale = 1.0
 	p.play()
 
+## Fades out the sound `handle` names (from play) if its voice still plays it: a wind-up whose cast was broken.
+func cut(handle: int, fade := CUT_FADE) -> void:
+	if not sounding(handle):
+		return
+	var p := players[handle % POOL]
+	var tw := p.create_tween()
+	tw.tween_property(p, "volume_db", -60.0, fade)
+	tw.tween_callback(p.stop)
+	_cut_tw[handle % POOL] = tw
+
+## Whether the sound `handle` names (from play) is still playing.
+func sounding(handle: int) -> bool:
+	var i := handle % POOL
+	return handle >= 0 and handle == starts[i] * POOL + i and players[i].playing
+
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter (returns a handle for cut, -1 when nothing played). reach:
 ## metres this call carries (0: the sound's own "reach", else hear_range). mine: your own sound played away from you (a hit tick on the one you hit), so the pool
 ## keeps it as it keeps your other sounds (SfxVoices). take: a given take of a sound that has several (FireSfx
-## round-robins them), else a random one that isn't the last.
+## round-robins them), else a random one that isn't the last. Returns a handle for cut, -1 when nothing played.
 func play(
 	sname: String,
 	pos = null,
