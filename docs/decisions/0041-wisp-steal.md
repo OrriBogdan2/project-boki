@@ -42,3 +42,7 @@ Field Book count only).
 - Results: `KinSteal.carried_home` keeps the wisps the player carried at match end (`r["wisps_home"]`); the results
   Boki block lists each as "<name>  going home" next to the XP and bond lines of your own Boki (`ResultsBokiLines`,
   `--results-boki-line-check`).
+- `--passive-stack-check` covers the Q8 stacking (own 100 %, stolen 50 %, clamp at the carry cap, 2 stolen, passives leave on escape or match end).
+- HUD: up to two rows above the Boki box (`BokiHud.stolen_wisps`): the critter in its colours inside an ally-blue thief
+  ring, its carry passive at `passive_k`, the summon key while ready / "OUT 4s" / "USED". A teammate's squad row wears
+  a count badge (`TeamBoki`). It sits on the Boki box's group, so the HUD stays at five groups. `--stolen-hud-check`.
