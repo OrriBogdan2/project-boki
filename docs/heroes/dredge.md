@@ -333,7 +333,7 @@ hold, wind-up and charge with nothing fired (the `merge hold` lines of the check
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
-| Deep Reach reel (to the arrival, up to 3 s) | LMB tap or hold | [W] only the dash and the air dash work while it pulls | gun locked (`can_shoot`); a held LMB fires the frame the reel ends, a tap is lost | match | `reel: the gun is locked`; [W]; [F] dredge.md:241 (open question) |
+| Deep Reach reel (to the arrival, up to 3 s) | LMB tap or hold | [W] only the dash and the air dash work while it pulls | gun locked (`can_shoot`); a held LMB fires the frame the reel ends, and a tap inside the reel is kept to that frame: one volley (`DredgeKit.lmb_override`, the input-buffer rule) | match | `reel: the gun is locked`, `reel: an LMB tapped 0.2 s into a 1 s reel fires one volley ...`; [W]; [F] dredge.md:241 (open question) |
 | reel | RMB, E, X | as above | each refused (the deny buzz); the reel runs on | match | `reel: a second Deep Reach is denied`, `E is denied while reeling`; `ult` row below |
 | reel | jump, glide | [W] as above; [F] 0127 "GROUNDED" on the caster | Grounded for the whole reel: no jump, no glider | match | dash_flow `into_jump.rmb` lock; `KitStatus` "gnd"; item 31 |
 | Deep Reach, arm out (the coil-back and the flight to the miss, up to 11.5 m) | LMB | [W] the only lock is "while it pulls" (the reel); [D] no lock on the throw; owner item 31 limits only the walk and the height while it is out | both: a volley goes, the arm flies on | match | `arm out: the gun fires, the arm flies on`; [F] dredge.md:77 "the video doesn't test this" |
