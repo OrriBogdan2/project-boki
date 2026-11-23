@@ -217,5 +217,6 @@ func _aim_line(m: Match) -> void:
 		var along: Vector3 = -m.aim_line.global_transform.basis.z   # look_at aims -Z
 		var line := Vector2(along.x, along.z).normalized()
 		var off := rad_to_deg(line.angle_to(P.aim_dir())) if m.aim_line.visible else 0.0
-		ok(m.aim_line.visible and absf(off) < 1.0, "aim line vs cone centre, %s cursor: %.2f degrees apart" % [key, off])
+		var seen: bool = m.aim_line.visible and absf(off) < 1.0
+		ok(seen, "aim line vs cone centre, %s cursor: %.2f degrees apart" % [key, off])
 	P.ak = saved_ak
