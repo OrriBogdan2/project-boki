@@ -374,7 +374,12 @@ const CHECKS := {
 	"--dash-streak-shots": ["res://tools/dash_streak_shots.gd", "dash_streak_shots", null],
 	# a press in another ability's wind-up or recovery (the Cast into cast tables)
 	"--cast-into-cast-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", null],
-	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],  # dash -> ability rows
+	# dash -> ability rows, in four shards (each under the gate's 300 s cap)
+	"--dash-flow-1-check":
+		["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "archer,juggernaut,gunslinger,bulwark"],
+	"--dash-flow-2-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "rimewright,ashwick,dolm"],
+	"--dash-flow-3-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "mage,dredge,tender"],
+	"--dash-flow-4-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "thief,ostra,gil"],
 	"--glide-trail-check": ["res://tools/glide_trail_check.gd", "glide_trail_check", null],
 	"--glide-trail-shots": ["res://tools/glide_trail_shots.gd", "glide_trail_shots", null],
 	# cast at a jump's top: momentum per slot
