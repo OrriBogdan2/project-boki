@@ -116,8 +116,12 @@ def raster(sx, sy, depth, tris, w, h):
                 py = y0[t][:, None] + oy[None, :]
                 qx, qy = px + 0.5, py + 0.5
                 a_ = area[t][:, None]
-                w0 = ((bx[t][:, None] - qx) * (cy[t][:, None] - qy) - (cx[t][:, None] - qx) * (by[t][:, None] - qy)) / a_
-                w1 = ((cx[t][:, None] - qx) * (ay[t][:, None] - qy) - (ax[t][:, None] - qx) * (cy[t][:, None] - qy)) / a_
+                w0 = (
+                    (bx[t][:, None] - qx) * (cy[t][:, None] - qy) - (cx[t][:, None] - qx) * (by[t][:, None] - qy)
+                ) / a_
+                w1 = (
+                    (cx[t][:, None] - qx) * (ay[t][:, None] - qy) - (ax[t][:, None] - qx) * (cy[t][:, None] - qy)
+                ) / a_
                 w2 = 1.0 - w0 - w1
                 inside = (w0 >= -1e-6) & (w1 >= -1e-6) & (w2 >= -1e-6) & (px < w) & (py < h)
                 ti, pi = np.nonzero(inside)
@@ -168,8 +172,11 @@ class Posed:
         fin = np.isfinite(self.body.pos).all(axis=1)
         p = self.body.pos[fin]
         self.height = float(p[:, 1].max() - p[:, 1].min()) or 1.0
-        self.center = (float((p[:, 0].max() + p[:, 0].min()) / 2), float((p[:, 1].max() + p[:, 1].min()) / 2),
-                       float((p[:, 2].max() + p[:, 2].min()) / 2))
+        self.center = (
+            float((p[:, 0].max() + p[:, 0].min()) / 2),
+            float((p[:, 1].max() + p[:, 1].min()) / 2),
+            float((p[:, 2].max() + p[:, 2].min()) / 2),
+        )
         self.rig = hmc.Rig(self.g)
         self.double = np.array([bool(m.get("doubleSided")) for m in self.g.j.get("materials", [])] + [False])
         self.skinned = self.body.skin is not None and bool(self.g.j.get("skins"))
@@ -311,8 +318,15 @@ def _images(live, cand, cam, frames, clip, f, view):
     return live.render(live.pose(clip, f, frames), cam, view), cand.render(cand.pose(clip, f, frames), cam, view)
 
 
-def compare(live_data: bytes, cand_data: bytes, frames: int = 6, clip_re: str | None = None, png_dir=None, name="hunter",
-            jobs: int = 8):
+def compare(
+    live_data: bytes,
+    cand_data: bytes,
+    frames: int = 6,
+    clip_re: str | None = None,
+    png_dir=None,
+    name="hunter",
+    jobs: int = 8,
+):
     """Returns {"verdict", "codes", "worst": {metric: [live, fix, where]}, "mesh": ..., "sil": ..., "frames": n}."""
     import multiprocessing as mp
 
@@ -357,11 +371,19 @@ def compare(live_data: bytes, cand_data: bytes, frames: int = 6, clip_re: str | 
     if mesh["new_open_edges"] > NEW_OPEN * max(mesh["tris_live"] * 1.5, 1):
         codes["new_open_edges"] = "FAIL"
     level = "FAIL" if "FAIL" in codes.values() else "WARN" if codes else "PASS"
-    res = {"verdict": level, "codes": codes, "worst": worst, "mesh": mesh,
-           "sil": {k: [round(sil[k], 4), sil_at[k]] for k in sil}, "frames": frames}
+    res = {
+        "verdict": level,
+        "codes": codes,
+        "worst": worst,
+        "mesh": mesh,
+        "sil": {k: [round(sil[k], 4), sil_at[k]] for k in sil},
+        "frames": frames,
+    }
     if png_dir is not None:
         shown = {k: worst_at[k] for k in worst_at if k in codes} or dict(list(worst_at.items())[:3])
-        imgs = {k: (*_images(live, cand, cam, frames, *w), f"{w[0] or 'rest'} f{w[1]} {w[2]}") for k, w in shown.items()}
+        imgs = {
+            k: (*_images(live, cand, cam, frames, *w), f"{w[0] or 'rest'} f{w[1]} {w[2]}") for k, w in shown.items()
+        }
         res["png"] = write_sheet(Path(png_dir) / f"{name}_review.png", imgs, codes, name)
     return res
 
