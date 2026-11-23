@@ -1,0 +1,12 @@
+{
+ "_doc": "Monster camps (scripts/match/camps.gd, docs/CAMPS.md). Every camp spot on the map is one of three sizes by its layout kind: light = Small Camp, normal = Camp, heavy = Great Camp. lvl: the level a bot wants before it goes for the camp (bots farm small camps first). n and big: monsters in a camp from a region table, and the one big monster a Great Camp always has. fixed: the monsters of a Great Camp with no region table. A camp's monsters are picked by a dice seeded from its spot alone, so the same camp holds the same monsters every match. back_s: a cleared camp comes back once this many seconds after its clear, if no Hunter is within back_clear_r metres (rolling sessions only). spread: how far (m) the monsters stand from the camp's centre.",
+ "sizes": {
+  "light": {"name": "Small Camp", "lvl": 1, "n": 2},
+  "normal": {"name": "Camp", "lvl": 2, "n": 3},
+  "heavy": {"name": "Great Camp", "lvl": 4, "n": 4, "big": ["brute", "sentinel"], "fixed": ["brute", "spitter", "skitter", "sentinel"]}
+ },
+ "back_s": 240.0,
+ "back_clear_r": 22.0,
+ "spread": 1.8,
+ "bot_camp_share": 0.85
+}

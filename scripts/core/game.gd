@@ -370,8 +370,7 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 
 ## XP a kin needs to go from level `lv` to the next (the curve is in content/rules/garden_xp.json).
 func xp_need(lv: int) -> int:
-	var c: Dictionary = GardenXp.rules()["curve"]
-	return int(c["per_level"]) * mini(lv, int(c["flat_from"]))
+	return GardenXp.need(lv)
 
 ## Gives a kin XP, runs each level up's evolution into `out`; returns the levels gained.
 func add_xp(k: Dictionary, xp: int, out: Dictionary) -> int:
