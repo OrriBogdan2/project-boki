@@ -282,6 +282,7 @@ func _finish(sid: String) -> void:
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
 	if resumed:
+		camps.told = true  # (a resumed run saw the first camp's countdown: its camps come at once)
 		_restore()
 	_enter()
 
