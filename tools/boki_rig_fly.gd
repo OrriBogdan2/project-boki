@@ -24,7 +24,7 @@ func run(m: Node, c) -> void:
 	main = m
 	check = c
 	Save.no_write = true
-	seed(3)  # (7 no longer lets the fliers roam: the lane's BaseLife draws one more random number per choice)
+	seed(6)  # (3 and 7 no longer roam 30 s: the lane draws more random numbers per BaseLife choice; 6 roams 37 s)
 	var farm_rules: Dictionary = Content.rules("farm_build")
 	farm_rules["base_mode"] = true
 	_new_save()
