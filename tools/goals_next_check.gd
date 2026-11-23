@@ -5,6 +5,7 @@ extends "res://tools/new_player_flow_check.gd"
 ## Never touches the real save.
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm, like the flow check
 	main = m
 	tree = main.get_tree()
 	Save.no_write = true
