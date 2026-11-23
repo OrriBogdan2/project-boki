@@ -11096,3 +11096,4 @@ READY ext/owner-kit-notes-b 2f9dc89b10 (bulk-rebase: origin/main merged in mecha
 READY ext/parity-recheck-tenzo-sparkle 93ad07ffac (bulk-rebase: origin/main merged in mechanically, was 529f18a37f; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/stuck-integ-ed6637f4 67dd546411 (bulk-rebase: origin/main merged in mechanically, was ce8503d362; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/feel-last-estimates 26446efc6339 (sourced overheat/spike/jump-pad numbers; merged main again; --check 0 failures, new overheat/spike/pad move-feel rows ok; 14 other --move-feel-check rows red but not in this branch rows; health --strict fails only on main camp_clear_check long_line)
+READY ext/parity-recheck-sable-motley 199cd0ca03 (bulk-rebase: origin/main merged in mechanically, was f452714364; union 1 gen 0 files; the branch's own READY checks still apply)
