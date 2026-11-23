@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c2hwltl1wi4st"
-path="res://.godot/imported/cairnback_cairnback_normal.webp-9dc6c064d94347288e71282481ba8ff7.ctex"
+path.bptc="res://.godot/imported/cairnback_cairnback_normal.webp-9dc6c064d94347288e71282481ba8ff7.bptc.ctex"
+path.astc="res://.godot/imported/cairnback_cairnback_normal.webp-9dc6c064d94347288e71282481ba8ff7.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "c493762fc661935c25dc9c4ed4c5e97c"
+"md5": "db4125e2a215034297823ee9cde3f7fa"
 }
 
 [deps]
 
 source_file="res://art/kin/cairnback/cairnback_cairnback_normal.webp"
-dest_files=["res://.godot/imported/cairnback_cairnback_normal.webp-9dc6c064d94347288e71282481ba8ff7.ctex"]
+dest_files=["res://.godot/imported/cairnback_cairnback_normal.webp-9dc6c064d94347288e71282481ba8ff7.bptc.ctex", "res://.godot/imported/cairnback_cairnback_normal.webp-9dc6c064d94347288e71282481ba8ff7.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

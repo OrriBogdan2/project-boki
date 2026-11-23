@@ -8,8 +8,9 @@ extends RefCounted
 
 const RULES_PATH := "res://content/rules/glossary.json"
 
-static var _lines := {}            # word -> its one line
-static var _this_session := {}     # words first seen in this session: their line keeps showing
+static var _lines := {}  # word -> its one line
+static var _this_session := {}  # words first seen in this session: their line keeps showing
+
 
 ## The one-line explanation of `word` while it is new to this save, else "".
 static func first_line(word: String) -> String:
@@ -25,11 +26,13 @@ static func first_line(word: String) -> String:
 	_this_session[word] = true
 	return String(_lines[word])
 
+
 ## Adds `word`'s first-time line to `box` as a small faint paragraph (nothing once it has been seen).
 static func add_note(box: Control, word: String) -> void:
 	var line := first_line(word)
 	if line != "":
 		box.add_child(UI.para(line, UI.T_SMALL, UI.FAINT))
+
 
 ## Forgets this session's words, as if the game had restarted (the check uses it).
 static func new_session() -> void:

@@ -58,15 +58,32 @@ from Meshy's auto-rig instead (spec key `weights: "meshy"`; mesh, UVs, paint, ri
   pokes through.) A loose piece (a pistol, a sword, a horn) with `RIGID_SHARE` of its weight on one bone rides that
   bone whole.
 - A forearm or hand fused to the body in the master's pose is cut free (`detach`, automatic for the `past_wrist`
-  bones). `regions`, `smooth` and `relax` are not run (`meshy_smooth`, below, widens Meshy's blends). The spring, `skirt`, `cape` and `pauldron` bones stay in the
+  bones). `regions`, `smooth` and `relax` are not run. The spring, `skirt`, `cape` and `pauldron` bones stay in the
   rig but carry no body weight in this mode.
 Sable, Tenzo, Kael and Lace are built this way (the rig bake-off against the other method, sheets in the job's
 report). Known leftovers: a braid or strap fused into the body mesh follows the arm it rests on (Sable's braid); a
 coat or skirt below the belt stays with the thighs, so it steps off the waist in a deep lean and Lace's skirt spreads
-wide in her bow stance. Kael is built from the one-sword master (`A_keep_new.glb`, the master's sword faces
-dropped, the game's sword kept). A first run that asks Meshy for the rig can hang after the `meshy:` lines (11-17: twice,
-15 and 100 min); the same swap run again on that WORK dir, with `meshy/rigged_character.glb` already there, ends in
-2 min (run v95_swap.py itself: v95_to_game.py clears `meshy/` and asks again).
+wide in her bow stance; Kael's master sword and the game's sword both show in his hand.
+
+## Hands (2026-11-21, ext/hand-flatten-fix): why fingers flattened and what protects them
+`python3 tools/art1/glb_regions.py <glb>...` reports per-region triangles (head, hand per side, forearm, weapon bones ...)
+and finger bones of a game .glb (exit 1 when a hand holds under 6%). On main's 13 Hunters a hand held 0.0-11% (most
+0.4-3%) while the head held 27-58%: a uniform collapse spends the budget on the big smooth areas.
+1. **Rig** (`meshy_task.py rig OUT TASK [--no-fingers]`): sends `include_fingers`. The game skeleton stays `hand.*`
+   plus the Warden's own extra bones (RIG_CONTRACT: more bones are fine and follow their parent; Hem, Sparkle, Albert and
+   Motley already carry finger chains). No per-finger chain is added for the rest: no clip moves a finger, so a chain
+   only costs skin_relax time. Meshy's finger joints are a reference for where a chain would go.
+2. **Decimate**: `v95_to_game.py` sets `hand_tris` = 9% of `tris` per hand ball (6-8% of the triangles by dominant bone); `bake_warden.make_low` holds the head and both
+   hand spheres (`v95_swap.hand_balls`: r = 8.5% of the height, round the wrist-to-elbow line) while the body collapses,
+   then takes each sphere to its budget alone, seam weights kept. A hand with fewer triangles than its budget keeps them.
+   A hand sphere holds only what is nearer the forearm-to-finger-tip line than the thighs and trunk (`LIMB_R`): Cinder's,
+   Kael's and Tarek's hands hang within a sphere's reach of the thigh (11%, 4%, 7% of a thigh's surface fell inside).
+   Before/after (11-21, two dense Sparkle Meshy bodies, 1.36-1.39M tris, to 60k, head 45%): a hand 0.8-1.0% -> 8.9%.
+   `fit_warden.py`'s `region_budget` (opt-in spec key) does the same for the non-keep_uv fit.
+3. **Geometry**: multi-image tasks cap at 2k; `meshy_task.py create OUT front.png side.png ... --detail-image front.png`
+   adds a single-image 4k task into `OUT/detail` (the hand and head shapes a 2k mesh smooths). Compare the two, take the
+   hands/head shapes you like into a body pass; a detail pass is not a replacement body (one view, no back).
+4. **Weapons**: the game .glb's weapon pieces (Hem's bow and arrow, Albert's hammer: meshes and empties of their own) are re-imported and exported with the swap; Hem's bow, 896 triangles, comes through unchanged. What a swap does lose: faces of the old body mesh on a weapon bone that `keep` does not list (Grimble's `gun`). The swap now prints that count ("SWAP weapons: ..."): list the bone in `keep` when it is not the master's own.
 
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
@@ -94,6 +111,12 @@ the hammer in his right fist, tipped up onto the floor) and `tarek` (the five fi
 `~/meshy/v95/<Name>/props/`, the per-Hunter table in `~/meshy/v95/PROPS_1113.md`. Gil, Kael, Lace, Meeko, Neve
 and Tarek's eye stones are separate parts of their masters already; Vex, Sable and Grimble's are in the Meshy mesh;
 Sparkle and Cinder carry none. Promoting a props GLB is a body pass (no face change).
+
+## Status (2026-11-14, ext/albert-i1-ingame): Albert i1 in game
+Albert is on his live i1 master (art/wardens/breaker/IMPORT.md). Two swap keys came with him: `emit_paint` (a master that paints its
+glow: the emissive texture is the baked atlas's texels in a hue/sat/value range) and `screen` again (`screen_uvs`, lost in a merge
+before 11-11: Albert's porthole showed blank glass from the clean1 swap on). The fish has `move_bones` with `to` and the game glb is
+main's (absolute points only), which closes the 16x stretch: worst 5.24, 0 clips over 9.5.
 
 ## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
 In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged
@@ -252,23 +275,18 @@ drops and prints them (indices and normals only), then `glb_relax.py` as usual. 
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
 
-`meshy_reach` (spec, `weights` "meshy" only, 2026-11-20 Neve regen): `{"arm": [r0, r1], "thigh": [r0, r1]}` m. Meshy's
-auto-rig gives a cropped jacket's front panels half to the arm and a flared skirt to the thighs; an arm or thigh weight on
-a vertex past r1 from that limb's bones goes to `hips`, faded from r0 (Neve: arm 0.08-0.12, thigh 0.10-0.15; her idle's
-worst stretch 19.3 -> 6.6 on run C). The joints of a fresh Meshy master can come from its own auto-rig: pelvis = the hip
-joints - 0.045 (the game rig's `hips` sit 0.04 below its thighs), neck = Meshy's `Head` bone (ours starts at the chin, not
-the collar); Meshy's `Hips` and `neck` put the pelvis at the waist and stretch the torso x1.8 onto the rig.
+## Rebake, 2026-11-18 (ext/rig-ship-1117): spec `own.rebake`, for a master whose atlas is a patchwork of tiny islands
+Tenzo's pick (1.07M tris, 8k paint) has an atlas of thousands of small islands. `keep_uv`'s 60k collapse carries those
+UVs along, so many triangles span several islands and draw as black and orange specks (torso, sarong, arms), and the
+skin read orange. With `"rebake": true` (v95_swap.py `rebake_paint`) the low mesh is decimated without the UVs, unwrapped
+(bake_warden `unwrap`) and the master's base colour (4096) and emission (2048) are baked on as "v95" / "v95b"; weights,
+rig, clips and names are unchanged. Other picked masters with the same kind of atlas need the same key. GPU shots of a
+Hunter: `--clip-shots --yaw=0` (front: a negative `--dist`); a yaw other than 0 without a state twists the root bone, so the
+thighs turn against the hips and a sarong tears at the waist in the shot only.
 
-`meshy_smooth` (spec, `weights` "meshy" only, 2026-11-20 Neve regen): N passes of the `smooth` blend on Meshy's
-weights after `meshy_reach` and `detach` (default 0). `meshy_reach` and the pelvis ramp hand weight to `hips` over a
-few cm, so neighbouring skirt and crotch vertices carry very different thigh weight and those edges stretch
-(`hips>hips` in --stretch-check). Neve run C, 71 clips, worst / clips over 5x: 0 passes 12.17 / 50, 4 9.83 / 28,
-10 6.66 / 16, 20 5.56 / 5, 40 5.23 / 2 (live 11-10 glb 9.15 / 38). 20 keeps knees and elbows shaped in crouch_f
-and stomp.
-
-Neve r4 (2026-11-20, ext/hunter-regen-claire-1120): six fresh multi-image gens from the 11-19 turnaround (40 credits each),
-`create ... --texture-refs` and `--enhance off` varied; `--enhance off` speckles the skirt again (g6, as run B). The joints
-script is `~/gens/hunter-regen-1120/claire/r4/scripts/rig_joints.py` (Meshy rig on the quad master -> `joints.json`). Use
-`--warden-variant=claire_<tag>` (art/wardens/claire_<tag>/claire_<tag>.glb) to put several candidates in ONE tree for `jobq`
-(one relay, no same-name `.ctex` mtime trap). Stretch (71 clips, worst / mean / clips over 5x), smooth 20: g2 4.35 / 3.19 / 0,
-g5 5.08 / 3.33 / 1, g1 7.45 / 4.05 / 14 (r3 run C 5.56 / 3.58 / 5, live 9.15 / 5.47 / 38). The branch head is another job's G1 (4.86 worst, 0 over 5x); g2 stays a side candidate in `~/gens/hunter-regen-1120/claire/r4/cand_g2/` (it keeps the TA braid).
+## Torn right foot, 2026-11-18 (ext/grimble-ingame-fix-1117)
+Cutting the floor puddle took the Meshy faces of Grimble's right foot with it: below the knee his right leg was a fan of
+shards that tore in every clip (the stretch check cannot see it; Blender renders of idle, run_f, throw, lunge and
+death can). The rig is mirror-symmetric, so `python3 tools/art1/glb_mirror_limb.py IN.glb OUT.glb --below 0.42`
+dropped the right leg's 575 triangles under 0.42 m and put the left shin and foot there, mirrored (534 tris, same UVs and
+paint, .L joints renamed .R). Stretch-check unchanged (mean of 52 clips 4.66, worst 8.52 ledge).

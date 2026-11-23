@@ -40,6 +40,7 @@ static var glide_swoop_fade := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
 static var dash_glide_ease := 0.0
+static var press_buffer := 0.0   # s an early press waits to be allowed: a dash's end, a recast window, a CC's end
 static var _mtime := 0
 static var _loaded := load_tuning()
 
@@ -72,6 +73,7 @@ static func load_tuning() -> bool:
 	carry_drag = T["glide_carry"]["carry_drag"]
 	dash_jump_keep = T["dash"]["jump_keep"]
 	dash_glide_ease = T["dash_glide"]["ease_t"]
+	press_buffer = T["press_buffer"]
 	return true
 
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).

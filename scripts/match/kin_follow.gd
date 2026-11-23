@@ -203,6 +203,7 @@ static func land_side(k: Kin) -> void:
 	k.vel = Vector3.ZERO
 	k.state = "active"
 	k.m.fx.dust(k.pos, 8)
+	land_cue(k, true)       # (the hop home to your side settles like one onto your shoulder)
 
 ## The sound of it coming down: a thrown Boki by its weight class (a light patter, a heavy thump), or the soft
 ## settle of one landing back on your shoulder. A rival's is quieter. Cues and sizes: boki_system.json "follow".

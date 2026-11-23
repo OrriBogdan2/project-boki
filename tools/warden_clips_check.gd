@@ -27,6 +27,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
@@ -134,7 +135,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			if d > worst:
 				worst = d
 				worst_mv = k
-		if moved < 0.03 and not k in ["bul_short", "bul_crush", "bul_armed"]:
+		if moved < 0.03 and not k in ["bul_short", "bul_crush"]:
 			still.append(k)
 		_play(m, an, sync, st, 12)
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])
@@ -398,7 +399,7 @@ func _air_legs(id: String) -> void:
 		var cast := {"vel": Vector3(0, -2.0, 0), "face": 0.0, "grounded": false, "kmove": k}
 		for f in AIR_FRAMES:
 			cast["kmove_t"] = f * DT
-			cast["grounded"] = f >= AIR_FRAMES / 2
+			cast["grounded"] = f >= int(AIR_FRAMES / 2.0)
 			_play(pair[1][0], pair[1][1], pair[1][2], cast, 1)
 			if cast["grounded"] and clips.act_w > 0.01 and not k in snaps:
 				snaps.append(k)

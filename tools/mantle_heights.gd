@@ -6,14 +6,14 @@ extends RefCounted
 ## height from a run (a running jump), a standing jump and a glide. A height inside the reach (a jump's apex plus
 ## Hunter.MANTLE_REACH, or the glide's) must top every try with no snap; a height past it must never top by jumping.
 
-const HEROES := ["tender", "gunslinger", "bulwark"]    # light Meeko, medium Vex, heavy Albert (the brief's classes)
+const HEROES := ["tender", "gunslinger", "bulwark"]  # light Meeko, medium Vex, heavy Albert (the brief's classes)
 const MODES := ["run", "jump", "glide"]
-const PER_HEIGHT := 6        # faces driven per height bucket
-const SNAP_M := 0.2          # m: one step's move this far off what its velocity explains is a snap
+const PER_HEIGHT := 6  # faces driven per height bucket
+const SNAP_M := 0.2  # m: one step's move this far off what its velocity explains is a snap
 
-var c                        # the cliff check (tools/cliff_mantle_check.gd): its Match, Hunter, _try
-var census := {}             # "kind height" -> faces counted, over both tiers
-var rows := {}               # "height kind hero mode" -> {n, top, snap}
+var c  # the cliff check (tools/cliff_mantle_check.gd): its Match, Hunter, _try
+var census := {}  # "kind height" -> faces counted, over both tiers
+var rows := {}  # "height kind hero mode" -> {n, top, snap}
 
 
 func _init(check) -> void:
@@ -70,9 +70,22 @@ func _face(a: Vector2i, d: Vector2i) -> Dictionary:
 		kind = "sheer"
 	elif w.stairs.has(ib):
 		kind = "stair_side"
+	if kind == "stair_side":
+		# a flight's side grows along it: only a lip that is level across the body's width is a ledge of one height
+		var sv := Vector2(d.y, d.x) * 0.4
+		for sgn in [-1.0, 1.0]:
+			if absf(w.ground_at(edge.x + dv.x + sv.x * sgn, edge.y + dv.y + sv.y * sgn) - ga - hb) > 0.1:
+				return {}
 	hb = snappedf(hb, 0.4 if kind == "stair_side" else 0.01)
-	return {"kind": kind, "h": hb, "a": a, "d": d, "rise": w.level[ib] - w.level[w.idx(a.x, a.y)],
-		"la": w.level[w.idx(a.x, a.y)], "top_y": ga + hb}
+	return {
+		"kind": kind,
+		"h": hb,
+		"a": a,
+		"d": d,
+		"rise": w.level[ib] - w.level[w.idx(a.x, a.y)],
+		"la": w.level[w.idx(a.x, a.y)],
+		"top_y": ga + hb
+	}
 
 
 ## One face, every hero and mode.

@@ -23,7 +23,7 @@ const STARVE := {"weak": 6.0, "refuse": 18.0, "sick": 30.0, "dead": 72.0}
 const STARVE_INFO := {
 	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
 	"weak": ["Weak from hunger", "Slow and weak. Feed it, let it nap or keep a friend close."],
-	"refuse": ["Too weak to go out", "Too weak for expeditions. Feed it, let it nap; a Puffcorn snack works fastest."],
+	"refuse": ["Very weak from hunger", "No expedition on an empty belly. One meal and it comes along."],
 	"sick": ["Sick from hunger", "Sick and drooping. Feed it, nap, keep a friend close; one Puffcorn snack cures it."],
 }
 ## Getting better, in starve-seconds undone per second while it is fed (food over 20): a meal's worth,
@@ -69,7 +69,7 @@ const IV_INHERIT_MAX := 5
 ## Rare Eggs from boss lairs: this many stats are always at least IV_RARE_FLOOR.
 const IV_RARE_HIGH := 3
 const IV_RARE_FLOOR := 26
-const IV_EXPLAIN := "IVs are what a Boki is born with: 0 to 31 a stat, fixed for life, passed down when Boki breed. 31 is up to 10% better than 0."
+const IV_EXPLAIN := "IVs: born-with stats from 0 to 31, passed on to eggs."
 
 const BONDS := [
 	[0.0, "Wary", "Might refuse a risky throw."],
@@ -96,7 +96,7 @@ const STALL_FOODS := {
 		"desc": "A bun that hums."},
 }
 ## Every prepared food: the stall's plus the type snacks of content/rules/snacks.json (coloured by their type's tint).
-static var FOODS: Dictionary = _foods()
+static var foods_v: Dictionary = _foods()
 
 static func _foods() -> Dictionary:
 	var all := STALL_FOODS.duplicate()
@@ -127,7 +127,7 @@ static func ensure(rec: Dictionary) -> void:
 		rec["stats"] = {"power": 0, "guard": 0, "speed": 0, "focus": 0}
 	if not rec.has("likes"):
 		var r := RandomNumberGenerator.new(); r.seed = hash(String(rec.get("uid", "x")) + "likes")
-		var foods: Array = Data.CROPS.keys() + FOODS.keys()
+		var foods: Array = Data.CROPS.keys() + foods_v.keys()
 		var love: String = foods[r.randi() % foods.size()]
 		var hate: String = love
 		while hate == love:
@@ -281,16 +281,21 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0, help :=
 	if st > 0.0: rec["starve"] = st
 	else: rec.erase("starve")
 
+## True when hunger keeps it home from an expedition: a long-starved kin with an empty belly. Any meal that
+## fills the bar lifts it at once, even while the starve clock is still high (the clock heals over hours).
+static func refuses_to_go(rec: Dictionary) -> bool:
+	return starve_h(rec) >= STARVE["refuse"] and need(rec, "food") <= 0.5
+
 ## True while it is weak or sick from hunger (the cures above apply).
 static func ailing(rec: Dictionary) -> bool:
 	return starve_h(rec) >= STARVE["weak"]
 
 ## How fast it gets about (care.json ailing_pace): 1.0 well, slower weak, slower still sick.
 static func pace(rec: Dictionary) -> float:
-	var P: Dictionary = Content.rules("care").get("ailing_pace", {})
+	var p: Dictionary = Content.rules("care").get("ailing_pace", {})
 	var h := starve_h(rec)
-	if h >= STARVE["sick"]: return float(P.get("sick", 0.5))
-	return float(P.get("weak", 0.7)) if h >= STARVE["weak"] else 1.0
+	if h >= STARVE["sick"]: return float(p.get("sick", 0.5))
+	return float(p.get("weak", 0.7)) if h >= STARVE["weak"] else 1.0
 
 ## The most the starve clock holds, in seconds. With natural_death off it stops at the "dead" mark, so
 ## a Boki left alone for weeks still recovers with a few meals and a day of care.
@@ -434,12 +439,12 @@ static func speech(rec: Dictionary) -> int:
 
 static func food_name(f: String) -> String:
 	if Data.CROPS.has(f): return String(Data.CROPS[f]["name"])
-	if FOODS.has(f): return String(FOODS[f]["name"])
+	if foods_v.has(f): return String(foods_v[f]["name"])
 	return f
 
 static func food_col(f: String) -> Color:
 	if Data.CROPS.has(f): return Data.CROPS[f]["color"]
-	if FOODS.has(f): return FOODS[f]["col"]
+	if foods_v.has(f): return foods_v[f]["col"]
 	return Color.WHITE
 
 ## Learns something about the kin. Returns true the first time.
@@ -467,9 +472,9 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 		return out
 	var fill := 28.0
 	var joy := 6.0
-	if FOODS.has(f):
-		fill = float(FOODS[f]["food"]); joy = float(FOODS[f].get("joy", 0.0))
-		change(rec, "energy", float(FOODS[f].get("energy", 0.0)))
+	if foods_v.has(f):
+		fill = float(foods_v[f]["food"]); joy = float(foods_v[f].get("joy", 0.0))
+		change(rec, "energy", float(foods_v[f].get("energy", 0.0)))
 	if out["love"]:
 		joy += 22.0
 		fill *= Unique.FAV_FILL       # its favourite food: a little more filling too
@@ -516,12 +521,35 @@ static func trust_up(rec: Dictionary, kind: String, now_s: float, food := "", mu
 	if now_s < float(last.get(kind, -1.0e9)) + float(r["cooldown_h"]) * float(r["hour_s"]):
 		return ""
 	var was := float(rec.get("trust", 0.0))
-	rec["trust"] = clampf(was + float(r[kind]) * mul, 0.0, 100.0)
-	if float(rec["trust"]) <= was:
+	if trust_add(rec, float(r[kind]) * mul, now_s) <= 0.0:
 		return ""
 	last[kind] = now_s
 	rec["care_t"] = last
 	return String(r["say"][kind]) % ([rec["name"], food_name(food)] if kind == "food" else [rec["name"]])
+
+## Trust a paid act adds after the day's taper (garden_trust.json taper): the first `free` acts of a
+## Boki in one window pay in full, each one after that pays `step` less of its amount, down to `floor`.
+## The window (rec.trust_acts) opens at its first act and closes after care.json care_day_s, so it resets
+## with the garden day. A loss passes through untaxed. Returns the trust actually added.
+static func trust_add(rec: Dictionary, amount: float, now_s: float) -> float:
+	var was := float(rec.get("trust", 0.0))
+	if amount > 0.0:
+		amount *= trust_taper(rec, now_s)
+	rec["trust"] = clampf(was + amount, 0.0, 100.0)
+	return float(rec["trust"]) - was
+
+## The share (0..1) the next paid act of the day pays; counts the act when trust is not full.
+static func trust_taper(rec: Dictionary, now_s: float) -> float:
+	if float(rec.get("trust", 0.0)) >= 100.0:
+		return 1.0
+	var T: Dictionary = Content.rules("garden_trust")["taper"]
+	var w: Dictionary = rec.get_or_add("trust_acts", {"t0": now_s, "n": 0})
+	if now_s - float(w["t0"]) >= float(Content.rules("care")["care_day_s"]) or now_s < float(w["t0"]):
+		w["t0"] = now_s
+		w["n"] = 0
+	var over := int(w["n"]) - int(T["free"])
+	w["n"] = int(w["n"]) + 1
+	return 1.0 if over < 0 else maxf(float(T["floor"]), 1.0 - float(T["step"]) * float(over + 1))
 
 # ------------------------------------------------------------------ IVs
 ## A fresh set of IVs, each 0 to 31.
@@ -657,6 +685,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
 	baby["gifts"] = Parentage.gifts(a, b, baby, _inherit_habits(baby, a, b, rng))
+	baby["gifts"].merge(Unique.bred_coat(baby, a, b, maxi(int(baby["gifts"]["species"]), 0)))
 	if UnstableMix.unstable(a, b): UnstableMix.mark(baby)
 	var lean := head_start(a, b)
 	if not lean.is_empty(): baby["lean"] = lean

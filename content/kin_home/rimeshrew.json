@@ -1,0 +1,14 @@
+{
+	"id": "rimeshrew",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/rimeshrew.json.",
+	"shiny": {
+		"color": "#ca9d9f",
+		"belly": "#ffe5e8",
+		"glow": "#ffcabf"
+	},
+	"work": {
+		"frost": 3,
+		"craft": 2,
+		"mend": 1
+	}
+}

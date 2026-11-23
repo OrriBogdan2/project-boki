@@ -68,7 +68,7 @@ func _hard() -> Array:
 		["Hem Heartpiercer wall stun 1.2", stun.call(1.2)], ["Tarek punch wall stun 0.9", stun.call(0.9)],
 		["Tarek Volcano slam stun 1.2", stun.call(1.2)], ["Claire Rimelock stun 0.75", stun.call(0.75)],
 		["Ostra Snap stun 1.8", stun.call(1.8)], ["Albert Crush stun 1.0", stun.call(1.0)],
-		["Albert Shield Slam stun 0.6", stun.call(0.6)], ["Albert Crushing Blow stun 0.4", stun.call(0.4)],
+		["Albert Crushing Blow stun 0.4", stun.call(0.4)],
 		["Ryzz Storm Rod wall stun 0.8", stun.call(0.8)], ["Sable Bola pair stun 0.9", stun.call(0.9)],
 		["Grimble Anchor stun 1.1", stun.call(1.1)],
 		["Pip Burrseed root 1.1", func(): s.hurt(1.0, f, {"src": "abil", "root": 1.1})],

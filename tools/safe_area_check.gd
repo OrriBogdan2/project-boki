@@ -1,8 +1,9 @@
 extends RefCounted
-## --safe-area-check: the HUD and the main screens at five window sizes (1280x720, 1920x1080, 2560x1440,
-## 2560x1080 ultrawide, 1024x640), and at 720p and 1080p again at Text size 125% and 150%
+## --safe-area-check: the HUD and the main screens at seven window sizes (1280x720, 1920x1080, 2560x1440,
+## 2560x1080 21:9, 5120x1440 32:9, 1920x1200 16:10, 1024x640), and at 720p and 1080p again at Text size 125% and 150%
 ## (Settings.TEXT_SIZES). At each, no text is clipped (SafeArea.clipped), every group (a registered HUD panel,
-## or a top-level control of a screen) sits inside SafeArea's margin and no two groups of one screen overlap.
+## or a top-level control of a screen) sits inside SafeArea's margin of its frame (all of a 16:9 screen, a centred
+## 16:9 frame on wider ones) and no two groups of one screen overlap.
 ## The match HUD is read from SafeArea's registry; the pick (prematch), pause, results, farm HUD, expedition
 ## panel, settings, inventory and Field Book from their controls.
 ## The Ways Out widgets (the strip, its one line, the quest tracker, the Gate prompt, the uplink's status and the
@@ -12,7 +13,13 @@ extends RefCounted
 ## and size (<dir>/<W>x<H>_<text %>_<screen>.png) and a contact sheet of them.
 
 const SIZES := [
-	Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440), Vector2i(2560, 1080), Vector2i(1024, 640)
+	Vector2i(1280, 720),
+	Vector2i(1920, 1080),
+	Vector2i(2560, 1440),
+	Vector2i(2560, 1080),
+	Vector2i(5120, 1440),
+	Vector2i(1920, 1200),
+	Vector2i(1024, 640)
 ]
 const TEXT_WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080)]  # the windows that also run at 125% and 150%
 const RESULT := {
@@ -63,6 +70,7 @@ var text_k := 1.0
 var m: Match
 var home
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SAFEAREA %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
@@ -70,12 +78,13 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(mn: Node, mode: String) -> void:
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = mn
 	Save.no_write = true
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			shots = String(a).substr(12)
-		if String(a).begins_with("--hud-scale="):      # (HUD size for this run only: nothing is saved)
+		if String(a).begins_with("--hud-scale="):  # (HUD size for this run only: nothing is saved)
 			Settings.v["hud_scale"] = float(String(a).substr(12))
 		if String(a).begins_with("--size="):
 			var wh := String(a).substr(7).split("x")
@@ -89,17 +98,18 @@ func run(mn: Node, mode: String) -> void:
 		text_k = k
 		UI.set_text_size(k)
 		if is_instance_valid(home):
-			home.queue_free()      # (the last round's farm would show under this round's screens)
+			home.queue_free()  # (the last round's farm would show under this round's screens)
 		if k > 1.0 and not only_size:
 			sizes = TEXT_WINDOWS
 		await _hud()
 		if k == 1.0:
-			await _ways_out()      # (the Ways Out states once, at 100% text)
+			await _ways_out()  # (the Ways Out states once, at 100% text)
 		await _screens()
 		await _farm()
 	UI.set_text_size(1.0)
 	print("SAFEAREA DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _frames(n: int) -> void:
 	for i in n:
@@ -112,17 +122,21 @@ func _resize(win: Vector2i) -> Vector2:
 	await _frames(3)
 	return main.get_tree().root.get_visible_rect().size
 
+
 func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2, root: Node) -> void:
 	var tag := "%dx%d %d%% %s" % [win.x, win.y, int(text_k * 100.0), screen]
 	var problems := SafeArea.problems(groups, sz)
 	problems.append_array(SafeArea.clipped(root))
 	var what := "%s: %d groups in the %d px margin, no overlap (logical %s) %s"
-	ok(not groups.is_empty() and problems.is_empty(),
-			what % [tag, groups.size(), int(SafeArea.MARGIN), sz, problems.slice(0, 4)])
+	ok(
+		not groups.is_empty() and problems.is_empty(),
+		what % [tag, groups.size(), int(SafeArea.MARGIN), sz, problems.slice(0, 4)]
+	)
 	if shots != "":
 		await _frames(2)
 		var file := "%s/%dx%d_%d_%s.png" % [shots, win.x, win.y, int(text_k * 100.0), screen]
 		main.get_viewport().get_texture().get_image().save_png(file)
+
 
 func _hud() -> void:
 	m = Match.new()
@@ -138,10 +152,10 @@ func _hud() -> void:
 		var sz := await _resize(win)
 		m.skydrop.planning = true
 		m.skydrop.plan_t = 20.0
-		m.player.riding = true      # (the last size's "hud" state set it down; the drop map grows only while riding)
+		m.player.riding = true  # (the last size's "hud" state set it down; the drop map grows only while riding)
 		m.hud.open_map(true)
 		await _hud_at(win, sz, "drop")
-		m.skydrop.planning = false      # the ship has gone: the map steps aside and the HUD you play with shows
+		m.skydrop.planning = false  # the ship has gone: the map steps aside and the HUD you play with shows
 		m.player.riding = false
 		m.player.dropping = false
 		await _frames(2)
@@ -153,7 +167,7 @@ func _hud() -> void:
 
 
 func _hud_at(win: Vector2i, sz: Vector2, screen: String, with_toasts := true) -> void:
-	for i in 3:      # (HUD size holds a corner's growth to what its neighbour leaves, read from the pass before)
+	for i in 3:  # (HUD size holds a corner's growth to what its neighbour leaves, read from the pass before)
 		m.hud.panels.queue_redraw()
 		await _frames(1)
 	SafeArea.seen.clear()
@@ -266,11 +280,12 @@ func _screens() -> void:
 		var sz := await _resize(win)
 		main.show_screen("prematch", {"teams": 10, "squad": 3, "tier": 0})
 		await main.get_tree().create_timer(0.8).timeout
-		if text_k == 1.0:      # (at 125% / 150% the pick overflows its margin: docs/DEBT.md "Pick screen at big text")
+		if text_k == 1.0:  # (at 125% / 150% the pick overflows its margin: docs/DEBT.md "Pick screen at big text")
 			await _judge("pick", win, SafeArea.groups_of(main.current, sz), sz, main.current)
 		main.show_screen("results", RESULT)
 		await main.get_tree().create_timer(1.0).timeout
 		await _judge("results", win, SafeArea.groups_of(main.current, sz), sz, main.current)
+
 
 func _farm() -> void:
 	home = await main._hb_home()
@@ -282,16 +297,17 @@ func _farm() -> void:
 	for win: Vector2i in sizes:
 		var sz := await _resize(win)
 		await main.get_tree().create_timer(0.6).timeout
-		home._close_panel()      # (a Boki's evolve card can open by itself: it is a panel, not the farm HUD)
-		await main.get_tree().create_timer(0.35).timeout      # the Hints row steps off the hub every 0.2 s
+		home._close_panel()  # (a Boki's evolve card can open by itself: it is a panel, not the farm HUD)
+		await main.get_tree().create_timer(0.35).timeout  # the Hints row steps off the hub every 0.2 s
 		if home.hover_box:
-			home.hover_box.hide()      # (the Boki hover card follows the mouse, here (0, 0): not a layout panel)
+			home.hover_box.hide()  # (the Boki hover card follows the mouse, here (0, 0): not a layout panel)
 		await _judge("farm", win, SafeArea.groups_of(home.root_ui, sz), sz, home.root_ui)
 		home._open_expedition()
 		await main.get_tree().create_timer(0.8).timeout
 		await _judge("expedition", win, SafeArea.groups_of(home.panel_host, sz), sz, home.panel_host)
 		home._close_panel()
 		await _overlays(win, sz)
+
 
 ## Settings, the inventory and the Field Book (an inventory tab), each opened over the farm.
 func _overlays(win: Vector2i, sz: Vector2) -> void:

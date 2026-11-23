@@ -190,7 +190,7 @@ The ranked follow-ups below still hold.
 
 **Ranked follow-ups after the 2b re-shoot** (rank = groups removed per screen shown to every new player):
 1. **Tutorial HUD in steps (item 1 below):** 9 to 5 on the landing and on all 12 step screens. Biggest win, still not done.
-2. **First expedition HUD:** hide the Ways Out strip, counters and clock/status until the first Ways Out beat or the first kill; 11 to 6 on screens 33-35. This one regressed since section 2.
+2. **First expedition HUD:** hide the Ways Out strip, counters and clock/status until the first Ways Out beat or the first kill; 11 to 6 on screens 33-35. This one regressed since section 2. **Done in ext/ui-first-exp-hud:** on main the strip already waited (d839e1df777) and the counters wait for the 4th expedition (ext/ui-hud-groups-five, landing 5); what still showed from the first second was the clock/status strip under the minimap. It now waits too, through HudReveal's table (`beat_clock`: from match 4, or first "beat"), until a seat is within `ways_out_lead_s` of opening or your first kill/knock (`HudGroups.clock_shown`). `--hud-groups-check` stays 5/7/8/8 (the clock counts with the minimap); by section 1's counting (clock/status its own group) landing and first fight each lose one.
 3. **Glider strip and perk line:** four dim, unlabelled icons plus a caption show from the first frame; draw them only once a perk or glider item exists (saves 1-2 groups on every match screen).
 4. **Q/V/X slots and the belt:** draw only the slots that hold something or are unlocked (saves 2).
 5. **Plan your drop:** fold the "This match" legend behind a key (7 to 5).
@@ -241,12 +241,16 @@ The only 0.24.5 newcomer is the Ways Out strip (the Heart seat, quest seats and 
 
 | Moment | Groups | Strip | Note |
 |---|---|---|---|
-| First landing | 10 | waits | nine always-on blocks + the button card |
-| First fight | 11 | waits | nine + toasts + loot prompt |
-| Heart unlock | 12 | shows | nine + toasts + Gate prompt + strip |
-| Quest-exit race | 12 | shows | nine + toasts + prompt + strip |
+| First landing | 5 (was 9) | waits | minimap (its clock strip hangs under it), vitals, abilities, Boki/glove boxes, weapon |
+| First fight | 7 (was 11) | waits | five + toasts + loot prompt |
+| Heart unlock | 8 (was 12) | shows | five + toasts + Gate prompt + strip |
+| Quest-exit race | 8 (was 12) | shows | five + toasts + prompt + strip |
 
-All four are over the owner's 5 because of the nine blocks that were already there; that is in `docs/DEBT.md` for the declutter lane.
+ext/ui-hud-groups-five: the counters (the staged HUD, `HudReveal`, were already off for a fresh save but still counted), the glider ring
+(only while you glide or the meter is not full, `HudGroups.glider_shown`) and the belt (`BeltHud.shown`: from the first time a held item could be
+used, a tonic when hurt or an armor kit when the armor is down, then this save keeps it; `hud_reveal.json` "belt", always from the 4th expedition)
+fold in until they matter, and the clock counts with the minimap it hangs under. Shots before / after: `docs/ui_hud_groups_five/`.
+The fight and later moments stay over 5 by the toast lane and the prompt, which cannot fold: owner's call.
 ## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
 
 DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)
@@ -277,8 +281,8 @@ Not changed (still on screen, each one group): the key row (folds after 3 uses o
 `ExpFold.first_visit()` (`scripts/home/exp_fold.gd`): true while the first Where is the only one open (`extracts` below the second Where's unlock).
 Then the **expedition panel** shows the picked Relic, the open Where and Start; "All Relics (n)", "Locked drops (n)" and "More: Boki, match and modes"
 fold the other Relics, the locked Wheres, and Boki you bring, loadout, Match, Conditions and the Training Grounds / Play online links (the links
-move from the footer into that fold). The **Relics page** shows the picked and the open or ready Relics; "Locked Relics (n)" folds the rest. With a
-second Where open nothing is folded. The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
+move from the footer into that fold). The **Relics page** (Hunters screen) never folds: every Hunter shows, locked ones dim with their
+challenge progress (11-23: a new save showed one tile and a "Locked Relics" button; the owner read it as one Hunter). The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
 fits on one line. `--relics-fold-check` asserts the folds and that no Relic name is cut or wrapped at 1280x720 on either screen.
 
 Shots (1280x720, software renderer on rpc4, the same save as section 1): [expedition before](shots/ui-relics-grid/before_expedition.jpg) /

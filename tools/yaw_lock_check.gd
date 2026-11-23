@@ -68,10 +68,10 @@ func _match(main: Node, arch: String) -> Match:
 	for mob in m.mobs:
 		mob.queue_free()
 	m.mobs.clear()
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	var w: World = m.world
-	var cx := int(floor(P.pos.x))
-	var cz := int(floor(P.pos.z))
+	var cx := int(floor(p.pos.x))
+	var cz := int(floor(p.pos.z))
 	var home_i: int = w.idx(cx, cz)
 	var level: int = int(w.level[home_i]) if w.kind[home_i] != World.T_VOID else 0
 	for dz in range(-24, 25):
@@ -85,72 +85,72 @@ func _match(main: Node, arch: String) -> Match:
 			w.walls.erase(i)
 			w.props.erase(i)
 			w.stairs.erase(i)
-	P.teleport(Vector3(cx + 0.5, level * World.LEVEL, cz + 0.5))
-	P.set_arch(arch)
-	P.unlock_all()
-	P.lvl = 6
+	p.teleport(Vector3(cx + 0.5, level * World.LEVEL, cz + 0.5))
+	p.set_arch(arch)
+	p.unlock_all()
+	p.lvl = 6
 	var foe_set := false
 	for other in m.hunters:
-		if other == P:
+		if other == p:
 			continue
 		other.ctrl = "idle"
 		# one rival where the slot lands (a hook, a grab or a step needs someone to land on)
 		var at: Vector3 = FOE_AT.get(arch, FOE_DEFAULT)
-		other.teleport(P.pos + (at if not foe_set and other.team != P.team else Vector3(40, 0, 40)))
-		foe_set = foe_set or other.team != P.team
+		other.teleport(p.pos + (at if not foe_set and other.team != p.team else Vector3(40, 0, 40)))
+		foe_set = foe_set or other.team != p.team
 	for i in 20:
-		_aim(P, Vector2(1, 0))
+		_aim(p, Vector2(1, 0))
 		m.step(DT)
 	return m
 
 
-func _aim(P: Hunter, d: Vector2) -> void:
-	P.inp["aim"] = P.pos + Vector3(d.x, 0.0, d.y) * 8.0 + Vector3(0, 0.9, 0)
+func _aim(p: Hunter, d: Vector2) -> void:
+	p.inp["aim"] = p.pos + Vector3(d.x, 0.0, d.y) * 8.0 + Vector3(0, 0.9, 0)
 
 
-func _press(P: Hunter, slot: String) -> void:
+func _press(p: Hunter, slot: String) -> void:
 	match slot:
 		"rmb":
-			P.inp["sec"] = true
+			p.inp["sec"] = true
 		"e", "e_recast":
-			P.inp["sig"] = true
+			p.inp["sig"] = true
 		"x", "x_recast":
-			HunterKeys.ult_pressed(P)
+			HunterKeys.ult_pressed(p)
 
 
 ## The most the body turned from where it was at each window's sweep: {"early": deg, "late": deg}.
 func probe(m: Match, slot: String) -> Dictionary:
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	var out := {}
 	var face0 := 0.0
 	var aims := {"early": Vector2(0, -1), "late": Vector2(-1, 0)}
 	var aim := Vector2(1, 0)
-	var before := _spent(P)
-	_press(P, slot)
+	var before := _spent(p)
+	_press(p, slot)
 	for f in 60:
-		P.inp["fire"] = slot == "lmb" and f < HOLD_F
-		P.inp["sec_hold"] = slot == "rmb" and f < HOLD_F
+		p.inp["fire"] = slot == "lmb" and f < HOLD_F
+		p.inp["sec_hold"] = slot == "rmb" and f < HOLD_F
 		if f == PRESS_AT and slot.ends_with("_recast"):
-			_press(P, slot)
+			_press(p, slot)
 		for wname in WINDOWS:
 			var win: Array = WINDOWS[wname]
 			if f == int(win[0]):
 				aim = aims[wname]
-				face0 = P.face
+				face0 = p.face
 			if f > int(win[0]) and f <= int(win[1]):
-				var turned := absf(rad_to_deg(angle_difference(face0, P.face)))
+				var turned := absf(rad_to_deg(angle_difference(face0, p.face)))
 				out[wname] = maxf(float(out.get(wname, 0.0)), turned)
-		_aim(P, aim)
+		_aim(p, aim)
 		m.step(DT)
-	P.inp["fire"] = false
-	P.inp["sec_hold"] = false
-	out["went"] = slot == "lmb" or _spent(P) != before
+	p.inp["fire"] = false
+	p.inp["sec_hold"] = false
+	out["went"] = slot == "lmb" or _spent(p) != before
 	return out
 
 
 ## What the slots have spent so far (a press that went off changes it).
-func _spent(P: Hunter) -> String:
-	return str([P.used, P.ak.cd, P.ak.ch_rmb, P.ak.rmb_t, HeroUlt.cast_id(P.ak)])
+func _spent(p: Hunter) -> String:
+	return str([p.used, p.ak.cd, p.ak.ch_rmb, p.ak.rmb_t, HeroUlt.cast_id(p.ak)])
 
 
 ## Does a turn of `deg` over a window match `rule` ("free", "locked" or a deg/s cap)?
@@ -172,6 +172,7 @@ func _heroes() -> Array:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	for arch in _heroes():
 		for slot in SLOTS:
 			var m := _match(main, arch)

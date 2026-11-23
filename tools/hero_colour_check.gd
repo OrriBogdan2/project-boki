@@ -48,12 +48,11 @@ const MEANING := {
 	"c8b496": "earth dust",
 	"b8946a": "earth dust",
 	"7a5c3a": "earth thrown up by a dive",
-	"1a5a6a": "the anchor spiral: seafoam stands off the grass"
+	"1a5a6a": "the anchor spiral: seafoam stands off the grass",
+	"5cffd8": "Grimble's stun swirl: anchor seafoam, the stun cue"
 }
 ## Moves whose colours are the thing they act on or heal: a broken Boki's type, a heal.
-const EXEMPT_MOVES := {
-	"gil": ["shatter_air", "shatter_fire", "shatter_slime", "shatter_zeep"]
-}
+const EXEMPT_MOVES := {"gil": ["shatter_air", "shatter_fire", "shatter_slime", "shatter_zeep"]}
 const HEX_LITERAL := '[Cc]olor\\("#?([0-9a-fA-F]{6})"'
 const FLOAT_LITERAL := "Color\\(\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*[,)]"
 
