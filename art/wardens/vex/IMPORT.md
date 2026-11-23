@@ -96,3 +96,21 @@ Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/deep/tool/: `folds.py`, `bla
   tools/stretch_check.gd worst 10.16 -> 5.53, mean clip worst 5.02 -> 3.85, 35 clips better, g_laugh 1.76 -> 2.00;
   posed loose islands (seams joined within 5 mm) 373 -> 159 tris; hunter_mesh_check stretched tris 524 -> 120 (WARN cleared),
   spike_edges 188 -> 188 (bind-pose scan slivers, untouched: no remodel).
+
+## Left hand re-bind 11-23 (ext/vex-hands-1123, on top of #360): the hand hangs on its bones
+Owner 11-23: "mostly issues with ... hands for Vex". Cause: v95_swap.py keeps everything past the wrist rigid in the master's
+pose (`past_wrist`), and the master holds the left hand flat, pointing 62 deg out from the hip, while the rig's hand.L ->
+fingers.L hang straight down. So the mesh fingers sat 15-25 cm from the bones and the coin (bound under them), bone heat gave
+them to thigh.L (live: 61 % thigh, 22 forearm, 17 hand), #360 moved that to forearm/hand 56/44 (the wrist shears), and
+fingers.L/thumb.L had no weight, so the clips' finger curl (14 deg grip, 48 coin flick, 57 fusion) never showed: a flat claw.
+Fix: `python3 -I tools/art1/hand_rebind.py in.glb out.glb --turn 0.75 --no-thumb` (on #360's glb):
+- the 1244 hand vertices (arm side of #360's cut, below the cuff) turn rigidly about the mesh wrist by 46 deg (0.75 of the
+  turn onto the bone axis; the full turn puts the idle fingers into the hip), faded in over 2 cm at the cuff. Same shape, UVs, texture.
+- weights: cuff band forearm.L -> hand.L over 3.5 cm, palm hand.L, past the knuckles (the fingers bone's depth, 8.2 cm)
+  fingers.L blended over 4 cm. Thumb left on the hand (the thumb split is a heuristic; `--no-thumb` off weights it to thumb.L).
+- Everything else is #360's glb bit for bit (right side fins, left hip weights); no other GLB touched; the gatling unchanged.
+- hunter_mesh_check: stretched tris live 524 / #360 120 / this 124, union 647 / 180 / 185, collapsed 2 / 42 / 2.
+- Sheets (Blender, game camera 28 deg lens at 27 m up / 17.5 m back, plus full, eye, knee and both hand close-ups;
+  idle, run, shoot, coin flick (Vex has no reload clip), dash): /home/boki/gens/vex-hands-1123/final/.
+Open: #360's fin split leaves a black jagged gap on the right hip in run/shoot close-ups (was tan blade fins); a pipeline hook
+(v95_to_game running hand_rebind) needs a hand selection that does not depend on #360's graph cut.
