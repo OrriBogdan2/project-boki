@@ -25,8 +25,11 @@ const WEIGHTS := {"clear": 0.42, "dusk": 0.18, "night": 0.14, "ash": 0.12, "fog"
 const SIGHT := {"clear": 1.0, "day": 1.0, "dusk": 0.85, "night": 0.6, "ash": 0.72, "fog": 0.62}
 ## How much bolder and more numerous the Blight is (BlightDir).
 const BLIGHT := {"clear": 1.0, "day": 1.0, "dusk": 1.12, "night": 1.4, "ash": 1.25, "fog": 1.2}
-## Outside-of-sight dimming (the vis shader scales the albedo by this where fogged; docs/specs/VISION_LOOK.md).
-const VIS_DARK := 0.82     # albedo scale outside sight, every weather: ~85% of the lit light on screen, same colours
+## Sight fog outside the cone: a slight DARK fog, partly grey, never tinted. Owner 11-23: "something in
+## between the full grey and the flat dim; slight dark fog, grey not blue". Two tunables, every weather
+## (docs/specs/VISION_LOOK.md). Default = variant B of the 11-23 sheet.
+const VIS_DARK := 0.60    # albedo scale outside sight (1 = no dimming)
+const VIS_GREY := 0.55    # share pulled to neutral grey (0 = own colours, 1 = full grey)
 const NAMES := {"clear": "Clear evening", "day": "Overcast day", "dusk": "Dusk", "night": "Night", "ash": "Ash storm", "fog": "Fog"}
 const BLURBS := {
 	"clear": "Good light. You see far, and so does everything else.",
@@ -80,15 +83,21 @@ static func pick(opts: Dictionary, seed_val := 0) -> String:
 		if o != "": return o
 	return roll(seed_val) if rolls(opts) else "clear"
 
-## Applies a condition over the tier's base look (Look.environment) and key light.
+## Applies a condition over the tier's base look (Look.environment) and key light, then sets `vis_amb` and
+## `vis_haze` from the ambient and env fog it ends with, so the fog outside sight comes out grey under them
+## (shaders/vis.gdshaderinc).
 static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, t: Dictionary, cond: String) -> void:
 	_apply(e, sun, fill, t, cond)
-	e.fog_light_color = neutral(e.fog_light_color)     # no tinted haze behind the hunter
+	RenderingServer.global_shader_parameter_set("vis_amb", vis_amb(e))
+	var h := e.fog_light_color.srgb_to_linear() * e.fog_light_energy
+	var on := 1.0 if e.fog_enabled else 0.0
+	RenderingServer.global_shader_parameter_set("vis_haze", Vector4(h.r, h.g, h.b, e.fog_density * on))
+	RenderingServer.global_shader_parameter_set("vis_haze_h", Vector2(e.fog_height, e.fog_height_density * on))
 
-## A colour as the grey of the same brightness (the haze keeps its depth, loses its hue).
-static func neutral(c: Color) -> Color:
-	var l := c.get_luminance()
-	return Color(l, l, l, c.a)
+## The ambient light's luma x energy (linear): what the fog outside sight gets back as grey for the ambient it drops.
+static func vis_amb(e: Environment) -> float:
+	var c := e.ambient_light_color.srgb_to_linear()
+	return (c.r * 0.3 + c.g * 0.59 + c.b * 0.11) * e.ambient_light_energy
 
 static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, t: Dictionary,
 		cond: String) -> void:

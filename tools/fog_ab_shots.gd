@@ -3,7 +3,8 @@ extends RefCounted
 ## measured on one frame. You stand on open ground aiming; the same camera frame is saved with the sight fog
 ## off (ref.png: the scene as lit) and on (fog.png), then the ground in front of you (inside the cone) and
 ## behind you (outside it) is compared pixel for pixel: luma on/ref and the hue shift. Outside sight should
-## be only 10-20% darker, the same hue, no tint. Prints one FOGAB line and writes fogab.txt.
+## be a slight dark fog (see RaidLook.VIS_DARK / VIS_GREY), partly grey, no blue cast. `--vis-dark=<x>
+## --vis-grey=<x>` try other numbers on the same frame (the sheet of 11-23). Prints one FOGAB line, writes fogab.txt.
 ## Run on a real GPU (jobq --needs gpu); docs/specs/VISION_LOOK.md.
 
 const SPAWN_WAIT := 30
@@ -23,11 +24,15 @@ func run(mn: Node) -> void:
 	Settings.set_v("tips", false, false)
 	Game.god = true
 	var mode := "training"
+	var dark := -1.0
+	var grey := -1.0
 	var raid := "clear"
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
 		if String(a).begins_with("--raid="): raid = String(a).substr(7)
 		if String(a).begins_with("--fog-mode="): mode = String(a).substr(11)
+		if String(a).begins_with("--vis-dark="): dark = float(String(a).substr(11))
+		if String(a).begins_with("--vis-grey="): grey = float(String(a).substr(11))
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
@@ -40,6 +45,10 @@ func run(mn: Node) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
+	if dark >= 0.0:
+		RenderingServer.global_shader_parameter_set("vis_dark", dark)
+	if grey >= 0.0:
+		RenderingServer.global_shader_parameter_set("vis_greyness", grey)
 	var P := m.player
 	for i in SPAWN_WAIT:
 		await main.get_tree().process_frame
@@ -61,6 +70,8 @@ func run(mn: Node) -> void:
 		mode, raid, inside["ratio"], outside["ratio"]]
 	line += " outside_hue_deg=%.2f outside_bshift=%.4f n_in=%d n_out=%d" % [
 		outside["hue"], outside["b"], inside["n"], outside["n"]]
+	line += " out_rb_on=%.4f out_rb_ref=%.4f out_rb_cast=%.4f" % [
+		outside["rb_on"], outside["rb_ref"], outside["rb_cast"]]
 	print(line)
 	var f := FileAccess.open(dir.path_join("fogab.txt"), FileAccess.WRITE)
 	f.store_line(line)
@@ -110,7 +121,7 @@ func _stats(m: Match, on: Image, ref: Image, at: Vector3, aim: float, lo: float,
 			sum_ref += Vector3(r.r, r.g, r.b)
 			n += 1
 	if n == 0:
-		return {"ratio": 0.0, "hue": 0.0, "b": 0.0, "n": 0}
+		return {"ratio": 0.0, "hue": 0.0, "b": 0.0, "n": 0, "rb_on": 0.0, "rb_ref": 0.0, "rb_cast": 0.0}
 	var mo := sum_on / n
 	var mr := sum_ref / n
 	var co := Color(mo.x, mo.y, mo.z)
@@ -119,8 +130,10 @@ func _stats(m: Match, on: Image, ref: Image, at: Vector3, aim: float, lo: float,
 	if co.s > 0.02 and cr.s > 0.02:
 		hue = absf(angle_difference(deg_to_rad(co.h * 360.0), deg_to_rad(cr.h * 360.0)))
 		hue = rad_to_deg(hue)
-	return {"ratio": _luma(mo) / maxf(_luma(mr), 0.001), "hue": hue,
-		"b": (mo.z - (mo.x + mo.y) * 0.5) - (mr.z - (mr.x + mr.y) * 0.5), "n": n}
+	var rb_on := (mo.x - mo.z) / maxf(_luma(mo), 0.001)     # red minus blue, per unit of luma
+	var rb_ref := (mr.x - mr.z) / maxf(_luma(mr), 0.001)
+	return {"ratio": _luma(mo) / maxf(_luma(mr), 0.001), "hue": hue, "rb_on": rb_on, "rb_ref": rb_ref,
+		"rb_cast": rb_on - rb_ref, "b": (mo.z - (mo.x + mo.y) * 0.5) - (mr.z - (mr.x + mr.y) * 0.5), "n": n}
 
 func _luma(v: Vector3) -> float:
 	return v.x * 0.299 + v.y * 0.587 + v.z * 0.114

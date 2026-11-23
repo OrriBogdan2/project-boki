@@ -29,18 +29,20 @@ void fragment() {
 		float fade = 1.0 - smoothstep(radius * 0.55, radius, length(a - b));
 		cut = fade;
 	}
-	float fog = vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
-	c = vis_apply(c, fog);
+	vis_f = vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz) * vis_greyness;
+	c = vis_apply(c, vis_f);
 	ALBEDO = c;
 	ALPHA = 1.0 - cut * 0.78;     // see through the part of a wall that hides you, smoothly
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
-	EMISSION = vec3(1.0, 0.96, 0.88) * rim * rim_amount * 0.35;
+	EMISSION = vis_grey(vec3(1.0, 0.96, 0.88), vis_f) * rim * rim_amount * 0.35;
+	AO = vis_ao(vis_f);                      // out of sight: the coloured ambient out, its grey back in (vis.gdshaderinc)
+	EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }
 
 void light() {
-	vec3 lc = LIGHT_COLOR;
+	vec3 lc = vis_grey(LIGHT_COLOR, vis_f);     // out of sight: grey light, grey shadow side, no ambient cast (vis.gdshaderinc)
 	if (!LIGHT_IS_DIRECTIONAL) {
 		// lamps and glows: plain falloff. (The cel shade floor below is only for the sun; on a lamp
 		// it lit whole screen clusters at once, which showed up as blocky squares at night.)
@@ -51,6 +53,6 @@ void light() {
 		float lit = smoothstep(0.0, 0.06, ndl) * ATTENUATION;
 		float band = smoothstep(0.35, 0.65, lit);
 		vec3 tone = mix(vec3(shade) * vec3(0.7, 0.66, 0.92), vec3(1.05, 1.0, 0.93), band);
-		DIFFUSE_LIGHT += ALBEDO * lc / PI * tone;
+		DIFFUSE_LIGHT += ALBEDO * lc / PI * vis_grey(tone, vis_f);
 	}
 }
