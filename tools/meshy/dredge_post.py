@@ -39,13 +39,18 @@ FILL_RINGS, FILL_BULGE, FILL_MIN = 4, 0.25, 6
 BLADE_GROW = 0.06  # m: pale triangles this close to the crescent's body go with it (its root at the foot)
 HAND = "RightHand"
 CHAIN_Y = (0.97, 0.70, 0.43, 0.16)  # m: rest height of GooTail0..3 (the first is the hand's own origin)
-FADE_Y = 1.15  # m: the goo above this keeps its arm weights; between this and the hand it blends into GooTail0
+FADE_Y = 1.35  # m: the goo above this keeps its arm weights; between this and the hand it blends into GooTail0
 # share of the bone above's turn each segment takes (the first is the hand's own); the rest it keeps hanging
 TAIL_FOLLOW = (1.0, 0.6, 0.5, 0.5)
 LAG = (0.0, 0.4, 0.5, 0.6)  # per frame carry-over of each segment's direction (a later swing down the chain)
 FPS = 30.0
 # the attack clip keeps this share of its head and upper-spine bend
+# r10 right foot: replaced below FOOT_CUT (m) by the mirrored left one; FOOT_MID: |x| beyond which a triangle is a leg's
+# and below FOOT_OUT (the hands hang at the knee: x 0.5 m and out)
+FOOT_CUT, FOOT_MID, FOOT_OUT = 0.62, 0.08, 0.40
+SEAM_BAND, SEAM_ITER = 0.05, 8  # m, rounds: the seam's relax
 LUNGE_CLIP, LUNGE_BONES, LUNGE_KEEP = "Attack", ("Spine02", "Spine01", "neck", "Head"), 0.35
+LEAN_FREE, LEAN_CUT = 12.0, 0.6  # deg, share: r10 the attack's forward lean past LEAN_FREE is cut by LEAN_CUT
 
 
 def island_labels(pos, faces, tol=ISLAND_TOL):
@@ -158,9 +163,7 @@ def fill_cut(js, b, out, prim, pos, f, gone):
     q = np.round(pos / ISLAND_TOL).astype(np.int64)
     w = np.unique(q, axis=0, return_inverse=True)[1].ravel()
     loops = rim_loops(f, gone, w, pos)
-    arr = {k: (n.floats(js, b, a) if js["accessors"][a]["componentType"] == 5126 else
-               np.frombuffer(n.view_bytes(js, b, js["accessors"][a]["bufferView"]), np.uint16,
-                             js["accessors"][a]["count"] * 4).reshape(-1, 4).copy()) for k, a in att.items()}
+    arr = read_attrs(js, b, att)
     tex = js["materials"][prim["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
     bv = js["bufferViews"][js["images"][js["textures"][tex]["source"]]["bufferView"]]
     px = np.asarray(Image.open(io.BytesIO(b[bv.get("byteOffset", 0):][: bv["byteLength"]])).convert("RGB")).astype(int)
@@ -211,7 +214,21 @@ def fill_cut(js, b, out, prim, pos, f, gone):
         base += len(pts)
     if not loops:
         return np.zeros((0, 3), np.int64), 0
-    for k, a in att.items():
+    append_attrs(js, out, att, arr, new)
+    return np.concatenate(tris), len(loops)
+
+
+def read_attrs(js, b, att):
+    """Every vertex array of a primitive (floats, or the uint16 joints) by attribute name."""
+    return {k: (n.floats(js, b, a) if js["accessors"][a]["componentType"] == 5126 else
+                np.frombuffer(n.view_bytes(js, b, js["accessors"][a]["bufferView"]), np.uint16,
+                              js["accessors"][a]["count"] * 4).reshape(-1, 4).copy()) for k, a in att.items()}
+
+
+def append_attrs(js, out, att, arr, new):
+    """Writes arr + the new vertices (lists of arrays per attribute) as new accessors, repointing every primitive
+    that shared the old ones (the goo shares the skin's vertex arrays)."""
+    for k, a in list(att.items()):
         full = np.concatenate([arr[k]] + new[k])
         if js["accessors"][a]["componentType"] == 5126:
             acc = out.add_floats(full, js["accessors"][a]["type"])
@@ -221,10 +238,216 @@ def fill_cut(js, b, out, prim, pos, f, gone):
             js["accessors"].append({"bufferView": out.add_view(full.astype(np.uint16).tobytes()),
                                     "componentType": 5123, "count": len(full), "type": "VEC4"})
             acc = len(js["accessors"]) - 1
-        for p2 in js["meshes"][0]["primitives"]:  # the goo shares the skin's vertex arrays
+        for p2 in js["meshes"][0]["primitives"]:
             if p2["attributes"].get(k) == a:
                 p2["attributes"][k] = acc
-    return np.concatenate(tris), len(loops)
+
+
+def open_rim(f, w, sel):
+    """Welded ids of the vertices on the open boundary of triangles f[sel]."""
+    e = np.sort(w[np.concatenate([f[sel][:, [0, 1]], f[sel][:, [1, 2]], f[sel][:, [2, 0]]])], 1)
+    u, cnt = np.unique(e, axis=0, return_counts=True)
+    return np.unique(u[cnt == 1])
+
+
+def contour_at(pts, ctr, ang):
+    """Radius of the closed contour pts (x, z) round ctr at the angles ang (polar interpolation)."""
+    a = np.arctan2(pts[:, 1] - ctr[1], pts[:, 0] - ctr[0])
+    r = np.linalg.norm(pts - ctr, axis=1)
+    o = np.argsort(a)
+    a, r = a[o], r[o]
+    return np.interp(ang, np.r_[a - 2 * np.pi, a, a + 2 * np.pi], np.r_[r, r, r])
+
+
+def shells(pos, f, tris):
+    """The big islands (>= MIN_TRIS/10 triangles) among triangles tris, outermost first (mean distance from their
+    common centre, in x and z)."""
+    lab = island_labels(pos, f[tris])
+    ctr = pos[f[tris]].reshape(-1, 3).mean(0)
+    big = [k for k in range(lab.max() + 1) if (lab == k).sum() >= MIN_TRIS // 10]
+    reach = {k: np.linalg.norm((pos[f[tris[lab == k]]].reshape(-1, 3) - ctr)[:, [0, 2]], axis=1).mean() for k in big}
+    return [tris[lab == k] for k in sorted(big, key=lambda k: -reach[k])]
+
+
+def replace_foot(js, b, out):
+    """r10: Meshy fused a cluster of dark spiky shards into the right instep and layered torn flaps up the shin
+    (skin, not goo; deleting or snapping them in r9 left gaps or strands). The right leg below FOOT_CUT (lower
+    thigh, where it is clean again) is replaced by a mirror copy of the clean left one: x flipped (normals and
+    tangents too), Left* bones swapped for Right*, moved by the offset that best fits it to the right thigh.
+    Both legs are two shells 4 mm apart; each copied shell is welded to its own right shell along a flat seam:
+    both rims go onto the copy's cross-section at FOOT_CUT and snap onto each other's vertices, normals shared,
+    so the leg stays one piece. Returns (tris removed, tris added, shift, rim vertices, largest move)."""
+    prim = js["meshes"][0]["primitives"][0]
+    att = prim["attributes"]
+    arr = read_attrs(js, b, att)
+    pos, f = arr["POSITION"], prim_faces(js, b, prim)
+    c = pos[f].mean(1)
+    leg_r = (c[:, 0] < -FOOT_MID) & (c[:, 0] > -FOOT_OUT)
+    leg_l = (c[:, 0] > FOOT_MID) & (c[:, 0] < FOOT_OUT)
+    gone = leg_r & (c[:, 1] < FOOT_CUT)
+    # fit: shift the mirrored left thigh onto the right one in the band above the cut (nearest-point median)
+    band_r = pos[np.unique(f[leg_r & (c[:, 1] > FOOT_CUT) & (c[:, 1] < FOOT_CUT + 0.08)])]
+    band_l = pos[np.unique(f[leg_l & (c[:, 1] > FOOT_CUT) & (c[:, 1] < FOOT_CUT + 0.08)])] * [-1.0, 1.0, 1.0]
+    shift, tree = np.zeros(3), cKDTree(band_r)
+    for _ in range(5):
+        shift = np.median(band_r[tree.query(band_l + shift)[1]] - band_l, 0)
+    shift[1] = 0.0  # the sole stays on the ground
+    q = np.round(pos / ISLAND_TOL).astype(np.int64)
+    w = np.unique(q, axis=0, return_inverse=True)[1].ravel()
+    shells_l = shells(pos, f, np.flatnonzero(leg_l & (c[:, 1] < FOOT_CUT)))
+    src = np.zeros(len(f), bool)
+    for t in shells_l:
+        src[t] = True
+    sv = np.unique(f[src])
+    slot = np.zeros(len(pos), np.int64)
+    slot[sv] = np.arange(len(sv))
+    mp = pos[sv] * [-1.0, 1.0, 1.0] + shift
+    nrm_l = arr["NORMAL"][sv] * [-1.0, 1.0, 1.0]
+    shells_r = shells(pos, f, np.flatnonzero(leg_r & (c[:, 1] > FOOT_CUT) & (c[:, 1] < FOOT_CUT + 0.1)))
+    rim_all = np.isin(w, open_rim(f, w, ~gone & leg_r)) & (np.abs(pos[:, 1] - FOOT_CUT) < 0.04)
+    moved, nrim = [0.0], 0
+    for tl, tr in zip(shells_l, shells_r):
+        sel = np.zeros(len(f), bool)
+        sel[tl] = True
+        lv = slot[np.unique(f[tl])]
+        ti = lv[np.isin(w[sv[lv]], open_rim(f, w, sel)) & (mp[lv, 1] > FOOT_CUT - 0.04)]
+        mp[ti, 1] = FOOT_CUT
+        ctr = mp[ti][:, [0, 2]].mean(0)
+        rv = np.unique(f[tr])
+        rim = rv[rim_all[rv]]
+        nrim += len(rim)
+        ang = np.arctan2(pos[rim, 2] - ctr[1], pos[rim, 0] - ctr[0])
+        rad = contour_at(mp[ti][:, [0, 2]], ctr, ang)
+        on = np.c_[ctr[0] + rad * np.cos(ang), np.full(len(rim), FOOT_CUT), ctr[1] + rad * np.sin(ang)]
+        j = ti[cKDTree(mp[ti]).query(on)[1]]
+        moved.append(float(np.linalg.norm(mp[j] - pos[rim], axis=1).max()))
+        arr["POSITION"][rim] = mp[j]
+        # and back: every copy rim vertex onto the nearest point of the thigh's rim edges (exact T-junctions: no
+        # crack for the inner shell to show through), normals shared
+        kept = ~gone & leg_r
+        ke = np.concatenate([f[kept][:, [0, 1]], f[kept][:, [1, 2]], f[kept][:, [2, 0]]])
+        kw = np.sort(w[ke], 1)
+        u, inv, cnt = np.unique(kw, axis=0, return_inverse=True, return_counts=True)
+        rw = np.zeros(int(w.max()) + 1, bool)
+        rw[w[rim]] = True
+        be = ke[(cnt[inv.ravel()] == 1) & rw[w[ke[:, 0]]] & rw[w[ke[:, 1]]]]
+        a0, a1 = pos[be[:, 0]], pos[be[:, 1]]
+        d_ = a1 - a0
+        best = np.full(len(ti), np.inf)
+        proj = mp[ti].copy()
+        for s0 in range(0, len(be), 256):
+            A, D = a0[s0:s0 + 256], d_[s0:s0 + 256]
+            t_ = np.clip(np.einsum("pij,ij->pi", mp[ti][:, None] - A[None], D) / np.maximum((D * D).sum(1), 1e-12), 0, 1)
+            pt = A[None] + t_[..., None] * D[None]
+            dist = np.linalg.norm(pt - mp[ti][:, None], axis=2)
+            k_ = dist.argmin(1)
+            better = dist[np.arange(len(ti)), k_] < best
+            best[better] = dist[np.arange(len(ti)), k_][better]
+            proj[better] = pt[np.arange(len(ti)), k_][better]
+        moved.append(float(best.max()))
+        mp[ti] = proj
+        kk = cKDTree(pos[rim]).query(mp[ti])[1]
+        for a_, b_ in list(zip(ti, rim[kk])) + list(zip(j, rim)):
+            m_ = arr["NORMAL"][b_] + nrm_l[a_]
+            arr["NORMAL"][b_] = nrm_l[a_] = m_ / max(np.linalg.norm(m_), 1e-9)
+    names = [js["nodes"][jn]["name"] for jn in js["skins"][0]["joints"]]
+    swap = np.arange(max(len(names), int(arr["JOINTS_0"].max()) + 1))
+    for i, nm in enumerate(names):
+        if nm.startswith("Left") and "Right" + nm[4:] in names:
+            swap[i] = names.index("Right" + nm[4:])
+    new = {}
+    for k in arr:
+        v = arr[k][sv].copy()
+        if k == "POSITION":
+            v = mp
+        elif k == "NORMAL":
+            v = nrm_l
+        elif k == "TANGENT":
+            v[:, 0] *= -1
+            v[:, 3] *= -1
+        elif k == "JOINTS_0":
+            v = swap[v]
+        new[k] = [v]
+    added = (len(pos) + slot[f[src]])[:, [0, 2, 1]]  # mirrored: wind the other way
+    append_attrs(js, out, att, arr, new)
+    keep = np.concatenate([f[~gone], added])
+    js["accessors"].append({"bufferView": out.add_view(keep.astype(np.uint32).tobytes()), "componentType": 5125,
+                            "count": len(keep) * 3, "type": "SCALAR"})
+    prim["indices"] = len(js["accessors"]) - 1
+    return int(gone.sum()), int(src.sum()), np.round(shift, 3).tolist(), nrim, round(max(moved), 3)
+
+
+def relax_seam(js, b, out):
+    """Umbrella smoothing (welded, SEAM_ITER rounds) of the right leg's skin within SEAM_BAND of the seam: untangles
+    the folds where the thigh's rim met the copy (flipped triangles 48 -> see the log) and softens the step."""
+    prim = js["meshes"][0]["primitives"][0]
+    att = prim["attributes"]
+    arr = read_attrs(js, b, att)
+    pos, f = arr["POSITION"], prim_faces(js, b, prim)
+    q = np.round(pos / ISLAND_TOL).astype(np.int64)
+    w = np.unique(q, axis=0, return_inverse=True)[1].ravel()
+    m = int(w.max()) + 1
+    wf = w[f]
+    e = np.concatenate([wf[:, [0, 1]], wf[:, [1, 2]], wf[:, [2, 0]]])
+    adj = sp.coo_matrix((np.ones(len(e) * 2), (np.r_[e[:, 0], e[:, 1]], np.r_[e[:, 1], e[:, 0]])), (m, m)).tocsr()
+    adj.data[:] = 1.0
+    deg = np.asarray(adj.sum(1)).ravel()
+    p = np.zeros((m, 3))
+    p[w] = pos
+    used = np.zeros(m, bool)
+    used[wf.ravel()] = True
+    move = used & (p[:, 0] < -FOOT_MID) & (p[:, 0] > -FOOT_OUT) & (np.abs(p[:, 1] - FOOT_CUT) < SEAM_BAND)
+    t = 1 - np.abs(p[:, 1] - FOOT_CUT) / SEAM_BAND  # full strength at the seam, none at the band's edge
+    for _ in range(SEAM_ITER):
+        avg = (adj @ p) / np.maximum(deg, 1)[:, None]
+        p[move] += 0.5 * t[move, None] * (avg[move] - p[move])
+    arr["POSITION"] = p[w]
+    # the inner shell near the seam wears the outer shell's texture: a crack shows skin, not the dark inside
+    c = arr["POSITION"][f].mean(1)
+    band = np.flatnonzero((c[:, 0] < -FOOT_MID) & (c[:, 0] > -FOOT_OUT) & (np.abs(c[:, 1] - FOOT_CUT) < 2 * SEAM_BAND))
+    sh = shells(arr["POSITION"], f, band)
+    if len(sh) > 1:
+        ov = np.unique(f[sh[0]])
+        iv = np.unique(np.concatenate([f[t].ravel() for t in sh[1:]]))
+        arr["TEXCOORD_0"][iv] = arr["TEXCOORD_0"][ov[cKDTree(arr["POSITION"][ov]).query(arr["POSITION"][iv])[1]]]
+    keys = {k: att[k] for k in ("POSITION", "TEXCOORD_0")}
+    append_attrs(js, out, keys, {k: arr[k] for k in keys}, {k: [] for k in keys})
+    return int(move.sum())
+
+
+def straighten_lunge(rig, out):
+    """r10: after the spine cut the attack still leans 36 deg forward at the slam (idle and run 10): the Hips
+    pitch it in. Spine02's keys get a counter-turn about the world's side axis (x) of LEAN_CUT of the lean past
+    LEAN_FREE, so the upper body rises and the legs keep their plant. Returns the old and new peak lean."""
+    js, b = rig.js, rig.b
+    clip = next(a for a in js["animations"] if a["name"] == LUNGE_CLIP)
+    s02 = rig.names.index("Spine02")
+    node = rig.joints[s02]
+    hips = rig.names.index("Hips")
+    head = rig.names.index("Head")
+    ch = next(c for c in clip["channels"] if c["target"]["node"] == node and c["target"]["path"] == "rotation")
+    smp = clip["samplers"][ch["sampler"]]
+    times = n.floats(js, b, smp["input"])[:, 0]
+    keys = n.floats(js, b, smp["output"]).astype(float)
+
+    def world(t, i):
+        return rig.pose(LUNGE_CLIP, t)[i] @ np.linalg.inv(rig.ibm[i])
+
+    def lean(t):
+        v = world(t, head)[:3, 3] - world(t, s02)[:3, 3]
+        return np.degrees(np.arctan2(v[2], v[1]))
+
+    before = [lean(t) for t in times]
+    for k, t in enumerate(times):
+        corr = np.radians(LEAN_CUT * max(0.0, before[k] - LEAN_FREE))
+        if corr <= 0:
+            continue
+        hr = world(t, hips)[:3, :3]
+        hr = hr / np.linalg.norm(hr, axis=0)
+        cx = np.array([[1, 0, 0], [0, np.cos(-corr), -np.sin(-corr)], [0, np.sin(-corr), np.cos(-corr)]])
+        keys[k] = mat_quat(hr.T @ cx @ hr @ rs.quat_mat(keys[k]))
+    smp["output"] = out.add_floats(keys, "VEC4")
+    return round(max(before)), times, keys
 
 
 def slerp_to(q, rest, keep):
@@ -430,9 +653,24 @@ def build(out_path, in_path):
     out.write(out_path)  # (each stage writes and reloads: a new index array lives in the new file's buffer)
     rig = rs.Rig(out_path)
     out = n.Out(rig.js, rig.b)
+    foot = replace_foot(rig.js, rig.b, out)
+    rs.compact(out)
+    out.write(out_path)
+    rig = rs.Rig(out_path)
+    out = n.Out(rig.js, rig.b)
+    relax_seam(rig.js, rig.b, out)
+    rs.compact(out)
+    out.write(out_path)
+    rig = rs.Rig(out_path)
+    out = n.Out(rig.js, rig.b)
     gone = drop_islands(rig.js, rig.b, out)
     rs.compact(out)
     out.write(out_path)  # the cleaned body first: the chain stage reads the new index arrays from the file
+    rig = rs.Rig(out_path)
+    out = n.Out(rig.js, rig.b)
+    lean0 = straighten_lunge(rig, out)[0]
+    rs.compact(out)
+    out.write(out_path)
     rig = rs.Rig(out_path)
     js, b = rig.js, rig.b
     out = n.Out(js, b)
@@ -456,6 +694,9 @@ def build(out_path, in_path):
     add_tail_clips(js, out, baked, first)
     rs.compact(out)
     out.write(out_path)
+    print(f"attack lean peak {lean0} deg before the spine counter-turn")
+    print(f"right foot: {foot[0]} tris replaced by {foot[1]} mirrored (shift {foot[2]} m, {foot[3]} rim vertices "
+          f"welded, largest move {foot[4]} m)")
     print(f"heel crescent {blade} tris ({holes} holes filled), {gone[0]} islands ({gone[1]} tris), "
           f"chain at {np.round(ys, 2).tolist()}")
     print("written", out_path)
