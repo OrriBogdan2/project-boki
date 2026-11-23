@@ -95,7 +95,8 @@ func _names() -> void:
 	ok(silent.is_empty(), "every cheer, fanfare and huff sound exists (missing %s)" % [silent])
 	var cues: Array = ["glint_cast", "glint_plop", "glint_water", "glint_bite", "glint_reel", "tumble_push",
 			"tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal", "show_crowd",
-			"relay_handoff", "relay_fumble", "relay_finish", "garden_snack_ripe"]
+			"relay_handoff", "relay_fumble", "relay_finish", "kite_flap", "kite_ring", "kite_updraft", "kite_finish",
+			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win", "garden_snack_ripe"]
 	for texture in SnackPatch.rules()["pick_textures"]:
 		cues.append("garden_snack_" + texture)
 	for move in BaseTumble.rules()["moves"]:
@@ -223,6 +224,8 @@ func _games() -> void:
 	home._close_panel()
 	for k in home.kins:
 		k.erase("indoors")
+	# Boki at free play cue garden_go (tag) and cheers through the same library: off while the games are counted
+	home.life.sfx.mute = true
 	GardenSfx.heard.clear()
 	await _shove(home)
 	GardenSfx.heard.clear()
@@ -236,6 +239,7 @@ func _games() -> void:
 			k["rec"]["needs"]["energy"] = 90.0
 		GardenSfx.heard.clear()
 		await game.call(home)
+	home.life.sfx.mute = false
 	GardenSfx.heard.clear()
 	_chimes(home)
 	GardenSfx.heard.clear()

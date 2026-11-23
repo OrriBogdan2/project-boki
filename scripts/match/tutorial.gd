@@ -605,8 +605,10 @@ func _boki_sent() -> bool:
 	if k == null or k.state == "downed" or k.st_throws > throws0:
 		return true
 	for e: Dictionary in camps.ledger:
+		if not is_instance_valid(e["mb"]):
+			continue
 		var mb: Mob = e["mb"]
-		if not is_instance_valid(mb) or mb.dead:
+		if mb.dead:
 			continue
 		if k.target == mb or mb.tgt == k:
 			return true
