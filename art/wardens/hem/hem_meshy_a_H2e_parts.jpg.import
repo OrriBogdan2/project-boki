@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dhg4ov7ru6s3v"
-path="res://.godot/imported/hem_meshy_a_H2d_parts.jpg-f34a94f727fcd9cdcc40f9ce592ccc61.ctex"
+uid="uid://clxf7ncqdwdv2"
+path="res://.godot/imported/hem_meshy_a_H2e_parts.jpg-0d411745fa2b8b988516b9eb18477141.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://art/wardens/hem/hem_meshy_a_H2d_parts.jpg"
-dest_files=["res://.godot/imported/hem_meshy_a_H2d_parts.jpg-f34a94f727fcd9cdcc40f9ce592ccc61.ctex"]
+source_file="res://art/wardens/hem/hem_meshy_a_H2e_parts.jpg"
+dest_files=["res://.godot/imported/hem_meshy_a_H2e_parts.jpg-0d411745fa2b8b988516b9eb18477141.ctex"]
 
 [params]
 
