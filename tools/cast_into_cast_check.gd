@@ -4,7 +4,8 @@ extends RefCounted
 ## what the row says: "fire" (goes within ACT_S), "queue" (held, goes after the row's wait, +-WAIT_TOL), "cancel"
 ## (goes at once and the first move never comes) or "drop" (never goes). The two press times per first move are its
 ## row's "at" (s after its press). An LMB hold is held HOLD_S, then let go. --cast-into-cast-check=<id>,<id> runs
-## only those heroes. Reuses --dash-flow-check's arena, ready-up and "went off" probes. Never touches the save.
+## only those heroes. Reuses --dash-flow-check's arena, ready-up and "went off" probes (a NEEDS_ALLY hero keeps its
+## teammate beside it and aims at it, as there). Never touches the save.
 
 const PHASES := ["windup", "recovery"]
 const ACT_S := 0.1              # s: a press that goes this soon went at once
@@ -18,6 +19,7 @@ var flow_check = preload("res://tools/dash_flow_check.gd").new()
 var bad := 0
 var first_cut := false      # the last trial's first move never went off (pressed second, it ended it)
 var trials := 0
+var bases := {}            # "hero/slot" -> s that slot takes to go off when pressed alone
 
 func ok(cond: bool, what: String) -> void:
 	print("CASTCAST %s %s" % ["ok  " if cond else "FAIL", what])
@@ -50,7 +52,10 @@ func _heroes() -> Array:
 func _row(main: Node, hero: String, first: String, second: String, moves: Dictionary) -> void:
 	var row: Dictionary = moves[second]
 	ok(String(row.get("source", "")) != "", "%s %s during %s has a source" % [hero, second, first])
-	var base := maxf(0.0, await _wait(main, hero, "", second, 0.0))
+	var key := hero + "/" + second          # the second pressed alone: once per hero and slot, not per row
+	if not bases.has(key):
+		bases[key] = maxf(0.0, await _wait(main, hero, "", second, 0.0))
+	var base: float = bases[key]
 	for i in PHASES.size():
 		var phase: String = PHASES[i]
 		trials += 1
@@ -88,8 +93,8 @@ func _timed(m: Match, first: String, second: String, at: float) -> float:
 	var h: Hunter = flow_check.hunter
 	flow_check._ready_up(m)
 	for other in m.hunters:
-		if other != h:
-			other.teleport(h.pos + FOE_AT)
+		if other != h and other != flow_check.ally:
+			other.teleport(h.pos + FOE_AT)   # (the teammate of a NEEDS_ALLY hero stays beside her: her X needs it)
 	var hold_steps := int(round(HOLD_S / Match.DT)) if first == "lmb_hold" else 1
 	var step := 0
 	var before: Dictionary = flow_check._snap()
@@ -120,7 +125,9 @@ func _step(m: Match, fire_down: bool) -> void:
 	m.step(Match.DT)
 	var h: Hunter = flow_check.hunter
 	h.inp["fire"] = fire_down
-	h.inp["aim"] = flow_check.get_meta("home") + AIM
+	# a NEEDS_ALLY hero (Meeko: Hearth Call wants a teammate under the cursor, in reach) aims at that teammate
+	var ally: Hunter = flow_check.ally
+	h.inp["aim"] = ally.pos + Vector3(0, 0.9, 0) if ally else flow_check.get_meta("home") + AIM
 
 func _press(slot: String) -> void:
 	flow_check._press(_key(slot))

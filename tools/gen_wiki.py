@@ -906,7 +906,7 @@ def _cast_tables(flows):
                 rows.append(["%s during %s" % (names.get(second, second), label),
                              "%s (%s s in)" % (_cast_ours(row, "windup"), at[0]),
                              "%s (%s s in)" % (_cast_ours(row, "recovery"), at[1]), row.get("source", "")])
-        out += "\n### %s\n\n" % ARCH.get(aid, {}).get("name", aid) + table(
+        out += "\n### %s (%s)\n\n" % (ARCH.get(aid, {}).get("base_name", aid), aid) + table(
             ["Pair", "Ours, wind-up", "Ours, recovery", "Source"], rows)
     if not out:
         return ""
