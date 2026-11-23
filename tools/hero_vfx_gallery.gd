@@ -47,7 +47,7 @@ func run(main: Node) -> void:
 	m.cam.snap(P.pos + Vector3(0, 0, GAP * (rows - 1) * 0.5 - 2.0))
 	Sfx.listener = P.pos
 	for i in moves.size():
-		var at := base + Vector3(GAP * (i % PER_ROW), 0, GAP * (i / PER_ROW))
+		var at := base + Vector3(GAP * (i % PER_ROW), 0, GAP * (int(i / float(PER_ROW))))
 		V.play(P, String(moves[i]), at, Vector2(1, 0), {"r": 1.6, "len": 2.6, "w": 1.0, "k": 1.0,
 			"to": at + Vector3(2.4, 1.0, 0.0)})
 	print("GALLERY moves: %s" % ", ".join(moves))

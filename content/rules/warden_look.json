@@ -670,7 +670,7 @@
 		},
 		"lights": [
 			{
-				"anchor": "anchor_hang_lantern",
+				"anchor": "anchor_sun",
 				"colour": [
 					1.0,
 					0.74,
@@ -682,7 +682,7 @@
 		],
 		"halos": [
 			{
-				"anchor": "anchor_hang_lantern",
+				"anchor": "anchor_sun",
 				"color": [
 					1.0,
 					0.8,
