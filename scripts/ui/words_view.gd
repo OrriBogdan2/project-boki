@@ -8,18 +8,24 @@ const RULES_PATH := "res://content/rules/words.json"
 
 static var _rules := {}
 
+
 static func rules() -> Dictionary:
 	if _rules.is_empty():
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
 		_rules = parsed if parsed is Dictionary else {"words": []}
 	return _rules
 
-## Whether the player has met a term: no rule always, else its tutorial flag is set or enough expeditions are played.
+
+## Whether the player has met a term: no rule always, else its tutorial flag is set or enough expeditions are
+## played. A Fusion term is never met while Fusion is off.
 static func is_seen(w: Dictionary) -> bool:
+	if w.get("needs_fusion", false) and not MergeForm.enabled():
+		return false
 	var seen: Dictionary = w.get("seen", {})
 	if seen.has("tut") and not Save.d["tutorial"].get(String(seen["tut"]), false):
 		return false
 	return int(Save.d.get("matches", 0)) >= int(seen.get("matches", 0))
+
 
 ## The terms to show now, in order.
 static func visible() -> Array:
@@ -28,6 +34,7 @@ static func visible() -> Array:
 		if is_seen(w):
 			out.append(w)
 	return out
+
 
 ## Fills a menu page with the visible terms.
 static func fill(v: VBoxContainer) -> void:

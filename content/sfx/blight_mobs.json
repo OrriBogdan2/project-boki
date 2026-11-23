@@ -1,0 +1,11 @@
+{
+ "group": "blight_mobs",
+ "name": "Blight mobs",
+ "script": "tools/gen_sfx_blight_mobs.py",
+ "sounds": {
+  "v_bl_skitter": "grunt",
+  "v_bl_warden": "grunt"
+ },
+ "signature": [],
+ "replaces": []
+}

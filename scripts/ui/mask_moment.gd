@@ -151,7 +151,7 @@ func _show_intro() -> void:
 	_look_to = LOOK_INTRO
 	if kin and is_instance_valid(kin):
 		create_tween().tween_property(kin, "position", BOKI_INTRO, 0.9).set_trans(Tween.TRANS_SINE)
-	var panel := HunterViewer.make(hunter_id, Vector2.ZERO, CLIP, 3)
+	var panel := HunterViewer.make(hunter_id, Vector2.ZERO, CLIP, 3, false)
 	panel.set_meta("mask_intro", hunter_id)
 	var col := UI.vbox(12)
 	col.add_child(panel)

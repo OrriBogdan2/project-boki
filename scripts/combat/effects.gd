@@ -327,6 +327,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 					var kb := rel.normalized() * float(e.get("kb", 0.0)) if rel.length() > 0.05 else Vector2.ZERO
 					if float(e.get("kb", 0.0)) < 0.0 and rel.length() <= 0.05: kb = Vector2.ZERO
 					var o := _hit_opts(e, ctx, kb, caster)
+					o["at"] = at      # the blast's own point: HitContact clamps it onto the foe's collider
 					var dmg := float(e.get("dmg", 0.0)) * pw
 					if e.has("spike") and not f.grounded and f.pos.y > f.ground() + 0.35:
 						dmg *= 1.0 + float(e["spike"].get("dmg", 0.5))

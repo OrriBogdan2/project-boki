@@ -13,5 +13,5 @@ void fragment() {
 	// vertex colours are 8-bit sRGB (finer steps in the darks than linear): to linear here
 	vec3 base = mix(pow((COLOR.rgb + 0.055) / 1.055, vec3(2.4)), COLOR.rgb / 12.92, step(COLOR.rgb, vec3(0.04045)));
 	vec3 col = mix(base, vec3(1.0), glow * facing * facing);
-	ALBEDO = mix(col, rim_col.rgb * 1.3, pow(1.0 - facing, 2.0) * rim) * dim;
+	ALBEDO = mix(col, rim_col.rgb * 1.3, pow(1.0 - facing, 1.2) * rim) * dim;
 }

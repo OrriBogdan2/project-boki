@@ -1,7 +1,7 @@
 extends RefCounted
 ## --title-check: the title screen (painted splashes, logo and a torn-strip menu: briefs/UI_STYLE.md).
 ## It builds; its menu has the items it should (Continue or New Game, Training Grounds, Demo Match and
-## Play with Your Boki with a save, Play with Friends when online play is there, Save Files, Settings, Quit off the web) and
+## Play with Your Boki with a save, Test Zone for the owner, Play with Friends when online play is there, Save Files, Settings, Quit off the web) and
 ## nothing called "The story so far"; the first button is the big one and holds focus, the rest are
 ## strips, and pointing at one focuses it; no subtext, tagline or currency under the logo; the logo,
 ## the painted backdrop and the build version are there; and the screen stays inside a frame budget
@@ -46,6 +46,7 @@ func _pass() -> void:
 	var labels: Array = ts.menu_labels()
 	var has: bool = not Save.d["roster"].is_empty()
 	var want: Array = ["Continue" if has else "New Game", "Training Grounds"]
+	if Overlay.admin_allowed(): want.append("Test Zone")
 	if has: want.append_array(["Demo Match", "Play with Your Boki"])
 	if Net.available(): want.append("Play with Friends")
 	want.append_array(["Save Files", "Settings", "Help"])

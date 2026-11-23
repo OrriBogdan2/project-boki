@@ -36,7 +36,7 @@ const TUT_HINT := {
 	"points": ["One point to start. Pick well!", "(holds up one paw, very serious)"],
 	"pick_sec": ["That one! Press %S!", "(points its nose at the glowing button)"],
 	"sec": ["Use your power on them!", "(watches your hands, tail going)"],
-	"shoot": ["Get them! They're worth XP!", "(growls at the monster)"],
+	"shoot": ["Get them!", "(growls at the monster)"],
 	"pick_dash": ["You leveled up! Take the dash!", "(zips off to the side and back, showing you)"],
 	"dash": ["Dash across, like this!", "(zips off to the side and back, showing you)"],
 	"exdash": ["Jump, then dash in the air!", "(leaps and darts forward in the air)"],

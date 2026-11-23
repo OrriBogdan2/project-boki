@@ -108,6 +108,16 @@ standing; on the move the legs keep the gait), and WardenClips hands the arms ba
 .glb that follows these bones needs no clip for them. `--utility-pose-check` and `--utility-pose-shots` (`<move>/` and
 `<move>_run/` strips).
 
+### Bone lookup (contract names on Meshy's own skeleton)
+Game code and checks name bones by their contract name and look them up with `WardenSkeleton.find` only (never
+`find_bone("hand.R")`). On a contract armature that is the bone itself. On a Hunter drawn on Meshy's own skeleton
+(meshy_native: Meshy's bones are never renamed or retargeted) it is the Meshy bone that plays the part
+(`WardenSkeleton.NATIVE`: `hips` -> `Spine02`, `head` -> `Head`, `hand.R` -> `RightHand`, `thigh.L` -> `LeftUpLeg`,
+...), or the Hunter's own stand-in (Skeleton3D meta `contract_bones`). The procedural layers that only need bones
+(flinch, wall kick, open reach) and the bone-point VFX then run on either skeleton; the node that carries the layers
+is `WardenGlb.layers(model)` (Sync on the contract path). The rig-fit test (`mismatches`) reads only real contract
+bones (`WardenSkeleton.own`).
+
 ## Nodes the game keeps from the procedural rig (do not model these into the body)
 - `Rig/Torso/Aim/Gun` and its children: the held weapon (`Models.gun_parts`, `PinBjornWeapons`), its `Muzzle`
   (shots leave from it), `Mag` (reload anim), Bjorn's `Hammer` pivot (meta `hammer_pivot`; BjornFx finds the
@@ -125,7 +135,7 @@ standing; on the move the legs keep the gait), and WardenClips hands the arms ba
 Empties (glTF nodes without mesh) parented to the bone, named exactly, for effects that should start on the
 model rather than at a fixed offset. None is required today (kits use the hand bones, the Muzzle and the
 Hammer pivot); export these so FX can move onto them without another export:
-- `anchor_head_top` (bone `head`): nameplate, overhead tells (Bjorn's Guard pips, Pin's glint).
+- `anchor_head_top` (bone `head`): nameplate, overhead tells (Pin's glint).
 - `anchor_chest` (bone `hips`, at chest height): hit sparks, buffs.
 - `anchor_weapon_tip` (on the weapon mesh, if exported): trails.
 - Per hero: Bjorn `anchor_prow_crack` (the prow's glow), Zedran `anchor_fuller` (the blade's heat), Pin

@@ -23,8 +23,33 @@ extends Node
 ## home quirks and work poses, match lunges).
 
 ## The body plan of each species (anything else, the older round kin, moves like a blob).
-const BODY := {"cindle": "quad", "puddlet": "quad", "burrlet": "quad", "pebbit": "quad", "cairnback": "quad",
-	"zapple": "biped", "wisplet": "flyer", "hivara": "flyer", "zephyrak": "serpent"}
+const BODY := {
+	"cindle": "quad",
+	"puddlet": "quad",
+	"burrlet": "quad",
+	"pebbit": "quad",
+	"cairnback": "quad",
+	"zapple": "biped",
+	"wisplet": "flyer",
+	"hivara": "flyer",
+	"zephyrak": "serpent"
+}
+const SLEEP_EAR := 0.3  # rad the ears lie back asleep
+const POSE_T := {
+	"growl": {"sy": 0.86, "rx": 0.2, "ear": 0.45, "tail": -0.6, "shiver": 1.0},
+	"guard": {"sy": 1.02, "rx": 0.08, "ear": 0.4, "tail": -0.7, "shiver": 0.4},
+	"alert": {"sy": 1.08, "rx": -0.14, "ear": -0.35, "tail": -0.3},
+	"point": {"sz": 1.14, "rx": -0.1, "ear": -0.3, "tail": -0.25, "leg": 1.0},
+	"whine": {"sy": 0.92, "rx": 0.18, "ear": 0.6, "tail": 0.6},
+	"nudge": {"rx": 0.14, "rz": 0.16, "ear": 0.3, "tail": 0.2},
+	"comfort": {"rx": 0.12, "rz": -0.18, "ear": 0.35, "tail": 0.3},
+	"beckon": {"ear": -0.25, "rx": -0.06},
+}
+
+## Blinks and twitches roll on their own generator: they run every frame (the loading screen
+## included), so drawing from the global one would shift whatever the match builds after them.
+static var _idle_rng := RandomNumberGenerator.new()
+
 var species := ""
 var plan := "blob"
 var flex_base := Vector3.ZERO
@@ -46,12 +71,13 @@ var eye_base: Array[Vector3] = []
 var t := 0.0
 var blink_t := 2.0
 var blink_k := 0.0
+var lids := 0.0  # eyes held shut, 0..1 (BokiWispPop: eyes open last, close first)
 var y_prev := 0.0
 var vy := 0.0
 var vy_prev := 0.0
-var sq := 0.0          # squash (+) and stretch (-), springs back
+var sq := 0.0  # squash (+) and stretch (-), springs back
 var sq_v := 0.0
-var feel := LandLean.new()     # a landing off a leap or a drop squashes too, and it leans as it starts and stops
+var feel := LandLean.new()  # a landing off a leap or a drop squashes too, and it leans as it starts and stops
 var ear_flop := 0.0
 var ear_v := 0.0
 var twitch_t := 3.0
@@ -65,52 +91,47 @@ var legs: Array[Node3D] = []
 var wings: Array[Node3D] = []
 var spin: Node3D
 var phase := randf() * TAU
-## Blinks and twitches roll on their own generator: they run every frame (the loading screen
-## included), so drawing from the global one would shift whatever the match builds after them.
-static var _idle_rng := RandomNumberGenerator.new()
 var quirk := ""
 var girth := 1.0
-var quirk_t := 3.0     # until the next time it does its habit
-var quirk_k := 0.0     # 1 at the start of one, down to 0
+var quirk_t := 3.0  # until the next time it does its habit
+var quirk_k := 0.0  # 1 at the start of one, down to 0
 var pose_last := ""
 var fl := KinFlinch.new()
 var nap: KinNap
-var rot_base := Vector3.ZERO     # the lean before the hit jolt is added
+var rot_base := Vector3.ZERO  # the lean before the hit jolt is added
 var pz := {"sy": 1.0, "sz": 1.0, "rx": 0.0, "rz": 0.0, "ear": 0.0, "tail": 0.0, "leg": 0.0, "shiver": 0.0}
-const SLEEP_EAR := 0.3       # rad the ears lie back asleep
-const POSE_T := {
-	"growl": {"sy": 0.86, "rx": 0.2, "ear": 0.45, "tail": -0.6, "shiver": 1.0},
-	"guard": {"sy": 1.02, "rx": 0.08, "ear": 0.4, "tail": -0.7, "shiver": 0.4},
-	"alert": {"sy": 1.08, "rx": -0.14, "ear": -0.35, "tail": -0.3},
-	"point": {"sz": 1.14, "rx": -0.1, "ear": -0.3, "tail": -0.25, "leg": 1.0},
-	"whine": {"sy": 0.92, "rx": 0.18, "ear": 0.6, "tail": 0.6},
-	"nudge": {"rx": 0.14, "rz": 0.16, "ear": 0.3, "tail": 0.2},
-	"comfort": {"rx": 0.12, "rz": -0.18, "ear": 0.35, "tail": 0.3},
-	"beckon": {"ear": -0.25, "rx": -0.06},
-}
+
+var _acc := 0.0
+var _n := 0
+
 
 func _ready() -> void:
 	root = get_parent() as Node3D
 	body = root.get_node_or_null("Body")
 	if body == null:
-		set_process(false); return
+		set_process(false)
+		return
 	flex = body.get_node_or_null("Flex")
 	if flex == null:
-		set_process(false); return
+		set_process(false)
+		return
 	tail = flex.get_node_or_null("Tail")
 	ears = flex.get_node_or_null("Ears")
 	var lg := flex.get_node_or_null("Legs")
 	if lg:
 		for ch in lg.get_children():
-			if String(ch.name).begins_with("Leg"): legs.append(ch)
+			if String(ch.name).begins_with("Leg"):
+				legs.append(ch)
 	var wg := flex.get_node_or_null("Wings")
 	if wg:
-		for ch in wg.get_children(): wings.append(ch)
+		for ch in wg.get_children():
+			wings.append(ch)
 	spin = flex.get_node_or_null("Spin")
 	for sd in ["L", "R"]:
 		var e := flex.get_node_or_null("Eye" + sd) as Node3D
 		if e:
-			eyes.append(e); eye_base.append(e.scale)
+			eyes.append(e)
+			eye_base.append(e.scale)
 		var s := flex.get_node_or_null("Shine" + sd) as Node3D
 		if s:
 			shines.append(s)
@@ -125,8 +146,7 @@ func _ready() -> void:
 	girth = float(root.get_meta("girth", 1.0))
 	quirk_t = 2.0 + fposmod(phase, 3.0)
 
-var _acc := 0.0
-var _n := 0
+
 func _process(dt: float) -> void:
 	if dt <= 0.0 or not is_instance_valid(flex):
 		return
@@ -241,20 +261,30 @@ func _process(dt: float) -> void:
 		var qd := 1.6 if quirk in ["tail_chase", "look_around", "stretch"] else 1.0
 		quirk_k = maxf(0.0, quirk_k - dt / qd)
 		var qk := quirk_k * idle
-		var e := sin(quirk_k * PI)     # in and out
+		var e := sin(quirk_k * PI)  # in and out
 		match quirk:
 			"tail_chase":
-				if qk > 0.0: ry += (1.0 - quirk_k) * TAU
-			"head_tilt": rz += e * 0.32 * idle
-			"hop": off.y += absf(sin(quirk_k * PI * 3.0)) * 0.09 * qk
-			"sway": rz += sin(quirk_k * PI * 4.0) * 0.14 * qk
+				if qk > 0.0:
+					ry += (1.0 - quirk_k) * TAU
+			"head_tilt":
+				rz += e * 0.32 * idle
+			"hop":
+				off.y += absf(sin(quirk_k * PI * 3.0)) * 0.09 * qk
+			"sway":
+				rz += sin(quirk_k * PI * 4.0) * 0.14 * qk
 			"sneeze":
 				var sn := clampf((0.35 - absf(quirk_k - 0.4)) * 4.0, 0.0, 1.0) * idle
-				rx += sn * 0.28; sy -= sn * 0.1
-			"stretch": sz += e * 0.16 * idle; sy -= e * 0.07 * idle; rx -= e * 0.12 * idle
+				rx += sn * 0.28
+				sy -= sn * 0.1
+			"stretch":
+				sz += e * 0.16 * idle
+				sy -= e * 0.07 * idle
+				rx -= e * 0.12 * idle
 			"ear_flick":
-				if quirk_k > 0.0: twitch = maxf(twitch, e)
-			"look_around": ry += sin(quirk_k * TAU) * 0.6 * qk
+				if quirk_k > 0.0:
+					twitch = maxf(twitch, e)
+			"look_around":
+				ry += sin(quirk_k * TAU) * 0.6 * qk
 	# attack: a quick lunge, stretched long, head down
 	rx -= att_k * 0.35
 	sz += att_k * 0.18
@@ -268,7 +298,8 @@ func _process(dt: float) -> void:
 	var pose := String(root.get_meta("pose", ""))
 	if pose != pose_last:
 		if pose == "flinch":
-			sq_v += 3.0; ear_v -= 6.0
+			sq_v += 3.0
+			ear_v -= 6.0
 		pose_last = pose
 	var pt: Dictionary = POSE_T.get(pose, {})
 	for key in pz:
@@ -305,7 +336,7 @@ func _process(dt: float) -> void:
 	if blink_t <= 0.0:
 		blink_t = _idle_rng.randf_range(1.8, 4.6)
 		if _idle_rng.randf() < 0.2:
-			blink_t = 0.22   # a double blink now and then
+			blink_t = 0.22  # a double blink now and then
 		blink_k = 1.0
 	blink_k = maxf(0.0, blink_k - dt * 8.0)
 	var shut := sin(blink_k * PI)
@@ -315,6 +346,7 @@ func _process(dt: float) -> void:
 		shut = 1.0
 	elif happy:
 		shut = maxf(shut, 0.45)
+	shut = maxf(shut, lids)
 	for i in eyes.size():
 		var b := eye_base[i]
 		eyes[i].scale = Vector3(b.x * (1.0 + shut * 0.15), b.y * maxf(0.08, 1.0 - shut), b.z)
@@ -325,9 +357,12 @@ func _process(dt: float) -> void:
 		var rate := 3.0 + move_k * 9.0 + (6.0 if happy else 0.0)
 		var amp := 0.18 + move_k * 0.25 + (0.25 if happy else 0.0)
 		if dazed or sleep_k > 0.5:
-			rate = 1.2; amp = 0.05
+			rate = 1.2
+			amp = 0.05
 		tail.rotation.y = sin(t * rate + phase) * amp
-		tail.rotation.x = lerpf(tail.rotation.x, (0.5 if dazed else -0.1 * move_k + float(pz["tail"])), 1.0 - exp(-6.0 * dt))
+		tail.rotation.x = lerpf(
+			tail.rotation.x, 0.5 if dazed else -0.1 * move_k + float(pz["tail"]), 1.0 - exp(-6.0 * dt)
+		)
 	# ears: spring that flops on landing, perks on a cast, twitches now and then
 	if ears:
 		twitch_t -= dt * (1.0 - sleep_k)
@@ -353,7 +388,8 @@ func _process(dt: float) -> void:
 				a = 0.35 + sin(t * 3.0 + i) * 0.1
 		a += att_k * (-0.5 if i < 2 else 0.3)
 		a = lerpf(a, -0.9 if i < 2 else 0.9, sleep_k)
-		if i == 0: a -= float(pz["leg"]) * 0.9      # a paw up, pointing
+		if i == 0:
+			a -= float(pz["leg"]) * 0.9  # a paw up, pointing
 		legs[i].rotation.x = a
 	# wings: a slow flutter at rest, quick beats when it moves; flyers beat fast all the time,
 	# and fold them asleep
@@ -362,7 +398,8 @@ func _process(dt: float) -> void:
 		var rate := 5.0 + move_k * 9.0
 		var amp := 0.25 + move_k * 0.3
 		if plan in ["flyer", "serpent"]:
-			rate = 16.0 + move_k * 10.0; amp = 0.45 + move_k * 0.2
+			rate = 16.0 + move_k * 10.0
+			amp = 0.45 + move_k * 0.2
 		rate += absf(air) * 10.0
 		amp = lerpf(amp, 0.05, maxf(sleep_k, perch_k * 0.6))
 		var flap := sin(t * rate + phase) * amp
@@ -377,6 +414,7 @@ func _process(dt: float) -> void:
 		stars.visible = starry
 		if starry:
 			stars.rotation.y += dt * 4.0
+
 
 func _make_stars() -> void:
 	stars = Node3D.new()

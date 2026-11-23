@@ -27,6 +27,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
@@ -134,7 +135,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			if d > worst:
 				worst = d
 				worst_mv = k
-		if moved < 0.03 and not k in ["bul_short", "bul_crush", "bul_armed"]:
+		if moved < 0.03 and not k in ["bul_short", "bul_crush"]:
 			still.append(k)
 		_play(m, an, sync, st, 12)
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])

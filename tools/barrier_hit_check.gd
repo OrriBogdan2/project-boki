@@ -2,6 +2,8 @@ extends "res://tools/hero_pair_check.gd"
 ## --barrier-hit-check [--shots-dir=<dir>]: a shot into Albert's front shield (bulwark), a Tenzo rock (dolm) and
 ## Neve's Rimewall (rimewright) each spawns exactly one hit ripple (scripts/combat/barrier_ripple.gd) on the
 ## barrier's face, in that barrier's colour; the hit that breaks it is bigger; a shot at a Hunter spawns none.
+## The same hit reads as blocked (Juice.blocked): one deflect spark in the barrier's colour and one metallic tick,
+## and no damage hit (no hit event, no hurt flash on the owner).
 ## With --shots-dir, a screenshot of each plain and breaking hit (needs a renderer).
 
 const SHOT_AT := 0.07      # s after the hit: the ring is spreading, the flash still lit
@@ -67,8 +69,21 @@ func _neve() -> void:
 ## the wall nearly gone, a second shot that breaks it: one bigger ripple.
 func _probe(who: String, m: Match, T: Hunter, wall: Dictionary, tag: String) -> void:
 	var col: Color = wall["col"]
+	var ticks: Array = []
+	var hits: Array = []
+	var on_tick := func(n: String, _at, _db, _pitch) -> void: if n == Juice.BLOCK_TICK: ticks.append(n)
+	var on_hit := func(_by, _target, _d, _tags) -> void: hits.append(1)
+	Sfx.played.connect(on_tick)
+	CombatBus.hit_landed.connect(on_hit)
 	var plain := _shoot(m, T, wall)
 	step(m, SHOT_AT)
+	Sfx.played.disconnect(on_tick)
+	CombatBus.hit_landed.disconnect(on_hit)
+	var owner_h: Ent = wall["by"]
+	ok("%s: it reads as blocked, a metallic tick" % who, ticks.size() == 1, "%d ticks" % ticks.size())
+	ok("%s: it reads as blocked, a deflect spark in the barrier's colour" % who, _sparked(m, col), "no spark")
+	ok("%s: it is no damage hit" % who, hits.is_empty() and owner_h.flash_t <= 0.0,
+			"%d hit events, flash %.2f" % [hits.size(), owner_h.flash_t])
 	var rings := _rings(m)
 	ok("%s: a shot into the barrier spawns one ripple" % who, rings.size() == 1 and plain, "%d rings" % rings.size())
 	if rings.size() == 1:
@@ -99,6 +114,10 @@ func _shoot(m: Match, T: Hunter, wall: Dictionary) -> bool:
 		if wall["hp"] != hp0:
 			return true
 	return false
+
+## Is a deflect spark in `col`'s hue (the blocker's) still flying?
+func _sparked(m: Match, col: Color) -> bool:
+	return m.fx.sparks.any(func(p: CPUParticles3D): return p.emitting and absf(p.color.h - col.h) < 0.06)
 
 func _rings(m: Match) -> Array:
 	return m.verbs.ripple.get_children().filter(func(c): return c.visible)

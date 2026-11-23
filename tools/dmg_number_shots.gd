@@ -4,9 +4,12 @@ extends RefCounted
 ## quarter second for two seconds, one a crit and one a heavy hit, the reticle on the nearest.
 ##   dmgnum_0_ticks   mid-fight, ticks landing
 ##   dmgnum_1_end     the last tick, numbers at their totals
+##   dmgnum_2_trio    you and two teammates focus one dummy (tools/dmg_number_trio.gd), 2.3 s in, and
+##   dmgnum_2_trio_crop  the 480x360 around the dummy; prints the most numbers over one spot per frame
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
+const Trio := preload("res://tools/dmg_number_trio.gd")
 const TICK_EVERY := 15     # frames: a quarter second
 
 var main: Node
@@ -31,6 +34,7 @@ func run(main_node: Node) -> void:
 		if f == 70:
 			_take("dmgnum_0_ticks", lines, "Mid-fight: five rivals taking ticks, reticle on the nearest")
 	_take("dmgnum_1_end", lines, "After two seconds of ticks, a crit and a heavy hit")
+	await _trio(lines)
 	var cap := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
 		cap.store_line(l)
@@ -87,3 +91,39 @@ func _frame() -> void:
 func _take(file: String, lines: Array, caption: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
 	lines.append("%s.png: %s" % [file, caption])
+
+## The trio-focus case: three attackers on one dummy for Trio.SECS s, the frame after your ability hit
+## shot whole and cropped round the dummy.
+func _trio(lines: Array) -> void:
+	m.queue_free()
+	m = Match.new()
+	main.add_child(m)
+	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.set_process(false)
+	P = m.player
+	fx = m.fx
+	fx.set_process(false)
+	for mb in m.mobs:
+		mb.queue_free()
+	m.mobs.clear()
+	var s := Trio.setup(m)
+	var dummy: Hunter = s["dummy"]
+	fx.nums.clear()
+	var most := 0
+	var per: Array = []
+	for f in int(Trio.SECS / DT):
+		Trio.hit(s, f)
+		await _frame()
+		var c := Trio.overlap(fx, m.cam)
+		per.append(c)
+		most = maxi(most, c)
+		if f == 138:
+			_take("dmgnum_2_trio", lines, "Trio focus: you and two teammates on one dummy, 2.3 s in")
+			var img := main.get_viewport().get_texture().get_image()
+			var c2 := Vector2i(m.cam.unproject_position(dummy.pos + Vector3(0, 1.5, 0)))
+			var r := Rect2i(c2 - Vector2i(240, 200), Vector2i(480, 360))
+			r = r.intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+			img.get_region(r).save_png(dir.path_join("dmgnum_2_trio_crop.png"))
+			lines.append("dmgnum_2_trio_crop.png: The dummy's numbers, cropped")
+	print("DMGNUMSHOTS trio max overlap %d (limit %d), per-second max %s" % [most, Trio.MAX_OVERLAP,
+		[per.slice(0, 60).max(), per.slice(60, 120).max(), per.slice(120, 180).max()]])
