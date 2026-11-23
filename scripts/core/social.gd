@@ -875,7 +875,8 @@ static func clean_island(d: Dictionary) -> Dictionary:
 		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor")),
 		"tag": ClanInfo.clean_tag(d.get("tag")),
 		"last": ClanInfo.clean_deed(d.get("last"), int(Time.get_unix_time_from_system())),
-		"showcase": BaseShowcase.clean(d.get("showcase")), "fish": FishingDerby.clean(d.get("fish"))}.merged(VisitZones.clean(d))
+		"showcase": BaseShowcase.clean(d.get("showcase")), "fish": FishingDerby.clean(d.get("fish"))}\
+		.merged(VisitZones.clean(d))
 
 ## One Boki from someone else's snapshot: {} if its species is unknown, else only safe fields, numbers clamped.
 static func clean_snap_kin(rv) -> Dictionary:

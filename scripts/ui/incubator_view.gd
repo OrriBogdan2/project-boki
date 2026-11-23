@@ -8,7 +8,7 @@ extends RefCounted
 const CARD_W := 222.0
 
 ## Fills the Nook panel body v. reopen rebuilds the panel; hatch(id) hatches one ready egg.
-static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callable) -> void:
+static func build(home: Home, v: VBoxContainer, reopen: Callable, hatch: Callable) -> void:
 	Incubator.ensure()
 	var q := Incubator.shelf()
 	UI.subtitle(v, "Rare Eggs from boss lairs warm here side by side. Each hatches a first-form Boki, with good stats, after about %d minutes of play, in the garden or in matches." % int(Incubator.need() / 60.0))
@@ -68,7 +68,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 			if w != "": home._toast(w); return
 			Sfx.play("unlock"); Save.save_game()
 			if home.hinc: home.hinc.refresh()
-			if home.has_method("_refresh_top"): home._refresh_top()
+			home._refresh_top()
 			reopen.call(), 0, "gem")
 		bb.disabled = int(Save.d["gems"]) < cost and not Game.modding()
 		bb.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
