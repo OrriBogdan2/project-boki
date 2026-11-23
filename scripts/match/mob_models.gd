@@ -84,7 +84,7 @@ static func _sph(r: float) -> SphereMesh:
 	var key := "s%.4f|%d" % [r, sg]
 	if not _meshes.has(key):
 		var s := SphereMesh.new()
-		s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(6, sg / 2)
+		s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(6, int(sg / 2.0))
 		_meshes.put(key, s)
 	return _meshes.mesh(key)
 
