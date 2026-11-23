@@ -63,6 +63,8 @@ static func drop(h, e: Dictionary) -> bool:
 	for k in h.kins:
 		if Care.need(k["rec"], "food") < Econ.HUNGRY_AT and not k.has("life_eat"):
 			k["t"] = 0.0  # answers now, not after its rest
+			if h.life != null:
+				h.life.hungry_wake(k)  # a day nap or a game of tag is not worth missing the meal for
 	return true
 
 
