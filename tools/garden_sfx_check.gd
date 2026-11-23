@@ -95,11 +95,11 @@ func _names() -> void:
 	ok(silent.is_empty(), "every cheer, fanfare and huff sound exists (missing %s)" % [silent])
 	var cues: Array = ["glint_cast", "glint_plop", "glint_water", "glint_bite", "glint_reel", "tumble_push",
 			"tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal", "show_crowd",
-			"relay_handoff", "relay_fumble", "relay_finish"]
+			"relay_handoff", "relay_fumble", "relay_finish", "kite_flap", "kite_ring", "kite_updraft", "kite_finish",
+			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win"]
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
-	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo Steps, Show Ring and Relay cue exists (%d)"
-			% cues.size())
+	ok(cues.all(func(c): return Sfx.ensure(c)), "every garden game cue exists (%d)" % cues.size())
 
 func _fishing() -> void:
 	var rec := _kin("zapple", "Pip")
@@ -493,17 +493,17 @@ func _whistle(home) -> void:
 	ok(_count(BaseWhistle.TAP) == 1 and _count(BaseWhistle.HOLD) == 0, "whistle: a tap is one short whistle (%s)"
 			% [GardenSfx.heard])
 	w.press()
-	w.step(float(w.R["hold_s"]) + 0.05)
+	w.step(float(w.r["hold_s"]) + 0.05)
 	w.release()
 	ok(_count(BaseWhistle.TAP) == 2 and _count(BaseWhistle.HOLD) == 1, "whistle: a hold adds one rising whistle (%s)"
 			% [GardenSfx.heard])
 	var sp := String(home.kins[0]["rec"]["species"])
 	_answer(home, 90.0, 80.0, false)
-	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.R["happy_at"]) and _count(KinVoice.cue(sp, "happy")) == 1
+	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.r["happy_at"]) and _count(KinVoice.cue(sp, "happy")) == 1
 			and _voices() == 1 and _total("garden_sulk_") == 0, "whistle: a trusting, glad Boki answers happy (%s)"
 			% [GardenSfx.heard])
 	_answer(home, 25.0, 40.0, false)
-	ok(w.eagerness(home.kins[0]["rec"]) < float(w.R["happy_at"]) and _count(KinVoice.cue(sp, "unsure")) == 1
+	ok(w.eagerness(home.kins[0]["rec"]) < float(w.r["happy_at"]) and _count(KinVoice.cue(sp, "unsure")) == 1
 			and _voices() == 1, "whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard])
 	var rec: Dictionary = _answer(home, 90.0, 5.0, false)["rec"]
 	ok(w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _voices() == 0,

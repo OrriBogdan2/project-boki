@@ -33,6 +33,7 @@ func _has_job(hw, kind: String) -> bool:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (the shipped rules have the garden on)
 	# ---------------------------------------------------------------- 1. elements as data
 	var sp_ok := true
 	var lines: Array = []

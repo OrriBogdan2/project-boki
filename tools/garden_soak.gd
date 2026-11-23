@@ -152,8 +152,8 @@ func _step() -> void:
 	home.hrace.tick(DT)
 	home.hshove.tick(DT)
 	var e := SnackPatch.entry(Save.d)
-	if e.has("t"):
-		e["t"] = float(e["t"]) - DT          # real unix time cannot be sped up: age the timer instead
+	if e.has(SnackPatch.RIPE_KEY):
+		e[SnackPatch.RIPE_KEY] = float(e[SnackPatch.RIPE_KEY]) - DT      # unix time can't be sped up: age the timer
 	if int(t / home.DAY_LEN) > day_before:
 		_player_day(int(t / home.DAY_LEN))
 
@@ -273,7 +273,7 @@ func _check_toy(k: Dictionary, nm: String) -> void:
 func _check_joy(rec: Dictionary, nm: String) -> void:
 	var joy := Care.need(rec, "joy")
 	joy_low[nm] = minf(float(joy_low.get(nm, 100.0)), joy)
-	if joy < float(home.life.R["whistle"]["sulky_joy"]):
+	if joy < float(home.life.r_v["whistle"]["sulky_joy"]):
 		sulky_s[nm] = float(sulky_s.get(nm, 0.0)) + DT
 
 ## Toy use per Boki per in-game day (the play that trains stats, GARDEN.md 4) and how glum each got. A Boki you

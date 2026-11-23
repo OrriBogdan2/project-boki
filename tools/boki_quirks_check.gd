@@ -136,8 +136,11 @@ func _care() -> void:
 	var usual := _food_drop("zapple")
 	ok(absf(fast - 2.0 * usual) < 0.01, "a Rimeshrew gets hungry twice as fast (%.1f vs %.1f)" % [fast, usual])
 	var joy := {}
+	var was := FarmUnlocks.base_mode()
+	FarmUnlocks.rules()["base_mode"] = false      # the farm's joy pace: the base's 8 a minute floors both in 10 min
 	for sp in ["goliathite", "burrlet", "zapple"]:
 		joy[sp] = _rain_mood(sp)
+	FarmUnlocks.rules()["base_mode"] = was
 	ok(joy["goliathite"] < -1.0 and joy["burrlet"] > 1.0 and absf(joy["zapple"]) < 0.01,
 		"rain sinks an Effigeetle's mood, lifts a Mycroll's, leaves others alone %s" % str(joy))
 	ok(_rain_mood("goliathite", true) == 0.0, "a Boki asleep or indoors doesn't feel the rain")

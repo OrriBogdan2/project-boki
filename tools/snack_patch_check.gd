@@ -27,7 +27,8 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	rules["base_mode"] = false
 	Save.d = _save()
 	HomeLayout.ensure(Save.d)
 	ok(HomeLayout.count_of(SnackPatch.ID, Save.d) == 0 and not FarmUnlocks.open(SnackPatch.ID),
@@ -38,7 +39,7 @@ func run(m: Node) -> void:
 	_ridge()
 	await _in_the_garden()
 	_market()
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	print("SNACK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -57,7 +58,7 @@ func _rules_and_save() -> void:
 	var e := {"u": HomeLayout._next_uid(l), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0}
 	(l["deco"] as Array).append(e)
 	l["inv"].erase(SnackPatch.ID)
-	e["t"] = Time.get_unix_time_from_system()
+	e[SnackPatch.RIPE_KEY] = Time.get_unix_time_from_system()
 	var back: Dictionary = JSON.parse_string(JSON.stringify(Save.d))
 	HomeLayout.ensure(back)
 	var kept := HomeLayout.count_of(SnackPatch.ID, back) == 1 and not SnackPatch.entry(back).is_empty()
@@ -79,7 +80,8 @@ func _first_batch() -> void:
 	Save.d = _save()
 	HomeLayout.ensure(Save.d)
 	var l := HomeLayout.of(Save.d)
-	var e := {"u": HomeLayout._next_uid(l), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0, "t": 1000.0}
+	var e := {"u": HomeLayout._next_uid(l), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0, "t": 1,
+		SnackPatch.RIPE_KEY: 1000.0}
 	(l["deco"] as Array).append(e)
 	var first := float(SnackPatch.rules()["first_grow_secs"])
 	var grow := float(SnackPatch.rules()["grow_secs"])
@@ -89,7 +91,7 @@ func _first_batch() -> void:
 			"first batch: not ripe at 59 s, ripe at 60 s")
 	ok(not SnackPatch.harvest(Save.d, 1000.0 + first).is_empty() and int(Save.d["snack_picks"]) == 1,
 			"picking the first batch counts one")
-	var t2: float = float(e["t"])
+	var t2: float = float(e[SnackPatch.RIPE_KEY])
 	ok(not SnackPatch.ripe(e, t2 + grow - 1.0) and SnackPatch.ripe(e, t2 + grow),
 			"second batch: not ripe at 479 s, ripe at 480 s")
 	ok(SnackPatch.ripe(e, t2 + 60.0) == false, "second batch: not ripe at 60 s")
@@ -119,7 +121,7 @@ func _ridge() -> void:
 			"ridge: the patch grows Flying, Electric, Fairy and Sound snacks: %s" % str(SnackPatch.zone_snacks(Save.d)))
 	var l := HomeLayout.of(Save.d)
 	var e := {"u": HomeLayout._next_uid(l), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0,
-			"t": Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
+			SnackPatch.RIPE_KEY: Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
 	(l["deco"] as Array).append(e)
 	var got := SnackPatch.harvest(Save.d, Time.get_unix_time_from_system())
 	var each := got == SnackPatch.snacks(Save.d)      # its list, plus the season snack
@@ -135,7 +137,7 @@ func _in_the_garden() -> void:
 	HomeLayout.ensure(Save.d)
 	var l := HomeLayout.of(Save.d)
 	var e := {"u": HomeLayout._next_uid(l), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0,
-			"t": Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
+			SnackPatch.RIPE_KEY: Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
 	(l["deco"] as Array).append(e)
 	l["inv"].erase(SnackPatch.ID)
 	var home = await main._hb_home()

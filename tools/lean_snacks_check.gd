@@ -67,7 +67,7 @@ func _habits() -> void:
 func _patch() -> void:
 	Save.d = Save.fresh()
 	HomeLayout.ensure(Save.d)
-	var e := {"id": SnackPatch.ID, "t": 1, "x": 0, "z": 0, "r": 0}
+	var e := {"id": SnackPatch.ID, SnackPatch.RIPE_KEY: 1, "x": 0, "z": 0, "r": 0}
 	Save.d["layout"]["deco"].append(e)
 	var seen := {}
 	for i in 24:

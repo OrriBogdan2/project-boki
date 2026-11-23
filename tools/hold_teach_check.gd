@@ -21,6 +21,7 @@ var main_node: Node
 func run(main: Node) -> void:
 	main_node = main
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (the shipped rules have the garden on)
 	var holds0: Dictionary = (Settings.get_v(HoldTeach.SETTING) as Dictionary).duplicate()
 	Settings.set_v(HoldTeach.SETTING, {}, false)
 	HoldTeach.reset_session()

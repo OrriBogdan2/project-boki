@@ -49,6 +49,7 @@ func _spot(hb: HomeBuild, p: Vector3, min_d := 0.0) -> Array:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (the shipped rules have the garden on)
 	var t0 := Time.get_ticks_msec()
 	# ---------------------------------------------------------------- 1. a new save starts nearly empty
 	Save.d = _new_save()

@@ -140,6 +140,8 @@ func _settle() -> void:
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
+	var was := FarmUnlocks.base_mode()
+	rules["base_mode"] = false      # the old farm first (the shipped rules have the garden on)
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["Pip", "Ash", "Bo"][i], 10, 10, 70.0)
@@ -179,6 +181,6 @@ func _on_base() -> void:
 			ring = ring or (fb.cue != null and fb.cue.landing.visible)
 		ok(fb.run == null and is_instance_valid(fb.card), "on: the round ends with a result card (%.1f s)" % t)
 		ok(ring and fb.cue == null, "cue: the landing ring showed on the tosses and is gone at the end")
-	rules["base_mode"] = false
+	rules["base_mode"] = was
 	home.queue_free()
 	await main.get_tree().process_frame

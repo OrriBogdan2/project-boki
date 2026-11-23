@@ -258,6 +258,7 @@ func _key(code: Key) -> InputEventKey:
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
+	rules["base_mode"] = false      # the old farm first (the shipped rules have it on)
 	var d := Save.fresh()
 	for i in 2:
 		var k := _kin(["zapple", "cindle"][i], ["Pip", "Ash"][i], 10, 50.0)
