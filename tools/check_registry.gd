@@ -605,7 +605,10 @@ const CHECKS := {
 	"--egg-models-check": ["res://tools/egg_models_check.gd", "egg_models_check", null],  # the eggs' 3D shells
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],  # keys, bond hook, release
 	# every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
-	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
+	"--snag-1-check": ["res://tools/snag_check.gd", "snag_check", "archer,juggernaut,gunslinger"],
+	"--snag-2-check": ["res://tools/snag_check.gd", "snag_check", "bulwark,rimewright,ashwick"],
+	"--snag-3-check": ["res://tools/snag_check.gd", "snag_check", "dolm,mage,dredge"],
+	"--snag-4-check": ["res://tools/snag_check.gd", "snag_check", "tender,thief,ostra,gil"],
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],  # far rocks and trees batched
 	"--prop-glb-check": ["res://tools/prop_glb_check.gd", "prop_glb_check", null],  # art/props models
 	"--ult-glow-check": ["res://tools/ult_glow_check.gd", "ult_glow_check", null],  # ready glow, cast flash
