@@ -11119,3 +11119,4 @@ READY ext/sfx-hit-tier-confirm 3e1b339ccc (bulk-rebase: origin/main merged in me
 READY ext/extra-race-hub-path 1392d31a36 (bulk-rebase: origin/main merged in mechanically, was 6b713babda; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/farm-garden-perf-30 6220908839 (bulk-rebase: origin/main merged in mechanically, was 03daafd1d8; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/farm-garden-day-replay 55b899544e (bulk-rebase: origin/main merged in mechanically, was 3ce318890f; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/anim-boki-own-clips-sttv 89043791d1 (merged origin/main, boki_anim_shots keeps main --bred plus branch --clips; --check 0 failures, boki-anim-audit 131 red identical to main = NEW-RED 0, health.py --strict fails only on style files this branch does not touch)
