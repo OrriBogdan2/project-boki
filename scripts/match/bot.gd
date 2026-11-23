@@ -172,7 +172,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if a["strafe_t"] <= 0.0:
 			a["strafe_t"] = randf_range(0.6, 1.6)
 			a["strafe"] = -a["strafe"]
-		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8
+		# point blank (a melee bot at 1.2 m) a full strafe orbits the target and its facing spins ~5 turns
+		# in 5 s (--bot-sanity-check); closer than 2.5 m the sidestep shrinks with the distance
+		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8 * clampf(d / 2.5, 0.35, 1.0)
 		if finishing:
 			# walk onto the wisp to stomp it, and finish it
 			move = to if d > 0.7 else Vector2.ZERO
