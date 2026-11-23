@@ -164,6 +164,7 @@ func _process(_delta: float) -> void:
 				var img := get_viewport().get_texture().get_image()
 				if img: img.save_png("%s/load_%03d.png" % [shots_dir, load_frames.size()])
 		load_frames.append({"wall": wall, "marks": marks, "render": _render_us / 1000.0, "compiles": new_c,
+			"cc": cache_changed.duplicate(),
 			"slice": _slices_between(last_us_prev, now),
 			"proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, "phys": Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 			"spin": int(ld.get("spin_draws")) if ld and ld.get("spin_draws") != null else -1, "stage": String(ld.get("stage_label")) if ld and ld.get("stage_label") != null else ""})
@@ -456,6 +457,11 @@ func _finish_load() -> void:
 				var mks := ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))
 				lines.append("LOAD   @%6.0f %6.0f %6.0f c%-3d %-20s %s%s" % [at, float(f["wall"]),
 					float(f["render"]), int(f["compiles"]), String(f["stage"]), mks, String(f["slice"])])
+				var kinds := {}
+				for c in f["cc"]:
+					var ck := String(c).get_slice("/", 0)
+					kinds[ck] = int(kinds.get(ck, 0)) + 1
+				if not kinds.is_empty(): lines.append("LOAD        compiled: " + str(kinds))
 	var steps := {}
 	for mk in PerfLog.marks:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
