@@ -12,9 +12,9 @@ extends RefCounted
 ##   7. the hit-feel table (DASHES_AND_ABILITY_FEEL.md §5.4): in 4, the lightest hit an LMB / RMB / X lands on
 ##      the dummy is its rules tier (TIER_OK lists the explained exceptions), the dummy never flashes longer than
 ##      a tier's flash and your own camera never shakes; one HITFEEL row per Hunter (LMB light, RMB heavy, X ult);
-##   8. no kit file sets its own hit-stop, body flash or shake number: they come from the tiers.
-##   9. every freeze of your game, whoever asks (Match.freeze_frame: an armor break, a parry, a Boki's strike),
+##   8. every freeze of your game, whoever asks (Match.freeze_frame: an armor break, a parry, a Boki's strike),
 ##      shares that cap, and one asked while another runs costs only the time it adds.
+##   9. no kit file sets its own hit-stop, body flash or shake number: they come from the tiers.
 ## Reuses the dash-flow check's training match and slot presses. Never touches the save.
 
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
@@ -435,7 +435,7 @@ func _stacking(m: Match) -> void:
 ## Three 0.07 s freezes of your game, each drained before the next as the running game does: the first in full, all
 ## three within the cap. Then one asked twice on the same step holds it once and costs once: the next gets the rest.
 func _freezes(m: Match, cap_s: float) -> void:
-	const ASK := 0.07  # s: a parry's freeze (combat/verbs.gd)
+	const ASK := 0.07               # s: a parry's freeze (combat/verbs.gd)
 	m.time += 2.0
 	var got: Array[float] = []
 	for i in 3:
@@ -444,8 +444,7 @@ func _freezes(m: Match, cap_s: float) -> void:
 		got.append(m.hitstop)
 		m.time += 0.05
 	var total := got[0] + got[1] + got[2]
-	ok(
-		is_equal_approx(got[0], ASK) and total <= cap_s + 0.0001,
+	ok(is_equal_approx(got[0], ASK) and total <= cap_s + 0.0001,
 		"three %.0f ms freezes inside %.2f s hold your game %.0f ms in all (cap %d): %s"
 			% [ASK * 1000.0, ImpactWeight.cap("hitstop_window_s"), total * 1000.0, int(cap_s * 1000.0), str(got)])
 	m.time += 2.0
