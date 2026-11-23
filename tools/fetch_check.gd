@@ -77,8 +77,8 @@ func _stats() -> void:
 	var sharp := _wins(0, 30)
 	var both := _wins(30, 30)
 	ok(absf(even - ROUNDS / 2.0) < 40.0, "equal Boki split the rounds (%d of %d)" % [even, ROUNDS])
-	ok(fast > ROUNDS / 2 + EDGE, "Speed alone wins %d of %d" % [fast, ROUNDS])
-	ok(sharp > ROUNDS / 2 + EDGE, "Focus alone wins %d of %d" % [sharp, ROUNDS])
+	ok(fast > int(ROUNDS / 2.0) + EDGE, "Speed alone wins %d of %d" % [fast, ROUNDS])
+	ok(sharp > int(ROUNDS / 2.0) + EDGE, "Focus alone wins %d of %d" % [sharp, ROUNDS])
 	ok(both > fast and both < ROUNDS, "Speed and Focus win %d of %d: more, but not every round" % [both, ROUNDS])
 	ok(
 		BaseFetch.pace(_kin("H", 10, 10, 100.0, 100.0)) > BaseFetch.pace(_kin("G", 10, 10, 0.0, 0.0)) * 1.1,

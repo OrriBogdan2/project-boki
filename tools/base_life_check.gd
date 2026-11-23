@@ -184,7 +184,7 @@ func _cues(sname: String) -> int:
 func _nap_sounds(home) -> void:
 	var pile := []
 	for i in 30:
-		pile.append({"pos": Vector3(float(i % 6) * 1.2, 0, float(i / 6) * 1.2)})
+		pile.append({"pos": Vector3(float(i % 6) * 1.2, 0, float(int(i / 6.0)) * 1.2)})
 	var heard := BokiNapSfx.heard(pile, Vector3.ZERO)
 	var reach := float(Sfx.sound_reach.get(BokiNapSfx.LOOP, 0.0))
 	var inside := heard.all(func(k): return Vector2(k["pos"].x, k["pos"].z).length() < reach)

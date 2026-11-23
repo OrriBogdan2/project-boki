@@ -42,7 +42,7 @@ static func membrane(pts: Array, sub := 5, cup := 0.025) -> ArrayMesh:
 	var c := Vector3.ZERO
 	for p in ring: c += p
 	c /= ring.size()
-	var nrm := ((ring[0] as Vector3) - c).cross((ring[ring.size() / 4] as Vector3) - c).normalized()
+	var nrm := ((ring[0] as Vector3) - c).cross((ring[int(ring.size() / 4.0)] as Vector3) - c).normalized()
 	c += nrm * cup
 	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in ring.size():
