@@ -25,10 +25,11 @@ const WEIGHTS := {"clear": 0.42, "dusk": 0.18, "night": 0.14, "ash": 0.12, "fog"
 const SIGHT := {"clear": 1.0, "day": 1.0, "dusk": 0.85, "night": 0.6, "ash": 0.72, "fog": 0.62}
 ## How much bolder and more numerous the Blight is (BlightDir).
 const BLIGHT := {"clear": 1.0, "day": 1.0, "dusk": 1.12, "night": 1.4, "ash": 1.25, "fog": 1.2}
-## Outside-of-sight darkening (the vis shader's grey fog multiplier; 0.7 is the usual, docs/specs/VISION_LOOK.md; the
-## darker conditions keep about the same ratios to it, night and ash set so the grey fog's luma on GPU stays 0-10% under
-## what each weather showed before it went grey).
-const VIS_DARK := {"clear": 0.7, "day": 0.7, "dusk": 0.63, "night": 0.5, "ash": 0.58, "fog": 0.57}
+## Sight fog outside the cone: a slight DARK fog, partly grey, never tinted. Owner 11-23: "something in
+## between the full grey and the flat dim; slight dark fog, grey not blue". Two tunables, every weather
+## (docs/specs/VISION_LOOK.md). Default = variant B of the 11-23 sheet.
+const VIS_DARK := 0.60    # albedo scale outside sight (1 = no dimming)
+const VIS_GREY := 0.55    # share pulled to neutral grey (0 = own colours, 1 = full grey)
 const NAMES := {"clear": "Clear evening", "day": "Overcast day", "dusk": "Dusk", "night": "Night", "ash": "Ash storm", "fog": "Fog"}
 const BLURBS := {
 	"clear": "Good light. You see far, and so does everything else.",
