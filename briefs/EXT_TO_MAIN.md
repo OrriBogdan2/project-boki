@@ -11070,3 +11070,4 @@ READY ext/feel-grimble-reel-tap 75b6e3f47cbcc86b370a05f182914d96bc0c1d3d (Deep R
 READY ext/parity-recheck-sable-motley 0a4f6cbd8f (Sable+Motley parity re-check)
 READY ext/parity-recheck-albert-neve f9a01e9491ca46ad263d18c203084eb1aa7d0662 (Albert+Neve parity re-check)
 READY ext/parity-recheck-tenzo-sparkle 7b4af68271507162c0fabe77eef4009e1738077b (Tenzo+Sparkle parity re-check)
+READY ext/vfx-meeko-weak-col 63485c47a51633addf7cbc288f1e5901f5dcdb06 (Meeko VFX lift)
