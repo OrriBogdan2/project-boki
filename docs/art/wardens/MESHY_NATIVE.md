@@ -81,7 +81,7 @@ as Meshy made them; only the vertex data is replaced) and packs it with `native_
 Sable weight fixes are not applied to these. Tenzo rides `orbit_stones`, Motley `orbit_cards`, both on `Head`.
 Every state plays one of the six clips (the same map as Sable's), so none can T-pose.
 
-## Grimble (dredge): goo arm, pack, coin cap (r7), tail chain and cleanup (r8)
+## Grimble (dredge): goo arm, pack, coin cap (r7), tail chain and cleanup (r8), right leg and lean (r10)
 `art/wardens/dredge/dredge_meshy.glb` (skin-native, skin-goo, hoard pack, coin cap) is the r5 body re-skinned by
 `tools/meshy/dredge_reskin.py OUT R5 R3 [tail_arm]` (`--stretch FILE.glb` lists edges stretched >3x and over 6 cm).
 - Goo: one mesh, no cuts (r6 cut it at 0.8 m, which left floating pieces). Own vertex copies, Meshy's weights without
@@ -102,5 +102,14 @@ r8, `tools/meshy/dredge_post.py OUT IN` on the r7 body (IN = the r7 glb, never t
   their rest direction (they hang) and take 60/50/50 % of the bone above's turn with a lag. Goo edges over 3x and
   6 cm: Attack 0.5 s 113 (r7 1366), run 16, idle 0.
 - Attack: the head and upper-spine bend of Meshy's lunge is cut to 35 % (Spine02, Spine01, neck, Head keys).
+r10 (same tool):
+- Right leg: Meshy fused dark spiky shards into the right instep and layered torn flaps up the shin (the right leg
+  had 4x the left's triangles at the knee). Below 0.62 m it is replaced by a mirror copy of the clean left leg
+  (x flipped, Left* bones swapped for Right*, fitted to the thigh). Both legs are two shells 4 mm apart; each shell
+  is welded to its own along a flat seam (rims onto the copy's cross-section, copy rim vertices onto the thigh's rim
+  edges), relaxed, and the inner shell near the seam wears the outer's texture. Skin stays 1 island.
+- Attack: the lean that the Hips still pitched in (Head over Spine02, 38 deg at the slam, idle 10) past 12 deg is
+  cut by 60 % with a counter-turn of Spine02 about the side axis: peak 21 deg, legs keep their plant.
+- Goo: the arm-to-tail blend runs from 1.35 m (was 1.15): Attack 0.5 s 33 long edges (r9 109), run 0 (16).
 Grimble has no hit clip: a hit is the Hips flinch spring (WardenFlinch) over the playing clip.
 The gun's hip is data (`holster.hip.pos`, x +0.17 = his left, where the gauntlet draws it).
