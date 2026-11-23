@@ -11,7 +11,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 
 LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; the 'hold LMB through' rows below note where a hero's kit has its own say.
 
-An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; a lock that runs on past that answers with the deny cue. The footage shows no such press dropped (`--cast-lock-buffer-check`).
+An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0118-cc-exit-buffer.md): it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; a lock that runs on past that answers with the deny cue. The footage shows no such press dropped (`--cast-lock-buffer-check`).
 
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
