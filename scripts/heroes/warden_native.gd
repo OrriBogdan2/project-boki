@@ -64,6 +64,7 @@ var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkelet
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
+var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 
 
@@ -126,9 +127,11 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	process_priority = 10  # (after Match renders the hunters: HunterAnim.update)
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	plays = (d["clips"] as Dictionary).duplicate()
+	moves = WardenNativeMoves.new(player, d)
+	plays.merge(moves.clips())
 	skel = WardenGlb.skeleton(glb)
 	_borrow_clips()
-	for st in SLOTS:  # (a slot whose clip is nowhere plays today's clip)
+	for st in SLOTS + moves.clips().keys():  # (a slot whose clip is nowhere plays today's clip)
 		if plays.has(st) and not player.has_animation(String(plays[st])):
 			push_warning("warden_native %s: slot %s names clip %s, which no file has" % [art_id, st, plays[st]])
 			plays.erase(st)
@@ -176,6 +179,10 @@ func _process(dt: float) -> void:
 	var xt := float(s.get("extract_t", -1.0))
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
+	elif moves.owns(s, plays):  # a kit move with its own clip (draw, release, Spirit Walk): laid at the move's clock
+		moves.play(s, plays, dt)
+		attack_left = 0.0
+		cur = "kmove"
 	elif one != "":
 		attack_left = _clip_len(one) / _shot_rate(one)
 		_play(one, _shot_rate(one), true)
@@ -408,8 +415,8 @@ func borrow(src: Node3D) -> void:
 	var from := String(sp.get_node(sp.root_node).get_path_to(WardenGlb.skeleton(src)))
 	var to := String(player.get_node(player.root_node).get_path_to(skel))
 	var lib := player.get_animation_library(&"")
-	for st in SLOTS:
-		var nm := String(plays.get(st, ""))
+	for st in plays:
+		var nm := String(plays[st])
 		if nm == "" or player.has_animation(nm) or not sp.has_animation(nm):
 			continue
 		var clip := sp.get_animation(nm).duplicate(true) as Animation
