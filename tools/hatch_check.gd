@@ -248,8 +248,9 @@ func _egg_cards(tree: SceneTree) -> void:
 		ok(pic != null and pic.modulate.get_luminance() > 0.5, "starter card %d's picture is in full colour" % i)
 	hx._pick(3)
 	await tree.process_frame      # (the old row is freed at the end of the frame)
-	var myst: Array = hx.bottom.get_child(0).get_children().filter(func(c): return c.find_child("BokiName", true, false) \
-			and _card_text(c, "BokiName") == "???")
+	var myst: Array = hx.bottom.get_child(0).get_children().filter(
+		func(c): return c.find_child("BokiName", true, false) and _card_text(c, "BokiName") == "???"
+	)
 	var secret_name := String(Data.KIN[secret]["name"])
 	var mpic: CanvasItem = myst[0].find_child("Picture", true, false) if myst.size() == 1 else null
 	ok(myst.size() == 1 and not " ".join(myst[0].find_children("*", "Label", true, false).map(
