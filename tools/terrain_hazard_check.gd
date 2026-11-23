@@ -152,11 +152,8 @@ func _deep_water(ai: int, safe: bool) -> void:
 	await _run(0.3)
 	var spd := p_v.slow_mult(0.65) * (1.35 if p_v.haste_t > 0.0 else 1.0)
 	var hits := TerrainHazards.hit_mult(m, p_v)
-	ok(
-		"deep water %s: the hunter swims" % _who(safe),
-		HazardMoves.of(p_v) == HazardMoves.SWIM,
-		str(HazardMoves.of(p_v))
-	)
+	var move := HazardMoves.of(p_v)
+	ok("deep water %s: the hunter swims" % _who(safe), move == HazardMoves.SWIM, str(move))
 	await _run(float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"]) + 1.5)
 	var lost := p_v.max_hp - p_v.hp
 	if safe:

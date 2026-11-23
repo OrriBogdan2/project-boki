@@ -14,6 +14,7 @@ var main: Node
 var here := Vector3.ZERO
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	m = Match.new()
 	main.add_child(m)
