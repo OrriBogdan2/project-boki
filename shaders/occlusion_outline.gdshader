@@ -14,9 +14,9 @@ uniform float grow = 0.015;      // m: how far the shell stands off the model
 uniform float band = 0.3;        // 0..1: how close to edge-on a surface must be to take the line
 uniform float gap = 0.9;         // m: how much nearer the depth buffer must be to count as cover
 uniform vec4 rim_color : source_color = vec4(0.08, 0.065, 0.12, 1.0);  // the ink colour (outline.gdshader)
-uniform float rim_alpha = 0.85;
+uniform float rim_alpha = 1.0;
 uniform float rim_depth = 0.25;  // m: how much farther the scene behind the fringe must be (the ground)
-uniform float rim_px = 1.2;      // the shell at least this many pixels of a 720 px tall view wide
+uniform float rim_px = 1.6;      // the shell at least this many pixels of a 720 px tall view wide
 uniform sampler2D depth_tex : hint_depth_texture, repeat_disable, filter_nearest;
 void vertex() {
 	float d = -(MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).z;
