@@ -26,6 +26,7 @@ func _drawn(hud) -> void:
 	await main.get_tree().process_frame
 
 func run(main_node: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()

@@ -40,12 +40,15 @@ static func tab_level(tab_name: String) -> int:
 		return Shelter.open_level()
 	return int(TABS.filter(func(t): return t[0] == tab_name)[0][1])
 
-## The tabs this stall's level opens.
+## The tabs this stall's level opens (the Shelter also in base_mode, Shelter.open; no Exchange there).
 func tabs() -> Array:
 	var lv := Stalls.level()
-	var no_exchange := FarmUnlocks.base_mode()
-	var out := TABS.filter(func(t): return tab_level(String(t[0])) <= lv and not (no_exchange and t[0] == "Exchange")) \
-			.map(func(t): return String(t[0]))
+	var base := FarmUnlocks.base_mode()
+	var shown := func(t) -> bool:
+		if base and t[0] == "Exchange":
+			return false
+		return tab_level(String(t[0])) <= lv
+	var out := TABS.filter(shown).map(func(t): return String(t[0]))
 	if not out.has("Shelter") and not TransferPost.inbox.is_empty():
 		out.append("Shelter")      # a Boki handed to you waits there, at any stall level
 	return out
