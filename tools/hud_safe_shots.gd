@@ -4,10 +4,11 @@ extends RefCounted
 ## margin outlined in magenta so a block over the line shows. Prints how many menu controls leave the margin.
 
 const GUIDE := Color(1.0, 0.2, 0.9)
-const LINE := 2.0      # px, the outline
+const LINE := 2.0  # px, the outline
 
 var main: Node
 var dir := "hud_safe_shots"
+
 
 func _grab(label: String) -> void:
 	for i in 12:
@@ -23,6 +24,7 @@ func _grab(label: String) -> void:
 		img.fill_rect(Rect2i(edge), GUIDE)
 	img.save_png(path + "_guide.png")
 	print("HUDSAFE-SHOT ", path)
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -44,7 +46,7 @@ func run(main_node: Node) -> void:
 	m.set_process(false)
 	if main.fade != null:
 		await main.fade.reveal(0.01)
-	await main.get_tree().create_timer(0.5).timeout      # let the window settle at its size
+	await main.get_tree().create_timer(0.5).timeout  # let the window settle at its size
 	for i in 30:
 		m.step(Match.DT)
 		await main.get_tree().process_frame
@@ -57,6 +59,7 @@ func run(main_node: Node) -> void:
 		print("HUDSAFE %s controls outside the safe margin: %d %s" % [which[0], bad.size(), bad.slice(0, 3)])
 		Overlay.close()
 	main.get_tree().quit()
+
 
 func _outside(node: Node, safe: Rect2) -> Array:
 	var bad: Array = []

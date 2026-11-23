@@ -5,13 +5,14 @@ extends RefCounted
 ## beyond earshot. At most MAX_VOICES sound at once, and one Boki speaks at most once per SELF_GAP_MS.
 ## sulk_edge() makes a need falling to urgent a sulk; KinWants answers a want met with a chirp.
 
-const MAX_VOICES := 3       # Boki voices sounding at once
-const VOICE_MS := 1400      # ms a cue is counted as sounding (the takes are 0.5-1.4 s)
-const SELF_GAP_MS := 1200   # ms before the same Boki may speak again (a feed also pets: one chirp)
-const SULK_DB := -9.0       # dB: a sulk is quieter than a chirp
+const MAX_VOICES := 3  # Boki voices sounding at once
+const VOICE_MS := 1400  # ms a cue is counted as sounding (the takes are 0.5-1.4 s)
+const SELF_GAP_MS := 1200  # ms before the same Boki may speak again (a feed also pets: one chirp)
+const SULK_DB := -9.0  # dB: a sulk is quieter than a chirp
 
-static var _until: Array[int] = []        # when each sounding voice ends (ms)
-static var _last := {}                    # uid -> when that Boki last spoke (ms)
+static var _until: Array[int] = []  # when each sounding voice ends (ms)
+static var _last := {}  # uid -> when that Boki last spoke (ms)
+
 
 ## A mood ("happy", "alert", "unsure", "sleepy", "hurt") or a plain cue ("boki_eat") for a Boki's record.
 ## pos null is the player's own action (a pet, a feed): always in earshot.
@@ -30,6 +31,7 @@ static func say(rec: Dictionary, what: String, pos, vol_db := -8.0, pitch_var :=
 	_last[uid] = now
 	var cue := what if what.begins_with("boki_") else KinVoice.cue(String(rec["species"]), what)
 	Sfx.play(cue, pos, vol_db, pitch_var, Unique.voice(rec))
+
 
 ## Called each frame for every Boki at home with its want ("" for none): a need falling to urgent is one sulk.
 static func sulk_edge(k: Dictionary, want: String) -> void:
