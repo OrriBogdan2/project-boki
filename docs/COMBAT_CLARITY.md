@@ -22,7 +22,7 @@ text is rare. Our looks stay ours: the signature colour is the body of every eff
 | the hit | `Ent.render` | the hit flash holds full white for 3 frames (`FLASH_FADE`), then fades |
 | what it did: CC | `StatusLooks` + `BodyTell` | each status's own body look (`StatusLooks`, docs/STATUS_LOOKS.md: stars over the head for a stun, stakes at the feet for a root, rings down the legs for a slow, and Grounded, Dazed and the rest), the same from every source; and the body pulses that colour while it lasts (`BodyTell`). No floating CC words, no icon tiles beside other Hunters' plates (the plate's word stays in place of the name) |
 | less text | `Fx.word` | one floating word at a spot at a time (`WORD_ROOM` 3 m, `WORD_HOLD` 0.6 s), smaller (28 / 40 px) |
-| less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | in a fight (`MusicDir.fight_on`) only your own Boki's speech bubble is drawn; a Boki's ability name floats over your own Boki only (others' read from their looks) |
+| less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | in a fight (`MusicDir.fight_on`) only your own Boki's speech bubble is drawn and no callout pin ("Behind you! · 3m", `BokiChatter.calm`); a Boki's ability name floats over your own Boki only (others' read from their looks) |
 
 ## Ground order (11-12): a melee is not one disc
 A ground ring means gameplay, so in a pile the draw order and strength are one rule (`SideColor.ORDER_*`, a material's

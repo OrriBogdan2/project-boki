@@ -28,7 +28,12 @@ static func say(m: Match, k: Kin, trigger_id: String, fill := {}) -> void:
 
 ## Is the line over this Boki's head drawn? In a fight only your own Boki's are: the rest print over the fight.
 static func heard(m: Match, k: Kin) -> bool:
-	return k.owner_h == m.player or m.music_dir == null or not m.music_dir.fight_on(m)
+	return k.owner_h == m.player or calm(m)
+
+
+## No fight on for the player: Boki callout pins ("Behind you! · 3m") and other Bokis' lines are drawn.
+static func calm(m: Match) -> bool:
+	return m.music_dir == null or not m.music_dir.fight_on(m)
 
 ## Tutorial hints in its own voice, by step (grown speech, then what a hatchling does instead).
 const TUT_HINT := {

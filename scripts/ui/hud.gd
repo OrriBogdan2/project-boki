@@ -1476,8 +1476,8 @@ func _draw_squad_pings(p: Hunter) -> void:
 		_draw_waypoint(pg["pos"], PingInput.label(pg, p), Color(pg["col"], a), EdgeMarker.PRIO_LOW)
 	# a Boki's callout: a marker with what it spotted, fading after a few seconds
 	for pg in m.pings:
-		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null:
-			continue      # (the tutorial has one marker: no Boki callout pins)
+		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null or not BokiChatter.calm(m):
+			continue      # (the tutorial has one marker: no Boki callout pins; none in a fight either)
 		var kk: Kin = pg["kin"] if is_instance_valid(pg["kin"]) else null
 		var a2 := clampf(float(pg.get("life", 5.0)) - float(pg["t"]), 0.0, 1.0) * clampf(float(pg["t"]) * 6.0, 0.0, 1.0)
 		var who := String(kk.rec.get("name", "Boki")) if kk and kk.owner_h != p else ""
