@@ -10,7 +10,16 @@ const DT := 1.0 / 60.0
 const WARM := 20
 const FRAMES := 300
 const MODES := [
-	"as is", "no ui", "as is", "no ui", "every frame", "as is", "every frame", "no shadows", "rigs paused", "boki hidden"
+	"as is",
+	"no ui",
+	"as is",
+	"no ui",
+	"every frame",
+	"as is",
+	"every frame",
+	"no shadows",
+	"rigs paused",
+	"boki hidden"
 ]
 
 var main: Node
@@ -32,13 +41,13 @@ func run(part: String, ui_was: Array) -> void:
 		_apply(home, mode, false, ui_was)
 		if base == 0.0:
 			base = w[0]
-		print(
-			"BENCH isolate %s %s: p50 %.1f ms, p95 %.1f ms, saves %.1f ms of p50" % [part, mode, w[0], w[1], base - w[0]]
-		)
+		var line := "BENCH isolate %s %s: p50 %.1f ms, p95 %.1f ms, saves %.1f ms of p50"
+		print(line % [part, mode, w[0], w[1], base - w[0]])
 	var t0 := Time.get_ticks_usec()
 	for i in 60:
 		home._move_kin(DT)
-	print("BENCH isolate %s kin script: %.2f ms a frame (Home._move_kin)" % [part, (Time.get_ticks_usec() - t0) / 60000.0])
+	var ms := (Time.get_ticks_usec() - t0) / 60000.0
+	print("BENCH isolate %s kin script: %.2f ms a frame (Home._move_kin)" % [part, ms])
 
 
 func _sample() -> Array:

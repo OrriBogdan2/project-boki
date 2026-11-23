@@ -18,7 +18,8 @@ extends RefCounted
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
 ##   [--bench-garden] [--bench-boki=10,20,30]  (only the garden: each --bench-zone zone with each Boki count out, then
-##   the hub; --bench-isolate adds the cost split per zone part; frame p50/p95 per part, docs/GARDEN_PERF.md. Budget lines are FAIL-checked only at 9 Boki)
+##   the hub; --bench-isolate adds the cost split per zone part; frame p50/p95 per part, docs/GARDEN_PERF.md.
+##   Budget lines are FAIL-checked only at 9 Boki)
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
