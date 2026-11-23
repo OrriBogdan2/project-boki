@@ -8,6 +8,7 @@ extends RefCounted
 ## teaches it, 11-18), and only the camps paid XP.
 ## The first camp is telegraphed: its marker and countdown show (world + minimap, CampMark) for TELEGRAPH_T
 ## with no monster out, then the monsters appear on the spots the marker showed.
+## Each run also judges the framing at 1280x720 (TutorialFraming).
 
 var bad := 0
 
@@ -52,10 +53,12 @@ func _play(main: Node, id: String) -> void:
 	ok(locked and m.player.lvl == 1 and m.player.skill_pts == 1, id + ": lands at level 1, one point, all locked")
 	var forced := false
 	var tele := {"ticks": 0, "early": false, "spots": [], "landed": false, "on_spot": false}
+	var framing := TutorialFraming.new()
 	while t < 400.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
+		framing.tick(m)
 		texts[tu.id()] = tu.text
 		_watch_telegraph(m, tele)
 		if tu.id() == "pick_sec" and not forced:
@@ -82,6 +85,7 @@ func _play(main: Node, id: String) -> void:
 	var names_move: bool = hint.contains(HINT_WORD[id]) and hint.length() <= 34
 	ok(names_move, "%s: the first fight line names its move ('%s')" % [id, hint])
 	ok(m.player.extracted, id + ": the course finishes")
+	framing.judge(id, ok)
 	var lv: Dictionary = m.player.slot_lv
 	var all_on: bool = lv.keys().all(func(k): return int(lv[k]) > 0 if k != "ult" else int(lv[k]) == 0)
 	ok(all_on, "%s: every ability unlocked, Fusion left locked %s" % [id, str(m.player.slot_lv)])
