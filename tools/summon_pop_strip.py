@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw
 
 d, out = sys.argv[1], sys.argv[2]
 key = json.load(open(os.path.join(d, "key.json")))
-types = list(key["types"])
+types = key.get("order", list(key["types"]))
 cols = len(key["us"])
 first = Image.open(os.path.join(d, "%s_0.png" % types[0])).convert("RGB")
 w, h = first.size

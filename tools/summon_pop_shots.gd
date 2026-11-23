@@ -12,9 +12,13 @@ func run(main: Node) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
-	var vp := main.get_viewport()
+	var vp := SubViewport.new()  # its own world: Main's splash and menus stay out of the frames
+	vp.size = Vector2i(480, 360)
+	vp.own_world_3d = true
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	main.add_child(vp)
 	var root := Node3D.new()
-	main.add_child(root)
+	vp.add_child(root)
 	var env := WorldEnvironment.new()
 	env.environment = Environment.new()
 	env.environment.background_mode = Environment.BG_COLOR
@@ -50,7 +54,7 @@ func run(main: Node) -> void:
 			key[t]["rim"].append(pop.glow_at(US[i], true).to_html(false))
 		pop.queue_free()
 	var f := FileAccess.open(dir.path_join("key.json"), FileAccess.WRITE)
-	f.store_string(JSON.stringify({"us": US, "types": key}))
+	f.store_string(JSON.stringify({"us": US, "order": TYPES, "types": key}))
 	f.close()
 	print("SUMMONPOPSHOTS %d frames in %s" % [TYPES.size() * US.size(), dir])
 	main.get_tree().quit(0)
