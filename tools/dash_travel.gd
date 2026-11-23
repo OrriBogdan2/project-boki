@@ -21,7 +21,14 @@ const POP_RATE := 30.0  # rad/s over the sim frames beside it, summed on JOINTS:
 const OWN := 0.5  # act_w from which the clip owns the body
 const MOVING := 1.0  # m/s: the body is going somewhere
 const FADE_IN := 0.12  # s from the press the loco may still show (WardenClips.FADE)
+const ENTRY_S := 0.25  # s from the travel's start: the clip may still be reaching its drive pose
+const TAIL_S := 0.1  # s before the travel's end: the recovery may begin on the curve's slow tail
+const HOLD_RATE := 20.0  # rad/s over the sim frames: past the entry the drive pose holds until the travel ends
+const SPINS := ["vault_r", "vault_l", "vault_f", "vault_b", "vault_twist", "shift_whirl"]  # clip names
+# a cartwheel or whirl: the turn is the travel, so it has no drive pose to hold
 const AFTER_S := 0.6  # s after the travel the hand-over is watched
+const STRIKE_AT_STOP := {"juggernaut": "lunge"}  # a clip whose strike is the stop (JuggernautKit.LUNGE_COIL_T): its
+const STRIKE_S := 0.07  # fastest pose frame is within this of the travel's end at any length
 const FEET := [["foot.L", "shin.L"], ["foot.R", "shin.R"]]
 const JOINTS := ["root", "hips", "upper_arm.L", "upper_arm.R", "thigh.L", "thigh.R"]
 
@@ -143,6 +150,10 @@ static func judge(arch: String, fs: Array, trav: Array) -> Array:
 		lean_max = maxf(lean_max, float(e["lean"]))
 		if float(e["t"]) - press > FADE_IN and float(e["act"]) < OWN and float(e["up"]) < OWN:
 			early += dt
+	var hold := 0.0
+	for e: Dictionary in trav:
+		if float(e["t"]) - t0 > ENTRY_S and float(e["t"]) < t1 - TAIL_S:
+			hold = maxf(hold, _rate(e))
 	var ride := 0.0
 	var pop := 0.0
 	var pop_at := ""
@@ -172,6 +183,40 @@ static func judge(arch: String, fs: Array, trav: Array) -> Array:
 			"run shown %.2f s of the travel (limit %.2f); %s" % [early, EARLY_S, about]
 		]
 	)
+	var spin := ""
+	for c: String in SPINS:
+		if clips.has(c):
+			spin = c
+	out.append(
+		[
+			"the drive pose holds while it travels",
+			hold <= HOLD_RATE or spin != "",
+			(
+				"pose moved at most %.0f rad/s from %.2f s in to %.2f s before its end (limit %.0f%s)"
+				% [hold, ENTRY_S, TAIL_S, HOLD_RATE, ", none: %s spins" % spin if spin != "" else ""]
+			)
+		]
+	)
+	var strike_clip: String = STRIKE_AT_STOP.get(arch, "")
+	if not clips.has(strike_clip):
+		strike_clip = ""
+	if strike_clip != "":
+		var fast := -1.0
+		var fast_at := t0
+		for e: Dictionary in fs:
+			if float(e["t"]) >= t0 and float(e["t"]) <= t1 + AFTER_S and _rate(e) > fast:
+				fast = _rate(e)
+				fast_at = float(e["t"])
+		out.append(
+			[
+				"the %s strike lands on the stop" % strike_clip,
+				absf(fast_at - t1) <= STRIKE_S,
+				(
+					"fastest pose frame %+.2f s from the travel's end (%.0f rad/s; limit %.2f)"
+					% [fast_at - t1, fast, STRIKE_S]
+				)
+			]
+		)
 	out.append(
 		[
 			"the dash pose hands over with the travel",
