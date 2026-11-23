@@ -8,7 +8,7 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 21
+const VERSION := 22
 const UNNAMED := "Hunter"      # the name of a player who never typed one (the results line then drops it)
 const MAX_MEMORY := 40
 const SLOTS := 6
@@ -19,7 +19,7 @@ const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
 		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
 		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19",
-		19: "_migrate_19_to_20", 20: "_migrate_20_to_21"}
+		19: "_migrate_19_to_20", 20: "_migrate_20_to_21", 21: "_migrate_21_to_22"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -79,6 +79,7 @@ func fresh() -> Dictionary:
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
+		"snack_picks": 0,     # snack patch batches picked; 0 = the first batch ripens early (SnackPatch.first_grow_secs)
 		"items": {"tonic": 1}.merged(GardenFirstDay.rules()["start_items"]),   # plus the first-day kibble
 		"treat": "",
 		"plots": _empty_plots(4),
@@ -89,6 +90,7 @@ func fresh() -> Dictionary:
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
 		"hud_reveal": {},     # HUD groups whose first event happened (HudReveal); absent = an older save, full HUD
+		"time_trial": {},           # Hunter id -> personal best on the Training Grounds course (s)
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
@@ -376,6 +378,10 @@ func _migrate_19_to_20(data: Dictionary) -> void:
 func _migrate_20_to_21(data: Dictionary) -> void:
 	HunterHints.migrate(data)
 
+## v21 -> v22: the Training Grounds' time trial. Every Hunter starts with no personal best (TimeTrial).
+func _migrate_21_to_22(data: Dictionary) -> void:
+	TimeTrial.migrate(data)
+
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
 ## and a one-time notice lists it all (EqualMigrate).
@@ -521,6 +527,9 @@ func load_from(p: String) -> void:
 	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	FirstCapture.migrate(parsed)      # likewise: no version step
+	FirstObjective.migrate(parsed)      # likewise
+	if not parsed.has("snack_picks"):
+		parsed["snack_picks"] = 1      # an older save had its first snack batch: no early 60 s one
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked
@@ -534,11 +543,28 @@ var no_write := _tool_run()   # headless checks play with a save without touchin
 ## from the very first frame (other autoloads may save while starting up).
 static func _tool_run() -> bool:
 	for a in OS.get_cmdline_user_args():
-		if a == "--no-save" or a == "--archetype-check":
+		if a == "--no-save" or NO_SAVE_FLAGS.has(a):
 			return true
-		if String(a).begins_with("--shot=") or String(a).begins_with("--demo="):
-			return true
+		for pre in ["--shot=", "--demo=", "--arena-shot=", "--rolling-shot="]:
+			if String(a).begins_with(pre):
+				return true
 	return false
+## Checks that play on a copy of the save (they used to be listed in main.gd).
+const NO_SAVE_FLAGS := [
+	"--archetype-check",
+	"--kit-combo-check",
+	"--mage-combo-check",
+	"--gunslinger-combo-check",
+	"--zone-check",
+	"--dolm-combo-check",
+	"--ostra-combo-check",
+	"--hero-combo-check",
+	"--archer-combo-check",
+	"--bulwark-combo-check",
+	"--arena-check",
+	"--dredge-combo-check",
+	"--ashwick-combo-check",
+]
 var newer := false            # the slot holds a save from a newer game: never overwrite it
 
 func save_game() -> void:
@@ -611,7 +637,7 @@ func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> 
 		mem.append({"m": m, "kind": kind, "text": text})
 	while mem.size() > MAX_MEMORY:
 		mem.pop_front()
-	k["trust"] = clampf(float(k["trust"]) + trust_delta, 0.0, 100.0)
+	Care.trust_add(k, trust_delta, Time.get_unix_time_from_system())
 
 func has_building(b: String) -> bool:
 	return d.get("buildings", []).has(b)

@@ -1,5 +1,6 @@
 {
- "_doc": "Perk orbs (scripts/match/perk_orbs.gd). Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones. sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan.",
+ "_doc": "Perk orbs (scripts/match/perk_orbs.gd). slots: the most perks one hunter holds in a run (owner loadout, docs/decisions/0005-equal-footing.md), a stack counts as one; at the limit an orb stays on the ground. Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones. sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan.",
+ "slots": 5,
  "take_radius": 1.2,
  "bot_radius": 16.0,
  "fan_radius": 2.4,

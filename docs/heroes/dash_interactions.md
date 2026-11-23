@@ -11,6 +11,8 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 
 LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; the 'hold LMB through' rows below note where a hero's kit has its own say.
 
+An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; a lock that runs on past that answers with the deny cue. The footage shows no such press dropped (`--cast-lock-buffer-check`).
+
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
 | Lace (archer) | ground dash -> LMB | [?] The source is silent: the data (sv/briefs/kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
@@ -171,7 +173,7 @@ LMB is a held input (source parity): held through a dash, RMB, E, the ult or a g
 | Cinder (ashwick) | air dash -> ult (X) | Data: knockback impulses speed the flight up. Ours: X ends the poof and the flight takes over. | cancels the dash; dash momentum carries |
 | Cinder (ashwick) | air dash -> Q glove | No source glove; it goes off from the poof. | fires mid-dash |
 | Cinder (ashwick) | LMB -> dash | Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once; the stream goes out for the ram and, still held, roars again the step it ends (hold.lmb). | the dash goes, the ability keeps running |
-| Cinder (ashwick) | RMB -> dash | Footage: the aim lane shows about 0.4s while he keeps moving. Ours: Shift while aiming rams; the bolt still goes on release. | the dash goes, the ability keeps running |
+| Cinder (ashwick) | RMB -> dash | Footage: the bolt is a 0.4s cast (lane on the press, 0073 > 0075) while he keeps moving. Ours: Shift in the cast rams; the bolt still leaves 0.4s after the press. | the dash goes, the ability keeps running |
 | Cinder (ashwick) | E -> dash | Heat Shield is instant (owner item 11): there is no wind-up to dash out of. | the dash goes, the ability keeps running |
 | Cinder (ashwick) | ult (X) -> dash | Data: the flight is his movement; knockback impulses speed it up; reactivating lands. Footage: no dash during the flight. Ours (owner, item 66): in Flue Flight only E works, so Shift in the flight does nothing (no poof, no dash spent, not buffered); AshwickJet.lock_inputs. | **exception:** the dash is refused while it runs (Owner decision (item 66): in Flue Flight only E works, so Shift does nothing there: no poof, no dash spent, not buffered (AshwickJet.lock_inputs).) |
 | Cinder (ashwick) | Q glove -> dash | No source glove. | the dash goes, the ability keeps running |
@@ -188,9 +190,9 @@ LMB is a held input (source parity): held through a dash, RMB, E, the ult or a g
 | Cinder (ashwick) | hold LMB through a ground dash | Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram the stream goes out and roars again the step it ends: no pilot, no relight gap. Flue Flight is no dash here (owner item 66): LMB is off for the whole flight, ignored, not buffered, a press ticks softly, and the lance lights as usual the step it ends. | the hold carries through and lets go there |
 | Cinder (ashwick) | hold LMB through an air dash | As on the ground: held through the poof, the stream is back the step it ends. | the hold carries through and lets go there |
 | Cinder (ashwick) | hold LMB through a jump | Ours: the hose keeps burning through a jump. | the hold carries through and lets go there |
-| Cinder (ashwick) | hold RMB through a ground dash | [?] Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. Kept: the hold carries through (owner item 51). | the hold carries through and lets go there |
-| Cinder (ashwick) | hold RMB through an air dash | [?] Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. Air dash not shown (linwick.md:278-279). Kept: the hold carries through (owner item 51). | the hold carries through and lets go there |
-| Cinder (ashwick) | hold RMB through a jump | [?] Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. No jump shown (linwick.md:285-286). Kept: the hold carries through (owner item 51). | the hold carries through and lets go there |
+| Cinder (ashwick) | hold RMB through a ground dash | [?] Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. Kept: the 0.4s cast carries through and the bolt leaves on time (owner item 51; a cast since 11-21, docs/heroes/ashwick.md). | the hold carries through and lets go there |
+| Cinder (ashwick) | hold RMB through an air dash | [?] Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. Air dash not shown (linwick.md:278-279). Kept: the 0.4s cast carries through and the bolt leaves on time (owner item 51; a cast since 11-21, docs/heroes/ashwick.md). | the hold carries through and lets go there |
+| Cinder (ashwick) | hold RMB through a jump | [?] Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. No jump shown (linwick.md:285-286). Kept: the 0.4s cast carries through and the bolt leaves on time (owner item 51; a cast since 11-21, docs/heroes/ashwick.md). | the hold carries through and lets go there |
 | Cinder (ashwick) | hold LMB through ult (X) | Data: reactivating ends the flight early; LMB is off for the whole flight. | Held through Flue Flight, the lance lights the step the flight ends (pilot, then the roar), no relight gap (0 frames). E, RMB and a glove never stop the hose. |
 | Tenzo (dolm) | ground dash -> LMB | Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-hop and the hop's arc carries on (a punch's step pushes him a little further); every hop of a Rock Hop chain counts as the dash. | fires mid-dash; dash momentum carries |
 | Tenzo (dolm) | ground dash -> RMB | Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-hop; let go in the air and the slam lands where the hop does, which ends the chain there. | fires mid-dash; dash momentum carries |
@@ -542,7 +544,7 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | archer | RMB | free | free | briefs/hero-ref/pin.md:21 hold to charge toward the cursor; no turn limit shown |
 | archer | E | free | free | briefs/hero-ref/pin.md:23 a tap placed at the cursor distance; no turn limit shown |
 | archer | ult (X) | free | free | briefs/hero-ref/pin.md:254 'a self-buff with no cast lock' |
-| juggernaut | LMB hold | free | free | briefs/hero-ref/juggernaut.md:254 'the upper body follows the cursor with the blade'; data: yaw RotationRate 1280 deg/s (briefs/supervive-data/supervive_physics.md:51) |
+| juggernaut | LMB hold | free | free | briefs/hero-ref/juggernaut.md:254 'the upper body follows the cursor with the blade'; data: yaw RotationRate 1280 deg/s (private reports repo, sv/DATA.md) |
 | juggernaut | RMB | free | locked | briefs/hero-ref/juggernaut.md:155 the lane grows toward the aim while held, the release dash follows it: free while held, the drive faces its lane; turn rate while held: match 1280 (ext/hero-ref-footage juggernaut 0122-0126: the cursor never swings in the hold) |
 | juggernaut | E | free | free | briefs/hero-ref/juggernaut.md:96 a hook thrown toward the cursor; no turn limit shown |
 | juggernaut | E recast | free | free | briefs/hero-ref/juggernaut.md:21 recast pulls him to the hook; no turn limit shown |
@@ -558,7 +560,7 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | rimewright | LMB hold | free | free | briefs/hero-ref/tamsin.md:286 'she turns to face the cursor and fires while skating'; :274 turns in about 0.1 s |
 | rimewright | RMB | free | free | briefs/hero-ref/tamsin.md:50 a tap that lands at the cursor; no turn limit shown |
 | rimewright | E | free | free | briefs/hero-ref/tamsin.md:20 a tap, the wall travels toward the cursor; no turn limit shown |
-| rimewright | E recast | free | free | data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown |
+| rimewright | E recast | free | free | data: recast freezes the wall (private reports repo, sv/DATA.md); no turn limit shown |
 | rimewright | ult (X) | locked | locked | briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65) |
 | rimewright | ult (X) recast | locked | free | briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out |
 | ashwick | LMB hold | free | free | briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags behind the aim (:15); turn rate while held: match 1280 (ext/hero-ref-footage linwick 0014-0018: the nozzle follows 45 and 90 deg swings inside one 0.2 s frame) |
@@ -594,3 +596,293 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | ostra | E | free | free | briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown |
 | ostra | E recast | free | free | briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown |
 | ostra | ult (X) | free | locked | briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248); turn rate in the wind-up: match 1280 (ext/hero-ref-footage ostra 0436-0441: the cursor stays put through the telegraph) |
+## Cast into cast
+
+The second ability pressed during the first one's wind-up and its recovery (the times are seconds after the first press), read from `into_cast` in `content/dash_flow/<hero>.json` and asserted by `--cast-into-cast-check`, which also asserts the first move still comes (a press that ends it reads "ends it"; none did in the measuring runs). "Source" is what the footage shows; `[?]` marks a pair it cannot settle.
+
+### Lace (archer)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md). |
+| LMB tap during ult (X) | dropped (0.05 s in) | dropped (0.6 s in) | Owner 11-08 items 18-20 (a19ee5fd4c): Starpiercer looses an arrow the frame X is pressed and on each LMB press after its 1.0 s recover (archer.json x.recover; 'footage: 1.5 s a shot, a 0.4-0.8 s draw', briefs/hero-ref/pin.md:257,268); the nock is gone, so a tap inside the recover is refused (PinUlt.lmb) and a held button goes the step it is recovered. |
+| LMB hold during ult (X) | dropped (0.05 s in) | queued, goes 0.38 s later (0.6 s in) | Owner 11-08 items 18-20 (a19ee5fd4c): Starpiercer looses an arrow the frame X is pressed and on each LMB press after its 1.0 s recover (archer.json x.recover; 'footage: 1.5 s a shot, a 0.4-0.8 s draw', briefs/hero-ref/pin.md:257,268); the nock is gone, so a tap inside the recover is refused (PinUlt.lmb) and a held button goes the step it is recovered. Held 0.75 s from 0.05 s in, it is let go before the recover ends. |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281). |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281). |
+### Kael (juggernaut)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.3 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.3 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.3 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| LMB tap during RMB | fires at once (0.3 s in) | fires at once (0.8 s in) | [?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250). |
+| LMB hold during RMB | fires at once (0.3 s in) | fires at once (0.8 s in) | [?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250). |
+| E during RMB | fires at once (0.3 s in) | fires at once (0.8 s in) | [?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250). |
+| ult (X) during RMB | fires at once (0.3 s in) | fires at once (0.8 s in) | [?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
+| LMB tap during ult (X) | dropped (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
+| LMB hold during ult (X) | queued, goes 0.45 s later (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
+| RMB during ult (X) | dropped (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
+| E during ult (X) | dropped (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
+### Vex (gunslinger)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches. |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches. |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Spike Grenade commits about 0.2 s (briefs/hero-ref/venator.md:72): one frame at 5 fps, no press seen inside it. |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Spike Grenade commits about 0.2 s (briefs/hero-ref/venator.md:72): one frame at 5 fps, no press seen inside it. |
+| LMB tap during E | fires at once (0.3 s in) | dropped (0.85 s in) | [?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either. Ours since main: after the beam she is held 0.6 s (GunslingerKit.E_RECOVER, the into_dash e row); a press in it is refused, a held gun goes as it ends. |
+| LMB hold during E | fires at once (0.3 s in) | queued, goes 0.40 s later (0.85 s in) | [?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either. Ours since main: after the beam she is held 0.6 s (GunslingerKit.E_RECOVER, the into_dash e row); a press in it is refused, a held gun goes as it ends. |
+| RMB during E | fires at once (0.3 s in) | dropped (0.85 s in) | [?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either. Ours since main: after the beam she is held 0.6 s (GunslingerKit.E_RECOVER, the into_dash e row); a press in it is refused, a held gun goes as it ends. |
+| ult (X) during E | fires at once (0.3 s in) | dropped (0.85 s in) | [?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either. Ours since main: X goes during the charge (DECISIONS 11-07 'every interaction is chainable', commit eb41d741a2); the held recovery refuses it. Ours since main: after the beam she is held 0.6 s (GunslingerKit.E_RECOVER, the into_dash e row); a press in it is refused, a held gun goes as it ends. |
+| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | Owner playtest 11-17 (5687b9120d, 'shouldn't cause her to not move at all'): Mini Nuke no longer holds her; a 0.25 s wind-up at 70% walk (GunslingerUlt.WINDUP) in which the rifle, jump, Shift and abilities all go. Was the source's ~0.8 s commit (briefs/hero-ref/venator.md:129, R 4). |
+| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | Owner playtest 11-17 (5687b9120d, 'shouldn't cause her to not move at all'): Mini Nuke no longer holds her; a 0.25 s wind-up at 70% walk (GunslingerUlt.WINDUP) in which the rifle, jump, Shift and abilities all go. Was the source's ~0.8 s commit (briefs/hero-ref/venator.md:129, R 4). |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | Owner playtest 11-17 (5687b9120d, 'shouldn't cause her to not move at all'): Mini Nuke no longer holds her; a 0.25 s wind-up at 70% walk (GunslingerUlt.WINDUP) in which the rifle, jump, Shift and abilities all go. Was the source's ~0.8 s commit (briefs/hero-ref/venator.md:129, R 4). |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | Owner playtest 11-17 (5687b9120d, 'shouldn't cause her to not move at all'): Mini Nuke no longer holds her; a 0.25 s wind-up at 70% walk (GunslingerUlt.WINDUP) in which the rifle, jump, Shift and abilities all go. Was the source's ~0.8 s commit (briefs/hero-ref/venator.md:129, R 4). |
+### Albert (bulwark)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside a shot in the clip (briefs/hero-ref/bjorn.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside a shot in the clip (briefs/hero-ref/bjorn.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside a shot in the clip (briefs/hero-ref/bjorn.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Oath presses nothing else inside a held shot in the clip (briefs/hero-ref/bjorn.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Oath presses nothing else inside a held shot in the clip (briefs/hero-ref/bjorn.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Oath presses nothing else inside a held shot in the clip (briefs/hero-ref/bjorn.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside its RMB in the clip (briefs/hero-ref/bjorn.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside its RMB in the clip (briefs/hero-ref/bjorn.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside its RMB in the clip (briefs/hero-ref/bjorn.md). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | Barrier Shield to walk in, then Earthshatter is the source combo (briefs/hero-ref/bjorn.md:304): ours fires. Matches. |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md). |
+| LMB tap during ult (X) | dropped (0.05 s in) | fires at once (0.75 s in) | [?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31). |
+| LMB hold during ult (X) | queued, goes 0.57 s later (0.05 s in) | fires at once (0.75 s in) | [?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31). |
+| RMB during ult (X) | dropped (0.05 s in) | fires at once (0.75 s in) | [?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31). |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.75 s in) | [?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31). |
+### Neve (rimewright)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside a shot in the clip (briefs/hero-ref/tamsin.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside a shot in the clip (briefs/hero-ref/tamsin.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside a shot in the clip (briefs/hero-ref/tamsin.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Celeste presses nothing else inside a held shot in the clip (briefs/hero-ref/tamsin.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Celeste presses nothing else inside a held shot in the clip (briefs/hero-ref/tamsin.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Celeste presses nothing else inside a held shot in the clip (briefs/hero-ref/tamsin.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md). |
+| LMB tap during ult (X) | dropped (0.05 s in) | dropped (1.0 s in) | Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches. |
+| LMB hold during ult (X) | dropped (0.05 s in) | dropped (1.0 s in) | Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches. |
+| RMB during ult (X) | dropped (0.05 s in) | dropped (1.0 s in) | Owner item 65: the statue takes only the recast and Shift out (footage: no other press in the crystal, briefs/hero-ref/tamsin.md:218-227). Fixed: ours spent an RMB charge and dropped the spear; now refused like LMB and E. |
+| E during ult (X) | dropped (0.05 s in) | dropped (1.0 s in) | Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches. |
+### Cinder (ashwick)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| LMB tap during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
+| LMB hold during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
+| RMB during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
+| E during ult (X) | fires at once (0.3 s in) | fires at once (2.1 s in) | Mid-flight [?] (briefs/hero-ref/linwick.md:198). Recovery: Flame Shield fires the moment he lands (briefs/hero-ref/linwick.md:216, f137-f139). Matches. |
+### Tenzo (dolm)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
+| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | [?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md). |
+| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | Tetraform wall, then a held Quake Punch through its rocks is the source combo (briefs/hero-ref/breah.md:401): ours fires. Matches. |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | [?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md). |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | [?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md). |
+### Sparkle (mage)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside a shot in the clip (briefs/hero-ref/vireo.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside a shot in the clip (briefs/hero-ref/vireo.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside a shot in the clip (briefs/hero-ref/vireo.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Joule presses nothing else inside a held shot in the clip (briefs/hero-ref/vireo.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Joule presses nothing else inside a held shot in the clip (briefs/hero-ref/vireo.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Joule presses nothing else inside a held shot in the clip (briefs/hero-ref/vireo.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md). |
+| LMB tap during ult (X) | dropped (0.05 s in) | fires at once (2.6 s in) | [?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207). |
+| LMB hold during ult (X) | dropped (0.05 s in) | fires at once (2.6 s in) | [?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207). |
+| RMB during ult (X) | dropped (0.05 s in) | fires at once (2.6 s in) | [?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207). |
+| E during ult (X) | dropped (0.05 s in) | fires at once (2.6 s in) | [?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207). |
+### Grimble (dredge)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | Grasp, then Iron Smash on the target stunned at your feet is the source combo (briefs/hero-ref/dredge.md:98,140): ours fires. Matches. |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] The source combo is Grasp, then Kaiju Blast once the pull lands (briefs/hero-ref/dredge.md:275); a press while the arm is still out is not shown. Ours since main: X goes through the arm's flight (commit b8253ec76a: the wiki's only lock is while it pulls; the data card has none on the throw). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
+| RMB during E | dropped (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
+| ult (X) during E | dropped (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
+| LMB tap during ult (X) | queued, goes 1.03 s later (0.05 s in) | dropped (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
+| LMB hold during ult (X) | queued, goes 1.03 s later (0.05 s in) | fires at once (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
+| RMB during ult (X) | dropped (0.05 s in) | dropped (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
+| E during ult (X) | dropped (0.05 s in) | dropped (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
+### Meeko (tender)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside a shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside a shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside a shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Elluna presses nothing else inside a held shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Elluna presses nothing else inside a held shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Elluna presses nothing else inside a held shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
+| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
+### Sable (thief)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside a shot in the clip (briefs/hero-ref/dancer.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside a shot in the clip (briefs/hero-ref/dancer.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside a shot in the clip (briefs/hero-ref/dancer.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Shiv presses nothing else inside a held shot in the clip (briefs/hero-ref/dancer.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Shiv presses nothing else inside a held shot in the clip (briefs/hero-ref/dancer.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Shiv presses nothing else inside a held shot in the clip (briefs/hero-ref/dancer.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md). |
+| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md). |
+| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md). |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md). |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md). |
+### Motley (ostra)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside a shot in the clip (briefs/hero-ref/ostra.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside a shot in the clip (briefs/hero-ref/ostra.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside a shot in the clip (briefs/hero-ref/ostra.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Void presses nothing else inside a held shot in the clip (briefs/hero-ref/ostra.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Void presses nothing else inside a held shot in the clip (briefs/hero-ref/ostra.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Void presses nothing else inside a held shot in the clip (briefs/hero-ref/ostra.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside its RMB in the clip (briefs/hero-ref/ostra.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside its RMB in the clip (briefs/hero-ref/ostra.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | Snap stun, then the bomb on the stunned dummy is shown in the source (briefs/hero-ref/ostra.md:112, 0419-0429): ours fires. Matches. |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside its RMB in the clip (briefs/hero-ref/ostra.md). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside its E in the clip (briefs/hero-ref/ostra.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside its E in the clip (briefs/hero-ref/ostra.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside its E in the clip (briefs/hero-ref/ostra.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Void presses nothing else inside its E in the clip (briefs/hero-ref/ostra.md). |
+| LMB tap during ult (X) | dropped (0.05 s in) | fires at once (1.2 s in) | Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches. |
+| LMB hold during ult (X) | dropped (0.05 s in) | fires at once (1.2 s in) | Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches. |
+| RMB during ult (X) | dropped (0.05 s in) | fires at once (1.2 s in) | Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches. |
+| E during ult (X) | dropped (0.05 s in) | fires at once (1.2 s in) | Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches. |
+### Gil (gil)
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row; kept chainable (DECISIONS 11-07, decision 0015). |
+| E during ult (X) | dropped (0.05 s in) | dropped (0.6 s in) | [?] Ours: Gil is our own Hunter, no source row. Tidal Wave is his movement: he rides it, untargetable, until it lands (into_dash.x: lock); GilKit.cast_e refuses a Riptide spin while the wave runs, as on_dash refuses Shift. |

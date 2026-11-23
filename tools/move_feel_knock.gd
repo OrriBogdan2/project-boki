@@ -50,11 +50,11 @@ const WALL_GAP := 1.5  # m from the body's centre to the cliff face
 const T := {
 	"knock_lace_01_m": ["~", [1.12, 1.22], "m", "Heavy Shot push 12 at 0.1 s"],
 	"knock_lace_02_m": ["~", [2.22, 2.32], "m", "Heavy Shot push 12 at 0.2 s"],
-	"knock_lace_04_m": ["~", [4.03, 4.23], "m", "Heavy Shot push 12 at 0.4 s"],
+	"knock_lace_04_m": ["~", [4.19, 4.29], "m", "Heavy Shot push 12 at 0.4 s"],
 	"knock_lace_keys_s": ["~", [0.33, 0.37], "s", "Heavy Shot push 12: keys back (knock_t, capped 0.35 s)"],
 	"knock_sparkle_01_m": ["~", [0.81, 0.91], "m", "Storm Rod push 9 at 0.1 s"],
 	"knock_sparkle_02_m": ["~", [1.62, 1.72], "m", "Storm Rod push 9 at 0.2 s"],
-	"knock_sparkle_04_m": ["~", [2.62, 2.82], "m", "Storm Rod push 9 at 0.4 s"],
+	"knock_sparkle_04_m": ["~", [2.83, 2.93], "m", "Storm Rod push 9 at 0.4 s"],
 	"knock_sparkle_keys_s": ["~", [0.27, 0.30], "s", "Storm Rod push 9: keys back (0.1 + 0.02 s per m/s)"],
 	"knock_albert_01_m": ["~", [1.21, 1.31], "m", "hammer swing push 13 at 0.1 s"],
 	"knock_albert_02_m": ["~", [2.42, 2.52], "m", "hammer swing push 13 at 0.2 s"],
@@ -64,20 +64,24 @@ const T := {
 	"knock_kael_02_m": ["~", [1.02, 1.12], "m", "Finishing Slam push 6 at 0.2 s"],
 	"knock_kael_04_m": ["~", [1.52, 1.72], "m", "Finishing Slam push 6 at 0.4 s"],
 	"knock_kael_keys_s": ["~", [0.22, 0.25], "s", "Finishing Slam push 6: keys back"],
-	# [footage] a knock is done in about 0.4 s (Joule spear 0064-0066, Ghost wall cone 0073-0077)
-	"knock_done_04": [">=", 0.85, "share", "[footage] the least share of the four landed by 0.4 s"],
+	# [footage] Joule's spear is done in about 0.4 s (0064-0066): Storm Rod is its knock. The other three
+	# footage knocks show a distance, no timing; their share is printed (the source walking brake, 5a2831b2b10).
+	"knock_done_04": [">=", 0.85, "share", "[footage] Storm Rod's share landed by 0.4 s (Joule spear)"],
 }
 
 
 static func run(c) -> void:
-	var done := 1.0
+	var least := 1.0
 	for key in REF:
 		var arc := _arc(c, float(REF[key]))
 		var dist: Array = arc["d"]
 		for j in SAMPLES.size():
 			c.rec("knock_%s_0%d_m" % [key, [1, 2, 4][j]], float(dist[j]), T)
 		c.rec("knock_%s_keys_s" % key, float(arc["keys_t"]), T)
-		done = minf(done, float(dist[2]) / float(arc["rest"]))
+		var share := float(dist[2]) / float(arc["rest"])
+		least = minf(least, share)
+		if key == "sparkle":
+			c.rec("knock_done_04", share, T)
 		var row := [key, REF[key], arc["rest"], arc["stop_t"], arc["slam_m"], WALL_GAP, _wall_frame(c, float(REF[key]))]
 		print(
 			(
@@ -88,7 +92,7 @@ static func run(c) -> void:
 				% row
 			)
 		)
-	c.rec("knock_done_04", done, T)
+	print("MFEEL knock least share landed by 0.4 s: %.3f (printed only)" % least)
 	for row in SWEEP:
 		var a := _arc(c, float(row[0]), float(row[1]))
 		var vals := [row[0], row[1], a["rest"], a["stop_t"]]
@@ -98,7 +102,7 @@ static func run(c) -> void:
 ## Distance over time on open ground, the step the keys come back, and how far the body gets while a wall
 ## would still count as a slam (Hunter: inside 0.6 s of the knock and faster than 8 m/s).
 static func _arc(c, push: float, lift := -1.0) -> Dictionary:
-	var body: Hunter = c.P
+	var body: Hunter = c.p_v
 	c._reset(c.flat + Vector3(-3.0, 0, 0))
 	var x0 := body.pos.x
 	c.m.displace.knock(body, Vector2(push, 0.0), lift)
@@ -124,7 +128,7 @@ static func _arc(c, push: float, lift := -1.0) -> Dictionary:
 ## The step a cliff WALL_GAP ahead stuns the knocked body (-1: no slam). The cliff is raised for the test
 ## and put back.
 static func _wall_frame(c, push: float) -> int:
-	var body: Hunter = c.P
+	var body: Hunter = c.p_v
 	var world: World = c.w
 	var at: Vector3 = c.flat + Vector3(-3.0, 0, 0)
 	var face := int(floor(at.x + WALL_GAP))

@@ -88,13 +88,15 @@ def tris(ob):
 SEAM_WEIGHT = 0.05  # keep_uv: a UV-seam vertex's collapse weight (1 = free; 0 holds it, and then 60k is out of reach)
 
 
-def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False):
+def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False, hands=(), hand_tris=0):
     """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated
     (`keep_uv`: its materials and UVs kept, the collapse carries the UVs along, so the master's own paint fits it;
     the UV-seam vertices collapse last (`_seam_weights`): the collapse drags a seam's UVs and tears cheeks and hair).
-    With a head budget, in two passes: the body to n_tris - head_tris with the head (`head`: centre, r) held,
-    then the head to head_tris with the body held (left to itself the collapse keeps ~5k of 36k on the head,
-    and the monocle and the strands over the face come out jagged)."""
+    With a head budget and/or hand budgets, in passes: the body to what is left of n_tris with each region (`head`:
+    centre, r; `hands`: [{centre, r, axis, others}, ...] (`_region_weight`), each given `hand_tris`) held, then each region alone down to its budget
+    with everything else held (left to itself the collapse keeps ~5k of 36k on the head, and the monocle and the
+    strands over the face come out jagged, and ~0.5% of the triangles on a hand: fingers flatten to a mitten).
+    A region that has fewer triangles than its budget is left as it is."""
     me = high.data.copy()
     low = bpy.data.objects.new("Low", me)
     bpy.context.scene.collection.objects.link(low)
@@ -112,7 +114,8 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False)
     bpy.context.view_layer.objects.active = low
     low.select_set(True)
     seam = _seam_weights(me) if keep_uv else 1.0
-    if not head or head_tris <= 0:
+    regions = ([(head, head_tris)] if head and head_tris > 0 else []) + [(h, hand_tris) for h in hands if hand_tris > 0]
+    if not regions:
         group = None
         if keep_uv:
             group = "seam"
@@ -122,21 +125,68 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False)
         _decimate(low, n_tris / max(tris(low), 1), group)
         low.vertex_groups.clear()
     else:
-        c, r = Vector(head["centre"]), float(head["r"])
-        co = np.array([v.co[:] for v in me.vertices])
-        inside = np.clip((r * 1.03 - np.linalg.norm(co - np.array(c), axis=1)) / (r * 0.06), 0.0, 1.0)
-        for name, w in (("body", (1.0 - inside) * seam), ("head", inside * seam)):
+        co = _coords(me)
+        inside = [_region_weight(co, rg) for rg, _ in regions]
+        groups = [("body", (1.0 - np.maximum.reduce(inside)) * seam)] + [
+            ("region%d" % i, w * seam) for i, w in enumerate(inside)
+        ]
+        for name, w in groups:
             g = low.vertex_groups.new(name=name)
             for i in np.nonzero(w > 0.0)[0]:
                 g.add([int(i)], float(w[i]), "REPLACE")
-        n_head = sum(1 for p in me.polygons if (p.center - c).length < r)
+        held = sum(_tris_in(me, rg) for rg, _ in regions)
         # (a held region doesn't count: the ratio is of the whole mesh)
-        _decimate(low, (n_head + n_tris - head_tris) / tris(low), "body")
-        _decimate(low, n_tris / tris(low), "head")
+        _decimate(low, (held + n_tris - sum(b for _, b in regions)) / tris(low), "body")
+        for i, (rg, budget) in enumerate(regions):
+            have = _tris_in(low.data, rg)
+            _decimate(low, (tris(low) - max(0, have - budget)) / tris(low), "region%d" % i)
+            log("region %d: %d -> %d tris (budget %d)" % (i, have, _tris_in(low.data, rg), budget))
         low.vertex_groups.clear()
     _unfold(low)
     log("low: %d -> %d tris" % (tris(high), tris(low)))
     return low
+
+
+def _coords(me):
+    co = np.empty(len(me.vertices) * 3, np.float32)
+    me.vertices.foreach_get("co", co)
+    return co.reshape(-1, 3).astype(float)
+
+
+def _seg_dist(co, a, b):
+    """Per point: its distance to the segment a-b."""
+    a, b = np.asarray(a, float), np.asarray(b, float)
+    d = b - a
+    t = np.clip((co - a) @ d / max(float(d @ d), 1e-12), 0.0, 1.0)
+    return np.linalg.norm(co - (a + t[:, None] * d), axis=1)
+
+
+def _region_weight(co, rg):
+    """Per vertex: 1 inside the region's ball (`centre`, `r`; a soft 6% edge), 0 outside. With an `axis` [a, b, r] (a
+    hand: elbow to finger tips, its thickness) and `others` [[a, b, r], ...] (thighs, spine), only the vertices nearer
+    the axis' surface than any other's: a hand that hangs by the hip leaves the thigh and the skirt out of its budget."""
+    c, r = np.asarray(rg["centre"], float), float(rg["r"])
+    w = np.clip((r * 1.03 - np.linalg.norm(co - c, axis=1)) / (r * 0.06), 0.0, 1.0)
+    if rg.get("axis") and rg.get("others"):
+        a, b, ra = rg["axis"]
+        own = _seg_dist(co, a, b) - ra
+        w *= own < np.minimum.reduce([_seg_dist(co, oa, ob) - ro for oa, ob, ro in rg["others"]])
+    return w
+
+
+def _tris_in(me, rg):
+    """The triangles of mesh `me` in region `rg` (their corners' mean weight over 0.5)."""
+    w = _region_weight(_coords(me), rg)
+    vi = np.empty(len(me.loops), dtype=np.int32)
+    me.loops.foreach_get("vertex_index", vi)
+    start = np.empty(len(me.polygons), dtype=np.int32)
+    total = np.empty(len(me.polygons), dtype=np.int32)
+    me.polygons.foreach_get("loop_start", start)
+    me.polygons.foreach_get("loop_total", total)
+    if not len(start):
+        return 0
+    inside = np.add.reduceat(w[vi], start) > 0.5 * total
+    return int((total[inside] - 2).sum())
 
 
 def _seam_weights(me):

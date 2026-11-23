@@ -108,10 +108,11 @@
   "shoot": "%L",
   "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
+  "glide": "Jump, then press %J again in the air to open your glider.",
   "wallkick": "A jump against a wall kicks you up it.",
   "crouch": "Crouching shows what lies far ahead.",
   "gkey": "%T sends %s at a monster; tap again to recall %s.",
-  "summon": "%s bursts out and fights for %D seconds: watch the ring",
+  "summon": "%s fights for %D seconds; your perks are off meanwhile",
   "summon_warn": "Almost time. %s is getting tired.",
   "summon_back": "Back to a light. %s rests now.",
   "summon_knocked": "%s got beaten and flew back to you. It needs a longer rest.",
@@ -223,5 +224,7 @@
    "to": 6,
    "far": true
   }
- }
+ },
+ "lead_doc": "Your Boki leads on the steps with a lead goal (TutorialLead): it runs ahead to the goal, waits when you are more than wait_m behind, stops stop_m from it and looks back at you. It sprints at run_speed m/s (a wisp floats at wisp_speed) so it can be ahead of a running Hunter; a Boki you have passed just falls in beside you, and one that stood stalled for stall_s s trying to lead (an edge or a wall on the straight way) falls in beside you for off_s s, then leads again.",
+ "lead": {"wait_m": 8.0, "stop_m": 2.5, "run_speed": 11.0, "wisp_speed": 14.0, "stall_s": 0.3, "off_s": 2.0}
 }

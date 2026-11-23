@@ -17,8 +17,9 @@ const MEND_HP := 40.0
 const MEND_ARMOR := 20.0
 const SCAN_RANGE := 26.0        # tiles
 const SCAN_TIME := 3.0          # seconds rivals stay revealed
-const PAD_VY := 17.0            # m/s up off a Spring pad: ~9.8 m apex, ~2.3 s aloft ([?] no source number)
-const PAD_MIN_HV := 6.0         # m/s: the least a pad sends you on with (toward your aim if you stood still)
+## Spring pad launch (content/rules/hunter_move.json "jump_pad", both [?]: no source number).
+static var PAD_VY: float = MoveRules.data()["jump_pad"]["vy"]  # m/s up: ~9.8 m apex, ~2.3 s aloft
+static var PAD_MIN_HV: float = MoveRules.data()["jump_pad"]["min_hv"]  # m/s on, at least (toward your aim)
 
 ## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
 static func channel(id: String, key: String) -> float:

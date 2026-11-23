@@ -37,6 +37,7 @@ static func open(host: Control, at: Vector2, title: String, entries: Array, colo
 			for state in ["normal", "hover", "pressed"]:
 				sw.add_theme_stylebox_override(state, face)
 			sw.tooltip_text = "Colour"
+			UI.sfx(sw)
 			sw.pressed.connect(func():
 				menu.close()
 				on_colour.call(chosen))
