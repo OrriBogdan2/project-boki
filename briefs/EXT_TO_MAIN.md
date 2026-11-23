@@ -11165,3 +11165,4 @@ READY ext/anim-native-move-states 644061f4be (native dash/glide/land/hit/downed 
 READY ext/ship-intro-feet-sound-1123 6c616b0345e (skyship intro: riders upright + boots on deck, no abyss howl loop; --intro-deck-check)
 READY ext/merge-lane-n23c-1123 680a6bf485 (lane n23c bundle: 11 ported branches, NEW-RED 0 after dropping kael-lmb-press and ingame-scale-1119, export dry-run OK 1060 MB +1.9%)
 READY ext/suite-load-robust-1119 678f1b4ff2aa8bd3509273f51effa73b8eadc8d9 (suite checks load-robust: results island MSAA follows settings, Boki cooldown on match time, playthrough load budget, low-fps tap trial)
+READY ext/vision-fog-flat-dim-1123 004a508e608 (sight fog is a flat slight dim: no grey, no blue; before/after GPU proof)
