@@ -180,7 +180,7 @@ func _clip(kind: String, safe: bool) -> void:
 		await main.get_tree().process_frame
 		var img := main.get_viewport().get_texture().get_image()
 		if img:  # (none headless: a dry run walks the clips without saving them)
-			img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+			img.resize(FRAME_W, int(FRAME_W * img.get_height() / float(img.get_width())), Image.INTERPOLATE_BILINEAR)
 			img.save_jpg(out.path_join("%05d.jpg" % frame), 0.85)
 		frame += 1
 	p_v.inp["move"] = Vector2.ZERO
