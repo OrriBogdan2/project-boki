@@ -11149,3 +11149,4 @@ READY ext/ruin-walls-v1-drop 3390b58b7773edf29a6623a813cc51f003fea64e (origin/ma
 READY ext/parity-recheck-sable-motley 2b3d22b438 (origin/main merged; one conflict in tools/move_feel_check.gd: kept main's m._later.clear plus the branch's 30 settling steps, main's run_v; --check 0, --thief-combo-check 193/0, --kit-parity-check 0, --move-feel-check 0 failures, health --strict OK)
 READY ext/feel-native-land-weight 534167831754cc5c58020051cc81286b75bdaed5 (native Hunters: landing squash and drop pose)
 READY ext/vfx-sparkle-skycall b02e457f62777702f25d7816d0005625177cfe2b (Sparkle Skycall and orb haze)
+READY ext/build-load-textures 0a28b716a2 (origin/main 400582324b merged; only conflict warden_props.gd doc comment, kept main's wrap; --check 0 failures, warden-native 236/0, warden-rest 0, health --strict OK; build.hunters 2337->1184 ms timing from the earlier rp2g run, not re-measured)
