@@ -8,7 +8,7 @@ cursor state plus `MANIFEST.txt`).
 |---|---|
 | `aim_mode.gd` (`AimMode`) | Where a shot or placement goes (cursor-clamped vs max range), plus membership tests that match the shapes |
 | `aim_kit.gd` (`AimKit`) | The API kit code calls: the shapes, hide/clear, the cursor states |
-| `aim_draw.gd` (`AimDraw`) | One node per match. Rebuilds every telegraph into one ImmediateMesh surface each frame |
+| `aim_draw.gd` (`AimDraw`) | One node per match. Rebuilds every telegraph into one ArrayMesh each frame (AimGeo's packed arrays, one call per surface) |
 | `aim_shapes.gd` (`AimShapes`) | The shape builders and the quiet default look |
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
@@ -56,7 +56,7 @@ id replaces the previous one. Stop calling and it disappears after 0.1 s of matc
 - `AimKit.hide(h, id)` drops it at once.
 - A `"dur": secs` param keeps a one-off up that long with no further calls (a 0.2 s edge ring, a stuck
   grenade's cone for its fuse).
-- Nothing makes a node: every entry is drawn into one ImmediateMesh owned by the match's `AimDraw`.
+- Nothing makes a node: every entry is drawn into one ArrayMesh owned by the match's `AimDraw`.
 
 Common params (every shape):
 
