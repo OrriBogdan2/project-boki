@@ -69,7 +69,7 @@ func _hook_hold() -> void:
 	ak.step(m, 0.2)
 	var walk := p.flat_dist(p0) / 0.2
 	ak.tap(m, p)
-	ak.step(m, 0.05)
+	ak.step(m, 0.1)  # let the walk settle to the slow first (the brake from a run takes ~0.1 s)
 	p0 = p.pos
 	ak.step(m, 0.25)
 	var crawl := p.flat_dist(p0) / 0.25
@@ -604,41 +604,41 @@ func _all() -> void:
 	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
 	# --- owner rule, placed walls: Tenzo's ridge (his rocks) and Albert's raised shield stop the Hand too
 	reset.call()
-	var rock: Dictionary = HeroZones.rock(m, T, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
-	dm0 = ak.dmg(T)
-	gw0 = K.grapples
-	_throw(m, P)
+	var rock: Dictionary = HeroZones.rock(m, t, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
 	ok(
 		"Tenzo ridge: a rock of his stops the Deep Reach, no hook and no damage behind it",
-		not rock.is_empty() and K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
-		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
+		not rock.is_empty() and k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
 	)
 	m.verbs.walls.erase(rock)
 	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
 	reset.call()
-	var AL: Hunter = m.make_hunter(
-		"AL", T.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"}
+	var al: Hunter = m.make_hunter(
+		"AL", t.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"}
 	)
-	AL.set_arch("bulwark")
-	AL.max_hp = 1e9
-	AL.hp = AL.max_hp
-	ak.aim_at(AL, P.pos)
+	al.set_arch("bulwark")
+	al.max_hp = 1e9
+	al.hp = al.max_hp
+	ak.aim_at(al, p.pos)
 	m.step(ak.DT)
-	(AL.ak as BulwarkKit)._raise()
-	dm0 = ak.dmg(T)
-	gw0 = K.grapples
-	_throw(m, P)
+	(al.ak as BulwarkKit)._raise()
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
 	ok(
 		"Albert shield: his raised aegis stops the Deep Reach, no hook and no damage behind it",
-		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
-		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
+		k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
 	)
-	for w in m.verbs.walls.duplicate():
-		if w.get("by") == AL:
-			m.verbs.walls.erase(w)
-			if is_instance_valid(w.get("node")): (w["node"] as Node).queue_free()
-	AL.queue_free()
-	m.hunters.erase(AL)
+	for pw in m.verbs.walls.duplicate():
+		if pw.get("by") == al:
+			m.verbs.walls.erase(pw)
+			if is_instance_valid(pw.get("node")): (pw["node"] as Node).queue_free()
+	al.queue_free()
+	m.hunters.erase(al)
 	m.step(ak.DT)
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
