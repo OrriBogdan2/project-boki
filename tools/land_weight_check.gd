@@ -155,13 +155,11 @@ func _native() -> void:
 					gone = i
 			var depth := want.x * WardenClips.LAND_SQUASH
 			var secs := gone * NATIVE_DT
-			ok(
-				absf(deepest / depth - 1.0) <= NATIVE_TOL and absf(secs / want.y - 1.0) <= NATIVE_TOL and lift < FOOT_TOL,
-				(
-					"native %s %s %s: head down %.1f%% (contract %.1f%%), back up in %.3f s (contract %.3f), feet %+.3f m"
-					% [a, cls, way, deepest * 100.0, depth * 100.0, secs, want.y, lift]
-				)
-			)
+			var near := absf(deepest / depth - 1.0) <= NATIVE_TOL and absf(secs / want.y - 1.0) <= NATIVE_TOL
+			var what := "native %s %s %s: head down %.1f%%" % [a, cls, way, deepest * 100]
+			what += " (contract %.1f%%)" % (depth * 100)
+			what += ", back up in %.3f s (contract %.3f), feet %+.3f m" % [secs, want.y, lift]
+			ok(near and lift < FOOT_TOL, what)
 	ok(n > 0, "native Hunters measured: %d" % n)
 
 
