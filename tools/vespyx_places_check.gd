@@ -52,6 +52,7 @@ func run(m: Node) -> void:
 	var glb: String = BokiRig.PATH % [species, species]
 	var head := "VESPYX_PLACES species=%s save=%s renderer=%s glb=%s has=%s"
 	print(head % [species, kind, DisplayServer.get_name(), glb, BokiRig.has(species)])
+	print("VESPYX_TIME boot %d ms (engine start to run())" % Time.get_ticks_msec())
 	await _place("starter_pick", "hatch", {})
 	await _place("farm_home", "home", {})
 	await _place("party", "party", {})
