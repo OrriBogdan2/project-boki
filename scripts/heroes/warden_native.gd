@@ -84,7 +84,8 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	glb.name = "Warden"
 	glb.rotation.y = PI  # (Meshy faces +Z; a Hunter's model faces -Z)
 	model.add_child(glb)
-	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb)) * float(e.get("size", 1.0))  # (data "size": x the head-pivot fit)
+	# (data "size": x the head-pivot fit)
+	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb)) * float(e.get("size", 1.0))
 	var nat := WardenNative.new()
 	nat.name = "Native"
 	nat.art_id = WardenGlb.art(arch)
