@@ -11128,3 +11128,5 @@ READY ext/main-red-movefeel-style-1123 bbf73b5bfd2 (main reds: style ratchet gre
 READY ext/toast-side-rail 05c4c54d82 (toasts on right rail CLARITYTOAST 20/20->0/20; armour hint off LV row; merged main)
 READY ext/merge-lane-n23d-1123 3e5d001a20 (lane n23d bundle: tenzo-press-windup tut-hint-lines garden-market-no-match tut-goals-next kael-guard-edges anim-hit-react-dir anim-dash-drive-hold; 0 conflicts, targeted checks green or same-red as main)
 READY ext/build-load-textures 59e261a16c (build.hunters 2337->1184 ms, mobs 534 ms on rp2g load-check)
+READY ext/hunter-review-check cc580a649d (bulk-rebase: origin/main merged in mechanically, was d178d53959; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/ui-results-boki-line 7b14388973 (bulk-rebase: origin/main merged in mechanically, was a882ed986c; union 1 gen 0 files; the branch's own READY checks still apply)
