@@ -11053,3 +11053,4 @@ READY ext/stuck-integ-5ff8c39e 9664edef79 (supersedes: ext/anim-dash-drive-hold 
 READY ext/ruin-walls-v1-drop 2ce1c5cb50 (delete ruin_walls_v1.gd + --art1 preload; health dup-versions none)
 READY ext/branch-reaper 0e216d28b3c (tools/branch_reaper.sh: delete merged ext/* branches; ran once, 829 deleted)
 READY ext/cj-dedup-guard c2c0a6b49e (jobq submit dedupe: apply_dedupe.py + selftest 11/11; install on hetzner per ops/jobq-dedupe/INSTALL.md)
+READY ext/feel-cast-into-cast-reland 61c88f9196bbc924c99a4b4b41b54b552ed240f6 (cast-into-cast buffering re-landed)
