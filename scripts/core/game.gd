@@ -203,6 +203,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			Care.dex_got(nk)
 			out["caught"].append(nk)
 	if won: Heart.settle(r, out)   # the Heartspark's rare egg and materials (heart.gd)
+	KinSteal.settle(r, out)        # gems for stolen wisps brought out alive (kin_steal.gd)
 	WaysResult.settle(r, out)      # a squad that did not leave: placement pay
 	Equal.settle_belt(r)       # the utility you brought and found comes home with you, or is gone (equal.gd)
 	Backpacks.settle(r)        # and the backpack you wore out
@@ -367,6 +368,8 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 		out["levelup"] = true
 	if lead:
 		out["trust_delta"] = float(k["trust"]) - before
+	# what the results screen lists for each Boki you brought: the XP and bond just applied above
+	out["kin_gains"] = out.get("kin_gains", []) + [{"kin": k, "xp": xp, "bond": float(k["trust"]) - before}]
 
 ## XP a kin needs to go from level `lv` to the next (the curve is in content/rules/garden_xp.json).
 func xp_need(lv: int) -> int:

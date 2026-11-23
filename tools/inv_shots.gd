@@ -70,13 +70,13 @@ func run(main_node: Node) -> void:
 	print("INVSHOTS %d in %s" % [captions.size(), dir])
 	main.get_tree().quit(0)
 
-## A hunter in a full loadout: two gloves, armor, boots, belt items, a few perks and a half-full pack.
+## A hunter in a full loadout: two gloves, armor, boots, belt items, five perks, four belt items and a half-full pack.
 static func dress(p: Hunter) -> void:
 	p.gear = [{"id": "power_core", "rar": 2}, {"id": "frost", "rar": 1}, {"id": "quilted_coat", "rar": 1},
 		{"id": "boots", "rar": 1}]
-	p.perks = ["keen", "keen", "toughskin", "fleet"]
-	UtilityBelt.grant(p, "medkit", 2)
-	UtilityBelt.grant(p, "smoke", 1)
+	p.perks = ["quickhands", "secondwind", "featherfall", "scavenger", "toughskin"]
+	for id in ["medkit", "smoke", "stim", "tonic"]:
+		UtilityBelt.grant(p, id, 2)
 	p.refresh_gear()
 	p.pack_cap = 6
 	p.pack = [Loot.gear("vest", 3), Loot.gear("blink", 2), Loot.gear("windstep_boots", 1), Loot.valuable("kin_idol"),

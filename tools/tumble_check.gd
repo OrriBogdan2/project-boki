@@ -17,29 +17,31 @@ extends RefCounted
 
 const BOUTS := 200
 const SEED := 20261110
-const DT := 1.0 / 30.0           # s per step
-const LEN_LOW := 60.0            # s, the shortest average bout
-const LEN_HIGH := 75.0           # s, the longest average bout
-const BOOST := 30                # stat points added for the "every stat matters" test
-const STAT_PUSH := 0.25          # steps further forward those points must end a bout, on average
-const MOVE_SPREAD := 0.08        # most the fixed-move strategies' exchange win shares may differ by
-const MOVE_MAX := 0.6            # no fixed move may win more than this share
-const TELL_ROLLS := 4000         # tells sampled for the honesty test
-const TELL_SLACK := 0.03         # how far the sampled honesty may sit from the rule
-const PICK_S := [0.8, 2.8]       # s the simulated player takes to pick, after the tell
-const PRESS_S := [0.4, 2.0]      # s it takes to press, after the charge starts
-const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish building
+const DT := 1.0 / 30.0  # s per step
+const LEN_LOW := 60.0  # s, the shortest average bout
+const LEN_HIGH := 75.0  # s, the longest average bout
+const BOOST := 30  # stat points added for the "every stat matters" test
+const STAT_PUSH := 0.25  # steps further forward those points must end a bout, on average
+const MOVE_SPREAD := 0.08  # most the fixed-move strategies' exchange win shares may differ by
+const MOVE_MAX := 0.6  # no fixed move may win more than this share
+const TELL_ROLLS := 4000  # tells sampled for the honesty test
+const TELL_SLACK := 0.03  # how far the sampled honesty may sit from the rule
+const PICK_S := [0.8, 2.8]  # s the simulated player takes to pick, after the tell
+const PRESS_S := [0.4, 2.0]  # s it takes to press, after the charge starts
+const SETTLE_FRAMES := 600  # frames to wait at most for the home to finish building
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("TUMBLE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(m: Node) -> void:
-	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -52,6 +54,7 @@ func run(m: Node) -> void:
 	print("TUMBLE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _kin(sp: String, kname: String, stats: Array) -> Dictionary:
 	var k := Save.new_kin(sp, kname)
 	k["level"] = 5
@@ -62,25 +65,28 @@ func _kin(sp: String, kname: String, stats: Array) -> Dictionary:
 	k["trust"] = 50.0
 	return k
 
+
 func _by_theme() -> Dictionary:
 	var out := {}
 	for id in Data.KIN:
 		out[String(Data.KIN[id].get("theme", ""))] = id
 	return out
 
+
 ## One exchange with fixed moves and presses on a fresh run; returns the run after it resolved.
 func _exchange(a: Dictionary, b: Dictionary, mine: String, theirs: String, want := "") -> BaseTumble.Run:
 	var r := BaseTumble.Run.new([a, b], RandomNumberGenerator.new())
-	r.R = r.R.duplicate(true)
-	r.R["rival_press"] = {"great": 0.0, "good": 0.0}
-	r.step(float(r.R["intro_s"]) + DT)
+	r.r_x = r.r_x.duplicate(true)
+	r.r_x["rival_press"] = {"great": 0.0, "good": 0.0}
+	r.step(float(r.r_x["intro_s"]) + DT)
 	r.want = want if want != "" else BaseTumble.counter(mine)
 	r.plan = theirs
 	r.choose(mine)
-	r.step(float(r.R["tell_s"]))
+	r.step(float(r.r_x["tell_s"]))
 	r.press("miss")
-	r.step(float(r.R["impact_s"]))
+	r.step(float(r.r_x["impact_s"]))
 	return r
+
 
 func _rules() -> void:
 	var th := _by_theme()
@@ -105,18 +111,19 @@ func _rules() -> void:
 	var c := _kin(th["ember"], "C", [10, 10, 10, 10])
 	var d := _kin(th["frost"], "D", [10, 10, 10, 10])
 	r = _exchange(c, d, "rush", "dodge")
-	var p := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
+	var p := r.push(0, "power", "miss") / (float(r.r_x["base"]) + 10.0)
 	ok(absf(p - 1.0) < 0.001, "species themes change no push (x%.3f)" % p)
 	r = _exchange(a, b, "rush", "dodge", "rush")
-	var f := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
+	var f := r.push(0, "power", "miss") / (float(r.r_x["base"]) + 10.0)
 	ok(absf(f - 1.1) < 0.001 and r.follows == 1, "following the want is 10%% more push (x%.3f)" % f)
 	var idle := BaseTumble.Run.new([a, b], RandomNumberGenerator.new())
-	var limit := float(idle.R["intro_s"]) + float(idle.R["tell_s"]) + float(idle.R["pick_s"]) + DT * 2.0
+	var limit := float(idle.r_x["intro_s"]) + float(idle.r_x["tell_s"]) + float(idle.r_x["pick_s"]) + DT * 2.0
 	var tt := 0.0
 	while idle.state != "resolve" and tt < limit:
 		idle.step(DT)
 		tt += DT
 	ok(idle.state == "resolve" and idle.pick == idle.want, "no pick in 3 s goes with what your Boki wants")
+
 
 func _tells() -> void:
 	var sharp := _kin("zapple", "S", [10, 10, 10, 60])
@@ -131,9 +138,12 @@ func _tells() -> void:
 			if r.shown("rush", viewer) == "rush":
 				right += 1
 		share[viewer] = float(right) / TELL_ROLLS
-	var h: Array = r.R["honest"]
-	ok(absf(share[0] - float(h[0])) < TELL_SLACK and absf(share[1] - float(h[1])) < TELL_SLACK,
-			"the higher Focus sees the honest tell %.0f%%, the other %.0f%%" % [share[0] * 100.0, share[1] * 100.0])
+	var h: Array = r.r_x["honest"]
+	ok(
+		absf(share[0] - float(h[0])) < TELL_SLACK and absf(share[1] - float(h[1])) < TELL_SLACK,
+		"the higher Focus sees the honest tell %.0f%%, the other %.0f%%" % [share[0] * 100.0, share[1] * 100.0]
+	)
+
 
 ## Plays a whole bout. style: "mixed" (the simulated player), or a move to always pick.
 func _bout(a: Dictionary, b: Dictionary, s: int, style: String) -> BaseTumble.Run:
@@ -156,11 +166,13 @@ func _bout(a: Dictionary, b: Dictionary, s: int, style: String) -> BaseTumble.Ru
 		r.step(DT)
 	return r
 
+
 ## The simulated press: a quarter great, nearly half good, the rest missed.
 func _grade(roll: float) -> String:
 	if roll < 0.25:
 		return "great"
 	return "good" if roll < 0.7 else "miss"
+
 
 func _style_pick(r: BaseTumble.Run, style: String, me: RandomNumberGenerator) -> String:
 	if style != "mixed":
@@ -171,6 +183,7 @@ func _style_pick(r: BaseTumble.Run, style: String, me: RandomNumberGenerator) ->
 	if roll < 0.85:
 		return r.want
 	return ["rush", "brace", "dodge"][me.randi() % 3]
+
 
 ## The seeded field: random species and stats on both sides.
 func _field() -> Array:
@@ -189,6 +202,7 @@ func _field() -> Array:
 		out.append(pair)
 	return out
 
+
 func _share(field: Array, style: String, boost := "") -> Dictionary:
 	var wins := 0
 	var secs := 0.0
@@ -205,20 +219,32 @@ func _share(field: Array, style: String, boost := "") -> Dictionary:
 		ex[1] += r.wins[1]
 		if r.winner() == 0:
 			wins += 1
-	return {"share": float(wins) / field.size(), "secs": secs / field.size(), "ex": float(ex[0]) / (ex[0] + ex[1]),
-			"pos": pos / field.size()}
+	return {
+		"share": float(wins) / field.size(),
+		"secs": secs / field.size(),
+		"ex": float(ex[0]) / (ex[0] + ex[1]),
+		"pos": pos / field.size()
+	}
+
 
 func _bouts() -> void:
 	var field := _field()
 	var base := _share(field, "mixed")
-	ok(base["secs"] >= LEN_LOW and base["secs"] <= LEN_HIGH, "%d bouts last %.1f s on average (needs %d to %d)"
-			% [BOUTS, base["secs"], LEN_LOW, LEN_HIGH])
+	ok(
+		base["secs"] >= LEN_LOW and base["secs"] <= LEN_HIGH,
+		"%d bouts last %.1f s on average (needs %d to %d)" % [BOUTS, base["secs"], LEN_LOW, LEN_HIGH]
+	)
 	for s in ["power", "guard", "speed", "focus"]:
 		var up := _share(field, "mixed", s)
 		var gain := float(up["pos"]) - float(base["pos"])
-		ok(gain >= STAT_PUSH and up["share"] >= base["share"],
+		ok(
+			gain >= STAT_PUSH and up["share"] >= base["share"],
+			(
 				"+%d %s ends %.2f steps further forward (needs %.2f), wins %.0f%% of bouts (from %.0f%%)"
-				% [BOOST, s, gain, STAT_PUSH, up["share"] * 100.0, base["share"] * 100.0])
+				% [BOOST, s, gain, STAT_PUSH, up["share"] * 100.0, base["share"] * 100.0]
+			)
+		)
+
 
 func _moves() -> void:
 	var field := _field()
@@ -231,8 +257,23 @@ func _moves() -> void:
 	var spread: float = ex.max() - ex.min()
 	var what := "no dominant move: always Rush, Brace, Dodge win %.0f, %.0f, %.0f%% of exchanges (spread under %.0f)"
 	what += " and %.0f, %.0f, %.0f%% of bouts (none over %.0f)"
-	ok(spread <= MOVE_SPREAD and bouts.max() <= MOVE_MAX, what % [ex[0] * 100.0, ex[1] * 100.0, ex[2] * 100.0,
-			MOVE_SPREAD * 100.0, bouts[0] * 100.0, bouts[1] * 100.0, bouts[2] * 100.0, MOVE_MAX * 100.0])
+	ok(
+		spread <= MOVE_SPREAD and bouts.max() <= MOVE_MAX,
+		(
+			what
+			% [
+				ex[0] * 100.0,
+				ex[1] * 100.0,
+				ex[2] * 100.0,
+				MOVE_SPREAD * 100.0,
+				bouts[0] * 100.0,
+				bouts[1] * 100.0,
+				bouts[2] * 100.0,
+				MOVE_MAX * 100.0
+			]
+		)
+	)
+
 
 func _settle() -> void:
 	Save.d = Save.fresh()
@@ -243,12 +284,16 @@ func _settle() -> void:
 	r.follows = 2
 	var gems := int(Save.d["gems"])
 	var res := BaseTumble.settle(r)
-	var want_trust := 50.0 + float(r.R["win_trust"]) + 2.0 * float(r.R["follow_trust"])
-	ok(res["win"] == a and absf(float(a["trust"]) - want_trust) < 0.001,
-			"settle: the winner gains trust, plus following")
+	var want_trust := 50.0 + float(r.r_x["win_trust"]) + 2.0 * float(r.r_x["follow_trust"])
+	ok(
+		res["win"] == a and absf(float(a["trust"]) - want_trust) < 0.001,
+		"settle: the winner gains trust, plus following"
+	)
 	ok(float(a["needs"]["joy"]) > 50.0 and float(b["needs"]["joy"]) < 50.0, "settle: the winner beams, the loser sulks")
-	ok(String(a["memory"][-1]["text"]).contains("Ash") and String(b["memory"][-1]["text"]).contains("Pip"),
-			"settle: both remember it")
+	ok(
+		String(a["memory"][-1]["text"]).contains("Ash") and String(b["memory"][-1]["text"]).contains("Pip"),
+		"settle: both remember it"
+	)
 	ok(int(Save.d["gems"]) > gems and res["backed_won"], "settle: gems for your win")
 	var v := _kin("cindle", "Visitor", [10, 10, 10, 10])
 	var before := v.duplicate(true)
@@ -257,6 +302,7 @@ func _settle() -> void:
 	r.pos = -3.0
 	BaseTumble.settle(r)
 	ok(v == before, "settle: a visitor's record is left alone")
+
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
@@ -318,17 +364,22 @@ func _on_base() -> void:
 			tb.tick(0.1)
 			t += 0.1
 		await main.get_tree().process_frame
-		ok(tb.run == null and is_instance_valid(tb.card) and tb.card.name == "GameResultCard",
-				"on: the bout ends in the shared result card (%.1f s)" % t)
+		ok(
+			tb.run == null and is_instance_valid(tb.card) and tb.card.name == "GameResultCard",
+			"on: the bout ends in the shared result card (%.1f s)" % t
+		)
 		Save.d["tutorial"].erase("first_tumble")
 		tb.use()
 		tb.input(_menu())
-		ok(tb.teach == null and _bout_start(tb) and not TumbleTeach.due(),
-				"teach: skip (menu key) goes straight to the bout and is not offered again")
+		ok(
+			tb.teach == null and _bout_start(tb) and not TumbleTeach.due(),
+			"teach: skip (menu key) goes straight to the bout and is not offered again"
+		)
 		tb._end(false)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
 
 ## A real bout has just started: a run in its intro with the bout's own exchange count.
 func _bout_start(tb: BaseTumble) -> bool:
@@ -341,6 +392,7 @@ func _menu() -> InputEventAction:
 	e.pressed = true
 	return e
 
+
 ## The first Tumble: one slow practice exchange (triangle, the 'probably' tell, keys from Settings, the press),
 ## no prize, then the bout with the same pair ending in its card.
 func _teach(tb: BaseTumble, home) -> void:
@@ -350,12 +402,17 @@ func _teach(tb: BaseTumble, home) -> void:
 	var mems := (rec.get("memories", []) as Array).size()
 	ok(TumbleTeach.due(), "teach: due on a save that never played a Tumble")
 	tb.use()
-	ok(tb.teach != null and is_instance_valid(tb.teach.card) and not TumbleTeach.due(),
-			"teach: the first Tumble opens the practice card, marked seen at once")
+	ok(
+		tb.teach != null and is_instance_valid(tb.teach.card) and not TumbleTeach.due(),
+		"teach: the first Tumble opens the practice card, marked seen at once"
+	)
 	ok(tb.run != null and tb.pair.size() == 2, "teach: the practice is between your two Boki")
 	var rival: Node3D = tb.pair[1]["node"] if tb.pair.size() == 2 else null
-	var tri := tb.teach.card.find_children("*", "Control", true, false).filter(
-			func(c): return c is TumbleTeach.Triangle) if tb.teach != null else []
+	var tri := (
+		tb.teach.card.find_children("*", "Control", true, false).filter(func(c): return c is TumbleTeach.Triangle)
+		if tb.teach != null
+		else []
+	)
 	ok(tri.size() == 1, "teach: the card draws the Rush/Brace/Dodge triangle")
 	var r_v := BaseTumble.rules()
 	ok(tb.run != null and int(tb.run.r_x["exchanges"]) == 1 and float(tb.run.r_x["pick_s"]) > float(r_v["pick_s"]),
@@ -377,17 +434,28 @@ func _teach(tb: BaseTumble, home) -> void:
 					tb.run.press("good")
 	ok(honest, "teach: the practice tell is honest")
 	var tell: String = lines.get("tell", "")
-	ok(tell.contains("probably") and tell.contains(TumbleTeach.pick_key(0)) and tell.contains(TumbleTeach.pick_key(2)),
-			"teach: the tell line names the rival's 'probably' move and the pick keys from Settings (%s)" % tell)
-	ok(String(lines.get("resolve", "")).contains(Settings.key_cap("interact")),
-			"teach: the press line names %s" % Settings.key_cap("interact"))
-	ok(bar_speed > 0.0 and bar_speed < TimingBar.START_SPEED,
-			"teach: the practice bar sweeps slower (%.2f)" % bar_speed)
+	ok(
+		tell.contains("probably") and tell.contains(TumbleTeach.pick_key(0)) and tell.contains(TumbleTeach.pick_key(2)),
+		"teach: the tell line names the rival's 'probably' move and the pick keys from Settings (%s)" % tell
+	)
+	ok(
+		String(lines.get("resolve", "")).contains(Settings.key_cap("interact")),
+		"teach: the press line names %s" % Settings.key_cap("interact")
+	)
+	ok(
+		bar_speed > 0.0 and bar_speed < TimingBar.START_SPEED,
+		"teach: the practice bar sweeps slower (%.2f)" % bar_speed
+	)
 	ok(lines.has("push"), "teach: the practice exchange plays out to the push")
-	ok(tb.teach == null and _bout_start(tb),
-			"teach: practice runs once, then the bout starts (%.1f s)" % t)
-	ok(int(Save.d["gems"]) == gems and float(rec.get("needs", {}).get("joy", 0.0)) == joy
-			and (rec.get("memories", []) as Array).size() == mems, "teach: no prize, joy or memory from the practice")
+	ok(tb.teach == null and _bout_start(tb), "teach: practice runs once, then the bout starts (%.1f s)" % t)
+	ok(
+		(
+			int(Save.d["gems"]) == gems
+			and float(rec.get("needs", {}).get("joy", 0.0)) == joy
+			and (rec.get("memories", []) as Array).size() == mems
+		),
+		"teach: no prize, joy or memory from the practice"
+	)
 	ok(tb.pair.size() == 2 and tb.pair[1]["node"] == rival, "teach: the bout keeps the same pair")
 	t = 0.0
 	while tb.run != null and tb.run.state != "resolve" and t < 200.0:

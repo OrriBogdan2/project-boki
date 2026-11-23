@@ -12,6 +12,8 @@ const CHECKS := {
 	"--arena-check": ["res://tools/arena_check.gd", "arena_check", null],
 	# every archetype kit, controls, locks, infusion, feel
 	"--archetype-check": ["res://tools/archetype_check.gd", "archetype_check", null],
+	# 0022 ult ranks
+	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],
 	"--kit-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # (same tool: the combo section)
 	# Sparkle's cross-ability interactions
 	"--mage-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],

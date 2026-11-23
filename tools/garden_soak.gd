@@ -13,55 +13,69 @@ extends RefCounted
 ## unfed Boki ate on its own. Never touches the real save.
 
 const DAYS := 30
-const DT := 0.25                # s of farm time per step
-const SPAWN_EVERY := 400        # steps between frames, so deferred frees and timers can run
-const STUCK_HOURS := 6.0        # in-game hours (DAY_LEN / 24 = 12.5 s each) in one state: the rules cap Roam at 45 s
-const TOY_HOLD := 60.0          # s a Boki may keep one toy (go_timeout 20 + play 12 at most, with room)
-const SAVE_GROWTH := 2.0        # the save may grow to this many times its size at SIZE_DAY
-const SIZE_DAY := 10            # by then the baby, the journals and the away card's lines are in (journals are capped)
-const DAY_START := 0.3          # the farm clock at the start (morning)
-const FED := 3                  # Boki the player feeds each day; the others feed themselves (GARDEN.md 2)
-const TOYS_A_DAY := 3.5        # toys a fed Boki plays at least, per in-game day on average (GARDEN.md 4)
-const RACE_MAX_S := 120.0       # s a headless race may run
+const DT := 0.25  # s of farm time per step
+const SPAWN_EVERY := 400  # steps between frames, so deferred frees and timers can run
+const STUCK_HOURS := 6.0  # in-game hours (DAY_LEN / 24 = 12.5 s each) in one state: the rules cap Roam at 45 s
+const TOY_HOLD := 60.0  # s a Boki may keep one toy (go_timeout 20 + play 12 at most, with room)
+const SAVE_GROWTH := 2.0  # the save may grow to this many times its size at SIZE_DAY
+const SIZE_DAY := 10  # by then the baby, the journals and the away card's lines are in (journals are capped)
+const DAY_START := 0.3  # the farm clock at the start (morning)
+const FED := 3  # Boki the player feeds each day; the others feed themselves (GARDEN.md 2)
+const TOYS_A_DAY := 3.5  # toys a fed Boki plays at least, per in-game day on average (GARDEN.md 4)
+const RACE_MAX_S := 120.0  # s a headless race may run
 const Loop := preload("res://tools/garden_soak_loop.gd")
 const OUT := "user://garden_soak.json"
 
+
 ## Collects engine errors while the soak runs (warnings do not count).
-class ErrorLog extends Logger:
+class ErrorLog:
+	extends Logger
 	var lines: Array = []
 
-	func _log_error(function: String, file: String, line: int, code: String, rationale: String, _notify: bool,
-			error_type: int, _backtraces: Array) -> void:
+	func _log_error(
+		function: String,
+		file: String,
+		line: int,
+		code: String,
+		rationale: String,
+		_notify: bool,
+		error_type: int,
+		_backtraces: Array
+	) -> void:
 		if error_type == ERROR_TYPE_WARNING:
 			return
 		lines.append("%s:%d %s %s" % [file.get_file(), line, function, rationale if rationale != "" else code])
+
 
 var bad := 0
 var main: Node
 var home
 var loop := Loop.new(self)
 var errors := ErrorLog.new()
-var hist := {}              # name -> Array of [t s, state name]
-var longest := {}           # name -> {state name: longest stay in s}
-var play_since := {}        # name -> t its current toy began
+var hist := {}  # name -> Array of [t s, state name]
+var longest := {}  # name -> {state name: longest stay in s}
+var play_since := {}  # name -> t its current toy began
 var t := 0.0
-var size_base := 0          # bytes of the save at SIZE_DAY
-var seen := {"plays": 0, "picks": 0, "races": 0, "bouts": 0, "hunts": 0, "volleys": 0, "self_fed": 0}      # exercised
-var low := {}               # need -> lowest value seen on any Boki
-var snack := {}             # name -> it was off for a snack (life_eat) at the last look
-var food_was := {}          # name -> its food need at the last look
-var toy_use := {}           # name -> {plays: toys picked up, low: plays begun with joy under toys.json joy_below}
-var joy_low := {}           # name -> its lowest joy
-var sulky_s := {}           # name -> s spent sulky (joy under base_life.json whistle sulky_joy)
+var size_base := 0  # bytes of the save at SIZE_DAY
+var seen := {"plays": 0, "picks": 0, "races": 0, "bouts": 0, "hunts": 0, "volleys": 0, "self_fed": 0}  # exercised
+var low := {}  # need -> lowest value seen on any Boki
+var snack := {}  # name -> it was off for a snack (life_eat) at the last look
+var food_was := {}  # name -> its food need at the last look
+var toy_use := {}  # name -> {plays: toys picked up, low: plays begun with joy under toys.json joy_below}
+var joy_low := {}  # name -> its lowest joy
+var sulky_s := {}  # name -> s spent sulky (joy under base_life.json whistle sulky_joy)
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SOAK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _fail(what: String) -> void:
 	print("SOAK FAIL %s (t=%.0f s, day %.1f)" % [what, t, t / home.DAY_LEN])
 	bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -92,22 +106,30 @@ func run(m: Node) -> void:
 	_report_toys()
 	loop.report()
 	_report_toys()
-	ok(size1 <= size_base * SAVE_GROWTH, "save size from day %d: %d -> %d bytes (limit x%.0f)"
-			% [SIZE_DAY, size_base, size1, SAVE_GROWTH])
+	ok(
+		size1 <= size_base * SAVE_GROWTH,
+		"save size from day %d: %d -> %d bytes (limit x%.0f)" % [SIZE_DAY, size_base, size1, SAVE_GROWTH]
+	)
 	var drifted: int = home.kins.filter(func(k): return k["rec"].has("drift")).size()
 	print("SOAK exercised: ", seen, ", trait drift on %d Boki" % drifted)
-	ok(seen.values().all(func(n): return n > 0) and drifted > 0,
-			"toys, patch, Dash, Shove, Seek, Volley and trait drift all ran")
+	ok(
+		seen.values().all(func(n): return n > 0) and drifted > 0,
+		"toys, patch, Dash, Shove, Seek, Volley and trait drift all ran"
+	)
 	var played: bool = hist.values().any(func(h): return h.any(func(e): return e[1] == "Play"))
 	ok(played, "the machine shows Play while a Boki is at a toy (home_toys.gd)")
 	var unfed: Array = home.kins.slice(FED).map(func(k): return String(k["rec"]["name"]))
 	var fed_self: Array = unfed.filter(func(nm): return hist[nm].any(func(e): return e[1] == "Eat"))
-	ok(fed_self.size() == unfed.size(), "every unfed Boki (%s) ate on its own (%d snacks eaten)"
-			% [", ".join(unfed), seen["self_fed"]])
+	ok(
+		fed_self.size() == unfed.size(),
+		"every unfed Boki (%s) ate on its own (%d snacks eaten)" % [", ".join(unfed), seen["self_fed"]]
+	)
 	var floors := Care.sulky()
 	print("SOAK lowest needs: ", low, " sulky floors: ", floors)
-	ok(not floors.is_empty() and Care.NEEDS.all(func(n): return float(low.get(n, 0.0)) >= float(floors[n]) - 0.01),
-			"needs bottomed out at sulky, never lower")
+	ok(
+		not floors.is_empty() and Care.NEEDS.all(func(n): return float(low.get(n, 0.0)) >= float(floors[n]) - 0.01),
+		"needs bottomed out at sulky, never lower"
+	)
 	ok(errors.lines.is_empty(), "no errors in the log (%d)" % errors.lines.size())
 	for l in errors.lines.slice(0, 5):
 		print("SOAK   ", l)
@@ -119,6 +141,7 @@ func run(m: Node) -> void:
 	print("SOAK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## Two more Boki on top of the demo's four: a baby (level 1) and an Elder who has retired as a mentor.
 func _add_young_and_old(d: Dictionary) -> void:
 	for spec in [["burrlet", "Bean", 1], ["pebbit", "Gran", 16]]:
@@ -128,6 +151,7 @@ func _add_young_and_old(d: Dictionary) -> void:
 		d["roster"].append(rec)
 		if spec[2] == 16:
 			Mentor.retire(rec)
+
 
 ## The three toys and the snack patch near the landing; the demo's Nook and egg are left out.
 func _stage() -> void:
@@ -141,6 +165,7 @@ func _stage() -> void:
 	ok(home.bridges.values().all(func(b): return b["built"] or not b.has("sign")), "no unbuilt bridge sign")
 	ok(home.toys.toys().size() == 3 and not SnackPatch.entry(Save.d).is_empty(), "three toys and the snack patch stand")
 
+
 func _step() -> void:
 	var day_before: int = int(t / home.DAY_LEN)
 	t += DT
@@ -153,9 +178,10 @@ func _step() -> void:
 	home.hshove.tick(DT)
 	var e := SnackPatch.entry(Save.d)
 	if e.has("t"):
-		e["t"] = float(e["t"]) - DT          # real unix time cannot be sped up: age the timer instead
+		e["t"] = float(e["t"]) - DT  # real unix time cannot be sped up: age the timer instead
 	if int(t / home.DAY_LEN) > day_before:
 		_player_day(int(t / home.DAY_LEN))
+
 
 ## What the player does once a day: feed everyone, walk over the patch, and now and then run a Dash and a Shove.
 func _player_day(day: int) -> void:
@@ -173,6 +199,7 @@ func _player_day(day: int) -> void:
 	if day == SIZE_DAY:
 		size_base = JSON.stringify(Save.d).length()
 	_match(day)
+
 
 ## One game a day, round robin: the Dash, the Stump Shove, Seek, Spark Volley, on the logic classes.
 func _match(day: int) -> void:
@@ -212,6 +239,7 @@ func _match(day: int) -> void:
 				BaseVolley.settle(volley)
 				seen["volleys"] += 1
 
+
 ## One look at every Boki: record a state change, and check the stuck limit and every value's range. A Boki the
 ## farm itself has (called, indoors, held) keeps its state and does not count; neither does a night Nap or a
 ## retired mentor's stroll, which have no end by design.
@@ -229,15 +257,16 @@ func _watch(limit_s: float) -> void:
 		longest[nm][state] = maxf(float(longest[nm].get(state, 0.0)), m.since)
 		var endless: bool = m.is_in(BaseLife.S.MENTOR) or (m.is_in(BaseLife.S.NAP) and home.life.night)
 		if m.since > limit_s and m.since <= limit_s + DT and not endless and not BaseLife._taken(k):
-			_fail("%s stuck in %s for over %.1f s" % [nm, state, limit_s])      # said once, as it crosses
+			_fail("%s stuck in %s for over %.1f s" % [nm, state, limit_s])  # said once, as it crosses
 		var food := Care.need(rec, "food")
 		if snack.get(nm, false) and not k.has("life_eat") and food > float(food_was.get(nm, food)):
-			seen["self_fed"] += 1      # it was off for a snack and came back fuller: it fed itself
+			seen["self_fed"] += 1  # it was off for a snack and came back fuller: it fed itself
 		snack[nm] = k.has("life_eat")
 		food_was[nm] = food
 		_check_values(rec, nm)
 		_check_toy(k, nm)
 		_check_joy(rec, nm)
+
 
 func _check_values(rec: Dictionary, nm: String) -> void:
 	for n in Care.NEEDS:
@@ -256,6 +285,7 @@ func _check_values(rec: Dictionary, nm: String) -> void:
 		if is_nan(v) or v < -1.0 or v > 1.0:
 			_fail("%s bond %s = %s" % [nm, uid, str(v)])
 
+
 func _check_toy(k: Dictionary, nm: String) -> void:
 	if not k.has("play"):
 		play_since.erase(nm)
@@ -269,12 +299,14 @@ func _check_toy(k: Dictionary, nm: String) -> void:
 	elif t - float(play_since[nm]) > TOY_HOLD and t - float(play_since[nm]) < TOY_HOLD + DT:
 		_fail("%s holds a toy for over %.0f s" % [nm, TOY_HOLD])
 
+
 ## Joy over the run: the lowest, and the time spent sulky.
 func _check_joy(rec: Dictionary, nm: String) -> void:
 	var joy := Care.need(rec, "joy")
 	joy_low[nm] = minf(float(joy_low.get(nm, 100.0)), joy)
 	if joy < float(home.life.r_v["whistle"]["sulky_joy"]):
 		sulky_s[nm] = float(sulky_s.get(nm, 0.0)) + DT
+
 
 ## Toy use per Boki per in-game day (the play that trains stats, GARDEN.md 4) and how glum each got. A Boki you
 ## feed plays at least TOYS_A_DAY a day and is never sulky; the unfed may sulk (care.json sulky, never sick).
@@ -283,13 +315,28 @@ func _report_toys() -> void:
 		var nm := String(home.kins[i]["rec"]["name"])
 		var use: Dictionary = toy_use.get(nm, {"plays": 0, "low": 0})
 		var a_day := float(use["plays"]) / DAYS
-		print("SOAK %-6s %s toys %.1f a day (%d from low joy), lowest joy %.0f, sulky %.0f%% of the time"
-				% [nm, "fed  " if i < FED else "unfed", a_day, use["low"], joy_low.get(nm, 100.0),
-				100.0 * float(sulky_s.get(nm, 0.0)) / t])
+		print(
+			(
+				"SOAK %-6s %s toys %.1f a day (%d from low joy), lowest joy %.0f, sulky %.0f%% of the time"
+				% [
+					nm,
+					"fed  " if i < FED else "unfed",
+					a_day,
+					use["low"],
+					joy_low.get(nm, 100.0),
+					100.0 * float(sulky_s.get(nm, 0.0)) / t
+				]
+			)
+		)
 		if i < FED:
-			ok(a_day >= TOYS_A_DAY and int(use["low"]) * 2 >= DAYS and float(sulky_s.get(nm, 0.0)) == 0.0,
+			ok(
+				a_day >= TOYS_A_DAY and int(use["low"]) * 2 >= DAYS and float(sulky_s.get(nm, 0.0)) == 0.0,
+				(
 					"%s (fed) plays %.1f toys a day (limit %.1f), from low joy every other day or more, never sulky"
-					% [nm, a_day, TOYS_A_DAY])
+					% [nm, a_day, TOYS_A_DAY]
+				)
+			)
+
 
 func _report() -> void:
 	for nm in hist:
@@ -299,6 +346,7 @@ func _report() -> void:
 			parts.append("%s %.0f" % [s, longest[nm][s]])
 		print("SOAK %-6s %4d changes, longest stay (s): %s" % [nm, changes, ", ".join(parts)])
 		ok(changes > 0, "%s changed state during the run" % nm)
+
 
 func _write() -> void:
 	var f := FileAccess.open(OUT, FileAccess.WRITE)

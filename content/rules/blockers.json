@@ -3,13 +3,14 @@
  "classes": {
   "solid": {"shield": "stop", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "stop"},
   "body": {"shield": "na", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "na"},
+  "reach": {"shield": "stop", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "stop"},
   "pierce": {"shield": "stop", "rock": "pass", "ice": "stop", "wall": "stop", "guard": "stop"},
   "phase": {"shield": "na", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "na"},
   "lob": {"shield": "pass", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "pass"}
  },
  "crossers": {
   "shot": {"class": "solid", "arch": "gunslinger", "what": "every projectile (LMB weapons, kit shots, Boki shots)"},
-  "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Deep Reach (pierces terrain)"},
+  "hand": {"class": "reach", "arch": "dredge", "what": "Grimble's Deep Reach (pierces terrain; every placed blocker stops it: Tenzo's ridge, Albert's shield)"},
   "beam": {"class": "pierce", "arch": "gunslinger", "what": "Vex's Longneedle (pierces terrain)"},
   "chain": {"class": "solid", "arch": "juggernaut", "what": "Kael's Warchain (bites the wall it meets)"},
   "cloak": {"class": "solid", "arch": "ashwick", "what": "Cinder's Furnace Cloak pull (needs sight)"},

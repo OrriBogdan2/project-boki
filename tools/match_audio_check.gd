@@ -93,6 +93,7 @@ func run(main_node: Node) -> void:
 	await _hover(other, "another player's")
 	other.remote = false
 	await _loudness(m)
+	_regions(m, p_v)
 	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
 	m.music_dir.beds.tick(m, p_v)
 	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
@@ -113,6 +114,88 @@ func run(main_node: Node) -> void:
 	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Region ambience (content/rules/region_ambience.json, docs/AUDIO.md): every region the layout makes has a
+## bed from the library; the bed plays in its region; crossing a border crossfades over 3-4 s; the Blight
+## quietens the place beds.
+func _regions(m: Match, p_v: Hunter) -> void:
+	var lay := World.load_layout("hollowcrown")
+	var rules := AmbBeds.rules()
+	var ids := []
+	var isl := {}
+	for r in lay.get("regions", []):
+		ids.append(String(r["id"]))
+		var bed := AmbBeds.bed_of_region(String(r["id"]))
+		var file := bed != "" and ResourceLoader.exists("res://audio/amb_%s.ogg" % bed)
+		ok(file, "region %s plays bed amb_%s (file there)" % [r["id"], bed])
+		for i in r["islands"]: isl[String(i)] = String(r["id"])
+	var n_reg: int = m.world.regions.size()
+	ok(ids.size() == 9 and n_reg == ids.size(), "the world has the layout's %d regions (%d)" % [ids.size(), n_reg])
+	var stale: Array = rules["beds"].keys().filter(func(k): return not k in ids)
+	ok(stale.is_empty(), "the map has no region the layout does not make %s" % str(stale))
+	var beds := AmbBeds.new()
+	var wrong := []
+	for d in lay["islands"]:
+		var rid: String = isl[String(d["id"])]
+		var at := Vector3(float(d["poi"][0]) + 0.5, 0.0, float(d["poi"][1]) + 0.5)
+		if m.world.island_of(at.x, at.z) < 0:
+			continue     # a lagoon or a hole at the point of interest: nothing to stand on
+		p_v.pos = at
+		var lv := beds.place_levels(m, p_v)
+		var top := ""
+		for b in lv:
+			if b != "water" and (top == "" or float(lv[b]) > float(lv[top])): top = b
+		if top != AmbBeds.bed_of_region(rid) or float(lv[top]) < 0.5: wrong.append("%s:%s" % [d["id"], top])
+	ok(wrong.is_empty(), "standing in each region its own bed is loudest %s" % str(wrong))
+	# the crossfade: from the Crown out to Larkhollow, the beds trade places over fade_s
+	var fade := float(rules["fade_s"])
+	ok(fade >= 3.0 and fade <= 4.0, "the border crossfade is 3-4 s (%.1f s)" % fade)
+	var a: String = AmbBeds.bed_of_region("crown")
+	var b: String = AmbBeds.bed_of_region("lark")
+	Sfx.clear_amb_layers(0.01)
+	var lark: Dictionary = (lay["islands"] as Array).filter(func(d): return d["id"] == "lark")[0]
+	var crown: Dictionary = (lay["islands"] as Array).filter(func(d): return d["id"] == "crown")[0]
+	p_v.pos = Vector3(float(crown["poi"][0]) + 0.5, 0.0, float(crown["poi"][1]) + 0.5)
+	beds.tick(m, p_v)
+	for i in int(fade * 8): Sfx._process(0.125)
+	var full := db_to_linear(-12.0)
+	ok(_lin(a) > 0.45 * full and _lin(b) == 0.0,
+			"Crown bed %s up, Larkhollow's %s not (%.2f / %.2f)" % [a, b, _lin(a) / full, _lin(b) / full])
+	var before := _lin(a)
+	p_v.pos = Vector3(float(lark["poi"][0]) + 0.5, 0.0, float(lark["poi"][1]) + 0.5)
+	beds.tick(m, p_v)
+	for i in int(fade * 4): Sfx._process(0.125)
+	var mid_a := _lin(a)
+	var mid_b := _lin(b)
+	ok(mid_a > 0.0 and mid_a < before and mid_b > 0.0,
+			"mid-fade both sound (%s %.2f -> %.2f, %s %.2f)" % [a, before / full, mid_a / full, b, mid_b / full])
+	for i in int(fade * 4) + 2: Sfx._process(0.125)
+	ok(not Sfx.amb_layers.has(a) and _lin(b) > 0.45 * full,
+			"after %.1f s the old bed is gone and the new one is up (%s %.2f)" % [fade, b, _lin(b) / full])
+	# the Blight: past the tide ring the place beds are quieter, at the Heart they are not
+	var own_heart := m.heart == null      # (this check's match has no clock, so no Heart: give it one for the tide)
+	if own_heart:
+		m.heart = Heart.new(m)
+		m.heart.setup(lay)
+	var t_was := m.time
+	m.time = maxf(m.time, Heart.r("tide_start_s") + 1.0 - m.sess_t0)      # the tide is up
+	if m.heart != null:
+		var site: Vector3 = m.heart.site
+		var near := Vector3(site.x, 0.0, site.z)
+		var far := near + Vector3(Heart.tide_r(m) + 60.0, 0.0, 0.0)
+		var k_in := AmbBeds.blight_share(m, near)
+		var k_out := AmbBeds.blight_share(m, far)
+		var quiet: bool = k_in == 1.0 and absf(k_out - float(rules["blight_k"])) < 0.01 and k_out < 0.5
+		ok(quiet, "in the Blight the place beds drop to %.2f of their level (%.2f at the Heart)" % [k_out, k_in])
+	else:
+		ok(false, "setup: the match has a Heart to read the Blight tide from")
+	m.time = t_was
+	if own_heart:
+		m.heart = null
+	Sfx.clear_amb_layers(0.01)
+
+func _lin(bed: String) -> float:
+	return db_to_linear((Sfx.amb_layers[bed]["p"] as AudioStreamPlayer).volume_db) if Sfx.amb_layers.has(bed) else 0.0
 
 func _ult_chime(m: Match, p_v: Hunter) -> void:
 	var mate: Hunter = null
@@ -390,6 +473,39 @@ func _steps(m: Match, p: Hunter) -> void:
 	Sfx.listener = p.pos
 	ok(not is_nan(own_near) and is_equal_approx(own_near, own_far),
 			"your own step plays at one level wherever the camera is (%.1f / %.1f dB)" % [own_near, own_far])
+	_step_weights(r, p)
+
+
+## One rival per weight class (archer light, dolm medium, ashwick heavy) steps: heavier is lower and louder,
+## on the foot's contact step and the surface step both. Motley (ostra) has no steps to weigh (gait < 0.5).
+func _step_weights(R: Hunter, P: Hunter) -> void:
+	var arch0 := R.arch
+	var got := {}
+	for a in ["archer", "dolm", "ashwick"]:
+		R.arch = a
+		got[a] = [_step_params(R, P, true), _step_params(R, P, false)]
+	R.arch = arch0
+	for i in 2:
+		var l: Vector2 = got["archer"][i]
+		var md: Vector2 = got["dolm"][i]
+		var hv: Vector2 = got["ashwick"][i]
+		var what := "contact" if i == 0 else "surface"
+		ok(l.x > md.x and md.x > hv.x, "%s step pitch: light %.2f > medium %.2f > heavy %.2f" % [what, l.x, md.x, hv.x])
+		ok(l.y < md.y and md.y < hv.y, "%s step level: light %.1f < medium %.1f < heavy %.1f dB" %
+				[what, l.y, md.y, hv.y])
+	ok(KMovesStone.gait("ostra") < 0.5, "Motley floats: no footsteps (gait %.1f)" % KMovesStone.gait("ostra"))
+
+
+## (pitch scale, dB) of one step of R, 10 m from P, from the Sfx.played signal.
+func _step_params(R: Hunter, P: Hunter, contact: bool) -> Vector2:
+	var out := [Vector2.ZERO]
+	var on := func(sname: String, _at, db: float, pitch: float):
+		if sname.contains("step"):
+			out[0] = Vector2(pitch, db)
+	Sfx.played.connect(on)
+	_step_db(R, P, 10.0, contact)
+	Sfx.played.disconnect(on)
+	return out[0]
 
 ## The level (dB) of one step of h placed `d` m from p_v along x (h == p_v: where p_v stands), NAN when nothing played.
 ## contact: the foot's plain step (StepReach.contact), else the surface step (Juice.footstep).
@@ -697,7 +813,10 @@ func _abyss() -> void:
 		ok(glide.find("abyss_whoosh") == 0 and glide.find("abyss_catch") == 1 and not glide.has("abyss_fallout"),
 			"...gliding: whoosh, then the catch %s" % [glide])
 		var hot := _walk(am, p, rim, true, true)
-		ok(hot.find("abyss_catch") == 1 and hot.has("strain"),
+		# the strain loop starts as the lift turns upward (vel.y > 0), a few frames before the catch
+		# sting (vel.y > CATCH_VY), so only the whoosh is first and the order of the other two is free
+		ok(hot.find("abyss_whoosh") == 0 and hot.has("abyss_catch") and hot.has("strain")
+			and not hot.has("abyss_fallout"),
 			"...an overheated glider lifting: the catch and the strain loop %s" % [hot])
 		_teammate(am, other, rim)
 	am.queue_free()

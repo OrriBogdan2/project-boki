@@ -116,6 +116,19 @@ def rifle(i):
     return lpf(out, 9000)
 
 
+def rifle_hold(i):
+    """The rotary cannon's round for the 2nd shot on while LMB is held: the same punch, crack and bolt clack with a
+    60 ms room instead of the 0.2 s one and no brass, so 12 rounds a second rattle instead of smearing."""
+    d = 0.13
+    punch = kick(330 + 15 * i, 105, d, 0.005, 0.015, 2.6) * 0.55
+    snap = crack(d, 1100, 4800 + 200 * i, 0.008) * 2.2
+    mid = crack(d, 260, 1100, 0.013) * 1.8
+    clack = at(ring((1650 + 40 * i, 2480, 3900), 0.05, (0.01, 0.007, 0.004), (0.35, 0.2, 0.08)), 0.012)
+    body = mix(click(0.002, 2500, 7500) * 1.2, punch, snap, mid, clack)
+    room = reflections(tail(0.08, 1900, 0.025) * 0.6, ((0.03, 0.25, 1600), (0.06, 0.12, 1100)))
+    return lpf(mix(body, room), 9000)
+
+
 # ------------------------------------------------------------------ RMB: Burr Charge
 def grenade_thunk():
     """The spiked charge bites into a wall: a hollow steel thunk, the spikes' tick, then the fuse arms."""
@@ -379,6 +392,9 @@ def build():
     S.save_cat("gunslinger_down", down(), "grunt")
     S.save_cat("gunslinger_death", death(), "grunt")
     S.save_cat("vn_coin_flip", coin_flip(), "cast")  # last: the sounds above keep their random stream
+    # held fire (FireSfx): the rounds after a burst's first play these short takes; written after the coin so the
+    # sounds above keep their noise (one seeded generator)
+    S.takes_hold("vn_rifle_hold", rifle_hold, 3, "fire")
 
 
 if __name__ == "__main__":

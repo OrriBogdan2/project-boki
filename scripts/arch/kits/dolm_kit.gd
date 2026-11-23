@@ -392,6 +392,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 				return true
 			lmb_t = 0.0
 		lmb_t += dt
+		# the gauntlet draws back from HOLD_POSE_T into the hold (source 0118: cocked on the hold's first frame), not
+		# at the tap window; the lane, glow and charge still wait for it, and a tap's release throws as before
+		if lmb_t <= float(ld["tap"]): play_hold("breah_wind", lmb_t)
 		if lmb_t > float(ld["tap"]):
 			var k := punch_k()
 			h.mel_hold = k
@@ -494,8 +497,8 @@ func _punch(k: float) -> void:
 		hv = HunterMove.push(Vector2(h.vel.x, h.vel.z), dir, stepv * float(pd["air_k"]))
 	h.vel.x = hv.x
 	h.vel.z = hv.y
-	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
-	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
+	var dmg: float = float(pd["dmg"]) * m.dmg_mult(h)
+	var kb := float(pd["kb"])
 	vfx("punch", h.pos, dir, {"len": float(pd["len"]), "k": k})
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	var swept := sweep_rocks(dir)

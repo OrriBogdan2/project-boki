@@ -91,6 +91,7 @@ const NAMES := [
 	"armor_up",
 	"armor_up_own",
 	"knock_confirm",
+	"knock_warn",
 	"extract_ok",
 	"elim_confirm",
 	"ab_throw",
@@ -145,9 +146,9 @@ const NAMES := [
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
-## The squad cues (you or a squadmate downs or finishes a rival): one dedicated voice, so footsteps and
-## the combat crowd never steal it, and no gap or stack cap thins it.
-const CUES := ["knock_confirm", "elim_confirm"]
+## The squad cues (you or a squadmate downs or finishes a rival, or a squadmate is downed): one dedicated voice, so
+## footsteps and the combat crowd never steal it, and no gap or stack cap thins it.
+const CUES := ["knock_confirm", "knock_warn", "elim_confirm"]
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := [
 	"v_skitter",
@@ -574,11 +575,12 @@ func _stop_layers(fade: float) -> void:
 ## Extra ambience beds on top of the main one (wind over the abyss, ruins, the garden's time-of-day
 ## and pond beds), each faded to a level by where you are; created on first use, freed once faded
 ## to nothing, stopped together by clear_amb_layers.
-var amb_layers := {}  # name -> {p, want}
+var amb_layers := {}  # name -> {p, want, fade}  (fade: seconds from silent to full)
+const AMB_FADE := 2.5
 const MATCH_BEDS := ["abyss", "ruins"]  # MusicDir's beds; other amb_layers are the farm's
 
 
-func amb_layer(name: String, level: float) -> void:
+func amb_layer(name: String, level: float, fade_s := AMB_FADE) -> void:
 	if not amb_layers.has(name):
 		if level <= 0.001 or not ResourceLoader.exists("res://audio/amb_%s.ogg" % name):
 			return
@@ -588,8 +590,9 @@ func amb_layer(name: String, level: float) -> void:
 		p.volume_db = -60.0
 		add_child(p)
 		p.play()
-		amb_layers[name] = {"p": p, "want": 0.0}
+		amb_layers[name] = {"p": p, "want": 0.0, "fade": fade_s}
 	amb_layers[name]["want"] = clampf(level, 0.0, 1.0)
+	amb_layers[name]["fade"] = maxf(fade_s, 0.05)
 
 
 func clear_amb_layers(fade := 1.0) -> void:
@@ -608,7 +611,8 @@ func _process(delta: float) -> void:
 	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
-		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / 2.5)
+		var fade_s: float = float(amb_layers[n].get("fade", AMB_FADE))
+		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / fade_s)
 		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
 		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
 			ap.queue_free()
@@ -631,9 +635,9 @@ var _step_i := 0
 
 
 ## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
-func step(pos = null, vol := -16.0, reach := 0.0) -> void:
+func step(pos = null, vol := -16.0, reach := 0.0, pitch := 1.0) -> void:
 	_step_i = (_step_i + 1) % 3
-	play("step%d" % _step_i, pos, vol, 0.12, 1.0, reach)
+	play("step%d" % _step_i, pos, vol, 0.12, pitch, reach)
 
 
 func has(sname: String) -> bool:

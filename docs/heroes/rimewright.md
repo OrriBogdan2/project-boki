@@ -332,7 +332,7 @@ Verified on origin/main d255acbee against the Neve block of docs/KIT_PARITY.md, 
 |---|---|---|---|
 | Passive: Chill 4 s | Damaging abilities Chill for 4 s | `chill_t` J:53, `add_chill` K:72 | match |
 | Passive: no Chill slow | Owner 11-07: no ours-only riders | Chill sets no slow; asserted `tm passive: Chill is 4 s ... no slow` | match |
-| Passive: Shatter slow | Shatter is damage only (data) | the Shatter burst hurts with `slow 1.2 s, 30%` (K:138) | **open**: ours-only rider, needs K |
+| Passive: Shatter slow | Shatter is damage only (data) | the Shatter burst hurts with `slow 1.2 s, 30%` (K:138) | match; closed `f6c93c7a59` (slow removed from `splinter`; `--rimewright-combo-check` asserts no slow) |
 | Passive: 8 darts Shatter | 8 dart hits on one foe burst | `fan_hits` J:52, K:111-121 | match (damage scaled, 60 vs 529) |
 | Passive: knock Shatter | Chilled foe knocked or minion killed shatters after a beat | K:98-108, delay J `splinter_delay` | match (37 vs 324, scaled) |
 | LMB hold, rhythm | Hold; barrage then 3 larger darts at the end | `burst` 4, `heavy.n` 3, W:28-29; K:190 | match |
@@ -369,4 +369,4 @@ Verified on origin/main d255acbee against the Neve block of docs/KIT_PARITY.md, 
 | Dash-flow source text | Owner: darts home while skating | D:6 said "straight thick beams" | fixed here (text only, no behaviour) |
 | Clips | Footage poses | every `tm_*` kit move has a clip in `claire.json`, 0 fails | match |
 
-Open, not fixed (needs a file an unmerged Neve branch changes): the Shatter slow, K:138. Remove `"slow": 1.2, "slow_k": 0.3` from the `splinter` hit, and assert `foe.slow_t == 0` after a Shatter in `--rimewright-combo-check`. Stale text in files held by other branches: J card `dash` ("your darts fly straight and thick") and the Neve block of docs/KIT_PARITY.md (still "Claire", "15% slow", "straight while skating") are fixed by ext/neve-lmb-celeste and ext/parity-neve-skate-home once merged.
+Shatter slow (K:138): closed `f6c93c7a59`. Stale text in files held by other branches: J card `dash` ("your darts fly straight and thick") and the Neve block of docs/KIT_PARITY.md (still "Claire", "15% slow", "straight while skating") are fixed by ext/neve-lmb-celeste and ext/parity-neve-skate-home once merged.

@@ -2,8 +2,13 @@ extends RefCounted
 ## --inventory-check: the in-match inventory. Gear compares with what you wear (only the changed numbers,
 ## better or worse); equip into a chosen slot, take off, swap gloves and drop to the ground move the right
 ## things and keep stats right; the window labels every slot with its key, shows the hover card, takes a
-## press-and-hold drag (mouse and pad), the Enter and Delete keys, and sits beside an open deathbox. Never
+## press-and-hold drag (mouse and pad), the Enter and Delete keys, and sits beside an open deathbox. A full
+## loadout (2 gloves, armor, boots, 4 utility, 5 perks, a full backpack) at 1280x720, 1920x1080 and 3440x1440:
+## the window inside the safe margin, no text clipped, every slot whole, on screen and clickable. Never
 ## touches the save.
+
+const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(3440, 1440)]
+const PERKS := ["quickhands", "secondwind", "featherfall", "scavenger", "toughskin"]
 
 var bad := 0
 
@@ -26,6 +31,7 @@ func run(main: Node) -> void:
 	_compare(p)
 	_moves(m, p)
 	await _window(main, m, p, q)
+	await _sizes(main, m, p)
 	print("INVENTORY CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -124,6 +130,55 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	ok(worn_id == String(first["id"]), "Enter on a pack piece wears it")
 	m.hud.close_pack()
 	await _beside(main, m, p, q)
+
+## The full loadout window at each of SIZES: where it sits, what clips, and each slot's reach.
+func _sizes(main: Node, m: Match, p: Hunter) -> void:
+	for win: Vector2i in SIZES:
+		main.get_tree().root.size = win
+		await _frames(main, 3)
+		_dress(p)
+		p.perks = PERKS.duplicate()
+		for id in ["medkit", "smoke", "stim", "tonic"]:
+			UtilityBelt.grant(p, id, 2)
+		p.pack = [Loot.gear("vest", 3), Loot.gear("blink", 2), Loot.gear("windstep_boots", 1),
+			Loot.valuable("kin_idol"), Loot.valuable("sky_pearl"), Loot.valuable("old_coin")]
+		p.refresh_gear()
+		m.hud.close_pack()
+		m.hud.toggle_pack()
+		await _frames(main, 6)
+		var pc: PanelContainer = m.hud.pack_panel
+		var vs := pc.get_viewport_rect().size
+		var tag := "%dx%d (logical %s)" % [win.x, win.y, vs]
+		var safe := HudStyle.safe_rect(vs).grow(0.5)
+		var rect := pc.get_global_rect()
+		ok(safe.encloses(rect), "%s: the window %s sits inside the safe margin %s" % [tag, rect, safe])
+		var clipped := SafeArea.clipped(pc)
+		ok(clipped.is_empty(), "%s: no text clipped %s" % [tag, clipped.slice(0, 4)])
+		var lp: LoadoutPanel = pc.find_children("*", "LoadoutPanel", true, false)[0]
+		var slots := {"worn": 0, "belt": 0, "pack": 0}
+		var stray: Array = []
+		for c: Control in lp._drag._slots:
+			var key: Dictionary = lp._drag._slots[c]["key"]
+			var r := SlotDrag._rect(c)
+			var whole: bool = pc.get_global_rect().encloses(r) and _on_screen(vs, _mid(c))
+			if c.mouse_filter == Control.MOUSE_FILTER_IGNORE or not (whole or key["inv"] == "pack"):
+				stray.append("%s %d at %s" % [key["inv"], key["i"], r])
+			slots[key["inv"]] += 1
+		var list := lp._drag._slots.keys().filter(func(c): return lp._drag._slots[c]["key"]["inv"] == "pack")
+		var pane := SlotDrag._rect(list[0].get_parent().get_parent() as Control)      # (a long list scrolls)
+		var listed: bool = pc.get_global_rect().encloses(pane) and _on_screen(vs, pane.end)
+		ok(listed, "%s: the backpack list %s is on screen" % [tag, pane])
+		ok(slots["worn"] == 4 and slots["belt"] == 4 and slots["pack"] >= 6 and stray.is_empty(),
+			"%s: 4 worn, 4 belt, %d pack slots on screen, clickable %s" % [tag, slots["pack"], stray.slice(0, 3)])
+		var orbs: HFlowContainer = pc.find_children("*", "HFlowContainer", true, false)[0]
+		var shown := orbs.get_child_count()
+		ok(shown == PERKS.size(), "%s: all %d perk orbs show (%d)" % [tag, PERKS.size(), shown])
+	m.hud.close_pack()
+	main.get_tree().root.size = SIZES[0]
+	await _frames(main, 2)
+
+func _on_screen(vs: Vector2, at: Vector2) -> bool:
+	return Rect2(Vector2.ZERO, vs).has_point(at)
 
 ## A full pack (6 of 6) at 720p: every line shows without scrolling, one line each, inside the window.
 func _full_pack(main: Node, m: Match, p: Hunter) -> void:

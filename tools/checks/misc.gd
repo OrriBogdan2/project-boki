@@ -13,4 +13,5 @@ const CHECKS := {
 	# parse every kin grammar file (=<root> for another folder)
 	"--grammar-check": ["res://tools/grammar_check.gd", "grammar_check", null],
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
+	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 }

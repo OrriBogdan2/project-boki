@@ -647,6 +647,7 @@ const CHECKS := {
 	# the first two Extractions' guide
 	# the sight wedge first-time hint
 	"--first-time-hint-check": ["res://tools/first_time_hint_check.gd", "first_time_hint_check", null],
+	# every first-time hint shows once per save: three matches with a save and load between
 	"--first-objective-shots": ["res://tools/first_objective_shots.gd", "first_objective_shots", null],
 	"--first-objective-check": ["res://tools/first_objective_check.gd", "first_objective_check", null],
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
@@ -1052,22 +1053,31 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 		printerr("CHECKREGISTRY FAIL: duplicate flags across tools/checks/*.gd and CHECKS: ", _dupes)
 		main.get_tree().quit(1)
 		return true
+	var flag := flag_in(args)
+	if flag == "":
+		return false
+	var e: Array = checks[flag]
+	Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
+	seed(hash(flag))
+	for a in args:
+		if String(a).begins_with("--rng-seed="):
+			seed(int(String(a).substr(11)))
+	var c = load(String(e[0])).new()
+	main.set_meta(String(e[1]), c)
+	if e[2] == null:
+		c.run(main)
+	else:
+		c.run(main, e[2])
+	return true
+
+
+## The first registered check flag on the command line, "" if none (Settings uses it too).
+static func flag_in(args: PackedStringArray) -> String:
+	var checks := all()
 	for flag in checks:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
-			var e: Array = checks[flag]
-			Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
-			seed(hash(flag))
-			for a in args:
-				if String(a).begins_with("--rng-seed="):
-					seed(int(String(a).substr(11)))
-			var c = load(String(e[0])).new()
-			main.set_meta(String(e[1]), c)
-			if e[2] == null:
-				c.run(main)
-			else:
-				c.run(main, e[2])
-			return true
-	return false
+			return flag
+	return ""
 
 
 ## Every check, one lookup: the legacy CHECKS above plus the area files in tools/checks/. A flag present in two

@@ -98,6 +98,7 @@ var grow := 0.0                   # level growth, capped by the expedition tier 
 var melee_n := 0                  # its own melee hits, for "on_hit" triggers
 var low_fired := {}               # on_low_hp triggers already fired this dip
 var brain: KinTactics = null        # how it fights on its own
+var ack_at := 0.0                 # m.time before it answers another command (KinAck)
 var throw_cd := 0.0               # a moment after a recall before it can be thrown again
 var shield := 0.0
 var shield_t := 0.0
@@ -331,6 +332,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 			bark("hesitate")
 		m.sfx(KinVoice.cue(species, "unsure"), owner_h.pos, -4.0, Unique.voice(rec))
 		return
+	KinAck.say(self, "send")
 	if from_shoulder:
 		_launch(p)
 	else:
@@ -389,6 +391,7 @@ func recall() -> void:
 		if cmd == "follow":
 			KinFollow.disengage(self)       # Call back in a fight: it stays with you
 		m.sfx("recall", pos, -6.0)
+		KinAck.say(self, "recall")
 		KinNet.event(m, "recall", self)
 		CombatBus.kin_recalled.emit(self, owner_h)
 		fire_trigger("on_recall", {"at": owner_h.pos})
@@ -784,7 +787,7 @@ func _sim_fly(dt: float) -> void:
 				m.sfx("kinhit", pos, 0.0)
 				m.fx.burst(pos, sp["color"], 14, 4.0)
 				if owner_h and owner_h.is_local():
-					m.freeze_frame(0.06)
+					m.freeze_frame(ImpactWeight.hold_s(ImpactWeight.of_boki(true)))
 				target = f
 	if k >= 1.0:
 		var land: Array = fly.get("land", [])
@@ -1109,7 +1112,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		shield -= soak
 		d -= soak
 		if d <= 0.0:
-			flash_t = 0.08
+			flash_t = ImpactWeight.flash_s("")
 			return 0.0
 	return super.hurt(d, by, opts)
 

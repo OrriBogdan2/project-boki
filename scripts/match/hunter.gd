@@ -536,7 +536,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if downed:
 		return Life.wisp_hit(self, by, dmg, opts)
 	var d_in := d
-	d = MergeShell.absorb(self, d, opts)         # a merged form's shell takes the hit first (docs/decisions/0003)
+	d = MergeShell.absorb(self, d, opts, by)         # a merged form's shell takes the hit first (docs/decisions/0003)
 	var shelled := false
 	if d <= 0.0:
 		if d_in <= 0.0:
@@ -547,10 +547,10 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		var a := minf(shield, d)
 		shield -= a; d -= a
 		ShieldSfx.hit(self, a)
+		SoakNumber.at(self, by, a, HudStyle.NUM_SHIELD)       # what the shield took, in its own look
 		if shield <= 0.0: shield_kind = ""
 		if d <= 0.0:
 			flash_t = 0.06
-			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
 			return 0.0
 	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
@@ -576,6 +576,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		# your kin's owner shield soaks last; a fully soaked hit still counts as a hit (truces, interrupts)
 		var ks0 := minf(kin_shield, d)
 		kin_shield -= ks0
+		SoakNumber.at(self, by, ks0, HudStyle.NUM_SHIELD)
 		d = maxf(0.01, d - ks0)
 		opts["soaked"] = ks0
 	return d
@@ -2363,11 +2364,11 @@ var gear_cd: Array = [0.0, 0.0, 0.0, 0.0]
 
 # ---- run levels: like Supervive, you start each run at level 1 with one skill point and every
 # ability locked. XP comes from knocks and lair bosses, never from time or from damage; each level gives a
-# point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9).
+# point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9, rank 3 at 10).
 const XP_TO := [0.0, 70.0, 170.0, 300.0, 460.0, 650.0, 870.0, 1120.0, 1400.0, 1710.0]   # total XP to reach level i+1
 const SLOTS := ["sec", "dash", "kin", "ult"]                  # the hero's own abilities; gloves never rank (Gloves)
-const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 2}
-const ULT_AT := [6, 9]
+const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 3}
+const ULT_AT := [6, 9, 10]          # run level each R rank opens at (0022)
 var lvl := 1
 var xp := 0.0
 var skill_pts := 1
@@ -2429,11 +2430,11 @@ func level_slot(slot: String) -> bool:
 func _bot_spend() -> void:
 	var order := ["sec", "dash", "kin", "sec", "kin", "dash", "sec", "kin", "dash"]
 	if ak:
-		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens (and
-		# any "gear" left in it: gloves don't rank)
+		# the archetype's recommended order (ARCHETYPES §6) without the R (ranks 1-2 as they open, rank 3 once
+		# every slot is rank 2) or any "gear" left in it (gloves don't rank)
 		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult" and SLOT_MAX.has(x)) + ["kin", "dash", "sec"]
 	while skill_pts > 0:
-		if can_level("ult"):
+		if can_level("ult") and (int(slot_lv["ult"]) < 2 or SLOTS.all(func(s): return int(slot_lv[s]) >= 2)):
 			level_slot("ult"); continue
 		var done := false
 		# follow the order as a list of ranks (sec 1, dash 1, kin 1, gear 1, sec 2, ...), so every slot

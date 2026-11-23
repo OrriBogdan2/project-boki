@@ -59,6 +59,10 @@
    "Press %M to summon %s"
   ],
   [
+   "steal",
+   "Hold %K to grab the loose wisp"
+  ],
+  [
    "pack",
    "Beat the pack, and summon when the ring is bright"
   ],
@@ -116,6 +120,7 @@
   "summon_warn": "Almost time. %s is getting tired.",
   "summon_back": "Back to a light. %s rests now.",
   "summon_knocked": "%s got beaten and flew back to you. It needs a longer rest.",
+  "steal": "A Hunter's Boki scatters when they go down: hold %F beside it to make it yours.",
   "pack": "A dim light means %s rests (%B seconds); bright means ready",
   "glove": "Gloves need no points; %Q uses this one.",
   "hook": "It shoots from afar, and your glove drags it to your feet.",
@@ -129,6 +134,7 @@
   "sec_hold": "Tap, then hold %K, to use %A",
   "summon_out": "%s is out for %D seconds",
   "summon_rest": "%s is resting",
+  "steal_got": "It rides with you now: %M brings it out while yours rests",
   "summon_early": "That calls it back early: let it stay",
   "pack_wait": "Wait for the bright ring, then press %M",
   "shoot_draw": "Hold %K to draw, let go to loose",
@@ -143,6 +149,7 @@
   "shoot": "Back at your last stop. Fight with solid ground behind you",
   "gkey": "Back at your last stop. Tap %T and let %s go in first",
   "summon": "Back at your last stop. Press %M and let %s out first",
+  "steal": "Back at your last stop. Hold %K beside the loose wisp",
   "pack": "Back at your last stop. Fight with solid ground behind you",
   "kin": "Back at your last stop. Line them up, then use %A",
   "hook": "Back at your last stop. Hook the Sentinel with %Q from afar"
@@ -165,6 +172,7 @@
   "wallkick": "Climb",
   "crouch": "Lookout",
   "glove": "Glove",
+  "steal": "Wisp",
   "wayout": "Uplink",
   "uplink": "Uplink",
   "defend": "Outpost",

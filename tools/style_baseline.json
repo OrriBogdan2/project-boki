@@ -577,10 +577,6 @@
 "nested_ternary": 1,
 "semicolon": 19
 },
-"scripts/match/ruin_walls_v1.gd": {
-"long_line": 8,
-"semicolon": 11
-},
 "scripts/match/sky_deco.gd": {
 "semicolon": 4
 },

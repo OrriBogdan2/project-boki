@@ -1162,7 +1162,6 @@ func a0_of(isl: int) -> float:
 
 # ------------------------------------------------------------------ meshes
 const RuinWalls := preload("res://scripts/match/ruin_walls.gd")
-const RuinWallsV1 := preload("res://scripts/match/ruin_walls_v1.gd")     # the first art pass (--art1)
 const SkyDeco := preload("res://scripts/match/sky_deco.gd")
 const Landmarks := preload("res://scripts/match/landmarks.gd")
 var landmarks = null
@@ -1633,7 +1632,7 @@ func _decorate() -> void:
 			wlist = _mesh_cache[wkey]
 		else:
 			var keep := _visual_seed_begin()
-			var rw = RuinWalls.new(self) if Flora.v2() else RuinWallsV1.new(self)
+			var rw = RuinWalls.new(self)
 			_visual_seed_end(keep)
 			for wmi in await rw.build(wall_mat):
 				wlist.append([String(wmi.name), (wmi as MeshInstance3D).mesh])
@@ -2183,7 +2182,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		var poi := GroundShapes.v2(D.get("poi", [cen.x, cen.y]))
 		islands.append({"c": cen, "r": sqrt(cells.size() / PI), "base": 0, "cells": cells, "role": String(D.get("role", "grove")),
 			"form": "authored", "fdir": Vector2.RIGHT, "name": String(D.get("name", "")), "id": String(D["id"]),
-			"region_fixed": int(D.get("region", 0)), "poi_at": poi, "drop": bool(D.get("drop", false)), "sheer_arcs": D.get("sheer", []),
+			"region_fixed": int(D.get("region", 0)), "poi_at": poi, "drop": bool(D.get("drop", false)), "sheer_arcs": D.get("sheer", []), "sheer_cliffs": D.get("sheer_cliffs", false),
 			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", []), "landmark": D.get("landmark")})
 		if String(D.get("biome", "")) != "":
 			var bj := load_biome(String(D["biome"]))
@@ -2283,6 +2282,8 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		await _slice()
 		var arcs: Array = islands[ii].get("sheer_arcs", [])
 		var cen2: Vector2 = islands[ii]["c"]
+		if islands[ii].get("sheer_cliffs", false):
+			GroundShapes.sheer_cliffs(self, islands[ii]["cells"])
 		for cell in islands[ii]["cells"]:
 			var i := idx(cell.x, cell.y)
 			if neck.has(i) and kind[i] != T_VOID and edge_dist(cell.x, cell.y, 1) != 1:
