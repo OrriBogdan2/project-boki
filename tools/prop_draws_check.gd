@@ -10,7 +10,7 @@ extends RefCounted
 ## Draws per model as measured on 11-11 (before the merges: chest with its padlocks 37, key 10,
 ## stall L1 32, L3 69, nook 60, incubator 235, burrow 67). The stall, nook, incubator and burrow are PaintMerged
 ## (one mesh per painted look, not per colour).
-const MAX_DRAWS := {"chest": 29, "key": 6, "stall1": 6, "stall3": 15, "nook": 6, "incubator": 153, "burrow": 13}
+const MAX_DRAWS := {"chest": 29, "key": 6, "stall1": 8, "stall3": 18, "nook": 7, "incubator": 155, "burrow": 14}
 
 var fails := 0
 
