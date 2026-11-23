@@ -127,5 +127,10 @@
 		"line": "kerchick",
 		"stage": 3,
 		"from": "jibbatross"
+	},
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

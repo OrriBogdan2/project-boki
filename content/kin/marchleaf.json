@@ -116,5 +116,10 @@
 		"art": "todo",
 		"line": "marchleaf",
 		"stage": 1
+	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }
