@@ -7,5 +7,7 @@ extends RefCounted
 const CHECKS := {
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
 	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # solos and the play space (0084)
+	"--drop-merge-audit": ["res://tools/drop_merge_check.gd", "drop_merge_check", "audit"],  # ground audit, not gated
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
+	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
 }
