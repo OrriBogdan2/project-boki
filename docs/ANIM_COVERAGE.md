@@ -120,11 +120,7 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | zephyrak | clip | clip | clip | clip | clip | clip | clip | clip |
 | casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
 | duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
-| floenatee | shared | shared | shared | shared | shared | shared | proc | proc |
-| gibbelle | shared | shared | shared | shared | shared | shared | proc | proc |
-| glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
-| goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
 | heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
 | kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
 | limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -146,6 +142,9 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | pebbit | clip | clip | clip | clip | clip | clip | proc | proc |
 | wisplet | clip | clip | clip | clip | clip | clip | proc | proc |
 | caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
+| floenatee | clip | clip | clip | clip | clip | clip | proc | proc |
+| gibbelle | clip | clip | clip | clip | clip | clip | proc | proc |
+| glaciyak | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
 | kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
