@@ -139,18 +139,18 @@ Cinderstep is the busiest zone (most emitters and draws in the earlier tables). 
 lines are judged at 9 Boki only), `--bench-isolate` (`tools/perf/garden_isolate.gd`). Frame p50 / p95 ms, UI shown
 (the part's own `BENCH <part> frames:` line):
 
-| part | Medium before | Medium after | Low before | target |
-|---|---|---|---|---|
-| hub | 11.8 / 13.7 | 12.2 / 15.6 | 11.5 / 15.1 | 16.7 (60 fps) |
-| Cinderstep 10 Boki | 17.9 / 22.1 | 19.2 / 22.9 | 17.3 / 20.8 | 16.7 medium, 33 low |
-| Cinderstep 20 Boki | 26.7 / 30.1 | 24.5 / 30.8 | 26.4 / 30.4 | same |
-| Cinderstep 30 Boki | 34.9 / 39.4 | 30.3 / 37.2 | 33.4 / 39.4 | same |
+| part | Medium before | Medium after | Low before | Low after | target |
+|---|---|---|---|---|---|
+| hub | 11.8 / 13.7 | 12.2 / 15.6 | 11.5 / 15.1 | 11.7 / 15.6 | 16.7 (60 fps) |
+| Cinderstep 10 Boki | 17.9 / 22.1 | 19.2 / 22.9 | 17.3 / 20.8 | 18.2 / 22.3 | 16.7 medium, 33 low |
+| Cinderstep 20 Boki | 26.7 / 30.1 | 24.5 / 30.8 | 26.4 / 30.4 | 23.8 / 29.1 | same |
+| Cinderstep 30 Boki | 34.9 / 39.4 | 30.3 / 37.2 | 33.4 / 39.4 | 29.1 / 34.8 | same |
 
 Before = origin/main 05d78b9e87 (jobq 20261123-090432-27983 medium, 20261123-090449-14296 low); after = this branch
-(20261123-094722-00163 medium). Draws at 10 / 20 / 30 Boki: 472 / 552 / 634 (Medium, with UI).
+(20261123-094722-00163 medium, 20261123-094722-03959 low). Draws at 10 / 20 / 30 Boki: 472 / 552 / 634 (Medium, with UI).
 
 Verdict: **over target.** Medium misses 60 fps at 10 Boki already (about 18-19 ms) and reaches about 33 fps at 30;
-Low meets 30 fps only up to 20 Boki and sits at the line at 30 (33-34 ms). The hub is fine. The numbers are CPU-bound:
+Low meets 30 fps at 10, 20 and (after) 30 Boki (29.1 ms p50, p95 34.8; before 33.4 / 39.4). The hub is fine. The numbers are CPU-bound:
 Medium and Low are within 1-2 ms of each other and the GPU time is 2-6 ms.
 
 Run noise on this pod is large: the same scene in "as is" drifts 2-3 ms inside one run, and runs differ by 1-3 ms, so
