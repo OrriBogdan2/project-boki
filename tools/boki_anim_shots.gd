@@ -10,6 +10,8 @@ extends RefCounted
 ## --video instead: a state tour per --boki id (idle, a stroll, a run at its match speed, stop, attack, hit, faint,
 ## revive, a trot), side view over the floor bars, one jpg a 1/30 s in <dir>/<id>_<tag>/NNNN.jpg for
 ## `ffmpeg -framerate 30 -i %04d.jpg` (jobq returns the out dir, not a movie).
+## --clips instead (a contact sheet per --boki id): one row a clip (CLIP_ROWS), FRAMES poses evenly across its loop at
+## a three-quarter front view, played in place; <dir>/<id>_clips_<tag>.png.
 ## For a before strip, run the same tool on the old tree. Needs a renderer.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
@@ -17,6 +19,9 @@ const DT := 1.0 / 30.0
 const WARM_S := 0.8
 const WANDER := 2.4             # m/s: a home wander (home.gd); the second row is the species' match speed
 const FRAMES := 8
+const CLIP_ROWS := ["idle", "walk", "run", "attack", "cast", "hop", "sleep"]
+const CLIP_CAM := Vector3(0.75, 0.45, -1.15)    # m from the Boki: its front quarter, a little above
+const CLIP_BACK := {"tuatrune": 1.2, "threadwyrm": 1.5, "velvorm": 2.0}      # x CLIP_CAM, for a bigger body
 const FRAME_S := 0.1             # s between the frames of a strip
 const PX := 256
 const POST_SPACING := 0.4        # m between floor posts
@@ -45,12 +50,14 @@ func run(main: Node) -> void:
 	var seams: Array = []
 	var bred: Array = []
 	var video := false
+	var clips := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bred="): bred = Array(a.substr(7).split(",", false))
 		if a.begins_with("--seam="): seams = Array(a.substr(7).split(",", false))
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--boki="): ids = Array(a.substr(7).split(",", false))
 		if a == "--video": video = true
+		if a == "--clips": clips = true
 		if a.begins_with("--tag="): tag = a.substr(6)
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
@@ -68,6 +75,13 @@ func run(main: Node) -> void:
 			var what := String(seams[mini(i, seams.size() - 1)])
 			var row: Image = await _seam(shots, String(ids[i]), what)
 			row.save_png(out.path_join("%s_%s_%s.png" % [ids[i], what, tag]))
+		print("BOKI_ANIM_SHOTS_DONE ", ids.size())
+		main.get_tree().quit()
+		return
+	if clips:
+		for id in ids:
+			var sheet: Image = await _clips(shots, String(id))
+			sheet.save_png(out.path_join("%s_clips_%s.png" % [id, tag]))
 		print("BOKI_ANIM_SHOTS_DONE ", ids.size())
 		main.get_tree().quit()
 		return
@@ -125,6 +139,40 @@ func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, ro
 			img.convert(Image.FORMAT_RGBA8)
 			sheet.blit_rect(img, Rect2i(0, 0, PX, PX), Vector2i((f / steps) * PX, row * PX))
 	k.queue_free()
+
+## A contact sheet of the rig's clips: a row each, FRAMES poses evenly across the loop, front quarter.
+func _clips(shots: Shots, id: String) -> Image:
+	var vp: SubViewport = shots._stage(Vector2i(PX, PX))
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.make_current()
+	cam.fov = 26.0
+	var label := Label.new()
+	label.add_theme_font_size_override("font_size", 20)
+	vp.add_child(label)
+	var k := Shots.rigged_kin(id)
+	vp.add_child(k)
+	k.position = Vector3.ZERO
+	cam.position = CLIP_CAM * float(CLIP_BACK.get(id, 1.0))
+	cam.look_at(Vector3(0, 0.3, 0))
+	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+	rig.set_process(false)
+	rig.player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	var sheet := Image.create(PX * FRAMES, PX * CLIP_ROWS.size(), false, Image.FORMAT_RGBA8)
+	for row in CLIP_ROWS.size():
+		var clip: String = CLIP_ROWS[row]
+		label.text = "%s %s" % [id, clip]
+		rig.clip = ""
+		rig.set_clip(clip, 0.0)
+		var dur := rig.player.get_animation(clip).length
+		for f in FRAMES:
+			rig.player.seek(dur * f / float(FRAMES), true)
+			rig.advance(0.0)
+			var img: Image = await shots._grab(vp)
+			img.convert(Image.FORMAT_RGBA8)
+			sheet.blit_rect(img, Rect2i(0, 0, PX, PX), Vector2i(f * PX, row * PX))
+	vp.queue_free()
+	return sheet
 
 ## Parent a, parent b and their seeded hatchling in a line, side view, standing still.
 func _bred(shots: Shots, parents: Array) -> Image:

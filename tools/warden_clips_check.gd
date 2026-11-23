@@ -16,6 +16,10 @@ const WHIRL_TOL := 0.05         # m (neutral): BjornFx's whirl trail runs this c
 const PREFIX := {"breaker": ["bulwark", "bul_"], "tarek": ["dolm", "breah_"]}
 const SKIP := ["bul_smash_late"]
 const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
+const HEAVY_LAND := ["gunslinger", "juggernaut", "archer", "ashwick"]   # Vex, Kael, Lace, Cinder (Arch ids)
+const FALL_H := [1.0, 3.2, 6.0, 12.0]   # m fallen: a hop, a terrace drop, a long drop, a dive's plunge
+const DIVE_BACK := 10           # frames a plunge may be up later than a drop (its dive settles at 0.8 x)
+const LAND_DEEPER := 0.015       # m (model): a 6 m fall's crouch is at least this deeper than a terrace drop's
 const AIR_FRAMES := 20          # frames of each air cast checked
 
 var bad := 0
@@ -33,13 +37,45 @@ func run(main: Node) -> void:
 	main.add_child(holder)
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
+	_moveless_clips()
 	_companions()
 	_finishers()
 	for id in Arch.ORDER:
 		_air_legs(String(id))
+	for id in HEAVY_LAND:
+		_heavy_land(String(id))
 	bad += WardenStatesCheck.new().run(holder)
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Clips a Hunter's GLB carries that no kit move plays, with why they stay (the known-unused list). Each one is in the
+## GLB, is mapped by no kmove, and is still held by the named user (so it can't rot into a silent orphan).
+## ostra flurry: authored for owner item 136's 8-card RMB flurry; DECISIONS 11-07 (parity first) put the source's Snap
+## back and no data/wiki/footage beat is a card volley, so no move plays it. The results stage holds it as his pose.
+const MOVELESS := {"ostra": {"flurry": "results_pose"}}
+
+func _moveless_clips() -> void:
+	var poses: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/results_pose.json"))
+	for id in MOVELESS:
+		var cfg := WardenClips.data(String(id))
+		var hid := String(id)
+		var m := Models.hunter(Arch.weight(hid), Data.TEAM_COLORS[0], Arch.signature(hid), "",
+			PlayerLook.neutral(), hid)
+		holder.add_child(m)
+		var w := m.get_node_or_null("Warden")
+		var clips: WardenClips = (w.get_node("Sync") as WardenGlb.Sync).clips if w else null
+		ok(clips != null and clips.lib != null, "%s: clip tree built for the known-unused clips" % id)
+		if clips == null or clips.lib == null:
+			continue
+		for clip in MOVELESS[id]:
+			ok(clips.lib.has_animation(String(clip)), "%s: known-unused clip %s is in the .glb" % [id, clip])
+			var played_by: Array = []
+			for k in cfg["kmoves"]:
+				if String((cfg["kmoves"][k] as Dictionary)["clip"]) == clip:
+					played_by.append(k)
+			ok(played_by.is_empty(), "%s: no kmove plays %s any more (%s)" % [id, clip, str(played_by)])
+			ok(String((poses.get(id, {}) as Dictionary).get("clip", "")) == clip,
+				"%s: %s is still his results pose (%s), else cut it from the list" % [id, clip, MOVELESS[id][clip]])
 
 func _hunter(art_name: String, id: String, prefix: String) -> void:
 	var cfg := WardenClips.data(art_name)
@@ -407,6 +443,75 @@ func _air_legs(id: String) -> void:
 	ok(snaps.is_empty(), "%s: landing mid-cast keeps the legs off the planted stance (%s)" % [id, str(snaps)])
 	for p in pair:
 		p[0].free()
+
+## One landing: two identical bodies run the same frames (the same idle and gait stream), one falling `h` metres and
+## landing, the other held on the ground. The hips of the first, under the second's, are the crouch.
+## Returns the deepest it goes (m) and the last frame it is more than 1 cm off the control.
+func _land_probe(id: String, h: float, moving: bool) -> Dictionary:
+	var pair: Array = []
+	for i in 2:
+		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+		m.set_meta("anim_seed", 1)
+		holder.add_child(m)
+		pair.append([m, HunterAnim.new(m), m.get_node("Warden/Sync") as WardenGlb.Sync])
+	var sk := WardenGlb.skeleton(pair[0][0].get_node("Warden"))
+	var hips := WardenSkeleton.find(sk, "hips")
+	var sk_c := WardenGlb.skeleton(pair[1][0].get_node("Warden"))
+	var run := Vector3(0, 0, -4.8) if moving else Vector3.ZERO
+	var ground := {"vel": run, "face": 0.0, "grounded": true}
+	var fall := {"vel": run + Vector3(0, -sqrt(2.0 * Hunter.H_GRAV * h), 0), "face": 0.0, "grounded": false}
+	for p in pair:
+		_play(p[0], p[1], p[2], ground, 90)
+	for f in 20:
+		_play(pair[0][0], pair[0][1], pair[0][2], fall, 1)
+		_play(pair[1][0], pair[1][1], pair[1][2], ground, 1)
+	var deep := 0.0
+	var back := 0
+	for f in 90:
+		for p in pair:
+			_play(p[0], p[1], p[2], ground, 1)
+		var d := sk_c.get_bone_global_pose(hips).origin.y - sk.get_bone_global_pose(hips).origin.y
+		deep = maxf(deep, d)
+		if absf(d) > 0.01:
+			back = f + 1
+	for p in pair:
+		p[0].free()
+	return {"deep": deep, "back": back}
+
+## Vex, Kael, Lace and Cinder: the landing grows with the fall. A 6 m drop (13.3 m/s) crouches deeper than a
+## terrace drop, and a hop less; the heavy one never owns the body longer than the terrace drop's crouch does (the
+## source: no input lock on a landing, so only the pose is heavier, never the control).
+func _heavy_land(id: String) -> void:
+	var cfg := WardenClips.data(WardenGlb.art(id))
+	var lnd: Dictionary = cfg.get("land", {})
+	for moving in [false, true]:
+		var r := {}
+		for h in FALL_H:
+			r[h] = _land_probe(id, h, moving)
+		var tag := "moving" if moving else "standing"
+		print("CLIPS land %s %s: deep (m) %s, back (frames) %s" % [id, tag,
+				FALL_H.map(func(h): return "%.3f" % float(r[h]["deep"])),
+				FALL_H.map(func(h): return int(r[h]["back"]))])
+		var d1 := float(r[1.0]["deep"])
+		var d3 := float(r[3.2]["deep"])
+		var d6 := float(r[6.0]["deep"])
+		var d12 := float(r[12.0]["deep"])
+		var b3 := int(r[3.2]["back"])
+		var b6 := int(r[6.0]["back"])
+		var b12 := int(r[12.0]["back"])
+		ok(d1 < d3, "%s %s: a hop crouches less than a terrace drop" % [id, tag])
+		ok(d6 >= d3 + LAND_DEEPER, "%s %s: a 6 m fall crouches deeper than a 3.2 m drop (%.3f vs %.3f m)" % [
+				id, tag, d6, d3])
+		ok(d12 >= d6 - 0.001, "%s %s: a 12 m plunge is no shallower than 6 m" % [id, tag])
+		if not moving:   # (the run's own stride keeps the hips off the control: frames only count standing)
+			ok(b6 <= b3 + 1, "%s: a 6 m fall is up again no later than the drop (%d vs %d frames)" % [id, b6, b3])
+			ok(b12 <= b3 + DIVE_BACK, "%s: a 12 m plunge is up within %d frames of the drop (%d vs %d)" % [
+					id, DIVE_BACK, b12, b3])
+	var hv: Dictionary = lnd.get("heavy", {})
+	var dr: Dictionary = lnd.get("drop", {})
+	ok(float(hv.get("deep", 0.0)) > 0.0 and float(hv.get("dur", dr["dur"])) <= float(dr["dur"]) \
+			and float(hv.get("moving", dr["moving"])) <= float(dr["moving"]),
+			"%s: the heavy landing's hold (%s) is no longer than the terrace drop's (%s)" % [id, str(hv), str(dr)])
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:
