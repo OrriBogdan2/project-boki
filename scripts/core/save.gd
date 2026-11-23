@@ -560,7 +560,12 @@ static func _tool_run() -> bool:
 				return true
 	return false
 ## Checks that play on a copy of the save (they used to be listed in main.gd).
-const NO_SAVE_FLAGS := ["--archetype-check", "--kit-combo-check", "--mage-combo-check", "--gunslinger-combo-check", "--zone-check", "--dolm-combo-check", "--ostra-combo-check", "--hero-combo-check", "--archer-combo-check", "--bulwark-combo-check", "--arena-check", "--dredge-combo-check", "--ashwick-combo-check"]
+const NO_SAVE_FLAGS := [
+	"--archetype-check", "--kit-combo-check", "--mage-combo-check", "--gunslinger-combo-check",
+	"--zone-check", "--dolm-combo-check", "--ostra-combo-check", "--hero-combo-check",
+	"--archer-combo-check", "--bulwark-combo-check", "--arena-check", "--dredge-combo-check",
+	"--ashwick-combo-check"
+]
 var newer := false            # the slot holds a save from a newer game: never overwrite it
 
 func save_game() -> void:
