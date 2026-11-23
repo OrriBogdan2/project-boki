@@ -132,6 +132,12 @@ static func fits(text: String) -> bool:
 	return words(text) <= int(tuning("max_words")) and one_sentence(text)
 
 
+## Forgets every Boki's last lines and cooldowns (a check that plays several runs in one process starts each clean).
+static func reset() -> void:
+	_recent.clear()
+	_quiet_until.clear()
+
+
 ## A line from the pool this Boki hasn't said lately; if it said them all, the one it said longest ago.
 static func _fresh(boki_id: String, pool: Array) -> String:
 	var recent: Array = _recent.get(boki_id, [])

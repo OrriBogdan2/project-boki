@@ -12,7 +12,20 @@ static func line(k: Kin, trigger_id: String) -> String:
 		t = "revive_low"
 	var stage := Care.speech(k.rec) if k.rec.size() > 0 else 3
 	var id := String(k.rec.get("uid", "kin%d" % k.get_instance_id()))
-	return BokiLines.line(id, t, k.species, stage, -1.0, k.lines.get(t, []))
+	return BokiLines.line(id, t, k.species, stage, clock(k), k.lines.get(t, []))
+
+
+## The clock a Boki's line cooldown runs on in a match: the match's own time, set level with the wall clock at its
+## first line (so a cooldown begun on the farm carries on). A pause or a check that steps a match faster than real
+## time then waits game seconds, not real ones (on the wall clock --tutorial-dead-air-check's stepped course heard
+## its Boki by how loaded the box was).
+static func clock(k: Kin) -> float:
+	var mt = k.m.get("time") if k.m != null else null
+	if not (mt is float):
+		return -1.0
+	if not k.m.has_meta("chat_t0"):
+		k.m.set_meta("chat_t0", Time.get_ticks_msec() / 1000.0 - float(mt))
+	return float(k.m.get_meta("chat_t0")) + float(mt)
 
 
 ## Says a trigger's line over the Boki, if it has one to say right now (inside a Fusion it's quiet).
