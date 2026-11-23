@@ -302,6 +302,7 @@ func tier_up(h: Hunter, tier: int) -> void:
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
+	last_voice = -1
 	var k := float(o.get("k", 0.0))
 	for s: Dictionary in rec.get("sfx", []):
 		if not _wanted(s, o):
@@ -315,7 +316,7 @@ func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
 		if delay > 0.0:
 			m.later(delay, Sfx.play.bind(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch))
 		else:
-			Sfx.play(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch)
+			last_voice = Sfx.play(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch)
 
 
 static func _wanted(entry: Dictionary, o: Dictionary) -> bool:

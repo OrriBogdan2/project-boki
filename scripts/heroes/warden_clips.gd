@@ -52,6 +52,8 @@ const RECOIL_DECAY := 3.0    # e-folds over the data's "settle" (the kick is dow
 ## Bone -> its share of the kick: the gun arm, the support arm, the shoulder pieces (the HunterAnim PAD_FOLLOW)
 const RECOIL_BONES := {"upper_arm.R": 1.0, "upper_arm.L": 0.7, "pauldron.R": 0.55, "pauldron.L": 0.55}
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
+const STOP_RATE := 5.0       # 1/s: how fast the loco blend falls back as he slows ("loco.stop_rate"): 80 % by 0.2 s
+const CROUCH_RATE_MIN := 0.7 # the sneak clip's slowest rate while he holds a move
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 const SET_OFF_STILL := 0.3   # s standing before a start counts as setting off: the walk ring has faded out by then
 static var _data := {}       # art name -> its parsed file ({} when it has none)
@@ -1099,6 +1101,19 @@ func _ease_start(dt: float) -> void:
 	for b in start_bones:
 		skel.set_bone_pose_rotation(b[0], (b[1] as Quaternion).slerp(skel.get_bone_pose_rotation(b[0]), k))
 
+## A blend position eased toward `goal`: at `rate` (1/s) as he speeds up, at "loco.stop_rate" as he slows to a stand.
+func _ease(pos: Vector2, goal: Vector2, rate: float, dt: float) -> Vector2:
+	if goal.length() < pos.length():
+		rate = float(d["loco"].get("stop_rate", STOP_RATE))
+	return pos.lerp(goal, 1.0 - exp(-dt * rate))
+
+## How much of a blend is out of the idle, for the clip rate: 1 while he holds a move, 0 standing, and as much as is
+## still out (`out` over `ring`, its walk ring) while the blend falls back to `goal` as he stops.
+func _out_of_idle(out: float, ring: float, goal: float, spd: float) -> float:
+	if goal < out:
+		return minf(out / ring, 1.0)
+	return 1.0 if spd >= STILL else 0.0
+
 ## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
 ## Grounded ("gnd") holds it low for as long as the cords do.
 func _crouch(s: Dictionary, dt: float) -> void:
@@ -1148,6 +1163,8 @@ func _crouch(s: Dictionary, dt: float) -> void:
 	var speed := float(cr.get("speed", 2.4))
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var pos := Vector2(dir.dot(rt), dir.dot(fw)) * clampf(spd / speed, 0.0, 1.0) if spd >= STILL else Vector2.ZERO
-	crouch_pos = crouch_pos.lerp(pos, 1.0 - exp(-dt * 12.0))
+	crouch_pos = _ease(crouch_pos, pos, 12.0, dt)
 	_p("crouch_loco/blend_position", crouch_pos)
-	_p("crouch_rate/scale", clampf(spd / speed, 0.7, CROUCH_RATE_MAX) if spd >= STILL else 1.0)
+	var moving := _out_of_idle(crouch_pos.length(), 1.0, pos.length(), spd)
+	var rate := clampf(spd / maxf(speed * moving, 0.01), CROUCH_RATE_MIN * moving, CROUCH_RATE_MAX)
+	_p("crouch_rate/scale", WardenGait.follow(rate, moving))

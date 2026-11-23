@@ -68,6 +68,10 @@ var ult: GunslingerUlt         # Cinderfall, her ultimate on X
 var commit_end := 0.0          # match time her committed recovery ends (E after the beam)
 var x_wind_end := 0.0          # match time the ult's short wind-up ends (GunslingerUlt.WINDUP): slowed, never rooted
 
+## One plain dash with one cooldown (Vex's Slipstep): no charge pips, no Second Wind.
+func single_dash() -> bool: return true
+
+
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
 	last_shot = h.shot_n           # a round fired before she took the kit (another hero's) is not hers
@@ -302,8 +306,6 @@ func _faded_now() -> float:
 	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
 
 # ------------------------------------------------------------------ dash: Slipstep
-func single_dash() -> bool: return true
-
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if use_ex and h.dashes >= 1.0 and not h.grounded:
@@ -658,7 +660,7 @@ func cast_e() -> bool:
 	var ed := e_def()
 	needle = {"t": 0.0, "dir": h.aim_dir(), "push": _push_want()}
 	e_t = float(ed["charge"]) + 0.1
-	m.sfx("vn_ion_charge", h.pos, -3.0)
+	KitWindup.play(self, "e", "vn_ion_charge", -3.0)
 	play("gunslinger_e")
 	return true
 
@@ -687,6 +689,7 @@ func _tick_needle(dt: float) -> void:
 	needle["t"] = float(needle["t"]) + dt
 	if h.downed or h.stun_t > 0.0:
 		_end_needle()
+		KitWindup.broken(self, "e")
 		return
 	_turn_needle(dt)
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)
