@@ -135,14 +135,10 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
 | scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
 | sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
-| spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
-| squalltross | shared | shared | shared | shared | shared | shared | proc | proc |
-| threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
-| tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
-| velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| spatewader | shared | clip | clip | shared | shared | shared | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
 | burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -161,8 +157,12 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
+| squalltross | clip | clip | clip | clip | clip | clip | proc | proc |
+| threadwyrm | clip | clip | clip | clip | clip | clip | proc | proc |
 | thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
+| tuatrune | clip | clip | clip | clip | clip | clip | proc | proc |
 | umbrathere | clip | clip | clip | clip | clip | clip | proc | proc |
+| velvorm | clip | clip | clip | clip | clip | clip | proc | proc |
 | cairnback | clip | clip | clip | clip | clip | clip | proc | proc |
 | hivara | clip | clip | clip | clip | clip | clip | proc | proc |
 | zephyrak | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -214,6 +214,12 @@ Worst five, backlog-ready:
    owns the body through the 0.17 s dash and its spin (0.73 s); Meeko's skip (0.233 s) spans her 0.22 s hop; Grimble's
    lunge holds through the 0.18 s shove and its gap, then `lunge_out`; Motley's Trade is no travel dash (no roll), the
    aim then the lob. Their cells read `proc` only because the move names do not say dash, so `warden_anim/*.json`
+   marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
+   clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
+   theirs too.
+4. **21 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
+   models, 9116769e95: casquebill to velvorm in the table, less squalltross, threadwyrm, tuatrune and velvorm, which
+   have their own since `ext/anim-boki-own-clips-sttv`; hoarheron has its own idle only). Nothing is `missing` on
    marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) carry the
    same mark, so both cells read `clip`; claire, kael, ryzz, sable, tarek and vex key theirs too.
 4. **25 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
