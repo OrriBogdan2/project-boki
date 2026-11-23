@@ -694,6 +694,7 @@ func _your_name_edit() -> LineEdit:
 	le.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return le
 
+
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	var rec: Dictionary = new_rec if String(new_rec.get("species", "")) == sp_id else _hatched_rec(sp_id)
 	rec["name"] = kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id)

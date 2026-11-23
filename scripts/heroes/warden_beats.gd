@@ -6,7 +6,6 @@ extends RefCounted
 
 const NAMES := ["win", "lose"]
 
-
 ## The beats of this Hero that the .glb can play: {name: {clip, loop_from, upper}}.
 static func build(lib: AnimationLibrary, beats: Dictionary) -> Dictionary:
 	var out := {}
@@ -16,7 +15,6 @@ static func build(lib: AnimationLibrary, beats: Dictionary) -> Dictionary:
 		if clip != "" and lib.has_animation(clip):
 			out[nm] = {"clip": clip, "loop_from": float(b.get("loop_from", 0.0)), "upper": bool(b.get("upper", false))}
 	return out
-
 
 ## Where in the clip a beat that began `t` seconds ago stands: it plays once, then loops from "loop_from".
 static func time_of(length: float, from: float, t: float) -> float:
