@@ -457,7 +457,9 @@ func _ult_cues() -> void:
 	var wired := press.contains("UltCue.cast(k)") and cue.contains('"ucast"')
 	wired = wired and match_src.contains('"ucast": UltCue.net_in')
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
-	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2 and cue.count("Sfx.play_foe(") == 2
+			and cue.count(", DB_FOE)") == 2 and UltCue.DB_FOE > UltCue.DB and AudioServer.get_bus_index("SFXFoe") >= 0,
+			"your team's cue and tag play at DB, a rival's the same sounds at DB_FOE (louder) on the SFXFoe bus")
 	var draw_src := FileAccess.get_file_as_string("res://scripts/match/aim/aim_draw.gd")
 	var tell_ok := Sfx.ensure("tell_foe") and Sfx.MIN_GAP.has("tell_foe") and TellCue.DB_BIG < UltCue.DB
 	tell_ok = tell_ok and draw_src.contains("TellCue.aim(")
@@ -1342,7 +1344,7 @@ func _step_on(_m: Match, h: Hunter, surf: String, p: Vector3) -> void:
 		Sfx.recent.clear()
 		Sfx.listener = p
 		Juice.footstep(h)
-		var got: Array = Sfx.last_played.keys()
+		var got: Array = Sfx.last_played.keys().filter(func(s): return not String(s).ends_with("_foley"))
 		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
 		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
 	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]

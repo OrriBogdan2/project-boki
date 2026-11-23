@@ -47,7 +47,7 @@ static func how(i: int) -> String:
 ## own strip.
 static func shown(m: Match) -> bool:
 	var p: Hunter = m.player
-	if p == null or p.out or p.extracted or m.heart_raid or not HudGroups.ways_out_shown(m):
+	if p == null or p.out or p.extracted or m.heart_raid or not HudReveal.ways_out_shown(m):
 		return false
 	return QuestTracker.seat_of(m, p.team) == null
 

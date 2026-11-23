@@ -270,7 +270,7 @@ func update(dt: float) -> void:
 	if m.hud:
 		m.hud.msgs.hold = card_up()  # messages wait while the banner is up
 	var sid := id()
-	camps.update()
+	camps.update(dt)
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
 	if got != got_seen:
@@ -299,6 +299,7 @@ func _finish(sid: String) -> void:
 	var resumed := sid == "land" and TutorialResume.last_beat() != ""
 	if resumed:
 		step = TutorialResume.step_after(TutorialResume.last_beat())
+		camps.told = true  # a resumed course already had its first camp telegraphed: camps come at once
 	else:
 		TutorialResume.remember(sid)
 	if step == 1:

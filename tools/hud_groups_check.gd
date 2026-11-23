@@ -2,17 +2,18 @@ extends RefCounted
 ## --hud-groups-check: how many separately placed HUD blocks (groups, HudGroups) a new player scans at the four
 ## moments the 0.24.5 Ways Out touch: the first landing, the first fight, the Heart unlock, the quest-exit race.
 ##   1. the Ways Out strip is deferred (a newcomer) at the landing and the first fight, and revealed once a seat
-##      is within ways_out_lead_s of opening, is open, or you are out
+##      is within seat_pips' lead_s (hud_reveal.json) of opening, is open, or you are out
 ##   2. at the Heart unlock and the exit race it is one group, and the Gate prompt is the one prompt, not a second
 ##   2b. a save's first expedition holds the clock/status strip back until the first Ways Out beat or kill
 ##   3. each moment's count equals the pinned one: 0.24.5 adds at most the one strip, only where it is needed.
 ##      The landing is at the owner's 5; the counters, glider ring and belt are folded in until they matter (rule 5).
 ##      The later moments add the toasts, the prompt and the strip. The check plays a fresh save (a new player), so
 ##      the "Your kit" card is not at the landing (rule 4)
-##   4. a save under HudGroups.NEW_PLAYER_MATCHES expeditions: no kit card (the training room keeps it), and your own
+##   4. a save before kit_card / own_numbers' match (HudReveal): no kit card (the training room keeps it), and your own
 ##      kills/knocks/gems row waits for the first kill, knock or gem or Tab; a veteran sees both as before
 ##   5. the glider ring only while you glide or the meter is not full; the belt only once a held item could be used
 ##      (then the save keeps it); the counters follow HudReveal ("counters", from the 4th expedition)
+##   6. the gear strip and the perk row count only once drawn (HudReveal "gear" / "perks", then an item held)
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
@@ -74,7 +75,7 @@ func run(main: Node) -> void:
 	var m: Match = await make_match(main)
 	var hud := m.hud
 	var q: Dictionary = Heart.rules()["quest"]
-	var lead: float = HudGroups.rules()["ways_out_lead_s"]
+	var lead := float(HudReveal.groups()["seat_pips"]["lead_s"])
 	var out := {}
 	for id in MOMENTS:
 		set_moment(m, id)
@@ -90,12 +91,12 @@ func run(main: Node) -> void:
 	m.interact = {}
 	m.heart._force(Heart.S.ASLEEP, "reset")      # the unlock moment left the spark ready
 	m.sess_t0 = float(q["lair_open_s"]) - lead - 1.0 - m.time
-	ok(not HudGroups.ways_out_shown(m), "every seat still more than %d s off: the strip waits" % int(lead))
+	ok(not HudReveal.ways_out_shown(m), "every seat still more than %d s off: the strip waits" % int(lead))
 	m.sess_t0 = float(q["lair_open_s"]) - lead + 1.0 - m.time
-	ok(HudGroups.ways_out_shown(m), "the Lair opens within %d s: the strip comes" % int(lead))
+	ok(HudReveal.ways_out_shown(m), "the Lair opens within %d s: the strip comes" % int(lead))
 	m.sess_t0 = 6.0 - m.time
 	m.player.out = true
-	ok(HudGroups.ways_out_shown(m), "out of the match: the strip (and the Ways out left line) is yours")
+	ok(HudReveal.ways_out_shown(m), "out of the match: the strip (and the Ways out left line) is yours")
 	m.player.out = false
 	# 5. what folds in until it matters (the beats above made the save remember the clock)
 	Save.d["hud_reveal"].erase("beat_clock")
@@ -118,21 +119,36 @@ func run(main: Node) -> void:
 	var p: Hunter = m.player
 	set_moment(m, "landing")
 	hud.kit_t0 = m.time      # just landed: a veteran's kit card would be up
-	ok(HudGroups.new_player(), "a fresh save is a new player")
+	ok(not HudReveal.reached("kit_card"), "a fresh save is a new player")
 	ok(not on_screen_has(hud, "kit"), "new player: no kit card at the landing")
 	m.opts["training"] = true
 	ok(on_screen_has(hud, "kit"), "new player: the training room keeps the kit card")
 	m.opts["training"] = false
-	ok(not HudGroups.own_numbers_shown(p, false), "new player: own kills/knocks/gems wait before the first one")
-	ok(HudGroups.own_numbers_shown(p, true), "new player: own numbers show while Tab is held")
+	ok(not HudReveal.own_numbers_shown(p, false), "new player: own kills/knocks/gems wait before the first one")
+	ok(HudReveal.own_numbers_shown(p, true), "new player: own numbers show while Tab is held")
 	for stat in ["kills", "knocks", "gems"]:
 		p.set(stat, 1)
-		ok(HudGroups.own_numbers_shown(p, false), "new player: own numbers show once %s is 1" % stat)
+		ok(HudReveal.own_numbers_shown(p, false), "new player: own numbers show once %s is 1" % stat)
 		p.set(stat, 0)
-	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES
-	ok(not HudGroups.new_player(), "a save with %d expeditions is not new" % HudGroups.NEW_PLAYER_MATCHES)
-	ok(on_screen_has(hud, "kit") and HudGroups.own_numbers_shown(p, false),
+	Save.d["matches"] = int(HudReveal.groups()["kit_card"]["from_match"]) - 1
+	ok(HudReveal.reached("kit_card") and HudReveal.reached("own_numbers"),
+		"a save with %d expeditions is not new" % Save.d["matches"])
+	ok(on_screen_has(hud, "kit") and HudReveal.own_numbers_shown(p, false),
 		"veteran: kit card and own numbers as before")
+	# 6. the gear strip and the perk row are counted only once drawn (HudReveal "gear" / "perks", then an item)
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"),
+		"veteran with no gear and no perk: neither strip")
+	Save.d["matches"] = 0
+	p.gear[2] = {"id": String(Gear.ALL.keys()[0]), "rar": 0}
+	p.perks.append(String(Data.PERKS.keys()[0]))
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"),
+		"new player with gear and a perk: held back (HudReveal)")
+	Save.d["matches"] = int(HudReveal.groups()["gear"]["from_match"]) - 1  # (the save's next match shows the gear)
+	ok(on_screen_has(hud, "gear") and on_screen_has(hud, "perks"),
+		"veteran with gear and a perk: both strips")
+	p.gear[2] = {}
+	p.perks.clear()
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"), "back to nothing held: neither strip")
 	for i in 3:
 		await main.get_tree().process_frame      # the real HUD draws the veteran's own-numbers row too
 	Save.d["matches"] = 0

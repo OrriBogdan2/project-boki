@@ -76,9 +76,10 @@ func _shapes(d: Dictionary, mats: Array) -> void:
 		"tufted":
 			var tuft := Models.sphere(0.03, 6)
 			var bone := "ear2." if skel.find_bone("ear2.L") >= 0 else "ear1."
+			var has_ears := skel.find_bone(bone + "L") >= 0      # (a rig without ear bones tufts its head)
 			var tip: Vector3 = frame["ear_tip"]
-			_stick(bone + "L", tip * Vector3(-1, 1, 1), tuft, tuft_m, "Tuft", TUFT_SHAPE)
-			_stick(bone + "R", tip, tuft, tuft_m, "Tuft", TUFT_SHAPE)
+			_stick(bone + "L" if has_ears else "head", tip * Vector3(-1, 1, 1), tuft, tuft_m, "Tuft", TUFT_SHAPE)
+			_stick(bone + "R" if has_ears else "head", tip, tuft, tuft_m, "Tuft", TUFT_SHAPE)
 	match String(d.get("tailv", "standard")):
 		"tufted":
 			var tip_at: Vector3 = frame["tail_tip"]

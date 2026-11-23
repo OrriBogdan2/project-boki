@@ -1502,7 +1502,7 @@ func _spawn_wild() -> void:
 		live[order[i]] = true
 	for si in spots.size():
 		var p: Vector3 = spots[si]
-		var sp := BokiModes.draw(HeartRaid.boki_for(opts), rng) if HeartRaid.on(opts) else ModeBoki.draw(Data.common_kin(), "expedition", tier, rng)      # a raid: its own Boki
+		var sp := BokiModes.draw(HeartRaid.boki_for(opts), rng) if HeartRaid.on(opts) else ModeBoki.draw(Data.wild_kin(), "expedition", tier, rng)      # a raid: its own Boki
 		var rec := Save.new_kin(sp, "", kin_seed("wild"))
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
@@ -2938,7 +2938,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at}      # at: the contact (HitContact); pg: the volley id (a kit reads it)
+	# at: the contact (HitContact); pg: the volley id (a kit reads it); from: where it was fired (IncomingHitSfx)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at, "from": s["start"]}
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -4985,12 +4986,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
-			var st: int = int(it[8])
-			if st >= 0 and st < MOB_STATES.size():
-				if mb.st == "idle" and st == 1: MobNotice.woke(mb)
-				mb.st = MOB_STATES[st]
+			mb.follow(int(it[8]), it[12])
 			mb.atk_dir = Vector2(it[10], it[11])
-			mb.st_t = it[12]
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])

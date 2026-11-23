@@ -512,6 +512,12 @@ func common_kin() -> Array:
 	return LAUNCH_KIN.filter(func(k): return all.has(k)) + all.filter(func(k): return not LAUNCH_KIN.has(k))
 
 
+## common_kin() less the species whose model is not in the game yet (Evo.has_art): what the wild draws from,
+## so a match never shows the old primitive body (DECISIONS: a form waits until its art ships; Bellowary does).
+func wild_kin() -> Array:
+	return common_kin().filter(func(k): return Evo.has_art(String(k)))
+
+
 func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))
 

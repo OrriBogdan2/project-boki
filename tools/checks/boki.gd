@@ -4,4 +4,6 @@ extends RefCounted
 ## One entry per line, and a flag may appear in only ONE file (CheckRegistry.all() fails loudly on a duplicate).
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
-const CHECKS := {}
+const CHECKS := {
+	"--boki-size-shots": ["res://tools/boki_size_shots.gd", "boki_size_shots", null],  # Boki beside Vex, true size
+}

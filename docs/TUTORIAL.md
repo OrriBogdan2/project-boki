@@ -6,7 +6,7 @@ drivers. It is **advisory**: it prints one `TUTT` row per step and only a stall 
 playtest. DECISIONS 2026-11-08 ask for a match tutorial of about 8 steps and a garden one of 4 to 5, one banner line each, with a
 visible Skip; the tables show how far the line is from that (section 5).
 
-**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main.
+**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main. `-- --fps=30|60|144` caps the frame rate and plays the course on the match's own frame loop (one driver call per drawn frame, held through that frame's sim steps); `--window=WxH` sets the window (default 1280x720). Waits use `CheckClock`, not the wall clock.
 
 Columns: **Time** is sim seconds of the instant-reacting `TutorialDrive` (no reading, no misses; screens: wall seconds; farm and
 garden: the driver ticks them off at once, so n/a). **Read s** = words / 3.5 + 0.45 s, the pace of `docs/TUTORIAL_PACE.md` (add it to
@@ -265,3 +265,10 @@ The owner's first-match playtest on the PC build, and what each fix is:
 - **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
   half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
   `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
+
+## Telegraphed first camp
+
+The first camp of a run (`TutorialCamps.spawn`) does not appear at once: a ring on the ground and a clock (`CampMark`, drawn in
+the world and on the minimap like the nest marker) count down `TELEGRAPH_T` (3 s) on the spots the monsters then stand on. No
+step ends and no camp is re-spawned while it counts (`alive()` counts it). Step order is unchanged; the fight beats take about
+3 s longer. `--tutorial-fight-check` asserts the marker shows for 3 s with no monster out, then the monsters stand on its spots.

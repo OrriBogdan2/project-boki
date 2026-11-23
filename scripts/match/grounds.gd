@@ -9,6 +9,8 @@ extends RefCounted
 const ACT_R := 1.5  # [m] how close you stand to use a pedestal
 const SHOW_R := 6.5  # [m] a pedestal's name is drawn inside this
 const PED_GLOW := 0.3  # pedestal emission: a faint glow that keeps its colour under bloom (0.9 washed to white)
+const PED_GAP := 1.6  # [m] least gap between pedestals on a ring (over ACT_R: you never stand in reach of two)
+const RING_STEP := 2.0  # [m] a full ring spills its extra pedestals onto one this much further in
 const FALL_Y := -12.0  # [m] below this you fell off the map: back to the start (the abyss kills at -17)
 const KIND_COL := {
 	"arch": "ffb454",
@@ -28,6 +30,7 @@ var m: Match
 var stations: Array = []  # {kind, id, at: Vector3 (the pedestal), c: Vector3 (its perch's middle), label: Label3D}
 var near_i := -1
 var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
+var hints: GroundsHints = null  # the first-time line for each station
 var prompt: Label = null
 var trial: TimeTrial = null  # the time-trial course on the open floor
 
@@ -108,6 +111,7 @@ func build() -> void:
 		_duel(v3(g["duel"]))
 	summon_pad = SummonStation.new(a)
 	GroundsLanes.build(m, g)
+	hints = GroundsHints.new(m)
 	_layer = CanvasLayer.new()
 	_layer.layer = 20
 	prompt = Label.new()
@@ -125,15 +129,21 @@ func build() -> void:
 	trial.build(_layer, self)
 
 
-## One ring of pedestals round a perch's middle, one per id of the kind.
+## Rings of pedestals round a perch's middle, one per id of the kind: the outer ring at `r` holds as many as fit
+## PED_GAP apart, the rest go on rings RING_STEP further in (89 Boki do not fit one 12.4 m ring).
 func _ring(kind: String, c: Vector3, r: float) -> void:
 	var ids := ids_for(kind)
-	var n := ids.size()
-	for i in n:
-		var ang := -PI / 2.0 + TAU * float(i) / float(n)
-		var p := c + Vector3(cos(ang), 0, sin(ang)) * r
-		p.y = m.world.ground_at(p.x, p.z)
-		_pedestal(kind, String(ids[i]), p, c)
+	var done := 0
+	var rr := r
+	while done < ids.size() and rr > 0.0:
+		var n := mini(ids.size() - done, maxi(1, floori(TAU * rr / PED_GAP)))
+		for i in n:
+			var ang := -PI / 2.0 + TAU * float(i) / float(n)
+			var p := c + Vector3(cos(ang), 0, sin(ang)) * rr
+			p.y = m.world.ground_at(p.x, p.z)
+			_pedestal(kind, String(ids[done + i]), p, c)
+		done += n
+		rr -= RING_STEP
 
 
 func _mat(col: Color) -> StandardMaterial3D:
@@ -205,6 +215,7 @@ func tick(dt: float) -> void:
 	if p == null or prompt == null:
 		return
 	summon_pad.tick()
+	hints.tick()
 	if p.pos.y < FALL_Y and not p.downed:
 		p.teleport(a.home)
 		p.vel = Vector3.ZERO
