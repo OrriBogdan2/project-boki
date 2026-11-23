@@ -68,7 +68,7 @@ func _sliders() -> void:
 	Overlay.tab = "Main"
 	Overlay.open_settings()
 	await main.get_tree().process_frame
-	var master := _find_sliders(Overlay.root).back() as HSlider      # (Main: Interface size, then Master)
+	var master := _find_sliders(Overlay.root).back() as HSlider  # (Main: Interface size, then Master)
 	_slider_ok(master, "master", 0.25)
 	Overlay.tab = "Audio"
 	Overlay.open_settings()
