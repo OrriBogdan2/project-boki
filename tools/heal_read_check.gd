@@ -349,7 +349,7 @@ func _strip(m: Match, h: Hunter, file: String) -> void:
 			t += DT
 		var img := main.get_viewport().get_texture().get_image()
 		var c := main.get_viewport().get_camera_3d().unproject_position(h.position + Vector3(0, 1.2, 0))
-		var rg := Rect2i(Vector2i(int(c.x) - CROP.x / 2, int(c.y) - CROP.y / 2), CROP)
+		var rg := Rect2i(Vector2i(int(c.x) - int(CROP.x / 2.0), int(c.y) - int(CROP.y / 2.0)), CROP)
 		var crop := img.get_region(rg.intersection(Rect2i(Vector2i.ZERO, img.get_size())))
 		crop.resize(int(CROP.x * 1.5), int(CROP.y * 1.5), Image.INTERPOLATE_BILINEAR)
 		shots.append(crop)

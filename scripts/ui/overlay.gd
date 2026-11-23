@@ -599,7 +599,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 		"In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. "
 		+ "Off: it walks beside you"
 	)
-	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
+	_toggle(v, "Boki ride as wisps", "boki_wisps", wisp_hint)
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
@@ -809,7 +809,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 	preview.draw.connect(
 		func():
 			preview.draw_rect(Rect2(Vector2.ZERO, preview.size), Color(0.16, 0.2, 0.17))
-			Reticle.draw(preview, preview.size * 0.5)
+			Reticle.draw(preview, preview.size * 0.5, 0.0, Reticle.swatch("hunter"))
 	)
 	Settings.changed.connect(preview.queue_redraw.unbind(1))
 	v.get_child(v.get_child_count() - 1).add_child(preview)
@@ -821,7 +821,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 		sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		sw.tooltip_text = String(Reticle.COLORS[id][0])
 		var chosen: bool = Settings.get_v("reticle_col") == id
-		var face := UI.frame(Reticle.COLORS[id][1], 13, UI.INK if chosen else Color(0, 0, 0, 0), 3)
+		var face := UI.frame(Reticle.swatch(id), 13, UI.INK if chosen else Color(0, 0, 0, 0), 3)
 		for state in ["normal", "hover", "pressed"]:
 			sw.add_theme_stylebox_override(state, face)
 		UI.sfx(sw)
@@ -852,7 +852,7 @@ func _row(v: VBoxContainer, label_txt: String, hint := "", key := "") -> HBoxCon
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var head := UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi)
-	head.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # a long action name wraps, never widens the panel
+	UI.wrapped(head)  # a long action name wraps, never widens the panel
 	lc.add_child(head)
 	if hint != "":
 		lc.add_child(UI.para(hint, UI.T_SMALL - 1, UI.MUTED))

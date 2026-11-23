@@ -9,8 +9,8 @@ extends RefCounted
 ## row needs a reason and a source; the list per hero prints at the end (the hero agents' worklist). Landings
 ## (_landings): a dash, a jump and every slot pressed as he lands from a hop, a fall, a glide or a dive is never lost
 ## and, from the first step on the ground, acts as soon as it does standing.
-## It walks DashFlow.SLOTS for every hero, so rows added later are covered. --dash-flow-check=<id>,<id> runs only
-## those heroes. Never touches the save.
+## It walks DashFlow.SLOTS for every hero, so rows added later are covered. The registry splits the heroes into four
+## flags (--dash-flow-<n>-check) so each stays under the gate's 300 s cap. Never touches the save.
 
 const QUIET_MAX := 900  # steps: the last trial's ability (an ult, a zone) winds down first
 const DASH_WAIT := 40  # steps: a dash with a wind-up shows up within this
@@ -57,9 +57,7 @@ const LAND_AT := {0: "on the touchdown step of", 1: "on the first step after", 7
 const LAND_WATCH := 30  # steps a press has to act in
 
 ## Landing rows open at this merge ("<hero>:<press>:<way>:<steps in>" -> what); each fix removes its entry.
-const LAND_OPEN := {
-	"rimewright:lmb:fall:7": "never goes off 0.1 s into a fall's absorb (docs/DEBT.md)",
-}
+const LAND_OPEN := {}
 
 # ------------------------------------------------------------------ combos with Shift and jump (item 51)
 const ACT_S := 0.1  # s: owner rule, a jump or Shift out of an ability's recovery acts within this
@@ -93,12 +91,12 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-
-func run(main: Node) -> void:
+## The whole check over `heroes`; the registry runs it in four shards (tools/dash_flow_shard_check.gd).
+func run_heroes(main: Node, heroes: Array) -> void:
 	for r in SOURCE_ROWS:
 		var row := DashFlow.row_of(r[0], r[2], r[1] == "air")
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
-	for hero in _heroes():
+	for hero in heroes:
 		await check_hero(main, hero)
 	await _one_window(main)
 	_print_exceptions()
@@ -132,15 +130,6 @@ func _hero(main: Node, hero: String, rows: bool) -> int:
 		await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(_on_used)
 	return bad
-
-
-## Every hero, or the ones named in --dash-flow-check=<id>,<id>.
-func _heroes() -> Array:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--dash-flow-check=") and arg.length() > 18:
-			return arg.get_slice("=", 1).split(",")
-	return Arch.ORDER
-
 
 func _on_used(caster: Node, _ability: String, slot: String) -> void:
 	if caster == hunter:
@@ -259,8 +248,9 @@ func _ready_up(m: Match) -> void:
 			or k.rmb_down
 			or k.ult_running()
 			or _last_shot() >= 0
-			or k.commit_left() > 0.0
-		)  # (a move's committed recovery: Vex's E and X)
+			or k.commit_left() > 0.0  # (a move's committed recovery: Vex's E and X)
+			or k.fire_wait() > 0.0  # (a kit's own cadence: Neve's burst pause would hold the next tap)
+		)
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
@@ -888,7 +878,7 @@ func _lock_steps(m: Match, slot: String, in_air: bool) -> int:
 	if at_hi != "now":
 		return -hi
 	while hi - lo > 1:
-		var mid := (lo + hi) / 2
+		var mid := int((lo + hi) / 2.0)
 		if _space_at(m, slot, in_air, mid) == "now":
 			hi = mid
 		else:
