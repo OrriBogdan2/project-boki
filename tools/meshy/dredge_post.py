@@ -19,6 +19,7 @@ Runs on the r7 body (tools/meshy/dredge_reskin.py output) and writes the game gl
   python3 tools/meshy/dredge_post.py OUT.glb IN.glb
   python3 tools/meshy/dredge_post.py --islands FILE.glb
   python3 tools/meshy/dredge_post.py --r11 OUT.glb IN_R10.glb [PACK.glb]   # r11 stages on the r10 glb (never build() twice)
+  python3 tools/meshy/dredge_post.py --r12 OUT.glb IN_R11.glb   # r12 tail gather (re-runnable on its own output)
 
 Needs numpy and scipy (the venv).
 """
@@ -51,6 +52,12 @@ LAG = (0.0, 0.4, 0.5, 0.6)  # per frame carry-over of each segment's direction (
 # r11: share of the hand's twist (turn about the arm's own axis) each segment keeps. Swing-only bones (r10) met the
 # forearm's full twist inside the blend zone and the goo tube collapsed to a sheet (a twisted ellipse at 90 deg)
 TAIL_TWIST = (1.0, 0.8, 0.55, 0.3)
+# r12: the swung tail gathers (shorter along the chain, a little thicker): seen from the game's top-down camera a 1 m
+# tail swung level reads as a long flat ribbon, while a hanging one is seen end-on. g rises (smoothstep) from 0 to 1 as
+# GooTail0 swings GATHER_DEG away from hanging; the chain keeps 1 - GATHER * g of its length (GooTail1..3 offsets) and
+# GooTail0 scales by 1 + (GATHER_THICK - 1) * g (uniform: the node's own frame is not the bind frame, so an axis scale
+# would squeeze sideways). GATHER_LAG: per frame carry-over of g (no pops).
+GATHER, GATHER_DEG, GATHER_THICK, GATHER_LAG = 0.4, (35.0, 80.0), 1.12, 0.5
 TWIST_FROM = "RightForeArm"  # the bone whose twist the chain takes up (the hand's own twist is the wrist's: too much)
 # r11: Meshy's goo carries head and spine weights near the shoulder (it follows the head and tears off the arm: the
 # worst stretch edges in the attack). Those go to RightArm; this share of RightShoulder's weight goes there too.
@@ -626,6 +633,8 @@ def tail_keys(rig, clip, rest_pts):
     times = clip_times(rig, clip)
     held = rest_dir.copy()
     keys = np.zeros((len(times), len(seg), 4))
+    gathers = np.zeros(len(times))
+    g = 0.0
     for rep in range(2):
         for ti, t in enumerate(times):
             world = rig.pose(clip, t)[ih] @ np.linalg.inv(rig.ibm[ih])
@@ -645,6 +654,12 @@ def tail_keys(rig, clip, rest_pts):
                 q = axis_turn(held[k], ang * TAIL_TWIST[k]) @ arc(rest_dir[k], held[k])
                 keys[ti, k] = mat_quat(r0.T @ prev.T @ q @ r0)
                 prev = q
+                if k == 0:
+                    ang0 = np.degrees(np.arccos(np.clip(held[0] @ rest_dir[0], -1, 1)))
+                    x = np.clip((ang0 - GATHER_DEG[0]) / (GATHER_DEG[1] - GATHER_DEG[0]), 0, 1)
+                    g = GATHER_LAG * g + (1 - GATHER_LAG) * x * x * (3 - 2 * x)
+                    gathers[ti] = g
+    tail_keys.gathers = gathers  # g per frame, read by gather_tail
     return times, keys
 
 
@@ -691,6 +706,43 @@ def rebake_tail(js, b, out, rig):  # r11 stage
         for k in range(len(CHAIN_Y)):
             ch = [c for c in a["channels"] if c["target"]["node"] == rig.joints[first + k]][0]
             a["samplers"][ch["sampler"]]["output"] = out.add_floats(keys[:, k], "VEC4")
+
+
+def set_track(a, node, path, inp, out, vals, kind):
+    """Swap the output of node's path channel in clip a, or add the channel (sharing the input times inp)."""
+    old = [c for c in a["channels"] if c["target"]["node"] == node and c["target"]["path"] == path]
+    if old:
+        a["samplers"][old[0]["sampler"]]["output"] = out.add_floats(vals, kind)
+        return
+    a["samplers"].append({"input": inp, "output": out.add_floats(vals, kind), "interpolation": "LINEAR"})
+    a["channels"].append({"sampler": len(a["samplers"]) - 1, "target": {"node": node, "path": path}})
+
+
+def gather_tail(js, b, out, rig):  # r12 stage (safe to re-run: swaps outputs, adds no bones)
+    """r12: the chain's keys baked again; GooTail0 gets a uniform scale track and GooTail1..3 translation tracks per
+    clip (the swung tail gathers)."""
+    first = rig.names.index("GooTail0")
+    pos = n.floats(js, b, js["meshes"][0]["primitives"][0]["attributes"]["POSITION"])
+    rest_pts = chain_points(pos[goo_vertices(js, b)], rest_world(rig, HAND)[1])
+    peak = {}
+    for a in js["animations"]:
+        times, keys = tail_keys(rig, a["name"], rest_pts)
+        g = tail_keys.gathers[:, None]
+        u = 1 + (GATHER_THICK - 1) * g
+        lo = 1 - GATHER * g
+        inp = None
+        for k in range(len(CHAIN_Y)):
+            node = rig.joints[first + k]
+            ch = [c for c in a["channels"] if c["target"]["node"] == node and c["target"]["path"] == "rotation"][0]
+            a["samplers"][ch["sampler"]]["output"] = out.add_floats(keys[:, k], "VEC4")
+            inp = a["samplers"][ch["sampler"]]["input"]
+            if k == 0:
+                set_track(a, node, "scale", inp, out, np.repeat(u, 3, 1), "VEC3")
+            else:
+                t0 = np.array(js["nodes"][node]["translation"])
+                set_track(a, node, "translation", inp, out, (lo / u) * t0[None, :], "VEC3")
+        peak[a["name"]] = round(float(lo.min()), 2)
+    return f"tail gather, least share of the chain length kept per clip: {peak}"
 
 
 def clean_goo_weights(js, b, out, rig):
@@ -852,6 +904,11 @@ def rebuild_r11(out_path, in_path, pack_path=None):
               ("goo weights", clean_goo_weights), ("tail keys", rebake_tail)]
     if pack_path:
         stages.insert(0, ("pack tris", lambda js, b, out, rig: swap_pack(js, b, out, rig, pack_path)))
+    rebuild_stages(out_path, in_path, stages)
+
+
+def rebuild_stages(out_path, in_path, stages):
+    """Each stage writes the file and the next reloads it (new arrays live in the new file's buffer)."""
     src = in_path
     for name, fn in stages:
         rig = rs.Rig(src)
@@ -925,6 +982,8 @@ def build(out_path, in_path):
 if __name__ == "__main__":
     if sys.argv[1] == "--islands":
         count_islands(sys.argv[2])
+    elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
+        rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
         rebuild_r11(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else None)
     else:
