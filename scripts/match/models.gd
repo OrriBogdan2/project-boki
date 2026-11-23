@@ -2084,7 +2084,7 @@ static func nesting_nook() -> Node3D:
 	part(heart, sphere(0.13, 12), toon(Color("ff5a7a"), false, 0.35), Vector3(0.08, 0.04, 0))
 	part(heart, cyl(0.0, 0.19, 0.24, 4), toon(Color("ff5a7a"), false, 0.35), Vector3(0, -0.1, 0), Vector3(1.0, 1.0, 0.45), Vector3(PI, PI / 4, 0))
 	PropAnim.on(heart, 0.0, 0.05, 2.0)
-	merge_tree(root, true)      # 60 draws to 17: the stones, stalks and flowers share colours
+	PaintMerge.tree(root)      # the stones, stalks and flowers: a mesh per painted look
 	return root
 
 ## An egg in a straw nest, for kin you raise from an egg at home.
@@ -2136,7 +2136,7 @@ static func incubator() -> Node3D:
 	# the cradles: an arc of eight round the front of the hearth, each with ember pebbles in front. One is built
 	# and merged, the rest are copies that share its meshes, so the eight draw together.
 	var cradle := IncubatorCradle.build(stone, straw, pebble, iron)
-	merge_tree(cradle, true)
+	PaintMerge.tree(cradle)
 	for i in 8:
 		var a := PI * (0.04 + 0.92 * float(i) / 7.0)
 		var c: Node3D = cradle if i == 0 else cradle.duplicate()
@@ -2157,7 +2157,7 @@ static func incubator() -> Node3D:
 			var mk := Marker3D.new(); mk.name = "S%d" % ((0 if y < 0.5 else 3) + j); mk.position = Vector3(x, y + 0.03, 0)
 			shelf.add_child(mk)
 	for n in [root, embers, shelf]:      # (not merge_tree: the cradles are merged, and their copies share the meshes)
-		merge_static(n, false, true)
+		PaintMerge.node(n)
 	return root
 
 ## A small Rare Egg for the incubator's shelf and cradle, its seam ring in the colour of the kin inside.
@@ -2686,15 +2686,15 @@ const EXTRACT_R := 2.6
 static func portal(c: Color) -> Node3D:
 	var root := Node3D.new()
 	var t := TorusMesh.new(); t.inner_radius = 0.95; t.outer_radius = 1.2; t.rings = 24; t.ring_segments = 8
-	var mr := toon(Color("6a6f80"), true)
-	var ring := part(root, t, mr, Vector3(0, 1.25, 0), Vector3.ONE, Vector3(PI / 2, 0, 0), "Ring")
+	var ring := part(root, t, toon(Color("6a6f80")), Vector3(0, 1.25, 0), Vector3.ONE, Vector3(PI / 2, 0, 0), "Ring")
 	# runes around the ring that light up, and a pair of stone feet
+	var rune := toon(c, false, 0.9); var foot := toon(Color("585c6a")); var moss := toon(Color("7fa65a"), false)
 	for i in 8:
 		var a := TAU * i / 8.0
-		part(ring, box(0.12, 0.3, 0.14), toon(c, false, 0.9), Vector3(cos(a) * 1.08, 0.0, sin(a) * 1.08), Vector3.ONE, Vector3(0, -a, 0))
+		part(ring, box(0.12, 0.3, 0.14), rune, Vector3(cos(a) * 1.08, 0.0, sin(a) * 1.08), Vector3.ONE, Vector3(0, -a, 0))
 	for sx in [-1.0, 1.0]:
-		part(root, box(0.42, 0.34, 0.5), toon(Color("585c6a")), Vector3(0.95 * sx, 0.17, 0))
-		part(root, box(0.3, 0.06, 0.38), toon(Color("7fa65a"), false), Vector3(0.95 * sx, 0.36, 0))
+		part(root, box(0.42, 0.34, 0.5), foot, Vector3(0.95 * sx, 0.17, 0))
+		part(root, box(0.3, 0.06, 0.38), moss, Vector3(0.95 * sx, 0.36, 0))
 	var disc := part(root, cyl(1.0, 1.0, 0.02, 24), glow_mat(c), Vector3(0, 1.25, 0), Vector3.ONE, Vector3(PI / 2, 0, 0), "Disc")
 	disc.visible = false
 	var base := MeshInstance3D.new(); base.name = "Base"; base.mesh = flat_quad(3.2)
@@ -2884,7 +2884,7 @@ static func signpost(text_lines: Array) -> Node3D:
 	l.font_size = 40; l.pixel_size = 0.005; l.modulate = Color("3a2a1a"); l.outline_size = 0
 	l.position = Vector3(0, 1.25, 0.1)
 	root.add_child(l)
-	return root
+	return PaintMerge.merged(root)
 
 # ---------------------------------------------------------------- home buildings
 static func building(id: String) -> Node3D:
@@ -3057,7 +3057,7 @@ static func ferry_post() -> Node3D:
 	root.add_child(l)
 	for i in 3:
 		part(root, box(1.4, 0.08, 0.36), wood, Vector3(0, 0.04, -0.6 - i * 0.38))
-	return root
+	return PaintMerge.merged(root)
 
 
 ## Guild landmarks.

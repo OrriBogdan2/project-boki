@@ -577,7 +577,7 @@ func _sync_deco() -> void:
 		var e: Dictionary = want[u]
 		if not nodes.has(u):
 			var n := make_deco(e)
-			Models.merge_tree(n, true)      # its plain parts, in every group: a mesh per material, shadows unchanged
+			PaintMerge.tree(n)      # its plain parts, in every group: a mesh per painted look, shadows unchanged
 			n.set_meta("sig", _sig(e))
 			_place_node(n, e)
 			ShadowPolicy.judge_tree(n, n.scale.x)      # small props throw no shadow (item 94)

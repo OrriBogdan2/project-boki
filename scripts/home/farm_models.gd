@@ -232,31 +232,30 @@ const STONE_DARK := "4a4f45"     # a locked zone's standing stone: dark and grow
 const STONE_GLOW := 0.6         # a lit standing stone's glow (ZoneReveal warms a woken one up to it)
 const RING_R := 1.6              # m, the Waystone's ring; its standing stones stand just outside it
 
-## The Waystone: a flat stone ring with one standing stone per zone round it. stones: [{colour, open, keys}].
+## The Waystone: a flat stone ring with one standing stone per zone round it. stones: [{colour, open, keys, owed}].
 ## A lit stone glows in its zone's colour and wears a glowing cap. A locked one is dark, grown over with
 ## moss, and has its two keys drawn on its face: a seed mark and a Boki mark, each dull until you hold it.
+## Only a stone owed its reveal keeps its own named body and cap ("Stone%d", "Cap%d": ZoneReveal lights them);
+## the rest merge into one mesh per painted look.
 static func waystone(stones: Array) -> Node3D:
 	var n := Node3D.new()
-	_piece(n, Models.cyl(RING_R, RING_R + 0.1, 0.14, 24), "9c968a", Vector3(0, 0.07, 0), "Ring")
-	_piece(n, Models.cyl(RING_R - 0.35, RING_R - 0.35, 0.03, 24), "c9c2b2", Vector3(0, 0.155, 0), "Inlay", false)
+	_piece(n, Models.cyl(RING_R, RING_R + 0.1, 0.14, 24), "9c968a", Vector3(0, 0.07, 0), "")
+	_piece(n, Models.cyl(RING_R - 0.35, RING_R - 0.35, 0.03, 24), "c9c2b2", Vector3(0, 0.155, 0), "", false)
 	for i in stones.size():
 		var a := TAU * float(i) / float(stones.size())
 		var at := Vector3(sin(a), 0, cos(a)) * (RING_R + 0.45)
 		var lit: bool = stones[i]["open"]
+		var owed: bool = stones[i].get("owed", false)
 		var col := Color(stones[i]["colour"] if lit else STONE_DARK)
-		var st := Models.part(n, Models.box(0.36, 1.25, 0.24), Models.toon(col, true, STONE_GLOW if lit else 0.0),
-				at + Vector3(0, 0.62, 0), Vector3.ONE, Vector3(0, a, 0), "Stone%d" % i)
-		st.set_meta("open", lit)
+		Models.part(n, Models.box(0.36, 1.25, 0.24), Models.toon(col, true, STONE_GLOW if lit else 0.0),
+				at + Vector3(0, 0.62, 0), Vector3.ONE, Vector3(0, a, 0), "Stone%d" % i if owed else "")
 		if lit:
 			var cap := Models.toon(col.lightened(0.4), false, 1.0)
 			var top := at + Vector3(0, 1.34, 0)
-			Models.part(n, Models.sphere(0.13, 8), cap, top, Vector3.ONE, Vector3.ZERO, "Cap%d" % i)
+			Models.part(n, Models.sphere(0.13, 8), cap, top, Vector3.ONE, Vector3.ZERO, "Cap%d" % i if owed else "")
 			continue
-		var lock := stone_lock(stones[i]["colour"], stones[i].get("keys", {}))
-		lock.position = at
-		lock.rotation.y = a
-		lock.name = "Lock%d" % i
-		n.add_child(lock)
+		_lock_parts(n, Transform3D(Basis(Vector3.UP, a), at), stones[i]["colour"], stones[i].get("keys", {}))
+	PaintMerge.node(n)
 	return n
 
 ## A locked stone's lock look, set at the stone's foot and turned with it: its moss and, on its face, the
@@ -264,14 +263,21 @@ static func waystone(stones: Array) -> Node3D:
 ## ZoneReveal drops it off the stone when the zone wakes.
 static func stone_lock(colour: String, keys: Dictionary) -> Node3D:
 	var n := Node3D.new()
-	_piece(n, Models.box(0.4, 0.22, 0.28), "5f7a3e", Vector3(0, 0.12, 0), "Moss", false)
+	_lock_parts(n, Transform3D.IDENTITY, colour, keys)
+	return n
+
+## stone_lock's parts, added to `n` placed by `xf`.
+static func _lock_parts(n: Node3D, xf: Transform3D, colour: String, keys: Dictionary) -> void:
+	var parts: Array = [Models.part(n, Models.box(0.4, 0.22, 0.28), Models.toon(Color("5f7a3e"), false),
+			Vector3(0, 0.12, 0))]
 	for j in 2:
 		var held: bool = keys.get(["seed", "lean"][j], false)
 		var mark := Color(colour) if held else Color("2c302a")
 		var spin := Vector3(0, 0, PI * 0.25 * float(1 - j))      # seed mark: diamond; Boki mark: square
-		Models.part(n, Models.box(0.09, 0.09, 0.02), Models.toon(mark, false, 0.8 if held else 0.0),
-				Vector3(-0.07 + 0.14 * j, 0.8, 0.125), Vector3.ONE, spin, "Key%d" % j)
-	return n
+		parts.append(Models.part(n, Models.box(0.09, 0.09, 0.02), Models.toon(mark, false, 0.8 if held else 0.0),
+				Vector3(-0.07 + 0.14 * j, 0.8, 0.125), Vector3.ONE, spin))
+	for p in parts:
+		(p as Node3D).transform = xf * (p as Node3D).transform
 
 ## A zone's return pad: a small flat stone in the zone's colour, the way back to the hub.
 static func return_pad(colour: String) -> Node3D:
@@ -285,11 +291,12 @@ static func return_pad(colour: String) -> Node3D:
 static func games_board() -> Node3D:
 	var n := Node3D.new()
 	for sx in [-0.9, 0.9]:
-		_piece(n, Models.box(0.14, 1.7, 0.14), "7a5a38", Vector3(sx, 0.85, 0), "Post")
-	_piece(n, Models.box(2.1, 1.0, 0.1), "a98456", Vector3(0, 1.35, 0.05), "Board")
+		_piece(n, Models.box(0.14, 1.7, 0.14), "7a5a38", Vector3(sx, 0.85, 0), "")
+	_piece(n, Models.box(2.1, 1.0, 0.1), "a98456", Vector3(0, 1.35, 0.05), "")
 	var ids := GardenZones.ids()
 	for i in ids.size():
 		var tab := Color(String(GardenZones.info(ids[i])["colour"]))
 		Models.part(n, Models.box(0.3, 0.6, 0.04), Models.toon(tab, false, 0.4 if GardenZones.is_open(ids[i]) else 0.0),
-				Vector3(-0.8 + 0.4 * i, 1.35, 0.12), Vector3.ONE, Vector3.ZERO, "Tab%d" % i)
+				Vector3(-0.8 + 0.4 * i, 1.35, 0.12))
+	PaintMerge.node(n)
 	return n
