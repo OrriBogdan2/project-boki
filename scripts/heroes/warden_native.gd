@@ -53,6 +53,7 @@ var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest 
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
+var steps: WardenNativeSteps  # the footsteps, on the foot plants of Meshy's clips (data "plants")
 
 
 ## The art's entry in warden_native.json ({} when it has none).
@@ -147,6 +148,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	companions = WardenCompanions.detach(glb, skel, WardenClips.data(art_id), to_m.affine_inverse() * c_xf)
 	mouth = skel.find_child(WardenGlb.WEAPON_MUZZLE, true, false) as Node3D
 	model.set_meta(WardenClips.DEATH_T, 0.0)  # (the extract beat plays, WardenClips.leave_t; no death clip to hold)
+	steps = WardenNativeSteps.new(model, player, d.get("plants", {}))
 	_play("idle", 1.0)
 
 
@@ -163,6 +165,7 @@ func _process(dt: float) -> void:
 	elif attack_left <= 0.0:
 		_loco(s)
 	player.advance(dt)
+	steps.step(cur if xt < 0.0 else "")
 	WardenClips.air_tilt(root, skel, WardenSkeleton.find(skel, "root"))  # (the glider's bank, the dive's pitch)
 	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
