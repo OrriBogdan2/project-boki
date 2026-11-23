@@ -268,10 +268,15 @@ static func uses_model(arch: String) -> bool:
 
 
 ## Where the rig's torso shows, world: on a Hero playing clips, the torso of the body you see (its hips bone, back
-## through the retarget); else the rig's own. A Boki riding on you sits on it (Kin), so it keeps its seat on that body.
+## through the retarget; a Meshy-native model's torso bone, WardenNative); else the rig's own. A Boki riding on you
+## sits on it (Kin), so it keeps its seat on that body.
 static func shown_torso(model: Node3D) -> Transform3D:
 	var torso := model.get_node(^"Rig/Torso") as Node3D
 	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
+	if sync == null:
+		var nat := model.get_node_or_null(^"Warden/Native") as WardenNative
+		if nat:
+			return nat.shown_torso()
 	return sync.shown(torso) if sync and sync.clips else torso.global_transform
 
 
