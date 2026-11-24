@@ -295,7 +295,8 @@ func _neve() -> void:
 	_row("Neve", "Rimelock crash", _watch(m, tgt, 8.0), {"stun": 0.75, "slow": [0.15, 0.2], "slow_k": 0.35})
 	_reset(m, ply, tgt, home, 3.0)
 	kit.splinter(tgt.pos, 10.0, 2.0)
-	_row("Neve", "Shatter splinter", _watch(m, tgt, 2.0), {"slow": 1.2, "slow_k": 0.3})
+	# damage only since ext/neve-shatter-slow (docs/heroes/rimewright.md, --rimewright-combo-check): no slow
+	_row("Neve", "Shatter splinter", _watch(m, tgt, 2.0), {})
 	await done(m)
 
 
