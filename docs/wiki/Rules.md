@@ -647,6 +647,14 @@ Blight nests (scripts/match/blight_nests.gd, docs/SPAWNS.md): the only place Ski
 | classes | {"solid": {"shield": "stop", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "stop"}, "body": {"shield": "na", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "na"}, "pierce": {"shield": "stop", "rock": "pass", "ice": "stop", "wall": "stop", "guard": "stop"}, "phase": {"shield": "na", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "na"}, "lob": {"shield": "pass", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "pass"}} |
 | crossers | {"shot": {"class": "solid", "arch": "gunslinger", "what": "every projectile (LMB weapons, kit shots, Boki shots)"}, "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Deep Reach (pierces terrain)"}, "beam": {"class": "pierce", "arch": "gunslinger", "what": "Vex's Longneedle (pierces terrain)"}, "chain": {"class": "solid", "arch": "juggernaut", "what": "Kael's Warchain (bites the wall it meets)"}, "cloak": {"class": "solid", "arch": "ashwick", "what": "Cinder's Furnace Cloak pull (needs sight)"}, "fissure": {"class": "solid", "arch": "bulwark", "what": "Albert's Faultline cells"}, "knock": {"class": "solid", "arch": "gunslinger", "what": "every knockback"}, "dash": {"class": "body", "arch": "gunslinger", "what": "every dash"}, "phase": {"class": "phase", "arch": "archer", "what": "Lace's Spirit Walk (through walls, objects and raised terrain; only the edge guard stops it)"}, "trade": {"class": "lob", "arch": "ostra", "what": "Motley's Trade (a high lob, then a swap)"}} |
 
+## boki_eyes (`content/rules/boki_eyes.json`)
+
+Boki whose coat has no painted eyes of its own yet: they keep the face overlay (BokiRig.uses_overlay). Every other species drops the Face mesh and shows the model's eyes. Remove a species here when its eye-paint pass lands.
+
+| Setting | Value |
+|---|---|
+| overlay_species | ["cindle", "puddlet", "burrlet", "pebbit", "selenfin", "zapple", "gibbelle", "goliathite", "hoarheron", "floenatee", "duskapi", "moundvark", "murmurling", "nacrolin", "sentrikat", "threadwyrm", "lilybara"] |
+
 ## boki_fly (`content/rules/boki_fly.json`)
 
 Fliers in the garden (scripts/home/boki_fly.gd, BokiRig's hover, glide and flare clips). A species whose look has wings (its species JSON colors.wing) takes to the air while it roams (BaseLife's Roam) a zone listed in zones, and while it crosses a gap (a bridge over the void, the leap to another isle, The Dash's jump). Each flight picks a height in height (m over the ground); it rises at climb and comes down at sink (m/s), hovering while it stands and gliding while it moves. It flares for flare_s (s) as it touches down: the flare starts sink x flare_s / 2 m up, so the feet land halfway through it. Then it walks.
