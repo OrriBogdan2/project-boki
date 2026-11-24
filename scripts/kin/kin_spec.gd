@@ -33,7 +33,7 @@ var evo_root := ""
 var evo_paths: Array = []    # [{affinity, nodes: [ids]}]
 var voice := {}
 var egg := {}
-var avg_size := {}              # optional: {cm, kg, fit}: an average one's height, weight, model scale (Unique.base_size)
+var avg_size := {}  # optional: {cm, kg, fit}: an average one's height, weight, model scale (Unique.base_size)
 var infusion := {}           # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
 
 const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "active", "auto", "merge", "evolution", "voice", "egg", "size", "infusion"]

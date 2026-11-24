@@ -81,7 +81,7 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 
 ## base_axes (`content/rules/base_axes.json`)
 
-Raising leans (docs/decisions/0102-raising-leans.md, scripts/home/base_axes.gd): care moves three personality axes, each -1..1 in rec['raised'] (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle); BaseLife.choose reads them. tools/garden_sim.py reads this same file for its care-style rows.
+Raising leans (docs/decisions/0177-raising-leans.md, scripts/home/base_axes.gd): care moves three personality axes, each -1..1 in rec['raised'] (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle); BaseLife.choose reads them. tools/garden_sim.py reads this same file for its care-style rows.
 
 | Setting | Value |
 |---|---|

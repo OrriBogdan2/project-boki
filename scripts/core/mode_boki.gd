@@ -26,7 +26,8 @@ static func offer(pool: Array, mode_id: String, level: int) -> Array:
 
 ## One species of that offer, drawn with `r`.
 static func draw(pool: Array, mode_id: String, level: int, r: RandomNumberGenerator) -> String:
-	# a species with no model yet (Evo.has_art) is not drawn: it would show the old primitive body (--vespyx-places-check)
+	# a species with no model yet (Evo.has_art) is not drawn: it would show the old primitive body
+	# (--vespyx-places-check)
 	var fits := offer(pool, mode_id, level).filter(func(sp): return Evo.has_art(String(sp)))
 	return String(fits[r.randi_range(0, fits.size() - 1)])
 

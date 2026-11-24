@@ -74,7 +74,7 @@
 	"auto": "thorn_patch",
 	"merge": "hive_crown",
 	"evolution": {
-		"root": "Pip",
+		"root": "Pipe",
 		"paths": [
 			{
 				"affinity": "fierce",
@@ -105,8 +105,8 @@
 	"voice": {
 		"line": "sweet, sour, sinister",
 		"syllables": [
-			"Pip",
-			"eworth"
+			"Pipe",
+			"worth"
 		]
 	},
 	"egg": {

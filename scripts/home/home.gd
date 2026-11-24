@@ -1348,7 +1348,7 @@ func _move_player(d: float) -> void:
 			pvy = 0.0
 			gliding = false
 			Sfx.step(null, -16.0)
-		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)):
+		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < _abyss_respawn_y(ppos, gliding)):
 			_respawn_safe()
 	else:
 		py = gh
@@ -5169,3 +5169,9 @@ func _econ_tests(dbg) -> void:
 				player.position = ppos; cam.snap(ppos)
 			if "--shrine-open" in dbg: hecon.open_shrine()
 			elif "--grave-open" in dbg: hecon.open_grave(Econ.graves()[Econ.graves().size() - 1]))
+
+
+## Below this height over the abyss the home respawns you: the abyss floor less the fall room (more while gliding).
+func _abyss_respawn_y(at: Vector3, gliding: bool) -> float:
+	var room := HunterFeel.abyss_extra + (HunterFeel.abyss_glide_room if gliding else 0.0)
+	return world.abyss_floor(at.x, at.z) - room
