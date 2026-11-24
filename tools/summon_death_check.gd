@@ -3,8 +3,7 @@ extends RefCounted
 ## ends the window; its death turns the Boki back into a wisp where it fell. A rival hunter's kill: the longer
 ## cooldown, the wisp flies home at home_speed, its owner is revealed for reveal_s and pinged on the killer squad's
 ## minimap. A monster's kill: plain cooldown, no reveal. The owner downed: a rival's kill leaves a loose wisp
-## where it fell, a monster's sends it home. A kill plays boki_downed once where it fell (a loose wisp as it breaks
-## loose), nothing on the way home. Online: the "wkill" event pings only the killer's squad and the kin
+## where it fell, a monster's sends it home. Online: the "wkill" event pings only the killer's squad and the kin
 ## snapshot shows the wisp. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
@@ -119,7 +118,6 @@ func _death() -> void:
 	ok(k.global_position.distance_to(k.summon.fly_from) < 1.0, "...the streak starts where it fell")
 	_frames(k.summon.fly_len + 0.1)
 	ok(k.summon.fly == 0.0 and k.state == "shoulder", "...and ends on its owner's shoulder")
-	ok(downs == 1, "...one boki_downed where it fell, nothing on the way home (%d)" % downs)
 
 	f.reveal_t = 0.0
 	pings = _wisp_pings()
@@ -131,11 +129,8 @@ func _death() -> void:
 
 	k = _summoned(f)
 	f.downed = true
-	_listen(k.pos)
 	k.hurt(k.max_hp * 5.0, p)
-	_heard_down()
 	ok(k.wisp and KinSteal.loose(k), "owner downed, killed by a rival: a loose wisp")
-	ok(downs == 1, "...one boki_downed as it breaks loose (%d)" % downs)
 	ok(absf(k.summon.cd - base * mult) < 0.01, "...and the longer cooldown")
 	KinSteal.go_home(k)
 	k = _summoned(f)

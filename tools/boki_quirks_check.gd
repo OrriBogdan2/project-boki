@@ -98,6 +98,9 @@ func _rare_trait() -> void:
 	ok(found.has("nightmark") and found.has("") and BokiQuirks.has_trait(found["nightmark"], "nightmark")
 		and BokiQuirks.rare_of(found["nightmark"])["name"] == "Nightmark" and BokiQuirks.rare_of(found[""]).is_empty(),
 		"Save.new_kin rolls it at hatch (%s) and the card finds its badge text" % str(found.keys()))
+	var egg_baby := {"rare": true}      # a Rare Egg's baby: its rare = true is the egg, not a trait id
+	ok(BokiQuirks.rare_of(egg_baby).is_empty() and not BokiQuirks.has_trait(egg_baby, "nightmark"),
+		"a Rare Egg baby (rare = true) has no trait badge and raises no error")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
 	var a := Save.new_kin("marchleaf")

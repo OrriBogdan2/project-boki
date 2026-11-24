@@ -88,17 +88,17 @@ func run(main: Node) -> void:
 	var boss: Boss = m.lairs.boss_of(f)
 	var side := Vector3(-f["out"].y, 0, f["out"].x)
 	var outside: Vector3 = f["gate_c"] + Vector3(f["out"].x, 0, f["out"].y) * 6.0
-	_spot(p, outside + side * 2.5)
-	_spot(b, outside - side * 2.5)
+	_spot(p, outside + side * 1.5)  # (3 m apart: an Easy bot's reach is 4.8 m, a rolled difficulty)
+	_spot(b, outside - side * 1.5)
 	# (it looks once the team's sight has seen the player (a few ticks), before a roaming bot walks out of it:
 	# sight ends near 5.5 m)
 	b.ai["think"] = 0.05
 	# ---- 1. the control: outside the lair, the player is fair game
 	var went := false
-	p.reveal_t = 2.5      # (seen whichever way the bot faces: it only sees what is in front of it)
+	p.reveal_t = 2.5  # (seen whichever way the bot faces: it only sees what is in front of it)
 	for i in int(2.0 / Match.DT):
 		# (the player keeps firing, so the bot sees them whichever way its roam faces: its roam goal is a random
-		# draw that camp spawns shift, and from behind a player 4 m away is outside the view cone)
+		# draw that camp spawns shift, and from behind a player 3 m away is outside the view cone)
 		p.reveal_t = 1.0
 		_step()
 		if b.ai["tgt"] == p:
@@ -106,7 +106,7 @@ func run(main: Node) -> void:
 	p.reveal_t = 0.0
 	ok(
 		boss.dormant and m.lairs.boss_fight(b).is_empty() and went,
-		"outside the lair, boss asleep: the bot goes for the player 4 m away"
+		"outside the lair, boss asleep: the bot goes for the player 3 m away"
 	)
 	# ---- 2. sealed in: the boss only (a hit from before the seal doesn't count)
 	b.hurt(2.0, p, {"src": "shot"})
