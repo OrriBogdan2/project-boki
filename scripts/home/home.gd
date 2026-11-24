@@ -775,7 +775,8 @@ func _build_lots() -> void:
 		var at := _rect_center(rc)
 		var holder := Node3D.new(); holder.position = at; holder.rotation.y = int(pl["r"]) * PI * 0.5; add_child(holder)
 		var built := _has_b(b)
-		holder.add_child(Models.building(b) if built else FarmLots.look(b, _d()))
+		if not HubLayout.is_hub(visit):      # (the hub holds none: a side isle's lots would float in its void)
+			holder.add_child(Models.building(b) if built else FarmLots.look(b, _d()))
 		lots[b] = {"node": holder, "built": built, "at": at, "door": HomeLayout.door_at(b, int(pl["x"]), int(pl["z"]), int(pl["r"]))}
 		if not HomeLayout.placed(b, _d()):
 			# a farm-start lot you haven't marked out yet (build mode, Buildings)
@@ -1348,7 +1349,7 @@ func _move_player(d: float) -> void:
 			pvy = 0.0
 			gliding = false
 			Sfx.step(null, -16.0)
-		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)):
+		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)):
 			_respawn_safe()
 	else:
 		py = gh
@@ -1617,12 +1618,12 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 
 ## One step of rising up a ledge (the match's Hunter._ledge_rise): sets pvy while it lasts and
 ## returns true; false once it's over (moved off the face, dashed, glided, or timed out). A jump
-## near the top (Hunter.LRISE_WINDOW) flings you higher and faster toward your keys.
+## near the top (HunterFeel.lrise_window) flings you higher and faster toward your keys.
 func _ledge_float(d: float, mv: Vector2) -> bool:
 	lfl["t"] = float(lfl["t"]) + d
 	var n: Vector2 = lfl["n"]
 	var glide_now := Input.is_action_pressed("glide")
-	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > Hunter.LRISE_OFF
+	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > HunterFeel.lrise_off
 	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and mover.pressed(&"glide")):
 		lfl = {}
 		return false
@@ -1630,18 +1631,18 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 	var dir: Vector2 = mv.normalized() if mv.length() > 0.3 else n
 	if mover.pressed(&"jump") and panel_open == "":
 		# the fling: strong in the window near the top, weaker before it
-		var timed := left <= Hunter.LRISE_WINDOW
+		var timed := left <= HunterFeel.lrise_window
 		lfl = {}
 		var hv := Vector2(pvel.x, pvel.z)
-		var spd := Hunter.FLING_SPEED if timed else walk_speed()
+		var spd := HunterFeel.fling_speed if timed else walk_speed()
 		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
 		pvel = Vector3(hv.x, 0, hv.y)
-		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
+		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (HunterFeel.fling_height if timed else HunterFeel.fling_early_height)))
 		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
 		return true
 	if left <= 0.0:
 		lfl = {}
-		pvy = Hunter.LRISE_POP
+		pvy = HunterFeel.lrise_pop
 		if mv.length() > 0.3:
 			var hv := Vector2(pvel.x, pvel.z)
 			var run := walk_speed()
@@ -1649,7 +1650,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 			if mv.normalized().dot(n) > 0.15 and hv.dot(n) < run * 0.6: hv += n * (run * 0.6 - hv.dot(n))
 			pvel = Vector3(hv.x, 0, hv.y)
 	else:
-		pvy = HunterMove.rise_vy(pvy, left, 1.0, Hunter.LRISE_SPEED, d)
+		pvy = HunterMove.rise_vy(pvy, left, 1.0, HunterFeel.lrise_speed, d)
 	return true
 
 ## The pull-up over a rim (the match's mantle): straight up the face, then forward over the lip.
@@ -1689,7 +1690,7 @@ func _abyss_tint(d: float) -> void:
 	var want := 0.0
 	if world.is_void(ppos.x, ppos.z) and climb.is_empty() and pvy <= ABYSS_FX.RISE_OFF:     # (rising back up: no tint)
 		var top := _abyss_lip() - 0.5
-		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)
+		var kill: float = world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)
 		want = ABYSS_FX.danger_depth(top - py, top - kill)
 	abyss_k = lerpf(abyss_k, want, 1.0 - exp(-(12.0 if want > abyss_k else 9.0) * d))     # in fast, out over a few frames
 	if abyss_fx == null and abyss_k > 0.004:
@@ -4806,6 +4807,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide_i
 			(ke["node"] as Node3D).position = ke["pos"]
 		# a closer look (its card, and turning it round), then naming
 		var rv := KinReveal.new(baby["species"], baby)
+		if not ke.is_empty(): rv.twin = ke["node"]
 		add_child(rv)
 		panel_open = "reveal"; building_now = true      # hold the hunter still while you turn it round
 		rv.proceed.connect(func():
@@ -4837,6 +4839,7 @@ func _name_baby(baby: Dictionary) -> void:
 	var was_name := String(baby["name"])
 	var step := NameStep.new(baby["species"])      # (closing the panel keeps the suggestion)
 	v.add_child(step)
+	step.focus()
 	step.named.connect(func(nm: String, kept: bool):
 		baby["name"] = nm
 		if nm != was_name: Save.log_event("renamed", baby, {"from": was_name})
