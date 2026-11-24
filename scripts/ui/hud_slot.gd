@@ -120,8 +120,10 @@ static func locked(h, id: String, r: Rect2, icon: String, col: Color, key: Strin
 	padlock(h, r.get_center() + Vector2(0, 4), lcol)
 	if can:
 		if not h.in_fight():      # the gold glow says it; the word waits for a quiet moment
+			# (at a bigger Text size the word grows down into the slot, not up into the resource bar's name)
+			var base := r.position.y - 2.0 + (UI.fs(10) - 10)      # (just clear of the resource bar's label above the slot)
 			var pt := TextCache.fit(HudStyle.BIG, POINT_TAG, 10, r.size.x + 8.0)
-			HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), pt, 10, HudStyle.GOLD, 3)
+			HudStyle.ctext(c, Vector2(r.get_center().x, base), pt, 10, HudStyle.GOLD, 3)
 	elif tag != "":
 		var tw := TextCache.width(HudStyle.BIG, tag, 10) + 12.0
 		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 14), Vector2(tw, 14))

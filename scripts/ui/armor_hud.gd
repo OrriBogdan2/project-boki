@@ -18,13 +18,14 @@ static func pop(hud) -> void:
 
 ## The first-time armour hint (ArmourHint, via Hud.tip "armor"): one line just over the armour
 ## readout at `at`, fading out over its last second. The meta is [text, match time it ends]
-## (match time, as in bar(): the vitals redraw at HudPanels.REDRAW_HZ).
+## (match time, as in bar(): the vitals redraw at HudPanels.REDRAW_HZ). While you fight (Hud.in_fight) it
+## waits and keeps its whole time for the next lull: its box sat on the vitals and on the fight around them.
 static func note(hud, at: Vector2) -> void:
 	var n: Array = hud.get_meta("armor_note", [])
 	if n.is_empty():
 		return
-	if hud.in_fight():
-		hud.set_meta("armor_note", [n[0], hud.m.time + hud.TIP_LIFE])      # it waits the fight out
+	if hud.in_fight():   # COMBAT_CLARITY: no hint box over a fight
+		hud.set_meta("armor_note", [n[0], hud.m.time + hud.TIP_LIFE])
 		return
 	var left: float = float(n[1]) - hud.m.time
 	if left <= 0.0:

@@ -9,7 +9,8 @@ extends RefCounted
 ## from trained Speed, joy, and a lean on its own stretch (the Tide knack swims, wings glide the gap);
 ## friends run side by side, rivals bump.
 ## The runners crouch on the line through the countdown, burst off it, and celebrate or sulk at the line (RaceBeats).
-## The result card: the winner gains joy and trust, the last one home sulks, you get a few gems,
+## The result card names what carried the winner (carried(): "Speed carried it"). The winner gains joy and
+## trust, the last one home sulks, you get a few gems,
 ## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
 ## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
 ## on, "Train" runs a solo lap of the same loop (solo()); each cheer adds to Speed, see settle_solo().
@@ -156,6 +157,24 @@ static func expected_time(rec: Dictionary, tw := {}) -> float:
 	for i in st.size():
 		out += float(st[i]["len"]) / stretch_pace(rec, i, tw)
 	return out
+
+## The plain line naming what put `win` ahead of `other` ("Speed carried it"): the biggest of the two Boki's
+## raised Speed, mood (joy) and knack (swimming, gliding) gaps, or luck when the winner was not the favourite.
+static func carried(win: Dictionary, other: Dictionary, tw := {}) -> String:
+	var total := expected_time(other, tw) / expected_time(win, tw)
+	if total <= 1.0:
+		return "A lucky run carried it"
+	var spp := float(rules()["speed_per_point"])
+	var speed := (1.0 + float(win["stats"]["speed"]) * spp) / (1.0 + float(other["stats"]["speed"]) * spp)
+	var mood := _mood(win) / _mood(other)
+	var knack := total / (speed * mood)
+	if speed >= mood and speed >= knack:
+		return "Speed carried it"
+	return "A happy mood carried it" if mood >= knack else "Its knack carried it"
+
+static func _mood(rec: Dictionary) -> float:
+	var mood: Array = rules()["mood"]
+	return lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
 
 ## The race itself: runners' distance along the lap, stepped in time.
 class Run:
@@ -311,7 +330,8 @@ static func settle(run: Run) -> Dictionary:
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var mine: Dictionary = run.recs[run.backed]
 	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine, "dash"), backed_won)
-	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize, "pull": pull}
+	var why := carried(win, run.recs[order[1]], run.tw)
+	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize, "pull": pull, "why": why}
 
 ## Pays out a solo training lap (grades: three of great/good/miss). Returns the Speed gained.
 static func settle_solo(rec: Dictionary, grades: Array) -> int:
@@ -683,6 +703,7 @@ func _race_card(res: Dictionary, pinned: bool) -> void:
 	var why := " for backing the winner" if res["backed_won"] else ""
 	show_card("%s wins the Dash!" % win["name"], [
 		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
+		[res["why"], UI.MUTED],
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
 		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned)
 			+ GardenPrizes.rows(res["prize"]) + pull_rows(res))

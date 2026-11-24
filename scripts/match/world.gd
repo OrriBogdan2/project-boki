@@ -1162,7 +1162,6 @@ func a0_of(isl: int) -> float:
 
 # ------------------------------------------------------------------ meshes
 const RuinWalls := preload("res://scripts/match/ruin_walls.gd")
-const RuinWallsV1 := preload("res://scripts/match/ruin_walls_v1.gd")     # the first art pass (--art1)
 const SkyDeco := preload("res://scripts/match/sky_deco.gd")
 const Landmarks := preload("res://scripts/match/landmarks.gd")
 var landmarks = null
@@ -1633,7 +1632,7 @@ func _decorate() -> void:
 			wlist = _mesh_cache[wkey]
 		else:
 			var keep := _visual_seed_begin()
-			var rw = RuinWalls.new(self) if Flora.v2() else RuinWallsV1.new(self)
+			var rw = RuinWalls.new(self)
 			_visual_seed_end(keep)
 			for wmi in await rw.build(wall_mat):
 				wlist.append([String(wmi.name), (wmi as MeshInstance3D).mesh])

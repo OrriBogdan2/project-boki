@@ -163,9 +163,7 @@ func arch_tip(id: String, p: Hunter) -> Array:
 			]
 		)
 	if id == "r":
-		out.append(
-			["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], h_v.MUTED, 12]
-		)
+		out.append(["Unlocks at level %d, rank 2 at %d, rank 3 at %d. " % Hunter.ULT_AT, h_v.MUTED, 12])
 	if id == "sec":
 		var rd := p.ak.res_def()
 		out.append(
