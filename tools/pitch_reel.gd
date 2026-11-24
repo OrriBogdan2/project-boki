@@ -312,8 +312,7 @@ func _kit() -> void:
 	m.length = m.time + CLOCK_LEFT_S
 	var me := m.player
 	me.ctrl = "idle"
-	var off := _arg("--off=", "0,0").split(",")
-	var base := _roomy_ground(me.pos + Vector3(float(off[0]), 0, float(off[1])))
+	var base := _roomy_ground(me.pos)
 	me.pos = base
 	var foe_arch := String(Arch.ids()[(Arch.ids().find(hunter) + 3) % Arch.ids().size()])
 	foe_arch = _arg("--foe=", foe_arch)
@@ -329,6 +328,8 @@ func _kit() -> void:
 	hold_zoom = kz
 	_clean_take()
 	_zoom(kz)
+	if "--no-hud" in OS.get_cmdline_user_args():
+		Record.set_level(2)  # (the HUD bar sat over the Hunter in the low half of the frame)
 	mark("kit")
 	var t := 0.0
 	while t < SECS[7]:
@@ -379,23 +380,37 @@ func _arg(name: String, dflt: String) -> String:
 	return dflt
 
 
-## The ground nearest `p` with solid ground `--room=` m all round (no map edge in the frame) and no hazard area
-## (lava, static flats...) as near; `p` with the old KIT_ROOM_M rule when no spot that clear is within reach.
+## The ground nearest `p` (+ `--off=x,z` m) with solid ground `--room=` m all round (no map edge in the frame) and no
+## hazard area (lava, static flats...) as near; with `--open=<m>` the clearest such spot in reach instead (fewest trees,
+## rocks, walls and tall-grass tiles within that many m: no canopy or grass hides the fight), nearest on a tie;
+## `p` with the old KIT_ROOM_M rule when no spot that clear is within reach.
 func _roomy_ground(p: Vector3) -> Vector3:
+	var off := _arg("--off=", "0,0").split(",")
+	p += Vector3(float(off[0]), 0, float(off[1]))
 	var room := int(_arg("--room=", str(KIT_ROOM_M)))
 	var reach := int(_arg("--search=", str(KIT_SEARCH_M)))
+	var open_m := int(_arg("--open=", "0"))
 	var best := Vector3.INF
 	var best_d := INF
+	var best_c := INF
 	for dz in range(-reach, reach + 1, 2):
 		for dx in range(-reach, reach + 1, 2):
 			var x := int(p.x) + dx
 			var z := int(p.z) + dz
 			var d := float(dx * dx + dz * dz)
-			var clear := m.world.inb(x, z) and m.world.edge_dist(x, z, room) > room
-			if d < best_d and clear and not _hazard_near(x, z, room):
+			if not (m.world.inb(x, z) and m.world.edge_dist(x, z, room) > room):
+				continue
+			var c := _clutter(x, z, open_m) if open_m > 0 else 0.0
+			if (c < best_c or (c == best_c and d < best_d)) and not _hazard_near(x, z, room):
 				best = Vector3(x + 0.5, 0.0, z + 0.5)
 				best_d = d
-	print("PITCH_SPOT room=%d found=%s off=%.0f m" % [room, best != Vector3.INF, sqrt(best_d)])
+				best_c = c
+	print(
+		(
+			"PITCH_SPOT room=%d open=%d clutter=%s found=%s off=%.0f m"
+			% [room, open_m, best_c, best != Vector3.INF, sqrt(best_d)]
+		)
+	)
 	if best != Vector3.INF:
 		return _ground(best)
 	for dz in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
@@ -407,6 +422,19 @@ func _roomy_ground(p: Vector3) -> Vector3:
 				best = Vector3(x + 0.5, 0.0, z + 0.5)
 				best_d = d
 	return _ground(best if best != Vector3.INF else p)
+
+
+## How cluttered the ground within `r` m of (x, z) is: 3 a tree, rock or wall tile, 1 a tall-grass tile.
+func _clutter(x: int, z: int, r: int) -> float:
+	var w: World = m.world
+	var c := 0.0
+	for dz in range(-r, r + 1):
+		for dx in range(-r, r + 1):
+			if dx * dx + dz * dz > r * r or not w.inb(x + dx, z + dz):
+				continue
+			var i := w.idx(x + dx, z + dz)
+			c += 3.0 if w.kind[i] == World.T_BLOCK else (1.0 if w.bush.has(i) else 0.0)
+	return c
 
 
 ## A terrain hazard area (TerrainHazards) on any tile within `r` m of (x, z) (sampled every 2 m).
