@@ -102,3 +102,11 @@ lengths, glTF JSON identical); mesh, UVs, skin weights, Image_1/2 byte-identical
 - Skin islands: round 28 skipped skin skinned to LeftShoulder/LeftArm (left pec, left shoulder blade) and dark bare-arm
   skin; C/fix_islands.py gives those 20.8k texels the same grade (S x0.65, V x0.9). Sash untouched.
 Scripts, specs, renders: /home/boki/gens/hunter-round-1124/tenzo/C/.
+
+### Round 30 (2026-11-24, job 20261124-233706-a1): game-crouch arms, Attack arc, crotch plum
+- The game plays crouch with the WALK clip's arms (warden_native.json `crouch_arms_from`), so crouch arm fixes go in
+  `walk`. Measured on the game's crouch (gens/hunter-round-1124/tenzo/D/crouch_game.py): stone hand in thigh held
+  7.5 cm (round 29) -> 1.5 cm. Offsets D/z5.json via C/clip_offsets.py (rotation floats only): walk LeftArm +15,
+  RightArm -5 deg abduct; run/Jump_Run thighs +3 deg spread; Attack stone arm lowered out in the wind-up (clear of the
+  head), both arms swung apart in the smash (palms no longer inside the other forearm).
+- Image_0: dark/grey inner-crotch pants texels lifted to the outer plum (D/crotch.py, 66.6k texels, V 0.36 -> 0.40).
