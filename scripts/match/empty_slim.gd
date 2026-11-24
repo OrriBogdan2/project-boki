@@ -54,7 +54,7 @@ static func slim(mesh: Mesh, keep: float) -> Mesh:
 			return mesh
 		arrs[Mesh.ARRAY_INDEX] = idx
 		var far := reduce(arrs, LOD_KEEP)
-		var lods := {} if far.is_empty() else {0.05: far}
+		var lods := {} if far.is_empty() or far.size() >= idx.size() else {0.05: far}
 		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs, [], lods)
 	return out
 

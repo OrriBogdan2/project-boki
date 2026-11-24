@@ -367,8 +367,9 @@ Not timed (no source time beyond "a held cast"): `ostra_well*`, `ostra_empower`,
 The clips were keyed to the kit's beats, so the only gap was the hover: the kit constant was half the source and the doc's own number. The check asserts the
 rows above (blend by 0.12 s, the beat inside its frame, the hand back by the clip's end + 0.2 s, the 1.8 s flight, the 0.3 m hover) and that he never plants a
 foot: the rig has thigh and shin bones but no foot, the robe covers them, and the lowest bone never drops under 0.2 m over the ground point, standing or walking.
-Suggestions, not built: a "firing faster lowers speed and damage" penalty (card text, still none: the 0.6 s cadence cannot be beaten); the unused `flurry` clip
-(`ostra_flurry`, nothing plays it); the footage's Snap flight speed reads about 30 h/s but the notes' "about 3 h" stun flight is ambiguous.
+Suggestions, not built: a "firing faster lowers speed and damage" penalty (card text, still none: the 0.6 s cadence cannot be beaten); a card-volley move for the
+`flurry` clip (no source beat is one: see the Clips row in the audit table); the footage's Snap flight speed reads about 30 h/s but the notes' "about 3 h" stun flight is ambiguous.
+
 ## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
 
 Every slot measured three ways: the source from briefs/hero-ref/ostra.md (one frame = 0.2 s, the ult strip 0.1 s), the
@@ -433,7 +434,7 @@ clip that far in on the kit's clock (docs/art/wardens/CLIPS.md); kit numbers unt
 | X opens (`ostra_well_snap`) | the vortex opens, he is free [f33] | 0.00 / 0.03 / 0.57, free at the open | same | matches; asserted |
 | R | the Boki Merge (`mf_xform`, ours) | 0.80 | same | no source |
 
-Not in the slots: `ostra_flurry` is cut (no caller, `--dead-kmoves-check`); `ostra_empower` (Swollen, 0.9 s) has no source frame.
+Not in the slots: `ostra_flurry` is cut from the moves (no caller, `--dead-kmoves-check`; the clip stays, it is his results pose); `ostra_empower` (Swollen, 0.9 s) has no source frame.
 ## Parity verify, Nov 9
 Main d255acbee against the sources (docs/KIT_PARITY.md Ostra block, briefs/hero-ref/ostra.md, sv/briefs/kits.md Void,
 DECISIONS 2026-11-07 and the owner holds: Nightwell locks him about 1 s then he moves freely; Brimseed peaks at 3.5x; LMB and RMB are owner
@@ -484,11 +485,11 @@ branch (ext/motley-seed-fizzle, ext/parity-motley-float, ext/cancel-matrix-c); t
 | Dash-flow, 16 rows, all with a source | Swap is a lobbed projectile [D] | `dash.{ground,air}.{lmb,rmb,e,x,q}` fire; `into_dash` lmb, rmb, e, q fire | match | F:6-59, 68 |
 | Dash-flow: Shift in the Nightwell dome, jump in the dome | the 1.0 s cast hold [F] | `into_dash.x` buffer (goes as the well opens), `into_jump.x` lock | match (owner hold) | F:63, 74, U:294-299 |
 | Clips: 14 kit moves | footage poses | every `play()` id is in KMovesStone and warden_anim/ostra.json `kmoves` | match on coverage | kmoves_stone.gd:476-743 |
-| Clips: `ostra_flurry` | item 136 RMB card flurry, since replaced by the Snap | never played; VoidCard and tools/motley_card_shots.gd still hang on it | open (dead, not parity; `warden_anim/ostra.json` is *in flight* on ext/anim-arm-motley) | kmoves_stone.gd:500-506 |
+| Clips: `flurry` (GLB clip, 0.9 s) | authored for owner item 136 (Nov 5: RMB becomes an 8-card flurry, 4 hits stun); DECISIONS 11-07 put the source's Snap back, and no data/wiki/footage beat is a card volley | no kit move plays it (mapping cut by `ext/dead-kmoves`); it is NOT dead: `content/rules/results_pose.json` holds it at 0.5 s as his results-stage pose, and `--warden-clips-check` pins it (in the GLB, mapped by no move, still the pose) | closed (listed as move-less, no move invented; GLB untouched). Suggestion, not built: a card flurry only if the owner reopens item 136 over the Snap | content/rules/results_pose.json, tools/warden_clips_check.gd |
 
 Fixed in this pass: the small-mechanics row "Charged orb passes through terrain: not built" was stale since item 60 (now built, asserted by
 `item 60: every orb passes the wall ...`). The rest are listed, not built: LMB slow 6% vs 10%, orb speed, spam penalty, Shift ranges, ult ranks,
-the dead flurry clip, and the stale Ostra rows of KIT_PARITY (E 3x, gap 17), whose file two branches are editing.
+the move-less flurry clip (closed above), and the stale Ostra rows of KIT_PARITY (E 3x, gap 17), whose file two branches are editing.
 
 ## v2 re-audit (Nov 9: models-v2 merged)
 Re-measured on the v2 model and clips (`--anim-audit`, a hand-to-prop sweep against the pre-v2 tree `54df2f18a^`, `--anim-shots --close`; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 walk and run strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/ostra.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
