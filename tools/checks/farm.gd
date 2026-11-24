@@ -8,4 +8,5 @@ const CHECKS := {
 	"--bond-pace-check": ["res://tools/bond_pace_check.gd", "bond_pace_check", null],  # FARM_LOOP: bond pace, taper
 	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 	"--care-prompt-check": ["res://tools/care_prompt_check.gd", "care_prompt_check", null],  # the care line over a Boki
+	"--farm-greet-clip": ["res://tools/farm_greet_clip.gd", "farm_greet_clip", null],  # GPU film: Boki notice you back
 }

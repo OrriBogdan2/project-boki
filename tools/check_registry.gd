@@ -315,6 +315,8 @@ const CHECKS := {
 	"--heal-read-check": ["res://tools/heal_read_check.gd", "heal_read_check", null],  # every heal: one read
 	"--results-ways-check": ["res://tools/results_ways_check.gd", "results_ways_check", null],  # 0051 results
 	"--results-five-check": ["res://tools/results_five_check.gd", "results_five_check", "check"],
+	"--results-boki-line-check": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "check"],
+	"--results-boki-line-shots": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "shots"],
 	"--results-five-shots": ["res://tools/results_five_check.gd", "results_five_check", "shots"],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--xp-cue-check": ["res://tools/xp_cue_check.gd", "xp_cue_check", null],  # kill XP tick, steal stings
@@ -1050,22 +1052,31 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 		printerr("CHECKREGISTRY FAIL: duplicate flags across tools/checks/*.gd and CHECKS: ", _dupes)
 		main.get_tree().quit(1)
 		return true
+	var flag := flag_in(args)
+	if flag == "":
+		return false
+	var e: Array = checks[flag]
+	Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
+	seed(hash(flag))
+	for a in args:
+		if String(a).begins_with("--rng-seed="):
+			seed(int(String(a).substr(11)))
+	var c = load(String(e[0])).new()
+	main.set_meta(String(e[1]), c)
+	if e[2] == null:
+		c.run(main)
+	else:
+		c.run(main, e[2])
+	return true
+
+
+## The first registered check flag on the command line, "" if none (Settings uses it too).
+static func flag_in(args: PackedStringArray) -> String:
+	var checks := all()
 	for flag in checks:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
-			var e: Array = checks[flag]
-			Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
-			seed(hash(flag))
-			for a in args:
-				if String(a).begins_with("--rng-seed="):
-					seed(int(String(a).substr(11)))
-			var c = load(String(e[0])).new()
-			main.set_meta(String(e[1]), c)
-			if e[2] == null:
-				c.run(main)
-			else:
-				c.run(main, e[2])
-			return true
-	return false
+			return flag
+	return ""
 
 
 ## Every check, one lookup: the legacy CHECKS above plus the area files in tools/checks/. A flag present in two
