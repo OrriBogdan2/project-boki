@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | RMB: Sticky Fingers | An abyssal arm grabs the first body and reels it in, stunned. |
 | E: Lump Sum | Slam your fist into the ground ahead: damage and a long stun. |
 | Hunter ultimate: Both Barrels | Charge a fan while walking slowly, then two waves of brass slugs. |
-| Weapon: Shotgun | Seven slugs, 6m out: all seven fly in a tight group along your aim; rear hits hurt more. |
+| Weapon: Potshot | Seven slugs, 6m out: all seven fly in a tight group along your aim; rear hits hurt more. |
 
 ### Abilities in full
 

@@ -55,7 +55,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 |  |  |
 |---|---|
 | Body | 193 health, 5.63 m/s, 2 dash charges |
-| Signature weapon | War Hammer & Blue Guard (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Signature weapon | Capstan Hammer (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's shield. Holds the line with his Blue Guard, plants his hammer where the fight is, and heals the spot. |
 | Silhouette | the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist |
 | Resource | Crushed (max 1) |
@@ -66,23 +66,23 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Frontline tank: block with your Blue Guard, then knock foes into walls with your hammer to stun them. |
+| Loop | Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them. |
 | Passive: Crushed | Knocking a foe into a wall stuns it. |
-| Dash: Tideturner | Short dash ending in a spinning hit; with Blue Guard up, Full Ahead. |
+| Dash: Tideturner | Short dash ending in a spinning hit; with aegis up, Full Ahead. |
 | RMB: Blue Guard | Hold to block shots from the front; your dash key becomes Full Ahead. |
 | E: Safe Harbour | Healing zone around your hammer for 4s, ending in a burst. |
 | Hunter ultimate: Groundswell | Plant and slam: the ground erupts down a lane, throwing foes up. |
-| Weapon: War Hammer & Blue Guard | Tap throws the hammer, tap again recalls; hold to spin and slam. |
+| Weapon: Capstan Hammer | Tap throws the hammer, tap again recalls; hold to spin and slam. |
 
 ### Abilities in full
 
 **Crushed (passive).** Crushed: any knock of yours (Crushing Blow, Tideturner, Full Ahead) that drives a foe into a wall stuns it 1.0 (8 damage).
 
-**Tideturner (dash, Shift, 8s cooldown).** Tideturner: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the Blue Guard raised it's a Full Ahead on its own 6s cooldown (it spends no dash charge): 4.2m behind the Blue Guard, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
+**Tideturner (dash, Shift, 8s cooldown).** Tideturner: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Full Ahead on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
 
 **Blue Guard (RMB, 6s cooldown).**
 
-- *Hold:* Raise the Blue Guard: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Full Ahead on this slot's 6s cooldown.
+- *Hold:* Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Full Ahead on this slot's 6s cooldown.
 - *Tap:* A tap only raises and lowers the Blue Guard; the Bash is the Full Ahead on the dash key.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
 

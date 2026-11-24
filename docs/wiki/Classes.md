@@ -52,14 +52,14 @@ your class in the Expedition menu, and you can try every class against dummies i
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Drawstring | Red Thread | Slip Stitch | Pin Down | Hemline | none (Boki Fusion) |
-| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Bitter End | Bad Blood | Rampage | Final Swing | Short Leash | none (Boki Fusion) |
+| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Bitter End | Rage | Rampage | Final Swing | Short Leash | none (Boki Fusion) |
 | [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Brass Tacks | Hot Streak | Slipstep | Coin Blast | Palm Lance | none (Boki Fusion) |
-| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Crushed | Tideturner | Aegis | Safe Harbour | none (Boki Fusion) |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | Capstan Hammer | Crushed | Tideturner | Blue Guard | Safe Harbour | none (Boki Fusion) |
 | [the Snowglide](Class-Snowglide.md) | 124 / 1 | Ice Darts | Cold Snap | Skate | Icebreaker | Cold Front | none (Boki Fusion) |
 | [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Open Flame | Boiling Point | Lock Horns | Spitfire | Molten Hug | none (Boki Fusion) |
 | [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Stone's Throw | Jade Ward | Leap of Faith | Rock Bottom | Foothold | none (Boki Fusion) |
 | [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Finger Guns | Static | Wirerun | Pink Spear | Undercurrent | none (Boki Fusion) |
-| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Potshot | Finders Keepers | Mad Dash | Sticky Fingers | Lump Sum | none (Boki Fusion) |
+| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Potshot | Salvage | Mad Dash | Sticky Fingers | Lump Sum | none (Boki Fusion) |
 | [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Hot and Cold | Carry the Day | Foxtrot | Stick Around | Hearthlight | none (Boki Fusion) |
 | [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Sleight Trigger | Marks | Vault | Bola | White Flash | none (Boki Fusion) |
 | [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Comic Timing | Swell | Musical Chairs | Stage Fright | Gag Gift | none (Boki Fusion) |
@@ -92,7 +92,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | Hunter | Goal | Target | Reward |
 |---|---|---|---|
 | the Red Stitch | Stun 12 enemies | 12 | Colours: Fletcher Green |
-| the Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
+| the Red Stitch | Your Boki lands 40 hits | 40 | Emote: Spin a Yarn |
 | the Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
 | the Red Stitch | Make it out after being knocked down | 1 | Title: Loose End |
 | the Unbroken | Knock 10 enemies into walls | 10 | Colours: Forge Red |
@@ -100,7 +100,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
 | the Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
 | the Hired Gun | Land 30 hits from 12 m or more | 30 | Colours: Dust Rider |
-| the Hired Gun | Revive 2 teammates | 2 | Emote: Hat Tip |
+| the Hired Gun | Revive 2 teammates | 2 | Emote: Call It |
 | the Hired Gun | Fly through 10 air rings | 10 | Trail: Loose Change |
 | the Hired Gun | Make it out of 3 expeditions | 3 | Title: Long Shot |
 | the Barnacle Knight | Revive 3 teammates | 3 | Colours: Hullsteel |
@@ -122,7 +122,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Storm Chaser | Stagger 10 monsters with abilities | 10 | Colours: Storm Violet |
 | the Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
 | the Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
-| the Storm Chaser | Your Boki lands 50 hits | 50 | Title: Live Wire |
+| the Storm Chaser | Your Boki lands 50 hits | 50 | Title: Fully Charged |
 | the Scrap King | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
 | the Scrap King | Stun 10 enemies | 10 | Colours: Rust and Brine |
 | the Scrap King | Open 10 chests | 10 | Title: Salvager |
