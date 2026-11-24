@@ -342,7 +342,7 @@ func busy() -> bool:
 	return disabled()
 
 ## The kit's own cast lock (its ult planting the body) refuses a press of `slot` now: DashFlow holds the press for
-## the lock's end (docs/decisions/0022-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
+## the lock's end (docs/decisions/0118-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
 func lock_refuses(_slot: String) -> bool:
 	return busy() and not disabled()
 
@@ -576,7 +576,7 @@ func _r_impact() -> void:
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
 	m.sfx("boom", h.pos, -2.0, 0.8)
-	Shake.incoming_big(m, h.pos, ImpactWeight.shake("heavy"), h)
+	Shake.big(m, h.pos, "ult", h)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.18)
 
