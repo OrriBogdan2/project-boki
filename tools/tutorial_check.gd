@@ -335,7 +335,7 @@ func _lead_sample(m: Match, tu: Tutorial, lead: Dictionary) -> void:
 		return
 	r["far"] += 1
 	if int(r["far"]) == 1 and d > pd + 2.0:
-		r["behind"] = true  # (it starts the leg out fighting, behind you: Lead.passed has it fall in beside you, not lead)
+		r["behind"] = true  # (starts the leg fighting behind you: Lead.passed)
 	if d < pd - 2.0:
 		r["ahead"] += 1
 	if float(r["still"]) > 0.6 and (k.wisp or k.comp.lead_hold):
