@@ -11263,3 +11263,4 @@ READY ext/feel-hit-tick 7e4891563b (reticle hit tick 0.15 s / 7 px; GPU pair in 
 READY ext/boki-own-clips-c f2896d1945 (bulk-rebase: origin/main merged in mechanically, was 0fcf21e059; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/perf-aim-circles dfb6ade5631b5dd1ed4e58ce2b68679b668aa1d7 (fight perf r2: circle telegraphs look each ground point up once; aim_draw 1.95->1.38 ms/frame GPU, same vertices)
 READY ext/perf-thief-marks 6fee09f5b6d01a8346bb8be8e4516aadab7add7e (fight perf r2: Sable's Marks fade walk skipped while none is up, one meta read per foe; -0.04 ms busy fight)
+READY ext/perf-thief-marks ea1f3619ba5226b7dc6cf89fd7a534d1f0c186b2 (fight perf r2: Sable's Marks fade walk skipped while none is up; supersedes 6fee09f, fixes a godot-shadow ratchet line)
