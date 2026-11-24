@@ -348,8 +348,9 @@ func _away(cs) -> void:
 	if bb == null:
 		return
 	await _wait(1.5)
-	var text := _labels(bb.root_ui)
-	ok(bb.panel_open == "While you were away", "the away card opens (%s)" % bb.panel_open)
+	var text := "\n".join(BaseCard.away)  # the lines behind the HUD line
+	var line := BaseCard.away_line(BaseCard.away)
+	ok(line != "" and bb.panel_open != "While you were away", "the return is one HUD line, no panel (%s)" % line)
 	await _grab("away_card")
 	print("GDAY card: ", text.substr(maxi(0, text.find("While you were away")), 900))
 	ok("Moss trained" not in text, "Moss lives in Cinderstep: it does not train at Bramblebank's toys while away")
@@ -385,8 +386,9 @@ func _away_cinderstep(bb, bb_trained: bool) -> void:
 	if cs == null:
 		return
 	await _wait(1.5)
-	var text := _labels(cs.root_ui)
-	ok(cs.panel_open == "While you were away", "Cinderstep has its own away card (%s)" % cs.panel_open)
+	var text := "\n".join(BaseCard.away)
+	var line := BaseCard.away_line(BaseCard.away)
+	ok(line != "", "Cinderstep has its own return line (%s)" % line)
 	print("GDAY cinderstep card: ", text.substr(maxi(0, text.find("While you were away")), 900))
 	var head := text.find("Cinderstep")
 	var trained := text.find("Moss trained")
