@@ -626,3 +626,4 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
   Unfinished features ship behind a flag or a "(prototype)" label, never half-wired into the default path.
 - Post READY by ~1 PM EST to make that day's train.
 - 2026-11-24 (owner): hunter movement = ONE blended move; no walk/run/sprint states, NO sprint button; speed comes from movement tech (dash -> glide), SUPERVIVE model.
+- 2026-11-24 (owner): farm / home garden = modern creature-raising garden with a CLOSE THIRD-PERSON camera, permanent. Problems in the farm get fixed in third person; never revert the farm to top-down. Expeditions and matches stay top-down. Our garden stays original (no copied look or assets).
