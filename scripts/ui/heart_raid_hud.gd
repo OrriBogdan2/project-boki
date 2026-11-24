@@ -63,7 +63,7 @@ static func fill(rd: HeartRaid) -> float:
 
 static func _clock(t: float) -> String:
 	var s := maxi(0, int(ceil(t)))
-	return "%d:%02d" % [s / 60, s % 60]
+	return "%d:%02d" % [int(s / 60.0), s % 60]
 
 
 ## The coming wave's gates are marked (its countdown is on).

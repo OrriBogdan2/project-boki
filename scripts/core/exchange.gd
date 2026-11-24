@@ -140,10 +140,10 @@ static func _makers(item: String, force := false) -> void:
 ## so setting the system clock can't pick a cheap or dear day. Saved as the day's date ("day").
 static func _day_turn() -> void:
 	var st := _st()
-	var clock := int(Time.get_unix_time_from_datetime_dict(Time.get_datetime_dict_from_system()) / 86400)
+	var clock := int(Time.get_unix_time_from_datetime_dict(Time.get_datetime_dict_from_system()) / 86400.0)
 	var last := -1
 	if String(st["day"]) != "":
-		last = int(Time.get_unix_time_from_datetime_string(String(st["day"])) / 86400)
+		last = int(Time.get_unix_time_from_datetime_string(String(st["day"])) / 86400.0)
 	if _run_day < 0:
 		_run_day = last if last >= 0 else clock
 	var day := Time.get_date_string_from_unix_time(anchored_day(last, clock, _run_day) * 86400)

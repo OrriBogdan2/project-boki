@@ -104,7 +104,7 @@ func _knock() -> void:
 		open = open and h.gliding
 	ok(open, "a hard knock keeps the glider open the whole 0.5 s")
 	var moved := h.pos.x - x0
-	ok(moved > 0.5 * Hunter.GLIDE_SPEED + 1.0, "...and the shove carries it %.1f m in 0.5 s" % moved)
+	ok(moved > 0.5 * HunterMove.glide_cruise + 1.0, "...and the shove carries it %.1f m in 0.5 s" % moved)
 	# a shut glider still waits the knock out before it opens ([est], --abyss-check section 8 on edge knocks)
 	_reset(spot, Vector3(0, -2.0, 0))
 	h.air_t = 1.0

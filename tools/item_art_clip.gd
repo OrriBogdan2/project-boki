@@ -55,4 +55,4 @@ func _circle(item: String, at: Vector3) -> void:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
 		if i % 2 == 0:
-			main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s_%03d.png" % [item, i / 2]))
+			main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s_%03d.png" % [item, int(i / 2.0)]))

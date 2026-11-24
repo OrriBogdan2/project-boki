@@ -60,3 +60,7 @@ LMB, RMB, E + recast, X + leap, hit, death).
   thin and folded parts as black specks.
 - Not changed: textures, materials, UVs, skeleton, bind matrices, every body vertex except the right fingers.
   The hat brim keeps the scan's notches.
+
+## Native model r6 (gil_meshy.glb)
+- Hat (brim and cone) texels recoloured from charcoal to dark navy, blue floor above the toon shader's dark_lift (0.07 linear; anything darker is lifted to neutral grey). Texture is now `gil_meshy_r6.jpg` (4096, q90, 4:2:0).
+- Attack: LeftArm/LeftForeArm re-keyed again, closest left hand/forearm to head and hat 0.021 -> 0.098 m. Other clips, mesh, UVs, skin and ink room unchanged from r5.
