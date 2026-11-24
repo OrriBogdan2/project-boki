@@ -19,7 +19,7 @@ const PATH := "res://art/kin/%s/%s.glb"
 const FRAME := {
 	"cindowary":
 	{
-		"head": Vector3(0, 0.357, -0.0814),
+		"head": Vector3(0, 0.467, -0.105),
 		"top": 0.464,
 		"carry": Vector3(0, 0.517, 0.042),
 		"ear_tip": Vector3(0.0199, 0.464, 0.0379),
@@ -37,7 +37,7 @@ const FRAME := {
 	},
 	"basaltoad":
 	{
-		"head": Vector3(0, 0.357, -0.132),
+		"head": Vector3(0, 0.347, -0.178),
 		"top": 0.464,
 		"carry": Vector3(0, 0.517, 0.0654),
 		"ear_tip": Vector3(0.054, 0.464, 0.0588),

@@ -247,10 +247,13 @@ AUTO = {  # id: overrides on AUTO_BASE
     "tuatrune": BORROWED,
     "velvorm": BORROWED,
     "casquebill": BORROWED,
-    "basaltoad": {**BORROWED, "sat": 0.35, "gain": 1.15, "tint": (1.03, 1.0, 0.85)},  # lit toad read red-brown, 2D is tan
+    # eyes read off the fit sheet's painted eyes (front view seen from -z, the sheet's own front view is the back)
+    "basaltoad": {**BORROWED, "sat": 0.35, "gain": 1.15, "tint": (1.03, 1.0, 0.85),  # lit toad read red-brown, 2D is tan
+                  "eye_c": (0.106, 0.347, -0.163), "eye_r": (0.032, 0.03, 0.018), "eye_yaw": 0.5, "iris": "edc15a"},
     # lit leather read pink (sat 0.68 vs the 2D 0.48); the embers and the brass keep their own saturation, and a crack
     # a texel wide keeps a texel of the atlas (hot: reach in texture texels)
-    "cindowary": {**BORROWED, "sat": 0.55, "hot_sat": 0.95, "hot": 3},
+    "cindowary": {**BORROWED, "sat": 0.55, "hot_sat": 0.95, "hot": 3,
+                  "eye_c": (0.026, 0.467, -0.098), "eye_r": (0.011, 0.011, 0.006), "eye_yaw": 0.6, "iris": "f76e35"},
     "caecilith": {},
     "glintmole": {},
     "rimeshrew": {},

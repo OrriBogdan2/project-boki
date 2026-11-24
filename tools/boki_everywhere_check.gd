@@ -207,7 +207,9 @@ func _surfaces() -> void:
 	for sp in species:  # each listed species as the wild visitor of the zone you stand in (GardenVisitor)
 		Demo.setup("farm")
 		var vz := GardenZones.current()
-		GardenVisitor.begin(vz, sp, Time.get_unix_time_from_system())
+		var vrec := GardenVisitor.begin(vz, sp, Time.get_unix_time_from_system())
+		print("BOKI_EVERYWHERE %s visitor muts=%s (shot with a plain record: muts cleared)" % [sp, str(vrec.get("muts", []))])
+		vrec["muts"] = []  # a grown part (antennae, a ball on the hips) is the record's; the model's own look is what is judged
 		main.show_screen("home", {"zone": vz})  # base-mode saves land on the hub, where no visitor walks
 		for i in 120:
 			await RenderingServer.frame_post_draw
@@ -240,6 +242,17 @@ func _visitor_close(h, sp: String, path: String) -> void:
 		main.get_tree().process_frame.connect(aim)
 		await _grab_window(path, 30)
 		main.get_tree().process_frame.disconnect(aim)
+		# the eye-level shot: the camera at the model's eye height (FRAME head), 0.7 m out in front, a little to the side
+		var rig := n.find_child("BokiRig", true, false) as Node3D
+		if rig and BokiRig.FRAME.has(sp):
+			var eye: Vector3 = rig.global_transform * (BokiRig.FRAME[sp]["head"] as Vector3)
+			var fwd: Vector3 = -rig.global_transform.basis.z.normalized()
+			var side: Vector3 = fwd.cross(Vector3.UP).normalized()
+			cam.fov = 30
+			cam.global_position = Vector3(eye.x, eye.y, eye.z) + (fwd * 0.7 + side * 0.18)
+			cam.look_at(eye)
+			print("BOKI_EVERYWHERE %s eye-level camera y=%.3f m (eye y=%.3f, FRAME head y=%.3f)" % [sp, cam.global_position.y, eye.y, BokiRig.FRAME[sp]["head"].y])
+			await _grab_window(path.replace("visitor_close_", "visitor_eye_"), 30)
 		cam.queue_free()
 		return
 	print("BOKI_EVERYWHERE FAIL: %s is not in the garden as the visitor (%d kins out)" % [sp, h.kins.size()])
