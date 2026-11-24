@@ -213,7 +213,7 @@ func _surfaces() -> void:
 		main.show_screen("home", {"zone": vz})  # base-mode saves land on the hub, where no visitor walks
 		for i in 120:
 			await RenderingServer.frame_post_draw
-		if main.current and main.current.has_method("_close_panel"):
+		if main.current and main.current.has_method("_close_panel") and main.current.get("panel_host") != null:
 			main.current._close_panel()  # the "while you were away" note
 		await _grab_window(out.path_join("visitor_%s.png" % sp), 30)
 		await _visitor_close(main.current, sp, out.path_join("visitor_close_%s.png" % sp))
