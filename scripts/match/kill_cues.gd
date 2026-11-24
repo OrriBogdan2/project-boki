@@ -8,11 +8,12 @@ extends RefCounted
 ##   steal_lost  the same moment from the squad that was robbed
 ## Nothing plays for a squadmate farther than SHARE_RADIUS from the kill, or for a third squad.
 
-const SHARE_RADIUS := 30.0      # m: squadmates this close to a kill share its XP (and hear its cues)
-const TICK_DB := -9.0           # the tick sits well under the sting: it lands on every kill
+const SHARE_RADIUS := 30.0  # m: squadmates this close to a kill share its XP (and hear its cues)
+const TICK_DB := -9.0  # the tick sits well under the sting: it lands on every kill
 const STING_DB := -3.0
-const STING_DUCK_S := 0.4       # s the music dips under a sting (a short, shallow dip: Sfx.duck)
+const STING_DUCK_S := 0.4  # s the music dips under a sting (a short, shallow dip: Sfx.duck)
 const STING_DUCK_DB := -4.0
+
 
 ## The Hunter team that dealt the most damage to the monster, or -1 if no hunter hurt it.
 static func top_team(mb: Mob) -> int:
@@ -24,6 +25,7 @@ static func top_team(mb: Mob) -> int:
 			best = int(t)
 	return best
 
+
 ## Who shares the kill XP of a monster at `at` taken by `killer`: the killer and their squadmates in range.
 static func sharers(m: Match, at: Vector3, killer: Hunter) -> Array[Hunter]:
 	var out: Array[Hunter] = []
@@ -32,8 +34,10 @@ static func sharers(m: Match, at: Vector3, killer: Hunter) -> Array[Hunter]:
 			out.append(h)
 	return out
 
+
 static func _near(h: Hunter, at: Vector3) -> bool:
 	return Vector2(h.pos.x - at.x, h.pos.z - at.z).length() <= SHARE_RADIUS
+
 
 ## `credit` took the last hit (a Boki counts as its owner); `top` is the team that did most of the damage.
 static func on_kill(m: Match, mb: Mob, credit: Ent, top: int) -> void:

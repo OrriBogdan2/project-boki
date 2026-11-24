@@ -9,7 +9,8 @@ extends ArchKit
 ##   A burning foe takes more from the stream and the cinder (ignite_bonus), and the stream chips its health.
 ## - LMB, Torch Lance: hold for a stream of fire from her hand (a gold pilot flame first); the stream keeps its own
 ##   velocity so a sweep bends it, narrow at the palm and billowing at the end.
-## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that always flies its full 14m;
+## - RMB, Cinder Shot: a cast. The press shows the lane with a flash in her palm and starts the cooldown; the
+##   cinder leaves 0.4s later (footage f0073 > f0075) and always flies its full 14m;
 ##   it slows the foe and sets it Ablaze; on a burning foe it upgrades and spreads. Rank 3: a second charge.
 ## - Shift, Soot Ram: two charges of a short head-first dash toward the cursor that STOPS on the
 ##   first foe with a fiery impact and shoves it; rank 3: more damage, a speed boost and a shield on a hit.
@@ -31,9 +32,8 @@ const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
 const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds her hand up off the aim (as_cloak: wide to 0.26)
-const GLOW_RAMP := 0.5                # s of an RMB hold for the palm glow to reach full size and heat
 const GLOW_STEP := 0.05               # s between two palm glow puffs (each lives ~0.14 s: they overlap)
-const GLOW_HOT := 0.7                 # hold fraction where a white-hot bloom joins the glow
+const GLOW_HOT := 0.7                 # cast fraction where a white-hot bloom joins the glow
 const CRACKS_PEAK := 4.0               # her magma cracks' emission while the fire runs (rest: the toon's 2.2)
 const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
@@ -55,8 +55,9 @@ var was_held := false
 var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
-var glow_t := 0.0                # the hold time (s) of the last palm glow puff while Cinder Shot is held
-var aiming := false             # hold: Cinder Shot held (the lane shows)
+var glow_t := 0.0                # the cast time (s) of the last palm glow puff while Cinder Shot casts
+var aiming := false             # hold: Cinder Shot casting (the lane shows; the cinder leaves at cast_t)
+var cast_t := 0.0               # s since the Cinder Shot press (the cast; the cinder leaves at rmb.cast)
 var fx: LDFx
 var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
@@ -214,6 +215,7 @@ func _tick(dt: float) -> void:
 		hose.step(m.world, dt)
 		_hose_look()
 	if not bash.is_empty(): _tick_bash(dt)
+	if aiming: _tick_shot_cast(dt)
 	jet.tick(dt)
 	KMovesPair.air_moves(self, "lw_jump", "lw_land")
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
@@ -300,7 +302,7 @@ func pips_on(f: Ent) -> int:
 		if fx.shown("pip%d_%d" % [key, i]): n += 1
 	return n
 
-## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot lane, with nothing fired.
+## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot cast, with nothing fired.
 func _drop_holds() -> void:
 	hose.clear()
 	if fx: fx.flame_off("hose%d" % h.get_instance_id())
@@ -310,6 +312,7 @@ func _drop_holds() -> void:
 	flame_acc = 0.0
 	h.mel_hold = 0.0
 	bash = {}
+	if aiming: AimKit.hide(h, "rmb")
 	aiming = false
 	jet.drop()
 
@@ -444,31 +447,55 @@ func _stream_looks() -> void:
 	if live.size() < 4:
 		return
 	if flame_ticks % TONGUE_EVERY == 0:
-		var mid: Dictionary = live[live.size() / 2]
+		var mid: Dictionary = live[int(live.size() / 2.0)]
 		var v: Vector3 = mid["v"]
 		vfx("lance_tongue", ground(mid["p"]), Vector2(v.x, v.z).normalized())
 	if flame_ticks % LICK_EVERY == 0:
 		vfx("lance_lick", ground(live[0]["p"]))
 
 # ------------------------------------------------------------------ RMB: Cinder Shot
-## Her palms glow while Cinder Shot is held: puffs at the hold fraction (size, heat), a white-hot bloom near full.
+## Her palms glow while Cinder Shot casts: puffs at the cast fraction (size, heat), a white-hot bloom near the end.
 func _palm_glow(t: float) -> void:
 	if t >= glow_t and t - glow_t < GLOW_STEP:
-		return          # (t restarts from 0 on a new hold: glow_t is then ahead of it)
+		return          # (t restarts from 0 on a new cast: glow_t is then ahead of it)
 	glow_t = t
-	var k := clampf((t - float(rmb_def().get("hold", 0.0))) / GLOW_RAMP, 0.0, 1.0)
+	var k := clampf(t / maxf(float(rmb_def()["cast"]), 0.01), 0.0, 1.0)
 	vfx("palm_charge", null, null, {"k": k, "hot": k >= GLOW_HOT})
 
-## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), her casting hand
-## drawn back.
-func rmb_hold_tick(t: float) -> void:
-	if not rmb_ready():
+## The press (a cast, footage f0073-f0075 / f0102-f0104 / f0128-f0130: two frames of lane every time, then the
+## cinder): the charge and the cooldown go now, with a flash in her palm and the lane; the cinder leaves at rmb.cast.
+func fire_rmb(c: Dictionary) -> void:
+	c["variant"] = "tap"
+	last_variant = "tap"
+	if aiming or not spend_rmb():
 		return
-	if not aiming:
-		aiming = true
-	if not jet.running(): play_hold("as_aim", t)       # (flying, the flight pose stays)
-	HeroVfx.of(m).hold(h, "shot_aim")
-	_palm_glow(t)
+	aiming = true
+	cast_t = 0.0
+	glow_t = 0.0
+	if not jet.running(): play_hold("as_aim", 0.0)
+	vfx("shot_cast")
+	_shot_lane()
+
+## Casting: a thin white lane of the shot's full, fixed length that follows the aim (the cursor distance doesn't
+## matter), her casting hand drawn back. A stun, a knock-down or the flight ends it with nothing fired.
+func _tick_shot_cast(dt: float) -> void:
+	if busy() or jet.running():
+		aiming = false
+		AimKit.hide(h, "rmb")
+		if not jet.running(): play("")
+		return
+	cast_t += dt
+	if cast_t < float(rmb_def()["cast"]) - 0.0001:
+		play_hold("as_aim", cast_t)
+		HeroVfx.of(m).hold(h, "shot_aim")
+		_palm_glow(cast_t)
+		_shot_lane()
+		return
+	aiming = false
+	AimKit.hide(h, "rmb")
+	_loose_shot()
+
+func _shot_lane() -> void:
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
@@ -476,15 +503,9 @@ func rmb_hold_tick(t: float) -> void:
 				"alpha": 0.9, "tip": true}
 	)
 
-func fire_rmb(c: Dictionary) -> void:
-	c["variant"] = "tap"
-	last_variant = "tap"
-	var was_aiming := aiming
-	aiming = false
-	AimKit.hide(h, "rmb")
-	if not spend_rmb():
-		if was_aiming: play("")
-		return
+func rmb_winding() -> bool: return aiming
+
+func _loose_shot() -> void:
 	var rdf := rmb_def()
 	if not jet.running(): play("as_shot")
 	var amt := float(rdf["dmg"])

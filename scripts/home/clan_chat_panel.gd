@@ -11,23 +11,23 @@ static func side_rows(dv: VBoxContainer) -> void:
 	var box := UI.vbox(4)
 	dv.add_child(box)
 	box.add_child(UI.section("Clan chat"))
-	var log := UI.vbox(2)
-	box.add_child(log)
+	var log_v := UI.vbox(2)
+	box.add_child(log_v)
 	var members: Array = []
 	var refresh := func() -> void:
 		ClanChat.read(
 			gid,
 			members,
 			func(lines: Array):
-				if not is_instance_valid(log):
+				if not is_instance_valid(log_v):
 					return
-				for c in log.get_children():
+				for c in log_v.get_children():
 					c.queue_free()
 				for l in lines:
 					var who: String = ("[%s] " % l["tag"] if l["tag"] != "" else "") + String(l["name"])
-					log.add_child(UI.para("%s: %s" % [who, l["text"]], UI.T_SMALL, UI.INK))
+					log_v.add_child(UI.para("%s: %s" % [who, l["text"]], UI.T_SMALL, UI.INK))
 				if lines.is_empty():
-					log.add_child(UI.para("Quiet in here. Say hello to your clan.", UI.T_SMALL, UI.MUTED))
+					log_v.add_child(UI.para("Quiet in here. Say hello to your clan.", UI.T_SMALL, UI.MUTED))
 		)
 	var row := UI.hbox(6)
 	box.add_child(row)

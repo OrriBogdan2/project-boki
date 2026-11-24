@@ -505,7 +505,7 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 		not K.wall.is_empty() and absf(T.pos.x - x0) < 0.05 and K.boop.boops == 0,
 		"moved %.2f boops %d" % [T.pos.x - x0, K.boop.boops])
 	ok("bjorn shield: no push chevron in front of the raised wall", not AimKit.shown(P, "aegis_push"))
-	ok("bjorn shield: the wall is drawn in layers (sheet, inner sheet, rim, ground contact: not a flat slab) and bigger",
+	ok("bjorn shield: the wall is drawn in layers (sheet, inner sheet, rim, ground contact, not a flat slab), bigger",
 		K.fx.aegis.get_child_count() >= 4 and AegisWall.H >= 1.3 * 1.3 - 0.01 and K.fx.aegis.visible,
 		"parts %d height %.2f" % [K.fx.aegis.get_child_count(), AegisWall.H])
 	# LMB with the aegis held: the boop
@@ -554,7 +554,7 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 		K.lmb_t = -1.0
 		K.mace = {}          # (a hold let go under its tap throws the hammer)
 	# a mantle ends the hold within one frame; the button still down starts a fresh one once he is off the lip
-	# (LMB is a held input, docs/decisions/0022-held-fire-resume.md)
+	# (LMB is a held input, docs/decisions/0117-held-fire-resume.md)
 	reset.call()
 	step(m, 0.6, aim)
 	ok("bjorn hold: the swing is charging", K.lmb_t > 0.4, "lmb_t %.2f" % K.lmb_t)

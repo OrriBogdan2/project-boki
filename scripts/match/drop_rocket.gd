@@ -1,6 +1,6 @@
 class_name DropRocket
 extends RefCounted
-## Owner 2026-11-11: the drop is a squad mini rocket (docs/decisions/0061-rocket-drop.md). When the drop leader
+## Owner 2026-11-11: the drop is a squad mini rocket (docs/decisions/0143-rocket-drop.md). When the drop leader
 ## launches, the whole squad still aboard the skyship rides one rocket down (a solo rides a one-seat one).
 ## The leader steers it and everyone else sees where it will hit (DropReticle). Doing nothing lands the squad
 ## together where it hits. Anyone can jump out early (detach): they free-fall slower than the rocket and can open
@@ -12,7 +12,7 @@ extends RefCounted
 ## Looks, the same on every machine: a thin exhaust trail in the squad colour (HeroVfx.streak, none at TRAIL_OFF), a
 ## small puff where someone jumps out (Fx.puff) and dust settling where it lands (Fx.settle). No ring, no blast.
 
-const FALL := 24.0             # m/s, the rocket's top dive speed (a hunter free-falls at Hunter.DIVE_FALL, 13)
+const FALL := 24.0             # m/s, the rocket's top dive speed (a hunter free-falls at HunterFeel.dive_fall, 13)
 const FALL_ACCEL := 20.0       # m/s^2, how fast it reaches FALL after leaving the ship
 const SPEED := 16.0            # m/s, top flat speed the leader steers it at
 const ACCEL := 20.0            # m/s^2, how fast it answers the leader's keys
@@ -186,7 +186,7 @@ func detach(h: Hunter, dive := true) -> bool:
 	h.teleport(pos)
 	h.vel = vel
 	if not dive:
-		h.vel.y = Hunter.DEPLOY_POP
+		h.vel.y = HunterFeel.deploy_pop
 	snd.jump_out(self, h)
 	return true
 
