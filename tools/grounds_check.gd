@@ -42,6 +42,7 @@ func run(main_node: Node) -> void:
 	_counts(g)
 	_sites(m, g)
 	step(m, 0.3)
+	_hints(m, g)
 	_use_all(m, g)
 	_rides(m)
 	_duel_and_fall(m, g)
@@ -107,6 +108,7 @@ func _fields(m: Match) -> void:
 	p_v.inp["move"] = Vector2.ZERO
 
 
+
 ## Hold `move` until the player stands higher than the 6th terrace or `secs` pass; the highest ground reached.
 func _walk_up(m: Match, p: Hunter, move: Vector2, secs: float) -> float:
 	var top := 0.0
@@ -152,6 +154,7 @@ func _rides(m: Match) -> void:
 	p.vel = Vector3.ZERO
 	p.inp["move"] = Vector2.ZERO
 	p.inp["glide"] = false
+
 
 
 ## Hold `move` (and the glider once airborne) until you are back on the ground, up to `secs`.
@@ -239,6 +242,60 @@ func _worn(p: Hunter, id: String) -> bool:
 func _duel_and_fall(m: Match, g: Grounds) -> void:
 	var p: Hunter = m.player
 	ok("duel pad on the floor", m.duel_pad != Vector3.INF and m.world.island_id(m.duel_pad.x, m.duel_pad.z) == "floor")
-	p.teleport(Vector3(60, -20, 25))  # off the map
+	p.teleport(Vector3(60, -20, 25))      # off the map
 	g.tick(DT)
 	ok("a faller is brought home", p.flat_dist(m.arena.home) < 1.0 and p.pos.y > -1.0, "at %s" % p.pos)
+
+
+## First-time hints: each pedestal island and the dash lanes say one line (the live key caps, the Training Grounds'
+## own words) the first time you come near, and never again: not on a second visit, not in a later match.
+func _hints(m: Match, g: Grounds) -> void:
+	var p: Hunter = m.player
+	var tut: Dictionary = Save.d["tutorial"]
+	var spots := {}
+	for s in g.stations:
+		if not spots.has(s["kind"]):
+			spots[s["kind"]] = s["at"]
+	var lane: Array = Grounds.data()["lanes"][0]
+	spots[GroundsHints.LANE_ID] = Vector3(float(lane[0]), 0.0, float(lane[1]) + 2.0)
+	for id in spots:
+		tut.erase(GroundsHints.KEY_PREFIX + id)
+	g.hints = GroundsHints.new(m)
+	var lines := {}
+	var bad: Array = []
+	for id in spots:
+		var want := GroundsHints.line(id)
+		lines[want] = true
+		var at: Vector3 = spots[id]
+		at.y = m.world.ground_at(at.x, at.z)
+		m.hud.msgs.clear()
+		p.teleport(m.arena.home)
+		step(m, 0.1)
+		if m.hud.msgs.texts().has(want):
+			bad.append(id + " far")
+		p.teleport(at)
+		step(m, 0.1)
+		if m.hud.msgs.texts().count(want) != 1 or not tut.get(GroundsHints.KEY_PREFIX + id, false):
+			bad.append(id + " first")
+		m.hud.msgs.clear()
+		step(m, 0.5)
+		p.teleport(m.arena.home)
+		step(m, 0.1)
+		p.teleport(at)
+		step(m, 0.1)
+		if m.hud.msgs.texts().has(want):
+			bad.append(id + " twice")
+	ok("each station says its line once, near it", bad.is_empty(), " ".join(bad))
+	var plain := lines.keys().all(
+		func(t):
+			return (
+				t.contains(Settings.key_cap("interact")) and not t.contains("Arena") and not t.contains("Training Area")
+			)
+	)
+	ok("six distinct lines with the live keys, no old names", lines.size() == spots.size() and plain)
+	g.hints = GroundsHints.new(m)
+	m.hud.msgs.clear()
+	p.teleport(spots["arch"])
+	step(m, 0.1)
+	ok("a later match (flags set) stays quiet", m.hud.msgs.count() == 0)
+	p.teleport(m.arena.home)
