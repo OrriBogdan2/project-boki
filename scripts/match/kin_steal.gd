@@ -19,6 +19,8 @@ const BOB_M := 0.12  # m a loose wisp bobs up and down
 const BOB_HZ := 0.8  # bobs per second
 const POP_M := 2.5  # m from the fallen hunter it floats: clear of their stomp and revive ring (Life revive_radius)
 
+static var carried_home: Array = []  # records of the stolen wisps the player carried when the match ended
+
 
 static func rules() -> Dictionary:
 	return KinSummon.rules()["steal"]
@@ -93,6 +95,7 @@ static func break_loose(k: Kin, at: Vector3) -> void:
 	k.pos = at + Vector3(0, KinWisp.SHOULDER_Y, 0)
 	k.prev = k.pos
 	k.m.fx.burst(k.pos, k.sp.get("glow", k.sp["color"]), 10, 2.5)
+	k.m.sfx("boki_downed", k.pos, -4.0)
 
 
 ## Back to its own hunter's shoulder (loose too long, or the match is over). A downed hunter keeps it this time.
@@ -226,6 +229,9 @@ static func render(k: Kin) -> void:
 
 ## Match end: every loose or stolen wisp goes home to its own hunter.
 static func match_end(m: Match) -> void:
+	carried_home = []
 	for k in m.kins:
+		if m.player != null and k.owner_h == m.player and stolen(k) and not k.dead:
+			carried_home.append(k.rec.duplicate())
 		if taken(k) and k.home_h and not k.dead:
 			go_home(k)

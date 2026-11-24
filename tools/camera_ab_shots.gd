@@ -1,6 +1,6 @@
 extends "res://tools/gameplay_media.gd"
 ## --camera-ab-shots --hero=<arch id> --shots-dir=<dir>: one Hunter in three staged moments, each shot under the
-## Supervive camera and the source_scale one (the flag, docs/CAMERA_AB.md), as <dir>/<hero>_<moment>_<style>.png:
+## Default camera and the source_scale one (the flag, docs/CAMERA_AB.md), as <dir>/<hero>_<moment>_<style>.png:
 ##   fight   open ground: the hero and a rival fighting at FIGHT_GAP
 ##   glide   a ledge drop: the hero runs off an edge over the abyss and glides
 ##   squads  three squads of three, SQUAD_GAP apart, the hero's in the middle of it
@@ -148,9 +148,9 @@ func _squads_shot(style: String) -> void:
 ## A ground tile with void next to it (and EDGE_RUN m of ground behind it): [the tile, the direction to the void].
 func _edge() -> Array:
 	var w := m.world
-	for r in range(0, w.w / 2 - 3):
-		for z in range(w.h / 2 - r, w.h / 2 + r + 1):
-			for x in range(w.w / 2 - r, w.w / 2 + r + 1):
+	for r in range(0, int(w.w / 2.0) - 3):
+		for z in range(int(w.h / 2.0) - r, int(w.h / 2.0) + r + 1):
+			for x in range(int(w.w / 2.0) - r, int(w.w / 2.0) + r + 1):
 				if w.kind[w.idx(x, z)] != World.T_GROUND:
 					continue
 				for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
@@ -159,7 +159,7 @@ func _edge() -> Array:
 					var back: Vector2i = Vector2i(x, z) - d * int(EDGE_RUN)
 					if w.inb(back.x, back.y) and w.kind[w.idx(back.x, back.y)] == World.T_GROUND:
 						return [Vector2i(x, z), d]
-	return [Vector2i(w.w / 2, w.h / 2), Vector2i(0, 1)]
+	return [Vector2i(int(w.w / 2.0), int(w.h / 2.0)), Vector2i(0, 1)]
 
 
 func _glide_shot(style: String) -> void:

@@ -163,6 +163,7 @@ func run(main: Node) -> void:
 	await _scarf(main)
 	await _rime_ends(main)
 	_dots(m)
+	_decor_rings()
 	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
 	await _rocket(main)
@@ -389,6 +390,7 @@ func _lean() -> void:
 	var edge := absf((Basis(Vector3(0, 0, 1), stood) * Vector3.UP).dot(back))
 	ok(worst > 0.4 and within and edge < 0.01, "a stood-up sweep leans to the camera at every aim (%.2f)" % worst)
 
+
 ## One language for armour on every body: a hit on the shell flashes the body shell-coloured, a health hit white, the
 ## break holds the flash and sheds shards with no ring or burst, and the HUD strip flashes as the armour empties.
 func _armour(m: Match, p: Hunter) -> void:
@@ -416,6 +418,7 @@ func _armour(m: Match, p: Hunter) -> void:
 	plates._watch(foe, 0.016)
 	ok(plates.armor_flash_of(foe) > 0.5, "the armour strip flashes as it loses some")
 	foe.hp = 0.0
+
 
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, v: HeroVfx, p: Hunter) -> void:
@@ -508,6 +511,11 @@ func _dolm_rocks(m: Match) -> void:
 				if c.r > c.b:
 					warm.append(kind)
 		n.free()
+	for i in RockLook.COLS.size():  # his raised rocks (Stone Row, Basalt Spine): cobalt slate too
+		var sm := RockLook._crag(i)[1] as ShaderMaterial
+		var hues: Array = ["glow", "rim_col", "stone", "stone_hi", "cap_col"].map(sm.get_shader_parameter)
+		if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r >= c.b):
+			warm.append("crag%d" % i)
 	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
 	# the raised rocks (Stone Row, Basalt Spine) and his fists wear the arm's slate and teal: nothing red-leaning
 	var raised: Array = [RockLook.make()]
@@ -811,7 +819,7 @@ func _core_kinds(main: Node, m: Match, v: HeroVfx, p: Hunter) -> void:
 
 
 ## Lace's tap shots and Sparkle's finger bolts: thick at match zoom with a bright head, the body in the Hunter's colour;
-## Lace's short and sharp, Sparkle's soft, sparkly and longer; Lace's drawn arrows stay above the tap; a head fits the
+## Lace's long and sharp, Sparkle's a wider, blunter streak; Lace's drawn arrows stay above the tap; a head fits the
 ## circle its shot hits in (the hit sizes are the weapons'). Flying: the head is part of the trail's own mesh, a pooled
 ## node keeps no look of the last Hunter's, and a volley makes no node once the pool is warm. The stock orb under such a
 ## round stays hidden (Oomph.hide_orb).
@@ -835,12 +843,12 @@ func _shot_trails(m: Match, v: HeroVfx, p: Hunter) -> void:
 	var tap := _ribbon_of("archer", "fire_tap")
 	var bolt := _ribbon_of("mage", "lmb_trail")
 	ok(
-		reach["archer"] < reach["mage"] and not tap.get("soft", false) and float(tap.get("head_len", 1.0)) >= 2.0,
-		"Lace's is short and sharp: %.1f m, a pointed head" % reach["archer"]
+		not tap.get("soft", false) and float(tap.get("head_len", 1.0)) >= 2.0,
+		"Lace's is sharp: %.1f m of trail, a pointed head" % reach["archer"]
 	)
 	ok(
-		bolt.get("soft", false) and float(bolt.get("head_len", 1.0)) <= 1.2,
-		"Sparkle's is soft and sparkly: %.1f m, a round head" % reach["mage"]
+		float(bolt["size"]) > float(tap["size"]) and float(bolt.get("head_len", 1.0)) < float(tap["head_len"]),
+		"Sparkle's is a wider, blunter streak than Lace's: %.1f m of trail" % reach["mage"]
 	)
 	var sizes := ["fire_tap", "fire_arrow", "fire_super"].map(func(mv): return float(_ribbon_of("archer", mv)["size"]))
 	ok(sizes[0] < sizes[1] and sizes[1] < sizes[2], "Lace's drawn arrows stay thicker than the tap %s" % [sizes])
@@ -1469,6 +1477,30 @@ func _streak_span(v: HeroVfx, fps: float) -> float:
 	dot.queue_free()
 	_clear(v)
 	return span
+
+
+## DECISIONS "a ground ring means gameplay": the moves that are a dash, a landing, a reset or a cast with no area
+## carry no ring layer, and no scorch under a wind-up (docs/VFX_QUALITY.md, "Ground ring audit").
+const NO_RING := {
+	"ashwick": ["flashover"],
+	"dredge": ["anchor_slam", "reel"],
+	"gil": ["dive", "tide_lunge", "beached", "wave_land"],
+	"gunslinger": ["e_fire"],
+	"juggernaut": ["slam_hit"],
+}
+const NO_SCORCH := {"dolm": ["row_tell"], "rimewright": ["rime", "rime_melt"]}
+
+
+func _decor_rings() -> void:
+	for table: Dictionary in [NO_RING, NO_SCORCH]:
+		var kind := "ring" if table == NO_RING else "scorch"
+		for arch: String in table:
+			var file := FileAccess.get_file_as_string("res://content/vfx/%s.json" % arch)
+			var moves: Dictionary = JSON.parse_string(file)["moves"]
+			for move: String in table[arch]:
+				var layers: Array = (moves[move] as Dictionary).get("fx", []) if moves.has(move) else []
+				var n := layers.filter(func(l: Dictionary): return l["p"] == kind).size()
+				ok(n == 0, "%s/%s draws no %s layer (a decoration, not an area)" % [arch, move, kind])
 
 
 ## Sable's Encore ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and the
