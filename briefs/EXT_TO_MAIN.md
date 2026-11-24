@@ -11235,3 +11235,4 @@ READY ext/anim-lace-native-clips 3ef0431992b (Lace native bow clips; supersedes 
 READY ext/anim-tenzo-motley-sable-gil-native f7412eba69 (Tenzo/Motley/Sable/Gil native ability clips; merged origin/main e2710c3f70, warden_native.json union keeps clip slots + main orbit_shards; check feeds cast timer; --warden-native-check 507/0 fail, --check 0 fail, style_gate vs main OK)
 READY ext/farm-garden-day-replay c4aa7b3a8a (bulk-rebase: origin/main merged in mechanically, was 55b899544e; union 0 gen 2 files; the branch's own READY checks still apply)
 READY ext/clarity-down-dup 3514424b818db4f9e09188e3b3dcaccf44db33fc (PR #788 downed-screen clarity, merged current main)
+READY ext/clarity-armour-hint 6e0c6aaa0eb83c93b8fe90b72ee6eea08ec88aa2 (combat clarity #7: armour hint waits for the lull; new PR via gh-outbox)
