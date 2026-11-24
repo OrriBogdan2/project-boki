@@ -89,7 +89,8 @@ func _states(main: Node, a: String) -> void:
 	var m := _model(a)
 	var nat := m.get_node("Warden/Native") as WardenNative
 	# (every state carries "cast" like Hunter._anim_state's: without it WardenNative reads the state as not yet
-	# filled and ignores the swing; the idle case is the first read, the baseline the attack's swing_n 1 is counted against)
+	# filled and ignores the swing; the idle case is the first read, the baseline the attack's swing_n 1 is counted
+	# against)
 	var cases := [
 		["idle", {"cast": 99.0, "grounded": true}],
 		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
