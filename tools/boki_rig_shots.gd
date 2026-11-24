@@ -3,6 +3,7 @@ extends RefCounted
 ## Boki, in the engine (--normal-k=0 leaves a Meshy body's normal map out, for an A/B).
 ## <dir>/turntable.png, faces.png, coats.png, anim_<clip>.png (a strip of each clip), match.png (match camera),
 ## farm.png and farm_close.png (farm camera) and frames/<clip>/NNN.png for the GIFs (tools/boki/review_gifs.sh).
+## --washout=<ids> [--close] [--compat]: a Boki's colour against its own atlas flat, at the match camera (or the 3.3 m view).
 ## Needs a renderer.
 
 const YAWS := 8
@@ -55,6 +56,12 @@ func run(m: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--sheet="):    # one picture a view of every species listed, named, in a grid
 			await _sheet(a.substr(8).split(","))
+			print("BOKI_RIG_SHOTS_DONE")
+			main.get_tree().quit()
+			return
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--washout="):    # <id>_blank/_master/_game.png at the match camera, per species
+			await _washout(a.substr(10).split(","))
 			print("BOKI_RIG_SHOTS_DONE")
 			main.get_tree().quit()
 			return
@@ -430,3 +437,68 @@ func _far(file: String, dist: float, boki_scale: float, picks: Array, yaw: float
 	crop.resize(crop.get_width() * ENLARGE, crop.get_height() * ENLARGE, Image.INTERPOLATE_NEAREST)
 	crop.save_png(out.path_join(file))
 	vp.queue_free()
+
+
+## Colour at the match camera, or with --close the 3.3 m view (Models.kin's stage in --boki-everywhere-check, the
+## reveal card, the dex): per species <id>_blank.png (ground only), <id>_master.png (the painted atlas flat, linear
+## tonemap: the Bokidex colours) and <id>_game.png (as the game dresses it).
+func _washout(ids: PackedStringArray) -> void:
+	var close := "--close" in OS.get_cmdline_user_args()
+	if "--compat" in OS.get_cmdline_user_args() and Look.full_renderer():
+		# the web / mobile look: run the same shots in a child game on the Compatibility renderer
+		var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-method", "gl_compatibility",
+			"--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--"]
+		args.append_array(OS.get_cmdline_user_args())
+		OS.execute(OS.get_executable_path(), args, [], true)
+		return
+	for id in ids:
+		species = id
+		var vp := _stage(Vector2i(512, 512) if close else Vector2i(1920, 1080))
+		var cam := Camera3D.new()
+		vp.add_child(cam)
+		cam.make_current()
+		var crop := Rect2i(0, 0, 512, 512)
+		if close:
+			cam.fov = 24.0
+			cam.position = Vector3(0, 0.8, 3.3)
+			cam.look_at(Vector3(0, 0.42, 0))
+		else:
+			cam.fov = MATCH_FOV
+			var p := deg_to_rad(MATCH_PITCH)
+			cam.position = Vector3(0, sin(p), cos(p)) * MATCH_DIST
+			cam.rotation = Vector3(-p, 0, 0)
+			crop = Rect2i(Vector2i(cam.unproject_position(Vector3(0, 0.3, 0))) - Vector2i(110, 90), Vector2i(220, 180))
+		var env := (vp.get_child(0) as WorldEnvironment).environment
+		var kr := _kin(vp)
+		var k := kr[0] as Node3D
+		k.basis = Basis(Vector3.UP, PI - 0.6) if close else Basis(Vector3.RIGHT, -LEAN) * Basis(Vector3.UP, PI * 0.8)
+		await RenderingServer.frame_post_draw
+		(kr[1] as BokiRig).seek(0.5)
+		k.visible = false
+		await _save_crop(vp, crop, "%s_blank.png" % id, close)
+		k.visible = true
+		await _save_crop(vp, crop, "%s_game.png" % id, close)
+		var tone := env.tonemap_mode
+		env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+		env.tonemap_exposure = 1.0
+		for mi in k.find_children("*", "MeshInstance3D", true, false):
+			var inst := mi as MeshInstance3D
+			for si in inst.mesh.get_surface_count():
+				var src := inst.mesh.surface_get_material(si) as BaseMaterial3D
+				if src != null and src.albedo_texture != null:
+					var flat := StandardMaterial3D.new()
+					flat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+					flat.albedo_texture = src.albedo_texture
+					inst.set_surface_override_material(si, flat)
+		await _save_crop(vp, crop, "%s_master.png" % id, close)
+		env.tonemap_mode = tone
+		vp.queue_free()
+
+
+func _save_crop(vp: SubViewport, crop: Rect2i, file: String, whole := false) -> void:
+	var img: Image = await _grab(vp)
+	var part := img.get_region(crop)
+	if not whole:
+		part.resize(part.get_width() * ENLARGE, part.get_height() * ENLARGE, Image.INTERPOLATE_NEAREST)
+	part.save_png(out.path_join(file))
+
