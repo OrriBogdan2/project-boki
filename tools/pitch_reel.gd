@@ -30,7 +30,7 @@ const ESCAPE_CHARGE_LEFT := 4.0  # s of the uplink's charge left when shot 10 st
 const CLOCK_LEFT_S := 840.0  # s on the match clock when a stepped shot starts (1e9 reads as junk)
 const KIT_GAP_M := 4.5  # m between the Hunter and its foe in the kit shot (both well inside the frame)
 const KIT_ZOOM := 0.85  # the kit shot's camera zoom (0.55 frames only ~8 m: the pair sat on its edges)
-const KIT_FOE_REACH := 7.0  # m: a foe that has walked further than this from the Hunter is put back at the fight
+const KIT_FOE_REACH := 7.0  # m: a foe that has walked further than this from the Hunter is put back at the fight (--reach=)
 const KIT_ROOM_M := 10  # m of solid ground all round the kit fight (at a cliff edge both fell off)
 const KIT_LEASH_M := 3.0  # m the Hunter may stray from the fight's centre before it walks back (dashes)
 const KIT_SEARCH_M := 30  # m from the start the kit shot looks for that much room
@@ -367,8 +367,9 @@ func _roomy_ground(p: Vector3) -> Vector3:
 func _kit_press(t: float, me: Hunter, foe: Hunter, base: Vector3) -> void:
 	me.hp = me.max_hp  # neither of them goes down or walks off: the shot is about the kit
 	foe.hp = foe.max_hp
-	if me.flat_dist(foe) > KIT_FOE_REACH:
-		foe.teleport(_ground(me.pos + (foe.pos - me.pos).normalized() * KIT_GAP_M))
+	var reach := float(_arg("--reach=", str(KIT_FOE_REACH)))
+	if me.flat_dist(foe) > reach:
+		foe.teleport(_ground(me.pos + (foe.pos - me.pos).normalized() * minf(KIT_GAP_M, reach)))
 	me.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
 	var back := Vector2(base.x - me.pos.x, base.z - me.pos.z)
 	me.inp["move"] = back.normalized() if back.length() > KIT_LEASH_M else Vector2.ZERO
