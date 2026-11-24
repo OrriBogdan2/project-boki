@@ -58,6 +58,10 @@ func hatch(take: int) -> void:
 ## Shot 3: a Boki that is one level from its next form takes it: the farm's own evolution scene.
 func evolve() -> void:
 	Demo.setup("farm")
+	# PRIVATE 2b scratch: no real line has art at both ends yet, so the mechanic is shown on cindle -> wisplet
+	var ln: Dictionary = Evo.rules()["lines"]["cindle"]
+	ln["into"] = [{"id": "wisplet"}]
+	(Save.d["roster"] as Array)[0]["species"] = "cindle"
 	var rec := _about_to_evolve()
 	await _farm("farm", false)
 	if rec.is_empty():

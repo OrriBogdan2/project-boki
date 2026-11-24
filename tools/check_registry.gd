@@ -42,6 +42,9 @@ const CHECKS := {
 	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],  # GPU: MP4 frames
 	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],  # demo-reel footage, 1080p60 (GPU)
 	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],  # the reel's drivers play through
+	"--hero-reel": ["res://tools/hero_reel.gd", "hero_reel", null],
+	"--boki-grid-clip": ["res://tools/boki_grid_clip.gd", "boki_rig_shots", null],
+	"--garden-play-clean": ["res://tools/garden_play_clean.gd", "garden_play_clip", null],
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],  # the recording presets
 	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],  # docs/SENTRY.md, stays off
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],  # F1-F3 look at a teammate
