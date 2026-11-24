@@ -6,15 +6,20 @@ extends RefCounted
 ## after 8 s, a muted player (MuteList), one cleaned line, and no chat for an offline squad.
 
 const ROSTER := [
-	{"peer": "1", "name": "Ada", "team": 0}, {"peer": "2", "name": "Bo", "team": 0},
-	{"peer": "3", "name": "Cy", "team": 1}, {"peer": "4", "name": "Di", "team": 1},
+	{"peer": "1", "name": "Ada", "team": 0},
+	{"peer": "2", "name": "Bo", "team": 0},
+	{"peer": "3", "name": "Cy", "team": 1},
+	{"peer": "4", "name": "Di", "team": 1},
 ]
 var bad := 0
 var clients: Array = []
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SQUADCHAT %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	MuteList.clear()
@@ -44,6 +49,7 @@ func run(main: Node) -> void:
 	print("SQUADCHAT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _join_all(main: Node) -> void:
 	for r in ROSTER:
 		var c := SquadChat.new()
@@ -53,16 +59,19 @@ func _join_all(main: Node) -> void:
 		c.send = func(d): _relay(c, d)
 		clients.append(c)
 
+
 ## What relay.gd does with a match or lobby emit: everyone but the sender gets it, "from" is the sender.
 func _relay(sender: SquadChat, d: Dictionary) -> void:
 	for c in clients:
 		if c != sender:
 			c.receive(SquadChat.TOPIC, d, sender.me)
 
+
 func _say(c: SquadChat, text: String) -> void:
 	_enter(c)
 	c.input.text = text
 	c.input.text_submitted.emit(text)
+
 
 func _enter(c: SquadChat) -> void:
 	var k := InputEventKey.new()
@@ -70,14 +79,17 @@ func _enter(c: SquadChat) -> void:
 	k.pressed = true
 	c._unhandled_input(k)
 
+
 func _esc(c: SquadChat) -> void:
 	var a := InputEventAction.new()
 	a.action = "menu"
 	a.pressed = true
 	c._input(a)
 
+
 func _text(c: SquadChat, i: int) -> String:
 	return (c.box.get_child(i) as Label).text
+
 
 func _fade(bo: SquadChat) -> void:
 	var line := bo.box.get_child(0) as Label
@@ -89,6 +101,7 @@ func _fade(bo: SquadChat) -> void:
 	bo._process(0.0)
 	ok(line.modulate.a == 1.0, "typing brings the recent lines back")
 	_esc(bo)
+
 
 func _mute_cap_off() -> void:
 	var ada: SquadChat = clients[0]

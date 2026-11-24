@@ -437,7 +437,7 @@ func _press(start: String) -> bool:
 func _farm_entry() -> void:
 	var g_main = Game.main
 	Game.main = null          # (goto only records the opts)
-	var home: Node = load("res://scripts/home/home.gd").new()
+	var home := Home.new()
 	home._start_training()
 	home.free()
 	Game.main = g_main

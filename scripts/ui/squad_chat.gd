@@ -6,14 +6,14 @@ extends Control
 ## its own team and not muted (MuteList). The lobby has its own one-line chat (PrematchView).
 
 const TOPIC := "chat"
-const SHOWN := 5            # lines on screen at once
-const FADE_S := 8.0         # s a line stays fully visible
-const FADE_OUT_S := 1.0     # s it then takes to fade away
-const FONT := 18            # px
+const SHOWN := 5  # lines on screen at once
+const FADE_S := 8.0  # s a line stays fully visible
+const FADE_OUT_S := 1.0  # s it then takes to fade away
+const FONT := 18  # px
 
-var roster: Array = []      # online roster entries {peer, name, team}
-var me := ""                # my peer id
-var m: Match = null         # while typing your Hunter holds still (Match.paused)
+var roster: Array = []  # online roster entries {peer, name, team}
+var me := ""  # my peer id
+var m: Match = null  # while typing your Hunter holds still (Match.paused)
 var send: Callable = Net.chat
 var typing := false
 var input: LineEdit
@@ -141,7 +141,7 @@ func show_line(who: String, text: String, col: Color) -> void:
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	l.set_meta("age", 0.0)
 	box.add_child(l)
-	box.move_child(l, box.get_child_count() - 2)      # above the input row
+	box.move_child(l, box.get_child_count() - 2)  # above the input row
 	while lines_shown() > SHOWN:
 		var oldest := box.get_child(0)
 		box.remove_child(oldest)
