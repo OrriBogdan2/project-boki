@@ -233,7 +233,8 @@ func _hatching(tree: SceneTree):
 	hx._start_hatch()
 	for i in hx.TAPS:
 		hx._tap_egg()
-	ok(hx.title.text == hx.KNOCK_LINES[mini(hx.TAPS, hx.KNOCK_LINES.size() - 1)], "every knock runs to its end: the line moves on")
+	var last: String = hx.KNOCK_LINES[mini(hx.TAPS, hx.KNOCK_LINES.size() - 1)]
+	ok(hx.title.text == last, "every knock runs to its end: the line moves on")
 	var frames := 0
 	while hx.stage != "hatching" and frames < MAX_FRAMES:
 		await tree.process_frame
