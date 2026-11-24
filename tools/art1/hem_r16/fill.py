@@ -155,8 +155,16 @@ for y in np.linspace(YP0, YP1, 9):
     s = (YP0 - y) / (YP0 - YP1)
     rr = Rtop + (Rbot - Rtop) * ss(s) + F("bulge", 0.012) * np.sin(np.pi * s)
     rr = np.minimum(rr, np.where(np.isfinite(Rsk), Rsk, 9))
+    if F("cap", 0) > 0:  # flare the top rings out to the skirt's inner wall (closes the waist well)
+        Ry = sinprof(S, c, y - 0.012, y + 0.012) - F("capgap", 0.006)
+        ok = np.isfinite(Ry)
+        Ry = np.where(ok, Ry, rr)
+        for _ in range(3):
+            Ry = np.minimum(Ry, (np.roll(Ry, 1) + 2 * Ry + np.roll(Ry, -1)) / 4)
+        wcap = ss((y - 0.945) / 0.025)
+        rr = np.maximum(rr, rr + wcap * (Ry - rr))
     rings.append(np.stack([cx + rr * np.cos(ang), np.full(NA, y), cz + rr * np.sin(ang)], 1))
-V, Fa = ring_mesh(rings, False, True)
+V, Fa = ring_mesh(rings, F("cap", 0) > 0, True)
 dx = V[:, 0] - cx
 wl = 0.4 * ss((0.90 - V[:, 1]) / 0.06) * np.clip(np.abs(dx) / 0.06, 0, 1)
 W = np.zeros((len(V), 4))
