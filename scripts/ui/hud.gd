@@ -1640,7 +1640,7 @@ func _draw_crosshair(p: Hunter) -> void:
 	if p.ak and p.ak.has_meter():
 		# the payoff is armed (FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the resource arc
 		var rl := p.ak.ready_label()
-		if rl != "" and not m.has_meta("pitch_no_foe_plates"):      # (the pitch-reel recorder films fights with no game text)
+		if rl != "" and not m.has_meta("pitch_no_foe_plates"):  # (pitch-reel fights: no game text)
 			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
 			_ctext(mp + Vector2(0, Reticle.t("res_r") + 16.0), rl, 13, Color(p.ak.res_col().lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
