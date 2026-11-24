@@ -88,6 +88,7 @@ rank 1.
   so no kit code changed. A kit with `per_rank` takes only its own steps (parity: no generic +15% / -10% on top).
   Damage steps are the source's % of OUR base (base numbers re-read on main cbb6b02f5). Tender takes the source
   Elluna tiers (+25% heal, -5s x2, the private reference kit notes:13; this table's "none listed" was an
+  Elluna tiers (+25% heal, -5s x2, reference kit data line 13; this table's "none listed" was an
   older capture). Gil has no source: Tidal Wave keeps its base (`rank_next.ult` says so). Rimewright's ult no longer
   reads `power("ult")`.
 - Cooldown steps are the source deltas scaled by our base / the source's (last line below), rounded to 0.5s:

@@ -94,6 +94,10 @@ def main():
     print(style.rstrip())
     if "STYLE FAIL" in style:
         bad.append("style ratchet (docs/STYLE.md)")
+    names = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "old_names_lint.py")], capture_output=True, text=True)
+    print(names.stdout.rstrip())
+    if names.returncode:
+        bad.append("retired hunter names in player text (tools/old_names_lint.py)")
     clashes = decision_clashes()
     for n, fs in clashes.items():
         print(f"DECISION NUMBER CLASH {n}: {', '.join(fs)} (keep the oldest, give the rest the next free number)")
