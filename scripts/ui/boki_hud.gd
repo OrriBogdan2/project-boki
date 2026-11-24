@@ -64,7 +64,7 @@ static func r_slot(h_v, p: Hunter, ur: Rect2) -> void:
 	if ulv < Hunter.SLOT_MAX["ult"]:
 		var trap := Rect2(Vector2(ur.end.x - 16, ur.position.y + 2), Vector2(14, 14))
 		h_v._rounded(trap, Color(0.03, 0.03, 0.05, 0.9), 5, Color(h_v.MUTED, 0.6), 1)
-		h_v._ctext(trap.get_center() + Vector2(0, 4), str(int(Hunter.ULT_AT[1])), 10, h_v.MUTED, h_v.big)
+		h_v._ctext(trap.get_center() + Vector2(0, 4), str(int(Hunter.ULT_AT[ulv])), 10, h_v.MUTED, h_v.big)
 	if not merged:
 		return
 	var ml: Dictionary = p.merge_st
