@@ -6,23 +6,14 @@ extends RefCounted
 
 
 static func add(lib: AnimationLibrary, glb: Node3D, skel: Skeleton3D, files: Array) -> void:
-	var clips := read(glb.get_path_to(skel), files)
-	for clip in clips:
-		if not lib.has_animation(clip):  # (the model's library is shared by every model of the Hero)
-			lib.add_animation(clip, clips[clip])
-
-
-## The clips of the files, name -> Animation, their tracks pointed at the skeleton at `skel_path` by bone name.
-static func read(skel_path: NodePath, files: Array) -> Dictionary:
-	var out := {}
 	for file in files:
 		var scene := (load(String(file)) as PackedScene).instantiate()
 		var player := scene.find_child("AnimationPlayer", true, false) as AnimationPlayer
 		var from := player.get_animation_library(player.get_animation_library_list()[0])
 		for clip in from.get_animation_list():
-			out[clip] = _on_skeleton(from.get_animation(clip), skel_path)
+			if not lib.has_animation(clip):  # (the model's library is shared by every model of the Hero)
+				lib.add_animation(clip, _on_skeleton(from.get_animation(clip), glb.get_path_to(skel)))
 		scene.free()
-	return out
 
 
 static func _on_skeleton(src: Animation, skel_path: NodePath) -> Animation:
