@@ -75,3 +75,21 @@ inked), the sun on `glow-sun` (emissive + halo), two bigger rain drops hung clea
 WardenMood (faces swap with her moves, blink). `pip.glb` (contract model) is not rebuilt. Orbit: radius [1.1, 1.05], trail_max 0.12,
 head/wing/hand avoid spheres (`companions.avoid`; the push opens at once). Checks: `--meeko-orbit-check`, `--meeko-companions-clip-check`
 (sun/cloud vs the CPU-skinned body in idle, walk, run, dash, crouch, jump, attack, ult), `--meeko-companions-shots` (GPU).
+
+**11-24 (plan /home/boki/gens/meeko-comp-plan-1124/PLAN.md): sun and cloud bodies from Meshy, faces as the portrait.** Faceless refs of
+the portrait's sun and cloud (`art/portraits/tender.jpg` crops, vertex-gen, 48 gens, raws + gen_log.tsv in
+/home/boki/gens/meeko-comp-fix-1124/), then Meshy image-to-3D (meshy-7.1, 2k texture, no pose). Picked: sun `01a20cbd-4517-706a-83b8-55ae9c7a5d29`
+(sun_q2_r2: a ball with 10 soft petals; its portrait-like side is Meshy's back, so `--sun-turn=180`), cloud
+`01a20cb8-573a-75d8-b9fc-08eb7f29876b` (cloud_p4_r1: round lobes, smooth belly, lavender-white). Build:
+
+    M=/home/boki/meshy/meeko-comp-1124     # (the two task folders: glb.glb + texture maps + task.json)
+    $B -b --factory-startup --python tools/art1/pip_companions_native.py -- WORK/comp.glb WORK/faces.png \
+        --sun-glb=$M/sun_q2_r2/glb.glb --sun-turn=180 --cloud-glb=$M/cloud_p4_r1/glb.glb
+    python3 tools/meshy/native_hunters/graft_companions.py art/wardens/pip/pip_meshy.glb art/wardens/pip/pip_meshy.glb WORK/comp.glb WORK/faces.png
+    cp WORK/faces.png art/wardens/pip/pip_meshy_faces.png
+
+The builder welds Meshy's UV-seam splits (decimated apart they open as cracks), scales to 0.50 / 0.52 m, decimates to 700 / 800 tris
+and keeps the albedo at 512 px; the graft carries that image + UVs (glow-sun, cloth-cloud). Atlas cells 0/1 (sun calm/happy) and 4/5
+(cloud calm/happy) are the portrait's dot eyes, thin level brows, small closed smile, soft blush; cells 2, 3, 6, 7 are byte-identical.
+Raindrops show only while the cloud cries (`warden_anim/pip.json` cloud `mood_only`). Look (`warden_look.json` pip): the sun's albedo
+is a tint over the texture, low glow and no far-glow boost (the boost clipped the gold to lemon), the cloud lavender, uninked.
