@@ -171,12 +171,29 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	ok(not BokiRig.has("no_model"), "an id without one keeps its KinModels body")
+	await _no_overlay(main)
+	BokiRig.face_overlay = true  # the rest tests the kept overlay face: its blend shapes, LODs and eye shader
 	for id in SPECIES_LIST:
 		kin_id = id
 		await _species(main)
 	await Fly.new().run(main, self)
 	print("BOKIRIG DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## The default look: the eyes are the coat's own, so no Face mesh is left on any model and the rig plays on without one.
+func _no_overlay(main: Node) -> void:
+	for id in SPECIES_LIST:
+		var k := Shots.rigged_kin(id)
+		main.add_child(k)
+		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+		var left := rig.model.find_children("*", "MeshInstance3D", true, false).filter(
+			func(n: Node) -> bool: return (n as MeshInstance3D).mesh.get_blend_shape_count() > 0
+		)
+		ok(rig.face == null and rig.eye_mat == null and left.is_empty(), "%s: no face overlay on the coat" % id)
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+		k.queue_free()
 
 
 func _species(main: Node) -> void:
