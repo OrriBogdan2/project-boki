@@ -240,11 +240,6 @@ func use() -> void:
 	GardenSfx.countdown(h, mat.position)
 
 
-## True while a round is on (GardenMusic ducks the music for it).
-func playing() -> bool:
-	return run != null
-
-
 ## A press: true when the round took it.
 func input(event: InputEvent) -> bool:
 	if run == null:
