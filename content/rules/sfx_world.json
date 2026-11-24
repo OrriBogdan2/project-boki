@@ -101,12 +101,8 @@
     "scripts/match/seat_beacon.gd"
    ],
    "holes": [
-    "heart _force:portal",
-    "heart _tide_tick:thump",
     "exits_flow _tick_outpost/open:thump",
-    "exits_flow _waves:thump",
-    "quest_seat _force:horn",
-    "quest_seats _reseal:boom"
+    "exits_flow _waves:thump"
    ]
   }
  }
