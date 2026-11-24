@@ -82,8 +82,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
 | duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
-| heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
-| kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
 | limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
 | moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -101,6 +99,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| glaciyak | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
 | burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -110,10 +109,11 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
 | floenatee | clip | clip | clip | clip | clip | clip | proc | proc |
 | gibbelle | clip | clip | clip | clip | clip | clip | proc | proc |
-| glaciyak | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
+| heatherhorn | clip | clip | clip | clip | clip | clip | proc | proc |
 | kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
+| kilnbadger | clip | clip | clip | clip | clip | clip | proc | proc |
 | kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
 | lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
 | lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -133,11 +133,8 @@ Worst five, backlog-ready:
 - [anim] Boki casquebill (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki duskapi (No. 11): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki glomwort (No. 17): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glomwort_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki heatherhorn (No. 19): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/heatherhorn_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki kilnbadger (No. 22): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/kilnbadger_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki floenatee (No. 12): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki gibbelle (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki glaciyak (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki limpetor (No. 25): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/limpetor_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki moonloris (No. 28): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/moonloris_anim.py, rebuild the .glb, rerun --anim-coverage-check
 
 ### Mobs
 
