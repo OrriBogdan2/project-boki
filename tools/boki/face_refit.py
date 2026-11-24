@@ -7,6 +7,7 @@ rig and clips byte for byte and only moves Face vertices (all on the head bone, 
     as Vespyx's sit; the blend shapes (blink, moods) scale with it;
   - brows and the mouth move with the eyes (a brow by its eye's move and scale, the mouth by the eyes' mean), then each
     piece is set `SKIN` m in front of the coat;
+  - MOUTH: the mouth's own scale where the eyes' scale leaves it wider than the head (zephyrak);
   - AXIS: a painted face off the model's x = 0 (thread-wyrm, zephyrak) mirrors the eyes about its own axis;
   - FACING: the coat patch the face looks at (radius round the eyes' midpoint, x y), so a coil in front of the face
     cannot win the surface sample (thread-wyrm); REWEIGHT: Face pieces move off `head` onto the bone owning the nearest
@@ -38,6 +39,7 @@ EYES = {
 AXIS = {"threadwyrm": 0.1125, "zephyrak": -0.0275}  # x of the painted face's midline when it is off x = 0
 FACING = {"threadwyrm": 0.12}
 REWEIGHT = {"threadwyrm"}
+MOUTH = {"zephyrak": 0.35}  # the mouth's own scale where the eyes' scale leaves it wider than the head
 
 
 class Glb:
@@ -210,10 +212,11 @@ def refit(species):
         m = fpos[p].mean(0)
         sd = 1 if m[0] >= 0 else -1
         c0, c1 = (eye_from[sd], eye_to[sd]) if m[1] > mid_from[1] else (mid_from, mid_to)
-        fpos[p] = (fpos[p] - c0) * k + c1
-        if k != 1.0:
+        kp = k if m[1] > mid_from[1] else MOUTH.get(species, k)
+        fpos[p] = (fpos[p] - c0) * kp + c1
+        if kp != 1.0:
             for t in fp.get("targets", []):
-                g.scale_morph(t["POSITION"], p, k)
+                g.scale_morph(t["POSITION"], p, kp)
         groups.append((fp, p))
     for p in rest:  # each piece moves whole (no stretched triangles), by the median gap to the coat over its points
         gaps = [z - SKIN - fpos[i, 2] for i in p if (z := surface_z(body, fpos[i, 0], fpos[i, 1])) is not None]
