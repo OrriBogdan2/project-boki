@@ -1,6 +1,6 @@
 class_name TerrainHazards
 extends RefCounted
-## Terrain hazard areas on an authored map (docs/decisions/0060-terrain-hazards.md): lava fields, deep
+## Terrain hazard areas on an authored map (docs/decisions/0139-terrain-hazards.md): lava fields, deep
 ## water, ice sheets, static flats and bramble, each an outline in the map's islands[].hazard_areas.
 ## What the ground does and which Boki walks it safely is content/rules/terrain_hazards.json.
 ##
@@ -148,7 +148,7 @@ func _thorns(cells: Array[Vector2i], y: float) -> void:
 	mm.mesh = Models.cyl(0.0, 0.07, 0.6, 5)
 	mm.instance_count = cells.size() * 2
 	for i in mm.instance_count:
-		var c: Vector2i = cells[i / 2]
+		var c: Vector2i = cells[int(i / 2.0)]
 		var b := Basis.from_euler(Vector3(rr.randf_range(-0.6, 0.6), rr.randf() * TAU, rr.randf_range(-0.6, 0.6)))
 		var at := Vector3(c.x + rr.randf(), y + 0.2, c.y + rr.randf())
 		mm.set_instance_transform(i, Transform3D(b.scaled(Vector3.ONE * rr.randf_range(0.7, 1.4)), at))

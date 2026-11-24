@@ -80,14 +80,14 @@ func run(main: Node) -> void:
 	var boss: Boss = m.lairs.boss_of(f)
 	var side := Vector3(-f["out"].y, 0, f["out"].x)
 	var outside: Vector3 = f["gate_c"] + Vector3(f["out"].x, 0, f["out"].y) * 6.0
-	_spot(p, outside + side * 2.5)
-	_spot(b, outside - side * 2.5)
+	_spot(p, outside + side * 1.5)  # (3 m apart: an Easy bot's reach is 4.8 m, a rolled difficulty)
+	_spot(b, outside - side * 1.5)
 	# (it looks once the team's sight has seen the player (a few ticks), before a roaming bot walks out of it:
 	# sight ends near 5.5 m)
 	b.ai["think"] = 0.05
 	# ---- 1. the control: outside the lair, the player is fair game
 	var went := false
-	p.reveal_t = 2.5      # (seen whichever way the bot faces: it only sees what is in front of it)
+	p.reveal_t = 2.5  # (seen whichever way the bot faces: it only sees what is in front of it)
 	for i in int(2.0 / Match.DT):
 		_step()
 		if b.ai["tgt"] == p:
@@ -95,7 +95,7 @@ func run(main: Node) -> void:
 	p.reveal_t = 0.0
 	ok(
 		boss.dormant and m.lairs.boss_fight(b).is_empty() and went,
-		"outside the lair, boss asleep: the bot goes for the player 5 m away"
+		"outside the lair, boss asleep: the bot goes for the player 3 m away"
 	)
 	# ---- 2. sealed in: the boss only (a hit from before the seal doesn't count)
 	b.hurt(2.0, p, {"src": "shot"})
@@ -132,7 +132,7 @@ func run(main: Node) -> void:
 			+ ", nor do it or its Boki hit them"
 		)
 	)
-	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (100 * on_boss / maxi(1, n)))
+	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (int(100 * on_boss / float(maxi(1, n)))))
 	# ---- 3. the player starts it inside the seal: the bot fights back
 	# beside the bot, inside its near sense: the scripted hit has no shot to reveal where it came from, and a
 	# bot only turns on a rival it can see (its sight wedge faces the boss; 11-21)

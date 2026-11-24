@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cffdiqdiulb1"
-path="res://.godot/imported/kilnbadger_kilnbadger_atlas.webp-b9747be52155c4a41f1e2b9fcd0b334e.ctex"
+path.bptc="res://.godot/imported/kilnbadger_kilnbadger_atlas.webp-b9747be52155c4a41f1e2b9fcd0b334e.bptc.ctex"
+path.astc="res://.godot/imported/kilnbadger_kilnbadger_atlas.webp-b9747be52155c4a41f1e2b9fcd0b334e.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e6d662ffd034fb28ef93eb395f051297"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/kilnbadger/kilnbadger_kilnbadger_atlas.webp"
-dest_files=["res://.godot/imported/kilnbadger_kilnbadger_atlas.webp-b9747be52155c4a41f1e2b9fcd0b334e.ctex"]
+dest_files=["res://.godot/imported/kilnbadger_kilnbadger_atlas.webp-b9747be52155c4a41f1e2b9fcd0b334e.bptc.ctex", "res://.godot/imported/kilnbadger_kilnbadger_atlas.webp-b9747be52155c4a41f1e2b9fcd0b334e.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

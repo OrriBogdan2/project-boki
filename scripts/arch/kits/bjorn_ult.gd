@@ -263,7 +263,7 @@ func _impact(at: Vector3) -> void:
 	for f in k.foes_in(origin, cell_len() * 1.2):
 		if hit.has(f.get_instance_id()):
 			Feel.hitstop(m, h, f, float(xd().get("strike_dmg", 4.0)), {"heavy": true, "payoff": true})
-	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)      # the players near the landing (never his own)
+	Shake.big(m, at, "ult", h)      # the players near the landing (never his own)
 	HeroVfx.of(m).play(h, "fault_land", at, dir)
 	m.sfx("bjorn_ult_quake", at, 0.0 if h.is_local() else -4.0)
 

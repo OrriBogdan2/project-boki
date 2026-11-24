@@ -22,7 +22,7 @@ text is rare. Our looks stay ours: the signature colour is the body of every eff
 | the hit | `Ent.render` | the hit flash holds full white for 3 frames (`FLASH_FADE`), then fades |
 | what it did: CC | `StatusLooks` + `BodyTell` | each status's own body look (`StatusLooks`, docs/STATUS_LOOKS.md: stars over the head for a stun, stakes at the feet for a root, rings down the legs for a slow, and Grounded, Dazed and the rest), the same from every source; and the body pulses that colour while it lasts (`BodyTell`). No floating CC words, no icon tiles beside other Hunters' plates (the plate's word stays in place of the name) |
 | less text | `Fx.word` | one floating word at a spot at a time (`WORD_ROOM` 3 m, `WORD_HOLD` 0.6 s), smaller (28 / 40 px) |
-| less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | in a fight (`MusicDir.fight_on`) only your own Boki's speech bubble is drawn; a Boki's ability name floats over your own Boki only (others' read from their looks) |
+| less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | while you or a squadmate fights (`BokiChatter.calm`) only your own Boki's speech bubble is drawn and no callout pin ("Behind you! · 3m"; `--clarity-shots` prints `CLARITYCHATTER n/20`, 0 is the rule); a Boki's ability name floats over your own Boki only (others' read from their looks) |
 
 ## Ground order (11-12): a melee is not one disc
 A ground ring means gameplay, so in a pile the draw order and strength are one rule (`SideColor.ORDER_*`, a material's
@@ -42,6 +42,12 @@ Checked by `--clarity-check` (side edges per viewer, the side lean, the shot hal
 and off, the cast glint and ring, Boki bubbles and ability names in and out of a fight); the X band by
 `--dolm-combo-check` and `--aimkit-check`.
 
+## Toasts on the right rail (11-23)
+Toasts ("Fever is lit", "Bond full!") sit in the right rail under the alive counter and the kill feed (`TopStack.rail`), never in the top centre by the timer, level and HP. `--clarity-shots` pushes one on every fight frame and prints `CLARITYTOAST n/20`: n must be 0 (it was 20 before the rail).
+
+## First-time armour hint waits out the fight (11-24)
+"Hits on Hunters build armour. XP comes from monster kills." (`ArmourHint`, drawn by `ArmorHud.note` just over the LV / XP row) comes from your first hit on a Hunter, so it always landed mid-fight: its box sat on the vitals and on the fight next to them. While `Hud.in_fight()` is true it now waits, keeping its whole 6 s for the next lull. `--armour-hint-check` holds it.
+
 ## What sits on a Hunter (11-20, stabilize sprint: declutter only)
 `--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
 Lace / Cinder, Vex, Kael and Cinder, Lace, Vex / Lace, Cinder, Kael), 10 frames a fight, and counts every element over
@@ -60,6 +66,11 @@ Frames covered of 20 (element-Hunter pairs), headless count, before -> after:
 | your Boki's ability name ("Stinger Hook") | 1 (3) | 1 (3) | kept (DECISIONS 11-11) |
 `--clarity-check` holds the fight to `ClarityFight.BUDGET` (element-Hunter pairs a frame): no words but your own
 Boki's ability name, no world icons, the glove row at most 6 (was 16), no merge ground ring.
+The budget is unchanged (a fight frame measures 0 to 3.6 glow icons; with the row on, a frame is 9 to 18). What was
+flaky was the sample, not the cost: the bot trio-vs-trio is not repeatable (the same seed gives a different fight each
+run, a global `randf()` and timing outside `Match.rng`), and the bots often wander off for the 2 s combat window
+(`InCombat`), where the row is meant to show. `ClarityFight.play` now marks your Hunter in combat on every counted frame,
+so each one is a fight frame whatever the bots did. 11 of 19 runs failed on a loaded host before, 0 of 10 after.
 
 ## Films
 `docs/shots/combat-clarity/fight_3v3_a.mp4` (Tenzo, Sparkle, Lace vs Kael, Cinder, Vex) and `fight_3v3_b.mp4` (Meeko,

@@ -599,7 +599,8 @@ func _place_stairs() -> void:
 		cands.shuffle()
 		var placed: Array = []      # every tile of every flight placed on this island
 		var flights := 0
-		var want := clampi(cells.size() / 45, 1, 6) if layout_id == "" else clampi(cells.size() / 220, 2, 8)
+		var want := clampi(int(cells.size() / 45.0), 1, 6) if layout_id == "" else clampi(int(cells.size() / 220.0), 2,
+				8)
 		var max_w := 3 if layout_id == "" else STAIR_MAX_W
 		for cd in cands:
 			if flights >= want: break
@@ -611,7 +612,7 @@ func _place_stairs() -> void:
 			# a window of up to max_w tiles of the run, centred on c as far as the run allows
 			var wdt := mini(run.size(), max_w)
 			var ci := run.find(c)
-			var s0 := clampi(ci - wdt / 2, 0, run.size() - wdt)
+			var s0 := clampi(ci - int(wdt / 2.0), 0, run.size() - wdt)
 			var flight: Array = run.slice(s0, s0 + wdt)
 			var ok := true
 			for q in flight:
@@ -662,7 +663,7 @@ func _place_blockers() -> void:
 				strays.append(i)        # cleared once every spot is placed (item 151), so the spots stay put
 		# stone walls to fight around and peek past: straight runs with a doorway, corners,
 		# rows of pillars, and on big islands a broken square keep
-		var n_walls := 1 + int(cells.size() / 110) + rng.randi_range(0, 1)
+		var n_walls := 1 + int(cells.size() / 110.0) + rng.randi_range(0, 1)
 		for _w in n_walls:
 			var c0: Vector2i = cells[rng.randi_range(0, cells.size() - 1)]
 			var dv: Vector2i = [Vector2i(1, 0), Vector2i(0, 1)][rng.randi_range(0, 1)]
@@ -687,7 +688,7 @@ func _place_blockers() -> void:
 							continue
 						_wall_at(c0 + e, ii)
 		# patches of tall grass
-		for _b in rng.randi_range(2, 4) + int(cells.size() / 160):
+		for _b in rng.randi_range(2, 4) + int(cells.size() / 160.0):
 			var bc: Vector2i = cells[rng.randi_range(0, cells.size() - 1)]
 			var rad := rng.randf_range(1.2, 2.3)
 			for dz in range(-3, 4):
@@ -975,7 +976,7 @@ func _pillars(p: Vector3, offs: Array, what := "") -> void:
 ## A ground cell near p at a given distance, on the same island and not by an edge.
 func _near(p: Vector3, dist: float, ang: float, isl: int, taken: Dictionary) -> Vector3:
 	for t in 16:
-		var a := ang + (t / 2) * 0.45 * (1.0 if t % 2 == 0 else -1.0)
+		var a := ang + (int(t / 2.0)) * 0.45 * (1.0 if t % 2 == 0 else -1.0)
 		for dd in [dist, dist * 0.75, dist * 1.25]:
 			var x := int(floor(p.x + cos(a) * dd)); var z := int(floor(p.z + sin(a) * dd))
 			if not inb(x, z): continue
@@ -1109,7 +1110,7 @@ func _place_spots() -> void:
 	var outer: Array = range(1, islands.size())
 	outer.sort_custom(func(x, y): return a0_of(x) < a0_of(y))
 	var n_exits := 3 if islands.size() <= 8 else 5
-	var step := maxi(1, outer.size() / n_exits)
+	var step := maxi(1, int(outer.size() / float(n_exits)))
 	var off := rng.randi_range(0, outer.size() - 1)
 	var order: Array = []
 	for k in (n_exits if not outer.is_empty() else 0):      # (a one-island map has no outer islands)
@@ -1161,7 +1162,6 @@ func a0_of(isl: int) -> float:
 
 # ------------------------------------------------------------------ meshes
 const RuinWalls := preload("res://scripts/match/ruin_walls.gd")
-const RuinWallsV1 := preload("res://scripts/match/ruin_walls_v1.gd")     # the first art pass (--art1)
 const SkyDeco := preload("res://scripts/match/sky_deco.gd")
 const Landmarks := preload("res://scripts/match/landmarks.gd")
 var landmarks = null
@@ -1333,7 +1333,8 @@ func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
 			if absf(xf.basis.x.y) > 0.001 or absf(xf.basis.z.y) > 0.001 or not (mi.mesh is ArrayMesh):
 				loose.append([mi, xf])
 				continue
-			var key := [Vector2i(int(xf.origin.x) / 32, int(xf.origin.z) / 32), Models._mat_key(mi.material_override)]
+			var key := [Vector2i(int(int(xf.origin.x) / 32.0), int(int(xf.origin.z) / 32.0)),
+					Models._mat_key(mi.material_override)]
 			if not groups.has(key):
 				groups[key] = {"mat": mi.material_override, "parts": []}
 			var am := mi.mesh as ArrayMesh
@@ -1389,7 +1390,7 @@ static func with_lods(m: Mesh) -> Mesh:
 	var out: Mesh = m
 	var tris := 0
 	for si in am.get_surface_count():
-		tris += am.surface_get_array_index_len(si) / 3
+		tris += int(am.surface_get_array_index_len(si) / 3.0)
 	if tris >= 240 and am.get_blend_shape_count() == 0:
 		var im := ImporterMesh.new()
 		for si in am.get_surface_count():
@@ -1433,7 +1434,7 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 	var by := {}
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin
-		var key := Vector2i(int(o.x) / chunk, int(o.z) / chunk)
+		var key := Vector2i(int(int(o.x) / float(chunk)), int(int(o.z) / float(chunk)))
 		if not by.has(key): by[key] = []
 		by[key].append(it)
 	for key in by:
@@ -1470,7 +1471,7 @@ func _island_roots(st: SurfaceTool) -> void:
 		if cells.is_empty():
 			cells = []
 			for i in kind.size():
-				if island[i] == ii and kind[i] != T_VOID: cells.append(Vector2i(i % w, i / w))
+				if island[i] == ii and kind[i] != T_VOID: cells.append(Vector2i(i % w, int(i / float(w))))
 		if cells.size() < 6:
 			continue
 		var bio: Dictionary = _isl_bio[ii] if ii < _isl_bio.size() else biome
@@ -1631,7 +1632,7 @@ func _decorate() -> void:
 			wlist = _mesh_cache[wkey]
 		else:
 			var keep := _visual_seed_begin()
-			var rw = RuinWalls.new(self) if Flora.v2() else RuinWallsV1.new(self)
+			var rw = RuinWalls.new(self)
 			_visual_seed_end(keep)
 			for wmi in await rw.build(wall_mat):
 				wlist.append([String(wmi.name), (wmi as MeshInstance3D).mesh])
@@ -1641,7 +1642,7 @@ func _decorate() -> void:
 			var wmi := MeshInstance3D.new()
 			wmi.name = wl[0]; wmi.mesh = wl[1]; wmi.material_override = wall_mat
 			deco.add_child(wmi)
-			wtris += ((wmi as MeshInstance3D).mesh as ArrayMesh).surface_get_array_len(0) / 3
+			wtris += int(((wmi as MeshInstance3D).mesh as ArrayMesh).surface_get_array_len(0) / 3.0)
 		if "--art-stats" in OS.get_cmdline_user_args() or Array(OS.get_cmdline_user_args()).any(func(a): return String(a).begins_with("--art-view")):
 			print("PERF walls %d tris in %.0f ms" % [wtris, (Time.get_ticks_usec() - wt0) / 1000.0])
 	await _stage("world.walls")
@@ -2472,7 +2473,7 @@ func _authored_blockers(defs: Array, neck: Dictionary) -> void:
 		if D.get("perch", false) or D.get("no_rocks", false) or hand:
 			continue
 		var cells2: Array = islands[ii]["cells"].duplicate()
-		var want := int(cells2.size() / 240)
+		var want := int(cells2.size() / 240.0)
 		var placed: Array = []
 		var tries := 0
 		while placed.size() < want and tries < want * 30 + 30:
@@ -2573,16 +2574,16 @@ func _wall_tiles(Wd: Dictionary) -> Array:
 		var x0 := int(bx[0]); var z0 := int(bx[1]); var x1 := int(bx[2]); var z1 := int(bx[3])
 		var gw2 := int(Wd.get("gate_w", 3))
 		var gs: Array = Wd.get("gates", [])
-		var mx := (x0 + x1) / 2; var mz := (z0 + z1) / 2
+		var mx := int((x0 + x1) / 2.0); var mz := int((z0 + z1) / 2.0)
 		for x in range(x0, x1 + 1):
 			for zz in [z0, z1]:
 				var side := "n" if zz == z0 else "s"
-				if gs.has(side) and absi(x - mx) <= gw2 / 2: continue
+				if gs.has(side) and absi(x - mx) <= int(gw2 / 2.0): continue
 				out.append(Vector2i(x, zz))
 		for z in range(z0 + 1, z1):
 			for xx in [x0, x1]:
 				var side2 := "w" if xx == x0 else "e"
-				if gs.has(side2) and absi(z - mz) <= gw2 / 2: continue
+				if gs.has(side2) and absi(z - mz) <= int(gw2 / 2.0): continue
 				out.append(Vector2i(xx, z))
 	return out
 
