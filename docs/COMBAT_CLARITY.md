@@ -42,6 +42,9 @@ Checked by `--clarity-check` (side edges per viewer, the side lean, the shot hal
 and off, the cast glint and ring, Boki bubbles and ability names in and out of a fight); the X band by
 `--dolm-combo-check` and `--aimkit-check`.
 
+## Toasts on the right rail (11-23)
+Toasts ("Fever is lit", "Bond full!") sit in the right rail under the alive counter and the kill feed (`TopStack.rail`), never in the top centre by the timer, level and HP. `--clarity-shots` pushes one on every fight frame and prints `CLARITYTOAST n/20`: n must be 0 (it was 20 before the rail).
+
 ## What sits on a Hunter (11-20, stabilize sprint: declutter only)
 `--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
 Lace / Cinder, Vex, Kael and Cinder, Lace, Vex / Lace, Cinder, Kael), 10 frames a fight, and counts every element over
@@ -60,6 +63,11 @@ Frames covered of 20 (element-Hunter pairs), headless count, before -> after:
 | your Boki's ability name ("Stinger Hook") | 1 (3) | 1 (3) | kept (DECISIONS 11-11) |
 `--clarity-check` holds the fight to `ClarityFight.BUDGET` (element-Hunter pairs a frame): no words but your own
 Boki's ability name, no world icons, the glove row at most 6 (was 16), no merge ground ring.
+The budget is unchanged (a fight frame measures 0 to 3.6 glow icons; with the row on, a frame is 9 to 18). What was
+flaky was the sample, not the cost: the bot trio-vs-trio is not repeatable (the same seed gives a different fight each
+run, a global `randf()` and timing outside `Match.rng`), and the bots often wander off for the 2 s combat window
+(`InCombat`), where the row is meant to show. `ClarityFight.play` now marks your Hunter in combat on every counted frame,
+so each one is a fight frame whatever the bots did. 11 of 19 runs failed on a loaded host before, 0 of 10 after.
 
 ## Films
 `docs/shots/combat-clarity/fight_3v3_a.mp4` (Tenzo, Sparkle, Lace vs Kael, Cinder, Vex) and `fight_3v3_b.mp4` (Meeko,

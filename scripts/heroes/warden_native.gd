@@ -3,9 +3,10 @@ extends Node
 ## A Hunter drawn on Meshy's own skeleton and playing Meshy's own clips (docs/art/wardens/MESHY_NATIVE.md). Only the
 ## Hunters switched on in content/rules/warden_native.json ("meshy_native") take this path; every other one keeps the
 ## contract model (WardenGlb, WardenSync, WardenClips) untouched. Meshy's bones are never renamed, retargeted or merged
-## onto the contract: the clips play on them as Meshy keyed them, and the contract's procedural bone layers (springs,
-## orbits, carry, look-at, drop pose, squash) are not built. The contract's anchor empties hang on Meshy's bones as
-## BoneAttachment3D nodes (data "anchors"), and the weapon's aim node rides Meshy's hand bone. HunterAnim still runs
+## onto the contract: the clips play on them as Meshy keyed them; of the contract's procedural bone layers the springs
+## and look-at are not built, the drop pose and the landing squash are (on WardenSkeleton.find's stand-ins). The
+## contract's anchor empties hang on Meshy's bones as BoneAttachment3D nodes (data "anchors"), and the weapon's aim
+## node rides Meshy's hand bone. HunterAnim still runs
 ## on the hidden rig and hands over its state (WardenClips.STATE) each frame. The surfaces take the game's hero-toon
 ## pass (WardenGlb._toon: shading, ink, hit flashes) like every other Hunter's, unless data "toon" is false.
 
@@ -23,7 +24,7 @@ const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chai
 ## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
 static var contract_only := false
 static var _data = null  # art name -> its entry (parsed once)
-## "art orbit" -> [the orbit node packed (instanced per Hunter), its rest, the head's, the contract scene]. The scene is
+## "art orbit" -> [the orbit node packed (instanced per Hunter), its rest, the head's, its bone's, the contract scene]. The scene is
 ## kept loaded: letting it go freed Tarek's contract .glb on the main thread mid-build (480 ms on rp2g).
 static var _orbit_src := {}
 static var _contracts := {}  # art -> what its contract .glb gives the native path (contract(): sk_m, anchors)
@@ -41,15 +42,17 @@ var built_off := 0  # and the rig's Offhand last hidden (instance id)
 var cur := ""  # the game state playing ("idle", "walk", ...)
 var attack_left := 0.0  # s the attack clip still owns the body
 var attack_move := false  # it was started by a kit move or a swing (not a cast or a shot): the open reach waits
-## The state counters last frame; cast -1: none read yet (the first frame's seconds since a cast is no new cast)
+## The state counters last frame; cast -1: none read yet (the first state read is the baseline, no new hit)
 var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
-## flinch, the wall kick's plant and push, the open channel's reach. Null when a bone is missing.
+## flinch, the wall kick's plant and push, the open channel's reach, the drop's ride and skydive poses. Null when a
+## bone is missing. The landing squash (WardenClips.lay_feel) goes on last, as on the contract path.
 var flinch: WardenFlinch
 var wall: WardenWall
 var opener: WardenOpen
+var drop_pose: WardenDropPose
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkeleton.find "hips": Spine02)
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
@@ -91,11 +94,15 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	nat.name = "Native"
 	nat.art_id = WardenGlb.art(arch)
 	nat.setup(model, glb, e)
+	var look := WardenGlb.look(WardenGlb.art(arch))  # (the contract path's glow and far-hide, on the copied props)
+	WardenGlb._halos(model, glb, look)
+	WardenFx.bloom(model, glb, look)
+	WardenGlb._far_hide(glb, look)
 	if nat.wall:
 		nat.wall.heavy = Arch.weight(arch) == "heavy"  # (as WardenGlb.dress: a heavy Hero crouches deeper)
 	glb.add_child(nat)
 	if bool(e.get("toon", true)):
-		var own := WardenGlb.look(WardenGlb.art(arch))
+		var own := look
 		var mats: Array = model.get_meta("mats", [])
 		mats.append_array(WardenGlb._toon(glb, lk, MantleLook.warden(arch), own, arch))
 		model.set_meta("mats", mats)
@@ -127,6 +134,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	flinch = WardenFlinch.make(model, skel)
 	wall = WardenWall.make(model, skel)
 	opener = WardenOpen.make_on(model, skel)
+	drop_pose = WardenDropPose.make(model, skel)
 	if d.has("crouch_arms_from"):
 		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
@@ -153,6 +161,12 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	_play("idle", 1.0)
 
 
+## The idle pose at once: a model dressed mid-frame (a re-class, a remote copy built off a snapshot) would draw
+## Meshy's rest T-pose until its first _process advance.
+func _ready() -> void:
+	player.advance(0.0)
+
+
 func _process(dt: float) -> void:
 	_hide_rig_weapon()
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
@@ -165,8 +179,10 @@ func _process(dt: float) -> void:
 		_play("attack", float(d.get("attack_rate", 1.0)), true)
 	elif attack_left <= 0.0:
 		_loco(s)
+	var hips := WardenSkeleton.find(skel, "root")
+	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
-	WardenClips.air_tilt(root, skel, WardenSkeleton.find(skel, "root"))  # (the glider's bank, the dive's pitch)
+	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
 		opener.busy = attack_left > 0.0 and attack_move  # (as clips.busy: a kit move's clip owns the body)
@@ -175,6 +191,10 @@ func _process(dt: float) -> void:
 		flinch.step(dt)
 	if wall:
 		wall.step(dt)
+	if drop_pose:
+		drop_pose.step(dt)
+	var land: Vector2 = root.get_meta(WardenClips.FEEL, Vector2.ZERO)  # (HunterAnim's land_k by weight class)
+	WardenClips.lay_feel(root, skel, hips, land.x * WardenClips.LAND_SQUASH, 0.0)
 	props.step(dt, String(s.get("kmove", "")))
 	if companions:
 		companions.step(dt)
@@ -257,8 +277,11 @@ func _attacked(s: Dictionary) -> bool:
 		"cast": INF if String(s.get("cast_slot", "")) in BOKI_SLOTS else float(s.get("cast", INF)),
 		"recoil": float(s.get("recoil", 0.0)),
 	}
+	if not s.has("cast"):
+		return false  # (Hunter._anim_state has not filled this model's state yet: no counters to read)
 	if float(last["cast"]) < 0.0:
-		last["cast"] = now["cast"]
+		last = now  # (the first state read is the baseline: counters a freshly dressed model finds are no new hit)
+		return false
 	var hit: bool = (
 		(now["kmove"] != "" and now["kmove"] != last["kmove"])
 		or now["swing_n"] > last["swing_n"]
@@ -363,14 +386,12 @@ func _chain(b: int, into: Dictionary) -> void:
 ## The contract model's orbits (data "orbits": orbit node -> Meshy bone; Tenzo's three seeing-stones round his head)
 ## are separate props, not in Meshy's mesh: each is copied from the Hunter's contract .glb onto a holder that follows
 ## Meshy's bone's place (not its turn, so the ring stays level when the clip bows the head), at the same place against
-## the head as on the contract model and at the same size in metres, and
+## the bone as on the contract model and at the same size in metres, and
 ## WardenOrbits turns it as on the contract path (circling, bobbing, the eyes turning to what the kit watches).
 func _add_orbits(glb: Node3D) -> void:
 	var want: Dictionary = d.get("orbits", {})
 	if want.is_empty():
 		return
-	var head_m := glb.transform * WardenGlb.model_xf(glb, skel)
-	head_m = head_m * skel.get_bone_global_rest(skel.find_bone("Head"))
 	for orb in want:
 		var src := _orbit(String(orb))
 		if src.is_empty():
@@ -383,21 +404,25 @@ func _add_orbits(glb: Node3D) -> void:
 		skel.add_child(at)
 		var nd := src[0] as Node3D
 		var sk_m := glb.transform * WardenGlb.model_xf(glb, skel)
-		var shift := head_m.origin - (src[2] as Transform3D).origin  # (Meshy's head pivot vs the contract's)
+		# Meshy's bone vs the contract's: the head for a head orbit, the bone it rides there for any other
+		var ride := sk_m * skel.get_bone_global_rest(b)
+		var ref: Transform3D = src[2] if String(want[orb]) == "Head" else src[3]
+		var shift := ride.origin - ref.origin
 		nd.transform = (sk_m.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D))
 		at.add_child(nd)
 		followers.append([at, b])
 	orbits.setup(skel)
 
 
-## The orbit node `orb` of this Hunter's contract model (a copy), its rest in model space and the contract head's ([]
-## if none). The contract .glb is loaded and instanced once per art and orbit (_orbit_src keeps the part, packed).
+## The orbit node `orb` of this Hunter's contract model (a copy), its rest in model space, the contract head's and the
+## rest of the contract bone it rides ([] if none). The contract .glb is loaded and instanced once per art and orbit
+## (_orbit_src keeps the part, packed).
 func _orbit(orb: String) -> Array:
 	var key := "%s %s" % [art_id, orb]
 	if not _orbit_src.has(key):
 		_orbit_src[key] = _read_orbit(art_id, orb)
 	var src: Array = _orbit_src[key]
-	return [] if src.is_empty() else [(src[0] as PackedScene).instantiate() as Node3D, src[1], src[2]]
+	return [] if src.is_empty() else [(src[0] as PackedScene).instantiate() as Node3D, src[1], src[2], src[3]]
 
 
 static func _read_orbit(art_name: String, orb: String) -> Array:
@@ -413,6 +438,7 @@ static func _read_orbit(art_name: String, orb: String) -> Array:
 	if csk and at and csk.find_bone(at.bone_name) >= 0:
 		var sk_m := WardenGlb.model_xf(con, csk)
 		var rest := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name)) * nd.transform
+		var bone := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name))
 		var head := sk_m * csk.get_bone_global_rest(WardenSkeleton.find(csk, "head"))
 		var copy := nd.duplicate() as Node3D
 		for c in copy.find_children("*", "", true, false):
@@ -420,7 +446,7 @@ static func _read_orbit(art_name: String, orb: String) -> Array:
 		var packed := PackedScene.new()
 		packed.pack(copy)
 		copy.free()
-		out = [packed, rest, head, ps]
+		out = [packed, rest, head, bone, ps]  # (ps: kept loaded)
 	con.free()
 	return out
 
