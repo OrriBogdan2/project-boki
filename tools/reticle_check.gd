@@ -58,7 +58,7 @@ func _hunters(main: Node) -> void:
 	Settings.v["reticle_col"] = "hunter"
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts())
+	m.start(Match.arena_opts())
 	var canvas := Control.new()
 	main.add_child(canvas)
 	var rt := Reticle.new()

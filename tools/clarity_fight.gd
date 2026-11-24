@@ -50,7 +50,7 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		"demo_kin_lv": "8:95"
 	}
 	o.merge({"arch": archs[0], "cls": Arch.weight(archs[0]), "weapon": Arch.signature(archs[0])}, true)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:

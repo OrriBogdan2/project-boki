@@ -64,7 +64,7 @@ func _plan_groups(had: int, held := false) -> PackedStringArray:
 	if m: m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242})
 	m.set_process(false)
 	for i in 3:
 		m.step(Match.DT)

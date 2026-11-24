@@ -40,7 +40,7 @@ func _breaker_whirl() -> void:
 	for start in ["bulwark", "thief"]:
 		var m := Match.new()
 		main.add_child(m)
-		await m.start(Match.arena_opts(start))
+		m.start(Match.arena_opts(start))
 		m.set_process(false)
 		var P: Hunter = m.player
 		if start != "bulwark":
@@ -106,7 +106,7 @@ func _breaker_whirl() -> void:
 func _arena() -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("thief"))
+	m.start(Match.arena_opts("thief"))
 	m.set_process(false)
 	var P: Hunter = m.player
 	ok(
@@ -449,7 +449,7 @@ func _training() -> void:
 	var m := Match.new()
 	main.add_child(m)
 	printerr("ARENACHECK starting the training match")
-	await m.start(
+	m.start(
 		{
 			"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
 			"no_drop": true
