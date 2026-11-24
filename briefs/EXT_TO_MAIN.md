@@ -11259,3 +11259,4 @@ READY ext/clarity-smoke-part 0b8592774b5 (smoke puffs part on screen over Hunter
 READY ext/clarity-hover-tip 8162f6b5a0b (no hover card over a fight, 4/20->0/20 frames)
 READY ext/ttk-fix-1124 f882c02655 (TTK: Vex, Grimble, Kael, Meeko, Neve to the parity bar; 14 -> 1 FAIL; PR via gh-outbox new-pr-ttk.md)
 READY ext/feel-dmg-number-size 077a3be6f7 (damage number sizes on our health scale; GPU pair in gens/damage-feel-1124)
+READY ext/feel-hit-tick 7e4891563b (reticle hit tick 0.15 s / 7 px; GPU pair in gens/damage-feel-1124)
