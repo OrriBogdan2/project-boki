@@ -9,7 +9,7 @@ extends RefCounted
 ## <sp>_reveal.png (the whole window with the reveal card up). Fails if any listed species is not rigged.
 ## --pack=<abs .pck>: load an exported pck over res:// first (for a GPU box that can only run the tree; the strict
 ## form is still `godot --main-pack <pck>`). --surfaces (with --shots-dir): also the real farm (the demo farm save,
-## all three starters on it) as farm.png and each listed species' Field Book page as dex_<sp>.png.
+## all three starters on it) as farm.png, each listed species' Field Book page as dex_<sp>.png and as the garden's wild visitor as visitor_<sp>.png.
 
 const PX := 512
 
@@ -121,6 +121,11 @@ func _surfaces() -> void:
 		Overlay.shot_demo(PackedStringArray(["dex", sp]))
 		await _grab_window(out.path_join("dex_%s.png" % sp), 60)
 		Overlay.close()
+	for sp in species:  # each listed species as the wild visitor of the zone you stand in (GardenVisitor)
+		Demo.setup("farm")
+		GardenVisitor.begin(GardenZones.current(), sp, Time.get_unix_time_from_system())
+		main.show_screen("home", {})
+		await _grab_window(out.path_join("visitor_%s.png" % sp), 150)
 
 
 func _grab_window(path: String, frames := 30) -> void:
