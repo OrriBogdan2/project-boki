@@ -26,6 +26,7 @@ const SAMPLES := {
 const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
+var back := false  # --back: the model turned to show his back (the fin and crest)
 var native := false
 var video := false  # --video: every frame (30 fps) of idle 1.2 s, run 1.0 s, attack 0.6 s as v0000.jpg ...
 var vn := 0
@@ -51,6 +52,8 @@ func run(main: Node) -> void:
 			frame_px = int(a.substr(7))
 		if a == "--close":
 			close = true
+		if a == "--back":
+			back = true
 		if a == "--video":
 			video = true
 		if a == "--probe":
@@ -158,6 +161,8 @@ func _hunter(id: String, dir: String) -> void:
 	marks.append("kind %s glb %s tris %d body_h %.2f" % [kind, WardenGlb.path(id), bx[2], bx[1]])
 	for clip in ["idle", "run", "attack"] if video else CLIPS:
 		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+		if back:
+			yaw += PI
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
 		if probe:
@@ -272,6 +277,37 @@ func _probe_geom(model: Node3D, sk: Skeleton3D, fish: MeshInstance3D) -> void:
 	for k in range(0, fv.size(), maxi(1, fv.size() / 600)):
 		fl.append([fv[k].x, fv[k].y, fv[k].z])
 	pj["fish_verts"] = fl
+	var pp := {}
+	for pn in ["hips", "head"]:
+		var part := WardenProps.part(sk, pn)
+		if part == null:
+			continue
+		var pv: PackedVector3Array = part.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		var out := []
+		for k in range(0, pv.size(), maxi(1, pv.size() / 300)):
+			var bi2 := sk.find_bone((part.get_parent() as BoneAttachment3D).bone_name)
+			var w := sk.get_bone_global_rest(bi2) * part.transform * pv[k]
+			out.append([w.x, w.y, w.z])
+		pp[pn] = out
+	pj["prop_verts"] = pp
+	var pxf := {}
+	for pn in ["hips", "head"]:
+		var part2 := WardenProps.part(sk, pn)
+		if part2 != null:
+			var bi3 := sk.find_bone((part2.get_parent() as BoneAttachment3D).bone_name)
+			pxf[pn] = {"bone": sk.get_bone_name(bi3), "rest": _xf9(sk.get_bone_global_rest(bi3)), "part": _xf9(part2.transform), "base": _xf9(part2.get_meta("base"))}
+	pj["prop_xf"] = pxf
+	var allv := []
+	for mi in model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var m2 := mi as MeshInstance3D
+		if m2.skin == null or m2 == fish or m2.mesh == null or m2.name.begins_with("prop_"):
+			continue
+		var tsk := sk.global_transform.affine_inverse() * m2.global_transform
+		var av: PackedVector3Array = m2.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		for k in range(0, av.size(), maxi(1, av.size() / 4000)):
+			var w2 := tsk * av[k]
+			allv.append([w2.x, w2.y, w2.z])
+	pj["body_all"] = allv
 
 
 func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
