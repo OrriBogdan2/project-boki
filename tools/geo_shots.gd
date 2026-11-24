@@ -1,8 +1,8 @@
 extends RefCounted
 ## --geo-shots --geo-dir=res://<dir> --shots-dir=<dir>: renders the posed hunter frames tools/anim/geo_check.py
 ## --dump-shots wrote (<name>.json meta + <name>.bin: float32 positions and normals, uint32 triangles, one group byte
-## per triangle: 0 body, 1 the part that clips, 2 the part it sinks into, drawn see-through) as <shots-dir>/<name>_close.png
-## (the clip point close up) and <name>_full.png, on the real GPU. Needs a renderer.
+## per triangle: 0 body, 1 the part that clips, 2 the part it sinks into, drawn see-through)
+## as <shots-dir>/<name>_close.png (the clip point close up) and <name>_full.png, on the real GPU. Needs a renderer.
 
 const SIZE := 520
 const CLOSE_DIST := 1.0
