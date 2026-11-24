@@ -1,14 +1,15 @@
 extends RefCounted
-## --boki-eyes-shots --shots-dir=<dir> [--species=a,b] [--px=640]: does each rigged Boki's coat carry its own eyes?
-## Per species, as the game builds it (idle, neutral): <dir>/<id>_off.png, the front of the whole Boki with the face
-## overlay off (BokiRig.face_overlay, the default), <id>_on.png the same with it on, and <id>_game.png, a crop at
-## the match camera (overlay off). <dir>/eyes.tsv: id, Face tris dropped, coat tris. Needs a renderer (GPU worker).
+## --boki-eyes-shots --shots-dir=<dir> [--species=a,b] [--px=480]: does each rigged Boki's coat carry its own eyes?
+## Per species, as the game builds it (idle at 0.5 s, neutral): <dir>/<id>_off.png, a front close-up of its head with
+## the face overlay off (BokiRig.face_overlay, the default), <id>_on.png the same with it on, and <id>_game.png, a
+## crop at the match camera (overlay off). <dir>/eyes.tsv: id, Face tris dropped, coat tris. Needs a renderer (GPU worker).
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Rig := preload("res://tools/boki_rig_check.gd")
 const CLOSE_FOV := 18.0  # deg
-const CLOSE_PITCH := deg_to_rad(8.0)  # the close camera a little above the middle
-const CLOSE_MARGIN := 1.08  # the frame on the Boki's bounds
+const CLOSE_PITCH := deg_to_rad(8.0)  # the close camera a little above the face
+const CLOSE_MARGIN := 1.15  # the frame on the head's bounds
+const HEAD_BONE := "head"  # every Boki rig has one
 const GAME_RES := Vector2i(1920, 1080)
 const GAME_CROP := 96  # px of the 1080p match frame kept round the Boki
 const GAME_ENLARGE := 3  # nearest-neighbour, so the game's pixels stay readable
@@ -16,7 +17,7 @@ const GAME_YAW := PI * 0.8  # its front three-quarters, as boki_rig_shots' match
 
 var main: Node
 var out := ""
-var px := 640
+var px := 480
 var only: Array = []
 
 
@@ -36,9 +37,7 @@ func run(m: Node) -> void:
 	for id in only if not only.is_empty() else Rig.SPECIES_LIST:
 		BokiRig.face_overlay = true
 		tsv.append("%s\t%d\t%d" % [id, _face_tris(String(id)), _coat_tris(String(id))])
-		await _close(String(id), "on")
-		BokiRig.face_overlay = false
-		await _close(String(id), "off")
+		await _close(String(id))
 		await _game(String(id))
 	var f := FileAccess.open(out.path_join("eyes.tsv"), FileAccess.WRITE)
 	f.store_string("\n".join(tsv) + "\n")
@@ -47,22 +46,24 @@ func run(m: Node) -> void:
 	main.get_tree().quit()
 
 
-## A front view of the whole Boki, framed on its bounds (FRAME's "head" is not its eyes on every species).
-func _close(id: String, tag: String) -> void:
-	var vp := _stage(Vector2i(px, px), false)
-	var k := _posed(vp, id, PI)
-	var box := k.global_transform * Shots._box(k)
-	var mid := box.get_center()
-	var size := maxf(box.size.x, box.size.y) * CLOSE_MARGIN
-	var cam := Camera3D.new()
-	vp.add_child(cam)
-	cam.fov = CLOSE_FOV
-	cam.near = 0.05
-	var dist := size * 0.5 / tan(deg_to_rad(CLOSE_FOV) * 0.5) + box.size.z
-	cam.position = mid + Vector3(0, sin(CLOSE_PITCH), cos(CLOSE_PITCH)) * dist
-	cam.look_at(mid)
-	cam.make_current()
-	await _save(vp, "%s_%s.png" % [id, tag])
+## A front close-up on the coat's head (its vertices on the head bone, as posed), with the overlay `on` and off.
+func _close(id: String) -> void:
+	for on in [true, false]:
+		BokiRig.face_overlay = on
+		var vp := _stage(Vector2i(px, px), false)
+		var rig := _posed(vp, id, PI).get_node("Body/Flex/BokiRig") as BokiRig
+		var box := _head_box(rig)
+		var mid := box.get_center()
+		var size := maxf(box.size.x, box.size.y) * CLOSE_MARGIN
+		var cam := Camera3D.new()
+		vp.add_child(cam)
+		cam.fov = CLOSE_FOV
+		cam.near = 0.02
+		cam.position = mid + Vector3(0, sin(CLOSE_PITCH), cos(CLOSE_PITCH)) * (size * 0.5 / tan(deg_to_rad(CLOSE_FOV) * 0.5)
+			+ box.size.z * 0.5)
+		cam.look_at(mid)
+		cam.make_current()
+		await _save(vp, "%s_%s.png" % [id, "on" if on else "off"])
 
 
 ## At the match camera, leaned like the game (boki_rig_shots' match.png), cropped round it and enlarged.
@@ -85,6 +86,42 @@ func _game(id: String) -> void:
 	vp.queue_free()
 
 
+## World bounds of the coat's vertices that mostly follow the head bone, moved from the rest pose to the held frame.
+static func _head_box(rig: BokiRig) -> AABB:
+	var skel := rig.skeleton()
+	var head := skel.find_bone(HEAD_BONE)
+	var to_skel := skel.global_transform.affine_inverse()
+	var lift := skel.global_transform * skel.get_bone_global_pose(head) * skel.get_bone_global_rest(head).affine_inverse()
+	var pts := PackedVector3Array()
+	for mi in rig.model.find_children("*", "MeshInstance3D", true, false):
+		var inst := mi as MeshInstance3D
+		if inst == rig.face or inst.skin == null:
+			continue
+		var into := to_skel * inst.global_transform
+		for si in inst.mesh.get_surface_count():
+			var arr := inst.mesh.surface_get_arrays(si)
+			var verts := arr[Mesh.ARRAY_VERTEX] as PackedVector3Array
+			var bones := arr[Mesh.ARRAY_BONES] as PackedInt32Array
+			var weights := arr[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array
+			var per := bones.size() / verts.size()
+			for v in verts.size():
+				var top := 0
+				for j in per:
+					if weights[v * per + j] > weights[v * per + top]:
+						top = j
+				if _bind_bone(inst.skin, skel, bones[v * per + top]) == head:
+					pts.append(lift * (into * verts[v]))
+	var box := AABB(pts[0], Vector3.ZERO)
+	for q in pts:
+		box = box.expand(q)
+	return box
+
+
+static func _bind_bone(skin: Skin, skel: Skeleton3D, bind: int) -> int:
+	var b := skin.get_bind_bone(bind)
+	return b if b >= 0 else skel.find_bone(skin.get_bind_name(bind))
+
+
 ## The species standing in its idle, neutral face, turned `yaw` (PI faces the camera on +z).
 func _posed(vp: SubViewport, id: String, yaw: float) -> Node3D:
 	var k := Shots.rigged_kin(id)
@@ -94,6 +131,7 @@ func _posed(vp: SubViewport, id: String, yaw: float) -> Node3D:
 	rig.manual = true
 	rig.set_face("neutral")
 	rig.seek(0.5)
+	rig.set_process(false)  # held on that frame, so the two close-ups differ only by the face
 	return k
 
 
