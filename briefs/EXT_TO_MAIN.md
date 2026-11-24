@@ -11264,3 +11264,4 @@ READY ext/boki-own-clips-c f2896d1945 (bulk-rebase: origin/main merged in mechan
 READY ext/perf-aim-circles dfb6ade5631b5dd1ed4e58ce2b68679b668aa1d7 (fight perf r2: circle telegraphs look each ground point up once; aim_draw 1.95->1.38 ms/frame GPU, same vertices)
 READY ext/perf-thief-marks 6fee09f5b6d01a8346bb8be8e4516aadab7add7e (fight perf r2: Sable's Marks fade walk skipped while none is up, one meta read per foe; -0.04 ms busy fight)
 READY ext/perf-thief-marks ea1f3619ba5226b7dc6cf89fd7a534d1f0c186b2 (fight perf r2: Sable's Marks fade walk skipped while none is up; supersedes 6fee09f, fixes a godot-shadow ratchet line)
+READY ext/ui-native-plate-height 813e0e595e177530d0b07ff79bc5f1337055dcfe (plates above native heads; origin/main 2ce5f92d6d merged, only conflict tools/warden_native_check.gd kept both _plate_gap and main's new checks; --warden-native-check 587 checks 0 failed, --check 0 failures, health --strict OK)
