@@ -13,14 +13,17 @@ const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
 var main: Node
-var s: Hunter        # the stomper
-var o: Hunter        # the wisp under its feet
-var f: Hunter        # a foe of the stomper, who lands the CC
-var cues := {}       # stomp_* sound -> times played (Sfx.cue_log) since the last _stage
+var s: Hunter  # the stomper
+var o: Hunter  # the wisp under its feet
+var f: Hunter  # a foe of the stomper, who lands the CC
+var cues := {}  # stomp_* sound -> times played (Sfx.cue_log) since the last _stage
+
 
 func ok(cond: bool, what: String) -> void:
 	print("STOMP %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -28,7 +31,8 @@ func run(mn: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
 		h.ctrl = "idle"
@@ -56,54 +60,86 @@ func run(mn: Node) -> void:
 	print("STOMPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## [name, Callable(): the CC as the kit puts it on the stomper]. Numbers from KIT_PARITY "Crowd control".
 func _hard() -> Array:
 	var stun := func(sec: float) -> Callable: return func(): s.hurt(1.0, f, {"src": "abil", "stun": sec})
 	var tow := func(stun_s: float) -> Callable:
 		return func():
-			m.displace.tow(s, null, {"mode": "glide", "to": [s.pos.x + 9.0, s.pos.y, s.pos.z], "spd": 6.0, "gap": 0.5,
-				"dur": 1.5, "stun": stun_s})
+			m.displace.tow(
+				s,
+				null,
+				{
+					"mode": "glide",
+					"to": [s.pos.x + 9.0, s.pos.y, s.pos.z],
+					"spd": 6.0,
+					"gap": 0.5,
+					"dur": 1.5,
+					"stun": stun_s
+				}
+			)
 	return [
-		["Vex wall slam stun 0.7", stun.call(0.7)], ["Zedran Meteor core stun 0.8", stun.call(0.8)],
-		["Zedran Chain Lunge stun 0.35", stun.call(0.35)], ["Zedran Haul Slam stun 0.6", stun.call(0.6)],
-		["Hem Heartpiercer wall stun 1.2", stun.call(1.2)], ["Tarek punch wall stun 0.9", stun.call(0.9)],
-		["Tarek Volcano slam stun 1.2", stun.call(1.2)], ["Claire Rimelock stun 0.75", stun.call(0.75)],
-		["Ostra Snap stun 1.8", stun.call(1.8)], ["Albert Crush stun 1.0", stun.call(1.0)],
+		["Vex wall slam stun 0.7", stun.call(0.7)],
+		["Zedran Meteor core stun 0.8", stun.call(0.8)],
+		["Zedran Chain Lunge stun 0.35", stun.call(0.35)],
+		["Zedran Haul Slam stun 0.6", stun.call(0.6)],
+		["Hem Heartpiercer wall stun 1.2", stun.call(1.2)],
+		["Tarek punch wall stun 0.9", stun.call(0.9)],
+		["Tarek Volcano slam stun 1.2", stun.call(1.2)],
+		["Claire Rimelock stun 0.75", stun.call(0.75)],
+		["Ostra Snap stun 1.8", stun.call(1.8)],
+		["Albert Crush stun 1.0", stun.call(1.0)],
 		["Albert Crushing Blow stun 0.4", stun.call(0.4)],
-		["Ryzz Storm Rod wall stun 0.8", stun.call(0.8)], ["Sable Bola pair stun 0.9", stun.call(0.9)],
+		["Ryzz Storm Rod wall stun 0.8", stun.call(0.8)],
+		["Sable Bola pair stun 0.9", stun.call(0.9)],
 		["Grimble Anchor stun 1.1", stun.call(1.1)],
 		["Pip Burrseed root 1.1", func(): s.hurt(1.0, f, {"src": "abil", "root": 1.1})],
 		["Pip Burrseed root 1.4 (rank 3)", func(): s.hurt(1.0, f, {"src": "abil", "root": 1.4})],
 		["Sable Bola Grounded 1.5", func(): KitStatus.apply(s, "gnd", 1.5)],
 		["Ryzz Skycall Grounded 1.5", func(): KitStatus.apply(s, "gnd", 1.5)],
 		["Grimble Anchor Grounded", func(): KitStatus.apply(s, "gnd", 1.0)],
-		["Ostra Nightwell stun and pull 3.5", func():
-			s.hurt(1.0, f, {"src": "abil", "stun": 3.5})
-			tow.call(0.0).call()],
-		["Grimble hook reel (stun 0.2 and a haul)", func():
-			s.hurt(1.0, f, {"src": "abil", "stun": 0.2})],
+		[
+			"Ostra Nightwell stun and pull 3.5",
+			func():
+				s.hurt(1.0, f, {"src": "abil", "stun": 3.5})
+				tow.call(0.0).call()
+		],
+		["Grimble hook reel (stun 0.2 and a haul)", func(): s.hurt(1.0, f, {"src": "abil", "stun": 0.2})],
 		["a pull with no stun (a bare tow)", tow.call(0.0)],
-		["a knockback", func():
-			s.impulse(Vector2(14.0, 0.0), -1.0)
-			s.kb_t = m.time],
+		[
+			"a knockback",
+			func():
+				s.impulse(Vector2(14.0, 0.0), -1.0)
+				s.kb_t = m.time
+		],
 	]
+
 
 func _soft() -> Array:
 	var slow := func(k: float, sec: float) -> Callable:
 		return func(): s.hurt(1.0, f, {"src": "abil", "slow": sec, "slow_k": k})
 	return [
-		["Vex Cinderfall slow 30%", slow.call(0.3, 0.6)], ["Zedran Meteor ring slow 40%", slow.call(0.4, 1.5)],
-		["Zedran Fireblast slow 30%", slow.call(0.3, 1.0)], ["Hem Rain of Arrows slow 35%", slow.call(0.35, 0.8)],
-		["Cinder Shot slow 30%", slow.call(0.3, 1.5)], ["Tarek Basalt Spine slow 35%", slow.call(0.35, 1.0)],
-		["Claire Ice Spear slow 35%", slow.call(0.35, 0.8)], ["Claire Rimelock build to 55%", slow.call(0.55, 1.5)],
-		["Ostra orb slow 10%", slow.call(0.1, 1.5)], ["Sable Shadow Knife slow 50%", slow.call(0.5, 2.5)],
+		["Vex Cinderfall slow 30%", slow.call(0.3, 0.6)],
+		["Zedran Meteor ring slow 40%", slow.call(0.4, 1.5)],
+		["Zedran Fireblast slow 30%", slow.call(0.3, 1.0)],
+		["Hem Rain of Arrows slow 35%", slow.call(0.35, 0.8)],
+		["Cinder Shot slow 30%", slow.call(0.3, 1.5)],
+		["Tarek Basalt Spine slow 35%", slow.call(0.35, 1.0)],
+		["Claire Ice Spear slow 35%", slow.call(0.35, 0.8)],
+		["Claire Rimelock build to 55%", slow.call(0.55, 1.5)],
+		["Ostra orb slow 10%", slow.call(0.1, 1.5)],
+		["Sable Shadow Knife slow 50%", slow.call(0.5, 2.5)],
 		["Sable Bola slow 30%", slow.call(0.3, 1.5)],
 		["Ostra Trade Disoriented", func(): KitStatus.apply(s, "dsr", 1.5, 0.4)],
 		["Vex Burr Charge Daze 1.4", func(): KitStatus.apply(s, "rat", 1.4)],
-		["Daze and a slow together", func():
-			KitStatus.apply(s, "rat", 1.4)
-			s.hurt(1.0, f, {"src": "abil", "slow": 1.0, "slow_k": 0.3})],
+		[
+			"Daze and a slow together",
+			func():
+				KitStatus.apply(s, "rat", 1.4)
+				s.hurt(1.0, f, {"src": "abil", "slow": 1.0, "slow_k": 0.3})
+		],
 	]
+
 
 func _step(secs: float) -> void:
 	var t := 0.0
@@ -111,9 +147,11 @@ func _step(secs: float) -> void:
 		m.step(DT)
 		t += DT
 
+
 ## Resets both bodies (no CC left over, a full wisp), then the stomper starts on the wisp.
 func _stage() -> void:
-	if not s.stomp.is_empty(): Life.end_stomp(m, s, "reset")
+	if not s.stomp.is_empty():
+		Life.end_stomp(m, s, "reset")
 	var at := Vector3(o.pos.x, m.world.ground_at(o.pos.x, o.pos.z), o.pos.z)
 	s.teleport(at + Vector3(0.6, 0, 0))
 	for h in [s, o]:
@@ -133,12 +171,14 @@ func _stage() -> void:
 	s.hp = s.max_hp
 	Sfx.cue_log = []
 	Life.start_stomp(m, s, o)
-	_step(1.0)         # a second in: the animation is under way, the first foot has come down
+	_step(1.0)  # a second in: the animation is under way, the first foot has come down
+
 
 func _baseline() -> void:
 	_stage()
 	ok(not s.stomp.is_empty() and int(s.stomp["hits"]) >= 1, "a stomp a second in is running with a foot down")
 	ok(_cues() == {"stomp_windup": 1}, "the stomp's start plays the wind-up once at the stomper (%s)" % [cues])
+
 
 ## The stomp prompt (StompTarget): the one closest downed enemy in reach, nothing for a teammate's wisp.
 func _prompt() -> void:
@@ -169,6 +209,7 @@ func _prompt() -> void:
 	ok(StompTarget.target(m, s) == f, "a remote client's wisp is skipped")
 	o.remote = false
 
+
 ## Last, since it kills the wisp: with no CC the animation finishes.
 func _finish() -> void:
 	_stage()
@@ -176,6 +217,7 @@ func _finish() -> void:
 	ok(s.stomp.is_empty() and o.out, "with no CC the animation finishes and the wisp dies")
 	ok(_cues() == {"stomp_windup": 1, "stomp_finish": 1}, "the kill plays the finish thud once, no crack (%s)" % [cues])
 	Sfx.cue_log = null
+
 
 func _row(what: String, cc: Callable, cancels: bool) -> void:
 	_stage()
@@ -188,6 +230,7 @@ func _row(what: String, cc: Callable, cancels: bool) -> void:
 		ok(not running and alive and crack == 1, "%s cancels the stomp, the wisp lives, one crack" % what)
 	else:
 		ok(running and alive and crack == 0, "%s does not cancel the stomp, no crack" % what)
+
 
 ## The stomp_* cues played since _stage, with the count of each, read from Sfx.cue_log; the position of each
 ## must be set (positional: heard by anyone in reach, both squads).

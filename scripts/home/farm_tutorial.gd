@@ -154,6 +154,7 @@ static func hint_text(id: String) -> String:
 		return ""
 	return fill(String((s["hints"] as Dictionary).get(stage(id), "")))
 
+
 ## One tutorial line with its {tokens} filled: keys through Settings.key_cap, the food, the house cost.
 static func fill(raw: String) -> String:
 	var txt := (raw if base() else FarmTaskGuide.fill(raw)).replace("{build}", Settings.key_cap("build"))
@@ -222,6 +223,7 @@ static func detect() -> void:
 	if Progress.stat("harvested") > 0 and not HomeLayout.fixtures(Save.d, "farm").is_empty():
 		mark("crop")
 
+
 ## The line for the first construction site a profile places ("" after that): sites only progress while you
 ## are on the farm. Shown once through the placement toast; the seen flag is Save.d.tutorial.site_hint.
 static func site_hint() -> String:
@@ -230,6 +232,7 @@ static func site_hint() -> String:
 		return ""
 	tut["site_hint"] = true
 	return String(rules()["site_hint"])
+
 
 static func mark(id: String) -> void:
 	var st := state()

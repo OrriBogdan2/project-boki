@@ -11,16 +11,19 @@ extends RefCounted
 const BUSES := {"master": "Master", "music": "Music", "sfx": "SFX", "ambience": "Ambience"}
 const PROBE := "--audio-boot-probe"
 const SAVED := {"master": 0.3, "music": 0.4, "sfx": 0.5, "ambience": 0.6}
-const TOL := 0.05      # dB
+const TOL := 0.05  # dB
 
 var main: Node
 var fails := 0
 var n := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	n += 1
 	printerr("AUDIOSET %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -53,8 +56,10 @@ func run(main_node: Node) -> void:
 	print("AUDIOSET %d checks, %d failed" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _db(bus: String) -> float:
 	return AudioServer.get_bus_volume_db(AudioServer.get_bus_index(bus))
+
 
 func _sliders(where: String) -> void:
 	for key in Settings.BUSES:
@@ -73,7 +78,7 @@ func _sliders(where: String) -> void:
 	ok(moved_master, "%s: dragging the master slider moves the Master bus (%.1f dB)" % [where, _db("Master")])
 	Overlay.tab = "Audio"
 	Overlay.open_settings()
-	await main.get_tree().process_frame          # (the Main page is freed at the end of the frame)
+	await main.get_tree().process_frame  # (the Main page is freed at the end of the frame)
 	var sliders := Overlay.find_children("*", "HSlider", true, false)
 	ok(sliders.size() >= 3, "%s: the Audio page has its volume sliders (%d)" % [where, sliders.size()])
 	# one slider per Settings.BUSES entry after Master, in that order (Voices and UI sit between the others)
@@ -90,6 +95,7 @@ func _sliders(where: String) -> void:
 		var send := AudioServer.get_bus_send(AudioServer.get_bus_index(b))
 		ok(send == &"Master", "%s: %s bus sends to Master" % [where, b])
 
+
 ## Every player in the tree is on a slider's bus: one on Master (the default) or on a name with no bus (Godot
 ## falls back to Master) would ignore Music, Sound effects and Ambience.
 func _routes(where: String) -> void:
@@ -103,6 +109,7 @@ func _routes(where: String) -> void:
 			off.append("%s on %s" % [p.get_path(), p.get("bus")])
 	ok(count > 0 and off.is_empty(), "%s: all %d players are on a slider's bus %s" % [where, count, off])
 
+
 ## True if a bus is levelled by a slider other than Master: it is one of Settings.BUSES, or sends into one
 ## (SFXFar, Boki -> SFX). Master alone is not.
 func _on_slider(bus: String) -> bool:
@@ -113,6 +120,7 @@ func _on_slider(bus: String) -> bool:
 			return true
 		bus = String(AudioServer.get_bus_send(AudioServer.get_bus_index(bus)))
 	return false
+
 
 ## What reaches the speakers: a steady tone on each slider's bus, the Master bus's peak at full, half and 0.
 ## Half is about half as loud (-12 dB, give or take the peak meter's 2 dB); 0 is silence.
@@ -131,7 +139,8 @@ func _heard() -> void:
 		for k in BUSES:
 			Settings.set_v(k, 1.0, false)
 		var silent := main.get_tree().root.find_children("*", "AudioStreamPlayer", true, false).filter(
-			func(q): return q.playing and not q.stream_paused)
+			func(q): return q.playing and not q.stream_paused
+		)
 		for q in silent:
 			q.stream_paused = true
 		p.play()
@@ -148,6 +157,7 @@ func _heard() -> void:
 	for k in BUSES:
 		Settings.set_v(k, 1.0, false)
 
+
 ## The Master bus's loudest moment over 0.3 s, after 0.25 s for the mixer to take a change.
 func _peak() -> float:
 	await main.get_tree().create_timer(0.25).timeout
@@ -159,6 +169,7 @@ func _peak() -> float:
 		pk = maxf(pk, AudioServer.get_bus_peak_volume_right_db(0, 0))
 	return pk
 
+
 ## Nothing writes a bus back later: with the screen running for a few seconds (music and ambience fading in)
 ## the levels the sliders set are still the ones on the buses.
 func _stays(where: String) -> void:
@@ -169,6 +180,7 @@ func _stays(where: String) -> void:
 		var still := absf(_db(BUSES[key]) - Sfx.slider_db(0.2)) < TOL
 		ok(still, "%s: after a few seconds %s is still at %.1f dB" % [where, BUSES[key], _db(BUSES[key])])
 
+
 ## A real mouse press on the Music slider's track (not a script write), as a player does it.
 func _mouse_drag(where: String, sliders: Array) -> void:
 	if sliders.is_empty():
@@ -178,7 +190,7 @@ func _mouse_drag(where: String, sliders: Array) -> void:
 	sl.value = 1.0
 	await main.get_tree().process_frame
 	var vp := sl.get_viewport()
-	for fade in main.find_children("*", "ColorRect", true, false):      # (the boot fade takes clicks in a real window)
+	for fade in main.find_children("*", "ColorRect", true, false):  # (the boot fade takes clicks in a real window)
 		(fade as ColorRect).mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var in_canvas := sl.get_global_transform_with_canvas() * Vector2(sl.size.x * 0.1, sl.size.y * 0.5)
 	var pos := vp.get_final_transform() * in_canvas
@@ -197,6 +209,7 @@ func _mouse_drag(where: String, sliders: Array) -> void:
 		await main.get_tree().process_frame
 	var what := "%s: a mouse click near the left of the Music slider turns the Music bus down" % where
 	ok(_db("Music") < -12.0, "%s (%.1f dB)" % [what, _db("Music")])
+
 
 ## A saved settings.cfg is what the game boots with: write one, start the game again on it (--settings-file).
 ## A file from before the perceptual curve (no audio_v) boots sounding as it did: gain = its old slider.
@@ -221,6 +234,7 @@ func _boot_with_saved_cfg(current: bool) -> void:
 		var what := "%s cfg: %s=%.1f boots with %s bus" % [kind, key, SAVED[key], BUSES[key]]
 		ok(absf(got - want) < TOL, "%s %.1f dB (want %.1f)" % [what, got, want])
 
+
 func _put_back(keep: String) -> void:
 	if keep == "":
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
@@ -229,11 +243,13 @@ func _put_back(keep: String) -> void:
 	f.store_string(keep)
 	f.close()
 
+
 func _parse(text: String, bus: String) -> float:
 	for line in text.split("\n"):
 		if line.begins_with("AUDIOBOOT %s " % bus):
 			return float(line.split(" ")[2])
 	return 999.0
+
 
 func _probe() -> void:
 	for f in 20:

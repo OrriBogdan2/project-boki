@@ -12,26 +12,26 @@ signal finished
 
 const YOU_AT := Vector3(-0.45, 0.0, 1.0)
 const BOKI_AT := Vector3(0.55, 0.0, 1.35)
-const FROM_AT := Vector3(0.0, 2.6, -5.2)         # the heart-crystal in the broken arch
-const HOVER := Vector3(0.55, -0.12, 0.6)          # m from your head: where the Relic waits, beside your face
-const CAM_YOU := Vector3(0.15, 1.35, 4.6)        # framing you, the Boki and the Relic's path
+const FROM_AT := Vector3(0.0, 2.6, -5.2)  # the heart-crystal in the broken arch
+const HOVER := Vector3(0.55, -0.12, 0.6)  # m from your head: where the Relic waits, beside your face
+const CAM_YOU := Vector3(0.15, 1.35, 4.6)  # framing you, the Boki and the Relic's path
 const LOOK_YOU := Vector3(0.05, 1.0, 0.6)
-const CAM_INTRO := Vector3(1.2, 1.35, 5.6)       # framing the new you on the left of the intro panel
+const CAM_INTRO := Vector3(1.2, 1.35, 5.6)  # framing the new you on the left of the intro panel
 const LOOK_INTRO := Vector3(1.15, 0.85, 0.9)
-const BOKI_INTRO := Vector3(-1.25, 0.0, 1.45)     # your Boki at your side while you look at the clips
-const DRIFT_S := 3.4                             # s the Relic takes to reach you
-const DIM := 0.45                                # x the island's lights while the Relic comes
-const CLIP := Vector2(250, 140)                  # px: each ability clip in the intro
+const BOKI_INTRO := Vector3(-1.25, 0.0, 1.45)  # your Boki at your side while you look at the clips
+const DRIFT_S := 3.4  # s the Relic takes to reach you
+const DIM := 0.45  # x the island's lights while the Relic comes
+const CLIP := Vector2(250, 140)  # px: each ability clip in the intro
 const BUTTON := "Put on the Relic"
 const GO := "Into the portal"
 
 var hunter_id := ""
-var host: Node3D                                 # the island scene (the hatch)
+var host: Node3D  # the island scene (the hatch)
 var cam: Camera3D
-var kin: Node3D                                  # your new Boki
+var kin: Node3D  # your new Boki
 var you: Node3D
 var relic: MaskRelic
-var phase := ""                                  # arrive | wait | put | intro
+var phase := ""  # arrive | wait | put | intro
 var ui: CanvasLayer
 var prompt: Control
 var intro: Control
@@ -40,10 +40,11 @@ var _anim: HunterAnim
 var _cam_to := CAM_YOU
 var _look_to := LOOK_YOU
 var _look := LOOK_YOU
-var _lights: Array = []                          # [light, its own energy]
+var _lights: Array = []  # [light, its own energy]
 var _env: Environment
-var _env_energy := Vector2.ONE                   # the island's ambient and sky energy before the dim
+var _env_energy := Vector2.ONE  # the island's ambient and sky energy before the dim
 var _t := 0.0
+
 
 static func make(scene: Node3D, camera: Camera3D, boki: Node3D, id: String) -> MaskMoment:
 	var m := MaskMoment.new()
@@ -53,9 +54,10 @@ static func make(scene: Node3D, camera: Camera3D, boki: Node3D, id: String) -> M
 	m.hunter_id = id
 	return m
 
+
 func _ready() -> void:
 	you = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], "", "", Unmasked.worn())
-	you.get_node("Rig/Torso/Aim/Gun").free()      # (empty-handed: the Relic brings the weapon)
+	you.get_node("Rig/Torso/Aim/Gun").free()  # (empty-handed: the Relic brings the weapon)
 	you.position = YOU_AT
 	you.rotation.y = PI
 	host.add_child(you)
@@ -71,10 +73,12 @@ func _ready() -> void:
 	_build_ui()
 	_arrive()
 
+
 func _build_ui() -> void:
 	ui = CanvasLayer.new()
 	ui.layer = 20
 	add_child(ui)
+
 
 ## The light goes down and the Relic leaves the crystal, drifting to wait in front of your face.
 func _arrive() -> void:
@@ -82,10 +86,11 @@ func _arrive() -> void:
 	relic = MaskRelic.make(hunter_id)
 	relic.position = FROM_AT
 	host.add_child(relic)
-	relic.face_to = cam.position          # (it shows you its face as it comes)
+	relic.face_to = cam.position  # (it shows you its face as it comes)
 	relic.drift_to(_head() + HOVER, DRIFT_S, 1.2).finished.connect(_wait)
 	Sfx.play("whoosh", null, -10.0)
 	get_tree().create_timer(DRIFT_S * 0.7).timeout.connect(_boki_looks)
+
 
 ## Your Boki sees it coming: it turns to it and hops twice.
 func _boki_looks() -> void:
@@ -98,6 +103,7 @@ func _boki_looks() -> void:
 		tw.tween_property(kin, "position:y", 0.22, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tw.tween_property(kin, "position:y", 0.0, 0.16).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 	Sfx.play("hover", null, -6.0)
+
 
 func _wait() -> void:
 	phase = "wait"
@@ -123,12 +129,14 @@ func _wait() -> void:
 	prompt = box
 	UI.pop_in(box)
 
+
 func _unhandled_input(event: InputEvent) -> void:
 	if phase == "wait" and (event.is_action_pressed("interact") or event.is_action_pressed("ui_accept")):
 		put_on()
 		get_viewport().set_input_as_handled()
 	elif phase == "intro" and go_button and event.is_action_pressed("ui_accept"):
 		_go()
+
 
 ## The put-on beat (MaskBeat): the Relic rises to your hollow face, a cut to black, the fallen Hunter, and you
 ## stand as them.
@@ -138,10 +146,15 @@ func put_on() -> void:
 	phase = "put"
 	if prompt:
 		prompt.queue_free()
-	MaskBeat.play(relic, you, func(model: Node3D):
-		you = model
-		_anim = HunterAnim.new(you)
-		get_tree().create_timer(0.4).timeout.connect(_show_intro))
+	MaskBeat.play(
+		relic,
+		you,
+		func(model: Node3D):
+			you = model
+			_anim = HunterAnim.new(you)
+			get_tree().create_timer(0.4).timeout.connect(_show_intro)
+	)
+
 
 ## What the Hunter does: their ability clips beside you, and on to the tutorial.
 func _show_intro() -> void:
@@ -170,6 +183,7 @@ func _show_intro() -> void:
 	intro = holder
 	UI.pop_in(col)
 
+
 func _go() -> void:
 	if phase != "intro":
 		return
@@ -177,8 +191,10 @@ func _go() -> void:
 	Sfx.play("click")
 	finished.emit()
 
+
 func _head() -> Vector3:
 	return (you.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
+
 
 func _process(dt: float) -> void:
 	_t += dt
@@ -188,7 +204,7 @@ func _process(dt: float) -> void:
 	cam.look_at(_look)
 	var dim := lerpf(1.0, DIM, clampf(_t / 1.5, 0.0, 1.0))
 	for pair in _lights:
-		if not is_instance_valid(pair[0]):      # (the island may free its lights before the beat ends)
+		if not is_instance_valid(pair[0]):  # (the island may free its lights before the beat ends)
 			continue
 		var light := pair[0] as Light3D
 		if not light.get_parent() is MaskRelic:

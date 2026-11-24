@@ -8,31 +8,39 @@ extends RefCounted
 ## shows the quirk and the sex note, where it's found and its rarity ("?" for both until it's met), and
 ## the boss-egg kinds close the book. Never touches the save.
 
-const SEEDS := 4000      # hatches rolled per kind for the share checks
+const SEEDS := 4000  # hatches rolled per kind for the share checks
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("QUIRKS %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 ## Enough of Home for FarmChatter's rain warning: the weather, and who said what.
-class FakeHome extends RefCounted:
+class FakeHome:
+	extends RefCounted
 	var raining := false
 	var rain_next := true
 	var weather_t := 10.0
 	var said: Array = []
+
 	func _say(k: Dictionary, line: String, _delay: float, _direct: bool) -> void:
 		said.append([String(k["rec"]["species"]), line])
+
 
 func _female_share(species: String) -> float:
 	var fem := 0
 	for i in SEEDS:
-		if BokiQuirks.sex_for(species, 5000 + i) == "f": fem += 1
+		if BokiQuirks.sex_for(species, 5000 + i) == "f":
+			fem += 1
 	return float(fem) / SEEDS
 
+
 func run(main: Node) -> void:
-	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	Save.no_write = true
 	_data()
 	_sexes()
@@ -43,15 +51,21 @@ func run(main: Node) -> void:
 	print("QUIRKS DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _data() -> void:
 	var d := BokiQuirks.data()
-	ok((d.get("quirk", {}) as Dictionary).size() == 140 and (d.get("sexNote", {}) as Dictionary).size() == 18,
-		"the data file loads: 140 quirks, 18 sex notes")
+	ok(
+		(d.get("quirk", {}) as Dictionary).size() == 140 and (d.get("sexNote", {}) as Dictionary).size() == 18,
+		"the data file loads: 140 quirks, 18 sex notes"
+	)
 	var missing := Data.KIN.keys().filter(func(sp): return BokiQuirks.quirk(sp) == "")
 	ok(missing.is_empty(), "every species in the game has a quirk %s" % str(missing))
 	ok(BokiQuirks.key("basaltoad") == "rampartoad", "a species is looked up by its display name")
-	ok(BokiQuirks.sex_note("hivara") != "" and BokiQuirks.sex_note("zapple") == "",
-		"sex notes only where the kind is unusual")
+	ok(
+		BokiQuirks.sex_note("hivara") != "" and BokiQuirks.sex_note("zapple") == "",
+		"sex notes only where the kind is unusual"
+	)
+
 
 func _sexes() -> void:
 	ok(_female_share("hivara") == 1.0 and _female_share("mossgrade") == 1.0, "all-female kinds only hatch females")
@@ -62,12 +76,15 @@ func _sexes() -> void:
 	ok(absf(even - 0.5) < 0.03, "other kinds stay half and half (%.1f%% female)" % (100.0 * even))
 	var same := true
 	for i in 300:
-		if BokiQuirks.sex_for("zapple", i) != Unique.sex_for_seed(i): same = false
-		if BokiQuirks.sex_for("marchleaf", i) != BokiQuirks.sex_for("marchleaf", i): same = false
+		if BokiQuirks.sex_for("zapple", i) != Unique.sex_for_seed(i):
+			same = false
+		if BokiQuirks.sex_for("marchleaf", i) != BokiQuirks.sex_for("marchleaf", i):
+			same = false
 	ok(same, "the roll is the same for the same seed, and unchanged for half-and-half kinds")
 	var all_f := true
 	for i in 40:
-		if Unique.sex(Save.new_kin("hivara")) != "f": all_f = false
+		if Unique.sex(Save.new_kin("hivara")) != "f":
+			all_f = false
 	ok(all_f, "Save.new_kin hatches an all-female kind female")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
@@ -75,8 +92,10 @@ func _sexes() -> void:
 	var b := Save.new_kin("mossgrade")
 	var bred := true
 	for i in 20:
-		if Unique.sex(Care.breed(a, b, rng, "mossgrade")) != "f": bred = false
+		if Unique.sex(Care.breed(a, b, rng, "mossgrade")) != "f":
+			bred = false
 	ok(bred, "Care.breed keeps the kind's sexes after inheriting looks")
+
 
 ## Marchleaf's Nightmark: about 4% at hatch, from the seed, only that kind, kept by save and load.
 func _rare_trait() -> void:
@@ -84,23 +103,39 @@ func _rare_trait() -> void:
 	var same := true
 	for i in 10000:
 		var t := BokiQuirks.rare_trait_for("marchleaf", 7000 + i)
-		if t == "nightmark": hits += 1
-		elif t != "": same = false
-		if BokiQuirks.rare_trait_for("marchleaf", 7000 + i) != t: same = false
-	ok(hits >= 300 and hits <= 500 and same,
-		"Nightmark: %.1f%% of 10k seeded Marchleaf hatches, the same each time" % (hits / 100.0))
-	ok(BokiQuirks.rare_trait_for("zapple", 1) == "" and not Save.new_kin("zapple").has("rare"),
-		"other kinds roll no rare trait")
+		if t == "nightmark":
+			hits += 1
+		elif t != "":
+			same = false
+		if BokiQuirks.rare_trait_for("marchleaf", 7000 + i) != t:
+			same = false
+	ok(
+		hits >= 300 and hits <= 500 and same,
+		"Nightmark: %.1f%% of 10k seeded Marchleaf hatches, the same each time" % (hits / 100.0)
+	)
+	ok(
+		BokiQuirks.rare_trait_for("zapple", 1) == "" and not Save.new_kin("zapple").has("rare"),
+		"other kinds roll no rare trait"
+	)
 	var found: Dictionary = {}
 	for i in 400:
 		var m := Save.new_kin("marchleaf")
 		found[String(m["rare"])] = m
-	ok(found.has("nightmark") and found.has("") and BokiQuirks.has_trait(found["nightmark"], "nightmark")
-		and BokiQuirks.rare_of(found["nightmark"])["name"] == "Nightmark" and BokiQuirks.rare_of(found[""]).is_empty(),
-		"Save.new_kin rolls it at hatch (%s) and the card finds its badge text" % str(found.keys()))
-	var egg_baby := {"rare": true}      # a Rare Egg's baby: its rare = true is the egg, not a trait id
-	ok(BokiQuirks.rare_of(egg_baby).is_empty() and not BokiQuirks.has_trait(egg_baby, "nightmark"),
-		"a Rare Egg baby (rare = true) has no trait badge and raises no error")
+	ok(
+		(
+			found.has("nightmark")
+			and found.has("")
+			and BokiQuirks.has_trait(found["nightmark"], "nightmark")
+			and BokiQuirks.rare_of(found["nightmark"])["name"] == "Nightmark"
+			and BokiQuirks.rare_of(found[""]).is_empty()
+		),
+		"Save.new_kin rolls it at hatch (%s) and the card finds its badge text" % str(found.keys())
+	)
+	var egg_baby := {"rare": true}  # a Rare Egg's baby: its rare = true is the egg, not a trait id
+	ok(
+		BokiQuirks.rare_of(egg_baby).is_empty() and not BokiQuirks.has_trait(egg_baby, "nightmark"),
+		"a Rare Egg baby (rare = true) has no trait badge and raises no error"
+	)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
 	var a := Save.new_kin("marchleaf")
@@ -108,7 +143,7 @@ func _rare_trait() -> void:
 	ok(kid.has("rare"), "Care.breed rolls it for the baby too")
 	var round_trip: Variant = JSON.parse_string(JSON.stringify({"roster": [found["nightmark"].duplicate(true)]}))
 	ok(String(round_trip["roster"][0]["rare"]) == "nightmark", "the trait survives a save and load")
-	var old: Dictionary = found["nightmark"].duplicate(true)      # an older save: Marchleaf with no roll yet
+	var old: Dictionary = found["nightmark"].duplicate(true)  # an older save: Marchleaf with no roll yet
 	old.erase("rare")
 	var plain := Save.new_kin("zapple")
 	var save_data := {"roster": [old, plain]}
@@ -116,8 +151,11 @@ func _rare_trait() -> void:
 	var rolled := String(old.get("rare", "?"))
 	BokiQuirks.migrate(save_data)
 	var expect := BokiQuirks.rare_trait_for("marchleaf", int(old["dna"]["seed"]))
-	ok(old.has("rare") and String(old["rare"]) == rolled and rolled == expect
-		and not plain.has("rare"), "an older save's Marchleaf rolls once on load (from its seed) and keeps it")
+	ok(
+		old.has("rare") and String(old["rare"]) == rolled and rolled == expect and not plain.has("rare"),
+		"an older save's Marchleaf rolls once on load (from its seed) and keeps it"
+	)
+
 
 ## How much food a new Boki of this kind loses in ten awake minutes.
 func _food_drop(species: String) -> float:
@@ -125,6 +163,7 @@ func _food_drop(species: String) -> float:
 	rec["needs"]["food"] = 90.0
 	Care.tick(rec, 600.0)
 	return 90.0 - Care.need(rec, "food")
+
 
 ## Joy after ten minutes in the rain minus joy after ten dry ones.
 func _rain_mood(species: String, sleeping := false) -> float:
@@ -135,6 +174,7 @@ func _rain_mood(species: String, sleeping := false) -> float:
 	Care.tick(dry, 600.0, sleeping, false)
 	return Care.need(wet, "joy") - Care.need(dry, "joy")
 
+
 func _care() -> void:
 	var fast := _food_drop("rimeshrew")
 	var usual := _food_drop("zapple")
@@ -142,9 +182,12 @@ func _care() -> void:
 	var joy := {}
 	for sp in ["goliathite", "burrlet", "zapple"]:
 		joy[sp] = _rain_mood(sp)
-	ok(joy["goliathite"] < -1.0 and joy["burrlet"] > 1.0 and absf(joy["zapple"]) < 0.01,
-		"rain sinks an Effigeetle's mood, lifts a Mycroll's, leaves others alone %s" % str(joy))
+	ok(
+		joy["goliathite"] < -1.0 and joy["burrlet"] > 1.0 and absf(joy["zapple"]) < 0.01,
+		"rain sinks an Effigeetle's mood, lifts a Mycroll's, leaves others alone %s" % str(joy)
+	)
 	ok(_rain_mood("goliathite", true) == 0.0, "a Boki asleep or indoors doesn't feel the rain")
+
 
 func _rain_warning() -> void:
 	var h := FakeHome.new()
@@ -152,8 +195,10 @@ func _rain_warning() -> void:
 	var senser := {"rec": Save.new_kin("kestrike")}
 	ok(not FarmChatter._rain_warning(h, [usual]), "a Boki that can't sense rain says nothing")
 	var warned := FarmChatter._rain_warning(h, [usual, senser])
-	ok(warned and h.said.size() == 1 and h.said[0][0] == "kestrike" and h.said[0][1] != "",
-		"a Kestrike warns that rain is coming: %s" % str(h.said))
+	ok(
+		warned and h.said.size() == 1 and h.said[0][0] == "kestrike" and h.said[0][1] != "",
+		"a Kestrike warns that rain is coming: %s" % str(h.said)
+	)
 	ok(not FarmChatter._rain_warning(h, [senser]), "it warns only once before each rain")
 	h.raining = true
 	FarmChatter._rain_warning(h, [senser])
@@ -166,13 +211,16 @@ func _rain_warning() -> void:
 	h.weather_t = 5.0
 	ok(FarmChatter._rain_warning(h, [senser]), "it warns again before the next rain")
 
+
 func _field_book(main: Node) -> void:
 	var v := VBoxContainer.new()
 	main.add_child(v)
 	DexView.detail(v, "hivara", main.get_tree(), Callable())
 	var texts: Array = v.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
-	ok(texts.has(BokiQuirks.quirk("hivara")) and texts.has(BokiQuirks.sex_note("hivara")),
-		"the Field Book page shows its quirk and sex note")
+	ok(
+		texts.has(BokiQuirks.quirk("hivara")) and texts.has(BokiQuirks.sex_note("hivara")),
+		"the Field Book page shows its quirk and sex note"
+	)
 	var unmet: Array = texts.filter(func(t): return t == "?")
 	ok(unmet.size() >= 2 or FieldBook.form_seen("hivara"), "an unmet Boki's page shows ? for found in and rarity")
 	v.queue_free()
@@ -182,5 +230,7 @@ func _field_book(main: Node) -> void:
 	ok(DexFound.tier("pebbit") == 0 and DexFound.tier("hivara") == 2, "wild is Common, Rare Egg is Very rare")
 	var wild_at := DexFound.found_in("pebbit")
 	var egg_at := DexFound.found_in("hivara")
-	ok(wild_at.begins_with("Expedition, The Hollow Crown: ") and egg_at.contains("Thornhive"),
-		"found in: the mode and map, then regions (wild) or the boss's lair: %s | %s" % [wild_at, egg_at])
+	ok(
+		wild_at.begins_with("Expedition, The Hollow Crown: ") and egg_at.contains("Thornhive"),
+		"found in: the mode and map, then regions (wild) or the boss's lair: %s | %s" % [wild_at, egg_at]
+	)

@@ -18,29 +18,39 @@ extends RefCounted
 ## hold (a lane, a shield, a fan, a stream), which draws no ring.
 ## Tender and Thief have no hold slot.
 const HOLDS := [
-	["archer", "Heavy Shot", "rmb", true, "cursor"], ["archer", "bow draw", "lmb", false, ""],
-	["ashwick", "Cinder Shot lane", "rmb", false, ""], ["ashwick", "Torch Lance stream", "lmb", false, ""],
-	["bulwark", "hammer whirl", "lmb", true, "cursor"], ["bulwark", "Aegis", "rmb", false, ""],
-	["dolm", "punch", "lmb", true, "cursor"], ["dolm", "Quakefall", "rmb", true, "cursor"],
+	["archer", "Heavy Shot", "rmb", true, "cursor"],
+	["archer", "bow draw", "lmb", false, ""],
+	["ashwick", "Cinder Shot lane", "rmb", false, ""],
+	["ashwick", "Torch Lance stream", "lmb", false, ""],
+	["bulwark", "hammer whirl", "lmb", true, "cursor"],
+	["bulwark", "Aegis", "rmb", false, ""],
+	["dolm", "punch", "lmb", true, "cursor"],
+	["dolm", "Quakefall", "rmb", true, "cursor"],
 	["dredge", "Brass Broadside fan", "e", false, ""],
 	["gunslinger", "Longneedle", "e", true, "cursor"],
-	["juggernaut", "blast", "lmb", true, "body"], ["juggernaut", "Lunge", "rmb", true, "cursor"],
-	["mage", "Wirerun", "dash", true, "cursor"], ["mage", "Storm Rod", "rmb", true, "cursor"],
+	["juggernaut", "blast", "lmb", true, "body"],
+	["juggernaut", "Lunge", "rmb", true, "cursor"],
+	["mage", "Wirerun", "dash", true, "cursor"],
+	["mage", "Storm Rod", "rmb", true, "cursor"],
 	["ostra", "Lantern Trade ends", "dash", false, ""],
-	["rimewright", "Ice Spear aim", "rmb", false, ""], ["rimewright", "Skate", "dash", false, ""],
+	["rimewright", "Ice Spear aim", "rmb", false, ""],
+	["rimewright", "Skate", "dash", false, ""],
 ]
-const HOLD_SECS := 2.5         # s each hold is kept down
-const OLD_REACH := 13.0     # px: how far the old cross reached from the cursor at rest (gap 6 + arm 7)
+const HOLD_SECS := 2.5  # s each hold is kept down
+const OLD_REACH := 13.0  # px: how far the old cross reached from the cursor at rest (gap 6 + arm 7)
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("RETICLE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func hue_of(id: String) -> float:
 	return Reticle.accent(id).h * 360.0
+
 
 ## 4. the accents, and every Hunter drawn in the Arena with a hit confirm.
 func _hunters(main: Node) -> void:
@@ -64,9 +74,11 @@ func _hunters(main: Node) -> void:
 	var rt := Reticle.new()
 	var rh := ReticleHud.new(rt)
 	var drawn := [0]
-	canvas.draw.connect(func():
-		rh.draw(canvas, m.player, Vector2(100, 100), m.time)
-		drawn[0] += 1)
+	canvas.draw.connect(
+		func():
+			rh.draw(canvas, m.player, Vector2(100, 100), m.time)
+			drawn[0] += 1
+	)
 	for id in Arch.ids():
 		m.arena.set_arch(String(id), Arch.signature(String(id)))
 		m.player.recoil = 1.0
@@ -90,6 +102,7 @@ func _hunters(main: Node) -> void:
 	canvas.queue_free()
 	m.queue_free()
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Settings.reset_all()
@@ -99,8 +112,13 @@ func run(main: Node) -> void:
 	ok((st["col"] as Color).is_equal_approx(white) and st["hunter"], "default colour: a pale ring, accent dot")
 	ok(Reticle.t("ring_r") + Reticle.t("line_w") < OLD_REACH * 0.6, "the default is clearly smaller than the old cross")
 	# ---------------------------------------------------------------- 2. set, persist, apply
-	var want := {"reticle_shape": "cross", "reticle_size": 1.5, "reticle_col": "yellow", "reticle_alpha": 0.6,
-		"reticle_outline": false}
+	var want := {
+		"reticle_shape": "cross",
+		"reticle_size": 1.5,
+		"reticle_col": "yellow",
+		"reticle_alpha": 0.6,
+		"reticle_outline": false
+	}
 	for key in want:
 		Settings.set_v(key, want[key])
 	var cf := ConfigFile.new()
@@ -124,15 +142,17 @@ func run(main: Node) -> void:
 	canvas.size = Vector2(80, 80)
 	main.add_child(canvas)
 	var drawn := [0]
-	canvas.draw.connect(func():
-		for s in Reticle.SHAPES:
-			for cid in Reticle.COLORS:
-				Settings.v["reticle_shape"] = s[0]
-				Settings.v["reticle_col"] = cid
-				for outline in [true, false]:
-					Settings.v["reticle_outline"] = outline
-					Reticle.draw(canvas, Vector2(40, 40), 3.0)
-					drawn[0] += 1)
+	canvas.draw.connect(
+		func():
+			for s in Reticle.SHAPES:
+				for cid in Reticle.COLORS:
+					Settings.v["reticle_shape"] = s[0]
+					Settings.v["reticle_col"] = cid
+					for outline in [true, false]:
+						Settings.v["reticle_outline"] = outline
+						Reticle.draw(canvas, Vector2(40, 40), 3.0)
+						drawn[0] += 1
+	)
 	canvas.queue_redraw()
 	for i in 3:
 		await main.get_tree().process_frame
@@ -144,6 +164,7 @@ func run(main: Node) -> void:
 	await _holds(main)
 	print("RETICLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## Holds one slot of `kit` for HOLD_SECS and reads the cursor ring each step: [first, max, rising, flared].
 func _hold_run(ac: RefCounted, kit: String, input: String) -> Array:
@@ -166,7 +187,8 @@ func _hold_run(ac: RefCounted, kit: String, input: String) -> Array:
 		"dash":
 			P.inp["dash_down"] = true
 			P.do_dash()
-		"e": K.use_e()
+		"e":
+			K.use_e()
 	while t < HOLD_SECS:
 		P.inp["fire"] = input == "lmb"
 		P.inp["sec_hold"] = input == "rmb"
@@ -177,12 +199,13 @@ func _hold_run(ac: RefCounted, kit: String, input: String) -> Array:
 		var k := float(rt["charge"])
 		if k >= 0.0:
 			first = k if first < 0.0 else first
-			rising = rising and (top >= 1.0 or k >= top - 0.001)      # (past full the shot goes and the ring resets)
+			rising = rising and (top >= 1.0 or k >= top - 0.001)  # (past full the shot goes and the ring resets)
 			top = maxf(top, k)
 			at = String(rt["at"])
 		flared = flared or float(rt["flare"]) > 0.0
 	m.queue_free()
 	return [first, top, rising, flared, at]
+
 
 func _holds(main: Node) -> void:
 	var ac = load("res://tools/archetype_check.gd").new()
@@ -194,8 +217,13 @@ func _holds(main: Node) -> void:
 			var starts: bool = float(res[0]) >= 0.0 and float(res[0]) < 0.6
 			var placed: bool = String(res[4]) == row[4]
 			var good: bool = starts and bool(res[2]) and float(res[1]) >= 1.0 and bool(res[3]) and placed
-			ok(good, "hold ring: %s fills from the start, never falls, flashes at full, at the %s %s"
-					% [tag, row[4], str(res)])
+			ok(
+				good,
+				(
+					"hold ring: %s fills from the start, never falls, flashes at full, at the %s %s"
+					% [tag, row[4], str(res)]
+				)
+			)
 		else:
 			ok(float(res[1]) < 0.0, "hold ring: %s draws no ring (an aim or raise hold) %s" % [tag, str(res)])
 		await main.get_tree().process_frame
