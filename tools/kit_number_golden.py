@@ -10,6 +10,7 @@ content/archetypes/*.json and content/rules/kit_parity.json. Key = `<file>:<dott
 Only numbers and booleans count; text (names, card lines, evidence) is free to edit. health.py --strict runs --check.
 See docs/ARCHETYPES.md, 'Kit number golden'.
 """
+
 import glob, json, os, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

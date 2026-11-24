@@ -388,7 +388,7 @@ func _base_world() -> void:
 # ------------------------------------------------------------------ 1. Hob
 func _hob_rules() -> void:
 	Save.d = _new_save()
-	var L := HomeLayout.ensure(Save.d)
+	var lay := HomeLayout.ensure(Save.d)
 	_stats()
 	var start_open := ["house", "crop_patch", "cook_pot", "ranch_pen", "fence", "path_dirt", "flowers"]
 	ok(
@@ -1375,17 +1375,17 @@ func _has_drop(hb) -> bool:
 
 ## The same stretch of growing time: a watered plot away from water stays at its stage, the same plot
 ## with water beside the patch moves on one (FarmWater.grow_mul, 1.25: 72 s a stage instead of 90 s).
-func _grows_faster(home, L: Dictionary) -> void:
+func _grows_faster(home, lay: Dictionary) -> void:
 	var day1 := bool(Save.d["tutorial"].get("day1_done", false))
 	Save.d["tutorial"]["day1_done"] = true  # (the tutorial's quick first crop would hide the difference)
-	L["water"].clear()
+	lay["water"].clear()
 	var away_s := FarmWater.stage_s(Save.d, "plots", 0)
 	var into := Data.WATER_TIME / FarmWater.grow_mul() + 4.0  # past the by-water stage, short of the dry one
 	var planted := {"crop": "tidebloom", "stage": 0, "care": 0, "wt": Time.get_unix_time_from_system() - into, "wet": 2}
 	Save.d["plots"][0] = planted.duplicate()
 	home._farm_tick()
 	var dry_stage := int(Save.d["plots"][0]["stage"])
-	L["water"][HomeLayout.key(49, 31)] = 1
+	lay["water"][HomeLayout.key(49, 31)] = 1
 	var near_s := FarmWater.stage_s(Save.d, "plots", 0)
 	Save.d["plots"][0] = planted.duplicate()
 	home._farm_tick()
@@ -1402,13 +1402,13 @@ func _grows_faster(home, L: Dictionary) -> void:
 
 
 ## A plain trough fills itself from the pantry only by the water; away from it you fill it yourself.
-func _trough_by_water(L: Dictionary) -> void:
+func _trough_by_water(lay: Dictionary) -> void:
 	Save.d["items"]["kibble"] = 10
 	var f := {"id": "fw", "kind": "trough", "x": 49.5, "z": 33.5, "food": [], "auto": true}
 	ok(Econ.auto_refill(f) > 0, "a trough two tiles from water tops itself up from the pantry")
 	var far := {"id": "fd", "kind": "trough", "x": 49.5, "z": 40.5, "food": [], "auto": true}
 	ok(Econ.auto_refill(far) == 0 and not Econ.self_fills(far), "a trough away from water waits for you to fill it")
-	L["water"].erase(HomeLayout.key(49, 31))
+	lay["water"].erase(HomeLayout.key(49, 31))
 
 
 func _note_text(hb) -> String:

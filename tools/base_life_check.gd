@@ -293,7 +293,8 @@ func _nap_sounds(home) -> void:
 	Sfx.listener = sleeper["pos"]
 	# holds from earlier steps lapse on the wall clock (250 ms), not on these fixed steps
 	for key in Sfx.loops.keys():
-		if String(key).begins_with("nap:"): Sfx.loop_stop(key)
+		if String(key).begins_with("nap:"):
+			Sfx.loop_stop(key)
 	home._move_kin(DT)
 	var on := Sfx.loops.keys().filter(func(key): return String(key).begins_with("nap:"))
 	ok(
@@ -351,7 +352,7 @@ func _spots_part(home, center: Vector3) -> void:
 	var cz := int(center.z)
 	zone["nap"] = [["sunny rock", cx + 4, cz], ["under a tree", cx - 4, cz + 3]]
 	var life: BaseLife = home.life
-	life.r_v["doze"] = 0.0      # these places are for tired naps: a random company doze would send a Boki elsewhere
+	life.r_v["doze"] = 0.0  # these places are for tired naps: a random company doze would send a Boki elsewhere
 	life.r_v["doze_pile"] = 0.0
 	seed(11)
 	home.day_t = 0.4
@@ -408,17 +409,17 @@ func _spots_part(home, center: Vector3) -> void:
 ## Raising leans (BaseAxes, base_axes.json): 10 days of each care style give the rows below, ten days of play make a
 ## busy Boki and ten of feeding alone a lazy one, and a lazier Boki naps more often on its own than a busy one.
 func _axes_part(home) -> void:
-	var R := Content.rules("base_axes")
+	var axes := Content.rules("base_axes")
 	var rows := {}
-	for style in R["styles"]:
+	for style in axes["styles"]:
 		var rec := Save.new_kin("burrlet", style)
 		for day in 10:
-			for kind in R["styles"][style]:
+			for kind in axes["styles"][style]:
 				BaseAxes.care(rec, kind)
 		rows[style] = rec
-		var scales: Array = R["weights"].keys().map(func(a): return "%s x%.2f" % [a, BaseAxes.mult(rec, a)])
+		var scales: Array = axes["weights"].keys().map(func(a): return "%s x%.2f" % [a, BaseAxes.mult(rec, a)])
 		print("BASELIFE axes %-8s %s %s" % [style, rec["raised"], ", ".join(scales)])
-	var cap := float(R["cap"])
+	var cap := float(axes["cap"])
 	ok(rows["none"]["raised"].values().all(func(v): return v == 0.0), "no care leaves every axis at 0")
 	ok(
 		rows.values().all(func(r): return r["raised"].values().all(func(v): return absf(v) <= cap + 0.0001)),
