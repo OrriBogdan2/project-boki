@@ -7,10 +7,10 @@ extends RefCounted
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const HIT := 12.0            # damage of the test hit
-const FIGHT := 30            # Hunters in the budget fight
-const FIGHT_FRAMES := 120    # frames of one hit per Hunter each
-const WARM_FRAMES := 30      # of them before the node count is taken
+const HIT := 12.0  # damage of the test hit
+const FIGHT := 30  # Hunters in the budget fight
+const FIGHT_FRAMES := 120  # frames of one hit per Hunter each
+const WARM_FRAMES := 30  # of them before the node count is taken
 const SHOT_FRAMES := [2, 5]  # frames after the hit the strip is taken at (the flash holds ~6)
 
 var bad := 0
@@ -18,9 +18,12 @@ var main: Node
 var m: Match
 var P: Hunter
 
+
 func ok(cond: bool, what: String) -> void:
 	print("HITFLASH %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(root: Node, mode: String = "check") -> void:
 	main = root
@@ -29,7 +32,8 @@ func run(root: Node, mode: String = "check") -> void:
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "god": false})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	P = m.player
 	if mode == "shots":
@@ -39,10 +43,12 @@ func run(root: Node, mode: String = "check") -> void:
 	print("HITFLASH DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _flash_col() -> Color:
 	var fx := m.fx
 	var mi: MeshInstance3D = fx.flash_pool[(fx.fi - 1 + fx.flash_pool.size()) % fx.flash_pool.size()]
 	return (mi.material_override as ShaderMaterial).get_shader_parameter("color")
+
 
 ## The flash a plain hit from the player leaves on `t`, and how many flashes it started.
 func _hit(t: Ent, dmg := HIT) -> Array:
@@ -50,11 +56,13 @@ func _hit(t: Ent, dmg := HIT) -> Array:
 	m.on_damage(t, P, dmg, {"src": "primary"})
 	return [_flash_col(), m.fx.flashes.size() - before]
 
+
 func _foe(at: Vector3) -> Hunter:
 	var h := m.make_hunter("F%d" % m.hunters.size(), 2, "warden", "Foe", "idle", {}, at, {})
 	h.ctrl = "idle"
-	h.armor = 0.0       # (armor turns the flash blue: a different case)
+	h.armor = 0.0  # (armor turns the flash blue: a different case)
 	return h
+
 
 func _check() -> void:
 	var foe := _foe(P.pos + Vector3(4, 0, 0))
@@ -76,12 +84,15 @@ func _check() -> void:
 	ok(nb > 0 and nb < nh, "a Boki's number is smaller than a Hunter's (%d vs %d)" % [nb, nh])
 	_budget()
 
+
 ## Font size of the number the player's hit on t just printed (the newest in use).
 func _number_size(t: Ent) -> int:
 	m.fx.nums.clear()
-	for l in m.fx.num_pool: l.visible = false
+	for l in m.fx.num_pool:
+		l.visible = false
 	m.on_damage(t, P, 30.0, {"src": "primary"})
 	return (m.fx.nums[m.fx.nums.size() - 1]["node"] as Label3D).font_size if not m.fx.nums.is_empty() else 0
+
 
 ## 30 Hunters, a hit on each every frame, half of them with a Boki beside: no node is made, no flash
 ## beyond the pool is live, and the number labels stay in their pool.
@@ -97,7 +108,7 @@ func _budget() -> void:
 	var peak := 0
 	for f in FIGHT_FRAMES:
 		if f == WARM_FRAMES:
-			nodes = m.fx.get_child_count()     # (Fx builds a few pools on first use)
+			nodes = m.fx.get_child_count()  # (Fx builds a few pools on first use)
 		for t in targets:
 			t.hp = 1e6
 			m.on_damage(t, P, HIT, {"src": "primary"})
@@ -107,14 +118,18 @@ func _budget() -> void:
 	ok(peak <= m.fx.flash_pool.size(), "live flashes stay in the pool (%d of %d)" % [peak, m.fx.flash_pool.size()])
 	ok(m.fx.nums.size() <= m.fx.NUM_POOL, "live numbers stay in the pool (%d)" % m.fx.nums.size())
 
+
 func _shots() -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
-	if m.hud: m.hud.visible = false
+	if fade != null:
+		await fade.reveal(0.01)
+	if m.hud:
+		m.hud.visible = false
 	var home := P.pos
 	var foe := _foe(home + Vector3(-1.4, 0, 5))
 	var wild := m.spawn_wild(Save.new_kin("puddlet", "Wob"), home + Vector3(1.4, 0, 5), false)
