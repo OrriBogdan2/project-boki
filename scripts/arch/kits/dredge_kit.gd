@@ -277,8 +277,6 @@ func _dress_volley() -> void:
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
 		return
-	if not pull.is_empty():
-		HeroVfx.of(m).hold(h, "reel")         # grounded while he reels: a brass ring at his feet
 	if barge_t > 0.0:
 		barge_t -= dt
 		_barge_trail(dt)
@@ -747,7 +745,6 @@ func _quake(at: Vector3, fell: float) -> void:
 	m.fx.dust(at, 34)
 	play("dr_quake")
 	m.sfx("dr_quake", at, 0.0, 1.0)
-	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)
 	lock_until = m.time + float(dash_def()["lock_t"])
 	net_ring(at, r, col_of(ed))
 
