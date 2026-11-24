@@ -60,11 +60,11 @@ func run(main: Node) -> void:
 	var chest := h.pos + Vector3(0, 1.0, 0)
 	on.global_position = chest + (m.cam.global_position - chest).normalized() * 9.0
 	var gd := Vector2(on.global_position.x - h.pos.x, on.global_position.z - h.pos.z).length()
-	var rad := on.get_aabb().size.x * 0.5 * on.global_transform.basis.get_scale().x
+	var reach := on.get_aabb().size.x * 0.5 * on.global_transform.basis.get_scale().x + FxHunterCap.PUFF_CLEAR
 	cap._process(0.016)
 	ok(
-		not on.visible and gd > rad + FxHunterCap.PUFF_CLEAR,
-		"a puff between the camera and the Hunter parts (%.1f m off on the ground, %.1f m reach)" % [gd, rad + FxHunterCap.PUFF_CLEAR]
+		not on.visible and gd > reach,
+		"a puff between the camera and the Hunter parts (%.1f m off on the ground, %.1f m reach)" % [gd, reach]
 	)
 	on.global_position = h.pos + Vector3(9.0, 1.0, 3.0)
 	cap._process(0.016)
