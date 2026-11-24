@@ -242,6 +242,8 @@ AUTO = {  # id: overrides on AUTO_BASE
     "tuatrune": BORROWED,
     "velvorm": BORROWED,
     "casquebill": BORROWED,
+    "basaltoad": BORROWED,
+    "cindowary": BORROWED,
     "caecilith": {},
     "glintmole": {},
     "rimeshrew": {},

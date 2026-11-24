@@ -54,6 +54,8 @@ const SPECIES_LIST := [
 	"tuatrune",
 	"velvorm",
 	"nimbostrich",
+	"basaltoad",
+	"cindowary",
 	"lilybara",
 	"umbrathere"
 ]
@@ -150,6 +152,8 @@ const OVER_TRIS := {
 	"wisplet": MESHY_TRIS,
 	"zephyrak": MESHY_TRIS,
 	"nimbostrich": MESHY_TRIS,
+	"basaltoad": MESHY_TRIS,
+	"cindowary": MESHY_TRIS,
 	"rimeshrew": MESHY_TRIS
 }
 const MAX_BONES := 64

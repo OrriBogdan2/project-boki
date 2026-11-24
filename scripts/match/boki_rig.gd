@@ -17,6 +17,14 @@ const PATH := "res://art/kin/%s/%s.glb"
 ## gets a soft shadow on the ground under it. "coat" overrides COAT_LOOK (a matte skin: less fresnel, rim and top
 ## light, no sheen).
 const FRAME := {
+	"cindowary": {"head": Vector3(0, 0.357, -0.0814), "top": 0.464, "carry": Vector3(0, 0.517, 0.042),
+		"ear_tip": Vector3(0.0199, 0.464, 0.0379), "tail_tip": Vector3(0, 0.264, 0.124), "tip_bone": "hips", "hip": 0.184,
+		"marks": {"left flank": Vector3(-0.0492, 0.27, 0.0256), "right flank": Vector3(0.0492, 0.27, 0.0256),
+			"back": Vector3(0, 0.37, 0.0667), "chest": Vector3(0, 0.25, -0.0731)}},
+	"basaltoad": {"head": Vector3(0, 0.357, -0.132), "top": 0.464, "carry": Vector3(0, 0.517, 0.0654),
+		"ear_tip": Vector3(0.054, 0.464, 0.0588), "tail_tip": Vector3(0, 0.264, 0.197), "tip_bone": "hips", "hip": 0.184,
+		"marks": {"left flank": Vector3(-0.134, 0.27, 0.0391), "right flank": Vector3(0.134, 0.27, 0.0391),
+			"back": Vector3(0, 0.37, 0.105), "chest": Vector3(0, 0.25, -0.119)}},
 	"nimbostrich":
 	{
 		"head": Vector3(0, 0.354, -0.124),
