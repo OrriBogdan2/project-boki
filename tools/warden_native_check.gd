@@ -88,13 +88,15 @@ func _height(a: String) -> void:
 func _states(main: Node, a: String) -> void:
 	var m := _model(a)
 	var nat := m.get_node("Warden/Native") as WardenNative
+	# (every state carries "cast" like Hunter._anim_state's: without it WardenNative reads the state as not yet filled and
+	# ignores the swing; the idle case is the first read, the baseline the attack's swing_n 1 is counted against)
 	var cases := [
-		["idle", {"grounded": true}],
-		["walk", {"grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
-		["run", {"grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}],
-		["jump", {"grounded": false, "vel": Vector3(0.0, 3.0, -4.0)}],
-		["crouch", {"grounded": true, "crouch": 1.0}],
-		["attack", {"grounded": true, "swing_n": 1}],
+		["idle", {"cast": 99.0, "grounded": true}],
+		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
+		["run", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}],
+		["jump", {"cast": 99.0, "grounded": false, "vel": Vector3(0.0, 3.0, -4.0)}],
+		["crouch", {"cast": 99.0, "grounded": true, "crouch": 1.0}],
+		["attack", {"cast": 99.0, "grounded": true, "swing_n": 1}],
 	]
 	for c in cases:
 		m.set_meta(WardenClips.STATE, c[1])
