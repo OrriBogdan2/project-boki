@@ -244,7 +244,8 @@ func _camp() -> Array:
 			_sample(f / 60.0)
 			last = Time.get_ticks_usec()  # (the particle count walks the tree: it stays out of the frame times)
 		if f == int(PEAK_AT * 60.0) or f == int(QUIET_AT * 60.0):
-			scene.report(bench.main.get_tree().root, m, bench.main.get_viewport(), "peak" if f < QUIET_AT * 60.0 else "quiet")
+			var tag := "peak" if f < QUIET_AT * 60.0 else "quiet"
+			scene.report(bench.main.get_tree().root, m, bench.main.get_viewport(), tag)
 			last = Time.get_ticks_usec()  # (so does the inventory)
 		f += 1
 	counting = false
