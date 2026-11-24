@@ -325,9 +325,33 @@ rigs only (Kael, Lace, Grimble through Meshy's `include_fingers` rig; no hunter 
 | Lace left | 65 edges >3x | 44 |
 | Grimble right (left has no fingers) | 6, 12, 55.8 mm | 4, 2, 55.8 mm |
 
-Real-GPU stills (`docs/art/wardens/rig_tear_1124/<hunter>_<hand>.jpg`; the 11-23 sheets `rig_faults_1123/` are re-rendered with the graded fist, grey = Meshy's weights, green = cleaned; rows open / fist / grip):
-the graded fist and grip show no shards on Kael (both hands). Lace's fingertips still crumple in the fist (her fingers are tiny and
-fused; 44 left-hand edges stay over 3x) and Grimble's armoured hands hide the fingers: both open (see the PR text).
-Open: the 12k-triangle decimate (`fault2_decimate.jpg`) still leaves a jagged fist (the hands keep 989 of 2265 triangles; Kael's rig
-curled in the same graded fist). Protected hands are clearly better than the uniform collapse, not yet clean: raise `DEFAULT_REGIONS`'
-hand share or decimate the hands last.
+### Finger roll (follow-up, same day)
+The weights were half of it. Meshy rolls every finger joint its own way, so "turn about local z" is not one motion:
+- Lace's roll changes joint to joint (index 1 and 2 turn toward the palm about z, index 3 sideways): her fist swung the
+  fingertips sideways and crumpled them (the "tiny fused fingers" read above was wrong).
+- On Kael's and Lace's right hands, +z closed the fingers toward the **back** of the hand; the 11-24 morning stills took that for a fist.
+- The palm side is known from the thumb: its last joint sits 22 to 79 mm on the palm's side of the knuckles on all three rigs, and the
+  mesh fingertips hang the same way at rest.
+
+Fix 3, `tools/meshy/finger_roll.py` (run by `finger_weights.clean` first, so `meshy_task.py rig` gets it): every finger joint's local
++z becomes bone direction x palm side; thumbs aim across the palm (`THUMB_AIM`). It changes only the rest rotations of the finger
+nodes, their children's rest transforms and the inverse bind matrices: the rest pose is unchanged (max drift 0.0007 mm). The game
+rig is unaffected (`v95_swap` moves finger weights onto the hand bone); this is for Meshy rigs that keep their fingers and for
+`--rig-hands-shots`.
+
+| fist 80/60/30, thumb 0.6: edges >2x / >3x | weights only (morning) | roll + weights |
+|---|---|---|
+| Kael right | 2 / 0 | 2 / 0 |
+| Kael left | 6 / 0 | 0 / 0 |
+| Lace right | 40 / 2 | 25 / 1 |
+| Lace left | 94 / 44 | 35 / 0 |
+| Grimble right | 34 / 4 | 5 / 3 |
+
+Real-GPU stills (`docs/art/wardens/rig_tear_1124/<hunter>_<hand>.jpg`; rows open / fist / grip; grey = weights only (the morning
+state), green = roll + weights): Kael's and Lace's fists and grips now close toward the palm with no shards. Lace's left (bow) hand
+keeps a small flap at the little finger in the side view: Meshy weighted part of the bow to her fingers on the scratch rig, so the
+bow bends with them. Grimble's right hand barely changes on camera (armoured, nearly fingerless); his left hand has no finger bones.
+`rig_faults_1123/fault1_fingers.jpg` is Kael's right-hand sheet; `fault2_decimate.jpg` is re-rendered with the roll on both rigs.
+Open: the 12k-triangle decimate (`fault2_decimate.jpg`) still leaves a faceted, jagged fist (the hands keep 989 of 2265 triangles).
+Protected hands are clearly better than the uniform collapse, not yet clean: raise `DEFAULT_REGIONS`' hand share or decimate the hands
+last.
