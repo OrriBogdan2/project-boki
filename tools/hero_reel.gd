@@ -1,0 +1,585 @@
+extends "res://tools/pitch_reel.gd"
+## SCRATCH (private, never shipped). --hero-reel --hunter=<id> [--hero-pass=hud|clean] [--hero-seed=N] [--foe=<id>]
+## [--foe-hp=<x>] [--bot-diff=expert] [--dry] --shots-dir=<dir>: shot 11 is the hero moment (a cinematic intro with the
+## HUD off, then the combo played through the REAL input actions: Input.action_press / release, read by
+## Match._gather_input exactly as a keyboard and mouse would be), shot 12 the same combo inside a 2v2.
+## Prints HERO_STEP / HERO_RESULT lines (fired, landed, foe hp) so a dry run says what failed.
+
+const HERO_SHOT := 11
+const FIGHT_SHOT := 12
+const PORT_SHOT := 13  # v6: eye-level front portrait orbit, HUD off
+const PORT_S := 6.0
+const INTRO_S := 3.6  # s of the cinematic intro
+const INTRO_ARC := 150.0  # deg the orbit sweeps
+const INTRO_R := 2.9  # m from the hunter
+const INTRO_EYE := 1.1  # m above the feet (knee height: --intro-eye=0.55)
+const INTRO_FOV := 40.0
+const GAP_M := 6.0  # m between the hunter and the foe at the start
+const HOLD_END_S := 1.0  # s kept after the kill
+const COMBO_MAX_S := 14.0  # s the combo may take before it is called failed
+const FINISH_MAX_S := 6.0  # s the driver keeps hitting after the last step when the foe is still up
+const READY_WAIT_S := 5.0  # s a step waits for its ability to come back before it is called not fired
+const AFTER_S := 0.7  # s watched after a press for the ability's effect
+const STEP_GAP_S := 0.2  # s between two steps
+const WALL_SEARCH_M := 110  # m round the start the wall spot is looked for
+const FLOOR_K := 0.12  # share of the foe's hp it cannot be brought under until the combo's last step
+const RECAST_AFTER_S := 0.8  # s after the first press a second R (Kitefall's strike) waits
+const ULT_AFTER_S := 2.5  # s watched after an ult (Kitefall and the like land late)
+const AGAIN_MAX := 2  # extra tries an "again" step (walks in like "in") gets when it misses
+const WALL_REACH_M := 2.6  # m behind the foe a wall must stand for the Storm Rod's stun
+const FAR_M := 70.0  # m the foe waits away during the intro
+const MOVES := ["left", "right", "up", "down"]
+## [label key (slot), action, slot, hold s, range m, tag]. fire has no slot (checked by the foe's hp).
+const COMBOS := {
+	"mage":
+	[
+		["sec", "secondary", "sec", 0.35, 9.0, "wall"],
+		["fire", "fire", "", 1.7, 9.0, ""],
+		["dash", "dash", "dash", 0.2, 7.0, "through"],
+		["x", "hunter_ult", "x", 0.35, 8.0, ""],
+		["x", "hunter_ult", "x", 0.1, 20.0, "recast"]
+	],
+	"thief":
+	[
+		["sec", "secondary", "sec", 0.3, 9.0, ""],
+		["dash", "dash", "dash", 0.2, 8.0, "in"],
+		["fire", "fire", "", 1.6, 3.5, ""],
+		["kin", "signature", "e", 0.3, 6.0, ""],
+		["x", "hunter_ult", "x", 0.3, 6.0, ""]
+	],
+	"dolm":
+	[
+		["dash", "dash", "dash", 0.2, 11.0, "in"],
+		["fire", "fire", "", 1.2, 5.0, ""],
+		["kin", "signature", "e", 0.3, 5.5, ""],
+		["sec", "secondary", "sec", 0.45, 3.5, "again"],  # (Quakefall: full hold, close; a miss is slammed again)
+		["x", "hunter_ult", "x", 0.3, 5.5, ""]
+	],
+	"juggernaut":
+	[
+		["dash", "dash", "dash", 0.5, 9.0, "in"],
+		["fire", "fire", "", 1.6, 3.0, ""],
+		["kin", "signature", "e", 0.3, 7.0, ""],
+		["sec", "secondary", "sec", 0.3, 4.0, ""],
+		["x", "hunter_ult", "x", 0.3, 4.0, ""]
+	],
+	"ashwick":
+	[  # ends on Gilded Riposte (Fable edit 2)
+		["dash", "dash", "dash", 0.2, 8.0, "in"],
+		["kin", "signature", "e", 0.3, 4.0, ""],
+		["fire", "fire", "", 1.8, 4.5, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""]
+	],
+	"tender":
+	[
+		["sec", "secondary", "sec", 0.3, 9.0, ""],
+		["fire", "fire", "", 1.6, 7.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["fire", "fire", "", 1.6, 6.0, ""]
+	],
+	"gunslinger":
+	[
+		["sec", "secondary", "sec", 0.3, 9.0, ""],
+		["fire", "fire", "", 1.6, 8.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["kin", "signature", "e", 0.3, 6.0, ""],
+		["x", "hunter_ult", "x", 0.3, 8.0, ""]
+	],
+	"ostra":
+	[  # Coin Blast, rifle fire, Slipstep, Palm Lance, Cinderfall
+		["kin", "signature", "e", 0.3, 8.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["x", "hunter_ult", "x", 0.3, 8.0, ""],
+		["fire", "fire", "", 1.6, 5.0, ""]
+	],
+	"gil": [["fire", "fire", "", 1.6, 3.0, ""]],  # portrait-only (crouch beat)
+	"learn":
+	[
+		# same move for every hunter (learnings beat)
+		["dash", "dash", "dash", 0.2, 8.0, "in"],
+		["fire", "fire", "", 2.0, 4.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["fire", "fire", "", 2.0, 4.0, ""]
+	],
+	"rimewright":
+	[
+		["fire", "fire", "", 1.6, 8.0, ""],
+		["kin", "signature", "e", 0.3, 7.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["x", "hunter_ult", "x", 0.3, 6.0, ""]
+	],
+}
+
+var hero_pass := "hud"
+var hero_seed := 5
+var foe_id := ""
+var foe_hp_k := 1.0
+var ally_id := ""
+var foe2_id := ""
+var summon_at := -1.0  # --summon-at=<s>: tap C this many s into the combo (Boki wisp out whole)
+var combo_key := ""  # --combo=<key>: play another hunter's (or the generic "learn") combo
+var diff := "expert"
+var dry := false
+var intro_eye := INTRO_EYE
+var port_fov := 36.0
+var port_s := PORT_S
+var port_arc := 70.0
+var port_r0 := 3.0
+var port_r1 := 2.1
+var port_y0 := 1.0
+var port_y1 := 1.35
+var port_eye := 1.45
+var port_crouch := false  # --port-crouch: hold crouch through the portrait (Gil crouch beat)
+var port_yaw := 0.0  # --port-yaw=<deg>: turn the whole sweep round the hunter (180 = from behind)
+var port_look := false  # --port-look: he turns to the camera and his orbit props (Tenzo's seeing-stones) watch it
+# --port-aim-off=<m>: with --port-look he faces this far to the camera's right of it (a profile for a thrust)
+var port_aim_off := 0.0
+var port_hold := ""  # --port-hold=<input>: hold this input (fire = a charged guard, the sword raised) in the portrait
+var steps_log: Array = []
+var reseats := 0
+var floor_on := false
+var casts: Array = []  # ability ids the Hunter cast (CombatBus.ability_used), in order
+
+
+func run(main_node: Node) -> void:
+	for a in OS.get_cmdline_user_args():
+		var arg := String(a)
+		hero_pass = arg.substr(12) if arg.begins_with("--hero-pass=") else hero_pass
+		hero_seed = int(arg.substr(12)) if arg.begins_with("--hero-seed=") else hero_seed
+		foe_id = arg.substr(6) if arg.begins_with("--foe=") else foe_id
+		foe_hp_k = float(arg.substr(9)) if arg.begins_with("--foe-hp=") else foe_hp_k
+		diff = arg.substr(11) if arg.begins_with("--bot-diff=") else diff
+		intro_eye = float(arg.substr(12)) if arg.begins_with("--intro-eye=") else intro_eye
+		combo_key = arg.substr(8) if arg.begins_with("--combo=") else combo_key
+		port_fov = float(arg.substr(11)) if arg.begins_with("--port-fov=") else port_fov
+		port_s = float(arg.substr(9)) if arg.begins_with("--port-s=") else port_s
+		port_arc = float(arg.substr(11)) if arg.begins_with("--port-arc=") else port_arc
+		port_r0 = float(arg.substr(10)) if arg.begins_with("--port-r0=") else port_r0
+		port_r1 = float(arg.substr(10)) if arg.begins_with("--port-r1=") else port_r1
+		port_y0 = float(arg.substr(10)) if arg.begins_with("--port-y0=") else port_y0
+		port_y1 = float(arg.substr(10)) if arg.begins_with("--port-y1=") else port_y1
+		port_eye = float(arg.substr(11)) if arg.begins_with("--port-eye=") else port_eye
+		port_crouch = port_crouch or arg == "--port-crouch"
+		port_yaw = float(arg.substr(11)) if arg.begins_with("--port-yaw=") else port_yaw
+		port_look = port_look or arg == "--port-look"
+		port_aim_off = float(arg.substr(15)) if arg.begins_with("--port-aim-off=") else port_aim_off
+		port_hold = arg.substr(12) if arg.begins_with("--port-hold=") else port_hold
+		ally_id = arg.substr(7) if arg.begins_with("--ally=") else ally_id
+		foe2_id = arg.substr(7) if arg.begins_with("--foe2=") else foe2_id
+		summon_at = float(arg.substr(12)) if arg.begins_with("--summon-at=") else summon_at
+		dry = dry or arg == "--dry"
+		floor_on = floor_on or arg == "--hp-floor"
+	await super.run(main_node)
+
+
+func _hunter_for(args: PackedStringArray) -> String:
+	return Demo.hunter_in(args)
+
+
+func play() -> void:
+	if shot == HERO_SHOT or shot == FIGHT_SHOT or shot == PORT_SHOT:
+		await _hero()
+	else:
+		await super.play()
+
+
+## The match, as _start builds it but with this take's seed and bot difficulty.
+func _start_hero(arch: String) -> void:
+	Save.d["first_guide"] = 99
+	Save.d["name"] = HeroTitle.base_name(arch)
+	var o := {
+		"teams": 2,
+		"squad": 3,
+		"total": 1,
+		"tier": 1,
+		"seed": hero_seed,
+		"length": 1e9,
+		"no_drop": true,
+		"raid": "clear",
+		"blight": false,
+		"sim_keep": true,
+		"demo_kin": "cindle",
+		"demo_kin_lv": "8:95",
+		"bot_diff": diff,
+		"boki_wisps": true
+	}
+	o.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
+	m = Match.new()
+	main.add_child(m)
+	await m.start(o)
+	m.set_process(false)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+	_purge()
+	if m.hud:
+		m.hud.guide_hidden = true
+	m.player.unlock_all()
+	m.player.lvl = int(Hunter.ULT_AT[0])  # R (the hero ult) is gated on this level
+
+
+func _hero() -> void:
+	await _start_hero(hunter)
+	_clean_take()
+	m.length = m.time + CLOCK_LEFT_S
+	var me := m.player
+	var foe_arch := foe_id
+	if not Arch.exists(foe_id):
+		# (never Kael by default: his ultimate form reads as a purple box on film)
+		foe_arch = "mage" if hunter == "gunslinger" else "gunslinger"
+	CombatBus.ability_used.connect(_on_cast)
+	var combo: Array = COMBOS.get(combo_key if combo_key != "" else hunter, [])
+	if combo.is_empty():
+		fail("no combo for %s" % hunter)
+		return
+	var spot := _arena(me, combo)
+	me.pos = spot["me"]
+	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(spot["foe"] + Vector3(FAR_M, 0, 0)))
+	foe.max_hp *= foe_hp_k
+	foe.hp = foe.max_hp
+	foe.belt = UtilityBelt.empty()  # no tonic to drink: a hurt bot would back out and heal to half
+	foe.belt_free = {}
+	foe.ctrl = "idle"
+	var squad_b_extra: Array = []
+	squad_a = [me]
+	if shot == FIGHT_SHOT:
+		var ally_arch := ally_id
+		if not Arch.exists(ally_id):
+			ally_arch = String(Arch.ids()[(Arch.ids().find(hunter) + 1) % Arch.ids().size()])
+		var ally := _hunter("a1", 0, ally_arch, "pebbit", _ground(spot["me"] + Vector3(-2.5, 0, 2.0)))
+		squad_a.append(ally)
+		var foe2_arch := foe2_id if Arch.exists(foe2_id) else "gunslinger"
+		squad_b_extra.append(_hunter("b1", 1, foe2_arch, "pebbit", _ground(spot["foe"] + Vector3(FAR_M, 0, 3))))
+		(squad_b_extra[0] as Hunter).ctrl = "idle"
+	squad_b = [foe] + squad_b_extra
+	for h in squad_a + squad_b:
+		h.teleport(h.pos)
+	print(
+		(
+			"PITCH_HERO_INFO hunter=%s foe=%s seed=%d diff=%s bot_diff=%s lvl=%d pass=%s wall=%s"
+			% [hunter, foe_arch, hero_seed, diff, m.bot_diff, me.lvl, hero_pass, spot["wall"]]
+		)
+	)
+	var hz := float(_arg("--zoom=", str(KIT_ZOOM)))
+	_zoom(hz)
+	if shot != PORT_SHOT and _arg("--zoom=", "") != "":
+		m.set_meta("zoom_hold", hz)  # the match camera re-reads its zoom every frame; this holds it
+		hold_zoom = hz
+	if shot == PORT_SHOT:
+		await _portrait(me)
+		return
+	await _intro(me)
+	for a in squad_a:
+		if a != me:
+			(a as Hunter).ctrl = "bot"  # the ally fights too (2v2)
+	for i in squad_b.size():
+		var f: Hunter = squad_b[i]
+		f.ctrl = "bot"
+		f.teleport(_ground(spot["foe"] + Vector3(1.5, 0, 1.5) * i))
+	Record.set_level(1 if hero_pass == "hud" else 2)
+	mark("combo")
+	await _combo(me, foe, combo, spot)
+	_release_all()
+
+
+## The cinematic intro: a slow 150 degree orbit at eye height, HUD off, the Hunter idle with its Boki beside it.
+func _intro(me: Hunter) -> void:
+	Record.set_level(2)
+	var fov0 := m.cam.fov
+	var near0 := m.cam.near
+	m.cam.fov = INTRO_FOV
+	m.cam.near = 0.1
+	mark("intro")
+	var frames := roundi(INTRO_S * FPS)
+	var a0 := deg_to_rad(-20.0)
+	for i in frames:
+		_purge()
+		if port_crouch and i > 20:
+			me.inp["crouch"] = true
+		m.step(1.0 / FPS)
+		for h in m.hunters:
+			h.render(1.0 / FPS, 1.0)
+		var k := float(i) / float(frames - 1)
+		k = k * k * (3.0 - 2.0 * k)
+		var mid := me.pos.lerp(me.kin.pos if me.kin != null else me.pos, 0.35) + Vector3(0, 0.95, 0)
+		var ang := a0 + deg_to_rad(INTRO_ARC) * k
+		var r := INTRO_R * lerpf(1.15, 0.85, k)
+		var eye := mid + Vector3(sin(ang) * r, intro_eye - 0.95, cos(ang) * r)
+		m.cam.global_transform = Transform3D(Basis.looking_at(mid - eye, Vector3.UP), eye)
+		await main.get_tree().process_frame
+	m.cam.fov = fov0
+	m.cam.near = near0
+	print("PITCH_HERO_INTRO frames=%d kin=%s" % [frames, me.kin != null])
+
+
+## A spot with room all round; for a combo that needs a wall behind the foe, a foe spot with a wall within
+## WALL_REACH_M one way and the Hunter WALL gap the other way.
+func _arena(me: Hunter, combo: Array) -> Dictionary:
+	var base := _roomy_ground(me.pos)
+	var out := {"me": base, "foe": _ground(base + Vector3(GAP_M, 0, 0)), "wall": false, "dir": Vector2(1, 0)}
+	var wants := false
+	for s in combo:
+		wants = wants or String(s[5]) == "wall"
+	if not wants:
+		return out
+	var probe := _hunter("probe", 1, "juggernaut", "pebbit", base)
+	var dirs := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]
+	for ring in range(0, WALL_SEARCH_M, 3):
+		for dz in range(-ring, ring + 1, 3):
+			for dx in range(-ring, ring + 1, 3):
+				if maxi(absi(dx), absi(dz)) != ring:
+					continue
+				var c := _ground(Vector3(base.x + dx, 0, base.z + dz))
+				probe.pos = c
+				for d: Vector2 in dirs:
+					if KnockWall.behind(m, probe, d, WALL_REACH_M) and _open(c - Vector3(d.x, 0, d.y) * GAP_M):
+						_drop_probe(probe)
+						return {"me": _ground(c - Vector3(d.x, 0, d.y) * GAP_M), "foe": c, "wall": true, "dir": d}
+	print("PITCH_HERO_WALL none found within %d m" % WALL_SEARCH_M)
+	_drop_probe(probe)
+	return out
+
+
+## The wall probe leaves with its Boki (a kin left behind sims a freed owner: kin.gd _sim_shoulder errors).
+func _drop_probe(probe: Hunter) -> void:
+	var k_v: Kin = probe.kin
+	if k_v != null and is_instance_valid(k_v):
+		m.kins.erase(k_v)
+		k_v.queue_free()
+		probe.kin = null
+	m.hunters.erase(probe)
+	probe.queue_free()
+
+
+func _open(p: Vector3) -> bool:
+	var x := int(p.x)
+	var z := int(p.z)
+	return m.world.inb(x, z) and m.world.edge_dist(x, z, 3) > 2 and not m.world.is_void(p.x, p.z)
+
+
+# ------------------------------------------------------------------ the combo driver
+## Plays `combo` step by step on the real input actions; each step waits for its ability, walks into range,
+## presses (hold = the aim hold of an aimed cast), lets go, and watches 0.7 s for fired / landed.
+func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
+	var idx := 0
+	var phase := "approach"
+	var timer := 0.0
+	var wait_ready := 0.0
+	var prev_hp := 0.0
+	var hp0 := foe.hp
+	var charges0 := 0
+	var casts0 := 0
+	var tries := 0  # misses an "again" step has slammed again
+	var seen_down := false
+	var t := 0.0
+	var end_t := -1.0
+	var finish := false
+	var summoned := false
+	steps_log.clear()
+	while true:
+		_purge()
+		if floor_on and idx < combo.size() - 1 and not foe.dead:
+			foe.hp = maxf(foe.hp, foe.max_hp * FLOOR_K)  # the finisher is the last step's
+		if foe.hp > prev_hp + 5.0:
+			print("PITCH_HERO_DBG t=%.2f foe hp %.0f -> %.0f idx=%d phase=%s" % [t, prev_hp, foe.hp, idx, phase])
+		prev_hp = foe.hp
+		if m.hud:
+			m.hud.msgs.hold = true  # no tips, bond popups or "Last squad down" in the HUD pass
+			m.hud.msgs.clear()
+		me.hp = me.max_hp  # the Hunter is never the story: a take must not end on its own KO
+		me.inp["aim_y"] = foe.pos.y
+		var down := foe.dead or foe.downed or foe.out
+		if down and end_t < 0.0:
+			end_t = t
+			_release_all()
+			if idx < combo.size() and phase != "approach":
+				_log(me, foe, combo[idx], idx, true, true, hp0, charges0, casts.size() > casts0)
+			print("PITCH_HERO_KILL t=%.2f step=%d dead=%s why=%s" % [t, idx, foe.dead, foe.get_meta("died_why", "-")])
+		if end_t >= 0.0 and t - end_t >= HOLD_END_S:
+			mark("hold_end")
+			break
+		if t > COMBO_MAX_S + (FINISH_MAX_S if finish else 0.0) and end_t < 0.0:
+			print("PITCH_HERO_NOKILL t=%.2f idx=%d foe_hp=%.0f/%.0f" % [t, idx, foe.hp, foe.max_hp])
+			break
+		if summon_at >= 0.0 and t >= summon_at and not summoned:
+			summoned = true
+			_summon_now(me, t)
+		var ms := Vector2.ZERO
+		if end_t < 0.0:
+			if idx >= combo.size():
+				finish = true
+				_key("fire", true)
+				ms = Vector2(foe.pos.x - me.pos.x, foe.pos.z - me.pos.z).normalized() if me.flat_dist(foe) > 6.0 else ms
+			else:
+				var st: Array = combo[idx]
+				var dist := me.flat_dist(foe)
+				var to := Vector2(foe.pos.x - me.pos.x, foe.pos.z - me.pos.z)
+				var info: Dictionary = me.slot_info(String(st[2])) if String(st[2]) != "" else {"ready": true}
+				match phase:
+					"approach":
+						ms = to.normalized() if dist > float(st[4]) else Vector2.ZERO
+						if String(st[5]) == "wall" and foe.pos.distance_to(spot["foe"]) > 3.0 and not down:
+							foe.teleport(_ground(spot["foe"]))
+							reseats += 1
+						wait_ready += 1.0 / FPS
+						var go: bool = bool(info["ready"])
+						if String(st[5]) == "recast":
+							go = me.ak != null and me.ak.ult_running() and wait_ready > RECAST_AFTER_S
+						if go and dist <= float(st[4]) + 0.3:
+							phase = "hold"
+							timer = float(st[3])
+							hp0 = foe.hp
+							charges0 = int(info.get("charges", 0))
+							casts0 = casts.size()
+							_key(String(st[1]), true)
+						elif wait_ready > READY_WAIT_S:
+							_log(me, foe, st, idx, false, false, hp0, 0, false)
+							idx += 1
+							wait_ready = 0.0
+					"hold":
+						ms = to.normalized() if String(st[5]) in ["in", "through", "again"] else Vector2.ZERO
+						timer -= 1.0 / FPS
+						if timer <= 0.0:
+							_key(String(st[1]), false)
+							phase = "after"
+							timer = ULT_AFTER_S if String(st[2]) == "x" else AFTER_S
+							if idx + 1 < combo.size() and String(combo[idx + 1][5]) == "recast":
+								timer = AFTER_S
+					"after":
+						timer -= 1.0 / FPS
+						ms = Vector2.ZERO
+						if timer <= 0.0:
+							var landed := foe.hp < hp0 - 0.5 or foe.stun_t > 0.0
+							_log(me, foe, st, idx, true, landed, hp0, charges0, casts.size() > casts0)
+							if not landed and String(st[5]) == "again" and tries < AGAIN_MAX:
+								tries += 1
+								# (staged: the charge is back for the retry)
+								if me.ak != null and String(st[2]) == "sec":
+									me.ak.cd["rmb"] = 0.0
+									me.ak.ch_rmb = float(me.ak.rmb_charges())
+							else:
+								idx += 1
+								tries = 0
+							phase = "approach"
+							wait_ready = -STEP_GAP_S
+		_move(ms)
+		m._gather_input()
+		me.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
+		me.inp["aim_y"] = foe.pos.y
+		_step_frame(me.pos.lerp(foe.pos, 0.5))
+		await main.get_tree().process_frame
+		t += 1.0 / FPS
+		seen_down = seen_down or down
+	print(
+		(
+			"PITCH_HERO_RESULT hunter=%s kill=%s t=%.2f reseats=%d steps=%s casts=%s"
+			% [hunter, end_t >= 0.0, t, reseats, steps_log, casts]
+		)
+	)
+
+
+## One step's outcome: `fired` = the ability went on cooldown (or, for the basic attack, the foe lost hp).
+func _log(
+	me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: bool, hp0: float, ch0: int, cast: bool
+) -> void:
+	var slot := String(st[2])
+	var info: Dictionary = me.slot_info(slot) if slot != "" else {}
+	var name := String(info.get("name", "Finger Guns / basic"))
+	var fired := pressed
+	if pressed and slot == "":
+		fired = foe.hp < hp0 - 0.5
+	elif pressed:
+		fired = cast or int(info.get("charges", 0)) < ch0 or not bool(info.get("ready", true))
+	print(
+		(
+			"PITCH_HERO_STEP %d %s (%s) fired=%s landed=%s foe_hp=%.0f movie_frame=%d"
+			% [idx + 1, name, String(st[1]), fired, landed, foe.hp, Engine.get_frames_drawn()]
+		)
+	)
+	var step_mark := "F" if fired else "-"
+	step_mark += "L" if landed else "-"
+	steps_log.append(name + ":" + step_mark)
+
+
+## A real action press or release (Input.action_press is what a key down does inside the Input singleton).
+## The Summon press itself (KinSummon.press, as the match's fixed step does), logged with why it failed.
+func _summon_now(me: Hunter, t: float) -> void:
+	var k_v: Kin = me.kin
+	var cd_v := k_v.summon.cd if k_v != null and k_v.summon != null else -1.0
+	var why := "kin=%s wisp=%s cd=%.1f out=%s" % [k_v != null, k_v != null and k_v.wisp, cd_v, me.out]
+	if k_v != null and k_v.summon != null and k_v.wisp:
+		k_v.summon.cd = 0.0  # (a fresh take: the wisp is rested)
+	print("PITCH_SUMMON t=%.2f ok=%s %s" % [t, KinSummon.press(me), why])
+
+
+func _key(action: String, down: bool) -> void:
+	if down:
+		Input.action_press(action)
+	else:
+		Input.action_release(action)
+
+
+## Walk keys from a screen-space direction (camera yaw 0: east is +x, south is +z).
+func _move(v: Vector2) -> void:
+	Input.action_release("left")
+	Input.action_release("right")
+	Input.action_release("up")
+	Input.action_release("down")
+	if v.length() < 0.01:
+		return
+	Input.action_press("right" if v.x > 0.0 else "left", absf(v.x))
+	Input.action_press("down" if v.y > 0.0 else "up", absf(v.y))
+
+
+func _on_cast(caster: Node, ability_id: String, slot: String) -> void:
+	if caster == m.player:
+		casts.append("%s/%s" % [ability_id, slot])
+
+
+func _release_all() -> void:
+	for a in ["fire", "secondary", "signature", "dash", "hunter_ult"] + MOVES:
+		Input.action_release(a)
+
+
+## v6 portrait: HUD off, the Hunter idle, the camera starts 40 deg to one side of its FRONT at eye height, sweeps
+## through the front to 40 deg the other side while pushing in from a full-body frame to head and shoulders.
+func _portrait(me: Hunter) -> void:
+	Record.set_level(2)
+	var fov0 := m.cam.fov
+	m.cam.fov = port_fov
+	m.cam.near = 0.1
+	var hid := 0
+	if m.world != null and m.world.get("_deco") != null:
+		for c in (m.world.get("_deco") as Node).get_children():
+			if String(c.name).begins_with("Bushes") and c is Node3D:
+				(c as Node3D).visible = false  # tall grass out of the foreground
+				hid += 1
+	print("PITCH_HERO_PORT hid_bush_chunks=%d" % hid)
+	await main.get_tree().process_frame
+	mark("intro")
+	var frames := roundi(port_s * FPS)
+	for i in frames:
+		_purge()
+		m.step(1.0 / FPS)
+		if port_look:
+			var at := m.cam.global_position + m.cam.global_transform.basis.x * port_aim_off
+			me.inp["aim"] = at
+			me.inp["aim_y"] = at.y
+			me.model.set_meta(WardenGlb.ORBIT_LOOK, m.cam.global_position)
+		for h in m.hunters:
+			h.render(1.0 / FPS, 1.0)
+		var k := float(i) / float(frames - 1)
+		k = k * k * (3.0 - 2.0 * k)
+		var ang := deg_to_rad(port_yaw - port_arc * 0.5 + port_arc * k)
+		if port_hold != "" and i > 20:
+			me.inp[port_hold] = true
+		var fwd := Vector3(-sin(me.face), 0, -cos(me.face))
+		var dirv := fwd.rotated(Vector3.UP, ang)
+		var r := lerpf(port_r0, port_r1, k)
+		var look := me.pos + Vector3(0, lerpf(port_y0, port_y1, k), 0)
+		var eye := look + dirv * r + Vector3(0, port_eye - lerpf(port_y0, port_y1, k), 0)
+		m.cam.global_transform = Transform3D(Basis.looking_at(look - eye, Vector3.UP), eye)
+		await main.get_tree().process_frame
+	m.cam.fov = fov0
+	print("PITCH_HERO_PORT frames=%d" % frames)
