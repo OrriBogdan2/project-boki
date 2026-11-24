@@ -36,7 +36,7 @@ def pendulum(t, amp, bob):
 def idle(t):
     br = s(t, 2)
     p = {}
-    ring_sc(p, ring(t, 0.55))
+    ring_sc(p, ring(t, 0.4, decay=14.0))
     add(p, "root", rz=0.04 * s(t, 1))
     add(p, "spine", rx=0.02 * br)
     add(p, "head", rx=LOOK + 0.05 * s(t, 2, 0.2), ry=0.18 * s(t, 1, 0.1) + 0.06 * s(t, 3), rz=0.06 * s(t, 1, 0.3))
