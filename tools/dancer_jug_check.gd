@@ -858,6 +858,13 @@ func juggernaut(a) -> void:
 	a_x.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes its full length",
 			float(k.cd["rmb"]) > 3.0 and p_v.flat_dist(home) > far - 0.4,
 			"cd %.1f moved %.1f" % [float(k.cd["rmb"]), p_v.flat_dist(home)])
+	# DECISIONS 11-11 (briefs/DECISIONS.md:602): "Kael RMB is a straight-line thrust with a short forward lunge, not
+	# a cone": the tap is the lane asserted above; the hold's lunge runs dead along the aim, a few metres at most
+	var off_aim := absf(p_v.pos.z - home.z)
+	var fwd := p_v.pos.x - home.x
+	var reach := far * float(k.rmb_def()["lunge"]["perfect_k"]) + 0.1
+	a_x.ok("juggernaut RMB (DECISIONS:602): the lunge is a straight short thrust along the aim (aside %.2f, fwd %.1f)"
+			% [off_aim, fwd], off_aim < 0.1 and fwd > 0.0 and p_v.flat_dist(home) <= reach)
 	# air: the down slam, its hit circle just ahead of where he lands; it slows, the centre takes more and is stunned
 	var dd: Dictionary = k.rmb_def()["drop"]
 	var ahead := float(dd["ahead"])
