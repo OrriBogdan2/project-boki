@@ -91,7 +91,7 @@ func _mat(mode: int, col: Color, col2: Color, bb := false) -> ShaderMaterial:
 	_param(mt, "color", col)
 	_param(mt, "color2", col2)
 	_param(mt, "billboard", bb)
-	_param(mt, "seed", randf() * 10.0)
+	_param(mt, "seed", KitLooks.vis_rng.randf() * 10.0)
 	return mt
 
 ## Sets a shader parameter on a look's body pass and on its glow pass.
@@ -256,7 +256,7 @@ func _play(n: Node3D, kind: String, col: Color, col2: Color, dur: float, s0: Vec
 		_param(mt, "color2", col2)
 		_param(mt, "life", 0.0)
 		_param(mt, "progress", 0.0)
-		_param(mt, "seed", randf() * 10.0)
+		_param(mt, "seed", KitLooks.vis_rng.randf() * 10.0)
 	n.scale = s0
 	var e := {"node": n, "t": 0.0, "dur": maxf(0.05, dur), "kind": kind, "s0": s0, "mat": mt}
 	live.append(e)
@@ -272,7 +272,7 @@ func _flat(
 
 ## A cracked scorch mark that cools over `dur`.
 func scorch(at: Vector3, r: float, dur := 1.0, col := Color("ff7a2a"), col2 := Color("3a1a2a")) -> void:
-	_flat("scorch", M_SCORCH, at, r, col, col2, dur, randf() * TAU)
+	_flat("scorch", M_SCORCH, at, r, col, col2, dur, KitLooks.vis_rng.randf() * TAU)
 
 ## A Broadside slug's look, flown on the effect clock instead of riding its shot (the shot lives about
 ## 0.2s, too short to read): a `col` orb with a `dark` core and a smear flies from `from` to `to` over `fly`,

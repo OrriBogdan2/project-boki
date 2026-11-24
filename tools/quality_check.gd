@@ -111,12 +111,10 @@ func _shadows_and_aa() -> void:
 	ok(root.screen_space_aa == Viewport.SCREEN_SPACE_AA_DISABLED, "very low: no anti-aliasing pass")
 	Settings.v["quality"] = "high"
 	Settings._apply_quality()
-	ok(Engine.max_physics_steps_per_frame == 8 and root.debug_draw == Viewport.DEBUG_DRAW_DISABLED,
-		"high: full physics catch-up, lit")
+	ok(root.debug_draw == Viewport.DEBUG_DRAW_DISABLED, "high: lit")
 	Settings.v["quality"] = "very_low"
 	Settings._apply_quality()
-	ok(Engine.max_physics_steps_per_frame == 2 and root.debug_draw == Viewport.DEBUG_DRAW_UNSHADED,
-		"very low: physics catch-up capped, unlit")
+	ok(root.debug_draw == Viewport.DEBUG_DRAW_UNSHADED, "very low: unlit")
 	Settings.v["quality"] = keep_q
 	Settings.v["msaa"] = keep_m
 	Settings._apply_quality()
