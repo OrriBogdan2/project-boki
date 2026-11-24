@@ -93,7 +93,17 @@ func _on_hit(attacker: Node, target: Node, _amount: float, tags: Array) -> void:
 	_add("hit", detail, attacker, [attacker, target], [target])
 
 func _on_cast(caster: Node, id: String, slot: String) -> void:
-	_add("cast", "%s %s" % [slot, id], caster, [caster])
+	_add("cast", "%s %s" % [slot, id], caster, [caster] + _anchors_of(caster))
+
+## Where a Hunter's own move cues play: its HeroVfx anchors (Lace's Heavy Shot release rings from "bow_root").
+## In this hand-stepped match the models are not processed, so an anchor can sit metres from the body, and a cue
+## placed there is still the cast's own (it read "none" at the caster's feet: docs/AUDIO.md, Silence audit).
+func _anchors_of(caster) -> Array:
+	var out := []
+	if caster is Hunter and not caster.out:
+		for a in HeroVfx.data(caster.arch).get("anchors", {}):
+			out.append(HeroVfx.of(_m).anchor_pos(caster, String(a)))
+	return out
 
 func _on_status(target: Node, status: String, by: Node, _t: float) -> void:
 	_add("status", "%s on %s" % [status, _who(target)], by, [target])
