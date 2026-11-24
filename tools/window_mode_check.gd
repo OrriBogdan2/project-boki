@@ -19,7 +19,7 @@ func _write_cfg(fullscreen: Variant, video_v: int) -> void:
 	cf.set_value("s", "video_v", video_v)
 	if fullscreen != null:
 		cf.set_value("s", "fullscreen", fullscreen)
-	cf.save(Settings.PATH)
+	cf.save(Settings.path)
 
 
 ## What an export (desktop_export on) or the editor loads from a save with this state.
