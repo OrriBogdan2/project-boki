@@ -1,5 +1,5 @@
 extends RefCounted
-## --move-feel-check, the movement review per Hunter (docs/MOVEMENT_PARITY.md "Review on main, 2026-11-20"):
+## --move-feel-check, the movement review per Hunter (sv/MOVEMENT_PARITY.md "Review on main, 2026-11-20"):
 ## each of the 13 Hunters, its own kit and model swapped in, on the real match step. Measured per kit: the run (top
 ## speed against its hunter_move.json row, 95% of it), the let-go slide (inside the source's 30-144 fps band for that
 ## speed) and its stop time, the jump's lift-off (Hunter.JUMP_V, pinned at 6.8 m/s by the owner's ruling), the glide
@@ -9,7 +9,7 @@ extends RefCounted
 ## and --wallmove-check.
 
 const DT := 1.0 / 60.0
-const JUMP_PINNED := 6.8  # m/s, owner ruling (docs/MOVEMENT_PARITY.md "Lift-off speed"): never the source's 7.5
+const JUMP_PINNED := 6.8  # m/s, owner ruling (sv/MOVEMENT_PARITY.md "Lift-off speed"): never the source's 7.5
 const SPEED_TOL := 0.01  # m/s: the run and the lift-off land on their rows within this
 const SETTLE_STEPS := 30  # after the kit swap: a swap slows the walk (x0.8) for its first 0.25 s, not a run row
 const GLIDE_TOL := 0.05  # m/s: the cruise against HunterMove.glide_cruise (MaxGlide 5.0 x body_scale)
@@ -21,7 +21,7 @@ var hunter: Hunter
 
 func _init(check) -> void:
 	c = check
-	hunter = check.P
+	hunter = check.p_v
 
 
 func run() -> void:

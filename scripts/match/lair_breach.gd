@@ -147,7 +147,7 @@ func _crack(l: Dictionary, mb: Mob, k: int) -> void:
 	m.fx.burst(mb.pos + Vector3(0, 1.5, 0), col, 16 + 8 * k, 3.5 + k, 0.6, 6.0)
 	m.sfx(CRACK_SFX[k], mb.pos, 2.0 + k, 0.9 - 0.05 * k)
 	m.sfx("boom", mb.pos, -6.0 + 2.0 * k, 0.6)
-	Shake.incoming_big(m, mb.pos, 0.2 + 0.1 * k)
+	Shake.big(m, mb.pos, "lair_crack", null, k)
 	var by := hunter_of(mb.last_hit_by)
 	if by:
 		lairs.loud(l, mb.pos, by, "The gate of %s cracks (%d of %d)" % [l["name"], k, STAGES])
@@ -178,7 +178,7 @@ func broken(l: Dictionary, mb: Mob, credit: Hunter) -> void:
 		for sx in [-1.0, 0.0, 1.0]:
 			m.brk.show_break(mb.pos + side * sx + Vector3(0, 1.2, 0), "stone", 28)
 	m.sfx("br_crumble", mb.pos, 6.0, 0.7)
-	Shake.incoming_big(m, mb.pos, 0.6)
+	Shake.big(m, mb.pos, "lair_break")
 	l["seal_stage"] = STAGES
 	lairs.open(l, credit, "breach")
 

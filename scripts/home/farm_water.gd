@@ -1,6 +1,6 @@
 class_name FarmWater
 extends RefCounted
-## Placing by the water (docs/decisions/0011-farm-builder-tutorial.md, numbers in docs/FARM_LOOP.md).
+## Placing by the water (docs/decisions/0104-farm-builder-tutorial.md, numbers in docs/FARM_LOOP.md).
 ## Water is a pond, a river you painted, or the wild water the island came with: all of it lives in
 ## layout["water"]. Within reach tiles of it a crop patch waters itself (its plots are tended without
 ## you or the rain) and grows grow_mul() times as fast; a trough tops itself up from your pantry like a
@@ -51,7 +51,7 @@ static func near_entry(d: Dictionary, e: Dictionary) -> bool:
 ## Is plot i (Save.d.plots, four to each patch in the order they were put down) by water?
 static func plot_near(d: Dictionary, i: int) -> bool:
 	var fx := HomeLayout.fixtures(d, "farm")
-	var p := i / 4
+	var p := int(i / 4.0)
 	return p < fx.size() and near_entry(d, fx[p])
 
 ## Is a trough (a Save.d feeders entry) by water?
