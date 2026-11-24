@@ -26,6 +26,8 @@ const SAMPLES := {
 const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
+var dense := false  # review scratch: --dense samples every 0.15 s
+var yawabs := 999.0  # review scratch: --yawabs=<deg> absolute model yaw for every clip
 var native := false
 var video := false  # --video: every frame (30 fps) of idle 1.2 s, run 1.0 s, attack 0.6 s as v0000.jpg ...
 var vn := 0
@@ -49,6 +51,10 @@ func run(main: Node) -> void:
 			ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--size="):
 			frame_px = int(a.substr(7))
+		if a == "--dense":
+			dense = true
+		if a.begins_with("--yawabs="):
+			yawabs = float(a.substr(9))
 		if a == "--close":
 			close = true
 		if a == "--video":
@@ -158,8 +164,14 @@ func _hunter(id: String, dir: String) -> void:
 	marks.append("kind %s glb %s tris %d body_h %.2f" % [kind, WardenGlb.path(id), bx[2], bx[1]])
 	for clip in ["idle", "run", "attack"] if video else CLIPS:
 		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+		if yawabs < 900.0:
+			yaw = deg_to_rad(yawabs)
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
+		if dense:
+			times = []
+			for q in int({"idle": 2.1, "run": 0.8, "dash": 0.5, "jump": 1.05, "attack": 0.95, "hit": 0.65}[clip] / 0.15):
+				times.append(q * 0.15)
 		if probe:
 			times = [{"idle": 3.2, "run": 1.2, "dash": 1.0, "jump": 1.4, "attack": 2.4, "hit": 0.8}[clip]]
 		if video:
