@@ -16,13 +16,13 @@ const STATES := [  # [name, held inputs, s held before the shot]
 	["crouch", {"crouch": true}, 0.8],
 ]
 const PHASE_SECS := 1.0
+const EYE_OFF := Vector2(2.4, 3.8)  # m: where the --eye camera stands (x, z) from her
+const EYE_STATES := [["idle", {}, 1.5], ["run", {"move": Vector2(1, 0.4)}, 1.0], ["fire", {"fire": true}, 0.25]]
 var face := false
 var close := 0.2
 # --eye=<m>: the game camera dropped to this height above her feet, level, three-quarter front; each state also writes
 # game_<state>.png at the game camera
 var eye := -1.0
-const EYE_OFF := Vector2(2.4, 3.8)  # m: where it stands (x, z) from her
-const EYE_STATES := [["idle", {}, 1.5], ["run", {"move": Vector2(1, 0.4)}, 1.0], ["fire", {"fire": true}, 0.25]]
 
 
 func run(main_node: Node) -> void:

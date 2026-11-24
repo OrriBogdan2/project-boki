@@ -146,15 +146,15 @@ static func _cut_for(body: MeshInstance3D, dd: Dictionary, frame: Transform3D) -
 	for si in src.get_surface_count():
 		var m := src.surface_get_material(si)
 		names.append(String(m.resource_name) if m else "")
-	var parts := {}
+	var cuts := {}
 	var gone: Array = []
 	for p in dd["list"]:
 		var am := ArrayMesh.new()
 		var am_mood := ArrayMesh.new()  # (the "mood_only" surfaces: their own node, shown by mood)
 		var at: Array = p["at"]
-		var centre := frame * Vector3(at[0], at[1], at[2])
+		var mid := frame * Vector3(at[0], at[1], at[2])
 		if frame != Transform3D.IDENTITY:
-			centre = _middle(src, names, p["surfaces"], centre)
+			mid = _middle(src, names, p["surfaces"], mid)
 		for nm in p["surfaces"]:
 			var si := names.find(String(nm))
 			if si < 0:
@@ -163,24 +163,24 @@ static func _cut_for(body: MeshInstance3D, dd: Dictionary, frame: Transform3D) -
 			var arr := src.surface_get_arrays(si)
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			for i in v.size():
-				v[i] -= centre
+				v[i] -= mid
 			arr[Mesh.ARRAY_VERTEX] = v
 			arr[Mesh.ARRAY_BONES] = null
 			arr[Mesh.ARRAY_WEIGHTS] = null
 			var tgt := am_mood if (p.get("mood_only", {}) as Dictionary).has(String(nm)) else am
 			tgt.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 			tgt.surface_set_material(tgt.get_surface_count() - 1, src.surface_get_material(si))
-		parts[String(p["id"])] = [am, centre, am_mood]
+		cuts[String(p["id"])] = [am, mid, am_mood]
 	gone.sort()
 	gone.reverse()
 	for si in gone:
 		mine.surface_remove(si)
-	var out := {"body": mine, "parts": parts}
+	var out := {"body": mine, "parts": cuts}
 	_cut[key] = out
 	return out
 
 
-## The middle of the surfaces `surfs` of `src` (their bounds' centre), or `or_else` when it has none of them.
+## The middle of the surfaces `surfs` of `src` (their bounds' mid), or `or_else` when it has none of them.
 static func _middle(src: ArrayMesh, names: Array, surfs: Array, or_else: Vector3) -> Vector3:
 	var box := AABB()
 	var any := false
@@ -208,13 +208,13 @@ func _clear(p: Part, at: Vector3, dt: float) -> Vector3:
 	for _pass in 3:
 		for av in avoid:
 			var c := skel.get_bone_global_pose(int(av[0])).origin
-			var d := q - c
+			var gap := q - c
 			if vdir != Vector3.ZERO:
-				d -= vdir * d.dot(vdir)  # (the gap on screen: along the line of sight does not count)
+				gap -= vdir * gap.dot(vdir)  # (the gap on screen: along the line of sight does not count)
 			var need := float(av[1]) + p.radius + (float(d_margin()) if vdir != Vector3.ZERO else 0.0)
-			if d.length() < need:
-				var dn := d.normalized() if d.length() > 0.001 else (Vector3.UP - vdir * vdir.y).normalized()
-				q += dn * (need - d.length())
+			if gap.length() < need:
+				var dn := gap.normalized() if gap.length() > 0.001 else (Vector3.UP - vdir * vdir.y).normalized()
+				q += dn * (need - gap.length())
 	var off := q - at
 	p.push = off if off.length() >= p.push.length() else p.push.lerp(off, 1.0 - exp(-10.0 * dt))
 	return at + p.push
