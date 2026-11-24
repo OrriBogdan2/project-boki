@@ -25,6 +25,7 @@ const WALL_SEARCH_M := 110  # m round the start the wall spot is looked for
 const FLOOR_K := 0.12  # share of the foe's hp it cannot be brought under until the combo's last step
 const RECAST_AFTER_S := 0.8  # s after the first press a second R (Kitefall's strike) waits
 const ULT_AFTER_S := 2.5  # s watched after an ult (Kitefall and the like land late)
+const AGAIN_MAX := 2  # extra tries an "again" step (walks in like "in") gets when it misses
 const WALL_REACH_M := 2.6  # m behind the foe a wall must stand for the Storm Rod's stun
 const FAR_M := 70.0  # m the foe waits away during the intro
 const MOVES := ["left", "right", "up", "down"]
@@ -51,7 +52,7 @@ const COMBOS := {
 		["dash", "dash", "dash", 0.2, 11.0, "in"],
 		["fire", "fire", "", 1.2, 5.0, ""],
 		["kin", "signature", "e", 0.3, 5.5, ""],
-		["sec", "secondary", "sec", 0.3, 5.5, ""],
+		["sec", "secondary", "sec", 0.45, 3.5, "again"],  # (Quakefall: full hold, close; a miss is slammed again)
 		["x", "hunter_ult", "x", 0.3, 5.5, ""]
 	],
 	"juggernaut":
@@ -369,6 +370,7 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 	var hp0 := foe.hp
 	var charges0 := 0
 	var casts0 := 0
+	var tries := 0  # misses an "again" step has slammed again
 	var seen_down := false
 	var t := 0.0
 	var end_t := -1.0
@@ -436,7 +438,7 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 							idx += 1
 							wait_ready = 0.0
 					"hold":
-						ms = to.normalized() if String(st[5]) in ["in", "through"] else Vector2.ZERO
+						ms = to.normalized() if String(st[5]) in ["in", "through", "again"] else Vector2.ZERO
 						timer -= 1.0 / FPS
 						if timer <= 0.0:
 							_key(String(st[1]), false)
@@ -450,7 +452,14 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 						if timer <= 0.0:
 							var landed := foe.hp < hp0 - 0.5 or foe.stun_t > 0.0
 							_log(me, foe, st, idx, true, landed, hp0, charges0, casts.size() > casts0)
-							idx += 1
+							if not landed and String(st[5]) == "again" and tries < AGAIN_MAX:
+								tries += 1
+								if me.ak != null and String(st[2]) == "sec":  # (staged: the charge is back for the retry)
+									me.ak.cd["rmb"] = 0.0
+									me.ak.ch_rmb = float(me.ak.rmb_charges())
+							else:
+								idx += 1
+								tries = 0
 							phase = "approach"
 							wait_ready = -STEP_GAP_S
 		_move(ms)
