@@ -144,6 +144,8 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| scaldamus | clip | shared | shared | clip | clip | clip | proc | proc |
+| sentrikat | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
 | burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -217,11 +219,16 @@ Worst five, backlog-ready:
    owns the body through the 0.17 s dash and its spin (0.73 s); Meeko's skip (0.233 s) spans her 0.22 s hop; Grimble's
    lunge holds through the 0.18 s shove and its gap, then `lunge_out`; Motley's Trade is no travel dash (no roll), the
    aim then the lob. Their cells read `proc` only because the move names do not say dash, so `warden_anim/*.json`
+   marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
+   clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
+   theirs too.
+4. **23 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
    marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) carry the
    same mark, so both cells read `clip`; claire, kael, ryzz, sable, tarek and vex key theirs too.
 4. **25 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
    models, 9116769e95: casquebill to velvorm in the table; hoarheron has its own idle only). Nothing is `missing` on
-   any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. That includes glomwort,
+   any Boki (scaldamus and sentrikat left it 11-20), but the shared set is the same wobble on a heron, an okapi and a
+   rope wyrm. That includes glomwort,
    whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
    sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).

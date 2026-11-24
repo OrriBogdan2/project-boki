@@ -118,6 +118,12 @@ before its legs, then give the legs back with `auto_legs.py -- nacrolin legs=2 t
 `top=0.5 reach=0.8 hold=hips`): walk and run keep the species' own neck, head and spine motion, the root and hips
 are held so the planted feet can follow. Slide at home and match speed, borrowed walk -> own clips (x1): nacrolin
 18/22/21/29/32% -> 8/9/9/18/21, nimbostrich 18/19/18/33/44 -> 11/10/13/29/40.
+11-20: Chuggamus (`scaldamus`) and Barokat (`sentrikat`) have their own clips (`scaldamus_anim.py`, `sentrikat_anim.py`) on
+the borrowed Glomwort skeleton: the hippo-engine's cowcatcher ram and boiler vent; the meerkat's sentry scan, upright
+strike and barometer pulse, and a sleep that nods off and jerks awake. Re-keyed with `tools/boki/reclip.py` (mesh, skin
+and atlases unchanged). 11-22: both have `auto_legs.py` legs (below), so reclip keeps the file's leg bones and its
+planted-paw walk and run and re-keys only the other 11 clips, legs at rest (the modules' own walk/run, the piston plod
+and stiff march, glide the paws and are not used). A full rebuild with `build_boki.py` needs `auto_legs.py` again.
 
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.
