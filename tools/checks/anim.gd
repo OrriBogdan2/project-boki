@@ -14,4 +14,5 @@ const CHECKS := {
 	"--stretch-6-check": ["res://tools/stretch_check.gd", "stretch_check", "dolm,ostra"],
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
+	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
 }
