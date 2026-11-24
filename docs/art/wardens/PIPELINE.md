@@ -662,3 +662,9 @@ Pip body `01a1c20d-dc11-75b4` (enhance on), `01a1c20d-dbac-712c` (off), head `01
 Vex body `01a1c20d-dbe6-747e`, `01a1c20d-dc12-71ff`, head `01a1c20d-db57-7423` (raws: ~/meshy/<name>/rvA, rvB). None was
 used: side by side with the shipped raws they read the same (no sharper face, hands or weapon), and the shipped raws
 already carry the fit's tuned landmarks, so each build keeps its old dense raw.
+
+### Tenzo seeing-stones, round 25B, 2026-11-24 (jobs 20261124-093442-a2 and 20261124-101600-a3; cap 100, spent 194)
+6 `edit` tasks on the splash crop (art/brand/splash/field_tent_tenzo.jpg) x 9 credits + 4 image-to-3d `create` tasks x 35 =
+194 credits, all by job -093442-a2 (over its 100 cap). The kept rock: one create, decimated to 379 tris, cobalt texture,
+plus a 16-tri flat `glow-tarek` eye disc on -Z, swapped into stone_0-2 (rest re-aimed: eye radially out, 40 deg up).
+Raw gens and sheets: /home/boki/gens/hunter-round-1124/tenzo/B/meshy/.
