@@ -27,12 +27,12 @@ static func model(sleepers := 0) -> Node3D:
 	# the round door at the front (the front faces +Z, toward where you walk up)
 	var door_at := Vector3(0, 0.5, 1.12)
 	var frame := TorusMesh.new(); frame.inner_radius = 0.42; frame.outer_radius = 0.56; frame.rings = 20; frame.ring_segments = 8
-	Models.part(root, frame, wood, door_at, Vector3.ONE, Vector3(PI * 0.5, 0, 0), "DoorFrame")
-	Models.part(root, Models.cyl(0.44, 0.44, 0.08, 20), dark, door_at + Vector3(0, 0, -0.03), Vector3.ONE, Vector3(PI * 0.5, 0, 0), "Door")
+	Models.part(root, frame, wood, door_at, Vector3.ONE, Vector3(PI * 0.5, 0, 0))
+	Models.part(root, Models.cyl(0.44, 0.44, 0.08, 20), dark, door_at + Vector3(0, 0, -0.03), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
 	Models.part(root, Models.cyl(0.38, 0.38, 0.06, 20), wood, door_at + Vector3(0, 0, 0.02), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
 	for i in 3:
 		Models.part(root, Models.box(0.04, 0.66, 0.03), dark, door_at + Vector3(-0.18 + i * 0.18, 0, 0.06))
-	Models.part(root, Models.sphere(0.05, 8), Models.toon(Color("e8c86a"), false, 0.4), door_at + Vector3(0.24, 0, 0.09), Vector3.ONE, Vector3.ZERO, "Knob")
+	Models.part(root, Models.sphere(0.05, 8), Models.toon(Color("e8c86a"), false, 0.4), door_at + Vector3(0.24, 0, 0.09))
 	# a paw print over the door
 	var paw := Models.toon(LILAC.darkened(0.25), false, 0.5)
 	Models.part(root, Models.sphere(0.09, 8), paw, door_at + Vector3(0, 0.72, -0.02), Vector3(1.0, 0.8, 0.35))
@@ -41,13 +41,13 @@ static func model(sleepers := 0) -> Node3D:
 	# round windows along the sides: lit when kin sleep inside
 	var wins := [Vector3(-0.95, 0.55, 0.62), Vector3(0.95, 0.55, 0.62), Vector3(-1.25, 0.42, 0.0), Vector3(1.25, 0.42, 0.0), Vector3(-0.6, 0.85, -0.7), Vector3(0.6, 0.85, -0.7)]
 	var lit := clampi(int(ceil(float(sleepers) / 5.0)), 0, wins.size()) if sleepers > 0 else 0
-	# one frame mesh for all six windows, so they draw together
+	# one frame mesh for all six windows (merged with the other wood)
 	var wf := TorusMesh.new(); wf.inner_radius = 0.13; wf.outer_radius = 0.18; wf.rings = 14; wf.ring_segments = 6
 	for i in wins.size():
 		var w: Vector3 = wins[i]
 		var face := Vector3(w.x, 0, w.z).normalized()
 		var yaw := atan2(face.x, face.z)
-		Models.part(root, wf, wood, w, Vector3.ONE, Vector3(PI * 0.5, yaw, 0), "WinFrame%d" % i)
+		Models.part(root, wf, wood, w, Vector3.ONE, Vector3(PI * 0.5, yaw, 0))
 		var pane := Models.part(root, Models.cyl(0.135, 0.135, 0.03, 14), glow if i < lit else dim, w - face * 0.02, Vector3.ONE, Vector3(PI * 0.5, yaw, 0), "Window%d" % i)
 		pane.set_meta("lit", i < lit)
 	# a post with a hanging lantern by the door
@@ -67,7 +67,9 @@ static func model(sleepers := 0) -> Node3D:
 	root.add_child(light)
 	# a flat stone step in front of the door
 	Models.part(root, Models.cyl(0.42, 0.46, 0.08, 16), stone, Vector3(0, 0.04, 1.5), Vector3(1.3, 1.0, 0.8))
-	Models.merge_static(root, false, true)      # the unnamed parts: a mesh per material
+	# the unnamed parts: a mesh per painted look. The squashed mound, turf and lantern stay their own meshes: merged,
+	# their normals turn with the squash and they shade darker on top (MeshArrays.merged).
+	PaintMerge.node(root)
 	return root
 
 ## Lights the right number of windows for how many kin sleep inside.

@@ -4,7 +4,7 @@ New sections go in `docs/MOVEMENT_FEEL.d/`, one file per change (docs/DOC_FRAGME
 
 The owner's note (Oct 31 2026): dropping, gliding and moving felt sloppy. The reference is the bar: snappy and responsive, especially the glide, and Shift into a glide should give you more momentum.
 
-Every target below is checked by `--move-feel-check` (`tools/move_feel_check.gd`). The check drives the real match step with scripted inputs. It counts fixed 60 Hz simulation steps, never wall-clock time, so a loaded machine can't skew it. It never touches the save.
+Every target below is checked by `--move-feel-check` (`tools/move_feel_check.gd`). The check drives the real match step with scripted inputs. It counts fixed 60 Hz simulation steps, never wall-clock time, so a loaded machine can't skew it. It never touches the save. `--fps-feel-check` steps the same moves at 1/30, 1/60 and 1/144 s and holds jump apex and glide sink within 3% of each other (dash and knock rows print only, docs/DEBT.md; docs/decisions/0170).
 
 ```
 XDG_DATA_HOME=<scratch> godot --headless --path . -- --move-feel-check
@@ -347,7 +347,7 @@ Owner: "still zoomed in too much. Start zoomed out as far as it allows, then the
 
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 
-- **Wall kick / wall dance** (`WallMoves`, every hunter; item 149, the REFERENCE wall dance): touching or facing a wall (your keys, else your aim), every jump press hops you off it: no limit, no cooldown, no glider, and a stone scuff with a varied pitch that everyone nearby hears (online too: the "fx" "whop" event). Keys into the wall or none add `KICK_RISE` 0.8m to the jump you are on; keys away push you off at 7.5 m/s. A hop only starts up to `HOP_CLIMB_CAP` 1.6m over your take-off ground, so you can dance at a wall indefinitely, jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau), and 5 terraces (4.0m) stay sheer. Near a wall a capped press does nothing rather than open the glider (the glide button or a held glide still does). The glider stays shut until each hop's rise ends. **Diminishing returns** (decision 0100, owner 11-13): each kick in a row without touching the ground keeps less of its rise and push: kick 1 at 100%, kick 2 at 60%, kick 3 and later at 30% (`content/rules/wall_kick.json` `curve`, `WallMoves.chain`). Landing resets the chain. `HOP_CLIMB_CAP` is unchanged. A climb kick never stacks on an earlier climb's rise still going (it only lifts the rise left to its own share), so mashing gains nothing; it still adds to a jump or a push-off. `--wallmove-check`, a 5-terrace wall (4.0m), a press every step: peak 4.98m on main, 4.26m with the curve alone, 1.81m now. Timed presses on the way down peak at 2.28m either way, because the cap stops a hop that starts too high.
+- **Wall kick / wall dance** (`WallMoves`, every hunter; item 149, the REFERENCE wall dance): touching or facing a wall (your keys, else your aim), every jump press hops you off it: no limit, no cooldown, no glider, and a stone scuff with a varied pitch that everyone nearby hears (online too: the "fx" "whop" event). Keys into the wall or none add `KICK_RISE` 0.8m to the jump you are on; keys away push you off at 7.5 m/s. A hop only starts up to `HOP_CLIMB_CAP` 1.6m over your take-off ground, so you can dance at a wall indefinitely, jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau), and 5 terraces (4.0m) stay sheer. Near a wall a capped press does nothing rather than open the glider (the glide button or a held glide still does). The glider stays shut until each hop's rise ends. **Diminishing returns** (decision 0158, owner 11-13): each kick in a row without touching the ground keeps less of its rise and push: kick 1 at 100%, kick 2 at 60%, kick 3 and later at 30% (`content/rules/wall_kick.json` `curve`, `WallMoves.chain`). Landing resets the chain. `HOP_CLIMB_CAP` is unchanged. A climb kick never stacks on an earlier climb's rise still going (it only lifts the rise left to its own share), so mashing gains nothing; it still adds to a jump or a push-off. `--wallmove-check`, a 5-terrace wall (4.0m), a press every step: peak 4.98m on main, 4.26m with the curve alone, 1.81m now. Timed presses on the way down peak at 2.28m either way, because the cap stops a hop that starts too high.
 - **Wall bounce** (`WallMoves`): an airborne dash or boosted jump that hits a wall more than 20 degrees off its normal and at least 4 m/s into it reflects about the normal, keeping 85% of the speed. Your keys steer the rebound for 0.25s at 25 m/s^2. Head-on it stops as before. Ground dashes, shoves and charges, walls low enough to mantle, knockbacks and slow jumps don't bounce. Dust, a spark and the landing thud mark it.
 - **Glider on a wall** (`WallMoves.stopped`, decision 0023): a glider never bounces or stops dead on a cliff face, a ruin wall or a Tenzo rock. [game data] REFERENCE glides on UE's CharacterMovementComponent, whose wall hit slides: the part of the speed into the wall is dropped, the part along it kept, and the canopy stays open; the glide force then holds the slide at cruise x sin(angle off the normal) while your keys push into it (0, 30, 60 degrees in `--move-feel-check`, rows `glide_wall_*`). [?] No glide-wall row in the physics dump and no footage of one.
 - **Ledges:** the rise no longer waits for the apex of a jump. Any airborne state (rising, falling, gliding, just after releasing the glider, after a dash) catches a ledge top within `MANTLE_REACH` above you when you press into it, or when glide momentum carries you into it. A ledge higher than where you last stood counts once you have been in the air 0.5s (`GlideLift.LEDGE_AIR_T`), are gliding, or let go of the glider within the last 0.6s (`FEATHER_KEEP`); before, launching from a higher place meant the ledge never caught you. Stunned or rooted players never grab a ledge. Only a tile sharing an edge with yours counts, so sliding along a wall never pulls you up it.
@@ -1328,6 +1328,69 @@ Tenzo's Rock Hop chain too): held height at most 1 step, the exit at least 0.75x
 own fitted curve if lower: Vex, Kael and Lace bleed off through run speed, decision 0025), glider within 2 steps,
 no ground pose after the end, an air dash on the next press, and no Rock Hop crash in the air. Motley's Trade (a lob,
 no travel of his own) must set him down below the edge.
+
+## Ability ranges on screen (`--range-screen-check`, `tools/range_screen_check.gd`)
+
+Does each slot's end at max range stay on screen with the match camera (`default` style)?
+The check puts each of the 12 Hunters at the screen's centre (the camera focus: feet a little below it), takes
+every slot's longest range from its data (LMB the weapon's `range`; RMB, E, R, dash the largest range-like number
+in the slot; Cinder's flight is `speed` x `time`), aims up, down, left and right at that range on the ground and
+projects the end through the camera at the start view (`camera.json` zoom max, the widest) and the wheel's closest
+zoom (min), at 1280x720, 1920x1080, 2560x1080 and 1024x768. An end closer than 20 px to the edge (`CamRig.on_screen`)
+counts as off. **No range was changed (source data) and no indicator was clamped wrong**: the cursor-placed shapes
+end at the cursor, which is always on screen, and the fixed lanes are drawn at their full data length. Ways are spelled out (up, down, left, right);
+`-` none. Each cell is "start view / closest zoom". The check fails when a Hunter has
+no rows, or when a range up to 18 m has its end off screen left or right at 1920x1080 at the start view.
+
+| Hunter | Slot | Reach m (data) | 1280x720 | 1920x1080 | 2560x1080 | 1024x768 | Lean, 1920x1080 start view |
+|---|---|---|---|---|---|---|---|
+| Lace | lmb | 12.0 (weapon longbow) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Lace | rmb | 14.0 (rmb.pin.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Lace | e | 10.8 (e.reach) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Lace | x | 18.0 (x.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Kael | lmb | 14.0 (lmb.wave_range[1]) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Kael | rmb | 6.3 (rmb.lunge.dist[1]) | - / up down | - / up down | - / up down | - / down | - |
+| Kael | e | 24.0 (e.tether_max) | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right |
+| Vex | lmb | 11.0 (weapon quill_rifle) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Vex | rmb | 10.5 (rmb.burr.range) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Vex | e | 18.0 (e.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Vex | x | 14.0 (x.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Albert | lmb | 14.0 (lmb.rope.max_len) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Neve | lmb | 10.0 (weapon hoar_fan) | down / up down left right | down / up down left right | down / up down left right | - / up down left right | down |
+| Neve | rmb | 12.0 (rmb.lance.range) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Neve | e | 16.2 (e.travel) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Cinder | lmb | 6.1 (weapon flamethrower) | - / up down | - / up down | - / up down | - / down | - |
+| Cinder | rmb | 14.0 (rmb.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Cinder | dash | 6.8 (dash.air_dist) | - / up down left right | - / up down | - / up down | - / down left right | - |
+| Cinder | x | 22.7 (flight speed x time) | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right |
+| Tenzo | lmb | 11.0 (weapon rubble_fists) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Tenzo | x | 21.0 (x.len) | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right |
+| Tenzo | dash | 6.0 (dash.rock_range) | - / up down | - / up down | - / up down | - / down | - |
+| Sparkle | lmb | 13.0 (weapon coilcaster) | down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Sparkle | rmb | 13.0 (rmb.coil.range) | down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Sparkle | e | 11.0 (e.reach) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Sparkle | x | 14.4 (x.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Sparkle | dash | 10.5 (dash.dist[1]) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Grimble | lmb | 6.3 (weapon shotgun) | - / up down | - / up down | - / up down | - / down | - |
+| Grimble | rmb | 11.5 (rmb.range) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Grimble | x | 5.9 (x.range) | - / up down | - / up down | - / up down | - / down | - |
+| Meeko | lmb | 13.5 (weapon lantern_crook) | up down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Meeko | rmb | 14.0 (rmb.seed.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Meeko | e | 9.0 (e.reach) | - / up down left right | - / up down left right | down / up down left right | - / up down left right | - |
+| Meeko | x | 12.6 (x.range) | down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Meeko | dash | 10.5 (dash.air.dist) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Sable | lmb | 8.5 (weapon arc_bolts) | - / up down left right | - / up down left right | down / up down left right | - / up down left right | - |
+| Sable | rmb | 7.0 (rmb.bola.range) | - / up down left right | - / up down left right | - / up down left right | - / down left right | - |
+| Sable | e | 15.0 (e.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Sable | x | 5.4 (x.reach) | - / up down | - / up down | - / up down | - / down | - |
+| Motley | lmb | 12.2 (weapon tether_lantern) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Motley | rmb | 13.0 (rmb.snap.range) | down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Motley | e | 9.0 (e.reach) | - / up down left right | - / up down left right | down / up down left right | - / up down left right | - |
+| Motley | x | 10.0 (x.range) | down / up down left right | down / up down left right | down / up down left right | - / up down left right | down |
+| Motley | dash | 12.0 (dash.reach) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+
+"Lean" is the same end with the view leaned toward it as the cursor held there makes it (`CamRig.lean_to`).
+The table is regenerated from the check's `RANGESCREEN row` lines (11-20: on the camera as main has it).
 
 ## Not touched
 
