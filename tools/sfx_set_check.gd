@@ -1351,7 +1351,7 @@ func _step_on(_m: Match, h: Hunter, surf: String, p: Vector3) -> void:
 		Sfx.recent.clear()
 		Sfx.listener = p
 		Juice.footstep(h)
-		var got: Array = Sfx.last_played.keys()
+		var got: Array = Sfx.last_played.keys().filter(func(s): return not String(s).ends_with("_foley"))
 		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
 		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
 	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]

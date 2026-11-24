@@ -146,6 +146,9 @@ func run(m: Node) -> void:
 	rec["shimmer"] = true
 	rec["rare"] = true
 	var rv := KinReveal.new(sp, rec)
+	var twin := Node3D.new()      # (the same Boki out in the world behind)
+	rv.twin = twin
+	main.add_child(twin)
 	main.add_child(rv)
 	var named := {"go": false}
 	rv.proceed.connect(func(): named["go"] = true)
@@ -153,6 +156,7 @@ func run(m: Node) -> void:
 		await tree.process_frame
 	ok(not ("rays" in rv) and not ("flash" in rv) and not rv.has_method("_jingle"), "no light rays, flash or fanfare")
 	ok(rv.name_btn.disabled and not rv.met, "it can't be named before it has met you")
+	ok(not twin.visible and KinReveal.DIM.a >= 0.9, "the world behind is greyed out and its copy of the Boki is hidden")
 	var hot: Array = []
 	for n in rv.find_children("*", "ColorRect", true, false):
 		var c := (n as ColorRect).color
@@ -190,6 +194,9 @@ func run(m: Node) -> void:
 		await tree.process_frame
 		frames += 1
 	ok(named["go"], "Name it hands over to naming")
+	for i in 40: await tree.process_frame
+	ok(twin.visible, "the world's Boki is back once the look is over")
+	twin.queue_free()
 	await _skip_row(tree, waited)
 	await _egg_cards(tree)
 	await _naming(tree)
@@ -615,6 +622,10 @@ func _name_card(tree: SceneTree) -> void:
 		)
 		var card: Rect2 = (hx.bottom.get_child(0) as Control).get_global_rect()
 		ok(screen.encloses(card), "name card %s fits the screen (%s in %s)" % [str(sz), str(card), str(screen)])
+		ok(card.position.x >= screen.size.x * 0.45 and not hx.top_box.visible,
+			"name card %s sits right of the Boki, with no stale title over it" % str(sz))
+		var foc: Control = hx.get_viewport().gui_get_focus_owner()
+		ok(foc is LineEdit and hx.bottom.is_ancestor_of(foc), "name card %s: typing goes into the name box" % str(sz))
 		if dir != "":
 			DirAccess.make_dir_recursive_absolute(dir)
 			tree.root.get_texture().get_image().save_png(dir.path_join("name_%dx%d.png" % [sz.x, sz.y]))

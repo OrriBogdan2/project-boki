@@ -26,6 +26,11 @@ static func starter_eggs() -> Array:
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
+const NAME_LOOK := Vector3(1.4, 0.25, 0.5)     # m: the naming shot aims right of the Boki, so it sits left of the card
+const NAME_CARD_W := 520.0      # px: the naming card
+const NAME_MARGIN := 32.0       # px: its gap to the screen edge
+const LABEL_W := 130.0          # px: the naming card's row labels
+const DICE_W := 44.0            # px: the dice button and its gap, in the Name row (so both boxes line up)
 const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
 
 var cam: Camera3D
@@ -559,7 +564,7 @@ func _process(delta: float) -> void:
 	if stage == "mask" or stage == "create":
 		pass       # (MaskMoment, or the LookLocker, moves the camera)
 	else:
-		cam.look_at(Vector3(0, (0.25 if stage != "pick" else 0.55) if stage != "name" else -0.55, 0.5))
+		cam.look_at(NAME_LOOK if stage == "name" else Vector3(0, 0.25 if stage != "pick" else 0.55, 0.5))
 	if stage == "pick":
 		var hv := _egg_under_mouse()
 		if hv != hover:
@@ -592,12 +597,12 @@ func _process(delta: float) -> void:
 				cam_to = Vector3(0, 2.2, 5.6)
 				# a closer look (its card, and turning it round), then naming
 				var rv := KinReveal.new(egg_defs[chosen]["species"], new_rec)
+				rv.twin = kin_node
 				reveal = rv
 				add_child(rv)
 				rv.revealed.connect(skipper.queue_free)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
-					if top_box: top_box.visible = true
 					stage = "name"
 					_show_name()))
 			wegg.start()
@@ -616,10 +621,18 @@ func _skip_hatch() -> void:
 
 func _show_name() -> void:
 	_clear_bottom()
+	top_box.visible = false      # (its line, "He's looking at you", is the reveal's: stale here)
+	# the card on the right and the Boki whole on the left, never a card over its body
+	var side := bottom.get_parent() as Control
+	side.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+	side.offset_left = -(NAME_CARD_W + 2.0 * NAME_MARGIN)
+	side.offset_right = 0.0
+	side.offset_top = NAME_MARGIN
+	side.offset_bottom = -NAME_MARGIN
 	var sp_id: String = egg_defs[chosen]["species"]
 	var sp: Dictionary = Data.KIN[sp_id]
 	var card := UI.card(UI.CARD, 16, 18)
-	card.custom_minimum_size = Vector2(520, 0)
+	card.custom_minimum_size = Vector2(NAME_CARD_W, 0)
 	var v := UI.vbox(10); card.add_child(v)
 	if new_rec.is_empty() or String(new_rec.get("species", "")) != sp_id:
 		new_rec = _hatched_rec(sp_id)
@@ -643,14 +656,14 @@ func _show_name() -> void:
 	v.add_child(sex_row)
 	v.add_child(UI.label("Voice: %s." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)
-	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
+	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = LABEL_W - DICE_W
 	name_row.add_child(nl)
 	var step := NameStep.new(sp_id, "")      # (both ways on below keep the name)
 	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(step)
 	v.add_child(name_row)
 	var you_row := UI.hbox(8)
-	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
+	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = LABEL_W
 	you_row.add_child(yl)
 	var ye := _your_name_edit()
 	you_row.add_child(ye)
@@ -666,8 +679,7 @@ func _show_name() -> void:
 	# Enter in either box is the same as "Skip tutorial"
 	step.box.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
 	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
-	step.box.grab_focus()
-	step.box.select_all()
+	step.focus()
 
 ## One of the two ways on from the naming card: a button and a line under it, one click.
 ## The main way is bright; the other is a flat grey button.

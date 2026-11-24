@@ -13,6 +13,7 @@ const HP_H := 16.0         # px: the health bar
 const AR_H := 5.0          # px: the armour strip above it
 const LVL_POP := 0.35      # s: the level number's gold fade after a level-up
 const XP_POP := 0.4        # s: the pop of the level number and bar when XP lands
+const NOTE_UP := 24.0     # px: the armour hint's baseline over the LV row's (its 24 px card clears LV and the XP bar)
 const XP_H := 6.0          # px: the XP bar's height
 const BAR_X := 44.0        # px: where the XP bar starts, right of the LV number
 const XP_FILL_K := 6.0     # 1/s: how fast the shown XP closes on the real XP
@@ -53,7 +54,7 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 			var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
 			var tw := TextCache.width(HudStyle.BIG, tn, 10)
 			HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
-	ArmorHud.note(h, Vector2(x0, y0 - 26))
+	ArmorHud.note(h, Vector2(x0, pr.position.y - 5.0 - NOTE_UP))   # above the LV / XP row, never on it
 	# armour on top (the merged form's shell while merged), health thick and segmented under it, the chip and flash
 	# shared with your overhead plate
 	var ar := Rect2(Vector2(x0, y0 + 6), Vector2(w, AR_H))

@@ -12,5 +12,6 @@ const CHECKS := {
 	"--title-loading-shots": ["res://tools/title_loading_shots.gd", "title_loading_shots", null],  # GPU, --shots-dir=
 	"--scoreboard-check": ["res://tools/scoreboard_check.gd", "scoreboard_check", null],  # the Tab squad board
 	"--scoreboard-shots": ["res://tools/scoreboard_shots.gd", "scoreboard_shots", null],  # --shots-dir=<dir>
+	"--hatch-flow-shots": ["res://tools/hatch_flow_shots.gd", "hatch_flow_shots", null],  # --hatch-flow-shots=<dir>
 	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],  # GPU
 }

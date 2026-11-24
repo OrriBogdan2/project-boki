@@ -271,7 +271,7 @@ func _send_presence(d: float) -> void:
 		return
 	var ak := Save.active_kin()
 	js.hubPresence(JSON.stringify({"n": String(Save.d.get("name", "Hunter")).substr(0, 16), "h": Data.class_of_save(),
-		"x": snappedf(ppos.x, 0.01), "z": snappedf(ppos.z, 0.01), "f": snappedf(pface, 0.01), "k": ak.get("species", "")}))
+		"a": Arch.of_save(), "x": snappedf(ppos.x, 0.01), "z": snappedf(ppos.z, 0.01), "f": snappedf(pface, 0.01), "k": ak.get("species", "")}))
 
 func _on_peers(arr: Array) -> void:
 	var seen := {}
@@ -286,7 +286,8 @@ func _on_peers(arr: Array) -> void:
 		if not others.has(id):
 			var ocl := Social.txt_of(p.get("h"), "medium")
 			if not Data.CLASSES.has(ocl): ocl = "medium"
-			var n := Models.hunter(ocl, Data.TEAM_COLORS[1 + others.size() % 5], Data.CLASSES[ocl]["weapon"], "")
+			var oa := Arch.fix(Social.txt_of(p.get("a")), ocl)  # older clients send no "a": the class's default Hunter
+			var n := Models.hunter(ocl, Data.TEAM_COLORS[1 + others.size() % 5], Arch.signature(oa), "", {}, oa)
 			add_child(n)
 			var lbl := Label3D.new()
 			lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 10
