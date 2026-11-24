@@ -51,7 +51,8 @@ Toasts ("Fever is lit", "Bond full!") sit in the right rail under the alive coun
 ## Lace's Hail Wall laces part round a Hunter (11-24)
 The wall's 32 red threads (`PinFx.rain_on`: an X between each pair of posts and an X across the ground) ran straight
 through any Hunter on or near the arc: a red zigzag over the fight. A lace whose ground line passes within
-`PinFx.LACE_CLEAR` (0.8 m) of a shown Hunter's feet is hidden while it does (`PinFx._part_laces`, every drawn frame);
+`PinFx.LACE_CLEAR` (0.8 m) of a shown Hunter's feet, or that crosses its box on screen (`HunterZone.rect_of`: the
+camera's slant puts a lace on its side of a body across it), is hidden while it does (`PinFx._part_laces`, every frame);
 the posts, the ground laces elsewhere, the arrows and the blue burn flames still mark the wall. Purely visual.
 `--archer-combo-check` holds it.
 

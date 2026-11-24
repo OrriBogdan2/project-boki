@@ -406,13 +406,18 @@ func _pull_laces(grow: float, thick: float) -> void:
 		n.look_at(b, Vector3.UP if absf((b - a).normalized().y) < 0.98 else Vector3.RIGHT)
 		n.scale = Vector3(thick, thick, a.distance_to(b))
 
-## A lace that runs within LACE_CLEAR of a shown Hunter's feet (ground distance) is hidden while it does, so the wall's
+## A lace that runs within LACE_CLEAR of a shown Hunter's feet (ground distance), or crosses its box on screen (the
+## camera looks down at a slant, so a lace on its side of a body cuts across it), is hidden while it does: the wall's
 ## red threads never cut across a body (docs/COMBAT_CLARITY.md); the posts, flames and arrows still mark the wall.
 func _part_laces() -> void:
 	var feet: Array[Vector2] = []
+	var zones: Array[Rect2] = []
 	for o: Hunter in h.m.hunters:
 		if not o.out and not o.unseen:
 			feet.append(Vector2(o.pos.x, o.pos.z))
+			var z: Rect2 = HunterZone.rect_of(h.m, o)
+			if z.has_area():
+				zones.append(z)
 	for l in laces:
 		var a: Vector3 = l["a"]
 		var b: Vector3 = l["b"]
@@ -422,7 +427,24 @@ func _part_laces() -> void:
 			if c.distance_to(f) < LACE_CLEAR:
 				near = true
 				break
+		if not near and not zones.is_empty():
+			near = _on_screen_box(a, b, zones)
 		(l["node"] as Node3D).visible = not near
+
+
+## Whether the line a -> b crosses any of the screen boxes `zones` (sampled every eighth of its length).
+func _on_screen_box(a: Vector3, b: Vector3, zones: Array[Rect2]) -> bool:
+	var cam: Camera3D = h.m.cam
+	if cam == null or cam.is_position_behind(a) or cam.is_position_behind(b):
+		return false
+	var sa: Vector2 = cam.unproject_position(a)
+	var sb: Vector2 = cam.unproject_position(b)
+	for i in 9:
+		var p: Vector2 = sa.lerp(sb, i / 8.0)
+		for z in zones:
+			if z.has_point(p):
+				return true
+	return false
 
 
 func _arc_pt(center: Vector3, yaw: float, radius: float, u: float) -> Vector3:
