@@ -198,6 +198,8 @@ func _seen(e: Ent, viewer: Variant) -> bool:
 
 
 func _show(h: Ent, st: String, dt: float) -> void:
+	if st == "chill" and m.has_meta("pitch_no_chill_shell"):
+		return  # pitch films: the pale ice shell over a whole body reads as a ghost on film
 	var key := "%d/%s" % [h.get_instance_id(), st]
 	var r: Dictionary = rigs.get(key, {})
 	if r.is_empty():
