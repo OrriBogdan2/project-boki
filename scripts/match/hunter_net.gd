@@ -25,7 +25,7 @@ static func extra(h: Hunter) -> Array:
 
 static func apply(h: Hunter, it: Array) -> void:
 	var i := it.size() - TAIL
-	var tags_ok := i >= 0 and it[i] == TAG and it[i + 2] == SICK_TAG and it[i + 4] == CHAN_TAG
+	var tags_ok: bool = i >= 0 and it[i] == TAG and it[i + 2] == SICK_TAG and it[i + 4] == CHAN_TAG
 	if not tags_ok or it[i + 7] != REACH_TAG or it[i + 9] != MOVE_TAG:
 		return
 	h.lvl = maxi(1, int(it[i + 1]))
