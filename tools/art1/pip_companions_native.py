@@ -1,7 +1,10 @@
 """Meeko's sun and raincloud for the Meshy-native pack (art/wardens/pip/pip_meshy.glb), 11-23: bigger, tilted toward the
 camera, bolder faces. Builds the five companion surfaces on their own (no body, no rig) with pip_companions.py's builders
 and constants overridden here; tools/meshy/native_hunters/graft_companions.py swaps them into pip_meshy.glb.
-  blender -b --factory-startup --python tools/art1/pip_companions_native.py -- OUT.glb OUT_faces.png
+  blender -b --factory-startup --python tools/art1/pip_companions_native.py -- OUT.glb OUT_faces.png [--sun-glb=S.glb --cloud-glb=C.glb]
+--sun-glb/--cloud-glb (11-24, plan meeko-comp-plan-1124 3.1/3.3): the bodies are Meshy image-to-3D models from the portrait
+(imported, centred, scaled to the spans below, turned to face +Y, decimated to TRIS, their albedo kept at TEX_PX); the
+procedural sun_body()/pc.cloud_body() are the fallback when they are not given.
 Space: Blender's, facing +Y, her right +X (the sun floats on her left, -X), up +Z, contract metres.
 Why (docs: Fable plan 11-23): the live sun/cloud were 12 px dots at the game camera (66 deg top-down), their vertical face decals
 sank into the decimated bodies and were seen at a grazing angle, the cloud sat on the tinted `skin` slot (pink on pink)."""
@@ -20,7 +23,7 @@ import pip_companions as pc  # noqa: E402
 
 pc.SUN_R = 0.18          # was 0.105: a round ball 0.36 m wide, short rays to 1.4 R (span 0.50 m: 27 px at the game camera, was 12)
 pc.CLOUD_W = 0.52        # was 0.36
-pc.TRIS = {"sun": 620, "cloud": 760}
+pc.TRIS = {"sun": 700, "cloud": 800}     # (plan 11-24 budget; was 620 / 760)
 # the cloud's face needs one smooth belly under it (the lumpy original left creases the decal could not lie on)
 pc.CLOUD_LOBES = [(0.0, 0.04, 0.31), (-0.03, 0.2, 0.24), (-0.31, -0.03, 0.2), (0.29, -0.01, 0.22), (-0.17, -0.19, 0.17), (0.2, -0.18, 0.17),
                   (-0.41, -0.11, 0.11)]
@@ -28,6 +31,7 @@ TILT = 0.0               # (was 50 deg: facing is done in code now, warden_anim/
 SUN_CELL = 0.145
 CLOUD_CELL = 0.16
 LIFT = 0.007             # m the face sits off the body
+LIFT_MESHY = 0.010       # m: on the decimated Meshy ball (its facets sag a flat 7 mm patch to 1.3 mm in places)
 MIN_OUT = 0.002          # m: the build fails when a decal vertex or triangle centre is closer to (or inside) the body
 SUN_RAY = 0.34           # ray length past the ball's skin, x SUN_R: short and wide like the splash (was 0.64; 0.80 read as a spiky star)
 SUN_RAY_BASE = 0.38      # ray base radius, x SUN_R
@@ -35,6 +39,8 @@ SUN_FLAT = 0.62          # ray thickness along the view axis (was 0.72)
 LEMON = (1.0, 0.86, 0.22)
 CLOUD_COL = (0.97, 0.97, 1.0)
 DROPS = ((-0.22, -0.60, 0.07), (0.02, -0.66, 0.085))   # x, z (x cloud width), radius (x cloud width): the drops hang clear of the nubs
+SPAN = {"sun": 0.50, "cloud": 0.52}   # m: the sun across its petal tips (its widest of X/Z), the cloud's width (X)
+TEX_PX = 512                           # the Meshy albedo's size in the game file
 CELL_FACE = {"sun": 1, "cloud": 5}    # the atlas cell each face is baked to (laugh; the cloud's happy)
 
 
@@ -63,14 +69,6 @@ def brows(c, col, worried=True, y=0.36):
         c.stroke([(0.26 * s, yi), (0.52 * s, yo)], 0.06, col)
 
 
-def mouth_open(c, y=-0.18, w=0.3, depth=0.32):
-    prof = np.clip(1 - (c.x / w) ** 2, 0, 1)
-    inside = (c.y < y) & (c.y > y - depth * prof) & (abs(c.x) < w)
-    c.lay(np.where(inside, -0.01, 0.05), pc.MOUTH)
-    c.lay(np.where(inside & (c.y < y - depth * 0.45 * prof), -0.01, 0.05), (1.0, 0.55, 0.62), 0.9)
-    c.stroke([(-w, y), (w, y)], 0.05, pc.PLUM)
-    t = np.linspace(0, math.pi, 28)
-    c.stroke(list(zip(w * np.cos(t), y - depth * np.sin(t))), 0.05, pc.PLUM)
 
 
 def mouth_o(c, y=-0.2):
@@ -82,9 +80,6 @@ def mouth_frown(c, y=-0.24):
     c.arc(0, y - 0.1, 0.2, 0.45, math.pi - 0.45, 0.06, pc.PLUM)
 
 
-def mouth_wavy(c, y=-0.17):
-    x = np.linspace(-0.2, 0.2, 24)
-    c.stroke(list(zip(x, y + 0.04 * np.sin(x / 0.2 * 3 * math.pi))), 0.05, pc.PLUM)
 
 
 def mouth_sad(c, y=-0.18):
@@ -102,21 +97,64 @@ def tears(c):
         c.ellipse(0.46 * s, -0.55, 0.075, 0.075, pc.TEAR)
 
 
+# ------------------------------------------------------------------- calm / happy faces as the portrait (11-24 plan 3.2/3.4)
+def dot_eyes(c, y):
+    """Solid plum dots with one small white highlight (the portrait's idle eyes)."""
+    for s in (-1, 1):
+        c.ellipse(0.36 * s, y, 0.10, 0.12, pc.PLUM)
+        c.ellipse(0.36 * s + 0.035, y + 0.045, 0.03, 0.03, (1, 1, 1))
+
+
+def closed_eyes(c, y):
+    """Happy closed eyes: thin upturned arcs."""
+    for s in (-1, 1):
+        c.arc(0.36 * s, y - 0.06, 0.11, 0.35, math.pi - 0.35, 0.05, pc.PLUM)
+
+
+def soft_brows(c, col, y):
+    """Thin short brows, a touch raised and level (not the worried V, not angry): the top of a small arc."""
+    for s in (-1, 1):
+        c.arc(0.36 * s, y - 0.12, 0.12, 0.30 * math.pi, 0.70 * math.pi, 0.035, col)
+
+
+def small_smile(c, y, w):
+    """A small closed smile: an arc w wide each side, corners at y, stroke 0.045 (no open mouth, no teeth)."""
+    r = w * 1.4
+    a = math.acos(w / r)
+    c.arc(0, y + r * math.sin(a), r, math.pi + a, 2 * math.pi - a, 0.045, pc.PLUM)
+
+
+def soft_blush(c, y):
+    """Soft blush at (+-0.62, y): four nested ellipses, about alpha 0.6 at the centre, fading out."""
+    for s in (-1, 1):
+        for k in range(4):
+            f = 1 - 0.2 * k
+            c.ellipse(0.62 * s, y, 0.18 * f, 0.11 * f, pc.PINK, 0.21)
+
+
+def face_calm(c, who, happy):
+    eye_y, mouth_y, w = (0.08, -0.20, 0.16) if who == "sun" else (0.06, -0.18, 0.14)
+    soft_blush(c, -0.16)
+    if happy:
+        closed_eyes(c, eye_y)
+        small_smile(c, mouth_y, w + 0.04)
+    else:
+        soft_brows(c, pc.BROW_SUN if who == "sun" else pc.BROW_CLOUD, eye_y + 0.27)
+        dot_eyes(c, eye_y)
+        small_smile(c, mouth_y, w)
+
+
 def face_cell(who, name):
     c = pc.Cell()
     brow = pc.BROW_SUN if who == "sun" else pc.BROW_CLOUD
-    if name == "happy" and who == "sun":
-        blush(c); brows(c, brow); eyes_open(c); mouth_open(c)
-    elif name == "laugh":
-        blush(c); eyes_arc(c, True); mouth_open(c, w=0.34, depth=0.4)
+    if (who, name) in (("sun", "happy"), ("cloud", "shy")):          # cells 0, 4: calm (idle)
+        face_calm(c, who, False)
+    elif (who, name) in (("sun", "laugh"), ("cloud", "happy")):      # cells 1, 5: happy (emotes)
+        face_calm(c, who, True)
     elif name == "grumpy":
         blush(c, -0.16); brows(c, brow, False, 0.28); eyes_open(c, 0.05, 0.85); mouth_frown(c)
     elif name == "sleep":
         blush(c); eyes_arc(c, False); mouth_o(c)
-    elif name == "shy":
-        blush(c); brows(c, brow); eyes_open(c); mouth_wavy(c)
-    elif name == "happy":
-        blush(c); eyes_arc(c, True); mouth_open(c)
     elif name == "cry":
         tears(c); blush(c); brows(c, brow); eyes_arc(c, False, 0.03); mouth_sad(c)
     return c
@@ -138,6 +176,60 @@ def sun_body():
                               matrix=m @ Matrix.Translation((0, 0, (length + R * 0.18) / 2 - R * 0.1)))
     ob = pc.blob("sun", bm, 0.0065, 8, pc.TRIS["sun"])
     ob.data.transform(Matrix.Rotation(TILT, 4, "X"))
+    return ob
+
+
+def meshy_body(name, path, mat_name):
+    """A Meshy image-to-3D body: joined, centred on its bounds, scaled to SPAN, its front (glTF +Z, Blender -Y on import) turned
+    to +Y, decimated to pc.TRIS, smooth-shaded; one material `mat_name` with only Meshy's base colour (TEX_PX square)."""
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    meshes = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
+    for o in set(bpy.data.objects) - before - set(meshes):
+        bpy.data.objects.remove(o)
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in meshes:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = meshes[0]
+    if len(meshes) > 1:
+        bpy.ops.object.join()
+    ob = bpy.context.view_layer.objects.active
+    ob.parent = None
+    ob.data.transform(ob.matrix_world)
+    ob.matrix_world = Matrix.Identity(4)
+    src = next(n.image for m in ob.data.materials if m and m.use_nodes for n in m.node_tree.nodes
+               if n.type == "TEX_IMAGE" and n.image and any(lk.to_socket.name == "Base Color" for lk in n.outputs[0].links))
+    vs = np.array([v.co[:] for v in ob.data.vertices])
+    lo, hi = vs.min(0), vs.max(0)
+    span = (hi[0] - lo[0]) if name == "cloud" else max(hi[0] - lo[0], hi[2] - lo[2])
+    ob.data.transform(Matrix.Rotation(math.pi, 4, "Z") @ Matrix.Scale(SPAN[name] / span, 4) @ Matrix.Translation(Vector(-(lo + hi) / 2)))
+    bm = bmesh.new()      # (weld Meshy's UV-seam splits first: decimated apart they open as cracks; loop UVs survive the weld)
+    bm.from_mesh(ob.data)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+    bm.to_mesh(ob.data)
+    bm.free()
+    d = ob.modifiers.new("d", "DECIMATE")
+    d.ratio = min(1.0, pc.TRIS[name] / max(1, sum(len(p.vertices) - 2 for p in ob.data.polygons)))
+    bpy.ops.object.modifier_apply(modifier=d.name)
+    t = ob.modifiers.new("t", "TRIANGULATE")
+    bpy.ops.object.modifier_apply(modifier=t.name)
+    ob.data.polygons.foreach_set("use_smooth", [True] * len(ob.data.polygons))
+    img = src.copy()
+    img.scale(TEX_PX, TEX_PX)
+    img.name = mat_name + "_albedo"
+    if bpy.data.materials.get(mat_name):      # (the flat fallback material of that name: it keeps a suffix, unused)
+        bpy.data.materials[mat_name].name = mat_name + "_flat"
+    m = bpy.data.materials.new(mat_name)
+    m.use_nodes = True
+    tex = m.node_tree.nodes.new("ShaderNodeTexImage")
+    tex.image = img
+    bsdf = m.node_tree.nodes["Principled BSDF"]
+    m.node_tree.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    bsdf.inputs["Roughness"].default_value = 0.5
+    ob.data.materials.clear()
+    ob.data.materials.append(m)
+    ob.name = name
+    print("MESHY", name, path, "tris", len(ob.data.polygons), "span m", SPAN[name])
     return ob
 
 
@@ -217,7 +309,9 @@ def check_drops(cloud, dr):
 
 
 def main():
-    dst, faces_png = sys.argv[sys.argv.index("--") + 1:][:2]
+    args = sys.argv[sys.argv.index("--") + 1:]
+    dst, faces_png = args[:2]
+    opt = dict(a[2:].split("=", 1) for a in args[2:] if a.startswith("--"))
     bpy.ops.wm.read_factory_settings(use_empty=True)
     pc.face_cell = face_cell
     img = pc.build_atlas()
@@ -226,13 +320,16 @@ def main():
     mats = {"sun": pc.flat_mat("glow-sun", LEMON), "cloud": pc.flat_mat("cloth-cloud", CLOUD_COL, 0.5),
             "drop": pc.flat_mat("ice-drop", (0.60, 0.78, 0.98), 0.15),
             "fsun": pc.face_mat("eyes-mood_sun", img), "fcloud": pc.face_mat("eyes-mood_cloud", img)}
-    sun, cloud, dr = sun_body(), pc.cloud_body(), drops()
+    sun = meshy_body("sun", opt["sun-glb"], "glow-sun") if "sun-glb" in opt else sun_body()
+    cloud = meshy_body("cloud", opt["cloud-glb"], "cloth-cloud") if "cloud-glb" in opt else pc.cloud_body()
+    dr = drops()
     for ob, mk in ((sun, "sun"), (cloud, "cloud"), (dr, "drop")):
-        ob.data.materials.append(mats[mk])
+        if not ob.data.materials:
+            ob.data.materials.append(mats[mk])
     bpy.context.view_layer.update()
     check_drops(cloud, dr)
     objs = [sun, cloud, dr]
-    f = face_patch("face_sun", sun, SUN_CELL, Vector((0, 0, 0)), TILT)
+    f = face_patch("face_sun", sun, SUN_CELL, Vector((0, 0, 0)), TILT, LIFT_MESHY if "sun-glb" in opt else LIFT)
     f.data.materials.append(mats["fsun"])
     objs.append(f)
     f = face_patch("face_cloud", cloud, CLOUD_CELL, Vector((0, 0, 0.04 * pc.CLOUD_W)), TILT, 0.012, 0.45)
