@@ -30,9 +30,6 @@ static func open(h: Home) -> void:
 	right.add_child(UI.section("Where"))
 	_tiles(h, right)
 	right.add_child(UI.spacer(2))
-	right.add_child(UI.section("Mode"))
-	right.add_child(ModeCards.make(Data.saved_mode(), func(md: String): ModeCards.pick(md, h._open_expedition)))
-	right.add_child(UI.spacer(2))
 	_details(h, ak, details)
 	_conditions(h, right, details)
 	_links(h, details)
@@ -95,9 +92,11 @@ static func _conditions(h: Home, into: Control, details: Control) -> void:
 	into.add_child(UI.section("Conditions"))
 	into.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), blurb))
 	details.add_child(UI.section("Match"))
-	var mode := Data.saved_mode()
-	var line := "Extraction: %s, %s. Everyone drops together; about 10 minutes."
-	details.add_child(UI.label(line % [mode, Data.MODE_LINES[mode]], UI.T_SMALL, UI.MUTED))
+	details.add_child(
+		UI.label(
+			"Extraction: trios, 7 squads of three. Everyone drops together; about 10 minutes.", UI.T_SMALL, UI.MUTED
+		)
+	)
 	details.add_child(UI.para("%s: %s" % [RaidLook.NAMES.get(rc, rc), blurb], 12, UI.MUTED))
 	details.add_child(UI.para("The drop: " + String(Data.TIERS[h.exp_tier]["desc"]), 12, UI.MUTED))
 

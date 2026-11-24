@@ -1,9 +1,9 @@
 extends RefCounted
 ## --wisp-steal-check: stolen Boki wisps (KinSteal, decision 0041), with Boki wisps on. A downed hunter's wisp
-## breaks loose (one boki_downed) and floats; holding interact beside it grabs it (the prompt shows the key cap);
-## the thief gets its carry passive at half strength (clamped) and the owner loses it; one stolen summon at half the
-## window; at most two stolen wisps ("Hands full"); a thief going down scatters them; the owner takes theirs
-## back once revived; an
+## breaks loose (one boki_downed) and floats; holding interact beside it grabs it
+## (the prompt shows the key cap); the thief gets its carry passive at half strength (clamped) and the owner loses
+## it; one stolen summon at half the window; at most
+## two stolen wisps ("Hands full"); a thief going down scatters them; the owner takes theirs back once revived; an
 ## ungrabbed wisp goes home and stays; match end sends every stolen wisp home; the kin snapshot carries the
 ## carrier. The passive rows are the carry-passive stacking (own Boki 100 %, stolen at passive_k, clamped at the
 ## carry cap). Prints PASS/FAIL.
@@ -13,7 +13,7 @@ const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
 var main: Node
-var downs := 0  # boki_downed starts, one a step at most (_heard_down)
+var downs := 0      # boki_downed starts, one a step at most (_heard_down)
 
 
 func run(main_node: Node) -> void:
@@ -59,7 +59,6 @@ func _frames(secs: float) -> void:
 		t += DT
 		_heard_down()
 
-
 ## Counts a boki_downed start into `downs` and clears Sfx's own last start: the steps run faster than real time,
 ## so the real-time MIN_GAP would hide a repeat.
 func _heard_down() -> void:
@@ -67,7 +66,6 @@ func _heard_down() -> void:
 		downs += 1
 		Sfx.last_played.erase("boki_downed")
 		Sfx.recent.erase("boki_downed")
-
 
 ## A fresh boki_downed count, heard from `at`.
 func _listen(at: Vector3) -> void:

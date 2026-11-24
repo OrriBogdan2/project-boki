@@ -666,12 +666,3 @@ All match sounds go through `Sfx._distance_db`; the numbers live in one place at
 | 31 | silent | silent |
 
 `--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 4 dB quieter but present, one at 31 m is silent.
-## Terrain hazards (`content/sfx/hazards.json`, `tools/gen_sfx_hazards.py`)
-`scripts/match/hazard_sfx.gd` (`TerrainHazards.audio`) plays them for the bodies this game owns; the levels, cadences and names are the set's `play` block.
-- **Beds**: one quiet loop per area kind (`hazard_bed_lava|water|ice|static|bramble`), held with `Sfx.loop_hold` at the area's ground nearest the listener, so it swells as you near the edge (reach 10-16 m) and sits round you inside. Every 0.25 s a scan of the tile lookup round the listener picks the nearest `beds_max` (2) areas in reach; the others stop.
-- **Contact cues** at a hunter on the ground, positional (yours at `contact_db`, a bot's `others_db` under): `hazard_lava_burn` every 0.5 s, `hazard_wade` while wading (`hazard_swim` instead when a Boki or perk keeps deep water off you), `hazard_ice_skid` while sliding, `hazard_bramble_snag` every 0.5 s, `hazard_static_crackle` on each shock; the first plays the moment you step in. `hazard_breath` (a gasp) once a dip when the breath falls under 40%, before drowning starts. The static flats keep `warn` (charging) and `zap` (the discharge).
-- **`hazard_warded`**: a soft two-note shimmer the first time your Boki or ward perk keeps each kind of ground off you in a match (it replaced the stock `shield` chime on every step in).
-- `--terrain-hazard-check` asserts each cue, the range, the swim, the single gasp before drowning, the warded cue once, and the beds (nearest ground, louder nearer, at most 2).
-
-## Solos are quiet of squad cues
-With nobody on your squad (`Life.has_mates` false: the Solos mode) the squad's sounds stay off: your own squad ping (`Match.squad_ping`), your Boki's callout ping (`Match.kin_ping`; its bark still plays), and the pick-turn tick in the lobby (`PrematchView`, squad of one). The teammate down/back/eliminated cues (`MateAlerts`) and the mate-revive cues already need a teammate. `--match-audio-check` starts a solos match and asserts none of them fire, then the same events with a squadmate do.
