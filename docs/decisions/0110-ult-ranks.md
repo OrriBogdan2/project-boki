@@ -1,6 +1,6 @@
 # 0022: Ultimate ranks
 
-- **Status:** proposed (spec only, no code)
+- **Status:** accepted (owner 2026-11-18: ultimates rank with level, R rank 3 at level 10; built on ext/ult-ranks-source, 2026-11-19)
 - **Date:** 2026-11-09
 - **Area:** combat, progression
 
@@ -17,7 +17,7 @@ II / tier III; `x2` = the same step at each tier. Cooldown is in seconds.
 
 | Source hero (line) | Ours | Base | Upg: II / III | Ours already? |
 |---|---|---|---|---|
-| ref-tender, channel heal (13) | tender Hearth Call | 60s | none listed | no ranks; base only |
+| ref-tender, channel heal (13) | tender Hearth Call | 60s | +25% heal, -5s CD at each tier | cd 46s; none |
 | ref-juggernaut, Volcanic Rebuke (28) | juggernaut Gilded Riposte | 45s | +30 dmg, +5% AP, -5s CD at each tier | cd 36s; the generic rank only |
 | ref-rimewright, Chilling Finale (36) | rimewright Rimelock | 80s | +40% dmg and -10s / -10s | cd 80s; none |
 | ref-ashwick, Flight of the Firefox (44) | ashwick Flue Flight | 45s | -15s / +25% dmg | cd 36s; none |
@@ -31,8 +31,8 @@ II / tier III; `x2` = the same step at each tier. Cooldown is in seconds.
 | ref-ostra, Singularity (117) | ostra Nightwell | 70s | -5s at each tier | cd 70s; none |
 
 "Approximate" today means only the base: every kit has a cooldown near the source's (a few were cut for our
-shorter matches) and the shared rank rules (below). No kit reads an X rank. ref-tender's line lists no Upg, so
-tender gets the generic step only.
+shorter matches) and the shared rank rules (below). No kit reads an X rank. (Tender's tiers were read
+later: +25% heal, -5s x2.)
 
 ## Options
 1. A new slot `x` beside `ult`. Ranks and Merge ranks would split cleanly, but a fifth slot means a new
@@ -82,6 +82,23 @@ rank 1.
   10 takes rank 3.
 - Alternative kept open: option 1 if the owner wants Merge and ult ranks spent separately.
 
+## As built (ext/ult-ranks-source, salvaged from ext/ult-ranks-rebased-rebased)
+- `x.per_rank` holds, per key, what R ranks 2 and 3 each add **in the key's own unit** (a +20% source step is
+  written as the flat 20% of our base), read by `HeroUlt.ranked` through `ArchKit.x_def()` (cached per rank),
+  so no kit code changed. A kit with `per_rank` takes only its own steps (parity: no generic +15% / -10% on top).
+  Damage steps are the source's % of OUR base (base numbers re-read on main cbb6b02f5). Tender takes the source
+  Elluna tiers (+25% heal, -5s x2, briefs/supervive-data/supervive_kits.md:13; this table's "none listed" was an
+  older capture). Gil has no source: Tidal Wave keeps its base (`rank_next.ult` says so). Rimewright's ult no longer
+  reads `power("ult")`.
+- Cooldown steps are the source deltas scaled by our base / the source's (last line below), rounded to 0.5s:
+  juggernaut -4, gunslinger -4, dredge -3, mage -5, bulwark -4, thief -2.5, tender -4, ashwick -12 at rank 2.
+  Juggernaut +30 of the source's 230 = +13%: +5.6 on our 43.
+  Alternative: the unscaled source deltas (-5 each) if the owner prefers the absolute numbers.
+- Text: `rank2.ult` / `rank_next.ult` (the slot key the other slots use, read by `Arch.next_ranks` and the wiki),
+  not `rank2.x` / `rank3.x`. No rank-3 toast: no other slot has one.
+- Bots take R ranks 1-2 as they open and rank 3 once every slot is rank 2 (no `order` edits).
+- Juggernaut's +5% AP per tier is not built (our ult has no AP ratio). Check: `--ult-rank-check`.
+
 ## Per-hero build items (for the planner)
 1. Shared: `ULT_AT`, `SLOT_MAX`, `_bot_spend`, `HeroUlt.cooldown`, `rank_text`, pips to 3, Net.VERSION, check.
 2. juggernaut: `x.per_rank` dmg +30 flat each rank, cd -5; `rank3.x` text.
@@ -95,5 +112,5 @@ rank 1.
 10. thief: dmg +10%, cd -5 each rank; her wiki note "Not built" line in `docs/heroes/thief.md` goes.
 11. dolm: cd -5 and wall lifetime +2.5s each rank (`time`).
 12. ostra: cd -5 each rank (Nightwell `time` stays).
-13. tender: generic step only (no source tiers); optional heal +15% by `level_k`.
+13. tender: heal_ps +25% of base and -4s (the source's -5s scaled to 46/60) at each tier.
 Cooldowns above are source deltas; where our base is already shorter, scale the delta by ours/source.
