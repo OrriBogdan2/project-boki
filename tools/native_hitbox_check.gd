@@ -107,7 +107,7 @@ func _points(m: Node3D) -> PackedVector3Array:
 	for mi in m.find_children("*", "MeshInstance3D", true, false):
 		var mesh := mi as MeshInstance3D
 		var path := String(m.get_path_to(mesh)).to_lower()
-		if not mesh.is_visible_in_tree() or mesh.mesh == null or path.contains("ring"):
+		if not mesh.is_visible_in_tree() or mesh.mesh == null or mesh.mesh is QuadMesh or path.contains("ring"):  # (a QuadMesh is a glow billboard: halo, bloom)
 			continue
 		if PROP_PARTS.any(func(w): return path.contains(w)):
 			continue
