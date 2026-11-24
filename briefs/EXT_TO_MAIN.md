@@ -11225,3 +11225,4 @@ READY ext/tut-hint-once 6fd4b248f3 (bulk-rebase: origin/main merged in mechanica
 READY ext/anim-relic-equip-5s 4d08cccc90 (bulk-rebase: origin/main merged in mechanically, was 5d476c3da1; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/parity-recheck-lace 47370674c6 (bulk-rebase: origin/main merged in mechanically, was 92c0343dd1; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/farm-garden-perf-30 2a24ad8c90 (merged origin/main; conflicts only tools/perf_bench.gd (kept main's --bench-hub plus branch's --bench-garden) and docs/GARDEN_PERF.md (both sections); --check 0 failures; health.py --strict HEALTH OK)
+READY ext/sfx-hit-tier-confirm 52e7bf224d (merged origin/main; only conflict content/rules/impact_weight.json: main's shake.json doc/no shake key kept + branch's confirm_db; --check 0 fail, health --strict OK)
