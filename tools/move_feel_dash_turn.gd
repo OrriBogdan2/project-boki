@@ -30,7 +30,7 @@ var hunter: Hunter
 
 func _init(check) -> void:
 	c = check
-	hunter = check.P
+	hunter = check.p_v
 
 
 func run() -> void:

@@ -121,6 +121,17 @@ const CALLED_ELSEWHERE := [
 const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
 
 const DT_FILL := 1.0 / 60.0  # s per step while timing the Faultline fill
+const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
+const RIG_PARTS := 16  # meshes one status look may use (30 Hunters each with a few stay cheap)
+const BOKI_CC := ["stun", "root", "slow", "daze"]
+const NO_RING := {
+	"ashwick": ["flashover"],
+	"dredge": ["anchor_slam", "reel"],
+	"gil": ["dive", "tide_lunge", "beached", "wave_land"],
+	"gunslinger": ["e_fire"],
+	"juggernaut": ["slam_hit"],
+}
+const NO_SCORCH := {"dolm": ["row_tell"], "rimewright": ["rime", "rime_melt"]}
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
@@ -171,6 +182,7 @@ func run(main: Node) -> void:
 	await _scarf(main)
 	await _rime_ends(main)
 	_dots(m)
+	_decor_rings()
 	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
 	await _rocket(main)
@@ -1136,8 +1148,6 @@ func _dots(m: Match) -> void:
 
 # ------------------------------------------------------------------ status looks
 ## The statuses the source makes readable on a body: each has a look in content/rules/status_looks.json.
-const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
-const RIG_PARTS := 16  # meshes one status look may use (30 Hunters each with a few stay cheap)
 
 
 ## Puts `st` on `F` the way the game does (its timers, KitStatus, a kit's keep) or takes it off.
@@ -1215,7 +1225,6 @@ func _statuses(m: Match, p: Hunter) -> void:
 
 ## The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md) on its body: the Hunter's look, colours and
 ## pace, sized to the Boki (over its head, round its body), from the pool; Grounded never lands so shows nothing.
-const BOKI_CC := ["stun", "root", "slow", "daze"]
 
 
 func _boki_statuses(m: Match, p: Hunter) -> void:
@@ -1498,6 +1507,22 @@ func _streak_span(v: HeroVfx, fps: float) -> float:
 	dot.queue_free()
 	_clear(v)
 	return span
+
+
+## DECISIONS "a ground ring means gameplay": the moves that are a dash, a landing, a reset or a cast with no area
+## carry no ring layer, and no scorch under a wind-up (docs/VFX_QUALITY.md, "Ground ring audit").
+
+
+func _decor_rings() -> void:
+	for table: Dictionary in [NO_RING, NO_SCORCH]:
+		var kind := "ring" if table == NO_RING else "scorch"
+		for arch: String in table:
+			var file := FileAccess.get_file_as_string("res://content/vfx/%s.json" % arch)
+			var moves: Dictionary = JSON.parse_string(file)["moves"]
+			for move: String in table[arch]:
+				var layers: Array = (moves[move] as Dictionary).get("fx", []) if moves.has(move) else []
+				var n := layers.filter(func(l: Dictionary): return l["p"] == kind).size()
+				ok(n == 0, "%s/%s draws no %s layer (a decoration, not an area)" % [arch, move, kind])
 
 
 ## Sable's Encore ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and the

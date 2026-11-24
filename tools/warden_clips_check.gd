@@ -21,6 +21,11 @@ const FALL_H := [1.0, 3.2, 6.0, 12.0]  # m fallen: a hop, a terrace drop, a long
 const DIVE_BACK := 10  # frames a plunge may be up later than a drop (its dive settles at 0.8 x)
 const LAND_DEEPER := 0.015  # m (model): a 6 m fall's crouch is at least this deeper than a terrace drop's
 const AIR_FRAMES := 20  # frames of each air cast checked
+## Clips a Hunter's GLB carries that no kit move plays, with why they stay (the known-unused list). Each one is in the
+## GLB, is mapped by no kmove, and is still held by the named user (so it can't rot into a silent orphan).
+## ostra flurry: authored for owner item 136's 8-card RMB flurry; DECISIONS 11-07 (parity first) put the source's Snap
+## back and no data/wiki/footage beat is a card volley, so no move plays it. The results stage holds it as his pose.
+const MOVELESS := {"ostra": {"flurry": "results_pose"}}
 
 var bad := 0
 var holder: Node3D
@@ -39,6 +44,7 @@ func run(main: Node) -> void:
 	main.add_child(holder)
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
+	_moveless_clips()
 	_companions()
 	_finishers()
 	for id in Arch.ORDER:
@@ -49,6 +55,29 @@ func run(main: Node) -> void:
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
+func _moveless_clips() -> void:
+	var poses: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/results_pose.json"))
+	for id in MOVELESS:
+		var cfg := WardenClips.data(String(id))
+		var hid := String(id)
+		var m := Models.hunter(Arch.weight(hid), Data.TEAM_COLORS[0], Arch.signature(hid), "",
+			PlayerLook.neutral(), hid)
+		holder.add_child(m)
+		var w := m.get_node_or_null("Warden")
+		var clips: WardenClips = (w.get_node("Sync") as WardenGlb.Sync).clips if w else null
+		ok(clips != null and clips.lib != null, "%s: clip tree built for the known-unused clips" % id)
+		if clips == null or clips.lib == null:
+			continue
+		for clip in MOVELESS[id]:
+			ok(clips.lib.has_animation(String(clip)), "%s: known-unused clip %s is in the .glb" % [id, clip])
+			var played_by: Array = []
+			for k in cfg["kmoves"]:
+				if String((cfg["kmoves"][k] as Dictionary)["clip"]) == clip:
+					played_by.append(k)
+			ok(played_by.is_empty(), "%s: no kmove plays %s any more (%s)" % [id, clip, str(played_by)])
+			ok(String((poses.get(id, {}) as Dictionary).get("clip", "")) == clip,
+				"%s: %s is still his results pose (%s), else cut it from the list" % [id, clip, MOVELESS[id][clip]])
 
 func _hunter(art_name: String, id: String, prefix: String) -> void:
 	var cfg := WardenClips.data(art_name)
@@ -576,7 +605,7 @@ func _heavy_land(id: String) -> void:
 	)
 
 
-func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
+func _play(_m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:
 		an.update(DT, s)
 		sync._process(DT)
