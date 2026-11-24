@@ -9,6 +9,12 @@ converted into the hips' space, so the barge roll looks the same (`tools/art1/gr
 `--r21-keys` (docs/art/wardens/MESHY_NATIVE.md): one junk ball, orphan vertices gone, strap on the spine/shoulders with ink, skin and goo
 graded toward the turnaround, a Meshy gauntlet fist and knobbed pack rod, keys eased off every held clip pair (geo_check PASS), size 1.025.
 
+**Native model r22 (2026-11-24, ext/grimble-native):** `dredge_meshy.glb` = r21 + `tools/meshy/dredge_r22.py --all` (plan
+gens/hunter-round-1124/grimble/PLAN-1124o.md): the r21 strap stopped under the armpit with its last rows 5.6-8.3 cm off the chest
+(the review's black tab and grey bands); it is now one closed leather band per side, shoulder blade to belt, snapped to the skin
+(3-10 mm) and skinned with the skin's own weights, its colour taken from the atlas belt. 22 skin slivers dropped, goo arm root
+flared over the socket dome, the dome's head weights moved to the shoulder.
+
 **No floor puddle (2026-11-17, ext/grimble-puddle-1117):** the owner: "we can remove grimbles goo puddle if it helps.
 can just have it drip off him a bit on that arm". The puddle's vertices were split between `hook` and `foot.R`, so it tore into
 dark spikes when the arm moved. The master is now the 11-17 gun-hand pick minus the puddle
