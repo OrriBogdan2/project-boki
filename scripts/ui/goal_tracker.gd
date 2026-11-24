@@ -6,8 +6,8 @@ extends RefCounted
 ##   first_day the new-save list (GardenFirstDay), in its own order with the ticked lines last
 ##   garden    the garden's own long goal: your Boki's next level (base_mode), always there for a player who stays home
 ##   unlock    a Hunter's unlock challenge (ClassUnlock), for every Hunter not open yet
-##   mastery   the goals of the Hunter you play that are not done
-##   milestone a farm milestone not reached (FarmUnlocks)
+##   mastery   the goals of the Hunter you play that are not done (base_mode: after the first match)
+##   milestone a farm milestone not reached (FarmUnlocks; base_mode: after the first match)
 ##   level     the next farm level, always last
 ## A row: {text, have, need, frac, ready, source}. Ready-to-claim rows lead; inside a source the
 ## closest to done comes first. The card is hidden when there are no rows. It shows one line, "Next: ...",
@@ -81,8 +81,14 @@ static func _unlocks() -> Array:
 		out.append(_row(ClassUnlock.challenge_text(hid), prog, "unlock", ClassUnlock.can_unlock(hid)))
 	return out
 
+## A Boki base that has never been on an expedition: rows only a match can fill wait for the first one.
+static func _home_only() -> bool:
+	return FarmUnlocks.base_mode() and int(Save.d.get("matches", 0)) < 1
+
 static func _mastery() -> Array:
 	var out: Array = []
+	if _home_only():
+		return out   # match stats (rings, slams, ...) cannot grow at home: the row waits for the first expedition
 	var id := Arch.of_save()
 	var goals := ClassUnlock.mastery(id)
 	for i in goals.size():
@@ -93,8 +99,8 @@ static func _mastery() -> Array:
 
 static func _milestones() -> Array:
 	var out: Array = []
-	if not FarmUnlocks.gated():
-		return out
+	if not FarmUnlocks.gated() or _home_only():
+		return out   # every milestone (expedition, extraction, boss, scan) is an expedition's
 	var ms: Dictionary = FarmUnlocks.rules()["milestones"]
 	for id in ms:
 		if FarmUnlocks.milestone_done(String(id)):
