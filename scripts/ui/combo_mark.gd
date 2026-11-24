@@ -28,7 +28,7 @@ static func payoff(m: Node, h: Hunter, t: Ent) -> void:
 ## Draws the tags centred on `at` for `e`: the viewer's own combo state first, then each squadmate's, side by
 ## side, so only an attacker and their squad see a state (a rival's kit never reads onto your foe).
 static func draw(c: Control, at: Vector2, viewer: Hunter, e: Ent, time: float) -> void:
-	if viewer == null or e == null:
+	if viewer == null or e == null or (viewer.m as Match).has_meta("pitch_no_foe_plates"):  # pitch-reel films: no text
 		return
 	var slot := 0
 	for o in (viewer.m as Match).hunters:
