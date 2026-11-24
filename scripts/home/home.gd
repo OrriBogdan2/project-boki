@@ -956,7 +956,8 @@ func _plot_spots(cap: int) -> Array:
 		var c := HomeLayout.deco_center(e)
 		for j in 4:
 			if out.size() >= cap: break
-			out.append(c + Vector3(-1.1 + (j % 2) * 2.2, 0, -1.0 + (int(j / 2.0)) * 2.0).rotated(Vector3.UP, int(e.get("r", 0)) * PI * 0.5))
+			var corner := Vector3(-1.1 + (j % 2) * 2.2, 0, -1.0 + (int(j / 2.0)) * 2.0)
+			out.append(c + corner.rotated(Vector3.UP, int(e.get("r", 0)) * PI * 0.5))
 	return out
 
 func _plot_node(arr: String, i: int) -> Node3D:

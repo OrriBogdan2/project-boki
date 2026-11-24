@@ -13,7 +13,9 @@ extends RefCounted
 ## Surface map: docs/art/BOKI_3D_SURFACES.md.
 ## --pack=<abs .pck>: load an exported pck over res:// first (for a GPU box that can only run the tree; the strict
 ## form is still `godot --main-pack <pck>`). --surfaces (with --shots-dir): also the real farm (the demo farm save,
-## all three starters on it) as farm.png, each listed species' Field Book page as dex_<sp>.png, and as the garden's wild visitor in its zone as visitor_<sp>.png plus a close camera on it (visitor_close_<sp>.png; FAIL line if it is not out).
+## all three starters on it) as farm.png, each listed species' Field Book page as dex_<sp>.png, and as the
+## garden's wild visitor in its zone as visitor_<sp>.png plus a close camera on it (visitor_close_<sp>.png; FAIL
+## line if it is not out).
 
 const PX := 512
 ## Species with data but no art/kin body yet (docs/art/kin/MESHY_BOKI_RECIPE.md): they must be the only FALLBACKs.
