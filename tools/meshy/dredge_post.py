@@ -131,8 +131,12 @@ def drop_blade(js, b, out):
     patch, holes = fill_cut(js, b, out, prim, pos, f, gone)
     keep = np.concatenate([f[~gone], patch])
     js["accessors"].append(
-        {"bufferView": out.add_view(keep.astype(np.uint32).tobytes()), "componentType": 5125,
-         "count": len(keep) * 3, "type": "SCALAR"}
+        {
+            "bufferView": out.add_view(keep.astype(np.uint32).tobytes()),
+            "componentType": 5125,
+            "count": len(keep) * 3,
+            "type": "SCALAR",
+        }
     )
     prim["indices"] = len(js["accessors"]) - 1
     return int(gone.sum()), holes
@@ -152,7 +156,7 @@ def rim_loops(f, gone, w, pos):
     cutv = np.zeros(m, bool)
     cutv[w[f[gone]].ravel()] = True
     rep = {}
-    for (a, b_) in e[bd]:
+    for a, b_ in e[bd]:
         rep.setdefault(w[a], a), rep.setdefault(w[b_], b_)
     nb = {}
     for wa, wb in ew[bd]:
@@ -197,7 +201,7 @@ def fill_cut(js, b, out, prim, pos, f, gone):
     arr = read_attrs(js, b, att)
     tex = js["materials"][prim["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
     bv = js["bufferViews"][js["images"][js["textures"][tex]["source"]]["bufferView"]]
-    px = np.asarray(Image.open(io.BytesIO(b[bv.get("byteOffset", 0):][: bv["byteLength"]])).convert("RGB")).astype(int)
+    px = np.asarray(Image.open(io.BytesIO(b[bv.get("byteOffset", 0) :][: bv["byteLength"]])).convert("RGB")).astype(int)
     h, wd = px.shape[:2]
     new = {k: [] for k in arr}
     base, tris = len(pos), []
@@ -237,7 +241,7 @@ def fill_cut(js, b, out, prim, pos, f, gone):
             else:
                 b0, b1 = idx[k + 1], np.roll(idx[k + 1], -1)
                 tris += [np.stack([a0, a1, b1], 1), np.stack([a0, b1, b0], 1)]
-        lt = np.concatenate(tris[-(2 * rings_n - 1):]) - base
+        lt = np.concatenate(tris[-(2 * rings_n - 1) :]) - base
         fn = np.cross(pts[lt[:, 1]] - pts[lt[:, 0]], pts[lt[:, 2]] - pts[lt[:, 0]]).sum(0)
         if fn @ nrm < 0:  # wound against the skin: flip this loop's triangles
             for j in range(len(tris) - (2 * rings_n - 1), len(tris)):
@@ -251,9 +255,18 @@ def fill_cut(js, b, out, prim, pos, f, gone):
 
 def read_attrs(js, b, att):
     """Every vertex array of a primitive (floats, or the uint16 joints) by attribute name."""
-    return {k: (n.floats(js, b, a) if js["accessors"][a]["componentType"] == 5126 else
-                np.frombuffer(n.view_bytes(js, b, js["accessors"][a]["bufferView"]), np.uint16,
-                              js["accessors"][a]["count"] * 4).reshape(-1, 4).copy()) for k, a in att.items()}
+    return {
+        k: (
+            n.floats(js, b, a)
+            if js["accessors"][a]["componentType"] == 5126
+            else np.frombuffer(
+                n.view_bytes(js, b, js["accessors"][a]["bufferView"]), np.uint16, js["accessors"][a]["count"] * 4
+            )
+            .reshape(-1, 4)
+            .copy()
+        )
+        for k, a in att.items()
+    }
 
 
 def append_attrs(js, out, att, arr, new):
@@ -266,8 +279,14 @@ def append_attrs(js, out, att, arr, new):
             if k == "POSITION":
                 js["accessors"][acc]["min"], js["accessors"][acc]["max"] = full.min(0).tolist(), full.max(0).tolist()
         else:
-            js["accessors"].append({"bufferView": out.add_view(full.astype(np.uint16).tobytes()),
-                                    "componentType": 5123, "count": len(full), "type": "VEC4"})
+            js["accessors"].append(
+                {
+                    "bufferView": out.add_view(full.astype(np.uint16).tobytes()),
+                    "componentType": 5123,
+                    "count": len(full),
+                    "type": "VEC4",
+                }
+            )
             acc = len(js["accessors"]) - 1
         for p2 in js["meshes"][0]["primitives"]:
             if p2["attributes"].get(k) == a:
@@ -367,8 +386,10 @@ def replace_foot(js, b, out):
         best = np.full(len(ti), np.inf)
         proj = mp[ti].copy()
         for s0 in range(0, len(be), 256):
-            A, D = a0[s0:s0 + 256], d_[s0:s0 + 256]
-            t_ = np.clip(np.einsum("pij,ij->pi", mp[ti][:, None] - A[None], D) / np.maximum((D * D).sum(1), 1e-12), 0, 1)
+            A, D = a0[s0 : s0 + 256], d_[s0 : s0 + 256]
+            t_ = np.clip(
+                np.einsum("pij,ij->pi", mp[ti][:, None] - A[None], D) / np.maximum((D * D).sum(1), 1e-12), 0, 1
+            )
             pt = A[None] + t_[..., None] * D[None]
             dist = np.linalg.norm(pt - mp[ti][:, None], axis=2)
             k_ = dist.argmin(1)
@@ -402,8 +423,14 @@ def replace_foot(js, b, out):
     added = (len(pos) + slot[f[src]])[:, [0, 2, 1]]  # mirrored: wind the other way
     append_attrs(js, out, att, arr, new)
     keep = np.concatenate([f[~gone], added])
-    js["accessors"].append({"bufferView": out.add_view(keep.astype(np.uint32).tobytes()), "componentType": 5125,
-                            "count": len(keep) * 3, "type": "SCALAR"})
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(keep.astype(np.uint32).tobytes()),
+            "componentType": 5125,
+            "count": len(keep) * 3,
+            "type": "SCALAR",
+        }
+    )
     prim["indices"] = len(js["accessors"]) - 1
     return int(gone.sum()), int(src.sum()), np.round(shift, 3).tolist(), nrim, round(max(moved), 3)
 
@@ -510,8 +537,10 @@ def count_islands(path):
         pos = n.floats(js, b, prim["attributes"]["POSITION"])
         f = prim_faces(js, b, prim)
         size = np.bincount(island_labels(pos, f))
-        print(f"{js['materials'][prim['material']]['name']:14s} {len(f):6d} tris, {len(size)} islands, "
-              f"{int((size < MIN_TRIS).sum())} under {MIN_TRIS} tris (largest {size.max()})")
+        print(
+            f"{js['materials'][prim['material']]['name']:14s} {len(f):6d} tris, {len(size)} islands, "
+            f"{int((size < MIN_TRIS).sum())} under {MIN_TRIS} tris (largest {size.max()})"
+        )
 
 
 def drop_islands(js, b, out):
@@ -528,8 +557,12 @@ def drop_islands(js, b, out):
         gone[0] += int((size < MIN_TRIS).sum())
         gone[1] += int((~keep).sum())
         js["accessors"].append(
-            {"bufferView": out.add_view(f[keep].astype(np.uint32).tobytes()), "componentType": 5125,
-             "count": int(keep.sum()) * 3, "type": "SCALAR"}
+            {
+                "bufferView": out.add_view(f[keep].astype(np.uint32).tobytes()),
+                "componentType": 5125,
+                "count": int(keep.sum()) * 3,
+                "type": "SCALAR",
+            }
         )
         prim["indices"] = len(js["accessors"]) - 1
     return gone
@@ -771,7 +804,14 @@ def clean_goo_weights(js, b, out, rig):
     rest = np.ones(len(nj), bool)
     rest[gv] = False
     nj[rest], nw[rest] = joints[rest], weights[rest]  # everything but the goo keeps its own rows
-    js["accessors"].append({"bufferView": out.add_view(nj.astype(np.uint16).tobytes()), "componentType": 5123, "count": len(nj), "type": "VEC4"})
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(nj.astype(np.uint16).tobytes()),
+            "componentType": 5123,
+            "count": len(nj),
+            "type": "VEC4",
+        }
+    )
     jacc, wacc = len(js["accessors"]) - 1, out.add_floats(nw, "VEC4")
     for p in prims[:2]:
         p["attributes"]["JOINTS_0"], p["attributes"]["WEIGHTS_0"] = jacc, wacc
@@ -793,17 +833,35 @@ def cut_pile(F, P, UV, img, lo, hi):
     yi = np.clip((uv[:, 1] % 1.0 * px.shape[0]).astype(int), 0, px.shape[0] - 1)
     r, g, b_ = (px[yi, xi, k].astype(float) for k in range(3))
     mx, mn = np.maximum(np.maximum(r, g), b_), np.minimum(np.minimum(r, g), b_)
-    hue = np.where(mx == r, 60 * ((g - b_) / np.maximum(mx - mn, 1)), np.where(mx == g, 60 * (2 + (b_ - r) / np.maximum(mx - mn, 1)), 0))
-    gold = (hue > 29) & (hue < 60) & ((mx - mn) / np.maximum(mx, 1) > 0.5) & (mx > 60)  # this pack's coins sit at 30-40 deg, its wood at 20-26
+    hue = np.where(
+        mx == r,
+        60 * ((g - b_) / np.maximum(mx - mn, 1)),
+        np.where(mx == g, 60 * (2 + (b_ - r) / np.maximum(mx - mn, 1)), 0),
+    )
+    gold = (
+        (hue > 29) & (hue < 60) & ((mx - mn) / np.maximum(mx, 1) > 0.5) & (mx > 60)
+    )  # this pack's coins sit at 30-40 deg, its wood at 20-26
     drop = low & gold
     F = F[~drop]
     # loose shards (what the decimation left of the planks at the base): tiny islands anywhere, small ones in the bottom 40 %
     lab = island_labels(P, F)
     size = np.bincount(lab)
     cen = P[F].mean(1)
-    base = cen[:, 1] < lo[1] + 0.4 * (hi[1] - lo[1])
     shard = (size[lab] < 6) | ((size[lab] < 30) & (cen[:, 1] < lo[1] + 0.3 * (hi[1] - lo[1])))
-    print("pile cut:", int(drop.sum()), "triangles; shards dropped:", int(shard.sum()), "of", len(F), "islands <6:", int((size < 6).sum()), "<30:", int((size < 30).sum()), "of", len(size))
+    print(
+        "pile cut:",
+        int(drop.sum()),
+        "triangles; shards dropped:",
+        int(shard.sum()),
+        "of",
+        len(F),
+        "islands <6:",
+        int((size < 6).sum()),
+        "<30:",
+        int((size < 30).sum()),
+        "of",
+        len(size),
+    )
     return F[~shard]
 
 
@@ -819,7 +877,9 @@ def swap_pack(js, b, out, rig, pack_path, under_path=None):
     F = prim_faces(pj, pb, pp)
     lo, hi = P.min(0), P.max(0)
     tex0 = pj["materials"][pp["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
-    big = Image.open(io.BytesIO(bytes(n.view_bytes(pj, pb, pj["images"][pj["textures"][tex0]["source"]]["bufferView"])))).convert("RGB")
+    big = Image.open(
+        io.BytesIO(bytes(n.view_bytes(pj, pb, pj["images"][pj["textures"][tex0]["source"]]["bufferView"])))
+    ).convert("RGB")
     F = cut_pile(F, P, UV, big, lo, hi)
     ctr = np.array([(lo[0] + hi[0]) / 2, lo[1], (lo[2] + hi[2]) / 2])
     P = (P - ctr) * np.array([-1.0, 1.0, -1.0]) * PACK_SCALE  # 180 deg about y
@@ -835,18 +895,43 @@ def swap_pack(js, b, out, rig, pack_path, under_path=None):
     im.save(buf, "JPEG", quality=90)
     js["images"].append({"bufferView": out.add_view(buf.getvalue()), "mimeType": "image/jpeg"})
     js["textures"].append({"source": len(js["images"]) - 1})
-    js["materials"].append({"name": "pack-meshy", "doubleSided": True, "pbrMetallicRoughness": {
-        "baseColorTexture": {"index": len(js["textures"]) - 1}, "metallicFactor": 0.0, "roughnessFactor": 0.75}})
-    attrs = {"POSITION": out.add_floats(P, "VEC3"), "NORMAL": out.add_floats(N, "VEC3"),
-             "TEXCOORD_0": out.add_floats(UV, "VEC2"), "WEIGHTS_0": out.add_floats(wt, "VEC4")}
+    js["materials"].append(
+        {
+            "name": "pack-meshy",
+            "doubleSided": True,
+            "pbrMetallicRoughness": {
+                "baseColorTexture": {"index": len(js["textures"]) - 1},
+                "metallicFactor": 0.0,
+                "roughnessFactor": 0.75,
+            },
+        }
+    )
+    attrs = {
+        "POSITION": out.add_floats(P, "VEC3"),
+        "NORMAL": out.add_floats(N, "VEC3"),
+        "TEXCOORD_0": out.add_floats(UV, "VEC2"),
+        "WEIGHTS_0": out.add_floats(wt, "VEC4"),
+    }
     js["accessors"][attrs["POSITION"]].update(min=P.min(0).tolist(), max=P.max(0).tolist())
-    js["accessors"].append({"bufferView": out.add_view(jn.astype(np.uint16).tobytes()), "componentType": 5123,
-                            "count": len(P), "type": "VEC4"})
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(jn.astype(np.uint16).tobytes()),
+            "componentType": 5123,
+            "count": len(P),
+            "type": "VEC4",
+        }
+    )
     attrs["JOINTS_0"] = len(js["accessors"]) - 1
     f = F.astype(np.uint32)  # a turn keeps the winding
-    js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"}
+    )
     prims = js["meshes"][0]["primitives"]
-    keep = [p for p in prims if js["materials"][p["material"]]["name"] not in ("leather-pack", "brass-pack", "pack-meshy", "pack-under")]
+    keep = [
+        p
+        for p in prims
+        if js["materials"][p["material"]]["name"] not in ("leather-pack", "brass-pack", "pack-meshy", "pack-under")
+    ]
     keep.append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
     if under_path:  # r13: a closed brown shell just inside the pack (voxel remesh, Blender): cracks in Meshy's planks show wood, not the ink hull
         uj, ub = n.load(under_path)
@@ -858,15 +943,35 @@ def swap_pack(js, b, out, rig, pack_path, under_path=None):
         UN = UN * np.array([-1.0, 1.0, -1.0])
         UP += np.array([PACK_X, PACK_BOTTOM, PACK_BACK_Z - depth / 2])
         ujn, uwt = rs.pack_weights(UP, rig.names)
-        js["materials"].append({"name": "pack-under", "doubleSided": True, "pbrMetallicRoughness": {
-            "baseColorFactor": list(UNDER_COLOUR) + [1.0], "metallicFactor": 0.0, "roughnessFactor": 0.9}})
-        ua = {"POSITION": out.add_floats(UP.astype(np.float32), "VEC3"), "NORMAL": out.add_floats(UN.astype(np.float32), "VEC3"),
-              "WEIGHTS_0": out.add_floats(uwt, "VEC4")}
+        js["materials"].append(
+            {
+                "name": "pack-under",
+                "doubleSided": True,
+                "pbrMetallicRoughness": {
+                    "baseColorFactor": list(UNDER_COLOUR) + [1.0],
+                    "metallicFactor": 0.0,
+                    "roughnessFactor": 0.9,
+                },
+            }
+        )
+        ua = {
+            "POSITION": out.add_floats(UP.astype(np.float32), "VEC3"),
+            "NORMAL": out.add_floats(UN.astype(np.float32), "VEC3"),
+            "WEIGHTS_0": out.add_floats(uwt, "VEC4"),
+        }
         js["accessors"][ua["POSITION"]].update(min=UP.min(0).tolist(), max=UP.max(0).tolist())
-        js["accessors"].append({"bufferView": out.add_view(ujn.astype(np.uint16).tobytes()), "componentType": 5123,
-                                "count": len(UP), "type": "VEC4"})
+        js["accessors"].append(
+            {
+                "bufferView": out.add_view(ujn.astype(np.uint16).tobytes()),
+                "componentType": 5123,
+                "count": len(UP),
+                "type": "VEC4",
+            }
+        )
         ua["JOINTS_0"] = len(js["accessors"]) - 1
-        js["accessors"].append({"bufferView": out.add_view(UF.tobytes()), "componentType": 5125, "count": int(UF.size), "type": "SCALAR"})
+        js["accessors"].append(
+            {"bufferView": out.add_view(UF.tobytes()), "componentType": 5125, "count": int(UF.size), "type": "SCALAR"}
+        )
         keep.append({"attributes": ua, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
     js["meshes"][0]["primitives"] = keep
     return len(F)
@@ -952,7 +1057,9 @@ def cap_shoulder(js, b, out, rig):
         return "no loop found"
     append_attrs(js, out, att, arr, new)
     full = np.concatenate([f.astype(np.uint32)] + [t.astype(np.uint32) for t in tris])
-    js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"}
+    )
     prim["indices"] = len(js["accessors"]) - 1
     return int(sum(len(t) for t in tris))
 
@@ -970,7 +1077,9 @@ CAPS = (
     ("small goo holes", 1, ((-1.0, -0.2, -1.0), (1.0, 2.0, 1.0)), 6, 0.06, None, 0),
 )
 PUDDLE_Y = 0.08  # m: goo triangles lower than this (rest pose) are dropped: the flat puddle round the foot that swung up as a ring
-CAP_BULGE = 0.2  # a dome rises CAP_BULGE x the rim's thin width (m), at most CAP_MAX; rings: per CAPS entry (0 = a fan fill)
+CAP_BULGE = (
+    0.2  # a dome rises CAP_BULGE x the rim's thin width (m), at most CAP_MAX; rings: per CAPS entry (0 = a fan fill)
+)
 CAP_MAX = 0.05
 LEGACY_CAPS = ("goo mouth at the shoulder", "skin crack on the shoulder top")  # r13b: kept exactly as r13 built them
 
@@ -998,7 +1107,14 @@ def weld_weights(js, b, out, rig):
     diff = (np.abs(W2 - W).sum(1) > 0.02) | (J2 != J).any(1) & (W > 0.02).any(1)
     old = att["JOINTS_0"]
     jacc = len(js["accessors"])
-    js["accessors"].append({"bufferView": out.add_view(J2.astype(np.uint16).tobytes()), "componentType": 5123, "count": len(J2), "type": "VEC4"})
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(J2.astype(np.uint16).tobytes()),
+            "componentType": 5123,
+            "count": len(J2),
+            "type": "VEC4",
+        }
+    )
     wacc = out.add_floats(W2.astype(np.float32), "VEC4")
     for p in prims:
         if p["attributes"].get("JOINTS_0") == old:
@@ -1022,7 +1138,9 @@ def trim_puddle(js, b, out, rig):
     f = prim_faces(js, b, prim)
     keep = pos[f].mean(1)[:, 1] >= PUDDLE_Y
     full = f[keep].astype(np.uint32)
-    js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"}
+    )
     prim["indices"] = len(js["accessors"]) - 1
     return "%d goo triangles dropped" % int((~keep).sum())
 
@@ -1089,11 +1207,15 @@ def cap_rims(js, b, out, rig):
         bd = u[c == 1]
         ids = np.unique(bd)
         slot = {v: i for i, v in enumerate(ids)}
-        g = sp.coo_matrix((np.ones(len(bd)), ([slot[x] for x in bd[:, 0]], [slot[x] for x in bd[:, 1]])), (len(ids),) * 2)
+        g = sp.coo_matrix(
+            (np.ones(len(bd)), ([slot[x] for x in bd[:, 0]], [slot[x] for x in bd[:, 1]])), (len(ids),) * 2
+        )
         lab = connected_components(g, directed=False)[1]
         de = np.concatenate([fs[:, [0, 1]], fs[:, [1, 2]], fs[:, [2, 0]]])
         bset = set(map(tuple, bd.tolist()))
-        dbd = [tuple(e_) for e_ in de.tolist() if e_[0] != e_[1] and tuple(sorted(e_)) in bset]  # rim edges, face direction
+        dbd = [
+            tuple(e_) for e_ in de.tolist() if e_[0] != e_[1] and tuple(sorted(e_)) in bset
+        ]  # rim edges, face direction
         todo = []
         n_caps = 0
         for l in range(lab.max() + 1):
@@ -1124,7 +1246,9 @@ def cap_rims(js, b, out, rig):
             n_caps += 1
         for cyc, name, pi_, m, d, fixed, vs in todo:
             legacy = cyc is None
-            order = vs if legacy else rep[np.array(cyc)][::-1]  # against the kept faces' direction: the fill's own winding
+            order = (
+                vs if legacy else rep[np.array(cyc)][::-1]
+            )  # against the kept faces' direction: the fill's own winding
             p = pos[order]
             ctr = p.mean(0)
             ax = np.linalg.svd(p - ctr)[2]
@@ -1149,8 +1273,14 @@ def cap_rims(js, b, out, rig):
             if fixed and "TEXCOORD_0" in arr:  # a dome that shows one colour: the darkest texel on its rim
                 tex = prim_texture(js, b, pi_)
                 uvs = arr["TEXCOORD_0"][order]
-                lum = np.asarray(tex)[np.clip((uvs[:, 1] % 1 * tex.size[1]).astype(int), 0, tex.size[1] - 1),
-                                      np.clip((uvs[:, 0] % 1 * tex.size[0]).astype(int), 0, tex.size[0] - 1)].astype(float).sum(1)
+                lum = (
+                    np.asarray(tex)[
+                        np.clip((uvs[:, 1] % 1 * tex.size[1]).astype(int), 0, tex.size[1] - 1),
+                        np.clip((uvs[:, 0] % 1 * tex.size[0]).astype(int), 0, tex.size[0] - 1),
+                    ]
+                    .astype(float)
+                    .sum(1)
+                )
                 near = order[np.argmin(lum)]
             n_pts = len(order)
             for r in range(1, m_ + 1):
@@ -1163,7 +1293,9 @@ def cap_rims(js, b, out, rig):
                     elif key == "NORMAL":
                         piece = np.tile(out_n, (n_pts, 1)) * k + piece * (1 - k)
                         piece /= np.linalg.norm(piece, axis=1, keepdims=True)
-                    elif key.startswith("TEXCOORD") and m_ > 0 and fixed:  # one texel for the whole dome: no streaks along the rim
+                    elif (
+                        key.startswith("TEXCOORD") and m_ > 0 and fixed
+                    ):  # one texel for the whole dome: no streaks along the rim
                         piece = np.tile(arrv[near], (n_pts, 1))
                     new[key].append(piece)
             for key, arrv in arr.items():
@@ -1192,7 +1324,17 @@ def cap_rims(js, b, out, rig):
             add[pi_].append(tr)
             total += n_pts * m_ + 1
             if m_:
-                print("cap", name, n_pts, "verts at", ctr.round(2), "dia", round(float(np.ptp((p - ctr) @ ax[0])), 2), "bulge", round(float(bulge), 3))
+                print(
+                    "cap",
+                    name,
+                    n_pts,
+                    "verts at",
+                    ctr.round(2),
+                    "dia",
+                    round(float(np.ptp((p - ctr) @ ax[0])), 2),
+                    "bulge",
+                    round(float(bulge), 3),
+                )
         report.append("%s %d" % (name, n_caps))
     if not total:
         return "no loop found"
@@ -1202,13 +1344,21 @@ def cap_rims(js, b, out, rig):
         if not trs:
             continue
         full = np.concatenate([prim_faces(js, b, prims[pi]).astype(np.uint32)] + [t.astype(np.uint32) for t in trs])
-        js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+        js["accessors"].append(
+            {
+                "bufferView": out.add_view(full.tobytes()),
+                "componentType": 5125,
+                "count": int(full.size),
+                "type": "SCALAR",
+            }
+        )
         prims[pi]["indices"] = len(js["accessors"]) - 1
     return "; ".join(report) + ", %d new vertices, %d fixed-direction caps against their winding" % (total, clash)
 
 
-
-ORIENT_TOP = 1.2  # m (rest pose): above this (the goo mouth, its cap and the shoulder) turning faces reopened black slits
+ORIENT_TOP = (
+    1.2  # m (rest pose): above this (the goo mouth, its cap and the shoulder) turning faces reopened black slits
+)
 
 
 def orient_faces(js, b, out, rig):
@@ -1225,7 +1375,9 @@ def orient_faces(js, b, out, rig):
         fn = np.cross(pos[f[:, 1]] - pos[f[:, 0]], pos[f[:, 2]] - pos[f[:, 0]])
         bad = ((fn * nrm[f].sum(1)).sum(1) < 0) & (pos[f].mean(1)[:, 1] < ORIENT_TOP)
         f[bad] = f[bad][:, ::-1]
-        js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
+        js["accessors"].append(
+            {"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"}
+        )
         prims[pi]["indices"] = len(js["accessors"]) - 1
         res.append("%s %d of %d" % (js["materials"][prims[pi]["material"]]["name"], int(bad.sum()), len(f)))
     return "faces turned to their normals: " + ", ".join(res)
@@ -1249,8 +1401,21 @@ def strap_ink(js, b, out, rig):
 # follow the torso from the pack's back over each shoulder crest and down the chest to the belt line. Waypoints are
 # (y, z) of the torso surface in the rest pose at |x| = STRAP_X, already offset outward by STRAP_LIFT.
 STRAP_X, STRAP_W, STRAP_LIFT = 0.17, 0.085, 0.014
-STRAP_PATH = ((1.22, -0.37), (1.32, -0.395), (1.45, -0.40), (1.56, -0.395), (1.65, -0.33), (1.71, -0.22),
-              (1.70, -0.10), (1.64, -0.02), (1.55, 0.045), (1.45, 0.06), (1.36, 0.02), (1.28, -0.05), (1.20, -0.10))
+STRAP_PATH = (
+    (1.22, -0.37),
+    (1.32, -0.395),
+    (1.45, -0.40),
+    (1.56, -0.395),
+    (1.65, -0.33),
+    (1.71, -0.22),
+    (1.70, -0.10),
+    (1.64, -0.02),
+    (1.55, 0.045),
+    (1.45, 0.06),
+    (1.36, 0.02),
+    (1.28, -0.05),
+    (1.20, -0.10),
+)
 STRAP_COLOUR = (0.22, 0.11, 0.045)
 
 
@@ -1259,8 +1424,15 @@ def catmull(pts, k):
     out = []
     for i in range(1, len(p) - 2):
         for t in np.linspace(0, 1, k, endpoint=False):
-            out.append(0.5 * ((2 * p[i]) + (-p[i - 1] + p[i + 1]) * t + (2 * p[i - 1] - 5 * p[i] + 4 * p[i + 1] - p[i + 2]) * t * t
-                              + (-p[i - 1] + 3 * p[i] - 3 * p[i + 1] + p[i + 2]) * t ** 3))
+            out.append(
+                0.5
+                * (
+                    (2 * p[i])
+                    + (-p[i - 1] + p[i + 1]) * t
+                    + (2 * p[i - 1] - 5 * p[i] + 4 * p[i + 1] - p[i + 2]) * t * t
+                    + (-p[i - 1] + 3 * p[i] - 3 * p[i + 1] + p[i + 2]) * t**3
+                )
+            )
     out.append(p[-2])
     return np.array(out)
 
@@ -1289,26 +1461,49 @@ def add_straps(js, b, out, rig):
     tn = np.cross(P[F[:, 1]] - P[F[:, 0]], P[F[:, 2]] - P[F[:, 0]])
     F[(tn * N[F[:, 0]]).sum(1) < 0] = F[(tn * N[F[:, 0]]).sum(1) < 0][:, ::-1]  # faces turned outward
     jn, wt = rs.pack_weights(P, rig.names)
-    js["materials"].append({"name": "strap-leather", "doubleSided": True, "pbrMetallicRoughness": {
-        "baseColorFactor": list(STRAP_COLOUR) + [1.0], "metallicFactor": 0.0, "roughnessFactor": 0.8}})
-    attrs = {"POSITION": out.add_floats(P, "VEC3"), "NORMAL": out.add_floats(N, "VEC3"), "WEIGHTS_0": out.add_floats(wt, "VEC4")}
+    js["materials"].append(
+        {
+            "name": "strap-leather",
+            "doubleSided": True,
+            "pbrMetallicRoughness": {
+                "baseColorFactor": list(STRAP_COLOUR) + [1.0],
+                "metallicFactor": 0.0,
+                "roughnessFactor": 0.8,
+            },
+        }
+    )
+    attrs = {
+        "POSITION": out.add_floats(P, "VEC3"),
+        "NORMAL": out.add_floats(N, "VEC3"),
+        "WEIGHTS_0": out.add_floats(wt, "VEC4"),
+    }
     js["accessors"][attrs["POSITION"]].update(min=P.min(0).tolist(), max=P.max(0).tolist())
-    js["accessors"].append({"bufferView": out.add_view(jn.astype(np.uint16).tobytes()), "componentType": 5123,
-                            "count": len(P), "type": "VEC4"})
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(jn.astype(np.uint16).tobytes()),
+            "componentType": 5123,
+            "count": len(P),
+            "type": "VEC4",
+        }
+    )
     attrs["JOINTS_0"] = len(js["accessors"]) - 1
-    js["accessors"].append({"bufferView": out.add_view(F.tobytes()), "componentType": 5125, "count": int(F.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(F.tobytes()), "componentType": 5125, "count": int(F.size), "type": "SCALAR"}
+    )
     prims = js["meshes"][0]["primitives"]
     prims[:] = [p for p in prims if js["materials"][p["material"]]["name"] != "strap-leather"]
     prims.append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
     return len(F)
 
 
-
 # r15: Meshy's run/walk/jump swing the right (goo) arm up past the chest and the tail chain follows the hand, so the goo
 # lay over the torso like a sash in run/dash/jump (art-gate r13/r14). Those clips' right-arm keys are turned back toward
 # the Idle clip's first-frame pose (keep ARM_KEEP of the swing); the tail is then baked again (gather_tail).
-ARM_CLIPS, ARM_BONES, ARM_KEEP = ("run", "walk", "Jump_Run", "Crouch_Walk_with_Torch"), \
-    ("RightShoulder", "RightArm", "RightForeArm", "RightHand"), float(__import__("os").environ.get("ARM_KEEP", "0.3"))
+ARM_CLIPS, ARM_BONES, ARM_KEEP = (
+    ("run", "walk", "Jump_Run", "Crouch_Walk_with_Torch"),
+    ("RightShoulder", "RightArm", "RightForeArm", "RightHand"),
+    float(__import__("os").environ.get("ARM_KEEP", "0.3")),
+)
 
 
 def calm_goo_arm(js, b, out, rig):  # r15 stage (re-running it calms the swing again: run it once per source file)
@@ -1341,7 +1536,9 @@ def calm_goo_arm(js, b, out, rig):  # r15 stage (re-running it calms the swing a
 _E = __import__("os").environ
 HANG_CLIPS = ARM_CLIPS + ("Idle",)
 HANG_KEEP = float(_E.get("HANG_KEEP", "0.4"))  # share of each clip's own arm swing kept (relative to the bind pose)
-HANG_OUT = float(_E.get("HANG_OUT", "12"))  # degrees the upper arm is lifted out to the side past that (goo off the hip)
+HANG_OUT = float(
+    _E.get("HANG_OUT", "12")
+)  # degrees the upper arm is lifted out to the side past that (goo off the hip)
 HANG_FOLLOW = tuple(float(x) for x in _E.get("HANG_FOLLOW", "0.7,0.3,0.2,0.15").split(","))
 FOLLOW_BY_CLIP = {}  # clip -> chain follow per segment (empty: every clip uses TAIL_FOLLOW, as before r17)
 
@@ -1373,8 +1570,15 @@ def qmul(a, q):
     """a (xyzw) times every key q (frames x xyzw)."""
     ax, ay, az, aw = a
     x, y, z, w = q.T
-    return np.stack([aw * x + ax * w + ay * z - az * y, aw * y - ax * z + ay * w + az * x,
-                     aw * z + ax * y - ay * x + az * w, aw * w - ax * x - ay * y - az * z], 1)
+    return np.stack(
+        [
+            aw * x + ax * w + ay * z - az * y,
+            aw * y - ax * z + ay * w + az * x,
+            aw * z + ax * y - ay * x + az * w,
+            aw * w - ax * x - ay * y - az * z,
+        ],
+        1,
+    )
 
 
 def hang_tail(js, b, out, rig):  # r17 stage: gather_tail with the moving clips' chain following the hand less
@@ -1389,9 +1593,14 @@ def hang_tail(js, b, out, rig):  # r17 stage: gather_tail with the moving clips'
 # and Jump_Run, which also plays for the glide, becomes a held leaping pose instead of a run cycle.
 IDLE_KEEP = {"Spine": 0.5, "Spine01": 0.5, "Spine02": 0.5, "neck": 0.25, "Head": 0.25}  # share of Idle's own sway kept
 JUMP_TURNS = (  # (bone, degrees about the world X axis; the model faces +Z, so a negative turn lifts a thigh forward)
-    ("LeftUpLeg", -48), ("LeftLeg", 82), ("LeftFoot", -20),
-    ("RightUpLeg", -48), ("RightLeg", 82), ("RightFoot", -20),
-    ("Spine", 6), ("Spine01", 4),
+    ("LeftUpLeg", -48),
+    ("LeftLeg", 82),
+    ("LeftFoot", -20),
+    ("RightUpLeg", -48),
+    ("RightLeg", 82),
+    ("RightFoot", -20),
+    ("Spine", 6),
+    ("Spine01", 4),
 )
 JUMP_SWAY = 3.0  # degrees the thighs rock either way over the clip (it loops: the glide holds it)
 
@@ -1409,6 +1618,7 @@ def _clip(js, name):
 
 def fix_idle(js, b, out, rig):  # r16 stage: run once per source file
     from scipy.spatial.transform import Rotation as Rot
+
     idle, walk = _clip(js, "Idle"), _clip(js, "walk")
     done = 0
     for ch in idle["channels"]:
@@ -1438,6 +1648,7 @@ def fix_idle(js, b, out, rig):  # r16 stage: run once per source file
 
 def fix_jump(js, b, out, rig):  # r16 stage: run once per source file
     from scipy.spatial.transform import Rotation as Rot
+
     jump, walk, idle = _clip(js, "Jump_Run"), _clip(js, "walk"), _clip(js, "Idle")
     par = {c: i for i, nd in enumerate(js["nodes"]) for c in nd.get("children", [])}
     name = {js["nodes"][i].get("name"): i for i in range(len(js["nodes"]))}
@@ -1489,7 +1700,11 @@ def fix_jump(js, b, out, rig):  # r16 stage: run once per source file
 # r18: the goo arm is replaced by a slim Meshy arm (image-to-3D of a slim goo-arm drawing made from the turnaround's arm).
 # Fit: length ARM_TOP..ARM_BOT (m), thickness x ARM_THICK, set ARM_Z behind the old line, bent along the chain's rest line.
 ARM_TOP, ARM_BOT, ARM_THICK, ARM_Z, ARM_TEX, ARM_PUDDLE, ARM_GAIN = 1.66, 0.30, 1.5, -0.10, 2048, 0.045, "1.45,0.9,1.15"
-ARM_BULB, ARM_BULB_Y, ARM_SOCKET = 1.0, 1.36, "-0.17,-0.12"  # bulb 1 = none (a goo shoulder flare read as a wing, r18 try d/e)
+ARM_BULB, ARM_BULB_Y, ARM_SOCKET = (
+    1.0,
+    1.36,
+    "-0.17,-0.12",
+)  # bulb 1 = none (a goo shoulder flare read as a wing, r18 try d/e)
 
 
 def poly_xz(pts, y):
@@ -1521,12 +1736,13 @@ def swap_goo_arm(js, b, out, rig, arm_path):
     lo, hi = P.min(0), P.max(0)
     s = (top - bot) / (hi[1] - lo[1])
     mid = P[P[:, 1] > lo[1] + 0.4 * (hi[1] - lo[1])][:, [0, 2]].mean(0)
-    cx, cz = (lo[0] + hi[0]) / 2, mid[1]
     if flip:
         P[:, 0], N[:, 0] = -(P[:, 0] - mid[0]) + mid[0], -N[:, 0]
         F = F[:, ::-1]
     first = rig.names.index("GooTail0")
-    pts = [rest_world(rig, nm)[1] for nm in ("RightArm", "RightForeArm", "GooTail0", "GooTail1", "GooTail2", "GooTail3")]
+    pts = [
+        rest_world(rig, nm)[1] for nm in ("RightArm", "RightForeArm", "GooTail0", "GooTail1", "GooTail2", "GooTail3")
+    ]
     pts = np.array(pts)
     # tip: one more step down the chain's last segment
     pts = np.vstack([pts, pts[-1] + (pts[-1] - pts[-2])])
@@ -1534,7 +1750,9 @@ def swap_goo_arm(js, b, out, rig, arm_path):
     px, pz = poly_xz(pts, y)
     bulb, by = float(os.environ.get("ARM_BULB", ARM_BULB)), float(os.environ.get("ARM_BULB_Y", ARM_BULB_Y))
     g = np.clip((y - by) / (top - by), 0, 1)
-    g = 1 + (bulb - 1) * g * g * (3 - 2 * g)  # a goo shoulder mass over the open socket (the turnaround's goo arm is bulky there)
+    g = 1 + (bulb - 1) * g * g * (
+        3 - 2 * g
+    )  # a goo shoulder mass over the open socket (the turnaround's goo arm is bulky there)
     w = (g - 1) / max(bulb - 1, 1e-6)  # 0 on the arm, 1 at the top: the mass is centred on the socket
     sx, sz = (float(v) for v in os.environ.get("ARM_SOCKET", ARM_SOCKET).split(","))
     px, pz = px + w * (sx - px), pz + w * (sz - pz - az)
@@ -1557,25 +1775,48 @@ def swap_goo_arm(js, b, out, rig, arm_path):
     img = aj["images"][aj["textures"][tex]["source"]]
     im = Image.open(io.BytesIO(bytes(n.view_bytes(aj, ab, img["bufferView"])))).convert("RGB")
     im.thumbnail((ARM_TEX, ARM_TEX))
-    gain = np.array([float(x) for x in os.environ.get("ARM_GAIN", ARM_GAIN).split(",")])  # albedo level match to the body's goo atlas
+    gain = np.array(
+        [float(x) for x in os.environ.get("ARM_GAIN", ARM_GAIN).split(",")]
+    )  # albedo level match to the body's goo atlas
     im = Image.fromarray(np.clip(np.asarray(im, np.float32) * gain, 0, 255).astype(np.uint8))
     buf = io.BytesIO()
     im.save(buf, "JPEG", quality=90)
     js["images"].append({"bufferView": out.add_view(buf.getvalue()), "mimeType": "image/jpeg"})
     js["textures"].append({"source": len(js["images"]) - 1})
-    js["materials"].append({"name": "skin-goo", "doubleSided": True, "pbrMetallicRoughness": {
-        "baseColorTexture": {"index": len(js["textures"]) - 1}, "metallicFactor": 0.0, "roughnessFactor": 0.6}})
+    js["materials"].append(
+        {
+            "name": "skin-goo",
+            "doubleSided": True,
+            "pbrMetallicRoughness": {
+                "baseColorTexture": {"index": len(js["textures"]) - 1},
+                "metallicFactor": 0.0,
+                "roughnessFactor": 0.6,
+            },
+        }
+    )
     col = np.ones((len(Q), 4), np.float32)
     col[:, 3] = float(os.environ.get("ARM_INK", "0.5"))
-    attrs = {"POSITION": out.add_floats(Q, "VEC3"), "NORMAL": out.add_floats(N, "VEC3"),
-             "TEXCOORD_0": out.add_floats(UV, "VEC2"), "WEIGHTS_0": out.add_floats(wt, "VEC4"),
-             "COLOR_0": out.add_floats(col, "VEC4")}
+    attrs = {
+        "POSITION": out.add_floats(Q, "VEC3"),
+        "NORMAL": out.add_floats(N, "VEC3"),
+        "TEXCOORD_0": out.add_floats(UV, "VEC2"),
+        "WEIGHTS_0": out.add_floats(wt, "VEC4"),
+        "COLOR_0": out.add_floats(col, "VEC4"),
+    }
     js["accessors"][attrs["POSITION"]].update(min=Q.min(0).tolist(), max=Q.max(0).tolist())
-    js["accessors"].append({"bufferView": out.add_view(jn.astype(np.uint16).tobytes()), "componentType": 5123,
-                            "count": len(Q), "type": "VEC4"})
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(jn.astype(np.uint16).tobytes()),
+            "componentType": 5123,
+            "count": len(Q),
+            "type": "VEC4",
+        }
+    )
     attrs["JOINTS_0"] = len(js["accessors"]) - 1
     f = F.astype(np.uint32)
-    js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"}
+    )
     prims = js["meshes"][0]["primitives"]
     keep = [p for p in prims if js["materials"][p["material"]]["name"] != "skin-goo"]
     keep.append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
@@ -1586,12 +1827,14 @@ def swap_goo_arm(js, b, out, rig, arm_path):
 def rebuild_r11(out_path, in_path, pack_path=None):
     """The r11 stages on an r10 glb; each one writes the file and the next reloads it (new arrays live in the new
     file's buffer)."""
-    stages = [("shoulder socket cap (tris)", cap_shoulder),
-              ("goo weights", clean_goo_weights), ("tail keys", rebake_tail)]
+    stages = [
+        ("shoulder socket cap (tris)", cap_shoulder),
+        ("goo weights", clean_goo_weights),
+        ("tail keys", rebake_tail),
+    ]
     if pack_path:
         stages.insert(0, ("pack tris", lambda js, b, out, rig: swap_pack(js, b, out, rig, pack_path)))
     rebuild_stages(out_path, in_path, stages)
-
 
 
 # r19: the r11 socket dome (cap_shoulder) copied each ring's UV from its nearest rim vertex, so its fan showed the
@@ -1610,7 +1853,13 @@ def skin_socket(js, b, out, rig):
     P, UV, f = arr["POSITION"], arr["TEXCOORD_0"], prim_faces(js, b, prim).astype(np.int64)
     a3 = np.linalg.norm(np.cross(P[f[:, 1]] - P[f[:, 0]], P[f[:, 2]] - P[f[:, 0]]), axis=1) / 2
     u = UV[f]
-    a2 = np.abs((u[:, 1, 0] - u[:, 0, 0]) * (u[:, 2, 1] - u[:, 0, 1]) - (u[:, 2, 0] - u[:, 0, 0]) * (u[:, 1, 1] - u[:, 0, 1])) / 2
+    a2 = (
+        np.abs(
+            (u[:, 1, 0] - u[:, 0, 0]) * (u[:, 2, 1] - u[:, 0, 1])
+            - (u[:, 2, 0] - u[:, 0, 0]) * (u[:, 1, 1] - u[:, 0, 1])
+        )
+        / 2
+    )
     ratio = a2 / np.maximum(a3, 1e-12)
     lo, hi = SOCKET_BOX
     c = P[f].mean(1)
@@ -1642,7 +1891,7 @@ def skin_socket(js, b, out, rig):
     else:  # one texel for the whole dome: per-vertex UVs from scattered atlas islands interpolate into noise
         tu = np.clip((UV[src, 0] % 1) * tw, 4, tw - 5).astype(int)
         tv = np.clip((UV[src, 1] % 1) * th, 4, th - 5).astype(int)
-        std = np.array([tex[y - 4:y + 5, x - 4:x + 5].std((0, 1)).sum() for x, y in zip(tu, tv)])
+        std = np.array([tex[y - 4 : y + 5, x - 4 : x + 5].std((0, 1)).sum() for x, y in zip(tu, tv)])
         best = src[np.argmin(std + np.linalg.norm(col[src] - skin_rgb, axis=1))]
         new["TEXCOORD_0"] = [np.repeat(UV[best][None], len(dv), 0)]
         return_note = ("flat texel", col[best].round().tolist())
@@ -1652,13 +1901,17 @@ def skin_socket(js, b, out, rig):
     f2[dome] = remap[f[dome]]
     append_attrs(js, out, att, arr, new)
     full = f2.astype(np.uint32).ravel()
-    js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"}
+    )
     prim["indices"] = len(js["accessors"]) - 1
     return int(dome.sum()), len(dv), skin_rgb.round().tolist(), return_note
 
 
 STRAP_MAX_LIFT = 0.03  # m: a strap row never moves further than this
-STRAP_BACK_Z = 0.05  # m: only rows behind this z (the shoulder top and back) lift; the chest rows already clear the skin
+STRAP_BACK_Z = (
+    0.05  # m: only rows behind this z (the shoulder top and back) lift; the chest rows already clear the skin
+)
 STRAP_ACROSS = 3  # r14 strap: 3 vertices across, rows of them, one strap after the other (right one first)
 
 
@@ -1678,7 +1931,7 @@ def lift_strap(js, b, out, rig):
     rows = len(S) // k
     lifts = np.zeros(rows)
     for r in range(rows):
-        V, nn = S[k * r:k * r + k], N[k * r + k // 2] / np.linalg.norm(N[k * r + k // 2])
+        V, nn = S[k * r : k * r + k], N[k * r + k // 2] / np.linalg.norm(N[k * r + k // 2])
         if V[:, 2].mean() >= STRAP_BACK_Z:
             continue
         need = 0.0
@@ -1691,9 +1944,9 @@ def lift_strap(js, b, out, rig):
         lifts[r] = min(STRAP_MAX_LIFT, max(0.0, need))
     side_rows = rows // 2  # rows of the first strap, then the second
     for s_ in range(2):
-        seg = lifts[s_ * side_rows:(s_ + 1) * side_rows]
+        seg = lifts[s_ * side_rows : (s_ + 1) * side_rows]
         sm = np.maximum(seg, np.convolve(np.pad(seg, 1, mode="edge"), np.ones(3) / 3, "valid"))
-        lifts[s_ * side_rows:(s_ + 1) * side_rows] = sm
+        lifts[s_ * side_rows : (s_ + 1) * side_rows] = sm
     S += np.repeat(lifts, k)[:, None] * N / np.linalg.norm(N, axis=1, keepdims=True)
     acc = out.add_floats(S.astype(np.float32), "VEC3")
     js["accessors"][acc].update(min=S.min(0).tolist(), max=S.max(0).tolist())
@@ -1704,14 +1957,18 @@ def lift_strap(js, b, out, rig):
 def drop_under(js, b, out, rig):
     """r19: the 'under' skin layer (prim 4) shows through the socket dome as a grey sheet: its triangles inside
     SOCKET_BOX are removed (the dome and the skin around it cover the shoulder)."""
-    prim = next(p for p in js["meshes"][0]["primitives"] if js["materials"][p["material"]].get("extras", {}).get("under"))
+    prim = next(
+        p for p in js["meshes"][0]["primitives"] if js["materials"][p["material"]].get("extras", {}).get("under")
+    )
     P = n.floats(js, b, prim["attributes"]["POSITION"])
     f = prim_faces(js, b, prim).astype(np.int64)
     lo, hi = SOCKET_BOX
     c = P[f].mean(1)
     gone = ((c >= lo) & (c <= hi)).all(1)
     full = f[~gone].astype(np.uint32).ravel()
-    js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"}
+    )
     prim["indices"] = len(js["accessors"]) - 1
     return int(gone.sum())
 
@@ -1737,7 +1994,9 @@ def reshape_socket(js, b, out, rig):
     lo, hi = SOCKET_BOX
     c = P[f].mean(1)
     inbox = ((c >= lo) & (c <= hi)).all(1)
-    g = sp.coo_matrix((np.ones(len(f) * 3), (np.r_[f[:, 0], f[:, 1], f[:, 2]], np.r_[f[:, 1], f[:, 2], f[:, 0]])), (len(P),) * 2)
+    g = sp.coo_matrix(
+        (np.ones(len(f) * 3), (np.r_[f[:, 0], f[:, 1], f[:, 2]], np.r_[f[:, 1], f[:, 2], f[:, 0]])), (len(P),) * 2
+    )
     lab = connected_components(g, directed=False)[1]
     flab = lab[f[:, 0]]
     cnt, cin = np.bincount(flab, minlength=lab.max() + 1), np.bincount(flab, inbox, minlength=lab.max() + 1)
@@ -1782,8 +2041,16 @@ def reshape_socket(js, b, out, rig):
     df = f[dome]
     li = {v: i for i, v in enumerate(dv)}
     e = np.array([[li[x] for x in r] for r in df])
-    A = sp.coo_matrix((np.ones(len(e) * 6), (np.r_[e[:, 0], e[:, 1], e[:, 2], e[:, 1], e[:, 2], e[:, 0]],
-                                             np.r_[e[:, 1], e[:, 2], e[:, 0], e[:, 0], e[:, 1], e[:, 2]])), (len(dv),) * 2).tocsr()
+    A = sp.coo_matrix(
+        (
+            np.ones(len(e) * 6),
+            (
+                np.r_[e[:, 0], e[:, 1], e[:, 2], e[:, 1], e[:, 2], e[:, 0]],
+                np.r_[e[:, 1], e[:, 2], e[:, 0], e[:, 0], e[:, 1], e[:, 2]],
+            ),
+        ),
+        (len(dv),) * 2,
+    ).tocsr()
     A.data[:] = 1.0
     deg = np.maximum(np.asarray(A.sum(1)).ravel(), 1)[:, None]
     free = (rim_d > ISLAND_TOL)[:, None]
@@ -1797,7 +2064,9 @@ def reshape_socket(js, b, out, rig):
     lv = np.unique(lf)
     near = lv[cKDTree(P[lv] * flip).query(P[dv])[1]]
     nb = len(rig.names)
-    remap = np.array([rig.names.index(mirror_name(s)) if mirror_name(s) in rig.names else k for k, s in enumerate(rig.names)])
+    remap = np.array(
+        [rig.names.index(mirror_name(s)) if mirror_name(s) in rig.names else k for k, s in enumerate(rig.names)]
+    )
     mj = remap[arr["JOINTS_0"][near].astype(np.int64)]
     dm = rs.dense(mj, arr["WEIGHTS_0"][near], nb)
     do = rs.dense(arr["JOINTS_0"][dv].astype(np.int64), arr["WEIGHTS_0"][dv], nb)
@@ -1818,14 +2087,28 @@ def reshape_socket(js, b, out, rig):
             if k == "POSITION":
                 js["accessors"][new].update(min=v.min(0).tolist(), max=v.max(0).tolist())
         else:
-            js["accessors"].append({"bufferView": out.add_view(v.astype(np.uint16).tobytes()), "componentType": 5123,
-                                    "count": len(v), "type": "VEC4"})
+            js["accessors"].append(
+                {
+                    "bufferView": out.add_view(v.astype(np.uint16).tobytes()),
+                    "componentType": 5123,
+                    "count": len(v),
+                    "type": "VEC4",
+                }
+            )
             new = len(js["accessors"]) - 1
         for p2 in js["meshes"][0]["primitives"]:
             if p2["attributes"].get(k) == acc:
                 p2["attributes"][k] = new
-    head = sum(nw[:, j][np.isin(nj[:, j], [rig.names.index(s) for s in STRAY if s in rig.names])].sum() for j in range(4))
-    return "dome tris %d, verts %d, moved %d, head/spine weight left %.0f; %s" % (dome.sum(), len(dv), moved, head, uv_note)
+    head = sum(
+        nw[:, j][np.isin(nj[:, j], [rig.names.index(s) for s in STRAY if s in rig.names])].sum() for j in range(4)
+    )
+    return "dome tris %d, verts %d, moved %d, head/spine weight left %.0f; %s" % (
+        dome.sum(),
+        len(dv),
+        moved,
+        head,
+        uv_note,
+    )
 
 
 DOME_UV_CORE_X = 0.15  # m: x of the point the dome's UV angles are taken from
@@ -1850,7 +2133,9 @@ def bake_dome(js, b, out, prim, arr, P, f, dome, dv, lf):
 
     def tex_of(ti):
         img = js["images"][js["textures"][ti]["source"]]
-        return np.asarray(Image.open(io.BytesIO(bytes(n.view_bytes(js, b, img["bufferView"])))).convert("RGB"), np.float32)
+        return np.asarray(
+            Image.open(io.BytesIO(bytes(n.view_bytes(js, b, img["bufferView"])))).convert("RGB"), np.float32
+        )
 
     atlas = tex_of(mat["pbrMetallicRoughness"]["baseColorTexture"]["index"])
     UV = arr["TEXCOORD_0"]
@@ -1905,14 +2190,22 @@ def bake_dome(js, b, out, prim, arr, P, f, dome, dv, lf):
     buf = io.BytesIO()
     Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(buf, "JPEG", quality=92)
     js["images"].append({"bufferView": out.add_view(buf.getvalue()), "mimeType": "image/jpeg"})
-    js["textures"].append({"source": len(js["images"]) - 1, **({"sampler": js["textures"][0]["sampler"]} if "sampler" in js["textures"][0] else {})})
+    js["textures"].append(
+        {
+            "source": len(js["images"]) - 1,
+            **({"sampler": js["textures"][0]["sampler"]} if "sampler" in js["textures"][0] else {}),
+        }
+    )
     pbr = dict(mat["pbrMetallicRoughness"])
     pbr["baseColorTexture"] = {"index": len(js["textures"]) - 1}
     rough = 0.85
     if "metallicRoughnessTexture" in pbr:
         mr = tex_of(pbr.pop("metallicRoughnessTexture")["index"])
         su = UV[np.unique(lf)]
-        g_ = mr[np.clip((su[:, 1] % 1) * mr.shape[0], 0, mr.shape[0] - 1).astype(int), np.clip((su[:, 0] % 1) * mr.shape[1], 0, mr.shape[1] - 1).astype(int)]
+        g_ = mr[
+            np.clip((su[:, 1] % 1) * mr.shape[0], 0, mr.shape[0] - 1).astype(int),
+            np.clip((su[:, 0] % 1) * mr.shape[1], 0, mr.shape[1] - 1).astype(int),
+        ]
         rough = float(np.median(g_[:, 1]) / 255)
         pbr["metallicFactor"], pbr["roughnessFactor"] = float(np.median(g_[:, 2]) / 255), rough
     dm = {k: v for k, v in mat.items() if k not in ("normalTexture", "pbrMetallicRoughness", "name")}
@@ -1920,15 +2213,21 @@ def bake_dome(js, b, out, prim, arr, P, f, dome, dv, lf):
     js["materials"].append(dm)
     arr["TEXCOORD_0"][dv] = uv.astype(np.float32)
     keep = f[~dome].astype(np.uint32).ravel()
-    js["accessors"].append({"bufferView": out.add_view(keep.tobytes()), "componentType": 5125, "count": int(keep.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(keep.tobytes()), "componentType": 5125, "count": int(keep.size), "type": "SCALAR"}
+    )
     prim["indices"] = len(js["accessors"]) - 1
     dp_ = {k: v for k, v in prim.items() if k not in ("indices", "material")}
     dfl = f[dome].astype(np.uint32).ravel()
-    js["accessors"].append({"bufferView": out.add_view(dfl.tobytes()), "componentType": 5125, "count": int(dfl.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(dfl.tobytes()), "componentType": 5125, "count": int(dfl.size), "type": "SCALAR"}
+    )
     dp_.update(indices=len(js["accessors"]) - 1, material=len(js["materials"]) - 1)
     js["meshes"][0]["primitives"].append(dp_)  # (attributes are repointed below with the skin's: same dict objects)
     u2 = uv[np.array([slot[v] for v in f[dome].ravel()])].reshape(-1, 3, 2)
-    a2 = (u2[:, 1, 0] - u2[:, 0, 0]) * (u2[:, 2, 1] - u2[:, 0, 1]) - (u2[:, 2, 0] - u2[:, 0, 0]) * (u2[:, 1, 1] - u2[:, 0, 1])
+    a2 = (u2[:, 1, 0] - u2[:, 0, 0]) * (u2[:, 2, 1] - u2[:, 0, 1]) - (u2[:, 2, 0] - u2[:, 0, 0]) * (
+        u2[:, 1, 1] - u2[:, 0, 1]
+    )
     folds = int(min((a2 < 0).sum(), (a2 > 0).sum()))
     return "dome texture %dpx, %d texels, uv folds %d, roughness %.2f" % (S, int(have.sum()), folds, rough)
 
@@ -1945,6 +2244,7 @@ def mirror_strap(js, b, out, rig):
     along its normal to sit MIRROR_LIFT over the outermost right skin under its columns; r14's weights (mean of the
     STRAP_K skin vertices nearest the row middle) taken again on the right."""
     import dredge_r14 as r14
+
     prims = js["meshes"][0]["primitives"]
     st = next(p for p in prims if js["materials"][p["material"]]["name"] == "strap-leather")
     skin = prims[0]
@@ -1960,7 +2260,7 @@ def mirror_strap(js, b, out, rig):
     flip = np.array([-1.0, 1.0, 1.0])
     shifts = []
     for r in range(half):
-        L = S[k * (half + r):k * (half + r) + k][::-1] * flip
+        L = S[k * (half + r) : k * (half + r) + k][::-1] * flip
         nn = N[k * (half + r) + k // 2] * flip
         nn = nn / np.linalg.norm(nn)
         need = []
@@ -1979,29 +2279,653 @@ def mirror_strap(js, b, out, rig):
                 need.append(t.max() - MIRROR_PROBE)  # the outermost skin layer's offset from v along nn
         sh = float(np.clip(max(need) + MIRROR_LIFT, -MIRROR_CAP, MIRROR_CAP)) if need else 0.0
         shifts.append(sh)
-        S[k * r:k * r + k] = L + sh * nn
-        N[k * r:k * r + k] = nn
+        S[k * r : k * r + k] = L + sh * nn
+        N[k * r : k * r + k] = nn
     shifts = np.array(shifts)
     sm = np.convolve(np.pad(shifts, 1, mode="edge"), np.ones(3) / 3, "valid")  # no step between neighbour rows
     for r in range(half):
-        S[k * r:k * r + k] += (sm[r] - shifts[r]) * N[k * r + k // 2]
+        S[k * r : k * r + k] += (sm[r] - shifts[r]) * N[k * r + k // 2]
     sj, sw = r14.joints_weights(js, b, skin["attributes"])
     ids = np.unique(sf)
-    near = ids[cKDTree(sp_[ids]).query(S[1:k * half:k], k=r14.STRAP_K)[1]]
+    near = ids[cKDTree(sp_[ids]).query(S[1 : k * half : k], k=r14.STRAP_K)[1]]
     dn = rs.dense(sj, sw, len(rig.names))
     jn, wt = rs.top4(dn[near].mean(1))
     J, W = r14.joints_weights(js, b, st["attributes"])
     J, W = J.astype(np.uint16).copy(), W.copy()
-    J[:k * half], W[:k * half] = jn.repeat(k, axis=0), wt.repeat(k, axis=0)
+    J[: k * half], W[: k * half] = jn.repeat(k, axis=0), wt.repeat(k, axis=0)
     acc = out.add_floats(S.astype(np.float32), "VEC3")
     js["accessors"][acc].update(min=S.min(0).tolist(), max=S.max(0).tolist())
     st["attributes"]["POSITION"] = acc
     st["attributes"]["NORMAL"] = out.add_floats(N.astype(np.float32), "VEC3")
     st["attributes"]["WEIGHTS_0"] = out.add_floats(W.astype(np.float32), "VEC4")
-    js["accessors"].append({"bufferView": out.add_view(J.tobytes()), "componentType": 5123, "count": len(J), "type": "VEC4"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(J.tobytes()), "componentType": 5123, "count": len(J), "type": "VEC4"}
+    )
     st["attributes"]["JOINTS_0"] = len(js["accessors"]) - 1
-    width = np.linalg.norm(S[0:k * half:k] - S[k - 1:k * half:k], axis=1)
+    width = np.linalg.norm(S[0 : k * half : k] - S[k - 1 : k * half : k], axis=1)
     return "right rows %d, width %.3f-%.3f m, shift %.3f..%.3f m" % (half, width.min(), width.max(), sm.min(), sm.max())
+
+
+# r21: the second junk ball trio (r16b left a copy 23 cm further back), strap UVs on the dark leather and spine/shoulder
+# weights only, the socket dome's texture matched to the body round it, and the skin/goo grade toward the turnaround.
+BALL_DROP_Z = -0.9  # m (rest pose): ball prims centred behind this are the stray copy (the r16b one sits at z -0.75)
+STRAP_U = (0.3, 0.5, 0.7)  # strap texture columns: inside the two light stitch lines (u 0.19 and 0.81)
+STRAP_BONES = ("Spine02", "Spine01", "LeftShoulder", "RightShoulder")
+SKIN_HUE = (290.0, 355.0)  # deg: atlas texels in this hue band (and S > SKIN_MIN_S) are skin
+SKIN_MIN_S = 0.15
+SKIN_DS, SKIN_DV = -0.10, 0.07  # turnaround skin S 0.38 vs r20 0.48 (PLAN 2.5)
+GOO_DH = float(_E.get("GOO_DH", "-7"))  # deg: r18 goo texture hue turn (turnaround goo H 301, r20 310-323)
+
+
+def _image(js, b, ii):
+    return np.asarray(Image.open(io.BytesIO(bytes(n.view_bytes(js, b, js["images"][ii]["bufferView"])))).convert("RGB"))
+
+
+def _set_image(js, out, ii, arr):
+    buf = io.BytesIO()
+    Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8)).save(buf, "JPEG", quality=92)
+    js["images"][ii]["bufferView"] = out.add_view(buf.getvalue())
+    js["images"][ii]["mimeType"] = "image/jpeg"
+
+
+def _mat_image(js, name):
+    mat = next(
+        m for m in js["materials"] if m["name"] == name and "baseColorTexture" in m.get("pbrMetallicRoughness", {})
+    )
+    return js["textures"][mat["pbrMetallicRoughness"]["baseColorTexture"]["index"]]["source"]
+
+
+def prune_materials(js):
+    """Drops the materials, textures and images no primitive uses (indices remapped)."""
+    prims = js["meshes"][0]["primitives"]
+    mats = sorted({p["material"] for p in prims})
+    mmap = {o: i for i, o in enumerate(mats)}
+    js["materials"] = [js["materials"][i] for i in mats]
+    for p in prims:
+        p["material"] = mmap[p["material"]]
+    tex = sorted(
+        {
+            m["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+            for m in js["materials"]
+            if "baseColorTexture" in m.get("pbrMetallicRoughness", {})
+        }
+    )
+    tmap = {o: i for i, o in enumerate(tex)}
+    js["textures"] = [js["textures"][i] for i in tex]
+    for m in js["materials"]:
+        bc = m.get("pbrMetallicRoughness", {}).get("baseColorTexture")
+        if bc:
+            bc["index"] = tmap[bc["index"]]
+    imgs = sorted({t["source"] for t in js["textures"]})
+    imap = {o: i for i, o in enumerate(imgs)}
+    js["images"] = [js["images"][i] for i in imgs]
+    for t in js["textures"]:
+        t["source"] = imap[t["source"]]
+
+
+def drop_ball_copy(js, b, out, rig):
+    prims = js["meshes"][0]["primitives"]
+    keep, gone = [], 0
+    for p in prims:
+        z = n.floats(js, b, p["attributes"]["POSITION"])[np.unique(prim_faces(js, b, p))][:, 2].mean()
+        if js["materials"][p["material"]]["name"].endswith("-ball") and z < BALL_DROP_Z:
+            gone += len(prim_faces(js, b, p))
+        else:
+            keep.append(p)
+    js["meshes"][0]["primitives"] = keep
+    prune_materials(js)
+    return "ball copy tris dropped %d" % gone
+
+
+def strap_r21(js, b, out, rig):
+    import dredge_r14 as r14
+
+    prims = js["meshes"][0]["primitives"]
+    st = next(p for p in prims if js["materials"][p["material"]]["name"] == "strap-leather")
+    skin = prims[0]
+    S = n.floats(js, b, st["attributes"]["POSITION"])
+    UV = n.floats(js, b, st["attributes"]["TEXCOORD_0"]).copy()
+    UV[:, 0] = np.array(STRAP_U)[np.arange(len(UV)) % STRAP_ACROSS]
+    st["attributes"]["TEXCOORD_0"] = out.add_floats(UV.astype(np.float32), "VEC2")
+    sp_ = n.floats(js, b, skin["attributes"]["POSITION"])
+    ids = np.unique(prim_faces(js, b, skin))
+    sj, sw = r14.joints_weights(js, b, skin["attributes"])
+    dn = rs.dense(sj, sw, len(rig.names))
+    near = ids[cKDTree(sp_[ids]).query(S, k=r14.STRAP_K)[1]]
+    w = dn[near].mean(1)
+    allow = np.zeros(len(rig.names), bool)
+    allow[[rig.names.index(x) for x in STRAP_BONES]] = True
+    w[:, ~allow] = 0.0
+    empty = w.sum(1) < 1e-6
+    w[empty, rig.names.index("Spine02")] = 1.0
+    jn, wt = rs.top4(w / w.sum(1, keepdims=True))
+    st["attributes"]["WEIGHTS_0"] = out.add_floats(wt.astype(np.float32), "VEC4")
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(jn.astype(np.uint16).tobytes()),
+            "componentType": 5123,
+            "count": len(jn),
+            "type": "VEC4",
+        }
+    )
+    st["attributes"]["JOINTS_0"] = len(js["accessors"]) - 1
+    k = STRAP_ACROSS
+    width = np.linalg.norm(S[0::k] - S[k - 1 :: k], axis=1)
+    return "strap u %s, weights on %s only (%d fell back to Spine02), width %.3f-%.3f m" % (
+        STRAP_U,
+        "/".join(STRAP_BONES),
+        int(empty.sum()),
+        width.min(),
+        width.max(),
+    )
+
+
+def _hsv(a):
+    """RGB 0-255 -> HSV 0-1 (numpy)."""
+    a = a / 255.0
+    mx, mn = a.max(-1), a.min(-1)
+    d = np.where(mx > mn, mx - mn, 1.0)
+    r, g, bl = a[..., 0], a[..., 1], a[..., 2]
+    h = np.where(mx == r, (g - bl) / d, np.where(mx == g, 2.0 + (bl - r) / d, 4.0 + (r - g) / d))
+    h = np.where(mx > mn, (h / 6.0) % 1.0, 0.0)
+    return np.stack([h, np.where(mx > 0, (mx - mn) / np.where(mx > 0, mx, 1), 0.0), mx], -1)
+
+
+def _rgb(hsv):
+    """HSV 0-1 -> RGB 0-255 (numpy)."""
+    h, s, v = (np.clip(hsv[..., i], 0, 1) for i in range(3))
+    i = np.floor(h * 6.0) % 6
+    f = h * 6.0 - np.floor(h * 6.0)
+    p, q, t = v * (1 - s), v * (1 - s * f), v * (1 - s * (1 - f))
+    sel = [i == k for k in range(6)]
+    r = np.select(sel, [v, q, p, p, t, v])
+    g = np.select(sel, [t, v, v, q, p, p])
+    bl = np.select(sel, [p, p, t, v, v, q])
+    return np.stack([r, g, bl], -1) * 255.0
+
+
+def grade_r21(js, b, out, rig):
+    """Skin texels of the body atlas and the dome: S + SKIN_DS, V + SKIN_DV. The dome's texture first takes the body's
+    median colour along its rim (per-channel gain: its inner median was greener, its rim darker = the line on the shoulder
+    crest). The r18 goo arm texture: hue + GOO_DH."""
+    prims = js["meshes"][0]["primitives"]
+    skin = prims[0]
+    atlas, dome_i, goo_i = _mat_image(js, "skin-native"), _mat_image(js, "skin-native-dome"), _mat_image(js, "skin-goo")
+    msg = []
+    A = _image(js, b, atlas).astype(float)
+    dome = next(p for p in prims if js["materials"][p["material"]]["name"] == "skin-native-dome")
+    f = prim_faces(js, b, dome).astype(np.int64)
+    e = np.sort(np.concatenate([f[:, [0, 1]], f[:, [1, 2]], f[:, [2, 0]]]), 1)
+    u, c = np.unique(e, axis=0, return_counts=True)
+    rim = np.unique(u[c == 1])
+    D = _image(js, b, dome_i).astype(float)
+    duv = n.floats(js, b, dome["attributes"]["TEXCOORD_0"])
+    sp_, suv = n.floats(js, b, skin["attributes"]["POSITION"]), n.floats(js, b, skin["attributes"]["TEXCOORD_0"])
+    ids = np.unique(prim_faces(js, b, skin))
+    near = ids[cKDTree(sp_[ids]).query(n.floats(js, b, dome["attributes"]["POSITION"])[rim], k=8)[1]].ravel()
+
+    def texel(img, uv):
+        h, w = img.shape[:2]
+        return img[(uv[:, 1] * h).astype(int).clip(0, h - 1), (uv[:, 0] * w).astype(int).clip(0, w - 1)]
+
+    body = np.median(texel(A, suv[near]), 0)
+    inner = np.median(texel(D, duv[np.setdiff1d(np.unique(f), rim)]), 0)
+    D = D * (body / np.maximum(inner, 1))
+    msg.append("dome gain %s" % np.round(body / np.maximum(inner, 1), 2).tolist())
+    for name, img, ii in (("atlas", A, atlas), ("dome", D, dome_i)):
+        hsv = _hsv(img)
+        m = (hsv[..., 0] * 360 >= SKIN_HUE[0]) & (hsv[..., 0] * 360 <= SKIN_HUE[1]) & (hsv[..., 1] > SKIN_MIN_S)
+        before = np.median(hsv[..., 1][m])
+        hsv[..., 1] = np.where(m, hsv[..., 1] + SKIN_DS, hsv[..., 1])
+        hsv[..., 2] = np.where(m, hsv[..., 2] + SKIN_DV, hsv[..., 2])
+        _set_image(js, out, ii, _rgb(hsv))
+        msg.append("%s skin texels %.0f%% S %.2f->%.2f" % (name, 100 * m.mean(), before, np.median(hsv[..., 1][m])))
+    G = _image(js, b, goo_i).astype(float)
+    hsv = _hsv(G)
+    m = hsv[..., 1] > 0.2
+    before = np.median(hsv[..., 0][m]) * 360
+    hsv[..., 0] = np.where(m, (hsv[..., 0] + GOO_DH / 360.0) % 1.0, hsv[..., 0])
+    _set_image(js, out, goo_i, _rgb(hsv))
+    msg.append("goo texture H %.0f->%.0f" % (before, np.median(hsv[..., 0][m]) * 360))
+    return "; ".join(msg)
+
+
+# r21 graft: Meshy parts (decimated in Blender only) added rigid on one bone, each with its own texture (add_ball's
+# path, generalised). The gauntlet fist replaces the r20 one (the LeftHand-dominant skin and liner triangles: cuff and
+# fist): fitted to the old one's points (principal axes, the best of 24 turns x 12 rolls, then ICP), uniform scale by
+# the mean principal extent, so the size stays within 5 % of r20. The rod stands in the pack on his left.
+FIST_BONE = "LeftHand"
+RIGID_TEX = 1024  # px: a grafted part's texture
+CUFF_BAND = (0.06, 0.12)  # m past the wrist joint down the arm: above the first the fist part is all forearm (the
+# cuff ring), past the second all hand; geo_check's hand = the LeftHand vertices, and with the
+# smooth cuff on them the hand's outline was a convex block (sep 0.13 on r20 and on this fist)
+FIST_GRADE = (0.6, 0.10)  # fist texture S x, V +: the turnaround gauntlet is S 0.21 (= the Meshy map), but the toon
+# light adds ~0.08 S as on the skin, so unshifted it melts into the skin at game view
+ROD_BASE = np.array(
+    [0.20, 1.40, -0.70]
+)  # m (rest pose): the rod's foot, inside the pack behind the barrels on his left
+ROD_TOP = np.array(
+    [0.36, 2.02, -0.74]
+)  # m: its knob (about 0.45 m above the barrel tops, leaning out like the turnaround)
+ROD_BONE = "Spine"  # the pack's own bone (the Meshy rig's top spine joint), so the rod never slides on the pack
+
+
+def _part(path):
+    """A Meshy part glb -> positions, normals, UVs, faces (all primitives) and its base colour image (RGB array)."""
+    pj, pb = n.load(path)
+    P, N, UV, F, off = [], [], [], [], 0
+    img = None
+    for mesh in pj["meshes"]:
+        for p in mesh["primitives"]:
+            at = p["attributes"]
+            P.append(n.floats(pj, pb, at["POSITION"]))
+            N.append(n.floats(pj, pb, at["NORMAL"]))
+            UV.append(n.floats(pj, pb, at["TEXCOORD_0"]))
+            F.append(prim_faces(pj, pb, p).astype(np.int64) + off)
+            off += len(P[-1])
+            if img is None:
+                img = _image(pj, pb, _mat_image(pj, pj["materials"][p["material"]]["name"]))
+                img = np.asarray(Image.fromarray(img).resize((RIGID_TEX, RIGID_TEX), Image.LANCZOS))
+    return np.concatenate(P), np.concatenate(N), np.concatenate(UV), np.concatenate(F), img
+
+
+def _turns():
+    out = []
+    for perm in ((0, 1, 2), (1, 2, 0), (2, 0, 1), (1, 0, 2), (0, 2, 1), (2, 1, 0)):
+        for sg in ((1, 1, 1), (1, -1, -1), (-1, 1, -1), (-1, -1, 1), (-1, 1, 1), (1, -1, 1), (1, 1, -1), (-1, -1, -1)):
+            m = np.zeros((3, 3))
+            m[range(3), perm] = sg
+            if np.linalg.det(m) > 0:
+                out.append(m)
+    return out
+
+
+def _axes(pts):
+    c = pts.mean(0)
+    w, v = np.linalg.eigh(np.cov((pts - c).T))
+    v = v[:, ::-1]
+    if np.linalg.det(v) < 0:
+        v[:, 2] *= -1
+    q = (pts - c) @ v
+    return c, v, q.max(0) - q.min(0)
+
+
+def fit_part(src, dst, rolls=12, icp=15):
+    """Similarity transform (R, s, t) putting src points on dst points: dst ~ s * src @ R.T + t."""
+    cs, vs, es = _axes(src)
+    cd, vd, ed = _axes(dst)
+    s = float(ed.mean() / es.mean())
+    tree = cKDTree(dst)
+    sub = src[np.random.default_rng(0).choice(len(src), min(len(src), 3000), replace=False)]
+    dsub = dst[np.random.default_rng(1).choice(len(dst), min(len(dst), 3000), replace=False)]
+    best = None
+    for m in _turns():
+        for k in range(rolls):
+            a = 2 * np.pi * k / rolls
+            roll = np.array([[1, 0, 0], [0, np.cos(a), -np.sin(a)], [0, np.sin(a), np.cos(a)]])
+            R = vd @ roll @ m @ vs.T
+            q = s * (sub - cs) @ R.T + cd
+            err = tree.query(q)[0].mean() + cKDTree(q).query(dsub)[0].mean()
+            if best is None or err < best[0]:
+                best = (err, R)
+    R, t = best[1], cd - s * cs @ best[1].T
+    for _ in range(icp):
+        q = s * sub @ R.T + t
+        d = dst[tree.query(q)[1]]
+        qc, dc = q.mean(0), d.mean(0)
+        u, _, vt = np.linalg.svd((q - qc).T @ (d - dc))
+        dR = (u @ vt).T
+        if np.linalg.det(dR) < 0:
+            u[:, -1] *= -1
+            dR = (u @ vt).T
+        R, t = dR @ R, dR @ (t - qc) + dc
+    q = s * sub @ R.T + t
+    return R, s, t, float(tree.query(q)[0].mean() + cKDTree(q).query(dsub)[0].mean())
+
+
+def add_rigid(js, b, out, rig, part, R, s, t, bone, mat_name, blend=None):
+    """Appends a part (from _part) as one primitive rigid on bone: positions s * P @ R.T + t, its texture at RIGID_TEX."""
+    P, N, UV, F, img = part
+    P = (s * P @ R.T + t).astype(np.float32)
+    N = (N @ R.T).astype(np.float32)
+    js["images"].append({})
+    _set_image(js, out, len(js["images"]) - 1, img)
+    js["textures"].append({"source": len(js["images"]) - 1})
+    js["materials"].append(
+        {
+            "name": mat_name,
+            "pbrMetallicRoughness": {
+                "baseColorTexture": {"index": len(js["textures"]) - 1},
+                "metallicFactor": 0.0,
+                "roughnessFactor": 1.0,
+            },
+        }
+    )
+    w = np.zeros((len(P), 4), np.float32)
+    w[:, 0] = 1.0
+    j = np.zeros((len(P), 4), np.uint16)
+    j[:, 0] = rig.names.index(bone)
+    if blend is not None:  # (second bone, its weight per vertex of the placed part)
+        share = blend[1](P)
+        w[:, 0], w[:, 1], j[:, 1] = 1.0 - share, share, rig.names.index(blend[0])
+    attrs = {
+        "POSITION": out.add_floats(P, "VEC3"),
+        "NORMAL": out.add_floats(N, "VEC3"),
+        "TEXCOORD_0": out.add_floats(UV.astype(np.float32), "VEC2"),
+        "WEIGHTS_0": out.add_floats(w, "VEC4"),
+    }
+    js["accessors"][attrs["POSITION"]].update(min=P.min(0).tolist(), max=P.max(0).tolist())
+    js["accessors"].append(
+        {"bufferView": out.add_view(j.tobytes()), "componentType": 5123, "count": len(P), "type": "VEC4"}
+    )
+    attrs["JOINTS_0"] = len(js["accessors"]) - 1
+    idx = F.reshape(-1).astype(np.uint32)
+    js["accessors"].append(
+        {"bufferView": out.add_view(idx.tobytes()), "componentType": 5125, "count": int(idx.size), "type": "SCALAR"}
+    )
+    js["meshes"][0]["primitives"].append(
+        {"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1}
+    )
+    return P
+
+
+def _bone_faces(js, b, p, bone_i):
+    import dredge_r14 as r14
+
+    J, W = r14.joints_weights(js, b, p["attributes"])
+    dom = J[np.arange(len(J)), W.argmax(1)] == bone_i
+    f = prim_faces(js, b, p).astype(np.int64)
+    return f, dom[f].any(1)
+
+
+def swap_fist(js, b, out, rig, part_path):
+    prims = js["meshes"][0]["primitives"]
+    bi = rig.names.index(FIST_BONE)
+    skin = [p for p in prims if js["materials"][p["material"]]["name"] == "skin-native"]
+    f0, hit0 = _bone_faces(js, b, skin[0], bi)
+    old = n.floats(js, b, skin[0]["attributes"]["POSITION"])[np.unique(f0[hit0])]
+    part = _part(part_path)
+    hsv = _hsv(part[4].astype(float))
+    hsv[..., 1] *= FIST_GRADE[0]
+    hsv[..., 2] += FIST_GRADE[1]
+    part = part[:4] + (_rgb(hsv).astype(np.uint8),)
+    R, s, t, err = fit_part(part[0], old)
+    gone = 0
+    for p in skin:
+        f, hit = _bone_faces(js, b, p, bi)
+        keep = f[~hit].astype(np.uint32).ravel()
+        js["accessors"].append(
+            {
+                "bufferView": out.add_view(keep.tobytes()),
+                "componentType": 5125,
+                "count": int(keep.size),
+                "type": "SCALAR",
+            }
+        )
+        p["indices"] = len(js["accessors"]) - 1
+        gone += int(hit.sum())
+    wrist = rest_world(rig, FIST_BONE)[1]
+    down = wrist - rest_world(rig, "LeftForeArm")[1]
+    down /= np.linalg.norm(down)
+
+    def cuff_share(
+        P,
+    ):  # the cuff ring rides the forearm (a gauntlet's cuff is strapped on it), the plated fist the hand
+        x = np.clip(((P - wrist) @ down - CUFF_BAND[0]) / (CUFF_BAND[1] - CUFF_BAND[0]), 0, 1)
+        return 1.0 - x * x * (3 - 2 * x)
+
+    P = add_rigid(js, b, out, rig, part, R, s, t, FIST_BONE, "metal-fist", ("LeftForeArm", cuff_share))
+    size_old, size_new = _axes(old)[2], _axes(P)[2]
+    return "fist %s: %d tris out, %d in, fit %.3f m, size %s -> %s m (%.0f%%)" % (
+        os.path.basename(os.path.dirname(part_path)),
+        gone,
+        len(part[3]),
+        err,
+        np.round(size_old, 3).tolist(),
+        np.round(size_new, 3).tolist(),
+        100 * (size_new.mean() / size_old.mean() - 1),
+    )
+
+
+def add_rod(js, b, out, rig, part_path):
+    """The rod's long axis on ROD_BASE -> ROD_TOP (its knob end = the end with the wider cross-section)."""
+    part = _part(part_path)
+    c, v, e = _axes(part[0])
+    q = (part[0] - c) @ v[:, 0]
+    wide_top = (
+        np.ptp(((part[0] - c) @ v)[q > 0.4 * q.max()][:, 1:], 0).mean()
+        > np.ptp(((part[0] - c) @ v)[q < 0.4 * q.min()][:, 1:], 0).mean()
+    )
+    ax = v[:, 0] if wide_top else -v[:, 0]
+    want = ROD_TOP - ROD_BASE
+    s = float(np.linalg.norm(want) / e[0])
+    R = dp_align(ax, want / np.linalg.norm(want))
+    foot = c + ((part[0] - c) @ ax).min() * ax  # the foot end on the axis (the mean sits toward the dense knob)
+    t = ROD_BASE - s * foot @ R.T
+    P = add_rigid(js, b, out, rig, part, R, s, t, ROD_BONE, "leather-rod")
+    return "rod %d tris, length %.2f m, top y %.2f, on %s" % (
+        len(part[3]),
+        np.linalg.norm(want),
+        P[:, 1].max(),
+        ROD_BONE,
+    )
+
+
+def dp_align(a, b_):
+    """Rotation matrix turning unit vector a onto unit vector b_."""
+    v, c = np.cross(a, b_), float(np.dot(a, b_))
+    k = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+    return np.eye(3) + k + k @ k / (1 + c)
+
+
+# r21 keys: geo_check's held pairs on r20 (gauntlet and gun into the left shin in Idle/walk/run, the gauntlet at the face in
+# run f12, the heels into the seat and the own thigh in run f8/f18, the goo tail through the right foot and the floor in
+# crouch and run). Each rule eases one bone's keys: "rest" pulls its local rotation back toward the bind pose (the A-pose
+# knee is straight) by the least share that keeps the clearance between the parts it carries and the obstacle parts at
+# that key; "out" swings the bone outward (away from the body) about the hips' forward axis by the least angle that does
+# (the gauntlet off the left shin in the hunched Idle; the goo chain, its tip also over TAIL_FLOOR). A point that is nearer than that in the bind pose (calf on hamstring) only may not get
+# nearer than it was there less 5 mm. The shares are eased over KEY_EASE keys either side so nothing pops.
+LEFT_ARM = ("LeftArm", "LeftForeArm", "LeftHand")
+HEAD = ("Head", "head_end", "headfront")
+TORSO = ("Hips", "Spine02", "Spine01", "Spine")
+LEG_L, LEG_R = (
+    ("LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase"),
+    ("RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"),
+)
+GOO_LOW = ("GooTail1", "GooTail2", "GooTail3")
+KEY_RULES = (  # (clips, bone, kind, moving bones, obstacle bones, clearance m, least share kept | most degrees out)
+    (("Idle", "walk", "run", "Crouch_Walk_with_Torch"), "LeftArm", "out", LEFT_ARM[1:], LEG_L + HEAD, 0.05, 15.0),
+    (
+        ("run", "walk", "Crouch_Walk_with_Torch"),
+        "RightLeg",
+        "rest",
+        ("RightLeg", "RightFoot", "RightToeBase"),
+        TORSO + ("LeftUpLeg", "LeftLeg", "RightUpLeg"),
+        0.02,
+        0.35,
+    ),
+    (
+        ("run", "walk", "Crouch_Walk_with_Torch"),
+        "LeftLeg",
+        "rest",
+        ("LeftLeg", "LeftFoot", "LeftToeBase"),
+        TORSO + ("RightUpLeg", "RightLeg", "LeftUpLeg"),
+        0.02,
+        0.35,
+    ),
+    (
+        ("Idle", "walk", "run", "Crouch_Walk_with_Torch", "Attack", "Jump_Run"),
+        "GooTail1",
+        "out",
+        GOO_LOW,
+        LEG_R + LEG_L + LEFT_ARM,
+        0.03,
+        35.0,
+    ),
+)
+KEY_RULES_2 = (  # on the pass-1 keys: the run's forward arm swing (gauntlet at the face, gun on the shin) eased toward rest
+    (("run",), "LeftArm", "rest", LEFT_ARM[1:], LEG_L + HEAD, 0.06, 0.3),
+)
+PIVOT_SKIP = 0.12  # m: moving points this near the bone's own joint are not tested (the knee meets its thigh)
+TAIL_FLOOR = 0.05  # m: the goo tip never goes below this
+KEY_EASE = 3  # keys either side a share eases over
+SAMPLE = 1500  # points per part set
+
+
+def _posed(M, V, J, W):
+    out = np.zeros_like(V)
+    h = np.c_[V, np.ones(len(V))]
+    for k in range(4):
+        out += W[:, k : k + 1] * np.einsum("nij,nj->ni", M[J[:, k]], h)[:, :3]
+    return out
+
+
+def _bone_points(js, b, rig, bones):
+    """Vertices (all skinned prims) whose dominant joint is one of bones: rest positions, joints, weights (sampled)."""
+    import dredge_r14 as r14
+
+    ids = [rig.names.index(x) for x in bones]
+    Vs, Js, Ws = [], [], []
+    for p in js["meshes"][0]["primitives"]:
+        if js["materials"][p["material"]].get("extras", {}).get("under"):
+            continue
+        P = n.floats(js, b, p["attributes"]["POSITION"])
+        J, W = r14.joints_weights(js, b, p["attributes"])
+        used = np.unique(prim_faces(js, b, p))
+        dom = J[used, W[used].argmax(1)]
+        sel = used[np.isin(dom, ids)]
+        Vs.append(P[sel])
+        Js.append(J[sel].astype(np.int64))
+        Ws.append(W[sel])
+    V, J, W = np.concatenate(Vs), np.concatenate(Js), np.concatenate(Ws)
+    pick = np.random.default_rng(0).choice(len(V), min(len(V), SAMPLE), replace=False)
+    return V[pick], J[pick], W[pick]
+
+
+def _ease(share, worse_is_low):
+    """Per-key shares spread to KEY_EASE neighbours (min for 'rest', max for 'out') then smoothed (cyclic)."""
+    k = KEY_EASE
+    pad = np.r_[share[-k:], share, share[:k]]
+    win = np.lib.stride_tricks.sliding_window_view(pad, 2 * k + 1)
+    spread = win.min(1) if worse_is_low else win.max(1)
+    pad = np.r_[spread[-k:], spread, spread[:k]]
+    return np.convolve(pad, np.ones(2 * k + 1) / (2 * k + 1), "valid")
+
+
+def clear_keys(js, b, out, rig, rules=KEY_RULES):
+    msg, writes = [], []
+    for clips, bone, kind, moving, obst, clear, least in rules:
+        bi = rig.names.index(bone)
+        node = rig.joints[bi]
+        mv, ob = _bone_points(js, b, rig, moving), _bone_points(js, b, rig, obst)
+        need_d = np.minimum(clear, cKDTree(ob[0]).query(mv[0])[0] - 0.005)
+        rest_q = np.array(js["nodes"][node].get("rotation", [0, 0, 0, 1]), float)
+        for clip in clips:
+            a = _clip(js, clip)
+            ch, q = _track(js, b, a, node, "rotation")
+            if ch is None:
+                continue
+            times = n.floats(js, b, a["samplers"][ch["sampler"]]["input"])[:, 0]
+            need = np.zeros(len(times)) if kind == "out" else np.ones(len(times))
+            for ti, t in enumerate(times):
+                M = rig.pose(clip, t)
+                W_ = M @ np.linalg.inv(rig.ibm)
+                piv = W_[bi][:3, 3]
+                pm, po = _posed(M, *mv), _posed(M, *ob)
+                far = np.linalg.norm(pm - piv, axis=1) > PIVOT_SKIP
+                tree = cKDTree(po)
+                if kind == "rest":
+                    par = (
+                        rig.names.index(js["nodes"][rig.parent[node]]["name"])
+                        if rig.parent.get(node) in rig.joints
+                        else None
+                    )
+                    pr = W_[par][:3, :3] / np.linalg.norm(W_[par][:3, :3], axis=0) if par is not None else np.eye(3)
+                    cur = pr @ quat_mat_(q[ti])
+                    for keep in np.linspace(1.0, least, 17):
+                        new = pr @ quat_mat_(slerp_to(q[ti : ti + 1], rest_q, keep)[0])
+                        d = new @ cur.T
+                        pts = (pm[far] - piv) @ d.T + piv
+                        if (tree.query(pts)[0] >= need_d[far]).all():
+                            break
+                    need[ti] = keep
+                else:
+                    hips = W_[rig.names.index("Hips")]
+                    fwd = hips[:3, 2] / np.linalg.norm(hips[:3, 2])
+                    side = hips[:3, 0] / np.linalg.norm(hips[:3, 0])
+                    away = np.sign((pm.mean(0) - hips[:3, 3]) @ side)  # the goo's side of the body
+                    for ang in np.radians(np.arange(0, least + 0.1, 2.5)):
+                        best = None
+                        for sg in (1.0, -1.0):
+                            pts = (pm - piv) @ axis_turn(fwd, sg * ang).T + piv
+                            reach = away * ((pts.mean(0) - hips[:3, 3]) @ side)
+                            if best is None or reach > best[0]:
+                                best = (reach, sg, pts)
+                        if (tree.query(best[2])[0] >= need_d).all() and best[2][:, 1].min() >= TAIL_FLOOR:
+                            break
+                    need[ti] = np.degrees(ang) * best[1]
+            if kind == "rest":
+                share = _ease(need, True)
+                vals = np.array([slerp_to(q[i : i + 1], rest_q, share[i])[0] for i in range(len(q))])
+                msg.append("%s %s least %.2f" % (clip, bone, share.min()))
+            else:
+                mag = _ease(np.abs(need), False)
+                sg = np.sign(need[np.argmax(np.abs(need))]) if np.abs(need).max() > 0 else 1.0
+                vals = []
+                for i in range(len(q)):
+                    M = rig.pose(clip, times[i])
+                    W_ = M @ np.linalg.inv(rig.ibm)
+                    par = rig.names.index(js["nodes"][rig.parent[node]]["name"])
+                    pr = W_[par][:3, :3] / np.linalg.norm(W_[par][:3, :3], axis=0)
+                    hips = W_[rig.names.index("Hips")][:3, :3]
+                    fwd = hips[:, 2] / np.linalg.norm(hips[:, 2])
+                    loc = pr.T @ axis_turn(fwd, sg * np.radians(mag[i])) @ pr @ quat_mat_(q[i])
+                    vals.append(mat_quat(loc))
+                vals = np.array(vals)
+                msg.append("%s %s out max %.1f deg" % (clip, bone, mag.max()))
+            writes.append((a["samplers"][ch["sampler"]], vals))
+    for sm, vals in writes:  # after every rule has posed the source keys
+        sm["output"] = out.add_floats(vals, "VEC4")
+    return "; ".join(msg)
+
+
+def quat_mat_(q):
+    return rs.quat_mat(q)
+
+
+_DT = {5120: np.int8, 5121: np.uint8, 5122: np.int16, 5123: np.uint16, 5125: np.uint32, 5126: np.float32}
+_NC = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}
+
+
+def drop_unused(js, b, out, rig):
+    """r21: every primitive keeps only the vertices its triangles use. The r18 goo swap and the r20 dome left the old fat
+    goo's ~80k vertices in the shared body buffer (weighted to GooTail*, no triangles): geo_check samples a part's
+    vertices, so they showed as 'outfit:tail' clipping 16 cm through the right foot that nothing in the game draws."""
+    before = after = 0
+    for p in js["meshes"][0]["primitives"]:
+        f = prim_faces(js, b, p).astype(np.int64)
+        used, inv = np.unique(f, return_inverse=True)
+        before += js["accessors"][p["attributes"]["POSITION"]]["count"]
+        after += len(used)
+        attrs = {}
+        for k, ai in p["attributes"].items():
+            a = js["accessors"][ai]
+            raw = n.view_bytes(js, b, a["bufferView"])
+            arr = np.frombuffer(raw, _DT[a["componentType"]], a["count"] * _NC[a["type"]], a.get("byteOffset", 0))
+            arr = np.ascontiguousarray(arr.reshape(a["count"], _NC[a["type"]])[used])
+            new = {kk: v for kk, v in a.items() if kk in ("componentType", "type", "normalized")}
+            new.update(bufferView=out.add_view(arr.tobytes()), count=len(used))
+            if k == "POSITION":
+                new.update(min=arr.min(0).tolist(), max=arr.max(0).tolist())
+            js["accessors"].append(new)
+            attrs[k] = len(js["accessors"]) - 1
+        p["attributes"] = attrs
+        idx = inv.reshape(-1).astype(np.uint32)
+        js["accessors"].append(
+            {"bufferView": out.add_view(idx.tobytes()), "componentType": 5125, "count": int(idx.size), "type": "SCALAR"}
+        )
+        p["indices"] = len(js["accessors"]) - 1
+    return "vertices %d -> %d (unreferenced ones dropped)" % (before, after)
 
 
 def rebuild_stages(out_path, in_path, stages):
@@ -2069,10 +2993,14 @@ def build(out_path, in_path):
     rs.compact(out)
     out.write(out_path)
     print(f"attack lean peak {lean0} deg before the spine counter-turn")
-    print(f"right foot: {foot[0]} tris replaced by {foot[1]} mirrored (shift {foot[2]} m, {foot[3]} rim vertices "
-          f"welded, largest move {foot[4]} m)")
-    print(f"heel crescent {blade} tris ({holes} holes filled), {gone[0]} islands ({gone[1]} tris), "
-          f"chain at {np.round(ys, 2).tolist()}")
+    print(
+        f"right foot: {foot[0]} tris replaced by {foot[1]} mirrored (shift {foot[2]} m, {foot[3]} rim vertices "
+        f"welded, largest move {foot[4]} m)"
+    )
+    print(
+        f"heel crescent {blade} tris ({holes} holes filled), {gone[0]} islands ({gone[1]} tris), "
+        f"chain at {np.round(ys, 2).tolist()}"
+    )
     print("written", out_path)
 
 
@@ -2092,14 +3020,55 @@ if __name__ == "__main__":
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", calm_goo_arm), ("tail gather", gather_tail)])
     elif sys.argv[1] == "--r16":  # r16: standing Idle, held jump/glide pose, then the tail baked again
         rebuild_stages(sys.argv[2], sys.argv[3], [("idle", fix_idle), ("jump", fix_jump), ("tail gather", gather_tail)])
-    elif sys.argv[1] == "--r17":  # r17 (on an r16 file): goo arm hangs at its bind abduction, chain hangs, tail baked again
+    elif (
+        sys.argv[1] == "--r17"
+    ):  # r17 (on an r16 file): goo arm hangs at its bind abduction, chain hangs, tail baked again
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", hang_goo_arm), ("tail gather", hang_tail)])
-    elif sys.argv[1] == "--r18":  # r18: the slim Meshy goo arm swapped in (argv: OUT IN ARM.glb); the chain's clips stay
-        rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm swap", lambda js, b, out, rig: swap_goo_arm(js, b, out, rig, sys.argv[4]))])
+    elif (
+        sys.argv[1] == "--r18"
+    ):  # r18: the slim Meshy goo arm swapped in (argv: OUT IN ARM.glb); the chain's clips stay
+        rebuild_stages(
+            sys.argv[2],
+            sys.argv[3],
+            [("goo arm swap", lambda js, b, out, rig: swap_goo_arm(js, b, out, rig, sys.argv[4]))],
+        )
     elif sys.argv[1] == "--r19":  # r19: r18 glb: socket dome skin UVs, strap lift, under layer cut (argv: OUT IN)
-        rebuild_stages(sys.argv[2], sys.argv[3], [("socket skin", skin_socket), ("strap lift", lift_strap), ("under layer", drop_under)])
+        rebuild_stages(
+            sys.argv[2],
+            sys.argv[3],
+            [("socket skin", skin_socket), ("strap lift", lift_strap), ("under layer", drop_under)],
+        )
     elif sys.argv[1] == "--r20":  # r20: r19b glb: right strap = mirrored left strap on the right skin (argv: OUT IN)
         rebuild_stages(sys.argv[2], sys.argv[3], [("socket reshape", reshape_socket), ("strap mirror", mirror_strap)])
+    elif (
+        sys.argv[1] == "--r21"
+    ):  # r21: r20 glb: stray ball copy, strap UVs/weights, dome + skin/goo grade (argv: OUT IN)
+        rebuild_stages(
+            sys.argv[2],
+            sys.argv[3],
+            [
+                ("ball copy", drop_ball_copy),
+                ("unused vertices", drop_unused),
+                ("strap", strap_r21),
+                ("grade", grade_r21),
+            ],
+        )
+    elif sys.argv[1] == "--r21-keys":  # r21: keys eased off the held clip pairs (argv: OUT IN)
+        rebuild_stages(
+            sys.argv[2],
+            sys.argv[3],
+            [("keys", clear_keys), ("keys 2", lambda js, b, out, rig: clear_keys(js, b, out, rig, KEY_RULES_2))],
+        )
+    elif sys.argv[1] == "--r21-graft":  # r21: the Meshy gauntlet fist and rod (argv: OUT IN FIST.glb ROD.glb)
+        rebuild_stages(
+            sys.argv[2],
+            sys.argv[3],
+            [
+                ("fist", lambda js, b, out, rig: swap_fist(js, b, out, rig, sys.argv[4])),
+                ("rod", lambda js, b, out, rig: add_rod(js, b, out, rig, sys.argv[5])),
+                ("unused vertices", drop_unused),
+            ],
+        )
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
