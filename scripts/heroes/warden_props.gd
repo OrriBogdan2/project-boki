@@ -29,7 +29,7 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 	var stretch_d: Dictionary = d.get("stretch", {})
 	var wp := WardenProps.new()
 	wp.stretch = stretch_d
-	var parts: Dictionary = contract(art, want).get("parts", {})
+	var parts: Dictionary = contract(art, want).get("parts", {}) if not want.is_empty() else {}  # (none: no .glb load)
 	for cb: String in parts:
 		var p: Array = parts[cb]
 		var onto := _onto(skel, to_m, p[3], deg_to_rad(float((d.get("tilt", {}) as Dictionary).get(cb, 0.0))))
