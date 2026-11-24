@@ -17,9 +17,15 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
+##   [--bench-hub]  (only the hub part, with its budget and draw owners)
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
+##   [--bench-probe]  (only the scripted expedition a player gets: loading screen, planning map, skyship ride, drop,
+##   a fight; per-phase frame costs and hitches. tests/perf_probe.gd: --probe-out= --probe-quick --probe-squad=
+##   --probe-teams= --probe-full)
+##   [--bench-hunter-gpu]  (only what the Hunter models cost to draw: six Hunters and four Boki in idle at the match
+##   camera; tools/perf/hunter_gpu.gd: --wardens=a,b --tiers=n,25k,40k --bench-secs=8; needs a real GPU)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -94,6 +100,13 @@ var vp: RID
 
 
 func run(main_node: Node) -> void:
+	var args := OS.get_cmdline_user_args()
+	if "--bench-probe" in args:      # the two own-setup parts: their window, save and camera, not setup()'s
+		main_node.add_child(load("res://tests/perf_probe.gd").new())
+		return
+	if "--bench-hunter-gpu" in args:
+		await load("res://tools/perf/hunter_gpu.gd").new().run(main_node)
+		return
 	setup(main_node)
 	if tracy_dir != "":
 		await _tracy_match()
@@ -104,6 +117,10 @@ func run(main_node: Node) -> void:
 		return
 	if "--bench-ab" in OS.get_cmdline_user_args():
 		await _ab()
+		_finish()
+		return
+	if "--bench-hub" in args:
+		await _farm("hub", {"zone": GardenZones.HUB})
 		_finish()
 		return
 	await _match()
@@ -179,7 +196,7 @@ func _finish() -> void:
 
 
 func _match(part := "match") -> Array:
-	var m := await _start("match", {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101})
+	var m := await _start("match", {"teams": int(hunters / 2.0), "squad": 2, "total": hunters, "seed": 4101})
 	return await _play(m, part, [m.player], _bring_fight, FIGHT_AT)
 
 
@@ -654,8 +671,7 @@ func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	)
 	return f
 
-
-## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as --perf-probe does.
+## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as tests/perf_probe.gd does.
 func _hook_hud(m: Match) -> void:
 	var h = m.hud
 	var cb := Callable(h, "_draw_all")
@@ -680,7 +696,7 @@ func _avg(fl: Array, key: String) -> float:
 func _summary(part: String, fl: Array) -> void:
 	var w: Array = fl.map(func(f): return float(f["wall"]))
 	w.sort()
-	var cut := maxi(1, w.size() / 100)
+	var cut := maxi(1, int(w.size() / 100.0))
 	var low := 0.0
 	for k in cut:
 		low += float(w[w.size() - 1 - k])
@@ -856,7 +872,7 @@ func _meshes() -> void:
 		for si in mi.mesh.get_surface_count():
 			if mi.mesh is ArrayMesh:
 				var il := (mi.mesh as ArrayMesh).surface_get_array_index_len(si)
-				tris += (il if il > 0 else (mi.mesh as ArrayMesh).surface_get_array_len(si)) / 3
+				tris += int((il if il > 0 else (mi.mesh as ArrayMesh).surface_get_array_len(si)) / 3.0)
 		var key := String(mi.name).rstrip("0123456789@")
 		if key == "" or key.begins_with("@"):
 			var up := mi.get_parent()
@@ -878,10 +894,12 @@ func _meshes() -> void:
 	_owners()
 
 
-## Draw passes per piece of the open scene (its direct children, the grouping the draw fixes work on): a
-## visible mesh or MultiMesh costs one pass per surface, two where its material has an outline next_pass.
+## Draw passes per piece of the open scene (its direct children and where they stand, the grouping the draw fixes
+## work on): a mesh or MultiMesh the camera can see costs one pass per surface, two where its material has an outline
+## next_pass. Copies sharing a mesh and material draw as one instanced call, so only the first is charged.
 func _owners() -> void:
 	var by := {}
+	var seen := {}
 	var scene: Node = main.current
 	for n in scene.find_children("*", "GeometryInstance3D", true, false):
 		var gi := n as GeometryInstance3D
@@ -892,17 +910,31 @@ func _owners() -> void:
 			mesh = gi.multimesh.mesh
 		if mesh == null or not gi.is_visible_in_tree():
 			continue
+		var cam := main.get_viewport().get_camera_3d()
+		var box := gi.global_transform * gi.get_aabb()
+		if cam and not cam.is_position_in_frustum(box.get_center()) and not cam.is_position_in_frustum(box.position):
+			continue      # (a rough cull: the draws are what the camera sees)
 		var passes := 0
 		for si in mesh.get_surface_count():
 			var mat: Material = gi.material_override if gi.material_override else mesh.surface_get_material(si)
+			var pair := [mesh, mat]
+			if seen.has(pair):
+				continue
+			seen[pair] = true
 			passes += 2 if mat and mat.next_pass else 1
 		var top: Node = gi
 		var under: Node = gi  # the level below `top`: the home's world root holds most pieces
 		while top.get_parent() != scene:
 			under = top
 			top = top.get_parent()
-		var key := "%s/%s" % [String(top.name).rstrip("0123456789@"), String(under.name).rstrip("0123456789@")]
+		var at: Vector3 = (top as Node3D).global_position if top is Node3D else Vector3.ZERO
+		var key := "%s@%d,%d/%s" % [_plain_name(top), roundi(at.x), roundi(at.z), _plain_name(under)]
 		by[key] = int(by.get(key, 0)) + passes
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
-	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 20).map(func(k): return "%s %d" % [k, by[k]])))
+	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 40).map(func(k): return "%s %d" % [k, by[k]])))
+
+
+## A node's name without Godot's auto-numbering.
+func _plain_name(n: Node) -> String:
+	return String(n.name).rstrip("0123456789@")

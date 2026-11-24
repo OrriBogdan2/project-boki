@@ -33,6 +33,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	A = load("res://tools/archetype_check.gd").new()
 	A.main = main
@@ -61,7 +62,7 @@ func _stand_row() -> void:
 	_rise(0.6)
 	var row := _rocks()
 	row.sort_custom(func(a, b): return _mid(a).x < _mid(b).x)
-	var mid: Dictionary = row[row.size() / 2]
+	var mid: Dictionary = row[int(row.size() / 2.0)]
 	_place(_mid(mid) + Vector3(0, float(mid["top"]), 0))
 	_score("stand on a Stone Row rock", Vector2.ZERO, SETTLE)
 
