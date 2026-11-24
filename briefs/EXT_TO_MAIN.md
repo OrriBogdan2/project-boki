@@ -11257,3 +11257,4 @@ READY ext/stuck-integ-4409db43 fff2c74b537e7e8aff39cb067627e32eb6acf662 (base ex
 READY ext/clarity-lace-part 6c8e2c0b9b2 (Hail Wall laces part round Hunters, lace pairs 20.75->8.15/frame)
 READY ext/clarity-smoke-part 0b8592774b5 (smoke puffs part on screen over Hunters)
 READY ext/clarity-hover-tip 8162f6b5a0b (no hover card over a fight, 4/20->0/20 frames)
+READY ext/ttk-fix-1124 f882c02655 (TTK: Vex, Grimble, Kael, Meeko, Neve to the parity bar; 14 -> 1 FAIL; PR via gh-outbox new-pr-ttk.md)
