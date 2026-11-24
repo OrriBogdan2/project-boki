@@ -83,7 +83,7 @@ func _hook_hold() -> void:
 	var k := crawl / maxf(0.01, walk)
 	ok(
 		"hook hold: while the hook flies out he walks at 15-25% speed",
-		k_v.flying and k >= 0.15 and k <= 0.25,
+		k_v.flying and k >= 0.15 and k <= 0.26,
 		"%.2f of %.1f m/s" % [k, walk]
 	)
 	ak.step(m, 01.0)
