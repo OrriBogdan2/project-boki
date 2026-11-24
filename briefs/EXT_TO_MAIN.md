@@ -11260,3 +11260,4 @@ READY ext/clarity-hover-tip 8162f6b5a0b (no hover card over a fight, 4/20->0/20 
 READY ext/ttk-fix-1124 f882c02655 (TTK: Vex, Grimble, Kael, Meeko, Neve to the parity bar; 14 -> 1 FAIL; PR via gh-outbox new-pr-ttk.md)
 READY ext/feel-dmg-number-size 077a3be6f7 (damage number sizes on our health scale; GPU pair in gens/damage-feel-1124)
 READY ext/feel-hit-tick 7e4891563b (reticle hit tick 0.15 s / 7 px; GPU pair in gens/damage-feel-1124)
+READY ext/boki-own-clips-c f2896d1945 (bulk-rebase: origin/main merged in mechanically, was 0fcf21e059; union 1 gen 0 files; the branch's own READY checks still apply)
