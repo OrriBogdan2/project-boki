@@ -214,7 +214,7 @@ func _poses(out: String, states: Array, stem: String) -> void:
 			_clear()
 			await tree.process_frame
 		if stem.ends_with("_"):
-			_stack(rows).save_png(out.path_join("%s%d.png" % [stem, start / CUTS_PER_ROW + 1]))
+			_stack(rows).save_png(out.path_join("%s%d.png" % [stem, int(start / float(CUTS_PER_ROW)) + 1]))
 			rows.clear()
 	if not stem.ends_with("_"):
 		_stack(rows).save_png(out.path_join(stem + ".png"))

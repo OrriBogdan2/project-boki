@@ -84,6 +84,8 @@ extends RefCounted
 ##      drops, and stops on a heal, a down or out
 ##  20. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
 ##      without taking a slot, and a need falling to urgent sulks once
+##  21. the carry cues (CarrySfx): every name it plays exists and has a MIN_GAP (the voice cap), the thief's
+##      take carries past hearing range to nearby squads, and the swap, claim, steal and deathbox paths call it
 ##  10. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
 ##      tools/sfx_world_cues.gd
 ## Reads the files only; never touches the save.
@@ -184,6 +186,7 @@ func run(main: Node) -> void:
 	_low_hp()
 	_stomp_cues()
 	_voices()
+	_carry()
 	_boki_impacts()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	preload("res://tools/sfx_bar_check.gd").new().run(ok)
@@ -323,9 +326,10 @@ func _vfx_own() -> void:
 
 
 ## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
-## files the set lists under "kit_files" (paths under scripts/arch/kits/).
+## files the set lists under "kit_files" (paths under scripts/arch/kits/). A wind-up's sound goes through
+## KitWindup.play(kit, "slot", "name", ...), so those names count too.
 func _kit_names(arch: String, extra: Array) -> void:
-	var re := RegEx.create_from_string('\\.sfx\\("([a-z0-9_]+)"')
+	var re := RegEx.create_from_string('(?:\\.sfx\\(|KitWindup\\.play\\(\\w+, "\\w+", )"([a-z0-9_]+)"')
 	var silent := []
 	for f in ["%s_kit.gd" % arch] + extra:
 		var path := "res://scripts/arch/kits/" + String(f)
@@ -356,11 +360,11 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 			rough.append("%s (not in the set)" % sname)
 			continue
 		var data := _data(takes[0])
-		var n := data.size() / 2
+		var n := int(data.size() / 2.0)
 		var first := data.decode_s16(0) / 32768.0
 		var last := data.decode_s16((n - 1) * 2) / 32768.0
 		var mid := 0.0
-		for k in range(n / 2, n / 2 + 200):
+		for k in range(int(n / 2.0), int(n / 2.0) + 200):
 			mid = maxf(mid, absf(data.decode_s16(k * 2) / 32768.0))
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
@@ -411,6 +415,25 @@ func _garden_names() -> void:
 	var named := seen.size() >= 12 and silent.is_empty()
 	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
 
+## 10. The carry cues: on file, capped, the take carrying, and wired where the swap, claim and steal happen.
+func _carry() -> void:
+	var re := RegEx.create_from_string("\"(carry_[a-z_]+)\"")
+	var names := []
+	for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/match/carry_sfx.gd")):
+		if not names.has(hit.get_string(1)):
+			names.append(hit.get_string(1))
+	var wrong := names.filter(func(n): return not Sfx.ensure(n) or not Sfx.MIN_GAP.has(n))
+	ok(names.size() == 5 and wrong.is_empty(),
+			"carry: %d cues on file with a MIN_GAP (wrong: %s)" % [names.size(), wrong])
+	var reach: float = Sfx.sound_reach.get("carry_take", 0.0)
+	ok(reach > Sfx.hear_range and reach <= REACH_MAX, "carry: the thief's take carries %.0f m" % reach)
+	var calls := {"scripts/match/match.gd": "CarrySfx.swap(", "scripts/match/capture.gd": "CarrySfx.claim(",
+			"scripts/kin/kin_track.gd": "CarrySfx.stolen(", "scripts/match/life.gd": "CarrySfx.from_box("}
+	var unwired := calls.keys().filter(func(f): return not _src(f).contains(calls[f]))
+	ok(unwired.is_empty(), "carry: swap, claim, steal and deathbox paths play the cues (missing: %s)" % [unwired])
+
+static func _src(path: String) -> String:
+	return FileAccess.get_file_as_string("res://" + path)
 
 ## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
 func _ult_cues() -> void:
@@ -446,7 +469,7 @@ func _ult_cues() -> void:
 func _nuke_fall() -> void:
 	var delay := float(Arch.def("gunslinger")["x"]["delay"])
 	var b := FileAccess.get_file_as_bytes("res://audio/vn_nuke_fall.wav")
-	var secs := float(_data("res://audio/vn_nuke_fall.wav").size() / 2) / float(b.decode_u32(24))
+	var secs := float(int(_data("res://audio/vn_nuke_fall.wav").size() / 2.0)) / float(b.decode_u32(24))
 	var what := "vn_nuke_fall is %.3f s, the fall is %.2f s (within %.0f ms)"
 	ok(absf(secs - delay) <= FALL_TOL_S, what % [secs, delay, FALL_TOL_S * 1000.0])
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
@@ -1356,7 +1379,7 @@ func _step_on(_m: Match, h: Hunter, surf: String, p: Vector3) -> void:
 		Sfx.recent.clear()
 		Sfx.listener = p
 		Juice.footstep(h)
-		var got: Array = Sfx.last_played.keys()
+		var got: Array = Sfx.last_played.keys().filter(func(s): return not String(s).ends_with("_foley"))
 		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
 		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
 	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]
@@ -1399,7 +1422,7 @@ func _rank_cues() -> void:
 ## Seconds to the last sample above 2% of the peak, in a mono 44.1 kHz wav (as tools/sfx_lib.py writes them).
 func _audible_secs(path: String) -> float:
 	var data := _data(path)
-	var n := data.size() / 2
+	var n := int(data.size() / 2.0)
 	var pk := 0.0
 	for k in n:
 		pk = maxf(pk, absf(data.decode_s16(k * 2)))
@@ -1542,7 +1565,7 @@ func _takes(sname: String) -> Array:
 ## Peak and RMS (dBFS) of a 16-bit PCM wav; RMS over samples above 2% of the peak, as tools/sfx_lib.py levels.
 func _measure(path: String) -> Dictionary:
 	var data := _data(path)
-	var n := data.size() / 2
+	var n := int(data.size() / 2.0)
 	var pk := 0.0
 	for k in n:
 		pk = maxf(pk, absf(data.decode_s16(k * 2) / 32768.0))
@@ -1765,7 +1788,7 @@ func _stomp_cues() -> void:
 		"stomp: wind-up, finish and crack are in their set and played positionally by Life %s" % [off]
 	)
 	var data := _data("res://audio/stomp_windup.wav")
-	var half := data.size() / 4
+	var half := int(data.size() / 4.0)
 	var e := [0.0, 0.0]
 	for k in half * 2:
 		e[int(k >= half)] += pow(data.decode_s16(k * 2) / 32768.0, 2)
