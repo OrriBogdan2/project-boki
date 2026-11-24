@@ -1,7 +1,8 @@
 extends RefCounted
 ## --tutorial-idle-check: nobody is ever left without a next thing to do (DECISIONS, First 10 minutes).
 ## Plays the match tutorial with its driver and, at every step, does nothing for IDLE_S seconds:
-##   - a hint banner (or a quiet step's hint line) or the Boki lead is up within HINT_BY seconds, and the step's line stays on the pill
+##   - a hint banner (or a quiet step's hint line) or the Boki lead is up within HINT_BY seconds,
+##     and the step's line stays on the pill
 ##   - a step with a place keeps its marker (beam, pin or edge arrow, and the distance label) every frame
 ##   - a nag (the pill and marker pulse, the Boki says it again) lands inside the window, so no wait
 ##     goes SILENT_MAX seconds without a prompt; the timed waits all outlast a nag
