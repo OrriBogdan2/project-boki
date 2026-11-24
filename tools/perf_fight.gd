@@ -194,6 +194,16 @@ func _camp() -> Array:
 		m.fx.visible = false
 		HeroVfx.of(m).visible = false
 		print("BENCH fight fx off")
+	if "--bench-noink" in OS.get_cmdline_user_args():  # (a probe: what the Hunters' ink outlines cost the draw)
+		for h: Hunter in m.hunters:
+			for shell in WardenMerge.inks(h.model) if h.model else []:
+				(shell as Node3D).visible = false
+			for n in h.model.find_children("*", "MeshInstance3D", true, false) if h.model else []:
+				var mi := n as MeshInstance3D
+				for si in mi.get_surface_override_material_count():
+					if mi.get_surface_override_material(si):
+						mi.get_surface_override_material(si).next_pass = null
+		print("BENCH fight ink off")
 	RenderingServer.frame_pre_draw.connect(_on_pre_draw)
 	RenderingServer.frame_post_draw.connect(_on_post_draw)
 	bench.main.get_tree().physics_frame.connect(_on_physics)
