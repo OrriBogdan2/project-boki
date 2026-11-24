@@ -1,8 +1,9 @@
 extends RefCounted
 ## --boki-eyes-shots --shots-dir=<dir> [--species=a,b] [--px=480]: does each rigged Boki's coat carry its own eyes?
 ## Per species, as the game builds it (idle at 0.5 s, neutral): <dir>/<id>_off.png, a front close-up of its head with
-## the face overlay off (BokiRig.face_overlay, the default), <id>_on.png the same with it on, and <id>_game.png, a
-## crop at the match camera (overlay off). <dir>/eyes.tsv: id, Face tris dropped, coat tris.
+## the species' own face (the overlay only for the ones in content/rules/boki_eyes.json), <id>_on.png the same with the
+## overlay forced on (BokiRig.face_overlay), and <id>_game.png, a crop at the match camera (the species' own face).
+## <dir>/eyes.tsv: id, Face tris, coat tris.
 ## Needs a renderer (a GPU worker: jobq submit --needs gpu).
 
 const Shots := preload("res://tools/boki_rig_shots.gd")

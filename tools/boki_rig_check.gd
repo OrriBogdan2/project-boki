@@ -181,19 +181,24 @@ func run(main: Node) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 
-## The default look: the eyes are the coat's own, so no Face mesh is left on any model and the rig plays on without one.
+## The default look: a species with its own painted eyes keeps no Face mesh (and the rig plays on without one); one in
+## content/rules/boki_eyes.json keeps the overlay until its eye-paint pass lands.
 func _no_overlay(main: Node) -> void:
+	var listed := Content.rules("boki_eyes")["overlay_species"] as Array
 	for id in SPECIES_LIST:
+		ok(BokiRig.uses_overlay(id) == listed.has(id), "%s: the overlay follows boki_eyes.json" % id)
 		var k := Shots.rigged_kin(id)
 		main.add_child(k)
 		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 		var left := rig.model.find_children("*", "MeshInstance3D", true, false).filter(
 			func(n: Node) -> bool: return (n as MeshInstance3D).mesh.get_blend_shape_count() > 0
 		)
-		ok(rig.face == null and rig.eye_mat == null and left.is_empty(), "%s: no face overlay on the coat" % id)
+		ok((rig.face != null) == listed.has(id) and left.size() == (1 if listed.has(id) else 0), "%s: face mesh" % id)
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
 		k.queue_free()
+	for id in listed:
+		ok(SPECIES_LIST.has(id), "%s (boki_eyes.json) is a rigged species" % id)
 
 
 func _species(main: Node) -> void:
