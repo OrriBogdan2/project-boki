@@ -5,5 +5,6 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--boki-eyes-shots": ["res://tools/boki_eyes_shots.gd", "boki_eyes_shots", null],  # coat's own eyes, close
 	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # Boki in .pck
 }
