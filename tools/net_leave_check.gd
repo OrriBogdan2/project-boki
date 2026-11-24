@@ -33,7 +33,7 @@ func run(main_node: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	var nd := {"mid": "nl", "seed": 4242, "host": ME, "teams": 2, "squad": 2, "tier": 0, "roster": roster}
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "cls": "medium",
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "cls": "medium",
 		"heart": true, "net": nd})
 	m.set_process(false)
 	m.step(DT)

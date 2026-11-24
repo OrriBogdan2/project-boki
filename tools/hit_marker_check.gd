@@ -21,7 +21,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
 	var p := m.player
 	var r: Reticle = m.hud.reticle
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]

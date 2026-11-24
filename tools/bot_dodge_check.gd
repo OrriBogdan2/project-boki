@@ -24,7 +24,7 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(OPTS.duplicate())
+	m.start(OPTS.duplicate())
 	m.set_process(false)
 	m.duel.mode = "fight"
 	var rate := {}

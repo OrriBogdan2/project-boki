@@ -146,7 +146,7 @@ func run(main: Node) -> void:
 	for arch in HEROES:
 		var rows := []
 		for r in RUNS:
-			rows.append(await _run(main, arch, int(r[1]), float(r[2])))
+			rows.append(_run(main, arch, int(r[1]), float(r[2])))
 			await main.get_tree().process_frame
 		var base: Dictionary = rows[BASE]
 		var row := "FPSPAR %-10s base: dash %.2f m  apex %.2f m  glide %.2f m  end %.2f m"
