@@ -342,7 +342,7 @@ func _drop_lineup(out: String) -> void:
 			var s: Dictionary = {"vel": Vector3(0, -13.0, 0), "face": face, "grounded": false}
 			s.merge(poses[nm], true)
 			if s.has("bank"):  # (steering right of the facing)
-				s["vel"] = Vector3(cos(face), 0.0, -sin(face)) * Hunter.DIVE_SPEED + Vector3(0, -13.0, 0)
+				s["vel"] = Vector3(cos(face), 0.0, -sin(face)) * HunterFeel.dive_speed + Vector3(0, -13.0, 0)
 			for k in 40:
 				for m in models:
 					(m as Node3D).rotation.y = face
