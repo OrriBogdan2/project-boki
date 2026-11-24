@@ -13,7 +13,8 @@ const CHECKS := {
 	"--stretch-5-check": ["res://tools/stretch_check.gd", "stretch_check", "archer,mage"],
 	"--stretch-6-check": ["res://tools/stretch_check.gd", "stretch_check", "dolm,ostra"],
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
-	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],  # GPU: posed hunter clip frames, --geo-dir= --shots-dir=
+	# GPU: posed hunter clip frames, --geo-dir= --shots-dir=
+	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
 	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames

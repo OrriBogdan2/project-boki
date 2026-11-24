@@ -69,8 +69,15 @@ SKIP_CLIPS = re.compile(r"baselayer", re.I)
 MAT_WORDS = {"skirt": "skirt", "cape": "cape", "scarf": "scarf", "hair": "hair", "sword": "weapon", "hammer": "hammer"}
 # anatomically joined pairs (base names, same side unless noted): not tested
 JOINED = {
-    ("head", "torso"), ("head", "hair"), ("head", "upper_arm"), ("torso", "upper_arm"), ("upper_arm", "forearm"), ("forearm", "hand"),
-    ("torso", "thigh"), ("thigh", "shin"), ("shin", "foot"),
+    ("head", "torso"),
+    ("head", "hair"),
+    ("head", "upper_arm"),
+    ("torso", "upper_arm"),
+    ("upper_arm", "forearm"),
+    ("forearm", "hand"),
+    ("torso", "thigh"),
+    ("thigh", "shin"),
+    ("shin", "foot"),
 }
 COMPONENT = ("torso", "head")  # outfit shells hang off these: joined to them and to the limb roots
 LIMB_ROOTS = ("upper_arm", "thigh", "hair", "pauldron")
@@ -155,8 +162,14 @@ class Rig:
         self.joints = sk["joints"]
         self.names = [nodes[i]["name"] for i in self.joints]
         self.ibm = accessor(j, bin_, sk["inverseBindMatrices"]).reshape(-1, 4, 4).transpose(0, 2, 1)
-        self.rest = [(np.array(nd.get("translation", [0, 0, 0]), float), np.array(nd.get("rotation", [0, 0, 0, 1]), float),
-                      np.array(nd.get("scale", [1, 1, 1]), float)) for nd in nodes]
+        self.rest = [
+            (
+                np.array(nd.get("translation", [0, 0, 0]), float),
+                np.array(nd.get("rotation", [0, 0, 0, 1]), float),
+                np.array(nd.get("scale", [1, 1, 1]), float),
+            )
+            for nd in nodes
+        ]
 
     def skin_mats(self, anim, T):
         """Skinning matrices [F, joints, 4, 4] at times T [F] for animation `anim` (None = the rest pose)."""
@@ -187,7 +200,13 @@ class Rig:
 def region_of(name):
     """(region, side) a bone name says by itself, or None."""
     n = name.lower().replace("mixamorig:", "")
-    side = "L" if (n.startswith("left") or re.search(r"[._]l$", n)) else "R" if (n.startswith("right") or re.search(r"[._]r$", n)) else ""
+    side = (
+        "L"
+        if (n.startswith("left") or re.search(r"[._]l$", n))
+        else "R"
+        if (n.startswith("right") or re.search(r"[._]r$", n))
+        else ""
+    )
     n = re.sub(r"^(left|right)", "", n)
     n = re.sub(r"[._][lr]$", "", n)
     if n.startswith("x_") and any(k in n for k in ("shield", "weapon", "fish")):
@@ -228,7 +247,6 @@ def region_of(name):
 def bone_regions(rig):
     """['region' or 'region_L'] per joint: its own name, else its nearest named ancestor's (a loose Bone_NN under the
     head is hair, under the hips cloth)."""
-    idx = {n: k for k, n in enumerate(rig.joints)}
     out = []
     for k, node in enumerate(rig.joints):
         cur, found = node, None
@@ -265,8 +283,14 @@ def load_mesh(j, bin_):
             P.append(pos), N.append(nrm), J.append(jo), W.append(wt), TR.append(idx)
             M.append([m["name"] + "|" + mat] * len(pos))
             base += len(pos)
-    return {"pos": np.vstack(P), "nrm": np.vstack(N), "joints": np.vstack(J), "weights": np.vstack(W),
-            "tris": np.vstack(TR), "mat": np.concatenate(M).astype(object)}
+    return {
+        "pos": np.vstack(P),
+        "nrm": np.vstack(N),
+        "joints": np.vstack(J),
+        "weights": np.vstack(W),
+        "tris": np.vstack(TR),
+        "mat": np.concatenate(M).astype(object),
+    }
 
 
 def split_parts(rig, mesh):
@@ -279,16 +303,26 @@ def split_parts(rig, mesh):
         low = mt.lower()
         for word, name in MAT_WORDS.items():
             if word in low:
-                reg[k] = ("outfit:" + name) if name in ("skirt", "cape", "scarf") else ("hair" if name == "hair" else "prop:" + name)
+                reg[k] = (
+                    ("outfit:" + name)
+                    if name in ("skirt", "cape", "scarf")
+                    else ("hair" if name == "hair" else "prop:" + name)
+                )
     H = np.ptp(mesh["pos"][:, 1])
     jpos = np.linalg.inv(rig.ibm)[:, :3, 3]  # joint positions in the bind pose
     for side in "LR":
         # the hand = from the wrist joint one hand length (HAND_LEN of body height) along the forearm; what the hand
         # bone carries further out (a pistol barrel, a blade) is a held prop, so the hand test measures the hand
         arm = np.isin(reg, ["%s_%s" % (r, side) for r in ("upper_arm", "forearm", "hand")])
-        wrist = [k for k, n in enumerate(rig.names) if region_of(rig.j["nodes"][rig.joints[k]]["name"]) == ("hand", side)
-                 and re.search(r"hand$", re.sub(r"[._ ]?[lr]$", "", n.lower().replace("mixamorig:", "")))]
-        elbow = [k for k, n in enumerate(rig.names) if region_of(rig.j["nodes"][rig.joints[k]]["name"]) == ("forearm", side)]
+        wrist = [
+            k
+            for k, n in enumerate(rig.names)
+            if region_of(rig.j["nodes"][rig.joints[k]]["name"]) == ("hand", side)
+            and re.search(r"hand$", re.sub(r"[._ ]?[lr]$", "", n.lower().replace("mixamorig:", "")))
+        ]
+        elbow = [
+            k for k, n in enumerate(rig.names) if region_of(rig.j["nodes"][rig.joints[k]]["name"]) == ("forearm", side)
+        ]
         if not wrist or not elbow or arm.sum() < 60:
             continue
         w, e = jpos[wrist[0]], jpos[elbow[0]]
@@ -308,8 +342,10 @@ def split_parts(rig, mesh):
     _, weld = np.unique(key, axis=0, return_inverse=True)
     weld = weld.reshape(-1)
     tr = weld[mesh["tris"]]
-    g = coo_matrix((np.ones(len(tr) * 3), (np.r_[tr[:, 0], tr[:, 1], tr[:, 2]], np.r_[tr[:, 1], tr[:, 2], tr[:, 0]])),
-                   shape=(weld.max() + 1,) * 2)
+    g = coo_matrix(
+        (np.ones(len(tr) * 3), (np.r_[tr[:, 0], tr[:, 1], tr[:, 2]], np.r_[tr[:, 1], tr[:, 2], tr[:, 0]])),
+        shape=(weld.max() + 1,) * 2,
+    )
     _, comp = connected_components(g, directed=False)
     comp = comp[weld]  # whole-mesh island of each vertex: only a piece detached from the body is its own part
     reg = absorb_strays(reg, weld, tr)
@@ -435,6 +471,7 @@ def closest_on_tris(p, a, b, c):
 
     def put(mask, w):
         bc[mask] = w[mask]
+
     z = np.zeros_like(d1)
     with np.errstate(divide="ignore", invalid="ignore"):
         t = np.clip(np.nan_to_num((d4 - d3) / ((d4 - d3) + (d5 - d6))), 0, 1)
@@ -575,7 +612,9 @@ class Check:
         self.bind_pos = np.linalg.inv(self.rig.ibm)[:, :, 3]  # joint positions in the bind pose
         key = np.round(self.mesh["pos"] * 1e4).astype(np.int64)
         weld = np.unique(key, axis=0, return_inverse=True)[1].reshape(-1)
-        self.faces = {k: part_faces(self.mesh, v, weld) for k, v in self.parts.items() if k in {c for _, c in self.pairs}}
+        self.faces = {
+            k: part_faces(self.mesh, v, weld) for k, v in self.parts.items() if k in {c for _, c in self.pairs}
+        }
         self.every = np.arange(len(self.mesh["pos"]))
         thumb = [k for k, n in enumerate(self.rig.names) if "thumb" in n.lower()]
         self.thumb_joint = set(thumb)
@@ -584,19 +623,26 @@ class Check:
         """{'hand_L': (vertex ids, thumb mask)}: a hand's pieces together (a glove can be a detached island)."""
         out = {}
         for side in "LR":
-            ids = np.concatenate([v for k, v in self.parts.items() if base_of(k) == ("hand", side)] or [np.zeros(0, int)])
+            ids = np.concatenate(
+                [v for k, v in self.parts.items() if base_of(k) == ("hand", side)] or [np.zeros(0, int)]
+            )
             if len(ids) >= 30:
                 out["hand_" + side] = (ids, np.isin(self.dom[ids], list(self.thumb_joint)))
         return out
 
     def finger_bones_unused(self, side):
         """True when the rig has finger/thumb bones on this side and no vertex is mainly on any of them."""
-        fing = [k for k, n in enumerate(self.rig.names) if region_of(self.rig.j["nodes"][self.rig.joints[k]]["name"]) == ("hand", side)
-                and re.search(r"fing|thumb|index|middle|ring|pinky", n.lower())]
+        fing = [
+            k
+            for k, n in enumerate(self.rig.names)
+            if region_of(self.rig.j["nodes"][self.rig.joints[k]]["name"]) == ("hand", side)
+            and re.search(r"fing|thumb|index|middle|ring|pinky", n.lower())
+        ]
         return bool(fing) and int(np.isin(self.dom, fing).sum()) < 20
 
     def pivot_joint(self, a, c):
         """Joint index of the nearest common ancestor of the two parts' main bones (the hinge they share), or None."""
+
         def chain(part):
             ids = self.parts[part]
             node = self.rig.joints[np.bincount(self.dom[ids], minlength=len(self.rig.joints)).argmax()]
@@ -605,6 +651,7 @@ class Check:
                 out.append(node)
                 node = self.rig.parent[node]
             return out
+
         ca, cc = chain(a), chain(c)
         common = next((n for n in ca if n in cc), None)
         return self.rig.joints.index(common) if common in self.rig.joints else None
@@ -634,8 +681,17 @@ class Check:
         hands = self.hand_ids()
         rows, worst, hand = [], {}, {k: {"rest": None, "worst": None} for k in hands}
         clips = [("rest", None, np.array([0.0]))] + [
-            (a["name"], a, np.arange(0, max(accessor(self.rig.j, self.rig.bin, s["input"]).max() for s in a["samplers"]) + 1e-6, STEP / FPS))
-            for a in self.anims]
+            (
+                a["name"],
+                a,
+                np.arange(
+                    0,
+                    max(accessor(self.rig.j, self.rig.bin, s["input"]).max() for s in a["samplers"]) + 1e-6,
+                    STEP / FPS,
+                ),
+            )
+            for a in self.anims
+        ]
         for cname, anim, T in clips:
             mats = self.rig.skin_mats(anim, T)
             held = cname == "rest" or bool(HELD.match(cname))
@@ -652,8 +708,13 @@ class Check:
                 for k, (ids, thumb) in hands.items():
                     hp, _ = skin_points(mats[f], self.mesh, ids)
                     ratio, lobe, sep = hand_shape(hp, thumb)
-                    rec = {"ratio": round(ratio, 3), "thumb_lobe": None if lobe is None else round(lobe, 2),
-                           "finger_sep": round(sep, 2), "clip": cname, "frame": f * STEP}
+                    rec = {
+                        "ratio": round(ratio, 3),
+                        "thumb_lobe": None if lobe is None else round(lobe, 2),
+                        "finger_sep": round(sep, 2),
+                        "clip": cname,
+                        "frame": f * STEP,
+                    }
                     if cname == "rest":
                         hand[k]["rest"] = rec
                     if hand[k]["worst"] is None or ratio < hand[k]["worst"]["ratio"]:
@@ -688,19 +749,49 @@ def summarize(chk, rows, worst, hand):
         # mesh (Vex: belt beads ride hand.L) are a warning only: then the hand test measures what the hand bone carries
         rig_bad = chk.finger_bones_unused(k[-1])
         flat[k] = rest["finger_sep"] < FLAT_SEP or rest["ratio"] < FLAT_RATIO
-        parts.setdefault(k, {"clips_into": []}).update({"flat": bool(flat[k]), "thickness_ratio": rest["ratio"], "worst_ratio": w["ratio"],
-                         "worst_at": "%s:%d" % (w["clip"], w["frame"]), "thumb_lobe": rest["thumb_lobe"],
-                         "finger_sep": rest["finger_sep"],
-                         "finger_bones_unused": rig_bad})
-    hl = " | ".join("HAND %s %s sep %.2f ratio %.2f%s" % (k.split("_")[-1], "FLAT" if flat[k] else "ok", hand[k]["rest"]["finger_sep"],
-                                                     hand[k]["rest"]["ratio"], " fingers-unrigged" if parts[k]["finger_bones_unused"] else "")
-                    for k in sorted(hand)) or "HAND none"
+        parts.setdefault(k, {"clips_into": []}).update(
+            {
+                "flat": bool(flat[k]),
+                "thickness_ratio": rest["ratio"],
+                "worst_ratio": w["ratio"],
+                "worst_at": "%s:%d" % (w["clip"], w["frame"]),
+                "thumb_lobe": rest["thumb_lobe"],
+                "finger_sep": rest["finger_sep"],
+                "finger_bones_unused": rig_bad,
+            }
+        )
+    hl = (
+        " | ".join(
+            "HAND %s %s sep %.2f ratio %.2f%s"
+            % (
+                k.split("_")[-1],
+                "FLAT" if flat[k] else "ok",
+                hand[k]["rest"]["finger_sep"],
+                hand[k]["rest"]["ratio"],
+                " fingers-unrigged" if parts[k]["finger_bones_unused"] else "",
+            )
+            for k in sorted(hand)
+        )
+        or "HAND none"
+    )
     line = "%s: CLIP worst %.1f cm in %d frames (held %d, held worst %.1f cm) | %s" % (
-        chk.key, top, len(over), len(over_held), top_held, hl)
-    stats = {"worst_cm": top, "held_worst_cm": top_held, "frames": len(over), "held_frames": len(over_held),
-             "flat": flat, "ratios": {k: [hand[k]["rest"]["ratio"], hand[k]["worst"]["ratio"]] for k in hand},
-             "seps": {k: hand[k]["rest"]["finger_sep"] for k in hand},
-             "pairs": {"%s>%s" % k: [round(e["held_max_cm"], 2), round(e["max_cm"], 2)] for k, e in agg.items()}}
+        chk.key,
+        top,
+        len(over),
+        len(over_held),
+        top_held,
+        hl,
+    )
+    stats = {
+        "worst_cm": top,
+        "held_worst_cm": top_held,
+        "frames": len(over),
+        "held_frames": len(over_held),
+        "flat": flat,
+        "ratios": {k: [hand[k]["rest"]["ratio"], hand[k]["worst"]["ratio"]] for k in hand},
+        "seps": {k: hand[k]["rest"]["finger_sep"] for k in hand},
+        "pairs": {"%s>%s" % k: [round(e["held_max_cm"], 2), round(e["max_cm"], 2)] for k, e in agg.items()},
+    }
     return line, parts, stats
 
 
@@ -725,7 +816,11 @@ def verdict(stats, live=None):
     why = []
     if stats["held_worst_cm"] > HELD_CM:
         why.append("held clip clips %.1f cm" % stats["held_worst_cm"])
-    why += ["hand %s FLAT (sep %.2f, ratio %.2f)" % (k, stats["seps"][k], stats["ratios"][k][0]) for k, v in stats["flat"].items() if v]
+    why += [
+        "hand %s FLAT (sep %.2f, ratio %.2f)" % (k, stats["seps"][k], stats["ratios"][k][0])
+        for k, v in stats["flat"].items()
+        if v
+    ]
     if live:
         for pair, (held, _all) in stats["pairs"].items():
             if held > live["pairs"].get(pair, [0, 0])[0] + WORSE_CM and held > HELD_CM:
@@ -762,12 +857,28 @@ def dump_shots(chk, key, worst, out, count=3):
             v = np.array([0.0, 0.2, 1.0])
         name = "%s_%d" % (key, len(names) + 1)
         with open(os.path.join(out, name + ".bin"), "wb") as f:
-            f.write(pos.astype("<f4").tobytes() + nrm.astype("<f4").tobytes() + tri.astype("<i4").tobytes()
-                    + grp[tri[:, 0]].tobytes())
-        json.dump({"key": key, "clip": clip, "frame": frame, "pair": "%s>%s" % pair, "cm": round(depth * 100, 2),
-                   "held": clip == "rest" or bool(HELD.match(clip)), "nv": len(pos), "nt": len(tri),
-                   "at": [float(x) for x in at], "view": [float(x) for x in v], "height": float(pos[:, 1].max())},
-                  open(os.path.join(out, name + ".json"), "w"))
+            f.write(
+                pos.astype("<f4").tobytes()
+                + nrm.astype("<f4").tobytes()
+                + tri.astype("<i4").tobytes()
+                + grp[tri[:, 0]].tobytes()
+            )
+        json.dump(
+            {
+                "key": key,
+                "clip": clip,
+                "frame": frame,
+                "pair": "%s>%s" % pair,
+                "cm": round(depth * 100, 2),
+                "held": clip == "rest" or bool(HELD.match(clip)),
+                "nv": len(pos),
+                "nt": len(tri),
+                "at": [float(x) for x in at],
+                "view": [float(x) for x in v],
+                "height": float(pos[:, 1].max()),
+            },
+            open(os.path.join(out, name + ".json"), "w"),
+        )
         names.append(name)
     return names
 
@@ -776,6 +887,7 @@ def make_sheets(meta_dir, png_dir, out, per_page=5, width=1600):
     """Contact sheets (width px wide, one hunter a row, its 3 worst frames close up with the whole body inset) from
     the --dump-shots metas and the PNGs tools/geo_shots.gd rendered. Border: red = a held clip over 1 cm, grey = not."""
     from PIL import Image, ImageDraw
+
     tile = (width - 4 * 10) // 3
     keys = [k for k in KEYS if os.path.exists(os.path.join(meta_dir, k + "_1.json"))]
     pages = []
@@ -796,7 +908,11 @@ def make_sheets(meta_dir, png_dir, out, per_page=5, width=1600):
                 x = 10 + i * (tile + 10)
                 ImageDraw.Draw(im).rectangle([0, 0, tile - 1, tile - 1], outline=col, width=6)
                 row.paste(im, (x, 28))
-                d.text((x, 8), "%s  %s f%d  %s  %.1f cm" % (k, m["clip"], m["frame"], m["pair"], m["cm"]), fill=(235, 235, 235))
+                d.text(
+                    (x, 8),
+                    "%s  %s f%d  %s  %.1f cm" % (k, m["clip"], m["frame"], m["pair"], m["cm"]),
+                    fill=(235, 235, 235),
+                )
             rows.append(row)
         page = Image.new("RGB", (width, sum(r.height for r in rows)))
         y = 0
@@ -825,11 +941,26 @@ def run_one(path, key, out, quiet=False, shots=None):
             f.write("clip\tframe\tpair\tdepth_cm\tflags\n")
             for r in sorted(rows, key=lambda r: -r[3]):
                 f.write("\t".join(str(x) for x in r) + "\n")
-        json.dump({"glb_blob": glb_blob(path), "glb": path, "parts": parts, "stats": stats,
-                   "worst": [{"pair": "%s>%s" % k, "cm": round(v[0] * 100, 2), "clip": v[1], "frame": v[2],
-                              "at": [round(x, 4) for x in v[3]]}
-                             for k, v in sorted(worst.items(), key=lambda kv: -kv[1][0])[:12]]},
-                  open(os.path.join(out, key + ".json"), "w"), indent=1)
+        json.dump(
+            {
+                "glb_blob": glb_blob(path),
+                "glb": path,
+                "parts": parts,
+                "stats": stats,
+                "worst": [
+                    {
+                        "pair": "%s>%s" % k,
+                        "cm": round(v[0] * 100, 2),
+                        "clip": v[1],
+                        "frame": v[2],
+                        "at": [round(x, 4) for x in v[3]],
+                    }
+                    for k, v in sorted(worst.items(), key=lambda kv: -kv[1][0])[:12]
+                ],
+            },
+            open(os.path.join(out, key + ".json"), "w"),
+            indent=1,
+        )
     return line, stats
 
 
@@ -848,8 +979,13 @@ def main():
         print("%d sheets" % make_sheets(*a.sheets))
         return
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    jobs = [(k, native_glb(k, root)) for k in KEYS] if a.all else [(a.hunter, native_glb(a.hunter, root))] if a.hunter \
+    jobs = (
+        [(k, native_glb(k, root)) for k in KEYS]
+        if a.all
+        else [(a.hunter, native_glb(a.hunter, root))]
+        if a.hunter
         else [(a.key or os.path.basename(a.glb).split(".")[0], a.glb)]
+    )
     fail = False
     for key, path in jobs:
         line, stats = run_one(path, key, a.out, shots=a.dump_shots)

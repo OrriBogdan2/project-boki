@@ -997,7 +997,6 @@ func _tick_tells() -> void:
 				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):
 		var k := wave_k()
-		AimKit.circle(h, "wave", {"self": true, "r": 1.35, "fill": k, "col": WAVE_RED})
 		AimKit.charge(h, k, {"col": Color("ff6a4a")})
 
 ## During the Warchain's pull: a fiery spin around you that blights everyone it hits.

@@ -1,8 +1,8 @@
 extends RefCounted
 ## --geo-shots --geo-dir=res://<dir> --shots-dir=<dir>: renders the posed hunter frames tools/anim/geo_check.py
 ## --dump-shots wrote (<name>.json meta + <name>.bin: float32 positions and normals, uint32 triangles, one group byte
-## per triangle: 0 body, 1 the part that clips, 2 the part it sinks into, drawn see-through) as <shots-dir>/<name>_close.png
-## (the clip point close up) and <name>_full.png, on the real GPU. Needs a renderer.
+## per triangle: 0 body, 1 the part that clips, 2 the part it sinks into, drawn see-through)
+## as <shots-dir>/<name>_close.png (the clip point close up) and <name>_full.png, on the real GPU. Needs a renderer.
 
 const SIZE := 520
 const CLOSE_DIST := 1.0
@@ -11,13 +11,16 @@ var tree: SceneTree
 var holder: Node3D
 var cam: Camera3D
 
+
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var dir := ""
 	var out := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--geo-dir="): dir = a.substr(10)
-		if a.begins_with("--shots-dir="): out = a.substr(12)
+		if a.begins_with("--geo-dir="):
+			dir = a.substr(10)
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
