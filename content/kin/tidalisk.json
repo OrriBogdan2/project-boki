@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "tidalisk",
+	"name": "Tidalisk",
+	"theme": "prism",
+	"type2": "tide",
+	"flavor": "Sleek wave-runner, crest of breaking foam.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "opalisk",
+		"stage": 3,
+		"from": "frothisk"
+	}
+}

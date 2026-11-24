@@ -166,7 +166,7 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 
 
 ## A fresh training match as `hero` on a flat patch, every slot open, a glove on Q, level 10.
-func _match(main: Node, hero: String, squad := 1) -> Match:
+func _match(main: Node, hero: String, squad := 1, seed_v := 77) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	(
@@ -178,7 +178,7 @@ func _match(main: Node, hero: String, squad := 1) -> Match:
 				"squad": 2 if hero in NEEDS_ALLY else squad,
 				"tier": 0,
 				"length": 1e9,
-				"seed": 77,
+				"seed": seed_v,
 				"no_drop": true,
 				"cls": Arch.weight(hero),
 				"arch": hero,
@@ -228,6 +228,13 @@ func _clear_mobs(m: Match) -> void:
 	for mob in m.mobs:
 		mob.queue_free()
 	m.mobs.clear()
+	# wild Boki too (no owner): which species rolls onto which spot moves with the roster, and one near home
+	# turns a trial on whatever the roll put there
+	for k: Kin in m.kins.duplicate():
+		if k.owner_h == null:
+			k.dead = true
+			m.kins.erase(k)
+			k.queue_free()
 
 
 func _steps(m: Match, n: int) -> void:

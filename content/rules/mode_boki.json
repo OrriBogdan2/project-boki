@@ -22,7 +22,7 @@
 			"status": "prototype",
 			"gate_doc": "Heart Raid difficulty level, 0 the easiest. The mode has no levels yet.",
 			"tiers": {
-				"common": {"gate": 0, "species": ["moonloris", "velvorm"]},
+				"common": {"gate": 0, "species": ["moonloris", "velvorm", "ermink"]},
 				"rare": {"gate": 1, "species": ["squalltross", "umbrathere"]},
 				"very_rare": {"gate": 2, "species": ["duskapi"]}
 			}
