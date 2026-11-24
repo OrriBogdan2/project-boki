@@ -246,8 +246,8 @@ AUTO = {  # id: overrides on AUTO_BASE
     "tuatrune": BORROWED,
     "velvorm": BORROWED,
     "casquebill": BORROWED,
-    "basaltoad": {**BORROWED, "sat": 0.6, "gain": 1.0},  # the toon pass turned its tan and moss orange
-    "cindowary": {**BORROWED, "sat": 0.75},
+    "basaltoad": {**BORROWED, "sat": 0.5, "gain": 1.0},  # the game light lifts saturation ~2.5x: 0.5 lands the lit toad on the 2D tan
+    "cindowary": {**BORROWED, "sat": 0.55},  # lit leather read pink (sat 0.68 vs the 2D 0.48)
     "caecilith": {},
     "glintmole": {},
     "rimeshrew": {},
