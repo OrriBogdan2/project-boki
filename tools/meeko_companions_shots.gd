@@ -90,3 +90,19 @@ func _take(secs: float, zoom_v: float, file: String, held := {}) -> void:
 	for k in held:
 		p.inp[k] = Vector2.ZERO if k == "move" else false
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
+	_where(file)
+
+
+## <file>.json: each companion's screen centre and radius (px) in that shot, for the colour/size measures (sheets).
+func _where(file: String) -> void:
+	var cam := m.player.get_viewport().get_camera_3d()  # (her own viewport's camera: its pixels are the shot's)
+	var out := {}
+	for n in m.player.find_children("Companion_*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var c := mi.global_transform * mi.get_aabb().get_center()
+		var r := mi.get_aabb().size.length() * 0.5 * mi.global_basis.get_scale().x
+		var px := cam.unproject_position(c)
+		var edge := cam.unproject_position(c + cam.global_basis.x * r)
+		out[String(mi.name).trim_prefix("Companion_")] = [px.x, px.y, px.distance_to(edge)]
+	var f := FileAccess.open(dir.path_join(file.get_basename() + ".json"), FileAccess.WRITE)
+	f.store_string(JSON.stringify(out))

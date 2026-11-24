@@ -17,6 +17,7 @@ extends RefCounted
 ##   "face": "forward" (as modelled), "outward", or "camera" (its front, as modelled, squares up to the active camera), "sway_deg": a slow yaw, "lean_deg": a roll into the turn
 ##   "list": [{"id", "surfaces": [material names], "at": [x, y, z] the part's centre at rest, "phase_deg" (0 = her
 ##     right), "bob_period", "bob_phase", "bone": the bone it was skinned to, "anchors": [empties that ride it]}]
+##     "mood_only": {surface: [moods]}: a surface shown only in those WardenMood moods (the cloud's rain while it cries)
 ## Cosmetic only; nothing here touches a kit (the FX empties on the sun follow it, so a shot leaves the sun).
 ## On Meshy's own skeleton (WardenNative) `frame` takes the data's contract skeleton space onto that skeleton's (its
 ## units and its turn under the model), and each part's centre is the middle of its own surfaces there.

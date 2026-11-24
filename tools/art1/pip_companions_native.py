@@ -1,7 +1,7 @@
 """Meeko's sun and raincloud for the Meshy-native pack (art/wardens/pip/pip_meshy.glb), 11-23: bigger, tilted toward the
 camera, bolder faces. Builds the five companion surfaces on their own (no body, no rig) with pip_companions.py's builders
 and constants overridden here; tools/meshy/native_hunters/graft_companions.py swaps them into pip_meshy.glb.
-  blender -b --factory-startup --python tools/art1/pip_companions_native.py -- OUT.glb OUT_faces.png [--sun-glb=S.glb --cloud-glb=C.glb]
+  blender -b --factory-startup --python tools/art1/pip_companions_native.py -- OUT.glb OUT_faces.png [--sun-glb=S.glb --cloud-glb=C.glb [--sun-turn=deg --cloud-turn=deg]]
 --sun-glb/--cloud-glb (11-24, plan meeko-comp-plan-1124 3.1/3.3): the bodies are Meshy image-to-3D models from the portrait
 (imported, centred, scaled to the spans below, turned to face +Y, decimated to TRIS, their albedo kept at TEX_PX); the
 procedural sun_body()/pc.cloud_body() are the fallback when they are not given.
@@ -179,9 +179,9 @@ def sun_body():
     return ob
 
 
-def meshy_body(name, path, mat_name):
+def meshy_body(name, path, mat_name, turn=0.0):
     """A Meshy image-to-3D body: joined, centred on its bounds, scaled to SPAN, its front (glTF +Z, Blender -Y on import) turned
-    to +Y, decimated to pc.TRIS, smooth-shaded; one material `mat_name` with only Meshy's base colour (TEX_PX square)."""
+    to +Y (then `turn` degrees about Z: a model whose portrait-like side is Meshy's back), decimated to pc.TRIS, smooth-shaded; one material `mat_name` with only Meshy's base colour (TEX_PX square)."""
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path)
     meshes = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
@@ -202,7 +202,7 @@ def meshy_body(name, path, mat_name):
     vs = np.array([v.co[:] for v in ob.data.vertices])
     lo, hi = vs.min(0), vs.max(0)
     span = (hi[0] - lo[0]) if name == "cloud" else max(hi[0] - lo[0], hi[2] - lo[2])
-    ob.data.transform(Matrix.Rotation(math.pi, 4, "Z") @ Matrix.Scale(SPAN[name] / span, 4) @ Matrix.Translation(Vector(-(lo + hi) / 2)))
+    ob.data.transform(Matrix.Rotation(math.pi + math.radians(turn), 4, "Z") @ Matrix.Scale(SPAN[name] / span, 4) @ Matrix.Translation(Vector(-(lo + hi) / 2)))
     bm = bmesh.new()      # (weld Meshy's UV-seam splits first: decimated apart they open as cracks; loop UVs survive the weld)
     bm.from_mesh(ob.data)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
@@ -320,8 +320,8 @@ def main():
     mats = {"sun": pc.flat_mat("glow-sun", LEMON), "cloud": pc.flat_mat("cloth-cloud", CLOUD_COL, 0.5),
             "drop": pc.flat_mat("ice-drop", (0.60, 0.78, 0.98), 0.15),
             "fsun": pc.face_mat("eyes-mood_sun", img), "fcloud": pc.face_mat("eyes-mood_cloud", img)}
-    sun = meshy_body("sun", opt["sun-glb"], "glow-sun") if "sun-glb" in opt else sun_body()
-    cloud = meshy_body("cloud", opt["cloud-glb"], "cloth-cloud") if "cloud-glb" in opt else pc.cloud_body()
+    sun = meshy_body("sun", opt["sun-glb"], "glow-sun", float(opt.get("sun-turn", 0))) if "sun-glb" in opt else sun_body()
+    cloud = meshy_body("cloud", opt["cloud-glb"], "cloth-cloud", float(opt.get("cloud-turn", 0))) if "cloud-glb" in opt else pc.cloud_body()
     dr = drops()
     for ob, mk in ((sun, "sun"), (cloud, "cloud"), (dr, "drop")):
         if not ob.data.materials:
