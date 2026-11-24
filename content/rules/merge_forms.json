@@ -362,6 +362,23 @@
 				"dmg": 6.0,
 				"kb": 2.0
 			}
+		},
+		"wild": {
+			"cue": "normal",
+			"style": "nova",
+			"parts": [
+				"crest",
+				"halo",
+				"plates"
+			],
+			"word": "FUSION",
+			"rider": {
+				"kb": 2.0
+			},
+			"dash": {
+				"dmg": 6.0,
+				"kb": 2.0
+			}
 		}
 	},
 	"shell_base": {

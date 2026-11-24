@@ -1971,8 +1971,9 @@ static func kin(species: String, rec := {}) -> Node3D:
 	root.add_child(pup)
 	if int(rec.get("level", 1)) < 4 and (rec.get("forms", []) as Array).is_empty() and not rec.is_empty():
 		# hatchlings are small
-		root.set_meta("evo_scale", 0.82)
-		root.scale = Vector3.ONE * 0.82
+		# small, and its lean's size on top
+		root.set_meta("evo_scale", 0.82 * float(root.get_meta("evo_scale", 1.0)))
+		root.scale = Vector3.ONE * float(root.get_meta("evo_scale"))
 	Unique.dress(root, rec)          # this kin's own: size, palette shift, coat marks, proportions, shapes
 	Mutations.dress(root, rec)       # rare mutations: size, palette, extra parts
 	ShadowPolicy.boki(root)      # the body casts, the bits don't (item 94)

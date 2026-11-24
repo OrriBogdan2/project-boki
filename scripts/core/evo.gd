@@ -379,6 +379,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		root.set_meta("evo_scale", 1.0 + grown + minf(forms.size() * 0.1, 0.6))
 	if String(ln[0]) != "":
 		base = base.lerp(Lean.face(ln[0])["tint"], LEAN_TINT * float(ln[1]))
+		root.set_meta("evo_scale", float(root.get_meta("evo_scale", 1.0)) * Lean.size(rec))
 		if Lean.on():
 			Lean.mark(body, ln[0], Lean.flecks(rec))
 	# recolour the body to the form's and the meals' tint

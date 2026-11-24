@@ -35,6 +35,12 @@ const LOOKS := {
 		"dots": {"n": 4, "speed": 3.0, "life": 0.7, "grav": -2.0, "size": 3.1, "spread": 35.0},
 		"streaks": {"n": 4, "speed": 6.0, "life": 0.45, "grav": -4.0, "size": 2.9, "spread": 35.0}
 	},
+	"wyrm":
+	{
+		"col": "c8344f",
+		"dots": {"n": 5, "speed": 3.6, "life": 0.8, "grav": -1.0, "size": 3.4, "spread": 28.0},
+		"streaks": {"n": 3, "speed": 7.5, "life": 0.4, "grav": -2.0, "size": 3.3, "spread": 22.0, "fwd": true}
+	},
 	"dark": {"col": "5a3d86", "dots": {"n": 6, "speed": 1.2, "life": 1.1, "grav": -0.5, "size": 6.2, "spread": 180.0}},
 	"poison": {"col": "a6e22e", "dots": {"n": 6, "speed": 1.6, "life": 0.9, "grav": -2.5, "size": 4.7, "spread": 60.0}},
 	"bug": {"col": "f0b030", "dots": {"n": 10, "speed": 3.0, "life": 0.8, "grav": 0.0, "size": 2.2, "spread": 180.0}},
@@ -67,7 +73,10 @@ const BY_THEME := {
 	"dark": "dark",
 	"titan": "steel",
 	"swarm": "bug",
-	"tempest": "flying"
+	"tempest": "flying",
+	"tide": "water",
+	"wyrm": "wyrm",
+	"wild": "normal"
 }
 
 

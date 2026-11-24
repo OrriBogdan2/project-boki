@@ -20,4 +20,6 @@ const CHECKS := {
 	# Vex's cross-ability interactions
 	"--gunslinger-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],
 	"--boss-check": ["res://tools/boss_check.gd", "boss_check", null],  # boss lairs: dial, wards, phases, the Rare Egg
+	# belt vs source
+	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],
 }

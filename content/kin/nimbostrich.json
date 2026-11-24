@@ -124,5 +124,12 @@
 		"cm": 70,
 		"kg": 60.0,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
-	}
+	},
+	"roster": {
+		"art": "todo",
+		"line": "fizzlet",
+		"stage": 2,
+		"from": "fizzlet"
+	},
+	"type2": "tempest"
 }
