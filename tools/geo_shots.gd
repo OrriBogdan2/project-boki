@@ -11,13 +11,16 @@ var tree: SceneTree
 var holder: Node3D
 var cam: Camera3D
 
+
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var dir := ""
 	var out := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--geo-dir="): dir = a.substr(10)
-		if a.begins_with("--shots-dir="): out = a.substr(12)
+		if a.begins_with("--geo-dir="):
+			dir = a.substr(10)
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -53,7 +56,9 @@ func _stage(main: Node) -> void:
 
 
 func _shot(dir: String, name: String, out: String) -> void:
-	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("%s/%s.json" % [dir, name]))
+	var meta: Dictionary = JSON.parse_string(
+		FileAccess.get_file_as_string("%s/%s.json" % [dir, name])
+	)
 	var fa := FileAccess.open("%s/%s.bin" % [dir, name], FileAccess.READ)
 	var nv := int(meta["nv"])
 	var nt := int(meta["nt"])
