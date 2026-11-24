@@ -12,7 +12,6 @@ var aim: WardenAim  # the body's pitch across terrace heights (WardenAim)
 var holster: WardenHolster  # the gun prop's hip and hand sockets (WardenHolster), or null
 var sway: WardenSway  # a body that lags on its spring, tumbling props (WardenSway), or null
 var head_look: WardenLookAt  # the head turns to the aim ahead of the body (WardenLookAt)
-var heavy_land: WardenHeavyLand  # a long drop's deeper crouch over the land clip, or null
 var flinch: WardenFlinch  # the hit flinch over the clips (WardenFlinch), or null
 var wall: WardenWall  # the plant and push of a wall kick or bounce over the clips, or null
 var clips: WardenClips  # a Hero's hand-keyed clips, or null: the bones follow the rig (WardenGlb.BONES)
@@ -83,7 +82,6 @@ func use_clips(glb: Node3D, art_name: String) -> void:
 	opener = WardenOpen.make(clips) if clips else null
 	sway = WardenSway.make(root, skel, dd.get("sway", {}))
 	flinch = WardenFlinch.make(root, skel) if clips else null
-	heavy_land = WardenHeavyLand.make(clips, skel) if clips else null
 	aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))
 	holster = WardenHolster.make(root, skel, dd.get("holster", {}), String(bl.get("bone", "")))
 	wall = WardenWall.make(root, skel) if clips else null
@@ -237,8 +235,6 @@ func _play(dt: float) -> void:
 		opener.step(dt, 1.0 - w)
 	if flinch:
 		flinch.step(dt)
-	if heavy_land:
-		heavy_land.step()
 	if drop_pose:
 		drop_pose.step(dt)
 	clips.feel(dt, rig_root.is_empty())

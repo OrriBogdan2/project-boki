@@ -27,7 +27,7 @@
 		"plants": {"crouch_b": {"L": [0.3], "R": [0.0]}, "crouch_f": {"L": [0.267], "R": [0.583]}, "crouch_l": {"L": [0.283], "R": [0.617]}, "crouch_r": {"L": [0.283], "R": [0.6]}}
 	},
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dash_ex"},
-	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}, "heavy": {"deep": 0.25}},
+	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"gunslinger_lmb": {"clip": "lmb", "cut": 0.08, "upper": "moving", "fade_out": 0.4, "air_legs": true},
 		"gunslinger_rmb": {"clip": "coin_flick", "upper": "moving", "fade_out": 0.4, "air_legs": true},

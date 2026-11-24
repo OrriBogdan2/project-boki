@@ -30,7 +30,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 	var d := Save.fresh()
 	for i in kin_count:
 		var k := Save.new_kin(["zapple", "cindle"][i], ["Pip", "Ash"][i])
-		k["uid"] = "ftut%d" % i  # likes are seeded from the uid: a random one hates the tutorial's food
+		k["uid"] = "ftut%d" % i      # likes are seeded from the uid: a random one hates the tutorial's food
 		k["level"] = 5
 		Care.ensure(k)
 		d["roster"].append(k)
@@ -141,10 +141,12 @@ func _base_tutorial() -> void:
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
 	var last := FarmTutorial.hint_text("out")
+	var path_said: bool = last.contains("Wayseed") and last.contains("leaning Boki")
 	ok(
-		last.contains("portal") and last.contains("Stay") and not last.contains("\n"),
-		"the last hint: the portal and Stay in one short line (the Waystone path is the hub's own hint)"
+		last.contains("Waystone") and path_said and not last.contains("\n"),
+		"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line"
 	)
+	_banner_fits()
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
@@ -185,7 +187,45 @@ func _base_tutorial() -> void:
 	FarmTutorial.event("stay")
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
 	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
+	_base_ends_alone()
 	await _base_world()
+
+
+## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a
+## readable size (12 px is the shrink
+## floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
+func _banner_fits() -> void:
+	var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
+	var worst := 99
+	var over := ""
+	for sz in [Vector2(1920, 1080), Vector2(1280, 720)]:
+		var r := TutorialStrip.rect(sz)
+		var line := {"text": "\u2713 Done!  " + FarmTutorial.hint_text("out"), "count": "4/4"}
+		var lay := TutorialStrip.layout(font, r, line)
+		worst = mini(worst, int(lay["text_px"]))
+		if float(lay["text_w"]) > float(lay["text_room"]):
+			over = "at %s" % str(sz)
+	ok(over == "" and worst >= 12, "the head out line fits the strip beside 4/4 (smallest %d px) %s" % [worst, over])
+
+
+## "Head out or stay" also ends on its own: a zone waking, or a Boki finishing a toy turn. Neither counts before
+## the toy step is done, and each pays the one reward once.
+func _base_ends_alone() -> void:
+	for what in ["wake", "played"]:
+		Save.d = _new_save()
+		HomeLayout.ensure(Save.d)
+		_stats()
+		FarmTutorial.event(what)
+		ok(FarmTutorial.done_count() == 0 and FarmTutorial.active(), "%s before the toy step counts for nothing" % what)
+		for id in ["meet", "patch", "eat", "toy"]:
+			FarmTutorial.mark(id)
+		ok(FarmTutorial.current() == "out", "%s: toy done, 'head out or stay' is the step" % what)
+		var g := int(Save.d["gems"])
+		FarmTutorial.event(what)
+		var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
+		ok(not FarmTutorial.active() and FarmTutorial.did("out") and paid, "%s ends it with the one reward" % what)
+		FarmTutorial.event(what)
+		ok(int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems")), "%s again pays nothing more" % what)
 
 
 ## The hint line's Skip button is up (and not hidden behind a quiet guide).
@@ -290,7 +330,20 @@ func _base_world() -> void:
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
 	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
+	var hint := FarmTutorial.hint_text("toy")
+	var price := str(HomeLayout.price("toy_ball")[0])
+	ok(
+		hint.contains(Settings.key_cap("build")) and hint.contains(price) and hint.contains("free"),
+		"toy: the line names the build key, the ball's price and that the patch is free: %s" % hint
+	)
+	var marked: Array = []
+	for tab in ["Base", "Garden"]:
+		for e in home.hb.entries.tab(tab):
+			if bool(e.get("hl", false)):
+				marked.append(String(e["id"]))
+	ok(marked == ["toy_ball", "snack_patch"], "toy: the ball and the patch glow in their tabs: %s" % str(marked))
 	guide.place_toy()
+	ok(FarmTutorial.marks().is_empty(), "toy: nothing glows once a toy is down")
 	ok(
 		guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
 		"toy: the marker is on the toy you put down, not a side isle"
@@ -906,15 +959,12 @@ func _build_spotlight() -> void:
 	for id in ["house", "hammer", "task"]:
 		FarmTutorial.mark(id)
 	FarmTutorial.detect()
-	ok(
-		FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
-		"the trough step is up to place (%s)" % FarmTutorial.current()
-	)
+	ok(FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
+			"the trough step is up to place (%s)" % FarmTutorial.current())
 	await _lights_build_tile(home, "feeder_trough", "trough")
 	home.queue_free()
 	await main.get_tree().process_frame
 	FarmSpotlight.reset()
-
 
 func _lights_build_tile(home, entry: String, what: String) -> void:
 	var hb: HomeBuild = home.hb
@@ -931,10 +981,8 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	for b in hb.bar.find_children("*", "Button", true, false):
 		if b.get_meta("tab", "") == "Buildings" and not b.is_queued_for_deletion():
 			tab = b
-	ok(
-		FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
-		"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what
-	)
+	ok(FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
+			"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what)
 	hb.cat = "Buildings"
 	hb._build_bar()
 	await main.get_tree().process_frame
@@ -951,14 +999,12 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	hb._drop_held()
 	hb.toggle()
 
-
 func _pick_entry(hb: HomeBuild, entry: String) -> void:
 	if entry.begins_with("feeder_"):
 		hb.take_feeder(entry.trim_prefix("feeder_"))
 	else:
 		hb.take(entry)
 	hb._build_bar()
-
 
 ## Is the spotlight's first cut-out round this control?
 func _lit(c: Control) -> bool:
@@ -967,11 +1013,10 @@ func _lit(c: Control) -> bool:
 	var hole: Rect2 = FarmSpotlight._node._holes[0]
 	return hole.get_center().distance_to(c.get_global_rect().get_center()) < 2.0
 
-
 ## A Home with its interface built (its meshes build over a few frames; slower on a software rasterizer).
 func _ready_home():
 	var home = await main._hb_home()
-	var t0 := CheckClock.own_msec()  # the home builds its UI in frame slices: CPU work, not game time
+	var t0 := CheckClock.own_msec()      # the home builds its UI in frame slices: CPU work, not game time
 	while home.panel_host == null and CheckClock.own_msec() - t0 < 60000:
 		await main.get_tree().process_frame
 	home._close_panel()

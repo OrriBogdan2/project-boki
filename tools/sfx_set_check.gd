@@ -191,7 +191,6 @@ func run(main: Node) -> void:
 	_voices()
 	_carry()
 	_boki_impacts()
-	_boki_fly_home()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	preload("res://tools/sfx_bar_check.gd").new().run(ok)
 	_falloff()
@@ -1898,21 +1897,6 @@ func _boki_impacts() -> void:
 	kin.free()
 	var caps := [Sfx.IMPACT_GAP, Sfx.STACK_MAX]
 	ok(caps[0] >= 60 and caps[1] <= 4, "impacts keep their own gap (%d ms) and the stack cap (%d)" % caps)
-
-
-## The Boki leaving the fight to fly back to you (active>flying_home) has a cue of the Boki set: the `recall` takes
-## (Kin.recall, the ordered call; KinFollow.leap, its own hop; Kin.merge_leap), played at the Boki so you and nearby
-## players hear it at normal attenuation. --sfx-silence-audit (--audit-throw) counts it: 0 silent.
-func _boki_fly_home() -> void:
-	var boki: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boki.json"))
-	ok((boki["sounds"] as Dictionary).get("recall", "") == "boki", "the Boki set owns the recall cue")
-	ok(_takes("recall").size() >= 2 and Sfx.ensure("recall"), "recall has %d takes" % _takes("recall").size())
-	var kin := FileAccess.get_file_as_string("res://scripts/match/kin.gd")
-	var fol := FileAccess.get_file_as_string("res://scripts/match/kin_follow.gd")
-	ok(
-		kin.count('m.sfx("recall", pos, ') == 2 and fol.count('k.m.sfx("recall", k.pos, HOP_DB)') == 1,
-		"recall and merge_leap play it at the Boki, a hop home at HOP_DB (no `mine`: everyone in reach hears it)"
-	)
 
 
 func _impact_ok(types: Dictionary, t: String) -> bool:

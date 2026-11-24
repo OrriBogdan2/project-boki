@@ -1,7 +1,7 @@
 extends RefCounted
 ## --garden-fit-check [--shots-dir=<dir>]: the garden's newer screens (the Waystone's zone cards with locked
-## zones and "Move to...", the games board, the games picker, the Nesting Nook
-## preview, the Boki card's Family tab with its lineage) at 1280x720, 1920x1080, 2560x1080, 3440x1440, a small
+## zones and "Move to...", the games board, the Waystone wishes card, the games picker, the Nesting Nook
+## preview, the Boki card's Family tab with its lineage) at 1280x720, 1920x1080, 2560x1080, a small
 ## 960x540 window and 1280x720 with the Interface size slider at its top (UI_SCALE_MAX). Every visible
 ## control must sit inside its panel (no overflowing text, nothing cut off sideways), no one-line label or
 ## button may clip or ellipsize its text, and the panel must sit inside the window's safe margin. With
@@ -9,18 +9,12 @@ extends RefCounted
 ## the real save.
 
 const SettingsScript := preload("res://scripts/core/settings.gd")
-const SIZES := [
-	[Vector2i(1280, 720), 1.0],
-	[Vector2i(1920, 1080), 1.0],
-	[Vector2i(2560, 1080), 1.0],
-	[Vector2i(3440, 1440), 1.0],
-	[Vector2i(960, 540), 1.0],
-	[Vector2i(1280, 720), SettingsScript.UI_SCALE_MAX]
-]  # [window, "ui_scale"]
-const SAFE_MIN := 16.0  # px (logical), the least gap from a panel to the window's edge (as UI.scroll_panel)
-const SLACK := 1.5  # px a control may stick out of its panel (rounding of the torn frames)
-const SETTLE := 8  # frames for a panel and its scroll to size themselves
-const GROWN := 8  # level at which a Boki can go in the Nook
+const SIZES := [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector2i(2560, 1080), 1.0],
+		[Vector2i(960, 540), 1.0], [Vector2i(1280, 720), SettingsScript.UI_SCALE_MAX]]      # [window, "ui_scale"]
+const SAFE_MIN := 16.0       # px (logical), the least gap from a panel to the window's edge (as UI.scroll_panel)
+const SLACK := 1.5           # px a control may stick out of its panel (rounding of the torn frames)
+const SETTLE := 8            # frames for a panel and its scroll to size themselves
+const GROWN := 8             # level at which a Boki can go in the Nook
 
 var bad := 0
 var main: Node
@@ -30,17 +24,16 @@ var screens := {
 	"zone_cards": func(): ZoneCards.open(home, home.hway.here()),
 	"zone_move_to": func(): ZoneCards.move_to(home, home._kin_entry(Save.d["roster"][0])),
 	"games_board": func(): ZoneCards.board(home),
+	"wishes": func(): _wishes(),
 	"games_picker": func(): MinigameHub.open(home),
 	"nook_preview": func(): _nook(),
 	"boki_card_family": func(): _boki_card(),
 }
 
-
 func ok(cond: bool, what: String) -> void:
 	print("GARDENFIT %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
-
 
 func run(m: Node) -> void:
 	main = m
@@ -54,10 +47,8 @@ func run(m: Node) -> void:
 	nav._save()
 	_dress_save()
 	home = await nav._open_home()
-	ok(
-		not home.hg.demo_place("training_post", HomeLayout.LANDING + Vector3(5.0, 0, 3.0)).is_empty(),
-		"a Training post placed (the picker lists its games)"
-	)
+	ok(not home.hg.demo_place("training_post", HomeLayout.LANDING + Vector3(5.0, 0, 3.0)).is_empty(),
+			"a Training post placed (the picker lists its games)")
 	await _frames(2)
 	ok(not MinigameHub.listed(home).is_empty(), "the picker has games to list")
 	if main.get("fade") != null:
@@ -81,11 +72,9 @@ func run(m: Node) -> void:
 	print("GARDENFIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-
 func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
-
 
 ## Six Boki, two Grown friends (the first with a record of parents), three with wishes, a Dash winner on the wall.
 func _dress_save() -> void:
@@ -93,28 +82,33 @@ func _dress_save() -> void:
 	for i in 2:
 		roster[i]["level"] = GROWN
 		roster[i]["trust"] = 60.0
-	roster[0]["lineage"] = {
-		"parents": [],
-		"names": ["Pennyroyal the Wandering", "Bartholomew-Longname"],
-		"gen": 3,
-		"nest": {"gifts": 2, "species": true, "habit": true}
-	}
+	roster[0]["lineage"] = {"parents": [], "names": ["Pennyroyal the Wandering", "Bartholomew-Longname"], "gen": 3,
+			"nest": {"gifts": 2, "species": true, "habit": true}}
 	for i in range(2, 5):
 		for n in roster[i]["needs"]:
 			roster[i]["needs"][n] = 5.0
 	Save.d.erase("wishes")
 	Save.d["showcase"] = [{"name": "Pennyroyal the Wandering", "date": "day 12", "twist": "Low-gravity gust week"}]
 
+func _wishes() -> void:
+	var v: VBoxContainer = home._new_panel("Today's wishes", 520)
+	var w := GardenWishes.today(Time.get_unix_time_from_system())
+	ok(not w["list"].is_empty(), "the wishes card has wishes")
+	# the wishes now ride on the away card as plain lines (GardenWishes.card_lines, c21b61357c):
+	# lay them out the same way
+	for line in GardenWishes.card_lines():
+		var l := Label.new()
+		l.text = String(line)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(l)
 
 func _nook() -> void:
 	home.nook_pick = [Save.d["roster"][0]["uid"], Save.d["roster"][1]["uid"]]
 	home._open_nook()
 
-
 func _boki_card() -> void:
 	home.kin_tab = "Family"
 	home._open_kin(Save.d["roster"][0])
-
 
 ## Checks the open panel against the window and its own frame.
 func _scan(tag: String) -> void:
@@ -134,7 +128,7 @@ func _scan(tag: String) -> void:
 		var p := c.get_parent()
 		while p != panel and p != null:
 			if p is ScrollContainer:
-				limit = Rect2(p.global_position.x, -1e6, p.size.x, 2e6)  # scrolls down, never sideways
+				limit = Rect2(p.global_position.x, -1e6, p.size.x, 2e6)      # scrolls down, never sideways
 				break
 			p = p.get_parent()
 		if not limit.grow(SLACK).encloses(c.get_global_rect()):
@@ -144,18 +138,12 @@ func _scan(tag: String) -> void:
 	var texts: Array = cut.slice(0, 3).map(func(c): return c.text)
 	ok(cut.is_empty(), "%s: no text cut short (%d: %s)" % [tag, cut.size(), texts])
 
-
 ## A one-line label or button that clips or ellipsizes a text wider than itself.
 func _cut_short(c: Control) -> bool:
 	if not c.is_visible_in_tree() or c.size.x <= 0.0 or not (c is Label or c is Button) or c.text == "":
 		return false
-	if (
-		c is Label
-		and (
-			c.autowrap_mode != TextServer.AUTOWRAP_OFF
-			or (not c.clip_text and c.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING)
-		)
-	):
+	if c is Label and (c.autowrap_mode != TextServer.AUTOWRAP_OFF or (not c.clip_text
+			and c.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING)):
 		return false
 	if c is Button and not c.clip_text and c.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING:
 		return false

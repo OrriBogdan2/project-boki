@@ -29,7 +29,7 @@
 		"plants": {"crouch_b": {"L": [0.267], "R": [0.0]}, "crouch_f": {"L": [0.25], "R": [0.533]}, "crouch_l": {"L": [0.25], "R": [0.55]}, "crouch_r": {"L": [0.267], "R": [0.55]}}
 	},
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "hop"},
-	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13}, "heavy": {"deep": 0.25}},
+	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"as_lance": {"clip": "lance", "hold_from": 0.34, "upper": "moving", "fade_out": 0.4, "air_legs": true},
 		"lw_stoke_lance": {"clip": "lance_stoke", "hold_from": 0.5, "upper": "moving", "fade_out": 0.4, "air_legs": true},

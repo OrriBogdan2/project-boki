@@ -665,19 +665,6 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 | LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large darts; they leave along the aim, then curve onto the foe at the cursor over 35 to 70% of the flight. **Skating beams home the same way** after leaving straight on the aim | match; gap 16 closed `e5c73480c` (bend assert pending `ext/parity-neve-skate-home` 9b65ea7f1) |
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Ice Spear: pushed out to the cursor (12 m), 18 dmg, 2.2 m slow zone 35%, bursts 22 (= 190/156 x hit 18) at 1.8 s, 2 charges, cd 10.2 | differ (owner: push-like release); 0.85x cd |
 | Q | none | glove | ours |
-| E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, 70 HP, E again freezes 6 s, cd 17 | match; 0.85x cd |
-| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Rimelock: hold 3.5, skate carry .8 (owner), 40 dmg + 0.75 s stun, early recast cancels, cd 80 | match |
-| Dash | Hold, release stops, 13 s; ice islands over the abyss [D] | Skate 11.5 m/s (F 10 to 11), up to 1.6 s, early-release refund .6 (owner), ice ribbon in the air, cd 13 | match; refund owner |
-| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s, 8 darts shatter, knock shatters. **Chill slow removed; Shatter burst slow removed** | match; closed `3bcb50eca`, Shatter slow `f6c93c7a59` |
-| Anim | Footage poses | 19 moves plus the fusion move, all on `claire.glb` (49 clips); v2 model `59ac7b48d` | match on coverage |
-| Body | 1.1 to 1.15 [F] | size 1.014 (1.56 m, owner height chart `4538174a8`) | differ (owner) |
-| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight while skating | match; skate tracking owner question (gap 16) · **done** `ext/parity-neve-skate-home`, `ext/neve-dart-homing`: late homing while skating, asserted |
-| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2; detonation 22 = 190/156 x hit 18 | differ (owner) · **owner** |
-| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight, 2x damage while skating | match; skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skate tracking owner question (gap 16) |
-| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
-| LMB | Hold, semi-homing, 3 heavy at end of burst, 0.5 s barrage cd [D]; one uniform stream while held [F] | Hold = one burst of plain darts (0.18 s, 4 dmg), 3 large on the let-go (x2 damage), 0.5 s pause; darts leave along the aim and curve onto the foe at the cursor over 35 to 70% of the flight; skating: beams (x2 damage, `dash.skate_dart_dmg_k`) that home the same way; a tap the burst cannot take yet is buffered (`b53f5b0328`, 11-22) | match; skating x2 is the wiki's number (footage 1.6x, no data number) |
-| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Ice Spear: pushed out to the cursor (12 m, 18 m/s), 18 dmg, 2.2 m slow zone 35%, bursts 22 in 2.7 m at 1.8 s (= 190/156 x the hit), 2 charges, cd 10.2 | differ (owner: push-like release); 0.85x cd (gap 10, owner row) |
-| Q | none | glove | ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, **200 HP** (owner 11-08), E again freezes 6 s, cd 17 | match; 0.85x cd (gap 10, owner row) |
 | R | Invulnerable Slowing zone 3.5 s with periodic Shatter stacks, explode, stun, cancel, 80 s [D] | Rimelock: hold **3.3** (footage 3.2 to 3.4), flat 35% slow (no ramp), skate carry .8 x1.05 (owner 11-08), rink **7.47 m** (4 bh +15% owner 11-08, then -10% owner 11-11; was written 8.3 here), crash **18** = 155/156 x the spear hit + 0.75 s stun, cd 80 | match; radius and carry owner; periodic Shatter stacks not built (no period in [D]) |
 | Dash | Hold, release stops, 13 s; ice islands over the abyss [D] | Skate 10.5 m/s (F 10 to 11, the mean), ramp 0.12 s (11-20), up to 1.6 s, early-release refund .6 (owner), ice ribbon in the air, cd 13 | match; refund owner |
@@ -801,8 +788,6 @@ DECISIONS 2026-11-10: the first pick is Lace, Kael or Vex, so every new player t
 - **C. Zone ticks run 0.52 s, not 0.5.** `scripts/arch/kits/gunslinger_ult.gd:181-183` (Cinderfall) and `scripts/arch/kits/archer_kit.gd:401-404` (Hail Wall) reset the tick timer and drop the remainder, so 0.5 s costs 31 frames. 3% slow, same on main. Keep the remainder (`+= every`) in both.
 
 ## Crowd control: every stun, root, Ground, slow, Daze and knock effect (main d255acbee, 2026-11-09)
-
-> Re-measured 2026-11-22: the current table is `docs/KIT_PARITY.d/1122-cc-reread.md` (`--cc-measure-check`). The rows below are the 11-09 read.
 
 Read from `content/archetypes/*.json` and the kit code. Source = the card text in `sv/briefs/kits.md` [D] and the footage reads in `briefs/hero-ref` [F] (5 fps, so a read is good to about +-0.2 s). **The card gives no CC duration or strength except Motley's (Snap 0.8 to 1.8 s, Black Hole 3.5 s, orb 6%) and the upgrade steps (Binding +0.3 s root, Primal Slam +0.1 s and +0.2 s stun).** Every other source row is a footage read or just the word "Slow", "Stun", "Daze". No silence and no knock-up (a launch that disables) is built anywhere, and none is in these 12 kits' cards except ref-bulwark's Faultline (queued, skipped). Self-slows (cast, charge, carry) are not CC and are left out. Albert's Faultline and Spin Dash are skipped (queued job). Sable's 30% bola slow stays (owner item 53).
 
@@ -966,6 +951,8 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Kael | 4.5 m/.17 s (+.07 dip) | class long dash | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.2 s | ×feel |
 | Lace | 3.0 m/.27 s roll | 5.0 m/.22 s flick (light long dash) | F roll | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | 5.0 m/.22 s |
 | Cinder | 3.4 m/.33 s | 3.4 m/.28 s poof (was 6.8 m) | F | ×1 | 3.4 m/.33 s | 3.4 m/.28 s (owner 11-17: was 6.8 m, twice as far) |
+| Meeko | 3.6 m/.2 s | 13.3 m/.95 s glide | F | ×1 | 3.6 m/.2 s | 13.3 m/.95 s |
+| Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 3.4 m/.28 s (owner 11-17: was 6.8 m, twice as far) |
 | Meeko | 3.15 m/.23 s | 10.5 m/.95 s glide (footage 3.6 m/.2 s and 13.3 m/.95 s, shortened and slowed by the owner 11-11, `2f8b11c58c`) | F, then owner | ×1 | 3.15 m/.23 s | 10.5 m/.95 s |
 | Tenzo | 2.8 m/.26 s hop | class long dash | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | ×feel |
 | Grimble | 3.2 m/.16 s | 4.3 m/.16 s (×1.35) | no (owner 23:40) | ×.85/×1.15 | 2.7 m/.18 s | 3.7 m/.18 s |

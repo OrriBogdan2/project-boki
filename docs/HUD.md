@@ -78,6 +78,13 @@ drawn, your shield strip drains first and fades, the downed plate and status wor
 the ultimate tile goes cooling -> ready with the shine on the redraw it comes back, steady after, padlocked while stunned,
 no second shine).
 
+## Combat HUD clutter check: backlog (all 13 Hunters, 2026-11-20)
+
+`--hud-clutter-check --hunter=<id>` run for all 13 Hunters on main fff700af22: 6 Hunters failed: Gil cast (drawn panels 58/57), Thief ult (kill feed over the Hunter), Mage and Rimewright ult ("not in a fight", a harness gap), Juggernaut cast (62/57 while three rank-up hints showed) and Tender cast (knock banner still open under load). Fixed here: the kill feed slides out of the Hunter's box, one fresh ALT+key rank-up hint at a time, the check stages a fight state for god-mode Hunters and waits for the knock banner by clock. Open, needs a design call:
+- The drawn-panel budget (`drawn_panels` 57, `total` 68) counts every panel redraw inside the 4-frame recording window, and the panels redraw 20 times a second, so one pass is counted 1 to 3 times (a single pass is about 25 for Albert, the recorded count 50 to 75). Count one pass and lower the budget to match, or keep the budget and say so. Owner OK needed: it changes the gate.
+- After the fixes Gil and Juggernaut casts still read 58 against 57 (18 ability panels and 12 weapon-card panels over two redraws, 29 a pass; Archer's cast is 8 and 10). Budget room, or a lighter ability row and weapon card while casting, is a design call.
+- The hover tooltip can sit over the Boki in the harness shots (cursor at screen centre); the check does not count it.
+
 ## Damage numbers
 
 Every hit's number goes through `Fx.damage_number`, which shows only damage that involves you (dealt by you
@@ -89,13 +96,6 @@ never from the kit:
 | hit | your direct hits (and anyone's hits on you) | full | `HudStyle.HIT`, crit / armour / hurt colours | the hit spot; rapid hits add up |
 | Boki | a Boki's hits | 78% | its type colour (`DexView.type_col`, the HUD badge's); crit, armour and hurt colours as for a hit | beside yours; its own number |
 | tick | burn and poison ticks, or any hit flagged `tick` | 62% | the burn colour (`DotLook.COL`) | lower on the body; one number per second |
-
-What a hit landed on is its own number too (one table, `HudStyle.NUM_STYLE`; `Fx.Num` SHIELD and HEAVY): a shield soaking
-it (Albert's aegis, the timed ward, the Boki owner shield: `HudStyle.NUM_SHIELD`, lavender, 85%) and a Fusion shell
-soaking it (`NUM_SHELL`, teal, 85%) print what they took (`SoakNumber`, also on a partly soaked hit), and an empowered
-hit (`heavy` / `payoff`: `NUM_EMPOWERED`, orange, 112%). Armour stays blue, a crit gold with the ember outline, a heal
-green with a `+`, damage you take red. No two kinds share a colour and a size. Check: `--dmg-number-check` (one of each
-kind through the real paths).
 
 Crits keep their colour, thick ember outline and bigger pop in the hit and Boki looks; armour keeps its colour.
 Numbers of different looks (or a heal, `Fx.Num.HEAL`) never add onto each other; a number on a Boki is
@@ -141,8 +141,8 @@ for the squad rows). Verified 11-11:
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
 - An open deathbox does not open this window: the loot window (below) shows what you carry itself.
-- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`). `--inventory-check` also sweeps a full loadout at 1280x720, 1920x1080 and 3440x1440 (safe margin, clipping, every slot reachable); `--garden-fit-check` covers the garden Boki card at the same sizes.
-  0.24.5 pass at 1280x720 and 3440x1440 in docs/shots/ui-inventory.
+- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`); 0.24.5 pass at 1280x720 and
+  3440x1440 in docs/shots/ui-inventory.
 
 ## Pop-up budget
 

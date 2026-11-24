@@ -114,7 +114,7 @@
   "glide": "A tap just flicks it: keep %J held until you are across.",
   "pick_kin": "%L",
   "shoot": "%L",
-  "shoot_draw": "Hold to draw the bow, let go to loose. A longer draw hits harder.",
+  "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
   "glide": "Jump, then press %J again in the air to open your glider.",
   "wallkick": "A jump against a wall kicks you up it.",
@@ -173,7 +173,7 @@
   "wallkick": "Climb",
   "crouch": "Lookout",
   "glove": "Glove",
-  "wayout": "Outpost",
+  "wayout": "Uplink",
   "uplink": "Uplink",
   "defend": "Outpost",
   "extract": "Lift"

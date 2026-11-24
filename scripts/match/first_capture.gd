@@ -25,7 +25,7 @@ static func _in_range(p: Hunter, k: Kin) -> bool:
 
 static func hint_text(k: Kin) -> String:
 	return (
-		"%s  ·  %s  ·  Hold %s to capture it; get out to keep it"
+		"%s  ·  %s  ·  Hold %s to capture it: it comes home with you if you get out"
 		% [k.sp["name"], String(k.sp["type"]).capitalize(), Settings.key_cap("interact")]
 	)
 

@@ -32,7 +32,7 @@
 		"deep_water": {
 			"icon": "wave",
 			"name": "Deep Water",
-			"tip": "Deep water slows you, weakens your hits and runs you out of breath.",
+			"tip": "Deep water ahead: it slows you, weakens your hits and runs you out of breath.",
 			"noun": "deep water",
 			"hurts": "slow, weak hits, short of breath",
 			"effect": {

@@ -41,10 +41,6 @@ func _tip(h: Hunter, id: String) -> Array:
 	var slot := UtilityBelt.slot_of(h, id)
 	if slot < 0 or Save.d["tutorial"].get(key, false):
 		return []
-	return [key, line(id, slot)]
-
-
-## "<item> on <key>: <first sentence of its desc>".
-static func line(id: String, slot: int) -> String:
 	var effect := String(UtilityBelt.def(id).get("desc", "")).get_slice(". ", 0).trim_suffix(".")
-	return "%s on %s: %s" % [UtilityBelt.name_of(id), Settings.key_cap(UtilityBelt.KEYS[slot]), effect]
+	var cap := Settings.key_cap(UtilityBelt.KEYS[slot])
+	return [key, "%s on %s: %s" % [UtilityBelt.name_of(id), cap, effect]]

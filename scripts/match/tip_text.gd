@@ -4,17 +4,24 @@ extends RefCounted
 ## (Settings.key_cap) at the moment they appear, so a rebind shows in the next hint.
 
 
-## The glide is jump, then jump again (held) in the air: the second press is what the line says.
 static func move() -> String:
 	var fire := Settings.key_cap("fire")
-	return (
-		"Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide"
-		% [fire, Settings.key_cap("dash"), Settings.key_cap("jump")]
-	)
+	return "Hold %s to shoot  ·  %s dashes  ·  %s" % [fire, Settings.key_cap("dash"), glide_how()]
+
+
+## How to glide: jump, then press jump again in the air and hold it (HoldTeach: a held glide).
+static func glide_how() -> String:
+	return "jump, then press %s again in the air and hold to glide" % Settings.key_cap("jump")
 
 
 static func rings() -> String:
-	return "Glide through the glowing rings between islands for a burst of speed."
+	return (
+		(
+			"Glowing rings in the air between islands: jump off the edge, then %s and fly through them for a burst "
+			+ "of speed. Fast gliders barely sink."
+		)
+		% glide_how()
+	)
 
 
 ## A hunter with a kit sends the Boki on the Boki key; the others use their E ability.
@@ -39,4 +46,10 @@ static func scan() -> String:
 
 static func stagger(mob: String) -> String:
 	var keys := [Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")]
-	return "Purple ring on %s: use %s, %s or %s for a big stun." % ([mob] + keys)
+	return (
+		(
+			"A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long "
+			+ "stun and your cooldown back."
+		)
+		% ([mob] + keys)
+	)

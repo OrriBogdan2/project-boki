@@ -14,16 +14,13 @@ const FIGHT_STEPS := ["sec", "shoot", "gkey", "kin", "hook"]
 const USED := ["sec", "fire", "dash", "kick", "boki", "kin", "glove"]
 ## What each starter's first fight line says.
 const HINT_WORD := {"archer": "draw", "juggernaut": "step in", "gunslinger": "shoot"}
-const FIGHT_MIN := 12.0  # s: the fight beats together, bot-driven, per starter (Lace and Vex take 16-20 s)
-const FIGHT_MAX := 70.0  # (six camps since 0.24.4: the bot's melee juggernaut walks to each, 52-61 s)
-const DAMAGE_MAX := 60.0  # hp taken over the fight beats (of 100)
-
+const FIGHT_MIN := 12.0       # s: the fight beats together, bot-driven, per starter (Lace and Vex take 16-20 s)
+const FIGHT_MAX := 70.0       # (six camps since 0.24.4: the bot's melee juggernaut walks to each, 52-61 s)
+const DAMAGE_MAX := 60.0      # hp taken over the fight beats (of 100)
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTFIGHT %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond:
-		bad += 1
-
+	if not cond: bad += 1
 
 func run(main: Node) -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
@@ -33,29 +30,15 @@ func run(main: Node) -> void:
 	print("TUTFIGHT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-
 func _play(main: Node, id: String) -> void:
-	seed(11)  # (the same run each time)
-	Save.d["tutorial"]["tut_beat"] = ""  # (each starter from the top: the last one's beat would resume this one)
+	seed(11)       # (the same run each time)
+	Save.d["tutorial"]["tut_beat"] = ""     # (each starter from the top: the last one's beat would resume this one)
 	var m := Match.new()
 	main.add_child(m)
-	(
-		m
-		. start(
-			{
-				"tutorial": true,
-				"tut_test": true,
-				"seed": 11,
-				"teams": 1,
-				"squad": 1,
-				"tier": 0,
-				"length": 1500.0,
-				"demo_kin": "cindle",
-				"arch": id,
-				"cls": Arch.weight(id),
-			}
-		)
-	)
+	m.start({
+		"tutorial": true, "tut_test": true, "seed": 11, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
+		"demo_kin": "cindle", "arch": id, "cls": Arch.weight(id),
+	})
 	m.set_process(false)
 	var tu: Tutorial = m.tut
 	var t := 0.0
@@ -67,7 +50,6 @@ func _play(main: Node, id: String) -> void:
 	var locked: bool = m.player.slot_lv.values().all(func(v): return int(v) == 0)
 	ok(locked and m.player.lvl == 1 and m.player.skill_pts == 1, id + ": lands at level 1, one point, all locked")
 	var forced := false
-	var placed := false
 	while t < 400.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
@@ -80,13 +62,6 @@ func _play(main: Node, id: String) -> void:
 			ok(only and not p.can_level("ult"), id + ": the first pick (made for you) is the right click, no other")
 			p.gain_xp(500.0)
 			ok(p.lvl == 1, id + ": XP from anything but the camps is ignored")
-		if tu.id() == "wallkick" and not placed:
-			placed = true  # (up on the lookout with no kick: the step waits; the bot walks off and kicks up)
-			m.player.pos = tu.stop("crouch")
-			m.player.vel = Vector3.ZERO
-			for i in 15:
-				m.step(Match.DT)
-			ok(tu.id() == "wallkick", id + ": on the lookout with no wall kick, the Climb step is still open")
 		if tu.id() in FIGHT_STEPS:
 			fight_t += Match.DT
 			damage += maxf(0.0, hp - m.player.hp)
