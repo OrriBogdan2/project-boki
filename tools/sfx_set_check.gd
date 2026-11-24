@@ -117,6 +117,8 @@ const WIRED := {
 	"boki_unfuse": ["match/merge_xform.gd"],
 	"boki_eat": ["home/home.gd"],
 	"boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
+	"wisp_burst": ["match/kin_summon.gd"],
+	"wisp_fold": ["match/kin_summon.gd"],
 }
 
 ## 11. Meeko's channel loop, one training match per end path.
@@ -181,6 +183,7 @@ func run(main: Node) -> void:
 	_fusion_cues()
 	_training()
 	_boki_cues()
+	_summon_cues()
 	_pick_taken()
 	_ui_cues()
 	_low_hp()
@@ -216,6 +219,45 @@ func _boki_cues() -> void:
 	for theme in KinLib.TYPE_OF_THEME:
 		types[KinLib.TYPE_OF_THEME[theme]] = true
 	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
+
+
+## The summon pop's sounds (KinSummon.popped, BokiWispPop): the burst plays the bloom at the Boki with the species'
+## own happy cry layered on it, a fold plays the inward swish, a re-bloom the bloom again; each cue is a short
+## file in the wisp set, and every one goes through Sfx.play (so Sfx.MIN_GAP holds).
+func _summon_cues() -> void:
+	var stub := GDScript.new()
+	stub.source_code = "extends Node\nfunc sfx(n, p = null, vol := 0.0, pitch := 1.0, mine := false):\n"
+	stub.source_code += "\tSfx.play(n, p, vol, 0.07, pitch, 0.0, mine)\n"
+	stub.reload()
+	var k := Kin.new()
+	k.m = stub.new()
+	k.species = "cindle"
+	k.pos = Vector3(4, 0, 2)
+	var s := KinSummon.new(k)
+	var own := KinVoice.cue(k.species, "happy")
+	Sfx.cue_log = []
+	s.popped(false)
+	var burst: Array = Sfx.cue_log.duplicate()
+	Sfx.cue_log = []
+	s.popped(true)
+	var fold: Array = Sfx.cue_log.duplicate()
+	Sfx.cue_log = null
+	var heard := func(calls: Array) -> Array: return calls.map(func(c): return c[0])
+	ok(own.begins_with("bk_"), "summon: a Cindle has its own happy cry to layer (%s)" % own)
+	var want := ["wisp_burst", own]
+	ok(heard.call(burst) == want, "summon: the burst plays the bloom, then its own cry (%s)" % [heard.call(burst)])
+	ok(heard.call(fold) == ["wisp_fold"], "summon: the fold plays the swish alone (%s)" % [heard.call(fold)])
+	ok(
+		burst.all(func(c): return c[1] == k.pos and c[2]) and fold.all(func(c): return c[1] == k.pos and c[2]),
+		"summon: each cue is on file and played at the Boki"
+	)
+	var lens := []
+	for cue in [KinSummon.BURST_CUE, KinSummon.FOLD_CUE]:
+		var path: String = _takes(cue)[0]
+		lens.append(_data(path).size() / 2.0 / FileAccess.get_file_as_bytes(path).decode_u32(24))  # s: samples / rate
+	var short: bool = lens[0] <= 0.6 and lens[1] <= 0.4 and lens[0] > lens[1]
+	ok(short, "summon: bloom %.2f s, swish %.2f s (short, the bloom longer)" % lens)
+	k.free()
 
 
 func _check_set(path: String) -> void:
@@ -1313,6 +1355,7 @@ func _steps(main: Node) -> void:
 		var deck := Vector3(car.origin.x, m.skytrain.deck_y(car.origin + Vector3(0, 0.3, 0)), car.origin.z)
 		ok(StepSurface.at(m, deck) == "metal", "a sky train car's deck is metal")
 		spots["metal"] = deck
+	_style_rows(m)
 	var plank: Vector3 = spots.get("grass", Vector3.ZERO)
 	for surf in ["grass", "stone", "snow", "metal", "wood"]:
 		if surf == "wood":  # last: lays a plank tile on the grass one
@@ -1327,6 +1370,42 @@ func _steps(main: Node) -> void:
 		var wade := "step_water_" + StepSurface.weight_of(WEIGHT_ARCH[cls])
 		ok(wade == "step_water_" + cls and Sfx.ensure(wade), "farm wading: %s plays %s" % [cls, wade])
 	m.queue_free()
+
+
+## Every biome style a tile can have (Flora.STYLES, the generated regions, the styles the Hollow Crown's islands
+## carry) maps to one of the four step sets every Hunter has (content/rules/step_biomes.json), and the map's ember
+## and gloom ground plays stone, its frost snow.
+func _style_rows(m: Match) -> void:
+	var known := ["grass", "stone", "wood", "snow"]
+	var styles: Array = Flora.STYLES.duplicate()
+	for i in m.world.w * m.world.h:
+		var st := m.world.style_at(i)
+		if not styles.has(st):
+			styles.append(st)
+	var rules: Dictionary = Content.rules(StepSurface.RULES)
+	var bad := []
+	for st in styles:
+		if not rules["styles"].has(st) or not known.has(StepSurface.for_style(st)):
+			bad.append(st)
+	var good: bool = bad.is_empty() and known.has(String(rules["default"]))
+	ok(good, "every biome style maps to a known step set (%s; unmapped %s)" % [styles, bad])
+	ok(rules["styles"].keys().all(func(k): return styles.has(k)), "step_biomes.json lists no style the game lacks")
+	var want := [["ember", "stone"], ["gloom", "stone"], ["frost", "snow"]]
+	want += [["meadow", "grass"], ["bloom", "grass"], ["storm", "grass"]]
+	for pair in want:
+		ok(StepSurface.for_style(pair[0]) == pair[1], "%s ground plays %s" % pair)
+	var walked := {}
+	for z in m.world.h:
+		for x in m.world.w:
+			var i := m.world.idx(x, z)
+			var w: World = m.world
+			if w.kind[i] == World.T_GROUND and not (w.bridge.has(i) or w.stairs.has(i) or w.paint.has(i)):
+				var p := Vector3(x + 0.5, m.world.ground_at(x + 0.5, z + 0.5), z + 0.5)
+				var st := m.world.style_at(i)
+				if not walked.has(st):
+					walked[st] = true
+					var sf := StepSurface.for_style(st)
+					ok(StepSurface.at(m, p) == sf, "a bare %s tile on the Hollow Crown plays %s" % [st, sf])
 
 
 ## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the

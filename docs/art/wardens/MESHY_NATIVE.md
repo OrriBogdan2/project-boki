@@ -24,7 +24,7 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
   bone `find` names for their contract bone at the same offset from its head; one on a bone with no stand-in (a tail
   spring) rides the nearest Meshy bone. The Gun's Muzzle sits on the copied `weapon_muzzle` each frame.
 - HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
-  idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack`, crouch
+  idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack` (or its clip slot below), crouch
   `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
 - Crouch arms (`crouch_arms_from`): Meshy's only crouch holds a torch out in front, which read in game as Sable's
   pistol and Tenzo's stone arm floating off the body. The crouch plays a copy (`<clip>_arms`, added beside Meshy's
@@ -74,6 +74,45 @@ the parts' length as the contract clips key Cinder's jet bones (x0.06 at rest, x
 in Meshy's mesh (Meeko's sun and cloud, surfaces named as in `warden_anim/<art>.json` "companions") are cut out and
 circle her as on the contract path, the data's skeleton space carried onto Meshy's.
 
+## Clip slots (per-move and per-state clips)
+Data `clips` may add any of these keys beside idle, walk, run, jump, attack and crouch. Each names a clip; a missing key
+plays today's clip, so nothing changes until a Hunter's clips land (`WardenNative._one_shot` / `_held`).
+| Key | Plays | Without it |
+|---|---|---|
+| `lmb` | a melee swing or a shot | `attack` |
+| `lmb_hold` | a charged swing (state `combo` -1) | `lmb`, then `attack` |
+| `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
+| `hit` | one-shot when a hit lands (state `hit_t` jumps back) | the loop clip plays on |
+| `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
+| `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
+| `glide` | while `gliding` (loops) | `jump` |
+| `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
+| `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
+Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
+played) and play at `attack_rate`, `hit` and `land` at 1. A hit wins over a swing, a swing over a landing.
+A clip may come from an animation-only file `art/wardens/<art>/<art>_clips.glb`, packed with `native_pack.py` onto the
+same skeleton (Y-up Hips as in the main file). Clips the data names that Meshy's own file lacks are looked up there by
+clip name, their tracks laid on this skeleton's bones by bone name (tracks of a bone it lacks are dropped), and added
+once to the shared library (`WardenNative.borrow`). A slot whose clip is in neither file is dropped with a warning and
+plays today's clip.
+`--warden-native-check` rows (per Hunter, per slot): the slot empty plays today's clip; the slot filled plays its clip
+with at least 10 bones off Meshy's T-pose on the switch frame and after the crossfade; a charged swing takes `lmb`
+without `lmb_hold`; a synthetic clips file's clip lands on Meshy's bones and plays; every slot the data names has its clip.
+
+## Kit-move clips (data `kmoves`)
+A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
+"rate": x, "fade": s}}` (`WardenNativeMoves`). While the move lasts the clip is laid at the move's clock (`kmove_t`), so a
+release move, which the kit starts at the frame the arrow leaves, shows its release on its first frames. `hold_from` loops
+the clip from there to its end for as long as the move lasts; the kit ends the draw move with the hold input, so the loop
+never shows without it. A move with no clip, or whose clip no file has, keeps the slot clips above. The clips come from
+`<art>_clips.glb` by name like the slots'. Lace's (`tools/meshy/lace_clips.py`, poses by limb direction on her skeleton,
+no retarget; the string follows the drawing hand on `StringMid`): `lace_draw`, `lace_over`, `lace_tap`, `lace_loose`,
+`lace_super`, `lace_heavy_wind`, `lace_heavy`, `lace_spirit`, `lace_ult`, `lace_ult_final`. The clips are the whole body
+(the contract's upper-body layer is not on this path): the feet of the draw and Spirit Walk clips do not follow the ground.
+`--warden-native-check` rows (per kit move): the clip is there, plays on the move and is no T-pose; a hold loop stays in
+`[hold_from, end]` while the move lasts and is gone when it ends; a release has the string drawn on its first frame and
+back on the bow a frame later.
+
 ## Look-at on Meshy's bones
 `WardenLookAt.make(model, skel, true)`: the same layer, limits (70 deg yaw, 25 deg pitch) and smoothing as the contract path,
 laid after the clip and the air tilt. The turn is shared down Meshy's chain so the head's total turn is the contract's
@@ -83,7 +122,7 @@ plays for any swing, cast or kit move): the layer eases out as that clip takes t
 after it, so it does not fight a clip that already turns the head. `--look-at-check` runs it on every native Hunter.
 
 ## Not on the native path (yet)
-Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Tenzo's
+Death, stun, ledge, emote and clips for moves beyond the slots above (Meshy gave six); the contract's per-hunter extras (Tenzo's
 ground rings, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
 
 ## Sable: hybrid rig (Meshy rig, scripted weight fixes)
