@@ -97,3 +97,7 @@ skin, clips and images are byte-identical; only the index buffer is split. Hair 
 saturation < 28) above 1.0 m, majority-smoothed over welded neighbours (cloak cream is warm, sat > 55; face skin out).
 Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GLB Image_0.png mask.npy`,
 `split_hair.py GLB mask.npy OUT.glb`); re-run both on any new kael_meshy.glb.
+- Hair grade (same round): only the hair texels of Image_0 (the hair triangles rasterised in UV, grown 3 px into their
+  own padding) are graded to the kael_v2 turnaround's hair values: luminance median 212 -> 196, p5 177 -> 143,
+  p95 242 -> 229, chroma kept (silver with grey strand shading as in the ref; game view clipped-white hair pixels
+  20 % -> 0 %). `hair_grade.py r21.glb mask.npy Image_0.jpg`, then `set_image.py split.glb Image_0 Image_0.jpg OUT.glb`.
