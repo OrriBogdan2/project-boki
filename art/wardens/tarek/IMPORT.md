@@ -90,3 +90,15 @@ hair V x1.6 to H 22 S x0.6 (dark brown), skin S x0.65 V x0.88 (sash S > 0.58 unt
 (idle f010): chest S 0.92 -> 0.73, pants V 0.25 -> 0.45 (plum), hair V 0.18 -> 0.22 brown. Four Meshy retextures with
 --original-uv (60 credits) came back with live's colours (stone S 0.35 V 0.36), so they were not used.
 Scripts, region map and renders: /home/boki/gens/hunter-round-1124/tenzo/A/ (grade.py, swap.py, masks.py).
+
+## Clip offsets + skin islands (2026-11-24, job 20261124-202920-a1, round 29)
+`tarek_meshy.glb`: Image_0 bytes plus the float32 values of 28 rotation-key accessors changed (same accessors, same
+lengths, glTF JSON identical); mesh, UVs, skin weights, Image_1/2 byte-identical.
+- Clips (C/clip_offsets.py, spec C/b4.json): RightArm -14 / LeftArm +13 deg abduction about the chest's forward axis in
+  Idle/walk/run/Jump_Run/Crouch (LeftArm +17 in walk, RightArm -20 in Jump_Run); RightHand slerped 50% to rest
+  (wrist no longer bent back into the hip); thighs spread 6/8 deg (gait) and 6/16 deg (crouch) about the hips'
+  forward/up axes; Attack: arms spread in the wind-up (0.55-0.95 s), forward in the smash (1.08-1.9 s), neck back 12.
+  geo_check: worst clip 13.2 -> 5.8 cm, held worst 13.2 -> 3.0 cm, clipping frames 154 -> 47.
+- Skin islands: round 28 skipped skin skinned to LeftShoulder/LeftArm (left pec, left shoulder blade) and dark bare-arm
+  skin; C/fix_islands.py gives those 20.8k texels the same grade (S x0.65, V x0.9). Sash untouched.
+Scripts, specs, renders: /home/boki/gens/hunter-round-1124/tenzo/C/.
