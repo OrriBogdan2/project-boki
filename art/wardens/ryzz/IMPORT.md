@@ -94,3 +94,11 @@ the close views (copper vs skin value gap 0.08 -> 0.29 at eye level) and the boo
 `ryzz.painted` on top of this glb moves the copper-vs-skin value gap at the match camera from -0.10 / +0.03 (idle / run) to +0.15 / +0.16
 (turnaround 0.22); it also changes every other colour on her at that range, so it is an owner call.
 
+### Follow-up, same branch (glb b70b92c4333b, supersedes the tail and "clips byte-equal" lines above)
+- Image_3: the two dark spots and the smear on the fishnet inner leg are covered with netting cloned from the outer side of the same
+  leg (6,881 texels, 149 of 16,384 MCUs spliced). The copper and boot grades are unchanged from the round above.
+- Shirt tail: LeftUpLeg -> Hips ramp as above with the fade at 0.03 (`tail2.py 0.30 0.03`); glbstretch is identical to live in all six clips (the
+  first version stretched more than live in Jump and Crouch). JOINTS_0 is equal to live, only WEIGHTS_0 differs.
+- Forearm rotation keys nudged 6-12 deg where a hand entered the body (`arm.py`): Attack L, Jump L and R, walk L. Frames deeper than 8 mm:
+  Attack L 5 -> 0, Jump L 2 -> 0, Jump R 1 -> 0, walk L 2 -> 0. No other animation channel differs from live.
+Scripts: `~/gens/hunter-round-1124/sparkle/o/tools/` (build.sh, tail2.py, arm.py).
