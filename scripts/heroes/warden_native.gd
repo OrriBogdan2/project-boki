@@ -34,7 +34,10 @@ const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chai
 ## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
 static var contract_only := false
 static var _data = null  # art name -> its entry (parsed once)
-static var _anchors := {}  # art -> the contract model's anchor empties: [name, contract bone, model xf, bone head]
+## "art orbit" -> [the orbit node packed (instanced per Hunter), its rest, the head's, its bone's, the contract scene].
+## The scene is kept loaded: letting it go freed Tarek's contract .glb on the main thread mid-build (480 ms on rp2g).
+static var _orbit_src := {}
+static var _contracts := {}  # art -> what its contract .glb gives the native path (contract(): sk_m, anchors)
 
 var root: Node3D
 var player: AnimationPlayer
@@ -172,7 +175,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
 	props = WardenProps.carry(art_id, skel, to_m, d)
 	_copy_anchors(glb)
-	var c_xf: Transform3D = WardenProps.contract(art_id).get("sk_m", Transform3D.IDENTITY)
+	var c_xf: Transform3D = contract(art_id).get("sk_m", Transform3D.IDENTITY)
 	companions = WardenCompanions.detach(glb, skel, WardenClips.data(art_id), to_m.affine_inverse() * c_xf)
 	mouth = skel.find_child(WardenGlb.WEAPON_MUZZLE, true, false) as Node3D
 	model.set_meta(WardenClips.DEATH_T, 0.0)  # (the extract beat plays, WardenClips.leave_t; no death clip to hold)
@@ -530,14 +533,23 @@ func _add_orbits(glb: Node3D) -> void:
 
 
 ## The orbit node `orb` of this Hunter's contract model (a copy), its rest in model space, the contract head's and the
-## rest of the contract bone it rides ([] if none). The contract .glb is loaded (ResourceLoader keeps it) and instanced
-## only for the copy.
+## rest of the contract bone it rides ([] if none). The contract .glb is loaded and instanced once per art and orbit
+## (_orbit_src keeps the part, packed).
 func _orbit(orb: String) -> Array:
-	var path := "%s/%s/%s.glb" % [WardenGlb.DIR, art_id, art_id]
+	var key := "%s %s" % [art_id, orb]
+	if not _orbit_src.has(key):
+		_orbit_src[key] = _read_orbit(art_id, orb)
+	var src: Array = _orbit_src[key]
+	return [] if src.is_empty() else [(src[0] as PackedScene).instantiate() as Node3D, src[1], src[2], src[3]]
+
+
+static func _read_orbit(art_name: String, orb: String) -> Array:
+	var path := "%s/%s/%s.glb" % [WardenGlb.DIR, art_name, art_name]
 	if not ResourceLoader.exists(path):
 		return []
 	var out: Array = []
-	var con := (load(path) as PackedScene).instantiate() as Node3D
+	var ps := load(path) as PackedScene
+	var con := ps.instantiate() as Node3D
 	var csk := WardenGlb.skeleton(con)
 	var nd := con.find_child(orb, true, false) as Node3D
 	var at := nd.get_parent() as BoneAttachment3D if nd else null
@@ -546,7 +558,13 @@ func _orbit(orb: String) -> Array:
 		var rest := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name)) * nd.transform
 		var bone := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name))
 		var head := sk_m * csk.get_bone_global_rest(WardenSkeleton.find(csk, "head"))
-		out = [nd.duplicate() as Node3D, rest, head, bone]
+		var copy := nd.duplicate() as Node3D
+		for c in copy.find_children("*", "", true, false):
+			c.owner = copy  # (packed with it)
+		var packed := PackedScene.new()
+		packed.pack(copy)
+		copy.free()
+		out = [packed, rest, head, bone, ps]  # (ps: kept loaded)
 	con.free()
 	return out
 
@@ -563,7 +581,7 @@ func _copy_anchors(glb: Node3D) -> void:
 	var inv := to_m.affine_inverse()
 	var k := 1.0 / maxf(to_m.basis.get_scale().y, 0.0001)  # metres -> Meshy's skeleton units
 	var have: Dictionary = d.get("anchors", {})
-	for a: Array in _contract_anchors(art_id):
+	for a: Array in contract(art_id).get("anchors", []):
 		if have.has(a[0]) or skel.find_child(String(a[0]), true, false) != null:
 			continue
 		var nb := -1
@@ -597,16 +615,29 @@ func _nearest(p: Vector3) -> int:
 	return best
 
 
-## The anchor empties of the art's contract .glb (read once per art): [name, [[contract bone, the anchor in that bone's
-## rest frame (metres)] from its own bone up to the root], its model-space rest].
-static func _contract_anchors(art_name: String) -> Array:
-	if _anchors.has(art_name):
-		return _anchors[art_name]
+## What the native path reads off the art's contract .glb ({sk_m, anchors}, see measure_contract; {} when it has
+## none): baked (WardenRest.contracts), else measured once a session.
+static func contract(art_name: String) -> Dictionary:
+	if not _contracts.has(art_name):
+		var baked := WardenRest.contracts()
+		_contracts[art_name] = baked[art_name] if baked.has(art_name) else measure_contract(art_name)
+	return _contracts[art_name]
+
+
+## The arts on the native path's data (warden_native.json; WardenRest bakes their anchors).
+static func arts() -> Array:
+	entry("")
+	return (_data as Dictionary).keys().filter(func(k): return typeof(_data[k]) == TYPE_DICTIONARY)
+
+
+## Reads the art's contract .glb (loads and instances it; {} when there is none): "sk_m" its skeleton -> its model,
+## "anchors" its anchor empties: [name, [[contract bone, the anchor in that bone's rest frame (metres)] from its own
+## bone up to the root], its model-space rest].
+static func measure_contract(art_name: String) -> Dictionary:
 	var out: Array = []
-	_anchors[art_name] = out
 	var path := "%s/%s/%s.glb" % [WardenGlb.DIR, art_name, art_name]
 	if not ResourceLoader.exists(path):
-		return out
+		return {}
 	var con := (load(path) as PackedScene).instantiate() as Node3D
 	var csk := WardenGlb.skeleton(con)
 	var sk_m := WardenGlb.model_xf(con, csk) if csk else Transform3D.IDENTITY
@@ -630,4 +661,4 @@ static func _contract_anchors(art_name: String) -> Array:
 			b = csk.get_bone_parent(b)
 		out.append([nm, chain, sk_m * on_sk])
 	con.free()
-	return out
+	return {"sk_m": sk_m, "anchors": out}
