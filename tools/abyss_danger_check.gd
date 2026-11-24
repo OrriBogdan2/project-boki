@@ -4,7 +4,7 @@ extends RefCounted
 ## and no sound down to start_depth, then the tint and the warning heartbeat (level and rate) rise
 ## monotonically, the tint to 1 exactly at the kill depth, and both are gone again on the way back up.
 
-const SPAN := 17.5  # m, lip to the point of no return (World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA)
+const SPAN := 17.5  # m, lip to the point of no return (World.ABYSS_DEPTH + HunterFeel.abyss_extra)
 
 var bad := 0
 

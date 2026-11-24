@@ -45,7 +45,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-func run(mn: Node) -> void:
+func run(mn: Node, _arch := "") -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
@@ -151,7 +151,7 @@ func _course() -> void:
 				chimed += 1
 			else:
 				stray += 1
-		if pulsed:
+		if pulsed and not TutorialHints.quiet(tu.id()):  # (a hint step has no banner, so no chime)
 			changes += 1
 		t += Match.DT
 		if tu.step != last:
@@ -199,7 +199,10 @@ func _course() -> void:
 	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
-	var wide := texts.values().filter(func(x): return String(x).length() > MAX_LINE)
+	var wide := []
+	for sid in texts:
+		if not TutorialHints.quiet(String(sid)) and String(texts[sid]).length() > MAX_LINE:
+			wide.append(texts[sid])
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))

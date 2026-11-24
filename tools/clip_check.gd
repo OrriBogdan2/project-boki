@@ -159,7 +159,7 @@ func _drop_poses(id: String, m: Node3D, sync: Node) -> void:
 	var flat := rad_to_deg(torso.angle_to(-f.z))
 	ok(flat < 25.0 and spread > 1.0 and lift > 0.0, ("%s: skydives belly down along the drop (%.0f deg off level),"
 			+ " hands out past the shoulders by %.1f upper arms, %.2f m above the hips") % [id, flat, spread, lift])
-	s["vel"] = Vector3(Hunter.DIVE_SPEED, -13.0, 0.0)     # (steering right of the facing)
+	s["vel"] = Vector3(HunterFeel.dive_speed, -13.0, 0.0)     # (steering right of the facing)
 	_drop_frames(m, sync, s, 40)
 	var bank := _hand(dp, "L").dot(f.y) - _hand(dp, "R").dot(f.y)
 	ok(bank > 0.1, "%s: banks into a right steer (right hand %.2f m lower)" % [id, bank])

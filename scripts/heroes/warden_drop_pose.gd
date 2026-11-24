@@ -1,6 +1,6 @@
 class_name WardenDropPose
 extends RefCounted
-## The drop's two shared body poses (docs/decisions/0061-rocket-drop.md), worn by every Hero over
+## The drop's two shared body poses (docs/decisions/0143-rocket-drop.md), worn by every Hero over
 ## its clips or its rig: "ride", braced and holding on aboard the squad rocket (DropRocket.seat), and "skydive",
 ## belly to the ground with the arms and legs spread, banking with the steer, which eases off into the glider-open
 ## clip when the canopy opens. One pose set for all, content/rules/drop_poses.json: the body line and each limb are
@@ -84,7 +84,7 @@ func step(dt: float) -> void:
 		return
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var face := float(s.get("face", 0.0))
-	var flat := Vector2(vel.x, vel.z) / Hunter.DIVE_SPEED
+	var flat := Vector2(vel.x, vel.z) / HunterFeel.dive_speed
 	# (the model faces -Z at yaw 0: its right and ahead)
 	var goal := Vector2(flat.dot(Vector2(cos(face), -sin(face))), flat.dot(Vector2(-sin(face), -cos(face))))
 	steer = steer.lerp(goal.limit_length(1.0), 1.0 - exp(-dt * LEAN_RATE))
