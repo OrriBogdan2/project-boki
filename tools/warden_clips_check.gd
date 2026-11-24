@@ -20,8 +20,8 @@ const AIR_FRAMES := 20  # frames of each air cast checked
 
 ## Clips a Hunter's GLB carries that no kit move plays, with why they stay (the known-unused list). Each one is in the
 ## GLB, is mapped by no kmove, and is still held by the named user (so it can't rot into a silent orphan).
-## The holder is a result beat (WardenBeats: warden_anim/<art>.json "beats"). Empty since main moved results onto beats
-## and gave Ostra an emote win: his `flurry` (owner item 136's card volley, no source beat) is held by nothing (DEBT).
+## The holder is a result beat (WardenBeats: warden_anim/<art>.json "beats"). Ostra's `flurry` (the card volley
+## of item 136, no source beat) is in no beat (he wins with emote), so it is not listed: docs/DEBT.md.
 const MOVELESS := {}
 var bad := 0
 var holder: Node3D
