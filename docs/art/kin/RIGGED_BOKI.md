@@ -383,3 +383,18 @@ action, sleep, hop, ability or attack takes over at once and restarts the count.
 Boki is: its Bokidex quirk (`content/rules/boki_quirks.json` on ext/boki-quirks; the runtime does not read it) else
 body plan and type; the `note` of each row says which. Review: `--boki-idle-shots` (a row per species: 4 breath
 frames, 4 fidget frames); axis signs: x pitches the nose up, y turns left, z rolls; right-side bones mirror y and z.
+
+### Own clips for a long body, a flyer and a lizard (squalltross, threadwyrm, tuatrune, velvorm)
+
+These four are Meshy scans on Glomwort's 5-bone rig (root, hips, spine, neck, head), so a body shape has only those
+bones to move. `tools/boki/<id>_anim.py` keys idle, walk, run, hop, carry, attack, ability and sleep for each:
+threadwyrm a travelling S-wave (yaw on head, neck, spine, hips, each `LAG` later, the root countering), velvorm a
+caterpillar's arch running tail to head with the root stretching and bunching, squalltross a wing beat as the spine's
+lateral scale (`SCALED`: the neck takes the inverse so the head keeps its shape; the body rises as the wings open),
+tuatrune a lizard's spine bend against its steps. Squalltross and tuatrune have `auto_legs.py` legs: `KEEP_LEGS`
+(walk, run) tells `tools/boki/reclip_own.py` to keep the file's leg curves and root height and lay the module's body
+turns over them, so the paws still plant (slide 35% -> 11% on tuatrune's walk: the old shared body drove the feet).
+Rebuild without the raw model: `blender -b --factory-startup --python tools/boki/reclip_own.py -- --species=<id>`, then
+`godot --headless --import`. Contact sheet: `--boki-anim-shots --clips --boki=<id> --tag=after --shots-dir=<dir>` (a row
+a clip, eight poses across its loop, front quarter). Walk loop seams: `SEAM_OVER` squalltross 1.50, tuatrune 1.57 (the
+planted-paw wrap, 1.45 before, a little rougher under a calmer body).
