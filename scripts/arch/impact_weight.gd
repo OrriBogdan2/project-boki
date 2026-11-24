@@ -83,5 +83,15 @@ static func flash_s(w: String) -> float:
 	return float(rules["tiers"][w if w != "" else "light"]["flash_ms"]) / 1000.0
 
 
+## The confirm sound layered on your hit of this tier ("hit_light", "hit_solid", "hit_heavy"; "" plays none).
+static func confirm(w: String) -> String:
+	return "hit_" + w if w != "" else ""
+
+
+## Its volume, dB.
+static func confirm_db(w: String) -> float:
+	return float(rules["tiers"][w]["confirm_db"])
+
+
 static func cap(key: String) -> float:
 	return float(rules["cap"][key])
