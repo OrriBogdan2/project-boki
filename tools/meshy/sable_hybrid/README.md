@@ -14,3 +14,7 @@ the coat bones change. Python with numpy and scipy.
    5-20 deg off the geometry and the head/body graft seam at y=1.519 was open (2.2 mm mean, 8.9 mm max). It snaps the
    145 body ring verts onto the head ring and writes smooth area-weighted normals on the face; normal-split groups over
    10 deg in the face box 161 -> 3. Only POSITION (ring) and NORMAL bytes change: tris, UVs, weights, clips identical.
+6. `spikefix.py IN.glb OUT.glb` (sable r21, after the r20 shell/braid/layer fixes): those fixes left spike edges on the
+   coat hem and waist (Attack 39% / Jump 7% torn frames). It smooths weights only around spike edges and opened layer
+   pairs (mesh + layer neighbours, coat-vs-leg and arm-contact pairs excluded). r21 ran it twice: `--rounds=8`, then
+   `--gap=0 --rounds=6 --rings=2` (spikes only). Torn frames 0% in all 6 clips. Only JOINTS_0/WEIGHTS_0 change.

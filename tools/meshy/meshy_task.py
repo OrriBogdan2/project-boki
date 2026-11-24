@@ -7,7 +7,7 @@ repo, chmod 600). It is never printed or written anywhere else.
   meshy_task.py balance
   meshy_task.py create OUT_DIR img1.png [img2 ...] [options]      one image: image-to-3d, 2-4: multi-image-to-3d
   meshy_task.py fetch OUT_DIR TASK_ID [--api multi-image-to-3d]
-  meshy_task.py retexture OUT_DIR (TASK_ID | model.glb) front.png [more views] [--model meshy-7] [--original-uv]
+  meshy_task.py retexture OUT_DIR (TASK_ID | model.glb) front.png [more views] [--model meshy-7] [--original-uv] [--prompt TEXT]
   meshy_task.py rig OUT_DIR (TASK_ID | model.glb) [--height 1.7] [--no-fingers]   auto-rig, 5 credits (a task id sends
       include_fingers unless --no-fingers; an uploaded .glb is rigged without finger bones: its 24-bone skin weights)
   meshy_task.py remesh OUT_DIR TASK_ID [--polycount 40000] [--topology quad]
@@ -151,6 +151,9 @@ def retexture(o):
     --original-uv keeps the model's own UVs (a clean low-poly's)."""
     body = {"ai_model": o.model, "multiview_image_urls": [data_uri(p) for p in o.images[:4]],
             "enable_original_uv": o.original_uv, "enable_pbr": False, "target_formats": ["glb"]}
+    if o.prompt:  # Meshy: multiview_image_urls and text_style_prompt are mutually exclusive -> text only
+        body.pop("multiview_image_urls")
+        body["text_style_prompt"] = o.prompt
     if o.model != "meshy-n1":
         body["texture_resolution"] = o.texture_res
     if o.source.lower().endswith(".glb"):
@@ -216,6 +219,7 @@ def main():
     r.add_argument("--model", default="meshy-7")
     r.add_argument("--texture-res", default="8k")
     r.add_argument("--original-uv", action="store_true")
+    r.add_argument("--prompt", default="", help="text-only style (Meshy refuses it with images; the views are then not sent)")
     e = sub.add_parser("edit")
     e.add_argument("out")
     e.add_argument("images", nargs="+")
