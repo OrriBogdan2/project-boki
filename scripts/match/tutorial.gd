@@ -324,6 +324,7 @@ func _finish(sid: String) -> void:
 	elif TutorialHints.settles(sid):
 		wait = 0.6  # (the Boki gets its lead on the next leg: no banner, no sting, only the pause)
 	if resumed:
+		camps.told = true  # (a resumed run saw the first camp's countdown: its camps come at once)
 		_restore()
 	_enter()
 
