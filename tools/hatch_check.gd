@@ -15,6 +15,7 @@ extends RefCounted
 ## suggestion, save and load, and your first catch named on the results screen. Never touches the real save.
 
 const MAX_FRAMES := 6000  # (a hang guard counted in frames, not seconds)
+const HATCH_GD := "res://scripts/ui/hatch.gd"
 var bad := 0
 var main: Node
 
@@ -310,7 +311,7 @@ func _egg_cards(tree: SceneTree) -> void:
 	Save.d = Save.fresh()
 	Save.d["tutorial"] = {"intro": true}
 	Save.d["look"] = Unmasked.default_look()
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH_GD).new()
 	main.add_child(hx)
 	for i in 4:
 		await tree.process_frame

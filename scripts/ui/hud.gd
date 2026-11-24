@@ -12,6 +12,8 @@ var reticle: Reticle        # the hit tick's state: raised by every landed hit o
 var ret: ReticleHud         # draws the cursor reticle, its aim arcs and the hit tick from `reticle`
 var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
+var feed_top := 18.0        # px: where the kill feed (KillFeed) starts, under the counters and any boss bar
+var lvl_cue := LevelUpCue.new()      # the level-up moment over your hero and over the vitals
 var lowhp := LowHpCue.new()      # the low-health heartbeat and edge glow
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hurt_t := 0.0
@@ -618,7 +620,6 @@ func _draw_duel(sz: Vector2) -> void:
 	var keys_at := Vector2(box.position.x + 14, box.end.y - 12)
 	_text(keys_at, "B bot setup  ·  Backspace reset  ·  G hide", 11, Color(MUTED, 0.85))
 
-var feed_top := 18.0        # px: where the kill feed (KillFeed) starts, under the counters and any boss bar
 
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
@@ -999,7 +1000,6 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
-var lvl_cue := LevelUpCue.new()      # the level-up moment over your hero and over the vitals
 var xp_seen := -1.0      # the last XP the tracker saw (HudVitals.xp_step)
 var xp_shown := -1.0     # the XP the bar has filled to
 var xp_pop := 0.0        # s left of the pop after XP landed

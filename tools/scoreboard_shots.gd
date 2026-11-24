@@ -32,18 +32,18 @@ func run(main: Node) -> void:
 		h.lives = 1
 		h.ctrl = "idle"
 	await _play(m, main, SETTLE_S)
-	var P: Hunter = m.player
-	var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
-	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
+	var pl: Hunter = m.player
+	var foes: Array = m.hunters.filter(func(x): return x.team != pl.team)
+	var mates: Array = m.hunters.filter(func(x): return x.team == pl.team and x != pl)
 	for i in 3:
-		P.gear[i + 1] = {"id": Gear.ids_for(i + 1)[0], "rar": i + 1}
+		pl.gear[i + 1] = {"id": Gear.ids_for(i + 1)[0], "rar": i + 1}
 	DashReset.note(foes[0], mates[0])
-	m.knock(foes[0], P, {})
-	m.eliminate(foes[0], P, "finished")
+	m.knock(foes[0], pl, {})
+	m.eliminate(foes[0], pl, "finished")
 	m.knock(mates[1], foes[3], {})
 	for h in m.hunters.filter(func(x): return x.team == foes[0].team):
-		m.eliminate(h, P, "finished")
-	P.dmg_done = 1240.0
+		m.eliminate(h, pl, "finished")
+	pl.dmg_done = 1240.0
 	mates[0].dmg_done = 610.0
 	Input.action_press("scores")
 	await _play(m, main, RUN_S)
