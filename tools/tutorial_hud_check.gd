@@ -45,7 +45,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-func run(mn: Node) -> void:
+func run(mn: Node, _arch := "") -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
