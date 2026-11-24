@@ -15,6 +15,8 @@ extends RefCounted
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
 const SHRINK_S := BokiWispPop.DURATION  # s: the fold back into the wisp
+const BURST_CUE := "wisp_burst"  # content/sfx/wisp.json: the bloom as the Boki bursts out of its wisp
+const FOLD_CUE := "wisp_fold"  # the inward swish as it folds back in
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 const CALL_AT := "summon_call_at"  # meta on the Hunter: match time of the last call or recall gesture
 const CALL_K := "summon_call_k"  # meta on the Hunter: which ("call" on the burst, "recall" on the fold)
@@ -65,6 +67,11 @@ static func card_line(window: float) -> String:
 		if window >= float(cl[0]):
 			out_v = String(cl[1])
 	return out_v
+
+
+## The one plain line for the perks rule (Field Book card, Boki tooltip), with the Summon key's cap.
+static func perk_line() -> String:
+	return String(rules()["perk_line"]) % Settings.key_cap("summon")
 
 
 ## Out as the full Boki (the shrink back included)?
@@ -156,6 +163,7 @@ func killed(by: Ent) -> bool:
 	elif foe and (o.downed or o.out):
 		KinSteal.break_loose(k, at)  # its owner is down: anyone may grab it
 	else:
+		k.m.sfx("boki_downed", at, -4.0)          # (a loose one says it as it breaks loose)
 		k.back_home = true
 		fly_len = maxf(0.1, Vector2(at.x - o.pos.x, at.z - o.pos.z).length() / float(rules()["home_speed"]))
 		fly = fly_len
@@ -221,11 +229,12 @@ func popped(to_wisp: bool, gesture := true) -> void:
 		_pop(true, false)
 		if gesture:
 			_call("call")
-		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
+		_pop_sfx(true)
 	elif _folding:
 		_drop_pop()
 	else:
 		_pop(false, true)
+		_pop_sfx(false)
 	_folding = false
 
 
@@ -246,6 +255,16 @@ func _pop(burst_v: bool, stowing: bool) -> void:
 	k.add_child(pop)
 	k.model.visible = false
 	pop.play(burst_v)
+
+
+## The pop's sounds, at the Boki on every game: the bloom of the burst with the species' own happy cry layered on
+## it (the shared one when it has none), or the inward swish of the fold. Sfx.MIN_GAP applies to each.
+func _pop_sfx(burst_v: bool) -> void:
+	if not burst_v:
+		k.m.sfx(FOLD_CUE, k.pos, -6.0)
+		return
+	k.m.sfx(BURST_CUE, k.pos, -6.0)
+	k.m.sfx(KinVoice.cue(k.species, "happy"), k.pos, -6.0, Unique.voice(k.rec))
 
 
 ## The burst ended: the walking Boki takes over. A fold holds its last pose until the wisp flag flips.
@@ -280,6 +299,7 @@ func render() -> void:
 	if shrink > 0.0 and not k.wisp and not _folding:
 		_folding = true
 		_pop(false, false)
+		_pop_sfx(false)
 		_call("recall")
 	elif _folding and shrink <= 0.0 and not k.wisp:
 		_folding = false  # left behind mid-fold: it stays the walking Boki

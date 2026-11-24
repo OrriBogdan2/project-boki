@@ -22,6 +22,7 @@ func ok(name: String, cond: bool, info := "") -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	ak = load("res://tools/archetype_check.gd").new()
+	_disc_rim()
 	ak.main = main
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
@@ -65,6 +66,9 @@ func _shot_dist(m: Match, P: Hunter) -> float:
 		var mz: Vector3 = s["muzzle"]
 		var st: Vector3 = s["start"]
 		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+		if (s["x"] as Dictionary).has("hand"):
+			# the drawn muzzle is the hand (ShotOrigin.draw_from); the sim still launches 0.6 m ahead of the body
+			lead = 0.6
 	return float(s["life0"]) * (s["vel"] as Vector2).length() - lead
 
 func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
@@ -496,3 +500,19 @@ func _aim_slot(m: Match, P: Hunter, key: String, slot: String) -> void:
 				ok("reach %s: Quick cast off, R holds to aim" % key, AimReach.holds(P.ak, "x"))
 			m.aim_hold = "signature" if slot == "e" else "hunter_ult"
 			m._update_indicators(1.0)
+
+## A disc's rim vertices sit on the angle grid (segs steps round), every ring cut at the same angles.
+func _disc_rim() -> void:
+	var g := AimGeo.new()
+	var ctr := Vector2(3.0, 4.0)
+	g.disc(ctr, 6.0, Color.WHITE)
+	var rim := 0
+	var on_grid := true
+	for p in g.v:
+		var q := Vector2(p.x, p.z) - ctr
+		if absf(q.length() - 6.0) < 0.001:
+			rim += 1
+			var steps := (fposmod(q.angle(), TAU) / TAU) * 48.0
+			on_grid = on_grid and absf(steps - roundf(steps)) < 0.001
+	ok("geo: a 6 m disc is 6 rings of 48 steps (1584 vertices)", g.v.size() == 1584, str(g.v.size()))
+	ok("geo: its rim vertices sit on the 48-step angle grid", rim > 0 and on_grid, "%d on the rim" % rim)

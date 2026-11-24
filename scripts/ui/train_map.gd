@@ -23,7 +23,7 @@ var _halts: Array = []      # [{name: String, pos: Vector2, s: float (the route'
 ## Seconds as "0:24", counting up to the next whole second.
 static func clock(secs: float) -> String:
 	var t := int(ceilf(maxf(0.0, secs)))
-	return "%d:%02d" % [t / 60, t % 60]
+	return "%d:%02d" % [int(t / 60.0), t % 60]
 
 ## The map line for a halt's countdown: "Next train: 0:24", or that the train is there.
 static func eta_text(secs: float) -> String:
@@ -108,7 +108,7 @@ func _draw_halts(hud, st: SkyTrain, inner: Rect2, to_screen: Callable, named: bo
 			if named:
 				hud.full_map.label_near(eta, pv + Vector2(0, y), 10, GOLD)
 			else:
-				hud._ctext(pv + Vector2(0, y), eta, 10, GOLD, hud.big)
+				MapNames.put(eta, pv + Vector2(0, y), 10, GOLD, hud.big, true)
 
 ## One marker for the train (a chevron on its heading) and a dot for each car behind it.
 func _draw_train(hud, st: SkyTrain, inner: Rect2, to_screen: Callable) -> void:

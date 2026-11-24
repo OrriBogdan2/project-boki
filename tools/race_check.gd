@@ -25,6 +25,9 @@ extends RefCounted
 ## Never touches the real save.
 
 const RACES := 20
+const SIM_RACES := 200
+const SIM_GAP := 10              # Speed points the raised Boki leads by
+const SIM_SHARE := 0.75          # the higher-Speed Boki must win at least this share of SIM_RACES
 const WIN_SHARE := 0.6           # the favourite must win at least this share
 const DT := 1.0 / 30.0           # s per step
 const MAX_S := 120.0             # s: a race that runs longer is stuck
@@ -49,6 +52,8 @@ func run(m: Node) -> void:
 	_leans()
 	_friends_rivals()
 	_settle()
+	_raised()
+	_carried()
 	_twists()
 	_formats()
 	_courses()
@@ -173,6 +178,39 @@ func _settle() -> void:
 	ok(not mem_w.is_empty() and mem_w[-1]["kind"] == "race" and not mem_l.is_empty() and mem_l[-1]["kind"] == "race",
 			"both remember it: \"%s\"" % (mem_w[-1]["text"] if not mem_w.is_empty() else ""))
 
+## SIM_RACES seeded two-Boki races, same species, joy and zone, the only gap SIM_GAP raised Speed points: the
+## raised one wins most (raising decides, the wobble keeps an upset possible).
+func _raised() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261123
+	var raised_wins := 0
+	for n in SIM_RACES:
+		var low := rng.randi_range(0, 30)
+		var recs := [_kin("zapple", "Lo", low, 60.0), _kin("zapple", "Hi", low + SIM_GAP, 60.0)]
+		if rng.randi() % 2 == 0:
+			recs.reverse()
+		var r := _race(recs, 0, rng, false)
+		raised_wins += 1 if recs[r.order()[0]]["name"] == "Hi" else 0
+	print("RACE sim: the +%d Speed Boki won %d of %d" % [SIM_GAP, raised_wins, SIM_RACES])
+	ok(raised_wins >= int(SIM_RACES * SIM_SHARE), "+%d Speed wins %d of %d races (needs %d)"
+			% [SIM_GAP, raised_wins, SIM_RACES, int(SIM_RACES * SIM_SHARE)])
+
+## The line after the race names what won it.
+func _carried() -> void:
+	var fast := _kin("zapple", "Fast", 30, 60.0)
+	var slow := _kin("zapple", "Slow", 0, 60.0)
+	ok(BaseRace.carried(fast, slow) == "Speed carried it", "a Speed gap: \"%s\"" % BaseRace.carried(fast, slow))
+	var happy := _kin("zapple", "Happy", 0, 100.0)
+	var glum := _kin("zapple", "Glum", 0, 0.0)
+	var mood_line := BaseRace.carried(happy, glum)
+	ok(mood_line == "A happy mood carried it", "a mood gap: \"%s\"" % mood_line)
+	var luck_line := BaseRace.carried(slow, fast)
+	ok(luck_line == "A lucky run carried it", "the underdog's win: \"%s\"" % luck_line)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var res := BaseRace.settle(_race([fast, slow], 0, rng))
+	ok(res["why"] == "Speed carried it", "settle hands the card its line: \"%s\"" % res["why"])
+
 func _twists() -> void:
 	var rec := _kin("zapple", "Tw", 10, 60.0)
 	var st: Array = BaseRace.stretches()
@@ -221,7 +259,8 @@ func _formats() -> void:
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	rules["base_mode"] = false      # the "off" half walks the old farm
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 70.0)
@@ -305,7 +344,7 @@ func _on_base() -> void:
 		ok(race.pin(rec, game) and not race.pin(rec, game + "x"), "on: only a win in this week's event game is pinned")
 		ok(is_instance_valid(race.wall) and race.wall.get_child_count() > 1, "on: the wall shows the frame")
 	await _drill(home)
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame
 
@@ -556,7 +595,7 @@ func _zone_tracks() -> void:
 			_footing(z, home, race)
 		home.queue_free()
 		await main.get_tree().process_frame
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = true
 
 func _footing(z: String, home: Node, race: BaseRace) -> void:
 	var taken := {}

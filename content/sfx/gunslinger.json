@@ -7,7 +7,7 @@
   "vn_rifle": "fire",
   "gunslinger_grenade_thunk": "signature",
   "vn_cock": "cast",
-  "vn_throw": "cast",
+  "vn_throw": "cast", "vn_coin_flip": "cast",
   "vn_blast": "impact",
   "vn_slide": "dash",
   "gunslinger_dash": "dash",
