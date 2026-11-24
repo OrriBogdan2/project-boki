@@ -60,3 +60,35 @@ No-gum version (2026-11-20, ext/ryzz-gum-mouth, owner 11-20 "want TWO versions")
 `ryzz_nogum` (`content/rules/warden_look.json` `"ryzz_nogum": {"hide_bones": ["gum"]}`, no .glb of its own) is this
 same model with the `gum` bone shrunk away every frame (WardenSync), and no gum fidget (MageGum). Pick it with
 `--warden-variant=ryzz_nogum`; shipping it as the default would move `hide_bones` onto `"ryzz"`.
+
+## Meshy-native model (ryzz_meshy.glb), polish 2026-11-24 (ext/sparkle-native-polish-1124)
+`meshy_native` in `content/rules/warden_native.json` draws her from this glb (blob 8a64d9b5666 before this round, 79,980 tris,
+66 Meshy joints, 6 clips); `ryzz.glb` (the contract) is not drawn and not touched.
+
+Source: the hybrid-rig round-1 pick `~/gens/meshy-skel-pack-1121/Sparkle/hybrid/Sparkle_hybrid_rig.glb` (Meshy rig task
+`01a1fc24-71e6-70e7-9410-4a59826594ac` on the owner's doll pick A of 11-18), packed by
+`tools/meshy/native_hunters/pack.sh ryzz RIG.glb DECIMATED.glb` (decimate 35 % head keep, graft, `native_pack.py
+--max-tex=2048 --max-tex-maps=1024`; Image_0 head, Image_3 body, Image_6 face_donor base colour, 2048 px JPEG q90 4:2:0).
+
+This round changes three images and the shirt tail's skin weights, nothing else (mesh, UVs, skeleton, inverse binds, clips,
+materials and Image_0 are byte-equal to the live glb; `tools/art1/glb_image_swap.py` + a DCT-level splice):
+- Image_3 (body), masks built by rasterising the glb's triangles into UV space with the vertex position / dominant bone as the
+  selector, then a colour gate: copper (pack and torso back, plus the ribbed arm coils: local luma std > 0.03; 556,756 texels):
+  value x0.75, saturation pulled into 0.58-0.70, hue +14 deg (texture mean V 0.66 -> 0.50, H 9 -> 23); boot leather (below
+  y 0.27 m, not sole V < 0.10, not laces V > 0.55; 480,312 texels): V 0.25 -> 0.37, H 339 -> 3; fishnet: the smooth no-net band
+  and a smudge in the right-thigh island refilled from the lattice above (shift found by line-mask matching, seam-cloned).
+- Image_6 (face_donor): a pink bolt (H 331, S 0.54, V 0.83, 1.1 mm core, soft edge) under the character's left eye, placed by 3D
+  position on the front-most surface only (3,901 texels). Both eyes and everything else untouched: the iris boxes plus 60 px
+  are cmp-equal to live.
+- Body prim JOINTS_0/WEIGHTS_0: the 3,031 shirt-tail verts below the knot (y < 1.02 m) ramp LeftUpLeg -> Hips, 0 % at the knot, 30 %
+  at the tip, faded over 10 mesh rings. 50 % tore nothing but sank the tip into the thigh in Attack (1.6 cm from the axis);
+  30 % keeps it 7.0 cm out.
+Meshy retexture (original UV, 3 tasks, 45 credits, ids in docs/art/wardens/PIPELINE.md) kept the copper at the live level
+(V 0.66-0.72) and the boots at 0.27-0.30, so it was not used.
+The masks and scripts are in the job folder (`~/gens/hunter-round-1124/sparkle/tools/`: masks_body.py, grade.py, face.py,
+tail.py, jpgsplice.py, assemble.py); rerun `assemble.py LABEL body.png face.png` for any new grade.
+
+Limits: at the match camera (>= 8 m) the toon look's `far_lift` brightens the copper back to V ~0.92-0.98, so the grade shows in
+the close views (copper vs skin value gap 0.08 -> 0.29 at eye level) and the boots, much less at the match camera; the look
+(`content/rules/warden_look.json`, slot far_lift) is the other lever and is not changed here.
+
