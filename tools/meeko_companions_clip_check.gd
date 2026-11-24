@@ -7,7 +7,8 @@ extends RefCounted
 ## companion vertex against the body's vertices (every 5th), each bucketed by the part of her its main bone belongs to
 ## (head, arms, hands, spine, hips, legs; Meshy's unnamed Bone_nnn chains are the wings, ears and tail), and the sun
 ## against the cloud. Passes when each pair stays >= the data's clear_min (warden_anim/pip.json companions.clear_min)
-## and the two companions stay >= PAIR_MIN apart. Prints MEEKOCLIP lines: closest approach in mm and the part of her.
+## and the two companions stay >= PAIR_MIN apart. (A state needs a "cast" key, or WardenNative reads no swing and the
+## attack states play idle.) Prints MEEKOCLIP lines: closest approach in mm and the part of her.
 
 const DT := 1.0 / 30.0
 const EVERY := 3  # frames between samples
@@ -28,12 +29,13 @@ const STATES := {
 	"dash": [{"vel": Vector3(14.0, 0, 0)}, 0.5],
 	"crouch": [{"crouch": 1.0}, 0.0],
 	"jump": [{"grounded": false, "vel": Vector3(3.0, 0, 0)}, 0.0],
-	"attack": [{"kmove": "mm_shot_r", "swing": true}, 0.0],
-	"ult": [{"kmove": "mm_call", "swing": true}, 0.0],
+	"attack": [{"kmove": "mm_shot_r", "swing": true, "cast": 9.0}, 0.0],
+	"ult": [{"kmove": "mm_call", "swing": true, "cast": 9.0}, 0.0],
 	# a heavy hit every 0.5 s from the front, right, back and left in turn (WardenFlinch leans her away from it)
 	"hit": [{"hit": 2.0}, 0.0],
 	"death": [{"dead": true}, 0.0],
 }
+const HANDS_MIN := 0.03  # m: in the attack swing both hands stay this far below the head bone (PLAN 4A: not through her face)
 const KEYS := ["hand", "forearm", "arm", "shoulder", "head", "neck", "spine", "hips", "leg", "foot", "toe"]
 
 var bad := 0
@@ -87,6 +89,7 @@ func run(main: Node) -> void:
 		var worst := {}  # companion id -> [m, part of her, frame]
 		var screen := {}  # companion id -> [on-screen gap m, frame]
 		var pair := 9.0
+		var hands := 9.0  # the lowest head-bone y minus the highest hand-bone y over the swing
 		for f in FRAMES:
 			var s: Dictionary = (spec[0] as Dictionary).duplicate()
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -121,6 +124,8 @@ func run(main: Node) -> void:
 				if not worst.has(part.id) or float(r[0]) < float(worst[part.id][0]):
 					worst[part.id] = [r[0], r[1], f, r[2]]
 			pair = minf(pair, _pair(wc.parts[0], wc.parts[1]))
+			if st == "attack":
+				hands = minf(hands, _hands_gap(wc.skel))
 			var flat := _flat(wc.skel, g, cam)
 			for p in wc.parts:
 				var sg := _screen_gap(wc.skel, p as WardenCompanions.Part, flat, cam)
@@ -144,12 +149,20 @@ func run(main: Node) -> void:
 					% [st, id, float(screen[id][0]) * 1000.0, SCREEN_MIN * 1000.0, screen[id][1]]
 				)
 			)
+		if st == "attack":
+			ok(hands >= HANDS_MIN, "attack hands: %.0f mm below the head (needs %.0f)" % [hands * 1000.0, HANDS_MIN * 1000.0])
 		ok(
 			pair >= PAIR_MIN,
 			"%s: the sun and the cloud stay %.0f mm apart (needs %.0f)" % [st, pair * 1000.0, PAIR_MIN * 1000.0]
 		)
 	m.free()
 	_done(main)
+
+
+## The head bone's height minus the higher hand bone's, in world space (the posed skeleton, this frame).
+func _hands_gap(sk: Skeleton3D) -> float:
+	var y := func(b: String) -> float: return (sk.global_transform * sk.get_bone_global_pose(sk.find_bone(b))).origin.y
+	return float(y.call("Head")) - maxf(float(y.call("LeftHand")), float(y.call("RightHand")))
 
 
 func _done(main: Node) -> void:
