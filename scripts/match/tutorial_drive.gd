@@ -77,11 +77,13 @@ static func drive(m: Match) -> void:
 			else:
 				p.inp["move"] = to.normalized()
 				if sid == "exdash" and p.vel.y < 0.5: p.inp["dash"] = true
-				if sid == "glide": p.inp["glide"] = true
+				if sid == "glide":
+					var press: bool = not p.gliding and p.coyote <= 0.0 and p.can_glide()
+					p.inp["jump"] = press     # the second press opens it
+					p.inp["glide"] = p.gliding or press     # holding only keeps it open
 		"wallkick":
 			goto.call(tu.stop("crouch"), 0.4)
-			if not p.grounded and p.vel.y < 1.0 and p.pos.y < tu.stop("crouch").y - 0.2:
-				p.inp["jump"] = int(m.time * 10.0) % 2 == 0      # (again, against the cliff: the kick)
+			_kick_up(m, tu.stop("crouch").y)
 		"crouch":
 			goto.call(dest, 0.4)
 			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
@@ -141,6 +143,13 @@ static func _aim_at(m: Match, at: Vector3) -> Vector3:
 		_miss = _rng.randf() < MISS_RATE
 	return at + Vector3(MISS_OFF if human and _miss else 0.0, 0.9, 0)
 
+## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
+## take-off on, or the mantle climbs a low cliff first and the kick never counts).
+static func _kick_up(m: Match, top_y: float) -> void:
+	var p := m.player
+	if not p.grounded and p.pos.y < top_y - 0.2:
+		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
+
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
 	var sid := tu.id()
@@ -150,6 +159,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if sid == "sec":
 		_rmb(m, tu)
 	if best == null:
+		if sid == "summon" or sid == "pack":
+			_summon(m, tu)      # (the monster fell in a window called back early: the Boki still comes out again)
 		return
 	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)
@@ -204,6 +215,14 @@ static func fire_key(m: Match) -> bool:
 	if p.wpn.get("melee", false):
 		return fmod(m.time, 0.5) < 0.1
 	return true
+
+## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
+## take-off on, or the mantle climbs a low cliff first and the kick never counts).
+static func _kick_up(m: Match, top_y: float) -> void:
+	var p := m.player
+	if not p.grounded and p.pos.y < top_y - 0.2:
+		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
+
 
 ## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:
