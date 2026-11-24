@@ -5,7 +5,7 @@
 "semicolon": 8
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 25,
+"long_line": 26,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -16,7 +16,7 @@
 },
 "scripts/arch/hero_demo.gd": {
 "long_line": 1,
-"semicolon": 12
+"semicolon": 13
 },
 "scripts/arch/kit_status.gd": {
 "nested_ternary": 1
@@ -151,7 +151,7 @@
 "nested_ternary": 2
 },
 "scripts/core/social.gd": {
-"long_line": 11,
+"long_line": 12,
 "semicolon": 1
 },
 "scripts/core/synth.gd": {
@@ -434,8 +434,8 @@
 "semicolon": 26
 },
 "scripts/match/hunter.gd": {
-"history_comment": 15,
-"long_line": 68,
+"history_comment": 24,
+"long_line": 69,
 "nested_ternary": 12,
 "semicolon": 40
 },
@@ -510,7 +510,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 3,
-"long_line": 182,
+"long_line": 184,
 "nested_ternary": 14,
 "semicolon": 123
 },
@@ -531,9 +531,9 @@
 "semicolon": 39
 },
 "scripts/match/models.gd": {
-"long_line": 258,
+"long_line": 259,
 "nested_ternary": 10,
-"semicolon": 247
+"semicolon": 250
 },
 "scripts/match/music_dir.gd": {
 "nested_ternary": 1
@@ -591,7 +591,7 @@
 "scripts/match/terrain_mesh.gd": {
 "long_line": 49,
 "nested_ternary": 2,
-"semicolon": 84
+"semicolon": 85
 },
 "scripts/match/train_route.gd": {
 "long_line": 2,
@@ -986,7 +986,7 @@
 "semicolon": 5
 },
 "tools/raid_check.gd": {
-"long_line": 19,
+"long_line": 20,
 "semicolon": 5
 },
 "tools/revive_check.gd": {
