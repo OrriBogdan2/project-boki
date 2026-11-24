@@ -318,6 +318,7 @@ static func footstep(h: Hunter) -> void:
 		return
 	var surf := StepSurface.at(m, h.pos)
 	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, -13.0), StepSurface.vol_db(h, -17.0))
+	HunterFoley.step(h)
 
 
 ## The pitch of a tier's rise: higher tier, brighter.
