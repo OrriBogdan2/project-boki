@@ -29,10 +29,10 @@ varying vec3 wpos;
 varying vec3 wnorm;
 varying float style;
 varying float vdist;
-// How much fine ground detail a spot keeps: all of it up to 28 m from the camera, none past 55 m (the
+// How much fine ground detail a spot keeps: all of it up to 14 m from the camera, none past 36 m (the
 // brush streaks, dabs, speckles, clover and petals are sub-pixel or a blur out there; the big painted
 // patches, swathes and pools stay everywhere). Skips their noise reads, not only hides them.
-uniform vec2 detail_range = vec2(28.0, 55.0);   // m from the camera: full fine detail, none (bench: 1e6 = the old look)
+uniform vec2 detail_range = vec2(14.0, 36.0);   // m from the camera: full fine detail, none (bench: 1e6 = the old look)
 float detail_w() { return 1.0 - smoothstep(detail_range.x, detail_range.y, vdist); }
 void vertex() {
 	vdist = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
@@ -49,14 +49,15 @@ float hgt(vec2 p) {
 // How much higher ground and blockers crowd around this spot (0 open .. 1 tucked in a corner).
 float contact(vec3 p) {
 	float occ = 0.0;
-	for (int i = 0; i < 8; i++) {
+	int stp = detail_w() > 0.5 ? 1 : 2;     // far from the camera 4 of the 8 directions do (the cue is soft there)
+	for (int i = 0; i < 8; i += stp) {
 		float a = float(i) * 0.785398 + 0.39;
 		vec2 d = vec2(cos(a), sin(a));
 		float h1 = hgt(p.xz + d * 0.55);
 		float h2 = hgt(p.xz + d * 1.15);
 		occ += clamp((h1 - p.y - 0.05) * 1.6, 0.0, 1.0) * 0.6 + clamp((h2 - p.y - 0.05) * 1.1, 0.0, 1.0) * 0.4;
 	}
-	occ = occ / 3.2;
+	occ = occ * float(stp) / 3.2;
 	return clamp(occ, 0.0, 1.0);
 }
 

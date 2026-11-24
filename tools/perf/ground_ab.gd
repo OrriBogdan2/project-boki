@@ -4,7 +4,7 @@ extends RefCounted
 ## The fight cycles four variants in blocks of BLOCK frames; the GPU time of every frame after SKIP warm-up frames
 ## of a block (the renderer's stamps arrive a frame or two late) goes to that variant:
 ##   old    the terrain's full fine detail everywhere (the look before the cut), sea shown
-##   cut    the terrain skips its fine detail past 28 m (shaders/terrain.gdshader detail_range), sea shown
+##   cut    the terrain skips its fine detail past 14-36 m (shaders/terrain.gdshader detail_range), sea shown
 ##   flat   the terrain returns its base colour (flat_ground), sea shown
 ##   nosea  old terrain, the cloud-sea plane hidden
 ## Prints "BENCH ab ground: <variant> gpu <ms> over <n> frames" and the saving of each against old.
@@ -46,10 +46,10 @@ func _init(root_node: Node, world: Node) -> void:
 ## Called once per frame with the frame number: switches the variant at each block start.
 func frame(f: int) -> void:
 	since += 1
-	if shots_dir != "" and f >= SHOT_AT and f <= SHOT_AT + 14:
+	if shots_dir != "" and f >= SHOT_AT and f < SHOT_AT + 12:
 		_shot(f - SHOT_AT)
 		return
-	if f % BLOCK != 0 and f != SHOT_AT + 15:
+	if f % BLOCK != 0 and f != SHOT_AT + 12:
 		return
 	mode = (f / BLOCK) % NAMES.size()
 	since = 0
@@ -58,7 +58,7 @@ func frame(f: int) -> void:
 
 func _apply(i: int) -> void:
 	for m in mats:
-		m.set_shader_parameter("detail_range", Vector2(28, 55) if i == 1 else Vector2(1e6, 1e6))
+		m.set_shader_parameter("detail_range", Vector2(14, 36) if i == 1 else Vector2(1e6, 1e6))
 		m.set_shader_parameter("flat_ground", i == 2)
 	for s in sea:
 		s.visible = i != 3
