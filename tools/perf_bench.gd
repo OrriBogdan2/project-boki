@@ -17,8 +17,13 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
+##   [--bench-garden] [--bench-boki=10,20,30]  (only the garden: each --bench-zone zone with each Boki count out, then
+##   the hub; --bench-isolate adds the cost split per zone part; frame p50/p95 per part, docs/GARDEN_PERF.md.
+##   Budget lines are FAIL-checked only at 9 Boki)
 ##   [--bench-hub]  (only the hub part, with its budget and draw owners)
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
+##   [--bench-loading]  each match part builds behind the loading screen, as a player's does (its load line then
+##   covers the sliced build and the warm-up; without it, autoplay builds the match in one frame)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
 ##   [--bench-probe]  (only the scripted expedition a player gets: loading screen, planning map, skyship ride, drop,
@@ -85,6 +90,10 @@ var base_secs := 60.0
 var pipes_draw := 0  # pipelines built at draw time so far (the hitch lines print each frame's new ones)
 var out_path := ""
 var zone := ""
+var boki_counts: Array = [BOKI_OUT]  # --bench-boki=a,b,c: Boki out in each garden zone part
+var ui_was: Array = []  # [node, visible] of the screen UI _budget hid (--bench-isolate shows it again)
+var isolate := false  # --bench-isolate: each zone part also gets the cost split (tools/perf/garden_isolate.gd)
+var garden_only := false  # --bench-garden: the zone parts and the hub only
 var tracy_dir := ""
 var hunters := 6
 var trios := 0  # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
@@ -92,6 +101,7 @@ var pose_us := {}  # "kind band on|off" -> [us, poses] (--bench-trios)
 var rigs_posed := Vector2i.ZERO  # Hero rigs posed, Hero rigs there, summed over the frames (--bench-trios)
 var shots_dir := ""  # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
 var failed := false  # a budget line said FAIL: the exit code carries it
+var loading := false  # --bench-loading: match parts build behind the loading screen (main.gd "probe")
 var wisps := ""  # --boki-wisps=on|off: the match opts' boki_wisps ("": the setting decides)
 var rows := PackedStringArray()
 var hud_us := 0
@@ -119,6 +129,10 @@ func run(main_node: Node) -> void:
 		await _ab()
 		_finish()
 		return
+	if garden_only:
+		await _garden()
+		_finish()
+		return
 	if "--bench-hub" in args:
 		await _farm("hub", {"zone": GardenZones.HUB})
 		_finish()
@@ -132,7 +146,8 @@ func run(main_node: Node) -> void:
 	if zone == "all":
 		zones = GardenZones.built()
 	for id in zones:
-		await _zone(id)
+		for n in boki_counts:
+			await _zone(id, n)
 	_finish()
 
 
@@ -153,6 +168,12 @@ func setup(main_node: Node) -> void:
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="):
 			zone = a.substr(13)
+		if a.begins_with("--bench-boki="):
+			boki_counts = Array(a.substr(13).split(",")).map(func(x): return int(x))
+		if a == "--bench-isolate":
+			isolate = true
+		if a == "--bench-garden":
+			garden_only = true
 		if a.begins_with("--tracy="):
 			tracy_dir = a.substr(8)
 		if a.begins_with("--bench-hunters="):
@@ -163,6 +184,8 @@ func setup(main_node: Node) -> void:
 			shots_dir = a.substr(14)
 		if a.begins_with("--boki-wisps="):
 			wisps = a.substr(13)
+		if a == "--bench-loading":
+			loading = true
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -265,15 +288,42 @@ func _start(part: String, extra: Dictionary) -> Match:
 		o["boki_wisps"] = wisps == "on"
 	if trios > 0 and part == "match":
 		o.merge({"teams": trios, "squad": 3, "total": trios * 3}, true)
+	if loading:
+		o["probe"] = true
+		PerfLog.trace_slices = true     # (a slow load frame below names the slice point that ended it)
 	o.erase("demo_match")
 	o.erase("fresh_t")
+	var load0 := Time.get_ticks_usec()
 	Game.goto("match", o)
 	var m: Match = null
+	var longest := 0.0    # ms: the longest frame from goto to the built match (DEBT item 33: no load frame over 100)
+	var slow := 0
+	var worst := {}       # loading screen stage -> its longest frame (ms)
+	var t := load0
 	while m == null:
+		var ld: Object = main.get("_ld")
+		var stage := String(ld.get("stage_label")) if is_instance_valid(ld) else "-"
 		await main.get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		var ms := (now - t) / 1000.0
+		t = now
+		longest = maxf(longest, ms)
+		slow += 1 if ms > 100.0 else 0
+		worst[stage] = maxf(float(worst.get(stage, 0.0)), ms)
+		if ms > 100.0 and loading:
+			# what the build did in it: its steps (PerfLog marks) and the slice point that ended it
+			var since := now - int(ms * 1000.0)
+			var marks: Array = PerfLog.between(since, now).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])
+			var ended: Array = PerfLog.slices.filter(func(sl): return int(sl[0]) > since and int(sl[0]) <= now)
+			var slices: Array = ended.map(func(sl): return "%.0f ms at %s" % [float(sl[1]), String(sl[2])])
+			var line := "BENCH %s slow load frame: %.0f ms in %s; steps: %s; slice: %s"
+			print(line % [part, ms, stage, ", ".join(marks), ", ".join(slices)])
 		var cur = main.current
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
+	print("BENCH %s load: %.0f ms, longest frame %.0f ms, %d frames over 100 ms; longest by stage: %s"
+			% [part, (Time.get_ticks_usec() - load0) / 1000.0, longest, slow,
+			", ".join(worst.keys().map(func(k): return "%s %.0f" % [k, worst[k]]))])
 	m.set_process(false)
 	# play draws everything once behind the loading screen (Match.warm_up) before the drop; "autoplay" skips that
 	# screen, so without this the run's tail was shader compiles a player never sees mid-match
@@ -482,18 +532,31 @@ func _frames(part: String) -> void:
 
 
 ## A garden zone with nine Boki out (GARDEN.md 10.6: 6 residents, the partner, 2 visitors), as a farm part.
-func _zone(id: String) -> void:
+func _zone(id: String, boki := BOKI_OUT) -> void:
 	var nav := NavCheck.new()
 	nav.main = main
 	nav.zone = "" if id == GardenZones.start() else id
 	FarmUnlocks.rules()["base_mode"] = true
 	nav._save()
-	for i in BOKI_OUT - Save.d["roster"].size():
+	for i in boki - Save.d["roster"].size():
 		var rec := Save.new_kin(VISITORS[i % VISITORS.size()], "V%d" % i)
 		Care.ensure(rec)
 		rec["zone"] = id
 		Save.d["roster"].append(rec)
-	await _farm("zone_" + id, {"zone": id})
+	var part := "zone_" + id + ("" if boki == BOKI_OUT else "_b%d" % boki)
+	await _farm(part, {"zone": id})
+	if isolate:
+		await load("res://tools/perf/garden_isolate.gd").new(main).run(part, ui_was)
+
+
+## --bench-garden: every --bench-zone zone with each --bench-boki count out, then the hub (nobody lives there, so
+## its cost does not move with the count: it runs once with the biggest roster saved, all of them in the zone).
+func _garden() -> void:
+	var ids: Array = [zone] if zone != "" and zone != "all" else GardenZones.built()
+	for id in ids:
+		for n in boki_counts:
+			await _zone(id, n)
+	await _farm("hub", {"zone": GardenZones.HUB})
 
 
 ## A part against GARDEN.md 10.6 (the hub against its own column). Draws and objects are the scene itself: the
@@ -507,8 +570,10 @@ func _budget(part: String, fl: Array) -> void:
 		var all := main.get_tree().root.find_children("*", cls, true, false)
 		emit += all.filter(func(n): return n.emitting and n.is_visible_in_tree()).size()
 	var home = main.current
+	ui_was = [[home.root_ui, home.root_ui.visible]]
 	home.root_ui.visible = false
 	for cl in home.find_children("*", "CanvasLayer", true, false):
+		ui_was.append([cl, cl.visible])
 		cl.visible = false
 	for i in 8:
 		await main.get_tree().process_frame
@@ -528,13 +593,16 @@ func _budget(part: String, fl: Array) -> void:
 	print("BENCH %s boki out: %d, draws with the UI: %.0f" % [part, home.kins.size(), _avg(fl, "draws")])
 	var held: Dictionary = GardenZones.rules()["ratchet"].get(Settings.quality(), {}).get(part, {})
 	var bad := false
+	var judged: bool = home.kins.size() <= BOKI_OUT  # a bigger crowd is measured, not judged
 	for k in got:
 		var over: bool = float(got[k]) > float(b[k])
 		var limit: float = float(held.get(k, b[k]))  # a measured ceiling stands in until the target is met
 		var good: bool = float(got[k]) <= limit
-		bad = bad or not good
+		bad = bad or (not good and judged)
 		var verdict := "ok"
-		if not good:
+		if not good and not judged:
+			verdict = "over (%d Boki, not judged)" % home.kins.size()
+		elif not good:
 			verdict = "FAIL (past the held %.1f)" % limit
 		elif over:
 			verdict = "over target, held at %.1f" % limit

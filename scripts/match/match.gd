@@ -446,12 +446,12 @@ func _start(o: Dictionary) -> void:
 	if BlightDir.enabled(opts) and big and world.layout_id != "tutorial":
 		# the Blight: Wardens on the islands from the start, Skitters later (scripts/match/blight_dir.gd)
 		blight = BlightDir.new(self)
-		blight.setup()
+		await blight.setup()
 	if rolling:
 		rolling.after_setup()      # the map as picked over as the session is old
 	if not (opts.get("duel", false) or opts.get("arena", false) or opts.get("tutorial", false)):
 		keys = KeyRun.new(self)
-		keys.setup()               # who carries the chest keys, and the Shrublings
+		await keys.setup()         # who carries the chest keys, and the Shrublings
 	await _slice()
 	_trim_shadows(self)
 	for list in [mobs, kins, chests, breaks, shrines, wpicks]:
@@ -2257,9 +2257,9 @@ func _update_tracking(dt: float) -> void:
 	if track_t > 0.0:
 		return
 	track_t = 22.0
-	for tr in tracked:
-		var k: Kin = tr["kin"]
-		var h: Hunter = tr["holder"]
+	for trk in tracked:
+		var k: Kin = trk["kin"]
+		var h: Hunter = trk["holder"]
 		if k.dead or h.out:
 			continue
 		var at: Vector3 = k.pos if k.state != "bench" else h.pos
@@ -2362,7 +2362,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		MobSfx.stagger_open(self, mb)
-		_tip("stagger", TipText.stagger(String(mb.md["name"])))
+		_tip("stagger", TipText.stagger())
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -2686,6 +2686,7 @@ func _update_shots(dt: float) -> void:
 				p.y = float(sx["y0"]) + float(sx["dy"]) * clampf(trav / float(sx["dyd"]), 0.0, 1.0)
 			# domes stop shots fired at them from outside
 			if _dome_blocks(s, p):
+				s["prop"] = true
 				_shot_end(s, p, null)
 				hit = true; break
 			var gp := world.ground_at(p.x, p.z)      # terrain and rocks
@@ -2722,6 +2723,7 @@ func _update_shots(dt: float) -> void:
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
 					brk.hit(bh, s["by"])
+				s["prop"] = true
 				_shot_end(s, p, null)
 				hit = true; break
 			for e in near:
@@ -2867,6 +2869,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 		s["node"].visible = false
 	if e == null:
 		MissFx.shot_ended(self, s, at, why)
+	MissFx.shot_landed(self, s, at, e, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
@@ -4562,6 +4565,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
+	KinSteal.on_extract(self, h)
 	_check_last()
 
 func _update_rules(dt: float) -> void:
@@ -4987,12 +4991,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
-			var st: int = int(it[8])
-			if st >= 0 and st < MOB_STATES.size():
-				if mb.st == "idle" and st == 1: MobNotice.woke(mb)
-				mb.st = MOB_STATES[st]
+			mb.follow(int(it[8]), it[12])
 			mb.atk_dir = Vector2(it[10], it[11])
-			mb.st_t = it[12]
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
@@ -5369,7 +5369,7 @@ func _tips() -> void:
 	var hunter_tip := hunter_hints.next(self)
 	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
-		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+		_tip("overheat_lift", TipText.overheat_lift())
 	var heart_tip := heart.tip_for(player) if heart else []
 	if heart_tip: _tip(heart_tip[0], heart_tip[1])
 	var ex := ExpeditionTips.next(self)
@@ -5377,13 +5377,15 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
+	var call := TipText.summon(k)
+	if call != "": _tip("first_summon", call)
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
-		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
+		_tip("skill", TipText.skill(k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"))
 	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		_tip("exit_uplink", "Start the uplink, hold the outpost, then take the lift")
-	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
+		_tip("exit_uplink", TipText.exit_uplink())
+	if player.downed: _tip("down", TipText.down())
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands

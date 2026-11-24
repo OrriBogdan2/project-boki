@@ -72,7 +72,7 @@ func setup(match_node: Match) -> void:
 	# the painted map (smooth coasts, shading, paths) replaces the tile texture once it's baked
 	c.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	await m._slice()      # under the loading screen: a frame now and then (never waits otherwise)
-	MapPaint.request(self, m.world, func(t: Texture2D): map_paint = t)
+	await MapPaint.request(self, m.world, func(t: Texture2D): map_paint = t)
 	await m._slice()
 	full_map = FullMap.new(self, m)
 

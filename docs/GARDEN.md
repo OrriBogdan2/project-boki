@@ -47,15 +47,25 @@ garden minutes of either player; it arrives at trust 50. The player works the st
 goes to whoever is being raised. "Friends" is the first time trust is 50 or more on both (the starter's trust
 climbs 1 a pet and 2 a meal, one of each per 12.5 s).
 
+Re-measured 2026-11-22 on main 0a0db9747cc (after ext/garden-xp-pace, toy XP, snack patch and minigame-fair; no number
+changed: `--garden-pace-check` and `tools/garden_sim.py` print the same values as before those merges, because the
+play model reads only care, drill, game XP and the level curve, none of which moved). Minutes of play:
+
 | Player (shipped numbers) | Second Boki | Grown (starter) | Friends | First egg |
 |---|---|---|---|---|
 | Garden-only | 5 min | 190 min (3.2 h) | 33 min | 386 min (6.4 h) |
 | 1 expedition a session | 29 min | 190 min (3.2 h) | 108 min | 389 min (6.5 h) |
 
 The model plays care (once a kind a day, so mostly from the training yard) and runs; it does not play the garden
-games (the sim in `tools/garden_sim.py` has those). Re-measured after the XP rework (care once a day, games paid,
-halved curve: 50 x level); the first version of this table, on the old per-action XP and the 100 x level curve, was
-2230 and 1266 min.
+games. `tools/garden_sim.py` has those and counts days (visitor as the second Boki, friends not charged, so about a
+day early), first egg day, median of 200 seeds: 30 min a day (+2 runs) day 4; home only 30 min day 5; home only
+20 min day 6; 5 min a day (+1 run) day 8; home only 5 min day 11. (The sim's Lv 8 days are 2, 3, 3, 4 and 7.)
+
+**Largest single wait: the starter's climb to Grown, 190 min of the 386.** The second Boki (5 to 29 min) and
+friends (33 to 108 min) overlap it or are small; the visitor's own Grown climb is the other half of the egg wait.
+Knob: `content/rules/garden_xp.json`, key `curve.per_level` (30: XP from level n to n + 1 is 30 x n). The other
+levers on the same wait are `care` (15) and `play`/`win`/`first_win` (5/8/60) in the same file, or the Nook's Grown
+level (`breed_options` there, data only). Nothing is applied.
 
 The 30 minute target is still missed (half a day to a day of play for the egg): a Grown Boki needs 1400 XP, and the
 Nook needs two. The second Boki and friends are not the bottleneck (minutes); only levels are. That is why no
@@ -72,6 +82,8 @@ Data-only options (`breed_options` in content/rules/garden_xp.json, read by the 
 
 Even the best option is 4 to 6 hours of play to a first egg. A 30 minute egg needs both a far larger XP rate and a
 Grown level near 2 (roughly 10x the XP, or a Nook that takes Youngling kin); that is a design call.
+Food shapes the body too (`Lean.size`, `content/rules/lean.json` `size`): at full lean a heavy type (Rock, Dragon, Steel) swells up to 15% and a light one (Bug, Flying, Fairy) slims up to 15%, in step with the tint, by lean strength. `Evo.dress` applies it as the model's `evo_scale`; the Boki card's lean line says it (", 8% bigger"). `--feed-check` feeds ten meals each way; `--lean-shots --foods=pebblenut,sapjelly --meals=10` shows it.
+
 ## Base-only breeding
 
 Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
@@ -93,6 +105,11 @@ Chew, Zipseed, Hushpearl) with `lair_drop.chance` in `content/rules/garden_items
 `bag` (`Loot.VALUABLES`, `Loot.is_bag_item`, like the Wayseeds), come home into the garden bag (`Econ._store`), and are eaten from
 the feed menu with the exact preview. The use writes the Boki card's journal line (`CareJournal` -> `JournalCard`):
 "ate Thumpnut: Power +3 (4 to 7)". `--garden-items-check` (loot part) proves the whole path; `--loot-nudge-shots` shows the card.
+
+The first time you come home with a garden item kind you never had, the nearest free Boki (not the most curious) walks up
+(`ComeLook` kind `item`, flag `loot_react_<id>` in Save.d tutorial, so once per kind per save and no migration), reacts by its
+traits (curious sniffs, timid hides and says `look_shy`, the rest puff up and say `look_item`) and its journal keeps one line:
+"sniffed the new Thumpnut". No pop-up. `--come-look-check` (two kinds, then plain loot) and a react row in `--garden-day-played-check`.
 
 ## Balance: 30 days for four players
 
@@ -155,16 +172,15 @@ The Black Market is the only blocker left. A zone opens with two keys, a Wayseed
 (`GardenZones.keys`); a Wayseed comes from only two places, the Black Market's weekly stock (the building is
 placed once `matches >= 1`, `home.gd _fs_arrivals`) or a lair (an expedition). Nothing else gates a zone.
 `--garden-unlock-pace-check` passes (garden player: 2nd zone day 3, 5th day 12) because it buys the Wayseed
-without the building. Open question 1 is still the fix.
+without the building. Open question 1 was then decided (a) and built (below).
 
-1. **Old Pell's Black Market never stands on a new island.** `home.gd _fs_arrivals` places it (and the
-   Challenge House) only once `matches >= 1`. The zone cards say a Wayseed comes from the Black Market
-   (`black_market.gd` stocks one for the next locked zone every `wayseed_days`), so a player who never
-   extracts keeps one zone of five: after 30 min the check prints `Black Market placed false, zones open
-   1 of 5`. `--garden-unlock-pace-check` does not see it: it buys the Wayseed without the building.
-   Fix options: (a) in base mode `_fs_arrivals` places the Black Market straight away (one condition;
-   the Challenge House stays after the first expedition); (b) a Wayseed stall at the hub's Waystone.
-   Default if nobody decides: (a).
+1. **Old Pell's Black Market (decided: (a), done).** `home.gd _fs_arrivals` used to place it (and the
+   Challenge House) only once `matches >= 1`, so a player who never extracts could never buy a Wayseed.
+   In base mode the Black Market now stands at once; the Challenge House still waits for the first
+   expedition. `--garden-only-pass-check` printed `Black Market placed false, zones open 1 of 5` before and
+   prints `Black Market placed true, zones open 1 of 5` after: the building is there, but the bot does not
+   buy, and a Wayseed is stocked only every `wayseed_days` (30 min is under that). The other option, (b) a
+   Wayseed stall at the hub's Waystone, was not built.
 2. **Hunter unlock goals in the Goals card.** (`mastery` rows and farm milestones now wait for the first match; only `unlock` is left.) Eleven Hunters unlock by match challenges ("Knock 3 enemies
    into walls") and show as `unlock` rows after the home rows. A Boki at the level cap loses its
    "Raise ... to level N" row, and then the first line of the card is one of these. Options: hide the

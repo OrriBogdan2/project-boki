@@ -351,13 +351,14 @@ func _sync_fixtures() -> void:
 ## Challenge House goes up, each on open ground near the portal (move them wherever you like).
 ## Returns true if any went up.
 func _fs_arrivals() -> bool:
-	if int(Save.d.get("matches", 0)) < 1:
-		return false
+	var fought: bool = int(Save.d.get("matches", 0)) >= 1
 	var any := false
 	var put: Array = []
 	var w: World = world
+	var loop := BaseRace.loop_rect()      # the race loop stays clear
 	for b in ["board", "ransom"]:
-		if HomeLayout.placed(b, _d()) or not _has_b(b):
+		var early: bool = b == "ransom" and FarmUnlocks.base_mode()  # the Ransom board stands before a first fight
+		if HomeLayout.placed(b, _d()) or not _has_b(b) or (not fought and not early):
 			continue
 		var item := {"kind": "b", "id": b, "r": 0, "from": 0}
 		var best := Vector2i(-1, -1); var bd := 1e9
@@ -366,7 +367,9 @@ func _fs_arrivals() -> bool:
 				var dd := Vector2(x - HomeLayout.LANDING.x, z - HomeLayout.LANDING.z).length()
 				if dd < 5.0 or dd > 16.0 or dd >= bd: continue
 				if not w.inb(x, z) or w.island[w.idx(x, z)] != 0: continue
-				if hb.fits(item, HomeLayout.cells_of(HomeLayout.rect_at(b, x, z, 0))): best = Vector2i(x, z); bd = dd
+				var rc := HomeLayout.rect_at(b, x, z, 0)
+				var tiles := Rect2(rc[0], rc[1], rc[2] - rc[0] + 1, rc[3] - rc[1] + 1)
+				if not tiles.intersects(loop) and hb.fits(item, HomeLayout.cells_of(rc)): best = Vector2i(x, z); bd = dd
 		if best.x >= 0:
 			HomeLayout.of(_d())["b"][b] = {"x": best.x, "z": best.y, "r": 0}
 			hb._apply_blockers()
@@ -1149,6 +1152,7 @@ func _see_through() -> void:
 	SeeThrough.update(cam, player.global_position, b)
 
 func _exit_tree() -> void:
+	RigPace.crowd = 0
 	ZoneLayout.leave()
 	SeeThrough.off()
 	Sfx.clear_amb_layers()
@@ -1400,6 +1404,7 @@ func _move_kin(d: float) -> void:
 	_separate_kin(d)
 	if life: life.step(d)
 	nap_sound.step(kins, d)
+	RigPace.crowd = kins.size()
 	for k in kins:
 		if k.get("busy", false):
 			fly.land(k)
@@ -3239,6 +3244,7 @@ func _open_kin(rec: Dictionary) -> void:
 			var ln := Evo.lean(rec)
 			if String(ln[0]) != "":
 				var lean_t := "Its meals lean it %s: %d%%" % [Lean.face(ln[0])["name"], int(100.0 * float(ln[1]))]
+				lean_t += Lean.size_note(rec)
 				c1.add_child(UI.label(lean_t, UI.T_SMALL, Lean.face(ln[0])["tint"]))
 			EvoPathView.block(rec, c1, func(): _open_kin(rec))
 			var tot := 0.0
@@ -5019,7 +5025,10 @@ func _separate_kin(d: float) -> void:
 			if j == i: continue
 			var b: Dictionary = act[j]
 			var diff := ap - Vector2(b["pos"].x, b["pos"].z)
-			var need := (_kin_r(a) + _kin_r(b)) * (life.pile(a, b) if life else 1.0)
+			var reach := _kin_r(a) + _kin_r(b)  # (the pile scale is under 1: nobody past this is pushed)
+			if diff.length_squared() >= reach * reach:
+				continue
+			var need := reach * (life.pile(a, b) if life else 1.0)
 			var dl := diff.length()
 			if dl < need:
 				if dl < 0.001: diff = Vector2.from_angle(float(i) * 2.4); dl = 0.001

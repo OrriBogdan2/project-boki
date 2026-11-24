@@ -1128,19 +1128,14 @@ static func fetch_common() -> void:
 		return
 	for sp in Data.common_kin():
 		var p := PATH % [sp, sp]
-		if (
-			has(String(sp))
-			and not _scenes.has(p)
-			and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
-		):
-			BackgroundWork.request(p)
+		if has(String(sp)) and not _scenes.has(p):
+			BackgroundWork.read_ahead(p)
 
 
 static func _scene(kin_id: String) -> PackedScene:
 	var p := PATH % [kin_id, kin_id]
 	if not _scenes.has(p):
-		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
-		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
+		_scenes[p] = BackgroundWork.take(p)
 	return _scenes[p] as PackedScene
 
 
@@ -1250,6 +1245,12 @@ func _process(dt: float) -> void:
 		return
 	if not root.is_visible_in_tree():
 		return
+	# a crowded home (RigPace.crowd): the whole step, scripts and skeleton, runs every other frame with the time held
+	var crowded := pace.every == 1 and RigPace.crowd > RigPace.crowd_from
+	if crowded:
+		dt = pace.step(dt, RigPace.is_lead(get_viewport(), root.global_position))
+		if dt <= 0.0:
+			return
 	_flinch.update(root, dt)
 	_water = float(root.get_meta("kwater", 0.0))
 	if _water > 0.0:
@@ -1257,7 +1258,7 @@ func _process(dt: float) -> void:
 	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
-	var t := pace.step(dt)
+	var t := dt if crowded else pace.step(dt)
 	if t > 0.0:
 		_face_step(t)
 		advance(t)

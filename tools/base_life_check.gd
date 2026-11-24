@@ -182,21 +182,22 @@ func _notice_part(home, center: Vector3) -> void:
 	var gap := BaseLife._dist(k, {"pos": home.ppos})
 	for _i in int(float(r["follow_s"]) / DT) + 6:
 		home._move_kin(DT)
-		if m.is_in(BaseLife.S.ROAM):
-			break
+		if not m.is_in(BaseLife.S.GREET):
+			break  # (back to its day: it may pick a toy in the same tick it roams again)
 	var now := BaseLife._dist(k, {"pos": home.ppos})
 	ok(now < gap, "it followed you as you walked off (%.1f m gap, was %.1f)" % [now, gap])
 	for _i in int(float(r["follow_s"]) / DT) + 6:
 		home._move_kin(DT)
 	ok(
-		m.is_in(BaseLife.S.ROAM) and not k.has("life_greet") and not k.has("led"),
-		"then it went back to what it was doing"
+		not m.is_in(BaseLife.S.GREET) and not k.has("life_greet") and not k.has("led"),
+		"then it went back to what it was doing (%s)" % m.state_name()
 	)
 	r["chance"] = kept_chance
 	var hits := {0.0: 0, 95.0: 0}
 	seed(11)
 	for trust in hits:
 		for _i in 200:
+			k.erase("play")  # a toy it went off to after the run over would take it to Play before it can look
 			m.go(BaseLife.S.ROAM, "test")
 			k["rec"]["trust"] = trust
 			k["notice_away"] = float(r["away_s"])

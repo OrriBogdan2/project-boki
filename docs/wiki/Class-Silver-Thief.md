@@ -80,7 +80,7 @@ What the in-game kit card (K) says.
 
 **Marks (passive).** Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +1.3 per Mark (a tenth of a shot, added flat, the empowered shot included). The empowered shot adds 2, the Bola 1. A knock heals you 20% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
-**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a shot and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Throw it within 1.2s of the Vault and it and the next three bolts leave 40% sooner (0.27s apart), their tails cyan. Rank 2: the empowered bonus +20%; rank 3: +40%.
+**Vault (dash, Shift, 5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a shot and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Throw it within 1.2s of the Vault and it and the next three bolts leave 40% sooner (0.27s apart), their tails cyan. Rank 2: the empowered bonus +20%; rank 3: +40%.
 
 **Bola (RMB, 7s cooldown).**
 
@@ -100,7 +100,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | damage +50%. | cooldown 7s -> 4.8s, damage +50%; flies 1m further after the first foe, and two foes caught pool their Marks. |
 | Dash (Shift) | the empowered bonus +20%. | the empowered bonus +40% in all, and the speed boost is half again as big. |
 | E | cooldown 15s -> 10.7s. | cooldown 10.7s; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
-| R (ultimate) | Encore cooldown 24s -> 21.5s, damage 4.5 -> 4.95, rim damage 3.1 -> 3.41. The Fusion lasts 30% longer. | Encore cooldown 24s -> 19s, damage 4.5 -> 5.4, rim damage 3.1 -> 3.72. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 

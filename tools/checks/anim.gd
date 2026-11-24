@@ -17,4 +17,5 @@ const CHECKS := {
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
+	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
 }

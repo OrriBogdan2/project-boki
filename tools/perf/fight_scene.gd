@@ -129,8 +129,7 @@ func _transparent(seen: Array) -> String:
 	ks.sort_custom(func(a, b): return by[a] > by[b])
 	var top := ks.slice(0, TOP).map(func(k): return "%s %.2f" % [k, by[k]])
 	return (
-		"%d things, %d see-through surfaces, boxes cover %.1f screens: %s"
-		% [things, surfaces, screens, ", ".join(top)]
+		"%d things, %d see-through surfaces, boxes cover %.1f screens: %s" % [things, surfaces, screens, ", ".join(top)]
 	)
 
 

@@ -28,6 +28,9 @@ const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his 
 const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
+const LUNGE_COIL_T := 0.2              # s on jug_lunge's clock where its held coil ends (kael.json "lead" -0.45 at
+                                       # "rate" 2.2): a longer Lunge holds it there to its stop, thrusting on the stop
+const LUNGE_SNAP_T := 0.05             # s of travel left when the coil lets go: the thrust's snap and a frame to see it
 const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
                                        # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
 
@@ -368,11 +371,17 @@ func lmb_override(held: bool, dt: float) -> bool:
 			else:
 				_slash()
 		return true
+	# the source (Brall) swings on the press and keeps the hold for the blast (heroes/juggernaut.md, LMB press):
+	# a press slashes at once and goes on timing the hold; let go inside the tap it is done (that swing was the
+	# tap), held past it the Searing Wave charges and goes on the release. A press in the cooldown swings at its end.
 	if held:
 		if lmb_t < 0.0:
 			if h.fire_cd > 0.0:
 				if pressed: lmb_buf = 0.25
 				return true
+			var fresh := pressed or lmb_buf > 0.0
+			lmb_buf = 0.0
+			if fresh: _slash()  # (it clears lmb_t: the hold is timed from here)
 			lmb_t = 0.0
 		lmb_t += dt
 		if lmb_t > float(ld["tap"]):
@@ -380,7 +389,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			_wave_preview()
 			if anim_id != "jug_wave_wind": play("jug_wave_wind")
 	elif lmb_t >= 0.0:
-		if lmb_t < float(ld["tap"]): _slash()
+		if lmb_t < float(ld["tap"]): lmb_t = -1.0     # a tap: its slash went on the press
 		else: _wave()
 	elif lmb_buf > 0.0 and h.fire_cd <= 0.0:
 		lmb_buf = 0.0
@@ -848,6 +857,8 @@ func _lunge(k: float, perfect: bool) -> void:
 func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var dv: Vector2 = lunge["dir"]
+	if anim_id == "jug_lunge" and m.time - anim_at > LUNGE_COIL_T and h.roll_t > LUNGE_SNAP_T:
+		anim_at = m.time - LUNGE_COIL_T      # the coil holds while he travels: the thrust lands as the travel stops
 	for f in m.foes_of(h.team):
 		if f.hittable() and h.flat_dist(f) < h.r + f.r + LUNGE_REACH and absf(f.pos.y - h.pos.y) < 1.6:
 			var k := float(lunge["k"])

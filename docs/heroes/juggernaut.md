@@ -93,12 +93,13 @@ one frame = 0.2 s, and the ult frames at 10 fps), [O] owner notes (MAIN_TO_EXT 1
 
 | Slot | Beat | Source | Ours | Status |
 |---|---|---|---|---|
-| LMB tap | animation | [F] 0023-0034 (5 fps): ~1 frame wind-up with the blade raised (0025, 0028, 0032) and 1 frame of swing (0026, 0029, 0033), alternating sides; the blade trails behind, flaming, between swings (0027, 0030-0031, 0034) | `jug_slash_r/_l`: coiled (0.0), the cut at 0.1, follow-through to 0.24, settled by 0.45; alternating; the cut lands on the tap's release | matches the sides and the trail; the wind-up is shorter than the footage's one frame [?] |
+| LMB tap | animation | [F] 0023-0034 (5 fps): ~1 frame wind-up with the blade raised (0025, 0028, 0032) and 1 frame of swing (0026, 0029, 0033), alternating sides; the blade trails behind, flaming, between swings (0027, 0030-0031, 0034) | `jug_slash_r/_l`: coiled (0.0), the cut at 0.1, follow-through to 0.24, settled by 0.45; alternating; the cut lands on the press (ext/kael-lmb-press; was the tap's release) | matches the sides and the trail; the wind-up is shorter than the footage's one frame [?] |
 | LMB tap | step | [F] none: standing, his nameplate stays on the same pixel (331,189 of 720x405) from 0025 to 0036 through three swings, his body within 4 px (0.15 m); only the legs coil | `_slash` adds no motion and the move keys are pose only (`legs`, `lift`): four standing taps move him under 0.1 m | matches |
 | LMB tap | tracking | [F] he walks while swinging; the slash goes toward the aim (some swings look facing-led: unconfirmed) | each slash is aimed at the cursor at the swing; he keeps his full walk | matches (cursor kept: the facing read is unconfirmed) |
 | LMB tap | cadence | [F] the player's taps 0.6 s (0026-0029) and 0.8 s (0029-0033) apart; the shortest tap-to-tap in 0014-0120 is 0.6 s, so the top rate is not on film ([D] card: 0.2 s cooldown) | one slash per 0.34 s (`rate`) | kept [?] |
 | LMB tap | chain window | [F] the sides keep alternating across every 0.6 and 0.8 s gap (0026-0029-0033-0037, 0046-0050); a 4-frame gap at 5 fps is 0.6-1.0 s | a tap within `CHAIN_RESET` 1.0 s of the last slash swings the other side (was 0.8 s, inside a 4-frame gap's slack) | changed |
 | LMB tap | reset | [F] no clean restart on film: after the 1.4 s (0050-0057) and 1.8 s (0037-0046) gaps the side cannot be told from a restart | idle past 1.0 s, the next tap is the first swing (right) again | [?] the 1.0 s is ours |
+| LMB press | press to swing | [F] all.mp4 at 30 fps, 364.50-365.07 s (frames 0024-0027): the blade leaves its trailing rest at 364.53, draws back through 364.80, ignites at 364.87 and the crescent sweeps 364.93-365.07: one unbroken wind-up into the cut, no pause for a release. Every hold blast is led by a swing: slash 0074 -> bolt 0075, 0079 -> 0081, 0086 -> charge arc 0087, 0091 -> 0094 (0.2-0.6 s), so the press swings and the hold carries on into the blast | the press slashes on its own tick (`--input-latency-check` lmb tick 0, was 7 on the release); held past `tap` 0.22 s the Searing Wave charges and goes on the release; a tap's release adds nothing (one swing); a press in the 0.34 s cooldown swings at its end, and if still held goes on to the wave | changed (verdict: the source starts on the press) |
 | LMB tap | queued tap | [F] n/a: taps are not on film | a tap inside the 0.34 s swings once when it ends (two taps: still one); it is kept 0.25 s (`lmb_buf`), so a tap in the first 0.09 s after a swing is dropped | [?] |
 | LMB hold | charge | [F] 0.6-1.0 s, a thin white arc round him (0087); [O] it grows with the hold, shown while charging | tap 0.22 s, full 0.95 s; the ring round him fills, and now a lane on the ground grows as long (7 -> 14 m) and wide as the wave it would throw, gold-hot at full | changed (the preview is new) |
 | LMB hold | walk | [F] 0 px/s in all 7 holds (0062-0067, 0076-0120) against about 4 m/s on his runs; he also stands for the taps there, and the one hold off the dummy (0062-0067) sits between two short walks, so a forced stop can't be told from a chosen one | the Searing Wave charge walks at 55% (`move_k`) | kept: not determinable (docs/MOVEMENT_FEEL.md) |
@@ -212,7 +213,7 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Throwing | hits a wall or a block | Hooked to a wall | [D] |
 | Throwing | passes an ally or your own Boki | keeps flying (it only bites foes and walls) | [D] "enemies or walls" |
 | Throwing | reaches 13 m, or drops into the abyss | Missed: "MISS", the cooldown starts | [W] 07.01.25 |
-| Throwing | E pressed in flight | remembered for 0.12 s: if it hooks in that time, the pull starts on the hook | ours (buffer) |
+| Throwing | E pressed in flight | remembered for 0.15 s: if it hooks in that time, the pull starts on the hook | ours (buffer) |
 | Throwing | stunned | Missed (the chain breaks), the cooldown starts | [W] 05.02.25 |
 | Hooked (foe or wall) | time | the link chain stays on while you walk, jump, glide or dash, 5 s, then breaks; the cooldown starts | [W] 5 s; [F] 0305-0317 |
 | Hooked | he backs away (or the foe walks off) | the chain pays out; the links pull straight and glow hotter past 85% of its length, a creak as it tightens | [F] 0305-0317 tension |
@@ -249,7 +250,7 @@ Ranks: the cooldown is 12.5% shorter at rank 2 and 37.5% at rank 3 (the data's -
 
 What a Smash press does, by state. "Press" fires on the press; "tap" fires on a release under 0.3 s; "hold" on a
 release after it. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop and its recovery, the
-Gilded Riposte's guard and cleave) is held for 0.12 s before it ends and goes off when it does; earlier presses are ignored, never doubled.
+Gilded Riposte's guard and cleave) is held for 0.15 s before it ends and goes off when it does; earlier presses are ignored, never doubled.
 
 | State | RMB | Result | Source |
 |---|---|---|---|
@@ -357,10 +358,14 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 11. **Invulnerable means everything but the abyss:** a fall still counts; damage over time is blocked too.
 12. **The bond:** paid when the cleave lands on a rival hunter (a hit, a knock or a kill, the best of the cast) by
     `HeroUlt.landed`, which calls the main session's `KinBond.from_ult` once it exists; a miss or a monster pays nothing.
-13. **Open, the guard's edges (guard check, 11-12):** the guard ends at 0.65 s, so a hit in the 0.1 s strike or the
-    recovery lands in full (the source says 0.65 s of invulnerability, nothing after). Crowd control that does not go
-    through a hit (Dredge's reel, a wall slam from a knock before the guard) is not asserted either way; no source row
-    covers it.
+13. **The guard's edges (closed, Nov 20, `ext/kael-guard-edges`):** the source says 0.65 s of invulnerability and
+    nothing after, and main matches it, so no code changed. A shot one tick inside 0.65 s is blocked; a hit one tick
+    past it (the 0.1 s strike, then the 0.35 s recovery) lands in full: damage, stun and knock, no block counted, no
+    +20% on the strike. Crowd control that does not go through a hit has no source row, so main's behaviour stays and
+    is ours, now asserted: a pull (Grimble's reel) is refused only while the guard stands (`Blockers.body_stops`),
+    never in the strike or recovery; a wall slam from a knock that began before the guard, landing inside it, loses
+    its 10 damage to the guard but keeps its 0.9 s stun (the slam sets the stun outside the hit). Asserts:
+    `juggernaut X guard edge: ...` (six rows, in `tools/dj_ult_check.gd`).
 
 ## Small mechanics
 
@@ -397,7 +402,7 @@ From the wiki's ability page and patch notes (reference notes) and the owner's n
 | He lunges about 1 bh into the strike | footage ult f39 | yes | Built (1.8m); asserted |
 
 Assumption 7: the dash after an RMB turns freely; the pull keeps 35% of its speed as you arrive (the owner: "arrival keeps momentum").
-Also ours (no footage): the pull exits (Shift, a jump) and the 0.12s input buffer are ours; the footage shows none of them.
+Also ours (no footage): the pull exits (Shift, a jump) and the 0.15 s input buffer are ours; the footage shows none of them.
 
 ## Cancels (ability to ability)
 
@@ -417,19 +422,19 @@ and the attack key does nothing from a glide (`HunterAttack.can_fire`).
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
 | RMB Finishing Slam, wind-up (0.6 s) | LMB | not shown | both: the slash goes at once (the wind-up doesn't hold the blade) | settled: chainable, kept | [W] gives a 0.55 s cast time, nothing on presses in it; [D] [F] silent; DECISIONS "every interaction is chainable"; `jug cancel: LMB in the Slam's wind-up` |
-| Slam wind-up, Lunge, Meteor Drop and its 0.5 s recovery | RMB | not shown | waits: a press in the last 0.12 s goes when the move ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] [W] silent; DECISIONS "every interaction is chainable"; `jug cancel: RMB again in the Slam's wind-up` |
+| Slam wind-up, Lunge, Meteor Drop and its 0.5 s recovery | RMB | not shown | waits: a press in the last 0.15 s goes when the move ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] [W] silent; DECISIONS "every interaction is chainable"; `jug cancel: RMB again in the Slam's wind-up` |
 | Slam wind-up | E | not shown | both: the hook flies, the Slam strikes the way it was started | owner | `jug 113.5` |
 | Slam wind-up | jump | not shown | both: a 0.8 m hop, the wind-up goes on | settled: chainable, kept | [D] [F] [W] silent (the jump lock in [W] is the Riposte's only); DECISIONS "every interaction is chainable"; `jug cancel: a jump in the Slam's wind-up` |
 | Slam wind-up | X | not shown | both: the guard starts and the wind-up runs on under it | unsettled (flagged below) | |
 | RMB held (Lunge charge) | jump | not shown | the Lunge goes from the air along the aim | owner | interaction table |
 | RMB held | glide | not shown | shut | owner | `jug 113.2` |
 | RMB held, chain hooked | E | the source has only the spin in the pull | pull, then a Haul Slam on arrival | ours (flagged below) | [D] |
-| Lunge, Meteor Drop (active) | LMB | not shown | waits: a press in the last 0.12 s (the Lunge's fling, the Drop's recovery) swings as it ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] silent; DECISIONS "every interaction is chainable"; `jug cancel: LMB in a Lunge or a Meteor Drop` |
+| Lunge, Meteor Drop (active) | LMB | not shown | waits: a press in the last 0.15 s (the Lunge's fling, the Drop's recovery) swings as it ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] silent; DECISIONS "every interaction is chainable"; `jug cancel: LMB in a Lunge or a Meteor Drop` |
 | Lunge end (wind-down) | glide | "winddown frames where Brall can't immediately enter a glider state" | shut for 0.35 s after the Lunge | match (the length is ours: the patch gives no number) | [W] patch 05.02.25 |
 | E Warchain, pulling | RMB | Scorching Spin "DURING Feysteel Chain pull" | Cinder Spin at once, the pull goes on | match | [D] |
 | E hooked | E | "reactivate to pull yourself to the target" | pulls | match | [D] |
 | X Gilded Riposte, guard and cleave (0.65 s) | jump | "Brall can no longer jump while using Volcanic Rebuke" | ignored until the cleave lands; in the recovery a jump goes at once | match | [W] hotfix 08.21.2024; content/dash_flow `into_jump.x` |
-| X guard and cleave | LMB, RMB | not shown | waits: a press in the last 0.12 s swings the slash or starts the Smash as the cleave lands; earlier presses are ignored (as the heavy moves) | settled: chainable (**fixed**: was ignored) | [F] ult f33-f38 (planted, nothing on presses); [W] locks only the jump; DECISIONS "every interaction is chainable"; `jug cancel: LMB or RMB in the Riposte's guard or cleave` |
+| X guard and cleave | LMB, RMB | not shown | waits: a press in the last 0.15 s swings the slash or starts the Smash as the cleave lands; earlier presses are ignored (as the heavy moves) | settled: chainable (**fixed**: was ignored) | [F] ult f33-f38 (planted, nothing on presses); [W] locks only the jump; DECISIONS "every interaction is chainable"; `jug cancel: LMB or RMB in the Riposte's guard or cleave` |
 | X guard and cleave | E | not shown | ignored, except a held chain hauls him in | owner | `jug 113.7` |
 | X guard and cleave | glide | not shown | shut; open in the last 0.35 s, which a glide ends | owner | `jug 113.2` |
 | LMB slash, recovery (about 0.34 s) | LMB | "PRESS for a series of quick melee attacks" | waits: a press in the last 0.25 s swings the next slash; earlier presses are ignored | settled: chainable (the series), kept | [D] Caldera; [F] 0026-0033 alternating swings; `jug cancel: LMB in the slash's recovery` |
@@ -437,7 +442,7 @@ and the attack key does nothing from a glide (`HunterAttack.can_fire`).
 | LMB held (Searing Wave charge) | jump | not shown | the charge goes on through the jump | ours | content/dash_flow `hold.lmb` |
 | LMB held | RMB, E | not shown | both: the charge goes on | settled: chainable, kept | [D] silent (nothing ends the charge); DECISIONS "every interaction is chainable"; `jug cancel: RMB or E with the Searing Wave held` |
 
-Fixes made: the Riposte's guard and cleave now keep an LMB or RMB press for 0.12 s (it was dropped).
+Fixes made: the Riposte's guard and cleave now keep an LMB or RMB press for 0.15 s (it was dropped).
 
 ## Combinations
 
@@ -503,7 +508,7 @@ clip through its strike).
 | `jug_wave` | the blast fires on release | 0.07 / 0.033 / 0.60 | lead 0.03: strike 0.037 | fixed; asserted |
 | `jug_slam` | 0.6 s wind-up, blade cocked low, then the strike [f155-158] | 0.60 / 0.583 / 1.13 | same | matches; asserted |
 | `jug_lunge_wind` (held) | lane grows 0.6-0.8 s to full [f121-127] | pose from the hold threshold (0.3), held from 0.45 | same | matches; asserted (never on a tap) |
-| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48 | fixed; asserted |
+| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48; a longer Lunge (full, perfect, a miss) holds the coil to its stop (`JuggernautKit.LUNGE_COIL_T`) | fixed; asserted |
 | `jug_meteor` (held hang, then the dive) | hang, then straight down [f263-288] | dive 0.22 / kit dive 0.083 | lead 0.14: dive 0.077 | fixed; asserted |
 | `jug_meteor_land` | impact cloud [f288], a 0.5 s rise | 0.15 / 0.000 / 0.50 | lead 0.13: impact 0.02 | fixed; asserted |
 | `jug_dash` | about 2 bh in 0.2 s, hit at the end [f387-401] | 0.156 / 0.233 / 0.27 at rate 1.6 | rate 1.6, lead -0.12: the first pose holds through the 0.07 s wind-up, strike 0.231, clip ends 0.34 (dash stops 0.42) | fixed; asserted |
@@ -617,7 +622,7 @@ The sword tip is the point that jumps: idle, rest stance and walk carry the blad
 | `jug_wave` | the blast fires on release | 0.07 / 0.033 / 0.60 | lead 0.03: strike 0.037 | fixed; asserted |
 | `jug_slam` | **3.43** weapon | **3.43** weapon | **2.67** weapon | **2.67** weapon | 0.10 / 0.16 | 0.30 / 0.40 |
 | `jug_lunge_wind` | **3.43** weapon | **3.08** weapon | **2.67** weapon | **3.33** weapon | 0.18 / 0.16 | 0.18 / 0.40 |
-| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48 | fixed; asserted |
+| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48; a longer Lunge (full, perfect, a miss) holds the coil to its stop (`JuggernautKit.LUNGE_COIL_T`) | fixed; asserted |
 | `jug_meteor` | **3.43** weapon | **3.15** weapon | **2.67** weapon | **1.64** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
 | `jug_meteor_land` | impact cloud [f288], a 0.5 s rise | 0.15 / 0.000 / 0.50 | lead 0.13: impact 0.02 | fixed; asserted |
 | `jug_dash` | about 2 bh in 0.2 s, hit at the end [f387-401] | 0.156 / 0.233 / 0.27 at rate 1.6 | rate 1.6, lead -0.12: the first pose holds through the 0.07 s wind-up, strike 0.231, clip ends 0.34 (dash stops 0.42) | fixed; asserted |

@@ -149,7 +149,23 @@ func _breah() -> void:
 	var lane_at := {}
 	var k_at := [0.0, 0.0]
 	P.inp["fire"] = true
-	step(m, 0.5, func(): P.inp["fire"] = true)
+	# PARITY (breah.md 0118, the gauntlet is cocked on the hold's first frame): the wind-up pose comes HOLD_POSE_T into
+	# the hold, before the 0.28 s tap window, while the lane and the charge still wait for it
+	var wind_at := [-1.0]
+	var lane_early := [false]
+	var held_t := [0.0]
+	step(m, 0.27, func():
+		P.inp["fire"] = true
+		held_t[0] += DT
+		if wind_at[0] < 0.0 and K.anim_id == "breah_wind": wind_at[0] = held_t[0]
+		if AimKit.shown(P, "punch"): lane_early[0] = true
+	)
+	ok(
+		"lmb hold: the wind-up shows from HOLD_POSE_T, before the tap window, the lane after it",
+		wind_at[0] >= ArchKit.HOLD_POSE_T - 0.001 and wind_at[0] < ArchKit.HOLD_POSE_T + 2.5 * DT and not lane_early[0],
+		"wind at %.3f s lane early %s" % [wind_at[0], lane_early[0]]
+	)
+	step(m, 0.23, func(): P.inp["fire"] = true)
 	k_at[0] = K.punch_k()
 	lane_at = AimKit.entry(P, "punch")
 	var ret := AimKit.reticle(P)
@@ -176,8 +192,23 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.4)
 	ok(
-		"lmb: hold + release = punch, knocks back", K.punches == 1 and dmg(T) >= 20.0 and T.pos.x - home.x > 3.0,
+		"lmb: hold + release = punch, knocks back (the data's 199 vs the 169 boulder = 10.6, no charge scaling)",
+		K.punches == 1 and typeof(pd["dmg"]) == TYPE_FLOAT and T.pos.x - home.x > 3.0
+		and absf(dmg(T) - float(pd["dmg"]) * m.dmg_mult(P)) < 0.6,
 		"punches %d took %.1f dx %.1f" % [K.punches, dmg(T), T.pos.x - home.x]
+	)
+	var full_dmg := dmg(T)
+	reset.call()
+	T.teleport(home + Vector3(2.4, 0, 0))
+	aim_at(P, T.pos)
+	P.inp["fire"] = true
+	step(m, 0.4, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok(
+		"lmb: a short hold hits as hard as a full one (no charge scaling on damage or knockback)",
+		K.punches == 2 and absf(dmg(T) - full_dmg) < 0.1 and T.pos.x - home.x > 3.0,
+		"short %.1f full %.1f dx %.1f" % [dmg(T), full_dmg, T.pos.x - home.x]
 	)
 	ok(
 		"lmb: the punch lands with the blue hit flash and debris (sized by the lane's half width)",

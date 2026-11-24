@@ -598,6 +598,44 @@ func _all() -> void:
 	)
 	m.verbs.walls.erase(wall)
 	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
+	# --- owner rule, placed walls: Tenzo's ridge (his rocks) and Albert's raised shield stop the Hand too
+	reset.call()
+	var rock: Dictionary = HeroZones.rock(m, t, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Tenzo ridge: a rock of his stops the Deep Reach, no hook and no damage behind it",
+		not rock.is_empty() and k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	m.verbs.walls.erase(rock)
+	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
+	reset.call()
+	var al: Hunter = m.make_hunter(
+		"AL", t.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"}
+	)
+	al.set_arch("bulwark")
+	al.max_hp = 1e9
+	al.hp = al.max_hp
+	ak.aim_at(al, p.pos)
+	m.step(ak.DT)
+	(al.ak as BulwarkKit)._raise()
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Albert shield: his raised aegis stops the Deep Reach, no hook and no damage behind it",
+		k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	for wl in m.verbs.walls.duplicate():
+		if wl.get("by") == al:
+			m.verbs.walls.erase(wl)
+			if is_instance_valid(wl.get("node")): (wl["node"] as Node).queue_free()
+	al.queue_free()
+	m.hunters.erase(al)
+	m.step(ak.DT)
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
 	for dz in range(-1, 2):
