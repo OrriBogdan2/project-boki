@@ -1849,7 +1849,8 @@
   "art/kin/goliathite/goliathite.glb": 10,
   "art/kin/hoarheron/hoarheron.glb": 6,
   "art/wardens/gil/gil_meshy.glb": 217,
-  "art/wardens/pip/pip_meshy.glb": 424784
+  "art/wardens/pip/pip_meshy.glb": 424784,
+  "art/wardens/sable/sable_meshy.glb": 2
  },
  "godot-shadow": {
   "scripts/arch/arch.gd": 1,
