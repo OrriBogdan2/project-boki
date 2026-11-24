@@ -8,6 +8,7 @@ procedural sun_body()/pc.cloud_body() are the fallback when they are not given.
 Space: Blender's, facing +Y, her right +X (the sun floats on her left, -X), up +Z, contract metres.
 Why (docs: Fable plan 11-23): the live sun/cloud were 12 px dots at the game camera (66 deg top-down), their vertical face decals
 sank into the decimated bodies and were seen at a grazing angle, the cloud sat on the tinted `skin` slot (pink on pink)."""
+
 import math
 import os
 import sys
@@ -21,27 +22,39 @@ from mathutils.bvhtree import BVHTree
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pip_companions as pc  # noqa: E402
 
-pc.SUN_R = 0.18          # was 0.105: a round ball 0.36 m wide, short rays to 1.4 R (span 0.50 m: 27 px at the game camera, was 12)
-pc.CLOUD_W = 0.52        # was 0.36
-pc.TRIS = {"sun": 700, "cloud": 800}     # (plan 11-24 budget; was 620 / 760)
+pc.SUN_R = (
+    0.18  # was 0.105: a round ball 0.36 m wide, short rays to 1.4 R (span 0.50 m: 27 px at the game camera, was 12)
+)
+pc.CLOUD_W = 0.52  # was 0.36
+pc.TRIS = {"sun": 700, "cloud": 800}  # (plan 11-24 budget; was 620 / 760)
 # the cloud's face needs one smooth belly under it (the lumpy original left creases the decal could not lie on)
-pc.CLOUD_LOBES = [(0.0, 0.04, 0.31), (-0.03, 0.2, 0.24), (-0.31, -0.03, 0.2), (0.29, -0.01, 0.22), (-0.17, -0.19, 0.17), (0.2, -0.18, 0.17),
-                  (-0.41, -0.11, 0.11)]
-TILT = 0.0               # (was 50 deg: facing is done in code now, warden_anim/pip.json companions.face 'camera': the disc squares up to the active camera in every pose)
+pc.CLOUD_LOBES = [
+    (0.0, 0.04, 0.31),
+    (-0.03, 0.2, 0.24),
+    (-0.31, -0.03, 0.2),
+    (0.29, -0.01, 0.22),
+    (-0.17, -0.19, 0.17),
+    (0.2, -0.18, 0.17),
+    (-0.41, -0.11, 0.11),
+]
+TILT = 0.0  # (was 50 deg: facing is done in code now, warden_anim/pip.json companions.face 'camera': the disc squares up to the active camera in every pose)
 SUN_CELL = 0.145
 CLOUD_CELL = 0.16
-LIFT = 0.007             # m the face sits off the body
-LIFT_MESHY = 0.010       # m: on the decimated Meshy ball (its facets sag a flat 7 mm patch to 1.3 mm in places)
-MIN_OUT = 0.002          # m: the build fails when a decal vertex or triangle centre is closer to (or inside) the body
-SUN_RAY = 0.34           # ray length past the ball's skin, x SUN_R: short and wide like the splash (was 0.64; 0.80 read as a spiky star)
-SUN_RAY_BASE = 0.38      # ray base radius, x SUN_R
-SUN_FLAT = 0.62          # ray thickness along the view axis (was 0.72)
+LIFT = 0.007  # m the face sits off the body
+LIFT_MESHY = 0.010  # m: on the decimated Meshy ball (its facets sag a flat 7 mm patch to 1.3 mm in places)
+MIN_OUT = 0.002  # m: the build fails when a decal vertex or triangle centre is closer to (or inside) the body
+SUN_RAY = 0.34  # ray length past the ball's skin, x SUN_R: short and wide like the splash (was 0.64; 0.80 read as a spiky star)
+SUN_RAY_BASE = 0.38  # ray base radius, x SUN_R
+SUN_FLAT = 0.62  # ray thickness along the view axis (was 0.72)
 LEMON = (1.0, 0.86, 0.22)
 CLOUD_COL = (0.97, 0.97, 1.0)
-DROPS = ((-0.22, -0.60, 0.07), (0.02, -0.66, 0.085))   # x, z (x cloud width), radius (x cloud width): the drops hang clear of the nubs
-SPAN = {"sun": 0.50, "cloud": 0.52}   # m: the sun across its petal tips (its widest of X/Z), the cloud's width (X)
-TEX_PX = 512                           # the Meshy albedo's size in the game file
-CELL_FACE = {"sun": 1, "cloud": 5}    # the atlas cell each face is baked to (laugh; the cloud's happy)
+DROPS = (
+    (-0.22, -0.60, 0.07),
+    (0.02, -0.66, 0.085),
+)  # x, z (x cloud width), radius (x cloud width): the drops hang clear of the nubs
+SPAN = {"sun": 0.50, "cloud": 0.52}  # m: the sun across its petal tips (its widest of X/Z), the cloud's width (X)
+TEX_PX = 512  # the Meshy albedo's size in the game file
+CELL_FACE = {"sun": 1, "cloud": 5}  # the atlas cell each face is baked to (laugh; the cloud's happy)
 
 
 # ----------------------------------------------------------------------------------------------------- bolder faces
@@ -69,8 +82,6 @@ def brows(c, col, worried=True, y=0.36):
         c.stroke([(0.26 * s, yi), (0.52 * s, yo)], 0.06, col)
 
 
-
-
 def mouth_o(c, y=-0.2):
     c.ellipse(0, y, 0.07, 0.09, pc.PLUM)
     c.ellipse(0, y, 0.045, 0.06, pc.MOUTH)
@@ -78,8 +89,6 @@ def mouth_o(c, y=-0.2):
 
 def mouth_frown(c, y=-0.24):
     c.arc(0, y - 0.1, 0.2, 0.45, math.pi - 0.45, 0.06, pc.PLUM)
-
-
 
 
 def mouth_sad(c, y=-0.18):
@@ -147,16 +156,25 @@ def face_calm(c, who, happy):
 def face_cell(who, name):
     c = pc.Cell()
     brow = pc.BROW_SUN if who == "sun" else pc.BROW_CLOUD
-    if (who, name) in (("sun", "happy"), ("cloud", "shy")):          # cells 0, 4: calm (idle)
+    if (who, name) in (("sun", "happy"), ("cloud", "shy")):  # cells 0, 4: calm (idle)
         face_calm(c, who, False)
-    elif (who, name) in (("sun", "laugh"), ("cloud", "happy")):      # cells 1, 5: happy (emotes)
+    elif (who, name) in (("sun", "laugh"), ("cloud", "happy")):  # cells 1, 5: happy (emotes)
         face_calm(c, who, True)
     elif name == "grumpy":
-        blush(c, -0.16); brows(c, brow, False, 0.28); eyes_open(c, 0.05, 0.85); mouth_frown(c)
+        blush(c, -0.16)
+        brows(c, brow, False, 0.28)
+        eyes_open(c, 0.05, 0.85)
+        mouth_frown(c)
     elif name == "sleep":
-        blush(c); eyes_arc(c, False); mouth_o(c)
+        blush(c)
+        eyes_arc(c, False)
+        mouth_o(c)
     elif name == "cry":
-        tears(c); blush(c); brows(c, brow); eyes_arc(c, False, 0.03); mouth_sad(c)
+        tears(c)
+        blush(c)
+        brows(c, brow)
+        eyes_arc(c, False, 0.03)
+        mouth_sad(c)
     return c
 
 
@@ -172,8 +190,15 @@ def sun_body():
         out = Vector((math.sin(a), 0, math.cos(a)))
         length = R * SUN_RAY + (R * 0.14 if k % 2 == 0 else 0)
         m = Matrix.Translation(out * R * 0.82) @ Matrix.Rotation(a, 4, "Y") @ Matrix.Diagonal((1, SUN_FLAT, 1, 1))
-        bmesh.ops.create_cone(bm, cap_ends=True, segments=10, radius1=R * SUN_RAY_BASE, radius2=R * 0.07, depth=length + R * 0.18,
-                              matrix=m @ Matrix.Translation((0, 0, (length + R * 0.18) / 2 - R * 0.1)))
+        bmesh.ops.create_cone(
+            bm,
+            cap_ends=True,
+            segments=10,
+            radius1=R * SUN_RAY_BASE,
+            radius2=R * 0.07,
+            depth=length + R * 0.18,
+            matrix=m @ Matrix.Translation((0, 0, (length + R * 0.18) / 2 - R * 0.1)),
+        )
     ob = pc.blob("sun", bm, 0.0065, 8, pc.TRIS["sun"])
     ob.data.transform(Matrix.Rotation(TILT, 4, "X"))
     return ob
@@ -197,13 +222,24 @@ def meshy_body(name, path, mat_name, turn=0.0):
     ob.parent = None
     ob.data.transform(ob.matrix_world)
     ob.matrix_world = Matrix.Identity(4)
-    src = next(n.image for m in ob.data.materials if m and m.use_nodes for n in m.node_tree.nodes
-               if n.type == "TEX_IMAGE" and n.image and any(lk.to_socket.name == "Base Color" for lk in n.outputs[0].links))
+    src = next(
+        n.image
+        for m in ob.data.materials
+        if m and m.use_nodes
+        for n in m.node_tree.nodes
+        if n.type == "TEX_IMAGE" and n.image and any(lk.to_socket.name == "Base Color" for lk in n.outputs[0].links)
+    )
     vs = np.array([v.co[:] for v in ob.data.vertices])
     lo, hi = vs.min(0), vs.max(0)
     span = (hi[0] - lo[0]) if name == "cloud" else max(hi[0] - lo[0], hi[2] - lo[2])
-    ob.data.transform(Matrix.Rotation(math.pi + math.radians(turn), 4, "Z") @ Matrix.Scale(SPAN[name] / span, 4) @ Matrix.Translation(Vector(-(lo + hi) / 2)))
-    bm = bmesh.new()      # (weld Meshy's UV-seam splits first: decimated apart they open as cracks; loop UVs survive the weld)
+    ob.data.transform(
+        Matrix.Rotation(math.pi + math.radians(turn), 4, "Z")
+        @ Matrix.Scale(SPAN[name] / span, 4)
+        @ Matrix.Translation(Vector(-(lo + hi) / 2))
+    )
+    bm = (
+        bmesh.new()
+    )  # (weld Meshy's UV-seam splits first: decimated apart they open as cracks; loop UVs survive the weld)
     bm.from_mesh(ob.data)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
     bm.to_mesh(ob.data)
@@ -217,7 +253,7 @@ def meshy_body(name, path, mat_name, turn=0.0):
     img = src.copy()
     img.scale(TEX_PX, TEX_PX)
     img.name = mat_name + "_albedo"
-    if bpy.data.materials.get(mat_name):      # (the flat fallback material of that name: it keeps a suffix, unused)
+    if bpy.data.materials.get(mat_name):  # (the flat fallback material of that name: it keeps a suffix, unused)
         bpy.data.materials[mat_name].name = mat_name + "_flat"
     m = bpy.data.materials.new(mat_name)
     m.use_nodes = True
@@ -277,7 +313,7 @@ def face_patch(name, body, cell_half, centre, tilt, lift=LIFT, steep=0.55):
         for i in range(n_g + 1):
             p = centre + Vector((1, 0, 0)) * ((i / n_g * 2 - 1) * cell_half) + v_dir * ((j / n_g * 2 - 1) * cell_half)
             hit, nrm, _, _ = bvh.ray_cast(p + n_dir * 2.0, -n_dir)
-            if hit is not None and nrm.dot(n_dir) > steep:      # (not up the steep rim: a flat quad would sag into it)
+            if hit is not None and nrm.dot(n_dir) > steep:  # (not up the steep rim: a flat quad would sag into it)
                 grid[i, j] = bm.verts.new(hit + nrm * lift)
     for j in range(n_g):
         for i in range(n_g):
@@ -294,7 +330,9 @@ def face_patch(name, body, cell_half, centre, tilt, lift=LIFT, steep=0.55):
             worst = min(worst, height_above(bvh, p, n_dir))
     print("DECAL", name, "quads", len(bm.faces), "lowest above the body (mm)", round(worst * 1000, 1))
     assert len(bm.faces) >= 24, f"{name}: the face patch lost most of its quads"
-    assert worst >= MIN_OUT, f"{name}: a face vertex or triangle centre is {worst * 1000:.1f} mm from the body (< {MIN_OUT * 1000} mm)"
+    assert worst >= MIN_OUT, (
+        f"{name}: a face vertex or triangle centre is {worst * 1000:.1f} mm from the body (< {MIN_OUT * 1000} mm)"
+    )
     ob = pc.new_obj(name, bm)
     ob.data.polygons.foreach_set("use_smooth", [True] * len(ob.data.polygons))
     return ob
@@ -309,7 +347,7 @@ def check_drops(cloud, dr):
 
 
 def main():
-    args = sys.argv[sys.argv.index("--") + 1:]
+    args = sys.argv[sys.argv.index("--") + 1 :]
     dst, faces_png = args[:2]
     opt = dict(a[2:].split("=", 1) for a in args[2:] if a.startswith("--"))
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -317,11 +355,21 @@ def main():
     img = pc.build_atlas()
     img.filepath_raw, img.file_format = faces_png, "PNG"
     img.save()
-    mats = {"sun": pc.flat_mat("glow-sun", LEMON), "cloud": pc.flat_mat("cloth-cloud", CLOUD_COL, 0.5),
-            "drop": pc.flat_mat("ice-drop", (0.60, 0.78, 0.98), 0.15),
-            "fsun": pc.face_mat("eyes-mood_sun", img), "fcloud": pc.face_mat("eyes-mood_cloud", img)}
-    sun = meshy_body("sun", opt["sun-glb"], "glow-sun", float(opt.get("sun-turn", 0))) if "sun-glb" in opt else sun_body()
-    cloud = meshy_body("cloud", opt["cloud-glb"], "cloth-cloud", float(opt.get("cloud-turn", 0))) if "cloud-glb" in opt else pc.cloud_body()
+    mats = {
+        "sun": pc.flat_mat("glow-sun", LEMON),
+        "cloud": pc.flat_mat("cloth-cloud", CLOUD_COL, 0.5),
+        "drop": pc.flat_mat("ice-drop", (0.60, 0.78, 0.98), 0.15),
+        "fsun": pc.face_mat("eyes-mood_sun", img),
+        "fcloud": pc.face_mat("eyes-mood_cloud", img),
+    }
+    sun = (
+        meshy_body("sun", opt["sun-glb"], "glow-sun", float(opt.get("sun-turn", 0))) if "sun-glb" in opt else sun_body()
+    )
+    cloud = (
+        meshy_body("cloud", opt["cloud-glb"], "cloth-cloud", float(opt.get("cloud-turn", 0)))
+        if "cloud-glb" in opt
+        else pc.cloud_body()
+    )
     dr = drops()
     for ob, mk in ((sun, "sun"), (cloud, "cloud"), (dr, "drop")):
         if not ob.data.materials:
@@ -339,8 +387,16 @@ def main():
     bpy.ops.object.select_all(action="DESELECT")
     for ob in objs:
         ob.select_set(True)
-    bpy.ops.export_scene.gltf(filepath=dst, export_format="GLB", use_selection=True, export_apply=False, export_animations=False,
-                              export_materials="EXPORT", export_image_format="AUTO", export_yup=True)
+    bpy.ops.export_scene.gltf(
+        filepath=dst,
+        export_format="GLB",
+        use_selection=True,
+        export_apply=False,
+        export_animations=False,
+        export_materials="EXPORT",
+        export_image_format="AUTO",
+        export_yup=True,
+    )
     print("exported", dst)
 
 

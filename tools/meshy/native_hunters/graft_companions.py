@@ -8,7 +8,6 @@ A body whose COMPANIONS.glb material has a base colour texture (the Meshy sun/cl
   python3 graft_companions.py OUT.glb IN.glb COMPANIONS.glb FACES.png
 """
 
-import json
 import sys
 
 import numpy as np
@@ -21,8 +20,8 @@ import graft  # noqa: E402
 
 SCALE = 1.256 / 1.065
 GROUPS = {"sun": ("cloth-sun", "eyes-mood_sun"), "cloud": ("skin-cloud", "ice-drop", "eyes-mood_cloud")}
-NEW_NAME = {"cloth-sun": "glow-sun", "skin-cloud": "cloth-cloud"}   # material in IN.glb -> its name in the new file
-SRC_NAME = {"cloth-sun": "glow-sun", "skin-cloud": "cloth-cloud"}   # ... and what COMPANIONS.glb calls it
+NEW_NAME = {"cloth-sun": "glow-sun", "skin-cloud": "cloth-cloud"}  # material in IN.glb -> its name in the new file
+SRC_NAME = {"cloth-sun": "glow-sun", "skin-cloud": "cloth-cloud"}  # ... and what COMPANIONS.glb calls it
 FACES = ("eyes-mood_sun", "eyes-mood_cloud")
 
 
@@ -41,22 +40,29 @@ def carry_texture(js, out, mt, cjs, cbin, cm):
         return
     js["images"].append({"bufferView": view, "mimeType": cimg["mimeType"], "name": mt["name"] + "_albedo"})
     js["textures"].append({"sampler": 0, "source": len(js["images"]) - 1})
-    mt["pbrMetallicRoughness"] = {"baseColorTexture": {"index": len(js["textures"]) - 1}, "metallicFactor": 0,
-                                  "roughnessFactor": cm["pbrMetallicRoughness"].get("roughnessFactor", 0.5)}
+    mt["pbrMetallicRoughness"] = {
+        "baseColorTexture": {"index": len(js["textures"]) - 1},
+        "metallicFactor": 0,
+        "roughnessFactor": cm["pbrMetallicRoughness"].get("roughnessFactor", 0.5),
+    }
 
 
 def main(out_path, in_path, comp_path, faces_png):
     js, bin_ = npk.load(in_path)
     cjs, cbin = npk.load(comp_path)
     old, new = prims(js, bin_), prims(cjs, cbin)
-    old.update({n: old[NEW_NAME[n]] for n in NEW_NAME if n not in old and NEW_NAME[n] in old})   # (an earlier graft)
+    old.update({n: old[NEW_NAME[n]] for n in NEW_NAME if n not in old and NEW_NAME[n] in old})  # (an earlier graft)
     cmat = {m["name"]: m for m in cjs["materials"]}
     out = npk.Out(js, bin_)
     for grp, names in GROUPS.items():
         lo = np.min([graft.read(js, bin_, old[n]["attributes"]["POSITION"]).min(0) for n in names], 0)
         hi = np.max([graft.read(js, bin_, old[n]["attributes"]["POSITION"]).max(0) for n in names], 0)
         old_c = (lo + hi) / 2
-        src = {n: graft.read(cjs, cbin, new[SRC_NAME.get(n, n)]["attributes"]["POSITION"]) * np.array([-1, 1, -1], np.float32) for n in names}
+        src = {
+            n: graft.read(cjs, cbin, new[SRC_NAME.get(n, n)]["attributes"]["POSITION"])
+            * np.array([-1, 1, -1], np.float32)
+            for n in names
+        }
         nlo = np.min([v.min(0) for v in src.values()], 0)
         nhi = np.max([v.max(0) for v in src.values()], 0)
         for n in names:
@@ -65,14 +71,22 @@ def main(out_path, in_path, comp_path, faces_png):
             nrm = graft.read(cjs, cbin, q["attributes"]["NORMAL"]) * np.array([-1, 1, -1], np.float32)
             idx = graft.read(cjs, cbin, q["indices"]).ravel()
             textured = "baseColorTexture" in cmat[SRC_NAME.get(n, n)].get("pbrMetallicRoughness", {})
-            if n in FACES or textured:  # (faces: 0..1 over the face's cell, WardenMood's atlas shader picks it; Meshy bodies: their atlas)
+            if (
+                n in FACES or textured
+            ):  # (faces: 0..1 over the face's cell, WardenMood's atlas shader picks it; Meshy bodies: their atlas)
                 uv = graft.read(cjs, cbin, q["attributes"]["TEXCOORD_0"])
             else:
                 uv = np.tile(np.array([0.0, 1.0], np.float32), (len(pos), 1))
             joint = int(graft.read(js, bin_, p["attributes"]["JOINTS_0"])[0][0])
             n_v = len(pos)
-            at = {"POSITION": pos, "NORMAL": nrm, "TEXCOORD_0": uv, "COLOR_0": np.full((n_v, 4), 255.0, np.float32),
-                  "COLOR_1": np.full((n_v, 4), 65535.0, np.float32), "WEIGHTS_0": np.tile(np.array([1, 0, 0, 0], np.float32), (n_v, 1))}
+            at = {
+                "POSITION": pos,
+                "NORMAL": nrm,
+                "TEXCOORD_0": uv,
+                "COLOR_0": np.ones((n_v, 4), np.float32),
+                "COLOR_1": np.ones((n_v, 4), np.float32),
+                "WEIGHTS_0": np.tile(np.array([1, 0, 0, 0], np.float32), (n_v, 1)),
+            }
             for k, v in at.items():
                 acc = {"componentType": 5126, "type": "SCALAR" if v.shape[1] == 1 else f"VEC{v.shape[1]}"}
                 data = np.ascontiguousarray(v, np.float32)
@@ -83,11 +97,19 @@ def main(out_path, in_path, comp_path, faces_png):
                 p["attributes"][k] = len(js["accessors"]) - 1
             jd = np.zeros((n_v, 4), np.uint16)
             jd[:, 0] = joint
-            js["accessors"].append({"componentType": 5123, "type": "VEC4", "count": n_v, "bufferView": out.add_view(jd.tobytes())})
+            js["accessors"].append(
+                {"componentType": 5123, "type": "VEC4", "count": n_v, "bufferView": out.add_view(jd.tobytes())}
+            )
             p["attributes"]["JOINTS_0"] = len(js["accessors"]) - 1
             big = n_v > 65535
-            js["accessors"].append({"componentType": 5125 if big else 5123, "type": "SCALAR", "count": len(idx),
-                                    "bufferView": out.add_view(idx.astype(np.uint32 if big else np.uint16).tobytes())})
+            js["accessors"].append(
+                {
+                    "componentType": 5125 if big else 5123,
+                    "type": "SCALAR",
+                    "count": len(idx),
+                    "bufferView": out.add_view(idx.astype(np.uint32 if big else np.uint16).tobytes()),
+                }
+            )
             p["indices"] = len(js["accessors"]) - 1
             if n in NEW_NAME:
                 mt = js["materials"][p["material"]]
