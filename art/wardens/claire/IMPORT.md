@@ -61,17 +61,3 @@ node only; `python3 tools/art1/v95_to_game.py claire --master <B body>`), then t
 ice-heart head) from the same master as a separate 4k-tri mesh `spear` rigid on hand.R (`tools/art1/v95_prop_swap.py`, material
 `cloth-spear`, image `claire_v95p.jpg`); the old atlas spear faces are gone and weapon_muzzle / anchor_blade_root / anchor_blade_mid
 sit on the new head. 59.9k tris, same rig and 61 clips.
-
-**11-20 right arm on its bones (ext/anim-neve-wrist, `python3 tools/art1/glb_arm_refit.py claire IN OUT --i-checked-renders`):**
-the 11-17 body was modelled with the right forearm held forward at the waist and the open glove up (thumb up, palm in), but bound
-to the rig's straight-down arm bones with the glove on `upper_arm.R`/`forearm.R`, so every clip bent it about the wrong points:
-the glove stuck out at the side by the hip while `hand.R` and the spear sat on the shoulder (idle). In place, numpy only: the arm
-(1117 points grown from its chain over arm-weighted vertices) turns about its own shoulder onto a straight line down to the spear
-shaft, the glove's middle 3 cm outside it (unbending the elbow turns the palm onto the shaft, thumb along it); its weights are
-rebuilt (glove on `hand.R`, elbow blend between the scan's elbow and the bone's, the scan's upper arm being 0.24 m to the rig's
-0.21), stray arm weight on the skirt, sash and cape fades out with distance (a loose 26-point fur sliver by the right hip keeps
-its hand weights, as on main); and in every clip the hand's roll about its bone is
-split evenly with the forearm (capped at 60 degrees: the stance twirl stays in the wrist), hand.R's world pose kept, so the spear
-aims exactly as before. Bones, spear, anchors and the left arm untouched. Skin stretch (glb_relax maths, 61 clips): worst
-9.10 -> 7.53, summed edges over 1.3x 54052 -> 42888, no clip worse; idle wrist roll 52 -> 26 degrees. Before/after GPU
-shots: ~/anim/neve-wrist-1120 (sheet_before_after.png, sheet_states.png).
