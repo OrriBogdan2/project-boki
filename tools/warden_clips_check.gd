@@ -27,6 +27,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
@@ -134,7 +135,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			if d > worst:
 				worst = d
 				worst_mv = k
-		if moved < 0.03 and not k in ["bul_short", "bul_crush", "bul_armed"]:
+		if moved < 0.03 and not k in ["bul_short", "bul_crush"]:
 			still.append(k)
 		_play(m, an, sync, st, 12)
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])
@@ -179,7 +180,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	if piece:
 		_thrown(m, piece.get_child(0) as MeshInstance3D)
 		piece.free()
-	_mood(m, sync, sk)
+	_mood(m, sync, sk, art_name)
 	# the budget
 	var tris := 0
 	for mi in w.find_children("*", "MeshInstance3D", true, false):
@@ -269,15 +270,21 @@ func _hammer_scale(w: Node, sk: Skeleton3D) -> void:
 	ok(absf(k - 0.79) <= 0.06, "breaker: the hammer is %.2f of his height (sheet 0.79)" % k)
 
 ## The porthole's moods and the fish: cosmetic, off the state and the kit's pokes.
-func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
+func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D, art_name: String) -> void:
 	var md: WardenMood = sync.mood
-	ok(md != null and md.face != null and not md.lure.is_empty(), "the porthole and the lure are on their materials")
+	if WardenClips.data(art_name).get("mood", {}).is_empty():
+		return
+	ok(md != null and md.tex_faces.size() == 1, "breaker: the porthole's faces are on its glass")
+	ok(md != null and not md.lure.is_empty(), "breaker: the lure is on its material")
+	if md == null:
+		return
 	var seen := {}
 	for st in [{}, {"emote": "x"}, {"kmove": "bul_smash"}, {"kmove": "bul_guard"}, {"downed": true}]:
 		m.set_meta(WardenClips.STATE, st)
 		md.step(0.5)
-		seen[md.face.get_shader_parameter("to_mood")] = true
+		seen[md.cur] = true
 	ok(seen.size() == 5, "five moods from the state (%d)" % seen.size())
+	_porthole(m, md)
 	var fish := WardenSkeleton.find(sk, "x_fish")
 	m.set_meta(WardenClips.STATE, {})
 	md.step(0.01)
@@ -293,6 +300,40 @@ func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
 	ok(float((md.lure[0] as ShaderMaterial).get_shader_parameter("glow")) > rest_glow * 2.0, "the ult flares the lure")
 	m.set_meta(WardenMood.FLARE, false)
 	md.step(1.0)
+
+## Owner 11-18: the porthole smiles (face A) by default and shows the old angry paint in a fight (he swung, cast or
+## was hit in the last combat_t s) or a move; the swap is a texture already loaded, never a load mid-match.
+func _porthole(m: Node3D, md: WardenMood) -> void:
+	if md.tex_faces.is_empty():
+		return
+	var mat := md.tex_faces[0][0] as ShaderMaterial
+	var own := md.tex_faces[0][2] as Texture2D
+	var angry := load("res://art/wardens/breaker/breaker_v95_angry.jpg") as Texture2D
+	ok(own != null and angry != null and own != angry, "breaker: the smile is the .glb's paint, the glare its own")
+	var rows := [
+		[{}, false, "at rest he smiles"],
+		[{"fired": 1.0}, true, "a swing makes him glare"],
+		[{"hit_t": 3.5}, true, "a hit 3.5 s ago still glares"],
+		[{"cast": 2.0}, true, "a cast glares"],
+		[{"kmove": "bul_guard"}, true, "his guard glares"],
+		[{"fired": 4.5, "cast": 9.0, "hit_t": 9.0}, false, "4 s after the fight he smiles again"],
+		[{"emote": "x"}, false, "an emote smiles"],
+		[_spawn_state(), false, "a fresh spawn smiles (shot, cast and hit timers all start expired)"],
+	]
+	for row in rows:
+		m.set_meta(WardenClips.STATE, row[0])
+		md.step(0.1)
+		var shown := mat.get_shader_parameter("albedo_tex") as Texture2D
+		ok(shown == (angry if row[1] else own), "breaker: %s" % row[2])
+
+
+## A Hunter's own spawn defaults at match time 0, as its snapshot would read them: no shot, cast or hit yet.
+func _spawn_state() -> Dictionary:
+	var h: Object = load("res://scripts/match/hunter.gd").new()
+	var st := {"fired": float(h.idle_fire), "cast": 0.0 - float(h.cast_at), "hit_t": 0.0 - float(h.hurt_at)}
+	h.free()
+	return st
+
 
 ## Item 59: the kit's angle seeks the hold's loop: the head goes where the phase says, inside the slam's reach.
 func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st: Dictionary) -> void:
@@ -398,7 +439,7 @@ func _air_legs(id: String) -> void:
 		var cast := {"vel": Vector3(0, -2.0, 0), "face": 0.0, "grounded": false, "kmove": k}
 		for f in AIR_FRAMES:
 			cast["kmove_t"] = f * DT
-			cast["grounded"] = f >= AIR_FRAMES / 2
+			cast["grounded"] = f >= int(AIR_FRAMES / 2.0)
 			_play(pair[1][0], pair[1][1], pair[1][2], cast, 1)
 			if cast["grounded"] and clips.act_w > 0.01 and not k in snaps:
 				snaps.append(k)

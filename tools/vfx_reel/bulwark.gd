@@ -2,7 +2,7 @@ extends "res://tools/hero_vfx_reel.gd"
 ## Albert's reel (tools/hero_vfx_reel.gd, docs/decisions/0061-breaker-swing-lunge.md), every slot at the match
 ## camera's zoom: the hammer thrown and called back, the charged swing, the swing's lunge standing and running (its
 ## distance over him with the full performance overlay on), the raised shield, the aegis boop on the dummy, its Shield
-## Charge into a Shield Slam, a foe driven into a rock, the 360 Smash (dash), Mending Ground (e), the Faultline hop and
+## Charge, a foe driven into a rock, the 360 Smash (dash), Mending Ground (e), the Faultline hop and
 ## slam (r), and the thrown hammer reeled home by its rope.
 
 const HOLD := 1.5              # s the swing is held: past full charge and its perfect window
@@ -57,7 +57,6 @@ func _part_shield() -> void:
 func _part_bash() -> void:
 	await _reset(5.0)
 	_hand()
-	P.ak.res = 50.0          # (a full Guard: the charge ends in a Shield Slam)
 	var charge := func(t: float):
 		P.inp["sec_hold"] = t > 0.15
 		if _at(t, 0.2):
@@ -69,7 +68,7 @@ func _part_bash() -> void:
 		if t > 0.55:
 			P.inp["move"] = Vector2.ZERO
 		_aim(T.pos)
-	await _go(1.9, charge, _sheet("bash", "Shift behind the shield: the Shield Charge into a Shield Slam",
+	await _go(1.9, charge, _sheet("bash", "Shift behind the shield: the Shield Charge",
 		[0.45, 0.52, 0.6, 0.7, 0.8, 0.9, 1.0, 1.15, 1.5]), 2.0)
 	await _go(GAP)
 
@@ -134,11 +133,11 @@ func _part_swing() -> void:
 	await _reset(12.0)
 	_hand()
 	P.teleport(home + Vector3(-4.0, 0, 0))
-	var run := func(t: float):
+	var run_v := func(t: float):
 		P.inp["fire"] = t > 0.1 and t < 0.1 + HOLD
 		P.inp["move"] = Vector2(1, 0) if t < 2.0 else Vector2.ZERO
 		_aim(T.pos)
-	await _go(2.8, run, _sheet("swing", "LMB held and let go running: further", [1.5, 1.62, 1.75, 1.9, 2.2]), 1.5)
+	await _go(2.8, run_v, _sheet("swing", "LMB held and let go running: further", [1.5, 1.62, 1.75, 1.9, 2.2]), 1.5)
 	await _go(GAP)
 
 func _part_boop() -> void:

@@ -13,6 +13,7 @@ const SKY_HOLD_AT := 0.9      # s into the sky clip: its arm-up pose (keys 0.5-1
 const ARROW_LEN := 1.3       # of the circle radius: the committed arrow inside the circle
 
 var kit: MageKit
+var bound := {}                 # foe instance id -> [foe, seconds left]: Skycall's Grounded, held by two pink rings
 
 func _init(owner_kit: MageKit) -> void:
 	kit = owner_kit
@@ -45,6 +46,7 @@ func _held() -> bool:
 	return kit.h.is_local() and Input.is_action_pressed("signature")
 
 func tick(dt: float) -> void:
+	_tick_bound(dt)
 	var ed := kit.e_def()
 	var r := float(ed["radius"])
 	if kit.anim_id == "mage_e" and not kit.strikes.is_empty() and kit.m.time - kit.anim_at > SKY_HOLD_AT:
@@ -76,6 +78,25 @@ func tick(dt: float) -> void:
 		else:
 			kit.strikes.erase(s)
 			_strike(s)
+
+## Skycall's Grounded wears the look of every Grounded source (the Thief's Bola, docs/heroes/thief.md): two binding
+## rings round the legs, one dashed, drawn for everyone, in her colour (the body's cords and arrow take it too:
+## KitStatus "gnd_by", StatusLooks). They end with the Grounded, cut short or run out.
+func _tick_bound(dt: float) -> void:
+	for key in bound.keys():
+		var w: Array = bound[key]
+		w[1] = float(w[1]) - dt
+		var f = w[0]
+		if float(w[1]) <= 0.0 or not is_instance_valid(f) or (f as Ent).dead or not KitStatus.grounded(f):
+			bound.erase(key)
+			continue
+		var e := f as Ent
+		var col := AimKit.hero_col(kit.h)
+		var r := e.r + 0.35 + 0.08 * sin(kit.m.time * 10.0)
+		# thin bands (no filled disc under the body: a flat disc read as a generic damage mark), the inner one dashed
+		AimKit.circle(kit.h, "gnd%d" % key, {"at": e.pos, "r": r, "col": col, "all": true, "band": 0.12, "alpha": 1.3})
+		AimKit.circle(kit.h, "gnd2%d" % key,
+				{"at": e.pos, "r": r * 0.7, "col": col, "all": true, "band": 0.09, "dashed": true, "alpha": 1.3})
 
 ## E let go (or the hold ran out): the vector is fixed here for good.
 func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:
@@ -118,10 +139,11 @@ func _strike(s: Dictionary) -> void:
 	kit.run(stg, kit.cx("e", "skycall", at, {"at": at, "dir": dir}))
 	for f in kit.foes_in(at, float(ed["radius"])):
 		kit.add_spark(f, int(ed.get("stacks", 1)))
+		kit.m.sfx("mage_sky_ground", f.pos, -6.0)     # each foe pinned, under the strike's thunder
 		_slide(f, dir, ed)
 		if f is Hunter:
-			KitStatus.apply(f, "gnd", float(ed["grounded"]))
-		kit.vfx("grounded", f.position, null, {"on": f, "t": float(ed["grounded"])})
+			KitStatus.apply(f, "gnd", float(ed["grounded"]), 0.0, true, "", kit.h.nid)
+			bound[f.get_instance_id()] = [f, float(ed["grounded"])]
 	for o in kit.m.hunters:       # rival Wisps (downed hunters) are launched too; no Static, no Grounded
 		if o.team != kit.h.team and o.downed and not o.dead and not o.out and not CareUtil.is_carried(o) \
 				and o.flat_dist(at) < float(ed["radius"]) + o.r and absf(o.pos.y - at.y) < 2.2:

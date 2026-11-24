@@ -8,13 +8,18 @@ const MIN_HALF_W := 40.0  # px: the zone is at least this far either side of the
 const BODY_HALF_K := 0.32  # of the hunter's height on screen: the half width
 const PLATE_UP := 2.7  # m over the feet (times the hunter's scale): the overhead plate (Hud._draw_overhead)
 const FEET_PAD := 10.0  # px under the feet
+const PLATE_PAD := 20.0  # px over the plate's top
 const NEAR_PX := 260.0  # px: a label farther than this from the zone is not measured
 const SIDE_GAP := 6.0  # px: a slid box stops this far off the zone, so it never grazes it
 
 
 ## The zone in screen px; an empty Rect2 when there is no hunter on screen to keep clear.
 static func rect(m: Match) -> Rect2:
-	var p: Hunter = m.player
+	return rect_of(m, m.player)
+
+
+## The same zone over any hunter `p` (--clarity-shots counts what sits on each one).
+static func rect_of(m: Match, p: Hunter) -> Rect2:
 	if p == null or m.cam == null or p.out or p.downed or p.riding:
 		return Rect2()
 	var up := Vector3(0, PLATE_UP * float(p.cdat["scale"]), 0)
@@ -26,17 +31,23 @@ static func rect(m: Match) -> Rect2:
 	var bottom := m.cam.unproject_position(feet)
 	if not top.is_finite() or not bottom.is_finite():
 		return Rect2()
+	return box(top, bottom)
+
+
+## The zone for a hunter whose plate top is at `top` and feet at `bottom` (screen px). CamRig leans the view only as
+## far as keeps this clear of the HUD's groups.
+static func box(top: Vector2, bottom: Vector2) -> Rect2:
 	var half := maxf(MIN_HALF_W, absf(bottom.y - top.y) * BODY_HALF_K)
 	var mid := (top.x + bottom.x) * 0.5
-	return Rect2(mid - half, top.y - 20.0, half * 2.0, bottom.y - top.y + FEET_PAD + 20.0)
+	return Rect2(mid - half, top.y - PLATE_PAD, half * 2.0, bottom.y - top.y + FEET_PAD + PLATE_PAD)
 
 
 ## The sideways move (px, negative = left) that takes `box` out of `zone`: to whichever side is nearer. 0 when clear.
-static func slide(box: Rect2, zone: Rect2) -> float:
-	if not zone.has_area() or not box.intersects(zone):
+static func slide(box_v: Rect2, zone: Rect2) -> float:
+	if not zone.has_area() or not box_v.intersects(zone):
 		return 0.0
-	var left := zone.position.x - box.end.x - SIDE_GAP
-	var right := zone.end.x - box.position.x + SIDE_GAP
+	var left := zone.position.x - box_v.end.x - SIDE_GAP
+	var right := zone.end.x - box_v.position.x + SIDE_GAP
 	return left if -left < right else right
 
 

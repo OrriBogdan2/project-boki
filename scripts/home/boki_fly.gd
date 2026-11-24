@@ -5,6 +5,7 @@ extends RefCounted
 ## The Dash's jump). Up there it hovers when it stands and glides when it moves; coming down it flares just before
 ## touchdown, then walks. It tells the body through two metas on its node: "aloft" (BokiRig plays hover or glide,
 ## and the flare when it turns false) and "lift" (m over the ground, where BokiRig keeps its shadow).
+## Over an updraft vent (ZoneVents) it rises fast to vent_h and holds there, then glides down to a fresh height.
 ## k["fly"] = {h: m up now, to: m this flight holds}, only while it is off the ground. home.gd calls step() after
 ## each move, leap() on a leap and land() when another system takes the Boki.
 
@@ -47,11 +48,17 @@ func step(k: Dictionary, pos: Vector3, n: Node3D, d: float) -> bool:
 			return false
 		k["fly"] = {"h": 0.0, "to": 0.0}
 	var f: Dictionary = k["fly"]
+	var vent := up and ZoneVents.over(pos)
 	if not up:
 		f["to"] = 0.0
-	elif float(f["to"]) <= 0.0:
+	elif vent:
+		f["to"] = float(R["vent_h"])
+	elif float(f["to"]) <= 0.0 or float(f["to"]) >= float(R["vent_h"]):
 		f["to"] = randf_range(float(R["height"][0]), float(R["height"][1]))
-	f["h"] = move_toward(float(f["h"]), float(f["to"]), float(R["climb"] if up else R["sink"]) * d)
+	var rate := float(R["sink"])
+	if up:
+		rate = float(R["vent_climb"] if vent else R["climb"])
+	f["h"] = move_toward(float(f["h"]), float(f["to"]), rate * d)
 	var lift := float(f["h"])
 	n.position.y += lift
 	n.set_meta("aloft", lift > (0.0 if up else flare_from()))
