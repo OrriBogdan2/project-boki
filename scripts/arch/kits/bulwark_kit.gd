@@ -252,7 +252,7 @@ func in_e() -> bool:
 	return not mend.is_empty()
 
 # ------------------------------------------------------------------ Crushed (the payoff)
-## A knock that drives a foe into terrain, or into another foe, Crushes it: a stun.
+## A knock that drives a foe into terrain Crushes it: a stun (a foe behind it does not count).
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or t.dead or m.time > knock_until:
 		return

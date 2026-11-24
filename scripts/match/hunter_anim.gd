@@ -347,6 +347,8 @@ var run_k := 0.0
 var air_k := 0.0
 var glide_k := 0.0
 var bank_k := 0.0  # the roll into turns: the glider's, and a move keyed "bank" (Flue Flight)
+var swim_k := 0.0  # in deep water: the crawl
+var swim_ph := 0.0  # rad: the stroke
 var dive_k := 0.0
 var crouch_k := 0.0
 var ledge_k := 0.0
@@ -823,6 +825,7 @@ func update(dt: float, s: Dictionary) -> void:
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
 	fall_k = maxf(0.0, float(s.get("fall", -1.0)))
 	HunterTool.tick(self, dt, s)
+	HunterSwim.tick(self, dt, s, spd)
 	_act_tick(dt, s, grounded, spd)
 	var base_p := float(s.get("base", -1.0))
 	base_k = _ease(base_k, 1.0 if base_p >= 0.0 else 0.0, 6.0, dt)
@@ -977,7 +980,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var landed: bool = moving and floor(ph / PI) != floor(ph0 / PI)
 	if clip_steps >= 0:
 		landed = clip_steps != seen_steps
-	stepped = landed and KMovesStone.gait(arch) > 0.5
+	stepped = landed and KMovesStone.gait(arch) > 0.5 and swim_k < 0.5
 	seen_steps = clip_steps
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
 	var want_yaw := 0.0
@@ -1095,6 +1098,12 @@ func update(dt: float, s: Dictionary) -> void:
 	kl = lerpf(kl, -0.5 + sin(t * 3.2 + 1.0 + seed_ph) * 0.15, glide_k)
 	hr = lerpf(hr, 0.6 - sin(t * 3.2 + seed_ph) * 0.12, glide_k)
 	kr = lerpf(kr, -0.7 - sin(t * 3.2 + 1.0 + seed_ph) * 0.15, glide_k)
+	# swimming: a flutter kick
+	var kick := HunterSwim.legs(swim_ph, spd, KMovesStone.gait(arch))
+	hl = lerpf(hl, kick.x, swim_k)
+	kl = lerpf(kl, kick.y, swim_k)
+	hr = lerpf(hr, kick.z, swim_k)
+	kr = lerpf(kr, kick.w, swim_k)
 	# skydiving: legs bent back and spread
 	hl = lerpf(hl, -0.15, dive_k)
 	kl = lerpf(kl, -1.1, dive_k)
@@ -1217,7 +1226,7 @@ func update(dt: float, s: Dictionary) -> void:
 	pitch -= smoothstep(0.4, 0.8, fall_k) * FALL_SLUMP
 	var yaw := -sin(ph) * 0.16 * r1 * back  # the shoulders swing against the hips
 	yaw += stomp_k * stomp_b.y
-	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05
+	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05 + cos(swim_ph) * 0.14 * swim_k
 	var dz := 0.0
 	if arch == "thief":
 		pitch -= r1 * 0.35  # runs low and pitched far forward, chest over the lead foot
@@ -1730,7 +1739,8 @@ func _upper(
 	var want_aim := 1.0 if fired < 1.1 or float(s.get("charge", 0.0)) > 0.0 or crouch_k > 0.5 else 0.0
 	aim_k = _ease(aim_k, want_aim, 14.0 if want_aim > aim_k else 3.0, dt)
 	model.set_meta(WardenHolster.DRAW, aim_k)
-	var want_carry := 1.0 if r1 > 0.55 and aim_k < 0.3 and grounded and hold != "minigun" else 0.0
+	var carries := r1 > 0.55 or swim_k > 0.5      # (swimming keeps the gun in one hand, as on a run)
+	var want_carry := 1.0 if carries and aim_k < 0.3 and grounded and hold != "minigun" else 0.0
 	carry_k = _ease(carry_k, want_carry, 6.0, dt)
 	var stow := maxf(maxf(glide_k, dive_k), maxf(emote_k * (0.0 if emote_id == "" else 1.0), 0.0))
 	stow = maxf(stow, stow_k)
@@ -1994,6 +2004,11 @@ func _upper(
 	if glide_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(0.02, 0.36, 0.06), glide_k)
 		fr = fr.lerp(sh_r + Vector3(-0.02, 0.36, 0.06), glide_k)
+	# swimming: the crawl (only a hand the kit lets go of strokes: free_l and free_r weigh these in)
+	if swim_k > 0.01:
+		var sv := Vector2(vel.x, vel.z).length()
+		fl = fl.lerp(HunterSwim.hand(sh_l, swim_ph, sv, -1.0, float(st["arm"])), swim_k)
+		fr = fr.lerp(HunterSwim.hand(sh_r, swim_ph + PI, sv, 1.0, float(st["arm"])), swim_k)
 	# skydiving: arms spread wide and forward
 	if dive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(-0.32, 0.12, -0.22), dive_k)
@@ -2117,6 +2132,9 @@ func _upper(
 	if glide_k > 0.01:
 		pole_l = pole_l.lerp(Vector3(-1.0, -0.3, 0.2), glide_k)
 		pole_r = pole_r.lerp(Vector3(1.0, -0.3, 0.2), glide_k)
+	# the crawl's elbows ride out and up
+	pole_l = pole_l.lerp(Vector3(-1.0, 0.1, 0.0), swim_k)
+	pole_r = pole_r.lerp(Vector3(1.0, 0.1, 0.0), swim_k)
 	var bsh := Vector3(0, breath * 0.005 * still, 0)
 	_ik(arm_l, el_l, sh_l + bsh, tl2, pole_l)
 	_ik(arm_r, el_r, sh_r + bsh, tr2, pole_r)

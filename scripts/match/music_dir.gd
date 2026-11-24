@@ -95,6 +95,8 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	var abyss := clampf(float(voids) / float(n) * 1.8, 0.0, 1.0)
 	if w.is_void(p.pos.x, p.pos.z) or p.gliding or p.dropping:
 		abyss = 1.0
+	if p.riding:
+		abyss = 0.0      # (the ship sails over the void the whole ride: a howl that loops for it all is not wanted)
 	Sfx.amb_layer("abyss", abyss)
 	Sfx.amb_layer("ruins", clampf(float(walls) / 6.0, 0.0, 1.0))
 	beds.tick(m, p)

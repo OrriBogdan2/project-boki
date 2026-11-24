@@ -117,13 +117,13 @@ def sweep(f0, f1, d, shape='sin', curve=1.0):
     return np.sin(ph)
 
 
-def sweep_noise(d, f0, f1, width=0.4):
-    """Noise whose band glides f0 -> f1 (a rush of air): a bank of bands from 150 Hz to 8 kHz, each one
-    sounding while the glide is within `width` (natural-log Hz) of it."""
+def sweep_noise(d, f0, f1, width=0.4, lo=150, hi=8000, bands=18):
+    """Noise whose band glides f0 -> f1 (a rush of air): a bank of `bands` bands from `lo` to `hi` Hz
+    (default 150 Hz to 8 kHz), each one sounding while the glide is within `width` (natural-log Hz) of it."""
     n = N(d); u = np.arange(n) / max(1, n - 1)
     lf = np.log(f0) + (np.log(f1) - np.log(f0)) * u
     out = np.zeros(n); src = noise(d)
-    for fc in np.geomspace(150, 8000, 18):
+    for fc in np.geomspace(lo, hi, bands):
         g = np.exp(-((np.log(fc) - lf) / width) ** 2)
         if g.max() < 0.02:
             continue

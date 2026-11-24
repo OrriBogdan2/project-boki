@@ -275,7 +275,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 		out["kin"] = brought[0]
 	# the vault keeps a third of what you were carrying when you go down
 	if not won and Save.has_building("vault") and int(r.get("lost_gems", 0)) > 0:
-		out["vault_gems"] = int(r["lost_gems"]) / 3
+		out["vault_gems"] = int(int(r["lost_gems"]) / 3.0)
 		d["gems"] = int(d["gems"]) + out["vault_gems"]
 	# kin who stayed home rest in the cottages and train in the yard
 	var rest := (2.0 if Save.has_building("cottage") else 0.0) + (2.0 if Save.has_building("cottage2") else 0.0)
@@ -367,6 +367,8 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 		out["levelup"] = true
 	if lead:
 		out["trust_delta"] = float(k["trust"]) - before
+	# what the results screen lists for each Boki you brought: the XP and bond just applied above
+	out["kin_gains"] = out.get("kin_gains", []) + [{"kin": k, "xp": xp, "bond": float(k["trust"]) - before}]
 
 ## XP a kin needs to go from level `lv` to the next (the curve is in content/rules/garden_xp.json).
 func xp_need(lv: int) -> int:

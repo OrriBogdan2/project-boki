@@ -119,6 +119,8 @@ const WIRED := {
 	"boki_unfuse": ["match/merge_xform.gd"],
 	"boki_eat": ["home/home.gd"],
 	"boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
+	"wisp_burst": ["match/kin_summon.gd"],
+	"wisp_fold": ["match/kin_summon.gd"],
 }
 
 ## 11. Meeko's channel loop, one training match per end path.
@@ -183,6 +185,7 @@ func run(main: Node) -> void:
 	_fusion_cues()
 	_training()
 	_boki_cues()
+	_summon_cues()
 	_pick_taken()
 	_ui_cues()
 	_low_hp()
@@ -218,6 +221,45 @@ func _boki_cues() -> void:
 	for theme in KinLib.TYPE_OF_THEME:
 		types[KinLib.TYPE_OF_THEME[theme]] = true
 	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
+
+
+## The summon pop's sounds (KinSummon.popped, BokiWispPop): the burst plays the bloom at the Boki with the species'
+## own happy cry layered on it, a fold plays the inward swish, a re-bloom the bloom again; each cue is a short
+## file in the wisp set, and every one goes through Sfx.play (so Sfx.MIN_GAP holds).
+func _summon_cues() -> void:
+	var stub := GDScript.new()
+	stub.source_code = "extends Node\nfunc sfx(n, p = null, vol := 0.0, pitch := 1.0, mine := false):\n"
+	stub.source_code += "\tSfx.play(n, p, vol, 0.07, pitch, 0.0, mine)\n"
+	stub.reload()
+	var k := Kin.new()
+	k.m = stub.new()
+	k.species = "cindle"
+	k.pos = Vector3(4, 0, 2)
+	var s := KinSummon.new(k)
+	var own := KinVoice.cue(k.species, "happy")
+	Sfx.cue_log = []
+	s.popped(false)
+	var burst: Array = Sfx.cue_log.duplicate()
+	Sfx.cue_log = []
+	s.popped(true)
+	var fold: Array = Sfx.cue_log.duplicate()
+	Sfx.cue_log = null
+	var heard := func(log: Array) -> Array: return log.map(func(c): return c[0])
+	ok(own.begins_with("bk_"), "summon: a Cindle has its own happy cry to layer (%s)" % own)
+	var want := ["wisp_burst", own]
+	ok(heard.call(burst) == want, "summon: the burst plays the bloom, then its own cry (%s)" % [heard.call(burst)])
+	ok(heard.call(fold) == ["wisp_fold"], "summon: the fold plays the swish alone (%s)" % [heard.call(fold)])
+	ok(
+		burst.all(func(c): return c[1] == k.pos and c[2]) and fold.all(func(c): return c[1] == k.pos and c[2]),
+		"summon: each cue is on file and played at the Boki"
+	)
+	var lens := []
+	for cue in [KinSummon.BURST_CUE, KinSummon.FOLD_CUE]:
+		var path: String = _takes(cue)[0]
+		lens.append(_data(path).size() / 2.0 / FileAccess.get_file_as_bytes(path).decode_u32(24))  # s: samples / rate
+	var short: bool = lens[0] <= 0.6 and lens[1] <= 0.4 and lens[0] > lens[1]
+	ok(short, "summon: bloom %.2f s, swish %.2f s (short, the bloom longer)" % lens)
+	k.free()
 
 
 func _check_set(path: String) -> void:
@@ -362,11 +404,11 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 			rough.append("%s (not in the set)" % sname)
 			continue
 		var data := _data(takes[0])
-		var n := data.size() / 2
+		var n := int(data.size() / 2.0)
 		var first := data.decode_s16(0) / 32768.0
 		var last := data.decode_s16((n - 1) * 2) / 32768.0
 		var mid := 0.0
-		for k in range(n / 2, n / 2 + 200):
+		for k in range(int(n / 2.0), int(n / 2.0) + 200):
 			mid = maxf(mid, absf(data.decode_s16(k * 2) / 32768.0))
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
@@ -471,7 +513,7 @@ func _ult_cues() -> void:
 func _nuke_fall() -> void:
 	var delay := float(Arch.def("gunslinger")["x"]["delay"])
 	var b := FileAccess.get_file_as_bytes("res://audio/vn_nuke_fall.wav")
-	var secs := float(_data("res://audio/vn_nuke_fall.wav").size() / 2) / float(b.decode_u32(24))
+	var secs := float(int(_data("res://audio/vn_nuke_fall.wav").size() / 2.0)) / float(b.decode_u32(24))
 	var what := "vn_nuke_fall is %.3f s, the fall is %.2f s (within %.0f ms)"
 	ok(absf(secs - delay) <= FALL_TOL_S, what % [secs, delay, FALL_TOL_S * 1000.0])
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
@@ -1408,7 +1450,7 @@ func _step_on(_m: Match, h: Hunter, surf: String, p: Vector3) -> void:
 		Sfx.recent.clear()
 		Sfx.listener = p
 		Juice.footstep(h)
-		var got: Array = Sfx.last_played.keys()
+		var got: Array = Sfx.last_played.keys().filter(func(s): return not String(s).ends_with("_foley"))
 		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
 		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
 	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]
@@ -1451,7 +1493,7 @@ func _rank_cues() -> void:
 ## Seconds to the last sample above 2% of the peak, in a mono 44.1 kHz wav (as tools/sfx_lib.py writes them).
 func _audible_secs(path: String) -> float:
 	var data := _data(path)
-	var n := data.size() / 2
+	var n := int(data.size() / 2.0)
 	var pk := 0.0
 	for k in n:
 		pk = maxf(pk, absf(data.decode_s16(k * 2)))
@@ -1594,7 +1636,7 @@ func _takes(sname: String) -> Array:
 ## Peak and RMS (dBFS) of a 16-bit PCM wav; RMS over samples above 2% of the peak, as tools/sfx_lib.py levels.
 func _measure(path: String) -> Dictionary:
 	var data := _data(path)
-	var n := data.size() / 2
+	var n := int(data.size() / 2.0)
 	var pk := 0.0
 	for k in n:
 		pk = maxf(pk, absf(data.decode_s16(k * 2) / 32768.0))
@@ -1817,7 +1859,7 @@ func _stomp_cues() -> void:
 		"stomp: wind-up, finish and crack are in their set and played positionally by Life %s" % [off]
 	)
 	var data := _data("res://audio/stomp_windup.wav")
-	var half := data.size() / 4
+	var half := int(data.size() / 4.0)
 	var e := [0.0, 0.0]
 	for k in half * 2:
 		e[int(k >= half)] += pow(data.decode_s16(k * 2) / 32768.0, 2)
