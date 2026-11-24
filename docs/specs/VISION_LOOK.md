@@ -31,7 +31,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
 - **Dim is a slight dark fog, partly grey, in every weather (owner 11-23).** The 11-20 fog was a full grey (the
   fogged ground sat at 0.37-0.63 of the lit luma and 32-156 degrees of hue from it); the first 11-23 answer, a flat
   0.82 dim, was too weak to read. The owner asked for something in between: "slight dark fog", grey not blue, like
-  Supervive. Two tunables, both in `RaidLook` and read by `vis_apply` (`shaders/vis.gdshaderinc`):
+  the reference. Two tunables, both in `RaidLook` and read by `vis_apply` (`shaders/vis.gdshaderinc`):
   `VIS_DARK` (albedo scale outside sight; 1 = no dimming) and `VIS_GREY` (share of the albedo pulled to its luma;
   0 = its own colours, 1 = full grey). The light's tint, the cool shadow side and the ambient are greyed by the same share
   as the albedo; the weather haze's colour is taken out in full; the cone is untouched. Default **B** (0.60 / 0.55).
