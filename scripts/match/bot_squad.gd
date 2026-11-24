@@ -8,31 +8,32 @@ extends RefCounted
 ## `regroup_goal` when it picks where to walk. The tier still matters: skill sets how far off a bot
 ## notices a squadmate's fight and how bad the odds must be before it holds back.
 
-const FAR_M := 28.0            # metres from the nearest squadmate where a bot with nothing pressing heads back
-const NEAR_M := 10.0           # ...and how close it comes before it goes back to its own errands
-const BASE_M := 55.0           # metres: further off than this, base to the squadmate instead of walking
-const GUARD_M := 6.0           # metres from a busy lead where a squadmate with nothing to do waits
+const FAR_M := 28.0  # metres from the nearest squadmate where a bot with nothing pressing heads back
+const NEAR_M := 10.0  # ...and how close it comes before it goes back to its own errands
+const BASE_M := 55.0  # metres: further off than this, base to the squadmate instead of walking
+const GUARD_M := 6.0  # metres from a busy lead where a squadmate with nothing to do waits
 const GUARD_WAIT := Vector2(1.5, 3.5)  # s it stands on one spot beside the lead before it steps to another
-const GUARD_WALK := 3.0        # s to get to that spot before it picks another
-const CALM_S := 4.0            # seconds since the last hit before a bot stands still to base
-const ASSIST_BASE := 18.0      # metres from which the least skilled bot notices a squadmate's fight
-const ASSIST_SKILL := 22.0     # ...more per point of skill (an expert: about 38 m)
-const ASSIST_REACH := 12.0     # metres: the least reach onto a rival who is fighting a squadmate
-const FOCUS := 8.0             # target score added for the rival the squad has called (see HELD)
-const HELD := 6.0              # target score added for the rival a bot is already shooting...
-const HELD_FRESH := 14.0       # ...and for the first HOLD_S after it picked them: a player sticks with a
-                               # pick for a few seconds (with HELD alone bots flipped 7 times a fight minute)
-const HOLD_S := 2.5            # seconds a fresh pick counts as HELD_FRESH
-const FIGHT_FRESH_S := 3.0     # seconds a landed hit keeps two hunters "in a fight"
-const HELP_HP := 0.35          # health share under which a bot leaves the helping to others
-const CROWD_M := 12.0          # metres round a rival that count as its side of a fight
-const SIDE_M := 14.0           # metres round us that count as ours
-const CLOSE_M := 6.0           # a rival this close is fought whatever the odds
-const ODDS_SKILL := 0.45       # skill from which one extra rival is enough to hold back (below: two)
-const SPACE_BASE := 4.0        # metres a bot in a fight keeps off each squadmate (the least skilled bot)...
-const SPACE_SKILL := 2.0       # ...more per point of skill (an expert: about 6 m)
-const SPACE_PUSH := 1.2        # strength of the push off a squadmate standing right on us (1 = a full step)
-const BESIDE_M := 5.0          # metres round a squadmate (or the lead's roam goal) where a bot walks up
+const GUARD_WALK := 3.0  # s to get to that spot before it picks another
+const CALM_S := 4.0  # seconds since the last hit before a bot stands still to base
+const ASSIST_BASE := 18.0  # metres from which the least skilled bot notices a squadmate's fight
+const ASSIST_SKILL := 22.0  # ...more per point of skill (an expert: about 38 m)
+const ASSIST_REACH := 12.0  # metres: the least reach onto a rival who is fighting a squadmate
+const FOCUS := 8.0  # target score added for the rival the squad has called (see HELD)
+const HELD := 6.0  # target score added for the rival a bot is already shooting...
+const HELD_FRESH := 14.0  # ...and for the first HOLD_S after it picked them: a player sticks with a
+# pick for a few seconds (with HELD alone bots flipped 7 times a fight minute)
+const HOLD_S := 2.5  # seconds a fresh pick counts as HELD_FRESH
+const FIGHT_FRESH_S := 3.0  # seconds a landed hit keeps two hunters "in a fight"
+const HELP_HP := 0.35  # health share under which a bot leaves the helping to others
+const CROWD_M := 12.0  # metres round a rival that count as its side of a fight
+const SIDE_M := 14.0  # metres round us that count as ours
+const CLOSE_M := 6.0  # a rival this close is fought whatever the odds
+const ODDS_SKILL := 0.45  # skill from which one extra rival is enough to hold back (below: two)
+const SPACE_BASE := 4.0  # metres a bot in a fight keeps off each squadmate (the least skilled bot)...
+const SPACE_SKILL := 2.0  # ...more per point of skill (an expert: about 6 m)
+const SPACE_PUSH := 1.2  # strength of the push off a squadmate standing right on us (1 = a full step)
+const BESIDE_M := 5.0  # metres round a squadmate (or the lead's roam goal) where a bot walks up
+
 
 ## Off for a match started with "bot_plain": bots as they were without squad play or retreats
 ## (the bot-human check measures both ways from one build). Off in the duel room too: one against
@@ -40,8 +41,10 @@ const BESIDE_M := 5.0          # metres round a squadmate (or the lead's roam go
 static func on(m) -> bool:
 	return not (m.opts.get("bot_plain", false) or m.opts.get("duel", false))
 
+
 static func up(o: Hunter) -> bool:
 	return not (o.out or o.downed or o.extracted or o.riding or o.dropping)
+
 
 ## The nearest squadmate on their feet within `within` metres, or null.
 static func nearest(m, h: Hunter, within := 1e9) -> Hunter:
@@ -56,6 +59,7 @@ static func nearest(m, h: Hunter, within := 1e9) -> Hunter:
 			best = o
 	return best
 
+
 ## The hunter behind a hit (a kin's hit counts as its owner's).
 static func hunter_of(e) -> Hunter:
 	if e == null or not is_instance_valid(e):
@@ -63,6 +67,7 @@ static func hunter_of(e) -> Hunter:
 	if e is Hunter:
 		return e
 	return (e as Kin).owner_h if e is Kin else null
+
 
 ## The rival this hunter is fighting right now, or null: a bot's own target, else whoever hit it
 ## (or it hit) in the last few seconds, so a player squadmate's fights count too.
@@ -74,10 +79,15 @@ static func foe_of(m, mate: Hunter) -> Hunter:
 	if by and by.team != mate.team and by.targetable() and m.time - mate.hurt_at < FIGHT_FRESH_S:
 		return by
 	for o in m.hunters:
-		if o.team != mate.team and o.targetable() and m.time - o.hurt_at < FIGHT_FRESH_S \
-				and hunter_of(o.last_hit_by) == mate:
+		if (
+			o.team != mate.team
+			and o.targetable()
+			and m.time - o.hurt_at < FIGHT_FRESH_S
+			and hunter_of(o.last_hit_by) == mate
+		):
 			return o
 	return null
+
 
 ## The rivals this bot's squadmates are fighting within earshot (further for a skilled bot).
 static func foes(m, h: Hunter, a: Dictionary) -> Array:
@@ -92,6 +102,7 @@ static func foes(m, h: Hunter, a: Dictionary) -> Array:
 		if f and not out.has(f):
 			out.append(f)
 	return out
+
 
 ## The one rival of `fighting` the squad shoots together: the one a player squadmate is on, else
 ## the one the first of its bots in a fight is on. Null for that first bot itself, which keeps its
@@ -115,11 +126,13 @@ static func called(m, h: Hunter, fighting: Array) -> Hunter:
 				break
 	return pick
 
+
 ## The target score the rival a bot is already shooting gets (Bot._choose; tgt_t is when it was picked).
 static func held(m, a: Dictionary) -> float:
 	if on(m) and m.time - float(a.get("tgt_t", -9.0)) < HOLD_S:
 		return HELD_FRESH
 	return HELD
+
 
 ## How many more rivals than squad (this bot included) stand within SIDE_M of this bot.
 static func odds(m, h: Hunter) -> int:
@@ -129,6 +142,7 @@ static func odds(m, h: Hunter) -> int:
 			continue
 		k += -1 if x.team == h.team else 1
 	return k
+
 
 ## Where to run to help: the nearest rival a squadmate is fighting (Bot._choose targets it once it
 ## is in reach and in sight), or INF. A badly hurt bot stays out of it. The bot keeps to the rival
@@ -148,8 +162,9 @@ static func assist_goal(m, h: Hunter, a: Dictionary, fighting: Array) -> Vector3
 		a["assist"] = best
 	var mate := nearest(m, h)
 	if h.flat_dist(best) < ASSIST_REACH and mate:
-		return BotWays.around(m, mate.pos, h, BESIDE_M)      # (beside them, not onto them)
+		return BotWays.around(m, mate.pos, h, BESIDE_M)  # (beside them, not onto them)
 	return best.pos
+
 
 ## Would starting on rival `o` be a fight against more than we have here? Counted the way a player
 ## reads it: hunters on their feet round the rival against those round us.
@@ -167,6 +182,7 @@ static func outnumbered(m, h: Hunter, a: Dictionary, o: Hunter, d: float) -> boo
 			ours += 1
 	return theirs - ours >= (1 if float(a.get("skill", 0.5)) >= ODDS_SKILL else 2)
 
+
 ## Who the squad keeps to: a player on the squad if there is one (the nearest), else the first of
 ## its bots on their feet. Null when that is `h` itself or nobody is up.
 static func lead(m, h: Hunter) -> Hunter:
@@ -183,6 +199,7 @@ static func lead(m, h: Hunter) -> Hunter:
 		return human
 	return null if first == h else first
 
+
 ## Keep off squadmates in a fight, the way three players spread round one rival: a push away from each
 ## squadmate closer than the spacing (wider for a skilled bot), and the strafe side that leads away from
 ## the nearest of them, so two bots on one rival work round it on two angles instead of shoulder to
@@ -194,7 +211,7 @@ static func spread(m, h: Hunter, a: Dictionary, to: Vector2) -> Vector2:
 	var space := SPACE_BASE + SPACE_SKILL * float(a.get("skill", 0.5))
 	var push := Vector2.ZERO
 	var nd := space
-	var off := Vector2.ZERO      # away from the nearest squadmate inside the spacing
+	var off := Vector2.ZERO  # away from the nearest squadmate inside the spacing
 	for o in m.hunters:
 		if o == h or o.team != h.team or not up(o):
 			continue
@@ -209,6 +226,7 @@ static func spread(m, h: Hunter, a: Dictionary, to: Vector2) -> Vector2:
 	if off != Vector2.ZERO:
 		a["strafe"] = 1.0 if Vector2(-to.y, to.x).dot(off) >= 0.0 else -1.0
 	return push * SPACE_PUSH
+
 
 ## Where a bot with nothing to do roams: where its lead is roaming to, else to the lead, or INF for
 ## the lead itself, which picks its own way (each squadmate its own spot round that goal, so the squad
@@ -234,16 +252,17 @@ static func roam_to(m, h: Hunter, a: Dictionary) -> Vector3:
 		a["guard_in"] = true
 		a["guard_t"] = m.time + randf_range(GUARD_WAIT.x, GUARD_WAIT.y)
 	if g == Vector3.INF or ld.flat_dist(g) > GUARD_M or m.time > float(a.get("guard_t", 0.0)):
-		for i in 4:      # (a step away from where it stands, or it never moves)
+		for i in 4:  # (a step away from where it stands, or it never moves)
 			var ang := randf() * TAU
 			var at: Vector3 = ld.pos + Vector3(cos(ang), 0.0, sin(ang)) * randf_range(2.5, 4.5)
 			g = m.world.free_spot_near(at, [], 1.0, 0.45, 3.0)
 			if h.flat_dist(g) >= 2.0:
 				break
 		a["guard"] = g
-		a["guard_t"] = m.time + GUARD_WALK      # (a spot it can't get to: another one)
+		a["guard_t"] = m.time + GUARD_WALK  # (a spot it can't get to: another one)
 		a.erase("guard_in")
 	return g
+
 
 ## Drifted off from the squad with nothing pressing: the squadmate to head back to (and base to
 ## them when they are islands away and it is calm), or INF. Holds until the bot is close again.
@@ -261,6 +280,7 @@ static func regroup_goal(m, h: Hunter, a: Dictionary) -> Vector3:
 	if d > BASE_M and h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and m.time - h.hurt_at > CALM_S:
 		BaseRecall.start(h, mate)
 	return mate.pos
+
 
 ## One bot decides, the squad's bots go along (leaving for the exit, crashing a rival's uplink).
 static func agree(m, h: Hunter, key: String, value: bool) -> void:
