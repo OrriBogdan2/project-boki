@@ -117,7 +117,9 @@ func _states(main: Node, a: String) -> void:
 		["attack", {"grounded": true, "swing_n": 1}],
 	]
 	for c in cases:
-		m.set_meta(WardenClips.STATE, c[1])
+		var st := {"cast": 99.0}  # (the game's state always names its cast timer: WardenNative reads swings only then)
+		st.merge(c[1], true)
+		m.set_meta(WardenClips.STATE, st)
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
 		var want := String(nat.plays["lmb" if c[0] == "attack" and nat.plays.has("lmb") else c[0]])
@@ -237,7 +239,7 @@ func _feed(main: Node, nat: WardenNative, m: Node3D, calm: Dictionary, s: Dictio
 	nat.hit_prev = 99.0
 	nat.land_prev = 0.0
 	for st in [calm, s]:
-		var state := {"grounded": true}
+		var state := {"grounded": true, "cast": 99.0}  # (no cast lately, as the game's state says)
 		state.merge(st, true)
 		m.set_meta(WardenClips.STATE, state)
 		m.set_meta(WardenClips.FEEL, state.get("feel", Vector2.ZERO))
