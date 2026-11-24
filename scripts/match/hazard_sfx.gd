@@ -29,8 +29,8 @@ static func play_rules() -> Dictionary:
 
 func _init(terrain: TerrainHazards) -> void:
 	tz = terrain
-	for K in play_rules()["kinds"].values():
-		widest = maxf(widest, _reach(String(K["bed"])))
+	for kd in play_rules()["kinds"].values():
+		widest = maxf(widest, _reach(String(kd["bed"])))
 
 
 static func _reach(sname: String) -> float:
@@ -40,14 +40,14 @@ static func _reach(sname: String) -> float:
 # ------------------------------------------------------------------ beds
 ## Every frame: re-find the nearest beds every bed_scan_s, and hold the ones that sound.
 func tick(dt: float) -> void:
-	var R := play_rules()
+	var rules := play_rules()
 	scan_t -= dt
 	if scan_t <= 0.0:
-		scan_t = float(R["bed_scan_s"])
+		scan_t = float(rules["bed_scan_s"])
 		scan(Sfx.listener)
 	for ai in beds:
-		var bed := String(R["kinds"][tz.areas[ai]["kind"]]["bed"])
-		Sfx.loop_hold("hazard_bed%d" % ai, bed, beds[ai], float(R["bed_db"]))
+		var bed := String(rules["kinds"][tz.areas[ai]["kind"]]["bed"])
+		Sfx.loop_hold("hazard_bed%d" % ai, bed, beds[ai], float(rules["bed_db"]))
 
 
 ## The beds that sound around p: each area's ground nearest p, if its bed carries that far; the nearest
@@ -85,29 +85,29 @@ func scan(p: Vector3) -> void:
 ## A hunter on hazard ground this frame (TerrainHazards._tick_hunter; st is its hazard state). entered: it
 ## has just stepped onto this area, so the first cue plays at once.
 func contact(h: Hunter, kind: String, safe: bool, st: Dictionary, entered: bool, dt: float) -> void:
-	var K: Dictionary = play_rules()["kinds"][kind]
-	if K.has("breath"):
-		_breath(h, K, safe, st)
-	var cue := String(K.get("warded_contact", "")) if safe else String(K["contact"])
-	if cue == "" or float(K["every_s"]) <= 0.0:
+	var kd: Dictionary = play_rules()["kinds"][kind]
+	if kd.has("breath"):
+		_breath(h, kd, safe, st)
+	var cue := String(kd.get("warded_contact", "")) if safe else String(kd["contact"])
+	if cue == "" or float(kd["every_s"]) <= 0.0:
 		return
 	st["snd"] = 0.0 if entered else float(st.get("snd", 0.0)) - dt
 	if float(st["snd"]) > 0.0:
 		return
-	if not entered and K["moving"] and Vector2(h.vel.x, h.vel.z).length() < MOVING:
+	if not entered and kd["moving"] and Vector2(h.vel.x, h.vel.z).length() < MOVING:
 		return
-	st["snd"] = float(K["every_s"])
+	st["snd"] = float(kd["every_s"])
 	_cue(h, cue)
 
 
 ## A gasp once a dip, as the breath falls under breath_at of full (again only once it has come back over).
-func _breath(h: Hunter, K: Dictionary, safe: bool, st: Dictionary) -> void:
+func _breath(h: Hunter, kd: Dictionary, safe: bool, st: Dictionary) -> void:
 	var full := float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"])
-	if float(st["breath"]) >= float(K["breath_at"]) * full:
+	if float(st["breath"]) >= float(kd["breath_at"]) * full:
 		st.erase("gasp")
 	elif not safe and not st.has("gasp"):
 		st["gasp"] = true
-		_cue(h, String(K["breath"]))
+		_cue(h, String(kd["breath"]))
 
 
 ## The static flats' shock going through an unwarded hunter.
@@ -124,5 +124,5 @@ func ward(h: Hunter, kind: String) -> void:
 
 
 func _cue(h: Hunter, sname: String) -> void:
-	var R := play_rules()
-	Sfx.play(sname, h.pos, float(R["contact_db"]) + (0.0 if h == tz.m.player else float(R["others_db"])))
+	var rules := play_rules()
+	Sfx.play(sname, h.pos, float(rules["contact_db"]) + (0.0 if h == tz.m.player else float(rules["others_db"])))

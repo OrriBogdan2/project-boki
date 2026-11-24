@@ -668,22 +668,22 @@ func _solos() -> void:
 	m.start(opts)
 	var hud = m.hud
 	await frames_until(m, 1.0)
-	var P: Hunter = m.player
+	var pl: Hunter = m.player
 	await hud.panels.draw
-	ok(not Life.has_mates(m, P) and m.hunters.size() > 3, "solos: %d hunters, none on your squad" % m.hunters.size())
+	ok(not Life.has_mates(m, pl) and m.hunters.size() > 3, "solos: %d hunters, none on your squad" % m.hunters.size())
 	ok(TeamBoki.shown.is_empty() and hud.mates.last.is_empty(),
 		"solos: no squad row, Boki icon or squad watch on the left")
 	ok(_spot(hud, "vitals") and not _spot(hud, "base"),
 		"solos: the vitals block is there, the base-to-a-teammate badge is not")
-	var rivals: Array = m.hunters.filter(func(x): return x != P)
-	m.knock(rivals[0], P, {})
+	var rivals: Array = m.hunters.filter(func(x): return x != pl)
+	m.knock(rivals[0], pl, {})
 	await hud.panels.draw
 	ok(hud.mates.lines.is_empty() and hud.mates.last.is_empty(), "solos: a rival going down raises no squad line")
 	var fm: FullMap = hud.full_map
 	fm.open()
 	await hud.panels.draw
 	ok(fm.side_rows == 0, "solos: the full map has no squad panel")
-	rivals[1].team = P.team       # the same HUD with a squadmate: every squad piece comes back
+	rivals[1].team = pl.team       # the same HUD with a squadmate: every squad piece comes back
 	await hud.panels.draw
 	ok(fm.side_rows == 2 and _spot(hud, "base"),
 		"a squadmate joins: the map's squad panel (%d rows) and the base badge show" % fm.side_rows)

@@ -351,11 +351,11 @@ func _beds() -> void:
 		au.scan(Sfx.listener)
 		au.scan_t = 1.0
 		au.tick(0.0)
-		var L: Dictionary = Sfx.loops.get("hazard_bed%d" % ai, {})
+		var lay: Dictionary = Sfx.loops.get("hazard_bed%d" % ai, {})
 		var at: Vector3 = au.beds.get(ai, Vector3.INF)
 		var off := Vector2(at.x - Sfx.listener.x, at.z - Sfx.listener.z).length()
 		var placed: bool = tz.area_at(at) == ai and off <= d + 1.0
-		vols.append((L["p"] as AudioStreamPlayer).volume_db if placed and not L.is_empty() else -99.0)
+		vols.append((lay["p"] as AudioStreamPlayer).volume_db if placed and not lay.is_empty() else -99.0)
 	ok(
 		"the lava bed sounds from its nearest ground, louder 2 m off than 10 m",
 		vols[0] > -99.0 and vols[1] > vols[0],

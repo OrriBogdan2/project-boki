@@ -101,29 +101,29 @@ func _sable_hit(main: Node) -> void:
 	a.main = main
 	var r: Array = a.setup("thief", 6.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var pl: Hunter = r[1]
+	var tgt: Hunter = r[2]
 	var want := Arch.color("thief")
-	P.fire_cd = 0.0
+	pl.fire_cd = 0.0
 	var tinted := false
 	var shown := Color.BLACK
 	var t := 0.0
 	while t < 1.2 and not tinted:
-		P.inp["fire"] = true
+		pl.inp["fire"] = true
 		a.step(m, DT)
-		T.render(DT, 1.0)
-		tinted = T.flash_t > 0.0 and _same(T.flash_tint, want)
-		if tinted and not T.mats.is_empty():
-			shown = T.mats[0].get_shader_parameter("flash_color")
+		tgt.render(DT, 1.0)
+		tinted = tgt.flash_t > 0.0 and _same(tgt.flash_tint, want)
+		if tinted and not tgt.mats.is_empty():
+			shown = tgt.mats[0].get_shader_parameter("flash_color")
 		t += DT
-	P.inp["fire"] = false
+	pl.inp["fire"] = false
 	ok(tinted, "Sable's bolt hit: the struck body's flash is her violet")
 	ok(_same(shown, want), "... and the shader draws it (%s)" % shown)
 	a.step(m, 0.3)
-	T.render(DT, 1.0)
-	ok(_same(T.flash_tint, Color.WHITE), "the tint is white again once the flash ends")
-	T.hurt(5.0, P, {})
-	ok(_same(T.flash_tint, Color.WHITE) and T.flash_t > 0.0, "any other hit flashes white")
+	tgt.render(DT, 1.0)
+	ok(_same(tgt.flash_tint, Color.WHITE), "the tint is white again once the flash ends")
+	tgt.hurt(5.0, pl, {})
+	ok(_same(tgt.flash_tint, Color.WHITE) and tgt.flash_t > 0.0, "any other hit flashes white")
 	m.queue_free()
 
 ## The first ClarityFight fight: each BUDGET entry's element-Hunter pairs a frame, on average, within its budget.
