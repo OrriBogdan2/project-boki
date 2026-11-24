@@ -239,12 +239,16 @@ func draw(sz: Vector2) -> void:
 
 ## The one line of a plain plan, on the map's foot: the jump key, and the key that brings the rest back.
 func _plain_hint(sz: Vector2) -> void:
+	hud._rounded(_plain_pill(sz), Color(0.04, 0.05, 0.08, 0.88), 10)
+	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), _plain_line(), 16, INK, hud.big)
+
+func _plain_line() -> String:
 	var keys := [Settings.key_cap("jump"), Settings.key_cap("scores")]
-	var line := "Press %s to jump  ·  hold %s for the legend and ways out" % keys
-	var w: float = hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
-	var pill := Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
-	hud._rounded(pill, Color(0.04, 0.05, 0.08, 0.88), 10)
-	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), line, 16, INK, hud.big)
+	return "Press %s to jump  ·  hold %s for the legend and ways out" % keys
+
+func _plain_pill(sz: Vector2) -> Rect2:
+	var w: float = hud.big.get_string_size(_plain_line(), HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
+	return Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
 func _shrines(c: Control, kk: float) -> void:
@@ -369,12 +373,15 @@ func _label_rect(txt: String, at: Vector2, px: int) -> Rect2:
 ## word, the hot zone's caption: they draw at their spot, forced).
 func _obstacles() -> void:
 	_spots.clear()
+	if plain_plan():
+		_taken.append(_plain_pill(hud.c.size))
 	if m.spawn_plan:
 		for cnd in m.spawn_plan.cands:
 			_spots.append(to_screen(cnd["pos"]))
 	if m.exits:
 		for x in m.exits.list:
 			_spots.append(to_screen(x["pos"]))
+			_taken.append(ExitMark.pill_box(self, x))
 	if m.heart:
 		var at := WaysOutMap.sites(m)
 		var sd := WaysOutHud.seats(m)
