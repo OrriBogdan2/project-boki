@@ -2,10 +2,10 @@
 
 Goal: the slams carry the source's weight and timing with our poses. The hit lands on the kit's hit frame, holds for a
 short beat, recoils a little, and the body is back on the legs when the kit's keys end (the recover). Gameplay timing
-does not change: the kits, their hits and their KMOVES tables are untouched, and the combo checks stay green. Five slams
-(Kael Meteor Drop, Tarek's tap slam, Grimble's air Anchor landing, Albert's two swings) carry the follow-through as keys in
-their clips (see Keyed clips below) and play 1:1. The other three keep it in the clip's own clock, set per move in
-`content/rules/warden_anim/<hero>.json`:
+does not change: the kits, their hits and their KMOVES tables are untouched, and the combo checks stay green. Three slams
+(Grimble's air Anchor landing, Albert's two swings) carry the follow-through as keys in
+their clips (see Keyed clips below) and play 1:1. Grimble's Anchor Drop keeps it in the clip's own clock, set per move
+in `content/rules/warden_anim/<hero>.json`:
 
 - `time`: [[kit s, clip s], ...] with straight lines between the points.
   - A flat stretch holds the impact.
@@ -37,27 +37,25 @@ Columns:
 
 | Slam | Impact (now) | Hold | Recoil | Whip | Back on legs |
 |---|---|---|---|---|---|
-| Kael Finishing Slam (jug_slam) | +1 f | 2 → 5 f | 0.07 → 2.24 m | 37.2 → 20.0 m/s | 0.68 → 0.55 s (kit 0.55) |
-| Kael Meteor Drop (jug_meteor_land) | +3 f | 3 → 4 f | 2.48 → 0.26 m | 19.5 → 6.8 m/s | 0.50 → 0.52 s (kit 0.50) |
-| Tarek RMB slam (breah_slam) | -1 f | 4 → 4 f | 0.07 → 0.13 m | 1.8 → 1.7 m/s | 0.93 → 0.90 s (kit 0.91) |
-| Tarek RMB tap slam (breah_slam_land) | +3 f | 5 → 5 f | 0.31 → 0.12 m | 2.4 → 5.7 m/s | 0.73 → 0.75 s (kit 0.75) |
 | Grimble Anchor Drop (dr_anchor) | +0 f | 9 → 6 f | 0.34 → 0.31 m | 3.8 → 5.2 m/s | 0.77 → 0.60 s (kit 0.62) |
 | Grimble air Anchor landing (dr_quake) | +3 f | 3 → 5 f | 0.29 → 0.23 m | 2.9 → 4.4 m/s | 0.73 → 0.75 s (kit 0.75) |
 | Albert charged swing (bul_smash) | +3 f | 5 → 6 f | 0.71 → 0.69 m | 6.0 → 7.3 m/s | 0.50 → 0.52 s (kit 0.50) |
 | Albert Faultline (bul_ult_slam) | +3 f | 7 → 7 f | 0.64 → 0.57 m | 6.3 → 4.6 m/s | 0.60 → 0.62 s (kit 0.60) |
 
-Before = the moves on current main (v95 clips): the three slams without keys have no follow-through keys at all; the five
-keyed ones are measured with their `time` maps (11-20, before the keyed clips). After = this branch. Every row of
-`--slam-follow-check` passes (the old `WHIP_OPEN` cap on Meteor Drop is gone: 6.8 m/s).
+Before = the moves on current main (v95 clips): the Anchor Drop has no follow-through keys at all; the three keyed
+ones are measured with their `time` maps (11-20, before the keyed clips). After = this branch. Every row of
+`--slam-follow-check` passes.
 
-Notes on the three time maps (jug_slam, breah_slam, dr_anchor):
+Grimble's Anchor Drop (dr_anchor) holds 4 frames and skips 2 dead frames.
 
-- Kael's finishing slam and Tarek's held slam keep their clip timing up to the hit, then flatten for the hold.
-- Grimble's Anchor Drop holds 4 frames and skips 2 dead frames.
+Kael and Tarek are not in the table: they are drawn on Meshy's own skeleton (WardenNative, `meshy_native` in
+`content/rules/warden_native.json`), whose `_meshy.glb` has only Idle, Attack, Jump_Run, crouch, walk and run. Every
+Kael and Tarek move plays that one Attack clip, so their slams have no clip to key and `--slam-follow-check` prints
+`SLAM skip` for them. Their contract clips (`kael.glb`, `tarek.glb`) are not drawn and stay as on main.
 
 ## Keyed clips
 
-Five clips carry the follow-through as keys, made in Blender by `tools/art1/slam_follow_keys.py` (a table of
+Three clips carry the follow-through as keys, made in Blender by `tools/art1/slam_follow_keys.py` (a table of
 (kit s, source clip s, carry weight) rows per clip) and spliced onto the shipped glbs with `tools/art1/glb_add_clips.py`
 (`=<clip>`, so only those clips change; no mesh, head or material is touched). Their moves play 1:1 on the kit's clock.
 Each clip is the kit's length and has the same three beats:
@@ -70,17 +68,13 @@ Each clip is the kit's length and has the same three beats:
 |---|---|---|---|---|
 | Albert `lmb_slam` (bul_smash) | 0.50 s | 0.04-0.11 s | to 0.2 s | 0.2-0.45 s |
 | Albert `x_slam` (bul_ult_slam) | 0.60 s | 0.03-0.11 s | to 0.24 s | 0.24-0.55 s |
-| Tarek `rmb_land` (breah_slam_land) | 0.75 s | 0-0.08 s | to 0.17 s, settle to 0.32 s | 0.32-0.70 s (the old recovery at 1:1) |
 | Grimble `quake` (dr_quake) | 0.75 s | 0-0.10 s | to 0.2 s, settle to 0.3 s | 0.3-0.70 s (the old recovery at 1:1) |
-| Kael `meteor_land` (jug_meteor_land) | 0.50 s | 0-0.10 s | to 0.2 s | 0.2-0.45 s |
 
 - Albert's hammer no longer lifts back overhead: it rises about a hand's width, then comes down to the carry.
-- Tarek's and Grimble's 0.33-0.4 s frozen opening is now the hold, recoil and settle; the recovery plays at the clip's
-  own speed (it was 0.5-0.6x under the maps).
-- Kael's old clip dragged the sword along the ground for 10 frames and snapped hand.R into the carry in its last
-  0.05 s. The keys start on the settled sword and ease the whole body into the carry, so the sword never whips.
+- Grimble's 0.4 s frozen opening is now the hold, recoil and settle; the recovery plays at the clip's own speed (it was
+  0.5-0.6x under the map).
 - `blend_out` stays on these moves at 0.05 s: a longer one hands the body to the legs while the clip is still
-  recovering, and the blend itself whipped the sword (Kael 65 m/s). The clip now ends on the carry.
+  recovering, and the blend itself whipped the hammer. The clip now ends on the carry.
 
 `jobq submit --tree . --needs gpu --out slam_shots -- --slam-follow-check --shots-dir=slam_shots` renders every 3rd frame
 of each slam from 0.2 s before the hit, as played now (`after`) and without its `time`, `fade` and `blend_out` keys (`before`).

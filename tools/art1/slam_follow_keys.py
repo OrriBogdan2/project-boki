@@ -1,9 +1,9 @@
-"""Keys the slam follow-through into five rig-contract clips in Blender (docs/art/SLAM_FOLLOW.md): a short impact hold,
+"""Keys the slam follow-through into three rig-contract clips in Blender (docs/art/SLAM_FOLLOW.md): a short impact hold,
 a recoil and a recovery that ends on the idle carry, at the kit's own length. Only the bones' pose channels are keyed;
 no mesh, head or material is touched. The poses are the clip's own (its impact, its recoil rise), so the model keeps its
 look; each clip's `KEYS` row says which of them plays when.
 Run: blender -b -P tools/art1/slam_follow_keys.py -- <hero glb> <hero> <out source.glb>
-  hero: breaker (lmb_slam, x_slam) | tarek (rmb_land) | dredge (quake) | kael (meteor_land)
+  hero: breaker (lmb_slam, x_slam) | dredge (quake)
 Then splice onto the shipped glb with no further Blender (tools/art1/glb_add_clips.py, `=<clip>` takes that clip only):
   python3 tools/art1/glb_add_clips.py <glb> <out source.glb> =lmb_slam,=x_slam <glb>
 A row of KEYS is (kit s, source clip s, carry weight): the new clip at kit s plays the old clip at source clip s, blended
@@ -43,21 +43,6 @@ KEYS = {
             ],
         ),
     },
-    "tarek": {
-        # the landing's crouch held 0.08 s, the rise, the settle (the old clip's frozen stretch), then its recovery at 1:1
-        "rmb_land": (
-            0.75,
-            [
-                (0.0, 0.0, 0.0),
-                (0.08, 0.0, 0.0),
-                (0.17, 0.10, 0.0),
-                (0.32, 0.30, 0.0),
-                (0.45, 0.43, 0.0),
-                (0.70, 0.733, 1.0),
-                (0.75, 0.733, 1.0),
-            ],
-        ),
-    },
     "dredge": {
         "quake": (
             0.75,
@@ -70,14 +55,6 @@ KEYS = {
                 (0.70, 0.733, 1.0),
                 (0.75, 0.733, 1.0),
             ],
-        ),
-    },
-    "kael": {
-        # the old clip drags the sword along the ground at 0.1-0.18 s and snaps into the carry in its last 0.05 s: the keys
-        # start on the settled sword (old 0.2 s), hold it, lift a little (old 0.29 s) and ease the body into the carry
-        "meteor_land": (
-            0.5,
-            [(0.0, 0.20, 0.0), (0.10, 0.20, 0.0), (0.2, 0.29, 0.0), (0.45, 0.29, 1.0), (0.5, 0.29, 1.0)],
         ),
     },
 }

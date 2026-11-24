@@ -96,7 +96,8 @@
 		"breah_slam_land": {
 			"clip": "rmb_land",
 			"fade": 0.05,
-			"blend_out": 0.05
+			"time": [[0, 0.1], [0.14, 0.4], [0.75, 0.733]],
+			"blend_out": 0.2
 		},
 		"breah_lunge": {
 			"clip": "rmb_lunge"
