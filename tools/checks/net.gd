@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# 2 games, relay: kit zones on the other game (--shots-dir=: GPU, the guest's frames)
+	"--zone-net-check": ["res://tools/zone_net_check.gd", "zone_net_check", null],
 	"--remote-anim-1-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "1"],
 	"--remote-anim-2-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "2"],
 	"--remote-anim-3-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "3"],
