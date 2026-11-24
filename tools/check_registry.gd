@@ -558,7 +558,6 @@ const CHECKS := {
 	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],  # draw cost of sets of rigged Bokis
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],  # rigged Boki review sheets
 	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],
-	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # Boki in .pck
 	"--vespyx-places-check": ["res://tools/vespyx_places_check.gd", "vespyx_places_check", null],  # Vespyx everywhere
 	"--boki-swim-shots": ["res://tools/boki_swim_shots.gd", "boki_swim_shots", null],  # Boki afloat in 1 m of water
 	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],  # fliers hover, glide, flare
@@ -1021,7 +1020,6 @@ const CHECKS := {
 	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],  # air casts, frame by frame
 	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],  # WardenBreak
 	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],  # WardenBreak frames
-	"--next-form-shots": ["res://tools/next_form_shots.gd", "next_form_shots", null],  # GPU, =<dir>
 	# moved out of main.gd (ext/checks-out-of-main-c)
 }
 
@@ -1052,22 +1050,31 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 		printerr("CHECKREGISTRY FAIL: duplicate flags across tools/checks/*.gd and CHECKS: ", _dupes)
 		main.get_tree().quit(1)
 		return true
+	var flag := flag_in(args)
+	if flag == "":
+		return false
+	var e: Array = checks[flag]
+	Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
+	seed(hash(flag))
+	for a in args:
+		if String(a).begins_with("--rng-seed="):
+			seed(int(String(a).substr(11)))
+	var c = load(String(e[0])).new()
+	main.set_meta(String(e[1]), c)
+	if e[2] == null:
+		c.run(main)
+	else:
+		c.run(main, e[2])
+	return true
+
+
+## The first registered check flag on the command line, "" if none (Settings uses it too).
+static func flag_in(args: PackedStringArray) -> String:
+	var checks := all()
 	for flag in checks:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
-			var e: Array = checks[flag]
-			Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
-			seed(hash(flag))
-			for a in args:
-				if String(a).begins_with("--rng-seed="):
-					seed(int(String(a).substr(11)))
-			var c = load(String(e[0])).new()
-			main.set_meta(String(e[1]), c)
-			if e[2] == null:
-				c.run(main)
-			else:
-				c.run(main, e[2])
-			return true
-	return false
+			return flag
+	return ""
 
 
 ## Every check, one lookup: the legacy CHECKS above plus the area files in tools/checks/. A flag present in two

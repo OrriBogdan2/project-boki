@@ -739,7 +739,7 @@ func cast_e() -> bool:
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
-		m.later(tell, func(): if is_instance_valid(h): _raise(p2, dir))
+		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
 	return true
 
 ## One rock of the Stone Row rises; the row's rocks rise on the same step and the first to rise carries its sound.
