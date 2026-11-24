@@ -26,10 +26,13 @@ const MAX_APART := 0.3          # share of samples with no teammate within APART
 const MAX_CALM_UNHEALED := 0.7  # share of calm, hurt samples with a heal in the belt and no drink started
                                 # (0.03 to 0.58 measured on fourteen runs; the old behaviour 0.42 to 0.95)
 const MIN_ASSIST := 0.6         # share of near teammates that join a squadmate's fight (0.74 to 0.91 measured)
+const MIN_FIGHT_GAP_P10 := 0.0  # m: 10th percentile of the nearest squadmate's distance in a fight (BotSquad.spread)
+const TIGHT_M := 2.5            # metres: a squadmate this close in a fight is stacked on you
 
 var n := {}                     # counters
 var log_left := 30
 var st := {}                    # hunter -> its state between samples
+var fight_gaps: Array[float] = []  # m: nearest squadmate (within MATE_M) of a hunter in a fight, every sample
 var teams := 10
 ## The run stops and reports (limits skipped) after this much real time since the engine started, boot included:
 ## under the gate's 450 s cap for this check (flag_timeouts.tsv), so a loaded host cuts it here instead of the
@@ -256,7 +259,9 @@ func _sample(m: Match) -> void:
 			_add("weak target dropped")
 		if prev != null and tgt != null and prev != tgt and prev.team == tgt.team and _up(prev):
 			_add("target flips")
-		if fight: _add("fight samples")
+		if fight:
+			_add("fight samples")
+			_fight_gap(m, h)
 		s["tgt"] = tgt
 		# 7. standing around
 		var moved: float = Vector2(h.pos.x - s["pos"].x, h.pos.z - s["pos"].z).length()
@@ -282,6 +287,23 @@ func _sample(m: Match) -> void:
 				log_left -= 1
 				print("BOTLOG t=%d %s fights %s; %s is %d m away doing '%s'" % [int(m.time), h.pname, foe.pname,
 					o.pname, int(o.flat_dist(h)), String(o.ai.get("goal_kind", "?"))])
+
+## How far the nearest squadmate stands from a hunter in a fight (only a mate close enough to be in it).
+func _fight_gap(m: Match, h: Hunter) -> void:
+	var md := MATE_M
+	for o in _near(m, h, h.pos, MATE_M, true):
+		md = minf(md, o.flat_dist(h))
+	if md < MATE_M:
+		fight_gaps.append(md)
+
+
+func _pct(q: float) -> float:
+	if fight_gaps.is_empty():
+		return 0.0
+	var s := fight_gaps.duplicate()
+	s.sort()
+	return s[mini(int(q * s.size()), s.size() - 1)]
+
 
 func _share(a: String, b: String) -> float:
 	return float(n.get(a, 0)) / maxf(float(n.get(b, 0)), 1.0)
@@ -314,6 +336,10 @@ func _report(diff: String, runs: int) -> int:
 		["weak targets dropped", float(n.get("weak target dropped", 0))],
 		["target flips per fight minute", float(n.get("target flips", 0)) / fight_min],
 		["fight share of up time", _share("fight samples", "up samples")],
+		["fight nearest-mate distance median m", _pct(0.5)],
+		["fight nearest-mate distance p10 m", _pct(0.1)],
+		["fight nearest-mate share under %.1f m" % TIGHT_M,
+			float(fight_gaps.filter(func(x): return x < TIGHT_M).size()) / maxf(fight_gaps.size(), 1.0)],
 		["idle share of up time", _share("idle samples", "up samples")],
 		["revived / knocks", _share("revived", "knocks")],
 		["extracted per expedition", float(n.get("end extracted", 0)) / float(runs)],
@@ -336,6 +362,7 @@ func _report(diff: String, runs: int) -> int:
 	bad += _limit("calm hurt with heal unused", _share("calm hurt heal unused", "calm hurt samples"),
 			MAX_CALM_UNHEALED, true)
 	bad += _limit("assist share", _share("assists", "assist chances"), MIN_ASSIST, false)
+	bad += _limit("fight nearest-mate p10 m", _pct(0.1), MIN_FIGHT_GAP_P10, false)
 	return bad
 
 func _limit(what: String, v: float, lim: float, is_max: bool) -> int:
