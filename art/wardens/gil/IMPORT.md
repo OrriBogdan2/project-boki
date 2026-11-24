@@ -83,3 +83,7 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - Back fin and coat: live's skin-v95 index list is back (the 1,171 triangles r7 cut were live's own dorsal fin; the cut left 95 open edges down the coat back). Open edges 95 -> 0; vertex data is byte-identical to main.
 - The Meshy `skin-fin-back` / `skin-crest` props and `tools/art1/gil_fin_crest.py` are gone; gil.glb and its textures are main's again.
 - Kept from r8: tail weights, Tail bone (zero weight), arm/leg re-keys, Hit clip, swordfish scale 1.6.
+- Grip (r9b-d): `grip.hand.R` turned so the bill leads (hammer grip, tail stalk in the palm). Bill yaw off forward, median: Idle 79 -> 31 deg, walk 85 -> 28, run 114 -> 37, Jump_Run 112 -> 11, Crouch 86 -> 15. Bill-back frames: run 50% -> 17%, Jump_Run 60% -> 0%. Hit stays bill-back (94%, a recoil).
+- Attack: RightArm/ForeArm/Hand re-keyed (`hunter-round-1124/gil/r9/tools/attacksweep.py`, `fadeback.py`): wind-up over the right shoulder at 0.30, bill sweeps past the front at 0.47, follow-through to his left at 0.58, eased back to the original keys over 0.80-0.95 (no pop into Idle).
+- Right-arm clearance (`r7/tools/rightfish.py`, SIDE=Right) on run, Jump_Run, Hit and Idle. Closest fish-to-body min, before -> after: run -0.009 -> 0.007 m, Jump_Run -0.007 -> 0.021, Hit -0.010 -> 0.033, Idle 0.030 -> 0.040. Fish-to-head min: Attack 0.038, Hit 0.039.
+- geo_check vs main: worst held 7.2 cm (Jump_Run forearm_L>torso; main 13.6). HAND L/R ok.
