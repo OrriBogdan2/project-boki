@@ -229,6 +229,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	lib = clips
+	WardenClipFile.add(lib, glb, sk, d.get("clip_files", []))
 	WardenDerive.add(lib, d.get("derive", {}))
 	var contract: Array = []
 	for b in WardenGlb.BONES:
@@ -913,15 +914,20 @@ func feel(dt: float, squash: bool) -> void:
 	var k := 1.0 - proc_w
 	var kl := k * (1.0 - up_w)      # (a move that owns the upper body keeps its own posture: no lean over it)
 	var sq := f.x * LAND_SQUASH * k if squash else 0.0
-	if bi < 0 or (sq < 0.001 and absf(lean * kl) < 0.001):
+	lay_feel(root, skel, bi, sq, lean * kl)
+
+## Flattens the body `sq` of its height (widening by 0.6 of that) and tips it `lean` rad forward, about the skeleton's
+## origin (the feet: every Hero's armature stands on it), by bone `bi` and all below it. WardenNative's squash too.
+static func lay_feel(model: Node3D, sk: Skeleton3D, bi: int, sq: float, lean: float) -> void:
+	if bi < 0 or (sq < 0.001 and absf(lean) < 0.001):
 		return
 	# (in the skeleton's space: his up and right, whichever way the .glb was built)
-	var inv := skel.global_basis.inverse()
-	var up := (inv * root.global_basis.y).normalized()
+	var inv := sk.global_basis.inverse()
+	var up := (inv * model.global_basis.y).normalized()
 	var flat := Basis.from_scale(Vector3.ONE * (1.0 + sq * 0.6))
 	var squashed := Basis(flat.x - up * up.x * sq * 1.6, flat.y - up * up.y * sq * 1.6, flat.z - up * up.z * sq * 1.6)
-	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * kl)
-	skel.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * skel.get_bone_global_pose(bi))
+	var tip := Basis((inv * model.global_basis.x).normalized(), -lean)
+	sk.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * sk.get_bone_global_pose(bi))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that

@@ -13,7 +13,7 @@ const LEDGE_DROP := 1.5     # m: a monster this far below the player cannot be s
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
 const KEYS := [      # the action inputs
-		"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
+		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var human := false
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input

@@ -64,20 +64,24 @@ const T := {
 	"knock_kael_02_m": ["~", [1.02, 1.12], "m", "Finishing Slam push 6 at 0.2 s"],
 	"knock_kael_04_m": ["~", [1.52, 1.72], "m", "Finishing Slam push 6 at 0.4 s"],
 	"knock_kael_keys_s": ["~", [0.22, 0.25], "s", "Finishing Slam push 6: keys back"],
-	# [footage] a knock is done in about 0.4 s (Joule spear 0064-0066, Ghost wall cone 0073-0077)
-	"knock_done_04": [">=", 0.78, "share", "[footage] the least share of the four landed by 0.4 s"],
+	# [footage] Joule's spear is done in about 0.4 s (0064-0066): Storm Rod is its knock. The other three
+	# footage knocks show a distance, no timing; their share is printed (the source walking brake, 5a2831b2b10).
+	"knock_done_04": [">=", 0.85, "share", "[footage] Storm Rod's share landed by 0.4 s (Joule spear)"],
 }
 
 
 static func run(c) -> void:
-	var done := 1.0
+	var least := 1.0
 	for key in REF:
 		var arc := _arc(c, float(REF[key]))
 		var dist: Array = arc["d"]
 		for j in SAMPLES.size():
 			c.rec("knock_%s_0%d_m" % [key, [1, 2, 4][j]], float(dist[j]), T)
 		c.rec("knock_%s_keys_s" % key, float(arc["keys_t"]), T)
-		done = minf(done, float(dist[2]) / float(arc["rest"]))
+		var share := float(dist[2]) / float(arc["rest"])
+		least = minf(least, share)
+		if key == "sparkle":
+			c.rec("knock_done_04", share, T)
 		var row := [key, REF[key], arc["rest"], arc["stop_t"], arc["slam_m"], WALL_GAP, _wall_frame(c, float(REF[key]))]
 		print(
 			(
@@ -88,7 +92,7 @@ static func run(c) -> void:
 				% row
 			)
 		)
-	c.rec("knock_done_04", done, T)
+	print("MFEEL knock least share landed by 0.4 s: %.3f (printed only)" % least)
 	for row in SWEEP:
 		var a := _arc(c, float(row[0]), float(row[1]))
 		var vals := [row[0], row[1], a["rest"], a["stop_t"]]

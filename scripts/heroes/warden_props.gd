@@ -46,12 +46,8 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 		mi.mesh = p[0]
 		# (data "scale": the part grown about its bone)
 		var grow := _grow((d.get("scale", {}) as Dictionary).get(cb, 1.0))
-		mi.transform = (
-			(to_m * skel.get_bone_global_rest(nb)).affine_inverse()
-			* onto
-			* (p[1] as Transform3D)
-			* Transform3D(Basis.from_scale(grow))
-		)
+		mi.transform = ((to_m * skel.get_bone_global_rest(nb)).affine_inverse() * onto * (p[1] as Transform3D)
+			* Transform3D(Basis.from_scale(grow)))
 		# (data "grip": a point of the part into the fist)
 		var grip: Dictionary = (d.get("grip", {}) as Dictionary).get(cb, {})
 		if not grip.is_empty():
@@ -237,7 +233,7 @@ static func _rigid(arr: Array, bind: int, pose: Transform3D) -> Array:
 	var pos: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 	var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES]
 	var wts: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
-	var per := bones.size() / maxi(pos.size(), 1)
+	var per := int(bones.size() / float(maxi(pos.size(), 1)))
 	var mine := PackedByteArray()
 	mine.resize(pos.size())
 	for i in pos.size():
