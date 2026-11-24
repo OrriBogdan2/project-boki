@@ -11227,3 +11227,4 @@ READY ext/parity-recheck-lace 47370674c6 (bulk-rebase: origin/main merged in mec
 READY ext/farm-garden-perf-30 2a24ad8c90 (merged origin/main; conflicts only tools/perf_bench.gd (kept main's --bench-hub plus branch's --bench-garden) and docs/GARDEN_PERF.md (both sections); --check 0 failures; health.py --strict HEALTH OK)
 READY ext/sfx-hit-tier-confirm 52e7bf224d (merged origin/main; only conflict content/rules/impact_weight.json: main's shake.json doc/no shake key kept + branch's confirm_db; --check 0 fail, health --strict OK)
 READY ext/anim-native-stride 408e613d65 (native Hunters: per-Hunter stride rates; origin/main merged, warden_native.json conflict resolved keeping stride rates + main's orbit_shards; --check 0 failures, health --strict OK, --warden-native-check 10 attack-clip fails identical on main)
+READY ext/native-attack-idle-1124 96f22acff64ff92b8b5cbfcf76bcd517be37b6f5 (warden-native-check attack case fixed: stale check, 247/0 failed)
