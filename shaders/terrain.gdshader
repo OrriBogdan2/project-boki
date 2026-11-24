@@ -32,7 +32,8 @@ varying float vdist;
 // How much fine ground detail a spot keeps: all of it up to 28 m from the camera, none past 55 m (the
 // brush streaks, dabs, speckles, clover and petals are sub-pixel or a blur out there; the big painted
 // patches, swathes and pools stay everywhere). Skips their noise reads, not only hides them.
-float detail_w() { return 1.0 - smoothstep(28.0, 55.0, vdist); }
+uniform vec2 detail_range = vec2(28.0, 55.0);   // m from the camera: full fine detail, none (bench: 1e6 = the old look)
+float detail_w() { return 1.0 - smoothstep(detail_range.x, detail_range.y, vdist); }
 void vertex() {
 	vdist = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
