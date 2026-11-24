@@ -24,7 +24,7 @@ func run(m: Node, c) -> void:
 	main = m
 	check = c
 	Save.no_write = true
-	seed(7)
+	seed(3)  # (7 no longer lets the fliers roam: the lane's BaseLife draws one more random number per choice)
 	var farm_rules: Dictionary = Content.rules("farm_build")
 	farm_rules["base_mode"] = true
 	_new_save()
@@ -98,6 +98,9 @@ func _roam() -> void:
 		fliers.all(func(k: Dictionary) -> bool: return not k.is_empty()) and not walker.is_empty(),
 		"fliers: %s and the walker %s are out" % [", ".join(FLIERS), WALKER]
 	)
+	# this check times flight while roaming: a random day nap or a hello (BaseLife) would take a flier off the clock
+	home.life.r_v["doze"] = 0.0
+	home.life.r_v["greet_chance"] = 0.0
 	var on_foot := {}  # flier uid -> s it has walked the ground in a row while roaming
 	var longest := 0.0
 	var roam_s := 0.0

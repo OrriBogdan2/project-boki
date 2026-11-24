@@ -1,6 +1,6 @@
 extends "res://tools/wall_slide_check.gd"
 ## --dash-wall-check: a ground dash that meets a wall slides along it and keeps the part of its length that
-## runs along the face (docs/decisions/0047-dash-wall-slide.md: cos of the angle to the wall, 0.94 at 20
+## runs along the face (docs/decisions/0135-dash-wall-slide.md: cos of the angle to the wall, 0.94 at 20
 ## degrees, 0.71 at 45, 0.17 at 80). All 12 Hunters dash from touching a straight cliff on The Hollow Crown,
 ## a placed Tenzo rock, a raised Neve wall and a Hollow Crown prop's face, at 20, 45 and 80 degrees to it;
 ## the same dash on open ground is the reference. Both are measured where the dash ends (roll_t runs out): the

@@ -1,6 +1,6 @@
 # 0010: Dash -> ability flow
 
-- **Status:** accepted; amended by 0015 (combo flow: jump and hold rows, owner item 51)
+- **Status:** accepted; amended by 0015 (combo flow: jump and hold rows, owner item 51) and below (dash buffering in the source)
 - **Date:** 2026-11-03
 - **Area:** movement / combat
 
@@ -19,3 +19,10 @@ Option 2. Per ground or air dash and slot (LMB, RMB, E, X, Q) a row says `fire` 
 - Kit-side cases for the per-hero rows to absorb: Vex's and Neve's `fires_in_dash`, Cinder's jet ending the dash.
 - A press at the end of a stun, root or Grounded goes through the same held slots (0022, `--cc-exit-buffer-check`).
 - Check `--dash-flow-check`; table `docs/heroes/dash_interactions.md` (gen_wiki). No Net or save change.
+
+## Amendment: dash buffering in the source (DECISIONS "match the reference")
+Re-checked 2026-11-23 (ext/feel-dash-buffer-source), building on the 11-03 finding (ext/dash-buffer-source 7690213d, `content/dash_flow/_source_buffering.json` there). Result: **not determinable**, so the default stands: a `buffer` press made at any point in a dash is held and goes the step the dash ends (then up to `Loco.press_buffer`, 0.15 s, while the hunter can't act). It never expires inside the dash and never cancels it.
+- **Game data: nothing.** No dump has an input-buffer, queue or cancel-window field; the ability system and C++ defaults are encrypted, and the named tunables list no input timing. The tooltips never say what a press inside a dash does.
+- **Frames checked (briefs/hero-ref on ext/agent-briefs):** every press seen inside a dash fires mid-dash, which is the `fire` rows, not a buffer: Shiv's empowered shot leaves on the Cartwheel's own frame (dancer.md:131-134, frame 0193); Ghost fires the rifle through the slide (venator.md:88, 0149-0151); Celeste fires the whole skate (tamsin.md:78-79, 0239-0245, 0285-0290); Tetra's "Punch to Extend Dash/RMB" (breah.md:8-9) resolves only its RMB half. A sweep of every hero-ref for buffer, queued, held to/until, a lost/dropped/eaten press or "after the dash ends" finds nothing new.
+- **Not seen anywhere:** a press held to a dash's end, a press lost, or one expiring after a time. So neither how early a press is kept nor whether it fires at the end or cancels can be read; the 0.05/0.15/0.3 s-before-end assert waits for a source.
+- If a source limit turns up: `held[slot]` would count from the press (not only in `_release` after the dash), a press older than the limit at the dash's end would be dropped with the deny cue, and `press_buffer` would mean the maximum age since the press; `--dash-flow-check` and `--move-feel-check` would assert it.

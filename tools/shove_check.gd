@@ -98,7 +98,8 @@ func _press() -> void:
 	var moved := float(with_press - without) / PRESS_BOUTS
 	var what := "a great press moves the backed Boki's odds %d to %d%% (%+.0f points, under %d)"
 	ok(moved > 0.0 and moved < PRESS_MAX,
-			what % [without * 100 / PRESS_BOUTS, with_press * 100 / PRESS_BOUTS, moved * 100.0, PRESS_MAX * 100.0])
+			what % [int(without * 100 / float(PRESS_BOUTS)), int(with_press * 100 / float(PRESS_BOUTS)), moved * 100.0,
+					PRESS_MAX * 100.0])
 
 func _types() -> void:
 	var by_theme := {}
@@ -140,6 +141,7 @@ func _on_base() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
+	rules["base_mode"] = false      # base_mode is on in the shipped rules; the "off" half walks the old farm
 	var off = await main._hb_home()
 	ok(off.hshove == null, "off: no stump on the farm")
 	off.queue_free()
@@ -173,6 +175,6 @@ func _on_base() -> void:
 		ok(sh.run == null and is_instance_valid(sh.card), "on: the bout ends with a result card (%.1f s)" % t)
 		ok(peak > 0.0 and leans_to_stronger, "cue: the meter filled (%.2f) toward the stronger Boki" % peak)
 		ok(sh.cue == null, "cue: the meter is gone when the bout ends")
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame
