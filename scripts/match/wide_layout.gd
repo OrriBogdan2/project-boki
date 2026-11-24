@@ -29,7 +29,7 @@ const WIDE_RING := [
 	[67.5, "o_drift", "Driftmoor", "camp", "still", "dawn"],
 	[112.5, "o_kestrel", "Kestrel Rise", "nest", "moss", "dawn"],
 	[157.5, "o_hollow", "Hollowmere", "camp", "moss", "iron"],
-	[202.5, "o_cinder", "Cinderfall Ledge", "grove", "lantern", "iron"],
+	[202.5, "o_cinder", "Penny Drop Ledge", "grove", "lantern", "iron"],
 	[247.5, "o_ashen", "Ashen Terrace", "camp", "lantern", "skyport"],
 	[292.5, "o_rime", "Rimefold", "nest", "gull", "skyport"],
 	[337.5, "o_bright", "Brightwater Shoal", "camp", "gull", "fern"],

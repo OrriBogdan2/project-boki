@@ -1,7 +1,7 @@
 extends "res://tools/hero_vfx_reel.gd"
-## Gil's reel (tools/hero_vfx_reel.gd): the generic thrusts, Tide Lunge (hold) and Ground Swim (dash); the bag's
+## Gil's reel (tools/hero_vfx_reel.gd): the generic thrusts, Tide Lunge (hold) and Deep End (dash); the bag's
 ## potions in a fixed order (Thunder held, then Slime, Air, Fire and a Super Zeep tapped onto one dummy: three
-## different marks Beach it); the slime's puddle to its end; the Riptide spin sent off as a spout; the Tidal Wave
+## different marks Beach it); the slime's puddle to its end; the Spin Cycle spin sent off as a spout; the Surf's Up
 ## followed down its line.
 
 const BAG := ["slime", "air", "fire", "zeep"]  # the "bag" part's throws, in order
@@ -125,7 +125,7 @@ func _part_r() -> void:
 		cast,
 		_sheet(
 			"r",
-			"R, Tidal Wave: the lane, the surf over the dummy, the landing",
+			"R, Surf's Up: the lane, the surf over the dummy, the landing",
 			[0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.15, 1.4, 2.0],
 			func(): return P.position + Vector3(2.0, 0.9, 0)
 		),

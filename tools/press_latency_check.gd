@@ -55,7 +55,7 @@ const ACTION := {
 	"lmb": "fire", "rmb": "secondary", "e": "signature", "dash": "dash", "jump": "jump", "r": "ultimate",
 }
 const CALIB_SPOT := Vector3(12.0, 0.0, -32.0)       # move_feel_check's flat spot, when the seed keeps it
-## Keys played as a hold whose tap shows nothing by design: Lace's Heavy Shot has no tap variant, and Albert's tap
+## Keys played as a hold whose tap shows nothing by design: Lace's Pin Down has no tap variant, and Albert's tap
 ## lowers an aegis that only goes up at the 0.1 s hold.
 const HELD := {"archer": "rmb", "bulwark": "rmb"}
 const FPS := 60.0                      # the engine's fixed frame rate the check is run at (--fixed-fps)

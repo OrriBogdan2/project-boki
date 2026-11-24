@@ -9,7 +9,7 @@ extends RefCounted
 ##   --arena-demo=pr_payoff_dr / pr_payoff_as   the payoff moments
 ##   moves: dr_shot dr_throw dr_reel dr_anchor dr_dive dr_lunge dr_pounce dr_flex
 ##          as_lance as_sweep as_shot as_leap lw_hop as_cloak lw_stoke lw_stoke_lance
-##          lw_jet dr_blast (the X ultimates), dr_rock (the Deep Reach hauling a foe over a rock)
+##          lw_jet dr_blast (the X ultimates), dr_rock (the Sticky Fingers hauling a foe over a rock)
 ## A move's optional fourth entry is its strip zoom (the hose and the rope need the wider gameplay view).
 
 const MOVES := {
@@ -189,7 +189,7 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 			if t <= go: P.teleport(D.pos - Vector3(1.8, 0, 0))       # point blank, where every slug lands
 			if ArenaDemo._at(t, dt, go): _ult(P)
 		"lw_stoke_lance":
-			# a Flashover mid-roar: the fist pump plays over the braced hose
+			# a Boiling Point mid-roar: the fist pump plays over the braced hose
 			P.inp["fire"] = t > go and t < 1.8
 			if t < go: D.teleport(A.home + Vector3(3.5, 0, 0))
 			if ArenaDemo._at(t, dt, go + 0.45):
@@ -202,7 +202,7 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 				K.stoke(D)
 
 ## Puts the dummy behind the nearest rock or prop round the hunter, on the far side along the same line,
-## so the Deep Reach has to fly over it and drag the dummy back across it.
+## so the Sticky Fingers has to fly over it and drag the dummy back across it.
 static func _behind_rock(A: Arena, D: Hunter) -> void:
 	var W = A.m.world
 	for ring in range(3, 10):

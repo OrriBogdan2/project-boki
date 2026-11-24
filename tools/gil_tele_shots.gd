@@ -1,7 +1,7 @@
 extends RefCounted
 ## --gil-tele-shots --shots-dir=<dir>: Gil's three telegraphs in a real Match at the gameplay camera (its own
-## zoom), one PNG each: rmb_* (a thrown potion's landing circle filling), e_* (the Riptide spout's lane filling
-## with its front), x_* (the Tidal Wave lane while he surfs). Before/after proof for the AimKit move (DEBT
+## zoom), one PNG each: rmb_* (a thrown potion's landing circle filling), e_* (the Spin Cycle spout's lane filling
+## with its front), x_* (the Surf's Up lane while he surfs). Before/after proof for the AimKit move (DEBT
 ## "Two telegraph systems"). Needs a renderer.
 
 const DT := 1.0 / 60.0

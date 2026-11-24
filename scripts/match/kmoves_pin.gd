@@ -176,7 +176,7 @@ const MOVES := {
 	},
 	"arc_heavy_wind":
 	{
-		# the Heavy Shot's draw: like the bow draw but sunk low, weight back, the shoulders turned hard (holds)
+		# the Pin Down's draw: like the bow draw but sunk low, weight back, the shoulders turned hard (holds)
 		"hold": true,
 		"keys":
 		[
@@ -247,7 +247,7 @@ const MOVES := {
 	},
 	"arc_hail":
 	{
-		# Hail Wall: the bow raised high, the body arching back, the volley lobbed up in an arc, then down
+		# Hemline: the bow raised high, the body arching back, the volley lobbed up in an arc, then down
 		"keys":
 		[
 			[0.0, {"p": 0.1}],
@@ -280,7 +280,7 @@ const MOVES := {
 	},
 	"pin_roll":
 	{
-		# Spirit Walk's dodge roll: tucked into one forward roll in 0.16 s, then up and light on the feet
+		# Slip Stitch's dodge roll: tucked into one forward roll in 0.16 s, then up and light on the feet
 		"keys":
 		[
 			[0.0, {"p": -0.35, "sq": 0.25, "lw": 1.0, "legs": [0.9, -1.3, 0.9, -1.3]}],
@@ -503,7 +503,7 @@ const MOVES := {
 	},
 	"pin_walk":
 	{
-		# Spirit Walk after the roll: light on the toes, leaning in, arms trailing like a ghost (held while it lasts)
+		# Slip Stitch after the roll: light on the toes, leaning in, arms trailing like a ghost (held while it lasts)
 		"hold": true,
 		"keys":
 		[
@@ -524,7 +524,7 @@ const MOVES := {
 	},
 	"pin_flick":
 	{
-		# the base long dash (in the air, or out of Spirit Walk charges): a quick flick and a sideways tumble
+		# the base long dash (in the air, or out of Slip Stitch charges): a quick flick and a sideways tumble
 		"keys":
 		[
 			[0.0, {"p": -0.2, "sq": 0.2, "lw": 1.0, "legs": [0.7, -1.0, 0.2, -0.4]}],

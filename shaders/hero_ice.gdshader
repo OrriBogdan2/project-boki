@@ -1,6 +1,6 @@
 shader_type spatial;
 render_mode blend_mix, depth_draw_always, cull_back, diffuse_lambert, specular_schlick_ggx;
-// A hero body turned to ice (Rimelock, IceBody): the hero's own materials are swapped for this one, so the
+// A hero body turned to ice (Freeze Frame, IceBody): the hero's own materials are swapped for this one, so the
 // body itself is ice, not a shell round it. Translucent and refractive (the ground shows through, bent by
 // the surface), a fresnel rim, a cold glow deep in the thick parts, a web of frost cracks and a drifting
 // sparkle. `freeze` sweeps a bright frost front from the feet (foot_y) up past the head (head_y): below it

@@ -2,7 +2,7 @@ class_name KMovesGil
 extends RefCounted
 ## Keyed full-body moves of Gil (content/archetypes/gil.json, scripts/arch/kits/gil_kit.gd), in the
 ## HunterAnim.KMOVES format: a fencer's thrusts on the swordfish (right foot leading, the back hand up behind),
-## the held Tide Lunge, the dive under the ground and the burst back out, the potion toss, the Riptide spin and
+## the held Tide Lunge, the dive under the ground and the burst back out, the potion toss, the Spin Cycle spin and
 ## the wave ride. Gil's .glb carries no clips, so these keyed poses are his animation. Signs as KMovesDJ: p < 0
 ## leans in, y < 0 brings the right (sword) shoulder forward, lift is metres up from the feet.
 
@@ -266,7 +266,7 @@ const MOVES := {
 			[0.6, {}]
 		]
 	},
-	# Ground Swim: a quick crouch, then head first into the ground like a dive into water; held under
+	# Deep End: a quick crouch, then head first into the ground like a dive into water; held under
 	"gil_dive":
 	{
 		# (the body fully below the surface) until gil_surface replaces it
@@ -409,7 +409,7 @@ const MOVES := {
 			[0.42, {}]
 		]
 	},
-	# Riptide: the swordfish held straight out to the side, the free arm out for balance, turning on the spot
+	# Spin Cycle: the swordfish held straight out to the side, the free arm out for balance, turning on the spot
 	"gil_spin":
 	{
 		# once every 0.25s (looped: a turn ends where it began)
@@ -489,7 +489,7 @@ const MOVES := {
 	},
 	"gil_surf":
 	{
-		# Tidal Wave: up on the crest in a low surfer's crouch, side on, the arms out, rocking with the water
+		# Surf's Up: up on the crest in a low surfer's crouch, side on, the arms out, rocking with the water
 		"hold": true,
 		"loop": 0.15,
 		"keys":

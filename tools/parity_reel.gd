@@ -30,7 +30,7 @@ const CLOSE_FILL := 0.7                 # --reel-close: the Hunter's share of th
 const CLOSE_PITCH := 45.0               # degrees the close camera sits above level (the match tips a Hunter 20)
 const CLOSE_ORBIT := 0.6                # rad/s the close camera turns round the Hunter
 const DUMMY_HIT := 10.0                 # the dummy's blow, when its own weapon does not land in time
-const ALLY_AT := Vector3(4.0, 0, -3.0)  # the downed ally dummy, from the spot (in Hearth Call's 12.6 m reach)
+const ALLY_AT := Vector3(4.0, 0, -3.0)  # the downed ally dummy, from the spot (in Rise and Shine's 12.6 m reach)
 
 var lit := {}                           # key cap -> s left lit
 var caps := {}                          # key cap -> its Label
@@ -233,7 +233,7 @@ func _p_e() -> void:
 		P.inp["sig"] = _in(t, 0.2) or _in(t, 1.8)
 	, CLOAK_TD if who == "ashwick" else 7.0)
 
-## Motley's Brimseed grows for its `grow` s: the recast waits until it is full size, so the whole growth shows.
+## Motley's Gag Gift grows for its `grow` s: the recast waits until it is full size, so the whole growth shows.
 func _e_brimseed() -> void:
 	var grow := float(Arch.def(who)["e"]["grow"])
 	var popped := [-1.0]
@@ -275,7 +275,7 @@ func _r_presses(t: float) -> void:
 		r_down = true
 		HunterKeys.ult_pressed(P)
 
-## Kael's Gilded Riposte answers a hit: he starts hurt (so the cleave's heal shows), the dummy stands inside the
+## Kael's Blow for Blow answers a hit: he starts hurt (so the cleave's heal shows), the dummy stands inside the
 ## cleave's strip and swings at him once in the guard (one plain hit, the Training Grounds dummy firing its own
 ## weapon, else a direct blow), so the guard blocks it and the cleave lands and heals.
 func _r_riposte() -> void:
@@ -294,7 +294,7 @@ func _r_riposte() -> void:
 	var by := "direct blow" if blow[0] else "its weapon"
 	print("REEL_RIPOSTE blocked %d (%s) strikes %d healed %.0f" % [u.blocked, by, u.strikes, u.last_healed])
 
-## Meeko's Hearth Call needs a teammate: a downed ally dummy (the Training Grounds dummy on her team) lies in
+## Meeko's Rise and Shine needs a teammate: a downed ally dummy (the Training Grounds dummy on her team) lies in
 ## reach; R tethers it, the tether heals it, and at the end it is pulled to her side and stood up.
 func _r_hearth_call() -> void:
 	var at := home + ALLY_AT

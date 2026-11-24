@@ -1,6 +1,6 @@
 extends RefCounted
-## Sparkle items 70-74: faster autos and a longer Wirerun (70), Skycall's orb fling and pull
-## (71), the committed Skycall vector (73) and the Storm Rod's single Static (74). Item 72 (Kitefall's Static
+## Sparkle items 70-74: faster autos and a longer Wirerun (70), Undercurrent's orb fling and pull
+## (71), the committed Undercurrent vector (73) and the Pink Spear's single Static (74). Item 72 (Stormfall's Static
 ## spread) is in tools/vv_ult_check.gd. Runs inside --mage-combo-check and reports through its ok().
 
 const DT := 1.0 / 60.0
@@ -77,7 +77,7 @@ func _item_70() -> void:
 			shots.size() >= 3 and absf(gap - 0.648) < 0.05, "gap %.3f" % gap)
 
 # ------------------------------------------------------------------ item 71
-## Casts Skycall on a circle at `at`, drags toward `drag_to`, lets go and runs the 0.8 s plus the fling.
+## Casts Undercurrent on a circle at `at`, drags toward `drag_to`, lets go and runs the 0.8 s plus the fling.
 func _skycall(at: Vector3, drag_to: Vector3) -> void:
 	K.cd["e"] = 0.0
 	ac.aim_at(P, at)

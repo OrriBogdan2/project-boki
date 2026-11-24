@@ -1,5 +1,5 @@
 extends RefCounted
-## The ultimates on X of Sable (Encore, ThiefUlt) and Kael (Gilded Riposte, JuggernautUlt), run inside
+## The ultimates on X of Sable (Last Dance, ThiefUlt) and Kael (Blow for Blow, JuggernautUlt), run inside
 ## --dancer-combo-check / --juggernaut-combo-check / --kit-combo-check (tools/dancer_jug_check.gd) with the
 ## helpers of tools/archetype_check.gd passed in as A. Each asserts the cast, the telegraph, the payoff, the
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
@@ -35,7 +35,7 @@ func _gate(p: Hunter, who: String) -> void:
 			locked and float(p.ak.cd["x"]) <= 0.0 and not p.ak.ult_running() and not p.ak.slot_info("x")["ready"])
 	_open(p)
 
-# ------------------------------------------------------------------ Sable: Encore
+# ------------------------------------------------------------------ Sable: Last Dance
 func dancer(a) -> void:
 	a_x = a
 	var r = a_x.setup("thief", 4.6, "", true)
@@ -61,7 +61,7 @@ func dancer(a) -> void:
 	a_x.ok("dancer X: one press, one cast (main's X path only)", u.casts == 1 and int(p.used.get("x", 0)) == used0 + 1,
 			"casts %d used +%d" % [u.casts, int(p.used.get("x", 0)) - used0])
 	var ring: Dictionary = AimKit.entry(p, "ult")
-	a_x.ok("dancer X: Encore casts; the ring everyone sees starts small and grows; the Vault comes back",
+	a_x.ok("dancer X: Last Dance casts; the ring everyone sees starts small and grows; the Vault comes back",
 			u.running() and AimKit.shown(p, "ult") and bool(ring.get("all", false))
 			and float(ring.get("r", 0.0)) < float(d["reach"]) * 0.6 and p.dashes >= p.max_dashes() - 0.01,
 			"r %.2f dashes %.2f" % [float(ring.get("r", 0.0)), p.dashes])
@@ -156,7 +156,7 @@ func dancer(a) -> void:
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	await a_x.done(m)
 
-## One cast of Encore against dummies that stand still while Sable stands or walks (`walk` m/s along +x).
+## One cast of Last Dance against dummies that stand still while Sable stands or walks (`walk` m/s along +x).
 ## Returns each foe's landings: {foe id: [[seconds since the cast, hp lost], ...]}; `rings` is the ring's radius
 ## and the foe's distance at every beat, so a check can say which volleys a foe was in reach of.
 func _cast_log(m: Match, p: Hunter, foes: Dictionary, walk: float, rings: Array) -> Dictionary:
@@ -264,7 +264,7 @@ func dancer_ring(a) -> void:
 			hits.size(), rings.size(), in_band, got, want, p.pos.x - home.x])
 	await a_x.done(m)
 
-# ------------------------------------------------------------------ Kael: Gilded Riposte
+# ------------------------------------------------------------------ Kael: Blow for Blow
 func zedran(a) -> void:
 	a_x = a
 	var r = a_x.setup("juggernaut", 2.6, "", true)
@@ -561,7 +561,7 @@ func combos(a) -> void:
 	await _merge_holds()
 	await _burst_cap()
 
-## The sheet's natural combo: Bola grounds a foe, then Encore: Grounded, they can't leave the ring.
+## The sheet's natural combo: Dark Bola grounds a foe, then Last Dance: Grounded, they can't leave the ring.
 func _bola_encore() -> void:
 	var r = a_x.setup("thief", 3.5)
 	var m: Match = r[0]
@@ -618,7 +618,7 @@ func _merge_holds() -> void:
 	KinMerge.cast(p)
 	var b0 := tk.encore.blades
 	a_x.step(m, 1.6)
-	a_x.ok("merge hold dancer: Encore's blades stop and its ring goes (hold field encore.st)",
+	a_x.ok("merge hold dancer: Last Dance's blades stop and its ring goes (hold field encore.st)",
 			not tk.encore.running() and tk.encore.blades == b0 and not AimKit.shown(p, "ult") and KinMerge.active(p),
 			"blades after %d" % (tk.encore.blades - b0))
 	await a_x.done(m)
@@ -755,7 +755,7 @@ func _recovery_exits() -> void:
 func _near(a: float, b: float) -> bool:
 	return absf(a - b) < 0.02
 
-## VFX_QUALITY zone rule on Encore's ring as drawn (AimShapes, not the data): her signature violet, a lit rim, the
+## VFX_QUALITY zone rule on Last Dance's ring as drawn (AimShapes, not the data): her signature violet, a lit rim, the
 ## centre at most AimShapes.SOFT_A, also at a beat's pulse (`alpha`).
 static func _soft_ring(a_v, p: Hunter, e: Dictionary, alpha: float) -> void:
 	var got: Array = load("res://tools/aimkit_check.gd").measure(e, 0.0, float(e.get("r", 0.0)) - 0.05)

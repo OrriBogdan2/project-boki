@@ -1,6 +1,6 @@
 class_name OstraLand
 extends RefCounted
-## Where Motley's Lantern Trade puts him: he can throw it onto high, hard-to-reach ledges and get there, and it
+## Where Motley's Musical Chairs puts him: he can throw it onto high, hard-to-reach ledges and get there, and it
 ## never leaves him inside a wall. The world is a terrace heightmap plus blocker tiles (rocks, trees,
 ## walls: never standable) and dynamic walls (some standable stones). The lantern lands on the top surface under
 ## the cursor; a cursor just in front of a higher terrace (pointing at the cliff face) lands on that terrace's top.

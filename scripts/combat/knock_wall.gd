@@ -1,7 +1,7 @@
 class_name KnockWall
 extends RefCounted
-## "Driven into a wall": the one test every wall stun asks (Heavy Shot's pin, the Crush, Burr's cone, Tenzo's
-## punch, the Storm Rod and a plain knock's slam). A wall is whatever stops a knocked body's walk and stands
+## "Driven into a wall": the one test every wall stun asks (Pin Down's pin, the Crush, Burr's cone, Tenzo's
+## punch, the Pink Spear and a plain knock's slam). A wall is whatever stops a knocked body's walk and stands
 ## taller than a terrace step: terrain cliffs, rocks, trees, placed barriers, the train's engine. Ground it
 ## walks up, a flat car deck and the soft props (crates, pots, barrels, kegs) are not walls. What counts and
 ## why: docs/KNOCK_WALLS.md. Checked by --wall-stun-check.

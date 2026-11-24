@@ -49,7 +49,7 @@ const MOVES := {
 		[0.3, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.7, "p": -0.45, "y": -0.3, "lw": 1.0,
 				"legs": [1.0, -0.8, -0.6, -0.3]}],
 		[0.6, {}]]},
-	# Meteor Drop, the hang and the dive (footage 0261-0288: the rise, a slash at the top, a steep drive): he
+	# Hit the Deck, the hang and the dive (footage 0261-0288: the rise, a slash at the top, a steep drive): he
 	# rocks back and hauls the blade up overhead with the knees tucked, turning once as he gathers (0.2s hang),
 	# then drops upright and straight down, the blade driven point-down under him and the legs
 	# straight; that pose holds until he hits the ground
@@ -87,7 +87,7 @@ const MOVES := {
 		[0.28, {"blade": Vector3(-1.2, -0.4, 1.4), "bw": 1.0, "rad": 0.4, "p": -0.35, "sq": 0.2, "lift": -0.1,
 				"lw": 1.0, "legs": [0.95, -1.3, -0.4, -0.8]}],
 		[0.42, {}]]},
-	# Warchain: the chain hand cocked back, then flung out ahead; the body twists into it
+	# Short Leash: the chain hand cocked back, then flung out ahead; the body twists into it
 	"jug_chain": {"keys": [
 		[0.0, {}],
 		[0.08, {"fl": Vector3(-0.15, 0.25, 0.25), "hw": 1.0, "y": -0.5, "p": 0.1}],
@@ -103,7 +103,7 @@ const MOVES := {
 		[0.4, {"fl": Vector3(0.12, 0.15, -0.5), "hw": 1.0, "p": -0.5, "lift": 0.05, "lw": 1.0,
 				"legs": [-0.1, -0.7, -0.6, -0.4]}],
 		[0.65, {}]]},
-	# Cinder Spin: blade out wide, the whole body turns twice
+	# Full Circle: blade out wide, the whole body turns twice
 	"jug_spin": {"keys": [
 		[0.0, {"blade": Vector3(-1.5, 0.0, 1.5), "bw": 1.0, "rad": 0.55, "lw": 1.0, "legs": [0.6, -1.0, 0.5, -0.9],
 				"lift": -0.06}],
@@ -133,7 +133,7 @@ const MOVES := {
 		[0.35, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 0.9, "rad": 0.55, "p": -0.6, "lift": -0.14, "sq": 0.25,
 				"lw": 1.0, "legs": [1.1, -1.6, -0.4, -1.0]}],
 		[0.7, {}]]},
-	# Gilded Riposte, the guard (ult f33-f38, 0.6s): planted wide, the blade drawn up vertical in front of
+	# Blow for Blow, the guard (ult f33-f38, 0.6s): planted wide, the blade drawn up vertical in front of
 	# him, braced and shivering a little under the gold
 	"jug_guard": {"keys": [
 		[0.0, {}],
@@ -262,7 +262,7 @@ const MOVES := {
 				"legs": [0.9, -1.4, 0.5, -1.2], "fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0,
 				"fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0, "wg": 0.6}],
 		[0.48, {"fz": -6.283, "fy": 6.283}]]},
-	# the Bola (0100-0102): the right hand raised over the head and circled (three points every 0.13s)
+	# the Dark Bola (0100-0102): the right hand raised over the head and circled (three points every 0.13s)
 	# through the 0.4s lane, the weights whirling round it (DJFx), then slung with a long forward lunge; the
 	# legs are a stance, so walking through the wind-up she keeps walking
 	"thf_bola": {"stance": true, "keys": [
@@ -290,7 +290,7 @@ const MOVES := {
 		[0.5, {"fr": Vector3(0.04, 0.1, -0.7), "rw": 1.0, "y": 0.5, "p": -0.38, "lw": 1.0,
 				"legs": [1.1, -0.75, -0.7, -0.25]}],
 		[0.75, {}]]},
-	# the Shadow Knife (0222-0225): a whole-body spin (about 250 degrees by 0.09) with the off hand cocked
+	# the White Flash (0222-0225): a whole-body spin (about 250 degrees by 0.09) with the off hand cocked
 	# back, unwinding into a side-arm throw released at 0.12
 	"thf_knife": {"keys": [
 		[0.0, {"sq": 0.12, "lift": -0.04}],
@@ -309,7 +309,7 @@ const MOVES := {
 		[0.06, {"lift": -0.14, "p": -0.45, "sq": 0.45, "lw": 1.0, "legs": [1.25, -2.0, -0.2, -1.6]}],
 		[0.3, {"lift": -0.1, "p": -0.35, "sq": 0.2, "lw": 1.0, "legs": [1.15, -1.8, -0.15, -1.4]}],
 		[0.6, {}]]},
-	# Encore (ult f27-f35): both blades raised as the ring grows (anticipation, a little squash), then a
+	# Last Dance (ult f27-f35): both blades raised as the ring grows (anticipation, a little squash), then a
 	# whole-body spin as it opens, done by 0.4s when the dance takes over (no leg keys: she walks)
 	"thf_encore": {"keys": [
 		[0.0, {}],
@@ -320,7 +320,7 @@ const MOVES := {
 		[0.38, {"fl": Vector3(-0.55, 0.35, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.35, 0.0), "rw": 1.0, "p": -0.1,
 				"sq": -0.2, "fy": 6.283}],
 		[0.55, {}]]},
-	# ... the dance (our own choreography, on Encore's 0.2s beats; f33-f35 is the source's arm snap): eight beats
+	# ... the dance (our own choreography, on Last Dance's 0.2s beats; f33-f35 is the source's arm snap): eight beats
 	# that loop, one fling per beat, right on the even ones, left on the odd, so the blade leaves the hand that is
 	# out at that moment (ThiefUlt._volley). Two side flings, a pirouette with the arms wide and the wings open, two
 	# low sweeps, then the crossbows crossed overhead and a twirl back. Upper body and hips only: walking, the legs

@@ -323,7 +323,7 @@ def clips():
           "FL": (-0.12, -0.42, 0.3), "FR": (0.13, -0.55, 0.4), "FLp": 0.8, "FRp": 0.8, "LP": (-0.3, 0.45, 0.72)}
     a2 = {"prt": (0.3, 0.2, 0), "tor": (0.3, 0.1, 0), "hed": (-0.5, 0, 0), "FL": (-0.15, 0.22, 0.3), "FR": (0.16, 0.14, 0.26), "FLp": -0.2, "FRp": -0.2}
     out.append(C("exdash", 0.5, [(0.0, a0), (0.05, a1, "out"), (0.22, {"prt": (1.0, 0.42, 0.14)}, "lin"), (0.32, a2), (0.5, {"pel": (0, 0, -0.03)})]))
-    # Warchain: the sword arm whips the chain out from the wrist: a sidearm crack, the blade held out of the way
+    # Short Leash: the sword arm whips the chain out from the wrist: a sidearm crack, the blade held out of the way
     th0 = {"pel": (0, -0.04, -0.09), "prt": (0.05, -0.35, 0), "tor": (0, -0.5, 0.1), "hed": (-0.1, 0.8, 0), "G": (0.44, -0.2, 0.96), "BE": be(-170, 34, (0, 0, 1)),
            "LP": (-0.2, 0.3, 0.92), "fing": 0.3, "brow": 1.0, "lid": 0.2}
     th1 = {"pel": (0, 0.1, -0.13), "prt": (0.3, 0.4, 0), "tor": (0.28, 0.5, -0.1), "hed": (-0.42, -0.72, 0), "G": at(-16, 0.72, 1.0), "BE": be(-26, -6, (0, 0, 1)),
@@ -335,7 +335,7 @@ def clips():
     r2 = dict(r1)
     r2.update({"pel": (0.01, 0.05, 0.075), "FR": (0.16, -0.34, 0.33), "FL": (-0.14, -0.14, 0.24)})
     out.append(C("reel", 0.65, [(0.0, {"G": at(-14, 0.66, 0.98), "BE": be(-26, -6, (0, 0, 1))}), (0.08, r1, "out"), (0.25, r2), (0.4, r1), (0.53, r2), (0.65, r1)]))
-    # Cinder Spin: blade flung out wide, the body turns twice
+    # Full Circle: blade flung out wide, the body turns twice
     sp0 = {"pel": (0, 0, -0.14), "prt": (0.15, 0, 0), "tor": (0.12, 0, 0), "hed": (-0.2, 0, 0), "G": at(-55, 0.62, 0.92), "BE": be(-74, -2, (0, 0, 1)),
            "Lw": 1.0, "FL": (-0.22, 0.08, A_Z), "FR": (0.22, -0.08, A_Z), "fing": 1, "brow": 1, "lid": 0.2}
     sp1 = dict(sp0)
@@ -353,7 +353,7 @@ def clips():
     hs = {"pel": (0, 0.14, -0.3), "prt": (0.72, 0, 0), "tor": (0.5, 0, 0), "hed": (-1.05, 0, 0), "G": (0.1, 0.68, 0.46), "BE": be(0, -44, (0, 0.7, -0.7)),
           "FL": (-0.24, 0.42, A_Z), "FR": (0.26, -0.3, A_Z), "FLp": 0, "FRp": -0.6, "skirt": 0.5}
     out.append(C("haulslam", 0.7, [(0.0, hw), (0.06, hs, "out"), (0.35, {"pel": (0, 0.12, -0.25)}), (0.7, READY_END)]))
-    # Gilded Riposte: the blade up before him, planted, shivering under the gold; then down and up through them
+    # Blow for Blow: the blade up before him, planted, shivering under the gold; then down and up through them
     gd = {"pel": (0, 0, -0.14), "prt": (0.02, 0, 0), "tor": (0.0, 0, 0), "hed": (-0.04, 0, 0), "G": (0.08, 0.34, 0.92), "BE": be(0, 86, (1, 0, 0)), "Lw": 1.0,
           "FL": (-0.24, 0.16, A_Z), "FR": (0.24, -0.16, A_Z), "brow": 1.0, "lid": 0.12, "fing": 1}
     g2 = dict(gd)

@@ -52,13 +52,13 @@ const HEROES := [
 const MEDIAN_BAR := "roster median"      # source name of a Hunter with no source hero
 
 ## The share table watches one cast this long (s): a damage-a-second source number (Rain of Arrows) is counted
-## over the same window, and Meeko's Burrseed shows its sourced hit, not the burst 2 s after it sticks.
+## over the same window, and Meeko's Stick Around shows its sourced hit, not the burst 2 s after it sticks.
 const HIT_S := 2.0
-const RMB_HOLD := {"archer": 1.1}      # hero -> s its RMB is held before the release (Heavy Shot at full draw)
+const RMB_HOLD := {"archer": 1.1}      # hero -> s its RMB is held before the release (Pin Down at full draw)
 
 ## Casts the share table lists that no combo row uses: hero -> slot -> source damage of one cast, a level 1
 ## tooltip against the level 1 target (the footage LMB is level 9, so these five cannot join a combo). our_hit
-## casts the ult, then waits ULT_WAIT s for a held ult to go off (Rimelock cracks open at 3.5 s; Starpiercer's
+## casts the ult, then waits ULT_WAIT s for a held ult to go off (Freeze Frame cracks open at 3.5 s; Finishing Touch's
 ## three shots).
 const SHARE_ONLY := {
 	"rimewright": {"rmb": 346.0, "x": 155.0},
@@ -203,7 +203,7 @@ func our_hit(arch: String, slot: String) -> float:
 		if slot == "e":
 			_abilities(P, [slot])      # (the recast that sets a planted E off)
 		P.inp["sec_hold"] = t < hold_v
-		P.inp["fire"] = P.ak.ult_running()      # an ult that empowers the next shots (Starpiercer) fires them
+		P.inp["fire"] = P.ak.ult_running()      # an ult that empowers the next shots (Finishing Touch) fires them
 		_tick(m, P, T, f[3])
 		t += DT
 	var share := (OUR_HP - T.hp) / OUR_HP

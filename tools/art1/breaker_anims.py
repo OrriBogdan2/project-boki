@@ -192,14 +192,14 @@ C.bake("shield_boop", 0.36, [(0, GUARD), (0.07, merged(GUARD, pos=(0, -0.03, -0.
 C.bake("guard_armed", 0.35, [(0, CARRY), (0.1, dict(rot=(-5, 0, -8), head=(6, 0, 8), sh=sl(-0.04, 0.22, -0.3), e="out")), (0.35, CARRY)])
 
 # ---------------------------------------------------------------------- Shift
-# 360 Smash (0.75 s): 0.17 s of leaning in, ONE full spin of the whole ball 0.17..0.33, the hammer straight out, then a skid
+# Tideturner (0.75 s): 0.17 s of leaning in, ONE full spin of the whole ball 0.17..0.33, the hammer straight out, then a skid
 OUT_R = dict(gr=sp(0.43, 0.06, 0.0), gd=(1, 0.06, 0.05), ga=(0, 0, 1), er=(0.1, -1, 0.3), fing_r=1.0)
 C.bake("shift_whirl", 0.75, [(0, CARRY),
                              (0.17, merged(OUT_R, pos=(0, 0.03, -0.04), rot=(-12, 0, 28), head=(2, 0, 12), sh=sl(-0.1, 0.26, -0.2), sn=(-0.5, 0.8, 0.1), fr=(AX, -0.08, AZ), fl=(-AX, 0.08, AZ), e="out")),
                              (0.33, dict(rot=(-8, 0, -332), pos=(0, 0.0, -0.03), e="lin")),
                              (0.58, merged(STANCE, rot=(-6, 3, -360), pos=(0, 0, -0.05), gr=sp(0.3, 0.26, -0.15), gd=(0.5, 0.75, -0.3), ga=(0, 0.3, 1), e="out")),
                              (0.75, merged(CARRY, rot=(0, 0, -360)))])
-# Shield Charge (0.6 s): the whole hull thrown behind the door
+# Full Ahead (0.6 s): the whole hull thrown behind the door
 CH = merged(GUARD, pos=(0, 0.06, -0.05), rot=(-22, 0, -2), head=(16, 0, 2), sh=sl(-0.3, 0.44, -0.3), fr=(AX, -0.11, AZ), fl=(-AX, 0.09, AZ), fra=-16.0)
 C.bake("shift_charge", 0.6, [(0, CARRY), (0.16, merged(CH, e="out")), (0.34, dict(rot=(-24, 0, -2), fr=(AX, 0.09, AZ + 0.03), fl=(-AX, -0.1, AZ), fla=-16.0, fra=0.0)), (0.6, GUARD)])
 C.bake("dash_short", 0.25, [(0, CARRY), (0.1, dict(pos=(0, 0.03, -0.03), rot=(-16, 0, 0), fr=(AX, -0.1, AZ), fl=(-AX, 0.1, AZ), fra=-12.0, e="out")), (0.25, CARRY)])
@@ -212,14 +212,14 @@ C.bake("shield_slam", 0.85, [(0, GUARD), (0.25, merged(GUARD, pos=(0, -0.05, -0.
                              (0.33, merged(GUARD, pos=(0, 0.1, -0.05), rot=(-24, 0, 22), sh=sl(-0.36, 0.46, -0.3), fr=(AX, -0.12, AZ), fl=(-AX, 0.11, AZ), fra=-18.0, e="snap")),
                              (0.55, dict(rot=(-20, 0, 18))), (0.85, CARRY)])
 
-# ---------------------------------------------------------------------- E, Mending Ground: the drum lifted and set down gently
+# ---------------------------------------------------------------------- E, Safe Harbour: the drum lifted and set down gently
 C.bake("e_mend", 0.95, [(0, CARRY),
                         (0.16, dict(rot=(5, 0, 0), head=(-10, 0, 0), gr=sp(-0.02, 0.26, -0.06), gd=(0, 0.3, 0.95), ga=(0, 0.95, -0.3))),
                         (0.26, dict(pos=(0, 0.03, -0.05), rot=(-16, 0, 4), head=(10, 0, 0), gr=sp(-0.04, 0.42, -0.42), gd=(0.05, 0.1, -1), ga=(0, 1, 0.1), e="out")),
                         (0.45, dict(pos=(0, 0.03, -0.05), rot=(-15, 0, 4))),
                         (0.95, CARRY)])
 
-# ---------------------------------------------------------------------- X, Faultline
+# ---------------------------------------------------------------------- X, Groundswell
 UW = merged(WIND, pos=(0, 0, -0.04), rot=(12, 0, 0), head=(-10, 0, 0), gr=sp(-0.04, -0.06, 0.43), gd=(-0.1, -0.5, 0.85), ga=(0, 0.85, 0.5), er=(1, 0, 0.1),
             sh=sl(0.06, 0.06, -0.32), fr=(AX + 0.03, -0.05, AZ), fl=(-AX - 0.02, 0.06, AZ))
 # the hop (BjornUlt.leap_y; the game lifts him 1.2 m): a crouch, legs tucked with the hammer high overhead, a hang

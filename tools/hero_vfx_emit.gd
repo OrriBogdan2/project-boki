@@ -20,25 +20,25 @@ const EMITTERS := {
 	[
 		["LMB slash", "blade_tip", "hand.R"],
 		["RMB Smash", "blade_tip", "hand.R"],
-		["E Warchain throw", "hand_chain", "hand.R"],
-		["E Warchain line", "node:anchor_chain", "hand.R"],
-		["X Gilded Riposte", "blade_tip", "hand.R"]
+		["E Short Leash throw", "hand_chain", "hand.R"],
+		["E Short Leash line", "node:anchor_chain", "hand.R"],
+		["X Blow for Blow", "blade_tip", "hand.R"]
 	],
 	"archer":
 	[
 		["LMB arrow", "bow_root", "bow"],
-		["RMB Heavy Shot nock", "nock", "bow_s"],
-		["E Hail Wall", "bow_root", "bow"],
-		["X Starpiercer", "bow_root", "bow"]
+		["RMB Pin Down nock", "nock", "bow_s"],
+		["E Hemline", "bow_root", "bow"],
+		["X Finishing Touch", "bow_root", "bow"]
 	],
 	"ashwick":
 	[
 		["LMB lance (right palm)", "nozzle", "hand.R"],
-		["RMB Cinder Shot", "nozzle", "hand.R"],
+		["RMB Spitfire", "nozzle", "hand.R"],
 		["left palm", "node:weapon_muzzle_l", "hand.L"],
-		["E Furnace Cloak", "chest", "hips"],
-		["X Flue Flight jet L", "heel_l", "jet.0"],
-		["X Flue Flight jet R", "heel_r", "jet.1"]
+		["E Molten Hug", "chest", "hips"],
+		["X Red Carpet jet L", "heel_l", "jet.0"],
+		["X Red Carpet jet R", "heel_r", "jet.1"]
 	],
 	"bulwark":
 	[
@@ -48,9 +48,9 @@ const EMITTERS := {
 	],
 	"tender":
 	[
-		["RMB Burrseed", "lantern", "sun"],
+		["RMB Stick Around", "lantern", "sun"],
 		["E Hearthlight", "lantern", "sun"],
-		["X Hearth Call", "lantern", "sun"],
+		["X Rise and Shine", "lantern", "sun"],
 		["dash", "chest", "hips"]
 	]
 }

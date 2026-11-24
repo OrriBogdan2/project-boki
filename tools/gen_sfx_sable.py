@@ -3,7 +3,7 @@
     python3 tools/gen_sfx_sable.py      (then: godot --headless --import)
 
 Her voice is quick, light and silver: flintlock cracks (a flint snap, the pan's flash, then the shot and its
-smoke), whirled chain bolas, a thrown dagger, a shadow blink, a storm of blades for her Encore. A light woman's
+smoke), whirled chain bolas, a thrown dagger, a shadow blink, a storm of blades for her Last Dance. A light woman's
 wordless voice; soft leather boots with a faint jingle of stolen silver.
 Original synthesis, no samples.
 """
@@ -118,7 +118,7 @@ def dash(i):
                flutter * env(N(0.36), 0.03, 0.12) * 0.35, at(land, 0.3))
 
 
-# ------------------------------------------------------------------ RMB: the Bola
+# ------------------------------------------------------------------ RMB: the Dark Bola
 def chain_clinks(d, times, lo=2300, hi=4800, g=0.35):
     out = np.zeros(N(d))
     for tt in times:
@@ -161,7 +161,7 @@ def bola_stun(i):
     return mix(taut, at(thuds, 0.02), at(S.rattle(0.25, 80, 2200, 5000, decay=0.07) * 0.3, 0.02), daze)
 
 
-# ------------------------------------------------------------------ E: the Shadow Knife
+# ------------------------------------------------------------------ E: the White Flash
 def knife_throw(i):
     shing = mix(S.sweep(3100, 3600, 0.12) * env(N(0.12), 0.004, 0.035) * 0.22,
                 ring((3350, 4720), 0.12, (0.04, 0.025), (0.12, 0.06)))
@@ -195,7 +195,7 @@ def heal(i):
     return mix(arp, rise, pad_)
 
 
-# ------------------------------------------------------------------ X: Encore
+# ------------------------------------------------------------------ X: Last Dance
 def shing(f, g=1.0):
     d = 0.35
     blade = S.sweep(f, f * 1.25, d) * env(N(d), 0.004, 0.09)
@@ -298,7 +298,7 @@ def step(surface, i):
 
 # ------------------------------------------------------------------ the cues each ability lacked (VFX_QUALITY Snd)
 def knife_whisk(i):
-    """The Shadow Knife in flight (`thief_knife_whisk`): a light blade spinning away, a thin whisk on every turn,
+    """The White Flash in flight (`thief_knife_whisk`): a light blade spinning away, a thin whisk on every turn,
     each a touch lower and fainter as it goes (0.38 s, its flight to full range)."""
     d = 0.38
     turns = mix(*[at(swish(0.06, 1900 - 90 * k, 5200 - 200 * k, 6.0) * (1.0 - 0.15 * k), 0.055 * k) for k in range(6)])
@@ -317,7 +317,7 @@ def knife_ground(i):
 
 
 def shadow_whisk(i):
-    """The Shadow Knife's step behind a foe (`thief_shadow_whisk`): her light blade drawn twice through the air,
+    """The White Flash's step behind a foe (`thief_shadow_whisk`): her light blade drawn twice through the air,
     quick and close, and a silver glint. Replaces the shared swipe."""
     d = 0.3
     w1 = swish(0.09, 1500, 4800, 5.0)
@@ -344,7 +344,7 @@ def bola_tie(i):
 
 
 def encore_end(i):
-    """Encore running out (`thief_encore_end`): the blades slow, three soft shings falling in pitch as they fold
+    """Last Dance running out (`thief_encore_end`): the blades slow, three soft shings falling in pitch as they fold
     away, a sheath click. A quiet end, never a burst (the ring fades)."""
     d = 0.7
     slow, _ = am_whirl(0.45, 12, 4, 800, 3800, 3.0)

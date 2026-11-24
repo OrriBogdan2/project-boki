@@ -8,18 +8,18 @@ extends ArchKit
 ## - LMB: the scattergun (the weapon's own firing): seven slugs in one tight group that stop and hang at
 ##   6.3m; one aim line on the ground follows the cursor; the body rocks back on each shot.
 ##   At dash rank 3 pellet hits trim the barge recharge.
-## - RMB, Deep Reach: his mutated arm stretches out, a bone hook at its end, piercing terrain to the first body
+## - RMB, Sticky Fingers: his mutated arm stretches out, a bone hook at its end, piercing terrain to the first body
 ##   (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he stands braced
 ##   while he reels (Grounded, a slow shuffle that swings the body), and only the barge works. Rank 3: a foe hit
 ##   takes half the cooldown off.
-## - E, Anchor Drop: a thin outline of the cone on the ground through a short wind-up (he can walk slowly) while
+## - E, Lump Sum: a thin outline of the cone on the ground through a short wind-up (he can walk slowly) while
 ##   a giant translucent fist falls into it (HeroVfx "anchor_fist"), then the slam hits the cone in front: a long
 ##   stun. In the air you smash straight down, the anchor lands with you, a ring at the landing, and the height
 ##   adds damage. Rank 3: double damage on a foe over the abyss and a longer stun.
 ##   Just after it the barge turns badly.
-## - Dash, Barge: a monster's low lunge the way you move, clawing the ground and hauling himself along; it
+## - Dash, Mad Dash: a monster's low lunge the way you move, clawing the ground and hauling himself along; it
 ##   touches nobody. A pounce in the air, further.
-## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
+## - X, Both Barrels (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
 const SLUDGE := Color("5a4414")        # the dark-brass drips off the arm
@@ -52,9 +52,9 @@ var drip_at := 0.0              # the next sludge drip
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
 var wind := 0.0                 # hold: the Anchor's wind-up left
-var e_queued := false           # E pressed while reeling a foe: the Anchor Drop goes the moment it arrives, at it
-var e_at := Vector2.ZERO        # (cast_e) the direction a queued Anchor Drop locks to: the hauled foe
-var e_plant := false            # a queued Anchor Drop winding up: he stands planted over the hauled foe
+var e_queued := false           # E pressed while reeling a foe: the Lump Sum goes the moment it arrives, at it
+var e_at := Vector2.ZERO        # (cast_e) the direction a queued Lump Sum locks to: the hauled foe
+var e_plant := false            # a queued Lump Sum winding up: he stands planted over the hauled foe
 var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the telegraph is that exact cone)
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
@@ -66,7 +66,7 @@ var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
 var shot_seen := 0              # the last weapon volley the kit dressed
 var armor_shreds := 0           # (tests) hits that shredded armor
-var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
+var broadside: DredgeBlast      # X, Both Barrels (its charge and waves are a hold: broadside.blast)
 var grapples := 0               # (tests) foes reeled in
 var anchors := 0
 var abyss_dunks := 0           # (tests) foes the rank-3 Anchor hit over the abyss
@@ -281,7 +281,7 @@ func _tick_looks(dt: float) -> void:
 		barge_t -= dt
 		_barge_trail(dt)
 
-## Grimble's 3D model: a hit knocks coins off the hoard. His arm IS the Deep Reach: the model's own right arm
+## Grimble's 3D model: a hit knocks coins off the hoard. His arm IS the Sticky Fingers: the model's own right arm
 ## reaches to `arm_tip` (WardenReach), so the hand that grabs is his slime hand and bone crescent.
 func _tick_model(_dt: float) -> void:
 	if h.model:
@@ -318,7 +318,7 @@ func sound_tick(dt: float) -> void:
 		net_tip = Vector3.INF
 	h.model.set_meta(WardenReach.TIP, net_tip)
 
-# ------------------------------------------------------------------ RMB: Deep Reach
+# ------------------------------------------------------------------ RMB: Sticky Fingers
 func fire_rmb(c: Dictionary) -> void:
 	c["variant"] = "tap"
 	last_variant = "tap"
@@ -538,7 +538,7 @@ func _end_pull(arrived: bool) -> void:
 		e_at = Vector2.ZERO
 		e_plant = wind > 0.0
 
-# ------------------------------------------------------------------ E: Anchor Drop
+# ------------------------------------------------------------------ E: Lump Sum
 func cast_e() -> bool:
 	if wind > 0.0 or not pull.is_empty() or not dive.is_empty() or broadside.running():
 		return false
@@ -748,7 +748,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	lock_until = m.time + float(dash_def()["lock_t"])
 	net_ring(at, r, col_of(ed))
 
-# ------------------------------------------------------------------ dash: Barge
+# ------------------------------------------------------------------ dash: Mad Dash
 ## Shift barges at once, whatever he is doing (the barge works even while he reels). Out of the Anchor's wind-up,
 ## its air smash or the Broadside that move runs on and keeps its pose: the fist stays raised and slams where the
 ## barge arrives, the smash rides the pounce and drops from where it ends, the fan follows him.
@@ -856,7 +856,7 @@ func _clawed_turf(dir: Vector2) -> void:
 	var at := h.pos + Vector3(dir.x * 0.6, 0.15, dir.y * 0.6)
 	m.fx.debris(at, Color("6a5236"), 6, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
 
-# ------------------------------------------------------------------ X: Brass Broadside
+# ------------------------------------------------------------------ X: Both Barrels
 ## Not mid-reel, mid-Anchor or mid-dive. While the arm flies out it goes, like E, and the arm flies on: the
 ## source locks only the pull (wiki), not the throw (docs/heroes/dredge.md, Cancels).
 func cast_ult() -> bool:

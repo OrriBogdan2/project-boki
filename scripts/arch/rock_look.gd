@@ -1,6 +1,6 @@
 class_name RockLook
 extends RefCounted
-## What Tarek's raised rocks look like (Stone Row, Basalt Spine; owner item 67): a craggy crown of tapered
+## What Tarek's raised rocks look like (Foothold, Backbone; owner item 67): a craggy crown of tapered
 ## columns in blue slate like his arm, the main one peaking at HeroZones.ROCK_TOP (you stand there), pale sunlit
 ## upward faces that read from the match camera, teal light on the edges, thin teal cracks in the ground at
 ## the foot that cool off, and a soft shadow on the ground. They heave up with dust and a short rumble and,
@@ -29,13 +29,13 @@ const COLS := [
 ]
 
 static var _rumble_at := -9.0
-static var _hush_until := -9.0  # match time: a caster that rumbles for its whole ridge (Basalt Spine) sets it
+static var _hush_until := -9.0  # match time: a caster that rumbles for its whole ridge (Backbone) sets it
 static var _crags: Dictionary = {}  # column index -> [mesh, material], shared by every rock
 const SPARES := "rock_spares"  # the match's meta: rocks done with (crumbled, launched), hidden, for the next take
 
 
 ## A rock for HeroZones.rock under `m`: a spare one made fresh again, else built now. Spares are built at match
-## load (prewarm: a Stone Row built 57 meshes in one frame, --first-cast-check) and come back through park.
+## load (prewarm: a Foothold built 57 meshes in one frame, --first-cast-check) and come back through park.
 static func take(m: Node) -> Node3D:
 	var spares := _spares(m)
 	while not spares.is_empty():

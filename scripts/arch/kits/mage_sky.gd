@@ -1,6 +1,6 @@
 class_name MageSky
 extends RefCounted
-## Sparkle's Skycall (E) and what it does to her charge orbs. docs/heroes/mage.md has the numbers.
+## Sparkle's Undercurrent (E) and what it does to her charge orbs. docs/heroes/mage.md has the numbers.
 ##
 ## Press drops the circle at the cursor; while E is held the drag follows the cursor from the circle; the
 ## release commits ONE vector (the drag, or the away-from-her default when it is tiny) and every foe and orb
@@ -13,7 +13,7 @@ const SKY_HOLD_AT := 0.9      # s into the sky clip: its arm-up pose (keys 0.5-1
 const ARROW_LEN := 1.3       # of the circle radius: the committed arrow inside the circle
 
 var kit: MageKit
-var bound := {}                 # foe instance id -> [foe, seconds left]: Skycall's Grounded, held by two pink rings
+var bound := {}                 # foe instance id -> [foe, seconds left]: Undercurrent's Grounded (two pink rings)
 
 func _init(owner_kit: MageKit) -> void:
 	kit = owner_kit
@@ -38,7 +38,7 @@ func cast() -> bool:
 	kit.play("mage_e")
 	return true
 
-## Skycall is held to drag (the data: "HOLD AND DRAG before release to aim"): the key read here for the local
+## Undercurrent is held to drag (the data: "HOLD AND DRAG before release to aim"): the key read here for the local
 ## player, inp["e_down"] for tests and scripted demos. Bots never hold (a tap: the default drag).
 func _held() -> bool:
 	if bool(kit.h.inp.get("e_down", false)):
@@ -79,7 +79,7 @@ func tick(dt: float) -> void:
 			kit.strikes.erase(s)
 			_strike(s)
 
-## Skycall's Grounded wears the look of every Grounded source (the Thief's Bola, docs/heroes/thief.md): two binding
+## Undercurrent's Grounded wears the look of every Grounded source (the Thief's Bola, docs/heroes/thief.md): two binding
 ## rings round the legs, one dashed, drawn for everyone, in her colour (the body's cords and arrow take it too:
 ## KitStatus "gnd_by", StatusLooks). They end with the Grounded, cut short or run out.
 func _tick_bound(dt: float) -> void:

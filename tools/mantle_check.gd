@@ -366,7 +366,7 @@ const STALL_MAX := 0.1                      # s stood still at a face you do cli
 ## case: what happened (mantle, step up, stop, slide, bounce), the time from the press to standing on top,
 ## the time stood still at the face, the time lost against the same press with no rim in the way, and the
 ## speed you leave the face with. Ground rims come in whole terraces (0.8 m): a ground row builds the
-## terrace nearest its height. Lace's Shift with charges is the Spirit Walk (it climbs faces by design), so
+## terrace nearest its height. Lace's Shift with charges is the Slip Stitch (it climbs faces by design), so
 ## her rows are her travel dash, the flick.
 func _dash_rims() -> void:
 	var wl: Dictionary = _carve_walls(1)[0]

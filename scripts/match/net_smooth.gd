@@ -4,7 +4,7 @@ extends RefCounted
 ## curve between the two snapshots around that moment (cubic Hermite through their positions and
 ## velocities), so late, jittered or lost snapshots don't make it stutter or overshoot. A move between
 ## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump, unless the
-## velocities the two snapshots report account for it (a kit's scripted dive, like Kitefall's fall).
+## velocities the two snapshots report account for it (a kit's scripted dive, like Stormfall's fall).
 ## Times are the owner's match time from the "st" header; `off` is our match time minus theirs plus the
 ## line's delay, taken from the quickest recent arrival. The margin on top of one snapshot gap follows how
 ## late recent snapshots came against that quickest one (a jitter buffer), so a jittery long line (two hops

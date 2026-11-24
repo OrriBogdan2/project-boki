@@ -147,7 +147,7 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
-## Is the kit holding its own hero still (Neve's Rimelock statue)? That root is the move itself, so the
+## Is the kit holding its own hero still (Neve's Freeze Frame statue)? That root is the move itself, so the
 ## HUD shows no ROOTED icon or timer for it (HudPlate.statuses).
 func holds_still() -> bool: return false
 ## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
@@ -329,7 +329,7 @@ func turn_lock(cur: Vector2, deg_s: float, dt: float) -> Vector2:
 	return cur.rotated(clampf(cur.angle_to(want), -step, step))
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
-## A fresh glide press in the air: the kit's own flight lets go for the glider (Rock Hop). True = it ended now.
+## A fresh glide press in the air: the kit's own flight lets go for the glider (Leap of Faith). True = it ended now.
 func glide_cancel() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
@@ -1012,7 +1012,7 @@ func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true
 
 # ------------------------------------------------------------------ payoffs and state tells (shared)
-# The Thief (Cash In) and the Juggernaut (Rage Smash) set the bar: a kit builds a resource, the
+# The Thief (Cash In) and the Juggernaut (Final Swing) set the bar: a kit builds a resource, the
 # hunter visibly changes when its payoff is armed, and the payoff lands with a named word, T4
 # hitstop (the hit carries payoff: true), a T4 shake, its own sound, VFX and a camera punch. The
 # helpers below give the Archer, Mage, Gunslinger and Bulwark the same language.

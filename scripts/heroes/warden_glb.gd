@@ -173,7 +173,7 @@ const SHIELD := "shield"  # a shield modelled in the left hand's Shield node's s
 
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire);
 ## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide); a hanging wing (Sable's moth wings)
-## raises up behind her instead, set by WardenWings (idle, air, emote, the Vault's flips and the Encore).
+## raises up behind her instead, set by WardenWings (idle, air, emote, the Vault's flips and the Last Dance).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"  # an empty on a skinned weapon: the frame of the piece that leaves the hand
 

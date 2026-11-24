@@ -1,10 +1,10 @@
 extends RefCounted
-## Sable's Vault loop and Bola (OWNER_REVIEW_1103 item 53), run inside --dancer-combo-check: five chained
+## Sable's Vault loop and Dark Bola (OWNER_REVIEW_1103 item 53), run inside --dancer-combo-check: five chained
 ## Vault -> empowered hit cycles all reset, each with a different flip from the last; no Shift press is lost in
 ## a fast loop; a single caught foe is Grounded and slowed, a pair stays stunned.
 
 const CYCLES := 5
-const BOLA_SLOW := 0.3       # the owner's default: the Bola's slow, over the Ground's 1.5s
+const BOLA_SLOW := 0.3       # the owner's default: the Dark Bola's slow, over the Ground's 1.5s
 var A
 
 func run(a, m: Match, P: Hunter, K: ThiefKit, T: Hunter, T2: Hunter, home: Vector3) -> void:
@@ -172,7 +172,7 @@ func _bola(m: Match, P: Hunter, K: ThiefKit, T: Hunter, T2: Hunter, home: Vector
 			seen["gnd"] = true
 			seen["slow"] = maxf(float(seen["slow"]), T.slow_t)
 			seen["mult"] = T.slow_mult(0.5))
-	A.ok("dancer Bola: one foe caught is Grounded and slowed 30% for the Ground's 1.5s, no stun",
+	A.ok("dancer Dark Bola: one foe caught is Grounded and slowed 30% for the Ground's 1.5s, no stun",
 			bool(seen["gnd"]) and absf(float(seen["slow"]) - 1.5) < 0.2 and float(seen["stun"]) <= 0.0
 			and absf(float(seen["mult"]) - (1.0 - BOLA_SLOW)) < 0.01, str(seen))
 	_calm(m, P, K, T, home, 4.0)
@@ -183,7 +183,7 @@ func _bola(m: Match, P: Hunter, K: ThiefKit, T: Hunter, T2: Hunter, home: Vector
 	var pairs0 := K.bola_pairs
 	K.press_rmb()
 	A.step(m, 0.9)
-	A.ok("dancer Bola: a pair in a line stays the stun and bonus damage", K.bola_pairs == pairs0 + 1
+	A.ok("dancer Dark Bola: a pair in a line stays the stun and bonus damage", K.bola_pairs == pairs0 + 1
 			and T.stun_t > 0.0 and T2.stun_t > 0.0 and A.dmg(T) >= 9.0, "dmg %.1f" % A.dmg(T))
 	T2.teleport(home + Vector3(-30.0, 0, 0))
 	A.fresh(T)

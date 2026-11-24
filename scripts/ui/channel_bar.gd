@@ -1,6 +1,6 @@
 class_name ChannelBar
 extends RefCounted
-## "Meeko is protecting you": while an ally's Hearth Call channels on you, a slim bar with her portrait sits
+## "Meeko is protecting you": while an ally's Rise and Shine channels on you, a slim bar with her portrait sits
 ## under your vitals and drains over the channel's length; it is gone the frame the channel ends or breaks.
 ## The caster's game reads its kit; every other game gets the target and the seconds left from the hunter
 ## snapshot (HunterNet), so the ally sees it online too. Check: --hudref-check (and the online row of

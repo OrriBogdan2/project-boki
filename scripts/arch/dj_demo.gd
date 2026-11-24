@@ -236,7 +236,7 @@ static func chain(P: Hunter, t: float, dt: float) -> void:
 	var after := fmod(t - 0.5, 0.85)
 	P.inp["fire"] = t > 0.5 and after > 0.5 and after < 0.53
 
-## The Warchain's pull with a steer: hooked from 10m, pulled in while holding a sideways key.
+## The Short Leash's pull with a steer: hooked from 10m, pulled in while holding a sideways key.
 static func pull_steer(P: Hunter, K: ArchKit, D: Hunter, t: float, dt: float) -> void:
 	if t < 0.4: P.teleport(Vector3(D.pos.x - 10.0, P.pos.y, D.pos.z))
 	if at(t, dt, 0.45):

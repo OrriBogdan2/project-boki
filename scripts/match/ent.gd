@@ -63,7 +63,7 @@ var bump_top := 0.0  # top of what the last slide() ran into (KnockWall.tall: a 
 
 ## Called every rendered frame. alpha blends between the last two simulation steps.
 var lod_dt := 0.0  # frame time a far-away entity's visuals skipped (Match renders it less often)
-var wash := 0.0  # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
+var wash := 0.0  # 0..1: the body mixes toward wash_col (Lace's Slip Stitch); a hit's white flash wins
 var wash_col := Color.WHITE
 
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
@@ -123,7 +123,7 @@ func over_void() -> bool:
 	var st = m.get("skytrain")
 	if st and st.deck_y(pos, 3.0) > World.VOID + 1.0:
 		return false
-	# a standable rock under the feet is ground (Tarek's Basalt Spine over the abyss)
+	# a standable rock under the feet is ground (Tarek's Backbone over the abyss)
 	return StoneStand.top_under(m.world.dyn_walls, pos, hull_r(), World.VOID) <= World.VOID + 1.0
 
 
@@ -442,7 +442,7 @@ func net_follow(dt: float) -> void:
 	vel = net_vel
 
 
-## Tints the body: the hit flash (white; the shell's cyan while shell_t runs), else the wash (Spirit Walk),
+## Tints the body: the hit flash (white; the shell's cyan while shell_t runs), else the wash (Slip Stitch),
 ## else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
 	var f := hit

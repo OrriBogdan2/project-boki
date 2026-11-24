@@ -147,7 +147,7 @@ def dart_hit(i):
                g(shatter(0.2, 70, 0.03), 0.35))
 
 
-# ------------------------------------------------------------------ RMB: Ice Spear
+# ------------------------------------------------------------------ RMB: Icebreaker
 def spear_aim():
     """The spear crystallising between her palms: crackle gathering, a glass tone rising, frost swelling."""
     d = 0.6
@@ -209,7 +209,7 @@ def splinter(i):
                g(at(frost(0.6, 1500, 5200, 0.02, 0.18), 0.02), 0.35))
 
 
-# ------------------------------------------------------------------ E: Rink Wall
+# ------------------------------------------------------------------ E: Cold Front
 def wall_tell():
     """The 0.2 s tell: ice gathering at her feet, a quick rising crackle over a low groan."""
     d = 0.42
@@ -245,7 +245,7 @@ def freeze():
     return mix(g(sweep_in, 0.6), lock, shimmer, g(at(frost(0.5, 1500, 5000, 0.02, 0.15), 0.22), 0.35))
 
 
-# ------------------------------------------------------------------ X: Rimelock
+# ------------------------------------------------------------------ X: Freeze Frame
 def lock():
     """Sealed in ice: frost races over her, the shell closes with a muffled thud, a breath of her voice inside."""
     d = 1.3
@@ -269,7 +269,7 @@ def creak(i):
 
 
 def crash():
-    """Rimelock cracks open: the biggest blast in her kit, the shell exploding into shards, a long cold tail."""
+    """Freeze Frame cracks open: the biggest blast in her kit, the shell exploding into shards, a long cold tail."""
     d = 2.0
     body = mix(g(kick(140, 36, 1.0, 0.06, 0.26, 2.8), 1.0), g(sub(62, 30, 1.3, 0.4), 0.8))
     cracks = mix(*[at(g(pew(R(2600, 4200), R(200, 380), 0.14), R(0.35, 0.65)), R(0.0, 0.18)) for _ in range(6)])
@@ -282,7 +282,7 @@ def crash():
 
 
 def crack():
-    """Rimelock broken early: the shell just splits and falls apart, no blast."""
+    """Freeze Frame broken early: the shell just splits and falls apart, no blast."""
     d = 0.6
     return mix(g(ice_crack(0.2, 3000, 350), 1.0), g(kick(220, 100, 0.25, 0.02, 0.06, 2.0), 0.6),
                g(shatter(0.5, 120, 0.07), 0.6), g(at(crystal(1480, 0.45, 0.12), 0.02), 0.25))

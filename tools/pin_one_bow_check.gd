@@ -1,6 +1,6 @@
 extends "res://tools/archetype_check.gd"
 ## One bow, one arrow, run from --archer-combo-check (tools/archer_bulwark_combo_check.gd adds the counts): Lace's
-## LMB draw and Heavy Shot hold never run at once. The newer press drops the held draw with no arrow, either order
+## LMB draw and Pin Down hold never run at once. The newer press drops the held draw with no arrow, either order
 ## (docs/heroes/archer.md, Cancels). Prints AKCHECK lines.
 
 ## Both press orders, each against a fresh range.
@@ -21,8 +21,8 @@ func _keys(P: Hunter, T: Hunter, lmb: bool, rmb: bool) -> void:
 	P.inp["sec_hold"] = rmb
 	aim_at(P, T.pos)
 
-## LMB held, then RMB: the draw drops (no arrow, its pose gone), the bow rests while the Heavy Shot is held, a
-## release of LMB then looses nothing, and RMB's release looses the one Heavy Shot.
+## LMB held, then RMB: the draw drops (no arrow, its pose gone), the bow rests while the Pin Down is held, a
+## release of LMB then looses nothing, and RMB's release looses the one Pin Down.
 func _lmb_then_rmb() -> void:
 	var r := setup("archer", 7.0, "", true)
 	var m: Match = r[0]
@@ -45,7 +45,7 @@ func _lmb_then_rmb() -> void:
 	)
 	step(m, 0.6, func(): _keys(P, T, true, true))
 	ok(
-		"one bow LMB>RMB: a still-held LMB doesn't draw while the Heavy Shot is held",
+		"one bow LMB>RMB: a still-held LMB doesn't draw while the Pin Down is held",
 		P.draw_t < 0.0 and K.pin_aim and K.anim_id == "arc_heavy_wind",
 		"draw %.2f aim %s anim %s" % [P.draw_t, K.pin_aim, K.anim_id]
 	)
@@ -54,13 +54,13 @@ func _lmb_then_rmb() -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok(
-		"one bow LMB>RMB: RMB's release looses the one Heavy Shot, no bow arrow",
+		"one bow LMB>RMB: RMB's release looses the one Pin Down, no bow arrow",
 		K.heavy_kicks == kicks0 + 1 and K.ch_rmb < ch0 and K.draw.loosed_at == loosed0,
 		"kicks %d charges %.1f -> %.1f" % [K.heavy_kicks - kicks0, ch0, K.ch_rmb]
 	)
 	await done(m)
 
-## RMB held into the Heavy Shot's draw, then LMB: the hold drops (no shot, no charge spent, its bar and pose
+## RMB held into the Pin Down's draw, then LMB: the hold drops (no shot, no charge spent, its bar and pose
 ## gone), the bow draws, a still-held RMB starts nothing, and LMB's release looses one bow arrow.
 func _rmb_then_lmb() -> void:
 	var r := setup("archer", 7.0, "", true)
@@ -73,13 +73,13 @@ func _rmb_then_lmb() -> void:
 	P.inp["sec_hold"] = true
 	K.press_rmb()
 	step(m, 0.6, func(): _keys(P, T, false, true))
-	ok("one bow RMB>LMB: the Heavy Shot is held first", K.rmb_down and K.pin_aim, K.anim_id)
+	ok("one bow RMB>LMB: the Pin Down is held first", K.rmb_down and K.pin_aim, K.anim_id)
 	var ch0 := K.ch_rmb
 	var kicks0 := K.heavy_kicks
 	var loosed0 := K.draw.loosed_at
 	step(m, 0.5, func(): _keys(P, T, true, true))
 	ok(
-		"one bow RMB>LMB: the LMB press drops the Heavy Shot with no shot and no charge spent",
+		"one bow RMB>LMB: the LMB press drops the Pin Down with no shot and no charge spent",
 		not K.rmb_down and not K.pin_aim and not AimKit.shown(P, "rmb_bar") and K.ch_rmb == ch0
 			and K.heavy_kicks == kicks0 and K.anim_id != "arc_heavy_wind",
 		"rmb %s aim %s charges %.1f -> %.1f anim %s" % [K.rmb_down, K.pin_aim, ch0, K.ch_rmb, K.anim_id]

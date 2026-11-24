@@ -1,5 +1,5 @@
 extends RefCounted
-## --neve-shots --shots-dir=<dir> [--no-lod]: Neve's Rink Wall and Rimelock in a real Match at the match camera,
+## --neve-shots --shots-dir=<dir> [--no-lod]: Neve's Cold Front and Freeze Frame in a real Match at the match camera,
 ## frame by frame: wall_00.. as the wall erupts, slides and widens, then rime_00.. as her body turns to ice,
 ## the rink builds and the crash comes. Before/after proofs for the owner's playtest notes. Needs a renderer.
 
@@ -7,7 +7,7 @@ const DT := 1.0 / 60.0
 const WALL_FRAMES := [0.1, 0.3, 0.6, 1.2, 2.0, 3.0, 3.8]      # s after the E press
 const RIME_FRAMES := [0.05, 0.12, 0.25, 0.8, 2.0, 3.3, 3.55, 3.7]  # s after the X press (crash at 3.5)
 const WALL_AT := 7.0            # m ahead the cursor sits for the wall: in frame at gameplay zoom
-const RIME_ZOOM := 0.45         # camera zoom for the Rimelock frames: close enough to see her body
+const RIME_ZOOM := 0.45         # camera zoom for the Freeze Frame frames: close enough to see her body
 const WALL_ZOOM := 0.55         # camera zoom for the wall frames: the slab and pillars readable
 
 var main: Node

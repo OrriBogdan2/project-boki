@@ -6,7 +6,7 @@ extends "res://tools/displace_net_check.gd"
 ## HunterAnim move within LAG_TOL, and play nothing the host did not. CUTS: holds cancelled mid-move. Both games log
 ## every change of the
 ## move (the kit's id and HunterAnim's), compared per cast. Vex's tapped RMB also
-## compares the ground cone her Burr Charge shows stuck on a wall (a row of rock tiles 4 m out on the host only;
+## compares the ground cone her Coin Blast shows stuck on a wall (a row of rock tiles 4 m out on the host only;
 ## the "cone" fx, Net 0.24.5): the guest's copy must draw it as long as the host's.
 ## Then the lair bosses (Net 0.24.6's "bat" event): the
 ## host wakes a Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a
@@ -14,7 +14,8 @@ extends "res://tools/displace_net_check.gd"
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Every AimKit `all` telegraph the host's hunter draws in a cast must show on the guest under its copy too
 ## (AimNet, Net 0.24.6), asserted once per shape kind.
-## Grimble's Deep Reach (Net 0.24.20): the host's Grimble hooks the guest's hunter and reels them in; on the guest his
+## Grimble's Sticky Fingers (Net 0.24.20): the host's Grimble hooks the guest's hunter and reels them in; on the guest
+## his
 ## arm (the model's WardenReach.TIP) reaches out, as far, within a snapshot of the host's, and no plain shot flies.
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts. The registry splits the run into four flags
 ## (tools/checks/net.gd: --remote-anim-1/2/3-check cast a third of ARCHS each, --remote-anim-rest-check the bosses, the
@@ -30,7 +31,7 @@ const SKEW := 0.05  # s: clocks of two processes on one machine
 const NET_SNAP_TOL := 0.08  # s: a re-time on the copy is the host's to within the age snap plus a frame
 const SETTLE := 1.6  # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8  # s a held key stays down
-const WALK := 3.6  # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
+const WALK := 3.6  # s more after Lace's Slip Stitch starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
 const WASH_ON := 0.15  # the body tint (Ent.wash) counts as showing above this
 const REST := "rest"  # the shard with the bosses, the re-time and the reach row (no Hunter casts)
 const SHARDS := 3  # Hunter shards "1".."3": each casts its third of ARCHS
@@ -66,7 +67,7 @@ const ARCHS := [
 	"thief"
 ]
 
-## Holds a kit cancels by clearing its move id (Albert's raised shield, Lace's Heavy Shot draw, Kael's Lunge
+## Holds a kit cancels by clearing its move id (Albert's raised shield, Lace's Pin Down draw, Kael's Lunge
 ## wind-up): held CUT_AT s, then cut as a Boki merge cuts them (MergeAugment), the key let go after.
 const CUTS := ["archer rmb", "bulwark rmb", "juggernaut rmb"]
 const CUT_AT := 0.6  # s: past every RMB hold threshold (0.1-0.3 s) plus a snapshot, so the hold move shows
@@ -475,7 +476,7 @@ func _cast(_g: Hunter, arch: String, key: String, held: bool, cut := false) -> v
 	print("%s %s  %d moves, worst lag %.2f s" % [tag, what, cmp["moves"], cmp["lag"]])
 
 
-## Grimble's Deep Reach on the guest: the host's Grimble hooks the guest's hunter 6 m out and reels them in.
+## Grimble's Sticky Fingers on the guest: the host's Grimble hooks the guest's hunter 6 m out and reels them in.
 func _reach_row(g: Hunter) -> void:
 	var p := m.player
 	p.reclass(Arch.weight("dredge"), "dredge")
@@ -510,11 +511,11 @@ func _reach_row(g: Hunter) -> void:
 			and lag_in < LAG_TOL
 			and absf(lag_out) < LAG_TOL
 		),
-		"Grimble's Deep Reach: on the guest his arm reaches and holds as on the host",
+		"Grimble's Sticky Fingers: on the guest his arm reaches and holds as on the host",
 		"host %.2f m, guest %.2f m, in +%.2f s, out %+.2f s, arrivals %d" % [len_h, len_g, lag_in, lag_out, arrived]
 	)
 	var their_balls := int(replies[0].get("balls", -1)) if not replies.is_empty() else -1
-	ok(their_balls == 0, "Grimble's Deep Reach: the guest draws no plain shot for his hook", "%d" % their_balls)
+	ok(their_balls == 0, "Grimble's Sticky Fingers: the guest draws no plain shot for his hook", "%d" % their_balls)
 	var out_h := int(reach.get("to", 0)) - int(reach.get("from", 0))
 	var out_g := int(theirs.get("to", 0)) - int(theirs.get("from", 0))
 	print("%s reach host %.2f m %d ms, guest %.2f m %d ms" % [tag, len_h, out_h, len_g, out_g])
@@ -584,7 +585,7 @@ func _tele_ok(what: String, theirs: Dictionary) -> void:
 		print("%s %s  telegraphs: %s (guest shows %d)" % [tag, what, ", ".join(ids), theirs.size()])
 
 
-## Lace's Spirit Walk darkens her body on both games: on within LAG_TOL of the host's, and off again within
+## Lace's Slip Stitch darkens her body on both games: on within LAG_TOL of the host's, and off again within
 ## LAG_TOL of the host's (the copy's walk is the base length, so it never outstays the walk).
 func _wash_rows_ok() -> void:
 	var h_on := _wash_at(wash_host, true)
@@ -592,7 +593,7 @@ func _wash_rows_ok() -> void:
 	var h_off := _wash_at(wash_host, false)
 	var g_off := _wash_at(wash_guest, false)
 	var detail := "host %s guest %s" % [str(wash_host), str(wash_guest)]
-	ok(h_on >= 0.0 and h_off > h_on + 2.0, "archer: the host's own body tints through the Spirit Walk", detail)
+	ok(h_on >= 0.0 and h_off > h_on + 2.0, "archer: the host's own body tints through the Slip Stitch", detail)
 	ok(g_on >= h_on - SKEW and g_on <= h_on + LAG_TOL, "archer: the guest's copy tints within %.1f s" % LAG_TOL, detail)
 	ok(g_off > g_on + 2.0 and g_off <= h_off + LAG_TOL, "archer: the copy's tint ends with the walk", detail)
 

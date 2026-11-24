@@ -1,13 +1,13 @@
 extends "res://tools/archetype_check.gd"
 ## --wall-stun-check: a foe knocked into each kind of surface, for every source that stuns on a wall hit
-## (Lace's Heavy Shot, Albert's Crush, Burr's cone, Tenzo's punch, Joule's Storm Rod, and a plain knock's
+## (Lace's Pin Down, Albert's Crush, Burr's cone, Tenzo's punch, Joule's Pink Spear, and a plain knock's
 ## slam). Which surfaces stun is settled in docs/KNOCK_WALLS.md; every source goes through KnockWall.
 ## Prints AKCHECK lines: stun, damage and the frame the stun starts on (counted from the first damage).
 
 const SURFACES := ["cliff", "tier step", "rock", "rimewall", "crate", "breakable", "hunter"]
 const SOURCES := ["archer", "bulwark", "gunslinger", "dolm", "mage", "knock"]
 ## Settled: a tall wall of any kind stuns; ground a body walks up, soft props and decks do not. Another
-## Hunter stuns only for the Storm Rod (the source says "wall or another target" for the spear alone).
+## Hunter stuns only for the Pink Spear (the source says "wall or another target" for the spear alone).
 const WALLS := ["cliff", "rock", "rimewall"]
 const GAP := 2            # tiles between the foe's tile and the surface
 const FRAMES := 90
@@ -56,7 +56,7 @@ func _source(src: String) -> void:
 		var placed_ok := wi.placed - decals0 == (1 if s in WALLS else 0)
 		if s in WALLS and placed_ok:
 			placed_ok = at.x > face - 0.3 and at.x < face + 1.0 and absf(at.z - spot.z) < 1.0
-			# facing out of the wall: the normal is the knock's, and Lace's Heavy Shot leaves her bow, off her centre
+			# facing out of the wall: the normal is the knock's, and Lace's Pin Down leaves her bow, off her centre
 			placed_ok = placed_ok and wi.last_normal.dot(Vector3(-1, 0, 0)) > cos(deg_to_rad(5.0))
 		ok("decal %s > %s" % [src, s], placed_ok, "decals %d at %s" % [wi.placed - decals0, at])
 	await done(m)

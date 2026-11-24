@@ -19,10 +19,10 @@ extends ArchKit
 const LIME := Color("b8f03c")  # palette "main", her signature (Arch.color)
 const HOT := Color("eaffa8")  # palette "hot"
 const DEEP := Color("4f8a12")  # palette "deep"
-const BRONZE := Color("b9732f")  # Cinderfall's shell (gunslinger_ult)
+const BRONZE := Color("b9732f")  # Penny Drop's shell (gunslinger_ult)
 const GOLD := Color("ffcf3f")  # her coin (unshaded: the toon light turns gold red-brown)
 const GOLD_DARK := Color("d99a1e")  # its struck faces
-const DUD_DUST := Color("6b4a2e")  # a dud Burr Charge's dull dust puff where its lane ended
+const DUD_DUST := Color("6b4a2e")  # a dud Coin Blast's dull dust puff where its lane ended
 const DAZE_PINK := Color("ff4fb0")  # palette "daze": the Daze's own colour, so its bonus is not a plain crit
 const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const DAZE_NUM_LIFT := 2.1  # m over a foe's feet: the "+N" floats above its hit number
@@ -48,15 +48,15 @@ const E_RECOVER := 0.6  # s she is held after the beam: the source's recoil shov
 var slide := {}  # {t, held, dir} while a Slipstep runs
 var burrs: Array = []  # Burr Charges in flight or stuck: {pos, dir, t, node, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []  # their nodes, reused
-var needle := {}  # Longneedle's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
+var needle := {}  # Palm Spear's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
 var knocked := {}
 var direct_hits := 0  # Burr Charges that struck a foe (tests)
 var rattles := 0  # Burr Charges that blew (tests)
 var duds := 0  # Burr Charges that reached the lane's end on nothing (tests)
 var dazed_hits := 0  # rifle rounds on a Dazed foe (tests)
-var skewers := 0  # Longneedle payoffs
+var skewers := 0  # Palm Spear payoffs
 var needle_hits := 0
-var needle_dir := Vector2.ZERO  # tests: the line the last Longneedle fired along
+var needle_dir := Vector2.ZERO  # tests: the line the last Palm Spear fired along
 var wall_slams := 0
 var last_dash_kind := ""
 var last_shot := 0
@@ -66,7 +66,7 @@ var last_beam := Vector3.ZERO  # tests: where the last beam was drawn from
 var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
-var ult: GunslingerUlt         # Cinderfall, her ultimate on X
+var ult: GunslingerUlt         # Penny Drop, her ultimate on X
 var commit_end := 0.0          # match time her committed recovery ends (E after the beam)
 var x_wind_end := 0.0          # match time the ult's short wind-up ends (GunslingerUlt.WINDUP): slowed, never rooted
 
@@ -259,7 +259,7 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 		_on_knock(t)
 
 
-## Hot Streak: rank 3 resets the Burr Charge on a knock (Slipstep comes back by the game-wide DashReset rule).
+## Hot Streak: rank 3 resets the Coin Blast on a knock (Slipstep comes back by the game-wide DashReset rule).
 func _on_knock(t: Ent) -> void:
 	knocked[t.get_instance_id()] = true
 	if rank("sec") >= 3:
@@ -486,7 +486,7 @@ func _gun_muzzle() -> Node3D:
 	return h.model.get_node_or_null(GUN_MUZZLE) as Node3D if h.model else null
 
 
-## Cinderfall's shell (gunslinger_ult): a bronze ball with its spikes out.
+## Penny Drop's shell (gunslinger_ult): a bronze ball with its spikes out.
 func _burr_mesh() -> Node3D:
 	var n := own_node()
 	Models.part(n, Models.sphere(0.15, 12), Models.shiny(BRONZE, 0.6))
@@ -655,7 +655,7 @@ func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
 		m.sfx("crit", at, -2.0, 0.8)
 
 
-## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
+## RecastCue's badge: Dazed foes (her rifle and Palm Spear hit harder; a Palm Spear on a Dazed rival SKEWERS).
 func combo_marks(out: Array) -> void:
 	super(out)
 	for f in m.foes_of(h.team):
@@ -663,7 +663,7 @@ func combo_marks(out: Array) -> void:
 			out.append(RecastCue.mark(f, 0, KitStatus.rattled_left(f), KitStatus.rattled_total(f), true))
 
 
-## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data). The status draws its own
+## Dazed: the foe takes more from the rifle and Palm Spear (rattle_k in the data). The status draws its own
 ## crown of stars over the head (KitStatus).
 func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
@@ -743,7 +743,7 @@ func cast_e() -> bool:
 	return true
 
 
-## A Boki merge ends the Longneedle's charge with no shot and cuts a Slipstep short (no refund, no speed buff).
+## A Boki merge ends the Palm Spear's charge with no shot and cuts a Slipstep short (no refund, no speed buff).
 func _drop_holds() -> void:
 	_end_needle()
 	if not slide.is_empty():
@@ -761,7 +761,7 @@ func _end_needle() -> void:
 	AimKit.hide(h, "e")
 
 
-## While the Longneedle charges she aims along the capped line, not the cursor (ZERO otherwise: free).
+## While the Palm Spear charges she aims along the capped line, not the cursor (ZERO otherwise: free).
 func aim_lock() -> Vector2:
 	return needle.get("dir", Vector2.ZERO)
 

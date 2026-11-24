@@ -1,6 +1,6 @@
 class_name OstraWell
 extends RefCounted
-## Ostra's ultimate on X, Nightwell (HeroUlt): tap X to set a well at the cursor (clamped, on ground short of
+## Ostra's ultimate on X, Main Attraction (HeroUlt): tap X to set a well at the cursor (clamped, on ground short of
 ## walls). A pale teal dome of its exact size shows to everyone for 1.0s, then it opens into a turning teal whirl (a
 ## lit rim, a clear inside) for 3.5s: every foe inside (or who walks in) is stunned until it closes and drawn to its
 ## centre, taking a small tick every 0.1s. Allies pass through untouched. Ostra is locked in the cast pose for the

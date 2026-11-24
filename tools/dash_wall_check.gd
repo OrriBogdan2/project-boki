@@ -5,13 +5,13 @@ extends "res://tools/wall_slide_check.gd"
 ## a placed Tenzo rock, a raised Neve wall and a Hollow Crown prop's face, at 20, 45 and 80 degrees to it;
 ## the same dash on open ground is the reference. Both are measured where the dash ends (roll_t runs out): the
 ## coast after it is the run's brake, a constant deceleration on the tangent speed, so it keeps about cos^2,
-## not cos (Bulwark's 360 Smash hands over at 0.66 of its mean speed: 13% at 80 degrees over the whole window).
+## not cos (Bulwark's Tideturner hands over at 0.66 of its mean speed: 13% at 80 degrees over the whole window).
 ## A try fails when the distance it makes along the wall is off the reference's (its length times the table)
 ## by more than KEEP_TOL. A face shorter than that share (Ryzz's 7 m lane at 80 degrees past a 1.3 m Tenzo rock
 ## or a prop's 0.9 m) is left round its end, where the corner slip adds to it: a try that misses the table
-## there asserts instead that it got past the end and ended free of the wall ("round"). Tenzo's Rock Hop is a
+## there asserts instead that it got past the end and ended free of the wall ("round"). Tenzo's Leap of Faith is a
 ## leap to a spot picked short of the wall (KIT_STOPS): it only must never end up inside it.
-## No Hunter's body may overlap the wall on any step of a try, except while a Spirit Walk is on (Lace's dash goes
+## No Hunter's body may overlap the wall on any step of a try, except while a Slip Stitch is on (Lace's dash goes
 ## through rocks and barriers by design): her walk is held into each barrier for its whole length and must end with
 ## her out of it (PinSpirit.end puts her back), never left inside.
 ## Counts fixed simulation steps; never touches the save. Prints one "DWALL ..." line per try and
@@ -28,7 +28,7 @@ const SPIRIT_STEPS := 240  # 4 s: the walk's 2.8 s plus the roll, and the ending
 const REF_DIR := Vector2(1, 0)  # the reference dashes' line on open ground
 const PATH_LEN := 9.0  # m of open ground the slide and what follows the corner must have
 # kits whose dash stops at a wall on purpose: the try only asserts it never ends inside the wall
-const KIT_STOPS := {"dolm": "Rock Hop picks a landing short of what it would hop into (BreahHop.spot_for)"}
+const KIT_STOPS := {"dolm": "Leap of Faith picks a landing short of what it would hop into (BreahHop.spot_for)"}
 const HUNTERS := [
 	"archer",
 	"ashwick",
@@ -46,7 +46,7 @@ const HUNTERS := [
 
 var own_walls: Array = []  # the Tenzo rock and the Neve wall the tries meet
 var dash_end := Vector2.ZERO  # where the last _dash's dash itself ended (roll_t ran out), from its start
-var pen_steps := 0  # steps of the last _dash or _hold_into the body overlapped a wall with no Spirit Walk on
+var pen_steps := 0  # steps of the last _dash or _hold_into the body overlapped a wall with no Slip Stitch on
 
 
 func run(main: Node) -> void:
@@ -165,7 +165,7 @@ func _dash(at: Vector3, wish: Vector2) -> Vector2:
 	return got
 
 
-## Lace's Spirit Walk held straight into barrier s for its whole length: she goes through it (by design), and must
+## Lace's Slip Stitch held straight into barrier s for its whole length: she goes through it (by design), and must
 ## come out the far side or be put back, never be left inside once the walk is over.
 func _hold_into(hero: String, s: Dictionary) -> void:
 	var wish: Vector2 = -s["n"]
@@ -199,7 +199,7 @@ func _overlaps() -> bool:
 	return w.occupy(P.pos.x, P.pos.z, P.r, P.pos.y, false) != 0.0
 
 
-## Counts the step as a penetration when the body overlaps a wall and no Spirit Walk is on.
+## Counts the step as a penetration when the body overlaps a wall and no Slip Stitch is on.
 func _count_overlap() -> void:
 	if P.spirit_t <= 0.0 and _overlaps():
 		pen_steps += 1

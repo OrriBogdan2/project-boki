@@ -1,11 +1,12 @@
 class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
-##   gnd  Grounded (the Thief's Bola, Sparkle's Skycall): no dash, jump or glide; cords round the legs (StatusLooks),
+##   gnd  Grounded (the Thief's Bola, Sparkle's Undercurrent): no dash, jump or glide; cords round the legs
+##   (StatusLooks),
 ##        in the caster's colour when `by` names one, else amber
-##   blt  Blight (the Juggernaut's Warchain, Sable's Encore rim): healing on the body is cut
+##   blt  Blight (the Juggernaut's Short Leash, Sable's Last Dance rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
-##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
+##   rat  Dazed (Vex's Coin Blast; "Rattled" in code): her rifle and Palm Spear hit harder (no slow: the
 ##        source's Daze is only a damage window); a crystal ring over the head (StatusLooks)
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; the slow's body look (StatusLooks)
 ##   ign chl sta mrk  Ignite level (Cinder), Chill (Neve), Static (Sparkle), Marks (Sable): the caster's kit
@@ -181,7 +182,7 @@ static func _tags(e: Ent, kind: String) -> Dictionary:
 static func tag_cap(kind: String) -> int:
 	match kind:
 		"ign":
-			return 2  # AshwickKit.stoke: Ablaze, Flashover
+			return 2  # AshwickKit.stoke: Ablaze, Boiling Point
 		"chl":
 			return 1
 		"sta":

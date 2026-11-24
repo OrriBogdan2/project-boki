@@ -2,8 +2,8 @@ class_name BjornFx
 extends Node3D
 ## Breaker's pooled meshes that follow his hammer and shield (built once when the kit starts). Every other look of
 ## his is HeroVfx data (content/vfx/bulwark.json): the throw's trail, plant and catch, the planted hammer's beacon,
-## the dash wake, the swing and Slam crescents, the 360 Smash ring, the Mending Ground column, zone and burst, the
-## aegis rise and block, Faultline.
+## the dash wake, the swing and Slam crescents, the Tideturner ring, the Safe Harbour column, zone and burst, the
+## aegis rise and block, Groundswell.
 ## - the thrown hammer (tumbling) on its rope, planted head-down in the ground
 ## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a trail in
 ##   his ivory (Arch.color) behind its head, a glint in his colour on the head from 0.6 s that grows, burning

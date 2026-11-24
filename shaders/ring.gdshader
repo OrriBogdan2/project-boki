@@ -5,7 +5,7 @@ uniform vec4 color : source_color = vec4(1.0);
 uniform float thickness = 0.12;
 uniform float fill = 0.0;
 uniform float arc = 1.0;
-uniform float wash = 0.0;   // a zone's faint inside rising toward the band (Gil's slime puddle, Ostra's Nightwell)
+uniform float wash = 0.0;   // a zone's faint inside rising toward the band (Gil's slime puddle, Ostra's Main Attraction)
 uniform float halo = 0.0;   // a soft glow either side of the band and a hot core in it (0..1)
 void fragment() {
 	vec2 uv = UV * 2.0 - 1.0;

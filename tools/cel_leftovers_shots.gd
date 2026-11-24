@@ -1,7 +1,7 @@
 extends RefCounted
 ## --cel-leftovers-shots --shots-dir=<dir> --preset=<very_low|low|medium|high> (under xvfb with a renderer): the
 ## looks that were not on the cel pass (KitLooks' tinted lumps: sigil, mote, aura, rock cracks, crater, the seed's ring
-## in Vex green / Sparkle pink / Tenzo blue; CareLook's ice: spikes, shell, frost, Rink Wall) at the match camera.
+## in Vex green / Sparkle pink / Tenzo blue; CareLook's ice: spikes, shell, frost, Cold Front) at the match camera.
 ## Writes <dir>/cel_<preset>_<n>.png and prints "CELSHOTS draws <preset> <n> <draw calls> <objects>" per shot, to
 ## compare before and after a change to those materials.
 
