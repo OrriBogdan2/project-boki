@@ -1,0 +1,66 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+RESULTSTAGE ok   archer holds draw at 1.2 s
+RESULTSTAGE ok   juggernaut holds slash_r at 0.25 s
+RESULTSTAGE ok   gunslinger holds lmb at 0.2 s
+RESULTSTAGE ok   bulwark holds rmb_guard at 0.5 s
+RESULTSTAGE ok   rimewright holds spear at 0.3 s
+RESULTSTAGE ok   ashwick holds lance at 0.3 s
+RESULTSTAGE ok   dolm holds lmb_punch at 0.35 s
+RESULTSTAGE ok   mage holds rmb_hold at 0.5 s
+RESULTSTAGE ok   dredge holds flex at 0.3 s
+RESULTSTAGE ok   tender holds hearth at 0.5 s
+RESULTSTAGE ok   thief holds flourish at 0.4 s
+RESULTSTAGE ok   ostra holds flurry at 0.5 s
+RESULTSTAGE FAIL gil holds - at - s
+RESULTSTAGE FAIL all 13 Hunters have a pose
+RESULTSTAGE ok   3 left: 3 Hunters and Boki on the stage
+RESULTSTAGE ok   3 left: every Hunter holds its pose
+RESULTSTAGE ok   3 left: closing frees all 6 models
+RESULTSTAGE ok   2 left: 2 Hunters and Boki on the stage
+RESULTSTAGE ok   2 left: every Hunter holds its pose
+RESULTSTAGE ok   2 left: closing frees all 4 models
+RESULTSTAGE ok   1 left: 1 Hunters and Boki on the stage
+RESULTSTAGE ok   1 left: every Hunter holds its pose
+RESULTSTAGE ok   1 left: closing frees all 2 models
+SCRIPT ERROR: Invalid access to property or key 'halo' on a base object of type 'Dictionary'.
+          at: ResultsStage._wisp (res://scripts/ui/results_stage.gd:143)
+          GDScript backtrace (most recent call first):
+              [0] _wisp (res://scripts/ui/results_stage.gd:143)
+              [1] _build_next (res://scripts/ui/results_stage.gd:120)
+              [2] _process (res://scripts/ui/results_stage.gd:94)
+SCRIPT ERROR: Invalid assignment of property or key 'position' with value of type 'Vector3' on a base object of type 'Nil'.
+          at: ResultsStage._build_next (res://scripts/ui/results_stage.gd:121)
+          GDScript backtrace (most recent call first):
+              [0] _build_next (res://scripts/ui/results_stage.gd:121)
+              [1] _process (res://scripts/ui/results_stage.gd:94)
+SCRIPT ERROR: Invalid access to property or key 'halo' on a base object of type 'Dictionary'.
+          at: ResultsStage._wisp (res://scripts/ui/results_stage.gd:143)
+          GDScript backtrace (most recent call first):
+              [0] _wisp (res://scripts/ui/results_stage.gd:143)
+              [1] _build_next (res://scripts/ui/results_stage.gd:120)
+              [2] _process (res://scripts/ui/results_stage.gd:94)
+SCRIPT ERROR: Invalid assignment of property or key 'position' with value of type 'Vector3' on a base object of type 'Nil'.
+          at: ResultsStage._build_next (res://scripts/ui/results_stage.gd:121)
+          GDScript backtrace (most recent call first):
+              [0] _build_next (res://scripts/ui/results_stage.gd:121)
+              [1] _process (res://scripts/ui/results_stage.gd:94)
+SCRIPT ERROR: Invalid access to property or key 'halo' on a base object of type 'Dictionary'.
+          at: ResultsStage._wisp (res://scripts/ui/results_stage.gd:143)
+          GDScript backtrace (most recent call first):
+              [0] _wisp (res://scripts/ui/results_stage.gd:143)
+              [1] _build_next (res://scripts/ui/results_stage.gd:120)
+              [2] _process (res://scripts/ui/results_stage.gd:94)
+SCRIPT ERROR: Invalid assignment of property or key 'position' with value of type 'Vector3' on a base object of type 'Nil'.
+          at: ResultsStage._build_next (res://scripts/ui/results_stage.gd:121)
+          GDScript backtrace (most recent call first):
+              [0] _build_next (res://scripts/ui/results_stage.gd:121)
+              [1] _process (res://scripts/ui/results_stage.gd:94)
+WATCHDOG quit: a script error, then 60 s and 600 frames without a line (the check's coroutine is dead)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

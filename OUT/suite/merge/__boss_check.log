@@ -1,0 +1,256 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOSS ok   generated big map seed 3 has 2 lair(s): ["brood", "colossus"]
+BOSS ok   generated big map seed 8 has 2 lair(s): ["colossus", "serpent"]
+BOSS ok   generated big map seed 13 has 2 lair(s): ["brood", "colossus"]
+BOSS ok   generated mid map has 1 lair(s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:654)
+       [13] _ready (res://scripts/main.gd:289)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:654)
+       [13] _ready (res://scripts/main.gd:289)
+BOSS ok   Skyreach has 3 lairs: ["Stormcrown Eyrie (serpent)", "The Sunken Forge (colossus)", "The Thornhive (brood)"]
+BOSS ok   Skyreach rolled 3 of 3 lairs live (3 boss markers on the full map), the rest dormant
+BOSS ok   every gate starts sealed, each boss asleep inside
+BOSS ok   the seal throws you out of a sealed lair (now 8.3m from its middle)
+BOSS ok   dial: 4 locks opened in 6.4s with no misses, gate open
+BOSS ok   the gate's tiles are open ground now
+BOSS ok   miss: the lock resets (fails 1, arcs lit again, jammed 0.7s)
+BOSS ok   miss: chime pings nearby players, reveals the presser, guards 3 -> 5
+BOSS ok   runes: 3 pylons lit, the Eyrie is open
+BOSS ok   wards: 3 broken (guards came out: 6), the Thornhive is open
+BOSS ok   before the fight: into the gateway and back out, the boss still asleep (14.1m out)
+BOSS ok   walk in: Siegephant wakes and the gate seals behind you (locked true, gate shut true)
+BOSS ok   the seal holds for at most 90s (1:30 left on the clock); Siegephant enrages at 75s, inside it
+BOSS ok   the bars are back down and the ward glows over the walls
+BOSS ok   sealed: walking at the gate or being flung over the wall keeps you inside
+BOSS ok   sealed: a rival can't get in (7.8m from the middle)
+BOSS ok   bots: sealed in they fight it (["lair_fight"]); a sealed lair isn't a goal from outside ([])
+BOSS ok   wiped: the seal breaks, Siegephant heals (1071 -> 1500) and sleeps
+BOSS ok   the seal times out after 90s: it drops and the boss resets
+BOSS ok   unsealed: you walk out through the gate (8.1m from the middle)
+BOSS ok   Siegephant wakes when you walk in and seals you both in
+BOSS ok   Siegephant: phase 2 at 66%, phase 3 at 33% (shrugs off hits while it roars), enraged after 75s
+BOSS ok   Siegephant used 3 attacks: ["slam", "boulders", "phase"]
+BOSS ok   Siegephant falls: the gate stays shut (opens in 0:20), the lever lit, the updraft blowing
+BOSS ok   after the kill: walking at the shut gate keeps you in
+BOSS ok   Siegephant's loot: 4 things, all good (["quickstep_boots 3", "brand_void", "Ember Ink", "Boki Idol"]), an Epic+ piece of gear and a Brand upgrade
+BOSS ok   the lever: 'F: Open the gate'; pulled 1.9s after the kill, the gate opens and the updraft dies down
+BOSS ok   after the kill you walk out through the gate (0.9s)
+BOSS ok   Siegephant falls: exactly one Rare Egg, to one hunter in the pit (told in the feed), an Epic+ weapon, +260 XP
+BOSS ok   Sarcobra wakes when you walk in and seals you both in
+BOSS ok   Sarcobra: phase 2 at 66%, phase 3 at 33% (shrugs off hits while it roars), enraged after 75s
+BOSS ok   Sarcobra used 4 attacks: ["dash", "storm", "phase", "static"]
+BOSS ok   Sarcobra falls: the gate stays shut (opens in 0:20), the lever lit, the updraft blowing
+BOSS ok   after the kill: walking at the shut gate keeps you in
+BOSS ok   Sarcobra's loot: 4 things, all good (["quickstep_boots 3", "brand_fire", "Wyrm Ink", "Boki Idol"]), an Epic+ piece of gear and a Brand upgrade
+BOSS ok   the updraft refuses outsiders: no lift over it (0.00m), shoved off and out (8.1m from the middle)
+BOSS ok   the updraft: lifts you 12.5m over the floor, over the wall and away (12.5m behind the lair's middle, landed true) while the gate stays shut
+BOSS ok   nobody at the lever: the gate opens by itself 20.0s after the kill, the updraft dies down
+BOSS ok   after the kill you walk out through the gate (0.0s)
+BOSS ok   Sarcobra falls: exactly one Rare Egg, to one hunter in the pit (told in the feed), an Epic+ weapon, +260 XP
+BOSS ok   Calderoise wakes when you walk in and seals you both in
+BOSS ok   Calderoise: phase 2 at 66%, phase 3 at 33% (shrugs off hits while it roars), enraged after 75s
+BOSS ok   Calderoise used 4 attacks: ["spit", "lob", "phase", "burrow"]
+BOSS ok   Calderoise falls: the gate stays shut (opens in 0:20), the lever lit, the updraft blowing
+BOSS ok   after the kill: walking at the shut gate keeps you in
+BOSS ok   Calderoise's loot: 4 things, all good (["grapple 4", "brand_void", "Bloom Ink", "Boki Idol"]), an Epic+ piece of gear and a Brand upgrade
+BOSS ok   bots after the kill: no one at the gate, pull the lever (["lair_lever"]); rivals camping it, the updraft (["lair_updraft"])
+BOSS FAIL a bot rides the updraft out with rivals at the gate (16.0s, 1.3m from the gate, the gate still shut)
+BOSS ok   after the kill you walk out through the gate (0.9s)
+BOSS ok   Calderoise falls: exactly one Rare Egg, to one hunter in the pit (told in the feed), an Epic+ weapon, +260 XP
+BOSS ok   full pack: the egg opens the swap window
+BOSS ok   the Rare Egg is in the pack (["Sky Pearl", "Rare Moon Egg"])
+BOSS ok   picking it up shows the carrier to everyone for a few seconds
+BOSS ok   dead: the egg is in your deathbox
+BOSS ok   smart loot takes the egg first, even from a full pack
+BOSS ok   extract: a Moon Egg goes to the Incubator [{ "sp": "wisplet", "boss": "colossus", "id": "re187994423_1", "slot": 0, "heat": 0.0, "slow": true }]
+BOSS ok   home: it goes straight into the Incubator's cradle (the breeding nest stays free)
+BOSS ok   hatch: a rare-egg Lunowl (wisplet)
+BOSS ok   rare species (["cairnback", "hivara", "zephyrak"]) only come from eggs
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:1092)
+       [13] _ready (res://scripts/main.gd:289)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:1092)
+       [13] _ready (res://scripts/main.gd:289)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:1092)
+       [13] _ready (res://scripts/main.gd:289)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:1092)
+       [13] _ready (res://scripts/main.gd:289)
+BOSS FAIL every glide, wind and bridge route lands on the island it leads to (2 of 44 don't: ["11>13 land (404.5, -1000000000.0, 340.5)", "10>4 land (200.5, -1000000000.0, 304.5)"])
+BOSS FAIL a bot walked up and opened Stormcrown Eyrie in 150s (0 misses)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:1134)
+       [13] _ready (res://scripts/main.gd:289)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:1134)
+       [13] _ready (res://scripts/main.gd:289)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:1134)
+       [13] _ready (res://scripts/main.gd:289)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _boss_check (res://scripts/main.gd:1134)
+       [13] _ready (res://scripts/main.gd:289)
+BOSS ok   a rival squad walks into The Sunken Forge: sealed in with Siegephant, you outside
+BOSS ok   the fight is heard by everyone outside within 150m (you, your mate, a rival 81m off) but not 413m away, nor by those inside
+BOSS ok   outside: a ping on the lair (boss icon on the map), 'Siegephant fight at The Sunken Forge', the beam over the lair, the seal's clock over the gate ('The Sunken Forge / SIEGEPHANT FIGHT  ·  1:30')
+BOSS ok   bots that heard it may camp the gate (odds 0.48 with the squad up, 0.27 hurt; ["lair_camp"]); not when leaving, nor if they never heard it
+BOSS ok   the boss falls: everyone near hears it ('Siegephant has fallen at The Sunken Forge'), the clock over the gate: 'The Sunken Forge / Siegephant has fallen  ·  gate opens 0:20'
+BOSS ok   bots sealed in: with a rival camping the gate one rides the updraft out (3.9s); with nobody there the other pulls the lever (0.8s)
+BOSS ok   a generated map: 2 lair(s), 1 live (["colossus", "serpent"])
+BOSSCHECK done, failures: 3
+ERROR: 3 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 31 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

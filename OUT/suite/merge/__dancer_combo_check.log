@@ -1,0 +1,309 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AKCHECK dancer: kit, model, Arc Bolts      PASS  arc_bolts
+AKCHECK dancer: her moves are keyed (KMovesDJ) PASS  
+AKCHECK dancer LMB: a bolt every 0.45s while held, hands alternating PASS  bolts 3 hands [0, 1, 0, 1]
+AKCHECK dancer LMB: bolts hit and stack Marks (one per hit) PASS  took 43 marks 3
+AKCHECK dancer LMB: the aim line ends at the cursor, pale lilac PASS  
+AKCHECK dancer LMB: a bolt lands at the cursor and fizzles (cursor-placed) PASS  0.62 m off the cursor
+AKCHECK dancer LMB: clamped to 8.5m (the source's 850 units) PASS  8.7 m of 8.5
+AKCHECK dancer LMB: flight time, 37.5 m/s over its range (0.23s) PASS  0.22s
+AKCHECK dancer small mechanics: the empowered bolt flies 12% further (9.5m); firing it ends the speed PASS  10.0 m haste 0.00
+AKCHECK dancer LMB: each bolt has its own pooled look PASS  
+AKCHECK dancer passive: a flat +1.3 per Mark on bolts only, whatever the bolt deals PASS  12.60
+AKCHECK dancer passive: ability hits don't stack PASS  
+AKCHECK dancer passive: Marks have no cap (22 after 20 more), eight diamonds show PASS  22
+AKCHECK dancer passive: 22 Marks add 28.6 to a bolt PASS  
+AKCHECK dancer Vault ranks: empowered +20% / +40%, speed boost 0.18 -> 0.27 at rank 3 PASS  [[1.0, 0.18], [1.2, 0.18], [1.4, 0.27]]
+AKCHECK upgrade parity: Bola damage +50% from rank 2 and the cooldown 7 -> 4.8 only at rank 3 PASS  [[7.0, 1.0, 4.5, 15.0, 1.0], [7.0, 1.5, 4.5, 10.7145, 1.0], [4.8461, 1.5, 4.5, 10.7145, 1.0]]
+AKCHECK upgrade parity: Vault recharge stays 5 (Quickflip 5s, no cooldown upgrade) FAIL  [[7.0, 1.0, 4.5, 15.0, 1.0], [7.0, 1.5, 4.5, 10.7145, 1.0], [4.8461, 1.5, 4.5, 10.7145, 1.0]]
+AKCHECK upgrade parity: Shadow Knife cooldown 15 -> 10.7 from rank 2 (the source's -8s of 28), no damage step PASS  [[7.0, 1.0, 4.5, 15.0, 1.0], [7.0, 1.5, 4.5, 10.7145, 1.0], [4.8461, 1.5, 4.5, 10.7145, 1.0]]
+AKCHECK dancer dash: the flip leaves a trail that follows the turn, none before it starts or after it ends PASS  { "before": 0, "mid": 24, "after": 0 }
+AKCHECK dancer dash (item 8): no ring on the cartwheel or its landing; the glint in the throwing hand flares PASS  rings 0 -> 0 pop 1.00 glint 0.10295863449574
+AKCHECK dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers FAIL  moved 5.1 primed 2.45 anim thf_vault_l
+AKCHECK dancer dash: the aim line turns solid gold, thick, with a glow while empowered PASS  
+AKCHECK dancer HUD: EMPOWERED label + dash dot PASS  EMPOWERED  ·  land it to reset Vault
+AKCHECK dancer empowered bolt: the big look rides it PASS  
+AKCHECK dancer empowered bolt: a big hit, 2 Marks (the owner's faster stacking), no Shred, speed ends, Vault back PASS  dealt 30 marks 2 vuln 0.0 dashes 1.00
+AKCHECK dancer dash: from a jump the cartwheel carries its speed on to the landing (further than on the ground) PASS  moved 5.3
+AKCHECK dancer air dash (items 32, 35): the air Cartwheel, empowered by its row, lands in thf_land, no ring PASS  move thf_exdash landed true primed 0.58
+AKCHECK dancer dash moves (item 35): her own ids; the ground and air cartwheels fit inside their dash PASS  ground 0.48 air 0.48 / 0.48
+AKCHECK dancer RMB: the lane shows through the 0.4s wind-up (about 1 bh by 6 bh), nothing thrown yet PASS  len 10.8
+AKCHECK dancer RMB telegraph: the lane is drawn as wide as it catches (rmb.bola.lane_w, the parity 1.8 m) PASS  width 1.80
+AKCHECK dancer RMB: Bola grounds the first, flies on, tangles two (stun) PASS  pairs 1 grounded true/true stun 0.65/0.65 dmg 9
+AKCHECK dancer RMB: the pair stun is 0.9s in data and neither foe is held longer PASS  pair_stun 0.90 stun 0.65/0.65
+AKCHECK dancer RMB: yellow binding rings on the Grounded (everyone sees them) PASS  
+AKCHECK dancer Bola: Grounded can't dash or jump PASS  dashes 1.00 vy 0.0
+AKCHECK dancer RMB telegraph: a foe just inside the lane's edge is caught, one just outside is not PASS  in true out false
+AKCHECK dancer Bola: bounces off a wall    PASS  bounces 1
+AKCHECK dancer Bola small mechanic: a crate counts as the first catch, it flies on PASS  breaks 1
+AKCHECK dancer E: the knife leaves the hand on the throw's key pose (0.12s), not before PASS  early false shots 1
+AKCHECK dancer E: the dagger lands at the cursor, RecastCue's marker on it PASS  (13.5, 1.6, 30.5) vs (13.5, 1.6, 30.5)
+AKCHECK dancer E recast: a blink to it with an afterimage chain, arriving in her own low drop PASS  blinks 1
+AKCHECK dancer E: the dagger sticks in a foe (slow 50%, damage) PASS  slow 2.40 dmg 8
+AKCHECK dancer E: waiting 6s steps you to it anyway PASS  dist 1.1
+AKCHECK dancer E: the dagger sticks to a barrier it hits, on her side of it PASS  knife (13.16667, 3.39, 32.5)
+AKCHECK dancer E: the stuck dagger rides its barrier when it moves PASS  moved 3.00
+AKCHECK dancer E: after 6s the return puts her beside it on her side, never inside PASS  gap 1.07
+AKCHECK dancer E: the barrier broke: the dagger drops to the ground under it PASS  knife (13.16667, 1.6, 32.5)
+AKCHECK dancer E: ... and she steps to it  PASS  
+AKCHECK dancer passive: a knock heals (25% in all), star + pillar PASS  hp 62 -> 93
+AKCHECK dancer fx: pooled (every kind capped, a handful of nodes at most per burst) PASS  made 125 -> 128
+AKCHECK dancer dash -> LMB (row: fire, empowered): the bolt leaves mid-flip, empowered; the cartwheel plays on PASS  bolts 1 emp true roll 0.38 anim thf_vault_r
+AKCHECK dancer RMB -> dash (into_dash row: fire): Shift in the wind-up cartwheels, the Bola still flies PASS  wound true thrown true
+AKCHECK dancer dash -> E recast: the blink ends the cartwheel (she arrives standing) PASS  blinks +1 roll 0.00 vault {  }
+AKCHECK dancer feel: the ground Cartwheel is the source's, 4.5m in 0.48s (off the global dash feel) PASS  4.69 m in 0.48 s
+AKCHECK dancer feel: it bursts to about 17 m/s near 0.18s, then runs down into the hasted run PASS  peak 17.1 m/s at 0.18 s
+AKCHECK dancer feel: from a jump it is the ground Cartwheel, carried on by the air's drag to the landing PASS  4.51 m in 0.48 s
+AKCHECK dancer feel: the empowered bolt is a bolt plus the source's bonus (2.34x), the bonus +20% / +40% by rank PASS  30.42 / 13.00 = 2.340 ranks [2.34, 2.608, 2.876]
+AKCHECK dancer feel: the Vault is back on the step the empowered bolt lands (its flight, 0.3s at most) PASS  landed at 0.18 s dashes 1.00
+AKCHECK dancer feel: Marks add a flat 1.3 each, the empowered bolt too (the source's +16 a stack on 160) PASS  29.90
+AKCHECK dancer feel: +18% speed for 2s; the empowered bolt waits 3s, then the next bolt is plain PASS  haste true/false primed at 2.9s true, after 0.00 emp false
+AKCHECK dancer feel: the reset loop keeps the footage's pace (two empowered hits inside 1.4s, LMB held) PASS  hits at [0.15, 0.76666666666667, 1.31666666666667]
+AKCHECK dancer feel: a click mid-flip while the bolt cools is kept and goes, empowered, before she is up PASS  cooling 0.15 bolts +1 { "mid_flip": true, "emp": true }
+AKCHECK dancer quick: Shift then LMB, the empowered bolt and the next three leave 0.27s apart, then 0.45s PASS  cooling cut to 0.27 gaps [0.28, 0.28, 0.28, 0.47] quick 3
+AKCHECK dancer quick: LMB 1.3s after the Vault, or after a pause in the run, keeps the usual 0.45s PASS  late [0.47, 0.47] paused [0.47, 0.47]
+AKCHECK dancer parity LMB: the blade whips from cocked to the aim by 0.06s, right, left, both when empowered PASS  reach at 0.054 s, arcs true steps true hands on the blades true
+AKCHECK dancer parity LMB: the torso turned ~30 degrees into the throw PASS  -0.50 rad
+AKCHECK dancer parity LMB: by the next bolt the torso is wound toward the other hand, where the next throw starts PASS  
+AKCHECK dancer parity: the throws' and the Bola wind-up's legs are a stance, dropped at a run (legs keep running) PASS  
+AKCHECK dancer parity LMB: held, a bolt every 0.45s from alternating hands, each with its own throw PASS  at [0.01666666666667, 0.48333333333333, 0.95, 1.41666666666667, 1.88333333333333] moves ["thf_lmb_l", "thf_lmb_r", "thf_lmb_l", "thf_lmb_r", "thf_lmb_l"]
+AKCHECK dancer parity LMB: a bolt goes at the cursor as it leaves, even swung behind her PASS  0.0 degrees off
+AKCHECK dancer parity LMB: the body turns 180 degrees to the cursor inside 0.2s (source 1280 deg/s) PASS  0.13 s
+AKCHECK dancer parity LMB: running, she throws and keeps the source's share of her run (0.67-0.75) PASS  3.85 m/s firing vs 5.39 (0.71)
+AKCHECK Sable audit: the plain bolt deals 13 (the owner: plain autos carry her), the empowered one 2.34x it PASS  
+AKCHECK Sable audit: a bolt mid-flip goes empowered, the cartwheel plays on and whips both blades out (swing 2) PASS  bolts +1 emp true move thf_vault_r swing 2
+AKCHECK Sable audit: the blink leaves no ground ring (the afterimage chain and the puff stay) PASS  blinks +1 rings +0
+AKCHECK dancer timing: the bola winds up 0.40 s (footage 0.4-0.6 s) PASS  
+AKCHECK dancer timing: the cartwheel lasts 0.48 s (footage 0.37-0.57 s) PASS  
+AKCHECK dancer timing: the knife leaves the hand by 0.12 s of its spin (footage: one frame) PASS  
+AKCHECK dancer timing: the skinned clip tree was built PASS  
+dancer timing: frame 0 off the settled pose, deg: thf_lmb_r 152, thf_lmb_l 147, thf_primed 128, thf_vault_r 172, thf_vault_l 165, thf_vault_f 112, thf_vault_b 157, thf_vault_twist 154, thf_exdash 118, thf_land 90, thf_knife 127, thf_reset 129
+AKCHECK dancer timing: each quick move's clip starts on its first pose, not settled ([]) PASS  
+AKCHECK dancer timing: the quick moves blend in at the default fade ([]) PASS  
+AKCHECK dancer timing: each clip lasts its kit move ([]) PASS  
+AKCHECK dancer loop: 5 chained Vault -> empowered hit cycles all reset (no cap) PASS  hits +5
+AKCHECK dancer loop: a chain is a routine of flips, never one clip twice running PASS  ["thf_vault_r", "thf_vault_f", "thf_vault_twist", "thf_vault_l", "thf_vault_f"]
+AKCHECK dancer loop: every flip turns a full circle in the air, crossbows tucked, wings flared PASS  
+AKCHECK dancer loop: Shift pressed 0.38s before the flip ends isn't lost: the next Vault follows at once PASS  next at 0.50, flip left 0.38, primed 2.68
+AKCHECK dancer loop: Shift while the empowered bolt flies waits for it, then a real Vault, not the long dash PASS  kept true hits +1 ex_cd 0.00 primed 2.75
+AKCHECK dancer loop: a miss still lets the waiting press go (the long dash, with no charge) PASS  ex_cd 11.68
+AKCHECK dancer loop: the reset gives the air Vault back too PASS  spent true dashes 1.00
+AKCHECK dancer Bola: one foe caught is Grounded and slowed 30% for the Ground's 1.5s, no stun PASS  { "gnd": true, "slow": 1.48333333333333, "mult": 0.7, "stun": 0.0 }
+AKCHECK dancer Bola: a pair in a line stays the stun and bonus damage PASS  dmg 9.1
+AKCHECK thief clip timing: thf_lmb_r strikes at 0.03 s, the kit releases it at 0.00 s PASS  +0.03 s
+AKCHECK thief clip timing: thf_lmb_l strikes at 0.03 s, the kit releases it at 0.00 s PASS  +0.03 s
+AKCHECK thief clip timing: thf_primed strikes at 0.02 s, the kit releases it at 0.00 s PASS  +0.02 s
+AKCHECK thief clip timing: thf_bola strikes at 0.38 s, the kit releases it at 0.40 s PASS  -0.02 s
+AKCHECK thief clip timing: thf_knife strikes at 0.08 s, the kit releases it at 0.12 s PASS  -0.04 s
+TIME thf_lmb_r play 0.02 in 0.10 hit 0.02 (clip 0.00) lmb_r 0.70 out -1.00
+AKCHECK Sable timing LMB: the bolt and its throw leave on the press's frame, the clip is on within the blend-in PASS  hit 0.02 play 0.02 in 0.10 clip 0.00
+TIME thf_lmb held: 4 bolts in 1.5 s, one every 0.467 s, throws ["thf_lmb_l", "thf_lmb_r", "thf_lmb_l", "thf_lmb_r"]
+AKCHECK Sable timing LMB held: a bolt every 0.45 s (the card; the footage's 2-3 frames), each hand's throw in turn PASS  gap 0.467 ["thf_lmb_l", "thf_lmb_r", "thf_lmb_l", "thf_lmb_r"]
+TIME thf_bola play 0.00 in 0.10 hit 0.42 (clip 0.42) bola 0.73 out 0.90
+AKCHECK Sable timing Bola: thrown 0.4-0.6 s after the press (the source's lane), on the clip's sling key PASS  thrown 0.42 clip 0.42 in 0.10
+TIME thf_knife play 0.00 in 0.10 hit 0.13 (clip 0.13) knife 0.47 out 0.63
+AKCHECK Sable timing dagger: it leaves her hand on the clip's release key PASS  released 0.13 clip 0.13 in 0.10
+TIME thf_arrive recast: dagger stuck, there after 0.02 s, anim thf_arrive
+AKCHECK Sable timing dagger recast: she is at the dagger within a frame (the source: under 0.2 s) in the arrive clip PASS  blink 0.02 thf_arrive
+AKCHECK Sable timing dagger forced return: the window's end steps her to the dagger in the arrive clip PASS  there true (1.2 m off) arrive true moved 1.0 m knife true roll 0.00 vault true
+AKCHECK Sable timing dagger forced return from a cartwheel: the window's end steps her to the dagger in the arrive clip PASS  there true (0.0 m off) arrive true moved 8.1 m knife true roll 0.00 vault true
+TIME thf_vault_r play 0.00 in 0.10 hit -1.00 (clip -1.00) vault_r 0.47 out 0.63
+TIME vault dash 0.48 s clip vault_r
+AKCHECK Sable timing Vault (ground): flip clip from the first frame, 0.48 s, ends with the dash PASS  play 0.00 in 0.10 len 0.47 out 0.63
+TIME thf_exdash air: 5.20 m, down 0.75 s, thf_land from 0.77 s (sheet 8.4 m / 0.95 s)
+AKCHECK Sable timing Vault (air): the landing crouch plays on the touchdown frame PASS  down 0.75 land 0.77
+TIME thf_encore: first thf_encore, beats 10 from 0.42 every 0.200, dance from 0.42 (clip clock 0.02), over 2.42
+AKCHECK Sable timing Encore: the cast clip on the press, a blade beat at 0.4 s then every 0.2 s (10 beats) PASS  thf_encore 10 beats first 0.42 gap 0.200 over 2.42
+AKCHECK Sable timing Encore: the dance takes over by the first beat, on the beat's clock PASS  dance from 0.42, clip clock starts 0.40
+TIME run: 5.39 m/s, stride 2.68 Hz (sheet 2.3 Hz)
+AKCHECK Sable timing run: the stride matches the sheet's (about 2.3 Hz) FAIL  2.68 Hz at 5.39 m/s
+AKCHECK dancer Encore: a blade grows with level (LevelGrowth.ap 1.0 -> 1.35) PASS  L1 4.50 L10 6.08
+AKCHECK dancer X: no cast below level 6 (even with a point forced in) PASS  
+AKCHECK dancer X: one press, one cast (main's X path only) PASS  casts 1 used +1
+AKCHECK dancer X: Encore casts; the ring everyone sees starts small and grows; the Vault comes back PASS  r 0.51 dashes 1.00
+AKCHECK dancer X: its cooldown runs from the cast (24s) PASS  24.0
+AKCHECK dancer X: the ring is near 3 bh just before 0.4s, the outer band marked; no blade before it PASS  r 5.19
+AKCHECK dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach PASS  band 0.25 r 5.188 radius 5.188
+AKCHECK dancer X: the ring and its dashed outer band are drawn at exactly the hit radius on every beat PASS  off 0.0000
+AKCHECK dancer X: a blade at each foe every 0.2s, the ring pulsing on the beat PASS  10 beats, pulse 2.00
+AKCHECK dancer X: she dances from the first beat on PASS  
+AKCHECK dancer X: still running at 2.3s    PASS  
+AKCHECK dancer X: 2s of blades, 10 at most on each foe; ends with a plain fade and the dance stops PASS  blades 20
+AKCHECK dancer X small mechanic: the outer band hits harder and blights 6s; the inside doesn't blight PASS  rim 76 inner 45 blight 5.6
+AKCHECK dancer X: the blades keep the sourced totals (45 inside, 76 from the outer band) PASS  45
+AKCHECK dancer X small mechanic: every blade refreshes her Marks PASS  
+AKCHECK dancer X: blades landing on a hunter fill the bond once a cast (a hit: 60% of the bar, KinBond.from_ult) PASS  owed 0.60
+AKCHECK dancer X: on cooldown it doesn't cast again PASS  
+AKCHECK dancer X small mechanic: she walks and fires freely, the ring moves with her PASS  moved 1.89 bolts +2
+AKCHECK dancer X: the dance plays on through her walking and her plain bolts (a stance: the legs keep walking) PASS  
+AKCHECK dancer X: a Vault flips out of the dance and it picks up again on the beat PASS  thf_vault_r, off 0.800
+AKCHECK dancer X: no foe in the ring, no bond (never on the cast alone) PASS  owed 0.00
+AKCHECK dancer X: its moves are keyed (cast, throws) PASS  
+AKCHECK dancer ring: a standing dummy takes a blade every 0.2s for 2s (10, the first at 0.4s plus the flight) PASS  10 hits, first 0.55s, gaps 0.18..0.22
+AKCHECK dancer ring: 0.17 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band hits harder, a 6s blight PASS  0.17 bh -> 3.00 bh
+AKCHECK dancer ring: 4 a blade in the middle, 6 from the band (x power); none past the radius PASS  mid 4.50 rim 7.60 power 1.00
+AKCHECK dancer ring: walking, a blade lands for every beat the foe is inside, 6 in the band, 4 inside it PASS  9 of 10 beats (1 in the band), 44 damage (44 by the beats), she walked 10.5m
+AKCHECK combo tag (thief): nothing on a clean foe PASS  
+AKCHECK combo tag (thief): shows while the status runs, with an icon and the time left PASS  { "icon": "mark_thief", "n": 3, "max": 8, "left": 4.0, "total": 4.0 }
+AKCHECK combo tag (thief): the foe's own kit has no tag on you PASS  
+AKCHECK combo tag (thief): the time left shrinks PASS  { "icon": "mark_thief", "n": 3, "max": 8, "left": 3.48333333333334, "total": 4.0 }
+AKCHECK combo tag (thief): pips match the stacks PASS  3
+AKCHECK combo tag (thief): gone when the status ends PASS  
+AKCHECK combo tag (thief): 11 Marks read 11 past the 8 pips PASS  11
+AKCHECK combo tag (thief): the payoff hit flashes the body white PASS  stamp 4.92 flash 0.153
+AKCHECK combo jug: E > E > RMB tap = Cinder Spin (it blights who it hits) PASS  spins 1 variant during_e
+AKCHECK combo jug: E > hold RMB = Chain Lunge (no stun) PASS  lunges 1 dist 2.6 took 25 stun 0.00
+AKCHECK combo jug: E > hold RMB > E = Haul Slam on arrival (no stun) PASS  slams 1 took 22 stun 0.00
+AKCHECK combo jug: E > E > hold RMB = Cinder Spin on the press (no Haul Slam, no second move) PASS  spins 2 slams 1
+AKCHECK combo jug: E > RMB tap = Finishing Slam PASS  
+AKCHECK combo jug: the attached Warchain draws as a link chain PASS  
+AKCHECK combo jug: RMB sweet spot > knock = Riposte reset + heal + a dash PASS  dashes 1.00
+AKCHECK combo jug: RMB hold miss = cooldown x2 PASS  3.1
+AKCHECK combo jug: Rampage winds down (no instant glide) PASS  0.30
+AKCHECK combo jug: rooted = no Warchain    PASS  
+AKCHECK combo jug: Grounded = no Warchain  PASS  
+AKCHECK combo jug: stun breaks the Warchain PASS  
+AKCHECK combo jug: Enraged hastes the Smash PASS  1.80
+AKCHECK combo dancer: Vault > bolt = empowered hit + Vault reset PASS  
+AKCHECK combo dancer: the reset loop (Vault > bolt > Vault > bolt) PASS  
+AKCHECK combo dancer: an empowered bolt that misses is spent PASS  
+AKCHECK combo dancer: Knife in a foe at rank 2 (Vault rank 3) gives no Vault back PASS  dashes 0.08
+AKCHECK combo dancer: Knife in a foe (Knife rank 3) = Vault reset + refund PASS  dashes 1.00 e cd 5.1
+AKCHECK combo dancer: Knife > E = step to them PASS  
+AKCHECK combo dancer: Bola on two (rank 3) = pooled Marks PASS  T 5 T2 5
+AKCHECK combo dancer: Bola > Grounded = no dash PASS  
+AKCHECK combo dancer: Bola > X = the Grounded foe takes every blade PASS  grounded true blades 10
+AKCHECK combo jug: E > E > X = pulled in, a hit blocked, the cleave lands PASS  reels 1 blocked 1 took 58
+AKCHECK merge hold dancer: Encore's blades stop and its ring goes (hold field encore.st) PASS  blades after 0
+AKCHECK merge hold jug: the Riposte's guard drops, no cleave (hold field riposte.st) PASS  running false strikes 0 merged true
+AKCHECK burst cap: X then a merge (and its ultimate) never one-shots a full-health hunter PASS  least health left 99% []
+AKCHECK merge hold jug: the Searing Wave is charging PASS  lmb_t 0.70
+AKCHECK merge hold jug: the merge starts   PASS  
+AKCHECK merge hold jug: the charged wave does not fire PASS  waves 0 took 0
+AKCHECK merge hold jug: no charge left behind PASS  lmb_t -1.00
+AKCHECK merge hold jug: the Finishing Slam is winding up PASS  
+AKCHECK merge hold jug: the wound-up slam does not land PASS  took 21 (merge alone 21)
+AKCHECK merge hold jug: the Lunge is charging PASS  
+AKCHECK merge hold jug: the charged Lunge does not go and no Smash charge is spent PASS  charges 1.0 of 1.0
+AKCHECK merge hold jug: an armed Haul Slam is dropped PASS  
+AKCHECK merge hold dancer: the Bola is winding up PASS  
+AKCHECK merge hold dancer: the wound-up Bola is not thrown PASS  
+AKCHECK merge hold jug: the Meteor Drop is diving PASS  
+AKCHECK merge hold jug: the dive is dropped, no slam lands PASS  
+AKCHECK DONE, 180 checks, failures: 3
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 10 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 210: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 215: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 221: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 223: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 225: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 227: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 231: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 230: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 235: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 233: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 237: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 236: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 238: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 241: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 244: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 243: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 253: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 245: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 264: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 272: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 273: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 281: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 284: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 287: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 285: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 291: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 293: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 292: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 302: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

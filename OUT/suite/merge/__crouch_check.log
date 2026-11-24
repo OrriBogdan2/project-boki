@@ -1,0 +1,141 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CROUCH ok   archer: down from 1.54 to 1.17 m
+CROUCH ok   archer: the dip goes 0.056 m under the hold, then settles
+CROUCH ok   archer: no pop going down (0.067 m a frame)
+CROUCH ok   archer: the feet stay on the ground (0.114, standing 0.066)
+CROUCH ok   archer: a heel is up, on the ball of the foot
+CROUCH ok   archer: one foot leads by 0.48 m
+CROUCH ok   archer: the sneak steps (0.60 m)
+CROUCH ok   archer: the feet plant at the crouch speed (1.12 of it)
+CROUCH ok   archer: the head rides level on the sneak (0.039 m)
+CROUCH ok   archer: no pop coming up (0.067 m a frame)
+CROUCH ok   archer: back up on the idle (1.54 m, stood 1.54)
+CROUCH ok   archer: with no crouch data the clips stand through it, as before
+CROUCH ok   juggernaut: down from 1.41 to 1.08 m
+CROUCH ok   juggernaut: the dip goes 0.058 m under the hold, then settles
+CROUCH ok   juggernaut: no pop going down (0.074 m a frame)
+CROUCH ok   juggernaut: the head rides level on the sneak (0.047 m)
+CROUCH ok   juggernaut: no pop coming up (0.063 m a frame)
+CROUCH ok   juggernaut: back up on the idle (1.41 m, stood 1.41)
+CROUCH ok   juggernaut: with no crouch data the clips stand through it, as before
+CROUCH ok   gunslinger: down from 1.54 to 1.07 m
+CROUCH ok   gunslinger: the dip goes 0.056 m under the hold, then settles
+CROUCH ok   gunslinger: no pop going down (0.066 m a frame)
+CROUCH ok   gunslinger: the feet stay on the ground (0.162, standing 0.156)
+CROUCH ok   gunslinger: a heel is up, on the ball of the foot
+CROUCH ok   gunslinger: one foot leads by 0.66 m
+CROUCH ok   gunslinger: the sneak steps (0.63 m)
+CROUCH ok   gunslinger: the feet plant at the crouch speed (1.20 of it)
+CROUCH ok   gunslinger: the head rides level on the sneak (0.041 m)
+CROUCH ok   gunslinger: no pop coming up (0.076 m a frame)
+CROUCH ok   gunslinger: back up on the idle (1.53 m, stood 1.54)
+CROUCH ok   gunslinger: with no crouch data the clips stand through it, as before
+CROUCH ok   bulwark: down from 0.89 to 0.74 m
+CROUCH ok   bulwark: the dip goes 0.025 m under the hold, then settles
+CROUCH ok   bulwark: no pop going down (0.069 m a frame)
+CROUCH ok   bulwark: the feet stay on the ground (0.061, standing 0.064)
+CROUCH ok   bulwark: a heel is up, on the ball of the foot
+CROUCH ok   bulwark: one foot leads by 0.17 m
+CROUCH ok   bulwark: the sneak steps (0.19 m)
+CROUCH ok   bulwark: the feet plant at the crouch speed (0.88 of it)
+CROUCH ok   bulwark: the head rides level on the sneak (0.007 m)
+CROUCH ok   bulwark: no pop coming up (0.059 m a frame)
+CROUCH ok   bulwark: back up on the idle (0.88 m, stood 0.89)
+CROUCH ok   bulwark: with no crouch data the clips stand through it, as before
+CROUCH ok   rimewright: down from 1.41 to 0.97 m
+CROUCH ok   rimewright: the dip goes 0.057 m under the hold, then settles
+CROUCH ok   rimewright: no pop going down (0.106 m a frame)
+CROUCH ok   rimewright: the feet stay on the ground (0.213, standing 0.177)
+CROUCH ok   rimewright: a heel is up, on the ball of the foot
+CROUCH ok   rimewright: one foot leads by 0.58 m
+CROUCH ok   rimewright: the sneak steps (0.64 m)
+CROUCH ok   rimewright: the feet plant at the crouch speed (1.37 of it)
+CROUCH ok   rimewright: the head rides level on the sneak (0.033 m)
+CROUCH ok   rimewright: no pop coming up (0.098 m a frame)
+CROUCH ok   rimewright: back up on the idle (1.40 m, stood 1.41)
+CROUCH ok   rimewright: with no crouch data the clips stand through it, as before
+CROUCH ok   ashwick: down from 1.32 to 0.91 m
+CROUCH ok   ashwick: the dip goes 0.055 m under the hold, then settles
+CROUCH ok   ashwick: no pop going down (0.073 m a frame)
+CROUCH ok   ashwick: the feet stay on the ground (0.163, standing 0.124)
+CROUCH ok   ashwick: a heel is up, on the ball of the foot
+CROUCH ok   ashwick: one foot leads by 0.45 m
+CROUCH ok   ashwick: the sneak steps (0.60 m)
+CROUCH ok   ashwick: the feet plant at the crouch speed (0.85 of it)
+CROUCH ok   ashwick: the head rides level on the sneak (0.045 m)
+CROUCH ok   ashwick: no pop coming up (0.076 m a frame)
+CROUCH ok   ashwick: back up on the idle (1.32 m, stood 1.32)
+CROUCH ok   ashwick: with no crouch data the clips stand through it, as before
+CROUCH ok   dolm: down from 1.84 to 1.23 m
+CROUCH ok   dolm: the dip goes 0.068 m under the hold, then settles
+CROUCH ok   dolm: no pop going down (0.098 m a frame)
+CROUCH ok   dolm: the feet stay on the ground (0.132, standing 0.101)
+CROUCH ok   dolm: a heel is up, on the ball of the foot
+CROUCH ok   dolm: one foot leads by 0.60 m
+CROUCH ok   dolm: the sneak steps (0.73 m)
+CROUCH ok   dolm: the feet plant at the crouch speed (1.08 of it)
+CROUCH ok   dolm: the head rides level on the sneak (0.059 m)
+CROUCH ok   dolm: no pop coming up (0.095 m a frame)
+CROUCH ok   dolm: back up on the idle (1.84 m, stood 1.84)
+CROUCH ok   dolm: with no crouch data the clips stand through it, as before
+CROUCH ok   mage: down from 1.41 to 0.98 m
+CROUCH ok   mage: the dip goes 0.037 m under the hold, then settles
+CROUCH ok   mage: no pop going down (0.076 m a frame)
+CROUCH ok   mage: the feet stay on the ground (0.152, standing 0.104)
+CROUCH ok   mage: a heel is up, on the ball of the foot
+CROUCH ok   mage: one foot leads by 0.38 m
+CROUCH ok   mage: the sneak steps (0.58 m)
+CROUCH ok   mage: the feet plant at the crouch speed (1.24 of it)
+CROUCH ok   mage: the head rides level on the sneak (0.061 m)
+CROUCH ok   mage: no pop coming up (0.078 m a frame)
+CROUCH ok   mage: back up on the idle (1.41 m, stood 1.41)
+CROUCH ok   mage: with no crouch data the clips stand through it, as before
+CROUCH ok   dredge: down from 1.01 to 0.77 m
+CROUCH ok   dredge: the dip goes 0.055 m under the hold, then settles
+CROUCH ok   dredge: no pop going down (0.047 m a frame)
+CROUCH ok   dredge: the feet stay on the ground (0.107, standing 0.052)
+CROUCH ok   dredge: a heel is up, on the ball of the foot
+CROUCH ok   dredge: one foot leads by 0.38 m
+CROUCH ok   dredge: the sneak steps (0.48 m)
+CROUCH ok   dredge: the feet plant at the crouch speed (1.08 of it)
+CROUCH ok   dredge: the head rides level on the sneak (0.038 m)
+CROUCH ok   dredge: no pop coming up (0.047 m a frame)
+CROUCH ok   dredge: back up on the idle (1.00 m, stood 1.01)
+CROUCH ok   dredge: with no crouch data the clips stand through it, as before
+CROUCH ok   tender: down from 1.03 to 0.69 m
+CROUCH ok   tender: the dip goes 0.030 m under the hold, then settles
+CROUCH ok   tender: no pop going down (0.077 m a frame)
+CROUCH ok   tender: the feet stay on the ground (0.117, standing 0.080)
+CROUCH ok   tender: a heel is up, on the ball of the foot
+CROUCH ok   tender: one foot leads by 0.29 m
+CROUCH ok   tender: the sneak steps (0.50 m)
+CROUCH ok   tender: the feet plant at the crouch speed (1.15 of it)
+CROUCH ok   tender: the head rides level on the sneak (0.025 m)
+CROUCH ok   tender: no pop coming up (0.062 m a frame)
+CROUCH ok   tender: back up on the idle (1.03 m, stood 1.03)
+CROUCH ok   tender: with no crouch data the clips stand through it, as before
+CROUCH ok   thief: down from 1.45 to 0.92 m
+CROUCH ok   thief: the dip goes 0.070 m under the hold, then settles
+CROUCH ok   thief: no pop going down (0.101 m a frame)
+CROUCH ok   thief: the feet stay on the ground (0.178, standing 0.136)
+CROUCH ok   thief: a heel is up, on the ball of the foot
+CROUCH ok   thief: one foot leads by 0.51 m
+CROUCH ok   thief: the sneak steps (0.68 m)
+CROUCH ok   thief: the feet plant at the crouch speed (1.26 of it)
+CROUCH ok   thief: the head rides level on the sneak (0.044 m)
+CROUCH ok   thief: no pop coming up (0.105 m a frame)
+CROUCH ok   thief: back up on the idle (1.44 m, stood 1.45)
+CROUCH ok   thief: with no crouch data the clips stand through it, as before
+CROUCH ok   ostra: down from 1.74 to 1.32 m
+CROUCH ok   ostra: the dip goes 0.056 m under the hold, then settles
+CROUCH ok   ostra: no pop going down (0.085 m a frame)
+CROUCH ok   ostra: the root rides the Rig and stays off the ground (0.258 m)
+CROUCH ok   ostra: the head rides level on the sneak (0.071 m)
+CROUCH ok   ostra: no pop coming up (0.078 m a frame)
+CROUCH ok   ostra: back up on the idle (1.72 m, stood 1.74)
+CROUCH ok   at least one Hero has a crouch (12)
+CROUCH_CHECK_DONE, failures: 0

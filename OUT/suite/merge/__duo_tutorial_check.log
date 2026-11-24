@@ -1,0 +1,104 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+DUOTUT PASS archer: the tutorial is up with two rivals
+DUOTUT PASS archer: 2v2 sides
+DUO beat 0 meet t=0.0
+DUO beat 1 attack t=2.9
+DUO beat 2 sec t=8.8
+DUO beat 3 slide t=11.8
+DUO beat 4 kin t=14.7
+DUO beat 5 dodge t=17.3
+DUO beat 6 focus t=22.7
+DUO beat 7 boki t=27.3
+DUO beat 8 capture t=32.2
+DUO beat 9 revive t=40.3
+DUO beat 10 finale t=46.7
+DUO beat 11  t=52.4
+DUOTUT archer: 53.9 s, reached ["meet", "attack", "sec", "slide", "kin", "dodge", "focus", "boki", "capture", "revive", "finale"], skipped [], put back in the ring 0 times
+DUOTUT PASS archer: the run ends (54 s, beat 11 )
+DUOTUT PASS archer: every beat in order
+DUOTUT PASS archer: no beat passed by the stall skip []
+DUOTUT PASS archer: the rivals hold fire in the first beats (0)
+DUOTUT PASS archer: nobody left the ring (0 steps outside)
+DUOTUT PASS archer: the wild Boki was caught
+DUOTUT PASS juggernaut: the tutorial is up with two rivals
+DUOTUT PASS juggernaut: 2v2 sides
+DUO beat 0 meet t=0.0
+DUO beat 1 attack t=2.9
+DUO beat 2 sec t=6.6
+DUO beat 3 slide t=10.3
+DUO beat 4 kin t=13.0
+DUO beat 5 dodge t=15.3
+DUO beat 6 focus t=22.4
+DUO beat 7 boki t=25.8
+DUO beat 8 capture t=32.2
+DUO beat 9 revive t=41.0
+DUO beat 10 finale t=47.4
+DUO beat 11  t=53.3
+DUOTUT juggernaut: 54.8 s, reached ["meet", "attack", "sec", "slide", "kin", "dodge", "focus", "boki", "capture", "revive", "finale"], skipped [], put back in the ring 0 times
+DUOTUT PASS juggernaut: the run ends (55 s, beat 11 )
+DUOTUT PASS juggernaut: every beat in order
+DUOTUT PASS juggernaut: no beat passed by the stall skip []
+DUOTUT PASS juggernaut: the rivals hold fire in the first beats (0)
+DUOTUT PASS juggernaut: nobody left the ring (0 steps outside)
+DUOTUT PASS juggernaut: the wild Boki was caught
+DUOTUT PASS gunslinger: the tutorial is up with two rivals
+DUOTUT PASS gunslinger: 2v2 sides
+DUO beat 0 meet t=0.0
+DUO beat 1 attack t=2.9
+DUO beat 2 sec t=5.5
+DUO beat 3 slide t=8.3
+DUO beat 4 kin t=11.2
+DUO beat 5 dodge t=13.8
+DUO beat 6 focus t=24.2
+DUO beat 7 boki t=27.4
+DUO beat 8 capture t=30.7
+DUO beat 9 revive t=39.4
+DUO beat 10 finale t=46.1
+DUO beat 11  t=57.3
+DUOTUT gunslinger: 58.8 s, reached ["meet", "attack", "sec", "slide", "kin", "dodge", "focus", "boki", "capture", "revive", "finale"], skipped [], put back in the ring 0 times
+DUOTUT PASS gunslinger: the run ends (59 s, beat 11 )
+DUOTUT PASS gunslinger: every beat in order
+DUOTUT PASS gunslinger: no beat passed by the stall skip []
+DUOTUT PASS gunslinger: the rivals hold fire in the first beats (0)
+DUOTUT PASS gunslinger: nobody left the ring (0 steps outside)
+DUOTUT PASS gunslinger: the wild Boki was caught
+DUOTUT PASS idle: the guide nags ('Over here! I'm the one waving.')
+DUOTUT PASS idle: the first beat passed itself (beat 1)
+DUOTUT DONE, failures: 0
+ERROR: 3 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 42 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 6 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 31: leaked 5592432 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 32: leaked 11184824 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 33: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 56: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 57: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 58: leaked 2796240 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 34: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 36: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 35: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 41: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 40: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 49: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 33 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

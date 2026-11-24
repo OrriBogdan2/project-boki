@@ -1,0 +1,121 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ODROCKET ok   the headless relay server listens on 7884  
+ODROCKET ok   the host is on the server as 1975353174 (100 ms each way, jitter 0)  
+ODROCKET ok   the guest joins the server  1799040994
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _build (res://tools/online_rocket_check.gd:50)
+       [12] _host (res://tools/online_displace_check.gd:140)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _build (res://tools/online_rocket_check.gd:50)
+       [12] _host (res://tools/online_displace_check.gd:140)
+WARNING: Sending 1711 bytes unreliably which is above the MTU (1392), this will result in higher packet loss
+     at: put_packet (modules/enet/enet_multiplayer_peer.cpp:363)
+     GDScript backtrace (most recent call first):
+         [0] send (res://scripts/core/net_enet.gd:40)
+         [1] _emit (res://scripts/core/net.gd:213)
+         [2] _chunks (res://scripts/core/net.gd:237)
+         [3] tick (res://scripts/core/net.gd:265)
+         [4] step (res://scripts/match/match.gd:3935)
+         [5] _run (res://tools/online_rocket_check.gd:72)
+ODROCKET ok   the guest's hunter is here, driven by the guest's game  
+ODROCKET ok   both ride the ship (host true, guest copy true)  
+ODROCKET ok   the leader launches the squad's rocket  
+ODROCKET ok   the rocket lands and the squad is down (4.7 s after the launch, from 98 m up)  
+ODROCKET ok   the leader stands on the ground (y 1.60, ground 1.60)  
+ODROCKET ok   the guest is down on the host's copy ((86.36, -0.21, 19.65))  
+ODROCKET steps host game, squadmate (the other player), ride (launch = 632.77): 633.36 s +1.24 m, 634.36 s +0.83 m, 635.38 s +0.77 m, 635.86 s +0.53 m, 636.40 s +1.38 m, 636.86 s +1.08 m, 637.31 s +1.75 m, 637.88 s +1.32 m
+ODROCKET FLAG host game, squadmate (the other player), ride: largest step 2.60 m per 1/60 s, 13 frames over 0.5 m, 17 catch-up frames
+ODROCKET steps host game, squadmate (the other player), fall (launch = 632.77): 641.78 s +1.47 m, 642.77 s +2.10 m, 643.70 s +2.25 m, 645.31 s +4.27 m, 646.67 s +2.89 m
+ODROCKET FLAG host game, squadmate (the other player), fall: largest step 4.27 m per 1/60 s, 5 frames over 0.5 m, 12 catch-up frames
+ODROCKET steps host game, squadmate (the other player), glide (launch = 632.77): 648.20 s +2.48 m, 649.80 s +0.99 m, 650.81 s +0.97 m, 652.26 s +1.03 m, 653.88 s +0.78 m, 654.93 s +0.63 m, 655.50 s +0.65 m, 656.50 s +0.64 m
+ODROCKET FLAG host game, squadmate (the other player), glide: largest step 2.48 m per 1/60 s, 12 frames over 0.5 m, 33 catch-up frames
+ODROCKET steps guest game, squadmate (the other player), ride (launch = 632.77): 633.01 s +2.20 m, 633.65 s +0.74 m, 633.67 s +0.99 m, 633.69 s +0.97 m, 633.70 s +0.67 m, 634.06 s +6.61 m, 634.46 s +0.72 m, 634.47 s +0.91 m
+ODROCKET FLAG guest game, squadmate (the other player), ride: largest step 18.00 m per 1/60 s, 33 frames over 0.5 m, 38 catch-up frames
+ODROCKET steps guest game, squadmate (the other player), fall (launch = 632.77): 641.56 s +0.53 m, 641.59 s +0.53 m, 641.62 s +0.53 m, 641.63 s +0.53 m, 641.66 s +0.53 m, 641.69 s +0.53 m, 641.70 s +0.53 m, 641.72 s +0.53 m
+ODROCKET FLAG guest game, squadmate (the other player), fall: largest step 18.71 m per 1/60 s, 44 frames over 0.5 m, 60 catch-up frames
+ODROCKET steps guest game, squadmate (the other player), glide (launch = 632.77): 647.86 s +0.53 m, 647.89 s +0.53 m, 647.90 s +0.53 m, 647.92 s +0.53 m, 647.93 s +0.53 m, 647.99 s +0.53 m, 648.02 s +0.53 m, 648.04 s +0.53 m
+ODROCKET FLAG guest game, squadmate (the other player), glide: largest step 17.63 m per 1/60 s, 28 frames over 0.5 m, 86 catch-up frames
+ODROCKET steps guest game, squadmate (the other player), landing (launch = 632.77): 657.24 s +15.83 m, 657.75 s +0.57 m, 657.77 s +0.58 m, 657.78 s +0.51 m, 658.45 s +0.79 m
+ODROCKET info guest game, squadmate (the other player), landing: largest step 15.83 m per 1/60 s, 5 frames over 0.5 m, 7 catch-up frames
+ODROCKET steps guest game, rocket (follower copy), ride (launch = 632.77): 639.15 s +0.50 m, 639.17 s +0.51 m, 639.18 s +0.52 m, 639.23 s +0.53 m, 639.26 s +0.53 m, 639.27 s +0.54 m, 639.31 s +0.55 m, 640.06 s +0.53 m
+ODROCKET FLAG guest game, rocket (follower copy), ride: largest step 0.61 m per 1/60 s, 48 frames over 0.5 m, 38 catch-up frames
+ODROCKET steps guest game, rocket (follower copy), fall (launch = 632.77): 641.32 s +0.61 m, 641.34 s +0.61 m, 641.37 s +0.61 m, 641.38 s +0.61 m, 641.56 s +0.53 m, 641.59 s +0.53 m, 641.62 s +0.53 m, 641.63 s +0.53 m
+ODROCKET FLAG guest game, rocket (follower copy), fall: largest step 0.61 m per 1/60 s, 115 frames over 0.5 m, 60 catch-up frames
+ODROCKET steps guest game, rocket (follower copy), glide (launch = 632.77): 647.67 s +0.61 m, 647.71 s +0.61 m, 647.73 s +0.61 m, 647.75 s +0.61 m, 647.77 s +0.61 m, 647.79 s +0.61 m, 647.86 s +0.53 m, 647.89 s +0.53 m
+ODROCKET FLAG guest game, rocket (follower copy), glide: largest step 0.61 m per 1/60 s, 107 frames over 0.5 m, 86 catch-up frames
+ODROCKET info guest game, rocket (follower copy), landing: largest step 0.46 m per 1/60 s, 0 frames over 0.5 m, 2 catch-up frames
+ODROCKET steps guest game, own body (this game), ride (launch = 632.77): 633.01 s +3.73 m, 639.17 s +0.50 m, 639.18 s +0.51 m, 639.23 s +0.52 m, 639.26 s +0.53 m, 639.27 s +0.53 m, 639.31 s +0.54 m, 640.07 s +0.53 m
+ODROCKET FAIL guest game, own body (this game), ride: largest step 3.73 m per 1/60 s, 47 frames over 0.5 m, 38 catch-up frames  
+ODROCKET info guest game, rival bots, ride: largest step 1.65 m per 1/60 s, 22 frames over 0.5 m, 76 catch-up frames
+ODROCKET info guest game, rival bots, fall: largest step 1.65 m per 1/60 s, 16 frames over 0.5 m, 120 catch-up frames
+ODROCKET info guest game, rival bots, glide: largest step 1.65 m per 1/60 s, 20 frames over 0.5 m, 172 catch-up frames
+ODROCKET info guest game, rival bots, landing: largest step 1.64 m per 1/60 s, 4 frames over 0.5 m, 14 catch-up frames
+ODROCKET ok   remote bodies were measured on both games  
+ODROCKET FAIL the guest ends where the other game shows them (3.01 m apart)  
+ODROCKET ok   the leader ends where the other game shows them (0.01 m apart)  
+ODROCKET FAIL the guest jumped out (8.5 s), opened the glider (14.8 s) and landed (inf s)  
+ODROCKET table
+| Game | Body | Phase | Frames | Largest step per 1/60 s (m) | Frames over 0.5 m | Catch-up frames | Worst at (s after launch) |
+|---|---|---|---|---|---|---|---|
+| host | squadmate (the other player) | ride | 17 | 2.60 | 13 | 17 | 5.6 |
+| host | squadmate (the other player) | fall | 12 | 4.27 | 5 | 12 | 12.5 |
+| host | squadmate (the other player) | glide | 33 | 2.48 | 12 | 33 | 15.4 |
+| host | own body (this game) | ride | 17 | 0.48 | 0 | 17 | 7.5 |
+| host | own body (this game) | fall | 12 | 0.48 | 0 | 12 | 11.5 |
+| host | own body (this game) | glide | 33 | 0.47 | 0 | 33 | 15.4 |
+| guest | squadmate (the other player) | ride | 392 | 18.00 | 33 | 38 | 7.3 |
+| guest | squadmate (the other player) | fall | 255 | 18.71 | 44 | 60 | 13.4 |
+| guest | squadmate (the other player) | glide | 367 | 17.63 | 28 | 86 | 16.7 |
+| guest | squadmate (the other player) | landing | 66 | 15.83 | 5 | 7 | 24.5 |
+| guest | rocket (follower copy) | ride | 382 | 0.61 | 48 | 38 | 8.4 |
+| guest | rocket (follower copy) | fall | 255 | 0.61 | 115 | 60 | 13.6 |
+| guest | rocket (follower copy) | glide | 367 | 0.61 | 107 | 86 | 16.9 |
+| guest | rocket (follower copy) | landing | 16 | 0.46 | 0 | 2 | 24.1 |
+| guest | own body (this game) | ride | 392 | 3.73 | 47 | 38 | 0.2 |
+| guest | own body (this game) | fall | 255 | 0.45 | 0 | 60 | 8.5 |
+| guest | own body (this game) | glide | 367 | 0.22 | 0 | 86 | 14.9 |
+| guest | own body (this game) | landing | 66 | 0.08 | 0 | 7 | 25.0 |
+| guest | rival bots | ride | 784 | 1.65 | 22 | 76 | 6.8 |
+| guest | rival bots | fall | 510 | 1.65 | 16 | 120 | 10.7 |
+| guest | rival bots | glide | 734 | 1.65 | 20 | 172 | 23.0 |
+| guest | rival bots | landing | 132 | 1.64 | 4 | 14 | 25.2 |
+
+ODROCKET DONE, 14 checks, failures: 3
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 21 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

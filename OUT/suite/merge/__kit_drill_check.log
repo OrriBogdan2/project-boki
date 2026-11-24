@@ -1,0 +1,129 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KITDRILL ok   archer: a line and a key for every slot
+KITDRILL   [LMB] Hold to draw, then let go on the gold flash.  HOLD LMB, not just a tap
+KITDRILL   [RMB] Hold to draw a Heavy Shot; a foe pinned to a wall takes it twice.  HOLD RMB, not just a tap
+KITDRILL   [E] Rain arrows on a wall at the cursor: damage, slow, anti-heal...  
+KITDRILL   [R] Your next 3 shots skip the draw and pierce.  
+KITDRILL   [SHIFT] Roll, then walk through rocks and trees for 2.8s.  
+KITDRILL ok   juggernaut: a line and a key for every slot
+KITDRILL   [LMB] Wide greatsword slashes.  
+KITDRILL   [RMB] A heavy slam. Hold to charge it.  HOLD RMB, not just a tap
+KITDRILL   [E] Chain a foe or a wall, then haul yourself in.  Press E, then E AGAIN
+KITDRILL   [R] Guard, then lunge into a healing cleave.  
+KITDRILL   [SHIFT] Charge through foes; the tip hits hardest.  
+KITDRILL ok   gunslinger: a line and a key for every slot
+KITDRILL   [LMB] Hold to fire. No reload: let go and the drum refills itself. Dazed foes take 76% more.  HOLD LMB, not just a tap
+KITDRILL   [RMB] Launcher shot: a hit Dazes; on a wall or the ground it blasts a cone that knocks foes back.  
+KITDRILL   [E] Stand still 0.6s, then a beam fires through walls; its recoil shoves you back.  
+KITDRILL   [R] Mark a zone at the cursor: a shell lands there 1.6s later and burns.  
+KITDRILL   [SHIFT] Tap to skid, hold to slide; you keep firing through both.  HOLD SHIFT, not just a tap
+KITDRILL ok   bulwark: a line and a key for every slot
+KITDRILL ok   rimewright: a line and a key for every slot
+KITDRILL ok   ashwick: a line and a key for every slot
+KITDRILL   [LMB] Pour fire from your hand 6m ahead.  
+KITDRILL   [RMB] A cinder that slows and spreads the burn.  HOLD RMB, not just a tap
+KITDRILL   [E] A heat blast drags foes in and shields you.  
+KITDRILL   [R] Fly, laying a burning lava carpet.  Press R, then R AGAIN
+KITDRILL   [SHIFT] Ram head first into the first foe.  
+KITDRILL ok   dolm: a line and a key for every slot
+KITDRILL ok   mage: a line and a key for every slot
+KITDRILL ok   dredge: a line and a key for every slot
+KITDRILL ok   tender: a line and a key for every slot
+KITDRILL ok   thief: a line and a key for every slot
+KITDRILL ok   ostra: a line and a key for every slot
+KITDRILL ok   gil: a line and a key for every slot
+KITDRILL ok   juggernaut E is a recast (its chain: press E again)
+KITDRILL ok   gunslinger dash has a hold
+KITDRILL ok   LMB is a plain press unless the JSON says hold
+KITDRILL ok   Vex's lmb line names ["hold", "no reload", "refills"] (missing [])
+KITDRILL ok   Vex's rmb line names ["launcher", "knocks"] (missing [])
+KITDRILL ok   Vex's e line names ["stand still", "0.6s", "recoil"] (missing [])
+KITDRILL ok   Vex's x line names ["zone", "cursor"] (missing [])
+KITDRILL ok   Vex's dash line names ["tap", "hold", "firing"] (missing [])
+KITDRILL ok   Vex: LMB is a hold step (full-auto)
+KITDRILL ok   Vex's fire call-out names the key
+KITDRILL ok   Lace: the draw and the Heavy Shot are holds
+KITDRILL ok   Lace's draw line: hold, then let go on the gold flash
+KITDRILL ok   Lace's Heavy Shot line: hold, and the wall pin
+KITDRILL ok   Lace's draw call-out names the key
+KITDRILL ok   after the first press the call-out is '<KEY> AGAIN'
+KITDRILL ok   a slice Hunter's line is its own text
+KITDRILL ok   a Hunter outside the slice gets the generic line
+KITDRILL ok   the wrong key does not advance
+KITDRILL ok   step lmb is open
+KITDRILL ok   step rmb is open
+KITDRILL ok   step e is open
+KITDRILL ok   e: the first press of a recast does not finish it
+KITDRILL ok   step e is open
+KITDRILL ok   step x is open
+KITDRILL ok   step dash is open
+KITDRILL ok   juggernaut: the last step ends the drill
+KITDRILL ok   archer: a tap on LMB does not finish its hold
+KITDRILL ok   step lmb is open
+KITDRILL ok   step rmb is open
+KITDRILL ok   step e is open
+KITDRILL ok   step x is open
+KITDRILL ok   step dash is open
+KITDRILL ok   archer: the last step ends the drill
+KITDRILL ok   gunslinger: a tap on LMB does not finish its hold
+KITDRILL ok   step lmb is open
+KITDRILL ok   step rmb is open
+KITDRILL ok   step e is open
+KITDRILL ok   step x is open
+KITDRILL ok   step dash is open
+KITDRILL ok   gunslinger: the last step ends the drill
+KITDRILL ok   gunslinger finish: the first visit gets the drill
+KITDRILL ok   gunslinger finish: the save key is set
+KITDRILL ok   gunslinger finish: never shown again
+KITDRILL ok   gunslinger skip: the first visit gets the drill
+KITDRILL ok   gunslinger skip: the save key is set
+KITDRILL ok   gunslinger skip: never shown again
+KITDRILL ok   archer finish: the first visit gets the drill
+KITDRILL ok   archer finish: the save key is set
+KITDRILL ok   archer finish: never shown again
+KITDRILL ok   juggernaut finish: the first visit gets the drill
+KITDRILL ok   juggernaut finish: the save key is set
+KITDRILL ok   juggernaut finish: never shown again
+KITDRILL ok   recast: the Training Grounds bar has the station, closed
+KITDRILL ok   recast: Ostra has one two-step slot (E)
+KITDRILL ok   recast: E again inside the window reads hit
+KITDRILL ok   recast: and the real recast went off
+KITDRILL ok   recast: a timer-less window reads HIT only
+KITDRILL ok   recast: a finished rep resets the slot
+KITDRILL ok   recast: E again well before the marker reads early
+KITDRILL ok   recast: the seed is still out, the slot waits
+KITDRILL ok   recast: a second clean press reads hit again
+KITDRILL ok   recast: three reps finish the ability
+KITDRILL ok   recast: a fourth rep is not counted
+KITDRILL ok   recast: a press inside the buffer before the window arms is a hit
+KITDRILL ok   recast: Vex sees 'No two-step abilities'
+KITDRILL ok   recast late: the Thief has one two-step slot (E)
+KITDRILL ok   recast late: a window that closes unused reads late
+KITDRILL OK
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 215: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 220: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 222: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 28 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

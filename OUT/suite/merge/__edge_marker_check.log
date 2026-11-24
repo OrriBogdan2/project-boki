@@ -1,0 +1,50 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+EDGEMARK ok   (1280.0, 720.0): 'Glove' never sits under its arrow (0 of 96 touch)
+EDGEMARK ok   (1280.0, 720.0): 'Glove' stays on the screen (0 of 48 spill)
+EDGEMARK ok   (1280.0, 720.0): 'Monster' never sits under its arrow (0 of 96 touch)
+EDGEMARK ok   (1280.0, 720.0): 'Monster' stays on the screen (0 of 48 spill)
+EDGEMARK ok   (1280.0, 720.0): 'Lookout' never sits under its arrow (0 of 96 touch)
+EDGEMARK ok   (1280.0, 720.0): 'Lookout' stays on the screen (0 of 48 spill)
+EDGEMARK ok   (1280.0, 720.0): 'Uplink' never sits under its arrow (0 of 96 touch)
+EDGEMARK ok   (1280.0, 720.0): 'Uplink' stays on the screen (0 of 48 spill)
+EDGEMARK ok   (1920.0, 1080.0): 'Glove' never sits under its arrow (0 of 96 touch)
+EDGEMARK ok   (1920.0, 1080.0): 'Glove' stays on the screen (0 of 48 spill)
+EDGEMARK ok   (1920.0, 1080.0): 'Monster' never sits under its arrow (0 of 96 touch)
+EDGEMARK ok   (1920.0, 1080.0): 'Monster' stays on the screen (0 of 48 spill)
+EDGEMARK ok   (1920.0, 1080.0): 'Lookout' never sits under its arrow (0 of 96 touch)
+EDGEMARK ok   (1920.0, 1080.0): 'Lookout' stays on the screen (0 of 48 spill)
+EDGEMARK ok   (1920.0, 1080.0): 'Uplink' never sits under its arrow (0 of 96 touch)
+EDGEMARK ok   (1920.0, 1080.0): 'Uplink' stays on the screen (0 of 48 spill)
+EDGEMARK ok   world rim, angle 0.0: two markers at one angle do not overlap
+EDGEMARK ok   world rim, angle 0.0: the goal keeps its place, the other slides
+EDGEMARK ok   world rim, angle 0.7: two markers at one angle do not overlap
+EDGEMARK ok   world rim, angle 0.7: the goal keeps its place, the other slides
+EDGEMARK ok   world rim, angle -1.6: two markers at one angle do not overlap
+EDGEMARK ok   world rim, angle -1.6: the goal keeps its place, the other slides
+EDGEMARK ok   world rim, angle 2.3: two markers at one angle do not overlap
+EDGEMARK ok   world rim, angle 2.3: the goal keeps its place, the other slides
+EDGEMARK ok   world rim, angle 3.1: two markers at one angle do not overlap
+EDGEMARK ok   world rim, angle 3.1: the goal keeps its place, the other slides
+EDGEMARK ok   world rim, angle 3.9: two markers at one angle do not overlap
+EDGEMARK ok   world rim, angle 3.9: the goal keeps its place, the other slides
+EDGEMARK ok   world rim: a lone marker sits on the rim at its angle
+EDGEMARK ok   world rim: eight markers close together do not overlap
+EDGEMARK ok   minimap rim, angle 0.0: two markers at one angle do not overlap
+EDGEMARK ok   minimap rim, angle 0.0: the goal keeps its place, the other slides
+EDGEMARK ok   minimap rim, angle 0.7: two markers at one angle do not overlap
+EDGEMARK ok   minimap rim, angle 0.7: the goal keeps its place, the other slides
+EDGEMARK ok   minimap rim, angle -1.6: two markers at one angle do not overlap
+EDGEMARK ok   minimap rim, angle -1.6: the goal keeps its place, the other slides
+EDGEMARK ok   minimap rim, angle 2.3: two markers at one angle do not overlap
+EDGEMARK ok   minimap rim, angle 2.3: the goal keeps its place, the other slides
+EDGEMARK ok   minimap rim, angle 3.1: two markers at one angle do not overlap
+EDGEMARK ok   minimap rim, angle 3.1: the goal keeps its place, the other slides
+EDGEMARK ok   minimap rim, angle 3.9: two markers at one angle do not overlap
+EDGEMARK ok   minimap rim, angle 3.9: the goal keeps its place, the other slides
+EDGEMARK ok   minimap rim: a lone marker sits on the rim at its angle
+EDGEMARK ok   minimap rim: eight markers close together do not overlap
+EDGEMARK DONE, failures: 0

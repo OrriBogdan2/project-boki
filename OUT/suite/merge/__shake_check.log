@@ -1,0 +1,656 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SHAKE ok   the Screen shake slider defaults to 30%
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+SHAKE ok   archer: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   archer: no shake left running
+SHAKE ok   archer: the script really cast (6 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   juggernaut: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   juggernaut: no shake left running
+SHAKE ok   juggernaut: the script really cast (6 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   gunslinger: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   gunslinger: no shake left running
+SHAKE ok   gunslinger: the script really cast (5 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   bulwark: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   bulwark: no shake left running
+SHAKE ok   bulwark: the script really cast (4 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   rimewright: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   rimewright: no shake left running
+SHAKE ok   rimewright: the script really cast (3 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   ashwick: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   ashwick: no shake left running
+SHAKE ok   ashwick: the script really cast (6 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   dolm: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   dolm: no shake left running
+SHAKE ok   dolm: the script really cast (5 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   mage: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   mage: no shake left running
+SHAKE ok   mage: the script really cast (5 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   dredge: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   dredge: no shake left running
+SHAKE ok   dredge: the script really cast (6 abilities went off)
+SHAKE FAIL tender: lmb, rmb, e, x, q, dash, air dash, landing put 0.150 s of shake on the caster's camera
+SHAKE FAIL tender: no shake left running
+SHAKE ok   tender: the script really cast (4 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   thief: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   thief: no shake left running
+SHAKE ok   thief: the script really cast (5 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   ostra: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   ostra: no shake left running
+SHAKE ok   ostra: the script really cast (5 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/shake_check.gd:30)
+SHAKE ok   gil: lmb, rmb, e, x, q, dash, air dash, landing put 0.000 s of shake on the caster's camera
+SHAKE ok   gil: no shake left running
+SHAKE ok   gil: the script really cast (6 abilities went off)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _boss_slam (res://tools/shake_check.gd:92)
+       [13] run (res://tools/shake_check.gd:34)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _boss_slam (res://tools/shake_check.gd:92)
+       [13] run (res://tools/shake_check.gd:34)
+SHAKE ok   a boss slam on you shakes 0.150 s
+SHAKE ok   the slider scales it: 30% 0.075, 60% 0.150
+SHAKE ok   a slam 40 m away is not felt
+SHAKE ok   a slam you caused yourself is not felt
+SHAKE ok   slider at 0: a slam on you shakes nothing
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _fight (res://tools/shake_check.gd:126)
+       [13] run (res://tools/shake_check.gd:35)
+       [14] _boss_slam (res://tools/shake_check.gd:119)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _fight (res://tools/shake_check.gd:126)
+       [13] run (res://tools/shake_check.gd:35)
+       [14] _boss_slam (res://tools/shake_check.gd:119)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _fight (res://tools/shake_check.gd:126)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _fight (res://tools/shake_check.gd:126)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _fight (res://tools/shake_check.gd:126)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _fight (res://tools/shake_check.gd:126)
+SHAKE ok   a scripted 60 s fight shakes 0.150 s (budget 1.0 s)
+SHAKE DONE, failures: 2
+ERROR: 1 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 3 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 79: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 81: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 80: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 272: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 285: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 283: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 289: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 300: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 298: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 303: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 301: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 306: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 304: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 309: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 307: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 311: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 14261: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14262: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14263: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14264: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 57 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

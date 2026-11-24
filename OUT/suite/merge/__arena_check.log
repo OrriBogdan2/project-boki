@@ -1,0 +1,166 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ARENACHECK arena boots on its own map               PASS  layout arena
+ARENACHECK arena: no monsters, chests or train      PASS  mobs 0 chests 0
+ARENACHECK arena: player is a thief on the floor    PASS  thief on floor
+ARENACHECK arena: three dummies                     PASS  
+ARENACHECK arena: ult unlocked by default           PASS  
+ARENACHECK dummy takes damage                       PASS  3000 -> 2975
+ARENACHECK dummy meter counts it                    PASS  total 25
+ARENACHECK dummy label shows DPS                    PASS  DPS 25   ·   last 25
+total 25
+ARENACHECK thief Bola hits a dummy, Grounds and Marks it PASS  total 28 marks 2
+ARENACHECK five Marks: diamonds over the dummy      PASS  marks 6 pips 1
+ARENACHECK X doesn't reset the arena (it is the Merge key) PASS  
+ARENACHECK Backspace resets the arena               PASS  
+ARENACHECK reset: you're home and healed            PASS  
+ARENACHECK reset: dummies full and meters clear     PASS  
+ARENACHECK cooldowns off: E ready again             PASS  
+ARENACHECK glove picker: blink on Q                 PASS  
+ARENACHECK cooldowns off covers the glove           PASS  
+ARENACHECK two gloves: blink stays on Q, grapple goes to V PASS  
+ARENACHECK cooldowns off covers both gloves         PASS  
+ARENACHECK the V glove fires alone: V on cooldown, Q ready PASS  
+ARENACHECK then the Q glove fires too               PASS  
+ARENACHECK every active glove casts (their own sounds play) PASS  
+ARENACHECK one glove can't be worn twice: blink to V empties Q PASS  
+ARENACHECK two gloves again: grapple Q, blink V     PASS  
+ARENACHECK ult toggle: locked                       PASS  
+ARENACHECK ult toggle: unlocked                     PASS  
+ARENACHECK swap to juggernaut: heavy, rage kit      PASS  juggernaut heavy hp 193
+ARENACHECK swap keeps both gloves                   PASS  
+ARENACHECK the swap brings the archetype's one weapon PASS  
+ARENACHECK Boki swap: cindle on your shoulder       PASS  
+ARENACHECK Boki swap: none                          PASS  
+ARENACHECK swap to archer                           PASS  
+ARENACHECK swap to juggernaut                       PASS  
+ARENACHECK swap to gunslinger                       PASS  
+ARENACHECK swap to bulwark                          PASS  
+ARENACHECK swap to rimewright                       PASS  
+ARENACHECK swap to ashwick                          PASS  
+ARENACHECK swap to dolm                             PASS  
+ARENACHECK swap to mage                             PASS  
+ARENACHECK swap to dredge                           PASS  
+ARENACHECK swap to tender                           PASS  
+ARENACHECK swap to thief                            PASS  
+ARENACHECK swap to ostra                            PASS  
+ARENACHECK swap to gil                              PASS  
+ARENACHECK hold: archer winds up (ring), ticks full, releases PASS  mid 0.38 fulls +1 last 1.00
+ARENACHECK hold: juggernaut winds up (ring), ticks full, releases PASS  mid 0.52 fulls +1 last 1.00
+ARENACHECK hold: bulwark winds up (ring), ticks full, releases PASS  mid 0.32 fulls +1 last 1.00
+ARENACHECK hold: dolm winds up (ring), ticks full, releases PASS  mid 0.93 fulls +1 last 1.00
+ARENACHECK hold: mage winds up (ring), ticks full, releases PASS  mid 0.42 fulls +1 last 1.00
+ARENACHECK hold: juggernaut greatsword winds up a Searing Wave PASS  mid 0.45 fulls +1 waves 1
+ARENACHECK juggernaut: Rage fills to Enraged, the form grows PASS  enraged 5.7 scale 1.26
+ARENACHECK juggernaut: his own ultimate is on X (Gilded Riposte) PASS  
+ARENACHECK bot: idle                                PASS  
+ARENACHECK bot: fights as a thief                   PASS  
+ARENACHECK bot uses the thief kit (RMB, E, dash)    FAIL  rmb 5 e 0 dash true
+ARENACHECK bot uses the juggernaut kit (RMB, E, dash) PASS  rmb 4 e 1 dash true
+ARENACHECK bot: off                                 PASS  
+ARENACHECK loadout panel opens (fixed size)         PASS  
+ARENACHECK kit card opens in the arena              PASS  
+ARENACHECK kit card closes                          PASS  
+ARENACHECK practice: the Esc menu has Practice      FAIL  pause
+ARENACHECK practice: Max all                        FAIL  { "sec": 1, "dash": 1, "kin": 1, "ult": 1 }
+ARENACHECK practice: max rank shortens the cooldown FAIL  1.0
+SCRIPT ERROR: Invalid access to property or key 'tooltip_text' on a base object of type 'Nil'.
+          at: _practice_page (res://tools/arena_check.gd:379)
+          GDScript backtrace (most recent call first):
+              [0] _practice_page (res://tools/arena_check.gd:379)
+ARENACHECK (arena match freed)
+ARENACHECK (next frame)
+ARENACHECK arena Mossy (opened as him): his 3D hammer is skinned on him PASS  
+ARENACHECK arena Mossy (opened as him): held, the hammer whirls at the data's rate PASS  3.62 turns/s
+ARENACHECK arena Mossy (opened as him): the whirled hammer reads at the match camera (>= 1.5 m long) PASS  1.96 m
+ARENACHECK arena Mossy (opened as him): the release slams PASS  slams +1
+ARENACHECK arena Mossy (opened as him): held through a recall, the catch goes into the whirl PASS  out true back true held true
+ARENACHECK arena Mossy (swapped to him): his 3D hammer is skinned on him PASS  
+ARENACHECK arena Mossy (swapped to him): held, the hammer whirls at the data's rate PASS  3.62 turns/s
+ARENACHECK arena Mossy (swapped to him): the whirled hammer reads at the match camera (>= 1.5 m long) PASS  1.96 m
+ARENACHECK arena Mossy (swapped to him): the release slams PASS  slams +1
+ARENACHECK arena Mossy (swapped to him): held through a recall, the catch goes into the whirl PASS  out true back true held true
+ARENACHECK (kit cards)
+ARENACHECK kit card builds: archer                  PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: archer PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: archer PASS  
+ARENACHECK kit card builds: juggernaut              PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: juggernaut PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: juggernaut PASS  
+ARENACHECK kit card builds: gunslinger              PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: gunslinger PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: gunslinger PASS  
+ARENACHECK kit card builds: bulwark                 PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: bulwark PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card line is one short line: bulwark.rmb FAIL  Hold to block shots from the front; your dash key becomes Shield Charge.
+ARENACHECK kit card chips quote the kit's numbers: bulwark PASS  
+ARENACHECK kit card builds: rimewright              PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: rimewright PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card line is one short line: rimewright.e FAIL  An ice wall slides to the cursor, shoving foes; use it again to freeze it.
+ARENACHECK kit card chips quote the kit's numbers: rimewright PASS  
+ARENACHECK kit card builds: ashwick                 PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: ashwick PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: ashwick PASS  
+ARENACHECK kit card builds: dolm                    PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: dolm   PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: dolm PASS  
+ARENACHECK kit card builds: mage                    PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: mage   PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: mage FAIL  x 22 dmg
+ARENACHECK kit card builds: dredge                  PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: dredge PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card line is one short line: dredge.lmb FAIL  Seven slugs, 6m out: all seven fly in a tight group along your aim; rear hits hurt more.
+ARENACHECK kit card chips quote the kit's numbers: dredge PASS  
+ARENACHECK kit card builds: tender                  PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: tender PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: tender PASS  
+ARENACHECK kit card builds: thief                   PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: thief  PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: thief PASS  
+ARENACHECK kit card builds: ostra                   PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: ostra  PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: ostra FAIL  rmb 9.5 dmg, e 12.5 dmg
+ARENACHECK kit card builds: gil                     PASS  size (800.0, 627.0)
+ARENACHECK kit card sub-page keeps its size: gil    PASS  (800.0, 627.0) -> (800.0, 627.0)
+ARENACHECK kit card chips quote the kit's numbers: gil PASS  
+ARENACHECK kit card: Boki infusion lines (RMB and E; her ultimate on X isn't infused) PASS  Bola: +poison 6.3 over 3s, +stun 0.3s | Shadow Knife: +poison 5.4 over 3s, +stun 0.3s
+ARENACHECK loadout strip: six kit tiles (the hunter ultimate has its own X tile) PASS  6
+ARENACHECK home has the kit card                    PASS  
+ARENACHECK expedition panel shows no ability strip  PASS  
+ARENACHECK (training match next)
+ARENACHECK starting the training match
+ARENACHECK training match up
+ARENACHECK training gets the practice tools         PASS  
+ARENACHECK training: ult open from the start        PASS  
+ARENACHECK training: archetype swap                 PASS  
+ARENACHECK training: E casts                        PASS  
+ARENACHECK training: RMB casts                      PASS  hold
+ARENACHECK training: dash                           PASS  
+ARENACHECK drill: you start in the Strafer's reach  PASS  
+ARENACHECK drill: the lane shows before the orb leaves PASS  
+ARENACHECK drill: standing still is caught, no count, no damage PASS  0
+ARENACHECK drill: three dashes clear of the shot finish it PASS  3
+ARENACHECK drill: the checklist row ticks           PASS  
+ARENACHECK drill: done, the Strafer stops throwing  PASS  
+ARENACHECK training: dummy hit, reset and bot play their cues PASS  { "training_dummy_hit": 1, "training_reset": 1, "training_bot_spawn": 1 }
+ARENACHECK training: its own beds, not the match's  PASS  ["training_wind", "training_island"] 
+ARENACHECK DONE, 133 checks, failures: 9
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 4 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 34: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 35: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 33: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 415: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 51 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

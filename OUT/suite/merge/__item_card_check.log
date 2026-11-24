@@ -1,0 +1,109 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ITEMCARD ok   building the card changes nothing on the Boki
+ITEMCARD ok   capped Thumpnut: ghost row says '46 +2 (of +3, level cap)' (preview after caps)
+ITEMCARD ok   the card shows the preview line 'Power +2 (46 to 48)'
+ITEMCARD ok   budget ring: 'Budget 106 to 108 of 240'
+ITEMCARD ok   no lean before or after: the lean ring says none
+ITEMCARD ok   Glassdew: lean ring 'Lean Water 0% to 50%'
+ITEMCARD ok   a full stat: the card says why and draws no ghost
+ITEMCARD ok   after() is the preview's deltas on a copy
+ITEMCARD ok   Puzzlenut tips an undecided Zapple to its curious end
+ITEMCARD ok   verdict line names the unmet final '?' with the pips after (got 'With this Puzzlenut Tock turns toward ? (1 to 0).')
+ITEMCARD ok   path meter: each end's pips before and after
+ITEMCARD ok   Why? lists the token pip and where it came from (got ["?: tokens 0 to 1"])
+ITEMCARD ok   a met final is named: 'With this Puzzlenut Tock turns toward Chimelop (1 to 0).'
+ITEMCARD ok   a token for the leading end: keeps growing
+ITEMCARD ok   no branching line: no path meter on the card
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+ITEMCARD ok   hovering a feed row shows its card
+ITEMCARD ok   try-on: the Boki wears the new colour (its model swapped out)
+ITEMCARD ok   after tryon_s it is itself again, no lean given
+ITEMCARD ok   closing the feed menu slides the card out
+ITEMCARD ok   held from the bag: no card away from a Boki
+ITEMCARD ok   near Pip: its card slides in
+ITEMCARD ok   ...with one soft tick
+ITEMCARD ok   ...and about one every 0.6 s while it is up (3 in 1.8 s)
+ITEMCARD ok   walking away ends the hold, both Thumpnuts still in the bag
+ITEMCARD ok   no ticks once the card is gone
+ITEMCARD ok   interact on Pip gives it: Power 0 to 3
+ITEMCARD ok   ...and Pip's give plays one stat bite
+ITEMCARD ok   one Thumpnut left in the bag
+ITEMCARD ok   one journal line with the cause: 'ate Thumpnut: Power +3 (0 to 3)'
+ITEMCARD DONE, failures: 0
+WARNING: 190 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 25 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 38: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 39: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 40: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 55: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 56: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 57: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 58: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 60: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 61: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 62: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 63: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 64: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 65: leaked 174762 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 66: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 67: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 68: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 69: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 73: leaked 174762 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 74: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 75: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 76: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 77: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 78: leaked 174762 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 79: leaked 174762 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 80: leaked 174762 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: 10 RID allocations of type 'PN18TextServerAdvanced22ShapedTextDataAdvancedE' were leaked at exit.
+ERROR: 3 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.
+ERROR: 1 RID allocations of type 'PN18TextServerAdvanced27FontAdvancedLinkedVariationE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 21 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

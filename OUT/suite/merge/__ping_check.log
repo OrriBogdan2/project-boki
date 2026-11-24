@@ -1,0 +1,241 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PING ok   middle mouse pings
+PING ok   C alone sends the Boki
+PING ok   ping is in the rebindable list
+PING ok   saved [G, MMB] on throw: G stays, MMB pings
+PING ok   saved MMB alone on throw: throw goes back to its default
+PING ok   MMB custom-bound elsewhere: ping starts unbound
+PING ok   the step runs once
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/ping_check.gd:75)
+       [13] _world (res://tools/ping_check.gd:91)
+       [14] run (res://tools/ping_check.gd:28)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/ping_check.gd:75)
+       [13] _world (res://tools/ping_check.gd:91)
+       [14] run (res://tools/ping_check.gd:28)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/ping_check.gd:75)
+       [12] _world (res://tools/ping_check.gd:91)
+       [13] run (res://tools/ping_check.gd:28)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/ping_check.gd:75)
+       [12] _world (res://tools/ping_check.gd:91)
+       [13] run (res://tools/ping_check.gd:28)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/ping_check.gd:75)
+       [13] _world (res://tools/ping_check.gd:91)
+       [14] run (res://tools/ping_check.gd:28)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/ping_check.gd:75)
+       [13] _world (res://tools/ping_check.gd:91)
+       [14] run (res://tools/ping_check.gd:28)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+PING ok   a bot teammate
+PING ok   on an enemy: an enemy ping (enemy)
+PING ok   it is red
+PING ok   one word over it: Enemy
+PING ok   the bot teammate takes it as its ping goal
+PING ok   on a deathbox: a loot ping (loot)
+PING ok   on the box
+PING ok   on the ground: a plain spot (spot)
+PING ok   under the cursor (0.00 m off)
+PING ok   your own spot, and the bot takes it
+PING ok   the ping key places a ping
+PING ok   a ping from the net keeps its kind
+PING ok   a loot ping is gold
+PING ok   a ground ping is white
+PING ok   a third ping drops the oldest: 2 kept
+PING ok   the enemy ping follows its hunter
+PING ok   it is gone after 4 s, the ground ping stays
+PING ok   the ground ping is gone after 45 s
+PING ok   Alt+click pings and does not shoot
+WARNING: An input event object is being parsed more than once in the same frame, which is unsafe.
+If you are generating events in a script, you have to instantiate a new event instead of sending the same one more than once, unless the original one was sent on an earlier frame.
+You can call duplicate() on the event to get a new instance with identical values.
+     at: parse_input_event (core/input/input.cpp:1253)
+     GDScript backtrace (most recent call first):
+         [0] _kinds_and_life (res://tools/ping_check.gd:173)
+         [1] _world (res://tools/ping_check.gd:137)
+         [2] run (res://tools/ping_check.gd:28)
+         [3] run (res://tools/check_registry.gd:980)
+         [4] _ready (res://scripts/main.gd:270)
+PING ok   Net: the peer gets the enemy ping on the same hunter
+PING ok   Net: it lasts 4 s there too
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/ping_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/ping_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/ping_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/ping_check.gd:75)
+PING ok   planning: the map is up
+PING ok   on the map: the ping lands on the map point
+PING ok   off the map: nothing moves
+PING ok   riding the squad rocket down
+PING ok   in the rocket: a ping under the cursor (spot)
+PING ok   on the ground, not in the air
+PING ok   the bot teammate takes the landing spot
+PING CHECK DONE, failures: 0
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 2 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 28 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

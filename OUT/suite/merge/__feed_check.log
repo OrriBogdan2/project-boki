@@ -1,0 +1,76 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+FEED ok   fresh save: no food says so
+FEED ok   fresh save: bought 2 kibble from the market
+FEED ok   fresh save: the panel offers the kibble
+FEED ok   fresh save: too weak to go while starving
+FEED ok   fresh save: feeding eats a kibble, food 5 -> 35
+FEED ok   fresh save: it can go on an expedition again
+FEED ok   with a trough: no food says so
+FEED ok   with a trough: bought 2 kibble from the market
+FEED ok   with a trough: the panel offers the kibble
+FEED ok   with a trough: too weak to go while starving
+FEED ok   with a trough: feeding eats a kibble, food 5 -> 35
+FEED ok   with a trough: it can go on an expedition again
+FEED ok   bowl: hidden outside base mode
+FEED ok   bowl: in base mode it can be built
+FEED ok   bowl: home puts the bowl and four Boki out
+FEED ok   bowl: nobody heads for an empty bowl
+FEED ok   bowl: three snacks come out of the pantry and the bowl takes no more
+FEED  bowl: ate at { "Bold": 3.3, "Greedy": 6.6, "Shy": 10.0 }, phases seen Bold:go, Greedy:go, Shy:go, Bold:wait, Bold:eat, Shy:wait, Greedy:huff, Greedy:wait, Greedy:eat, Shy:eat
+FEED ok   bowl: all three hungry Boki eat within 30 s
+FEED ok   bowl: the timid one eats last
+FEED ok   bowl: one at the bowl at a time
+FEED ok   bowl: every visit is BaseLife's Eat state (one machine)
+FEED ok   bowl: the rivals huff at the bowl
+FEED ok   bowl: the timid one picks no fight, the full one stays out, bowl empty
+FEED ok   bowl: each Boki that ate leans (Evo.eat) (Bold, Greedy, Shy)
+FEED ok   bowl: everyone is done at the bowl
+FEED ok   prompt text names the use key
+FEED ok   trusting: no snack selected, the hold does not feed
+FEED ok   trusting: Q selects the snack and the prompt shows it
+FEED ok   trusting: the held use key sends it to your hand
+FEED ok   trusting: ate from the hand in 2.00 s (limit 3)
+FEED ok   trusting: the snack was used once (1 left)
+FEED ok   trusting: food 40 -> 56, joy 50 -> 58
+FEED ok   trusting: trust went up
+FEED ok   trusting: the snack's own lean built (0.0 -> 9.0)
+FEED ok   trusting: back to its day, the hand is empty
+FEED ok   trusting: no machine refusal (0)
+FEED ok   prompt text names the use key
+FEED ok   shy: no snack selected, the hold does not feed
+FEED ok   shy: Q selects the snack and the prompt shows it
+FEED ok   shy: the held use key sends it to your hand
+FEED ok   shy: the first try is a hesitant look
+FEED ok   shy: it remembers being asked
+FEED ok   shy: the second try, it ate and trusts more
+FEED ok   shy: no machine refusal (0)
+FEED ok   prompt text names the use key
+FEED ok   full: no snack selected, the hold does not feed
+FEED ok   full: Q selects the snack and the prompt shows it
+FEED ok   full: the held use key sends it to your hand
+FEED ok   full: sniffed, snack kept
+FEED ok   full: it left
+FEED ok   full: no machine refusal (0)
+FEED DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

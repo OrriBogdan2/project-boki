@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+IACHECK ok   gem uses its sculpted model
+IACHECK ok   gem is the primitive's size (0.60 m)
+IACHECK ok   tonic uses its sculpted model
+IACHECK ok   tonic is the primitive's size (0.50 m)
+IACHECK ok   armor_shard uses its sculpted model
+IACHECK ok   armor_shard is the primitive's size (0.45 m)
+IACHECK ok   the shrine uses its sculpted dais
+IACHECK ok   the shrine keeps its own Crystal (it hides once used)
+IACHECK ok   the revive beacon uses its sculpted dais and posts
+IACHECK ok   the revive beacon keeps its own glowing crystal and beam
+IACHECK ok   the sculpted beacon's four posts get glow strips (4)
+IACHECK ok   gear slot 2 drop spins its sculpted piece
+IACHECK ok   gear slot 2 piece takes the drop colour
+IACHECK ok   gear slot 3 drop spins its sculpted piece
+IACHECK ok   gear slot 3 piece takes the drop colour
+IACHECK ok   the Heart loads its glass heart
+IACHECK ok   the Heart stands about 1.9 m on its plinth (1.90)
+IACHECK ok   a missing model gives null
+IACHECK DONE, failures: 0

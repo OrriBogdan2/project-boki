@@ -1,0 +1,15 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOKI_EVERYWHERE pck=/mnt/HC_Volume_107406663/cj/20261119-153526-a2/tree/ renderer=X11
+BOKI_EVERYWHERE cindle glb=res://art/kin/cindle/cindle.glb exists=true has=true models_kin=rig reveal=rig tris=19860
+BOKI_EVERYWHERE glintmole glb=res://art/kin/glintmole/glintmole.glb exists=true has=true models_kin=rig reveal=rig tris=19749
+BOKI_EVERYWHERE kindlewren glb=res://art/kin/kindlewren/kindlewren.glb exists=true has=true models_kin=rig reveal=rig tris=20062
+BOKI_EVERYWHERE nettlynx glb=res://art/kin/nettlynx/nettlynx.glb exists=true has=true models_kin=rig reveal=rig tris=19683
+BOKI_EVERYWHERE OK: 0 of 4 species not rigged
+WARNING: 4 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

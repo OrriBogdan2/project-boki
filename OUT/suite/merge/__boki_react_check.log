@@ -1,0 +1,846 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOKIREACT PASS quad light: primitive body
+BOKIREACT quad light         h 0.93 m mass 0.8 | chip 0.109 0.20 s | big 0.201 0.20 s | part 0.015
+BOKIREACT PASS quad light: a chip hit moves 0.109 of its height by 0.1 s
+BOKIREACT PASS quad light: a big hit moves 0.201 of its height by 0.1 s
+BOKIREACT PASS quad light: a big hit moves farther (0.186 vs 0.101 m)
+BOKIREACT PASS quad light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS quad light: no part detaches (worst 0.015 of height)
+BOKIREACT PASS quad light: Flex stays in shape (scale 0.95 to 1.03)
+BOKIREACT PASS quad light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS quad light: no part detaches (worst 0.015 of height)
+BOKIREACT PASS quad light: Flex stays in shape (scale 0.89 to 1.06)
+BOKIREACT PASS quad light: a landing squashes it to 0.89 within 0.1 s
+BOKIREACT PASS quad light: a dash leans it forward 0.198 rad within 0.1 s
+BOKIREACT PASS quad medium: primitive body
+BOKIREACT quad medium        h 0.93 m mass 1.3 | chip 0.085 0.28 s | big 0.158 0.28 s | part 0.033
+BOKIREACT PASS quad medium: a chip hit moves 0.085 of its height by 0.1 s
+BOKIREACT PASS quad medium: a big hit moves 0.158 of its height by 0.1 s
+BOKIREACT PASS quad medium: a big hit moves farther (0.147 vs 0.079 m)
+BOKIREACT PASS quad medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS quad medium: no part detaches (worst 0.015 of height)
+BOKIREACT PASS quad medium: Flex stays in shape (scale 0.94 to 1.02)
+BOKIREACT PASS quad medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS quad medium: no part detaches (worst 0.033 of height)
+BOKIREACT PASS quad medium: Flex stays in shape (scale 0.90 to 1.04)
+BOKIREACT PASS quad medium: a landing squashes it to 0.91 within 0.1 s
+BOKIREACT PASS quad medium: a dash leans it forward 0.140 rad within 0.1 s
+BOKIREACT PASS quad heavy: primitive body
+BOKIREACT quad heavy         h 0.93 m mass 2.0 | chip 0.071 0.38 s | big 0.132 0.38 s | part 0.015
+BOKIREACT PASS quad heavy: a chip hit moves 0.071 of its height by 0.1 s
+BOKIREACT PASS quad heavy: a big hit moves 0.132 of its height by 0.1 s
+BOKIREACT PASS quad heavy: a big hit moves farther (0.123 vs 0.066 m)
+BOKIREACT PASS quad heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS quad heavy: no part detaches (worst 0.015 of height)
+BOKIREACT PASS quad heavy: Flex stays in shape (scale 0.98 to 1.03)
+BOKIREACT PASS quad heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS quad heavy: no part detaches (worst 0.015 of height)
+BOKIREACT PASS quad heavy: Flex stays in shape (scale 0.94 to 1.04)
+BOKIREACT PASS quad heavy: a landing squashes it to 0.93 within 0.1 s
+BOKIREACT PASS quad heavy: a dash leans it forward 0.149 rad within 0.1 s
+BOKIREACT PASS biped light: primitive body
+BOKIREACT biped light        h 1.08 m mass 0.8 | chip 0.090 0.20 s | big 0.157 0.20 s | part 0.013
+BOKIREACT PASS biped light: a chip hit moves 0.090 of its height by 0.1 s
+BOKIREACT PASS biped light: a big hit moves 0.157 of its height by 0.1 s
+BOKIREACT PASS biped light: a big hit moves farther (0.170 vs 0.097 m)
+BOKIREACT PASS biped light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS biped light: no part detaches (worst 0.013 of height)
+BOKIREACT PASS biped light: Flex stays in shape (scale 0.93 to 1.05)
+BOKIREACT PASS biped light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS biped light: no part detaches (worst 0.013 of height)
+BOKIREACT PASS biped light: Flex stays in shape (scale 0.86 to 1.08)
+BOKIREACT PASS biped light: a landing squashes it to 0.86 within 0.1 s
+BOKIREACT PASS biped light: a dash leans it forward 0.157 rad within 0.1 s
+BOKIREACT PASS biped medium: primitive body
+BOKIREACT biped medium       h 1.08 m mass 1.3 | chip 0.070 0.28 s | big 0.124 0.28 s | part 0.000
+BOKIREACT PASS biped medium: a chip hit moves 0.070 of its height by 0.1 s
+BOKIREACT PASS biped medium: a big hit moves 0.124 of its height by 0.1 s
+BOKIREACT PASS biped medium: a big hit moves farther (0.134 vs 0.076 m)
+BOKIREACT PASS biped medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS biped medium: no part detaches (worst 0.000 of height)
+BOKIREACT PASS biped medium: Flex stays in shape (scale 0.93 to 1.02)
+BOKIREACT PASS biped medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS biped medium: no part detaches (worst 0.000 of height)
+BOKIREACT PASS biped medium: Flex stays in shape (scale 0.87 to 1.05)
+BOKIREACT PASS biped medium: a landing squashes it to 0.89 within 0.1 s
+BOKIREACT PASS biped medium: a dash leans it forward 0.124 rad within 0.1 s
+BOKIREACT PASS biped heavy: primitive body
+BOKIREACT biped heavy        h 1.08 m mass 2.0 | chip 0.058 0.38 s | big 0.103 0.38 s | part 0.013
+BOKIREACT PASS biped heavy: a chip hit moves 0.058 of its height by 0.1 s
+BOKIREACT PASS biped heavy: a big hit moves 0.103 of its height by 0.1 s
+BOKIREACT PASS biped heavy: a big hit moves farther (0.112 vs 0.063 m)
+BOKIREACT PASS biped heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS biped heavy: no part detaches (worst 0.013 of height)
+BOKIREACT PASS biped heavy: Flex stays in shape (scale 0.96 to 1.03)
+BOKIREACT PASS biped heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS biped heavy: no part detaches (worst 0.013 of height)
+BOKIREACT PASS biped heavy: Flex stays in shape (scale 0.91 to 1.05)
+BOKIREACT PASS biped heavy: a landing squashes it to 0.91 within 0.1 s
+BOKIREACT PASS biped heavy: a dash leans it forward 0.101 rad within 0.1 s
+BOKIREACT PASS flyer light: primitive body
+BOKIREACT flyer light        h 0.92 m mass 0.8 | chip 0.187 0.20 s | big 0.320 0.20 s | part 0.019
+BOKIREACT PASS flyer light: a chip hit moves 0.187 of its height by 0.1 s
+BOKIREACT PASS flyer light: a big hit moves 0.320 of its height by 0.1 s
+BOKIREACT PASS flyer light: a big hit moves farther (0.294 vs 0.172 m)
+BOKIREACT PASS flyer light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS flyer light: no part detaches (worst 0.019 of height)
+BOKIREACT PASS flyer light: Flex stays in shape (scale 0.97 to 1.01)
+BOKIREACT PASS flyer light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS flyer light: no part detaches (worst 0.019 of height)
+BOKIREACT PASS flyer light: Flex stays in shape (scale 0.96 to 1.02)
+BOKIREACT PASS flyer light: a landing squashes it to 0.96 within 0.1 s
+BOKIREACT PASS flyer light: a dash leans it forward 0.272 rad within 0.1 s
+BOKIREACT PASS flyer medium: primitive body
+BOKIREACT flyer medium       h 0.92 m mass 1.3 | chip 0.147 0.28 s | big 0.254 0.28 s | part 0.019
+BOKIREACT PASS flyer medium: a chip hit moves 0.147 of its height by 0.1 s
+BOKIREACT PASS flyer medium: a big hit moves 0.254 of its height by 0.1 s
+BOKIREACT PASS flyer medium: a big hit moves farther (0.232 vs 0.135 m)
+BOKIREACT PASS flyer medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS flyer medium: no part detaches (worst 0.019 of height)
+BOKIREACT PASS flyer medium: Flex stays in shape (scale 0.97 to 1.01)
+BOKIREACT PASS flyer medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS flyer medium: no part detaches (worst 0.019 of height)
+BOKIREACT PASS flyer medium: Flex stays in shape (scale 0.96 to 1.01)
+BOKIREACT PASS flyer medium: a landing squashes it to 0.97 within 0.1 s
+BOKIREACT PASS flyer medium: a dash leans it forward 0.215 rad within 0.1 s
+BOKIREACT PASS flyer heavy: primitive body
+BOKIREACT flyer heavy        h 0.92 m mass 2.0 | chip 0.120 0.38 s | big 0.208 0.38 s | part 0.019
+BOKIREACT PASS flyer heavy: a chip hit moves 0.120 of its height by 0.1 s
+BOKIREACT PASS flyer heavy: a big hit moves 0.208 of its height by 0.1 s
+BOKIREACT PASS flyer heavy: a big hit moves farther (0.190 vs 0.110 m)
+BOKIREACT PASS flyer heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS flyer heavy: no part detaches (worst 0.019 of height)
+BOKIREACT PASS flyer heavy: Flex stays in shape (scale 0.98 to 1.00)
+BOKIREACT PASS flyer heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS flyer heavy: no part detaches (worst 0.000 of height)
+BOKIREACT PASS flyer heavy: Flex stays in shape (scale 0.97 to 1.01)
+BOKIREACT PASS flyer heavy: a landing squashes it to 0.97 within 0.1 s
+BOKIREACT PASS flyer heavy: a dash leans it forward 0.174 rad within 0.1 s
+BOKIREACT PASS serpent light: primitive body
+BOKIREACT serpent light      h 0.70 m mass 0.8 | chip 0.123 0.20 s | big 0.236 0.20 s | part 0.018
+BOKIREACT PASS serpent light: a chip hit moves 0.123 of its height by 0.1 s
+BOKIREACT PASS serpent light: a big hit moves 0.236 of its height by 0.1 s
+BOKIREACT PASS serpent light: a big hit moves farther (0.166 vs 0.086 m)
+BOKIREACT PASS serpent light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS serpent light: no part detaches (worst 0.018 of height)
+BOKIREACT PASS serpent light: Flex stays in shape (scale 0.98 to 1.02)
+BOKIREACT PASS serpent light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS serpent light: no part detaches (worst 0.000 of height)
+BOKIREACT PASS serpent light: Flex stays in shape (scale 0.95 to 1.03)
+BOKIREACT PASS serpent light: a landing squashes it to 0.94 within 0.1 s
+BOKIREACT PASS serpent light: a dash leans it forward 0.143 rad within 0.1 s
+BOKIREACT PASS serpent medium: primitive body
+BOKIREACT serpent medium     h 0.70 m mass 1.3 | chip 0.098 0.28 s | big 0.189 0.28 s | part 0.018
+BOKIREACT PASS serpent medium: a chip hit moves 0.098 of its height by 0.1 s
+BOKIREACT PASS serpent medium: a big hit moves 0.189 of its height by 0.1 s
+BOKIREACT PASS serpent medium: a big hit moves farther (0.133 vs 0.069 m)
+BOKIREACT PASS serpent medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS serpent medium: no part detaches (worst 0.018 of height)
+BOKIREACT PASS serpent medium: Flex stays in shape (scale 0.99 to 1.02)
+BOKIREACT PASS serpent medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS serpent medium: no part detaches (worst 0.000 of height)
+BOKIREACT PASS serpent medium: Flex stays in shape (scale 0.97 to 1.03)
+BOKIREACT PASS serpent medium: a landing squashes it to 0.96 within 0.1 s
+BOKIREACT PASS serpent medium: a dash leans it forward 0.113 rad within 0.1 s
+BOKIREACT PASS serpent heavy: primitive body
+BOKIREACT serpent heavy      h 0.70 m mass 2.0 | chip 0.079 0.38 s | big 0.154 0.38 s | part 0.018
+BOKIREACT PASS serpent heavy: a chip hit moves 0.079 of its height by 0.1 s
+BOKIREACT PASS serpent heavy: a big hit moves 0.154 of its height by 0.1 s
+BOKIREACT PASS serpent heavy: a big hit moves farther (0.108 vs 0.056 m)
+BOKIREACT PASS serpent heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS serpent heavy: no part detaches (worst 0.018 of height)
+BOKIREACT PASS serpent heavy: Flex stays in shape (scale 0.98 to 1.02)
+BOKIREACT PASS serpent heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS serpent heavy: no part detaches (worst 0.000 of height)
+BOKIREACT PASS serpent heavy: Flex stays in shape (scale 0.98 to 1.03)
+BOKIREACT PASS serpent heavy: a landing squashes it to 0.96 within 0.1 s
+BOKIREACT PASS serpent heavy: a dash leans it forward 0.092 rad within 0.1 s
+BOKIREACT PASS blob light: primitive body
+BOKIREACT blob light         h 0.83 m mass 0.8 | chip 0.151 0.20 s | big 0.314 0.20 s | part 0.000
+BOKIREACT PASS blob light: a chip hit moves 0.151 of its height by 0.1 s
+BOKIREACT PASS blob light: a big hit moves 0.314 of its height by 0.1 s
+BOKIREACT PASS blob light: a big hit moves farther (0.261 vs 0.126 m)
+BOKIREACT PASS blob light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS blob light: no part detaches (worst 0.000 of height)
+BOKIREACT PASS blob light: Flex stays in shape (scale 0.84 to 1.09)
+BOKIREACT PASS blob light: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS blob light: no part detaches (worst 0.000 of height)
+BOKIREACT PASS blob light: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS blob light: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS blob light: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS blob medium: primitive body
+BOKIREACT blob medium        h 0.83 m mass 1.3 | chip 0.117 0.28 s | big 0.247 0.28 s | part 0.000
+BOKIREACT PASS blob medium: a chip hit moves 0.117 of its height by 0.1 s
+BOKIREACT PASS blob medium: a big hit moves 0.247 of its height by 0.1 s
+BOKIREACT PASS blob medium: a big hit moves farther (0.205 vs 0.097 m)
+BOKIREACT PASS blob medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS blob medium: no part detaches (worst 0.000 of height)
+BOKIREACT PASS blob medium: Flex stays in shape (scale 0.85 to 1.06)
+BOKIREACT PASS blob medium: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS blob medium: no part detaches (worst 0.000 of height)
+BOKIREACT PASS blob medium: Flex stays in shape (scale 0.74 to 1.12)
+BOKIREACT PASS blob medium: a landing squashes it to 0.75 within 0.1 s
+BOKIREACT PASS blob medium: a dash leans it forward 0.068 rad within 0.1 s
+BOKIREACT PASS blob heavy: primitive body
+BOKIREACT blob heavy         h 0.83 m mass 2.0 | chip 0.098 0.38 s | big 0.206 0.38 s | part 0.000
+BOKIREACT PASS blob heavy: a chip hit moves 0.098 of its height by 0.1 s
+BOKIREACT PASS blob heavy: a big hit moves 0.206 of its height by 0.1 s
+BOKIREACT PASS blob heavy: a big hit moves farther (0.171 vs 0.081 m)
+BOKIREACT PASS blob heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS blob heavy: no part detaches (worst 0.000 of height)
+BOKIREACT PASS blob heavy: Flex stays in shape (scale 0.90 to 1.06)
+BOKIREACT PASS blob heavy: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS blob heavy: no part detaches (worst 0.000 of height)
+BOKIREACT PASS blob heavy: Flex stays in shape (scale 0.81 to 1.11)
+BOKIREACT PASS blob heavy: a landing squashes it to 0.80 within 0.1 s
+BOKIREACT PASS blob heavy: a dash leans it forward 0.055 rad within 0.1 s
+BOKIREACT PASS rigged burrlet: rigged body
+BOKIREACT rigged burrlet     h 0.63 m mass 0.8 | chip 0.103 0.20 s | big 0.197 0.20 s | part 0.000
+BOKIREACT PASS rigged burrlet: a chip hit moves 0.103 of its height by 0.1 s
+BOKIREACT PASS rigged burrlet: a big hit moves 0.197 of its height by 0.1 s
+BOKIREACT PASS rigged burrlet: a big hit moves farther (0.124 vs 0.065 m)
+BOKIREACT PASS rigged burrlet: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged burrlet: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged burrlet: Flex stays in shape (scale 0.94 to 1.03)
+BOKIREACT PASS rigged burrlet: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged burrlet: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged burrlet: Flex stays in shape (scale 0.89 to 1.06)
+BOKIREACT PASS rigged burrlet: a landing squashes it to 0.89 within 0.1 s
+BOKIREACT PASS rigged burrlet: a dash leans it forward 0.215 rad within 0.1 s
+BOKIREACT PASS rigged caecilith: rigged body
+BOKIREACT rigged caecilith   h 0.53 m mass 1.1 | chip 0.116 0.25 s | big 0.283 0.25 s | part 0.000
+BOKIREACT PASS rigged caecilith: a chip hit moves 0.116 of its height by 0.1 s
+BOKIREACT PASS rigged caecilith: a big hit moves 0.283 of its height by 0.1 s
+BOKIREACT PASS rigged caecilith: a big hit moves farther (0.149 vs 0.061 m)
+BOKIREACT PASS rigged caecilith: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged caecilith: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged caecilith: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged caecilith: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged caecilith: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged caecilith: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged caecilith: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged caecilith: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged cairnback: rigged body
+BOKIREACT rigged cairnback   h 0.81 m mass 1.6 | chip 0.081 0.32 s | big 0.149 0.33 s | part 0.000
+BOKIREACT PASS rigged cairnback: a chip hit moves 0.081 of its height by 0.1 s
+BOKIREACT PASS rigged cairnback: a big hit moves 0.149 of its height by 0.1 s
+BOKIREACT PASS rigged cairnback: a big hit moves farther (0.120 vs 0.065 m)
+BOKIREACT PASS rigged cairnback: settles in 0.32 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged cairnback: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged cairnback: Flex stays in shape (scale 0.96 to 1.02)
+BOKIREACT PASS rigged cairnback: settles in 0.33 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged cairnback: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged cairnback: Flex stays in shape (scale 0.92 to 1.04)
+BOKIREACT PASS rigged cairnback: a landing squashes it to 0.92 within 0.1 s
+BOKIREACT PASS rigged cairnback: a dash leans it forward 0.153 rad within 0.1 s
+BOKIREACT PASS rigged casquebill: rigged body
+BOKIREACT rigged casquebill  h 0.55 m mass 1.1 | chip 0.116 0.25 s | big 0.280 0.25 s | part 0.000
+BOKIREACT PASS rigged casquebill: a chip hit moves 0.116 of its height by 0.1 s
+BOKIREACT PASS rigged casquebill: a big hit moves 0.280 of its height by 0.1 s
+BOKIREACT PASS rigged casquebill: a big hit moves farther (0.155 vs 0.064 m)
+BOKIREACT PASS rigged casquebill: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged casquebill: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged casquebill: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged casquebill: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged casquebill: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged casquebill: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged casquebill: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged casquebill: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged cindle: rigged body
+BOKIREACT rigged cindle      h 0.86 m mass 0.8 | chip 0.113 0.20 s | big 0.196 0.20 s | part 0.000
+BOKIREACT PASS rigged cindle: a chip hit moves 0.113 of its height by 0.1 s
+BOKIREACT PASS rigged cindle: a big hit moves 0.196 of its height by 0.1 s
+BOKIREACT PASS rigged cindle: a big hit moves farther (0.169 vs 0.097 m)
+BOKIREACT PASS rigged cindle: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged cindle: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged cindle: Flex stays in shape (scale 0.94 to 1.03)
+BOKIREACT PASS rigged cindle: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged cindle: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged cindle: Flex stays in shape (scale 0.89 to 1.06)
+BOKIREACT PASS rigged cindle: a landing squashes it to 0.89 within 0.1 s
+BOKIREACT PASS rigged cindle: a dash leans it forward 0.215 rad within 0.1 s
+BOKIREACT PASS rigged duskapi: rigged body
+BOKIREACT rigged duskapi     h 0.55 m mass 1.5 | chip 0.104 0.30 s | big 0.240 0.32 s | part 0.000
+BOKIREACT PASS rigged duskapi: a chip hit moves 0.104 of its height by 0.1 s
+BOKIREACT PASS rigged duskapi: a big hit moves 0.240 of its height by 0.1 s
+BOKIREACT PASS rigged duskapi: a big hit moves farther (0.133 vs 0.057 m)
+BOKIREACT PASS rigged duskapi: settles in 0.30 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged duskapi: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged duskapi: Flex stays in shape (scale 0.88 to 1.06)
+BOKIREACT PASS rigged duskapi: settles in 0.32 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged duskapi: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged duskapi: Flex stays in shape (scale 0.77 to 1.12)
+BOKIREACT PASS rigged duskapi: a landing squashes it to 0.77 within 0.1 s
+BOKIREACT PASS rigged duskapi: a dash leans it forward 0.063 rad within 0.1 s
+BOKIREACT PASS rigged floenatee: rigged body
+BOKIREACT rigged floenatee   h 0.75 m mass 2.0 | chip 0.069 0.38 s | big 0.221 0.38 s | part 0.000
+BOKIREACT PASS rigged floenatee: a chip hit moves 0.069 of its height by 0.1 s
+BOKIREACT PASS rigged floenatee: a big hit moves 0.221 of its height by 0.1 s
+BOKIREACT PASS rigged floenatee: a big hit moves farther (0.166 vs 0.051 m)
+BOKIREACT PASS rigged floenatee: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged floenatee: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged floenatee: Flex stays in shape (scale 0.89 to 1.05)
+BOKIREACT PASS rigged floenatee: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged floenatee: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged floenatee: Flex stays in shape (scale 0.80 to 1.10)
+BOKIREACT PASS rigged floenatee: a landing squashes it to 0.80 within 0.1 s
+BOKIREACT PASS rigged floenatee: a dash leans it forward 0.055 rad within 0.1 s
+BOKIREACT PASS rigged gibbelle: rigged body
+BOKIREACT rigged gibbelle    h 0.59 m mass 1.1 | chip 0.115 0.25 s | big 0.280 0.25 s | part 0.000
+BOKIREACT PASS rigged gibbelle: a chip hit moves 0.115 of its height by 0.1 s
+BOKIREACT PASS rigged gibbelle: a big hit moves 0.280 of its height by 0.1 s
+BOKIREACT PASS rigged gibbelle: a big hit moves farther (0.166 vs 0.068 m)
+BOKIREACT PASS rigged gibbelle: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged gibbelle: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged gibbelle: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged gibbelle: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged gibbelle: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged gibbelle: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged gibbelle: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged gibbelle: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged glaciyak: rigged body
+BOKIREACT rigged glaciyak    h 0.55 m mass 1.5 | chip 0.094 0.32 s | big 0.245 0.32 s | part 0.000
+BOKIREACT PASS rigged glaciyak: a chip hit moves 0.094 of its height by 0.1 s
+BOKIREACT PASS rigged glaciyak: a big hit moves 0.245 of its height by 0.1 s
+BOKIREACT PASS rigged glaciyak: a big hit moves farther (0.135 vs 0.052 m)
+BOKIREACT PASS rigged glaciyak: settles in 0.32 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged glaciyak: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged glaciyak: Flex stays in shape (scale 0.88 to 1.06)
+BOKIREACT PASS rigged glaciyak: settles in 0.32 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged glaciyak: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged glaciyak: Flex stays in shape (scale 0.77 to 1.12)
+BOKIREACT PASS rigged glaciyak: a landing squashes it to 0.77 within 0.1 s
+BOKIREACT PASS rigged glaciyak: a dash leans it forward 0.063 rad within 0.1 s
+BOKIREACT PASS rigged glintmole: rigged body
+BOKIREACT rigged glintmole   h 0.48 m mass 0.8 | chip 0.123 0.20 s | big 0.344 0.20 s | part 0.000
+BOKIREACT PASS rigged glintmole: a chip hit moves 0.123 of its height by 0.1 s
+BOKIREACT PASS rigged glintmole: a big hit moves 0.344 of its height by 0.1 s
+BOKIREACT PASS rigged glintmole: a big hit moves farther (0.164 vs 0.058 m)
+BOKIREACT PASS rigged glintmole: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged glintmole: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged glintmole: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged glintmole: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged glintmole: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged glintmole: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged glintmole: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged glintmole: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged gloamshell: rigged body
+BOKIREACT rigged gloamshell  h 0.51 m mass 0.8 | chip 0.124 0.20 s | big 0.343 0.20 s | part 0.000
+BOKIREACT PASS rigged gloamshell: a chip hit moves 0.124 of its height by 0.1 s
+BOKIREACT PASS rigged gloamshell: a big hit moves 0.343 of its height by 0.1 s
+BOKIREACT PASS rigged gloamshell: a big hit moves farther (0.176 vs 0.064 m)
+BOKIREACT PASS rigged gloamshell: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged gloamshell: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged gloamshell: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged gloamshell: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged gloamshell: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged gloamshell: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged gloamshell: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged gloamshell: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged glomwort: rigged body
+BOKIREACT rigged glomwort    h 0.57 m mass 0.8 | chip 0.107 0.20 s | big 0.327 0.20 s | part 0.000
+BOKIREACT PASS rigged glomwort: a chip hit moves 0.107 of its height by 0.1 s
+BOKIREACT PASS rigged glomwort: a big hit moves 0.327 of its height by 0.1 s
+BOKIREACT PASS rigged glomwort: a big hit moves farther (0.185 vs 0.061 m)
+BOKIREACT PASS rigged glomwort: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged glomwort: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged glomwort: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged glomwort: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged glomwort: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged glomwort: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged glomwort: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged glomwort: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged goliathite: rigged body
+BOKIREACT rigged goliathite  h 0.76 m mass 2.0 | chip 0.070 0.38 s | big 0.217 0.38 s | part 0.000
+BOKIREACT PASS rigged goliathite: a chip hit moves 0.070 of its height by 0.1 s
+BOKIREACT PASS rigged goliathite: a big hit moves 0.217 of its height by 0.1 s
+BOKIREACT PASS rigged goliathite: a big hit moves farther (0.165 vs 0.053 m)
+BOKIREACT PASS rigged goliathite: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged goliathite: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged goliathite: Flex stays in shape (scale 0.89 to 1.05)
+BOKIREACT PASS rigged goliathite: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged goliathite: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged goliathite: Flex stays in shape (scale 0.80 to 1.10)
+BOKIREACT PASS rigged goliathite: a landing squashes it to 0.80 within 0.1 s
+BOKIREACT PASS rigged goliathite: a dash leans it forward 0.055 rad within 0.1 s
+BOKIREACT PASS rigged heatherhorn: rigged body
+BOKIREACT rigged heatherhorn h 0.55 m mass 1.5 | chip 0.097 0.30 s | big 0.244 0.32 s | part 0.000
+BOKIREACT PASS rigged heatherhorn: a chip hit moves 0.097 of its height by 0.1 s
+BOKIREACT PASS rigged heatherhorn: a big hit moves 0.244 of its height by 0.1 s
+BOKIREACT PASS rigged heatherhorn: a big hit moves farther (0.135 vs 0.054 m)
+BOKIREACT PASS rigged heatherhorn: settles in 0.30 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged heatherhorn: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged heatherhorn: Flex stays in shape (scale 0.88 to 1.06)
+BOKIREACT PASS rigged heatherhorn: settles in 0.32 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged heatherhorn: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged heatherhorn: Flex stays in shape (scale 0.77 to 1.12)
+BOKIREACT PASS rigged heatherhorn: a landing squashes it to 0.77 within 0.1 s
+BOKIREACT PASS rigged heatherhorn: a dash leans it forward 0.063 rad within 0.1 s
+BOKIREACT PASS rigged hivara: rigged body
+BOKIREACT rigged hivara      h 0.58 m mass 0.8 | chip 0.197 0.20 s | big 0.327 0.20 s | part 0.000
+BOKIREACT PASS rigged hivara: a chip hit moves 0.197 of its height by 0.1 s
+BOKIREACT PASS rigged hivara: a big hit moves 0.327 of its height by 0.1 s
+BOKIREACT PASS rigged hivara: a big hit moves farther (0.191 vs 0.115 m)
+BOKIREACT PASS rigged hivara: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged hivara: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged hivara: Flex stays in shape (scale 0.98 to 1.01)
+BOKIREACT PASS rigged hivara: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged hivara: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged hivara: Flex stays in shape (scale 0.96 to 1.02)
+BOKIREACT PASS rigged hivara: a landing squashes it to 0.96 within 0.1 s
+BOKIREACT PASS rigged hivara: a dash leans it forward 0.272 rad within 0.1 s
+BOKIREACT PASS rigged hoarheron: rigged body
+BOKIREACT rigged hoarheron   h 0.71 m mass 1.1 | chip 0.088 0.25 s | big 0.299 0.25 s | part 0.000
+BOKIREACT PASS rigged hoarheron: a chip hit moves 0.088 of its height by 0.1 s
+BOKIREACT PASS rigged hoarheron: a big hit moves 0.299 of its height by 0.1 s
+BOKIREACT PASS rigged hoarheron: a big hit moves farther (0.212 vs 0.063 m)
+BOKIREACT PASS rigged hoarheron: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged hoarheron: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged hoarheron: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged hoarheron: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged hoarheron: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged hoarheron: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged hoarheron: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged hoarheron: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged kestrike: rigged body
+BOKIREACT rigged kestrike    h 0.71 m mass 0.8 | chip 0.113 0.20 s | big 0.310 0.20 s | part 0.000
+BOKIREACT PASS rigged kestrike: a chip hit moves 0.113 of its height by 0.1 s
+BOKIREACT PASS rigged kestrike: a big hit moves 0.310 of its height by 0.1 s
+BOKIREACT PASS rigged kestrike: a big hit moves farther (0.221 vs 0.081 m)
+BOKIREACT PASS rigged kestrike: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged kestrike: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged kestrike: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged kestrike: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged kestrike: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged kestrike: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged kestrike: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged kestrike: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged kilnbadger: rigged body
+BOKIREACT rigged kilnbadger  h 0.55 m mass 1.1 | chip 0.115 0.25 s | big 0.281 0.25 s | part 0.000
+BOKIREACT PASS rigged kilnbadger: a chip hit moves 0.115 of its height by 0.1 s
+BOKIREACT PASS rigged kilnbadger: a big hit moves 0.281 of its height by 0.1 s
+BOKIREACT PASS rigged kilnbadger: a big hit moves farther (0.155 vs 0.063 m)
+BOKIREACT PASS rigged kilnbadger: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged kilnbadger: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged kilnbadger: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged kilnbadger: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged kilnbadger: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged kilnbadger: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged kilnbadger: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged kilnbadger: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged kindlewren: rigged body
+BOKIREACT rigged kindlewren  h 0.52 m mass 0.8 | chip 0.122 0.20 s | big 0.344 0.20 s | part 0.000
+BOKIREACT PASS rigged kindlewren: a chip hit moves 0.122 of its height by 0.1 s
+BOKIREACT PASS rigged kindlewren: a big hit moves 0.344 of its height by 0.1 s
+BOKIREACT PASS rigged kindlewren: a big hit moves farther (0.178 vs 0.063 m)
+BOKIREACT PASS rigged kindlewren: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged kindlewren: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged kindlewren: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged kindlewren: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged kindlewren: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged kindlewren: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged kindlewren: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged kindlewren: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged lilybara: rigged body
+BOKIREACT rigged lilybara    h 0.66 m mass 1.5 | chip 0.081 0.32 s | big 0.254 0.30 s | part 0.000
+BOKIREACT PASS rigged lilybara: a chip hit moves 0.081 of its height by 0.1 s
+BOKIREACT PASS rigged lilybara: a big hit moves 0.254 of its height by 0.1 s
+BOKIREACT PASS rigged lilybara: a big hit moves farther (0.167 vs 0.053 m)
+BOKIREACT PASS rigged lilybara: settles in 0.32 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged lilybara: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged lilybara: Flex stays in shape (scale 0.88 to 1.06)
+BOKIREACT PASS rigged lilybara: settles in 0.30 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged lilybara: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged lilybara: Flex stays in shape (scale 0.77 to 1.12)
+BOKIREACT PASS rigged lilybara: a landing squashes it to 0.77 within 0.1 s
+BOKIREACT PASS rigged lilybara: a dash leans it forward 0.063 rad within 0.1 s
+BOKIREACT PASS rigged limpetor: rigged body
+BOKIREACT rigged limpetor    h 0.55 m mass 2.0 | chip 0.085 0.38 s | big 0.212 0.38 s | part 0.000
+BOKIREACT PASS rigged limpetor: a chip hit moves 0.085 of its height by 0.1 s
+BOKIREACT PASS rigged limpetor: a big hit moves 0.212 of its height by 0.1 s
+BOKIREACT PASS rigged limpetor: a big hit moves farther (0.117 vs 0.047 m)
+BOKIREACT PASS rigged limpetor: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged limpetor: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged limpetor: Flex stays in shape (scale 0.89 to 1.05)
+BOKIREACT PASS rigged limpetor: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged limpetor: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged limpetor: Flex stays in shape (scale 0.80 to 1.10)
+BOKIREACT PASS rigged limpetor: a landing squashes it to 0.80 within 0.1 s
+BOKIREACT PASS rigged limpetor: a dash leans it forward 0.055 rad within 0.1 s
+BOKIREACT PASS rigged lodestick: rigged body
+BOKIREACT rigged lodestick   h 0.48 m mass 0.8 | chip 0.135 0.20 s | big 0.334 0.20 s | part 0.000
+BOKIREACT PASS rigged lodestick: a chip hit moves 0.135 of its height by 0.1 s
+BOKIREACT PASS rigged lodestick: a big hit moves 0.334 of its height by 0.1 s
+BOKIREACT PASS rigged lodestick: a big hit moves farther (0.159 vs 0.064 m)
+BOKIREACT PASS rigged lodestick: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged lodestick: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged lodestick: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged lodestick: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged lodestick: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged lodestick: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged lodestick: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged lodestick: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged marchleaf: rigged body
+BOKIREACT rigged marchleaf   h 0.47 m mass 0.8 | chip 0.122 0.20 s | big 0.345 0.20 s | part 0.000
+BOKIREACT PASS rigged marchleaf: a chip hit moves 0.122 of its height by 0.1 s
+BOKIREACT PASS rigged marchleaf: a big hit moves 0.345 of its height by 0.1 s
+BOKIREACT PASS rigged marchleaf: a big hit moves farther (0.164 vs 0.058 m)
+BOKIREACT PASS rigged marchleaf: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged marchleaf: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged marchleaf: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged marchleaf: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged marchleaf: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged marchleaf: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged marchleaf: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged marchleaf: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged moonloris: rigged body
+BOKIREACT rigged moonloris   h 0.55 m mass 1.1 | chip 0.093 0.25 s | big 0.299 0.25 s | part 0.000
+BOKIREACT PASS rigged moonloris: a chip hit moves 0.093 of its height by 0.1 s
+BOKIREACT PASS rigged moonloris: a big hit moves 0.299 of its height by 0.1 s
+BOKIREACT PASS rigged moonloris: a big hit moves farther (0.164 vs 0.051 m)
+BOKIREACT PASS rigged moonloris: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged moonloris: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged moonloris: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged moonloris: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged moonloris: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged moonloris: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged moonloris: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged moonloris: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged mossgrade: rigged body
+BOKIREACT rigged mossgrade   h 0.48 m mass 0.8 | chip 0.117 0.20 s | big 0.348 0.20 s | part 0.000
+BOKIREACT PASS rigged mossgrade: a chip hit moves 0.117 of its height by 0.1 s
+BOKIREACT PASS rigged mossgrade: a big hit moves 0.348 of its height by 0.1 s
+BOKIREACT PASS rigged mossgrade: a big hit moves farther (0.168 vs 0.057 m)
+BOKIREACT PASS rigged mossgrade: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged mossgrade: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged mossgrade: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged mossgrade: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged mossgrade: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged mossgrade: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged mossgrade: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged mossgrade: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged moundvark: rigged body
+BOKIREACT rigged moundvark   h 0.55 m mass 2.0 | chip 0.086 0.38 s | big 0.211 0.38 s | part 0.000
+BOKIREACT PASS rigged moundvark: a chip hit moves 0.086 of its height by 0.1 s
+BOKIREACT PASS rigged moundvark: a big hit moves 0.211 of its height by 0.1 s
+BOKIREACT PASS rigged moundvark: a big hit moves farther (0.116 vs 0.047 m)
+BOKIREACT PASS rigged moundvark: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged moundvark: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged moundvark: Flex stays in shape (scale 0.89 to 1.05)
+BOKIREACT PASS rigged moundvark: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged moundvark: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged moundvark: Flex stays in shape (scale 0.80 to 1.10)
+BOKIREACT PASS rigged moundvark: a landing squashes it to 0.80 within 0.1 s
+BOKIREACT PASS rigged moundvark: a dash leans it forward 0.055 rad within 0.1 s
+BOKIREACT PASS rigged murmurling: rigged body
+BOKIREACT rigged murmurling  h 0.55 m mass 1.1 | chip 0.121 0.25 s | big 0.278 0.25 s | part 0.000
+BOKIREACT PASS rigged murmurling: a chip hit moves 0.121 of its height by 0.1 s
+BOKIREACT PASS rigged murmurling: a big hit moves 0.278 of its height by 0.1 s
+BOKIREACT PASS rigged murmurling: a big hit moves farther (0.153 vs 0.067 m)
+BOKIREACT PASS rigged murmurling: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged murmurling: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged murmurling: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged murmurling: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged murmurling: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged murmurling: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged murmurling: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged murmurling: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged nacrolin: rigged body
+BOKIREACT rigged nacrolin    h 0.55 m mass 1.1 | chip 0.123 0.25 s | big 0.277 0.25 s | part 0.000
+BOKIREACT PASS rigged nacrolin: a chip hit moves 0.123 of its height by 0.1 s
+BOKIREACT PASS rigged nacrolin: a big hit moves 0.277 of its height by 0.1 s
+BOKIREACT PASS rigged nacrolin: a big hit moves farther (0.153 vs 0.068 m)
+BOKIREACT PASS rigged nacrolin: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged nacrolin: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged nacrolin: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged nacrolin: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged nacrolin: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged nacrolin: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged nacrolin: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged nacrolin: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged nettlynx: rigged body
+BOKIREACT rigged nettlynx    h 0.46 m mass 0.8 | chip 0.132 0.20 s | big 0.328 0.20 s | part 0.000
+BOKIREACT PASS rigged nettlynx: a chip hit moves 0.132 of its height by 0.1 s
+BOKIREACT PASS rigged nettlynx: a big hit moves 0.328 of its height by 0.1 s
+BOKIREACT PASS rigged nettlynx: a big hit moves farther (0.151 vs 0.061 m)
+BOKIREACT PASS rigged nettlynx: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged nettlynx: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged nettlynx: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged nettlynx: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged nettlynx: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged nettlynx: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged nettlynx: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged nettlynx: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged nimbostrich: rigged body
+BOKIREACT rigged nimbostrich h 0.55 m mass 1.5 | chip 0.103 0.30 s | big 0.240 0.32 s | part 0.000
+BOKIREACT PASS rigged nimbostrich: a chip hit moves 0.103 of its height by 0.1 s
+BOKIREACT PASS rigged nimbostrich: a big hit moves 0.240 of its height by 0.1 s
+BOKIREACT PASS rigged nimbostrich: a big hit moves farther (0.132 vs 0.057 m)
+BOKIREACT PASS rigged nimbostrich: settles in 0.30 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged nimbostrich: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged nimbostrich: Flex stays in shape (scale 0.88 to 1.06)
+BOKIREACT PASS rigged nimbostrich: settles in 0.32 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged nimbostrich: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged nimbostrich: Flex stays in shape (scale 0.77 to 1.12)
+BOKIREACT PASS rigged nimbostrich: a landing squashes it to 0.77 within 0.1 s
+BOKIREACT PASS rigged nimbostrich: a dash leans it forward 0.063 rad within 0.1 s
+BOKIREACT PASS rigged opalisk: rigged body
+BOKIREACT rigged opalisk     h 0.55 m mass 0.8 | chip 0.129 0.20 s | big 0.330 0.20 s | part 0.000
+BOKIREACT PASS rigged opalisk: a chip hit moves 0.129 of its height by 0.1 s
+BOKIREACT PASS rigged opalisk: a big hit moves 0.330 of its height by 0.1 s
+BOKIREACT PASS rigged opalisk: a big hit moves farther (0.180 vs 0.071 m)
+BOKIREACT PASS rigged opalisk: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged opalisk: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged opalisk: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged opalisk: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged opalisk: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged opalisk: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged opalisk: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged opalisk: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged orchisloth: rigged body
+BOKIREACT rigged orchisloth  h 0.55 m mass 1.1 | chip 0.123 0.25 s | big 0.277 0.25 s | part 0.000
+BOKIREACT PASS rigged orchisloth: a chip hit moves 0.123 of its height by 0.1 s
+BOKIREACT PASS rigged orchisloth: a big hit moves 0.277 of its height by 0.1 s
+BOKIREACT PASS rigged orchisloth: a big hit moves farther (0.153 vs 0.068 m)
+BOKIREACT PASS rigged orchisloth: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged orchisloth: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged orchisloth: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged orchisloth: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged orchisloth: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged orchisloth: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged orchisloth: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged orchisloth: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged pebbit: rigged body
+BOKIREACT rigged pebbit      h 0.58 m mass 1.4 | chip 0.090 0.28 s | big 0.167 0.30 s | part 0.000
+BOKIREACT PASS rigged pebbit: a chip hit moves 0.090 of its height by 0.1 s
+BOKIREACT PASS rigged pebbit: a big hit moves 0.167 of its height by 0.1 s
+BOKIREACT PASS rigged pebbit: a big hit moves farther (0.097 vs 0.052 m)
+BOKIREACT PASS rigged pebbit: settles in 0.28 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged pebbit: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged pebbit: Flex stays in shape (scale 0.95 to 1.02)
+BOKIREACT PASS rigged pebbit: settles in 0.30 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged pebbit: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged pebbit: Flex stays in shape (scale 0.91 to 1.04)
+BOKIREACT PASS rigged pebbit: a landing squashes it to 0.91 within 0.1 s
+BOKIREACT PASS rigged pebbit: a dash leans it forward 0.164 rad within 0.1 s
+BOKIREACT PASS rigged puddlet: rigged body
+BOKIREACT rigged puddlet     h 0.59 m mass 0.8 | chip 0.116 0.20 s | big 0.218 0.20 s | part 0.000
+BOKIREACT PASS rigged puddlet: a chip hit moves 0.116 of its height by 0.1 s
+BOKIREACT PASS rigged puddlet: a big hit moves 0.218 of its height by 0.1 s
+BOKIREACT PASS rigged puddlet: a big hit moves farther (0.128 vs 0.068 m)
+BOKIREACT PASS rigged puddlet: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged puddlet: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged puddlet: Flex stays in shape (scale 0.94 to 1.03)
+BOKIREACT PASS rigged puddlet: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged puddlet: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged puddlet: Flex stays in shape (scale 0.89 to 1.06)
+BOKIREACT PASS rigged puddlet: a landing squashes it to 0.89 within 0.1 s
+BOKIREACT PASS rigged puddlet: a dash leans it forward 0.215 rad within 0.1 s
+BOKIREACT PASS rigged rimeshrew: rigged body
+BOKIREACT rigged rimeshrew   h 0.54 m mass 0.8 | chip 0.109 0.20 s | big 0.345 0.20 s | part 0.000
+BOKIREACT PASS rigged rimeshrew: a chip hit moves 0.109 of its height by 0.1 s
+BOKIREACT PASS rigged rimeshrew: a big hit moves 0.345 of its height by 0.1 s
+BOKIREACT PASS rigged rimeshrew: a big hit moves farther (0.187 vs 0.059 m)
+BOKIREACT PASS rigged rimeshrew: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged rimeshrew: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged rimeshrew: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged rimeshrew: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged rimeshrew: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged rimeshrew: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged rimeshrew: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged rimeshrew: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged scaldamus: rigged body
+BOKIREACT rigged scaldamus   h 0.55 m mass 2.0 | chip 0.080 0.38 s | big 0.215 0.38 s | part 0.000
+BOKIREACT PASS rigged scaldamus: a chip hit moves 0.080 of its height by 0.1 s
+BOKIREACT PASS rigged scaldamus: a big hit moves 0.215 of its height by 0.1 s
+BOKIREACT PASS rigged scaldamus: a big hit moves farther (0.118 vs 0.044 m)
+BOKIREACT PASS rigged scaldamus: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged scaldamus: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged scaldamus: Flex stays in shape (scale 0.89 to 1.05)
+BOKIREACT PASS rigged scaldamus: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged scaldamus: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged scaldamus: Flex stays in shape (scale 0.80 to 1.10)
+BOKIREACT PASS rigged scaldamus: a landing squashes it to 0.80 within 0.1 s
+BOKIREACT PASS rigged scaldamus: a dash leans it forward 0.055 rad within 0.1 s
+BOKIREACT PASS rigged selenfin: rigged body
+BOKIREACT rigged selenfin    h 0.71 m mass 0.8 | chip 0.121 0.20 s | big 0.318 0.20 s | part 0.000
+BOKIREACT PASS rigged selenfin: a chip hit moves 0.121 of its height by 0.1 s
+BOKIREACT PASS rigged selenfin: a big hit moves 0.318 of its height by 0.1 s
+BOKIREACT PASS rigged selenfin: a big hit moves farther (0.226 vs 0.086 m)
+BOKIREACT PASS rigged selenfin: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged selenfin: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged selenfin: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged selenfin: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged selenfin: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged selenfin: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged selenfin: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged selenfin: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged sentrikat: rigged body
+BOKIREACT rigged sentrikat   h 0.55 m mass 1.1 | chip 0.126 0.25 s | big 0.276 0.25 s | part 0.000
+BOKIREACT PASS rigged sentrikat: a chip hit moves 0.126 of its height by 0.1 s
+BOKIREACT PASS rigged sentrikat: a big hit moves 0.276 of its height by 0.1 s
+BOKIREACT PASS rigged sentrikat: a big hit moves farther (0.152 vs 0.069 m)
+BOKIREACT PASS rigged sentrikat: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged sentrikat: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged sentrikat: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged sentrikat: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged sentrikat: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged sentrikat: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged sentrikat: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged sentrikat: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged spatewader: rigged body
+BOKIREACT rigged spatewader  h 0.55 m mass 2.0 | chip 0.082 0.38 s | big 0.214 0.38 s | part 0.000
+BOKIREACT PASS rigged spatewader: a chip hit moves 0.082 of its height by 0.1 s
+BOKIREACT PASS rigged spatewader: a big hit moves 0.214 of its height by 0.1 s
+BOKIREACT PASS rigged spatewader: a big hit moves farther (0.118 vs 0.045 m)
+BOKIREACT PASS rigged spatewader: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged spatewader: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged spatewader: Flex stays in shape (scale 0.89 to 1.05)
+BOKIREACT PASS rigged spatewader: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged spatewader: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged spatewader: Flex stays in shape (scale 0.80 to 1.10)
+BOKIREACT PASS rigged spatewader: a landing squashes it to 0.80 within 0.1 s
+BOKIREACT PASS rigged spatewader: a dash leans it forward 0.055 rad within 0.1 s
+BOKIREACT PASS rigged squalltross: rigged body
+BOKIREACT rigged squalltross h 0.55 m mass 2.0 | chip 0.093 0.38 s | big 0.208 0.38 s | part 0.000
+BOKIREACT PASS rigged squalltross: a chip hit moves 0.093 of its height by 0.1 s
+BOKIREACT PASS rigged squalltross: a big hit moves 0.208 of its height by 0.1 s
+BOKIREACT PASS rigged squalltross: a big hit moves farther (0.115 vs 0.051 m)
+BOKIREACT PASS rigged squalltross: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged squalltross: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged squalltross: Flex stays in shape (scale 0.89 to 1.05)
+BOKIREACT PASS rigged squalltross: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged squalltross: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged squalltross: Flex stays in shape (scale 0.80 to 1.10)
+BOKIREACT PASS rigged squalltross: a landing squashes it to 0.80 within 0.1 s
+BOKIREACT PASS rigged squalltross: a dash leans it forward 0.055 rad within 0.1 s
+BOKIREACT PASS rigged threadwyrm: rigged body
+BOKIREACT rigged threadwyrm  h 0.55 m mass 1.1 | chip 0.122 0.25 s | big 0.277 0.25 s | part 0.000
+BOKIREACT PASS rigged threadwyrm: a chip hit moves 0.122 of its height by 0.1 s
+BOKIREACT PASS rigged threadwyrm: a big hit moves 0.277 of its height by 0.1 s
+BOKIREACT PASS rigged threadwyrm: a big hit moves farther (0.153 vs 0.068 m)
+BOKIREACT PASS rigged threadwyrm: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged threadwyrm: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged threadwyrm: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged threadwyrm: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged threadwyrm: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged threadwyrm: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged threadwyrm: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged threadwyrm: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged thrumbird: rigged body
+BOKIREACT rigged thrumbird   h 0.59 m mass 0.8 | chip 0.131 0.20 s | big 0.284 0.20 s | part 0.000
+BOKIREACT PASS rigged thrumbird: a chip hit moves 0.131 of its height by 0.1 s
+BOKIREACT PASS rigged thrumbird: a big hit moves 0.284 of its height by 0.1 s
+BOKIREACT PASS rigged thrumbird: a big hit moves farther (0.167 vs 0.077 m)
+BOKIREACT PASS rigged thrumbird: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged thrumbird: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged thrumbird: Flex stays in shape (scale 0.83 to 1.08)
+BOKIREACT PASS rigged thrumbird: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged thrumbird: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged thrumbird: Flex stays in shape (scale 0.69 to 1.16)
+BOKIREACT PASS rigged thrumbird: a landing squashes it to 0.69 within 0.1 s
+BOKIREACT PASS rigged thrumbird: a dash leans it forward 0.086 rad within 0.1 s
+BOKIREACT PASS rigged tuatrune: rigged body
+BOKIREACT rigged tuatrune    h 0.55 m mass 1.1 | chip 0.109 0.25 s | big 0.285 0.25 s | part 0.000
+BOKIREACT PASS rigged tuatrune: a chip hit moves 0.109 of its height by 0.1 s
+BOKIREACT PASS rigged tuatrune: a big hit moves 0.285 of its height by 0.1 s
+BOKIREACT PASS rigged tuatrune: a big hit moves farther (0.158 vs 0.060 m)
+BOKIREACT PASS rigged tuatrune: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged tuatrune: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged tuatrune: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged tuatrune: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged tuatrune: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged tuatrune: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged tuatrune: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged tuatrune: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged umbrathere: rigged body
+BOKIREACT rigged umbrathere  h 0.78 m mass 2.0 | chip 0.088 0.38 s | big 0.198 0.38 s | part 0.000
+BOKIREACT PASS rigged umbrathere: a chip hit moves 0.088 of its height by 0.1 s
+BOKIREACT PASS rigged umbrathere: a big hit moves 0.198 of its height by 0.1 s
+BOKIREACT PASS rigged umbrathere: a big hit moves farther (0.155 vs 0.069 m)
+BOKIREACT PASS rigged umbrathere: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged umbrathere: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged umbrathere: Flex stays in shape (scale 0.89 to 1.05)
+BOKIREACT PASS rigged umbrathere: settles in 0.38 s (heavy: 0.24 to 0.45)
+BOKIREACT PASS rigged umbrathere: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged umbrathere: Flex stays in shape (scale 0.80 to 1.10)
+BOKIREACT PASS rigged umbrathere: a landing squashes it to 0.80 within 0.1 s
+BOKIREACT PASS rigged umbrathere: a dash leans it forward 0.055 rad within 0.1 s
+BOKIREACT PASS rigged velvorm: rigged body
+BOKIREACT rigged velvorm     h 0.55 m mass 1.1 | chip 0.093 0.25 s | big 0.299 0.25 s | part 0.000
+BOKIREACT PASS rigged velvorm: a chip hit moves 0.093 of its height by 0.1 s
+BOKIREACT PASS rigged velvorm: a big hit moves 0.299 of its height by 0.1 s
+BOKIREACT PASS rigged velvorm: a big hit moves farther (0.164 vs 0.051 m)
+BOKIREACT PASS rigged velvorm: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged velvorm: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged velvorm: Flex stays in shape (scale 0.85 to 1.07)
+BOKIREACT PASS rigged velvorm: settles in 0.25 s (medium: 0.18 to 0.38)
+BOKIREACT PASS rigged velvorm: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged velvorm: Flex stays in shape (scale 0.73 to 1.13)
+BOKIREACT PASS rigged velvorm: a landing squashes it to 0.73 within 0.1 s
+BOKIREACT PASS rigged velvorm: a dash leans it forward 0.074 rad within 0.1 s
+BOKIREACT PASS rigged wisplet: rigged body
+BOKIREACT rigged wisplet     h 0.52 m mass 0.8 | chip 0.224 0.20 s | big 0.372 0.20 s | part 0.000
+BOKIREACT PASS rigged wisplet: a chip hit moves 0.224 of its height by 0.1 s
+BOKIREACT PASS rigged wisplet: a big hit moves 0.372 of its height by 0.1 s
+BOKIREACT PASS rigged wisplet: a big hit moves farther (0.194 vs 0.117 m)
+BOKIREACT PASS rigged wisplet: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged wisplet: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged wisplet: Flex stays in shape (scale 0.98 to 1.01)
+BOKIREACT PASS rigged wisplet: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged wisplet: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged wisplet: Flex stays in shape (scale 0.96 to 1.02)
+BOKIREACT PASS rigged wisplet: a landing squashes it to 0.96 within 0.1 s
+BOKIREACT PASS rigged wisplet: a dash leans it forward 0.272 rad within 0.1 s
+BOKIREACT PASS rigged zapple: rigged body
+BOKIREACT rigged zapple      h 1.22 m mass 0.8 | chip 0.058 0.20 s | big 0.106 0.20 s | part 0.000
+BOKIREACT PASS rigged zapple: a chip hit moves 0.058 of its height by 0.1 s
+BOKIREACT PASS rigged zapple: a big hit moves 0.106 of its height by 0.1 s
+BOKIREACT PASS rigged zapple: a big hit moves farther (0.129 vs 0.071 m)
+BOKIREACT PASS rigged zapple: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged zapple: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged zapple: Flex stays in shape (scale 0.92 to 1.04)
+BOKIREACT PASS rigged zapple: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged zapple: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged zapple: Flex stays in shape (scale 0.86 to 1.07)
+BOKIREACT PASS rigged zapple: a landing squashes it to 0.86 within 0.1 s
+BOKIREACT PASS rigged zapple: a dash leans it forward 0.157 rad within 0.1 s
+BOKIREACT PASS rigged zephyrak: rigged body
+BOKIREACT rigged zephyrak    h 0.48 m mass 0.8 | chip 0.140 0.20 s | big 0.192 0.20 s | part 0.000
+BOKIREACT PASS rigged zephyrak: a chip hit moves 0.140 of its height by 0.1 s
+BOKIREACT PASS rigged zephyrak: a big hit moves 0.192 of its height by 0.1 s
+BOKIREACT PASS rigged zephyrak: a big hit moves farther (0.092 vs 0.067 m)
+BOKIREACT PASS rigged zephyrak: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged zephyrak: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged zephyrak: Flex stays in shape (scale 0.97 to 1.02)
+BOKIREACT PASS rigged zephyrak: settles in 0.20 s (light: 0.14 to 0.30)
+BOKIREACT PASS rigged zephyrak: no part detaches (worst 0.000 of height)
+BOKIREACT PASS rigged zephyrak: Flex stays in shape (scale 0.94 to 1.03)
+BOKIREACT PASS rigged zephyrak: a landing squashes it to 0.94 within 0.1 s
+BOKIREACT PASS rigged zephyrak: a dash leans it forward 0.143 rad within 0.1 s
+BOKIREACT PASS match: a owned Boki exists
+BOKIREACT PASS match: a owned Boki flinches when hurt
+BOKIREACT PASS match: a burn tick on a owned Boki is not a hit
+BOKIREACT PASS match: a rival Boki exists
+BOKIREACT PASS match: a rival Boki flinches when hurt
+BOKIREACT PASS match: a burn tick on a rival Boki is not a hit
+BOKIREACT PASS match: a wild Boki exists
+BOKIREACT PASS match: a wild Boki flinches when hurt
+BOKIREACT PASS match: a burn tick on a wild Boki is not a hit
+BOKIREACT DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 224: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 225: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

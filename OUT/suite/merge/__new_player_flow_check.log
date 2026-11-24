@@ -1,0 +1,196 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+NPF ok   the starter is Lace, Kael or Vex (gunslinger)
+NPF ok   the prologue opens
+NPF the prologue runs 37 s if watched
+NPF ok   the skipped prologue lands on the hatch (47.3 s, 1.4 s of game time)
+NPF ok   and is remembered as seen
+NPF ok   the hatch opens on its card (0.0 s, 0.0 s of game time)
+NPF ok   there is a way forward: 'Choose your Boki'
+WARNING: Depth of field blur is only available when using the Forward+ or Mobile renderer.
+     at: camera_attributes_set_dof_blur (servers/rendering/storage/camera_attributes_storage.cpp:70)
+     GDScript backtrace (most recent call first):
+         [0] _build_stage (res://scripts/ui/look_locker.gd:160)
+         [1] open (res://scripts/ui/look_locker.gd:73)
+         [2] _show_create (res://scripts/ui/hatch.gd:398)
+         [3] _end_intro (res://scripts/ui/hatch.gd:349)
+         [4] <anonymous lambda> (res://scripts/ui/ui.gd:189)
+         [5] _press (res://tools/new_player_flow_check.gd:98)
+         [6] _hatch (res://tools/new_player_flow_check.gd:156)
+         [7] run (res://tools/new_player_flow_check.gd:44)
+         [8] _prologue (res://tools/new_player_flow_check.gd:149)
+         [9] _wait (res://tools/new_player_flow_check.gd:84)
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+         [10] open (res://scripts/ui/look_locker.gd:75)
+         [11] _show_create (res://scripts/ui/hatch.gd:398)
+         [12] _end_intro (res://scripts/ui/hatch.gd:349)
+         [13] <anonymous lambda> (res://scripts/ui/ui.gd:189)
+         [14] _press (res://tools/new_player_flow_check.gd:98)
+         [15] _hatch (res://tools/new_player_flow_check.gd:156)
+         [16] run (res://tools/new_player_flow_check.gd:44)
+         [17] _prologue (res://tools/new_player_flow_check.gd:149)
+         [18] _wait (res://tools/new_player_flow_check.gd:84)
+NPF ok   then you make yourself (0.0 s, 0.0 s of game time)
+NPF ok   with a Random button as well
+NPF ok   there is a way forward: 'Looks good'
+NPF ok   then the eggs (0.0 s, 0.0 s of game time)
+NPF ok   there is a way forward: 'This one'
+NPF ok   choosing an egg offers 'Hatch it'
+NPF ok   there is a way forward: 'Hatch it'
+NPF ok   the egg waits for knocks (0.0 s, 0.0 s of game time)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _unhandled_input (res://scripts/ui/hatch.gd:355)
+              [2] _hatch (res://tools/new_player_flow_check.gd:169)
+              [3] run (res://tools/new_player_flow_check.gd:44)
+              [4] _prologue (res://tools/new_player_flow_check.gd:149)
+              [5] _wait (res://tools/new_player_flow_check.gd:84)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _unhandled_input (res://scripts/ui/hatch.gd:355)
+              [2] _hatch (res://tools/new_player_flow_check.gd:169)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _unhandled_input (res://scripts/ui/hatch.gd:355)
+              [2] _hatch (res://tools/new_player_flow_check.gd:169)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _unhandled_input (res://scripts/ui/hatch.gd:355)
+              [2] _hatch (res://tools/new_player_flow_check.gd:169)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _unhandled_input (res://scripts/ui/hatch.gd:355)
+              [2] _hatch (res://tools/new_player_flow_check.gd:169)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _unhandled_input (res://scripts/ui/hatch.gd:355)
+              [2] _hatch (res://tools/new_player_flow_check.gd:169)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _unhandled_input (res://scripts/ui/hatch.gd:355)
+              [2] _hatch (res://tools/new_player_flow_check.gd:169)
+NPF ok   seven knocks hatch it (129.9 s, 10.6 s of game time)
+NPF ok   the new Boki meets you (288.9 s, 4.8 s of game time)
+NPF ok   then it can be named (42.3 s, 0.3 s of game time)
+NPF ok   the naming card offers 'Skip tutorial' beside 'Tutorial'
+NPF ok   there is a way forward: 'Tutorial'
+NPF ok   naming leads into the starter pick (0.0 s, 0.0 s of game time)
+NPF ok   there is a way forward: 'Yes, take Vex'
+NPF ok   the pick leads into the first Relic (0.0 s, 0.0 s of game time)
+NPF ok   the Relic waits by your face (44.2 s, 3.4 s of game time)
+NPF ok   putting it on opens its page (157.4 s, 14.3 s of game time)
+NPF ok   the page has a way on (0.0 s, 0.0 s of game time)
+Quality: auto picked very_low (load benchmark 344.4 ms a frame)
+NPF ok   'Tutorial' opens the tutorial match (327.6 s, 9.0 s of game time)
+NPF ok   it is the tutorial course
+TUT step 0 land t=0.0 mobs=0 lv=1 pts=1 kin=true seen=[]
+TUT step 1 shoot t=3.7 mobs=2 lv=1 pts=1 kin=true seen=[]
+TUT step 2 points t=7.2 mobs=0 lv=1 pts=1 kin=true seen=["fire"]
+TUT step 3 pick_sec t=10.7 mobs=0 lv=1 pts=1 kin=true seen=["fire"]
+TUT step 4 sec t=11.4 mobs=2 lv=1 pts=0 kin=true seen=["fire"]
+TUT step 5 pick_dash t=14.7 mobs=0 lv=2 pts=1 kin=true seen=["fire", "sec"]
+TUT step 6 dash t=15.3 mobs=0 lv=2 pts=0 kin=true seen=["fire", "sec"]
+TUT step 7 exdash t=18.8 mobs=0 lv=2 pts=0 kin=true seen=["fire", "sec", "dash"]
+TUT step 8 glide t=21.3 mobs=0 lv=2 pts=0 kin=true seen=["fire", "sec", "dash"]
+TUT step 9 wallkick t=25.4 mobs=0 lv=2 pts=0 kin=true seen=["fire", "sec", "dash", "glide_s"]
+TUT step 10 crouch t=26.9 mobs=0 lv=2 pts=0 kin=true seen=["fire", "sec", "dash", "glide_s", "kick"]
+TUT step 11 gkey t=28.4 mobs=2 lv=2 pts=0 kin=true seen=["fire", "sec", "dash", "glide_s", "kick"]
+TUT step 14 pick_kin t=30.5 mobs=0 lv=3 pts=1 kin=true seen=["fire", "sec", "dash", "glide_s", "kick", "boki"]
+TUT step 15 kin t=31.1 mobs=3 lv=3 pts=0 kin=true seen=["fire", "sec", "dash", "glide_s", "kick", "boki"]
+TUT step 16 glove t=32.8 mobs=0 lv=4 pts=1 kin=true seen=["fire", "sec", "dash", "glide_s", "kick", "boki", "kin"]
+TUT step 17 hook t=39.6 mobs=2 lv=4 pts=1 kin=true seen=["fire", "sec", "dash", "glide_s", "kick", "boki", "kin"]
+TUT step 18 ranks t=43.8 mobs=0 lv=6 pts=3 kin=true seen=["fire", "sec", "dash", "glide_s", "kick", "boki", "kin", "glove"]
+TUT step 19 wayout t=44.4 mobs=0 lv=6 pts=0 kin=true seen=["fire", "sec", "dash", "glide_s", "kick", "boki", "kin", "glove"]
+TUT step 20 uplink t=48.3 mobs=0 lv=6 pts=0 kin=true seen=["fire", "sec", "dash", "glide_s", "kick", "boki", "kin", "glove"]
+TUT step 21 defend t=50.2 mobs=0 lv=6 pts=0 kin=true seen=["fire", "sec", "dash", "glide_s", "kick", "boki", "kin", "glove"]
+TUT step 22 extract t=58.2 mobs=0 lv=6 pts=0 kin=true seen=["fire", "sec", "dash", "glide_s", "kick", "boki", "kin", "glove"]
+NPF ok   the driver finishes the course and extracts (58 s of play)
+NPF ok   the course is played as the starter (gunslinger)
+NPF ok   every step the kit has was taught: 21 of them (missed: [])
+NPF ok   no step took more than 45 s of play (8 s)
+NPF ok   the course ends on the results (12.7 s, 1.9 s of game time)
+NPF ok   it counts as the first expedition
+NPF ok   and the second Relic is on offer
+NPF ok   there is a way forward: 'Go home'
+NPF ok   'Go home' opens the farm (0.8 s, 0.0 s of game time)
+NPF ok   the farm builds (3.2 s, 0.9 s of game time)
+NPF ok   the farm tutorial starts by calling you to Hob
+NPF ok   its first prompt is on screen
+NPF ok   'hob' tells you what to do
+NPF ok   and in at most 120 characters (36)
+NPF ok   'axe' tells you what to do
+NPF ok   and in at most 120 characters (31)
+NPF ok   'chop' tells you what to do
+NPF ok   and in at most 120 characters (44)
+NPF ok   'stone' tells you what to do
+NPF ok   and in at most 120 characters (49)
+NPF ok   'house' tells you what to do
+NPF ok   and in at most 120 characters (50)
+NPF ok   the house can be placed on the farm
+NPF ok   its labour can all be done: the house stands
+NPF ok   'task' tells you what to do
+NPF ok   and in at most 120 characters (53)
+NPF ok   'feed' tells you what to do
+NPF ok   and in at most 120 characters (32)
+NPF ok   'crop' tells you what to do
+NPF ok   and in at most 120 characters (39)
+NPF ok   'buy' tells you what to do
+NPF ok   and in at most 120 characters (38)
+NPF ok   'sell' tells you what to do
+NPF ok   and in at most 120 characters (40)
+NPF ok   'expedition' tells you what to do
+NPF ok   and in at most 120 characters (53)
+NPF ok   every step can be done in turn
+NPF ok   the axe and the pickaxe were handed over
+NPF ok   the reward at the end is paid
+NPF ok   and the prompts are gone
+NPF ok   Hob offers it now the house is down
+SCRIPT ERROR: Invalid call. Nonexistent function 'release' in base 'Nil'.
+          at: HobTalk._on_line (res://scripts/home/hob_talk.gd:138)
+          GDScript backtrace (most recent call first):
+              [0] _on_line (res://scripts/home/hob_talk.gd:138)
+              [1] advance (res://scripts/ui/talk_box.gd:103)
+              [2] say (res://scripts/ui/talk_box.gd:81)
+              [3] start (res://scripts/home/hob_talk.gd:59)
+              [4] talk (res://scripts/home/farm_hob.gd:315)
+              [5] _second_relic (res://tools/new_player_flow_check.gd:310)
+              [6] run (res://tools/new_player_flow_check.gd:47)
+              [7] _tutorial_match (res://tools/new_player_flow_check.gd:258)
+              [8] _wait (res://tools/new_player_flow_check.gd:84)
+NPF ok   talking to him, his lines lead to the three Relics
+NPF ok   3 to choose from
+NPF ok   there is a way forward: 'Yes, take Kael'
+NPF ok   taking one opens it (juggernaut)
+NPF ok   and it can be worn for the next expedition
+NPF ok   'Go' leaves the farm (3.9 s, 0.3 s of game time)
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)

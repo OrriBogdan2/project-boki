@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MOVEDRILLS ok   the Training Area's bar has a Drills button
+MOVEDRILLS ok   gates: the bot passes in 41 steps (0.7 s)
+MOVEDRILLS ok   glide: the bot passes in 188 steps (3.1 s)
+MOVEDRILLS ok   dive: the bot passes in 89 steps (1.5 s)
+MOVEDRILLS ok   wall: the bot passes in 83 steps (1.4 s)
+MOVEDRILLS FAIL mantle: the bot passes in 840 steps (14.0 s)
+MOVEDRILLS    banner: Mantle: Out of time
+MOVEDRILLS ok   glide: fails with 'Space held' (Glide: Space held from the take-off: tap it, let go, then hold)
+MOVEDRILLS ok   dive: fails with 'm off the mat' (Dive: 8.0 m off the mat)
+MOVEDRILLS ok   a drill that runs out of time fails
+MOVEDRILLS ok   the first pass is the best
+MOVEDRILLS ok   a slower pass keeps the best
+MOVEDRILLS ok   a faster pass replaces it
+MOVEDRILLS ok   the bot's passes were saved in the profile
+MOVEDRILLS ok   the end of the run puts the terraces and you back
+MOVEDRILLS ok   no Drills button in arena
+MOVEDRILLS ok   no Drills button in training
+MOVEDRILLS ok   no Drills button in tutorial
+MOVEDRILLS ok   a v11 save upgrades with an empty best-times table
+MOVEDRILLS ok   a new save starts with one
+MOVEDRILLS DONE, failures: 1
+ERROR: Texture with GL ID of 224: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 226: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 222: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 231: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 21 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

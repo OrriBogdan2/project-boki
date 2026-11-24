@@ -1,0 +1,307 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AKCHECK item 183 bulwark: its air dash is its ground dash (bul_whirl, reach 5.78 vs 5.86) PASS  [{ "anim": "bul_whirl", "spent": 1.0, "ex_cd": 0.0, "reach": 5.86278247833252 }, { "anim": "bul_whirl", "spent": 1.0, "ex_cd": 0.0, "reach": 5.78255653381348 }]
+AKCHECK bjorn aim: the line ends where the hammer lands (2.5 / 5 / 9 m), the shared weapon line hidden PASS  spans [2.5, 5.0, 9.0]
+AKCHECK bjorn aim: the hammer lands at the cursor (5m) and stays planted PASS  throws 1 st ground d 5.2 beacon true
+AKCHECK bjorn: the planted hammer stays planted until the rope's time runs out PASS  ground
+AKCHECK bjorn: tap again calls it back     PASS  
+AKCHECK bjorn recall: from 5 m the hand closes on the hammer at the recall clip's catch key (0.30 s) PASS  caught 0.300 bul_recall
+AKCHECK bjorn E: with the hammer in hand it comes down on him, the column and circle shown PASS  mend (8.5, 1.6, 32.5)
+AKCHECK bjorn E: the landing circle shows for everyone while it comes down PASS  
+AKCHECK bjorn E: the zone ring and the column are in his own colour, not a heal green PASS  
+AKCHECK bjorn E: the zone ends after the column (1s) and 4s of ticks PASS  
+AKCHECK bjorn aim: a far cursor clamps the throw to 9m PASS  d 9.2
+AKCHECK bjorn recall: from 9 m too, caught on the catch key (sheet: recall flight 0.2-0.4 s) PASS  caught 0.300
+AKCHECK bjorn small: a recall in the first 0.25 s is ignored PASS  wind
+AKCHECK bjorn small: a close cursor still throws 2.5 m PASS  d 2.8
+AKCHECK bjorn LMB held: the hammer whirling round him (item 59), no glint yet PASS  held true glint false anim bul_smash_wind
+AKCHECK bjorn LMB held: the glint shows from 0.6s, the cursor ring filling PASS  glint true charge 0.60
+AKCHECK bjorn LMB held: the full-charge flare at 1.25s PASS  k 1.00
+AKCHECK combo bjorn: the full slam = a 180 crescent, carries him forward, hits hard (5x the throw) PASS  carry 2.38 took 66
+AKCHECK combo bjorn: a full slam only knocks, no stun (the source gives none) PASS  stun 0.00
+AKCHECK bjorn anim: the slam plays bul_smash PASS  bul_smash
+AKCHECK bjorn vfx: the release plays the swing, its crescent drawn at the hit's arc PASS  plays 1 arc 180.0
+AKCHECK bjorn vfx: the swing's crescent and trail are his ivory, not Kael's orange PASS  []
+AKCHECK bjorn vfx: the held swing's whirl trail is his ivory too PASS  fff0b0
+AKCHECK bjorn small: wind-down after the slam, no glider straight away (momentum kept) PASS  glide_cd 0.28
+AKCHECK combo bjorn: 360 Smash = no hit on the way, one spin hit on arrival PASS  mid 0 spins 1 took 24
+AKCHECK combo bjorn: one spin ring, a full circle whose outer edge is the hit radius PASS  plays 1 rings 1 r 2.20
+AKCHECK bjorn RMB: his aegis is drawn in place of the plain wall PASS  aegis true anim bul_guard
+AKCHECK bjorn anim: the long dash is his lumbering shove PASS  lumber bul_lumber
+AKCHECK combo bulwark: RMB tap no longer bashes (no push, no Crush, no charge spent) PASS  moved 0.00 took 0 crushes 0 charges 1.0
+AKCHECK combo bulwark: shield up > Shift = Shield Charge, Crushed on the wall PASS  dash charge crushes 1 stun 0.55
+AKCHECK combo bulwark: a Crush stuns 1.0 s (footage: Knockout label up about 1 s), not the old 0.5 PASS  stun left 0.55
+AKCHECK combo bulwark: the Shield Charge spends no dash charge and has its own 6 s cooldown PASS  dashes spent 0.00 cd 6.0 charges 0.0
+AKCHECK combo bulwark: a Crush no longer heals him PASS  hp 153 -> 153
+AKCHECK combo bulwark: the Shield Charge on cooldown: RMB is refused (no aegis), the Shift is no Shield Charge PASS  aegis false charges 0.00 -> 0.00
+AKCHECK combo bulwark: shield + Shift pressed together = the Shield Charge, no Spin Dash charge spent PASS  dash charge spins 0 dashes 1.00 cd 5.5
+AKCHECK combo bulwark: Shield Charge cooldown 6 / 4.5 / 3 s by dash rank, aegis 160 / 200 / 240 PASS  cds [6.0, 4.5, 3.0] shields [160.0, 200.0, 240.0]
+AKCHECK combo bulwark: rank row, Spin Dash recharge 8 / 6.5 / 5 s, no rank damage on the aegis, Smash or field PASS  recharge [8.0, 6.5, 5.0] power [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+AKCHECK combo bulwark: rank 3 repairs faster (regen 30/s, back in 2 s when broken, 1.4 s wait) PASS  regen 30 lock 2.0 wait 1.4
+AKCHECK combo bulwark: the 360 Smash into the wall Crushes (stun, 8 damage on top) PASS  crushes 1 took 32 stun 0.82
+AKCHECK combo bulwark: rank 3 the 360 Smash goes no further than rank 1 (source Upg has no range) PASS  rank 1 3.03 rank 3 3.03
+AKCHECK combo bulwark: rank 3, a 360 Smash that hits refunds the Shield Charge PASS  charges 1.0 cd 0.0
+AKCHECK combo bulwark: dash refund, rank 3 hit: refunded true, cue true PASS  charges 1.0 cd 0.0 cues ["dash_hit"]
+AKCHECK combo bulwark: dash refund, rank 3 miss: refunded false, cue false PASS  charges 0.0 cd 3.6 cues []
+AKCHECK combo bulwark: dash refund, rank 1 hit: refunded false, cue false PASS  charges 0.0 cd 3.6 cues []
+AKCHECK combo bulwark: Guard 50 + Shift behind the shield = Shield Slam, Guard spent PASS  slams 1 guard 80 -> 26 stun 0.38
+AKCHECK bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle PASS  plays 3/1
+AKCHECK bulwark vfx: the Shield Slam fan and its flare are his ivory, not Kael's orange PASS  []
+AKCHECK anim bulwark: charging holds bul_smash_wind PASS  bul_smash_wind
+AKCHECK combo bulwark: a half-charged blow into the wall Crushes PASS  crushes 1
+AKCHECK combo bulwark: full Crushing Blow > wall = Crushed PASS  crushes 1 anim bul_smash
+AKCHECK combo bulwark: a full Crushing Blow in the open knocks, no stun PASS  took 66 moved 3.05 stun 0.00 crushes 0
+AKCHECK combo bulwark: hold LMB > Shift = short dash, a full charge, the swing still charging PASS  dash short lmb 0.75 spent 1.00 moved 2.4
+AKCHECK anim bulwark: out of the short dash he is back in the spin's pose PASS  bul_smash_wind
+AKCHECK anim bulwark: Mending Ground plays bul_mend PASS  bul_mend
+AKCHECK combo bulwark: Mending Ground is a zone: the column (1 s), then ticks of 2 every 0.5 s PASS  zone 3.70 ticks 0
+AKCHECK combo bulwark: E with the shield down heals but does not mend it, and foes inside are not slowed PASS  hp 93 -> 127 shield 40 ticks 8
+AKCHECK combo bulwark: E cooldown 12 / 12 / 8 s and healing x1 / 1.25 / 1.5 by rank PASS  cds [12.0, 12.0, 8.0] heals [1.0, 1.25, 1.5]
+AKCHECK upgrade parity: Spin Dash recharge 8 / 6.5 / 5 s, no damage step on any slot PASS  recharge [8.0, 6.5, 5.0] power [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+AKCHECK bjorn small: Mending Ground doesn't repair a broken aegis PASS  shield 0
+AKCHECK bjorn small: a downed teammate inside Mending Ground starts reviving PASS  revive 0.35
+AKCHECK combo bulwark: E with the shield raised mends it (at the burst) PASS  shield 102
+AKCHECK combo bulwark: mace thrown > E blooms where it lies PASS  mend (14.49999, 1.6, 32.5) mace (14.49999, 1.75, 32.5)
+AKCHECK combo bulwark: the zone follows the hammer back to him when it is recalled PASS  far 6.0 near 0.0
+AKCHECK bulwark: no class R                PASS  
+AKCHECK merge hold: the Crushing Blow is charging before the merge PASS  lmb_t 1.00
+AKCHECK merge hold: a merge is under way   PASS  
+AKCHECK merge hold: bulwark's Crushing Blow charge is dropped, the release swings nothing PASS  lmb_t -1.00 took 0 (merge burst 0) anim 
+AKCHECK merge hold: the shield is raised before the merge PASS  
+AKCHECK merge hold: a merge is under way   PASS  
+AKCHECK merge hold: bulwark's raised shield comes down with the merge (hit points kept) PASS  wall false rmb_down false hp 160 -> 160
+AKCHECK hold albert whirl: let go swings the Crushing Blow PASS  { "whirling": true, "anim": "bul_smash_wind", "slams": 1 }
+AKCHECK hold albert whirl: stun mid-hold drops it, no swing PASS  { "whirling": false, "anim": "", "slams": 0 }
+AKCHECK hold albert whirl: down mid-hold drops it, no swing PASS  { "whirling": false, "anim": "", "slams": 0 }
+AKCHECK hold albert whirl: rmb mid-hold [?] ends it, no swing PASS  { "whirling": false, "anim": "", "slams": 0 }
+AKCHECK hold albert whirl: e mid-hold [?] ends it, no swing PASS  { "whirling": false, "anim": "bul_mend", "slams": 0 }
+AKCHECK growth: the 360 Smash spin hit grows with level (LevelGrowth.ap 1.0 -> 1.35) PASS  L1 24.00 L10 32.42
+AKCHECK bjorn ult gate: no Faultline below level 6 PASS  
+AKCHECK bjorn ult: one X press is one cast (main's X path only) PASS  casts +1
+AKCHECK bjorn ult cast: planted, hammer up (bul_ult_wind) PASS  wind bul_ult_wind move 0.00
+AKCHECK bjorn ult telegraph: one outlined 16x4.5m lane (the gameplay box) for everyone, with its crack PASS  ["kind", "col", "col2", "alpha", "hot", "lw", "all", "soft", "keep", "y", "fletch", "lace", "len", "width", "width_end", "fill", "rails", "chevrons", "tip", "from", "dir", "follow", "h", "t"]
+AKCHECK bjorn ult telegraph: the crack glows brighter as the slam nears PASS  0.99 -> 2.48
+AKCHECK bjorn ult cooldown: 40 s from the cast (0.8 x the data's 50 s) PASS  39.9
+AKCHECK bjorn ult bond: nothing for the cast alone PASS  0.022
+AKCHECK bjorn ult small: planted, no throw or swing in the wind-up PASS  
+AKCHECK bjorn ult anim: the slam (bul_ult_slam) at 0.4s PASS  bul_ult_slam
+AKCHECK bjorn ult: a stun marker circles over each foe it stunned PASS  stunned true
+AKCHECK bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns struck targets) PASS  struck 2
+AKCHECK bjorn ult payoff: each foe on the lane struck (stun) and thrown once (4 + 18, a heavy slow) PASS  took 22 / 22 (want 22) stunned true slow 1.32
+AKCHECK bjorn ult bond: two hunters thrown, the cast pays its best event once (hit, 0.6) PASS  best 0.60 cast bulwark_1 meter 0.999
+AKCHECK bjorn ult small: a scar stays on the lane and slows a foe on it PASS  scar ["t", "a", "len", "fx"]
+AKCHECK bjorn ult small: the scar slows 20% PASS  slow 0.20
+AKCHECK bjorn ult small: the scar fades after 10s PASS  
+AKCHECK bjorn ult small: in the cast, a jump in the wind-up is ignored, not buffered (no rise past the hop) PASS  rose 1.20 m (hop 1.20 m)
+AKCHECK bjorn ult small: free once the fissure runs, a jump goes PASS  0.76 m up, erupt
+AKCHECK bjorn ult bond: a Faultline that hits nobody pays nothing PASS  owed 0.00
+AKCHECK bjorn ult cooldown: no recast while it recharges PASS  
+AKCHECK bjorn ult small: a wall stops the fissure (cells 1) PASS  
+AKCHECK bjorn ult small: the foe past the wall is untouched PASS  took 0
+AKCHECK bjorn ult small: a stun in the wind-up interrupts it (cooldown back to 8s) PASS  slams 2 cd 7.4
+AKCHECK bjorn ult merge: the wind-up drops with no slam PASS  slams 2
+AKCHECK bjorn ult burst: a Faultline then a merge leave a full-health light hunter standing PASS  ult 22, with the merge 43 of 161
+AKCHECK bjorn ult exit: Shift, LMB and jump pressed 0.1s before the plant ends go on its first free step PASS  dash +1 (no lock +1), lmb +1 (no lock +1), jump +1 (no lock +1)
+AKCHECK bjorn auto: the throw is the source card's 0.45 s, the swing and the recall lock recover 10-15% faster PASS  throw 0.450 swing 0.610 lock 0.220
+AKCHECK bjorn auto: the throw and recall poses end with the faster cadence (no pose cut mid-way) PASS  tail 0.50
+AKCHECK bjorn auto: throw, recall and throw again within 3 s at least 4 times PASS  throws 4
+AKCHECK bjorn shield: the wall is 40% longer (4.2 m) PASS  
+AKCHECK bjorn shield: a foe touching the raised wall is not pushed PASS  moved 0.00 boops 0
+AKCHECK bjorn shield: no push chevron in front of the raised wall PASS  
+AKCHECK bjorn shield: the wall is built of plates (solid, not a flat slab) and bigger PASS  parts 59 height 1.70
+AKCHECK bjorn boop: LMB with the aegis up thrusts the wall out and back PASS  boops 1 out 0.67
+AKCHECK bjorn boop: it shoves the foe in front back its push distance, no damage PASS  booped 1 moved 2.80 hp 10000/10000
+AKCHECK bjorn boop: behind the aegis LMB never throws or swings PASS  
+AKCHECK bjorn boop: a foe he walked into (inside the aegis face) is shoved too PASS  moved 2.83
+AKCHECK bjorn shield: lowered, the wall is gone PASS  
+AKCHECK bjorn hold: the swing is charging  PASS  lmb_t 0.60
+AKCHECK bjorn hold: a mantle ends the hold within one frame PASS  lmb_t -1.00
+AKCHECK bjorn hold: after the mantle the held button starts a fresh hold, no swing PASS  lmb_t 0.52 slams 0
+AKCHECK bjorn hold: letting go and pressing again starts a fresh hold PASS  lmb_t 0.52
+AKCHECK bjorn hold: glide ends the hold    PASS  live true lmb_t 0.02 mel_hold 0.02
+AKCHECK bjorn hold: knock ends the hold    PASS  live true lmb_t -1.00 mel_hold 0.00
+AKCHECK bjorn hold: ability ends the hold  PASS  live true lmb_t 0.03 mel_hold 0.03
+AKCHECK bjorn hold: a Q glove ends the hold PASS  live true lmb_t 0.03 mel_hold 0.03
+AKCHECK bjorn hold: the release plays one flaming sweep over the hit's own 180 degrees, drawn to its reach PASS  plays 1 arc 180.0
+AKCHECK bjorn hold: the swing moves him forward at least 1.5 m PASS  lunge 2.42
+AKCHECK bjorn hold: the swing knocks the foe back along it, at least 2 m PASS  knock 5.76
+AKCHECK bjorn dash table: LMB buffers, RMB / E fire, a held swing is kept through a dash (item 51) PASS  
+AKCHECK bjorn dash > LMB: a tap during the dash is not lost, the hammer goes when it ends PASS  rolling true throws 1
+AKCHECK bjorn dash > LMB held: a press made in the dash and held through it winds up the swing when the dash ends PASS  in dash true hold 0.10
+AKCHECK bjorn dash > RMB and E: both start during the dash PASS  rmb true e true
+AKCHECK bjorn plant > Shift: the dash waits through the plant (row: buffer) and goes when it ends PASS  held true last whirl dashes 0.01
+AKCHECK dash moves ["bul_whirl", "bul_charge", "bul_lumber", "bul_short"]: each is its own move, none shared PASS  ["bul_whirl", "bul_charge", "bul_lumber", "bul_short"]
+AKCHECK dash moves ["bul_whirl", "bul_charge", "bul_lumber", "bul_short"]: each move's length fits its dash plus a short settle PASS  worst +0.55 s
+AKCHECK bjorn ult trail: the lane runs on over the abyss (cells over it: 3) PASS  cells 4 over 3
+AKCHECK bjorn ult trail: the drawn length equals its travel length, over the abyss cells too PASS  drawn 16.0 travel 16.0
+AKCHECK bjorn ult trail: over the abyss it is drawn at his height (floating), not down at the bottom PASS  
+AKCHECK bjorn ult trail: the scar's height over the void is his own PASS  
+AKCHECK bjorn #48 ult: planted for the wind-up and the slam (planar speed 0 for 0.6 s) PASS  speed 0.00
+AKCHECK bjorn #48 ult: free the moment the plant ends (already moving 0.05 s after it) PASS  1.82 of 5.63
+AKCHECK bjorn #48 ult: from ~0.1 s after the slam he walks at 90%+ of his run speed while it erupts PASS  slowest 5.63 of run 5.63 over 41 steps
+AKCHECK bjorn #48 ult: the lane erupts where it was cast, wherever he walks (the far dummy is thrown) PASS  took 22, he is 4.3 m off the lane
+AKCHECK bjorn #49 window: it opens at full charge (1.25 s) with the one full flare and the hot glint PASS  opens at 1.25 flash true hot true
+AKCHECK bjorn #49 window: it shuts 0.18 s after full PASS  shuts at 1.43 (want 1.43)
+AKCHECK bjorn #49 window: held past it nothing goes off by itself (sheet: a 2.6 s hold); let go, a normal swing PASS  held on true launches 0 slams 1
+AKCHECK bjorn #49: a release outside the window lunges him 1.4-2.4 m, further the fuller the charge PASS  late 2.42 early 1.90
+AKCHECK bjorn #49: the perfect swing knocks harder and holds the hit longer PASS  knock 5.86 -> 9.11, hit-stop 0.025 -> 0.033
+AKCHECK bjorn #49: a release in the window launches him >= 3.5 m (bul_launch, a dash to DashFlow) PASS  moved 4.58 anim true dash true
+AKCHECK bjorn #49: a mantle ends the launch within one frame PASS  live true roll 0.00
+AKCHECK bjorn #49: glide pressed during the launch jumps him out into a glide at >= 70% of its speed PASS  glide opens at 9.6 of 13.3 m/s
+AKCHECK bjorn 11-09: launched off a ledge with no glide press he falls on (no glider by itself) PASS  gliding false
+AKCHECK bjorn #49: launched off a ledge, a fresh glide press glides at >= 70% of the launch's speed PASS  glide opens at 11.2 of 13.3 m/s, 5.6 m out
+AKCHECK bjorn #51 hold > jump: it charges on through the jump and swings on the release in the air, keeping speed PASS  charged 0.23 in air true slams 1 speed 3.1 -> 6.9
+AKCHECK bjorn #51 hold > Shift: the short dash goes, the swing charges on in it, let go there it swings at once PASS  short true slams 1
+AKCHECK bjorn #51 perfect out of a jump: let go in the window in the air, he launches >= 3.5 m PASS  launches 1 moved 7.29 air true
+AKCHECK bjorn #51 perfect out of a dash: let go in the window after it, he launches >= 3.5 m PASS  launches 1 moved 4.58 air false
+AKCHECK bjorn #51 a jump in the swing's step acts within 0.1 s PASS  in it true took 0.02 s
+AKCHECK bjorn #51 Shift in the swing's step acts within 0.1 s PASS  in it true took 0.03 s
+AKCHECK bjorn #51 a jump in the perfect launch acts within 0.1 s PASS  in it true took 0.02 s
+AKCHECK bjorn #51 Shift in the perfect launch acts within 0.1 s PASS  in it true took 0.03 s
+AKCHECK bjorn parity LMB: in the hold he turns with a cursor sweeping 1.25 turns a second (trails <= 25 deg) PASS  worst 0 deg hold 1.00
+AKCHECK bjorn parity LMB: in the hold he turns with a cursor sweeping 1.25 turns a second, walking (trails <= 25 deg) PASS  worst 0 deg hold 1.00
+AKCHECK bjorn parity LMB: let go, the swing goes on the release step at the cursor (behind him), the hit within 0.1 s PASS  took 59 anim bul_smash
+AKCHECK bjorn parity LMB: the swing recovers in ~0.6 s (sheet: one frame of sweep, ~0.4 s of recovery) PASS  fire_cd 0.61
+AKCHECK bjorn parity LMB: the throw's wind-up, the hammer leaves his hand 0.08-0.15 s after the press (one frame) PASS  left at 0.117 anim bul_throw
+AKCHECK bjorn parity LMB: the throw's cadence is the source card's 0.45 s (sheet: 175 out, 175 back) PASS  throw_rate 0.45 fire_cd 0.367
+AKCHECK bjorn parity RMB: the aegis is up 0.1 s into the hold (data: a 0.1 s cast) PASS  up at 0.12
+AKCHECK bjorn parity RMB: the aegis faces a sweeping cursor at once (within 10 deg) PASS  worst 0.0 deg
+AKCHECK bjorn #59: held, the hammer keeps turning, >= 1.0 turns/s in every 0.25 s, through the window and on PASS  2.56-4.00 turns/s
+AKCHECK bjorn #59: the whirl speeds up with the charge PASS  2.56-4.00 turns/s
+AKCHECK bjorn #59: the head runs at arm's length with its trail behind it PASS  head 1.84 m out (arm's length 1.37), trail true
+AKCHECK bjorn #59: the whirl hurts nobody (the default for now): a foe inside its circle took nothing in 2 s PASS  took 0
+AKCHECK bjorn #59: he walks at the hold speed while it whirls (55% of his run) PASS  3.35 turns/s at 3.1 m/s, run 5.3
+AKCHECK bjorn #59: a jump keeps the whirl  PASS  3.19 turns/s
+AKCHECK bjorn #59: Shift keeps the whirl   PASS  3.19 turns/s
+AKCHECK bjorn #59: let go, the slam goes at the cursor, the hammer back in the hand, the trail gone PASS  slams +1 trail false
+AKCHECK bjorn #59: the slam hits           PASS  took 53
+AKCHECK bjorn audit: the thrown hammer knocking a foe into a wall Crushes it (stun) PASS  crushes 1 stun 0.70
+AKCHECK bjorn audit: a blow that knocks a foe into another foe (no wall) doesn't Crush (data: walls only) PASS  crushes 0 took 66
+AKCHECK bjorn audit: the raised aegis takes a melee blow from the front (data: all damage from the front) PASS  hp 135 -> 119 wall 160 -> 140
+AKCHECK bjorn audit: a blow from behind still lands on him PASS  hp 135 -> 119
+AKCHECK bjorn audit: a shot from the front is stopped by the aegis (he takes none, it takes it) PASS  hp 119 -> 119 wall 140 -> 120
+AKCHECK bjorn audit: a shot from behind lands on him PASS  hp 119 -> 103
+AKCHECK bjorn audit: a stun, slow and root riding a hit from the front are blocked with it PASS  stun 0.0 slow 0.0 root 0.0
+AKCHECK bjorn audit: the same from behind lands PASS  stun 1.0
+AKCHECK bjorn audit: Kael's chain from the front stops on the aegis (no anchor, no pull) PASS  state ready
+AKCHECK bjorn audit: Grimble's hand from the front stops on the aegis (no grab) PASS  thrown true grapples 0
+AKCHECK bjorn audit: Grimble's hand from behind catches him PASS  grapples 1
+AKCHECK albert ult: the lane is 20-25% wider (telegraph and hits read the one width) PASS  4.5 -> 5.5 m
+AKCHECK albert ult: he hops 1-1.5 m with the hammer up PASS  top 1.20 m
+AKCHECK albert ult: the slam keeps its 0.4 s and lands him on the ground PASS  slam at 0.42, 0.00 m up
+AKCHECK albert ult: a foe 3 m off the line is thrown (outside the old lane, inside the new) PASS  took 22
+AKCHECK albert rope: past 14 m the hammer reels home on its own, the throw shut till the catch PASS  landed true reeled true shut true home in 0.45 s
+AKCHECK albert rope: caught, it throws again PASS  throws 1
+AKCHECK albert rope: left out 6 s it reels home on its own PASS  after 6.00 s
+AKCHECK albert lunge: standing, a part charge ~1.4 m and a full one ~2.4 m (the finisher pulls more) PASS  part 1.26 full 2.42
+AKCHECK albert lunge: running, the swing travels further than standing PASS  run 3.10 standing 2.42
+AKCHECK albert lunge: in the air it pulls ~55% of the ground's PASS  air 1.33 (want 1.32) ground 2.42
+AKCHECK albert lunge: the 360 Smash's spin lunges him on at least 1.6 m (the dash's speed stacks like a run) PASS  spin 2.73 m
+AKCHECK DONE, 197 checks, failures: 0
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 213: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 219: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 223: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 220: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 225: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 224: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 228: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 226: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 234: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 230: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 236: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 235: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 238: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 237: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 239: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 241: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 246: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 243: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 249: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 247: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 251: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 250: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 263: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 264: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 272: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 271: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 274: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 295: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 297: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 305: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 306: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 304: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 309: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 307: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 311: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 310: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 313: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 17 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

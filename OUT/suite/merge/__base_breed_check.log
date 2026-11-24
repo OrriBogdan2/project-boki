@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BREED gate both Grown: 1333 min (667 each; a runner needs 319 each)
+BREED OVER both Grown: 1333 min, 29.6 sessions (limit 90 min)
+BREED ok   farm XP alone reaches Grown at all (667 min)
+BREED ok   farm XP is at most 2.2x slower than runs to Grown (2.09x)
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+BREED gate hatch: 0 min (a starter, 200 gems, farm level 1)
+BREED ok   a toy costs 12 of the 200 gems you start with
+BREED ok   the toy stands on the base
+BREED OPEN a second Boki: the Shelter needs a tier 2 market stall (8 wood, 6 stone, 4 fibre); docs/DEBT.md
+BREED gate friends: 2 min (bond 0.55, trust 42/42)
+BREED ok   the two become friends on their own within the limit
+BREED ok   every Nook gate is met ()
+BREED ok   an egg is laid and is not ready at once
+BREED ok   the egg is ready after its 10 minutes at home
+BREED ok   the egg hatches into a baby
+BREED ok   a parent rests after laying (Needs a rest after its last egg)
+BREED gate first egg laid: 1333 min; baby out: 1343 min (limit 90)
+BREED OVER the baby: 1343 min, 29.8 sessions (limit 90 min)
+BREED ok   no match was entered (matches 0)
+BREED DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

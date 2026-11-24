@@ -1,0 +1,136 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/boss_sfx_check.gd:79)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/boss_sfx_check.gd:79)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+BOSSSFX ok   serpent wakes (heard from 60 m) plays boss_serpent_wake, no k_ name (played ["ping", "boss_serpent_wake", "ui_toast", "ult"])
+BOSSSFX ok   serpent phase 2 plays boss_serpent_phase, no k_ name (played ["ui_toast", "gunslinger_hurt", "armor_hit", "boss_serpent_phase"])
+BOSSSFX ok   serpent enrage plays boss_serpent_phase, no k_ name (played ["ui_toast", "boss_serpent_phase"])
+BOSSSFX ok   serpent dash wind-up plays boss_serpent_dash_wind, no k_ name (played ["boss_serpent_dash_wind"])
+BOSSSFX ok   serpent dash: swell 0.95 s, wind-up key 0.95 s, pitch x1.00
+BOSSSFX ok   serpent dash strike plays boss_serpent_dash_hit, no k_ name (played ["boss_serpent_dash_hit"])
+BOSSSFX ok   serpent dash enraged wind-up plays boss_serpent_dash_wind, no k_ name (played ["boss_serpent_dash_wind"])
+BOSSSFX ok   serpent dash enraged: swell 0.95 s, wind-up key 0.61 s, pitch x1.56
+BOSSSFX ok   serpent dash enraged strike plays boss_serpent_dash_hit, no k_ name (played ["boss_serpent_dash_wind", "boss_serpent_dash_hit"])
+BOSSSFX ok   serpent storm wind-up plays boss_serpent_storm_wind, no k_ name (played ["boss_serpent_storm_wind"])
+BOSSSFX ok   serpent storm: swell 1.10 s, wind-up key 1.10 s, pitch x1.00
+BOSSSFX ok   serpent storm strike plays boss_serpent_storm_hit, no k_ name (played ["boss_serpent_storm_hit"])
+BOSSSFX ok   serpent storm enraged wind-up plays boss_serpent_storm_wind, no k_ name (played ["boss_serpent_storm_wind"])
+BOSSSFX ok   serpent storm enraged: swell 1.10 s, wind-up key 0.94 s, pitch x1.18
+BOSSSFX ok   serpent storm enraged strike plays boss_serpent_storm_hit, no k_ name (played ["boss_serpent_storm_hit"])
+BOSSSFX ok   serpent static wind-up plays boss_serpent_static_wind, no k_ name (played ["boss_serpent_static_wind"])
+BOSSSFX ok   serpent static: swell 1.50 s, wind-up key 1.50 s, pitch x1.00
+BOSSSFX ok   serpent static strike plays boss_serpent_static_hit, no k_ name (played ["boss_serpent_static_hit"])
+BOSSSFX ok   serpent static enraged wind-up plays boss_serpent_static_wind, no k_ name (played ["boss_serpent_static_wind"])
+BOSSSFX ok   serpent static enraged: swell 1.50 s, wind-up key 1.27 s, pitch x1.18
+BOSSSFX ok   serpent static enraged strike plays boss_serpent_static_hit, no k_ name (played ["boss_serpent_static_hit"])
+BOSSSFX ok   serpent stagger plays boss_serpent_stagger, no k_ name (played ["ui_toast", "mstag_hit", "boss_serpent_stagger"])
+BOSSSFX ok   serpent falls to your squad plays boss_serpent_defeat, no k_ name (played ["ui_toast", "bond", "armor_up_own", "gunslinger_hit", "hit_heavy", "xp_tick", "level_up", "glide", "horn", "die_big_1", "unlock", "pickup", "boss_serpent_fall", "boss_serpent_defeat", "mdie_warden", "kill", "boom"])
+BOSSSFX ok   serpent body falls plays boss_serpent_fall, no k_ name (played ["ui_toast", "bond", "armor_up_own", "gunslinger_hit", "hit_heavy", "xp_tick", "level_up", "glide", "horn", "die_big_1", "unlock", "pickup", "boss_serpent_fall", "boss_serpent_defeat", "mdie_warden", "kill", "boom"])
+BOSSSFX ok   serpent falls to a rival: the horn, not your sting
+BOSSSFX ok   colossus wakes (heard from 60 m) plays boss_colossus_wake, no k_ name (played ["ping", "ui_toast", "ult", "boss_colossus_wake"])
+BOSSSFX ok   colossus phase 2 plays boss_colossus_phase, no k_ name (played ["ui_toast", "gunslinger_hurt", "armor_hit", "boss_colossus_phase"])
+BOSSSFX ok   colossus enrage plays boss_colossus_phase, no k_ name (played ["ui_toast", "boss_colossus_phase"])
+BOSSSFX ok   colossus slam wind-up plays boss_colossus_slam_wind, no k_ name (played ["ui_toast", "boss_colossus_slam_wind", "mstag_open"])
+BOSSSFX ok   colossus slam: swell 1.10 s, wind-up key 1.10 s, pitch x1.00
+BOSSSFX ok   colossus slam strike plays boss_colossus_slam_hit, no k_ name (played ["boss_colossus_slam_hit"])
+BOSSSFX ok   colossus slam enraged wind-up plays boss_colossus_slam_wind, no k_ name (played ["boss_colossus_slam_wind"])
+BOSSSFX ok   colossus slam enraged: swell 1.10 s, wind-up key 0.70 s, pitch x1.56
+BOSSSFX ok   colossus slam enraged strike plays boss_colossus_slam_hit, no k_ name (played ["boss_colossus_slam_hit"])
+BOSSSFX ok   colossus boulders wind-up plays boss_colossus_boulders_wind, no k_ name (played ["boss_colossus_boulders_wind"])
+BOSSSFX ok   colossus boulders: swell 0.85 s, wind-up key 0.85 s, pitch x1.00
+BOSSSFX ok   colossus boulders strike plays boss_colossus_boulders_hit, no k_ name (played ["boss_colossus_boulders_hit"])
+BOSSSFX ok   colossus boulders lands plays boss_colossus_boulders_land, no k_ name (played ["boss_colossus_boulders_hit", "boss_colossus_boulders_land"])
+BOSSSFX ok   colossus boulders enraged wind-up plays boss_colossus_boulders_wind, no k_ name (played ["boss_colossus_boulders_wind"])
+BOSSSFX ok   colossus boulders enraged: swell 0.85 s, wind-up key 0.85 s, pitch x1.00
+BOSSSFX ok   colossus boulders enraged strike plays boss_colossus_boulders_hit, no k_ name (played ["boss_colossus_boulders_hit"])
+BOSSSFX ok   colossus boulders enraged lands plays boss_colossus_boulders_land, no k_ name (played ["boss_colossus_boulders_land"])
+BOSSSFX ok   colossus fissure wind-up plays boss_colossus_fissure_wind, no k_ name (played ["boss_colossus_fissure_wind"])
+BOSSSFX ok   colossus fissure: swell 1.00 s, wind-up key 0.99 s, pitch x1.01
+BOSSSFX ok   colossus fissure strike plays boss_colossus_fissure_hit, no k_ name (played ["boss_colossus_fissure_hit"])
+BOSSSFX ok   colossus fissure enraged wind-up plays boss_colossus_fissure_wind, no k_ name (played ["boss_colossus_fissure_wind"])
+BOSSSFX ok   colossus fissure enraged: swell 1.00 s, wind-up key 0.63 s, pitch x1.58
+BOSSSFX ok   colossus fissure enraged strike plays boss_colossus_fissure_hit, no k_ name (played ["boss_colossus_fissure_hit"])
+BOSSSFX ok   colossus stagger plays boss_colossus_stagger, no k_ name (played ["ui_toast", "mstag_hit", "boss_colossus_stagger"])
+BOSSSFX ok   colossus falls to your squad plays boss_colossus_defeat, no k_ name (played ["ui_toast", "armor_up_own", "gunslinger_hit", "hit_heavy", "xp_tick", "level_up", "glide", "horn", "die_big_1", "unlock", "pickup", "mdie_warden", "kill", "boom", "boss_colossus_fall", "boss_colossus_defeat"])
+BOSSSFX ok   colossus body falls plays boss_colossus_fall, no k_ name (played ["ui_toast", "armor_up_own", "gunslinger_hit", "hit_heavy", "xp_tick", "level_up", "glide", "horn", "die_big_1", "unlock", "pickup", "mdie_warden", "kill", "boom", "boss_colossus_fall", "boss_colossus_defeat"])
+BOSSSFX ok   colossus falls to a rival: the horn, not your sting
+BOSSSFX ok   brood wakes (heard from 60 m) plays boss_brood_wake, no k_ name (played ["ping", "ui_toast", "ult", "boss_brood_wake"])
+BOSSSFX ok   brood phase 2 plays boss_brood_phase, no k_ name (played ["ui_toast", "gunslinger_hurt", "armor_hit", "boss_brood_phase"])
+BOSSSFX ok   brood enrage plays boss_brood_phase, no k_ name (played ["ui_toast", "boss_brood_phase"])
+BOSSSFX ok   brood spit wind-up plays boss_brood_spit_wind, no k_ name (played ["boss_brood_spit_wind"])
+BOSSSFX ok   brood spit: swell 0.85 s, wind-up key 0.85 s, pitch x1.00
+BOSSSFX ok   brood spit strike plays boss_brood_spit_hit, no k_ name (played ["boss_brood_spit_hit"])
+BOSSSFX ok   brood spit enraged wind-up plays boss_brood_spit_wind, no k_ name (played ["boss_brood_spit_wind"])
+BOSSSFX ok   brood spit enraged: swell 0.85 s, wind-up key 0.54 s, pitch x1.56
+BOSSSFX ok   brood spit enraged strike plays boss_brood_spit_hit, no k_ name (played ["boss_brood_spit_hit"])
+BOSSSFX ok   brood lob wind-up plays boss_brood_lob_wind, no k_ name (played ["boss_brood_lob_wind"])
+BOSSSFX ok   brood lob: swell 0.70 s, wind-up key 0.70 s, pitch x1.00
+BOSSSFX ok   brood lob strike plays boss_brood_lob_hit, no k_ name (played ["boss_brood_lob_hit"])
+BOSSSFX ok   brood lob lands plays boss_brood_lob_land, no k_ name (played ["boss_brood_lob_hit", "boss_brood_lob_land"])
+BOSSSFX ok   brood lob enraged wind-up plays boss_brood_lob_wind, no k_ name (played ["boss_brood_lob_wind"])
+BOSSSFX ok   brood lob enraged: swell 0.70 s, wind-up key 0.70 s, pitch x1.00
+BOSSSFX ok   brood lob enraged strike plays boss_brood_lob_hit, no k_ name (played ["boss_brood_lob_hit"])
+BOSSSFX ok   brood lob enraged lands plays boss_brood_lob_land, no k_ name (played ["boss_brood_lob_land"])
+BOSSSFX ok   brood brood wind-up plays boss_brood_brood_wind, no k_ name (played ["boss_brood_brood_wind"])
+BOSSSFX ok   brood brood: swell 0.60 s, wind-up key 0.50 s, pitch x1.20
+BOSSSFX ok   brood brood strike plays boss_brood_brood_hit, no k_ name (played ["boss_brood_brood_hit"])
+BOSSSFX ok   brood brood enraged wind-up plays boss_brood_brood_wind, no k_ name (played ["boss_brood_brood_wind"])
+BOSSSFX ok   brood brood enraged: swell 0.60 s, wind-up key 0.50 s, pitch x1.20
+BOSSSFX ok   brood brood enraged strike plays boss_brood_brood_hit, no k_ name (played ["boss_brood_brood_hit"])
+BOSSSFX ok   brood burrow wind-up plays boss_brood_burrow_wind, no k_ name (played ["boss_brood_burrow_wind"])
+BOSSSFX ok   brood burrow: swell 2.00 s, wind-up key 2.10 s, pitch x0.95
+BOSSSFX ok   brood burrow strike plays boss_brood_burrow_hit, no k_ name (played ["boss_brood_burrow_hit"])
+BOSSSFX ok   brood burrow enraged wind-up plays boss_brood_burrow_wind, no k_ name (played ["boss_brood_burrow_wind"])
+BOSSSFX ok   brood burrow enraged: swell 2.00 s, wind-up key 2.10 s, pitch x0.95
+BOSSSFX ok   brood burrow enraged strike plays boss_brood_burrow_hit, no k_ name (played ["boss_brood_burrow_hit"])
+BOSSSFX ok   brood stagger plays boss_brood_stagger, no k_ name (played ["ui_toast", "mstag_hit", "boss_brood_stagger"])
+BOSSSFX ok   brood falls to your squad plays boss_brood_defeat, no k_ name (played ["ui_toast", "gunslinger_hit", "hit_heavy", "xp_tick", "level_up", "glide", "horn", "die_big_1", "unlock", "pickup", "mdie_warden", "kill", "boom", "boss_brood_fall", "boss_brood_defeat"])
+BOSSSFX ok   brood body falls plays boss_brood_fall, no k_ name (played ["ui_toast", "gunslinger_hit", "hit_heavy", "xp_tick", "level_up", "glide", "horn", "die_big_1", "unlock", "pickup", "mdie_warden", "kill", "boom", "boss_brood_fall", "boss_brood_defeat"])
+BOSSSFX ok   brood falls to a rival: the horn, not your sting
+BOSSSFX ok   all 3 bosses were in this match (["serpent", "colossus", "brood"])
+BOSSSFX DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 21 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

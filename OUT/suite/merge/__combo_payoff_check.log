@@ -1,0 +1,50 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PAYCHECK thief: tag shows an icon and the time left                               PASS  { "icon": "mark_thief", "n": 3, "max": 8, "left": 4.0, "total": 4.0 }
+PAYCHECK thief: the payoff flashes the body white                                 PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK thief: the payoff plays the combo sound                                  PASS  
+PAYCHECK gunslinger: tag shows an icon and the time left                          PASS  { "icon": "mark_daze", "n": 0, "max": 0, "left": 1.4, "total": 2.0 }
+PAYCHECK gunslinger: the payoff flashes the body white                            PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK gunslinger: the payoff plays the combo sound                             PASS  
+PAYCHECK mage: tag shows an icon and the time left                                PASS  { "icon": "mark_static", "n": 2, "max": 4, "left": 4.5, "total": 4.5, "lift": 30.0 }
+PAYCHECK mage: the payoff flashes the body white                                  PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK mage: the payoff plays the combo sound                                   PASS  
+PAYCHECK ashwick: tag shows an icon and the time left                             PASS  { "icon": "fireball", "n": 1, "max": 2, "left": 3.0, "total": 3.0 }
+PAYCHECK ashwick: the payoff flashes the body white                               PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK ashwick: the payoff plays the combo sound                                PASS  
+PAYCHECK rimewright: tag shows an icon and the time left                          PASS  { "icon": "frost", "n": 1, "max": 1, "left": 4.0, "total": 4.0 }
+PAYCHECK rimewright: the payoff flashes the body white                            PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK rimewright: the payoff plays the combo sound                             PASS  
+PAYCHECK tender: tag shows an icon and the time left                              PASS  { "icon": "burst", "n": 3, "max": 5, "left": 4.0, "total": 4.0 }
+PAYCHECK tender: the payoff flashes the body white                                PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK tender: the payoff plays the combo sound                                 PASS  
+PAYCHECK gil: tag shows an icon and the time left                                 PASS  { "icon": "tonic", "n": 2, "max": 3, "left": 5.0, "total": 5.0 }
+PAYCHECK gil: the payoff flashes the body white                                   PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK gil: the payoff plays the combo sound                                    PASS  
+PAYCHECK juggernaut: tag shows an icon and the time left                          PASS  { "icon": "slam", "n": 0, "max": 0, "left": 2.0, "total": 2.0 }
+PAYCHECK juggernaut: the payoff flashes the body white                            PASS  stamp 0.10 time 0.12 flash 0.120
+PAYCHECK juggernaut: the payoff plays the combo sound                             PASS  
+PAYCHECK gunslinger (needle): tag shows an icon and the time left                 PASS  { "icon": "mark_daze", "n": 0, "max": 0, "left": 1.4, "total": 2.0 }
+PAYCHECK gunslinger (needle): the payoff flashes the body white                   PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK gunslinger (needle): the payoff plays the combo sound                    PASS  
+PAYCHECK ashwick (flashover): tag shows an icon and the time left                 PASS  { "icon": "fireball", "n": 1, "max": 2, "left": 3.0, "total": 3.0 }
+PAYCHECK ashwick (flashover): the payoff flashes the body white                   PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK ashwick (flashover): the payoff plays the combo sound                    PASS  
+PAYCHECK rimewright (knock): tag shows an icon and the time left                  PASS  { "icon": "frost", "n": 1, "max": 1, "left": 4.0, "total": 4.0 }
+PAYCHECK rimewright (knock): the payoff flashes the body white                    PASS  stamp 0.50 time 0.50 flash 0.153
+PAYCHECK rimewright (knock): the payoff plays the combo sound                     PASS  
+PAYCHECK juggernaut (chain): tag shows an icon and the time left                  PASS  { "icon": "chain", "n": 0, "max": 0, "left": 5.0, "total": 5.0 }
+PAYCHECK juggernaut (chain): the payoff flashes the body white                    PASS  stamp 0.08 time 0.08 flash 0.153
+PAYCHECK juggernaut (chain): the payoff plays the combo sound                     PASS  
+PAYCHECK DONE, 36 checks, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 30 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

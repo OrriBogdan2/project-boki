@@ -1,0 +1,79 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MOBGLB ok   skitter: model dressed, 8 bones linked to pivots
+MOBGLB ok   skitter: 5998 triangles (<= 7000)
+MOBGLB ok   skitter: no primitive draws over the model (0)
+MOBGLB ok   skitter: textured, measured repaint band at hue 0.73
+MOBGLB ok   skitter: the region's colour reaches the paint
+MOBGLB ok   skitter: turning pivot JawL moves its bone
+MOBGLB ok   skitter: copy_pose matches the per-bone global set (worst 0.00000)
+MOBGLB ok   skitter: a held pose copies nothing (true), the next drawn one does (true)
+MOBGLB ok   spitter: model dressed, 5 bones linked to pivots
+MOBGLB ok   spitter: 5999 triangles (<= 7000)
+MOBGLB ok   spitter: no primitive draws over the model (0)
+MOBGLB ok   spitter: textured, measured repaint band at hue 0.20
+MOBGLB ok   spitter: the region's colour reaches the paint
+MOBGLB ok   spitter: turning pivot Leaf0 moves its bone
+MOBGLB ok   spitter: copy_pose matches the per-bone global set (worst 0.00000)
+MOBGLB ok   spitter: a held pose copies nothing (true), the next drawn one does (true)
+MOBGLB ok   brute: model dressed, 6 bones linked to pivots
+MOBGLB ok   brute: 5999 triangles (<= 7000)
+MOBGLB ok   brute: no primitive draws over the model (0)
+MOBGLB ok   brute: textured, measured repaint band at hue 0.06
+MOBGLB ok   brute: the region's colour reaches the paint
+MOBGLB ok   brute: turning pivot LegL moves its bone
+MOBGLB ok   brute: copy_pose matches the per-bone global set (worst 0.00000)
+MOBGLB ok   brute: a held pose copies nothing (true), the next drawn one does (true)
+MOBGLB ok   warden: model dressed, 6 bones linked to pivots
+MOBGLB ok   warden: 6000 triangles (<= 7000)
+MOBGLB ok   warden: no primitive draws over the model (0)
+MOBGLB ok   warden: textured, measured repaint band at hue 0.72
+MOBGLB ok   warden: the region's colour reaches the paint
+MOBGLB ok   warden: turning pivot LegL moves its bone
+MOBGLB ok   warden: copy_pose matches the per-bone global set (worst 0.00000)
+MOBGLB ok   warden: a held pose copies nothing (true), the next drawn one does (true)
+MOBGLB ok   bomber: model dressed, 4 bones linked to pivots
+MOBGLB ok   bomber: 5999 triangles (<= 7000)
+MOBGLB ok   bomber: no primitive draws over the model (0)
+MOBGLB ok   bomber: textured, measured repaint band at hue 0.05
+MOBGLB ok   bomber: the region's colour reaches the paint
+MOBGLB ok   bomber: turning pivot Puff moves its bone
+MOBGLB ok   bomber: copy_pose matches the per-bone global set (worst 0.00000)
+MOBGLB ok   bomber: a held pose copies nothing (true), the next drawn one does (true)
+MOBGLB ok   sentinel: model dressed, 2 bones linked to pivots
+MOBGLB ok   sentinel: 6867 triangles (<= 7000)
+MOBGLB ok   sentinel: no primitive draws over the model (0)
+MOBGLB ok   sentinel: textured, measured repaint band at hue 0.50
+MOBGLB ok   sentinel: the region's colour reaches the paint
+MOBGLB ok   sentinel: turning pivot Crystal moves its bone
+MOBGLB ok   sentinel: copy_pose matches the per-bone global set (worst 0.00000)
+MOBGLB ok   sentinel: a held pose copies nothing (true), the next drawn one does (true)
+MOBGLB ok   glimmer: model dressed, 2 bones linked to pivots
+MOBGLB ok   glimmer: 5999 triangles (<= 7000)
+MOBGLB ok   glimmer: no primitive draws over the model (0)
+MOBGLB ok   glimmer: textured, measured repaint band at hue 0.12
+MOBGLB ok   glimmer: the region's colour reaches the paint
+MOBGLB ok   glimmer: turning pivot EarL moves its bone
+MOBGLB ok   glimmer: copy_pose matches the per-bone global set (worst 0.00000)
+MOBGLB ok   glimmer: a held pose copies nothing (true), the next drawn one does (true)
+MOBGLB ok   bl_skitter: model dressed, 8 bones linked to pivots
+MOBGLB ok   bl_skitter: 5999 triangles (<= 7000)
+MOBGLB ok   bl_skitter: no primitive draws over the model (0)
+MOBGLB ok   bl_skitter: textured, measured repaint band at hue 0.06
+MOBGLB ok   bl_skitter: the region's colour reaches the paint
+MOBGLB ok   bl_skitter: turning pivot Leg0-1 moves its bone
+MOBGLB ok   bl_skitter: copy_pose matches the per-bone global set (worst 0.00000)
+MOBGLB ok   bl_skitter: a held pose copies nothing (true), the next drawn one does (true)
+MOBGLB ok   bl_warden: model dressed, 8 bones linked to pivots
+MOBGLB ok   bl_warden: 6000 triangles (<= 7000)
+MOBGLB ok   bl_warden: no primitive draws over the model (0)
+MOBGLB ok   bl_warden: textured, measured repaint band at hue 0.11
+MOBGLB ok   bl_warden: the region's colour reaches the paint
+MOBGLB ok   bl_warden: turning pivot Leg0 moves its bone
+MOBGLB ok   bl_warden: copy_pose matches the per-bone global set (worst 0.00000)
+MOBGLB ok   bl_warden: a held pose copies nothing (true), the next drawn one does (true)
+MOBGLB ok   9 monsters have a model
+MOBGLB DONE, failures: 0

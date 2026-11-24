@@ -1,0 +1,81 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] run (res://tools/life_check.gd:8)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] run (res://tools/life_check.gd:8)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+LCHECK ally revive: back=true after 2.6s hp 25%
+LCHECK  knocked: downed=true hp=100.0
+LCHECK   t=0.0 downed=true down_hp=99.9 revive=0.00 out=false
+LCHECK   t=2.0 downed=true down_hp=86.6 revive=0.00 out=false
+LCHECK   t=4.0 downed=true down_hp=73.2 revive=0.00 out=false
+LCHECK   t=6.0 downed=true down_hp=60.0 revive=0.00 out=false
+LCHECK   t=8.0 downed=true down_hp=46.7 revive=0.00 out=false
+LCHECK   t=10.0 downed=true down_hp=33.3 revive=0.00 out=false
+LCHECK   t=12.0 downed=true down_hp=20.0 revive=0.00 out=false
+LCHECK   t=14.0 downed=true down_hp=6.7 revive=0.00 out=false
+LIFE 17 saltlick_ bled out
+LIFE 17 box saltlick_ value 47 at (66.0, 0.0, 311.0)
+LCHECK bleed: dead=true after 15.0s box=true gems in box=20
+LIFE 17 box revive saltlick_ by Sprocket_
+LCHECK box revive: back=true hp 25% gems 20
+LIFE 23 saltlick_ stomped out
+LIFE 23 box saltlick_ value 47 at (66.0, 0.0, 311.0)
+LCHECK stomp: dead=true after 6.0s (expect ~6.0s at 2.5x) pinned=true stomper flagged=true slow=0.40
+LIFE 27 beacon team 0 brought back saltlick_
+LCHECK beacon: back=true after 4.0s hp 100% sick 12.0s used=true
+LIFE 27 stomp start st4rfish on saltlick_
+LIFE 30 stomp end st4rfish (done)
+LIFE 30 box saltlick_ value 0 at (70.0, 0.0, 312.0)
+LCHECK execute: dead=true after 2.6s (stomp drains too)
+LIFE 30 stomp start st4rfish on Sprocket_
+LIFE 31 stomp cc knock on st4rfish
+LIFE 31 stomp end st4rfish (broken)
+LCHECK stomp lock: committed=true still after letting go=true broken by knock=true wisp alive=true
+LCHECK beacons=6 boxes=3
+LIFE 31 box Hunter value 16 at (64.0, 0.0, 312.0)
+LCHECK hollow: kin guarding=true
+LCHECK hollow loot: foe caught=0 guard still dazed=true
+LCHECK meadow: kin state=active lost=1
+LCHECK loot window: items=2 took first=15 gems smart=1 gems +15 gear=[{ "id": "barrier", "rar": 3 }, {  }, {  }, {  }] left=0 empty=true
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 23 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

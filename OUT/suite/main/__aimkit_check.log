@@ -1,0 +1,118 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AIMKIT mode: cursor = the cursor distance inside range            PASS  5.00
+AIMKIT mode: cursor past range clamps to range                    PASS  
+AIMKIT mode: point-blank still travels the minimum                PASS  
+AIMKIT place: a zone at a 0.4 m cursor lands there, not 1.5 m out PASS  0.40
+AIMKIT place: the default circle marker sits at the cursor too    PASS  
+AIMKIT place: past range clamps to range                          PASS  
+AIMKIT mode: max = always the full range                          PASS  
+AIMKIT mode: the landing point sits on the aim line at the cursor PASS  (5.0, 0.0, 0.0)
+AIMKIT default: a plain gun (quill rifle) is max range            PASS  max
+AIMKIT default: the rifle round flies its full range past a 5 m cursor PASS  11.00 of 11.00
+AIMKIT per shot: shot_aim = cursor lands it at the cursor         PASS  5.00
+AIMKIT per shot: the override is taken by that one shot           PASS  
+AIMKIT per shot: cursor beyond range still stops at range         PASS  
+AIMKIT default: a boom weapon is cursor-placed                    PASS  
+AIMKIT default: the boom round lands at the cursor and keeps its blast PASS  5.00
+AIMKIT per shot: shot_aim = max sends a boom round to full range  PASS  
+AIMKIT per weapon: "aim": "cursor" in the weapon data             PASS  
+AIMKIT show: every shape is up                                    PASS  []
+AIMKIT show: all 11 draw for their own player, in one mesh        PASS  built 11 verts 6525
+AIMKIT lane: grows len0 -> len and narrows width -> width_to with k PASS  len 5.00 width 0.65
+AIMKIT vee: half open at k 0.5 (25 deg -> 6.25 deg a side), not merged PASS  6.25
+AIMKIT sweet: the sweet spot grows 0.5 -> 1 bh (0.9 -> 1.8 m)     PASS  core 1.35 r 4.50
+AIMKIT arc: radius defaults to the cursor distance                PASS  
+AIMKIT circle: lands on the cursor point                          PASS  
+AIMKIT colour: the hero colour by default                         PASS  
+AIMKIT update: the lane is full length, narrowest, hot at k 1     PASS  
+AIMKIT update: the V has closed into one line                     PASS  
+AIMKIT update: a per-hero colour through col                      PASS  
+AIMKIT update: still one entry per id                             PASS  11
+AIMKIT hide: drops it at once                                     PASS  
+AIMKIT expire: not refreshed for 0.25 s, the per-step shapes are gone PASS  
+AIMKIT expire: a dur 0.5 telegraph is still up at 0.25 s          PASS  
+AIMKIT expire: and gone after 0.5 s; nothing left drawn           PASS  
+AIMKIT refresh: called every step, it stays up                    PASS  
+AIMKIT seen: a foe's aim telegraph isn't drawn for you            PASS  
+AIMKIT seen: their "all" area is drawn, in their own colour       PASS  
+AIMKIT clear: drops one hunter's set only                         PASS  
+AIMKIT net: one "tele" event per all telegraph, none for the aim lane PASS  11 sent
+AIMKIT net: refreshed every step for 0.5 s, it goes out about every 0.1 s PASS  5.0 sends each
+AIMKIT net: an event naming a hunter this game runs is ignored    PASS  
+AIMKIT net: the remote copy's entries are not sent back           PASS  
+AIMKIT net lane: shows on the other game as the caster drew it    PASS  
+AIMKIT net dotted: shows on the other game as the caster drew it  PASS  
+AIMKIT net vee: shows on the other game as the caster drew it     PASS  
+AIMKIT net cone: shows on the other game as the caster drew it    PASS  
+AIMKIT net circle: shows on the other game as the caster drew it  PASS  
+AIMKIT net circle: shows on the other game as the caster drew it  PASS  
+AIMKIT net arc_wall: shows on the other game as the caster drew it PASS  
+AIMKIT net swap: shows on the other game as the caster drew it    PASS  
+AIMKIT net line: shows on the other game as the caster drew it    PASS  
+AIMKIT net span: shows on the other game as the caster drew it    PASS  
+AIMKIT net star: shows on the other game as the caster drew it    PASS  
+AIMKIT net: a received one outlives its keep by AimNet.LAG        PASS  
+AIMKIT net: both sets draw, the caster's and the remote copy's    PASS  built 22
+AIMKIT net: the caster's hide sends the drop                      PASS  
+AIMKIT net: the drop takes it off the other game                  PASS  
+AIMKIT net: a one-off that replaces it inside the gap still goes out, at the next sweep PASS  2
+AIMKIT soft lane: inside <= 0.25 at the centre, rim lit (0.20 / 0.98) PASS  
+AIMKIT soft cone: inside <= 0.25 at the centre, arc lit (0.20 / 0.92) PASS  
+AIMKIT in_lane: inside / beside / past the end                    PASS  
+AIMKIT in_cone: inside the angle, outside it, past the length     PASS  
+AIMKIT in_arc: on the band, inside it, beyond the ends            PASS  
+AIMKIT in_circle                                                  PASS  
+AIMKIT pool: 300 frames of every shape add no nodes to the match  PASS  2485 -> 2485 (the match alone: +163)
+AIMKIT pool: the drawer is still its mesh and reticle layer (4 nodes) PASS  
+AIMKIT pool: one surface at most, ever                            PASS  
+AIMKIT pool: one drawer per match                                 PASS  
+AIMKIT reticle: none to start                                     PASS  
+AIMKIT charge ring: holds the charge                              PASS  
+AIMKIT full flare: reaching full fires the flare                  PASS  
+AIMKIT full flare: once, not again while held full                PASS  
+AIMKIT full flare: fades out                                      PASS  
+AIMKIT perfect: the star flashes                                  PASS  
+AIMKIT perfect: gone after one footage frame (0.12 s)             PASS  
+AIMKIT perfect: the flash is short                                PASS  
+AIMKIT charge ring: not refreshed, it goes                        PASS  
+AIMKIT drop_holds: every telegraph goes (dur ones too)            PASS  
+AIMKIT drop_holds: and the cursor states                          PASS  
+AIMKIT merge: a merging hunter's telegraphs and cursor states go, and new ones don't show PASS  
+AIMKIT drop_holds: ArchKit's own merge paths call drop_holds, not _drop_holds PASS  
+AIMKIT reach: the data's ground-target slots are the ones checked PASS  ["dolm.x", "gunslinger.x", "mage.e", "mage.x", "ostra.dash", "ostra.e", "ostra.x", "rimewright.rmb", "tender.e"]
+AIMKIT reach gunslinger.x: Quick cast off, R holds to aim         PASS  
+AIMKIT reach gunslinger.x: the ring sits round the caster at the data range PASS  14.0 m
+AIMKIT reach gunslinger.x: the landing mark stops on the range, cursor at 2x PASS  14.00 of 14.0
+AIMKIT reach mage.e: the ring sits round the caster at the data range PASS  11.0 m
+AIMKIT reach mage.e: the landing mark stops on the range, cursor at 2x PASS  11.00 of 11.0
+AIMKIT reach mage.x: Quick cast off, R holds to aim               PASS  
+AIMKIT reach mage.x: the ring sits round the caster at the data range PASS  14.4 m
+AIMKIT reach mage.x: the landing mark stops on the range, cursor at 2x PASS  14.40 of 14.4
+AIMKIT reach tender.e: her first E is self-cast, so no preview    PASS  
+AIMKIT reach tender.e: the ring sits round the caster at the data range PASS  9.0 m
+AIMKIT reach tender.e: the landing mark stops on the range, cursor at 2x PASS  9.00 of 9.0
+AIMKIT reach ostra.e: the ring sits round the caster at the data range PASS  9.0 m
+AIMKIT reach ostra.e: the landing mark stops on the range, cursor at 2x PASS  9.00 of 9.0
+AIMKIT reach ostra.x: Quick cast off, R holds to aim              PASS  
+AIMKIT reach ostra.x: the ring sits round the caster at the data range PASS  10.0 m
+AIMKIT reach ostra.x: the landing mark stops on the range, cursor at 2x PASS  10.00 of 10.0
+AIMKIT reach rimewright.rmb: the ring sits round the caster at the data range PASS  12.0 m
+AIMKIT reach rimewright.rmb: the landing mark stops on the range, cursor at 2x PASS  12.00 of 12.0
+AIMKIT reach ostra.dash: the ring sits round the caster at the data range PASS  12.0 m
+AIMKIT reach ostra.dash: the landing mark stops on the range, cursor at 2x PASS  12.00 of 12.0
+AIMKIT reach dolm.x: R aims on its own hold, not Match's          PASS  
+AIMKIT reach dolm.x: the ring sits round the caster at the data range PASS  11.0 m
+AIMKIT reach dolm.x: the landing mark stops on the range, cursor at 2x PASS  11.00 of 11.0
+AIMKIT DONE, 104 checks, failures: 0
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 23 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

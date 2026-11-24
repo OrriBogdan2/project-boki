@@ -1,0 +1,62 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+GARDENDAY ok   Bramblebank: 6 Boki live on a base_mode farm
+GARDENDAY ok   Bramblebank: three toys and the snack patch stand
+GARDENDAY Bramblebank: 1200 s of game time in 23.7 s of wall time
+GARDENDAY ok   Bramblebank: B0 visited 5 states (Roam, Chore, Play, PlayWith, Watch)
+GARDENDAY ok   Bramblebank: B1 visited 4 states (Roam, Play, PlayWith, Nap)
+GARDENDAY ok   Bramblebank: B2 visited 5 states (Roam, Play, PlayWith, Nap, Watch)
+GARDENDAY ok   Bramblebank: B3 visited 5 states (Roam, Play, Nap, PlayWith, Watch)
+GARDENDAY ok   Bramblebank: B4 visited 5 states (Roam, Play, Chore, Nap, PlayWith)
+GARDENDAY ok   Bramblebank: B5 visited 4 states (Roam, Play, Nap, PlayWith)
+GARDENDAY ok   Bramblebank: 1138 nodes (budget 3000)
+GARDENDAY ok   Bramblebank: 3 emitting particle systems (budget 12)
+GARDENDAY ok   Bramblebank: 2.05 ms of script a frame (the whole frame's budget is 16.7 ms)
+GARDENDAY ok   Bramblebank: 0.284 ms a base-life step (budget 1.5 ms)
+GARDENDAY hub: 1200 s of game time in 0.9 s of wall time
+GARDENDAY ok   hub: 80 nodes (budget 2000)
+GARDENDAY ok   hub: 0 emitting particle systems (budget 6)
+GARDENDAY ok   hub: 0.01 ms of script a frame (the whole frame's budget is 16.7 ms)
+GARDENDAY ok   hub: 0.011 ms a base-life step (budget 0.5 ms)
+GARDENDAY DONE, failures: 0
+ERROR: 2 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 35: leaked 17108 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 34: leaked 8554 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 36: leaked 17108 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 45: leaked 675120 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 46: leaked 405072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 47: leaked 81000 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 104: leaked 48600 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 19 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

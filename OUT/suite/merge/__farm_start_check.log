@@ -1,0 +1,83 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+FARMSTART ok   a brand new save gets a farm-start island of its own (seed 289970074, scale 1.233)
+FARMSTART ok   no house, plots, pot or decorations yet: the island starts empty but for its market stall
+FARMSTART ok   no building lots on the meadow, and the first trough waits in storage to be set down
+FARMSTART ok   200 gems to start: a house, a crop patch and a pot cost 140, with a little to spare
+FARMSTART ok   1203 tiles of open meadow and only the stall on it (wild: { "tree": 27, "rock": 15, "cliff": 12 })
+FARMSTART  plan ["grove:20", "rocks:10", "pond:11", "cliff:20", "lone:13"], generated { "tree": 28, "rock": 13, "water": 11, "cliff": 18 }, standing { "tree": 27, "rock": 15, "cliff": 12 }
+FARMSTART ok   every bit of open ground can be walked to from the landing (1203 of 1203), nothing the island needs is cut off
+FARMSTART ok   build mode's Buildings tab offers the house and the essentials
+FARMSTART ok   taking the house holds a ghost of it
+FARMSTART ok   on the landing by the portal it tints red: That spot is kept clear
+FARMSTART ok   R turns it a quarter (5x3 becomes 3x5)
+FARMSTART ok   on open meadow it tints green
+FARMSTART ok   the house goes down where you chose as a free construction site
+FARMSTART ok   the farm knows where its house is now ((38.5, 0.0, 27.5))
+FARMSTART ok   its door step is open ground ((38.5, 0.0, 29.6))
+FARMSTART ok   a second house is refused
+FARMSTART ok   a crop patch goes down and its four plots are out (4)
+FARMSTART ok   the cooking pot goes down beside it
+FARMSTART ok   the house door, the plots, the pot and the portal can all be walked to (0 places missed; 1187 of 1187 open reached)
+FARMSTART ok   150 gems left after the patch and the pot (the house is free)
+FARMSTART ok   clicking the house picks it up to move
+FARMSTART ok   the Nesting Nook needs wood: with none, it can't be picked up
+FARMSTART ok   with wood it goes down and takes its 8 wood (Nook at (32.9, 0.0, 31.0))
+FARMSTART ok   there are wild trees to chop
+FARMSTART ok   next to a tree the prompt says you need an axe (Needs an axe (Market, Farm tab))
+FARMSTART ok   without one, nothing happens
+FARMSTART ok   the market sells an axe (35 gems) and a pickaxe (45 gems)
+FARMSTART ok   bought, they're yours
+FARMSTART ok   now the prompt says: Chop the tree
+FARMSTART ok   holding the key, three hits and it's down: 3 wood
+FARMSTART ok   it grows back in 15 minutes
+FARMSTART ok   a pickaxe mines a boulder for 3 stone
+FARMSTART ok   later, the tree grows back where it stood (2 came back)
+FARMSTART ok   the farm has no Training Grounds isle
+FARMSTART ok   Esc > More has Grounds
+FARMSTART ok   a ridge is ground to stand on (level 2): tools leave it, the Clear the wild brush levels it
+FARMSTART ok   a Lumber Camp by the trees, a Seed Garden and a Kiln go down
+FARMSTART ok   only Boki with the knack can be assigned (Rocky: Timber, Moss: Bloom, Ash: Ember)
+FARMSTART  Rocky is on island 0, the camp on 0
+FARMSTART ok   Rocky, assigned to the camp, takes its job (chop)
+FARMSTART ok   nobody unassigned fires the Kiln
+FARMSTART ok   in two minutes at home Rocky made 41 wood (0 on piles)
+FARMSTART ok   and Moss raised a seedling at the Seed Garden (5 seeds, was 3)
+FARMSTART ok   an hour away: +24 wood from the Lumber Camp (Rocky worked it) | +1 Emberberry seed, 1 Sunroot seed, 1 Puffcorn seed, 1 Tidebloom seed from the Seed Garden (Moss worked it) | +4 Ember Coals (from 12 wood) from the Kiln (Ash worked it)
+FARMSTART ok   the Kiln burned wood into 4 Ember Coals
+FARMSTART ok   three days away still only fills the cap (24 wood)
+FARMSTART ok   coming straight back isn't time away
+FARMSTART ok   a Boki asleep in the Burrow makes nothing
+FARMSTART ok   walking up to the Lumber Camp opens its panel (who's assigned)
+FARMSTART ok   crouching works on the farm: 2.64 m/s crouched (pose 1.00) against 5.28 standing
+FARMSTART ok   saved and loaded: the house, the plots, the Nook and Rocky's job are all still there (fs true, house (38.5, 0.0, 27.5), plots 4, nook (32.9, 0.0, 31.0), crew 1)
+FARMSTART ok   five seeds, about the same land: [1252, 1249, 1246, 1249, 1251] (target 1250)
+FARMSTART ok   and about the same usable room once ponds and cliffs are out: [1222, 1210, 1235, 1225, 1219]
+FARMSTART ok   each island's outline is its own (at least 11% of tiles differ between any two)
+FARMSTART ok   and its features differ: cliff,grove,lone,rocks,stream / cliff,cliff,grove,lone,rocks / grove,grove,lone,pond,rocks / cliff,grove,lone,pond,rocks / cliff,grove,lone,pond,rocks
+FARMSTART ok   50 seeds: every isle's bridge spans the gap edge to edge at ground level with its sign in reach (50 of 50) 
+FARMSTART ok   an old save without a layout keeps the classic farm (house, four plots, the lamps and flower beds) and its gems
+FARMSTART  procedural wild: 53 raw
+FARMSTART ok   a procedural home from before keeps its fixed farm and its wild (54 wild tiles)
+FARMSTART DONE, failures: 0 (72.7 s)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

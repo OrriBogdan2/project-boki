@@ -1,0 +1,12 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WINGS ok   folded: 0 card vertices inside the body (worst 0.0 cm), edges stretch x1.00 at most
+WINGS ok   raised: 0 card vertices inside the body (worst 0.0 cm), edges stretch x1.00 at most
+WINGS ok   run: 0 card vertices inside the body (worst 0.0 cm), edges stretch x1.00 at most
+WINGS ok   shoot: 0 card vertices inside the body (worst 0.0 cm), edges stretch x1.00 at most
+WINGS ok   shoot raised: 0 card vertices inside the body (worst 0.0 cm), edges stretch x1.00 at most
+WINGS ok   flip: 0 card vertices inside the body (worst 0.0 cm), edges stretch x1.00 at most
+sable-wings-check: PASS (0 fails)

@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HCGCHECK ok   13 Hunters to compare (13)
+HCGCHECK ok   OKLab: white is L 1, no hue
+HCGCHECK ok   archer / juggernaut is still close (0.099), keep it on the open list
+HCGCHECK ok   juggernaut / ashwick is still close (0.110), keep it on the open list
+HCGCHECK ok   gunslinger / dredge is still close (0.133), keep it on the open list
+HCGCHECK ok   gunslinger / tender is still close (0.111), keep it on the open list
+HCGCHECK ok   bulwark / dredge is still close (0.125), keep it on the open list
+HCGCHECK ok   rimewright / ostra is still close (0.113), keep it on the open list
+HCGCHECK ok   dolm / thief is still close (0.132), keep it on the open list
+HCGCHECK ok   tender / ostra is still close (0.099), keep it on the open list
+HCGCHECK ok   every open pair names two Hunters (8/8)
+HCGCHECK DONE, failures: 0

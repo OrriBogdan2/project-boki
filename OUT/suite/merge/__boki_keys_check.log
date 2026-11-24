@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOKIKEYS PASS five quick keys are in the Controls list
+BOKIKEYS PASS ...and all start unbound
+BOKIKEYS PASS a new player sees only C (nothing on the kit card)
+BOKIKEYS PASS bound keys on the kit card: ["KP0", "KP1", "KP2", "KP3", "KP4"]
+BOKIKEYS PASS no quick key clashes with another action
+BOKIKEYS PASS kin_chase leaves the Boki as the wheel's chase does (chase)
+BOKIKEYS PASS kin_guard leaves the Boki as the wheel's guard does (guard)
+BOKIKEYS PASS kin_return leaves the Boki as the wheel's return does (return)
+BOKIKEYS PASS kin_follow leaves the Boki as the wheel's follow does (follow)
+BOKIKEYS PASS the summon key sends the Boki out like a G tap (key true, tap true)
+BOKIKEYS PASS ...and the same key calls it back (state flying_home)
+BOKIKEYS PASS two keys in one frame both run, in order (ends on follow)
+BOKIKEYS PASS a quick key beside a wheel pick in one frame: both run (ends on follow)
+BOKIKEYS PASS a press while paused is ignored
+BOKIKEYS PASS the G wheel still picks (chase)
+BOKIKEYS DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

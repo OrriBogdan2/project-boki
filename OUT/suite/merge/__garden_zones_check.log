@@ -1,0 +1,237 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ZONES ok   a v12 save upgrades to v21
+ZONES ok   only bramblebank is open
+ZONES ok   every Boki lives in bramblebank
+ZONES ok   a new save starts with only bramblebank open
+ZONES ok   Glasswater starts locked
+ZONES ok   no keys yet
+ZONES ok   a Boki just under the lean key is not enough
+ZONES ok   with no key the locked card's one line names both: Find its Wayseed in a run's lair or at the trader, and feed a Boki Water, Ice or Crystal meals.
+ZONES ok   a Wayseed and a Boki leaning Ice tick both keys
+ZONES ok   with both keys its line says it is ready
+ZONES ok   with the lean but no Wayseed it asks only for the Wayseed
+ZONES ok   a new save lands in the start zone for its first day's tutorial
+ZONES ok   with the tutorial done or skipped, home is the hub
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+ZONES ok   the hub loads
+ZONES ok   only your partner is in the hub (1 Boki out)
+ZONES ok   you arrive beside the Waystone
+ZONES ok   no toys or games in the hub
+ZONES ok   the hub has its house
+ZONES ok   the hub has its stall
+ZONES ok   the hub has its nook
+ZONES ok   the hub has its burrow
+ZONES ok   the Soul Shrine has its lot
+ZONES ok   rack, Incubator and games board stand
+ZONES ok   the house and the Burrow are built
+ZONES ok   E at the house uses it (got house)
+ZONES ok   E at the stall uses it (got stall)
+ZONES ok   E at the portal uses it (got portal)
+ZONES ok   E at the rack uses it (got rack)
+ZONES ok   E at the burrow uses it (got burrow)
+ZONES ok   E at the nook uses it (got nook)
+ZONES ok   E at the incubator uses it (got incubator)
+ZONES ok   E at the waystone uses it (got waystone)
+ZONES ok   every fixture stands on land
+ZONES ok   the Waystone and the board are on land
+ZONES ok   the games board reads as one
+ZONES ok   the board shows this week's twist and the wall
+ZONES ok   the showcase wall hangs beside the board
+ZONES ok   no side-isle bridges or signposts in the hub
+ZONES ok   build mode in the hub offers only the Garden tab
+ZONES ok   the hub's layout is on the save
+ZONES ok   the hub shows 5 islands on its horizon
+ZONES ok   bramblebank's island reads lit
+ZONES ok   glasswater's island reads grey in mist
+ZONES ok   cinderstep's island reads grey in mist
+ZONES ok   hushwood's island reads grey in mist
+ZONES ok   ridge's island reads grey in mist
+ZONES ok   the islands follow Save.d zones (open: bramblebank)
+ZONES ok   islands share one material per state
+ZONES ok   at arrival zoom 5 of 5 islands are in frame
+ZONES ok   E on the Waystone opens the cards
+ZONES ok   a hop to locked Glasswater is refused
+ZONES ok   Bramblebank's card has its colour band
+ZONES ok   Bramblebank's card shows 3 Boki, each with a mood face
+ZONES ok   each face is happy, content or sulky
+ZONES ok   it names its game and that you have no best yet
+ZONES ok   after a win it names your best Boki
+ZONES ok   locked Glasswater: its name and one line (Find its Wayseed in a run's lair or at the trader, and feed a Boki Water, Ice or Crystal meals.)
+ZONES ok   a hop to open Bramblebank starts
+ZONES ok   Bramblebank loads
+ZONES ok   Bramblebank has its 3 Boki, your partner among them
+ZONES ok   you arrive on its return pad
+ZONES ok   an unminded egg calls a Boki with the Ember knack
+ZONES ok   the return pad takes you to the hub
+ZONES ok   back in the hub with your partner and the egg-minder
+ZONES ok   the egg-minder sets off to mind the egg in the Nook
+ZONES ok   nobody moved or went missing on the way
+ZONES ok   a new save's Bramblebank loads
+ZONES ok   an older layout keeps its entries
+ZONES ok   Bramblebank builds none of them
+ZONES ok   no house, Burrow or stall
+ZONES ok   no Nook or Incubator: the egg shows only in the hub
+ZONES ok   no stall is set down there
+ZONES ok   build mode offers none of them there
+ZONES ok   a classic island (a save from before the farm-start update)
+ERROR: Lambda capture at index 1 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 3 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 4 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 6 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ZONES ok   a classic island builds none of them either
+ZONES ok   with the garden off a classic island keeps its own
+ZONES ok   Bramblebank loads with base life
+ZONES ok   Bramblebank: its 3 nap spots (sunny rock, under a tree, by the water) are open ground (3 found)
+ZONES ok   Move to... opens its zone cards
+ZONES ok   Ash is sent to Glasswater
+ZONES ok   it walks to the pad and blinks out (2.1 s)
+ZONES ok   your partner can't be moved: it follows you
+ZONES ok   a Boki leaning Crystal would thrive in Glasswater
+ZONES ok   it goes to wait at the pad, asking
+ZONES ok   it asks once per visit
+ZONES ok   E on it sends it to Glasswater
+ZONES ok   a Boki not asking is petted as usual
+ZONES ok   set down on the pad: its zone cards open
+ZONES ok   Glasswater loads
+ZONES ok   in Glasswater after the hop: your partner and Ash
+ZONES ok   Ash is gone from Bramblebank
+ZONES ok   with 6 out in Glasswater, the next move is refused
+ZONES ok   Bramblebank still has room of its own
+ZONES ok   Glasswater loads
+ZONES ok   its layout stands in while it is open; the save's own layout stays Bramblebank's
+ZONES ok   the splash tub stands in it
+ZONES ok   its patch grows Water, Ice and Crystal snacks (tidebloom, frostdrop, geodecandy)
+ZONES ok   the Spark Volley log lies in the shallow channel
+ZONES ok   a miss splashes on the court
+ZONES ok   you arrive on its return pad
+ZONES ok   build mode is off in the zone
+ZONES ok   Glasswater: its 3 nap spots (by the water, sunny rock, under a tree) are open ground (3 found)
+ZONES ok   the scatter is 146 props in 3 MultiMesh batches over 3 shared materials
+ZONES ok   the patch's timer is kept on the save
+ZONES ok   the hub has no zone layout
+ZONES ok   Cinderstep loads
+ZONES ok   its own cinder ground
+ZONES ok   Cinderstep: its 3 nap spots (sunny rock, under a tree, warm crack) are open ground (3 found)
+ZONES ok   a warm stone and a climbing post (toy_stone, toy_post)
+ZONES ok   its patch grows Fire, Rock, Steel and Dragon snacks (emberberry, pebblenut, ironcrisp, scalepepper)
+ZONES ok   the Stump Shove stump stands on its spot with no Training post and offers a bout
+ZONES ok   terraces and glowing cracks, one batch each on one material ({ &"terrace": 32, &"crack": 44 })
+ZONES ok   the hub reloads with Cinderstep open
+ZONES ok   the hub shows 5 islands on its horizon
+ZONES ok   bramblebank's island reads lit
+ZONES ok   glasswater's island reads lit
+ZONES ok   cinderstep's island reads lit
+ZONES ok   hushwood's island reads grey in mist
+ZONES ok   ridge's island reads grey in mist
+ZONES ok   the islands follow Save.d zones (open: bramblebank, glasswater, cinderstep)
+ZONES ok   islands share one material per state
+ZONES ok   at arrival zoom 5 of 5 islands are in frame
+ZONES ok   a Boki leaning Fire thrives in Cinderstep, one leaning Water does not
+ZONES ok   a temper over 0.6 thrives there too
+ZONES ok   thriving joy falls at 0.5x (15.0 vs 30.0)
+ZONES ok   Glasswater: Water lean thrives, Fire with temper 0.5 does not
+ZONES ok   a calm Boki (temper 0.2) thrives in Glasswater
+ZONES ok   a thriver's toys train about +25% (504 vs 400 per 400)
+ZONES ok   a day in Cinderstep: temper +0.01
+ZONES ok   the pull stops at 0.8
+ZONES ok   a trait already past the limit is left alone
+ZONES ok   calm Glasswater pulls temper down and stops at 0.2
+ZONES ok   a Boki from another zone is not pulled
+ZONES ok   the hub loads for the unlock
+ZONES ok   the locked Cinderstep stone shows its two keys
+ZONES ok   no Wayseed and no lean: Cinderstep stays asleep
+ZONES ok   a lean but no Wayseed does not wake it
+ZONES ok   a Wayseed and a lean just under 12 does not wake it, and keeps the seed
+ZONES ok   both keys wake Cinderstep, the seed is used
+ZONES ok   Ash is the founder
+ZONES ok   it remembers the day
+ZONES ok   its journal says so
+ZONES ok   its stone is lit
+ZONES ok   the woken stone starts dark with its lock on, the reveal is spent on the save
+ZONES ok   then it lights in Cinderstep's colour, the lock gone, the cap on
+ZONES ok   a zone woken away from the hub waits for it
+ZONES ok   the next hub plays it for that zone only
+ZONES ok   and never again
+ZONES ok   an open zone cannot be woken again
+ZONES ok   its card names the founder
+ZONES ok   a lair's Wayseed is for a locked zone of its biome: not Cinderstep (open), not the meadow
+ZONES ok   a Wayseed is carried home
+ZONES ok   it comes home as a bag item
+ZONES ok   the trader holds one Wayseed, for a zone still locked
+ZONES ok   buying it puts the Wayseed in the bag
+ZONES ok   no second Wayseed the same week
+ZONES ok   with every zone open the trader holds no Wayseed
+ZONES ok   the snapshot carries the hub and both open zones' layouts
+ZONES ok   a visitor lands in the hub
+ZONES ok   a zone shows only its own Boki, the hub none
+ZONES ok   an older doc is the single island it was
+ZONES ok   a hostile layout is cut to the catalog, the tiles, a cap
+ZONES ok   the visitor stands in the friend's hub
+ZONES ok   nobody lives in their hub, and their games board is not yours
+ZONES ok   the visitor hops to their Glasswater
+ZONES ok   and finds only Ash there, still a visit
+ZONES ok   your own Rare Egg keeps warming while you visit (play time; decision 0080)
+ZONES PASS (0 failures)
+WARNING: 21 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 16 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 38: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 39: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 52: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 53: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 54: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 55: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 56: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 58: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 80: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 35: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 36: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 94: leaked 174762 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 90: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 97: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 103: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 117: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: 4 RID allocations of type 'PN18TextServerAdvanced22ShapedTextDataAdvancedE' were leaked at exit.
+ERROR: 2 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.
+ERROR: 1 RID allocations of type 'PN18TextServerAdvanced27FontAdvancedLinkedVariationE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

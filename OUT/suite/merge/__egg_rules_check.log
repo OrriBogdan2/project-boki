@@ -1,0 +1,18 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+EGGRULES ok   every legendary is no_egg
+EGGRULES ok   the egg pool is first forms only, no legendary
+EGGRULES ok   base_form walks a line back to its first form
+EGGRULES ok   later forms are not in the pool
+EGGRULES ok   a T3 and a T2 parent's baby is the first form (burrlet)
+EGGRULES ok   ...even when the egg was laid as a later form
+EGGRULES ok   an old save's T3 egg hatches the first form
+EGGRULES ok   old Incubator eggs are first forms
+EGGRULES ok   3000 boss, Heart and old-save rolls: first forms only (47 kinds)
+EGGRULES ok   two legendaries: no egg (Tor and Vee are legendary: Boki like them never come from an egg)
+EGGRULES ok   a legendary and a friend can still pair
+EGGRULES ok   a legendary's egg is rerolled
+EGG RULES CHECK DONE, failures: 0

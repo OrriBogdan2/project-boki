@@ -1,0 +1,97 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+UNLOCKPACE ok   garden-only, trader week day 0: Glasswater opens on day 3 (by 3)
+UNLOCKPACE ok   garden-only, trader week day 1: Glasswater opens on day 3 (by 3)
+UNLOCKPACE ok   garden-only, trader week day 2: Glasswater opens on day 3 (by 3)
+UNLOCKPACE ok   the start patch grows tidebloom, a water snack Glasswater takes
+UNLOCKPACE ok   burrlet leans Water on 2 tidebloom
+UNLOCKPACE ok   cindle leans Water on 2 tidebloom
+UNLOCKPACE ok   pebbit leans Water on 2 tidebloom
+UNLOCKPACE ok   puddlet leans Water on 2 tidebloom
+UNLOCKPACE ok   wisplet leans Water on 2 tidebloom
+UNLOCKPACE ok   zapple leans Water on 2 tidebloom
+UNLOCKPACE ok   basaltoad leans Water on 2 tidebloom
+UNLOCKPACE ok   caecilith leans Water on 2 tidebloom
+UNLOCKPACE ok   casquebill leans Water on 2 tidebloom
+UNLOCKPACE ok   cindowary leans Water on 2 tidebloom
+UNLOCKPACE ok   duskapi leans Water on 2 tidebloom
+UNLOCKPACE ok   floenatee leans Water on 2 tidebloom
+UNLOCKPACE ok   gibbelle leans Water on 2 tidebloom
+UNLOCKPACE ok   glaciyak leans Water on 2 tidebloom
+UNLOCKPACE ok   glintmole leans Water on 2 tidebloom
+UNLOCKPACE ok   gloamshell leans Water on 2 tidebloom
+UNLOCKPACE ok   glomwort leans Water on 2 tidebloom
+UNLOCKPACE ok   goliathite leans Water on 2 tidebloom
+UNLOCKPACE ok   heatherhorn leans Water on 2 tidebloom
+UNLOCKPACE ok   hoarheron leans Water on 2 tidebloom
+UNLOCKPACE ok   kestrike leans Water on 2 tidebloom
+UNLOCKPACE ok   kilnbadger leans Water on 2 tidebloom
+UNLOCKPACE ok   kindlewren leans Water on 2 tidebloom
+UNLOCKPACE ok   lilybara leans Water on 2 tidebloom
+UNLOCKPACE ok   limpetor leans Water on 2 tidebloom
+UNLOCKPACE ok   lodestick leans Water on 2 tidebloom
+UNLOCKPACE ok   marchleaf leans Water on 2 tidebloom
+UNLOCKPACE ok   moonloris leans Water on 2 tidebloom
+UNLOCKPACE ok   mossgrade leans Water on 2 tidebloom
+UNLOCKPACE ok   moundvark leans Water on 2 tidebloom
+UNLOCKPACE ok   murmurling leans Water on 2 tidebloom
+UNLOCKPACE ok   nacrolin leans Water on 2 tidebloom
+UNLOCKPACE ok   nettlynx leans Water on 2 tidebloom
+UNLOCKPACE ok   nimbostrich leans Water on 2 tidebloom
+UNLOCKPACE ok   opalisk leans Water on 2 tidebloom
+UNLOCKPACE ok   orchisloth leans Water on 2 tidebloom
+UNLOCKPACE ok   rimeshrew leans Water on 2 tidebloom
+UNLOCKPACE ok   scaldamus leans Water on 2 tidebloom
+UNLOCKPACE ok   selenfin leans Water on 2 tidebloom
+UNLOCKPACE ok   sentrikat leans Water on 2 tidebloom
+UNLOCKPACE ok   spatewader leans Water on 2 tidebloom
+UNLOCKPACE ok   squalltross leans Water on 2 tidebloom
+UNLOCKPACE ok   threadwyrm leans Water on 2 tidebloom
+UNLOCKPACE ok   thrumbird leans Water on 2 tidebloom
+UNLOCKPACE ok   tuatrune leans Water on 2 tidebloom
+UNLOCKPACE ok   umbrathere leans Water on 2 tidebloom
+UNLOCKPACE ok   velvorm leans Water on 2 tidebloom
+UNLOCKPACE runner: percent of players with the 2nd 3rd 4th 5th zone open, by day
+UNLOCKPACE runner day  1:    0%    0%    0%    0%
+UNLOCKPACE runner day  2:  100%    0%    0%    0%
+UNLOCKPACE runner day  3:  100%   37%    0%    0%
+UNLOCKPACE runner day  4:  100%   69%    2%    0%
+UNLOCKPACE runner day  5:  100%  100%   12%    1%
+UNLOCKPACE runner day  6:  100%  100%   44%    7%
+UNLOCKPACE runner day  7:  100%  100%   73%   16%
+UNLOCKPACE runner day  8:  100%  100%  100%   21%
+UNLOCKPACE runner day  9:  100%  100%  100%   48%
+UNLOCKPACE runner day 10:  100%  100%  100%   74%
+UNLOCKPACE runner day 11:  100%  100%  100%  100%
+UNLOCKPACE runner day 12:  100%  100%  100%  100%
+UNLOCKPACE runner day 13:  100%  100%  100%  100%
+UNLOCKPACE runner day 14:  100%  100%  100%  100%
+UNLOCKPACE runner day 15:  100%  100%  100%  100%
+UNLOCKPACE runner day 16:  100%  100%  100%  100%
+UNLOCKPACE runner: median day of the 2nd zone 2, of the 5th 10
+UNLOCKPACE ok   runner opens the second zone on day 2
+UNLOCKPACE ok   runner has all 5 open by day 10 to 14
+UNLOCKPACE garden: percent of players with the 2nd 3rd 4th 5th zone open, by day
+UNLOCKPACE garden day  1:    0%    0%    0%    0%
+UNLOCKPACE garden day  2:    0%    0%    0%    0%
+UNLOCKPACE garden day  3:  100%    0%    0%    0%
+UNLOCKPACE garden day  4:  100%    0%    0%    0%
+UNLOCKPACE garden day  5:  100%    0%    0%    0%
+UNLOCKPACE garden day  6:  100%    0%    0%    0%
+UNLOCKPACE garden day  7:  100%  100%    0%    0%
+UNLOCKPACE garden day  8:  100%  100%    0%    0%
+UNLOCKPACE garden day  9:  100%  100%    0%    0%
+UNLOCKPACE garden day 10:  100%  100%  100%    0%
+UNLOCKPACE garden day 11:  100%  100%  100%    0%
+UNLOCKPACE garden day 12:  100%  100%  100%   67%
+UNLOCKPACE garden day 13:  100%  100%  100%  100%
+UNLOCKPACE garden day 14:  100%  100%  100%  100%
+UNLOCKPACE garden day 15:  100%  100%  100%  100%
+UNLOCKPACE garden day 16:  100%  100%  100%  100%
+UNLOCKPACE garden: median day of the 2nd zone 3, of the 5th 12
+UNLOCKPACE ok   garden opens the second zone on day 3
+UNLOCKPACE ok   garden has all 5 open by day 10 to 14
+UNLOCKPACE PASS (0 failures)

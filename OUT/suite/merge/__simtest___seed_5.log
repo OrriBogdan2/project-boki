@@ -1,0 +1,177 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _simtest (res://scripts/main.gd:1308)
+       [12] _ready (res://scripts/main.gd:286)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _simtest (res://scripts/main.gd:1308)
+       [12] _ready (res://scripts/main.gd:286)
+ERROR: NO GRAB
+   at: _mouse_update_mode (platform/linuxbsd/x11/display_server_x11.cpp:563)
+   GDScript backtrace (most recent call first):
+       [0] _apply (res://scripts/core/cursor_mode.gd:24)
+       [1] aim (res://scripts/core/cursor_mode.gd:14)
+       [2] _start (res://scripts/match/match.gd:494)
+       [3] start (res://scripts/match/match.gd:155)
+       [4] _simtest (res://scripts/main.gd:1308)
+       [5] _ready (res://scripts/main.gd:286)
+SIMTEST seed 5 raid dusk blight true
+  island=12 pads=[]
+  player pos=(258.8, 1.6, 420.4) goal=(51.04746, 0.0, 316.6009) kind=roam tgt=<null> move=(0.966292, -0.25745) grounded=true
+t=22 alive=4 down=0 mobs=120 shots=0 pickups=3 feed=[]
+  island=12 pads=[]
+  player pos=(264.1, 1.6, 448.0) goal=(140.5, 4.8, 376.5) kind=roam tgt=<null> move=(0.050475, 0.998725) grounded=true
+t=52 alive=4 down=0 mobs=116 shots=0 pickups=6 feed=["Nest broken · quiet for 5:00"]
+  island=5 pads=[]
+  player pos=(204.3, 1.6, 429.6) goal=(184.5, 1.6, 436.5) kind=chest tgt=<null> move=(-0.997181, 0.075034) grounded=true
+t=82 alive=4 down=0 mobs=110 shots=0 pickups=9 feed=["Nest broken · quiet for 5:00"]
+  island=5 pads=[]
+  player pos=(138.5, 1.6, 388.5) goal=(140.5, 4.8, 376.5) kind=roam tgt=<null> move=(0.163093, -0.986611) grounded=true
+t=112 alive=4 down=0 mobs=109 shots=0 pickups=9 feed=["Nest broken · quiet for 5:00", "Nest broken · quiet for 5:00"]
+ARMOR Hunter -> Uncommon
+  island=5 pads=[]
+  DBG tgt=Node3D:mob.gd pos=(130.6, 4.8, 367.0) hp=68.4355908333301 dead=false drop=false vel=(4.2, 0.0, 2.5) grap=0 ride=false cross=true blockhere=false ground=4.8
+  player pos=(127.7, 4.8, 372.6) goal=(178.4471, 0.0, 322.1102) kind=zone tgt=@Node3D@15909:<Node3D#1682150810303> move=(0.883203, 0.46899) grounded=true
+t=142 alive=4 down=0 mobs=107 shots=0 pickups=11 feed=["Nest broken · quiet for 5:00", "Nest broken · quiet for 5:00", "The Sealed Lair is open: Stormcrown Eyrie, first squad to finish it leaves"]
+ARMOR Hunter -> Rare
+  island=4 pads=[]
+  player pos=(106.1, 0.0, 330.5) goal=(106.1611, 1.806516, 330.1017) kind=loot tgt=<null> move=(-0.114303, -0.993446) grounded=true
+t=172 alive=4 down=0 mobs=107 shots=1 pickups=18 feed=["Nest broken · quiet for 5:00", "Nest broken · quiet for 5:00", "The Sealed Lair is open: Stormcrown Eyrie, first squad to finish it leaves", "The zone closes in 20 s. Get inside the ring!"]
+ARMOR tofu.exe -> Uncommon
+  island=4 pads=[]
+  player pos=(78.3, 0.0, 260.9) goal=(79.19696, 0.0, 260.3712) kind=ring tgt=<null> move=(0.842292, -0.539022) grounded=true
+t=202 alive=4 down=0 mobs=102 shots=0 pickups=32 feed=["Nest broken · quiet for 5:00", "Nest broken · quiet for 5:00", "The Sealed Lair is open: Stormcrown Eyrie, first squad to finish it leaves", "The zone closes in 20 s. Get inside the ring!", "A meteor shower is coming down. Stars leave gems where they land"]
+  island=4 pads=[]
+  player pos=(92.5, 0.0, 259.6) goal=(93.40453, 0.0, 259.1319) kind=ring tgt=<null> move=(0.0, 0.0) grounded=true
+t=232 alive=4 down=0 mobs=95 shots=0 pickups=36 feed=["Nest broken · quiet for 5:00", "Nest broken · quiet for 5:00", "The Sealed Lair is open: Stormcrown Eyrie, first squad to finish it leaves", "The zone closes in 20 s. Get inside the ring!", "A meteor shower is coming down. Stars leave gems where they land"]
+ARMOR tiptoe_ -> Uncommon
+ARMOR tofu.exe -> Rare
+  island=4 pads=[]
+  player pos=(142.3, 0.0, 256.6) goal=(141.4666, 0.958969, 255.4365) kind=loot tgt=<null> move=(-0.56097, -0.827836) grounded=true
+t=262 alive=4 down=0 mobs=94 shots=0 pickups=36 feed=["A meteor shower is coming down. Stars leave gems where they land", "The wild Umbrathere is knocked out. Hold F beside it to scan it.", "The Heart wakes: its one Heartspark is charging", "The Heart Gate is open", "The Watcher wakes on the center island in 30 s"]
+  island=4 pads=[]
+  player pos=(214.8, 2.3, 231.1) goal=(218.0401, 3.2, 203.9151) kind=zone tgt=<null> move=(0.999069, -0.043136) grounded=true
+t=292 alive=4 down=0 mobs=94 shots=0 pickups=39 feed=["The Heart wakes: its one Heartspark is charging", "The Heart Gate is open", "The Watcher wakes on the center island in 30 s", "The Watcher wakes on the center island in 10 s", "The Watcher has woken on the center island"]
+ARMOR tiptoe_ -> Rare
+  island=0 pads=[]
+  player pos=(219.7, 3.2, 199.7) goal=(218.0401, 3.2, 203.9151) kind=zone tgt=<null> move=(-0.356689, 0.934223) grounded=true
+t=322 alive=4 down=0 mobs=92 shots=0 pickups=38 feed=["The Watcher wakes on the center island in 10 s", "The Watcher has woken on the center island", "The Sealed Lair shuts in 29s", "The zone closes in 20 s. Get inside the ring!", "The Heartspark is charged"]
+  island=0 pads=[]
+  player pos=(222.9, 3.2, 191.6) goal=(222.9086, 3.5, 191.4205) kind=loot tgt=<null> move=(0.118448, -0.99296) grounded=true
+t=352 alive=4 down=0 mobs=90 shots=0 pickups=43 feed=["The zone closes in 20 s. Get inside the ring!", "The Heartspark is charged", "The Sealed Lair has shut", "A Glimmerkin turns up to the southwest in 30 s", "A Glimmerkin turns up to the southwest in 10 s"]
+  island=0 pads=[]
+  player pos=(222.9, 3.2, 191.4) goal=(222.9086, 3.5, 191.4205) kind=loot tgt=<null> move=(0.327529, -0.944841) grounded=true
+t=382 alive=4 down=0 mobs=90 shots=0 pickups=41 feed=["A Glimmerkin turns up to the southwest in 10 s", "The Uplink is open: Larkhollow Outpost, first squad to finish it leaves", "A Glimmerkin appeared to the southwest. Catch it before it escapes", "tiptoe_\'s squad and tofu.exe\'s squad made a truce", "tofu.exe broke the truce!"]
+ARMOR BigMood -> Uncommon
+LIFE 401 box tofu.exe value 127 at (271.0, 10.0, 210.0)
+  island=0 pads=[]
+  player pos=(238.8, 3.2, 194.2) goal=(264.3962, 3.2, 141.8226) kind=zone tgt=<null> move=(0.396295, -0.918123) grounded=true
+t=412 alive=3 down=0 mobs=87 shots=0 pickups=42 feed=["A Glimmerkin appeared to the southwest. Catch it before it escapes", "tiptoe_\'s squad and tofu.exe\'s squad made a truce", "tofu.exe broke the truce!", "tiptoe_ knocked tofu.exe", "tofu.exe is out"]
+  island=0 pads=[]
+  player pos=(264.4, 3.2, 141.8) goal=(264.3962, 3.2, 141.8226) kind=zone tgt=<null> move=(0.703904, 0.710295) grounded=true
+t=442 alive=3 down=0 mobs=87 shots=1 pickups=38 feed=["A Glimmerkin appeared to the southwest. Catch it before it escapes", "tiptoe_\'s squad and tofu.exe\'s squad made a truce", "tofu.exe broke the truce!", "tiptoe_ knocked tofu.exe", "tofu.exe is out"]
+LIFE 462 box BigMood value 318 at (280.0, 3.0, 152.0)
+  island=0 pads=[]
+  player pos=(281.5, 3.2, 153.3) goal=(280.288, 3.2, 151.7079) kind=box tgt=<null> move=(-0.603409, -0.797432) grounded=true
+t=472 alive=2 down=0 mobs=87 shots=0 pickups=38 feed=["tofu.exe is out", "The zone closes in 20 s. Get inside the ring!", "The Uplink shuts in 29s", "tiptoe_ knocked BigMood", "BigMood is out"]
+  island=0 pads=[]
+  player pos=(279.9, 3.2, 152.1) goal=(279.9438, 3.2, 152.1353) kind=zone tgt=<null> move=(0.0, 0.0) grounded=true
+t=502 alive=2 down=0 mobs=87 shots=0 pickups=40 feed=["The Uplink shuts in 29s", "tiptoe_ knocked BigMood", "BigMood is out", "The Uplink has shut", "tiptoe_ took the Heartspark"]
+  island=0 pads=[]
+  DBG tgt=Node3D:hunter.gd pos=(286.2, 3.2, 144.9) hp=122.517513105281 dead=false drop=false vel=(-4.0, 0.0, 3.7) grap=0 ride=false cross=false blockhere=false ground=3.2
+  player pos=(292.1, 3.2, 150.9) goal=(292.6412, 3.2, 145.4123) kind=ring tgt=@Node3D@1807:<Node3D#1244835885785> move=(-0.700783, 0.713374) grounded=true
+t=532 alive=2 down=0 mobs=88 shots=2 pickups=40 feed=["The Uplink shuts in 29s", "tiptoe_ knocked BigMood", "BigMood is out", "The Uplink has shut", "tiptoe_ took the Heartspark"]
+LIFE 543 box tiptoe_ value 228 at (288.0, 3.0, 145.0)
+  island=0 pads=[]
+  player pos=(291.7, 3.2, 154.5) goal=(291.6392, 3.2, 154.8258) kind=ring tgt=<null> move=(0.0, 0.0) grounded=true
+t=562 alive=1 down=0 mobs=89 shots=0 pickups=40 feed=["tiptoe_ is out", "The Heart opens: hold its ring to leave", "tiptoe_ dropped the Heartspark", "The Heart is open", "The zone closes in 20 s: the islands outside the last circle will fall!"]
+  island=0 pads=[]
+  player pos=(288.4, 3.2, 146.6) goal=(288.0522, 3.2, 146.5494) kind=ring tgt=<null> move=(0.0, 0.0) grounded=true
+t=592 alive=1 down=0 mobs=89 shots=0 pickups=40 feed=["tiptoe_ is out", "The Heart opens: hold its ring to leave", "tiptoe_ dropped the Heartspark", "The Heart is open", "The zone closes in 20 s: the islands outside the last circle will fall!"]
+LIFE 602 box Hunter value 702 at (289.0, 3.0, 147.0)
+   | 39 Nest broken · quiet for 5:00
+   | 97 Nest broken · quiet for 5:00
+   | 120 The Sealed Lair is open: Stormcrown Eyrie, first squad to finish it leaves
+   | 156 The zone closes in 20 s. Get inside the ring!
+   | 172 A meteor shower is coming down. Stars leave gems where they land
+   | 239 The wild Umbrathere is knocked out. Hold F beside it to scan it.
+   | 240 The Heart wakes: its one Heartspark is charging
+   | 240 The Heart Gate is open
+   | 258 The Watcher wakes on the center island in 30 s
+   | 278 The Watcher wakes on the center island in 10 s
+   | 288 The Watcher has woken on the center island
+   | 300 The Sealed Lair shuts in 29s
+   | 309 The zone closes in 20 s. Get inside the ring!
+   | 315 The Heartspark is charged
+   | 330 The Sealed Lair has shut
+   | 330 A Glimmerkin turns up to the southwest in 30 s
+   | 350 A Glimmerkin turns up to the southwest in 10 s
+   | 360 The Uplink is open: Larkhollow Outpost, first squad to finish it leaves
+   | 360 A Glimmerkin appeared to the southwest. Catch it before it escapes
+   | 378 tiptoe_'s squad and tofu.exe's squad made a truce
+   | 380 tofu.exe broke the truce!
+   | 401 tiptoe_ knocked tofu.exe
+   | 401 tofu.exe is out
+   | 444 The zone closes in 20 s. Get inside the ring!
+   | 450 The Uplink shuts in 29s
+   | 462 tiptoe_ knocked BigMood
+   | 462 BigMood is out
+   | 480 The Uplink has shut
+   | 482 tiptoe_ took the Heartspark
+   | 543 Hunter knocked tiptoe_
+   | 543 tiptoe_ is out
+   | 543 The Heart opens: hold its ring to leave
+   | 543 tiptoe_ dropped the Heartspark
+   | 543 The Heart is open
+   | 556 The zone closes in 20 s: the islands outside the last circle will fall!
+   | 602 Hunter went down
+   | 602 Hunter is out
+WPN tether_lantern n=2 dmg=5561 knocks=3
+WPN flamethrower n=1 dmg=1184 knocks=0
+WPN quill_rifle n=1 dmg=2246 knocks=0
+player island 0 pads out: []
+SIMSTAT breaks 0/76 pickups left 28 gear worn [0, 0, 0, 0] staggers 8 rings 0 pads 0
+SIMTEST done in 302623ms, sim time 602, result { "extracted": false, "why": "team wiped", "ending": true }
+SIMKIN { "kin_ab": 50, "auto": 43, "combo": 53, "ult": 0, "swap": 0, "left": 0, "bl_dmg": 10.4238401600002 } lost=[]
+SIMBLIGHT spawned 72 alive 20 wardens 8 shrieks 7 knocks 0 outs 0 dmg 10
+  Hunter team 0 medium ostra knocks 1 kills 1 dmg 2742 gems 0 OUT
+  BigMood team 1 heavy ashwick knocks 0 kills 0 dmg 1184 gems 0 OUT
+  tofu.exe team 2 medium gunslinger knocks 0 kills 0 dmg 2246 gems 0 OUT
+  tiptoe_ team 3 medium ostra knocks 2 kills 2 dmg 2818 gems 0 OUT
+ERROR: 5 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 17 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 30 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

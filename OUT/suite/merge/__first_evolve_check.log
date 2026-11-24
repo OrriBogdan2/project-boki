@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FIRSTEVO ok   a due Zapple whose meter leads: ready
+FIRSTEVO ok   a level short: not yet
+FIRSTEVO ok   a worn Stayleaf: not ready
+FIRSTEVO ok   an undecided meter: not ready
+FIRSTEVO ok   a line that does not branch: never
+FIRSTEVO ok   Jarmit with no Ink: not ready
+FIRSTEVO ok   a held Storm Ink offers Stormit: ready
+FIRSTEVO ok   the beat starts on the ready Boki, with a marker over it
+FIRSTEVO ok   it is marked seen as it starts
+FIRSTEVO ok   line 1: 'Pim is ready to change.' shows on time (["Pim is ready to change."])
+FIRSTEVO ok   line 2: 'Pick what it grows into.' shows on time (["Pim is ready to change.", "Pick what it grows into."])
+FIRSTEVO ok   line 3: 'It keeps its name and memories.' shows on time (["Pick what it grows into.", "It keeps its name and memories."])
+FIRSTEVO ok   no card before the last line has had its time
+FIRSTEVO ok   then Pim's card opens on Growth, the Evolve prompt ([["Pim", "Growth"]])
+FIRSTEVO ok   the marker goes with it
+FIRSTEVO ok   once per save: a second ready Boki gets no beat
+FIRSTEVO ok   tips off: no beat, and it is not used up
+FIRSTEVO ok   a panel opening skips it: marker gone
+FIRSTEVO ok   skipped: no more lines, no card (["Tok is ready to change."])
+FIRSTEVO ok   skipped counts as seen: it never comes back
+FIRSTEVO DONE, failures: 0

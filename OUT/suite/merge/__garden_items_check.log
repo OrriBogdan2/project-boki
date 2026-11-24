@@ -1,0 +1,393 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+GARDENITEMS ok   29 items, unique ids, each with a name, family, use, one effect and sources
+GARDENITEMS ok   no preview line hides its effect behind a question mark
+GARDENITEMS ok   thumpnut on cindle: preview changes nothing
+GARDENITEMS ok   thumpnut on cindle: apply does exactly the preview (Power +1 (17 to 18))
+GARDENITEMS ok   thumpnut on cindle: one journal line names it
+GARDENITEMS ok   shellbark_chew on cindle: preview changes nothing
+GARDENITEMS ok   shellbark_chew on cindle: apply does exactly the preview (Guard +3 (0 to 3))
+GARDENITEMS ok   shellbark_chew on cindle: one journal line names it
+GARDENITEMS ok   zipseed on cindle: preview changes nothing
+GARDENITEMS ok   zipseed on cindle: apply does exactly the preview (Speed +3 (5 to 8))
+GARDENITEMS ok   zipseed on cindle: one journal line names it
+GARDENITEMS ok   hushpearl on cindle: preview changes nothing
+GARDENITEMS ok   hushpearl on cindle: apply does exactly the preview (Focus +3 (0 to 3))
+GARDENITEMS ok   hushpearl on cindle: one journal line names it
+GARDENITEMS ok   sunsap on cindle: preview changes nothing
+GARDENITEMS ok   sunsap on cindle: apply does exactly the preview (+40 xp (0 to 40))
+GARDENITEMS ok   sunsap on cindle: one journal line names it
+GARDENITEMS ok   bristlethorn on cindle: preview changes nothing
+GARDENITEMS ok   bristlethorn on cindle: apply does exactly the preview (1 step toward fierce (1 of 3 tokens))
+GARDENITEMS ok   bristlethorn on cindle: one journal line names it
+GARDENITEMS ok   keepstone on cindle: preview changes nothing
+GARDENITEMS ok   keepstone on cindle: apply does exactly the preview (1 step toward steadfast (1 of 3 tokens))
+GARDENITEMS ok   keepstone on cindle: one journal line names it
+GARDENITEMS ok   puzzlenut on cindle: preview changes nothing
+GARDENITEMS ok   puzzlenut on cindle: apply does exactly the preview (1 step toward curious (1 of 3 tokens))
+GARDENITEMS ok   puzzlenut on cindle: one journal line names it
+GARDENITEMS ok   galeribbon on cindle: preview changes nothing
+GARDENITEMS ok   galeribbon on cindle: apply does exactly the preview (1 step toward swift (1 of 3 tokens))
+GARDENITEMS ok   galeribbon on cindle: one journal line names it
+GARDENITEMS ok   stayleaf on cindle: preview changes nothing
+GARDENITEMS ok   stayleaf on cindle: apply does exactly the preview (stays small: no new forms while worn)
+GARDENITEMS ok   stayleaf on cindle: one journal line names it
+GARDENITEMS ok   glowmoss_sprig on cindle: preview changes nothing
+GARDENITEMS ok   glowmoss_sprig on cindle: apply does exactly the preview (slow glow motes drift round it at night (looks only))
+GARDENITEMS ok   glowmoss_sprig on cindle: one journal line names it
+GARDENITEMS ok   mistbloom on cindle: preview changes nothing
+GARDENITEMS ok   mistbloom on cindle: apply does exactly the preview (a trail of mist in its lean colour follows it (looks only))
+GARDENITEMS ok   mistbloom on cindle: one journal line names it
+GARDENITEMS ok   chimegrass on cindle: preview changes nothing
+GARDENITEMS ok   chimegrass on cindle: apply does exactly the preview (soft notes rise, with a chime, when it is happy or wins (looks and sound only))
+GARDENITEMS ok   chimegrass on cindle: one journal line names it
+GARDENITEMS ok   rinse_melon on cindle: preview changes nothing
+GARDENITEMS ok   rinse_melon on cindle: unusable, nothing changed
+GARDENITEMS ok   unwind_tea on cindle: preview changes nothing
+GARDENITEMS ok   unwind_tea on cindle: apply does exactly the preview (17 Power points come out as loose points)
+GARDENITEMS ok   unwind_tea on cindle: one journal line names it
+GARDENITEMS ok   heirloom_thread on cindle: preview changes nothing
+GARDENITEMS ok   heirloom_thread on cindle: unusable, nothing changed
+GARDENITEMS ok   likeness_locket on cindle: preview changes nothing
+GARDENITEMS ok   likeness_locket on cindle: unusable, nothing changed
+GARDENITEMS ok   lullaby_shell on cindle: preview changes nothing
+GARDENITEMS ok   lullaby_shell on cindle: unusable, nothing changed
+GARDENITEMS ok   hatchling_down on cindle: preview changes nothing
+GARDENITEMS ok   hatchling_down on cindle: apply does exactly the preview (trust +3 (35 to 38): it will remember a hatching)
+GARDENITEMS ok   hatchling_down on cindle: one journal line names it
+GARDENITEMS ok   fourfold_bun on cindle: preview changes nothing
+GARDENITEMS ok   fourfold_bun on cindle: apply does exactly the preview (+1 to Power 18, Guard 1, Speed 6, Focus 1)
+GARDENITEMS ok   fourfold_bun on cindle: one journal line names it
+GARDENITEMS ok   bramble_honey on cindle: preview changes nothing
+GARDENITEMS ok   bramble_honey on cindle: apply does exactly the preview (Grass lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   bramble_honey on cindle: one journal line names it
+GARDENITEMS ok   glassdew on cindle: preview changes nothing
+GARDENITEMS ok   glassdew on cindle: apply does exactly the preview (Water lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   glassdew on cindle: one journal line names it
+GARDENITEMS ok   cinderbrittle on cindle: preview changes nothing
+GARDENITEMS ok   cinderbrittle on cindle: apply does exactly the preview (Fire lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   cinderbrittle on cindle: one journal line names it
+GARDENITEMS ok   hush_truffle on cindle: preview changes nothing
+GARDENITEMS ok   hush_truffle on cindle: apply does exactly the preview (Dark lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   hush_truffle on cindle: one journal line names it
+GARDENITEMS ok   windfloss on cindle: preview changes nothing
+GARDENITEMS ok   windfloss on cindle: apply does exactly the preview (Flying lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   windfloss on cindle: one journal line names it
+GARDENITEMS ok   dare_pepper on cindle: preview changes nothing
+GARDENITEMS ok   dare_pepper on cindle: apply does exactly the preview (Bravery +0.04 (0.74 to 0.78), braver)
+GARDENITEMS ok   dare_pepper on cindle: one journal line names it
+GARDENITEMS ok   lullwort_tea on cindle: preview changes nothing
+GARDENITEMS ok   lullwort_tea on cindle: apply does exactly the preview (Temper -0.04 (0.63 to 0.59), calmer)
+GARDENITEMS ok   lullwort_tea on cindle: one journal line names it
+GARDENITEMS ok   peekbox on cindle: preview changes nothing
+GARDENITEMS ok   peekbox on cindle: apply does exactly the preview (Curiosity +0.04 (0.65 to 0.69), more curious)
+GARDENITEMS ok   peekbox on cindle: one journal line names it
+GARDENITEMS ok   twinbun on cindle: preview changes nothing
+GARDENITEMS ok   twinbun on cindle: unusable, nothing changed
+GARDENITEMS ok   thumpnut on zapple: preview changes nothing
+GARDENITEMS ok   thumpnut on zapple: apply does exactly the preview (Power +3 (0 to 3))
+GARDENITEMS ok   thumpnut on zapple: one journal line names it
+GARDENITEMS ok   shellbark_chew on zapple: preview changes nothing
+GARDENITEMS ok   shellbark_chew on zapple: apply does exactly the preview (Guard +3 (0 to 3))
+GARDENITEMS ok   shellbark_chew on zapple: one journal line names it
+GARDENITEMS ok   zipseed on zapple: preview changes nothing
+GARDENITEMS ok   zipseed on zapple: apply does exactly the preview (Speed +3 (5 to 8))
+GARDENITEMS ok   zipseed on zapple: one journal line names it
+GARDENITEMS ok   hushpearl on zapple: preview changes nothing
+GARDENITEMS ok   hushpearl on zapple: apply does exactly the preview (Focus +1 (41 to 42))
+GARDENITEMS ok   hushpearl on zapple: one journal line names it
+GARDENITEMS ok   sunsap on zapple: preview changes nothing
+GARDENITEMS ok   sunsap on zapple: apply does exactly the preview (+40 xp (0 to 40))
+GARDENITEMS ok   sunsap on zapple: one journal line names it
+GARDENITEMS ok   bristlethorn on zapple: preview changes nothing
+GARDENITEMS ok   bristlethorn on zapple: apply does exactly the preview (1 step toward fierce (1 of 3 tokens))
+GARDENITEMS ok   bristlethorn on zapple: one journal line names it
+GARDENITEMS ok   keepstone on zapple: preview changes nothing
+GARDENITEMS ok   keepstone on zapple: apply does exactly the preview (1 step toward steadfast (1 of 3 tokens))
+GARDENITEMS ok   keepstone on zapple: one journal line names it
+GARDENITEMS ok   puzzlenut on zapple: preview changes nothing
+GARDENITEMS ok   puzzlenut on zapple: apply does exactly the preview (1 step toward curious (1 of 3 tokens))
+GARDENITEMS ok   puzzlenut on zapple: one journal line names it
+GARDENITEMS ok   galeribbon on zapple: preview changes nothing
+GARDENITEMS ok   galeribbon on zapple: apply does exactly the preview (1 step toward swift (1 of 3 tokens))
+GARDENITEMS ok   galeribbon on zapple: one journal line names it
+GARDENITEMS ok   stayleaf on zapple: preview changes nothing
+GARDENITEMS ok   stayleaf on zapple: apply does exactly the preview (stays small: no new forms while worn)
+GARDENITEMS ok   stayleaf on zapple: one journal line names it
+GARDENITEMS ok   glowmoss_sprig on zapple: preview changes nothing
+GARDENITEMS ok   glowmoss_sprig on zapple: apply does exactly the preview (slow glow motes drift round it at night (looks only))
+GARDENITEMS ok   glowmoss_sprig on zapple: one journal line names it
+GARDENITEMS ok   mistbloom on zapple: preview changes nothing
+GARDENITEMS ok   mistbloom on zapple: apply does exactly the preview (a trail of mist in its lean colour follows it (looks only))
+GARDENITEMS ok   mistbloom on zapple: one journal line names it
+GARDENITEMS ok   chimegrass on zapple: preview changes nothing
+GARDENITEMS ok   chimegrass on zapple: apply does exactly the preview (soft notes rise, with a chime, when it is happy or wins (looks and sound only))
+GARDENITEMS ok   chimegrass on zapple: one journal line names it
+GARDENITEMS ok   rinse_melon on zapple: preview changes nothing
+GARDENITEMS ok   rinse_melon on zapple: apply does exactly the preview (lean cleared; the grown parts stay)
+GARDENITEMS ok   rinse_melon on zapple: one journal line names it
+GARDENITEMS ok   unwind_tea on zapple: preview changes nothing
+GARDENITEMS ok   unwind_tea on zapple: apply does exactly the preview (20 Focus points come out as loose points)
+GARDENITEMS ok   unwind_tea on zapple: one journal line names it
+GARDENITEMS ok   heirloom_thread on zapple: preview changes nothing
+GARDENITEMS ok   heirloom_thread on zapple: unusable, nothing changed
+GARDENITEMS ok   likeness_locket on zapple: preview changes nothing
+GARDENITEMS ok   likeness_locket on zapple: unusable, nothing changed
+GARDENITEMS ok   lullaby_shell on zapple: preview changes nothing
+GARDENITEMS ok   lullaby_shell on zapple: unusable, nothing changed
+GARDENITEMS ok   hatchling_down on zapple: preview changes nothing
+GARDENITEMS ok   hatchling_down on zapple: apply does exactly the preview (trust +3 (35 to 38): it will remember a hatching)
+GARDENITEMS ok   hatchling_down on zapple: one journal line names it
+GARDENITEMS ok   fourfold_bun on zapple: preview changes nothing
+GARDENITEMS ok   fourfold_bun on zapple: apply does exactly the preview (+1 to Power 1, Guard 1, Speed 6, Focus 42)
+GARDENITEMS ok   fourfold_bun on zapple: one journal line names it
+GARDENITEMS ok   bramble_honey on zapple: preview changes nothing
+GARDENITEMS ok   bramble_honey on zapple: apply does exactly the preview (Grass lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   bramble_honey on zapple: one journal line names it
+GARDENITEMS ok   glassdew on zapple: preview changes nothing
+GARDENITEMS ok   glassdew on zapple: apply does exactly the preview (Water lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   glassdew on zapple: one journal line names it
+GARDENITEMS ok   cinderbrittle on zapple: preview changes nothing
+GARDENITEMS ok   cinderbrittle on zapple: apply does exactly the preview (Fire lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   cinderbrittle on zapple: one journal line names it
+GARDENITEMS ok   hush_truffle on zapple: preview changes nothing
+GARDENITEMS ok   hush_truffle on zapple: apply does exactly the preview (Dark lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   hush_truffle on zapple: one journal line names it
+GARDENITEMS ok   windfloss on zapple: preview changes nothing
+GARDENITEMS ok   windfloss on zapple: apply does exactly the preview (Flying lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   windfloss on zapple: one journal line names it
+GARDENITEMS ok   dare_pepper on zapple: preview changes nothing
+GARDENITEMS ok   dare_pepper on zapple: apply does exactly the preview (Bravery +0.04 (0.77 to 0.81), braver)
+GARDENITEMS ok   dare_pepper on zapple: one journal line names it
+GARDENITEMS ok   lullwort_tea on zapple: preview changes nothing
+GARDENITEMS ok   lullwort_tea on zapple: apply does exactly the preview (Temper -0.04 (0.49 to 0.45), calmer)
+GARDENITEMS ok   lullwort_tea on zapple: one journal line names it
+GARDENITEMS ok   peekbox on zapple: preview changes nothing
+GARDENITEMS ok   peekbox on zapple: unusable, nothing changed
+GARDENITEMS ok   twinbun on zapple: preview changes nothing
+GARDENITEMS ok   twinbun on zapple: unusable, nothing changed
+GARDENITEMS ok   thumpnut on burrlet: preview changes nothing
+GARDENITEMS ok   thumpnut on burrlet: apply does exactly the preview (Power +3 (0 to 3))
+GARDENITEMS ok   thumpnut on burrlet: one journal line names it
+GARDENITEMS ok   shellbark_chew on burrlet: preview changes nothing
+GARDENITEMS ok   shellbark_chew on burrlet: apply does exactly the preview (Guard +1 (83 to 84))
+GARDENITEMS ok   shellbark_chew on burrlet: one journal line names it
+GARDENITEMS ok   zipseed on burrlet: preview changes nothing
+GARDENITEMS ok   zipseed on burrlet: apply does exactly the preview (Speed +3 (5 to 8))
+GARDENITEMS ok   zipseed on burrlet: one journal line names it
+GARDENITEMS ok   hushpearl on burrlet: preview changes nothing
+GARDENITEMS ok   hushpearl on burrlet: apply does exactly the preview (Focus +3 (0 to 3))
+GARDENITEMS ok   hushpearl on burrlet: one journal line names it
+GARDENITEMS ok   sunsap on burrlet: preview changes nothing
+GARDENITEMS ok   sunsap on burrlet: apply does exactly the preview (+40 xp (0 to 40))
+GARDENITEMS ok   sunsap on burrlet: one journal line names it
+GARDENITEMS ok   bristlethorn on burrlet: preview changes nothing
+GARDENITEMS ok   bristlethorn on burrlet: apply does exactly the preview (1 step toward fierce (1 of 3 tokens))
+GARDENITEMS ok   bristlethorn on burrlet: one journal line names it
+GARDENITEMS ok   keepstone on burrlet: preview changes nothing
+GARDENITEMS ok   keepstone on burrlet: apply does exactly the preview (1 step toward steadfast (1 of 3 tokens))
+GARDENITEMS ok   keepstone on burrlet: one journal line names it
+GARDENITEMS ok   puzzlenut on burrlet: preview changes nothing
+GARDENITEMS ok   puzzlenut on burrlet: apply does exactly the preview (1 step toward curious (1 of 3 tokens))
+GARDENITEMS ok   puzzlenut on burrlet: one journal line names it
+GARDENITEMS ok   galeribbon on burrlet: preview changes nothing
+GARDENITEMS ok   galeribbon on burrlet: apply does exactly the preview (1 step toward swift (1 of 3 tokens))
+GARDENITEMS ok   galeribbon on burrlet: one journal line names it
+GARDENITEMS ok   stayleaf on burrlet: preview changes nothing
+GARDENITEMS ok   stayleaf on burrlet: apply does exactly the preview (stays small: no new forms while worn)
+GARDENITEMS ok   stayleaf on burrlet: one journal line names it
+GARDENITEMS ok   glowmoss_sprig on burrlet: preview changes nothing
+GARDENITEMS ok   glowmoss_sprig on burrlet: apply does exactly the preview (slow glow motes drift round it at night (looks only))
+GARDENITEMS ok   glowmoss_sprig on burrlet: one journal line names it
+GARDENITEMS ok   mistbloom on burrlet: preview changes nothing
+GARDENITEMS ok   mistbloom on burrlet: apply does exactly the preview (a trail of mist in its lean colour follows it (looks only))
+GARDENITEMS ok   mistbloom on burrlet: one journal line names it
+GARDENITEMS ok   chimegrass on burrlet: preview changes nothing
+GARDENITEMS ok   chimegrass on burrlet: apply does exactly the preview (soft notes rise, with a chime, when it is happy or wins (looks and sound only))
+GARDENITEMS ok   chimegrass on burrlet: one journal line names it
+GARDENITEMS ok   rinse_melon on burrlet: preview changes nothing
+GARDENITEMS ok   rinse_melon on burrlet: apply does exactly the preview (lean cleared; the grown parts stay)
+GARDENITEMS ok   rinse_melon on burrlet: one journal line names it
+GARDENITEMS ok   unwind_tea on burrlet: preview changes nothing
+GARDENITEMS ok   unwind_tea on burrlet: apply does exactly the preview (20 Guard points come out as loose points)
+GARDENITEMS ok   unwind_tea on burrlet: one journal line names it
+GARDENITEMS ok   heirloom_thread on burrlet: preview changes nothing
+GARDENITEMS ok   heirloom_thread on burrlet: unusable, nothing changed
+GARDENITEMS ok   likeness_locket on burrlet: preview changes nothing
+GARDENITEMS ok   likeness_locket on burrlet: unusable, nothing changed
+GARDENITEMS ok   lullaby_shell on burrlet: preview changes nothing
+GARDENITEMS ok   lullaby_shell on burrlet: unusable, nothing changed
+GARDENITEMS ok   hatchling_down on burrlet: preview changes nothing
+GARDENITEMS ok   hatchling_down on burrlet: apply does exactly the preview (trust +3 (35 to 38): it will remember a hatching)
+GARDENITEMS ok   hatchling_down on burrlet: one journal line names it
+GARDENITEMS ok   fourfold_bun on burrlet: preview changes nothing
+GARDENITEMS ok   fourfold_bun on burrlet: apply does exactly the preview (+1 to Power 1, Guard 84, Speed 6, Focus 1)
+GARDENITEMS ok   fourfold_bun on burrlet: one journal line names it
+GARDENITEMS ok   bramble_honey on burrlet: preview changes nothing
+GARDENITEMS ok   bramble_honey on burrlet: apply does exactly the preview (Grass lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   bramble_honey on burrlet: one journal line names it
+GARDENITEMS ok   glassdew on burrlet: preview changes nothing
+GARDENITEMS ok   glassdew on burrlet: apply does exactly the preview (Water lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   glassdew on burrlet: one journal line names it
+GARDENITEMS ok   cinderbrittle on burrlet: preview changes nothing
+GARDENITEMS ok   cinderbrittle on burrlet: apply does exactly the preview (Fire lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   cinderbrittle on burrlet: one journal line names it
+GARDENITEMS ok   hush_truffle on burrlet: preview changes nothing
+GARDENITEMS ok   hush_truffle on burrlet: apply does exactly the preview (Dark lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   hush_truffle on burrlet: one journal line names it
+GARDENITEMS ok   windfloss on burrlet: preview changes nothing
+GARDENITEMS ok   windfloss on burrlet: apply does exactly the preview (Flying lean 0 to 12 of 24, kept 7 days)
+GARDENITEMS ok   windfloss on burrlet: one journal line names it
+GARDENITEMS ok   dare_pepper on burrlet: preview changes nothing
+GARDENITEMS ok   dare_pepper on burrlet: apply does exactly the preview (Bravery +0.04 (0.51 to 0.55), braver)
+GARDENITEMS ok   dare_pepper on burrlet: one journal line names it
+GARDENITEMS ok   lullwort_tea on burrlet: preview changes nothing
+GARDENITEMS ok   lullwort_tea on burrlet: apply does exactly the preview (Temper -0.04 (0.29 to 0.25), calmer)
+GARDENITEMS ok   lullwort_tea on burrlet: one journal line names it
+GARDENITEMS ok   peekbox on burrlet: preview changes nothing
+GARDENITEMS ok   peekbox on burrlet: apply does exactly the preview (Curiosity +0.04 (0.88 to 0.92), more curious)
+GARDENITEMS ok   peekbox on burrlet: one journal line names it
+GARDENITEMS ok   twinbun on burrlet: preview changes nothing
+GARDENITEMS ok   twinbun on burrlet: unusable, nothing changed
+GARDENITEMS ok   thumpnut was usable on at least one sample
+GARDENITEMS ok   shellbark_chew was usable on at least one sample
+GARDENITEMS ok   zipseed was usable on at least one sample
+GARDENITEMS ok   hushpearl was usable on at least one sample
+GARDENITEMS ok   sunsap was usable on at least one sample
+GARDENITEMS ok   bristlethorn was usable on at least one sample
+GARDENITEMS ok   keepstone was usable on at least one sample
+GARDENITEMS ok   puzzlenut was usable on at least one sample
+GARDENITEMS ok   galeribbon was usable on at least one sample
+GARDENITEMS ok   stayleaf was usable on at least one sample
+GARDENITEMS ok   glowmoss_sprig was usable on at least one sample
+GARDENITEMS ok   mistbloom was usable on at least one sample
+GARDENITEMS ok   chimegrass was usable on at least one sample
+GARDENITEMS ok   rinse_melon was usable on at least one sample
+GARDENITEMS ok   unwind_tea was usable on at least one sample
+GARDENITEMS ok   hatchling_down was usable on at least one sample
+GARDENITEMS ok   fourfold_bun was usable on at least one sample
+GARDENITEMS ok   bramble_honey was usable on at least one sample
+GARDENITEMS ok   glassdew was usable on at least one sample
+GARDENITEMS ok   cinderbrittle was usable on at least one sample
+GARDENITEMS ok   hush_truffle was usable on at least one sample
+GARDENITEMS ok   windfloss was usable on at least one sample
+GARDENITEMS ok   dare_pepper was usable on at least one sample
+GARDENITEMS ok   lullwort_tea was usable on at least one sample
+GARDENITEMS ok   peekbox was usable on at least one sample
+GARDENITEMS ok   twinbun was usable on at least one sample
+GARDENITEMS ok   three tokens at most, the fourth is refused
+GARDENITEMS ok   three Galeribbons steer the form to swift
+GARDENITEMS ok   taking one off frees the slot and returns it to the bag
+GARDENITEMS ok   taking off what it doesn't wear does nothing
+GARDENITEMS ok   level 14 changes it (a form, or a part while the form has no art)
+GARDENITEMS ok   with a Stayleaf worn it does not evolve
+GARDENITEMS ok   taken off, it evolves again
+GARDENITEMS ok   Glowmoss Sprig previews one change: its aura
+GARDENITEMS ok   worn: rec.aura set, stats untouched, the model redraws
+GARDENITEMS ok   a second one on the same Boki is refused
+GARDENITEMS FAIL the model wears its aura, dark until night
+GARDENITEMS ok   no day clock: it glows; Home lights it at night
+GARDENITEMS ok   taken off, back in the bag
+GARDENITEMS ok   no aura worn, no aura node
+GARDENITEMS ok   both new auras preview on hold
+GARDENITEMS ok   Mistbloom is worn
+GARDENITEMS ok   taken off and given to another Boki
+GARDENITEMS ok   Mistbloom: one set, in the lean colour, always on
+GARDENITEMS ok   no lean yet: pale mist
+GARDENITEMS ok   Chimegrass: sits still until it chimes
+GARDENITEMS ok   a small joy rise: no note
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:642)
+   GDScript backtrace (most recent call first):
+       [0] chime (res://scripts/home/garden_aura.gd:61)
+       [1] _watch (res://scripts/home/home_chimes.gd:36)
+       [2] tick (res://scripts/home/home_chimes.gd:26)
+       [3] _more_auras (res://tools/garden_items_check.gd:186)
+       [4] _tokens_and_stay (res://tools/garden_items_check.gd:121)
+       [5] run (res://tools/garden_items_check.gd:46)
+       [6] run (res://tools/check_registry.gd:980)
+       [7] _ready (res://scripts/main.gd:270)
+GARDENITEMS ok   a happy rise (a win): one note through the garden sound path and a puff of notes
+GARDENITEMS ok   without Chimegrass the joy rise is silent
+GARDENITEMS ok   Low quality: no aura particles
+GARDENITEMS ok   Care.feed: Thumpnut when full, Power 4 to 7
+GARDENITEMS ok   Rinse Melon clears the lean through Care.feed
+GARDENITEMS ok   Unwind Tea: all 7 Power points go loose
+GARDENITEMS ok   a lair pile holds a bite below the chance roll and none above it
+GARDENITEMS ok   lair drop thumpnut is a stat bite carried as treasure under its own name
+GARDENITEMS ok   thumpnut brought out of a match lands in the garden bag, not the sell shelf
+GARDENITEMS ok   thumpnut eaten at home: +3 power, one journal line, bag empty
+GARDENITEMS ok   thumpnut: the Boki card's journal shows the item and the change
+GARDENITEMS ok   lair drop shellbark_chew is a stat bite carried as treasure under its own name
+GARDENITEMS ok   shellbark_chew brought out of a match lands in the garden bag, not the sell shelf
+GARDENITEMS ok   shellbark_chew eaten at home: +3 guard, one journal line, bag empty
+GARDENITEMS ok   shellbark_chew: the Boki card's journal shows the item and the change
+GARDENITEMS ok   lair drop zipseed is a stat bite carried as treasure under its own name
+GARDENITEMS ok   zipseed brought out of a match lands in the garden bag, not the sell shelf
+GARDENITEMS ok   zipseed eaten at home: +3 speed, one journal line, bag empty
+GARDENITEMS ok   zipseed: the Boki card's journal shows the item and the change
+GARDENITEMS ok   lair drop hushpearl is a stat bite carried as treasure under its own name
+GARDENITEMS ok   hushpearl brought out of a match lands in the garden bag, not the sell shelf
+GARDENITEMS ok   hushpearl eaten at home: +3 focus, one journal line, bag empty
+GARDENITEMS ok   hushpearl: the Boki card's journal shows the item and the change
+GARDENITEMS ok   a Boki saved before auras loads wearing none
+GARDENITEMS ok   a v12 save gains path, stay, loose
+GARDENITEMS ok   Keepstone: the token cue, no pip yet
+GARDENITEMS ok   ...then its pip clicks into the meter 0.35 s later
+GARDENITEMS ok   every fed item has its family's cue, on file (missing: [])
+GARDENITEMS ok   a give plays one cue, its family's (wrong: [])
+GARDENITEMS ok   Zapple reaches level 16, its evolve level: the brighter chime instead of the level one
+GARDENITEMS ok   a level past it: the level chime, no second brighter one
+GARDENITEMS ok   a Stayleaf holds it: no brighter chime, a level is the level chime
+GARDENITEMS ok   the Stayleaf off: it can evolve again, the brighter chime
+GARDENITEMS DONE, failures: 1
+ERROR: Pages in use exist at exit in PagedAllocator: N20RasterizerSceneGLES321GeometryInstanceGLES3E
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: 3 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+ERROR: 2 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Buffer with GL ID of 95: leaked 640 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 96: leaked 1800 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 97: leaked 720 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 98: leaked 864 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 100: leaked 640 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 111: leaked 320 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 112: leaked 1800 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 113: leaked 720 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 114: leaked 864 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: 3 RID allocations of type 'N17RendererSceneCull8InstanceE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

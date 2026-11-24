@@ -1,0 +1,79 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+RAISING ok   an old save's once-per-expedition stamps are dropped on load
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+RAISING ok   the Boki is out on the farm
+RAISING ok   home after an hour away it runs over and says hello (1.2 m)
+RAISING ok   back from a minute in a menu: no rush
+RAISING ok   the rank it arrives with is where it starts, even under a panel (Friendly)
+RAISING ok   and once the panel is gone it plays no moment for it
+RAISING ok   petting builds trust (35.0 -> 37.5)
+RAISING ok   petting again the same farm day adds no trust (37.5)
+RAISING ok   the next farm day petting builds trust again, no expedition needed (39.0)
+RAISING ok   the same care before the next expedition is one memory (1, 1)
+RAISING ok   a finished game of fetch trains Speed (0 -> 1)
+RAISING ok   a worn-out Boki plays but doesn't learn (1)
+RAISING ok   the expedition panel says what raising does: "From how you've raised it: +10% damage, +10% health." / "From how you've raised it: -18% damage, -18% health."
+RAISING ok   a fresh Boki gets no run payoff
+RAISING ok   the payoff caps stay small ({ "stats_w": 0.75, "lean_w": 0.25, "carry_max": 0.15, "summon_max": 0.1 })
+RAISING ok   full expedition stats score stats_w (0.75)
+RAISING ok   points past the expedition cap add nothing
+RAISING ok   fully trained and leaned: carry x1.15, summon x1.10
+RAISING ok   float passives scale, whole jumps don't
+RAISING ok   the Boki card says it: "Raised for runs: carry passive +15%"
+RAISING ok   two Emberberries lean it Fierce (62%) and still grow the affinity
+RAISING ok   and the model on the farm turns toward the Fierce colour at once (0.601 -> 0.488)
+RAISING ok   four Tideblooms later the last meals decide: it leans swift
+RAISING ok   plain food leaves the lean alone, and a new Boki has none
+RAISING ok   a week of farm days of care, no expedition: Close (trust 66)
+RAISING ok   reaching Close plays its moment: "Ember is now Close"
+RAISING ok   and only once
+RAISING DONE, failures: 0
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 1 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 3 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 4 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 6 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 1 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 3 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 4 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 6 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 1 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 3 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 4 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 6 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

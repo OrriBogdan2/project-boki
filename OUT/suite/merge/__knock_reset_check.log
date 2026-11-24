@@ -1,0 +1,58 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AKCHECK global: an assist (a hit in the last 5s, a teammate's knock) gives the dash back PASS  dashes 1.00 ex 0.0
+AKCHECK global: an assist heals nothing and cues once as an assist PASS  hp 100.0 cues ["assist"]
+AKCHECK global: a third team's knock gives nothing PASS  dashes 0.01
+AKCHECK vex: his knock gives Combat Slide back whole (one charge) PASS  dashes 1.00 / 1
+AKCHECK vex: rank 3 Burr Charge resets on the knock PASS  cd 0.0
+AKCHECK vex: one cue, not two (the kit no longer repeats DashReset) PASS  ["takedown"]
+AKCHECK cinder: a knock gives one Soot Ram charge of two, not both PASS  dashes 1.01 / 2
+AKCHECK cinder: her knock resets the Furnace Cloak PASS  cd 0.0
+AKCHECK cinder: her knock heals 16% (+5% takedown) PASS  0.710 want 0.710
+AKCHECK cinder: an assist: one charge, no Cloak reset, no heal PASS  dashes 1.01 cd 6.0 hp 0.50
+AKCHECK kael: his knock heals 20% of the foe's health (+5% takedown) PASS  +49.6 want 49.6
+AKCHECK kael: a knock within 2s of the Finishing Slam readies the Riposte PASS  cd 0.0
+AKCHECK kael: the Riposte that knocks a hunter is ready again (the source's kill reset) PASS  down true cd 0.0
+AKCHECK sable: her knock heals her (+5% takedown) PASS  0.650 want 0.650
+AKCHECK sable: an assist heals her and gives the Vault back PASS  0.650 want 0.650 dashes 1.00
+AKCHECK sable: the Encore gives the Vault back PASS  dashes 1.00
+AKCHECK sparkle: a Blowout (through a foe at 4 Static) gives the Wirerun back PASS  dashes 1.00 cues ["hero"]
+AKCHECK grimble: an assist adds a Salvage stack PASS  0 -> 1
+AKCHECK grimble: an assist gives one barge charge of three PASS  dashes 1.01 / 3
+AKCHECK meeko: rank 3, picking up a teammate refreshes the long air dash PASS  ex 0.0
+KNOCKRESET DONE, 20 checks, failures: 0
+ERROR: Texture with GL ID of 210: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 226: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 222: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 235: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 239: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 252: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 262: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 29 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KNOCKCHAIN Kael Haul Slam -> Albert Shield Charge: right after it, the speed is the newer knock's PASS  (0.0, 11.0) want (0.0, 11.0)
+KNOCKCHAIN Kael Haul Slam -> Albert Shield Charge: covers the solo knock's distance (replace, no add, no immunity) PASS  4.43 m vs solo 4.43 m (off 0.00)
+KNOCKCHAIN Kael Haul Slam -> Albert Shield Charge: into a wall, the second knock wall-stuns PASS  stun 0.90
+KNOCKCHAIN Grimble reel -> Sparkle Storm Rod: right after it, the speed is the newer knock's PASS  (0.0, 6.6) want (0.0, 6.6)
+KNOCKCHAIN Grimble reel -> Sparkle Storm Rod: covers the solo knock's distance (replace, no add, no immunity) PASS  1.78 m vs solo 1.78 m (off 0.00)
+KNOCKCHAIN Grimble reel -> Sparkle Storm Rod: the knock ends the reel         PASS  knocked
+KNOCKCHAIN Vex Burr Charge -> Vex Burr Charge: right after it, the speed is the newer knock's PASS  (0.0, 11.0) want (0.0, 11.0)
+KNOCKCHAIN Vex Burr Charge -> Vex Burr Charge: covers the solo knock's distance (replace, no add, no immunity) PASS  4.46 m vs solo 4.43 m (off 0.21)
+KNOCKCHAIN Vex Burr Charge -> Vex Burr Charge: into a wall, the second knock wall-stuns PASS  stun 0.90
+KNOCKCHAIN Sparkle Storm Rod -> Grimble reel: the reel takes over the knock's flight PASS  v 0.00 knock_t 0.00
+KNOCKCHAIN Sparkle Storm Rod -> Grimble reel: the reel still lands him at the arm PASS  arrived
+KNOCKCHAIN Vex -> Vex, both into walls: each knock wall-stuns (no lockout after the first slam) PASS  slams 1 then 2
+KNOCKCHAIN a first knock's longer wall stun is the first knock's: the second's slam stuns the base 0.9 s PASS  stun 0.90
+KNOCKCHAIN TABLE | pair | after 2nd knock (m) | 2nd knock alone (m) | 1st knock's carry (m) | wall stun |
+KNOCKCHAIN TABLE | Kael Haul Slam -> Albert Shield Charge | 4.43 | 4.43 | 0.00 | STUNNED 0.90s |
+KNOCKCHAIN TABLE | Grimble reel -> Sparkle Storm Rod | 1.78 | 1.78 | 0.00 | none |
+KNOCKCHAIN TABLE | Vex Burr Charge -> Vex Burr Charge | 4.46 | 4.43 | 0.17 | STUNNED 0.90s |
+KNOCKCHAIN DONE, 13 checks, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 9 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

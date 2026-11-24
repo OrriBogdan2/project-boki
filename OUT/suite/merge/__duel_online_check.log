@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+DUELNET ok   the line pairs the first two; the second waits, the third has no rival  ["b", "", ""]
+DUELNET ok   a duel is two teams of one, hosted by the first  
+DUELNET ok   the start message opens the duel room online  
+relay: listening on 7938, up to 120 players, version 0.24.18, Discord check OFF
+DUELNET ok   the relay listens on 7938  
+relay: 1135821284 joined as Hunter (1 online)
+DUELNET ok   the host is on the relay as 1135821284  
+relay: 813304898 joined as Hunter (2 online)
+DUELNET ok   the guest joins the duel line over the relay  ["1135821284", "813304898"]
+DUELNET ok   the lower id hosts the pair  
+DUELNET ok   the guest's hunter is here, driven by the guest's game  
+DUELNET ok   the duel room holds the two players and no bot  
+DUELNET ok   nobody else is in the room  2 hunters
+DUELNET ok   both games use the same two marks, one each  
+DUELNET ok   the marks face each other a few steps apart  7.0 m
+DUELNET ok   the guest's fall is a knock on its own game  
+DUELNET ok   the round is the host's on both games  guest knocked 1, host knocks 1
+DUELNET ok   the guest is back up on both games  
+DUELNET ok   back on its mark  
+DUELNET ok   round 2 on both games  
+DUELNET ok   the host's knock counts for the guest  guest knocks 1
+DUELNET ok   the host is up on its mark  
+DUELNET ok   the match goes on  
+relay: 813304898 left (1 online)
+ERROR: Thread 3817769 exited with errno: 10
+   at: _check_pid_is_running (drivers/unix/os_unix.cpp:862)
+   GDScript backtrace (most recent call first):
+       [0] _finish (res://tools/duel_online_check.gd:167)
+DUELNET DONE, 20 checks, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 9 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,31 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+RECCHECK ok   off: debug label, HUD and fps shown
+RECCHECK ok   F10: clean (level 1)
+RECCHECK ok   clean: debug label and fps hidden, the HUD stays
+RECCHECK ok   clean: the camera follows softer, less shake
+RECCHECK ok   clean: no new tips queued
+RECCHECK ok   F10 again: no HUD (level 2, hud visible false)
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+RECCHECK ok   F9: the camera orbits (0.047 rad)
+RECCHECK ok   F10 a third time: off, all back as it was (a hidden one stays hidden)
+RECCHECK ok   Shift+F10: straight to no HUD
+RECCHECK ok   Shift+F10 again: back to the clean HUD
+RECCHECK ok   F10 is a rebindable action (F10)
+RECCHECK ok   demo settings at their defaults change nothing
+RECCHECK ok   demo settings: clear weather, no Blight, 60s for fresh landers
+RECCHECK ok   always clear over 40 seeds (clear)
+RECCHECK done, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 8 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

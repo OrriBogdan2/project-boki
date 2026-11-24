@@ -1,0 +1,8 @@
+file has vanished: "/home/boki/cj/20261119-153526-a2/tree/OUT/suite/merge/__ability_bar_check.claim"
+file has vanished: "/home/boki/cj/20261119-153526-a2/tree/OUT/suite/merge/__ability_card_check.claim"
+file has vanished: "/home/boki/cj/20261119-153526-a2/tree/OUT/suite/merge/__abyss_check.claim"
+file has vanished: "/home/boki/cj/20261119-153526-a2/tree/OUT/suite/merge/__aim_latency_check.claim"
+file has vanished: "/home/boki/cj/20261119-153526-a2/tree/OUT/suite/merge/__aim_near_check.claim"
+file has vanished: "/home/boki/cj/20261119-153526-a2/tree/OUT/suite/merge/__aim_pitch_check.claim"
+rsync warning: some files vanished before they could be transferred (code 24) at main.c(1356) [sender=3.4.1]
+suite-pod rpc5: rsync failed, skipped

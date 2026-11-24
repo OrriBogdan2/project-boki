@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LIVE ok   Neve wears her clips in a match
+LIVE ok   one weapon drawn (0 procedural pieces)
+LIVE ok   the darts play their clips (["dart_l", "dart_r"])
+LIVE ok   the skate plays its clips (["dart_l", "dart_r", "dart_heavy", "skate_go", "beam", "skate"])
+LIVE ok   aim stays on the cursor on the skate (0.00 rad off)
+LIVE ok   a skating beam plays its clip
+LIVE ok   letting go plays the stop
+LIVE ok   the spear's hold plays its clip
+LIVE ok   the release plays the push
+LIVE ok   the statue holds still (hand 0.0000 m, tail 0.0056 m, ripple off true)
+LIVE ok   a knock-out plays the death clip on screen (clip true, visible true)
+LIVE kit moves seen: ["", "tm_dart_l", "tm_dart_r", "tm_dart_heavy", "tm_skate_go", "tm_beam", "tm_skate", "tm_skate_stop", "tm_spear_aim", "tm_spear", "tm_clench"] clips: 
+CLIP_LIVE_CLAIRE_DONE, failures: 0
+ERROR: 1 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Buffer with GL ID of 7218: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 7219: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 7220: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 7221: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

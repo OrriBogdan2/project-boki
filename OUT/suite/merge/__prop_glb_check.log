@@ -1,0 +1,53 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PGCHECK ok   a hunter stands 1.74 m
+PGCHECK ok   jump_pad loads
+PGCHECK ok   jump_pad has its part Base
+PGCHECK ok   jump_pad has its part Spring
+PGCHECK ok   jump_pad has its part Top
+PGCHECK ok   jump_pad draws on the toon shader with its texture
+PGCHECK ok   jump_pad is in its budget (7000 <= 7000 tris)
+PGCHECK ok   jump_pad stands on its origin (bottom -0.00)
+PGCHECK ok   jump_pad is 1.50 m wide (1.50)
+PGCHECK ok   jump_pad is 0.51 m tall, 29% of a hunter (15% to 35%)
+PGCHECK ok   the pad's plate pivots at its bottom centre (it squashes down)
+PGCHECK ok   the plate sits on the top half of the pad
+PGCHECK ok   gust_fan loads
+PGCHECK ok   gust_fan has its part Body
+PGCHECK ok   gust_fan has its part Blades
+PGCHECK ok   gust_fan draws on the toon shader with its texture
+PGCHECK ok   gust_fan is in its budget (9000 <= 9000 tris)
+PGCHECK ok   gust_fan stands on its origin (bottom -0.00)
+PGCHECK ok   gust_fan is 1.30 m tall, 74% of a hunter (50% to 90%)
+PGCHECK ok   the blades spin about their hub on local Z (0.044 m off)
+PGCHECK ok   the blades face the fan's front (+Z)
+PGCHECK ok   updraft_vent loads
+PGCHECK ok   updraft_vent has its part Rim
+PGCHECK ok   updraft_vent has its part Grate
+PGCHECK ok   updraft_vent has its part Glow
+PGCHECK ok   updraft_vent draws on the toon shader with its texture
+PGCHECK ok   updraft_vent is in its budget (6999 <= 7000 tris)
+PGCHECK ok   updraft_vent stands on its origin (bottom 0.00)
+PGCHECK ok   updraft_vent is 3.20 m wide (3.20)
+PGCHECK ok   updraft_vent is 0.55 m tall, 31% of a hunter (25% to 40%)
+PGCHECK ok   chest loads
+PGCHECK ok   chest has its part Body
+PGCHECK ok   chest has its part Lid
+PGCHECK ok   chest has its part Lock
+PGCHECK ok   chest draws on the toon shader with its texture
+PGCHECK ok   chest is in its budget (9000 <= 9000 tris)
+PGCHECK ok   chest stands on its origin (bottom -0.00)
+PGCHECK ok   chest is 1.16 m wide (1.16)
+PGCHECK ok   chest is 1.12 m tall, 64% of a hunter (50% to 75%)
+PGCHECK ok   the lid hinges at its back edge, on the seam
+PGCHECK ok   the hinge is at the back (-Z)
+PGCHECK ok   the padlock hangs on the front
+PGCHECK ok   Models.jump_pad builds the 3D pad, its plate Top (match.gd pulses it)
+PGCHECK ok   the plate takes the caller's colour
+PGCHECK ok   the plate glows, unoutlined
+PGCHECK ok   pads of one colour share their materials
+PGCHECK ok   --prim-art builds the primitive pad
+PGCHECK DONE, failures: 0

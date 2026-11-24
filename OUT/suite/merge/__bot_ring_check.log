@@ -1,0 +1,226 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _one (res://tools/bot_ring_check.gd:63)
+       [13] run (res://tools/bot_ring_check.gd:147)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _one (res://tools/bot_ring_check.gd:63)
+       [13] run (res://tools/bot_ring_check.gd:147)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _one (res://tools/bot_ring_check.gd:63)
+       [13] run (res://tools/bot_ring_check.gd:147)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _one (res://tools/bot_ring_check.gd:63)
+       [13] run (res://tools/bot_ring_check.gd:147)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _one (res://tools/bot_ring_check.gd:63)
+       [13] run (res://tools/bot_ring_check.gd:147)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _one (res://tools/bot_ring_check.gd:63)
+       [13] run (res://tools/bot_ring_check.gd:147)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+RING ok   seed 4: 30 bots and a Heart (30)
+LIFE 48 wisp revive Hunter
+LIFE 49 stomp start ClapBack on duskrunner
+LIFE 51 stomp end ClapBack (missed)
+LIFE 54 wisp revive duskrunner
+LIFE 59 box ctrl_alt_pie value 27 at (198.0, 0.0, 239.0)
+LIFE 59 box zr0 value 16 at (198.0, 0.0, 239.0)
+LIFE 59 box quarterpipe value 20 at (198.0, 0.0, 241.0)
+LIFE 59 wisp revive couch_co_op
+LIFE 62 wisp revive Hunter
+LIFE 62 wisp revive st4rfish
+LIFE 68 stomp start ruckus_ on fiddlesticks
+LIFE 69 wisp revive TurboTurnip
+LIFE 69 box Hunter value 75 at (221.0, 3.0, 184.0)
+LIFE 69 box duskrunner value 32 at (221.0, 3.0, 185.0)
+LIFE 69 box couch_co_op value 20 at (220.0, 3.0, 185.0)
+LIFE 70 stomp cc stun on ruckus_
+LIFE 70 stomp end ruckus_ (broken)
+LIFE 79 fiddlesticks stomped out
+LIFE 79 box fiddlesticks value 27 at (314.0, 3.0, 242.0)
+LIFE 81 box TurboTurnip value 19 at (314.0, 3.0, 242.0)
+LIFE 81 box vinyl_vic value 71 at (314.0, 3.0, 238.0)
+LIFE 82 box clutch_or_kick value 27 at (198.0, 0.0, 240.0)
+LIFE 82 box Cheddar_ value 27 at (198.0, 0.0, 241.0)
+LIFE 82 box sidequest_ value 20 at (198.0, 0.0, 240.0)
+LIFE 84 box nova_nick value 30 at (321.0, 3.0, 243.0)
+LIFE 84 box ruckus_ value 76 at (319.0, 3.0, 244.0)
+LIFE 84 box saltlick_ value 88 at (319.0, 3.0, 243.0)
+LIFE 110 wisp revive st4rfish
+LIFE 117 stomp start tiptoe_ on TankTop_Tim
+LIFE 119 stomp cc stun on tiptoe_
+LIFE 119 stomp end tiptoe_ (broken)
+LIFE 119 stomp start grapejuice_ on nitrogen_
+LIFE 119 stomp cc root on grapejuice_
+LIFE 119 stomp end grapejuice_ (broken)
+LIFE 121 TankTop_Tim bled out
+LIFE 121 box TankTop_Tim value 112 at (237.0, 3.0, 159.0)
+LIFE 124 stomp start lobster_roll on quickscope_q
+LIFE 124 stomp start grapejuice_ on quickscope_q
+LIFE 124 nitrogen_ stomped out
+LIFE 124 box nitrogen_ value 44 at (322.0, 3.0, 230.0)
+LIFE 124 box ClapBack value 18 at (237.0, 3.0, 160.0)
+LIFE 124 box st4rfish value 36 at (237.0, 3.0, 159.0)
+LIFE 125 stomp start Mr_Meep on quickscope_q
+LIFE 125 box quickscope_q value 20 at (323.0, 3.0, 230.0)
+LIFE 125 stomp end Mr_Meep (gone)
+LIFE 125 stomp end grapejuice_ (gone)
+LIFE 125 stomp end lobster_roll (gone)
+LIFE 162 box Mr_Meep value 51 at (287.0, 3.0, 149.0)
+LIFE 162 box grapejuice_ value 49 at (286.0, 3.0, 148.0)
+LIFE 162 box lobster_roll value 100 at (287.0, 3.0, 149.0)
+LIFE 182 box frogger_ value 52 at (293.0, 3.0, 157.0)
+LIFE 195 stomp start tiptoe_ on kilowatt_
+LIFE 196 stomp start jollyroger_ on kilowatt_
+LIFE 196 wisp revive cable_guy_
+LIFE 197 kilowatt_ stomped out
+LIFE 197 box kilowatt_ value 34 at (284.0, 3.0, 146.0)
+LIFE 197 stomp end jollyroger_ (gone)
+LIFE 197 stomp end tiptoe_ (gone)
+LIFE 199 stomp start jetlag_ on cable_guy_
+LIFE 201 stomp end jetlag_ (missed)
+LIFE 206 wisp revive cable_guy_
+LIFE 208 stomp start tiptoe_ on SaltyPretzel
+RING seed 4: 210 s, stages -1..10, downs 36 (Blight with a rival near 0), up 4, inside 4
+RING ok   seed 4: the run saw 11 tide stages close
+RING ok   seed 4: no bot went down to the Blight with no rival within 20 m (0 did)
+RING ok   seed 4: every bot still up stands inside the ring (4 of 4)
+RING done, failures: 0
+ERROR: 2 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 9 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 41 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 9 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 4 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 33: leaked 11184824 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 34: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 35: leaked 5592432 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 39: leaked 5592432 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 28982: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 28983: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 28984: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 28985: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 30953: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 30954: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 30955: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 30956: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 77 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

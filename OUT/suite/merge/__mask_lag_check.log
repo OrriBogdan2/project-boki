@@ -1,0 +1,125 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _ready (res://scripts/home/home.gd:240)
+         [11] _hb_home (res://scripts/main.gd:1490)
+         [12] run (res://tools/mask_lag_check.gd:43)
+         [13] run (res://tools/check_registry.gd:980)
+         [14] _ready (res://scripts/main.gd:270)
+MASKLAG   masks_first: frame 1 took 736.5 ms
+MASKLAG   masks_first: frame 5 took 2641.9 ms
+MASKLAG   masks_first: frame 6 took 1220.6 ms
+MASKLAG   masks_first: frame 7 took 1221.8 ms
+MASKLAG   masks_first: frame 8 took 1154.7 ms
+MASKLAG   masks_first: frame 9 took 1051.1 ms
+MASKLAG   masks_first: frame 10 took 976.5 ms
+MASKLAG masks_first   frames= 10  max= 2641.9 ms  median=1154.7 ms  model builds=3 (max 2364.7 ms)  views=3
+MASKLAG FAIL masks_first: at most 2 3D previews render a frame (3)
+MASKLAG   masks_open: frame 3 took 3338.7 ms
+MASKLAG   masks_open: frame 4 took 1847.9 ms
+MASKLAG   masks_open: frame 5 took 2811.2 ms
+MASKLAG   masks_open: frame 6 took 2866.9 ms
+MASKLAG masks_open    frames=  6  max= 3338.7 ms  median=2866.9 ms  model builds=2 (max 1412.4 ms)  views=3
+MASKLAG FAIL masks_open: at most 2 3D previews render a frame (3)
+MASKLAG   masks_switch: frame 1 took 2050.7 ms
+MASKLAG   masks_switch: frame 2 took 924.4 ms
+MASKLAG   masks_switch: frame 6 took 7385.1 ms
+MASKLAG masks_switch  frames=  6  max= 7385.1 ms  median=2050.7 ms  model builds=3 (max 5352.8 ms)  views=3
+MASKLAG FAIL masks_switch: at most 2 3D previews render a frame (3)
+MASKLAG   reveal: frame 1 took 1050.5 ms
+MASKLAG   reveal: frame 4 took 1093.1 ms
+MASKLAG   reveal: frame 5 took 869.6 ms
+MASKLAG   reveal: frame 6 took 630.4 ms
+MASKLAG   reveal: frame 7 took 541.8 ms
+MASKLAG   reveal: frame 8 took 785.0 ms
+MASKLAG   reveal: frame 9 took 763.0 ms
+MASKLAG   reveal: frame 10 took 1005.3 ms
+MASKLAG   reveal: frame 11 took 473.7 ms
+MASKLAG   reveal: frame 12 took 1053.6 ms
+MASKLAG   reveal: frame 13 took 1242.2 ms
+MASKLAG reveal        frames= 13  max= 1242.2 ms  median= 869.6 ms  model builds=2 (max 1299.0 ms)  views=1
+MASKLAG ok   reveal: at most 1 3D previews render a frame (1)
+MASKLAG   offer: frame 5 took 1677.0 ms
+MASKLAG   offer: frame 6 took 2001.3 ms
+MASKLAG   offer: frame 7 took 1801.8 ms
+MASKLAG   offer: frame 8 took 1782.0 ms
+MASKLAG   offer: frame 9 took 2972.8 ms
+MASKLAG offer         frames=  9  max= 2972.8 ms  median=1801.8 ms  model builds=4 (max 1672.6 ms)  views=1
+MASKLAG ok   offer: at most 1 3D previews render a frame (1)
+MASKLAG   offer_focus: frame 5 took 2128.1 ms
+MASKLAG   offer_focus: frame 6 took 1312.8 ms
+MASKLAG   offer_focus: frame 7 took 848.6 ms
+MASKLAG   offer_focus: frame 8 took 848.6 ms
+MASKLAG   offer_focus: frame 9 took 913.5 ms
+MASKLAG   offer_focus: frame 10 took 1051.0 ms
+MASKLAG offer_focus   frames= 10  max= 2128.1 ms  median=1051.0 ms  model builds=4 (max 2807.9 ms)  views=1
+MASKLAG ok   offer_focus: at most 1 3D previews render a frame (1)
+MASKLAG   accept: frame 1 took 454.8 ms
+MASKLAG   accept: frame 2 took 350.3 ms
+MASKLAG   accept: frame 3 took 389.3 ms
+MASKLAG   accept: frame 4 took 364.4 ms
+MASKLAG   accept: frame 5 took 340.3 ms
+MASKLAG   accept: frame 6 took 382.2 ms
+MASKLAG   accept: frame 7 took 457.7 ms
+MASKLAG   accept: frame 8 took 417.2 ms
+MASKLAG   accept: frame 9 took 558.3 ms
+MASKLAG   accept: frame 10 took 744.7 ms
+MASKLAG   accept: frame 11 took 448.9 ms
+MASKLAG   accept: frame 12 took 383.7 ms
+MASKLAG   accept: frame 13 took 361.2 ms
+MASKLAG   accept: frame 14 took 355.1 ms
+MASKLAG   accept: frame 15 took 349.0 ms
+MASKLAG   accept: frame 16 took 352.8 ms
+MASKLAG   accept: frame 17 took 839.0 ms
+MASKLAG   accept: frame 18 took 540.7 ms
+MASKLAG   accept: frame 19 took 397.4 ms
+MASKLAG   accept: frame 20 took 329.6 ms
+MASKLAG   accept: frame 21 took 601.3 ms
+MASKLAG   accept: frame 22 took 637.2 ms
+MASKLAG   accept: frame 23 took 476.9 ms
+MASKLAG   accept: frame 24 took 772.4 ms
+MASKLAG   accept: frame 25 took 519.8 ms
+MASKLAG   accept: frame 26 took 462.5 ms
+MASKLAG accept        frames= 26  max=  839.0 ms  median= 448.9 ms  model builds=0 (max 0.0 ms)  views=0
+MASKLAG   put_on: frame 1 took 651.2 ms
+MASKLAG   put_on: frame 2 took 696.1 ms
+MASKLAG   put_on: frame 3 took 430.4 ms
+MASKLAG   put_on: frame 4 took 367.9 ms
+MASKLAG   put_on: frame 5 took 391.9 ms
+MASKLAG   put_on: frame 6 took 440.7 ms
+MASKLAG   put_on: frame 7 took 619.0 ms
+MASKLAG   put_on: frame 8 took 465.9 ms
+MASKLAG   put_on: frame 9 took 430.5 ms
+MASKLAG   put_on: frame 10 took 435.9 ms
+MASKLAG   put_on: frame 11 took 461.7 ms
+MASKLAG   put_on: frame 12 took 481.5 ms
+MASKLAG   put_on: frame 13 took 496.5 ms
+MASKLAG   put_on: frame 14 took 1104.0 ms
+MASKLAG   put_on: frame 15 took 440.9 ms
+MASKLAG   put_on: frame 16 took 1273.0 ms
+MASKLAG   put_on: frame 17 took 1476.3 ms
+MASKLAG   put_on: frame 18 took 656.6 ms
+MASKLAG   put_on: frame 19 took 465.3 ms
+MASKLAG   put_on: frame 20 took 402.8 ms
+MASKLAG put_on        frames= 20  max= 1476.3 ms  median= 465.9 ms  model builds=0 (max 0.0 ms)  views=0
+MASKLAG ok   the pick opened Pip
+MASKLAG DONE (drawn), failures: 3
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

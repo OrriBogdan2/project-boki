@@ -1,0 +1,162 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HITCH renderer=gl_compatibility adapter=llvmpipe (LLVM 21.1.8, 256 bits) software=true headless=false seed=4101 squad=3
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+WARNING: Nodes with non-equal opposite anchors will have their size overridden after _ready(). 
+If you want to set size, change the anchors or consider using set_deferred().
+     at: _set_size (scene/gui/control.cpp:1487)
+     GDScript backtrace (most recent call first):
+         [0] _build (res://scripts/match/squad_intro.gd:193)
+         [1] start (res://scripts/match/squad_intro.gd:65)
+         [2] _start (res://scripts/match/match.gd:474)
+         [3] setup (res://scripts/ui/hud.gd:75)
+         [4] _slice (res://scripts/match/match.gd:200)
+WARNING: Nodes with non-equal opposite anchors will have their size overridden after _ready(). 
+If you want to set size, change the anchors or consider using set_deferred().
+     at: _set_size (scene/gui/control.cpp:1487)
+     GDScript backtrace (most recent call first):
+         [0] _build (res://scripts/match/squad_intro.gd:193)
+         [1] start (res://scripts/match/squad_intro.gd:65)
+         [2] _start (res://scripts/match/match.gd:474)
+         [3] setup (res://scripts/ui/hud.gd:75)
+         [4] _slice (res://scripts/match/match.gd:200)
+Quality: auto picked very_low (load benchmark 1124.8 ms a frame)
+HITCH pack: 11 mobs (skitter,spitter,brute,bomber,sentinel,glimmer,shrubling,warden,bl_skitter,bl_warden,bl_nest) at t=39.55
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+         [4] _process (res://tools/hitch_check.gd:210)
+HITCH renderer=gl_compatibility adapter=llvmpipe (LLVM 21.1.8, 256 bits) window=(640, 360) quality=auto
+HITCH loading screen 191676 ms over 1248 frames, worst 4417 ms, 96 shader compiles; build steps: build.warm_up 78772, build.generate 12561, world.terrain 5904, world.grass 5194, build.hunters 4687, build.spawns 3764, world.walls 3550, build.mobs 3105, world.scatter_plan 2695, world.roots 1172
+HITCH phase first      16 frames  median    694 ms  worst    856 ms  shader compiles 1
+HITCH phase planning   78 frames  median    864 ms  worst   2286 ms  shader compiles 2
+HITCH phase ride      414 frames  median    690 ms  worst   1909 ms  shader compiles 2
+HITCH phase drop       42 frames  median    313 ms  worst    667 ms  shader compiles 1
+HITCH phase land      180 frames  median    380 ms  worst   2198 ms  shader compiles 0
+HITCH landing stall (worst frame in the first 1.5 s on the ground, landed at t=38.55): 892 ms
+HITCH start-of-match stall (worst frame from the reveal to the first second of the ride): 2286 ms
+HITCH worst frames (wall; sim, visuals, other scripts, render submit, rest = swap/driver):
+HITCH      2286 ms  planning t= 0.00  sim 0.7 (+4.7 x6)  vis 13.2  other 38.0  render 2225.3  rest 3.6  draws 2022  shader compiles 0
+HITCH      2198 ms  land     t=41.17  sim 191.7 (+0.0 x1)  vis 239.0  other 208.4  render 1426.0  rest 133.1  draws 601  shader compiles 0  sim sections: hunters 84.0, kins 46.3, bots 18.1, train 10.4  visual sections: hunters 184.8, kins_mobs 29.2, camera 11.7, vision 5.4
+HITCH      1909 ms  ride     t= 9.35  sim 12.9 (+67.5 x6)  vis 12.7  other 20.1  render 1765.7  rest 29.8  draws 1900  shader compiles 0
+HITCH      1829 ms  ride     t= 9.45  sim 106.7 (+265.2 x6)  vis 30.5  other 28.6  render 1356.7  rest 41.2  draws 1898  shader compiles 0  sim sections: kins 34.2, mobs 34.2, separate 11.0, rest 7.3  visual sections: hunters 15.4, kins_mobs 9.0, vision 1.5, camera 0.2
+HITCH      1814 ms  planning t= 0.00  sim 0.7 (+2.1 x6)  vis 14.1  other 17.3  render 1705.2  rest 74.6  draws 2997  shader compiles 0
+HITCH      1772 ms  land     t=41.30  sim 171.7 (+0.0 x1)  vis 57.3  other 105.1  render 1267.6  rest 170.3  draws 653  shader compiles 0  sim sections: kins 56.4, hunters 55.9, truce_spawns 18.4, bots 12.1  visual sections: hunters 30.5, camera 5.3, kins_mobs 4.9, vision 2.0
+HITCH      1725 ms  ride     t= 9.55  sim 15.1 (+78.6 x6)  vis 13.1  other 94.4  render 1460.8  rest 63.4  draws 1898  shader compiles 0
+HITCH      1713 ms  planning t= 0.00  sim 0.6 (+1.9 x6)  vis 14.0  other 40.0  render 1601.9  rest 54.8  draws 3022  shader compiles 0
+HITCH compiled 1:     844 ms  first    t= 0.00  sim 9.8 (+0.0 x1)  vis 128.1  other 26.3  render 675.5  rest 4.5  draws 420  shader compiles 1  visual sections: hunters 51.9, kins_mobs 22.3, aim 2.4, vision 0.4
+HITCH compiled 2:     918 ms  planning t= 0.05  sim 0.7 (+54.2 x6)  vis 15.2  other 46.1  render 737.4  rest 64.8  draws 1950  shader compiles 2
+HITCH       first in view: MeshInstance3D:shader seat_beam.gdshader (WaysOut/@Node3D@19718/@MeshInstance3D@19720)
+HITCH       first in view: MeshInstance3D:shader -9223370283367263343 (ZoneWall)
+HITCH compiled 2:    1033 ms  ride     t= 6.05  sim 13.4 (+66.6 x6)  vis 18.1  other 20.2  render 904.3  rest 10.6  draws 2064  shader compiles 2
+HITCH       first in view: MeshInstance3D:std t0 s1 c0 a0 e1 tex3 bb0 v0 (@Node3D@20130/@MeshInstance3D@20129)
+HITCH       first in view: MeshInstance3D:std t0 s1 c0 a0 e0 tex3 bb0 v0 (@Node3D@20130/@MeshInstance3D@20128)
+HITCH       first in view: MeshInstance3D:std t1 s0 c2 a1 e0 tex3 bb1 v0 (@Node3D@1803/@Node3D@1802/@MeshInstance3D@1801)
+HITCH compiled 1:     391 ms  drop     t=38.35  sim 37.2 (+64.2 x3)  vis 2.8  other 36.8  render 238.8  rest 11.1  draws 852  shader compiles 1  sim sections: hunters 14.8, lairs 7.1, kins 4.3, separate 2.1
+HITCH worst script frames (one step + visuals, extra fast-forward steps left out):
+HITCH   430.7 ms     2198 ms  land     t=41.17  sim 191.7 (+0.0 x1)  vis 239.0  other 208.4  render 1426.0  rest 133.1  draws 601  shader compiles 0  sim sections: hunters 84.0, kins 46.3, bots 18.1, train 10.4  visual sections: hunters 184.8, kins_mobs 29.2, camera 11.7, vision 5.4
+HITCH   340.9 ms      983 ms  land     t=41.13  sim 178.1 (+0.0 x1)  vis 162.8  other 31.2  render 537.1  rest 74.2  draws 564  shader compiles 0  sim sections: hunters 84.5, kins 22.2, bots 20.0, interact 18.7  visual sections: hunters 100.8, kins_mobs 33.7, vision 6.3, camera 2.9
+HITCH   250.1 ms     1295 ms  land     t=41.25  sim 150.7 (+0.0 x1)  vis 99.4  other 69.0  render 906.6  rest 69.4  draws 647  shader compiles 0  sim sections: hunters 100.1, bots 20.1, kins 11.4, separate 4.2  visual sections: hunters 60.2, kins_mobs 15.3, camera 1.8, vision 1.6
+HITCH   249.0 ms     1128 ms  land     t=41.15  sim 99.2 (+0.0 x1)  vis 149.8  other 61.8  render 661.0  rest 155.8  draws 575  shader compiles 0  sim sections: kins 32.8, hunters 19.2, mobs 12.5, rest 8.8  visual sections: kins_mobs 88.7, hunters 42.5, aim 7.3, camera 0.9
+HITCH   240.5 ms      836 ms  ride     t=29.25  sim 26.7 (+114.9 x6)  vis 213.9  other 43.6  render 380.6  rest 56.6  draws 953  shader compiles 0  sim sections: hunters 10.2, kins 3.2, bots 2.9, separate 2.4  visual sections: hunters 115.7, kins_mobs 44.0, vision 0.3, camera 0.1
+HITCH ADVISORY compiled 2 shader variant(s) during ride:    1033 ms  ride     t= 6.05  sim 13.4 (+66.6 x6)  vis 18.1  other 20.2  render 904.3  rest 10.6  draws 2064  shader compiles 2
+HITCH ADVISORY compiled 1 shader variant(s) during drop:     391 ms  drop     t=38.35  sim 37.2 (+64.2 x3)  vis 2.8  other 36.8  render 238.8  rest 11.1  draws 852  shader compiles 1  sim sections: hunters 14.8, lairs 7.1, kins 4.3, separate 2.1
+HITCH budget software: 2.5x the frames around it and +1.2 s; worst judged frame at 0.95 of budget; ADVISORY (2 frames)
+ERROR: 6 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 17 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 6 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 53 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOSSFOCUS ok   outside the lair, boss asleep: the bot goes for the player 5 m away
+BOSSFOCUS ok   the boss wakes and seals the bot in with the player
+BOSSFOCUS ok   6 s of boss fight: past its next think the bot never targets the player (0 ticks; the player's Boki hit it), nor do it or its Boki hit them
+BOSSFOCUS ok   it targets the boss 100% of the fight
+BOSSFOCUS FAIL hit by the player inside the seal: the bot turns on them
+BOSS FOCUS CHECK DONE, failures: 1
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

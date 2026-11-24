@@ -1,0 +1,92 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+GRAMMAR res://content: 16 abilities, 9 merges, 10 evolution nodes, 50 kin
+GRAMMAR ok    abilities_v2/boulder_heave.json  (tier 1, on_cast, placeholder cost 13)
+GRAMMAR ok    abilities_v2/chain_spark.json  (tier 1, on_cast, placeholder cost 10)
+GRAMMAR ok    abilities_v2/echolocate.json  (tier 1, auto, placeholder cost 4)
+GRAMMAR ok    abilities_v2/flare_dash.json  (tier 1, auto, placeholder cost 8)
+GRAMMAR ok    abilities_v2/gale_lance.json  (tier 1, on_cast, placeholder cost 15)
+GRAMMAR ok    abilities_v2/hive_swarm.json  (tier 1, on_cast, placeholder cost 10)
+GRAMMAR ok    abilities_v2/moon_mark.json  (tier 1, on_cast, placeholder cost 8)
+GRAMMAR ok    abilities_v2/prism_wall.json  (tier 1, on_cast, placeholder cost 6)
+GRAMMAR ok    abilities_v2/puffcap_mines.json  (tier 1, on_cast, placeholder cost 11)
+GRAMMAR ok    abilities_v2/refraction.json  (tier 1, auto, placeholder cost 6)
+GRAMMAR ok    abilities_v2/rock_guard.json  (tier 1, auto, placeholder cost 3)
+GRAMMAR ok    abilities_v2/slam.json  (tier 1, on_cast, placeholder cost 10)
+GRAMMAR ok    abilities_v2/stinger_hook.json  (tier 1, on_cast, placeholder cost 10)
+GRAMMAR ok    abilities_v2/storm_arc.json  (tier 1, auto, placeholder cost 8)
+GRAMMAR ok    abilities_v2/thorn_patch.json  (tier 1, auto, placeholder cost 5)
+GRAMMAR ok    abilities_v2/updraft.json  (tier 1, auto, placeholder cost 5)
+GRAMMAR ok    merges_v2/blaze_mantle.json
+GRAMMAR ok    merges_v2/cairn_colossus.json
+GRAMMAR ok    merges_v2/hive_crown.json
+GRAMMAR ok    merges_v2/stormcoat.json
+GRAMMAR ok    merges_v2/stormwing.json
+GRAMMAR ok    merges_v2/tempest.json
+GRAMMAR ok    merges_v2/thornwake.json
+GRAMMAR ok    merges_v2/tidal_shell.json
+GRAMMAR ok    merges_v2/titan.json
+GRAMMAR ok    evolution_v2/burrlet_spore_drift.json
+GRAMMAR ok    evolution_v2/cindle_barbed_tail.json
+GRAMMAR ok    evolution_v2/curious_form.json
+GRAMMAR ok    evolution_v2/fierce_form.json
+GRAMMAR ok    evolution_v2/pebbit_dense_plate.json
+GRAMMAR ok    evolution_v2/puddlet_wide_prism.json
+GRAMMAR ok    evolution_v2/steadfast_form.json
+GRAMMAR ok    evolution_v2/swift_form.json
+GRAMMAR ok    evolution_v2/wisplet_long_throw.json
+GRAMMAR ok    evolution_v2/zapple_overtone.json
+GRAMMAR ok    kin_v2/basaltoad.json
+GRAMMAR ok    kin_v2/burrlet.json
+GRAMMAR ok    kin_v2/caecilith.json
+GRAMMAR ok    kin_v2/cairnback.json
+GRAMMAR ok    kin_v2/casquebill.json
+GRAMMAR ok    kin_v2/cindle.json
+GRAMMAR ok    kin_v2/cindowary.json
+GRAMMAR ok    kin_v2/duskapi.json
+GRAMMAR ok    kin_v2/floenatee.json
+GRAMMAR ok    kin_v2/gibbelle.json
+GRAMMAR ok    kin_v2/glaciyak.json
+GRAMMAR ok    kin_v2/glintmole.json
+GRAMMAR ok    kin_v2/gloamshell.json
+GRAMMAR ok    kin_v2/glomwort.json
+GRAMMAR ok    kin_v2/goliathite.json
+GRAMMAR ok    kin_v2/heatherhorn.json
+GRAMMAR ok    kin_v2/hivara.json
+GRAMMAR ok    kin_v2/hoarheron.json
+GRAMMAR ok    kin_v2/kestrike.json
+GRAMMAR ok    kin_v2/kilnbadger.json
+GRAMMAR ok    kin_v2/kindlewren.json
+GRAMMAR ok    kin_v2/lilybara.json
+GRAMMAR ok    kin_v2/limpetor.json
+GRAMMAR ok    kin_v2/lodestick.json
+GRAMMAR ok    kin_v2/marchleaf.json
+GRAMMAR ok    kin_v2/moonloris.json
+GRAMMAR ok    kin_v2/mossgrade.json
+GRAMMAR ok    kin_v2/moundvark.json
+GRAMMAR ok    kin_v2/murmurling.json
+GRAMMAR ok    kin_v2/nacrolin.json
+GRAMMAR ok    kin_v2/nettlynx.json
+GRAMMAR ok    kin_v2/nimbostrich.json
+GRAMMAR ok    kin_v2/opalisk.json
+GRAMMAR ok    kin_v2/orchisloth.json
+GRAMMAR ok    kin_v2/pebbit.json
+GRAMMAR ok    kin_v2/puddlet.json
+GRAMMAR ok    kin_v2/rimeshrew.json
+GRAMMAR ok    kin_v2/scaldamus.json
+GRAMMAR ok    kin_v2/selenfin.json
+GRAMMAR ok    kin_v2/sentrikat.json
+GRAMMAR ok    kin_v2/spatewader.json
+GRAMMAR ok    kin_v2/squalltross.json
+GRAMMAR ok    kin_v2/threadwyrm.json
+GRAMMAR ok    kin_v2/thrumbird.json
+GRAMMAR ok    kin_v2/tuatrune.json
+GRAMMAR ok    kin_v2/umbrathere.json
+GRAMMAR ok    kin_v2/velvorm.json
+GRAMMAR ok    kin_v2/wisplet.json
+GRAMMAR ok    kin_v2/zapple.json
+GRAMMAR ok    kin_v2/zephyrak.json
+GRAMMAR DONE, errors: 0, warnings: 0

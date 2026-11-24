@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+relay: listening on 7887, up to 120 players, version 0.24.18, Discord check OFF
+relay: 1558292410 joined as Hunter (1 online)
+relay: 2084477447 joined as Hunter (2 online)
+CASTPRED gunslinger lmb  anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED gunslinger rmb  anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED gunslinger e    anim off  0 on  0  vfx off  1 on  1  ok
+CASTPRED gunslinger r    anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED gunslinger dash anim off  0 on 16  vfx off  0 on  -  FAIL
+CASTPRED juggernaut lmb  anim off 13 on 13  vfx off 13 on 13  ok
+CASTPRED juggernaut rmb  anim off 19 on 19  vfx off  4 on  4  ok
+CASTPRED juggernaut e    anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED juggernaut r    anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED juggernaut dash anim off  0 on  0  vfx off  4 on  4  ok
+CASTPRED archer     lmb  anim off  1 on  1  vfx off  1 on  1  ok
+CASTPRED archer     rmb  anim off  0 on  0  vfx off  1 on  1  ok
+CASTPRED archer     e    anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED archer     r    anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED archer     dash anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED ashwick    lmb  anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED ashwick    rmb  anim off  7 on  7  vfx off  1 on  1  ok
+CASTPRED ashwick    e    anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED ashwick    r    anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED ashwick    dash anim off  0 on  0  vfx off  0 on  0  ok
+CASTPRED rtt 2076 ms (client, 10 pings), relay lost 11 packets, weather ok
+CASTPRED DONE, failures: 1
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 9 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

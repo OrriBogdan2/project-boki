@@ -1,0 +1,51 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HPREGEN ok   (a) bulwark: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) bulwark: no regen of its own 12s after a hit (missing 46.4 -> 46.4)
+HPREGEN ok   (a) dredge: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) dredge: no regen of its own 12s after a hit (missing 46.4 -> 46.4)
+HPREGEN ok   (a) thief: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) thief: no regen of its own 12s after a hit (missing 46.4 -> 46.4)
+HPREGEN ok   (a) mage: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) mage: no regen of its own 12s after a hit (missing 46.4 -> 46.4)
+HPREGEN ok   (a) dolm: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) dolm: no regen of its own 12s after a hit (missing 46.4 -> 46.4)
+HPREGEN ok   (a) ostra: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) ostra: no regen of its own 12s after a hit (missing 46.4 -> 46.4)
+HPREGEN ok   (a) ashwick: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) ashwick: no regen of its own 12s after a hit (missing 46.4 -> 46.4)
+HPREGEN ok   (a) juggernaut: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) juggernaut: no regen of its own 12s after a hit (missing 46.4 -> 46.4)
+HPREGEN ok   (a) archer: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) archer: no regen of its own 12s after a hit (missing 58.0 -> 58.0)
+HPREGEN ok   (a) tender: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) tender: no regen of its own 12s after a hit (missing 58.0 -> 58.0)
+HPREGEN ok   (a) gunslinger: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) gunslinger: no regen of its own 12s after a hit (missing 58.0 -> 58.0)
+HPREGEN ok   (a) rimewright: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) rimewright: no regen of its own 12s after a hit (missing 58.0 -> 58.0)
+HPREGEN ok   (a) gil: stays out of a fight (dealt 0.0)
+HPREGEN ok   (a) gil: no regen of its own 12s after a hit (missing 58.0 -> 58.0)
+HPREGEN ok   (b) owner_regen 4: 4.00 hp/s (want 4)
+HPREGEN ok   (b) the health bar's fill rises with it (0.500 -> 0.555)
+HPREGEN ok   (b) under Blight: 1.60 hp/s (want 1.60)
+HPREGEN ok   (c) no shield refill in the first 4.5s after a hit (0.00)
+HPREGEN ok   (c) after 5.0s it fills 0.50 of its size/s (want 0.50)
+HPREGEN ok   (c) dealing damage restarts the wait too (0.00 after 4.5s)
+HPREGEN ok   (c) a monster's hit restarts the wait (0.00 after 4.5s)
+HPREGEN ok   (c) Blight damage restarts the wait (0.00 after 4.5s)
+HPREGEN ok   (d) downed: no owner_regen (43.50 -> 43.50)
+HPREGEN ok   (e) has an armour bar to test (max 350.0)
+HPREGEN ok   (e) armour stays at 175.0 after 15s out of a fight (175.0)
+HPREGEN DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 23 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,1533 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HEROVFX ok   archer has a recipe file
+HEROVFX ok   archer: all 26 moves its kit calls have recipes []
+HEROVFX ok   archer: no recipe is left unused []
+HEROVFX ok   archer: every sound in the data has a file []
+HEROVFX ok   archer: every colour is in the palette []
+HEROVFX ok   archer: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   archer: every layer is a known look []
+HEROVFX ok   archer: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   ashwick has a recipe file
+HEROVFX ok   ashwick: all 28 moves its kit calls have recipes []
+HEROVFX ok   ashwick: no recipe is left unused []
+HEROVFX ok   ashwick: every sound in the data has a file []
+HEROVFX ok   ashwick: every colour is in the palette []
+HEROVFX ok   ashwick: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   ashwick: every layer is a known look []
+HEROVFX ok   ashwick: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   bulwark has a recipe file
+HEROVFX ok   bulwark: all 12 moves its kit calls have recipes []
+HEROVFX ok   bulwark: no recipe is left unused []
+HEROVFX ok   bulwark: every sound in the data has a file []
+HEROVFX ok   bulwark: every colour is in the palette []
+HEROVFX ok   bulwark: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   bulwark: every layer is a known look []
+HEROVFX ok   bulwark: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   dolm has a recipe file
+HEROVFX ok   dolm: all 24 moves its kit calls have recipes []
+HEROVFX ok   dolm: no recipe is left unused []
+HEROVFX ok   dolm: every sound in the data has a file []
+HEROVFX ok   dolm: every colour is in the palette []
+HEROVFX ok   dolm: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   dolm: every layer is a known look []
+HEROVFX ok   dolm: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   dredge has a recipe file
+HEROVFX ok   dredge: all 1 moves its kit calls have recipes []
+HEROVFX ok   dredge: no recipe is left unused []
+HEROVFX ok   dredge: every sound in the data has a file []
+HEROVFX ok   dredge: every colour is in the palette []
+HEROVFX ok   dredge: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   dredge: every layer is a known look []
+HEROVFX ok   dredge: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   gil has a recipe file
+HEROVFX ok   gil: all 25 moves its kit calls have recipes []
+HEROVFX ok   gil: no recipe is left unused []
+HEROVFX ok   gil: every sound in the data has a file []
+HEROVFX ok   gil: every colour is in the palette []
+HEROVFX ok   gil: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   gil: every layer is a known look []
+HEROVFX ok   gil: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   gunslinger has a recipe file
+HEROVFX ok   gunslinger: all 20 moves its kit calls have recipes []
+HEROVFX ok   gunslinger: no recipe is left unused []
+HEROVFX ok   gunslinger: every sound in the data has a file []
+HEROVFX ok   gunslinger: every colour is in the palette []
+HEROVFX ok   gunslinger: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   gunslinger: every layer is a known look []
+HEROVFX ok   gunslinger: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   juggernaut has a recipe file
+HEROVFX ok   juggernaut: all 45 moves its kit calls have recipes []
+HEROVFX ok   juggernaut: no recipe is left unused []
+HEROVFX ok   juggernaut: every sound in the data has a file []
+HEROVFX ok   juggernaut: every colour is in the palette []
+HEROVFX ok   juggernaut: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   juggernaut: every layer is a known look []
+HEROVFX ok   juggernaut: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   mage has a recipe file
+HEROVFX ok   mage: all 38 moves its kit calls have recipes []
+HEROVFX ok   mage: no recipe is left unused []
+HEROVFX ok   mage: every sound in the data has a file []
+HEROVFX ok   mage: every colour is in the palette []
+HEROVFX ok   mage: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   mage: every layer is a known look []
+HEROVFX ok   mage: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   ostra has a recipe file
+HEROVFX ok   ostra: all 18 moves its kit calls have recipes []
+HEROVFX ok   ostra: no recipe is left unused []
+HEROVFX ok   ostra: every sound in the data has a file []
+HEROVFX ok   ostra: every colour is in the palette []
+HEROVFX ok   ostra: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   ostra: every layer is a known look []
+HEROVFX ok   ostra: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   rimewright has a recipe file
+HEROVFX ok   rimewright: all 24 moves its kit calls have recipes []
+HEROVFX ok   rimewright: no recipe is left unused []
+HEROVFX ok   rimewright: every sound in the data has a file []
+HEROVFX ok   rimewright: every colour is in the palette []
+HEROVFX ok   rimewright: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   rimewright: every layer is a known look []
+HEROVFX ok   rimewright: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   tender has a recipe file
+HEROVFX ok   tender: all 21 moves its kit calls have recipes []
+HEROVFX ok   tender: no recipe is left unused []
+HEROVFX ok   tender: every sound in the data has a file []
+HEROVFX ok   tender: every colour is in the palette []
+HEROVFX ok   tender: no look over 2.2 s, 4.0 m flare, 4.5 m swirl []
+HEROVFX ok   tender: every layer is a known look []
+HEROVFX ok   tender: every sound is a one-shot, nothing can outlive the match []
+HEROVFX ok   no kit holds the shared gold ffd25a: a Hunter's flashes follow its colour []
+HEROVFX ok   gunslinger wears its .glb
+HEROVFX FAIL gunslinger LMB rounds: within 0.15 m of forearm.R through every clip (worst 0.154 m)
+HEROVFX ok   gunslinger RMB Burr Charge: within 0.15 m of forearm.R through every clip (worst 0.043 m)
+HEROVFX ok   gunslinger RMB Burr Charge bell: within 0.15 m of forearm.R through every clip (worst 0.043 m)
+HEROVFX ok   juggernaut wears its .glb
+HEROVFX ok   juggernaut LMB slash: within 0.15 m of hand.R through every clip (worst 0.002 m)
+HEROVFX ok   juggernaut RMB Smash: within 0.15 m of hand.R through every clip (worst 0.002 m)
+HEROVFX ok   juggernaut E Warchain throw: within 0.15 m of hand.R through every clip (worst 0.000 m)
+HEROVFX ok   juggernaut E Warchain line: within 0.15 m of hand.R through every clip (worst 0.000 m)
+HEROVFX ok   juggernaut X Gilded Riposte: within 0.15 m of hand.R through every clip (worst 0.002 m)
+HEROVFX ok   archer wears its .glb
+HEROVFX ok   archer LMB arrow: within 0.15 m of bow through every clip (worst 0.082 m)
+HEROVFX ok   archer RMB Heavy Shot nock: within 0.15 m of bow_s through every clip (worst 0.000 m)
+HEROVFX ok   archer E Hail Wall: within 0.15 m of bow through every clip (worst 0.082 m)
+HEROVFX ok   archer X Starpiercer: within 0.15 m of bow through every clip (worst 0.082 m)
+HEROVFX ok   ashwick wears its .glb
+HEROVFX ok   ashwick LMB lance (right palm): within 0.15 m of hand.R through every clip (worst 0.059 m)
+HEROVFX ok   ashwick RMB Cinder Shot: within 0.15 m of hand.R through every clip (worst 0.059 m)
+HEROVFX ok   ashwick left palm: within 0.15 m of hand.L through every clip (worst 0.021 m)
+HEROVFX ok   ashwick E Furnace Cloak: within 0.15 m of hips through every clip (worst 0.016 m)
+HEROVFX ok   ashwick X Flue Flight jet L: within 0.15 m of jet.0 through every clip (worst 0.000 m)
+HEROVFX ok   ashwick X Flue Flight jet R: within 0.15 m of jet.1 through every clip (worst 0.000 m)
+HEROVFX ok   bulwark wears its .glb
+HEROVFX ok   bulwark LMB swing: within 0.15 m of x_weapon through every clip (worst 0.143 m)
+HEROVFX ok   bulwark RMB Aegis: within 0.15 m of x_shield through every clip (worst 0.110 m)
+HEROVFX ok   bulwark hammer catch: within 0.15 m of x_weapon through every clip (worst 0.000 m)
+HEROVFX ok   tender wears its .glb
+HEROVFX ok   tender RMB Burrseed: within 0.15 m of sun through every clip (worst 0.000 m)
+HEROVFX ok   tender E Hearthlight: within 0.15 m of sun through every clip (worst 0.000 m)
+HEROVFX ok   tender X Hearth Call: within 0.15 m of sun through every clip (worst 0.000 m)
+HEROVFX ok   tender dash: within 0.15 m of hips through every clip (worst 0.048 m)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/hero_vfx_check.gd:127)
+       [13] run (res://tools/hero_vfx_emit.gd:39)
+       [14] _hero (res://tools/hero_vfx_emit.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/hero_vfx_check.gd:127)
+       [13] run (res://tools/hero_vfx_emit.gd:39)
+       [14] _hero (res://tools/hero_vfx_emit.gd:75)
+HEROVFX ok   blade_tip uses the Gun's space on a model without the anchor
+HEROVFX ok   a model's own anchor_blade_tip wins
+HEROVFX ok   no model at all: the body offset still places it
+HEROVFX ok   past LOD_NEAR: the near layers drop, the rest thin (6 -> 2 particles)
+HEROVFX ok   past LOD_FAR: nothing is drawn
+HEROVFX ok   a pile-up stays at the live cap (92 <= 420)
+HEROVFX ok   every pool stays within its cap
+HEROVFX ok   a warm pool makes no new nodes
+HEROVFX ok   a hold starts emitting
+HEROVFX ok   asking again keeps the one emitter
+HEROVFX ok   the asks stop: the hold ends by itself
+HEROVFX ok   your own effects at full
+HEROVFX ok   an ally's effects sit at ALLY_K
+HEROVFX ok   an enemy's effects at full
+HEROVFX ok   the viewer is unchanged
+HEROVFX ok   a stood-up sweep leans to the camera at every aim (0.42)
+HEROVFX ok   the Finishing Slam plays its recipe
+HEROVFX ok   no shared ring under it
+HEROVFX ok   the own-look scope closes
+HEROVFX ok   Motley Trade: the landing end is his sea teal #2ee6c0
+HEROVFX ok   Motley Trade: his own end and the dash slot col are teal #7fe0d0
+HEROVFX ok   Motley Trade: the hot core is a lighter teal #b8fff0
+HEROVFX ok   Motley: every ostra palette colour is teal or neutral, none pink []
+HEROVFX ok   Motley Trade lantern: every colour is teal or neutral (17, off [])
+HEROVFX ok   Motley Swollen sphere: every colour is teal or neutral (3, off [])
+HEROVFX ok   Motley Nightwell: the Swollen core is teal, not pink
+HEROVFX ok   Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette []
+HEROVFX ok   a hit on the armour flashes the body shell-coloured
+HEROVFX ok   a hit on health flashes white
+HEROVFX ok   the break holds the shell flash on the body
+HEROVFX ok   no ring and no burst with it
+HEROVFX ok   the armour strip flashes as it loses some
+HEROVFX ok   a move arrives from another game
+HEROVFX ok   status looks: every plain status has data
+HEROVFX ok   status burn: its look comes up on that body only
+HEROVFX ok   status burn: 12 meshes (at most 16)
+HEROVFX ok   status burn: the look goes when it ends
+HEROVFX ok   status chill: its look comes up on that body only
+HEROVFX ok   status chill: 8 meshes (at most 16)
+HEROVFX ok   status chill: the look goes when it ends
+HEROVFX ok   status slow: its look comes up on that body only
+HEROVFX ok   status slow: 3 meshes (at most 16)
+HEROVFX ok   status slow: the look goes when it ends
+HEROVFX ok   status stun: its look comes up on that body only
+HEROVFX ok   status stun: 5 meshes (at most 16)
+HEROVFX ok   status stun: the look goes when it ends
+HEROVFX ok   status root: its look comes up on that body only
+HEROVFX ok   status root: 5 meshes (at most 16)
+HEROVFX ok   status root: the look goes when it ends
+HEROVFX ok   status gnd: its look comes up on that body only
+HEROVFX ok   status gnd: 5 meshes (at most 16)
+HEROVFX ok   status gnd: a down arrow over the head
+HEROVFX ok   status gnd: the look goes when it ends
+HEROVFX ok   status daze: its look comes up on that body only
+HEROVFX ok   status daze: 6 meshes (at most 16)
+HEROVFX ok   status daze: the look goes when it ends
+HEROVFX ok   status static: its look comes up on that body only
+HEROVFX ok   status static: 8 meshes (at most 16)
+HEROVFX ok   status static: the look goes when it ends
+HEROVFX ok   status antiheal: its look comes up on that body only
+HEROVFX ok   status antiheal: 6 meshes (at most 16)
+HEROVFX ok   status antiheal: the look goes when it ends
+HEROVFX ok   status sick: its look comes up on that body only
+HEROVFX ok   status sick: 4 meshes (at most 16)
+HEROVFX ok   status sick: the look goes when it ends
+HEROVFX ok   status looks: each status has a look of its own (10)
+HEROVFX ok   status looks: all at once on one body, from the pool (built 10)
+HEROVFX ok   status looks: a hit sent to another game's body shows what it carries here
+HEROVFX ok   status looks: ... until that status would end
+HEROVFX ok   status looks: nothing draws past LOD_FAR
+HEROVFX ok   boki status: a look's size comes from the Boki's body (0.53 across, 0.32 up)
+HEROVFX ok   boki status stun: the look comes up on the summoned Boki
+HEROVFX ok   boki status stun: in the Hunter's colours
+HEROVFX ok   boki status stun: at the Hunter's pace
+HEROVFX ok   boki status stun: over the Boki's head (0.71 m up, its head 0.63, a Hunter's 2.25)
+HEROVFX ok   boki status stun: the look goes when it ends
+HEROVFX ok   boki status root: the look comes up on the summoned Boki
+HEROVFX ok   boki status root: in the Hunter's colours
+HEROVFX ok   boki status root: at the Hunter's pace
+HEROVFX ok   boki status root: round its squat body (0.53 across, 0.32 up)
+HEROVFX ok   boki status root: the look goes when it ends
+HEROVFX ok   boki status slow: the look comes up on the summoned Boki
+HEROVFX ok   boki status slow: in the Hunter's colours
+HEROVFX ok   boki status slow: at the Hunter's pace
+HEROVFX ok   boki status slow: round its squat body (0.53 across, 0.32 up)
+HEROVFX ok   boki status slow: the look goes when it ends
+HEROVFX ok   boki status daze: the look comes up on the summoned Boki
+HEROVFX ok   boki status daze: in the Hunter's colours
+HEROVFX ok   boki status daze: at the Hunter's pace
+HEROVFX ok   boki status daze: over the Boki's head (0.81 m up, its head 0.63, a Hunter's 2.55)
+HEROVFX ok   boki status daze: the look goes when it ends
+HEROVFX ok   boki status: a stunned Boki squints but its own stars stay off (one ring of stars, the shared one)
+HEROVFX ok   boki status: Grounded does not land on a summoned Boki, so no cords
+HEROVFX ok   boki status: another game's summoned Boki shows the CC it is sent
+HEROVFX ok   boki status: ... until it would end
+HEROVFX ok   a gain inside the tier is no tier-up
+HEROVFX ok   no sheen without a tier-up
+HEROVFX ok   tier 1: one sheen
+HEROVFX ok   tier 1: the new tier's colour
+HEROVFX ok   tier 2: one sheen
+HEROVFX ok   tier 2: the new tier's colour
+HEROVFX ok   tier 3: one sheen
+HEROVFX ok   tier 3: the new tier's colour
+HEROVFX ok   tier 4: one sheen
+HEROVFX ok   tier 4: the new tier's colour
+HEROVFX ok   the sheen sweeps in 0.4 s
+HEROVFX ok   no sheen on an armour break
+HEROVFX ok   a rival's tier-up arrives from another game
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _zones (res://tools/hero_vfx_check.gd:546)
+       [13] run (res://tools/hero_vfx_check.gd:146)
+       [14] _holds (res://tools/hero_vfx_check.gd:334)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _zones (res://tools/hero_vfx_check.gd:546)
+       [13] run (res://tools/hero_vfx_check.gd:146)
+       [14] _holds (res://tools/hero_vfx_check.gd:334)
+HEROVFX ok   VVFx disc: centre alpha at most 0.25 and a lit rim
+HEROVFX ok   VVFx disc: its rim on the hitbox radius
+HEROVFX ok   Motley's well: no solid floor (centre alpha 0), a lit rim
+HEROVFX ok   Motley's well dome: centre alpha at most 0.25, the rim carries it
+HEROVFX ok   Meeko's Hearthlight disc: centre alpha at most 0.25
+HEROVFX ok   Meeko's root field: leaf green, inside alpha at most 0.25 to the rim (0.23)
+HEROVFX ok   Meeko's root field: the burst's ring lands on the burst radius
+HEROVFX ok   Sable's X: a ring band with a faint tint inside
+HEROVFX ok   ld_fx softens into the ground
+HEROVFX ok   ld_fx_glow softens into the ground
+HEROVFX ok   hero_vfx softens into the ground
+HEROVFX ok   hero_vfx_mote softens into the ground
+HEROVFX ok   the match world shares its ground map
+HEROVFX ok   every layer kind plays
+HEROVFX ok   a pile-up of every kind stays at the live cap (278)
+HEROVFX ok   a sweep's even band runs round in its own turn (0.16 of 0.5 s); a plain one keeps the taper [[0.32, 0.3], [0.28, 0.0]]
+HEROVFX ok   a bone anchor follows the model's hand.R
+HEROVFX ok   prewarm holds up one node of every kind (21)
+HEROVFX ok   and they are hidden again
+HEROVFX ok   a stream held along the aim turns with it ((0.0, 0.0, 1.0))
+HEROVFX ok   a projectile gets its trail
+HEROVFX ok   the trail follows the projectile
+WARNING: Attempting to use a shader (res://shaders/toon.gdshader) that requires tangents with a mesh  that doesn't contain tangents. Ensure that meshes are imported with the 'ensure_tangents' option. If creating your own meshes, add an `ARRAY_TANGENT` array (when using ArrayMesh) or call `generate_tangents()` (when using SurfaceTool).
+     at: _geometry_instance_add_surface_with_material (drivers/gles3/rasterizer_scene_gles3.cpp:312)
+WARNING: Attempting to use a shader (res://shaders/toon.gdshader) that requires tangents with a mesh  that doesn't contain tangents. Ensure that meshes are imported with the 'ensure_tangents' option. If creating your own meshes, add an `ARRAY_TANGENT` array (when using ArrayMesh) or call `generate_tangents()` (when using SurfaceTool).
+     at: _geometry_instance_add_surface_with_material (drivers/gles3/rasterizer_scene_gles3.cpp:312)
+WARNING: Attempting to use a shader (res://shaders/toon.gdshader) that requires tangents with a mesh  that doesn't contain tangents. Ensure that meshes are imported with the 'ensure_tangents' option. If creating your own meshes, add an `ARRAY_TANGENT` array (when using ArrayMesh) or call `generate_tangents()` (when using SurfaceTool).
+     at: _geometry_instance_add_surface_with_material (drivers/gles3/rasterizer_scene_gles3.cpp:312)
+WARNING: Attempting to use a shader (res://shaders/toon.gdshader) that requires tangents with a mesh  that doesn't contain tangents. Ensure that meshes are imported with the 'ensure_tangents' option. If creating your own meshes, add an `ARRAY_TANGENT` array (when using ArrayMesh) or call `generate_tangents()` (when using SurfaceTool).
+     at: _geometry_instance_add_surface_with_material (drivers/gles3/rasterizer_scene_gles3.cpp:312)
+WARNING: Attempting to use a shader (res://shaders/toon.gdshader) that requires tangents with a mesh  that doesn't contain tangents. Ensure that meshes are imported with the 'ensure_tangents' option. If creating your own meshes, add an `ARRAY_TANGENT` array (when using ArrayMesh) or call `generate_tangents()` (when using SurfaceTool).
+     at: _geometry_instance_add_surface_with_material (drivers/gles3/rasterizer_scene_gles3.cpp:312)
+WARNING: Attempting to use a shader (res://shaders/toon.gdshader) that requires tangents with a mesh  that doesn't contain tangents. Ensure that meshes are imported with the 'ensure_tangents' option. If creating your own meshes, add an `ARRAY_TANGENT` array (when using ArrayMesh) or call `generate_tangents()` (when using SurfaceTool).
+     at: _geometry_instance_add_surface_with_material (drivers/gles3/rasterizer_scene_gles3.cpp:312)
+WARNING: Attempting to use a shader (res://shaders/toon.gdshader) that requires tangents with a mesh  that doesn't contain tangents. Ensure that meshes are imported with the 'ensure_tangents' option. If creating your own meshes, add an `ARRAY_TANGENT` array (when using ArrayMesh) or call `generate_tangents()` (when using SurfaceTool).
+     at: _geometry_instance_add_surface_with_material (drivers/gles3/rasterizer_scene_gles3.cpp:312)
+WARNING: Attempting to use a shader (res://shaders/toon.gdshader) that requires tangents with a mesh  that doesn't contain tangents. Ensure that meshes are imported with the 'ensure_tangents' option. If creating your own meshes, add an `ARRAY_TANGENT` array (when using ArrayMesh) or call `generate_tangents()` (when using SurfaceTool).
+     at: _geometry_instance_add_surface_with_material (drivers/gles3/rasterizer_scene_gles3.cpp:312)
+HEROVFX ok   the projectile ends: its tail runs out
+HEROVFX ok   archer fire_tap: 0.50 m across, a 0.30 m head
+HEROVFX ok   archer: the trail is the Hunter's colour (#d41e2e)
+HEROVFX ok   archer: the head fits the circle its shot hits in
+HEROVFX ok   mage lmb_trail: 1.00 m across, a 0.70 m head
+HEROVFX ok   mage: the trail is the Hunter's colour (#ff5ab4)
+HEROVFX ok   mage: the head fits the circle its shot hits in
+HEROVFX ok   Lace's is short and sharp: 4.2 m, a pointed head
+HEROVFX ok   Sparkle's is soft and sparkly: 5.2 m, a round head
+HEROVFX ok   Lace's drawn arrows stay thicker than the tap [0.5, 0.6, 0.75]
+HEROVFX ok   a pooled trail Sparkle used comes back hard-edged for Lace
+HEROVFX ok   the head is in the trail's own mesh, its tip 0.45 m ahead of the shot
+HEROVFX ok   a volley of 24 draws on the ribbon pool: no new node (26 running)
+HEROVFX ok   a round its kit draws keeps the stock orb shrunk through the match's frame; its hit size is kept
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _lisette (res://tools/hero_vfx_check.gd:602)
+       [13] run (res://tools/hero_vfx_check.gd:150)
+       [14] _core_kinds (res://tools/hero_vfx_check.gd:729)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _lisette (res://tools/hero_vfx_check.gd:602)
+       [13] run (res://tools/hero_vfx_check.gd:150)
+       [14] _core_kinds (res://tools/hero_vfx_check.gd:729)
+HEROVFX ok   a new match has its own pools
+HEROVFX ok   a missed needle leaves its thread
+HEROVFX ok   the thread lasts as long as the needle
+HEROVFX ok   the Heavy Shot stays big
+HEROVFX ok   the string shows unless the model brings its own
+HEROVFX ok   nock: the model's anchor, else the drawing hand
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _vex_core (res://tools/hero_vfx_check.gd:628)
+       [13] run (res://tools/hero_vfx_check.gd:151)
+       [14] _lisette (res://tools/hero_vfx_check.gd:619)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _vex_core (res://tools/hero_vfx_check.gd:628)
+       [13] run (res://tools/hero_vfx_check.gd:151)
+       [14] _lisette (res://tools/hero_vfx_check.gd:619)
+HEROVFX ok   Cinderfall rank 1: the centre ring is the damage core (1.20 m), seen by all, filling with the disc
+HEROVFX ok   Cinderfall rank 2: the centre ring is the damage core (1.20 m), seen by all, filling with the disc
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _scarf (res://tools/hero_vfx_check.gd:862)
+       [13] run (res://tools/hero_vfx_check.gd:152)
+       [14] _vex_core (res://tools/hero_vfx_check.gd:653)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _scarf (res://tools/hero_vfx_check.gd:862)
+       [13] run (res://tools/hero_vfx_check.gd:152)
+       [14] _vex_core (res://tools/hero_vfx_check.gd:653)
+HEROVFX ok   Claire wears two scarf tails
+HEROVFX ok   the scarf anchor rides the neck bone
+HEROVFX ok   the scarf anchor sits at her neck (1.49 m up)
+HEROVFX ok   a tail is one ribbon mesh, drawn
+HEROVFX ok   at rest a tail hangs (tip 0.78 m under its root)
+HEROVFX ok   and hangs behind her, not through her
+HEROVFX ok   a tail is one ribbon mesh, drawn
+HEROVFX ok   at rest a tail hangs (tip 0.78 m under its root)
+HEROVFX ok   and hangs behind her, not through her
+HEROVFX ok   one mesh per tail (2)
+HEROVFX ok   a tail's root follows the anchor as she moves
+HEROVFX ok   running at 6 m/s it streams behind her (0.70 m back)
+HEROVFX ok   a tail's root follows the anchor as she moves
+HEROVFX ok   running at 6 m/s it streams behind her (0.68 m back)
+HEROVFX ok   your own scarf shows past the LOD listener
+HEROVFX ok   off at the Low preset
+HEROVFX ok   back on, the same meshes
+HEROVFX ok   the loading screen draws one more ribbon (its shader compiles then), pooled after
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _rime_ends (res://tools/hero_vfx_check.gd:964)
+       [13] run (res://tools/hero_vfx_check.gd:153)
+       [14] _scarf (res://tools/hero_vfx_check.gd:920)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _rime_ends (res://tools/hero_vfx_check.gd:964)
+       [13] run (res://tools/hero_vfx_check.gd:153)
+       [14] _scarf (res://tools/hero_vfx_check.gd:920)
+HEROVFX ok   Rimelock ended by X early: rime_break, not rime_melt
+HEROVFX ok   Rimelock ended by X late: rime_break, not rime_melt
+HEROVFX ok   Rimelock ended by Shift: rime_break, not rime_melt
+HEROVFX ok   Rimelock ended by time up: rime_melt, not rime_break
+HEROVFX ok   rime_break spawns in 0.225 ms (< 1.0)
+HEROVFX ok   rime_melt spawns in 0.327 ms (< 1.0)
+HEROVFX ok   a pile-up of ends stays pooled and capped (44 nodes)
+HEROVFX ok   Low dots fade by height
+HEROVFX ok   one material per preset
+HEROVFX ok   a burst gives its ground (0.80)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _sable_ring (res://tools/hero_vfx_check.gd:1396)
+       [13] run (res://tools/hero_vfx_check.gd:155)
+       [14] _rime_ends (res://tools/hero_vfx_check.gd:1005)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _sable_ring (res://tools/hero_vfx_check.gd:1396)
+       [13] run (res://tools/hero_vfx_check.gd:155)
+       [14] _rime_ends (res://tools/hero_vfx_check.gd:1005)
+HEROVFX ok   Sable's Encore ring is about half its full radius at 0.2s (0.53)
+HEROVFX ok   Sable's ring and blades stay on her through a Vault (off by 0.03 m)
+HEROVFX ok   no Hunter ability data names a Boki damage colour []
+HEROVFX ok   a Hunter's arc-on rider is not drawn in a Boki damage colour
+HEROVFX ok   archer: no cast of its draws a Boki damage colour (82 colours seen, 0 fenced)
+HEROVFX ok   juggernaut: no cast of its draws a Boki damage colour (40 colours seen, 0 fenced)
+HEROVFX ok   gunslinger: no cast of its draws a Boki damage colour (90 colours seen, 0 fenced)
+HEROVFX ok   bulwark: no cast of its draws a Boki damage colour (49 colours seen, 0 fenced)
+HEROVFX ok   rimewright: no cast of its draws a Boki damage colour (68 colours seen, 0 fenced)
+HEROVFX ok   ashwick: no cast of its draws a Boki damage colour (57 colours seen, 0 fenced)
+HEROVFX ok   dolm: no cast of its draws a Boki damage colour (91 colours seen, 0 fenced)
+HEROVFX ok   mage: no cast of its draws a Boki damage colour (88 colours seen, 0 fenced)
+HEROVFX ok   dredge: no cast of its draws a Boki damage colour (150 colours seen, 0 fenced)
+HEROVFX ok   tender: no cast of its draws a Boki damage colour (30 colours seen, 0 fenced)
+HEROVFX ok   thief: no cast of its draws a Boki damage colour (60 colours seen, 0 fenced)
+HEROVFX ok   ostra: no cast of its draws a Boki damage colour (35 colours seen, 0 fenced)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:116)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:116)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] hold (res://tools/archetype_check.gd:170)
+              [9] _casts (res://tools/hero_cat_fence_check.gd:118)
+              [10] run (res://tools/hero_cat_fence_check.gd:75)
+              [11] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [12] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] hold (res://tools/archetype_check.gd:170)
+              [9] _casts (res://tools/hero_cat_fence_check.gd:118)
+              [10] run (res://tools/hero_cat_fence_check.gd:75)
+              [11] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [12] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] hold (res://tools/archetype_check.gd:170)
+              [9] _casts (res://tools/hero_cat_fence_check.gd:118)
+              [10] run (res://tools/hero_cat_fence_check.gd:75)
+              [11] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [12] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:119)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:119)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:122)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:122)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:125)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:125)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:128)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:128)
+              [9] run (res://tools/hero_cat_fence_check.gd:75)
+              [10] _casts (res://tools/hero_cat_fence_check.gd:139)
+              [11] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:116)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:116)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] hold (res://tools/archetype_check.gd:170)
+              [9] _casts (res://tools/hero_cat_fence_check.gd:118)
+              [10] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] hold (res://tools/archetype_check.gd:170)
+              [9] _casts (res://tools/hero_cat_fence_check.gd:118)
+              [10] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] hold (res://tools/archetype_check.gd:170)
+              [9] _casts (res://tools/hero_cat_fence_check.gd:118)
+              [10] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:119)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:119)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:122)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:122)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:125)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:125)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:128)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:128)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:132)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:132)
+              [9] done (res://tools/archetype_check.gd:183)
+SCRIPT ERROR: Out of bounds get index '0' (on base: 'Array[CPUParticles3D]')
+          at: CatSpy._emit (res://scripts/match/fx.gd:258)
+          GDScript backtrace (most recent call first):
+              [0] _emit (res://scripts/match/fx.gd:258)
+              [1] debris (res://scripts/match/fx.gd:297)
+              [2] _tick (res://scripts/arch/kits/gil_kit.gd:602)
+              [3] tick (res://scripts/arch/arch_kit.gd:258)
+              [4] sim (res://scripts/match/hunter.gd:1537)
+              [5] sim (res://scripts/match/sfx_cast.gd:15)
+              [6] step (res://scripts/match/match.gd:3829)
+              [7] step (res://tools/archetype_check.gd:145)
+              [8] _casts (res://tools/hero_cat_fence_check.gd:132)
+              [9] done (res://tools/archetype_check.gd:183)
+HEROVFX ok   gil: no cast of its draws a Boki damage colour (192 colours seen, 0 fenced)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _rocket_match (res://tools/hero_vfx_check.gd:1282)
+       [13] _rocket (res://tools/hero_vfx_check.gd:1225)
+       [14] run (res://tools/hero_vfx_check.gd:157)
+       [15] run (res://tools/hero_cat_fence_check.gd:75)
+       [16] _casts (res://tools/hero_cat_fence_check.gd:139)
+       [17] done (res://tools/archetype_check.gd:183)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _rocket_match (res://tools/hero_vfx_check.gd:1282)
+       [13] _rocket (res://tools/hero_vfx_check.gd:1225)
+       [14] run (res://tools/hero_vfx_check.gd:157)
+       [15] run (res://tools/hero_cat_fence_check.gd:75)
+       [16] _casts (res://tools/hero_cat_fence_check.gd:139)
+       [17] done (res://tools/archetype_check.gd:183)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _rocket_match (res://tools/hero_vfx_check.gd:1282)
+       [12] _rocket (res://tools/hero_vfx_check.gd:1225)
+       [13] run (res://tools/hero_vfx_check.gd:157)
+       [14] run (res://tools/hero_cat_fence_check.gd:75)
+       [15] _casts (res://tools/hero_cat_fence_check.gd:139)
+       [16] done (res://tools/archetype_check.gd:183)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _rocket_match (res://tools/hero_vfx_check.gd:1282)
+       [12] _rocket (res://tools/hero_vfx_check.gd:1225)
+       [13] run (res://tools/hero_vfx_check.gd:157)
+       [14] run (res://tools/hero_cat_fence_check.gd:75)
+       [15] _casts (res://tools/hero_cat_fence_check.gd:139)
+       [16] done (res://tools/archetype_check.gd:183)
+HEROVFX ok   the launch starts a trail from the nozzle
+HEROVFX ok   the trail is in the squad colour and thin (0.45 m)
+HEROVFX ok   its head rides the nozzle
+HEROVFX ok   it streams up behind the dive (18.0 m)
+HEROVFX ok   jumping out leaves a small puff where they let go, beside the body (6 dots)
+HEROVFX ok   another game's flags say one jumped out: the same puff here
+HEROVFX ok   no ring and no burst on jumping out
+HEROVFX ok   the landing adds no ring or burst, nor do the riders' touchdowns
+HEROVFX ok   dust settles where it lands, round the squad that stepped out
+HEROVFX ok   low and slow, sinking back: not a blast (3.6 m/s, 22 dots)
+HEROVFX ok   the trail runs out after the landing, back to the pool
+HEROVFX ok   a later trail reuses the pooled ribbon (no new node)
+HEROVFX ok   as long at 144 fps as at 30 (16.8 m, 16.8 m)
+HEROVFX ok   40 trails at once stay in the pool (26)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _rocket_match (res://tools/hero_vfx_check.gd:1282)
+       [13] _rocket (res://tools/hero_vfx_check.gd:1253)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _rocket_match (res://tools/hero_vfx_check.gd:1282)
+       [13] _rocket (res://tools/hero_vfx_check.gd:1253)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _rocket_match (res://tools/hero_vfx_check.gd:1282)
+       [12] _rocket (res://tools/hero_vfx_check.gd:1253)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _rocket_match (res://tools/hero_vfx_check.gd:1282)
+       [12] _rocket (res://tools/hero_vfx_check.gd:1253)
+HEROVFX ok   no trail at the very-low preset
+HEROVFX ok   the flags say they landed: the same dust here
+HEROVFX ok   fewer dots at very low (5, 22 at high)
+ERROR: Too many instances using shader instance variables. Consider increasing rendering/limits/global_shader_variables/buffer_size in the Project Settings. Maximum items supported by this hardware is: 4096.
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2058)
+   GDScript backtrace (most recent call first):
+       [0] merge_static (res://scripts/match/models.gd:1206)
+       [1] _hunter (res://scripts/match/models.gd:739)
+       [2] hunter (res://scripts/match/models.gd:625)
+       [3] init_hunter (res://scripts/match/hunter.gd:307)
+       [4] make_hunter (res://scripts/match/match.gd:609)
+       [5] _spawn_hunters (res://scripts/match/match.gd:765)
+       [6] _start (res://scripts/match/match.gd:380)
+       [7] start (res://scripts/match/match.gd:155)
+       [8] _match (res://tools/dash_flow_check.gd:123)
+       [9] _vex_tracer (res://tools/hero_vfx_check.gd:492)
+       [10] run (res://tools/hero_vfx_check.gd:158)
+       [11] _rocket (res://tools/hero_vfx_check.gd:1275)
+ERROR: Too many instances using shader instance variables. Consider increasing rendering/limits/global_shader_variables/buffer_size in the Project Settings. Maximum items supported by this hardware is: 4096.
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2058)
+   GDScript backtrace (most recent call first):
+       [0] merge_static (res://scripts/match/models.gd:1206)
+       [1] _hunter (res://scripts/match/models.gd:739)
+       [2] hunter (res://scripts/match/models.gd:625)
+       [3] init_hunter (res://scripts/match/hunter.gd:307)
+       [4] make_hunter (res://scripts/match/match.gd:609)
+       [5] _spawn_hunters (res://scripts/match/match.gd:765)
+       [6] _start (res://scripts/match/match.gd:380)
+       [7] start (res://scripts/match/match.gd:155)
+       [8] _match (res://tools/dash_flow_check.gd:123)
+       [9] _vex_tracer (res://tools/hero_vfx_check.gd:492)
+       [10] run (res://tools/hero_vfx_check.gd:158)
+       [11] _rocket (res://tools/hero_vfx_check.gd:1275)
+ERROR: Too many instances using shader instance variables. Consider increasing rendering/limits/global_shader_variables/buffer_size in the Project Settings. Maximum items supported by this hardware is: 4096.
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2058)
+   GDScript backtrace (most recent call first):
+       [0] merge_static (res://scripts/match/models.gd:1206)
+       [1] _hunter (res://scripts/match/models.gd:739)
+       [2] hunter (res://scripts/match/models.gd:625)
+       [3] init_hunter (res://scripts/match/hunter.gd:307)
+       [4] make_hunter (res://scripts/match/match.gd:609)
+       [5] _spawn_hunters (res://scripts/match/match.gd:765)
+       [6] _start (res://scripts/match/match.gd:380)
+       [7] start (res://scripts/match/match.gd:155)
+       [8] _match (res://tools/dash_flow_check.gd:123)
+       [9] _vex_tracer (res://tools/hero_vfx_check.gd:492)
+       [10] run (res://tools/hero_vfx_check.gd:158)
+       [11] _rocket (res://tools/hero_vfx_check.gd:1275)
+ERROR: Too many instances using shader instance variables. Consider increasing rendering/limits/global_shader_variables/buffer_size in the Project Settings. Maximum items supported by this hardware is: 4096.
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2058)
+   GDScript backtrace (most recent call first):
+       [0] merge_static (res://scripts/match/models.gd:1206)
+       [1] _hunter (res://scripts/match/models.gd:739)
+       [2] hunter (res://scripts/match/models.gd:625)
+       [3] init_hunter (res://scripts/match/hunter.gd:307)
+       [4] make_hunter (res://scripts/match/match.gd:609)
+       [5] _spawn_hunters (res://scripts/match/match.gd:765)
+       [6] _start (res://scripts/match/match.gd:380)
+       [7] start (res://scripts/match/match.gd:155)
+       [8] _match (res://tools/dash_flow_check.gd:123)
+       [9] _vex_tracer (res://tools/hero_vfx_check.gd:492)
+       [10] run (res://tools/hero_vfx_check.gd:158)
+       [11] _rocket (res://tools/hero_vfx_check.gd:1275)
+ERROR: Too many instances using shader instance variables. Consider increasing rendering/limits/global_shader_variables/buffer_size in the Project Settings. Maximum items supported by this hardware is: 4096.
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2058)
+   GDScript backtrace (most recent call first):
+       [0] merge_static (res://scripts/match/models.gd:1206)
+       [1] _hunter (res://scripts/match/models.gd:739)
+       [2] hunter (res://scripts/match/models.gd:625)
+       [3] init_hunter (res://scripts/match/hunter.gd:307)
+       [4] make_hunter (res://scripts/match/match.gd:609)
+       [5] _spawn_hunters (res://scripts/match/match.gd:765)
+       [6] _start (res://scripts/match/match.gd:380)
+       [7] start (res://scripts/match/match.gd:155)
+       [8] _match (res://tools/dash_flow_check.gd:123)
+       [9] _vex_tracer (res://tools/hero_vfx_check.gd:492)
+       [10] run (res://tools/hero_vfx_check.gd:158)
+       [11] _rocket (res://tools/hero_vfx_check.gd:1275)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _vex_tracer (res://tools/hero_vfx_check.gd:492)
+       [13] run (res://tools/hero_vfx_check.gd:158)
+       [14] _rocket (res://tools/hero_vfx_check.gd:1275)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _vex_tracer (res://tools/hero_vfx_check.gd:492)
+       [13] run (res://tools/hero_vfx_check.gd:158)
+       [14] _rocket (res://tools/hero_vfx_check.gd:1275)
+HEROVFX ok   a round flies at the weapon's speed (74 m/s)
+HEROVFX ok   a held string fires its rounds (30)
+HEROVFX ok   every live round has a tracer riding it, drawn 2-4.5 m long (0 bare)
+HEROVFX ok   the tracer is wide enough for the match camera (0.60 m)
+HEROVFX ok   the tracer is the whole round: the stock glow is dark under it (0 lit)
+HEROVFX ok   a muzzle flash for every round (30 of 30)
+HEROVFX ok   a tracer for every round (30 of 30)
+HEROVFX ok   a round that lands has a flash and sparks
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+   GDScript backtrace (most recent call first):
+       [0] build (res://scripts/match/sky_deco.gd:49)
+       [1] _decorate (res://scripts/match/world.gd:1742)
+       [2] build_meshes (res://scripts/match/world.gd:1244)
+       [3] _start (res://scripts/match/match.gd:340)
+       [4] start (res://scripts/match/match.gd:155)
+       [5] _match (res://tools/dash_flow_check.gd:123)
+       [6] _slam_fill (res://tools/hero_vfx_check.gd:927)
+       [7] run (res://tools/hero_vfx_check.gd:159)
+       [8] _vex_tracer (res://tools/hero_vfx_check.gd:540)
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+   GDScript backtrace (most recent call first):
+       [0] build (res://scripts/match/sky_deco.gd:49)
+       [1] _decorate (res://scripts/match/world.gd:1742)
+       [2] build_meshes (res://scripts/match/world.gd:1244)
+       [3] _start (res://scripts/match/match.gd:340)
+       [4] start (res://scripts/match/match.gd:155)
+       [5] _match (res://tools/dash_flow_check.gd:123)
+       [6] _slam_fill (res://tools/hero_vfx_check.gd:927)
+       [7] run (res://tools/hero_vfx_check.gd:159)
+       [8] _vex_tracer (res://tools/hero_vfx_check.gd:540)
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+   GDScript backtrace (most recent call first):
+       [0] build (res://scripts/match/sky_deco.gd:49)
+       [1] _decorate (res://scripts/match/world.gd:1742)
+       [2] build_meshes (res://scripts/match/world.gd:1244)
+       [3] _start (res://scripts/match/match.gd:340)
+       [4] start (res://scripts/match/match.gd:155)
+       [5] _match (res://tools/dash_flow_check.gd:123)
+       [6] _slam_fill (res://tools/hero_vfx_check.gd:927)
+       [7] run (res://tools/hero_vfx_check.gd:159)
+       [8] _vex_tracer (res://tools/hero_vfx_check.gd:540)
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+   GDScript backtrace (most recent call first):
+       [0] build (res://scripts/match/sky_deco.gd:49)
+       [1] _decorate (res://scripts/match/world.gd:1742)
+       [2] build_meshes (res://scripts/match/world.gd:1244)
+       [3] _start (res://scripts/match/match.gd:340)
+       [4] start (res://scripts/match/match.gd:155)
+       [5] _match (res://tools/dash_flow_check.gd:123)
+       [6] _slam_fill (res://tools/hero_vfx_check.gd:927)
+       [7] run (res://tools/hero_vfx_check.gd:159)
+       [8] _vex_tracer (res://tools/hero_vfx_check.gd:540)
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+   GDScript backtrace (most recent call first):
+       [0] build (res://scripts/match/sky_deco.gd:49)
+       [1] _decorate (res://scripts/match/world.gd:1742)
+       [2] build_meshes (res://scripts/match/world.gd:1244)
+       [3] _start (res://scripts/match/match.gd:340)
+       [4] start (res://scripts/match/match.gd:155)
+       [5] _match (res://tools/dash_flow_check.gd:123)
+       [6] _slam_fill (res://tools/hero_vfx_check.gd:927)
+       [7] run (res://tools/hero_vfx_check.gd:159)
+       [8] _vex_tracer (res://tools/hero_vfx_check.gd:540)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _slam_fill (res://tools/hero_vfx_check.gd:927)
+       [13] run (res://tools/hero_vfx_check.gd:159)
+       [14] _vex_tracer (res://tools/hero_vfx_check.gd:540)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _slam_fill (res://tools/hero_vfx_check.gd:927)
+       [13] run (res://tools/hero_vfx_check.gd:159)
+       [14] _vex_tracer (res://tools/hero_vfx_check.gd:540)
+HEROVFX ok   rank 1 windup 0.40: fill closed at 0.417 s, slam at 0.417 s
+HEROVFX ok   rank 2 windup 0.40: fill closed at 0.417 s, slam at 0.417 s
+HEROVFX ok   rank 3 windup 0.40: fill closed at 0.417 s, slam at 0.417 s
+HEROVFX ok   rank 1 windup 0.60: fill closed at 0.600 s, slam at 0.600 s
+HEROVFX 1 failed
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+ERROR: Condition "global_shader_uniforms.instance_buffer_pos.has(p_instance)" is true. Returning: -1
+   at: global_shader_parameters_instance_allocate (drivers/gles3/storage/material_storage.cpp:2055)
+ERROR: 12 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 111 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 12 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 40: leaked 21844 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 56: leaked 11184824 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 58: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 63: leaked 5592432 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 66: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 445: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 446: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 436: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 448: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 447: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 450: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 449: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 453: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 451: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 482: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 454: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 485: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 483: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 488: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 486: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 491: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 489: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 493: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 492: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 495: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 494: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 498: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 496: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 501: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 499: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 504: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 502: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 506: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 505: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 525: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 523: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 527: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 526: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 530: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 528: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 537: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 531: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 540: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 538: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 542: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 541: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 545: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 543: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 547: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 546: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 550: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 548: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 557: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 556: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 563: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 558: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 566: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 564: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 569: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 573: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 574: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 78 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

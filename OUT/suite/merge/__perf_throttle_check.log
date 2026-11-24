@@ -1,0 +1,481 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PERFTHROTTLE PASS setup: an idle camp monster
+PERFTHROTTLE PASS with nobody within 36 m it sleeps where it stands
+PERFTHROTTLE PASS a Hunter walking up wakes it (windup)
+PERFTHROTTLE PASS setup: a bot
+PERFTHROTTLE PASS setup: a flight of stairs 55-80 m off
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_walks (res://tools/perf_throttle_check.gd:400)
+              [2] _far_bots (res://tools/perf_throttle_check.gd:213)
+              [3] run (res://tools/perf_throttle_check.gd:42)
+PERFTHROTTLE PASS walking far off it runs about 1 in 3 steps (582 of 1680)
+PERFTHROTTLE PASS throttled, it walks on the ground, never over the abyss or in a rock (0 bad steps)
+PERFTHROTTLE PASS throttled, it walks the full-rate path (ends 0.15 m apart)
+PERFTHROTTLE PASS setup: open ground 55-80 m off
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_bots (res://tools/perf_throttle_check.gd:216)
+              [2] run (res://tools/perf_throttle_check.gd:42)
+PERFTHROTTLE PASS far and calm it steps every 3 sim steps, losing no time
+PERFTHROTTLE PASS its Boki on follow steps with it
+PERFTHROTTLE PASS fighting something far off it still steps every 3
+PERFTHROTTLE PASS fighting the player (or anything near them) it steps every step
+PERFTHROTTLE PASS just hit by the player it steps every step
+PERFTHROTTLE PASS walking to a box far off it still steps every 3
+PERFTHROTTLE PASS boarding something that moves it steps every step
+PERFTHROTTLE PASS inside 90 m it chooses at the usual pace
+PERFTHROTTLE PASS setup: open ground past 100 m
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_bots (res://tools/perf_throttle_check.gd:250)
+              [2] run (res://tools/perf_throttle_check.gd:42)
+PERFTHROTTLE PASS past 90 m and calm it chooses 2x less often
+PERFTHROTTLE PASS past 90 m but fighting the player it chooses at the usual pace
+PERFTHROTTLE PASS aboard the sky ship it holds still and picks nothing
+SCRIPT ERROR: Invalid assignment of property or key 'step_vis' with value of type 'float' on a base object of type 'Node3D (Hunter)'.
+          at: _place (res://tools/perf_throttle_check.gd:453)
+          GDScript backtrace (most recent call first):
+              [0] _place (res://tools/perf_throttle_check.gd:453)
+              [1] _far_bots (res://tools/perf_throttle_check.gd:262)
+              [2] run (res://tools/perf_throttle_check.gd:42)
+PERFTHROTTLE PASS near the player it steps every step
+PERFTHROTTLE PASS setup: a monster
+PERFTHROTTLE PASS far away a monster steps every 3 sim steps, no time lost (4 steps)
+PERFTHROTTLE PASS near the player it steps every sim step (6 of 6)
+PERFTHROTTLE PASS setup: a bot for the line-of-sight cache
+PERFTHROTTLE PASS a bot's first look at a target is a real line-of-sight test
+PERFTHROTTLE PASS within 0.1 s it trusts its last look
+PERFTHROTTLE PASS a new target is looked at at once
+PERFTHROTTLE PASS after 0.1 s on the same target it looks again
+PERFTHROTTLE PASS setup: a spot past 40 m on screen from the ride's camera
+PERFTHROTTLE PASS a rival near the player is posed every frame
+PERFTHROTTLE PASS far on screen at the wide view: every 2 frames
+PERFTHROTTLE PASS hidden by sight: every 6 frames
+PERFTHROTTLE PASS far but after the player: every frame
+PERFTHROTTLE PASS far but just hit by the player: every frame
+PERFTHROTTLE PASS far but just hit the player: every frame
+PERFTHROTTLE PASS the player's squad: every frame
+PERFTHROTTLE PASS the match slow: a rival 7.5 m off is posed every 2 frames
+PERFTHROTTLE PASS the match slow: a rival within 6 m every frame
+PERFTHROTTLE PASS the match slow: a rival after the player every frame
+PERFTHROTTLE PASS the match quick: that rival every frame
+PERFTHROTTLE PASS under 36 fps the match is slow
+PERFTHROTTLE PASS slow until the fps is back over 50
+PERFTHROTTLE PASS over 50 fps it is quick again
+PERFTHROTTLE PASS quick until the fps is under 36
+PERFTHROTTLE PASS off screen: every 3 frames
+PERFTHROTTLE PASS off screen some frames are not posed
+PERFTHROTTLE PASS coming on screen it is posed that frame
+PERFTHROTTLE PASS setup: a Hero model
+PERFTHROTTLE PASS a Hero's clips hold with the Hunter and catch up the time
+PERFTHROTTLE PASS a small part (0.4 m) doesn't cast
+PERFTHROTTLE PASS a big part (3 m) casts
+PERFTHROTTLE PASS low has a caster size (2.0 m)
+PERFTHROTTLE PASS medium has a caster size (1.6 m)
+PERFTHROTTLE PASS high has a caster size (1.3 m)
+PERFTHROTTLE PASS ultra has a caster size (1.0 m)
+PERFTHROTTLE FAIL no mesh under 2.5 m casts outside Hunters and Boki bodies (664 casters; small ones: { "@Node3D/World/Ground": 4, "World/Deco/Camps": 1, "World/Deco/@MeshInstance3D": 8, "Deco/@Node3D/@MeshInstance3D": 4, "@Node3D/@Node3D/@MeshInstance3D": 6, "MobSkeleton/Skeleton3D/Mesh": 83, "Spin/gear_armor/Mesh": 3, "Spin/gear_boots/Mesh": 3, "@Node3D/@Node3D/Ring": 3, "Body/@Node3D/@MeshInstance3D": 3 })
+PERFTHROTTLE PASS a 0.5 m rock goes in a non-casting batch, a 2.5 m one in a casting batch
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_9_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_8_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_10_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_9_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_6_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_3_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_8_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_1_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_3_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_9_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_10_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_8_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_11_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_7_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_12_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_6_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_5_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_3_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_2_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_1_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_13_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_13_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_4_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_5_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_12_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_11_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_10_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_7_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_8_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_4_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_0_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_9_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_0_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_4_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_1_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_1_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_2_small_2_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_8_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_9_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_7_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_9_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_6_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_3_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_8_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_11_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_10_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_8_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_11_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_7_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_6_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_2_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_3_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_5_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_1_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_4_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_1_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_13_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_5_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_4_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_10_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_0_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_10_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_5_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_6_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_0_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_9_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_8_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_4_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_0_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_1_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_1_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_1_small_2_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_8_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_10_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_7_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_9_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_6_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_11_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_3_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_1_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_3_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_2_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_9_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_10_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_8_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_7_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_12_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_6_0 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_13_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_5_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_2_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_3_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_4_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_1_1 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_5_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_1_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_13_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_4_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_12_2 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_10_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_0_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_9_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_8_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_4_3 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_8_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_4_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_4_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_1_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_frost_0_small_3_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_7_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_10_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_10_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_8_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_7_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_6_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_11_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_7_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_8_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_10_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_9_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_0_small_10_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_7_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_10_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_10_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_8_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_8_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_9_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_7_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_6_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_11_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_6_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_11_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_7_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_10_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_1_small_10_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_7_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_10_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_10_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_8_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_7_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_10_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_6_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_11_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_7_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_7_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_9_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_gloom_2_small_10_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_13_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_14_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_13_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_15_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_13_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_15_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_16_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_12_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_12_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_12_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_16_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_12_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_16_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_12_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_16_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_15_11 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_1_small_13_11 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_13_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_14_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_13_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_13_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_13_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_14_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_12_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_15_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_16_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_12_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_12_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_12_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_16_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_12_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_16_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_16_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_12_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_13_11 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_14_11 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_15_11 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_2_small_13_12 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_14_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_13_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_15_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_13_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_14_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_15_4 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_15_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_12_5 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_16_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_16_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_12_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_16_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_12_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_16_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_12_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_16_11 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_12_11 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_15_11 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_ember_0_small_14_11 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_1_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_5_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_4_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_3_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_5_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_3_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_4_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_1_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_0_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_6_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_0_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_6_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_1_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_1_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_1_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_3_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_4_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_1_small_2_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_1_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_5_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_4_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_1_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_5_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_2_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_3_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_1_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_4_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_5_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_6_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_6_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_0_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_6_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_1_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_6_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_1_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_4_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_3_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_2_small_2_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_1_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_5_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_4_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_3_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_1_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_2_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_3_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_1_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_4_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_0_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_5_6 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_7_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_6_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_0_7 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_6_8 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_6_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_1_9 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_1_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_4_10 doesn't cast
+PERFTHROTTLE PASS small rock batch rock_meadow_0_small_3_10 doesn't cast
+PERFTHROTTLE PASS big rocks cast (18 batches)
+PERFTHROTTLE PASS no effect casts (0 do)
+PERFTHROTTLE PASS Hunter casts (2 meshes)
+PERFTHROTTLE PASS saltlick_ casts (2 meshes)
+PERFTHROTTLE PASS walls cast (38 wall batches)
+PERFTHROTTLE PASS a Boki: the body casts, the bits don't (1 cast, 3 don't)
+PERFTHROTTLE PASS setup: a spawn plan with spots
+PERFTHROTTLE PASS one frame looks at 2 of 30 spots
+PERFTHROTTLE PASS the spot underfoot is known within 0.10 s
+PERFTHROTTLE PASS setup: no ability walls up (the plain rule below reads terrain only)
+PERFTHROTTLE PASS los and tile_kind agree with the plain per-sample reading on 400 random lines (0 differ)
+PERFTHROTTLE PASS setup: a gear piece with a speed stat
+PERFTHROTTLE PASS gear put on through refresh_gear counts in the same step
+PERFTHROTTLE PASS setup: an open perk with a stat
+PERFTHROTTLE PASS a perk taken counts in the same step (fleet: speed)
+PERFTHROTTLE PASS setup: the HUD
+PERFTHROTTLE PASS setup: a rival
+PERFTHROTTLE FAIL a rival on screen gets a plate (frame 1, now 4)
+PERFTHROTTLE PASS a rival past 60 m isn't laid out (last at frame 1, since 5)
+PERFTHROTTLE PASS setup: a spot off screen within 60 m
+PERFTHROTTLE PASS a rival off screen isn't laid out (last at frame 1, since 8)
+PERFTHROTTLE PASS the same label reuses its layout
+PERFTHROTTLE PASS changed text is laid out once
+PERFTHROTTLE PASS the match has Warden rigs (2)
+PERFTHROTTLE PASS each rig's pace fits the driver
+PERFTHROTTLE PASS a Warden away from the focus is posed on 2 of 4 frames
+PERFTHROTTLE PASS the one at the camera's focus every frame (4)
+PERFTHROTTLE PASS a flurry takes pooled meshes (3 more rings out)
+PERFTHROTTLE PASS a flurry of rings, ghosts, bolts, beams and swings adds no node to the Fx
+PERFTHROTTLE PASS the flurry's ring, ghost, beam and swing meshes are all back in their pools
+PERFTHROTTLE DONE, failures: 2
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

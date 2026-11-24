@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BREED ok   enough even-share babies to test the split (461 of 500)
+BREED ok   even-share babies split half and half: 225 female of 461 (0.5 sigma)
+BREED ok   a share of 0 or 1 never hatches the other sex (0 off of 39)
+BREED ok   lodestick hatches 95% female as documented (7 of 7)
+BREED ok   limpetor hatches 0% female as documented (0 of 9)
+BREED ok   marchleaf hatches 95% female as documented (10 of 12)
+BREED ok   mossgrade hatches 100% female as documented (11 of 11)
+BREED ok   every baby is a parent's first form, or a first form for a legendary parent (0 off)
+BREED ok   every trait is its parents' mean within 0.12 (0 off)
+BREED ok   IVs: 3 copied from a named parent, the rest in range (0 off)
+BREED ok   the evolution head start is one parent's leading way (0 off)
+BREED ok   a baby's lean is only the stronger parent's elements (0 off)
+BREED ok   favourite food and play come from a parent (0 off)
+BREED ok   mutations known, one per group, dna names parents (0, 0 off)
+BREED ok   mutations no parent carries are base-odds rolls: 23 (at most 49)
+BREED ok   shimmer stays about 1 in 4096 (0 of 500)
+BREED ok   mark matches a parent in 466 of 500 (min 80%)
+BREED ok   mark_col matches a parent in 488 of 500 (min 80%)
+BREED ok   eye matches a parent in 459 of 500 (min 80%)
+BREED ok   ears matches a parent in 456 of 500 (min 70%)
+BREED ok   tailv matches a parent in 449 of 500 (min 70%)
+BREED ok   quirk matches a parent in 317 of 500 (min 40%)
+BREED done, 0 failed

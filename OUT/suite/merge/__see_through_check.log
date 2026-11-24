@@ -1,0 +1,12 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SEETHROUGH PASS the tree beside the hunter is in frame (5098 px)
+SEETHROUGH PASS a tree beside the hunter stays fully solid (0 px change)
+SEETHROUGH PASS a tree behind the hunter stays fully solid (0 px change)
+SEETHROUGH PASS a tree between the camera and the hunter thins (503 px)
+SEETHROUGH PASS the hunter shows through it (233 px)
+SEETHROUGH PASS it keeps 91% of itself (at least 75%)
+SEETHROUGH DONE, failures: 0

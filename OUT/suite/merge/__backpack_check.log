@@ -1,0 +1,45 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PACKS ok   four tiers: ["Pouch", "Satchel", "Pack", "Rucksack"]
+PACKS ok   the Pouch adds nothing, each tier adds more
+PACKS ok   the biggest you may bring: Satchel, Pack, Rucksack by difficulty
+PACKS ok   no drop table holds a backpack (no random backpack drops)
+PACKS ok   a new farm brings the Pouch
+PACKS ok   buy a Rucksack at the armory for gems and scrap ([450, 20])
+PACKS ok   and a Satchel
+PACKS ok   no gems, no Pack
+PACKS ok   the Rucksack is picked; the easiest difficulty takes the biggest allowed one you own (Satchel)
+PACKS ok   setting out takes it from the stash
+PACKS ok   a match that never ended puts it back
+PACKS ok   die with it and it is gone
+PACKS ok   extract wearing a rival's Pack: the Pack comes home
+PACKS ok   a brought Pack: 10 slots (Equal.pack_slots)
+PACKS ok   a Satchel on a rival: 8 slots
+PACKS ok   a shop upgrade to the Rucksack for 90 gems
+PACKS ok   nothing above the Rucksack
+PACKS ok   die and your backpack is in your deathbox
+PACKS ok   ...and you are on the Pouch (6 slots)
+PACKS ok   revived: still the Pouch
+PACKS ok   a looter sees the Rucksack as an upgrade
+PACKS ok   taken: the rival wears the Rucksack, their Satchel is in the box
+PACKS ok   a smaller one is never swapped in
+PACKS ok   smart loot takes the Satchel back from the box
+PACKS ok   taking everything swaps in a Pack
+PACKS ok   the result carries the backpack home only when you extract
+PACKS ok   expert bots: 22 of 40 set out with a bigger backpack
+PACKS DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 15 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

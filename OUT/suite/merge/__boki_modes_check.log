@@ -1,0 +1,21 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOKIMODES ok   every game species has a mode []
+BOKIMODES ok   no species sits on two lines []
+BOKIMODES ok   every line has a known mode, rarity and difficulty []
+BOKIMODES ok   the file lists the whole Bokidex (117 lines)
+BOKIMODES ok   each lair boss's egg hatches an Expedition very rare []
+BOKIMODES ok   Heart Raid lines are gated by rarity (Normal, Hard, Nightmare) []
+BOKIMODES ok   the wild pool is 34 Expedition Boki []
+BOKIMODES ok   no boss-egg kin at the wild spots []
+BOKIMODES ok   the rare_spot pool is 32 Expedition Boki []
+BOKIMODES ok   no boss-egg kin at the rare_spot spots []
+BOKIMODES ok   a very rare is drawn less often than a rare (284 vs 858 draws each)
+BOKIMODES ok   a Heart Raid Boki is never drawn in an Expedition (20000 draws)
+BOKIMODES ok   Normal: commons only
+BOKIMODES ok   Hard: + rares
+BOKIMODES ok   Nightmare: + very rares
+BOKIMODES DONE, failures: 0

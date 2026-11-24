@@ -1,0 +1,345 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LOOK ok   every Hunter of the roster, 12 or more (13)
+LOOK ok   archer: aiming where he faces, the head is at rest
+LOOK ok   archer: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   archer: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   archer: 60 swing, never past the aim (0.00 deg)
+LOOK ok   archer: 60 swing, at rest once the body has turned
+LOOK ok   archer: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   archer: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   archer: -60 swing, never past the aim (0.00 deg)
+LOOK ok   archer: -60 swing, at rest once the body has turned
+LOOK ok   archer: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   archer: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   archer: 170 swing, never past the aim (0.00 deg)
+LOOK ok   archer: 170 swing, at rest once the body has turned
+LOOK ok   archer: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   archer: the bone is there (60.0 deg)
+LOOK ok   archer: clamped in yaw (-70.0 deg)
+LOOK ok   archer: looks up, clamped (25.0 deg)
+LOOK ok   archer: the bone is pitched there (25.0 deg)
+LOOK ok   archer: looks down a slope (-11.3 deg)
+LOOK ok   archer: a dash eases the head back
+LOOK ok   archer: zero through the dash from 4 frames in (of 12)
+LOOK ok   archer: off for a stun
+LOOK ok   archer: off for an emote
+LOOK ok   archer: off for no aim (a knock, a remote Hunter)
+LOOK ok   archer: off under the full-body clip of pin_roll
+LOOK ok   archer: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   juggernaut: aiming where he faces, the head is at rest
+LOOK ok   juggernaut: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   juggernaut: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   juggernaut: 60 swing, never past the aim (0.00 deg)
+LOOK ok   juggernaut: 60 swing, at rest once the body has turned
+LOOK ok   juggernaut: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   juggernaut: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   juggernaut: -60 swing, never past the aim (0.00 deg)
+LOOK ok   juggernaut: -60 swing, at rest once the body has turned
+LOOK ok   juggernaut: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   juggernaut: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   juggernaut: 170 swing, never past the aim (0.00 deg)
+LOOK ok   juggernaut: 170 swing, at rest once the body has turned
+LOOK ok   juggernaut: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   juggernaut: the bone is there (60.0 deg)
+LOOK ok   juggernaut: clamped in yaw (-70.0 deg)
+LOOK ok   juggernaut: looks up, clamped (25.0 deg)
+LOOK ok   juggernaut: the bone is pitched there (25.0 deg)
+LOOK ok   juggernaut: looks down a slope (-11.3 deg)
+LOOK ok   juggernaut: a dash eases the head back
+LOOK ok   juggernaut: zero through the dash from 4 frames in (of 12)
+LOOK ok   juggernaut: off for a stun
+LOOK ok   juggernaut: off for an emote
+LOOK ok   juggernaut: off for no aim (a knock, a remote Hunter)
+LOOK ok   juggernaut: off under the full-body clip of jug_wave
+LOOK ok   juggernaut: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   gunslinger: aiming where he faces, the head is at rest
+LOOK ok   gunslinger: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   gunslinger: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   gunslinger: 60 swing, never past the aim (0.00 deg)
+LOOK ok   gunslinger: 60 swing, at rest once the body has turned
+LOOK ok   gunslinger: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   gunslinger: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   gunslinger: -60 swing, never past the aim (0.00 deg)
+LOOK ok   gunslinger: -60 swing, at rest once the body has turned
+LOOK ok   gunslinger: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   gunslinger: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   gunslinger: 170 swing, never past the aim (0.00 deg)
+LOOK ok   gunslinger: 170 swing, at rest once the body has turned
+LOOK ok   gunslinger: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   gunslinger: the bone is there (60.0 deg)
+LOOK ok   gunslinger: clamped in yaw (-70.0 deg)
+LOOK ok   gunslinger: looks up, clamped (25.0 deg)
+LOOK ok   gunslinger: the bone is pitched there (25.0 deg)
+LOOK ok   gunslinger: looks down a slope (-11.3 deg)
+LOOK ok   gunslinger: a dash eases the head back
+LOOK ok   gunslinger: zero through the dash from 4 frames in (of 12)
+LOOK ok   gunslinger: off for a stun
+LOOK ok   gunslinger: off for an emote
+LOOK ok   gunslinger: off for no aim (a knock, a remote Hunter)
+LOOK ok   gunslinger: off under the full-body clip of gunslinger_dash
+LOOK ok   gunslinger: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   bulwark: aiming where he faces, the head is at rest
+LOOK ok   bulwark: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   bulwark: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   bulwark: 60 swing, never past the aim (0.00 deg)
+LOOK ok   bulwark: 60 swing, at rest once the body has turned
+LOOK ok   bulwark: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   bulwark: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   bulwark: -60 swing, never past the aim (0.00 deg)
+LOOK ok   bulwark: -60 swing, at rest once the body has turned
+LOOK ok   bulwark: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   bulwark: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   bulwark: 170 swing, never past the aim (0.00 deg)
+LOOK ok   bulwark: 170 swing, at rest once the body has turned
+LOOK ok   bulwark: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   bulwark: the bone is there (60.0 deg)
+LOOK ok   bulwark: clamped in yaw (-70.0 deg)
+LOOK ok   bulwark: looks up, clamped (25.0 deg)
+LOOK ok   bulwark: the bone is pitched there (25.0 deg)
+LOOK ok   bulwark: looks down a slope (-11.3 deg)
+LOOK ok   bulwark: a dash eases the head back
+LOOK ok   bulwark: zero through the dash from 4 frames in (of 12)
+LOOK ok   bulwark: off for a stun
+LOOK ok   bulwark: off for an emote
+LOOK ok   bulwark: off for no aim (a knock, a remote Hunter)
+LOOK ok   bulwark: off under the full-body clip of bul_smash
+LOOK ok   bulwark: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   rimewright: aiming where he faces, the head is at rest
+LOOK ok   rimewright: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   rimewright: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   rimewright: 60 swing, never past the aim (0.00 deg)
+LOOK ok   rimewright: 60 swing, at rest once the body has turned
+LOOK ok   rimewright: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   rimewright: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   rimewright: -60 swing, never past the aim (0.00 deg)
+LOOK ok   rimewright: -60 swing, at rest once the body has turned
+LOOK ok   rimewright: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   rimewright: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   rimewright: 170 swing, never past the aim (0.00 deg)
+LOOK ok   rimewright: 170 swing, at rest once the body has turned
+LOOK ok   rimewright: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   rimewright: the bone is there (60.0 deg)
+LOOK ok   rimewright: clamped in yaw (-70.0 deg)
+LOOK ok   rimewright: looks up, clamped (25.0 deg)
+LOOK ok   rimewright: the bone is pitched there (25.0 deg)
+LOOK ok   rimewright: looks down a slope (-11.3 deg)
+LOOK ok   rimewright: a dash eases the head back
+LOOK ok   rimewright: zero through the dash from 4 frames in (of 12)
+LOOK ok   rimewright: off for a stun
+LOOK ok   rimewright: off for an emote
+LOOK ok   rimewright: off for no aim (a knock, a remote Hunter)
+LOOK ok   rimewright: off under the full-body clip of tm_wall
+LOOK ok   rimewright: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   ashwick: aiming where he faces, the head is at rest
+LOOK ok   ashwick: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   ashwick: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   ashwick: 60 swing, never past the aim (0.00 deg)
+LOOK ok   ashwick: 60 swing, at rest once the body has turned
+LOOK ok   ashwick: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   ashwick: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   ashwick: -60 swing, never past the aim (0.00 deg)
+LOOK ok   ashwick: -60 swing, at rest once the body has turned
+LOOK ok   ashwick: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   ashwick: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   ashwick: 170 swing, never past the aim (0.00 deg)
+LOOK ok   ashwick: 170 swing, at rest once the body has turned
+LOOK ok   ashwick: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   ashwick: the bone is there (60.0 deg)
+LOOK ok   ashwick: clamped in yaw (-70.0 deg)
+LOOK ok   ashwick: looks up, clamped (25.0 deg)
+LOOK ok   ashwick: the bone is pitched there (25.0 deg)
+LOOK ok   ashwick: looks down a slope (-11.3 deg)
+LOOK ok   ashwick: a dash eases the head back
+LOOK ok   ashwick: zero through the dash from 4 frames in (of 12)
+LOOK ok   ashwick: off for a stun
+LOOK ok   ashwick: off for an emote
+LOOK ok   ashwick: off for no aim (a knock, a remote Hunter)
+LOOK ok   ashwick: off under the full-body clip of lw_hop
+LOOK ok   ashwick: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   dolm: aiming where he faces, the head is at rest
+LOOK ok   dolm: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   dolm: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   dolm: 60 swing, never past the aim (0.00 deg)
+LOOK ok   dolm: 60 swing, at rest once the body has turned
+LOOK ok   dolm: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   dolm: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   dolm: -60 swing, never past the aim (0.00 deg)
+LOOK ok   dolm: -60 swing, at rest once the body has turned
+LOOK ok   dolm: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   dolm: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   dolm: 170 swing, never past the aim (0.00 deg)
+LOOK ok   dolm: 170 swing, at rest once the body has turned
+LOOK ok   dolm: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   dolm: the bone is there (60.0 deg)
+LOOK ok   dolm: clamped in yaw (-70.0 deg)
+LOOK ok   dolm: looks up, clamped (25.0 deg)
+LOOK ok   dolm: the bone is pitched there (25.0 deg)
+LOOK ok   dolm: looks down a slope (-11.3 deg)
+LOOK ok   dolm: a dash eases the head back
+LOOK ok   dolm: zero through the dash from 4 frames in (of 12)
+LOOK ok   dolm: off for a stun
+LOOK ok   dolm: off for an emote
+LOOK ok   dolm: off for no aim (a knock, a remote Hunter)
+LOOK ok   dolm: off under the full-body clip of breah_slam
+LOOK ok   dolm: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   mage: aiming where he faces, the head is at rest
+LOOK ok   mage: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   mage: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   mage: 60 swing, never past the aim (0.00 deg)
+LOOK ok   mage: 60 swing, at rest once the body has turned
+LOOK ok   mage: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   mage: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   mage: -60 swing, never past the aim (0.00 deg)
+LOOK ok   mage: -60 swing, at rest once the body has turned
+LOOK ok   mage: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   mage: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   mage: 170 swing, never past the aim (0.00 deg)
+LOOK ok   mage: 170 swing, at rest once the body has turned
+LOOK ok   mage: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   mage: the bone is there (60.0 deg)
+LOOK ok   mage: clamped in yaw (-70.0 deg)
+LOOK ok   mage: looks up, clamped (25.0 deg)
+LOOK ok   mage: the bone is pitched there (25.0 deg)
+LOOK ok   mage: looks down a slope (-11.3 deg)
+LOOK ok   mage: a dash eases the head back
+LOOK ok   mage: zero through the dash from 4 frames in (of 12)
+LOOK ok   mage: off for a stun
+LOOK ok   mage: off for an emote
+LOOK ok   mage: off for no aim (a knock, a remote Hunter)
+LOOK ok   mage: off under the full-body clip of mage_dash_go
+LOOK ok   mage: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   dredge: aiming where he faces, the head is at rest
+LOOK ok   dredge: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   dredge: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   dredge: 60 swing, never past the aim (0.00 deg)
+LOOK ok   dredge: 60 swing, at rest once the body has turned
+LOOK ok   dredge: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   dredge: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   dredge: -60 swing, never past the aim (0.00 deg)
+LOOK ok   dredge: -60 swing, at rest once the body has turned
+LOOK ok   dredge: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   dredge: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   dredge: 170 swing, never past the aim (0.00 deg)
+LOOK ok   dredge: 170 swing, at rest once the body has turned
+LOOK ok   dredge: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   dredge: the bone is there (60.0 deg)
+LOOK ok   dredge: clamped in yaw (-70.0 deg)
+LOOK ok   dredge: looks up, clamped (25.0 deg)
+LOOK ok   dredge: the bone is pitched there (25.0 deg)
+LOOK ok   dredge: looks down a slope (-11.3 deg)
+LOOK ok   dredge: a dash eases the head back
+LOOK ok   dredge: zero through the dash from 4 frames in (of 12)
+LOOK ok   dredge: off for a stun
+LOOK ok   dredge: off for an emote
+LOOK ok   dredge: off for no aim (a knock, a remote Hunter)
+LOOK ok   dredge: off under the full-body clip of dr_quake
+LOOK ok   dredge: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   tender: aiming where he faces, the head is at rest
+LOOK ok   tender: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   tender: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   tender: 60 swing, never past the aim (0.00 deg)
+LOOK ok   tender: 60 swing, at rest once the body has turned
+LOOK ok   tender: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   tender: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   tender: -60 swing, never past the aim (0.00 deg)
+LOOK ok   tender: -60 swing, at rest once the body has turned
+LOOK ok   tender: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   tender: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   tender: 170 swing, never past the aim (0.00 deg)
+LOOK ok   tender: 170 swing, at rest once the body has turned
+LOOK ok   tender: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   tender: the bone is there (60.0 deg)
+LOOK ok   tender: clamped in yaw (-70.0 deg)
+LOOK ok   tender: looks up, clamped (25.0 deg)
+LOOK ok   tender: the bone is pitched there (25.0 deg)
+LOOK ok   tender: looks down a slope (-11.3 deg)
+LOOK ok   tender: a dash eases the head back
+LOOK ok   tender: zero through the dash from 4 frames in (of 12)
+LOOK ok   tender: off for a stun
+LOOK ok   tender: off for an emote
+LOOK ok   tender: off for no aim (a knock, a remote Hunter)
+LOOK ok   tender: off under the full-body clip of mm_float
+LOOK ok   tender: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   thief: aiming where he faces, the head is at rest
+LOOK ok   thief: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   thief: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   thief: 60 swing, never past the aim (0.00 deg)
+LOOK ok   thief: 60 swing, at rest once the body has turned
+LOOK ok   thief: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   thief: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   thief: -60 swing, never past the aim (0.00 deg)
+LOOK ok   thief: -60 swing, at rest once the body has turned
+LOOK ok   thief: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   thief: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   thief: 170 swing, never past the aim (0.00 deg)
+LOOK ok   thief: 170 swing, at rest once the body has turned
+LOOK ok   thief: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   thief: the bone is there (60.0 deg)
+LOOK ok   thief: clamped in yaw (-70.0 deg)
+LOOK ok   thief: looks up, clamped (25.0 deg)
+LOOK ok   thief: the bone is pitched there (25.0 deg)
+LOOK ok   thief: looks down a slope (-11.3 deg)
+LOOK ok   thief: a dash eases the head back
+LOOK ok   thief: zero through the dash from 4 frames in (of 12)
+LOOK ok   thief: off for a stun
+LOOK ok   thief: off for an emote
+LOOK ok   thief: off for no aim (a knock, a remote Hunter)
+LOOK ok   thief: off under the full-body clip of thf_vault_r
+LOOK ok   thief: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   ostra: aiming where he faces, the head is at rest
+LOOK ok   ostra: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   ostra: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   ostra: 60 swing, never past the aim (0.00 deg)
+LOOK ok   ostra: 60 swing, at rest once the body has turned
+LOOK ok   ostra: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   ostra: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   ostra: -60 swing, never past the aim (0.00 deg)
+LOOK ok   ostra: -60 swing, at rest once the body has turned
+LOOK ok   ostra: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   ostra: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   ostra: 170 swing, never past the aim (0.00 deg)
+LOOK ok   ostra: 170 swing, at rest once the body has turned
+LOOK ok   ostra: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   ostra: the bone is there (60.0 deg)
+LOOK ok   ostra: clamped in yaw (-70.0 deg)
+LOOK ok   ostra: looks up, clamped (25.0 deg)
+LOOK ok   ostra: the bone is pitched there (25.0 deg)
+LOOK ok   ostra: looks down a slope (-11.3 deg)
+LOOK ok   ostra: a dash eases the head back
+LOOK ok   ostra: zero through the dash from 4 frames in (of 12)
+LOOK ok   ostra: off for a stun
+LOOK ok   ostra: off for an emote
+LOOK ok   ostra: off for no aim (a knock, a remote Hunter)
+LOOK ok   ostra: off under the full-body clip of ostra_snap
+LOOK ok   ostra: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   gil: aiming where he faces, the head is at rest
+LOOK ok   gil: a 60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   gil: 60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   gil: 60 swing, never past the aim (0.00 deg)
+LOOK ok   gil: 60 swing, at rest once the body has turned
+LOOK ok   gil: a -60 degree swing, the head leads the body (peak 18.8 deg)
+LOOK ok   gil: -60 swing inside the clamp (peak 18.8 deg)
+LOOK ok   gil: -60 swing, never past the aim (0.00 deg)
+LOOK ok   gil: -60 swing, at rest once the body has turned
+LOOK ok   gil: a 170 degree swing, the head leads the body (peak 65.1 deg)
+LOOK ok   gil: 170 swing inside the clamp (peak 65.1 deg)
+LOOK ok   gil: 170 swing, never past the aim (0.00 deg)
+LOOK ok   gil: 170 swing, at rest once the body has turned
+LOOK ok   gil: holds an aim 60 degrees off (60.0 deg)
+LOOK ok   gil: the bone is there (60.0 deg)
+LOOK ok   gil: clamped in yaw (-70.0 deg)
+LOOK ok   gil: looks up, clamped (25.0 deg)
+LOOK ok   gil: the bone is pitched there (25.0 deg)
+LOOK ok   gil: looks down a slope (-11.3 deg)
+LOOK ok   gil: a dash eases the head back
+LOOK ok   gil: zero through the dash from 4 frames in (of 12)
+LOOK ok   gil: off for a stun
+LOOK ok   gil: off for an emote
+LOOK ok   gil: off for no aim (a knock, a remote Hunter)
+LOOK ok   gil: the head bone turns by the layer's figure (worst 0.00 deg off)
+LOOK ok   a full-body kit clip was played on 12 Hunters
+LOOK_AT_CHECK_DONE, failures: 0

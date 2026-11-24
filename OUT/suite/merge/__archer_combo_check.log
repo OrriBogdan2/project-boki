@@ -1,0 +1,758 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AKCHECK pin bow: stage timings (Empowered 0.6, Supercharged 1.15, overdraw 0.5 later) PASS  0.60 1.15 1.65
+AKCHECK pin reticle: a faint aim line to the cursor at rest, in place of the shared weapon line PASS  
+AKCHECK pin anim: drawing holds arc_draw   PASS  arc_draw
+AKCHECK pin reticle: drawing fills the aim line part way (a filling line, no V) PASS  fill 1.58 of 6.40
+AKCHECK pin reticle: no cursor ring and no bow glint (the line is the whole readout) PASS  { "charge": -1.0, "flare": 0.0, "perfect": 0.0, "at": "cursor" }
+AKCHECK pin reticle: Supercharged = one thick line out to max range (16m), the foe under it ringed PASS  kind line reach 16.0 tgt true
+AKCHECK pin anim: the body flashed white as Supercharged came up PASS  flash -0.01
+AKCHECK pin anim: a Supercharged release plays arc_super PASS  arc_super
+AKCHECK pin aim: an Empowered arrow lands at the cursor (6m) PASS  reach 6.6 kind arrow
+AKCHECK pin anim: an Empowered release plays arc_loose PASS  arc_loose
+AKCHECK pin vfx: the spent arrow stays stuck in the ground at the cursor PASS  planted 1
+AKCHECK pin aim: a Supercharged arrow flies past the cursor to 16m PASS  reach 16.6 kind super
+AKCHECK pin aim: a tap shot lands at the cursor (4m) PASS  reach 4.6 kind tap
+AKCHECK pin anim: a tap shot plays arc_tap PASS  arc_tap
+AKCHECK pin anim: overdrawn, the draw arm shakes (arc_over) PASS  arc_over
+AKCHECK pin reticle: overdrawn dims the line to a thin pale one and drops the circle PASS  alpha 0.55 lw 0.03
+AKCHECK pin anim: an overdrawn release droops (arc_over_loose) PASS  arc_over_loose
+AKCHECK pin bow: overdrawn = half damage   PASS  overdraws 1 took 30
+AKCHECK pin anim: a perfect release plays arc_perfect PASS  arc_perfect
+AKCHECK combo pin: stage-1 perfect release (no damage bonus, the quick draw banked) PASS  perfects 1 took 30 quick true
+AKCHECK combo pin: perfect > the next draw reaches Empowered in ~0.38s PASS  draw_t 0.66 after 0.42s
+AKCHECK pin small: after a perfect the draw slows you less (0.85 not 0.7, wiki) PASS  move_k 1.21
+AKCHECK pin: a draw without a perfect is back to normal speed PASS  quick false
+AKCHECK pin RMB held: the gold V and a gold bar from the bow PASS  v false bar true anim arc_heavy_wind
+AKCHECK pin anim: the Heavy Shot's draw clip runs on the hold's clock (its full-draw key 1.1 lands with full 1.1) PASS  clip 0.60 hold 0.60
+AKCHECK pin RMB held: the bar grows with the charge, to 2 body heights PASS  1.86 -> 3.60
+AKCHECK pin small: the Heavy Shot can be held 3 s before it looses by itself (wiki) PASS  auto 3.0
+AKCHECK combo archer: Heavy Shot > wall = pin 1.2s + wall hit PASS  pins 1 stun 1.13 took 178 anim arc_heavy
+AKCHECK pin look: full-charge hit burst 6.1 m is wider than an uncharged one 3.4 m PASS  
+AKCHECK pin look: the wall pin burst 8.0 m beats the plain hit 6.1 m PASS  
+AKCHECK pin look: heavy_hit has a white-core flare and no ground ring PASS  
+AKCHECK pin look: heavy_pin has a white-core flare and no ground ring PASS  
+AKCHECK pin look: the stun mark rides over the head for the whole stun PASS  
+AKCHECK parity lace: wall pin pays 173 extra on the 35 shot (source ratio 4.94x), not our old 0.4x PASS  took 178, want 178
+AKCHECK parity lace: RMB charge starts at the press (guard 0.15 s, was a 0.5 s dead zone) PASS  hold 0.15
+AKCHECK combo archer: wall pin > shot is a plain arrow (Focus and Deadeye are cut, not in the source) PASS  dealt 22 anim arc_tap res 0
+AKCHECK pin rank 3: a Heavy Shot wall stun gives a dash charge PASS  stun 1.13 dashes 1.00
+AKCHECK pin E: the arc shows at the cursor distance for everyone PASS  5.0
+AKCHECK archer anim: Hail Wall plays arc_hail PASS  arc_hail
+AKCHECK pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not PASS  on arc 15 inside 0
+AKCHECK pin small: Heavy Shot into a foe burning in the Hail Wall = CREMATED PASS  cremations 1
+AKCHECK pin E: a rival Wisp in the wall loses down_hp each tick (est 5 x 2.5 a tick), an ally's only bleeds PASS  rival 48.3 ally 10.8
+AKCHECK pin E: the wall does not slow, burn or damage a Wisp PASS  slow 0.00 hp 0.0
+AKCHECK combo archer: RMB tap looses nothing and costs no charge (no snare, no Tripwire) PASS  took 0 root 0.00 charges 1.0 variant tap
+AKCHECK combo archer: RMB press draws at once; let go before the hold and the draw is put away, nothing looses PASS  drawn true anim  aim false took 0 charges 1.0
+AKCHECK combo archer: a quick RMB tap while the LMB draws leaves that draw on PASS  draw 0.12 anim arc_draw aim false
+AKCHECK combo archer: RMB hold looses the Heavy Shot on one charge and a 16 s cooldown PASS  took 30 max charges 1 charges 0.0 cd 15.7
+AKCHECK archer anim: the Heavy Shot plays arc_heavy PASS  arc_heavy
+AKCHECK combo archer: Heavy Shot ranks cut 3 s each (16, 13, 10) and rank 3 flies 3 m farther PASS  cds [16.0, 13.0, 10.0] reaches [14.0, 14.0, 17.0]
+AKCHECK upgrade parity: Heavy Shot damage +20% / +40% PASS  [[1.0, 1.0, 9.5, 15.0, 120.0], [1.2, 1.3, 8.49965, 13.0005, 120.0], [1.4, 1.6, 7.50025, 9.0, 156.0]]
+AKCHECK upgrade parity: Spirit Walk recharge 9.5 -> 8.5 -> 7.5 PASS  [[1.0, 1.0, 9.5, 15.0, 120.0], [1.2, 1.3, 8.49965, 13.0005, 120.0], [1.4, 1.6, 7.50025, 9.0, 156.0]]
+AKCHECK upgrade parity: Hail Wall cooldown 15 -> 13 -> 9 and damage +30% / +60% PASS  [[1.0, 1.0, 9.5, 15.0, 120.0], [1.2, 1.3, 8.49965, 13.0005, 120.0], [1.4, 1.6, 7.50025, 9.0, 156.0]]
+AKCHECK upgrade parity: rank 3 (tier IV) Hail Wall arc 120 -> 156 degrees PASS  [[1.0, 1.0, 9.5, 15.0, 120.0], [1.2, 1.3, 8.49965, 13.0005, 120.0], [1.4, 1.6, 7.50025, 9.0, 156.0]]
+AKCHECK combo archer: knock > a dash charge back, no kit heal PASS  dashes 1.00
+AKCHECK combo archer: Red Thread: above the line hidden, below it seen past a rock and outlined PASS  healthy false injured 0.33 seen true, 12 outlined meshes at 10.5 m
+AKCHECK combo archer: Red Thread: healed past the line, the reveal and outline go PASS  reveal 0.00, 0 outlined
+AKCHECK combo archer: Red Thread: hurt but past 22 m stays hidden PASS  reveal 0.00 at 25.0 m
+AKCHECK pin anim: Spirit Walk's roll plays pin_roll PASS  pin_roll
+AKCHECK pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.27, footage: no landing beat) PASS  pin_walk at +0.28
+AKCHECK pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc) PASS  wash 0.75 (0.1804, 0.0471, 0.2431, 1.0)
+AKCHECK pin cast-move: the Spirit Walk runs at 1.1 (footage 117-126 px/s against a 113 run: 1.04-1.12) PASS  move_k outside 1.10
+AKCHECK pin small: no extra speed inside something below rank 3 (x1.1 like outside) PASS  move_k inside 1.10
+AKCHECK pin small: walking into the rock left a spirit orb at the entry PASS  orbs 1
+AKCHECK pin small: anyone touching the orb walks as a spirit too PASS  ghost 2.68 granted 1
+AKCHECK pin anim: after the roll she walks as a spirit (pin_walk) PASS  pin_walk
+AKCHECK combo pin: Spirit Walk passes through a rock column PASS  x 17.0 (rock at 11) inside 9
+AKCHECK pin tint: the body is back to normal when the walk ends PASS  wash 0.00
+AKCHECK combo pin: Spirit Walk ending inside a rock = back to the entry PASS  x 10.9 (rock 11, entry 10.9)
+AKCHECK combo pin: Spirit Walk running out inside a rock = back to the entry PASS  x 10.0 (rock 11, entry 10.0) snaps 1 walks 1
+AKCHECK combo pin: Spirit Walk climbs a raised terrace wall and drops off the far side (a plain walk stops at it) FAIL  plain x 5.4, spirit x -1.7 y -2.43 peak +1.60 (wall 3..5) inside 5
+AKCHECK combo pin: Spirit Walk ending inside a terrace = on top of it, not inside PASS  x 4.4 y +1.60 ground +1.60
+AKCHECK pin: damage ends Spirit Walk       PASS  
+AKCHECK pin rank 3: Spirit Walk lasts 0.5 s longer (3.3 s) and an ally within 6 m walks too PASS  walk 3.30 ally ghost 3.30
+AKCHECK pin rank 3: +33% inside something, fading as the walk runs out PASS  samples 12 first 0.305 last 0.288
+AKCHECK pin anim: the long dash is her flick and tumble PASS  flick pin_flick
+AKCHECK archer RMB air: the press starts a draw, no Plunge PASS  vy -2.0
+AKCHECK archer: no class R                 PASS  
+AKCHECK merge hold: the bow is drawn before the merge PASS  draw_t 0.52
+AKCHECK merge hold: a merge is under way   PASS  
+AKCHECK merge hold: archer's bow draw is dropped with no arrow loosed PASS  draw_t -1.00 took 0 ammo 999 -> 999
+AKCHECK air steer archer: an air dash roll, then the keys steer (+6.3 m/s across) PASS  carry 1.0 m/s airborne true
+AKCHECK item 183 archer: its air dash is its ground dash (pin_roll, reach 3.38 vs 3.38) PASS  [{ "anim": "pin_roll", "spent": 1.0, "ex_cd": 0.0, "reach": 3.37640476226807 }, { "anim": "pin_roll", "spent": 1.0, "ex_cd": 0.0, "reach": 3.37640476226807 }]
+AKCHECK Lace cancel LMB draw + E: both (rule), the wall goes up and the draw keeps charging PASS  draw 0.42 -> 0.63 wall true
+AKCHECK Lace cancel X window + RMB, E: both (rule), each goes and the shots after the first arrow stay PASS  window true RMB true E true left 2 of 2
+AKCHECK Lace cancel glide + LMB: both (rule), the bow draws from the open glider, which stays open PASS  gliding true -> true draw 0.65
+AKCHECK Lace cancel glide + RMB, E, X: both (rule), each goes and the glider stays open PASS  gliding [true, true, true, true, true, true] RMB true E true X true
+AKCHECK merge hold: the Heavy Shot is held before the merge PASS  rmb_down true aim true
+AKCHECK merge hold: a merge is under way   PASS  
+AKCHECK merge hold: archer's Heavy Shot hold, its gold telegraph and draw pose are dropped, no shot spent PASS  rmb_down false aim false charges 2.0 -> 2.0 anim  took 0
+AKCHECK merge hold: Spirit Walk is running before the merge PASS  
+AKCHECK merge hold: a merge is under way   PASS  
+AKCHECK merge hold: Spirit Walk ends with the merge PASS  ghost 0.00
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _wall_climb_h (res://tools/archer_bulwark_combo_check.gd:109)
+       [13] _wall_climb (res://tools/archer_bulwark_combo_check.gd:104)
+       [14] run (res://tools/archer_bulwark_combo_check.gd:37)
+       [15] _archer_combos (res://tools/archer_bulwark_combo_check.gd:966)
+       [16] done (res://tools/archetype_check.gd:183)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _wall_climb_h (res://tools/archer_bulwark_combo_check.gd:109)
+       [13] _wall_climb (res://tools/archer_bulwark_combo_check.gd:104)
+       [14] run (res://tools/archer_bulwark_combo_check.gd:37)
+       [15] _archer_combos (res://tools/archer_bulwark_combo_check.gd:966)
+       [16] done (res://tools/archetype_check.gd:183)
+AKCHECK Lace climbs a double wall (4 terraces) facing it PASS  low 0.00 top 3.20 { "archer1.0": 3.20000004768372, "archer-1.0": 0.0, "gunslinger1.0": 0.0, "gunslinger-1.0": 0.0 }
+AKCHECK Lace does not climb it with her back to it PASS  low 0.00 top 3.20 { "archer1.0": 3.20000004768372, "archer-1.0": 0.0, "gunslinger1.0": 0.0, "gunslinger-1.0": 0.0 }
+AKCHECK another Hunter does not climb a double wall PASS  low 0.00 top 3.20 { "archer1.0": 3.20000004768372, "archer-1.0": 0.0, "gunslinger1.0": 0.0, "gunslinger-1.0": 0.0 }
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _wall_climb_h (res://tools/archer_bulwark_combo_check.gd:109)
+       [13] _wall_climb (res://tools/archer_bulwark_combo_check.gd:104)
+       [14] run (res://tools/archer_bulwark_combo_check.gd:37)
+       [15] _archer_combos (res://tools/archer_bulwark_combo_check.gd:966)
+       [16] done (res://tools/archetype_check.gd:183)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _wall_climb_h (res://tools/archer_bulwark_combo_check.gd:109)
+       [13] _wall_climb (res://tools/archer_bulwark_combo_check.gd:104)
+       [14] run (res://tools/archer_bulwark_combo_check.gd:37)
+       [15] _archer_combos (res://tools/archer_bulwark_combo_check.gd:966)
+       [16] done (res://tools/archetype_check.gd:183)
+AKCHECK Lace does not climb 5 terraces (past double-high) PASS  low 0.00 top 4.00 { "archer1.0": 0.0, "archer-1.0": 0.0, "gunslinger1.0": 0.0, "gunslinger-1.0": 0.0 }
+AKCHECK hold lace Heavy Shot: let go looses it PASS  { "held": true, "anim": "arc_heavy_wind", "spent": true, "moved": 0.0 }
+AKCHECK hold lace Heavy Shot: stun mid-hold drops it, no arrow, nothing spent PASS  { "held": false, "anim": "", "spent": false, "moved": 0.0 }
+AKCHECK hold lace Heavy Shot: down mid-hold drops it, no arrow, nothing spent PASS  { "held": false, "anim": "", "spent": false, "moved": 0.0 }
+AKCHECK hold lace Heavy Shot: E mid-hold [?]: the draw goes on, looses at let go PASS  { "held": true, "anim": "arc_hail", "spent": true, "moved": 0.0 }
+AKCHECK hold lace draw: let go looses the arrow PASS  { "drawing": true, "anim": "arc_draw", "dropped": false, "dmg": 30.0 }
+AKCHECK hold lace draw: stun mid-draw drops it, no arrow PASS  { "drawing": false, "anim": "", "dropped": false, "dmg": 0.0 }
+AKCHECK hold lace draw: down mid-draw drops it, no arrow PASS  { "drawing": false, "anim": "", "dropped": false, "dmg": 0.0 }
+AKCHECK hold lace draw: rmb mid-draw: the press drops the draw with no arrow (one bow) PASS  { "drawing": true, "anim": "arc_draw", "dropped": true, "dmg": 15.0 }
+AKCHECK hold lace draw: e mid-draw [?]: the draw goes on, looses at let go PASS  { "drawing": true, "anim": "arc_hail", "dropped": false, "dmg": 45.0 }
+AKCHECK pin ult gate: no Starpiercer below level 6 PASS  
+AKCHECK pin ult cast: the first arrow leaves the frame X is pressed, two more empowered for 6s PASS  left 2 fired 1 shots 1
+AKCHECK pin ult cast: it leaves from the bow's mouth toward the cursor PASS  at (8.332253, 2.657756, 32.56803) bow (8.332253, 2.657756, 32.56803)
+AKCHECK pin ult: one X press is one cast (main's X path only) PASS  casts +1
+AKCHECK pin ult cooldown: 36s from the cast PASS  60.0
+AKCHECK pin ult anim: the press plays the loose (pin_ult_loose), no cast wind-up before the shot PASS  pin_ult_loose
+AKCHECK pin ult sound: the cast cue plays for everyone on the map (no distance cut, loud for rivals too) PASS  
+AKCHECK pin ult look: nothing is hit the instant it is loosed PASS  
+AKCHECK pin ult bond: nothing for the cast alone PASS  0.000
+AKCHECK pin ult look: the shot is a travelling arrow (a skinned projectile at the data speed, not an instant lane) PASS  1 shots, 1 arrows
+AKCHECK pin ult telegraph: the beam's lane out to 18m from the bow and the crosshair ring at her feet PASS  lane 18.0 ring true
+AKCHECK pin ult look: hits land after flight time (7m foe by 0.1s, the 16m foe still ahead of it) PASS  took 14 / 0
+AKCHECK pin ult payoff: the beam pierces both foes, 16m out too (1.5x her Empowered range) PASS  took 14 / 18 (want 18)
+AKCHECK pin ult small: the bow needs no draw at all (the arrow out at the press) PASS  
+AKCHECK pin ult small: held fire waits through the 1.0 s recover after an arrow PASS  fired 1
+AKCHECK pin ult small: armor shredded by 10 on top of the hit PASS  armor 5.6
+AKCHECK pin ult bond: a beam that hits a hunter sends from_ult hit (0.6 into the meter) PASS  best 0.60 meter 0.889
+AKCHECK pin ult anim: the beam plays pin_ult_loose PASS  pin_ult_loose
+AKCHECK pin ult small: the beam knocks back PASS  vel 0.00
+AKCHECK pin ult cadence: 1.0 s from beam to beam with fire held (the recover, no nock: owner 11-08) PASS  1.00 s
+AKCHECK pin ult bond: a beam that misses pays nothing PASS  owed 0.60 -> 0.60
+AKCHECK pin ult small: she can move between shots PASS  move_k 1.00
+AKCHECK pin ult anim: the last beam plays pin_ult_final PASS  pin_ult_final
+AKCHECK pin ult payoff: the last beam finishes a hunter left under 12% PASS  executes 1 hp 0 downed true
+AKCHECK pin ult bond: the execute's knock is the cast's best event (0.7, not added per hit) PASS  best 0.70
+AKCHECK pin ult ends after the third shot, the telegraph goes PASS  left 0
+AKCHECK pin ult small: unused shots go when the 6s window ends (only the press's arrow went) PASS  fired 1
+AKCHECK pin ult cooldown: no recast while it recharges PASS  
+AKCHECK pin ult: after the window the bow draws as normal PASS  draw_t 1.00
+AKCHECK pin ult small: Spirit Walk between shots keeps them PASS  left 2
+AKCHECK pin ult small: a wall stops the beam (the foe behind it untouched) PASS  took 0
+AKCHECK pin ult merge: the empowered window drops with no beam PASS  fired 3
+AKCHECK pin ult burst: three beams then a merge leave a full-health light hunter standing PASS  ult 91, with the merge 95 of 161
+AKCHECK pin early release: 5 s on the button looses nothing PASS  arrows 0
+AKCHECK pin early release: letting go looses exactly one arrow (an overdrawn one) PASS  arrows 1 kind over
+AKCHECK pin early release: a cooldown mid-draw does not loose it PASS  arrows 0 draw_t 1.10
+AKCHECK pin early release: a dash keeps the draw, charging on through the roll, and looses nothing PASS  draw 0.30 -> 0.43 arrows 0
+AKCHECK pin early release: letting go after the dash looses one arrow from the carried draw PASS  arrows 1 kind arrow
+AKCHECK pin readout: the line leaves Lace along the aim line and the fill grows out of its start PASS  from (12.42019, 32.73116) fill from (12.42019, 32.73116)
+AKCHECK pin readout: the fill fraction tracks the draw time PASS  fill 0.394 vs 0.417 at t 0.48
+AKCHECK pin readout: the perfect-timing circle sits on the line at the Empowered fraction PASS  at 0.522 want 0.522
+AKCHECK pin readout: the circle is quiet on every frame before the fill reaches it PASS  t 0.630
+AKCHECK pin readout: the circle flashes on the very frame the fill reaches it PASS  fill 1.0 drawn 0.533 want 0.522 r 0.49
+AKCHECK pin readout: past the window it moves on: one circle, quiet, at the end of the line for Supercharged PASS  fill -1.0 at 7.02 of 7.02
+AKCHECK pin readout: and flashes when the fill reaches it at Supercharged PASS  t 1.180
+AKCHECK pin readout: no V and no UI: no cursor ring, no flare, no bow glint, all through the draw PASS  { "charge": -1.0, "flare": 0.0, "perfect": 0.0, "at": "cursor" } glint false chg {  }
+AKCHECK pin readout: after the last window the circle goes PASS  t 1.630
+AKCHECK pin readout: full draw runs one line from Lace along the aim line, past the cursor, to max range PASS  len 15.4 cursor 7.6
+AKCHECK pin readout: release -0.05 s from 0.60 s: perfect false, and the flash agrees PASS  perfects +0 lit false
+AKCHECK pin readout: release -0.05 s from 1.15 s: perfect false, and the flash agrees PASS  perfects +0 lit false
+AKCHECK pin readout: release +0.02 s from 0.60 s: perfect true, and the flash agrees PASS  perfects +1 lit true
+AKCHECK pin readout: release +0.02 s from 1.15 s: perfect true, and the flash agrees PASS  perfects +1 lit true
+AKCHECK pin readout: release +0.33 s from 0.60 s: perfect true, and the flash agrees PASS  perfects +1 lit true
+AKCHECK pin readout: release +0.33 s from 1.15 s: perfect true, and the flash agrees PASS  perfects +1 lit true
+AKCHECK pin readout: release +0.39 s from 0.60 s: perfect false, and the flash agrees PASS  perfects +0 lit false
+AKCHECK pin readout: release +0.39 s from 1.15 s: perfect false, and the flash agrees PASS  perfects +0 lit false
+AKCHECK pin readout: the perfect release burst sits on the aim line at the bow, with no cursor star PASS  perfect true off 0.000
+AKCHECK 114 needle: nothing on the bow before the hold PASS  
+AKCHECK 114 needle: on the bow by 0.3 s, pointing along the aim PASS  visible true dot 1.00
+AKCHECK 114 needle: oversized, over 2.5 times a loosed arrow PASS  2.34 m
+AKCHECK 114 needle: its eye rides the bow's nock point (the model's nock anchor), not a body offset PASS  eye (8.332253, 2.730424, 32.63807) nock (8.332253, 2.730424, 32.63807)
+AKCHECK 114 needle: the red thread trails behind the eye PASS  -1.91 m
+AKCHECK 114 slow: she moves at the data's share of her speed while she holds RMB PASS  free 5.50 held 2.09
+AKCHECK 114 needle: it glows up with the charge, the silver going red-hot PASS  glow 0.22 -> 0.76 k 1.00
+AKCHECK 114 V: none in the Heavy Shot hold or the bow draw PASS  
+AKCHECK 114 needle: gone the moment it's loosed PASS  visible false
+AKCHECK 114 slow: back to full speed after the shot PASS  5.49 vs 5.50
+AKCHECK 114 needle: a stun drops it        PASS  up true visible false
+AKCHECK pin draw: the arrow nocks within 0.05 s of the press (arc_draw, the string hand on the string) PASS  anim arc_draw draw_t 0.07
+AKCHECK pin draw: the pose runs on the draw's own clock PASS  clock 0.57 draw_t 0.58
+AKCHECK pin draw: a quick draw keeps the pose and the stage cues together PASS  clock 0.45 draw_t 0.48
+AKCHECK pin draw: no pose pop between stages (the biggest 10 ms step is a smooth ramp) PASS  worst 0.015
+AKCHECK pin draw: each release starts from the pose the draw held (no pop) PASS  worst 0.000
+AKCHECK pin heavy: the arrow is the bow's arrow made much bigger (PinFx.HEAVY_SCALE) with a long trail PASS  scale x6.0 trail 7.0 vs 2.6
+AKCHECK pin heavy: the telegraph while held is a thick gold lane with a tip, from Lace along the aim line PASS  width 0.50 tip true
+AKCHECK pin heavy: it spawns its own projectile type (heavy), never an LMB arrow type PASS  heavy 1 lmb 0
+AKCHECK pin heavy: a release burst at the bow's mouth, wider than the bow cues, with a screen kick PASS  scale 1.6 kicks 1
+AKCHECK pin heavy: it pins the foe to the wall and the target flashes PASS  pins 1 stun 1.03 flash 0.20
+AKCHECK pin heavy: a wall pin leaves nothing in the wall or on the ground (the owner's 11-08 note) PASS  standing 8, 8 before
+AKCHECK pin dash table: LMB, RMB / E / X fire (the source is silent), a draw carries through a dash PASS  
+AKCHECK pin dash > LMB: a tap during the roll draws and looses (no buffering) PASS  rolling true loosed 40.18 -> 45.48
+AKCHECK pin dash > RMB and E: both start during the dash PASS  rmb true e true
+AKCHECK dash moves ["pin_roll", "pin_flick"]: each is its own move, none shared PASS  ["pin_roll", "pin_flick"]
+AKCHECK dash moves ["pin_roll", "pin_flick"]: each move's length fits its dash plus a short settle PASS  worst +0.20 s
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+       [13] combos_of (res://tools/dash_flow_check.gd:68)
+       [14] pin (res://tools/pin_bjorn_owner_check.gd:57)
+       [15] done (res://tools/archetype_check.gd:183)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+       [13] combos_of (res://tools/dash_flow_check.gd:68)
+       [14] pin (res://tools/pin_bjorn_owner_check.gd:57)
+       [15] done (res://tools/archetype_check.gd:183)
+DASHFLOW ok   archer jump -> lmb: fire (row: fire)
+DASHFLOW ok   archer lmb -> ground out of it: act (row: fire)
+DASHFLOW ok   archer lmb -> air out of it: act (row: fire)
+DASHFLOW ok   archer lmb -> jump out of it: act (row: fire)
+DASHFLOW ok   archer lmb ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   archer lmb air Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW note archer lmb let go after a plain hold: speed 3.7 -> 4.2 m/s
+DASHFLOW note archer lmb let go after ground: speed 1.0 -> 4.2 m/s
+DASHFLOW ok   archer hold lmb through ground: keep (row: keep)
+DASHFLOW ok   archer hold lmb through ground: sourced (keep)
+DASHFLOW note archer lmb let go after air in the air: speed 1.0 -> 3.2 m/s
+DASHFLOW ok   archer hold lmb through air: keep (row: keep)
+DASHFLOW ok   archer hold lmb through air: sourced (keep)
+DASHFLOW note archer lmb let go after jump in the air: speed 3.7 -> 4.2 m/s
+DASHFLOW ok   archer hold lmb through jump: keep (row: keep)
+DASHFLOW ok   archer hold lmb through jump: sourced (keep)
+DASHFLOW ok   archer dash pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer dash pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer jump pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer lmb pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   archer jump -> rmb: fire (row: fire)
+DASHFLOW ok   archer rmb -> ground out of it: act (row: fire)
+DASHFLOW ok   archer rmb -> air out of it: act (row: fire)
+DASHFLOW ok   archer rmb -> jump out of it: act (row: fire)
+DASHFLOW ok   archer rmb ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   archer rmb air Space: lock 0.02s, at 25/50/75%: end 0.10s, now, now
+DASHFLOW note archer rmb let go after a plain hold: speed 2.0 -> 5.3 m/s
+DASHFLOW note archer rmb let go after ground: speed 1.0 -> 5.2 m/s
+DASHFLOW ok   archer hold rmb through ground: keep (row: keep)
+DASHFLOW ok   archer hold rmb through ground: sourced (keep)
+DASHFLOW note archer rmb let go after air in the air: speed 1.0 -> 3.2 m/s
+DASHFLOW ok   archer hold rmb through air: keep (row: keep)
+DASHFLOW ok   archer hold rmb through air: sourced (keep)
+DASHFLOW note archer rmb let go after jump in the air: speed 2.0 -> 4.1 m/s
+DASHFLOW ok   archer hold rmb through jump: keep (row: keep)
+DASHFLOW ok   archer hold rmb through jump: sourced (keep)
+DASHFLOW ok   archer rmb pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer rmb pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   archer jump -> e: fire (row: fire)
+DASHFLOW ok   archer e -> ground out of it: act (row: fire)
+DASHFLOW ok   archer e -> air out of it: act (row: fire)
+DASHFLOW ok   archer e -> jump out of it: act (row: fire)
+DASHFLOW ok   archer e ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   archer e air Space: lock 0.58s, at 25/50/75%: end 0.47s, end 0.32s, end 0.18s
+DASHFLOW ok   archer e pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer e pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   archer jump -> x: fire (row: fire)
+DASHFLOW ok   archer x -> ground out of it: act (row: fire)
+DASHFLOW ok   archer x -> air out of it: act (row: fire)
+DASHFLOW ok   archer x -> jump out of it: act (row: fire)
+DASHFLOW ok   archer x ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   archer x air Space: lock 0.47s, at 25/50/75%: end 0.38s, end 0.27s, end 0.15s
+DASHFLOW ok   archer x pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer x pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   archer jump -> q: fire (row: fire)
+DASHFLOW ok   archer q -> ground out of it: act (row: fire)
+DASHFLOW ok   archer q -> air out of it: act (row: fire)
+DASHFLOW ok   archer q -> jump out of it: act (row: fire)
+DASHFLOW ok   archer q pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   archer q pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+AKCHECK pin item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move PASS  0 failing (the DASHFLOW lines)
+AKCHECK parity pin: drawing she walks slower (footage f111-116), about 0.7 of her run PASS  3.9 of 5.1 m/s
+AKCHECK parity pin: mid-draw the body turns to a moved cursor at once (the source turns throughout) PASS  0 deg
+AKCHECK parity pin: the arrow leaves along the new aim, while walking PASS  0.0 deg
+AKCHECK parity pin: the release is a snap (string hand back within 0.1s, settled by 0.45s; footage: 1 frame) PASS  arc_loose 0.05 / 0.42
+AKCHECK parity pin: the next draw starts about 0.5s after the release (card: 0.5s) PASS  0.50 s
+AKCHECK audit pin: cooldowns from the data (Phase Walk 9.5s, Rain of Arrows 15s, Virideth's Fury 60s) PASS  
+AKCHECK audit pin: no knock heal and no instant Focus draw in the kit data PASS  
+AKCHECK audit pin: the Heavy Shot stops on the first foe (data: one target, a knockback; no pierce) PASS  30 / 0
+AKCHECK combo archer: tall climb, climb_tall is on the source's Hunters only PASS  ["archer", "juggernaut"]
+AKCHECK combo archer: tall climb, archer reaches a double-high ledge PASS  stood 3.20 of 3.20 m
+AKCHECK combo archer: tall climb, archer cannot reach 5 terraces PASS  stood 0.00 of 4.00 m
+AKCHECK combo archer: tall climb, archer cannot reach it with her back to it PASS  stood 0.00 of 3.20 m
+AKCHECK combo archer: tall climb, juggernaut reaches a double-high ledge PASS  stood 3.20 of 3.20 m
+AKCHECK combo archer: tall climb, juggernaut cannot reach 5 terraces PASS  stood 0.00 of 4.00 m
+AKCHECK combo archer: tall climb, gunslinger cannot reach a double-high ledge PASS  stood 0.00 of 3.20 m
+AKCHECK combo archer: tall climb, gunslinger still reaches a single-high ledge PASS  stood 1.60 of 1.60 m
+AKCHECK lace cancels: every dash-flow row names its source PASS  []
+AKCHECK lace cancels: the 15 rows no source settles are [?] and run item 51's default PASS  []
+AKCHECK lace cancels: the draw through a jump or a dash is the owner's (item 51 names it) PASS  
+AKCHECK lace cancels: draw > E: the wall goes up and the draw keeps charging PASS  e cd 14.8 draw 0.52 -> 0.73
+SCRIPT ERROR: Invalid access to property or key 'nock_t' on a base object of type 'Node3D (PinUlt)'.
+          at: _during_draw (res://tools/lace_cancels_check.gd:103)
+          GDScript backtrace (most recent call first):
+              [0] _during_draw (res://tools/lace_cancels_check.gd:103)
+              [1] cancels (res://tools/lace_cancels_check.gd:30)
+              [2] run (res://tools/archer_bulwark_combo_check.gd:42)
+              [3] tall (res://tools/tall_climb_check.gd:72)
+              [4] done (res://tools/archetype_check.gd:183)
+AKCHECK lace cancels: Heavy Shot held > E: the wall goes up, the hold carries on PASS  e cd 14.9 held true
+AKCHECK lace cancels: Heavy Shot held > X: three shots empowered, the hold carries on PASS  ult true held true
+AKCHECK lace cancels: Heavy Shot held > Shift: she rolls at once, the hold carries through (into_dash.rmb) PASS  rolling true held true
+AKCHECK lace cancels: Spirit Walk > LMB: she draws and looses, still walking PASS  walking true loosed true on true
+AKCHECK lace cancels: Spirit Walk > RMB: the Heavy Shot draws, still walking PASS  walking true held true on true
+AKCHECK lace cancels: Spirit Walk > E: the wall goes up, still walking PASS  walking true on true
+AKCHECK lace cancels: Spirit Walk > X: three shots empowered, still walking PASS  walking true ult true on true
+AKCHECK one bow LMB>RMB: the bow is drawn first PASS  arc_draw
+AKCHECK one bow LMB>RMB: the RMB press drops the draw with no arrow PASS  draw -1.00 rmb true anim arc_heavy_wind
+AKCHECK one bow LMB>RMB: a still-held LMB doesn't draw while the Heavy Shot is held PASS  draw -1.00 aim true anim arc_heavy_wind
+AKCHECK one bow LMB>RMB: letting LMB go looses nothing PASS  
+AKCHECK one bow LMB>RMB: RMB's release looses the one Heavy Shot, no bow arrow PASS  kicks 1 charges 2.0 -> 1.0
+AKCHECK one bow RMB>LMB: the Heavy Shot is held first PASS  arc_heavy_wind
+AKCHECK one bow RMB>LMB: the LMB press drops the Heavy Shot with no shot and no charge spent PASS  rmb false aim false charges 2.0 -> 2.0 anim arc_draw
+AKCHECK one bow RMB>LMB: the bow draws in its place PASS  arc_draw
+AKCHECK one bow RMB>LMB: LMB's release looses one bow arrow; the still-held RMB loosed nothing PASS  kicks 0 charges 2.0 -> 2.0
+AKCHECK pin look: a portal where she goes into the rock and one where she comes out PASS  portals 2, x from the rock [-0.54, 1.52]
+AKCHECK pin look: nothing bursts on the roll (no portal; spirit_go has no flare, ring, disc or portal) PASS  portals on the roll 0
+AKCHECK pin look: her screen washes for the whole walk, darker inside the rock, clear after it PASS  walking 0.45 inside 1.00 after 0.00
+AKCHECK pin look: gameplay as before: 2.8 s after the roll, through the rock, a spirit the whole walk PASS  walk 2.80 lasted 3.08 (roll 0.27) x 15.2 (rock 13)
+AKCHECK pin look: ending inside the rock puts her back at the entry, a portal there PASS  snaps 1 portals +1 x 11.4 (rock 13)
+AKCHECK pin look: ending inside a ledge sets her on top, a portal there PASS  portals +1 y +1.60
+AKCHECK pin look: the portal goes to every game (hvfx, net on) and opens there PASS  net true, portals there 1
+AKCHECK DONE, 233 checks, failures: 1
+ERROR: 5 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 34 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 262: leaked 5592432 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 263: leaked 11184824 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 208: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 213: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 215: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 273: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 274: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 277: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 281: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 283: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 285: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 284: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 287: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 290: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 292: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 291: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 294: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 293: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 295: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 298: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 297: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 300: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 299: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 302: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 301: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 305: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 303: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 308: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 306: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 310: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 309: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 312: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 311: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 315: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 313: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 317: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 316: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 319: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 318: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 321: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 320: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 324: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 322: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 329: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 325: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 331: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 330: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 334: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 332: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 336: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 335: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 338: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 28 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

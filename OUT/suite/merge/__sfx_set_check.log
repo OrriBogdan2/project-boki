@@ -1,0 +1,551 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SFXSET ok   the loudness table loads
+SFXSET ok   abyss: 4 sounds on file and at level 
+SFXSET ok   abyss: 1 sounds with their own reach (wrong: [])
+SFXSET ok   abyss: 1 loops repeat seamlessly []
+SFXSET ok   abyss_fall: 4 sounds on file and at level 
+SFXSET ok   abyss_fall: 0 sounds with their own reach (wrong: [])
+SFXSET ok   abyss_fall: 1 loops repeat seamlessly []
+SFXSET ok   archer: 32 sounds on file and at level 
+SFXSET ok   archer: 0 sounds with their own reach (wrong: [])
+SFXSET ok   archer: 0 loops repeat seamlessly []
+SFXSET ok   archer: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   archer: a weapon fire sound
+SFXSET ok   archer: signature sounds ["archer_thread_twang"] (missing [])
+SFXSET ok   archer: signature weapon longbow plays its own archer_thread_twang, not a stock sound
+SFXSET ok   archer: HeroSfx picks its own (["archer_dash", "archer_step_grass", "archer_hurt"])
+SFXSET ok   archer: every sound its kit plays exists (silent: [])
+SFXSET ok   ashwick: 24 sounds on file and at level 
+SFXSET ok   ashwick: 0 sounds with their own reach (wrong: [])
+SFXSET ok   ashwick: 0 loops repeat seamlessly []
+SFXSET ok   ashwick: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   ashwick: a weapon fire sound
+SFXSET ok   ashwick: signature sounds ["lw_roar", "ashwick_tank_hiss"] (missing [])
+SFXSET ok   ashwick: signature weapon flamethrower plays its own lw_roar, not a stock sound
+SFXSET ok   ashwick: HeroSfx picks its own (["ashwick_dash", "ashwick_step_grass", "ashwick_hurt"])
+SFXSET ok   ashwick: every sound its kit plays exists (silent: [])
+SFXSET ok   barks: 52 sounds on file and at level 
+SFXSET ok   barks: 13 sounds with their own reach (wrong: [])
+SFXSET ok   barks: 0 loops repeat seamlessly []
+SFXSET ok   blight_mobs: 2 sounds on file and at level 
+SFXSET ok   blight_mobs: 0 sounds with their own reach (wrong: [])
+SFXSET ok   blight_mobs: 0 loops repeat seamlessly []
+SFXSET ok   boki: 65 sounds on file and at level 
+SFXSET ok   boki: 5 sounds with their own reach (wrong: [])
+SFXSET ok   boki: 1 loops repeat seamlessly []
+SFXSET ok   boki_voices: 250 sounds on file and at level 
+SFXSET ok   boki_voices: 0 sounds with their own reach (wrong: [])
+SFXSET ok   boki_voices: 0 loops repeat seamlessly []
+SFXSET ok   boki_voices: 50 shown species, 5 moods, 2 takes, none on a shared cue (gaps [])
+SFXSET ok   boki_voices: every species sounds different (same [])
+SFXSET ok   boki_voices: an unknown species falls back (["kin_happy", "kin_alert", "kin_unsure", "boki_sleep", "kinhit"])
+SFXSET ok   boss: 37 sounds on file and at level 
+SFXSET ok   boss: 31 sounds with their own reach (wrong: [])
+SFXSET ok   boss: 0 loops repeat seamlessly []
+SFXSET ok   bowl: 9 sounds on file and at level 
+SFXSET ok   bowl: 0 sounds with their own reach (wrong: [])
+SFXSET ok   bowl: 1 loops repeat seamlessly []
+SFXSET ok   breakables: 8 sounds on file and at level 
+SFXSET ok   breakables: 0 sounds with their own reach (wrong: [])
+SFXSET ok   breakables: 0 loops repeat seamlessly []
+SFXSET ok   build: 7 sounds on file and at level 
+SFXSET ok   build: 0 sounds with their own reach (wrong: [])
+SFXSET ok   build: 0 loops repeat seamlessly []
+SFXSET ok   bulwark: 33 sounds on file and at level 
+SFXSET ok   bulwark: 0 sounds with their own reach (wrong: [])
+SFXSET ok   bulwark: 0 loops repeat seamlessly []
+SFXSET ok   bulwark: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   bulwark: a weapon fire sound
+SFXSET ok   bulwark: signature sounds ["bulwark_hammer_clang", "bulwark_hull_creak"] (missing [])
+SFXSET ok   bulwark: signature weapon tower_shield plays its own bjorn_spin, not a stock sound
+SFXSET ok   bulwark: HeroSfx picks its own (["bulwark_dash", "bulwark_step_grass", "bulwark_hurt"])
+SFXSET ok   bulwark: every sound its kit plays exists (silent: [])
+SFXSET ok   capture: 6 sounds on file and at level 
+SFXSET ok   capture: 1 sounds with their own reach (wrong: [])
+SFXSET ok   capture: 0 loops repeat seamlessly []
+SFXSET ok   cc: 10 sounds on file and at level 
+SFXSET ok   cc: 5 sounds with their own reach (wrong: [])
+SFXSET ok   cc: 0 loops repeat seamlessly []
+SFXSET ok   chop: 6 sounds on file and at level 
+SFXSET ok   chop: 0 sounds with their own reach (wrong: [])
+SFXSET ok   chop: 0 loops repeat seamlessly []
+SFXSET ok   combat: 1 sounds on file and at level 
+SFXSET ok   combat: 0 sounds with their own reach (wrong: [])
+SFXSET ok   combat: 0 loops repeat seamlessly []
+SFXSET ok   dash: 16 sounds on file and at level 
+SFXSET ok   dash: 0 sounds with their own reach (wrong: [])
+SFXSET ok   dash: 0 loops repeat seamlessly []
+SFXSET ok   dolm: 24 sounds on file and at level 
+SFXSET ok   dolm: 0 sounds with their own reach (wrong: [])
+SFXSET ok   dolm: 0 loops repeat seamlessly []
+SFXSET ok   dolm: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   dolm: a weapon fire sound
+SFXSET ok   dolm: signature sounds ["dolm_rock_crunch"] (missing [])
+SFXSET ok   dolm: signature weapon rubble_fists plays its own br_punch, not a stock sound
+SFXSET ok   dolm: HeroSfx picks its own (["dolm_dash", "dolm_step_grass", "dolm_hurt"])
+SFXSET ok   dolm: every sound its kit plays exists (silent: [])
+SFXSET ok   dredge: 24 sounds on file and at level 
+SFXSET ok   dredge: 0 sounds with their own reach (wrong: [])
+SFXSET ok   dredge: 0 loops repeat seamlessly []
+SFXSET ok   dredge: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   dredge: a weapon fire sound
+SFXSET ok   dredge: signature sounds ["dredge_coin_jingle", "dredge_junk_clatter", "dredge_pickup"] (missing [])
+SFXSET ok   dredge: signature weapon shotgun plays its own dr_shot, not a stock sound
+SFXSET ok   dredge: HeroSfx picks its own (["dredge_dash", "dredge_step_grass", "dredge_hurt"])
+SFXSET ok   dredge: every sound its kit plays exists (silent: [])
+SFXSET ok   egg: 3 sounds on file and at level 
+SFXSET ok   egg: 0 sounds with their own reach (wrong: [])
+SFXSET ok   egg: 0 loops repeat seamlessly []
+SFXSET ok   garden: 65 sounds on file and at level 
+SFXSET ok   garden: 0 sounds with their own reach (wrong: [])
+SFXSET ok   garden: 2 loops repeat seamlessly []
+SFXSET ok   gil: 24 sounds on file and at level 
+SFXSET ok   gil: 0 sounds with their own reach (wrong: [])
+SFXSET ok   gil: 0 loops repeat seamlessly []
+SFXSET ok   gil: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   gil: a weapon fire sound
+SFXSET ok   gil: signature sounds ["gil_thrust", "gil_beached"] (missing [])
+SFXSET ok   gil: signature weapon swordfish plays its own gil_thrust, not a stock sound
+SFXSET ok   gil: HeroSfx picks its own (["gil_dash", "gil_step_grass", "gil_hurt"])
+SFXSET ok   gil: every sound its kit plays exists (silent: [])
+SFXSET ok   glider: 15 sounds on file and at level 
+SFXSET ok   glider: 0 sounds with their own reach (wrong: [])
+SFXSET ok   glider: 11 loops repeat seamlessly []
+SFXSET ok   glint: 8 sounds on file and at level 
+SFXSET ok   glint: 1 sounds with their own reach (wrong: [])
+SFXSET ok   glint: 2 loops repeat seamlessly []
+SFXSET ok   gloves: 21 sounds on file and at level 
+SFXSET ok   gloves: 0 sounds with their own reach (wrong: [])
+SFXSET ok   gloves: 0 loops repeat seamlessly []
+SFXSET ok   guns: 5 sounds on file and at level 
+SFXSET ok   guns: 0 sounds with their own reach (wrong: [])
+SFXSET ok   guns: 0 loops repeat seamlessly []
+SFXSET ok   gunslinger: 22 sounds on file and at level 
+SFXSET ok   gunslinger: 1 sounds with their own reach (wrong: [])
+SFXSET ok   gunslinger: 0 loops repeat seamlessly []
+SFXSET ok   gunslinger: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   gunslinger: a weapon fire sound
+SFXSET ok   gunslinger: signature sounds ["gunslinger_grenade_thunk"] (missing [])
+SFXSET ok   gunslinger: signature weapon quill_rifle plays its own vn_rifle, not a stock sound
+SFXSET ok   gunslinger: HeroSfx picks its own (["gunslinger_dash", "gunslinger_step_grass", "gunslinger_hurt"])
+SFXSET ok   gunslinger: every sound its kit plays exists (silent: [])
+SFXSET ok   hatch: 12 sounds on file and at level 
+SFXSET ok   hatch: 0 sounds with their own reach (wrong: [])
+SFXSET ok   hatch: 0 loops repeat seamlessly []
+SFXSET ok   health: 1 sounds on file and at level 
+SFXSET ok   health: 0 sounds with their own reach (wrong: [])
+SFXSET ok   health: 0 loops repeat seamlessly []
+SFXSET ok   heart: 19 sounds on file and at level 
+SFXSET ok   heart: 3 sounds with their own reach (wrong: [])
+SFXSET ok   heart: 2 loops repeat seamlessly []
+SFXSET ok   hit: 6 sounds on file and at level 
+SFXSET ok   hit: 0 sounds with their own reach (wrong: [])
+SFXSET ok   hit: 0 loops repeat seamlessly []
+SFXSET ok   juggernaut: 29 sounds on file and at level 
+SFXSET ok   juggernaut: 0 sounds with their own reach (wrong: [])
+SFXSET ok   juggernaut: 0 loops repeat seamlessly []
+SFXSET ok   juggernaut: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   juggernaut: a weapon fire sound
+SFXSET ok   juggernaut: signature sounds ["juggernaut_chain_rattle", "juggernaut_blade_hiss", "juggernaut_enrage"] (missing [])
+SFXSET ok   juggernaut: signature weapon greatsword plays its own juggernaut_blade_hiss, not a stock sound
+SFXSET ok   juggernaut: HeroSfx picks its own (["juggernaut_dash", "juggernaut_step_grass", "juggernaut_hurt"])
+SFXSET ok   juggernaut: every sound its kit plays exists (silent: [])
+SFXSET ok   last_alive: 3 sounds on file and at level 
+SFXSET ok   last_alive: 0 sounds with their own reach (wrong: [])
+SFXSET ok   last_alive: 1 loops repeat seamlessly []
+SFXSET ok   legendary: 6 sounds on file and at level 
+SFXSET ok   legendary: 0 sounds with their own reach (wrong: [])
+SFXSET ok   legendary: 1 loops repeat seamlessly []
+SFXSET ok   mage: 28 sounds on file and at level 
+SFXSET ok   mage: 0 sounds with their own reach (wrong: [])
+SFXSET ok   mage: 1 loops repeat seamlessly []
+SFXSET ok   mage: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   mage: a weapon fire sound
+SFXSET ok   mage: signature sounds ["mage_zap", "mage_bubble_pop"] (missing [])
+SFXSET ok   mage: signature weapon coilcaster plays its own vv_bolt, not a stock sound
+SFXSET ok   mage: HeroSfx picks its own (["mage_dash", "mage_step_grass", "mage_hurt"])
+SFXSET ok   mage: every sound its kit plays exists (silent: [])
+SFXSET ok   mobs: 9 sounds on file and at level 
+SFXSET ok   mobs: 0 sounds with their own reach (wrong: [])
+SFXSET ok   mobs: 0 loops repeat seamlessly []
+SFXSET ok   ostra: 21 sounds on file and at level 
+SFXSET ok   ostra: 1 sounds with their own reach (wrong: [])
+SFXSET ok   ostra: 1 loops repeat seamlessly []
+SFXSET ok   ostra: voice, dash and ["hover"] (missing [])
+SFXSET ok   ostra: no feet, so no step files ([]) and ostra_hover is a loop
+SFXSET ok   ostra: a weapon fire sound
+SFXSET ok   ostra: signature sounds ["ostra_music_box", "ostra_spring_boing"] (missing [])
+SFXSET ok   ostra: signature weapon tether_lantern plays its own os_orb, not a stock sound
+SFXSET ok   ostra: HeroSfx picks its own (["ostra_dash", "ostra_hover", "ostra_hurt"])
+SFXSET ok   ostra: every sound its kit plays exists (silent: [])
+SFXSET ok   quest: 5 sounds on file and at level 
+SFXSET ok   quest: 1 sounds with their own reach (wrong: [])
+SFXSET ok   quest: 1 loops repeat seamlessly []
+SFXSET ok   raid: 5 sounds on file and at level 
+SFXSET ok   raid: 4 sounds with their own reach (wrong: [])
+SFXSET ok   raid: 0 loops repeat seamlessly []
+SFXSET ok   rimewright: 29 sounds on file and at level 
+SFXSET ok   rimewright: 0 sounds with their own reach (wrong: [])
+SFXSET ok   rimewright: 2 loops repeat seamlessly []
+SFXSET ok   rimewright: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   rimewright: a weapon fire sound
+SFXSET ok   rimewright: signature sounds ["rimewright_skate_scrape", "rimewright_chime"] (missing [])
+SFXSET ok   rimewright: signature weapon hoar_fan plays its own rime_shard, not a stock sound
+SFXSET ok   rimewright: HeroSfx picks its own (["rimewright_dash", "rimewright_step_grass", "rimewright_hurt"])
+SFXSET ok   rimewright: every sound its kit plays exists (silent: [])
+SFXSET ok   rocket: 5 sounds on file and at level 
+SFXSET ok   rocket: 3 sounds with their own reach (wrong: [])
+SFXSET ok   rocket: 2 loops repeat seamlessly []
+SFXSET ok   shield: 6 sounds on file and at level 
+SFXSET ok   shield: 3 sounds with their own reach (wrong: [])
+SFXSET ok   shield: 0 loops repeat seamlessly []
+SFXSET ok   steps: 6 sounds on file and at level 
+SFXSET ok   steps: 0 sounds with their own reach (wrong: [])
+SFXSET ok   steps: 0 loops repeat seamlessly []
+SFXSET ok   tender: 27 sounds on file and at level 
+SFXSET ok   tender: 0 sounds with their own reach (wrong: [])
+SFXSET ok   tender: 1 loops repeat seamlessly []
+SFXSET ok   tender: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   tender: a weapon fire sound
+SFXSET ok   tender: signature sounds ["tender_lantern_chime", "tender_cheer"] (missing [])
+SFXSET ok   tender: signature weapon lantern_crook plays its own tend_ember, not a stock sound
+SFXSET ok   tender: HeroSfx picks its own (["tender_dash", "tender_step_grass", "tender_hurt"])
+SFXSET ok   tender: every sound its kit plays exists (silent: [])
+SFXSET ok   thief: 26 sounds on file and at level 
+SFXSET ok   thief: 0 sounds with their own reach (wrong: [])
+SFXSET ok   thief: 1 loops repeat seamlessly []
+SFXSET ok   thief: voice, dash and ["step_grass", "step_stone", "step_wood", "step_snow"] (missing [])
+SFXSET ok   thief: a weapon fire sound
+SFXSET ok   thief: signature sounds ["thief_flintlock_crack", "dj_bolt", "thief_cock"] (missing [])
+SFXSET ok   thief: signature weapon arc_bolts plays its own dj_bolt, not a stock sound
+SFXSET ok   thief: HeroSfx picks its own (["thief_dash", "thief_step_grass", "thief_hurt"])
+SFXSET ok   thief: every sound its kit plays exists (silent: [])
+SFXSET ok   tide: 3 sounds on file and at level 
+SFXSET ok   tide: 1 sounds with their own reach (wrong: [])
+SFXSET ok   tide: 1 loops repeat seamlessly []
+SFXSET ok   train: 7 sounds on file and at level 
+SFXSET ok   train: 6 sounds with their own reach (wrong: [])
+SFXSET ok   train: 2 loops repeat seamlessly []
+SFXSET ok   training: 5 sounds on file and at level 
+SFXSET ok   training: 0 sounds with their own reach (wrong: [])
+SFXSET ok   training: 0 loops repeat seamlessly []
+SFXSET ok   ui: 38 sounds on file and at level 
+SFXSET ok   ui: 0 sounds with their own reach (wrong: [])
+SFXSET ok   ui: 0 loops repeat seamlessly []
+SFXSET ok   ult_cues: 17 sounds on file and at level 
+SFXSET ok   ult_cues: 16 sounds with their own reach (wrong: [])
+SFXSET ok   ult_cues: 0 loops repeat seamlessly []
+SFXSET ok   warn: 3 sounds on file and at level 
+SFXSET ok   warn: 0 sounds with their own reach (wrong: [])
+SFXSET ok   warn: 0 loops repeat seamlessly []
+SFXSET ok   wisp: 2 sounds on file and at level 
+SFXSET ok   wisp: 0 sounds with their own reach (wrong: [])
+SFXSET ok   wisp: 1 loops repeat seamlessly []
+SFXSET ok   zone: 4 sounds on file and at level 
+SFXSET ok   zone: 1 sounds with their own reach (wrong: [])
+SFXSET ok   zone: 1 loops repeat seamlessly []
+SFXSET 54 sound sets
+SFXSET ok   settings: all 8 tabs sound, 12 sliders tick once a burst, 23 toggles sound higher on than off, 24 dropdowns sound []
+SFXSET ok   inventory: all 6 tabs sound []
+SFXSET ok   field book: a tile sounds pointed at (true) and picked (true), its page opens (true), Back sounds and returns (true)
+SFXSET ok   every roster Hunter has a <arch>_dash_air in dash.json (missing: [])
+SFXSET ok   13 Hunters: dash in the air and on the ground differ (wrong: [])
+SFXSET ok   the no-charge tick exists
+SFXSET ok   the shared dash_ground and dash_air exist
+SFXSET ok   10 warning and Boki sounds are wired []
+SFXSET ok   the heartbeat is under 30% health, quicker as health falls; the countdown is the last 5 s
+SFXSET ok   heartbeat only when hurt and up (full, 20 pct, downed, 0: [false, true, false, false])
+SFXSET ok   no set: the shared dash, and no voice line (["dash", ""])
+SFXSET ok   15 ult cues exist and carry (wrong: [])
+SFXSET ok   HeroUlt.press plays and sends the cue; the match plays others'
+SFXSET ok   ally and rival tags play at the one level
+SFXSET ok   the rival telegraph wind-up exists, has a gap, sits under the ult cues, wired to the aim telegraph
+SFXSET ok   vn_nuke_fall is 1.600 s, the fall is 1.60 s (within 50 ms)
+SFXSET ok   vn_nuke_fall carries past hearing range
+SFXSET ok   the kit plays vn_nuke_fall at the landing point on the cast
+SFXSET ok   garden minigames: 85 sound names, all exist (silent: [])
+SFXSET ok   garden: every bed has its file []
+SFXSET ok   garden: four day parts and rain pick beds ["garden_night", "garden_morning", "garden_midday", "garden_evening"]
+SFXSET ok   garden: pond full by the water, silent far off or with none
+SFXSET ok   garden: 3 loops at most at once (peak 3)
+SFXSET ok   garden: a new day part fades in over 20 s (20.0)
+SFXSET ok   garden: pond up by water 1.00, off far 0.00
+SFXSET ok   garden: every bed is on the Ambience bus, so the ambience volume setting governs it
+SFXSET ok   garden: never plays amb_match
+SFXSET ok   garden: no script of scripts/home asks for the match ambience
+SFXSET ok   build cues: 7 sounds exist (silent: [])
+SFXSET ok   build cues: wood or stone by material, a move is its own (["build_place_wood", "build_place_stone", "build_move"])
+SFXSET ok   build cues: every stone piece is in the catalog (unknown: [])
+SFXSET ok   build cues: one knock per attempt, then silent on that spot [true, false, true, false]
+SFXSET ok   build cues: quiet mutes pick and store, not the turn [false, false, true]
+SFXSET ok   build cues: farm and house play them all (missing [])
+SFXSET ok   strip chime: ui_open is in the UI set and has its file
+SFXSET ok   strip chime: sfx_levels has the calm and the ducked level { "objective": -10.0, "objective_fight": -20.0 }
+SFXSET ok   strip chime: plays through Sfx
+SFXSET ok   chop: the axe bite and pick strike come in 3 takes
+SFXSET ok   chop: every sound HomeGather plays exists (silent: [])
+SFXSET ok   chop: the axe, creak, fall, pick, crack and break are wired; no stand-ins
+SFXSET ok   rarity tiers: common 0, a rare species 1, a shimmer 2 [0, 1, 2]
+SFXSET ok   rarity stings exist, under the scan chime ["rarity_rare", "rarity_very_rare"]
+SFXSET ok   rarity stings: first sight, claim and hatch play them (unwired [])
+SFXSET ok   rarity stings: within 30 m, held in a loud fight
+SFXSET ok   channel loop (time): it sounds on her and the ally once the call starts
+SFXSET ok   channel loop (time): the ally's is quieter
+SFXSET ok   channel loop (time): X again does not stack a second loop (2)
+SFXSET ok   channel loop (time): both loops are gone the frame the channel ends (129 frames in)
+SFXSET ok   channel loop (ally out of reach): it sounds on her and the ally once the call starts
+SFXSET ok   channel loop (ally out of reach): the ally's is quieter
+SFXSET ok   channel loop (ally out of reach): X again does not stack a second loop (2)
+SFXSET ok   channel loop (ally out of reach): both loops are gone the frame the channel ends (1 frames in)
+SFXSET ok   channel loop (stun): it sounds on her and the ally once the call starts
+SFXSET ok   channel loop (stun): the ally's is quieter
+SFXSET ok   channel loop (stun): X again does not stack a second loop (2)
+SFXSET ok   channel loop (stun): both loops are gone the frame the channel ends (1 frames in)
+SFXSET ok   channel loop (knock): it sounds on her and the ally once the call starts
+SFXSET ok   channel loop (knock): the ally's is quieter
+SFXSET ok   channel loop (knock): X again does not stack a second loop (2)
+SFXSET ok   channel loop (knock): both loops are gone the frame the channel ends (1 frames in)
+SFXSET ok   channel loop (dead): it sounds on her and the ally once the call starts
+SFXSET ok   channel loop (dead): the ally's is quieter
+SFXSET ok   channel loop (dead): X again does not stack a second loop (2)
+SFXSET ok   channel loop (dead): both loops are gone the frame the channel ends (0 frames in)
+SFXSET ok   channel loop (ally dead): it sounds on her and the ally once the call starts
+SFXSET ok   channel loop (ally dead): the ally's is quieter
+SFXSET ok   channel loop (ally dead): X again does not stack a second loop (2)
+SFXSET ok   channel loop (ally dead): both loops are gone the frame the channel ends (1 frames in)
+SFXSET ok   channel loop (merge): it sounds on her and the ally once the call starts
+SFXSET ok   channel loop (merge): the ally's is quieter
+SFXSET ok   channel loop (merge): X again does not stack a second loop (2)
+SFXSET ok   channel loop (merge): both loops are gone the frame the channel ends (0 frames in)
+SFXSET ok   encore: no whirr while the ring is still growing
+SFXSET ok   encore: the whirr starts once the ring has grown
+SFXSET ok   encore: dashed 4.8 m off the cast point, the whirr 0.11 m from her
+SFXSET ok   encore: the whirr is gone as the ring ends (84 frames in)
+SFXSET ok   the rival-cast layer exists, reach 30 m
+SFXSET ok   13 Hunters: E and R each start the layer once, RMB and dash never (["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage", "dredge", "tender", "thief", "ostra", "gil"])
+SFXSET ok   a rival's cast at 5 m plays the layer, an ally's does not (true, false)
+SFXSET ok   a rival's cast at 40 m does not
+SFXSET ok   E and R (ability_used), X (UltCue) and other games' casts (hcast) play it
+SFXSET ok   level_up, rank_up and rank_max exist and are not positional
+SFXSET ok   every ranked slot has its own confirm pitch
+SFXSET ok   Hunter plays the rise and the rank cue once each, inside the is_local gates
+SFXSET ok   Kitefall: the press starts the cast
+SFXSET ok   Kitefall crouch: vv_ult_charge sounds 0 ms after the state change
+SFXSET ok   Kitefall rise: vv_ult_rise sounds 0 ms after the state change
+SFXSET ok   Kitefall fall: vv_ult_crack sounds 0 ms after the state change
+SFXSET ok   Kitefall after: vv_ult_slam sounds 0 ms after the state change
+SFXSET ok   Kitefall hover: the hum loop is on 17 ms after the hover starts
+SFXSET ok   Kitefall drop: the hum loop is off 0 ms after the drop starts
+SFXSET ok   held-fire weapons found: ["flamethrower", "hoar_fan", "minigun", "quill_rifle", "rifle", "smg"]
+SFXSET ok   lw_roar (flamethrower) 3 s at 80 ms: voices 11 plain -> 3 held, cap 3, 13 of 38 shots sound
+SFXSET ok   lw_roar: first shot is the base take, the rest go round 3 other takes without repeating ([0, 1, 2, 3, 1, 2, 3, 1])
+SFXSET ok   rime_shard (hoar_fan) 3 s at 80 ms: voices 6 plain -> 3 held, cap 3, 16 of 38 shots sound
+SFXSET ok   rime_shard: first shot is the base take, the rest go round 3 other takes without repeating ([0, 1, 2, 3, 1, 2, 3, 1])
+SFXSET ok   smg (minigun) 3 s at 80 ms: voices 8 plain -> 3 held, cap 3, 18 of 38 shots sound
+SFXSET ok   smg: first shot is the base take, the rest go round 3 other takes without repeating ([0, 1, 2, 3, 1, 2, 3, 1])
+SFXSET ok   vn_rifle (quill_rifle) 3 s at 80 ms: voices 6 plain -> 3 held, cap 3, 21 of 38 shots sound
+SFXSET ok   vn_rifle: first shot is the base take, the rest go round 3 other takes without repeating ([0, 1, 2, 3, 1, 2, 3, 1])
+SFXSET ok   gun_rifle (rifle) 3 s at 80 ms: voices 9 plain -> 3 held, cap 3, 15 of 38 shots sound
+SFXSET ok   gun_rifle: first shot is the base take, the rest go round 2 other takes without repeating ([0, 1, 2, 1, 2, 1, 2, 1])
+SFXSET ok   gun_smg (smg) 3 s at 80 ms: voices 4 plain -> 3 held, cap 3, 30 of 38 shots sound
+SFXSET ok   gun_smg: first shot is the base take, the rest go round 2 other takes without repeating ([0, 1, 2, 1, 2, 1, 2, 1])
+SFXSET ok   hit ticks: six families (["hit_gun", "hit_bow", "hit_blade", "hit_blunt", "hit_magic", "hit_thrown"])
+SFXSET ok   hit ticks: every Hunter's weapon names one of them ([])
+SFXSET ok   hit ticks: every family is some Hunter's weapon (unused [])
+SFXSET ok   hit ticks: shot, primary, ability ["hit_bow", "hit_bow", "hit"]
+SFXSET ok   hit ticks: no weapon tick or no Hunter, the shared one ["hit", "hit"]
+SFXSET ok   every boss move has its own cue (missing [])
+SFXSET ok   boss.gd plays no shared sound: its moves go through BossSfx
+SFXSET ok   cc stun: you hear cc_stun, a squadmate 6 m off cc_stun_mate (8.0 dB under), a rival and a squadmate 20 m off nothing ([["cc_stun"], ["cc_stun_mate"], [], []])
+SFXSET ok   cc root: you hear cc_root, a squadmate 6 m off cc_root_mate (8.0 dB under), a rival and a squadmate 20 m off nothing ([["cc_root"], ["cc_root_mate"], [], []])
+SFXSET ok   cc ground: you hear cc_ground, a squadmate 6 m off cc_ground_mate (8.0 dB under), a rival and a squadmate 20 m off nothing ([["cc_ground"], ["cc_ground_mate"], [], []])
+SFXSET ok   cc daze: you hear cc_daze, a squadmate 6 m off cc_daze_mate (8.0 dB under), a rival and a squadmate 20 m off nothing ([["cc_daze"], ["cc_daze_mate"], [], []])
+SFXSET ok   cc slow: you hear cc_slow, a squadmate 6 m off cc_slow_mate (8.0 dB under), a rival and a squadmate 20 m off nothing ([["cc_slow"], ["cc_slow_mate"], [], []])
+SFXSET ok   stacked CC plays once: a root 0.1 s after a stun is silent, a slow 0.4 s later plays (["cc_stun"] [] ["cc_slow"])
+SFXSET ok   a hit with stun, root and slow plays the stun; a 0.2 s slow and a stun refresh play nothing (stun//)
+SFXSET ok   Ent.hurt and KitStatus.apply play the cues where the status lands
+SFXSET ok   inventory cues: 5 sounds exist (silent: [])
+SFXSET ok   inventory cues: each plays its own sound (not: [])
+SFXSET ok   inventory cues: -30 dB, under a hit or shot (-17 dB)
+SFXSET ok   inventory cues: the inventory and loot code plays them (missing [])
+SFXSET ok   inventory cues: none played from hud.gd
+SFXSET ok   step check runs on the Hollow Crown (hollowcrown)
+SFXSET ok   the Hollow Crown has no plank bridges (its docks are gone)
+SFXSET ok   the Hollow Crown has a sky train
+SFXSET ok   a sky train car's deck is metal
+SFXSET ok   light on grass: archer plays archer_step_grass (["archer_step_grass"])
+SFXSET ok   medium on grass: dolm plays dolm_step_grass (["dolm_step_grass"])
+SFXSET ok   heavy on grass: ashwick plays ashwick_step_grass (["ashwick_step_grass"])
+SFXSET ok   grass: shared steps are louder the heavier the Hunter ([-13.0, -13.0, -13.0])
+SFXSET ok   light on stone: archer plays archer_step_stone (["archer_step_stone"])
+SFXSET ok   medium on stone: dolm plays dolm_step_stone (["dolm_step_stone"])
+SFXSET ok   heavy on stone: ashwick plays ashwick_step_stone (["ashwick_step_stone"])
+SFXSET ok   stone: shared steps are louder the heavier the Hunter ([-13.0, -13.0, -13.0])
+SFXSET ok   light on snow: archer plays archer_step_snow (["archer_step_snow"])
+SFXSET ok   medium on snow: dolm plays dolm_step_snow (["dolm_step_snow"])
+SFXSET ok   heavy on snow: ashwick plays ashwick_step_snow (["ashwick_step_snow"])
+SFXSET ok   snow: shared steps are louder the heavier the Hunter ([-13.0, -13.0, -13.0])
+SFXSET ok   light on metal: archer plays step_metal_light (["step_metal_light"])
+SFXSET ok   medium on metal: dolm plays step_metal_medium (["step_metal_medium"])
+SFXSET ok   heavy on metal: ashwick plays step_metal_heavy (["step_metal_heavy"])
+SFXSET ok   metal: shared steps are louder the heavier the Hunter ([-14.5, -13.0, -11.5])
+SFXSET ok   a plank bridge tile is wood
+SFXSET ok   light on wood: archer plays archer_step_wood (["archer_step_wood"])
+SFXSET ok   medium on wood: dolm plays dolm_step_wood (["dolm_step_wood"])
+SFXSET ok   heavy on wood: ashwick plays ashwick_step_wood (["ashwick_step_wood"])
+SFXSET ok   wood: shared steps are louder the heavier the Hunter ([-13.0, -13.0, -13.0])
+SFXSET ok   farm wading: light plays step_water_light
+SFXSET ok   farm wading: medium plays step_water_medium
+SFXSET ok   farm wading: heavy plays step_water_heavy
+SFXSET ok   rank_ready is a ui sound playing at -32.0 dBFS, 15.0 dB under a weapon shot
+SFXSET ok   the new-point chime is short (0.36 s)
+SFXSET ok   13 Hunters with a voice have all 4 callouts (missing [])
+SFXSET ok   the squad's Boki-down call carries past 30 m (short: [])
+SFXSET ok   the match ticks the callouts and reports knocks and Boki downs, here and from other games
+SFXSET ok   ambience bed amb_meadow.ogg
+SFXSET ok   ambience bed amb_cliffs.ogg
+SFXSET ok   ambience bed amb_water.ogg
+SFXSET ok   ambience bed amb_gust.ogg
+SFXSET ok   ambience bed amb_rain.ogg
+SFXSET ok   ambience bed amb_blight.ogg
+SFXSET ok   ambience bed amb_title.ogg
+SFXSET ok   ambience bed amb_match.ogg
+SFXSET ok   ambience bed amb_abyss.ogg
+SFXSET ok   ambience bed amb_ruins.ogg
+SFXSET ok   4 materials break with their own sound in 3 takes (wrong: [])
+SFXSET ok   keg: its own fuse hiss (0.45 s for a 0.45 s fuse) and blast
+SFXSET ok   3 chest tiers open with their own lid creak, the last for richer (wrong: [])
+SFXSET ok   gloves: every named sound exists (silent: [])
+SFXSET ok   gloves: Blink, Barrier, Hook and Rocket have their own sounds (13 do)
+SFXSET ok   moments: all 10 cues have files
+SFXSET ok   moments: friends once, as the bond reaches friend_at [["moment_a", "moment_b"]]
+SFXSET ok   moments: a lean shows one fleck from its first meal, all at full (1)
+SFXSET ok   moments: a lean that shows more flecks chimes garden_chime_part once
+SFXSET ok   moments: one cup fanfare per cup round (3)
+SFXSET ok   moments: Sprout, Bloom and Crown cards each play their own cup fanfare once, a card with no round none
+SFXSET ok   moments: every site names its cue and none plays unlock []
+SFXSET ok   17 Fusion cues and the end, tired, evolve sounds on file (missing [])
+SFXSET ok   3 forms: own cast, travel and hit, 9 sounds on file (silent [])
+SFXSET ok   training: 5 cues of its own set, each with its own file (off: [])
+SFXSET ok   training: the stations and the duel ring play their own cues, not the shared revive
+SFXSET ok   training: the duel ring counts 3-2-1 and sounds the horn once [3, 1]
+SFXSET ok   training: both beds have their file []
+SFXSET ok   training: full wind on the expanse, less on an island { "training_wind": 1.0, "training_island": 0.0 } { "training_wind": 0.35, "training_island": 1.0 }
+SFXSET ok   training: both beds play on the Ambience bus ["training_wind", "training_island"]
+SFXSET ok   training: never the match's wind, abyss or ruins beds
+SFXSET ok   every Boki type has a cast cue file []
+SFXSET ok   each of the 19 types has a cast cue []
+SFXSET ok   shadow maps to k_dark, ghost to k_ghost
+SFXSET ok   each theme maps to its own type (15)
+SFXSET ok   pick taken: the confirm family has takes
+SFXSET ok   pick taken: UI.pick_taken plays ui_confirm, not the hover tick
+SFXSET ok   pick taken: egg pick and Relic pick call it (missing [])
+SFXSET ok   UiSfx: 9 cues all have a file []
+SFXSET ok   heartbeat: silent at the line (0.25 of max health and armour)
+SFXSET ok   heartbeat: starts just under the line, 12 beats in 10 s
+SFXSET ok   heartbeat: faster as health drops (18 beats in 10 s near empty)
+SFXSET ok   heartbeat: stops when you heal back over the line
+SFXSET ok   heartbeat: stops when downed or out (a full share)
+SFXSET ok   heartbeat: on by default, sound on file
+SFXSET ok   voices: a Boki past earshot takes no slot
+SFXSET ok   voices: five Bokis at once sound 3
+SFXSET ok   voices: the same Boki twice inside its gap speaks once
+SFXSET ok   voices: a need gone urgent sulks once (1, then none)
+SFXSET hole mobs: mob _strike/spit:k_spore
+SFXSET hole mobs: mob _strike/volley:throw
+SFXSET hole mobs: mob _strike/fuse:boom
+SFXSET hole mobs: mob _strike/slam:k_rock
+SFXSET ok   mobs: no new shared or missing cue (4 known holes; new: [])
+SFXSET ok   mobs: every listed hole is still one (gone, drop from sfx_world.json: [])
+SFXSET hole pickups: loot_full denied:lock_rattle
+SFXSET hole pickups: pack take_ground:pickup
+SFXSET hole pickups: pack stash:pickup
+SFXSET hole pickups: pack swap:pickup
+SFXSET hole pickups: pack wear_from_box:pickup
+SFXSET hole pickups: life take_item:pickup
+SFXSET hole pickups: life loot_box:pickup
+SFXSET hole pickups: key_run on_pickup:key_get
+SFXSET hole pickups: key_chest deny:lock_rattle
+SFXSET hole pickups: key_chest unlock_fx:unlock
+SFXSET ok   pickups: no new shared or missing cue (10 known holes; new: [])
+SFXSET ok   pickups: every listed hole is still one (gone, drop from sfx_world.json: [])
+SFXSET ok   gloves: no new shared or missing cue (0 known holes; new: [])
+SFXSET ok   gloves: every listed hole is still one (gone, drop from sfx_world.json: [])
+SFXSET hole utilities: utility_use start/drink:pickup
+SFXSET hole utilities: utility_use start/repair:build
+SFXSET hole utilities: utility_use start/mend:heal
+SFXSET hole utilities: utility_use start/smoke:cloak
+SFXSET hole utilities: utility_use start/scan:ping
+SFXSET hole utilities: utility_use start:skill
+SFXSET hole utilities: utility_use _pad:throw
+SFXSET hole utilities: utility_use tick:heal
+SFXSET hole utilities: utility_use tick:shield
+SFXSET ok   utilities: no new shared or missing cue (9 known holes; new: [])
+SFXSET ok   utilities: every listed hole is still one (gone, drop from sfx_world.json: [])
+SFXSET ok   garden games: no new shared or missing cue (0 known holes; new: [])
+SFXSET ok   garden games: every listed hole is still one (gone, drop from sfx_world.json: [])
+SFXSET hole ways out: heart _force:portal
+SFXSET hole ways out: heart _tide_tick:thump
+SFXSET hole ways out: exits _tick_outpost/open:thump
+SFXSET hole ways out: exits _waves:thump
+SFXSET hole ways out: quest_seat _force:horn
+SFXSET hole ways out: quest_seats _reseal:boom
+SFXSET ok   ways out: no new shared or missing cue (6 known holes; new: [])
+SFXSET ok   ways out: every listed hole is still one (gone, drop from sfx_world.json: [])
+SFXSET falloff: edge 11.7 m -5.0 dB, +10 m -9.8 dB, 31 m nan
+SFXSET ok   a cue at the screen edge (11.7 m) is heard clearly (-5.0 dB, clear bus)
+SFXSET ok   ...one 10 m off screen is still there but quieter (-9.8 dB)
+SFXSET ok   ...and past ~30 m it is silent
+SFXSET DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 79: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 80: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 124: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 125: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 81: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 126: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 269: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 272: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 281: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 284: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 295: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 292: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 400: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 28 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

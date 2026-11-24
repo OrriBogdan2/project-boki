@@ -1,0 +1,65 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AKCHECK archer weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK archer weapon into open air: one wider, fainter puff PASS  1
+AKCHECK archer abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK archer abil into open air: one wider, fainter puff PASS  1
+AKCHECK juggernaut weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK juggernaut weapon into open air: one wider, fainter puff PASS  1
+AKCHECK juggernaut abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK juggernaut abil into open air: one wider, fainter puff PASS  1
+AKCHECK gunslinger weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK gunslinger weapon into open air: one wider, fainter puff PASS  1
+AKCHECK gunslinger abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK gunslinger abil into open air: one wider, fainter puff PASS  1
+AKCHECK bulwark weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK bulwark weapon into open air: one wider, fainter puff PASS  1
+AKCHECK bulwark abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK bulwark abil into open air: one wider, fainter puff PASS  1
+AKCHECK rimewright weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK rimewright weapon into open air: one wider, fainter puff PASS  1
+AKCHECK rimewright abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK rimewright abil into open air: one wider, fainter puff PASS  1
+AKCHECK ashwick weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK ashwick weapon into open air: one wider, fainter puff PASS  1
+AKCHECK ashwick abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK ashwick abil into open air: one wider, fainter puff PASS  1
+AKCHECK dolm weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK dolm weapon into open air: one wider, fainter puff PASS  1
+AKCHECK dolm abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK dolm abil into open air: one wider, fainter puff PASS  1
+AKCHECK mage weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK mage weapon into open air: one wider, fainter puff PASS  1
+AKCHECK mage abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK mage abil into open air: one wider, fainter puff PASS  1
+AKCHECK dredge weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK dredge weapon into open air: one wider, fainter puff PASS  1
+AKCHECK dredge abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK dredge abil into open air: one wider, fainter puff PASS  1
+AKCHECK tender weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK tender weapon into open air: one wider, fainter puff PASS  1
+AKCHECK tender abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK tender abil into open air: one wider, fainter puff PASS  1
+AKCHECK thief weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK thief weapon into open air: one wider, fainter puff PASS  1
+AKCHECK thief abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK thief abil into open air: one wider, fainter puff PASS  1
+AKCHECK ostra weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK ostra weapon into open air: one wider, fainter puff PASS  1
+AKCHECK ostra abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK ostra abil into open air: one wider, fainter puff PASS  1
+AKCHECK gil weapon into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK gil weapon into open air: one wider, fainter puff PASS  1
+AKCHECK gil abil into a wall: one puff, small, in the kit colour PASS  1
+AKCHECK gil abil into open air: one wider, fainter puff PASS  1
+AKCHECK a stage-owned look draws no puff   PASS  
+AKCHECK a shot that hits draws no miss puff PASS  
+AKCHECK 100 misses: the pool stays at its cap, no node made PASS  12 made, 1 live
+AKCHECK DONE, 55 checks, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 15 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SHOWCASE ok   the wall holds 6 frames
+SHOWCASE ok   the oldest dropped off, the newest is last
+SHOWCASE ok   an entry has the date, twist, species
+SHOWCASE ok   the wall builds a caption per frame (6)
+SHOWCASE ok   8 weekly twists in the list
+SHOWCASE ok   the twist follows the week number and wraps
+SHOWCASE ok   consecutive weeks rotate through every twist
+SHOWCASE ok   week_now is a real week number (2968)
+SHOWCASE ok   week 0 maps to format sprint (dash)
+SHOWCASE ok   week 1 maps to format night_seek (seek)
+SHOWCASE ok   week 2 maps to format seven_up (volley)
+SHOWCASE ok   week 3 maps to format mud (dash)
+SHOWCASE ok   week 4 maps to format high_tide (dash)
+SHOWCASE ok   week 5 maps to format two_streams (dash)
+SHOWCASE ok   week 6 maps to format gusty (dash)
+SHOWCASE ok   week 7 maps to format wild (dash)
+SHOWCASE ok   week 8 maps to format sprint (dash)
+SHOWCASE ok   week 9 maps to format night_seek (seek)
+SHOWCASE ok   week 10 maps to format seven_up (volley)
+SHOWCASE ok   week 11 maps to format mud (dash)
+SHOWCASE ok   week 12 maps to format high_tide (dash)
+SHOWCASE ok   week 13 maps to format two_streams (dash)
+SHOWCASE ok   week 14 maps to format gusty (dash)
+SHOWCASE ok   week 15 maps to format wild (dash)
+SHOWCASE ok   the rotation visits Dash, Seek and Volley
+SHOWCASE ok   this week's format is sprint
+SHOWCASE ok   only dash gets this week's format
+SHOWCASE ok   the visit snapshot carries the wall
+SHOWCASE ok   a visitor's wall is capped at 6
+SHOWCASE ok   a bad portrait is not drawn
+SHOWCASE ok   no wall in the snapshot = an empty wall
+SHOWCASE DONE, failures: 0

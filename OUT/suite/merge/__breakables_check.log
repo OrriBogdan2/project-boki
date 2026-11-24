@@ -1,0 +1,101 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/breakables_check.gd:35)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/breakables_check.gd:35)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+BRKCHECK no kind has a health pool, and the roll reaches every kind     PASS  
+BRKCHECK crate: one shot hit breaks it                                  PASS  
+BRKCHECK crate: one melee hit breaks it                                 PASS  
+BRKCHECK crate: one ability hit breaks it                               PASS  
+BRKCHECK crate: one boki hit breaks it                                  PASS  
+BRKCHECK crate: one blast hit breaks it                                 PASS  
+BRKCHECK crate: one dash hit breaks it                                  PASS  
+BRKCHECK pot: one shot hit breaks it                                    PASS  
+BRKCHECK pot: one melee hit breaks it                                   PASS  
+BRKCHECK pot: one ability hit breaks it                                 PASS  
+BRKCHECK pot: one boki hit breaks it                                    PASS  
+BRKCHECK pot: one blast hit breaks it                                   PASS  
+BRKCHECK pot: one dash hit breaks it                                    PASS  
+BRKCHECK barrel: one shot hit breaks it                                 PASS  
+BRKCHECK barrel: one melee hit breaks it                                PASS  
+BRKCHECK barrel: one ability hit breaks it                              PASS  
+BRKCHECK barrel: one boki hit breaks it                                 PASS  
+BRKCHECK barrel: one blast hit breaks it                                PASS  
+BRKCHECK barrel: one dash hit breaks it                                 PASS  
+BRKCHECK keg: one shot hit lights it                                    PASS  
+BRKCHECK keg: ...and the shot-lit keg then blows                        PASS  
+BRKCHECK keg: one melee hit lights it                                   PASS  
+BRKCHECK keg: ...and the melee-lit keg then blows                       PASS  
+BRKCHECK keg: one ability hit lights it                                 PASS  
+BRKCHECK keg: ...and the ability-lit keg then blows                     PASS  
+BRKCHECK keg: one boki hit lights it                                    PASS  
+BRKCHECK keg: ...and the boki-lit keg then blows                        PASS  
+BRKCHECK keg: one blast hit lights it                                   PASS  
+BRKCHECK keg: ...and the blast-lit keg then blows                       PASS  
+BRKCHECK keg: one dash hit lights it                                    PASS  
+BRKCHECK keg: ...and the dash-lit keg then blows                        PASS  
+BRKCHECK a broken pot drops loot                                        FAIL  2 -> 2
+BRKCHECK a broken crate drops loot                                      FAIL  2 -> 2
+BRKCHECK a broken barrel drops loot                                     FAIL  2 -> 2
+BRKCHECK effects are pooled: breaking 30 crates adds no nodes           PASS  22
+BRKCHECK a lit keg is fusing, not blown yet                             PASS  
+BRKCHECK then it blows after its fuse                                   PASS  
+BRKCHECK a body inside the configured radius is hurt                    PASS  9999 -> 9985
+BRKCHECK a body outside it is not                                       PASS  
+BRKCHECK the first keg blew and lit the next one                        PASS  
+BRKCHECK a pot in the blast broke at once                               PASS  
+BRKCHECK the chained keg blew a beat later                              PASS  
+BRKCHECK crate: a break plays break_wood, a different take each time    PASS  [2, 1, 0, 2]
+BRKCHECK pot: a break plays break_clay, a different take each time      PASS  [2, 0, 1, 2]
+BRKCHECK barrel: a break plays break_wood, a different take each time   PASS  [0, 1, 0, 2]
+BRKCHECK keg: a break plays break_metal, a different take each time     FAIL  [1, 2, 1, 1]
+BRKCHECK a keg lit by a hit hisses its own fuse                         PASS  ["keg_fuse"]
+BRKCHECK ...then blows with its own blast                               PASS  ["zap", "throw", "break_metal", "keg_blast", "gunslinger_hit", "flyby_ice", "gunslinger_hurt", "armor_hit", "gunslinger_call_low", "warn_heartbeat"]
+BRKCHECK a chain-lit keg's hiss plays faster to end on its fuse         PASS  pitch 2.10 for 2.05
+BRKCHECK a bot beside a lit keg is steered away from it                 PASS  
+BRKCHECK a bot far away is left alone                                   PASS  
+BRKCHECK DONE, 51 checks, failures: 4
+ERROR: 5 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 17 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 25 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

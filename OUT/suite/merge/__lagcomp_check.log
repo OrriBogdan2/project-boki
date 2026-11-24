@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+relay: listening on 7890, up to 120 players, version 0.24.18, Discord check OFF
+LAGCOMP ok   the lag relay listens on 7890  
+relay: 27302746 joined as Hunter (1 online)
+LAGCOMP ok   the shooter is on the relay  
+relay: 11604229 joined as Hunter (2 online)
+LAGCOMP ok   the target joins the relay  
+LAGCOMP ok   the target's game is sending  
+LAGCOMP line: shooter +100 ms round trip, target +150 ms; ff cap 150 ms
+LAGCOMP row case             shots  shooter  applied  lost  copy  copy+ff  mean age ms
+LAGCOMP ok   Vex LMB: the target wrote its record  
+ERROR: Parse JSON failed. Error at line 0: Unknown error getting token
+   at: parse_string (core/io/json.cpp:624)
+   GDScript backtrace (most recent call first):
+       [0] _case (res://tools/lagcomp_check.gd:179)
+       [1] _host_run (res://tools/lagcomp_check.gd:199)
+LAGCOMP FAIL Vex LMB: a record to compare  
+relay: 11604229 left (1 online)
+LAGCOMP FAIL Lace Heavy Shot: the target wrote its record  
+LAGCOMP FAIL Sparkle RMB: the target wrote its record  
+ERROR: Thread 343455 exited with errno: 10
+   at: _check_pid_is_running (drivers/unix/os_unix.cpp:862)
+   GDScript backtrace (most recent call first):
+       [0] _finish (res://tools/lagcomp_check.gd:272)
+LAGCOMP DONE, failures: 3
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 18 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

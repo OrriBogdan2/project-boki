@@ -1,0 +1,93 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FLOOR ok   a new save gets its starter egg, not a stray
+FLOOR ok   zero Boki and zero gems is the stuck state
+FLOOR ok   the cheapest shelter Boki (20) is in the floor price band
+FLOOR ok   a stray Boki turns up at the farm
+FLOOR ok   the stray is an ordinary common (zapple)
+FLOOR ok   it's your partner, registered as a stray
+FLOOR ok   with a Boki again, nothing more is given
+FLOOR ok   and you're not stuck any more
+FLOOR ok   your last Boki can't be released (Echolop is your partner: partners stay on the farm)
+FLOOR ok   nor given up at the shelter or handed on
+FLOOR ok   after losing your only Boki to a rival you still have one (1, stranded true, floor [])
+FLOOR ok   (the last Boki starved)
+FLOOR ok   a stray turns up after the last Boki starves
+FLOOR ok   with no Boki, a stray turns up and is the one you play with
+FLOOR ok   the stray goes with you like any other Boki
+FLOOR ok   tonics from the stash (cap 5 on the Hollow) and the issued kits (5, 2); keys never come from home
+FLOOR ok   dying, the belt stays in your deathbox: nothing comes home
+FLOOR ok   a freed Boki node is skipped when leaving and finishing (no crash)
+FLOOR ok   from zero: a stray, then one extract adopts a Boki at the shelter (20 gems)
+FLOOR ok   a run uses the treat up
+FLOOR ok   the book has both sides (market makers)
+FLOOR ok   best bid 2 < best ask 4
+FLOOR ok   selling 10 wood at 2 fills now: +19 gems after 1 tax
+FLOOR ok   the trade is in the price history
+FLOOR ok   a low bid rests with 10 gems in escrow
+FLOOR ok   cancelling returns the escrow
+FLOOR ok   a buy takes the 20 at the best ask and rests 5 (partial fill)
+FLOOR ok   stone in, gems out (the rest held in escrow)
+FLOOR ok   can't sell what you don't have
+FLOOR ok   a price far off the band is refused
+FLOOR ok   Boki aren't on the order book
+FLOOR ok   an offer at the middle of the book rests (10 left)
+FLOOR ok   a resting offer fills over a few expeditions (2 fills)
+FLOOR ok   and always at the trader's quote, never below the 23 it asked
+FLOOR ok   the tax is a gem sink (15 taken)
+FLOOR ok   the fill tax rounds up: a 12-gem fill pays 1, not 0
+FLOOR ok   a sell of 25 at the best bid fills the 20 there and rests 5 (partial fill)
+FLOOR ok   ...paying 40 less 2 tax
+FLOOR ok   ...with the 5 left held in escrow, not in your pack (15 wood in the pack)
+FLOOR ok   cancelling after the partial fill returns the 5 unsold wood and leaves the gems alone
+FLOOR ok   a cancelled offer can't be cancelled twice
+FLOOR ok   a buy of 23 at the best ask fills 20 for 100 and escrows 15
+FLOOR ok   cancelling after the partial fill returns the escrow: exactly the 100 spent is gone
+FLOOR ok   bought the whole ask side of scrap (90)
+FLOOR ok   the side refills at the same quotes (7), not a ratcheted price
+FLOOR ok   buying out the side and selling it straight back loses gems (2938 -> 2524)
+FLOOR ok   (tonic offers at 17 and 29 are inside the allowed band, outside the walk)
+FLOOR ok   both rest on the book
+FLOOR ok   out-of-band offers never fill (0 fills in 400 runs, 20 units still resting)
+FLOOR ok   an offer at the middle fills (7 fills) and never worse than it asked (0 worse)
+FLOOR ok   wood: no round trip profits (ask 4 vs best tick sale -999 net; bid 2 vs cheapest tick buy 999999)
+FLOOR ok   stone: no round trip profits (ask 5 vs best tick sale 3 net; bid 3 vs cheapest tick buy 4)
+FLOOR ok   scrap: the experiment saw tick fills
+FLOOR ok   scrap: no round trip profits (ask 7 vs best tick sale 5 net; bid 5 vs cheapest tick buy 6)
+FLOOR ok   kibble: no round trip profits (ask 6 vs best tick sale 4 net; bid 4 vs cheapest tick buy 5)
+FLOOR ok   tonic: the experiment saw tick fills
+FLOOR ok   tonic: no round trip profits (ask 24 vs best tick sale 23 net; bid 22 vs cheapest tick buy 22)
+FLOOR ok   tidebloom: the experiment saw tick fills
+FLOOR ok   tidebloom: no round trip profits (ask 7 vs best tick sale 5 net; bid 5 vs cheapest tick buy 6)
+FLOOR ok   puffcorn: no round trip profits (ask 5 vs best tick sale 3 net; bid 3 vs cheapest tick buy 4)
+FLOOR ok   sunroot: the experiment saw tick fills
+FLOOR ok   sunroot: no round trip profits (ask 10 vs best tick sale 8 net; bid 8 vs cheapest tick buy 9)
+FLOOR ok   emberberry: the experiment saw tick fills
+FLOOR ok   emberberry: no round trip profits (ask 11 vs best tick sale 9 net; bid 9 vs cheapest tick buy 10)
+FLOOR ok   no commodity is a free-gem loop
+FLOOR ok   anchored day: never back, forward capped per run, a new save takes the clock
+FLOOR ok   setting the clock back keeps today's day (2026-11-24) and quotes
+FLOOR ok   a 30-day jump forward moves the day 1, not 30 (2026-10-21)
+FLOOR ok   and 1 more on the next run
+FLOOR ok   an older save's day (2026-11-19) carries on unchanged
+FLOOR ok   open Exchange offers and escrow survive a save/load
+FLOOR ok   the floor's record survives a save/load
+FLOOR ok   an old save loads without the new keys
+FLOOR ok   and the Exchange and the floor work on it
+FLOOR ok   a zero-Boki, zero-gem save loaded from disk gets its stray
+FLOOR DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

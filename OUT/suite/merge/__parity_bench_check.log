@@ -1,0 +1,49 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PARITYBENCH ok   the Training Area bar has a Bench button
+PARITYBENCH ok   the bench starts closed
+PARITYBENCH ok   its button opens the panel
+PARITYBENCH ok   nothing selected before a hit: ["Hit a dummy to select it."]
+PARITYBENCH ok   the test dummy has a clear way to be shoved
+PARITYBENCH ok   the dummy that was hit is selected
+PARITYBENCH ok   last hit is 200.0
+PARITYBENCH ok   last hit reads Last hit  200
+PARITYBENCH ok   rolling DPS reads DPS  200
+PARITYBENCH ok   last 5 s reads Last 5 s  200
+PARITYBENCH ok   181 / DPS: Down a Hunter  0.9 s
+PARITYBENCH ok   stun, about 0.9 s left: CC  stun  0.9 s left
+PARITYBENCH ok   the time left counts down: CC  stun  0.4 s left
+PARITYBENCH ok   the stun is over: CC  none
+PARITYBENCH ok   a knock was read: Knock  1.01 m in 0.32 s
+PARITYBENCH ok   knock 1.01 m matches the dummy's move (1.01 m)
+PARITYBENCH ok   after 6 s quiet the 5 s total is 0: ["DPS  0", "Last hit  200", "Last 5 s  0", "Down a Hunter  -", "CC  none", "Knock  1.01 m in 0.32 s"]
+PARITYBENCH ok   walking away clears the readout
+PARITYBENCH ok   reset clears the readout and the dummy's record
+PARITYBENCH ok   the button closes the panel
+PARITYBENCH ok   no bench in the tutorial
+PARITYBENCH ok   no bench in the duel room
+PARITYBENCH ok   a real match has no bench
+PARITYBENCH DONE, failures: 0
+ERROR: 3 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 210: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 215: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 342: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 36 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

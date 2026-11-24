@@ -1,0 +1,61 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] show_screen (res://scripts/main.gd:569)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] show_screen (res://scripts/main.gd:569)
+Quality: auto picked very_low (load benchmark 256.2 ms a frame)
+BENCH match warm-up: 78055 ms
+BENCH match build (ms): build.warm_up 64690, build.generate 12426, world.terrain 7058, world.grass 5571, map.bake 3855, build.hunters 3220
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+         [4] _play (res://tools/perf_bench.gd:233)
+BENCH hitch t=1.32 906 ms (script 40.3), new nodes: {  }
+BENCH hitch t=1.33 863 ms (script 202.6), new nodes: {  }
+BENCH hitch t=1.37 1656 ms (script 133.8), new nodes: {  }
+BENCH hitch t=1.38 1017 ms (script 164.1), new nodes: {  }
+BENCH hitch t=1.40 1271 ms (script 162.7), new nodes: {  }
+BENCH hitch t=2.02 1063 ms (script 125.9), new nodes: {  }
+BENCH hitch t=2.25 1839 ms (script 301.2), new nodes: {  }
+BENCH hitch t=4.43 1781 ms (script 199.1), new nodes: {  }
+BENCH hitch t=5.10 3513 ms (script 695.4), new nodes: {  }
+BENCH hitch t=6.20 2171 ms (script 211.9), new nodes: {  }
+BENCH hitch t=6.88 2339 ms (script 441.3), new nodes: {  }
+BENCH hitch t=14.00 1314 ms (script 76.3), new nodes: {  }
+BENCH hitch t=20.85 1088 ms (script 192.6), new nodes: { "MeshInstance3D:@MeshInstance3D": 3, "Node3D:LastAura": 1, "AudioStreamPlayer:@AudioStreamPlayer": 2, "Node3D:Wisp": 1, "MeshInstance3D:Body": 1 }
+BENCH hitch t=21.03 1027 ms (script 27.5), new nodes: {  }
+LIFE 25 wisp revive static_shock

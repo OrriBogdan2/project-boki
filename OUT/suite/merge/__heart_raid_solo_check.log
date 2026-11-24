@@ -1,0 +1,53 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HRAID ok   squad 1 normal: the raid is built
+HRAID ok   squad 1 normal: one squad of 1, no rivals
+HRAID ok   squad 1 normal: no lairs, no outposts
+HRAID ok   squad 1 normal: the Heart held shut, scaled for 1 at normal
+HRAID squad 1 normal built in 28892 ms, Heart at (286.0, 10.0, 213.0)
+HRAID squad 1 normal 1:00 WAVES wave 0 foes 0 mobs 103 up 1/1 you 134 hp 141 m to the Heart, tide 0 m
+HRAID squad 1 normal 2:00 WAVES wave 1 foes 1 mobs 104 up 1/1 you 134 hp 16 m to the Heart, tide 310 m
+HRAID squad 1 normal 3:00 WAVES wave 2 foes 4 mobs 107 up 1/1 you 133 hp 40 m to the Heart, tide 282 m
+HRAID squad 1 normal 4:00 WAVES wave 3 foes 6 mobs 109 up 1/1 you 119 hp 40 m to the Heart, tide 254 m
+HRAID squad 1 normal 5:00 WAVES wave 3 foes 3 mobs 104 up 1/1 you 127 hp 32 m to the Heart, tide 226 m
+HRAID squad 1 normal 6:00 WAVES wave 4 foes 5 mobs 106 up 1/1 you 107 hp 18 m to the Heart, tide 197 m
+HRAID squad 1 normal 7:00 WAVES wave 5 foes 5 mobs 106 up 1/1 you 107 hp 52 m to the Heart, tide 169 m
+HRAID squad 1 normal 8:00 WAVES wave 6 foes 6 mobs 107 up 1/1 you 89 hp 21 m to the Heart, tide 141 m
+HRAID squad 1 normal 9:00 WAVES wave 7 foes 8 mobs 108 up 1/1 you 125 hp 66 m to the Heart, tide 113 m
+HRAID squad 1 normal 10:00 WAVES wave 7 foes 7 mobs 107 up 1/1 you 125 hp 47 m to the Heart, tide 84 m
+HRAID squad 1 normal 11:00 WAVES wave 8 foes 7 mobs 107 up 1/1 you 125 hp 59 m to the Heart, tide 70 m
+HRAID squad 1 normal 12:00 BOSS wave 8 foes 7 mobs 108 up 1/1 you 125 hp 59 m to the Heart, tide 70 m
+LIFE 746 box Hunter value 217 at (290.0, 3.0, 153.0)
+HRSWEEP 1 normal seed 11 arch : LOST at 746 s, downs 0, wave 8, boss yes
+HRAID squad 1 normal      0.00 start, squad of 1, normal
+HRAID squad 1 normal     75.45 wave 1: 3 monsters
+HRAID squad 1 normal    150.37 wave 2: 4 monsters
+HRAID squad 1 normal    225.28 wave 3: 5 monsters
+HRAID squad 1 normal    300.20 wave 4: 5 monsters
+HRAID squad 1 normal    375.12 wave 5: 3 monsters
+HRAID squad 1 normal    450.03 wave 6: 3 monsters
+HRAID squad 1 normal    525.47 wave 7: 2 monsters
+HRAID squad 1 normal    600.38 wave 8: 1 monsters
+HRAID squad 1 normal    660.32 boss colossus, 800 hp
+HRAID squad 1 normal    747.12 lost
+HRAID ok   squad 1 normal: the first wave at 75s
+HRAID ok   squad 1 normal: 8 waves on the clock, marked 10s before, out of their gates []
+HRAID ok   squad 1 normal: wave monsters never over the cap of 8 (most at once 8)
+HRAID ok   squad 1 normal: the raid ended with a result (team wiped at 12:26)
+HRAID ok   squad 1 normal: the raid is LOST
+HRAID ok   squad 1 normal: sounds: 8 waves, 1 boss rise, 48 gate ticks (>= 48)
+HRAID ok   squad 1 normal: every raid cue has its sound file
+HRAID ok   squad 1 normal: the summary agrees: Heart Raid (Normal) lost on wave 8 of 8 (12:28).
+HRAID squad 1 normal: LOST, 8 waves, 26 wave monsters, most mobs alive 109; 501.5 s wall for 12:28 (11.17 ms a step)
+HRAID PASS
+ERROR: 5 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 7 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 27 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

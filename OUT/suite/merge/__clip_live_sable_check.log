@@ -1,0 +1,32 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LIVE ok   Sable wears her clips in a match
+LIVE ok   only the skinned pistols drawn (0 procedural pieces)
+LIVE ok   the same after an equip (0 procedural pieces)
+LIVE ok   both pistols' shots play their clips (["lmb_r", "lmb_l"])
+LIVE flips: ["vault_r", "vault_f", "vault_twist"]
+LIVE ok   the Vault's routine plays its flips (["vault_r", "vault_f", "vault_twist"])
+LIVE ok   the wings stay untwisted through the flips (worst bend 0.34 rad)
+LIVE ok   Encore starts
+LIVE ok   Encore plays the opening and the dance (["encore", "encore_dance"])
+LIVE ok   the dance flares the wings
+LIVE ok   the dance over, the wings fold down (-0.04 after 12 frames)
+LIVE ok   standing about raises the wings and folds them again (raised true, folded true)
+LIVE ok   raised, the tips stand up and back behind her (0.36 m up, 0.42 m back)
+LIVE ok   the raised wing is flat, not folded over itself (bend 0.00 rad)
+LIVE ok   running keeps them folded on the ground (most open 0.00)
+LIVE ok   a jump raises them (most open 1.00)
+LIVE ok   sable.json carries the wings block
+LIVE ok   an emote opens them slowly (-0.41 after 0.5 s)
+LIVE ok   and fully (-1.04)
+LIVE ok   a run folds them even mid-emote (-0.00)
+LIVE ok   an idle raise comes, holds and folds again (first at 5.7 s, open 2.3 s)
+LIVE ok   a knock-out plays the death clip on screen (clip true, visible true)
+CLIP_LIVE_SABLE_DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

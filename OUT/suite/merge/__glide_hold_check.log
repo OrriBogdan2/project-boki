@@ -1,0 +1,693 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:349)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:349)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ACHECK ok   the sweep's map has 12 m of flat open ground
+ACHECK ok   jump and hold Space for 2s: never glides
+ACHECK ok   LMB held, jump and hold Space for 2s: never glides
+ACHECK ok   glide button held since before the jump: never glides
+ACHECK ok   jump, release, press Space again and hold: glides
+ACHECK ok   jump, then a fresh glide-button press and hold: glides
+ACHECK ok   a folded glider stays shut while Space is still held (opened 1 times)
+ACHECK ok   a folded glider re-opens on a fresh Space press
+ACHECK ok   Space held since the jump, an air dash ending: still no glider
+ACHECK ok   glide button 0.5s into a fall (phase 0): opens on the press step
+ACHECK ok   glide button 0.5s into a fall (phase 1): opens on the press step
+ACHECK ok   glide button 0.5s into a fall (phase 2): opens on the press step
+ACHECK ok   glide button 0.5s into a fall (phase 3): opens on the press step
+ACHECK ok   glide button 0.5s into a fall (phase 4): opens on the press step
+ACHECK ok   glide button 0.5s into a fall (phase 5): opens on the press step
+ACHECK ok   the remote copy opens <= 1 Net tick (6 steps) behind the local open: [0, 5, 4, 3, 2, 1] steps
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   archer: jump, let go of Space, hold LMB for 2s: never glides
+ACHECK ok   archer: jump and hold Space and LMB for 2s: never glides
+ACHECK ok   archer: gliding, then LMB held with Space: opens once, never again after a fold (1)
+ACHECK ok   archer: a fresh Space press 1s after the air Shift glides
+ACHECK ok   archer: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep archer air tap (move 23 steps): steps to glide, m/s before>after: 1@25% 8.0>8.0, 1@50% 15.9>15.9, 1@75% 8.9>8.9
+ACHECK ok   sweep archer air chain (move 43 steps): steps to glide, m/s before>after: 1@25% 15.3>15.3, 1@50% 4.2>4.2, 1@75% 12.9>12.9
+ACHECK ok   sweep archer air hold (move 23 steps): steps to glide, m/s before>after: 1@25% 8.0>8.0, 1@50% 15.9>15.9, 1@75% 8.9>8.9
+ACHECK ok   sweep archer ground tap (move 23 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep archer ground chain (move 43 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep archer ground hold (move 23 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   archer: the glider opening from a run-speed jump (5.3 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   archer: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   archer: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   juggernaut: jump, let go of Space, hold RMB for 2s: never glides
+ACHECK ok   juggernaut: jump and hold Space and RMB for 2s: never glides
+ACHECK ok   juggernaut: gliding, then RMB held with Space: opens once, never again after a fold (1)
+ACHECK ok   juggernaut: a fresh Space press 1s after the air Shift glides
+ACHECK ok   juggernaut: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep juggernaut air tap (move 15 steps): steps to glide, m/s before>after: 1@25% 0.0>0.0, 1@50% 27.2>27.2, 1@75% 23.3>23.3
+ACHECK ok   sweep juggernaut air chain (move 46 steps): steps to glide, m/s before>after: 1@25% 23.3>23.3, 1@50% 27.2>27.2, 1@75% 14.8>14.8
+ACHECK ok   sweep juggernaut air hold (move 15 steps): steps to glide, m/s before>after: 1@25% 0.0>0.0, 1@50% 27.2>27.2, 1@75% 23.3>23.3
+ACHECK ok   sweep juggernaut ground tap (move 15 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep juggernaut ground chain (move 31 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep juggernaut ground hold (move 15 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   juggernaut: the glider opening from a run-speed jump (5.3 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   juggernaut: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   juggernaut: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   gunslinger: a fresh Space press 1s after the air Shift glides
+ACHECK ok   gunslinger: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep gunslinger air tap (move 19 steps): steps to glide, m/s before>after: 1@25% 14.1>14.1, 1@50% 14.1>14.1, 1@75% 14.1>14.1
+ACHECK ok   sweep gunslinger air chain (move 33 steps): steps to glide, m/s before>after: 1@25% 14.1>14.1, 1@50% 14.1>14.1, 1@75% 17.0>17.0
+ACHECK ok   sweep gunslinger air hold (move 19 steps): steps to glide, m/s before>after: 1@25% 14.1>14.1, 1@50% 14.1>14.1, 1@75% 14.1>14.1
+ACHECK ok   sweep gunslinger ground tap (move 27 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep gunslinger ground chain (move 56 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep gunslinger ground hold (move 43 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   gunslinger: the glider opening from a run-speed jump (5.3 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   gunslinger: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   gunslinger: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   bulwark: jump, let go of Space, hold LMB for 2s: never glides
+ACHECK ok   bulwark: jump and hold Space and LMB for 2s: never glides
+ACHECK ok   bulwark: gliding, then LMB held with Space: opens once, never again after a fold (1)
+ACHECK ok   bulwark: a fresh Space press 1s after the air Shift glides
+ACHECK FAIL bulwark: Space pressed 0.07s into the air Shift and held glides 0.12s of 1.93s
+ACHECK FAIL sweep bulwark air tap (move 25 steps): steps to glide, m/s before>after: 1@25% 24.6>24.6, 1@50% 13.3>13.3, 1@75% 9.6>9.6
+ACHECK FAIL sweep bulwark air chain (move 30 steps): steps to glide, m/s before>after: 1@25% 22.3>22.3, 1@50% 9.6>9.6, 1@75% 14.8>14.8
+ACHECK FAIL sweep bulwark air hold (move 25 steps): steps to glide, m/s before>after: 1@25% 24.6>24.6, 1@50% 13.3>13.3, 1@75% 9.6>9.6
+ACHECK ok   sweep bulwark ground tap (move 25 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep bulwark ground chain (move 21 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep bulwark ground hold (move 25 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   bulwark: the glider opening from a run-speed jump (5.6 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   bulwark: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   bulwark: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   rimewright: a fresh Space press 1s after the air Shift glides
+ACHECK ok   rimewright: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep rimewright air tap (move 12 steps): steps to glide, m/s before>after: 1@25% 10.5>10.5, 1@50% 10.5>10.5, 1@75% 10.5>10.5
+ACHECK ok   sweep rimewright air chain (move 12 steps): steps to glide, m/s before>after: 1@25% 10.5>10.5, 1@50% 10.5>10.5, 1@75% 10.5>10.5
+ACHECK ok   sweep rimewright air hold (move 50 steps): steps to glide, m/s before>after: 1@25% 10.5>10.5, 1@50% 10.5>10.5, 1@75% 10.5>10.5
+ACHECK ok   sweep rimewright ground tap (move 12 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep rimewright ground chain (move 12 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep rimewright ground hold (move 40 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   rimewright: the glider opening from a run-speed jump (5.2 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   rimewright: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   rimewright: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   ashwick: a fresh Space press 1s after the air Shift glides
+ACHECK ok   ashwick: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep ashwick air tap (move 16 steps): steps to glide, m/s before>after: 1@25% 24.3>24.3, 1@50% 24.3>24.3, 1@75% 24.3>24.3
+ACHECK ok   sweep ashwick air chain (move 16 steps): steps to glide, m/s before>after: 1@25% 24.3>24.3, 1@50% 24.3>24.3, 1@75% 24.3>24.3
+ACHECK ok   sweep ashwick air hold (move 16 steps): steps to glide, m/s before>after: 1@25% 24.3>24.3, 1@50% 24.3>24.3, 1@75% 24.3>24.3
+ACHECK ok   sweep ashwick ground tap (move 19 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep ashwick ground chain (move 39 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep ashwick ground hold (move 19 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   ashwick: the glider opening from a run-speed jump (5.4 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   ashwick: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   ashwick: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   dolm: a fresh Space press 1s after the air Shift glides
+ACHECK ok   dolm: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep dolm air tap (move 21 steps): steps to glide, m/s before>after: 1@25% 8.0>8.0, 1@50% 8.0>8.0, 1@75% 8.0>8.0
+ACHECK ok   sweep dolm air chain (move 43 steps): steps to glide, m/s before>after: 1@25% 8.0>8.0, 1@50% 8.0>8.0, 1@75% 17.0>17.0
+ACHECK ok   sweep dolm air hold (move 21 steps): steps to glide, m/s before>after: 1@25% 8.0>8.0, 1@50% 8.0>8.0, 1@75% 8.0>8.0
+ACHECK ok   sweep dolm ground tap (move 40 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep dolm ground chain (move 91 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep dolm ground hold (move 40 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   dolm: the glider opening from a run-speed jump (5.4 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   dolm: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   dolm: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   mage: a fresh Space press 1s after the air Shift glides
+ACHECK ok   mage: Space pressed 0.07s into the air Shift and held glides 1.80s of 1.93s
+ACHECK ok   sweep mage air tap (move 11 steps): steps to glide, m/s before>after: 1@25% 40.0>40.0, 1@50% 39.6>39.6, 1@75% 39.3>39.3
+ACHECK ok   sweep mage air chain (move 28 steps): steps to glide, m/s before>after: 1@25% 39.4>39.4, 1@50% 18.0>18.0, 1@75% 18.5>18.5
+ACHECK note sweep mage air hold (move 66 steps): steps to glide, m/s before>after: 0@25% 0.0>0.0, 34@50% 0.0>27.6, 18@75% 0.0>27.6 (by design: Sparkle's wire: her keys do nothing while she holds Shift (mage_kit _tick_wire))
+ACHECK ok   sweep mage ground tap (move 11 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep mage ground chain (move 28 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK note sweep mage ground hold (move 66 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75% (by design: Sparkle's wire: her keys do nothing while she holds Shift (mage_kit _tick_wire))
+ACHECK ok   mage: the glider opening from a run-speed jump (5.4 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   mage: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   mage: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   dredge: a fresh Space press 1s after the air Shift glides
+ACHECK ok   dredge: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep dredge air tap (move 11 steps): steps to glide, m/s before>after: 1@25% 20.0>20.0, 1@50% 20.0>20.0, 1@75% 20.0>20.0
+ACHECK ok   sweep dredge air chain (move 11 steps): steps to glide, m/s before>after: 1@25% 20.0>20.0, 1@50% 20.0>20.0, 1@75% 20.0>20.0
+ACHECK ok   sweep dredge air hold (move 11 steps): steps to glide, m/s before>after: 1@25% 20.0>20.0, 1@50% 20.0>20.0, 1@75% 20.0>20.0
+ACHECK ok   sweep dredge ground tap (move 11 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep dredge ground chain (move 47 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep dredge ground hold (move 11 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   dredge: the glider opening from a run-speed jump (5.4 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   dredge: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   dredge: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   tender: a fresh Space press 1s after the air Shift glides
+ACHECK ok   tender: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep tender air tap (move 56 steps): steps to glide, m/s before>after: 1@25% 13.7>13.7, 1@50% 13.7>13.7, 1@75% 11.7>11.7
+ACHECK ok   sweep tender air chain (move 56 steps): steps to glide, m/s before>after: 1@25% 13.7>13.7, 1@50% 13.7>13.7, 1@75% 11.7>11.7
+ACHECK ok   sweep tender air hold (move 56 steps): steps to glide, m/s before>after: 1@25% 13.7>13.7, 1@50% 13.7>13.7, 1@75% 11.7>11.7
+ACHECK ok   sweep tender ground tap (move 13 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep tender ground chain (move 13 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep tender ground hold (move 13 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   tender: the glider opening from a run-speed jump (5.3 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   tender: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   tender: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   thief: a fresh Space press 1s after the air Shift glides
+ACHECK ok   thief: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep thief air tap (move 28 steps): steps to glide, m/s before>after: 1@25% 10.8>10.8, 1@50% 14.7>14.7, 1@75% 9.1>9.1
+ACHECK ok   sweep thief air chain (move 42 steps): steps to glide, m/s before>after: 1@25% 15.8>15.8, 1@50% 9.1>9.1, 1@75% 10.3>10.3
+ACHECK ok   sweep thief air hold (move 28 steps): steps to glide, m/s before>after: 1@25% 10.8>10.8, 1@50% 14.7>14.7, 1@75% 9.1>9.1
+ACHECK ok   sweep thief ground tap (move 28 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep thief ground chain (move 43 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep thief ground hold (move 28 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   thief: the glider opening from a run-speed jump (5.4 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   thief: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   thief: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   ostra: a fresh Space press 1s after the air Shift glides
+ACHECK ok   ostra: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep ostra air tap (move 100 steps): steps to glide, m/s before>after: 1@25% 3.6>3.6, 1@50% 5.4>5.4, 1@75% 3.6>3.6
+ACHECK ok   sweep ostra air chain (move 100 steps): steps to glide, m/s before>after: 1@25% 3.6>3.6, 1@50% 5.4>5.4, 1@75% 3.6>3.6
+ACHECK note sweep (ostra air hold): holds nothing for 0 steps: nothing to cancel
+ACHECK FAIL ostra: the glider opening from a run-speed jump (0.2 m/s) adds no speed (gain inf m/s)
+ACHECK ok   ostra: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   ostra: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/glide_hold_check.gd:356)
+ACHECK ok   gil: a fresh Space press 1s after the air Shift glides
+ACHECK ok   gil: Space pressed 0.07s into the air Shift and held glides 1.93s of 1.93s
+ACHECK ok   sweep gil air tap (move 13 steps): steps to glide, m/s before>after: 1@25% 18.5>18.5, 1@50% 18.5>18.5, 1@75% 18.5>18.5
+ACHECK ok   sweep gil air chain (move 13 steps): steps to glide, m/s before>after: 1@25% 18.5>18.5, 1@50% 18.5>18.5, 1@75% 18.5>18.5
+ACHECK ok   sweep gil air hold (move 13 steps): steps to glide, m/s before>after: 1@25% 18.5>18.5, 1@50% 18.5>18.5, 1@75% 18.5>18.5
+ACHECK ok   sweep gil ground tap (move 58 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep gil ground chain (move 25 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   sweep gil ground hold (move 58 steps): steps to glide, m/s before>after: no jump out@25%, no jump out@50%, no jump out@75%
+ACHECK ok   gil: the glider opening from a run-speed jump (5.3 m/s) adds no speed (gain 0.00 m/s)
+ACHECK ok   gil: the glider opening at an air Shift's end adds no speed (gain 0.00 m/s)
+ACHECK ok   gil: the glider opening from a fall adds no speed (gain 0.00 m/s)
+ACHECK DONE, failures: 5
+ERROR: 1 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 162: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 165: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 164: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 272: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 285: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 283: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 289: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 300: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 298: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 303: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 10731: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10732: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10733: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10734: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 50 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

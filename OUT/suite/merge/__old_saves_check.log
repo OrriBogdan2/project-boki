@@ -1,0 +1,116 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+OLDSAVES ok   v0.24.2: v11 upgrades to v21
+OLDSAVES ok   v0.24.2: the old file is kept as .bak-v11
+OLDSAVES ok   v0.24.2: gems, matches and the Hunter's name are kept
+OLDSAVES ok   v0.24.2: every item count is kept
+OLDSAVES ok   v0.24.2: every Boki is still on the roster and the partner is the same
+OLDSAVES ok   v0.24.2: Pip the cindle: species, name, inborn rolls, trust and xp are kept
+OLDSAVES ok   v0.24.2: Pip the cindle: level 3 (was 3, cap 100)
+OLDSAVES ok   v0.24.2: Pip the cindle: has a zone, bonds and an evolution record
+OLDSAVES ok   v0.24.2: Pip the cindle: a Boki with forms keeps a form name ()
+OLDSAVES ok   v0.24.2: Bubble the puddlet: species, name, inborn rolls, trust and xp are kept
+OLDSAVES ok   v0.24.2: Bubble the puddlet: level 12 (was 12, cap 100)
+OLDSAVES ok   v0.24.2: Bubble the puddlet: has a zone, bonds and an evolution record
+OLDSAVES ok   v0.24.2: Bubble the puddlet: a Boki with forms keeps a form name (Pudkeep)
+OLDSAVES ok   v0.24.2: Rocky the pebbit: species, name, inborn rolls, trust and xp are kept
+OLDSAVES ok   v0.24.2: Rocky the pebbit: level 100 (was 130, cap 100)
+OLDSAVES ok   v0.24.2: Rocky the pebbit: has a zone, bonds and an evolution record
+OLDSAVES ok   v0.24.2: Rocky the pebbit: a Boki with forms keeps a form name (Pebaegis VI)
+OLDSAVES ok   v0.24.2: the breeding-nest egg is kept
+OLDSAVES ok   v0.24.2: the Incubator egg is kept
+OLDSAVES ok   v0.24.2: the Rare Egg is kept
+OLDSAVES ok   v0.24.2: bramblebank is open and the others are locked
+OLDSAVES ok   v0.24.2: a save and reload keeps it all
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+OLDSAVES ok   v0.24.2: the hub opens
+OLDSAVES ok   v0.24.2: bramblebank opens with its 3 Boki out of 3
+OLDSAVES ok   v0.24.3: v11 upgrades to v21
+OLDSAVES ok   v0.24.3: the old file is kept as .bak-v11
+OLDSAVES ok   v0.24.3: gems, matches and the Hunter's name are kept
+OLDSAVES ok   v0.24.3: every item count is kept
+OLDSAVES ok   v0.24.3: every Boki is still on the roster and the partner is the same
+OLDSAVES ok   v0.24.3: Pip the cindle: species, name, inborn rolls, trust and xp are kept
+OLDSAVES ok   v0.24.3: Pip the cindle: level 3 (was 3, cap 100)
+OLDSAVES ok   v0.24.3: Pip the cindle: has a zone, bonds and an evolution record
+OLDSAVES ok   v0.24.3: Pip the cindle: a Boki with forms keeps a form name ()
+OLDSAVES ok   v0.24.3: Bubble the puddlet: species, name, inborn rolls, trust and xp are kept
+OLDSAVES ok   v0.24.3: Bubble the puddlet: level 12 (was 12, cap 100)
+OLDSAVES ok   v0.24.3: Bubble the puddlet: has a zone, bonds and an evolution record
+OLDSAVES ok   v0.24.3: Bubble the puddlet: a Boki with forms keeps a form name (Pudkeep)
+OLDSAVES ok   v0.24.3: Rocky the pebbit: species, name, inborn rolls, trust and xp are kept
+OLDSAVES ok   v0.24.3: Rocky the pebbit: level 100 (was 130, cap 100)
+OLDSAVES ok   v0.24.3: Rocky the pebbit: has a zone, bonds and an evolution record
+OLDSAVES ok   v0.24.3: Rocky the pebbit: a Boki with forms keeps a form name (Pebaegis VI)
+OLDSAVES ok   v0.24.3: the breeding-nest egg is kept
+OLDSAVES ok   v0.24.3: the Incubator egg is kept
+OLDSAVES ok   v0.24.3: the Rare Egg is kept
+OLDSAVES ok   v0.24.3: bramblebank is open and the others are locked
+OLDSAVES ok   v0.24.3: a save and reload keeps it all
+ERROR: Lambda capture at index 1 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 3 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 4 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+ERROR: Lambda capture at index 6 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+OLDSAVES ok   v0.24.3: the hub opens
+ERROR: Error calling from signal 'timeout' to callable: 'GDScript::_notice': Cannot convert argument 1 from Object to Object.
+   at: emit_signalp (core/object/object.cpp:1406)
+ERROR: Error calling from signal 'timeout' to callable: 'GDScript::_notice': Cannot convert argument 1 from Object to Object.
+   at: emit_signalp (core/object/object.cpp:1406)
+ERROR: Error calling from signal 'timeout' to callable: 'GDScript::_notice': Cannot convert argument 1 from Object to Object.
+   at: emit_signalp (core/object/object.cpp:1406)
+OLDSAVES ok   v0.24.3: bramblebank opens with its 3 Boki out of 3
+OLDSAVES ok   v0.24.4: v12 upgrades to v21
+OLDSAVES ok   v0.24.4: the old file is kept as .bak-v12
+OLDSAVES ok   v0.24.4: gems, matches and the Hunter's name are kept
+OLDSAVES ok   v0.24.4: every item count is kept
+OLDSAVES ok   v0.24.4: every Boki is still on the roster and the partner is the same
+OLDSAVES ok   v0.24.4: Pip the cindle: species, name, inborn rolls, trust and xp are kept
+OLDSAVES ok   v0.24.4: Pip the cindle: level 3 (was 3, cap 100)
+OLDSAVES ok   v0.24.4: Pip the cindle: has a zone, bonds and an evolution record
+OLDSAVES ok   v0.24.4: Pip the cindle: a Boki with forms keeps a form name ()
+OLDSAVES ok   v0.24.4: Bubble the puddlet: species, name, inborn rolls, trust and xp are kept
+OLDSAVES ok   v0.24.4: Bubble the puddlet: level 12 (was 12, cap 100)
+OLDSAVES ok   v0.24.4: Bubble the puddlet: has a zone, bonds and an evolution record
+OLDSAVES ok   v0.24.4: Bubble the puddlet: a Boki with forms keeps a form name ()
+OLDSAVES ok   v0.24.4: Rocky the pebbit: species, name, inborn rolls, trust and xp are kept
+OLDSAVES ok   v0.24.4: Rocky the pebbit: level 100 (was 130, cap 100)
+OLDSAVES ok   v0.24.4: Rocky the pebbit: has a zone, bonds and an evolution record
+OLDSAVES ok   v0.24.4: Rocky the pebbit: a Boki with forms keeps a form name ()
+OLDSAVES ok   v0.24.4: the breeding-nest egg is kept
+OLDSAVES ok   v0.24.4: the Incubator egg is kept
+OLDSAVES ok   v0.24.4: the Rare Egg is kept
+OLDSAVES ok   v0.24.4: bramblebank is open and the others are locked
+OLDSAVES ok   v0.24.4: a save and reload keeps it all
+OLDSAVES ok   v0.24.4: the hub opens
+ERROR: Error calling from signal 'timeout' to callable: 'GDScript::_notice': Cannot convert argument 1 from Object to Object.
+   at: emit_signalp (core/object/object.cpp:1406)
+ERROR: Error calling from signal 'timeout' to callable: 'GDScript::_notice': Cannot convert argument 1 from Object to Object.
+   at: emit_signalp (core/object/object.cpp:1406)
+ERROR: Error calling from signal 'timeout' to callable: 'GDScript::_notice': Cannot convert argument 1 from Object to Object.
+   at: emit_signalp (core/object/object.cpp:1406)
+OLDSAVES ok   v0.24.4: bramblebank opens with its 3 Boki out of 3
+OLDSAVES DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

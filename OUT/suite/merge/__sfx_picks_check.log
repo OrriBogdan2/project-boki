@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SFXPICKS ok   manifest: every cue has its file and every pick is a candidate []
+SFXPICKS ok   manifest: the owner's letters (11-15) are the picks (wrong: [])
+SFXPICKS ok   manifest: glide, extract and the dash keep the generated sounds (picked: [])
+SFXPICKS ok   manifest: the six tester slots are marked (missing: [])
+SFXPICKS ok   manifest: those tester slots offer at least 4 candidates (thin: [])
+SFXPICKS ok   tester: a letter replaces the cue's stream
+SFXPICKS ok   tester: Default brings the build's sound back
+SFXPICKS ok   tester: Lock in writes user://sfx_picks.json ({ "glider_wind": "_fire" })
+SFXPICKS ok   tester: a locked pick plays again at the next start
+SFXPICKS ok   page: Default, each letter (the build's pick starred) and Lock in are buttons (["Clear all picks", "Lock in", "Play again", "_fire", "_leaf ★", "Default"])
+SFXPICKS ok   page: pressing a letter plays it, Lock in lists it on screen
+SFXPICKS ok   dash: every Hunter plays a different, existing sound in the air and on the ground ([])
+SFXPICKS ok   dash: with no set of its own the floor picks dash_ground or dash_air (["dash_ground", "dash_air"])
+SFXPICKS ok   dash: a tester pick for the air dash beats the Hunter's own
+SFXPICKS ok   dash: ...and leaves the ground dash alone
+SFXPICKS ok   gliders: every skin's start and loop cue has its file ([])
+SFXPICKS ok   gliders: every skin that is not cloth has its own wind loop (plain: [])
+SFXPICKS ok   gliders: the default is the cloth wing's cues, a leaf's wind is its own
+SFXPICKS ok   gliders: every skin loop is listed in glider.json, so --sfx-set-check holds its level and seam
+SFXPICKS DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

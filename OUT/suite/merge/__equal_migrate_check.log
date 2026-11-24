@@ -1,0 +1,22 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+EQUAL ok   the save version is 7 or later (Hunter unlocks are v6, the market v8)
+EQUAL ok   a v5 save upgrades to v21
+EQUAL ok   gloves, boots and treasure stay (["blink", "skylark_boots", "old_coin", "focus"])
+EQUAL ok   armor, kit and utility-glove pieces leave the armory
+EQUAL ok   gems: 279 (want 279: item value at 100% plus the smaller backpack level)
+EQUAL ok   materials: 3 wood, 4 stone (want 3, 4)
+EQUAL ok   scrap: 7 (want 7: 3 from the plate, 4 refunded)
+EQUAL ok   backpack level 2 is now one Pack in the stash, picked ([0, 0, 1, 0])
+EQUAL ok   the smoke glove became 3 smoke bombs in the stash
+EQUAL ok   the old backpack level is gone (now a backpack) and the loadout keeps only gloves and boots
+EQUAL ok   the second glove slot (V) starts empty; the old passive glove stays in the armory
+EQUAL ok   the notice lists what converted (11 lines)
+EQUAL ok   five pieces converted, none deleted without a line in the notice
+EQUAL ok   a save with nothing to convert upgrades quietly
+EQUAL ok   the notice is shown once, then it is gone
+EQUAL ok   armor found in a match salvages for gems on arrival (+36), the glove is stored
+EQUAL DONE, failures: 0

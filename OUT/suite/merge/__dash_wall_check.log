@@ -1,0 +1,202 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _setup (res://tools/wall_slide_check.gd:68)
+       [13] run (res://tools/dash_wall_check.gd:47)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _setup (res://tools/wall_slide_check.gd:68)
+       [13] run (res://tools/dash_wall_check.gd:47)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+DWALL surface cliff at (413.429, 39.5)
+DWALL surface tenzo rock at (87.01405, 232.8153)
+DWALL surface neve wall at (444.9007, 209.4796)
+DWALL surface rock at (319.3003, 44.9)
+DWALL reference dashes at (499.5, 8.0, 320.5)
+DWALL archer     cliff        a20 dash  3.4m  kept  94% (table  94%)  along  3.2m  out -1.17m  slide   ok
+DWALL archer     cliff        a45 dash  3.4m  kept  71% (table  71%)  along  2.4m  out -2.41m  slide   ok
+DWALL archer     cliff        a80 dash  3.4m  kept  17% (table  17%)  along  0.6m  out -3.36m  slide   ok
+DWALL archer     tenzo rock   a20 dash  3.4m  kept  94% (table  94%)  along  3.2m  out -1.17m  slide   ok
+DWALL archer     tenzo rock   a45 dash  3.4m  kept  71% (table  71%)  along  2.4m  out -2.41m  slide   ok
+DWALL archer     tenzo rock   a80 dash  3.4m  kept  17% (table  17%)  along  0.6m  out -3.36m  slide   ok
+DWALL archer     neve wall    a20 dash  3.4m  kept  94% (table  94%)  along  3.2m  out -2.68m  slide   ok
+DWALL archer     neve wall    a45 dash  3.4m  kept  71% (table  71%)  along  2.4m  out -2.41m  slide   ok
+DWALL archer     neve wall    a80 dash  3.4m  kept  17% (table  17%)  along  0.6m  out -3.36m  slide   ok
+DWALL archer     rock         a20 dash  3.4m  kept  94% (table  94%)  along  3.2m  out -1.17m  slide   ok
+DWALL archer     rock         a45 dash  3.4m  kept  71% (table  71%)  along  2.4m  out -2.41m  slide   ok
+DWALL archer     rock         a80 dash  3.4m  kept  17% (table  17%)  along  0.6m  out -3.36m  slide   ok
+DWALL ashwick    cliff        a20 dash  3.4m  kept  94% (table  94%)  along  3.2m  out -0.01m  slide   ok
+DWALL ashwick    cliff        a45 dash  3.4m  kept  71% (table  71%)  along  2.4m  out  0.00m  slide   ok
+DWALL ashwick    cliff        a80 dash  3.4m  kept  17% (table  17%)  along  0.6m  out  0.00m  slide   ok
+DWALL ashwick    tenzo rock   a20 dash  3.4m  kept  94% (table  94%)  along  3.2m  out -0.79m  slide   ok
+DWALL ashwick    tenzo rock   a45 dash  3.4m  kept  74% (table  71%)  along  2.5m  out -1.18m  slide   ok
+DWALL ashwick    tenzo rock   a80 dash  3.4m  kept  17% (table  17%)  along  0.6m  out -0.02m  slide   ok
+DWALL ashwick    neve wall    a20 dash  3.4m  kept  94% (table  94%)  along  3.2m  out  0.66m  bounce  ok
+DWALL ashwick    neve wall    a45 dash  3.4m  kept  71% (table  71%)  along  2.4m  out  0.66m  bounce  ok
+DWALL ashwick    neve wall    a80 dash  3.4m  kept  17% (table  17%)  along  0.6m  out  0.66m  bounce  ok
+DWALL ashwick    rock         a20 dash  3.4m  kept  94% (table  94%)  along  3.2m  out -0.75m  slide   ok
+DWALL ashwick    rock         a45 dash  3.4m  kept  72% (table  71%)  along  2.5m  out -1.27m  slide   ok
+DWALL ashwick    rock         a80 dash  3.4m  kept  17% (table  17%)  along  0.6m  out -0.02m  slide   ok
+DWALL bulwark    cliff        a20 dash  3.6m  kept  94% (table  94%)  along  3.4m  out  0.02m  slide   ok
+DWALL bulwark    cliff        a45 dash  3.6m  kept  71% (table  71%)  along  2.5m  out  0.04m  slide   ok
+DWALL bulwark    cliff        a80 dash  3.6m  kept  17% (table  17%)  along  0.6m  out  0.01m  slide   ok
+DWALL bulwark    tenzo rock   a20 dash  3.6m  kept  95% (table  94%)  along  3.4m  out -1.88m  slide   ok
+DWALL bulwark    tenzo rock   a45 dash  3.6m  kept  75% (table  71%)  along  2.7m  out -3.43m  slide   ok
+DWALL bulwark    tenzo rock   a80 dash  3.6m  kept  17% (table  17%)  along  0.6m  out -0.02m  slide   ok
+DWALL bulwark    neve wall    a20 dash  3.6m  kept  94% (table  94%)  along  3.4m  out -0.66m  slide   ok
+DWALL bulwark    neve wall    a45 dash  3.6m  kept  71% (table  71%)  along  2.5m  out  0.66m  bounce  ok
+DWALL bulwark    neve wall    a80 dash  3.6m  kept  17% (table  17%)  along  0.6m  out  0.66m  bounce  ok
+DWALL bulwark    rock         a20 dash  3.6m  kept  95% (table  94%)  along  3.4m  out -1.80m  slide   ok
+DWALL bulwark    rock         a45 dash  3.6m  kept  76% (table  71%)  along  2.7m  out -3.70m  slide   ok
+DWALL bulwark    rock         a80 dash  3.6m  kept  17% (table  17%)  along  0.6m  out -0.02m  slide   ok
+DWALL dolm: Rock Hop picks a landing short of what it would hop into (BreahHop.spot_for)
+DWALL dolm       cliff        a20 dash  3.1m  kept   0% (table  94%)  along  0.0m  out  0.00m  kit     ok
+DWALL dolm       cliff        a45 dash  3.1m  kept   0% (table  71%)  along  0.0m  out  0.00m  kit     ok
+DWALL dolm       cliff        a80 dash  3.1m  kept   0% (table  17%)  along  0.0m  out  0.00m  kit     ok
+DWALL dolm       tenzo rock   a20 dash  3.1m  kept  15% (table  94%)  along  0.5m  out -0.02m  kit     ok
+DWALL dolm       tenzo rock   a45 dash  3.1m  kept  -1% (table  71%)  along -0.0m  out -0.02m  kit     ok
+DWALL dolm       tenzo rock   a80 dash  3.1m  kept  -2% (table  17%)  along -0.1m  out  0.04m  kit     ok
+DWALL dolm       neve wall    a20 dash  3.1m  kept  24% (table  94%)  along  0.7m  out  1.65m  kit     ok
+DWALL dolm       neve wall    a45 dash  3.1m  kept   0% (table  71%)  along -0.0m  out  2.04m  kit     ok
+DWALL dolm       neve wall    a80 dash  3.1m  kept   0% (table  17%)  along  0.0m  out  1.97m  kit     ok
+DWALL dolm       rock         a20 dash  3.1m  kept  15% (table  94%)  along  0.5m  out -0.02m  kit     ok
+DWALL dolm       rock         a45 dash  3.1m  kept  10% (table  71%)  along  0.3m  out -0.02m  kit     ok
+DWALL dolm       rock         a80 dash  3.1m  kept   2% (table  17%)  along  0.1m  out -0.02m  kit     ok
+DWALL dredge     cliff        a20 dash  2.8m  kept  94% (table  94%)  along  2.6m  out  0.01m  slide   ok
+DWALL dredge     cliff        a45 dash  2.8m  kept  71% (table  71%)  along  2.0m  out  0.01m  slide   ok
+DWALL dredge     cliff        a80 dash  2.8m  kept  17% (table  17%)  along  0.5m  out  0.01m  slide   ok
+DWALL dredge     tenzo rock   a20 dash  2.8m  kept  95% (table  94%)  along  2.7m  out -0.62m  slide   ok
+DWALL dredge     tenzo rock   a45 dash  2.8m  kept  76% (table  71%)  along  2.1m  out -0.81m  slide   ok
+DWALL dredge     tenzo rock   a80 dash  2.8m  kept  17% (table  17%)  along  0.5m  out -0.02m  slide   ok
+DWALL dredge     neve wall    a20 dash  2.8m  kept  94% (table  94%)  along  2.6m  out  0.66m  bounce  ok
+DWALL dredge     neve wall    a45 dash  2.8m  kept  71% (table  71%)  along  2.0m  out  0.66m  bounce  ok
+DWALL dredge     neve wall    a80 dash  2.8m  kept  17% (table  17%)  along  0.5m  out  0.66m  bounce  ok
+DWALL dredge     rock         a20 dash  2.8m  kept  95% (table  94%)  along  2.7m  out -0.57m  slide   ok
+DWALL dredge     rock         a45 dash  2.8m  kept  75% (table  71%)  along  2.1m  out -0.97m  slide   ok
+DWALL dredge     rock         a80 dash  2.8m  kept  17% (table  17%)  along  0.5m  out -0.02m  slide   ok
+DWALL gunslinger cliff        a20 dash  4.8m  kept  94% (table  94%)  along  4.5m  out -0.02m  slide   ok
+DWALL gunslinger cliff        a45 dash  4.8m  kept  71% (table  71%)  along  3.4m  out  0.00m  slide   ok
+DWALL gunslinger cliff        a80 dash  4.8m  kept  17% (table  17%)  along  0.8m  out  0.00m  slide   ok
+DWALL gunslinger tenzo rock   a20 dash  4.8m  kept  94% (table  94%)  along  4.6m  out -1.28m  slide   ok
+DWALL gunslinger tenzo rock   a45 dash  4.8m  kept  74% (table  71%)  along  3.6m  out -2.15m  slide   ok
+DWALL gunslinger tenzo rock   a80 dash  4.8m  kept  17% (table  17%)  along  0.8m  out -0.02m  slide   ok
+DWALL gunslinger neve wall    a20 dash  4.8m  kept  94% (table  94%)  along  4.5m  out  0.85m  bounce  ok
+DWALL gunslinger neve wall    a45 dash  4.8m  kept  71% (table  71%)  along  3.4m  out  1.13m  bounce  ok
+DWALL gunslinger neve wall    a80 dash  4.8m  kept  17% (table  17%)  along  0.8m  out  1.13m  bounce  ok
+DWALL gunslinger rock         a20 dash  4.8m  kept  94% (table  94%)  along  4.5m  out -1.26m  slide   ok
+DWALL gunslinger rock         a45 dash  4.8m  kept  73% (table  71%)  along  3.5m  out -2.18m  slide   ok
+DWALL gunslinger rock         a80 dash  4.8m  kept  17% (table  17%)  along  0.8m  out -0.02m  slide   ok
+DWALL juggernaut cliff        a20 dash  3.8m  kept  94% (table  94%)  along  3.6m  out  0.02m  slide   ok
+DWALL juggernaut cliff        a45 dash  3.8m  kept  71% (table  71%)  along  2.7m  out  0.03m  slide   ok
+DWALL juggernaut cliff        a80 dash  3.8m  kept  17% (table  17%)  along  0.7m  out  0.01m  slide   ok
+DWALL juggernaut tenzo rock   a20 dash  3.8m  kept  95% (table  94%)  along  3.7m  out -1.12m  slide   ok
+DWALL juggernaut tenzo rock   a45 dash  3.8m  kept  76% (table  71%)  along  2.9m  out -1.82m  slide   ok
+DWALL juggernaut tenzo rock   a80 dash  3.8m  kept  17% (table  17%)  along  0.7m  out -0.02m  slide   ok
+DWALL juggernaut neve wall    a20 dash  3.8m  kept  94% (table  94%)  along  3.6m  out  0.65m  bounce  ok
+DWALL juggernaut neve wall    a45 dash  3.8m  kept  71% (table  71%)  along  2.7m  out  0.66m  bounce  ok
+DWALL juggernaut neve wall    a80 dash  3.8m  kept  17% (table  17%)  along  0.7m  out  0.66m  bounce  ok
+DWALL juggernaut rock         a20 dash  3.8m  kept  94% (table  94%)  along  3.6m  out -1.02m  slide   ok
+DWALL juggernaut rock         a45 dash  3.8m  kept  76% (table  71%)  along  2.9m  out -2.08m  slide   ok
+DWALL juggernaut rock         a80 dash  3.8m  kept  14% (table  17%)  along  0.5m  out -0.02m  slide   FAIL
+DWALL mage       cliff        a20 dash  7.4m  kept  94% (table  94%)  along  6.9m  out  0.01m  slide   ok
+DWALL mage       cliff        a45 dash  7.4m  kept  70% (table  71%)  along  5.2m  out  0.03m  slide   ok
+DWALL mage       cliff        a80 dash  7.4m  kept  17% (table  17%)  along  1.3m  out -0.00m  slide   ok
+DWALL mage       tenzo rock   a20 dash  7.4m  kept  94% (table  94%)  along  6.9m  out -2.10m  slide   ok
+DWALL mage       tenzo rock   a45 dash  7.4m  kept  74% (table  71%)  along  5.4m  out -3.84m  slide   ok
+DWALL mage       tenzo rock   a80 dash  7.4m  kept  27% (table  17%)  along  2.0m  out -1.03m  round   ok
+DWALL mage       neve wall    a20 dash  7.4m  kept  83% (table  94%)  along  6.1m  out -0.60m  round   ok
+DWALL mage       neve wall    a45 dash  7.4m  kept  63% (table  71%)  along  4.6m  out -0.60m  round   ok
+DWALL mage       neve wall    a80 dash  7.4m  kept  15% (table  17%)  along  1.1m  out  1.50m  bounce  FAIL
+DWALL mage       rock         a20 dash  7.4m  kept  94% (table  94%)  along  6.9m  out -1.89m  slide   ok
+DWALL mage       rock         a45 dash  7.4m  kept  57% (table  71%)  along  4.2m  out -2.96m  round   ok
+DWALL mage       rock         a80 dash  7.4m  kept   7% (table  17%)  along  0.5m  out -0.02m  round   FAIL
+DWALL ostra      cliff        a20 dash  6.0m  kept  94% (table  94%)  along  5.6m  out -2.05m  slide   ok
+DWALL ostra      cliff        a45 dash  6.0m  kept  71% (table  71%)  along  4.2m  out -4.24m  slide   ok
+DWALL ostra      cliff        a80 dash  6.0m  kept  17% (table  17%)  along  1.0m  out -5.91m  slide   ok
+DWALL ostra      tenzo rock   a20 dash  6.0m  kept  94% (table  94%)  along  5.6m  out -2.05m  slide   ok
+DWALL ostra      tenzo rock   a45 dash  6.0m  kept  71% (table  71%)  along  4.2m  out -4.24m  slide   ok
+DWALL ostra      tenzo rock   a80 dash  6.0m  kept  17% (table  17%)  along  1.0m  out -5.91m  slide   ok
+DWALL ostra      neve wall    a20 dash  6.0m  kept  94% (table  94%)  along  5.6m  out -2.05m  slide   ok
+DWALL ostra      neve wall    a45 dash  6.0m  kept  71% (table  71%)  along  4.2m  out -4.24m  slide   ok
+DWALL ostra      neve wall    a80 dash  6.0m  kept  17% (table  17%)  along  1.0m  out -5.91m  slide   ok
+DWALL ostra      rock         a20 dash  6.0m  kept  94% (table  94%)  along  5.6m  out -2.05m  slide   ok
+DWALL ostra      rock         a45 dash  6.0m  kept  71% (table  71%)  along  4.2m  out -4.24m  slide   ok
+DWALL ostra      rock         a80 dash  6.0m  kept  17% (table  17%)  along  1.0m  out -5.91m  slide   ok
+DWALL rimewright cliff        a20 dash  1.6m  kept  94% (table  94%)  along  1.5m  out  0.01m  slide   ok
+DWALL rimewright cliff        a45 dash  1.6m  kept  71% (table  71%)  along  1.1m  out  0.01m  slide   ok
+DWALL rimewright cliff        a80 dash  1.6m  kept  17% (table  17%)  along  0.3m  out  0.00m  slide   ok
+DWALL rimewright tenzo rock   a20 dash  1.6m  kept  94% (table  94%)  along  1.5m  out -0.59m  slide   ok
+DWALL rimewright tenzo rock   a45 dash  1.6m  kept  71% (table  71%)  along  1.1m  out -1.22m  slide   ok
+DWALL rimewright tenzo rock   a80 dash  1.6m  kept  17% (table  17%)  along  0.3m  out -1.70m  slide   ok
+DWALL rimewright neve wall    a20 dash  1.6m  kept  94% (table  94%)  along  1.5m  out -0.59m  slide   ok
+DWALL rimewright neve wall    a45 dash  1.6m  kept  71% (table  71%)  along  1.1m  out -1.22m  slide   ok
+DWALL rimewright neve wall    a80 dash  1.6m  kept  17% (table  17%)  along  0.3m  out -1.70m  slide   ok
+DWALL rimewright rock         a20 dash  1.6m  kept  95% (table  94%)  along  1.5m  out -0.19m  slide   ok
+DWALL rimewright rock         a45 dash  1.6m  kept  73% (table  71%)  along  1.2m  out -0.01m  slide   ok
+DWALL rimewright rock         a80 dash  1.6m  kept  17% (table  17%)  along  0.3m  out -0.02m  slide   ok
+DWALL tender     cliff        a20 dash  3.2m  kept  94% (table  94%)  along  3.0m  out  0.02m  slide   ok
+DWALL tender     cliff        a45 dash  3.2m  kept  71% (table  71%)  along  2.2m  out  0.03m  slide   ok
+DWALL tender     cliff        a80 dash  3.2m  kept  17% (table  17%)  along  0.6m  out  0.01m  slide   ok
+DWALL tender     tenzo rock   a20 dash  3.2m  kept  94% (table  94%)  along  3.0m  out -1.25m  slide   ok
+DWALL tender     tenzo rock   a45 dash  3.2m  kept  71% (table  71%)  along  2.2m  out -2.59m  slide   ok
+DWALL tender     tenzo rock   a80 dash  3.2m  kept  17% (table  17%)  along  0.6m  out -3.61m  slide   ok
+DWALL tender     neve wall    a20 dash  3.2m  kept  94% (table  94%)  along  3.0m  out -1.25m  slide   ok
+DWALL tender     neve wall    a45 dash  3.2m  kept  71% (table  71%)  along  2.2m  out -2.59m  slide   ok
+DWALL tender     neve wall    a80 dash  3.2m  kept  17% (table  17%)  along  0.6m  out -3.61m  slide   ok
+DWALL tender     rock         a20 dash  3.2m  kept  94% (table  94%)  along  3.0m  out -0.88m  slide   ok
+DWALL tender     rock         a45 dash  3.2m  kept  73% (table  71%)  along  2.3m  out -1.48m  slide   ok
+DWALL tender     rock         a80 dash  3.2m  kept  17% (table  17%)  along  0.6m  out -0.02m  slide   ok
+DWALL thief      cliff        a20 dash  4.7m  kept  94% (table  94%)  along  4.4m  out  0.00m  slide   ok
+DWALL thief      cliff        a45 dash  4.7m  kept  71% (table  71%)  along  3.3m  out  0.02m  slide   ok
+DWALL thief      cliff        a80 dash  4.7m  kept  17% (table  17%)  along  0.8m  out -0.00m  slide   ok
+DWALL thief      tenzo rock   a20 dash  4.7m  kept  94% (table  94%)  along  4.4m  out -1.81m  slide   ok
+DWALL thief      tenzo rock   a45 dash  4.7m  kept  71% (table  71%)  along  3.3m  out -3.74m  slide   ok
+DWALL thief      tenzo rock   a80 dash  4.7m  kept  17% (table  17%)  along  0.8m  out -5.21m  slide   ok
+DWALL thief      neve wall    a20 dash  4.7m  kept  94% (table  94%)  along  4.4m  out -1.81m  slide   ok
+DWALL thief      neve wall    a45 dash  4.7m  kept  71% (table  71%)  along  3.3m  out -3.74m  slide   ok
+DWALL thief      neve wall    a80 dash  4.7m  kept  17% (table  17%)  along  0.8m  out -5.21m  slide   ok
+DWALL thief      rock         a20 dash  4.7m  kept  94% (table  94%)  along  4.4m  out -1.36m  slide   ok
+DWALL thief      rock         a45 dash  4.7m  kept  73% (table  71%)  along  3.4m  out -2.58m  slide   ok
+DWALL thief      rock         a80 dash  4.7m  kept  17% (table  17%)  along  0.8m  out -0.02m  slide   ok
+DASH WALL CHECK DONE, failures: 3
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 49 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

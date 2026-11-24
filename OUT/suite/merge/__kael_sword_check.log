@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SWORD model scale 0.973, height 1.879 m
+SWORD carried          blade 1.004 m = 0.534 of height, hand R 0.059 L 0.687 off the hilt
+SWORD walk             blade 1.004 m = 0.534 of height, hand R 0.059 L 0.705 off the hilt
+SWORD run              blade 1.004 m = 0.534 of height, hand R 0.059 L 0.721 off the hilt
+SWORD LMB swing 1      blade 1.004 m = 0.534 of height, hand R 0.059 L 0.135 off the hilt
+SWORD LMB swing 2      blade 1.004 m = 0.534 of height, hand R 0.059 L 0.112 off the hilt
+SWORD Wave wind-up     blade 1.004 m = 0.534 of height, hand R 0.059 L 0.646 off the hilt
+SWORD Wave             blade 1.004 m = 0.534 of height, hand R 0.059 L 0.234 off the hilt
+SWORD Lunge hold 0.10  blade 1.004 m = 0.534 of height, hand R 0.059 L 0.376 off the hilt
+SWORD Lunge hold 0.28  blade 1.004 m = 0.534 of height, hand R 0.059 L 0.352 off the hilt
+SWORD Lunge hold 0.45  blade 1.004 m = 0.534 of height, hand R 0.059 L 0.208 off the hilt
+SWORD Lunge hold 1.20  blade 1.004 m = 0.534 of height, hand R 0.059 L 0.209 off the hilt
+SWORD Lunge            blade 1.004 m = 0.534 of height, hand R 0.059 L 0.479 off the hilt
+SWORD Slam wind-up     blade 1.004 m = 0.534 of height, hand R 0.059 L 0.086 off the hilt
+SWORD Slam             blade 1.004 m = 0.534 of height, hand R 0.059 L 0.061 off the hilt
+SWORD Rampage drive    blade 1.004 m = 0.534 of height, hand R 0.059 L 0.589 off the hilt
+SWORD Rampage tip      blade 1.004 m = 0.534 of height, hand R 0.059 L 0.699 off the hilt
+SWORD Rampage drag     blade 1.004 m = 0.534 of height, hand R 0.059 L 0.737 off the hilt
+SWORD Guard            blade 1.004 m = 0.534 of height, hand R 0.059 L 0.241 off the hilt
+kael-sword-check: PASS (0 fails)

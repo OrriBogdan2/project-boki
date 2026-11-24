@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+RELICSFOLD ok   a fresh save is on its first visit
+RELICSFOLD ok   the expedition panel shows only the picked Relic (1 of 13)
+RELICSFOLD ok   and one Where (1 shown of 3)
+RELICSFOLD ok   no match line or mode link shows
+RELICSFOLD ok   Start shows
+RELICSFOLD ok   and so do the Boki and the conditions
+RELICSFOLD ok   the fold brings back every Relic
+RELICSFOLD ok   and every Where
+RELICSFOLD ok   and the match lines and the mode links
+RELICSFOLD ok   expedition: all 13 Relic names whole at 1280x720
+RELICSFOLD ok   the Relics page shows 1 of 13 tiles on a first visit
+RELICSFOLD ok   the fold shows every Relic tile
+RELICSFOLD ok   Relics page: all 13 Relic names whole at 1280x720
+RELICSFOLD ok   with a second drop open it is no longer a first visit
+RELICSFOLD ok   the expedition panel stays compact
+RELICSFOLD ok   and so are the tiles
+RELICSFOLD DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

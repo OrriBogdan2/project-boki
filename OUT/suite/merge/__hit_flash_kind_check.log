@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HITFLASH ok   puddlet has a type colour of its own
+HITFLASH ok   a Hunter's hit flashes white: (1.0, 0.9412, 0.8235, 1.0)
+HITFLASH ok   a Boki's hit flashes in its type colour: (1.0, 0.6235, 0.8157, 1.0)
+HITFLASH ok   a mob keeps its flash: (1.0, 0.9412, 0.8235, 1.0)
+HITFLASH ok   a hit on you keeps the hot flash
+HITFLASH ok   a Boki's flash can't be taken for a Hunter's
+HITFLASH ok   a Boki hit starts no more flashes than a Hunter hit (1 vs 1)
+HITFLASH ok   a Boki's number is smaller than a Hunter's (30 vs 40)
+HITFLASH ok   the fight makes no new fx nodes once warm (195)
+HITFLASH ok   live flashes stay in the pool (20 of 20)
+HITFLASH ok   live numbers stay in the pool (24)
+HITFLASH DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 25 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+DAILY ok   1 h away gives 0 gifts (got 0)
+DAILY ok   1 h away never lowers a need or a stat
+DAILY ok   8 h away gives 3 gifts (got 3)
+DAILY ok   8 h away never lowers a need or a stat
+DAILY ok   72 h away gives 3 gifts (got 3)
+DAILY ok   72 h away never lowers a need or a stat
+DAILY ok   the first arrival has nothing to give
+DAILY ok   4.5 min away trains nothing: a quarter rate of 90 s a point is under one point
+DAILY ok   12 min away trains 2 points at a quarter rate (got 2)
+DAILY ok   72 h trains the 3 points a Boki can get, no more
+DAILY ok   a stat already past the cap is left alone, never lowered
+DAILY ok   patch overflow went to the feeder bowl (6 in it)
+DAILY ok   nothing is lost: 12 snacks made, 6 in the bowl, 6 in the pantry
+DAILY ok   one batch still waits ripe on the patch
+DAILY ok   three wishes a day (got 3)
+DAILY ok   the same three all day
+DAILY ok   each wish is for a low need
+DAILY ok   nothing is granted while the needs stay low
+DAILY ok   raising one need grants that one wish
+DAILY ok   it gave trust and a small item
+DAILY ok   one wish gives no gems
+DAILY ok   all three give 6 gems
+DAILY ok   granted wishes pay once
+DAILY ok   a new day picks fresh wishes
+DAILY ok   missing days costs nothing
+DAILY ok   one low need, one wish (a short list is fine)
+DAILY ok   a short list gives no all-three gems
+DAILY DONE, failures: 0

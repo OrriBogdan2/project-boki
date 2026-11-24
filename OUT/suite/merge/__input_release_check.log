@@ -1,0 +1,343 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+INREL ok   archer: the match has its HUD
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+INREL ok   archer lmb: held 0.5 s, off the frame after the release
+INREL ok   archer lmb: no attack starts 0.75 s after the release (0 after it, last at -1.00 s)
+INREL ok   archer rmb: held 0.5 s, off the frame after the release
+INREL ok   archer e: held 0.5 s, off the frame after the release
+INREL ok   archer r: held 0.5 s, off the frame after the release
+INREL ok   archer dash: held 0.5 s, off the frame after the release
+INREL ok   archer jump: held 0.5 s, off the frame after the release
+INREL ok   archer glide: held 0.5 s, off the frame after the release
+INREL ok   archer lmb: let go under the map, off once it closes
+INREL ok   archer lmb: no firing after the map closes (last at -1.00 s)
+INREL ok   archer lmb: let go in a hitstop, 1 attacks after (last at 0.05 s)
+INREL ok   archer lmb: let go in a stun, 0 attacks after (last at -1.00 s)
+INREL ok   archer lmb: let go in a dash, 0 attacks after (last at -1.00 s)
+INREL ok   archer lmb: let go in a pause, 0 attacks after (last at -1.00 s)
+INREL ok   archer lmb: let go in a reclick, 0 attacks after (last at -1.00 s)
+INREL ok   archer lmb: a focus loss mid-hold lets it go
+INREL ok   archer lmb: no firing after the focus loss (last at -1.00 s)
+INREL ok   archer rmb: a focus loss mid-hold lets it go
+INREL ok   archer e: a focus loss mid-hold lets it go
+INREL ok   archer r: a focus loss mid-hold lets it go
+INREL ok   archer dash: a focus loss mid-hold lets it go
+INREL ok   archer jump: a focus loss mid-hold lets it go
+INREL ok   archer glide: a focus loss mid-hold lets it go
+INREL ok   map: a drag whose release went elsewhere ends on the next move
+INREL ok   map: opened on the ship, closed on landing
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+INREL ok   juggernaut: the match has its HUD
+INREL ok   juggernaut lmb: held 0.5 s, off the frame after the release
+INREL ok   juggernaut lmb: no attack starts 0.75 s after the release (0 after it, last at -1.00 s)
+INREL ok   juggernaut rmb: held 0.5 s, off the frame after the release
+INREL ok   juggernaut e: held 0.5 s, off the frame after the release
+INREL ok   juggernaut r: held 0.5 s, off the frame after the release
+INREL ok   juggernaut dash: held 0.5 s, off the frame after the release
+INREL ok   juggernaut jump: held 0.5 s, off the frame after the release
+INREL ok   juggernaut glide: held 0.5 s, off the frame after the release
+INREL ok   juggernaut lmb: let go under the map, off once it closes
+INREL ok   juggernaut lmb: no firing after the map closes (last at -1.00 s)
+INREL ok   juggernaut lmb: let go in a hitstop, 1 attacks after (last at 0.03 s)
+INREL ok   juggernaut lmb: let go in a stun, 0 attacks after (last at -1.00 s)
+INREL ok   juggernaut lmb: let go in a dash, 1 attacks after (last at 0.20 s)
+INREL ok   juggernaut lmb: let go in a pause, 0 attacks after (last at -1.00 s)
+INREL ok   juggernaut lmb: let go in a reclick, 0 attacks after (last at -1.00 s)
+INREL ok   juggernaut lmb: a focus loss mid-hold lets it go
+INREL ok   juggernaut lmb: no firing after the focus loss (last at -1.00 s)
+INREL ok   juggernaut rmb: a focus loss mid-hold lets it go
+INREL ok   juggernaut e: a focus loss mid-hold lets it go
+INREL ok   juggernaut r: a focus loss mid-hold lets it go
+INREL ok   juggernaut dash: a focus loss mid-hold lets it go
+INREL ok   juggernaut jump: a focus loss mid-hold lets it go
+INREL ok   juggernaut glide: a focus loss mid-hold lets it go
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+INREL ok   gunslinger: the match has its HUD
+INREL ok   gunslinger lmb: held 0.5 s, off the frame after the release
+INREL ok   gunslinger lmb: no attack starts 0.75 s after the release (0 after it, last at -1.00 s)
+INREL ok   gunslinger rmb: held 0.5 s, off the frame after the release
+INREL ok   gunslinger e: held 0.5 s, off the frame after the release
+INREL ok   gunslinger r: held 0.5 s, off the frame after the release
+INREL ok   gunslinger dash: held 0.5 s, off the frame after the release
+INREL ok   gunslinger jump: held 0.5 s, off the frame after the release
+INREL ok   gunslinger glide: held 0.5 s, off the frame after the release
+INREL ok   gunslinger lmb: let go under the map, off once it closes
+INREL ok   gunslinger lmb: no firing after the map closes (last at -1.00 s)
+INREL ok   gunslinger lmb: let go in a hitstop, 0 attacks after (last at -1.00 s)
+INREL ok   gunslinger lmb: let go in a stun, 0 attacks after (last at -1.00 s)
+INREL ok   gunslinger lmb: let go in a dash, 0 attacks after (last at -1.00 s)
+INREL ok   gunslinger lmb: let go in a pause, 0 attacks after (last at -1.00 s)
+INREL ok   gunslinger lmb: let go in a reclick, 0 attacks after (last at -1.00 s)
+INREL ok   gunslinger lmb: a focus loss mid-hold lets it go
+INREL ok   gunslinger lmb: no firing after the focus loss (last at -1.00 s)
+INREL ok   gunslinger rmb: a focus loss mid-hold lets it go
+INREL ok   gunslinger e: a focus loss mid-hold lets it go
+INREL ok   gunslinger r: a focus loss mid-hold lets it go
+INREL ok   gunslinger dash: a focus loss mid-hold lets it go
+INREL ok   gunslinger jump: a focus loss mid-hold lets it go
+INREL ok   gunslinger glide: a focus loss mid-hold lets it go
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+INREL ok   bulwark: the match has its HUD
+INREL ok   bulwark lmb: held 0.5 s, off the frame after the release
+INREL ok   bulwark lmb: no attack starts 0.75 s after the release (0 after it, last at -1.00 s)
+INREL ok   bulwark rmb: held 0.5 s, off the frame after the release
+INREL ok   bulwark e: held 0.5 s, off the frame after the release
+INREL ok   bulwark r: held 0.5 s, off the frame after the release
+INREL ok   bulwark dash: held 0.5 s, off the frame after the release
+INREL ok   bulwark jump: held 0.5 s, off the frame after the release
+INREL ok   bulwark glide: held 0.5 s, off the frame after the release
+INREL ok   bulwark lmb: let go under the map, off once it closes
+INREL ok   bulwark lmb: no firing after the map closes (last at -1.00 s)
+INREL ok   bulwark lmb: let go in a hitstop, 1 attacks after (last at 0.03 s)
+INREL ok   bulwark lmb: let go in a stun, 0 attacks after (last at -1.00 s)
+INREL ok   bulwark lmb: let go in a dash, 0 attacks after (last at -1.00 s)
+INREL ok   bulwark lmb: let go in a pause, 0 attacks after (last at -1.00 s)
+INREL ok   bulwark lmb: let go in a reclick, 0 attacks after (last at -1.00 s)
+INREL ok   bulwark lmb: a focus loss mid-hold lets it go
+INREL ok   bulwark lmb: no firing after the focus loss (last at -1.00 s)
+INREL ok   bulwark rmb: a focus loss mid-hold lets it go
+INREL ok   bulwark e: a focus loss mid-hold lets it go
+INREL ok   bulwark r: a focus loss mid-hold lets it go
+INREL ok   bulwark dash: a focus loss mid-hold lets it go
+INREL ok   bulwark jump: a focus loss mid-hold lets it go
+INREL ok   bulwark glide: a focus loss mid-hold lets it go
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+INREL ok   rimewright: the match has its HUD
+INREL ok   rimewright lmb: held 0.5 s, off the frame after the release
+INREL ok   rimewright lmb: no attack starts 0.75 s after the release (3 after it, last at 0.45 s)
+INREL ok   rimewright rmb: held 0.5 s, off the frame after the release
+INREL ok   rimewright e: held 0.5 s, off the frame after the release
+INREL ok   rimewright r: held 0.5 s, off the frame after the release
+INREL ok   rimewright dash: held 0.5 s, off the frame after the release
+INREL ok   rimewright jump: held 0.5 s, off the frame after the release
+INREL ok   rimewright glide: held 0.5 s, off the frame after the release
+INREL ok   rimewright lmb: let go under the map, off once it closes
+INREL ok   rimewright lmb: no firing after the map closes (last at 0.10 s)
+INREL ok   rimewright lmb: let go in a hitstop, 3 attacks after (last at 0.53 s)
+INREL ok   rimewright lmb: let go in a stun, 0 attacks after (last at -1.00 s)
+INREL ok   rimewright lmb: let go in a dash, 3 attacks after (last at 0.42 s)
+INREL ok   rimewright lmb: let go in a pause, 3 attacks after (last at 0.47 s)
+INREL ok   rimewright lmb: let go in a reclick, 3 attacks after (last at 0.43 s)
+INREL ok   rimewright lmb: a focus loss mid-hold lets it go
+INREL ok   rimewright lmb: no firing after the focus loss (last at 0.32 s)
+INREL ok   rimewright rmb: a focus loss mid-hold lets it go
+INREL ok   rimewright e: a focus loss mid-hold lets it go
+INREL ok   rimewright r: a focus loss mid-hold lets it go
+INREL ok   rimewright dash: a focus loss mid-hold lets it go
+INREL ok   rimewright jump: a focus loss mid-hold lets it go
+INREL ok   rimewright glide: a focus loss mid-hold lets it go
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/input_release_check.gd:45)
+INREL ok   ashwick: the match has its HUD
+INREL ok   ashwick lmb: held 0.5 s, off the frame after the release
+INREL ok   ashwick lmb: no attack starts 0.75 s after the release (0 after it, last at -1.00 s)
+INREL ok   ashwick rmb: held 0.5 s, off the frame after the release
+INREL ok   ashwick e: held 0.5 s, off the frame after the release
+INREL ok   ashwick r: held 0.5 s, off the frame after the release
+INREL ok   ashwick dash: held 0.5 s, off the frame after the release
+INREL ok   ashwick jump: held 0.5 s, off the frame after the release
+INREL ok   ashwick glide: held 0.5 s, off the frame after the release
+INREL ok   ashwick lmb: let go under the map, off once it closes
+INREL ok   ashwick lmb: no firing after the map closes (last at -1.00 s)
+INREL ok   ashwick lmb: let go in a hitstop, 0 attacks after (last at -1.00 s)
+INREL ok   ashwick lmb: let go in a stun, 0 attacks after (last at -1.00 s)

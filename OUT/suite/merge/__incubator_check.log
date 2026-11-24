@@ -1,0 +1,91 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+INCUB ok   a fresh save has an Incubator with 5 empty cradles
+INCUB ok   7 Rare Eggs brought home: 5 go into their own cradles, 2 wait on the shelf
+INCUB ok   none go in the breeding nest
+INCUB ok   each knows its kind and boss (Rare Basaltoad Egg, from Siegephant)
+INCUB ok   'Next up' moves a shelf egg to the front
+INCUB ok   a 6th cradle for 300 gems
+INCUB ok   the next shelf egg goes straight into it
+INCUB ok   up to 8 cradles, then no more (The Incubator has all its cradles)
+INCUB ok   no gems, no cradle
+INCUB ok   new eggs start cold
+INCUB ok   ten minutes of play: every egg is half warm at once
+INCUB ok   each says what's left: "~10 min of play left"
+INCUB ok   twenty minutes: all ready
+INCUB ok   ready eggs wait for you: nothing hatches by itself
+INCUB ok   an Ember kin at the brazier: twice as fast (120 s vs 60 s a minute)
+INCUB ok   Ember Coals burning: twice as fast (120 s)
+INCUB ok   both: three times as fast (180 s)
+INCUB ok   no coals, nothing to stoke (No Ember Coals: the market stall sells them)
+INCUB ok   stoking one uses it and burns for 4 minutes
+INCUB ok   it burns down while eggs warm (180 s left)
+INCUB ok   and keeps when nothing's warming
+INCUB ok   an egg needs 20 minutes of play (content/rules/incubator.json)
+INCUB ok   two expeditions on the counter warm nothing by themselves
+INCUB ok   a five-minute match warms every egg a quarter
+INCUB ok   an hour with the game closed warms nothing
+INCUB ok   cracks show in stages: none at 10%, two sets at 70%, three at 95% ([0, 2, 3])
+INCUB ok   the shell glows brighter as it warms ([0.35, 0.98007080441832, 1.48412744795297])
+INCUB ok   it wobbles harder (0.155 rad, was 0.030)
+INCUB ok   nothing hatches before it's ready
+INCUB ok   the ready one hatches a rare Rampartoad; the others keep warming (6 still in cradles)
+INCUB ok   with the Rare Egg IV floor: 4 stats at 26+ ({ "hp": 30, "atk": 17, "spd": 29, "work": 30, "bond": 27 })
+INCUB ok   its cradle is free (the shelf was empty)
+INCUB ok   the next egg brought home goes into the free cradle, cold
+INCUB ok   a pair's egg in the breeding nest is left alone
+INCUB ok   the old settle call never puts Rare Eggs in the nest
+INCUB ok   a Rare Egg sitting in the old nest moves into a cradle, and the nest is free
+INCUB ok   an early one-egg incubator is cradle 1, cold
+INCUB ok   eggs in cradles in an older save start at 0 progress, no crash
+INCUB ok   save and load keep the progress
+INCUB ok   an old save file with an egg in the cradle loads: both kept, cold
+INCUB ok   a day-old clock stamp changes nothing: 300 s of play is a quarter
+INCUB ok   a clock jump forward changes nothing either: 60 s more is 5 percent
+INCUB ok   written back and loaded again, the Incubator is the same
+INCUB ok   an old save's waiting Rare Egg goes into a cradle
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+INCUB ok   the Incubator stands by the Nook with 3 eggs placed in their cradles
+INCUB ok   the 3 cradles not bought yet are shut behind a grate
+INCUB ok   warming eggs make one Ember job: Warm the incubator
+INCUB ok   the Ember kin (Ash) goes for it; the Tide kin doesn't
+INCUB ok   Ash walks over and sits by the brazier (Warming the incubator (Ember 3, 0%))
+INCUB ok   while it's at it every egg warms twice as fast (6.00 s in 3 s)
+INCUB ok   with every egg ready there's nothing to warm
+INCUB ok   warmed past half by the Incubator: each of 3 eggs knocks once (3)
+INCUB ok   ready while you were far off: no chime, then one each when you come near (0, 3)
+INCUB ok   a ready egg puts up no message ([])
+INCUB ok   the Nook's nest egg: silent while it waits, one chime when ready (1)
+INCUB ok   walking up says: Hatch the Rare Basaltoad Egg!
+INCUB ok   ready eggs burst once and say nothing ()
+INCUB ok   just under half warm for 30 minutes: silent (its progress decides, not a clock)
+INCUB ok   half warm: one gentle wobble and knock
+INCUB ok   then quiet up to 90%
+INCUB ok   from 90%: a small crack every 4 s while you are near (3 in 10 s)
+INCUB ok   past 10 m: no cracks, and no chime as it turns ready
+INCUB ok   come near: one ready chime, and the cracks stop
+INCUB ok   half warm while you were away: its knock plays once you come near
+INCUB ok   past half and 90% while away: just the cracks
+INCUB ok   the nest egg chimes when ready, and the next egg laid there chimes again
+INCUB FAIL Sfx plays the chime at the egg: -6.0 dB from 1 m, -8.4 dB from 8 m
+INCUBATOR CHECK DONE, failures: 1
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,68 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SHOW ok   look: fully raised scores 10
+SHOW ok   look: plain scores its joy and clean share only
+SHOW ok   look: half a lean is half the lean points
+SHOW ok   trick: picked by the best stat
+SHOW ok   trick: the speed trick
+SHOW ok   trick: presses plus the stat share (5.60)
+SHOW ok   trick: three greats and a strong stat give 10
+SHOW ok   bond: perfect calls give 10
+SHOW ok   bond: trust and loyalty shrink the pull (8.67 > 3.28)
+SHOW ok   bond: calling helps
+SHOW ok   bond: calls grade by how close to the lure
+SHOW ok   judges: three tastes a week, the same each time
+SHOW ok   judges: next week's tastes differ
+SHOW ok   judges: a full Grass lean fits the Grass taste
+SHOW ok   judges: the lean adds its look points and the taste bonus
+SHOW ok   judges: a retired mentor sits on the bench first
+SHOW ok   run: the same Boki and presses score the same
+SHOW ok   run: about 2 minutes (102.0 s)
+SHOW ok   run: presses recorded
+SHOW ok   run: the run's score is the static score
+SHOW ok   settle: pays gems (5)
+SHOW ok   settle: backing follows the winner
+SHOW ok   settle: prizes paid once
+SHOW ok   ribbon: the win is gold
+SHOW ok   ribbon: a close second is silver
+SHOW ok   ribbon: a lower second is bronze
+SHOW ok   ribbon: the rest took part
+SHOW ok   ribbon: four colours, one per placing
+SHOW ok   marks: all gone within 1.5 s
+SHOW ok   marks: pips follow each round's points [5, 3, 0]
+SHOW ok   ribbon: stays while the Boki is in the ring
+SHOW ok   ribbon: gone once the Boki leaves the ring
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+SHOW ok   off: no stage on the farm
+SHOW ok   on: the base has the Show Ring
+SHOW ok   on: the stage offers a show
+SHOW ok   on: the board posts three judges' tastes
+SHOW ok   on: a show starts with two Boki
+SHOW ok   on: it struts on the walk-in
+SHOW ok   on: it holds a pose when the judges look
+SHOW ok   on: no pose before the judges' round
+SHOW ok   on: the show ends with the shared result card (121.0 s)
+SHOW ok   on: the result shows its marks and ribbon
+SHOW ok   on: the placing is read with a hop and a bow (["bow", "hop", ""])
+SHOW ok   on: and nobody keeps a show clip
+SHOW DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

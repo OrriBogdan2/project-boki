@@ -1,0 +1,194 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BUILDHOLD ok   every building's four quarters add up to its whole cost
+BUILDHOLD ok   the house is a real build: 10 wood · 6 stone
+BUILDHOLD ok   a 12-swing build asks for a quarter at swings 0, 3, 6 and 9 ([1, 1, 2, 2, 3, 4, 4])
+BUILDHOLD ok   a 3-swing build still pays everything before its last swing
+BUILDHOLD ok   a site saved before this loads as fully paid and never asks for more
+BUILDHOLD ok   and it finishes without spending anything again
+BUILDHOLD ok   a new-shape site survives a save and load
+BUILDHOLD ok   archer: carries a weapon before it takes up the axe
+BUILDHOLD ok   archer with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   archer after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   archer: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   archer with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   archer after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   archer: carries a weapon before it takes up the hammer
+BUILDHOLD ok   archer with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   archer after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   juggernaut: carries a weapon before it takes up the axe
+BUILDHOLD ok   juggernaut with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   juggernaut: the raised axe head stands 0.83 m above the head (at least 0.65)
+BUILDHOLD ok   juggernaut after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   juggernaut: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   juggernaut with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   juggernaut: the raised pickaxe head stands 0.76 m above the head (at least 0.65)
+BUILDHOLD ok   juggernaut after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   juggernaut: carries a weapon before it takes up the hammer
+BUILDHOLD ok   juggernaut with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   juggernaut after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   gunslinger: carries a weapon before it takes up the axe
+BUILDHOLD ok   gunslinger with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   gunslinger after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   gunslinger: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   gunslinger with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   gunslinger after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   gunslinger: carries a weapon before it takes up the hammer
+BUILDHOLD ok   gunslinger with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   gunslinger after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   bulwark: carries a weapon before it takes up the axe
+BUILDHOLD ok   bulwark with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   bulwark: the raised axe head stands 1.32 m above the head (at least 0.65)
+BUILDHOLD ok   bulwark after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   bulwark: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   bulwark with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   bulwark: the raised pickaxe head stands 1.23 m above the head (at least 0.65)
+BUILDHOLD ok   bulwark after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   bulwark: carries a weapon before it takes up the hammer
+BUILDHOLD ok   bulwark with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   bulwark after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   rimewright: carries a weapon before it takes up the axe
+BUILDHOLD ok   rimewright with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   rimewright after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   rimewright: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   rimewright with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   rimewright after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   rimewright: carries a weapon before it takes up the hammer
+BUILDHOLD ok   rimewright with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   rimewright after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   ashwick: carries a weapon before it takes up the axe
+BUILDHOLD ok   ashwick with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   ashwick after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   ashwick: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   ashwick with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   ashwick after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   ashwick: carries a weapon before it takes up the hammer
+BUILDHOLD ok   ashwick with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   ashwick after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   dolm: carries a weapon before it takes up the axe
+BUILDHOLD ok   dolm with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   dolm after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   dolm: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   dolm with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   dolm after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   dolm: carries a weapon before it takes up the hammer
+BUILDHOLD ok   dolm with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   dolm after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   mage: carries a weapon before it takes up the axe
+BUILDHOLD ok   mage with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   mage after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   mage: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   mage with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   mage after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   mage: carries a weapon before it takes up the hammer
+BUILDHOLD ok   mage with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   mage after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   dredge: carries a weapon before it takes up the axe
+BUILDHOLD ok   dredge with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   dredge after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   dredge: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   dredge with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   dredge after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   dredge: carries a weapon before it takes up the hammer
+BUILDHOLD ok   dredge with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   dredge after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   tender: carries a weapon before it takes up the axe
+BUILDHOLD ok   tender with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   tender after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   tender: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   tender with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   tender after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   tender: carries a weapon before it takes up the hammer
+BUILDHOLD ok   tender with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   tender after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   thief: carries a weapon before it takes up the axe
+BUILDHOLD ok   thief with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   thief after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   thief: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   thief with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   thief after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   thief: carries a weapon before it takes up the hammer
+BUILDHOLD ok   thief with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   thief after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   ostra: carries a weapon before it takes up the axe
+BUILDHOLD ok   ostra with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   ostra after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   ostra: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   ostra with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   ostra after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   ostra: carries a weapon before it takes up the hammer
+BUILDHOLD ok   ostra with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   ostra after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   gil: carries a weapon before it takes up the axe
+BUILDHOLD ok   gil with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   gil after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   gil: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   gil with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   gil after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   gil: carries a weapon before it takes up the hammer
+BUILDHOLD ok   gil with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   gil after the hammer: tool away, weapon away at home, back in a match
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _rigs (res://tools/build_hold_check.gd:134)
+         [10] run (res://tools/build_hold_check.gd:32)
+         [11] run (res://tools/check_registry.gd:980)
+         [12] _ready (res://scripts/main.gd:270)
+BUILDHOLD ok   the Empty: carries a weapon before it takes up the axe
+BUILDHOLD ok   the Empty with the axe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   the Empty: the raised axe head stands 0.78 m above the head (at least 0.65)
+BUILDHOLD ok   the Empty after the axe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   the Empty: carries a weapon before it takes up the pickaxe
+BUILDHOLD ok   the Empty with the pickaxe: weapon nodes hidden, tool in the hands (0.10 m from a hand)
+BUILDHOLD ok   the Empty: the raised pickaxe head stands 0.70 m above the head (at least 0.65)
+BUILDHOLD ok   the Empty after the pickaxe: tool away, weapon away at home, back in a match
+BUILDHOLD ok   the Empty: carries a weapon before it takes up the hammer
+BUILDHOLD ok   the Empty with the hammer: weapon nodes hidden, tool in the hands (0.05 m from a hand)
+BUILDHOLD ok   the Empty after the hammer: tool away, weapon away at home, back in a match
+BUILDHOLD ok   the house goes down as a site
+BUILDHOLD ok   marking it out spends nothing
+BUILDHOLD FAIL holding 2.8 s did 0 swings, as did 4 taps (one beat is 0.8 s)
+BUILDHOLD FAIL wood left in four steps as the quarters began (spent so far: [0])
+BUILDHOLD FAIL and the finished house used exactly its 10 wood · 6 stone
+BUILDHOLD FAIL with two quarters' worth the build stops at swing 6 of 12
+BUILDHOLD FAIL the site says so: ''
+BUILDHOLD FAIL and so does the prompt: 'Hold to hammer the house (0/12)'
+BUILDHOLD FAIL and it hangs over the site as a label
+BUILDHOLD FAIL a Boki would not start on a site that is waiting
+BUILDHOLD FAIL pressing at it does nothing but tell you what is missing
+BUILDHOLD FAIL bring the rest and hammering carries on to the end
+BUILDHOLD ok   a Boki nearby dropped what it was doing and came to build
+BUILDHOLD FAIL 7 s of holding: 0 swings alone, 1 with one Boki helping
+BUILDHOLD ok   there is a tree to work
+BUILDHOLD ok   holding use with the axe out starts working the tree
+BUILDHOLD FAIL at home the axe is in the hands and the weapon nodes are hidden
+BUILDHOLD FAIL 3 hits felled the tree: 0 wood
+BUILDHOLD ok   every hit landed as the head met the target (78% into the swing)
+BUILDHOLD ok   the tree shed leaves and chips showed each hit
+BUILDHOLD ok   there is a rock to work
+BUILDHOLD ok   holding use with the pickaxe out starts working the rock
+BUILDHOLD ok   at home the pickaxe is in the hands and the weapon nodes are hidden
+BUILDHOLD ok   3 hits felled the rock: 3 stone
+BUILDHOLD ok   every hit landed as the head met the target (78% into the swing)
+BUILDHOLD ok   the boulder cracked showed each hit
+BUILDHOLD ok   a tap is one swing: the tree keeps its hit and the tool goes away
+BUILDHOLD DONE, failures: 13
+WARNING: 4 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 8 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

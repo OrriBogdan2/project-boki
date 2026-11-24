@@ -1,0 +1,60 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KITE ok   seeded laps finish with all twelve rings passed: 8 of 8
+KITE ok   one seed flies the same rings to the same time (41.89 s, 41.89 s)
+KITE ok   another seed lays other rings
+KITE ok   Speed 0: the bot goes through every ring on 8 of 8 seeds
+KITE ok   Speed 60: the bot goes through every ring on 8 of 8 seeds
+KITE ok   Speed 40 lands sooner than Speed 0: 34.03 s < 54.45 s
+KITE ok   a lap flies lap / pace: 54.45 s for 40.8 m at 0.75 m/s
+KITE ok   no steering misses rings: 9 of 12 (steered: 0)
+KITE ok   each miss adds 1 s: 50.89 s vs clean 41.89 s with 9 misses
+KITE ok   settled clean lap: energy 82, joy 58, +4 gems
+KITE ok   settled missed lap: energy 82, joy 58, +1 gems
+KITE ok   flaps by Guard (3, +1 per 25): { 0: 3, 24: 3, 25: 4, 60: 5, 100: 7 }
+KITE ok   a Guard 50 lap starts with 5 flaps: 5
+KITE ok   a flap climbs 0.92 m (high rings 0.90 m up) and the tow line brings it back to 0
+KITE ok   no flaps left: Space does nothing
+KITE ok   6 high rings a lap, never the first (48 over 8 seeds)
+KITE ok   2 vents on the loop
+KITE ok   over a vent with every flap left: nothing (3)
+KITE ok   over a vent with a flap spent: it comes back (3)
+KITE ok   passing wide of a vent: no flap back (2)
+KITE ok   Guard 0: taking the vents gives 16 flaps back and 88 rings vs 79 without
+KITE ok   the rival is your stats x min_ratio for each of 3 cup rounds
+KITE ok   the rival's time: lap / its pace + 2 misses (35.7 s)
+KITE ok   the kite prize table is Zipseed and Windfloss: ["zipseed", "windfloss"]
+KITE ok   three won laps: ["Sprout", "Bloom", "Crown"] and the Kite Tow Cup Ribbon
+KITE ok   XP: 60 for the first win of the day, then 5 a win: [60, 5, 5]
+KITE ok   prizes banked: first-win Zipseed and the Galeribbon cup prize { "windfloss": 3, "zipseed": 1, "galeribbon": 1 }
+KITE ok   a lost lap: 3 play XP and the cup starts over
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+KITE ok   meadow: no kite stand off the ridge
+KITE ok   ridge: the kite stand is up
+KITE ok   ridge: the stand offers a flight
+KITE ok   ridge: your partner takes off with twelve rings up
+KITE ok   ridge: the lap lands on a result card (47.4 s)
+KITE ok   ridge zone: the kite stand is up
+KITE ok   ridge zone: the stand offers a flight
+KITE ok   ridge zone: the lap lands on a result card (47.4 s)
+KITE DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

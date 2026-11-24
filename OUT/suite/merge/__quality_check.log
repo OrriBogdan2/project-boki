@@ -1,0 +1,77 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+QUALITY PASS very_low has every knob
+QUALITY PASS low has every knob
+QUALITY PASS medium has every knob
+QUALITY PASS high has every knob
+QUALITY PASS ultra has every knob
+QUALITY PASS Very Low <= Low render height
+QUALITY PASS Very Low <= Low lamp distance
+QUALITY PASS Very Low <= Low draw
+QUALITY PASS Very Low <= Low grass
+QUALITY PASS Very Low <= Low fx
+QUALITY PASS Very Low <= Low atlas
+QUALITY PASS Very Low <= Low msaa
+QUALITY PASS Very Low <= Low splits
+QUALITY PASS Very Low <= Low clouds
+QUALITY PASS Very Low <= Low mesh detail
+QUALITY PASS Low <= Medium render height
+QUALITY PASS Low <= Medium lamp distance
+QUALITY PASS Low <= Medium draw
+QUALITY PASS Low <= Medium grass
+QUALITY PASS Low <= Medium fx
+QUALITY PASS Low <= Medium atlas
+QUALITY PASS Low <= Medium msaa
+QUALITY PASS Low <= Medium splits
+QUALITY PASS Low <= Medium clouds
+QUALITY PASS Low <= Medium mesh detail
+QUALITY PASS Medium <= High render height
+QUALITY PASS Medium <= High lamp distance
+QUALITY PASS Medium <= High draw
+QUALITY PASS Medium <= High grass
+QUALITY PASS Medium <= High fx
+QUALITY PASS Medium <= High atlas
+QUALITY PASS Medium <= High msaa
+QUALITY PASS Medium <= High splits
+QUALITY PASS Medium <= High clouds
+QUALITY PASS Medium <= High mesh detail
+QUALITY PASS High <= Ultra render height
+QUALITY PASS High <= Ultra lamp distance
+QUALITY PASS High <= Ultra draw
+QUALITY PASS High <= Ultra grass
+QUALITY PASS High <= Ultra fx
+QUALITY PASS High <= Ultra atlas
+QUALITY PASS High <= Ultra msaa
+QUALITY PASS High <= Ultra splits
+QUALITY PASS High <= Ultra clouds
+QUALITY PASS High <= Ultra mesh detail
+QUALITY PASS very low: no shadows, SSAO, bloom, volumetrics or light shafts
+QUALITY PASS very low: short draw distance, render height capped
+QUALITY PASS high keeps the full look
+QUALITY PASS medium at 2160p renders the 3D at half (0.50)
+QUALITY PASS medium at 720p renders at full size
+QUALITY PASS high renders native at 2160p
+QUALITY PASS low: a lamp fades with distance
+QUALITY PASS high: a lamp without its own fade never fades
+QUALITY PASS shadows: 2 cascades medium, 1 low, none very low
+QUALITY PASS shadow distance shorter at medium than high, shorter again at low
+QUALITY PASS render scale 0.77 low, 0.5 very low
+QUALITY PASS MSAA off by default; medium and low use FXAA
+QUALITY PASS low at 1080p renders at 0.77 (0.77)
+WARNING: Screen-space AA is only available when using the Forward+ or Mobile renderer.
+     at: viewport_set_screen_space_aa (servers/rendering/renderer_viewport.cpp:1400)
+     GDScript backtrace (most recent call first):
+         [0] apply (res://scripts/core/settings.gd:390)
+         [1] _shadows_and_aa (res://tools/quality_check.gd:107)
+         [2] run (res://tools/quality_check.gd:21)
+         [3] run (res://tools/check_registry.gd:980)
+         [4] _ready (res://scripts/main.gd:270)
+QUALITY PASS low with MSAA off turns FXAA on
+QUALITY PASS very low: no anti-aliasing pass
+QUALITY PASS high: full physics catch-up, lit
+QUALITY PASS very low: physics catch-up capped, unlit
+QUALITY PASS auto-detect names a preset (very_low)
+QUALITY DONE, failures: 0

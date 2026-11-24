@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PERF clutter ultra: batches 2288, small 161152, bush 36364, big 1171
+PERF clutter high: batches 2107, small 96656, bush 36364, big 1171
+PERF clutter medium: batches 1925, small 64232, bush 28985, big 1171
+PERF clutter low: batches 1650, small 32161, bush 21716, big 1171
+PERF clutter very_low: batches 1345, small 13075, bush 18149, big 1171
+CLUTTER PASS ultra keeps every tree, boulder and pillar (1171)
+CLUTTER PASS ultra keeps 1.00 of the small clutter (target 1.00)
+CLUTTER PASS ultra keeps 1.00 of the bush clutter (target 1.00)
+CLUTTER PASS high keeps every tree, boulder and pillar (1171)
+CLUTTER PASS high keeps 0.60 of the small clutter (target 0.60)
+CLUTTER PASS high keeps 1.00 of the bush clutter (target 1.00)
+CLUTTER PASS medium keeps every tree, boulder and pillar (1171)
+CLUTTER PASS medium keeps 0.40 of the small clutter (target 0.40)
+CLUTTER PASS medium keeps 0.80 of the bush clutter (target 0.80)
+CLUTTER PASS low keeps every tree, boulder and pillar (1171)
+CLUTTER PASS low keeps 0.20 of the small clutter (target 0.20)
+CLUTTER PASS low keeps 0.60 of the bush clutter (target 0.60)
+CLUTTER PASS very_low keeps every tree, boulder and pillar (1171)
+CLUTTER PASS very_low keeps 0.08 of the small clutter (target 0.08)
+CLUTTER PASS very_low keeps 0.50 of the bush clutter (target 0.50)
+CLUTTER PASS medium has at most half of the small clutter
+CLUTTER DONE, failures: 0

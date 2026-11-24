@@ -1,0 +1,453 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SUPPORT rimewright: kit wired, light, no R             PASS  
+SUPPORT Rink Wall: raised ahead                        PASS  
+SUPPORT Rink Wall: no squad shield or heal (she copies her source: ice control only) PASS  shield 0.0 hp 72.5 -> 72.5
+SUPPORT upgrade parity: Ice Spear cooldown 10.2 -> 8.7 -> 7.2, damage +15% / +30% PASS  [[10.2, 13.0, 17.0, 1.0, 1.0, 12.0], [8.71284, 11.4998, 14.875, 1.15, 1.0, 12.0], [7.22466, 9.9996, 12.75, 1.3, 1.0, 12.0]]
+SUPPORT upgrade parity: Skate recharge 13 -> 11.5 -> 10 PASS  [[10.2, 13.0, 17.0, 1.0, 1.0, 12.0], [8.71284, 11.4998, 14.875, 1.15, 1.0, 12.0], [7.22466, 9.9996, 12.75, 1.3, 1.0, 12.0]]
+SUPPORT upgrade parity: Rink Wall cooldown 17 -> 14.9 -> 12.75, no rank damage on the wall PASS  [[10.2, 13.0, 17.0, 1.0, 1.0, 12.0], [8.71284, 11.4998, 14.875, 1.15, 1.0, 12.0], [7.22466, 9.9996, 12.75, 1.3, 1.0, 12.0]]
+SUPPORT upgrade parity: rank 3 (tier IV) Rink Wall is 40 HP tougher PASS  [200.0, 240.0]
+SUPPORT tm: kit sounds load                            PASS  
+SUPPORT tm: the thin aim line to the cursor is always up, the shared one hidden PASS  
+SUPPORT tm LMB: a held burst is one steady stream, a plain dart every 0.18 s, no pause, no large one PASS  8 darts, longest gap 0.18, pppppppp
+SUPPORT tm LMB: the let-go ends the burst on exactly 3 large darts at double damage (game data), 0.18 s apart PASS  HHH after the let-go, 0.37 s across
+SUPPORT tm LMB: the next burst starts only after the 0.5 s barrage pause, plain again PASS  0.52 s after the last large dart
+SUPPORT tm LMB: a tap is a burst too: one plain dart, then the 3 large ones PASS  pHHH
+SUPPORT tm LMB: darts come out slowly (16 m/s), a little off the aim to alternating sides PASS  first bow 10 deg
+SUPPORT tm LMB: the bowed darts curve back onto the foe at the cursor PASS  dealt 244 of 124
+SUPPORT tm LMB: darts alternate hands with their own flick moves PASS  
+SUPPORT tm passive: the stacks show on your FAN badge (the frost glow on the foe is for the others) PASS  
+SUPPORT tm LMB: a dart flies out straight (the first third of the way under 1 deg of turn), then curves in late PASS  early 0.0 deg, late 20.6 deg
+SUPPORT tm Shift: skating, beams aimed 1.5 m off a foe home in late (bend over 5 deg) and hit it PASS  7 beams, bent 30.1 deg, 64 damage
+SUPPORT tm Shift: her ice trail lasts a few seconds (plates still down 2 s after the skate), skate cd 13 s (data) PASS  18 plates, cd 13.0 s
+SUPPORT tm Shift: skating past a dummy that walks on, beams aimed 1.5 m off it curve onto it late PASS  40 damage
+SUPPORT tm Shift: a dummy far off the line of fire (12 m aside) is never hit: no hard lock PASS  0 damage
+SUPPORT tm passive: 8 darts on one foe Shatter them (about 15 darts' damage, ice spikes) PASS  neighbour -60
+SUPPORT tm passive: Chill is 4 s and shatter only, no slow of ours (the source has none) PASS  slow_t 0.00
+SUPPORT tm passive: knocking a Chilled foe Shatters them after a beat PASS  downed true
+SUPPORT tm passive: the knock's Shatter deals the data's damage to the neighbour (and Chills them) PASS  neighbour -73.0, data 37.0
+SUPPORT tm passive: knocking a foe that is not Chilled does not Shatter PASS  downed true, shatters 0
+SUPPORT tm passive: Chill lasts 4s and a new hit refreshes it PASS  
+SUPPORT tm Shift: Shift held starts a skate with its push-off PASS  
+SUPPORT tm Shift: darts while skating are straight beams at dash.skate_dart_dmg_k (2x) the plain dart's damage PASS  plain dart 4.00, skating beam 8.00
+SUPPORT tm Shift: full skating speed within about 0.2 s, a trail of ice plates, no ground disc PASS  10.5 m/s
+SUPPORT tm Shift: the stride move loops while skating (off the step she is on the air stride) PASS  tm_skate_air grounded false
+SUPPORT tm Shift: she skates on over a ledge (not stopped by leaving the ground) PASS  at -8.1 from the start
+SUPPORT tm Shift: letting go stops with a hockey stop (a ground pose; no disc) and refunds part of the charge PASS  dashes 0.34 grounded false
+SUPPORT tm Shift: the shorter the skate, the more of the charge comes back PASS  0.3 s: +0.48, 1.2 s: +0.15
+SUPPORT tm Shift: she steers the skate into a curve (not a snap) with ice spraying and scraping off the edge PASS  turned 90 deg, 4 carve scrapes
+SUPPORT tm Shift: LMB keeps firing (straight beams) the whole skate PASS  3 beams in 0.6 s
+SUPPORT tm Shift: skating, the beams track the cursor: a beam after the cursor swings leaves at it (within 6 deg) PASS  0.8 deg off the cursor
+SUPPORT tm Shift: with no charge nothing happens (no spare dash) PASS  
+SUPPORT tm Shift: the skate runs at the footage's mean, 10.5 m/s (5.83 body heights a second, 1 bh = 1.8 m) PASS  10.50 m/s
+SUPPORT tm Shift: her dash moves are her own skate (push-off, stride), no other hero's, fitting the skate PASS  push-off 0.16 s (shortest skate 0.20), stride 0.56 s
+SUPPORT tm Shift: a tap on the ground is a short skate, no dash, and no long-dash pip PASS  ["rinkrun"]
+SUPPORT tm Shift (item 62): pressed in the air the skate starts at once at skate speed (no buffer) PASS  roll 10.5 m/s of 10.5
+SUPPORT tm Shift: ice plates form under her while she skates PASS  14 plates
+SUPPORT tm Shift: the trail is 24 plates long while she skates (a new plate reuses the oldest) PASS  26 laid, 24 showing
+SUPPORT tm Shift (item 62): a Shift at the top of a jump skates within a frame at skate speed PASS  jumped true, skating true, 10.5 m/s
+SUPPORT tm Shift (item 62): over a 6 m abyss gap she skates across, sinking no faster than air_fall PASS  void true, crossed true, y 0.00, sink 1.50 of 1.50 m/s
+SUPPORT tm Shift (item 62): landing mid-skate goes straight on along the ground (no stop, no restart) PASS  in air true, landed after 0.28 s, skating true
+SUPPORT tm X (item 64): an ult cast from the air skate keeps >= 80% of its speed for 0.3 s, same direction PASS  slowest 9.5 of 10.5 m/s, dot 1.000
+SUPPORT tm Shift (items 51/62): a jump in the skate rises and the skate goes on under it, at skate speed PASS  ground true, top 1.52 m, skating true
+SUPPORT tm Shift (item 62): off the ground the skate plays its own move, tm_skate_air PASS  tm_skate_air
+SUPPORT tm Shift (item 62): landing from it goes back to the ground stride PASS  tm_skate grounded true skating true
+SUPPORT tm Shift (item 62): pressed while gliding the glider folds and she skates at once PASS  gliding false, skating true, 10.5 m/s
+SUPPORT tm Shift (item 62): a jump press in the air skate opens the glider, keeping the speed PASS  gliding true, 10.4 m/s
+SUPPORT tm X (item 65): LMB and jump do nothing in the statue, sliding or rooted PASS  0 shots, rose 0.00 m, aiming false
+SUPPORT tm X: glide held while sealed in the air does nothing; she keeps falling PASS  fell 2.27 m
+SUPPORT tm X: Shift ends Rimelock and she skates straight out at speed (first 0.3 s >= 80%) PASS  slowest 10.5 m/s (before 0.0, skate 10.5)
+SUPPORT tm X (item 64): skating into it keeps >= 80% of the skate's speed for 0.3 s, same direction PASS  slowest 9.5 of 10.5 m/s, direction dot 1.000
+SUPPORT tm X (item 65): the statue slides on along the skate (speed x carry_t x 2/3, >= 2 m), easing to a stop PASS  5.79 m (want 5.60 from 10.5 m/s over 0.8s)
+SUPPORT tm X: the rink rode with her and sits where she stopped PASS  
+SUPPORT tm X: then encased and rooted: zero planar speed with the move key held, no slide on the ice PASS  fastest 0.000 m/s
+SUPPORT tm X (item 65): her facing and model rotation hold while the cursor sweeps 360 deg round the seal PASS  face off by 0.0000 rad, model 0.0000 rad
+SUPPORT tm X: an early recast frees her: she walks off PASS  moved 1.89
+SUPPORT tm X move: WASD never steers the carry (held sideways, it runs on along the skate) PASS  dot 1.000
+SUPPORT tm X end: no momentum after the crash, and the next step is hers (she walks off) PASS  0.00 m/s then 0.60 m
+SUPPORT tm X ledge: the carry slides off a terrace (never blocked), sinking at the skate's air fall, then drops rooted PASS  off true sank 0.89 grounded true
+SUPPORT tm X abyss: the carry runs on over the void; X frees her and held glide opens the step the break move ends PASS  over true glider at 0.30 s (break move 0.30 s)
+SUPPORT tm Shift rank 3: skating over the Abyss lays ice that goes again; none below rank 3 PASS  rank 1 [0, 0], rank 3 [18, 0] (tiles now, after)
+SUPPORT tm RMB rank 3: the detonation is 45% harder and no wider PASS  x1.88 want x1.89, edge foe 0/0
+SUPPORT tm RMB: travel time grows with distance (4 m vs 10 m: about 1/speed s per metre), from her each time PASS  0.28 s vs 0.62 s
+SUPPORT tm RMB: held, the landing ring sits on the cursor; she gathers the spear between her palms at her chest PASS  
+SUPPORT tm RMB: let go, the push starts (no throw wind-up): the spear on her palms, nothing at the target PASS  
+SUPPORT tm RMB: the push: the spear emerges from her (within 1 m, chest height) as the palms extend (0.1 s) PASS  after 0.12 s, 0.90 m out at 1.05 m up, 18.0 m/s
+SUPPORT tm RMB: it travels out to the target, landing on arrival (not at the cast) PASS  flight 0.32 s, want 0.34
+SUPPORT tm RMB: the landing hits a small area (game data: 156 in a small AoE + slow): 18 within 1.2 m PASS  18.0
+SUPPORT tm RMB: the spear lands at the cursor and leaves a slow zone PASS  off 0.10
+SUPPORT tm RMB: two charges on a 10.2 s cooldown       PASS  cd 9.57
+SUPPORT tm RMB: a foe in the zone is slowed and Chilled PASS  slow 0.35
+SUPPORT tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none) PASS  at 1.80 s, 22 damage, root 0.00
+SUPPORT tm E: a 0.2 s tell first (sparkle, the move, the path shown to all), no wall yet PASS  
+SUPPORT tm E: the palm shove lands as the wall erupts (the move's 'out' key = the tell) PASS  shove 0.20 s, tell 0.20 s
+SUPPORT tm E: then it erupts about 1 bh ahead and narrow, in her own ice look PASS  at 2.2 len 2.0
+SUPPORT tm E: a solid ice slab spans the pillars, the barricade itself PASS  slab (1.833653, 0.666667, 1.0)
+SUPPORT tm E: it slides toward the cursor, widening, and shoves the foe ahead PASS  len 4.5 moved 4.7 foe +3.7
+SUPPORT tm E: it stops at the cursor                   PASS  mid at 7.0, cursor 7.0
+SUPPORT tm E: it travels 16.2 m at most (+50%), about 3.6 s, and still stands at the end PASS  travelled 16.2 m in 3.80 s
+SUPPORT tm E: E again freezes it where it stands, for 6 s, with the stamp move PASS  
+SUPPORT tm E: the wall stops a foe's shot              PASS  hp 86.8 -> 86.8
+SUPPORT tm merge: drop_holds ends the skate, the spear aim and the wall's tell (no throw, no wall) PASS  
+SUPPORT combo tag (rimewright): nothing on a clean foe PASS  
+SUPPORT combo tag (rimewright): shows while the status runs, with an icon and the time left PASS  { "icon": "frost", "n": 1, "max": 1, "left": 4.0, "total": 4.0 }
+SUPPORT combo tag (rimewright): the foe's own kit has no tag on you PASS  
+SUPPORT combo tag (rimewright): the time left shrinks  PASS  { "icon": "frost", "n": 1, "max": 1, "left": 3.48333333333334, "total": 4.0 }
+SUPPORT combo tag (rimewright): pips match the stacks  PASS  1
+SUPPORT combo tag (rimewright): gone when the status ends PASS  
+SUPPORT combo tag (rimewright): the payoff hit flashes the body white PASS  stamp 4.92 flash 0.153
+SUPPORT tm X: Rimelock is in the kit data, sounds load PASS  
+SUPPORT tm X: below level 6 it does nothing            PASS  
+SUPPORT tm X: one X press is one cast (main's X path only) PASS  rimes +1
+SUPPORT tm X: sealed in, the 7.47 m rink (4 bh + 15%, then -10% on owner 11-11) shown to everyone, the cast move PASS  tm_rime_hold
+SUPPORT tm X: the rink is a thin ring at the hit radius, no countdown fill, the frost bud at its centre PASS  band 0.25
+SUPPORT tm X: drawn == hit: a body touching the ring is in the rink, one just past it is out PASS  
+SUPPORT tm X: the frost edge flashes as the rink opens PASS  flash 0.81
+SUPPORT tm X: its own cooldown (80 s, game data) starts on the cast, no bond for the cast PASS  
+SUPPORT tm X: inside the shell she is invulnerable and rooted, and nothing fires PASS  hp 0 moved 0.00
+SUPPORT tm X: a foe in the rink is Chilled and slowed a flat 35%, the same at 0.75 s and 2.35 s (source: no ramp) PASS  0.35 -> 0.35
+SUPPORT tm X: the ring (and the cracks) brighten as it builds: the countdown PASS  
+SUPPORT tm X: the opening flash is short (gone by 0.3 s) PASS  0.00
+SUPPORT tm X: the rink is a lit rim over a soft inside (no screen-wide cyan), even near the crash PASS  fill 0.61 (max 0.70)
+SUPPORT tm X: no damage before the crash               PASS  -0
+SUPPORT tm X: it cracks open by itself at 3.3 s: damage and an ice-block stun PASS  dmg 18 stun 0.53
+SUPPORT tm X: the crash plays its own move             PASS  tm_rime_crash
+SUPPORT tm X: the crash pays the bond as a hit and the meter fills by 0.6 PASS  hit +0.64
+SUPPORT tm X: on cooldown it does nothing              PASS  
+SUPPORT tm X: X early ends it with no damage, no stun and no bond (small mechanic) PASS  
+SUPPORT tm X: after the early break she is free (not rooted or invulnerable) PASS  
+SUPPORT tm X: X in the last 0.75 s cracks it open early at two thirds (small mechanic) PASS  dealt 12 of 18 stun 0.49
+SUPPORT tm merge: drop_holds ends Rimelock with no crash and frees her PASS  
+SUPPORT tm X: a foe behind a rock is not hit (line of sight) PASS  stunned 3
+SUPPORT tm X: three hunters stunned pay one event for the cast (the best one) PASS  hit 0.60
+SUPPORT tm X: on the cast her body's materials trade for the ice shader (no shell), the front still climbing PASS  k 0.33, 18 surfaces
+SUPPORT tm X: all ice within snap_t, every surface of the model PASS  18 surfaces
+SUPPORT tm X: ending it thaws the front back down      PASS  k 0.67
+SUPPORT tm X: thawed, her own materials are back on every surface PASS  
+SUPPORT anim tm_dart_l: the first dart leaves at 0.00 s, the clip's hit pose lands with it PASS  lag 0.00 s
+SUPPORT anim darts: a dart every 0.15-0.2 s through the hold (footage 0009-0090) PASS  0.188 s
+SUPPORT anim tm_dart_heavy: a large dart leaves at 0.00 s, the clip's hit pose lands with it PASS  lag 0.00 s
+SUPPORT anim spear: the held spear is full size as her palms gather it (0.12 s) PASS  0.12 s
+SUPPORT anim tm_spear: the spear leaves her palms at 0.10 s, the clip's hit pose lands with it PASS  lag -0.00 s
+SUPPORT anim spear: it detonates 1.8-2.0 s after landing (footage 0098 -> 0107, 0130 -> 0140) PASS  1.82 s
+SUPPORT anim tm_clench: the burst at 0.00 s, the clip's hit pose lands with it PASS  lag 0.00 s
+SUPPORT anim wall: the tell is the footage's 0.2 s sparkle (0300 -> 0301) PASS  0.22 s
+SUPPORT anim tm_wall: the ice erupts at 0.22 s, the clip's hit pose lands with it PASS  lag -0.02 s
+SUPPORT anim tm_freeze: the freeze lands at 0.00 s, the clip's hit pose lands with it PASS  lag 0.00 s
+SUPPORT anim skate: full speed within 0.2 s of the push-off (footage: 124 -> 479 px/s in one 0.2 s step) PASS  0.18 s
+SUPPORT anim tm_beam: a skating beam leaves at 0.00 s, the clip's hit pose lands with it PASS  lag 0.00 s
+SUPPORT anim skate: it stops within 0.2 s of letting go (footage: 0.1-0.2 s) PASS  0.12 s
+SUPPORT anim skate: the push-off clip is as long as the ramp PASS  
+SUPPORT anim rime: the rink snaps out in 0.2 s and the seal clip is 0.2 s (footage f25 -> f27) PASS  
+SUPPORT anim rime: it cracks open by itself at 3.2-3.5 s (footage: f25 -> f57 on the 0.1 s strip) PASS  3.32 s
+SUPPORT anim rime: the crash clip is the footage's 0.4 s from the burst to her recovery (f57 -> f61) PASS  
+SUPPORT anim rime: she is locked from the burst for the crash clip's length, 0.4 s (control and body agree) PASS  
+SUPPORT anim rime: no walking, darts or E in the recovery PASS  0.00 m, 0 darts
+SUPPORT anim rime: an E pressed in its last 0.15 s goes as it ends; she walks and fires again PASS  E at +0.017 s, 1.46 m, 2 darts
+SUPPORT anim rime: Shift in the recovery skates out of it at once PASS  
+SUPPORT burst: Rimelock straight into a merge and its ultimate does not one-shot a full-health hunter PASS  ult 18, ult+merge 84 of 145 hp (merge true, its ult true)
+SUPPORT DONE, 146 checks, failures: 0
+ERROR: 18 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 18 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 6 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 194 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 6 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 41: leaked 11184824 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 49: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 54: leaked 5592432 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 60: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 48: leaked 21844 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 37: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 38: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 36: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 44: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 43: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 46: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 45: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 75: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 47: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 80: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 78: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 96: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 87: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 98: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 97: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 100: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 99: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 103: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 101: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 111: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 104: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 113: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 112: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 116: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 115: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 120: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 119: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 239: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 215: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 241: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 243: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 251: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 244: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 252: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 274: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 277: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 281: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 280: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 284: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 283: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 291: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 289: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 293: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 292: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 295: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 294: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 297: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 298: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 299: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 300: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 302: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 303: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 301: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 305: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 304: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 307: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 317: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 318: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 9075: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9076: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9077: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9078: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9786: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9787: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9788: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9789: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10258: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10259: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10260: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10261: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 11131: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 11132: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 11133: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 11134: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 11400: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 11401: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 11402: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 11403: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12044: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12045: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12058: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12059: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12445: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12446: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12447: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12448: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12899: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12900: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12901: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 12902: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13145: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13146: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13147: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13148: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13366: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13367: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13368: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13369: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14361: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14362: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14363: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14364: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14392: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14393: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14394: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14395: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14589: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14590: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14591: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14592: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14805: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14806: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14807: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14808: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 15017: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 15018: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 15019: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 15020: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 16784: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 16785: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 16786: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 16787: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 30050: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 30051: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 30052: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 30053: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 38915: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 38916: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 38917: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 38918: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 25 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

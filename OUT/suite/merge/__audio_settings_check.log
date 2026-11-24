@@ -1,0 +1,173 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AUDIOSET PASS title: master slider 0.25 -> Master bus -24.1 dB (want -24.1)
+AUDIOSET PASS title: master slider 1.00 -> Master bus 0.0 dB (want 0.0)
+AUDIOSET PASS title: master slider 0.50 -> Master bus -12.0 dB (want -12.0)
+AUDIOSET PASS title: music slider 0.25 -> Music bus -24.1 dB (want -24.1)
+AUDIOSET PASS title: music slider 1.00 -> Music bus 0.0 dB (want 0.0)
+AUDIOSET PASS title: music slider 0.50 -> Music bus -12.0 dB (want -12.0)
+AUDIOSET PASS title: sfx slider 0.25 -> SFX bus -24.1 dB (want -24.1)
+AUDIOSET PASS title: sfx slider 1.00 -> SFX bus 0.0 dB (want 0.0)
+AUDIOSET PASS title: sfx slider 0.50 -> SFX bus -12.0 dB (want -12.0)
+AUDIOSET PASS title: voices slider 0.25 -> Voice bus -24.1 dB (want -24.1)
+AUDIOSET PASS title: voices slider 1.00 -> Voice bus 0.0 dB (want 0.0)
+AUDIOSET PASS title: voices slider 0.50 -> Voice bus -12.0 dB (want -12.0)
+AUDIOSET PASS title: ambience slider 0.25 -> Ambience bus -24.1 dB (want -24.1)
+AUDIOSET PASS title: ambience slider 1.00 -> Ambience bus 0.0 dB (want 0.0)
+AUDIOSET PASS title: ambience slider 0.50 -> Ambience bus -12.0 dB (want -12.0)
+AUDIOSET PASS title: ui_sounds slider 0.25 -> UI bus -24.1 dB (want -24.1)
+AUDIOSET PASS title: ui_sounds slider 1.00 -> UI bus 0.0 dB (want 0.0)
+AUDIOSET PASS title: ui_sounds slider 0.50 -> UI bus -12.0 dB (want -12.0)
+AUDIOSET PASS title: dragging the master slider moves the Master bus (-18.2 dB)
+AUDIOSET PASS title: the Audio page has its volume sliders (5)
+AUDIOSET PASS title: dragging the music slider moves the Music bus (-18.2 dB)
+AUDIOSET PASS title: dragging the sfx slider moves the SFX bus (-18.2 dB)
+AUDIOSET PASS title: dragging the voices slider moves the Voice bus (-18.2 dB)
+AUDIOSET PASS title: dragging the ambience slider moves the Ambience bus (-18.2 dB)
+AUDIOSET PASS title: dragging the ui_sounds slider moves the UI bus (-18.2 dB)
+AUDIOSET PASS title: a mouse click near the left of the Music slider turns the Music bus down (-52.0 dB)
+AUDIOSET PASS title: Music bus sends to Master
+AUDIOSET PASS title: SFX bus sends to Master
+AUDIOSET PASS title: Ambience bus sends to Master
+AUDIOSET PASS title: all 28 players are on a slider's bus []
+AUDIOSET PASS heard: master slider 1 / 0.5 / 0 -> Master peak -15.0 / -27.1 / -95.0 dB
+AUDIOSET PASS heard: music slider 1 / 0.5 / 0 -> Master peak -15.0 / -27.1 / -95.0 dB
+AUDIOSET PASS heard: sfx slider 1 / 0.5 / 0 -> Master peak -18.3 / -30.1 / -98.3 dB
+AUDIOSET PASS heard: ambience slider 1 / 0.5 / 0 -> Master peak -15.0 / -27.1 / -95.0 dB
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] show_screen (res://scripts/main.gd:569)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] show_screen (res://scripts/main.gd:569)
+AUDIOSET PASS match: master slider 0.25 -> Master bus -24.1 dB (want -24.1)
+AUDIOSET PASS match: master slider 1.00 -> Master bus 0.0 dB (want 0.0)
+AUDIOSET PASS match: master slider 0.50 -> Master bus -12.0 dB (want -12.0)
+AUDIOSET PASS match: music slider 0.25 -> Music bus -24.1 dB (want -24.1)
+AUDIOSET PASS match: music slider 1.00 -> Music bus 0.0 dB (want 0.0)
+AUDIOSET PASS match: music slider 0.50 -> Music bus -12.0 dB (want -12.0)
+AUDIOSET PASS match: sfx slider 0.25 -> SFX bus -24.1 dB (want -24.1)
+AUDIOSET PASS match: sfx slider 1.00 -> SFX bus 0.0 dB (want 0.0)
+AUDIOSET PASS match: sfx slider 0.50 -> SFX bus -12.0 dB (want -12.0)
+AUDIOSET PASS match: voices slider 0.25 -> Voice bus -24.1 dB (want -24.1)
+AUDIOSET PASS match: voices slider 1.00 -> Voice bus 0.0 dB (want 0.0)
+AUDIOSET PASS match: voices slider 0.50 -> Voice bus -12.0 dB (want -12.0)
+AUDIOSET PASS match: ambience slider 0.25 -> Ambience bus -24.1 dB (want -24.1)
+AUDIOSET PASS match: ambience slider 1.00 -> Ambience bus 0.0 dB (want 0.0)
+AUDIOSET PASS match: ambience slider 0.50 -> Ambience bus -12.0 dB (want -12.0)
+AUDIOSET PASS match: ui_sounds slider 0.25 -> UI bus -24.1 dB (want -24.1)
+AUDIOSET PASS match: ui_sounds slider 1.00 -> UI bus 0.0 dB (want 0.0)
+AUDIOSET PASS match: ui_sounds slider 0.50 -> UI bus -12.0 dB (want -12.0)
+AUDIOSET PASS match: dragging the master slider moves the Master bus (-18.2 dB)
+AUDIOSET PASS match: the Audio page has its volume sliders (5)
+AUDIOSET PASS match: dragging the music slider moves the Music bus (-18.2 dB)
+AUDIOSET PASS match: dragging the sfx slider moves the SFX bus (-18.2 dB)
+AUDIOSET PASS match: dragging the voices slider moves the Voice bus (-18.2 dB)
+AUDIOSET PASS match: dragging the ambience slider moves the Ambience bus (-18.2 dB)
+AUDIOSET PASS match: dragging the ui_sounds slider moves the UI bus (-18.2 dB)
+AUDIOSET PASS match: a mouse click near the left of the Music slider turns the Music bus down (-52.0 dB)
+AUDIOSET PASS match: Music bus sends to Master
+AUDIOSET PASS match: SFX bus sends to Master
+AUDIOSET PASS match: Ambience bus sends to Master
+AUDIOSET PASS match: all 31 players are on a slider's bus []
+AUDIOSET PASS match: after a few seconds Master is still at -28.0 dB
+AUDIOSET PASS match: after a few seconds Music is still at -28.0 dB
+AUDIOSET PASS match: after a few seconds SFX is still at -28.0 dB
+AUDIOSET PASS match: after a few seconds Ambience is still at -28.0 dB
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+AUDIOSET PASS home: master slider 0.25 -> Master bus -24.1 dB (want -24.1)
+AUDIOSET PASS home: master slider 1.00 -> Master bus 0.0 dB (want 0.0)
+AUDIOSET PASS home: master slider 0.50 -> Master bus -12.0 dB (want -12.0)
+AUDIOSET PASS home: music slider 0.25 -> Music bus -24.1 dB (want -24.1)
+AUDIOSET PASS home: music slider 1.00 -> Music bus 0.0 dB (want 0.0)
+AUDIOSET PASS home: music slider 0.50 -> Music bus -12.0 dB (want -12.0)
+AUDIOSET PASS home: sfx slider 0.25 -> SFX bus -24.1 dB (want -24.1)
+AUDIOSET PASS home: sfx slider 1.00 -> SFX bus 0.0 dB (want 0.0)
+AUDIOSET PASS home: sfx slider 0.50 -> SFX bus -12.0 dB (want -12.0)
+AUDIOSET PASS home: voices slider 0.25 -> Voice bus -24.1 dB (want -24.1)
+AUDIOSET PASS home: voices slider 1.00 -> Voice bus 0.0 dB (want 0.0)
+AUDIOSET PASS home: voices slider 0.50 -> Voice bus -12.0 dB (want -12.0)
+AUDIOSET PASS home: ambience slider 0.25 -> Ambience bus -24.1 dB (want -24.1)
+AUDIOSET PASS home: ambience slider 1.00 -> Ambience bus 0.0 dB (want 0.0)
+AUDIOSET PASS home: ambience slider 0.50 -> Ambience bus -12.0 dB (want -12.0)
+AUDIOSET PASS home: ui_sounds slider 0.25 -> UI bus -24.1 dB (want -24.1)
+AUDIOSET PASS home: ui_sounds slider 1.00 -> UI bus 0.0 dB (want 0.0)
+AUDIOSET PASS home: ui_sounds slider 0.50 -> UI bus -12.0 dB (want -12.0)
+AUDIOSET PASS home: dragging the master slider moves the Master bus (-18.2 dB)
+AUDIOSET PASS home: the Audio page has its volume sliders (5)
+AUDIOSET PASS home: dragging the music slider moves the Music bus (-18.2 dB)
+AUDIOSET PASS home: dragging the sfx slider moves the SFX bus (-18.2 dB)
+AUDIOSET PASS home: dragging the voices slider moves the Voice bus (-18.2 dB)
+AUDIOSET PASS home: dragging the ambience slider moves the Ambience bus (-18.2 dB)
+AUDIOSET PASS home: dragging the ui_sounds slider moves the UI bus (-18.2 dB)
+AUDIOSET PASS home: a mouse click near the left of the Music slider turns the Music bus down (-52.0 dB)
+AUDIOSET PASS home: Music bus sends to Master
+AUDIOSET PASS home: SFX bus sends to Master
+AUDIOSET PASS home: Ambience bus sends to Master
+AUDIOSET PASS home: all 33 players are on a slider's bus []
+AUDIOSET PASS home: after a few seconds Master is still at -28.0 dB
+AUDIOSET PASS home: after a few seconds Music is still at -28.0 dB
+AUDIOSET PASS home: after a few seconds SFX is still at -28.0 dB
+AUDIOSET PASS home: after a few seconds Ambience is still at -28.0 dB
+AUDIOSET PASS unfocused: the window stays audible when 'mute when unfocused' is off
+AUDIOSET PASS boot probe ran (exit 0)
+AUDIOSET PASS saved cfg: master=0.3 boots with Master bus -20.9 dB (want -20.9)
+AUDIOSET PASS saved cfg: music=0.4 boots with Music bus -15.9 dB (want -15.9)
+AUDIOSET PASS saved cfg: sfx=0.5 boots with SFX bus -12.0 dB (want -12.0)
+AUDIOSET PASS saved cfg: ambience=0.6 boots with Ambience bus -8.9 dB (want -8.9)
+AUDIOSET PASS boot probe ran (exit 0)
+AUDIOSET PASS pre-curve cfg: master=0.3 boots with Master bus -10.5 dB (want -10.5)
+AUDIOSET PASS pre-curve cfg: music=0.4 boots with Music bus -8.0 dB (want -8.0)
+AUDIOSET PASS pre-curve cfg: sfx=0.5 boots with SFX bus -6.0 dB (want -6.0)
+AUDIOSET PASS pre-curve cfg: ambience=0.6 boots with Ambience bus -4.4 dB (want -4.4)
+AUDIOSET 113 checks, 0 failed
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 18 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

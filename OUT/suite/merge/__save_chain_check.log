@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SAVE-CHAIN ok   one step for every version 1..20 ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+SAVE-CHAIN ok   each step is named _migrate_<n>_to_<n+1>
+SAVE-CHAIN ok   the doc lists every step from v11 (missing [])
+SAVE-CHAIN ok   a v11 save upgrades to v21
+SAVE-CHAIN ok   v11 -> v12: Evo (level capped at 100, old form kept)
+SAVE-CHAIN ok   v11 -> v12: base life (no friends or rivals yet)
+SAVE-CHAIN ok   v12 -> v13: garden zones, the Boki in the start zone
+SAVE-CHAIN ok   v12 -> v13: shaping items (Care.ensure on every Boki)
+SAVE-CHAIN ok   v13 -> v14: carry 2, the second starts empty
+SAVE-CHAIN ok   v14 -> v15: no drill times yet
+SAVE-CHAIN ok   v15 -> v16: a played save is past the combat tutorial
+SAVE-CHAIN ok   v16 -> v17: the guild becomes its clan, as a member
+SAVE-CHAIN ok   v17 -> v18: the XP first-time lines are unseen
+SAVE-CHAIN ok   v18 -> v19: no Boki away on a sleepover
+SAVE-CHAIN ok   the chain again from v11 changes nothing (the clan role stays)
+SAVE-CHAIN ok   a first-time-hints v13 dev save still gets base life and zones
+SAVE-CHAIN ok   a v18 dev save from the old chain gets carry 2
+SAVE-CHAIN ok   a save from a newer game is refused
+SAVE-CHAIN DONE, failures: 0

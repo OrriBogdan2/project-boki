@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CONTACT ok   LMB   gunslinger_lmb   lmb            hit 0.000 s (lead 0.00), strike 0.050..0.283 s, off 0.050 s, tip 0.062 m from the strike pose, PASS
+CONTACT ok   RMB   gunslinger_rmb   rmb            hit 0.000 s (lead 0.00), strike 0.033..0.050 s, off 0.033 s, tip 0.245 m from the strike pose, PASS
+CONTACT FAIL X     gunslinger_x     x              hit 0.140 s (lead 0.00), strike 0.033..0.083 s, off 0.057 s, tip 0.223 m from the strike pose, FAIL
+CONTACT ok   LMB   as_lance         lance          hit 0.200 s (lead 0.00), strike 0.117..0.167 s, off 0.033 s, tip 0.025 m from the strike pose, PASS
+CONTACT ok   RMB   as_shot          shot           hit 0.000 s (lead 0.00), strike 0.033..0.050 s, off 0.033 s, tip 0.140 m from the strike pose, PASS
+CONTACT ok   E     as_cloak         cloak          hit 0.000 s (lead 0.00), strike 0.033..0.050 s, off 0.033 s, tip 0.391 m from the strike pose, PASS
+CONTACT ok   LMB   thf_lmb_r        lmb_r          hit 0.000 s (lead 0.00), strike 0.033..0.050 s, off 0.033 s, tip 0.797 m from the strike pose, PASS
+CONTACT ok   RMB   thf_bola         bola           hit 0.400 s (lead 0.00), strike 0.350..0.417 s, off 0.000 s, tip 0.000 m from the strike pose, PASS
+CONTACT ok   E     thf_knife        knife          hit 0.120 s (lead 0.00), strike 0.100..0.150 s, off 0.000 s, tip 0.000 m from the strike pose, PASS
+CONTACT ok   LMB   jug_slash_r      slash_r        hit 0.000 s (lead 0.00), strike 0.033..0.083 s, off 0.033 s, tip 2.575 m from the strike pose, PASS
+CONTACT ok   RMB   jug_slam         slam           hit 0.600 s (lead 0.00), strike 0.550..0.617 s, off 0.000 s, tip 0.000 m from the strike pose, PASS
+CONTACT ok   LMB held jug_wave         wave           hit 0.000 s (lead 0.00), strike 0.033..0.117 s, off 0.033 s, tip 1.908 m from the strike pose, PASS
+CONTACT ok   LMB   bul_smash        lmb_slam       hit 0.000 s (lead 0.00), strike 0.050..0.067 s, off 0.050 s, tip 2.170 m from the strike pose, PASS
+CONTACT ok   RMB   bul_slamshield   shield_slam    hit 0.250 s (lead 0.25), strike 0.250..0.317 s, off 0.000 s, tip 0.000 m from the strike pose, PASS
+CONTACT ok   X     bul_ult_slam     x_slam         hit 0.000 s (lead 0.00), strike 0.050..0.083 s, off 0.050 s, tip 1.195 m from the strike pose, PASS
+CONTACT ok   LMB   mm_shot_r        shot_r         hit 0.060 s (lead 0.06), strike 0.067..0.433 s, off 0.007 s, tip 0.000 m from the strike pose, PASS
+CONTACT FAIL RMB   mm_seed          seed           hit 0.060 s (lead 0.06), strike 0.283..0.533 s, off 0.223 s, tip 1.022 m from the strike pose, FAIL
+CONTACT ok   E     mm_hearth        hearth         hit 0.150 s (lead 0.15), strike 0.050..0.667 s, off 0.000 s, tip 0.000 m from the strike pose, PASS
+CONTACT ok   LMB   ostra_orb        orb            hit 0.000 s (lead 0.00), strike 0.050..0.083 s, off 0.050 s, tip 0.414 m from the strike pose, PASS
+CONTACT ok   RMB   ostra_snap       snap           hit 0.000 s (lead 0.00), strike 0.033..0.050 s, off 0.033 s, tip 0.922 m from the strike pose, PASS
+CONTACT ok   E     ostra_swap       swap           hit 0.000 s (lead 0.00), strike 0.033..0.050 s, off 0.033 s, tip 1.408 m from the strike pose, PASS
+CONTACT FAIL LMB   tm_dart_r        dart_r         hit 0.000 s (lead 0.00), strike 0.100..0.133 s, off 0.100 s, tip 0.377 m from the strike pose, FAIL
+CONTACT ok   RMB   tm_spear         spear          hit 0.000 s (lead 0.00), strike 0.050..0.083 s, off 0.050 s, tip 0.136 m from the strike pose, PASS
+CONTACT ok   E     tm_freeze        freeze         hit 0.000 s (lead 0.00), strike 0.033..0.033 s, off 0.000 s, tip 0.000 m from the strike pose, PASS
+CONTACT ok   LMB   mage_lmb_r       lmb_r          hit 0.000 s (lead 0.00), strike 0.033..0.083 s, off 0.033 s, tip 0.346 m from the strike pose, PASS
+CONTACT ok   RMB   mage_rmb         rmb            hit 0.000 s (lead 0.00), strike 0.033..0.050 s, off 0.033 s, tip 0.405 m from the strike pose, PASS
+CONTACT ok   E     mage_e_snap      sky_snap       hit 0.000 s (lead 0.00), strike 0.033..0.050 s, off 0.033 s, tip 0.000 m from the strike pose, PASS
+CONTACT_CHECK_DONE, failures: 3

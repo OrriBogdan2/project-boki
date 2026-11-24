@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOKILINES every trigger has >= min_lines general lines                   PASS  []
+BOKILINES every line is <= 6 words and one sentence                      FAIL  ["huff: Hmph. I was here first."]
+BOKILINES every action is <= 4 words, in brackets                        PASS  []
+BOKILINES every trigger's feeling has tones                              PASS  
+BOKILINES no Boki line or action calls a Boki it/its                     FAIL  ["huff: (puffs out its chest)"]
+BOKILINES pronoun tokens fill by sex                                     PASS  (pats his belly, he grins, He waits for him by himself. His day) / (pats her belly, she grins, She waits for her by herself. Her day)
+BOKILINES every tone is only the name (and a sound)                      PASS  
+BOKILINES aliases point at real triggers                                 PASS  
+BOKILINES a line over the cap or two sentences is caught                 PASS  
+BOKILINES every match category and recall kind a caller passes has a trigger PASS  []
+BOKILINES stage 3: 200 picks per trigger, 50 species: no repeat within 10 PASS  
+BOKILINES stage 3: 200 picks per trigger, 50 species: always a line, <= 6 words PASS  
+BOKILINES stage 1: 200 picks per trigger, 3 species: no repeat within 10 PASS  
+BOKILINES stage 1: 200 picks per trigger, 3 species: always a line, <= 6 words PASS  
+BOKILINES stage 0: 200 picks per trigger, 3 species: no repeat within 10 PASS  
+BOKILINES stage 0: 200 picks per trigger, 3 species: always a line, <= 6 words PASS  
+BOKILINES a mixed run of every trigger never repeats within 10           PASS  
+BOKILINES it speaks, then stays quiet for cooldown_s (6.0 s)             PASS  Puddles everywhere! | 
+BOKILINES an answer to you (direct) skips the wait                       PASS  That tickles!
+BOKILINES after the cooldown it speaks again                             PASS  Bedtime soon.
+BOKILINES a cooldown is per Boki                                         PASS  
+BOKILINES an unknown trigger says nothing                                PASS  
+BOKILINES old names share lines (yelp -> hurt)                           PASS  
+BOKILINES Care.speech gives stages 0, 1 and 3 for these                  PASS  
+BOKILINES a young Boki only says its name, in a tone, plus an action     PASS  Vespyx...! (points the other way)
+BOKILINES at stage 1 it sometimes adds the trigger's one word            PASS  384 with it
+BOKILINES a grown Boki says real lines                                   PASS  We grew that!
+BOKILINES its element adds flavour lines                                 PASS  
+BOKILINES DONE, 28 checks, failures: 2

@@ -1,0 +1,263 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BHT archer     lmb     | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT archer     rmb     | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT archer     e       | hunter       25 kb 0.0 slow | summoned     25 kb 0.0 slow | wild         25 kb 0.0 slow
+BHT archer     dash    | hunter       15 kb 0.0 slow | summoned     15 kb 0.0 slow | wild         15 kb 0.0 slow
+BHT archer     x       | hunter       59 kb 4.0  | summoned     59 kb 5.0  | wild         59 kb 5.0 
+BHT archer     execute | hunter       15 kb 4.0  DONE | summoned     15 kb 0.0  DONE | wild         12 kb 5.0  DONE
+BHT juggernaut lmb     | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT juggernaut rmb     | hunter       36 kb 5.9  | summoned     36 kb 7.1  | wild         36 kb 7.1 
+BHT juggernaut e       | hunter        6 kb 0.0  | summoned      6 kb 0.0  | wild          6 kb 0.0 
+BHT juggernaut dash    | hunter       27 kb 9.0  | summoned     27 kb11.2  | wild         27 kb11.2 
+BHT juggernaut x       | hunter       49 kb 5.9  | summoned     49 kb 7.1  | wild         49 kb 7.1 
+BHT juggernaut execute | hunter       15 kb 5.9  DONE | summoned     15 kb 0.0  DONE | wild         13 kb 7.1  DONE
+BHT gunslinger lmb     | hunter      106 kb 1.0  | summoned    106 kb 1.3  | wild        106 kb 1.3 
+BHT gunslinger rmb     | hunter       22 kb 0.0  | summoned     22 kb 0.0  | wild         22 kb 0.0 
+BHT gunslinger e       | hunter       24 kb 0.0  | summoned     24 kb 0.0  | wild         24 kb 0.0 
+BHT gunslinger dash    | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT gunslinger x       | hunter       54 kb 0.0 slow | summoned     54 kb 0.0 slow | wild         54 kb 0.0 slow
+BHT bulwark    lmb     | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT bulwark    rmb     | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT bulwark    e       | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT bulwark    dash    | hunter       24 kb 7.0  | summoned     24 kb 8.8  | wild         24 kb 8.8 
+BHT bulwark    x       | hunter       22 kb 0.0 stun,slow | summoned     22 kb 0.0 stun,slow | wild         22 kb 0.0 stun,slow
+BHT rimewright lmb     | hunter      112 kb 0.4 slow | summoned    112 kb 0.5 slow | wild        112 kb 0.5 slow
+BHT rimewright rmb     | hunter       40 kb 0.0 slow | summoned     40 kb 0.0 slow | wild         40 kb 0.0 slow
+BHT rimewright e       | hunter        0 kb 5.0 slow | summoned      0 kb 6.2 slow | wild          0 kb 6.2 slow
+BHT rimewright dash    | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT rimewright x       | hunter       18 kb 0.0 stun | summoned     18 kb 0.0 stun | wild         18 kb 0.0 stun
+BHT ashwick    lmb     | hunter      171 kb 0.0  | summoned    171 kb 0.0  | wild        171 kb 0.0 
+BHT ashwick    rmb     | hunter      258 kb 0.0 slow | summoned    258 kb 0.0 slow | wild        258 kb 0.0 slow
+BHT ashwick    e       | hunter        9 kb 0.0  | summoned      9 kb 0.0  | wild          9 kb 0.0 
+BHT ashwick    dash    | hunter      136 kb 6.9  | summoned    136 kb 8.3  | wild        136 kb 8.3 
+BHT ashwick    x       | hunter      113 kb 0.0 slow | summoned    113 kb 0.0 slow | wild        113 kb 0.0 slow
+BHT dolm       lmb     | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT dolm       rmb     | hunter       14 kb 5.8  | summoned     14 kb 7.4  | wild         14 kb 7.4 
+BHT dolm       e       | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT dolm       dash    | hunter       22 kb 8.0 slow | summoned     22 kb10.0 slow | wild         22 kb10.0 slow
+BHT dolm       x       | hunter        3 kb 0.0 slow | summoned      3 kb 0.0 slow | wild          3 kb 0.0 slow
+BHT mage       lmb     | hunter       36 kb 0.8  | summoned     36 kb 1.0  | wild         36 kb 1.0 
+BHT mage       rmb     | hunter       16 kb 4.4  | summoned     16 kb 5.5  | wild         16 kb 5.5 
+BHT mage       e       | hunter       19 kb 6.1  | summoned     19 kb 6.1  | wild         19 kb 6.1 
+BHT mage       dash    | hunter     1853 kb 0.0  | summoned   1853 kb 0.0  | wild       1853 kb 0.0 
+BHT mage       x       | hunter        9 kb 7.9  | summoned      9 kb 9.9  | wild          9 kb 9.9 
+BHT dredge     lmb     | hunter       70 kb 2.2  | summoned     70 kb 2.8  | wild         70 kb 2.8 
+BHT dredge     rmb     | hunter        6 kb 0.0  | summoned      6 kb 0.0  | wild          6 kb 0.0 
+BHT dredge     e       | hunter       25 kb 0.0 stun | summoned     25 kb 0.0 stun | wild         25 kb 0.0 stun
+BHT dredge     dash    | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT dredge     x       | hunter       16 kb 0.0  | summoned     16 kb 0.0  | wild         16 kb 0.0 
+BHT tender     lmb     | hunter       59 kb 1.0  | summoned     59 kb 1.2  | wild         59 kb 1.2 
+BHT tender     rmb     | hunter       13 kb 0.0  | summoned     13 kb 0.0  | wild         13 kb 0.0 
+BHT tender     e       | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT tender     dash    | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT tender     x       | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT thief      lmb     | hunter       98 kb 0.8  | summoned     98 kb 1.0  | wild         98 kb 1.0 
+BHT thief      rmb     | hunter        3 kb 0.0 slow | summoned      3 kb 0.0 slow | wild          3 kb 0.0 slow
+BHT thief      e       | hunter        8 kb 0.0 slow | summoned      8 kb 0.0 slow | wild          8 kb 0.0 slow
+BHT thief      dash    | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT thief      x       | hunter       45 kb 0.0  | summoned     45 kb 0.0  | wild         45 kb 0.0 
+BHT ostra      lmb     | hunter       77 kb 1.0 slow | summoned     77 kb 1.2 slow | wild         77 kb 1.2 slow
+BHT ostra      rmb     | hunter       18 kb 1.0 stun | summoned     18 kb 1.2 stun | wild         18 kb 1.2 stun
+BHT ostra      e       | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT ostra      dash    | hunter        0 kb 0.0  | summoned      0 kb 0.0  | wild          0 kb 0.0 
+BHT ostra      x       | hunter        6 kb 0.0 stun | summoned      6 kb 0.0 stun | wild          6 kb 0.0 stun
+BHT gil        lmb     | hunter        9 kb 1.2  | summoned      9 kb 1.5  | wild          9 kb 1.5 
+BHT gil        rmb     | hunter        4 kb 0.0 slow | summoned      4 kb 0.0 slow | wild          4 kb 0.0 slow
+BHT gil        e       | hunter       10 kb 0.0 stun | summoned     10 kb 0.0 stun | wild         10 kb 0.0 stun
+BHT gil        dash    | hunter        4 kb 0.0 stun | summoned      4 kb 0.0 stun | wild          4 kb 0.0 stun
+BHT gil        x       | hunter       18 kb 0.0 stun,slow | summoned     18 kb 0.0 stun,slow | wild         18 kb 0.0 stun,slow
+BHT DONE, 237 checks, failures: 0
+ERROR: 3 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 3 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 10 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 208: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 210: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 209: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 215: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 225: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 223: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 229: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 227: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 231: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 230: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 235: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 237: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 236: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 238: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 253: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 246: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 256: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 269: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 271: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 280: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 281: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 284: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 283: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 292: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 291: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 294: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 293: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 295: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 303: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 302: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 305: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 304: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 307: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 306: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 314: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 313: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 316: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 315: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 318: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 317: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 324: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 323: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 326: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 325: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 329: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 328: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 334: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 333: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 336: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 335: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 338: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 337: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 437: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 436: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 444: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 443: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 446: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 445: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 452: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 450: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 454: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 453: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 462: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 461: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 465: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 20275: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20276: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20277: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20278: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20430: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20431: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20438: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20439: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20862: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20863: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20864: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 20865: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 54 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+GARDENSFX ok   garden_feed is its own cue
+GARDENSFX ok   garden_feed is in the UI set and loads
+GARDENSFX ok   garden_pet is its own cue
+GARDENSFX ok   garden_pet is in the UI set and loads
+GARDENSFX ok   garden_friend is its own cue
+GARDENSFX ok   garden_friend is in the UI set and loads
+GARDENSFX ok   garden_trait is its own cue
+GARDENSFX ok   garden_trait is in the UI set and loads
+GARDENSFX ok   garden_toy is its own cue
+GARDENSFX ok   garden_toy is in the UI set and loads
+GARDENSFX ok   garden_egg loads from the garden set
+GARDENSFX ok   home.gd _pet_kin plays garden_pet
+GARDENSFX ok   home.gd _pet_kin keeps no unlock for a reaction (0 left)
+GARDENSFX ok   home.gd _after_feed plays garden_feed
+GARDENSFX ok   home.gd _after_feed keeps no unlock for a reaction (0 left)
+GARDENSFX ok   home.gd _play_with_kin plays garden_toy
+GARDENSFX ok   home.gd _play_with_kin keeps no unlock for a reaction (0 left)
+GARDENSFX ok   incubator_view.gd  plays garden_egg
+GARDENSFX ok   incubator_view.gd  keeps no unlock for a reaction (1 left)
+GARDENSFX ok   home.gd _play_evolutions plays garden_trait
+GARDENSFX ok   home.gd _play_evolutions keeps no unlock for a reaction (0 left)
+GARDENSFX ok   results.gd _kin_card plays garden_trait
+GARDENSFX ok   results.gd _kin_card keeps no unlock for a reaction (0 left)
+GARDENSFX ok   home.gd _move_kin plays garden_friend
+GARDENSFX ok   home.gd _move_kin keeps no unlock for a reaction (0 left)
+GARDENSFX ok   home.gd _care_feed plays boki_eat
+GARDENSFX ok   home.gd _care_feed keeps no unlock for a reaction (0 left)
+GARDENSFX ok   home_econ.gd feed_step plays boki_eat
+GARDENSFX ok   home_econ.gd feed_step keeps no unlock for a reaction (0 left)
+GARDENSFX ok   home.gd _care_step plays boki_sleep
+GARDENSFX ok   home.gd _care_step keeps no unlock for a reaction (0 left)
+GARDENSFX ok   home.gd _care_nap plays boki_sleep
+GARDENSFX ok   home.gd _care_nap keeps no unlock for a reaction (0 left)
+GARDENSFX ok   the Boki eat and nap sounds load
+GARDENSFX DONE, failures: 0

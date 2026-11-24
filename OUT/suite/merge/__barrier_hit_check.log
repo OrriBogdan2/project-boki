@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PAIRCHECK albert: front shield raised                  PASS  
+PAIRCHECK albert: a shot into the barrier spawns one ripple PASS  1 rings
+PAIRCHECK albert: the ripple wears the barrier's colour PASS  hue 0.56 vs 0.56
+PAIRCHECK albert: the ripple is gone after it spreads  PASS  0
+PAIRCHECK albert: the hit that breaks it is stronger   PASS  1.27 vs 0.69
+PAIRCHECK tenzo: a shot that hits a Hunter makes no barrier ripple PASS  0
+PAIRCHECK tenzo: Stone Row raised                      PASS  rocks 3
+PAIRCHECK tenzo: a shot into the barrier spawns one ripple PASS  1 rings
+PAIRCHECK tenzo: the ripple wears the barrier's colour PASS  hue 0.09 vs 0.09
+PAIRCHECK tenzo: the ripple is gone after it spreads   PASS  0
+PAIRCHECK tenzo: the hit that breaks it is stronger    PASS  1.27 vs 0.69
+PAIRCHECK neve: Rimewall raised                        PASS  walls 1
+PAIRCHECK neve: a shot into the barrier spawns one ripple PASS  1 rings
+PAIRCHECK neve: the ripple wears the barrier's colour  PASS  hue 0.48 vs 0.48
+PAIRCHECK neve: the ripple is gone after it spreads    PASS  0
+PAIRCHECK neve: the hit that breaks it is stronger     PASS  1.27 vs 0.69
+PAIRCHECK barrier hits DONE, 16 checks, failures: 0
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 220: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 219: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 17 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

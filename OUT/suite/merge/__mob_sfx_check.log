@@ -1,0 +1,12 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MOBSFX ok   7 kinds -> 7 distinct cues on file { "skitter": "mdie_skitter", "spitter": "mdie_spitter", "brute": "mdie_brute", "bomber": "mdie_bomber", "sentinel": "mdie_sentinel", "glimmer": "mdie_glimmer", "warden": "mdie_warden" } (silent: [])
+MOBSFX ok   bosses -> Watcher cue, Blight kinds -> base kind, Shrubling -> generic
+MOBSFX ok   a pack of 12 dying at once plays 3 cues (cap 3 per 200 ms), then one more after the window
+MOBSFX ok   stagger open tick and landed hit exist; every boss can stagger
+MOBSFX ok   Match plays them: deaths, window opening, landed stagger
+MOBSFX ok   all 4 cues are positional (at mb.pos)
+MOBSFX DONE, failures: 0

@@ -1,0 +1,184 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BCHECK ok   hunter r is its archetype's hit_r (medium 0.41)
+BCHECK ok   found an island edge
+BCHECK ok   light: hit radius 0.43 = hit_r + slack
+BCHECK ok   light below lip: marker 'balloon' (want 'balloon')
+BCHECK ok   light below lip: marker shows
+BCHECK ok   light below lip: ring radius 0.430 = hit radius 0.430
+BCHECK ok   light below lip: ring height 1.64 inside the shot band 1.15..4.39
+BCHECK ok   light below lip: ring centred on the hit circle
+BCHECK ok   light below lip: balloon radius 0.430 = hit radius
+BCHECK ok   light below lip: whole balloon 2.06..3.04 inside the band
+BCHECK ok   light below lip: a shot at the marker height 2.55 is let through
+BCHECK ok   light below lip: a real shot at 2.55 hits
+BCHECK ok   light below lip: marker flash on hit = true
+BCHECK ok   light below lip: a shot grazing just inside the marker's edge hits
+BCHECK ok   light below lip: a shot passing just outside the marker's edge misses
+BCHECK ok   light below lip: a shot over the band (4.69) misses
+BCHECK ok   light gliding high: marker 'ring' (want 'ring')
+BCHECK ok   light gliding high: marker shows
+BCHECK ok   light gliding high: ring radius 0.430 = hit radius 0.430
+BCHECK ok   light gliding high: ring height 3.44 inside the shot band 2.95..6.19
+BCHECK ok   light gliding high: ring centred on the hit circle
+BCHECK ok   light gliding high: no balloon over land
+BCHECK ok   light gliding high: ring above the terrace (3.40 > 1.60)
+BCHECK ok   light gliding high: a shot at the marker height 4.35 is let through
+BCHECK ok   light gliding high: a real shot at 4.35 hits
+BCHECK ok   light gliding high: marker flash on hit = true
+BCHECK ok   light gliding high: a shot grazing just inside the marker's edge hits
+BCHECK ok   light gliding high: a shot passing just outside the marker's edge misses
+BCHECK ok   light gliding high: a shot over the band (6.49) misses
+BCHECK ok   light just over hop height: marker 'ring' (want 'ring')
+BCHECK ok   light just over hop height: marker shows
+BCHECK ok   light just over hop height: ring radius 0.430 = hit radius 0.430
+BCHECK ok   light just over hop height: ring height 1.74 inside the shot band 1.25..4.49
+BCHECK ok   light just over hop height: ring centred on the hit circle
+BCHECK ok   light just over hop height: no balloon over land
+BCHECK ok   light just over hop height: ring above the terrace (1.70 > 1.60)
+BCHECK ok   light just over hop height: a shot at the marker height 2.65 is let through
+BCHECK ok   light just over hop height: a real shot at 2.65 hits
+BCHECK ok   light just over hop height: marker flash on hit = true
+BCHECK ok   light just over hop height: a shot grazing just inside the marker's edge hits
+BCHECK ok   light just over hop height: a shot passing just outside the marker's edge misses
+BCHECK ok   light just over hop height: a shot over the band (4.79) misses
+BCHECK ok   light hopping: marker '' (want '')
+BCHECK ok   light hopping: no marker, the body is the target
+BCHECK ok   light hopping: body middle 3.30 inside the band 1.15..4.39
+BCHECK ok   light hopping: hit as standing on the terrace
+BCHECK ok   light hopping: a shot at the marker height 2.55 is let through
+BCHECK ok   light hopping: a real shot at 2.55 hits
+BCHECK ok   light hopping: marker flash on hit = false
+BCHECK ok   light hopping: a shot over the band (4.69) misses
+BCHECK ok   light hop apex: marker '' (want '')
+BCHECK ok   light hop apex: no marker, the body is the target
+BCHECK ok   light hop apex: body middle 3.58 inside the band 1.15..4.39
+BCHECK ok   light hop apex: hit as standing on the terrace
+BCHECK ok   light hop apex: a shot at the marker height 2.55 is let through
+BCHECK ok   light hop apex: a real shot at 2.55 hits
+BCHECK ok   light hop apex: marker flash on hit = false
+BCHECK ok   light hop apex: a shot over the band (4.69) misses
+BCHECK ok   medium: hit radius 0.48 = hit_r + slack
+BCHECK ok   medium below lip: marker 'balloon' (want 'balloon')
+BCHECK ok   medium below lip: marker shows
+BCHECK ok   medium below lip: ring radius 0.480 = hit radius 0.480
+BCHECK ok   medium below lip: ring height 1.64 inside the shot band 1.15..4.39
+BCHECK ok   medium below lip: ring centred on the hit circle
+BCHECK ok   medium below lip: balloon radius 0.480 = hit radius
+BCHECK ok   medium below lip: whole balloon 1.96..3.06 inside the band
+BCHECK ok   medium below lip: a shot at the marker height 2.51 is let through
+BCHECK ok   medium below lip: a real shot at 2.51 hits
+BCHECK ok   medium below lip: marker flash on hit = true
+BCHECK ok   medium below lip: a shot grazing just inside the marker's edge hits
+BCHECK ok   medium below lip: a shot passing just outside the marker's edge misses
+BCHECK ok   medium below lip: a shot over the band (4.69) misses
+BCHECK ok   medium gliding high: marker 'ring' (want 'ring')
+BCHECK ok   medium gliding high: marker shows
+BCHECK ok   medium gliding high: ring radius 0.480 = hit radius 0.480
+BCHECK ok   medium gliding high: ring height 3.44 inside the shot band 2.95..6.19
+BCHECK ok   medium gliding high: ring centred on the hit circle
+BCHECK ok   medium gliding high: no balloon over land
+BCHECK ok   medium gliding high: ring above the terrace (3.40 > 1.60)
+BCHECK ok   medium gliding high: a shot at the marker height 4.35 is let through
+BCHECK ok   medium gliding high: a real shot at 4.35 hits
+BCHECK ok   medium gliding high: marker flash on hit = true
+BCHECK ok   medium gliding high: a shot grazing just inside the marker's edge hits
+BCHECK ok   medium gliding high: a shot passing just outside the marker's edge misses
+BCHECK ok   medium gliding high: a shot over the band (6.49) misses
+BCHECK ok   medium just over hop height: marker 'ring' (want 'ring')
+BCHECK ok   medium just over hop height: marker shows
+BCHECK ok   medium just over hop height: ring radius 0.480 = hit radius 0.480
+BCHECK ok   medium just over hop height: ring height 1.74 inside the shot band 1.25..4.49
+BCHECK ok   medium just over hop height: ring centred on the hit circle
+BCHECK ok   medium just over hop height: no balloon over land
+BCHECK ok   medium just over hop height: ring above the terrace (1.70 > 1.60)
+BCHECK ok   medium just over hop height: a shot at the marker height 2.65 is let through
+BCHECK ok   medium just over hop height: a real shot at 2.65 hits
+BCHECK ok   medium just over hop height: marker flash on hit = true
+BCHECK ok   medium just over hop height: a shot grazing just inside the marker's edge hits
+BCHECK ok   medium just over hop height: a shot passing just outside the marker's edge misses
+BCHECK ok   medium just over hop height: a shot over the band (4.79) misses
+BCHECK ok   medium hopping: marker '' (want '')
+BCHECK ok   medium hopping: no marker, the body is the target
+BCHECK ok   medium hopping: body middle 3.30 inside the band 1.15..4.39
+BCHECK ok   medium hopping: hit as standing on the terrace
+BCHECK ok   medium hopping: a shot at the marker height 2.55 is let through
+BCHECK ok   medium hopping: a real shot at 2.55 hits
+BCHECK ok   medium hopping: marker flash on hit = false
+BCHECK ok   medium hopping: a shot over the band (4.69) misses
+BCHECK ok   medium hop apex: marker '' (want '')
+BCHECK ok   medium hop apex: no marker, the body is the target
+BCHECK ok   medium hop apex: body middle 3.58 inside the band 1.15..4.39
+BCHECK ok   medium hop apex: hit as standing on the terrace
+BCHECK ok   medium hop apex: a shot at the marker height 2.55 is let through
+BCHECK ok   medium hop apex: a real shot at 2.55 hits
+BCHECK ok   medium hop apex: marker flash on hit = false
+BCHECK ok   medium hop apex: a shot over the band (4.69) misses
+BCHECK ok   heavy: hit radius 0.58 = hit_r + slack
+BCHECK ok   heavy below lip: marker 'balloon' (want 'balloon')
+BCHECK ok   heavy below lip: marker shows
+BCHECK ok   heavy below lip: ring radius 0.580 = hit radius 0.580
+BCHECK ok   heavy below lip: ring height 1.64 inside the shot band 1.15..4.39
+BCHECK ok   heavy below lip: ring centred on the hit circle
+BCHECK ok   heavy below lip: balloon radius 0.580 = hit radius
+BCHECK ok   heavy below lip: whole balloon 1.82..3.16 inside the band
+BCHECK ok   heavy below lip: a shot at the marker height 2.49 is let through
+BCHECK ok   heavy below lip: a real shot at 2.49 hits
+BCHECK ok   heavy below lip: marker flash on hit = true
+BCHECK ok   heavy below lip: a shot grazing just inside the marker's edge hits
+BCHECK ok   heavy below lip: a shot passing just outside the marker's edge misses
+BCHECK ok   heavy below lip: a shot over the band (4.69) misses
+BCHECK ok   heavy gliding high: marker 'ring' (want 'ring')
+BCHECK ok   heavy gliding high: marker shows
+BCHECK ok   heavy gliding high: ring radius 0.580 = hit radius 0.580
+BCHECK ok   heavy gliding high: ring height 3.44 inside the shot band 2.95..6.19
+BCHECK ok   heavy gliding high: ring centred on the hit circle
+BCHECK ok   heavy gliding high: no balloon over land
+BCHECK ok   heavy gliding high: ring above the terrace (3.40 > 1.60)
+BCHECK ok   heavy gliding high: a shot at the marker height 4.35 is let through
+BCHECK ok   heavy gliding high: a real shot at 4.35 hits
+BCHECK ok   heavy gliding high: marker flash on hit = true
+BCHECK ok   heavy gliding high: a shot grazing just inside the marker's edge hits
+BCHECK ok   heavy gliding high: a shot passing just outside the marker's edge misses
+BCHECK ok   heavy gliding high: a shot over the band (6.49) misses
+BCHECK ok   heavy just over hop height: marker 'ring' (want 'ring')
+BCHECK ok   heavy just over hop height: marker shows
+BCHECK ok   heavy just over hop height: ring radius 0.580 = hit radius 0.580
+BCHECK ok   heavy just over hop height: ring height 1.74 inside the shot band 1.25..4.49
+BCHECK ok   heavy just over hop height: ring centred on the hit circle
+BCHECK ok   heavy just over hop height: no balloon over land
+BCHECK ok   heavy just over hop height: ring above the terrace (1.70 > 1.60)
+BCHECK ok   heavy just over hop height: a shot at the marker height 2.65 is let through
+BCHECK ok   heavy just over hop height: a real shot at 2.65 hits
+BCHECK ok   heavy just over hop height: marker flash on hit = true
+BCHECK ok   heavy just over hop height: a shot grazing just inside the marker's edge hits
+BCHECK ok   heavy just over hop height: a shot passing just outside the marker's edge misses
+BCHECK ok   heavy just over hop height: a shot over the band (4.79) misses
+BCHECK ok   heavy hopping: marker '' (want '')
+BCHECK ok   heavy hopping: no marker, the body is the target
+BCHECK ok   heavy hopping: body middle 3.30 inside the band 1.15..4.39
+BCHECK ok   heavy hopping: hit as standing on the terrace
+BCHECK ok   heavy hopping: a shot at the marker height 2.55 is let through
+BCHECK ok   heavy hopping: a real shot at 2.55 hits
+BCHECK ok   heavy hopping: marker flash on hit = false
+BCHECK ok   heavy hopping: a shot over the band (4.69) misses
+BCHECK ok   heavy hop apex: marker '' (want '')
+BCHECK ok   heavy hop apex: no marker, the body is the target
+BCHECK ok   heavy hop apex: body middle 3.58 inside the band 1.15..4.39
+BCHECK ok   heavy hop apex: hit as standing on the terrace
+BCHECK ok   heavy hop apex: a shot at the marker height 2.55 is let through
+BCHECK ok   heavy hop apex: a real shot at 2.55 hits
+BCHECK ok   heavy hop apex: marker flash on hit = false
+BCHECK ok   heavy hop apex: a shot over the band (4.69) misses
+BALLOON CHECK DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

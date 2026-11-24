@@ -1,0 +1,65 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FISH ok   Focus 0 warns 0.30 s, Focus 100 0.80 s
+FISH ok   Power widens the band: 0.10 at 0, 0.22 at 100
+FISH ok   the same seed plays the same session
+FISH ok   another seed plays another
+FISH ok   Focus hooks more: 0.49 at 0, 1.00 at 100
+FISH ok   Power lands more: 0.63 at 0, 0.96 at 100
+FISH ok   a Water lean doubles rare glints: 0.132 to 0.299
+FISH ok   the same 3 catches all day
+FISH ok   they are distinct common catches
+FISH ok   the sign changes over ten days (5 lists)
+FISH ok   a common glint always pays from the sign
+FISH ok   items not in the catalog never bite ()
+FISH ok   no move refused, 120 of 120 sessions are five casts
+FISH ok   a session lasts 71 s on average
+FISH ok   a press before the ears spooks it
+FISH ok   no press after the bite and it gets away
+FISH ok   a cast on empty water plops
+FISH ok   5 catches banked
+FISH ok   joy up, energy down
+FISH ok   it remembers the session
+FISH ok   plop, wait, bite and catch each have a recipe with a look, a size and colours
+FISH ok   before the ears the rings stay wide and no bite
+FISH ok   half way through the warning, half closed
+FISH ok   at the bite they are closed and the splash is due
+FISH ok   the splash shows when played
+FISH ok   and hides when its life is spent
+FISH ok   the glint grows with the catch { "snack": 0.20000000298023, "item": 0.30000001192093, "rare": 0.5 }
+FISH ok   a rare draws at the rare size, else by kind
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+FISH ok   Glasswater has the fishing rock
+FISH ok   the rock offers fishing
+FISH ok   a sleeping partner is left alone
+FISH ok   a session starts with your partner
+FISH ok   the partner sits 2.0 m from you (under 3 m) during the cast
+FISH ok   and faces the bobber (1.00)
+FISH ok   side-on to the water (0.00 along the cast)
+FISH ok   it leans in on the bite (-0.30 rad)
+FISH ok   it hops on a catch, higher if rare (0.23 m, 0.44 m)
+FISH ok   the Empty holds the rod and casts (poses seen: ["wait", "land", "cast", ""])
+FISH ok   the rod is put away when fishing ends
+FISH ok   a cast's plop showed on the water during the session
+FISH ok   it ends with the shared result card (9.8 s, pressing every second)
+FISH DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

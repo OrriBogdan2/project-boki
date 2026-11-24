@@ -1,0 +1,65 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+GARDENRECIPES ok   7 recipes (bun, 5 sweets, Twinbun), each giving its own item
+GARDENRECIPES ok   with an empty bag every recipe is still listed but none can be mixed
+GARDENRECIPES ok   fourfold_bun: one short, nothing is planned or taken
+GARDENRECIPES ok   fourfold_bun: the plan takes 1 Thumpnut, 1 Shellbark Chew, the shape the recipe lists
+GARDENRECIPES ok   fourfold_bun: planning takes nothing
+GARDENRECIPES ok   fourfold_bun: it mixes
+GARDENRECIPES ok   fourfold_bun: exactly the plan left the bag and exactly 1 fourfold_bun came in
+GARDENRECIPES ok   bramble_honey: one short, nothing is planned or taken
+GARDENRECIPES ok   bramble_honey: the plan takes 3 Glowcap, the shape the recipe lists
+GARDENRECIPES ok   bramble_honey: planning takes nothing
+GARDENRECIPES ok   bramble_honey: it mixes
+GARDENRECIPES ok   bramble_honey: exactly the plan left the bag and exactly 1 bramble_honey came in
+GARDENRECIPES ok   glassdew: one short, nothing is planned or taken
+GARDENRECIPES ok   glassdew: the plan takes 3 Tidebloom, the shape the recipe lists
+GARDENRECIPES ok   glassdew: planning takes nothing
+GARDENRECIPES ok   glassdew: it mixes
+GARDENRECIPES ok   glassdew: exactly the plan left the bag and exactly 1 glassdew came in
+GARDENRECIPES ok   cinderbrittle: one short, nothing is planned or taken
+GARDENRECIPES ok   cinderbrittle: the plan takes 3 Emberberry, the shape the recipe lists
+GARDENRECIPES ok   cinderbrittle: planning takes nothing
+GARDENRECIPES ok   cinderbrittle: it mixes
+GARDENRECIPES ok   cinderbrittle: exactly the plan left the bag and exactly 1 cinderbrittle came in
+GARDENRECIPES ok   hush_truffle: one short, nothing is planned or taken
+GARDENRECIPES ok   hush_truffle: the plan takes 3 Mindmint, the shape the recipe lists
+GARDENRECIPES ok   hush_truffle: planning takes nothing
+GARDENRECIPES ok   hush_truffle: it mixes
+GARDENRECIPES ok   hush_truffle: exactly the plan left the bag and exactly 1 hush_truffle came in
+GARDENRECIPES ok   windfloss: one short, nothing is planned or taken
+GARDENRECIPES ok   windfloss: the plan takes 3 Starfruit, the shape the recipe lists
+GARDENRECIPES ok   windfloss: planning takes nothing
+GARDENRECIPES ok   windfloss: it mixes
+GARDENRECIPES ok   windfloss: exactly the plan left the bag and exactly 1 windfloss came in
+GARDENRECIPES ok   twinbun: one short, nothing is planned or taken
+GARDENRECIPES ok   twinbun: the plan takes 2 Sweet bun, the shape the recipe lists
+GARDENRECIPES ok   twinbun: planning takes nothing
+GARDENRECIPES ok   twinbun: it mixes
+GARDENRECIPES ok   twinbun: exactly the plan left the bag and exactly 1 twinbun came in
+GARDENRECIPES ok   dare_pepper: 3 of 18 tries work, moved 0.12 of the 0.12 cap, a friend pulling
+GARDENRECIPES ok   lullwort_tea: 3 of 18 tries work, moved 0.12 of the 0.12 cap, a friend pulling
+GARDENRECIPES ok   peekbox: 3 of 18 tries work, moved 0.12 of the 0.12 cap, a friend pulling
+GARDENRECIPES ok   twinbun: loyalty stops at the 0.12 cap while the bond keeps growing (10 shared)
+GARDENRECIPES ok   a sweet takes its type's lean to 12 of 24
+GARDENRECIPES ok   a pick outside the group falls to its first type
+GARDENRECIPES ok   7 other meals in 6 days: the lean has not faded
+GARDENRECIPES ok   the hold is let go on day 7
+GARDENRECIPES ok   then the next other meal fades it as it always did
+GARDENRECIPES ok   Fourfold Bun: +1 to all four stats
+GARDENRECIPES ok   Twinbun: loyalty +0.04 each, bond +0.1 both ways, one used
+GARDENRECIPES ok   Twinbun: with none left nothing happens
+GARDENRECIPES ok   the Bowl lists 7 recipes, one Mix
+GARDENRECIPES ok   feed rows: a row per sweet type; Twinbun to the closest friend
+GARDENRECIPES DONE, failures: 0
+WARNING: 75 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 16 RID allocations of type 'PN18TextServerAdvanced22ShapedTextDataAdvancedE' were leaked at exit.
+ERROR: 3 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 9 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

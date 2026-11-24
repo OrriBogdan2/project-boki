@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CAMFOLLOW source_dash      pan 697 px/s (source ~700), catch 0.45 s (source ~0.5)  ok
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+         [4] _case (res://tools/camera_follow_check.gd:143)
+         [5] run (res://tools/camera_follow_check.gd:75)
+         [6] run (res://tools/check_registry.gd:982)
+         [7] _ready (res://scripts/main.gd:270)
+CAMLAG vex_tap_dash 0.07 0.51 0.94 1.27 1.51 1.68 1.78 1.82 1.81 1.75 1.65 1.51 1.33 1.12 0.90 0.68 0.48 0.32 0.18 0.10 0.06 0.03 0.02 0.01 0.01 0.00 0.00 0.00 0.00 0.00
+CAMFOLLOW vex_tap_dash     moved 4.9 m, peak 1.82 m, catch 0.32 s, aim off 4.190 m  FAIL
+CAMLAG vex_hold_slide 0.07 0.51 0.94 1.27 1.51 1.69 1.76 1.80 1.82 1.83 1.81 1.79 1.75 1.69 1.63 1.56 1.48 1.39 1.29 1.19 1.08 0.97 1.10 1.40 1.66 1.90 2.12 2.32 2.50 2.43 2.18 1.91 1.64 1.37 1.10 0.84 0.62 0.43 0.28 0.16 0.09 0.05 0.03 0.02 0.01 0.01 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
+CAMFOLLOW vex_hold_slide   moved 11.6 m, peak 2.55 m, catch 0.42 s, aim off 4.190 m  FAIL
+CAMLAG sparkle_wirerun 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.67 1.76 2.73 3.62 4.16 4.16 4.11 4.03 3.89 3.42 3.08 2.73 2.39 2.04 1.69 1.38 1.09 0.84 0.62 0.43 0.27 0.16 0.09 0.05 0.03 0.02 0.01 0.00 0.00 0.00
+CAMFOLLOW sparkle_wirerun  moved 11.0 m, peak 4.16 m, catch 0.48 s, aim off 4.286 m  FAIL
+CAMLAG grimble_barges 0.35 0.86 1.20 1.36 1.44 1.42 1.26 1.05 0.83 0.62 0.43 0.28 0.51 0.99 1.31 1.47 1.53 1.51 1.34 1.12 0.89 0.67 0.48 0.31 0.53 1.01 1.33 1.48 1.54 1.52 1.35 1.13 0.90 0.68 0.48 0.32 0.19 0.10 0.06 0.03 0.02 0.01 0.01 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
+CAMFOLLOW grimble_barges   moved 8.8 m, peak 1.54 m, catch 0.30 s, aim off 4.151 m  FAIL
+CAMLAG motley_lob 0.02 0.09 0.12 0.11 0.08 0.05 0.03 0.02 0.01 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
+CAMFOLLOW motley_lob       moved 9.0 m, peak 8.74 m, catch 9.00 s, aim off 11.434 m  FAIL
+CAMLAG glide_start 0.01 0.05 0.10 0.16 0.21 0.25 0.29 0.32 0.35 0.37 0.38 0.39 0.40 0.41 0.42 0.42 0.43 0.43 0.43 0.44 0.44 0.44 0.44 0.44 0.44 0.44 0.44 0.44 0.44 0.44
+CAMFOLLOW glide_start      moved 4.6 m, peak 0.45 m, catch 9.00 s  FAIL
+CAMERA FOLLOW CHECK DONE, failures: 6
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 25 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

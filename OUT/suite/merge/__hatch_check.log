@@ -1,0 +1,135 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HATCH ok   the egg hatches all the way through (10.7 s)
+HATCH ok   the shell is gone 0.78 s after the pop (want under 1 s)
+HATCH ok   the whole hop-look-face-bounce beat takes 2.06 s (want under 2.5 s)
+HATCH ok   the Boki hops (0.45 m of height)
+HATCH ok   it looks around before it finds you
+HATCH ok   then it looks right at you (off by 0.00 rad)
+HATCH ok   no ring bursts round the egg (0)
+HATCH ok   only a few flakes of shell, no sparkle showers (5 bursts, largest 6)
+HATCH ok   a new nest egg: one glow ring and one small sparkle in its type colour (1 rings, 1 bursts)
+HATCH ok   and it wobbles once (tips 0.20 rad), then sits upright (0.000)
+SCRIPT ERROR: Invalid call. Nonexistent 'String' constructor.
+          at: rare_of (res://scripts/core/boki_quirks.gd:79)
+          GDScript backtrace (most recent call first):
+              [0] rare_of (res://scripts/core/boki_quirks.gd:79)
+              [1] _info_card (res://scripts/ui/kin_reveal.gd:234)
+              [2] _build (res://scripts/ui/kin_reveal.gd:159)
+              [3] _ready (res://scripts/ui/kin_reveal.gd:59)
+              [4] run (res://tools/hatch_check.gd:95)
+              [5] _nest_reveal (res://tools/hatch_check.gd:394)
+HATCH ok   no light rays, flash or fanfare
+HATCH ok   it can't be named before it has met you
+HATCH ok   nothing flashes white ([])
+HATCH ok   after it looks at you, you can name it (142 frames)
+HATCH ok   it faces you (off by 0.00 rad)
+HATCH ok   quiet words: "Vespyx" / "He's looking at you. He knows your face now."
+HATCH ok   a shimmer is a faint sparkle in its coat
+HATCH ok   no gold rarity text on its card (0)
+HATCH ok   a rare one gets a line of provenance
+HATCH ok   Name it hands over to naming
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _skip_row (res://tools/hatch_check.gd:160)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _skip_row (res://tools/hatch_check.gd:160)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _skip_row (res://tools/hatch_check.gd:160)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _skip_row (res://tools/hatch_check.gd:160)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _skip_row (res://tools/hatch_check.gd:160)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _skip_row (res://tools/hatch_check.gd:160)
+SCRIPT ERROR: Invalid access to property or key 'col' on a base object of type 'Node3D (EggHatch)'.
+          at: _tap_egg (res://scripts/ui/hatch.gd:504)
+          GDScript backtrace (most recent call first):
+              [0] _tap_egg (res://scripts/ui/hatch.gd:504)
+              [1] _skip_row (res://tools/hatch_check.gd:160)
+HATCH ok   the hatch beat can be skipped (stage hatching)
+HATCH ok   no pill in the first moments (alpha 0.00)
+HATCH ok   a key in the first 0.5 s skips nothing
+HATCH ok   the pill shows after 1.5 s
+HATCH ok   and it says so
+HATCH ok   one key jumps to the Boki revealed, its card up
+HATCH ok   the egg has hatched and the Boki is out
+HATCH ok   facing you (off by 0.00 rad)
+HATCH ok   the pill is gone once the card is up
+HATCH ok   the same end state as waiting ({ "met": true, "ready": true, "can_name": true, "title": "Vespyx", "sub": true, "faces": true, "turned_up": true } vs { "met": true, "ready": true, "can_name": true, "title": "Vespyx", "sub": true, "faces": true, "turned_up": true })
+HATCH ok   it still waits for you to name it
+HATCH ok   Name it hands over to naming
+HATCH ok   the Boki's record is made as it hatches, with a sex (f)
+HATCH ok   the same Boki is saved: your cindle, Ember, first of the roster
+HATCH ok   and it keeps the sex the reveal showed
+HATCH ok   the eggs come before any Relic (stage pick)
+HATCH ok   naming the Boki leads to the pick of Lace, Kael and Vex (["archer", "juggernaut", "gunslinger"])
+HATCH ok   nothing is worn before the pick, and no one else can be picked
+HATCH ok   there is no bottom Take button: the card itself picks
+HATCH ok   clicking Vex's card asks "Take Vex?" with Yes and Back
+HATCH ok   the question shows his portrait
+HATCH ok   asking takes nothing yet
+HATCH ok   Back keeps the pick screen as it was
+HATCH ok   another card asks about its own Relic
+HATCH ok   Esc is Back
+HATCH ok   Enter on a card asks as well
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready (res://scripts/ui/mask_moment.gd:58)
+         [10] _put_on_first (res://scripts/ui/hatch.gd:767)
+         [11] <anonymous lambda> (res://scripts/ui/hatch.gd:757)
+         [12] pick (res://scripts/home/hob_offer.gd:207)
+         [13] _yes (res://scripts/home/hob_offer.gd:199)
+         [14] <anonymous lambda> (res://scripts/ui/ui.gd:189)
+         [15] _first_mask (res://tools/hatch_check.gd:278)
+HATCH ok   taking one leads into the Relic moment, not the match
+HATCH ok   your first Relic is Vex, with your new Boki (gunslinger)
+HATCH ok   Vex's Relic drifts in from the crystal and waits by your face
+HATCH ok   your Boki stands beside you
+HATCH ok   one button: Put on the Relic, with the interact key (["This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours.", "F", "Put on the Relic"])
+HATCH ok   the Relic goes on and you become Vex
+HATCH ok   then Vex the Hired Gun
+HATCH ok   with a clip for each ability (5)
+HATCH ok   no gender or pronouns in the Relic's info ([])
+HATCH ok   the intro fits on a 1280x720 screen ([P: (426.0, 42.0), S: (830.0, 636.0)])
+HATCH ok   and goes on: Into the portal
+HATCH ok   name card (1280, 720): labels 80+ px wide, under 6 lines, on screen (10) []
+HATCH ok   name card (1280, 720) fits the screen ([P: (343.0, 179.0), S: (593.0, 527.0)] in [P: (0.0, 0.0), S: (1280.0, 720.0)])
+HATCH ok   name card (1920, 1080): labels 80+ px wide, under 6 lines, on screen (10) []
+HATCH ok   name card (1920, 1080) fits the screen ([P: (350.0, 179.0), S: (580.0, 527.0)] in [P: (0.0, 0.0), S: (1280.0, 720.0)])
+HATCH ok   name card (2560, 1440): labels 80+ px wide, under 6 lines, on screen (10) []
+HATCH ok   name card (2560, 1440) fits the screen ([P: (346.0, 179.0), S: (588.0, 527.0)] in [P: (0.0, 0.0), S: (1280.0, 720.0)])
+HATCH ok   a bred egg's card shows both parents (Ash, Bri)
+HATCH ok   it marks its colour, a stat and its personality with a parent (Kind and colour, Best stat, Loves, Likes)
+HATCH ok   starter and Rare Egg Boki get no parents row
+HATCH CHECK DONE, failures: 0

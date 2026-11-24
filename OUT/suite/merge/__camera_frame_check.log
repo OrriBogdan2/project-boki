@@ -1,0 +1,55 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CAMFRAME ok   the default style is camera.json's: { "pitch": 66.0, "dist": 23.0, "fov": 32.0, "rise": 1.2, "name": "Default" }
+CAMFRAME ok   pitch 66.0 deg inside the source's [64.0, 67.0]
+CAMFRAME ok   lens 32.0 deg at 16:9 inside the source's [25.0, 34.0]
+CAMFRAME ok   feet 3.53% of the height below the centre, inside the source's [3.0, 4.0]
+CAMFRAME ok   1.49 m ahead per m behind, inside the source's [1.46, 1.62]
+CAMFRAME ok   1.32 m to the side per m ahead, inside the source's [1.25, 1.35]
+CAMFRAME view 16:9 full 1920x1080: lens 32.0 deg, height 22.2 m, ground 9.3 m ahead, 6.2 m behind, 12.3 m each side
+CAMFRAME ok   16:9 full 1920x1080: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   16:9 full 1920x1080: 9.3 m ahead, at the 16:9 frame's 9.3 m
+CAMFRAME ok   16:9 full 1920x1080: your feet and head 502 px inside the screen
+CAMFRAME view 16:9 window 1280x720: lens 32.0 deg, height 22.2 m, ground 9.3 m ahead, 6.2 m behind, 12.3 m each side
+CAMFRAME ok   16:9 window 1280x720: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   16:9 window 1280x720: 9.3 m ahead, at the 16:9 frame's 9.3 m
+CAMFRAME ok   16:9 window 1280x720 frames what every 1.78 view frames
+CAMFRAME ok   16:9 window 1280x720: your feet and head 335 px inside the screen
+CAMFRAME view 16:9 full 3840x2160: lens 32.0 deg, height 22.2 m, ground 9.3 m ahead, 6.2 m behind, 12.3 m each side
+CAMFRAME ok   16:9 full 3840x2160: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   16:9 full 3840x2160: 9.3 m ahead, at the 16:9 frame's 9.3 m
+CAMFRAME ok   16:9 full 3840x2160 frames what every 1.78 view frames
+CAMFRAME ok   16:9 full 3840x2160: your feet and head 1004 px inside the screen
+CAMFRAME view 16:9 maximised window 1920x1017: lens 30.2 deg, height 22.2 m, ground 8.7 m ahead, 5.9 m behind, 12.3 m each side
+CAMFRAME ok   16:9 maximised window 1920x1017: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   16:9 maximised window 1920x1017: 8.7 m ahead, under the 16:9 frame's 9.3 m
+CAMFRAME ok   16:9 maximised window 1920x1017: your feet and head 470 px inside the screen
+CAMFRAME view 16:10 full 1920x1200: lens 35.3 deg, height 22.2 m, ground 10.4 m ahead, 6.9 m behind, 12.3 m each side
+CAMFRAME ok   16:10 full 1920x1200: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   16:10 full 1920x1200: 10.4 m ahead, over the 16:9 frame's 9.3 m
+CAMFRAME ok   16:10 full 1920x1200: your feet and head 562 px inside the screen
+CAMFRAME view 21:9 full 2560x1080: lens 24.3 deg, height 22.2 m, ground 6.9 m ahead, 4.7 m behind, 12.3 m each side
+CAMFRAME ok   21:9 full 2560x1080: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   21:9 full 2560x1080: 6.9 m ahead, under the 16:9 frame's 9.3 m
+CAMFRAME ok   21:9 full 2560x1080: your feet and head 489 px inside the screen
+CAMFRAME view 21:9 full 3440x1440: lens 24.1 deg, height 22.2 m, ground 6.8 m ahead, 4.7 m behind, 12.3 m each side
+CAMFRAME ok   21:9 full 3440x1440: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   21:9 full 3440x1440: 6.8 m ahead, under the 16:9 frame's 9.3 m
+CAMFRAME ok   21:9 full 3440x1440: your feet and head 652 px inside the screen
+CAMFRAME view 21:9 window 1680x720: lens 24.6 deg, height 22.2 m, ground 7.0 m ahead, 4.8 m behind, 12.3 m each side
+CAMFRAME ok   21:9 window 1680x720: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   21:9 window 1680x720: 7.0 m ahead, under the 16:9 frame's 9.3 m
+CAMFRAME ok   21:9 window 1680x720: your feet and head 327 px inside the screen
+CAMFRAME view 4:3 full 1600x1200: lens 41.8 deg, height 22.2 m, ground 12.8 m ahead, 8.2 m behind, 12.3 m each side
+CAMFRAME ok   4:3 full 1600x1200: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   4:3 full 1600x1200: 12.8 m ahead, over the 16:9 frame's 9.3 m
+CAMFRAME ok   4:3 full 1600x1200: your feet and head 568 px inside the screen
+CAMFRAME view 4:3 window 1024x768: lens 41.8 deg, height 22.2 m, ground 12.8 m ahead, 8.2 m behind, 12.3 m each side
+CAMFRAME ok   4:3 window 1024x768: 12.3 m each side, the 16:9 frame's 12.3 m
+CAMFRAME ok   4:3 window 1024x768: 12.8 m ahead, over the 16:9 frame's 9.3 m
+CAMFRAME ok   4:3 window 1024x768 frames what every 1.33 view frames
+CAMFRAME ok   4:3 window 1024x768: your feet and head 364 px inside the screen
+CAMFRAME CHECK DONE, failures: 0

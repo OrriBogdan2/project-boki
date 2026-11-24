@@ -1,0 +1,57 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KEYCAPS PASS mouse button 8 draws as M4 (M4)
+KEYCAPS PASS mouse button 9 draws as M5 (M5)
+KEYCAPS PASS mouse button 4 draws as WHEEL-UP (WHEEL-UP)
+KEYCAPS PASS mouse button 5 draws as WHEEL-DN (WHEEL-DN)
+KEYCAPS PASS mouse button 3 draws as MMB (MMB)
+KEYCAPS PASS mouse button 1 draws as LMB (LMB)
+KEYCAPS PASS mouse button 2 draws as RMB (RMB)
+KEYCAPS PASS an alternate shows beside the main cap (M4 / KP1)
+KEYCAPS PASS main key cleared: the alternate is the cap shown (KP1)
+KEYCAPS PASS nothing bound reads ?
+KEYCAPS PASS kit card dash tile reads M4
+KEYCAPS PASS kit card lmb tile reads M5
+KEYCAPS PASS kit card rmb tile reads MMB
+KEYCAPS PASS kit card e tile reads WHEEL-UP
+KEYCAPS PASS kit card r tile reads WHEEL-DN
+KEYCAPS PASS kit card x tile reads M4
+KEYCAPS PASS the passive tile has no cap
+KEYCAPS PASS recast badge e reads WHEEL-UP
+KEYCAPS PASS recast badge x reads M4
+KEYCAPS PASS recast badge dash reads M4
+KEYCAPS PASS recast badge lmb reads M5
+KEYCAPS PASS recast badge sec reads MMB
+KEYCAPS PASS class tooltip names MMB (secondary)
+KEYCAPS PASS class tooltip names WHEEL-UP (signature)
+KEYCAPS PASS class tooltip names WHEEL-DN (ultimate)
+KEYCAPS PASS class tooltip lost the default letters
+KEYCAPS PASS titan Fusion form text shows M5
+KEYCAPS PASS titan Fusion form text shows MMB
+KEYCAPS PASS titan Fusion form text shows WHEEL-UP
+KEYCAPS PASS titan Fusion form text shows M4
+KEYCAPS PASS titan Fusion form text shows the Fuse key
+KEYCAPS PASS titan form text lost the default names
+KEYCAPS PASS stormwing Fusion form text shows M5
+KEYCAPS PASS stormwing Fusion form text shows MMB
+KEYCAPS PASS stormwing Fusion form text shows WHEEL-UP
+KEYCAPS PASS stormwing Fusion form text shows M4
+KEYCAPS PASS stormwing Fusion form text shows the Fuse key
+KEYCAPS PASS stormwing form text lost the default names
+KEYCAPS PASS tidal_shell Fusion form text shows M5
+KEYCAPS PASS tidal_shell Fusion form text shows MMB
+KEYCAPS PASS tidal_shell Fusion form text shows WHEEL-UP
+KEYCAPS PASS tidal_shell Fusion form text shows M4
+KEYCAPS PASS tidal_shell Fusion form text shows the Fuse key
+KEYCAPS PASS tidal_shell form text lost the default names
+KEYCAPS PASS a Fusion form was checked
+KEYCAPS PASS dash no longer draws SHIFT
+KEYCAPS PASS fire no longer draws LMB
+KEYCAPS PASS secondary no longer draws RMB
+KEYCAPS PASS signature no longer draws E
+KEYCAPS PASS ultimate no longer draws X
+KEYCAPS PASS hunter_ult no longer draws R
+KEYCAPS DONE, failures: 0

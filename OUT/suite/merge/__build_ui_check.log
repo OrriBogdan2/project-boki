@@ -1,0 +1,89 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+BUILDUI ok   build mode opens the shared catalog bar and key hints
+BUILDUI ok   the camera eases to the build view
+BUILDUI ok   the bar has category tabs and a Storage tab (Buildings,
+		Storage,
+		Work,
+		Fences,
+		Paths,
+		Garden,
+		Lights,
+		Furniture,
+		Statues,
+		Upgrades,
+		Island)
+BUILDUI ok   a tile has a picture, a name and a price in gems
+BUILDUI ok   Rotate turns the ghost a quarter turn over several frames, not in one pop (0.45)
+BUILDUI ok   and it settles on the quarter turn
+BUILDUI ok   the key card shows while something is held
+BUILDUI ok   the bench goes down
+BUILDUI ok   it is in the layout and was paid for
+BUILDUI ok   placing one thing leaves build mode and eases the camera back
+BUILDUI ok   the toast names the build key ('Placed! B to build more')
+BUILDUI ok   holding Shift keeps the same piece in hand to place another
+BUILDUI ok   and a click without Shift places it and leaves
+BUILDUI ok   a fence line stays in its tool after placing
+BUILDUI ok   a path brush stays in its tool after painting
+BUILDUI ok   a blocked spot says why: 'Blocked by: Bench'
+BUILDUI ok   and the Bench that is in the way is lit up
+BUILDUI ok   the cursor tag is up with the reason
+BUILDUI ok   clicking a placed piece opens its menu (Move, Rotate, Store)
+BUILDUI ok   Rotate on the menu turns it in place
+BUILDUI ok   Move picks the placed piece up
+BUILDUI ok   and it can be put down somewhere else
+BUILDUI ok   Store puts it in storage in one step
+BUILDUI ok   the Storage tab lists it with its count
+BUILDUI ok   Undo brings it back
+BUILDUI ok   upgradable buildings stand on the farm (lumber_camp, quarry, storage_chest, job_board, cook_pot, market_stall)
+BUILDUI ok   hovering a placed building shows its name, level and an Upgrade button (Market stall, Level 1, LMB, Options, X, Store, F, Upgrade)
+BUILDUI ok   the button's key text is the interact key ('F')
+BUILDUI ok   the shortcut opens the Upgrades tab
+BUILDUI ok   on the page of the Market stall's row (row 5, page 1)
+BUILDUI ok   a building with no upgrade left says Max and the key does nothing
+BUILDUI ok   a new house starts empty
+BUILDUI ok   with the journal and gramophone waiting in storage
+BUILDUI ok   decorate opens the same catalog bar and eases the camera
+BUILDUI ok   the Storage tab lists the two stored pieces
+BUILDUI ok   placing a chair buys it and leaves decorate mode
+BUILDUI ok   Shift keeps the stool in hand to place another
+BUILDUI ok   Rotate turns the ghost over a few frames (-0.45)
+BUILDUI ok   a blocked spot says why: 'Blocked by: Chair'
+BUILDUI ok   and the Chair in the way is lit up
+BUILDUI ok   the doorway says so ('Keep the doorway clear')
+BUILDUI ok   clicking a placed piece opens its menu
+BUILDUI ok   Rotate turns the chair in place
+BUILDUI ok   Move puts it down somewhere else
+BUILDUI ok   Store puts it away in one step
+BUILDUI ok   Undo brings it back
+BUILDUI ok   an old save's house keeps its furniture and the two former fixtures (bed, rug, table, chair, lamp, stove, kin_bed, plant, journal, gramophone)
+BUILDUI ok   the bed, journal, gramophone and stove can all be picked up and moved (4 of 4)
+BUILDUI ok   and stored
+BUILDUI ok   the gramophone still plays and the door stays (2 spots)
+BUILDUI ok   a v10 save that has played keeps its 8 pieces and gets the two former fixtures as pieces
+BUILDUI ok   a v10 save with no Boki yet starts with an empty house
+BUILDUI ok   the cursor card keeps off the bar, the top band and the Goals card at every edge
+BUILDUI DONE, failures: 0
+WARNING: 14 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 8 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PETREACT ok   traits of a playful Boki read as playful
+PETREACT ok   traits of a shy Boki read as shy
+PETREACT ok   traits of a proud Boki read as proud
+PETREACT ok   traits of a sleepy Boki read as sleepy
+PETREACT ok   playful: a pat shows its icon
+PETREACT ok   playful: it rolls over (rot 2.98)
+PETREACT ok   playful: joy 15 and a happy wiggle
+PETREACT ok   playful: trust 2.5
+PETREACT ok   shy: the first pat is a flinch
+PETREACT ok   shy: the flinch pays nothing yet
+PETREACT ok   shy: the second pat is a lean in
+PETREACT ok   shy: it pays more trust (3.00 vs 2.50)
+PETREACT ok   shy: left alone a while, it flinches again
+PETREACT ok   proud: its one pat pays and shows its icon
+PETREACT ok   proud: it walks off away from you (goal x 7.0)
+PETREACT ok   proud: a second pat pays nothing
+PETREACT ok   sleepy: it purrs
+PETREACT ok   sleepy: it drops into a short nap
+PETREACT ok   a visit: the beat plays, no joy, no trust
+PETREACT ok   playful: 12 pats in a row pay 3 time(s), the daily cap is 3
+PETREACT ok   playful: past the cap a pat adds nothing
+PETREACT ok   playful: the next farm day pays again
+PETREACT ok   shy: 12 pats in a row pay 2 time(s), the daily cap is 2
+PETREACT ok   shy: past the cap a pat adds nothing
+PETREACT ok   shy: the next farm day pays again
+PETREACT ok   proud: 12 pats in a row pay 1 time(s), the daily cap is 1
+PETREACT ok   proud: past the cap a pat adds nothing
+PETREACT ok   proud: the next farm day pays again
+PETREACT ok   sleepy: 12 pats in a row pay 2 time(s), the daily cap is 2
+PETREACT ok   sleepy: past the cap a pat adds nothing
+PETREACT ok   sleepy: the next farm day pays again
+PETREACT DONE, failures: 0

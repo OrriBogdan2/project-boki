@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+relay: listening on 7937, up to 120 players, version 0.24.18, Discord check OFF
+RBAR ok   the relay listens on 7937  
+relay: 1154672290 joined as Hunter (1 online)
+RBAR ok   the host is on the relay as 1154672290  
+relay: 1734219776 joined as Hunter (2 online)
+RBAR ok   the guest joins the relay  1734219776
+WARNING: Sending 3590 bytes unreliably which is above the MTU (1392), this will result in higher packet loss
+     at: put_packet (modules/enet/enet_multiplayer_peer.cpp:363)
+     GDScript backtrace (most recent call first):
+         [0] send (res://scripts/core/net_enet.gd:40)
+         [1] _emit (res://scripts/core/net.gd:213)
+         [2] _chunks (res://scripts/core/net.gd:232)
+         [3] tick (res://scripts/core/net.gd:265)
+         [4] step (res://scripts/match/match.gd:3935)
+         [5] _run (res://tools/raid_boss_bar_online_check.gd:58)
+         [6] _host_up (res://tools/displace_net_check.gd:99)
+RBAR ok   the guest's hunter is here, driven by the guest's game  
+RBAR ok   the host runs the raid  
+RBAR ok   the host raises the boss  
+SCRIPT ERROR: Invalid access to property or key 'has' on a base object of type 'Dictionary'.
+          at: _host (res://tools/raid_boss_bar_online_check.gd:97)
+          GDScript backtrace (most recent call first):
+              [0] _host (res://tools/raid_boss_bar_online_check.gd:97)
+              [1] _bar (res://tools/raid_boss_bar_online_check.gd:127)
+              [2] _reply (res://tools/displace_net_check.gd:486)
+              [3] _run (res://tools/raid_boss_bar_online_check.gd:60)
+WATCHDOG quit: a script error, then 60 s and 2618 frames without a line (the check's coroutine is dead)
+ERROR: 5 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 7 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 28 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

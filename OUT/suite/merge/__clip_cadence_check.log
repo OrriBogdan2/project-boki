@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CADENCE art/move: clip s, played s (scale/cut), cadence s, strike s (played), hit s
+CADENCE hem/arc_tap: 0.37, 0.37 (x1.00 cut 0.37), 0.50, 0.03, -1.00
+CADENCE hem/arc_loose: 0.43, 0.43 (x1.00 cut 0.43), 0.50, 0.03, -1.00
+CADENCE hem/arc_perfect: 0.53, 0.50 (x1.07 cut 0.53), 0.50, 0.03, -1.00
+CADENCE hem/arc_super: 0.60, 0.50 (x1.20 cut 0.60), 0.50, 0.04, -1.00
+CADENCE hem/arc_over_loose: 0.53, 0.50 (x1.07 cut 0.53), 0.50, 0.03, -1.00
+CADENCE hem/pin_ult_loose: 0.50, 0.50 (x1.00 cut 0.50), 1.00, 0.05, -1.00
+CADENCE hem/pin_ult_final: 0.67, 0.67 (x1.00 cut 0.67), 1.00, 0.03, -1.00
+CADENCE kael/jug_slash_r: 0.47, 0.34 (x1.38 cut 0.47), 0.34, 0.05, -1.00
+CADENCE kael/jug_slash_l: 0.47, 0.34 (x1.38 cut 0.47), 0.34, 0.06, -1.00
+CADENCE kael/jug_dash: 0.43, 0.27 (x1.60 cut 0.43), 0.24, 0.04, -1.00
+CADENCE vex/gunslinger_lmb: 0.53, 0.08 (x1.00 cut 0.08), 0.08, 0.03, 0.00
+CADENCE vex/gunslinger_dash: 0.87, 0.69 (x1.25 cut 0.87), 0.45, 0.44, -1.00
+CADENCE breaker/bul_throw: 0.50, 0.45 (x1.12 cut 0.50), 0.45, 0.10, 0.12
+CADENCE breaker/bul_smash: 0.50, 0.50 (x1.00 cut 0.50), 0.61, 0.03, -1.00
+CADENCE claire/tm_dart_r: 0.13, 0.13 (x1.00 cut 0.13), 0.18, 0.08, -1.00
+CADENCE claire/tm_dart_l: 0.13, 0.13 (x1.00 cut 0.13), 0.18, 0.08, -1.00
+CADENCE claire/tm_dart_heavy: 0.13, 0.13 (x1.00 cut 0.13), 0.18, 0.02, -1.00
+CADENCE tarek/breah_throw: 0.55, 0.55 (x1.00 cut 0.55), 0.60, 0.10, -1.00
+CADENCE tarek/breah_punch: 0.60, 0.60 (x1.00 cut 0.60), 0.60, 0.05, -1.00
+CADENCE ryzz/mage_lmb_l: 0.33, 0.33 (x1.00 cut 0.33), 0.65, 0.07, 0.06
+CADENCE ryzz/mage_lmb_r: 0.33, 0.33 (x1.00 cut 0.33), 0.65, 0.03, 0.06
+CADENCE dredge/dr_shot: 0.37, 0.37 (x1.00 cut 0.37), 0.50, 0.02, -1.00
+CADENCE pip/mm_shot_r: 0.43, 0.37 (x1.00 cut 0.43), 0.40, 0.01, -1.00
+CADENCE pip/mm_shot_l: 0.43, 0.37 (x1.00 cut 0.43), 0.40, 0.01, -1.00
+CADENCE pip/mm_shot_emp: 0.53, 0.39 (x1.09 cut 0.53), 0.40, -0.04, -1.00
+CADENCE sable/thf_lmb_r: 0.70, 0.45 (x1.00 cut 0.45), 0.45, 0.02, -1.00
+CADENCE sable/thf_lmb_l: 0.70, 0.45 (x1.00 cut 0.45), 0.45, 0.03, -1.00
+CADENCE sable/thf_vault_r: 0.47, 0.47 (x1.00 cut 0.47), 0.48, 0.10, -1.00
+CADENCE sable/thf_vault_l: 0.47, 0.47 (x1.00 cut 0.47), 0.48, 0.12, -1.00
+CADENCE sable/thf_vault_f: 0.47, 0.47 (x1.00 cut 0.47), 0.48, 0.08, -1.00
+CADENCE sable/thf_vault_b: 0.47, 0.47 (x1.00 cut 0.47), 0.48, 0.12, -1.00
+CADENCE ostra/ostra_orb: 0.30, 0.30 (x1.00 cut 0.30), 0.60, 0.07, -1.00
+CADENCE ostra/ostra_orb_hot: 0.50, 0.44 (x1.00 cut 0.50), 0.60, 0.02, -1.00
+CLIP_CADENCE_DONE, moves: 33, failures: 0

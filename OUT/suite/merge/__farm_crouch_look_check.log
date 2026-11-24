@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+FARMLOOK ok   arriving: zoom 1.60 is the wheel's widest 1.60
+FARMLOOK ok   wheel in: stops at the closest 0.55
+FARMLOOK ok   closest: the camera 16.8 m back, from 45.9 m widest
+FARMLOOK ok   every notch is one step of 0.10 inside 0.55..1.60 (28 notches)
+FARMLOOK ok   wheel out: stops at the widest 1.60
+FARMLOOK ok   widest again: 45.6 m back (45.9 m)
+FARMLOOK ok   a panel open: the wheel leaves the camera alone
+FARMLOOK ok   held: zoom target 2.24 is the match's Ctrl zoom 2.24 (1.60 before)
+FARMLOOK ok   held: the camera is 63.6 m back, from 45.7 m (zoom 2.231)
+FARMLOOK ok   the wheel does not touch the look while it is held
+FARMLOOK ok   released: the zoom is back to the wheel's (1.50), the held wheel turn kept
+FARMLOOK ok   a panel that set the camera keeps it after the key lets go
+FARMLOOK CHECK DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

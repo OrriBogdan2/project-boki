@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CAMFRAME ok   the default style is camera.json's: { "pitch": 66.0, "dist": 23.0, "fov": 32.0, "rise": 1.2, "name": "Default" }
+CAMFRAME ok   pitch 66.0 deg inside the source's [64.0, 67.0]
+CAMFRAME ok   lens 32.0 deg inside the source's [25.0, 34.0]
+CAMFRAME ok   feet 3.53% of the height below the centre, inside the source's [3.0, 4.0]
+CAMFRAME ok   source_scale is off by default (the Settings camera is default)
+CAMFRAME ok   source_scale shows 37.0 m across, inside the source's [35.0, 39.0]
+CAMFRAME ok   source_scale draws Hunters 2.10x bigger
+CAMFRAME ok   the home keeps the Supervive view under source_scale
+CAMFRAME ok   no lean inside the 1.4 m deadzone
+CAMFRAME ok   zoom 0.60: the lean stays within its 7.5 m cap
+CAMFRAME ok   zoom 0.60: at full lean every way you stay on screen (478 px to the nearest edge)
+CAMFRAME ok   zoom 1.00: the lean stays within its 7.5 m cap
+CAMFRAME ok   zoom 1.00: at full lean every way you stay on screen (502 px to the nearest edge)
+CAMFRAME ok   zoom 1.45: the lean stays within its 10.9 m cap
+CAMFRAME ok   zoom 1.45: at full lean every way you stay on screen (513 px to the nearest edge)
+CAMFRAME ok   garden: eases in over 0.30 s to 30% nearer (0.50 at half time)
+CAMFRAME ok   garden zoom 0.55: you and a Boki 3.9 m away, framed every way, both on screen (169 px)
+CAMFRAME ok   garden zoom 1.20: you and a Boki 8.4 m away, framed every way, both on screen (368 px)
+CAMFRAME ok   garden zoom 1.60: you and a Boki 11.2 m away, framed every way, both on screen (411 px)
+CAMFRAME ok   garden: walking off eases back to the usual view within 0.30 s
+CAMFRAME ok   garden: framed while its card is open, eased back once it closes
+CAMFRAME ok   garden: a Boki too far to frame with you doesn't move the view
+CAMFRAME CHECK DONE, failures: 0

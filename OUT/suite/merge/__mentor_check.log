@@ -1,0 +1,48 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MENTOR ok   no Soul Shrine yet: cannot retire (Build the Soul Shrine first)
+MENTOR ok   a younger Boki cannot retire (Only an Elder can retire as a mentor)
+MENTOR ok   your partner cannot retire (Swap your partner out first)
+MENTOR ok   an Elder with the shrine built can
+MENTOR ok   retired: a mentor now, and cannot retire twice
+MENTOR ok   nothing reset, never lost
+MENTOR ok   it remembers retiring
+MENTOR ok   a mentor takes no jobs
+MENTOR ok   a mentor walks slowly
+MENTOR ok   the next egg gets one gift, a second lay gets none, and the baby wears it
+MENTOR ok   all of trait, habit and memory come up (memory, trait, habit)
+MENTOR ok   no gift left once it is given
+MENTOR ok   save round trip: still a mentor, gift marked given
+MENTOR ok   save round trip: the egg keeps its gift
+MENTOR ok   save round trip: the baby keeps its gift line
+MENTOR ok   an old record without the keys loads as no mentor
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+MENTOR ok   base_mode farm: BaseLife runs and the Soul Shrine stands
+MENTOR ok   the mentor is out on the farm
+MENTOR ok   the mentor is in its Mentor (or Nap) state (469 of 480 frames)
+MENTOR ok   it walks to the Soul Shrine first (frame 45 of 480)
+MENTOR ok   then it stays near the Soul Shrine (436 of 435 frames)
+MENTOR ok   it never hurries (top 1.19 m/s)
+MENTOR ok   it naps through the night (161 of 161 frames)
+MENTOR ok   its machine never refused a transition (0)
+MENTOR DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

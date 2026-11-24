@@ -1,0 +1,90 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+WHISTLE ok   3 Boki on a base_mode farm
+WHISTLE ok   the partner starts on your island
+WHISTLE   23 m away, trust 90, joy 80: arrives in 4.50 s
+WHISTLE ok   a trusting, happy partner reaches you in 4.50 s (limit 6 s)
+WHISTLE ok   the partner starts on your island
+WHISTLE   23 m away, trust 35, joy 45: arrives in 4.50 s
+WHISTLE FAIL a lukewarm partner still comes, slower (4.50 s)
+WHISTLE ok   a Boki already facing you answers in 0.14 s (limit 0.15 s)
+WHISTLE ok   one facing away takes 0.46 s to perk up and turn (0.3 to 0.5 s)
+WHISTLE ok   a sulky partner (joy low) waits a beat, then walks slowly
+WHISTLE ok   a sulky partner (joy low) has not set off after 0.25 s
+WHISTLE FAIL a sulky partner (joy low) walks over slowly (12.9 m in 6 s)
+WHISTLE ok   a sulky partner (joy low) is slower than the lukewarm one (4.50 s)
+WHISTLE ok   a partner that does not trust you yet waits a beat, then walks slowly
+WHISTLE ok   a partner that does not trust you yet has not set off after 0.25 s
+WHISTLE FAIL a partner that does not trust you yet walks over slowly (12.9 m in 6 s)
+WHISTLE ok   a partner that does not trust you yet is slower than the lukewarm one (4.50 s)
+WHISTLE ok   a tap calls the partner only
+WHISTLE ok   holding calls the nearest other Boki, not the farther one
+WHISTLE ok   the nearest Boki reaches you
+WHISTLE ok   no whistle hint while the tutorial steps run
+WHISTLE ok   no hint before the partner has been far for 10 s
+WHISTLE ok   a hint line shows on the HUD after 10 s far
+WHISTLE ok   it names the key cap (H)
+WHISTLE ok   the save remembers it was shown
+WHISTLE ok   using the whistle takes the line away
+WHISTLE ok   and it does not come back
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _in_a_match (res://tools/garden_whistle_check.gd:173)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _in_a_match (res://tools/garden_whistle_check.gd:173)
+WHISTLE ok   no farm exists in a match for the whistle to call
+WHISTLE ok   the whistle moves nothing in a match
+WHISTLE ok   no match script reads the whistle action
+WHISTLE DONE, failures: 3
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 30 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PARTYVIEW ok   seats: three, yours, the leader
+PARTYVIEW ok   seats: a ready friend, then an open seat
+PARTYVIEW ok   before the tutorial: Make a party is off
+PARTYVIEW ok   ...and says why
+PARTYVIEW ok   Make a party: forming, the invite code shows
+PARTYVIEW ok   the one line: Expeditions take 3. We fill the rest.
+PARTYVIEW ok   alone: two open seats, Find match is on
+PARTYVIEW ok   join by code: a member gets Ready
+PARTYVIEW ok   two in: the rest is filled by the matchmaker
+PARTYVIEW ok   a fourth is told it is full
+PARTYVIEW ok   three in: the card says a fourth waits
+PARTYVIEW ok   full: no open seat, Find match waits
+PARTYVIEW ok   Ready shows on the member's own screen
+PARTYVIEW ok   two Ready: Find match is on
+PARTYVIEW ok   Find match: queued, Cancel search is offered
+PARTYVIEW ok   the screen says it is looking for a squad
+PARTYVIEW ok   Cancel search: back on the card
+PARTYVIEW ok   Leave party: back to make or join
+PARTYVIEW DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

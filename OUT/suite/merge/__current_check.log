@@ -1,0 +1,87 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CURRENT ok   tutorial: the world places all 1 wind roads and 0 updrafts
+CURRENT ok   tutorial: 1 road and 0 column nodes
+CURRENT ok   tutorial: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   tutorial: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   tutorial: Low draws fewer streaks than High
+CURRENT ok   hollowcrown: the world places all 0 wind roads and 0 updrafts
+CURRENT ok   hollowcrown: 0 road and 0 column nodes
+CURRENT ok   hollowcrown: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   hollowcrown: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   hollowcrown: Low draws fewer streaks than High
+CURRENT ok   skyreach: the world places all 9 wind roads and 16 updrafts
+CURRENT ok   skyreach: 9 road and 16 column nodes
+CURRENT ok   skyreach: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   skyreach: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   skyreach: Low draws fewer streaks than High
+CURRENT ok   arena: the world places all 0 wind roads and 0 updrafts
+CURRENT ok   arena: 0 road and 0 column nodes
+CURRENT ok   arena: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   arena: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   arena: Low draws fewer streaks than High
+CURRENT ok   generated 1: the world places all 0 wind roads and 5 updrafts
+CURRENT ok   generated 1: 0 road and 5 column nodes
+CURRENT ok   generated 1: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 1: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 1: Low draws fewer streaks than High
+CURRENT ok   generated 2: the world places all 0 wind roads and 8 updrafts
+CURRENT ok   generated 2: 0 road and 8 column nodes
+CURRENT ok   generated 2: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 2: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 2: Low draws fewer streaks than High
+CURRENT ok   generated 3: the world places all 0 wind roads and 8 updrafts
+CURRENT ok   generated 3: 0 road and 8 column nodes
+CURRENT ok   generated 3: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 3: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 3: Low draws fewer streaks than High
+CURRENT ok   generated 4: the world places all 1 wind roads and 8 updrafts
+CURRENT ok   generated 4: 1 road and 8 column nodes
+CURRENT ok   generated 4: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 4: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 4: Low draws fewer streaks than High
+CURRENT ok   generated 5: the world places all 0 wind roads and 5 updrafts
+CURRENT ok   generated 5: 0 road and 5 column nodes
+CURRENT ok   generated 5: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 5: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 5: Low draws fewer streaks than High
+CURRENT ok   generated 6: the world places all 2 wind roads and 5 updrafts
+CURRENT ok   generated 6: 2 road and 5 column nodes
+CURRENT ok   generated 6: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 6: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 6: Low draws fewer streaks than High
+CURRENT ok   generated 7: the world places all 0 wind roads and 7 updrafts
+CURRENT ok   generated 7: 0 road and 7 column nodes
+CURRENT ok   generated 7: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 7: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 7: Low draws fewer streaks than High
+CURRENT ok   generated 8: the world places all 0 wind roads and 6 updrafts
+CURRENT ok   generated 8: 0 road and 6 column nodes
+CURRENT ok   generated 8: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 8: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 8: Low draws fewer streaks than High
+CURRENT ok   generated 9: the world places all 0 wind roads and 6 updrafts
+CURRENT ok   generated 9: 0 road and 6 column nodes
+CURRENT ok   generated 9: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 9: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 9: Low draws fewer streaks than High
+CURRENT ok   generated 10: the world places all 0 wind roads and 7 updrafts
+CURRENT ok   generated 10: 0 road and 7 column nodes
+CURRENT ok   generated 10: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 10: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 10: Low draws fewer streaks than High
+CURRENT ok   generated 11: the world places all 0 wind roads and 6 updrafts
+CURRENT ok   generated 11: 0 road and 6 column nodes
+CURRENT ok   generated 11: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 11: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 11: Low draws fewer streaks than High
+CURRENT ok   generated 12: the world places all 0 wind roads and 8 updrafts
+CURRENT ok   generated 12: 0 road and 8 column nodes
+CURRENT ok   generated 12: every node sits where its road or updraft is (a to b, the column's foot)
+CURRENT ok   generated 12: each road has 6-48 streaks, a ring at both ends, and wind_at names it
+CURRENT ok   generated 12: Low draws fewer streaks than High
+CURRENT 80 checks, 0 failed
+CURRENT_DONE PASS

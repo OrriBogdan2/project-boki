@@ -1,0 +1,550 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ASHCHECK linwick: heavy, Torch Lance, 2 ram charges                   PASS  flamethrower heavy The Ashen Kiss
+ASHCHECK lance: no fuel, held 9s it still burns (no ammo count)       PASS  ticks +5
+ASHCHECK lance: idle, no pilot flame in her palm                      PASS  
+ASHCHECK lance: the gold pilot shows (her fire, not blue), no fire for the first 0.2s PASS  puffs 0 dmg 0.0 col ffd23a
+ASHCHECK lance: roaring, the pilot is out                             PASS  
+ASHCHECK lance: the stream runs its full ~6.1m past a close cursor    PASS  reach 7.2 (cursor 1.5m)
+ASHCHECK lance: narrow at the nozzle, billowing at the far end        PASS  near r 0.38 far r 1.40
+ASHCHECK lance: a sweep bends the stream (old fire keeps its own heading) PASS  still east 9, new north 2
+ASHCHECK lance: letting go stops the fire at once                     PASS  live 0 left 0
+ASHCHECK lance: 0.35s before it can roar again                        PASS  emitted +0
+ASHCHECK lance: hold = damage and Char building                       PASS  dmg 12.4 char 12.0
+ASHCHECK lance: ~1s on the foe = Ablaze (level 1)                     PASS  burning 1 burn_t 2.8 ignitions 1
+ASHCHECK burn stage: a rival Ablaze gets the tag's 1 of 2 pips, no world pips PASS  tag { "icon": "fireball", "n": 1, "max": 2, "left": 2.78333333333332, "total": 3.0 } pips 0
+ASHCHECK lance: kept on a burning foe it Flashes over (level 2)       PASS  burning 2 upgrades 2 char 18.0
+ASHCHECK burn stage: a rival in Flashover gets the tag's 2 of 2 pips, no world pips PASS  tag { "icon": "fireball", "n": 2, "max": 2, "left": 2.3333333333333, "total": 3.0 } pips 0
+ASHCHECK lance: ignite_bonus on an Ablaze foe, more damage and a health chip (per tick) PASS  cold 3.10 burning 7.29 expect 7.29
+ASHCHECK lance: ignite_bonus on a Flashed-over foe, more again (per tick) PASS  flash 9.41 expect 9.41
+ASHCHECK lance: a burning foe builds Char at the full rate            PASS  cold 12.0 burning 12.0
+ASHCHECK wall: the lance does not burn through a wall                 PASS  dmg 0.0 char 0.0
+ASHCHECK wall: the cloak does not reach behind a wall                 PASS  dmg 0.0 char 0.0 dist 4.0
+ASHCHECK cinder: holding shows the aim lane at its full fixed length (cursor at 2 m) PASS  lane true len 14.0
+ASHCHECK cinder cast-move: her full walk while the lane is held (footage: the source does not stop moving) PASS  move_k 1.00 after_t -0.02
+ASHCHECK cinder: the aim lane is twice the shot radius (0.30 m), drawn = hit PASS  width 0.60
+ASHCHECK cinder: a miss flies its full length and fizzles at its end  PASS  expired true
+ASHCHECK cinder: the orb is her flame orange #ff7a1a round a white-hot core PASS  body ff7a1a core fff4c8
+ASHCHECK cinder: its glow is fire (red-orange, not violet)            PASS  glow d8281a
+ASHCHECK cinder: the orb is drawn at its hit radius (0.30 m), the body inside its glow PASS  glow 0.405 body 0.276
+ASHCHECK cinder: the orb is drawn leaving her palm                    PASS  0.00 m off
+ASHCHECK cinder: after 0.12 s the orb is drawn on its hitbox          PASS  0.000 m off
+ASHCHECK cinder: the flicker trail (shot_trail, 2 ribbons) follows the orb PASS  2 ribbons
+ASHCHECK cinder: cursor at 2 m and at 20 m travel the same distance, the max PASS  2 m: 14.7, 20 m: 14.7
+ASHCHECK cinder: a hit sets the foe Ablaze                            PASS  burning 1 took 47
+ASHCHECK cinder: the hit slows the foe 30%                            PASS  slow_t 0.82 slow_k 0.30
+ASHCHECK cinder: more on an Ablaze foe (ignite_bonus)                 PASS  hot 82.1 cold 47.2
+ASHCHECK combo: lance burn > Cinder Shot = upgrade + spread           PASS  T 2 T2 1
+ASHCHECK ram: the flame skull wraps his front while it flies          PASS  
+ASHCHECK ram timing: a foe 3 m out is hit by 0.22 s, the squash key on that frame (source: back in 0.1 s) PASS  hit 0.17 s key 0.36 upright by 0.36
+ASHCHECK ram: stops on the first foe and shoves it hard (doesn't pass through) PASS  x 1.7 foe x 4.8 dist 3.2
+ASHCHECK ram: impact damage and 17 Char                               PASS  dmg 18 char 17.0
+ASHCHECK ram: the source's ~3.4 m in 0.33 s, as it is felt (no global scale on top) PASS  3.40 m in 0.33s
+ASHCHECK ram: quick and short, front-loaded (over 37% of it in the first 30%) PASS  after 0.10s 1.33, at the end 3.46 of 3.40
+ASHCHECK ram: toward the cursor, two charges chain                    PASS  first 3.5 both 6.9 charges 0.09
+ASHCHECK air poof: 6.8 m in 0.28 s, scaled once (not twice)           PASS  6.80 m in 0.28s
+ASHCHECK air poof: launches him far and fast (over twice the ground dash), momentum kept after it PASS  poof 8.3 m in 0.28s, ground 3.4, speed kept 17.8 m/s
+ASHCHECK dash moves: the ram and the poof play his own moves, no shared pose under them PASS  as_leap / lw_hop
+ASHCHECK dash moves: each covers its dash and settles soon after      PASS  ram 0.55/0.33 poof 0.70/0.28
+ASHCHECK dash moves: no other kit plays them                          PASS  
+ASHCHECK dash moves: no ring on the ram or the poof                   PASS  rings 0
+AKCHECK air steer ashwick: the air poof, then the keys steer (+5.4 m/s across) PASS  carry 24.3 m/s airborne true
+ASHCHECK passive: the kit adds no ram charge on a knock (DashReset gives one back, --knock-reset-check) PASS  charges 0.00
+ASHCHECK ram rank 3: more damage (rank3_dmg, before the rank's own +30%) PASS  rank 1 18.0 rank 3 23.0
+ASHCHECK ram rank 3: a hit gives +16% speed and a 11.6% shield, and no instant burn PASS  shield 22.4 bonus 0.16 burning 0
+ASHCHECK ram rank 3: the boost ends after 2s                          PASS  bonus 0.00
+ASHCHECK cloak: fires on the press frame (no hold-to-aim, no delay)   PASS  blasts +1 dmg 9.0
+ASHCHECK cloak: the ring is centred on him at the blast's exact radius (cursor ignored) PASS  at 0.00 m off, r 4.50
+ASHCHECK cloak: the arms-out flare plays on the press (timed in ashwick_anim_check) PASS  as_cloak
+ASHCHECK cloak: damage, Char, Anti-Heal and a shield                  PASS  dmg 9 char 16 blight 2.3 shield 22.2
+ASHCHECK cloak: foes in sight are dragged toward you                  PASS  dist 1.3
+ASHCHECK cloak: the swirling fire shield shows while it holds         PASS  
+ASHCHECK cloak: one foe caught, one shield swirl on her               PASS  
+ASHCHECK cloak: a shield swirl per foe caught, three at most          PASS  
+ASHCHECK cloak look: thin lit swirls on the blast radius, no scorch disc or skirt fill PASS  
+ASHCHECK cloak: no cursor dependence (cursor far away or on the foe: the same pull) PASS  1.30 vs 1.30 m
+ASHCHECK passive: a knock resets the cloak and heals                  PASS  cd 0.0 hp 127
+ASHCHECK cloak rank 3: shield +80% in all (same foes in range)        PASS  rank 1 22.2 (1 foes) rank 3 40.0 (1 foes)
+ASHCHECK cloak: rank 3 no longer refunds on a stoke                   PASS  
+ASHCHECK cinder: one charge at rank 1                                 PASS  
+ASHCHECK cinder: a second charge at rank 3                            PASS  charges 2.0
+ASHCHECK upgrade parity: Cinderbolt cooldown 7 -> 5.8 -> 4.7 and damage +25% / +50% PASS  [[7.0, 9.0, 10.5, 1.0, 1.0, 1.0], [5.8331, 8.2503, 8.8851, 1.25, 1.25, 1.25], [4.6669, 7.4997, 7.26915, 1.5, 1.5, 1.8]]
+ASHCHECK upgrade parity: Ram recharge 9 -> 8.25 -> 7.5                PASS  [[7.0, 9.0, 10.5, 1.0, 1.0, 1.0], [5.8331, 8.2503, 8.8851, 1.25, 1.25, 1.25], [4.6669, 7.4997, 7.26915, 1.5, 1.5, 1.8]]
+ASHCHECK upgrade parity: Furnace Cloak cooldown 10.5 -> 8.9 -> 7.3, damage +25% / +50%, shield +25% / +80% PASS  [[7.0, 9.0, 10.5, 1.0, 1.0, 1.0], [5.8331, 8.2503, 8.8851, 1.25, 1.25, 1.25], [4.6669, 7.4997, 7.26915, 1.5, 1.5, 1.8]]
+ASHCHECK passive: Char past 31 is discarded (burn, then 0)            PASS  
+ASHCHECK passive: Char falls off all at once after 5s                 PASS  char 0.0
+ASHCHECK merge hold: the lance is roaring before the merge            PASS  puffs 14
+ASHCHECK merge hold: a merge is under way                             PASS  
+ASHCHECK merge hold: linwick's lance is dropped, no fire mid-merge    PASS  held false puffs 0 ticks +0
+ASHCHECK lance: held through a ram it goes out, then roars again within 0.1s of its end (item 51) PASS  dark true emitted +3
+ASHCHECK lance: it keeps burning through a jump                       PASS  emitted +7, 1.10 m up
+ASHCHECK lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk PASS  puffs 296, move_k 1.00
+ASHCHECK lance: let go mid-ram, the lance pose is gone 0.25s later (hold-pose audit) PASS  in ram true, move as_lance_end
+ASHCHECK growth: the Soot Ram's hit grows with level (LevelGrowth.ap 1.0 -> 1.35) PASS  L1 18.00 L10 24.32
+ASHCHECK combo tag (ashwick): nothing on a clean foe                  PASS  
+ASHCHECK combo tag (ashwick): shows while the status runs, with an icon and the time left PASS  { "icon": "fireball", "n": 1, "max": 2, "left": 3.0, "total": 3.0 }
+ASHCHECK combo tag (ashwick): the foe's own kit has no tag on you     PASS  
+ASHCHECK combo tag (ashwick): the time left shrinks                   PASS  { "icon": "fireball", "n": 1, "max": 2, "left": 2.48333333333333, "total": 3.0 }
+ASHCHECK combo tag (ashwick): pips match the stacks                   PASS  1
+ASHCHECK combo tag (ashwick): gone when the status ends               PASS  
+ASHCHECK combo tag (ashwick): the payoff hit flashes the body white   PASS  stamp 3.92 flash 0.153
+ASHCHECK timing: the lance pilot (spool) ends on as_lance's kick key  PASS  spool 0.20 key 0.20
+ASHCHECK timing: jet lift-off crouch by 0.1 s, flight pose by 0.22 s (source: burst 0.1, flying at 0.2) PASS  0.08 0.22
+ASHCHECK timing: running, a footfall every 0.15-0.21 s (source 0.15-0.2) PASS  0.185 s
+ASHCHECK ult: X is the hero ultimate (rebindable, its own action)     PASS  
+ASHCHECK ult: no cast below level 6                                   PASS  level 5
+ASHCHECK ult cast: lifts off in its ember puffs, no aim disc (it hits nothing) PASS  move lw_jet
+ASHCHECK ult: one X press is one cast (main's X path only)            PASS  flights +1
+ASHCHECK ult cast: its own cooldown starts (36s, the data's 45s at the kit's 0.8) PASS  cd 36.0
+ASHCHECK ult telegraph: the heading lane shows while flying           PASS  len 21.8
+ASHCHECK ult: flies low, off the ground                               PASS  height 0.45
+ASHCHECK ult: steering rolls the body into the turn (the flight is keyed bank) PASS  bank -20.6 deg
+ASHCHECK ult recast: X again lands early                              PASS  early 1
+SCRIPT ERROR: Invalid access to property or key 'min_fall' on a base object of type 'Dictionary'.
+          at: _flight (res://tools/ashwick_ult_check.gd:150)
+          GDScript backtrace (most recent call first):
+              [0] _flight (res://tools/ashwick_ult_check.gd:150)
+              [1] run (res://tools/ashwick_ult_check.gd:26)
+              [2] run (res://tools/ashwick_combo_check.gd:33)
+              [3] _growth (res://tools/ashwick_combo_check.gd:164)
+              [4] _ram (res://tools/ashwick_combo_check.gd:121)
+              [5] done (res://tools/archetype_check.gd:183)
+ASHCHECK ult 66: in the flight LMB, RMB, G and the Merge key fire nothing, the flight goes on PASS  puffs +0 shots +0 charges 1.0 kin shoulder merged false bond 1.00
+ASHCHECK ult 66: E fires in the flight                                PASS  
+ASHCHECK ult 66: X lands on the press frame                           PASS  
+ASHCHECK ult 66: nothing queued in the flight fires in the 0.3s after landing PASS  puffs +0 shots +0 charges 1.0 kin shoulder merged false bond 1.00
+ASHCHECK ult payoff: a molten carpet along the flight that lingers 5.2s (the flight's +30%) PASS  pieces 18 left 5.2
+ASHCHECK ult look: the carpet is drawn as wide as it burns (trail_w)  PASS  look 1.80 m, burns 1.80 m
+ASHCHECK ult payoff: the carpet burns, slows and builds Char          PASS  dmg 15.0 slow 0.42 char 31
+ASHCHECK ult payoff: the slow is about 30%                            PASS  slow_k 0.30
+ASHCHECK ult bond: burning a hunter pays once per cast through KinBond.from_ult (a hit: 0.6, two hunters still 0.6) PASS  owed 0.60
+ASHCHECK ult bond: a knock with the carpet counts as the cast's best event (0.7) PASS  downed true sent 0.70
+ASHCHECK ult: E (Furnace Cloak) still works mid-flight, the flight goes on PASS  
+ASHCHECK ult 66: RMB mid-flight spends no charge and fires nothing    PASS  charges 1.0 -> 1.0, shots +0
+ASHCHECK ult 66: Shift (dash), Q/V gloves, Boki C, skill and throw spend nothing PASS  ex_cd 0.00 gear_cd [0.0, 0.0]
+ASHCHECK ult 66: the utility slots use no item (tonic and smoke stay, nothing drunk) PASS  tonic 3 smoke 2
+ASHCHECK ult 66: every blocked press was swallowed and the flight went on PASS  swallowed 33 of 11
+ASHCHECK ult 66: flight steering still works (still flying, low)      PASS  y 2.05
+ASHCHECK ult 66: E still works after all that                         PASS  
+ASHCHECK ult 66: X lands it early                                     PASS  
+ASHCHECK ult 66: the moment it ends RMB fires again                   PASS  charges 1.0 -> 0.0
+ASHCHECK ult card: only the Furnace Cloak works in the flight         PASS  
+ASHCHECK ult 66: the lance does not roar mid-flight (no flame, no queued shot) PASS  puffs +0
+ASHCHECK ult 66: a press ticks softly once (denied), not once a frame PASS  denied 1
+ASHCHECK ult payoff: standing in it, Ablaze after about 2.4s          PASS  at 1.4s 0, at 2.6s 1
+ASHCHECK ult 66: idle on the ground, no pilot flame in her palm       PASS  
+ASHCHECK ult 66: LMB held through the whole flight: no flame, no pilot, no lance damage, Char or burn PASS  119 frames, held 0, pilot 0, puffs +0, dmg 0.0, chars 0, burn 0
+ASHCHECK ult 66: that hold ticks once, on its press                   PASS  denied +1
+ASHCHECK ult 66: LMB works on the first frame after the flight (the lance lights) PASS  held true spool 0.017
+ASHCHECK ult 66: its pilot flame is back a frame later                PASS  
+ASHCHECK ult 66: the lance pose is up once the hold is past HOLD_POSE_T PASS  as_lance
+ASHCHECK ult 66: out of the flight the lance roars and hits, after only its usual pilot PASS  puffs +10, dmg 6.2
+ASHCHECK ult 66: each press ticks                                     PASS  denied +3
+ASHCHECK ult 66: a tap in the flight is ignored, not buffered (nothing fires on landing) PASS  puffs +0
+ASHCHECK ult 66: (the lance is roaring before the cast)               PASS  
+ASHCHECK ult 66: a stream running at lift-off goes out; a hold carried in doesn't tick PASS  held false puffs +0 denied +0
+ASHCHECK ult 66: (a release leaves its relight gap running)           PASS  0.35
+ASHCHECK ult 66: landing early with X: LMB lights on the first frame, no relight gap left over PASS  relight 0.00
+ASHCHECK ult 66: another weapon in her hand doesn't fire in the flight either PASS  
+ASHCHECK ult 66: a press answers on the LMB slot with the deny cue    PASS  
+ASHCHECK ult 66: a bot's press is refused the same way, with no tick in your ears PASS  
+ASHCHECK ult abyss: the carpet never forms over the void, he flies across PASS  skips 4 x 22.6
+ASHCHECK ult: a knockback mid-flight speeds it up                     PASS  speed 12.6 -> 22.6
+ASHCHECK ult: Shift in the flight does nothing now (no poof, no dash spent, no speed; owner: only E works) PASS  speed 12.6 -> 12.6, boosts 0
+ASHCHECK ult: a jump in the flight leaps off it within 0.1s, keeping its speed into the air (item 51) PASS  rose 0.68 m, 8.3 m/s of 12.6
+ASHCHECK ult: a stun ends the flight                                  PASS  
+ASHCHECK merge hold: the flight is up before the merge                PASS  
+ASHCHECK merge hold: a merge is under way                             PASS  
+ASHCHECK merge hold: linwick's flight is dropped, nothing more is laid PASS  laid +0
+ASHCHECK burst: Flue Flight then the merge never one-shots a full-health light hunter PASS  ult 31, ult + merge 107 of 124
+SCRIPT ERROR: Invalid access to property or key 'RAM_HIT_KEY' on a base object of type 'RefCounted (AshwickKit)'.
+          at: run (res://tools/ashwick_anim_check.gd:41)
+          GDScript backtrace (most recent call first):
+              [0] run (res://tools/ashwick_anim_check.gd:41)
+              [1] run (res://tools/ashwick_combo_check.gd:34)
+              [2] run (res://tools/ashwick_ult_check.gd:29)
+              [3] _burst (res://tools/ashwick_ult_check.gd:629)
+              [4] run (res://tools/ult_burst.gd:30)
+              [5] done (res://tools/archetype_check.gd:183)
+ASHCHECK Cinder cancel LMB held + RMB: both (rule), the bolt leaves and the hose keeps burning PASS  bolt true, puffs +7
+ASHCHECK Cinder cancel LMB held + E: both (rule), the cloak blasts and the hose keeps burning PASS  cloaks +1
+ASHCHECK Cinder cancel LMB held + X: the flight goes at once (rule), the hose goes out for it [O] Nov 5 PASS  flights +1, puffs +0
+ASHCHECK Cinder cancel RMB + LMB, E: both (rule), the lance lights and the cloak blasts at once PASS  bolt true, cloaks +1, lance true
+ASHCHECK Cinder cancel E flare + LMB, RMB, X: both [O] item 11 no ring wait, rule, each goes at once PASS  lmb, rmb, x [true, true, true]
+ASHCHECK Cinder cancel X flight + LMB: ignored [O] Nov 5, a deny tick, no flame, the flight goes on PASS  denied +1
+ASHCHECK Cinder cancel X flight + glide: ignored [O] Nov 5, the glider stays shut, the flight goes on PASS  
+ASHCHECK Cinder cancel glide + LMB: both (rule; was ignored), the hose roars and the glider stays open PASS  puffs +6, gliding true
+ASHCHECK Cinder cancel glide + RMB, E, X: both (rule), each goes from the glide PASS  RMB true E true X true
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+       [13] check_hero (res://tools/dash_flow_check.gd:62)
+       [14] run (res://tools/ashwick_combo_check.gd:36)
+       [15] run (res://tools/ashwick_ult_check.gd:29)
+       [16] _burst (res://tools/ashwick_ult_check.gd:629)
+       [17] run (res://tools/ult_burst.gd:30)
+       [18] done (res://tools/archetype_check.gd:183)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+       [13] check_hero (res://tools/dash_flow_check.gd:62)
+       [14] run (res://tools/ashwick_combo_check.gd:36)
+       [15] run (res://tools/ashwick_ult_check.gd:29)
+       [16] _burst (res://tools/ashwick_ult_check.gd:629)
+       [17] run (res://tools/ult_burst.gd:30)
+       [18] done (res://tools/archetype_check.gd:183)
+DASHFLOW ok   ashwick ground dash -> lmb, pressed early: fire (row: fire)
+DASHFLOW ok   ashwick ground dash -> lmb, pressed on its last step: fire (row: fire)
+DASHFLOW ok   ashwick air dash -> lmb, pressed early: fire (row: fire)
+DASHFLOW ok   ashwick air dash -> lmb, pressed on its last step: fire (row: fire)
+DASHFLOW ok   ashwick jump -> lmb: fire (row: fire)
+DASHFLOW ok   ashwick lmb -> ground out of it: act (row: fire)
+DASHFLOW ok   ashwick lmb -> air out of it: act (row: fire)
+DASHFLOW ok   ashwick lmb -> jump out of it: act (row: fire)
+DASHFLOW ok   ashwick lmb ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   ashwick lmb air Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   ashwick dash pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick dash pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick jump pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick lmb pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   ashwick ground dash -> rmb, pressed early: buffer 0.00s after the dash (row: buffer)
+DASHFLOW ok   ashwick ground dash -> rmb, pressed on its last step: buffer 0.00s after the dash (row: buffer)
+DASHFLOW ok   ashwick air dash -> rmb, pressed early: fire (row: fire)
+DASHFLOW ok   ashwick air dash -> rmb, pressed on its last step: fire (row: fire)
+DASHFLOW ok   ashwick jump -> rmb: fire (row: fire)
+DASHFLOW ok   ashwick rmb -> ground out of it: act (row: fire)
+DASHFLOW ok   ashwick rmb -> air out of it: act (row: fire)
+DASHFLOW ok   ashwick rmb -> jump out of it: act (row: fire)
+DASHFLOW ok   ashwick rmb ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   ashwick rmb air Space: lock 0.45s, at 25/50/75%: end 0.37s, end 0.25s, end 0.15s
+DASHFLOW note ashwick rmb let go after a plain hold: speed 5.4 -> 5.4 m/s
+DASHFLOW note ashwick rmb let go after ground: speed 2.0 -> 5.4 m/s
+DASHFLOW ok   ashwick hold rmb through ground: keep (row: keep)
+DASHFLOW ok   ashwick hold rmb through ground: sourced (keep)
+DASHFLOW note ashwick rmb let go after air in the air: speed 24.3 -> 18.2 m/s
+DASHFLOW ok   ashwick hold rmb through air: keep (row: keep)
+DASHFLOW ok   ashwick hold rmb through air: sourced (keep)
+DASHFLOW note ashwick rmb let go after jump in the air: speed 5.4 -> 5.4 m/s
+DASHFLOW ok   ashwick hold rmb through jump: keep (row: keep)
+DASHFLOW ok   ashwick hold rmb through jump: sourced (keep)
+DASHFLOW ok   ashwick rmb pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick rmb pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   ashwick ground dash -> e, pressed early: buffer 0.00s after the dash (row: buffer)
+DASHFLOW ok   ashwick ground dash -> e, pressed on its last step: buffer 0.00s after the dash (row: buffer)
+DASHFLOW ok   ashwick air dash -> e, pressed early: fire (row: fire)
+DASHFLOW ok   ashwick air dash -> e, pressed on its last step: fire (row: fire)
+DASHFLOW ok   ashwick jump -> e: fire (row: fire)
+DASHFLOW ok   ashwick e -> ground out of it: act (row: fire)
+DASHFLOW ok   ashwick e -> air out of it: act (row: fire)
+DASHFLOW ok   ashwick e -> jump out of it: act (row: fire)
+DASHFLOW ok   ashwick e ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   ashwick e air Space: lock 0.22s, at 25/50/75%: end 0.20s, end 0.13s, end 0.08s
+DASHFLOW ok   ashwick e pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick e pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   ashwick ground dash -> x, pressed early: cancel (row: cancel)
+DASHFLOW ok   ashwick ground dash -> x, pressed on its last step: fire (row: cancel)
+DASHFLOW ok   ashwick air dash -> x, pressed early: cancel (row: cancel)
+DASHFLOW ok   ashwick air dash -> x, pressed on its last step: fire (row: cancel)
+DASHFLOW ok   ashwick jump -> x: fire (row: fire)
+DASHFLOW ok   ashwick exception into x ground: lock, reason and source given
+DASHFLOW ok   ashwick x -> ground out of it: lost (row: lock)
+DASHFLOW ok   ashwick exception into x air: lock, reason and source given
+DASHFLOW ok   ashwick x -> air out of it: lost (row: lock)
+DASHFLOW ok   ashwick x -> jump out of it: act (row: cancel)
+DASHFLOW ok   ashwick x ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   ashwick x air Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   ashwick x pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick x pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   ashwick ground dash -> q, pressed early: fire (row: fire)
+DASHFLOW ok   ashwick ground dash -> q, pressed on its last step: fire (row: fire)
+DASHFLOW ok   ashwick air dash -> q, pressed early: fire (row: fire)
+DASHFLOW ok   ashwick air dash -> q, pressed on its last step: fire (row: fire)
+DASHFLOW ok   ashwick jump -> q: fire (row: fire)
+DASHFLOW ok   ashwick q -> ground out of it: act (row: fire)
+DASHFLOW ok   ashwick q -> air out of it: act (row: fire)
+DASHFLOW ok   ashwick q -> jump out of it: act (row: fire)
+DASHFLOW ok   ashwick q pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   ashwick q pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ASHCHECK item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s PASS  0 failures
+ASHCHECK DONE, 157 checks, failures: 0
+ERROR: Texture with GL ID of 58: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 60: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 59: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 120: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 119: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 122: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 121: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 123: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 171: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 198: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 210: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 262: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 271: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 269: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 273: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 272: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 274: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 277: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 13 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

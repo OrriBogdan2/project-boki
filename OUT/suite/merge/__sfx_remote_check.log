@@ -1,0 +1,104 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+relay: listening on 7976, up to 120 players, version 0.24.18, Discord check OFF
+SFXREMOTE ok   the relay listens on 7976  
+relay: 39901134 joined as Hunter (1 online)
+SFXREMOTE ok   the host is on the relay as 39901134  
+relay: 662267459 joined as Hunter (2 online)
+SFXREMOTE ok   the guest joins the relay  662267459
+SFXREMOTE ok   the guest's hunter is here, driven by the guest's game  
+SFXREMOTE ok   archer lmb: 2 cues here, 2 there 
+SFXREMOTE ok   archer lmb held: 6 cues here, 6 there 
+SFXREMOTE ok   archer rmb: 0 cues here, 0 there 
+SFXREMOTE ok   archer rmb held: 10 cues here, 10 there 
+SFXREMOTE ok   archer e: 13 cues here, 14 there 
+SFXREMOTE ok   archer r: 4 cues here, 6 there 
+SFXREMOTE ok   archer dash: 2 cues here, 2 there 
+SFXREMOTE ok   ashwick lmb: 2 cues here, 2 there 
+SFXREMOTE ok   ashwick lmb held: 4 cues here, 4 there 
+SFXREMOTE ok   ashwick rmb: 2 cues here, 2 there 
+SFXREMOTE ok   ashwick rmb held: 5 cues here, 5 there 
+SFXREMOTE ok   ashwick e: 5 cues here, 7 there 
+SFXREMOTE ok   ashwick r: 4 cues here, 6 there 
+SFXREMOTE ok   ashwick dash: 2 cues here, 2 there 
+SFXREMOTE ok   bulwark lmb: 2 cues here, 2 there 
+SFXREMOTE ok   bulwark lmb held: 15 cues here, 15 there 
+SFXREMOTE ok   bulwark rmb: 0 cues here, 0 there 
+SFXREMOTE ok   bulwark rmb held: 3 cues here, 3 there 
+SFXREMOTE ok   bulwark e: 1 cues here, 3 there 
+SFXREMOTE ok   bulwark r: 4 cues here, 6 there 
+SFXREMOTE ok   bulwark dash: 4 cues here, 4 there 
+SFXREMOTE ok   dolm lmb: 2 cues here, 2 there 
+SFXREMOTE ok   dolm lmb held: 7 cues here, 7 there 
+SFXREMOTE ok   dolm rmb: 1 cues here, 1 there 
+SFXREMOTE ok   dolm rmb held: 14 cues here, 15 there 
+SFXREMOTE FAIL dolm e: 4 cues here, 7 there [shield x2 (caster x1)]
+SFXREMOTE ok   dolm r: 4 cues here, 6 there 
+SFXREMOTE ok   dolm dash: 18 cues here, 19 there 
+SFXREMOTE ok   dredge lmb: 1 cues here, 1 there 
+SFXREMOTE ok   dredge lmb held: 2 cues here, 2 there 
+SFXREMOTE ok   dredge rmb: 3 cues here, 3 there 
+SFXREMOTE ok   dredge rmb held: 3 cues here, 3 there 
+SFXREMOTE ok   dredge e: 4 cues here, 7 there 
+SFXREMOTE ok   dredge r: 4 cues here, 6 there 
+SFXREMOTE ok   dredge dash: 3 cues here, 3 there 
+SFXREMOTE ok   gunslinger lmb: 1 cues here, 1 there 
+SFXREMOTE ok   gunslinger lmb held: 6 cues here, 6 there 
+SFXREMOTE ok   gunslinger rmb: 2 cues here, 2 there 
+SFXREMOTE ok   gunslinger rmb held: 2 cues here, 2 there 
+SFXREMOTE ok   gunslinger e: 10 cues here, 12 there 
+SFXREMOTE ok   gunslinger r: 4 cues here, 6 there 
+SFXREMOTE ok   gunslinger dash: 2 cues here, 2 there 
+SFXREMOTE ok   juggernaut lmb: 3 cues here, 3 there 
+SFXREMOTE ok   juggernaut lmb held: 8 cues here, 8 there 
+SFXREMOTE ok   juggernaut rmb: 4 cues here, 5 there 
+SFXREMOTE ok   juggernaut rmb held: 11 cues here, 11 there 
+SFXREMOTE ok   juggernaut e: 3 cues here, 4 there 
+SFXREMOTE ok   juggernaut r: 4 cues here, 6 there 
+SFXREMOTE ok   juggernaut dash: 4 cues here, 4 there 
+SFXREMOTE ok   mage lmb: 1 cues here, 1 there 
+SFXREMOTE ok   mage lmb held: 2 cues here, 2 there 
+SFXREMOTE ok   mage rmb: 3 cues here, 3 there 
+SFXREMOTE ok   mage rmb held: 11 cues here, 11 there 
+SFXREMOTE ok   mage e: 5 cues here, 7 there 
+SFXREMOTE ok   mage r: 4 cues here, 6 there 
+SFXREMOTE ok   mage dash: 4 cues here, 5 there 
+SFXREMOTE ok   ostra lmb: 2 cues here, 2 there 
+SFXREMOTE ok   ostra lmb held: 3 cues here, 3 there 
+SFXREMOTE ok   ostra rmb: 4 cues here, 4 there 
+SFXREMOTE ok   ostra rmb held: 4 cues here, 4 there 
+SFXREMOTE ok   ostra e: 2 cues here, 4 there 
+SFXREMOTE ok   ostra r: 5 cues here, 7 there 
+SFXREMOTE ok   ostra dash: 2 cues here, 3 there 
+SFXREMOTE ok   rimewright lmb: 4 cues here, 4 there 
+SFXREMOTE ok   rimewright lmb held: 8 cues here, 8 there 
+SFXREMOTE ok   rimewright rmb: 5 cues here, 6 there 
+SFXREMOTE ok   rimewright rmb held: 6 cues here, 7 there 
+SFXREMOTE ok   rimewright e: 3 cues here, 5 there 
+SFXREMOTE ok   rimewright r: 4 cues here, 6 there 
+SFXREMOTE ok   rimewright dash: 3 cues here, 3 there 
+SFXREMOTE ok   tender lmb: 2 cues here, 2 there 
+SFXREMOTE ok   tender lmb held: 3 cues here, 3 there 
+SFXREMOTE ok   tender rmb: 3 cues here, 3 there 
+SFXREMOTE ok   tender rmb held: 3 cues here, 3 there 
+SFXREMOTE ok   tender e: 2 cues here, 3 there 
+SFXREMOTE ok   tender r: 4 cues here, 6 there 
+SFXREMOTE ok   tender dash: 2 cues here, 2 there 
+SFXREMOTE ok   thief lmb: 2 cues here, 2 there 
+SFXREMOTE ok   thief lmb held: 4 cues here, 4 there 
+SFXREMOTE ok   thief rmb: 4 cues here, 4 there 
+SFXREMOTE ok   thief rmb held: 4 cues here, 4 there 
+SFXREMOTE ok   thief e: 4 cues here, 5 there 
+SFXREMOTE ok   thief r: 4 cues here, 6 there 
+SFXREMOTE ok   thief dash: 3 cues here, 3 there 
+SFXREMOTE DONE, 88 checks, failures: 1
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 47 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

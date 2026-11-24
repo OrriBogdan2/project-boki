@@ -1,0 +1,46 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _settle (res://tools/dot_look_check.gd:140)
+DOTLOOK ok   nothing burning: no tint
+DOTLOOK ok   fire and poison hits both set the burn status
+DOTLOOK ok   Hunter: the tint never drops under the base 0.10 (min 0.10)
+DOTLOOK ok   Hunter: the tint stays subtle (max 0.30)
+DOTLOOK ok   Hunter: it flickers (0.10 to 0.30)
+DOTLOOK ok   Hunter: the body shows the burn colour (flash 0.10)
+DOTLOOK ok   Boki: the tint never drops under the base 0.10 (min 0.10)
+DOTLOOK ok   Boki: the tint stays subtle (max 0.16)
+DOTLOOK ok   Boki: it flickers (0.10 to 0.16)
+DOTLOOK ok   Boki: the body shows the burn colour (flash 0.14)
+DOTLOOK ok   tick 1: the body pulses on the damage tick
+DOTLOOK ok   tick 2: the body pulses on the damage tick
+DOTLOOK ok   tick 3: the body pulses on the damage tick
+DOTLOOK ok   tick 4: the body pulses on the damage tick
+DOTLOOK ok   tick 5: the body pulses on the damage tick
+DOTLOOK ok   tick 6: the body pulses on the damage tick
+DOTLOOK ok   tick 7: the body pulses on the damage tick
+DOTLOOK ok   tick 8: the body pulses on the damage tick
+DOTLOOK ok   2 s of burn: 8 pulses for 8 damage ticks
+DOTLOOK ok   the pulse has faded 0.2 s after the tick
+DOTLOOK ok   a hit's white flash wins over the burn tint
+DOTLOOK ok   Low quality: a steady tint, no flicker or pulse
+DOTLOOK ok   Low quality: the body wears the base tint
+DOTLOOK ok   burn over: the tint is gone from both bodies
+DOTLOOK ok   burn over: the flash colour is back to white
+DOTLOOK done, 0 failures
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 17 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

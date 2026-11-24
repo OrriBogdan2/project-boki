@@ -1,0 +1,32 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KEYTEXT PASS default caps read (E, LMB)
+KEYTEXT PASS the matcher catches 'Press E again'
+KEYTEXT PASS the matcher catches 'Hold Shift to dash'
+KEYTEXT PASS the matcher catches 'drink one (1)'
+KEYTEXT PASS the matcher catches 'Use your right click'
+KEYTEXT PASS the matcher lets 'A teammate is down' through
+KEYTEXT PASS the matcher lets 'Land 2 hits' through
+KEYTEXT PASS the matcher lets 'Click Market on the bar' through
+KEYTEXT PASS match.gd _tip lines read (4)
+SCRIPT ERROR: Out of bounds get index '51' (on base: 'Array')
+          at: _rebind (res://tools/key_text_check.gd:80)
+          GDScript backtrace (most recent call first):
+              [0] _rebind (res://tools/key_text_check.gd:80)
+              [1] run (res://tools/key_text_check.gd:39)
+              [2] run (res://tools/check_registry.gd:980)
+              [3] _ready (res://scripts/main.gd:270)
+KEYTEXT PASS tutorial lines checked (115)
+KEYTEXT PASS the tutorial's key tokens follow the rebind
+KEYTEXT PASS the Training Grounds glide row shows the rebound jump key
+KEYTEXT PASS the move hint names the rebound dash key
+KEYTEXT PASS farm tutorial lines checked (145)
+KEYTEXT PASS the farm house hint names the rebound use key: Hold F35 at the house to hammer it up.
+KEYTEXT DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

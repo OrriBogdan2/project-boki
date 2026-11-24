@@ -1,0 +1,121 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CLIFF tier 0 map The Hollow Crown (540x540)
+CLIFF tier 0: 48 terrace faces, 16 rims
+CLIFF ok   tier 0 face 1 terraces at (116, 222) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (119, 222) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (104, 235) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (131, 236) dir (-1, 0): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (50, 249) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (117, 249) dir (0, -1): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (50, 250) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (178, 252) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (168, 261) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (187, 262) dir (-1, 0): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (149, 279) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (92, 285) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (137, 292) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (102, 295) dir (-1, 0): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (149, 304) dir (0, -1): someone tops it
+CLIFF ok   tier 0 face 1 terraces at (92, 306) dir (0, -1): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (413, 419) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (428, 422) dir (-1, 0): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (428, 432) dir (-1, 0): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (414, 440) dir (0, -1): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (276, 473) dir (0, -1): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (262, 475) dir (0, -1): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (285, 477) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (249, 482) dir (-1, 0): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (294, 486) dir (-1, 0): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (333, 491) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (285, 495) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (294, 500) dir (-1, 0): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (285, 505) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (278, 507) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (304, 507) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 2 terraces at (318, 507) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (62, 145) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (86, 155) dir (-1, 0): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (262, 167) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (454, 170) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (495, 171) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (488, 180) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (502, 190) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (458, 204) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (427, 224) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (455, 232) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (455, 244) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (456, 260) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (482, 272) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (425, 289) dir (1, 0): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (131, 349) dir (0, 1): someone tops it
+CLIFF ok   tier 0 face 4 terraces at (108, 363) dir (1, 0): someone tops it
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _tier (res://tools/cliff_mantle_check.gd:74)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _tier (res://tools/cliff_mantle_check.gd:74)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _tier (res://tools/cliff_mantle_check.gd:74)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _tier (res://tools/cliff_mantle_check.gd:74)
+CLIFF tier 1 map The Hollow Crown (540x540)
+CLIFF tier 1: 48 terrace faces, 16 rims

@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+DMGNUM PASS setup: a rival
+DMGNUM PASS 10 ticks make 1 label (1)
+DMGNUM PASS its value is their sum: 56 of 56.0
+DMGNUM PASS a different source and target gets its own label
+DMGNUM PASS a crit is larger than a normal hit (50 vs 40)
+DMGNUM PASS bigger hits are in bigger tiers [34, 48, 70]
+DMGNUM PASS a crit right after a hit joins it, the label turns crit
+DMGNUM PASS a normal hit does not roll into a crit's number later
+DMGNUM PASS a point on the reticle is pushed out of its area
+DMGNUM PASS even one dead centre
+DMGNUM PASS a point away from it stays
+DMGNUM PASS setup: a camera
+DMGNUM PASS a number aimed at the reticle spawns clear of it (56 px, minus jitter)
+DMGNUM PASS numbers reuse the pool, no labels are created
+DMGNUM PASS no more than 24 live at once (24)
+DMGNUM DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,222 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PERKORB no offer_perks, choose_perk or perk_offer in the code          PASS  
+PERKORB no 'Pick a perk' toast                                         PASS  
+PERKORB Match has no perk prompt methods or state                      PASS  
+PERKORB every perk is in exactly one orb kind                          PASS  []
+PERKORB every orb id is a real perk                                    PASS  
+PERKORB old kit passive field_kit is a perk in the pool                PASS  
+PERKORB old kit passive magpie is a perk in the pool                   PASS  
+PERKORB old kit passive satchel is a perk in the pool                  PASS  
+PERKORB old kit passive spyglass is a perk in the pool                 PASS  
+PERKORB old kit passive tinker_roll is a perk in the pool              PASS  
+PERKORB shrines lean to flat stats                                     PASS  { "flat": 444, "weapon": 54, "kit": 102 }
+PERKORB chests lean to weapon perks                                    PASS  { "flat": 165, "weapon": 335, "kit": 100 }
+PERKORB bosses lean to weapon perks even harder                        PASS  { "flat": 158, "weapon": 405, "kit": 37 }
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/perkorb_check.gd:34)
+       [13] _drops (res://tools/perkorb_check.gd:80)
+       [14] run (res://tools/perkorb_check.gd:23)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/perkorb_check.gd:34)
+       [13] _drops (res://tools/perkorb_check.gd:80)
+       [14] run (res://tools/perkorb_check.gd:23)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+PERKORB a fresh match has no orbs on the ground                        PASS  
+PERKORB opening a chest drops exactly one orb                          PASS  1
+PERKORB the orb has a floating icon and a name in the perk's colour    PASS  
+PERKORB the orb bobs                                                   PASS  
+PERKORB a shrine drops one or two orbs                                 PASS  [2, 1]
+PERKORB using a shrine drops its orbs                                  PASS  2
+PERKORB a boss drops three orbs                                        PASS  
+PERKORB the boss's three orbs are all different perks                  PASS  ["brand_venom", "featherfall", "tinker_roll"]
+PERKORB and they share one fan                                         PASS  
+PERKORB the fan is spread out, not stacked                             PASS  3.1 apart
+PERKORB killing the Warden drops a fan of three                        PASS  3
+PERKORB the satchel perk adds a backpack slot                          PASS  6 -> 7
+PERKORB the magpie perk makes gems worth 25% more                      PASS  
+PERKORB the spyglass, tinker's roll and field kit perks add their stats PASS  
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/perkorb_check.gd:34)
+       [13] _fan (res://tools/perkorb_check.gd:149)
+       [14] run (res://tools/perkorb_check.gd:24)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/perkorb_check.gd:34)
+       [13] _fan (res://tools/perkorb_check.gd:149)
+       [14] run (res://tools/perkorb_check.gd:24)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+PERKORB before taking, all three are open to you                       PASS  
+PERKORB walking into an orb takes it                                   PASS  ["deepmag"]
+PERKORB the orb is gone from the ground                                PASS  
+PERKORB the other two fade for you                                     PASS  
+PERKORB you can't take another from that fan                           PASS  
+PERKORB standing in a faded orb does nothing                           PASS  
+PERKORB a teammate can still take the other two                        PASS  
+PERKORB the teammate takes one: they have the perk                     PASS  
+PERKORB the last orb stays on the ground for others                    PASS  
+PERKORB and it stays faded for you                                     PASS  
+PERKORB a teammate who took one can't take the last                    PASS  
+PERKORB a drop sends one odrop event per orb                           PASS  4
+PERKORB the other game spawns the same orbs (id, perk, fan, place)     PASS  4 vs 4
+PERKORB receiving orbs sends nothing back                              PASS  
+PERKORB taking an orb sends an otake event                             PASS  
+PERKORB the other game removes the taken orb                           PASS  
+PERKORB the rest of the fan stays for the player there                 PASS  
+PERKORB but the hunter who took one can't take another there           PASS  
+PERKORB Net is at 0.18.0 or later                                      PASS  0.24.18
+PERKORB with no new player nothing is re-sent                          PASS  
+PERKORB a new player makes the host re-send the live orbs              PASS  3
+PERKORB the late joiner sees the orbs already on the ground            PASS  
+PERKORB and it is only once                                            PASS  
+PERKORB ability power makes abilities hit harder (level 6: +19.5%)     PASS  1.195
+PERKORB the level badge tooltip shows the growth totals                PASS  From levels: +30% max health, +20% ability power
+PERKORB a class change keeps the levels' health                        PASS  188.5
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/perkorb_check.gd:34)
+       [13] _bots (res://tools/perkorb_check.gd:268)
+       [14] run (res://tools/perkorb_check.gd:27)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/perkorb_check.gd:34)
+       [13] _bots (res://tools/perkorb_check.gd:268)
+       [14] run (res://tools/perkorb_check.gd:27)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+PERKORB a bot looks for the orb (bot_goal points at it)                PASS  
+PERKORB the bot's goal was the orb                                     PASS  
+PERKORB the bot walked to the orb and took it                          PASS  1.5s
+PERKORB a bot ranks Ember Brand above Magpie Pouch and Satchel         PASS  
+PERKORB the bot takes the best orb of the fan                          PASS  1.0s, ["brand_fire"]
+PERKORB and only one of the three                                      PASS  
+PERKORB a bot ignores an orb for a perk it has maxed                   PASS  
+PERKORB DONE, 60 checks, failures: 0
+ERROR: 7 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 7 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 7 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 210: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 215: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 220: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 221: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 222: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 223: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 224: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 225: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 19 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

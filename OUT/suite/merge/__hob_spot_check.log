@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+HOBSPOT ok   Hob has a saved spot (45.5, 0.0, 37.5)
+HOBSPOT ok   and that is where he stands
+HOBSPOT ok   nothing placed and no place you interact with inside 3.5 m ()
+HOBSPOT ok   the same spot after the layout syncs again
+HOBSPOT ok   the stall moved into his ring: all 68 spots refused, 62 of them red with 'Too close to Hob' []
+HOBSPOT ok   where it stands it still fits ()
+HOBSPOT ok   his talk ring and the stall's never overlap (5.3 m apart)
+HOBSPOT ok   from Hob toward the stall the prompt stays Hob ["hob", "hob", "hob", "hob"]
+HOBSPOT ok   by the stall the prompt is the stall ["stall", "stall", "stall"]
+HOBSPOT ok   halfway between them it does not flicker ('')
+HOBSPOT ok   Hob 3 m from the stall: the nearer of the two wins ["hob", "stall"]
+HobSpot: something is inside Hob's clear ring at (45.5, 0.0, 37.5); he moves to (45.5, 0.0, 33.5)
+HOBSPOT ok   a save with the stall on his spot: he moves to (45.5, 0.0, 33.5) ()
+HOBSPOT ok   and that becomes his saved spot
+HOBSPOT ok   on open ground
+HOBSPOT ok   nearby (4.0 m from the old spot)
+HOBSPOT ok   he walks there
+HOBSPOT ok   and stays (moved once)
+HOBSPOT DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

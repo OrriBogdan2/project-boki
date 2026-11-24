@@ -1,0 +1,41 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+GEARPARITY every boots piece is in the audit table                  PASS  ["boots", "quickstep_boots", "skylark_boots", "windstep_boots"]
+GEARPARITY boots boots: cooldown 0.0 s                              PASS  
+GEARPARITY boots boots: stats as audited                            PASS  { "speed": 0.08 }
+GEARPARITY boots quickstep_boots: cooldown 0.0 s                    PASS  
+GEARPARITY boots quickstep_boots: stats as audited                  PASS  { "dodge": 0.15, "speed": 0.03 }
+GEARPARITY boots skylark_boots: cooldown 0.0 s                      PASS  
+GEARPARITY boots skylark_boots: stats as audited                    PASS  { "heat": 0.35 }
+GEARPARITY boots windstep_boots: cooldown 0.0 s                     PASS  
+GEARPARITY boots windstep_boots: stats as audited                   PASS  { "glide_speed": 0.1, "heat": 0.15 }
+GEARPARITY every charm piece is in the audit table                  PASS  ["booster", "focus", "heat_sink", "power_core"]
+GEARPARITY charm booster: cooldown 0.0 s                            PASS  
+GEARPARITY charm booster: stats as audited                          PASS  { "glide_speed": 0.2, "heat": 0.2 }
+GEARPARITY charm focus: cooldown 0.0 s                              PASS  
+GEARPARITY charm focus: stats as audited                            PASS  { "cdr": 0.18 }
+GEARPARITY charm heat_sink: cooldown 0.0 s                          PASS  
+GEARPARITY charm heat_sink: stats as audited                        PASS  { "heat": 0.45 }
+GEARPARITY charm power_core: cooldown 0.0 s                         PASS  
+GEARPARITY charm power_core: stats as audited                       PASS  { "dmg": 0.12 }
+GEARPARITY no gear kind named charm yet (charms not built)          PASS  
+GEARPARITY boots boots: HUD says Boots, no key                      PASS  Boots
+GEARPARITY boots boots: HUD stat line                               PASS  +8% move speed
+GEARPARITY boots boots: no cooldown to draw                         PASS  
+GEARPARITY boots quickstep_boots: HUD says Boots, no key            PASS  Boots
+GEARPARITY boots quickstep_boots: HUD stat line                     PASS  +15% faster dash recharge, +3% move speed
+GEARPARITY boots quickstep_boots: no cooldown to draw               PASS  
+GEARPARITY boots skylark_boots: HUD says Boots, no key              PASS  Boots
+GEARPARITY boots skylark_boots: HUD stat line                       PASS  +35% glider heat
+GEARPARITY boots skylark_boots: no cooldown to draw                 PASS  
+GEARPARITY boots windstep_boots: HUD says Boots, no key             PASS  Boots
+GEARPARITY boots windstep_boots: HUD stat line                      PASS  +10% glide speed, +15% glider heat
+GEARPARITY boots windstep_boots: no cooldown to draw                PASS  
+GEARPARITY DONE, 31 checks, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,198 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+RACE ok   every race finishes in under 120 s
+RACE ok   the favourite wins 17 of 20 races (needs 12)
+RACE ok   a water lean swims faster
+RACE ok   a flying lean glides the gap
+RACE ok   leans don't help on the straight
+RACE ok   some species have wings (they glide without a lean)
+RACE ok   a glum Boki is slower (mood)
+RACE ok   friends run side by side: mean gap 0.62 m vs 2.97 m as strangers
+RACE ok   rivals bump (3 bumps)
+RACE ok   the much faster Boki wins
+RACE ok   the winner gains joy and trust
+RACE ok   the loser sulks (joy down)
+RACE ok   you get gems (+14)
+RACE ok   the two grow apart (bonds -0.15)
+RACE ok   both remember it: "won the Dash ahead of Slow"
+RACE ok   twist row straight: x1.00 on the straight
+RACE ok   twist row water: x0.50 on the water
+RACE ok   twist row climb: x1.00 on the climb
+RACE ok   twist row jump: x1.00 on the jump
+RACE ok   a slow-water twist lengthens the lap
+RACE ok   every race under 'sprint' finishes
+RACE ok   every race under 'night_seek' finishes
+RACE ok   every race under 'seven_up' finishes
+RACE ok   every race under 'mud' finishes
+RACE ok   every race under 'high_tide' finishes
+RACE ok   every race under 'two_streams' finishes
+RACE ok   every race under 'gusty' finishes
+RACE ok   every race under 'wild' finishes
+RACE ok   a wobble twist widens the wobble
+RACE ok   6 Dash formats in the weekly list
+RACE ok   format sprint shortens the lap
+RACE ok   format mud lengthens the lap
+RACE ok   format high_tide lengthens the lap
+RACE ok   format two_streams makes a second water stretch
+RACE ok   format two_streams: a Tide lean gains on it
+RACE ok   format two_streams: the glide is lost there
+RACE ok   format two_streams lengthens a plain Boki's lap
+RACE ok   format gusty shortens the lap
+RACE ok   format wild changes the wobble
+RACE ok   a course for each zone: ["bramblebank", "glasswater", "cinderstep", "hushwood", "ridge"]
+RACE ok   every body plan has a species to run (["quad", "biped", "flyer", "blob", "serpent"])
+RACE ok   bramblebank: four stretches
+RACE ok   bramblebank: the lap closes at the line
+RACE ok   bramblebank: sharpest turn 55 of 110 degrees
+RACE ok   bramblebank: a quad (cairnback) laps in 23.4 s, band 18.0-28.0
+RACE ok   bramblebank: a quad runs it to the line (23.3 s)
+RACE ok   bramblebank: a biped (zapple) laps in 21.7 s, band 18.0-28.0
+RACE ok   bramblebank: a biped runs it to the line (20.8 s)
+RACE ok   bramblebank: a flyer (hivara) laps in 21.7 s, band 18.0-28.0
+RACE ok   bramblebank: a flyer runs it to the line (22.0 s)
+RACE ok   bramblebank: a blob (velvorm) laps in 23.4 s, band 18.0-28.0
+RACE ok   bramblebank: a blob runs it to the line (23.1 s)
+RACE ok   bramblebank: a serpent (zephyrak) laps in 20.9 s, band 18.0-28.0
+RACE ok   bramblebank: a serpent runs it to the line (21.2 s)
+RACE ok   glasswater: four stretches
+RACE ok   glasswater: the lap closes at the line
+RACE ok   glasswater: sharpest turn 107 of 110 degrees
+RACE ok   glasswater: a quad (cairnback) laps in 23.4 s, band 18.0-28.0
+RACE ok   glasswater: a quad runs it to the line (23.6 s)
+RACE ok   glasswater: a biped (zapple) laps in 22.1 s, band 18.0-28.0
+RACE ok   glasswater: a biped runs it to the line (23.6 s)
+RACE ok   glasswater: a flyer (hivara) laps in 22.1 s, band 18.0-28.0
+RACE ok   glasswater: a flyer runs it to the line (23.1 s)
+RACE ok   glasswater: a blob (velvorm) laps in 23.4 s, band 18.0-28.0
+RACE ok   glasswater: a blob runs it to the line (22.8 s)
+RACE ok   glasswater: a serpent (zephyrak) laps in 20.6 s, band 18.0-28.0
+RACE ok   glasswater: a serpent runs it to the line (21.4 s)
+RACE ok   cinderstep: four stretches
+RACE ok   cinderstep: the lap closes at the line
+RACE ok   cinderstep: sharpest turn 109 of 110 degrees
+RACE ok   cinderstep: a quad (cairnback) laps in 24.6 s, band 18.0-28.0
+RACE ok   cinderstep: a quad runs it to the line (25.2 s)
+RACE ok   cinderstep: a biped (zapple) laps in 23.3 s, band 18.0-28.0
+RACE ok   cinderstep: a biped runs it to the line (22.3 s)
+RACE ok   cinderstep: a flyer (hivara) laps in 23.3 s, band 18.0-28.0
+RACE ok   cinderstep: a flyer runs it to the line (23.5 s)
+RACE ok   cinderstep: a blob (velvorm) laps in 24.6 s, band 18.0-28.0
+RACE ok   cinderstep: a blob runs it to the line (24.1 s)
+RACE ok   cinderstep: a serpent (zephyrak) laps in 23.3 s, band 18.0-28.0
+RACE ok   cinderstep: a serpent runs it to the line (22.9 s)
+RACE ok   hushwood: four stretches
+RACE ok   hushwood: the lap closes at the line
+RACE ok   hushwood: sharpest turn 79 of 110 degrees
+RACE ok   hushwood: a quad (cairnback) laps in 23.9 s, band 18.0-28.0
+RACE ok   hushwood: a quad runs it to the line (24.9 s)
+RACE ok   hushwood: a biped (zapple) laps in 22.3 s, band 18.0-28.0
+RACE ok   hushwood: a biped runs it to the line (20.8 s)
+RACE ok   hushwood: a flyer (hivara) laps in 22.3 s, band 18.0-28.0
+RACE ok   hushwood: a flyer runs it to the line (22.3 s)
+RACE ok   hushwood: a blob (velvorm) laps in 23.9 s, band 18.0-28.0
+RACE ok   hushwood: a blob runs it to the line (24.7 s)
+RACE ok   hushwood: a serpent (zephyrak) laps in 21.3 s, band 18.0-28.0
+RACE ok   hushwood: a serpent runs it to the line (21.6 s)
+RACE ok   ridge: four stretches
+RACE ok   ridge: the lap closes at the line
+RACE ok   ridge: sharpest turn 79 of 110 degrees
+RACE ok   ridge: a quad (cairnback) laps in 25.8 s, band 18.0-28.0
+RACE ok   ridge: a quad runs it to the line (26.6 s)
+RACE ok   ridge: a biped (zapple) laps in 24.5 s, band 18.0-28.0
+RACE ok   ridge: a biped runs it to the line (23.9 s)
+RACE ok   ridge: a flyer (hivara) laps in 24.5 s, band 18.0-28.0
+RACE ok   ridge: a flyer runs it to the line (25.0 s)
+RACE ok   ridge: a blob (velvorm) laps in 25.8 s, band 18.0-28.0
+RACE ok   ridge: a blob runs it to the line (26.4 s)
+RACE ok   ridge: a serpent (zephyrak) laps in 24.5 s, band 18.0-28.0
+RACE ok   ridge: a serpent runs it to the line (24.1 s)
+RACE ok   no two zones share a course
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+RACE ok   glasswater: a race post stands in the zone
+RACE ok   glasswater: the whole loop is on land (0 samples off it)
+RACE ok   glasswater: the water stretch runs down its channel (0 samples off it)
+RACE ok   glasswater: no toy, snack patch, tree or prop on the loop (0 samples)
+RACE ok   glasswater: ground steps stay under 0.30 m between samples (worst 0.00)
+RACE ok   cinderstep: a race post stands in the zone
+RACE ok   cinderstep: the whole loop is on land (0 samples off it)
+RACE ok   cinderstep: no toy, snack patch, tree or prop on the loop (0 samples)
+RACE ok   cinderstep: ground steps stay under 0.30 m between samples (worst 0.00)
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+RACE ok   hushwood: a race post stands in the zone
+RACE ok   hushwood: the whole loop is on land (0 samples off it)
+RACE ok   hushwood: no toy, snack patch, tree or prop on the loop (0 samples)
+RACE ok   hushwood: ground steps stay under 0.30 m between samples (worst 0.00)
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+RACE ok   ridge: a race post stands in the zone
+RACE ok   ridge: the whole loop is on land (0 samples off it)
+RACE ok   ridge: no toy, snack patch, tree or prop on the loop (0 samples)
+RACE ok   ridge: ground steps stay under 0.30 m between samples (worst 0.00)
+RACE ok   beats: the race holds 28 frames for the 0.90 s countdown
+RACE ok   beats: 20 of 20 seeded races finish in the same order at the same times with the beats
+RACE ok   beats: the first two of four home hop then spin
+RACE ok   beats: the rest sulk, and the last one home always does
+RACE ok   beats: a timid winner only hops; a solo lap celebrates
+RACE ok   beats: a grumpy loser huffs (angry face)
+RACE ok   base_mode is off in the shipped rules
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+RACE ok   off: no race post on the farm
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+RACE ok   on: the base has the Dash
+RACE ok   bramblebank: the whole loop is on land (0 samples off it)
+RACE ok   bramblebank: no toy, snack patch, tree or prop on the loop (0 samples)
+RACE ok   bramblebank: ground steps stay under 0.30 m between samples (worst 0.00)
+RACE ok   on: the race post stands by the Training post and offers a race
+RACE ok   on: a race starts with 3 Boki
+RACE ok   cue: three unlit marks and a finish line with the lap
+RACE ok   on: a good race cheer plays your Hunter's cheer (cheer)
+RACE ok   on: the runners crouch on the line for the countdown
+RACE ok   on: the race ends with a result card (19.8 s)
+RACE ok   cue: the marks lit one by one (3 of 3) and cleared at the end
+RACE ok   on: the race does not start until 'go'
+RACE ok   on: every runner bursts off the line
+RACE ok   on: the winner celebrates, the last sulks
+RACE ok   on: each runner is let go once its finish clips are played (1.2 s after)
+RACE ok   practice: the first race opens as a solo lap
+RACE ok   practice: offered once per save
+RACE ok   practice: the first cheer ends it
+RACE ok   practice: no gain, no cost
+RACE ok   practice: the next time is the real race
+RACE ok   practice: a lap left unpressed ends, no race result
+RACE ok   practice: tips off, no offer
+RACE ok   cue: a solo lap clears its marks
+RACE ok   solo: a lap of missed cheers adds no Speed
+RACE ok   solo: three perfect cheers add 6 Speed (now 16)
+RACE ok   solo: the lap is a journal line ("ran a training lap of the Dash with you")
+RACE ok   solo: the lap costs energy
+RACE ok   solo: at the level cap there is no lap
+RACE ok   solo: a worn-out Boki does not start
+RACE ok   on: a Dash win is pinned under this week's format only when it is a Dash week
+RACE ok   on: only a win in this week's event game is pinned
+RACE ok   on: the wall shows the frame
+RACE ok   drill: starts on the timing bar
+RACE ok   drill: three presses end it (16)
+RACE DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 13 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,239 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KINTYPEFX ok   every Boki type (theme) has a look (16 of 16)
+KINTYPEFX ok   a look per type (18)
+KINTYPEFX ok   venom has an accent
+KINTYPEFX ok   venom inside the budget (6 dots, 0 streaks, 0 rings)
+KINTYPEFX ok   venom plays something
+KINTYPEFX ok   venom has its own shape
+KINTYPEFX ok   spore has an accent
+KINTYPEFX ok   spore inside the budget (5 dots, 0 streaks, 0 rings)
+KINTYPEFX ok   spore plays something
+KINTYPEFX ok   spore has its own shape
+KINTYPEFX ok   gravity has an accent
+KINTYPEFX ok   gravity inside the budget (4 dots, 4 streaks, 0 rings)
+KINTYPEFX ok   gravity plays something
+KINTYPEFX ok   gravity has its own shape
+KINTYPEFX ok   prism has an accent
+KINTYPEFX ok   prism inside the budget (0 dots, 5 streaks, 0 rings)
+KINTYPEFX ok   prism plays something
+KINTYPEFX ok   prism has its own shape
+KINTYPEFX ok   lunar has an accent
+KINTYPEFX ok   lunar inside the budget (8 dots, 0 streaks, 0 rings)
+KINTYPEFX ok   lunar plays something
+KINTYPEFX ok   lunar has its own shape
+KINTYPEFX ok   echo has an accent
+KINTYPEFX ok   echo inside the budget (0 dots, 0 streaks, 3 rings)
+KINTYPEFX ok   echo plays something
+KINTYPEFX ok   echo has its own shape
+KINTYPEFX ok   ember has an accent
+KINTYPEFX ok   ember inside the budget (8 dots, 0 streaks, 0 rings)
+KINTYPEFX ok   ember plays something
+KINTYPEFX ok   ember has its own shape
+KINTYPEFX ok   frost has an accent
+KINTYPEFX ok   frost inside the budget (0 dots, 6 streaks, 0 rings)
+KINTYPEFX ok   frost plays something
+KINTYPEFX ok   frost has its own shape
+KINTYPEFX ok   storm has an accent
+KINTYPEFX ok   storm inside the budget (0 dots, 8 streaks, 0 rings)
+KINTYPEFX ok   storm plays something
+KINTYPEFX ok   storm has its own shape
+KINTYPEFX ok   stone has an accent
+KINTYPEFX ok   stone inside the budget (7 dots, 0 streaks, 0 rings)
+KINTYPEFX ok   stone plays something
+KINTYPEFX ok   stone has its own shape
+KINTYPEFX ok   bloom has an accent
+KINTYPEFX ok   bloom inside the budget (7 dots, 0 streaks, 0 rings)
+KINTYPEFX ok   bloom plays something
+KINTYPEFX ok   bloom has its own shape
+KINTYPEFX ok   ghost has an accent
+KINTYPEFX ok   ghost inside the budget (4 dots, 0 streaks, 2 rings)
+KINTYPEFX ok   ghost plays something
+KINTYPEFX ok   ghost has its own shape
+KINTYPEFX ok   dark has an accent
+KINTYPEFX ok   dark inside the budget (6 dots, 0 streaks, 0 rings)
+KINTYPEFX ok   dark plays something
+KINTYPEFX ok   dark has its own shape
+KINTYPEFX ok   titan has an accent
+KINTYPEFX ok   titan inside the budget (0 dots, 5 streaks, 0 rings)
+KINTYPEFX ok   titan plays something
+KINTYPEFX ok   titan has its own shape
+KINTYPEFX ok   swarm has an accent
+KINTYPEFX ok   swarm inside the budget (10 dots, 0 streaks, 0 rings)
+KINTYPEFX ok   swarm plays something
+KINTYPEFX ok   swarm has its own shape
+KINTYPEFX ok   tempest has an accent
+KINTYPEFX ok   tempest inside the budget (0 dots, 5 streaks, 0 rings)
+KINTYPEFX ok   tempest plays something
+KINTYPEFX ok   tempest has its own shape
+KINTYPEFX ok   normal and fire colours differ (0.91)
+KINTYPEFX ok   normal and water colours differ (0.81)
+KINTYPEFX ok   normal and grass colours differ (0.83)
+KINTYPEFX ok   normal and spore colours differ (0.42)
+KINTYPEFX ok   normal and electric colours differ (0.64)
+KINTYPEFX ok   normal and ice colours differ (0.45)
+KINTYPEFX ok   normal and rock colours differ (1.02)
+KINTYPEFX ok   normal and psychic colours differ (0.64)
+KINTYPEFX ok   normal and flying colours differ (0.18)
+KINTYPEFX ok   normal and dragon colours differ (0.87)
+KINTYPEFX ok   normal and dark colours differ (0.94)
+KINTYPEFX ok   normal and poison colours differ (0.74)
+KINTYPEFX ok   normal and bug colours differ (0.71)
+KINTYPEFX ok   normal and steel colours differ (0.28)
+KINTYPEFX ok   normal and fairy colours differ (0.26)
+KINTYPEFX ok   normal and crystal colours differ (0.62)
+KINTYPEFX ok   normal and sound colours differ (0.40)
+KINTYPEFX ok   fire and water colours differ (1.23)
+KINTYPEFX ok   fire and grass colours differ (0.82)
+KINTYPEFX ok   fire and spore colours differ (0.53)
+KINTYPEFX ok   fire and electric colours differ (0.50)
+KINTYPEFX ok   fire and ice colours differ (1.13)
+KINTYPEFX ok   fire and rock colours differ (0.54)
+KINTYPEFX ok   fire and psychic colours differ (0.94)
+KINTYPEFX ok   fire and flying colours differ (1.04)
+KINTYPEFX ok   fire and dragon colours differ (1.15)
+KINTYPEFX ok   fire and dark colours differ (0.79)
+KINTYPEFX ok   fire and poison colours differ (0.59)
+KINTYPEFX ok   fire and bug colours differ (0.29)
+KINTYPEFX ok   fire and steel colours differ (0.83)
+KINTYPEFX ok   fire and fairy colours differ (0.81)
+KINTYPEFX ok   fire and crystal colours differ (1.11)
+KINTYPEFX ok   fire and sound colours differ (0.56)
+KINTYPEFX ok   water and grass colours differ (0.76)
+KINTYPEFX ok   water and spore colours differ (0.86)
+KINTYPEFX ok   water and electric colours differ (1.16)
+KINTYPEFX ok   water and ice colours differ (0.42)
+KINTYPEFX ok   water and rock colours differ (0.93)
+KINTYPEFX ok   water and psychic colours differ (0.65)
+KINTYPEFX ok   water and flying colours differ (0.69)
+KINTYPEFX ok   water and dragon colours differ (0.29)
+KINTYPEFX ok   water and dark colours differ (0.62)
+KINTYPEFX ok   water and poison colours differ (0.98)
+KINTYPEFX ok   water and bug colours differ (1.11)
+KINTYPEFX ok   water and steel colours differ (0.58)
+KINTYPEFX ok   water and fairy colours differ (0.83)
+KINTYPEFX ok   water and crystal colours differ (0.38)
+KINTYPEFX ok   water and sound colours differ (0.99)
+KINTYPEFX ok   grass and spore colours differ (0.55)
+KINTYPEFX ok   grass and electric colours differ (0.67)
+KINTYPEFX ok   grass and ice colours differ (0.73)
+KINTYPEFX ok   grass and rock colours differ (0.57)
+KINTYPEFX ok   grass and psychic colours differ (0.99)
+KINTYPEFX ok   grass and flying colours differ (0.86)
+KINTYPEFX ok   grass and dragon colours differ (0.88)
+KINTYPEFX ok   grass and dark colours differ (0.65)
+KINTYPEFX ok   grass and poison colours differ (0.34)
+KINTYPEFX ok   grass and bug colours differ (0.64)
+KINTYPEFX ok   grass and steel colours differ (0.64)
+KINTYPEFX ok   grass and fairy colours differ (0.91)
+KINTYPEFX ok   grass and crystal colours differ (0.53)
+KINTYPEFX ok   grass and sound colours differ (0.69)
+KINTYPEFX ok   spore and electric colours differ (0.32)
+KINTYPEFX ok   spore and ice colours differ (0.64)
+KINTYPEFX ok   spore and rock colours differ (0.66)
+KINTYPEFX ok   spore and psychic colours differ (0.70)
+KINTYPEFX ok   spore and flying colours differ (0.54)
+KINTYPEFX ok   spore and dragon colours differ (0.87)
+KINTYPEFX ok   spore and dark colours differ (0.72)
+KINTYPEFX ok   spore and poison colours differ (0.38)
+KINTYPEFX ok   spore and bug colours differ (0.31)
+KINTYPEFX ok   spore and steel colours differ (0.35)
+KINTYPEFX ok   spore and fairy colours differ (0.44)
+KINTYPEFX ok   spore and crystal colours differ (0.65)
+KINTYPEFX ok   spore and sound colours differ (0.17)
+KINTYPEFX ok   electric and ice colours differ (0.92)
+KINTYPEFX ok   electric and rock colours differ (0.79)
+KINTYPEFX ok   electric and psychic colours differ (1.00)
+KINTYPEFX ok   electric and flying colours differ (0.80)
+KINTYPEFX ok   electric and dragon colours differ (1.19)
+KINTYPEFX ok   electric and dark colours differ (0.97)
+KINTYPEFX ok   electric and poison colours differ (0.35)
+KINTYPEFX ok   electric and bug colours differ (0.22)
+KINTYPEFX ok   electric and steel colours differ (0.66)
+KINTYPEFX ok   electric and fairy colours differ (0.69)
+KINTYPEFX ok   electric and crystal colours differ (0.91)
+KINTYPEFX ok   electric and sound colours differ (0.26)
+KINTYPEFX ok   ice and rock colours differ (1.02)
+KINTYPEFX ok   ice and psychic colours differ (0.65)
+KINTYPEFX ok   ice and flying colours differ (0.31)
+KINTYPEFX ok   ice and dragon colours differ (0.60)
+KINTYPEFX ok   ice and dark colours differ (0.82)
+KINTYPEFX ok   ice and poison colours differ (0.83)
+KINTYPEFX ok   ice and bug colours differ (0.95)
+KINTYPEFX ok   ice and steel colours differ (0.32)
+KINTYPEFX ok   ice and fairy colours differ (0.57)
+KINTYPEFX ok   ice and crystal colours differ (0.26)
+KINTYPEFX ok   ice and sound colours differ (0.73)
+KINTYPEFX ok   rock and psychic colours differ (0.88)
+KINTYPEFX ok   rock and flying colours differ (1.08)
+KINTYPEFX ok   rock and dragon colours differ (0.86)
+KINTYPEFX ok   rock and dark colours differ (0.39)
+KINTYPEFX ok   rock and poison colours differ (0.60)
+KINTYPEFX ok   rock and bug colours differ (0.60)
+KINTYPEFX ok   rock and steel colours differ (0.81)
+KINTYPEFX ok   rock and fairy colours differ (0.95)
+KINTYPEFX ok   rock and crystal colours differ (0.90)
+KINTYPEFX ok   rock and sound colours differ (0.80)
+KINTYPEFX ok   psychic and flying colours differ (0.60)
+KINTYPEFX ok   psychic and dragon colours differ (0.47)
+KINTYPEFX ok   psychic and dark colours differ (0.63)
+KINTYPEFX ok   psychic and poison colours differ (1.01)
+KINTYPEFX ok   psychic and bug colours differ (0.92)
+KINTYPEFX ok   psychic and steel colours differ (0.49)
+KINTYPEFX ok   psychic and fairy colours differ (0.45)
+KINTYPEFX ok   psychic and crystal colours differ (0.78)
+KINTYPEFX ok   psychic and sound colours differ (0.78)
+KINTYPEFX ok   flying and dragon colours differ (0.77)
+KINTYPEFX ok   flying and dark colours differ (0.94)
+KINTYPEFX ok   flying and poison colours differ (0.84)
+KINTYPEFX ok   flying and bug colours differ (0.85)
+KINTYPEFX ok   flying and steel colours differ (0.27)
+KINTYPEFX ok   flying and fairy colours differ (0.33)
+KINTYPEFX ok   flying and crystal colours differ (0.53)
+KINTYPEFX ok   flying and sound colours differ (0.56)
+KINTYPEFX ok   dragon and dark colours differ (0.49)
+KINTYPEFX ok   dragon and poison colours differ (1.05)
+KINTYPEFX ok   dragon and bug colours differ (1.10)
+KINTYPEFX ok   dragon and steel colours differ (0.62)
+KINTYPEFX ok   dragon and fairy colours differ (0.79)
+KINTYPEFX ok   dragon and crystal colours differ (0.61)
+KINTYPEFX ok   dragon and sound colours differ (1.01)
+KINTYPEFX ok   dark and poison colours differ (0.79)
+KINTYPEFX ok   dark and bug colours differ (0.81)
+KINTYPEFX ok   dark and steel colours differ (0.68)
+KINTYPEFX ok   dark and fairy colours differ (0.85)
+KINTYPEFX ok   dark and crystal colours differ (0.73)
+KINTYPEFX ok   dark and sound colours differ (0.87)
+KINTYPEFX ok   poison and bug colours differ (0.35)
+KINTYPEFX ok   poison and steel colours differ (0.64)
+KINTYPEFX ok   poison and fairy colours differ (0.81)
+KINTYPEFX ok   poison and crystal colours differ (0.72)
+KINTYPEFX ok   poison and sound colours differ (0.46)
+KINTYPEFX ok   bug and steel colours differ (0.66)
+KINTYPEFX ok   bug and fairy colours differ (0.69)
+KINTYPEFX ok   bug and crystal colours differ (0.92)
+KINTYPEFX ok   bug and sound colours differ (0.32)
+KINTYPEFX ok   steel and fairy colours differ (0.32)
+KINTYPEFX ok   steel and crystal colours differ (0.43)
+KINTYPEFX ok   steel and sound colours differ (0.44)
+KINTYPEFX ok   fairy and crystal colours differ (0.74)
+KINTYPEFX ok   fairy and sound colours differ (0.43)
+KINTYPEFX ok   crystal and sound colours differ (0.77)
+KINTYPEFX ok   electric plays a streak pool entry
+KINTYPEFX ok   psychic plays two ripples
+KINTYPEFX ok   an unknown type plays nothing
+KINTYPEFX ok   the player has a Boki
+KINTYPEFX ok   its type 'echo' has an accent
+KINTYPEFX ok   casting an ability plays the accent
+KINTYPEFX DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

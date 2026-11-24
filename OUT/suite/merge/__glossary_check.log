@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+GLOSSARY ok   glossary.json parses
+GLOSSARY ok   Mastery: one line of 60 chars (at most 70)
+GLOSSARY ok   Mastery: no retired term
+GLOSSARY ok   Glider: one line of 54 chars (at most 70)
+GLOSSARY ok   Glider: no retired term
+GLOSSARY ok   Boss lair: one line of 33 chars (at most 34)
+GLOSSARY ok   Boss lair: no retired term
+GLOSSARY ok   Vault: one line of 19 chars (at most 34)
+GLOSSARY ok   Vault: no retired term
+GLOSSARY ok   Rare Boki: one line of 30 chars (at most 34)
+GLOSSARY ok   Rare Boki: no retired term
+GLOSSARY ok   Item cache: one line of 32 chars (at most 34)
+GLOSSARY ok   Item cache: no retired term
+GLOSSARY ok   the drop map's 'Boss lair' has a first-time line
+GLOSSARY ok   the drop map's 'Vault' has a first-time line
+GLOSSARY ok   the drop map's 'Rare Boki' has a first-time line
+GLOSSARY ok   the drop map's 'Item cache' has a first-time line
+GLOSSARY ok   hints off: no line (and the word stays new)
+GLOSSARY ok   a new save: the line shows (A big chest of loot)
+GLOSSARY ok   the same session: it keeps showing
+GLOSSARY ok   the save remembers the word
+GLOSSARY ok   a word with no line: nothing
+GLOSSARY ok   the next session: gone
+GLOSSARY ok   Relics page, first visit: the mastery list explains Mastery
+GLOSSARY ok   Relics page, a later session: no line
+GLOSSARY ok   full_map.gd no longer shows "Drop leader"
+GLOSSARY ok   full_map.gd no longer shows "Pass the lead"
+GLOSSARY ok   home.gd no longer shows "Boki at risk"
+GLOSSARY CHECK DONE, failures: 0

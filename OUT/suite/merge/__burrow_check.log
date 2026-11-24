@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BURROW ok   the cap is 6, from content/rules/burrow.json, with unit and reason
+BURROW ok   nine Boki: 6 out (the cap), 3 asleep
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+BURROW ok   the panel lists all nine Boki, out and asleep
+BURROW ok   one click only picks
+BURROW ok   the second click swaps them
+BURROW ok   the cap holds after the swap (6 out)
+BURROW FAIL bonds, journal, trust and level are untouched on both Boki
+BURROW ok   the one waking up starts at the Burrow door
+BURROW ok   the one going to sleep heads for the door
+BURROW ok   it slips in and leaves the island: 6 out
+BURROW ok   the new one walked out and wandered off
+BURROW ok   the partner won't swap out: stays on the island
+BURROW ok   a lone sleeper click on a full island only picks: the cap holds
+BURROW ok   with a free spot one click brings a sleeper out
+BURROW DONE failures: 1
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+NESTITEMS ok   the four nest items are in content/rules/garden_items.json with sources
+NESTITEMS ok   Thread, Locket and Shell are placed, not fed
+NESTITEMS ok   0 Thread(s): 500 of 500 eggs take exactly 3 of 5 gifts, previewed
+NESTITEMS ok   0 Thread(s): gifts equal the parent's, 0 used up per egg
+NESTITEMS ok   1 Thread(s): 500 of 500 eggs take exactly 4 of 5 gifts, previewed
+NESTITEMS ok   1 Thread(s): gifts equal the parent's, 1 used up per egg
+NESTITEMS ok   2 Thread(s): 500 of 500 eggs take exactly 5 of 5 gifts, previewed
+NESTITEMS ok   2 Thread(s): gifts equal the parent's, 2 used up per egg
+NESTITEMS ok   Locket: 500 of 500 babies are the wearer's species, one used each
+NESTITEMS ok   without a Locket it is about 50/50 (238 of 500)
+NESTITEMS ok   Shell: 500 of 500 babies have the wearer's habit and top trait
+NESTITEMS ok   without a Shell that exact match is rare (0 of 500)
+NESTITEMS ok   one Hatchling Down per hatch: 500 hatches, 500 in the bag
+NESTITEMS ok   fed to a Boki: trust +3 exactly and a memory line per baby in turn (500 of 500)
+NESTITEMS ok   at full trust it is not used
+NESTITEMS ok   the Nook shows no nest rows without nest items in the bag
+NESTITEMS ok   with items: heading, three rows, the placed Locket line
+NESTITEMS ok   a save from before nest items: no placement, 3 gifts
+NESTITEMS ok   a Down with no name recorded still gives a memory line
+NESTITEMS done, 0 failed

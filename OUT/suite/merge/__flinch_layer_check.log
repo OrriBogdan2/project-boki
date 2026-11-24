@@ -1,0 +1,234 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FLINCH ok   archer: arc_draw is a keyed move
+FLINCH ok   archer: LMB hold: arc_draw owns the body (1.00)
+FLINCH ok   archer: front hit: the arc_draw clip keeps running
+FLINCH ok   archer: front hit leans the torso away (0.057 m)
+FLINCH ok   archer: front hit: the legs hold the clip
+FLINCH ok   archer: settles after the front hit
+FLINCH ok   archer: back hit: the arc_draw clip keeps running
+FLINCH ok   archer: back hit leans the torso away (0.056 m)
+FLINCH ok   archer: back hit: the legs hold the clip
+FLINCH ok   archer: settles after the back hit
+FLINCH ok   archer: left hit: the arc_draw clip keeps running
+FLINCH ok   archer: left hit leans the torso away (0.057 m)
+FLINCH ok   archer: left hit: the legs hold the clip
+FLINCH ok   archer: settles after the left hit
+FLINCH ok   archer: right hit: the arc_draw clip keeps running
+FLINCH ok   archer: right hit leans the torso away (0.056 m)
+FLINCH ok   archer: right hit: the legs hold the clip
+FLINCH ok   archer: settles after the right hit
+FLINCH ok   archer: a stagger leans further (0.147 m vs 0.057)
+FLINCH ok   thief: thf_lmb_r is a keyed move
+FLINCH ok   thief: LMB hold: thf_lmb_r owns the body (1.00)
+FLINCH ok   thief: front hit: the thf_lmb_r clip keeps running
+FLINCH ok   thief: front hit leans the torso away (0.058 m)
+FLINCH ok   thief: front hit: the legs hold the clip
+FLINCH ok   thief: settles after the front hit
+FLINCH ok   thief: back hit: the thf_lmb_r clip keeps running
+FLINCH ok   thief: back hit leans the torso away (0.057 m)
+FLINCH ok   thief: back hit: the legs hold the clip
+FLINCH ok   thief: settles after the back hit
+FLINCH ok   thief: left hit: the thf_lmb_r clip keeps running
+FLINCH ok   thief: left hit leans the torso away (0.058 m)
+FLINCH ok   thief: left hit: the legs hold the clip
+FLINCH ok   thief: settles after the left hit
+FLINCH ok   thief: right hit: the thf_lmb_r clip keeps running
+FLINCH ok   thief: right hit leans the torso away (0.058 m)
+FLINCH ok   thief: right hit: the legs hold the clip
+FLINCH ok   thief: settles after the right hit
+FLINCH ok   thief: a stagger leans further (0.151 m vs 0.058)
+FLINCH ok   tender: mm_shot_r is a keyed move
+FLINCH ok   tender: LMB hold: mm_shot_r owns the body (1.00)
+FLINCH ok   tender: front hit: the mm_shot_r clip keeps running
+FLINCH ok   tender: front hit leans the torso away (0.056 m)
+FLINCH ok   tender: front hit: the legs hold the clip
+FLINCH ok   tender: settles after the front hit
+FLINCH ok   tender: back hit: the mm_shot_r clip keeps running
+FLINCH ok   tender: back hit leans the torso away (0.054 m)
+FLINCH ok   tender: back hit: the legs hold the clip
+FLINCH ok   tender: settles after the back hit
+FLINCH ok   tender: left hit: the mm_shot_r clip keeps running
+FLINCH ok   tender: left hit leans the torso away (0.057 m)
+FLINCH ok   tender: left hit: the legs hold the clip
+FLINCH ok   tender: settles after the left hit
+FLINCH ok   tender: right hit: the mm_shot_r clip keeps running
+FLINCH ok   tender: right hit leans the torso away (0.057 m)
+FLINCH ok   tender: right hit: the legs hold the clip
+FLINCH ok   tender: settles after the right hit
+FLINCH ok   tender: a stagger leans further (0.148 m vs 0.056)
+FLINCH ok   gunslinger: gunslinger_lmb is a keyed move
+FLINCH ok   gunslinger: LMB hold: gunslinger_lmb owns the body (1.00)
+FLINCH ok   gunslinger: front hit: the gunslinger_lmb clip keeps running
+FLINCH ok   gunslinger: front hit leans the torso away (0.053 m)
+FLINCH ok   gunslinger: front hit: the legs hold the clip
+FLINCH ok   gunslinger: settles after the front hit
+FLINCH ok   gunslinger: back hit: the gunslinger_lmb clip keeps running
+FLINCH ok   gunslinger: back hit leans the torso away (0.052 m)
+FLINCH ok   gunslinger: back hit: the legs hold the clip
+FLINCH ok   gunslinger: settles after the back hit
+FLINCH ok   gunslinger: left hit: the gunslinger_lmb clip keeps running
+FLINCH ok   gunslinger: left hit leans the torso away (0.054 m)
+FLINCH ok   gunslinger: left hit: the legs hold the clip
+FLINCH ok   gunslinger: settles after the left hit
+FLINCH ok   gunslinger: right hit: the gunslinger_lmb clip keeps running
+FLINCH ok   gunslinger: right hit leans the torso away (0.054 m)
+FLINCH ok   gunslinger: right hit: the legs hold the clip
+FLINCH ok   gunslinger: settles after the right hit
+FLINCH ok   gunslinger: a stagger leans further (0.140 m vs 0.053)
+FLINCH ok   ashwick: as_lance is a keyed move
+FLINCH ok   ashwick: LMB hold: as_lance owns the body (1.00)
+FLINCH ok   ashwick: front hit: the as_lance clip keeps running
+FLINCH ok   ashwick: front hit leans the torso away (0.048 m)
+FLINCH ok   ashwick: front hit: the legs hold the clip
+FLINCH ok   ashwick: settles after the front hit
+FLINCH ok   ashwick: back hit: the as_lance clip keeps running
+FLINCH ok   ashwick: back hit leans the torso away (0.045 m)
+FLINCH ok   ashwick: back hit: the legs hold the clip
+FLINCH ok   ashwick: settles after the back hit
+FLINCH ok   ashwick: left hit: the as_lance clip keeps running
+FLINCH ok   ashwick: left hit leans the torso away (0.047 m)
+FLINCH ok   ashwick: left hit: the legs hold the clip
+FLINCH ok   ashwick: settles after the left hit
+FLINCH ok   ashwick: right hit: the as_lance clip keeps running
+FLINCH ok   ashwick: right hit leans the torso away (0.047 m)
+FLINCH ok   ashwick: right hit: the legs hold the clip
+FLINCH ok   ashwick: settles after the right hit
+FLINCH ok   ashwick: a stagger leans further (0.127 m vs 0.048)
+FLINCH ok   mage: mage_lmb_l is a keyed move
+FLINCH ok   mage: LMB hold: mage_lmb_l owns the body (1.00)
+FLINCH ok   mage: front hit: the mage_lmb_l clip keeps running
+FLINCH ok   mage: front hit leans the torso away (0.053 m)
+FLINCH ok   mage: front hit: the legs hold the clip
+FLINCH ok   mage: settles after the front hit
+FLINCH ok   mage: back hit: the mage_lmb_l clip keeps running
+FLINCH ok   mage: back hit leans the torso away (0.051 m)
+FLINCH ok   mage: back hit: the legs hold the clip
+FLINCH ok   mage: settles after the back hit
+FLINCH ok   mage: left hit: the mage_lmb_l clip keeps running
+FLINCH ok   mage: left hit leans the torso away (0.053 m)
+FLINCH ok   mage: left hit: the legs hold the clip
+FLINCH ok   mage: settles after the left hit
+FLINCH ok   mage: right hit: the mage_lmb_l clip keeps running
+FLINCH ok   mage: right hit leans the torso away (0.052 m)
+FLINCH ok   mage: right hit: the legs hold the clip
+FLINCH ok   mage: settles after the right hit
+FLINCH ok   mage: a stagger leans further (0.141 m vs 0.053)
+FLINCH ok   dolm: breah_punch is a keyed move
+FLINCH ok   dolm: LMB hold: breah_punch owns the body (1.00)
+FLINCH ok   dolm: front hit: the breah_punch clip keeps running
+FLINCH ok   dolm: front hit leans the torso away (0.054 m)
+FLINCH ok   dolm: front hit: the legs hold the clip
+FLINCH ok   dolm: settles after the front hit
+FLINCH ok   dolm: back hit: the breah_punch clip keeps running
+FLINCH ok   dolm: back hit leans the torso away (0.052 m)
+FLINCH ok   dolm: back hit: the legs hold the clip
+FLINCH ok   dolm: settles after the back hit
+FLINCH ok   dolm: left hit: the breah_punch clip keeps running
+FLINCH ok   dolm: left hit leans the torso away (0.052 m)
+FLINCH ok   dolm: left hit: the legs hold the clip
+FLINCH ok   dolm: settles after the left hit
+FLINCH ok   dolm: right hit: the breah_punch clip keeps running
+FLINCH ok   dolm: right hit leans the torso away (0.054 m)
+FLINCH ok   dolm: right hit: the legs hold the clip
+FLINCH ok   dolm: settles after the right hit
+FLINCH ok   dolm: a stagger leans further (0.144 m vs 0.054)
+FLINCH ok   rimewright: tm_spear_aim is a keyed move
+FLINCH ok   rimewright: LMB hold: tm_spear_aim owns the body (1.00)
+FLINCH ok   rimewright: front hit: the tm_spear_aim clip keeps running
+FLINCH ok   rimewright: front hit leans the torso away (0.055 m)
+FLINCH ok   rimewright: front hit: the legs hold the clip
+FLINCH ok   rimewright: settles after the front hit
+FLINCH ok   rimewright: back hit: the tm_spear_aim clip keeps running
+FLINCH ok   rimewright: back hit leans the torso away (0.055 m)
+FLINCH ok   rimewright: back hit: the legs hold the clip
+FLINCH ok   rimewright: settles after the back hit
+FLINCH ok   rimewright: left hit: the tm_spear_aim clip keeps running
+FLINCH ok   rimewright: left hit leans the torso away (0.055 m)
+FLINCH ok   rimewright: left hit: the legs hold the clip
+FLINCH ok   rimewright: settles after the left hit
+FLINCH ok   rimewright: right hit: the tm_spear_aim clip keeps running
+FLINCH ok   rimewright: right hit leans the torso away (0.055 m)
+FLINCH ok   rimewright: right hit: the legs hold the clip
+FLINCH ok   rimewright: settles after the right hit
+FLINCH ok   rimewright: a stagger leans further (0.141 m vs 0.055)
+FLINCH ok   dredge: dr_shot is a keyed move
+FLINCH ok   dredge: LMB hold: dr_shot owns the body (1.00)
+FLINCH ok   dredge: front hit: the dr_shot clip keeps running
+FLINCH ok   dredge: front hit leans the torso away (0.043 m)
+FLINCH ok   dredge: front hit: the legs hold the clip
+FLINCH ok   dredge: settles after the front hit
+FLINCH ok   dredge: back hit: the dr_shot clip keeps running
+FLINCH ok   dredge: back hit leans the torso away (0.042 m)
+FLINCH ok   dredge: back hit: the legs hold the clip
+FLINCH ok   dredge: settles after the back hit
+FLINCH ok   dredge: left hit: the dr_shot clip keeps running
+FLINCH ok   dredge: left hit leans the torso away (0.044 m)
+FLINCH ok   dredge: left hit: the legs hold the clip
+FLINCH ok   dredge: settles after the left hit
+FLINCH ok   dredge: right hit: the dr_shot clip keeps running
+FLINCH ok   dredge: right hit leans the torso away (0.044 m)
+FLINCH ok   dredge: right hit: the legs hold the clip
+FLINCH ok   dredge: settles after the right hit
+FLINCH ok   dredge: a stagger leans further (0.115 m vs 0.043)
+FLINCH ok   bulwark: bul_smash_wind is a keyed move
+FLINCH ok   bulwark: LMB hold: bul_smash_wind owns the body (1.00)
+FLINCH ok   bulwark: front hit: the bul_smash_wind clip keeps running
+FLINCH ok   bulwark: front hit leans the torso away (0.063 m)
+FLINCH ok   bulwark: front hit: the legs hold the clip
+FLINCH ok   bulwark: settles after the front hit
+FLINCH ok   bulwark: back hit: the bul_smash_wind clip keeps running
+FLINCH ok   bulwark: back hit leans the torso away (0.063 m)
+FLINCH ok   bulwark: back hit: the legs hold the clip
+FLINCH ok   bulwark: settles after the back hit
+FLINCH ok   bulwark: left hit: the bul_smash_wind clip keeps running
+FLINCH ok   bulwark: left hit leans the torso away (0.063 m)
+FLINCH ok   bulwark: left hit: the legs hold the clip
+FLINCH ok   bulwark: settles after the left hit
+FLINCH ok   bulwark: right hit: the bul_smash_wind clip keeps running
+FLINCH ok   bulwark: right hit leans the torso away (0.063 m)
+FLINCH ok   bulwark: right hit: the legs hold the clip
+FLINCH ok   bulwark: settles after the right hit
+FLINCH ok   bulwark: a stagger leans further (0.163 m vs 0.063)
+FLINCH ok   ostra: ostra_snap_wind is a keyed move
+FLINCH ok   ostra: LMB hold: ostra_snap_wind owns the body (1.00)
+FLINCH ok   ostra: front hit: the ostra_snap_wind clip keeps running
+FLINCH ok   ostra: front hit leans the torso away (0.063 m)
+FLINCH ok   ostra: front hit: the legs hold the clip
+FLINCH ok   ostra: settles after the front hit
+FLINCH ok   ostra: back hit: the ostra_snap_wind clip keeps running
+FLINCH ok   ostra: back hit leans the torso away (0.063 m)
+FLINCH ok   ostra: back hit: the legs hold the clip
+FLINCH ok   ostra: settles after the back hit
+FLINCH ok   ostra: left hit: the ostra_snap_wind clip keeps running
+FLINCH ok   ostra: left hit leans the torso away (0.063 m)
+FLINCH ok   ostra: left hit: the legs hold the clip
+FLINCH ok   ostra: settles after the left hit
+FLINCH ok   ostra: right hit: the ostra_snap_wind clip keeps running
+FLINCH ok   ostra: right hit leans the torso away (0.063 m)
+FLINCH ok   ostra: right hit: the legs hold the clip
+FLINCH ok   ostra: settles after the right hit
+FLINCH ok   ostra: a stagger leans further (0.162 m vs 0.063)
+FLINCH ok   juggernaut: jug_slash_r is a keyed move
+FLINCH ok   juggernaut: LMB hold: jug_slash_r owns the body (1.00)
+FLINCH ok   juggernaut: front hit: the jug_slash_r clip keeps running
+FLINCH ok   juggernaut: front hit leans the torso away (0.045 m)
+FLINCH ok   juggernaut: front hit: the legs hold the clip
+FLINCH ok   juggernaut: settles after the front hit
+FLINCH ok   juggernaut: back hit: the jug_slash_r clip keeps running
+FLINCH ok   juggernaut: back hit leans the torso away (0.043 m)
+FLINCH ok   juggernaut: back hit: the legs hold the clip
+FLINCH ok   juggernaut: settles after the back hit
+FLINCH ok   juggernaut: left hit: the jug_slash_r clip keeps running
+FLINCH ok   juggernaut: left hit leans the torso away (0.046 m)
+FLINCH ok   juggernaut: left hit: the legs hold the clip
+FLINCH ok   juggernaut: settles after the left hit
+FLINCH ok   juggernaut: right hit: the jug_slash_r clip keeps running
+FLINCH ok   juggernaut: right hit leans the torso away (0.048 m)
+FLINCH ok   juggernaut: right hit: the legs hold the clip
+FLINCH ok   juggernaut: settles after the right hit
+FLINCH ok   juggernaut: a stagger leans further (0.121 m vs 0.045)
+FLINCH_CHECK_DONE, failures: 0

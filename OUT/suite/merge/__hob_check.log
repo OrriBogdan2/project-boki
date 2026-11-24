@@ -1,0 +1,71 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _ready (res://scripts/home/home.gd:240)
+         [11] _hb_home (res://scripts/main.gd:1490)
+         [12] _new_farm (res://tools/hob_check.gd:73)
+         [13] _first_arrival (res://tools/hob_check.gd:78)
+         [14] run (res://tools/hob_check.gd:46)
+         [15] run (res://tools/check_registry.gd:980)
+         [16] _ready (res://scripts/main.gd:270)
+HOBCHECK ok   Hob is a person standing by the market stall (at his spot, his clear ring apart from it) 5.3 m
+HOBCHECK ok   his name shows over him
+HOBCHECK ok   the first goal: meet him (Hob is calling: walk up and press F.)
+HOBCHECK ok   after the first expedition no second Relic is owned yet (Vex and Lace are open)
+HOBCHECK FAIL first arrival: the camera swings over to him while he waves and calls 'Hey! Over here!'
+HOBCHECK FAIL 5 s with no input: the camera is still on him
+HOBCHECK FAIL the hint shows ('') and you are not locked
+HOBCHECK FAIL a click and the camera is back on you in 0.00 s, once
+HOBCHECK ok   walking up to him: 'Talk to Hob (2 new blueprints)'
+HOBCHECK ok   interact opens the talk box (you stand still)
+HOBCHECK ok   his portrait, his name and his first line
+HOBCHECK ok   line by line; on the stall line he points at it
+HOBCHECK ok   and the camera stays on the stall for 5 s with no input
+HOBCHECK ok   after the last line: met, his name tag gone
+HOBCHECK ok   the next goal is the axe
+HOBCHECK ok   after the last line the camera is back on you in 0.63 s
+HOBCHECK ok   later he explains the step you're on: 'HOLD F at a tree to chop wood for the house.'
+HOBCHECK ok   Esc ends the talk
+HOBCHECK ok   no Mask talk before the house is down
+HOBCHECK ok   with the house down he has a '!' for you
+HOBCHECK ok   "By the way... I see you found a Vex Relic."
+HOBCHECK ok   "Could I interest you in another?"
+HOBCHECK ok   the offer shows exactly Kael, Cinder and Meeko (["juggernaut", "ashwick", "tender"])
+HOBCHECK ok   each with its portrait, name and title
+HOBCHECK ok   and a one-line role
+HOBCHECK ok   the Relic in focus (Meeko) loops its attack, healing ring and dash (["lmb", "e", "dash"])
+HOBCHECK ok   one clip shows at a time
+HOBCHECK ok   the reel moves on to the dash, from its start
+HOBCHECK ok   the Goals card, the goal line and the world prompts step aside
+HOBCHECK ok   the pick fits a 1280x720 screen ([P: (281.0, 3.0), S: (718.0, 667.0)])
+HOBCHECK ok   taking Meeko opens her and no one else (["archer", "gunslinger", "tender"])
+HOBCHECK FAIL the short Mask moment plays (you stand still)
+HOBCHECK ok   then the farm again: no reveal pops up
+HOBCHECK ok   and no more offer
+HOBCHECK ok   and the Goals card and the goal line are back
+HOBCHECK ok   with no farm tutorial the offer is there at once
+HOBCHECK ok   'Not now' keeps the offer
+HOBCHECK ok   a save that already has its second Mask keeps it and is not offered another
+HOBCHECK ok   a look starts
+HOBCHECK ok   a press held for a second skips the rest: no later look starts
+HOBCHECK ok   skip tutorial: the house is a site with its materials (10 wood, 6 stone)
+HOBCHECK ok   Hob hammers and a swing lands on the house after 6.0 s (every 6.0 s)
+HOBCHECK ok   the bar moved and the first materials were spent
+HOBCHECK ok   the walls rise as he works (0.18 m -> 1.10 m at 9/12)
+HOBCHECK ok   with nobody helping the house is done in 1.3 s
+HOBCHECK ok   and its materials were spent as it went (0 wood, 0 stone left)

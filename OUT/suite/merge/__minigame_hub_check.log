@@ -1,0 +1,57 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MINIGAMEHUB ok   registry: four games, each with an id, name, member, node and rule (["race", "shove", "seek", "volley"])
+MINIGAMEHUB ok   results: nothing played reads 'No games yet'
+MINIGAMEHUB ok   results: best is the most wins, last is the latest
+MINIGAMEHUB ok   results: another game keeps its own record
+MINIGAMEHUB ok   title: the entry is absent without a Boki (["New Game", "Training Grounds", "Test Zone", "Save Files", "Settings", "Help", "Quit"])
+MINIGAMEHUB ok   title: the entry is there with a save (["Continue", "Training Grounds", "Test Zone", "Demo Match", "Play with Your Boki", "Save Files", "Settings", "Help", "Quit"])
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+MINIGAMEHUB ok   picker: the home opens on 'Play with Your Boki'
+MINIGAMEHUB ok   picker: no farm tutorial step done, skipped or finished (skipping stays lossless)
+MINIGAMEHUB open on this base: []
+MINIGAMEHUB ok   picker: every game has a card, open or locked (4)
+MINIGAMEHUB ok   race: has a card
+MINIGAMEHUB ok   race: a rule line and a result line
+MINIGAMEHUB ok   shove: has a card
+MINIGAMEHUB ok   shove: a rule line and a result line
+MINIGAMEHUB ok   seek: has a card
+MINIGAMEHUB ok   seek: a rule line and a result line
+MINIGAMEHUB ok   volley: has a card
+MINIGAMEHUB ok   volley: a rule line and a result line
+MINIGAMEHUB ok   list: a game whose post isn't placed is locked
+MINIGAMEHUB ok   list: a game the home holds is open, the rest locked
+MINIGAMEHUB ok   start: the picker closes and the game's use() runs
+MINIGAMEHUB FAIL garden: the picker opens on the base
+MINIGAMEHUB ok   garden: the picker lands in the start zone, not the hub (the games stand there)
+MINIGAMEHUB FAIL garden: all four games are open ([])
+SCRIPT ERROR: Invalid call. Nonexistent function 'hop' in base 'Nil'.
+          at: start (res://scripts/home/minigame_hub.gd:111)
+          GDScript backtrace (most recent call first):
+              [0] start (res://scripts/home/minigame_hub.gd:111)
+              [1] _garden (res://tools/minigame_hub_check.gd:175)
+SCRIPT ERROR: Cannot call method 'get' on a null value.
+          at: _garden (res://tools/minigame_hub_check.gd:177)
+          GDScript backtrace (most recent call first):
+              [0] _garden (res://tools/minigame_hub_check.gd:177)
+MINIGAMEHUB DONE, failures: 2
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

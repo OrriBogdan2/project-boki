@@ -1,0 +1,16 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+GARDEN ok   habit from its element (venom -> pricklepear)
+GARDEN ok   petting raises trust and says so: 'Mira loved the scratches: trust up'
+GARDEN ok   a second pet inside the hour does nothing
+GARDEN ok   a pet after the hour counts again
+GARDEN ok   habit food raises trust: 'Mira loves Emberberry: trust up'
+GARDEN ok   habit food repeated inside the hour does nothing
+GARDEN ok   winning together raises trust: 'Mira won with you: trust up'
+GARDEN ok   trust is capped at 100
+GARDEN ok   a full-trust Boki gets no line
+GARDEN ok   an older save record gets its habit on load
+GARDEN DONE, failures: 0

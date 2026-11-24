@@ -1,0 +1,65 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+RELAY ok   seed 4242 twice: same times (18.46 / 17.69 s)
+RELAY ok   three legs a team, two hand-offs each
+RELAY ok   another seed, other times (18.61 s)
+RELAY ok   even teams: great hand-offs win 20 of 30, no presses win 6
+RELAY ok   no presses run 1.21 s slower on average
+RELAY ok   hand-off timing flips the result on 16 seeds
+RELAY ok   the water-lean Boki runs the water leg
+RELAY ok   order keeps all three
+RELAY ok   duo friends hand off cleanly with no press (lost [0.0, 0.0])
+RELAY ok   friends 16.77 s, strangers 18.82 s on the same seed
+RELAY ok   rivals fumble on a good press (0.55 s)
+RELAY ok   rivals hand off cleanly on a great press
+RELAY ok   Sprout round: visitors at 0.9x strength
+RELAY ok   Bloom round: visitors at 1.0x strength
+RELAY ok   Crown round: visitors at 1.1x strength
+RELAY ok   a win together raises each pair's bond by the rivalry win_step
+RELAY ok   a win pays the relay's gems
+RELAY ok   a win rolls the relay prize table and counts for the Sprout round ([{ "kind": "snack", "id": "tidebloom", "w": 15.0 }, { "kind": "item", "id": "zipseed" }])
+RELAY ok   the team remembers it: "won the Relay Cup with Ash and Bo"
+RELAY ok   a loss starts the cup run over
+RELAY ok   beats: strangers bump and brace
+RELAY ok   beats: the contact ends after 0.3 s
+RELAY ok   beats: a stranger's burst steps straight to 1.6x
+RELAY ok   beats: the burst ends after 0.4 s
+RELAY ok   beats: duo friends hop together
+RELAY ok   beats: friends' burst swells (1.19 then 1.60) where strangers' steps
+RELAY ok   beats: winners play their win clip
+RELAY ok   beats: losers play their sulk clip, head up
+RELAY ok   beats: no win clip is a hop
+RELAY ok   beats: a rig with no win clip but a hop plays its hop
+RELAY ok   beats: and with no sulk clip it stands
+RELAY ok   beats: no sulk clip is a head drop
+RELAY ok   beats: clear resets the runners
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+RELAY ok   on: the Dash loop has a relay stand
+RELAY ok   on: the stand offers "Run the Relay Cup (Sprout round)"
+RELAY ok   on: a relay starts, three against three
+RELAY ok   on: the relay ends with the shared result card (20.8 s)
+RELAY ok   on: the runners play contact reacts and burst off the baton
+RELAY ok   on: the teams show the finish, then are reset
+RELAY ok   on: the visitors leave
+RELAY ok   on: your three are free again
+RELAY DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

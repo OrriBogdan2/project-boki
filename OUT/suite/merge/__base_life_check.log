@@ -1,0 +1,58 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BASELIFE ok   a v11 save upgrades and its Boki gain an empty bonds map
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+BASELIFE ok   base_mode on: the farm runs BaseLife
+BASELIFE ok   the placed ball is the one toy the machine knows (HomeToys owns the toys)
+Ash Nap 120s ref 0 | 460.50 PlayWith>Nap night | Crag -1.00, Moss +0.40, Pip +1.00
+Crag Nap 120s ref 0 | 460.50 PlayWith>Nap night | Ash -1.00, Moss +1.00, Pip +0.00
+Moss Nap 120s ref 0 | 460.50 PlayWith>Nap night | Ash +0.40, Crag +1.00, Pip +0.39
+Pip Play 10s ref 0 | 570.50 Roam>Play toy | Ash +1.00, Crag +0.00, Moss +0.39
+BASELIFE ok   at least one friend pair formed (2)
+BASELIFE ok   at least one rival pair formed (1)
+BASELIFE ok   every bond is the same both ways
+BASELIFE ok   no state but Nap lasts over 90 s (longest { "Roam": 44.25, "Play": 18.5, "React": 11.75, "Chore": 8.5, "Watch": 8.75, "PlayWith": 25.75 })
+BASELIFE ok   the fourth Boki's arrival brought the others over to look (React)
+BASELIFE ok   at night the three day Boki nap (1263 of 1263 frames)
+BASELIFE ok   the nocturnal Zapple stays up at night (421 of 421 frames)
+BASELIFE ok   no machine refused a transition (0)
+BASELIFE ok   of 30 asleep only the 3 nearest breathe, all within 7 m
+BASELIFE ok   a bigger Boki breathes lower (["1.10", "0.94", "0.90", "0.80"])
+BASELIFE ok   the night's sleepers near you breathe (1 loops)
+BASELIFE ok   a Boki waking at dawn yawns
+BASELIFE ok   an awake Boki's breath lets go within 1500 ms (0 still on)
+BASELIFE ok   a tired Boki heads for a free nap spot
+BASELIFE ok   its friend (bond 0.6) takes the place beside it
+BASELIFE ok   a third Boki takes the other spot
+BASELIFE ok   all three walked there and lie down on their places in 15.0 s (3 of 3)
+BASELIFE ok   napping side by side, the friends' bond grows
+BASELIFE ok   nothing of it is saved: the records gain no key
+BASELIFE ok   rivals passing within 3.0 m both turn to each other (React)
+BASELIFE ok   both play the growl clip
+BASELIFE ok   each huffs through the garden SFX (2 cues)
+BASELIFE ok   a Boki that is not a rival is left alone
+BASELIFE ok   the beat ends in 1.6 s
+BASELIFE ok   it walks on, away from the other
+BASELIFE ok   no repeat inside the cooldown (40 s)
+BASELIFE ok   rivals never play tag together
+BASELIFE DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,141 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AIMPITCH ok   2 tiers up at 4 m: 20.1 deg, inside the 20 deg clamp
+AIMPITCH ok   2 tiers down: -20.1 deg
+AIMPITCH ok   flat ground (and a rise under the shot's own cut): 0
+AIMPITCH ok   a cursor on your toes stays inside the clamp
+AIMPITCH ok   a cliff past what shots climb stays flat, like the shot
+AIMPITCH ok   archer LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   archer LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   archer LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   archer LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   archer LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   archer ability aim: flat ground, no pitch on the body
+AIMPITCH ok   archer ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   archer ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   archer ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   archer ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   juggernaut LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   juggernaut LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   juggernaut LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   juggernaut LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   juggernaut LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   juggernaut ability aim: flat ground, no pitch on the body
+AIMPITCH ok   juggernaut ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   juggernaut ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   juggernaut ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   juggernaut ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   gunslinger LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   gunslinger LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   gunslinger LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   gunslinger LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   gunslinger LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   gunslinger ability aim: flat ground, no pitch on the body
+AIMPITCH ok   gunslinger ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   gunslinger ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   gunslinger ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   gunslinger ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   bulwark LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   bulwark LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   bulwark LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   bulwark LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   bulwark LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   bulwark ability aim: flat ground, no pitch on the body
+AIMPITCH ok   bulwark ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   bulwark ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   bulwark ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   bulwark ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   rimewright LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   rimewright LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   rimewright LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   rimewright LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   rimewright LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   rimewright ability aim: flat ground, no pitch on the body
+AIMPITCH ok   rimewright ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   rimewright ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   rimewright ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   rimewright ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   ashwick LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   ashwick LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   ashwick LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   ashwick LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   ashwick LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   ashwick ability aim: flat ground, no pitch on the body
+AIMPITCH ok   ashwick ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   ashwick ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   ashwick ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   ashwick ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   dolm LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   dolm LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   dolm LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   dolm LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   dolm LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   dolm ability aim: flat ground, no pitch on the body
+AIMPITCH ok   dolm ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   dolm ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   dolm ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   dolm ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   mage LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   mage LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   mage LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   mage LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   mage LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   mage ability aim: flat ground, no pitch on the body
+AIMPITCH ok   mage ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   mage ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   mage ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   mage ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   dredge LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   dredge LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   dredge LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   dredge LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   dredge LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   dredge ability aim: flat ground, no pitch on the body
+AIMPITCH ok   dredge ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   dredge ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   dredge ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   dredge ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   tender LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   tender LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   tender LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   tender LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   tender LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   tender ability aim: flat ground, no pitch on the body
+AIMPITCH ok   tender ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   tender ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   tender ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   tender ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   thief LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   thief LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   thief LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   thief LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   thief LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   thief ability aim: flat ground, no pitch on the body
+AIMPITCH ok   thief ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   thief ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   thief ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   thief ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   ostra LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   ostra LMB hold: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   ostra LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   ostra LMB hold: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   ostra LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   ostra ability aim: flat ground, no pitch on the body
+AIMPITCH ok   ostra ability aim: weapon bone pitched 20.0 deg for a 20.1 deg aim
+AIMPITCH ok   ostra ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   ostra ability aim: weapon bone pitched -20.0 deg for a -20.1 deg aim
+AIMPITCH ok   ostra ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   gil LMB hold: flat ground, no pitch on the body
+AIMPITCH ok   gil LMB hold: weapon bone pitched 19.9 deg for a 20.1 deg aim
+AIMPITCH ok   gil LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   gil LMB hold: weapon bone pitched -19.9 deg for a -20.1 deg aim
+AIMPITCH ok   gil LMB hold: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   gil ability aim: flat ground, no pitch on the body
+AIMPITCH ok   gil ability aim: weapon bone pitched 19.2 deg for a 20.1 deg aim
+AIMPITCH ok   gil ability aim: feet planted (shins moved 0.0000 m)
+AIMPITCH ok   gil ability aim: weapon bone pitched -19.2 deg for a -20.1 deg aim
+AIMPITCH ok   gil ability aim: feet planted (shins moved 0.0000 m)
+AIM_PITCH_DONE, failures: 0

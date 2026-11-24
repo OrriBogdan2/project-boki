@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SHOVE ok   the stronger side wins 39 of 50 (78%, needs 60 to 80%)
+SHOVE ok   a great press moves the backed Boki's odds 53 to 61% (+8 points, under 15)
+SHOVE ok   species themes change no push: equal Boki are level (+0.0000)
+SHOVE ok   settle: the side at its end of the balance wins
+SHOVE ok   settle: the winner gains joy and trust
+SHOVE ok   settle: the loser sulks
+SHOVE ok   settle: both remember it
+SHOVE ok   settle: you get gems for backing the winner
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+SHOVE ok   off: no stump on the farm
+SHOVE ok   on: the base has the Stump Shove
+SHOVE ok   on: the stump offers a shove
+SHOVE ok   on: a bout starts with two Boki
+SHOVE ok   cue: a level push meter appears over the stump
+SHOVE ok   on: the bout ends with a result card (2.3 s)
+SHOVE ok   cue: the meter filled (0.94) toward the stronger Boki
+SHOVE ok   cue: the meter is gone when the bout ends
+SHOVE DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

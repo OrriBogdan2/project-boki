@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+relay: listening on 8016, up to 120 players, version 0.24.18, Discord check OFF
+RSMOOTH ok   the lag relay listens on 8016  
+relay: 583848171 joined as Hunter (1 online)
+RSMOOTH ok   the host is on the relay  
+relay: 169593255 joined as Hunter (2 online)
+RSMOOTH ok   the guest joins the relay  
+RSMOOTH ok   the guest's game is sending  
+RSMOOTH ok   Kitefall goes off on the host  
+RSMOOTH ok   Kitefall hangs  air
+RSMOOTH ok   the guest wrote its record  
+RSMOOTH line: 40 ms +-20 ms one way, 2% loss (8 snapshots lost); drawn 245 ms behind
+RSMOOTH load: frames over 0.1 s cost the host's match clock 1227 ms, the guest's 252 ms (not the line)
+RSMOOTH idle  frames   17  snaps  0  jerks   0  backsteps   0  overshoot   0 (max 0.00 m)  mean err 0.00 m  max step 0.00 m
+RSMOOTH run   frames  183  snaps  2  jerks   7  backsteps   1  overshoot   0 (max 0.04 m)  mean err 0.15 m  max step 2.21 m
+RSMOOTH dash  frames   79  snaps  1  jerks   0  backsteps   0  overshoot   0 (max 0.09 m)  mean err 0.37 m  max step 1.03 m
+RSMOOTH glide frames  240  snaps  1  jerks   0  backsteps   2  overshoot   2 (max 0.42 m)  mean err 0.63 m  max step 4.98 m
+RSMOOTH knock frames   64  snaps  0  jerks   0  backsteps   0  overshoot   0 (max 0.00 m)  mean err 0.03 m  max step 0.15 m
+RSMOOTH all   frames  583  snaps  4  jerks   7  backsteps   3  overshoot   2 (max 0.42 m)  mean err 0.36 m  max step 4.98 m
+RSMOOTH fall  frames  114  snaps  9  jerks   0  backsteps   0  overshoot   0 (max 0.01 m)  mean err 0.34 m  max step 2.18 m
+RSMOOTH ok   the guest drew the whole run  583 frames
+RSMOOTH FAIL the lift is one snap and nothing else snaps  4 snaps
+RSMOOTH ok   the drawn speed changes only where the true one does  7 jerks
+RSMOOTH FAIL the drawn body never steps back  3 backsteps
+RSMOOTH FAIL the drawn body stays on the true path  max 0.42 m off
+RSMOOTH ok   drawn at most 250 ms behind  245 ms
+RSMOOTH ok   Kitefall's fall is drawn as a drop, not a jump  114 frames, max step 2.18 m
+RSMOOTH DONE, failures: 3
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 13 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

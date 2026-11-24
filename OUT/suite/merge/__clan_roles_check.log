@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CLAN ok   a member's own row claiming officer still reads as member
+CLAN ok   a member can't make himself officer
+CLAN ok   the founder makes an officer
+CLAN ok   an officer can't make officers
+CLAN ok   a guild doc's officer list drops the founder, repeats and junk
+CLAN ok   a member can't remove a member
+CLAN ok   forged removals (a member's list, an officer listing the founder) remove nobody
+CLAN ok   an officer can't remove the founder
+CLAN ok   an officer removes a member: off the roll
+CLAN ok   the removed member's game leaves the clan and deletes its row
+CLAN ok   ...and shows one line naming the clan (["Ranks"])
+CLAN ok   ...and can't join it again
+CLAN ok   the refused join says why in the same line
+CLAN ok   an officer can't remove another officer
+CLAN ok   the founder makes an officer a member again
+CLAN ok   the founder role goes only to an officer
+CLAN ok   an officer can't take it
+CLAN ok   the founder hands it to an officer
+CLAN ok   the guild doc's founder moves; the old founder is an officer
+CLAN ok   the old founder can't make officers
+CLAN ok   the old founder, now an officer, removes a member
+CLAN ok   the founder removes an officer, whose removals then stop holding
+CLAN ok   h1: the founder's game leaves and deletes its row
+CLAN ok   the longest-serving officer takes over, not the older member (oscar, ["olga"])
+CLAN ok   h2: the founder's game leaves and deletes its row
+CLAN ok   no officer: the longest-serving member, never a removed one
+CLAN ok   h3: the founder's game leaves and deletes its row
+CLAN ok   the last one out leaves the guild doc idle
+CLAN ok   an officer leaving changes no ranks
+CLAN ok   ties go to the lower id
+CLAN-ROLES DONE, failures: 0

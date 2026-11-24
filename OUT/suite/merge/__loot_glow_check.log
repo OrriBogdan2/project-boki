@@ -1,0 +1,267 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LOOTGLOW ok   every rarity has a look (5 tiers, 5 looks)
+LOOTGLOW ok   Common: a halo in the rarity colour
+LOOTGLOW ok   Common: pillar false
+LOOTGLOW ok   Common: the halo is brighter than the tier below
+LOOTGLOW ok   Common: no particles
+LOOTGLOW ok   Common: no flat ground ring
+LOOTGLOW ok   Common: the halo material is shared
+LOOTGLOW ok   Common: gear slot 0 wears it
+LOOTGLOW ok   Common: gear slot 1 wears it
+LOOTGLOW ok   Common: gear slot 2 wears it
+LOOTGLOW ok   Common: gear slot 3 wears it
+LOOTGLOW ok   Common: the deathbox glows, no value ring
+LOOTGLOW ok   Fine: a halo in the rarity colour
+LOOTGLOW ok   Fine: pillar false
+LOOTGLOW ok   Fine: the halo is brighter than the tier below
+LOOTGLOW ok   Fine: no particles
+LOOTGLOW ok   Fine: no flat ground ring
+LOOTGLOW ok   Fine: the halo material is shared
+LOOTGLOW ok   Fine: gear slot 0 wears it
+LOOTGLOW ok   Fine: gear slot 1 wears it
+LOOTGLOW ok   Fine: gear slot 2 wears it
+LOOTGLOW ok   Fine: gear slot 3 wears it
+LOOTGLOW ok   Fine: the deathbox glows, no value ring
+LOOTGLOW ok   Rare: a halo in the rarity colour
+LOOTGLOW ok   Rare: pillar false
+LOOTGLOW ok   Rare: the halo is brighter than the tier below
+LOOTGLOW ok   Rare: no particles
+LOOTGLOW ok   Rare: no flat ground ring
+LOOTGLOW ok   Rare: the halo material is shared
+LOOTGLOW ok   Rare: gear slot 0 wears it
+LOOTGLOW ok   Rare: gear slot 1 wears it
+LOOTGLOW ok   Rare: gear slot 2 wears it
+LOOTGLOW ok   Rare: gear slot 3 wears it
+LOOTGLOW ok   Rare: the deathbox glows, no value ring
+LOOTGLOW ok   Epic: a halo in the rarity colour
+LOOTGLOW ok   Epic: pillar true
+LOOTGLOW ok   Epic: pillar 3.2 m, taller than the last, short
+LOOTGLOW ok   Epic: the pillar stands on the ground
+LOOTGLOW ok   Epic: the halo is brighter than the tier below
+LOOTGLOW ok   Epic: no particles
+LOOTGLOW ok   Epic: no flat ground ring
+LOOTGLOW ok   Epic: the halo material is shared
+LOOTGLOW ok   Epic: gear slot 0 wears it
+LOOTGLOW ok   Epic: gear slot 1 wears it
+LOOTGLOW ok   Epic: gear slot 2 wears it
+LOOTGLOW ok   Epic: gear slot 3 wears it
+LOOTGLOW ok   Epic: the deathbox glows, no value ring
+LOOTGLOW ok   Legendary: a halo in the rarity colour
+LOOTGLOW ok   Legendary: pillar true
+LOOTGLOW ok   Legendary: pillar 3.8 m, taller than the last, short
+LOOTGLOW ok   Legendary: the pillar stands on the ground
+LOOTGLOW ok   Legendary: the halo is brighter than the tier below
+LOOTGLOW ok   Legendary: no particles
+LOOTGLOW ok   Legendary: no flat ground ring
+LOOTGLOW ok   Legendary: the halo material is shared
+LOOTGLOW ok   Legendary: gear slot 0 wears it
+LOOTGLOW ok   Legendary: gear slot 1 wears it
+LOOTGLOW ok   Legendary: gear slot 2 wears it
+LOOTGLOW ok   Legendary: gear slot 3 wears it
+LOOTGLOW ok   Legendary: the deathbox glows, no value ring
+LOOTGLOW ok   every tier has its own colour
+LOOTGLOW ok   an out-of-range rarity clamps to a look
+LOOTGLOW ok   a Brand tuning has a pillar
+LOOTGLOW ok   a plain tuning is halo only
+LOOTGLOW ok   very_low, Common: halo present false
+LOOTGLOW ok   very_low, Common: halo culled at 22 m
+LOOTGLOW ok   very_low, Common: a pillar outlasts the halo
+LOOTGLOW ok   very_low, Fine: halo present true
+LOOTGLOW ok   very_low, Fine: halo culled at 22 m
+LOOTGLOW ok   very_low, Fine: a pillar outlasts the halo
+LOOTGLOW ok   very_low, Rare: halo present true
+LOOTGLOW ok   very_low, Rare: halo culled at 22 m
+LOOTGLOW ok   very_low, Rare: a pillar outlasts the halo
+LOOTGLOW ok   very_low, Epic: halo present true
+LOOTGLOW ok   very_low, Epic: halo culled at 22 m
+LOOTGLOW ok   very_low, Epic: a pillar outlasts the halo
+LOOTGLOW ok   very_low, Legendary: halo present true
+LOOTGLOW ok   very_low, Legendary: halo culled at 22 m
+LOOTGLOW ok   very_low, Legendary: a pillar outlasts the halo
+SCRIPT ERROR: Invalid access to property or key 'very_low' on a base object of type 'Dictionary'.
+          at: _preset (res://tools/loot_glow_check.gd:100)
+          GDScript backtrace (most recent call first):
+              [0] _preset (res://tools/loot_glow_check.gd:100)
+              [1] run (res://tools/loot_glow_check.gd:68)
+              [2] run (res://tools/check_registry.gd:980)
+              [3] _ready (res://scripts/main.gd:270)
+LOOTGLOW ok   low, Common: halo present false
+LOOTGLOW ok   low, Common: halo culled at 30 m
+LOOTGLOW ok   low, Common: a pillar outlasts the halo
+LOOTGLOW ok   low, Fine: halo present true
+LOOTGLOW ok   low, Fine: halo culled at 30 m
+LOOTGLOW ok   low, Fine: a pillar outlasts the halo
+LOOTGLOW ok   low, Rare: halo present true
+LOOTGLOW ok   low, Rare: halo culled at 30 m
+LOOTGLOW ok   low, Rare: a pillar outlasts the halo
+LOOTGLOW ok   low, Epic: halo present true
+LOOTGLOW ok   low, Epic: halo culled at 30 m
+LOOTGLOW ok   low, Epic: a pillar outlasts the halo
+LOOTGLOW ok   low, Legendary: halo present true
+LOOTGLOW ok   low, Legendary: halo culled at 30 m
+LOOTGLOW ok   low, Legendary: a pillar outlasts the halo
+LOOTGLOW ok   low: a pile of 40 drops draws 24 glow meshes (budget 40)
+LOOTGLOW ok   low: 4 pillars, only on the top two tiers
+LOOTGLOW ok   medium, Common: halo present true
+LOOTGLOW ok   medium, Common: halo culled at 40 m
+LOOTGLOW ok   medium, Common: a pillar outlasts the halo
+LOOTGLOW ok   medium, Fine: halo present true
+LOOTGLOW ok   medium, Fine: halo culled at 40 m
+LOOTGLOW ok   medium, Fine: a pillar outlasts the halo
+LOOTGLOW ok   medium, Rare: halo present true
+LOOTGLOW ok   medium, Rare: halo culled at 40 m
+LOOTGLOW ok   medium, Rare: a pillar outlasts the halo
+LOOTGLOW ok   medium, Epic: halo present true
+LOOTGLOW ok   medium, Epic: halo culled at 40 m
+LOOTGLOW ok   medium, Epic: a pillar outlasts the halo
+LOOTGLOW ok   medium, Legendary: halo present true
+LOOTGLOW ok   medium, Legendary: halo culled at 40 m
+LOOTGLOW ok   medium, Legendary: a pillar outlasts the halo
+LOOTGLOW ok   medium: a pile of 40 drops draws 44 glow meshes (budget 60)
+LOOTGLOW ok   medium: 4 pillars, only on the top two tiers
+LOOTGLOW ok   high, Common: halo present true
+LOOTGLOW ok   high, Common: halo culled at 50 m
+LOOTGLOW ok   high, Common: a pillar outlasts the halo
+LOOTGLOW ok   high, Fine: halo present true
+LOOTGLOW ok   high, Fine: halo culled at 50 m
+LOOTGLOW ok   high, Fine: a pillar outlasts the halo
+LOOTGLOW ok   high, Rare: halo present true
+LOOTGLOW ok   high, Rare: halo culled at 50 m
+LOOTGLOW ok   high, Rare: a pillar outlasts the halo
+LOOTGLOW ok   high, Epic: halo present true
+LOOTGLOW ok   high, Epic: halo culled at 50 m
+LOOTGLOW ok   high, Epic: a pillar outlasts the halo
+LOOTGLOW ok   high, Legendary: halo present true
+LOOTGLOW ok   high, Legendary: halo culled at 50 m
+LOOTGLOW ok   high, Legendary: a pillar outlasts the halo
+LOOTGLOW ok   high: a pile of 40 drops draws 44 glow meshes (budget 60)
+LOOTGLOW ok   high: 4 pillars, only on the top two tiers
+LOOTGLOW ok   ultra, Common: halo present true
+LOOTGLOW ok   ultra, Common: halo culled at 80 m
+LOOTGLOW ok   ultra, Common: a pillar outlasts the halo
+LOOTGLOW ok   ultra, Fine: halo present true
+LOOTGLOW ok   ultra, Fine: halo culled at 80 m
+LOOTGLOW ok   ultra, Fine: a pillar outlasts the halo
+LOOTGLOW ok   ultra, Rare: halo present true
+LOOTGLOW ok   ultra, Rare: halo culled at 80 m
+LOOTGLOW ok   ultra, Rare: a pillar outlasts the halo
+LOOTGLOW ok   ultra, Epic: halo present true
+LOOTGLOW ok   ultra, Epic: halo culled at 80 m
+LOOTGLOW ok   ultra, Epic: a pillar outlasts the halo
+LOOTGLOW ok   ultra, Legendary: halo present true
+LOOTGLOW ok   ultra, Legendary: halo culled at 80 m
+LOOTGLOW ok   ultra, Legendary: a pillar outlasts the halo
+LOOTGLOW ok   ultra: a pile of 40 drops draws 44 glow meshes (budget 60)
+LOOTGLOW ok   ultra: 4 pillars, only on the top two tiers
+LOOTGLOW ok   a hidden stand-in warms the pillar shader
+LOOTGLOW ok   a box shows its best item's rarity
+LOOTGLOW ok   an empty box is the lowest tier
+LOOTGLOW OK
+ERROR: Pages in use exist at exit in PagedAllocator: N20RasterizerSceneGLES321GeometryInstanceGLES3E
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: 9 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+ERROR: 4 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 10 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+ERROR: 4 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Buffer with GL ID of 41: leaked 1540 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 42: leaked 616 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 43: leaked 720 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 53: leaked 1540 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 54: leaked 616 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 55: leaked 720 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 57: leaked 1140 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 58: leaked 456 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 59: leaked 360 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 167: leaked 23500 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 168: leaked 9400 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 169: leaked 13248 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 171: leaked 42900 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 172: leaked 17160 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 173: leaked 24576 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 175: leaked 42900 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 176: leaked 17160 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 177: leaked 24576 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 186: leaked 13300 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 187: leaked 5320 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 188: leaked 7344 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 191: leaked 42900 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 192: leaked 17160 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 193: leaked 24576 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 194: leaked 42900 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 195: leaked 17160 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 196: leaked 24576 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: 9 RID allocations of type 'N17RendererSceneCull8InstanceE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

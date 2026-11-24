@@ -1,0 +1,58 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+FCLIMBBLK ok   an open 9x9 patch of meadow to place on ((59, 30))
+FCLIMBBLK ok   fence: its 1 tile(s) stand you at 1.2 m
+FCLIMBBLK ok   fence: a running jump tops it (1.2 m)
+FCLIMBBLK ok   fence: from the top you walk off onto the meadow
+FCLIMBBLK ok   stone_wall: its 1 tile(s) stand you at 1.2 m
+FCLIMBBLK ok   stone_wall: a running jump tops it (1.2 m)
+FCLIMBBLK ok   stone_wall: from the top you walk off onto the meadow
+FCLIMBBLK ok   hedge: its 1 tile(s) stand you at 1.2 m
+FCLIMBBLK ok   hedge: a running jump tops it (1.2 m)
+FCLIMBBLK ok   hedge: from the top you walk off onto the meadow
+FCLIMBBLK ok   bench: its 2 tile(s) stand you at 0.5 m
+FCLIMBBLK ok   bench: a running jump tops it (0.5 m)
+FCLIMBBLK ok   bench: from the top you walk off onto the meadow
+FCLIMBBLK ok   storage_chest: its 1 tile(s) stand you at 1.2 m
+FCLIMBBLK ok   storage_chest: a running jump tops it (1.2 m)
+FCLIMBBLK ok   storage_chest: from the top you walk off onto the meadow
+FCLIMBBLK ok   tree: its 1 tile(s) stand you at 1.2 m
+FCLIMBBLK ok   tree: a running jump tops it (1.2 m)
+FCLIMBBLK ok   tree: from the top you walk off onto the meadow
+FCLIMBBLK ok   pillar: its 1 tile(s) stand you at 1.2 m
+FCLIMBBLK ok   pillar: a running jump tops it (1.2 m)
+FCLIMBBLK ok   pillar: from the top you walk off onto the meadow
+FCLIMBBLK ok   workbench: its 2 tile(s) stand you at 1.2 m
+FCLIMBBLK ok   workbench: a running jump tops it (1.2 m)
+FCLIMBBLK ok   workbench: from the top you walk off onto the meadow
+FCLIMBBLK ok   house: its 15 tile(s) stand you at 1.2 m
+FCLIMBBLK ok   house: a running jump tops it (1.2 m)
+FCLIMBBLK ok   house: from the top you walk off onto the meadow
+FCLIMBBLK ok   every blocked tile on the farm (0) has a climbable top (0 without)
+FCLIMBBLK ok   layout read
+FCLIMBBLK ok   a Boki walks round a 7-tile wall to the far side in 4.2 s, never on a block
+FCLIMBBLK ok   a Boki dropped from a block's top lands down
+FCLIMBBLK ok   a Boki found on a block when the layout changes is moved off it
+FCLIMBBLK ok   a player up on a block stays up on a layout change
+FCLIMBBLK DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

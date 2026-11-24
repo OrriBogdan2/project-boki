@@ -1,0 +1,43 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+GARDENAUDIO ok   bramblebank: zone_bramblebank plays under ["garden_midday"] (2 loops at most)
+GARDENAUDIO ok   glasswater: zone_glasswater plays under ["garden_midday"] (2 loops at most)
+GARDENAUDIO ok   cinderstep: zone_cinderstep plays under ["garden_midday"] (2 loops at most)
+GARDENAUDIO ok   hushwood: zone_hushwood plays under ["garden_evening"] (2 loops at most)
+GARDENAUDIO ok   ridge: zone_ridge plays under ["garden_midday"] (2 loops at most)
+GARDENAUDIO ok   hub: zone_hub plays under ["garden_midday"] (2 loops at most)
+GARDENAUDIO ok   every zone and the hub have their own bed (6)
+GARDENAUDIO ok   Hushwood stays at dusk, Bramblebank keeps the clock
+GARDENAUDIO ok   the hop and wake sounds exist
+GARDENAUDIO ok   the whoosh, a landing chime for every zone and the locked knock exist (missing: [])
+GARDENAUDIO ok   the departure whoosh is short (0.44 s)
+GARDENAUDIO ok   the hop sound lasts 0.64 s for the 0.5 s light-up
+GARDENAUDIO ok   waking Glasswater opens it with its sting
+GARDENAUDIO ok   a zone that is already awake gives no second sting
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+GARDENAUDIO ok   the hub plays its own bed
+GARDENAUDIO ok   a locked zone's card can be picked and is refused with the knock
+GARDENAUDIO ok   the Waystone hop plays its sound
+GARDENAUDIO ok   the hop leaves with the whoosh and lands in Bramblebank with its chime
+GARDENAUDIO ok   after the hop Bramblebank plays zone_bramblebank, the hub bed is gone
+GARDENAUDIO PASS (0 failures)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

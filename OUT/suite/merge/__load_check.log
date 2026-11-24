@@ -1,0 +1,140 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HITCH renderer=gl_compatibility adapter=llvmpipe (LLVM 21.1.8, 256 bits) software=true headless=false seed=4101 squad=3
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _slice (res://scripts/match/match.gd:200)
+WARNING: Nodes with non-equal opposite anchors will have their size overridden after _ready(). 
+If you want to set size, change the anchors or consider using set_deferred().
+     at: _set_size (scene/gui/control.cpp:1487)
+     GDScript backtrace (most recent call first):
+         [0] _build (res://scripts/match/squad_intro.gd:193)
+         [1] start (res://scripts/match/squad_intro.gd:65)
+         [2] _start (res://scripts/match/match.gd:474)
+         [3] setup (res://scripts/ui/hud.gd:75)
+         [4] _slice (res://scripts/match/match.gd:200)
+WARNING: Nodes with non-equal opposite anchors will have their size overridden after _ready(). 
+If you want to set size, change the anchors or consider using set_deferred().
+     at: _set_size (scene/gui/control.cpp:1487)
+     GDScript backtrace (most recent call first):
+         [0] _build (res://scripts/match/squad_intro.gd:193)
+         [1] start (res://scripts/match/squad_intro.gd:65)
+         [2] _start (res://scripts/match/match.gd:474)
+         [3] setup (res://scripts/ui/hud.gd:75)
+         [4] _slice (res://scripts/match/match.gd:200)
+Quality: auto picked very_low (load benchmark 1352.0 ms a frame)
+LOAD renderer=gl_compatibility adapter=llvmpipe (LLVM 21.1.8, 256 bits) window=(640, 360)
+LOAD total 143743 ms over 1071 frames; longest frame 2804 ms (2763 ms outside drawing); 29 frames over 150 ms (judged outside drawing)
+LOAD frame ms p50 62.9 p95 375.9 max 2803.7
+LOAD spinner drew on 1069 of 1069 loading-screen frames
+LOAD longest frames (wall, outside drawing, render, process, physics of the frame before, shader compiles, stage shown, build steps inside):
+LOAD      2804    2763      41    157     0  c0   Building the map         [slice 37 ms]
+LOAD       853     835      18    173     0  c0   Spawning                 [slice 800 ms]
+LOAD       664     641      23    250     0  c0   Building the map       world.roots 638
+LOAD       594     574      20   2129     0  c0   Preparing graphics     
+LOAD       554     538      16     54     0  c0   Building the map         [slice 536 ms]
+LOAD       428     405      22     90     0  c0   Spawning                 [slice 376 ms]
+LOAD       376     359      16    190     0  c0   Spawning                 [slice 324 ms]
+LOAD       325     311      14     54     0  c0   Building the map         [slice 309 ms]
+LOAD       325     305      20     54     0  c0   Spawning                 [slice 301 ms]
+LOAD       288     271      17    199     0  c0   Building the map         [slice 269 ms]
+LOAD       261     247      15     54     0  c0   Building the map       world.landmarks 212
+LOAD       245     245       0      0     0  c0   Building the map       
+LOAD build steps (total ms): build.warm_up 63731, build.generate 8291, world.terrain 3837, world.grass 3757, world.walls 2306, build.hunters 2284, build.spawns 2255, world.scatter_plan 2101, build.mobs 1309, build.chests 726, build.hud 686, world.roots 638, map.bake 437, world.landmarks 212, build.pads_exits 157, build.systems 89
+LOAD note: warm-up: 118 stand-ins in 52 batches
+LOAD note: warm-up: 3 stand-ins in 1 batches
+LOAD note: warm-up ms: stand-ins 55981, views 6720, late 1392 (0 of 121 keys warm from the stamp)
+LOAD held after Ready: 4343 ms (at most 300)
+LOAD ADVISORY (29 slow frames, held after Ready)
+ERROR: 4 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 4 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 48 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

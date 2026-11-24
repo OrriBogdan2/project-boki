@@ -1,0 +1,82 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/glide_hit_check.gd:249)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/glide_hit_check.gd:249)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ACHECK ok   found a test rim
+ACHECK ok   a 10 shot heats the glider 0.261 (3x rule: 0.261)
+ACHECK ok   ...and deals normal damage (10.0 of 10)
+ACHECK ok   a shot with heat left keeps the glider open (0.5 s on)
+ACHECK ok   a shot that fills the heat spikes: glider shut, stunned
+ACHECK ok   ...plummeting (-6.0 m/s)
+ACHECK ok   ...and a press can't reopen it in the air
+ACHECK ok   ...it lands stunned 0.70 s (source: 0.7 s)
+ACHECK ok   a shot on an overheated glider spikes it
+ACHECK ok   a monster's shot heats the glider but never spikes it
+ACHECK ok   the test shove is a hard knock (12 m/s)
+ACHECK ok   a hard knock keeps the glider open the whole 0.5 s
+ACHECK ok   ...and the shove carries it 5.2 m in 0.5 s
+ACHECK ok   a shut glider doesn't open in the first 0.3 s of a hard knock
+ACHECK ok   a stun shuts the glider at once
+ACHECK ok   ...and the body falls (-4.6 m/s)
+ACHECK ok   ...a press during the stun doesn't open it
+ACHECK ok   ...a press opens it the step the stun is over
+ACHECK ok   Grimble's reel (it stuns) shuts the glider
+ACHECK ok   ...a press opens it once the reel and its stun are over
+SCRIPT ERROR: Invalid access to property or key 'kb' on a base object of type 'Dictionary'.
+          at: _air_hits (res://tools/glide_hit_check.gd:143)
+          GDScript backtrace (most recent call first):
+              [0] _air_hits (res://tools/glide_hit_check.gd:143)
+              [1] _air_knocks (res://tools/glide_hit_check.gd:205)
+              [2] run (res://tools/glide_hit_check.gd:277)
+              [3] run (res://tools/check_registry.gd:980)
+              [4] _ready (res://scripts/main.gd:270)
+ACHECK DONE, failures: 0
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 25 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

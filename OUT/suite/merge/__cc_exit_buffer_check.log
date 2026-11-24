@@ -1,0 +1,616 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+CCEXIT ok   archer lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   archer rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   archer e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   archer x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   archer dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   archer jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   archer dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   archer dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   archer jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   archer lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   archer Shift at a stun's end with a root still on: never went off
+CCEXIT ok   archer e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   juggernaut lmb pressed 0.10s before the stun ends: went off 1 steps after the CC let it (no CC: 1 steps)
+CCEXIT ok   juggernaut rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   juggernaut e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   juggernaut x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   juggernaut dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   juggernaut jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   juggernaut dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   juggernaut dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   juggernaut jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   juggernaut lmb at a stun's end with a root still on: went off 1 steps after the CC let it
+CCEXIT ok   juggernaut Shift at a stun's end with a root still on: never went off
+CCEXIT ok   juggernaut e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   gunslinger lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gunslinger rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gunslinger e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gunslinger x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gunslinger dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gunslinger jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gunslinger dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gunslinger dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gunslinger jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gunslinger lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   gunslinger Shift at a stun's end with a root still on: never went off
+CCEXIT ok   gunslinger e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   bulwark lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   bulwark rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   bulwark e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   bulwark x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   bulwark dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   bulwark jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   bulwark dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   bulwark dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   bulwark jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   bulwark lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   bulwark Shift at a stun's end with a root still on: never went off
+CCEXIT ok   bulwark e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   rimewright lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   rimewright rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   rimewright e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   rimewright x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT FAIL rimewright dash pressed 0.10s before the stun ends: never went off (no CC: 0 steps)
+CCEXIT ok   rimewright jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   rimewright dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   rimewright dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   rimewright jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   rimewright lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   rimewright Shift at a stun's end with a root still on: never went off
+CCEXIT ok   rimewright e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   ashwick lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ashwick rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ashwick e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ashwick x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ashwick dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ashwick jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ashwick dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ashwick dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ashwick jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ashwick lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   ashwick Shift at a stun's end with a root still on: never went off
+CCEXIT ok   ashwick e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   dolm lmb pressed 0.10s before the stun ends: went off 1 steps after the CC let it (no CC: 1 steps)
+CCEXIT ok   dolm rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dolm e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dolm x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dolm dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dolm jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dolm dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dolm dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dolm jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dolm lmb at a stun's end with a root still on: went off 1 steps after the CC let it
+CCEXIT ok   dolm Shift at a stun's end with a root still on: never went off
+CCEXIT ok   dolm e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   mage lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   mage rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   mage e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   mage x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   mage dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   mage jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   mage dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   mage dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   mage jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   mage lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   mage Shift at a stun's end with a root still on: never went off
+CCEXIT ok   mage e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   dredge lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dredge rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dredge e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dredge x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dredge dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dredge jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dredge dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dredge dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dredge jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   dredge lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   dredge Shift at a stun's end with a root still on: never went off
+CCEXIT ok   dredge e pressed 0.30s before the stun ends is not held: never went off
+CCEXIT ok   tender lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   tender rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   tender e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   tender x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   tender dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   tender jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   tender dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   tender dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   tender jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   tender lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   tender Shift at a stun's end with a root still on: never went off
+CCEXIT ok   tender e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   thief lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   thief rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   thief e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   thief x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   thief dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   thief jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   thief dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   thief dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   thief jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   thief lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   thief Shift at a stun's end with a root still on: never went off
+CCEXIT ok   thief e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   ostra lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ostra rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ostra e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ostra x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ostra dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ostra jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ostra dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ostra dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ostra jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   ostra lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   ostra Shift at a stun's end with a root still on: never went off
+CCEXIT ok   ostra e pressed 0.30s before the stun ends is not held: never went off
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cc_exit_buffer_check.gd:31)
+CCEXIT ok   gil lmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gil rmb pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gil e pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gil x pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gil dash pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gil jump pressed 0.10s before the stun ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gil dash pressed 0.10s before the root ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gil dash pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gil jump pressed 0.10s before the gnd ends: went off 0 steps after the CC let it (no CC: 0 steps)
+CCEXIT ok   gil lmb at a stun's end with a root still on: went off 0 steps after the CC let it
+CCEXIT ok   gil Shift at a stun's end with a root still on: never went off
+CCEXIT ok   gil e pressed 0.30s before the stun ends is not held: never went off
+CCEXIT DONE, failures: 1, skipped: 0
+ERROR: 1 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 78: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 80: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 79: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 158: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 157: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 160: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 159: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 161: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 272: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 285: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 283: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 289: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 300: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 13374: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13375: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13376: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 13377: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 53 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,705 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MFEEL flat spot (99.5, 1.6, 163.5)
+MFEEL speed_light                =   5.278 m/s    target in [5.1, 5.7]  ok   ([game data] MoveSpeed 445-485 uu/s x body_scale 1.16 (0061))
+MFEEL speed_medium               =   5.278 m/s    target in [5.1, 5.7]  ok   ([game data] per hunter, at body_scale)
+MFEEL ground_input_frames        =   1.000 frames target <= 1.0         ok   (press to velocity change, same sim step)
+MFEEL ground_t95                 =   0.083 s      target <= 0.1         ok   ([game data] MaxAcceleration 4700-5400 uu/s2: top speed in ~0.09s)
+MFEEL ground_stop_t              =   0.200 s      target in [0.12, 0.25] ok   ([game data] braking 2220 uu/s2, friction 1 x2: SV ~0.18s)
+MFEEL ground_stop_dist           =   0.429 m      target in [0.27, 0.4] FAIL   ([game data] UE's walking brake: 0.28-0.39m at 30-144 fps)
+MFEEL ground_shed_dist           =   1.328 m      target in [1.25, 1.55] ok   ([game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m)
+MFEEL ground_shed_keys_m         =   0.947 m      target in [0.85, 1.05] ok   ([game data] the same brake to a 5.28 m/s run, keys held: 0.955m)
+MFEEL speed_heavy                =   5.278 m/s    target in [5.1, 5.7]  ok   ([game data] per hunter, at body_scale)
+MFEEL haste_two_bonus_x          =   1.326 x      target in [1.49, 1.51] FAIL   (haste 0.35 + kin buff 0.15 add (1.55 if stacked))
+MFEEL haste_bonus_slow_x         =   0.810 x      target in [0.8, 0.82] ok   (haste 0.35 under a 40% slow: 1.35 x 0.6)
+MFEEL haste_cap_mps              =   7.000 m/s    target in [6.95, 7.0] ok   ([game data] MaxMoveSpeed 700 uu/s)
+MFEEL haste_clip_rate            =   1.000 x      target in [0.99, 1.01] ok   (clip rate / (speed / clip speed), worst Warden)
+MFEEL face_turn180_t             =   0.150 s      target in [0.12, 0.17] ok   ([game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s)
+MFEEL face_turn20_t              =   0.017 s      target <= 0.04        ok   ([game data] the same fixed rate: a 20-degree flick lands in ~0.02s)
+MFEEL jump_input_frames          =   1.000 frames target <= 1.0         ok   (press to lift-off, same sim step)
+MFEEL jump_apex                  =   1.517 m      target in [1.2, 1.6]  ok   ([game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces)
+MFEEL jump_speed_vs_source       =   0.874 x      target in [0.85, 1.0] ok   ([game data] JumpZVelocity 7.5; ours 6.8 (terraces))
+MFEEL jump_airtime               =   0.900 s      target in [0.85, 1.05] ok   ([game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s)
+MFEEL air_carry_m                =   4.037 m      target >= 3.0         ok   ([game data] FallingLateralFriction 0.375: the run-up carries)
+MFEEL air_reverse_dv             =   8.936 m/s    target >= 5.0         ok   ([owner 11-08] strong WASD air control)
+MFEEL land_carry_hop_held        =   1.000 x      target in [0.98, 1.02] ok   ([game data] a 1 m hop, keys held: lands at run speed)
+MFEEL land_carry_drop4_held      =   1.000 x      target in [0.98, 1.02] ok   ([game data] a 4-terrace (3.2 m) drop, keys held: run speed)
+MFEEL land_carry_glide_held      =   1.000 x      target in [0.98, 1.07] ok   (glider let go 2 m up, keys held: the glide speed bleeds off)
+MFEEL coyote_frames              =   7.000 frames target >= 6.0         ok   (FeelConfig coyote_time 0.1s (walked off a rim over the void))
+MFEEL jump_buffer_frames         =   7.000 frames target >= 7.0         ok   (FeelConfig jump_buffer 0.12s (7 steps))
+MFEEL coyote_jump_050ms          =   1.000 yes    target >= 1.0         ok   (ran off a rim, jump 0.05s later: inside the 0.12s coyote [est])
+MFEEL buffer_jump_050ms          =   1.000 yes    target >= 1.0         ok   (jump 0.05s before landing goes off on landing: 0.12s buffer [est])
+MFEEL coyote_jump_100ms          =   1.000 yes    target >= 1.0         ok   (ran off a rim, jump 0.10s later: inside the 0.12s coyote [est])
+MFEEL buffer_jump_100ms          =   1.000 yes    target >= 1.0         ok   (jump 0.10s before landing goes off on landing: 0.12s buffer [est])
+MFEEL coyote_jump_150ms          =   0.000 yes    target <= 0.0         ok   (ran off a rim, jump 0.15s later: past the coyote, no jump [est])
+MFEEL buffer_jump_150ms          =   0.000 yes    target <= 0.0         ok   (jump 0.15s before landing (3m): past the buffer, no jump [est])
+MFEEL freefall_1s_depth          =   7.202 m      target in [6.8, 8.0]  ok   ([game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m)
+MFEEL glide_open_press_frames    =   1.000 frames target <= 1.0         ok   ([wiki/guide] hold jump in the air to glide; a second press opens at once)
+MFEEL ok   glide_start: opened while rising at 5.8 m/s
+MFEEL glide_start_vy             =   1.083 m/s    target in [0.85, 1.4] ok   ([game data] GlideStartFallSpeedMin: opened rising, it falls)
+MFEEL ok   glide_accel = GlideTargetXYForce 162,500 / Mass 100 (16.25)
+MFEEL ok   glide_start_vy = GlideStartFallSpeedMin 85 uu/s (0.85)
+MFEEL glide_open_hold_s          =   0.117 s      target <= 0.12        ok   (tap/hold split for Space; a tap is ~0.1s)
+MFEEL glide_open_button_frames   =   1.000 frames target <= 1.0         ok   (dedicated glide button: no tap/hold ambiguity)
+MFEEL glide_catch_t              =   0.183 s      target <= 0.2         ok   ([guide] opens 'instantly'; the catch rate is ours (max locked))
+MFEEL glide_speed                =   5.000 m/s    target in [4.5, 5.5]  ok   ([game data] MaxGlide 500 uu/s +-10% (item 163))
+MFEEL glide_sink                 =   1.400 m/s    target in [1.38, 1.42] ok   (hunter_move.json glide_sink (ours: no footage to count))
+MFEEL glide_turn90_t             =   0.383 s      target in [0.3, 0.6]  ok   ([game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia)
+MFEEL glide_reverse_t            =   0.600 s      target in [0.45, 0.8] ok   ([game data] the same 16.25 m/s^2 brakes a reversal in ~0.6 s)
+MFEEL glide_brake_ratio          =   0.071 x      target <= 0.8         ok   (steering against heading brakes momentum (speed vs letting go))
+MFEEL glide_high_sink            =   3.500 m/s    target in [3.3, 3.6]  ok   ([game data] GlideDownwardForce: above 8.5m)
+MFEEL glide_high_swoop_x         =   2.460 x      target in [2.4, 2.6]  ok   ([game data] SwoopSpeedTransferRatio 2.5, the pull's sink)
+MFEEL reglide_frames             =   1.000 frames target <= 1.0         ok   (glide-cancel then re-hold reopens at once)
+MFEEL dive_vy                    =  32.500 m/s    target in [32.0, 32.5] ok   ([game data] GlideDiveZTargetSpeed -3250 uu/s, crouch held)
+MFEEL sneak_speed                =   0.500 x      target in [0.499, 0.501] ok   ([data] SneakSpeedMultiplier 0.5 of run speed)
+MFEEL dive_vy_t                  =   0.750 s      target in [0.6, 0.9]  ok   ([game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2)
+MFEEL dive_cancel_h              =   3.086 m      target in [2.9, 3.5]  ok   ([game data] GlideDiveCancelDistance 350 uu, the glide catches)
+MFEEL dive_steer_ratio           =   0.250 x      target in [0.2, 0.3]  ok   ([game data] GlideDiveXYForceMultiplier 0.25 of the glide steer)
+MFEEL swoop: cruise 5.00, dive fall 3.73, shed 2.33, peak 10.75
+MFEEL swoop_x                    =   2.464 x      target in [2.4, 2.6]  ok   ([game data] SwoopSpeedTransferRatio 2.5, a dive's sink)
+MFEEL swoop_fade_s               =   1.500 s      target in [1.45, 1.55] ok   ([game data] SwoopSpeedFadeTime 1.5 s)
+MFEEL swoop_left                 =   0.000 m/s    target <= 0.05        ok   (over cruise 1.5 s after the level-out)
+MFEEL swoop (hot): cruise 2.50, dive fall 8.50, shed 3.50, peak 6.79
+MFEEL swoop_hot_x                =   1.226 x      target in [1.2, 1.3]  ok   (overheated: the swoop at half strength)
+MFEEL dive_timeout_s             =   9.983 s      target in [9.9, 10.1] ok   ([game data] GlideDiveTimeout 10 s of holding ends the plunge)
+MFEEL ok   dive_timeout_holds: a timed-out plunge stays off while crouch stays held
+MFEEL dashglide_reopen_frames    =   1.000 frames target <= 1.0         ok   (glider is back the step the dash ends while glide is held)
+MFEEL dashglide_open_speed       =  23.000 m/s    target >= 12.0        ok   ([wiki] gliding right after a lateral impulse keeps momentum and increases glide speed)
+MFEEL dashglide_1s_speed         =  11.581 m/s    target >= 10.5        ok   ([owner 11-13] the glide carries the dash)
+MFEEL dashglide_2s_speed         =   7.957 m/s    target in [7.0, 9.0]  ok   ([owner 11-13] still fast, bleeding back)
+MFEEL dashglide_3s_speed         =   6.329 m/s    target <= 6.5         ok   ([owner 11-08 item 9] back toward cruise)
+MFEEL ok   airdash_fall: the air dash fires out of a 12.0 m/s fall, 0.0 m/s forward
+MFEEL airdash_fall_vy_keep       =  -0.000 x      target in [0.0, 1.0]  ok   ([?] share of a 10 m fall's speed (12 m/s) the dash keeps)
+MFEEL airdash_fall_speed         =  23.001 m/s    target >= 0.0         ok   ([?] speed the dash ends on (reference))
+MFEEL ok   airdash_dive: the air dash fires out of a 32.5 m/s fall, 10.1 m/s forward
+MFEEL airdash_dive_vy_keep       =  -0.000 x      target in [0.0, 1.0]  ok   ([?] share of a glide dive's fall speed the dash keeps)
+MFEEL airdash_dive_hv_keep       =   0.000 x      target in [0.0, 1.0]  ok   ([?] share of the dive's forward speed added to the dash)
+MFEEL airdash_dive_speed         =  23.001 m/s    target >= 0.0         ok   ([?] speed the dash ends on (reference))
+MFEEL ok   brake = BrakingDecelerationWalking 2220 uu/s2 (22.2)
+MFEEL ok   brake_friction = GroundFriction 1.0 x BrakingFrictionFactor 2 (2.0)
+MFEEL dash_exit_run              =   1.000 x      target in [0.95, 1.05] ok   ([game data] no hard stop: hands over at run speed)
+MFEEL dash_exit_slide_m          =   0.429 m      target in [0.2, 0.5]  ok   ([game data] then the walking stop)
+MFEEL brake_vs_ue_err            =   0.000 m/s    target <= 0.0001      ok   (HunterMove.brake against UE's ApplyVelocityBraking)
+MFEEL ok   stop slide 0.324 m from 4.55 m/s in the source's 0.286-0.350 m (default, juggernaut, archer, tender, gunslinger)
+MFEEL ok   stop slide 0.367 m from 4.85 m/s in the source's 0.329-0.393 m (bulwark)
+MFEEL ok   stop slide 0.339 m from 4.65 m/s in the source's 0.302-0.364 m (dredge, thief, mage, dolm, ostra, ashwick)
+MFEEL ok   stop slide 0.330 m from 4.60 m/s in the source's 0.292-0.357 m (gil)
+MFEEL ok   stop slide 0.311 m from 4.45 m/s in the source's 0.275-0.336 m (rimewright)
+MFEEL slow ramp on thief (light), run 5.39 m/s
+MFEEL slow_land_0p1s             =   0.700 x      target in [0.69, 0.71] ok   ([game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s)
+MFEEL slow_land_0p3s             =   0.700 x      target in [0.69, 0.71] ok   ([game data] and holds there)
+MFEEL slow_end_0p1s              =   1.000 x      target in [0.99, 1.01] ok   ([game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s))
+MFEEL slow_end_0p3s              =   1.000 x      target in [0.99, 1.01] ok   ([game data] and holds there)
+MFEEL slow ramp on gunslinger (medium), run 5.28 m/s
+MFEEL slow_land_0p1s             =   0.700 x      target in [0.69, 0.71] ok   ([game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s)
+MFEEL slow_land_0p3s             =   0.700 x      target in [0.69, 0.71] ok   ([game data] and holds there)
+MFEEL slow_end_0p1s              =   1.000 x      target in [0.99, 1.01] ok   ([game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s))
+MFEEL slow_end_0p3s              =   1.000 x      target in [0.99, 1.01] ok   ([game data] and holds there)
+MFEEL slow ramp on juggernaut (heavy), run 5.28 m/s
+MFEEL slow_land_0p1s             =   0.700 x      target in [0.69, 0.71] ok   ([game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s)
+MFEEL slow_land_0p3s             =   0.700 x      target in [0.69, 0.71] ok   ([game data] and holds there)
+MFEEL slow_end_0p1s              =   1.000 x      target in [0.99, 1.01] ok   ([game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s))
+MFEEL slow_end_0p3s              =   1.000 x      target in [0.99, 1.01] ok   ([game data] and holds there)
+MFEEL haste_land_0p1s            =   1.000 x      target in [0.99, 1.01] ok   ([game data] a haste lands as a Slow ends: MaxAcceleration)
+MFEEL haste_end_0p1s             =   1.000 x      target in [0.99, 1.01] ok   ([game data] and ends as a Slow lands: the walking brake)
+MFEEL ok   brake_cast archer      plain 0.429 m 0.200 s, cast 0.429 m 0.200 s
+MFEEL ok   brake_cast juggernaut  plain 0.429 m 0.200 s, cast 0.429 m 0.200 s
+MFEEL ok   brake_cast gunslinger  plain 0.429 m 0.200 s, cast 0.429 m 0.200 s
+MFEEL ok   brake_cast bulwark     plain 0.481 m 0.200 s, cast 0.481 m 0.200 s
+MFEEL ok   brake_cast rimewright  plain 0.412 m 0.200 s, cast 0.412 m 0.200 s
+MFEEL ok   brake_cast ashwick     plain 0.447 m 0.200 s, cast 0.447 m 0.200 s
+MFEEL ok   brake_cast dolm        plain 0.447 m 0.200 s, cast 0.447 m 0.200 s
+MFEEL ok   brake_cast mage        plain 0.447 m 0.200 s, cast 0.447 m 0.200 s
+MFEEL ok   brake_cast dredge      plain 0.447 m 0.200 s, cast 0.447 m 0.200 s
+MFEEL ok   brake_cast tender      plain 0.429 m 0.200 s, cast 0.429 m 0.200 s
+MFEEL ok   brake_cast thief       plain 0.447 m 0.200 s, cast 0.447 m 0.200 s
+MFEEL ok   brake_cast ostra       plain 0.447 m 0.200 s, cast 0.447 m 0.200 s
+MFEEL ok   brake_cast gil         plain 0.438 m 0.200 s, cast 0.438 m 0.200 s
+MFEEL brake_cast_gap_m           =   0.000 m      target <= 0.05        ok   ([game data] a let-go brakes the same under a cast)
+MFEEL dash curve: gunslinger, 28 steps
+MFEEL dash_curve_gunslinger_peak_u =   0.089        target in [0.04, 0.18] ok   ([footage] Ghost slide peaks 0.04-0.06s into 0.47s)
+MFEEL dash_curve_gunslinger_peak_k =   1.864 x      target in [1.65, 1.9] ok   ([footage] Ghost peak 18.4 m/s, mean 10.2 (fit 1.81))
+MFEEL dash_curve_dist            =   1.011 x      target in [0.95, 1.05] ok   (the curve's mean is 1: the kit distance holds)
+MFEEL dash_curve_exit_run        =   0.533 x      target <= 1.05        ok   ([footage] the skid falls through run speed into the walk)
+MFEEL dash curve: juggernaut, 12 steps
+MFEEL dash_curve_juggernaut_peak_u =   0.292        target in [0.2, 0.36] ok   ([footage] Brall Quick Dash peaks 0.13s into 0.47s)
+MFEEL dash_curve_juggernaut_peak_k =   1.743 x      target in [1.6, 1.8]  ok   ([footage] Brall peak 17.1 m/s, mean 9.8 (fit 1.73))
+MFEEL dash_curve_dist            =   1.004 x      target in [0.95, 1.05] ok   (the curve's mean is 1: the kit distance holds)
+MFEEL dash_curve_exit_run        =   1.000 x      target <= 1.05        ok   ([footage] the skid falls through run speed into the walk)
+MFEEL dash curve: archer, 24 steps
+MFEEL dash_curve_archer_peak_u   =   0.438        target in [0.36, 0.52] ok   ([footage] Myth roll peaks 0.15s into 0.33s)
+MFEEL dash_curve_archer_peak_k   =   1.874 x      target in [1.7, 1.95] ok   ([footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86))
+MFEEL dash_curve_dist            =   1.006 x      target in [0.95, 1.05] ok   (the curve's mean is 1: the kit distance holds)
+MFEEL dash_curve_exit_run        =   0.181 x      target <= 1.05        ok   ([footage] the skid falls through run speed into the walk)
+MFEEL dash curve: bulwark, 11 steps
+MFEEL dash_curve_bulwark_peak_u  =   0.409        target in [0.4, 0.6]  ok   ([footage] Oath Smash peaks 0.17s into 0.33s)
+MFEEL dash_curve_bulwark_peak_k  =   1.236 x      target in [1.12, 1.3] ok   ([footage] Oath peak 530 px/s, mean 436)
+MFEEL dash_curve_dist            =   1.028 x      target in [0.95, 1.05] ok   (the curve's mean is 1: the kit distance holds)
+MFEEL dash_curve_exit_run        =   1.000 x      target <= 1.05        ok   ([footage] the skid falls through run speed into the walk)
+MFEEL dash_curve_time            =   1.074 x      target in [0.95, 1.08] ok   (the curve runs in the kit's own (feel-scaled) time)
+MFEEL dash_curve_bulwark_exit_k  =   0.660 x      target in [0.62, 0.8] ok   ([footage] Oath slides on into the spin (fit 0.66))
+MFEEL dash curve: thief, 15 steps
+MFEEL dash_curve_thief_peak_u    =   0.100        target in [0.28, 0.44] FAIL   ([footage] Shiv peaks in the 3rd-4th 1/15s of 8)
+MFEEL dash_curve_thief_peak_k    =   1.547 x      target in [1.7, 1.9]  FAIL   ([footage] Shiv peak 415 px/s, mean 235)
+MFEEL dash_curve_dist            =   0.429 x      target in [0.95, 1.05] FAIL   (the curve's mean is 1: the kit distance holds)
+MFEEL dash_curve_exit_run        =   0.710 x      target <= 1.05        ok   ([footage] the skid falls through run speed into the walk)
+MFEEL dash_curve_time            =   0.521 x      target in [0.95, 1.08] FAIL   (the curve runs in the kit's own (feel-scaled) time)
+MFEEL dash_curve_thief_exit_k    =   0.679 x      target in [0.5, 0.7]  ok   ([footage] Shiv ends 140 px/s, mean 235: hasted run)
+MFEEL dash curve: dredge, 12 steps
+MFEEL dash_curve_dredge_peak_u   =   0.042        target in [0.0, 0.1]  ok   ([footage] Kingpin's push: full speed at once)
+MFEEL dash_curve_dredge_peak_k   =   1.471 x      target in [1.3, 1.5]  ok   ([footage] Kingpin 14.6 m/s, mean 9.8 (fit 1.42))
+MFEEL dash_curve_dist            =   1.024 x      target in [0.95, 1.05] ok   (the curve's mean is 1: the kit distance holds)
+MFEEL dash_curve_exit_run        =   0.800 x      target <= 1.05        ok   ([footage] the skid falls through run speed into the walk)
+MFEEL dash curve: mage, 10 steps
+MFEEL dash_curve_mage_peak_u     =   0.050        target in [0.0, 0.1]  ok   ([footage] Joule's Surge is flat from the start)
+MFEEL dash_curve_mage_peak_k     =   1.070 x      target in [1.0, 1.12] ok   ([footage] Joule 33 m/s, mean 29.5 (fit 1.07))
+MFEEL dash_curve_dist            =   1.004 x      target in [0.95, 1.05] ok   (the curve's mean is 1: the kit distance holds)
+MFEEL dash_curve_exit_run        =   0.900 x      target <= 1.05        ok   ([footage] the skid falls through run speed into the walk)
+MFEEL dash curve: ashwick, 20 steps
+MFEEL dash_curve_ashwick_peak_u  =   0.125        target in [0.05, 0.18] ok   ([footage] Felix's ram peaks 0.07s into 0.65s)
+MFEEL dash_curve_ashwick_peak_k  =   1.700 x      target in [1.6, 1.95] ok   ([footage] Felix fit 1.88 (a step misses the tip))
+MFEEL dash_curve_dist            =   1.000 x      target in [0.95, 1.05] ok   (the curve's mean is 1: the kit distance holds)
+MFEEL dash_curve_exit_run        =   0.367 x      target <= 1.05        ok   ([footage] the skid falls through run speed into the walk)
+MFEEL dash curve: tender air, 56 steps, top 13.7
+MFEEL dash_curve_tender_air_dist =   1.028 x      target in [0.9, 1.1]  ok   (Meeko's glide: dash.air.dist 10.5m, owner 11-11)
+MFEEL dash_curve_tender_air_time =   0.982 x      target in [0.9, 1.08] ok   ([footage] Elluna air dash 0.8-1.1s (0.95))
+MFEEL dash_curve_tender_air_exit_k =   0.150 x      target in [0.05, 0.25] ok   (owner 11-11: little movement at the end (out_k 0.1))
+MFEEL ok   dash.jump_keep = 0.75, one value for every Hunter (0.75)
+MFEEL dash jump: gunslinger 11.96 -> 8.79 m/s (dashing true)
+MFEEL ok   dash jump gunslinger: pressed mid-dash on the ground, takes off
+MFEEL dash_jump_keep             =   0.750 x      target in [0.74, 0.76] ok   ([est] 0.75: source undecoded, no footage)
+MFEEL dash jump: juggernaut 17.27 -> 12.61 m/s (dashing true)
+MFEEL ok   dash jump juggernaut: pressed mid-dash on the ground, takes off
+MFEEL dash_jump_keep             =   0.750 x      target in [0.74, 0.76] ok   ([est] 0.75: source undecoded, no footage)
+MFEEL dash jump: archer 8.02 -> 5.97 m/s (dashing true)
+MFEEL ok   dash jump archer: pressed mid-dash on the ground, takes off
+MFEEL dash_jump_keep             =   0.752 x      target in [0.74, 0.76] ok   ([est] 0.75: source undecoded, no footage)
+MFEEL dash jump: ashwick 9.82 -> 7.25 m/s (dashing true)
+MFEEL ok   dash jump ashwick: pressed mid-dash on the ground, takes off
+MFEEL dash_jump_keep             =   0.750 x      target in [0.74, 0.76] ok   ([est] 0.75: source undecoded, no footage)
+MFEEL ok   a plain ground dash spawns no burst or ring (0)
+MFEEL ok   a plain air dash spawns no burst or ring (0)
+MFEEL ok   felt dash gunslinger ground 4.81 m in 0.450 s, want 4.80 m in 0.450 s  ([footage] Combat Slide tap 4.8 m in 0.47 s)
+MFEEL ok   felt dash gunslinger air    4.64 m in 0.330 s, want 4.70 m in 0.330 s  ([footage] Combat Slide tap 4.8 m in 0.47 s)
+MFEEL ok   felt dash gunslinger hold   7.14 m in 0.725 s, want 7.00 m in 0.730 s  ([footage] Combat Slide tap 4.8 m in 0.47 s)
+MFEEL ok   felt dash gunslinger: a sourced dash is off the dash feel
+MFEEL ok   felt dash archer     ground 3.38 m in 0.386 s, want 3.38 m in 0.386 s  ([footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed, owner 11-11: x1.125 far)
+MFEEL ok   felt dash archer: a sourced dash is off the dash feel
+MFEEL ok   felt dash ashwick    ground 3.39 m in 0.330 s, want 3.40 m in 0.330 s  ([footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m)
+MFEEL ok   felt dash ashwick    air    6.80 m in 0.280 s, want 6.80 m in 0.280 s  ([footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m)
+MFEEL ok   felt dash ashwick: a sourced dash is off the dash feel
+MFEEL ok   felt dash tender     ground 3.15 m in 0.230 s, want 3.15 m in 0.230 s  ([footage] Elluna 2 bh / 0.2 s, owner: shorter, slower (air: own check))
+MFEEL ok   felt dash tender: a sourced dash is off the dash feel
+MFEEL ok   felt dash bulwark    ground 3.53 m in 0.171 s, want 3.50 m in 0.170 s  ([footage] Oath Spin Dash ~3.5 m in ~0.17 s)
+MFEEL ok   felt dash bulwark: a sourced dash is off the dash feel
+MFEEL ok   felt dash thief      ground 4.67 m in 0.480 s, want 4.50 m in 0.480 s  ([footage] Shiv Cartwheel 4.5 m in 0.48 s)
+MFEEL ok   felt dash thief      air    4.50 m in 0.480 s, want 4.50 m in 0.480 s  ([footage] Shiv Cartwheel 4.5 m in 0.48 s)
+MFEEL ok   felt dash thief: a sourced dash is off the dash feel
+MFEEL ok   felt dash juggernaut ground 3.82 m in 0.262 s, want 3.83 m in 0.266 s  (owner 113.8: a 0.07 s dip, then 4.5 m / 0.17 s x0.85 / x1.15)
+MFEEL ok   felt dash juggernaut: a sourced dash is off the dash feel
+MFEEL ok   felt dash dredge     ground 2.72 m in 0.184 s, want 2.72 m in 0.184 s  (owner 23:40: 3.2 m / 0.16 s x0.85 / x1.15, air x1.35)
+MFEEL ok   felt dash dredge     air    3.67 m in 0.184 s, want 3.67 m in 0.184 s  (owner 23:40: 3.2 m / 0.16 s x0.85 / x1.15, air x1.35)
+MFEEL ok   felt dash dredge: a sourced dash is off the dash feel
+MFEEL ok   felt dash dolm       ground 2.38 m in 0.299 s, want 2.38 m in 0.299 s  (owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15)
+MFEEL ok   felt dash dolm: a sourced dash is off the dash feel
+MFEEL ok   felt dash mage       ground 6.16 m in 0.164 s, want 6.02 m in 0.161 s  (owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15)
+MFEEL ok   felt dash mage       air    6.16 m in 0.164 s, want 6.02 m in 0.161 s  (owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15)
+MFEEL ok   felt dash mage: a sourced dash is off the dash feel
+MFEEL ok   felt dash gil        ground 6.00 m in 0.400 s, want 6.00 m in 0.400 s  (ours: Ground Swim 6 m/0.4 s, air light long)
+MFEEL ok   felt dash gil        air    4.25 m in 0.230 s, want 4.25 m in 0.230 s  (ours: Ground Swim 6 m/0.4 s, air light long)
+MFEEL ok   felt dash gil: a sourced dash is off the dash feel
+MFEEL ok   felt move gunslinger long   3.91 m in 0.230 s, want 3.91 m in 0.230 s  (no source: medium long dash 4.6 m / 0.2 s x0.85 / x1.15)
+MFEEL ok   felt move archer     flick  4.25 m in 0.329 s, want 4.25 m in 0.329 s  (no source: light long dash 5.0 m / 0.2 s, dash_speed x0.7 x0.85 / x1.15)
+MFEEL ok   felt move bulwark    lumber 3.57 m in 0.242 s, want 3.57 m in 0.242 s  (no source: heavy long dash 4.2 m / 0.21 s x0.85 / x1.15)
+MFEEL ok   felt move bulwark    charge 3.57 m in 0.268 s, want 3.57 m in 0.268 s  (no source: 4.2 m at 18 m/s x0.85 / x1.15)
+MFEEL ok   felt move bulwark    short  2.21 m in 0.146 s, want 2.21 m in 0.146 s  (no source: 2.6 m at 20.5 m/s x0.85 / x1.15)
+MFEEL ok   felt move mage       long   4.25 m in 0.230 s, want 4.25 m in 0.230 s  (no source: light long dash 5.0 m / 0.2 s x0.85 / x1.15)
+MFEEL ok   felt move thief      long   4.25 m in 0.230 s, want 4.25 m in 0.230 s  (no source: light long dash 5.0 m / 0.2 s x0.85 / x1.15)
+MFEEL ok   felt move gil        long   4.25 m in 0.230 s, want 4.25 m in 0.230 s  (no source: light long dash 5.0 m / 0.2 s x0.85 / x1.15)
+MFEEL ok   felt move juggernaut long   3.57 m in 0.242 s, want 3.57 m in 0.242 s  (no source: heavy long dash 4.2 m / 0.21 s x0.85 / x1.15)
+MFEEL ok   felt move dolm       long   3.91 m in 0.230 s, want 3.91 m in 0.230 s  (no source: medium long dash 4.6 m / 0.2 s x0.85 / x1.15)
+MFEEL barge_chain_shoves         =   3.000        target in [3.0, 3.0]  ok   ([owner 11-03] three charges, a Shift tap inside each shove)
+MFEEL barge_chain_gap_t          =   0.100 s      target <= 0.1         ok   ([footage] turned back to the aim within ~0.1 s of the dash)
+MFEEL barge_chain_dead_frames    =   0.000 frames target <= 0.0         ok   (a press in a shove or the gap goes on the gap's last step)
+MFEEL barge_chain_turn90_t       =   0.067 s      target <= 0.1         ok   ([footage] he turns back to the aim within ~0.1 s after a dash)
+MFEEL barge_lmb_after_frames     =   1.000 frames target <= 1.0         ok   ([footage] aiming by 493.6 s: an LMB in the last shove fires)
+MFEEL barge chain: still steps between shoves [7, 7], the gap's 7
+MFEEL flue_lift_hold_s           =   0.167 s      target in [0.13, 0.2] ok   ([footage] Felix hangs at the ring)
+MFEEL flue_hover_m               =   0.450 m      target in [0.4, 0.5]  ok   ([footage] flies low: her 0.45 m by the hang's end)
+MFEEL flue_turn_deg_s            =  90.000 deg/s  target in [85.0, 95.0] ok   ([footage] peaks ~85-100 deg/s (cast 1: 52-67))
+MFEEL ok   ledge_dash gunslinger tap, 0.8 m from the edge: lip 19.3 m/s, held height 1 steps, ends in the air true at 0.436x run (least 0.263x), glider in 1 steps, ground pose after 0, air dash true (1 steps)
+MFEEL ok   ledge_dash gunslinger hold, 2.5 m from the edge: lip 15.5 m/s, held height 1 steps, ends in the air true at 0.436x run (least 0.263x), glider in 1 steps, ground pose after 0, air dash true (1 steps)
+MFEEL ok   ledge_dash juggernaut tap, 0.8 m from the edge: lip 17.3 m/s, held height 1 steps, ends in the air true at 1.186x run (least 0.750x), glider in 1 steps, ground pose after 0, air dash true (1 steps)
+MFEEL FAIL ledge_dash ashwick tap, 0.8 m from the edge: lip 17.3 m/s, held height 1 steps, ends in the air true at 0.367x run (least 0.750x), glider in 1 steps, ground pose after 0, air dash true (1 steps)
+MFEEL ok   ledge_dash tender tap, 0.8 m from the edge: lip 13.7 m/s, held height 1 steps, ends in the air true at 2.595x run (least 0.750x), glider in 1 steps, ground pose after 0, air dash true (1 steps)
+MFEEL ok   ledge_dash dolm tap, 1.6 m from the edge: lip 5.4 m/s, crashes in the air 0, lands below true
+MFEEL ok   ledge_dash dolm chain, 4.0 m from the edge: lip 1.8 m/s, crashes in the air 0, lands below true
+MFEEL ok   ledge_dash archer tap, 0.8 m from the edge: lip 10.9 m/s, held height 1 steps, ends in the air true at 0.199x run (least 0.199x), glider in 1 steps, ground pose after 0, air dash true (1 steps)
+MFEEL ok   ledge_dash dredge tap, 0.8 m from the edge: lip 20.6 m/s, held height 1 steps, ends in the air true at 1.370x run (least 0.750x), glider in 1 steps, ground pose after 0, air dash true (7 steps)
+MFEEL ok   ledge_dash dredge chain, 5.8 m from the edge: lip 10.4 m/s, held height 12 steps, ends in the air true at 1.370x run (least 0.750x), glider in 1 steps, ground pose after 0, air dash true (7 steps)
+MFEEL ok   ledge_dash rimewright tap, 0.8 m from the edge: lip 8.1 m/s, held height 1 steps, ends in the air true at 1.994x run (least 0.750x), glider in 1 steps, ground pose after 0, air dash true (1 steps)
+MFEEL ok   ledge_dash mage tap, 0.8 m from the edge: lip 40.0 m/s, held height 1 steps, ends in the air true at 4.991x run (least 0.750x), glider in 1 steps, ground pose after 0, air dash true (2 steps)
+MFEEL FAIL ledge_dash bulwark tap, 0.8 m from the edge: lip 24.1 m/s, held height 14 steps, ends in the air true at 2.405x run (least 0.750x), glider in 15 steps, ground pose after 0, air dash true (1 steps)
+MFEEL ok   ledge_dash thief tap, 0.8 m from the edge: lip 10.8 m/s, held height 1 steps, ends in the air true at 0.479x run (least 0.435x), glider in 1 steps, ground pose after 0, air dash true (1 steps)
+MFEEL ok   ledge_dash ostra trade, 0.8 m from the edge: the Trade takes him down below the edge
+MFEEL abyss_lift_t               =   0.667 s      target <= 1.0         ok   ([footage] back at island level (balloon line, 0.5m under the lip) ~1s after opening 4m deep)
+MFEEL abyss_bounce_m             =   1.585 m      target >= 1.5         ok   ([est] a bouncy lift from 6m deep)
+MFEEL abyss_kill_depth           =  17.500 m      target in [17.0, 18.0] ok   ([game data] AbyssHeight -1750 uu: 17.5m under ground level)
+MFEEL abyss_recover_depth        =  18.500 m      target >= 15.0        ok   (deepest a terminal fall can still glide out)
+MFEEL abyss_fall_vy_deep         =  10.026 m/s    target in [10.0, 10.8] ok   ([game data] AbyssFallSlowSpeedLimit 12 to 10 m/s)
+MFEEL abyss_fall_t               =   1.933 s      target >= 1.8         ok   ([game data] off the lip to AbyssHeight (17.5m) in ~2s)
+MFEEL abyss_tint_lip             =   0.000        target <= 0.02        ok   (no tint gliding at island level)
+MFEEL abyss_tint_half            =   0.726        target >= 0.6         ok   ([footage] tint deepens as you sink; owner: unmistakable early)
+MFEEL abyss_tint_end             =   1.000        target >= 0.95        ok   (full dark/red right before the point of no return)
+MFEEL abyss_tint_rising          =   0.000        target <= 0.02        ok   ([footage D1] off while the glider lifts you back up, even below the lip)
+MFEEL (no updrafts on this map, skipped)
+MFEEL feather_hold_m             =  44.583 m      target >= 0.0         ok   (holding glide over the abyss until the heat runs out (reference))
+MFEEL feather_m                  = 177.803 m      target >= 0.0         ok   (tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out)
+MFEEL feather_gain               =   3.988 x      target >= 1.15        ok   ([est] skilled feathering covers more ground than holding when heat is the limit)
+MFEEL feather_toggle_frames      =   1.000 frames target <= 1.0         ok   (feathering: glider closes and reopens the step you let go / press again, no toggle penalty)
+MFEEL dive_feather_speed         =   9.684 m/s    target >= 8.0         ok   (0061: 1s drop under the lip, then glide: speed 0.5s on)
+MFEEL dive_feather_m             =   9.643 m      target >= 7.0         ok   (...and the ground it covers in the 1s after the open)
+MFEEL knock_lace_01_m            =   1.165 m      target in [1.12, 1.22] ok   (Heavy Shot push 12 at 0.1 s)
+MFEEL knock_lace_02_m            =   2.270 m      target in [2.22, 2.32] ok   (Heavy Shot push 12 at 0.2 s)
+MFEEL knock_lace_04_m            =   4.242 m      target in [4.03, 4.23] FAIL   (Heavy Shot push 12 at 0.4 s)
+MFEEL knock_lace_keys_s          =   0.350 s      target in [0.33, 0.37] ok   (Heavy Shot push 12: keys back (knock_t, capped 0.35 s))
+MFEEL knock lace push 12.0: rest 5.12 m after 0.67 s, wall slams up to 4.11 m, cliff 1.5 m ahead: step 6
+MFEEL knock_sparkle_01_m         =   0.865 m      target in [0.81, 0.91] ok   (Storm Rod push 9 at 0.1 s)
+MFEEL knock_sparkle_02_m         =   1.670 m      target in [1.62, 1.72] ok   (Storm Rod push 9 at 0.2 s)
+MFEEL knock_sparkle_04_m         =   2.879 m      target in [2.62, 2.82] FAIL   (Storm Rod push 9 at 0.4 s)
+MFEEL knock_sparkle_keys_s       =   0.283 s      target in [0.27, 0.3] ok   (Storm Rod push 9: keys back (0.1 + 0.02 s per m/s))
+MFEEL knock sparkle push 9.0: rest 3.07 m after 0.53 s, wall slams up to 1.28 m, cliff 1.5 m ahead: step 8
+MFEEL knock_albert_01_m          =   1.265 m      target in [1.21, 1.31] ok   (hammer swing push 13 at 0.1 s)
+MFEEL knock_albert_02_m          =   2.470 m      target in [2.42, 2.52] ok   (hammer swing push 13 at 0.2 s)
+MFEEL knock_albert_04_m          =   4.669 m      target in [4.51, 4.71] ok   (hammer swing push 13 at 0.4 s)
+MFEEL knock_albert_keys_s        =   0.367 s      target in [0.35, 0.38] ok   (hammer swing push 13: keys back (the 0.35 s cap))
+MFEEL knock albert push 13.0: rest 5.86 m after 0.70 s, wall slams up to 4.95 m, cliff 1.5 m ahead: step 6
+MFEEL knock_kael_01_m            =   0.565 m      target in [0.51, 0.61] ok   (Finishing Slam push 6 at 0.1 s)
+MFEEL knock_kael_02_m            =   1.070 m      target in [1.02, 1.12] ok   (Finishing Slam push 6 at 0.2 s)
+MFEEL knock_kael_04_m            =   1.555 m      target in [1.52, 1.72] ok   (Finishing Slam push 6 at 0.4 s)
+MFEEL knock_kael_keys_s          =   0.233 s      target in [0.22, 0.25] ok   (Finishing Slam push 6: keys back)
+MFEEL knock kael push 6.0: rest 1.56 m after 0.40 s, wall slams up to 0.00 m, cliff 1.5 m ahead: step -1
+MFEEL knock_done_04              =   0.797 share  target >= 0.85        FAIL   ([footage] the least share of the four landed by 0.4 s)
+MFEEL ledge_rise_t               =   0.350 s      target <= 0.45        ok   ([game data] a 1.6m wall from a jump: jump-paced, suction lifts the rest)
+MFEEL ledge_rise_peak_m          =   0.412 m      target >= 0.2         ok   (no jump: you clear the lip with a small pop (height over the top))
+MFEEL ledge_rise_vy_max          =   5.820 m/s    target <= 7.0         ok   ([game data] suction cap 2.5 m/s: a rise never outruns the jump)
+MFEEL ledge_fling_early_m        =   2.299 m      target >= 0.0         ok   (a jump as the rise starts: a weak fling (distance onto the top, reference))
+MFEEL ledge_fling_timed_m        =   3.694 m      target >= 1.5         ok   ([est] a jump in the window near the top: a real fling onto the top)
+MFEEL ledge_fling_timed_up_m     =   0.967 m      target >= 0.7         ok   ([est] ...and it goes higher than topping out with no jump)
+MFEEL ledge_fling_gain           =   1.680 x      target >= 1.5         ok   ([est] timed fling distance vs no jump: a well-timed one is clearly rewarding)
+MFEEL ledge_window_s             =   0.233 s      target >= 0.08        ok   ([est] the fling window lasts long enough to hit on purpose (~5+ steps))
+MFEEL ledge: no jump +0.41m then 2.20m on; early jump +0.27m 2.30m; timed +0.97m 3.69m
+MFEEL ok   glide_wall cliff 0 deg: the glider met the wall
+MFEEL ok   glide_wall cliff 0 deg: the glider stays open on the wall
+MFEEL ok   glide_wall cliff 0 deg: it stays pressed on the wall (0.27 m/s into it at most)
+MFEEL ok   glide_wall cliff 30 deg: the glider met the wall
+MFEEL ok   glide_wall cliff 30 deg: the glider stays open on the wall
+MFEEL ok   glide_wall cliff 30 deg: it stays pressed on the wall (0.27 m/s into it at most)
+MFEEL glide_wall cliff 30 deg: along-wall 1.00x of 2.50 m/s, slowest 2.50 m/s
+MFEEL ok   glide_wall cliff 60 deg: the glider met the wall
+MFEEL ok   glide_wall cliff 60 deg: the glider stays open on the wall
+MFEEL ok   glide_wall cliff 60 deg: it stays pressed on the wall (0.27 m/s into it at most)
+MFEEL glide_wall cliff 60 deg: along-wall 1.00x of 4.33 m/s, slowest 4.33 m/s
+MFEEL ok   glide_wall ruin wall 0 deg: the glider met the wall
+MFEEL ok   glide_wall ruin wall 0 deg: the glider stays open on the wall
+MFEEL ok   glide_wall ruin wall 0 deg: it stays pressed on the wall (0.00 m/s into it at most)
+MFEEL ok   glide_wall ruin wall 30 deg: the glider met the wall
+MFEEL ok   glide_wall ruin wall 30 deg: the glider stays open on the wall
+MFEEL ok   glide_wall ruin wall 30 deg: it stays pressed on the wall (0.12 m/s into it at most)
+MFEEL glide_wall ruin wall 30 deg: along-wall 1.00x of 2.50 m/s, slowest 2.50 m/s
+MFEEL ok   glide_wall ruin wall 60 deg: the glider met the wall
+MFEEL ok   glide_wall ruin wall 60 deg: the glider stays open on the wall
+MFEEL ok   glide_wall ruin wall 60 deg: it stays pressed on the wall (0.27 m/s into it at most)
+MFEEL glide_wall ruin wall 60 deg: along-wall 1.00x of 4.33 m/s, slowest 4.33 m/s
+MFEEL ok   glide_wall tenzo rock 0 deg: the glider met the wall
+MFEEL ok   glide_wall tenzo rock 0 deg: the glider stays open on the wall
+MFEEL ok   glide_wall tenzo rock 0 deg: it stays pressed on the wall (0.00 m/s into it at most)
+MFEEL ok   glide_wall tenzo rock 30 deg: the glider met the wall
+MFEEL ok   glide_wall tenzo rock 30 deg: the glider stays open on the wall
+MFEEL ok   glide_wall tenzo rock 30 deg: it stays pressed on the wall (0.00 m/s into it at most)
+MFEEL glide_wall tenzo rock 30 deg: along-wall 1.00x of 2.50 m/s, slowest 2.50 m/s
+MFEEL ok   glide_wall tenzo rock 60 deg: the glider met the wall
+MFEEL ok   glide_wall tenzo rock 60 deg: the glider stays open on the wall
+MFEEL ok   glide_wall tenzo rock 60 deg: it stays pressed on the wall (0.01 m/s into it at most)
+MFEEL glide_wall tenzo rock 60 deg: along-wall 1.00x of 4.33 m/s, slowest 4.33 m/s
+MFEEL glide_wall_tangent_lo      =   1.000 x      target >= 0.9         ok   (along-wall speed over the 1 s after a 30/60 degree hit, as a share of the tangent speed it hit with (worst case))
+MFEEL glide_wall_tangent_hi      =   1.001 x      target <= 1.1         ok   (...and the best case: the wall neither brakes nor speeds the slide)
+MFEEL glide_wall_speed_min       =   2.499 m/s    target >= 1.0         ok   (slowest frame while the keys push along the wall: no dead stop)
+MFEEL glide_wall_flips           =   0.000 n      target <= 0.0         ok   (along-wall speed sign flips over 1 s, every angled hit: no jitter)
+MFEEL glide_wall_bounce_mps      =   0.006 m/s    target <= 0.3         ok   (fastest frame moving away from the wall after any hit: no rebound)
+MFEEL ok   ledge_walk_1.6 never reaches the top
+MFEEL ledge 1.6m walk : no, in 0.00 m/s, catch to top 0.000s, over the lip 0.00 m/s
+MFEEL ok   ledge_jump_1.6 reaches the top
+MFEEL ledge_jump_1.6_t           =   0.317 s      target <= 0.35        ok   ([footage] rim to top ~0.2s; two terraces from a running jump)
+MFEEL ledge_jump_1.6_keep        =   1.508 x      target >= 1.0         ok   ([game data] over the lip at least max(0.6x the approach, 3.5 m/s): MiniMantleXYSpeedTarget)
+MFEEL ledge 1.6m jump : top, in 5.28 m/s, catch to top 0.317s, over the lip 5.28 m/s
+MFEEL ok   ledge_glide_1.6 reaches the top
+MFEEL ledge_glide_1.6_t          =   0.183 s      target <= 0.35        ok   ([footage] rim to top ~0.2s; two terraces from a glide)
+MFEEL ledge_glide_1.6_keep       =   1.508 x      target >= 1.0         ok   ([game data] the same floor, two terraces from a glide)
+MFEEL ledge 1.6m glide: top, in 5.00 m/s, catch to top 0.183s, over the lip 5.28 m/s
+MFEEL ok   ledge_walk_2.4 never reaches the top
+MFEEL ledge 2.4m walk : no, in 0.00 m/s, catch to top 0.000s, over the lip 0.00 m/s
+MFEEL ok   ledge_jump_2.4 reaches the top
+MFEEL ledge_jump_2.4_t           =   0.300 s      target <= 0.35        ok   ([footage] rim to top ~0.2s; three terraces from a running jump)
+MFEEL ledge_jump_2.4_keep        =   1.506 x      target >= 1.0         ok   ([game data] the same floor, three terraces from a running jump)
+MFEEL ledge 2.4m jump : top, in 5.28 m/s, catch to top 0.300s, over the lip 5.27 m/s
+MFEEL ok   ledge_glide_2.4 reaches the top
+MFEEL ledge_glide_2.4_t          =   0.183 s      target <= 0.35        ok   ([footage] rim to top ~0.2s; three terraces from a glide)
+MFEEL ledge_glide_2.4_keep       =   1.508 x      target >= 1.0         ok   ([game data] the same floor, three terraces from a glide)
+MFEEL ledge 2.4m glide: top, in 5.00 m/s, catch to top 0.183s, over the lip 5.28 m/s
+MFEEL ok   ledge_walk_3.2 never reaches the top
+MFEEL ledge 3.2m walk : no, in 0.00 m/s, catch to top 0.000s, over the lip 0.00 m/s
+MFEEL ok   ledge_jump_3.2 never reaches the top
+MFEEL ledge 3.2m jump : no, in 0.00 m/s, catch to top 0.000s, over the lip 0.00 m/s
+MFEEL ok   ledge_glide_3.2 reaches the top
+MFEEL ledge_glide_3.2_t          =   0.183 s      target <= 0.35        ok   ([footage] rim to top ~0.2s; four terraces from a glide)
+MFEEL ledge_glide_3.2_keep       =   1.508 x      target >= 1.0         ok   ([game data] the same floor, four terraces from a glide)
+MFEEL ledge 3.2m glide: top, in 5.00 m/s, catch to top 0.183s, over the lip 5.28 m/s
+MFEEL drop_dive_vy_t             =   0.333 s      target <= 0.4         ok   ([est] punchy skydive: 90% of dive speed)
+MFEEL drop_dive_steer_t          =   0.400 s      target <= 0.42        ok   (one air model, DECISIONS 11-08: 90% of 14 m/s in 0.39 s + a step)
+MFEEL drop_deploy_frames         =   1.000 frames target <= 1.0         ok   (press jump: glider opens the same step)
+MFEEL drop_deploy_settle_t       =   0.217 s      target <= 0.3         ok   ([est] canopy catch to drop sink rate)
+MFEEL drop_glide_steer_t         =   0.283 s      target <= 0.3         ok   ([est] responsive steering under the canopy)
+MFEEL drop_land_dead_frames      =   1.000 frames target <= 1.0         ok   (no input dead time on landing)
+MFEEL land_dead_frames           =   1.000 frames target <= 1.0         ok   (no input dead time on landing)
+MFEEL land_squash                =   0.150        target >= 0.05        ok   (brief squash on a landing that reads)
+MFEEL ok   a landing at 6.8 m/s plays land tier 1 (want 1)
+MFEEL ok   a landing at 6.8 m/s spawns no ring or burst (0)
+MFEEL ok   a landing at 12.0 m/s plays land tier 2 (want 2)
+MFEEL ok   a landing at 12.0 m/s spawns no ring or burst (0)
+MFEEL ok   a landing at 2.5 m/s plays land tier 2 (want 2)
+MFEEL ok   a landing at 2.5 m/s off the glider spawns no ring or burst (0)
+MFEEL ok   a landing at 25.0 m/s plays land tier 3 (want 3)
+MFEEL ok   a landing at 25.0 m/s off the glider spawns no ring or burst (0)
+MFEEL ok   a landing at 2.2 m/s plays land tier 2 (want 2)
+MFEEL ok   a landing at 2.2 m/s out of the drop spawns no ring or burst (0)
+MFEEL cam_lag_m                  =   0.387 m      target <= 0.4         ok   ([footage] hunter stays roughly centred; [spec] follow 0.08-0.15s)
+MFEEL cam_settle_t               =   0.233 s      target <= 0.35        ok   (camera settles on you after a stop)
+MFEEL cam_glide_lead_m           =   0.633 m      target >= 0.4         ok   (slight lead in glide direction)
+MFEEL ok   glide_cam: the glider is open
+MFEEL cam_glide_zoom_05          =   1.178 x      target in [1.12, 1.25] ok   ([spec] glider opens the view +15..25%, mostly by +0.5 s)
+MFEEL ok   glide_cam: the plunge ran (43 steps)
+MFEEL cam_dive_zoom_hold         =   1.000 x      target >= 0.98        ok   (plunge keeps the view open (min / start zoom))
+MFEEL cam_dive_land_view         =   0.173 x      target <= 0.3         ok   (ground under a plunge, screens below centre)
+MFEEL glide_cam dive lead 0.00m, zoom at dive start 1.82
+MFEEL ok   glide_cam: landed
+MFEEL cam_land_step              =   0.041 x      target <= 0.1         ok   (zoom-out lost on landing's first step: no pop)
+MFEEL cam_land_left_05           =   0.287 x      target <= 0.35        ok   (zoom-out left 0.5 s after landing: eased back)
+MFEEL glide_cam zoom at landing 1.63, 0.5 s on 1.18
+MFEEL ok   glide_cam: no lens change (fov 32.0)
+MFEEL ok   glide_cam: no shake or pull-back
+MFEEL framing: style default pitch 66 dist 23.0 fov 32, viewport 1280x720, model scale 1.12, model 1.99m tall
+MFEEL view_across_m              =  23.450 m      target in [22.0, 25.0] ok   (ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames))
+MFEEL hunter_screen_pct          =   6.289 %      target in [5.45, 6.65] ok   (medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%))
+MFEEL hunter_feet_below_pct      =   2.064 %      target in [1.5, 5.0]  ok   (feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames))
+MFEEL framing bulwark (3D model): 12.44% of screen height, feet 2.71% below the centre
+MFEEL framing gunslinger (3D model): 5.72% of screen height, feet 1.74% below the centre
+MFEEL framing before (dist 25.0, scale /1.12): 25.5m across, hunter 4.9% of screen height (silhouette 10.9%); now silhouette 13.8%
+MFEEL source_view_across_m       =  37.010 m      target in [35.0, 39.0] ok   (ground across: the source's ~37 m)
+MFEEL source_hunter_screen_pct   =   8.408 %      target in [8.3, 9.3]  ok   (as hunter_screen_pct: the source's 90-100 px of 1080)
+MFEEL source_hunter_feet_below_pct =   2.887 %      target in [1.5, 5.0]  ok   (as hunter_feet_below_pct)
+MFEEL source scale x2.10 (model 2.35): body 4.17 m tall; kept: hit circle r 0.49 m, shots leave 0.95 m up and hit it below 2.79 m, teammate tag 2.4 m up
+MFEEL source framing bulwark: 16.98% of screen height
+MFEEL source framing gunslinger: 7.65% of screen height
+MFEEL e2e_input_frames           =   1.000 frames target <= 1.0         ok   (key press to sim velocity, same rendered frame)
+MFEEL e2e_render_frames          =   1.000 frames target <= 1.0         ok   (key press to the model moving on screen)
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+         [4] _e2e (res://tools/move_feel_check.gd:2408)
+         [5] run (res://tools/move_feel_check.gd:365)
+         [6] run (res://tools/check_registry.gd:980)
+         [7] _ready (res://scripts/main.gd:270)
+MFEEL render_lag_m               =   0.000 m      target <= 0.03        ok   (local player drawn where the sim is (no interpolation lag))
+MFEEL ok   archer standing dash goes to the cursor (3.41 m, 0 deg off)
+MFEEL ok   juggernaut standing dash goes to the cursor (4.27 m, 0 deg off)
+MFEEL ok   gunslinger standing dash goes to the cursor (5.64 m, 0 deg off)
+MFEEL ok   bulwark standing dash goes to the cursor (6.42 m, 0 deg off)
+MFEEL ok   rimewright standing dash goes to the cursor (2.96 m, 0 deg off)
+MFEEL ok   ashwick standing dash goes to the cursor (3.46 m, 0 deg off)
+MFEEL ok   dolm standing dash goes to the cursor (3.02 m, 0 deg off)
+MFEEL ok   mage standing dash goes to the cursor (8.99 m, 0 deg off)
+MFEEL ok   dredge standing dash goes to the cursor (2.93 m, 0 deg off)
+MFEEL ok   tender standing dash goes to the cursor (3.60 m, 0 deg off)
+MFEEL ok   thief standing dash goes to the cursor (5.29 m, 0 deg off)
+MFEEL ok   ostra standing dash goes to the cursor (5.00 m, 0 deg off)
+MFEEL ok   gil standing dash goes to the cursor (6.53 m, 0 deg off)
+MFEEL ok   turn_friction = GroundFriction 1.0 (1.0)
+MFEEL reverse_vs_source          =   1.005 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.046 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   0.999 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn bulwark    run 5.63 m/s accel 55: reverse 0.193 s (source 0.192), cut 0.238 s (source 0.228)
+MFEEL reverse_vs_source          =   0.991 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.048 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn dredge     run 5.39 m/s accel 55: reverse 0.183 s (source 0.184), cut 0.230 s (source 0.219)
+MFEEL reverse_vs_source          =   1.002 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.057 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn thief      run 5.39 m/s accel 63: reverse 0.162 s (source 0.161), cut 0.204 s (source 0.193)
+MFEEL reverse_vs_source          =   0.991 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.056 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn gil        run 5.34 m/s accel 60: reverse 0.164 s (source 0.165), cut 0.209 s (source 0.198)
+MFEEL reverse_vs_source          =   1.002 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.057 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn mage       run 5.39 m/s accel 63: reverse 0.162 s (source 0.161), cut 0.204 s (source 0.193)
+MFEEL reverse_vs_source          =   1.012 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.051 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn dolm       run 5.39 m/s accel 58: reverse 0.176 s (source 0.174), cut 0.218 s (source 0.207)
+MFEEL reverse_vs_source          =   1.002 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.057 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn ostra      run 5.39 m/s accel 63: reverse 0.162 s (source 0.161), cut 0.204 s (source 0.193)
+MFEEL reverse_vs_source          =   1.002 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.057 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn ashwick    run 5.39 m/s accel 63: reverse 0.162 s (source 0.161), cut 0.204 s (source 0.193)
+MFEEL reverse_vs_source          =   1.014 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.057 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn juggernaut run 5.28 m/s accel 63: reverse 0.160 s (source 0.158), cut 0.200 s (source 0.189)
+MFEEL reverse_vs_source          =   1.014 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.057 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn archer     run 5.28 m/s accel 63: reverse 0.160 s (source 0.158), cut 0.200 s (source 0.189)
+MFEEL reverse_vs_source          =   1.014 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.057 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn tender     run 5.28 m/s accel 63: reverse 0.160 s (source 0.158), cut 0.200 s (source 0.189)
+MFEEL reverse_vs_source          =   1.014 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.057 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn gunslinger run 5.28 m/s accel 63: reverse 0.160 s (source 0.158), cut 0.200 s (source 0.189)
+MFEEL reverse_vs_source          =   1.018 x      target in [0.98, 1.03] ok   ([game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a)
+MFEEL cut90_vs_source            =   1.060 x      target in [0.97, 1.1] ok   ([game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%)
+MFEEL cut90_min_speed            =   1.000 x      target >= 0.97        ok   ([game data] a cut arcs at run speed (the speed cap))
+MFEEL turn rimewright run 5.16 m/s accel 63: reverse 0.157 s (source 0.155), cut 0.197 s (source 0.185)
+MFEEL aim-relative (1.0, 0.0) fire=false run 5.278 m/s, 3 m in 37 frames
+MFEEL aim-relative (0.0, 1.0) fire=false run 5.278 m/s, 3 m in 37 frames
+MFEEL aim-relative (-1.0, 0.0) fire=false run 5.278 m/s, 3 m in 37 frames
+MFEEL aim-relative (-0.707107, 0.707107) fire=false run 5.278 m/s, 3 m in 37 frames
+MFEEL aim-relative (1.0, 0.0) fire=true  run 4.222 m/s, 3 m in 45 frames
+MFEEL aim-relative (0.0, 1.0) fire=true  run 4.222 m/s, 3 m in 45 frames
+MFEEL aim-relative (-1.0, 0.0) fire=true  run 4.222 m/s, 3 m in 45 frames
+MFEEL aim-relative (-0.707107, 0.707107) fire=true  run 4.222 m/s, 3 m in 45 frames
+MFEEL aim_side_speed_k           =   1.000 x      target in [0.99, 1.01] ok   ([game data] no strafe slow: across the aim / toward it)
+MFEEL aim_back_speed_k           =   1.000 x      target in [0.99, 1.01] ok   ([game data] no backpedal slow: away from the aim / toward it)
+MFEEL aim_back_fire_speed_k      =   1.000 x      target in [0.99, 1.01] ok   ([game data] the same, fire held: one fire slow either way)
+MFEEL aim_back_3m_frames         =   0.000 frames target <= 0.0         ok   ([game data] frames for 3 m away from the aim minus toward it)
+MFEEL vault_exit_run             =   1.180 x      target in [0.95, 1.05] FAIL   ([footage] Sable's Cartwheel runs down into her hasted run)
+MFEEL vault_slow_frames          =   0.000 frames target <= 0.0         ok   ([footage] past the peak, no step under the hasted run (no dip))
+MFEEL vault_shot_gap_frames      =   0.000 frames target <= 0.0         ok   ([footage 0193] she throws as the flip ends (mid-flip too))
+MFEEL dir ground W  screen   90.0 deg (ideal   90.0) world off 0.00 deg  speed 5.278 m/s
+MFEEL dir ground S  screen  -90.0 deg (ideal  -90.0) world off 0.00 deg  speed 5.278 m/s
+MFEEL dir ground A  screen -180.0 deg (ideal -180.0) world off 0.00 deg  speed 5.278 m/s
+MFEEL dir ground D  screen   -0.0 deg (ideal   -0.0) world off 0.00 deg  speed 5.278 m/s
+MFEEL dir ground WD screen   42.5 deg (ideal   42.5) world off 0.00 deg  speed 5.278 m/s
+MFEEL dir ground WA screen  137.5 deg (ideal  137.5) world off 0.00 deg  speed 5.278 m/s
+MFEEL dir ground SD screen  -42.5 deg (ideal  -42.5) world off 0.00 deg  speed 5.278 m/s
+MFEEL dir ground SA screen -137.5 deg (ideal -137.5) world off 0.00 deg  speed 5.278 m/s
+MFEEL dir_ground_screen_err_deg  =   0.000 deg    target <= 1.0         ok   ([footage] W runs straight up the screen; each key direction lands on its line)
+MFEEL dir_ground_world_err_deg   =   0.000 deg    target <= 1.0         ok   (keys -> world: no skew from the camera yaw or the axes)
+MFEEL dir_ground_speed_spread    =   0.000 x      target <= 0.01        ok   ([game data] input normalised: a diagonal is no faster than a cardinal)
+MFEEL dir glide  W  screen   90.0 deg (ideal   90.0) world off 0.00 deg  speed 5.000 m/s  gliding
+MFEEL dir glide  S  screen  -90.0 deg (ideal  -90.0) world off 0.00 deg  speed 5.000 m/s  gliding
+MFEEL dir glide  A  screen -180.0 deg (ideal -180.0) world off 0.00 deg  speed 5.000 m/s  gliding
+MFEEL dir glide  D  screen   -0.0 deg (ideal   -0.0) world off 0.00 deg  speed 5.000 m/s  gliding
+MFEEL dir glide  WD screen   42.2 deg (ideal   42.2) world off 0.00 deg  speed 5.000 m/s  gliding
+MFEEL dir glide  WA screen  137.8 deg (ideal  137.8) world off 0.00 deg  speed 5.000 m/s  gliding
+MFEEL dir glide  SD screen  -42.2 deg (ideal  -42.2) world off 0.00 deg  speed 5.000 m/s  gliding
+MFEEL dir glide  SA screen -137.8 deg (ideal -137.8) world off 0.00 deg  speed 5.000 m/s  gliding
+MFEEL dir_glide_screen_err_deg   =   0.000 deg    target <= 1.0         ok   ([footage] W runs straight up the screen; each key direction lands on its line)
+MFEEL dir_glide_world_err_deg    =   0.000 deg    target <= 1.0         ok   (keys -> world: no skew from the camera yaw or the axes)
+MFEEL dir_glide_speed_spread     =   0.000 x      target <= 0.01        ok   ([game data] input normalised: a diagonal is no faster than a cardinal)
+MFEEL dir dash   W  world off 0.00 deg  speed 23.000 m/s
+MFEEL dir dash   S  world off 0.00 deg  speed 23.000 m/s
+MFEEL dir dash   A  world off 0.00 deg  speed 23.000 m/s
+MFEEL dir dash   D  world off 0.00 deg  speed 23.000 m/s
+MFEEL dir dash   WD world off 0.00 deg  speed 23.000 m/s
+MFEEL dir dash   WA world off 0.00 deg  speed 23.000 m/s
+MFEEL dir dash   SD world off 0.00 deg  speed 23.000 m/s
+MFEEL dir dash   SA world off 0.00 deg  speed 23.000 m/s
+MFEEL dir_dash_world_err_deg     =   0.000 deg    target <= 1.0         ok   (a dash goes where the keys point, diagonals too)
+MFEEL dir_dash_speed_spread      =   0.000 x      target <= 0.01        ok   (one dash speed for all 8 directions)
+MFEEL glide_overheat_s           =   9.017 s      target in [8.95, 9.05] ok   (hunter_move.json glide_heat_s (owner 11-02 over footage))
+MFEEL carry match archer      ledge 5.28>5.28 | fall_6 5.28>5.28 | fall_15 5.28>5.28 | slope_10 0.00>0.00 | slope_10_run 5.28>5.28 | slope_25 0.00>0.00 | slope_25_run 5.28>5.28 | slope_40 0.00>0.00 | slope_40_run 5.28>5.28 | mantle 5.28>3.40 | knock 8.30>4.67 | glide_close 5.00>3.29
+MFEEL carry match juggernaut  ledge 5.28>5.28 | fall_6 5.28>5.28 | fall_15 5.28>5.28 | slope_10 0.00>0.00 | slope_10_run 5.28>5.28 | slope_25 0.00>0.00 | slope_25_run 5.28>5.28 | slope_40 0.00>0.00 | slope_40_run 5.28>5.28 | mantle 5.28>3.40 | knock 8.30>4.67 | glide_close 5.00>3.29
+MFEEL carry match gunslinger  ledge 5.28>5.28 | fall_6 5.28>5.28 | fall_15 5.28>5.28 | slope_10 0.00>0.00 | slope_10_run 5.28>5.28 | slope_25 0.00>0.00 | slope_25_run 5.28>5.28 | slope_40 0.00>0.00 | slope_40_run 5.28>5.28 | mantle 5.28>3.40 | knock 8.30>4.67 | glide_close 5.00>3.29
+MFEEL carry match bulwark     ledge 5.63>5.63 | fall_6 5.63>5.63 | fall_15 5.63>5.63 | slope_10 0.00>0.00 | slope_10_run 5.63>5.63 | slope_25 0.00>0.00 | slope_25_run 5.63>5.63 | slope_40 0.00>0.00 | slope_40_run 5.63>5.63 | mantle 5.63>3.62 | knock 8.30>4.86 | glide_close 5.00>3.29
+MFEEL carry match rimewright  ledge 5.16>5.16 | fall_6 5.16>5.16 | fall_15 5.16>5.16 | slope_10 0.00>0.00 | slope_10_run 5.16>5.16 | slope_25 0.00>0.00 | slope_25_run 5.16>5.16 | slope_40 0.00>0.00 | slope_40_run 5.16>5.16 | mantle 5.16>3.32 | knock 8.30>4.60 | glide_close 5.00>3.29
+MFEEL carry match ashwick     ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 8.30>4.73 | glide_close 5.00>3.29
+MFEEL carry match dolm        ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 8.30>4.73 | glide_close 5.00>3.29
+MFEEL carry match mage        ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 8.30>4.73 | glide_close 5.00>3.29
+MFEEL carry match dredge      ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 8.30>4.73 | glide_close 5.00>3.29
+MFEEL carry match tender      ledge 5.28>5.28 | fall_6 5.28>5.28 | fall_15 5.28>5.28 | slope_10 0.00>0.00 | slope_10_run 5.28>5.28 | slope_25 0.00>0.00 | slope_25_run 5.28>5.28 | slope_40 0.00>0.00 | slope_40_run 5.28>5.28 | mantle 5.28>3.40 | knock 8.30>4.67 | glide_close 5.00>3.29
+MFEEL carry match thief       ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 8.30>4.73 | glide_close 5.00>3.29
+MFEEL carry match ostra       ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 8.30>4.73 | glide_close 5.00>3.29
+MFEEL carry match gil         ledge 5.34>5.34 | fall_6 5.34>5.34 | fall_15 5.34>5.34 | slope_10 0.00>0.00 | slope_10_run 5.34>5.34 | slope_25 0.00>0.00 | slope_25_run 5.34>5.34 | slope_40 0.00>0.00 | slope_40_run 5.34>5.34 | mantle 5.34>3.44 | knock 8.30>4.70 | glide_close 5.00>3.29
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+MFEEL carry home  archer      ledge 5.28>5.28 | fall_6 5.28>5.28 | fall_15 5.28>5.28 | slope_10 0.00>0.00 | slope_10_run 5.28>5.28 | slope_25 0.00>0.00 | slope_25_run 5.28>5.28 | slope_40 0.00>0.00 | slope_40_run 5.28>5.28 | mantle 5.28>3.40 | knock 7.23>4.41 | glide_close 5.00>3.05
+MFEEL carry home  juggernaut  ledge 5.28>5.28 | fall_6 5.28>5.28 | fall_15 5.28>5.28 | slope_10 0.00>0.00 | slope_10_run 5.28>5.28 | slope_25 0.00>0.00 | slope_25_run 5.28>5.28 | slope_40 0.00>0.00 | slope_40_run 5.28>5.28 | mantle 5.28>3.40 | knock 7.23>4.41 | glide_close 5.00>3.05
+MFEEL carry home  gunslinger  ledge 5.28>5.28 | fall_6 5.28>5.28 | fall_15 5.28>5.28 | slope_10 0.00>0.00 | slope_10_run 5.28>5.28 | slope_25 0.00>0.00 | slope_25_run 5.28>5.28 | slope_40 0.00>0.00 | slope_40_run 5.28>5.28 | mantle 5.28>3.40 | knock 7.23>4.41 | glide_close 5.00>3.05
+MFEEL carry home  bulwark     ledge 5.63>5.63 | fall_6 5.63>5.63 | fall_15 5.63>5.63 | slope_10 0.00>0.00 | slope_10_run 5.63>5.63 | slope_25 0.00>0.00 | slope_25_run 5.63>5.63 | slope_40 0.00>0.00 | slope_40_run 5.63>5.63 | mantle 5.63>3.62 | knock 7.37>4.61 | glide_close 5.00>3.05
+MFEEL carry home  rimewright  ledge 5.16>5.16 | fall_6 5.16>5.16 | fall_15 5.16>5.16 | slope_10 0.00>0.00 | slope_10_run 5.16>5.16 | slope_25 0.00>0.00 | slope_25_run 5.16>5.16 | slope_40 0.00>0.00 | slope_40_run 5.16>5.16 | mantle 5.16>3.32 | knock 7.18>4.34 | glide_close 5.00>3.05
+MFEEL carry home  ashwick     ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 7.28>4.47 | glide_close 5.00>3.05
+MFEEL carry home  dolm        ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 7.28>4.47 | glide_close 5.00>3.05
+MFEEL carry home  mage        ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 7.28>4.47 | glide_close 5.00>3.05
+MFEEL carry home  dredge      ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 7.28>4.47 | glide_close 5.00>3.05
+MFEEL carry home  tender      ledge 5.28>5.28 | fall_6 5.28>5.28 | fall_15 5.28>5.28 | slope_10 0.00>0.00 | slope_10_run 5.28>5.28 | slope_25 0.00>0.00 | slope_25_run 5.28>5.28 | slope_40 0.00>0.00 | slope_40_run 5.28>5.28 | mantle 5.28>3.40 | knock 7.23>4.41 | glide_close 5.00>3.05
+MFEEL carry home  thief       ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 7.28>4.47 | glide_close 5.00>3.05
+MFEEL carry home  ostra       ledge 5.39>5.39 | fall_6 5.39>5.39 | fall_15 5.39>5.39 | slope_10 0.00>0.00 | slope_10_run 5.39>5.39 | slope_25 0.00>0.00 | slope_25_run 5.39>5.39 | slope_40 0.00>0.00 | slope_40_run 5.39>5.39 | mantle 5.39>3.47 | knock 7.28>4.47 | glide_close 5.00>3.05
+MFEEL carry home  gil         ledge 5.34>5.34 | fall_6 5.34>5.34 | fall_15 5.34>5.34 | slope_10 0.00>0.00 | slope_10_run 5.34>5.34 | slope_25 0.00>0.00 | slope_25_run 5.34>5.34 | slope_40 0.00>0.00 | slope_40_run 5.34>5.34 | mantle 5.34>3.44 | knock 7.25>4.44 | glide_close 5.00>3.05
+MFEEL ok   one profile: HunterMove holds hunter_move.json physics (brake, friction, glide_accel, dive_vy)
+MFEEL ok   one profile: Loco air accel/counter/drag = tuning.json air
+MFEEL ok   one profile: Loco glide turn/brake/catch = tuning.json glide
+MFEEL ok   one profile: Loco dash jump keep = tuning.json dash
+MFEEL ok   one profile: expedition solo: every hunter has its hunter_move.json row 
+MFEEL ok   one profile: expedition solo: the player is bulwark's row
+MFEEL ok   one profile: the glider opens in the air (match)
+MFEEL ok   one profile: bulwark runs 5.63 m/s = its row x body_scale 5.63
+MFEEL ok   one profile: jump apex 1.52 m ~ v^2/2g 1.57
+MFEEL ok   one profile: glide cruise 5.00 m/s ~ 5.0
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match_mode (res://tools/move_one_profile_check.gd:123)
+       [13] run (res://tools/move_one_profile_check.gd:30)
+       [14] _match_mode (res://tools/move_one_profile_check.gd:160)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match_mode (res://tools/move_one_profile_check.gd:123)
+       [13] run (res://tools/move_one_profile_check.gd:30)
+       [14] _match_mode (res://tools/move_one_profile_check.gd:160)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match_mode (res://tools/move_one_profile_check.gd:123)
+       [12] run (res://tools/move_one_profile_check.gd:30)
+       [13] _match_mode (res://tools/move_one_profile_check.gd:160)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match_mode (res://tools/move_one_profile_check.gd:123)
+       [12] run (res://tools/move_one_profile_check.gd:30)
+       [13] _match_mode (res://tools/move_one_profile_check.gd:160)
+MFEEL ok   one profile: expedition trio: every hunter has its hunter_move.json row 
+MFEEL ok   one profile: expedition trio: the player is bulwark's row
+MFEEL ok   one profile: the glider opens in the air (match)
+MFEEL ok   one profile: expedition trio = expedition solo (run, brake, air, jump, glide, dash) 
+MFEEL ok   one profile: arena: every hunter has its hunter_move.json row 
+MFEEL ok   one profile: arena: the player is bulwark's row
+MFEEL ok   one profile: the glider opens in the air (match)
+MFEEL ok   one profile: arena = expedition solo (run, brake, air, jump, glide, dash) 
+MFEEL ok   one profile: training grounds: every hunter has its hunter_move.json row 
+MFEEL ok   one profile: training grounds: the player is bulwark's row
+MFEEL ok   one profile: the glider opens in the air (match)
+MFEEL ok   one profile: training grounds = expedition solo (run, brake, air, jump, glide, dash) 
+MFEEL ok   one profile: duel ring: every hunter has its hunter_move.json row 
+MFEEL ok   one profile: duel ring: the player is bulwark's row
+MFEEL ok   one profile: the glider opens in the air (match)
+MFEEL ok   one profile: duel ring = expedition solo (run, brake, air, jump, glide, dash) 
+MFEEL ok   one profile: the glider opens in the air (garden)
+MFEEL ok   one profile: garden = expedition solo (run, brake, air, jump, glide, dash) 
+MOVE FEEL CHECK DONE, failures: 12
+ERROR: 5 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 5 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 253: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 285: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 63 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

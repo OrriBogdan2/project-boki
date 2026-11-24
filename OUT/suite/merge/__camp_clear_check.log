@@ -1,0 +1,73 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CAMPCLEAR ok   archer clears the skitter camp at level 1
+CAMPCLEAR row archer skitter@1 6.8s 7 dmg (runs 6.8 6.0 6.6 7.1 8.3)
+CAMPCLEAR ok   archer clears the spitter camp at level 1
+CAMPCLEAR row archer spitter@1 7.1s 0 dmg (runs 8.9 7.4 5.9 7.1 4.1)
+CAMPCLEAR ok   archer clears the brute camp at level 1
+CAMPCLEAR row archer brute@1 9.7s 6 dmg (runs 13.7 9.7 15.0 5.8 9.6)
+CAMPCLEAR ok   archer clears the skitter camp at level 5
+CAMPCLEAR row archer skitter@5 5.3s 0 dmg (runs 6.9 8.4 5.3 1.5 3.6)
+CAMPCLEAR ok   archer clears the spitter camp at level 5
+CAMPCLEAR row archer spitter@5 5.7s 6 dmg (runs 6.8 30.0 5.7 4.1 5.7)
+CAMPCLEAR ok   archer clears the brute camp at level 5
+CAMPCLEAR row archer brute@5 11.9s 23 dmg (runs 13.0 11.9 10.2 12.8 9.6)
+CAMPCLEAR ok   juggernaut clears the skitter camp at level 1
+CAMPCLEAR row juggernaut skitter@1 3.1s 0 dmg (runs 3.4 3.1 4.2 1.3 1.6)
+CAMPCLEAR ok   juggernaut clears the spitter camp at level 1
+CAMPCLEAR row juggernaut spitter@1 2.6s 0 dmg (runs 2.2 3.7 2.6 1.6 3.0)
+CAMPCLEAR ok   juggernaut clears the brute camp at level 1
+CAMPCLEAR row juggernaut brute@1 4.1s 16 dmg (runs 3.1 5.0 4.1 7.3 3.7)
+CAMPCLEAR ok   juggernaut clears the skitter camp at level 5
+CAMPCLEAR row juggernaut skitter@5 1.6s 0 dmg (runs 2.8 1.6 1.5 1.6 3.7)
+CAMPCLEAR ok   juggernaut clears the spitter camp at level 5
+CAMPCLEAR row juggernaut spitter@5 3.1s 0 dmg (runs 3.5 2.7 4.1 3.1 1.4)
+CAMPCLEAR ok   juggernaut clears the brute camp at level 5
+CAMPCLEAR row juggernaut brute@5 5.6s 16 dmg (runs 6.1 5.3 7.5 1.1 5.6)
+CAMPCLEAR ok   gunslinger clears the skitter camp at level 1
+CAMPCLEAR row gunslinger skitter@1 3.2s 0 dmg (runs 2.6 3.4 3.2 3.1 3.7)
+CAMPCLEAR ok   gunslinger clears the spitter camp at level 1
+CAMPCLEAR row gunslinger spitter@1 4.1s 0 dmg (runs 2.7 4.1 5.9 3.7 6.3)
+CAMPCLEAR ok   gunslinger clears the brute camp at level 1
+CAMPCLEAR row gunslinger brute@1 7.6s 0 dmg (runs 7.7 7.9 7.6 7.6 7.3)
+CAMPCLEAR ok   gunslinger clears the skitter camp at level 5
+CAMPCLEAR row gunslinger skitter@5 2.4s 0 dmg (runs 2.3 3.1 2.1 3.0 2.4)
+CAMPCLEAR ok   gunslinger clears the spitter camp at level 5
+CAMPCLEAR row gunslinger spitter@5 9.1s 0 dmg (runs 3.6 30.0 9.1 14.3 3.3)
+CAMPCLEAR ok   gunslinger clears the brute camp at level 5
+CAMPCLEAR row gunslinger brute@5 6.2s 0 dmg (runs 8.2 8.6 6.2 5.9 6.1)
+CAMPCLEAR ok   bulwark clears the skitter camp at level 1
+CAMPCLEAR row bulwark skitter@1 11.2s 7 dmg (runs 1.4 5.1 30.0 11.2 25.8)
+CAMPCLEAR ok   bulwark clears the spitter camp at level 1
+CAMPCLEAR row bulwark spitter@1 8.2s 7 dmg (runs 14.4 8.2 3.9 6.2 17.1)
+CAMPCLEAR ok   bulwark clears the brute camp at level 1
+CAMPCLEAR row bulwark brute@1 10.7s 30 dmg (runs 23.3 10.7 4.4 9.0 21.8)
+CAMPCLEAR ok   bulwark clears the skitter camp at level 5
+CAMPCLEAR row bulwark skitter@5 6.2s 6 dmg (runs 12.2 18.7 6.2 5.8 5.6)
+CAMPCLEAR ok   bulwark clears the spitter camp at level 5
+CAMPCLEAR row bulwark spitter@5 19.6s 0 dmg (runs 21.2 19.6 2.4 30.0 14.9)
+CAMPCLEAR FAIL bulwark clears the brute camp at level 5
+CAMPCLEAR row bulwark brute@5 30.0s 39 dmg (runs 30.0 30.0 5.6 5.5 30.0)
+CAMPCLEAR ok   rimewright clears the skitter camp at level 1
+CAMPCLEAR row rimewright skitter@1 3.2s 0 dmg (runs 3.3 2.8 3.5 2.8 3.2)
+CAMPCLEAR ok   rimewright clears the spitter camp at level 1
+CAMPCLEAR row rimewright spitter@1 4.2s 8 dmg (runs 4.2 3.7 3.8 4.5 5.6)
+CAMPCLEAR ok   rimewright clears the brute camp at level 1
+CAMPCLEAR row rimewright brute@1 4.0s 0 dmg (runs 4.3 4.0 4.0 3.5 3.4)
+CAMPCLEAR ok   rimewright clears the skitter camp at level 5
+CAMPCLEAR row rimewright skitter@5 2.1s 0 dmg (runs 1.7 1.5 2.1 3.1 2.5)
+CAMPCLEAR ok   rimewright clears the spitter camp at level 5
+CAMPCLEAR row rimewright spitter@5 3.9s 0 dmg (runs 3.9 30.0 1.5 3.7 30.0)
+CAMPCLEAR ok   rimewright clears the brute camp at level 5
+CAMPCLEAR row rimewright brute@5 2.5s 0 dmg (runs 3.2 2.5 2.4 3.7 2.2)
+CAMPCLEAR ok   ashwick clears the skitter camp at level 1
+CAMPCLEAR row ashwick skitter@1 4.8s 7 dmg (runs 4.8 4.9 3.6 2.9 5.2)
+CAMPCLEAR ok   ashwick clears the spitter camp at level 1
+CAMPCLEAR row ashwick spitter@1 19.0s 0 dmg (runs 23.4 19.0 4.2 25.1 6.5)
+CAMPCLEAR ok   ashwick clears the brute camp at level 1
+CAMPCLEAR row ashwick brute@1 6.9s 0 dmg (runs 6.9 9.9 7.3 3.3 4.7)
+CAMPCLEAR ok   ashwick clears the skitter camp at level 5
+CAMPCLEAR row ashwick skitter@5 5.0s 0 dmg (runs 5.0 2.3 30.0 1.7 5.1)

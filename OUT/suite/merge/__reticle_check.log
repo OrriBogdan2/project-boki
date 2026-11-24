@@ -1,0 +1,122 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+RETICLE ok   defaults: { "shape": "default", "k": 1.0, "col": (0.9569, 0.9451, 0.902, 1.0), "outline": true }
+RETICLE ok   default colour: white at full opacity
+RETICLE ok   the default is clearly smaller than the old cross
+RETICLE ok   the settings file exists
+RETICLE ok   every reticle option is in the settings file
+RETICLE ok   nothing went into the run save
+RETICLE ok   shape and size follow: { "shape": "cross", "k": 1.5, "col": (0.8941, 1.0, 0.1216, 0.6), "outline": false }
+RETICLE ok   colour and opacity follow
+RETICLE ok   outline off follows
+RETICLE ok   an unknown colour id falls back to white
+RETICLE ok   every shape x colour x outline draws (60)
+RETICLE ok   hold ring: archer Heavy Shot fills from the start, never falls, flashes at full, at the cursor [0.0, 1.0, true, true, "cursor"]
+RETICLE ok   hold ring: archer bow draw draws no ring (an aim or raise hold) [-1.0, -1.0, true, false, ""]
+RETICLE ok   hold ring: ashwick Cinder Shot lane draws no ring (an aim or raise hold) [-1.0, -1.0, true, false, ""]
+RETICLE ok   hold ring: ashwick Torch Lance stream draws no ring (an aim or raise hold) [-1.0, -1.0, true, false, ""]
+RETICLE ok   hold ring: bulwark hammer whirl fills from the start, never falls, flashes at full, at the cursor [0.01587301587302, 1.0, true, true, "cursor"]
+RETICLE ok   hold ring: bulwark Aegis draws no ring (an aim or raise hold) [-1.0, -1.0, true, false, ""]
+RETICLE ok   hold ring: dolm punch fills from the start, never falls, flashes at full, at the cursor [0.00537634408602, 1.0, true, true, "cursor"]
+RETICLE ok   hold ring: dolm Quakefall fills from the start, never falls, flashes at full, at the cursor [0.06666666666667, 1.0, true, true, "cursor"]
+RETICLE ok   hold ring: dredge Brass Broadside fan draws no ring (an aim or raise hold) [-1.0, -1.0, true, false, ""]
+RETICLE ok   hold ring: gunslinger Longneedle fills from the start, never falls, flashes at full, at the cursor [0.02777777777778, 1.0, true, true, "cursor"]
+RETICLE ok   hold ring: juggernaut blast fills from the start, never falls, flashes at full, at the body [0.01826484018265, 1.0, true, true, "body"]
+RETICLE ok   hold ring: juggernaut Lunge fills from the start, never falls, flashes at full, at the cursor [0.03333333333333, 1.0, true, true, "cursor"]
+RETICLE ok   hold ring: mage Wirerun fills from the start, never falls, flashes at full, at the cursor [0.02777777777778, 1.0, true, true, "cursor"]
+RETICLE ok   hold ring: mage Storm Rod fills from the start, never falls, flashes at full, at the cursor [0.01666666666667, 1.0, true, true, "cursor"]
+RETICLE ok   hold ring: ostra Lantern Trade ends draws no ring (an aim or raise hold) [-1.0, -1.0, true, false, ""]
+RETICLE ok   hold ring: rimewright Ice Spear aim draws no ring (an aim or raise hold) [-1.0, -1.0, true, false, ""]
+RETICLE ok   hold ring: rimewright Skate draws no ring (an aim or raise hold) [-1.0, -1.0, true, false, ""]
+RETICLE CHECK DONE, failures: 0
+ERROR: 1 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 40: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 41: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 39: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 49: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 48: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 52: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 51: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 80: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 78: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 96: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 89: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 108: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 98: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 226: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 128: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 262: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 317: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 269: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 324: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 318: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 327: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 325: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 345: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 328: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 347: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 346: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 361: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 360: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 365: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 14032: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14033: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14034: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 14035: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 44 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: Pages in use exist at exit in PagedAllocator: N7Variant5Pools12BucketMediumE
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)

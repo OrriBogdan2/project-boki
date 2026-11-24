@@ -1,0 +1,16 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ICONART ok   52 hunter ability slots, each with its own icon id
+ICONART ok   every hunter ability slot has a painted icon []
+ICONART ok   every weapon with no glyph has a painted icon []
+ICONART ok   every status has a painted icon []
+ICONART ok   every combat mark has a painted icon []
+ICONART ok   every Boki ability draws its painted icon []
+ICONART ok   every Fusion draws its painted icon []
+ICONART ok   every shaping item draws its painted icon []
+ICONART ok   items awaiting art ["glowmoss_sprig", "mistbloom", "chimegrass"] draw their family icon (drop an id once its art lands) []
+ICONART ok   no painted icon is left unused []
+ICONART DONE, failures: 0

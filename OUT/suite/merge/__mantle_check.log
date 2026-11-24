@@ -1,0 +1,123 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/mantle_check.gd:38)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/mantle_check.gd:38)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+MCHECK rims: climb times [0.88, 0.88, 0.88, 0.88, 0.88, 0.88, 0.88, 0.88, 0.88, 0.88, 0.88, 0.88, 0.88, 0.88]
+MCHECK ok   below a rim over the void, pushing in: floated up and landed on top 14 of 14 (half as a downed wisp)
+MCHECK ok   never inside the cliff while floating (0 frames, worst 0.00m)
+MCHECK ok   a 2.5m float to the top takes at most 0.88s (want < 1.4s; [footage] ~0.8s from a full second deep)
+MCHECK 16 walls two terraces high to test against
+MCHECK ok   jumping at a wall two terraces high (1.6m) while pushing into it: on top 16 of 16
+MCHECK ok   walking or jumping along a wall, glancing it, or jumping beside it with no keys: no float in 64 cases (0 floated)
+MCHECK ok   never moved toward the wall more than the keys ask (worst 0.0000m in a step)
+MCHECK ok   steering along the face mid-float moves you along it: 16 of 16 (least 1.39m further along in 0.15s)
+MCHECK ok   steering away mid-rise flings you off the face (nothing holds you to it): 16 of 16
+MCHECK fling: none +0.40m 2.20m on, early +0.26m 2.16m, timed +0.97m 3.69m (over 6 walls)
+MCHECK ok   a jump timed in the window near the top flings you higher and further than an early one or none
+MCHECK ok   sheer cliffs: caught 0 of 10 falling past (should be 0)
+MCHECK ok   dash-rim archer     ground 0.6m (built 0.8): step   top 0.17s lost 0.00s stall 0.00s off-top 12.9m/s
+MCHECK ok   dash-rim archer     air    0.6m (built 0.6): mantle top 0.30s lost 0.13s stall 0.00s off-top  6.3m/s
+MCHECK ok   dash-rim archer     ground 1.0m (built 0.8): step   top 0.17s lost 0.00s stall 0.00s off-top 12.9m/s
+MCHECK ok   dash-rim archer     air    1.0m (built 1.0): mantle top 0.32s lost 0.15s stall 0.02s off-top  6.3m/s
+MCHECK ok   dash-rim archer     ground 1.5m (built 1.6): stop   top never lost     - stall 2.12s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK ok   dash-rim archer     air    1.5m (built 1.5): mantle top 0.35s lost 0.18s stall 0.03s off-top  6.3m/s
+MCHECK ok   dash-rim archer     ground 2.0m (built 2.4): stop   top never lost     - stall 2.12s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK ok   dash-rim archer     air    2.0m (built 2.0): mantle top 0.38s lost 0.22s stall 0.05s off-top  6.3m/s
+MCHECK ok   dash-rim juggernaut ground 0.6m (built 0.8): step   top 0.18s lost 0.02s stall 0.00s off-top 23.3m/s
+MCHECK ok   dash-rim juggernaut air    0.6m (built 0.6): mantle top 0.37s lost 0.20s stall 0.00s off-top  6.3m/s
+MCHECK ok   dash-rim juggernaut ground 1.0m (built 0.8): step   top 0.18s lost 0.02s stall 0.00s off-top 23.3m/s
+MCHECK ok   dash-rim juggernaut air    1.0m (built 1.0): mantle top 0.38s lost 0.22s stall 0.00s off-top  6.3m/s
+MCHECK ok   dash-rim juggernaut ground 1.5m (built 1.6): stop   top never lost     - stall 2.25s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK ok   dash-rim juggernaut air    1.5m (built 1.5): mantle top 0.40s lost 0.23s stall 0.02s off-top  6.3m/s
+MCHECK ok   dash-rim juggernaut ground 2.0m (built 2.4): stop   top never lost     - stall 2.25s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK ok   dash-rim juggernaut air    2.0m (built 2.0): mantle top 0.43s lost 0.27s stall 0.02s off-top  6.3m/s
+MCHECK ok   dash-rim gunslinger ground 0.6m (built 0.8): step   top 0.15s lost 0.00s stall 0.00s off-top 15.5m/s
+MCHECK ok   dash-rim gunslinger air    0.6m (built 0.6): mantle top 0.27s lost 0.12s stall 0.00s off-top  6.3m/s
+MCHECK ok   dash-rim gunslinger ground 1.0m (built 0.8): step   top 0.15s lost 0.00s stall 0.00s off-top 15.5m/s
+MCHECK ok   dash-rim gunslinger air    1.0m (built 1.0): mantle top 0.28s lost 0.13s stall 0.00s off-top  6.3m/s
+MCHECK ok   dash-rim gunslinger ground 1.5m (built 1.6): stop   top never lost     - stall 2.10s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK FAIL dash-rim gunslinger air    1.5m (built 1.5): stop   top never lost     - stall 2.17s off-top  0.0m/s
+MCHECK ok   dash-rim gunslinger ground 2.0m (built 2.4): stop   top never lost     - stall 2.10s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK ok   dash-rim gunslinger air    2.0m (built 2.0): stop   top never lost     - stall 2.17s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK ok   dash-rim bulwark    ground 0.6m (built 0.8): step   top 0.12s lost 0.00s stall 0.00s off-top 22.3m/s
+MCHECK ok   dash-rim bulwark    air    0.6m (built 0.6): mantle top 0.25s lost 0.15s stall 0.00s off-top  9.6m/s
+MCHECK ok   dash-rim bulwark    ground 1.0m (built 0.8): step   top 0.12s lost 0.00s stall 0.00s off-top 22.3m/s
+MCHECK ok   dash-rim bulwark    air    1.0m (built 1.0): mantle top 0.25s lost 0.15s stall 0.00s off-top  9.6m/s
+MCHECK ok   dash-rim bulwark    ground 1.5m (built 1.6): stop   top never lost     - stall 2.05s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK FAIL dash-rim bulwark    air    1.5m (built 1.5): stop   top never lost     - stall 2.07s off-top  0.0m/s
+MCHECK ok   dash-rim bulwark    ground 2.0m (built 2.4): stop   top never lost     - stall 2.05s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK ok   dash-rim bulwark    air    2.0m (built 2.0): stop   top never lost     - stall 2.07s off-top  0.0m/s  (beyond reach: no climb wanted)
+MCHECK ok   glide rims: the hunter is archer (is archer)
+MCHECK ok   glide-rim archer     rim 0.5m full: { "out": "mantle", "at": 0.5, "vin": 5.3, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.32 }
+MCHECK ok   glide-rim archer     rim 0.5m slow: { "out": "mantle", "at": 0.5, "vin": 3.0, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.38 }
+MCHECK ok   glide-rim archer     rim 1.0m full: { "out": "mantle", "at": 1.0, "vin": 5.3, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.52 }
+MCHECK ok   glide-rim archer     rim 1.0m slow: { "out": "mantle", "at": 1.0, "vin": 3.0, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.58 }
+MCHECK ok   glide-rim archer     rim 1.8m full: { "out": "mantle", "at": 1.8, "vin": 5.3, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.47 }
+MCHECK ok   glide-rim archer     rim 1.8m slow: { "out": "mantle", "at": 1.8, "vin": 3.0, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.48 }
+MCHECK ok   glide rims: the hunter is juggernaut (is juggernaut)
+MCHECK ok   glide-rim juggernaut rim 0.5m full: { "out": "mantle", "at": 0.5, "vin": 5.3, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.32 }
+MCHECK ok   glide-rim juggernaut rim 0.5m slow: { "out": "mantle", "at": 0.5, "vin": 3.0, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.38 }
+MCHECK ok   glide-rim juggernaut rim 1.0m full: { "out": "mantle", "at": 1.0, "vin": 5.3, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.52 }
+MCHECK ok   glide-rim juggernaut rim 1.0m slow: { "out": "mantle", "at": 1.0, "vin": 3.0, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.58 }
+MCHECK ok   glide-rim juggernaut rim 1.8m full: { "out": "mantle", "at": 1.8, "vin": 5.3, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.47 }
+MCHECK ok   glide-rim juggernaut rim 1.8m slow: { "out": "mantle", "at": 1.8, "vin": 3.0, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.48 }
+MCHECK ok   glide rims: the hunter is gunslinger (is gunslinger)
+MCHECK ok   glide-rim gunslinger rim 0.5m full: { "out": "mantle", "at": 0.5, "vin": 5.3, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.32 }
+MCHECK ok   glide-rim gunslinger rim 0.5m slow: { "out": "mantle", "at": 0.5, "vin": 3.0, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.38 }
+MCHECK ok   glide-rim gunslinger rim 1.0m full: { "out": "mantle", "at": 1.0, "vin": 5.3, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.52 }
+MCHECK ok   glide-rim gunslinger rim 1.0m slow: { "out": "mantle", "at": 1.0, "vin": 3.0, "vout": 5.3, "into": "Mantling", "open": false, "t": 0.58 }
+MCHECK ok   glide-rim gunslinger rim 1.8m full: { "out": "fall", "at": 1.8, "vin": 5.3, "vout": 0.0, "into": "", "open": true, "t": 0.0 }
+MCHECK ok   glide-rim gunslinger rim 1.8m slow: { "out": "fall", "at": 1.8, "vin": 3.0, "vout": 0.0, "into": "", "open": true, "t": 0.0 }
+MCHECK ok   glide rims: the hunter is bulwark (is bulwark)
+MCHECK ok   glide-rim bulwark    rim 0.5m full: { "out": "mantle", "at": 0.5, "vin": 5.5, "vout": 5.6, "into": "Mantling", "open": false, "t": 0.28 }
+MCHECK ok   glide-rim bulwark    rim 0.5m slow: { "out": "mantle", "at": 0.5, "vin": 3.0, "vout": 5.6, "into": "Mantling", "open": false, "t": 0.33 }
+MCHECK ok   glide-rim bulwark    rim 1.0m full: { "out": "mantle", "at": 1.0, "vin": 5.5, "vout": 5.6, "into": "Mantling", "open": false, "t": 0.48 }
+MCHECK ok   glide-rim bulwark    rim 1.0m slow: { "out": "mantle", "at": 1.0, "vin": 3.0, "vout": 5.6, "into": "Mantling", "open": false, "t": 0.53 }
+MCHECK ok   glide-rim bulwark    rim 1.8m full: { "out": "fall", "at": 1.8, "vin": 5.5, "vout": 0.0, "into": "", "open": true, "t": 0.0 }
+MCHECK ok   glide-rim bulwark    rim 1.8m slow: { "out": "fall", "at": 1.8, "vin": 3.0, "vout": 0.0, "into": "", "open": true, "t": 0.0 }
+MCHECK DONE, failures: 2
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 25 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

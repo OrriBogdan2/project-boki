@@ -1,0 +1,189 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MODE_BOKI ok   expedition has common species
+MODE_BOKI ok   expedition common gate 0 is above the tier before (-1)
+MODE_BOKI ok   expedition has rare species
+MODE_BOKI ok   expedition rare gate 1 is above the tier before (0)
+MODE_BOKI ok   expedition has very_rare species
+MODE_BOKI ok   expedition very_rare gate 2 is above the tier before (1)
+MODE_BOKI ok   heart_raid has common species
+MODE_BOKI ok   heart_raid common gate 0 is above the tier before (-1)
+MODE_BOKI ok   heart_raid has rare species
+MODE_BOKI ok   heart_raid rare gate 1 is above the tier before (0)
+MODE_BOKI ok   heart_raid has very_rare species
+MODE_BOKI ok   heart_raid very_rare gate 2 is above the tier before (1)
+MODE_BOKI ok   garden_visitors has common species
+MODE_BOKI ok   garden_visitors common gate 1 is above the tier before (-1)
+MODE_BOKI ok   garden_visitors has rare species
+MODE_BOKI ok   garden_visitors rare gate 2 is above the tier before (1)
+MODE_BOKI ok   garden_visitors has very_rare species
+MODE_BOKI ok   garden_visitors very_rare gate 3 is above the tier before (2)
+MODE_BOKI ok   cindle is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   puddlet is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   burrlet is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   zapple is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   pebbit is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   wisplet is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   basaltoad is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   caecilith is in exactly one mode ["garden_visitors/very_rare"]
+MODE_BOKI ok   cairnback is in exactly one mode ["expedition/legendary"]
+MODE_BOKI ok   casquebill is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   cindowary is in exactly one mode ["expedition/very_rare"]
+MODE_BOKI ok   duskapi is in exactly one mode ["heart_raid/very_rare"]
+MODE_BOKI ok   floenatee is in exactly one mode ["expedition/rare"]
+MODE_BOKI ok   gibbelle is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   glaciyak is in exactly one mode ["expedition/very_rare"]
+MODE_BOKI ok   glintmole is in exactly one mode ["garden_visitors/rare"]
+MODE_BOKI ok   gloamshell is in exactly one mode ["garden_visitors/very_rare"]
+MODE_BOKI ok   glomwort is in exactly one mode ["garden_visitors/common"]
+MODE_BOKI ok   goliathite is in exactly one mode ["expedition/rare"]
+MODE_BOKI ok   heatherhorn is in exactly one mode ["expedition/very_rare"]
+MODE_BOKI ok   hivara is in exactly one mode ["expedition/legendary"]
+MODE_BOKI ok   hoarheron is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   kestrike is in exactly one mode ["garden_visitors/very_rare"]
+MODE_BOKI ok   kilnbadger is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   kindlewren is in exactly one mode ["garden_visitors/rare"]
+MODE_BOKI ok   lilybara is in exactly one mode ["expedition/very_rare"]
+MODE_BOKI ok   limpetor is in exactly one mode ["expedition/rare"]
+MODE_BOKI ok   lodestick is in exactly one mode ["garden_visitors/rare"]
+MODE_BOKI ok   marchleaf is in exactly one mode ["garden_visitors/common"]
+MODE_BOKI ok   moonloris is in exactly one mode ["heart_raid/common"]
+MODE_BOKI ok   mossgrade is in exactly one mode ["garden_visitors/common"]
+MODE_BOKI ok   moundvark is in exactly one mode ["expedition/rare"]
+MODE_BOKI ok   murmurling is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   nacrolin is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   nettlynx is in exactly one mode ["garden_visitors/very_rare"]
+MODE_BOKI ok   nimbostrich is in exactly one mode ["expedition/very_rare"]
+MODE_BOKI ok   opalisk is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   orchisloth is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   rimeshrew is in exactly one mode ["garden_visitors/rare"]
+MODE_BOKI ok   scaldamus is in exactly one mode ["expedition/rare"]
+MODE_BOKI ok   selenfin is in exactly one mode ["garden_visitors/very_rare"]
+MODE_BOKI ok   sentrikat is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   spatewader is in exactly one mode ["expedition/rare"]
+MODE_BOKI ok   squalltross is in exactly one mode ["heart_raid/rare"]
+MODE_BOKI ok   threadwyrm is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   thrumbird is in exactly one mode ["garden_visitors/very_rare"]
+MODE_BOKI ok   tuatrune is in exactly one mode ["expedition/common"]
+MODE_BOKI ok   umbrathere is in exactly one mode ["heart_raid/rare"]
+MODE_BOKI ok   velvorm is in exactly one mode ["heart_raid/common"]
+MODE_BOKI ok   zephyrak is in exactly one mode ["expedition/legendary"]
+MODE_BOKI ok   burrlet is a species in the game
+MODE_BOKI ok   cindle is a species in the game
+MODE_BOKI ok   pebbit is a species in the game
+MODE_BOKI ok   puddlet is a species in the game
+MODE_BOKI ok   wisplet is a species in the game
+MODE_BOKI ok   zapple is a species in the game
+MODE_BOKI ok   basaltoad is a species in the game
+MODE_BOKI ok   casquebill is a species in the game
+MODE_BOKI ok   gibbelle is a species in the game
+MODE_BOKI ok   hoarheron is a species in the game
+MODE_BOKI ok   kilnbadger is a species in the game
+MODE_BOKI ok   murmurling is a species in the game
+MODE_BOKI ok   nacrolin is a species in the game
+MODE_BOKI ok   opalisk is a species in the game
+MODE_BOKI ok   orchisloth is a species in the game
+MODE_BOKI ok   sentrikat is a species in the game
+MODE_BOKI ok   threadwyrm is a species in the game
+MODE_BOKI ok   tuatrune is a species in the game
+MODE_BOKI ok   floenatee is a species in the game
+MODE_BOKI ok   goliathite is a species in the game
+MODE_BOKI ok   limpetor is a species in the game
+MODE_BOKI ok   moundvark is a species in the game
+MODE_BOKI ok   scaldamus is a species in the game
+MODE_BOKI ok   spatewader is a species in the game
+MODE_BOKI ok   cindowary is a species in the game
+MODE_BOKI ok   glaciyak is a species in the game
+MODE_BOKI ok   heatherhorn is a species in the game
+MODE_BOKI ok   lilybara is a species in the game
+MODE_BOKI ok   nimbostrich is a species in the game
+MODE_BOKI ok   cairnback is a species in the game
+MODE_BOKI ok   hivara is a species in the game
+MODE_BOKI ok   zephyrak is a species in the game
+MODE_BOKI ok   moonloris is a species in the game
+MODE_BOKI ok   velvorm is a species in the game
+MODE_BOKI ok   squalltross is a species in the game
+MODE_BOKI ok   umbrathere is a species in the game
+MODE_BOKI ok   duskapi is a species in the game
+MODE_BOKI ok   glomwort is a species in the game
+MODE_BOKI ok   marchleaf is a species in the game
+MODE_BOKI ok   mossgrade is a species in the game
+MODE_BOKI ok   glintmole is a species in the game
+MODE_BOKI ok   kindlewren is a species in the game
+MODE_BOKI ok   lodestick is a species in the game
+MODE_BOKI ok   rimeshrew is a species in the game
+MODE_BOKI ok   caecilith is a species in the game
+MODE_BOKI ok   gloamshell is a species in the game
+MODE_BOKI ok   kestrike is a species in the game
+MODE_BOKI ok   nettlynx is a species in the game
+MODE_BOKI ok   selenfin is a species in the game
+MODE_BOKI ok   thrumbird is a species in the game
+MODE_BOKI ok   Expedition's legendaries are the rare kin ["cairnback", "hivara", "zephyrak"]
+MODE_BOKI ok   a legendary rolls in 20% of matches (under 30%)
+MODE_BOKI ok   cindle: mode_of and tier read the file
+MODE_BOKI ok   puddlet: mode_of and tier read the file
+MODE_BOKI ok   burrlet: mode_of and tier read the file
+MODE_BOKI ok   zapple: mode_of and tier read the file
+MODE_BOKI ok   pebbit: mode_of and tier read the file
+MODE_BOKI ok   wisplet: mode_of and tier read the file
+MODE_BOKI ok   basaltoad: mode_of and tier read the file
+MODE_BOKI ok   caecilith: mode_of and tier read the file
+MODE_BOKI ok   cairnback: mode_of and tier read the file
+MODE_BOKI ok   casquebill: mode_of and tier read the file
+MODE_BOKI ok   cindowary: mode_of and tier read the file
+MODE_BOKI ok   duskapi: mode_of and tier read the file
+MODE_BOKI ok   floenatee: mode_of and tier read the file
+MODE_BOKI ok   gibbelle: mode_of and tier read the file
+MODE_BOKI ok   glaciyak: mode_of and tier read the file
+MODE_BOKI ok   glintmole: mode_of and tier read the file
+MODE_BOKI ok   gloamshell: mode_of and tier read the file
+MODE_BOKI ok   glomwort: mode_of and tier read the file
+MODE_BOKI ok   goliathite: mode_of and tier read the file
+MODE_BOKI ok   heatherhorn: mode_of and tier read the file
+MODE_BOKI ok   hivara: mode_of and tier read the file
+MODE_BOKI ok   hoarheron: mode_of and tier read the file
+MODE_BOKI ok   kestrike: mode_of and tier read the file
+MODE_BOKI ok   kilnbadger: mode_of and tier read the file
+MODE_BOKI ok   kindlewren: mode_of and tier read the file
+MODE_BOKI ok   lilybara: mode_of and tier read the file
+MODE_BOKI ok   limpetor: mode_of and tier read the file
+MODE_BOKI ok   lodestick: mode_of and tier read the file
+MODE_BOKI ok   marchleaf: mode_of and tier read the file
+MODE_BOKI ok   moonloris: mode_of and tier read the file
+MODE_BOKI ok   mossgrade: mode_of and tier read the file
+MODE_BOKI ok   moundvark: mode_of and tier read the file
+MODE_BOKI ok   murmurling: mode_of and tier read the file
+MODE_BOKI ok   nacrolin: mode_of and tier read the file
+MODE_BOKI ok   nettlynx: mode_of and tier read the file
+MODE_BOKI ok   nimbostrich: mode_of and tier read the file
+MODE_BOKI ok   opalisk: mode_of and tier read the file
+MODE_BOKI ok   orchisloth: mode_of and tier read the file
+MODE_BOKI ok   rimeshrew: mode_of and tier read the file
+MODE_BOKI ok   scaldamus: mode_of and tier read the file
+MODE_BOKI ok   selenfin: mode_of and tier read the file
+MODE_BOKI ok   sentrikat: mode_of and tier read the file
+MODE_BOKI ok   spatewader: mode_of and tier read the file
+MODE_BOKI ok   squalltross: mode_of and tier read the file
+MODE_BOKI ok   threadwyrm: mode_of and tier read the file
+MODE_BOKI ok   thrumbird: mode_of and tier read the file
+MODE_BOKI ok   tuatrune: mode_of and tier read the file
+MODE_BOKI ok   umbrathere: mode_of and tier read the file
+MODE_BOKI ok   velvorm: mode_of and tier read the file
+MODE_BOKI ok   zephyrak: mode_of and tier read the file
+MODE_BOKI ok   an unlisted species has no mode
+MODE_BOKI ok   the live flag is off in the file
+MODE_BOKI ok   flag off: the Expedition pool is untouched
+MODE_BOKI ok   flag off: the visitor pool is untouched
+MODE_BOKI ok   flag on: Expedition level 0 offers 18 of its own
+MODE_BOKI ok   flag on: Expedition level 1 offers 24 of its own
+MODE_BOKI ok   flag on: Expedition level 2 offers 29 of its own
+MODE_BOKI ok   flag on: The Meadow offers 18, The Hollow 29 [18, 29]
+MODE_BOKI ok   flag on: garden visitors offer only their 13 once every zone is open
+MODE_BOKI ok   flag on: no visitor before a zone is open
+MODE_BOKI ok   flag on: one zone open offers the 3 common visitors (3)
+MODE_BOKI ok   flag on: draw stays inside the offer
+MODE_BOKI ok   flag off again: the pool is back as it was
+MODE_BOKI DONE, failures: 0

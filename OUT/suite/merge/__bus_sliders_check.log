@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BUSSLIDERS bus Master exists, setting 'master' has a default              PASS  
+BUSSLIDERS bus Music exists, setting 'music' has a default                PASS  
+BUSSLIDERS bus SFX exists, setting 'sfx' has a default                    PASS  
+BUSSLIDERS bus Voice exists, setting 'voices' has a default               PASS  
+BUSSLIDERS bus Ambience exists, setting 'ambience' has a default          PASS  
+BUSSLIDERS bus UI exists, setting 'ui_sounds' has a default               PASS  
+BUSSLIDERS v_brute (no spot) plays on Voice                               PASS  Voice
+BUSSLIDERS v_brute at a spot plays on SFXFar                              PASS  SFXFar
+BUSSLIDERS archer_hurt at a spot plays on Voice                           PASS  Voice
+BUSSLIDERS kin_alert (no spot) plays on Boki                              PASS  Boki
+BUSSLIDERS click (no spot) plays on UI                                    PASS  UI
+BUSSLIDERS thump at a spot plays on SFX                                   PASS  SFX
+BUSSLIDERS smg at a spot plays on SFXFar                                  PASS  SFXFar
+BUSSLIDERS smg (no spot) plays on SFX                                     PASS  SFX
+BUSSLIDERS 'master' slider sets bus Master                                PASS  0.250
+BUSSLIDERS ...and letting go plays the sample on Master                   PASS  
+BUSSLIDERS Settings > Audio: one slider per bus but Master                PASS  5 sliders
+BUSSLIDERS 'music' slider sets bus Music                                  PASS  0.350
+BUSSLIDERS ...and letting go plays the sample on Music                    PASS  
+BUSSLIDERS 'sfx' slider sets bus SFX                                      PASS  0.450
+BUSSLIDERS ...and letting go plays the sample on SFX                      PASS  
+BUSSLIDERS 'voices' slider sets bus Voice                                 PASS  0.550
+BUSSLIDERS ...and letting go plays the sample on Voice                    PASS  
+BUSSLIDERS 'ambience' slider sets bus Ambience                            PASS  0.650
+BUSSLIDERS ...and letting go plays the sample on Ambience                 PASS  
+BUSSLIDERS 'ui_sounds' slider sets bus UI                                 PASS  0.750
+BUSSLIDERS ...and letting go plays the sample on UI                       PASS  
+BUSSLIDERS 'master' survives a save and a load                            PASS  0.150
+BUSSLIDERS 'music' survives a save and a load                             PASS  0.270
+BUSSLIDERS 'sfx' survives a save and a load                               PASS  0.390
+BUSSLIDERS 'voices' survives a save and a load                            PASS  0.510
+BUSSLIDERS 'ambience' survives a save and a load                          PASS  0.630
+BUSSLIDERS 'ui_sounds' survives a save and a load                         PASS  0.750
+BUSSLIDERS an older settings file keeps its volumes (same loudness)       PASS  [0.77459666924148, 0.70710678118655, 0.54772255750517]
+BUSSLIDERS ...and Voices and UI start where Effects was                   PASS  
+BUSSLIDERS ...the master bus plays at the old gain                        PASS  
+BUSSLIDERS DONE, failures: 0

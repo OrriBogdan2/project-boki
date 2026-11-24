@@ -1,0 +1,51 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PARTY ok   --matchmaker= wins
+PARTY ok   else the --server= host on 8080
+PARTY ok   no address, no matchmaker
+PARTY ok   Net holds the matchmaker and the party
+PARTY ok   can_join is false before the tutorial
+PARTY ok   create refused before the tutorial
+PARTY ok   ...and no party was made
+PARTY ok   join refused before the tutorial
+PARTY ok   can_join once tutorial.home is set
+PARTY ok   create: forming, the code
+PARTY ok   the creator leads and holds a secret
+PARTY ok   no second party while in one
+PARTY ok   wrong code: not_found
+PARTY ok   another version: 409 version
+PARTY ok   join in any case: two members
+PARTY ok   the joiner is not the leader
+PARTY ok   a fourth is refused: full
+PARTY ok   the leader's card shows all three
+PARTY ok   only the leader sets the mode
+PARTY ok   the leader sets the mode
+PARTY ok   ready shows on the card
+PARTY ok   changing the mode clears every ready
+PARTY ok   Find match waits for the others
+PARTY ok   all ready: the leader's Find match is accepted
+PARTY ok   ...and the party is queued with a ticket
+PARTY ok   a member follows, with its own ticket
+PARTY ok   waiting: position and eta
+PARTY ok   ready: Net.server_addr and Net.token are set
+PARTY ok   ready: Net.start() opened the connection
+PARTY ok   the match is over: back on the card
+PARTY ok   ...not ready
+PARTY ok   a dropped member: the card shrinks
+PARTY ok   a dropped member: every ready is cleared
+PARTY ok   the dropped member's next heartbeat: 403 not_member ends it
+PARTY ok   leave: back to none
+PARTY ok   the leader is alone again
+PARTY ok   404 gone: 'your party ended', back to solo
+PARTY ok   a solo ticket queues
+PARTY ok   the solo ticket polls like a party's
+PARTY ok   cancel drops the solo ticket
+PARTY ok   the member secret never appeared in a path (43 calls)
+PARTY CHECK DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

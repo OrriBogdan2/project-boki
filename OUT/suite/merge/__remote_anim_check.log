@@ -1,0 +1,197 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+relay: listening on 7957, up to 120 players, version 0.24.18, Discord check OFF
+RANIM ok   the relay listens on 7957  
+relay: 1966146148 joined as Hunter (1 online)
+RANIM ok   the host is on the relay as 1966146148  
+relay: 541864944 joined as Hunter (2 online)
+RANIM ok   the guest joins the relay  541864944
+RANIM ok   the guest's hunter is here, driven by the guest's game  
+RANIM ok   the Net version moved on with the boss event (0.24.18)  
+RANIM ok   colossus: the host plays wake  ["", "wake", "", "slam_windup", "slam_strike", "", "phase", ""]
+RANIM ok   colossus: the host plays slam_windup  ["", "wake", "", "slam_windup", "slam_strike", "", "phase", ""]
+RANIM ok   colossus: the host plays slam_strike  ["", "wake", "", "slam_windup", "slam_strike", "", "phase", ""]
+RANIM ok   colossus: the host plays phase  ["", "wake", "", "slam_windup", "slam_strike", "", "phase", ""]
+RANIM FAIL colossus: the guest's copy plays the same moves, in order, within 0.3 s (worst 0.65 s)  the host's '' (1.76 s in) does not show within 0.3 s
+RANIM ok   colossus: the copy's slam_windup starts near its start (progress from the synced age)  k at first sight 0.02
+RANIM ok   serpent: the host plays wake  ["", "wake", "", "dash_windup", "dash_strike", "", "dash_windup", "phase", ""]
+RANIM ok   serpent: the host plays dash_windup  ["", "wake", "", "dash_windup", "dash_strike", "", "dash_windup", "phase", ""]
+RANIM ok   serpent: the host plays dash_strike  ["", "wake", "", "dash_windup", "dash_strike", "", "dash_windup", "phase", ""]
+RANIM ok   serpent: the host plays phase  ["", "wake", "", "dash_windup", "dash_strike", "", "dash_windup", "phase", ""]
+RANIM FAIL serpent: the guest's copy plays the same moves, in order, within 0.3 s (worst 4.28 s)  the host's '' (1.97 s in) does not show within 0.3 s
+RANIM ok   serpent: the copy's dash_windup starts near its start (progress from the synced age)  k at first sight 0.02
+RANIM ok   brood: the host plays wake  ["", "wake", "", "spit_windup", "spit_strike", "", "spit_windup", "phase", ""]
+RANIM ok   brood: the host plays spit_windup  ["", "wake", "", "spit_windup", "spit_strike", "", "spit_windup", "phase", ""]
+RANIM ok   brood: the host plays spit_strike  ["", "wake", "", "spit_windup", "spit_strike", "", "spit_windup", "phase", ""]
+RANIM ok   brood: the host plays phase  ["", "wake", "", "spit_windup", "spit_strike", "", "spit_windup", "phase", ""]
+RANIM ok   brood: the guest's copy plays the same moves, in order, within 0.3 s (worst 0.17 s)  
+RANIM ok   brood: the copy's spit_windup starts near its start (progress from the synced age)  k at first sight 0.02
+RANIM archer lmb  0 moves, worst lag 0.00 s
+RANIM archer lmb held  2 moves, worst lag 0.03 s
+RANIM archer rmb  0 moves, worst lag 0.00 s
+RANIM archer rmb held  2 moves, worst lag 0.05 s
+RANIM archer rmb cut  1 moves, worst lag 0.05 s
+RANIM archer e  telegraphs: arc_wall e (guest shows 1)
+RANIM archer e  1 moves, worst lag 0.17 s
+RANIM archer r  0 moves, worst lag 0.00 s
+RANIM archer dash  2 moves, worst lag 0.03 s
+RANIM archer dash held  2 moves, worst lag 0.05 s
+RANIM ashwick lmb  1 moves, worst lag 0.01 s
+RANIM ashwick lmb held  2 moves, worst lag 0.03 s
+RANIM ashwick rmb  1 moves, worst lag 0.01 s
+RANIM ashwick rmb held  2 moves, worst lag 0.04 s
+RANIM ashwick e  telegraphs: circle e_ring (guest shows 1)
+RANIM ashwick e  1 moves, worst lag 0.05 s
+RANIM ashwick r  0 moves, worst lag 0.00 s
+RANIM ashwick dash  1 moves, worst lag 0.03 s
+RANIM ashwick dash held  1 moves, worst lag 0.02 s
+RANIM bulwark lmb  1 moves, worst lag 0.04 s
+RANIM bulwark lmb held  2 moves, worst lag 0.00 s
+RANIM bulwark rmb  0 moves, worst lag 0.00 s
+RANIM bulwark rmb held  1 moves, worst lag 0.01 s
+RANIM bulwark rmb cut  1 moves, worst lag 0.03 s
+RANIM bulwark e  telegraphs: circle e (guest shows 1)
+RANIM bulwark e  1 moves, worst lag 0.04 s
+RANIM bulwark r  0 moves, worst lag 0.00 s
+RANIM bulwark dash  1 moves, worst lag 0.01 s
+RANIM bulwark dash held  1 moves, worst lag 0.01 s
+RANIM dolm lmb  1 moves, worst lag 0.05 s
+RANIM dolm lmb held  2 moves, worst lag 0.02 s
+RANIM dolm rmb  1 moves, worst lag 0.01 s
+RANIM dolm rmb held  telegraphs: circle rmb (guest shows 1)
+RANIM dolm rmb held  3 moves, worst lag 0.03 s
+RANIM dolm e  telegraphs: circle e_tell0, circle e_tell1, circle e_tell2 (guest shows 3)
+RANIM dolm e  1 moves, worst lag 0.04 s
+RANIM dolm r  0 moves, worst lag 0.00 s
+RANIM dolm dash  telegraphs: circle leap (guest shows 1)
+RANIM dolm dash  3 moves, worst lag 0.04 s
+RANIM dolm dash held  telegraphs: circle leap (guest shows 1)
+RANIM dolm dash held  3 moves, worst lag 0.04 s
+RANIM dredge lmb  1 moves, worst lag 0.03 s
+RANIM dredge lmb held  2 moves, worst lag 0.04 s
+RANIM dredge rmb  1 moves, worst lag 0.03 s
+RANIM dredge rmb held  1 moves, worst lag 0.00 s
+RANIM dredge e  telegraphs: cone e_tell, cone e_hit (guest shows 2)
+RANIM dredge e  1 moves, worst lag 0.00 s
+RANIM dredge r  0 moves, worst lag 0.00 s
+RANIM dredge dash  2 moves, worst lag 0.01 s
+RANIM dredge dash held  2 moves, worst lag 0.03 s
+RANIM gunslinger lmb  1 moves, worst lag 0.01 s
+RANIM GAP gunslinger lmb held
+RANIM gunslinger lmb held  5 moves, worst lag 3.10 s
+RANIM gunslinger rmb  telegraphs: cone burr3805777246937 (guest shows 2)
+RANIM ok   gunslinger rmb: the guest draws the Burr cone as long as the host  host 6.00 m, guest 6.00 m
+RANIM gunslinger rmb  1 moves, worst lag 0.05 s
+RANIM gunslinger rmb held  1 moves, worst lag 0.03 s
+RANIM gunslinger e  telegraphs: lane e (guest shows 1)
+RANIM gunslinger e  1 moves, worst lag 0.01 s
+RANIM gunslinger r  0 moves, worst lag 0.00 s
+RANIM gunslinger dash  1 moves, worst lag 0.04 s
+RANIM FAIL gunslinger dash held: the host's 'gunslinger_dash' (1.20 s in) does not show within 0.3 s
+RANIM gunslinger dash held  3 moves, worst lag 2.13 s
+RANIM juggernaut lmb  1 moves, worst lag 0.03 s
+RANIM FAIL juggernaut lmb held: the host's 'jug_wave' (1.92 s in) does not show within 0.3 s
+RANIM juggernaut lmb held  2 moves, worst lag 0.45 s
+RANIM juggernaut rmb  telegraphs: lane slam (guest shows 1)
+RANIM juggernaut rmb  1 moves, worst lag 0.04 s
+RANIM FAIL juggernaut rmb held: the host's 'jug_lunge' (1.67 s in) does not show within 0.3 s
+RANIM juggernaut rmb held  2 moves, worst lag 0.04 s
+RANIM juggernaut rmb cut  1 moves, worst lag 0.04 s
+RANIM juggernaut e  1 moves, worst lag 0.26 s
+RANIM juggernaut r  0 moves, worst lag 0.00 s
+RANIM juggernaut dash  1 moves, worst lag 0.00 s
+RANIM juggernaut dash held  1 moves, worst lag 0.09 s
+RANIM mage lmb  1 moves, worst lag 0.01 s
+RANIM mage lmb held  2 moves, worst lag 0.13 s
+RANIM mage rmb  0 moves, worst lag 0.00 s
+RANIM mage rmb held  2 moves, worst lag 0.02 s
+RANIM mage e  telegraphs: circle e0 (guest shows 1)
+RANIM mage e  2 moves, worst lag 0.06 s
+RANIM mage r  0 moves, worst lag 0.00 s
+RANIM mage dash  1 moves, worst lag 0.00 s
+RANIM mage dash held  telegraphs: circle dash_end (guest shows 1)
+RANIM mage dash held  3 moves, worst lag 0.02 s
+RANIM ostra lmb  1 moves, worst lag 0.02 s
+RANIM ostra lmb held  2 moves, worst lag 0.04 s
+RANIM ostra rmb  2 moves, worst lag 0.05 s
+RANIM ostra rmb held  2 moves, worst lag 0.02 s
+RANIM ostra e  telegraphs: circle seed (guest shows 1)
+RANIM ostra e  1 moves, worst lag 0.04 s
+RANIM ostra r  0 moves, worst lag 0.00 s
+RANIM ostra dash  telegraphs: swap swap_fly (guest shows 1)
+RANIM ostra dash  1 moves, worst lag 0.05 s
+RANIM ostra dash held  telegraphs: swap swap_fly (guest shows 1)
+RANIM ostra dash held  2 moves, worst lag 0.04 s
+RANIM rimewright lmb  3 moves, worst lag 0.06 s
+RANIM rimewright lmb held  7 moves, worst lag 0.14 s
+RANIM rimewright rmb  telegraphs: circle zone1 (guest shows 1)
+RANIM rimewright rmb  1 moves, worst lag 0.02 s
+RANIM rimewright rmb held  telegraphs: circle zone1 (guest shows 1)
+RANIM rimewright rmb held  2 moves, worst lag 0.08 s
+RANIM rimewright e  telegraphs: lane e (guest shows 1)
+RANIM rimewright e  1 moves, worst lag 0.04 s
+RANIM rimewright r  0 moves, worst lag 0.00 s
+RANIM rimewright dash  1 moves, worst lag 0.03 s
+RANIM rimewright dash held  3 moves, worst lag 0.02 s
+RANIM tender lmb  1 moves, worst lag 0.09 s
+RANIM tender lmb held  2 moves, worst lag 0.04 s
+RANIM tender rmb  2 moves, worst lag 0.04 s
+RANIM tender rmb held  2 moves, worst lag 0.04 s
+RANIM tender e  1 moves, worst lag 0.05 s
+RANIM tender r  0 moves, worst lag 0.00 s
+RANIM tender dash  1 moves, worst lag 0.06 s
+RANIM tender dash held  1 moves, worst lag 0.02 s
+RANIM thief lmb  1 moves, worst lag 0.01 s
+RANIM thief lmb held  2 moves, worst lag 0.05 s
+RANIM thief rmb  1 moves, worst lag 0.05 s
+RANIM thief rmb held  1 moves, worst lag 0.01 s
+RANIM thief e  1 moves, worst lag 0.03 s
+RANIM thief r  0 moves, worst lag 0.00 s
+RANIM thief dash  1 moves, worst lag 0.16 s
+RANIM thief dash held  1 moves, worst lag 0.03 s
+RANIM ok   archer: the host's own body tints through the Spirit Walk  host [[1795119866553, true], [1795119869788, false]] guest [[1795119866566.0, true], [1795119869701.0, false]]
+RANIM ok   archer: the guest's copy tints within 0.3 s  host [[1795119866553, true], [1795119869788, false]] guest [[1795119866566.0, true], [1795119869701.0, false]]
+RANIM ok   archer: the copy's tint ends with the walk  host [[1795119866553, true], [1795119869788, false]] guest [[1795119866566.0, true], [1795119869701.0, false]]
+RANIM ok   some cast draws an all telegraph (else none was compared)  
+RANIM ok   telegraph arc_wall: all 1 the host drew show on the guest  missing: []
+RANIM ok   telegraph circle: all 12 the host drew show on the guest  missing: []
+RANIM ok   telegraph cone: all 2 the host drew show on the guest  missing: []
+RANIM ok   telegraph lane: all 3 the host drew show on the guest  missing: []
+RANIM ok   telegraph swap: all 2 the host drew show on the guest  missing: []
+RANIM ok   ashwick ram hit: the host's as_leap jumps to its squash key  host [[1795120164748, -0.19]] guest [[1795120164752.0, -0.1], [1795120165112.0, -0.35]]
+RANIM FAIL ashwick ram hit: the guest's copy re-times as_leap by the same within 0.3 s  host [[1795120164748, -0.19]] guest [[1795120164752.0, -0.1], [1795120165112.0, -0.35]]
+RANIM ok   archer: some cast plays a kit move (else nothing was compared)  
+RANIM ok   archer: the guest's copy plays what the host's does  unlike: []
+RANIM ok   ashwick: some cast plays a kit move (else nothing was compared)  
+RANIM ok   ashwick: the guest's copy plays what the host's does  unlike: []
+RANIM ok   bulwark: some cast plays a kit move (else nothing was compared)  
+RANIM ok   bulwark: the guest's copy plays what the host's does  unlike: []
+RANIM ok   dolm: some cast plays a kit move (else nothing was compared)  
+RANIM ok   dolm: the guest's copy plays what the host's does  unlike: []
+RANIM ok   dredge: some cast plays a kit move (else nothing was compared)  
+RANIM ok   dredge: the guest's copy plays what the host's does  unlike: []
+RANIM ok   gunslinger: some cast plays a kit move (else nothing was compared)  
+RANIM FAIL gunslinger: the guest's copy plays what the host's does  unlike: ["gunslinger dash held: the host\'s \'gunslinger_dash\' (1.20 s in) does not show within 0.3 s"]
+RANIM ok   juggernaut: some cast plays a kit move (else nothing was compared)  
+RANIM FAIL juggernaut: the guest's copy plays what the host's does  unlike: ["juggernaut lmb held: the host\'s \'jug_wave\' (1.92 s in) does not show within 0.3 s", "juggernaut rmb held: the host\'s \'jug_lunge\' (1.67 s in) does not show within 0.3 s"]
+RANIM ok   mage: some cast plays a kit move (else nothing was compared)  
+RANIM ok   mage: the guest's copy plays what the host's does  unlike: []
+RANIM ok   ostra: some cast plays a kit move (else nothing was compared)  
+RANIM ok   ostra: the guest's copy plays what the host's does  unlike: []
+RANIM ok   rimewright: some cast plays a kit move (else nothing was compared)  
+RANIM ok   rimewright: the guest's copy plays what the host's does  unlike: []
+RANIM ok   tender: some cast plays a kit move (else nothing was compared)  
+RANIM ok   tender: the guest's copy plays what the host's does  unlike: []
+RANIM ok   thief: some cast plays a kit move (else nothing was compared)  
+RANIM ok   thief: the guest's copy plays what the host's does  unlike: []
+RANIM DONE, 158 checks, failures: 8
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 47 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

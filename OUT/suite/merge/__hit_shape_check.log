@@ -1,0 +1,112 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HSROW|archer|lmb|0|grid|0.0|0.0|0|12.0|0.0|0|
+HSROW|archer|lmb_hold|1|shot|16.6|0.4|0|12.0|0.0|0|reach +38%
+HSROW|archer|rmb|0|grid|0.0|0.0|0|0.0|0.0|0|
+HSROW|archer|rmb_hold|1|shot|15.6|0.6|0|0.0|0.0|0|
+HSROW|archer|e|0|grid|0.0|0.0|0|10.8|1.8|120|
+HSROW|archer|x|29|grid+r|7.3|1.5|16|18.0|0.5|0|width +208%
+HSROW|archer|dash|0|grid|0.0|0.0|0|3.4|0.0|0|
+HSCHECK ok   archer: at least one input hurt a dummy (3 did)
+HSROW|juggernaut|lmb|3|grid|1.6|2.5|113|3.4|0.0|160|reach -54%, arc -30%
+HSROW|juggernaut|lmb_hold|4|grid|1.4|0.5|0|3.4|0.0|160|reach -60%, arc -100%
+HSROW|juggernaut|rmb|0|grid|0.0|0.0|0|0.0|0.0|0|
+HSROW|juggernaut|rmb_hold|1|grid|0.8|0.0|0|0.0|0.0|0|
+HSROW|juggernaut|e|1|shot|13.6|0.4|0|13.0|0.0|0|
+HSROW|juggernaut|x|14|grid|3.3|1.5|44|3.6|1.8|0|~width -14%
+HSROW|juggernaut|dash|32|grid+w|5.9|3.5|41|4.5|0.0|0|reach +30%
+HSCHECK ok   juggernaut: at least one input hurt a dummy (6 did)
+HSROW|gunslinger|lmb|1|shot|11.6|0.3|0|11.0|0.0|0|
+HSROW|gunslinger|rmb|1|grid|0.8|0.0|0|0.0|0.0|0|
+HSROW|gunslinger|e|38|grid+r|7.3|2.5|33|18.0|0.9|0|width +182%
+HSROW|gunslinger|x|0|grid|0.0|0.0|0|14.0|0.0|0|
+HSROW|gunslinger|dash|0|grid|0.0|0.0|0|4.8|0.0|0|
+HSCHECK ok   gunslinger: at least one input hurt a dummy (3 did)
+HSROW|bulwark|lmb|39|grid+r|7.3|2.5|33|2.4|0.0|120|arc -72%
+HSROW|bulwark|lmb_hold|3|grid|1.2|1.5|90|2.4|0.0|120|reach -51%, arc -25%
+HSROW|bulwark|rmb|0|grid|0.0|0.0|0|0.0|0.0|0|
+HSROW|bulwark|rmb_hold|0|grid|0.0|0.0|0|0.0|0.0|0|
+HSROW|bulwark|e|0|grid|0.0|0.0|0|0.0|0.0|0|
+HSROW|bulwark|x|67|grid+wr|7.5|3.5|44|0.0|5.5|0|
+HSROW|bulwark|dash|4|grid|5.5|2.5|33|0.0|0.0|0|
+HSCHECK ok   bulwark: at least one input hurt a dummy (4 did)
+HSROW|rimewright|lmb|1|shot|12.1|0.5|0|10.0|0.0|0|reach +21%
+HSROW|rimewright|rmb|12|grid|2.5|1.5|67|0.0|0.0|0|
+HSROW|rimewright|rmb_hold|11|grid|2.5|1.5|67|0.0|0.0|0|
+HSROW|rimewright|e|27|grid|5.9|2.5|31|1.8|0.0|0|reach +225%
+HSROW|rimewright|x|16|grid+w|6.4|3.5|37|0.0|0.0|0|
+HSROW|rimewright|dash|10|grid+w|6.4|3.5|37|0.0|0.0|0|
+HSCHECK ok   rimewright: at least one input hurt a dummy (6 did)
+HSROW|ashwick|lmb|10|grid+w|6.9|3.5|37|6.1|0.0|0|reach +14%
+HSROW|ashwick|rmb|10|grid+w|6.3|3.5|37|14.0|0.0|0|reach -55%
+HSROW|ashwick|rmb_hold|1|shot|14.6|0.6|0|14.0|0.0|0|
+HSROW|ashwick|e|39|grid+w|4.5|3.5|77|0.0|0.0|0|
+HSROW|ashwick|x|37|grid+r|7.3|2.5|33|0.0|0.0|0|
+HSROW|ashwick|dash|1|grid|0.8|0.0|0|3.4|0.0|0|reach -77%
+HSCHECK ok   ashwick: at least one input hurt a dummy (6 did)
+HSROW|dolm|lmb|5|grid|1.4|1.5|90|11.0|0.0|120|reach -88%, arc -25%
+HSROW|dolm|lmb_hold|16|grid|5.0|2.5|37|11.0|0.0|120|reach -55%, arc -69%
+HSROW|dolm|rmb|48|grid+w|5.4|3.5|67|0.0|0.0|0|
+HSROW|dolm|rmb_hold|0|grid|0.0|0.0|0|0.0|0.0|0|
+HSROW|dolm|e|0|grid|0.0|0.0|0|3.4|0.0|0|
+HSROW|dolm|x|0|grid|0.0|0.0|0|21.0|0.0|0|
+HSROW|dolm|dash|0|grid|0.0|0.0|0|2.8|0.0|0|
+HSCHECK ok   dolm: at least one input hurt a dummy (3 did)
+HSROW|mage|lmb|1|shot|13.6|0.4|0|13.0|0.0|0|
+HSROW|mage|rmb|2|shot|13.6|0.4|0|0.0|0.0|0|
+HSROW|mage|rmb_hold|2|shot|13.6|0.4|0|0.0|0.0|0|
+HSROW|mage|e|0|grid|0.0|0.0|0|11.0|0.0|0|
+HSROW|mage|x|0|grid|0.0|0.0|0|14.4|0.0|0|
+HSROW|mage|dash|50|grid+wr|7.3|3.5|40|10.5|0.9|0|
+HSROW|mage|dash_hold|40|grid+r|7.3|2.5|33|10.5|0.9|0|width +182%
+HSCHECK ok   mage: at least one input hurt a dummy (5 did)
+HSROW|dredge|lmb|1|shot|13.5|0.3|0|6.3|0.0|0|reach +115%
+HSROW|dredge|rmb|1|shot|12.1|0.5|0|11.5|0.0|0|
+HSROW|dredge|e|12|grid|2.9|2.5|62|0.0|0.0|110|arc -44%
+HSROW|dredge|x|1|shot|5.0|0.9|0|5.9|0.0|0|reach -15%
+HSROW|dredge|dash|5|grid|4.0|2.5|53|3.2|0.0|0|reach +26%
+HSCHECK ok   dredge: at least one input hurt a dummy (5 did)
+HSROW|tender|lmb|1|shot|14.1|0.4|0|13.5|0.0|0|
+HSROW|tender|rmb|0|grid|0.0|0.0|0|0.0|0.0|0|
+HSROW|tender|e|0|grid|0.0|0.0|0|9.0|0.0|0|
+HSROW|tender|x|0|grid|0.0|0.0|0|12.6|0.0|0|
+HSROW|tender|dash|2|grid|3.9|1.5|32|3.1|0.0|0|reach +24%
+HSCHECK ok   tender: at least one input hurt a dummy (2 did)
+HSROW|thief|lmb|1|shot|8.5|0.3|0|8.5|0.0|0|
+HSROW|thief|rmb|2|grid|0.9|0.5|0|0.0|0.0|0|
+HSROW|thief|e|1|shot|15.6|0.4|0|15.0|0.0|0|
+HSROW|thief|x|43|grid+w|5.5|3.5|67|5.4|0.0|0|
+HSROW|thief|dash|0|grid|0.0|0.0|0|4.5|0.0|0|
+HSCHECK ok   thief: at least one input hurt a dummy (4 did)
+HSROW|ostra|lmb|1|shot|12.9|0.6|0|12.2|0.0|0|
+HSROW|ostra|rmb|1|shot|13.6|0.7|0|0.0|0.0|0|
+HSROW|ostra|e|0|grid|0.0|0.0|0|9.0|0.0|0|
+HSROW|ostra|x|17|grid+wr|7.5|3.5|32|10.0|0.0|0|
+HSROW|ostra|dash|0|grid|0.0|0.0|0|12.0|0.0|0|
+HSCHECK ok   ostra: at least one input hurt a dummy (3 did)
+HSROW|gil|lmb|1|grid|0.8|0.0|0|2.5|0.0|50|reach -69%, arc -100%
+HSROW|gil|rmb|23|grid+wr|7.5|3.5|37|8.0|0.0|0|
+HSROW|gil|e|16|grid+w|2.3|3.5|127|11.0|2.2|0|reach -79%
+HSROW|gil|x|62|grid+wr|7.5|3.5|44|14.0|3.6|0|
+HSROW|gil|dash|34|grid+w|6.9|3.5|44|6.0|0.0|0|reach +15%
+HSCHECK ok   gil: at least one input hurt a dummy (5 did)
+HSCHECK FAIL the run took 99.3 s (budget 60)
+HIT SHAPE CHECK DONE, failures: 1
+ERROR: 5 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 63 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 341: leaked 5592432 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 342: leaked 11184824 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 343: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 60 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

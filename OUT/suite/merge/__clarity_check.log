@@ -1,0 +1,162 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/clarity_check.gd:26)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/clarity_check.gd:26)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/clarity_check.gd:26)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/clarity_check.gd:26)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+CLARITY ok   a 3v3: a teammate, three rivals
+CLARITY ok   you and your ally
+CLARITY ok   every rival is the foe colour
+CLARITY ok   foe != ally
+CLARITY ok   Hunter's ring is the you colour
+CLARITY ok   Hunter's body edge: none on yours ((0.6078, 0.8902, 0.4314, 0.0))
+CLARITY ok   mintcondition's ring is the ally colour
+CLARITY ok   mintcondition's Boki ring matches its Hunter
+CLARITY ok   mintcondition's Boki takes its Hunter's colour
+CLARITY ok   mintcondition's body edge: ally ((0.3882, 0.7804, 1.0, 0.9))
+CLARITY ok   OverEasy's ring is the ally colour
+CLARITY ok   OverEasy's Boki ring matches its Hunter
+CLARITY ok   OverEasy's Boki takes its Hunter's colour
+CLARITY ok   OverEasy's body edge: ally ((0.3882, 0.7804, 1.0, 0.9))
+CLARITY ok   drizzle_d's ring is the foe colour
+CLARITY ok   drizzle_d's Boki ring matches its Hunter
+CLARITY ok   drizzle_d's Boki takes its Hunter's colour
+CLARITY ok   drizzle_d's body edge: foe ((1.0, 0.3529, 0.2902, 0.9))
+CLARITY ok   OffBrand_'s ring is the foe colour
+CLARITY ok   OffBrand_'s Boki ring matches its Hunter
+CLARITY ok   OffBrand_'s Boki takes its Hunter's colour
+CLARITY ok   OffBrand_'s body edge: foe ((1.0, 0.3529, 0.2902, 0.9))
+CLARITY ok   Sprocket_'s ring is the foe colour
+CLARITY ok   Sprocket_'s Boki ring matches its Hunter
+CLARITY ok   Sprocket_'s Boki takes its Hunter's colour
+CLARITY ok   Sprocket_'s body edge: foe ((1.0, 0.3529, 0.2902, 0.9))
+CLARITY ok   your own ability look keeps its colour
+CLARITY ok   a teammate's look leans cool ((0.8165, 0.7831, 0.4373, 1.0))
+CLARITY ok   a rival's look leans hostile ((1.0, 0.5108, 0.2578, 1.0))
+CLARITY ok   a rival's shot carries the hostile halo
+CLARITY ok   a stunned body spins the stars
+CLARITY ok   ... and pulses the stun colour
+CLARITY ok   a rooted body shows the stakes at its feet
+CLARITY ok   ... and pulses the root colour
+CLARITY ok   a slowed body shows the rings down its legs
+CLARITY ok   nothing holding it: nothing on the body
+CLARITY ok   a cast glints the caster in their colour
+CLARITY ok   ... and rings their feet
+CLARITY ok   the glint fades
+CLARITY ok   your ally and the rival each have a Boki
+CLARITY ok   no fight: every Boki's line is drawn
+CLARITY ok   in a fight: your own Boki's line is drawn
+CLARITY ok   ... the others' are not
+CLARITY ok   a rival's Boki casting: no name over it
+CLARITY ok   your own Boki casting: its name floats
+CLARITY ok   a 3v3 melee with every Boki out: 12 ownership rings (12)
+CLARITY ok   an ownership ring is the thinnest band
+CLARITY ok   ownership rings draw under every cast
+CLARITY ok   no telegraph: your ring is full strength
+CLARITY ok   draw order: rival over yours over a teammate's over the rings
+CLARITY ok   one full-strength fill under the pile: the rival's (1)
+CLARITY ok   a rival's landing ring is on the rival tier
+CLARITY ok   every ownership ring is faded under the telegraphs
+CLARITY ok   AimKit: yours and a rival's draw as two surfaces (2)
+CLARITY ok   AimKit: the rival's surface draws after yours
+CLARITY ok   AimKit: the pile counts as covered
+CLARITY ok   the ring is back at full strength with the ground clear
+CLARITY ok   the bleed-out drains (1.00 -> 0.93)
+CLARITY ok   the downed teammate has a Boki
+CLARITY ok   a Boki on the shoulder at the knock is no guardian: it stays put (shoulder)
+CLARITY ok   its Boki rides on it as a wisp: no icon over it
+CLARITY ok   a Boki down too shows the knock
+CLARITY ok   your own Boki out: tethered to you
+CLARITY ok   your downed teammate's Boki rides on them as a wisp: no tether
+CLARITY ok   drizzle_d's Boki: no tether
+CLARITY ok   OffBrand_'s Boki: no tether
+CLARITY ok   Sprocket_'s Boki: no tether
+CLARITY ok   nothing active: no CC row
+CLARITY ok   stunned dummy: one STUNNED icon, 2.0 s left
+CLARITY ok   slowed dummy: one SLOWED icon, 3.0 s left
+CLARITY ok   the stun timer shrinks (1.00 s left after 1 s)
+CLARITY ok   stun, root and Ground each get an icon, in order (["status_stunned", "status_rooted", "status_grounded"])
+CLARITY ok   Ground shows its time left (4.00 s)
+CLARITY ok   a remote body's Daze and Slow: two icons, Daze 2.5 s left
+CLARITY ok   all over: the row is gone
+CLARITY ok   a stunned monster: STUNNED icon, 1.2 s left
+CLARITY done, 0 failures
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 25 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

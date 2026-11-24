@@ -1,0 +1,10 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PASS terrain: 227 chunks from one band, 227 from eight
+PASS terrain: the same 2519739 vertices, normals, colours and uvs
+PASS terrain: the same chunk ranges, underside and rim spots
+PASS islands: 14 of 14 shape tests the same from the threads
+BUILDTHREADS DONE, failures: 0

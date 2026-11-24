@@ -1,0 +1,100 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CLAN ok   bad rank, other clan, wrong doc id, repeat and non-text rank are dropped (["a", "e", "f"])
+CLAN ok   a founder claim only holds for the guild doc's founder
+CLAN ok   numbers are clamped
+CLAN ok   at most 24 members show
+CLAN ok   joining makes a member clan
+CLAN ok   the corner seed comes from you and the clan
+CLAN ok   a roster doc is written on join
+CLAN ok   the roster reads back both members
+CLAN ok   the join finished
+CLAN ok   founding a clan makes you its founder
+CLAN ok   ...in the roster, and only there
+CLAN ok   a new clan is open
+CLAN ok   the founder closes it
+CLAN ok   someone else can't reopen it
+CLAN ok   a guild doc with no flag is open
+CLAN ok   leaving deletes only that clan's roster doc
+CLAN ok   ...and clears the clan
+CLAN ok   an old guild save joins its clan
+CLAN ok   an old save in no guild gets no clan
+CLAN ok   one from before guilds loads too
+CLAN ok   a new save starts with no clan
+CLAN ok   a 13th showcase Boki is dropped
+CLAN ok   only members, one Boki each
+CLAN ok   forged huge numbers are clamped
+CLAN ok   a broken doc reads as an empty wall
+CLAN ok   other clan, last week, wrong doc id, repeat and non-member rows are dropped (["e", "a"])
+CLAN ok   counts are clamped to the weekly caps
+CLAN ok   points are worked out, a stored score is ignored
+CLAN ok   the goal grows with the clan (50)
+CLAN ok   adds go to your row; a last-week row starts over ({ "cup": 1.0, "extract": 2.0, "final": 0.0, "guild": "g7", "paid": false, "updated": 1795107596462.73, "week": 2968.0 })
+CLAN ok   ...and never touch another member's row
+CLAN ok   the board reads back
+CLAN ok   the goal pays once a week ([25, 0])
+CLAN ok   ...marked in your row, counts kept
+CLAN ok   a form with no next form is a final
+CLAN ok   leaving deletes only your board row
+CLAN ok   outside a clan nothing is counted
+CLAN ok   tags: 2-4 letters, A-Z, blocked words out ({ "wren": "WREN", "AB": "AB", "A": "", "ABCDE": "", "A1": "", "<b>": "", "NAZI": "", "BASS": "BASS", "MOD": "", 7: "" })
+CLAN ok   a clan with no tag takes its initials, or its first letters
+CLAN ok   a forged tag falls back to the initials
+CLAN ok   founding stores the tag; your clan carries it
+CLAN ok   ...and so does your island snapshot
+CLAN ok   a forged snapshot tag reads as none
+CLAN ok   the tag goes before the name
+CLAN ok   leaving drops the tag
+CLAN ok   an egg of two parents hatching is a breed
+CLAN ok   a catch is not a deed: the breed stays last
+CLAN ok   an extraction is logged and is newest
+CLAN ok   a new form is a raise (a mutation is not)
+CLAN ok   the last deed rides the island snapshot
+CLAN ok   a forged deed is clamped to now, an unknown kind dropped
+CLAN ok   an unknown deed reads as none
+CLAN ok   the roll line reads 'bred a Mycroll, 3 h ago'
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+CLAN ok   the clan base opens
+CLAN ok   3 members give 3 corners (3)
+CLAN ok   each corner brings 3 of its member's Boki ({ "ann": 3, "ben": 3, "cat": 3 })
+CLAN ok   the wall shows members only, clamped
+CLAN ok   the board counts members only (11)
+CLAN ok   the top three: 1. Ann  6
+2. Ben  5
+CLAN ok   outside a clan no Boki can be lent
+CLAN ok   the lead Boki is not lent
+CLAN ok   a member lends Pip to Bob
+CLAN ok   Pip leaves the roster, not the save
+CLAN ok   one loan at a time
+CLAN ok   the offer is in the lender's own doc
+CLAN ok   offers from a stranger, another clan, a past or future day or a bad Boki are dropped
+CLAN ok   Bob sees Alice's offer
+CLAN ok   Bob takes Pip in
+CLAN ok   Pip shows in Bob's Nook
+CLAN ok   Pip comes home
+CLAN ok   it has the memory line and the offer is gone
+CLAN ok   an untaken loan comes home after its day
+CLAN ok   the clan isle loads its 3 members
+CLAN ok   the roll shows what each member did last (["Member roll", "", "Ann  ·  founder", "    made it out of a match, 2 min ago", "Ben  ·  member", "    nothing yet", "Cat  ·  member", "    nothing yet", "3 of 24 places filled."])
+CLAN ok   an island visit shows the tag ('Visiting [REED] Ann's island   ·   Pet t')
+CLAN DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

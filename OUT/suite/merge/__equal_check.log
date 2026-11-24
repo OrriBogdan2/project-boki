@@ -1,0 +1,340 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+EQUAL ok   util1 is on key 1
+EQUAL ok   util2 is on key 2
+EQUAL ok   util3 is on key 3
+EQUAL ok   util4 is on key 4
+EQUAL ok   the old heal and armor-kit actions are gone
+EQUAL ok   hunters take util1..4 as inputs
+EQUAL ok   rarity caps by tier: Rare, Epic, Legendary (2, 3, 4)
+EQUAL ok   tier 2: two very different farms start with identical armor, perks, health, pack and stats
+EQUAL ok   tier 2: base pack 6, armor level 0, no perks, no armor piece
+EQUAL ok   tier 2: the poor farm brings nothing but the everyday issue (["tonic", "armor_kit", "", ""])
+EQUAL ok   tier 2: every brought piece is within the rarity cap (["blink r3", "focus r1", "skylark_boots r4"])
+EQUAL ok   tier 2: the armor in the loadout stayed home
+EQUAL ok   tier 2: Legendary boots and an Epic glove come (no cap)
+EQUAL ok   what is brought leaves the armory (3 out)
+EQUAL ok   tier 2: the belt is what was picked, in order (["smoke", "tonic", "scanner", ""])
+EQUAL ok   tier 2: stack caps by tier (tonic 5, smoke 3, seeker 2)
+EQUAL ok   tier 2: what is brought leaves the stash
+EQUAL ok   tier 0: two very different farms start with identical armor, perks, health, pack and stats
+EQUAL ok   tier 0: base pack 6, armor level 0, no perks, no armor piece
+EQUAL ok   tier 0: the poor farm brings nothing but the everyday issue (["tonic", "armor_kit", "", ""])
+EQUAL ok   tier 0: every brought piece is within the rarity cap (["focus r1"])
+EQUAL ok   tier 0: the armor in the loadout stayed home
+EQUAL ok   tier 0: boots and glove above Rare stay home, the Fine passive comes (on Q, the first glove slot)
+EQUAL ok   ...and they are still in the armory, not lost
+EQUAL ok   what is brought leaves the armory (1 out)
+EQUAL ok   tier 0: the belt is what was picked, in order (["smoke", "tonic", "scanner", ""])
+EQUAL ok   tier 0: stack caps by tier (tonic 3, smoke 1, seeker 1)
+EQUAL ok   tier 0: what is brought leaves the stash
+EQUAL ok   (the easiest tier caps at Rare)
+EQUAL ok   the base backpack size is data (6 slots, content/rules/equal.json)
+EQUAL ok   pack_slots adds a +1 pack stat (the satchel perk) to the base
+EQUAL ok   ...and the worn backpack's slots (a Pack and the perk: 11)
+EQUAL ok   workshop, lighthouse and forge no longer change the glider or tonics (glide 9.00)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/equal_check.gd:65)
+       [12] _belt (res://tools/equal_check.gd:178)
+       [13] run (res://tools/equal_check.gd:23)
+       [14] _equal_base (res://tools/equal_check.gd:167)
+       [15] _drop (res://tools/equal_check.gd:78)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/equal_check.gd:65)
+       [12] _belt (res://tools/equal_check.gd:178)
+       [13] run (res://tools/equal_check.gd:23)
+       [14] _equal_base (res://tools/equal_check.gd:167)
+       [15] _drop (res://tools/equal_check.gd:78)
+EQUAL ok   a hunter sets out with the issue (2 tonics, 2 kits) plus the 1 tonic in the stash (3, 2)
+EQUAL ok   grant stacks onto one slot up to its max (smoke 3)
+EQUAL ok   four slots hold four kinds; a fifth kind does not fit
+EQUAL ok   an emptied slot frees up
+EQUAL ok   key 3 throws a smoke bomb: one charge spent, a cloud down
+EQUAL ok   it has a short cooldown between uses
+EQUAL ok   key 1 starts a drink
+EQUAL ok   a finished drink spends one tonic and heals (2 left, hp 118/153)
+EQUAL ok   key 2 starts an armor repair
+EQUAL ok   a hit spills it and nothing is spent
+EQUAL ok   a finished repair spends one kit and fills armor
+EQUAL ok   a tonic at full health does nothing (the slot buzzes)
+EQUAL ok   a mending kit heals 40 and mends 20 armor
+EQUAL ok   a swift draught hastes you
+EQUAL ok   a shield cell gives a shield
+EQUAL ok   a spring pad goes down and a seeker flare reveals rivals nearby
+EQUAL ok   single-charge items are used up
+EQUAL ok   a full belt cannot take another kind or more of a full stack (gems always can)
+EQUAL ok   found in the match: a dropped seeker flare goes on the belt
+EQUAL ok   die and the whole belt is in your deathbox (5 tonics)
+EQUAL ok   ...and you have nothing left on you
+EQUAL ok   a looter sees it item by item (4 rows)
+EQUAL ok   a rival who loots the box takes the charges
+EQUAL ok   extracting brings the brought and found charges home, not the issue; dying brings none
+EQUAL ok   ...into the farm stash
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/equal_check.gd:65)
+       [13] _armor_levels (res://tools/equal_check.gd:311)
+       [14] run (res://tools/equal_check.gd:24)
+       [15] _belt (res://tools/equal_check.gd:306)
+       [16] _drop (res://tools/equal_check.gd:78)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/equal_check.gd:65)
+       [13] _armor_levels (res://tools/equal_check.gd:311)
+       [14] run (res://tools/equal_check.gd:24)
+       [15] _belt (res://tools/equal_check.gd:306)
+       [16] _drop (res://tools/equal_check.gd:78)
+EQUAL ok   everyone starts at armor level 0
+EQUAL ok   damage to a rival fills your armor progress (88 xp)
+EQUAL ok   the HUD tip names the next level
+EQUAL ok   the armour bar follows armor_xp toward the next level (0.31)
+EQUAL ok   a hit that added armour progress ticks the bar
+EQUAL ok   the tick is over 0.5 s after the hit, no new hit
+EQUAL ok   an armor break and a heal play no tier-up cue
+EQUAL ok   your own tier-up plays the fuller cue, once
+EQUAL ok   pitched by tier: higher is brighter (0.90-1.20)
+EQUAL ok   enough damage levels your armor up: it blocks more (tier 2)
+EQUAL ok   its durability is the tier's (350 -> 350; --armour-check holds the numbers)
+EQUAL ok   the one who was hit does not level
+EQUAL ok   a rival's tier-up plays the positional cue
+EQUAL ok   ...at its tier's pitch (0.90)
+EQUAL ok   a tier-up out of earshot is not played
+EQUAL ok   monsters count for a third (9.9 xp for 30 damage)
+EQUAL ok   the top level is reachable and the HUD says so
+EQUAL ok   the bar is full in the top tier's colour
+EQUAL ok   the HUD has the armor badge (ArmorHud)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/equal_check.gd:65)
+       [13] _bots (res://tools/equal_check.gd:413)
+       [14] run (res://tools/equal_check.gd:25)
+       [15] _armor_levels (res://tools/equal_check.gd:363)
+       [16] _drop (res://tools/equal_check.gd:78)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/equal_check.gd:65)
+       [13] _bots (res://tools/equal_check.gd:413)
+       [14] run (res://tools/equal_check.gd:25)
+       [15] _armor_levels (res://tools/equal_check.gd:363)
+       [16] _drop (res://tools/equal_check.gd:78)
+EQUAL ok   a hurt bot reaches for its tonic (slot 1)
+EQUAL ok   a bot with broken armor and nobody close reaches for an armor kit (slot 2)
+EQUAL ok   hurt with a rival close and no tonic, a bot throws smoke (slot 3)
+EQUAL ok   in play, a hurt bot drinks a tonic by itself (400 steps)
+EQUAL ok   bots start without armor, with a spare utility item on hard (40 of 40)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/equal_check.gd:65)
+       [12] _gloves (res://tools/equal_check.gd:476)
+       [13] run (res://tools/equal_check.gd:26)
+       [14] _bots (res://tools/equal_check.gd:471)
+       [15] _drop (res://tools/equal_check.gd:78)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/equal_check.gd:65)
+       [12] _gloves (res://tools/equal_check.gd:476)
+       [13] run (res://tools/equal_check.gd:26)
+       [14] _bots (res://tools/equal_check.gd:471)
+       [15] _drop (res://tools/equal_check.gd:78)
+EQUAL ok   gloves are not a ranked slot (["sec", "dash", "kin", "ult"])
+EQUAL ok   no skill point can be spent on a glove
+EQUAL ok   a fresh hunter: level 1, nothing ranked
+EQUAL ok   a worn glove casts on Q at level 1 with no point spent (cd 12.0)
+EQUAL ok   the second glove casts on V (cd 14.0)
+EQUAL ok   its cooldown is the glove's own: no rank shortens it
+EQUAL ok   glove 2 is on V, shared on purpose with play at home
+EQUAL ok   a bot spends its points on its hero's abilities ({ "sec": 2, "dash": 2, "kin": 2, "ult": 2 })
+EQUAL ok   the HUD's two glove boxes sit on the right ([(759.389, 623.389), (821.389, 623.389)])
+EQUAL ok   the Boki box beside them is the Merge's (its key and tip: "ultimate")
+EQUAL ok   the V glove has its own slot info
+EQUAL ok   a remote hunter's two gloves come over the net with their rarity (blink, barrier)
+EQUAL ok   the glove on cooldown is dimmed, the ready one is not; the full bond comes too
+EQUAL ok   the third icon is the Boki's type, glowing on a full bond (venom)
+EQUAL ok   the three icons sit in the row HudStyle leaves under the nameplate
+EQUAL ok   a hard bot starts with two different active gloves (20 of 20)
+EQUAL ok   a bot uses both gloves, each on its own key (Q true, V true)
+EQUAL ok   drop odds come from content/rules/equal.json (boss 0.90)
+EQUAL ok   9 utility items, each with a description and a stack size
+EQUAL ok   smoke moved from gloves to utility items
+EQUAL ok   jump_pad moved from gloves to utility items
+EQUAL ok   scanner moved from gloves to utility items
+EQUAL ok   medkit moved from gloves to utility items
+EQUAL ok   field_kit left the gear slots (it comes back as a perk)
+EQUAL ok   magpie left the gear slots (it comes back as a perk)
+EQUAL ok   satchel left the gear slots (it comes back as a perk)
+EQUAL ok   spyglass left the gear slots (it comes back as a perk)
+EQUAL ok   tinker_roll left the gear slots (it comes back as a perk)
+EQUAL ok   the kit gear slot is gone: ["glove", "passive", "armor", "boots"]
+EQUAL ok   keys: chest keys are belt items (Rift Keys are gone)
+EQUAL ok   keys: stack cap from data: chest keys 3
+EQUAL ok   keys: keys can't be brought in at any difficulty
+EQUAL ok   keys: each tier is one depth deeper, with tougher monsters and richer loot
+EQUAL ok   keys: keys are not sold or picked at home
+EQUAL ok   keys: chest keys stack in one slot with the count (2)
+EQUAL ok   keys: the chest key cap is KeyChest.cap() (3)
+EQUAL ok   keys: no keys, no key slot
+EQUAL ok   keys: belt full: the key can't be picked up and waits on the ground
+EQUAL ok   keys: pressing a slot swaps it: the smoke bomb is on the ground, the key on the belt
+EQUAL ok   keys: chest key: ping when far, open when beside it (one key spent)
+EQUAL ok   keys: keys never come home with you
+EQUAL ok   keys: die and the keys are in your deathbox
+EQUAL ok   keys: a bot with a full belt drops its cheapest stack for a key
+EQUAL ok   keys: market Rift Keys in an old stash come back as gems (280)
+EQUAL ok   the save version is 7 or later (Hunter unlocks are v6, the market v8)
+EQUAL ok   a v5 save upgrades to v21
+EQUAL ok   gloves, boots and treasure stay (["blink", "skylark_boots", "old_coin", "focus"])
+EQUAL ok   armor, kit and utility-glove pieces leave the armory
+EQUAL ok   gems: 279 (want 279: item value at 100% plus the smaller backpack level)
+EQUAL ok   materials: 3 wood, 4 stone (want 3, 4)
+EQUAL ok   scrap: 7 (want 7: 3 from the plate, 4 refunded)
+EQUAL ok   backpack level 2 is now one Pack in the stash, picked ([0, 0, 1, 0])
+EQUAL ok   the smoke glove became 3 smoke bombs in the stash
+EQUAL ok   the old backpack level is gone (now a backpack) and the loadout keeps only gloves and boots
+EQUAL ok   the second glove slot (V) starts empty; the old passive glove stays in the armory
+EQUAL ok   the notice lists what converted (11 lines)
+EQUAL ok   five pieces converted, none deleted without a line in the notice
+EQUAL ok   a save with nothing to convert upgrades quietly
+EQUAL ok   the notice is shown once, then it is gone
+EQUAL ok   armor found in a match salvages for gems on arrival (+36), the glove is stored
+EQUAL DONE, failures: 0
+ERROR: 10 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 10 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 10 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 253: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 264: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 269: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 271: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 46 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

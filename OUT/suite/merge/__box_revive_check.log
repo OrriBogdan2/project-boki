@@ -1,0 +1,127 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/box_revive_check.gd:74)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/box_revive_check.gd:74)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] run (res://tools/box_revive_check.gd:74)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] run (res://tools/box_revive_check.gd:74)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+RVCHECK ok   several beacons on the map (6)
+RVCHECK ok   a fallen teammate leaves a box with their soul in it
+RVCHECK ok   a box revive is a 7.5 s channel the first time (7.50s)
+RVCHECK ok   revived Hunters stand up with 25% (same as a Wisp revive; per-tick heal band 12-35%)
+RVCHECK ok   an ally box wears its owner's squad colour
+RVCHECK ok   mid-channel: kneeling over the box, and it hums
+RVCHECK ok   the progress ring reads half way (0.50)
+RVCHECK ok   mid-channel: a tether from Sprocket_ to the soul in their side colour (0.50 m)
+RVCHECK ok   mid-channel: the soul's core fills with the progress (0.56, want 0.56)
+RVCHECK ok   no firing while channelling, and the channel goes on
+RVCHECK ok   the teammate is back after 7.52s (want 7.5s)
+RVCHECK ok   back at their box (0.2m away)
+RVCHECK ok   their Boki is back at their side
+RVCHECK ok   the hum stops once it's done
+RVCHECK ok   the tether and core are gone once it's done
+RVCHECK ok   the soul rises off the box on completion
+RVCHECK ok   the second box revive of a Hunter is slower (10.00s)
+RVCHECK ok   channelling again
+RVCHECK ok   a hit while channelling does 1.20x (the tonic's 1.20x)
+RVCHECK ok   and the hit breaks the channel
+RVCHECK ok   the tether and core clear on the interrupt
+RVCHECK ok   holding on does nothing until interact is pressed again
+RVCHECK ok   pressed again it starts over and takes the full 10.0s (10.00s)
+RVCHECK ok   channelling a third time
+RVCHECK ok   walking breaks the channel
+RVCHECK ok   remote: the synced hold times the revive (0.40)
+RVCHECK ok   remote: a tether from Sprocket_ to the soul in their side colour (0.50 m)
+RVCHECK ok   remote: the soul's core fills with the progress (0.47, want 0.47)
+RVCHECK ok   remote: tether and core clear when the hold stops
+RVCHECK ok   two of the squad are dead
+RVCHECK ok   a "bcn" lit event lights it here, hum and all
+RVCHECK ok   and "out" puts it out
+RVCHECK ok   Hunter (ally) gets the beacon notice
+RVCHECK ok   st4rfish (rival) gets the beacon notice
+RVCHECK ok   stepping off puts it out
+RVCHECK ok   while it's lit its hum carries 120m
+RVCHECK ok   and it's marked on everyone's map
+RVCHECK ok   the beacon brings back both dead teammates at once after 4.0s (want 4.0s)
+RVCHECK ok   single use, and quiet again
+RVCHECK ok   with resurrection sickness
+RVCHECK ok   a "used" event brings back this game's dead teammates
+RVCHECK ok   a bot walks to the box and brings its teammate back (13.9s incl. the walk)
+RVCHECK ok   with the soul gone a bot lights a beacon instead (5.3s incl. the walk)
+BOX REVIVE CHECK DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 23 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

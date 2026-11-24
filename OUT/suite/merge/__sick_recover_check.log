@@ -1,0 +1,22 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SICK ok   care.json natural_death is off
+SICK ok   10 days of neglect: no death
+SICK ok   ...it got sick, and stays sick (stage sick)
+SICK ok   the card line says what helps
+SICK ok   fed only: well in 11.3 h (limit 48 h)
+SICK ok   ...a nap speeds it up (6.8 h)
+SICK ok   ...a friend close speeds it up (8.5 h)
+SICK ok   ...both together faster still (5.7 h)
+SICK ok   a friend counts only when close and outdoors
+SICK ok   ...and only for a weak or sick Boki
+SICK ok   care.json ailing_pace: sick < weak < well
+SICK ok   ...a sick one droops and hops low
+SICK ok   ...well again, it stands straight
+SICK ok   a sick Boki is offered the Puffcorn first
+SICK ok   one Puffcorn snack cures a sick Boki at once
+SICK ok   ...a well Boki just has a snack
+SICK DONE, failures: 0

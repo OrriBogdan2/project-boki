@@ -1,0 +1,446 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PAIRCHECK card: a role line and one line each for LMB, RMB, E, Shift and the passive PASS  
+PAIRCHECK reticle: the thin aim line to the cursor shows the whole time, in place of the shared weapon line PASS  
+PAIRCHECK passive: Swell fills ten times faster on hunters PASS  hunter 4.50 mob 0.45
+PAIRCHECK passive: full Swell = Swollen for 9s, wrapped in the light-teal sphere PASS  swollen 9.0
+PAIRCHECK anim: Swollen plays ostra_empower            PASS  
+PAIRCHECK lmb: a plain orb flies past the cursor to full range (12.25m) PASS  12.9 m
+PAIRCHECK lmb: the orb is his own teal shard (skin) with its data trail PASS  
+PAIRCHECK lmb: ...and hits a foe well past the cursor  PASS  took 14.5
+PAIRCHECK lmb: the hit draws its impact on the foe (orb_hit) PASS  
+PAIRCHECK lmb: the impact is sized by the orb's hit radius (0.28 m) and has two shard layers PASS  
+PAIRCHECK lmb: a pause charges the next orb (a glow held at his hand) PASS  charge 1.00
+PAIRCHECK lmb: a full orb is faster (1.4x)             PASS  speed 42
+PAIRCHECK anim: a full orb plays ostra_orb_hot         PASS  
+PAIRCHECK lmb: a full orb hits harder and slows        PASS  took 19.4 slow 0.6
+PAIRCHECK item 60: the charge restarts from zero after a shot (plain again) PASS  charge 0.52
+PAIRCHECK zones: the seed drum is clear inside, lit at its teal rim PASS  
+PAIRCHECK zones: the black orbs (Snap wind-up, Nightwell rim) have a broad lit sea-teal rim PASS  
+PAIRCHECK zones: the open well has no floor fill, a lit rim PASS  
+PAIRCHECK zones: the well's dome is clear at its centre PASS  
+PAIRCHECK lmb parity: held, an orb every 0.6 s, each with its flick, while he drifts PASS  4 orbs, 0.60 s apart
+PAIRCHECK lmb parity: every orb leaves at the cursor as it swings round him (within 8 deg) PASS  0.0
+PAIRCHECK rmb: Shard Snap has one charge               PASS  
+PAIRCHECK rmb aim: holding RMB turns the line into two rails the bundle's width PASS  
+PAIRCHECK rmb: a wind-up first (dark orb at the hand, nothing fired yet) PASS  snaps 0
+PAIRCHECK small: he slows 25% while casting the Snap   PASS  0.75
+PAIRCHECK anim: the wind-up plays ostra_snap_wind      PASS  
+PAIRCHECK item 40: nothing is fired or hurt before the release PASS  snaps 0
+PAIRCHECK item 40: the release is at the data's wind-up (0.32s), +40% over the old 0.2s PASS  wind 0.33
+PAIRCHECK item 40: damage lands on the impact (release + travel), not at the press or release PASS  hit at 0.50 (release 0.33 travel 0.20)
+PAIRCHECK item 40: total cast time is about 40% over the old 0.54s PASS  0.76
+PAIRCHECK item 40: a short recovery keeps him slowed after the release PASS  
+PAIRCHECK rmb: then one tight bundle (a single projectile, crystal-spear skin) PASS  bundles 1
+PAIRCHECK rmb: the ability is spent (no second cast)   PASS  
+PAIRCHECK rmb: the stun shows on the dummy (stars over its head) PASS  
+PAIRCHECK rmb: it stuns 0.8s up close, up to 1.8s the further it flew PASS  near 0.93 far 1.63
+PAIRCHECK combo: Swollen Snap hits 44% harder          PASS  plain 18.0 swollen 25.9
+PAIRCHECK data: the Snap hits about 0.76x a seed (277 vs 365) PASS  0.759
+PAIRCHECK data: an orb is the source's 263 vs 277 less the ~15% held-fire DPS the owner gave up (item 117) PASS  0.806
+PAIRCHECK data: the Snap rests 10s; the Trade 9.5s; the seed 10s PASS  
+PAIRCHECK data: a full orb is 34% harder (353 vs 263)  PASS  
+PAIRCHECK data: a full orb slows 6% for 1.5s (the in-game card; the wiki's 10% is outranked) PASS  0.060 for 1.50s
+PAIRCHECK data: no speed burst before rank 3           PASS  
+PAIRCHECK dash aim: holding Shift shows both ends, the landing at the cursor PASS  (16.5, 32.5)
+PAIRCHECK anim: aiming Shift plays ostra_swap_aim      PASS  
+PAIRCHECK dash: let go = the lantern is lobbed (in flight, both ends shown to all) PASS  
+PAIRCHECK item 35: a ground Trade plays his underhand lob, ostra_swap PASS  
+PAIRCHECK owner: the Trade's lantern is drawn 1.65x (TRADE_LOOK_K), the catch circle 1.9m (dash.radius) PASS  
+PAIRCHECK dash: the lob takes about 1.8s (1.25s Swollen) PASS  1.77 s
+PAIRCHECK dash: a high lob (the lantern climbs 4m and more) PASS  peak 4.5
+PAIRCHECK dash: Trade trades places; the foe is only moved, not slowed (the data's Swap has no slow) PASS  me 8.0 foe 0.0
+PAIRCHECK owner: spamming Shift in flight never dashes (no travel, no second lob) PASS  moved 0.00 roll 0.00 swaps 1 aim -1.00
+PAIRCHECK owner: with no charge Shift is refused, never the long dash PASS  moved 0.17
+PAIRCHECK item 35: a Trade in the air plays his air sling and drift, ostra_swap_air PASS  
+PAIRCHECK owner 11-10: in flight he drifts at dash.fly_slow (0.675, the old 0.35 slow halved) of his run speed PASS  3.55 of 5.39 (data 0.68)
+PAIRCHECK item 17: his height is constant over the abyss (no fall) PASS  3.096..3.096 of 3.096
+PAIRCHECK item 17: the foe in the circle is sent to where he was when it resolved PASS  
+PAIRCHECK anim: arriving plays ostra_arrive            PASS  
+TIME ostra_orb play 0.03 in 0.12 hit 0.02 (clip 1.95) orb_l 0.30 out 0.50
+PAIRCHECK LMB orb: owns the body by 0.12 s, the beat lands by 0.05 s, the legs are back after PASS  in 0.12 hit 0.02 out 0.50 clip orb_l 0.30
+PAIRCHECK LMB orb: the flick is the one-hand clip, upper body (legs keep drifting) PASS  
+TIME ostra_orb_hot play 0.03 in 0.12 hit 0.02 (clip 2.48) orb_hot 0.50 out 0.70
+PAIRCHECK LMB full orb: owns the body by 0.12 s, the beat lands by 0.05 s, the legs are back after PASS  in 0.12 hit 0.02 out 0.70 clip orb_hot 0.50
+PAIRCHECK LMB full orb: his own, longer flick than the plain one's PASS  orb_hot 0.50
+TIME ostra_snap_wind play 0.00 in 0.10 hit 0.33 (clip 0.00) snap_wind 0.70 out 1.00
+PAIRCHECK RMB Snap: owns the body by 0.12 s, the beat lands by 0.40 s, the legs are back after PASS  in 0.10 hit 0.33 out 1.00 clip snap_wind 0.70
+PAIRCHECK RMB Snap: released at the end of his 0.32 s wind-up, after the sphere frame PASS  0.33
+TIME ostra_swap_aim play 0.00 in 0.10 hit 2.33 (clip 0.00) swap_aim 0.63 out 1.57
+TIME swap cast 0.53
+PAIRCHECK Shift: the aim pose owns the body by 0.12 s and the lantern leaves on the key's release PASS  in 0.10 cast 0.53
+PAIRCHECK Shift: the flight takes the source's 1.8 s from the throw to the landing (and he lands then) PASS  1.80
+PAIRCHECK Shift: the body is back with the legs during the flight, before the landing frame PASS  out 1.57
+TIME ostra_seed play 0.00 in 0.03 hit 0.02 (clip 0.02) seed 0.80 out 0.97
+PAIRCHECK E seed: owns the body by 0.12 s, the beat lands by 0.20 s, the legs are back after PASS  in 0.03 hit 0.02 out 0.97 clip seed 0.80
+TIME ostra_pop play 0.00 in 0.10 hit 0.02 (clip 0.02) pop 0.60 out 0.77
+PAIRCHECK E recast pop: owns the body by 0.12 s, the beat lands by 0.05 s, the legs are back after PASS  in 0.10 hit 0.02 out 0.77 clip pop 0.60
+TIME float idle gap 0.283..0.344 feet ["thigh.l", "shin.l", "thigh.r", "shin.r"]
+TIME float walk gap 0.267..0.343
+PAIRCHECK he floats about 0.3 m over his ground point (source 0.25-0.35 m), the bob +-0.03 m PASS  0.283..0.344
+PAIRCHECK he never plants a foot: no foot bone, and walking keeps the gap (no step lowers him to the ground) PASS  walk 0.267..0.343, bones ["thigh.l", "shin.l", "thigh.r", "shin.r"]
+PAIRCHECK far cast: a cursor at 0.5x reach over the abyss is the target PASS  
+PAIRCHECK far cast: an abyss target is accepted (the lantern flies to the cursor) PASS  
+PAIRCHECK far cast: a cursor at 2x reach goes to exactly full reach in that direction PASS  
+PAIRCHECK far cast: the same along another direction   PASS  
+PAIRCHECK item 17: a knock while the lantern flies still shoves him, at the held height PASS  moved 2.09
+PAIRCHECK footage: the landing is set at the cast; the cursor moving in flight does not steer it PASS  0.00 m
+PAIRCHECK air jump: the seed is planted on the floor at the cursor PASS  
+PAIRCHECK air jump: the well opens at the cursor on the floor PASS  
+PAIRCHECK air glide: the seed is planted on the floor at the cursor PASS  
+PAIRCHECK air glide: the well opens at the cursor on the floor PASS  
+PAIRCHECK combo: Swollen Trade is quicker              PASS  1.25
+PAIRCHECK small: the Trade's circle holds all three    PASS  
+PAIRCHECK owner: two units in the circle (a foe and an ally) both end up at his origin PASS  foe 0.80 ally 0.80
+PAIRCHECK small: each keeps its place in the circle (they don't stack on one spot) PASS  
+PAIRCHECK net: a body another game owns is sent its move to his origin, not moved here PASS  
+PAIRCHECK e: the seed lands at the cursor, everyone sees its ring PASS  
+PAIRCHECK e: a small orb drops from his hand onto the spot PASS  
+PAIRCHECK anim: the plant plays ostra_seed             PASS  
+PAIRCHECK small: E again inside 0.3s is eaten, the seed stays PASS  
+PAIRCHECK e: the light column rises near full growth (from about 4.4s) PASS  
+PAIRCHECK e: the seed grows for 6.5s to 3.2m           PASS  k 1.00 r 3.20
+PAIRCHECK e: a full pop hits up to 3.5x an early one   PASS  early 27.6 late 83.0
+PAIRCHECK e: a full pop is 3.5x the base damage (source peak) PASS  late 82.95 vs 82.95
+PAIRCHECK data: the pop does not ground what it catches PASS  
+PAIRCHECK anim: the pop plays ostra_pop                PASS  
+PAIRCHECK e: a full seed waits for the recast (no auto-pop), which Collapses it PASS  collapses 2
+PAIRCHECK e: no fizzle: a full seed left a whole minute is still there at full size, harmless PASS  seed true k 1.00
+PAIRCHECK e: the cooldown starts on the plant (it has run out by the minute, the pop is not waited for) PASS  cd at plant 10.0 now 0.0
+PAIRCHECK e: the data lists no timer: no hold_full cap in the def PASS  
+PAIRCHECK e: a merge does not take the waiting seed    PASS  
+PAIRCHECK e: going down ends the seed with no damage   PASS  
+PAIRCHECK combo: Snap > seed on the stunned foe > pop  PASS  stun 1.13 took 48.2
+PAIRCHECK combo: Seed > Trade puts the foe inside it   PASS  inside true took 51.2
+PAIRCHECK growth: the seed's pop scales with LevelGrowth.ap PASS  lvl1 32.82 lvl10 44.33 ap 1.00/1.35
+PAIRCHECK data: a knock does not heal him              PASS  healed 0.0
+PAIRCHECK data: a hazard hit passes him by             PASS  
+PAIRCHECK data: a lava hit passes him by               PASS  
+PAIRCHECK data: a spore hit passes him by              PASS  
+PAIRCHECK data: a toxic hit passes him by              PASS  
+PAIRCHECK data: a molten hit passes him by             PASS  
+PAIRCHECK data: a sky strike still hits him            PASS  took 7.0
+PAIRCHECK data: a plain hit still lands                PASS  
+PAIRCHECK rank 3: the growing seed burns a foe inside it, about 16 a second (250 vs a 365 bomb) PASS  dmg 39.4 over 1.2s (power 1.62)
+PAIRCHECK rank 3: the pop leaves a foe outside its rim where it stands PASS  off 3.4 rim 3.0
+PAIRCHECK data rank 3: Snap speeds him up 11% on the cast and 22% on a hit PASS  cast 0.108 hit 0.215 now 0.215
+PAIRCHECK data rank 3: the burst ends after 2s         PASS  
+PAIRCHECK data rank 3: an ally in his ring as he leaves gets 32.6% of his health as a shield for 3s PASS  shield 72.8 want 72.8, 2.8s
+PAIRCHECK data rank 3: no ally shield at the landing or past his 1.5m ring PASS  landing 0.0, 2.5m away 0.0
+PAIRCHECK upgrade parity: Shard Snap cooldown 10 -> 8.5 -> 7 and damage +20% / +40% PASS  [[10.0, 1.351, 9.5, 10.0, 1.351, 1.351], [8.5, 1.6212, 7.99995, 10.0, 1.4861, 1.351], [7.0, 1.8914, 6.4999, 8.0, 1.6212, 1.351]]
+PAIRCHECK upgrade parity: Lantern Trade recharge 9.5 -> 8 -> 6.5, no damage step PASS  [[10.0, 1.351, 9.5, 10.0, 1.351, 1.351], [8.5, 1.6212, 7.99995, 10.0, 1.4861, 1.351], [7.0, 1.8914, 6.4999, 8.0, 1.6212, 1.351]]
+PAIRCHECK upgrade parity: Brimseed cooldown 10 -> 10 -> 8 and damage +10% / +20% PASS  [[10.0, 1.351, 9.5, 10.0, 1.351, 1.351], [8.5, 1.6212, 7.99995, 10.0, 1.4861, 1.351], [7.0, 1.8914, 6.4999, 8.0, 1.6212, 1.351]]
+PAIRCHECK merge hold: the Trade is in flight before the merge PASS  swap true
+PAIRCHECK merge hold: a merge is under way             PASS  
+PAIRCHECK merge hold: ostra's Trade is dropped, nobody moves mid-merge PASS  me 0.0 foe 8.0
+PAIRCHECK merge hold: the orb is charged before the merge PASS  
+PAIRCHECK merge hold: a merge is under way             PASS  
+PAIRCHECK merge hold: the orb's charge, the Shift aim and the Snap wind-up drop with the merge PASS  charge 0.00
+PAIRCHECK item 35: his ground and air dash moves are two distinct ids, his alone (KMovesStone, no other table) PASS  
+PAIRCHECK item 35: each dash move's keyed length fits inside the quickest Trade (1.25s) PASS  [0.85, 1.25]
+PAIRCHECK float: 3 s of his floating walk plays zero step sounds; a footed Hunter's same walk does step PASS  Motley 0 steps (125 ticks walking), thief 8 (141)
+PAIRCHECK float: a remote Motley walking 3 s plays zero step sounds; a remote footed Hunter does step PASS  Motley 0, thief 9
+PAIRCHECK upgrade parity: Snap cooldown 10 -> 8.5 -> 7, damage +20% / +40% PASS  [[10.0, 1.0, 9.5, 10.0, 1.0], [8.5, 1.2, 7.99995, 10.0, 1.1], [7.0, 1.4, 6.4999, 8.0, 1.2]]
+PAIRCHECK upgrade parity: Trade recharge 9.5 -> 8 -> 6.5 PASS  [[10.0, 1.0, 9.5, 10.0, 1.0], [8.5, 1.2, 7.99995, 10.0, 1.1], [7.0, 1.4, 6.4999, 8.0, 1.2]]
+PAIRCHECK upgrade parity: Brimseed damage +10% / +20%, cooldown 10 -> 10 -> 8 PASS  [[10.0, 1.0, 9.5, 10.0, 1.0], [8.5, 1.2, 7.99995, 10.0, 1.1], [7.0, 1.4, 6.4999, 8.0, 1.2]]
+PAIRCHECK anim: every Motley move is keyed (KMovesStone) PASS  []
+PAIRCHECK sfx: every Motley sound is loaded by Sfx     PASS  []
+PAIRCHECK item 60: damage, speed and size grow with the wait (monotonic) from 0 to the window PASS  dmg [14.5, 14.5, 15.4243750000005, 17.5812499999993, 19.4300000000003, 19.4300000000003, 19.4300000000003] speed [30.0, 30.0, 32.0, 37.25, 42.0, 42.0, 42.0] r [0.28, 0.28, 0.32725, 0.4375, 0.532, 0.532, 0.532]
+PAIRCHECK item 60: it is smooth, not a switch (a mid wait lands between the two ends) PASS  
+PAIRCHECK item 60: capped after the window             PASS  [14.5, 14.5, 15.4243750000005, 17.5812499999993, 19.4300000000003, 19.4300000000003, 19.4300000000003]
+PAIRCHECK item 60: a full orb hits for the data's +34% (353 vs 263) PASS  [14.5, 14.5, 15.4243750000005, 17.5812499999993, 19.4300000000003, 19.4300000000003, 19.4300000000003]
+PAIRCHECK item 60: every orb passes the wall between him and the foe at any charge PASS  [14.5, 14.5, 15.4243750000005, 17.5812499999993, 19.4300000000003, 19.4300000000003, 19.4300000000003]
+PAIRCHECK item 60: only the full orb slows             PASS  [false, false, false, false, true, true, true]
+  orb table: ["0.0s k0.00 14.50dmg x1.00", "0.3s k0.00 14.50dmg x1.00", "0.6s k0.00 14.60dmg x1.02", "0.8s k0.25 15.84dmg x1.24", "1.0s k0.50 17.07dmg x1.47", "1.2s k0.75 18.30dmg x1.69", "1.4s k1.00 19.43dmg x1.90", "2.0s k1.00 19.43dmg x1.90", "6.0s k1.00 19.43dmg x1.90"]
+PAIRCHECK charge: k never falls with the wait          PASS  
+PAIRCHECK charge: dmg never falls with the wait        PASS  
+PAIRCHECK charge: r never falls with the wait          PASS  
+PAIRCHECK charge: speed never falls with the wait      PASS  
+PAIRCHECK charge: scale never falls with the wait      PASS  
+PAIRCHECK charge: bright never falls with the wait     PASS  
+PAIRCHECK charge: a quick shot is the plain orb (263)  PASS  
+PAIRCHECK charge: full at the 1.4s window, 353/263 of the plain orb PASS  19.43
+PAIRCHECK charge: the drawn orb's scale tracks the hit size PASS  x1.90
+PAIRCHECK item 117: a full orb is at least 1.6x a quick one, drawn and hit PASS  x1.90
+PAIRCHECK owner 11-08: a quick shot is the violet shard, a charged one (k >= 0.5) the void orb, each with its sound PASS  
+PAIRCHECK owner 11-08: the full void orb is drawn at least 1.8x a quick shot PASS  x1.90
+PAIRCHECK held fire: every orb in the stream is plain  PASS  [14.5, 14.5, 14.5, 14.5, 14.5]
+PAIRCHECK slow: a nearly full orb hits but doesn't slow PASS  18.9
+PAIRCHECK slow: a full orb slows (6% for 1.5s, the in-game card) PASS  slow 1.03
+PAIRCHECK slow: a plain orb right after a full one that missed doesn't slow PASS  took 14.6 slow 0.00
+PAIRCHECK slow: a full orb fired point blank still slows PASS  slow 1.17
+PAIRCHECK walls: fired pressed against the rock, a plain orb still passes PASS  took 14.6
+PAIRCHECK net: the orb goes out as one "s" event       PASS  1
+PAIRCHECK net: the event sends the pierce kind         PASS  kind 2.0
+PAIRCHECK net: the event sends the charged size        PASS  0.53
+PAIRCHECK net: the copy keeps pierce_terrain           PASS  
+PAIRCHECK net: the copy flies past the rock            PASS  x 13.2, rock 10.6
+PAIRCHECK glow: none right after a shot                PASS  charge 0.00
+PAIRCHECK glow: at his hand, it grows with the charge  PASS  [0.453125, 0.68333333730698, 0.91354167461395, 1.14374995231628, 1.25, 1.25]
+PAIRCHECK glow: it sits on his hand                    PASS  
+PAIRCHECK chime: once on reaching full                 PASS  1
+PAIRCHECK chime: not again while it waits              PASS  
+PAIRCHECK weapon: an upgrade becomes the new plain orb PASS  
+PAIRCHECK weapon: ...and the charge builds on it       PASS  38.9
+PAIRCHECK weapon: teardown leaves the weapon as loaded PASS  
+PAIRCHECK wisp kit: a charge shows before the down     PASS  
+PAIRCHECK wisp kit: downed: no motes held              PASS  
+PAIRCHECK wisp kit: downed: no charge built            PASS  0.00
+PAIRCHECK wisp kit: revive: the wait starts over       PASS  
+PAIRCHECK wisp kit: revive: the charge builds again    PASS  
+PAIRCHECK wisp kit: out: no motes held                 PASS  
+PAIRCHECK NOTE archer: 0 kit looks still updating while downed
+PAIRCHECK NOTE juggernaut: 0 kit looks still updating while downed
+PAIRCHECK NOTE gunslinger: 0 kit looks still updating while downed
+PAIRCHECK NOTE bulwark: 0 kit looks still updating while downed
+PAIRCHECK NOTE rimewright: 0 kit looks still updating while downed
+PAIRCHECK NOTE ashwick: 0 kit looks still updating while downed
+PAIRCHECK NOTE dolm: 0 kit looks still updating while downed
+PAIRCHECK NOTE mage: 0 kit looks still updating while downed
+PAIRCHECK NOTE dredge: 0 kit looks still updating while downed
+PAIRCHECK NOTE tender: 0 kit looks still updating while downed
+PAIRCHECK NOTE thief: 0 kit looks still updating while downed
+PAIRCHECK wisp kit: ostra: no look still updating      PASS  
+PAIRCHECK NOTE gil: 0 kit looks still updating while downed
+PAIRCHECK globe 0%: drawn radius 0.26 = hit radius 0.26 PASS  vis (0.256, 0.256, 0.256)
+PAIRCHECK globe 0%: a hunter 0.1m inside the rim is hit PASS  dmg 26.6
+PAIRCHECK globe 0%: a hunter 0.1m outside the rim is missed PASS  dmg 0.0
+PAIRCHECK globe 25%: drawn radius 0.81 = hit radius 0.81 PASS  vis (0.812308, 0.812308, 0.812308)
+PAIRCHECK globe 25%: a hunter 0.1m inside the rim is hit PASS  dmg 38.7
+PAIRCHECK globe 25%: a hunter 0.1m outside the rim is missed PASS  dmg 0.0
+PAIRCHECK globe 50%: drawn radius 1.62 = hit radius 1.62 PASS  vis (1.61641, 1.61641, 1.61641)
+PAIRCHECK globe 50%: a hunter 0.1m inside the rim is hit PASS  dmg 53.6
+PAIRCHECK globe 50%: a hunter 0.1m outside the rim is missed PASS  dmg 0.0
+PAIRCHECK globe 100%: drawn radius 3.20 = hit radius 3.20 PASS  vis (3.2, 3.2, 3.2)
+PAIRCHECK globe 100%: a hunter 0.1m inside the rim is hit PASS  dmg 83.0
+PAIRCHECK globe 100%: a hunter 0.1m outside the rim is missed PASS  dmg 0.0
+PAIRCHECK globe: full growth is the full rmax          PASS  
+PAIRCHECK globe: a fresh seed is a speck, not nothing  PASS  
+PAIRCHECK arena: the map has a stone block to shoot through PASS  
+PAIRCHECK walls: a full orb from 0.5m: arena stone block PASS  took 19.4 fired true from (54.884, 52.5) to (49.5, 52.5) y 0.0->0.0
+PAIRCHECK walls: a quick orb from 0.5m: arena stone block PASS  took 14.8 fired true from (54.884, 52.5) to (49.5, 52.5) y 0.0->0.0
+PAIRCHECK walls: a full orb from 5.0m: arena stone block PASS  took 19.4 fired true from (59.434, 52.5) to (49.5, 52.5) y 0.0->0.0
+PAIRCHECK walls: a quick orb from 5.0m: arena stone block PASS  took 14.8 fired true from (59.434, 52.5) to (49.5, 52.5) y 0.0->0.0
+PAIRCHECK arena: the dais has floor to stand on and a top PASS  
+PAIRCHECK walls: a full orb from 0.5m: arena dais, up onto its top PASS  took 19.4 fired true from (73.5, 63.884) to (73.5, 60.5) y 0.0->0.8
+PAIRCHECK walls: a quick orb from 0.5m: arena dais, up onto its top PASS  took 14.8 fired true from (73.5, 63.884) to (73.5, 60.5) y 0.0->0.8
+PAIRCHECK walls: a full orb from 5.0m: arena dais, up onto its top PASS  took 19.4 fired true from (73.5, 68.434) to (73.5, 60.5) y 0.0->0.8
+PAIRCHECK walls: a quick orb from 5.0m: arena dais, up onto its top PASS  took 14.8 fired true from (73.5, 68.434) to (73.5, 60.5) y 0.0->0.8
+PAIRCHECK arena after a swap to him: the map has a stone block to shoot through PASS  
+PAIRCHECK walls: a full orb from 0.5m: arena after a swap to him stone block PASS  took 19.4 fired true from (54.884, 52.5) to (49.5, 52.5) y 0.0->0.0
+PAIRCHECK walls: a quick orb from 0.5m: arena after a swap to him stone block PASS  took 14.8 fired true from (54.884, 52.5) to (49.5, 52.5) y 0.0->0.0
+PAIRCHECK walls: a full orb from 5.0m: arena after a swap to him stone block PASS  took 19.4 fired true from (59.434, 52.5) to (49.5, 52.5) y 0.0->0.0
+PAIRCHECK walls: a quick orb from 5.0m: arena after a swap to him stone block PASS  took 14.8 fired true from (59.434, 52.5) to (49.5, 52.5) y 0.0->0.0
+PAIRCHECK expedition: the map has a ruin wall to shoot through PASS  
+PAIRCHECK walls: a full orb from 0.5m: expedition ruin wall PASS  took 31.1 fired true from (385.5, 43.116) to (385.5, 47.5) y 8.0->8.0
+PAIRCHECK walls: a quick orb from 0.5m: expedition ruin wall PASS  took 23.7 fired true from (385.5, 43.116) to (385.5, 47.5) y 8.0->8.0
+PAIRCHECK walls: a full orb from 5.0m: expedition ruin wall PASS  took 31.1 fired true from (385.5, 38.566) to (385.5, 47.5) y 8.0->8.0
+PAIRCHECK walls: a quick orb from 5.0m: expedition ruin wall PASS  took 23.7 fired true from (385.5, 38.566) to (385.5, 47.5) y 8.0->8.0
+PAIRCHECK expedition: the map has a cliff with a terrace on top PASS  
+PAIRCHECK walls: a full orb from 0.5m: expedition cliff, up onto the terrace PASS  took 31.1 fired true from (229.116, 97.5) to (232.5, 97.5) y 3.2->4.0
+PAIRCHECK walls: a quick orb from 0.5m: expedition cliff, up onto the terrace PASS  took 23.7 fired true from (229.116, 97.5) to (232.5, 97.5) y 3.2->4.0
+PAIRCHECK walls: a full orb from 5.0m: expedition cliff, up onto the terrace PASS  took 31.1 fired true from (224.566, 97.5) to (232.5, 97.5) y 3.2->4.0
+PAIRCHECK walls: a quick orb from 5.0m: expedition cliff, up onto the terrace PASS  took 23.7 fired true from (224.566, 97.5) to (232.5, 97.5) y 3.2->4.0
+PAIRCHECK ult: no cast below level 6                   PASS  level 5
+PAIRCHECK ult: one X press is one cast                 PASS  used 1
+PAIRCHECK ult cast: a tap sets the well at the cursor, the thrust move plays, its own cooldown starts (70s, data) PASS  cd 70.0 at (6.0, 0.0, 0.0)
+PAIRCHECK ult telegraph: a dome of the exact size (3.6m) everyone sees, filling over 1.0s PASS  fill 0.53
+PAIRCHECK ult beats: it opens 1.0s after the press     PASS  0.97
+PAIRCHECK ult: it closes after 3.5s, quietly           PASS  phase ''
+PAIRCHECK ult bond: nothing when it catches nobody     PASS  paid 0.00
+PAIRCHECK ult: the cooldown denies a new cast          PASS  casts 1
+PAIRCHECK ult aim: past its range it is set at 10m toward the cursor PASS  10.0
+PAIRCHECK ult open: a foe inside is caught and stunned until it closes PASS  stun 3.42
+PAIRCHECK ult bond: a hunter caught when it opens is a land (a hit: 0.6) PASS  paid 0.60
+PAIRCHECK ult: the caught foe is drawn to the middle   PASS  off 0.30
+PAIRCHECK ult: a foe behind a wall is not caught       PASS  stun 0.00
+PAIRCHECK ult: an ally inside is untouched             PASS  
+PAIRCHECK ult: a foe who walks in later is caught too  PASS  stun 2.60
+PAIRCHECK ult bond: paid once per cast, never per tick PASS  
+PAIRCHECK ult payoff: small ticks every 0.1s (35 over 3.5s) PASS  dmg 5.76
+PAIRCHECK ult: the stun ends when it closes            PASS  stun -0.02
+PAIRCHECK ult plain: a well that is not Empowered breaks and lights nothing PASS  
+PAIRCHECK lock: movement input doesn't move him        PASS  
+PAIRCHECK lock: an RMB press and an attack are ignored PASS  
+PAIRCHECK lock: an E press is ignored (no seed)        PASS  
+PAIRCHECK lock: the glove and the Boki's C are held too (the cast_locked hook) PASS  
+PAIRCHECK lock: he cannot turn once committed          PASS  
+PAIRCHECK lock: the cast pose is held while the dome fills (ostra_well) PASS  
+PAIRCHECK lock: it lasts the 1.0s cast (Void's telegraph), then he is free and the well runs on PASS  freed at 1.00s
+PAIRCHECK release: shortly after he walks out at >= 90% run speed while the well holds PASS  5.57 of 5.39 m/s, well open
+PAIRCHECK release: he can act while it holds (a Snap)  PASS  snaps 1
+PAIRCHECK release: a jump while it holds goes at once (into_jump.x locks only the cast) PASS  
+PAIRCHECK dash flow: Shift during the lock is held, not lost (no Trade yet) PASS  
+PAIRCHECK dash flow: ... and goes the step the well opens and frees him (into_dash.x buffer) PASS  
+PAIRCHECK ult Swollen: the well is 5.1m wide, with the light-teal core PASS  r 5.1
+PAIRCHECK ult Swollen: its dome shows the bigger size  PASS  
+PAIRCHECK ult Swollen: Empowered ticks are Explosive, they break a crate and a pot and light a keg PASS  
+PAIRCHECK merge: a merge doesn't take the placed well down PASS  stun 2.25
+PAIRCHECK lock: a stun frees him early, the well goes on PASS  phase 'tell'
+PAIRCHECK lock: a knock frees him (and moves him), the well goes on PASS  moved 2.09
+PAIRCHECK ult burst: the well, merge and its ultimate leave a full-health light hunter standing PASS  ult 5.8 total 66.8 of 124
+PAIRCHECK lock: Shift, LMB and jump pressed 0.1s before it ends go on its first free step PASS  dash +1 (no lock +1), lmb +1 (no lock +1), jump +1 (no lock +1)
+PAIRCHECK swap mark: the landing sigil is there at launch PASS  
+PAIRCHECK swap mark: it starts empty (fill under 0.02) PASS  0.009
+PAIRCHECK swap mark: it ends full as the lantern lands (fill 1) PASS  1.000
+PAIRCHECK swap mark: it fills over the lob's flight time PASS  1.82 s
+PAIRCHECK swap mark: the fill only rises, no jumps     PASS  max step 0.009
+PAIRCHECK swap mark: it sits on the landing point (0.3 m) PASS  0.06 m
+PAIRCHECK swap mark: the cast sends the landing to other games PASS  ["zone", "trade", "p1", 15.5, 1.6, 32.5, 1.9, 1.8]
+PAIRCHECK swap mark online: a rival's game draws the sigil at launch PASS  
+PAIRCHECK swap mark online: it fills 0 -> 1 without jumps over the flight PASS  0.000 -> 1.000 in 1.82 s, max step 0.009
+PAIRCHECK swap mark online: on the landing point (0.3 m) PASS  0.06 m
+PAIRCHECK swap mark online: a Trade cut short takes the rival's sigil too PASS  
+PAIRCHECK swap mark fills [0.009, 0.51, 1.0]
+PAIRCHECK ostra clip timing: ostra_orb strikes at 0.05 s, the kit releases it at 0.00 s PASS  +0.05 s
+PAIRCHECK ostra clip timing: ostra_orb_hot strikes at 0.02 s, the kit releases it at 0.00 s PASS  +0.02 s
+PAIRCHECK ostra clip timing: ostra_snap strikes at 0.02 s, the kit releases it at 0.00 s PASS  +0.02 s
+PAIRCHECK ostra clip timing: ostra_swap strikes at 0.03 s, the kit releases it at 0.00 s PASS  +0.03 s
+PAIRCHECK ostra clip timing: ostra_swap_air strikes at 0.02 s, the kit releases it at 0.00 s PASS  +0.02 s
+PAIRCHECK ostra clip timing: ostra_seed strikes at 0.02 s, the kit releases it at 0.00 s PASS  +0.02 s
+PAIRCHECK ostra clip timing: ostra_pop strikes at 0.10 s, the kit releases it at 0.08 s PASS  +0.02 s
+PAIRCHECK ostra clip timing: ostra_well_snap strikes at 0.03 s, the kit releases it at 0.00 s PASS  +0.03 s
+PAIRCHECK ostra DONE, 277 checks, failures: 0
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 210: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 215: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 221: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 225: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 223: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 229: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 227: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 231: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 230: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 233: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 235: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 234: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 237: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 236: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 243: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 256: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 277: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 289: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 297: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 306: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 302: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 322: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 320: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 342: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 341: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 347: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 346: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 350: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 348: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 369: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 386: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 388: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 401: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 402: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 400: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 404: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 403: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 406: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 405: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 415: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 414: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 418: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 416: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 427: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 419: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 440: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 431: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 444: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 441: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 453: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 56 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

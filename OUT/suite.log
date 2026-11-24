@@ -1,0 +1,7 @@
+suite-fast: canary 1 of 10 red on both trees, 0 of 20 runs exit != own verdict
+suite-fast: took the worker pointer (free)
+Terminated                 sleep 60
+xargs: bash: terminated by signal 15
+xargs: bash: terminated by signal 15
+xargs: bash: terminated by signal 15
+Terminated                 nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run merge "{}"' < $OUT/order.txt

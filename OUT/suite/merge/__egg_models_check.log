@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+EGGMODELS ok   17 egg families, each with its tint
+EGGMODELS ok   every kin's type has an egg (15 types; missing [])
+EGGMODELS ok   ember: Cap 0.50..1.01 over Cup 0.00..0.50 m, 0.74 wide, 2736 tris, 512 px
+EGGMODELS ok   frost: Cap 0.50..1.00 over Cup -0.01..0.50 m, 0.74 wide, 2718 tris, 512 px
+EGGMODELS ok   venom: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2755 tris, 512 px
+EGGMODELS ok   stone: Cap 0.50..1.00 over Cup 0.00..0.50 m, 0.74 wide, 2698 tris, 512 px
+EGGMODELS ok   spore: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2655 tris, 512 px
+EGGMODELS ok   shadow: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2704 tris, 512 px
+EGGMODELS ok   titan: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2684 tris, 512 px
+EGGMODELS ok   gravity: Cap 0.50..1.01 over Cup 0.00..0.50 m, 0.74 wide, 2688 tris, 512 px
+EGGMODELS ok   echo: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2745 tris, 512 px
+EGGMODELS ok   bloom: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2568 tris, 512 px
+EGGMODELS ok   swarm: Cap 0.50..1.01 over Cup -0.01..0.50 m, 0.74 wide, 2702 tris, 512 px
+EGGMODELS ok   storm: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2678 tris, 512 px
+EGGMODELS ok   lunar: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2718 tris, 512 px
+EGGMODELS ok   prism: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2721 tris, 512 px
+EGGMODELS ok   tempest: Cap 0.50..1.00 over Cup -0.00..0.50 m, 0.74 wide, 2863 tris, 512 px
+EGGMODELS ok   rare: Cap 0.50..1.00 over Cup 0.00..0.50 m, 0.74 wide, 2533 tris, 512 px
+EGGMODELS ok   mystery: Cap 0.50..1.01 over Cup -0.00..0.50 m, 0.74 wide, 2666 tris, 512 px
+EGGMODELS ok   Cindle's EggHatch wears the Venom Egg's shell
+EGGMODELS ok   the hatch scene's basket egg wears the mystery shell
+EGGMODELS ok   the nest's egg, the incubator's and the boss drop wear their shells and turn gently
+EGGMODELS ok   the boss's Rare Egg has its seam ring in the kin's glow
+EGGMODELS DONE, failures: 0

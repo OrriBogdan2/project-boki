@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SETSIZE ok   1280x720 Main: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   1280x720 Controls: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   1280x720 Gameplay: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   1280x720 Camera: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   1280x720 Audio: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   1280x720 Video: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   1280x720 Accessibility: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   1280x720 Demo: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   1280x720 search 'e': panel (720.0, 648.0), in the safe area
+SETSIZE ok   1280x720 search 'zzzz': panel (720.0, 648.0), in the safe area
+SETSIZE ok   2560x1080 Main: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   2560x1080 Controls: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   2560x1080 Gameplay: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   2560x1080 Camera: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   2560x1080 Audio: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   2560x1080 Video: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   2560x1080 Accessibility: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   2560x1080 Demo: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   2560x1080 search 'e': panel (720.0, 648.0), in the safe area
+SETSIZE ok   2560x1080 search 'zzzz': panel (720.0, 648.0), in the safe area
+SETSIZE ok   3440x1440 Main: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   3440x1440 Controls: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   3440x1440 Gameplay: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   3440x1440 Camera: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   3440x1440 Audio: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   3440x1440 Video: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   3440x1440 Accessibility: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   3440x1440 Demo: panel (720.0, 648.0) (first (720.0, 648.0)), safe area
+SETSIZE ok   3440x1440 search 'e': panel (720.0, 648.0), in the safe area
+SETSIZE ok   3440x1440 search 'zzzz': panel (720.0, 648.0), in the safe area
+SETSIZE done, 0 failed

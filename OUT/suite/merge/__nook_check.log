@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+NOOK ok   two Grown friends are ready ()
+NOOK ok   a Youngling is not ready
+NOOK ok   no friendship, no egg (trust 40 and no bonds)
+NOOK ok   a recorded bond of 0.55 (friend_at 0.5, base scale) makes them friends
+NOOK ok   a recorded bond of 0.2 does not, whatever the trust
+NOOK ok   a parent that just laid an egg must rest
+NOOK ok   rested after 1200 seconds
+NOOK ok   one egg in the nest at a time
+NOOK ok   20 of 20 babies take the stronger parent's lean as a head start (20)
+NOOK ok   20 of 20 babies take the food from one parent and the play from the other (20)
+NOOK ok   a baby never hates its own favourite food
+NOOK ok   the preview names both kinds for a mixed pair
+NOOK ok   the preview credits the stronger parent's lean (Ash)
+NOOK ok   the preview's species and lean match 20 of 20 hatched babies (20)
+NOOK ok   the preview card builds
+NOOK ok   the parents grid has a row for lean, colour and each stat
+NOOK ok   a parent's lean names its strongest element (ember 6.0)
+NOOK ok   a stat from one parent 0.30 (card 0.30)
+NOOK ok   a coat from one parent 0.47 (card 0.45)
+NOOK ok   parents with no lean (older saves) breed a baby with none
+NOOK ok   the chime is two notes, the bigger parent's the lower
+NOOK ok   each parent chirps in its own voice
+NOOK ok   nook_note@0.00 plays once and loads
+NOOK ok   garden_egg@0.00 plays once and loads
+NOOK ok   nook_note@0.20 plays once and loads
+NOOK ok   nook_nuzzle@0.70 plays once and loads
+NOOK ok   kin_happy@0.75 plays once and loads
+NOOK ok   nook_settle@1.25 plays once and loads
+NOOK ok   kin_happy@1.30 plays once and loads
+NOOK ok   nook_nuzzle plays once
+NOOK ok   nook_settle plays once
+NOOK ok   garden_egg plays once
+NOOK ok   a stable pair has no wobble
+NOOK ok   an unstable mix gets one wobble
+NOOK ok   pairing plays them at the nest
+NOOK ok   the commit plays every step
+NOOK done, 0 failed

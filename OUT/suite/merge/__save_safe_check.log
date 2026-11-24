@@ -1,0 +1,18 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SAVESAFE ok   a clean save loads back  Keeper
+ERROR: Parse JSON failed. Error at line 0: Expected '}'
+   at: parse_string (core/io/json.cpp:624)
+   GDScript backtrace (most recent call first):
+       [0] _whole_text (res://scripts/core/save.gd:567)
+       [1] load_from (res://scripts/core/save.gd:502)
+       [2] load_game (res://scripts/core/save.gd:495)
+       [3] run (res://tools/save_safe_check.gd:32)
+       [4] run (res://tools/check_registry.gd:980)
+       [5] _ready (res://scripts/main.gd:270)
+SAVESAFE ok   a save cut short mid-write loads the last whole one  Older
+SAVESAFE ok   a save that died between its two steps loads the newest  Keeper
+SAVESAFE DONE, 3 checks, failures: 0

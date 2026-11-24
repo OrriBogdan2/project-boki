@@ -1,0 +1,32 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+IVS ok   2000 rolls stay 0..31 and reach both ends (0..31)
+IVS ok   rolls average about 15.5 (15.46)
+IVS ok   a new kin is born with all five IVs: { "hp": 25, "atk": 16, "spd": 7, "work": 21, "bond": 5 }
+IVS ok   new kin get different IVs (40 distinct of 40)
+IVS ok   a record with no IVs reads the ones its id gives, without changing it ({ "hp": 6, "atk": 7, "spd": 25, "work": 1, "bond": 22 })
+IVS ok   reading doesn't write
+IVS ok   Care.ensure backfills the same IVs
+IVS ok   the backfill is the same every time (deterministic from the uid)
+IVS ok   different ids, different IVs
+IVS ok   every egg takes exactly 3 IVs from a parent, with that parent's value
+IVS ok   each stat is inherited about 60% of the time: { "hp": 1769, "atk": 1797, "spd": 1848, "work": 1787, "bond": 1799 }
+IVS ok   both parents pass on equally (4521 / 4479)
+IVS ok   great parents give great eggs: average total 123.2 (expected ~122.5)
+IVS ok   inherit_n 5 (a future nest upgrade) passes all five
+IVS ok   inheritance is repeatable with a seeded rng
+IVS ok   every Rare Egg kin has at least 3 IVs of 26 or better
+IVS ok   Rare Egg kin average well above plain ones (116.7 vs 77.5)
+IVS ok   0 gives x1.00, 31 gives at most x1.10 (hp 1.100, atk 1.100, spd 1.050, work 1.100, bond 1.100)
+IVS ok   linear in between (hp 15: x1.0484)
+IVS ok   unknown stats and empty records are x1.00
+IVS ok   bad values are clamped (a hacked record can't go past +10%)
+IVS ok   shimmering doesn't change IVs
+IVS ok   the judge's words per stat
+IVS ok   overall grades: Remarkable / Ordinary stock
+IVS  judge: Ordinary stock: much like any other Boki. Its best is Health (pretty good).
+IVS ok   IVs survive a save and load (JSON floats read back as the same whole numbers)
+IV CHECK DONE, failures: 0

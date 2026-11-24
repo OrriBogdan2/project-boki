@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FSM ok   loco: 6 names for an enum of 6
+FSM ok   loco: every state has a row
+FSM ok   loco: every target is a state (0 stray)
+FSM ok   loco: no self-edges (0)
+FSM ok   loco: every state reachable from Grounded []
+FSM ok   base_life: 13 names for an enum of 13
+FSM ok   base_life: every state has a row
+FSM ok   base_life: every target is a state (0 stray)
+FSM ok   base_life: no self-edges (0)
+FSM ok   base_life: every state reachable from Roam []
+FSM ok   a labelled machine is listed in Fsm.live
+FSM ok   the table refuses a glide off the ground
+FSM ok   the refusal logs the reason and what refused it:    0.00 Grounded>Gliding press (table)
+FSM ok   go(to, why) logs the clock, the edge and the reason:    0.50 Grounded>Airborne jump
+FSM ok   guard_from refuses Airborne>Gliding without a fresh press
+FSM ok   guard_from allows it with one
+FSM ok   the Airborne edge's guard does not touch Dashing>Gliding
+FSM ok   a target guard refuses from any state
+FSM ok   refused 3, refusals 3, history 4
+FSM ok   the log keeps the last 32 lines, oldest first:    0.50 Gliding>Airborne fold
+FSM DONE, failures: 0

@@ -1,0 +1,219 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+MARKET ok   a brand new farm-start island has its market stall from the start, standing, at L1
+MARKET ok   near the portal (3.4 m from the landing)
+MARKET ok   and the farm knows where it is (the hub and the prompt open it)
+MARKET ok   only one
+MARKET ok   (an older farm-start save without a stall)
+MARKET ok   gets its stall set down when it loads
+MARKET ok   a stall you put in storage isn't placed again
+MARKET ok   L1: the vendor (and the Exchange) only: ["Vendor", "Relics", "Exchange"]
+MARKET ok   Vendor: Boki food and wear under Boki, the tonic and the belt items under Hunter
+MARKET ok   Vendor tabs name who the goods are for
+MARKET ok   upgrading to L2 takes labour 6, materials and 20 gems as it goes
+MARKET ok   while the Boki build it, it still works at L1
+MARKET ok   and the gems were spent by the time it was built
+MARKET ok   L2 adds the Shelter, your stall and search: ["Vendor", "Relics", "Exchange", "Shelter", "My stall", "Search"]
+MARKET ok   L3 adds the Auction House
+MARKET ok   each level changes the model (parts [11, 16, 25])
+MARKET ok   and the farm redraws it when the tier changes
+MARKET ok   a farm without the building pass (no upgrades there) has everything open
+MARKET ok   the shelter has 3 ordinary strays today
+MARKET ok   adopting costs 20 gems (destroyed: nobody is paid) and it comes home
+MARKET ok   it's an adoptee, and its trust partly resets with a new keeper
+MARKET ok   a higher level, shimmer or mutation costs more to adopt (180 vs 30)
+MARKET ok   giving a Boki up pays nothing (gems 980 -> 980)
+MARKET ok   it waits at the shelter, remembering who raised it
+MARKET ok   you can't adopt back one you gave away (You gave Bun up: let someone else give it a home)
+MARKET ok   a Boki under 7 days old can't be put up: It's too young: a Boki can be put up from 7 days old
+MARKET ok   each Boki once a day at most: It was put up today already
+MARKET ok   your partner stays: Pip is your partner: partners stay on the farm
+MARKET ok   and so does your last Boki
+MARKET ok   a full farm and Burrow can't adopt
+MARKET ok   an NPC adopter gives it a home while you're out (["Moss"])
+MARKET ok   a stall at L1 has no shelter yet
+MARKET ok   an empty shelter shows 3 strays
+MARKET ok   the strays are commons that aren't usual starters
+MARKET ok   each costs the flat fee (20 gems)
+MARKET ok   no Boki and only the fee: adopts one
+MARKET ok   adopting restocks a stray at once
+MARKET ok   no Boki and the fee in gems is not stuck
+MARKET ok   0 gems, 0 Boki: 3 strays shown, but none affordable
+MARKET ok   and the floor hands over a stray
+MARKET ok   a full zone: the adopted Boki sleeps in the Burrow, the zone keeps its 6
+MARKET ok   and the player reads why: Kindlewren is asleep in the Burrow (Box 1: Meadow): Glasswater Shallows is full (6 out)
+MARKET ok   the shelter restocked to 3 anyway
+MARKET ok   it lives in the zone you are in (Glasswater), not the full start zone
+MARKET ok   and the line says it is coming home
+MARKET ok   0 gems, 0 Boki: adopting says 'You need 20 more gems' and takes nothing
+MARKET ok   and the floor brings a stray, set as your partner
+MARKET ok   after save and reload the strays are the same 3 (one restocked), the adopted one is not back
+MARKET ok   and the adoptee and the gems are kept
+MARKET ok   gave a Boki up
+MARKET ok   adopting it back is refused (You gave Bun up: let someone else give it a home), no gems taken
+MARKET ok   the shelter still holds its 3 strays
+MARKET ok   a stray can be adopted in its place
+MARKET ok   a transfer needs another player's name
+MARKET ok   sending costs the flat fee (40, destroyed) and the Boki waits for them
+MARKET ok   one transfer a week (One transfer a week: the next in 168 h)
+MARKET ok   called back before they accept: the Boki, the fee and the week come back
+MARKET ok   sent: the packet is on the store for Moss, the Boki waits in Tarn's outbox
+MARKET ok   Moss's game sees the incoming Boki (Tarn wants to hand you Bun: accept or refuse it at the market stall's Shelter.)
+MARKET ok   Moss refuses it
+MARKET ok   sent: the packet is on the store for Moss, the Boki waits in Tarn's outbox
+MARKET ok   Moss's game sees the incoming Boki (Tarn wants to hand you Bun: accept or refuse it at the market stall's Shelter.)
+MARKET ok   Moss accepts it
+MARKET ok   an accepted Boki can't be called back
+MARKET ok   refused, it came home with the fee; accepted, it left Tarn's save and the store is empty (Moss accepted Bun. It's theirs now.)
+MARKET ok   Moss accepts: the same Boki, 'raised by' its old keeper, and no gems change hands
+MARKET ok   listing costs a 2-gem fee (5% of 36) and the good goes on the stall
+MARKET ok   taking it down gives the good back (not the fee)
+MARKET ok   an NPC buyer takes the fair one: 36 less a 4 tax
+MARKET ok   one priced over what NPCs pay (90 > 36) never sells offline
+MARKET ok   a stall holds 6 at once
+MARKET ok   a worn accessory can't be listed
+MARKET ok   a spare one can
+MARKET ok   and a piece of gear leaves the armory for the stall
+MARKET ok   the NPC stalls have goods today (20 kinds)
+MARKET ok   search returns each good's lowest price first
+MARKET ok   your cheaper listing becomes the lowest price for Sky dye
+MARKET ok   search finds it by part of its name
+MARKET ok   buying from a stall pays its price and the good is yours
+MARKET ok   an auction: start price, step and 24 h, a 5-gem listing fee
+MARKET ok   12, 24 or 48 hours only
+MARKET ok   you can't bid on your own lot
+MARKET ok   NPC lots of rare goods open at their full price or more
+MARKET ok   a bid under the start is refused
+MARKET ok   a bid is taken at once (escrow): 60
+MARKET ok   and can't be withdrawn or bid over by yourself
+MARKET ok   outbid: your gems come back (995)
+MARKET ok   a bid in the last minute pushes the end out (anti-snipe)
+MARKET ok   you win when it ends: the piece is yours
+MARKET ok   NPC bidders bid on your lot, never over 104
+MARKET ok   sold: you get 100 less the 10% tax
+MARKET ok   a friends-only lot gets no NPC bids
+MARKET ok   a lot nobody bid on comes back
+MARKET ok   rare stock: 4 rare or epic pieces today
+MARKET ok   priced as a sink: at least twice what they're worth
+MARKET ok   never keys, shards or match-only items
+MARKET ok   buying one: the gems are gone and it's out of stock until tomorrow
+MARKET ok   a Rare Egg goes to the Incubator's shelf
+MARKET ok   a Boki nobody took waits at the Black Market (its Ransom tab)
+MARKET ok   paying the ask brings it home
+MARKET ok   an offer to the captor carries your message
+MARKET ok   the Black Market has a Ransom tab and a Rare stock tab
+MARKET ok   ransom tab: 2 card(s)
+MARKET ok   ransom tab: at most 2 controls on a card (a button and More)
+MARKET ok   ransom tab: each card has one highlighted button
+MARKET ok   ransom tab: picture, name, time left or holder and price share one line
+MARKET ok   ransom tab: fits 1280x720 with the panel's header
+MARKET info ransom: 2 controls on a card, 258 px tall
+MARKET ok   captured tab: 1 card(s)
+MARKET ok   captured tab: at most 2 controls on a card (a button and More)
+MARKET ok   captured tab: each card has one highlighted button
+MARKET ok   captured tab: picture, name, time left or holder and price share one line
+MARKET ok   captured tab: fits 1280x720 with the panel's header
+MARKET info captured: 2 controls on a card, 123 px tall
+MARKET ok   no good can be bought from the game and sold back to it for more: []
+MARKET ok   NPC buyers pay under what NPC sellers ask
+MARKET ok   Exchange commodities stay on the Exchange
+MARKET ok   a just-adopted Boki can't be put up again at once: It's too young: a Boki can be put up from 7 days old
+MARKET ok   and giving it up pays nothing: a Boki never turns into gems
+MARKET ok   the old Boki selling is gone (Social.sell_kin, the Drift Pens)
+MARKET ok   gems add up: 1000 - 240 sunk + 32 paid = 792
+MARKET ok   a v7 save upgrades to the current version
+MARKET ok   open pen and web Boki listings come back to the roster
+MARKET ok   the pens are gone; seed listings stay
+MARKET ok   the market gets its defaults, and a one-time notice says who came home
+MARKET ok   your stall, auction, shelter card and transfer survive a save/load
+MARKET ok   and still work after it
+MARKET ok   two bosses, two trophies, on the results screen
+MARKET ok   a dye recolours what a Boki wears, and is used up
+MARKET DONE, failures: 0
+WARNING: 4 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 30 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 38: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 39: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 40: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 43: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 44: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 51: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 52: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 53: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 54: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 58: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 59: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 60: leaked 2796202 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 61: leaked 2796202 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 63: leaked 174762 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 64: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 65: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 66: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 67: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 68: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 69: leaked 174762 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 70: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 71: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 73: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 74: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 75: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 76: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 77: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 80: leaked 699050 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 85: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 86: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: 3 RID allocations of type 'PN18TextServerAdvanced22ShapedTextDataAdvancedE' were leaked at exit.
+ERROR: 3 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.
+ERROR: 1 RID allocations of type 'PN18TextServerAdvanced27FontAdvancedLinkedVariationE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

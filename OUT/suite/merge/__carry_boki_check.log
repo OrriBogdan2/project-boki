@@ -1,0 +1,53 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+CARRYBOKI ok   the roster has a middling (pebbit) and a big (cairnback) species
+CARRYBOKI ok   a small one is carried in the arms
+CARRYBOKI ok   a middling one is carried on the back
+CARRYBOKI ok   a big one is led, not lifted
+CARRYBOKI ok   high bravery is brave
+CARRYBOKI ok   low bravery is timid
+CARRYBOKI ok   a hot temper is grumpy, whatever the bravery
+CARRYBOKI ok   no change to your speed before you lift
+CARRYBOKI ok   a quick tap still pats instead of lifting
+CARRYBOKI ok   holding interact lifts a small Boki into your arms
+CARRYBOKI ok   you walk at 90% with the carry pose
+CARRYBOKI ok   it stays in your arms while you walk (0.42 m away at most)
+CARRYBOKI ok   pressing again sets it down in front of you (0.00 m off)
+CARRYBOKI ok   its size and your speed are normal again
+CARRYBOKI ok   a grumpy one squirms free after 5.1 s (set: 5.0)
+CARRYBOKI ok   it hops down and heads off, no longer carried
+CARRYBOKI ok   a timid one clings on as long as you like (30 s)
+CARRYBOKI ok   and only trembles a little
+CARRYBOKI ok   a brave one wriggles happily in your arms (0.20 rad)
+CARRYBOKI ok   a bonded Boki gains a little trust
+CARRYBOKI ok   but only once a day
+CARRYBOKI ok   and again the next day
+CARRYBOKI ok   a Boki that isn't bonded yet gains nothing
+CARRYBOKI ok   a big one stays on the ground and is led
+CARRYBOKI ok   it follows beside you as you walk (1.54 m behind at most)
+CARRYBOKI ok   its pace (5.7 m/s) is a run, up to 5.7
+CARRYBOKI ok   holding again lets it go
+CARRYBOKI ok   the hunter holds the carry pose while running
+CARRYBOKI ok   the hunter holds the pack pose while running
+CARRYBOKI DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

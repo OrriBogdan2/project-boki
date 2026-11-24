@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PROPDRAWS PASS chest draws 29 (at most 29)
+PROPDRAWS PASS key draws 6 (at most 6)
+PROPDRAWS PASS stall1 draws 20 (at most 20)
+PROPDRAWS PASS stall3 draws 38 (at most 38)
+PROPDRAWS PASS nook draws 17 (at most 17)
+PROPDRAWS PASS incubator draws 171 (at most 173)
+PROPDRAWS PASS burrow draws 37 (at most 37)
+PROPDRAWS PASS incubator keeps its 89 named nodes
+PROPDRAWS PASS a cradle's pebble is still its own mesh (it lights up)
+PROPDRAWS PASS burrow keeps its named parts
+PROPDRAWS PASS a locked chest wears both padlocks
+PROPDRAWS DONE, failures: 0

@@ -1,0 +1,54 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SNACKS ok   every type has a snack (none for: [])
+SNACKS ok   every snack is in exactly one zone list (not once: [])
+SNACKS ok   no zone list holds an unknown food ([])
+SNACKS ok   five zone lists
+SNACKS ok   emberberry is a real food named Emberberry
+SNACKS ok   emberberry leans a Boki to fire
+SNACKS ok   tidebloom is a real food named Tidebloom
+SNACKS ok   tidebloom leans a Boki to water
+SNACKS ok   sunroot is a real food named Sunroot
+SNACKS ok   sunroot leans a Boki to grass
+SNACKS ok   mindmint is a real food named Mindmint
+SNACKS ok   mindmint leans a Boki to psychic
+SNACKS ok   puffcorn is a real food named Puffcorn
+SNACKS ok   puffcorn leans a Boki to flying
+SNACKS ok   glowcap is a real food named Glowcap
+SNACKS ok   glowcap leans a Boki to spore
+SNACKS ok   starfruit is a real food named Starfruit
+SNACKS ok   starfruit leans a Boki to fairy
+SNACKS ok   kibble is a real food named Boki kibble
+SNACKS ok   kibble leans a Boki to normal
+SNACKS ok   sweetbun is a real food named Sweet bun
+SNACKS ok   sweetbun leans a Boki to normal
+SNACKS ok   tonicbrew is a real food named Pep brew
+SNACKS ok   tonicbrew leans a Boki to electric
+SNACKS ok   chimebun is a real food named Chime bun
+SNACKS ok   chimebun leans a Boki to sound
+SNACKS ok   frostdrop is a real food named Frost drop
+SNACKS ok   frostdrop leans a Boki to ice
+SNACKS ok   pebblenut is a real food named Pebble nut
+SNACKS ok   pebblenut leans a Boki to rock
+SNACKS ok   scalepepper is a real food named Scale pepper
+SNACKS ok   scalepepper leans a Boki to dragon
+SNACKS ok   duskplum is a real food named Dusk plum
+SNACKS ok   duskplum leans a Boki to dark
+SNACKS ok   pricklepear is a real food named Prickle pear
+SNACKS ok   pricklepear leans a Boki to poison
+SNACKS ok   sapjelly is a real food named Sap jelly
+SNACKS ok   sapjelly leans a Boki to bug
+SNACKS ok   ironcrisp is a real food named Iron crisp
+SNACKS ok   ironcrisp leans a Boki to steel
+SNACKS ok   geodecandy is a real food named Geode candy
+SNACKS ok   geodecandy leans a Boki to crystal
+SNACKS ok   each new snack's colour is its type's tint (gap 0.000)
+SNACKS ok   a Frost drop meal leans a Boki to ice
+SNACKS ok   every habit food is a known food ([])
+SNACKS ok   habit foods spread over the snacks (14 different)
+SNACKS ok   the start patch grew every snack within 24 ripenings (never: [])
+SNACKS ok   a ridge patch grows exactly its zone's list and the season's snack (["puffcorn", "tonicbrew", "starfruit", "chimebun", "glowcap"])
+SNACKS DONE, failures: 0

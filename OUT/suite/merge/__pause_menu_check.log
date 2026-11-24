@@ -1,0 +1,71 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+PAUSEMENU PASS farm: 4 buttons up front, More among them ["Resume", "Settings", "More", "Save and leave"]
+PAUSEMENU PASS farm: More opens its page
+PAUSEMENU PASS farm: every old action is reachable (missing [])
+PAUSEMENU PASS farm: one-line labels ([])
+PAUSEMENU PASS farm: Back from More returns to the menu
+PAUSEMENU PASS 1280x720 pause: inside the safe area (panel [P: (420.0, 170.0), S: (440.0, 380.0)], safe [P: (28.8, 28.8), S: (1222.4, 662.4)])
+PAUSEMENU PASS 1280x720 more: inside the safe area (panel [P: (417.0, 34.0), S: (446.0, 652.0)], safe [P: (28.8, 28.8), S: (1222.4, 662.4)])
+PAUSEMENU PASS 1920x1080 pause: inside the safe area (panel [P: (420.0, 170.0), S: (440.0, 380.0)], safe [P: (28.8, 28.8), S: (1222.4, 662.4)])
+PAUSEMENU PASS 1920x1080 more: inside the safe area (panel [P: (417.0, 34.0), S: (446.0, 652.0)], safe [P: (28.8, 28.8), S: (1222.4, 662.4)])
+PAUSEMENU PASS 2560x1080 pause: inside the safe area (panel [P: (633.0, 170.0), S: (440.0, 380.0)], safe [P: (28.8, 28.8), S: (1649.067, 662.4)])
+PAUSEMENU PASS 2560x1080 more: inside the safe area (panel [P: (630.0, 34.0), S: (446.0, 652.0)], safe [P: (28.8, 28.8), S: (1649.067, 662.4)])
+PAUSEMENU PASS 3440x1440 pause: inside the safe area (panel [P: (640.0, 170.0), S: (440.0, 380.0)], safe [P: (28.8, 28.8), S: (1662.4, 662.4)])
+PAUSEMENU PASS 3440x1440 more: inside the safe area (panel [P: (637.0, 34.0), S: (446.0, 652.0)], safe [P: (28.8, 28.8), S: (1662.4, 662.4)])
+PAUSEMENU PASS town: 4 buttons up front, More among them ["Resume", "Settings", "More", "Save and leave"]
+PAUSEMENU PASS town: More opens its page
+PAUSEMENU PASS town: every old action is reachable (missing [])
+PAUSEMENU PASS town: one-line labels ([])
+PAUSEMENU PASS town: Back from More returns to the menu
+PAUSEMENU PASS interior: 4 buttons up front, More among them ["Resume", "Settings", "More", "Save and leave"]
+PAUSEMENU PASS interior: More opens its page
+PAUSEMENU PASS interior: every old action is reachable (missing [])
+PAUSEMENU PASS interior: one-line labels ([])
+PAUSEMENU PASS interior: Back from More returns to the menu
+PAUSEMENU PASS training: 4 buttons up front, More among them ["Resume", "Settings", "More", "Leave"]
+PAUSEMENU PASS training: More opens its page
+PAUSEMENU PASS training: every old action is reachable (missing [])
+PAUSEMENU PASS training: one-line labels ([])
+PAUSEMENU PASS training: Back from More returns to the menu
+PAUSEMENU PASS tutorial: 4 buttons up front, More among them ["Resume", "Settings", "More", "Skip tutorial"]
+PAUSEMENU PASS tutorial: More opens its page
+PAUSEMENU PASS tutorial: every old action is reachable (missing [])
+PAUSEMENU PASS tutorial: one-line labels ([])
+PAUSEMENU PASS tutorial: Back from More returns to the menu
+PAUSEMENU PASS arena: 4 buttons up front, More among them ["Resume", "Settings", "More", "Leave"]
+PAUSEMENU PASS arena: More opens its page
+PAUSEMENU PASS arena: every old action is reachable (missing [])
+PAUSEMENU PASS arena: one-line labels ([])
+PAUSEMENU PASS arena: Back from More returns to the menu
+PAUSEMENU PASS match: 4 buttons up front, More among them ["Resume", "Settings", "More", "Leave match"]
+PAUSEMENU PASS match: More opens its page
+PAUSEMENU PASS match: every old action is reachable (missing [])
+PAUSEMENU PASS match: one-line labels ([])
+PAUSEMENU PASS match: Back from More returns to the menu
+PAUSEMENU DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 30 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

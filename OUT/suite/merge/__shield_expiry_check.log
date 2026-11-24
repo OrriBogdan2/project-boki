@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SHIELDEXPIRY ok   punch shield: a fresh shell is full
+SHIELDEXPIRY ok   punch shield: half left, the shell is 0.50 (want 0.50)
+SHIELDEXPIRY ok   punch shield: 20% left, the shell is 0.20
+SHIELDEXPIRY ok   punch shield: the shell pulsed 1 time(s) (want 1)
+SHIELDEXPIRY ok   punch shield: pulse began 0.48 s before the end
+SHIELDEXPIRY ok   punch shield: gone, the body's own ink is back (0 changed)
+SHIELDEXPIRY ok   Effects shield: the shell is up and full
+SHIELDEXPIRY ok   Effects shield: the shell pulsed 1 time(s) (want 1)
+SHIELDEXPIRY ok   Effects shield: pulse began 0.48 s before the end
+SHIELDEXPIRY ok   Effects shield: gone, the body's own ink is back (0 changed)
+SHIELDEXPIRY done, 0 failures
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 18 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

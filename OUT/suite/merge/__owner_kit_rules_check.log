@@ -1,0 +1,128 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+OKRCHECK Cinder Flue Flight (DECISIONS:83): LMB, RMB, Shift, utility, glove and C are refused PASS  flying true puffs +0 rmb 1.0->1.0 shots +0 dashes 2.0->2.0 tonic 3 glove cd 0.0
+OKRCHECK Cinder Flue Flight (DECISIONS:83): E (Furnace Cloak) still works, the flight goes on PASS  cloaks +1
+OKRCHECK Motley Nightwell (DECISIONS:78): about 1 s of cast lock, then he walks out     PASS  first step at 1.03s
+OKRCHECK Motley Nightwell (DECISIONS:78): free at >= 90% run speed while the well runs  PASS  5.35 of 5.39 m/s
+OKRCHECK Tenzo (DECISIONS:74): RMB out of a glide folds it and slams on landing         PASS  gliding true folded true slams +1
+OKRCHECK Kael (DECISIONS:70): RMB held 12 s is still charging (no auto-release)         PASS  held 12.0s anim jug_lunge_wind
+OKRCHECK Kael (DECISIONS:70): a release in the window is a perfect Lunge (further), one outside is not PASS  perfects +1, 8.09m vs 6.84m
+OKRCHECK Neve (DECISIONS:317): a skating beam flies out on the aim, then curves in onto the foe PASS  skating true beams 3 out -2 deg, turned 44.9 deg toward the foe
+OKRCHECK Vex (DECISIONS:80): RMB goes on the press, holding it shows no lane and holds nothing PASS  on press true lane false held false
+OKRCHECK Grimble (DECISIONS:82): the Deep Reach passes a cliff face and hooks the foe behind it PASS  grapples +1
+OKRCHECK Grimble (DECISIONS:82): a placed wall stops the Deep Reach                     PASS  grapples +0
+OKRCHECK archer (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK juggernaut (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK gunslinger (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK bulwark (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK rimewright (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK ashwick (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK dolm (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK mage (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK dredge (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK tender (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK thief (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK ostra (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK gil (DECISIONS:370): Space held from the jump never glides; a second press does PASS  held 0.00s, second press 0.73s
+OKRCHECK DONE, failures: 0
+ERROR: 1 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 219: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 233: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 231: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 238: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 248: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 246: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 250: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 249: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 263: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 269: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 327: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 330: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 329: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 338: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 337: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 351: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 350: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 353: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 352: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 355: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 354: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 358: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 356: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 364: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 363: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 372: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 371: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 387: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 386: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 397: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 396: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 400: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 398: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 405: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 9637: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9638: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9639: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 9640: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 51 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

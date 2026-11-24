@@ -1,0 +1,821 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KEYCHECK   seed 3 region r0   chests 5 monsters 12 shrublings 1 carriers 5 (spilled in 0)
+KEYCHECK   seed 3 region r1   chests 5 monsters 9 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 3 region r6   chests 5 monsters 5 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 3 region r5   chests 6 monsters 10 shrublings 1 carriers 6 (spilled in 0)
+KEYCHECK   seed 3 region r4   chests 5 monsters 16 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 3 region r8   chests 2 monsters 3 shrublings 0 carriers 2 (spilled in 0)
+KEYCHECK   seed 3 region r7   chests 3 monsters 8 shrublings 1 carriers 3 (spilled in 0)
+KEYCHECK   seed 3 region r3   chests 6 monsters 3 shrublings 0 carriers 3 (spilled in 3)
+KEYCHECK   seed 3 region r2   chests 6 monsters 16 shrublings 0 carriers 6 (spilled in 0)
+KEYCHECK seed 3: carriers in each region equal its chests (or all its monsters) PASS  
+KEYCHECK seed 3: the world holds one key per chest                  PASS  43 carriers, 43 chests, 3 spilled
+KEYCHECK seed 3: every carrier wears a key glint                    PASS  43/43
+KEYCHECK seed 3: 1-3 Shrublings, all carriers                       PASS  3
+KEYCHECK seed 3: Shrublings only in bloom/meadow/gloom/storm with 3+ patches near PASS  
+KEYCHECK   seed 5 region r0   chests 5 monsters 10 shrublings 2 carriers 5 (spilled in 0)
+KEYCHECK   seed 5 region r1   chests 6 monsters 6 shrublings 0 carriers 6 (spilled in 0)
+KEYCHECK   seed 5 region r6   chests 4 monsters 4 shrublings 0 carriers 4 (spilled in 0)
+KEYCHECK   seed 5 region r5   chests 5 monsters 10 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 5 region r4   chests 4 monsters 16 shrublings 1 carriers 4 (spilled in 0)
+KEYCHECK   seed 5 region r8   chests 3 monsters 3 shrublings 0 carriers 3 (spilled in 0)
+KEYCHECK   seed 5 region r7   chests 4 monsters 6 shrublings 0 carriers 4 (spilled in 0)
+KEYCHECK   seed 5 region r3   chests 7 monsters 2 shrublings 0 carriers 2 (spilled in 5)
+KEYCHECK   seed 5 region r2   chests 5 monsters 16 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK seed 5: carriers in each region equal its chests (or all its monsters) PASS  
+KEYCHECK seed 5: the world holds one key per chest                  PASS  43 carriers, 43 chests, 5 spilled
+KEYCHECK seed 5: every carrier wears a key glint                    PASS  43/43
+KEYCHECK seed 5: 1-3 Shrublings, all carriers                       PASS  3
+KEYCHECK seed 5: Shrublings only in bloom/meadow/gloom/storm with 3+ patches near PASS  
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _carriers (res://tools/keys_check.gd:67)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _carriers (res://tools/keys_check.gd:67)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _carriers (res://tools/keys_check.gd:67)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _carriers (res://tools/keys_check.gd:67)
+KEYCHECK   seed 9 region r0   chests 6 monsters 12 shrublings 0 carriers 6 (spilled in 0)
+KEYCHECK   seed 9 region r1   chests 5 monsters 8 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 9 region r6   chests 6 monsters 5 shrublings 0 carriers 5 (spilled in 1)
+KEYCHECK   seed 9 region r5   chests 6 monsters 10 shrublings 1 carriers 6 (spilled in 0)
+KEYCHECK   seed 9 region r4   chests 5 monsters 16 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 9 region r8   chests 2 monsters 3 shrublings 0 carriers 2 (spilled in 0)
+KEYCHECK   seed 9 region r7   chests 2 monsters 4 shrublings 0 carriers 2 (spilled in 0)
+KEYCHECK   seed 9 region r3   chests 5 monsters 2 shrublings 0 carriers 2 (spilled in 3)
+KEYCHECK   seed 9 region r2   chests 6 monsters 16 shrublings 0 carriers 6 (spilled in 0)
+KEYCHECK seed 9: carriers in each region equal its chests (or all its monsters) PASS  
+KEYCHECK seed 9: the world holds one key per chest                  PASS  43 carriers, 43 chests, 4 spilled
+KEYCHECK seed 9: every carrier wears a key glint                    PASS  43/43
+KEYCHECK seed 9: 1-3 Shrublings, all carriers                       PASS  1
+KEYCHECK seed 9: Shrublings only in bloom/meadow/gloom/storm with 3+ patches near PASS  
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _carriers (res://tools/keys_check.gd:67)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _carriers (res://tools/keys_check.gd:67)
+KEYCHECK   seed 12 region r0   chests 5 monsters 10 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 12 region r1   chests 5 monsters 9 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 12 region r6   chests 5 monsters 3 shrublings 0 carriers 3 (spilled in 2)
+KEYCHECK   seed 12 region r5   chests 5 monsters 10 shrublings 1 carriers 5 (spilled in 0)
+KEYCHECK   seed 12 region r4   chests 4 monsters 16 shrublings 0 carriers 4 (spilled in 0)
+KEYCHECK   seed 12 region r8   chests 2 monsters 3 shrublings 0 carriers 2 (spilled in 0)
+KEYCHECK   seed 12 region r7   chests 2 monsters 4 shrublings 1 carriers 2 (spilled in 0)
+KEYCHECK   seed 12 region r3   chests 10 monsters 2 shrublings 0 carriers 2 (spilled in 8)
+KEYCHECK   seed 12 region r2   chests 5 monsters 16 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK seed 12: carriers in each region equal its chests (or all its monsters) PASS  
+KEYCHECK seed 12: the world holds one key per chest                 PASS  43 carriers, 43 chests, 10 spilled
+KEYCHECK seed 12: every carrier wears a key glint                   PASS  43/43
+KEYCHECK seed 12: 1-3 Shrublings, all carriers                      PASS  2
+KEYCHECK seed 12: Shrublings only in bloom/meadow/gloom/storm with 3+ patches near PASS  
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _carriers (res://tools/keys_check.gd:67)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _carriers (res://tools/keys_check.gd:67)
+KEYCHECK   seed 21 region r0   chests 6 monsters 12 shrublings 0 carriers 6 (spilled in 0)
+KEYCHECK   seed 21 region r1   chests 5 monsters 10 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 21 region r6   chests 5 monsters 5 shrublings 0 carriers 5 (spilled in 0)
+KEYCHECK   seed 21 region r5   chests 5 monsters 10 shrublings 2 carriers 5 (spilled in 0)
+KEYCHECK   seed 21 region r4   chests 4 monsters 16 shrublings 0 carriers 4 (spilled in 0)
+KEYCHECK   seed 21 region r8   chests 3 monsters 3 shrublings 0 carriers 3 (spilled in 0)
+KEYCHECK   seed 21 region r7   chests 4 monsters 5 shrublings 0 carriers 4 (spilled in 0)
+KEYCHECK   seed 21 region r3   chests 5 monsters 1 shrublings 0 carriers 1 (spilled in 4)
+KEYCHECK   seed 21 region r2   chests 6 monsters 16 shrublings 0 carriers 6 (spilled in 0)
+KEYCHECK seed 21: carriers in each region equal its chests (or all its monsters) PASS  
+KEYCHECK seed 21: the world holds one key per chest                 PASS  43 carriers, 43 chests, 4 spilled
+KEYCHECK seed 21: every carrier wears a key glint                   PASS  43/43
+KEYCHECK seed 21: 1-3 Shrublings, all carriers                      PASS  2
+KEYCHECK seed 21: Shrublings only in bloom/meadow/gloom/storm with 3+ patches near PASS  
+KEYCHECK carriers change between seeds                              PASS  
+KEYCHECK no key: the prompt says locked                             PASS  Locked  ·  needs a key  ·  monsters with a key glint carry them
+KEYCHECK no key: the chest stays shut                               PASS  
+KEYCHECK with a key: the prompt offers to open it                   PASS  F to open  ·  uses 1 key
+KEYCHECK opening uses exactly one key                               PASS  keys 1
+KEYCHECK the lid creaks by the chest's tier, not the pickup sound   PASS  chest_creak_grand
+KEYCHECK an open chest costs nothing more                           PASS  
+KEYCHECK the chest pays out                                         PASS  
+KEYCHECK holding interact at a locked chest does nothing            PASS  
+KEYCHECK with a key: the prompt is a press, not a hold              PASS  F to open  ·  uses 1 key
+KEYCHECK one press of interact with a key opens it for one key, no hold PASS  keys 0
+KEYCHECK a free chest is still held open                            PASS  
+KEYCHECK keys drop in the deathbox                                  PASS  
+KEYCHECK the box lists the keys                                     PASS  
+KEYCHECK a rival can loot them                                      PASS  keys 3
+KEYCHECK a dropped key lies on the ground                           PASS  
+KEYCHECK walking into it picks it up                                PASS  keys 1
+KEYCHECK a full stack (3) leaves the key on the ground              PASS  keys 3
+KEYCHECK belt adapter: count                                        PASS  
+KEYCHECK belt adapter: take spends keys                             PASS  
+KEYCHECK belt adapter: take never goes below zero                   PASS  
+KEYCHECK with room again it picks the key up                        PASS  keys 1
+KEYCHECK looting a box past the cap leaves the rest in it           PASS  kept 2
+KEYCHECK a carrier drops its key when it dies                       PASS  0 -> 1 (+0 bonus)
+KEYCHECK it always carries a key                                    PASS  
+KEYCHECK it starts as a bush: disguised, standing on grass          PASS  
+KEYCHECK disguised, its tile is cover like any bush                 PASS  (161.5, 0.0, 307.5)
+KEYCHECK a hunter can stand in it and hide there                    PASS  0.22 m from it
+KEYCHECK standing in it, or next to it, does not wake it            PASS  disguised
+KEYCHECK still a bush with a hunter beside it for 4 s               PASS  disguised
+KEYCHECK the tell fires every 5-10 s                                PASS  5 tells in 32 s
+KEYCHECK a hit wakes it                                             PASS  alert
+KEYCHECK a hunter hiding in it is exposed when it bolts             PASS  hid true, reveal 1.2
+KEYCHECK damage makes it flee                                       PASS  moved 8.2 m
+KEYCHECK faster than a hunter on foot                               PASS  5.97 vs 5.28
+KEYCHECK slower than a dash                                         PASS  5.97 vs 19.0
+KEYCHECK out of sight it dives into grass and hides again           PASS  disguised at (147.0, 0.0, 304.0)
+KEYCHECK walking up to it again does not wake it                    PASS  disguised
+KEYCHECK a root counts as a hit: it wakes                           PASS  alert
+KEYCHECK a root pins it                                             PASS  moved 0.00
+KEYCHECK a slow cuts its pace                                       PASS  2.95 vs 5.97
+KEYCHECK Grounded: it can no longer dive                            PASS  flee
+KEYCHECK a grab drags it in                                         PASS  0.05 m off
+KEYCHECK it has low health and no attack                            PASS  hp 26
+KEYCHECK catching it pays the key                                   PASS  0 -> 1
+KEYCHECK a hit uncovers a disguised one                             PASS  
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _bots (res://tools/keys_check.gd:440)
+       [14] run (res://tools/keys_check.gd:55)
+       [15] _shrubling (res://tools/keys_check.gd:422)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _bots (res://tools/keys_check.gd:440)
+       [14] run (res://tools/keys_check.gd:55)
+       [15] _shrubling (res://tools/keys_check.gd:422)
+KEYCHECK a bot picks up a dropped (bonus) key                       PASS  
+KEYCHECK then opens a chest with it, and spends exactly that key    PASS  4s
+KEYCHECK a bot without a key has no chest goal                      PASS  
+KEYCHECK a bot without a key goes for a carrier 6 m off             PASS  
+KEYCHECK not one its fight gave up on (no clear shot)               PASS  
+KEYCHECK no way to a walking carrier: given up within 2 s           PASS  
+KEYCHECK and taken up again once the give-up runs out               PASS  
+KEYCHECK seed 3 bonus keys: expected 8.17 over 43 chests (+19%)  sources { "elite": 19, "monster": 74, "boss": 3, "": 27, "crate": 26, "pot": 22, "barrel": 15, "keg": 13, "train_crate": 3 }
+KEYCHECK seed 5 bonus keys: expected 10.21 over 43 chests (+24%)  sources { "elite": 30, "monster": 63, "boss": 3, "": 27, "crate": 26, "pot": 22, "barrel": 15, "keg": 13, "train_crate": 3 }
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+KEYCHECK seed 9 bonus keys: expected 10.02 over 43 chests (+23%)  sources { "elite": 29, "monster": 64, "boss": 3, "": 22, "crate": 26, "pot": 22, "barrel": 15, "keg": 13, "train_crate": 3 }
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+KEYCHECK seed 12 bonus keys: expected 9.09 over 43 chests (+21%)  sources { "elite": 24, "monster": 69, "boss": 3, "": 27, "crate": 26, "pot": 22, "barrel": 15, "keg": 13, "train_crate": 3 }
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+KEYCHECK seed 21 bonus keys: expected 10.02 over 43 chests (+23%)  sources { "elite": 29, "monster": 64, "boss": 3, "": 25, "crate": 26, "pot": 22, "barrel": 15, "keg": 13, "train_crate": 3 }
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] build (res://tools/keys_check.gd:42)
+       [12] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] build (res://tools/keys_check.gd:42)
+       [12] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _surplus (res://tools/keys_check.gd:514)
+KEYCHECK seed 33 bonus keys: expected 9.46 over 43 chests (+22%)  sources { "elite": 26, "monster": 67, "boss": 3, "": 26, "crate": 26, "pot": 22, "barrel": 15, "keg": 13, "train_crate": 3 }
+KEYCHECK SURPLUS mean +22.1% over 6 seeds (min +19.0%, max +23.7%)
+KEYCHECK bonus keys: +20-30% keys over chests on average (+22.1%)   PASS  
+KEYCHECK rolled for real: a surplus near that (+21%)                PASS  
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _sources (res://tools/keys_check.gd:541)
+       [14] _bonus (res://tools/keys_check.gd:505)
+       [15] _surplus (res://tools/keys_check.gd:537)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _sources (res://tools/keys_check.gd:541)
+       [14] _bonus (res://tools/keys_check.gd:505)
+       [15] _surplus (res://tools/keys_check.gd:537)
+KEYCHECK a dead monster drops a bonus key                           PASS  0 -> 1
+KEYCHECK a dead elite drops a bonus key                             PASS  1 -> 3
+KEYCHECK a dead boss drops a bonus key                              FAIL  3 -> 3
+KEYCHECK a broken pot drops one                                     PASS  3 -> 4
+KEYCHECK a broken crate drops one                                   PASS  4 -> 5
+KEYCHECK a broken barrel drops one                                  PASS  5 -> 8
+KEYCHECK a broken keg drops one                                     PASS  8 -> 9
+KEYCHECK a Shrubling gives no bonus (it always carries one)         PASS  
+KEYCHECK a bonus key is picked up like any key                      PASS  0 -> 1
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] build (res://tools/keys_check.gd:42)
+       [12] _train_crate (res://tools/keys_check.gd:583)
+       [13] _sources (res://tools/keys_check.gd:579)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] build (res://tools/keys_check.gd:42)
+       [12] _train_crate (res://tools/keys_check.gd:583)
+       [13] _sources (res://tools/keys_check.gd:579)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _train_crate (res://tools/keys_check.gd:583)
+       [14] _sources (res://tools/keys_check.gd:579)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] build (res://tools/keys_check.gd:42)
+       [13] _train_crate (res://tools/keys_check.gd:583)
+       [14] _sources (res://tools/keys_check.gd:579)
+KEYCHECK a sky-train crate drops one                                PASS  3 crates
+KEYCHECK keys are never sold in shops                               PASS  
+KEYCHECK thinning keeps chest.keep of the spots, the crowded one first out PASS  
+KEYCHECK thinning is the same every time (no dice)                  PASS  
+KEYCHECK hollowcrown: chest.keep of the map's chests and caches, every vault PASS  hollowcrown: map 36 of 60 spots, vaults 3, caches 4, train 3, total 46
+KEYCHECK skyreach: chest.keep of the map's chests and caches, every vault PASS  skyreach: map 26 of 44 spots, vaults 2, caches 2, train 3, total 33
+KEYCHECK training: chest.keep of its generated map's chests         PASS  5 of 9 spots
+KEYCHECK tutorial: no chests (the tutorial has no chest step)       PASS  0 chests, the map has 0 spots
+KEYCHECK the card script writes no key cap itself                   PASS  
+KEYCHECK every Hunter: five slots with an icon and a name           PASS  
+KEYCHECK every Hunter: all 11 rows show Settings.key_cap            PASS  
+KEYCHECK a rebind shows at once                                     PASS  ["CTRL", "MMB", "C", "X", "C", "N", "N", "SHIFT", "R", "J", "RMB", "LMB"]
+KEYCHECK rebind: LMB, RMB, E, R, Shift, Q, X, G, crouch, whistle, rotate, interact take a new key and an alternate PASS  []
+KEYCHECK rebind: and the bindings are saved                         PASS  
+KEYCHECK rebind: every other action takes a key and an alternate too (46) PASS  []
+KEYCHECK rebind: the ability bar shows the new keys (["sec", "dash", "k1", "x", "util2", "util1", "r"]) PASS  []
+KEYCHECK rebind: the dash slot shows F5                             PASS  
+KEYCHECK rebind: RecastCue's '<KEY> AGAIN' reads the bound key on every slot PASS  []
+KEYCHECK rebind: the recast label is drawn with the Utility key     PASS  ["F3 AGAIN"]
+KEYCHECK rebind: no hunter slot text or tooltip names a default key (409 texts) PASS  []
+KEYCHECK rebind: the move step's strip cap is the bound move keys ('F1F3F2F4') PASS  
+KEYCHECK rebind: the strip's key cap is the bound key on 16 steps   PASS  []
+KEYCHECK rebind: tutorial lines, details, hints, training rows name no default key (86) PASS  []
+KEYCHECK rebind: loading tips name no default key (32 tips)         PASS  []
+KEYCHECK rebind: the sweep's pattern catches the old wording and not a rebound key PASS  
+KEYCHECK rebind: the kit card's tile caps follow the bindings       PASS  
+KEYCHECK rebind: no loading tip leaves a {token} unfilled           PASS  
+KEYCHECK rebind: tokens fill from the bindings ('F5 F9 F12 F2')     PASS  
+KEYCHECK rebind: no JSON text names a default key (464 files)       PASS  []
+KEYCHECK rebind: no script text names a default key (976 files)     PASS  []
+KEYCHECK DONE, 119 checks, failures: 1
+ERROR: 25 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 144 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 25 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 253: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 264: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 269: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 271: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 274: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 281: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 280: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 284: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 287: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 289: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 290: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 292: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 291: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 294: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 293: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 295: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 298: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 297: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 300: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 299: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 301: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 304: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 305: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 306: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 308: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 53 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

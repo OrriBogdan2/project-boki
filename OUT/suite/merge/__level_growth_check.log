@@ -1,0 +1,211 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/level_growth_check.gd:51)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/level_growth_check.gd:51)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+LEVELGROWTH ok   the level badge names the per-level growth
+LEVELGROWTH ok   archer L1: sec damage x1.000
+LEVELGROWTH ok   archer L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   archer L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   archer L1: max health x1.000
+LEVELGROWTH ok   archer L5: sec damage x1.156
+LEVELGROWTH ok   archer L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   archer L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   archer L5: max health x1.240
+LEVELGROWTH ok   archer L10: sec damage x1.351
+LEVELGROWTH ok   archer L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   archer L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   archer L10: max health x1.540
+LEVELGROWTH ok   juggernaut L1: sec damage x1.000
+LEVELGROWTH ok   juggernaut L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   juggernaut L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   juggernaut L1: max health x1.000
+LEVELGROWTH ok   juggernaut L5: sec damage x1.156
+LEVELGROWTH ok   juggernaut L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   juggernaut L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   juggernaut L5: max health x1.240
+LEVELGROWTH ok   juggernaut L10: sec damage x1.351
+LEVELGROWTH ok   juggernaut L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   juggernaut L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   juggernaut L10: max health x1.540
+LEVELGROWTH ok   gunslinger L1: kin damage x1.000
+LEVELGROWTH ok   gunslinger L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   gunslinger L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   gunslinger L1: max health x1.000
+LEVELGROWTH ok   gunslinger L5: kin damage x1.156
+LEVELGROWTH ok   gunslinger L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   gunslinger L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   gunslinger L5: max health x1.240
+LEVELGROWTH ok   gunslinger L10: kin damage x1.351
+LEVELGROWTH ok   gunslinger L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   gunslinger L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   gunslinger L10: max health x1.540
+LEVELGROWTH ok   bulwark L1: dash damage x1.000
+LEVELGROWTH ok   bulwark L1: kit heal (heal_k) x1.000
+LEVELGROWTH ok   bulwark L1: aegis shield_max x1.000
+LEVELGROWTH ok   bulwark L1: max health x1.000
+LEVELGROWTH ok   bulwark L5: dash damage x1.156
+LEVELGROWTH ok   bulwark L5: kit heal (heal_k) x1.156
+LEVELGROWTH ok   bulwark L5: aegis shield_max x1.240
+LEVELGROWTH ok   bulwark L5: max health x1.240
+LEVELGROWTH ok   bulwark L10: dash damage x1.351
+LEVELGROWTH ok   bulwark L10: kit heal (heal_k) x1.351
+LEVELGROWTH ok   bulwark L10: aegis shield_max x1.540
+LEVELGROWTH ok   bulwark L10: max health x1.540
+LEVELGROWTH ok   rimewright L1: sec damage x1.000
+LEVELGROWTH ok   rimewright L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   rimewright L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   rimewright L1: max health x1.000
+LEVELGROWTH ok   rimewright L5: sec damage x1.156
+LEVELGROWTH ok   rimewright L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   rimewright L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   rimewright L5: max health x1.240
+LEVELGROWTH ok   rimewright L10: sec damage x1.351
+LEVELGROWTH ok   rimewright L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   rimewright L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   rimewright L10: max health x1.540
+LEVELGROWTH ok   ashwick L1: dash damage x1.000
+LEVELGROWTH ok   ashwick L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   ashwick L1: cloak shield (max health) x1.000
+LEVELGROWTH ok   ashwick L1: max health x1.000
+LEVELGROWTH ok   ashwick L5: dash damage x1.156
+LEVELGROWTH ok   ashwick L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   ashwick L5: cloak shield (max health) x1.240
+LEVELGROWTH ok   ashwick L5: max health x1.240
+LEVELGROWTH ok   ashwick L10: dash damage x1.351
+LEVELGROWTH ok   ashwick L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   ashwick L10: cloak shield (max health) x1.540
+LEVELGROWTH ok   ashwick L10: max health x1.540
+LEVELGROWTH ok   dolm L1: dash damage x1.000
+LEVELGROWTH ok   dolm L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   dolm L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   dolm L1: max health x1.000
+LEVELGROWTH ok   dolm L5: dash damage x1.156
+LEVELGROWTH ok   dolm L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   dolm L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   dolm L5: max health x1.240
+LEVELGROWTH ok   dolm L10: dash damage x1.351
+LEVELGROWTH ok   dolm L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   dolm L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   dolm L10: max health x1.540
+LEVELGROWTH ok   mage L1: dash damage x1.000
+LEVELGROWTH ok   mage L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   mage L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   mage L1: max health x1.000
+LEVELGROWTH ok   mage L5: dash damage x1.156
+LEVELGROWTH ok   mage L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   mage L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   mage L5: max health x1.240
+LEVELGROWTH ok   mage L10: dash damage x1.351
+LEVELGROWTH ok   mage L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   mage L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   mage L10: max health x1.540
+LEVELGROWTH ok   dredge L1: sec damage x1.000
+LEVELGROWTH ok   dredge L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   dredge L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   dredge L1: max health x1.000
+LEVELGROWTH ok   dredge L5: sec damage x1.156
+LEVELGROWTH ok   dredge L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   dredge L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   dredge L5: max health x1.240
+LEVELGROWTH ok   dredge L10: sec damage x1.351
+LEVELGROWTH ok   dredge L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   dredge L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   dredge L10: max health x1.540
+LEVELGROWTH ok   tender L1: sec damage x1.000
+LEVELGROWTH ok   tender L1: kit heal (heal_k) x1.000
+LEVELGROWTH ok   tender L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   tender L1: max health x1.000
+LEVELGROWTH ok   tender L5: sec damage x1.156
+LEVELGROWTH ok   tender L5: kit heal (heal_k) x1.156
+LEVELGROWTH ok   tender L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   tender L5: max health x1.240
+LEVELGROWTH ok   tender L10: sec damage x1.351
+LEVELGROWTH ok   tender L10: kit heal (heal_k) x1.351
+LEVELGROWTH ok   tender L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   tender L10: max health x1.540
+LEVELGROWTH ok   thief L1: kin damage x1.000
+LEVELGROWTH ok   thief L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   thief L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   thief L1: max health x1.000
+LEVELGROWTH ok   thief L5: kin damage x1.156
+LEVELGROWTH ok   thief L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   thief L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   thief L5: max health x1.240
+LEVELGROWTH ok   thief L10: kin damage x1.351
+LEVELGROWTH ok   thief L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   thief L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   thief L10: max health x1.540
+LEVELGROWTH ok   ostra L1: sec damage x1.000
+LEVELGROWTH ok   ostra L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   ostra L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   ostra L1: max health x1.000
+LEVELGROWTH ok   ostra L5: sec damage x1.156
+LEVELGROWTH ok   ostra L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   ostra L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   ostra L5: max health x1.240
+LEVELGROWTH ok   ostra L10: sec damage x1.351
+LEVELGROWTH ok   ostra L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   ostra L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   ostra L10: max health x1.540
+LEVELGROWTH ok   gil L1: dash damage x1.000
+LEVELGROWTH ok   gil L1: ability heal (Effects) x1.000
+LEVELGROWTH ok   gil L1: ability shield (Effects) x1.000
+LEVELGROWTH ok   gil L1: max health x1.000
+LEVELGROWTH ok   gil L5: dash damage x1.156
+LEVELGROWTH ok   gil L5: ability heal (Effects) x1.156
+LEVELGROWTH ok   gil L5: ability shield (Effects) x1.156
+LEVELGROWTH ok   gil L5: max health x1.240
+LEVELGROWTH ok   gil L10: dash damage x1.351
+LEVELGROWTH ok   gil L10: ability heal (Effects) x1.351
+LEVELGROWTH ok   gil L10: ability shield (Effects) x1.351
+LEVELGROWTH ok   gil L10: max health x1.540
+LEVELGROWTH PASS (0 failed)
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 50 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

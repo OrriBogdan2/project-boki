@@ -1,0 +1,294 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _ready (res://scripts/home/home.gd:240)
+         [11] _hb_home (res://scripts/main.gd:1490)
+         [12] run (res://tools/overflow_check.gd:38)
+         [13] reveal (res://scripts/ui/screen_fade.gd:93)
+SCRIPT ERROR: Invalid access to property or key 'ember' on a base object of type 'Dictionary'.
+          at: face (res://scripts/core/lean.gd:23)
+          GDScript backtrace (most recent call first):
+              [0] face (res://scripts/core/lean.gd:23)
+              [1] dress (res://scripts/core/evo.gd:392)
+              [2] kin (res://scripts/match/models.gd:1958)
+              [3] tex (res://scripts/ui/kin_portrait.gd:51)
+              [4] view (res://scripts/ui/kin_portrait.gd:75)
+              [5] _nook_tile (res://scripts/home/home.gd:4491)
+              [6] _open_nook (res://scripts/home/home.gd:4442)
+              [7] _nest_demo (res://scripts/home/home.gd:4728)
+              [8] _stage (res://tools/overflow_check.gd:60)
+              [9] run (res://tools/overflow_check.gd:46)
+              [10] _frames (res://tools/overflow_check.gd:55)
+SCRIPT ERROR: Invalid access to property or key 'tint' on a base object of type 'Dictionary'.
+          at: dress (res://scripts/core/evo.gd:392)
+          GDScript backtrace (most recent call first):
+              [0] dress (res://scripts/core/evo.gd:392)
+              [1] kin (res://scripts/match/models.gd:1958)
+              [2] tex (res://scripts/ui/kin_portrait.gd:51)
+              [3] view (res://scripts/ui/kin_portrait.gd:75)
+              [4] _nook_tile (res://scripts/home/home.gd:4491)
+              [5] _open_nook (res://scripts/home/home.gd:4442)
+              [6] _nest_demo (res://scripts/home/home.gd:4728)
+              [7] _stage (res://tools/overflow_check.gd:60)
+              [8] run (res://tools/overflow_check.gd:46)
+              [9] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] tex (res://scripts/ui/kin_portrait.gd:51)
+       [6] view (res://scripts/ui/kin_portrait.gd:75)
+       [7] _nook_tile (res://scripts/home/home.gd:4491)
+       [8] _open_nook (res://scripts/home/home.gd:4442)
+       [9] _nest_demo (res://scripts/home/home.gd:4728)
+       [10] _stage (res://tools/overflow_check.gd:60)
+       [11] run (res://tools/overflow_check.gd:46)
+       [12] _frames (res://tools/overflow_check.gd:55)
+OVERFLOW PASS nook_pair at 150%: []
+OVERFLOW PASS nook_grid at 150%: []
+OVERFLOW PASS nook_kin at 150%: []
+OVERFLOW PASS nook_rare at 150%: []
+OVERFLOW PASS nook_incubator_empty at 150%: []
+OVERFLOW PASS nook_incubator_eggs at 150%: []
+OVERFLOW PASS burrow at 150%: []
+OVERFLOW PASS feed at 150%: []
+OVERFLOW PASS zone_cards at 150%: []
+OVERFLOW PASS games_board at 150%: []
+OVERFLOW PASS prizes at 150%: []
+OVERFLOW PASS field_book at 150%: []
+OVERFLOW PASS card_care at 150%: []
+OVERFLOW PASS card_training at 150%: []
+OVERFLOW PASS card_growth at 150%: []
+OVERFLOW PASS card_family at 150%: []
+OVERFLOW PASS card_about at 150%: []
+OVERFLOW PASS item_thumpnut at 150%: []
+OVERFLOW PASS item_shellbark_chew at 150%: []
+OVERFLOW PASS item_zipseed at 150%: []
+OVERFLOW PASS item_hushpearl at 150%: []
+OVERFLOW PASS item_sunsap at 150%: []
+OVERFLOW PASS item_bristlethorn at 150%: []
+OVERFLOW PASS item_keepstone at 150%: []
+OVERFLOW PASS item_puzzlenut at 150%: []
+OVERFLOW PASS item_galeribbon at 150%: []
+OVERFLOW PASS item_stayleaf at 150%: []
+OVERFLOW PASS item_glowmoss_sprig at 150%: []
+OVERFLOW PASS item_mistbloom at 150%: []
+OVERFLOW PASS item_chimegrass at 150%: []
+OVERFLOW PASS item_rinse_melon at 150%: []
+OVERFLOW PASS item_unwind_tea at 150%: []
+OVERFLOW PASS item_heirloom_thread at 150%: []
+OVERFLOW PASS item_likeness_locket at 150%: []
+OVERFLOW PASS item_lullaby_shell at 150%: []
+OVERFLOW PASS item_hatchling_down at 150%: []
+OVERFLOW PASS item_fourfold_bun at 150%: []
+OVERFLOW PASS item_bramble_honey at 150%: []
+OVERFLOW PASS item_glassdew at 150%: []
+OVERFLOW PASS item_cinderbrittle at 150%: []
+OVERFLOW PASS item_hush_truffle at 150%: []
+OVERFLOW PASS item_windfloss at 150%: []
+OVERFLOW PASS item_dare_pepper at 150%: []
+OVERFLOW PASS item_lullwort_tea at 150%: []
+OVERFLOW PASS item_peekbox at 150%: []
+OVERFLOW PASS item_twinbun at 150%: []
+OVERFLOW DONE, failures: 0
+WARNING: 5 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

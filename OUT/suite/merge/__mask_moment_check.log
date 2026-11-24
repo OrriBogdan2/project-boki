@@ -1,0 +1,50 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MASKBEAT ok   every Hunter has a whisper and a sting key ([])
+MASKBEAT ok   the beat's own sounds exist
+MASKBEAT ok   the full beat runs 13.8 s with 0.60 s of black
+MASKBEAT ok   the memories run 5.4 s over 3 frames, the last held
+MASKBEAT ok   the short cut's memories run 3.4 s
+MASKBEAT ok   every Hunter has memory frames ([])
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _stage (res://tools/mask_moment_check.gd:89)
+         [10] _first_time (res://tools/mask_moment_check.gd:101)
+         [11] run (res://tools/mask_moment_check.gd:46)
+         [12] run (res://tools/check_registry.gd:980)
+         [13] _ready (res://scripts/main.gd:270)
+MASKBEAT ok   the first time: no skip, its own camera, the full cut even on the farm
+MASKBEAT ok   3 memory frames: ["res://art/portraits/memory/gunslinger_1.webp", "res://art/portraits/memory/gunslinger_2.webp", "res://art/portraits/memory/gunslinger_3.webp"]
+MASKBEAT ok   build-up: the camera has eased in on you
+MASKBEAT ok   the Mask rises to the face and a ghostly face flickers over yours
+MASKBEAT ok   contact: black, and the swell and heartbeat cut off
+MASKBEAT ok   behind the black you have become gunslinger
+MASKBEAT ok   the memories: the first comes up out of the black
+MASKBEAT ok   a cross-fade to the next, pushing in, and the whisper: "Another job. Another mark on the tally."
+MASKBEAT ok   a press during the memories changes nothing the first time
+MASKBEAT FAIL the snap back: the world again, a ripple of light
+MASKBEAT FAIL the name and title on screen
+MASKBEAT ok   "Another job. Another mark on the tally." stays up 3.77 s (reading time 3.00 s)
+MASKBEAT FAIL "Vex the Hired Gun" stays up 0.00 s (reading time 3.00 s)
+MASKBEAT FAIL the panel was up 4.21 s of the 5.40 s planned
+MASKBEAT FAIL done hands back the Hunter's model, standing where you stood
+MASKBEAT FAIL it ran 9.3 s of the 13.8 s planned (longest frame 0.05 s)
+MASKBEAT FAIL the scene's camera is back and the beat is marked seen
+MASKBEAT FAIL seen before: a skip hint with the interact key
+MASKBEAT ok   a press moves on one beat, to the black (black), and doesn't skip it all
+MASKBEAT ok   the next press: on to the memory
+MASKBEAT FAIL holding it skips the rest; the farm's cut keeps the body you had
+MASKBEAT DONE, failures: 9

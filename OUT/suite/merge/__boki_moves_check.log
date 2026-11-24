@@ -1,0 +1,15 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOKIMOVES ok   checked 50 species: one tile per move plus the bond tile, tips of 2-4 lines
+BOKIMOVES ok   no tip until you point at a tile
+BOKIMOVES ok   hovering the first tile opens its tip
+BOKIMOVES ok   the tip sits above the tile
+BOKIMOVES ok   moving off closes it
+BOKIMOVES ok   focusing the bond tile (keyboard/controller) opens its tip
+BOKIMOVES ok   losing focus closes it
+BOKIMOVES ok   the reveal card shows the move tiles
+BOKIMOVES ok   no multi-sentence paragraph on the card (0)
+BOKIMOVES DONE, failures: 0

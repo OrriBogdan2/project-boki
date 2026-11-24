@@ -1,0 +1,49 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+DEXSORT ok   plain and legendary entries (47, 3)
+DEXSORT ok   legendaries close the numbers
+DEXSORT ok   an All chip and one chip per type (16 types)
+DEXSORT ok   each type chip carries its own icon
+DEXSORT ok   a type chip picks its type and tells the owner
+DEXSORT ok   All clears the pick
+DEXSORT ok   Field Book, spore only: 3 entries, legendaries last
+DEXSORT ok   Field Book, titan only: 2 entries, legendaries last
+DEXSORT ok   Field Book, venom only: 3 entries, legendaries last
+DEXSORT ok   Field Book, swarm only: 4 entries, legendaries last
+DEXSORT ok   Field Book, gravity only: 3 entries, legendaries last
+DEXSORT ok   Field Book, prism only: 3 entries, legendaries last
+DEXSORT ok   Field Book, lunar only: 3 entries, legendaries last
+DEXSORT ok   Field Book, echo only: 3 entries, legendaries last
+DEXSORT ok   Field Book, tempest only: 2 entries, legendaries last
+DEXSORT ok   Field Book, ghost only: 2 entries, legendaries last
+DEXSORT ok   Field Book, dark only: 2 entries, legendaries last
+DEXSORT ok   Field Book, stone only: 4 entries, legendaries last
+DEXSORT ok   Field Book, ember only: 4 entries, legendaries last
+DEXSORT ok   Field Book, frost only: 4 entries, legendaries last
+DEXSORT ok   Field Book, bloom only: 4 entries, legendaries last
+DEXSORT ok   Field Book, storm only: 4 entries, legendaries last
+DEXSORT ok   every Boki's type has a chip, so each is found under its type []
+DEXSORT ok   an entry you have not met hides under a type pick
+DEXSORT ok   All lists every entry
+DEXSORT ok   Field Book by number: every entry, legendaries last
+DEXSORT ok   Field Book by number: the owned Boki lead in that order
+DEXSORT ok   Field Book by level: every entry, legendaries last
+DEXSORT ok   Field Book by level: the owned Boki lead in that order
+DEXSORT ok   Field Book by trust: every entry, legendaries last
+DEXSORT ok   Field Book by trust: the owned Boki lead in that order
+DEXSORT ok   Field Book by newest: every entry, legendaries last
+DEXSORT ok   Field Book by newest: the owned Boki lead in that order
+DEXSORT ok   Burrow by slot: the legendary is last
+DEXSORT ok   Burrow by number: the legendary is last
+DEXSORT ok   Burrow by level: the legendary is last
+DEXSORT ok   Burrow by trust: the legendary is last
+DEXSORT ok   Burrow by newest: the legendary is last
+DEXSORT ok   Burrow by species: the legendary is last
+DEXSORT ok   Burrow by rarity: the legendary is last
+DEXSORT ok   Burrow by name: the legendary is last
+DEXSORT ok   Burrow by level: highest first
+DEXSORT ok   Burrow by newest: the latest joined first
+DEXSORT ok   Burrow type pick

@@ -1,0 +1,714 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+RULE ok   archer | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   archer | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   archer | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   archer | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   archer | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   archer | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   archer | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   archer | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   archer | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   archer | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.27 m/s
+RULE ok   archer | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   archer | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   archer | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.28 m/s (run 4.55, the old farm's exp 6/s 3.18)
+RULE ok   archer | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   archer | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.61 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   juggernaut | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   juggernaut | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   juggernaut | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   juggernaut | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   juggernaut | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   juggernaut | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   juggernaut | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   juggernaut | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   juggernaut | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   juggernaut | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 1.09 m/s
+RULE ok   juggernaut | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   juggernaut | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   juggernaut | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.28 m/s (run 4.55, the old farm's exp 6/s 3.18)
+RULE ok   juggernaut | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   juggernaut | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.61 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   gunslinger | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   gunslinger | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   gunslinger | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   gunslinger | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   gunslinger | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   gunslinger | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   gunslinger | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   gunslinger | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   gunslinger | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   gunslinger | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.12 m/s
+RULE ok   gunslinger | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   gunslinger | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   gunslinger | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.28 m/s (run 4.55, the old farm's exp 6/s 3.18)
+RULE ok   gunslinger | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   gunslinger | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.61 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   bulwark | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   bulwark | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   bulwark | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   bulwark | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   bulwark | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   bulwark | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   bulwark | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   bulwark | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   bulwark | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE FAIL bulwark | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 9.75 m/s
+RULE ok   bulwark | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   bulwark | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   bulwark | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.63 m/s (run 4.85, the old farm's exp 6/s 3.39)
+RULE ok   bulwark | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   bulwark | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.87 m/s, a step of D held: 7.64 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   rimewright | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   rimewright | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   rimewright | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   rimewright | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   rimewright | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   rimewright | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   rimewright | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   rimewright | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   rimewright | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (rinkrun): open after 1; press 9 steps in (rinkrun): open after 1
+RULE ok   rimewright | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.07 m/s
+RULE ok   rimewright | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   rimewright | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   rimewright | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.16 m/s (run 4.45, the old farm's exp 6/s 3.11)
+RULE ok   rimewright | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   rimewright | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.85 m/s, a step of D held: 7.61 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   ashwick | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   ashwick | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   ashwick | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   ashwick | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   ashwick | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   ashwick | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   ashwick | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   ashwick | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   ashwick | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   ashwick | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.70 m/s
+RULE ok   ashwick | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   ashwick | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   ashwick | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.39 m/s (run 4.65, the old farm's exp 6/s 3.25)
+RULE ok   ashwick | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   ashwick | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.62 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   dolm | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   dolm | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   dolm | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   dolm | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   dolm | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   dolm | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   dolm | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   dolm | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   dolm | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   dolm | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.27 m/s
+RULE ok   dolm | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   dolm | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   dolm | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.39 m/s (run 4.65, the old farm's exp 6/s 3.25)
+RULE ok   dolm | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   dolm | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.62 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   mage | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   mage | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   mage | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   mage | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   mage | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   mage | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   mage | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   mage | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE open mage | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 11; press 9 steps in (dash): open after 4
+RULE ok   mage | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.21 m/s
+RULE ok   mage | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   mage | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   mage | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.39 m/s (run 4.65, the old farm's exp 6/s 3.25)
+RULE ok   mage | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   mage | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.62 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   dredge | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   dredge | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   dredge | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   dredge | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   dredge | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   dredge | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   dredge | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   dredge | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   dredge | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   dredge | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.40 m/s
+RULE ok   dredge | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   dredge | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   dredge | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.39 m/s (run 4.65, the old farm's exp 6/s 3.25)
+RULE ok   dredge | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   dredge | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.62 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   tender | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   tender | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   tender | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   tender | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   tender | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   tender | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   tender | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   tender | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   tender | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   tender | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.12 m/s
+RULE ok   tender | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   tender | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   tender | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.28 m/s (run 4.55, the old farm's exp 6/s 3.18)
+RULE ok   tender | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   tender | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.61 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   thief | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   thief | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   thief | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   thief | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   thief | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   thief | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   thief | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   thief | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   thief | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   thief | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.27 m/s
+RULE ok   thief | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   thief | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   thief | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.39 m/s (run 4.65, the old farm's exp 6/s 3.25)
+RULE ok   thief | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   thief | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.62 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   ostra | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   ostra | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   ostra | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   ostra | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   ostra | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   ostra | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   ostra | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   ostra | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   ostra | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   ostra | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.27 m/s
+RULE ok   ostra | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   ostra | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   ostra | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.39 m/s (run 4.65, the old farm's exp 6/s 3.25)
+RULE ok   ostra | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   ostra | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.62 m/s of it left
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _start (res://tools/glide_hold_check.gd:30)
+       [12] run (res://tools/move_rule_guard_check.gd:335)
+RULE ok   gil | Walking off ledges is ALWAYS allowed (never block it). | walking at the rim: over it in 0.48 s
+RULE ok   gil | Walking off ledges is ALWAYS allowed (never block it). | crouched at the rim: over it in 0.50 s
+RULE ok   gil | An overheated glider still lifts you out of the abyss, at half strength, while it burns. | 12 m under the lip: overheated lift 8.7 m/s = 0.52 of full (16.7), back at the lip in 1.55 s
+RULE ok   gil | Holding Space from the jump ... must never glide, no matter how long it is held. [11-08] | jump and hold Space 2 s: glided 0.00 s
+RULE ok   gil | Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08] | jump, let go, press again and hold: glided 0.73 s
+RULE ok   gil | glide start adds no speed [11-08] | glider opened jumping: h 3.20 -> 3.20 m/s, vy 5.33 -> -1.08 (open after 1 steps)
+RULE ok   gil | glide start adds no speed [11-08] | glider opened falling: h 2.25 -> 2.25 m/s, vy -10.53 -> -9.53 (open after 1 steps)
+RULE ok   gil | glide start adds no speed [11-08] | glider opened at rest: h 0.00 -> 0.00 m/s, vy -0.25 -> -1.08 (open after 1 steps)
+RULE ok   gil | Shift cancels into glide instantly for every Hunter. [11-08] | press 2 steps in (dash): open after 1; press 9 steps in (dash): open after 1
+RULE ok   gil | air control as REFERENCE (... never overwrite air velocity) [11-08] | the glide out of the Shift, D and Space held 0.6 s: largest change in one step 0.30 m/s
+RULE ok   gil | falling never converts into horizontal momentum [11-11] | no keys, h-speed after: a 1 s fall 0.00, a glide opened falling 11 m/s 0.00, a dive and let go 0.00, landing at 15 m/s 0.00
+RULE ok   gil | falling never converts into horizontal momentum [11-11] | glide holding D 1 s: h-speed 5.00 opened at rest, 5.00 opened falling 14 m/s
+RULE ok   gil | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | from rest in the air, D for 0.2 s: 5.34 m/s (run 4.60, the old farm's exp 6/s 3.21)
+RULE ok   gil | Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer | drifting back 5 m/s, D turns it forward in 0.07 s (<= 0.2)
+RULE ok   gil | air control as REFERENCE (... never overwrite air velocity) [11-08] | a sideways 7.86 m/s, a step of D held: 7.62 m/s of it left
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+RULE ok   archer | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.28 5.26 5.24 5.22 open 18 | 2.00 5.20 5.28 5.26 5.24 5.22 open 18
+RULE ok   juggernaut | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.28 5.26 5.24 5.22 open 18 | 2.00 5.20 5.28 5.26 5.24 5.22 open 18
+RULE ok   gunslinger | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.28 5.26 5.24 5.22 open 18 | 2.00 5.20 5.28 5.26 5.24 5.22 open 18
+RULE ok   bulwark | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.63 5.59 5.54 5.50 open 18 | 2.00 5.20 5.63 5.59 5.54 5.50 open 18
+RULE ok   rimewright | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.16 5.16 5.15 5.14 5.13 open 18 | 2.00 5.16 5.16 5.15 5.14 5.13 open 18
+RULE ok   ashwick | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.39 5.37 5.34 5.31 open 18 | 2.00 5.20 5.39 5.37 5.34 5.31 open 18
+RULE ok   dolm | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.39 5.37 5.34 5.31 open 18 | 2.00 5.20 5.39 5.37 5.34 5.31 open 18
+RULE ok   mage | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.39 5.37 5.34 5.31 open 18 | 2.00 5.20 5.39 5.37 5.34 5.31 open 18
+RULE ok   dredge | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.39 5.37 5.34 5.31 open 18 | 2.00 5.20 5.39 5.37 5.34 5.31 open 18
+RULE ok   tender | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.28 5.26 5.24 5.22 open 18 | 2.00 5.20 5.28 5.26 5.24 5.22 open 18
+RULE ok   thief | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.39 5.37 5.34 5.31 open 18 | 2.00 5.20 5.39 5.37 5.34 5.31 open 18
+RULE ok   ostra | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.39 5.37 5.34 5.31 open 18 | 2.00 5.20 5.39 5.37 5.34 5.31 open 18
+RULE ok   gil | One shared movement profile for all modes [11-11] | farm vs Training Area, D from a 3 m/s drift, then a glide press: vx 2.00 5.20 5.34 5.31 5.29 5.27 open 18 | 2.00 5.20 5.34 5.31 5.29 5.27 open 18
+RULE DONE, failures: 1
+ERROR: 1 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 79: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 81: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 80: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 272: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 285: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 283: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 289: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 300: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 10131: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10132: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10133: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 10134: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 56 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

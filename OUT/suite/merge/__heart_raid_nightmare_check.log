@@ -1,0 +1,101 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/heart_raid_check.gd:92)
+       [13] _sim (res://tools/heart_raid_check.gd:181)
+       [14] run (res://tools/heart_raid_check.gd:51)
+       [15] run (res://tools/check_registry.gd:982)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/heart_raid_check.gd:92)
+       [13] _sim (res://tools/heart_raid_check.gd:181)
+       [14] run (res://tools/heart_raid_check.gd:51)
+       [15] run (res://tools/check_registry.gd:982)
+       [16] _ready (res://scripts/main.gd:270)
+HRAID ok   squad 4 nightmare: the raid is built
+HRAID ok   squad 4 nightmare: one squad of 4, no rivals
+HRAID ok   squad 4 nightmare: no lairs, no outposts
+HRAID ok   squad 4 nightmare: the Heart held shut, scaled for 4 at nightmare
+HRAID squad 4 nightmare built in 31620 ms, Heart at (286.0, 10.0, 213.0)
+HRAID squad 4 nightmare 1:00 WAVES wave 0 foes 0 mobs 99 up 4/4 you 137 hp 146 m to the Heart, tide 0 m
+HRAID squad 4 nightmare 2:00 WAVES wave 1 foes 8 mobs 103 up 4/4 you 137 hp 236 m to the Heart, tide 310 m
+HRAID squad 4 nightmare 3:00 WAVES wave 2 foes 15 mobs 112 up 4/4 you 137 hp 218 m to the Heart, tide 282 m
+HRAID squad 4 nightmare 4:00 WAVES wave 3 foes 19 mobs 110 up 4/4 you 137 hp 224 m to the Heart, tide 254 m
+HRAID squad 4 nightmare 5:00 WAVES wave 3 foes 7 mobs 96 up 4/4 you 135 hp 72 m to the Heart, tide 226 m
+HRAID squad 4 nightmare 6:00 WAVES wave 4 foes 9 mobs 106 up 4/4 you 114 hp 21 m to the Heart, tide 197 m
+HRAID squad 4 nightmare 7:00 WAVES wave 5 foes 13 mobs 99 up 4/4 you 131 hp 28 m to the Heart, tide 169 m
+HRAID squad 4 nightmare 8:00 WAVES wave 6 foes 14 mobs 100 up 4/4 you 148 hp 21 m to the Heart, tide 141 m
+HRAID squad 4 nightmare 9:00 WAVES wave 7 foes 25 mobs 111 up 4/4 you 148 hp 66 m to the Heart, tide 113 m
+HRAID squad 4 nightmare 10:00 WAVES wave 7 foes 18 mobs 104 up 4/4 you 205 hp 58 m to the Heart, tide 84 m
+HRAID squad 4 nightmare 11:00 WAVES wave 8 foes 10 mobs 96 up 4/4 you 223 hp 59 m to the Heart, tide 70 m
+HRAID squad 4 nightmare 12:00 BOSS wave 8 foes 9 mobs 96 up 4/4 you 223 hp 59 m to the Heart, tide 70 m
+LIFE 748 wisp revive ruckus_
+LIFE 755 wisp revive Hunter
+LIFE 761 wisp revive parry_pete
+LIFE 762 wisp revive Hunter
+LIFE 764 wisp revive ruckus_
+LIFE 764 box Hunter value 127 at (292.0, 3.0, 153.0)
+LIFE 764 box cable_guy_ value 487 at (291.0, 3.0, 153.0)
+LIFE 764 box ruckus_ value 282 at (292.0, 3.0, 154.0)
+LIFE 764 box parry_pete value 248 at (292.0, 3.0, 153.0)
+HRSWEEP 4 nightmare seed 11 arch : LOST at 764 s, downs 13, wave 8, boss yes
+HRAID squad 4 nightmare      0.00 start, squad of 4, nightmare
+HRAID squad 4 nightmare     75.45 wave 1: 10 monsters
+HRAID squad 4 nightmare    150.37 wave 2: 14 monsters
+HRAID squad 4 nightmare    225.28 wave 3: 13 monsters
+HRAID squad 4 nightmare    300.20 wave 4: 17 monsters
+HRAID squad 4 nightmare    375.12 wave 5: 16 monsters
+HRAID squad 4 nightmare    450.03 wave 6: 12 monsters
+HRAID squad 4 nightmare    525.47 wave 7: 18 monsters
+HRAID squad 4 nightmare    600.38 wave 8: 7 monsters
+HRAID squad 4 nightmare    660.32 boss colossus, 7200 hp
+HRAID squad 4 nightmare    765.20 lost
+HRAID ok   squad 4 nightmare: the first wave at 75s
+HRAID ok   squad 4 nightmare: 8 waves on the clock, marked 10s before, out of their gates []
+HRAID ok   squad 4 nightmare: wave monsters never over the cap of 25 (most at once 25)
+HRAID ok   squad 4 nightmare: the raid ended with a result (abyss at 12:44)
+HRAID ok   squad 4 nightmare: the raid is LOST
+HRAID ok   squad 4 nightmare: sounds: 8 waves, 1 boss rise, 48 gate ticks (>= 48)
+HRAID ok   squad 4 nightmare: every raid cue has its sound file
+HRAID ok   squad 4 nightmare: the summary agrees: Heart Raid (Nightmare) lost on wave 8 of 8 (12:46).
+HRAID squad 4 nightmare: LOST, 8 waves, 107 wave monsters, most mobs alive 112; 926.4 s wall for 12:46 (20.15 ms a step)
+HRAID PASS
+ERROR: 6 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 7 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 6 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 38 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

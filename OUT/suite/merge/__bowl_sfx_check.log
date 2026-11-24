@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOWLSFX ok   the bowl's 9 sounds exist (silent: [])
+BOWLSFX ok   ingredients sound by kind: pearl a treat, bun a bun, a crop a snack
+BOWLSFX ok   tiers: Twinbun 1, a zone sweet 2, Fourfold Bun 3
+BOWLSFX ok   fourfold_bun: 2 plops, 1 stir (stopped), 1 tier-3 chime (got 2, 1, 1)
+BOWLSFX ok   bramble_honey: 3 plops, 1 stir (stopped), 1 tier-2 chime (got 3, 1, 1)
+BOWLSFX ok   glassdew: 3 plops, 1 stir (stopped), 1 tier-2 chime (got 3, 1, 1)
+BOWLSFX ok   cinderbrittle: 3 plops, 1 stir (stopped), 1 tier-2 chime (got 3, 1, 1)
+BOWLSFX ok   hush_truffle: 3 plops, 1 stir (stopped), 1 tier-2 chime (got 3, 1, 1)
+BOWLSFX ok   windfloss: 3 plops, 1 stir (stopped), 1 tier-2 chime (got 3, 1, 1)
+BOWLSFX ok   twinbun: 2 plops, 1 stir (stopped), 1 tier-1 chime (got 2, 1, 1)
+BOWLSFX ok   a Fourfold Bun is tasted once
+BOWLSFX ok   a sweet is tasted once
+BOWLSFX ok   a personality item is tasted once
+BOWLSFX ok   a stat bite is not a bowl item: no tasting
+BOWLSFX ok   nothing left, nothing tasted
+BOWLSFX ok   a small Boki tastes higher than a large one
+BOWLSFX ok   a Twinbun between a calm pair: tasted once, 0 fizzle
+BOWLSFX ok   a Twinbun between a clashing pair: tasted once, 1 fizzle
+BOWLSFX DONE, failures: 0

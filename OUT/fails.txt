@@ -1,0 +1,13 @@
+MFEEL dash_curve_dist
+MFEEL dash_curve_thief_peak_k
+MFEEL dash_curve_thief_peak_u
+MFEEL dash_curve_time
+MFEEL FAIL ledge_dash ashwick tap, 0.8 m from th
+MFEEL FAIL ledge_dash bulwark tap, 0.8 m from th
+MFEEL ground_stop_dist
+MFEEL haste_two_bonus_x
+MFEEL knock_done_04
+MFEEL knock_lace_04_m
+MFEEL knock_sparkle_04_m
+MFEEL source_hunter_screen_pct
+MFEEL vault_exit_run

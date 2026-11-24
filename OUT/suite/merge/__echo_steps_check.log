@@ -1,0 +1,77 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ECHO ok   length: the dance ends at 86.1 s (rules add up to 86.1 s)
+ECHO ok   length: about 90 s (86.1 s, 80 to 100)
+ECHO ok   perfect: 54 of 54 beats hit (54 judged)
+ECHO ok   perfect: one unbroken streak of 54
+ECHO ok   perfect: score 1050 = 1050 from the rules
+ECHO ok   early by 100 ms: still all hits (54)
+ECHO ok   late by 110 ms (inside the window): 54 of 54 hit
+ECHO ok   late by 140 ms (past it, Focus 0): 0 hits, 0 points
+ECHO ok   the same presses at Focus 100 (window 180 ms): 54 of 54 hit
+ECHO ok   late past 180 ms at Focus 100: 0 hits
+ECHO ok   no presses: 0 hits, 0 points, 54 of 54 beats judged
+ECHO ok   wrong stones: only your own lead's 24 beats count (24 hits)
+ECHO ok   Close: it fixes one miss a round (3 fixed)
+ECHO ok   Soulbound: two a round (6 fixed)
+ECHO ok   Wary: none (0 fixed)
+ECHO ok   Sound type: one miss a round keeps the streak (best 51 of 51 hits; plain best 19)
+ECHO ok   Sound type: the kept streak scores more (990 > 900)
+ECHO ok   a Sound lean saves a streak too, a plain Boki does not
+ECHO ok   the rival copies only your lead: 24 of 24 beats
+ECHO ok   Focus 100 copies better: 49 misses vs 340 at Focus 0
+ECHO ok   its misses follow rival_miss (0.35, 0.05 vs [0.35, 0.05])
+ECHO ok   machine: 22 phases in order, call, answer, score, result
+ECHO ok   machine: no move refused (0)
+ECHO ok   machine: RESULT goes nowhere, the move is refused and counted
+ECHO ok   settle: the better points per beat wins (10.0 vs 4.2)
+ECHO ok   settle: the winner gains joy and trust, the loser sulks
+ECHO ok   settle: both remember it
+ECHO ok   settle: a win rolls Echo Steps' prize table into the bag
+ECHO ok   settle: win gems for your Boki's win
+ECHO ok   settle: a poor solo (10 of 40) pays the small gems
+ECHO ok   practice: 4 beats at 70 bpm (the dance 100), the lead calls
+ECHO ok   practice: perfect presses hit 4 of 4, then it is over
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+ECHO ok   off: no stones on the farm
+ECHO ok   on: the base has Echo Steps
+ECHO ok   on: four stones offer a dance
+ECHO ok   practice: the first dance opens with it, marked done at once
+ECHO ok   practice: each stone shows its key, the rebind too (I A S D)
+ECHO ok   practice: the one line and the beat bar
+ECHO ok   practice: the key row shows the rebind and the skip (I A S D on the stones, F to skip, ESCAPE to stop)
+ECHO ok   practice: the stone the lead hops on lights its key, the others stay dim
+ECHO ok   practice: the lead hops the stones, then the phrase ends
+ECHO ok   practice: round one follows it
+ECHO ok   practice: no gems, energy or memory for it
+ECHO ok   on: the next dance is a versus straight away (the practice never repeats)
+ECHO ok   on: W is taken by the dance
+ECHO ok   on: a hop plays the stone hop
+ECHO ok   on: it ends with the hop
+ECHO ok   on: a kept phrase spins, and a hop does not cut it short
+ECHO ok   on: the spin lasts two beats
+ECHO ok   on: the dance ends with the shared result card
+ECHO ok   on: and nobody keeps a dance clip
+ECHO ok   skip: the interact key is taken in the practice
+ECHO ok   skip: straight to round one, the key caps gone
+ECHO DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

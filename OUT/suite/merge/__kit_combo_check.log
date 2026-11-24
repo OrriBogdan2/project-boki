@@ -1,0 +1,133 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AKCHECK combo jug: E > E > RMB tap = Cinder Spin (it blights who it hits) PASS  spins 1 variant during_e
+AKCHECK combo jug: E > hold RMB = Chain Lunge (no stun) PASS  lunges 1 dist 2.6 took 25 stun 0.00
+AKCHECK combo jug: E > hold RMB > E = Haul Slam on arrival (no stun) PASS  slams 1 took 22 stun 0.00
+AKCHECK combo jug: E > E > hold RMB = Cinder Spin on the press (no Haul Slam, no second move) PASS  spins 2 slams 1
+AKCHECK combo jug: E > RMB tap = Finishing Slam PASS  
+AKCHECK combo jug: the attached Warchain draws as a link chain PASS  
+AKCHECK combo jug: RMB sweet spot > knock = Riposte reset + heal + a dash PASS  dashes 1.00
+AKCHECK combo jug: RMB hold miss = cooldown x2 PASS  3.1
+AKCHECK combo jug: Rampage winds down (no instant glide) PASS  0.30
+AKCHECK combo jug: rooted = no Warchain    PASS  
+AKCHECK combo jug: Grounded = no Warchain  PASS  
+AKCHECK combo jug: stun breaks the Warchain PASS  
+AKCHECK combo jug: Enraged hastes the Smash PASS  1.80
+AKCHECK combo dancer: Vault > bolt = empowered hit + Vault reset PASS  
+AKCHECK combo dancer: the reset loop (Vault > bolt > Vault > bolt) PASS  
+AKCHECK combo dancer: an empowered bolt that misses is spent PASS  
+AKCHECK combo dancer: Knife in a foe at rank 2 (Vault rank 3) gives no Vault back PASS  dashes 0.08
+AKCHECK combo dancer: Knife in a foe (Knife rank 3) = Vault reset + refund PASS  dashes 1.00 e cd 5.1
+AKCHECK combo dancer: Knife > E = step to them PASS  
+AKCHECK combo dancer: Bola on two (rank 3) = pooled Marks PASS  T 5 T2 5
+AKCHECK combo dancer: Bola > Grounded = no dash PASS  
+AKCHECK combo dancer: Bola > X = the Grounded foe takes every blade PASS  grounded true blades 10
+AKCHECK combo jug: E > E > X = pulled in, a hit blocked, the cleave lands PASS  reels 1 blocked 1 took 58
+AKCHECK merge hold dancer: Encore's blades stop and its ring goes (hold field encore.st) PASS  blades after 0
+AKCHECK merge hold jug: the Riposte's guard drops, no cleave (hold field riposte.st) PASS  running false strikes 0 merged true
+AKCHECK burst cap: X then a merge (and its ultimate) never one-shots a full-health hunter PASS  least health left 99% []
+AKCHECK merge hold jug: the Searing Wave is charging PASS  lmb_t 0.70
+AKCHECK merge hold jug: the merge starts   PASS  
+AKCHECK merge hold jug: the charged wave does not fire PASS  waves 0 took 0
+AKCHECK merge hold jug: no charge left behind PASS  lmb_t -1.00
+AKCHECK merge hold jug: the Finishing Slam is winding up PASS  
+AKCHECK merge hold jug: the wound-up slam does not land PASS  took 21 (merge alone 21)
+AKCHECK merge hold jug: the Lunge is charging PASS  
+AKCHECK merge hold jug: the charged Lunge does not go and no Smash charge is spent PASS  charges 1.0 of 1.0
+AKCHECK merge hold jug: an armed Haul Slam is dropped PASS  
+AKCHECK merge hold dancer: the Bola is winding up PASS  
+AKCHECK merge hold dancer: the wound-up Bola is not thrown PASS  
+AKCHECK merge hold jug: the Meteor Drop is diving PASS  
+AKCHECK merge hold jug: the dive is dropped, no slam lands PASS  
+AKCHECK DONE, 39 checks, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 4 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 105: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 107: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 106: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 188: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 187: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 223: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 189: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 227: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 225: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 229: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 234: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 233: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 237: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 235: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 238: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 243: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 246: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 244: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 247: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 256: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 262: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 263: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 273: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 271: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 274: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 277: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 280: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 284: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

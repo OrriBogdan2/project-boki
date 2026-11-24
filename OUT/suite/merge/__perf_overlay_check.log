@@ -1,0 +1,21 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+Quality: auto picked very_low (load benchmark 1016.9 ms a frame)
+PERFOVERLAY PASS the overlay shows and times the match step
+PERFOVERLAY PASS it lists fps (1 fps   33.7 ms   1% low 20 fps | draws 420   tris 576k   objects 1433 | script 2046.8 ms   physics 0.0 ms   nodes 1841 | step ms: hunters 183.58  pickups 22.70  train 19.61  interact 7.29)
+PERFOVERLAY PASS it lists 1% low (1 fps   33.7 ms   1% low 20 fps | draws 420   tris 576k   objects 1433 | script 2046.8 ms   physics 0.0 ms   nodes 1841 | step ms: hunters 183.58  pickups 22.70  train 19.61  interact 7.29)
+PERFOVERLAY PASS it lists draws (1 fps   33.7 ms   1% low 20 fps | draws 420   tris 576k   objects 1433 | script 2046.8 ms   physics 0.0 ms   nodes 1841 | step ms: hunters 183.58  pickups 22.70  train 19.61  interact 7.29)
+PERFOVERLAY PASS it lists tris (1 fps   33.7 ms   1% low 20 fps | draws 420   tris 576k   objects 1433 | script 2046.8 ms   physics 0.0 ms   nodes 1841 | step ms: hunters 183.58  pickups 22.70  train 19.61  interact 7.29)
+PERFOVERLAY PASS it lists script (1 fps   33.7 ms   1% low 20 fps | draws 420   tris 576k   objects 1433 | script 2046.8 ms   physics 0.0 ms   nodes 1841 | step ms: hunters 183.58  pickups 22.70  train 19.61  interact 7.29)
+PERFOVERLAY PASS it lists step ms (1 fps   33.7 ms   1% low 20 fps | draws 420   tris 576k   objects 1433 | script 2046.8 ms   physics 0.0 ms   nodes 1841 | step ms: hunters 183.58  pickups 22.70  train 19.61  interact 7.29)
+PERFOVERLAY PASS Frame rate: the rate alone ('1 fps')
+PERFOVERLAY PASS Hidden: nothing shows or is timed
+PERFOVERLAY PASS the setting reads back
+PERFOVERLAY DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

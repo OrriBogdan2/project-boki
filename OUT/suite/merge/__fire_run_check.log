@@ -1,0 +1,226 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FIRERUN archer     run 5.28 m/s slide 6.42 m/s (122%)
+FIRERUN archer     lmb arc_draw         speed  71% full-stick  0/ 8 frames, body 0.00, slide   0% (all 125%)
+FIRERUN archer     lmb arc_tap          speed  84% full-stick  7/37 frames, body 0.00, slide  82% (all 129%)
+FIRERUN archer     rmb arc_heavy_wind   speed  48% full-stick  1/22 frames, body 0.00, slide   0% (all 218%)
+FIRERUN archer     rmb arc_heavy        speed  98% full-stick 42/44 frames, body 0.00, slide 124% (all 128%)
+FIRERUN ok   archer arc_heavy: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   archer arc_heavy: the feet slide 124% while firing, 122% plain run (limit +25)
+FIRERUN archer     e   arc_hail         speed 100% full-stick 54/54 frames, body 0.00, slide 118% (all 118%)
+FIRERUN ok   archer arc_hail: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   archer arc_hail: the feet slide 118% while firing, 122% plain run (limit +25)
+FIRERUN juggernaut run 5.28 m/s slide 0.64 m/s (12%)
+FIRERUN juggernaut lmb jug_slash_r      speed 100% full-stick 43/43 frames, body 0.00, slide  11% (all  11%)
+FIRERUN ok   juggernaut jug_slash_r: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   juggernaut jug_slash_r: the feet slide 11% while firing, 12% plain run (limit +25)
+FIRERUN juggernaut rmb jug_lunge_wind   speed  83% full-stick  0/ 3 frames, body 0.00, slide   0% (all  20%)
+FIRERUN juggernaut rmb jug_lunge        speed 179% full-stick 39/39 frames, body 1.00, slide  86% (all  86%)
+FIRERUN juggernaut e   jug_chain        speed 100% full-stick 64/64 frames, body 0.00, slide  14% (all  14%)
+FIRERUN ok   juggernaut jug_chain: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   juggernaut jug_chain: the feet slide 14% while firing, 12% plain run (limit +25)
+FIRERUN gunslinger run 5.28 m/s slide 1.10 m/s (21%)
+FIRERUN gunslinger lmb gunslinger_lmb   speed 100% full-stick 32/32 frames, body 0.00, slide  19% (all  19%)
+FIRERUN ok   gunslinger gunslinger_lmb: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   gunslinger gunslinger_lmb: the feet slide 19% while firing, 21% plain run (limit +25)
+FIRERUN gunslinger rmb gunslinger_rmb   speed 100% full-stick 41/41 frames, body 0.00, slide  19% (all  19%)
+FIRERUN ok   gunslinger gunslinger_rmb: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   gunslinger gunslinger_rmb: the feet slide 19% while firing, 21% plain run (limit +25)
+FIRERUN gunslinger e   gunslinger_e     speed  29% full-stick  6/66 frames, body 1.00, slide  96% (all  97%)
+FIRERUN bulwark    run 5.63 m/s slide 4.33 m/s (77%)
+FIRERUN bulwark    lmb bul_throw        speed 100% full-stick 36/36 frames, body 0.00, slide  71% (all  71%)
+FIRERUN ok   bulwark bul_throw: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   bulwark bul_throw: the feet slide 71% while firing, 77% plain run (limit +25)
+FIRERUN bulwark    rmb bul_guard        speed  76% full-stick  8/22 frames, body 0.00, slide  35% (all  87%)
+FIRERUN bulwark    rmb                  speed  96% full-stick  8/ 9 frames, body 0.00, slide  75% (all  86%)
+FIRERUN bulwark    e   bul_mend         speed 100% full-stick 66/66 frames, body 0.00, slide  83% (all  83%)
+FIRERUN ok   bulwark bul_mend: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   bulwark bul_mend: the feet slide 83% while firing, 77% plain run (limit +25)
+FIRERUN rimewright run 5.16 m/s slide 4.34 m/s (84%)
+FIRERUN rimewright lmb tm_dart_l        speed 100% full-stick 11/11 frames, body 0.00, slide  86% (all  86%)
+FIRERUN rimewright lmb tm_dart_heavy    speed 100% full-stick 40/40 frames, body 0.00, slide  83% (all  83%)
+FIRERUN rimewright rmb tm_spear_aim     speed 100% full-stick 15/15 frames, body 0.00, slide  95% (all  95%)
+FIRERUN rimewright rmb tm_spear         speed 100% full-stick 36/36 frames, body 0.00, slide  83% (all  83%)
+FIRERUN rimewright e   tm_wall          speed 100% full-stick 43/43 frames, body 1.00, slide 101% (all 101%)
+FIRERUN ashwick    run 5.39 m/s slide 1.48 m/s (27%)
+FIRERUN ashwick    lmb as_lance         speed 100% full-stick  2/ 2 frames, body 0.00, slide   0% (all   0%)
+FIRERUN ashwick    lmb as_lance_end     speed  79% full-stick 18/41 frames, body 0.00, slide  27% (all  23%)
+FIRERUN ok   ashwick as_lance_end: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   ashwick as_lance_end: the feet slide 27% while firing, 27% plain run (limit +25)
+FIRERUN ashwick    rmb as_aim           speed 100% full-stick 15/15 frames, body 0.00, slide  34% (all  34%)
+FIRERUN ok   ashwick as_aim: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   ashwick as_aim: the feet slide 34% while firing, 27% plain run (limit +25)
+FIRERUN ashwick    rmb as_shot          speed 100% full-stick 44/44 frames, body 0.00, slide  30% (all  30%)
+FIRERUN ok   ashwick as_shot: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   ashwick as_shot: the feet slide 30% while firing, 27% plain run (limit +25)
+FIRERUN ashwick    e   as_cloak         speed 100% full-stick 37/37 frames, body 0.00, slide  29% (all  29%)
+FIRERUN ok   ashwick as_cloak: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   ashwick as_cloak: the feet slide 29% while firing, 27% plain run (limit +25)
+FIRERUN dolm       run 5.39 m/s slide 2.49 m/s (46%)
+FIRERUN dolm       lmb breah_throw      speed  88% full-stick  7/43 frames, body 0.00, slide  50% (all  49%)
+FIRERUN dolm       rmb breah_crouch     speed  55% full-stick  0/ 9 frames, body 0.00, slide   0% (all 150%)
+FIRERUN dolm       rmb breah_windup     speed   0% full-stick  0/ 9 frames, body 0.00, slide   0% (all 993%)
+FIRERUN dolm       rmb breah_slam       speed 112% full-stick 28/35 frames, body 1.00, slide 105% (all 113%)
+FIRERUN FAIL dolm breah_slam: running, plays on the upper body (whole-body weight 1.00)
+FIRERUN FAIL dolm breah_slam: the feet slide 105% while firing, 46% plain run (limit +25)
+FIRERUN dolm       e   breah_raise      speed 100% full-stick 66/66 frames, body 0.00, slide  67% (all  67%)
+FIRERUN ok   dolm breah_raise: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   dolm breah_raise: the feet slide 67% while firing, 46% plain run (limit +25)
+FIRERUN mage       run 5.39 m/s slide 2.16 m/s (40%)
+FIRERUN mage       lmb mage_lmb_l       speed  90% full-stick  0/30 frames, body 0.00, slide   0% (all  41%)
+FIRERUN mage       rmb mage_rmb_hold    speed  86% full-stick  3/15 frames, body 0.00, slide  55% (all  39%)
+FIRERUN mage       rmb mage_rmb         speed 100% full-stick 44/44 frames, body 0.00, slide  40% (all  40%)
+FIRERUN ok   mage mage_rmb: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   mage mage_rmb: the feet slide 40% while firing, 40% plain run (limit +25)
+FIRERUN mage       e   mage_e           speed 100% full-stick 49/49 frames, body 0.00, slide  38% (all  38%)
+FIRERUN ok   mage mage_e: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   mage mage_e: the feet slide 38% while firing, 40% plain run (limit +25)
+FIRERUN mage       e   mage_e_snap      speed 100% full-stick 17/17 frames, body 0.00, slide  40% (all  40%)
+FIRERUN ok   mage mage_e_snap: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   mage mage_e_snap: the feet slide 40% while firing, 40% plain run (limit +25)
+FIRERUN dredge     run 5.39 m/s slide 1.17 m/s (22%)
+FIRERUN dredge     lmb dr_shot          speed  81% full-stick  2/32 frames, body 0.00, slide   0% (all  23%)
+FIRERUN dredge     rmb dr_throw         speed  26% full-stick  0/51 frames, body 0.00, slide   0% (all  69%)
+FIRERUN dredge     e   dr_anchor        speed 108% full-stick 57/66 frames, body 0.00, slide  24% (all  23%)
+FIRERUN ok   dredge dr_anchor: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   dredge dr_anchor: the feet slide 24% while firing, 22% plain run (limit +25)
+FIRERUN tender     run 5.28 m/s slide 2.94 m/s (56%)
+FIRERUN tender     lmb mm_shot_emp      speed 100% full-stick 42/42 frames, body 0.00, slide  56% (all  56%)
+FIRERUN ok   tender mm_shot_emp: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   tender mm_shot_emp: the feet slide 56% while firing, 56% plain run (limit +25)
+FIRERUN tender     rmb mm_seed_aim      speed  53% full-stick  0/36 frames, body 0.00, slide   0% (all  74%)
+FIRERUN tender     rmb mm_seed          speed  99% full-stick 28/30 frames, body 0.00, slide  54% (all  54%)
+FIRERUN ok   tender mm_seed: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   tender mm_seed: the feet slide 54% while firing, 56% plain run (limit +25)
+FIRERUN tender     e   mm_hearth        speed 100% full-stick 50/50 frames, body 0.00, slide  54% (all  54%)
+FIRERUN ok   tender mm_hearth: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   tender mm_hearth: the feet slide 54% while firing, 56% plain run (limit +25)
+FIRERUN thief      run 5.39 m/s slide 1.61 m/s (30%)
+FIRERUN thief      lmb thf_lmb_r        speed  79% full-stick  9/37 frames, body 0.00, slide  29% (all  31%)
+FIRERUN thief      rmb thf_bola         speed 100% full-stick 54/54 frames, body 0.00, slide  30% (all  30%)
+FIRERUN ok   thief thf_bola: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   thief thf_bola: the feet slide 30% while firing, 30% plain run (limit +25)
+FIRERUN thief      e   thf_knife        speed 100% full-stick 38/38 frames, body 0.00, slide  30% (all  30%)
+FIRERUN ok   thief thf_knife: running, plays on the upper body (whole-body weight 0.00)
+FIRERUN ok   thief thf_knife: the feet slide 30% while firing, 30% plain run (limit +25)
+FIRERUN ostra      run 5.39 m/s slide 5.40 m/s (100%)
+FIRERUN ostra      lmb ostra_orb_hot    speed  91% full-stick  5/40 frames, body 0.00, slide   0% (all   0%)
+FIRERUN ostra      rmb ostra_snap_wind  speed  76% full-stick  0/20 frames, body 0.00, slide   0% (all  97%)
+FIRERUN ostra      rmb ostra_snap       speed  93% full-stick 29/39 frames, body 1.00, slide   0% (all   0%)
+FIRERUN ostra      e   ostra_seed       speed 100% full-stick 58/58 frames, body 1.00, slide 100% (all 100%)
+SCRIPT ERROR: Invalid access to property or key 'up_w' on a base object of type 'Nil'.
+          at: _run (res://tools/fire_run_check.gd:110)
+          GDScript backtrace (most recent call first):
+              [0] _run (res://tools/fire_run_check.gd:110)
+              [1] _hunter (res://tools/fire_run_check.gd:54)
+              [2] run (res://tools/fire_run_check.gd:44)
+              [3] _hunter (res://tools/fire_run_check.gd:86)
+SCRIPT ERROR: Invalid access to property or key 'up_w' on a base object of type 'Nil'.
+          at: _run (res://tools/fire_run_check.gd:110)
+          GDScript backtrace (most recent call first):
+              [0] _run (res://tools/fire_run_check.gd:110)
+              [1] _hunter (res://tools/fire_run_check.gd:55)
+              [2] run (res://tools/fire_run_check.gd:44)
+              [3] _hunter (res://tools/fire_run_check.gd:86)
+FIRERUN gil        run 0.00 m/s slide 0.00 m/s (0%)
+SCRIPT ERROR: Invalid access to property or key 'up_w' on a base object of type 'Nil'.
+          at: _run (res://tools/fire_run_check.gd:110)
+          GDScript backtrace (most recent call first):
+              [0] _run (res://tools/fire_run_check.gd:110)
+              [1] _hunter (res://tools/fire_run_check.gd:64)
+              [2] run (res://tools/fire_run_check.gd:44)
+              [3] _hunter (res://tools/fire_run_check.gd:86)
+SCRIPT ERROR: Invalid access to property or key 'up_w' on a base object of type 'Nil'.
+          at: _run (res://tools/fire_run_check.gd:110)
+          GDScript backtrace (most recent call first):
+              [0] _run (res://tools/fire_run_check.gd:110)
+              [1] _hunter (res://tools/fire_run_check.gd:65)
+              [2] run (res://tools/fire_run_check.gd:44)
+              [3] _hunter (res://tools/fire_run_check.gd:86)
+SCRIPT ERROR: Invalid access to property or key 'up_w' on a base object of type 'Nil'.
+          at: _run (res://tools/fire_run_check.gd:110)
+          GDScript backtrace (most recent call first):
+              [0] _run (res://tools/fire_run_check.gd:110)
+              [1] _hunter (res://tools/fire_run_check.gd:64)
+              [2] run (res://tools/fire_run_check.gd:44)
+              [3] _hunter (res://tools/fire_run_check.gd:86)
+SCRIPT ERROR: Invalid access to property or key 'up_w' on a base object of type 'Nil'.
+          at: _run (res://tools/fire_run_check.gd:110)
+          GDScript backtrace (most recent call first):
+              [0] _run (res://tools/fire_run_check.gd:110)
+              [1] _hunter (res://tools/fire_run_check.gd:65)
+              [2] run (res://tools/fire_run_check.gd:44)
+              [3] _hunter (res://tools/fire_run_check.gd:86)
+SCRIPT ERROR: Invalid access to property or key 'up_w' on a base object of type 'Nil'.
+          at: _run (res://tools/fire_run_check.gd:110)
+          GDScript backtrace (most recent call first):
+              [0] _run (res://tools/fire_run_check.gd:110)
+              [1] _hunter (res://tools/fire_run_check.gd:64)
+              [2] run (res://tools/fire_run_check.gd:44)
+              [3] _hunter (res://tools/fire_run_check.gd:86)
+SCRIPT ERROR: Invalid access to property or key 'up_w' on a base object of type 'Nil'.
+          at: _run (res://tools/fire_run_check.gd:110)
+          GDScript backtrace (most recent call first):
+              [0] _run (res://tools/fire_run_check.gd:110)
+              [1] _hunter (res://tools/fire_run_check.gd:65)
+              [2] run (res://tools/fire_run_check.gd:44)
+              [3] _hunter (res://tools/fire_run_check.gd:86)
+FIRE_RUN_DONE, failures: 2
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 221: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 219: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 234: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 273: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 280: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 287: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 292: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 291: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 297: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 351: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 47 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

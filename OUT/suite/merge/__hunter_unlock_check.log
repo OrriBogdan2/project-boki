@@ -1,0 +1,193 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HUNTERCHECK ok   the starters are Lace, Kael and Vex, by id: ["archer", "juggernaut", "gunslinger"]
+HUNTERCHECK ok   the starter pick is 1 of them; the roster runs Lace, Kael, Vex, Albert, then the rest
+HUNTERCHECK ok   the second Relic is a pick of Kael, Cinder or Meeko: ["juggernaut", "ashwick", "tender"]
+HUNTERCHECK ok   ["The Void Jester", "The Dawnfox", "The Stone Seer"] are challenge-only
+HUNTERCHECK ok   every other Hunter has one challenge (a known stat, a target, one line); missing: []
+HUNTERCHECK ok   Vex and Lace have no unlock challenge (a starter not taken opens after the first expedition)
+HUNTERCHECK ok   Kael, Cinder and Gil are easy challenges
+HUNTERCHECK ok   the other Hunters are medium
+HUNTERCHECK ok   ["ostra", "tender", "dolm"] are hard and come last (they wait for other Hunters)
+HUNTERCHECK ok   each challenge reads in one line
+HUNTERCHECK ok   every stat a goal can count is one the game measures (HunterFeats or the result)
+HUNTERCHECK ok   every Hunter has 3-5 mastery goals of 3 or more kinds, each with a reward; off: []
+HUNTERCHECK ok   no grind goals (play N matches)
+HUNTERCHECK ok   the hold is 1.6 s (1.6s)
+HUNTERCHECK ok   every viewer move is a real kit move (HunterAnim.km_def); missing: []
+HUNTERCHECK ok   reward kinds are looks only: ["glider", "skin", "colourway", "emote", "title", "banner", "trail"]
+HUNTERCHECK ok   nothing in the progression data names a stat or ability: []
+HUNTERCHECK ok   every reward is just {kind, id, name} of a cosmetic kind
+HUNTERCHECK ok   no reward is given twice
+HUNTERCHECK ok   a glider skin only has look, sound and unlock keys (no handling): []
+HUNTERCHECK ok   no gameplay script reads a glider skin beyond its mesh, trail and sound: []
+HUNTERCHECK ok   Gliders holds no glide numbers (they are the movement rules')
+HUNTERCHECK ok   8 glider designs come from mastery, each from a goal
+HUNTERCHECK ok   3 gliders come from account-wide challenges, each saying how
+HUNTERCHECK ok   leaf, kite, paper crane and Boki-wing designs: ["wing", "leaf", "moth", "bat", "kite", "boki", "crane"]
+HUNTERCHECK ok   a mastery glider isn't yours before its goal
+HUNTERCHECK ok   and says how: The Red Stitch mastery: Fly through 8 air rings (0/8)
+HUNTERCHECK ok   The Red Stitch's ring goal gives the Paper Crane, and it equips
+HUNTERCHECK ok   a new save owns nothing until it takes its first Relic ([])
+HUNTERCHECK ok   nothing can be unlocked before it
+HUNTERCHECK ok   no pick is not a pick
+HUNTERCHECK ok   2 Hunters is not a pick
+HUNTERCHECK ok   the same Hunter twice is not a pick
+HUNTERCHECK ok   nothing but Lace, Kael or Vex can be the first Relic
+HUNTERCHECK ok   taking Vex works
+HUNTERCHECK ok   only Vex is open at first (["gunslinger"])
+HUNTERCHECK ok   the pick is made once
+HUNTERCHECK ok   the second Relic cannot be picked before the first expedition
+HUNTERCHECK ok   the three choices wait for the first expedition and say so
+HUNTERCHECK ok   nothing is announced before then
+HUNTERCHECK ok   a knocked-out first expedition offers the second Relic and opens Lace (["archer", "gunslinger"])
+HUNTERCHECK ok   only Kael, Cinder or Meeko can be the second Relic
+HUNTERCHECK ok   Meeko opens, with her reveal queued (["archer", "gunslinger", "tender"])
+HUNTERCHECK ok   the second pick is made once
+HUNTERCHECK ok   the two not picked go back to their own challenges
+HUNTERCHECK ok   every other Hunter is locked and says its challenge
+HUNTERCHECK ok   Vex first
+HUNTERCHECK ok   The Unbroken can be the second Relic
+HUNTERCHECK ok   and nothing else opens after it
+HUNTERCHECK ok   Vex first
+HUNTERCHECK ok   The Ashen Kiss can be the second Relic
+HUNTERCHECK ok   and nothing else opens after it
+HUNTERCHECK ok   Vex first
+HUNTERCHECK ok   The Dawnfox can be the second Relic
+HUNTERCHECK ok   and nothing else opens after it
+HUNTERCHECK ok   The Red Stitch can be the first Relic
+HUNTERCHECK ok   the rest wait for the first expedition: ["gunslinger", "juggernaut", "ashwick", "tender"]
+HUNTERCHECK ok   then the other starters are open or on offer
+HUNTERCHECK ok   The Unbroken can be the first Relic
+HUNTERCHECK ok   the rest wait for the first expedition: ["archer", "gunslinger", "ashwick", "tender"]
+HUNTERCHECK ok   then the other starters are open or on offer
+HUNTERCHECK ok   The Hired Gun can be the first Relic
+HUNTERCHECK ok   the rest wait for the first expedition: ["archer", "juggernaut", "ashwick", "tender"]
+HUNTERCHECK ok   then the other starters are open or on offer
+HUNTERCHECK ok   an older save keeps its two
+HUNTERCHECK ok   and gains nothing from the first expedition
+HUNTERCHECK ok   the setting is off by default and Relics stay locked
+HUNTERCHECK ok   on: every Relic is open offline
+HUNTERCHECK ok   and the save's unlocked list is untouched (["gunslinger"])
+HUNTERCHECK ok   a Relic the save has not opened is not sent to a lobby: Vex goes instead
+HUNTERCHECK ok   online the setting changes nothing
+HUNTERCHECK ok   off again: the Relics lock back
+HUNTERCHECK ok   a locked Hunter shows its challenge with a counter: Knock 3 enemies into walls (0/3)
+HUNTERCHECK ok   part of the challenge: in progress
+HUNTERCHECK ok   the challenge done (any Hunter counts): ready, but nothing opens by itself
+HUNTERCHECK ok   the results report it
+HUNTERCHECK ok   the results screen says a Hunter challenge is done, in Hunter words
+HUNTERCHECK ok   unlocking it (the hold's end) opens it
+HUNTERCHECK ok   an unfinished challenge can't be unlocked
+HUNTERCHECK ok   a ready unlock is announced once
+HUNTERCHECK ok   a hard challenge done early still waits for 6 open Hunters
+HUNTERCHECK ok   with 6 open it is ready
+HUNTERCHECK ok   mastery starts at level 0
+HUNTERCHECK ok   playing another Hunter doesn't count for The Red Stitch's mastery
+HUNTERCHECK ok   playing it does: mastery level 1 and its Fletcher Green
+HUNTERCHECK ok   the results list the goal just done
+HUNTERCHECK ok   and the results screen shows it
+HUNTERCHECK ok   every goal done
+HUNTERCHECK ok   full mastery changes no stats or kit data
+HUNTERCHECK ok   extraction goals count from the result (a close escape, the haul)
+HUNTERCHECK ok   best_ stats keep the best expedition, not a total
+HUNTERCHECK ok   a stun and a burn on a rival count, a burn's ticks once ({ "stuns": 1, "burns": 1 })
+HUNTERCHECK ok   stunning yourself doesn't
+HUNTERCHECK ok   a hit from 20 m is a far hit
+HUNTERCHECK ok   one ability hitting 3 enemies is one multi-hit
+HUNTERCHECK ok   weapon hits don't make a multi-hit
+HUNTERCHECK ok   a hit while off the ground is an air hit
+HUNTERCHECK ok   a knock while merged and under half health counts for both
+HUNTERCHECK ok   a v5 save (every Hunter was unlocked then) upgrades to v21 keeping them all
+HUNTERCHECK ok   all twelve open, no starter pick
+HUNTERCHECK ok   a pick-2-of-4 save keeps both its Hunters, gains The Hired Gun, and is not asked to pick again
+HUNTERCHECK ok   an early-flow save keeps every Hunter it unlocked or played (["gunslinger", "mage", "dredge", "thief"])
+HUNTERCHECK ok   and drops the old free-pick and account XP keys
+HUNTERCHECK ok   loading an old save file from disk keeps everything
+HUNTERCHECK ok   a new save read back keeps its Hunters and its counts
+HUNTERCHECK ok   the first screen after the prologue is the card (stage intro)
+HUNTERCHECK ok   one line and one button (["Every new adventurer picks a Boki to take into battle.", "Choose your Boki"])
+WARNING: Depth of field blur is only available when using the Forward+ or Mobile renderer.
+     at: camera_attributes_set_dof_blur (servers/rendering/storage/camera_attributes_storage.cpp:70)
+     GDScript backtrace (most recent call first):
+         [0] _build_stage (res://scripts/ui/look_locker.gd:160)
+         [1] open (res://scripts/ui/look_locker.gd:73)
+         [2] _show_create (res://scripts/ui/hatch.gd:398)
+         [3] _end_intro (res://scripts/ui/hatch.gd:349)
+         [4] _unhandled_input (res://scripts/ui/hatch.gd:359)
+         [5] _new_game_flow (res://tools/class_unlock_check.gd:501)
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+         [10] open (res://scripts/ui/look_locker.gd:75)
+         [11] _show_create (res://scripts/ui/hatch.gd:398)
+         [12] _end_intro (res://scripts/ui/hatch.gd:349)
+         [13] _unhandled_input (res://scripts/ui/hatch.gd:359)
+         [14] _new_game_flow (res://tools/class_unlock_check.gd:501)
+HUNTERCHECK ok   Enter takes it to making yourself (stage create)
+HUNTERCHECK ok   then straight to the egg pick, with no Relic pick before it (stage pick)
+HUNTERCHECK ok   there is no Relic pick screen at all
+HUNTERCHECK ok   the creator is behind us and the save holds your Empty look
+HUNTERCHECK ok   every Hunter's R ultimate shows, then the Boki Fusion last
+HUNTERCHECK ok   the viewer shows every ability in order: ["dash", "passive", "lmb", "rmb", "e", "x", "r"]
+HUNTERCHECK ok   each ability has its key, from the player's bindings
+HUNTERCHECK ok   every active ability is a clip of it working; the passive and Fusion are one line each
+HUNTERCHECK ok   the name and title, and no story, gender or fantasy paragraphs
+HUNTERCHECK ok   the real Hunter model stands in its own SubViewport
+HUNTERCHECK ok   the model turns on its turntable, standing at ease (no kit moves played in place)
+HUNTERCHECK ok   only the clip in focus plays; the others hold still
+HUNTERCHECK ok   each clip drives the Hunter with the kit's own move (KMOVES)
+HUNTERCHECK ok   and each one lands on the training dummy
+HUNTERCHECK FAIL every ability has one short line (["gunslinger.lmb", "gunslinger.rmb", "gunslinger.e", "gunslinger.x"])
+HUNTERCHECK ok   the viewer has no weight labels or class/hero wording
+HUNTERCHECK ok   the farm's bar button is Relics
+HUNTERCHECK ok   J opens the Relics screen (Relics)
+HUNTERCHECK ok   every Hunter has a tile (13)
+HUNTERCHECK ok   ready, in progress and locked tiles ({ "juggernaut": "ready", "gil": "ready", "archer": "open", "gunslinger": "open", "thief": "progress", "bulwark": "locked", "rimewright": "locked", "ashwick": "locked", "dolm": "locked", "mage": "locked", "dredge": "locked", "tender": "locked", "ostra": "locked" })
+HUNTERCHECK ok   the ready Hunter is shown first, with Hold to unlock (juggernaut)
+HUNTERCHECK ok   the Relics screen has no weight labels and says Hunter, not class or hero
+HUNTERCHECK ok   holding: the bar slides out and fills (0.53), the Hunter powers up (0.53)
+HUNTERCHECK ok   half a hold unlocks nothing
+HUNTERCHECK ok   letting go early cancels: the bar drains, nothing opens
+HUNTERCHECK ok   a full hold unlocks The Unbroken
+HUNTERCHECK ok   the viewer bursts
+HUNTERCHECK ok   then the reveal plays for it
+HUNTERCHECK ok   the reveal says NEW RELIC, with no weight label
+HUNTERCHECK ok   Later goes back to the Relics screen
+HUNTERCHECK ok   and the reveal never plays twice
+HUNTERCHECK ok   a locked Hunter shows its challenge and progress bar
+HUNTERCHECK ok   with its counter and tier
+HUNTERCHECK ok   and its mastery goals with their rewards
+HUNTERCHECK ok   The Red Stitch's mastery level shows (1)
+HUNTERCHECK ok   the glider pick offers the earned Paper Crane
+HUNTERCHECK ok   a click glides on it
+HUNTERCHECK ok   an unearned mastery glider shows greyed with how to earn it
+HUNTERCHECK ok   an unlocked Hunter can be played from the screen; the farm hunter turns into it
+HUNTERCHECK ok   a locked one can't be
+HUNTERCHECK ok   the expedition panel: one card per Hunter, locked ones say how to unlock, no weight tabs
+HUNTERCHECK ok   a locked Hunter's card takes no focus and no click
+HUNTERCHECK ok   the expedition panel lists no abilities
+HUNTERCHECK ok   the Arena starts you as a locked Hunter
+HUNTERCHECK ok   the Arena's big dummy is the Training dummy (["Dummy", "Strafer", "Training dummy"])
+HUNTERCHECK ok   and swaps to another locked one
+HUNTERCHECK ok   the Arena's L loadout lists Hunters with no weight letters
+HUNTERCHECK ok   the practice picker shows all 13 Hunters, no weight labels
+HUNTERCHECK ok   trying a locked Hunter in practice doesn't make it your expedition Hunter
+HUNTERCHECK DONE, 156 checks, failures: 1
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 22 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

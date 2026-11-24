@@ -1,0 +1,32 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LOOTFEED ok   1. Gems twice within 2 s: one row of 7
+LOOTFEED ok   1. Gems again after 2 s: a new row
+LOOTFEED ok   1. a different thing: its own row
+LOOTFEED ok   2. six rows in: 4 on show
+LOOTFEED ok   2. the two oldest went, the newest is last: Tonic, A, B, C
+LOOTFEED ok   3. a merge starts the row's time again
+LOOTFEED ok   3. whole until 2.6 s
+LOOTFEED ok   3. fading after that (alpha 0.75)
+LOOTFEED ok   3. gone at 3 s
+LOOTFEED ok   4. out of a fight a common pickup ticks
+LOOTFEED ok   4. in a fight a common pickup is silent
+LOOTFEED ok   4. in a fight a rare one still ticks
+LOOTFEED ok   5. gems, a tonic, gear: Gems, Tonic, Rare Barrier Glove
+LOOTFEED ok   5. nothing went to the message lane
+LOOTFEED ok   5. a bot's pickup is not in your feed
+LOOTFEED ok   6. nothing picked up: 9 groups, no more
+LOOTFEED ok   6. a pickup: the one loot group
+LOOTFEED ok   6. its rows faded: back to 9
+LOOTFEED DONE, failures: 0
+ERROR: 4 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 4 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 32 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

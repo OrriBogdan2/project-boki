@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ARRIVAL FAIL results: the hunter's name in the headline and three numbers
+ARRIVAL ok   results: no armor tile
+ARRIVAL ok   results: the small numbers and notes are hidden
+ARRIVAL ok   results: a Details toggle and the way home on screen
+ARRIVAL ok   results: Details shows them
+ARRIVAL ok   queue: the first modal opens, the others wait
+ARRIVAL ok   queue: closing one opens the next, never two
+ARRIVAL ok   queue: nothing opens while something plays
+ARRIVAL ok   queue: it opens by itself when that is over, in order
+ARRIVAL ok   chips: a new player sees none of the counters
+ARRIVAL ok   chips: each counter shows once you have some
+ARRIVAL ok   chips: and stays when it is spent
+ARRIVAL ok   chips: an old save sees them all
+ARRIVAL ok   keys: every key shows once the tutorial is over
+ARRIVAL ok   keys: a key used 3 times goes (walk), one used twice stays (menu)
+ARRIVAL ok   keys: the row rebuilds without it
+ARRIVAL DONE, failures: 1
+WARNING: 1 RID of type "CanvasItem" was leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2690)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

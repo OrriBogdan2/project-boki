@@ -1,0 +1,195 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HCHECK Hired Gun: the display name                                PASS  
+HCHECK LMB: rounds fly the full 11m past a near cursor            PASS  11.0 m
+HCHECK LMB: each round is a muzzle flash and a lime tracer riding it (HeroVfx data) PASS  
+HCHECK LMB: a short muzzle flash on the rifle's mouth (0.1 s at most) PASS  0.00 m off the Muzzle
+HCHECK LMB held: a second string makes no new effect nodes (pooled) PASS  8 rounds, 0 new nodes
+HCHECK Dazed: the rifle does +76%                                 PASS  
+HCHECK Dazed: big gold numbers (crit-style)                       PASS  
+HCHECK Dazed: the string's falloff keeps counting (no pause in the source) PASS  
+HCHECK Dazed: abilities are not boosted through outgoing          PASS  
+HCHECK RMB: tap only, no hold or auto release in the data, the text says tap PASS  Shoot a charge that Dazes; hitting a wall blasts a cone back
+HCHECK RMB tap: thrown on the press, nothing held, no lane shown  PASS  gunslinger_rmb, 1 in flight
+HCHECK RMB direct hit: damage + Dazed, no cone, the charge is spent PASS  took 22.0 hits 1 rattles 0 burrs 0
+HCHECK RMB direct hit: the struck foe's body is held lit longer than a plain hit's 0.12 s flash PASS  0.18
+HCHECK RMB direct hit: the Dazed foe takes the rifle's +76%       PASS  
+HCHECK RMB a ground cast on nothing: a dud, no stick, no cone, no blast, the foe past the end untouched PASS  duds +1 stuck false blasts +0 took 0.0
+HCHECK RMB an air cast 4 m up on nothing: a dud, no stick, no cone, no blast, the foe past the end untouched PASS  duds +1 stuck false blasts +0 took 0.0
+HCHECK RMB air cast 2 m up: a foe 8 m down the lane is still struck and Dazed PASS  took 22.0
+HCHECK RMB: 0.9s fuse                                             PASS  
+HCHECK RMB on a wall: sticks to the wall                          PASS  (17.98857, 2.247094, 32.59972)
+HCHECK RMB: the cone shows back toward you, for everyone          PASS  
+HCHECK RMB: the cone drawn is the cone that hits (length 6.0, 100 degrees) PASS  100.0
+HCHECK RMB wall cone: a second foe in the cone is hurt and Dazed too PASS  took 16 at (3.393795, 0.0, -2.332918)
+HCHECK RMB wall cone: hits, Dazes, shoves into terrain = stun, the cooldown is not shaved PASS  took 26 slams 1 cd 4.9
+HCHECK RMB wall slam: the walled foe is Dazed longer (the data), 0.6s past the cone's Daze PASS  0.60 s longer
+HCHECK Longneedle: you stand still to charge                      PASS  
+HCHECK Longneedle: the line narrows over the cast (18m)           PASS  1.67 -> 0.44
+HCHECK Longneedle: the line starts at the width of the beam that hits (1.80 m) PASS  1.67
+HCHECK Longneedle: nothing before 0.6s                            PASS  
+HCHECK Longneedle: fires at 0.6s                                  PASS  took 24
+HCHECK Longneedle: the recoil shoves you back                     PASS  -1.48
+HCHECK Longneedle look: the beam's body is 1.26 m across (0.5 bh = 0.9 m) on the 1.80 m hit width PASS  
+HCHECK Longneedle look: the beam fades out over about 0.8 s       PASS  0.80 s
+HCHECK Longneedle look: a smoke ring opens at the open palm of her cyborg (left) hand on release PASS  
+HCHECK Longneedle hit takes 20% off its cooldown (not 30% before rank 3) PASS  8.27
+HCHECK Longneedle on a Dazed hunter: +20% and Skewered            PASS  
+HCHECK Longneedle passes through a wall                           PASS  
+HCHECK Longneedle: a stun cancels the charge                      PASS  
+HCHECK Longneedle: the line shows the lagging aim, not the cursor, through the charge PASS  19.5 deg after 0.2 s
+HCHECK Longneedle: a 180-degree flick at the press moves the beam at most 54 degrees PASS  52.5 deg
+HCHECK Longneedle: a small tracking adjustment still lands on the cursor PASS  0.00 deg off
+HCHECK Longneedle: an aim at 3 m leaves the camera alone          PASS  zoom 0.000, pan 0.00 m
+HCHECK Longneedle: the push-out ramps with the aim distance, the full 25% at 18 m PASS  11 m zoom 0.138; 18 m zoom 0.250, pan 9.00 m
+HCHECK Slipstep tap: the rifle keeps firing                       PASS  dashes 1.00 -> 0.00 slide { "t": 0.01666666666667, "held": false, "dir": (0.0, 1.0), "from": (8.5, 1.6, 32.5) } stun 0.00
+HCHECK Slipstep tap: a ~0.5s skid that bleeds off (front-loaded past an even pace, still going at 0.3s) PASS  2.6 of 4.9 m
+HCHECK Slipstep: along the keys, not the cursor                   PASS  dz 4.9 dx 0.0
+HCHECK Slipstep: no ground ring or disc on the slide              PASS  rings 0
+HCHECK Slipstep: a held slide is owed a longer cooldown and letting go early refunds nothing PASS  dashes -0.34
+HCHECK dash table: the slide and the air roll fire LMB, DashFlow says so PASS  
+HCHECK dash table: a shot tapped mid-slide fires at once          PASS  16 -> 17
+HCHECK dash table: E (Longneedle) starts mid-slide                PASS  
+HCHECK dash anim: Slipstep's move runs about 0.85 s, its own id (not Wirerun's) PASS  0.85
+HCHECK small: an air tap slides 2/3 of the full hold (about 4.7m), a charge spent PASS  5.6 m kind air_slide
+AKCHECK air steer gunslinger: an air tap slide, then the keys steer (+5.3 m/s across) PASS  carry 12.4 m/s airborne true
+AKCHECK air steer gunslinger: Longneedle's recoil, then the keys steer (+0.0 m/s across) FAIL  carry 4.6 m/s airborne true
+HCHECK small: the rifle loses half its punch over a 10-round string PASS  
+HCHECK small: Fever wears off all at once                         PASS  
+HCHECK small: Fever is one flat level of 6% (a second ability hit adds nothing) PASS  1.00 0.06
+HCHECK small: Fever heals 6% of the damage dealt                  PASS  hp 56.0
+HCHECK small: Longneedle hits everyone in its line (two)          PASS  
+HCHECK small: Longneedle at rank 1 cuts its cooldown once however many it hits (20%) PASS  8.30
+HCHECK small: Longneedle at rank 3 takes 30% per hunter hit (two hits: 60% off its 11.5s cooldown) PASS  0.00
+HCHECK upgrade parity: Burr Charge cooldown 6.5 -> 5.4 -> 4.3     PASS  [[6.5, 8.5, 11.5, 1.0], [5.41645, 7.3916, 11.5, 1.2], [4.33355, 6.28235, 11.5, 1.4]]
+HCHECK upgrade parity: Slipstep recharge 8.5 -> 7.4 -> 6.3        PASS  [[6.5, 8.5, 11.5, 1.0], [5.41645, 7.3916, 11.5, 1.2], [4.33355, 6.28235, 11.5, 1.4]]
+HCHECK upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40% PASS  [[6.5, 8.5, 11.5, 1.0], [5.41645, 7.3916, 11.5, 1.2], [4.33355, 6.28235, 11.5, 1.4]]
+HCHECK upgrade parity: rank 3 (tier IV) a slide's end gives +25% speed, rank 1 none PASS  [0.0, 0.25]
+HCHECK Knock: no Slipstep or heal from the kit (both are DashReset's, so nothing double-fires) PASS  hp 40.3, dashes 0.00
+HCHECK Knock at rank 3: Burr Charge resets                        PASS  
+HCHECK Vex parity LMB: held, a round every 0.08s                  PASS  12 rounds
+HCHECK Vex parity LMB: walking with the cursor sweeping round, every round leaves on the aim PASS  11 rounds, worst 1.5 degrees, walked 5.68 m/s
+HCHECK Vex parity LMB: she keeps walking while she fires (85% of her walk or more) PASS  5.68 of 5.28 m/s
+HCHECK Vex parity LMB: the body turns 180 degrees to the cursor inside 0.2s (source 1280 deg/s) PASS  0.15 s
+HCHECK Vex item 109 (tap): dashing east at a north cursor, every round goes north (within 5 degrees) PASS  11 rounds, 6 in the dash, worst 0.8 deg
+HCHECK Vex item 109 (tap): no gap in the rifle's cadence across the dash PASS  longest gap 0.083 s
+HCHECK Vex item 109 (tap): the body stays on the aim through the dash, the legs follow it PASS  body 1.8 deg off, legs turned 1.09 rad, 18 steps
+HCHECK Vex item 109 (held): dashing east at a north cursor, every round goes north (within 5 degrees) PASS  11 rounds, 7 in the dash, worst 0.8 deg
+HCHECK Vex item 109 (held): no gap in the rifle's cadence across the dash PASS  longest gap 0.083 s
+HCHECK Vex item 109 (held): the body stays on the aim through the dash, the legs follow it PASS  body 1.8 deg off, legs turned 1.15 rad, 22 steps
+HCHECK Vex item 109 (air): dashing east at a north cursor, every round goes north (within 5 degrees) PASS  11 rounds, 4 in the dash, worst 0.8 deg
+HCHECK Vex item 109 (air): no gap in the rifle's cadence across the dash PASS  longest gap 0.083 s
+HCHECK Vex item 109 (air): the body stays on the aim through the dash, the legs follow it PASS  body 1.7 deg off, legs turned 1.15 rad, 10 steps
+HCHECK Vex sounds: a string and the top-up after it play only the rifle round (no wind-up, no reload) FAIL  kit sounds ["vn_rifle", "gunslinger_hit", "gunslinger_hit", "gunslinger_hit", "gunslinger_hit", "gunslinger_hit", "gunslinger_hit"]
+HCHECK Vex parity LMB: a 30-round drum that refills fast once the trigger rests (none in the first beat) PASS  after 12: 18, after 0.25s rest: 18, full at 0.38 s
+HCHECK Vex sounds: each time the drum runs dry the reload cue plays once PASS  2 reload cues, 2 times dry
+HCHECK Vex parity LMB: run dry, no reload; the trigger is dead until the drum refills (about 1.1s), then fires PASS  dry at 2.43, firing again 1.12 s later with 29 rounds
+HCHECK Vex parity LMB: firing brackets either side of her while she fires (yours only), gone after PASS  
+HCHECK Vex parity LMB: each round kicks the gun by 0.025s, back on the shoulder by 0.09 (replayed every round) PASS  gp 0.24, torso -0.08 -> 0.03
+HCHECK Vex item 112: no throw pose, the left hand stays out of it, a recoil kick on the cannon PASS  gp 0.55
+HCHECK Vex item 112: a tap fires within one step, from above the gun's muzzle on a model with no launcher PASS  y 2.70
+HCHECK Vex item 112: a 1s hold fires once, at the press           PASS  1 puffs
+HCHECK Vex item 112: the charge leaves launcher_fire at the press, the flash launcher_muzzle after 0.1s PASS  from spot true, waited true, 1 puff
+HCHECK Vex item 112: she keeps walking through the shot (85% of her walk or more) PASS  5.28 of 5.28 m/s
+HCHECK Vex cast-move: rooted through the Longneedle cast (footage: still through its 0.6 s cast bar) PASS  move_k 0.00
+HCHECK Vex item 68: the beam hits a line at least 1.5x as wide, and drawn that wide PASS  0.90 m either side, a foe 1.10 m off the line: 2 hit
+HCHECK Vex item 68: the view is at least 15% wider through the cast and leans along the aim, no shake PASS  x1.25, x1.25 at the shot, leaning 9.0 m
+HCHECK Vex item 68: the view is back within 0.3s of the shot      PASS  x1.004
+HCHECK Vex item 68: the beam fires along the line and the aim at release (1 degree); she faces it throughout PASS  line 0.11, aim 0.11, face 0.0 deg
+HCHECK Vex item 68: anyone else's cast leaves the camera alone    PASS  
+HCHECK Vex audit: no ground ring, scorch or flame wall on a slide, its rank-3 end or a knock PASS  step, knock true, []
+HCHECK Vex audit: Dazed is a damage window only, no slow (the data) PASS  slow 0.00 for 0.00 s
+HCHECK Vex audit: the rifle fires through her air roll (its dash row: fire) PASS  kind air roll 0.23
+HCHECK Vex audit: Shift in the Longneedle charge slides and the beam fires; after a Burr Charge she slides at once PASS  E true RMB true rows true
+HCHECK Vex cancel E wind-up + LMB: both (rule), rounds leave in the charge and the beam goes PASS  4 rounds, beam true
+HCHECK Vex cancel E wind-up + RMB: both (rule), the Burr Charge leaves and the beam goes PASS  burrs 1, beam true
+HCHECK Vex cancel E wind-up + jump: both (rule), she hops and the charge goes on PASS  
+HCHECK Vex cancel E wind-up + X: both (rule; was ignored), Cinderfall goes and the beam goes PASS  casts 1, beam true
+HCHECK Vex cancel E wind-up + glide: waits, as owner 162b asks: shut in the charge, held it opens after the recoil PASS  shut true, open 0.42 s after the beam
+HCHECK Vex cancel E recovery + any: no lock, as owner item 51 asks: jump, RMB, LMB go within 0.1 s of the beam FAIL  air true burrs +0 rounds +0
+HCHECK Vex cancel X + E, RMB: both (rule), the Burr Charge and the Longneedle go with the shell falling PASS  
+HCHECK Vex cancel LMB held + RMB, E, X: both (rule), each goes and the string goes on PASS  went [true, true, true], rounds [4, 3, 4]
+HCHECK Vex cancel LMB held + jump: both (rule), the string goes on through the hop PASS  4 rounds
+HCHECK Vex cancel glide + LMB: both (rule; was ignored), the rifle fires and the glider stays open PASS  4 rounds, gliding true
+HCHECK Vex cancel glide + RMB, E, X: both (rule), each goes from the glide (RMB as its air variant) PASS  RMB true E true X true
+HCHECK Vex coin: it sticks to an aegis                            PASS  at 4.51 of 5.0
+HCHECK Vex coin: it rides an aegis as it moves                    PASS  moved 1.50
+HCHECK Vex coin: when an aegis breaks the coin drops to the ground and still blasts PASS  let go true, 0.20 m up, blasts 1, foe took 44
+HCHECK Vex coin: it sticks to a Rink Wall                         PASS  at 4.51 of 5.0
+HCHECK Vex coin: it rides a Rink Wall as it moves                 PASS  moved 1.50
+HCHECK Vex coin: when a Rink Wall runs out the coin drops to the ground and still blasts PASS  let go true, 0.20 m up, blasts 1, foe took 16
+HCHECK Vex coin: it sticks to a Tenzo rock                        PASS  at 4.29 of 5.0
+HCHECK Vex coin: when a Tenzo rock breaks the coin drops to the ground and still blasts PASS  let go true, 0.20 m up, blasts 1, foe took 16
+HCHECK Vex coin: a wall of her own team lets it through           PASS  x 8.41
+TIME gunslinger_lmb play 0.03 in 0.12 hit 0.03 (clip 0.00) lmb 0.53 out -1.00
+HCHECK Vex timing LMB: the round and its move leave on the press's frame, the clip is on within a frame PASS  hit 0.03 play 0.03 in 0.12
+TIME gunslinger_rmb play 0.00 in 0.10 hit 0.02 (clip 0.02) rmb 0.30 out 0.72
+HCHECK Vex timing RMB: fired on the press, the swing on within a frame, the arm back by 0.3 s + the fade PASS  in 0.10 len 0.30 out 0.72
+HCHECK Vex timing RMB: walking through it, the legs walk (the swing is upper body) PASS  at 0.29: 5.3 m/s, full 0.00 upper 1.00
+TIME gunslinger_dash play 0.00 in 0.10 hit 0.47 (clip 0.47) dash 0.87 out 1.10
+HCHECK Vex timing Shift tap: the skid ends before the clip's stand-up key, the clip runs 0.85 s, legs back by 0.85 + the fade PASS  skid 0.47 len 0.87 out 1.10
+TIME gunslinger_dash play 0.00 in 0.10 hit 0.47 (clip 2.00) dash 0.87 out 0.87
+HCHECK Vex timing Shift tap: walking straight out of the skid, the legs are hers again by 0.75 s + the fade PASS  at 0.99: 5.3 m/s, full 0.00 upper 0.00
+TIME gunslinger_dash play 0.00 in 0.10 hit 0.73 (clip 0.47) dash 0.87 out 1.37
+HCHECK Vex timing Shift held: she slides 0.73 s low (the clip loops its slide window) and stands up as it ends PASS  skid 0.73 clip at 0.47 (peak 0.50, 2 wraps) out 1.37
+TIME gunslinger_e play 0.00 in 0.15 hit 0.63 (clip 0.63) e 1.07 out 1.23
+HCHECK Vex timing E: the beam fires at 0.63 s on the clip's fire key, the clip hands back as the hold lifts PASS  hit 0.63 len 1.07 out 1.23 lift 1.23
+HCHECK Vex timing E: held 0.6 s after the beam (venator.md E 4: 0.2 s shove + ~0.4 s recovery), walking does not move her PASS  held: 0.00 m/s, 0.11 m along the walk
+HCHECK Vex timing E: a press early in the hold is dropped, one in its last 0.15 s goes as it lifts PASS  went 1, at 1.25 (lift 1.23)
+HCHECK Vex timing E: after the hold she walks                     PASS  free: 5.28 m/s
+TIME gunslinger_x play 0.00 in 0.10 hit 0.15 (clip 0.15) x 0.60 out 1.02
+HCHECK Vex timing R: the shot leaves on the raised barrel (0.14 s), the clip plays its 0.6 s and hands back PASS  hit 0.15 len 0.60 out 1.02
+HCHECK Vex timing R: walking through the wind-up the legs walk, slowed but never stopped PASS  at 0.2: 3.7 m/s, full 0.00 upper 1.00 (run 5.3)
+HCHECK Vex timing R: after the 0.25 s wind-up she runs at full speed PASS  5.28 m/s (run 5.3)
+HCHECK Vex timing R: a jump in the wind-up goes at once           PASS  jump_at 109.85 t0 109.83
+TIME gunslinger_knock play 0.00 in 0.10 hit 0.02 (clip 0.02) knock 0.60 out 1.02
+HCHECK Vex timing knock: the cue plays its 0.6 s and hands back   PASS  len 0.60 out 1.02
+HCHECK merge hold: the Longneedle is charging before the merge    PASS  
+HCHECK merge hold: a merge is under way                           PASS  
+HCHECK merge hold: the Longneedle charge is dropped, no shot mid-merge PASS  
+HCHECK combo tag (gunslinger): nothing on a clean foe             PASS  
+HCHECK combo tag (gunslinger): shows while the status runs, with an icon and the time left PASS  { "icon": "mark_daze", "n": 0, "max": 0, "left": 1.4, "total": 2.0 }
+HCHECK combo tag (gunslinger): the foe's own kit has no tag on you PASS  
+HCHECK combo tag (gunslinger): the time left shrinks              PASS  { "icon": "mark_daze", "n": 0, "max": 0, "left": 0.88333333333333, "total": 2.0 }
+HCHECK combo tag (gunslinger): gone when the status ends          PASS  
+HCHECK combo tag (gunslinger): the payoff hit flashes the body white PASS  stamp 2.92 flash 0.153
+HCHECK X: the hero has an ultimate (the HUD tile shows)           PASS  
+HCHECK X: no cast below level 6                                   PASS  
+HCHECK Cinderfall: the tap goes off                               PASS  
+HCHECK Cinderfall: one press is one shell, its own cooldown starts PASS  
+HCHECK Cinderfall: it lands exactly at the cursor                 PASS  
+HCHECK Cinderfall: the rifle goes straight up (gunslinger_x)      PASS  
+HCHECK Cinderfall: she walks through the cast, slowed not stopped PASS  0.72 m in 0.2 s, 3.69 m/s (run 5.3)
+HCHECK Cinderfall: the disc and its hot centre ring, seen by everyone, filling together PASS  r 3.4 core 1.2 fill 0.32
+HCHECK Cinderfall: Vex moves and can shoot while it falls         PASS  
+HCHECK Cinderfall: nothing lands before 1.6s                      PASS  
+HCHECK Cinderfall: the impact, +50% in the centre                 PASS  centre 36.0 edge 24.0 (base 24.0)
+HCHECK Cinderfall: the bond fills once for the impact (a hit)     PASS  paid 0.60
+HCHECK Cinderfall: the patch burns and slows                      PASS  +7.0 ticks 4
+HCHECK Cinderfall: burn ticks pay no more bond                    PASS  
+HCHECK Cinderfall: the patch ticks every 0.5s (the source's), 6 times in its 3s, each the same PASS  6 ticks, gaps 0.500 to 0.500 s, burn 21.0 (3.5 each)
+HCHECK Cinderfall: the patch is gone after 3s                     PASS  
+HCHECK Cinderfall: on cooldown, a press now does nothing          PASS  
+HCHECK Cinderfall: a far cursor is clamped to its range           PASS  14.0 m
+HCHECK Cinderfall: stepping out of the disc dodges it, and pays no bond PASS  took 0.0 paid 0.00 at (6.0, 0.0, 6.0) impacts 3
+HCHECK burst: Cinderfall then the merge never one-shots a full-health light hunter PASS  ult 49, ult + merge 116 of 124
+HCHECK DONE gunslinger, 163 checks, failures: 3
+ERROR: Texture with GL ID of 210: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 214: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 8 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

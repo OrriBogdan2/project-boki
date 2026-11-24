@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LEVELGAP ok   two below: cool band
+LEVELGAP ok   two below: the blue entry
+LEVELGAP ok   one below: plain
+LEVELGAP ok   two above: warm band
+LEVELGAP ok   two above: the orange entry
+LEVELGAP ok   within one level: plain
+LEVELGAP ok   far above and far below keep their side
+LEVELGAP ok   yourself and no viewer: plain
+LEVELGAP ok   a teammate keeps their plain level at any gap
+LEVELGAP ok   warm and cool differ in luminance, not hue alone
+LEVELGAP ok   warm points up, cool points down
+LEVELGAP ok   a match with a HUD
+LEVEL GAP CHECK DONE, failures: 0
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 26 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,112 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+VISITOR ok   a toy it likes and two residents of its group suit it
+VISITOR ok   no toy: it does not come
+VISITOR ok   a toy it does not like: it does not come
+VISITOR ok   a species of another zone's group does not come
+VISITOR ok   the zone's group must hold its theme
+VISITOR ok   one resident of the group is not enough (another zone's do not count)
+VISITOR ok   a species with no rigged model never visits
+VISITOR ok   the pick suits and has a model (moundvark)
+VISITOR ok   it stays one garden day
+VISITOR ok   it is in its own zone only
+VISITOR ok   it walks the zone but is not one of your Boki
+VISITOR ok   it round-trips through the save
+VISITOR ok   a save with a visitor still upgrades and keeps it
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+VISITOR ok   no visitor to begin with
+VISITOR ok   a visitor wandered into Bramblebank
+VISITOR ok   it chirps garden_visit_in once as it comes
+VISITOR ok   the one that came suits the zone
+VISITOR ok   the first visitor starts it
+VISITOR ok   your partner leads to it
+VISITOR ok   it runs to the visitor
+VISITOR ok   the lead ends when you come over
+VISITOR ok   only one visitor at a time
+VISITOR ok   footprints were laid (1)
+VISITOR ok   the prints are flat, not rings
+VISITOR ok   they start faint and fade in
+VISITOR ok   they are in after fade_in_s
+VISITOR ok   it shimmers on arrival
+VISITOR ok   and stops after shimmer_s
+VISITOR ok   it is in the Dash lineup as one more Boki
+VISITOR ok   the away card says who is here: ["A wild Knotwyrm is visiting Bramblebank"]
+VISITOR ok   it says so once
+VISITOR ok   after one garden day it went home
+VISITOR ok   it says goodbye (garden_visit_out) once as it goes
+VISITOR ok   the away card says it left
+VISITOR ok   the next one waits
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] add_kin (res://scripts/home/home.gd:994)
+       [6] _look (res://scripts/home/garden_visitor.gd:124)
+       [7] step (res://scripts/home/garden_visitor.gd:100)
+       [8] step (res://scripts/home/base_life.gd:156)
+       [9] _move_kin (res://scripts/home/home.gd:1417)
+       [10] _step (res://tools/garden_visitor_check.gd:96)
+       [11] _stay_part (res://tools/garden_visitor_check.gd:136)
+       [12] _arrive_part (res://tools/garden_visitor_check.gd:187)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] add_kin (res://scripts/home/home.gd:994)
+       [6] _look (res://scripts/home/garden_visitor.gd:124)
+       [7] step (res://scripts/home/garden_visitor.gd:100)
+       [8] step (res://scripts/home/base_life.gd:156)
+       [9] _move_kin (res://scripts/home/home.gd:1417)
+       [10] _step (res://tools/garden_visitor_check.gd:96)
+       [11] _stay_part (res://tools/garden_visitor_check.gd:136)
+       [12] _arrive_part (res://tools/garden_visitor_check.gd:187)
+VISITOR ok   then another can come
+VISITOR ok   a later visitor gets no lead: once per save
+VISITOR ok   a stay that ran out while you were away is told on arrival
+VISITOR ok   and makes no goodbye sound
+VISITOR ok   a visitor with room in the zone
+VISITOR ok   its favourite is shown in the feed list
+VISITOR ok   two favourites counted
+VISITOR ok   asking to stay is no goodbye
+VISITOR ok   it asked to stay and is a new Boki
+VISITOR ok   it lives in the zone
+VISITOR ok   its kind is caught in the Field Book
+VISITOR ok   it stays on the farm, or sleeps in the Burrow as a repeat (false)
+VISITOR ok   the away card says it stayed
+VISITOR ok   the zone is full (7 out)
+VISITOR ok   two favourites counted
+VISITOR ok   leaving its egg, it says goodbye once
+VISITOR ok   with no room it left and did not join
+VISITOR ok   it left an egg of its kind (murmurling)
+VISITOR ok   the away card says it left an egg
+VISITOR ok   the egg remembers who, where and which day
+VISITOR ok   the egg glints in the Incubator
+VISITOR DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

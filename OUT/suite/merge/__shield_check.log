@@ -1,0 +1,68 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SHIELDCHECK ok   the Hunter has 5 visible body meshes
+SHIELDCHECK ok   ability shield: the body stays visible (hidden: [])
+SHIELDCHECK ok   ability shield: still targetable, never cloaked
+SHIELDCHECK ok   ability shield: the rival still sees the Hunter
+SHIELDCHECK ok   ability shield: nothing opaque of the shield stands between camera and body
+SHIELDCHECK ok   ability shield: the shield rim is on
+SHIELDCHECK ok   ability shield: the vitals strip shows it, icon brightshield (wanted brightshield)
+SHIELDCHECK ok   ally area: the body stays visible (hidden: [])
+SHIELDCHECK ok   ally area: still targetable, never cloaked
+SHIELDCHECK ok   ally area: the rival still sees the Hunter
+SHIELDCHECK ok   ally area: nothing opaque of the shield stands between camera and body
+SHIELDCHECK ok   ally area: the shield rim is on
+SHIELDCHECK ok   ally area: the vitals strip shows it, icon mend (wanted mend)
+SHIELDCHECK ok   Boki Refraction: the body stays visible (hidden: [])
+SHIELDCHECK ok   Boki Refraction: still targetable, never cloaked
+SHIELDCHECK ok   Boki Refraction: the rival still sees the Hunter
+SHIELDCHECK ok   Boki Refraction: nothing opaque of the shield stands between camera and body
+SHIELDCHECK ok   Boki Refraction: the shield rim is on
+SHIELDCHECK ok   Boki Refraction: the vitals strip shows it, icon paw (wanted paw)
+SHIELDCHECK ok   Boki Mass Guard: the body stays visible (hidden: [])
+SHIELDCHECK ok   Boki Mass Guard: still targetable, never cloaked
+SHIELDCHECK ok   Boki Mass Guard: the rival still sees the Hunter
+SHIELDCHECK ok   Boki Mass Guard: nothing opaque of the shield stands between camera and body
+SHIELDCHECK ok   Boki Mass Guard: the vitals strip shows it, icon none (wanted none)
+SHIELDCHECK ok   Fuse release: the body stays visible (hidden: [])
+SHIELDCHECK ok   Fuse release: still targetable, never cloaked
+SHIELDCHECK ok   Fuse release: the rival still sees the Hunter
+SHIELDCHECK ok   Fuse release: nothing opaque of the shield stands between camera and body
+SHIELDCHECK ok   Fuse release: the shield rim is on
+SHIELDCHECK ok   Fuse release: the vitals strip shows it, icon bond (wanted bond)
+SHIELDCHECK ok   Boki owner shield: the body stays visible (hidden: [])
+SHIELDCHECK ok   Boki owner shield: still targetable, never cloaked
+SHIELDCHECK ok   Boki owner shield: the rival still sees the Hunter
+SHIELDCHECK ok   Boki owner shield: nothing opaque of the shield stands between camera and body
+SHIELDCHECK ok   Boki owner shield: the vitals strip shows it, icon paw (wanted paw)
+SHIELDCHECK ok   Bulwark aegis: the body stays visible (hidden: [])
+SHIELDCHECK ok   Bulwark aegis: still targetable, never cloaked
+SHIELDCHECK ok   Bulwark aegis: the rival still sees the Hunter
+SHIELDCHECK ok   Bulwark aegis: nothing opaque of the shield stands between camera and body
+SHIELDCHECK ok   Bulwark aegis: the vitals strip shows it, icon brightshield (wanted brightshield)
+SHIELDCHECK ok   no shield: the rim is off
+SHIELDCHECK ok   no shield: no strip
+SHIELDCHECK ok   no burst or ring on the break
+SHIELDCHECK ok   a hit breaks the shield: it cracks once, 12 pieces
+SHIELDCHECK ok   the crack is in the owner's ability colour
+SHIELDCHECK ok   the crack and shards are gone after 0.60 s
+SHIELDCHECK ok   no burst or ring on the break (Low)
+SHIELDCHECK ok   a hit breaks the shield: it cracks once, 12 pieces (Low)
+SHIELDCHECK ok   the crack is in the owner's ability colour (Low)
+SHIELDCHECK ok   the crack and shards are gone after 0.60 s (Low)
+SHIELDCHECK ok   a shield that runs out doesn't crack
+SHIELDCHECK ok   the raised aegis is up
+SHIELDCHECK ok   a broken aegis cracks the same way
+SHIELDCHECK ok   a break from another game plays here
+SHIELDCHECK done, 0 failures
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 18 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

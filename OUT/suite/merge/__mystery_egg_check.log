@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MYSTERYEGG ok   every pool species is in the game (29 of 29)
+MYSTERYEGG ok   the pool is many early species, not just a few (29)
+MYSTERYEGG ok   no starter or boss kin in the pool []
+MYSTERYEGG ok   rares are in the pool (4)
+MYSTERYEGG ok   every draw comes from the pool
+MYSTERYEGG ok   every rare can hatch ([] never drawn in 30000)
+MYSTERYEGG ok   a rare is much less likely than a common (262 vs 1566 draws each)
+MYSTERYEGG ok   the black egg hatches mutated far more often (22.9% of the time, an egg at base odds 5.1%)
+MYSTERYEGG ok   1000 eggs: a rare hatches (28)
+MYSTERYEGG ok   1000 eggs: more species than starters (29)
+MYSTERYEGG ok   1000 eggs: mutated 241 vs a starter egg 47
+MYSTERYEGG ok   three starter eggs and the mystery egg
+MYSTERYEGG ok   only the mystery egg rolls mutations at birth
+MYSTERYEGG ok   the starters stand front and centre, the black egg well behind ((-2.75, 0.0, -2.55))
+MYSTERYEGG ok   it's the mystery egg (void shell, a cracked "?") in a basket
+MYSTERYEGG ok   its card is hidden until you find it (3 cards)
+MYSTERYEGG ok   clicking the black egg picks it and shows its card
+MYSTERYEGG ok   the hatchling keeps the mutation it was born with
+MYSTERYEGG DONE, failures: 0

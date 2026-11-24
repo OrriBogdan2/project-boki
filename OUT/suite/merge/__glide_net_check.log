@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+relay: listening on 7987, up to 120 players, version 0.24.18, Discord check OFF
+GNET ok   the relay listens on 7987  
+relay: 262873667 joined as Hunter (1 online)
+GNET ok   the host is on the relay as 262873667  
+relay: 893928555 joined as Hunter (2 online)
+GNET ok   the guest joins the relay  893928555
+GNET ok   the guest's hunter is here, driven by the guest's game  
+GNET btn: guest open frames after the press [1, 1, 1, 1, 1, 1]; host copy lag (s) [-0.007, 0.105, 0.04, -0.003, 0.028, 0.05]
+GNET ok   btn: the guest's own glider opens mid-fall (button: on the press step)  [1, 1, 1, 1, 1, 1]
+GNET ok   btn: the host's copy opens on every drop  [-0.007, 0.105, 0.04, -0.003, 0.028, 0.05]
+GNET ok   btn: the host's copy opens within 0.137 s (8.2 frames) of the guest's own (median; every drop < 0.6 s)  median 0.034 s = 2.0 frames, worst 0.105 s
+GNET space: guest open frames after the press [1, 1, 1, 1, 1, 1]; host copy lag (s) [0.082, 0.023, -0.012, 0.079, 0.08, 0.0]
+GNET ok   space: the guest's own glider opens mid-fall (button: on the press step)  [1, 1, 1, 1, 1, 1]
+GNET ok   space: the host's copy opens on every drop  [0.082, 0.023, -0.012, 0.079, 0.08, 0.0]
+GNET ok   space: the host's copy opens within 0.137 s (8.2 frames) of the guest's own (median; every drop < 0.6 s)  median 0.051 s = 3.1 frames, worst 0.082 s
+GNET ok   the button's remote open is no later than Space's (no fallback)  median btn 0.034 s, space 0.051 s
+GNET DONE, 11 checks, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 9 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

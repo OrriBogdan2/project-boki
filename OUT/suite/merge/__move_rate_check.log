@@ -1,0 +1,73 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MFEEL flat spot (99.5, 1.6, 163.5)
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+         [4] _frame (res://tools/move_rate_check.gd:42)
+         [5] _frames (res://tools/move_rate_check.gd:48)
+         [6] _frame (res://tools/move_rate_check.gd:43)
+MRATE ok   match run_speed 30=5.278 60=5.278 144=5.278 m/s (within 0.01 of 60 fps)
+MRATE ok   match run_1s 30=5.099 60=5.099 144=5.099 m (within 0.2 of 60 fps)
+MRATE ok   match stop 30=0.429 60=0.429 144=0.429 m (within 0.01 of 60 fps)
+MRATE ok   match jump_apex 30=1.516 60=1.517 144=1.517 m (within 0.005 of 60 fps)
+MRATE ok   match jump_air 30=0.900 60=0.900 144=0.903 s (within 0.05 of 60 fps)
+MRATE ok   match dash 30=4.852 60=4.852 144=4.852 m (within 0.2 of 60 fps)
+MRATE ok   match dash_time 30=0.433 60=0.450 144=0.451 s (within 0.05 of 60 fps)
+MRATE ok   match coyote 30=0.100 60=0.117 144=0.118 s (within 0.05 of 60 fps)
+MRATE ok   match buffer 30=0.133 60=0.133 144=0.132 s (within 0.05 of 60 fps)
+MRATE ok   match: the trials ran, jumped and dashed
+MRATE ok   match stop from 4.55 m/s 30=0.324 60=0.324 144=0.324 m in the source's 0.286-0.350 (default, juggernaut, archer, tender, gunslinger)
+MRATE ok   match stop from 4.85 m/s 30=0.367 60=0.367 144=0.367 m in the source's 0.329-0.393 (bulwark)
+MRATE ok   match stop from 4.65 m/s 30=0.339 60=0.339 144=0.339 m in the source's 0.302-0.364 (dredge, thief, mage, dolm, ostra, ashwick)
+MRATE ok   match stop from 4.60 m/s 30=0.330 60=0.330 144=0.330 m in the source's 0.292-0.357 (gil)
+MRATE ok   match stop from 4.45 m/s 30=0.311 60=0.311 144=0.311 m in the source's 0.275-0.336 (rimewright)
+MRATE ok   match coyote at 60 fps 0.117 s is its data row 0.12 s
+MRATE ok   match buffer at 60 fps 0.133 s is its data row 0.12 s
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+MRATE ok   farm run_speed 30=5.278 60=5.278 144=5.278 m/s (within 0.01 of 60 fps)
+MRATE ok   farm run_1s 30=5.134 60=5.134 144=5.134 m (within 0.2 of 60 fps)
+MRATE ok   farm stop 30=0.429 60=0.429 144=0.429 m (within 0.01 of 60 fps)
+MRATE ok   farm jump_apex 30=1.515 60=1.516 144=1.516 m (within 0.005 of 60 fps)
+MRATE ok   farm jump_air 30=0.900 60=0.900 144=0.903 s (within 0.05 of 60 fps)
+MRATE ok   farm dash 30=3.538 60=3.538 144=3.538 m (within 0.2 of 60 fps)
+MRATE ok   farm dash_time 30=0.133 60=0.150 144=0.153 s (within 0.05 of 60 fps)
+MRATE ok   farm coyote 30=0.100 60=0.117 144=0.118 s (within 0.05 of 60 fps)
+MRATE ok   farm buffer 30=0.133 60=0.133 144=0.132 s (within 0.05 of 60 fps)
+MRATE ok   farm: the trials ran, jumped and dashed
+MRATE FAIL farm stop from 4.55 m/s 30=0.429 60=0.429 144=0.429 m in the source's 0.286-0.350 (default, juggernaut, archer, tender, gunslinger)
+MRATE FAIL farm stop from 4.85 m/s 30=0.481 60=0.481 144=0.481 m in the source's 0.329-0.393 (bulwark)
+MRATE FAIL farm stop from 4.65 m/s 30=0.447 60=0.447 144=0.447 m in the source's 0.302-0.364 (dredge, thief, mage, dolm, ostra, ashwick)
+MRATE FAIL farm stop from 4.60 m/s 30=0.438 60=0.438 144=0.438 m in the source's 0.292-0.357 (gil)
+MRATE FAIL farm stop from 4.45 m/s 30=0.412 60=0.412 144=0.412 m in the source's 0.275-0.336 (rimewright)
+MRATE ok   farm coyote at 60 fps 0.117 s is its data row 0.12 s
+MRATE ok   farm buffer at 60 fps 0.133 s is its data row 0.12 s
+MOVE RATE CHECK DONE, failures: 5
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 22 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

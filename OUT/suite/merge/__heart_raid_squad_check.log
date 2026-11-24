@@ -1,0 +1,61 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HRAID ok   squad 4 normal: the raid is built
+HRAID ok   squad 4 normal: one squad of 4, no rivals
+HRAID ok   squad 4 normal: no lairs, no outposts
+HRAID ok   squad 4 normal: the Heart held shut, scaled for 4 at normal
+HRAID squad 4 normal built in 32141 ms, Heart at (286.0, 10.0, 213.0)
+HRAID squad 4 normal 1:00 WAVES wave 0 foes 0 mobs 99 up 4/4 you 122 hp 154 m to the Heart, tide 0 m
+HRAID squad 4 normal 2:00 WAVES wave 1 foes 0 mobs 95 up 4/4 you 160 hp 19 m to the Heart, tide 310 m
+HRAID squad 4 normal 3:00 WAVES wave 2 foes 2 mobs 97 up 4/4 you 160 hp 19 m to the Heart, tide 282 m
+HRAID squad 4 normal 4:00 WAVES wave 3 foes 5 mobs 99 up 4/4 you 179 hp 20 m to the Heart, tide 254 m
+HRAID squad 4 normal 5:00 WAVES wave 3 foes 0 mobs 90 up 4/4 you 197 hp 29 m to the Heart, tide 226 m
+HRAID squad 4 normal 6:00 WAVES wave 4 foes 1 mobs 92 up 4/4 you 197 hp 18 m to the Heart, tide 197 m
+HRAID squad 4 normal 7:00 WAVES wave 5 foes 3 mobs 93 up 4/4 you 214 hp 12 m to the Heart, tide 169 m
+HRAID squad 4 normal 8:00 WAVES wave 6 foes 10 mobs 101 up 4/4 you 214 hp 26 m to the Heart, tide 141 m
+HRAID squad 4 normal 9:00 WAVES wave 7 foes 16 mobs 106 up 4/4 you 223 hp 66 m to the Heart, tide 113 m
+HRAID squad 4 normal 10:00 WAVES wave 7 foes 6 mobs 96 up 4/4 you 223 hp 45 m to the Heart, tide 84 m
+HRAID squad 4 normal 11:00 WAVES wave 8 foes 3 mobs 93 up 4/4 you 223 hp 59 m to the Heart, tide 70 m
+HRAID squad 4 normal 12:00 BOSS wave 8 foes 3 mobs 94 up 4/4 you 223 hp 59 m to the Heart, tide 70 m
+LIFE 755 wisp revive cable_guy_
+LIFE 755 wisp revive parry_pete
+LIFE 757 wisp revive Hunter
+LIFE 761 wisp revive cable_guy_
+LIFE 763 wisp revive Hunter
+LIFE 764 box Hunter value 256 at (291.0, 3.0, 153.0)
+LIFE 764 box cable_guy_ value 384 at (291.0, 3.0, 153.0)
+LIFE 764 box ruckus_ value 256 at (292.0, 3.0, 153.0)
+LIFE 764 box parry_pete value 339 at (292.0, 3.0, 152.0)
+HRSWEEP 4 normal seed 11 arch : LOST at 764 s, downs 11, wave 8, boss yes
+HRAID squad 4 normal      0.00 start, squad of 4, normal
+HRAID squad 4 normal     75.45 wave 1: 6 monsters
+HRAID squad 4 normal    150.37 wave 2: 8 monsters
+HRAID squad 4 normal    225.28 wave 3: 11 monsters
+HRAID squad 4 normal    300.20 wave 4: 11 monsters
+HRAID squad 4 normal    375.12 wave 5: 11 monsters
+HRAID squad 4 normal    450.03 wave 6: 14 monsters
+HRAID squad 4 normal    525.47 wave 7: 12 monsters
+HRAID squad 4 normal    600.38 wave 8: 11 monsters
+HRAID squad 4 normal    660.32 boss colossus, 4000 hp
+HRAID squad 4 normal    765.20 lost
+HRAID ok   squad 4 normal: the first wave at 75s
+HRAID ok   squad 4 normal: 8 waves on the clock, marked 10s before, out of their gates []
+HRAID ok   squad 4 normal: wave monsters never over the cap of 17 (most at once 17)
+HRAID ok   squad 4 normal: the raid ended with a result (abyss at 12:44)
+HRAID ok   squad 4 normal: the raid is LOST
+HRAID ok   squad 4 normal: sounds: 8 waves, 1 boss rise, 48 gate ticks (>= 48)
+HRAID ok   squad 4 normal: every raid cue has its sound file
+HRAID ok   squad 4 normal: the summary agrees: Heart Raid (Normal) lost on wave 8 of 8 (12:46).
+HRAID squad 4 normal: LOST, 8 waves, 84 wave monsters, most mobs alive 106; 1005.6 s wall for 12:46 (21.87 ms a step)
+HRAID PASS
+ERROR: 6 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 7 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 6 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 38 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

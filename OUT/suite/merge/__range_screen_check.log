@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+RANGESCREEN ok   12 Hunters (12)
+RANGESCREEN ok   Lace has aimed slot rows
+RANGESCREEN ok   Kael has aimed slot rows
+RANGESCREEN ok   Vex has aimed slot rows
+RANGESCREEN ok   Albert has aimed slot rows
+RANGESCREEN ok   Neve has aimed slot rows
+RANGESCREEN ok   Cinder has aimed slot rows
+RANGESCREEN ok   Tenzo has aimed slot rows
+RANGESCREEN ok   Sparkle has aimed slot rows
+RANGESCREEN ok   Grimble has aimed slot rows
+RANGESCREEN ok   Meeko has aimed slot rows
+RANGESCREEN ok   Sable has aimed slot rows
+RANGESCREEN ok   Motley has aimed slot rows
+SCRIPT ERROR: Invalid access to property or key 'match' on a base object of type 'Dictionary'.
+          at: run (res://tools/range_screen_check.gd:38)
+          GDScript backtrace (most recent call first):
+              [0] run (res://tools/range_screen_check.gd:38)
+              [1] run (res://tools/check_registry.gd:980)
+              [2] _ready (res://scripts/main.gd:270)
+WATCHDOG quit: a script error, then 60 s and 1744 frames without a line (the check's coroutine is dead)

@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LEAN ok   18 types (18)
+LEAN ok   every food has a type (19 foods; untyped: [])
+LEAN ok   every type's part is a grown part ([])
+LEAN ok   every rigged species (48) has the lean's anchors (missing: [])
+LEAN ok   base_mode is off by default and meals lean the old way
+LEAN ok   a fresh Prismander has no mark and no part
+LEAN ok   one Fire snack: lean 9, a mark, and the tint moves toward Fire
+LEAN ok   3 Fire snacks: it leans Fire (88%)
+LEAN ok   more tint and more marks (2, then 3)
+LEAN ok   but no part before a form
+SCRIPT ERROR: Invalid access to property or key 'aff' on a base object of type 'Dictionary'.
+          at: describe (res://scripts/core/evo.gd:354)
+          GDScript backtrace (most recent call first):
+              [0] describe (res://scripts/core/evo.gd:354)
+              [1] _raise (res://tools/lean_check.gd:61)
+              [2] run (res://tools/lean_check.gd:104)
+              [3] run (res://tools/check_registry.gd:980)
+              [4] _ready (res://scripts/main.gd:270)
+LEAN FAIL its next form grows the Fire part: 
+LEAN ok   plain food leaves the lean alone
+LEAN ok   four Tideblooms later the lean is Water
+LEAN DONE, failures: 1

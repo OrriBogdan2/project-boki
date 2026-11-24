@@ -1,0 +1,280 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _expedition (res://tools/bot_human_check.gd:70)
+       [13] run (res://tools/bot_human_check.gd:60)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _expedition (res://tools/bot_human_check.gd:70)
+       [13] run (res://tools/bot_human_check.gd:60)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _expedition (res://tools/bot_human_check.gd:70)
+       [13] run (res://tools/bot_human_check.gd:60)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _expedition (res://tools/bot_human_check.gd:70)
+       [13] run (res://tools/bot_human_check.gd:60)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _expedition (res://tools/bot_human_check.gd:70)
+       [13] run (res://tools/bot_human_check.gd:60)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _expedition (res://tools/bot_human_check.gd:70)
+       [13] run (res://tools/bot_human_check.gd:60)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+FELL rift_runner hist=["43.3:(235.6,1.5,333.9) v(-3.5,-1.9,2.4) g0 f0.00 r0.00 gr0 void1 gl0 fuel1.0 kb0.2 dn0 st0.0 cd0.0 roam", "43.5:(235.5,0.9,334.1) v(0.0,0.6,0.0) g0 f0.00 r0.00 gr0 void1 gl1 fuel1.0 kb0.5 dn0 st0.0 cd0.0 roam", "43.8:(235.1,1.8,334.2) v(-5.5,3.7,-0.3) g0 f0.00 r0.00 gr0 void1 gl1 fuel0.2 kb0.1 dn0 st0.0 cd0.0 roam", "44.0:(234.2,1.8,334.1) v(-1.5,-7.2,0.1) g0 f0.00 r0.00 gr0 void1 gl0 fuel0.0 kb0.3 dn0 st0.3 cd0.0 roam", "44.3:(233.8,-0.5,334.2) v(-1.4,-10.9,0.1) g0 f0.00 r0.00 gr0 void1 gl0 fuel0.0 kb0.6 dn0 st0.0 cd0.0 roam", "44.5:(234.3,-3.4,334.3) v(2.2,-11.5,2.8) g0 f0.00 r0.00 gr0 void1 gl0 fuel0.0 kb0.8 dn0 st-0.0 cd0.0 assist", "44.8:(234.5,-6.2,335.6) v(-0.6,-11.1,5.4) g0 f0.00 r0.00 gr0 void1 gl0 fuel0.0 kb1.1 dn0 st-0.0 cd0.0 assist", "45.0:(234.3,-9.0,336.9) v(-1.3,-10.8,5.2) g0 f0.00 r0.00 gr0 void1 gl0 fuel0.0 kb1.3 dn0 st-0.0 cd0.0 assist", "45.3:(233.9,-11.6,338.2) v(-1.5,-10.4,5.2) g0 f0.00 r0.00 gr0 void1 gl0 fuel0.0 kb1.6 dn0 st-0.0 cd0.0 assist", "45.5:(233.6,-14.2,339.5) v(-1.4,-10.1,5.2) g0 f0.00 r0.00 gr0 void1 gl0 fuel0.0 kb1.8 dn0 st-0.0 cd0.0 assist"]
+LIFE 45 box rift_runner value 28 at (238.0, 2.0, 334.0)
+LIFE 50 stomp start backseat_bee on sleepyfox_
+LIFE 50 stomp start plum_crazy on sleepyfox_
+LIFE 52 sleepyfox_ stomped out
+LIFE 52 box sleepyfox_ value 39 at (409.0, 2.0, 269.0)
+LIFE 52 stomp end plum_crazy (gone)
+LIFE 52 stomp end backseat_bee (gone)
+FELL hoodie_up hist=["50.0:(244.7,1.2,322.6) v(1.3,0.0,-1.0) g0 f0.00 r-0.01 gr0 void1 gl1 fuel0.4 kb0.3 dn0 st0.0 cd0.0 roam", "50.3:(245.4,1.2,322.6) v(4.0,0.0,0.0) g0 f0.00 r-0.01 gr0 void1 gl1 fuel0.3 kb0.6 dn0 st0.0 cd0.0 roam", "50.5:(246.1,1.2,321.6) v(1.9,-1.2,-5.2) g0 f0.00 r-0.01 gr0 void1 gl0 fuel0.0 kb0.2 dn0 st0.2 cd0.0 roam", "50.8:(246.6,0.4,320.5) v(4.0,-4.9,-2.8) g0 f0.00 r-0.01 gr0 void1 gl0 fuel0.0 kb0.4 dn0 st-0.0 cd0.0 roam", "51.0:(247.9,-1.3,320.7) v(4.8,-8.6,3.8) g0 f0.00 r-0.01 gr0 void1 gl0 fuel0.0 kb0.7 dn0 st-0.0 cd0.0 roam", "51.3:(249.1,-3.9,321.4) v(6.1,-11.4,0.0) g0 f0.00 r-0.01 gr0 void1 gl0 fuel0.0 kb0.9 dn0 st-0.0 cd0.0 boki", "51.5:(250.6,-6.7,320.9) v(5.3,-11.1,-2.9) g0 f0.00 r-0.01 gr0 void1 gl0 fuel0.0 kb1.2 dn0 st-0.0 cd0.0 boki", "51.8:(251.9,-9.4,320.2) v(5.3,-10.7,-2.9) g0 f0.00 r-0.01 gr0 void1 gl0 fuel0.0 kb1.4 dn0 st-0.0 cd0.0 boki", "52.0:(253.2,-12.1,319.5) v(5.3,-10.4,-2.9) g0 f0.00 r-0.01 gr0 void1 gl0 fuel0.0 kb1.7 dn0 st-0.0 cd0.0 boki", "52.3:(254.6,-14.6,318.8) v(5.3,-10.1,-2.9) g0 f0.00 r-0.01 gr0 void1 gl0 fuel0.0 kb1.9 dn0 st-0.0 cd0.0 boki"]
+LIFE 52 box hoodie_up value 21 at (241.0, 2.0, 327.0)
+LIFE 55 box vinyl_vic value 28 at (239.0, 2.0, 327.0)
+LIFE 57 box couch_co_op value 37 at (412.0, 2.0, 271.0)
+LIFE 57 box dizzy_dot value 28 at (415.0, 2.0, 273.0)
+LIFE 59 wisp revive BoneApple8
+BOTLOG t=70 pepper_jack knocked by sundial_: low 0.0 s (backing off 0.0 s), heals left 4, 3v3, nearest mate 2 m (fighting)
+LIFE 70 stomp start BoneApple8 on ByteMe_
+LIFE 71 stomp start ClapBack on ByteMe_
+LIFE 71 stomp start snowbound_ on ByteMe_
+BOTLOG t=71 Hunter knocked by tinsel_: low 0.5 s (backing off 0.0 s), heals left 2, 2v3, nearest mate 5 m (fighting)
+LIFE 72 stomp start nightjar on Hunter
+LIFE 72 stomp start tinsel_ on Hunter
+LIFE 72 ByteMe_ stomped out
+LIFE 72 box ByteMe_ value 64 at (248.0, 2.0, 330.0)
+LIFE 72 stomp end ClapBack (gone)
+LIFE 72 stomp end snowbound_ (gone)
+LIFE 72 stomp end BoneApple8 (gone)
+LIFE 74 box Hunter value 20 at (291.0, 3.0, 120.0)
+LIFE 74 stomp end nightjar (gone)
+LIFE 74 stomp end tinsel_ (gone)
+LIFE 76 box Pixelpup value 21 at (289.0, 3.0, 121.0)
+LIFE 76 box pepper_jack value 44 at (290.0, 3.0, 121.0)
+LIFE 92 beacon team 9 brought back ByteMe_
+BOTLOG t=108 backseat_bee fights AFK_Alex; plum_crazy is 1 m away doing 'box'
+BOTLOG t=114 AFK_Alex knocked by backseat_bee: low 0.0 s (backing off 0.0 s), heals left 3, 3v2, nearest mate 1 m (fighting)
+BOTLOG t=117 wrenchmonkey knocked by backseat_bee: low 1.3 s (backing off 0.0 s), heals left 3, 2v2, nearest mate 3 m (fighting)
+LIFE 121 box wrenchmonkey value 21 at (408.0, 2.0, 258.0)
+LIFE 121 box AFK_Alex value 55 at (409.0, 2.0, 258.0)
+LIFE 121 box zippy_z value 29 at (411.0, 2.0, 258.0)
+BOTLOG t=129 ZigZagZoe fights ClapBack; noodle_ninja is 15 m away doing 'assist'
+BOTLOG t=131 ClapBack knocked by ZigZagZoe: low 0.5 s (backing off 0.0 s), heals left 1, 3v3, nearest mate 1 m (assist)
+LIFE 135 ClapBack stomped out
+LIFE 135 box ClapBack value 12 at (247.0, 3.0, 229.0)
+BOTLOG t=136 BoneApple8 knocked by noodle_ninja: low 0.3 s (backing off 0.0 s), heals left 1, 2v3, nearest mate 1 m (fighting)
+LIFE 136 box snowbound_ value 69 at (246.0, 3.0, 225.0)
+LIFE 136 box BoneApple8 value 42 at (249.0, 3.0, 226.0)
+BOTLOG t=168 ByteMe_ knocked by blank_page: low 0.6 s (backing off 0.5 s), heals left 0, 3v3, nearest mate 16 m (fighting)
+LIFE 169 stomp start blank_page on ByteMe_
+LIFE 169 stomp start quickscope_q on ByteMe_
+LIFE 169 stomp start capy_bara on ByteMe_
+LIFE 170 stomp cc stun on capy_bara
+LIFE 170 stomp end capy_bara (broken)
+LIFE 170 stomp cc stun on quickscope_q
+LIFE 170 stomp end quickscope_q (broken)
+LIFE 171 stomp end blank_page (missed)
+LIFE 172 box ByteMe_ value 33 at (144.0, 5.0, 387.0)
+BOTLOG t=181 blank_page knocked by mystery_meat: low 0.0 s (backing off 0.5 s), heals left 4, 3v1, nearest mate 1 m (fighting)
+BOTLOG t=185 mystery_meat fights quickscope_q; mr_biscuit is 25 m away doing 'ring'
+BOTLOG t=187 quickscope_q knocked by mystery_meat: low 1.1 s (backing off 1.5 s), heals left 4, 2v1, nearest mate 1 m (fighting)
+LIFE 190 box blank_page value 111 at (165.0, 2.0, 380.0)
+LIFE 190 box capy_bara value 26 at (165.0, 2.0, 380.0)
+LIFE 190 box quickscope_q value 72 at (166.0, 2.0, 380.0)
+BOTLOG t=213 plum_crazy knocked by nightjar: low 2.8 s (backing off 2.0 s), heals left 5, 1v3, nearest mate 65 m (roam)
+LIFE 214 stomp start tinsel_ on plum_crazy
+LIFE 214 stomp start nightjar on plum_crazy
+LIFE 215 stomp start sundial_ on plum_crazy
+LIFE 216 plum_crazy stomped out
+LIFE 216 box plum_crazy value 151 at (290.0, 3.0, 124.0)
+LIFE 216 stomp end sundial_ (gone)
+LIFE 216 stomp end nightjar (gone)
+LIFE 216 stomp end tinsel_ (gone)
+BOTLOG t=241 backseat_bee knocked by tinsel_: low 7.4 s (backing off 5.0 s), heals left 5, 1v3, nearest mate 152 m (zone)
+LIFE 241 stomp start tinsel_ on backseat_bee
+LIFE 243 stomp end tinsel_ (missed)
+LIFE 244 stomp start sundial_ on backseat_bee
+LIFE 245 stomp start tinsel_ on backseat_bee
+LIFE 245 box backseat_bee value 104 at (291.0, 3.0, 144.0)
+LIFE 245 stomp end sundial_ (gone)
+LIFE 245 stomp end tinsel_ (gone)
+BOTLOG t=317 tinsel_ knocked by cozy_goblin: low 5.9 s (backing off 3.0 s), heals left 1, 2v1, nearest mate 2 m (fighting)
+BOTLOG t=319 nightjar knocked by cozy_goblin: low 4.8 s (backing off 1.5 s), heals left 5, 1v1, nearest mate 37 m (revive)
+LIFE 319 stomp start cozy_goblin on tinsel_
+LIFE 322 stomp end cozy_goblin (missed)
+LIFE 327 box sundial_ value 104 at (290.0, 3.0, 119.0)
+LIFE 327 box nightjar value 43 at (290.0, 3.0, 118.0)
+LIFE 327 box tinsel_ value 54 at (290.0, 3.0, 119.0)
+BOTHUMAN run seed=3 diff=medium t=329 extracted=0 out=24
+BOTHUMAN medium | squad apart share (no mate within 30 m) | 0.06
+BOTHUMAN medium | squad mean nearest-mate distance m | 10.64
+BOTHUMAN medium | low-hp fight seconds | 42.50
+BOTHUMAN medium | low-hp fight share not backing off | 0.48
+BOTHUMAN medium | low-hp fight share with heal unused | 0.95
+BOTHUMAN medium | knocks by a rival | 18.00
+BOTHUMAN medium | knocked with heals left share | 0.94
+BOTHUMAN medium | knocked alone share (mate > 30 m) | 0.22
+BOTHUMAN medium | knocked outnumbered share | 0.33
+BOTHUMAN medium | knocked never backed off share | 0.00
+BOTHUMAN medium | fights that turned (under 50% health) | 23.00
+BOTHUMAN medium | turned fights survived share | 0.26
+BOTHUMAN medium | belt items used in a fight | 5.00
+BOTHUMAN medium | belt items used calm | 16.00
+BOTHUMAN medium | calm hurt share with heal unused | 0.44
+BOTHUMAN medium | calm hurt seconds | 31.50
+BOTHUMAN medium | engages | 64.00
+BOTHUMAN medium | engages outnumbered share | 0.17
+BOTHUMAN medium | engages under 40% health share | 0.05
+BOTHUMAN medium | assist share (mates within 35 m) | 0.80
+BOTHUMAN medium | assist chances per fight sample | 1.40
+BOTHUMAN medium | focus same-target share | 0.91
+BOTHUMAN medium | weak targets dropped | 3.00
+BOTHUMAN medium | target flips per fight minute | 5.26
+BOTHUMAN medium | fight share of up time | 0.10
+BOTHUMAN medium | idle share of up time | 0.12
+BOTHUMAN medium | revived / knocks | 0.11
+BOTHUMAN medium | extracted per expedition | 0.00
+BOTHUMAN medium | out per expedition | 24.00
+BOTHUMAN medium | alive at the end per expedition | 6.00
+BOTHUMAN medium | abil dodge | 33
+BOTHUMAN medium | abil k2 | 12
+BOTHUMAN medium | abil kin | 17
+BOTHUMAN medium | abil primary | 9
+BOTHUMAN medium | abil secondary | 37
+BOTHUMAN medium | abil ult | 15
+BOTHUMAN medium | abil ultimate | 8
+BOTHUMAN medium | belt calm armor_kit | 1
+BOTHUMAN medium | belt calm chest_key | 1
+BOTHUMAN medium | belt calm tonic | 14
+BOTHUMAN medium | belt calm total | 16
+BOTHUMAN medium | belt fight medkit | 1
+BOTHUMAN medium | belt fight shield_cell | 1
+BOTHUMAN medium | belt fight tonic | 3
+BOTHUMAN medium | belt fight total | 5
+BOTHUMAN medium | idle at box | 581
+BOTHUMAN medium | idle at lair_camp | 3
+BOTHUMAN medium | idle at ring | 1
+BOTHUMAN medium | idle at roam | 4
+BOTHUMAN medium | idle at seat | 136
+BOTHUMAN medium | idle at zone | 66
+BOTHUMAN skip limits: the run was cut short (6353 samples), too little to judge
+BOTHUMAN done, failures: 0
+ERROR: 1 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 7 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 22 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 7 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 36388: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 36389: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 36390: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 36391: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 68 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

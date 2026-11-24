@@ -1,0 +1,430 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AKCHECK archer: walk leaves the ledge      PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK archer: walk took hold on the ledge PASS  
+AKCHECK archer: lmb leaves the ledge       PASS  x=10.05 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK archer: lmb took hold on the ledge PASS  
+AKCHECK archer: rmb leaves the ledge       PASS  x=9.56 y=2.64 of 3.20, 1.8s walking, 0.0s rooted by the kit
+AKCHECK archer: rmb took hold on the ledge PASS  
+AKCHECK archer: e leaves the ledge         PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK archer: e took hold on the ledge   PASS  
+AKCHECK archer: e_press leaves the ledge   PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK archer: e_press took hold on the ledge PASS  
+AKCHECK archer: r_press leaves the ledge   PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK archer: r_press took hold on the ledge PASS  
+AKCHECK archer: crouch leaves the ledge    PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK archer: crouch took hold on the ledge PASS  
+AKCHECK archer: walk leaves the rim        PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK archer: walk took hold on the rim  PASS  
+AKCHECK archer: lmb leaves the rim         PASS  x=10.05 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK archer: lmb took hold on the rim   PASS  
+AKCHECK archer: rmb leaves the rim         PASS  x=9.56 y=2.64 of 3.20, 1.8s walking, 0.0s rooted by the kit
+AKCHECK archer: rmb took hold on the rim   PASS  
+AKCHECK archer: e leaves the rim           PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK archer: e took hold on the rim     PASS  
+AKCHECK archer: e_press leaves the rim     PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK archer: e_press took hold on the rim PASS  
+AKCHECK archer: r_press leaves the rim     PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK archer: r_press took hold on the rim PASS  
+AKCHECK archer: crouch leaves the rim      PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK archer: crouch took hold on the rim PASS  
+AKCHECK juggernaut: walk leaves the ledge  PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: walk took hold on the ledge PASS  
+AKCHECK juggernaut: lmb leaves the ledge   PASS  x=9.79 y=2.64 of 3.20, 1.2s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: lmb took hold on the ledge PASS  
+AKCHECK juggernaut: rmb leaves the ledge   PASS  x=10.19 y=2.64 of 3.20, 1.0s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: rmb took hold on the ledge PASS  
+AKCHECK juggernaut: e leaves the ledge     PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: e took hold on the ledge PASS  
+AKCHECK juggernaut: e_press leaves the ledge PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: e_press took hold on the ledge PASS  
+AKCHECK juggernaut: r_press leaves the ledge PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: r_press took hold on the ledge PASS  
+AKCHECK juggernaut: crouch leaves the ledge PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: crouch took hold on the ledge PASS  
+AKCHECK juggernaut: walk leaves the rim    PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: walk took hold on the rim PASS  
+AKCHECK juggernaut: lmb leaves the rim     PASS  x=9.79 y=2.64 of 3.20, 1.2s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: lmb took hold on the rim PASS  
+AKCHECK juggernaut: rmb leaves the rim     PASS  x=10.19 y=2.64 of 3.20, 1.0s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: rmb took hold on the rim PASS  
+AKCHECK juggernaut: e leaves the rim       PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: e took hold on the rim PASS  
+AKCHECK juggernaut: e_press leaves the rim PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: e_press took hold on the rim PASS  
+AKCHECK juggernaut: r_press leaves the rim PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: r_press took hold on the rim PASS  
+AKCHECK juggernaut: crouch leaves the rim  PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK juggernaut: crouch took hold on the rim PASS  
+AKCHECK gunslinger: walk leaves the ledge  PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: walk took hold on the ledge PASS  
+AKCHECK gunslinger: lmb leaves the ledge   PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: lmb took hold on the ledge PASS  
+AKCHECK gunslinger: rmb leaves the ledge   PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: rmb took hold on the ledge PASS  
+AKCHECK gunslinger: e leaves the ledge     PASS  x=10.49 y=2.64 of 3.20, 1.1s walking, 1.0s rooted by the kit
+AKCHECK gunslinger: e took hold on the ledge PASS  
+AKCHECK gunslinger: e_press leaves the ledge PASS  x=10.49 y=2.64 of 3.20, 1.1s walking, 1.0s rooted by the kit
+AKCHECK gunslinger: e_press took hold on the ledge PASS  
+AKCHECK gunslinger: r_press leaves the ledge PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: r_press took hold on the ledge PASS  
+AKCHECK gunslinger: crouch leaves the ledge PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: crouch took hold on the ledge PASS  
+AKCHECK gunslinger: walk leaves the rim    PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: walk took hold on the rim PASS  
+AKCHECK gunslinger: lmb leaves the rim     PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: lmb took hold on the rim PASS  
+AKCHECK gunslinger: rmb leaves the rim     PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: rmb took hold on the rim PASS  
+AKCHECK gunslinger: e leaves the rim       PASS  x=10.49 y=2.64 of 3.20, 1.1s walking, 1.0s rooted by the kit
+AKCHECK gunslinger: e took hold on the rim PASS  
+AKCHECK gunslinger: e_press leaves the rim PASS  x=10.49 y=2.64 of 3.20, 1.1s walking, 1.0s rooted by the kit
+AKCHECK gunslinger: e_press took hold on the rim PASS  
+AKCHECK gunslinger: r_press leaves the rim PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: r_press took hold on the rim PASS  
+AKCHECK gunslinger: crouch leaves the rim  PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK gunslinger: crouch took hold on the rim PASS  
+AKCHECK bulwark: walk leaves the ledge     PASS  x=10.54 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK bulwark: walk took hold on the ledge PASS  
+AKCHECK bulwark: lmb leaves the ledge      PASS  x=9.85 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK bulwark: lmb took hold on the ledge PASS  
+AKCHECK bulwark: rmb leaves the ledge      PASS  x=10.46 y=2.64 of 3.20, 1.2s walking, 0.0s rooted by the kit
+AKCHECK bulwark: rmb took hold on the ledge PASS  
+AKCHECK bulwark: e leaves the ledge        PASS  x=10.54 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK bulwark: e took hold on the ledge  PASS  
+AKCHECK bulwark: e_press leaves the ledge  PASS  x=10.54 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK bulwark: e_press took hold on the ledge PASS  
+AKCHECK bulwark: r_press leaves the ledge  PASS  x=10.54 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK bulwark: r_press took hold on the ledge PASS  
+AKCHECK bulwark: crouch leaves the ledge   PASS  x=10.44 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK bulwark: crouch took hold on the ledge PASS  
+AKCHECK bulwark: walk leaves the rim       PASS  x=10.54 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK bulwark: walk took hold on the rim PASS  
+AKCHECK bulwark: lmb leaves the rim        PASS  x=9.85 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK bulwark: lmb took hold on the rim  PASS  
+AKCHECK bulwark: rmb leaves the rim        PASS  x=10.46 y=2.64 of 3.20, 1.2s walking, 0.0s rooted by the kit
+AKCHECK bulwark: rmb took hold on the rim  PASS  
+AKCHECK bulwark: e leaves the rim          PASS  x=10.54 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK bulwark: e took hold on the rim    PASS  
+AKCHECK bulwark: e_press leaves the rim    PASS  x=10.54 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK bulwark: e_press took hold on the rim PASS  
+AKCHECK bulwark: r_press leaves the rim    PASS  x=10.54 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK bulwark: r_press took hold on the rim PASS  
+AKCHECK bulwark: crouch leaves the rim     PASS  x=10.44 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK bulwark: crouch took hold on the rim PASS  
+AKCHECK rimewright: walk leaves the ledge  PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: walk took hold on the ledge PASS  
+AKCHECK rimewright: lmb leaves the ledge   PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: lmb took hold on the ledge PASS  
+AKCHECK rimewright: rmb leaves the ledge   PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: rmb took hold on the ledge PASS  
+AKCHECK rimewright: e leaves the ledge     PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: e took hold on the ledge PASS  
+AKCHECK rimewright: e_press leaves the ledge PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: e_press took hold on the ledge PASS  
+AKCHECK rimewright: r_press leaves the ledge PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: r_press took hold on the ledge PASS  
+AKCHECK rimewright: crouch leaves the ledge PASS  x=10.31 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK rimewright: crouch took hold on the ledge PASS  
+AKCHECK rimewright: walk leaves the rim    PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: walk took hold on the rim PASS  
+AKCHECK rimewright: lmb leaves the rim     PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: lmb took hold on the rim PASS  
+AKCHECK rimewright: rmb leaves the rim     PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: rmb took hold on the rim PASS  
+AKCHECK rimewright: e leaves the rim       PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: e took hold on the rim PASS  
+AKCHECK rimewright: e_press leaves the rim PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: e_press took hold on the rim PASS  
+AKCHECK rimewright: r_press leaves the rim PASS  x=10.39 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK rimewright: r_press took hold on the rim PASS  
+AKCHECK rimewright: crouch leaves the rim  PASS  x=10.31 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK rimewright: crouch took hold on the rim PASS  
+AKCHECK ashwick: walk leaves the ledge     PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: walk took hold on the ledge PASS  
+AKCHECK ashwick: lmb leaves the ledge      PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: lmb took hold on the ledge PASS  
+AKCHECK ashwick: rmb leaves the ledge      PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: rmb took hold on the ledge PASS  
+AKCHECK ashwick: e leaves the ledge        PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: e took hold on the ledge  PASS  
+AKCHECK ashwick: e_press leaves the ledge  PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: e_press took hold on the ledge PASS  
+AKCHECK ashwick: r_press leaves the ledge  PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: r_press took hold on the ledge PASS  
+AKCHECK ashwick: crouch leaves the ledge   PASS  x=10.37 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK ashwick: crouch took hold on the ledge PASS  
+AKCHECK ashwick: walk leaves the rim       PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: walk took hold on the rim PASS  
+AKCHECK ashwick: lmb leaves the rim        PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: lmb took hold on the rim  PASS  
+AKCHECK ashwick: rmb leaves the rim        PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: rmb took hold on the rim  PASS  
+AKCHECK ashwick: e leaves the rim          PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: e took hold on the rim    PASS  
+AKCHECK ashwick: e_press leaves the rim    PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: e_press took hold on the rim PASS  
+AKCHECK ashwick: r_press leaves the rim    PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ashwick: r_press took hold on the rim PASS  
+AKCHECK ashwick: crouch leaves the rim     PASS  x=10.37 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK ashwick: crouch took hold on the rim PASS  
+AKCHECK dolm: walk leaves the ledge        PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: walk took hold on the ledge  PASS  
+AKCHECK dolm: lmb leaves the ledge         PASS  x=10.28 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: lmb took hold on the ledge   PASS  
+AKCHECK dolm: rmb leaves the ledge         PASS  x=10.46 y=2.64 of 3.20, 0.7s walking, 0.0s rooted by the kit
+AKCHECK dolm: rmb took hold on the ledge   PASS  
+AKCHECK dolm: e leaves the ledge           PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: e took hold on the ledge     PASS  
+AKCHECK dolm: e_press leaves the ledge     PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: e_press took hold on the ledge PASS  
+AKCHECK dolm: r_press leaves the ledge     PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: r_press took hold on the ledge PASS  
+AKCHECK dolm: crouch leaves the ledge      PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK dolm: crouch took hold on the ledge PASS  
+AKCHECK dolm: walk leaves the rim          PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: walk took hold on the rim    PASS  
+AKCHECK dolm: lmb leaves the rim           PASS  x=10.28 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: lmb took hold on the rim     PASS  
+AKCHECK dolm: rmb leaves the rim           PASS  x=10.46 y=2.64 of 3.20, 0.7s walking, 0.0s rooted by the kit
+AKCHECK dolm: rmb took hold on the rim     PASS  
+AKCHECK dolm: e leaves the rim             PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: e took hold on the rim       PASS  
+AKCHECK dolm: e_press leaves the rim       PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: e_press took hold on the rim PASS  
+AKCHECK dolm: r_press leaves the rim       PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dolm: r_press took hold on the rim PASS  
+AKCHECK dolm: crouch leaves the rim        PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK dolm: crouch took hold on the rim  PASS  
+AKCHECK mage: walk leaves the ledge        PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: walk took hold on the ledge  PASS  
+AKCHECK mage: lmb leaves the ledge         PASS  x=10.30 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: lmb took hold on the ledge   PASS  
+AKCHECK mage: rmb leaves the ledge         PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: rmb took hold on the ledge   PASS  
+AKCHECK mage: e leaves the ledge           PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: e took hold on the ledge     PASS  
+AKCHECK mage: e_press leaves the ledge     PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: e_press took hold on the ledge PASS  
+AKCHECK mage: r_press leaves the ledge     PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: r_press took hold on the ledge PASS  
+AKCHECK mage: crouch leaves the ledge      PASS  x=10.37 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK mage: crouch took hold on the ledge PASS  
+AKCHECK mage: walk leaves the rim          PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: walk took hold on the rim    PASS  
+AKCHECK mage: lmb leaves the rim           PASS  x=10.30 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: lmb took hold on the rim     PASS  
+AKCHECK mage: rmb leaves the rim           PASS  x=10.47 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: rmb took hold on the rim     PASS  
+AKCHECK mage: e leaves the rim             PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: e took hold on the rim       PASS  
+AKCHECK mage: e_press leaves the rim       PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: e_press took hold on the rim PASS  
+AKCHECK mage: r_press leaves the rim       PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK mage: r_press took hold on the rim PASS  
+AKCHECK mage: crouch leaves the rim        PASS  x=10.37 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK mage: crouch took hold on the rim  PASS  
+AKCHECK dredge: walk leaves the ledge      PASS  x=10.45 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dredge: walk took hold on the ledge PASS  
+AKCHECK dredge: lmb leaves the ledge       PASS  x=10.20 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK dredge: lmb took hold on the ledge PASS  
+AKCHECK dredge: rmb leaves the ledge       PASS  x=10.06 y=2.64 of 3.20, 1.9s walking, 0.0s rooted by the kit
+AKCHECK dredge: rmb took hold on the ledge PASS  
+AKCHECK dredge: e leaves the ledge         PASS  x=10.47 y=2.64 of 3.20, 0.7s walking, 0.0s rooted by the kit
+AKCHECK dredge: e took hold on the ledge   PASS  
+AKCHECK dredge: e_press leaves the ledge   PASS  x=10.47 y=2.64 of 3.20, 0.7s walking, 0.0s rooted by the kit
+AKCHECK dredge: e_press took hold on the ledge PASS  
+AKCHECK dredge: r_press leaves the ledge   PASS  x=10.45 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dredge: r_press took hold on the ledge PASS  
+AKCHECK dredge: crouch leaves the ledge    PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK dredge: crouch took hold on the ledge PASS  
+AKCHECK dredge: walk leaves the rim        PASS  x=10.45 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dredge: walk took hold on the rim  PASS  
+AKCHECK dredge: lmb leaves the rim         PASS  x=10.20 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK dredge: lmb took hold on the rim   PASS  
+AKCHECK dredge: rmb leaves the rim         PASS  x=10.45 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dredge: rmb took hold on the rim   PASS  
+AKCHECK dredge: e leaves the rim           PASS  x=10.47 y=2.64 of 3.20, 0.7s walking, 0.0s rooted by the kit
+AKCHECK dredge: e took hold on the rim     PASS  
+AKCHECK dredge: e_press leaves the rim     PASS  x=10.47 y=2.64 of 3.20, 0.7s walking, 0.0s rooted by the kit
+AKCHECK dredge: e_press took hold on the rim PASS  
+AKCHECK dredge: r_press leaves the rim     PASS  x=10.45 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK dredge: r_press took hold on the rim PASS  
+AKCHECK dredge: crouch leaves the rim      PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK dredge: crouch took hold on the rim PASS  
+AKCHECK tender: walk leaves the ledge      PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: walk took hold on the ledge PASS  
+AKCHECK tender: lmb leaves the ledge       PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: lmb took hold on the ledge PASS  
+AKCHECK tender: rmb leaves the ledge       PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: rmb took hold on the ledge PASS  
+AKCHECK tender: e leaves the ledge         PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: e took hold on the ledge   PASS  
+AKCHECK tender: e_press leaves the ledge   PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: e_press took hold on the ledge PASS  
+AKCHECK tender: r_press leaves the ledge   PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: r_press took hold on the ledge PASS  
+AKCHECK tender: crouch leaves the ledge    PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK tender: crouch took hold on the ledge PASS  
+AKCHECK tender: carry leaves the ledge     PASS  x=10.56 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: carry took hold on the ledge PASS  
+AKCHECK tender: walk leaves the rim        PASS  x=10.54 y=2.64 of 3.20, 0.8s walking, 0.0s rooted by the kit
+AKCHECK tender: walk took hold on the rim  PASS  
+AKCHECK tender: lmb leaves the rim         PASS  x=10.54 y=2.64 of 3.20, 0.8s walking, 0.0s rooted by the kit
+AKCHECK tender: lmb took hold on the rim   PASS  
+AKCHECK tender: rmb leaves the rim         PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: rmb took hold on the rim   PASS  
+AKCHECK tender: e leaves the rim           PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: e took hold on the rim     PASS  
+AKCHECK tender: e_press leaves the rim     PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: e_press took hold on the rim PASS  
+AKCHECK tender: r_press leaves the rim     PASS  x=10.48 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: r_press took hold on the rim PASS  
+AKCHECK tender: crouch leaves the rim      PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK tender: crouch took hold on the rim PASS  
+AKCHECK tender: carry leaves the rim       PASS  x=10.41 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK tender: carry took hold on the rim PASS  
+AKCHECK thief: walk leaves the ledge       PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: walk took hold on the ledge PASS  
+AKCHECK thief: lmb leaves the ledge        PASS  x=10.06 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK thief: lmb took hold on the ledge  PASS  
+AKCHECK thief: rmb leaves the ledge        PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: rmb took hold on the ledge  PASS  
+AKCHECK thief: e leaves the ledge          PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: e took hold on the ledge    PASS  
+AKCHECK thief: e_press leaves the ledge    PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: e_press took hold on the ledge PASS  
+AKCHECK thief: r_press leaves the ledge    PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: r_press took hold on the ledge PASS  
+AKCHECK thief: crouch leaves the ledge     PASS  x=10.37 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK thief: crouch took hold on the ledge PASS  
+AKCHECK thief: walk leaves the rim         PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: walk took hold on the rim   PASS  
+AKCHECK thief: lmb leaves the rim          PASS  x=10.06 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK thief: lmb took hold on the rim    PASS  
+AKCHECK thief: rmb leaves the rim          PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: rmb took hold on the rim    PASS  
+AKCHECK thief: e leaves the rim            PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: e took hold on the rim      PASS  
+AKCHECK thief: e_press leaves the rim      PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: e_press took hold on the rim PASS  
+AKCHECK thief: r_press leaves the rim      PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK thief: r_press took hold on the rim PASS  
+AKCHECK thief: crouch leaves the rim       PASS  x=10.37 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK thief: crouch took hold on the rim PASS  
+AKCHECK ostra: walk leaves the ledge       PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: walk took hold on the ledge PASS  
+AKCHECK ostra: lmb leaves the ledge        PASS  x=10.30 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: lmb took hold on the ledge  PASS  
+AKCHECK ostra: rmb leaves the ledge        PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: rmb took hold on the ledge  PASS  
+AKCHECK ostra: e leaves the ledge          PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: e took hold on the ledge    PASS  
+AKCHECK ostra: e_press leaves the ledge    PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: e_press took hold on the ledge PASS  
+AKCHECK ostra: r_press leaves the ledge    PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: r_press took hold on the ledge PASS  
+AKCHECK ostra: crouch leaves the ledge     PASS  x=10.37 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK ostra: crouch took hold on the ledge PASS  
+AKCHECK ostra: walk leaves the rim         PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: walk took hold on the rim   PASS  
+AKCHECK ostra: lmb leaves the rim          PASS  x=10.30 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: lmb took hold on the rim    PASS  
+AKCHECK ostra: rmb leaves the rim          PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: rmb took hold on the rim    PASS  
+AKCHECK ostra: e leaves the rim            PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: e took hold on the rim      PASS  
+AKCHECK ostra: e_press leaves the rim      PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: e_press took hold on the rim PASS  
+AKCHECK ostra: r_press leaves the rim      PASS  x=10.49 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK ostra: r_press took hold on the rim PASS  
+AKCHECK ostra: crouch leaves the rim       PASS  x=10.37 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK ostra: crouch took hold on the rim PASS  
+AKCHECK gil: walk leaves the ledge         PASS  x=10.43 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gil: walk took hold on the ledge   PASS  
+AKCHECK gil: lmb leaves the ledge          PASS  x=9.74 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK gil: lmb took hold on the ledge    PASS  
+AKCHECK gil: rmb leaves the ledge          PASS  x=10.43 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gil: rmb took hold on the ledge    PASS  
+AKCHECK gil: e leaves the ledge            PASS  x=10.02 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK gil: e took hold on the ledge      PASS  
+AKCHECK gil: e_press leaves the ledge      PASS  x=10.02 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK gil: e_press took hold on the ledge PASS  
+AKCHECK gil: r_press leaves the ledge      PASS  x=10.43 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gil: r_press took hold on the ledge PASS  
+AKCHECK gil: crouch leaves the ledge       PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK gil: crouch took hold on the ledge PASS  
+AKCHECK gil: walk leaves the rim           PASS  x=10.43 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gil: walk took hold on the rim     PASS  
+AKCHECK gil: lmb leaves the rim            PASS  x=9.74 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK gil: lmb took hold on the rim      PASS  
+AKCHECK gil: rmb leaves the rim            PASS  x=10.43 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gil: rmb took hold on the rim      PASS  
+AKCHECK gil: e leaves the rim              PASS  x=10.02 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK gil: e took hold on the rim        PASS  
+AKCHECK gil: e_press leaves the rim        PASS  x=10.02 y=2.64 of 3.20, 1.1s walking, 0.0s rooted by the kit
+AKCHECK gil: e_press took hold on the rim  PASS  
+AKCHECK gil: r_press leaves the rim        PASS  x=10.43 y=2.64 of 3.20, 0.9s walking, 0.0s rooted by the kit
+AKCHECK gil: r_press took hold on the rim  PASS  
+AKCHECK gil: crouch leaves the rim         PASS  x=10.36 y=2.64 of 3.20, 1.4s walking, 0.0s rooted by the kit
+AKCHECK gil: crouch took hold on the rim   PASS  
+LWALK DONE, 368 checks, failures: 0
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 4 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 221: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 219: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 234: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 273: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 280: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 287: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 292: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 291: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 297: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 302: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 48 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,65 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+DECOR ok   flowers has a comfort tag (bright)
+DECOR ok   bush has a comfort tag (wild)
+DECOR ok   tree has a comfort tag (wild)
+DECOR ok   pine has a comfort tag (wild)
+DECOR ok   blossom_tree has a comfort tag (wild)
+DECOR ok   lantern has a comfort tag (bright)
+DECOR ok   lamp_post has a comfort tag (bright)
+DECOR ok   bench has a comfort tag (cosy)
+DECOR ok   kin_bed has a comfort tag (cosy)
+DECOR ok   rug has a comfort tag (cosy)
+DECOR ok   rug_long has a comfort tag (cosy)
+DECOR ok   banner has a comfort tag (bright)
+DECOR ok   pillar has a comfort tag (quiet)
+DECOR ok   kin_statue has a comfort tag (quiet)
+DECOR ok   fountain has a comfort tag (quiet)
+DECOR ok   cosy effect has a name and a line
+DECOR ok   bright effect has a name and a line
+DECOR ok   wild effect has a name and a line
+DECOR ok   quiet effect has a name and a line
+DECOR ok   cosy: two pieces, effect off
+DECOR ok   cosy: three pieces switch the effect on
+DECOR ok   cosy: the zone card lists it
+DECOR ok   cosy: no other tag's effect is on
+DECOR ok   cosy: removing one switches it off
+DECOR ok   cosy: the card no longer lists it
+DECOR ok   bright: two pieces, effect off
+DECOR ok   bright: three pieces switch the effect on
+DECOR ok   bright: the zone card lists it
+DECOR ok   bright: no other tag's effect is on
+DECOR ok   bright: removing one switches it off
+DECOR ok   bright: the card no longer lists it
+DECOR ok   wild: two pieces, effect off
+DECOR ok   wild: three pieces switch the effect on
+DECOR ok   wild: the zone card lists it
+DECOR ok   wild: no other tag's effect is on
+DECOR ok   wild: removing one switches it off
+DECOR ok   wild: the card no longer lists it
+DECOR ok   quiet: two pieces, effect off
+DECOR ok   quiet: three pieces switch the effect on
+DECOR ok   quiet: the zone card lists it
+DECOR ok   quiet: no other tag's effect is on
+DECOR ok   quiet: removing one switches it off
+DECOR ok   quiet: the card no longer lists it
+DECOR ok   bright off: the patch ripens in grow_secs
+DECOR ok   wild off: the visitor chance is the rules'
+DECOR ok   cosy off: naps restore no joy
+DECOR ok   quiet off: squabbles at the rules' chance
+DECOR ok   all four tags three times: four effects on
+DECOR ok   bright on: the patch ripens faster
+DECOR ok   wild on: visitors come more often
+DECOR ok   cosy on: naps restore joy
+DECOR ok   quiet on: fewer squabbles
+DECOR ok   a built zone exists
+DECOR ok   glasswater: the start zone's lanterns are not its own
+DECOR ok   the start zone keeps its own effect
+DECOR DONE, failures: 0
+WARNING: 12 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

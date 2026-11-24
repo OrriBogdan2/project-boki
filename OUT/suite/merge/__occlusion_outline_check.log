@@ -1,0 +1,22 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+OCCLUSION cliff: terrain 5.7 m above the sight line at (104.5, 1.6, 117.5)
+OCCLUSION FAIL you, behind a cliff, wear the outline
+OCCLUSION FAIL your teammate wears it in the squad colour
+OCCLUSION FAIL a rival in sight wears it in red
+OCCLUSION ok   an unseen rival does not
+OCCLUSION FAIL but your side still does
+OCCLUSION FAIL back in sight, the rival wears it again
+OCCLUSION ok   Low takes it off
+OCCLUSION ok   medium puts it back
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 21 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

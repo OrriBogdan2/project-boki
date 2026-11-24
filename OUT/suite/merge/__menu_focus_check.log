@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MENUFOCUS title done, 9 buttons so far
+MENUFOCUS pause done, 13 buttons so far
+MENUFOCUS pause_title done, 17 buttons so far
+MENUFOCUS settings done, 24 buttons so far
+MENUFOCUS saves done, 30 buttons so far
+MENUFOCUS inventory done, 36 buttons so far
+MENUFOCUS title done, 45 buttons so far
+MENUFOCUS pause done, 49 buttons so far
+MENUFOCUS pause_title done, 53 buttons so far
+MENUFOCUS settings done, 60 buttons so far
+MENUFOCUS saves done, 66 buttons so far
+MENUFOCUS inventory done, 72 buttons so far
+MENUFOCUS CHECK DONE, buttons 72, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

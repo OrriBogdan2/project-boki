@@ -1,0 +1,57 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+COMELOOK ok   five Boki live on the farm (5)
+COMELOOK ok   the first look only learns who lives here: nobody comes
+COMELOOK ok   a new Boki: A, B, D come (curious first, timid last): ABD
+COMELOOK ok   a new Boki: no more than three come
+COMELOOK ok   a new Boki: a boki event; D is timid
+COMELOOK ok   a new Boki: everyone who came has looked and gone back to what they do
+COMELOOK ok   a new Boki: D hung back (4.2 m), A stood close (1.4 m)
+COMELOOK ok   a new Boki: they chatter (A,B,D)
+COMELOOK ok   a new Boki: they react by their traits: curious A sniffs, timid D hides ({ "A": "sniff", "B": "sniff", "D": "hide" })
+COMELOOK ok   a new Boki: A keeps one memory line: 'was there the day Newt arrived'
+COMELOOK ok   a new Boki: the line says it was a Rare Egg only when it was
+COMELOOK ok   a new Boki: nobody else wrote a line
+COMELOOK ok   a Rare Egg Boki: A, B, D come (curious first, timid last): ABD
+COMELOOK ok   a Rare Egg Boki: no more than three come
+COMELOOK ok   a Rare Egg Boki: a rare event; D is timid
+COMELOOK ok   a Rare Egg Boki: everyone who came has looked and gone back to what they do
+COMELOOK ok   a Rare Egg Boki: D hung back (4.2 m), A stood close (1.4 m)
+COMELOOK ok   a Rare Egg Boki: they chatter (A,B,D)
+COMELOOK ok   a Rare Egg Boki: they react by their traits: curious A sniffs, timid D hides ({ "A": "sniff", "B": "sniff", "D": "hide" })
+COMELOOK ok   a Rare Egg Boki: A keeps one memory line: 'was there the day Rarity hatched from a Rare Egg'
+COMELOOK ok   a Rare Egg Boki: the line says it was a Rare Egg only when it was
+COMELOOK ok   a Rare Egg Boki: nobody else wrote a line
+HobSpot: something is inside Hob's clear ring at (35.5, 0.0, 35.5); he moves to (35.5, 0.0, 33.5)
+COMELOOK ok   a new toy: you put a picnic rug down
+COMELOOK ok   a new toy: A, B, D come: ABD
+COMELOOK ok   a new toy: A (most curious) reaches the toy first (1.1 m)
+COMELOOK ok   a new toy: A keeps 'was first to try the new picnic rug'
+COMELOOK ok   a base toy: you put a play ball down
+COMELOOK ok   a base toy: ABD come, A (most curious) first
+COMELOOK ok   a base toy: A keeps 'was first to try the new play ball'
+COMELOOK ok   you home with loot: three come to you
+COMELOOK ok   you home with loot: they chatter and A keeps 'was there the day you came home with loot'
+COMELOOK ok   the same trip is not news twice
+COMELOOK done, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

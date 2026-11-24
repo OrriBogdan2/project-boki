@@ -1,0 +1,12 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PROF PASS Prof.on follows the extension class
+PROF PASS every export preset keeps perf_tracy/ out
+PROF PASS the report runs
+PROF PASS slowest first: mean 10.5, p95 19 ms
+PROF PASS the second zone follows
+PROF PASS the warm-up zone is dropped
+PROF DONE, failures: 0

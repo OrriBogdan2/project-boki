@@ -1,0 +1,140 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PBCHECK gunslinger LMB into a wall at 0.3m: puff at the face PASS  in view 3 buried 0
+PBCHECK gunslinger LMB: a foe touching you at a wall takes it PASS  took 17
+PBCHECK gunslinger RMB: a foe touching you at a wall takes it PASS  took 22
+PBCHECK gunslinger LMB into a cliff at 0.3m: puff at the face PASS  in view 4 buried 0
+PBCHECK gunslinger LMB: a foe touching you at a cliff takes it PASS  took 17
+PBCHECK gunslinger RMB: a foe touching you at a cliff takes it PASS  took 22
+PBCHECK gunslinger LMB with a wall at your back: hits ahead, none behind PASS  took 17 behind 0
+PBCHECK bulwark LMB into a wall at 0.3m: puff at the face    PASS  in view 10 buried 0
+PBCHECK bulwark LMB: a foe touching you at a wall takes it   PASS  took 44
+PBCHECK bulwark LMB into a cliff at 0.3m: puff at the face   PASS  in view 10 buried 0
+PBCHECK bulwark LMB: a foe touching you at a cliff takes it  PASS  took 44
+PBCHECK bulwark LMB with a wall at your back: hits ahead, none behind PASS  took 36 behind 0
+PBCHECK thief LMB into a wall at 0.3m: puff at the face      PASS  in view 1 buried 0
+PBCHECK thief LMB: a foe touching you at a wall takes it     PASS  took 13
+PBCHECK thief RMB: a foe touching you at a wall takes it     PASS  took 3
+PBCHECK thief LMB into a cliff at 0.3m: puff at the face     PASS  in view 1 buried 0
+PBCHECK thief LMB: a foe touching you at a cliff takes it    PASS  took 13
+PBCHECK thief RMB: a foe touching you at a cliff takes it    PASS  took 3
+PBCHECK thief LMB with a wall at your back: hits ahead, none behind PASS  took 13 behind 0
+PBCHECK juggernaut LMB into a wall at 0.3m: puff at the face PASS  in view 9 buried 0
+PBCHECK juggernaut LMB: a foe touching you at a wall takes it PASS  took 8
+PBCHECK juggernaut RMB: a foe touching you at a wall takes it PASS  took 26
+PBCHECK juggernaut LMB into a cliff at 0.3m: puff at the face PASS  in view 9 buried 0
+PBCHECK juggernaut LMB: a foe touching you at a cliff takes it PASS  took 8
+PBCHECK juggernaut RMB: a foe touching you at a cliff takes it PASS  took 26
+PBCHECK juggernaut LMB with a wall at your back: hits ahead, none behind PASS  took 13 behind 0
+PBCHECK ostra LMB into a wall: flies through (its data)      PASS  reached 12.3 past the face
+PBCHECK ostra LMB: a foe touching you at a wall takes it     PASS  took 16
+PBCHECK ostra RMB: a foe touching you at a wall takes it     PASS  took 18
+PBCHECK ostra LMB into a cliff: flies through (its data)     PASS  reached 12.2 past the face
+PBCHECK ostra LMB: a foe touching you at a cliff takes it    PASS  took 16
+PBCHECK ostra RMB: a foe touching you at a cliff takes it    PASS  took 18
+PBCHECK ostra LMB with a wall at your back: hits ahead, none behind PASS  took 19 behind 0
+PBCHECK rimewright LMB into a wall at 0.3m: puff at the face PASS  in view 5 buried 0
+PBCHECK rimewright LMB: a foe touching you at a wall takes it FAIL  took 0
+PBCHECK rimewright RMB: a foe touching you at a wall takes it PASS  took 18
+PBCHECK rimewright LMB into a cliff at 0.3m: puff at the face PASS  in view 5 buried 0
+PBCHECK rimewright LMB: a foe touching you at a cliff takes it FAIL  took 0
+PBCHECK rimewright RMB: a foe touching you at a cliff takes it PASS  took 18
+PBCHECK rimewright LMB with a wall at your back: hits ahead, none behind PASS  took 32 behind 0
+PBCHECK dredge LMB into a wall at 0.3m: puff at the face     PASS  in view 7 buried 0
+PBCHECK dredge LMB: a foe touching you at a wall takes it    PASS  took 14
+PBCHECK dredge RMB: a foe touching you at a wall takes it    PASS  took 6
+PBCHECK dredge LMB into a cliff at 0.3m: puff at the face    PASS  in view 7 buried 0
+PBCHECK dredge LMB: a foe touching you at a cliff takes it   PASS  took 14
+PBCHECK dredge RMB: a foe touching you at a cliff takes it   PASS  took 6
+PBCHECK dredge LMB with a wall at your back: hits ahead, none behind PASS  took 14 behind 0
+PBCHECK tender LMB into a wall at 0.3m: puff at the face     PASS  in view 1 buried 0
+PBCHECK tender LMB: a foe touching you at a wall takes it    PASS  took 8
+PBCHECK tender RMB: a foe touching you at a wall takes it    PASS  took 10
+PBCHECK tender LMB into a cliff at 0.3m: puff at the face    PASS  in view 1 buried 0
+PBCHECK tender LMB: a foe touching you at a cliff takes it   PASS  took 10
+PBCHECK tender RMB: a foe touching you at a cliff takes it   PASS  took 12
+PBCHECK tender LMB with a wall at your back: hits ahead, none behind PASS  took 44 behind 0
+PBCHECK ashwick LMB into a wall at 0.3m: puff at the face    PASS  in view 46 buried 0
+PBCHECK ashwick LMB: a foe touching you at a wall takes it   PASS  took 6
+PBCHECK ashwick RMB: a foe touching you at a wall takes it   PASS  took 83
+PBCHECK ashwick LMB into a cliff at 0.3m: puff at the face   PASS  in view 44 buried 0
+PBCHECK ashwick LMB: a foe touching you at a cliff takes it  PASS  took 15
+PBCHECK ashwick RMB: a foe touching you at a cliff takes it  PASS  took 83
+PBCHECK ashwick LMB with a wall at your back: hits ahead, none behind PASS  took 7 behind 0
+PBCHECK dolm LMB into a wall at 0.3m: puff at the face       PASS  in view 1 buried 0
+PBCHECK dolm LMB: a foe touching you at a wall takes it      PASS  took 9
+PBCHECK dolm RMB: a foe touching you at a wall takes it      PASS  took 22
+PBCHECK dolm LMB into a cliff at 0.3m: puff at the face      PASS  in view 1 buried 0
+PBCHECK dolm LMB: a foe touching you at a cliff takes it     PASS  took 9
+PBCHECK dolm RMB: a foe touching you at a cliff takes it     PASS  took 22
+PBCHECK dolm LMB with a wall at your back: hits ahead, none behind PASS  took 9 behind 0
+PBCHECK archer LMB into a wall at 0.3m: puff at the face     PASS  in view 1 buried 0
+PBCHECK archer LMB: a foe touching you at a wall takes it    PASS  took 15
+PBCHECK archer RMB: a foe touching you at a wall takes it    PASS  took 115
+PBCHECK archer LMB into a cliff at 0.3m: puff at the face    PASS  in view 1 buried 0
+PBCHECK archer LMB: a foe touching you at a cliff takes it   PASS  took 15
+PBCHECK archer RMB: a foe touching you at a cliff takes it   PASS  took 115
+PBCHECK archer LMB with a wall at your back: hits ahead, none behind PASS  took 15 behind 0
+PBCHECK mage LMB into a wall at 0.3m: puff at the face       PASS  in view 1 buried 0
+PBCHECK mage LMB: a foe touching you at a wall takes it      PASS  took 9
+PBCHECK mage RMB: a foe touching you at a wall takes it      PASS  took 16
+PBCHECK mage LMB into a cliff at 0.3m: puff at the face      PASS  in view 4 buried 0
+PBCHECK mage LMB: a foe touching you at a cliff takes it     PASS  took 9
+PBCHECK mage RMB: a foe touching you at a cliff takes it     PASS  took 16
+PBCHECK mage LMB with a wall at your back: hits ahead, none behind PASS  took 9 behind 0
+PBCHECK DONE, 82 checks, failures: 2
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 2 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 67: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 110: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 109: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 133: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 111: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 162: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 149: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 175: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 172: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 189: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 184: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 264: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 277: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 351: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 350: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 360: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 48 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

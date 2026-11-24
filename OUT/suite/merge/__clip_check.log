@@ -1,0 +1,1145 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CLIP ok   archer: its own hem.glb with clips, not the fallback
+CLIP ok   archer: wears the drop poses
+CLIP ok   archer: rides the rocket upright (11 deg), hands 0.47 m out ahead
+CLIP ok   archer: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.29 m above the hips
+CLIP ok   archer: banks into a right steer (right hand 0.40 m lower)
+CLIP ok   archer: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   thief: its own sable.glb with clips, not the fallback
+CLIP ok   thief: wears the drop poses
+CLIP ok   thief: rides the rocket upright (11 deg), hands 0.47 m out ahead
+CLIP ok   thief: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.29 m above the hips
+CLIP ok   thief: banks into a right steer (right hand 0.37 m lower)
+CLIP ok   thief: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   tender: its own pip.glb with clips, not the fallback
+CLIP ok   tender: wears the drop poses
+CLIP ok   tender: rides the rocket upright (11 deg), hands 0.48 m out ahead
+CLIP ok   tender: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.30 m above the hips
+CLIP ok   tender: banks into a right steer (right hand 0.42 m lower)
+CLIP ok   tender: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   gunslinger: its own vex.glb with clips, not the fallback
+CLIP ok   gunslinger: wears the drop poses
+CLIP ok   gunslinger: rides the rocket upright (11 deg), hands 0.47 m out ahead
+CLIP ok   gunslinger: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.29 m above the hips
+CLIP ok   gunslinger: banks into a right steer (right hand 0.40 m lower)
+CLIP ok   gunslinger: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   ashwick: its own cinder.glb with clips, not the fallback
+CLIP ok   ashwick: wears the drop poses
+CLIP ok   ashwick: rides the rocket upright (11 deg), hands 0.47 m out ahead
+CLIP ok   ashwick: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.28 m above the hips
+CLIP ok   ashwick: banks into a right steer (right hand 0.39 m lower)
+CLIP ok   ashwick: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   mage: its own ryzz.glb with clips, not the fallback
+CLIP ok   mage: wears the drop poses
+CLIP ok   mage: rides the rocket upright (11 deg), hands 0.46 m out ahead
+CLIP ok   mage: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.28 m above the hips
+CLIP ok   mage: banks into a right steer (right hand 0.32 m lower)
+CLIP ok   mage: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   dolm: its own tarek.glb with clips, not the fallback
+CLIP ok   dolm: wears the drop poses
+CLIP ok   dolm: rides the rocket upright (11 deg), hands 0.66 m out ahead
+CLIP ok   dolm: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.37 m above the hips
+CLIP ok   dolm: banks into a right steer (right hand 0.59 m lower)
+CLIP ok   dolm: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   rimewright: its own claire.glb with clips, not the fallback
+CLIP ok   rimewright: wears the drop poses
+CLIP ok   rimewright: rides the rocket upright (11 deg), hands 0.47 m out ahead
+CLIP ok   rimewright: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.29 m above the hips
+CLIP ok   rimewright: banks into a right steer (right hand 0.36 m lower)
+CLIP ok   rimewright: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   dredge: its own dredge.glb with clips, not the fallback
+CLIP ok   dredge: wears the drop poses
+CLIP ok   dredge: rides the rocket upright (11 deg), hands 0.47 m out ahead
+CLIP ok   dredge: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.29 m above the hips
+CLIP ok   dredge: banks into a right steer (right hand 0.52 m lower)
+CLIP ok   dredge: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   bulwark: its own breaker.glb with clips, not the fallback
+CLIP ok   bulwark: wears the drop poses
+CLIP ok   bulwark: rides the rocket upright (11 deg), hands 0.46 m out ahead
+CLIP ok   bulwark: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.29 m above the hips
+CLIP ok   bulwark: banks into a right steer (right hand 0.67 m lower)
+CLIP ok   bulwark: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   ostra: its own ostra.glb with clips, not the fallback
+CLIP ok   ostra: wears the drop poses
+CLIP ok   ostra: rides the rocket upright (11 deg), hands 0.48 m out ahead
+CLIP ok   ostra: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.30 m above the hips
+CLIP ok   ostra: banks into a right steer (right hand 0.38 m lower)
+CLIP ok   ostra: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   juggernaut: its own kael.glb with clips, not the fallback
+CLIP ok   juggernaut: wears the drop poses
+CLIP ok   juggernaut: rides the rocket upright (11 deg), hands 0.45 m out ahead
+CLIP ok   juggernaut: skydives belly down along the drop (17 deg off level), hands out past the shoulders by 2.5 upper arms, 0.27 m above the hips
+CLIP ok   juggernaut: banks into a right steer (right hand 0.51 m lower)
+CLIP ok   juggernaut: the glider opens into its own glide clip (skydive 0.00 left)
+CLIP ok   archer: wears clips
+CLIP FAIL archer: 102027 tris, weapon included (budget 80000)
+CLIP ok   archer: the file's 58 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP FAIL archer: every clip lasts as long as its kit move (worst 0.173 s, pin_roll, clip 0.533 s, keys 0.360 s)
+CLIP ok   archer: the home pat plays its own clip, seeked to the verb's clock
+CLIP ok   archer: the home feed plays its own clip, seeked to the verb's clock
+CLIP ok   archer: the home cheer plays its own clip, seeked to the verb's clock
+CLIP ok   archer: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   archer: all its kit moves have a clip (missing [])
+CLIP ok   archer: its stomp clip lasts the game's 0.70 s
+CLIP ok   archer: its drink clip lasts the game's 1.00 s
+CLIP ok   archer: arc_heavy_wind runs over the legs walking and owns the body standing
+CLIP ok   archer: arc_heavy runs over the legs walking and owns the body standing
+CLIP ok   archer: idle loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   archer: stance loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP open archer: the walk loops are one length (f 0.667 s; b 1.033 l 1.033 r 1.033) [b, l, r 1.033 s against f 0.667]
+CLIP ok   archer:walk: RING_OPEN entry still needed (the ring now matches: drop it)
+CLIP open archer: the run loops are one length (f 0.600 s; b 0.667 l 0.667 r 0.667) [b, l, r 0.667 s against f 0.583]
+CLIP ok   archer:run: RING_OPEN entry still needed (the ring now matches: drop it)
+CLIP ok   archer: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   archer: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL archer jump run off=72.2 again=0.0 apex=57.9 dip=-0.023 world=-0.021 dip_t=0.07 legs=0.00 back=0.17 held=0.50 settle=0.10
+CLIP ok   archer jump run: take-off (72 deg) and apex (58 deg) read
+CLIP ok   archer jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   archer jump run: the landing dips 0.023 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   archer jump run: the body is back 0.17 s after touchdown (data 0.27, max 0.60)
+CLIP ok   archer jump run: the legs are the run's again by 0.00 s (max 0.20), no hold
+JL archer drop run off=117.3 again=0.0 apex=11.1 dip=-0.109 world=-0.098 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.23
+CLIP ok   archer drop run: the landing dips 0.109 m (the deep crouch, at least 0.030), lowest at 0.10 s
+CLIP ok   archer drop run: the body is back 0.27 s after touchdown (data 0.31, max 0.60)
+CLIP ok   archer drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL archer glide run off=116.8 again=0.0 apex=7.3 dip=-0.104 world=-0.093 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   archer glide run: the landing dips 0.104 m (the deep crouch, at least 0.030), lowest at 0.10 s
+CLIP ok   archer glide run: the body is back 0.27 s after touchdown (data 0.31, max 0.60)
+CLIP ok   archer glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL archer kerb run off=121.7 again=0.0 apex=116.3 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   archer kerb run: a step down plays no landing (clip weight 0.00)
+JL archer jump still off=81.8 again=0.0 apex=64.3 dip=-0.046 world=-0.042 dip_t=0.10 legs=0.00 back=0.30 held=0.50 settle=0.20
+CLIP ok   archer jump still: take-off (82 deg) and apex (64 deg) read
+CLIP ok   archer jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   archer jump still: the landing dips 0.046 m (the hop's dip, at least 0.015), lowest at 0.10 s
+CLIP ok   archer jump still: the body is back 0.30 s after touchdown (data 0.39, max 0.60)
+JL archer drop still off=93.2 again=0.0 apex=5.5 dip=-0.111 world=-0.100 dip_t=0.10 legs=0.37 back=0.47 held=1.00 settle=0.27
+CLIP ok   archer drop still: the landing dips 0.111 m (the deep crouch, at least 0.058), lowest at 0.10 s
+CLIP ok   archer drop still: the body is back 0.47 s after touchdown (data 0.52, max 0.60)
+JL archer glide still off=114.2 again=0.0 apex=5.6 dip=-0.111 world=-0.100 dip_t=0.10 legs=0.37 back=0.47 held=1.00 settle=0.27
+CLIP ok   archer glide still: the landing dips 0.111 m (the deep crouch, at least 0.058), lowest at 0.10 s
+CLIP ok   archer glide still: the body is back 0.47 s after touchdown (data 0.52, max 0.60)
+JL archer kerb still off=98.5 again=0.0 apex=53.2 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   archer kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   archer: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   archer: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   archer: the look's bone offsets are held under the clips
+CLIP ok   archer: a knocked-out Hero stays on screen for its death clip
+CLIP ok   archer: the Muzzle stays on the visible tip in 244 frames (worst 0.000 m)
+CLIP ok   archer: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   archer: rooted, feet planted over every move (worst 0.062, arc_draw @0.57; idle 0.104)
+CLIP ok   archer: moves hand over without a pop (worst 0.000 m over the clip's own, ; limit 0.231)
+CLIP ok   archer: the clips own the body after the run
+CLIP ok   archer: a move with no clip hands back to the rig
+CLIP ok   archer: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   archer: flinch run recorded (31 frames)
+CLIP ok   archer: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   archer: a hit mid-run flinches the arms (hand moves 0.028 m, min 0.010)
+CLIP ok   archer: a solid hit flinches the arms more than a chip hit (0.050 m > 0.028 m)
+CLIP ok   archer: a chip hit standing still flinches the upper body only
+CLIP ok   archer: a stagger on the run takes the whole body
+CLIP ok   archer: a stagger standing still takes the whole body
+CLIP ok   archer: a chip hit on the run leaves the body to the legs
+CLIP ok   archer: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   archer: both wrists cradle the Boki at the chest (0.08 m from the socket, 0.25 m in front of the hips)
+CLIP ok   archer: the Boki rides at chest height (0.30 m over the hips)
+CLIP ok   archer: the Boki rides in front of the chest, not in it (0.15 m clear)
+CLIP ok   archer: the weapon bones the data stows are put away (0.001)
+CLIP ok   archer: no weapon rides a hand into the Boki (longest piece on a hand alone 0.00 m, limit 0.25)
+CLIP ok   archer: the legs keep stepping under it (0.652 m of stride, 0.658 m without)
+CLIP ok   archer: the stand-up beat stays on the clips
+CLIP ok   archer: the carry lets go (socket gone, weapon back, size 1.00)
+CLIP ok   archer: arc_tap: the blend-in is over 0.033 s after the spawn (limit 0.05)
+CLIP ok   archer: arc_loose: the blend-in is over 0.033 s after the spawn (limit 0.05)
+CLIP ok   archer: arc_super: the blend-in is over 0.033 s after the spawn (limit 0.05)
+CLIP ok   archer: a hard landing flattens him 10% (head 1.54 -> 1.38 m)
+CLIP ok   archer: a run start tips his head forward (0.153 m)
+CLIP ok   archer: and he stands back as he was (0.0000 m off)
+CLIP ok   archer: 180° on the spot, planted feet slide 1.6 cm (limit 5; no step: 23.0 cm)
+CLIP ok   archer: 4 turn steps, the foot lifts 23.1 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   archer: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   archer: no turn step while moving
+CLIP ok   archer: no turn step while casting
+CLIP ok   archer: no turn step while shooting
+CLIP ok   archer: no turn step while in a kit move
+CLIP ok   archer: moving cancels a turn step at once
+CLIP ok   archer: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   archer: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   archer: a root strains the torso forward (1.00, head 0.096 m, min 0.04)
+CLIP ok   archer: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   archer: the root's strain blends out in 0.1 s
+CLIP ok   archer: Grounded drops into the crouch (1.00, head 0.34 m lower)
+CLIP ok   archer: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   juggernaut: wears clips
+CLIP FAIL juggernaut: 112322 tris, weapon included (budget 80000)
+CLIP ok   juggernaut: the file's 64 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP ok   juggernaut: every clip lasts as long as its kit move (worst 0.017 s, jug_slam, clip 1.133 s, keys 1.150 s)
+CLIP ok   juggernaut: the home pat plays its own clip, seeked to the verb's clock
+CLIP ok   juggernaut: the home feed plays its own clip, seeked to the verb's clock
+CLIP ok   juggernaut: the home cheer plays its own clip, seeked to the verb's clock
+CLIP ok   juggernaut: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   juggernaut: all its kit moves have a clip (missing [])
+CLIP ok   juggernaut: its stomp clip lasts the game's 0.70 s
+CLIP ok   juggernaut: its drink clip lasts the game's 1.00 s
+CLIP ok   juggernaut: jug_slash_r runs over the legs walking and owns the body standing
+CLIP ok   juggernaut: jug_chain runs over the legs walking and owns the body standing
+CLIP ok   juggernaut: jug_ult_recover runs over the legs walking and owns the body standing
+CLIP ok   juggernaut: idle loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   juggernaut: stance loop seam 0.0x the limit (worst none), 8.0 s long (min 2.0)
+CLIP ok   juggernaut: the walk loops are one length (f 1.100 s; all match)
+CLIP ok   juggernaut: the run loops are one length (f 0.667 s; all match)
+CLIP ok   juggernaut: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   juggernaut: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL juggernaut jump run off=67.8 again=0.0 apex=39.9 dip=-0.051 world=-0.050 dip_t=0.07 legs=0.07 back=0.17 held=0.60 settle=0.10
+CLIP ok   juggernaut jump run: take-off (68 deg) and apex (40 deg) read
+CLIP ok   juggernaut jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   juggernaut jump run: the landing dips 0.051 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   juggernaut jump run: the body is back 0.17 s after touchdown (data 0.29, max 0.60)
+CLIP ok   juggernaut jump run: the legs are the run's again by 0.07 s (max 0.20), no hold
+JL juggernaut drop run off=102.1 again=0.0 apex=4.5 dip=-0.216 world=-0.210 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.23
+CLIP ok   juggernaut drop run: the landing dips 0.216 m (the deep crouch, at least 0.064), lowest at 0.10 s
+CLIP ok   juggernaut drop run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   juggernaut drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL juggernaut glide run off=125.4 again=0.0 apex=9.2 dip=-0.219 world=-0.213 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   juggernaut glide run: the landing dips 0.219 m (the deep crouch, at least 0.064), lowest at 0.10 s
+CLIP ok   juggernaut glide run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   juggernaut glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL juggernaut kerb run off=93.5 again=0.0 apex=87.3 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   juggernaut kerb run: a step down plays no landing (clip weight 0.00)
+JL juggernaut jump still off=171.0 again=0.0 apex=36.6 dip=-0.141 world=-0.137 dip_t=0.07 legs=0.23 back=0.33 held=0.60 settle=0.23
+CLIP ok   juggernaut jump still: take-off (171 deg) and apex (37 deg) read
+CLIP ok   juggernaut jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   juggernaut jump still: the landing dips 0.141 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   juggernaut jump still: the body is back 0.33 s after touchdown (data 0.43, max 0.60)
+JL juggernaut drop still off=179.4 again=0.0 apex=5.8 dip=-0.273 world=-0.266 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.40
+CLIP ok   juggernaut drop still: the landing dips 0.273 m (the deep crouch, at least 0.176), lowest at 0.10 s
+CLIP ok   juggernaut drop still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL juggernaut glide still off=174.1 again=0.0 apex=7.0 dip=-0.273 world=-0.266 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.40
+CLIP ok   juggernaut glide still: the landing dips 0.273 m (the deep crouch, at least 0.176), lowest at 0.10 s
+CLIP ok   juggernaut glide still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL juggernaut kerb still off=174.7 again=0.0 apex=104.1 dip=-0.000 world=-0.000 dip_t=0.13 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   juggernaut kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   juggernaut: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   juggernaut: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   juggernaut: the look's bone offsets are held under the clips
+CLIP ok   juggernaut: a knocked-out Hero stays on screen for its death clip
+CLIP ok   juggernaut: the Muzzle stays on the visible tip in 248 frames (worst 0.000 m)
+CLIP ok   juggernaut: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   juggernaut: rooted, feet planted over every move (worst 0.028, jug_meteor_land @0.03; idle 0.039)
+CLIP FAIL juggernaut: moves hand over without a pop (worst 0.455 m over the clip's own, jug_dash @0.17; limit 0.249)
+CLIP ok   juggernaut: the clips own the body after the run
+CLIP ok   juggernaut: a move with no clip hands back to the rig
+CLIP ok   juggernaut: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   juggernaut: flinch run recorded (31 frames)
+CLIP ok   juggernaut: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   juggernaut: a hit mid-run flinches the arms (hand moves 0.019 m, min 0.010)
+CLIP ok   juggernaut: a solid hit flinches the arms more than a chip hit (0.034 m > 0.019 m)
+CLIP ok   juggernaut: a chip hit standing still flinches the upper body only
+CLIP ok   juggernaut: a stagger on the run takes the whole body
+CLIP ok   juggernaut: a stagger standing still takes the whole body
+CLIP ok   juggernaut: a chip hit on the run leaves the body to the legs
+CLIP ok   juggernaut: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   juggernaut: both wrists cradle the Boki at the chest (0.09 m from the socket, 0.40 m in front of the hips)
+CLIP ok   juggernaut: the Boki rides at chest height (0.29 m over the hips)
+CLIP ok   juggernaut: the Boki rides in front of the chest, not in it (0.22 m clear)
+CLIP ok   juggernaut: the weapon bones the data stows are put away (0.000)
+CLIP ok   juggernaut: the weapon modelled into the hand leaves the shown mesh
+CLIP FAIL juggernaut: no weapon rides a hand into the Boki (longest piece on a hand alone 1.28 m, limit 0.25)
+CLIP ok   juggernaut: the legs keep stepping under it (0.572 m of stride, 0.571 m without)
+CLIP ok   juggernaut: the stand-up beat stays on the clips
+CLIP ok   juggernaut: the carry lets go (socket gone, weapon back, size 1.00)
+CLIP ok   juggernaut: a hard landing flattens him 10% (head 1.41 -> 1.27 m)
+CLIP ok   juggernaut: a run start tips his head forward (0.140 m)
+CLIP ok   juggernaut: and he stands back as he was (0.0000 m off)
+CLIP ok   juggernaut: 180° on the spot, planted feet slide 1.4 cm (limit 5; no step: 53.4 cm)
+CLIP ok   juggernaut: 4 turn steps, the foot lifts 17.5 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   juggernaut: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   juggernaut: no turn step while moving
+CLIP ok   juggernaut: no turn step while casting
+CLIP ok   juggernaut: no turn step while shooting
+CLIP ok   juggernaut: no turn step while in a kit move
+CLIP ok   juggernaut: moving cancels a turn step at once
+CLIP ok   juggernaut: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   juggernaut: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   juggernaut: a root strains the torso forward (1.00, head 0.161 m, min 0.04)
+CLIP ok   juggernaut: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   juggernaut: the root's strain blends out in 0.1 s
+CLIP ok   juggernaut: Grounded drops into the crouch (1.00, head 0.34 m lower)
+CLIP ok   juggernaut: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   gunslinger: wears clips
+CLIP FAIL gunslinger: 120190 tris, weapon included (budget 80000)
+CLIP ok   gunslinger: the file's 50 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP ok   gunslinger: every clip lasts as long as its kit move (worst 0.017 s, gunslinger_e, clip 1.067 s, keys 1.050 s)
+CLIP ok   gunslinger: the home pat plays its own clip, seeked to the verb's clock
+CLIP ok   gunslinger: the home feed plays its own clip, seeked to the verb's clock
+CLIP ok   gunslinger: the home cheer plays its own clip, seeked to the verb's clock
+CLIP ok   gunslinger: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   gunslinger: all its kit moves have a clip (missing [])
+CLIP ok   gunslinger: its stomp clip lasts the game's 0.70 s
+CLIP ok   gunslinger: its drink clip lasts the game's 1.00 s
+CLIP ok   gunslinger: gunslinger_lmb runs over the legs walking and owns the body standing
+CLIP ok   gunslinger: gunslinger_rmb runs over the legs walking and owns the body standing
+CLIP ok   gunslinger: gunslinger_x runs over the legs walking and owns the body standing
+CLIP ok   gunslinger: gunslinger_knock runs over the legs walking and owns the body standing
+CLIP ok   gunslinger: idle loop seam 0.0x the limit (worst none), 5.0 s long (min 2.0)
+CLIP ok   gunslinger: stance loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   gunslinger: the walk loops are one length (f 0.867 s; all match)
+CLIP ok   gunslinger: the run loops are one length (f 0.567 s; all match)
+CLIP ok   gunslinger: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   gunslinger: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL gunslinger jump run off=82.1 again=0.0 apex=101.3 dip=-0.062 world=-0.058 dip_t=0.07 legs=0.00 back=0.17 held=0.50 settle=0.13
+CLIP ok   gunslinger jump run: take-off (82 deg) and apex (101 deg) read
+CLIP ok   gunslinger jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   gunslinger jump run: the landing dips 0.062 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   gunslinger jump run: the body is back 0.17 s after touchdown (data 0.27, max 0.60)
+CLIP ok   gunslinger jump run: the legs are the run's again by 0.00 s (max 0.20), no hold
+JL gunslinger drop run off=82.0 again=0.0 apex=44.2 dip=-0.157 world=-0.148 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   gunslinger drop run: the landing dips 0.157 m (the deep crouch, at least 0.077), lowest at 0.10 s
+CLIP ok   gunslinger drop run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   gunslinger drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL gunslinger glide run off=64.2 again=0.0 apex=5.2 dip=-0.152 world=-0.143 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   gunslinger glide run: the landing dips 0.152 m (the deep crouch, at least 0.077), lowest at 0.10 s
+CLIP ok   gunslinger glide run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   gunslinger glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL gunslinger kerb run off=62.3 again=0.0 apex=131.6 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   gunslinger kerb run: a step down plays no landing (clip weight 0.00)
+JL gunslinger jump still off=43.0 again=0.0 apex=66.6 dip=-0.108 world=-0.101 dip_t=0.07 legs=0.00 back=0.30 held=0.50 settle=0.27
+CLIP ok   gunslinger jump still: take-off (43 deg) and apex (67 deg) read
+CLIP ok   gunslinger jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   gunslinger jump still: the landing dips 0.108 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   gunslinger jump still: the body is back 0.30 s after touchdown (data 0.39, max 0.60)
+JL gunslinger drop still off=86.2 again=0.0 apex=56.4 dip=-0.233 world=-0.219 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.40
+CLIP ok   gunslinger drop still: the landing dips 0.233 m (the deep crouch, at least 0.135), lowest at 0.10 s
+CLIP ok   gunslinger drop still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL gunslinger glide still off=95.7 again=0.0 apex=0.6 dip=-0.229 world=-0.215 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.37
+CLIP ok   gunslinger glide still: the landing dips 0.229 m (the deep crouch, at least 0.135), lowest at 0.10 s
+CLIP ok   gunslinger glide still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL gunslinger kerb still off=109.1 again=0.0 apex=53.3 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   gunslinger kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   gunslinger: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   gunslinger: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   gunslinger: the look's bone offsets are held under the clips
+CLIP ok   gunslinger: a knocked-out Hero stays on screen for its death clip
+CLIP ok   gunslinger: the Muzzle stays on the visible tip in 196 frames (worst 0.000 m)
+CLIP ok   gunslinger: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   gunslinger: gatling holds its size 0.80 over the clips
+CLIP ok   gunslinger: launcher holds its size 0.90 over the clips
+CLIP ok   gunslinger: rooted, feet planted over every move (worst 0.035, gunslinger_dash @0.20; idle 0.085)
+CLIP ok   gunslinger: moves hand over without a pop (worst 0.194 m over the clip's own, gunslinger_dash @0.47; limit 0.241)
+CLIP ok   gunslinger: the clips own the body after the run
+CLIP ok   gunslinger: a move with no clip hands back to the rig
+CLIP ok   gunslinger: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   gunslinger: flinch run recorded (31 frames)
+CLIP ok   gunslinger: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   gunslinger: a hit mid-run flinches the arms (hand moves 0.056 m, min 0.010)
+CLIP ok   gunslinger: a solid hit flinches the arms more than a chip hit (0.099 m > 0.056 m)
+CLIP ok   gunslinger: a chip hit standing still flinches the upper body only
+CLIP ok   gunslinger: a stagger on the run takes the whole body
+CLIP ok   gunslinger: a stagger standing still takes the whole body
+CLIP ok   gunslinger: a chip hit on the run leaves the body to the legs
+CLIP ok   gunslinger: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   gunslinger: both wrists cradle the Boki at the chest (0.09 m from the socket, 0.32 m in front of the hips)
+CLIP ok   gunslinger: the Boki rides at chest height (0.26 m over the hips)
+CLIP ok   gunslinger: the Boki rides in front of the chest, not in it (0.22 m clear)
+CLIP ok   gunslinger: the weapon bones the data stows are put away (0.001)
+CLIP ok   gunslinger: no weapon rides a hand into the Boki (longest piece on a hand alone 0.00 m, limit 0.25)
+CLIP ok   gunslinger: the legs keep stepping under it (0.613 m of stride, 0.607 m without)
+CLIP ok   gunslinger: the stand-up beat stays on the clips
+CLIP ok   gunslinger: the carry lets go (socket gone, weapon back, size 0.80)
+CLIP ok   gunslinger: a shot kicks the arm 2.00 deg (file 2.0)
+CLIP ok   gunslinger: the legs do not kick
+CLIP ok   gunslinger: sustained fire peaks 2.01 deg (cap 3.0)
+CLIP ok   gunslinger: the kick settles (0.000 deg left)
+CLIP ok   gunslinger: a hard landing flattens him 10% (head 1.54 -> 1.39 m)
+CLIP ok   gunslinger: a run start tips his head forward (0.154 m)
+CLIP ok   gunslinger: and he stands back as he was (0.0000 m off)
+CLIP ok   gunslinger: 180° on the spot, planted feet slide 0.5 cm (limit 5; no step: 37.8 cm)
+CLIP ok   gunslinger: 4 turn steps, the foot lifts 21.7 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   gunslinger: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   gunslinger: no turn step while moving
+CLIP ok   gunslinger: no turn step while casting
+CLIP ok   gunslinger: no turn step while shooting
+CLIP ok   gunslinger: no turn step while in a kit move
+CLIP ok   gunslinger: moving cancels a turn step at once
+CLIP ok   gunslinger: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   gunslinger: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   gunslinger: a root strains the torso forward (1.00, head 0.130 m, min 0.04)
+CLIP ok   gunslinger: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   gunslinger: the root's strain blends out in 0.1 s
+CLIP ok   gunslinger: Grounded drops into the crouch (1.00, head 0.44 m lower)
+CLIP ok   gunslinger: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   bulwark: wears clips
+CLIP FAIL bulwark: 108541 tris, weapon included (budget 80000)
+CLIP ok   bulwark: the file's 68 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP ok   bulwark: every clip lasts as long as its kit move (worst 0.017 s, bul_break, clip 0.667 s, keys 0.650 s)
+CLIP ok   bulwark: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   bulwark: all its kit moves have a clip (missing [])
+CLIP ok   bulwark: its stomp clip lasts the game's 0.70 s
+CLIP ok   bulwark: its drink clip lasts the game's 1.00 s
+CLIP ok   bulwark: bul_throw runs over the legs walking and owns the body standing
+CLIP ok   bulwark: bul_smash_wind runs over the legs walking and owns the body standing
+CLIP ok   bulwark: bul_guard runs over the legs walking and owns the body standing
+CLIP ok   bulwark: bul_mend runs over the legs walking and owns the body standing
+CLIP ok   bulwark: bul_ult_slam runs over the legs walking and owns the body standing
+CLIP open bulwark: idle loop seam 4.2x the limit (worst head), 3.2 s long (min 2.0) [head seam 4.2 deg (breathe() at half rate)]
+CLIP ok   bulwark:idle: STAND_OPEN entry still needed
+CLIP open bulwark: stance loop seam 4.2x the limit (worst head), 1.6 s long (min 2.0) [head seam 4.2 deg, 1.6 s long]
+CLIP ok   bulwark:stance: STAND_OPEN entry still needed
+CLIP ok   bulwark: the walk loops are one length (f 0.733 s; all match)
+CLIP ok   bulwark: the run loops are one length (f 0.633 s; all match)
+CLIP ok   bulwark: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   bulwark: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL bulwark jump run off=137.0 again=0.0 apex=37.2 dip=-0.017 world=-0.030 dip_t=0.07 legs=0.07 back=0.17 held=0.60 settle=0.00
+CLIP ok   bulwark jump run: take-off (137 deg) and apex (37 deg) read
+CLIP ok   bulwark jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   bulwark jump run: the landing dips 0.017 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   bulwark jump run: the body is back 0.17 s after touchdown (data 0.29, max 0.60)
+CLIP ok   bulwark jump run: the legs are the run's again by 0.07 s (max 0.20), no hold
+JL bulwark drop run off=124.7 again=0.0 apex=48.6 dip=-0.060 world=-0.103 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.17
+CLIP ok   bulwark drop run: the landing dips 0.060 m (the deep crouch, at least 0.030), lowest at 0.10 s
+CLIP ok   bulwark drop run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   bulwark drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL bulwark glide run off=152.9 again=0.0 apex=49.7 dip=-0.057 world=-0.099 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.17
+CLIP ok   bulwark glide run: the landing dips 0.057 m (the deep crouch, at least 0.030), lowest at 0.10 s
+CLIP ok   bulwark glide run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   bulwark glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL bulwark kerb run off=145.4 again=0.0 apex=151.6 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   bulwark kerb run: a step down plays no landing (clip weight 0.00)
+JL bulwark jump still off=50.5 again=0.0 apex=70.9 dip=-0.060 world=-0.103 dip_t=0.07 legs=0.23 back=0.33 held=0.60 settle=0.17
+CLIP ok   bulwark jump still: take-off (50 deg) and apex (71 deg) read
+CLIP ok   bulwark jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   bulwark jump still: the landing dips 0.060 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   bulwark jump still: the body is back 0.33 s after touchdown (data 0.43, max 0.60)
+JL bulwark drop still off=66.4 again=0.0 apex=58.8 dip=-0.100 world=-0.172 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.27
+CLIP ok   bulwark drop still: the landing dips 0.100 m (the deep crouch, at least 0.074), lowest at 0.10 s
+CLIP ok   bulwark drop still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL bulwark glide still off=125.8 again=0.0 apex=34.2 dip=-0.106 world=-0.184 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.27
+CLIP ok   bulwark glide still: the landing dips 0.106 m (the deep crouch, at least 0.074), lowest at 0.10 s
+CLIP ok   bulwark glide still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL bulwark kerb still off=64.0 again=0.0 apex=35.7 dip=-0.002 world=-0.004 dip_t=0.13 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   bulwark kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   bulwark: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   bulwark: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   bulwark: the look's bone offsets are held under the clips
+CLIP ok   bulwark: a knocked-out Hero stays on screen for its death clip
+CLIP ok   bulwark: the Muzzle stays on the visible tip in 272 frames (worst 0.000 m)
+CLIP ok   bulwark: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   bulwark: rooted, feet planted over every move (worst 0.017, bul_smash_wind @0.43; idle 0.017)
+CLIP ok   bulwark: moves hand over without a pop (worst 0.000 m over the clip's own, ; limit 0.442)
+CLIP ok   bulwark: the clips own the body after the run
+CLIP ok   bulwark: a move with no clip hands back to the rig
+CLIP ok   bulwark: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   bulwark: flinch run recorded (31 frames)
+CLIP ok   bulwark: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   bulwark: a hit mid-run flinches the arms (hand moves 0.072 m, min 0.010)
+CLIP ok   bulwark: a solid hit flinches the arms more than a chip hit (0.127 m > 0.072 m)
+CLIP ok   bulwark: a chip hit standing still flinches the upper body only
+CLIP ok   bulwark: a stagger on the run takes the whole body
+CLIP ok   bulwark: a stagger standing still takes the whole body
+CLIP ok   bulwark: a chip hit on the run leaves the body to the legs
+CLIP ok   bulwark: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   bulwark: both wrists cradle the Boki at the chest (0.78 m from the socket, 0.46 m in front of the hips)
+CLIP ok   bulwark: the Boki rides at chest height (0.62 m over the hips)
+CLIP ok   bulwark: the Boki rides in front of the chest, not in it (0.11 m clear)
+CLIP ok   bulwark: the weapon bones the data stows are put away (0.001)
+CLIP ok   bulwark: no weapon rides a hand into the Boki (longest piece on a hand alone 0.00 m, limit 0.25)
+CLIP ok   bulwark: the legs keep stepping under it (0.513 m of stride, 0.512 m without)
+CLIP ok   bulwark: the stand-up beat stays on the clips
+CLIP ok   bulwark: the carry lets go (socket gone, weapon back, size 1.00)
+CLIP ok   bulwark: a hard landing flattens him 10% (head 0.88 -> 0.80 m)
+CLIP ok   bulwark: a run start tips his head forward (0.088 m)
+CLIP ok   bulwark: and he stands back as he was (0.0000 m off)
+CLIP ok   bulwark: 180° on the spot, planted feet slide 0.9 cm (limit 5; no step: 72.2 cm)
+CLIP ok   bulwark: 4 turn steps, the foot lifts 7.7 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   bulwark: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   bulwark: no turn step while moving
+CLIP ok   bulwark: no turn step while casting
+CLIP ok   bulwark: no turn step while shooting
+CLIP ok   bulwark: no turn step while in a kit move
+CLIP ok   bulwark: moving cancels a turn step at once
+CLIP ok   bulwark: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   bulwark: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   bulwark: a root strains the torso forward (1.00, head 0.258 m, min 0.04)
+CLIP ok   bulwark: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   bulwark: the root's strain blends out in 0.1 s
+CLIP ok   bulwark: Grounded drops into the crouch (1.00, head 0.25 m lower)
+CLIP ok   bulwark: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   rimewright: wears clips
+CLIP FAIL rimewright: 95552 tris, weapon included (budget 80000)
+CLIP ok   rimewright: the file's 61 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP FAIL rimewright: every clip lasts as long as its kit move (worst 0.167 s, mf_xform, clip 0.633 s, keys 0.800 s)
+CLIP ok   rimewright: run_f matches the sheet's 0.17 s split (0.340 s)
+CLIP ok   rimewright: run_b matches the sheet's 0.17 s split (0.340 s)
+CLIP ok   rimewright: run_l matches the sheet's 0.17 s split (0.340 s)
+CLIP ok   rimewright: run_r matches the sheet's 0.17 s split (0.340 s)
+CLIP ok   rimewright: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   rimewright: all its kit moves have a clip (missing [])
+CLIP FAIL rimewright: its stomp clip lasts the game's 0.70 s
+CLIP FAIL rimewright: its drink clip lasts the game's 1.00 s
+CLIP ok   rimewright: tm_dart_r runs over the legs walking and owns the body standing
+CLIP ok   rimewright: tm_dart_l runs over the legs walking and owns the body standing
+CLIP ok   rimewright: tm_dart_heavy runs over the legs walking and owns the body standing
+CLIP ok   rimewright: tm_spear_aim runs over the legs walking and owns the body standing
+CLIP ok   rimewright: tm_spear runs over the legs walking and owns the body standing
+CLIP ok   rimewright: tm_freeze runs over the legs walking and owns the body standing
+CLIP ok   rimewright: tm_skate_stop runs over the legs walking and owns the body standing
+CLIP ok   rimewright: tm_shatter runs over the legs walking and owns the body standing
+CLIP ok   rimewright: tm_clench runs over the legs walking and owns the body standing
+CLIP ok   rimewright: tm_rime_crash runs over the legs walking and owns the body standing
+CLIP ok   rimewright: idle loop seam 0.0x the limit (worst none), 4.8 s long (min 2.0)
+CLIP ok   rimewright: stance loop seam 0.0x the limit (worst none), 4.8 s long (min 2.0)
+CLIP ok   rimewright: the walk loops are one length (f 0.467 s; all match)
+CLIP ok   rimewright: the run loops are one length (f 0.340 s; all match)
+CLIP ok   rimewright: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   rimewright: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL rimewright jump run off=63.0 again=0.0 apex=32.6 dip=-0.018 world=-0.017 dip_t=0.07 legs=0.00 back=0.17 held=0.50 settle=0.00
+CLIP ok   rimewright jump run: take-off (63 deg) and apex (33 deg) read
+CLIP ok   rimewright jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   rimewright jump run: the landing dips 0.018 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   rimewright jump run: the body is back 0.17 s after touchdown (data 0.27, max 0.60)
+CLIP ok   rimewright jump run: the legs are the run's again by 0.00 s (max 0.20), no hold
+JL rimewright drop run off=75.7 again=0.0 apex=12.6 dip=-0.068 world=-0.065 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   rimewright drop run: the landing dips 0.068 m (the deep crouch, at least 0.030), lowest at 0.10 s
+CLIP ok   rimewright drop run: the body is back 0.27 s after touchdown (data 0.31, max 0.60)
+CLIP ok   rimewright drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL rimewright glide run off=141.2 again=0.0 apex=10.5 dip=-0.070 world=-0.067 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.17
+CLIP ok   rimewright glide run: the landing dips 0.070 m (the deep crouch, at least 0.030), lowest at 0.10 s
+CLIP ok   rimewright glide run: the body is back 0.27 s after touchdown (data 0.31, max 0.60)
+CLIP ok   rimewright glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL rimewright kerb run off=54.0 again=0.0 apex=66.7 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   rimewright kerb run: a step down plays no landing (clip weight 0.00)
+JL rimewright jump still off=166.6 again=0.0 apex=32.6 dip=-0.035 world=-0.033 dip_t=0.07 legs=0.00 back=0.30 held=0.50 settle=0.10
+CLIP ok   rimewright jump still: take-off (167 deg) and apex (33 deg) read
+CLIP ok   rimewright jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   rimewright jump still: the landing dips 0.035 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   rimewright jump still: the body is back 0.30 s after touchdown (data 0.39, max 0.60)
+JL rimewright drop still off=164.7 again=0.0 apex=13.7 dip=-0.064 world=-0.060 dip_t=0.07 legs=0.37 back=0.47 held=1.00 settle=0.17
+CLIP ok   rimewright drop still: the landing dips 0.064 m (the deep crouch, at least 0.043), lowest at 0.07 s
+CLIP ok   rimewright drop still: the body is back 0.47 s after touchdown (data 0.52, max 0.60)
+JL rimewright glide still off=91.7 again=0.0 apex=3.6 dip=-0.065 world=-0.062 dip_t=0.10 legs=0.37 back=0.47 held=1.00 settle=0.20
+CLIP ok   rimewright glide still: the landing dips 0.065 m (the deep crouch, at least 0.043), lowest at 0.10 s
+CLIP ok   rimewright glide still: the body is back 0.47 s after touchdown (data 0.52, max 0.60)
+JL rimewright kerb still off=162.0 again=0.0 apex=88.7 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   rimewright kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   rimewright: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   rimewright: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   rimewright: the look's bone offsets are held under the clips
+CLIP ok   rimewright: a knocked-out Hero stays on screen for its death clip
+CLIP ok   rimewright: the Muzzle stays on the visible tip in 276 frames (worst 0.000 m)
+CLIP ok   rimewright: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   rimewright: each hit clip shows its hit pose on the hit (worst 0.033 s off, tm_wall: pose at 0.17 s, hit at 0.20 s)
+CLIP ok   rimewright: rooted, feet planted over every move (worst 0.145, tm_rime_carry @0.10; idle 0.145)
+CLIP ok   rimewright: moves hand over without a pop (worst 0.150 m over the clip's own, tm_skate @0.03; limit 0.243)
+CLIP ok   rimewright: the clips own the body after the run
+CLIP ok   rimewright: a move with no clip hands back to the rig
+CLIP ok   rimewright: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   rimewright: flinch run recorded (31 frames)
+CLIP ok   rimewright: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   rimewright: a hit mid-run flinches the arms (hand moves 0.045 m, min 0.010)
+CLIP ok   rimewright: a solid hit flinches the arms more than a chip hit (0.079 m > 0.045 m)
+CLIP ok   rimewright: a chip hit standing still flinches the upper body only
+CLIP ok   rimewright: a stagger on the run takes the whole body
+CLIP ok   rimewright: a stagger standing still takes the whole body
+CLIP ok   rimewright: a chip hit on the run leaves the body to the legs
+CLIP ok   rimewright: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   rimewright: both wrists cradle the Boki at the chest (0.09 m from the socket, 0.22 m in front of the hips)
+CLIP ok   rimewright: the Boki rides at chest height (0.29 m over the hips)
+CLIP FAIL rimewright: the Boki rides in front of the chest, not in it (0.09 m clear)
+CLIP ok   rimewright: the weapon bones the data stows are put away (0.000)
+CLIP ok   rimewright: the weapon modelled into the hand leaves the shown mesh
+CLIP ok   rimewright: no weapon rides a hand into the Boki (longest piece on a hand alone 0.10 m, limit 0.25)
+CLIP ok   rimewright: the legs keep stepping under it (0.244 m of stride, 0.248 m without)
+CLIP ok   rimewright: the stand-up beat stays on the clips
+CLIP ok   rimewright: the carry lets go (socket gone, weapon back, size 1.00)
+CLIP ok   rimewright: the mantle clip time follows the rise (0.14 s at half)
+CLIP ok   rimewright: hands reach over the head, then plant on the lip (0.28, -0.53 m off the head)
+CLIP ok   rimewright: the mantle clip runs on after the rise, 0.58 s of 0.60 s
+CLIP ok   rimewright: a move cuts the climb tail
+CLIP ok   rimewright: a ledge float hangs the clip at 0.30 s
+CLIP ok   rimewright: a hard landing flattens him 10% (head 1.41 -> 1.27 m)
+CLIP ok   rimewright: a run start tips his head forward (0.140 m)
+CLIP ok   rimewright: and he stands back as he was (0.0000 m off)
+CLIP ok   rimewright: 180° on the spot, planted feet slide 0.8 cm (limit 5; no step: 23.2 cm)
+CLIP ok   rimewright: 4 turn steps, the foot lifts 27.8 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   rimewright: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   rimewright: no turn step while moving
+CLIP ok   rimewright: no turn step while casting
+CLIP ok   rimewright: no turn step while shooting
+CLIP ok   rimewright: no turn step while in a kit move
+CLIP ok   rimewright: moving cancels a turn step at once
+CLIP ok   rimewright: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   rimewright: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   rimewright: a root strains the torso forward (1.00, head 0.108 m, min 0.04)
+CLIP ok   rimewright: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   rimewright: the root's strain blends out in 0.1 s
+CLIP ok   rimewright: Grounded drops into the crouch (1.00, head 0.43 m lower)
+CLIP ok   rimewright: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   ashwick: wears clips
+CLIP FAIL ashwick: 109187 tris, weapon included (budget 80000)
+CLIP ok   ashwick: the file's 55 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP ok   ashwick: every clip lasts as long as its kit move (worst 0.017 s, lw_jump, clip 0.467 s, keys 0.450 s)
+CLIP ok   ashwick: the home pat plays its own clip, seeked to the verb's clock
+CLIP ok   ashwick: the home feed plays its own clip, seeked to the verb's clock
+CLIP ok   ashwick: the home cheer plays its own clip, seeked to the verb's clock
+CLIP ok   ashwick: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   ashwick: all its kit moves have a clip (missing [])
+CLIP ok   ashwick: its stomp clip lasts the game's 0.70 s
+CLIP ok   ashwick: its drink clip lasts the game's 1.00 s
+CLIP ok   ashwick: as_lance runs over the legs walking and owns the body standing
+CLIP ok   ashwick: lw_stoke_lance runs over the legs walking and owns the body standing
+CLIP ok   ashwick: as_lance_end runs over the legs walking and owns the body standing
+CLIP ok   ashwick: as_aim runs over the legs walking and owns the body standing
+CLIP ok   ashwick: as_shot runs over the legs walking and owns the body standing
+CLIP ok   ashwick: as_cloak runs over the legs walking and owns the body standing
+CLIP ok   ashwick: lw_land runs over the legs walking and owns the body standing
+CLIP ok   ashwick: idle loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   ashwick: stance loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   ashwick: the walk loops are one length (f 0.667 s; all match)
+CLIP ok   ashwick: the run loops are one length (f 0.333 s; all match)
+CLIP ok   ashwick: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   ashwick: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL ashwick jump run off=125.9 again=0.0 apex=56.1 dip=-0.031 world=-0.035 dip_t=0.07 legs=0.07 back=0.17 held=0.60 settle=0.13
+CLIP ok   ashwick jump run: take-off (126 deg) and apex (56 deg) read
+CLIP ok   ashwick jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   ashwick jump run: the landing dips 0.031 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   ashwick jump run: the body is back 0.17 s after touchdown (data 0.29, max 0.60)
+CLIP ok   ashwick jump run: the legs are the run's again by 0.07 s (max 0.20), no hold
+JL ashwick drop run off=93.9 again=0.0 apex=14.3 dip=-0.101 world=-0.114 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   ashwick drop run: the landing dips 0.101 m (the deep crouch, at least 0.039), lowest at 0.10 s
+CLIP ok   ashwick drop run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   ashwick drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL ashwick glide run off=162.5 again=0.0 apex=4.6 dip=-0.097 world=-0.109 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   ashwick glide run: the landing dips 0.097 m (the deep crouch, at least 0.039), lowest at 0.10 s
+CLIP ok   ashwick glide run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   ashwick glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL ashwick kerb run off=125.2 again=0.0 apex=128.3 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   ashwick kerb run: a step down plays no landing (clip weight 0.00)
+JL ashwick jump still off=113.9 again=0.0 apex=56.1 dip=-0.083 world=-0.093 dip_t=0.07 legs=0.23 back=0.33 held=0.60 settle=0.23
+CLIP ok   ashwick jump still: take-off (114 deg) and apex (56 deg) read
+CLIP ok   ashwick jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   ashwick jump still: the landing dips 0.083 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   ashwick jump still: the body is back 0.33 s after touchdown (data 0.43, max 0.60)
+JL ashwick drop still off=91.0 again=0.0 apex=18.4 dip=-0.159 world=-0.179 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.37
+CLIP ok   ashwick drop still: the landing dips 0.159 m (the deep crouch, at least 0.103), lowest at 0.10 s
+CLIP ok   ashwick drop still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL ashwick glide still off=156.5 again=0.0 apex=4.2 dip=-0.163 world=-0.184 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.40
+CLIP ok   ashwick glide still: the landing dips 0.163 m (the deep crouch, at least 0.103), lowest at 0.10 s
+CLIP ok   ashwick glide still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL ashwick kerb still off=115.6 again=0.0 apex=59.8 dip=-0.001 world=-0.001 dip_t=0.13 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   ashwick kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   ashwick: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   ashwick: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   ashwick: the look's bone offsets are held under the clips
+CLIP ok   ashwick: a knocked-out Hero stays on screen for its death clip
+CLIP ok   ashwick: the Muzzle stays on the visible tip in 216 frames (worst 0.000 m)
+CLIP ok   ashwick: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   ashwick: rooted, feet planted over every move (worst 0.024, as_lance @0.00; idle 0.033)
+CLIP ok   ashwick: moves hand over without a pop (worst 0.000 m over the clip's own, ; limit 0.288)
+CLIP ok   ashwick: the clips own the body after the run
+CLIP ok   ashwick: a move with no clip hands back to the rig
+CLIP ok   ashwick: touching down just after lw_land (the landing), no generic land clip follows
+CLIP ok   ashwick: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   ashwick: flinch run recorded (31 frames)
+CLIP ok   ashwick: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   ashwick: a hit mid-run flinches the arms (hand moves 0.027 m, min 0.010)
+CLIP ok   ashwick: a solid hit flinches the arms more than a chip hit (0.048 m > 0.027 m)
+CLIP ok   ashwick: a chip hit standing still flinches the upper body only
+CLIP ok   ashwick: a stagger on the run takes the whole body
+CLIP ok   ashwick: a stagger standing still takes the whole body
+CLIP ok   ashwick: a chip hit on the run leaves the body to the legs
+CLIP ok   ashwick: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   ashwick: both wrists cradle the Boki at the chest (0.10 m from the socket, 0.42 m in front of the hips)
+CLIP ok   ashwick: the Boki rides at chest height (0.31 m over the hips)
+CLIP ok   ashwick: the Boki rides in front of the chest, not in it (0.23 m clear)
+CLIP ok   ashwick: the weapon bones the data stows are put away (0.000)
+CLIP ok   ashwick: no weapon rides a hand into the Boki (longest piece on a hand alone 0.16 m, limit 0.25)
+CLIP ok   ashwick: the legs keep stepping under it (0.508 m of stride, 0.509 m without)
+CLIP ok   ashwick: the stand-up beat stays on the clips
+CLIP ok   ashwick: the carry lets go (socket gone, weapon back, size 1.00)
+CLIP ok   ashwick: a hard landing flattens him 10% (head 1.32 -> 1.19 m)
+CLIP ok   ashwick: a run start tips his head forward (0.132 m)
+CLIP ok   ashwick: and he stands back as he was (0.0000 m off)
+CLIP ok   ashwick: 180° on the spot, planted feet slide 0.7 cm (limit 5; no step: 32.9 cm)
+CLIP ok   ashwick: 4 turn steps, the foot lifts 22.3 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   ashwick: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   ashwick: no turn step while moving
+CLIP ok   ashwick: no turn step while casting
+CLIP ok   ashwick: no turn step while shooting
+CLIP ok   ashwick: no turn step while in a kit move
+CLIP ok   ashwick: moving cancels a turn step at once
+CLIP ok   ashwick: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   ashwick: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   ashwick: a root strains the torso forward (1.00, head 0.101 m, min 0.04)
+CLIP ok   ashwick: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   ashwick: the root's strain blends out in 0.1 s
+CLIP ok   ashwick: Grounded drops into the crouch (1.00, head 0.47 m lower)
+CLIP ok   ashwick: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   dolm: wears clips
+CLIP FAIL dolm: 95626 tris, weapon included (budget 80000)
+CLIP ok   dolm: the file's 58 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP FAIL dolm: every clip lasts as long as its kit move (worst 0.143 s, breah_slam, clip 1.367 s, keys 1.510 s)
+CLIP ok   dolm: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   dolm: all its kit moves have a clip (missing [])
+CLIP ok   dolm: its stomp clip lasts the game's 0.70 s
+CLIP ok   dolm: its drink clip lasts the game's 1.00 s
+CLIP ok   dolm: breah_throw plays on the upper body
+CLIP ok   dolm: breah_throw runs over the legs walking and owns the body standing
+CLIP ok   dolm: breah_wind plays on the upper body
+CLIP ok   dolm: breah_wind runs over the legs walking and owns the body standing
+CLIP ok   dolm: breah_punch plays on the upper body
+CLIP ok   dolm: breah_punch runs over the legs walking and owns the body standing
+CLIP ok   dolm: breah_crouch owns the body
+CLIP ok   dolm: breah_windup owns the body
+CLIP ok   dolm: breah_leap owns the body
+CLIP ok   dolm: breah_slam owns the body
+CLIP ok   dolm: breah_dive owns the body
+CLIP ok   dolm: breah_slam_land owns the body
+CLIP ok   dolm: breah_lunge owns the body
+CLIP ok   dolm: breah_leap_land plays on the upper body
+CLIP ok   dolm: breah_leap_land runs over the legs walking and owns the body standing
+CLIP ok   dolm: breah_exdash owns the body
+CLIP FAIL dolm: breah_raise plays on the upper body
+CLIP ok   dolm: breah_raise runs over the legs walking and owns the body standing
+CLIP ok   dolm: breah_sense owns the body
+CLIP ok   dolm: breah_spine_aim plays on the upper body
+CLIP ok   dolm: breah_spine_aim runs over the legs walking and owns the body standing
+CLIP ok   dolm: breah_spine plays on the upper body
+CLIP ok   dolm: breah_spine runs over the legs walking and owns the body standing
+CLIP ok   dolm: mf_xform owns the body
+CLIP ok   dolm: breah_hop owns the body
+CLIP ok   dolm: breah_skate owns the body
+CLIP ok   dolm: idle loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   dolm: stance loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   dolm: the walk loops are one length (f 0.967 s; all match)
+CLIP ok   dolm: the run loops are one length (f 0.533 s; all match)
+CLIP ok   dolm: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   dolm: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL dolm jump run off=57.8 again=0.0 apex=88.7 dip=-0.141 world=-0.112 dip_t=0.07 legs=0.00 back=0.17 held=0.50 settle=0.13
+CLIP ok   dolm jump run: take-off (58 deg) and apex (89 deg) read
+CLIP ok   dolm jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   dolm jump run: the landing dips 0.141 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   dolm jump run: the body is back 0.17 s after touchdown (data 0.27, max 0.60)
+CLIP ok   dolm jump run: the legs are the run's again by 0.00 s (max 0.20), no hold
+JL dolm drop run off=97.3 again=0.0 apex=10.1 dip=-0.346 world=-0.276 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.23
+CLIP ok   dolm drop run: the landing dips 0.346 m (the deep crouch, at least 0.176), lowest at 0.10 s
+CLIP ok   dolm drop run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   dolm drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL dolm glide run off=169.4 again=0.0 apex=7.6 dip=-0.335 world=-0.267 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.23
+CLIP ok   dolm glide run: the landing dips 0.335 m (the deep crouch, at least 0.176), lowest at 0.10 s
+CLIP ok   dolm glide run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   dolm glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL dolm kerb run off=100.3 again=0.0 apex=65.0 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   dolm kerb run: a step down plays no landing (clip weight 0.00)
+JL dolm jump still off=35.7 again=0.0 apex=94.2 dip=-0.164 world=-0.131 dip_t=0.07 legs=0.00 back=0.30 held=0.50 settle=0.27
+CLIP ok   dolm jump still: take-off (36 deg) and apex (94 deg) read
+CLIP ok   dolm jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   dolm jump still: the landing dips 0.164 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   dolm jump still: the body is back 0.30 s after touchdown (data 0.39, max 0.60)
+JL dolm drop still off=85.3 again=0.0 apex=6.3 dip=-0.359 world=-0.287 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.40
+CLIP ok   dolm drop still: the landing dips 0.359 m (the deep crouch, at least 0.205), lowest at 0.10 s
+CLIP ok   dolm drop still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL dolm glide still off=166.0 again=0.0 apex=7.7 dip=-0.361 world=-0.288 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.40
+CLIP ok   dolm glide still: the landing dips 0.361 m (the deep crouch, at least 0.205), lowest at 0.10 s
+CLIP ok   dolm glide still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL dolm kerb still off=93.0 again=0.0 apex=47.4 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   dolm kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   dolm: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   dolm: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   dolm: the look's bone offsets are held under the clips
+CLIP ok   dolm: a knocked-out Hero stays on screen for its death clip
+CLIP ok   dolm: the Muzzle stays on the visible tip in 232 frames (worst 0.000 m)
+CLIP ok   dolm: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   dolm: rooted, feet planted over every move (worst 0.034, breah_slam @1.07; idle 0.031)
+CLIP ok   dolm: moves hand over without a pop (worst 0.000 m over the clip's own, ; limit 0.204)
+CLIP ok   dolm: the clips own the body after the run
+CLIP ok   dolm: a move with no clip hands back to the rig
+CLIP ok   dolm: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   dolm: flinch run recorded (31 frames)
+CLIP ok   dolm: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   dolm: a hit mid-run flinches the arms (hand moves 0.012 m, min 0.010)
+CLIP ok   dolm: a solid hit flinches the arms more than a chip hit (0.020 m > 0.012 m)
+CLIP ok   dolm: a chip hit standing still flinches the upper body only
+CLIP ok   dolm: a stagger on the run takes the whole body
+CLIP ok   dolm: a stagger standing still takes the whole body
+CLIP ok   dolm: a chip hit on the run leaves the body to the legs
+CLIP ok   dolm: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   dolm: both wrists cradle the Boki at the chest (0.11 m from the socket, 0.32 m in front of the hips)
+CLIP ok   dolm: the Boki rides at chest height (0.20 m over the hips)
+CLIP ok   dolm: the Boki rides in front of the chest, not in it (0.14 m clear)
+CLIP ok   dolm: the weapon bones the data stows are put away (0.000)
+CLIP ok   dolm: no weapon rides a hand into the Boki (longest piece on a hand alone 0.00 m, limit 0.25)
+CLIP ok   dolm: the legs keep stepping under it (0.559 m of stride, 0.561 m without)
+CLIP ok   dolm: the stand-up beat stays on the clips
+CLIP ok   dolm: the carry lets go (socket gone, weapon back, size 1.00)
+CLIP ok   dolm: a hard landing flattens him 10% (head 1.84 -> 1.66 m)
+CLIP ok   dolm: a run start tips his head forward (0.184 m)
+CLIP ok   dolm: and he stands back as he was (0.0000 m off)
+CLIP ok   dolm: 180° on the spot, planted feet slide 0.7 cm (limit 5; no step: 32.8 cm)
+CLIP ok   dolm: 4 turn steps, the foot lifts 12.4 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   dolm: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   dolm: no turn step while moving
+CLIP ok   dolm: no turn step while casting
+CLIP ok   dolm: no turn step while shooting
+CLIP ok   dolm: no turn step while in a kit move
+CLIP ok   dolm: moving cancels a turn step at once
+CLIP ok   dolm: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   dolm: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   dolm: a root strains the torso forward (1.00, head 0.091 m, min 0.04)
+CLIP ok   dolm: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   dolm: the root's strain blends out in 0.1 s
+CLIP ok   dolm: Grounded drops into the crouch (1.00, head 0.50 m lower)
+CLIP ok   dolm: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   mage: wears clips
+CLIP FAIL mage: 97646 tris, weapon included (budget 80000)
+CLIP ok   mage: the file's 58 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP ok   mage: every clip lasts as long as its kit move (worst 0.017 s, mage_lmb_l, clip 0.333 s, keys 0.350 s)
+CLIP ok   mage: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   mage: all its kit moves have a clip (missing [])
+CLIP ok   mage: its stomp clip lasts the game's 0.70 s
+CLIP ok   mage: its drink clip lasts the game's 1.00 s
+CLIP ok   mage: mage_dash_land runs over the legs walking and owns the body standing
+CLIP ok   mage: mage_x_land runs over the legs walking and owns the body standing
+CLIP ok   mage: idle loop seam 0.0x the limit (worst none), 4.0 s long (min 2.0)
+CLIP ok   mage: stance loop seam 0.0x the limit (worst none), 5.0 s long (min 2.0)
+CLIP ok   mage: the walk loops are one length (f 0.933 s; all match)
+CLIP ok   mage: the run loops are one length (f 0.600 s; all match)
+CLIP ok   mage: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   mage: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL mage jump run off=140.9 again=0.0 apex=88.6 dip=-0.039 world=-0.041 dip_t=0.07 legs=0.00 back=0.17 held=0.50 settle=0.10
+CLIP ok   mage jump run: take-off (141 deg) and apex (89 deg) read
+CLIP ok   mage jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   mage jump run: the landing dips 0.039 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   mage jump run: the body is back 0.17 s after touchdown (data 0.27, max 0.60)
+CLIP ok   mage jump run: the legs are the run's again by 0.00 s (max 0.20), no hold
+JL mage drop run off=158.7 again=0.0 apex=6.1 dip=-0.090 world=-0.096 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   mage drop run: the landing dips 0.090 m (the deep crouch, at least 0.048), lowest at 0.10 s
+CLIP ok   mage drop run: the body is back 0.27 s after touchdown (data 0.31, max 0.60)
+CLIP ok   mage drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL mage glide run off=158.1 again=0.0 apex=4.8 dip=-0.083 world=-0.088 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   mage glide run: the landing dips 0.083 m (the deep crouch, at least 0.048), lowest at 0.10 s
+CLIP ok   mage glide run: the body is back 0.27 s after touchdown (data 0.31, max 0.60)
+CLIP ok   mage glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL mage kerb run off=114.1 again=0.0 apex=141.6 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   mage kerb run: a step down plays no landing (clip weight 0.00)
+JL mage jump still off=87.8 again=0.0 apex=90.0 dip=-0.069 world=-0.073 dip_t=0.07 legs=0.00 back=0.30 held=0.50 settle=0.20
+CLIP ok   mage jump still: take-off (88 deg) and apex (90 deg) read
+CLIP ok   mage jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   mage jump still: the landing dips 0.069 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   mage jump still: the body is back 0.30 s after touchdown (data 0.39, max 0.60)
+JL mage drop still off=129.2 again=0.0 apex=2.7 dip=-0.139 world=-0.147 dip_t=0.10 legs=0.37 back=0.47 held=1.00 settle=0.27
+CLIP ok   mage drop still: the landing dips 0.139 m (the deep crouch, at least 0.086), lowest at 0.10 s
+CLIP ok   mage drop still: the body is back 0.47 s after touchdown (data 0.52, max 0.60)
+JL mage glide still off=110.0 again=0.0 apex=4.1 dip=-0.134 world=-0.142 dip_t=0.10 legs=0.37 back=0.47 held=1.00 settle=0.27
+CLIP ok   mage glide still: the landing dips 0.134 m (the deep crouch, at least 0.086), lowest at 0.10 s
+CLIP ok   mage glide still: the body is back 0.47 s after touchdown (data 0.52, max 0.60)
+JL mage kerb still off=130.8 again=0.0 apex=72.1 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   mage kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   mage: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   mage: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   mage: the look's bone offsets are held under the clips
+CLIP ok   mage: a knocked-out Hero stays on screen for its death clip
+CLIP ok   mage: the Muzzle stays on the visible tip in 224 frames (worst 0.000 m)
+CLIP ok   mage: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   mage: rooted, feet planted over every move (worst 0.038, mage_rmb @0.57; idle 0.090)
+CLIP ok   mage: moves hand over without a pop (worst 0.174 m over the clip's own, mage_lmb_l @0.00; limit 0.270)
+CLIP ok   mage: the clips own the body after the run
+CLIP ok   mage: a move with no clip hands back to the rig
+CLIP ok   mage: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   mage: flinch run recorded (31 frames)
+CLIP ok   mage: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   mage: a hit mid-run flinches the arms (hand moves 0.050 m, min 0.010)
+CLIP ok   mage: a solid hit flinches the arms more than a chip hit (0.088 m > 0.050 m)
+CLIP ok   mage: a chip hit standing still flinches the upper body only
+CLIP ok   mage: a stagger on the run takes the whole body
+CLIP ok   mage: a stagger standing still takes the whole body
+CLIP ok   mage: a chip hit on the run leaves the body to the legs
+CLIP ok   mage: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   mage: both wrists cradle the Boki at the chest (0.10 m from the socket, 0.36 m in front of the hips)
+CLIP ok   mage: the Boki rides at chest height (0.34 m over the hips)
+CLIP ok   mage: the Boki rides in front of the chest, not in it (0.20 m clear)
+CLIP ok   mage: the weapon bones the data stows are put away (0.000)
+CLIP ok   mage: no weapon rides a hand into the Boki (longest piece on a hand alone 0.00 m, limit 0.25)
+CLIP ok   mage: the legs keep stepping under it (0.681 m of stride, 0.664 m without)
+CLIP ok   mage: the stand-up beat stays on the clips
+CLIP ok   mage: the carry lets go (socket gone, weapon back, size 1.00)
+CLIP ok   mage: a hard landing flattens him 9% (head 1.41 -> 1.28 m)
+CLIP ok   mage: a run start tips his head forward (0.140 m)
+CLIP ok   mage: and he stands back as he was (0.0000 m off)
+CLIP ok   mage: 180° on the spot, planted feet slide 1.4 cm (limit 5; no step: 40.0 cm)
+CLIP ok   mage: 4 turn steps, the foot lifts 20.1 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   mage: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   mage: no turn step while moving
+CLIP ok   mage: no turn step while casting
+CLIP ok   mage: no turn step while shooting
+CLIP ok   mage: no turn step while in a kit move
+CLIP ok   mage: moving cancels a turn step at once
+CLIP ok   mage: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   mage: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   mage: a root strains the torso forward (1.00, head 0.138 m, min 0.04)
+CLIP ok   mage: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   mage: the root's strain blends out in 0.1 s
+CLIP ok   mage: Grounded drops into the crouch (1.00, head 0.47 m lower)
+CLIP ok   mage: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   dredge: wears clips
+CLIP FAIL dredge: 125032 tris, weapon included (budget 80000)
+CLIP ok   dredge: the file's 56 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP ok   dredge: every clip lasts as long as its kit move (worst 0.017 s, dr_quake, clip 0.733 s, keys 0.750 s)
+CLIP ok   dredge: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   dredge: all its kit moves have a clip (missing [])
+CLIP ok   dredge: its stomp clip lasts the game's 0.70 s
+CLIP ok   dredge: its drink clip lasts the game's 1.00 s
+CLIP ok   dredge: dr_throw runs over the legs walking and owns the body standing
+CLIP ok   dredge: dr_reel runs over the legs walking and owns the body standing
+CLIP ok   dredge: dr_pullend runs over the legs walking and owns the body standing
+CLIP ok   dredge: dr_anchor runs over the legs walking and owns the body standing
+CLIP ok   dredge: dr_blast runs over the legs walking and owns the body standing
+CLIP ok   dredge: idle loop seam 0.0x the limit (worst none), 5.0 s long (min 2.0)
+CLIP ok   dredge: stance loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   dredge: the walk loops are one length (f 1.000 s; all match)
+CLIP ok   dredge: the run loops are one length (f 0.633 s; all match)
+CLIP ok   dredge: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   dredge: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL dredge jump run off=171.4 again=0.0 apex=81.6 dip=-0.053 world=-0.080 dip_t=0.07 legs=0.07 back=0.17 held=0.60 settle=0.10
+CLIP ok   dredge jump run: take-off (171 deg) and apex (82 deg) read
+CLIP ok   dredge jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   dredge jump run: the landing dips 0.053 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   dredge jump run: the body is back 0.17 s after touchdown (data 0.29, max 0.60)
+CLIP ok   dredge jump run: the legs are the run's again by 0.07 s (max 0.20), no hold
+JL dredge drop run off=171.3 again=0.0 apex=15.7 dip=-0.194 world=-0.291 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.23
+CLIP ok   dredge drop run: the landing dips 0.194 m (the deep crouch, at least 0.067), lowest at 0.10 s
+CLIP ok   dredge drop run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   dredge drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL dredge glide run off=170.3 again=0.0 apex=11.1 dip=-0.185 world=-0.277 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.23
+CLIP ok   dredge glide run: the landing dips 0.185 m (the deep crouch, at least 0.067), lowest at 0.10 s
+CLIP ok   dredge glide run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   dredge glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL dredge kerb run off=170.5 again=0.0 apex=154.7 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   dredge kerb run: a step down plays no landing (clip weight 0.00)
+JL dredge jump still off=89.7 again=0.0 apex=67.7 dip=-0.143 world=-0.215 dip_t=0.10 legs=0.23 back=0.33 held=0.60 settle=0.30
+CLIP ok   dredge jump still: take-off (90 deg) and apex (68 deg) read
+CLIP ok   dredge jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   dredge jump still: the landing dips 0.143 m (the hop's dip, at least 0.015), lowest at 0.10 s
+CLIP ok   dredge jump still: the body is back 0.33 s after touchdown (data 0.43, max 0.60)
+JL dredge drop still off=111.4 again=0.0 apex=20.3 dip=-0.252 world=-0.378 dip_t=0.13 legs=0.47 back=0.57 held=1.00 settle=0.40
+CLIP ok   dredge drop still: the landing dips 0.252 m (the deep crouch, at least 0.179), lowest at 0.13 s
+CLIP ok   dredge drop still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL dredge glide still off=163.0 again=0.0 apex=11.1 dip=-0.252 world=-0.379 dip_t=0.13 legs=0.47 back=0.57 held=1.00 settle=0.40
+CLIP ok   dredge glide still: the landing dips 0.252 m (the deep crouch, at least 0.179), lowest at 0.13 s
+CLIP ok   dredge glide still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL dredge kerb still off=114.8 again=0.0 apex=61.1 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   dredge kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   dredge: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   dredge: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   dredge: the look's bone offsets are held under the clips
+CLIP ok   dredge: a knocked-out Hero stays on screen for its death clip
+CLIP ok   dredge: the Muzzle stays on the visible tip in 208 frames (worst 0.000 m)
+CLIP ok   dredge: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   dredge: rooted, feet planted over every move (worst 0.013, dr_shot @0.00; idle 0.089)
+CLIP ok   dredge: moves hand over without a pop (worst 0.173 m over the clip's own, dr_lunge @0.00; limit 0.385)
+CLIP ok   dredge: the clips own the body after the run
+CLIP ok   dredge: a move with no clip hands back to the rig
+CLIP ok   dredge: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   dredge: flinch run recorded (31 frames)
+CLIP ok   dredge: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   dredge: a hit mid-run flinches the arms (hand moves 0.073 m, min 0.010)
+CLIP ok   dredge: a solid hit flinches the arms more than a chip hit (0.127 m > 0.073 m)
+CLIP ok   dredge: a chip hit standing still flinches the upper body only
+CLIP ok   dredge: a stagger on the run takes the whole body
+CLIP ok   dredge: a stagger standing still takes the whole body
+CLIP ok   dredge: a chip hit on the run leaves the body to the legs
+CLIP ok   dredge: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   dredge: both wrists cradle the Boki at the chest (0.14 m from the socket, 0.85 m in front of the hips)
+CLIP ok   dredge: the Boki rides at chest height (0.27 m over the hips)
+CLIP ok   dredge: the Boki rides in front of the chest, not in it (0.49 m clear)
+CLIP ok   dredge: the weapon bones the data stows are put away (0.001)
+CLIP FAIL dredge: no weapon rides a hand into the Boki (longest piece on a hand alone 0.60 m, limit 0.25)
+CLIP ok   dredge: the legs keep stepping under it (0.699 m of stride, 0.705 m without)
+CLIP ok   dredge: the stand-up beat stays on the clips
+CLIP ok   dredge: the carry lets go (socket gone, weapon back, size 1.00)
+CLIP ok   dredge: the mantle clip time follows the rise (0.14 s at half)
+CLIP ok   dredge: hands reach over the head, then plant on the lip (0.39, -0.91 m off the head)
+CLIP ok   dredge: the mantle clip runs on after the rise, 0.71 s of 0.73 s
+CLIP ok   dredge: a move cuts the climb tail
+CLIP ok   dredge: a ledge float hangs the clip at 0.30 s
+CLIP ok   dredge: a shot kicks the arm 4.00 deg (file 4.0)
+CLIP ok   dredge: the legs do not kick
+CLIP ok   dredge: sustained fire peaks 4.16 deg (cap 6.0)
+CLIP ok   dredge: the kick settles (0.000 deg left)
+CLIP ok   dredge: a hard landing flattens him 10% (head 1.01 -> 0.91 m)
+CLIP ok   dredge: a run start tips his head forward (0.100 m)
+CLIP ok   dredge: and he stands back as he was (0.0000 m off)
+CLIP ok   dredge: 180° on the spot, planted feet slide 1.3 cm (limit 5; no step: 71.7 cm)
+CLIP ok   dredge: 4 turn steps, the foot lifts 26.5 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   dredge: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   dredge: no turn step while moving
+CLIP ok   dredge: no turn step while casting
+CLIP ok   dredge: no turn step while shooting
+CLIP ok   dredge: no turn step while in a kit move
+CLIP ok   dredge: moving cancels a turn step at once
+CLIP ok   dredge: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   dredge: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   dredge: a root strains the torso forward (1.00, head 0.141 m, min 0.04)
+CLIP ok   dredge: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   dredge: the root's strain blends out in 0.1 s
+CLIP ok   dredge: Grounded drops into the crouch (1.00, head 0.38 m lower)
+CLIP ok   dredge: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   tender: wears clips
+CLIP FAIL tender: 121292 tris, weapon included (budget 80000)
+CLIP ok   tender: the file's 56 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP ok   tender: every clip lasts as long as its kit move (worst 0.017 s, mm_float, clip 1.067 s, keys 1.050 s)
+CLIP ok   tender: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   tender: all its kit moves have a clip (missing [])
+CLIP ok   tender: its stomp clip lasts the game's 0.70 s
+CLIP ok   tender: its drink clip lasts the game's 1.00 s
+CLIP ok   tender: mm_shot_r runs over the legs walking and owns the body standing
+CLIP ok   tender: mm_shot_l runs over the legs walking and owns the body standing
+CLIP ok   tender: mm_shot_emp runs over the legs walking and owns the body standing
+CLIP ok   tender: mm_seed_aim runs over the legs walking and owns the body standing
+CLIP ok   tender: mm_seed runs over the legs walking and owns the body standing
+CLIP ok   tender: mm_hearth runs over the legs walking and owns the body standing
+CLIP ok   tender: mm_toss runs over the legs walking and owns the body standing
+CLIP ok   tender: mm_flare runs over the legs walking and owns the body standing
+CLIP ok   tender: idle loop seam 0.0x the limit (worst none), 5.0 s long (min 2.0)
+CLIP ok   tender: stance loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   tender: the walk loops are one length (f 0.333 s; all match)
+CLIP ok   tender: the run loops are one length (f 0.333 s; all match)
+CLIP ok   tender: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   tender: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL tender jump run off=157.9 again=0.0 apex=99.7 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.17 held=0.50 settle=0.00
+CLIP ok   tender jump run: take-off (158 deg) and apex (100 deg) read
+CLIP ok   tender jump run: the next jump takes off like the first (0.0 deg off)
+CLIP FAIL tender jump run: the landing dips -0.000 m (the hop's dip, at least 0.015), lowest at 0.00 s
+CLIP ok   tender jump run: the body is back 0.17 s after touchdown (data 0.27, max 0.60)
+CLIP ok   tender jump run: the legs are the run's again by 0.00 s (max 0.20), no hold
+JL tender drop run off=161.9 again=0.0 apex=7.9 dip=0.000 world=0.000 dip_t=0.00 legs=0.17 back=0.27 held=1.00 settle=0.00
+CLIP FAIL tender drop run: the landing dips -0.000 m (the deep crouch, at least 0.030), lowest at 0.00 s
+CLIP ok   tender drop run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   tender drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL tender glide run off=133.4 again=0.0 apex=6.3 dip=0.000 world=0.000 dip_t=0.00 legs=0.17 back=0.27 held=1.00 settle=0.00
+CLIP FAIL tender glide run: the landing dips -0.000 m (the deep crouch, at least 0.030), lowest at 0.00 s
+CLIP ok   tender glide run: the body is back 0.27 s after touchdown (data 0.32, max 0.60)
+CLIP ok   tender glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL tender kerb run off=177.3 again=0.0 apex=158.8 dip=-0.001 world=-0.001 dip_t=0.10 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   tender kerb run: a step down plays no landing (clip weight 0.00)
+JL tender jump still off=109.7 again=0.0 apex=99.7 dip=-0.044 world=-0.039 dip_t=0.07 legs=0.00 back=0.30 held=0.50 settle=0.10
+CLIP ok   tender jump still: take-off (110 deg) and apex (100 deg) read
+CLIP ok   tender jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   tender jump still: the landing dips 0.044 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   tender jump still: the body is back 0.30 s after touchdown (data 0.39, max 0.60)
+JL tender drop still off=169.5 again=0.0 apex=10.6 dip=-0.097 world=-0.084 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.17
+CLIP ok   tender drop still: the landing dips 0.097 m (the deep crouch, at least 0.055), lowest at 0.10 s
+CLIP ok   tender drop still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL tender glide still off=170.7 again=0.0 apex=6.0 dip=-0.113 world=-0.099 dip_t=0.10 legs=0.47 back=0.57 held=1.00 settle=0.20
+CLIP ok   tender glide still: the landing dips 0.113 m (the deep crouch, at least 0.055), lowest at 0.10 s
+CLIP ok   tender glide still: the body is back 0.57 s after touchdown (data 0.59, max 0.60)
+JL tender kerb still off=178.9 again=0.0 apex=101.6 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   tender kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   tender: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   tender: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   tender: the look's bone offsets are held under the clips
+CLIP ok   tender: a knocked-out Hero stays on screen for its death clip
+CLIP ok   tender: the Muzzle stays on the visible tip in 220 frames (worst 0.000 m)
+CLIP ok   tender: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   tender: rooted, feet planted over every move (worst 0.010, mm_shot_emp @0.20; idle 0.020)
+CLIP ok   tender: moves hand over without a pop (worst 0.082 m over the clip's own, mm_shot_emp @0.13; limit 0.224)
+CLIP ok   tender: the clips own the body after the run
+CLIP ok   tender: a move with no clip hands back to the rig
+CLIP ok   tender: strength grows with damage share and knock (1.19 < 2.09)
+CLIP ok   tender: flinch run recorded (31 frames)
+CLIP ok   tender: a hit mid-run leaves the legs on the run (foot slide off by 0.0000 m, limit 0.002)
+CLIP ok   tender: a hit mid-run flinches the arms (hand moves 0.028 m, min 0.010)
+CLIP ok   tender: a solid hit flinches the arms more than a chip hit (0.050 m > 0.028 m)
+CLIP ok   tender: a chip hit standing still flinches the upper body only
+CLIP ok   tender: a stagger on the run takes the whole body
+CLIP ok   tender: a stagger standing still takes the whole body
+CLIP ok   tender: a chip hit on the run leaves the body to the legs
+CLIP ok   tender: the carry lies over the clips, not the rig, and leaves a socket
+CLIP ok   tender: both wrists cradle the Boki at the chest (0.08 m from the socket, 0.34 m in front of the hips)
+CLIP ok   tender: the Boki rides at chest height (0.28 m over the hips)
+CLIP ok   tender: the Boki rides in front of the chest, not in it (0.18 m clear)
+CLIP ok   tender: the weapon bones the data stows are put away (0.000)
+CLIP ok   tender: no weapon rides a hand into the Boki (longest piece on a hand alone 0.00 m, limit 0.25)
+CLIP ok   tender: the legs keep stepping under it (0.253 m of stride, 0.261 m without)
+CLIP ok   tender: the stand-up beat stays on the clips
+CLIP ok   tender: the carry lets go (socket gone, weapon back, size 1.00)
+CLIP ok   tender: a hard landing flattens him 10% (head 1.03 -> 0.93 m)
+CLIP ok   tender: a run start tips his head forward (0.103 m)
+CLIP ok   tender: and he stands back as he was (0.0000 m off)
+CLIP ok   tender: 180° on the spot, planted feet slide 0.7 cm (limit 5; no step: 20.5 cm)
+CLIP ok   tender: 4 turn steps, the foot lifts 10.7 cm, the legs end under the body (lag 0.00 rad)
+CLIP ok   tender: a 45° turn keeps the upper-body lead (no step)
+CLIP ok   tender: no turn step while moving
+CLIP ok   tender: no turn step while casting
+CLIP ok   tender: no turn step while shooting
+CLIP ok   tender: no turn step while in a kit move
+CLIP ok   tender: moving cancels a turn step at once
+CLIP ok   tender: a stun plays its sway clip in 0.1 s (clip stun, 1.00)
+CLIP ok   tender: the stun blends out in 0.1 s (0.00 left)
+CLIP ok   tender: a root strains the torso forward (1.00, head 0.143 m, min 0.04)
+CLIP ok   tender: a root leaves the legs planted (off by 0.0000 m)
+CLIP ok   tender: the root's strain blends out in 0.1 s
+CLIP ok   tender: Grounded drops into the crouch (1.00, head 0.29 m lower)
+CLIP ok   tender: Grounded blends out in 0.1 s (0.00 left)
+CLIP ok   thief: wears clips
+CLIP FAIL thief: 115114 tris, weapon included (budget 80000)
+CLIP ok   thief: the file's 67 clips are in the .glb (missing []; glb_add_clips.py restores)
+CLIP ok   thief: every clip lasts as long as its kit move (worst 0.017 s, thf_knife, clip 0.467 s, keys 0.450 s)
+CLIP ok   thief: its garden clips last as long as the home verbs (off 0.000 s)
+CLIP ok   thief: all its kit moves have a clip (missing [])
+CLIP ok   thief: its stomp clip lasts the game's 0.70 s
+CLIP ok   thief: its drink clip lasts the game's 1.00 s
+CLIP ok   thief: thf_lmb_r runs over the legs walking and owns the body standing
+CLIP ok   thief: thf_lmb_l runs over the legs walking and owns the body standing
+CLIP ok   thief: thf_primed runs over the legs walking and owns the body standing
+CLIP ok   thief: thf_bola runs over the legs walking and owns the body standing
+CLIP ok   thief: thf_knife runs over the legs walking and owns the body standing
+CLIP ok   thief: thf_encore runs over the legs walking and owns the body standing
+CLIP ok   thief: thf_encore_dance runs over the legs walking and owns the body standing
+CLIP ok   thief: thf_reset runs over the legs walking and owns the body standing
+CLIP ok   thief: thf_flourish runs over the legs walking and owns the body standing
+CLIP ok   thief: idle loop seam 0.0x the limit (worst none), 5.0 s long (min 2.0)
+CLIP ok   thief: stance loop seam 0.0x the limit (worst none), 6.0 s long (min 2.0)
+CLIP ok   thief: the walk loops are one length (f 0.933 s; all match)
+CLIP ok   thief: the run loops are one length (f 0.633 s; all match)
+CLIP ok   thief: 8 wheel emotes, 8 clips, within 2.6 s (bad [])
+CLIP ok   thief: emotes play upper-body moving, full-body standing, then end (wrong [])
+JL thief jump run off=111.5 again=0.0 apex=51.2 dip=-0.030 world=-0.030 dip_t=0.07 legs=0.07 back=0.20 held=0.67 settle=0.10
+CLIP ok   thief jump run: take-off (112 deg) and apex (51 deg) read
+CLIP ok   thief jump run: the next jump takes off like the first (0.0 deg off)
+CLIP ok   thief jump run: the landing dips 0.030 m (the hop's dip, at least 0.015), lowest at 0.07 s
+CLIP ok   thief jump run: the body is back 0.20 s after touchdown (data 0.29, max 0.60)
+CLIP ok   thief jump run: the legs are the run's again by 0.07 s (max 0.20), no hold
+JL thief drop run off=102.4 again=0.0 apex=17.2 dip=-0.055 world=-0.054 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   thief drop run: the landing dips 0.055 m (the deep crouch, at least 0.038), lowest at 0.10 s
+CLIP ok   thief drop run: the body is back 0.27 s after touchdown (data 0.31, max 0.60)
+CLIP ok   thief drop run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL thief glide run off=115.9 again=0.0 apex=5.5 dip=-0.053 world=-0.052 dip_t=0.10 legs=0.17 back=0.27 held=1.00 settle=0.20
+CLIP ok   thief glide run: the landing dips 0.053 m (the deep crouch, at least 0.038), lowest at 0.10 s
+CLIP ok   thief glide run: the body is back 0.27 s after touchdown (data 0.31, max 0.60)
+CLIP ok   thief glide run: the legs are the run's again by 0.17 s (max 0.20), no hold
+JL thief kerb run off=102.6 again=0.0 apex=105.7 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   thief kerb run: a step down plays no landing (clip weight 0.00)
+JL thief jump still off=69.0 again=0.0 apex=52.2 dip=-0.076 world=-0.075 dip_t=0.10 legs=0.23 back=0.33 held=0.75 settle=0.20
+CLIP ok   thief jump still: take-off (69 deg) and apex (52 deg) read
+CLIP ok   thief jump still: the next jump takes off like the first (0.0 deg off)
+CLIP ok   thief jump still: the landing dips 0.076 m (the hop's dip, at least 0.015), lowest at 0.10 s
+CLIP ok   thief jump still: the body is back 0.33 s after touchdown (data 0.39, max 0.60)
+JL thief drop still off=67.1 again=0.0 apex=22.1 dip=-0.125 world=-0.123 dip_t=0.10 legs=0.37 back=0.47 held=1.00 settle=0.30
+CLIP ok   thief drop still: the landing dips 0.125 m (the deep crouch, at least 0.095), lowest at 0.10 s
+CLIP ok   thief drop still: the body is back 0.47 s after touchdown (data 0.52, max 0.60)
+JL thief glide still off=85.9 again=0.0 apex=4.5 dip=-0.123 world=-0.121 dip_t=0.10 legs=0.37 back=0.47 held=1.00 settle=0.30
+CLIP ok   thief glide still: the landing dips 0.123 m (the deep crouch, at least 0.095), lowest at 0.10 s
+CLIP ok   thief glide still: the body is back 0.47 s after touchdown (data 0.52, max 0.60)
+JL thief kerb still off=74.1 again=0.0 apex=35.1 dip=0.000 world=0.000 dip_t=0.00 legs=0.00 back=0.03 held=0.00 settle=0.00
+CLIP ok   thief kerb still: a step down plays no landing (clip weight 0.00)
+CLIP ok   thief: one weapon drawn (0 procedural pieces showing:)
+CLIP ok   thief: no clip keys a contract bone's offset (0 tracks), the sliders stay on
+CLIP ok   thief: the look's bone offsets are held under the clips
+CLIP ok   thief: a knocked-out Hero stays on screen for its death clip
+CLIP ok   thief: the Muzzle stays on the visible tip in 260 frames (worst 0.000 m)
+CLIP ok   thief: the blade never leaves the hand (worst drift 0.000 m)
+CLIP ok   thief: rooted, feet planted over every move (worst 0.077, thf_lmb_l @0.67; idle 0.094)

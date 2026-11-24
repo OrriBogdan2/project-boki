@@ -1,0 +1,45 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HATCHSFX ok   all 5 eggs hatch
+HATCHSFX ok   cindle: first crack, bigger crack and pop once each
+HATCHSFX ok   cindle: its first chirp hatch_chirp_venom once
+HATCHSFX ok   cindle: wobble ticks (2)
+HATCHSFX ok   cindle: in order ["hatch_crack_1", "hatch_crack_2", "hatch_pop", "hatch_chirp_venom"]
+HATCHSFX ok   cindle: none of the mystery sounds
+HATCHSFX ok   puddlet: first crack, bigger crack and pop once each
+HATCHSFX ok   puddlet: its first chirp hatch_chirp_prism once
+HATCHSFX ok   puddlet: wobble ticks (2)
+HATCHSFX ok   puddlet: in order ["hatch_crack_1", "hatch_crack_2", "hatch_pop", "hatch_chirp_prism"]
+HATCHSFX ok   puddlet: none of the mystery sounds
+HATCHSFX ok   burrlet: first crack, bigger crack and pop once each
+HATCHSFX ok   burrlet: its first chirp hatch_chirp_spore once
+HATCHSFX ok   burrlet: wobble ticks (2)
+HATCHSFX ok   burrlet: in order ["hatch_crack_1", "hatch_crack_2", "hatch_pop", "hatch_chirp_spore"]
+HATCHSFX ok   burrlet: none of the mystery sounds
+HATCHSFX ok   zapple (mystery): first crack, bigger crack and pop once each
+HATCHSFX ok   zapple (mystery): its first chirp hatch_mystery_chirp once
+HATCHSFX ok   zapple (mystery): wobble ticks (2)
+HATCHSFX ok   zapple (mystery): in order ["hatch_mystery_crack_1", "hatch_mystery_crack_2", "hatch_mystery_pop", "hatch_mystery_chirp"]
+HATCHSFX ok   zapple (mystery): only its own sounds
+HATCHSFX ok   pebbit: first crack, bigger crack and pop once each
+HATCHSFX ok   pebbit: its first chirp kin_happy once
+HATCHSFX ok   pebbit: wobble ticks (2)
+HATCHSFX ok   pebbit: in order ["hatch_crack_1", "hatch_crack_2", "hatch_pop", "kin_happy"]
+HATCHSFX ok   pebbit: none of the mystery sounds
+HATCHSFX ok   hatch_wobble exists
+HATCHSFX ok   hatch_crack_1 exists
+HATCHSFX ok   hatch_crack_2 exists
+HATCHSFX ok   hatch_pop exists
+HATCHSFX ok   hatch_chirp_venom exists
+HATCHSFX ok   hatch_chirp_prism exists
+HATCHSFX ok   hatch_chirp_spore exists
+HATCHSFX ok   hatch_mystery_wobble exists
+HATCHSFX ok   hatch_mystery_crack_1 exists
+HATCHSFX ok   hatch_mystery_crack_2 exists
+HATCHSFX ok   hatch_mystery_pop exists
+HATCHSFX ok   hatch_mystery_chirp exists
+HATCHSFX ok   kin_happy exists
+HATCHSFX CHECK DONE, failures: 0

@@ -1,0 +1,227 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+IDLEBREAK ok   archer has a break
+IDLEBREAK ok   archer: the break runs 2.6 s (2 to 3)
+IDLEBREAK ok   archer: no break without the flag (town, title)
+IDLEBREAK ok   archer: no break while moving
+IDLEBREAK ok   archer: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   archer: no break in combat (fired 3 s ago)
+IDLEBREAK ok   archer: no break in combat (cast 3 s ago)
+IDLEBREAK ok   archer: no break before 6 s of calm
+IDLEBREAK ok   archer: the break starts after 6 s of calm
+IDLEBREAK ok   archer: the break turns a bone 1.31 rad (>= 0.08)
+IDLEBREAK ok   archer: playing before the press
+IDLEBREAK ok   archer: the first press cancels it at once
+IDLEBREAK ok   archer: back on the idle 0.15 s after the press
+IDLEBREAK ok   archer: a press restarts the 6 s wait
+IDLEBREAK ok   archer: the break ended and the idle is back
+IDLEBREAK ok   archer: it does not repeat at once
+IDLEBREAK ok   archer: a hit ends it
+IDLEBREAK ok   juggernaut has a break
+IDLEBREAK ok   juggernaut: the break runs 2.4 s (2 to 3)
+IDLEBREAK ok   juggernaut: no break without the flag (town, title)
+IDLEBREAK ok   juggernaut: no break while moving
+IDLEBREAK ok   juggernaut: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   juggernaut: no break in combat (fired 3 s ago)
+IDLEBREAK ok   juggernaut: no break in combat (cast 3 s ago)
+IDLEBREAK ok   juggernaut: no break before 6 s of calm
+IDLEBREAK ok   juggernaut: the break starts after 6 s of calm
+IDLEBREAK ok   juggernaut: the break turns a bone 0.26 rad (>= 0.08)
+IDLEBREAK ok   juggernaut: playing before the press
+IDLEBREAK ok   juggernaut: the first press cancels it at once
+IDLEBREAK ok   juggernaut: back on the idle 0.15 s after the press
+IDLEBREAK ok   juggernaut: a press restarts the 6 s wait
+IDLEBREAK ok   juggernaut: the break ended and the idle is back
+IDLEBREAK ok   juggernaut: it does not repeat at once
+IDLEBREAK ok   juggernaut: a hit ends it
+IDLEBREAK ok   gunslinger has a break
+IDLEBREAK ok   gunslinger: the break runs 2.8 s (2 to 3)
+IDLEBREAK ok   gunslinger: no break without the flag (town, title)
+IDLEBREAK ok   gunslinger: no break while moving
+IDLEBREAK ok   gunslinger: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   gunslinger: no break in combat (fired 3 s ago)
+IDLEBREAK ok   gunslinger: no break in combat (cast 3 s ago)
+IDLEBREAK ok   gunslinger: no break before 6 s of calm
+IDLEBREAK ok   gunslinger: the break starts after 6 s of calm
+IDLEBREAK ok   gunslinger: the break turns a bone 1.03 rad (>= 0.08)
+IDLEBREAK ok   gunslinger: playing before the press
+IDLEBREAK ok   gunslinger: the first press cancels it at once
+IDLEBREAK ok   gunslinger: back on the idle 0.15 s after the press
+IDLEBREAK ok   gunslinger: a press restarts the 6 s wait
+IDLEBREAK ok   gunslinger: the break ended and the idle is back
+IDLEBREAK ok   gunslinger: it does not repeat at once
+IDLEBREAK ok   gunslinger: a hit ends it
+IDLEBREAK ok   bulwark has a break
+IDLEBREAK ok   bulwark: the break runs 2.6 s (2 to 3)
+IDLEBREAK ok   bulwark: no break without the flag (town, title)
+IDLEBREAK ok   bulwark: no break while moving
+IDLEBREAK ok   bulwark: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   bulwark: no break in combat (fired 3 s ago)
+IDLEBREAK ok   bulwark: no break in combat (cast 3 s ago)
+IDLEBREAK ok   bulwark: no break before 6 s of calm
+IDLEBREAK ok   bulwark: the break starts after 6 s of calm
+IDLEBREAK ok   bulwark: the break turns a bone 0.46 rad (>= 0.08)
+IDLEBREAK ok   bulwark: playing before the press
+IDLEBREAK ok   bulwark: the first press cancels it at once
+IDLEBREAK ok   bulwark: back on the idle 0.15 s after the press
+IDLEBREAK ok   bulwark: a press restarts the 6 s wait
+IDLEBREAK ok   bulwark: the break ended and the idle is back
+IDLEBREAK ok   bulwark: it does not repeat at once
+IDLEBREAK ok   bulwark: a hit ends it
+IDLEBREAK ok   rimewright has a break
+IDLEBREAK ok   rimewright: the break runs 2.8 s (2 to 3)
+IDLEBREAK ok   rimewright: no break without the flag (town, title)
+IDLEBREAK ok   rimewright: no break while moving
+IDLEBREAK ok   rimewright: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   rimewright: no break in combat (fired 3 s ago)
+IDLEBREAK ok   rimewright: no break in combat (cast 3 s ago)
+IDLEBREAK ok   rimewright: no break before 6 s of calm
+IDLEBREAK ok   rimewright: the break starts after 6 s of calm
+IDLEBREAK ok   rimewright: the break turns a bone 1.24 rad (>= 0.08)
+IDLEBREAK ok   rimewright: playing before the press
+IDLEBREAK ok   rimewright: the first press cancels it at once
+IDLEBREAK ok   rimewright: back on the idle 0.15 s after the press
+IDLEBREAK ok   rimewright: a press restarts the 6 s wait
+IDLEBREAK ok   rimewright: the break ended and the idle is back
+IDLEBREAK ok   rimewright: it does not repeat at once
+IDLEBREAK ok   rimewright: a hit ends it
+IDLEBREAK ok   ashwick has a break
+IDLEBREAK ok   ashwick: the break runs 2.6 s (2 to 3)
+IDLEBREAK ok   ashwick: no break without the flag (town, title)
+IDLEBREAK ok   ashwick: no break while moving
+IDLEBREAK ok   ashwick: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   ashwick: no break in combat (fired 3 s ago)
+IDLEBREAK ok   ashwick: no break in combat (cast 3 s ago)
+IDLEBREAK ok   ashwick: no break before 6 s of calm
+IDLEBREAK ok   ashwick: the break starts after 6 s of calm
+IDLEBREAK ok   ashwick: the break turns a bone 1.82 rad (>= 0.08)
+IDLEBREAK ok   ashwick: playing before the press
+IDLEBREAK ok   ashwick: the first press cancels it at once
+IDLEBREAK ok   ashwick: back on the idle 0.15 s after the press
+IDLEBREAK ok   ashwick: a press restarts the 6 s wait
+IDLEBREAK ok   ashwick: the break ended and the idle is back
+IDLEBREAK ok   ashwick: it does not repeat at once
+IDLEBREAK ok   ashwick: a hit ends it
+IDLEBREAK ok   dolm has a break
+IDLEBREAK ok   dolm: the break runs 2.4 s (2 to 3)
+IDLEBREAK ok   dolm: no break without the flag (town, title)
+IDLEBREAK ok   dolm: no break while moving
+IDLEBREAK ok   dolm: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   dolm: no break in combat (fired 3 s ago)
+IDLEBREAK ok   dolm: no break in combat (cast 3 s ago)
+IDLEBREAK ok   dolm: no break before 6 s of calm
+IDLEBREAK ok   dolm: the break starts after 6 s of calm
+IDLEBREAK ok   dolm: the break turns a bone 0.34 rad (>= 0.08)
+IDLEBREAK ok   dolm: playing before the press
+IDLEBREAK ok   dolm: the first press cancels it at once
+IDLEBREAK ok   dolm: back on the idle 0.15 s after the press
+IDLEBREAK ok   dolm: a press restarts the 6 s wait
+IDLEBREAK ok   dolm: the break ended and the idle is back
+IDLEBREAK ok   dolm: it does not repeat at once
+IDLEBREAK ok   dolm: a hit ends it
+IDLEBREAK ok   mage has a break
+IDLEBREAK ok   mage: the break runs 2.2 s (2 to 3)
+IDLEBREAK ok   mage: no break without the flag (town, title)
+IDLEBREAK ok   mage: no break while moving
+IDLEBREAK ok   mage: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   mage: no break in combat (fired 3 s ago)
+IDLEBREAK ok   mage: no break in combat (cast 3 s ago)
+IDLEBREAK ok   mage: no break before 6 s of calm
+IDLEBREAK ok   mage: the break starts after 6 s of calm
+IDLEBREAK ok   mage: the break turns a bone 1.35 rad (>= 0.08)
+IDLEBREAK ok   mage: playing before the press
+IDLEBREAK ok   mage: the first press cancels it at once
+IDLEBREAK ok   mage: back on the idle 0.15 s after the press
+IDLEBREAK ok   mage: a press restarts the 6 s wait
+IDLEBREAK ok   mage: the break ended and the idle is back
+IDLEBREAK ok   mage: it does not repeat at once
+IDLEBREAK ok   mage: a hit ends it
+IDLEBREAK ok   dredge has a break
+IDLEBREAK ok   dredge: the break runs 2.8 s (2 to 3)
+IDLEBREAK ok   dredge: no break without the flag (town, title)
+IDLEBREAK ok   dredge: no break while moving
+IDLEBREAK ok   dredge: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   dredge: no break in combat (fired 3 s ago)
+IDLEBREAK ok   dredge: no break in combat (cast 3 s ago)
+IDLEBREAK ok   dredge: no break before 6 s of calm
+IDLEBREAK ok   dredge: the break starts after 6 s of calm
+IDLEBREAK ok   dredge: the break turns a bone 1.60 rad (>= 0.08)
+IDLEBREAK ok   dredge: playing before the press
+IDLEBREAK ok   dredge: the first press cancels it at once
+IDLEBREAK ok   dredge: back on the idle 0.15 s after the press
+IDLEBREAK ok   dredge: a press restarts the 6 s wait
+IDLEBREAK ok   dredge: the break ended and the idle is back
+IDLEBREAK ok   dredge: it does not repeat at once
+IDLEBREAK ok   dredge: a hit ends it
+IDLEBREAK ok   tender has a break
+IDLEBREAK ok   tender: the break runs 2.6 s (2 to 3)
+IDLEBREAK ok   tender: no break without the flag (town, title)
+IDLEBREAK ok   tender: no break while moving
+IDLEBREAK ok   tender: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   tender: no break in combat (fired 3 s ago)
+IDLEBREAK ok   tender: no break in combat (cast 3 s ago)
+IDLEBREAK ok   tender: no break before 6 s of calm
+IDLEBREAK ok   tender: the break starts after 6 s of calm
+IDLEBREAK ok   tender: the break turns a bone 1.27 rad (>= 0.08)
+IDLEBREAK ok   tender: playing before the press
+IDLEBREAK ok   tender: the first press cancels it at once
+IDLEBREAK ok   tender: back on the idle 0.15 s after the press
+IDLEBREAK ok   tender: a press restarts the 6 s wait
+IDLEBREAK ok   tender: the break ended and the idle is back
+IDLEBREAK ok   tender: it does not repeat at once
+IDLEBREAK ok   tender: a hit ends it
+IDLEBREAK ok   thief has a break
+IDLEBREAK ok   thief: the break runs 2.2 s (2 to 3)
+IDLEBREAK ok   thief: no break without the flag (town, title)
+IDLEBREAK ok   thief: no break while moving
+IDLEBREAK ok   thief: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   thief: no break in combat (fired 3 s ago)
+IDLEBREAK ok   thief: no break in combat (cast 3 s ago)
+IDLEBREAK ok   thief: no break before 6 s of calm
+IDLEBREAK ok   thief: the break starts after 6 s of calm
+IDLEBREAK ok   thief: the break turns a bone 2.51 rad (>= 0.08)
+IDLEBREAK ok   thief: playing before the press
+IDLEBREAK ok   thief: the first press cancels it at once
+IDLEBREAK ok   thief: back on the idle 0.15 s after the press
+IDLEBREAK ok   thief: a press restarts the 6 s wait
+IDLEBREAK ok   thief: the break ended and the idle is back
+IDLEBREAK ok   thief: it does not repeat at once
+IDLEBREAK ok   thief: a hit ends it
+IDLEBREAK ok   ostra has a break
+IDLEBREAK ok   ostra: the break runs 2.4 s (2 to 3)
+IDLEBREAK ok   ostra: no break without the flag (town, title)
+IDLEBREAK ok   ostra: no break while moving
+IDLEBREAK ok   ostra: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   ostra: no break in combat (fired 3 s ago)
+IDLEBREAK ok   ostra: no break in combat (cast 3 s ago)
+IDLEBREAK ok   ostra: no break before 6 s of calm
+IDLEBREAK ok   ostra: the break starts after 6 s of calm
+IDLEBREAK ok   ostra: the break turns a bone 1.10 rad (>= 0.08)
+IDLEBREAK ok   ostra: playing before the press
+IDLEBREAK ok   ostra: the first press cancels it at once
+IDLEBREAK ok   ostra: back on the idle 0.15 s after the press
+IDLEBREAK ok   ostra: a press restarts the 6 s wait
+IDLEBREAK ok   ostra: the break ended and the idle is back
+IDLEBREAK ok   ostra: it does not repeat at once
+IDLEBREAK ok   ostra: a hit ends it
+IDLEBREAK ok   gil has a break
+IDLEBREAK ok   gil: the break runs 2.6 s (2 to 3)
+IDLEBREAK ok   gil: no break without the flag (town, title)
+IDLEBREAK ok   gil: no break while moving
+IDLEBREAK ok   gil: no break in combat (hit_t 3 s ago)
+IDLEBREAK ok   gil: no break in combat (fired 3 s ago)
+IDLEBREAK ok   gil: no break in combat (cast 3 s ago)
+IDLEBREAK ok   gil: no break before 6 s of calm
+IDLEBREAK ok   gil: the break starts after 6 s of calm
+IDLEBREAK ok   gil: the break turns a bone 1.75 rad (>= 0.08)
+IDLEBREAK ok   gil: playing before the press
+IDLEBREAK ok   gil: the first press cancels it at once
+IDLEBREAK ok   gil: back on the idle 0.15 s after the press
+IDLEBREAK ok   gil: a press restarts the 6 s wait
+IDLEBREAK ok   gil: the break ended and the idle is back
+IDLEBREAK ok   gil: it does not repeat at once
+IDLEBREAK ok   gil: a hit ends it
+IDLE BREAK CHECK DONE, failures: 0

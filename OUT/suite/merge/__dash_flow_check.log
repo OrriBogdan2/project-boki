@@ -1,0 +1,43 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+DASHFLOW ok   archer ground dash -> lmb is fire in the source
+DASHFLOW ok   archer air dash -> lmb is fire in the source
+DASHFLOW ok   mage ground dash -> lmb is fire in the source
+DASHFLOW ok   mage air dash -> lmb is fire in the source
+DASHFLOW ok   ashwick ground dash -> lmb is fire in the source
+DASHFLOW ok   ashwick air dash -> lmb is fire in the source
+DASHFLOW ok   dolm air dash -> lmb is fire in the source
+DASHFLOW ok   juggernaut ground dash -> lmb is buffer in the source
+DASHFLOW ok   juggernaut air dash -> lmb is buffer in the source
+DASHFLOW ok   bulwark ground dash -> lmb is buffer in the source
+DASHFLOW ok   bulwark air dash -> lmb is buffer in the source
+DASHFLOW ok   juggernaut ground dash -> x is cancel in the source
+DASHFLOW ok   bulwark ground dash -> x is cancel in the source
+DASHFLOW ok   ashwick ground dash -> x is cancel in the source
+ERROR: /root: The caller thread can't call the function `propagate_notification()` on this node. Use `call_deferred()` or `call_deferred_thread_group()` instead.
+   at: propagate_notification (scene/main/node.cpp:2597)
+   GDScript backtrace (most recent call first):
+       [0] _profile (res://scripts/match/terrain_mesh.gd:564)
+       [1] _wall (res://scripts/match/terrain_mesh.gd:492)
+       [2] _cell (res://scripts/match/terrain_mesh.gd:432)
+       [3] _trace_rows (res://scripts/match/terrain_mesh.gd:192)
+       [4] _trace_band (res://scripts/match/terrain_mesh.gd:177)
+       [5] _run (res://scripts/match/build_threads.gd:23)
+
+================================================================
+handle_crash: Program crashed with signal 11
+Engine version: Godot Engine v4.6.2.stable.official (71f334935c000924d403448e698df4441130df18)
+Dumping the backtrace. Please include this when reporting the bug on: https://github.com/godotengine/godot/issues
+ERROR: FATAL: Index p_index = 1 is out of bounds (size() = 0).
+   at: get (./core/templates/cowdata.h:193)
+   GDScript backtrace (most recent call first):
+       [0] _profile (res://scripts/match/terrain_mesh.gd:564)
+       [1] _wall (res://scripts/match/terrain_mesh.gd:492)
+       [2] _cell (res://scripts/match/terrain_mesh.gd:432)
+       [3] _trace_rows (res://scripts/match/terrain_mesh.gd:192)
+       [4] _trace_band (res://scripts/match/terrain_mesh.gd:177)
+       [5] _run (res://scripts/match/build_threads.gd:23)
+Illegal instruction (core dumped)

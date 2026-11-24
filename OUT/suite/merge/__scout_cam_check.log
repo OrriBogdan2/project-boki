@@ -1,0 +1,74 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SCOUTCAM ok   a cursor near the centre leans nowhere
+SCOUTCAM ok   a cursor halfway out leans half the room
+SCOUTCAM ok   zoom 1.00: the far look reaches 1 m+ past the cursor lean 16 of 16 ways
+SCOUTCAM ok   zoom 1.00: at the full far look every way you stay on screen (50 px to the nearest edge)
+SCOUTCAM ok   zoom 1.45: the far look reaches 1 m+ past the cursor lean 16 of 16 ways
+SCOUTCAM ok   zoom 1.45: at the full far look every way you stay on screen (34 px to the nearest edge)
+SCOUTCAM far look across the screen: 12.8 m (cursor lean cap 7.5 m)
+SCOUTCAM ok   held: 90% out in 0.367 s (ease_in_s 0.35)
+SCOUTCAM ok   released: 90% back in 0.250 s (ease_out_s 0.25)
+SCOUTCAM ok   released: settles exactly back on the usual view
+SCOUTCAM ok   held off the mouse (the ship, the launch): the view still eases back (0.00 s)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/scout_cam_check.gd:108)
+       [13] run (res://tools/scout_cam_check.gd:40)
+       [14] run (res://tools/check_registry.gd:982)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/scout_cam_check.gd:108)
+       [13] run (res://tools/scout_cam_check.gd:40)
+       [14] run (res://tools/check_registry.gd:982)
+       [15] _ready (res://scripts/main.gd:270)
+SCOUTCAM ok   not held: 27.0 m along the aim is past sight (24.0 m)
+SCOUTCAM ok   held: 27.0 m along the aim is seen (sight x1.25)
+SCOUTCAM ok   held: seen 12 deg off the aim, inside the 30 deg cone
+SCOUTCAM ok   held: not seen 18 deg off the aim, outside the cone
+SCOUTCAM ok   held: not seen past 30.0 m along the aim
+SCOUTCAM ok   the usual wider cone is the same held or not
+SCOUTCAM ok   the hold rides the hunter flags (teammates share it online)
+SCOUTCAM ok   walking: 5.28 m/s held, 5.28 m/s not (unchanged)
+SCOUTCAM ok   the hunter holds the far look while the key is down
+SCOUTCAM ok   the far look is on G by default (key cap G)
+SCOUTCAM ok   G clashes with nothing in a match (home's Goals shares it on purpose)
+SCOUTCAM CHECK DONE, failures: 0
+ERROR: Texture with GL ID of 31: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 32: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

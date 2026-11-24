@@ -1,0 +1,58 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SEEK ok   high Focus wins 17 of 20 (needs 14)
+SEEK ok   Focus adds speed and good sniffs
+SEEK ok   curiosity wins 65 of 80 at equal Focus
+SEEK ok   the day clock tells night from noon
+SEEK ok   Spore is a night type, Stone is not
+SEEK ok   Hushwood hunts by the night rules at noon, Bramblebank does not
+SEEK ok   1 Seek formats in the weekly list
+SEEK ok   format night_seek favours Spore: 75% against 44% by day
+SEEK ok   format night_seek: only night types sniff better
+SEEK ok   strangers are neither friends nor rivals
+SEEK ok   a bond above friend_at makes friends
+SEEK ok   a bond below rival_at makes rivals
+SEEK ok   rivals shoulder: the slower one is held back
+SEEK ok   settle: the finder wins
+SEEK ok   settle: the winner gains joy and trust
+SEEK ok   settle: the loser sulks
+SEEK ok   settle: both remember it
+SEEK ok   settle: you get gems
+SEEK ok   settle: strangers grow apart
+SEEK ok   settle: a friend sulks less and the pair grow closer
+SEEK ok   idle cannot jump to the hunt
+SEEK ok   idle, carry, hunt, result, idle is the way round
+SEEK ok   a refused move is counted and changes nothing
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+SEEK ok   off: no scent basket on the farm
+SEEK ok   on: the base has Seek
+SEEK ok   on: the basket offers the scent
+SEEK ok   on: carrying, any spot offers a hide
+SEEK ok   on: too close to the Boki, the scent stays in hand
+SEEK ok   on: hidden, two Boki hunt
+SEEK ok   cue: a scent trail appears with the hunt
+SEEK ok   cue: the trail shows (16 dots) and stays faint
+SEEK ok   cue: the trail is gone when the hunt ends
+SEEK ok   on: the hunt ends with a result card (7.5 s)
+SEEK ok   on: the card goes and Seek is ready again
+SEEK DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

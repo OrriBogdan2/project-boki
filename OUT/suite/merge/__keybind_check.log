@@ -1,0 +1,51 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KEYS ok   Merge ships on X (["key:88", ""], prompt 'X')
+KEYS ok   separating from the drop moved to Z
+KEYS ok   nothing else rebindable is on X ([])
+KEYS ok   a second key for utility slot 1 works (1 / Kp 1)
+KEYS ok   and is saved
+KEYS ok   and clears
+KEYS ok   clearing the main key leaves it unbound
+KEYS ok   a mouse button works as a second key (Mouse 4)
+KEYS ok   glove 2 ships on V, and V still plays fetch at home
+KEYS ok   glove 2 (match) and play (home) are separate contexts: no clash between them ([] [])
+KEYS ok   giving another action V still warns about both ([["gear2", 0], ["play", 0], ["push_to_talk", 0]])
+KEYS ok   glove 1 ships on Q (Q)
+KEYS ok   glove 2 ships on V, Mouse 4 its alt (V / Mouse 4)
+KEYS ok   no other action ships on Mouse 4
+KEYS ok   a glove slot on Mouse 4 reads M4 on its key cap
+KEYS ok   a saved glove 2 with one key gains Mouse 4 as its alt
+KEYS ok   Mouse 4 bound elsewhere in a saved config is left alone
+KEYS ok   an unsaved or two-key glove 2 is untouched
+KEYS FAIL the Boki key ships on C and shares it with details (home only) without a clash
+KEYS ok   a saved G Boki key moves to C ({ "keys": {  }, "keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys5_v": 1, "keys6_v": 1, "keys7_v": 1 })
+KEYS ok   giving the ultimate F is caught: it's Interact's ([["interact", 0]])
+KEYS ok   swapping gives Interact the ultimate's old key (ult F, interact X)
+KEYS default clash: throw 0
+KEYS default clash: summon 0
+KEYS FAIL the shipped defaults have no clash
+KEYS ok   only a home action and a match action may share a key
+KEYS ok   binding jump to F clashes with Interact ([["interact", 0]])
+KEYS ok   V for fuse clashes with glove 2 and push to talk, not with play (home) ([["gear2", 0], ["push_to_talk", 0]])
+KEYS ok   Swap leaves both rows clear (jump F, interact Space)
+KEYS ok   the old save keeps both bindings (F, F)
+KEYS ok   and both rows count as a clash
+KEYS ok   R is the hunter ultimate's: binding it to dash is a clash ([["hunter_ult", 0], ["rotate", 0]])
+KEYS ok   swap: dash on R, the ultimate and turn take dash's old key (R / Shift / Shift)
+KEYS ok   nobody is left unbound, and R is only dash's
+KEYS ok   the swap is saved
+KEYS ok   the saved settings load back to the same bindings
+KEYS ok   an owner given no key reads unbound
+KEYS ok   the arena and duel resets moved to Backspace
+KEYS ok   every action is in Controls, no hard-wired key ()
+KEYS ok   the binding page warns about the clash and offers a swap
+KEYS ok   both rows are marked while the clash waits ([["ultimate", 0], ["interact", 0]])
+KEYS ok   two actions of the same place get no 'Keep both'
+KEYS ok   an action in another place gets 'Keep both'
+KEYS ok   keeping both leaves the key on both, no clash (T)
+KEYS ok   no Controls label says Archetype (the game says Hunter)
+KEYS DONE, failures: 3

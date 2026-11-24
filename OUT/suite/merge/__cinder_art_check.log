@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CINDERART ok   the casting hand has its fire point
+CINDERART ok   the left palm has its fire point, mirroring the right palm's
+CINDERART ok   the tail tip has its flame point
+CINDERART ok   the heel jets are on the flame shader (1 surfaces)
+CINDERART ok   at rest the fire point sits on her palm
+CINDERART ok   the drawn stream starts at her palm (nearest puff 0.02 m)
+CINDERART ok   held LMB plays the casting clip (1.00)
+CINDERART ok   through the stream the FX stay on her palm (worst 0.000 m)
+CINDERART ok   the magma cracks brighten while she casts (2.2 to 4.0)
+CINDERART braced palm: fwd 0.603 up 1.514 right 0.202
+CINDERART ok   the braced palm reaches 0.60 m ahead
+CINDERART ok   the stream ran (24 puffs)
+CINDERART ok   the cracks fall back after (2.2)
+CINDERART ok   Flue Flight lifts off
+CINDERART ok   two jets, one on each heel (0.34 m apart)
+CINDERART FAIL the lift burns from her heels (at her feet)
+CINDERART FAIL the tail's fire burns behind her (at least -0.49 m)
+CINDERART ok   the clip stretches the heels' flames in flight (x3.5)
+CINDERART ok   no stream of fire runs in flight
+CINDERART ok   the fire is off her hand in flight
+CINDERART_DONE fails=2
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 9 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

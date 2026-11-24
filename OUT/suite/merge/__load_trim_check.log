@@ -1,0 +1,69 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LOADTRIM ok   classic: its canopy is the one wing mesh, built once
+LOADTRIM ok   classic: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   sunset: its canopy is the one wing mesh, built once
+LOADTRIM ok   sunset: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   leaf: its canopy is the one leaf mesh, built once
+LOADTRIM ok   leaf: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   moth: its canopy is the one moth mesh, built once
+LOADTRIM ok   moth: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   bat: its canopy is the one bat mesh, built once
+LOADTRIM ok   bat: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   prism: its canopy is the one kite mesh, built once
+LOADTRIM ok   prism: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   ember: its canopy is the one wing mesh, built once
+LOADTRIM ok   ember: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   storm: its canopy is the one kite mesh, built once
+LOADTRIM ok   storm: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   boki_wings: its canopy is the one boki mesh, built once
+LOADTRIM ok   boki_wings: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   swift_crane: its canopy is the one crane mesh, built once
+LOADTRIM ok   swift_crane: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   paper_crane: its canopy is the one crane mesh, built once
+LOADTRIM ok   paper_crane: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   patchwork: its canopy is the one wing mesh, built once
+LOADTRIM ok   patchwork: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   ember_leaf: its canopy is the one leaf mesh, built once
+LOADTRIM ok   ember_leaf: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   dusk_moth: its canopy is the one moth mesh, built once
+LOADTRIM ok   dusk_moth: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   frost_kite: its canopy is the one kite mesh, built once
+LOADTRIM ok   frost_kite: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   puff_wings: its canopy is the one boki mesh, built once
+LOADTRIM ok   puff_wings: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   slate_kite: its canopy is the one kite mesh, built once
+LOADTRIM ok   slate_kite: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   lantern_moth: its canopy is the one moth mesh, built once
+LOADTRIM ok   lantern_moth: the canopy's material wears the skin's colours, the team's and hero's in them
+LOADTRIM ok   each of the 7 shapes has its own canopy
+LOADTRIM ok   a duel reads your Warden's .glb
+LOADTRIM ok   a duel reads no other Warden's
+LOADTRIM ok   a match with rivals reads every Warden's .glb (missing [])
+LOADTRIM ok   and every common Boki's (missing [])
+LOADTRIM ok   a .glb Warden keeps its rig nodes
+LOADTRIM ok   a .glb Warden builds no procedural body (0 meshes)
+LOADTRIM ok   a glider is its canopy and its strings
+LOADTRIM ok   Hunters on one skin share its canopy's and strings' meshes
+LOADTRIM ok   each colours the canopy with its own material
+LOADTRIM ok   a Hunter's canopy shader mixes the weights (res://shaders/hero_toon.gdshader)
+LOADTRIM ok   built without its .glb, the body is built and merged
+LOADTRIM ok   archer: its .glb's rig is the procedural rig (17 bones, off [])
+LOADTRIM ok   juggernaut: its .glb's rig is the procedural rig (16 bones, off [])
+LOADTRIM ok   gunslinger: its .glb's rig is the procedural rig (17 bones, off [])
+LOADTRIM ok   bulwark: its .glb's rig is the procedural rig (16 bones, off [])
+LOADTRIM ok   rimewright: its .glb's rig is the procedural rig (17 bones, off [])
+LOADTRIM ok   ashwick: its .glb's rig is the procedural rig (17 bones, off [])
+LOADTRIM ok   dolm: its .glb's rig is the procedural rig (16 bones, off [])
+LOADTRIM ok   mage: its .glb's rig is the procedural rig (16 bones, off [])
+LOADTRIM ok   dredge: its .glb's rig is the procedural rig (16 bones, off [])
+LOADTRIM ok   tender: its .glb's rig is the procedural rig (17 bones, off [])
+LOADTRIM ok   thief: its .glb's rig is the procedural rig (18 bones, off [])
+LOADTRIM ok   ostra: its .glb's rig is the procedural rig (16 bones, off [])
+LOADTRIM ok   gil: its .glb's rig is the procedural rig (17 bones, off [])
+LOADTRIM DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

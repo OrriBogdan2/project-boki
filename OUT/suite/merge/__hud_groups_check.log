@@ -1,0 +1,44 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HUDGROUPS   landing: 9 groups (budget 5): minimap, clock, counters, vitals, abilities, glider, belt, slots, weapon
+HUDGROUPS ok   landing: 9 groups
+HUDGROUPS ok   landing: the Ways Out strip waits
+HUDGROUPS ok   landing: one prompt at most
+HUDGROUPS   fight: 11 groups (budget 5): minimap, clock, counters, vitals, abilities, glider, belt, slots, weapon, messages, prompt
+HUDGROUPS ok   fight: 11 groups
+HUDGROUPS ok   fight: the Ways Out strip waits
+HUDGROUPS ok   fight: one prompt at most
+HUDGROUPS   heart: 12 groups (budget 5): minimap, clock, counters, vitals, abilities, glider, belt, slots, weapon, messages, prompt, ways_out
+HUDGROUPS ok   heart: 12 groups
+HUDGROUPS ok   heart: the Ways Out strip shows
+HUDGROUPS ok   heart: one prompt at most
+HUDGROUPS   race: 12 groups (budget 5): minimap, clock, counters, vitals, abilities, glider, belt, slots, weapon, messages, prompt, ways_out
+HUDGROUPS ok   race: 12 groups
+HUDGROUPS ok   race: the Ways Out strip shows
+HUDGROUPS ok   race: one prompt at most
+HUDGROUPS ok   every seat still more than 30 s off: the strip waits
+HUDGROUPS ok   the Lair opens within 30 s: the strip comes
+HUDGROUPS ok   out of the match: the strip (and the Ways out left line) is yours
+HUDGROUPS ok   a fresh save is a new player
+HUDGROUPS ok   new player: no kit card at the landing
+HUDGROUPS ok   new player: the training room keeps the kit card
+HUDGROUPS ok   new player: own kills/knocks/gems wait before the first one
+HUDGROUPS ok   new player: own numbers show while Tab is held
+HUDGROUPS ok   new player: own numbers show once kills is 1
+HUDGROUPS ok   new player: own numbers show once knocks is 1
+HUDGROUPS ok   new player: own numbers show once gems is 1
+HUDGROUPS ok   a save with 3 expeditions is not new
+HUDGROUPS ok   veteran: kit card and own numbers as before
+HUDGROUPS ok   the real HUD drew all four moments
+HUDGROUPS DONE, failures: 0
+ERROR: 4 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 4 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 32 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

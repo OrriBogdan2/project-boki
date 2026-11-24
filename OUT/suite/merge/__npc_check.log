@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+NPCCHECK PASS hob: built from its rigged model
+NPCCHECK PASS hob: idle, talk and wave at least, every pose a clip (missing [])
+NPCCHECK PASS hob: 1.80 m tall on the ground (1.80 m, feet at 0.00)
+NPCCHECK PASS hob: its skeleton stands 1.78 m, not 100x (the glb's armature scale)
+NPCCHECK PASS hob: its name over its head
+NPCCHECK PASS hob: pose idle plays its clip
+NPCCHECK PASS hob: pose talk plays its clip
+NPCCHECK PASS hob: pose wave plays its clip
+NPCCHECK PASS hob: pose point plays its clip
+NPCCHECK PASS hob: pose hammer plays its clip
+NPCCHECK PASS hob: pose walk plays its clip
+NPCCHECK PASS hob: a pose with no clip plays idle
+NPCCHECK PASS pell: built from its rigged model
+NPCCHECK PASS pell: idle, talk and wave at least, every pose a clip (missing [])
+NPCCHECK PASS pell: 1.55 m tall on the ground (1.55 m, feet at 0.00)
+NPCCHECK PASS pell: its skeleton stands 1.56 m, not 100x (the glb's armature scale)
+NPCCHECK PASS pell: its name over its head
+NPCCHECK PASS pell: pose idle plays its clip
+NPCCHECK PASS pell: pose talk plays its clip
+NPCCHECK PASS pell: pose wave plays its clip
+NPCCHECK PASS pell: pose point plays its clip
+NPCCHECK PASS pell: pose walk plays its clip
+NPCCHECK PASS pell: a pose with no clip plays idle
+NPCCHECK PASS Hob is an NpcModel, his name over him
+NPCCHECK PASS pointing, he turns to what he points at (1.00)
+NPCCHECK PASS his portrait draws from the model
+NPCCHECK PASS the tutorial has Pell
+NPCCHECK PASS Pell stands by the landing
+NPCCHECK PASS as the first step begins Pell talks or waves (talk)
+NPCCHECK PASS you come near: Pell waves (wave)
+NPCCHECK PASS the next step: Pell is by its stop (shoot)
+NPCCHECK PASS and faces you
+NPCCHECK DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

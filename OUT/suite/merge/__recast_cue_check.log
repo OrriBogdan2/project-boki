@@ -1,0 +1,234 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AKCHECK thief e: reports its recast window PASS  { "slot": "e", "left": 6.0, "total": 6.0, "at": (14.5, 1.6, 32.5), "armed": true, "auto": true }
+AKCHECK thief e: the local cue carries it (slot, AGAIN key) PASS  cue e key E
+AKCHECK thief e: the first-time hint reads '<KEY> again to <verb>' PASS  E again to blink to your dagger
+AKCHECK thief e: the warning ticks play before it closes PASS  ticks 3
+AKCHECK thief e: unused, the slot shows EXPIRED ~0.6s PASS  exp e 0.57 after 6.00s
+AKCHECK tender e: reports its recast window PASS  { "slot": "e", "left": 2.5, "total": 2.5, "at": (8.5, 1.6, 32.5), "armed": true, "auto": true }
+AKCHECK tender e: the local cue carries it (slot, AGAIN key) PASS  cue e key E
+AKCHECK tender e: the first-time hint reads '<KEY> again to <verb>' PASS  E again to throw the Hearthlight
+AKCHECK tender e: the warning ticks play before it closes PASS  ticks 3
+AKCHECK tender e: unused, the slot shows EXPIRED ~0.6s PASS  exp e 0.57 after 2.50s
+AKCHECK ostra e: reports its recast window PASS  { "slot": "e", "left": inf, "total": inf, "at": (14.5, 1.6, 32.5), "armed": false, "auto": false, "marker": false }
+AKCHECK ostra e: the local cue carries it (slot, AGAIN key) PASS  cue e key E
+AKCHECK ostra e: the first-time hint reads '<KEY> again to <verb>' PASS  E again to pop your Brimseed
+AKCHECK ostra e: the warning ticks play before it closes FAIL  ticks 0
+AKCHECK ostra e: unused, the slot shows EXPIRED ~0.6s FAIL  exp - 0.00 after 18.00s
+AKCHECK rimewright e: reports its recast window PASS  { "slot": "e", "left": 0.98333333333333, "total": 1.0, "at": (10.375, 1.6, 32.5), "armed": true, "auto": true }
+AKCHECK rimewright e: the local cue carries it (slot, AGAIN key) PASS  cue e key E
+AKCHECK rimewright e: the first-time hint reads '<KEY> again to <verb>' PASS  E again to freeze the Rink Wall
+AKCHECK rimewright e: the warning ticks play before it closes PASS  ticks 3
+AKCHECK rimewright e: unused, the slot shows EXPIRED ~0.6s PASS  exp e 0.57 after 0.97s
+AKCHECK rimewright x: reports its recast window PASS  { "slot": "x", "left": 0.73333333333334, "total": 0.75, "at": (8.5, 1.6, 32.5), "armed": true, "auto": true }
+AKCHECK rimewright x: the local cue carries it (slot, AGAIN key) PASS  cue x key R
+AKCHECK rimewright x: the first-time hint reads '<KEY> again to <verb>' PASS  R again to crack Rimelock now
+AKCHECK rimewright x: the warning ticks play before it closes PASS  ticks 3
+AKCHECK rimewright x: unused, the slot shows EXPIRED ~0.6s PASS  exp x 0.57 after 0.73s
+AKCHECK juggernaut e: reports its recast window PASS  { "slot": "e", "left": 5.0, "total": 5.0, "at": (14.5, 1.6, 32.5), "armed": true, "auto": false }
+AKCHECK juggernaut e: the local cue carries it (slot, AGAIN key) PASS  cue e key E
+AKCHECK juggernaut e: the first-time hint reads '<KEY> again to <verb>' PASS  E again to haul yourself to the chain
+AKCHECK juggernaut e: the warning ticks play before it closes PASS  ticks 3
+AKCHECK juggernaut e: unused, the slot shows EXPIRED ~0.6s PASS  exp e 0.57 after 5.00s
+AKCHECK mage x: reports its recast window  PASS  { "slot": "x", "left": 1.7, "total": 1.7, "at": (14.5, 1.6, 32.5), "armed": false, "auto": true }
+AKCHECK mage x: the local cue carries it (slot, AGAIN key) PASS  cue x key R
+AKCHECK mage x: the first-time hint reads '<KEY> again to <verb>' PASS  R again to strike down at your cursor
+AKCHECK mage x: the warning ticks play before it closes PASS  ticks 3
+AKCHECK mage x: unused, the slot shows EXPIRED ~0.6s PASS  exp x 0.57 after 1.70s
+AKCHECK ashwick x: reports its recast window PASS  { "slot": "x", "left": 1.8, "total": 1.8, "at": (8.5, 1.6, 32.5), "armed": true, "auto": true }
+AKCHECK ashwick x: the local cue carries it (slot, AGAIN key) PASS  cue x key R
+AKCHECK ashwick x: the first-time hint reads '<KEY> again to <verb>' PASS  R again to land the Flue Flight
+AKCHECK ashwick x: the warning ticks play before it closes PASS  ticks 3
+AKCHECK ashwick x: unused, the slot shows EXPIRED ~0.6s PASS  exp x 0.57 after 1.97s
+AKCHECK bulwark lmb: reports its recast window PASS  { "slot": "lmb", "left": 1.0, "total": 1.0, "at": (8.5, 2.332, 32.5), "armed": false, "auto": true }
+AKCHECK bulwark lmb: the local cue carries it (slot, AGAIN key) PASS  cue lmb key LMB
+AKCHECK bulwark lmb: the first-time hint reads '<KEY> again to <verb>' PASS  LMB again to call the hammer back
+AKCHECK dolm dash: reports its recast window PASS  { "slot": "dash", "left": 0.66, "total": 0.66, "at": (8.5, 1.6, 32.5), "armed": true, "auto": false }
+AKCHECK dolm dash: the local cue carries it (slot, AGAIN key) PASS  cue dash key SHIFT
+AKCHECK dolm dash: the first-time hint reads '<KEY> again to <verb>' PASS  SHIFT again to hop on to the next rock
+AKCHECK dolm dash: the warning ticks play before it closes PASS  ticks 3
+AKCHECK dolm dash: unused, the slot shows EXPIRED ~0.6s PASS  exp dash 0.57 after 0.67s
+AKCHECK gil e: reports its recast window   PASS  { "slot": "e", "left": 2.0, "total": 2.0, "at": (8.5, 1.6, 32.5), "armed": true, "auto": true }
+AKCHECK gil e: the local cue carries it (slot, AGAIN key) PASS  cue e key E
+AKCHECK gil e: the first-time hint reads '<KEY> again to <verb>' PASS  E again to let the waterspout go
+AKCHECK gil e: the warning ticks play before it closes PASS  ticks 3
+AKCHECK gil e: unused, the slot shows EXPIRED ~0.6s PASS  exp e 0.57 after 2.00s
+AKCHECK ostra e: the hint is held back in training PASS  <null>
+AKCHECK ostra e: the hint is marked seen in a real match PASS  true
+AKCHECK dolm dash: an unused window shows EXPIRED PASS  dash
+AKCHECK ostra e: no world marker on the seed, the slot still pulses PASS  { "slot": "e", "left": inf, "total": inf, "at": (14.5, 1.6, 32.5), "armed": false, "auto": false, "marker": false }
+AKCHECK ostra e: an early press is buffered into the window PASS  held true popped true
+AKCHECK thief: the foe's badge shows its mark and time left PASS  [{ "e": @Node3D@61303:<Node3D#3381783443460>, "n": 2, "left": 3.98333333333333, "total": 4.0, "ready": false }]
+AKCHECK gunslinger: the foe's badge shows its mark and time left PASS  [{ "e": @Node3D@65125:<Node3D#3514440890507>, "n": 0, "left": 1.98333333333333, "total": 2.0, "ready": true }]
+AKCHECK gunslinger: the Daze badge reads KitStatus's timer PASS  2.0
+AKCHECK mage: the foe's badge shows its mark and time left PASS  [{ "e": @Node3D@68928:<Node3D#3649816239475>, "n": 2, "left": 2.98333333333333, "total": 4.5, "ready": false }]
+AKCHECK Sable's Marks cash-in: pay_cashin plays once PASS  ["combo", "reset_a", "pay_cashin"]
+AKCHECK Sable's Marks cash-in: pay_cashin is audible (-17.9 dB, floor -19.0) PASS  
+AKCHECK Vex's Daze + rifle: combo plays once PASS  ["ui_toast", "unlock", "combo", "crit"]
+AKCHECK Vex's Daze + rifle: combo is audible (-16.4 dB, floor -19.0) PASS  
+AKCHECK Sparkle's Static Blowout: hero_blowout plays once PASS  ["ui_toast", "unlock", "combo", "reset_a", "crit", "mage_hit", "ab_hit", "bond", "armor_up_own", "hit_heavy", "hero_blowout"]
+AKCHECK Sparkle's Static Blowout: hero_blowout is audible (-15.8 dB, floor -19.0) PASS  
+AKCHECK Neve's Chill Shatter on a knock: rime_splinter plays once PASS  ["ui_toast", "unlock", "reset_a", "bond", "armor_up_own", "hit_heavy", "rimewright_hit", "kill", "rimewright_call_knock", "knock", "combo", "rime_splinter"]
+AKCHECK Neve's Chill Shatter on a knock: rime_splinter is audible (-16.4 dB, floor -19.0) PASS  
+AKCHECK Motley's full Brimseed pop on a foe: pay_collapse plays once PASS  ["ui_toast", "skill", "unlock", "ab_ready", "os_seed", "crit", "ab_hit", "hit_heavy", "os_pop", "ostra_spring_boing", "ostra_hit", "pay_collapse"]
+AKCHECK Motley's full Brimseed pop on a foe: pay_collapse is audible (-16.0 dB, floor -19.0) PASS  
+AKCHECK Lace's wall stun: pay_called plays once PASS  ["pin_heavy_draw", "click", "ab_ready", "pin_heavy_full", "ui_toast", "skill", "unlock", "pin_heavy", "pin_heavy_burst", "ab_hit", "hit_heavy", "archer_hit", "pin_heavy_hit", "pay_called", "ab_stun", "knock"]
+AKCHECK Lace's wall stun: pay_called is audible (-16.2 dB, floor -19.0) PASS  
+AKCHECK Gil's Beach: pay_flashpoint plays once PASS  ["ui_toast", "unlock", "combo", "ab_stun", "drip", "hit", "splash", "pay_flashpoint"]
+AKCHECK Gil's Beach: pay_flashpoint is audible (-15.2 dB, floor -19.0) PASS  
+AKCHECK Cinder's Flashover: lw_blaze plays once PASS  ["combo", "crit", "as_ignite", "lw_blaze"]
+AKCHECK Cinder's Flashover: lw_blaze is audible (-16.0 dB, floor -19.0) PASS  
+AKCHECK Meeko's full Kindle: tend_kindled plays once PASS  ["unlock", "combo", "tend_kindled"]
+AKCHECK Meeko's full Kindle: tend_kindled is audible (-18.0 dB, floor -19.0) PASS  
+AKCHECK bulwark_kit.gd: payoff_fx pay_slam has a file at the floor (-15.7 dB) PASS  
+AKCHECK dolm_kit.gd: payoff_fx pay_rockfall has a file at the floor (-14.5 dB) PASS  
+AKCHECK dredge_kit.gd: payoff_fx dredge_coin_jingle has a file at the floor (-17.2 dB) PASS  
+AKCHECK juggernaut_kit.gd: payoff_fx pay_rage has a file at the floor (-14.8 dB) PASS  
+AKCHECK ostra_kit.gd: payoff_fx pay_collapse has a file at the floor (-16.0 dB) PASS  
+AKCHECK pin_ult.gd: payoff_fx pay_deadeye has a file at the floor (-16.8 dB) PASS  
+AKCHECK world marker and badge: no key letter, no word (only the count 3) PASS  ["3"]
+AKCHECK thief: the owner reads the foe's badge, the kit's world copy hides PASS  badge true art false
+AKCHECK thief: anyone else sees the kit's world art on the foe PASS  
+AKCHECK mage: the owner reads the foe's badge, the kit's world copy hides PASS  badge true art false
+AKCHECK mage: anyone else sees the kit's world art on the foe PASS  
+AKCHECK rimewright: the owner reads the foe's badge, the kit's world copy hides PASS  badge true art false
+AKCHECK rimewright: anyone else sees the kit's world art on the foe PASS  
+RECASTCUE DONE, 93 checks, failures: 2
+ERROR: 7 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 44 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 7 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 104: leaked 21844 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 83: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 101: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 99: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 219: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 225: leaked 11184824 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 231: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 234: leaked 5592432 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 241: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 230: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 229: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 235: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 245: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 243: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 256: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 330: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 323: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 343: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 334: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 350: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 348: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 365: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 359: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 367: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 366: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 375: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 368: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 377: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 376: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 379: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 378: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 381: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 380: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 389: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 388: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 392: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 390: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 395: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 393: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 404: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 396: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 406: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 405: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 408: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 407: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 420: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 419: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 423: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 421: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 432: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 431: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 435: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 433: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 443: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 442: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 445: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 444: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 447: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 58 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

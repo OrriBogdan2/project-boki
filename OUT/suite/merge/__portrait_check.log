@@ -1,0 +1,173 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PORTRAIT 13 Hunters                                                         PASS  ["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage", "dredge", "tender", "thief", "ostra", "gil"]
+PORTRAIT The Red Stitch: its painted portrait                               PASS  res://art/portraits/archer.jpg
+PORTRAIT The Red Stitch: its splash                                         PASS  res://art/portraits/archer_splash.jpg
+PORTRAIT The Unbroken: its painted portrait                                 PASS  res://art/portraits/juggernaut.jpg
+PORTRAIT The Unbroken: its splash                                           PASS  res://art/portraits/juggernaut_splash.jpg
+PORTRAIT The Hired Gun: its painted portrait                                PASS  res://art/portraits/gunslinger.jpg
+PORTRAIT The Hired Gun: its splash                                          PASS  res://art/portraits/gunslinger_splash.jpg
+PORTRAIT The Barnacle Knight: its painted portrait                          PASS  res://art/portraits/bulwark.jpg
+PORTRAIT The Barnacle Knight: its splash                                    PASS  res://art/portraits/bulwark_splash.jpg
+PORTRAIT The Snowglide: its painted portrait                                PASS  res://art/portraits/rimewright.jpg
+PORTRAIT The Snowglide: its splash                                          PASS  res://art/portraits/rimewright_splash.jpg
+PORTRAIT The Ashen Kiss: its painted portrait                               PASS  res://art/portraits/ashwick.jpg
+PORTRAIT The Ashen Kiss: its splash                                         PASS  res://art/portraits/ashwick_splash.jpg
+PORTRAIT The Stone Seer: its painted portrait                               PASS  res://art/portraits/dolm.jpg
+PORTRAIT The Stone Seer: its splash                                         PASS  res://art/portraits/dolm_splash.jpg
+PORTRAIT The Storm Chaser: its painted portrait                             PASS  res://art/portraits/mage.jpg
+PORTRAIT The Storm Chaser: its splash                                       PASS  res://art/portraits/mage_splash.jpg
+PORTRAIT The Scrap King: its painted portrait                               PASS  res://art/portraits/dredge.jpg
+PORTRAIT The Scrap King: its splash                                         PASS  res://art/portraits/dredge_splash.jpg
+PORTRAIT The Dawnfox: its painted portrait                                  PASS  res://art/portraits/tender.jpg
+PORTRAIT The Dawnfox: its splash                                            PASS  res://art/portraits/tender_splash.jpg
+PORTRAIT The Silver Thief: its painted portrait                             PASS  res://art/portraits/thief.jpg
+PORTRAIT The Silver Thief: its splash                                       PASS  res://art/portraits/thief_splash.jpg
+PORTRAIT The Void Jester: its painted portrait                              PASS  res://art/portraits/ostra.jpg
+PORTRAIT The Void Jester: its splash                                        PASS  res://art/portraits/ostra_splash.jpg
+PORTRAIT The Novice Mage: its painted portrait                              PASS  res://art/portraits/gil.jpg
+PORTRAIT The Novice Mage: its splash                                        PASS  res://art/portraits/gil_splash.jpg
+PORTRAIT the title backdrop shows every Hunter's current splash             PASS  
+PORTRAIT the new names                                                      PASS  
+PORTRAIT The Red Stitch: framing for its face and splash                    PASS  
+PORTRAIT The Red Stitch: a small frame crops in on the face                 PASS  [P: (81.92001, 39.93601), S: (307.2, 307.2)]
+PORTRAIT The Red Stitch: the HUD's slot shows the whole bust, inside the art PASS  [P: (18.30788, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Red Stitch: the reveal's square of the splash stays inside it  PASS  
+PORTRAIT The Unbroken: framing for its face and splash                      PASS  
+PORTRAIT The Unbroken: a small frame crops in on the face                   PASS  [P: (102.4, 39.93601), S: (307.2, 307.2)]
+PORTRAIT The Unbroken: the HUD's slot shows the whole bust, inside the art  PASS  [P: (38.78788, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Unbroken: the reveal's square of the splash stays inside it    PASS  
+PORTRAIT The Hired Gun: framing for its face and splash                     PASS  
+PORTRAIT The Hired Gun: a small frame crops in on the face                  PASS  [P: (56.32, 34.816), S: (307.2, 307.2)]
+PORTRAIT The Hired Gun: the HUD's slot shows the whole bust, inside the art PASS  [P: (0.0, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Hired Gun: the reveal's square of the splash stays inside it   PASS  
+PORTRAIT The Barnacle Knight: framing for its face and splash               PASS  
+PORTRAIT The Barnacle Knight: a small frame crops in on the face            PASS  [P: (112.64, 19.456), S: (307.2, 307.2)]
+PORTRAIT The Barnacle Knight: the HUD's slot shows the whole bust, inside the art PASS  [P: (49.02787, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Barnacle Knight: the reveal's square of the splash stays inside it PASS  
+PORTRAIT The Snowglide: framing for its face and splash                     PASS  
+PORTRAIT The Snowglide: a small frame crops in on the face                  PASS  [P: (97.28001, 111.616), S: (307.2, 307.2)]
+PORTRAIT The Snowglide: the HUD's slot shows the whole bust, inside the art PASS  [P: (33.66788, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Snowglide: the reveal's square of the splash stays inside it   PASS  
+PORTRAIT The Ashen Kiss: framing for its face and splash                    PASS  
+PORTRAIT The Ashen Kiss: a small frame crops in on the face                 PASS  [P: (112.64, 111.616), S: (307.2, 307.2)]
+PORTRAIT The Ashen Kiss: the HUD's slot shows the whole bust, inside the art PASS  [P: (49.02787, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Ashen Kiss: the reveal's square of the splash stays inside it  PASS  
+PORTRAIT The Stone Seer: framing for its face and splash                    PASS  
+PORTRAIT The Stone Seer: a small frame crops in on the face                 PASS  [P: (87.04, 45.05601), S: (307.2, 307.2)]
+PORTRAIT The Stone Seer: the HUD's slot shows the whole bust, inside the art PASS  [P: (23.42788, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Stone Seer: the reveal's square of the splash stays inside it  PASS  
+PORTRAIT The Storm Chaser: framing for its face and splash                  PASS  
+PORTRAIT The Storm Chaser: a small frame crops in on the face               PASS  [P: (87.04, 9.216009), S: (307.2, 307.2)]
+PORTRAIT The Storm Chaser: the HUD's slot shows the whole bust, inside the art PASS  [P: (23.42788, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Storm Chaser: the reveal's square of the splash stays inside it PASS  
+PORTRAIT The Scrap King: framing for its face and splash                    PASS  
+PORTRAIT The Scrap King: a small frame crops in on the face                 PASS  [P: (102.4, 75.77601), S: (307.2, 307.2)]
+PORTRAIT The Scrap King: the HUD's slot shows the whole bust, inside the art PASS  [P: (38.78788, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Scrap King: the reveal's square of the splash stays inside it  PASS  
+PORTRAIT The Dawnfox: framing for its face and splash                       PASS  
+PORTRAIT The Dawnfox: a small frame crops in on the face                    PASS  [P: (92.16, 116.736), S: (307.2, 307.2)]
+PORTRAIT The Dawnfox: the HUD's slot shows the whole bust, inside the art   PASS  [P: (28.54787, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Dawnfox: the reveal's square of the splash stays inside it     PASS  
+PORTRAIT The Silver Thief: framing for its face and splash                  PASS  
+PORTRAIT The Silver Thief: a small frame crops in on the face               PASS  [P: (174.08, 106.496), S: (307.2, 307.2)]
+PORTRAIT The Silver Thief: the HUD's slot shows the whole bust, inside the art PASS  [P: (77.57576, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Silver Thief: the reveal's square of the splash stays inside it PASS  
+PORTRAIT The Void Jester: framing for its face and splash                   PASS  
+PORTRAIT The Void Jester: a small frame crops in on the face                PASS  [P: (71.68, 111.616), S: (307.2, 307.2)]
+PORTRAIT The Void Jester: the HUD's slot shows the whole bust, inside the art PASS  [P: (8.067878, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Void Jester: the reveal's square of the splash stays inside it PASS  
+PORTRAIT The Novice Mage: framing for its face and splash                   PASS  
+PORTRAIT The Novice Mage: a small frame crops in on the face                PASS  [P: (128.0, 96.256), S: (307.2, 307.2)]
+PORTRAIT The Novice Mage: the HUD's slot shows the whole bust, inside the art PASS  [P: (64.38789, 0.0), S: (434.4243, 512.0)]
+PORTRAIT The Novice Mage: the reveal's square of the splash stays inside it PASS  
+PORTRAIT The Red Stitch: the Hunters tile shows its portrait                PASS  
+PORTRAIT The Red Stitch: the reveal shows its splash                        PASS  
+PORTRAIT The Unbroken: the Hunters tile shows its portrait                  PASS  
+PORTRAIT The Unbroken: the reveal shows its splash                          PASS  
+PORTRAIT The Hired Gun: the Hunters tile shows its portrait                 PASS  
+PORTRAIT The Hired Gun: the reveal shows its splash                         PASS  
+PORTRAIT The Barnacle Knight: the Hunters tile shows its portrait           PASS  
+PORTRAIT The Barnacle Knight: the reveal shows its splash                   PASS  
+PORTRAIT The Snowglide: the Hunters tile shows its portrait                 PASS  
+PORTRAIT The Snowglide: the reveal shows its splash                         PASS  
+PORTRAIT The Ashen Kiss: the Hunters tile shows its portrait                PASS  
+PORTRAIT The Ashen Kiss: the reveal shows its splash                        PASS  
+PORTRAIT The Stone Seer: the Hunters tile shows its portrait                PASS  
+PORTRAIT The Stone Seer: the reveal shows its splash                        PASS  
+PORTRAIT The Storm Chaser: the Hunters tile shows its portrait              PASS  
+PORTRAIT The Storm Chaser: the reveal shows its splash                      PASS  
+PORTRAIT The Scrap King: the Hunters tile shows its portrait                PASS  
+PORTRAIT The Scrap King: the reveal shows its splash                        PASS  
+PORTRAIT The Dawnfox: the Hunters tile shows its portrait                   PASS  
+PORTRAIT The Dawnfox: the reveal shows its splash                           PASS  
+PORTRAIT The Silver Thief: the Hunters tile shows its portrait              PASS  
+PORTRAIT The Silver Thief: the reveal shows its splash                      PASS  
+PORTRAIT The Void Jester: the Hunters tile shows its portrait               PASS  
+PORTRAIT The Void Jester: the reveal shows its splash                       PASS  
+PORTRAIT The Novice Mage: the Hunters tile shows its portrait               PASS  
+PORTRAIT The Novice Mage: the reveal shows its splash                       PASS  
+PORTRAIT the practice picker: every card shows its Warden                   PASS  
+PORTRAIT the Hunter viewer shows Vex's portrait by the name                 PASS  
+PORTRAIT the Relic moments: each Relic shows its Hunter's face (Vex, then Kael, Cinder, Meeko) PASS  
+PORTRAIT the kit card shows Neve's portrait                                 PASS  
+PORTRAIT no art: the tile renders the model                                 PASS  
+PORTRAIT no art: the chip is a plain name chip                              PASS  
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _hud (res://tools/portrait_check.gd:194)
+       [13] run (res://tools/portrait_check.gd:42)
+       [14] _menus (res://tools/portrait_check.gd:152)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _hud (res://tools/portrait_check.gd:194)
+       [13] run (res://tools/portrait_check.gd:42)
+       [14] _menus (res://tools/portrait_check.gd:152)
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+PORTRAIT the HUD's portrait slot is Vex's painted face                      PASS  
+PORTRAIT no model is rendered for a face with painted art                   PASS  []
+PORTRAIT no art: the HUD renders your model instead                         PASS  
+PORTRAIT DONE, 116 checks, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 21 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

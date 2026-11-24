@@ -1,0 +1,252 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FTUT ok   the starter set is open: house, crop patch, cook pot, pen, fence, dirt path, flowers
+FTUT ok   grass clearing and the rest are not
+FTUT ok   the T1 list is spread over farm levels 2 to 5 ({ 2: 8, 3: 8, 4: 10, 5: 8 })
+FTUT ok   a few new things per level, not a flood
+FTUT ok   nothing to draw at level 1, no toast
+FTUT ok   level 2 earns blueprints, but they are not buildable until Hob draws them
+FTUT ok   the 'new blueprints' toast is due once per batch
+FTUT ok   talking to him draws them up (8) and opens them
+FTUT ok   his line follows the level
+FTUT ok   the first visit has its own greeting
+FTUT ok   a milestone is a blueprint too, with its own line
+FTUT ok   the menu footer shows while something is still locked
+FTUT ok   and goes once everything is open
+FTUT ok   a v7 save upgrades to v21
+FTUT ok   it skips the tutorial and is marked legacy for Hob
+FTUT ok   its first look hands over everything it could already build (level 4)
+FTUT ok   nothing is pending, and no tutorial
+FTUT ok   a v8 save from elsewhere without the field is migrated by the field, not the version
+FTUT ok   it runs once, and a new save carries the field
+FTUT ok   a save with no Boki yet keeps the tutorial for later
+FTUT ok   a new farm starts with Hob calling you over
+FTUT ok   talking to him moves it on to the axe
+FTUT ok   the house waits for the wood, the last step for all
+FTUT ok   the tutorial hands over the axe once (free_tools)
+FTUT ok   owning an axe finishes step 1: chop a tree
+FTUT ok   the wood alone isn't enough: the step waits for one held chop (HoldTeach)
+FTUT ok   enough wood and a held chop finish chopping; the rocks are next
+FTUT ok   the rock step hands over a pickaxe
+FTUT ok   it says what stone is for and marks a rock
+FTUT ok   the house waits until its stone is in hand too
+FTUT ok   enough stone for the house finishes mining
+FTUT FAIL the house hint names what it costs: Press B, choose House, then click the marked spot.
+FTUT ok   doing a later step early does not count
+FTUT ok   a house site down finishes the house; the prompt is the hammer
+FTUT ok   a job for your Boki waits until the house stands (a pinned Boki would stop building)
+FTUT ok   a swing counts, and the first step left is feeding (the job waits for the house)
+FTUT ok   the hint names the real key, no leftovers
+FTUT ok   free order: the prompt stays on the first step left
+FTUT ok   once the house stands the job step is next
+FTUT ok   pinning a Boki to a job finishes it
+FTUT ok   a trough down moves the prompt to filling it
+FTUT ok   food in a trough finishes feeding
+FTUT ok   no water on the island: the plain patch hint, no marker
+FTUT ok   crops start at the patch, by the water, with a marker
+FTUT ok   a patch down: plant
+FTUT ok   planted: water it
+FTUT ok   a patch by the water needs no watering by hand
+FTUT ok   watered: wait
+FTUT ok   while the crop only grows the next open step is shown (the market)
+FTUT ok   grown: pick it, and it takes the prompt back
+FTUT ok   no tutorial hint says 'ripe in' (the first crop is quick)
+FTUT ok   a harvest finishes the crop step; the market is next
+FTUT ok   no stall yet: the hint points at the Market on the bar
+FTUT ok   a stall on the farm: walk there, with a marker
+FTUT ok   nobody is stuck at the stall: gems for one seed, not more
+FTUT ok   selling before buying does not count
+FTUT FAIL buying a seed finishes it; selling is next and says where gems come from
+FTUT ok   selling a crop finishes it, leaving the portal
+FTUT ok   the portal ends it with one reward of 30 gems
+FTUT ok   nothing is granted twice
+FTUT FAIL skipping ends the prompts, takes nothing, and hands over the axe, the pickaxe and the food
+FTUT ok   twelve steps, each with its hints
+FTUT ok   the owner's decision (Nov 8): the farm tutorial always has a Skip (a data option)
+FTUT ok   option 'tracker_replaces_day1' is data
+FTUT ok   option 'player_swing' is data
+FTUT ok   option 'end_gems' is data
+FTUT ok   option 'free_order' is data
+FTUT ok   option 'skippable' is data
+FTUT ok   the first site gets the home-only line
+FTUT ok   the second site gets none
+FTUT ok   the line is seen once per profile
+FTUT ok   a save with day1_done never runs the tutorial
+FTUT ok   the tracker has a few rows, at most 5 (5)
+FTUT ok   no row is tutorial text
+FTUT ok   the next farm level is the last row
+FTUT ok   each source stays inside its cap { "unlock": 2, "mastery": 1, "milestone": 1, "level": 1 }
+FTUT ok   a farm milestone shows with its counter
+FTUT ok   inside a source the closest to done comes first
+FTUT ok   a ready-to-claim challenge is a gold row at the top
+FTUT ok   the card builds
+FTUT ok   with a Boki the card has no Shelter row
+FTUT ok   with 0 Boki after the first hatch the card has a Shelter row
+FTUT ok   the Shelter row leads the rows still to work on and names the stray fee: No Boki: upgrade the market stall to open the Shelter (a stray costs 20 gems)
+FTUT ok   a new save that has not hatched yet gets no Shelter row
+FTUT ok   adopting a Boki clears the Shelter row
+FTUT ok   with nothing left to work towards the card is hidden
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+FTUT ok   Hob waits by the market stall from the start
+FTUT ok   the first prompt is on screen: Hob is calling: walk up and press F.
+FTUT ok   a seed growing adds no 'ripe in' timer to the line: Hob is calling: walk up and press F.
+FTUT ok   the old first-day card is gone
+FTUT ok   the house goes down as a site
+FTUT ok   marking it out is free: nothing is spent yet
+FTUT ok   while the house goes up he works beside it, not on it (4.8 m)
+FTUT ok   on solid ground
+FTUT ok   walking up to him offers to talk: 'Talk to Hob'
+FTUT ok   by a site with no materials the prompt says what it needs: 'Needs 2 more wood and 1 more stone'
+FTUT ok   with them, you may hold to hammer: 'Hold to hammer the house (0/12)'
+FTUT FAIL holding the key hammers beat after beat (3)
+FTUT ok   no Goals card while the tutorial runs
+FTUT ok   after it the Goals card is one "Next:" line
+FTUT ok   G opens the whole list (3 rows and the title)
+FTUT ok   and closes it again
+FTUT ok   talking opens the talk box face to face
+FTUT ok   B opens on Buildings
+FTUT ok   the menu says 'Talk to Hob for more'
+FTUT ok   tabs with something to build stay, empty ones are hidden (Buildings, Storage, Work, Fences, Paths, Garden, Upgrades, Island, Store, Undo, Done, ‹, ›)
+FTUT ok   one Boki finishes the house on its own (12 of 12 swings, 46s)
+FTUT ok   the house is the farm's house when done
+FTUT ok   after save and load the tutorial is where it was
+FTUT ok   Hob is there again
+FTUT ok   skipping puts the house down as a site and clears the prompts
+FTUT ok   two Boki open two crew slots and are no slower (28s against 46s)
+FTUT ok   the job step asks for the spotlight on the Boki in the world
+FTUT ok   the Market bar and build menu steps too
+FTUT ok   every spot is on a stage the step really has
+FTUT ok   entering the job step opens the spotlight beat
+FTUT ok   game clicks are held during the beat only
+FTUT ok   the cut-out is round the Boki (1 holes)
+FTUT ok   the hint text is beside it
+FTUT ok   after the beat it stays up (a vignette, a soft ring)
+FTUT ok   nothing in it takes a click once the beat is over: the target stays clickable
+FTUT ok   the dark has faded to the light vignette (0.30)
+FTUT ok   opening the page puts the spotlight away
+FTUT ok   the Boki page is up with the job dropdown
+FTUT ok   an unset job reads Not set, in a colour that asks to be chosen
+FTUT ok   before a job is set Feed is an ordinary button and nothing on the page is filled
+FTUT ok   picking a job sets it and finishes the step
+FTUT ok   and the Boki says in the world that it's off to work
+FTUT ok   then Done is the filled, ringed button
+FTUT ok   and Feed is still not the loud one
+FTUT ok   after the trough step Feed is the main button again
+FTUT ok   closing the page without a job brings back only the soft ring: the beat is once
+FTUT ok   the job step done: its spotlight is gone
+FTUT ok   a tick says Done! on the strip line
+FTUT ok   the house step is up to place
+FTUT ok   House step: the Build button is lit
+FTUT ok   House step, build mode on another tab: the Buildings tab gets the spotlight beat
+FTUT ok   House step, Buildings tab: the House tile is lit
+FTUT ok   House in hand: the spotlight is put away
+FTUT ok   the house goes down
+FTUT ok   the trough step is up to place (feed)
+FTUT ok   trough step: the Build button is lit
+FTUT ok   trough step, build mode on another tab: the Buildings tab gets the spotlight beat
+FTUT ok   trough step, Buildings tab: the trough tile is lit
+FTUT ok   trough in hand: the spotlight is put away
+FTUT ok   a new save has no Challenge House
+FTUT ok   and Hob has no blueprint for it before an expedition
+FTUT ok   after the first expedition he has one, not yet drawn
+FTUT ok   and says so in his own words
+FTUT ok   it costs wood and stone (6 wood · 4 stone)
+FTUT ok   not on the farm and not in the build menu at the start
+FTUT ok   once Hob has drawn it up it is in the Buildings tab with its price
+FTUT ok   marking it out leaves a site that waits while there is no wood and stone
+FTUT ok   building it spends the wood and stone and no gems (was ["ransom"])
+FTUT ok   a save that already has the Challenge House keeps it
+FTUT ok   a patch with no water about is dry
+FTUT ok   water two tiles from the patch counts
+FTUT ok   three tiles away does not
+FTUT ok   so a dry patch stays dry
+FTUT ok   a patch by the water waters its own plot, as tended
+FTUT ok   the prompt says why: 'Tidebloom: the water nearby tends it (6s)'
+FTUT ok   and the build menu says it in the patch's tooltip
+FTUT ok   the farmhand has nothing to water there
+FTUT ok   a crop by the water grows faster: a stage in 72 s, not 90 s (after 76 s: dry stage 0, by water 1)
+FTUT ok   the plot panel says so: 'By the water: it waters itself and grows 25% faster.'
+FTUT ok   a trough two tiles from water tops itself up from the pantry
+FTUT ok   a trough away from water waits for you to fill it
+FTUT ok   found open ground for a patch
+FTUT ok   the preview of a patch away from water stays clear (no note): ''
+FTUT ok   by the water it shows a water drop and '+growth' in blue: '+growth'
+FTUT ok   a trough held by the water shows the drop and 'fills itself': 'fills itself'
+FTUT ok   a River brush costs less than a pond tile
+FTUT ok   found an open row for a channel
+FTUT ok   dragging a river puts water on every tile of the channel for 12 gems
+FTUT ok   and a patch beside it is near water
+FTUT ok   base_mode is off in the shipped rules
+FTUT ok   off: Work and Upgrades tabs, axe and pickaxe, the Exchange all stay
+FTUT ok   on: build mode shows only Buildings, Base, Garden and Island: ["Buildings", "Base", "Garden", "Island"]
+FTUT ok   on: no axe or pickaxe at the market
+FTUT ok   on: no Exchange tab
+FTUT ok   on: wild trees and boulders are not choppable
+FTUT ok   on: no wild, station or haul jobs
+FTUT ok   base_mode off: the twelve old steps, Skip visible, Hob first
+FTUT ok   base_mode on: four steps and a Skip: ["meet", "eat", "toy", "out"]
+FTUT ok   one banner line per step, no leftover tokens
+FTUT ok   the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line
+FTUT ok   it starts with meeting your Boki
+FTUT ok   a later step done early does not count
+FTUT ok   met: feed it, the hint names the food
+FTUT ok   a plain meal leans nothing, so the step waits
+FTUT ok   the starter food leans the Boki fire
+FTUT ok   its colour leaned, the toy is next
+FTUT ok   a toy down: watch it play, marked
+FTUT ok   a Boki at play finishes the toy step
+FTUT ok   staying ends it with the one reward
+FTUT ok   in the base: far from your Boki is not meeting it
+FTUT ok   in the base Hob does not call you over: your Boki leads
+FTUT ok   your Boki leads the meet step and says its line
+FTUT ok   it comes toward you
+FTUT ok   step 1: Skip is on screen
+FTUT ok   meet and feed: the marker is on your Boki, not a side isle
+FTUT ok   walking up meets it and hands over the food
+FTUT ok   step 2: Skip is on screen
+FTUT FAIL feeding it through the home leans it
+FTUT ok   step 3: Skip on screen, crop and task guides retired
+FTUT FAIL after save and load it resumes at the toy step
+FTUT FAIL resumed: 3/4 on the line, Skip still there
+FTUT ok   resumed: the starter food is not handed over twice
+FTUT ok   toy: no marker until a toy is down
+FTUT ok   toy: the marker is on the toy you put down, not a side isle
+FTUT FAIL a toy down: it leaves the lead to go and play
+FTUT ok   head out: the marker is on the portal, no side isle
+FTUT FAIL head out or stay: it leads off toward the portal
+FTUT FAIL you fall behind: it waits and looks back; step 4 Skip on screen
+FTUT ok   Skip puts a toy down and ends it
+FTUT ok   Skip leaves the food in hand and costs nothing
+FTUT ok   Skip at the start: a toy placed, food in hand, no house site
+FTUT ok   hub first visit: the hub loads
+FTUT ok   beat 1: a marker floats over the Waystone saying 'Step in to travel'
+FTUT ok   far from the ring it stays, and nothing is blocked
+FTUT ok   stepping on the ring retires it
+FTUT ok   and it never shows again
+FTUT ok   beat 2: the first time the list opens, exactly one locked card carries the line
+FTUT ok   the next time the list opens, the line is gone
+FTUT ok   a skipped save sees neither beat
+FTUT ok   and its list has no line and records nothing
+FTUT DONE, failures: 10
+WARNING: 12 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

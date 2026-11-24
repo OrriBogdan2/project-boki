@@ -1,0 +1,365 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ROSTER ok   basaltoad: name Rampartoad is not used by anyone
+ROSTER ok   basaltoad is in Data.KIN
+ROSTER ok   basaltoad has home data
+ROSTER ok   basaltoad draws (placeholder)
+ROSTER ok   burrlet: name Mycroll is not used by anyone
+ROSTER ok   burrlet is in Data.KIN
+ROSTER ok   burrlet has home data
+ROSTER ok   burrlet draws (model)
+ROSTER ok   caecilith: name Zippelith is not used by anyone
+ROSTER ok   caecilith is in Data.KIN
+ROSTER ok   caecilith has home data
+ROSTER ok   caecilith draws (model)
+ROSTER ok   cairnback: name Cairnhorn is not used by anyone
+ROSTER ok   cairnback is in Data.KIN
+ROSTER ok   cairnback has home data
+ROSTER ok   cairnback draws (model)
+ROSTER ok   casquebill: name Anchorbill is not used by anyone
+ROSTER ok   casquebill is in Data.KIN
+ROSTER ok   casquebill has home data
+ROSTER ok   casquebill draws (model)
+ROSTER ok   cindle: name Vespyx is not used by anyone
+ROSTER ok   cindle is in Data.KIN
+ROSTER ok   cindle has home data
+ROSTER ok   cindle draws (model)
+ROSTER ok   cindowary: name Bellowary is not used by anyone
+ROSTER ok   cindowary is in Data.KIN
+ROSTER ok   cindowary has home data
+ROSTER ok   cindowary draws (placeholder)
+ROSTER ok   duskapi: name Snuffapi is not used by anyone
+ROSTER ok   duskapi is in Data.KIN
+ROSTER ok   duskapi has home data
+ROSTER ok   duskapi draws (model)
+ROSTER ok   floenatee: name Frigatee is not used by anyone
+ROSTER ok   floenatee is in Data.KIN
+ROSTER ok   floenatee has home data
+ROSTER ok   floenatee draws (model)
+ROSTER ok   gibbelle: name Gongibbon is not used by anyone
+ROSTER ok   gibbelle is in Data.KIN
+ROSTER ok   gibbelle has home data
+ROSTER ok   gibbelle draws (model)
+ROSTER ok   glaciyak: name Prowyak is not used by anyone
+ROSTER ok   glaciyak is in Data.KIN
+ROSTER ok   glaciyak has home data
+ROSTER ok   glaciyak draws (model)
+ROSTER ok   glintmole: name Glintmole is not used by anyone
+ROSTER ok   glintmole is in Data.KIN
+ROSTER ok   glintmole has home data
+ROSTER ok   glintmole draws (model)
+ROSTER ok   gloamshell: name Gloamshell is not used by anyone
+ROSTER ok   gloamshell is in Data.KIN
+ROSTER ok   gloamshell has home data
+ROSTER ok   gloamshell draws (model)
+ROSTER ok   glomwort: name Glomwort is not used by anyone
+ROSTER ok   glomwort is in Data.KIN
+ROSTER ok   glomwort has home data
+ROSTER ok   glomwort draws (model)
+ROSTER ok   goliathite: name Effigeetle is not used by anyone
+ROSTER ok   goliathite is in Data.KIN
+ROSTER ok   goliathite has home data
+ROSTER ok   goliathite draws (model)
+ROSTER ok   heatherhorn: name Crofthorn is not used by anyone
+ROSTER ok   heatherhorn is in Data.KIN
+ROSTER ok   heatherhorn has home data
+ROSTER ok   heatherhorn draws (model)
+ROSTER ok   hivara: name Hivara is not used by anyone
+ROSTER ok   hivara is in Data.KIN
+ROSTER ok   hivara has home data
+ROSTER ok   hivara draws (model)
+ROSTER ok   hoarheron: name Skateron is not used by anyone
+ROSTER ok   hoarheron is in Data.KIN
+ROSTER ok   hoarheron has home data
+ROSTER ok   hoarheron draws (model)
+ROSTER ok   kestrike: name Kestrike is not used by anyone
+ROSTER ok   kestrike is in Data.KIN
+ROSTER ok   kestrike has home data
+ROSTER ok   kestrike draws (model)
+ROSTER ok   kilnbadger: name Anvilbrock is not used by anyone
+ROSTER ok   kilnbadger is in Data.KIN
+ROSTER ok   kilnbadger has home data
+ROSTER ok   kilnbadger draws (model)
+ROSTER ok   kindlewren: name Kindlewren is not used by anyone
+ROSTER ok   kindlewren is in Data.KIN
+ROSTER ok   kindlewren has home data
+ROSTER ok   kindlewren draws (model)
+ROSTER ok   lilybara: name Soakybara is not used by anyone
+ROSTER ok   lilybara is in Data.KIN
+ROSTER ok   lilybara has home data
+ROSTER ok   lilybara draws (model)
+ROSTER ok   limpetor: name Buckleron is not used by anyone
+ROSTER ok   limpetor is in Data.KIN
+ROSTER ok   limpetor has home data
+ROSTER ok   limpetor draws (model)
+ROSTER ok   lodestick: name Lodestick is not used by anyone
+ROSTER ok   lodestick is in Data.KIN
+ROSTER ok   lodestick has home data
+ROSTER ok   lodestick draws (model)
+ROSTER ok   marchleaf: name Marchleaf is not used by anyone
+ROSTER ok   marchleaf is in Data.KIN
+ROSTER ok   marchleaf has home data
+ROSTER ok   marchleaf draws (model)
+ROSTER ok   moonloris: name Lanterloris is not used by anyone
+ROSTER ok   moonloris is in Data.KIN
+ROSTER ok   moonloris has home data
+ROSTER ok   moonloris draws (model)
+ROSTER ok   mossgrade: name Mossgrade is not used by anyone
+ROSTER ok   mossgrade is in Data.KIN
+ROSTER ok   mossgrade has home data
+ROSTER ok   mossgrade draws (model)
+ROSTER ok   moundvark: name Spirevark is not used by anyone
+ROSTER ok   moundvark is in Data.KIN
+ROSTER ok   moundvark has home data
+ROSTER ok   moundvark draws (model)
+ROSTER ok   murmurling: name Murmurling is not used by anyone
+ROSTER ok   murmurling is in Data.KIN
+ROSTER ok   murmurling has home data
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] run (res://tools/roster_check.gd:30)
+       [6] run (res://tools/check_registry.gd:980)
+       [7] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] run (res://tools/roster_check.gd:30)
+       [6] run (res://tools/check_registry.gd:980)
+       [7] _ready (res://scripts/main.gd:270)
+ROSTER ok   murmurling draws (model)
+ROSTER ok   nacrolin: name Mirrolin is not used by anyone
+ROSTER ok   nacrolin is in Data.KIN
+ROSTER ok   nacrolin has home data
+ROSTER ok   nacrolin draws (model)
+ROSTER ok   nettlynx: name Nettlynx is not used by anyone
+ROSTER ok   nettlynx is in Data.KIN
+ROSTER ok   nettlynx has home data
+ROSTER ok   nettlynx draws (model)
+ROSTER ok   nimbostrich: name Boltstrich is not used by anyone
+ROSTER ok   nimbostrich is in Data.KIN
+ROSTER ok   nimbostrich has home data
+ROSTER ok   nimbostrich draws (model)
+ROSTER ok   opalisk: name Bubblisk is not used by anyone
+ROSTER ok   opalisk is in Data.KIN
+ROSTER ok   opalisk has home data
+ROSTER ok   opalisk draws (model)
+ROSTER ok   orchisloth: name Terrasloth is not used by anyone
+ROSTER ok   orchisloth is in Data.KIN
+ROSTER ok   orchisloth has home data
+ROSTER ok   orchisloth draws (model)
+ROSTER ok   pebbit: name Gravadillo is not used by anyone
+ROSTER ok   pebbit is in Data.KIN
+ROSTER ok   pebbit has home data
+ROSTER ok   pebbit draws (model)
+ROSTER ok   puddlet: name Prismander is not used by anyone
+ROSTER ok   puddlet is in Data.KIN
+ROSTER ok   puddlet has home data
+ROSTER ok   puddlet draws (model)
+ROSTER ok   rimeshrew: name Rimeshrew is not used by anyone
+ROSTER ok   rimeshrew is in Data.KIN
+ROSTER ok   rimeshrew has home data
+ROSTER ok   rimeshrew draws (model)
+ROSTER ok   scaldamus: name Chuggamus is not used by anyone
+ROSTER ok   scaldamus is in Data.KIN
+ROSTER ok   scaldamus has home data
+ROSTER ok   scaldamus draws (model)
+ROSTER ok   selenfin: name Selenfin is not used by anyone
+ROSTER ok   selenfin is in Data.KIN
+ROSTER ok   selenfin has home data
+ROSTER ok   selenfin draws (model)
+ROSTER ok   sentrikat: name Barokat is not used by anyone
+ROSTER ok   sentrikat is in Data.KIN
+ROSTER ok   sentrikat has home data
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] run (res://tools/roster_check.gd:30)
+       [6] run (res://tools/check_registry.gd:980)
+       [7] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] run (res://tools/roster_check.gd:30)
+       [6] run (res://tools/check_registry.gd:980)
+       [7] _ready (res://scripts/main.gd:270)
+ROSTER ok   sentrikat draws (model)
+ROSTER ok   spatewader: name Barrelmander is not used by anyone
+ROSTER ok   spatewader is in Data.KIN
+ROSTER ok   spatewader has home data
+ROSTER ok   spatewader draws (model)
+ROSTER ok   squalltross: name Canvastross is not used by anyone
+ROSTER ok   squalltross is in Data.KIN
+ROSTER ok   squalltross has home data
+ROSTER ok   squalltross draws (model)
+ROSTER ok   threadwyrm: name Knotwyrm is not used by anyone
+ROSTER ok   threadwyrm is in Data.KIN
+ROSTER ok   threadwyrm has home data
+ROSTER ok   threadwyrm draws (model)
+ROSTER ok   thrumbird: name Thrumbird is not used by anyone
+ROSTER ok   thrumbird is in Data.KIN
+ROSTER ok   thrumbird has home data
+ROSTER ok   thrumbird draws (model)
+ROSTER ok   tuatrune: name Lockatara is not used by anyone
+ROSTER ok   tuatrune is in Data.KIN
+ROSTER ok   tuatrune has home data
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] run (res://tools/roster_check.gd:30)
+       [6] run (res://tools/check_registry.gd:980)
+       [7] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] run (res://tools/roster_check.gd:30)
+       [6] run (res://tools/check_registry.gd:980)
+       [7] _ready (res://scripts/main.gd:270)
+ROSTER ok   tuatrune draws (model)
+ROSTER ok   umbrathere: name Umbrathere is not used by anyone
+ROSTER ok   umbrathere is in Data.KIN
+ROSTER ok   umbrathere has home data
+ROSTER ok   umbrathere draws (model)
+ROSTER ok   velvorm: name Pipewurm is not used by anyone
+ROSTER ok   velvorm is in Data.KIN
+ROSTER ok   velvorm has home data
+ROSTER ok   velvorm draws (model)
+ROSTER ok   wisplet: name Lunowl is not used by anyone
+ROSTER ok   wisplet is in Data.KIN
+ROSTER ok   wisplet has home data
+ROSTER ok   wisplet draws (model)
+ROSTER ok   zapple: name Echolop is not used by anyone
+ROSTER ok   zapple is in Data.KIN
+ROSTER ok   zapple has home data
+ROSTER ok   zapple draws (model)
+ROSTER ok   zephyrak: name Zephyrak is not used by anyone
+ROSTER ok   zephyrak is in Data.KIN
+ROSTER ok   zephyrak has home data
+ROSTER ok   zephyrak draws (model)
+ROSTER ok   50 species (want 50)
+ROSTER sizes: small 20, medium 14, large 0, rideable 16
+ROSTER ok   archer.json: src note for lmb
+ROSTER ok   archer.json: src note for rmb
+ROSTER ok   archer.json: src note for e
+ROSTER ok   archer.json: src note for x
+ROSTER ok   archer.json: src note for dash
+ROSTER ok   archer.json: src note for passive
+ROSTER src archer: ours 1, [?] 0
+ROSTER ok   ashwick.json: src note for lmb
+ROSTER ok   ashwick.json: src note for rmb
+ROSTER ok   ashwick.json: src note for e
+ROSTER ok   ashwick.json: src note for x
+ROSTER ok   ashwick.json: src note for dash
+ROSTER ok   ashwick.json: src note for passive
+ROSTER src ashwick: ours 0, [?] 0
+ROSTER ok   bulwark.json: src note for lmb
+ROSTER ok   bulwark.json: src note for rmb
+ROSTER ok   bulwark.json: src note for e
+ROSTER ok   bulwark.json: src note for x
+ROSTER ok   bulwark.json: src note for dash
+ROSTER ok   bulwark.json: src note for passive
+ROSTER src bulwark: ours 0, [?] 0
+ROSTER ok   dolm.json: src note for lmb
+ROSTER ok   dolm.json: src note for rmb
+ROSTER ok   dolm.json: src note for e
+ROSTER ok   dolm.json: src note for x
+ROSTER ok   dolm.json: src note for dash
+ROSTER ok   dolm.json: src note for passive
+ROSTER src dolm: ours 0, [?] 0
+ROSTER ok   dredge.json: src note for lmb
+ROSTER ok   dredge.json: src note for rmb
+ROSTER ok   dredge.json: src note for e
+ROSTER ok   dredge.json: src note for x
+ROSTER ok   dredge.json: src note for dash
+ROSTER ok   dredge.json: src note for passive
+ROSTER src dredge: ours 1, [?] 0
+ROSTER ok   gil.json: src note for lmb
+ROSTER ok   gil.json: src note for rmb
+ROSTER ok   gil.json: src note for e
+ROSTER ok   gil.json: src note for x
+ROSTER ok   gil.json: src note for dash
+ROSTER ok   gil.json: src note for passive
+ROSTER src gil: ours 6, [?] 6
+ROSTER ok   gunslinger.json: src note for lmb
+ROSTER ok   gunslinger.json: src note for rmb
+ROSTER ok   gunslinger.json: src note for e
+ROSTER ok   gunslinger.json: src note for x
+ROSTER ok   gunslinger.json: src note for dash
+ROSTER ok   gunslinger.json: src note for passive
+ROSTER src gunslinger: ours 0, [?] 0
+ROSTER ok   juggernaut.json: src note for lmb
+ROSTER ok   juggernaut.json: src note for rmb
+ROSTER ok   juggernaut.json: src note for e
+ROSTER ok   juggernaut.json: src note for x
+ROSTER ok   juggernaut.json: src note for dash
+ROSTER ok   juggernaut.json: src note for passive
+ROSTER src juggernaut: ours 1, [?] 0
+ROSTER ok   mage.json: src note for lmb
+ROSTER ok   mage.json: src note for rmb
+ROSTER ok   mage.json: src note for e
+ROSTER ok   mage.json: src note for x
+ROSTER ok   mage.json: src note for dash
+ROSTER ok   mage.json: src note for passive
+ROSTER src mage: ours 0, [?] 0
+ROSTER ok   ostra.json: src note for lmb
+ROSTER ok   ostra.json: src note for rmb
+ROSTER ok   ostra.json: src note for e
+ROSTER ok   ostra.json: src note for x
+ROSTER ok   ostra.json: src note for dash
+ROSTER ok   ostra.json: src note for passive
+ROSTER src ostra: ours 1, [?] 0
+ROSTER ok   rimewright.json: src note for lmb
+ROSTER ok   rimewright.json: src note for rmb
+ROSTER ok   rimewright.json: src note for e
+ROSTER ok   rimewright.json: src note for x
+ROSTER ok   rimewright.json: src note for dash
+ROSTER ok   rimewright.json: src note for passive
+ROSTER src rimewright: ours 1, [?] 0
+ROSTER ok   tender.json: src note for lmb
+ROSTER ok   tender.json: src note for rmb
+ROSTER ok   tender.json: src note for e
+ROSTER ok   tender.json: src note for x
+ROSTER ok   tender.json: src note for dash
+ROSTER ok   tender.json: src note for passive
+ROSTER src tender: ours 3, [?] 0
+ROSTER ok   thief.json: src note for lmb
+ROSTER ok   thief.json: src note for rmb
+ROSTER ok   thief.json: src note for e
+ROSTER ok   thief.json: src note for x
+ROSTER ok   thief.json: src note for dash
+ROSTER ok   thief.json: src note for passive
+ROSTER src thief: ours 1, [?] 0
+ROSTER DONE, failures: 0

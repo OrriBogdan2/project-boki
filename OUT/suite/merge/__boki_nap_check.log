@@ -1,0 +1,35 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOKINAP ok   heft 1 settles in 0.60 s
+BOKINAP ok   bigger settles slower, smaller quicker: 0.52 / 0.60 / 0.82 s
+BOKINAP ok   even the biggest is down within 0.82 s
+BOKINAP ok   scale 1.0: 4 breaths in 14.4 s (one per 3.6 s)
+BOKINAP ok   breath depth 0.045
+BOKINAP ok   an ear twitches 7.5 s after it settles
+BOKINAP ok   scale 1.8: 4 breaths in 19.3 s (one per 4.8 s)
+BOKINAP ok   breath depth 0.045
+BOKINAP ok   an ear twitches 7.5 s after it settles
+BOKINAP ok   up in 0.40 s
+BOKINAP ok   stretches to 0.160 of its length
+BOKINAP ok   the stretch is low and front down all the way
+BOKINAP ok   and stands normal again by 1.1 s
+BOKINAP ok   basaltoad is a primitive body
+BOKINAP ok   asleep it curls lower: height 0.76 of awake
+BOKINAP ok   waking it stretches long: 1.16 of its length
+BOKINAP ok   cindle is a rigged body
+BOKINAP ok   kstate sleep plays the settle clip
+BOKINAP ok   at 1 / slow (0.95)
+BOKINAP ok   and holds it 1.42 s
+BOKINAP ok   then the nap clip
+BOKINAP ok   cindle has ear bones keyed in its nap clip: 2
+BOKINAP ok   an ear twitches asleep, 3.5 s in
+BOKINAP ok   the flick shows: 0.30 rad
+BOKINAP ok   and the clip sets the ear back each frame
+BOKINAP ok   awake it plays the wake clip (its stretch)
+BOKINAP ok   then idle
+BOKINAP ok   no ear twitch awake
+BOKINAP ok   30 Boki napping: 0.043 ms a frame
+BOKINAP DONE, failures: 0

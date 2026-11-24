@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SFXOCCLUSION PASS behind a cliff: a sound on the terrace, the listener on the floor, is blocked
+SFXOCCLUSION PASS in sight: the same floor, no cliff between, is not blocked
+SFXOCCLUSION PASS your own Hunter (beside the listener) is never blocked
+SFXOCCLUSION PASS both on the terrace: not blocked
+SFXOCCLUSION PASS the voice behind the cliff plays on the muffled bus
+SFXOCCLUSION PASS the voice in sight stays on the SFX bus
+SFXOCCLUSION PASS a UI sound (no position) stays on the SFX bus
+SFXOCCLUSION PASS the muffled bus is duller than the far bus (700 < 1800 Hz)
+SFXOCCLUSION PASS ...and a little quieter (-4.0 dB)
+SFXOCCLUSION PASS 30 uncached tests take 748 us (budget 2000)
+SFXOCCLUSION PASS the repeat inside 100 ms is cached (cheaper)
+SFXOCCLUSION 11 checks, 0 fail

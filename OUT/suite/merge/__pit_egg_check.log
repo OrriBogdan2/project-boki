@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PITEGG ok   50 kills with 3 in the pit: exactly one egg every time
+PITEGG ok   each hunter in the pit wins at least once ([16, 14, 20, 0])
+PITEGG ok   the hunter outside the pit never wins
+PITEGG ok   the three in the pit are from two teams
+PITEGG ok   the feed says who got which Egg
+PITEGG ok   a bot wins too: the egg is in its pack, where bot.gd's egg_home reads it
+PITEGG ok   full pack: the egg lies at the winner's feet
+PITEGG ok   it is reserved for the winner
+PITEGG ok   after the hold runs out anyone can take it
+PITEGG ok   nobody inside: one egg on the floor, free for all
+PITEGG ok   the floor egg lies inside the lair, 3.9m from the loot pile
+PITEGG DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 19 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

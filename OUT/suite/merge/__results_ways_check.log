@@ -1,0 +1,111 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+RESULTSWAYS ok   out at 100 with one still standing and one gone: 3rd of 5 ({ "place": 3, "squads": 5, "hid": false })
+RESULTSWAYS ok   a squad is over when its last Hunter is out: team 1 (50, 90) is 4th
+RESULTSWAYS ok   a squad that left by a seat has no place
+RESULTSWAYS ok   one Hunter of ours out the door: no place for the squad
+RESULTSWAYS ok   we give up with a mate still in: we place by now (80), under the one standing
+RESULTSWAYS ok   the islands fall on everyone at once: a tie
+RESULTSWAYS ok   placement pay: 5 per squad below, at most 40, nothing for last
+RESULTSWAYS ok   alone in the match: no pay
+RESULTSWAYS ok   ordinals
+RESULTSWAYS ok   how 'lair' reads: You rode the updraft out of the Sealed Lair.
+RESULTSWAYS ok   how 'heart_early' reads: You left through the Heart Gate.
+RESULTSWAYS ok   how 'uplink' reads: You rode the Uplink lift out of Outpost Two.
+RESULTSWAYS ok   how 'heart_final' reads: You held the Heart ring and left.
+RESULTSWAYS ok   the uplink line names the outpost
+RESULTSWAYS ok   a lost run says its placing
+RESULTSWAYS ok   no place, no how: nothing said
+RESULTSWAYS ok   the major reward line
+RESULTSWAYS ok   the minor reward line
+RESULTSWAYS ok   the early exit says the final seat would have paid the major set: The final seat (10:00, one squad) would have paid: 150 gems, a Rare Egg, 12 seeds, 2 Heartwood, 2 Starstone.
+RESULTSWAYS ok   the final exit says the early seat would have paid the minor set: The early seat (the Gate) would have paid: 40 gems, 4 seeds, 1 Heartwood.
+RESULTSWAYS ok   no line for other ways out
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _real_match (res://tools/results_ways_check.gd:125)
+       [12] run (res://tools/results_ways_check.gd:51)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _real_match (res://tools/results_ways_check.gd:125)
+       [12] run (res://tools/results_ways_check.gd:51)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+RESULTSWAYS ok   a real match: second of three after one squad went first ({ "place": 2, "squads": 3, "hid": true })
+RESULTSWAYS ok   a squad leaving by a seat after us still ranks above us
+RESULTSWAYS ok   _finish writes place and squads (the old stub 'placed' is gone)
+RESULTSWAYS ok   apply_result pays 35 gems to 3rd of 10 (35)
+RESULTSWAYS ok   a squad that left gets its seat's gems and no placement pay
+RESULTSWAYS ok   the tutorial pays no placement
+RESULTSWAYS ok   no place in the result (a match with no squads to rank): no pay
+RESULTSWAYS ok   a squad all at level 1 hid
+RESULTSWAYS ok   one Hunter past level 1 and the squad levelled
+RESULTSWAYS ok   a hiding squad placing 1st of 10 gets no gems
+RESULTSWAYS ok   a levelled squad is paid as before
+RESULTSWAYS ok   the line says why
+RESULTSWAYS ok   no line for a levelled squad
+RESULTSWAYS ok   no line for a squad that left
+RESULTSWAYS ok   the lost screen shows the placing and the pay
+RESULTSWAYS ok   a levelled squad's screen has no hiding line
+RESULTSWAYS ok   the hiding screen says why
+RESULTSWAYS ok   and shows no pay
+RESULTSWAYS ok   the final seat screen shows how you left and the reward
+RESULTSWAYS ok   and no placing
+RESULTSWAYS ok   and what the early seat would have paid
+RESULTSWAYS ok   the early seat screen
+RESULTSWAYS ok   ...says what the final would have paid
+RESULTSWAYS DONE, failures: 0
+SCRIPT ERROR: Invalid access to property or key 'halo' on a base object of type 'Dictionary'.
+          at: ResultsStage._wisp (res://scripts/ui/results_stage.gd:143)
+          GDScript backtrace (most recent call first):
+              [0] _wisp (res://scripts/ui/results_stage.gd:143)
+              [1] _build_next (res://scripts/ui/results_stage.gd:120)
+              [2] _process (res://scripts/ui/results_stage.gd:94)
+SCRIPT ERROR: Invalid assignment of property or key 'position' with value of type 'Vector3' on a base object of type 'Nil'.
+          at: ResultsStage._build_next (res://scripts/ui/results_stage.gd:121)
+          GDScript backtrace (most recent call first):
+              [0] _build_next (res://scripts/ui/results_stage.gd:121)
+              [1] _process (res://scripts/ui/results_stage.gd:94)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "big".
+          at: GDScript::reload (res://scripts/home/home.gd:797)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "body".
+          at: GDScript::reload (res://scripts/home/home.gd:3075)
+ERROR: Failed to load script "res://scripts/home/home.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+ERROR: 5 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 17 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 27 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

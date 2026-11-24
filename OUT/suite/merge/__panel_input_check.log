@@ -1,0 +1,62 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PANEL ok   map / LMB: opens
+PANEL ok   map / LMB: a press while open does not reach the match
+PANEL ok   map / LMB: closes
+PANEL ok   map / LMB: the first press after close lands on that frame
+PANEL ok   map / Shift: opens
+PANEL ok   map / Shift: a press while open does not reach the match
+PANEL ok   map / Shift: closes
+PANEL ok   map / Shift: the first press after close lands on that frame
+PANEL ok   map / E: opens
+PANEL ok   map / E: a press while open does not reach the match
+PANEL ok   map / E: closes
+PANEL ok   map / E: the first press after close lands on that frame
+PANEL ok   map / Space: opens
+PANEL ok   map / Space: a press while open does not reach the match
+PANEL ok   map / Space: closes
+PANEL ok   map / Space: the first press after close lands on that frame
+PANEL ok   pack / LMB: opens
+PANEL ok   pack / LMB: a press while open does not reach the match
+PANEL ok   pack / LMB: closes
+PANEL ok   pack / LMB: the first press after close lands on that frame
+PANEL ok   pack / Shift: opens
+PANEL ok   pack / Shift: a press while open does not reach the match
+PANEL ok   pack / Shift: closes
+PANEL ok   pack / Shift: the first press after close lands on that frame
+PANEL ok   pack / E: opens
+PANEL ok   pack / E: a press while open does not reach the match
+PANEL ok   pack / E: closes
+PANEL ok   pack / E: the first press after close lands on that frame
+PANEL ok   pack / Space: opens
+PANEL ok   pack / Space: a press while open does not reach the match
+PANEL ok   pack / Space: closes
+PANEL ok   pack / Space: the first press after close lands on that frame
+PANEL ok   pause / LMB: opens
+PANEL ok   pause / LMB: a press while open does not reach the match
+PANEL ok   pause / LMB: closes
+PANEL ok   pause / LMB: the first press after close lands on that frame
+PANEL ok   pause / Shift: opens
+PANEL ok   pause / Shift: a press while open does not reach the match
+PANEL ok   pause / Shift: closes
+PANEL ok   pause / Shift: the first press after close lands on that frame
+PANEL ok   pause / E: opens
+PANEL ok   pause / E: a press while open does not reach the match
+PANEL ok   pause / E: closes
+PANEL ok   pause / E: the first press after close lands on that frame
+PANEL ok   pause / Space: opens
+PANEL ok   pause / Space: a press while open does not reach the match
+PANEL ok   pause / Space: closes
+PANEL ok   pause / Space: the first press after close lands on that frame
+PANEL DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 15 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

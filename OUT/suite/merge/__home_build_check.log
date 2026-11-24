@@ -1,0 +1,81 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HOMEBUILD ok   the main island has 975 open tiles (the old one had about 480)
+HOMEBUILD ok   one expansion step grows it to 1202 tiles (+227)
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+HOMEBUILD ok   a new save's layout starts with the farm's lamps and flower beds as decorations
+HOMEBUILD ok   build mode opens with its catalog bar
+HOMEBUILD ok   a lantern goes down on open meadow at (52, 34)
+HOMEBUILD ok   it's in the layout and cost 15 gems
+HOMEBUILD ok   nothing goes on top of the lantern (Blocked by: Lantern)
+HOMEBUILD ok   nothing goes in the sky (That's off the island)
+HOMEBUILD ok   nothing goes on the house (Something's in the way)
+HOMEBUILD ok   a bench turned a quarter fits a 1x2 footprint
+HOMEBUILD ok   the bench is saved turned (r=1)
+HOMEBUILD ok   the bench blocks walking
+HOMEBUILD ok   the Workshop picks up, turns and drops at (54, 34)
+HOMEBUILD ok   its footprint moved in the world (old lot open again)
+HOMEBUILD ok   its door turned with it
+HOMEBUILD ok   a fence ring round the Workshop door is refused: it would cut the door off
+HOMEBUILD ok   clicking the lantern picks it up
+HOMEBUILD ok   X puts it in storage
+HOMEBUILD ok   undo brings it back
+HOMEBUILD ok   a stone path paints two tiles
+HOMEBUILD ok   a pond tile goes down (water you can wade into, but nothing can be built on it)
+HOMEBUILD ok   a 9-tile fence line goes down ()
+HOMEBUILD ok   a kin walks round the fence to the far side (reached=true through=false)
+HOMEBUILD ok   buying a feeder opens build mode holding it
+HOMEBUILD ok   it sets down on a green spot ((52, 36)) and leaves storage
+HOMEBUILD ok   a feeder that's out can be picked up again
+ERROR: Parameter "material" is null.
+   at: material_casts_shadows (drivers/gles3/storage/material_storage.cpp:2547)
+ERROR: Parameter "material" is null.
+   at: material_is_animated (drivers/gles3/storage/material_storage.cpp:2534)
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (drivers/gles3/storage/material_storage.cpp:2573)
+ERROR: Parameter "material" is null.
+   at: material_update_dependency (drivers/gles3/storage/material_storage.cpp:2585)
+HOMEBUILD ok   after a save and reload the Workshop, 20 decorations and the fence are where they were
+HOMEBUILD ok   the pond tile and the path come back too
+HOMEBUILD ok   Expand pays and grows the island a step (now 1)
+HOMEBUILD ok   the grown island has 1202 tiles of land
+HOMEBUILD ok   an old save gets a layout (the farm's lamps and flower beds)
+HOMEBUILD ok   its greenhouse stands on the (moved) Orchard Isle
+HOMEBUILD ok   a feeder left out where there's no land now is moved to open ground (61.0, 39.5)
+HOMEBUILD ok   its Workshop stays on its old lot
+HOMEBUILD ok   a dash at home carries you 2.9m
+HOMEBUILD ok   gliding sinks slowly (0.70m in half a second)
+HOMEBUILD ok   falling off the island puts you back where you last stood
+HOMEBUILD ok   light dashes at home as in a match: 1 short (1), then the long one (1), 6.5s to recharge (dodge cooldown 6.5s), then again (true)
+HOMEBUILD ok   medium dashes at home as in a match: 1 short (1), then the long one (1), 9.0s to recharge (dodge cooldown 9.0s), then again (true)
+HOMEBUILD ok   heavy dashes at home as in a match: 2 short (2), then the long one (1), 12.1s to recharge (dodge cooldown 12.0s), then again (true)
+HOMEBUILD ok   seed 1234567: 1149 open tiles, all 1149 reachable, 0 places missed, 44 wild tiles
+HOMEBUILD ok   a new home asks where things go first
+HOMEBUILD ok   Use suggested layout puts the Workshop lot at { "x": 42, "z": 23, "r": 0 } and the feeder by the pot, still all reachable ({ "ok": true, "open": 1149, "reached": 1149, "missing": [] })
+HOMEBUILD ok   seed 7654321: 992 open tiles, all 992 reachable, 0 places missed, 45 wild tiles
+HOMEBUILD ok   a new home asks where things go first
+HOMEBUILD ok   Use suggested layout puts the Workshop lot at { "x": 38, "z": 20, "r": 0 } and the feeder by the pot, still all reachable ({ "ok": true, "open": 992, "reached": 992, "missing": [] })
+HOMEBUILD ok   the two seeds made different islands
+HOMEBUILD done, failures: 0
+WARNING: 1 RID of type "CanvasItem" was leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2690)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 8 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,35 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MANTLE ok   every Hunter has its Warden in content/rules/mantle_look.json (missing [])
+MANTLE ok   every Warden's folk, face, hair and markings are real names ([])
+MANTLE ok   the Warden's gender is only the archetype's (stray [], missing [])
+MANTLE ok   every slider at 0 and 1, for every Hunter, stays inside its clamp ([])
+MANTLE ok   the ends reach exactly the clamp and the middle is the Warden's own size ([])
+MANTLE ok   gender, folk, face and hair come from the Warden whatever the player picked ([])
+MANTLE ok   body sizes move ±8% or more, face shape less (±5%)
+MANTLE ok   every skin, hair, eye and outfit pick only tints the Warden's palette ([])
+MANTLE ok   a signature red stays red under a blue pick (d03b4d)
+MANTLE ok   a Warden can lock a colour (the machine's plating takes no skin tint)
+MANTLE ok   the hit radius and the ring that shows it are the class's at every slider end ([])
+MANTLE ok   at home you're your own folk, body type and colours
+MANTLE ok   and your sliders count for more there (build 1.25)
+MANTLE ok   no Warden's gear at home; the Mantle's in a match
+MANTLE ok   at both slider ends every Hunter's silhouette is still closest to its own ([])
+MANTLE ok   and keeps at least 0.70 of its own shape (least 0.77, dolm)
+MANTLE silhouette: the closest call is dolm (vs archer), 0.16 IoU ahead of the next Hunter
+MANTLE ok   a slider look cleans back to itself, slider for slider
+MANTLE ok   a v7 save loads and upgrades to v21 through the v8 -> v9 step
+MANTLE ok   its look becomes the Unmasked, and its Bearer is exactly the Warden (every slider neutral)
+MANTLE ok   a v7 save with no look loads too, and builds the plain Warden
+MANTLE ok   Randomise and Looks good are there, so a player who doesn't mind is through in one click
+MANTLE ok   Randomise makes a new person, every slider in range
+MANTLE ok   Looks good hands back the look it shows
+MANTLE 23 checks, 0 failed
+MANTLE_DONE PASS
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOKIHUD ok   a trio match with your Boki and two teammates (2)
+BOKIHUD ok   the HUD canvas is 1280x720 ((1280.0, 720.0))
+BOKIHUD ok   bond 40%, no tag ({ "tag": "", "bond": 40, "frac": 1.0 })
+BOKIHUD ok   bond full, Boki with you: FUSE (FUSE)
+BOKIHUD ok   Boki sent far with the bond full: TOO FAR (TOO FAR)
+BOKIHUD ok   back in range: FUSE again (FUSE)
+BOKIHUD ok   Boki downed: RESCUE (RESCUE)
+BOKIHUD ok   a full bond starts the Fusion
+BOKIHUD ok   a Fusion that ran out leaves the Boki resting: RESTING (10.0 s, RESTING)
+BOKIHUD ok   the box's bar follows the Boki's health (0.5)
+BOKIHUD ok   a teammate's Boki icon shows a quarter of its health ({ "state": "", "frac": 0.25 })
+BOKIHUD GAP  no per-species summon duration: the summon ring has nothing to count (docs/HUD.md)
+BOKIHUD PASS (0 fail)
+ERROR: 4 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 17 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 4 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 69: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 70: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 71: leaked 2796240 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 39 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

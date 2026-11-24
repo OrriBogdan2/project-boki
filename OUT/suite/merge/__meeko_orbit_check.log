@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+MEEKOORBIT ok   Meeko's model has floating companions
+MEEKOORBIT ok   a sun and a raincloud (2 parts)
+MEEKOORBIT ok   no companion surface is left in the skinned body ([])
+MEEKOORBIT ok   sun is an unskinned mesh of its own, not on a shoulder bone
+MEEKOORBIT ok   sun's face is still on the mood atlas shader
+MEEKOORBIT ok   cloud is an unskinned mesh of its own, not on a shoulder bone
+MEEKOORBIT ok   cloud's face is still on the mood atlas shader
+MEEKOORBIT ok   one turn takes 4.0 s (3.5 to 4.5)
+MEEKOORBIT ok   each sits on the circle (ellipse 1.05 x 1.00 m) within 1%
+MEEKOORBIT ok   both go twice round in two periods (12.1 and 12.1 rad, want 12.6)
+MEEKOORBIT ok   the two are 180 degrees apart (179 degrees)
+MEEKOORBIT ok   a little vertical bob, 0.070 to 0.092 m each way (0.05 to 0.11)
+MEEKOORBIT ok   data bob 0.07 m is in 0.06 to 0.1
+MEEKOORBIT ok   the bob runs at its own frequencies (2.7 s and 3.3 s) not the turn's
+MEEKOORBIT ok   the turn's speed breathes (1.27 to 1.88 rad/s), not a constant spin
+MEEKOORBIT ok   the circle is centred on her (mean x 0.003 m)
+MEEKOORBIT ok   the companions stay 0.200 m (needs 0.010) clear of her body, head and wings round the whole circle (sun closest)
+MEEKOORBIT ok   the sun's muzzle empty rides the sun (0.029 m from it)
+MEEKOORBIT ok   running at 5 m/s the circle trails behind her (0.22 m)
+MEEKOORBIT ok   and never further behind than its limit (0.22 of 0.22 m)
+MEEKOORBIT ok   standing again it catches up (0.002 m behind, from 0.218)
+MEEKOORBIT ok   the centre moved with her
+MEEKOORBIT 22 checks, 0 failed
+MEEKOORBIT_DONE PASS

@@ -1,0 +1,72 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LANTERN ok   12 caps, 6 pairs
+LANTERN ok   the same seed deals the same ring
+LANTERN ok   another seed deals another ring
+LANTERN ok   a flash lights one pair
+LANTERN ok   a flash lights one pair
+LANTERN ok   a flash lights one pair
+LANTERN ok   a flash lights one pair
+LANTERN ok   a flash lights one pair
+LANTERN ok   a flash lights one pair
+LANTERN ok   every pair flashed
+LANTERN ok   after the flash every cap is dark
+LANTERN ok   no pick while the board flashes
+LANTERN ok   two caps open
+LANTERN ok   no third cap while two are lit
+LANTERN ok   a mismatch goes dark
+LANTERN ok   a match stays lit and scores
+LANTERN ok   a matched cap cannot be opened
+LANTERN ok   a cleared solo ring deals a fresh one that flashes
+LANTERN ok   50 Focus sniffs twice as often
+LANTERN ok   a curious Boki sniffs more often
+LANTERN ok   Focus points more often: 0.197 vs 0.080 points/s
+LANTERN ok   following a Focus Boki finds more: 1089 vs 610 pairs, 40 vs 12 wins
+LANTERN ok   a Focus rival leads by more pairs: 232 vs 100 over 40 games
+LANTERN ok   a miss passes the turn; you cannot open on the rival's turn
+LANTERN ok   a match keeps the turn
+LANTERN ok   the lantern table holds Peekbox, Glowmoss Sprig and Hush Truffle
+LANTERN ok   table entry peekbox exists
+LANTERN ok   table entry hush_truffle exists
+LANTERN ok   table entry glowmoss_sprig exists
+LANTERN ok   table entry glowcap exists
+LANTERN ok   table entry hushpearl exists
+LANTERN ok   a solo win: a roll and the first-win item
+LANTERN ok   a solo win never moves the cup
+LANTERN ok   gems paid
+LANTERN ok   a versus win over a stronger Boki takes the Sprout round
+LANTERN ok   a loss sulks
+LANTERN ok   a loss starts the cup over
+LANTERN ok   3 all is a draw, not a win
+LANTERN ok   IDLE -> RESULT refused
+LANTERN ok   PLAY -> PLAY refused
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+LANTERN ok   off: no glowcap ring on the farm
+LANTERN ok   on: the base has Lantern Match
+LANTERN ok   on: the ring offers a game
+LANTERN ok   on: the ring opens its panel
+LANTERN ok   on: solo starts with 12 caps on the panel
+LANTERN ok   on: the clock runs out to a card (93.7 s)
+LANTERN ok   on: the card goes and the ring is ready again
+LANTERN ok   on: closing the panel calls it off
+LANTERN DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

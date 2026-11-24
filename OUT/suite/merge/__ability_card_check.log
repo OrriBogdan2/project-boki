@@ -1,0 +1,81 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SCRIPT ERROR: Invalid access to property or key 'radius' on a base object of type 'Dictionary'.
+          at: _data_at (res://tools/ability_card_check.gd:42)
+          GDScript backtrace (most recent call first):
+              [0] _data_at (res://tools/ability_card_check.gd:42)
+              [1] _numbers (res://tools/ability_card_check.gd:59)
+              [2] run (res://tools/ability_card_check.gd:32)
+              [3] run (res://tools/check_registry.gd:980)
+              [4] _ready (res://scripts/main.gd:270)
+CARDCHECK 12 Hunters x dash, RMB, E, X: name, key, cooldown, range, again = data FAIL  juggernaut/rmb
+CARDCHECK 8 abilities are two-step, each says 'Press <key> again to'     PASS  8
+CARDCHECK at least 12 Hunters (all are checked)                          PASS  
+CARDCHECK the HUD's live card (rank 1) shows the same numbers as the menus' card PASS  
+CARDCHECK every card builds in a tree and shows its name and numbers     PASS  
+CARDCHECK Relic screen: every kit row shows a card (E row found)         PASS  
+CARDCHECK Relic screen: hovering E puts one card up with the data's numbers PASS  
+CARDCHECK Relic screen: the card goes when the mouse leaves              PASS  
+CARDCHECK Hunter pick: every kit row shows a card (E row found)          PASS  
+CARDCHECK Hunter pick: hovering E puts one card up with the data's numbers PASS  
+CARDCHECK Hunter pick: the card goes when the mouse leaves               PASS  
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _hud_hover (res://tools/ability_card_check.gd:187)
+       [13] _hover_and_shots (res://tools/ability_card_check.gd:179)
+       [14] _menu_hover (res://tools/ability_card_check.gd:153)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _hud_hover (res://tools/ability_card_check.gd:187)
+       [13] _hover_and_shots (res://tools/ability_card_check.gd:179)
+       [14] _menu_hover (res://tools/ability_card_check.gd:153)
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+CARDCHECK no Tab: no ability card on the HUD                             PASS  
+CARDCHECK Tab held on E: the card shows                                  PASS  
+CARDCHECK Tab held on E: one card with the kit's live name and cooldown  PASS  Shadow Knife
+CARDCHECK the live cooldown is the data's at rank 1                      PASS  15.0 vs 15.0
+CARDCHECK Tab let go: the card goes                                      PASS  
+CARDCHECK DONE, 16 checks, failures: 1
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 30 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

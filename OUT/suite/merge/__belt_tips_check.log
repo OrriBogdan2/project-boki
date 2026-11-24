@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BELT PASS first: a stim pickup shows 1 line(s), want 1 (got ["Swift draught on 3: Move 35% faster for 6s"])
+BELT PASS stim line has its key and effect: Swift draught on 3: Move 35% faster for 6s
+BELT PASS stim line has its name, is short
+BELT PASS first: a smoke pickup shows 1 line(s), want 1 (got ["Smoke bomb on 4: A cloud that hides everyone inside it, like tall grass, for 8s"])
+BELT PASS first: the chest key went on the belt
+BELT PASS first: a second stim, a chest key, a tonic and an armor kit shows 0 line(s), want 0 (got [])
+BELT PASS first: an armor break shows 1 line(s), want 1 (got ["Armor kit on 2: Repairs your armor to full"])
+BELT PASS kit line: Armor kit on 2: Repairs your armor to full
+BELT PASS first: low health shows 1 line(s), want 1 (got ["Tonic on 1: Drink for a second to heal"])
+BELT PASS tonic line: Tonic on 1: Drink for a second to heal
+BELT PASS the four are marked in the save
+BELT PASS a chest key has no belt tip
+BELT PASS second: a stim pickup shows 0 line(s), want 0 (got [])
+BELT PASS second: a smoke pickup shows 0 line(s), want 0 (got [])
+BELT PASS second: the chest key went on the belt
+BELT PASS second: a second stim, a chest key, a tonic and an armor kit shows 0 line(s), want 0 (got [])
+BELT PASS second: an armor break shows 0 line(s), want 0 (got [])
+BELT PASS second: low health shows 0 line(s), want 0 (got [])
+BELT DONE, failures: 0
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 2 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 253: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 19 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

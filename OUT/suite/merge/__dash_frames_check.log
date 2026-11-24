@@ -1,0 +1,69 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+DASHF renderer=gl_compatibility adapter=llvmpipe (LLVM 21.1.8, 256 bits) software=true
+Quality: auto picked very_low (load benchmark 292.9 ms a frame)
+WARNING: The Compatibility renderer does not support manually emitting particles.
+     at: particles_emit (drivers/gles3/storage/particles_storage.cpp:378)
+     GDScript backtrace (most recent call first):
+         [0] _emit (res://scripts/match/kin_type_trail.gd:107)
+         [1] tick (res://scripts/match/kin_type_trail.gd:96)
+         [2] render (res://scripts/match/kin.gd:1092)
+         [3] _process (res://scripts/match/match.gd:3175)
+DASHFRAMES ok thief dash #1: at least 5 intermediate positions with the dash pose  16 frames posed and moving of 16 in the dash
+DASHFRAMES ok thief dash #1: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 4.64 m in 0.45 s (["vault_l"]), lean 90 deg peak / -13 at the end, feet slip 23%
+DASHFRAMES ok thief dash #1: the dash pose hands over with the travel  dash pose rode the run 0.07 s after the travel (limit 0.28)
+DASHFRAMES ok thief dash #1: no pop into the run  hand-over jerk 26 rad/s (0.20 s after, ; limit 30)
+DASHFRAMES ok thief dash #1: no hitch  worst 473 ms, limit 1027 ms (window median 411), 0 compiles
+DASHFRAMES ok thief dash #2: at least 5 intermediate positions with the dash pose  14 frames posed and moving of 14 in the dash
+DASHFRAMES ok thief dash #2: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 4.51 m in 0.43 s (["vault_l"]), lean 90 deg peak / -12 at the end, feet slip 20%
+DASHFRAMES ok thief dash #2: the dash pose hands over with the travel  dash pose rode the run 0.05 s after the travel (limit 0.28)
+DASHFRAMES FAIL thief dash #2: no pop into the run  hand-over jerk 40 rad/s (0.38 s after, ; limit 30)
+DASHFRAMES ok thief dash #2: no hitch  worst 977 ms, limit 1237 ms (window median 495), 0 compiles
+DASHFRAMES ok thief dash #3: at least 5 intermediate positions with the dash pose  15 frames posed and moving of 15 in the dash
+DASHFRAMES ok thief dash #3: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 4.57 m in 0.43 s (["vault_l"]), lean 90 deg peak / -12 at the end, feet slip 16%
+DASHFRAMES ok thief dash #3: the dash pose hands over with the travel  dash pose rode the run 0.10 s after the travel (limit 0.28)
+DASHFRAMES FAIL thief dash #3: no pop into the run  hand-over jerk 98 rad/s (0.53 s after, ; limit 30)
+DASHFRAMES ok thief dash #3: no hitch  worst 651 ms, limit 1064 ms (window median 426), 0 compiles
+DASHFRAMES ok juggernaut rmb #1: at least 5 intermediate positions with the dash pose  8 frames posed and moving of 8 in the dash
+DASHFRAMES ok juggernaut rmb #1: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 6.58 m in 0.22 s (["lunge"]), lean 52 deg peak / 23 at the end, feet slip 46%
+DASHFRAMES ok juggernaut rmb #1: the dash pose hands over with the travel  dash pose rode the run 0.12 s after the travel (limit 0.28)
+DASHFRAMES ok juggernaut rmb #1: no pop into the run  hand-over jerk 3 rad/s (0.13 s after, lunge; limit 30)
+DASHFRAMES ok juggernaut rmb #1: no hitch  worst 478 ms, limit 1015 ms (window median 406), 0 compiles
+DASHFRAMES ok juggernaut rmb #2: at least 5 intermediate positions with the dash pose  9 frames posed and moving of 9 in the dash
+DASHFRAMES ok juggernaut rmb #2: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 6.85 m in 0.23 s (["lunge"]), lean 51 deg peak / 14 at the end, feet slip 49%
+DASHFRAMES ok juggernaut rmb #2: the dash pose hands over with the travel  dash pose rode the run 0.05 s after the travel (limit 0.28)
+DASHFRAMES ok juggernaut rmb #2: no pop into the run  hand-over jerk 2 rad/s (0.30 s after, lunge; limit 30)
+DASHFRAMES FAIL juggernaut rmb #2: no hitch  worst 1193 ms, limit 1097 ms (window median 439), 0 compiles
+DASHFRAMES ok juggernaut rmb #3: at least 5 intermediate positions with the dash pose  6 frames posed and moving of 11 in the dash
+DASHFRAMES ok juggernaut rmb #3: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 7.75 m in 0.32 s (["lunge"]), lean 52 deg peak / 0 at the end, feet slip 19%
+DASHFRAMES ok juggernaut rmb #3: the dash pose hands over with the travel  dash pose rode the run 0.00 s after the travel (limit 0.28)
+DASHFRAMES ok juggernaut rmb #3: no pop into the run  hand-over jerk 6 rad/s (0.08 s after, lunge; limit 30)
+DASHFRAMES ok juggernaut rmb #3: no hitch  worst 1034 ms, limit 1517 ms (window median 607), 0 compiles
+DASHFRAMES ok juggernaut dash #4: at least 5 intermediate positions with the dash pose  7 frames posed and moving of 9 in the dash
+DASHFRAMES ok juggernaut dash #4: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 3.76 m in 0.25 s (["dash"]), lean 69 deg peak / 25 at the end, feet slip 81%
+DASHFRAMES ok juggernaut dash #4: the dash pose hands over with the travel  dash pose rode the run 0.20 s after the travel (limit 0.28)
+DASHFRAMES FAIL juggernaut dash #4: no pop into the run  hand-over jerk 48 rad/s (0.52 s after, ; limit 30)
+DASHFRAMES ok juggernaut dash #4: no hitch  worst 2158 ms, limit 2679 ms (window median 1072), 0 compiles
+DASHFRAMES ok juggernaut dash #5: at least 5 intermediate positions with the dash pose  7 frames posed and moving of 8 in the dash
+DASHFRAMES ok juggernaut dash #5: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 3.69 m in 0.22 s (["dash"]), lean 69 deg peak / 33 at the end, feet slip 84%
+DASHFRAMES ok juggernaut dash #5: the dash pose hands over with the travel  dash pose rode the run 0.20 s after the travel (limit 0.28)
+DASHFRAMES ok juggernaut dash #5: no pop into the run  hand-over jerk 21 rad/s (0.57 s after, ; limit 30)
+DASHFRAMES FAIL juggernaut dash #5: no hitch  worst 3087 ms, limit 2753 ms (window median 1101), 0 compiles
+DASHFRAMES ok gunslinger dash #1: at least 5 intermediate positions with the dash pose  13 frames posed and moving of 13 in the dash
+DASHFRAMES ok gunslinger dash #1: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 4.80 m in 0.40 s (["dash"]), lean 0 deg peak / -21 at the end, feet slip 72%
+DASHFRAMES ok gunslinger dash #1: the dash pose hands over with the travel  dash pose rode the run 0.20 s after the travel (limit 0.28)
+DASHFRAMES ok gunslinger dash #1: no pop into the run  hand-over jerk 19 rad/s (0.43 s after, ; limit 30)
+DASHFRAMES ok gunslinger dash #1: no hitch  worst 1047 ms, limit 1262 ms (window median 505), 0 compiles
+DASHFRAMES ok archer dash #1: at least 5 intermediate positions with the dash pose  13 frames posed and moving of 13 in the dash
+DASHFRAMES ok archer dash #1: no run inside the travel  run shown 0.02 s of the travel (limit 0.05); travel 3.39 m in 0.37 s (["roll"]), lean 90 deg peak / -14 at the end, feet slip 37%
+DASHFRAMES ok archer dash #1: the dash pose hands over with the travel  dash pose rode the run 0.00 s after the travel (limit 0.28)
+DASHFRAMES ok archer dash #1: no pop into the run  hand-over jerk 16 rad/s (0.40 s after, roll; limit 30)
+DASHFRAMES FAIL archer dash #1: no hitch  worst 758 ms, limit 1249 ms (window median 499), 1 compiles
+DASHFRAMES ok ashwick dash #1: at least 5 intermediate positions with the dash pose  11 frames posed and moving of 11 in the dash
+DASHFRAMES ok ashwick dash #1: no run inside the travel  run shown 0.00 s of the travel (limit 0.05); travel 3.50 m in 0.30 s (["leap"]), lean 73 deg peak / -5 at the end, feet slip 45%
+DASHFRAMES ok ashwick dash #1: the dash pose hands over with the travel  dash pose rode the run 0.17 s after the travel (limit 0.28)
+DASHFRAMES ok ashwick dash #1: no pop into the run  hand-over jerk 13 rad/s (0.58 s after, ; limit 30)
+DASHFRAMES ok ashwick dash #1: no hitch  worst 1869 ms, limit 2082 ms (window median 833), 0 compiles

@@ -1,0 +1,324 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FMGUIDE PASS tutorial, duel and training get no guide and do not count
+FMGUIDE PASS the first two Extractions get the guide
+FMGUIDE PASS the third does not (the dive learnt); the flag stays at 2
+FMGUIDE PASS the third keeps only the dive line, uncounted
+FMGUIDE PASS an old save skips it; one match in: one more
+FMGUIDE PASS the field is never overwritten
+FMGUIDE PASS a new save starts at 0
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _walk (res://tools/first_match_guide_check.gd:68)
+       [12] run (res://tools/first_match_guide_check.gd:22)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _walk (res://tools/first_match_guide_check.gd:68)
+       [12] run (res://tools/first_match_guide_check.gd:22)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+FMGUIDE hunter archer
+FMGUIDE PASS a real Extraction gets the guide and is counted
+FMGUIDE PASS riding: no guide line
+FMGUIDE PASS riding: no hint card
+FMGUIDE PASS dropping: no guide line
+FMGUIDE PASS dropping: no hint card
+FMGUIDE PASS a skill point: rank an ability (Rank up Hail Wall: press Alt + E)
+FMGUIDE PASS ranked: it clears
+FMGUIDE PASS your Boki is with you: send it (Send Vespyx at a monster: tap C)
+FMGUIDE PASS sent: it clears
+FMGUIDE PASS a chest to open: loot it (Loot a chest: stand next to it and hold F)
+FMGUIDE PASS the message column starts under the line's strip
+FMGUIDE PASS opened: it clears
+FMGUIDE PASS with no line up the message column keeps its place
+FMGUIDE PASS a long feed line is cut at a word (The Sealed Lair is open: Stormcrown Eyrie, first…)
+FMGUIDE PASS a squad close by gets no line
+FMGUIDE PASS the match is closing: the Blight line (The Blight is closing in: time to wrap up)
+FMGUIDE PASS it clears after its time
+FMGUIDE PASS then: head for the way out the goal line names (Head for the Heart ring badge on your map: Stand in the Heart ring until the end)
+FMGUIDE PASS at an exit: it clears
+FMGUIDE PASS the guide never touched the player's input
+FMGUIDE PASS after extracting nothing shows
+FMGUIDE PASS Match.step ticks the guide
+FMGUIDE PASS chest fits the one-line strip (21 px)
+FMGUIDE PASS chest is not the squad or landing line
+FMGUIDE PASS rank fits the one-line strip (21 px)
+FMGUIDE PASS rank is not the squad or landing line
+FMGUIDE PASS send fits the one-line strip (21 px)
+FMGUIDE PASS send is not the squad or landing line
+FMGUIDE PASS zone fits the one-line strip (15 px)
+FMGUIDE PASS zone is not the squad or landing line
+FMGUIDE PASS wall fits the one-line strip (18 px)
+FMGUIDE PASS wall is not the squad or landing line
+FMGUIDE PASS mates fits the one-line strip (14 px)
+FMGUIDE PASS mates is not the squad or landing line
+FMGUIDE PASS blight fits the one-line strip (21 px)
+FMGUIDE PASS blight is not the squad or landing line
+FMGUIDE PASS exit fits the one-line strip (12 px)
+FMGUIDE PASS exit is not the squad or landing line
+FMGUIDE PASS dive fits the one-line strip (21 px)
+FMGUIDE PASS dive is not the squad or landing line
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _walk (res://tools/first_match_guide_check.gd:68)
+       [12] run (res://tools/first_match_guide_check.gd:22)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _walk (res://tools/first_match_guide_check.gd:68)
+       [12] run (res://tools/first_match_guide_check.gd:22)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+FMGUIDE hunter juggernaut
+FMGUIDE PASS a real Extraction gets the guide and is counted
+FMGUIDE PASS riding: no guide line
+FMGUIDE PASS riding: no hint card
+FMGUIDE PASS dropping: no guide line
+FMGUIDE PASS dropping: no hint card
+FMGUIDE PASS a skill point: rank an ability (Rank up Warchain: press Alt + E)
+FMGUIDE PASS ranked: it clears
+FMGUIDE PASS your Boki is with you: send it (Send Vespyx at a monster: tap C)
+FMGUIDE PASS sent: it clears
+FMGUIDE PASS a chest to open: loot it (Loot a chest: stand next to it and hold F)
+FMGUIDE PASS the message column starts under the line's strip
+FMGUIDE PASS opened: it clears
+FMGUIDE PASS with no line up the message column keeps its place
+FMGUIDE PASS a long feed line is cut at a word (The Sealed Lair is open: Stormcrown Eyrie, first…)
+FMGUIDE PASS a squad close by gets no line
+FMGUIDE PASS the match is closing: the Blight line (The Blight is closing in: time to wrap up)
+FMGUIDE PASS it clears after its time
+FMGUIDE PASS then: head for the way out the goal line names (Head for the Heart ring badge on your map: Stand in the Heart ring until the end)
+FMGUIDE PASS at an exit: it clears
+FMGUIDE PASS the guide never touched the player's input
+FMGUIDE PASS after extracting nothing shows
+FMGUIDE PASS Match.step ticks the guide
+FMGUIDE PASS chest fits the one-line strip (21 px)
+FMGUIDE PASS chest is not the squad or landing line
+FMGUIDE PASS rank fits the one-line strip (21 px)
+FMGUIDE PASS rank is not the squad or landing line
+FMGUIDE PASS send fits the one-line strip (21 px)
+FMGUIDE PASS send is not the squad or landing line
+FMGUIDE PASS zone fits the one-line strip (15 px)
+FMGUIDE PASS zone is not the squad or landing line
+FMGUIDE PASS wall fits the one-line strip (18 px)
+FMGUIDE PASS wall is not the squad or landing line
+FMGUIDE PASS mates fits the one-line strip (14 px)
+FMGUIDE PASS mates is not the squad or landing line
+FMGUIDE PASS blight fits the one-line strip (21 px)
+FMGUIDE PASS blight is not the squad or landing line
+FMGUIDE PASS exit fits the one-line strip (12 px)
+FMGUIDE PASS exit is not the squad or landing line
+FMGUIDE PASS dive fits the one-line strip (21 px)
+FMGUIDE PASS dive is not the squad or landing line
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _walk (res://tools/first_match_guide_check.gd:68)
+       [12] run (res://tools/first_match_guide_check.gd:22)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _walk (res://tools/first_match_guide_check.gd:68)
+       [12] run (res://tools/first_match_guide_check.gd:22)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+FMGUIDE hunter gunslinger
+FMGUIDE PASS a real Extraction gets the guide and is counted
+FMGUIDE PASS riding: no guide line
+FMGUIDE PASS riding: no hint card
+FMGUIDE PASS dropping: no guide line
+FMGUIDE PASS dropping: no hint card
+FMGUIDE PASS a skill point: rank an ability (Rank up Longneedle: press Alt + E)
+FMGUIDE PASS ranked: it clears
+FMGUIDE PASS your Boki is with you: send it (Send Vespyx at a monster: tap C)
+FMGUIDE PASS sent: it clears
+FMGUIDE PASS a chest to open: loot it (Loot a chest: stand next to it and hold F)
+FMGUIDE PASS the message column starts under the line's strip
+FMGUIDE PASS opened: it clears
+FMGUIDE PASS with no line up the message column keeps its place
+FMGUIDE PASS a long feed line is cut at a word (The Sealed Lair is open: Stormcrown Eyrie, first…)
+FMGUIDE PASS a squad close by gets no line
+FMGUIDE PASS the match is closing: the Blight line (The Blight is closing in: time to wrap up)
+FMGUIDE PASS it clears after its time
+FMGUIDE PASS then: head for the way out the goal line names (Head for the Heart ring badge on your map: Stand in the Heart ring until the end)
+FMGUIDE PASS at an exit: it clears
+FMGUIDE PASS the guide never touched the player's input
+FMGUIDE PASS after extracting nothing shows
+FMGUIDE PASS Match.step ticks the guide
+FMGUIDE PASS chest fits the one-line strip (21 px)
+FMGUIDE PASS chest is not the squad or landing line
+FMGUIDE PASS rank fits the one-line strip (21 px)
+FMGUIDE PASS rank is not the squad or landing line
+FMGUIDE PASS send fits the one-line strip (21 px)
+FMGUIDE PASS send is not the squad or landing line
+FMGUIDE PASS zone fits the one-line strip (15 px)
+FMGUIDE PASS zone is not the squad or landing line
+FMGUIDE PASS wall fits the one-line strip (18 px)
+FMGUIDE PASS wall is not the squad or landing line
+FMGUIDE PASS mates fits the one-line strip (14 px)
+FMGUIDE PASS mates is not the squad or landing line
+FMGUIDE PASS blight fits the one-line strip (21 px)
+FMGUIDE PASS blight is not the squad or landing line
+FMGUIDE PASS exit fits the one-line strip (12 px)
+FMGUIDE PASS exit is not the squad or landing line
+FMGUIDE PASS dive fits the one-line strip (21 px)
+FMGUIDE PASS dive is not the squad or landing line
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _mates (res://tools/first_match_guide_check.gd:147)
+       [12] run (res://tools/first_match_guide_check.gd:23)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 37).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _mates (res://tools/first_match_guide_check.gd:147)
+       [12] run (res://tools/first_match_guide_check.gd:23)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+FMGUIDE PASS squads, teammates far off: hold B to base to one (Hold B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.)
+FMGUIDE PASS opening the wheel clears it
+FMGUIDE PASS the player is a hero with a kit
+FMGUIDE PASS below the ult level: no hint
+FMGUIDE PASS cooling down: no hint
+FMGUIDE PASS ready 1.9 s into a fight: held back
+FMGUIDE PASS ready 2.1 s into the fight, still being hit: shown
+FMGUIDE PASS through the hint lane, one line
+FMGUIDE PASS the key cap and name (R is ready: Cinderfall, tap: fire a shell straight up)
+FMGUIDE PASS once per save: no second line
+FMGUIDE PASS a new fight after a quiet spell holds it again
+FMGUIDE PASS archer.json: a short line (press: a big arrow leaves your bow at once, and your next 2…)
+FMGUIDE PASS ashwick.json: a short line (lift off in a ring of embers, hang there a moment, then fly…)
+FMGUIDE PASS bulwark.json: a short line (hop 1.2m up with the hammer high overhead and drive it down…)
+FMGUIDE PASS dolm.json: a short line (the press raises a slab of rock ground under you at once…)
+FMGUIDE PASS dredge.json: a short line (charge for 1.1s while a 105 degree fan grows on the ground…)
+FMGUIDE PASS gil.json: a short line (call a wave and surf its crest 14m toward the cursor in 1s;…)
+FMGUIDE PASS gunslinger.json: a short line (tap: fire a shell straight up)
+FMGUIDE PASS juggernaut.json: a short line (plant in a gold guard for 0.65s: nothing hurts or stuns…)
+FMGUIDE PASS mage.json: a short line (crouch, then launch straight up and hang in the air…)
+FMGUIDE PASS ostra.json: a short line (tap: a pale dome of the well's exact size appears at the…)
+FMGUIDE PASS rimewright.json: a short line (cast it: your body turns to ice from the feet up, a frozen…)
+FMGUIDE PASS tender.json: a short line (cast it with the cursor on a teammate within 12.6m (7 body…)
+FMGUIDE PASS thief.json: a short line (a violet ring grows round you (0.4s) to 5.4m and rides with…)
+FMGUIDE DONE, failures: 0
+ERROR: 9 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 54 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 9 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 39 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

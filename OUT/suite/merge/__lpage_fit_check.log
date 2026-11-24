@@ -1,0 +1,21 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+LPAGEFIT PASS 1920x1080: every control inside the 1281x721 view (lowest edge 720)
+LPAGEFIT PASS 1920x1080: the Boki list scrolls to its last entry (51 entries, 288 px shown of 489)
+LPAGEFIT PASS 1280x720: every control inside the 1281x721 view (lowest edge 720)
+LPAGEFIT PASS 1280x720: the Boki list scrolls to its last entry (51 entries, 288 px shown of 489)
+LPAGEFIT PASS 2560x1440: every control inside the 1281x721 view (lowest edge 720)
+LPAGEFIT PASS 2560x1440: the Boki list scrolls to its last entry (51 entries, 288 px shown of 489)
+LPAGEFIT PASS 1920x1200: every control inside the 1241x776 view (lowest edge 775)
+LPAGEFIT PASS 1920x1200: the Boki list scrolls to its last entry (51 entries, 317 px shown of 489)
+LPAGEFIT PASS header names the hunter (Sable Ranged duelist: stay on one foe, cartwheel, and land the big shot. Everything applies at once. Esc or L closes.)
+LPAGEFIT PASS header does not show the title
+LPAGEFIT PASS header has the portrait
+LPAGEFIT DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 15 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

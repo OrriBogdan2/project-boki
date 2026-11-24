@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BABYPARENTS ok   20 of 20 babies save both parent uids (20)
+BABYPARENTS ok   the kind it hatched as is the kind the gift names (20 of 20)
+BABYPARENTS ok   the lean gift names the parent with the stronger lean (20 of 20)
+BABYPARENTS ok   the hatch card marks the kind, the lean and both habits with their parent (20 of 20)
+BABYPARENTS ok   its best inherited stat is marked with the parent it came from (20 of 20)
+BABYPARENTS ok   two of one kind give the kind together
+BABYPARENTS ok   no lean in either parent, no lean gift
+BABYPARENTS ok   a mutation a parent carried is credited to that parent (10 of 40)
+BABYPARENTS ok   an older or wild Boki with no gifts gets no parents row
+BABYPARENTS ok   a Rare Egg's Boki gets no parents row
+BABYPARENTS ok   parents, then a marker per trait (7 lines, 8 dots)
+BABYPARENTS ok   its parents are found by uid
+BABYPARENTS ok   a parent weighs more than a stranger
+BABYPARENTS ok   a weight, not a rule: a parent it fell out with is not greeted
+BABYPARENTS ok   it walks to its napping parent, not the napping stranger, 10 of 10 (10)
+BABYPARENTS ok   one journal line the first time (1): napped beside Ash, its parent
+BABYPARENTS ok   later greetings and naps add no second line
+BABYPARENTS ok   a Grown Boki has left the nest: no parent weight
+BABYPARENTS ok   it greets a parent about half the time, not always (22 of 40)
+BABYPARENTS done, 0 failed
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 5 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,257 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SUPPORT tender: kit wired, medium, no R                PASS  
+SUPPORT Hearthlight: lit, a ring is up                 PASS  
+SUPPORT Hearthlight: heals an ally in the ring         PASS  58.0 -> 62.0
+SUPPORT Hearthlight: flares at the end                 PASS  -> 88.0
+SUPPORT Hearthlight: heals you in full, like an ally   PASS  +30.0
+SUPPORT Hearthlight: a stun on you does not put it out PASS  
+SUPPORT Hearthlight: tossed, latches onto a teammate   PASS  latched
+SUPPORT Hearthlight: a downed teammate drinks it five times over PASS  60 -> 80
+SUPPORT Carrier: running into a downed teammate carries them PASS  
+SUPPORT Carrier: no shield of ours and no slow while carrying PASS  shield 0 k 1.00
+SUPPORT Carrier: the carried teammate rides along and does not bleed PASS  dist 0.35 down_hp 60.0 -> 60.0
+SUPPORT Carrier: crouch (never F) sets them down       PASS  
+SUPPORT Relay Step rank 3: picking up a teammate refreshes the air dash PASS  ex_cd 0.00
+SUPPORT Carrier: a stun drops them and locks pickup    PASS  again true lock 3.9
+SUPPORT Carrier: a hit drops them with a 4s lock and no stun on you PASS  lock 3.9 stun 0.00
+SUPPORT Carrier: a root holds them                     PASS  
+SUPPORT Carrier: a rival's hit drops them, 4s lock, no stun on you PASS  lock 3.88
+SUPPORT Carrier: no re-pick for 4s after a drop, then they can be scooped up PASS  lock 0.00
+SUPPORT Carrier: damage from any source drops them     PASS  
+SUPPORT rank 3: ally is downed before the flare        PASS  
+SUPPORT Hearthlight rank 3: the flare no longer revives (Hearth Call does), it heals the downed PASS  down_hp 100
+SUPPORT Hearthlight rank 3: the thrown light's healing boost doubles (50% -> 100%, still 1s) PASS  r3 1.00 r1 0.50
+SUPPORT Relay Step: through a teammate refunds nothing PASS  dashes 0.00 e 8.0
+SUPPORT upgrade parity: Burrseed damage +40% (rank 2), cooldown 10.5 -> 10.5 -> 7.8 PASS  [[10.5, 7.0, 11.0, 1.0, 1.0, 14.0], [10.5, 6.2503, 11.0, 1.4, 1.225, 12.5006], [7.76055, 5.4999, 8.25, 1.4, 1.5, 10.9998]]
+SUPPORT upgrade parity: Relay Step recharge 7 -> 6.25 -> 5.5, air glide 14 -> 12.5 -> 11 PASS  [[10.5, 7.0, 11.0, 1.0, 1.0, 14.0], [10.5, 6.2503, 11.0, 1.4, 1.225, 12.5006], [7.76055, 5.4999, 8.25, 1.4, 1.5, 10.9998]]
+SUPPORT upgrade parity: Hearthlight healing +22.5% / +50%, cooldown 11 -> 11 -> 8.25 PASS  [[10.5, 7.0, 11.0, 1.0, 1.0, 14.0], [10.5, 6.2503, 11.0, 1.4, 1.225, 12.5006], [7.76055, 5.4999, 8.25, 1.4, 1.5, 10.9998]]
+SUPPORT mm: renamed Meeko, kit sounds load             PASS  
+SUPPORT mm LMB: the ember flies its full range past the cursor at 4, 8 and 14 m PASS  range 13.5 reach [14.0999984741211, 14.0999984741211, 14.0999984741211]
+SUPPORT mm LMB: the range is the footage's 7-8 bh (12.6-14.4 m) PASS  13.5 m
+SUPPORT mm LMB: each ember has its comet look, a swirl at the hand and the flick move PASS  mm_shot_r 3
+SUPPORT mm LMB: the comet has a trail to follow at the match camera (0.8 m wide, 3.4 m long) PASS  (0.8, 3.4)
+SUPPORT mm LMB: a shot every 0.4 s (card) from alternating hands while strafing PASS  4 shots, 0.42 s apart
+SUPPORT mm LMB: each ember leaves at the cursor as it swings round her (within 8 deg) PASS  0.0 deg
+SUPPORT mm LMB: the push unwinds the torso about 45 degrees (footage) PASS  0.80 rad
+SUPPORT mm clips: each release beat lands on the kit's effect frame (within 0.05 s) PASS  0.040 s
+SUPPORT mm LMB: the hand releases within the source's 0.07 s wind of the ember PASS  0.020 s
+SUPPORT mm passive: embers Kindle the foe and no ring is drawn under them (a stack is not an area) PASS  kindle 5
+SUPPORT mm passive: an ember into a Kindled foe winds Hearthlight back PASS  e 5.08
+SUPPORT mm LMB: looks are pooled (no new nodes per ember) PASS  made 3 -> 3
+SUPPORT mm passive: Kindle ramps embers +45% at 5 stacks (footage 64 -> 93) PASS  +45.0%
+SUPPORT mm passive: the damage number is yellow at the plateau, white before it (footage) PASS  
+SUPPORT mm LMB: Empowered adds nothing the source doesn't name (no range or refund rider) PASS  range_k 1.00
+SUPPORT mm LMB: after a pause the next ember is Empowered (its own move) PASS  emp 1 anim mm_shot_emp
+SUPPORT mm RMB: not a hold (no hold data), the wind-up is 0.5-0.65 s (the owner asked 0.2-0.5 s off 1 s; the source's casts run 0.1-0.65 s), its clip and the model's clip as long PASS  wind 0.60 kmove 0.60 glb fit 0.60
+SUPPORT mm RMB: winding up, a short dotted lane, the coiled pose, half speed PASS  dotted len 6.0 mm_seed_aim k 0.50
+SUPPORT mm RMB: nothing leaves during the wind-up      PASS  
+SUPPORT mm RMB: nothing drawn at her feet during the wind-up PASS  
+SUPPORT mm RMB: letting go early does not throw or cancel PASS  
+SUPPORT mm RMB: the seed goes by itself at the end of the wind-up (thrown at 0.62 s) PASS  0.62 mm_seed
+SUPPORT mm RMB: the seed leaves from her hands, out in front at hand height, not on her PASS  0.80 m out, 0.72 m up
+SUPPORT mm RMB: the cast flare plays where the seed leaves (no body anchor), small PASS  
+SUPPORT mm RMB: the seed leaves on the release clip's first frame (the snap, not after it) PASS  clip at 0.000 s
+SUPPORT mm RMB: the release clip hops (footage: a small hop, about 0.3 s in the air) and lands in a squash PASS  rise 0.171 at 0.1 s, -0.101 at 0.32 s
+SUPPORT mm RMB: the aim is sampled at the throw: flicked onto the foe, it sticks in under 0.35 s PASS  stuck at 0.32 s
+SUPPORT mm RMB: the burst area shows under the foe at once, for everyone, filling PASS  r 2.20
+SUPPORT mm RMB: the field is a lit rim (a band, no flat fill) whose edge is the burst radius PASS  band 0.14 disc r 2.20
+SUPPORT mm RMB: the build-up is about 2 s, unwinds 2x out of a reach longer than the throw PASS  
+SUPPORT mm RMB: no root 1.85 s after it sticks; the vine on them thickens as it builds PASS  root 0.00 vine 0.33 -> 0.86
+SUPPORT mm RMB: it roots at about 2.0 s of contact (by 2.1 s), damages and Kindles, the vine gone PASS  root 0.95 dmg 32
+SUPPORT mm RMB: the root moment plays on the foe it takes (one per rooted foe) PASS  
+SUPPORT mm RMB: out of her reach it unwinds 2x; back in, the root waits for the lost time PASS  built 0.40 after 0.3 s out, early false root 0.56
+SUPPORT mm RMB: escaped (out of reach until it unwinds), the seed falls off and never roots PASS  burrs 0 root 0.00
+SUPPORT mm E: lit on her, a 2.6 m ring (1.4 bh) and the raise-the-lantern move PASS  
+SUPPORT mm E: the ring heals her for the full tick, no self-heal factor in the data PASS  healed 2.00
+SUPPORT mm E: thrown, it lands on the cursor within 0.2 s and widens to 2.9 m PASS  ground at 0.00 m
+SUPPORT mm Shift: Relay Step goes where you move (cursor elsewhere), its own hop and a trail of stars PASS  dx 3.6 dz 0.0 trail 1
+SUPPORT mm Shift: the hop is its own move (no shared roll under it) PASS  
+SUPPORT mm air dash: a floaty glide of dash.air.dist, held up while it floats, its own move PASS  10.8 m of 10.5, sank 0.00 m in 0.5 s
+SUPPORT mm body: small (a 0.92 model, heights.json) with the 0.352 m hurtbox (the chart size, --hurtbox-check) PASS  r 0.35 scale 0.98
+SUPPORT mm passive: a teammate being stomped can't be scooped up PASS  
+SUPPORT mm passive: scooping a downed teammate up plays the pickup move PASS  mm_pickup
+SUPPORT mm merge: drop_holds ends the Burrseed wind-up without a throw PASS  
+SUPPORT mm RMB: held down, it goes at the same moment, once (0.62 s) PASS  
+SUPPORT mm RMB: a stun in the wind-up loses the throw, not the charge PASS  
+TIME lmb 0.02 emp 0.43 l 0.85 r 1.27 l gaps 0
+SUPPORT mm timing LMB: an ember every 0.4 s, each move starting on its ember's frame PASS  
+SUPPORT mm timing LMB: the hands alternate shot to shot (the source's left-right) PASS  
+SUPPORT mm timing LMB: no frame between two embers drops back to the legs PASS  
+TIME mm_seed_aim play 0.00 in 0.10 hit -1.00 (clip -1.00) seed_aim 1.00 out -1.00 gaps 0
+TIME mm_seed play -0.10 in 0.02 hit -1.00 (clip -1.00) seed 0.53 out 0.60 gaps 0
+SUPPORT mm timing RMB: the wind-up throws on its clip's last frame (fitted), no gap into the hop PASS  
+TIME mm_hearth play 0.00 in 0.05 hit 0.02 (clip 0.02) hearth 0.67 out -1.00 gaps 0
+TIME mm_toss play 0.00 in 0.03 hit 0.02 (clip 0.02) toss 0.50 out -1.00 gaps 0
+SUPPORT mm timing E: the lift and the toss each own the body within the 0.1 s blend, with no gap PASS  
+TIME mm_call play 0.00 in 0.10 hit 0.02 (clip 0.02) call 0.33 out -1.00 gaps 0
+TIME mm_call_hold play -0.17 in 0.02 hit 0.02 (clip 0.18) call_hold 0.60 out -1.00 gaps 0
+SUPPORT mm timing X: the cast hands the body to the channel within the clip (ring by f28, 0.3 s), no gap PASS  
+TIME mm_call_end play 0.00 in 0.02 hit 0.02 (clip 0.02) call_end 0.30 out 0.47 gaps 0
+SUPPORT mm timing X: the end hands back to the legs inside the source's f74-f77 (0.4 s + the blend) PASS  
+TIME mm_skip play 0.00 in 0.10 hit 0.02 (clip 0.02) skip 0.23 out 0.40 gaps 0
+SUPPORT mm timing dash: the ground skip owns the body within the blend and covers the dash PASS  
+TIME mm_float play 0.00 in 0.10 hit 0.02 (clip 0.02) float 1.07 out 1.23 gaps 0
+SUPPORT mm timing glide: the float clip covers the 0.95 s glide (Elluna's 0.8-1.1 s), no gap PASS  
+TIME run: 5.28 m/s, clip rate 1.16, a stride cycle at 3.48 Hz (7.0 steps/s), 1.52 m (0.84 bh) a cycle
+SUPPORT mm RMB: Burrseed's burst grows with level (LevelGrowth.ap 1.0 -> 1.35) PASS  L1 41.0 L10 55.4
+SUPPORT mm RMB: the burst is 2.2 m wide, 4.4 m at rank 3 PASS  r1 2.20 r3 4.40
+SUPPORT mm RMB rank 3: the burst takes 1.5x the ability power bonus (x1.130 at level 10, x1 at level 1) PASS  L1 1.000 L10 1.130
+SUPPORT mm dashes: the ground hop is 3.15 m in 0.23 s, shorter and slower than Elluna's PASS  3.17 m in 0.23 s
+SUPPORT mm dashes: the air glide is 10.5 m over 0.95 s, peaking 13-15.5 m/s, slower than Elluna's PASS  10.80 m in 0.95 s, peak 13.7 m/s
+SUPPORT mm air dash: little movement at the end: a float-out under a quarter, left under run speed PASS  float-out 2.39 m of 10.80, leaves at 1.4 m/s
+SUPPORT mm dashes: Elluna's cooldowns: the glide 14 s, a hop charge 7 s (separate) PASS  glide 14.00 s, hop 7.00 s
+SUPPORT mm dashes: the glide goes 3-4x the hop's distance and about 5x its time (source) PASS  x3.41 distance, x4.13 time
+SUPPORT mm dashes: each plays its own move, never the shared roll PASS  mm_skip / mm_float
+SUPPORT mm dashes: each move covers its dash and settles soon after (ground 0.16-0.25 s) PASS  skip 0.24/0.23 float 1.05/0.95
+SUPPORT mm dashes: no other kit plays her dash moves   PASS  
+SUPPORT mm dashes: on the ground with the hop spent, Shift is refused (no glide along the ground) PASS  moved 0.03, ex_cd 0.0
+SUPPORT mm air dash: the move keys steer the glide (air control), at a capped rate PASS  turned 72 deg in 0.4 s
+SUPPORT mm RMB: Burrseed 10.5 s (the data's 11.5 : 12 against Hearthlight's 11 s) PASS  
+SUPPORT mm LMB: Ember Cast has no magazine to reload and no slow while firing (the source has neither) PASS  
+SUPPORT mm dashes: no ring or burst on her hop or glide (two tiny dust puffs, soft motes) PASS  rings 0 emitters 1 flares 0
+SUPPORT mm E: the light's last heal blooms (heals, no ring, blast or shake; a quiet chime) PASS  healed 22.0 rings 0
+SUPPORT audio: the explosion category peaks under the agreed level PASS  -8.1 dBFS (ceiling -6.0)
+SUPPORT mm carry: a rival's shot drops them, 4 s lock, no stun on her PASS  lock 3.88 stun 0.00
+SUPPORT mm carry: a burn tick drops them (any damage, no figure in source) PASS  
+SUPPORT mm carry: a stun drops them, 4 s lock          PASS  lock 3.90
+SUPPORT mm carry: a knock-back with no damage or stun holds them PASS  
+SUPPORT mm carry: a root holds them                    PASS  
+SUPPORT mm carry: a slow holds them                    PASS  
+SUPPORT mm carry: a teammate's heal on her holds them  PASS  
+SUPPORT mm carry: a rooted Meeko can still pick one up PASS  
+SUPPORT mm carry: no re-pick for 4 s after a drop      PASS  lock 0.27
+SUPPORT mm carry: after the 4 s they can be scooped up again PASS  lock 0.00
+SUPPORT combo tag (tender): nothing on a clean foe     PASS  
+SUPPORT combo tag (tender): shows while the status runs, with an icon and the time left PASS  { "icon": "burst", "n": 3, "max": 5, "left": 4.0, "total": 4.0 }
+SUPPORT combo tag (tender): the foe's own kit has no tag on you PASS  
+SUPPORT combo tag (tender): the time left shrinks      PASS  { "icon": "burst", "n": 3, "max": 5, "left": 3.48333333333334, "total": 4.0 }
+SUPPORT combo tag (tender): pips match the stacks      PASS  3
+SUPPORT combo tag (tender): gone when the status ends  PASS  
+SUPPORT combo tag (tender): the payoff hit flashes the body white PASS  stamp 4.92 flash 0.153
+SUPPORT mm X: Hearth Call is in the kit data, sounds load PASS  
+SUPPORT mm X: below level 6 it does nothing            PASS  
+SUPPORT mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them PASS  
+SUPPORT mm X: one X press is one cast (main's X path only) PASS  calls +1
+SUPPORT mm X: X starts the tether on that teammate with the cast move PASS  mm_call
+SUPPORT mm X: its own cooldown (46 s) starts on the cast PASS  cd 46.0
+SUPPORT mm X: no bond is paid for the cast alone       PASS  
+SUPPORT mm X: she walks while it channels (small mechanic) PASS  7.8 m
+SUPPORT mm X: the tether and the reach ring show for everyone PASS  mm_call_hold
+SUPPORT mm X: the tether is an arc, its middle bowed well off the straight hand-to-ally line PASS  bow 1.1 m
+SUPPORT mm X: the tether heals the teammate            PASS  58 -> 68
+SUPPORT mm X: mint pluses rise off the teammate on each heal tick, sent to other games PASS  3 in 1.5 s
+SUPPORT mm X: other abilities still cast during the channel (small mechanic) PASS  
+SUPPORT mm X: X again does not end or restart it       PASS  
+SUPPORT mm X: a completed channel pays the bond as a hit (KinBond.from_ult) PASS  hit
+SUPPORT mm X: the end plays its own move               PASS  mm_call_end
+SUPPORT mm X: on cooldown it does nothing              PASS  
+SUPPORT mm X: it can be cast on a downed teammate      PASS  
+SUPPORT mm X: the tether heals the downed teammate (game data: an ally or Wisp), not her PASS  ally 40 -> 96, her 72 -> 72
+SUPPORT mm X: at the end a downed teammate is pulled to her side and stood up PASS  downed false gap 0.9
+SUPPORT mm X: a rescue pays the bond's top event (kill) PASS  kill
+SUPPORT mm X: with nobody under the cursor nothing is cast and the cooldown is kept PASS  
+SUPPORT mm X: it breaks when the teammate leaves the ring, and pays nothing PASS  
+SUPPORT mm merge: drop_holds ends Hearth Call (no pull, no bond) PASS  
+SUPPORT mm X alone: no teammate in the match, no target (not herself) PASS  
+SUPPORT mm X alone: the press is refused, nothing runs, the cooldown is kept PASS  
+SUPPORT mm X alone: a bot does not try it              PASS  
+SUPPORT mm X ally out of range: no target, the press is refused, the cooldown is kept PASS  
+SUPPORT mm X ally out of range: a bot does not try it  PASS  
+SUPPORT mm X ally in range: the target is the teammate PASS  
+SUPPORT mm X ally in range: the press casts and the cooldown starts PASS  
+SUPPORT mm X cancel (stun): the tether ends, snaps once, and pays nothing PASS  
+SUPPORT mm X cancel (knock): the tether ends, snaps once, and pays nothing PASS  
+SUPPORT mm X cancel (dead): the tether ends, snaps once, and pays nothing PASS  
+SUPPORT mm X cancel (mate_dead): the tether ends, snaps once, and pays nothing PASS  
+SUPPORT mm X: plain damage and her own dash do not end it PASS  dashed true
+SUPPORT mm X: the teammate being knocked mid-channel does not end it, and it heals them PASS  74 -> 97
+SUPPORT mm X: ... and at the end they are pulled to her and revived PASS  
+SUPPORT DONE, 156 checks, failures: 0
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 213: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 211: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 215: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 221: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 219: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 227: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 223: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 230: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 229: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 232: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 231: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 234: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 233: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 236: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 235: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 237: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 238: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 241: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 244: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 245: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 243: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 253: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 246: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 256: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 264: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 9 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

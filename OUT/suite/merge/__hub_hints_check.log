@@ -1,0 +1,47 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+HUBHINT ok   the hub loads
+HUBHINT ok   nothing shows in the first moment
+HUBHINT ok   the Waystone hint shows first
+HUBHINT ok   it names the interact key
+HUBHINT ok   it is a line in the lane, not a panel
+HUBHINT ok   no second hint while the first is still up
+HUBHINT ok   next: the keys (no nest yet)
+HUBHINT ok   near the nest corner: its hint shows
+HUBHINT ok   by the Incubator with no egg in it: no egg line
+HUBHINT ok   the first egg placed: its line (It grows while you play: in the garden or out on a run.)
+HUBHINT ok   the line names no number
+HUBHINT ok   each hint shows once
+HUBHINT ok   a later visit says nothing
+HUBHINT ok   nothing shows over an open panel
+HUBHINT ok   the first Wayseed in the pack says what it is
+HUBHINT ok   no longer than the hub's own hints (68 of 87 chars)
+HUBHINT ok   once per save: the second says nothing
+HUBHINT ok   tips off: nothing, and it stays unseen
+HUBHINT ok   no Wayseed held: no pulse
+HUBHINT ok   holding one on arrival: the Waystone pulses
+HUBHINT ok   it is moving and blocks nothing
+HUBHINT ok   it settles back to its size
+HUBHINT ok   a later arrival holding one: no second pulse
+HUBHINT PASS (0 failures)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

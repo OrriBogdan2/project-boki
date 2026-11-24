@@ -1,0 +1,302 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/chain_sweep_check.gd:65)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/chain_sweep_check.gd:65)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+CHAIN ok   light archer in ground: dash: starts
+CHAIN ok   light archer in ground: jump: starts
+CHAIN ok   light archer in ground: glide: refused, no glider off the ground (Hunter.can_glide); Space is the jump
+CHAIN n/a  light archer in ground: wall_kick (a wall kick is an air move; on the ground Space is a jump)
+CHAIN ok   light archer in ground: mantle: starts
+CHAIN ok   light archer in ground: lmb: starts
+CHAIN ok   light archer in ground: e: starts
+CHAIN ok   light archer in air: dash: starts
+CHAIN ok   light archer in air: jump: starts
+CHAIN ok   light archer in air: glide: starts
+CHAIN ok   light archer in air: wall_kick: starts
+CHAIN ok   light archer in air: mantle: starts
+CHAIN ok   light archer in air: lmb: starts
+CHAIN ok   light archer in air: e: starts
+CHAIN ok   light archer in glide: dash: starts
+CHAIN ok   light archer in glide: jump: starts
+CHAIN ok   light archer in glide: glide: starts
+CHAIN ok   light archer in glide: wall_kick: starts
+CHAIN ok   light archer in glide: mantle: starts
+CHAIN ok   light archer in glide: lmb: starts
+CHAIN ok   light archer in glide: e: starts
+CHAIN ok   light archer in dash_ground: dash: starts (buffered, 0.38s)
+CHAIN ok   light archer in dash_ground: jump: starts
+CHAIN ok   light archer in dash_ground: glide: refused, no glider off the ground
+CHAIN n/a  light archer in dash_ground: wall_kick (air move)
+CHAIN ok   light archer in dash_ground: mantle: starts
+CHAIN ok   light archer in dash_ground: lmb: starts
+CHAIN ok   light archer in dash_ground: e: starts
+CHAIN ok   light archer in dash_air: dash: starts (buffered, 0.38s)
+CHAIN ok   light archer in dash_air: jump: starts
+CHAIN ok   light archer in dash_air: glide: starts
+CHAIN ok   light archer in dash_air: wall_kick: starts
+CHAIN ok   light archer in dash_air: mantle: starts (buffered, 0.08s)
+CHAIN ok   light archer in dash_air: lmb: starts
+CHAIN ok   light archer in dash_air: e: starts
+CHAIN ok   light archer in rocket_fall: dash: refused, no dash, attack or ability while dropping (ArchKit.locked, the drop's own rules)
+CHAIN ok   light archer in rocket_fall: jump: starts
+CHAIN ok   light archer in rocket_fall: glide: starts
+CHAIN ok   light archer in rocket_fall: wall_kick: refused, a dropping hunter never kicks (WallMoves.try_kick): Space pulls the glider
+CHAIN n/a  light archer in rocket_fall: mantle (no wall in the sky)
+CHAIN ok   light archer in rocket_fall: lmb: refused, no attack while dropping (ArchKit.locked)
+CHAIN ok   light archer in rocket_fall: e: refused, no ability while dropping (ArchKit.locked)
+CHAIN ok   light archer in ice: dash: starts
+CHAIN ok   light archer in ice: jump: starts
+CHAIN ok   light archer in ice: glide: refused, no glider off the ground
+CHAIN n/a  light archer in ice: wall_kick (air move)
+CHAIN ok   light archer in ice: mantle: starts
+CHAIN ok   light archer in ice: lmb: starts
+CHAIN ok   light archer in ice: e: starts
+CHAIN ok   light archer in deep_water: dash: starts
+CHAIN ok   light archer in deep_water: jump: starts
+CHAIN ok   light archer in deep_water: glide: refused, no glider off the ground
+CHAIN n/a  light archer in deep_water: wall_kick (air move)
+CHAIN ok   light archer in deep_water: mantle: starts
+CHAIN ok   light archer in deep_water: lmb: starts
+CHAIN ok   light archer in deep_water: e: starts
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/chain_sweep_check.gd:65)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/chain_sweep_check.gd:65)
+CHAIN ok   medium gunslinger in ground: dash: starts
+CHAIN ok   medium gunslinger in ground: jump: starts
+CHAIN ok   medium gunslinger in ground: glide: refused, no glider off the ground (Hunter.can_glide); Space is the jump
+CHAIN n/a  medium gunslinger in ground: wall_kick (a wall kick is an air move; on the ground Space is a jump)
+CHAIN ok   medium gunslinger in ground: mantle: starts
+CHAIN ok   medium gunslinger in ground: lmb: starts
+CHAIN ok   medium gunslinger in ground: e: starts
+CHAIN ok   medium gunslinger in air: dash: starts
+CHAIN ok   medium gunslinger in air: jump: starts
+CHAIN ok   medium gunslinger in air: glide: starts
+CHAIN ok   medium gunslinger in air: wall_kick: starts
+CHAIN ok   medium gunslinger in air: mantle: starts
+CHAIN ok   medium gunslinger in air: lmb: starts
+CHAIN ok   medium gunslinger in air: e: starts
+CHAIN ok   medium gunslinger in glide: dash: starts
+CHAIN ok   medium gunslinger in glide: jump: starts
+CHAIN ok   medium gunslinger in glide: glide: starts
+CHAIN ok   medium gunslinger in glide: wall_kick: starts
+CHAIN ok   medium gunslinger in glide: mantle: starts
+CHAIN ok   medium gunslinger in glide: lmb: starts
+CHAIN ok   medium gunslinger in glide: e: starts
+CHAIN ok   medium gunslinger in dash_ground: dash: starts (buffered, 0.45s)
+CHAIN ok   medium gunslinger in dash_ground: jump: starts
+CHAIN ok   medium gunslinger in dash_ground: glide: refused, no glider off the ground
+CHAIN n/a  medium gunslinger in dash_ground: wall_kick (air move)
+CHAIN ok   medium gunslinger in dash_ground: mantle: starts
+CHAIN ok   medium gunslinger in dash_ground: lmb: starts
+CHAIN ok   medium gunslinger in dash_ground: e: starts
+CHAIN ok   medium gunslinger in dash_air: dash: starts (buffered, 0.32s)
+CHAIN ok   medium gunslinger in dash_air: jump: starts
+CHAIN ok   medium gunslinger in dash_air: glide: starts
+CHAIN ok   medium gunslinger in dash_air: wall_kick: starts
+CHAIN ok   medium gunslinger in dash_air: mantle: starts (buffered, 0.42s)
+CHAIN ok   medium gunslinger in dash_air: lmb: starts
+CHAIN ok   medium gunslinger in dash_air: e: starts
+CHAIN ok   medium gunslinger in rocket_fall: dash: refused, no dash, attack or ability while dropping (ArchKit.locked, the drop's own rules)
+CHAIN ok   medium gunslinger in rocket_fall: jump: starts
+CHAIN ok   medium gunslinger in rocket_fall: glide: starts
+CHAIN ok   medium gunslinger in rocket_fall: wall_kick: refused, a dropping hunter never kicks (WallMoves.try_kick): Space pulls the glider
+CHAIN n/a  medium gunslinger in rocket_fall: mantle (no wall in the sky)
+CHAIN ok   medium gunslinger in rocket_fall: lmb: refused, no attack while dropping (ArchKit.locked)
+CHAIN ok   medium gunslinger in rocket_fall: e: refused, no ability while dropping (ArchKit.locked)
+CHAIN ok   medium gunslinger in ice: dash: starts
+CHAIN ok   medium gunslinger in ice: jump: starts
+CHAIN ok   medium gunslinger in ice: glide: refused, no glider off the ground
+CHAIN n/a  medium gunslinger in ice: wall_kick (air move)
+CHAIN ok   medium gunslinger in ice: mantle: starts
+CHAIN ok   medium gunslinger in ice: lmb: starts
+CHAIN ok   medium gunslinger in ice: e: starts
+CHAIN ok   medium gunslinger in deep_water: dash: starts
+CHAIN ok   medium gunslinger in deep_water: jump: starts
+CHAIN ok   medium gunslinger in deep_water: glide: refused, no glider off the ground
+CHAIN n/a  medium gunslinger in deep_water: wall_kick (air move)
+CHAIN ok   medium gunslinger in deep_water: mantle: starts
+CHAIN ok   medium gunslinger in deep_water: lmb: starts
+CHAIN ok   medium gunslinger in deep_water: e: starts
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/chain_sweep_check.gd:65)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/chain_sweep_check.gd:65)
+CHAIN ok   heavy bulwark in ground: dash: starts
+CHAIN ok   heavy bulwark in ground: jump: starts
+CHAIN ok   heavy bulwark in ground: glide: refused, no glider off the ground (Hunter.can_glide); Space is the jump
+CHAIN n/a  heavy bulwark in ground: wall_kick (a wall kick is an air move; on the ground Space is a jump)
+CHAIN ok   heavy bulwark in ground: mantle: starts
+CHAIN ok   heavy bulwark in ground: lmb: starts
+CHAIN ok   heavy bulwark in ground: e: starts
+CHAIN ok   heavy bulwark in air: dash: starts
+CHAIN ok   heavy bulwark in air: jump: starts
+CHAIN ok   heavy bulwark in air: glide: starts
+CHAIN ok   heavy bulwark in air: wall_kick: starts
+CHAIN ok   heavy bulwark in air: mantle: starts
+CHAIN ok   heavy bulwark in air: lmb: starts
+CHAIN ok   heavy bulwark in air: e: starts
+CHAIN ok   heavy bulwark in glide: dash: starts
+CHAIN ok   heavy bulwark in glide: jump: starts
+CHAIN ok   heavy bulwark in glide: glide: starts
+CHAIN ok   heavy bulwark in glide: wall_kick: starts
+CHAIN ok   heavy bulwark in glide: mantle: starts
+CHAIN ok   heavy bulwark in glide: lmb: refused, no attack with the glider open (Hunter.can_fire)
+CHAIN ok   heavy bulwark in glide: e: starts
+CHAIN ok   heavy bulwark in dash_ground: dash: starts (buffered, 0.17s)
+CHAIN ok   heavy bulwark in dash_ground: jump: starts
+CHAIN ok   heavy bulwark in dash_ground: glide: refused, no glider off the ground
+CHAIN n/a  heavy bulwark in dash_ground: wall_kick (air move)
+CHAIN ok   heavy bulwark in dash_ground: mantle: starts
+CHAIN ok   heavy bulwark in dash_ground: lmb: starts (buffered, 0.17s)
+CHAIN ok   heavy bulwark in dash_ground: e: starts
+CHAIN ok   heavy bulwark in dash_air: dash: starts (buffered, 0.17s)
+CHAIN ok   heavy bulwark in dash_air: jump: starts
+CHAIN ok   heavy bulwark in dash_air: glide: starts
+CHAIN ok   heavy bulwark in dash_air: wall_kick: starts
+CHAIN ok   heavy bulwark in dash_air: mantle: starts (buffered, 0.42s)
+CHAIN ok   heavy bulwark in dash_air: lmb: starts (buffered, 0.17s)
+CHAIN ok   heavy bulwark in dash_air: e: starts
+CHAIN ok   heavy bulwark in rocket_fall: dash: refused, no dash, attack or ability while dropping (ArchKit.locked, the drop's own rules)
+CHAIN ok   heavy bulwark in rocket_fall: jump: starts
+CHAIN ok   heavy bulwark in rocket_fall: glide: starts
+CHAIN ok   heavy bulwark in rocket_fall: wall_kick: refused, a dropping hunter never kicks (WallMoves.try_kick): Space pulls the glider
+CHAIN n/a  heavy bulwark in rocket_fall: mantle (no wall in the sky)
+CHAIN ok   heavy bulwark in rocket_fall: lmb: refused, no attack while dropping (ArchKit.locked)
+CHAIN ok   heavy bulwark in rocket_fall: e: refused, no ability while dropping (ArchKit.locked)
+CHAIN ok   heavy bulwark in ice: dash: starts
+CHAIN ok   heavy bulwark in ice: jump: starts
+CHAIN ok   heavy bulwark in ice: glide: refused, no glider off the ground
+CHAIN n/a  heavy bulwark in ice: wall_kick (air move)
+CHAIN ok   heavy bulwark in ice: mantle: starts
+CHAIN ok   heavy bulwark in ice: lmb: starts
+CHAIN ok   heavy bulwark in ice: e: starts
+CHAIN ok   heavy bulwark in deep_water: dash: starts
+CHAIN ok   heavy bulwark in deep_water: jump: starts
+CHAIN ok   heavy bulwark in deep_water: glide: refused, no glider off the ground
+CHAIN n/a  heavy bulwark in deep_water: wall_kick (air move)
+CHAIN ok   heavy bulwark in deep_water: mantle: starts
+CHAIN ok   heavy bulwark in deep_water: lmb: starts
+CHAIN ok   heavy bulwark in deep_water: e: starts
+CHAIN DONE, failures: 0, refused by a documented rule: 25, n/a: 15
+ERROR: 4 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 4 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 97: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 99: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 98: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 175: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 174: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 177: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 176: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 178: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 30 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

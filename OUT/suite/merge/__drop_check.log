@@ -1,0 +1,96 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/drop_plan_check.gd:13)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/drop_plan_check.gd:13)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] run (res://tools/drop_plan_check.gd:13)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] run (res://tools/drop_plan_check.gd:13)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+DCHECK planning=true plan_t=8.0 riding=true leader=Hunter map open=true
+DCHECK map ping at (394.5, 8.0, 56.5) -> (394.5, 8.0, 56.5) (squad pings 1)
+DCHECK planning lasted 8.02s, match clock 0.00 -> 0.00, bot pings 2, bot replies 1, events ["reply cozy_goblin omw", "depart"]
+DCHECK leader launched at t=26.9: 2 of 2 squadmates in the rocket
+DCHECK pass lead=true: leader now halfpipe_h
+DCHECK detach=true: rocket=<null> dropping=true, velocity (-14.0, 0.0) (steering (-1.0, 0.0))
+DCHECK landed after 10.5s more; squad on ground [["Hunter", true, (144.0, 0.0, 250.0)], ["halfpipe_h", true, (307.0, 6.0, 210.0)], ["cozy_goblin", true, (307.0, 6.0, 214.0)]]
+DCHECK ground ping: cozy_goblin headed there=true, 7.1m -> got within 1.5m; replies ["reply halfpipe_h omw"] (from (301.3, 6.4, 223.1) to (313.9, 6.4, 216.6))
+DCHECK candidates ["boss 3/3", "vault 3/5", "rare_kin 5/8", "cache 4/14"]; live by seed: { 4101: ["rare_kin:1", "rare_kin:4", "rare_kin:5", "rare_kin:6", "rare_kin:7", "vault:8", "vault:10", "vault:12", "cache:18", "cache:20", "cache:21", "cache:26", "boss:27", "boss:28", "boss:29"], 4102: ["rare_kin:1", "rare_kin:2", "rare_kin:3", "rare_kin:5", "rare_kin:7", "vault:9", "vault:10", "vault:12", "cache:13", "cache:15", "cache:20", "cache:24", "boss:27", "boss:28", "boss:29"], 4103: ["rare_kin:1", "rare_kin:2", "rare_kin:4", "rare_kin:6", "rare_kin:7", "vault:9", "vault:11", "vault:12", "cache:16", "cache:17", "cache:22", "cache:26", "boss:27", "boss:28", "boss:29"] }
+DCHECK generated map candidates: ["vault 5", "rare_kin 8", "cache 12"] (same both times=true)
+DCHECK rare kin: 5 spawned for 5 live points (0 strays, 0 at points not rolled)
+DCHECK scouting rare_kin:0: unknown -> empty
+DCHECK PASS
+ERROR: 5 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 17 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 42 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

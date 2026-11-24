@@ -1,0 +1,205 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+GROUNDSCHECK grounds built on the arena map                 PASS  
+GROUNDSCHECK floor is at least 3x the old arena             PASS  3033 tiles vs 616
+GROUNDSCHECK six sky perches (five stations, Cloud Isle)    PASS  6
+GROUNDSCHECK training room walls kept (3 dummies)           PASS  
+GROUNDSCHECK two dash lanes, each 90 m of flat ground       PASS  shortest 91 m
+GROUNDSCHECK open ground with the fields is at least 3x the old arena PASS  5927 tiles
+GROUNDSCHECK cliff faces of 2, 3, 4 and 5 terraces          PASS  [2, 3, 4, 5]
+GROUNDSCHECK tier steps: walking east climbs 6 terraces     PASS  top 4.8 m
+GROUNDSCHECK a glide jump-off over 10 m up reaches Cloud Isle PASS  
+GROUNDSCHECK a pedestal per Hunter                          PASS  13
+GROUNDSCHECK a pedestal per Boki                            PASS  50
+GROUNDSCHECK a pedestal per gear piece                      PASS  25
+GROUNDSCHECK a pedestal per belt item                       PASS  8
+GROUNDSCHECK a bot spawner per Hunter (+ clear)             PASS  14
+GROUNDSCHECK every pedestal stands on a perch               PASS  0 off
+GROUNDSCHECK pedestals are 1.5m+ apart                      PASS  closest 1.56
+GROUNDSCHECK no name drawn from afar                        PASS  0 shown
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] give_kin (res://scripts/match/match.gd:2345)
+       [8] set_kin (res://scripts/match/arena.gd:313)
+       [9] use (res://scripts/match/grounds.gd:240)
+       [10] _use_all (res://tools/grounds_check.gd:196)
+       [11] run (res://tools/grounds_check.gd:41)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+GROUNDSCHECK every pedestal does its thing                  PASS  bad: 
+GROUNDSCHECK every pad lands you on its perch               PASS  
+GROUNDSCHECK every glide route lands you on its island      PASS  12 routes 
+GROUNDSCHECK duel pad on the floor                          PASS  
+GROUNDSCHECK a faller is brought home                       PASS  at (72.5, 0.0, 79.5)
+GROUNDSCHECK DONE, 22 checks, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 50 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

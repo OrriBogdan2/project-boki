@@ -1,0 +1,321 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: Depth of field blur is only available when using the Forward+ or Mobile renderer.
+     at: camera_attributes_set_dof_blur (servers/rendering/storage/camera_attributes_storage.cpp:70)
+     GDScript backtrace (most recent call first):
+         [0] _build_stage (res://scripts/ui/look_locker.gd:160)
+         [1] open (res://scripts/ui/look_locker.gd:73)
+         [2] _show_create (res://scripts/ui/hatch.gd:398)
+         [3] _end_intro (res://scripts/ui/hatch.gd:349)
+         [4] _ready (res://scripts/ui/hatch.gd:109)
+         [5] run (res://tools/look_locker_check.gd:31)
+         [6] run (res://tools/check_registry.gd:982)
+         [7] _ready (res://scripts/main.gd:270)
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+         [10] open (res://scripts/ui/look_locker.gd:75)
+         [11] _show_create (res://scripts/ui/hatch.gd:398)
+         [12] _end_intro (res://scripts/ui/hatch.gd:349)
+         [13] _ready (res://scripts/ui/hatch.gd:109)
+         [14] run (res://tools/look_locker_check.gd:31)
+         [15] run (res://tools/check_registry.gd:982)
+         [16] _ready (res://scripts/main.gd:270)
+LOOK_LOCKER ok   Change your look opens the locker
+LOOK_LOCKER ok   four tabs: ["Body", "Hollow", "Shroud", "Glider"]
+LOOK_LOCKER ok   big tabs, each with its icon
+LOOK_LOCKER ok   Body shows sex and height as tiles
+LOOK_LOCKER ok   Hollow closes in on the head (1.75 m from 3.26 m)
+LOOK_LOCKER ok   the glow colours as swatches
+LOOK_LOCKER ok   Glider pulls back to show the canopy
+LOOK_LOCKER ok   under the open glider you hang over the turntable
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] _bake_tone (res://scripts/match/shroud_tailor.gd:177)
+       [1] _bake (res://scripts/match/shroud_tailor.gd:125)
+       [2] finish (res://scripts/match/shroud_tailor.gd:109)
+       [3] dress (res://scripts/match/shrouds.gd:76)
+       [4] dress (res://scripts/match/unmasked.gd:279)
+       [5] dress (res://scripts/match/hunter_body.gd:106)
+       [6] _hunter (res://scripts/match/models.gd:735)
+       [7] hunter (res://scripts/match/models.gd:625)
+       [8] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [9] _process (res://scripts/ui/look_locker.gd:262)
+LOOK_LOCKER ok   hovering Long Coat tries it on, not keeping it
+LOOK_LOCKER ok   leaving the tile puts your own shroud back
+LOOK_LOCKER ok   picking it keeps it and the model pops
+LOOK_LOCKER ok   the turntable flashes a ring and a burst
+LOOK_LOCKER ok   the pick is lit
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _hood (res://tools/look_locker_check.gd:103)
+       [8] run (res://tools/look_locker_check.gd:40)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+LOOK_LOCKER ok   a cut without a hood shows no hood row
+LOOK_LOCKER ok   a hooded cut shows it
+LOOK_LOCKER ok   trim colour: Match, then the colours
+LOOK_LOCKER ok   the turntable is the carved dais (art/look/dais.glb)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] _bake_tone (res://scripts/match/shroud_tailor.gd:177)
+       [1] _bake (res://scripts/match/shroud_tailor.gd:125)
+       [2] finish (res://scripts/match/shroud_tailor.gd:109)
+       [3] dress (res://scripts/match/shrouds.gd:76)
+       [4] dress (res://scripts/match/unmasked.gd:279)
+       [5] dress (res://scripts/match/hunter_body.gd:106)
+       [6] _hunter (res://scripts/match/models.gd:735)
+       [7] hunter (res://scripts/match/models.gd:625)
+       [8] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [9] pick (res://scripts/ui/look_locker.gd:113)
+       [10] _props (res://tools/look_locker_check.gd:120)
+       [11] run (res://tools/look_locker_check.gd:41)
+       [12] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [13] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _props (res://tools/look_locker_check.gd:120)
+       [8] run (res://tools/look_locker_check.gd:41)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+LOOK_LOCKER ok   the satchel is worn as its vertex-painted Meshy piece, on a material the body already wears
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] _bake_tone (res://scripts/match/shroud_tailor.gd:177)
+       [1] _bake (res://scripts/match/shroud_tailor.gd:125)
+       [2] finish (res://scripts/match/shroud_tailor.gd:109)
+       [3] dress (res://scripts/match/shrouds.gd:76)
+       [4] dress (res://scripts/match/unmasked.gd:279)
+       [5] dress (res://scripts/match/hunter_body.gd:106)
+       [6] _hunter (res://scripts/match/models.gd:735)
+       [7] hunter (res://scripts/match/models.gd:625)
+       [8] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [9] pick (res://scripts/ui/look_locker.gd:113)
+       [10] _props (res://tools/look_locker_check.gd:120)
+       [11] run (res://tools/look_locker_check.gd:41)
+       [12] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [13] _frames (res://tools/look_locker_check.gd:53)
+ERROR: Condition "index_count >= (uint32_t)index_array_len" is true. Continuing.
+   at: mesh_create_surface_data_from_arrays (servers/rendering/rendering_server.cpp:1342)
+   GDScript backtrace (most recent call first):
+       [0] slim (res://scripts/match/empty_slim.gd:58)
+       [1] apply (res://scripts/match/empty_slim.gd:28)
+       [2] bind (res://scripts/match/shrouds.gd:83)
+       [3] _hunter (res://scripts/match/models.gd:769)
+       [4] hunter (res://scripts/match/models.gd:625)
+       [5] _rebuild_model (res://scripts/ui/look_locker.gd:219)
+       [6] pick (res://scripts/ui/look_locker.gd:113)
+       [7] _props (res://tools/look_locker_check.gd:120)
+       [8] run (res://tools/look_locker_check.gd:41)
+       [9] _try_and_pick (res://tools/look_locker_check.gd:100)
+       [10] _frames (res://tools/look_locker_check.gd:53)
+LOOK_LOCKER ok   the lantern is worn as its vertex-painted Meshy piece, on a material the body already wears
+LOOK_LOCKER ok   glider rarity from how it is got (free, price, earned, a mastery gift)
+LOOK_LOCKER ok   every glider has a tile
+LOOK_LOCKER ok   a glider you don't own says how to get it
+LOOK_LOCKER ok   hovering one you don't own shows it on you
+LOOK_LOCKER ok   a locked glider never equips
+LOOK_LOCKER ok   an owned one glides on at a click
+LOOK_LOCKER ok   the wheel zooms in down to its limit (0.60)
+LOOK_LOCKER ok   a drag turns the turntable
+LOOK_LOCKER ok   Looks good saves the picks (shroud 3, the Sunset Kite) and closes the locker
+LOOK_LOCKER_CHECK PASSED
+ERROR: 5 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 3 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 8 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Buffer with GL ID of 1472: leaked 3440 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1473: leaked 2064 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1474: leaked 1224 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1478: leaked 3440 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1479: leaked 2064 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1480: leaked 1224 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1481: leaked 3440 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1482: leaked 2064 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1483: leaked 1224 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1484: leaked 3440 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1485: leaked 2064 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1486: leaked 1224 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1487: leaked 880 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1488: leaked 528 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 1489: leaked 252 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 10 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: Pages in use exist at exit in PagedAllocator: N7Variant5Pools12BucketMediumE
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)

@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PACE first form (level 4): garden-only 123 min, with runs 76 min, ratio 1.63
+PACE ok   garden-only reaches the first form at all (123 min)
+PACE ok   garden-only is at most 2.0x slower (1.63x)
+PACE ok   a farm action gives XP
+PACE ok   a second feed the same day pays nothing (5 xp)
+PACE ok   the next day's first feed pays again (10 xp)
+PACE ok   dash: play pays 3 (3)
+PACE ok   dash: win pays 5 (5)
+PACE ok   dash: first_win pays 60 (60)
+PACE ok   shove: play pays 3 (3)
+PACE ok   shove: win pays 5 (5)
+PACE ok   shove: first_win pays 60 (60)
+PACE ok   seek: play pays 3 (3)
+PACE ok   seek: win pays 5 (5)
+PACE ok   seek: first_win pays 60 (60)
+PACE ok   volley: play pays 3 (3)
+PACE ok   volley: win pays 5 (5)
+PACE ok   volley: first_win pays 60 (60)
+PACE ok   kite: play pays 3 (3)
+PACE ok   kite: win pays 5 (5)
+PACE ok   kite: first_win pays 60 (60)
+PACE ok   a game not in the list pays no XP
+PACE ok   Game.xp_need follows the curve (50 at level 1, flat from level 20)
+PACE breed table, minutes (second Boki / Grown / friends / first egg)
+PACE breed shipped        Lv8  garden-only              5    669     33   1346
+PACE breed shipped        Lv8  with 1 run a session    29    320    108    648
+PACE breed xp_x3          Lv8  garden-only              5    213     33    439
+PACE breed xp_x3          Lv8  with 1 run a session    29    320    108    632
+PACE breed grown_5        Lv5  garden-only              5    229     33    467
+PACE breed grown_5        Lv5  with 1 run a session    29    125    108    243
+PACE breed xp_x2_grown_6  Lv6  garden-only              5    165     33    345
+PACE breed xp_x2_grown_6  Lv6  with 1 run a session    29    174    108    340
+PACE CHECK DONE, failures: 0

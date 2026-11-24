@@ -1,0 +1,45 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+HOMEREACT ok   base_mode on: four Boki live on the farm (BaseLife)
+HOMEREACT ok   the first look only learns what is home: nobody comes
+HOMEREACT ok   home with a Rare Egg: egg news at you
+HOMEREACT ok   Sniff, Puff and Shy come; Busy keeps playing (Puff, Shy, Sniff)
+HOMEREACT ok   the first to come (Sniff) keeps the day: 'was there the day you brought a Rare Egg home'
+HOMEREACT ok   at least one Boki came within 2 m of you (0.73 m)
+HOMEREACT ok   Sniff reacts with a sniff (sniff)
+HOMEREACT ok   Puff reacts with a puff (puff)
+HOMEREACT ok   Shy reacts with a hide (hide)
+HOMEREACT ok   Sniff's body dips its nose (0.35 rad)
+HOMEREACT ok   Puff's body swells (x1.22)
+HOMEREACT ok   Shy's body ducks low (x0.70)
+HOMEREACT ok   Shy hangs back (4.1 m), Sniff comes close (1.6 m)
+HOMEREACT ok   everyone who came has looked and let go
+HOMEREACT ok   Sniff roams on to where it was going
+HOMEREACT ok   Puff's Watch waited while it looked and carries on (1.0 s in it)
+HOMEREACT ok   Busy stayed at its ball the whole time
+HOMEREACT ok   no panel or toast opened
+HOMEREACT ok   no machine refused a transition (0)
+HOMEREACT ok   home with an Ink: ink news, and Sniff keeps 'was there the day you brought Tide Ink home'
+HOMEREACT ok   the same trip is not news twice
+HOMEREACT done, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

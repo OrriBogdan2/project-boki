@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PROLOGUE ok   five slides (5)
+PROLOGUE ok   THE HOLLOWING reads the owner's line
+PROLOGUE ok   THE RELICS reads the owner's line
+PROLOGUE ok   every caption stays on screen at [(1280, 720), (1920, 1080), (800, 450)] (worst overhang 0.0 px, up to 3 lines)
+PROLOGUE ok   THE RELICS: every Boki and the hunter stay inside the frame (0 of 245 frames out)
+PROLOGUE ok   THE RELICS: no Boki stands in the hunter or another Boki (closest 1.00 m)
+PROLOGUE ok   THE RELICS: the relic wakes (1.00)
+PROLOGUE ok   the prologue ends on the hatch
+PROLOGUE ok   a click while the line types finishes it (slide 0)
+PROLOGUE ok   one more click moves on exactly one slide (now 1)
+PROLOGUE ok   a 0.6 s hold of a key does not skip (slide 1)
+PROLOGUE ok   0.8 s into holding A it is still playing
+PROLOGUE ok   holding A 1 s skips to the hatch (1.00 s)
+PROLOGUE ok   a skip is remembered
+PROLOGUE ok   the next new game skips it by default
+PROLOGUE done, 0 failed
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

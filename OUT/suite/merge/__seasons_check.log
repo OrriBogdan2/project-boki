@@ -1,0 +1,56 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SEASONS ok   bramblebank: twist two_streams is a dash twist
+SEASONS ok   bramblebank: snack glowcap is a crop the patch lacks
+SEASONS ok   glasswater: twist seven_up is a volley twist
+SEASONS ok   glasswater: snack mindmint is a crop the patch lacks
+SEASONS ok   cinderstep: twist hot_ledge is a shove twist
+SEASONS ok   cinderstep: snack glowcap is a crop the patch lacks
+SEASONS ok   hushwood: twist night_seek is a seek twist
+SEASONS ok   hushwood: snack mindmint is a crop the patch lacks
+SEASONS ok   ridge: twist gusty is a dash twist
+SEASONS ok   ridge: snack starfruit is a crop the patch lacks
+SEASONS ok   five zones take turns
+SEASONS ok   each season's zone is a garden zone: ["bramblebank", "glasswater", "cinderstep", "hushwood", "ridge"]
+SEASONS ok   the date maps to the weekly-event week (2966)
+SEASONS ok   one season holds for 2 weeks
+SEASONS ok   then the next zone in the list (hushwood -> ridge)
+SEASONS ok   and it wraps round after every zone
+SEASONS ok   the second before the season starts belongs to the last one
+SEASONS ok   bramblebank season: dash plays two_streams
+SEASONS ok   bramblebank season: games neither in season nor this week's play as usual
+SEASONS ok   glasswater season: volley plays seven_up
+SEASONS ok   glasswater season: games neither in season nor this week's play as usual
+SEASONS ok   cinderstep season: shove plays hot_ledge
+SEASONS ok   cinderstep season: games neither in season nor this week's play as usual
+SEASONS ok   hushwood season: seek plays night_seek
+SEASONS ok   hushwood season: games neither in season nor this week's play as usual
+SEASONS ok   ridge season: dash plays gusty
+SEASONS ok   ridge season: games neither in season nor this week's play as usual
+SEASONS ok   the weekly format wins its game
+SEASONS ok   Bramblebank: the Dash has two water stretches
+SEASONS ok   Cinderstep: Stump Shove rocks harder (wobble 0.95)
+SEASONS ok   Glasswater: Spark Volley is first to 7
+SEASONS ok   Hushwood: the Seek is at night
+SEASONS ok   bramblebank season: the patch grows glowcap
+SEASONS ok   bramblebank season: no other season's snack
+SEASONS ok   glasswater season: the patch grows mindmint
+SEASONS ok   glasswater season: no other season's snack
+SEASONS ok   cinderstep season: the patch grows glowcap
+SEASONS ok   cinderstep season: no other season's snack
+SEASONS ok   hushwood season: the patch grows mindmint
+SEASONS ok   hushwood season: no other season's snack
+SEASONS ok   ridge season: the patch grows starfruit
+SEASONS ok   ridge season: no other season's snack
+SEASONS ok   Hushwood season: the Seek Crown gives the Lantern Moth Charm and the card shows it
+SEASONS ok   the Boki keeps it (rec.keepsakes)
+SEASONS ok   a second Crown the same season: ribbon again, no keepsake
+SEASONS ok   a Crown in a game out of season: no keepsake
+SEASONS ok   the Boki card lists two ribbons and the keepsake
+SEASONS ok   entering ridge in its season plays garden_season once
+SEASONS ok   out of a house in ridge, into bramblebank or the hub: no sting
+SEASONS ok   with the garden off: no sting
+SEASONS DONE, failures: 0

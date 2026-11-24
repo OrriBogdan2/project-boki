@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+DEPTHCUECHECK ok   the DepthCues node is in the match
+DEPTHCUECHECK ok   terrain ledge light on (depth_k 1)
+DEPTHCUECHECK ok   terrain shader has the cliff shading and lip
+DEPTHCUECHECK ok   the map has ground ending in a drop for the light to catch (1586 tiles)
+DEPTHCUECHECK ok   abyss cloud sea is dimmed to 0.55
+DEPTHCUECHECK ok   a shadow disc for hunter 0
+DEPTHCUECHECK ok   hunter 0's disc lies on the ground (y 8.00)
+DEPTHCUECHECK ok   a shadow disc for hunter 1
+DEPTHCUECHECK ok   hunter 1's disc lies on the ground (y 1.60)
+DEPTHCUECHECK ok   at least one hunter's disc is visible on the ground
+DEPTHCUECHECK ok   one visible disc per flying shot (120 of 120)
+DEPTHCUECHECK ok   every shot's disc lies on the ground (y 8.00)
+DEPTHCUECHECK ok   discs: 485 us/frame, 2 hunters + 120 shots (budget 2000)
+DEPTHCUECHECK ok   no nodes added once warmed up
+DEPTHCUECHECK ok   shot discs hide when the shots are gone
+DEPTHCUECHECK ok   setting off: no terrain cues, abyss not dimmed
+DEPTHCUECHECK done, 0 failures
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

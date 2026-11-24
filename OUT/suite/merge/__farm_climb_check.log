@@ -1,0 +1,45 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FCLIMB ok   found 4 islands with a ridge: [1, 2, 4, 5]
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+FCLIMB ok   seed 1: all 14 ridge tiles are ground 1.6 m up, none a wall (0 walls)
+FCLIMB FAIL seed 1: a running jump tops every face tried (3 of 12; missed at [(32, 31), (31, 31), (31, 32), (29, 32), (29, 33), (28, 32), (28, 33), (27, 32), (27, 33)])
+FCLIMB ok   seed 1: from the top you walk off it back onto the meadow
+FCLIMB ok   seed 1: a Boki reaches every open tile from the landing (0 shut in: [])
+FCLIMB ok   seed 1: Clear the wild levels a ridge tile
+FCLIMB ok   seed 2: all 14 ridge tiles are ground 1.6 m up, none a wall (0 walls)
+FCLIMB FAIL seed 2: a running jump tops every face tried (4 of 12; missed at [(43, 43), (44, 43), (45, 40), (46, 40), (46, 38), (47, 38), (46, 37), (47, 37)])
+FCLIMB ok   seed 2: from the top you walk off it back onto the meadow
+FCLIMB ok   seed 2: a Boki reaches every open tile from the landing (0 shut in: [])
+FCLIMB ok   seed 2: Clear the wild levels a ridge tile
+FCLIMB ok   seed 4: all 16 ridge tiles are ground 1.6 m up, none a wall (0 walls)
+FCLIMB FAIL seed 4: a running jump tops every face tried (2 of 12; missed at [(52, 30), (53, 30), (53, 31), (54, 31), (55, 31), (55, 32), (56, 32), (56, 31), (57, 32), (57, 31)])
+FCLIMB ok   seed 4: from the top you walk off it back onto the meadow
+FCLIMB ok   seed 4: a Boki reaches every open tile from the landing (0 shut in: [])
+FCLIMB ok   seed 4: Clear the wild levels a ridge tile
+FCLIMB ok   seed 5: all 12 ridge tiles are ground 1.6 m up, none a wall (0 walls)
+FCLIMB FAIL seed 5: a running jump tops every face tried (4 of 11; missed at [(48, 37), (49, 38), (49, 37), (50, 38), (52, 39), (52, 40), (53, 40)])
+FCLIMB ok   seed 5: from the top you walk off it back onto the meadow
+FCLIMB ok   seed 5: a Boki reaches every open tile from the landing (0 shut in: [])
+FCLIMB ok   seed 5: Clear the wild levels a ridge tile
+FCLIMB DONE, failures: 4
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

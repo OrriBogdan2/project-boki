@@ -1,0 +1,153 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KSWEEP archer      dummy  ground ok
+KSWEEP archer      dummy  air    ok
+KSWEEP archer      dummy  glider ok
+KSWEEP archer      ledge  ground ok
+KSWEEP archer      ledge  air    ok
+KSWEEP archer      ledge  glider ok
+KSWEEP juggernaut  dummy  ground ok
+KSWEEP juggernaut  dummy  air    ok
+KSWEEP juggernaut  dummy  glider ok
+KSWEEP juggernaut  ledge  ground ok
+KSWEEP juggernaut  ledge  air    ok
+KSWEEP juggernaut  ledge  glider ok
+KSWEEP gunslinger  dummy  ground ok
+KSWEEP gunslinger  dummy  air    ok
+KSWEEP gunslinger  dummy  glider ok
+KSWEEP gunslinger  ledge  ground ok
+KSWEEP gunslinger  ledge  air    ok
+KSWEEP gunslinger  ledge  glider ok
+KSWEEP bulwark     dummy  ground ok
+KSWEEP bulwark     dummy  air    ok
+KSWEEP bulwark     dummy  glider ok
+KSWEEP bulwark     ledge  ground ok
+KSWEEP bulwark     ledge  air    ok
+KSWEEP bulwark     ledge  glider ok
+KSWEEP rimewright  dummy  ground ok
+KSWEEP rimewright  dummy  air    ok
+KSWEEP rimewright  dummy  glider ok
+KSWEEP rimewright  ledge  ground ok
+KSWEEP rimewright  ledge  air    ok
+KSWEEP rimewright  ledge  glider ok
+KSWEEP ashwick     dummy  ground ok
+KSWEEP ashwick     dummy  air    ok
+KSWEEP ashwick     dummy  glider ok
+KSWEEP ashwick     ledge  ground ok
+KSWEEP ashwick     ledge  air    ok
+KSWEEP ashwick     ledge  glider ok
+KSWEEP dolm        dummy  ground ok
+KSWEEP dolm        dummy  air    ok
+KSWEEP dolm        dummy  glider ok
+KSWEEP dolm        ledge  ground ok
+KSWEEP dolm        ledge  air    ok
+KSWEEP dolm        ledge  glider ok
+KSWEEP mage        dummy  ground ok
+KSWEEP mage        dummy  air    ok
+KSWEEP mage        dummy  glider ok
+KSWEEP mage        ledge  ground ok
+KSWEEP mage        ledge  air    ok
+KSWEEP mage        ledge  glider ok
+KSWEEP dredge      dummy  ground ok
+KSWEEP dredge      dummy  air    ok
+KSWEEP dredge      dummy  glider ok
+KSWEEP dredge      ledge  ground ok
+KSWEEP dredge      ledge  air    ok
+KSWEEP dredge      ledge  glider ok
+KSWEEP tender      dummy  ground ok
+KSWEEP tender      dummy  air    ok
+KSWEEP tender      dummy  glider ok
+KSWEEP tender      ledge  ground ok
+KSWEEP tender      ledge  air    ok
+KSWEEP tender      ledge  glider ok
+KSWEEP thief       dummy  ground ok
+KSWEEP thief       dummy  air    ok
+KSWEEP thief       dummy  glider ok
+KSWEEP thief       ledge  ground ok
+KSWEEP thief       ledge  air    ok
+KSWEEP thief       ledge  glider ok
+KSWEEP ostra       dummy  ground ok
+KSWEEP ostra       dummy  air    ok
+KSWEEP ostra       dummy  glider ok
+KSWEEP ostra       ledge  ground ok
+KSWEEP ostra       ledge  air    ok
+KSWEEP ostra       ledge  glider ok
+KSWEEP gil         dummy  ground ok
+KSWEEP gil         dummy  air    ok
+KSWEEP gil         dummy  glider ok
+KSWEEP gil         ledge  ground ok
+KSWEEP gil         ledge  air    ok
+KSWEEP gil         ledge  glider ok
+KSWEEP DONE, 78 runs, 0 distinct errors
+ERROR: 6 RID allocations of type 'N5GLES39MultiMeshE' were leaked at exit.
+ERROR: 6 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+ERROR: 8 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 81 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 8 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 5 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 317: leaked 21844 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 223: leaked 11184824 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 225: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5592432 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 320: leaked 2796216 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 17782: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17783: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17784: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17785: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17988: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17989: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17990: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17991: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17445: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17446: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17447: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17448: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17924: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 18017: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 18018: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 18019: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17944: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 18057: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 18058: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 18059: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17213: leaked 80 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17214: leaked 32 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17263: leaked 12 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 17264: leaked 1536 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 65 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

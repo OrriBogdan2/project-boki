@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+JOURNAL ok   a new Boki starts with an empty journal
+JOURNAL ok   three Emberberries raise its Fierce lean
+JOURNAL card: ["Pip: ate 3 × Emberberry: Fierce lean up", "Pip saved you a snack: Emberberry", "Pip saved you a snack: Emberberry"]
+JOURNAL ok   the card lists the 3 snacks and the lean change
+JOURNAL ok   a long absence brings saved snacks
+JOURNAL ok   the saved snacks are in the pantry
+JOURNAL ok   the next arrival has nothing new (one card, once)
+JOURNAL ok   parts and other happenings use the same journal
+JOURNAL ok   no line says lost, starved or sick
+JOURNAL ok   the journal keeps the last 20 lines
+JOURNAL ok   an older Boki record gets a journal
+JOURNAL ok   the Boki card shows its journal
+JOURNAL ok   with two zones open the card groups its lines by zone
+JOURNAL ok   the first zone's gifts sit under its name: ["Bramblebank", "  Pip: won the Dash", "  Pip saved you a snack: Mindmint", "  Pip saved you a snack: Mindmint", "Glasswater Shallows", "  Gil: splashed in a pool"]
+JOURNAL ok   no gift from a Boki living in the other zone
+JOURNAL ok   the other zone still gets its own first-arrival gifts: ["Glasswater Shallows", "  Gil saved you a snack: Mindmint", "  Gil saved you a snack: Mindmint"]
+JOURNAL ok   and none from the first zone's Boki
+JOURNAL ok   with one zone open the card is flat, as before
+JOURNAL ok   arriving in a zone catches up only its Boki
+JOURNAL DONE, failures: 0

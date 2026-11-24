@@ -1,0 +1,67 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+relay: listening on 7965, up to 120 players, version 0.24.18, Discord check OFF
+DISPNET ok   the relay listens on 7965  
+relay: 1962933570 joined as Hunter (1 online)
+DISPNET ok   the host is on the relay as 1962933570  
+relay: 1660600775 joined as Hunter (2 online)
+DISPNET ok   the guest joins the relay  1660600775
+DISPNET ok   the guest's hunter is here, driven by the guest's game  
+DISPNET ok   Cinder's cloak pull: the guest stands at the start  own (3.8, 0.0) here (3.8, 0.0)
+DISPNET ok   Cinder's cloak pull: the host's mirror of the tow ends when the guest's game says (arrived)  
+DISPNET ok   Cinder's cloak pull: the bot is moved (2.5 m)  
+DISPNET ok   Cinder's cloak pull: the player is moved on their own game, where the bot went  moved 2.5 m to (1.3, 0.0), the bot to (1.3, 0.0)
+DISPNET ok   Cinder's cloak pull: the host's copy of the player follows  here (1.3, 0.0), own (1.3, 0.0)
+DISPNET ok   Grimble's reel: the guest stands at the start  own (6.0, 0.0) here (6.0, 0.0)
+DISPNET ok   Grimble's reel: the host's mirror of the tow ends when the guest's game says (arrived)  
+DISPNET ok   Grimble's reel: the bot is moved (5.0 m)  
+DISPNET ok   Grimble's reel: the player is moved on their own game, where the bot went  moved 5.0 m to (1.0, 0.0), the bot to (1.0, 0.0)
+DISPNET ok   Grimble's reel: the host's copy of the player follows  here (1.0, 0.0), own (1.0, 0.0)
+DISPNET ok   Grimble's reel: on the player too it ends as an arrival (HAULED), reel let go  arrivals 2
+DISPNET ok   Motley's Trade: the guest stands at the start  own (8.0, 0.0) here (8.0, 0.0)
+DISPNET ok   Motley's Trade: the bot is moved (8.0 m)  
+DISPNET ok   Motley's Trade: the player is moved on their own game, where the bot went  moved 8.0 m to (0.0, 0.0), the bot to (0.0, 0.0)
+DISPNET ok   Motley's Trade: the host's copy of the player follows  here (0.0, 0.0), own (0.0, 0.0)
+DISPNET ok   Sparkle's Skycall drag: the guest stands at the start  own (7.0, 0.0) here (7.0, 0.0)
+DISPNET ok   Sparkle's Skycall drag: the host's mirror of the tow ends when the guest's game says (time)  
+DISPNET ok   Sparkle's Skycall drag: the bot is moved (3.2 m)  
+DISPNET ok   Sparkle's Skycall drag: the player is moved on their own game, where the bot went  moved 3.2 m to (10.2, 0.0), the bot to (10.2, 0.0)
+DISPNET ok   Sparkle's Skycall drag: the host's copy of the player follows  here (10.2, 0.0), own (10.2, 0.0)
+DISPNET ok   Mossy's shield push: the guest stands at the start  own (1.7, 0.0) here (1.7, 0.0)
+DISPNET ok   Mossy's shield push: the host's mirror of the tow ends when the guest's game says (arrived)  
+DISPNET ok   Mossy's shield push: the bot is moved (2.8 m)  
+DISPNET ok   Mossy's shield push: the player is moved on their own game, where the bot went  moved 2.8 m to (4.5, 0.0), the bot to (4.5, 0.0)
+DISPNET ok   Mossy's shield push: the host's copy of the player follows  here (4.5, 0.0), own (4.5, 0.0)
+DISPNET ok   a Boki pull: the guest stands at the start  own (8.0, 0.0) here (8.0, 0.0)
+DISPNET ok   a Boki pull: the bot is moved (2.5 m)  
+DISPNET ok   a Boki pull: the player is moved on their own game, where the bot went  moved 2.5 m to (5.5, 0.0), the bot to (5.5, 0.0)
+DISPNET ok   a Boki pull: the host's copy of the player follows  here (5.5, 0.0), own (5.5, 0.0)
+DISPNET ok   a Boki pull: the player's own game moves them within one snapshot  x 5.56 vx -2.2
+DISPNET ok   Kael's Warchain: it hooks the player and pulls Kael in  hooked true arrivals 1
+DISPNET ok   Kael's Warchain: he lands beside the player; the chain sends no move for them  gap 0.9, moves 0
+DISPNET ok   hazard: a strike on both games hurts the player and the bot once each (no hit from the other game)  player 14.0, bot 14.0, one strike 14.0
+DISPNET ok   knock: a wall stun of 2 s slams the player into the cliff for 2 s on their own game, like the bot  player 2.00, bot 2.00
+DISPNET ok   hit: the burn's length and the slow's strength reach the player (4 s, 40%)  burn 3.82 slow_k 0.40
+DISPNET ok   glide spike: a dunk spikes a gliding bot  stun 0.70 grounded true
+DISPNET ok   glide spike: the host sees the player gliding  
+DISPNET ok   glide spike: a dunk spikes the player out of the air on their own game, like the bot  player stun 0.70 air 0, bot 0.70
+DISPNET ok   glide spike: a Boki spike spikes a gliding bot  stun 0.70 grounded true
+DISPNET ok   glide spike: the host sees the player gliding  
+DISPNET ok   glide spike: a Boki spike spikes the player out of the air on their own game, like the bot  player stun 0.70 air 0, bot 0.70
+DISPNET ok   a Boki spike: the player is spiked on their own game within one snapshot  vy -12.0
+DISPNET ok   Meeko's channel on the guest: its game draws her bar, ~4 s of 5 left (before [], then ["P1962933570", 3.95])  
+DISPNET ok   she is stunned out of it: the bar is gone on the guest's game ([])  
+DISPNET ok   Cinder's cloak pull: a teammate on the guest's game is left alone  sent 0, moved 0.0 m
+DISPNET ok   Sparkle's Skycall drag: a teammate on the guest's game is left alone  sent 0, moved 0.0 m
+DISPNET ok   Albert's shield push: a teammate on the guest's game is left alone  sent 0, moved 0.0 m
+DISPNET ok   glide dive: the host sees the player plunge (the dive's flag bit)  
+DISPNET ok   glide dive: the host draws the player in the dive pose, not the glide  dive_k 0.99
+DISPNET ok   glide dive: the pose ends when the player's dive ends  0.9 s
+DISPNET DONE, 54 checks, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 30 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

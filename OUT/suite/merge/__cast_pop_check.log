@@ -1,0 +1,73 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+POP archer: move | stand in / out | walk in / out (m, worst point) | fade in / out now -> needed
+POP archer arc_draw | 0.288 hand.R / 0.729 weapon | 0.217 hand.L / 0.752 weapon | 0.10 / 0.40 -> 0.05 / 0.40
+POP archer arc_tap | 0.715 weapon / 0.279 hand.R | 0.738 weapon / 0.186 hand.L | 0.04 / 0.25 -> 0.04 / 0.35
+POP archer arc_loose | 0.703 weapon / 0.275 hand.R | 0.730 weapon / 0.182 hand.R | 0.04 / 0.29 -> 0.05 / 0.34
+POP archer arc_perfect | 0.700 weapon / 0.275 hand.R | 0.732 weapon / 0.200 hand.L | 0.10 / 0.28 -> 0.06 / 0.34
+POP archer arc_super | 0.701 weapon / 0.285 hand.R | 0.737 weapon / 0.209 hand.L | 0.04 / 0.30 -> 0.05 / 0.36
+POP archer arc_over | 0.705 weapon / 0.690 weapon | 0.738 weapon / 0.724 weapon | 0.10 / 0.40 -> 0.08 / 0.40
+POP archer arc_over_loose | 0.694 weapon / 0.297 hand.R | 0.739 weapon / 0.219 hand.L | 0.10 / 0.31 -> 0.06 / 0.37
+POP archer arc_heavy_wind | 0.320 hand.R / 0.590 weapon | 0.208 hand.L / 0.700 weapon | 0.20 / 0.40 -> 0.20 / 0.40
+POP archer arc_heavy | 0.592 weapon / 0.320 hand.R | 0.699 weapon / 0.207 hand.L | 0.10 / 0.40 -> 0.06 / 0.40
+POP archer arc_hail | 0.289 hand.R / 0.291 hand.R | 0.209 hand.L / 0.209 hand.L | 0.12 / 0.31 -> 0.12 / 0.36
+POP archer pin_roll | 0.320 hand.R / 0.320 hand.R | 0.793 foot.L / 0.794 foot.L | 0.10 / 0.40 -> 0.07 / 0.40
+POP archer pin_walk | 0.279 hand.R / 0.512 weapon | 0.207 hand.L / 0.401 weapon | 0.20 / 0.40 -> 0.20 / 0.40
+POP archer pin_flick | 0.320 hand.R / 0.320 hand.R | 0.793 foot.L / 0.789 foot.L | 0.10 / 0.40 -> 0.05 / 0.40
+POP archer pin_ult_loose | 0.700 weapon / 0.700 weapon | 0.732 weapon / 0.733 weapon | 0.10 / 0.40 -> 0.10 / 0.40
+POP archer pin_ult_final | 0.701 weapon / 0.285 hand.R | 0.737 weapon / 0.209 hand.L | 0.10 / 0.31 -> 0.10 / 0.36
+POP archer mf_xform | 0.320 hand.R / 0.320 hand.R | 0.793 foot.L / 0.793 foot.L | 0.18 / 0.40 -> 0.18 / 0.40
+POP FAIL archer: every move's blend is as long as its cast gap asks, inside its first key and the caps (short: ["arc_tap fade 0.04/0.35", "arc_loose fade 0.05/0.34", "arc_perfect fade 0.10/0.34", "arc_super fade 0.05/0.36", "arc_over_loose fade 0.10/0.37", "arc_hail fade 0.12/0.36", "pin_ult_final fade 0.10/0.36"])
+POP juggernaut: move | stand in / out | walk in / out (m, worst point) | fade in / out now -> needed
+POP juggernaut jug_slash_r | 2.016 weapon / 2.815 weapon | 2.179 weapon / 2.131 weapon | 0.10 / 0.40 -> 0.10 / 0.40
+POP juggernaut jug_slash_l | 2.451 weapon / 2.816 weapon | 2.677 weapon / 2.179 weapon | 0.10 / 0.40 -> 0.10 / 0.40
+POP juggernaut jug_wave_wind | 2.816 weapon / 1.886 weapon | 2.182 weapon / 1.780 weapon | 0.25 / 0.40 -> 0.25 / 0.40
+POP juggernaut jug_wave | 1.886 weapon / 2.816 weapon | 1.781 weapon / 2.181 weapon | 0.10 / 0.40 -> 0.10 / 0.40
+POP juggernaut jug_slam | 2.816 weapon / 2.818 weapon | 2.182 weapon / 2.178 weapon | 0.30 / 0.40 -> 0.30 / 0.40
+POP juggernaut jug_lunge_wind | 2.816 weapon / 2.529 weapon | 2.182 weapon / 2.753 weapon | 0.18 / 0.40 -> 0.10 / 0.40
+POP juggernaut jug_lunge | 2.527 weapon / 2.816 weapon | 2.757 weapon / 2.183 weapon | 0.10 / 0.40 -> 0.08 / 0.40
+POP juggernaut jug_meteor | 2.816 weapon / 2.589 weapon | 2.182 weapon / 1.326 weapon | 0.10 / 0.40 -> 0.08 / 0.40
+POP juggernaut jug_meteor_land | 3.074 weapon / 2.817 weapon | 1.661 weapon / 2.182 weapon | 0.10 / 0.40 -> 0.07 / 0.40
+POP juggernaut jug_dash | 2.816 weapon / 2.818 weapon | 2.182 weapon / 2.176 weapon | 0.10 / 0.40 -> 0.05 / 0.40
+POP juggernaut jug_exdash | 1.804 weapon / 2.097 weapon | 1.255 weapon / 1.642 weapon | 0.10 / 0.40 -> 0.05 / 0.40
+POP juggernaut jug_chain | 2.816 weapon / 2.817 weapon | 2.162 weapon / 2.146 weapon | 0.10 / 0.40 -> 0.08 / 0.40
+POP juggernaut jug_reel | 2.858 weapon / 3.061 weapon | 2.800 weapon / 2.919 weapon | 0.20 / 0.40 -> 0.08 / 0.40
+POP juggernaut jug_spin | 2.444 weapon / 2.817 weapon | 2.308 weapon / 2.181 weapon | 0.30 / 0.40 -> 0.30 / 0.40
+POP juggernaut jug_chainlunge | 2.702 weapon / 2.816 weapon | 2.556 weapon / 2.183 weapon | 0.10 / 0.40 -> 0.07 / 0.40
+POP juggernaut jug_haul_wind | 3.061 weapon / 2.743 weapon | 2.919 weapon / 2.655 weapon | 0.15 / 0.40 -> 0.15 / 0.40
+POP juggernaut jug_haulslam | 2.748 weapon / 2.816 weapon | 2.661 weapon / 2.183 weapon | 0.10 / 0.40 -> 0.06 / 0.40
+POP juggernaut jug_guard | 2.816 weapon / 2.363 weapon | 2.182 weapon / 2.789 weapon | 0.10 / 0.40 -> 0.08 / 0.40
+POP juggernaut jug_riposte | 3.059 weapon / 2.817 weapon | 2.035 weapon / 2.186 weapon | 0.10 / 0.40 -> 0.06 / 0.40
+POP juggernaut jug_ult_recover | 2.698 weapon / 2.739 weapon | 3.043 weapon / 2.238 weapon | 0.14 / 0.40 -> 0.14 / 0.40
+POP juggernaut jug_roar | 2.849 weapon / 2.853 weapon | 2.137 weapon / 2.158 weapon | 0.12 / 0.40 -> 0.12 / 0.40
+POP juggernaut mf_xform | 2.816 weapon / 2.814 weapon | 2.182 weapon / 2.184 weapon | 0.18 / 0.40 -> 0.18 / 0.40
+POP ok   juggernaut: every move's blend is as long as its cast gap asks, inside its first key and the caps (short: [])
+POP gunslinger: move | stand in / out | walk in / out (m, worst point) | fade in / out now -> needed
+POP gunslinger gunslinger_lmb | 1.056 weapon / 0.327 weapon | 0.694 weapon / 0.614 weapon | 0.10 / 0.40 -> 0.03 / 0.40
+POP gunslinger gunslinger_rmb | 1.125 weapon / 0.280 hand.L | 0.760 weapon / 0.849 weapon | 0.10 / 0.40 -> 0.04 / 0.40
+POP gunslinger gunslinger_dash | 1.095 weapon / 0.281 hand.L | 0.674 weapon / 0.768 weapon | 0.10 / 0.40 -> 0.08 / 0.40
+POP gunslinger gunslinger_dash_ex | 1.061 weapon / 0.281 hand.L | 0.630 weapon / 0.773 weapon | 0.10 / 0.40 -> 0.05 / 0.40
+POP gunslinger gunslinger_e | 0.281 hand.L / 0.280 hand.L | 0.769 weapon / 0.767 weapon | 0.15 / 0.16 -> 0.15 / 0.16
+POP gunslinger gunslinger_x | 0.281 hand.L / 0.281 hand.L | 0.858 weapon / 0.824 weapon | 0.10 / 0.40 -> 0.10 / 0.40
+POP gunslinger gunslinger_knock | 0.281 hand.L / 0.281 hand.L | 0.825 weapon / 0.832 weapon | 0.10 / 0.40 -> 0.10 / 0.40
+POP gunslinger mf_xform | 0.281 hand.L / 0.280 hand.L | 0.769 weapon / 0.765 weapon | 0.18 / 0.40 -> 0.18 / 0.40
+POP ok   gunslinger: every move's blend is as long as its cast gap asks, inside its first key and the caps (short: [])
+POP ashwick: move | stand in / out | walk in / out (m, worst point) | fade in / out now -> needed
+POP ashwick as_lance | 0.365 hand.L / 0.462 hand.R | 0.386 hand.L / 0.786 weapon | 0.10 / 0.40 -> 0.10 / 0.40
+POP ashwick lw_stoke_lance | 0.463 hand.R / 0.462 hand.R | 0.706 weapon / 0.786 weapon | 0.10 / 0.40 -> 0.10 / 0.40
+POP ashwick as_lance_end | 0.463 hand.R / 0.394 hand.L | 0.767 weapon / 0.206 hand.L | 0.10 / 0.40 -> 0.08 / 0.40
+POP ashwick as_aim | 0.394 hand.L / 0.515 hand.R | 0.307 hand.L / 0.775 weapon | 0.12 / 0.40 -> 0.12 / 0.40
+POP ashwick as_shot | 0.514 hand.R / 0.365 hand.L | 0.818 weapon / 0.389 hand.L | 0.10 / 0.40 -> 0.06 / 0.40
+POP ashwick as_leap | 0.394 hand.L / 0.394 hand.L | 0.485 foot.L / 0.486 foot.L | 0.10 / 0.40 -> 0.06 / 0.40
+POP ashwick lw_hop | 0.394 hand.L / 0.394 hand.L | 0.535 foot.L / 0.484 foot.L | 0.10 / 0.40 -> 0.04 / 0.40
+POP ashwick as_cloak | 0.247 hand.L / 0.394 hand.L | 0.311 weapon / 0.261 hand.L | 0.10 / 0.40 -> 0.05 / 0.40
+POP ashwick lw_stoke | 0.440 hand.L / 0.433 hand.L | 0.299 hand.L / 0.199 weapon | 0.10 / 0.40 -> 0.10 / 0.40
+POP ashwick lw_jet | 0.394 hand.L / 0.609 foot.R | 0.485 foot.L / 0.823 foot.R | 0.10 / 0.40 -> 0.08 / 0.40
+POP ashwick lw_land | 0.526 weapon / 0.394 hand.L | 0.481 weapon / 0.264 hand.L | 0.10 / 0.40 -> 0.07 / 0.40
+POP ashwick lw_jump | 0.394 hand.L / 0.345 weapon | 0.485 foot.L / 0.546 foot.L | 0.10 / 0.40 -> 0.07 / 0.40
+POP ashwick mf_xform | 0.394 hand.L / 0.394 hand.L | 0.485 foot.L / 0.485 foot.L | 0.18 / 0.40 -> 0.18 / 0.40
+POP ok   ashwick: every move's blend is as long as its cast gap asks, inside its first key and the caps (short: [])
+CAST_POP_CHECK_DONE, failures: 1

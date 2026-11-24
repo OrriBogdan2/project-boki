@@ -1,0 +1,123 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] run (res://tools/mob_damage_check.gd:158)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] run (res://tools/mob_damage_check.gd:158)
+       [12] run (res://tools/check_registry.gd:980)
+       [13] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/mob_damage_check.gd:158)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/mob_damage_check.gd:158)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+MOBDMG ok   a map with 10 m of open ground and lairs
+MOBDMG row skitter | level 1 (145 hp) 38.4 s | level 5 (180 hp) 46.3 s | 7.2 per hit | 3.9 per s
+MOBDMG row spitter | level 1 (145 hp) 51.3 s | level 5 (180 hp) 63.4 s | 8.8 per hit | 2.9 per s
+MOBDMG row brute | level 1 (145 hp) 27.2 s | level 5 (180 hp) 34.7 s | 19.2 per hit | 5.5 per s
+MOBDMG row warden | level 1 (145 hp) 20.2 s | level 5 (180 hp) 23.4 s | 24.0 per hit | 8.2 per s
+MOBDMG row bomber | level 1 (145 hp) > 90 s | level 5 (180 hp) > 90 s | 12.8 per hit | 0.1 per s
+MOBDMG row sentinel | level 1 (145 hp) 45.9 s | level 5 (180 hp) 59.9 s | 8.1 per hit | 3.1 per s
+MOBDMG row glimmer | level 1 (145 hp) > 90 s | level 5 (180 hp) > 90 s | 0.0 per hit | 0.0 per s
+MOBDMG row light: 2 skitter | level 1 (145 hp) 29.6 s | level 5 (180 hp) 34.9 s | 7.5 per hit | 5.2 per s
+MOBDMG row light: spitter + skitter | level 1 (145 hp) 22.2 s | level 5 (180 hp) 26.2 s | 7.8 per hit | 6.9 per s
+MOBDMG row light: bomber + skitter | level 1 (145 hp) 35.7 s | level 5 (180 hp) 45.3 s | 7.4 per hit | 4.1 per s
+MOBDMG row normal: brute + skitter + bomber | level 1 (145 hp) 21.7 s | level 5 (180 hp) 25.6 s | 12.4 per hit | 7.3 per s
+MOBDMG row normal: skitter + bomber + spitter | level 1 (145 hp) 30.8 s | level 5 (180 hp) 38.0 s | 7.5 per hit | 4.8 per s
+MOBDMG row normal: sentinel + 2 skitter | level 1 (145 hp) 21.7 s | level 5 (180 hp) 31.1 s | 7.8 per hit | 6.0 per s
+MOBDMG row heavy: brute + spitter + skitter + sentinel | level 1 (145 hp) 13.2 s | level 5 (180 hp) 17.1 s | 13.7 per hit | 11.2 per s
+MOBDMG row colossus | level 1 (145 hp) 26.9 s | level 5 (180 hp) 31.4 s | 15.5 per hit | 5.9 per s
+MOBDMG row serpent | level 1 (145 hp) 48.2 s | level 5 (180 hp) 53.6 s | 17.2 per hit | 3.5 per s
+MOBDMG row brood | level 1 (145 hp) 18.1 s | level 5 (180 hp) 19.0 s | 5.8 per hit | 9.5 per s
+MOBDMG ok   the Glimmerkin never hurts anyone
+MOBDMG ok   a lone Puffbomb blows up once and is gone
+MOBDMG ok   skitter fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (38.4 s, 25 hits)
+MOBDMG ok   spitter fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (51.3 s, 21 hits)
+MOBDMG ok   brute fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (27.2 s, 10 hits)
+MOBDMG ok   warden fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (20.2 s, 8 hits)
+MOBDMG ok   sentinel fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (45.9 s, 23 hits)
+MOBDMG ok   light: 2 skitter fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (29.6 s, 24 hits)
+MOBDMG ok   light: spitter + skitter fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (22.2 s, 23 hits)
+MOBDMG ok   light: bomber + skitter fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (35.7 s, 25 hits)
+MOBDMG ok   normal: brute + skitter + bomber fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (21.7 s, 15 hits)
+MOBDMG ok   normal: skitter + bomber + spitter fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (30.8 s, 24 hits)
+MOBDMG ok   normal: sentinel + 2 skitter fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (21.7 s, 24 hits)
+MOBDMG ok   heavy: brute + spitter + skitter + sentinel fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (13.2 s, 14 hits)
+MOBDMG ok   colossus fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (26.9 s, 12 hits)
+MOBDMG ok   serpent fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (48.2 s, 11 hits)
+MOBDMG ok   brood fells a level-1 Hunter who stands in it within 90 s, over 3+ hits (18.1 s, 31 hits)
+MOBDMG DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 256: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

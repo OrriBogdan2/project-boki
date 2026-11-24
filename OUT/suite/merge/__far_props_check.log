@@ -1,0 +1,9 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+FPCHECK ok   far props are batched (30 MultiMeshes)
+FPCHECK ok   shapes repeat, so batches hold several props (58 instances)
+FPCHECK ok   at most one batch per kind, style and variant
+FPCHECK DONE, failures: 0

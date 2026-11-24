@@ -1,0 +1,64 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+HBCHECK ok   archer: hit_r 0.408 is 1.020 x standard (band 0.85-1.15)
+HBCHECK ok   archer: the hunter's r is its hit_r
+HBCHECK ok   archer: ground circle radius 0.408 = hit_r 0.408
+HBCHECK ok   juggernaut: hit_r 0.429 is 1.073 x standard (band 0.85-1.15)
+HBCHECK ok   juggernaut: the hunter's r is its hit_r
+HBCHECK ok   juggernaut: ground circle radius 0.429 = hit_r 0.429
+HBCHECK ok   juggernaut: body size 0.825 is trimmed (max 0.94)
+HBCHECK ok   juggernaut: nameplate 2.74 per size (want 2.74)
+HBCHECK ok   gunslinger: hit_r 0.411 is 1.027 x standard (band 0.85-1.15)
+HBCHECK ok   gunslinger: the hunter's r is its hit_r
+HBCHECK ok   gunslinger: ground circle radius 0.411 = hit_r 0.411
+HBCHECK ok   bulwark: hit_r 0.404 is 1.010 x standard (band 0.85-1.15)
+HBCHECK ok   bulwark: the hunter's r is its hit_r
+HBCHECK ok   bulwark: ground circle radius 0.404 = hit_r 0.404
+HBCHECK ok   bulwark: body size 1.464 is trimmed (max 1.50)
+HBCHECK ok   bulwark: nameplate 1.87 per size (want 1.87)
+HBCHECK ok   rimewright: hit_r 0.395 is 0.988 x standard (band 0.85-1.15)
+HBCHECK ok   rimewright: the hunter's r is its hit_r
+HBCHECK ok   rimewright: ground circle radius 0.395 = hit_r 0.395
+HBCHECK ok   ashwick: hit_r 0.419 is 1.047 x standard (band 0.85-1.15)
+HBCHECK ok   ashwick: the hunter's r is its hit_r
+HBCHECK ok   ashwick: ground circle radius 0.419 = hit_r 0.419
+HBCHECK ok   dolm: hit_r 0.411 is 1.027 x standard (band 0.85-1.15)
+HBCHECK ok   dolm: the hunter's r is its hit_r
+HBCHECK ok   dolm: ground circle radius 0.411 = hit_r 0.411
+HBCHECK ok   mage: hit_r 0.410 is 1.025 x standard (band 0.85-1.15)
+HBCHECK ok   mage: the hunter's r is its hit_r
+HBCHECK ok   mage: ground circle radius 0.410 = hit_r 0.410
+HBCHECK ok   dredge: hit_r 0.458 is 1.145 x standard (band 0.85-1.15)
+HBCHECK ok   dredge: the hunter's r is its hit_r
+HBCHECK ok   dredge: ground circle radius 0.458 = hit_r 0.458
+HBCHECK ok   tender: hit_r 0.352 is 0.880 x standard (band 0.85-1.15)
+HBCHECK ok   tender: the hunter's r is its hit_r
+HBCHECK ok   tender: ground circle radius 0.352 = hit_r 0.352
+HBCHECK ok   thief: hit_r 0.398 is 0.995 x standard (band 0.85-1.15)
+HBCHECK ok   thief: the hunter's r is its hit_r
+HBCHECK ok   thief: ground circle radius 0.398 = hit_r 0.398
+HBCHECK ok   ostra: hit_r 0.434 is 1.085 x standard (band 0.85-1.15)
+HBCHECK ok   ostra: the hunter's r is its hit_r
+HBCHECK ok   ostra: ground circle radius 0.434 = hit_r 0.434
+HBCHECK ok   gil: hit_r 0.375 is 0.938 x standard (band 0.85-1.15)
+HBCHECK ok   gil: the hunter's r is its hit_r
+HBCHECK ok   gil: ground circle radius 0.375 = hit_r 0.375
+HBCHECK ok   smallest is tender, biggest is dredge
+HBCHECK ok   tender: 0.57 m off, just outside, misses
+HBCHECK ok   tender: 0.49 m off, just inside, hits
+HBCHECK ok   tender: a bullet through the centre hits
+HBCHECK ok   dredge: 0.68 m off, just outside, misses
+HBCHECK ok   dredge: 0.60 m off, just inside, hits
+HBCHECK ok   dredge: a bullet through the centre hits
+HITBOX SIZE CHECK DONE, failures: 0
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 50 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

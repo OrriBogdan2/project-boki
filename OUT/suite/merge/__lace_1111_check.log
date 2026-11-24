@@ -1,0 +1,35 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+AKCHECK RMB needle: nocked on her nock point (the model's anchor) while it winds up PASS  eye (8.332253, 2.730424, 32.63807) nock (8.332253, 2.730424, 32.63807)
+AKCHECK RMB bar: starts at the bow's mouth, laced, in her red PASS  from (8.332253, 32.56803) bow (8.332253, 2.657756, 32.56803)
+AKCHECK RMB shot: leaves the bow's mouth at the release frame and flies bow -> cursor PASS  start (8.332253, 2.657756, 32.56803) bow (8.332253, 2.657756, 32.56803)
+AKCHECK RMB shot: the bow's mouth is the model's own bow anchor (it rides the bow in the pose), at bow height PASS  bow - body (-0.167747, 1.057756, 0.068027)
+AKCHECK RMB online: the shot other players' games spawn starts at the bow too PASS  sent (8.33, 2.66, 32.57) bow (8.332253, 2.657756, 32.56803)
+AKCHECK RMB release: no burst sits on her body (heavy_go's bursts ride the bow) PASS  
+AKCHECK Shift: the roll goes 12.5% further (3.000 -> 3.375 m) in the same 0.27 s PASS  roll 3.375 roll_t 0.27
+AKCHECK colours: nothing of her kit is pink (palette, ability colours, PinFx) PASS  []
+AKCHECK colours: her thread is her laces' crimson, set by the kit (not the model's tint) PASS  d41e2e
+AKCHECK aim: the resting aim line is laced, in her red PASS  (0.8314, 0.1176, 0.1804, 1.0)
+AKCHECK aim: drawing, the line and its fill are laced and red (no pale pink) PASS  (0.8314, 0.1176, 0.1804, 1.0) (0.8314, 0.1176, 0.1804, 1.0)
+AKCHECK aim: a laced line is two crossing strands (more than the plain ribbon, under 12x its triangles) PASS  468 vs 84 vertices
+AKCHECK E arc: the cast's arc is laced, in her red PASS  (0.8314, 0.1176, 0.1804, 1.0)
+AKCHECK E: no glowing panels or ground band left on the wall (her laces instead) PASS  
+AKCHECK E laces: every gap between the needle posts laced (an upright X and a ground X), all drawn across PASS  32 of 32
+AKCHECK E laces: red thread, none of it pink PASS  32 red
+AKCHECK E laces: the upright pair crosses (one climbs as the other falls) PASS  
+AKCHECK E laces: gone when the wall ends   PASS  
+AKCHECK DONE, 18 checks, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 212: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 213: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

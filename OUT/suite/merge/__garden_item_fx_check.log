@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+ITEMFX ok   Sunsap: one tick, in gold
+ITEMFX ok   and it rises
+ITEMFX ok   Thumpnut: nothing from GardenItemFx ...
+ITEMFX ok   ... it rises as the Power glint (StatGlint)
+ITEMFX ok   Keepstone: 3 meter slots and a charm
+ITEMFX ok   the new pip is Steadfast's tint and slides
+ITEMFX ok   the charm pops on, same tint
+ITEMFX ok   a second token: the Keepstone stays in slot 1, the Galeribbon slides into slot 2
+ITEMFX ok   Bramble Honey: the lean ring
+ITEMFX ok   it fills from empty to half, in Grass's colour
+ITEMFX ok   Rinse Melon: the half ring drains to empty
+ITEMFX ok   it keeps playing on the redrawn model
+ITEMFX ok   Stayleaf: the leaf and the lock
+ITEMFX ok   a second Stayleaf can't be given: nothing plays
+ITEMFX ok   thirty gives: still the 16 pooled bits, no new node
+ITEMFX ok   after the moment: all hidden, idle
+ITEMFX DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

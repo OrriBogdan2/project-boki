@@ -1,0 +1,35 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+PLACECLEAR ok   a clear 5x5 of meadow to test on ((46, 35)) and two Boki out
+PLACECLEAR ok   a fence ring round Mossbun turns the ghost blocked: "This would shut Mossbun in"
+PLACECLEAR ok   the ring with a one tile gap is fine (the way out stays open): ""
+PLACECLEAR ok   an island corner to test on ((15, 18))
+PLACECLEAR ok   closing the corner pocket round Mossbun is refused: "This would shut Mossbun in" (3 tiles)
+PLACECLEAR ok   leaving the pocket tile that opens outward unfenced is allowed
+PLACECLEAR ok   one fence piece away from everyone is allowed
+PLACECLEAR ok   a ring round you is refused: "This would shut you in"
+PLACECLEAR ok   Mossbun now sits sealed in a pocket
+PLACECLEAR ok   loading sets Mossbun out on open ground nearby (moved 1)
+PLACECLEAR ok   the Boki that was already out is left where it was
+PLACECLEAR done 0 fail
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

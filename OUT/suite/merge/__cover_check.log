@@ -1,0 +1,96 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+COVERCHECK seed 3 cover share:  bloom 17.8%  meadow 9.7%  gloom 6.1%  storm 3.2%  ember 2.1%  frost 0.4%
+COVERCHECK seed 3: bloom cover 17.8% is inside 15.0-20.0%                 PASS  
+COVERCHECK seed 3: meadow cover 9.7% is inside 8.5-12.0%                  PASS  
+COVERCHECK seed 3: gloom cover 6.1% is inside 4.0-7.5%                    PASS  
+COVERCHECK seed 3: storm cover 3.2% is inside 2.0-4.0%                    PASS  
+COVERCHECK seed 3: ember cover 2.1% is inside 1.5-3.2%                    PASS  
+COVERCHECK seed 3: frost cover 0.4% is inside 0.0-1.0%                    PASS  
+COVERCHECK seed 3: order bloom > meadow > gloom > storm/ember > frost     PASS  
+COVERCHECK seed 3: Shard Perch stays bare                                 PASS  
+COVERCHECK seed 3: 276 patches, none a single tuft                        PASS  0 under 4 tiles
+COVERCHECK seed 3: no cover on or beside stairs, ramps or bridges         PASS  stairs 0 bridges 0
+COVERCHECK seed 3: no cover in a landing's drop circle or at an exit      PASS  0 tiles
+COVERCHECK seed 3: every cover tile is open ground                        PASS  0 off: 
+COVERCHECK seed 3: a patch in sight of each of the 1 exits in bush biomes PASS  
+COVERCHECK seed 3: bloom/meadow chests and camps with cover beside them   PASS  26 of 27
+COVERCHECK seed 3: bush never closes a path (341 landing walks)           PASS  
+COVERCHECK seed 3: the tile A* still finds every same-height one of them  PASS  0 without a path 
+COVERCHECK seed 3: bush biomes have cover spots with 3+ patches in sprint range PASS   bloom 1665 meadow 1753 gloom 738 storm 143
+COVERCHECK seed 5 cover share:  bloom 17.8%  meadow 9.6%  gloom 6.0%  storm 3.1%  ember 2.2%  frost 0.4%
+COVERCHECK seed 5: bloom cover 17.8% is inside 15.0-20.0%                 PASS  
+COVERCHECK seed 5: meadow cover 9.6% is inside 8.5-12.0%                  PASS  
+COVERCHECK seed 5: gloom cover 6.0% is inside 4.0-7.5%                    PASS  
+COVERCHECK seed 5: storm cover 3.1% is inside 2.0-4.0%                    PASS  
+COVERCHECK seed 5: ember cover 2.2% is inside 1.5-3.2%                    PASS  
+COVERCHECK seed 5: frost cover 0.4% is inside 0.0-1.0%                    PASS  
+COVERCHECK seed 5: order bloom > meadow > gloom > storm/ember > frost     PASS  
+COVERCHECK seed 5: Shard Perch stays bare                                 PASS  
+COVERCHECK seed 5: 276 patches, none a single tuft                        PASS  0 under 4 tiles
+COVERCHECK seed 5: no cover on or beside stairs, ramps or bridges         PASS  stairs 0 bridges 0
+COVERCHECK seed 5: no cover in a landing's drop circle or at an exit      PASS  0 tiles
+COVERCHECK seed 5: every cover tile is open ground                        PASS  0 off: 
+COVERCHECK seed 5: a patch in sight of each of the 1 exits in bush biomes PASS  
+COVERCHECK seed 5: bloom/meadow chests and camps with cover beside them   PASS  26 of 27
+COVERCHECK seed 5: bush never closes a path (341 landing walks)           PASS  
+COVERCHECK seed 5: the tile A* still finds every same-height one of them  PASS  0 without a path 
+COVERCHECK seed 5: bush biomes have cover spots with 3+ patches in sprint range PASS   bloom 1659 meadow 1747 gloom 727 storm 145
+COVERCHECK seed 9 cover share:  bloom 17.9%  meadow 9.6%  gloom 6.1%  storm 3.1%  ember 2.2%  frost 0.4%
+COVERCHECK seed 9: bloom cover 17.9% is inside 15.0-20.0%                 PASS  
+COVERCHECK seed 9: meadow cover 9.6% is inside 8.5-12.0%                  PASS  
+COVERCHECK seed 9: gloom cover 6.1% is inside 4.0-7.5%                    PASS  
+COVERCHECK seed 9: storm cover 3.1% is inside 2.0-4.0%                    PASS  
+COVERCHECK seed 9: ember cover 2.2% is inside 1.5-3.2%                    PASS  
+COVERCHECK seed 9: frost cover 0.4% is inside 0.0-1.0%                    PASS  
+COVERCHECK seed 9: order bloom > meadow > gloom > storm/ember > frost     PASS  
+COVERCHECK seed 9: Shard Perch stays bare                                 PASS  
+COVERCHECK seed 9: 276 patches, none a single tuft                        PASS  0 under 4 tiles
+COVERCHECK seed 9: no cover on or beside stairs, ramps or bridges         PASS  stairs 0 bridges 0
+COVERCHECK seed 9: no cover in a landing's drop circle or at an exit      PASS  0 tiles
+COVERCHECK seed 9: every cover tile is open ground                        PASS  0 off: 
+COVERCHECK seed 9: a patch in sight of each of the 1 exits in bush biomes PASS  
+COVERCHECK seed 9: bloom/meadow chests and camps with cover beside them   PASS  26 of 27
+COVERCHECK seed 9: bush never closes a path (341 landing walks)           PASS  
+COVERCHECK seed 9: the tile A* still finds every same-height one of them  PASS  0 without a path 
+COVERCHECK seed 9: bush biomes have cover spots with 3+ patches in sprint range PASS   bloom 1680 meadow 1749 gloom 742 storm 141
+COVERCHECK seed 12 cover share:  bloom 18.0%  meadow 9.6%  gloom 6.0%  storm 3.2%  ember 2.1%  frost 0.4%
+COVERCHECK seed 12: bloom cover 18.0% is inside 15.0-20.0%                PASS  
+COVERCHECK seed 12: meadow cover 9.6% is inside 8.5-12.0%                 PASS  
+COVERCHECK seed 12: gloom cover 6.0% is inside 4.0-7.5%                   PASS  
+COVERCHECK seed 12: storm cover 3.2% is inside 2.0-4.0%                   PASS  
+COVERCHECK seed 12: ember cover 2.1% is inside 1.5-3.2%                   PASS  
+COVERCHECK seed 12: frost cover 0.4% is inside 0.0-1.0%                   PASS  
+COVERCHECK seed 12: order bloom > meadow > gloom > storm/ember > frost    PASS  
+COVERCHECK seed 12: Shard Perch stays bare                                PASS  
+COVERCHECK seed 12: 276 patches, none a single tuft                       PASS  0 under 4 tiles
+COVERCHECK seed 12: no cover on or beside stairs, ramps or bridges        PASS  stairs 0 bridges 0
+COVERCHECK seed 12: no cover in a landing's drop circle or at an exit     PASS  0 tiles
+COVERCHECK seed 12: every cover tile is open ground                       PASS  0 off: 
+COVERCHECK seed 12: a patch in sight of each of the 1 exits in bush biomes PASS  
+COVERCHECK seed 12: bloom/meadow chests and camps with cover beside them  PASS  26 of 27
+COVERCHECK seed 12: bush never closes a path (341 landing walks)          PASS  
+COVERCHECK seed 12: the tile A* still finds every same-height one of them PASS  0 without a path 
+COVERCHECK seed 12: bush biomes have cover spots with 3+ patches in sprint range PASS   bloom 1685 meadow 1745 gloom 717 storm 149
+COVERCHECK seed 21 cover share:  bloom 17.8%  meadow 9.7%  gloom 6.1%  storm 3.2%  ember 2.2%  frost 0.4%
+COVERCHECK seed 21: bloom cover 17.8% is inside 15.0-20.0%                PASS  
+COVERCHECK seed 21: meadow cover 9.7% is inside 8.5-12.0%                 PASS  
+COVERCHECK seed 21: gloom cover 6.1% is inside 4.0-7.5%                   PASS  
+COVERCHECK seed 21: storm cover 3.2% is inside 2.0-4.0%                   PASS  
+COVERCHECK seed 21: ember cover 2.2% is inside 1.5-3.2%                   PASS  
+COVERCHECK seed 21: frost cover 0.4% is inside 0.0-1.0%                   PASS  
+COVERCHECK seed 21: order bloom > meadow > gloom > storm/ember > frost    PASS  
+COVERCHECK seed 21: Shard Perch stays bare                                PASS  
+COVERCHECK seed 21: 276 patches, none a single tuft                       PASS  0 under 4 tiles
+COVERCHECK seed 21: no cover on or beside stairs, ramps or bridges        PASS  stairs 0 bridges 0
+COVERCHECK seed 21: no cover in a landing's drop circle or at an exit     PASS  0 tiles
+COVERCHECK seed 21: every cover tile is open ground                       PASS  0 off: 
+COVERCHECK seed 21: a patch in sight of each of the 1 exits in bush biomes PASS  
+COVERCHECK seed 21: bloom/meadow chests and camps with cover beside them  PASS  26 of 27
+COVERCHECK seed 21: bush never closes a path (341 landing walks)          PASS  
+COVERCHECK seed 21: the tile A* still finds every same-height one of them PASS  0 without a path 
+COVERCHECK seed 21: bush biomes have cover spots with 3+ patches in sprint range PASS   bloom 1688 meadow 1751 gloom 732 storm 146
+COVERCHECK DONE, 85 checks, failures: 0

@@ -1,0 +1,100 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+SAVECOMPAT ok   feedback.json keeps minutes and answered versions
+SAVECOMPAT ok   feedback.json keeps the queued answer
+SAVECOMPAT ok   Feedback reads the golden as it was written
+SAVECOMPAT ok   save_v1.json parses
+SAVECOMPAT ok   save_v1.json: its version v1 still has an upgrade path
+SAVECOMPAT ok   save_v1.json loads and is v21
+SAVECOMPAT ok   save_v1.json: loading wrote nothing
+SAVECOMPAT ok   save_v1.json keeps all 5 kin
+SAVECOMPAT ok   save_v1.json loses nothing
+SAVECOMPAT ok   save_v13_farm.json parses
+SAVECOMPAT ok   save_v13_farm.json: its version v13 still has an upgrade path
+SAVECOMPAT ok   save_v13_farm.json loads and is v21
+SAVECOMPAT ok   save_v13_farm.json: loading wrote nothing
+SAVECOMPAT ok   save_v13_farm.json keeps all 4 kin
+SAVECOMPAT ok   save_v13_farm.json loses nothing
+SAVECOMPAT ok   save_v13_fresh.json parses
+SAVECOMPAT ok   save_v13_fresh.json: its version v13 still has an upgrade path
+SAVECOMPAT ok   save_v13_fresh.json loads and is v21
+SAVECOMPAT ok   save_v13_fresh.json: loading wrote nothing
+SAVECOMPAT ok   save_v13_fresh.json keeps all 0 kin
+SAVECOMPAT ok   save_v13_fresh.json loses nothing
+SAVECOMPAT ok   save_v14_farm.json parses
+SAVECOMPAT ok   save_v14_farm.json: its version v14 still has an upgrade path
+SAVECOMPAT ok   save_v14_farm.json loads and is v21
+SAVECOMPAT ok   save_v14_farm.json: loading wrote nothing
+SAVECOMPAT ok   save_v14_farm.json keeps all 4 kin
+SAVECOMPAT ok   save_v14_farm.json loses nothing
+SAVECOMPAT ok   save_v14_fresh.json parses
+SAVECOMPAT ok   save_v14_fresh.json: its version v14 still has an upgrade path
+SAVECOMPAT ok   save_v14_fresh.json loads and is v21
+SAVECOMPAT ok   save_v14_fresh.json: loading wrote nothing
+SAVECOMPAT ok   save_v14_fresh.json keeps all 0 kin
+SAVECOMPAT ok   save_v14_fresh.json loses nothing
+SAVECOMPAT ok   save_v15_farm.json parses
+SAVECOMPAT ok   save_v15_farm.json: its version v15 still has an upgrade path
+SAVECOMPAT ok   save_v15_farm.json loads and is v21
+SAVECOMPAT ok   save_v15_farm.json: loading wrote nothing
+SAVECOMPAT ok   save_v15_farm.json keeps all 4 kin
+SAVECOMPAT ok   save_v15_farm.json loses nothing
+SAVECOMPAT ok   save_v15_fresh.json parses
+SAVECOMPAT ok   save_v15_fresh.json: its version v15 still has an upgrade path
+SAVECOMPAT ok   save_v15_fresh.json loads and is v21
+SAVECOMPAT ok   save_v15_fresh.json: loading wrote nothing
+SAVECOMPAT ok   save_v15_fresh.json keeps all 0 kin
+SAVECOMPAT ok   save_v15_fresh.json loses nothing
+SAVECOMPAT ok   save_v19_farm.json parses
+SAVECOMPAT ok   save_v19_farm.json: its version v19 still has an upgrade path
+SAVECOMPAT ok   save_v19_farm.json loads and is v21
+SAVECOMPAT ok   save_v19_farm.json: loading wrote nothing
+SAVECOMPAT ok   save_v19_farm.json keeps all 4 kin
+SAVECOMPAT ok   save_v19_farm.json loses nothing
+SAVECOMPAT ok   save_v19_fresh.json parses
+SAVECOMPAT ok   save_v19_fresh.json: its version v19 still has an upgrade path
+SAVECOMPAT ok   save_v19_fresh.json loads and is v21
+SAVECOMPAT ok   save_v19_fresh.json: loading wrote nothing
+SAVECOMPAT ok   save_v19_fresh.json keeps all 0 kin
+SAVECOMPAT ok   save_v19_fresh.json loses nothing
+SAVECOMPAT ok   save_v20_farm.json parses
+SAVECOMPAT ok   save_v20_farm.json: its version v20 still has an upgrade path
+SAVECOMPAT ok   save_v20_farm.json loads and is v21
+SAVECOMPAT ok   save_v20_farm.json: loading wrote nothing
+SAVECOMPAT ok   save_v20_farm.json keeps all 4 kin
+SAVECOMPAT ok   save_v20_farm.json loses nothing
+SAVECOMPAT ok   save_v20_fresh.json parses
+SAVECOMPAT ok   save_v20_fresh.json: its version v20 still has an upgrade path
+SAVECOMPAT ok   save_v20_fresh.json loads and is v21
+SAVECOMPAT ok   save_v20_fresh.json: loading wrote nothing
+SAVECOMPAT ok   save_v20_fresh.json keeps all 0 kin
+SAVECOMPAT ok   save_v20_fresh.json loses nothing
+SAVECOMPAT ok   save_v21_farm.json parses
+SAVECOMPAT ok   save_v21_farm.json: its version v21 still has an upgrade path
+SAVECOMPAT ok   save_v21_farm.json loads and is v21
+SAVECOMPAT ok   save_v21_farm.json: loading wrote nothing
+SAVECOMPAT ok   save_v21_farm.json keeps all 4 kin
+SAVECOMPAT ok   save_v21_farm.json loses nothing
+SAVECOMPAT ok   save_v21_fresh.json parses
+SAVECOMPAT ok   save_v21_fresh.json: its version v21 still has an upgrade path
+SAVECOMPAT ok   save_v21_fresh.json loads and is v21
+SAVECOMPAT ok   save_v21_fresh.json: loading wrote nothing
+SAVECOMPAT ok   save_v21_fresh.json keeps all 0 kin
+SAVECOMPAT ok   save_v21_fresh.json loses nothing
+SAVECOMPAT ok   settings.cfg loads
+SAVECOMPAT ok   settings.cfg: only keys Settings knows (a rename needs a migration) []
+SAVECOMPAT ok   settings.cfg keeps the values the golden was written with
+SAVECOMPAT ok   settings.cfg: its camera ids load as today's (default, lean)
+SAVECOMPAT ok   settings.cfg keeps its key bindings
+SAVECOMPAT ok   settings.cfg keeps the last save slot
+SAVECOMPAT ok   warm_stamp.json keeps id, parts, files, unix and keys
+SAVECOMPAT ok   warm_stamp.json keeps its warm keys
+SAVECOMPAT ok   a save golden exists
+SAVECOMPAT ok   a settings golden exists
+SAVECOMPAT ok   a feedback golden exists
+SAVECOMPAT ok   a warm_stamp golden exists
+SAVECOMPAT ok   a golden for the current version (v21) exists: add one with the migration (docs/SAVES.md)
+SAVECOMPAT DONE, failures: 0

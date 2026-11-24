@@ -1,0 +1,264 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOKIIDLE PASS cindle has a fidget of its own
+BOKIIDLE PASS cindle has its fidget
+BOKIIDLE PASS cindle: idle loops, the fidget plays once
+BOKIIDLE PASS cindle: fidget a whole number of idle loops
+BOKIIDLE PASS cindle idle loop seam 0.0000
+BOKIIDLE PASS cindle idle breathes (0.142 rad)
+BOKIIDLE PASS cindle fidget ends at 1.8 s of its 2.60 s clip
+BOKIIDLE PASS cindle fidget starts and ends on the idle's pose (0.0000)
+BOKIIDLE PASS cindle fidget moves 0.76 rad
+BOKIIDLE PASS cindle fidgets every 4-9 s (10 in 60 s)
+BOKIIDLE PASS cindle never fidgets while it acts
+BOKIIDLE PASS puddlet has a fidget of its own
+BOKIIDLE PASS puddlet has its fidget
+BOKIIDLE PASS puddlet: idle loops, the fidget plays once
+BOKIIDLE PASS puddlet: fidget a whole number of idle loops
+BOKIIDLE PASS puddlet idle loop seam 0.0007
+BOKIIDLE PASS puddlet idle breathes (0.143 rad)
+BOKIIDLE PASS puddlet fidget ends at 1.9 s of its 2.40 s clip
+BOKIIDLE PASS puddlet fidget starts and ends on the idle's pose (0.0007)
+BOKIIDLE PASS puddlet fidget moves 0.45 rad
+BOKIIDLE PASS puddlet fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS puddlet never fidgets while it acts
+BOKIIDLE PASS burrlet has a fidget of its own
+BOKIIDLE PASS burrlet has its fidget
+BOKIIDLE PASS burrlet: idle loops, the fidget plays once
+BOKIIDLE PASS burrlet: fidget a whole number of idle loops
+BOKIIDLE PASS burrlet idle loop seam 0.0000
+BOKIIDLE PASS burrlet idle breathes (0.159 rad)
+BOKIIDLE PASS burrlet fidget ends at 1.3 s of its 3.00 s clip
+BOKIIDLE PASS burrlet fidget starts and ends on the idle's pose (0.0000)
+BOKIIDLE PASS burrlet fidget moves 0.33 rad
+BOKIIDLE PASS burrlet fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS burrlet never fidgets while it acts
+BOKIIDLE PASS glintmole has a fidget of its own
+BOKIIDLE PASS glintmole has its fidget
+BOKIIDLE PASS glintmole: idle loops, the fidget plays once
+BOKIIDLE PASS glintmole: fidget a whole number of idle loops
+BOKIIDLE PASS glintmole idle loop seam 0.0007
+BOKIIDLE PASS glintmole idle breathes (0.158 rad)
+BOKIIDLE PASS glintmole fidget ends at 1.7 s of its 2.70 s clip
+BOKIIDLE PASS glintmole fidget starts and ends on the idle's pose (0.0010)
+BOKIIDLE PASS glintmole fidget moves 0.60 rad
+BOKIIDLE PASS glintmole fidgets every 4-9 s (10 in 60 s)
+BOKIIDLE PASS glintmole never fidgets while it acts
+BOKIIDLE PASS rimeshrew has a fidget of its own
+BOKIIDLE PASS rimeshrew has its fidget
+BOKIIDLE PASS rimeshrew: idle loops, the fidget plays once
+BOKIIDLE PASS rimeshrew: fidget a whole number of idle loops
+BOKIIDLE PASS rimeshrew idle loop seam 0.0000
+BOKIIDLE PASS rimeshrew idle breathes (0.164 rad)
+BOKIIDLE PASS rimeshrew fidget ends at 1.6 s of its 1.80 s clip
+BOKIIDLE PASS rimeshrew fidget starts and ends on the idle's pose (0.0000)
+BOKIIDLE PASS rimeshrew fidget moves 0.38 rad
+BOKIIDLE PASS rimeshrew fidgets every 4-9 s (8 in 60 s)
+BOKIIDLE PASS rimeshrew never fidgets while it acts
+BOKIIDLE PASS zephyrak has a fidget of its own
+BOKIIDLE PASS zephyrak has its fidget
+BOKIIDLE PASS zephyrak: idle loops, the fidget plays once
+BOKIIDLE PASS zephyrak: fidget a whole number of idle loops
+BOKIIDLE PASS zephyrak idle loop seam 0.0000
+BOKIIDLE PASS zephyrak idle breathes (0.325 rad)
+BOKIIDLE PASS zephyrak fidget ends at 1.4 s of its 2.80 s clip
+BOKIIDLE PASS zephyrak fidget starts and ends on the idle's pose (0.0000)
+BOKIIDLE PASS zephyrak fidget moves 0.47 rad
+BOKIIDLE PASS zephyrak fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS zephyrak never fidgets while it acts
+BOKIIDLE PASS pebbit has a fidget of its own
+BOKIIDLE PASS pebbit has its fidget
+BOKIIDLE PASS pebbit: idle loops, the fidget plays once
+BOKIIDLE PASS pebbit: fidget a whole number of idle loops
+BOKIIDLE PASS pebbit idle loop seam 0.0012
+BOKIIDLE PASS pebbit idle breathes (0.171 rad)
+BOKIIDLE PASS pebbit fidget ends at 2.3 s of its 3.80 s clip
+BOKIIDLE PASS pebbit fidget starts and ends on the idle's pose (0.0012)
+BOKIIDLE PASS pebbit fidget moves 0.20 rad
+BOKIIDLE PASS pebbit fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS pebbit never fidgets while it acts
+BOKIIDLE PASS cairnback has a fidget of its own
+BOKIIDLE PASS cairnback has its fidget
+BOKIIDLE PASS cairnback: idle loops, the fidget plays once
+BOKIIDLE PASS cairnback: fidget a whole number of idle loops
+BOKIIDLE PASS cairnback idle loop seam 0.0012
+BOKIIDLE PASS cairnback idle breathes (0.182 rad)
+BOKIIDLE PASS cairnback fidget ends at 2.0 s of its 4.20 s clip
+BOKIIDLE PASS cairnback fidget starts and ends on the idle's pose (0.0012)
+BOKIIDLE PASS cairnback fidget moves 0.30 rad
+BOKIIDLE PASS cairnback fidgets every 4-9 s (8 in 60 s)
+BOKIIDLE PASS cairnback never fidgets while it acts
+BOKIIDLE PASS wisplet has a fidget of its own
+BOKIIDLE PASS wisplet has its fidget
+BOKIIDLE PASS wisplet: idle loops, the fidget plays once
+BOKIIDLE PASS wisplet: fidget a whole number of idle loops
+BOKIIDLE PASS wisplet idle loop seam 0.0000
+BOKIIDLE PASS wisplet idle breathes (0.330 rad)
+BOKIIDLE PASS wisplet fidget ends at 2.0 s of its 3.20 s clip
+BOKIIDLE PASS wisplet fidget starts and ends on the idle's pose (0.0000)
+BOKIIDLE PASS wisplet fidget moves 0.92 rad
+BOKIIDLE PASS wisplet fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS wisplet never fidgets while it acts
+BOKIIDLE PASS gloamshell has a fidget of its own
+BOKIIDLE PASS gloamshell has its fidget
+BOKIIDLE PASS gloamshell: idle loops, the fidget plays once
+BOKIIDLE PASS gloamshell: fidget a whole number of idle loops
+BOKIIDLE PASS gloamshell idle loop seam 0.0007
+BOKIIDLE PASS gloamshell idle breathes (0.148 rad)
+BOKIIDLE PASS gloamshell fidget ends at 1.9 s of its 3.50 s clip
+BOKIIDLE PASS gloamshell fidget starts and ends on the idle's pose (0.0007)
+BOKIIDLE PASS gloamshell fidget moves 0.40 rad
+BOKIIDLE PASS gloamshell fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS gloamshell never fidgets while it acts
+BOKIIDLE PASS selenfin has a fidget of its own
+BOKIIDLE PASS selenfin has its fidget
+BOKIIDLE PASS selenfin: idle loops, the fidget plays once
+BOKIIDLE PASS selenfin: fidget a whole number of idle loops
+BOKIIDLE PASS selenfin idle loop seam 0.0000
+BOKIIDLE PASS selenfin idle breathes (0.288 rad)
+BOKIIDLE PASS selenfin fidget ends at 2.1 s of its 3.00 s clip
+BOKIIDLE PASS selenfin fidget starts and ends on the idle's pose (0.0000)
+BOKIIDLE PASS selenfin fidget moves 0.32 rad
+BOKIIDLE PASS selenfin fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS selenfin never fidgets while it acts
+BOKIIDLE PASS zapple has a fidget of its own
+BOKIIDLE PASS zapple has its fidget
+BOKIIDLE PASS zapple: idle loops, the fidget plays once
+BOKIIDLE PASS zapple: fidget a whole number of idle loops
+BOKIIDLE PASS zapple idle loop seam 0.0000
+BOKIIDLE PASS zapple idle breathes (0.181 rad)
+BOKIIDLE PASS zapple fidget ends at 1.6 s of its 2.40 s clip
+BOKIIDLE PASS zapple fidget starts and ends on the idle's pose (0.0010)
+BOKIIDLE PASS zapple fidget moves 0.65 rad
+BOKIIDLE PASS zapple fidgets every 4-9 s (8 in 60 s)
+BOKIIDLE PASS zapple never fidgets while it acts
+BOKIIDLE PASS hivara has a fidget of its own
+BOKIIDLE PASS hivara has its fidget
+BOKIIDLE PASS hivara: idle loops, the fidget plays once
+BOKIIDLE PASS hivara: fidget a whole number of idle loops
+BOKIIDLE PASS hivara idle loop seam 0.0010
+BOKIIDLE PASS hivara idle breathes (3.101 rad)
+BOKIIDLE PASS hivara fidget ends at 1.6 s of its 2.20 s clip
+BOKIIDLE PASS hivara fidget starts and ends on the idle's pose (0.0012)
+BOKIIDLE PASS hivara fidget moves 0.68 rad
+BOKIIDLE PASS hivara fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS hivara never fidgets while it acts
+BOKIIDLE PASS glomwort has a fidget of its own
+BOKIIDLE PASS glomwort has its fidget
+BOKIIDLE PASS glomwort: idle loops, the fidget plays once
+BOKIIDLE PASS glomwort: fidget a whole number of idle loops
+BOKIIDLE PASS glomwort idle loop seam 0.0000
+BOKIIDLE PASS glomwort idle breathes (0.237 rad)
+BOKIIDLE PASS glomwort fidget ends at 2.0 s of its 2.60 s clip
+BOKIIDLE PASS glomwort fidget starts and ends on the idle's pose (0.0010)
+BOKIIDLE PASS glomwort fidget moves 0.49 rad
+BOKIIDLE PASS glomwort fidgets every 4-9 s (10 in 60 s)
+BOKIIDLE PASS glomwort never fidgets while it acts
+BOKIIDLE PASS kestrike has a fidget of its own
+BOKIIDLE PASS kestrike has its fidget
+BOKIIDLE PASS kestrike: idle loops, the fidget plays once
+BOKIIDLE PASS kestrike: fidget a whole number of idle loops
+BOKIIDLE PASS kestrike idle loop seam 0.0000
+BOKIIDLE PASS kestrike idle breathes (0.382 rad)
+BOKIIDLE PASS kestrike fidget ends at 1.7 s of its 3.60 s clip
+BOKIIDLE PASS kestrike fidget starts and ends on the idle's pose (0.0000)
+BOKIIDLE PASS kestrike fidget moves 0.56 rad
+BOKIIDLE PASS kestrike fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS kestrike never fidgets while it acts
+BOKIIDLE PASS kindlewren has a fidget of its own
+BOKIIDLE PASS kindlewren has its fidget
+BOKIIDLE PASS kindlewren: idle loops, the fidget plays once
+BOKIIDLE PASS kindlewren: fidget a whole number of idle loops
+BOKIIDLE PASS kindlewren idle loop seam 0.0000
+BOKIIDLE PASS kindlewren idle breathes (0.411 rad)
+BOKIIDLE PASS kindlewren fidget ends at 1.7 s of its 3.00 s clip
+BOKIIDLE PASS kindlewren fidget starts and ends on the idle's pose (0.0000)
+BOKIIDLE PASS kindlewren fidget moves 0.72 rad
+BOKIIDLE PASS kindlewren fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS kindlewren never fidgets while it acts
+BOKIIDLE PASS lodestick has a fidget of its own
+BOKIIDLE PASS lodestick has its fidget
+BOKIIDLE PASS lodestick: idle loops, the fidget plays once
+BOKIIDLE PASS lodestick: fidget a whole number of idle loops
+BOKIIDLE PASS lodestick idle loop seam 0.0000
+BOKIIDLE PASS lodestick idle breathes (0.349 rad)
+BOKIIDLE PASS lodestick fidget ends at 2.2 s of its 4.00 s clip
+BOKIIDLE PASS lodestick fidget starts and ends on the idle's pose (0.0007)
+BOKIIDLE PASS lodestick fidget moves 0.48 rad
+BOKIIDLE PASS lodestick fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS lodestick never fidgets while it acts
+BOKIIDLE PASS marchleaf has a fidget of its own
+BOKIIDLE PASS marchleaf has its fidget
+BOKIIDLE PASS marchleaf: idle loops, the fidget plays once
+BOKIIDLE PASS marchleaf: fidget a whole number of idle loops
+BOKIIDLE PASS marchleaf idle loop seam 0.0000
+BOKIIDLE PASS marchleaf idle breathes (0.939 rad)
+BOKIIDLE PASS marchleaf fidget ends at 1.5 s of its 3.00 s clip
+BOKIIDLE PASS marchleaf fidget starts and ends on the idle's pose (0.0007)
+BOKIIDLE PASS marchleaf fidget moves 0.46 rad
+BOKIIDLE PASS marchleaf fidgets every 4-9 s (8 in 60 s)
+BOKIIDLE PASS marchleaf never fidgets while it acts
+BOKIIDLE PASS mossgrade has a fidget of its own
+BOKIIDLE PASS mossgrade has its fidget
+BOKIIDLE PASS mossgrade: idle loops, the fidget plays once
+BOKIIDLE PASS mossgrade: fidget a whole number of idle loops
+BOKIIDLE PASS mossgrade idle loop seam 0.0000
+BOKIIDLE PASS mossgrade idle breathes (0.159 rad)
+BOKIIDLE PASS mossgrade fidget ends at 1.5 s of its 3.40 s clip
+BOKIIDLE PASS mossgrade fidget starts and ends on the idle's pose (0.0000)
+BOKIIDLE PASS mossgrade fidget moves 0.28 rad
+BOKIIDLE PASS mossgrade fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS mossgrade never fidgets while it acts
+BOKIIDLE PASS nettlynx has a fidget of its own
+BOKIIDLE PASS nettlynx has its fidget
+BOKIIDLE PASS nettlynx: idle loops, the fidget plays once
+BOKIIDLE PASS nettlynx: fidget a whole number of idle loops
+BOKIIDLE PASS nettlynx idle loop seam 0.0014
+BOKIIDLE PASS nettlynx idle breathes (0.142 rad)
+BOKIIDLE PASS nettlynx fidget ends at 1.5 s of its 2.90 s clip
+BOKIIDLE PASS nettlynx fidget starts and ends on the idle's pose (0.0014)
+BOKIIDLE PASS nettlynx fidget moves 0.45 rad
+BOKIIDLE PASS nettlynx fidgets every 4-9 s (9 in 60 s)
+BOKIIDLE PASS nettlynx never fidgets while it acts
+BOKIIDLE PASS thrumbird has a fidget of its own
+BOKIIDLE PASS thrumbird has its fidget
+BOKIIDLE PASS thrumbird: idle loops, the fidget plays once
+BOKIIDLE PASS thrumbird: fidget a whole number of idle loops
+BOKIIDLE PASS thrumbird idle loop seam 0.0000
+BOKIIDLE PASS thrumbird idle breathes (0.840 rad)
+BOKIIDLE PASS thrumbird fidget ends at 1.8 s of its 2.40 s clip
+BOKIIDLE PASS thrumbird fidget starts and ends on the idle's pose (0.0007)
+BOKIIDLE PASS thrumbird fidget moves 0.28 rad
+BOKIIDLE PASS thrumbird fidgets every 4-9 s (8 in 60 s)
+BOKIIDLE PASS thrumbird never fidgets while it acts
+BOKIIDLE SKIP gibbelle has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP caecilith has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP goliathite has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP hoarheron has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP floenatee has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP casquebill has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP duskapi has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP glaciyak has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP heatherhorn has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP kilnbadger has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP limpetor has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP moonloris has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP moundvark has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP murmurling has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP nacrolin has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP opalisk has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP orchisloth has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP scaldamus has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP sentrikat has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP spatewader has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP squalltross has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP threadwyrm has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP tuatrune has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP velvorm has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP nimbostrich has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP lilybara has no idle entry yet (docs/DEBT.md)
+BOKIIDLE SKIP umbrathere has no idle entry yet (docs/DEBT.md)
+BOKIIDLE DONE, failures: 0

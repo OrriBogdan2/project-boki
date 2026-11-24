@@ -1,0 +1,63 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+KINTRAIL ok   fire is in one group only
+KINTRAIL ok   spore is in one group only
+KINTRAIL ok   psychic is in one group only
+KINTRAIL ok   fairy is in one group only
+KINTRAIL ok   dark is in one group only
+KINTRAIL ok   poison is in one group only
+KINTRAIL ok   dragon is in one group only
+KINTRAIL ok   water is in one group only
+KINTRAIL ok   ice is in one group only
+KINTRAIL ok   rock is in one group only
+KINTRAIL ok   grass is in one group only
+KINTRAIL ok   bug is in one group only
+KINTRAIL ok   normal is in one group only
+KINTRAIL ok   flying is in one group only
+KINTRAIL ok   electric is in one group only
+KINTRAIL ok   steel is in one group only
+KINTRAIL ok   crystal is in one group only
+KINTRAIL ok   sound is in one group only
+KINTRAIL ok   normal has a trail group
+KINTRAIL ok   fire has a trail group
+KINTRAIL ok   water has a trail group
+KINTRAIL ok   grass has a trail group
+KINTRAIL ok   spore has a trail group
+KINTRAIL ok   electric has a trail group
+KINTRAIL ok   ice has a trail group
+KINTRAIL ok   rock has a trail group
+KINTRAIL ok   psychic has a trail group
+KINTRAIL ok   flying has a trail group
+KINTRAIL ok   dragon has a trail group
+KINTRAIL ok   dark has a trail group
+KINTRAIL ok   poison has a trail group
+KINTRAIL ok   bug has a trail group
+KINTRAIL ok   steel has a trail group
+KINTRAIL ok   fairy has a trail group
+KINTRAIL ok   crystal has a trail group
+KINTRAIL ok   sound has a trail group
+KINTRAIL ok   no group lists a type that does not exist (18)
+KINTRAIL ok   the capture pop colour is the type colour
+KINTRAIL ok   a Boki with no type keeps its own colour
+KINTRAIL ok   the player has a Boki
+KINTRAIL ok   one trail node serves every Boki
+KINTRAIL ok   4 shared emitters, one per group
+KINTRAIL ok   a summoned Boki is shown
+KINTRAIL FAIL a moving Boki leaves a trail particle
+KINTRAIL ok   standing still leaves none
+KINTRAIL ok   a knocked-out Boki leaves none
+KINTRAIL ok   a rival's Boki out of sight leaves none
+KINTRAIL ok   a far-off Boki leaves none
+KINTRAIL ok   still one trail node
+KINTRAIL DONE, failures: 1
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

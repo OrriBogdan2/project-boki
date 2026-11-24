@@ -1,0 +1,156 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PREMATCH ok   a trio's bot mates are dealt Hunters nobody else on the squad has (["bulwark", "dredge"])
+PREMATCH ok   offline nobody else has to load
+PREMATCH ok   no pick before picking starts
+PREMATCH ok   offline you pick first
+PREMATCH ok   a turn is 10 seconds
+PREMATCH ok   an open Hunter can be picked on your turn
+PREMATCH ok   a Hunter that isn't open is refused
+PREMATCH ok   you can change your mind until the turn runs out
+PREMATCH ok   once your turn runs out both bots pick at once and the picks lock
+PREMATCH ok   no two on the squad play the same Hunter (["gunslinger", "bulwark", "dredge"])
+PREMATCH ok   a taken Hunter names who took it
+PREMATCH ok   after the lock hold the match loads, exactly once (1)
+PREMATCH ok   the match starts with the picks, yours saved
+PREMATCH ok   a turn that runs out gives you a random open Hunter (bulwark)
+PREMATCH ok   the pick order is the same on every client (["1", "2", "3"])
+PREMATCH ok   picking waits until everyone loads (1/4)
+PREMATCH ok   a player's load is counted once
+PREMATCH ok   with everyone loaded the first turn starts
+PREMATCH ok   a teammate's pick off their turn is refused
+PREMATCH ok   a live pick shows, the turn goes on
+PREMATCH ok   a final pick ends the turn
+PREMATCH ok   the first pick is taken
+PREMATCH ok   you can't take a squadmate's Hunter
+PREMATCH ok   every squad pick is unique, a gone teammate picked for at once (["gunslinger", "bulwark", "mage"])
+PREMATCH ok   a teammate whose final pick never comes is picked for after the grace
+PREMATCH ok   a teammate can't take a taken Hunter
+PREMATCH ok   the roster carries the picks, the rival may mirror
+PREMATCH ok   a bot filling a squad skips Hunters the squad already has (dolm)
+PREMATCH ok   with nothing taken the pick is unchanged
+PREMATCH ok   on by default: an expedition gets the lobby
+PREMATCH ok   lobby_enabled off: no lobby, the plain loading screen
+PREMATCH ok   tutorial never gets the lobby
+PREMATCH ok   training never gets the lobby
+PREMATCH ok   arena never gets the lobby
+PREMATCH ok   duel never gets the lobby
+PREMATCH ok   demo_match never gets the lobby
+PREMATCH ok   autoplay never gets the lobby
+PREMATCH ok   a one-team match (training) never gets the lobby
+PREMATCH ok   a duo is dealt one bot mate
+PREMATCH ok   mates are dealt once
+PREMATCH ok   solo has no mates
+PREMATCH ok   the loading screen's squad is you first, then your mate
+PREMATCH ok   a chat line is trimmed and one line
+PREMATCH ok   a chat line is capped at 140 characters
+PREMATCH ok   without a transport the hook only tracks talking
+PREMATCH ok   a transport gets push-to-talk changes
+PREMATCH ok   first lobby: no teach while loading
+PREMATCH ok   first lobby, your turn, no pick: says 0:00 picks for you
+PREMATCH ok   first lobby, after a pick: says the squad sees it
+PREMATCH ok   first lobby: no teach once locked
+PREMATCH ok   second lobby: the usual note, teach shown once per save
+PREMATCH ok   an older save with no tutorial flag sees the first-lobby teach once
+PREMATCH ok   the screen shows every Hunter
+PREMATCH ok   the screen shows your squad
+PREMATCH ok   the banner says it's your turn (YOUR TURN)
+PREMATCH ok   the turn counts down from 0:10 (0:10)
+PREMATCH ok   first lobby: the note teaches the countdown
+PREMATCH ok   opening the first lobby marks it seen in the save
+PREMATCH ok   each card is name + role word, shut ones have a padlock, hover has stats and quest
+PREMATCH ok   no hold-to-talk without a voice transport and a human squadmate
+PREMATCH ok   every element sits inside the screen's safe margin ([])
+PREMATCH ok   13+ Hunter cards fit and the countdown stays big, top centre ([P: (569.0, 74.0), S: (141.0, 123.0)])
+PREMATCH ok   one how-to block: your pick's lines, the hovered card's on hover (, archer, )
+PREMATCH ok   a fresh save: Start here on the three starters only, no pick made for you (["archer", "juggernaut", "gunslinger"])
+PREMATCH ok   the expedition panel tags the same three (["archer", "juggernaut", "gunslinger"])
+PREMATCH ok   after one match no card says Start here
+PREMATCH ok   the chat is one 'Enter to chat' line until a message comes
+PREMATCH ok   Enter opens the input in place of the line
+PREMATCH ok   a fresh turn: plain digits
+PREMATCH ok   the last seconds of your turn turn the digits red
+PREMATCH ok   a sent chat line shows in the log
+PREMATCH ok   the first message opens the log and the input folds back
+PREMATCH FAIL with the chat log full every Hunter row still shows (["VBoxContainer at [P: (64.0, 36.0), S: (1152.0, 661.0)]", "HBoxContainer at [P: (64.0, 674.0), S: (1152.0, 23.0)]"])
+PREMATCH ok   your pick stands on the stage beside the grid, striking its lock-in pose
+PREMATCH FAIL with the stage up every element still sits inside the safe margin (["VBoxContainer at [P: (64.0, 36.0), S: (1152.0, 667.0)]", "HBoxContainer at [P: (64.0, 680.0), S: (1152.0, 23.0)]"])
+PREMATCH ok   once the squad has picked the banner says so
+PREMATCH ok   the note names the pick
+PREMATCH ok   archer: lock-in clip 'draw' is in its model
+PREMATCH ok   archer: the pose's window ends inside 'draw'
+PREMATCH ok   archer: choosing again restarts the pose
+PREMATCH ok   archer: the pose runs 1.25 s (1-1.5)
+PREMATCH ok   archer: back to its idle after the pose
+PREMATCH ok   archer: settled fully into its idle 0.6 s after
+PREMATCH ok   juggernaut: lock-in clip 'stance' is in its model
+PREMATCH ok   juggernaut: the pose's window ends inside 'stance'
+PREMATCH ok   juggernaut: choosing again restarts the pose
+PREMATCH ok   juggernaut: the pose runs 1.30 s (1-1.5)
+PREMATCH ok   juggernaut: back to its idle after the pose
+PREMATCH ok   juggernaut: settled fully into its idle 0.6 s after
+PREMATCH ok   gunslinger: lock-in clip 'emote' is in its model
+PREMATCH ok   gunslinger: the pose's window ends inside 'emote'
+PREMATCH ok   gunslinger: choosing again restarts the pose
+PREMATCH ok   gunslinger: the pose runs 1.45 s (1-1.5)
+PREMATCH ok   gunslinger: back to its idle after the pose
+PREMATCH ok   gunslinger: settled fully into its idle 0.6 s after
+PREMATCH ok   bulwark: lock-in clip 'emote' is in its model
+PREMATCH ok   bulwark: the pose's window ends inside 'emote'
+PREMATCH ok   bulwark: choosing again restarts the pose
+PREMATCH ok   bulwark: the pose runs 1.45 s (1-1.5)
+PREMATCH ok   bulwark: back to its idle after the pose
+PREMATCH ok   bulwark: settled fully into its idle 0.6 s after
+PREMATCH ok   rimewright: lock-in clip 'emote' is in its model
+PREMATCH ok   rimewright: the pose's window ends inside 'emote'
+PREMATCH ok   rimewright: choosing again restarts the pose
+PREMATCH ok   rimewright: the pose runs 1.45 s (1-1.5)
+PREMATCH ok   rimewright: back to its idle after the pose
+PREMATCH ok   rimewright: settled fully into its idle 0.6 s after
+PREMATCH ok   ashwick: lock-in clip 'emote' is in its model
+PREMATCH ok   ashwick: the pose's window ends inside 'emote'
+PREMATCH ok   ashwick: choosing again restarts the pose
+PREMATCH ok   ashwick: the pose runs 1.40 s (1-1.5)
+PREMATCH ok   ashwick: back to its idle after the pose
+PREMATCH ok   ashwick: settled fully into its idle 0.6 s after
+PREMATCH ok   dolm: lock-in clip 'emote_toss' is in its model
+PREMATCH ok   dolm: the pose's window ends inside 'emote_toss'
+PREMATCH ok   dolm: choosing again restarts the pose
+PREMATCH ok   dolm: the pose runs 1.45 s (1-1.5)
+PREMATCH ok   dolm: back to its idle after the pose
+PREMATCH ok   dolm: settled fully into its idle 0.6 s after
+PREMATCH ok   mage: lock-in clip 'emote' is in its model
+PREMATCH ok   mage: the pose's window ends inside 'emote'
+PREMATCH ok   mage: choosing again restarts the pose
+PREMATCH ok   mage: the pose runs 1.45 s (1-1.5)
+PREMATCH ok   mage: back to its idle after the pose
+PREMATCH ok   mage: settled fully into its idle 0.6 s after
+PREMATCH ok   dredge: lock-in clip 'emote' is in its model
+PREMATCH ok   dredge: the pose's window ends inside 'emote'
+PREMATCH ok   dredge: choosing again restarts the pose
+PREMATCH ok   dredge: the pose runs 1.45 s (1-1.5)
+PREMATCH ok   dredge: back to its idle after the pose
+PREMATCH ok   dredge: settled fully into its idle 0.6 s after
+PREMATCH ok   tender: lock-in clip 'emote' is in its model
+PREMATCH ok   tender: the pose's window ends inside 'emote'
+PREMATCH ok   tender: choosing again restarts the pose
+PREMATCH ok   tender: the pose runs 1.45 s (1-1.5)
+PREMATCH ok   tender: back to its idle after the pose
+PREMATCH ok   tender: settled fully into its idle 0.6 s after
+PREMATCH ok   thief: lock-in clip 'emote' is in its model
+PREMATCH ok   thief: the pose's window ends inside 'emote'
+PREMATCH ok   thief: choosing again restarts the pose
+PREMATCH ok   thief: the pose runs 1.45 s (1-1.5)
+PREMATCH ok   thief: back to its idle after the pose
+PREMATCH ok   thief: settled fully into its idle 0.6 s after
+PREMATCH ok   ostra: lock-in clip 'emote' is in its model
+PREMATCH ok   ostra: the pose's window ends inside 'emote'
+PREMATCH ok   ostra: choosing again restarts the pose
+PREMATCH ok   ostra: the pose runs 1.45 s (1-1.5)
+PREMATCH ok   ostra: back to its idle after the pose
+PREMATCH ok   ostra: settled fully into its idle 0.6 s after
+PREMATCH ok   gil: a model without clips names no lock-in
+PREMATCH DONE, failures: 2

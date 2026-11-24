@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+RATECARD ok   not due with no play time
+RATECARD ok   due after 10 minutes on this version
+RATECARD ok   the card shows instead of continuing
+RATECARD ok   skip continues and sends nothing
+RATECARD ok   once per version: not due again after a skip
+RATECARD ok   a second gate passes straight through
+RATECARD ok   offline: the answer stays queued
+RATECARD ok   next launch: the queue is sent and emptied
+RATECARD ok   payload has version, scores and note
+RATECARD ok   payload has minutes_played and player
+RATECARD ok   payload fits the 2 KB limit
+RATECARD DONE, failures: 0

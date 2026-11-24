@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BOTWAYS ok   the Ways Out mode is on in a real match
+BOTWAYS ok   plan raider 0.294 of squads (heart.json 0.30)
+BOTWAYS ok   plan runner 0.313 of squads (heart.json 0.30)
+BOTWAYS ok   plan holder 0.199 of squads (heart.json 0.20)
+BOTWAYS ok   plan stayer 0.194 of squads (heart.json 0.20)
+BOTWAYS ok   the player's squad is the human one, the rest are bot squads
+BOTWAYS ok   9 bot squads: bots may take 2 of the 3 early seats (got 2)
+BOTWAYS ok   before the 30 s delay a bot squad may not start the Sealed Lair, the human squad may
+BOTWAYS ok   after the delay with no bot squad on a seat: may start
+BOTWAYS ok   two early seats taken by bot squads: a third bot squad is capped
+BOTWAYS ok   ...and so is one of a squad that already took one
+BOTWAYS ok   ...the human squad never is
+BOTWAYS ok   a seat the human squad took does not count against the bots
+BOTWAYS ok   seed 5 has a bot raider squad
+BOTWAYS ok   a raider before raider_at_s: no seat yet (it loots)
+BOTWAYS ok   a raider at raider_at_s heads into the Sealed Lair (["lair_breach"])
+BOTWAYS ok   the lair shut: the raider falls through to the Heartspark and waits by the Heart (["seat"])
+BOTWAYS ok   every early seat gone: the final, inside the Heart ring (["ring"])
+BOTWAYS ok   the end phase closing over the Gate: the spark seat is gone, the final (["ring"])
+BOTWAYS ok   a goal out in the tide is pulled in to ground inside the ring (160 m, ring 179 m)
+BOTWAYS ok   a Hunter by the Heart has no reason to walk in
+BOTWAYS ok   a tile path leads no farther out than the ring, or than the bot already stands
+BOTWAYS ok   end phase: a bot within end_edge_m of the ring's edge walks in
+BOTWAYS ok   out in the tide: walk back in toward the Heart
+BOTWAYS PASS (0 fails)
+ERROR: 3 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 44 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

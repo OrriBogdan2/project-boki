@@ -1,0 +1,449 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+BLIGHT ok   a real expedition has the Blight
+BLIGHT ok   the map has outer (danger 0) and core (danger 2) islands
+BLIGHT levels: landing outer 0.06 core 0.14, 2 min core 0.46, 10 min outer 0.55 core 1.45
+BLIGHT ok   outer islands are safer than the core
+BLIGHT ok   it ramps with the squad's time on the islands
+BLIGHT ok   at landing it's weak everywhere (core 0.14)
+BLIGHT ok   per squad: a late squad starts soft (0.14 vs 1.45)
+BLIGHT skitter early 16.3 hp / 4.0 a bite, late core 41.8 hp / 11.3 a bite
+BLIGHT ok   an early Skitter dies fast and bites soft
+BLIGHT ok   a late one is the real thing
+BLIGHT ok   an early Warden's bolt is soft (6.0)
+BLIGHT raid: night 0.98 vs clear 0.70 at 5 min
+BLIGHT ok   night makes the Blight stronger
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _spawns (res://tools/blight_check.gd:120)
+       [14] run (res://tools/blight_check.gd:52)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _spawns (res://tools/blight_check.gd:120)
+       [14] run (res://tools/blight_check.gd:52)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+BLIGHT wardens 9: per island outer 1.00 mid 0.50 core 1.00
+BLIGHT ok   Wardens stand on the islands from the start
+BLIGHT FAIL fewer Wardens on the outer islands than in the core
+BLIGHT ok   no Skitters at the start
+BLIGHT ok   Wardens stand clear of camps and lairs
+BLIGHT 30 s of blasts late in a run, away from every nest: 0 Skitter(s)
+BLIGHT ok   noise away from any nest draws no Skitters (they only come from nests)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _noise_and_fights (res://tools/blight_check.gd:158)
+       [14] run (res://tools/blight_check.gd:53)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _noise_and_fights (res://tools/blight_check.gd:158)
+       [14] run (res://tools/blight_check.gd:53)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _noise_and_fights (res://tools/blight_check.gd:158)
+       [14] run (res://tools/blight_check.gd:53)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _noise_and_fights (res://tools/blight_check.gd:158)
+       [14] run (res://tools/blight_check.gd:53)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/blight_check.gd:25)
+       [12] _noise_and_fights (res://tools/blight_check.gd:158)
+       [13] run (res://tools/blight_check.gd:53)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/blight_check.gd:25)
+       [12] _noise_and_fights (res://tools/blight_check.gd:158)
+       [13] run (res://tools/blight_check.gd:53)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/blight_check.gd:25)
+       [12] _noise_and_fights (res://tools/blight_check.gd:158)
+       [13] run (res://tools/blight_check.gd:53)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/blight_check.gd:25)
+       [12] _noise_and_fights (res://tools/blight_check.gd:158)
+       [13] run (res://tools/blight_check.gd:53)
+       [14] run (res://tools/check_registry.gd:980)
+       [15] _ready (res://scripts/main.gd:270)
+BLIGHT ok   a Skitter in earshot heard the shot
+BLIGHT ok   one far off didn't
+BLIGHT the Skitter came 13.0 -> 6.4 tiles (state idle)
+BLIGHT ok   it came toward the noise
+BLIGHT ok   the hunter is level 1
+BLIGHT level-1 hunter vs an early Skitter: dead=true after 0.3s, the hunter lost 0 health+armor
+BLIGHT ok   a level-1 hunter kills an early Skitter
+BLIGHT ok   and keeps most of their health
+BLIGHT fleeing an early Skitter: it gave up after 6.8s (target <null>, 4.8 tiles), the hunter lost 0
+BLIGHT ok   a level-1 hunter can outrun an early Skitter
+BLIGHT ok   ... without losing much
+BLIGHT ok   an idle Skitter far from everyone burrows away
+BLIGHT ok   a Warden's snapshot carries its light and state (22 fields)
+BLIGHT ok   a remote Warden is built from the snapshot, light and all
+BLIGHT ok   the network version moved on (0.24.18)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _warden (res://tools/blight_check.gd:250)
+       [14] run (res://tools/blight_check.gd:54)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _warden (res://tools/blight_check.gd:250)
+       [14] run (res://tools/blight_check.gd:54)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+BLIGHT ok   out of the light, nothing happens
+BLIGHT Warden (lvl 0.21): shrieked after 1.40s in its light (1 shriek)
+BLIGHT ok   standing in a Warden's light makes it shriek
+BLIGHT ok   ... after a moment to get out (1.40s)
+BLIGHT ok   the light lights you up for everyone
+BLIGHT ok   early on the shriek is only a warning: no Skitters came out of it
+BLIGHT a late shriek (lvl 1.45) made 0 Skitters
+BLIGHT ok   late on, a shriek still makes no Skitters of its own
+BLIGHT ok   sneaking at the edge of the light keeps you unseen
+BLIGHT ok   found a bot
+BLIGHT a bot vs two early Skitters: 2.1s, skitters dead true/true, bot lost 4, bot out false downed false
+BLIGHT ok   Skitters go for bots too
+BLIGHT ok   the bot fights back
+BLIGHT ok   and isn't knocked by early Blight
+BLIGHT ok   a hurt bot picks a spot away from the Blight
+BLIGHT ok   no tide stage before the tide starts
+BLIGHT tide stage 0 from 90s: 0.34 a tick (source 3), full health dies in light 368s medium 430s heavy 573s
+BLIGHT tide stage 1 from 136s: 0.67 a tick (source 6), full health dies in light 184s medium 215s heavy 287s
+BLIGHT tide stage 2 from 183s: 5.62 a tick (source 50), full health dies in light 23s medium 26s heavy 35s
+BLIGHT tide stage 3 from 229s: 11.24 a tick (source 100), full health dies in light 12s medium 13s heavy 18s
+BLIGHT tide stage 4 from 275s: 16.86 a tick (source 150), full health dies in light 8s medium 9s heavy 12s
+BLIGHT tide stage 5 from 322s: 22.48 a tick (source 200), full health dies in light 6s medium 7s heavy 9s
+BLIGHT tide stage 6 from 368s: 28.10 a tick (source 250), full health dies in light 5s medium 6s heavy 7s
+BLIGHT tide stage 7 from 415s: 33.72 a tick (source 300), full health dies in light 4s medium 5s heavy 6s
+BLIGHT tide stage 8 from 461s: 39.34 a tick (source 350), full health dies in light 4s medium 4s heavy 5s
+BLIGHT tide stage 9 from 507s: 44.96 a tick (source 400), full health dies in light 3s medium 4s heavy 5s
+BLIGHT tide stage 10 from 554s: 50.58 a tick (source 450), full health dies in light 3s medium 3s heavy 4s
+BLIGHT ok   the close runs the source's 11 stages, each at its damage scaled by health
+BLIGHT ok   the last stage holds once the ring is closed
+BLIGHT tide live: outside true, lost 11.24 health in two ticks, armor 350 -> 350
+BLIGHT ok   outside the ring: the stage's damage a tick, past armor
+BLIGHT ok   inside the ring the tide doesn't hurt
+BLIGHT ok   at the last close a tick is the last stage's (50.6)
+BLIGHT ok   once the end close is done a tick is end_dmg_k times that (101.2)
+BLIGHT end phase, before the end phase: a downed Hunter out in the Blight (true) lost 7.3 down health in a tick (tick 50.6)
+BLIGHT ok   before the end phase: the tide leaves the downed to bleed (7.3)
+BLIGHT end phase, downed by a rival: a downed Hunter out in the Blight (true) lost 7.3 down health in a tick (tick 101.2)
+BLIGHT ok   downed by a rival: the tide leaves the downed to bleed (7.3)
+BLIGHT end phase, downed by the Blight: a downed Hunter out in the Blight (true) lost 100.0 down health in a tick (tick 101.2)
+BLIGHT ok   in the end phase the Blight wears down those it downed (100.0)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _tide_sfx (res://tools/blight_check.gd:437)
+       [14] run (res://tools/blight_check.gd:57)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _tide_sfx (res://tools/blight_check.gd:437)
+       [14] run (res://tools/blight_check.gd:57)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _tide_sfx (res://tools/blight_check.gd:437)
+       [14] run (res://tools/blight_check.gd:57)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _match (res://tools/blight_check.gd:25)
+       [13] _tide_sfx (res://tools/blight_check.gd:437)
+       [14] run (res://tools/blight_check.gd:57)
+       [15] run (res://tools/check_registry.gd:980)
+       [16] _ready (res://scripts/main.gd:270)
+BLIGHT ok   the three tide sounds exist and the rumble carries
+BLIGHT ok   before the tide starts: no cue, no rumble
+BLIGHT ok   the tide starting plays the onset swell once (["tide_onset"])
+BLIGHT ok   ...and nothing more inside the same stage
+BLIGHT ok   the next close stage plays the warning sting once (["tide_onset", "tide_warn"])
+BLIGHT ok   each new stage stings again
+BLIGHT tide rumble: -24.5 dB at 60 m, -5.2 dB at 12 m; on the ring true
+BLIGHT ok   the rumble sits on the wall and rises as it nears you
+BLIGHT DONE, failures: 1
+ERROR: 14 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 41 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 14 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 253: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 263: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 264: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 267: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 268: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 269: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 271: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 273: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 61 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

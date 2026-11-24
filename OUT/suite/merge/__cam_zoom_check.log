@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+CAMZOOM ok   a match starts at the widest view (1.60)
+CAMZOOM ok   37.5 m across, the source's [35.0, 39.0]
+CAMZOOM ok   a respawn puts the wheel back at the widest (1.60)
+CAMZOOM ok   wheel up steps in by 0.10 (1.50)
+CAMZOOM ok   wheel down steps back out (1.60)
+CAMZOOM ok   and stops at the widest
+CAMZOOM ok   wheel up stops at the closest (0.55)
+CAMZOOM ok   no wheel zoom while paused
+CAMZOOM ok   Ctrl reaches 2.24: past max 1.60, under the cap 2.40
+CAMZOOM ok   holding Ctrl asks for 2.24, wheel at 0.55
+CAMZOOM ok   holding Ctrl asks for 2.24, wheel at 1.60
+CAMZOOM ok   released, it asks for the wheel's 1.60 again
+CAMZOOM ok   the view eases to 2.24 (at 2.240)
+CAMZOOM ok   the view eases to 1.60 (at 1.600)
+CAMZOOM ok   in steps of at most 0.050 x a frame (0.026)
+CAMZOOM ok   gliding high up with the wheel at max stays under the cap (2.40)
+CAMZOOM ok   Ctrl view: the furthest corner is 36.5 m out, inside pose_far_m 40
+CAMZOOM ok   and 70 m from the camera, inside its far plane 299
+CAM ZOOM CHECK DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 254: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 255: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

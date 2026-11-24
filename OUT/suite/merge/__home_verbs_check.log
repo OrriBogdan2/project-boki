@@ -1,0 +1,79 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _rig (res://tools/home_verbs_check.gd:70)
+         [10] run (res://tools/home_verbs_check.gd:42)
+         [11] run (res://tools/check_registry.gd:980)
+         [12] _ready (res://scripts/main.gd:270)
+HOMEVERBS ok   feed: the body takes the move
+HOMEVERBS ok   feed: both hands held out in front
+HOMEVERBS ok   feed: ends and the body stands again
+HOMEVERBS ok   pat: the body takes the move
+HOMEVERBS ok   pat: the right hand reaches out and bobs (0.23)
+HOMEVERBS ok   pat: ends and the body stands again
+HOMEVERBS ok   lift: the body takes the move
+HOMEVERBS ok   lift: the hands go down to it, then up to the chest (0.28 to 0.60, rest 0.55)
+HOMEVERBS ok   lift: ends and the body stands again
+HOMEVERBS ok   toss: the body takes the move
+HOMEVERBS ok   toss: the hand goes back then through
+HOMEVERBS ok   toss: ends and the body stands again
+HOMEVERBS ok   cheer: the body takes the move
+HOMEVERBS ok   cheer: both hands above where they rest (+0.74)
+HOMEVERBS ok   cheer: ends and the body stands again
+HOMEVERBS ok   lift: ends on the carry hold, so the carry takes over with no pop
+HOMEVERBS ok   feed: knees well bent, a crouch
+HOMEVERBS ok   pat and toss lean in
+HOMEVERBS ok   every move has a length
+HOMEVERBS ok   the Empty walks on planted feet (EmptyGait)
+HOMEVERBS pat small Boki: hand 5.7 cm off at 0.56 m, 6.3 cm from its aim, hips 0.40 m, feet slid 0.07 cm
+HOMEVERBS ok   pat, small Boki: the hand touches it (5.7 cm off)
+HOMEVERBS ok   pat, small Boki: the feet stay planted (0.07 cm)
+HOMEVERBS feed small Boki: hand 5.8 cm off at 0.21 m, 6.6 cm from its aim, hips 0.28 m, feet slid 0.07 cm
+HOMEVERBS ok   feed, small Boki: the hand touches it (5.8 cm off)
+HOMEVERBS ok   feed, small Boki: the feet stay planted (0.07 cm)
+HOMEVERBS lift small Boki: hand 1.4 cm off at 0.20 m, 2.1 cm from its aim, hips 0.28 m, feet slid 0.07 cm
+HOMEVERBS ok   lift, small Boki: the hand touches it (1.4 cm off)
+HOMEVERBS ok   lift, small Boki: the feet stay planted (0.07 cm)
+HOMEVERBS pat big Boki: hand 0.2 cm off at 1.05 m, 4.4 cm from its aim, hips 0.45 m, feet slid 0.08 cm
+HOMEVERBS ok   pat, big Boki: the hand touches it (0.2 cm off)
+HOMEVERBS ok   pat, big Boki: the feet stay planted (0.08 cm)
+HOMEVERBS feed big Boki: hand 6.9 cm off at 0.54 m, 6.5 cm from its aim, hips 0.42 m, feet slid 0.07 cm
+HOMEVERBS ok   feed, big Boki: the hand touches it (6.9 cm off)
+HOMEVERBS ok   feed, big Boki: the feet stay planted (0.07 cm)
+HOMEVERBS lift big Boki: hand 0.7 cm off at 0.49 m, 2.1 cm from its aim, hips 0.36 m, feet slid 0.13 cm
+HOMEVERBS ok   lift, big Boki: the hand touches it (0.7 cm off)
+HOMEVERBS ok   lift, big Boki: the feet stay planted (0.13 cm)
+HOMEVERBS ok   feed: the hips go 14 cm lower for the small Boki
+HOMEVERBS ok   pat: the hand goes 49 cm higher for the big Boki's head
+HOMEVERBS ok   cheer: the feet stay planted (0.06 cm)
+HOMEVERBS ok   the home has the Boki
+HOMEVERBS ok   picking a Boki up plays the lift
+HOMEVERBS ok   you stand still for the lift, no carry hold yet
+HOMEVERBS ok   it stays on the ground until the hands have it
+HOMEVERBS ok   then it rides up to the chest (+0.89 m)
+HOMEVERBS ok   the carry hold takes over
+HOMEVERBS ok   petting plays the pat
+HOMEVERBS ok   tossing a ball plays the toss
+HOMEVERBS ok   feeding plays the crouch-and-offer
+HOMEVERBS ok   a drill is running, no cheer yet
+HOMEVERBS ok   a great drill mark plays the cheer
+HOMEVERBS ok   the home player body is animated
+HOMEVERBS DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

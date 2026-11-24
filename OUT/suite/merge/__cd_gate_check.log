@@ -1,0 +1,904 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+       [13] run (res://tools/check_registry.gd:980)
+       [14] _ready (res://scripts/main.gd:270)
+CDGATE ok   archer rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   archer rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   archer rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   archer rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   archer rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   archer rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   archer rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   archer rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   archer rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   archer rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   archer e on cooldown: no move or pose (anim )
+CDGATE ok   archer e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   archer e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   archer e on cooldown: nothing cast or spent
+CDGATE ok   archer e on cooldown: the bar shows the deny
+CDGATE ok   archer r on cooldown: no move or pose (anim )
+CDGATE ok   archer r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   archer r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   archer r on cooldown: nothing cast or spent
+CDGATE ok   archer r on cooldown: the bar shows the deny
+CDGATE ok   archer x on cooldown: no move or pose (anim )
+CDGATE ok   archer x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   archer x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   archer x on cooldown: nothing cast or spent
+CDGATE ok   archer x on cooldown: the bar shows the deny
+CDGATE ok   archer dash on cooldown: no move or pose (anim )
+CDGATE ok   archer dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   archer dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   archer dash on cooldown: nothing cast or spent
+CDGATE ok   archer dash on cooldown: the bar shows the deny
+CDGATE ok   archer q on cooldown: no move or pose (anim )
+CDGATE ok   archer q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   archer q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   archer q on cooldown: nothing cast or spent
+CDGATE ok   archer q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   juggernaut rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   juggernaut rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   juggernaut rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   juggernaut rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   juggernaut rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   juggernaut rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   juggernaut rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   juggernaut rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   juggernaut rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   juggernaut rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   juggernaut e on cooldown: no move or pose (anim )
+CDGATE ok   juggernaut e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   juggernaut e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   juggernaut e on cooldown: nothing cast or spent
+CDGATE ok   juggernaut e on cooldown: the bar shows the deny
+CDGATE ok   juggernaut r on cooldown: no move or pose (anim )
+CDGATE ok   juggernaut r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   juggernaut r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   juggernaut r on cooldown: nothing cast or spent
+CDGATE ok   juggernaut r on cooldown: the bar shows the deny
+CDGATE ok   juggernaut x on cooldown: no move or pose (anim )
+CDGATE ok   juggernaut x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   juggernaut x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   juggernaut x on cooldown: nothing cast or spent
+CDGATE ok   juggernaut x on cooldown: the bar shows the deny
+CDGATE ok   juggernaut dash on cooldown: no move or pose (anim )
+CDGATE ok   juggernaut dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   juggernaut dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   juggernaut dash on cooldown: nothing cast or spent
+CDGATE ok   juggernaut dash on cooldown: the bar shows the deny
+CDGATE ok   juggernaut q on cooldown: no move or pose (anim )
+CDGATE ok   juggernaut q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   juggernaut q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   juggernaut q on cooldown: nothing cast or spent
+CDGATE ok   juggernaut q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   gunslinger rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   gunslinger rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gunslinger rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gunslinger rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   gunslinger rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   gunslinger rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   gunslinger rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gunslinger rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gunslinger rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   gunslinger rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   gunslinger e on cooldown: no move or pose (anim )
+CDGATE ok   gunslinger e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gunslinger e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gunslinger e on cooldown: nothing cast or spent
+CDGATE ok   gunslinger e on cooldown: the bar shows the deny
+CDGATE ok   gunslinger r on cooldown: no move or pose (anim )
+CDGATE ok   gunslinger r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gunslinger r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gunslinger r on cooldown: nothing cast or spent
+CDGATE ok   gunslinger r on cooldown: the bar shows the deny
+CDGATE ok   gunslinger x on cooldown: no move or pose (anim )
+CDGATE ok   gunslinger x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gunslinger x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gunslinger x on cooldown: nothing cast or spent
+CDGATE ok   gunslinger x on cooldown: the bar shows the deny
+CDGATE ok   gunslinger dash on cooldown: no move or pose (anim )
+CDGATE ok   gunslinger dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gunslinger dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gunslinger dash on cooldown: nothing cast or spent
+CDGATE ok   gunslinger dash on cooldown: the bar shows the deny
+CDGATE ok   gunslinger q on cooldown: no move or pose (anim )
+CDGATE ok   gunslinger q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gunslinger q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gunslinger q on cooldown: nothing cast or spent
+CDGATE ok   gunslinger q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   bulwark rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   bulwark rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   bulwark rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   bulwark rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   bulwark rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   bulwark rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   bulwark rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   bulwark rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   bulwark rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   bulwark rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   bulwark e on cooldown: no move or pose (anim )
+CDGATE ok   bulwark e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   bulwark e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   bulwark e on cooldown: nothing cast or spent
+CDGATE ok   bulwark e on cooldown: the bar shows the deny
+CDGATE ok   bulwark r on cooldown: no move or pose (anim )
+CDGATE ok   bulwark r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   bulwark r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   bulwark r on cooldown: nothing cast or spent
+CDGATE ok   bulwark r on cooldown: the bar shows the deny
+CDGATE ok   bulwark x on cooldown: no move or pose (anim )
+CDGATE ok   bulwark x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   bulwark x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   bulwark x on cooldown: nothing cast or spent
+CDGATE ok   bulwark x on cooldown: the bar shows the deny
+CDGATE ok   bulwark dash on cooldown: no move or pose (anim )
+CDGATE ok   bulwark dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   bulwark dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   bulwark dash on cooldown: nothing cast or spent
+CDGATE ok   bulwark dash on cooldown: the bar shows the deny
+CDGATE ok   bulwark q on cooldown: no move or pose (anim )
+CDGATE ok   bulwark q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   bulwark q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   bulwark q on cooldown: nothing cast or spent
+CDGATE ok   bulwark q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   rimewright rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   rimewright rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   rimewright rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   rimewright rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   rimewright rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   rimewright rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   rimewright rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   rimewright rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   rimewright rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   rimewright rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   rimewright e on cooldown: no move or pose (anim )
+CDGATE ok   rimewright e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   rimewright e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   rimewright e on cooldown: nothing cast or spent
+CDGATE ok   rimewright e on cooldown: the bar shows the deny
+CDGATE ok   rimewright r on cooldown: no move or pose (anim )
+CDGATE ok   rimewright r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   rimewright r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   rimewright r on cooldown: nothing cast or spent
+CDGATE ok   rimewright r on cooldown: the bar shows the deny
+CDGATE ok   rimewright x on cooldown: no move or pose (anim )
+CDGATE ok   rimewright x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   rimewright x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   rimewright x on cooldown: nothing cast or spent
+CDGATE ok   rimewright x on cooldown: the bar shows the deny
+CDGATE ok   rimewright dash on cooldown: no move or pose (anim )
+CDGATE ok   rimewright dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   rimewright dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   rimewright dash on cooldown: nothing cast or spent
+CDGATE ok   rimewright dash on cooldown: the bar shows the deny
+CDGATE ok   rimewright q on cooldown: no move or pose (anim )
+CDGATE ok   rimewright q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   rimewright q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   rimewright q on cooldown: nothing cast or spent
+CDGATE ok   rimewright q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   ashwick rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   ashwick rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ashwick rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ashwick rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   ashwick rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   ashwick rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   ashwick rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ashwick rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ashwick rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   ashwick rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   ashwick e on cooldown: no move or pose (anim )
+CDGATE ok   ashwick e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ashwick e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ashwick e on cooldown: nothing cast or spent
+CDGATE ok   ashwick e on cooldown: the bar shows the deny
+CDGATE ok   ashwick r on cooldown: no move or pose (anim )
+CDGATE ok   ashwick r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ashwick r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ashwick r on cooldown: nothing cast or spent
+CDGATE ok   ashwick r on cooldown: the bar shows the deny
+CDGATE ok   ashwick x on cooldown: no move or pose (anim )
+CDGATE ok   ashwick x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ashwick x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ashwick x on cooldown: nothing cast or spent
+CDGATE ok   ashwick x on cooldown: the bar shows the deny
+CDGATE ok   ashwick dash on cooldown: no move or pose (anim )
+CDGATE ok   ashwick dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ashwick dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ashwick dash on cooldown: nothing cast or spent
+CDGATE ok   ashwick dash on cooldown: the bar shows the deny
+CDGATE ok   ashwick q on cooldown: no move or pose (anim )
+CDGATE ok   ashwick q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ashwick q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ashwick q on cooldown: nothing cast or spent
+CDGATE ok   ashwick q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   dolm rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   dolm rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dolm rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dolm rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   dolm rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   dolm rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   dolm rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dolm rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dolm rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   dolm rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   dolm e on cooldown: no move or pose (anim )
+CDGATE ok   dolm e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dolm e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dolm e on cooldown: nothing cast or spent
+CDGATE ok   dolm e on cooldown: the bar shows the deny
+CDGATE ok   dolm r on cooldown: no move or pose (anim )
+CDGATE ok   dolm r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dolm r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dolm r on cooldown: nothing cast or spent
+CDGATE ok   dolm r on cooldown: the bar shows the deny
+CDGATE ok   dolm x on cooldown: no move or pose (anim )
+CDGATE ok   dolm x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dolm x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dolm x on cooldown: nothing cast or spent
+CDGATE ok   dolm x on cooldown: the bar shows the deny
+CDGATE ok   dolm dash on cooldown: no move or pose (anim )
+CDGATE ok   dolm dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dolm dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dolm dash on cooldown: nothing cast or spent
+CDGATE ok   dolm dash on cooldown: the bar shows the deny
+CDGATE ok   dolm q on cooldown: no move or pose (anim )
+CDGATE ok   dolm q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dolm q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dolm q on cooldown: nothing cast or spent
+CDGATE ok   dolm q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   mage rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   mage rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   mage rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   mage rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   mage rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   mage rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   mage rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   mage rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   mage rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   mage rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   mage e on cooldown: no move or pose (anim )
+CDGATE ok   mage e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   mage e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   mage e on cooldown: nothing cast or spent
+CDGATE ok   mage e on cooldown: the bar shows the deny
+CDGATE ok   mage r on cooldown: no move or pose (anim )
+CDGATE ok   mage r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   mage r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   mage r on cooldown: nothing cast or spent
+CDGATE ok   mage r on cooldown: the bar shows the deny
+CDGATE ok   mage x on cooldown: no move or pose (anim mage_gum)
+CDGATE ok   mage x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   mage x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   mage x on cooldown: nothing cast or spent
+CDGATE ok   mage x on cooldown: the bar shows the deny
+CDGATE ok   mage dash on cooldown: no move or pose (anim mage_gum)
+CDGATE ok   mage dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   mage dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   mage dash on cooldown: nothing cast or spent
+CDGATE ok   mage dash on cooldown: the bar shows the deny
+CDGATE ok   mage q on cooldown: no move or pose (anim mage_gum)
+CDGATE ok   mage q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   mage q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   mage q on cooldown: nothing cast or spent
+CDGATE ok   mage q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   dredge rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   dredge rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dredge rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dredge rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   dredge rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   dredge rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   dredge rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dredge rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dredge rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   dredge rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   dredge e on cooldown: no move or pose (anim )
+CDGATE ok   dredge e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dredge e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dredge e on cooldown: nothing cast or spent
+CDGATE ok   dredge e on cooldown: the bar shows the deny
+CDGATE ok   dredge r on cooldown: no move or pose (anim )
+CDGATE ok   dredge r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dredge r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dredge r on cooldown: nothing cast or spent
+CDGATE ok   dredge r on cooldown: the bar shows the deny
+CDGATE ok   dredge x on cooldown: no move or pose (anim )
+CDGATE ok   dredge x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dredge x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dredge x on cooldown: nothing cast or spent
+CDGATE ok   dredge x on cooldown: the bar shows the deny
+CDGATE ok   dredge dash on cooldown: no move or pose (anim )
+CDGATE ok   dredge dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dredge dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dredge dash on cooldown: nothing cast or spent
+CDGATE ok   dredge dash on cooldown: the bar shows the deny
+CDGATE ok   dredge q on cooldown: no move or pose (anim )
+CDGATE ok   dredge q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   dredge q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   dredge q on cooldown: nothing cast or spent
+CDGATE ok   dredge q on cooldown: the bar shows the deny
+CDGATE ok   tender rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   tender rmb_tap on cooldown: no damage (foe 145 -> 145)
+CDGATE ok   tender rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   tender rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   tender rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   tender rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   tender rmb_hold on cooldown: no damage (foe 145 -> 145)
+CDGATE ok   tender rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   tender rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   tender rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   tender e on cooldown: no move or pose (anim )
+CDGATE ok   tender e on cooldown: no damage (foe 145 -> 145)
+CDGATE ok   tender e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   tender e on cooldown: nothing cast or spent
+CDGATE ok   tender e on cooldown: the bar shows the deny
+CDGATE ok   tender r on cooldown: no move or pose (anim )
+CDGATE ok   tender r on cooldown: no damage (foe 145 -> 145)
+CDGATE ok   tender r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   tender r on cooldown: nothing cast or spent
+CDGATE ok   tender r on cooldown: the bar shows the deny
+CDGATE ok   tender x on cooldown: no move or pose (anim )
+CDGATE ok   tender x on cooldown: no damage (foe 145 -> 145)
+CDGATE ok   tender x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   tender x on cooldown: nothing cast or spent
+CDGATE ok   tender x on cooldown: the bar shows the deny
+CDGATE ok   tender dash on cooldown: no move or pose (anim )
+CDGATE ok   tender dash on cooldown: no damage (foe 145 -> 145)
+CDGATE ok   tender dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   tender dash on cooldown: nothing cast or spent
+CDGATE ok   tender dash on cooldown: the bar shows the deny
+CDGATE ok   tender q on cooldown: no move or pose (anim )
+CDGATE ok   tender q on cooldown: no damage (foe 145 -> 145)
+CDGATE ok   tender q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   tender q on cooldown: nothing cast or spent
+CDGATE ok   tender q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   thief rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   thief rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   thief rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   thief rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   thief rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   thief rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   thief rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   thief rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   thief rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   thief rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   thief e on cooldown: no move or pose (anim )
+CDGATE ok   thief e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   thief e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   thief e on cooldown: nothing cast or spent
+CDGATE ok   thief e on cooldown: the bar shows the deny
+CDGATE ok   thief r on cooldown: no move or pose (anim )
+CDGATE ok   thief r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   thief r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   thief r on cooldown: nothing cast or spent
+CDGATE ok   thief r on cooldown: the bar shows the deny
+CDGATE ok   thief x on cooldown: no move or pose (anim )
+CDGATE ok   thief x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   thief x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   thief x on cooldown: nothing cast or spent
+CDGATE ok   thief x on cooldown: the bar shows the deny
+CDGATE ok   thief dash on cooldown: no move or pose (anim )
+CDGATE ok   thief dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   thief dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   thief dash on cooldown: nothing cast or spent
+CDGATE ok   thief dash on cooldown: the bar shows the deny
+CDGATE ok   thief q on cooldown: no move or pose (anim )
+CDGATE ok   thief q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   thief q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   thief q on cooldown: nothing cast or spent
+CDGATE ok   thief q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   ostra rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   ostra rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ostra rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ostra rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   ostra rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   ostra rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   ostra rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ostra rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ostra rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   ostra rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   ostra e on cooldown: no move or pose (anim )
+CDGATE ok   ostra e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ostra e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ostra e on cooldown: nothing cast or spent
+CDGATE ok   ostra e on cooldown: the bar shows the deny
+CDGATE ok   ostra r on cooldown: no move or pose (anim )
+CDGATE ok   ostra r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ostra r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ostra r on cooldown: nothing cast or spent
+CDGATE ok   ostra r on cooldown: the bar shows the deny
+CDGATE ok   ostra x on cooldown: no move or pose (anim )
+CDGATE ok   ostra x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ostra x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ostra x on cooldown: nothing cast or spent
+CDGATE ok   ostra x on cooldown: the bar shows the deny
+CDGATE ok   ostra dash on cooldown: no move or pose (anim )
+CDGATE ok   ostra dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ostra dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ostra dash on cooldown: nothing cast or spent
+CDGATE ok   ostra dash on cooldown: the bar shows the deny
+CDGATE ok   ostra q on cooldown: no move or pose (anim )
+CDGATE ok   ostra q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   ostra q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   ostra q on cooldown: nothing cast or spent
+CDGATE ok   ostra q on cooldown: the bar shows the deny
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:177)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] run (res://tools/cd_gate_check.gd:28)
+CDGATE ok   gil rmb_tap on cooldown: no move or pose (anim )
+CDGATE ok   gil rmb_tap on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gil rmb_tap on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gil rmb_tap on cooldown: nothing cast or spent
+CDGATE ok   gil rmb_tap on cooldown: the bar shows the deny
+CDGATE ok   gil rmb_hold on cooldown: no move or pose (anim )
+CDGATE ok   gil rmb_hold on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gil rmb_hold on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gil rmb_hold on cooldown: nothing cast or spent
+CDGATE ok   gil rmb_hold on cooldown: the bar shows the deny
+CDGATE ok   gil e on cooldown: no move or pose (anim )
+CDGATE ok   gil e on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gil e on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gil e on cooldown: nothing cast or spent
+CDGATE ok   gil e on cooldown: the bar shows the deny
+CDGATE ok   gil r on cooldown: no move or pose (anim )
+CDGATE ok   gil r on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gil r on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gil r on cooldown: nothing cast or spent
+CDGATE ok   gil r on cooldown: the bar shows the deny
+CDGATE ok   gil x on cooldown: no move or pose (anim )
+CDGATE ok   gil x on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gil x on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gil x on cooldown: nothing cast or spent
+CDGATE ok   gil x on cooldown: the bar shows the deny
+CDGATE ok   gil dash on cooldown: no move or pose (anim )
+CDGATE ok   gil dash on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gil dash on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gil dash on cooldown: nothing cast or spent
+CDGATE ok   gil dash on cooldown: the bar shows the deny
+CDGATE ok   gil q on cooldown: no move or pose (anim )
+CDGATE ok   gil q on cooldown: no damage (foe 193 -> 193)
+CDGATE ok   gil q on cooldown: no displacement (0.00 m, 0.00 with no press)
+CDGATE ok   gil q on cooldown: nothing cast or spent
+CDGATE ok   gil q on cooldown: the bar shows the deny
+CDGATE DONE, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 241: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 243: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 258: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 260: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 259: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 265: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 270: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 266: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 275: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 272: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 278: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 276: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 282: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 279: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 285: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 283: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 288: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 286: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 296: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 289: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 300: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 48 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

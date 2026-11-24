@@ -1,0 +1,1 @@
+2026-11-19T20:35:47Z ETA 21:04Z (~28 min): merge 633/633 done (258 red), main 167 run, ~91 still to run; now on main re-runs; 3.2 checks/min (last 10 min); avg 182 s/check on the server; started 16:13Z

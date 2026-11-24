@@ -1,0 +1,650 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PAIRCHECK shot vs shield                               PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] run (res://tools/check_registry.gd:980)
+       [4] _ready (res://scripts/main.gd:270)
+PAIRCHECK shot vs rock                                 PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] run (res://tools/check_registry.gd:980)
+       [4] _ready (res://scripts/main.gd:270)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] run (res://tools/check_registry.gd:980)
+       [4] _ready (res://scripts/main.gd:270)
+PAIRCHECK shot vs ice                                  PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] run (res://tools/check_registry.gd:980)
+       [4] _ready (res://scripts/main.gd:270)
+PAIRCHECK shot vs wall                                 PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] run (res://tools/check_registry.gd:980)
+       [4] _ready (res://scripts/main.gd:270)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] run (res://tools/check_registry.gd:980)
+       [4] _ready (res://scripts/main.gd:270)
+PAIRCHECK shot vs guard                                PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] run (res://tools/check_registry.gd:980)
+       [4] _ready (res://scripts/main.gd:270)
+PAIRCHECK hand vs shield                               PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK hand vs rock                                 PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK hand vs ice                                  PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK hand vs wall                                 PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK hand vs guard                                PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK beam vs shield                               PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK beam vs rock                                 PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK beam vs ice                                  PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK beam vs wall                                 PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK beam vs guard                                PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK chain vs shield                              PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK chain vs rock                                PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK chain vs ice                                 PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK chain vs wall                                PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK chain vs guard                               PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK cloak vs shield                              PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK cloak vs rock                                PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK cloak vs ice                                 PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK cloak vs wall                                PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK cloak vs guard                               PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK fissure vs shield                            PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK fissure vs rock                              PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK fissure vs ice                               PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK fissure vs wall                              PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK fissure vs guard                             PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK knock vs shield                              PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _fire (res://tools/blocker_check.gd:87)
+       [1] _try (res://tools/blocker_check.gd:57)
+       [2] _crosser (res://tools/blocker_check.gd:34)
+       [3] run (res://tools/blocker_check.gd:19)
+       [4] _crosser (res://tools/blocker_check.gd:37)
+       [5] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK knock vs rock                                PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _fire (res://tools/blocker_check.gd:87)
+       [1] _try (res://tools/blocker_check.gd:57)
+       [2] _crosser (res://tools/blocker_check.gd:34)
+       [3] run (res://tools/blocker_check.gd:19)
+       [4] _crosser (res://tools/blocker_check.gd:37)
+       [5] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK knock vs ice                                 PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _fire (res://tools/blocker_check.gd:87)
+       [1] _try (res://tools/blocker_check.gd:57)
+       [2] _crosser (res://tools/blocker_check.gd:34)
+       [3] run (res://tools/blocker_check.gd:19)
+       [4] _crosser (res://tools/blocker_check.gd:37)
+       [5] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK knock vs wall                                PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK knock vs guard                               PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK dash vs rock                                 PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK dash vs ice                                  PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK dash vs wall                                 PASS  want stop, got stop
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK phase vs rock                                PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK phase vs ice                                 PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK phase vs wall                                PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK trade vs shield                              PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK trade vs rock                                PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK trade vs ice                                 PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK trade vs wall                                PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_body'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+PAIRCHECK trade vs guard                               PASS  want pass, got pass
+ERROR: The object does not have any 'meta' values with the key 'blk_ice'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _clear (res://tools/blocker_check.gd:159)
+       [1] _crosser (res://tools/blocker_check.gd:36)
+       [2] run (res://tools/blocker_check.gd:19)
+       [3] _crosser (res://tools/blocker_check.gd:37)
+       [4] done (res://tools/hero_pair_check.gd:128)
+BLOCKER DONE, 46 checks, failures: 0
+ERROR: 1 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 1 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Texture with GL ID of 51: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 217: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 216: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 220: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 218: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 224: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 222: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 236: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 235: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 239: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 237: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 241: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 240: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 244: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 242: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 257: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 256: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 261: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 32 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

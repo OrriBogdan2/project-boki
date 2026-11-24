@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ROCKFEET ok   Tenzo's warden_anim map has legs_rigid
+ROCKFEET ok   stand on a Stone Row rock: planted foot 0.000 m off the surface (limit 0.04, 120 frames)
+ROCKFEET info stand on a Stone Row rock: the crags' mesh lies +0.04..+0.06 m under the foot (not asserted)
+ROCKFEET ok   Basalt Spine stands (13 rocks)
+ROCKFEET ok   walk along the Basalt Spine ridge: planted foot 0.000 m off the surface (limit 0.04, 23 frames)
+ROCKFEET info walk along the Basalt Spine ridge: the crags' mesh lies +0.05..+2.20 m under the foot (not asserted)
+ROCKFEET ok   step up onto a rock 0.25 m higher: planted foot 0.001 m off the surface (limit 0.04, 13 frames)
+ROCKFEET ok   step up onto a rock 0.25 m higher: the body eases up, no pop (0.033 m in a frame, limit 0.10), feet planted throughout (0 frames not)
+ROCKFEET info step up onto a rock 0.25 m higher: the crags' mesh lies +0.03..+2.45 m under the foot (not asserted)
+ROCKFEET ok   step down onto a rock 0.25 m lower: planted foot 0.000 m off the surface (limit 0.04, 12 frames)
+ROCKFEET info step down onto a rock 0.25 m lower: the crags' mesh lies +0.03..+2.45 m under the foot (not asserted)
+ROCKFEET ok   step up onto a rock 0.80 m higher: planted foot 0.000 m off the surface (limit 0.04, 5 frames)
+ROCKFEET ok   step up onto a rock 0.80 m higher: the body eases up, no pop (0.012 m in a frame, limit 0.10), feet planted throughout (0 frames not)
+ROCKFEET info step up onto a rock 0.80 m higher: the crags' mesh lies +0.16..+3.03 m under the foot (not asserted)
+ROCKFEET ok   step down onto a rock 0.80 m lower: planted foot 0.000 m off the surface (limit 0.04, 16 frames)
+ROCKFEET info step down onto a rock 0.80 m lower: the crags' mesh lies +0.02..+3.00 m under the foot (not asserted)
+ROCK_FEET_DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 10 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

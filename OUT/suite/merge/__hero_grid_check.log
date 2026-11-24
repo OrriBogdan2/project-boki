@@ -1,0 +1,192 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:468)
+         [10] _slice (res://scripts/home/home.gd:759)
+HEROGRID ok   1280x720: a tile per Hunter in the canonical order (["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage", "dredge", "tender", "thief", "ostra", "gil"])
+HEROGRID ok   1280x720: tile 'archer' label 'Lace' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'archer' label 'Lace' fits (1 lines, widest word 27 of 100 px)
+HEROGRID ok   1280x720: tile 'archer' label 'Lace' stays inside the tile
+HEROGRID ok   1280x720: tile 'archer' label 'the Red Stitch' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'archer' label 'the Red Stitch' fits (1 lines, widest word 30 of 100 px)
+HEROGRID ok   1280x720: tile 'archer' label 'the Red Stitch' stays inside the tile
+HEROGRID ok   1280x720: tile 'juggernaut' label 'Kael' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'juggernaut' label 'Kael' fits (1 lines, widest word 27 of 100 px)
+HEROGRID ok   1280x720: tile 'juggernaut' label 'Kael' stays inside the tile
+HEROGRID ok   1280x720: tile 'juggernaut' label 'the Unbroken' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'juggernaut' label 'the Unbroken' fits (1 lines, widest word 48 of 100 px)
+HEROGRID ok   1280x720: tile 'juggernaut' label 'the Unbroken' stays inside the tile
+HEROGRID ok   1280x720: tile 'gunslinger' label 'Vex' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'gunslinger' label 'Vex' fits (1 lines, widest word 24 of 100 px)
+HEROGRID ok   1280x720: tile 'gunslinger' label 'Vex' stays inside the tile
+HEROGRID ok   1280x720: tile 'gunslinger' label 'the Hired Gun' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'gunslinger' label 'the Hired Gun' fits (1 lines, widest word 27 of 100 px)
+HEROGRID ok   1280x720: tile 'gunslinger' label 'the Hired Gun' stays inside the tile
+HEROGRID ok   1280x720: tile 'gunslinger' label 'Playing' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'gunslinger' label 'Playing' fits (1 lines, widest word 37 of 100 px)
+HEROGRID ok   1280x720: tile 'gunslinger' label 'Playing' stays inside the tile
+HEROGRID ok   1280x720: tile 'bulwark' label 'Albert' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'bulwark' label 'Albert' fits (1 lines, widest word 38 of 100 px)
+HEROGRID ok   1280x720: tile 'bulwark' label 'Albert' stays inside the tile
+HEROGRID ok   1280x720: tile 'bulwark' label 'the Barnacle Knight' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'bulwark' label 'the Barnacle Knight' fits (1 lines, widest word 44 of 100 px)
+HEROGRID ok   1280x720: tile 'bulwark' label 'the Barnacle Knight' stays inside the tile
+HEROGRID ok   1280x720: tile 'rimewright' label 'Neve' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'rimewright' label 'Neve' fits (1 lines, widest word 30 of 100 px)
+HEROGRID ok   1280x720: tile 'rimewright' label 'Neve' stays inside the tile
+HEROGRID ok   1280x720: tile 'rimewright' label 'the Snowglide' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'rimewright' label 'the Snowglide' fits (1 lines, widest word 52 of 100 px)
+HEROGRID ok   1280x720: tile 'rimewright' label 'the Snowglide' stays inside the tile
+HEROGRID ok   1280x720: tile 'ashwick' label 'Cinder' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'ashwick' label 'Cinder' fits (1 lines, widest word 40 of 100 px)
+HEROGRID ok   1280x720: tile 'ashwick' label 'Cinder' stays inside the tile
+HEROGRID ok   1280x720: tile 'ashwick' label 'the Ashen Kiss' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'ashwick' label 'the Ashen Kiss' fits (1 lines, widest word 32 of 100 px)
+HEROGRID ok   1280x720: tile 'ashwick' label 'the Ashen Kiss' stays inside the tile
+HEROGRID ok   1280x720: tile 'dolm' label 'Tenzo' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'dolm' label 'Tenzo' fits (1 lines, widest word 35 of 100 px)
+HEROGRID ok   1280x720: tile 'dolm' label 'Tenzo' stays inside the tile
+HEROGRID ok   1280x720: tile 'dolm' label 'the Stone Seer' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'dolm' label 'the Stone Seer' fits (1 lines, widest word 30 of 100 px)
+HEROGRID ok   1280x720: tile 'dolm' label 'the Stone Seer' stays inside the tile
+HEROGRID ok   1280x720: tile 'mage' label 'Sparkle' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'mage' label 'Sparkle' fits (1 lines, widest word 47 of 100 px)
+HEROGRID ok   1280x720: tile 'mage' label 'Sparkle' stays inside the tile
+HEROGRID ok   1280x720: tile 'mage' label 'the Storm Chaser' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'mage' label 'the Storm Chaser' fits (1 lines, widest word 35 of 100 px)
+HEROGRID ok   1280x720: tile 'mage' label 'the Storm Chaser' stays inside the tile
+HEROGRID ok   1280x720: tile 'dredge' label 'Grimble' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'dredge' label 'Grimble' fits (1 lines, widest word 47 of 100 px)
+HEROGRID ok   1280x720: tile 'dredge' label 'Grimble' stays inside the tile
+HEROGRID ok   1280x720: tile 'dredge' label 'the Scrap King' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'dredge' label 'the Scrap King' fits (1 lines, widest word 29 of 100 px)
+HEROGRID ok   1280x720: tile 'dredge' label 'the Scrap King' stays inside the tile
+HEROGRID ok   1280x720: tile 'tender' label 'Meeko' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'tender' label 'Meeko' fits (1 lines, widest word 41 of 100 px)
+HEROGRID ok   1280x720: tile 'tender' label 'Meeko' stays inside the tile
+HEROGRID ok   1280x720: tile 'tender' label 'the Dawnfox' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'tender' label 'the Dawnfox' fits (1 lines, widest word 44 of 100 px)
+HEROGRID ok   1280x720: tile 'tender' label 'the Dawnfox' stays inside the tile
+HEROGRID ok   1280x720: tile 'thief' label 'Sable' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'thief' label 'Sable' fits (1 lines, widest word 33 of 100 px)
+HEROGRID ok   1280x720: tile 'thief' label 'Sable' stays inside the tile
+HEROGRID ok   1280x720: tile 'thief' label 'the Silver Thief' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'thief' label 'the Silver Thief' fits (1 lines, widest word 28 of 100 px)
+HEROGRID ok   1280x720: tile 'thief' label 'the Silver Thief' stays inside the tile
+HEROGRID ok   1280x720: tile 'ostra' label 'Motley' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'ostra' label 'Motley' fits (1 lines, widest word 44 of 100 px)
+HEROGRID ok   1280x720: tile 'ostra' label 'Motley' stays inside the tile
+HEROGRID ok   1280x720: tile 'ostra' label 'the Void Jester' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'ostra' label 'the Void Jester' fits (1 lines, widest word 32 of 100 px)
+HEROGRID ok   1280x720: tile 'ostra' label 'the Void Jester' stays inside the tile
+HEROGRID ok   1280x720: tile 'gil' label 'Gil' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'gil' label 'Gil' fits (1 lines, widest word 17 of 100 px)
+HEROGRID ok   1280x720: tile 'gil' label 'Gil' stays inside the tile
+HEROGRID ok   1280x720: tile 'gil' label 'the Novice Mage' is not clipped or ellipsed
+HEROGRID ok   1280x720: tile 'gil' label 'the Novice Mage' fits (1 lines, widest word 34 of 100 px)
+HEROGRID ok   1280x720: tile 'gil' label 'the Novice Mage' stays inside the tile
+HEROGRID ok   1280x720: every tile has a name and a title label (27)
+HEROGRID ok   1280x720: the grid shows without scrolling (bottom 558 of 603)
+HEROGRID ok   1920x1080: a tile per Hunter in the canonical order (["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage", "dredge", "tender", "thief", "ostra", "gil"])
+HEROGRID ok   1920x1080: tile 'archer' label 'Lace' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'archer' label 'Lace' fits (1 lines, widest word 27 of 100 px)
+HEROGRID ok   1920x1080: tile 'archer' label 'Lace' stays inside the tile
+HEROGRID ok   1920x1080: tile 'archer' label 'the Red Stitch' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'archer' label 'the Red Stitch' fits (1 lines, widest word 30 of 100 px)
+HEROGRID ok   1920x1080: tile 'archer' label 'the Red Stitch' stays inside the tile
+HEROGRID ok   1920x1080: tile 'juggernaut' label 'Kael' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'juggernaut' label 'Kael' fits (1 lines, widest word 27 of 100 px)
+HEROGRID ok   1920x1080: tile 'juggernaut' label 'Kael' stays inside the tile
+HEROGRID ok   1920x1080: tile 'juggernaut' label 'the Unbroken' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'juggernaut' label 'the Unbroken' fits (1 lines, widest word 48 of 100 px)
+HEROGRID ok   1920x1080: tile 'juggernaut' label 'the Unbroken' stays inside the tile
+HEROGRID ok   1920x1080: tile 'gunslinger' label 'Vex' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'gunslinger' label 'Vex' fits (1 lines, widest word 24 of 100 px)
+HEROGRID ok   1920x1080: tile 'gunslinger' label 'Vex' stays inside the tile
+HEROGRID ok   1920x1080: tile 'gunslinger' label 'the Hired Gun' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'gunslinger' label 'the Hired Gun' fits (1 lines, widest word 27 of 100 px)
+HEROGRID ok   1920x1080: tile 'gunslinger' label 'the Hired Gun' stays inside the tile
+HEROGRID ok   1920x1080: tile 'gunslinger' label 'Playing' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'gunslinger' label 'Playing' fits (1 lines, widest word 37 of 100 px)
+HEROGRID ok   1920x1080: tile 'gunslinger' label 'Playing' stays inside the tile
+HEROGRID ok   1920x1080: tile 'bulwark' label 'Albert' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'bulwark' label 'Albert' fits (1 lines, widest word 38 of 100 px)
+HEROGRID ok   1920x1080: tile 'bulwark' label 'Albert' stays inside the tile
+HEROGRID ok   1920x1080: tile 'bulwark' label 'the Barnacle Knight' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'bulwark' label 'the Barnacle Knight' fits (1 lines, widest word 44 of 100 px)
+HEROGRID ok   1920x1080: tile 'bulwark' label 'the Barnacle Knight' stays inside the tile
+HEROGRID ok   1920x1080: tile 'rimewright' label 'Neve' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'rimewright' label 'Neve' fits (1 lines, widest word 30 of 100 px)
+HEROGRID ok   1920x1080: tile 'rimewright' label 'Neve' stays inside the tile
+HEROGRID ok   1920x1080: tile 'rimewright' label 'the Snowglide' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'rimewright' label 'the Snowglide' fits (1 lines, widest word 52 of 100 px)
+HEROGRID ok   1920x1080: tile 'rimewright' label 'the Snowglide' stays inside the tile
+HEROGRID ok   1920x1080: tile 'ashwick' label 'Cinder' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'ashwick' label 'Cinder' fits (1 lines, widest word 40 of 100 px)
+HEROGRID ok   1920x1080: tile 'ashwick' label 'Cinder' stays inside the tile
+HEROGRID ok   1920x1080: tile 'ashwick' label 'the Ashen Kiss' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'ashwick' label 'the Ashen Kiss' fits (1 lines, widest word 32 of 100 px)
+HEROGRID ok   1920x1080: tile 'ashwick' label 'the Ashen Kiss' stays inside the tile
+HEROGRID ok   1920x1080: tile 'dolm' label 'Tenzo' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'dolm' label 'Tenzo' fits (1 lines, widest word 35 of 100 px)
+HEROGRID ok   1920x1080: tile 'dolm' label 'Tenzo' stays inside the tile
+HEROGRID ok   1920x1080: tile 'dolm' label 'the Stone Seer' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'dolm' label 'the Stone Seer' fits (1 lines, widest word 30 of 100 px)
+HEROGRID ok   1920x1080: tile 'dolm' label 'the Stone Seer' stays inside the tile
+HEROGRID ok   1920x1080: tile 'mage' label 'Sparkle' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'mage' label 'Sparkle' fits (1 lines, widest word 47 of 100 px)
+HEROGRID ok   1920x1080: tile 'mage' label 'Sparkle' stays inside the tile
+HEROGRID ok   1920x1080: tile 'mage' label 'the Storm Chaser' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'mage' label 'the Storm Chaser' fits (1 lines, widest word 35 of 100 px)
+HEROGRID ok   1920x1080: tile 'mage' label 'the Storm Chaser' stays inside the tile
+HEROGRID ok   1920x1080: tile 'dredge' label 'Grimble' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'dredge' label 'Grimble' fits (1 lines, widest word 47 of 100 px)
+HEROGRID ok   1920x1080: tile 'dredge' label 'Grimble' stays inside the tile
+HEROGRID ok   1920x1080: tile 'dredge' label 'the Scrap King' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'dredge' label 'the Scrap King' fits (1 lines, widest word 29 of 100 px)
+HEROGRID ok   1920x1080: tile 'dredge' label 'the Scrap King' stays inside the tile
+HEROGRID ok   1920x1080: tile 'tender' label 'Meeko' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'tender' label 'Meeko' fits (1 lines, widest word 41 of 100 px)
+HEROGRID ok   1920x1080: tile 'tender' label 'Meeko' stays inside the tile
+HEROGRID ok   1920x1080: tile 'tender' label 'the Dawnfox' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'tender' label 'the Dawnfox' fits (1 lines, widest word 44 of 100 px)
+HEROGRID ok   1920x1080: tile 'tender' label 'the Dawnfox' stays inside the tile
+HEROGRID ok   1920x1080: tile 'thief' label 'Sable' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'thief' label 'Sable' fits (1 lines, widest word 33 of 100 px)
+HEROGRID ok   1920x1080: tile 'thief' label 'Sable' stays inside the tile
+HEROGRID ok   1920x1080: tile 'thief' label 'the Silver Thief' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'thief' label 'the Silver Thief' fits (1 lines, widest word 28 of 100 px)
+HEROGRID ok   1920x1080: tile 'thief' label 'the Silver Thief' stays inside the tile
+HEROGRID ok   1920x1080: tile 'ostra' label 'Motley' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'ostra' label 'Motley' fits (1 lines, widest word 44 of 100 px)
+HEROGRID ok   1920x1080: tile 'ostra' label 'Motley' stays inside the tile
+HEROGRID ok   1920x1080: tile 'ostra' label 'the Void Jester' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'ostra' label 'the Void Jester' fits (1 lines, widest word 32 of 100 px)
+HEROGRID ok   1920x1080: tile 'ostra' label 'the Void Jester' stays inside the tile
+HEROGRID ok   1920x1080: tile 'gil' label 'Gil' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'gil' label 'Gil' fits (1 lines, widest word 17 of 100 px)
+HEROGRID ok   1920x1080: tile 'gil' label 'Gil' stays inside the tile
+HEROGRID ok   1920x1080: tile 'gil' label 'the Novice Mage' is not clipped or ellipsed
+HEROGRID ok   1920x1080: tile 'gil' label 'the Novice Mage' fits (1 lines, widest word 34 of 100 px)
+HEROGRID ok   1920x1080: tile 'gil' label 'the Novice Mage' stays inside the tile
+HEROGRID ok   1920x1080: every tile has a name and a title label (27)
+HEROGRID ok   1920x1080: the grid shows without scrolling (bottom 558 of 603)
+HEROGRID CHECK DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

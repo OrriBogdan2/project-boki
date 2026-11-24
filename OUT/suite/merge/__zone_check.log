@@ -1,0 +1,56 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+PAIRCHECK stone row: three rocks on open ground        PASS  rocks 3
+PAIRCHECK stone row: every rock stands on solid ground PASS  
+PAIRCHECK stone row: rocks block a body (collision)    PASS  
+PAIRCHECK stone row: a rock stops a walking body       PASS  
+PAIRCHECK stone row: nothing raised with the abyss right ahead PASS  rocks 0 cast false
+PAIRCHECK stone row: rocks near the edge stay on ground PASS  rocks 3
+PAIRCHECK spine: over the abyss the rocks are the walkway: the abyss stays abyss, no bridge event PASS  void 2828 -> 2828
+PAIRCHECK spine: rocks stand over the gap and on the banks, every rock raised PASS  rocks 15 over the gap 6
+PAIRCHECK stone row: not built through a rock or wall  PASS  rocks 0
+PAIRCHECK stone row: no rock raised inside a body      PASS  rocks 2
+PAIRCHECK net: each rock is announced                  PASS  events 3 rocks 3
+PAIRCHECK net: the second game has the same rocks in the same places PASS  b 3
+PAIRCHECK net: the remote rocks block bodies too       PASS  
+PAIRCHECK net: a launched rock is removed on the other game PASS  a 2 b 2
+PAIRCHECK seed: planted at the aimed edge, not over the abyss PASS  seed (12.75, 1.6, 32.5)
+PAIRCHECK seed: stops short of the abyss               PASS  x 4.2
+PAIRCHECK net: the seed is announced with its radius and growth PASS  [["zone", "seed", "p1", "p1.s2", 12.75, 1.6, 32.5, 3.2, 6.5]]
+PAIRCHECK swap: aimed over the abyss, it lands at the cursor, over the abyss (item 42) PASS  x 9.0
+PAIRCHECK swap: a rock in the way is lobbed over, it lands at the cursor (item 42) PASS  x 10.0
+PAIRCHECK net: Net.VERSION is at least 0.14.0 (carry and zone events) PASS  0.24.18
+PAIRCHECK net: Trade tells the game that owns the foe to move it PASS  [["disp", "tp", "t1", 8.5, 1.6, 32.5]]
+PAIRCHECK net: the owning game moves the foe to where the trader stood PASS  x 0.0
+PAIRCHECK zone DONE, 22 checks, failures: 0
+ERROR: Texture with GL ID of 41: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 43: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 42: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 58: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 86: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 89: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 61: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 67: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 60: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 75: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 108: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 110: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
