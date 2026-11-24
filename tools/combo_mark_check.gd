@@ -34,7 +34,8 @@ func run(ok: Callable, ac, arch: String) -> void:
 				str(mine.size()))
 		(k as ThiefKit).add_mark(t, 11, true)
 		mine = ThiefKit.marked_by.get(p.nid, {})
-		ok.call("%s: a Mark put on a foe is tracked for the fade" % tag, mine.has(t.get_instance_id()), str(mine.size()))
+		ok.call("%s: a Mark put on a foe is tracked for the fade" % tag, mine.has(t.get_instance_id()),
+				str(mine.size()))
 		var d3 := k.combo_read(t)
 		ok.call("%s: 11 Marks read 11 past the %d pips" % [tag, int(d3["max"])],
 				int(d3["n"]) == 11 and int(d3["n"]) > int(d3["max"]), str(d3["n"]))
