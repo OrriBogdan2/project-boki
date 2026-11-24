@@ -1,5 +1,5 @@
 extends "res://tools/gameplay_media.gd"
-## --meeko-companions-shots --shots-dir=<dir> [--hero=tender] [--face]: Meeko alone in a real match, her sun and cloud
+## --meeko-companions-shots --shots-dir=<dir> [--hero=tender] [--face] [--eye=<m>]: Meeko alone in a real match, her sun and cloud
 ## in game view (zoom 1.0), mid (0.5) and close (zoom --close=<z>, default 0.2), over 4 orbit phases, as
 ## <dir>/<tag>_<phase>_<view>.png. Needs a renderer (jobq --needs gpu).
 
@@ -13,6 +13,9 @@ const STATES := [  # [name, held inputs, s held before the shot]
 const PHASE_SECS := 1.0
 var face := false
 var close := 0.2
+var eye := -1.0  # --eye=<m>: the game camera dropped to this height above her feet, level, three-quarter front
+const EYE_OFF := Vector2(2.4, 3.8)  # m: where it stands (x, z) from her
+const EYE_STATES := [["idle", {}, 1.5], ["run", {"move": Vector2(1, 0.4)}, 1.0], ["fire", {"fire": true}, 0.25]]
 
 
 func run(main_node: Node) -> void:
@@ -23,6 +26,8 @@ func run(main_node: Node) -> void:
 			hero = String(a).substr(7)
 		if String(a) == "--face":
 			face = true
+		if String(a).begins_with("--eye="):
+			eye = float(String(a).substr(6))
 		if String(a).begins_with("--close="):
 			close = float(String(a).substr(8))
 		if String(a).begins_with("--shots-dir="):
@@ -34,6 +39,14 @@ func run(main_node: Node) -> void:
 	await _start(hero, "cindle")
 	m.player.ctrl = "idle"
 	m.player.teleport(_ground(m.player.pos))
+	if eye >= 0.0:
+		for st in EYE_STATES:
+			await _take(st[2], 1.0, "eye%03d_%s.png" % [int(eye * 100), st[0]], st[1])
+			for _i in 40:
+				m.step(STEP)
+		print("MEEKOSHOTS done in %s" % dir)
+		main.get_tree().quit(0)
+		return
 	for i in PHASES:
 		await _take(1.5 if i == 0 else PHASE_SECS, 1.0, "p%d_game.png" % i)
 		await _take(0.05, 0.5, "p%d_mid.png" % i)
@@ -54,13 +67,18 @@ func _take(secs: float, zoom_v: float, file: String, held := {}) -> void:
 	var t := 0.0
 	while t < secs:
 		_purge()
-		if face:
+		if eye >= 0.0:
+			p.inp["aim"] = p.pos + Vector3(EYE_OFF.x, 0.0, EYE_OFF.y)
+		elif face:
 			p.inp["aim"] = p.pos + FACE_CAM
 		for k in held:
 			p.inp[k] = held[k]
 		for _i in 2:
 			m.step(STEP)
 		m.cam.follow(p.pos, FRAME, false)
+		if eye >= 0.0:  # (still the game camera and lens, just at her height)
+			m.cam.global_position = p.pos + Vector3(EYE_OFF.x, eye, EYE_OFF.y)
+			m.cam.look_at(p.pos + Vector3(0.0, eye, 0.0), Vector3.UP)
 		for h in m.hunters:
 			h.render(FRAME, 1.0)
 		await main.get_tree().process_frame
