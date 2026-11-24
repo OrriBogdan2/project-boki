@@ -159,8 +159,10 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
 | marchleaf | clip | clip | clip | clip | clip | clip | proc | proc |
 | mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
+| nacrolin | clip | clip | clip | clip | clip | clip | proc | proc |
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
 | orchisloth | clip | clip | clip | clip | clip | clip | proc | proc |
+| nimbostrich | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
 | thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
