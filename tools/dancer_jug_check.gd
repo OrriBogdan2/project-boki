@@ -614,7 +614,8 @@ func juggernaut(a) -> void:
 	var air_r3 := k.air_cooldown()
 	p_v.slot_lv["sec"] = 1
 	p_v.slot_lv["kin"] = 1
-	a_x.ok("juggernaut ranks: Smash +20% at rank 2 and 3, Short Leash cooldown -12.5% / -37.5%, Hit the Deck 7.2s -> 4.8s",
+	a_x.ok("juggernaut ranks: Smash +20% at rank 2 and 3, Short Leash cooldown -12.5% / -37.5%, Hit the Deck " +
+			"7.2s -> 4.8s",
 			absf(float(smash_ks[0]) - 1.0) < 0.001 and absf(float(smash_ks[1]) - 1.2) < 0.001
 			and absf(float(smash_ks[2]) - 1.4) < 0.001 and absf(float(chain_ks[1]) - 0.875) < 0.001
 			and absf(float(chain_ks[2]) - 0.625) < 0.001 and absf(air_r1 - 7.2) < 0.001 and absf(air_r3 - 4.8) < 0.001,

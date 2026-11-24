@@ -1,7 +1,8 @@
 class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
-##   gnd  Grounded (the Thief's Bola, Sparkle's Undercurrent): no dash, jump or glide; cords round the legs (StatusLooks),
+##   gnd  Grounded (the Thief's Bola, Sparkle's Undercurrent): no dash, jump or glide; cords round the legs
+##   (StatusLooks),
 ##        in the caster's colour when `by` names one, else amber
 ##   blt  Blight (the Juggernaut's Short Leash, Sable's Last Dance rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage

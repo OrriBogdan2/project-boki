@@ -473,7 +473,8 @@ func _mage() -> void:
 	Sfx.listener = P.pos               # (the looks are drawn near the camera's focus)
 	P.inp["e_down"] = true
 	P.ak.use_e()
-	ok("Undercurrent: the circle drops at the cursor", not K.strikes.is_empty() and _flat(K.strikes[0]["at"], T.pos) < 0.3)
+	ok("Undercurrent: the circle drops at the cursor",
+			not K.strikes.is_empty() and _flat(K.strikes[0]["at"], T.pos) < 0.3)
 	ac.step(m, 0.05)
 	ac.aim_at(P, T.pos + Vector3(-3.0, 0, 0))           # the drag: back toward Sparkle
 	ac.step(m, 0.55)
@@ -494,7 +495,8 @@ func _mage() -> void:
 		if l["mode"] == HeroVfx.MODES["skirt"] and float(l["tall"]) <= 4.0 and pink:
 			pillars += 1
 	ce = AimKit.entry(P, "e0")
-	ok("Undercurrent look (footage): a dark disc on its radius (full to the strike), a short pink-white pillar, the chevron",
+	ok("Undercurrent look (footage): a dark disc on its radius (full to the strike), a short pink-white " +
+			"pillar, the chevron",
 			not disc.is_empty() and absf(float(disc["dur"]) * HeroVfx.HELD_LIFE - delay) < 0.01
 			and pillars == 1 and (ce.get("pointer", Vector2.ZERO) as Vector2).x < -0.9,
 			"disc %s pillars %d" % [disc.get("dur", "none"), pillars])
@@ -514,7 +516,8 @@ func _mage() -> void:
 	var ring_ok := not ring.is_empty() and not ring2.is_empty() and bool(ring2.get("dashed", false))
 	var ring_col := (ring.get("col", Color.BLACK) as Color).to_html(false)
 	ring_ok = ring_ok and bool(ring.get("all", false)) and ring_col == pink and float(ring.get("band", 0.0)) > 0.0
-	ok("Undercurrent's Grounded: two thin pink binding rings (one dashed, seen by all, no fill), pink cords, no amber disc",
+	ok("Undercurrent's Grounded: two thin pink binding rings (one dashed, seen by all, no fill), pink cords, " +
+			"no amber disc",
 			ring_ok and String(cords.get("tint", "")) == pink,
 			"rings %s/%s tint %s" % [not ring.is_empty(), not ring2.is_empty(), cords.get("tint", "-")])
 	ac.step(m, 0.9)

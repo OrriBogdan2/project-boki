@@ -666,7 +666,8 @@ func rmb_open() -> bool:
 	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
 
 ## The Final Swing press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Hit the Deck, the Gilded
-## Riposte's guard and cleave) is kept for Loco.press_buffer and goes off when it ends; in the Short Leash's pull (and just
+## Riposte's guard and cleave) is kept for Loco.press_buffer and goes off when it ends; in the Short Leash's pull (and
+## just
 ## after) it spins at once.
 func press_rmb() -> void:
 	if _rmb_waits():

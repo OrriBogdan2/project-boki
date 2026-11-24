@@ -13,7 +13,7 @@ const SKY_HOLD_AT := 0.9      # s into the sky clip: its arm-up pose (keys 0.5-1
 const ARROW_LEN := 1.3       # of the circle radius: the committed arrow inside the circle
 
 var kit: MageKit
-var bound := {}                 # foe instance id -> [foe, seconds left]: Undercurrent's Grounded, held by two pink rings
+var bound := {}                 # foe instance id -> [foe, seconds left]: Undercurrent's Grounded (two pink rings)
 
 func _init(owner_kit: MageKit) -> void:
 	kit = owner_kit

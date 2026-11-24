@@ -1,6 +1,7 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Tenzo's reel (--hero-vfx-reel --reel-hero=dolm): a boulder thrown, Foothold raised then punched into flying
-## rocks that burst, Leap of Faith, a full Rock Bottom, and Backbone erupting; owner playtest 11-08: the held Rock Bottom
+## rocks that burst, Leap of Faith, a full Rock Bottom, and Backbone erupting; owner playtest 11-08: the held Rock
+## Bottom
 ## at a dummy right in its path, and R pressed while falling over the abyss (the rock floor rising under him).
 
 ## Engine.time_scale while the reel runs: a software frame takes about half a second, so at this scale the

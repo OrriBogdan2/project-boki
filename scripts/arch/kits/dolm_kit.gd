@@ -624,7 +624,8 @@ func on_dash(use_ex: bool) -> bool:
 func charge_orb() -> bool:
 	return false
 
-## A Leap of Faith chain is her ground dash for DashFlow: from the press until it ends (the rock rolling on after is not).
+## A Leap of Faith chain is her ground dash for DashFlow: from the press until it ends (the rock rolling on after is
+## not).
 ## The Rock Bottom runs to its landing: no glider mid-move (item 162b), except over the abyss (a rescue).
 func locks_glide() -> bool:
 	return dive and not h.over_void()

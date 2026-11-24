@@ -1,6 +1,7 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Motley's reel (tools/hero_vfx_reel.gd): quick orbs and a full orb at the dummy with their hits, the Stage Fright's
-## wind-up, flight and stun, the Trade's lob to its landing, the Gag Gift planted, growing and popped, and Main Attraction
+## wind-up, flight and stun, the Trade's lob to its landing, the Gag Gift planted, growing and popped, and Main
+## Attraction
 ## from its dome through the open well to its close.
 
 

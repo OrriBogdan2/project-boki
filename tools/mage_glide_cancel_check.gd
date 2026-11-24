@@ -120,7 +120,8 @@ func _hang() -> void:
 	var hanging := U.phase() == MageUlt.AIR
 	_keys(true, false)
 	ac.step(m, 0.1)
-	ok("glider: Space held in the hang leaves Stormfall hanging", hanging and U.phase() == MageUlt.AIR and not P.gliding,
+	ok("glider: Space held in the hang leaves Stormfall hanging",
+			hanging and U.phase() == MageUlt.AIR and not P.gliding,
 			U.phase())
 	_keys(false, false)
 	m.step(DT)

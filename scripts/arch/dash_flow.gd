@@ -11,7 +11,8 @@ extends RefCounted
 ## the same way and goes on the first
 ## step the CC allows it (docs/decisions/0118-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
 ## own cast lock (ArchKit.lock_left: an ult that plants its caster).
-## An RMB or E pressed while the kit's own cast lock refuses it (ArchKit.lock_refuses: Motley's Main Attraction cast, Kael's
+## An RMB or E pressed while the kit's own cast lock refuses it (ArchKit.lock_refuses: Motley's Main Attraction cast,
+## Kael's
 ## Riposte guard and cleave, Vex's Stormfall) is held the same way, KIT_LOCK_SLOTS (--cast-lock-buffer-check).
 
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]

@@ -76,7 +76,8 @@ static func glass_mat(core: Color, rim: Color, a := 1.0, body := 0.35) -> Shader
 	mt.set_shader_parameter("body", body)
 	return mt
 
-## A black orb with a broad lit sea-teal rim (the held orbs, the Main Attraction's rim orbs), so it reads on dark ground.
+## A black orb with a broad lit sea-teal rim (the held orbs, the Main Attraction's rim orbs), so it reads on dark
+## ground.
 static func dark_mat() -> ShaderMaterial:
 	var mt := glass_mat(Color("02100d"), ORB_EDGE, 1.0, 1.0)
 	mt.set_shader_parameter("power", DARK_RIM_POWER)

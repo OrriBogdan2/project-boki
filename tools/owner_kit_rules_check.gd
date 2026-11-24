@@ -242,7 +242,8 @@ func _grimble(placed: bool) -> void:
 		t += DT
 	drive(m, P, 0.1, func(_i): pass)
 	if placed:
-		ok("Grimble (DECISIONS:82): a placed wall stops the Sticky Fingers", K.grapples == grapples and K.pull.is_empty(),
+		ok("Grimble (DECISIONS:82): a placed wall stops the Sticky Fingers",
+				K.grapples == grapples and K.pull.is_empty(),
 			"grapples +%d" % (K.grapples - grapples))
 	else:
 		ok("Grimble (DECISIONS:82): the Sticky Fingers passes a cliff face and hooks the foe behind it",

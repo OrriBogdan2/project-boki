@@ -4,7 +4,8 @@ extends RefCounted
 ## full reach past the cursor, lag on a sweep, narrow then billowing, the burning-foe bonus and health chip,
 ## stops at once,
 ## the 0.35s relight gap), the burn stages and their pips, the Spitfire lane and its fixed full range, the
-## Lock Horns stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
+## Lock Horns stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and
+## shield,
 ## the Molten Hug on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
 ## and the X ult, Red Carpet (tools/ashwick_ult_check.gd); and the source's animation beats (the lance pilot, the ram's
 ## squash on the hit frame, the jet lift-off, the run's footfalls).
