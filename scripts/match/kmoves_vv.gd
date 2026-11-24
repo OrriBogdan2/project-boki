@@ -73,7 +73,7 @@ const MOVES := {
 	},
 	"mage_rmb_hold":
 	{
-		# Storm Rod held: side-on, the rod hand raised high by the right shoulder, the left arm out ahead to aim
+		# Pink Spear held: side-on, the rod hand raised high by the right shoulder, the left arm out ahead to aim
 		"hold": true,
 		"keys":
 		[
@@ -108,7 +108,7 @@ const MOVES := {
 			]
 		]
 	},
-	# Storm Rod thrown: an overarm throw (the arm whips over and down past the hip), a stretch into the
+	# Pink Spear thrown: an overarm throw (the arm whips over and down past the hip), a stretch into the
 	"mage_rmb":
 	{
 		# release, the follow-through bent over the front leg, ~0.4 s to recover
@@ -265,7 +265,7 @@ const MOVES := {
 			[0.5, {"fx": -6.283}]
 		]
 	},
-	# Skycall: the left arm sweeps out toward the spot, then flicks up high through the 0.3 s flick window
+	# Undercurrent: the left arm sweeps out toward the spot, then flicks up high through the 0.3 s flick window
 	"mage_e":
 	{
 		# (the drag is being picked) and stays raised through the 0.8 s countdown (mage_e_snap brings it down)
@@ -305,7 +305,7 @@ const MOVES := {
 	},
 	"mage_e_snap":
 	{
-		# Skycall strike: the raised hand snapped down to the ground as the bolt lands, a squash, the settle
+		# Undercurrent strike: the raised hand snapped down to the ground as the bolt lands, a squash, the settle
 		"keys":
 		[
 			[0.00, {"p": 0.2, "fl": Vector3(0.05, 0.58, -0.15), "hw": 1.0}],
@@ -338,7 +338,7 @@ const MOVES := {
 	},
 	# the gum (MageGum): head and bubble only, the keyed clip does the work; the rig just waits it out
 	"mage_gum": {"keys": [[0.0, {}], [1.2, {}]]},
-	# Kitefall (X), on the sheet's 10 fps beats. The crouch (f28-f31, 0.3 s): knees deep, arms swept down and
+	# Stormfall (X), on the sheet's 10 fps beats. The crouch (f28-f31, 0.3 s): knees deep, arms swept down and
 	"mage_x":
 	{
 		# back, a squash that loads the launch
@@ -623,7 +623,7 @@ const MOVES := {
 			[1.05, {}]
 		]
 	},
-	# Cinderfall (X, f29 on the sheet): the rifle snapped straight up over her head in 0.1 s, the shot kicks it
+	# Penny Drop (X, f29 on the sheet): the rifle snapped straight up over her head in 0.1 s, the shot kicks it
 	"gunslinger_x":
 	{
 		# and squashes her a little, held up a beat, then back down into her aim by 0.6 s

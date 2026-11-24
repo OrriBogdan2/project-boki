@@ -223,8 +223,7 @@ def walk_speed(aid):
     return round(MOVE.get(aid, MOVE["default"])["speed"] * MOVE["body_scale"], 2)
 WEAPONS = content("weapons")
 ABIL1 = content("hunter_abilities")
-KIN2 = {kid: k for kid, k in content("kin").items() if not k.get("data_only")}
-KIN_LATER = {kid: k for kid, k in content("kin").items() if k.get("data_only")}
+KIN2 = content("kin")
 KIN1 = content("kin_home")
 AB2 = content("abilities_v2")
 MERGE = content("merges_v2")
@@ -235,7 +234,7 @@ def wname(wid):
     return WEAPONS.get(wid, {}).get("name", wid.replace("_", " ").title())
 
 def kname(kid):
-    return (KIN2.get(kid) or KIN_LATER.get(kid) or {}).get("name", kid)
+    return KIN2.get(kid, {}).get("name", kid)
 
 # ------------------------------------------------------------------ lore
 LORE = load_json(os.path.join(ROOT, "content", "rules", "lore.json"))
@@ -444,9 +443,6 @@ def gen_boki():
         for p in k.get("evolution", {}).get("paths", []):
             paths.append("%s: %s" % (p["affinity"].title(), " > ".join(EVO.get(n, {}).get("name", n) for n in p["nodes"])))
         if paths: body += "\n- Evolution paths: " + "; ".join(paths)
-    body += "\n\n## Not in the game yet\n\nIn the roster (docs/boki/ROSTER.md) with no model yet, so they never spawn.\n\n"
-    body += table(["Boki", "Type", "Evolves from"], [[k["name"], " / ".join(t.title() for t in [k["theme"], k.get("type2", "")] if t),
-        kname(k["roster"]["from"]) if k["roster"].get("from") else "-"] for k in KIN_LATER.values()])
     page("Boki-Species.md", "Boki species", body, ["content/kin", "content/kin_home", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
 
     # growth: evolution, mutations, bonds, stages, IVs, training
@@ -837,23 +833,23 @@ def gen_turn_table():
 AIR_AUDIT = {
     "thief": ["special", "8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`)",
               "dancer.md and owner items 7 / 129: the air dash is longer and slower"],
-    "archer": ["same", "with a charge: the same Spirit Walk (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot)",
-               "pin.md: one Spirit Walk, no air variant. Item 183 moved the generic long dash off the charged press"],
+    "archer": ["same", "with a charge: the same Slip Stitch (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot)",
+               "pin.md: one Slip Stitch, no air variant. Item 183 moved the generic long dash off the charged press"],
     "mage": ["same", "the same Wirerun (7.5 to 13 m by rank, one charge, same clip)", "vireo.md: one Wirerun, no air variant"],
     "gunslinger": ["special", "a tap in the air slides 2/3 of the ground Slipstep (`air_k`), the same charge and clip",
                    "venator.md: the air slide is shorter"],
     "tender": ["special", "its own air-dash slot (`air` block, about 3.8 times the ground step), its own cooldown", "mooshmoosh.md and owner item 24"],
-    "rimewright": ["same", "the same Skate, the same charge and clip; the fall is eased while it runs (`air_fall`)", "tamsin.md: one Skate"],
-    "dolm": ["same", "with a charge: the same Rock Hop (`breah_hop`, one charge), held at the height it starts at: no landing, no rock; "
+    "rimewright": ["same", "the same Free Skate, the same charge and clip; the fall is eased while it runs (`air_fall`)", "tamsin.md: one Free Skate"],
+    "dolm": ["same", "with a charge: the same Leap of Faith (`breah_hop`, one charge), held at the height it starts at: no landing, no rock; "
              "out of charges the class long dash (`breah_exdash`)", "breah.md: one Landslide, no air variant. Item 183 moved the generic long dash off the charged press"],
-    "ostra": ["same", "the same Lantern Trade (1.8 s), the same charge and clip", "ostra.md: one Lantern Trade"],
-    "bulwark": ["same", "with a charge: the same 360 Smash (`bul_whirl`, one charge); out of charges the class long dash",
-                "bjorn.md: one 360 Smash. Item 183 moved the generic long dash off the charged press"],
-    "juggernaut": ["same", "with a charge: the same Rampage (`jug_dash`, one charge); in the Meteor Smash's gather it rides the drive with no wind-up, "
+    "ostra": ["same", "the same Musical Chairs (1.8 s), the same charge and clip", "ostra.md: one Musical Chairs"],
+    "bulwark": ["same", "with a charge: the same Tideturner (`bul_whirl`, one charge); out of charges the class long dash",
+                "bjorn.md: one Tideturner. Item 183 moved the generic long dash off the charged press"],
+    "juggernaut": ["same", "with a charge: the same Rampage (`jug_dash`, one charge); in the Hit the Deck's gather it rides the drive with no wind-up, "
                    "the gather pose kept; out of charges the class shoulder charge (`jug_exdash`)",
                    "juggernaut.md: one Rampage. Item 183 moved the generic long dash off the charged press"],
     "ashwick": ["skipped", "air 8.0 m in 0.24 s (ground 3.4 m in 0.28 s)", "parity 11 (queued)"],
-    "dredge": ["skipped", "`air_k` carry on the Barge", "parity 13 (queued)"],
+    "dredge": ["skipped", "`air_k` carry on the Mad Dash", "parity 13 (queued)"],
 }
 
 def _air_audit_table():
@@ -953,8 +949,8 @@ def gen_dash_flow():
             "the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding "
             "again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; "
             "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n"
-            "An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte "
-            "guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0118-cc-exit-buffer.md): "
+            "An RMB or E pressed while a kit's own cast lock holds the body (Motley's Main Attraction cast, Kael's Riposte "
+            "guard and cleave, Vex's Stormfall) is held like a press at a crowd control's end (docs/decisions/0118-cc-exit-buffer.md): "
             "it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; "
             "a lock that runs on past that answers with the deny cue. The footage shows no such press dropped "
             "(`--cast-lock-buffer-check`).\n\n")

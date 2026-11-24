@@ -16,7 +16,7 @@ const QUIET_MAX := 900  # steps: the last trial's ability (an ult, a zone) winds
 const DASH_WAIT := 40  # steps: a dash with a wind-up shows up within this
 const WATCH := 120  # steps after the press that we watch for the ability
 const GLOVE := "barrier"  # Q: an active glove that stays where it's cast
-const NEEDS_ALLY := ["tender"]  # heroes whose X is refused with nobody to cast it on (Hearth Call): a squad of 2
+const NEEDS_ALLY := ["tender"]  # heroes whose X is refused with nobody to cast it on (Rise and Shine): a squad of 2
 const ALLY_AT := Vector3(5, 0, -3)  # m from home: the teammate stands beside the dash lane, inside X's 12.6 m
 
 ## The source's dash -> LMB / X rows (docs/heroes/dash_interactions.md): [hero, dash, slot, mode]. Silent source:
@@ -166,7 +166,7 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 
 
 ## A fresh training match as `hero` on a flat patch, every slot open, a glove on Q, level 10.
-func _match(main: Node, hero: String, squad := 1, seed_v := 77) -> Match:
+func _match(main: Node, hero: String, squad := 1) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	(
@@ -178,7 +178,7 @@ func _match(main: Node, hero: String, squad := 1, seed_v := 77) -> Match:
 				"squad": 2 if hero in NEEDS_ALLY else squad,
 				"tier": 0,
 				"length": 1e9,
-				"seed": seed_v,
+				"seed": 77,
 				"no_drop": true,
 				"cls": Arch.weight(hero),
 				"arch": hero,
@@ -228,13 +228,6 @@ func _clear_mobs(m: Match) -> void:
 	for mob in m.mobs:
 		mob.queue_free()
 	m.mobs.clear()
-	# wild Boki too (no owner): which species rolls onto which spot moves with the roster, and one near home
-	# turns a trial on whatever the roll put there
-	for k: Kin in m.kins.duplicate():
-		if k.owner_h == null:
-			k.dead = true
-			m.kins.erase(k)
-			k.queue_free()
 
 
 func _steps(m: Match, n: int) -> void:

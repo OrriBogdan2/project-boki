@@ -18,7 +18,7 @@ static func of(k: ArchKit, slot: String) -> Vector2:
 		return Vector2.ZERO
 	return Vector2(_num(sd, String(gs.get("range", ""))), _num(sd, String(gs.get("r", ""))))
 
-## Does a press now place at the cursor? (Brimseed's recast pops the seed; Hearthlight's recast is the throw.)
+## Does a press now place at the cursor? (Gag Gift's recast pops the seed; Hearthlight's recast is the throw.)
 static func live(k: ArchKit, slot: String) -> bool:
 	var up := (slot == "e" and k.e_recastable()) or (slot == "x" and k.ult_running())
 	return up == bool(k.d[slot]["ground"].get("recast", false))

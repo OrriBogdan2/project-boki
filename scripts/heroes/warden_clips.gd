@@ -929,7 +929,7 @@ static func lay_feel(model: Node3D, sk: Skeleton3D, bi: int, sq: float, lean: fl
 	var tip := Basis((inv * model.global_basis.x).normalized(), -lean)
 	sk.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * sk.get_bone_global_pose(bi))
 
-## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
+## A move keyed "heading" leans where he is going, not where he faces (the Short Leash's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
 ## plays moving backwards turns all the way round); "heading_off" turns it that much further (a sideways cartwheel
 ## travelling forward turns its side to the way he goes).
@@ -1000,7 +1000,7 @@ func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = _vel(s)
 	return Vector2(vel.x, vel.z).length() >= STILL
 
-## Rooted (a Root or a stuck cast), the feet stay planted whatever the velocity still says; Rimelock's statue
+## Rooted (a Root or a stuck cast), the feet stay planted whatever the velocity still says; Freeze Frame's statue
 ## (the "statue" state) is a full freeze and keeps its own clips.
 static func planted(s: Dictionary) -> bool:
 	return bool(s.get("rooted", false)) and not bool(s.get("statue", false))

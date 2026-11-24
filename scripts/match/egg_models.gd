@@ -25,7 +25,7 @@ const IDLE_SPIN := 0.35        # rad/s: an egg sitting out turns slowly, so its 
 const IDLE_BOB := 0.015        # m per metre of egg: its gentle float
 
 ## Kin types with no egg of their own hatch from the closest family.
-const THEME_EGG := {"dark": "shadow", "ghost": "shadow", "wild": "stone"}
+const THEME_EGG := {"dark": "shadow", "ghost": "shadow"}
 
 static var _halves := {}       # kind -> {"Cap": Mesh, "Cup": Mesh, "tex": Texture2D}
 

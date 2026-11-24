@@ -1106,7 +1106,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	# C and G (the Merge sits on the right: GripHud)
 	x = BokiHud.cg_slots(self, p, x, y, s)
 	# B (base to a teammate) as a small badge at the end of the row (the gloves sit on the right: GripHud)
-	if Life.has_mates(m, p):
+	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
@@ -1155,7 +1155,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x = HunterUltTile.draw(self, p, x, y, s, gap)
 	# C: the Boki's own ability, G: throw / recall (hold: hold the spot or follow)
 	x = BokiHud.cg_slots(self, p, x, y, s)
-	if Life.has_mates(m, p):
+	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
@@ -1430,7 +1430,7 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 	var lead: Hunter = dr.leader(p.team) if dr else null
 	var i_lead := lead == p
 	var waits: bool = dr != null and dr.waits(p)
-	var squad := Life.has_mates(m, p)
+	var squad := m.hunters.filter(func(x): return x.team == p.team).size() > 1
 	var rr := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 92), Vector2(w, 122 if squad else 92))
 	_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 14)
 	if dr and dr.planning:
@@ -1658,9 +1658,9 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.32 + 100.0), p)
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
-	var who := "You're a wisp: %ds left. %s standing on you brings you back. Enemies can stomp or execute you." % [int(ceil(left)), "A teammate or your Boki" if Life.has_mates(m, p) else "Your Boki"]
+	var who := "You're a wisp: %ds left. A teammate or your Boki standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
 	if p.kin and p.kin.state == "downed":
-		who = "You're a wisp: %ds left, and your Boki is down. %s" % [int(ceil(left)), "Only a teammate standing on you can bring you back." if Life.has_mates(m, p) else "Nobody can bring you back."]
+		who = "You're a wisp: %ds left, and your Boki is down. Only a teammate standing on you can bring you back." % int(ceil(left))
 	var stomped: bool = p.get_meta("stomped", false)
 	if stomped:
 		var sts: Array = p.get_meta("stompers", [])
@@ -1694,9 +1694,9 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if left_line != "":
 		y0 = sz.y * 0.58
 		_ctext(Vector2(sz.x * 0.5, y0 - 64), left_line, 20, GOLD, big)
-	if not b.is_empty() and Life.soul_here(m, b) and Life.has_mates(m, p):
+	if not b.is_empty() and Life.soul_here(m, b):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
-	if Life.has_mates(m, p): lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
+	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
 	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.2), p)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
@@ -1753,13 +1753,13 @@ func _draw_overhead(p: Hunter) -> void:
 		_ctext(sp + Vector2(-w * 0.5 - 30, 8), "%dm" % int(round(alt)), 13, Color("bfe6ff"), big)
 		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-w * 0.5 - 30, -10), sp + Vector2(-w * 0.5 - 35, -3), sp + Vector2(-w * 0.5 - 25, -3)]), Color("bfe6ff"))
 	if p.drink_t > 0.0:
-		var df := 1.0 - p.drink_t / p.drink_len
+		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
 		_ctext(sp + Vector2(0, 33), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
-		var kf := 1.0 - p.kit_t / p.kit_len
+		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)

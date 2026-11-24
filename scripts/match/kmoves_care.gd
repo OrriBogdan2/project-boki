@@ -12,7 +12,7 @@ extends RefCounted
 
 const MOVES := {
 	# ================================================================ Pip
-	# Ember Cast, right hand (every 0.4 s, alternating): the fist pulled back to the hip with the torso
+	# Hot and Cold, right hand (every 0.4 s, alternating): the fist pulled back to the hip with the torso
 	# twisted away, then a straight-arm punch-push at the cursor with the torso unwound ~45 deg past
 	# square and the stance dropped; held out 0.1 s, then the left hand rises open for the next one
 	"mm_shot_r": {"keys": [
@@ -84,7 +84,7 @@ const MOVES := {
 					"y": 0.7, "p": -0.25, "sq": -0.15, "lift": 0.18, "fr": Vector3(-0.02, 0.08, -0.6), "rw": 1.0,
 					"fl": Vector3(-0.36, 0.25, 0.36), "hw": 1.0, "lw": 0.8, "legs": [0.15, -0.2, -0.45, -0.1]}],
 		[0.55, {}]]},
-	# Burrseed wind-up (item 118, a fixed 0.6 s: tender.json rmb windup): turned side-on (~70 deg),
+	# Stick Around wind-up (item 118, a fixed 0.6 s: tender.json rmb windup): turned side-on (~70 deg),
 	# the casting fist pointed down the lane, the other hand drawn up beside the ear, sinking on the
 	# back leg until the throw
 	"mm_seed_aim": {"keys": [
@@ -158,7 +158,7 @@ const MOVES := {
 					"fl": Vector3(-0.3, 0.0, 0.25), "hw": 0.9, "lw": 0.6, "legs": [0.4, -0.6, -0.3, -0.2]}],
 		[0.26, {"y": 0.4, "p": -0.2, "fr": Vector3(-0.02, 0.3, -0.5), "rw": 0.8}],
 		[0.5, {}]]},
-	# Relay Step, the ground hop (0.2 s of dash): a quick squash, then a skip off one foot with the lead knee
+	# Foxtrot, the ground hop (0.2 s of dash): a quick squash, then a skip off one foot with the lead knee
 	# up and both arms flung up behind like little wings, a tucked apex, a squash on touchdown and a happy
 	# bounce with a wiggle of the shoulders (0.24 s in all)
 	"mm_skip": {"keys": [
@@ -252,7 +252,7 @@ const MOVES := {
 					"p": 0.22, "sq": -0.1, "lift": 0.08, "fl": Vector3(-0.3, 0.55, 0.05), "hw": 1.0,
 					"fr": Vector3(0.3, 0.55, 0.05), "rw": 1.0}],
 		[0.6, {}]]},
-	# the Burrseed's root going off (payoff): a sharp tug back on the free hand, as if pulling the thread
+	# the Stick Around's root going off (payoff): a sharp tug back on the free hand, as if pulling the thread
 	"mm_tug": {"keys": [
 		[0.0, {}],
 		[0.05, {"fl": Vector3(0.05, 0.1, -0.45), "hw": 1.0, "p": -0.1}],
@@ -304,7 +304,7 @@ const MOVES := {
 					"wo": Vector3(-0.04, 0.04, -0.26), "p": -0.35, "sq": -0.15}],
 		[0.14, {"fl": Vector3(0.18, 0.05, -0.58), "hw": 1.0, "wo": Vector3(0, 0.03, -0.22), "p": -0.3}],
 		[0.22, {}]]},
-	# Ice Spear held: she gathers it, both palms drawn in to her chest round the forming spear, elbows back,
+	# Icebreaker held: she gathers it, both palms drawn in to her chest round the forming spear, elbows back,
 	# the weight settling onto the back foot and the body squared to the cursor, a slight crouch
 	"tm_spear_aim": {"hold": true, "keys": [
 		[0.0, {}],
@@ -343,7 +343,7 @@ const MOVES := {
 					"fr": Vector3(-0.14, 0.02, -0.6), "rw": 0.9, "wf": 0.8, "lw": 0.9,
 					"legs": [0.95, -1.15, -0.55, -0.2]}],
 		[0.55, {}]]},
-	# Rink Wall (footage: both hands pushed forward): the 0.2 s tell, a deep crouch with both palms drawn back
+	# Cold Front (footage: both hands pushed forward): the 0.2 s tell, a deep crouch with both palms drawn back
 	# to the hips and the sparkle at her feet; then both palms shoved out low and wide along the ground as the
 	# ice erupts ahead (0.2, e.tell), the body driving after them, held while it starts to slide, then a settle
 	"tm_wall": {"keys": [
@@ -381,7 +381,7 @@ const MOVES := {
 					"lift": -0.1, "sq": 0.4, "p": -0.3, "lw": 1.0, "legs": [0.5, -0.8, 0.6, -0.9],
 					"fl": Vector3(0.05, -0.35, -0.3), "hw": 1.0}],
 		[0.42, {}]]},
-	# Skate held (looped by the kit every 0.56 s): low and leaning hard, the knees deep, one long push
+	# Free Skate held (looped by the kit every 0.56 s): low and leaning hard, the knees deep, one long push
 	# then the other, the arms swinging against the legs and the body rocking with each push
 	"tm_skate": {"keys": [
 		[
@@ -402,7 +402,7 @@ const MOVES := {
 					"p": -0.45, "r": 0.18, "y": -0.2, "lift": -0.12, "lw": 1.0, "legs": [0.85, -1.4, -0.6, -0.3],
 					"fl": Vector3(-0.15, -0.05, 0.35), "hw": 0.9, "wa": Vector3(0.3, 0.4, 0), "wo": Vector3(0, 0, -0.2),
 					"wf": 1.0}]]},
-	# Skate in the air (item 62, looped like tm_skate): no push, a long glide over the ribbon, the free leg
+	# Free Skate in the air (item 62, looped like tm_skate): no push, a long glide over the ribbon, the free leg
 	# stretched behind, the arms out for balance; ART-1 has no clip for it yet
 	"tm_skate_air": {"keys": [
 		[
@@ -423,7 +423,7 @@ const MOVES := {
 					"p": -0.5, "r": 0.1, "y": -0.1, "lift": 0.0, "lw": 1.0, "legs": [0.5, -0.8, -0.7, -0.2],
 					"fl": Vector3(-0.1, -0.05, 0.3), "hw": 0.9, "wa": Vector3(0.3, 0.3, 0), "wo": Vector3(0, 0, -0.15),
 					"wf": 1.0}]]},
-	# Skate start: a deep crouch and a hard push off the back blade
+	# Free Skate start: a deep crouch and a hard push off the back blade
 	"tm_skate_go": {"keys": [
 		[0.0, {"sq": 0.35, "lift": -0.12, "p": -0.25, "lw": 1.0, "legs": [1.0, -1.6, 0.9, -1.5]}],
 		[
@@ -437,7 +437,7 @@ const MOVES := {
 					"p": -0.45, "r": 0.18, "y": -0.2, "lift": -0.12, "lw": 1.0, "legs": [0.85, -1.4, -0.6, -0.3],
 					"fl": Vector3(-0.15, -0.05, 0.35), "hw": 0.9, "wa": Vector3(0.3, 0.4, 0), "wo": Vector3(0, 0, -0.2),
 					"wf": 1.0}]]},
-	# Skate end: a hockey stop, turned side-on, leaning back hard over braced blades, then up
+	# Free Skate end: a hockey stop, turned side-on, leaning back hard over braced blades, then up
 	"tm_skate_stop": {"keys": [
 		[0.0, {"p": -0.45, "lw": 1.0, "legs": [0.85, -1.4, -0.6, -0.3]}],
 		[
@@ -493,7 +493,7 @@ const MOVES := {
 		[0.07, {"y": -0.3, "p": 0.12, "sq": 0.15, "fl": Vector3(0.45, 0.0, 0.1), "hw": 1.0}],
 		[0.14, {"y": 0.1, "p": -0.15, "sq": -0.12, "lift": 0.04, "fl": Vector3(0.5, 0.35, -0.05), "hw": 1.0}],
 		[0.3, {}]]},
-	# Rimelock cast (f25-f27): a crouch with the arms crossed, then thrown up and out as the rink snaps,
+	# Freeze Frame cast (f25-f27): a crouch with the arms crossed, then thrown up and out as the rink snaps,
 	# then down into the sealed crouch
 	"tm_rime": {"keys": [
 		[0.0, {}],

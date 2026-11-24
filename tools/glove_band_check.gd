@@ -27,7 +27,7 @@ func _kit(id: String) -> Dictionary:
 	var cc := 0.0
 	var travel := 0.0
 	match id:
-		"archer":      # Hail Wall: every tick lands, slowed all through
+		"archer":      # Hemline: every tick lands, slowed all through
 			dmg *= float(e["time"]) / float(e["every"])
 			cc = float(e["time"])
 		"ashwick": cc = (float(e["radius"]) - float(e["gap"])) / float(e["pull_speed"])      # the drag in

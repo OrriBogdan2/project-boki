@@ -1,7 +1,7 @@
 extends "res://tools/archetype_check.gd"
 ## --zone-bounce-check (briefs/STATE_MACHINES.md bug 3.5): a Hunter standing in a zone that ticks a slow stays
-## on the ground. Every slow zone in turn (Lace's Hail Wall, Vex's Cinderfall patch, Cinder's lava trail,
-## Albert's fissure scar, Neve's Ice Spear field and Rimelock rink) is cast on a still Hunter, and every frame
+## on the ground. Every slow zone in turn (Lace's Hemline, Vex's Penny Drop patch, Cinder's lava trail,
+## Albert's fissure scar, Neve's Icebreaker field and Freeze Frame rink) is cast on a still Hunter, and every frame
 ## it stands in it is read: grounded stays true, no landing fires (a ground touch after leaving it, land_t)
 ## and vel.y never goes up.
 ## A real knock-up (a lift above 0) still launches. Prints AKCHECK lines.
@@ -60,13 +60,13 @@ func _hail_wall() -> void:
 	_stand(m, T, home + Vector3(5.0, 0, 0))
 	K.cd["e"] = 0.0
 	K.use_e()
-	_still(T, _watch(m, T, 2.4), "Lace's Hail Wall")
+	_still(T, _watch(m, T, 2.4), "Lace's Hemline")
 	# a hero walking through it (another body class, its own kit)
 	T.set_arch("juggernaut")
 	_stand(m, T, home + Vector3(5.0, 0, -2.0))
 	K.cd["e"] = 0.0
 	K.use_e()
-	_still(T, _watch(m, T, 2.4, func(): T.inp["move"] = Vector2(0, 0.6)), "Lace's Hail Wall walked through")
+	_still(T, _watch(m, T, 2.4, func(): T.inp["move"] = Vector2(0, 0.6)), "Lace's Hemline walked through")
 	T.inp["move"] = Vector2.ZERO
 	await done(m)
 
@@ -82,7 +82,7 @@ func _cinderfall() -> void:
 	HunterKeys.ult_pressed(P)
 	step(m, float(K.x_def()["delay"]) + 0.3)      # the shell lands (its own blast is a real knock)
 	_stand(m, T, at)
-	_still(T, _watch(m, T, 1.5), "Vex's Cinderfall patch")
+	_still(T, _watch(m, T, 1.5), "Vex's Penny Drop patch")
 	await done(m)
 
 func _cinder_trail() -> void:
@@ -112,9 +112,9 @@ func _scar() -> void:
 	aim_at(P, home + Vector3(7.0, 0, 0))
 	HunterKeys.ult_pressed(P)
 	step(m, 1.5)
-	ok("zone bounce: Albert's Faultline leaves its scar", not K.ult.scar.is_empty())
+	ok("zone bounce: Albert's Groundswell leaves its scar", not K.ult.scar.is_empty())
 	_stand(m, T, home + Vector3(5.0, 0, 0))
-	_still(T, _watch(m, T, 1.5), "Albert's Faultline scar")
+	_still(T, _watch(m, T, 1.5), "Albert's Groundswell scar")
 	await done(m)
 
 func _neve() -> void:
@@ -137,11 +137,11 @@ func _neve() -> void:
 		t += DT
 	var at: Vector3 = K.zones[0]["at"] if not K.zones.is_empty() else home
 	_stand(m, T, at)
-	_still(T, _watch(m, T, 1.2), "Neve's Ice Spear field")
+	_still(T, _watch(m, T, 1.2), "Neve's Icebreaker field")
 	step(m, 1.5)
 	_stand(m, T, home + Vector3(2.5, 0, 0))
 	HunterKeys.ult_pressed(P)
-	_still(T, _watch(m, T, 3.0), "Neve's Rimelock rink")
+	_still(T, _watch(m, T, 3.0), "Neve's Freeze Frame rink")
 	await done(m)
 
 ## The source: a slow row that carries "lift": 0.0 (and a pull's 0.0) is no launch; a real knock-up still is.

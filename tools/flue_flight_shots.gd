@@ -1,5 +1,5 @@
 extends "res://tools/glide_shots.gd"
-## --flue-flight-shots --shots-dir=<dir> [--size=360]: Cinder's Flue Flight in a live training match, for the clip map
+## --flue-flight-shots --shots-dir=<dir> [--size=360]: Cinder's Red Carpet in a live training match, for the clip map
 ## (content/rules/warden_anim/cinder.json): the take-off hover, the steady flight, a hard turn left then right, the
 ## early landing and the settle. <dir>/{back,side}/f000.png... at 15 fps (the glide shots' match and camera), one
 ## FLUE_SHOT line a frame with the move, the bank and the body's tilt. Needs a renderer.

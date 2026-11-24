@@ -6,7 +6,7 @@ extends RefCounted
 ## %R rank-up combo, %N the E ability's name, %X the E ability in plain words (key included), %Y the Ultimate's
 ## key (R: the hunter's own big move; the Fusion is the ultimate key, X, and %K in Tutorial) and %Z its name.
 
-## "Press E: Longneedle. Stand still ..." built from the hunter's card text (any Hunter).
+## "Press E: Palm Spear. Stand still ..." built from the hunter's card text (any Hunter).
 static func ability_tip(h: Hunter) -> String:
 	var cap := Settings.key_cap("signature")
 	if h == null or h.ak == null:

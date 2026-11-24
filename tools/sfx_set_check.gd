@@ -29,13 +29,13 @@ extends RefCounted
 ##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
 ##  11. the rarity stings (RaritySting): rare and very rare each have a sound, quieter than the scan chime,
 ##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
-##  11. Meeko's Hearth Call channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
+##  11. Meeko's Rise and Shine channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
 ##      even when X is pressed again, and it is gone within one frame of every way the channel can end
-## Reads the files (and, for the Hearth Call loop, one short training match); never touches the save.
+## Reads the files (and, for the Rise and Shine loop, one short training match); never touches the save.
 ##  11. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
 ##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
 ##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
-##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
+##  11. Sparkle's Stormfall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
 ##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
 ##  11. Sparkle's and Sable's ability beats: each new cast/travel/hit/end cue is in its set and plays on its own event
 ##      (tools/ability_beat_sfx_check.gd; two short training matches)
@@ -46,7 +46,7 @@ extends RefCounted
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
-##  11. Sable's Encore: the blade whirr is a keyed loop that starts once the ring has grown, follows her
+##  11. Sable's Last Dance: the blade whirr is a keyed loop that starts once the ring has grown, follows her
 ##      through a dash and is gone in the frame the ring ends
 ##  11. held fire (docs/AUDIO.md): every weapon under FireSfx.HELD_RATE, and Neve's dart, fired every HELD_STEP_MS for
 ##      HELD_S seconds through FireSfx keeps at most FireSfx.VOICES voices sounding, opens on its base take and goes
@@ -162,7 +162,6 @@ func run(main: Node) -> void:
 	_strip_chime()
 	_chop_mine()
 	_rarity_stings()
-	_carry()
 	await _call_loop(main)
 	await _encore_loop(main)
 	_hostile()
@@ -507,7 +506,7 @@ func _ult_cues() -> void:
 	ok(tell_ok, "the rival telegraph wind-up exists, has a gap, sits under the ult cues, wired to the aim telegraph")
 
 
-## Cinderfall's whistle runs the whole fall: its length matches x.delay from the archetype data within FALL_TOL_S,
+## Penny Drop's whistle runs the whole fall: its length matches x.delay from the archetype data within FALL_TOL_S,
 ## it carries past hearing range, and the kit plays it where the shell will land.
 func _nuke_fall() -> void:
 	var delay := float(Arch.def("gunslinger")["x"]["delay"])
@@ -1213,7 +1212,7 @@ func _cup_rounds(res: Dictionary) -> void:
 	ok(each, "moments: Sprout, Bloom and Crown cards each play their own cup fanfare once, a card with no round none")
 
 
-## 11. Encore's whirr is held at Sable: off while the ring grows, on after, riding with her through a dash,
+## 11. Last Dance's whirr is held at Sable: off while the ring grows, on after, riding with her through a dash,
 ## and stopped in the frame the ring ends (ThiefUlt.tick/drop, Sfx.loop_hold).
 func _encore_loop(main: Node) -> void:
 	var m := Match.new()

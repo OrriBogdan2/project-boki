@@ -26,7 +26,7 @@ STYLE = ('Stylized cel-shaded fantasy action game sound effect, punchy, clean, c
          'single short one-shot, no music, no voice: ')
 
 # name: (category, takes incl. the base file, seconds requested per take, prompt[, trim cap in seconds])
-# The cap is for sounds shorter than the API's 0.5 s minimum (pin_patter plays dozens of times per Hail Wall).
+# The cap is for sounds shorter than the API's 0.5 s minimum (pin_patter plays dozens of times per Hemline).
 # Silence put before a trimmed take, so its onset lands where the move's hit is (seconds). The Gilded
 # Riposte's cut lands at strike_t (content/archetypes/juggernaut.json x.strike_t = 0.1 s), the same rule
 # tools/gen_sfx_kael.py RIPOSTE_HIT follows; trim keeps 4 ms before the onset, so 0.096 s.
@@ -36,7 +36,7 @@ PLAN = {
     'dodge': ('dash', 4, 0.6,
         'a quick airy whoosh of a body sidestepping as an arrow zips past the ear, bright glassy shimmer at the '
         'end'),
-    # Archer (Hem): the bow, Heavy Shot, Hail Wall, Spirit Walk, Starpiercer
+    # Archer (Hem): the bow, Pin Down, Hemline, Slip Stitch, Finishing Touch
     'pin_loose': ('fire', 4, 0.5,
         'a light bow releasing a slim needle-like arrow, tight string thwack and a quick airy zip'),
     'pin_loose_super': ('fire', 1, 0.8,

@@ -3,7 +3,7 @@
     python3 tools/gen_sfx_kael.py      (then: godot --headless --import)
 
 Heavy, grim and cold: a huge greatsword that hisses white-hot through the air (never a fire roar: that is
-Cinder's), the iron Warchain he tore out of the arena wall rattling, biting and snapping taut, slams that
+Cinder's), the iron Short Leash he tore out of the arena wall rattling, biting and snapping taut, slams that
 shake the ground, a demon that is fed on a knock. A big man's low wordless grunts; heavy boots with the
 shackle's chain clinking at every step. Original synthesis, no samples.
 """
@@ -151,7 +151,7 @@ def dash(i):
                at(chain_rattle(0.3, 45, g=0.22), 0.04), pad(np.zeros(1), d))
 
 
-# ------------------------------------------------------------------ RMB: Smash, Lunge, Meteor
+# ------------------------------------------------------------------ RMB: Final Swing, Lunge, Meteor
 def charge(i):
     """Winding up: the blade heats (a rising hum), leather and plate creak, the hiss swelling."""
     d = 0.85; n = N(d)
@@ -189,7 +189,7 @@ def lunge_hit(i):
 
 
 def drop(i):
-    """The leap into the Meteor Drop: a heave of air upward and the blade hissing as it rises."""
+    """The leap into the Hit the Deck: a heave of air upward and the blade hissing as it rises."""
     d = 0.5
     return mix(swish(d, 200, 1800, 1.8) * 1.0, kick(160, 70, 0.3, 0.02, 0.05, 2.0) * 0.5,
                at(sizzle(0.4, 0.06, 0.2) * 0.5, 0.08))
@@ -204,9 +204,9 @@ def meteor(i):
                reflections(tail(1.0, 800, 0.25) * 1.2, ((0.07, 0.4, 900), (0.16, 0.3, 700), (0.28, 0.2, 500))))
 
 
-# ------------------------------------------------------------------ E: the Warchain
+# ------------------------------------------------------------------ E: the Short Leash
 def chain_rattle_sig(i):
-    """His signature: the Warchain flying out link by link (on the throw, the hook-lunge and the haul's end)."""
+    """His signature: the Short Leash flying out link by link (on the throw, the hook-lunge and the haul's end)."""
     d = 0.6; n = N(d)
     sw = env(n, 0.01, 0.3)
     return mix(chain_rattle(d, 75, 650, 2400, 0.5, sw), swish(0.3, 300, 1600, 2.0) * 0.4)
@@ -243,7 +243,7 @@ def reel(i):
                S.creak(d, 120, 160, 0.5, 1800) * 0.2) * (1 - 0.6 * t / d)
 
 
-# ------------------------------------------------------------------ X: Gilded Riposte, and the passives
+# ------------------------------------------------------------------ X: Blow for Blow, and the passives
 def guard(i):
     """The guard raised: plate and blade braced with a clank, a held hum of white heat."""
     d = 0.75; n = N(d)

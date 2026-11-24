@@ -40,7 +40,6 @@ const BEAM_H := 46.0
 const HELD_SCALE := 0.45  # the Heartspark in a carrier's hand, against 0.9 floating over the head
 const NEAR_LABEL := 7.0
 const TIDE_STAGES := 11  # the source's death circle has stages 0-10; our one close is split into as many
-const START_IN := 8.0  # m inside the play space's edge that squads start (in_play)
 const RING_DY := 3.0  # metres above or below the Heart that still count as in the ring
 
 static var _rules := {}
@@ -49,7 +48,6 @@ static var _rules := {}
 var m: Match
 var site := Vector3.INF
 var gate := Vector3.INF
-var start_r := INF  # m round the Heart the tide starts at (start_r_of: the map's play_space for the mode)
 var ways_scale := 1.0  # the map's "ways_scale": tide radii and gate_dist stretch with it (1.412 on the 2x map)
 var state := S.ASLEEP
 var trail: Array[String] = []  # "time from>to why", every move of the state (the checks read it)
@@ -106,17 +104,11 @@ static func enabled(opts: Dictionary) -> bool:
 
 
 # ------------------------------------------------------------------ the tide (read by BlightDir)
-## The tide ring's radius in metres at this match time: the play space it starts at (start_r) until the
-## closing ring is smaller (0 with no Heart: no ring).
+## The tide ring's radius in metres at this match time (0 before it starts: no ring).
 static func tide_r(m_v: Match) -> float:
-	return ring_in(m_v, 0.0)
-
-
-## The ring's radius `secs` seconds on (0 with no Heart).
-static func ring_in(m_v: Match, secs: float) -> float:
-	if m_v.heart == null:
+	if m_v.heart == null or m_v.sess_time() < r("tide_start_s"):
 		return 0.0
-	return minf(m_v.heart.start_r, ring_at(m_v.sess_time() + secs, m_v.heart.ways_scale))
+	return ring_at(m_v.sess_time(), m_v.heart.ways_scale)
 
 
 ## The tide ring's radius t seconds into a match on a map of ways_scale k: tide_r0 (also before the tide
@@ -151,29 +143,12 @@ static func tide_out(m_v: Match, p: Vector3) -> float:
 	return clampf((Vector2(p.x - m_v.heart.site.x, p.z - m_v.heart.site.z).length() - trap) / 40.0, 0.0, 1.0)
 
 
-## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the final circle once the ring
-## holds). `ahead` 2: two such steps on (bots).
+## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the first ring before the
+## tide starts, so the drop map shows it; the final circle once it holds). `ahead` 2: two such steps on (bots).
 static func next_r(m_v: Match, ahead := 1) -> float:
-	return ring_in(m_v, r("tide_next_s") * ahead)
-
-
-## The play space a match on this layout starts with, in metres round the Heart: the map's play_space for
-## the mode (solos when every squad is one Hunter, else trios), or the closing ring's first radius.
-static func start_r_of(layout: Dictionary, opts: Dictionary) -> float:
-	var mode := "solos" if int(opts.get("squad", 1)) == 1 else "trios"
-	var first := r("tide_r0") * float(layout.get("ways_scale", 1.0))
-	return minf(first, float(layout.get("play_space", {}).get(mode, first)))
-
-
-## The points (spawns) inside the play space at the start, START_IN short of its edge, on a layout with an
-## authored Heart; all of them if none are (or no Heart: training, tutorial, duel, arena).
-static func in_play(layout: Dictionary, opts: Dictionary, points: Array) -> Array:
-	if not enabled(opts) or not layout.has("heart"):
-		return points
-	var c := Vector2(float(layout["heart"][0]) + 0.5, float(layout["heart"][1]) + 0.5)
-	var edge := start_r_of(layout, opts) - START_IN
-	var inside := points.filter(func(p): return Vector2(p.x - c.x, p.z - c.y).length() <= edge)
-	return inside if not inside.is_empty() else points
+	if m_v.heart == null:
+		return 0.0
+	return ring_at(m_v.sess_time() + r("tide_next_s") * ahead, m_v.heart.ways_scale)
 
 
 ## Seconds until the tide starts to close (0 once it has), and until it holds at its last ring (0 once it does).
@@ -232,7 +207,6 @@ func setup(layout: Dictionary) -> void:
 		return
 	_rng.seed = int(m.seed_val) * 17 + 4242
 	ways_scale = float(layout.get("ways_scale", 1.0))
-	start_r = start_r_of(layout, m.opts)
 	var c: Vector2
 	if layout.has("heart"):
 		c = Vector2(float(layout["heart"][0]) + 0.5, float(layout["heart"][1]) + 0.5)
@@ -364,6 +338,9 @@ static func _by_blight(h: Hunter) -> bool:
 ## down those it downed itself out there (a Boki's revive stops the bleed, not the Blight; Life ends them
 ## at 0); one a rival downed keeps the usual bleed, even with the edge past them.
 func _tide_tick(dt: float) -> void:
+	var st := tide_stage(m)
+	if st < 0:
+		return
 	_tide_t += dt
 	if _tide_t < r("tide_tick_s"):
 		return

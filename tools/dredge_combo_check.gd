@@ -1,9 +1,9 @@
 extends RefCounted
 ## --dredge-combo-check: Grimble's abilities and their interactions, scripted one by one in the
-## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Deep Reach
-## reel (its parity rows: tools/dredge_reel_check.gd), only the barge during it, reel into the Anchor Drop,
+## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Sticky Fingers
+## reel (its parity rows: tools/dredge_reel_check.gd), only the barge during it, reel into the Lump Sum,
 ## terrain the hook pierces, the abyss, the Salvage passive, the back hit, the barge's turn lock after the
-## Anchor, the rank-3 specials, and the X ult, Brass Broadside (tools/dredge_ult_check.gd).
+## Anchor, the rank-3 specials, and the X ult, Both Barrels (tools/dredge_ult_check.gd).
 
 ## s from Brute Dash's arrival to aiming and walking (briefs/hero-ref/dredge.md:306, 493.32 -> 493.6 s)
 const SRC_RECOVER_S := 0.28
@@ -25,7 +25,6 @@ func run(main_node: Node) -> void:
 	await _all()
 	await _hook_hold()
 	await _slam_tell()
-	await _anchor_spike()
 	await _dash_moves()
 	await _glide_wins()
 	await _parity_gun()
@@ -42,7 +41,7 @@ func run(main_node: Node) -> void:
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
-## Taps the Deep Reach and steps through the coil-back and the flight (it grabs, misses or is stopped), then
+## Taps the Sticky Fingers and steps through the coil-back and the flight (it grabs, misses or is stopped), then
 ## one frame more so a reel's first frame is drawn.
 func _throw(m: Match, p: Hunter) -> void:
 	ak.tap(m, p)
@@ -304,7 +303,7 @@ func _dash_moves() -> void:
 	)
 	await ak.done(m)
 
-## Bug 26 pattern: the glider wins over the Anchor Drop. A fresh glide press in the air smash ends it (no hit) and
+## Bug 26 pattern: the glider wins over the Lump Sum. A fresh glide press in the air smash ends it (no hit) and
 ## he glides at the normal sink, never dragged down; after a ground slam a jump and glide is a normal glide.
 func _glide_wins() -> void:
 	var r: Array = ak.setup("dredge", 8.0, "", false)
@@ -461,7 +460,7 @@ func _all() -> void:
 		k.armor_shreds > 0 and worn > 0.0 and armor_hp0 - t.hp > 0.0,
 		"armor worn %.1f, hp %.1f, shreds %d" % [worn, armor_hp0 - t.hp, k.armor_shreds]
 	)
-	# --- Deep Reach reels a foe in
+	# --- Sticky Fingers reels a foe in
 	reset.call()
 	_throw(m, p)
 	var d0 := p.flat_dist(t)
@@ -487,7 +486,7 @@ func _all() -> void:
 	k.ch_rmb = 1.0
 	k.cd["rmb"] = 0.0
 	ak.tap(m, p)
-	ok("reel: a second Deep Reach is denied", k.grapples == 1)
+	ok("reel: a second Sticky Fingers is denied", k.grapples == 1)
 	k.cd["e"] = 0.0
 	p.ak.use_e()
 	ok("reel: E is not cast while reeling (it waits for the arrival)", k.anchors == 0 and k.wind <= 0.0 and k.e_queued)
@@ -512,7 +511,7 @@ func _all() -> void:
 		"arrivals %d dist %.1f (was %.1f)" % [k.arrivals, p.flat_dist(t), d0]
 	)
 	ok("reel: Grimble's own Grounded ends with the reel", not KitStatus.grounded(p))
-	# --- reel then Anchor Drop on the Grounded foe
+	# --- reel then Lump Sum on the Grounded foe
 	ak.fresh(t)
 	t.teleport(p.pos + Vector3(2.0, 0, 0))
 	ak.aim_at(p, t.pos)
@@ -531,14 +530,14 @@ func _all() -> void:
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, p.flat_dist(at0)]
 	)
 	ok(
-		"combo: reel > Anchor Drop = damage and stun, the foe is not Grounded (no Ground in the source)",
+		"combo: reel > Lump Sum = damage and stun, the foe is not Grounded (no Ground in the source)",
 		k.anchors == 1 and ak.dmg(t) - hp0 >= 20.0 and not KitStatus.grounded(t) and t.stun_t > 0.8,
 		"anchors %d took %.0f stun %.2f gnd %s" % [k.anchors, ak.dmg(t) - hp0, t.stun_t, KitStatus.grounded(t)]
 	)
 	var swirl := HeroVfx.of(k.m).live.filter(func(e): return e.get("on") == t)
 	ok("anchor: the stunned foe shows a stun swirl", not swirl.is_empty())
 	ok("anchor: E cooldown set", float(k.cd["e"]) > 5.0)
-	# --- Barge right after the Anchor can't turn
+	# --- Mad Dash right after the Anchor can't turn
 	reset.call()
 	p.face = -PI / 2.0
 	k.lock_until = m.time + 0.8
@@ -593,7 +592,7 @@ func _all() -> void:
 	var gw0 := k.grapples
 	_throw(m, p)
 	ok(
-		"placed wall: stops the Deep Reach, no hook and no damage behind it",
+		"placed wall: stops the Sticky Fingers, no hook and no damage behind it",
 		k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
 		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
 	)
@@ -680,7 +679,7 @@ func _all() -> void:
 	)
 	t2.downed = false
 	t2.teleport(home + Vector3(-9.0, 0, 6.0))
-	# --- Anchor Drop in the air: straight down, the anchor with you, a ring at the landing, height adds damage
+	# --- Lump Sum in the air: straight down, the anchor with you, a ring at the landing, height adds damage
 	reset.call()
 	t.teleport(home + Vector3(2.0, 0, 0))
 	ak.aim_at(p, t.pos)
@@ -915,7 +914,7 @@ func _all() -> void:
 		"passive: from behind +50%, from the front none", absf(behind - 15.0) < 0.01 and absf(front - 10.0) < 0.01,
 		"behind %.1f front %.1f" % [behind, front]
 	)
-	# --- rank 3: the Deep Reach refunds on a hit, pellet hits trim the barge recharge
+	# --- rank 3: the Sticky Fingers refunds on a hit, pellet hits trim the barge recharge
 	reset.call()
 	p.slot_lv["sec"] = 3
 	p.slot_lv["dash"] = 3
@@ -1059,32 +1058,3 @@ func _parity_gun() -> void:
 		"%.2f / %.2f / %.2f" % [float(keys[1][0]), float(keys[-2][0]), float(keys[-1][0])]
 	)
 	await ak.done(m)
-
-
-## docs/SPIKE_SLAM.md: the ground Anchor Drop spikes a foe in the air (driven down).
-func _anchor_spike() -> void:
-	var r: Array = ak.setup("dredge", 6.0, "", true)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var home: Vector3 = r[4]
-	var K: DredgeKit = P.ak
-	T.teleport(home + Vector3(2.0, 1.2, 0))
-	ak.fresh(T)
-	ak.aim_at(P, home + Vector3(2.0, 0, 0))
-	K.cd["e"] = 0.0
-	P.ak.use_e()
-	var t := 0.0
-	while K.anchors == 0 and t < 1.0:
-		T.pos.y = home.y + 1.2      # held in the air until the slam frame
-		T.vel = Vector3.ZERO
-		T.grounded = false
-		m.step(ak.DT)
-		t += ak.DT
-	var vy := T.vel.y
-	for i in 6:      # the cone's hit lands within a few frames of the slam
-		m.step(ak.DT)
-		vy = minf(vy, T.vel.y)
-	# the data's 16 m/s, which a hunter's fall cap (HunterMove.fall_max, 12) clamps on its next tick
-	ok("anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
-		K.anchors == 1 and vy <= -HunterMove.fall_max + 0.5, "anchors %d vy %.1f" % [K.anchors, vy])

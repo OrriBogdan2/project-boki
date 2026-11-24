@@ -524,13 +524,10 @@ func _fill_menu(v: VBoxContainer) -> void:
 		var ss: String = sp
 		var nm := "None" if sp == "" else String(Data.KIN.get(sp, {}).get("name", sp))
 		var b := UI.choice(nm, cur == sp, func(): set_kin(ss); _fill_menu(v), MENU_PICK_W)
-		b.add_theme_font_size_override("font_size", 11)
-		b.clip_text = true  # a long name never widens the grid (and the panel past a 16:10 window): it trims
-		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		b.tooltip_text = nm  # the tooltip has it whole
+		b.add_theme_font_size_override("font_size", 12)
 		if sp != "" and KinLib.kin(sp):
 			var ks := KinLib.kin(sp)
-			b.tooltip_text = "%s  ·  %s  ·  %s" % [nm, String(ks.theme).capitalize(), "   ".join(KitCard.infusion_lines(p_v.arch, ks))]
+			b.tooltip_text = "%s  ·  %s" % [String(ks.theme).capitalize(), "   ".join(KitCard.infusion_lines(p_v.arch, ks))]
 		kg.add_child(b)
 	# the species list outgrows any screen: it scrolls (wheel, or the pad moving focus through it)
 	var ks_scroll := ScrollContainer.new()

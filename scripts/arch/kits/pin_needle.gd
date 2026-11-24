@@ -1,6 +1,6 @@
 class_name PinNeedle
 extends Node3D
-## Lisette's Heavy Shot in her hands: an oversized silver needle nocked on the bow while she holds RMB,
+## Lisette's Pin Down in her hands: an oversized silver needle nocked on the bow while she holds RMB,
 ## glowing red with the charge, its red thread trailing from the eye. Its eye rides the model's nock anchor
 ## (her draw hand, HeroVfx "nock"), so the animation's pull-back is the needle's and the shot leaves the bow
 ## it lies on; it points along the aim. Everyone sees it (it's her wind-up).

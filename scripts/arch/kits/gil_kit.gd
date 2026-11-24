@@ -2,8 +2,8 @@ class_name GilKit
 extends ArchKit
 ## Gil, the Novice Mage (content/archetypes/gil.json). A pet fish a spell stood up on two legs: everything out
 ## here is new to him. A control mage: Fencer (three rapier thrusts, every one steps in, the third slows),
-## Grab Bag (a shuffled bag of potions, the next one always shown), Ground Swim (a dash under the ground that
-## knocks up where he surfaces), Riptide (a spin that sends a waterspout down a line) and Tidal Wave (X: he
+## Grab Bag (a shuffled bag of potions, the next one always shown), Deep End (a dash under the ground that
+## knocks up where he surfaces), Spin Cycle (a spin that sends a waterspout down a line) and Surf's Up (X: he
 ## surfs a wave down a line, untargetable, and lands with a shield). Passive Fish Out of Water: three different
 ## potion effects on one foe inside 5s Beach them. Every number lives in the JSON.
 
@@ -11,6 +11,13 @@ const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a to
 const TELE_LW := 0.1                 # m, their rim
 const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
 const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
+const PUDDLE_PEAK := 0.05       # s the puddle's rim holds its white flare as it lands (3 frames at 60 fps)
+const PUDDLE_SETTLE := 0.25     # s from landing to its steady glow (the flare eases out)
+const PUDDLE_FADE := 0.4        # s it fades on an ease-out curve before its slow ends
+const PUDDLE_FLARE := 0.6       # how far toward white the rim flares as it lands
+const PUDDLE_RIM := 0.06        # share of the radius the lit rim takes
+const PUDDLE_RIM_A := 0.85      # the rim's steady alpha
+const PUDDLE_IN_A := 0.8        # the inside's alpha: the ring shader's wash tops out at 0.3 of it (0.24 by the rim)
 ## The moving head of a spout or the wave's crest, every LINE_FX_DT (local: the cast's own look carries the
 ## line for other games).
 const LINE_FX_DT := 0.06
@@ -19,18 +26,18 @@ const BOT_TAP := 0.1      # s a bot holds RMB for a tap (RMB has no hold: one pr
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
 var flying: Array = []              # thrown potions in the air: {at, from, t, left, v, id}
-var puddles: Array = []             # slime puddles: HeroVfxZone.make's look plus {at, r, t, left, k, tick}
+var puddles: Array = []             # slime puddles: {at, r, t, left, k, tick, node, rim, inside}
 var marks := {}                     # foe instance id -> {mark: time it landed}
 var beach_at := {}                  # foe instance id -> time it can be Beached again
 var combo_n := 0
 var combo_at := -9.0
 var third_until := -9.0             # the third thrust's hits slow until then
 var hit_swing := -1                 # the swing whose hit sound played (one per thrust, however many foes)
-var swim_t := 0.0                   # Ground Swim under way
-var spin_t := -1.0                  # Riptide spin time (-1: not spinning)
+var swim_t := 0.0                   # Deep End under way
+var spin_t := -1.0                  # Spin Cycle spin time (-1: not spinning)
 var spin_tick := 0.0
 var spouts: Array = []              # moving waterspouts: {p, y, dir, left, w, spd, hit, id, from, len}
-var wave := {}                      # the Tidal Wave under way
+var wave := {}                      # the Surf's Up under way
 var untarget_t := 0.0
 var glow_t := 0.0
 var tele_n := 0                     # each potion and line has its own AimKit telegraph id
@@ -264,22 +271,43 @@ func _shatter_look(v: String, at: Vector3, r: float) -> void:
 	var dir := h.aim_dir()
 	match v:
 		"thunder": vfx("shatter_thunder", at, dir, {"r": r})
-		"slime":
-			var vd := vial_def("slime")
-			vfx("shatter_slime", at, dir, {"r": r, "life": float(vd["puddle_t"]), "zone_r": float(vd["puddle_r"])})
+		"slime": vfx("shatter_slime", at, dir, {"r": r})
 		"air": vfx("shatter_air", at, dir, {"r": r})
 		"fire": vfx("shatter_fire", at, dir, {"r": r})
 		_: vfx("shatter_zeep", at, dir, {"r": r})
 
 
 ## The slime's puddle slows whoever stands in it for puddle_t. It is drawn for exactly that long and on its radius:
-## Gil's lit rim over a faint inside in the slime's colour (HeroVfxZone's look, the one other games draw from the
-## shatter_slime message).
+## Gil's lit rim over a faint inside in the slime's colour (the wash: clear at the centre, rising toward the rim).
 func _add_puddle(at: Vector3, vd: Dictionary) -> void:
-	var pd := HeroVfxZone.make(m, at, float(vd["puddle_r"]), Arch.color(h.arch), col_of(vd))
-	pd.merge({"at": at, "r": float(vd["puddle_r"]), "t": float(vd["puddle_t"]), "left": float(vd["puddle_t"]),
-		"k": float(vd["puddle_k"]), "tick": 0.0})
-	puddles.append(pd)
+	var r := float(vd["puddle_r"])
+	var n := Node3D.new()
+	var quad := Models.flat_quad(r * 2.0)
+	var inside := Models.ring_mat(Color(col_of(vd), PUDDLE_IN_A), 0.0)
+	inside.set_shader_parameter("wash", 1.0)
+	var rim := Models.ring_mat(Arch.color(h.arch), PUDDLE_RIM)
+	rim.set_shader_parameter("halo", 1.0)
+	Models.part(n, quad, inside, Vector3(0, 0.06, 0))
+	Models.part(n, quad, rim, Vector3(0, 0.08, 0))
+	ShadowPolicy.off(n)
+	m.add_child(n)
+	n.global_position = at
+	puddles.append({"at": at, "r": r, "t": float(vd["puddle_t"]), "left": float(vd["puddle_t"]),
+		"k": float(vd["puddle_k"]), "tick": 0.0, "node": n, "rim": rim, "inside": inside})
+
+## The puddle's glow now: the rim's flare as it lands, then steady, then the ease-out fade as it dries.
+func _puddle_look(pd: Dictionary) -> void:
+	var left := float(pd["left"])
+	var age := float(pd["t"]) - left
+	if age > PUDDLE_SETTLE and left > PUDDLE_FADE:
+		return
+	var flare := pow(1.0 - clampf((age - PUDDLE_PEAK) / (PUDDLE_SETTLE - PUDDLE_PEAK), 0.0, 1.0), 2.0)
+	var fade := pow(clampf(left / PUDDLE_FADE, 0.0, 1.0), 2.0)
+	var sig := Arch.color(h.arch)
+	(pd["rim"] as ShaderMaterial).set_shader_parameter("color",
+		Color(sig.lerp(Color.WHITE, PUDDLE_FLARE * flare), lerpf(PUDDLE_RIM_A, 1.0, flare) * fade))
+	var inside: ShaderMaterial = pd["inside"]
+	inside.set_shader_parameter("color", Color(inside.get_shader_parameter("color"), PUDDLE_IN_A * fade))
 
 # ------------------------------------------------------------------ passive: Fish Out of Water
 func _mark(f: Ent, mk: String, col: Color) -> void:
@@ -325,7 +353,7 @@ func combo_read(f: Ent) -> Dictionary:
 func marks_on(f: Ent) -> int:
 	return int(combo_read(f).get("n", 0))
 
-# ------------------------------------------------------------------ dash: Ground Swim
+# ------------------------------------------------------------------ dash: Deep End
 func on_dash(use_ex: bool) -> bool:
 	if spin_t >= 0.0 or not wave.is_empty():
 		return true             # the spin and the wave hold him (content/dash_flow/gil.json: lock)
@@ -357,7 +385,7 @@ func _surface() -> void:
 		o["tags"] = ["dodge", "surface"]
 		f.hurt(float(dd["dmg"]) * power("dash"), h, o)
 
-# ------------------------------------------------------------------ E: Riptide
+# ------------------------------------------------------------------ E: Spin Cycle
 func cast_e() -> bool:
 	if spin_t >= 0.0 or not wave.is_empty():
 		return false
@@ -465,7 +493,7 @@ func _line_look(s: Dictionary, at: Vector3, dt: float) -> void:
 	if s["ab"] == "ult": vfx("wave_crest", at, s["dir"], {"w": s["w"]})
 	else: vfx("spout_col", at, s["dir"], {"w": s["w"]})
 
-# ------------------------------------------------------------------ X: Tidal Wave
+# ------------------------------------------------------------------ X: Surf's Up
 func cast_ult() -> bool:
 	return HeroUlt.press(self, _start_wave)
 
@@ -553,7 +581,7 @@ func _tick(dt: float) -> void:
 			(pd["node"] as Node3D).queue_free()
 			puddles.erase(pd)
 		else:
-			HeroVfxZone.glow(pd, float(pd["t"]) - float(pd["left"]), float(pd["left"]))
+			_puddle_look(pd)
 	if swim_t > 0.0:
 		swim_t -= dt
 		if swim_t <= 0.0:

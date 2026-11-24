@@ -37,16 +37,15 @@ static func hold(mp: ENetMultiplayerPeer, secs: float) -> void:
 	mp.peer_connected.connect(set_all)
 
 
-## Starts a second game of this project (headless unless asked) with `user_args` and returns its pid. It keeps a
-## user dir of its own beside `log_path`, so the two games never share a save. The watchdog leaves it alone.
-static func start(user_args: String, log_path: String, headless := true) -> int:
+## Starts a second headless game of this project with `user_args` and returns its pid. It keeps a user dir
+## of its own beside `log_path`, so the two games never share a save. The watchdog leaves it alone.
+static func start(user_args: String, log_path: String) -> int:
 	return run(
 		(
-			"XDG_DATA_HOME='%s' exec '%s' %s --path '%s' -- %s %s"
+			"XDG_DATA_HOME='%s' exec '%s' --headless --path '%s' -- %s %s"
 			% [
 				log_path.get_basename() + "_data",
 				OS.get_executable_path(),
-				"--headless" if headless else "",
 				ProjectSettings.globalize_path("res://"),
 				user_args,
 				"%s %s%d" % [Watchdog.CHILD_FLAG, Watchdog.HOST_PID_ARG, OS.get_process_id()]

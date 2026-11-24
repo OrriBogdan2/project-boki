@@ -4,8 +4,8 @@ extends Node3D
 ## LDFx.of(m)). Every node is made once and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader,
 ## a mode per look). Grimble's other looks are content/vfx/dredge.json (HeroVfx).
 ##
-## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
-## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot)
+## - flame(id, parts)      the Open Flame hose: pooled camera-facing puffs the kit simulates (immediate style)
+## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Spitfire)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "pip", "pilot",
 ##                         "glow"; stop calling and they hide
 ## - one-shots: scorch, lava, volley (Grimble's Broadside slug: it flies the whole fan; no data look does yet)
@@ -35,9 +35,9 @@ const VOLLEY_HEAD := 0.34
 const VOLLEY_HALO := 0.8
 const VOLLEY_SMEAR := 1.1
 const VOLLEY_WIDTH := 0.55
-const CINDER_GLOW := Color("d8281a")     # Cinder Shot's glow round its flame: her palette's deep red
+const CINDER_GLOW := Color("d8281a")     # Spitfire's glow round its flame: her palette's deep red
 const CINDER_SMOKE := Color(Color("2a100a"), 0.7)   # ... and the char its comet tail burns down to
-# Cinder Shot's orb is drawn at its shot's hit radius r (drawn = hit, docs/VFX_QUALITY.md "Scale"). Quad scale per m
+# Spitfire's orb is drawn at its shot's hit radius r (drawn = hit, docs/VFX_QUALITY.md "Scale"). Quad scale per m
 # of r: the soft glow's cover (strength 0.5) ends at r, the body's (strength 1.6) at 0.8 r (ld_fx.gdshaderinc mode 1).
 const ORB_GLOW_K := 1.35
 const ORB_BODY_K := 0.92
@@ -212,7 +212,7 @@ func _crescent_mesh(arc_deg: float) -> ArrayMesh:
 	return mesh
 
 # ------------------------------------------------------------------ the hose
-## The Torch Lance stream this step: parts [{p, age (0..1), r, seed}]. A pool of camera-facing puffs per id
+## The Open Flame stream this step: parts [{p, age (0..1), r, seed}]. A pool of camera-facing puffs per id
 ## (FLAME_CAP at most), reused every step; stop calling and they hide.
 func flame(id: String, parts: Array) -> void:
 	var e: Dictionary = flames.get(id, {})
@@ -407,7 +407,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var tail_col := col2
 	match kind:
 		"cinder":
-			# Cinder Shot: a flame-orange fireball with a white-hot core inside a deep-red glow, its tail burning
+			# Spitfire: a flame-orange fireball with a white-hot core inside a deep-red glow, its tail burning
 			# down to char (ride() sizes it to the shot's hit; the flicker is the orb and comet shader's own)
 			n.add_child(_rider_part("Halo", CINDER_GLOW, CINDER_GLOW, 1.0, 0.5))
 			n.add_child(_rider_part("Head", col, col2, 1.0, 1.6))

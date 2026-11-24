@@ -1,5 +1,5 @@
 extends "res://tools/vv_shots.gd"
-## --ostra-globe-shots --shots-dir=<dir>: Motley's Brimseed at 0, 25, 50 and 100% growth at the match camera (xvfb with
+## --ostra-globe-shots --shots-dir=<dir>: Motley's Gag Gift at 0, 25, 50 and 100% growth at the match camera (xvfb with
 ## a renderer), one strip; the drawn radius is printed next to the hit radius.
 
 const GROWTH := [0.0, 0.25, 0.5, 1.0]  # share of the grow time
@@ -28,7 +28,7 @@ func run(main_node: Node) -> void:
 	for g in GROWTH:
 		await _go(maxf(grow * g - t, 0.02))
 		t = grow * g
-		_take("globe", "brimseed_growth", "Brimseed at 0, 25, 50 and 100% growth, match camera", Callable())
+		_take("globe", "brimseed_growth", "Gag Gift at 0, 25, 50 and 100% growth, match camera", Callable())
 		var vis: Node3D = K.seed["vis"]
 		print("GLOBE %3d%%: drawn radius %.2f m, hit radius %.2f m" % [g * 100.0, vis.scale.x, K.seed_radius()])
 	var f := FileAccess.open(dir.path_join("MANIFEST_ostra.txt"), FileAccess.WRITE)

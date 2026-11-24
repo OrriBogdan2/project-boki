@@ -12,8 +12,8 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
 # one-step presses, cleared after each sim step
-const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec",
-		"gear1", "gear2", "skill", "swap"]
+const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill",
+		"swap"]
 # [input key, skill slot, feedback slot]: a press on a slot with no point is refused
 const SLOT_GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
@@ -35,7 +35,7 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "util5": false, "util6": false, "glide": false, "glide_press_only": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "glide_press_only": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "scout": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ground_accel := HunterFeel.ground_accel     # per hunter (HunterMove)
@@ -219,7 +219,7 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range multiplier (1 unless a kit sets it)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
-var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees, barriers and terrain don't stop you while > 0
+var spirit_t := 0.0           # Slip Stitch (PinSpirit): rocks, trees, barriers and terrain don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
 
@@ -839,7 +839,7 @@ func can_glide() -> bool:
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
 ## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled, unless
-## the kit lets go of its own flight on the press (ArchKit.glide_cancel: Rock Hop's launch_to). The dash's own
+## the kit lets go of its own flight on the press (ArchKit.glide_cancel: Leap of Faith's launch_to). The dash's own
 ## wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
 ## A press just after the dash (DashGlide.fresh) counts as one in it, past the kit's wind-down (decision 0061).
 func _dash_into_glide() -> bool:
@@ -1338,12 +1338,9 @@ func heal(n: float) -> void:
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
 ## The belt and what each item does: UtilityBelt, UtilityUse.
 var drink_t := 0.0
-var drink_id := "tonic"        # which belt drink is being drunk, and how long it takes (UtilityUse, the item's "time")
-var drink_len := 1.0
 var kit_t := 0.0
 var beat_id := ""              # the instant belt item whose body beat is playing (UtilityPose)
 var beat_t := 0.0
-var kit_len := 1.6             # how long the armor kit takes (its "time"; both lengths are set when a use starts)
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
@@ -1395,8 +1392,7 @@ func sim(dt: float) -> void:
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
 			_glide_btn_held = inp.get("glide_btn", false)      # a glide key held aboard is no press out there
-			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "fire",
-					"skill", "swap"]:
+			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
 		return
 	tick_status(dt)
@@ -1458,15 +1454,15 @@ func sim(dt: float) -> void:
 		BoxRevive.guard_inputs(self)
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4", "util5",
-				"util6", "gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
+				"gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
 	AirLimits.fold_at_touchdown(self, dt)
 	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
-	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
+	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Red Carpet: only E)
 	# gloves need no point: Gloves
 	gate_ranks()
 	BaseRecall.tick(self, dt)
@@ -1842,7 +1838,7 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + HunterFeel.spirit_climb * dt)
 		grounded = true
 		vel.y = 0.0
-	var keep: float = HunterMove.step_down + m.world.stair_slope(x0, z0, pos.x, pos.z)  # m kept on foot (stairs: slope)
+	var keep: float = 0.05 + m.world.stair_slope(x0, z0, pos.x, pos.z)      # m of drop kept on foot (stairs: the slope)
 	if grounded and g < pos.y - keep:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)

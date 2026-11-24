@@ -6,18 +6,18 @@ extends ArchKit
 ## - Passive, Rage (Blazing Spirit): damage you deal fills it; full, you're Enraged (the red shell, the
 ##   hunter swells): bonus damage, dash haste and ability haste. A knock heals you a share of the
 ##   knocked hunter's health (a monster kill, of the monster's).
-## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
+## - LMB (Bitter End): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
 ##   fills Rage fast). Neither knocks foes back.
-## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam behind a crimson strike cone (more to
+## - RMB, Final Swing (Adaptive Strike): tap a wound-up Finishing Slam behind a crimson strike cone (more to
 ##   the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
-##   the Gilded Riposte ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
+##   the Blow for Blow ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
 ##   wind-up, a crimson lane that grows, its rim hot at full, a rising whine; you can jump while charging;
-##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop straight down, its hit
+##   release flings you forward, a miss doubles the cooldown), in the air a Hit the Deck straight down, its hit
 ##   circle just ahead (everyone in it knocked down, the airborne spiked; while it rests, an air press is the
-##   ground Smash), during the Warchain's pull a Cinder Spin.
+##   ground Final Swing), during the Short Leash's pull a Full Circle.
 ## - Dash, Rampage (Flame Step): 2 charges (3 at rank 2) of a dash attack the way you face, the tip hits double.
-## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
-## - X, Gilded Riposte (JuggernautUlt, level 6): a 0.65s gold guard that blocks everything, then a lunging
+## - E, Short Leash (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
+## - X, Blow for Blow (JuggernautUlt, level 6): a 0.65s gold guard that blocks everything, then a lunging
 ##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. The Boki Merge has its own key.
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
@@ -43,9 +43,9 @@ var slash_at := -9.0
 var slam_w := {}               # the Finishing Slam winding up: {t, dir (at the press), pinned (to dir: E went)}
 var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
-var meteor: JuggernautDrop     # the airborne Smash
+var meteor: JuggernautDrop     # the airborne Final Swing
 var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (Loco.press_buffer)
-var e_held := false            # E pressed on a hooked chain while a Smash owned the body: the pull goes as it ends
+var e_held := false            # E pressed on a hooked chain while a Final Swing owned the body: it pulls at the end
 var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
 var slam_hit := {}             # foe id -> when the Finishing Slam hit them (a knock within 2s resets X)
 var riposte: JuggernautUlt     # X, the ultimate
@@ -68,10 +68,10 @@ func _setup() -> void:
 	riposte = JuggernautUlt.new(self)
 	warchain = JuggernautChain.new(self)
 	meteor = JuggernautDrop.new(self)
-	cd["air"] = 0.0             # the Meteor Drop's own cooldown slot
+	cd["air"] = 0.0             # the Hit the Deck's own cooldown slot
 
 func full_ready() -> bool:
-	return false               # no resource-full Smash: Enraged buffs everything instead
+	return false               # no resource-full Final Swing: Enraged buffs everything instead
 
 func res_frac() -> float:
 	return 1.0 if enraged_t > 0.0 else clampf(res / res_max(), 0.0, 1.0)
@@ -178,7 +178,7 @@ func _tick(dt: float) -> void:
 	_tick_tells()
 	if st.has("bot_haul_at") and m.time >= float(st["bot_haul_at"]):
 		st.erase("bot_haul_at")
-		if rmb_down and warchain.hooked(): warchain.press()     # a bot pulling in with the Smash charged
+		if rmb_down and warchain.hooked(): warchain.press()     # a bot pulling in with the Final Swing charged
 	net_pulse(dt, enraged_t > 0.0, 1.4)
 
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
@@ -211,7 +211,7 @@ func lunge_charging() -> bool:
 	return held and not rmb_ctx.get("air", false) and not rmb_ctx.get("e", false)
 
 ## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
-## way, if the Finishing Slam hit them in the last 2s the Gilded Riposte is ready again (the data: "knocking an
+## way, if the Finishing Slam hit them in the last 2s the Blow for Blow is ready again (the data: "knocking an
 ## enemy resets Volcanic Rebuke", any hit, not only the sweet spot).
 func on_knock(t: Hunter, mine: bool) -> void:
 	var rd := res_def()
@@ -230,7 +230,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		if _reset_riposte() and is_instance_valid(t):
 			ComboMark.payoff(m, h, t)
 
-## The Slam then a knock: the Gilded Riposte (X) is ready again (once it is unlocked). False when it was
+## The Slam then a knock: the Blow for Blow (X) is ready again (once it is unlocked). False when it was
 ## already ready or not yet unlocked.
 func _reset_riposte() -> bool:
 	if not _riposte_resettable():
@@ -243,7 +243,7 @@ func _reset_riposte() -> bool:
 func _riposte_resettable() -> bool:
 	return float(cd["x"]) > 0.0 and h.lvl >= int(Hunter.ULT_AT[0])
 
-## The combo tag (ComboMark): the Warchain's hold on `t`, else the Slam's 2s window in which a knock readies X.
+## The combo tag (ComboMark): the Short Leash's hold on `t`, else the Slam's 2s window in which a knock readies X.
 func combo_read(t: Ent) -> Dictionary:
 	if warchain.hooked() and warchain.target == t:
 		return {"icon": "chain", "n": 0, "max": 0, "left": warchain.tether_t, "total": float(e_def()["time"])}
@@ -253,7 +253,7 @@ func combo_read(t: Ent) -> Dictionary:
 		return {}
 	return {"icon": "slam", "n": 0, "max": 0, "left": left, "total": window}
 
-# ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
+# ------------------------------------------------------------------ X: Blow for Blow (JuggernautUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
 func cast_ult() -> bool:
 	return HeroUlt.press(self, _start_riposte)
@@ -280,12 +280,12 @@ func busy() -> bool:
 func lock_refuses(slot: String) -> bool:
 	return super.lock_refuses(slot) and not (slot == "e" and warchain.hooked())
 
-## Owner 113.2: a held Smash never opens the glider on a jump, nor do the Riposte's guard and cleave. Its last
+## Owner 113.2: a held Final Swing never opens the glider on a jump, nor do the Riposte's guard and cleave. Its last
 ## beat, the recovery, is open: a glide there ends the rest of it.
 func no_glide() -> bool:
 	return rmb_down or meteor.airborne() or (riposte != null and riposte.move_k() <= 0.0)
 
-## The Meteor Drop resting: a press in the air is the Smash as on the ground (a Slam, or a charge to pull into a
+## The Hit the Deck resting: a press in the air is the Final Swing as on the ground (a Slam, or a charge to pull into a
 ## Haul Slam), never a dead press.
 func air_rmb() -> bool:
 	return super() and float(cd["air"]) <= 0.0
@@ -300,12 +300,12 @@ func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 		return [0.0, o]
 	return [dmg, o]
 
-# ------------------------------------------------------------------ LMB: Greatsword (slashes / Searing Wave)
+# ------------------------------------------------------------------ LMB: Bitter End (slashes / Searing Wave)
 func _wk() -> float:
 	return h.wup_dmg * m.dmg_mult(h)
 
 ## A Boki merge starting (ArchKit's single cleanup hook) drops everything held or wound up: the Searing
-## Wave charge, the Finishing Slam's wind-up, an armed Haul Slam and a running Gilded Riposte (guard or
+## Wave charge, the Finishing Slam's wind-up, an armed Haul Slam and a running Blow for Blow (guard or
 ## cleave). Nothing fires and nothing is left over.
 func _drop_holds() -> void:
 	riposte.drop()
@@ -343,7 +343,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
-	# a press while a pull, a dash or a Meteor Drop holds the blade is kept for Loco.press_buffer, then swings
+	# a press while a pull, a dash or a Hit the Deck holds the blade is kept for Loco.press_buffer, then swings
 	if not h.atk.can_fire() or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
@@ -475,10 +475,10 @@ func _wave() -> void:
 
 # ------------------------------------------------------------------ dash: Rampage
 ## Shift during one of his moves does what its into_dash row in content/dash_flow/juggernaut.json says: held to
-## the move's end ("buffer"), the move dropped and the dash at once ("cancel"; out of the Warchain's pull the drive
+## the move's end ("buffer"), the move dropped and the dash at once ("cancel"; out of the Short Leash's pull the drive
 ## goes at once, the pull's speed running into it), or the dash at once with the move running on ("fire"). Out of
 ## the Slam's wind-up that is a Slam Drive: the drive goes at once along the strike's aim, the overhead pose kept,
-## and the Slam lands where it arrives. A Lunge or a Meteor Drop's dive is a dash of its own: Shift goes as it ends.
+## and the Slam lands where it arrives. A Lunge or a Hit the Deck's dive is a dash of its own: Shift goes as it ends.
 func on_dash(use_ex: bool) -> bool:
 	if _dash_waits():
 		dash_held = true
@@ -499,7 +499,7 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(false):
 		return true
 	var dd := dash_def()
-	var in_hang := meteor.running()           # the Smash's gather: the drive rides it, the gather pose kept
+	var in_hang := meteor.running()           # the Final Swing's gather: the drive rides it, the gather pose kept
 	var wind := 0.0 if from_pull or from_slam or in_hang else float(dd.get("windup", 0.15))
 	var dir := h.aim_dir() if from_slam else dash_dir()
 	rampage_dir = dir
@@ -570,7 +570,7 @@ func _tip() -> void:
 	if hit:
 		tips += 1
 
-# ------------------------------------------------------------------ RMB: Smash (Adaptive Strike)
+# ------------------------------------------------------------------ RMB: Final Swing (Adaptive Strike)
 func rmb_charge_full() -> float:
 	return float(rmb_def().get("full_t", 0.9))
 
@@ -632,16 +632,16 @@ func lunge_k(t: float) -> float:
 	var sd := rmb_def()
 	return clampf((t - float(sd["hold"])) / maxf(0.05, float(sd["full_t"]) - float(sd["hold"])), 0.0, 1.0)
 
-## Every Smash's damage: its rank, and +20% more at rank 2 and again at rank 3.
+## Every Final Swing's damage: its rank, and +20% more at rank 2 and again at rank 3.
 func smash_k() -> float:
 	return 1.0 + 0.2 * float(clampi(rank("sec") - 1, 0, 2))
 
-## The Meteor Drop's own cooldown, 2.4s shorter at rank 3.
+## The Hit the Deck's own cooldown, 2.4s shorter at rank 3.
 func air_cooldown() -> float:
 	var dd: Dictionary = rmb_def()["drop"]
 	return float(dd["cooldown"]) - (float(dd["r3_cut"]) if rank("sec") >= 3 else 0.0)
 
-## Spends the Meteor Drop's slot (the Smash's charge stays ready). False, with the deny buzz, while it rests.
+## Spends the Hit the Deck's slot (the Final Swing's charge stays ready). False, with the deny buzz, while it rests.
 func spend_air() -> bool:
 	if float(cd["air"]) > 0.0:
 		h._ab_feedback("sec", "deny")
@@ -652,7 +652,7 @@ func spend_air() -> bool:
 	CombatBus.ability_used.emit(h, id + "_rmb", "secondary")
 	return true
 
-## While airborne the secondary slot shows the Meteor Drop's own cooldown.
+## While airborne the secondary slot shows the Hit the Deck's own cooldown.
 func slot_info(slot: String) -> Dictionary:
 	var out := super.slot_info(slot)
 	if slot in ["sec", "utility"] and not h.grounded:
@@ -661,12 +661,13 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
-## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash).
+## In the air the bar shows the Hit the Deck's rest, but a Smash charge still takes the press (the ground Smash).
 func rmb_open() -> bool:
 	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
 
-## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
-## Riposte's guard and cleave) is kept for Loco.press_buffer and goes off when it ends; in the Warchain's pull (and just
+## The Final Swing press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Hit the Deck, the Gilded
+## Riposte's guard and cleave) is kept for Loco.press_buffer and goes off when it ends; in the Short Leash's pull (and
+## just
 ## after) it spins at once.
 func press_rmb() -> void:
 	if _rmb_waits():
@@ -684,8 +685,8 @@ func smash_running() -> bool:
 func _rmb_waits() -> bool:
 	return smash_running() or riposte.move_k() <= 0.0
 
-## A Smash winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
-## Meteor Drop's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
+## A Final Swing winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
+## Hit the Deck's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
 func _pull_waits() -> bool:
 	return (not slam_w.is_empty() and not _slam_young()) or not lunge.is_empty() or meteor.airborne()
 
@@ -702,8 +703,8 @@ func _flush_buffer() -> void:
 		dash_held = false
 		h.do_dash()
 
-## Which of his moves owns the body now, by slot ("" for none): the Gilded Riposte's guard and cleave, a Smash
-## (the Slam's wind-up, a Lunge, a Meteor Drop in the air), the Warchain's pull.
+## Which of his moves owns the body now, by slot ("" for none): the Blow for Blow's guard and cleave, a Final Swing
+## (the Slam's wind-up, a Lunge, a Hit the Deck in the air), the Short Leash's pull.
 func _move_slot() -> String:
 	if riposte.move_k() <= 0.0:
 		return "x"
@@ -717,7 +718,7 @@ func _into_mode(slot: String) -> String:
 	return String(DashFlow.into_row_of(id, slot, flow.dash_move())["mode"])
 
 ## Shift is held now (it goes the step this turns false): a move whose into_dash row buffers it (the guard and
-## the cleave), or a Lunge or a Meteor Drop's dive, each a dash of its own.
+## the cleave), or a Lunge or a Hit the Deck's dive, each a dash of its own.
 func _dash_waits() -> bool:
 	var slot := _move_slot()
 	if slot != "" and _into_mode(slot) == "buffer":
@@ -753,7 +754,7 @@ func fire_rmb(c: Dictionary) -> void:
 	elif not spend_rmb():
 		return
 	if spin:
-		_spin()                     # in the Warchain's pull, or just arrived
+		_spin()                     # in the Short Leash's pull, or just arrived
 	elif _aims_down_chain() and c.get("hold", false) and not c.get("air", false):
 		_chain_lunge(lunge_k(float(c.get("t", 0.0))))      # charged while tethered: along the chain
 	elif dropping:
@@ -789,7 +790,7 @@ func _tick_slam(dt: float) -> void:
 
 ## The Finishing Slam: a heavy strike down a lane (Brall's Execution Slam, hero-ref 0157); the wounded
 ## (under 35%) take +50%; a foe in the sweet spot (the far tip, dead ahead) is the payoff, and a knock on that
-## foe within 2s makes the Gilded Riposte ready again.
+## foe within 2s makes the Blow for Blow ready again.
 func _slam(pin := Vector2.ZERO) -> void:
 	var sd := rmb_def()
 	var sl: Dictionary = sd["slam"]
@@ -876,7 +877,7 @@ func _tick_lunge() -> void:
 			return                  # down the chain to a wall: it went where it was sent
 		cd["rmb"] = float(cd["rmb"]) * float(ld["miss_k"])        # struck nothing: the cooldown doubles
 
-## Hooked, with the aim within lunge.chain_deg of the chain: a held Smash goes down it. Aimed elsewhere it is a
+## Hooked, with the aim within lunge.chain_deg of the chain: a held Final Swing goes down it. Aimed elsewhere it is a
 ## plain Lunge along the aim, so the chain never takes the hold's direction from him.
 func _aims_down_chain() -> bool:
 	if not warchain.hooked():
@@ -906,12 +907,12 @@ func _chain_lunge(k: float) -> void:
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
 
-## A Slam wound up less than Loco.press_buffer ago: the pull takes it over as a Cinder Spin instead of waiting for it.
+## A Slam wound up less than Loco.press_buffer ago: the pull takes it over as a Full Circle instead of waiting for it.
 func _slam_young() -> bool:
 	return not slam_w.is_empty() and float(rmb_def()["windup"]) - float(slam_w["t"]) <= Loco.press_buffer
 
 ## The pull starting with a Smash pressed just before it (still down, or a young Slam): that press is the
-## Cinder Spin (the spin wins over the Slam; a Smash held longer, charging, is the Haul Slam: arm_haul).
+## Full Circle (the spin wins over the Slam; a Smash held longer, charging, is the Haul Slam: arm_haul).
 func spin_early() -> bool:
 	if _slam_young():
 		slam_w = {}                 # (its charge is spent: the spin is that Smash)
@@ -944,7 +945,7 @@ func land_haul() -> void:
 	if not haul.is_empty() and not h.downed:
 		_haul_land(float(haul["k"]))
 
-## The pull ended some other way (Shift, a jump, a stun): the armed Haul Slam is dropped and the Smash given back.
+## The pull ended some other way (Shift, a jump, a stun): the armed Haul Slam is dropped and the Final Swing given back.
 func drop_haul() -> void:
 	if haul.is_empty():
 		return
@@ -965,8 +966,8 @@ func _haul_land(k: float) -> void:
 	play("jug_haulslam")
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
-## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only), the
-## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready and not dashing, and the
+## The reads that aren't a key press: the wounded outlined red while the Final Swing is ready (yours only), the
+## Hit the Deck's hit circle (under him, just ahead) while you're in the air with it ready and not dashing, and the
 ## ring round the body while the Searing Wave charges.
 func _tick_tells() -> void:
 	if not h.is_local() or busy():
@@ -977,7 +978,7 @@ func _tick_tells() -> void:
 			if f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 				AimKit.circle(h, "exec%d" % f.get_instance_id(),
 						{"at": f.pos, "r": f.r + 0.4, "col": EXEC_RED, "hot": 0.5, "lw": 0.1})
-	# the Meteor Drop's own slot (not while a Lunge charges through a jump: that release is the Lunge)
+	# the Hit the Deck's own slot (not while a Lunge charges through a jump: that release is the Lunge)
 	var air_ready := float(cd["air"]) <= 0.0 and not meteor.running() and not warchain.spin_window()
 	if h.roll_t > 0.0:
 		AimKit.hide(h, "drop_aim")          # no disc on a dash: it comes back when the dash ends
@@ -988,7 +989,7 @@ func _tick_tells() -> void:
 		var k := wave_k()
 		AimKit.charge(h, k, {"col": Color("ff6a4a")})
 
-## During the Warchain's pull: a fiery spin around you that blights everyone it hits.
+## During the Short Leash's pull: a fiery spin around you that blights everyone it hits.
 func _spin() -> void:
 	var sp: Dictionary = rmb_def()["spin"]
 	spins += 1
@@ -1000,8 +1001,8 @@ func _spin() -> void:
 		if is_instance_valid(f) and not f.dead: KitStatus.apply(f, "blt", float(sp["blight"]))}))
 	vfx("spin", h.pos, h.aim_dir(), {"r": float(sp["radius"])})
 
-# ------------------------------------------------------------------ E: Warchain (JuggernautChain)
-## "During E" for the Smash is the pull and the moment after it (the Cinder Spin).
+# ------------------------------------------------------------------ E: Short Leash (JuggernautChain)
+## "During E" for the Final Swing is the pull and the moment after it (the Full Circle).
 func in_e() -> bool:
 	return warchain.spin_window()
 
@@ -1035,11 +1036,11 @@ func use_e() -> void:
 		h._ab_feedback("k1", "deny")
 		return
 	if warchain.hooked() and _pull_waits():
-		e_held = true                  # the pull waits for the Smash to land, then goes at once
+		e_held = true                  # the pull waits for the Final Swing to land, then goes at once
 		return
 	warchain.press()
 
-## The Warchain's cooldown starts when you pull, or when the chain misses or breaks.
+## The Short Leash's cooldown starts when you pull, or when the chain misses or breaks.
 func start_e_cd() -> void:
 	cd["e"] = float(e_def().get("cooldown", 13.0)) * cd_k("kin")
 
@@ -1049,7 +1050,7 @@ const PERFECT_LEAD := 0.07     # s past full charge a bot lets the Lunge go (the
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	# the Gilded Riposte up close: the guard eats what they throw, then the cleave answers
+	# the Blow for Blow up close: the guard eats what they throw, then the cleave answers
 	if HeroUlt.ready(self) and los and dist < float(x_def()["len"]):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		HunterKeys.ult_pressed(h)
@@ -1058,7 +1059,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if warchain.spin_window() and rmb_ready() and int(h.slot_lv["sec"]) > 0:
 		h.inp["sec"] = true
 		return
-	# chained to them: run a Chain Lunge down it, wind up a Smash and pull into a Haul Slam, or just pull
+	# chained to them: run a Chain Lunge down it, wind up a Final Swing and pull into a Haul Slam, or just pull
 	if warchain.hooked() and warchain.target != null and dist > 2.0 and not rmb_down:
 		var roll := randf()
 		if rmb_ready() and int(h.slot_lv["sec"]) > 0 and roll < 0.2:
@@ -1080,7 +1081,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sig"] = true
 		return
-	# in the air any press is the Meteor Drop: only with its slot ready and them inside its hit circle
+	# in the air any press is the Hit the Deck: only with its slot ready and them inside its hit circle
 	if not h.grounded:
 		var dd: Dictionary = rmb_def()["drop"]
 		if int(h.slot_lv["sec"]) > 0 and float(cd["air"]) <= 0.0 and los \

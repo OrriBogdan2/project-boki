@@ -134,7 +134,7 @@ func _hold(X: Hunter) -> void:
 	elif X.ak is BulwarkKit and not (X.ak as BulwarkKit).wall.is_empty():
 		(X.ak as BulwarkKit).wall["hp"] = 9999.0
 
-## Neve's Rink Wall raised by her own kit, stopped where it rose and moved onto the line.
+## Neve's Cold Front raised by her own kit, stopped where it rose and moved onto the line.
 func _ice(m: Match, home: Vector3, line: Vector3) -> void:
 	var at := home + Vector3(0, 0, -8.0)
 	var N: Hunter = m.make_hunter("N", A.team, "light", "Neve", "idle", {}, at, {"arch": "rimewright"})

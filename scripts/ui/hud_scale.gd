@@ -116,13 +116,6 @@ static func from_bottom(y: float, sz: Vector2) -> float:
 	return sz.y - from_edge(sz.y - y)
 
 
-## `p`, a point of the bottom-left groups in their unscaled frame, as it is once they have grown.
-static func grown_bl_pt(p: Vector2, sz: Vector2) -> Vector2:
-	var box := SafeArea.inner(sz)
-	var at := box.position + box.size * BL
-	return at + (p - at) * up()
-
-
 ## How far `r` (a centre-lane line: the Blight line, the Gate prompt) must rise, 0 or less, to stay clear of the
 ## bottom-left groups as they are once grown, where it would touch them sideways.
 static func lift(r: Rect2, sz: Vector2) -> float:

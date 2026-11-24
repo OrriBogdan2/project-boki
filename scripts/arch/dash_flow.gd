@@ -11,8 +11,9 @@ extends RefCounted
 ## the same way and goes on the first
 ## step the CC allows it (docs/decisions/0118-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
 ## own cast lock (ArchKit.lock_left: an ult that plants its caster).
-## An RMB or E pressed while the kit's own cast lock refuses it (ArchKit.lock_refuses: Motley's Nightwell cast, Kael's
-## Riposte guard and cleave, Vex's Kitefall) is held the same way, KIT_LOCK_SLOTS (--cast-lock-buffer-check).
+## An RMB or E pressed while the kit's own cast lock refuses it (ArchKit.lock_refuses: Motley's Main Attraction cast,
+## Kael's
+## Riposte guard and cleave, Vex's Stormfall) is held the same way, KIT_LOCK_SLOTS (--cast-lock-buffer-check).
 
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
@@ -301,7 +302,7 @@ func cc_left(slot: String) -> float:
 ## Presses the CC forbids now, in its last Loco.press_buffer: held for the first step it allows them; true when an
 ## LMB tap
 ## was. A held LMB is left alone (it fires on its own once allowed); a tap is replayed. A cast that holds the
-## hunter still with no end in sight (Rimelock's statue roots its caster) reads its own presses.
+## hunter still with no end in sight (Freeze Frame's statue roots its caster) reads its own presses.
 func _route_cc(fire_pressed: bool) -> bool:
 	var h := kit.h
 	if kit.cast_locked() and kit.lock_left() <= 0.0:
@@ -324,7 +325,7 @@ func _hold_for_cc(slot: String) -> bool:
 
 ## Presses the kit's own cast lock refuses: held like a CC's and replayed on the first step the lock lets them,
 ## at most Loco.press_buffer after the press (a lock that runs on past that answers with the slot's deny cue then). The
-## footage shows no such press dropped (hero-ref: Void acts through the Nightwell, Brall's guard and Ghost's
+## footage shows no such press dropped (hero-ref: Void acts through the Main Attraction, Brall's guard and Ghost's
 ## recoveries are silent), so every kit holds; a newer press replaces the held one.
 func _route_lock() -> void:
 	var h := kit.h

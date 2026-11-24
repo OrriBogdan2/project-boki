@@ -203,10 +203,10 @@ static func _rime(c: Dictionary) -> void:
 		_p(e2, HeroKit.cuff(0.066, 0.092, 0.09), fur, Vector3(0, -0.15, 0))
 
 # ------------------------------------------------------------------------------------------ weapons
-## Ember Cast (nothing held) and the Hoar Fan (a folding fan of ice slats). The gun points down -Z.
+## Hot and Cold (nothing held) and the Ice Darts (a folding fan of ice slats). The gun points down -Z.
 static func weapon(gun: Node3D, wid: String, m_gun: Material, m_dark: Material, m_acc: Material) -> void:
 	if wid == "lantern_crook":
-		# Ember Cast: nothing in the hands (an empty Mag keeps the shared gun from adding its magazine)
+		# Hot and Cold: nothing in the hands (an empty Mag keeps the shared gun from adding its magazine)
 		var mag := Node3D.new()
 		mag.name = "Mag"
 		gun.add_child(mag)

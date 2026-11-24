@@ -117,12 +117,5 @@
 		"cm": 32,
 		"kg": 1.4,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
-	},
-	"roster": {
-		"art": "todo",
-		"line": "mothlet",
-		"stage": 2,
-		"from": "mothlet"
-	},
-	"type2": "tempest"
+	}
 }

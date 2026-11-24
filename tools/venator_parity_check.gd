@@ -2,7 +2,7 @@ extends RefCounted
 ## Vex's parity pass and audit fixes (docs/heroes/gunslinger.md, "Parity pass"), run inside --gunslinger-combo-check
 ## (tools/hero_combo_check.gd): the rifle's cadence, how its rounds track the cursor while she walks, the 30-round
 ## drum that refills whenever the trigger rests, the firing brackets, the shouldered recoil pose, and the Burr
-## Charge fired from the cannon's launcher (item 112), a tap she walks through, and the Longneedle's wide beam,
+## Charge fired from the cannon's launcher (item 112), a tap she walks through, and the Palm Spear's wide beam,
 ## pushed-out view and aim (item 68).
 const ROUND_GAP := 0.08      # s between rounds held (the source's ~12 rounds/s, docs/WEAPON_FIRING_DATA.md)
 const MAG := 30              # rounds in the drum (game data: a 30-round magazine)
@@ -400,7 +400,7 @@ func _from_palm(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	c.ac.step(m, 1.2)
 
 
-## Item 68: the Longneedle hits a line at least 1.5x as wide, the view pushes out at least 15% through the cast, along
+## Item 68: the Palm Spear hits a line at least 1.5x as wide, the view pushes out at least 15% through the cast, along
 ## the aim, with no shake, and is back within 0.3 s of the shot; the beam goes exactly where the line last pointed.
 func _needle(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) -> void:
 	var cam: CamRig = m.cam
@@ -437,7 +437,7 @@ func _needle(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) ->
 		cam.follow(p.pos, c.DT, false)
 		m.step(c.DT)
 	var wide_ok := float(k.e_def()["width"]) >= OLD_NEEDLE_W * 1.5
-	c.ok("Vex cast-move: rooted through the Longneedle cast (footage: still through its 0.6 s cast bar)",
+	c.ok("Vex cast-move: rooted through the Palm Spear cast (footage: still through its 0.6 s cast bar)",
 			float(rec["mk"]) == 0.0 and is_equal_approx(float(k.e_def()["self_slow"]), 1.0),
 			"move_k %.2f" % float(rec["mk"]))
 	c.ok("Vex item 68: the beam hits a line at least 1.5x as wide, and drawn that wide",
@@ -529,7 +529,7 @@ func _audit(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) -> 
 	_into_dash(m, p, k, t, home)
 
 ## Shift during her moves (the into_dash rows, all "fire": owner item 51, every move combos with Shift): pressed in
-## the Longneedle's charge she slides and the beam still fires; pressed right after a Burr Charge she slides at once.
+## the Palm Spear's charge she slides and the beam still fires; pressed right after a Coin Blast she slides at once.
 func _into_dash(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) -> void:
 	c.ac.fresh(t)
 	p.teleport(home)
@@ -567,7 +567,7 @@ func _into_dash(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3)
 	var rows := ["lmb", "rmb", "e", "x", "q"].all(func(sl: String) -> bool:
 		var r := DashFlow.into_dash_of("gunslinger", sl)
 		return String(r.get("mode", "")) == "fire" and String(r.get("source", "")) != "")
-	c.ok("Vex audit: Shift in the Longneedle charge slides and the beam fires; after a Burr Charge she slides at once",
+	c.ok("Vex audit: Shift in the Palm Spear charge slides and the beam fires; after a Coin Blast she slides at once",
 			e_ok and rmb_ok and rows, "E %s RMB %s rows %s" % [e_ok, rmb_ok, rows])
 	c.ac.step(m, 1.5)
 

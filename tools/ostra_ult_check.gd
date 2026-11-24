@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## Motley's ultimate on X, Nightwell, for --ostra-combo-check (docs/heroes/ostra.md): the level gate, the well at
+## Motley's ultimate on X, Main Attraction, for --ostra-combo-check (docs/heroes/ostra.md): the level gate, the well at
 ## the cursor clamped to 10m, the 1.0s dome everyone sees, the opening, the catch (stunned until it closes and
 ## drawn to the middle), a foe walking in later, a foe behind a wall, allies untouched, Motley locked in the
 ## cast for the 1.0s dome and then free while the well runs, the small ticks, the quiet close, the Swollen

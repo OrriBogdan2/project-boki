@@ -1,8 +1,8 @@
 extends "res://tools/hero_pair_check.gd"
-## Tenzo's ultimate on X, Basalt Spine, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
+## Tenzo's ultimate on X, Backbone, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
 ## tap (across the aim, at the cursor) and the hold-and-drag (pivots on its centre), the preview only while
 ## held, the 0.2s cracks everyone sees, the centre-out rise over 0.8s, the slow beside it, bodies shoved off
-## the line, the rocks standing apart from Stone Row's, a punch along the ridge launching it, the bond only on
+## the line, the rocks standing apart from Foothold's, a punch along the ridge launching it, the bond only on
 ## a land (and inside its window), the merge drop while aiming, the cooldown and the burst cap; the arc and
 ## width of the ridge, and the rocks standing as ground over the abyss.
 
@@ -100,7 +100,7 @@ func _cast_and_rise() -> void:
 		"rocks %d" % ult_rocks.size()
 	)
 	ok(
-		"ult: the ridge's rocks are apart from Stone Row's (no pips, no cap)",
+		"ult: the ridge's rocks are apart from Foothold's (no pips, no cap)",
 		k.rocks_up() == 0,
 		"pips %d" % k.rocks_up()
 	)
@@ -184,10 +184,6 @@ func _punch_and_bond() -> void:
 	ok("ult beats: the rocks rise from the centre outward over 0.8s", absf(spread - 0.8) < 0.05, "%.2f" % spread)
 	var n_up := rocks(m).filter(func(w): return w.has("ult")).size()
 	ok("ult: 15 rocks over 21m on open ground", n_up == 15, "rocks %d" % n_up)
-	var joined := true
-	for w in rocks(m).filter(func(w): return w.has("ult")):
-		joined = joined and ((w["node"] as Node3D).get_node(RockLook.FIN) as Node3D).visible
-	ok("spine parity: every rock wears the ridge fin that joins it to the next, one ridge not nine rocks", joined)
 	var rd := k.rock_def()
 	var shape_ok := true
 	for w in rocks(m).filter(func(w): return w.has("ult")):
@@ -200,7 +196,7 @@ func _punch_and_bond() -> void:
 			span.normalized().dot(k.spine.axis)
 		) > cos(deg_to_rad(13.0)) and off_line < 1.25
 	ok(
-		"spine (item 15): real rocks, Stone Row's own (length, top, thickness), lying along the line, one rock deep",
+		"spine (item 15): real rocks, Foothold's own (length, top, thickness), lying along the line, one rock deep",
 		shape_ok and HeroZones.ROCK_TH * 2.0 < 1.0
 	)
 	_arc_and_width(m, k)

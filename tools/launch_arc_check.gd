@@ -119,8 +119,7 @@ func _place_pad() -> void:
 			break
 	var n := Node3D.new()
 	m.add_child(n)
-	pad = {"pos": at, "t": 1e9, "arm": 0.0, "after": 0.0, "push": UtilityUse.PAD_MIN_HV, "lift": UtilityUse.PAD_VY,
-		"col": Color.WHITE, "node": n, "cd": {}}      # (the fields UtilityMore._pad gives a pad)
+	pad = {"pos": at, "t": 1e9, "node": n, "cd": {}}
 	m.gpads.append(pad)
 	print("LARC pad at %s" % str(at))
 

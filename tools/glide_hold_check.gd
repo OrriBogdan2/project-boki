@@ -18,7 +18,7 @@ const HIGH := 12.0      # m: a start in the air, well above the ground, for the 
 const SNAP_S := 0.1     # s between a player's snapshots (Net.tick's send_t)
 const BUTTONS := {"juggernaut": "RMB", "archer": "LMB", "bulwark": "LMB"}      # Kael, Lace, Albert
 ## A held Shift that drops a Space press by design (MOVEMENT_FEEL "Dash into glide")
-const SWALLOWS := {}
+const SWALLOWS := {"mage": "Sparkle's wire: her keys do nothing while she holds Shift (mage_kit _tick_wire)"}
 
 ## A training match as `arch` ("" keeps the default kit), the player on an empty patch of ground.
 func _start(main: Node, arch: String) -> void:
@@ -220,7 +220,7 @@ const SWEEP_OPEN := 1                   # steps from the fresh press to the glid
 ## teleport: a jump out of it is not a dash to cancel, so only his air rows (the sling and drift) are swept.
 const SWEEP_SKIP := {"ostra": "ground"}
 ## A dash that ends in an attack keeps the glider shut for that attack's wind-down (the no-glider-in-an-attack
-## rule): Albert's 360 Smash spin lands as his dash ends.
+## rule): Albert's Tideturner spin lands as his dash ends.
 const SWEEP_WINDDOWN := {"bulwark": BulwarkKit.WINDDOWN}
 ## One probe of a Shift pattern moving east, the player's press on step `press` (-1: none). Returns {busy: steps
 ## the move kept a roll running or the glider shut, open: steps from the fresh press to the open glider (1 = the

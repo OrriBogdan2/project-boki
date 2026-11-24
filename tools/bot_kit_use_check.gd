@@ -13,21 +13,21 @@ const MUST := {
 	"juggernaut": ["rmb hold", "lunge perfect", "chain reel"],
 	"bulwark": ["rmb hold", "hammer throw", "hammer recall", "shield charge"],
 	"rimewright": ["skate", "rink freeze"],
-	"dolm": ["hop recast", "ab:rmb", "rocks raised", "rocks launched", "ab:rock"],      # Quakefall, Stone Row rocks
-	"ostra": ["snaps", "ab:rmb", "pops", "ab:e"],      # Shard Snap and its hits, Brimseed pops and their hits
+	"dolm": ["hop recast", "ab:rmb", "rocks raised", "rocks launched", "ab:rock"],      # Rock Bottom, Foothold rocks
+	"ostra": ["snaps", "ab:rmb", "pops", "ab:e"],      # Stage Fright and its hits, Gag Gift pops and their hits
 	"ashwick": ["cloak pull"],
 }
 ## arch -> the hit counters of its damage slots besides LMB: each lands in every duel by LAND_T.
 const LANDS := {
-	"ashwick": ["ab:utility", "ab:k1"],      # Cinder Shot, Furnace Cloak
-	"tender": ["ab:utility"],      # Burrseed (her ult needs an ally: NO_DUEL_ULT)
-	"dolm": ["ab:rmb", "ab:rock"],      # Quakefall, Stone Row rocks
-	"ostra": ["ab:rmb", "ab:e"],      # Shard Snap, Brimseed
+	"ashwick": ["ab:utility", "ab:k1"],      # Spitfire, Molten Hug
+	"tender": ["ab:utility"],      # Stick Around (her ult needs an ally: NO_DUEL_ULT)
+	"dolm": ["ab:rmb", "ab:rock"],      # Rock Bottom, Foothold rocks
+	"ostra": ["ab:rmb", "ab:e"],      # Stage Fright, Gag Gift
 }
 const LAND_T := 90.0      # s into each duel by which every damage slot has landed once
 const MISS_OK := 1        # duels per slot that may miss LAND_T (main's eager ults leave one seed short now and then)
 const ALWAYS := ["lmb hit", "rmb press", "e", "ultimate", "dash", "glide"]       # every Hunter, every duel
-const NO_DUEL_ULT := ["tender"]      # Hearth Call needs an ally: no cast in a duel (--kit-use-match checks it)
+const NO_DUEL_ULT := ["tender"]      # Rise and Shine needs an ally: no cast in a duel (--kit-use-match checks it)
 const COLS := ["lmb hit", "rmb press", "rmb hold", "rmb hit", "e", "e hit", "ultimate", "dash", "glide"]
 
 var bad := 0

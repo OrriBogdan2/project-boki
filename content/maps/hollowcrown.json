@@ -2034,13 +2034,6 @@
      "The Shelf"
     ]
    ],
-   "shops": [
-    [
-     290,
-     100,
-     "armor"
-    ]
-   ],
    "hazard_areas": [
     {
      "kind": "ice",
@@ -5111,13 +5104,6 @@
      62,
      408,
      "Nest Glade"
-    ]
-   ],
-   "shops": [
-    [
-     138,
-     372,
-     "perks"
     ]
    ],
    "hazard_areas": [
@@ -9893,13 +9879,6 @@
      "Shrine Table"
     ]
    ],
-   "shops": [
-    [
-     296,
-     364,
-     "move"
-    ]
-   ],
    "walls": [],
    "rocks": [],
    "landings": [
@@ -10821,13 +10800,6 @@
      414,
      300,
      "Forge Yard"
-    ]
-   ],
-   "shops": [
-    [
-     490,
-     248,
-     "gear"
     ]
    ],
    "hazard_areas": [
@@ -15446,10 +15418,6 @@
   212
  ],
  "ways_scale": 2.5,
- "play_space": {
-  "trios": 280,
-  "solos": 208
- },
  "outposts": [
   [
    296,

@@ -458,7 +458,7 @@ effect category" made concrete.
 **Heals read one way, whatever gives them.** Every heal goes through `Hunter.heal`, which calls
 `Fx.healed`: the healed Hunter gets a soft green-gold glow (`#b8f06a`, the sustain colour) that rises
 over them and moves with them, and a green `+N` (`HudStyle.HEAL`) above the damage numbers. That covers
-Meeko's Hearthlight and Hearth Call, Albert's Mending Ground, Kael's Gilded Riposte, lifesteal (a Void
+Meeko's Hearthlight and Rise and Shine, Albert's Safe Harbour, Kael's Blow for Blow, lifesteal (a Void
 weapon, a merge's leech, Fever), tonics and knock heals. A heal number is its own kind: it adds up only
 with heals, never with a hit or a Daze `+N`, and it still shows with damage numbers turned off. A heal
 too small to read (lifesteal on a light hit) waits, hidden, until the heals add up. While the glow is up,
@@ -487,7 +487,7 @@ Rules:
 - A victim of reveal, mark, blight or vulnerable gets a HUD status icon with a timer, and their model
   shows the mark to everyone (reveal outline, vulnerable crack overlay, blight sickly tint).
 - A status icon shows its seconds only while 0.5 s or more are left (HudPlate.shows_time): a zone that
-  tops a slow up every frame shows the icon, never a stuck "0.2". A hero's own hold (Neve's Rimelock
+  tops a slow up every frame shows the icon, never a stuck "0.2". A hero's own hold (Neve's Freeze Frame
   statue, ArchKit.holds_still) is not a status at all. `--ult-label-scan` fails any ult that leaves a
   stray number on screen.
 - (Enemy dash pips were removed by owner item 84.) Each enemy's merge and resource states have tells
@@ -569,12 +569,12 @@ The reference footage gives no hit-stop or shake number (5-10 fps frames; the so
 only the flash reads above and the HUD plate's 1-2 frame flicker at 30 fps, so the tiers stay as set. Every
 row flashes 120 ms, the same as the footage's one-frame body flash at 5-10 fps.
 
-Strays fixed (2026-11-20): the Archer's Heavy Shot flashed 0.2 s and the Gunslinger's Burr Charge 0.3 s (now
+Strays fixed (2026-11-20): the Archer's Pin Down flashed 0.2 s and the Gunslinger's Coin Blast 0.3 s (now
 their tier's 120 ms); the Bulwark ult's quake shook the players near it 0.8 (now the heavy tier's 0.6) and held
 him with its own 0.09 s outside the per-body cap (now the heavy hold through `Feel.hold`); the other ults' 0.6
 literals read the heavy tier; a Boki's big burst went through the cause-less world shake (now it names the Boki,
 and `Shake` treats your own Boki as you, so it never shakes its owner; an enemy Boki's burst near you still does).
-The Meteor Drop's bystander shake is gone (11-23: landings shake no one; its hit still shakes the struck player heavy).
+The Hit the Deck's bystander shake is gone (11-23: landings shake no one; its hit still shakes the struck player heavy).
 `--impact-weight-check` 7-8 assert the tiers per slot (explained exceptions in `TIER_OK`) and that no kit file
 sets its own hit-stop, flash or shake number.
 

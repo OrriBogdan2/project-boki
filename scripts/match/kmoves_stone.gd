@@ -6,7 +6,7 @@ extends RefCounted
 ## (deep knees, squash on every impact, the huge fists leading); Ostra floats (lifts, stretches and a
 ## spin on her Swell, light hands).
 
-## The bottom of Quakefall's wind-up: the deepest crouch, fists drawn back (breah_windup's end, breah_slam's start).
+## The bottom of Rock Bottom's wind-up: the deepest crouch, fists drawn back (breah_windup's end, breah_slam's start).
 const WOUND := {
 	"p": -0.5, "sq": 0.36, "lift": -0.22, "legs": [1.1, -1.85, 1.0, -1.75], "lw": 1.0,
 	"fl": Vector3(-0.38, -0.36, 0.32), "hw": 1.0, "fr": Vector3(0.38, -0.36, 0.32), "rw": 1.0
@@ -14,7 +14,7 @@ const WOUND := {
 
 const MOVES := {
 	# ---------------------------------------------------------------- Tarek
-	# Basalt Spine held: sunk wide and low, both fists spread out to the sides at the ground, the body
+	# Backbone held: sunk wide and low, both fists spread out to the sides at the ground, the body
 	# turned along the ridge being dragged (it holds while X is down)
 	"breah_spine_aim": {"hold": true, "keys": [
 		[0.00, {}],
@@ -25,7 +25,7 @@ const MOVES := {
 				"fl": Vector3(-0.7, -0.3, 0.05), "hw": 1.0, "fr": Vector3(0.7, -0.3, 0.05), "rw": 1.0
 			}
 		]]},
-	# Basalt Spine let go: the fists swing up (0.05) and are driven into the ground (0.1, the cracks), she
+	# Backbone let go: the fists swing up (0.05) and are driven into the ground (0.1, the cracks), she
 	# stays down through the cracks and the 0.8s rise (to 0.95), then heaves up as the ridge stands
 	# (1.0 = x.tell + x.rise), back to stance by 1.4 (the x_spine clip's keys, tools/art1/tarek_clips.py)
 	"breah_spine": {"keys": [
@@ -141,7 +141,7 @@ const MOVES := {
 			}
 		],
 		[0.60, {}]]},
-	# Quakefall held: a low crouch, the fists drawn in at the hips and glowing (it holds)
+	# Rock Bottom held: a low crouch, the fists drawn in at the hips and glowing (it holds)
 	"breah_crouch": {"hold": true, "keys": [
 		[0.00, {}],
 		[
@@ -181,7 +181,7 @@ const MOVES := {
 				"hw": 1.0, "fr": Vector3(0.16, 1.0, 0.12), "rw": 1.0
 			}
 		]]},
-	# Quakefall released: the wind-up (tenzo.rmb.windup, 0.16s), planted, sinking from the held crouch into a
+	# Rock Bottom released: the wind-up (tenzo.rmb.windup, 0.16s), planted, sinking from the held crouch into a
 	# deeper one with both fists drawn back past the hips, the tell before the hop
 	"breah_windup": {"hold": true, "keys": [
 		[
@@ -192,7 +192,7 @@ const MOVES := {
 			}
 		],
 		[0.16, WOUND]]},
-	# Quakefall's take-off after the wind-up (the hop is a real 0.75s arc, BreahSlam.flight(), the slam lands with
+	# Rock Bottom's take-off after the wind-up (the hop is a real 0.75s arc, BreahSlam.flight(), the slam lands with
 	# him, owner item 61 and 11-08): from the wound-up crouch he drives up off both legs with the fists swinging
 	# back (0.05), arches at the top with both fists high behind his head (0.41), whips them over and down as he
 	# drops (0.62), smashes them into the ground on landing (0.75: flat squash, knees wide), rebounds a little in
@@ -249,7 +249,7 @@ const MOVES := {
 			}
 		],
 		[1.51, {}]]},
-	# the air Quakefall: fists high, pitched down over them as she falls
+	# the air Rock Bottom: fists high, pitched down over them as she falls
 	"breah_dive": {"hold": true, "keys": [
 		[0.00, {}],
 		[
@@ -308,7 +308,7 @@ const MOVES := {
 				"fl": Vector3(-0.34, -0.26, 0.08), "hw": 1.0, "fr": Vector3(0.34, -0.26, 0.08), "rw": 1.0
 			}
 		]]},
-	# Rock Hop's hop (0.3s, a low fast arc): crouched on the rock (0), kicked off it long with the fists back
+	# Leap of Faith's hop (0.3s, a low fast arc): crouched on the rock (0), kicked off it long with the fists back
 	# (0.06), knees tucked, arms out for balance (0.16), the feet reaching for the next rock (0.28)
 	"breah_hop": {"keys": [
 		[
@@ -339,7 +339,7 @@ const MOVES := {
 				"fl": Vector3(-0.36, 0.2, 0.1), "hw": 1.0, "fr": Vector3(0.36, 0.2, 0.1), "rw": 1.0
 			}
 		]]},
-	# Rock Hop's skid: a skater's low stance along the rock, front knee bent, back leg long, one arm out ahead and
+	# Leap of Faith's skid: a skater's low stance along the rock, front knee bent, back leg long, one arm out ahead and
 	# one behind (0.08), held as he slides
 	"breah_skate": {"keys": [
 		[0.00, {"p": -0.1, "sq": 0.3, "lift": -0.12, "legs": [0.9, -1.2, -0.3, -0.5], "lw": 1.0}],
@@ -357,7 +357,7 @@ const MOVES := {
 				"fl": Vector3(-0.36, 0.15, 0.34), "hw": 1.0, "fr": Vector3(0.36, 0.22, -0.34), "rw": 1.0
 			}
 		]]},
-	# Rock Hop's crash: both fists smashed into the ground with a deep squash (0.05), held down through
+	# Leap of Faith's crash: both fists smashed into the ground with a deep squash (0.05), held down through
 	# the crash (0.25), then she heaves upright
 	"breah_leap_land": {"land": true, "keys": [
 		[
@@ -423,7 +423,7 @@ const MOVES := {
 				"fl": Vector3(-0.22, 0.1, -0.45), "hw": 0.8, "fr": Vector3(0.22, 0.15, -0.35), "rw": 0.8
 			}
 		]]},
-	# Stone Row: reared back with both fists high overhead (0.06), slammed down into the ground on the tell
+	# Foothold: reared back with both fists high overhead (0.06), slammed down into the ground on the tell
 	# with a deep squash (0.18, the fists travel 1.6m), held down through it, then heaved up and out as the
 	# rocks rise (0.36), a proud settle
 	"breah_raise": {"keys": [
@@ -464,7 +464,7 @@ const MOVES := {
 			}
 		],
 		[0.95, {}]]},
-	# Tremor Sense finding someone: sunk into a deep crouch, one palm flat on the ground, the head and
+	# Sight Unseen finding someone: sunk into a deep crouch, one palm flat on the ground, the head and
 	# shoulders cocked toward the feeling, the other fist up on guard
 	"breah_sense": {"keys": [
 		[0.00, {}],
@@ -652,7 +652,7 @@ const MOVES := {
 			}
 		],
 		[0.60, {}]]},
-	# Brimseed: the hand raised with the seed (0.08), then the palm turned down and opened over the spot
+	# Gag Gift: the hand raised with the seed (0.08), then the palm turned down and opened over the spot
 	"ostra_seed": {"keys": [
 		[0.00, {}],
 		[0.08, {"gp": 0.9, "p": 0.15, "lift": 0.08, "fr": Vector3(0.12, 0.55, -0.2), "rw": 1.0}],
@@ -683,7 +683,7 @@ const MOVES := {
 			}
 		],
 		[0.60, {}]]},
-	# Nightwell, a committed cast (she is locked in it while the dome fills): she sinks with the hands crossed
+	# Main Attraction, a committed cast (she is locked in it while the dome fills): she sinks with the hands crossed
 	# low (0.10), then rises tall and flings both arms out wide and high, the crook raised (0.25, the commit); she holds
 	# that spread pose while the dome fills
 	"ostra_well": {"hold": true, "keys": [

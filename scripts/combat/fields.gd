@@ -99,7 +99,7 @@ func tick(dt: float) -> void:
 				if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < float(z["r"]) + f.r and absf(f.pos.y - at.y) < 2.0:
 					var o := {"src": "kin" if by is Kin else "abil", "ab": String(z["ctx"].get("slot", "zone")), "tags": ["zone", String(z["ctx"].get("ability", ""))],
 							"at": at}      # the zone's own point: HitContact clamps it onto the foe's collider
-					for k in ["slow", "root", "stun", "burn", "blight"]:
+					for k in ["slow", "root", "stun", "burn"]:
 						if e.has(k): o[k] = float(e[k])
 					if float(e.get("dmg", 0.0)) > 0.0:
 						f.hurt(float(e["dmg"]) * float(z["pw"]), by, o)

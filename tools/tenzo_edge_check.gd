@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## --tenzo-edge-check: Tenzo's Quakefall (RMB) off a ledge never dunks him. On a small platform with open abyss
+## --tenzo-edge-check: Tenzo's Rock Bottom (RMB) off a ledge never dunks him. On a small platform with open abyss
 ## all round, he uses it off the edge every way it can go there: tapped in the air after walking or running off,
 ## after a jump off, in a glide off it, the hold's hop off the rim, a charge carried off the rim and let go in the
 ## air; four directions, cursor level with the ledge, deep in the void and high. Each run asserts he never

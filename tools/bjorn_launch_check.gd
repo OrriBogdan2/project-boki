@@ -1,6 +1,6 @@
 extends "res://tools/pin_bjorn_owner_check.gd"
 ## Owner items #48, #49, #51 and #59 for Breaker (briefs/OWNER_REVIEW_1103.md), run from --bulwark-combo-check
-## (tools/archer_bulwark_combo_check.gd adds the counts): the Faultline plants him only for the wind-up and
+## (tools/archer_bulwark_combo_check.gd adds the counts): the Groundswell plants him only for the wind-up and
 ## the slam, the held swing's perfect window launches him, into a glide off a ledge, and the hold pairs with a
 ## jump and a Shift dash (a perfect release out of either still launches); plus the LMB parity pass with the
 ## source (hero sheet bjorn.md): tracking in the hold, the throw's wind-up, the swing's timing. Prints AKCHECK

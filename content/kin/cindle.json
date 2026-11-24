@@ -121,10 +121,5 @@
 		"cm": 34,
 		"kg": 4.2,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
-	},
-	"roster": {
-		"art": "locked",
-		"line": "cindle",
-		"stage": 1
 	}
 }

@@ -1,6 +1,0 @@
-zone_net|guest_gil_puddle.jpg|Gil's slime puddle, cast on the host (seen on the guest's game)
-zone_net|guest_meeko_seed.jpg|Meeko's seed field under the guest, cast on the host (seen on the guest's game)
-zone_net|guest_meeko_hearth.jpg|Meeko's Hearthlight on the host's hunter (seen on the guest's game)
-zone_net|guest_motley_well.jpg|Motley's Nightwell, cast on the host (seen on the guest's game)
-zone_net|guest_vex_disc.jpg|Vex's X countdown disc, cast on the host (seen on the guest's game)
-zone_net|guest_vex_patch.jpg|Vex's burning patch, cast on the host (seen on the guest's game)

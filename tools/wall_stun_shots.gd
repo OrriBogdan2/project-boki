@@ -1,12 +1,12 @@
 extends RefCounted
 ## Screenshots for --wall-stun-shots --shots-dir=<dir>: a foe driven into a Tenzo rock by Lace and into a
-## Rink Wall by Albert, the crack and dust at 0.05 s and 0.4 s. Writes <dir>/MANIFEST.txt
+## Cold Front by Albert, the crack and dust at 0.05 s and 0.4 s. Writes <dir>/MANIFEST.txt
 ## (wallstun|<file>|<caption>). Run under xvfb with a renderer.
 
 ## [file stem, attacker archetype, surface, caption]
 const SHOTS := [
 	["rock_archer", "archer", "rock", "A body driven into a Tenzo rock: crack and dust, Lace's rim"],
-	["rimewall_bulwark", "bulwark", "rimewall", "A body driven into a Rink Wall: crack and dust, Albert's rim"],
+	["rimewall_bulwark", "bulwark", "rimewall", "A body driven into a Cold Front: crack and dust, Albert's rim"],
 ]
 
 var main: Node

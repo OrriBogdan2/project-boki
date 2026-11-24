@@ -2,7 +2,7 @@ extends RefCounted
 ## --range-clamp-check: every ground-targeted RMB, E and X (plus Motley's Trade on Shift) with the cursor at twice
 ## its range (docs/heroes/range_clamp.md). The source clamps each one to the range edge on the cursor line: never
 ## refused, never a walk in. So the cast lands on that edge, and the aim preview, where the slot has one, shows the
-## same spot. Grimble's Anchor Drop is the control: a cone at his feet that ignores the cursor's distance.
+## same spot. Grimble's Lump Sum is the control: a cone at his feet that ignores the cursor's distance.
 
 const DT := 1.0 / 60.0
 const TOL := 0.2        # m: the widest allowed miss of the range edge (a ground snap, a step of drift)
@@ -46,7 +46,7 @@ func vex_r(m: Match) -> void:
 	ok(K.cast_ult(), "Vex R: the press casts")
 	_steps(m, 2)
 	var s: Dictionary = K.ult.shells[-1]
-	_row("Vex R Cinderfall", from, rng, s["at"], _at(P, "x%d" % int(s["n"])))
+	_row("Vex R Penny Drop", from, rng, s["at"], _at(P, "x%d" % int(s["n"])))
 
 func sparkle(m: Match) -> void:
 	var P := m.player
@@ -56,7 +56,7 @@ func sparkle(m: Match) -> void:
 	var from := P.pos
 	K.use_e()
 	_steps(m, 2)
-	_row("Sparkle E Skycall", from, reach, K.strikes[0]["at"] if not K.strikes.is_empty() else null, _at(P, "e0"))
+	_row("Sparkle E Undercurrent", from, reach, K.strikes[0]["at"] if not K.strikes.is_empty() else null, _at(P, "e0"))
 	_steps(m, 120)
 	var rng := float(K.x_def()["range"])
 	_aim_at(P, rng)
@@ -65,7 +65,7 @@ func sparkle(m: Match) -> void:
 	_aim_at(P, rng)
 	from = K.ult.leap.get("from", P.pos)
 	_steps(m, 2)
-	_row("Sparkle R Kitefall", from, rng, K.ult.leap.get("land"), _at(P, "x_aim"))
+	_row("Sparkle R Stormfall", from, rng, K.ult.leap.get("land"), _at(P, "x_aim"))
 
 func kael_rmb_air(m: Match) -> void:
 	var P := m.player
@@ -79,7 +79,7 @@ func kael_rmb_air(m: Match) -> void:
 	var from := P.pos
 	var preview: Variant = _at(P, "drop_aim")
 	K.press_rmb()
-	_row("Kael RMB (air) Meteor Drop", from, reach, K.meteor.land if K.meteor.running() else null, preview)
+	_row("Kael RMB (air) Hit the Deck", from, reach, K.meteor.land if K.meteor.running() else null, preview)
 
 func lace_e(m: Match) -> void:
 	var P := m.player
@@ -97,7 +97,7 @@ func lace_e(m: Match) -> void:
 	var preview: Variant = null
 	if not e.is_empty():
 		preview = (e["center"] as Vector2) + (e["dir"] as Vector2) * float(e["radius"])
-	_row("Lace E Hail Wall", from, reach, cast, preview)
+	_row("Lace E Hemline", from, reach, cast, preview)
 
 func meeko_e(m: Match) -> void:
 	var P := m.player
@@ -125,7 +125,7 @@ func neve(m: Match) -> void:
 		m.step(DT)
 		if not K.zones.is_empty():
 			break
-	_row("Neve RMB Ice Spear", from, rng, K.zones[-1]["at"] if not K.zones.is_empty() else null, preview)
+	_row("Neve RMB Icebreaker", from, rng, K.zones[-1]["at"] if not K.zones.is_empty() else null, preview)
 	_steps(m, 200)
 	var ed: Dictionary = K.e_def()
 	var span := float(ed["reach"]) + float(ed["travel"])
@@ -141,7 +141,7 @@ func neve(m: Match) -> void:
 	if not K.wall_cast.is_empty():
 		var d: Vector2 = K.wall_cast["dir"]
 		wall = from + Vector3(d.x, 0, d.y) * (float(ed["reach"]) + float(K.wall_cast["travel"]))
-	_row("Neve E Rink Wall (where it stops)", from, span, wall, preview_e)
+	_row("Neve E Cold Front (where it stops)", from, span, wall, preview_e)
 
 func tenzo_r(m: Match) -> void:
 	var P := m.player
@@ -152,7 +152,7 @@ func tenzo_r(m: Match) -> void:
 	P.inp["x_down"] = true
 	ok(K.cast_ult(), "Tenzo R: the press starts the aim")
 	_steps(m, 3)
-	_row("Tenzo R Basalt Spine", from, rng, K.spine.center, _at(P, "x"))
+	_row("Tenzo R Backbone", from, rng, K.spine.center, _at(P, "x"))
 	P.inp["x_down"] = false
 	_steps(m, 3)
 
@@ -164,12 +164,12 @@ func motley(m: Match) -> void:
 	var from := P.pos
 	K.use_e()
 	_steps(m, 3)
-	_row("Motley E Brimseed", from, reach, K.seed.get("pos"), _at(P, "seed"))
+	_row("Motley E Gag Gift", from, reach, K.seed.get("pos"), _at(P, "seed"))
 	var rng := float(K.x_def()["range"])
 	_aim_at(P, rng)
 	ok(K.cast_ult(), "Motley R: the press casts")
 	_steps(m, 3)
-	_row("Motley R Nightwell", from, rng, K.well.center, _at(P, "x"))
+	_row("Motley R Main Attraction", from, rng, K.well.center, _at(P, "x"))
 	_steps(m, 400)
 	var trade := float(K.dash_def()["reach"])
 	_aim_at(P, trade)
@@ -195,9 +195,9 @@ func sable_e(m: Match) -> void:
 		if not K.knife.is_empty():
 			break
 	m.step(DT)
-	_row("Sable E Shadow Knife (where it lies)", from, rng, K.knife.get("pos"), _at(P, "knife"))
+	_row("Sable E White Flash (where it lies)", from, rng, K.knife.get("pos"), _at(P, "knife"))
 
-## The control: Anchor Drop slams a fixed cone from his feet, the cursor only turns it.
+## The control: Lump Sum slams a fixed cone from his feet, the cursor only turns it.
 func grimble_e(m: Match) -> void:
 	var P := m.player
 	var K = P.ak
@@ -207,7 +207,7 @@ func grimble_e(m: Match) -> void:
 	_steps(m, 2)
 	var cone := AimKit.entry(P, "e_tell")
 	var at_feet: bool = not cone.is_empty() and (cone["from"] as Vector2).distance_to(Vector2(P.pos.x, P.pos.z)) <= TOL
-	var what := "Grimble E Anchor Drop: a %.1f m cone at his feet, not at the cursor" % r
+	var what := "Grimble E Lump Sum: a %.1f m cone at his feet, not at the cursor" % r
 	ok(at_feet and is_equal_approx(float(cone["len"]), r), what)
 
 func run(main: Node) -> void:

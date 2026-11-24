@@ -10,8 +10,8 @@ extends RefCounted
 ##   godot --headless -- --match-repeat-check [--repeat-cycles=8]
 ## On a GPU (jobq --needs gpu) the video and texture memory lines include the painted map (MapPaint).
 
-const CYCLES := 7               # expeditions in a run (--repeat-cycles= overrides)
-const WARM := 4                 # cycles that may fill the shared caches before growth counts
+const CYCLES := 5               # expeditions in a run (--repeat-cycles= overrides)
+const WARM := 3                 # cycles that may fill the shared caches before growth counts
 const SIM_S := 20.0             # s of match time per expedition
 const DT := 1.0 / 60.0          # s per match step (Match.DT)
 const FRAME_EVERY := 30         # match steps between frames, so deferred frees and timers run

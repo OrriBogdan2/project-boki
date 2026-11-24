@@ -2,7 +2,7 @@ extends RefCounted
 ## --dash-dir-check: a plain dash follows the "Dash toward the cursor" setting for every hunter. With it off
 ## (the default) holding A with the cursor on the right dashes left, on the ground and in the air; with it on
 ## you dash at the cursor. Left out: hunters whose Shift is aimed movement in their doc row (Mage's Wirerun
-## direction from the cursor, Motley's Lantern Trade, Tarek's Rock Hop). Lace's roll follows WASD
+## direction from the cursor, Motley's Musical Chairs, Tarek's Leap of Faith). Lace's roll follows WASD
 ## (docs/heroes/archer.md, owner default), so she is checked. Never touches the save.
 
 const AIMED := ["mage", "ostra", "dolm"]

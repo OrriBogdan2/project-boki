@@ -1,5 +1,5 @@
 extends RefCounted
-## --ability-bar-shots --shots-dir=<dir>: the ability bar for Kael (dash charges, airborne Meteor Drop),
+## --ability-bar-shots --shots-dir=<dir>: the ability bar for Kael (dash charges, airborne Hit the Deck),
 ## Cinder (rank 3, two Cinder Shots), Neve (two Ice Spears) and Grimble (barges, airborne air pounce),
 ## each with a charge ready and the next recharging. Run under a renderer; files are <dir>/bar_<kit>.png.
 

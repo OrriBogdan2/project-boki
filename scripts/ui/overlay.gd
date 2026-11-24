@@ -634,8 +634,6 @@ func _tab_controls(v: VBoxContainer) -> void:
 					"util2",
 					"util3",
 					"util4",
-					"util5",
-					"util6",
 					"base",
 				]
 				+ KinKeys.ids()
@@ -650,16 +648,12 @@ func _tab_controls(v: VBoxContainer) -> void:
 	if not MergeForm.enabled():
 		named.erase("ultimate")  # (X stays reserved, but no row offers it while Fusion is off)
 	var shown := {}
-	var psc = Game.main.screen_node() if Game.main else null
-	var solo: bool = psc is Match and (psc as Match).player != null and not Life.has_mates(psc, (psc as Match).player)
-	for an in (["base", "ping", "pass_lead", "separate"] + MateLook.ACTIONS if solo else []):
-		shown[an] = true      # solos: the keys that need a squadmate are not listed (they stay bound for trios)
 	var extra: Array = []
 	for g in groups:
 		var first_extra := v.get_child_count()
-		_group(v, "Map" if solo and g[0] == "Squad and map" else String(g[0]))
+		_group(v, String(g[0]))
 		for an in g[1]:
-			if not named.has(an) or shown.has(an):
+			if not named.has(an):
 				continue
 			shown[an] = true
 			_bind_row(v, an, named[an])

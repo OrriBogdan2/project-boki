@@ -261,7 +261,7 @@ const MOVES := {
 			]
 		]
 	},
-	# 360 Smash: a hard 0.17 s run-up (the dash's own lean tips him forward, so the move adds none), ONE full
+	# Tideturner: a hard 0.17 s run-up (the dash's own lean tips him forward, so the move adds none), ONE full
 	# turn in 0.16 s with the hammer held out at arm's length while he slides on, then a low crouched
 	"bul_whirl":
 	{
@@ -314,7 +314,7 @@ const MOVES := {
 	},
 	"bul_charge":
 	{
-		# the Shield Charge: head down behind the shield, a ram (on top of the dash's own forward lean)
+		# the Full Ahead: head down behind the shield, a ram (on top of the dash's own forward lean)
 		"keys":
 		[
 			[0.0, {"p": -0.1, "y": 0.2, "sq": 0.2, "lw": 1.0, "legs": [0.8, -1.0, -0.6, -0.4]}],
@@ -333,7 +333,7 @@ const MOVES := {
 			[0.25, {"y": 0.75, "p": 0.12, "lift": -0.06, "gp": 0.25, "lw": 1.0, "legs": [0.55, -0.85, -0.45, -0.5]}]
 		]
 	},
-	# Mending Ground (Purify): the hammer hauled up to the sky on the toes, then driven down into the earth
+	# Safe Harbour (Purify): the hammer hauled up to the sky on the toes, then driven down into the earth
 	"bul_mend":
 	{
 		# as the light comes down; overshoot into a deep crouch, settle
@@ -452,7 +452,7 @@ const MOVES := {
 	},
 	"bul_ult_wind":
 	{
-		# Faultline wind-up (0.4 s, held): planted wide, the hammer hauled overhead in both hands, leaning back
+		# Groundswell wind-up (0.4 s, held): planted wide, the hammer hauled overhead in both hands, leaning back
 		"hold": true,
 		"keys":
 		[
@@ -489,7 +489,7 @@ const MOVES := {
 			]
 		]
 	},
-	# the Faultline slam: one frame from overhead down into the ground, a deep crouch over it through the plant
+	# the Groundswell slam: one frame from overhead down into the ground, a deep crouch over it through the plant
 	"bul_ult_slam":
 	{
 		# (0.2 s), then the legs free to walk while the back comes up over the hammer as the lane erupts

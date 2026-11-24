@@ -43,7 +43,6 @@ static var dive_timeout: float = _phys["dive_timeout"]
 static var speed_cap: float = _phys["speed_cap"]
 static var haste: float = _phys["haste"]
 static var coyote_s: float = _phys["coyote_s"]
-static var step_down: float = _phys["step_down"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
 static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed, accel, glide)
@@ -78,17 +77,6 @@ static func walk(hv: Vector2, want: Vector2, acc: float, grip: float, dt: float)
 	if want.length() < 0.001:
 		return brake(hv, grip, dt)
 	return Loco.accel_to(hv, want, acc * grip, 0.0, brake_rate(hv.length()) * grip, dt)
-
-## A standing body whose ground drops `drop` metres in a step stays on it (down a flight, a ramp or a stone):
-## more than step_down is a fall.
-static func sticks(drop: float) -> bool:
-	return drop <= step_down
-
-## The height a hunter stands at for the camera: the ground under it, or where it last stood over the void,
-## so a jump or a fall moves the view only with the ground (Cam.follow).
-static func stand_y(h: Hunter) -> float:
-	var g := h.ground()
-	return g if g > World.VOID + 1.0 else h.last_gy
 
 ## The one rule for ground speed: the move-speed bonuses (shares of run speed) add, the slows and
 ## states multiply that total, and nothing passes speed_cap ([game data] MaxMoveSpeed 700 uu/s).
@@ -209,7 +197,7 @@ static func fall(h: Hunter, dt: float) -> void:
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
-## plunge (ArchKit.dive_speed, like Breah's air Quakefall) outruns it.
+## plunge (ArchKit.dive_speed, like Breah's air Rock Bottom) outruns it.
 static func fall_cap(h: Hunter) -> float:
 	if h.ak and h.ak.dive_speed() > 0.0:
 		return h.ak.dive_speed()

@@ -5,7 +5,7 @@ uniform vec4 color : source_color = vec4(1.0);
 uniform float thickness = 0.12;
 uniform float fill = 0.0;
 uniform float arc = 1.0;
-uniform float wash = 0.0;   // a zone's faint inside rising toward the band (Gil's slime puddle, Ostra's Nightwell)
+uniform float wash = 0.0;   // a zone's faint inside rising toward the band (Gil's slime puddle, Ostra's Main Attraction)
 uniform float halo = 0.0;   // a soft glow either side of the band and a hot core in it (0..1)
 void fragment() {
 	vec2 uv = UV * 2.0 - 1.0;
@@ -13,9 +13,7 @@ void fragment() {
 	float ang = (atan(uv.x, -uv.y) / 6.2831853) + 0.5;
 	float ring = smoothstep(1.0 - thickness - 0.04, 1.0 - thickness, r) * (1.0 - smoothstep(0.96, 1.0, r));
 	float mid = 1.0 - thickness * 0.5 - 0.02;
-	// outside the band the glow is gone by the quad's edge (r = 1), so it never shows the quad as a square
-	float spread = mix(thickness + 0.2, 1.0 - mid, step(mid, r));
-	float soft = halo * (1.0 - smoothstep(0.0, spread, abs(r - mid)));
+	float soft = halo * (1.0 - smoothstep(0.0, thickness + 0.2, abs(r - mid)));
 	float inner = wash * smoothstep(0.15, 1.0, r) * step(r, mid);
 	if (ang > arc) { ring = 0.0; soft = 0.0; inner = 0.0; }
 	float a = max(max(ring, step(r, 1.0) * fill), max(soft * 0.5, inner * 0.3));

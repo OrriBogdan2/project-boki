@@ -408,7 +408,7 @@ def rod(i):
     sh = sweep("rod%d" % i, "metal-ryzz", np.array([a + d * s_ for s_ in shaft_t]), HEX6, shaft_r, side_hint=np.array([1.0, 0, 0]), uv_rect=COPPER_R)
     sock.rigid("rod.%d" % i)
     sh.rigid("rod.%d" % i)
-    # a thin glow sleeve lives inside the shaft; its bone flares it out past the copper when the rods light (Kitefall)
+    # a thin glow sleeve lives inside the shaft; its bone flares it out past the copper when the rods light (Stormfall)
     gl_t = np.linspace(0.12, L - 0.02, 4)
     gl = sweep("rodglow%d" % i, "glow-ryzz", np.array([a + d * s_ for s_ in gl_t]), TRI, np.full(4, ROD_R * 0.45), side_hint=np.array([1.0, 0, 0]), uv_rect=GLOWC_R, room=0.0)
     gl.rigid("rodlit.%d" % i)

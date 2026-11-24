@@ -68,6 +68,7 @@
     "utility_use start/smoke:cloak",
     "utility_use start/scan:ping",
     "utility_use start:skill",
+    "utility_use _pad:throw",
     "utility_use tick:heal",
     "utility_use tick:shield"
    ]

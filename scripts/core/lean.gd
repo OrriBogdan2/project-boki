@@ -23,20 +23,6 @@ static func face(key: String) -> Dictionary:
 		return Evo.AFF[key]
 	return {"name": t["name"], "tint": Color(String(t["tint"]))}
 
-## The body size its lean has grown to, as a multiplier (1.0 for none): the type's size at full lean, scaled by
-## the lean's strength. Heavy types swell and light ones slim (content/rules/lean.json `size`). Evo.dress applies it.
-static func size(rec: Dictionary) -> float:
-	var ln := Evo.lean(rec)
-	return 1.0 + float(rules()["types"].get(String(ln[0]), {}).get("size", 0.0)) * float(ln[1])
-
-## The Boki card's ending for the lean line: ", 8% bigger" or ", 5% slimmer" ("" under 1%).
-static func size_note(rec: Dictionary) -> String:
-	var pct := roundi((size(rec) - 1.0) * 100.0)
-	if pct == 0:
-		return ""
-	var way := "bigger" if pct > 0 else "slimmer"
-	return ", %d%% %s" % [absi(pct), way]
-
 const MARK_SIZE := 0.2         # fleck radius, as a share of the head's size (head bone to its crown and brow)
 const MARK_SPREAD := 0.5       # how far the flecks fan out across the brow, the same share
 const MARK_RISE := 0.08        # how far out of the head their centres sit: half showing, none floating

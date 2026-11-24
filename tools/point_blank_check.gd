@@ -7,12 +7,12 @@ extends "res://tools/archetype_check.gd"
 
 const IDS := ["gunslinger", "bulwark", "thief", "juggernaut", "ostra", "rimewright", "dredge", "tender", "ashwick",
 	"dolm", "archer", "mage"]
-const NO_HIT_RMB := ["bulwark"]           # Aegis is a shield, not a strike
-const THROUGH_WALLS := ["ostra"]          # Tether Lantern's orbs fly through walls (its data): no puff to make
+const NO_HIT_RMB := ["bulwark"]           # Blue Guard is a shield, not a strike
+const THROUGH_WALLS := ["ostra"]          # Comic Timing's orbs fly through walls (its data): no puff to make
 const WALL_AT := 0.3                      # m from your centre to the wall's face
 const FOE_AT := 0.5                       # m from your centre to the touching foe's
 const PUFF_NEAR := 0.5                    # m: a miss puff this far in front of the face counts as at the face
-const RMB_WAIT := 1.4                     # s after the RMB press: Burrseed winds up for 1.0 s before the throw
+const RMB_WAIT := 1.4                     # s after the RMB press: Stick Around winds up for 1.0 s before the throw
 var fire_walls: Array = []                # Cinder's fire flattened on a wall while firing (puffs only live 0.12 s)
 var behind := 0                           # frames a shot of yours flew back toward the wall behind you
 var far_x := -INF                         # the furthest x a shot of yours reached

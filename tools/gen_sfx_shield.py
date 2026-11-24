@@ -4,7 +4,7 @@
 
 One family per shield material (Hunter.shield_kind, played by ShieldSfx):
   ward    the plain energy shield of heals and Boki shields: a padded thud, a thin pane breaking
-  cloak   Cinder's Furnace Cloak: a muffled thump with embers snapping, a crack that scatters sparks
+  cloak   Cinder's Molten Hug: a muffled thump with embers snapping, a crack that scatters sparks
   molten  Tenzo's Molten Guard: a heavy basalt thud, a stone-and-glass split with a low rumble
 Each name has takes (_1.._3); every file is levelled to the impact category (docs/AUDIO.md).
 Original synthesis, no samples.

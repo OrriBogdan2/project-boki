@@ -4,7 +4,7 @@ extends RefCounted
 ## where a shot struck terrain or a wall, and a wider, fainter one fading out where it ran out of range. A weapon round
 ## of a Hunter with its own `<arch>_miss` sound (Sparkle's `mage_miss`) also fizzles out there.
 ## Drawn by DJFx's pooled puffs (made at load, at most POOL_CAP alive, the oldest taken back): nothing is made
-## in a fight. Every LMB and RMB shot ends through Match._shot_end; Sable's Bola, flown by her kit, calls it too.
+## in a fight. Every LMB and RMB shot ends through Match._shot_end; Sable's Dark Bola, flown by her kit, calls it too.
 
 const WALL_SIZE := 0.55  # m across a puff on terrain or a wall
 const WALL_S := 0.22  # s it lasts

@@ -9,7 +9,6 @@ extends RefCounted
 ## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only. What sits on the Hunters in a bot
 ## 3v3 of the slice Hunters (ClarityFight, 10 frames) stays within ClarityFight.BUDGET.
 
-const ARCH_CHECK := preload("res://tools/archetype_check.gd")
 const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
 const FIGHT_FRAMES := 10
@@ -25,7 +24,6 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
-	_sable_hit(main)
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
@@ -94,36 +92,6 @@ func run(main: Node) -> void:
 	print("CLARITY done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## Sable's crossbow hits read on the struck body: it flashes in her colour for the hit's 3 full frames, then the
-## flash is white again for the next Hunter's hit.
-func _sable_hit(main: Node) -> void:
-	var a := ARCH_CHECK.new()
-	a.main = main
-	var r: Array = a.setup("thief", 6.0)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var want := Arch.color("thief")
-	P.fire_cd = 0.0
-	var tinted := false
-	var shown := Color.BLACK
-	var t := 0.0
-	while t < 1.2 and not tinted:
-		P.inp["fire"] = true
-		a.step(m, DT)
-		T.render(DT, 1.0)
-		tinted = T.flash_t > 0.0 and _same(T.flash_tint, want)
-		if tinted and not T.mats.is_empty():
-			shown = T.mats[0].get_shader_parameter("flash_color")
-		t += DT
-	P.inp["fire"] = false
-	ok(tinted, "Sable's bolt hit: the struck body's flash is her colour")
-	ok(_same(shown, want), "... and the shader draws it (%s)" % shown)
-	a.step(m, 0.3)
-	T.render(DT, 1.0)
-	ok(_same(T.flash_tint, Color.WHITE), "the tint is white again once the flash ends")
-	m.queue_free()
-
 ## The first ClarityFight fight: each BUDGET entry's element-Hunter pairs a frame, on average, within its budget.
 func _fight_budget(main: Node) -> void:
 	var pairs := {}
@@ -139,6 +107,7 @@ func _fight_budget(main: Node) -> void:
 		var cap := float(ClarityFight.BUDGET[b])
 		ok(per <= cap, "3v3 fight: '%s' on a Hunter %.1f a frame (budget %.1f)" % [b, per, cap])
 	fm.queue_free()
+
 
 ## A stunned and a slowed dummy, then Ground and Daze (one of them a remote body, as the Net "kst" event
 ## leaves it): one icon per kind, each with its time left, shrinking, and nothing when nothing is active.

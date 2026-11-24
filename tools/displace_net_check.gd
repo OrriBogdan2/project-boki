@@ -5,7 +5,7 @@ extends RefCounted
 ## second headless game, the guest (--displace-net-check=guest), with CheckChild. Both build the
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
 ## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
-## Sparkle's Skycall drag, Mossy's shield boop; Kael's Warchain pulls Kael to the player (not the player).
+## Sparkle's Undercurrent drag, Mossy's shield boop; Kael's Short Leash pulls Kael to the player (not the player).
 ## A Boki's pull and spike (KinExec) move the player on their own game the same way, there by the next snapshot.
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game. Last, a dunk on a gliding player spikes them out
@@ -81,7 +81,7 @@ func _host_up() -> Hunter:
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	CheckChild.hold(relay.peer, START_S)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	guest_pid = _start_guest()
+	guest_pid = CheckChild.start("%s --dn-port=%d" % [guest_flag, _guest_door()], dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
@@ -109,11 +109,6 @@ func _host_up() -> Hunter:
 	ok(g != null and g.remote and g.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
 	return g if g != null and g.net_t >= 0.0 else null
 
-## The guest game, headless (a subclass that screenshots on the guest starts it drawing).
-func _start_guest() -> int:
-	return CheckChild.start("%s --dn-port=%d" % [guest_flag, _guest_door()], dir.path_join("guest.log"))
-
-
 ## The port the guest joins the relay on (a check with a proxy on the guest's link returns the proxy's).
 func _guest_door() -> int:
 	return port
@@ -129,7 +124,7 @@ func _host() -> void:
 	ok(dk.arrivals == 2 and dk.pull.is_empty(),
 		"Grimble's reel: on the player too it ends as an arrival (HAULED), reel let go", "arrivals %d" % dk.arrivals)
 	await _case(g, b, "ostra", Vector3(8.0, 0, 0), _ostra, 2.2, "Motley's Trade")
-	await _case(g, b, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Skycall drag", "slide")
+	await _case(g, b, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Undercurrent drag", "slide")
 	await _case(g, b, "bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Mossy's shield push", "push")
 	await _case(g, b, "bulwark", Vector3(8.0, 0, 0), _boki_pull, 1.2, "a Boki pull")
 	ok(_v(early.get("pos", [0, 0, 0])).x < home.x + 7.9 or float(early.get("vx", 0.0)) < -1.0,
@@ -261,7 +256,7 @@ func _boki(st: StageSpec, t: Hunter) -> void:
 		await _ask()
 		early = replies[0] if not replies.is_empty() else {}
 
-## Kael's Warchain hooks the player and pulls Kael to them; the player stays put (a self-pull).
+## Kael's Short Leash hooks the player and pulls Kael to them; the player stays put (a self-pull).
 func _zedran(g: Hunter) -> void:
 	var p_v := m.player
 	_kit("juggernaut")
@@ -279,10 +274,10 @@ func _zedran(g: Hunter) -> void:
 	Displace.capture = false
 	var moves := Displace.sent.filter(func(e): return String(e[2]) == g.nid).size()
 	await _ask()
-	ok(hooked and k_v.warchain.arrivals == 1, "Kael's Warchain: it hooks the player and pulls Kael in",
+	ok(hooked and k_v.warchain.arrivals == 1, "Kael's Short Leash: it hooks the player and pulls Kael in",
 		"hooked %s arrivals %d" % [hooked, k_v.warchain.arrivals])
 	ok(p_v.flat_dist(g) < 2.6 and moves == 0,
-		"Kael's Warchain: he lands beside the player; the chain sends no move for them",
+		"Kael's Short Leash: he lands beside the player; the chain sends no move for them",
 		"gap %.1f, moves %d" % [p_v.flat_dist(g), moves])
 
 ## A hazard strikes on both games (each game runs its own hazards): the player is hurt once, by
@@ -314,7 +309,7 @@ func _hazard(g: Hunter, b: Hunter) -> void:
 	b.teleport(home + Vector3(-6.0, 0, 9.0))
 	await _place(g, home + PARK)
 
-## Meeko's Hearth Call on the guest: its own game shows the protection bar (her nid, the seconds left from the
+## Meeko's Rise and Shine on the guest: its own game shows the protection bar (her nid, the seconds left from the
 ## snapshot) while she channels, and not once she is stunned out of it.
 func _meeko_bar(g: Hunter) -> void:
 	var p_v := m.player
@@ -435,7 +430,7 @@ func _ally_safe(g: Hunter) -> void:
 	var p_v := m.player
 	g.team = p_v.team
 	var moves := [["ashwick", Vector3(3.8, 0, 0), _cinder, 1.0, "Cinder's cloak pull"],
-		["mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Skycall drag"],
+		["mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Undercurrent drag"],
 		["bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Albert's shield push"]]
 	for c in moves:
 		_kit(c[0])
@@ -627,11 +622,6 @@ func _build(d: Dictionary) -> void:
 			nm.kins.erase(h.kin)
 			h.kin.queue_free()
 			h.kin = null
-	for k: Kin in nm.kins.duplicate():  # the wild ones too: the roster moves which species rolls onto the strip
-		if k.owner_h == null:
-			k.dead = true
-			nm.kins.erase(k)
-			k.queue_free()
 	var p_v := nm.player
 	p_v.max_hp = 10000.0
 	p_v.hp = p_v.max_hp

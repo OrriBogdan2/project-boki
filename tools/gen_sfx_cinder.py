@@ -3,7 +3,7 @@ bellows that blows her about, and a voice a little cracked by the Blight she dra
 
     cd tools && python3 gen_sfx_cinder.py      (then: godot --headless --import)
 
-Signatures: the flame roar (lw_roar, the Torch Lance) and the tank hiss (ashwick_tank_hiss, the valve
+Signatures: the flame roar (lw_roar, the Open Flame) and the tank hiss (ashwick_tank_hiss, the valve
 venting when she lets go). Fire here is built from turbulent low noise (the body), a mid whoosh, a
 low rumble and soft crackle, kept under 6 kHz so a held lance never turns into hiss. Every sound is
 levelled to its category (docs/AUDIO.md). The kit's older lw_* / as_ignite files are rebuilt under their
@@ -46,7 +46,7 @@ def snap_ring(freqs, d, dec, g):
     return S.ring(freqs, d, [dec * (1.0 - 0.15 * k) for k in range(len(freqs))], [g / (k + 1) for k in range(len(freqs))])
 
 
-# ------------------------------------------------------------------ LMB: Torch Lance
+# ------------------------------------------------------------------ LMB: Open Flame
 def pilot():
     """The igniter ticks, gas hisses and the cyan pilot catches with a soft fwump."""
     d = 0.42
@@ -77,7 +77,7 @@ def tank_hiss(i):
     return mix(pop, at(vent, 0.004), at(whistle, 0.01), tank, at(sputter, 0.05), out)
 
 
-# ------------------------------------------------------------------ RMB: Cinder Shot
+# ------------------------------------------------------------------ RMB: Spitfire
 def bolt():
     """A cinder lobbed from the gun hand: a mortar thoomp and the ember whirring away."""
     d = 0.55
@@ -97,7 +97,7 @@ def bolt_hit():
     return mix(smack, flare, at(embers, 0.03), sub(70, 40, 0.4, 0.07) * 0.3)
 
 
-# ------------------------------------------------------------------ Char: Ablaze and Flashover
+# ------------------------------------------------------------------ Char: Ablaze and Boiling Point
 def ignite():
     """A foe goes Ablaze: a rising whoomp as the Char catches."""
     d = 0.85
@@ -108,7 +108,7 @@ def ignite():
 
 
 def blaze():
-    """Flashover: the burn bursts fiercer. A deep double whoomp, a bright flare and a long crackling tail."""
+    """Boiling Point: the burn bursts fiercer. A deep double whoomp, a bright flare and a long crackling tail."""
     d = 1.1
     hit = mix(click(0.004, 2000, 7000) * 1.2, kick(140, 40, d, 0.03, 0.16, 2.8) * 0.8, sub(65, 32, d, 0.2) * 0.45)
     second = kick(100, 38, 0.6, 0.04, 0.12, 2.2) * 0.45
@@ -117,7 +117,7 @@ def blaze():
     return mix(hit, at(second, 0.11), flare, rise)
 
 
-# ------------------------------------------------------------------ Shift: Soot Ram and the poof
+# ------------------------------------------------------------------ Shift: Lock Horns and the poof
 def bash():
     """The burner whooshes and lights as she throws herself head first."""
     d = 0.55
@@ -155,7 +155,7 @@ def dash(i):
     return mix(rush, lick, knock)
 
 
-# ------------------------------------------------------------------ E: Furnace Cloak
+# ------------------------------------------------------------------ E: Molten Hug
 def cloak():
     """The bellows draw in, then the furnace blasts out round her."""
     d = 1.3
@@ -175,7 +175,7 @@ def cloak_hit():
     return mix(smack, sizzle, sear)
 
 
-# ------------------------------------------------------------------ X: Flue Flight
+# ------------------------------------------------------------------ X: Red Carpet
 def jet():
     """Lift-off: the bellows jet roars up, holds through the 1.8 s flight and dies away."""
     d = 1.9

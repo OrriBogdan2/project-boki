@@ -1,6 +1,6 @@
 class_name DredgeBlast
 extends RefCounted
-## Dredge's ultimate on X, Brass Broadside (docs/heroes/dredge.md): one press starts a 1.1s charge while a 105
+## Dredge's ultimate on X, Both Barrels (docs/heroes/dredge.md): one press starts a 1.1s charge while a 105
 ## degree fan grows on the ground in front (everyone sees it; it is the exact area, turning with his aim), then
 ## two waves 0.6s apart of six heavy brass slugs each (real shots, Match.spawn_shot) with Anti-Heal. He can walk
 ## slowly throughout (x.charge_move, then x.fire_move of his speed; CastHold) and keeps turning to the cursor.

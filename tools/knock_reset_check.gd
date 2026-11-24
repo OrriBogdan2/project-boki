@@ -3,8 +3,8 @@ extends RefCounted
 ## a rival dummy) with the helpers of tools/archetype_check.gd. The rules and their sources are listed in
 ## docs/KNOCK_RESETS.md. Covered here: the game-wide dash back (DashReset: the knocker whole or one charge
 ## of several, a teammate who hit the foe in the last 5s too, no heal for them, nothing for a third team);
-## Vex's Burr Charge at rank 3; Cinder's Furnace Cloak and heal; Kael's heal, the Finishing Slam's Riposte
-## reset and the Riposte's own takedown reset; Sable's heals (her own, an assist) and the Encore's Vault;
+## Vex's Coin Blast at rank 3; Cinder's Molten Hug and heal; Kael's heal, the Finishing Slam's Riposte
+## reset and the Riposte's own takedown reset; Sable's heals (her own, an assist) and the Last Dance's Vault;
 ## Sparkle's Blowout; Grimble's Salvage stack on an assist; Meeko's carry refresh at rank 3. Hem's wall-stun
 ## charge and Mossy's dash refund need walls and run in --archer-combo-check / --bulwark-combo-check.
 ## Never touches the save.
@@ -109,7 +109,7 @@ func _vex() -> void:
 	_knock(m, T, P)
 	A.ok("vex: his knock gives Combat Slide back whole (one charge)",
 			P.max_dashes() <= 1.0 and _full(P), "dashes %.2f / %.0f" % [P.dashes, P.max_dashes()])
-	A.ok("vex: rank 3 Burr Charge resets on the knock", float(K.cd["rmb"]) <= 0.0, "cd %.1f" % float(K.cd["rmb"]))
+	A.ok("vex: rank 3 Coin Blast resets on the knock", float(K.cd["rmb"]) <= 0.0, "cd %.1f" % float(K.cd["rmb"]))
 	A.ok("vex: one cue, not two (the kit no longer repeats DashReset)", _cues_for(P, c0) == ["takedown"],
 			str(_cues_for(P, c0)))
 	await A.done(m)
@@ -126,9 +126,9 @@ func _cinder() -> void:
 	_spend(P, 0.5)
 	K.cd["e"] = 6.0
 	_knock(m, T, P)
-	A.ok("cinder: a knock gives one Soot Ram charge of two, not both", P.max_dashes() >= 2.0
+	A.ok("cinder: a knock gives one Lock Horns charge of two, not both", P.max_dashes() >= 2.0
 			and P.dashes >= 1.0 and P.dashes < 1.5, "dashes %.2f / %.0f" % [P.dashes, P.max_dashes()])
-	A.ok("cinder: her knock resets the Furnace Cloak", float(K.cd["e"]) <= 0.0, "cd %.1f" % float(K.cd["e"]))
+	A.ok("cinder: her knock resets the Molten Hug", float(K.cd["e"]) <= 0.0, "cd %.1f" % float(K.cd["e"]))
 	var want: float = 0.5 + float(K.res_def()["heal_knock"]) + DashReset.HEAL
 	A.ok("cinder: her knock heals 16% (+5% takedown)", absf(_hp_k(P) - want) < 0.01,
 			"%.3f want %.3f" % [_hp_k(P), want])
@@ -199,7 +199,7 @@ func _sable() -> void:
 	K.cd["x"] = 0.0
 	HunterKeys.ult_pressed(P)
 	m.step(A.DT)
-	A.ok("sable: the Encore gives the Vault back", K.encore.running() and _full(P), "dashes %.2f" % P.dashes)
+	A.ok("sable: the Last Dance gives the Vault back", K.encore.running() and _full(P), "dashes %.2f" % P.dashes)
 	await A.done(m)
 
 # ------------------------------------------------------------------ Sparkle (Joule)

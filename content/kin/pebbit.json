@@ -125,11 +125,5 @@
 		"cm": 30,
 		"kg": 7.5,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
-	},
-	"roster": {
-		"art": "todo",
-		"line": "pebbit",
-		"stage": 1
-	},
-	"type2": "swarm"
+	}
 }

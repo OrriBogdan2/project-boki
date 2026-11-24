@@ -106,7 +106,7 @@ func draw(c: CanvasItem, at: Vector2, p: Hunter) -> void:
 		_who_line(c, at.x, y, verb, hits.back() as Dictionary)
 		HudStyle.ctext(c, Vector2(at.x, y + LINE_H), "Last %d s: %s" % [int(WINDOW_S), by_source(hits)], 14, MUTED)
 
-## "Downed by Rin with Shadow Knife", the Hunter's name in their squad colour.
+## "Downed by Rin with White Flash", the Hunter's name in their squad colour.
 func _who_line(c: CanvasItem, cx: float, y: float, verb: String, last: Dictionary) -> void:
 	var h: Hunter = last["hunter"]
 	var segs := [[verb, INK], [str(last["who"]), SideColor.of(m, h) if h else INK], [" with %s" % last["how"], INK]]

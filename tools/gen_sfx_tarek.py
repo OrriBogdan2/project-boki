@@ -99,7 +99,7 @@ def stone_tok(f, d=0.5, g=1.0):
     return ring((f, f * 2.63, f * 4.87), d, (0.09, 0.03, 0.015), (0.5 * g, 0.2 * g, 0.08 * g))
 
 
-# ------------------------------------------------------------------ LMB: Rubble Fists
+# ------------------------------------------------------------------ LMB: Stone's Throw
 def throw(i):
     """The boulder heaved from the shoulder: a low grinding heave, the stone whooshing off, grit shed behind it."""
     d = 0.45
@@ -155,9 +155,9 @@ def burst(i):
                at(molten(0.5, 0.02, 0.15) * 0.35, 0.03), reflections(tail(0.5, 900, 0.1) * 0.6))
 
 
-# ------------------------------------------------------------------ Tremor Sense
+# ------------------------------------------------------------------ Sight Unseen
 def sense(i):
-    """Tremor Sense: a deep pulse through the ground and the seeing-stones knocking as they 'see'."""
+    """Sight Unseen: a deep pulse through the ground and the seeing-stones knocking as they 'see'."""
     d = 0.8
     pulse = mix(np.sin(2 * np.pi * 52 * T(0.6)) * env(N(0.6), 0.03, 0.18) * 0.6, rumble(0.6, 180, 0.03, 0.15) * 0.8)
     toks = mix(*[at(stone_tok(f, 0.4, 0.6 - 0.12 * k), 0.12 + 0.07 * k) for k, f in enumerate((620, 740, 560))])
@@ -188,7 +188,7 @@ def leap(i):
 
 
 def slam(i):
-    """Quakefall / the leap's landing: a quake rolling out, stone cracking open, gravel raining."""
+    """Rock Bottom / the leap's landing: a quake rolling out, stone cracking open, gravel raining."""
     d = 1.3
     return mix(click(0.005, 1200, 5000) * 1.2, thud(110, 1.6, 0.9), crack(d, 250, 2600, 0.04) * 1.8,
                rumble(1.1, 200, 0.01, 0.35) * 1.5, crunch(0.6, 500, fall=0.15, big=6) * 0.8,
@@ -210,16 +210,16 @@ def roll(i):
     return fade_out(mix(bumps[:N(d)], grind, crunch(d, 150, big=4) * 0.5) * env(N(d), 0.02, 0.45), 0.1)
 
 
-# ------------------------------------------------------------------ E: Stone Row; X: Basalt Spine
+# ------------------------------------------------------------------ E: Foothold; X: Backbone
 def crack_cast(i):
-    """Stone Row's tell: the ground splitting open in a line, molten light in the cracks."""
+    """Foothold's tell: the ground splitting open in a line, molten light in the cracks."""
     d = 0.6
     splits = mix(*[at(crack(0.08, 300, 2500, 0.012) * (1.0 - 0.1 * k), 0.06 * k) for k in range(5)])
     return mix(splits, rumble(0.6, 250, 0.05, 0.2) * 0.9, at(molten(0.5, 0.05, 0.2) * 0.35, 0.05))
 
 
 def raise_rocks(i):
-    """Stone Row: the rocks bursting up out of the ground in a row, crunching into place."""
+    """Foothold: the rocks bursting up out of the ground in a row, crunching into place."""
     d = 0.9
     pushes = mix(*[at(mix(thud(160 - 10 * k, 0.6, 0.35), crunch(0.25, 500, big=3) * 0.5), 0.07 * k) for k in range(3)])
     return mix(pushes, rumble(0.7, 220, 0.02, 0.25) * 1.0, at(gravel(0.6, 130, 0.2) * 0.5, 0.1))

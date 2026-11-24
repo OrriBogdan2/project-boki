@@ -312,8 +312,6 @@ const ACTIONS := [
 	["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"],
 	["util4", "Utility belt slot 4"],
-	["util5", "Utility belt slot 5"],
-	["util6", "Utility belt slot 6"],
 	["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings)"],

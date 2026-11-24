@@ -13,7 +13,7 @@
 		"squad": {"from_match": 4, "what": "squad frames"},
 		"perks": {"from_match": 4, "what": "the perk row"},
 		"weather": {"from_match": 4, "what": "the weather and sight chip"},
-		"belt_spare": {"from_match": 0, "what": "belt slots 3 to 6 while they are empty (a filled one always shows)"},
+		"belt_spare": {"from_match": 0, "what": "belt slots 3 and 4 while they are empty (a filled one always shows)"},
 		"ult_tiles": {"from_match": 0, "what": "the locked ultimate tiles (X, and the Fusion box) until level 6"},
 		"pace_tags": {"from_match": 4, "what": "ahead / behind pace tags (no widget yet)"},
 		"plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"}

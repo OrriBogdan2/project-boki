@@ -91,7 +91,7 @@
 		"stamproo": {"mode": "farm", "rarity": "rare", "min_difficulty": "normal"},
 		"luckhop": {"mode": "farm", "rarity": "very_rare", "min_difficulty": "normal"},
 		"cubbat": {"mode": "tutorial", "rarity": "common", "min_difficulty": "normal"},
-		"ermink": {"kin": "ermink", "mode": "tutorial", "rarity": "common", "min_difficulty": "normal"},
+		"ermink": {"mode": "tutorial", "rarity": "common", "min_difficulty": "normal"},
 		"bastling": {"mode": "tutorial", "rarity": "rare", "min_difficulty": "normal"},
 		"bastionpet": {"mode": "tidewatch", "rarity": "common", "min_difficulty": "normal"},
 		"bathilus": {"mode": "tidewatch", "rarity": "common", "min_difficulty": "normal"},

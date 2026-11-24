@@ -1,6 +1,7 @@
 extends "res://tools/hero_vfx_reel.gd"
-## Motley's reel (tools/hero_vfx_reel.gd): quick orbs and a full orb at the dummy with their hits, the Shard Snap's
-## wind-up, flight and stun, the Trade's lob to its landing, the Brimseed planted, growing and popped, and Nightwell
+## Motley's reel (tools/hero_vfx_reel.gd): quick orbs and a full orb at the dummy with their hits, the Stage Fright's
+## wind-up, flight and stun, the Trade's lob to its landing, the Gag Gift planted, growing and popped, and Main
+## Attraction
 ## from its dome through the open well to its close.
 
 
@@ -38,7 +39,7 @@ func _part_rmb() -> void:
 		cast,
 		_sheet(
 			"rmb",
-			"RMB, Shard Snap: the wind-up, the bundle in flight, the stun",
+			"RMB, Stage Fright: the wind-up, the bundle in flight, the stun",
 			[0.15, 0.3, 0.42, 0.46, 0.52, 0.6, 0.75, 1.0, 1.4],
 			func(): return (P.pos + T.pos) * 0.5
 		),
@@ -58,7 +59,7 @@ func _part_dash() -> void:
 		lob,
 		_sheet(
 			"dash",
-			"Shift, Lantern Trade: the lob, the lantern in flight, both ends folding in",
+			"Shift, Musical Chairs: the lob, the lantern in flight, both ends folding in",
 			[0.2, 0.4, 0.8, 1.2, 1.6, 1.9, 2.0, 2.1, 2.4],
 			func(): return (P.pos + T.pos) * 0.5
 		),
@@ -77,7 +78,7 @@ func _part_e() -> void:
 		cast,
 		_sheet(
 			"e",
-			"E, Brimseed: the drop, the seed growing, E again: the pop",
+			"E, Gag Gift: the drop, the seed growing, E again: the pop",
 			[0.2, 0.4, 1.0, 2.0, 2.62, 2.68, 2.8, 3.0, 3.4],
 			func(): return T.pos
 		),
@@ -98,7 +99,7 @@ func _part_r() -> void:
 		cast,
 		_sheet(
 			"r",
-			"X, Nightwell: the dome, the well opening, held, closing",
+			"X, Main Attraction: the dome, the well opening, held, closing",
 			[0.3, 0.7, 1.05, 1.15, 1.3, 1.8, 3.0, 4.6, 4.8],
 			func(): return T.pos
 		),
