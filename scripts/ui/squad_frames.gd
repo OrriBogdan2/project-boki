@@ -149,7 +149,7 @@ static func _label(m: Match, h: Hunter, st: String) -> Array:
 		"DEATHBOX":
 			var b: Dictionary = Life.box_of(m, h)
 			var left := maxf(0.0, float(b.get("soul_until", 0.0)) - m.time)
-			return ["DEAD  %d:%02d" % [int(left) / 60, int(left) % 60], DEAD_COL]
+			return ["DEAD  %d:%02d" % [int(int(left) / 60.0), int(left) % 60], DEAD_COL]
 		"DEAD":
 			return ["DEAD", DEAD_COL]
 		"EXTRACTED":

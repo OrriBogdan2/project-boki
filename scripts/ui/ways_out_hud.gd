@@ -87,7 +87,7 @@ static func _heart_final(m: Match, now: float) -> void:
 
 
 static func _clock(t: float) -> String:
-	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]
 
 # ------------------------------------------------------------------ the strip
 ## Where the strip starts: the top of the window's safe area.

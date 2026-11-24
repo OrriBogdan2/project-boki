@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://be0y3pxl1cxfc"
-path="res://.godot/imported/ryzz_meshy_Image_2.jpg-91b24da3d0ad57fbcc974bdbd27ee3ce.ctex"
+path.s3tc="res://.godot/imported/ryzz_meshy_Image_2.jpg-91b24da3d0ad57fbcc974bdbd27ee3ce.s3tc.ctex"
+path.etc2="res://.godot/imported/ryzz_meshy_Image_2.jpg-91b24da3d0ad57fbcc974bdbd27ee3ce.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "552c1481d65fde88a8b4d6bccb7d53ab"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/ryzz/ryzz_meshy_Image_2.jpg"
-dest_files=["res://.godot/imported/ryzz_meshy_Image_2.jpg-91b24da3d0ad57fbcc974bdbd27ee3ce.ctex"]
+dest_files=["res://.godot/imported/ryzz_meshy_Image_2.jpg-91b24da3d0ad57fbcc974bdbd27ee3ce.s3tc.ctex", "res://.godot/imported/ryzz_meshy_Image_2.jpg-91b24da3d0ad57fbcc974bdbd27ee3ce.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

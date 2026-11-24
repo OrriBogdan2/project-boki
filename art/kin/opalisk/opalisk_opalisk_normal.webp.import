@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgrpyf1odwk2u"
-path="res://.godot/imported/opalisk_opalisk_normal.webp-e41c83f377123fc4db3ae60358c64ee7.ctex"
+path.bptc="res://.godot/imported/opalisk_opalisk_normal.webp-e41c83f377123fc4db3ae60358c64ee7.bptc.ctex"
+path.astc="res://.godot/imported/opalisk_opalisk_normal.webp-e41c83f377123fc4db3ae60358c64ee7.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d6f10392b9d34f8aa7ad911232959d3c"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/opalisk/opalisk_opalisk_normal.webp"
-dest_files=["res://.godot/imported/opalisk_opalisk_normal.webp-e41c83f377123fc4db3ae60358c64ee7.ctex"]
+dest_files=["res://.godot/imported/opalisk_opalisk_normal.webp-e41c83f377123fc4db3ae60358c64ee7.bptc.ctex", "res://.godot/imported/opalisk_opalisk_normal.webp-e41c83f377123fc4db3ae60358c64ee7.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -93,7 +93,7 @@ static func ago(secs: int) -> String:
 	if secs < MIN_S:
 		return "just now"
 	if secs < HOUR_S:
-		return "%d min ago" % (secs / MIN_S)
+		return "%d min ago" % (int(secs / float(MIN_S)))
 	if secs < DAY_S:
-		return "%d h ago" % (secs / HOUR_S)
-	return "%d d ago" % (secs / DAY_S)
+		return "%d h ago" % (int(secs / float(HOUR_S)))
+	return "%d d ago" % (int(secs / float(DAY_S)))
