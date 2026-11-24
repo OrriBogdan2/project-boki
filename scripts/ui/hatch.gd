@@ -8,12 +8,22 @@ extends Node3D
 ## egg is named for its element (Venom Egg, ...).
 const TOP_MARGIN := 48.0       # px: room kept clear of the window edges by the title block (both sides together)
 const STARTERS := ["cindle", "puddlet", "burrlet"]
-const SKIP_ARM_S := 0.5   # s into the hatch before a tap counts (the last knock's own click must not skip the egg)
 const MYSTERY := {
 	"species": "mystery", "name": "Mystery Egg", "temper": "???",
 	"desc": "Black as night, in an old basket. Who knows?",
 	"play": "Could be anything, even a rare one.",
 }
+
+static func starter_eggs() -> Array:
+	var out: Array = []
+	for sp in STARTERS:
+		var e: Dictionary = Data.egg_info(sp)
+		e["species"] = sp
+		for k in ["temper", "desc", "play"]:
+			if not e.has(k): e[k] = ""
+		out.append(e)
+	out.append(MYSTERY.duplicate())
+	return out
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
@@ -32,8 +42,7 @@ var stage := "intro"          # intro (the card) | create (yourself) | pick (egg
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
-var skipper: CanvasLayer     # holds the hatch beat's HoldSkip ring (freed once the Boki's card is up)
-var hold_skip: HoldSkip      # a tap moves the hatch on a beat, a hold skips to the card
+var skipper: HatchSkip       # watches the hatch beat for a key (freed once the Boki's card is up)
 var reveal: KinReveal
 var hover := -1
 var auto_warm := false        # test hook: hold the warmth on by itself
@@ -54,18 +63,6 @@ var edit_only := false
 var sub_lbl: Label        # opened from the menu just to change how you look
 var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make yourself
 var cam_to := Vector3(0, 3.6, 6.4)
-
-static func starter_eggs() -> Array:
-	var out: Array = []
-	for sp in STARTERS:
-		var e: Dictionary = Data.egg_info(sp)
-		e["species"] = sp
-		for k in ["temper", "desc", "play"]:
-			if not e.has(k): e[k] = ""
-		out.append(e)
-	out.append(MYSTERY.duplicate())
-	return out
-
 
 func _ready() -> void:
 	CursorMode.menu()
@@ -359,9 +356,6 @@ func _end_intro() -> void:
 		_after_create()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if hold_skip and hold_skip.feed(event):
-		get_viewport().set_input_as_handled()
-		return
 	if stage == "warm" and ((event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or event.is_action_pressed("jump")):
 		_tap_egg()
 		return
@@ -597,7 +591,8 @@ func _process(delta: float) -> void:
 		wegg.rotation.z = lerpf(wegg.rotation.z, sin(t * (6.0 + warmth * 30.0)) * warmth * 0.05, minf(1.0, delta * 12.0))
 		if taps >= TAPS and warmth >= 0.98:
 			stage = "hatching"
-			get_tree().create_timer(SKIP_ARM_S).timeout.connect(_arm_skip)
+			skipper = HatchSkip.new(_skip_hatch)
+			add_child(skipper)
 			title.text = "Something's moving..."
 			_clear_bottom()
 			wegg.rotation.z = 0.0
@@ -611,7 +606,7 @@ func _process(delta: float) -> void:
 				rv.twin = kin_node
 				reveal = rv
 				add_child(rv)
-				rv.revealed.connect(_end_skip)
+				rv.revealed.connect(skipper.queue_free)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
 					stage = "name"
@@ -625,38 +620,10 @@ func _process(delta: float) -> void:
 			# a little wobble now and then, like something inside is awake
 			egg.rotation.z = sin(t * 2.0 + i * 2.1) * 0.06 * (1.0 + float(sin(t * 0.7 + i) > 0.7) * 3.0)
 
-## SKIP_ARM_S into the hatch the beat can be skipped: a tap moves on one beat (the egg opens, then the Boki's
-## card), holding it skips both (HoldSkip, as the prologue).
-func _arm_skip() -> void:
-	if stage not in ["hatching", "reveal"] or (reveal != null and reveal.met):
-		return
-	skipper = CanvasLayer.new()
-	skipper.layer = 70
-	add_child(skipper)
-	hold_skip = HoldSkip.new()
-	hold_skip.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	hold_skip.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	hold_skip.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	hold_skip.offset_right = -24
-	hold_skip.offset_bottom = -16
-	hold_skip.tapped.connect(_skip_hatch.bind(false))
-	hold_skip.skipped.connect(_skip_hatch.bind(true))
-	skipper.add_child(hold_skip)
-
-## The beat's end: the ring goes.
-func _end_skip() -> void:
-	if skipper:
-		skipper.queue_free()
-	skipper = null
-	hold_skip = null
-
-## `all`: straight to the Boki's card; else one beat on: the egg finishes hatching, or the Boki meets you.
-func _skip_hatch(all: bool) -> void:
-	var egg_open := reveal == null
-	if egg_open:
-		eggs[chosen]["egg"].skip()      # (its done opens the reveal, if the egg was still hatching)
-	if all or not egg_open:
-		reveal.skip()
+## Any key or click while the egg hatches and the Boki meets you: straight to its card (HatchSkip).
+func _skip_hatch() -> void:
+	eggs[chosen]["egg"].skip()      # (its done opens the reveal, if the egg was still hatching)
+	reveal.skip()
 
 func _show_name() -> void:
 	_clear_bottom()

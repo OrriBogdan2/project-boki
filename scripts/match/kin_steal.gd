@@ -17,10 +17,6 @@ extends RefCounted
 
 const BOB_M := 0.12  # m a loose wisp bobs up and down
 const BOB_HZ := 0.8  # bobs per second
-const STING_DB := -3.0  # dB of the "your Boki was grabbed" sting (the owner's and squad's game only)
-const PICKUP_DB := -9.0  # dB of the thief's soft pickup cue: well under the sting
-const STING_DUCK_S := 0.4  # s the music dips under the sting
-const STING_DUCK_DB := -4.0  # dB of that dip
 const POP_M := 2.5  # m from the fallen hunter it floats: clear of their stomp and revive ring (Life revive_radius)
 
 static var carried_home: Array = []  # records of the stolen wisps the player carried when the match ended
@@ -162,7 +158,7 @@ static func grab(k: Kin, h: Hunter) -> bool:
 	return true
 
 
-## Every game: the catch moment, the cue for whoever it matters to here, and the soul echo for a local thief.
+## Every game: the catch moment, and the soul echo for a local thief.
 static func _grabbed(k: Kin, h: Hunter) -> void:
 	var glow: Color = k.sp.get("glow", k.sp["color"])
 	k.m.fx.ring(h.pos, 1.4, Color(glow, 0.8), 0.3)
@@ -170,22 +166,8 @@ static func _grabbed(k: Kin, h: Hunter) -> void:
 	if h == k.home_h:
 		return
 	k.m.add_feed("%s grabbed %s's %s" % [h.pname, k.home_h.pname, k.rec.get("name", "Boki")])
-	_cue(k, h)
 	if h == k.m.player:
 		Care.dex_mark(k.species, "echo")  # the thief keeps a soul echo in the Field Book (decision 0041)
-
-
-## What this game's own hunter hears of a grab: the owner's squad get the sting (a rival took it), the thief a
-## softer pickup cue. Rivals' grabs on third squads play nothing. Sounds from the library (ui set).
-static func _cue(k: Kin, h: Hunter) -> void:
-	var me: Hunter = k.m.player
-	if me == null:
-		return
-	if h == me:
-		k.m.sfx("pickup", null, PICKUP_DB)
-	elif me.team == k.home_h.team and h.team != me.team:
-		k.m.sfx("steal_lost", null, STING_DB)
-		Sfx.duck(STING_DUCK_S, STING_DUCK_DB)
 
 
 ## Summon with your own Boki resting or away: the first stolen wisp you carry that still has its one summon

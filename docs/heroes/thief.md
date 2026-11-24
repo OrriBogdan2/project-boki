@@ -378,10 +378,10 @@ Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means game
 |---|---|---|---|---|
 | Bola (RMB) | a chevron lane `lane_len()` (10.8 m) long, `bola.lane_w` 1.8 m wide (the parity row, footage: about 1 bh) | the flight catches a foe whose body comes within `lane_w / 2 - her radius` (0.516 m) of it: a 1.8 m corridor for a foe her size | caster | the hit reached a magic 0.45 m past the body (a 1.67 m corridor); now it reads the reach off the drawn lane (+0.066 m a side). Asserted at the lane's edge both ways |
 | Grounded | two yellow binding rings round the foe | status marker, no area | all | kept (the source shows the rings) |
-| Knife (E) | the dagger's arrival circle, 5.4 m across (`e.ring_r` 2.7 m radius = 1.5 bh) | the blink's arrival point | all | at the source's size (briefs/hero-ref/dancer.md:150, 'about 1.5 bh in radius'; was 1.6 m), no hit area |
+| Knife (E) | the dagger's arrival circle, 1.6 m | the blink's arrival point | caster | kept (source arrival marker), no hit area |
 | Encore (X) | a thin ring (`RING_W` 0.25 m band) whose outer edge grows from `x.r0` 2.3 to `x.reach` 5.4 m over `x.grow`, and a dashed outer band at `x.rim` 0.75 of it | a blade at every foe inside `radius()`; past the band hits harder | all | already true on 0.24.5 (no beat swell); now asserted on every beat |
 
-Note: the brief says the white circle is 1.5 bh in *radius*; the old note read it as 2.7 m across. The frame jpgs are not on this worker, so the written brief decides; if the frame shows 2.7 m across, set `e.ring_r` to 1.35.
+Suggestion, not built: the source's knife ring is about 1.5 bh (2.7 m) across; ours is 1.6 m.
 
 ## Combinations
 

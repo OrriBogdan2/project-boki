@@ -153,7 +153,7 @@ def pop_fire():
 
 
 def pop_zeep():
-    """Geyser (the rare one): a fizzing fuse, then a big frothy blast and a fountain of bubbles."""
+    """Super Zeep (the rare one): a fizzing fuse, then a big frothy blast and a fountain of bubbles."""
     _d = 1.1
     fizz = S.hiss(0.12, 3000, 9000, 0.02, 0.05) * 0.4
     blast = mix(

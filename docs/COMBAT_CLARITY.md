@@ -98,9 +98,8 @@ Grade: clear / unclear, worst first. "Shared" = fixed or helped by this pass; th
 | Cinder (ashwick) | clear | the bar: layered flame cone | per-Hunter job |
 
 Shared things still noisy in the films: Boki ability names (`Stinger Hook`, `Prism Wall`) over other people's Boki
-and other Boki's bubbles ("Echolope: behind you!") are now off in a fight (above). The "Hold F to
-stomp" prompt is one short HoldPrompt ring in the prompt bar, for the one closest downed rival inside stomp reach
-only (`StompPrompt`; a teammate's Wisp never asks, no world text on the Wisp; `--stomp-check`). Boki rings and the
+and other Boki's bubbles ("Echolope: behind you!") are now off in a fight (above). Still open: the "Hold F to
+stomp" prompt over a downed fight (the downed rework on `ext/wisp-clarity-1112` changes it); Boki rings and the
 Hunters' cast rings stack under a melee (fixed: Ground order, above).
 
 ## Hunter against the ground (11-23)

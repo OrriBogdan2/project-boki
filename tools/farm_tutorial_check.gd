@@ -30,7 +30,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 	var d := Save.fresh()
 	for i in kin_count:
 		var k := Save.new_kin(["zapple", "cindle"][i], ["Pip", "Ash"][i])
-		k["uid"] = "ftut%d" % i      # likes are seeded from the uid: a random one hates the tutorial's food
+		k["uid"] = "ftut%d" % i  # likes are seeded from the uid: a random one hates the tutorial's food
 		k["level"] = 5
 		Care.ensure(k)
 		d["roster"].append(k)
@@ -72,7 +72,6 @@ func run(m: Node, mode := "") -> void:
 	_tutorial_rules()
 	_tracker_rules()
 	await _world()
-	await _skip_at_each_step()
 	await _spotlight()
 	await _build_spotlight()
 	await _farm2()
@@ -142,10 +141,9 @@ func _base_tutorial() -> void:
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
 	var last := FarmTutorial.hint_text("out")
-	var path_said: bool = last.contains("Wayseed") and last.contains("Boki that leans")
 	ok(
-		last.contains("Waystone") and path_said and not last.contains("\n"),
-		"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line"
+		last.contains("portal") and last.contains("Stay") and not last.contains("\n"),
+		"the last hint: the portal and Stay in one short line (the Waystone path is the hub's own hint)"
 	)
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
@@ -908,12 +906,15 @@ func _build_spotlight() -> void:
 	for id in ["house", "hammer", "task"]:
 		FarmTutorial.mark(id)
 	FarmTutorial.detect()
-	ok(FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
-			"the trough step is up to place (%s)" % FarmTutorial.current())
+	ok(
+		FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
+		"the trough step is up to place (%s)" % FarmTutorial.current()
+	)
 	await _lights_build_tile(home, "feeder_trough", "trough")
 	home.queue_free()
 	await main.get_tree().process_frame
 	FarmSpotlight.reset()
+
 
 func _lights_build_tile(home, entry: String, what: String) -> void:
 	var hb: HomeBuild = home.hb
@@ -930,8 +931,10 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	for b in hb.bar.find_children("*", "Button", true, false):
 		if b.get_meta("tab", "") == "Buildings" and not b.is_queued_for_deletion():
 			tab = b
-	ok(FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
-			"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what)
+	ok(
+		FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
+		"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what
+	)
 	hb.cat = "Buildings"
 	hb._build_bar()
 	await main.get_tree().process_frame
@@ -948,12 +951,14 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	hb._drop_held()
 	hb.toggle()
 
+
 func _pick_entry(hb: HomeBuild, entry: String) -> void:
 	if entry.begins_with("feeder_"):
 		hb.take_feeder(entry.trim_prefix("feeder_"))
 	else:
 		hb.take(entry)
 	hb._build_bar()
+
 
 ## Is the spotlight's first cut-out round this control?
 func _lit(c: Control) -> bool:
@@ -962,10 +967,11 @@ func _lit(c: Control) -> bool:
 	var hole: Rect2 = FarmSpotlight._node._holes[0]
 	return hole.get_center().distance_to(c.get_global_rect().get_center()) < 2.0
 
+
 ## A Home with its interface built (its meshes build over a few frames; slower on a software rasterizer).
 func _ready_home():
 	var home = await main._hb_home()
-	var t0 := CheckClock.own_msec()      # the home builds its UI in frame slices: CPU work, not game time
+	var t0 := CheckClock.own_msec()  # the home builds its UI in frame slices: CPU work, not game time
 	while home.panel_host == null and CheckClock.own_msec() - t0 < 60000:
 		await main.get_tree().process_frame
 	home._close_panel()
@@ -1139,57 +1145,6 @@ func _world() -> void:
 	)
 	home2.queue_free()
 	await main.get_tree().process_frame
-
-
-# ------------------------------------------------------------------ 5b. Skip at every step
-## Skip with steps 0..n-1 done, for each n, on the farm's twelve steps and on the base's four: the tutorial is
-## over and nothing of it stays on screen or in the save (line, marker, spotlight, Hob calling you over), the
-## house (farm) or a toy (base) is down, and the Goals card, the Boki you were given, the incubator, the first
-## zone and the hub all work, also after a save and load.
-func _skip_at_each_step() -> void:
-	for base in [false, true]:
-		Content.rules("farm_build")["base_mode"] = base
-		var ids: Array = FarmTutorial.steps().map(func(s): return String(s["id"]))
-		for n in ids.size():
-			await _skip_at(base, ids, n)
-	Content.rules("farm_build")["base_mode"] = false
-
-
-func _skip_at(base: bool, ids: Array, n: int) -> void:
-	var home = await _home(1)
-	for i in n:
-		FarmTutorial.mark(ids[i])
-	if not base and ids.slice(0, n).has("house"):
-		home.guide.place_house()
-	home.guide.tick(0.6)
-	var at := "%s skip at step %d (%s)" % ["base" if base else "farm", n + 1, ids[n]]
-	ok(FarmTutorial.active() and FarmTutorial.current() != "", at + ": a step is up first")
-	home.guide.skip()
-	home.guide.tick(0.6)
-	ok(not FarmTutorial.active() and FarmTutorial.current() == "" and FarmTutorial.state()["skipped"], at + ": over")
-	ok(
-		not is_instance_valid(home.guide.hint_box) and not is_instance_valid(home.guide.marker),
-		at + ": no line or marker is left"
-	)
-	ok(not FarmSpotlight.showing() and not home.hob.chat.busy(), at + ": no spotlight, no talk")
-	home.hob.call_t = 0.0
-	home.hob._call_out(0.1)
-	ok(home.hob.call_t <= 0.0, at + ": Hob does not call you over")
-	if base:
-		var hub_home := GardenZones.landing({}) == GardenZones.HUB
-		ok(home.toys.toys().size() == 1 and hub_home, at + ": a toy is down, the hub is home")
-	else:
-		var tools: bool = HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe")
-		ok(not FarmHob.house_entry().is_empty() and tools, at + ": the house and the tools are there")
-	ok(GoalTracker.lines().size() > 0 and is_instance_valid(home.guide.tracker), at + ": the Goals card has rows")
-	ok(not Save.active_kin().is_empty() and Save.d["roster"].size() == 1, at + ": your Boki is still yours")
-	ok(Incubator.slots() > 0 and Incubator.free_slots() > 0, at + ": the incubator has a free slot")
-	ok(GardenZones.is_open(GardenZones.start()), at + ": the first zone is open")
-	home.queue_free()
-	await main.get_tree().process_frame
-	Save.d = JSON.parse_string(JSON.stringify(Save.d))
-	var seen := HubFirstVisit.wanted("marker") or HubFirstVisit.wanted("line")
-	ok(not FarmTutorial.active() and not seen, at + ": still over after save and load")
 
 
 # ------------------------------------------------------------------ 5. round 2: Challenge House, water, rivers

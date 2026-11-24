@@ -13,7 +13,6 @@ extends RefCounted
 const GAP_MAX := 4.0       # s: the longest the player may be left without a prompt or marker
 const BOT_FARM_S := 6.0    # s the farm bot takes over each step before it does it
 const SLOW_WAIT_S := 5.0   # s the slow player stands still at the start of each match step
-const QUICK_QUIET_MAX := 5.0  # s: the longest a one-key or one-walk step (Tutorial.NAG_QUICK) may go quiet
 const QUIET_MAX := 8.0     # s: the longest a slow player may go with nothing new to go on
 const HAMMER_BEAT_S := 0.8  # s one hammer swing of yours takes (farm_build.json)
 const MARKER_MOVE_M := 3.0  # m the marker has to shift to count as moving on
@@ -24,7 +23,6 @@ var main: Node
 var gap := {}      # span -> s so far
 var worst := {}    # span -> longest s
 var quiet := []    # the stretches over QUIET_MAX s: "where | step | at s | long s"
-var quick := {}    # step -> longest quiet s, for the steps in Tutorial.NAG_QUICK
 var calm := 0.0    # s since something new showed
 var last := {}     # what the player saw last frame: line, marker anchor, Boki and nag state
 var farm_t := 0.0  # s on the farm so far
@@ -49,10 +47,6 @@ func run(mn: Node) -> void:
 	for q in quiet:
 		print("DEADAIR quiet | ", q)
 	ok(quiet.is_empty(), "a slow player never goes %.0f s with nothing new (%d stretches)" % [QUIET_MAX, quiet.size()])
-	for step in Tutorial.NAG_QUICK:
-		var w := float(quick.get(step, 0.0))
-		var what := "the %s step never goes more than %.0f s quiet (longest %.1f s)"
-		ok(w <= QUICK_QUIET_MAX, what % [step, QUICK_QUIET_MAX, w])
 	print("DEADAIR DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -78,9 +72,6 @@ func _calm(fresh: bool, dt: float, where: String, at: float) -> void:
 		calm += dt
 		worst["quiet"] = maxf(float(worst.get("quiet", 0.0)), calm)
 		return
-	var step := String(last.get("prev", ""))
-	if step in Tutorial.NAG_QUICK:
-		quick[step] = maxf(float(quick.get(step, 0.0)), calm)
 	if calm > QUIET_MAX:
 		quiet.append("%s | %s | at %.1f s | %.1f s" % [where, last.get("sid", "?"), at - calm, calm])
 	calm = 0.0
@@ -103,7 +94,6 @@ func _match_fresh(m: Match, tu: Tutorial) -> bool:
 	last["line"] = line
 	last["says"] = says
 	last["nags"] = nags
-	last["prev"] = last.get("sid", "")
 	last["sid"] = tu.id()
 	return fresh
 

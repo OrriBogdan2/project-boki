@@ -114,8 +114,7 @@ const CALLED_ELSEWHERE := [
 	"fire_over",
 	"fire_heavy",
 	"fire_ult",
-	"rock_crumble",
-	"slug_hit"  # sound-only look, played by MissFx.shot_landed
+	"rock_crumble"
 ]
 ## The camera-facing effect shaders that soften where they meet the ground (shaders/soft_fade.gdshaderinc).
 ## (fx_dot has its own ground fade: FxDot, ground_y.)

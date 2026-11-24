@@ -185,13 +185,12 @@ func _labour(dt: float) -> void:
 	h._refresh_top()
 
 
-## Until you have met him (not after a Skip), and while he has the second Mask for you, he calls you over now and then.
+## Until you have met him, and while he has the second Mask for you, he calls you over now and then.
 func _call_out(dt: float) -> void:
 	call_t -= dt
 	var talk: Dictionary = rules()["talk"]
 	var met := bool(FarmBuilder.state().get("met", false))
-	var calling := not met and not FarmTutorial.base() and not bool(FarmTutorial.state()["skipped"])
-	var line := String(talk["call"]) if calling else ""      # in the base your Boki calls you; a skipper is not chased
+	var line := "" if met or FarmTutorial.base() else String(talk["call"])      # in the base your Boki calls you
 	if chat.offer_due():
 		line = String(talk["call_offer"])
 	elif line == "":

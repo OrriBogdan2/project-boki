@@ -19,7 +19,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
-| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge discs (2+ charges only: round discs on the top edge, the recharging one fills its ring; a ready charge shows the next one's countdown big in the middle, as the reference does, charges-sv-1116), key pill, rank pips (bottom edge, over the key pill), lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble), and every other kit's charge count per rank, then rebinds E to mouse 4 and R to a letter and asserts the bar, tooltips and tutorial show the new caps |
+| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge discs (2+ charges only: round discs on the top edge, the recharging one fills its ring; a ready charge shows the next one's countdown big in the middle, as the reference does, charges-sv-1116), key pill, rank pips (bottom edge, over the key pill), lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble), then rebinds E to mouse 4 and R to a letter and asserts the bar, tooltips and tutorial show the new caps |
 | `squad_frames.gd` (`SquadFrames`, drawn by `hud_panels.gd`) | the squad frames down the left edge in team modes, one row per squad member, you last (none in solo): round portrait with the run level on its lower-left (gold once the ultimate is open), a state label over the name, a thin armour bar over the health bar in one slanted frame. KNOCKED: pink label, red-tinted portrait, the bleed-out in the health row, a marker beside the row whose tail points at them. DEAD: grey cracked portrait, no bars (with the deathbox timer while they can be saved), and at the row's end the Hunter who finished them in a small red disc (`MateAlerts.killer`, read from `last_hit_by` when the row turns DEAD; none for a monster, the Blight or a fall). EXTRACTED and the drop's LEAD/SOLO use the same label. Sizes and colours are measured off the owner's reference: `scripts/ui/SQUAD_FRAMES_SPEC.md`. Check: `--hudref-check`; shots and film: `--team-boki-shots [--film]` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, lock |
 | `hunter_ult_tile.gd` (`HunterUltTile`) | the hero ultimate (R) on the ability row, one look for every hero in its ability colour: locked (padlock, LV 6), cooling (dim icon, sweep, countdown), blocked (off cooldown but stunned, downed or merged: a padlock over the dim icon), ready (`HudSlot.lit`: a steady lit rim and halo; a 0.6 s shine, white edge and a band of light, the moment it comes back from cooling or the level lock). Shots: `--ult-ready-shots` (GPU) |
@@ -90,6 +90,13 @@ never from the kit:
 | Boki | a Boki's hits | 78% | its type colour (`DexView.type_col`, the HUD badge's); crit, armour and hurt colours as for a hit | beside yours; its own number |
 | tick | burn and poison ticks, or any hit flagged `tick` | 62% | the burn colour (`DotLook.COL`) | lower on the body; one number per second |
 
+What a hit landed on is its own number too (one table, `HudStyle.NUM_STYLE`; `Fx.Num` SHIELD and HEAVY): a shield soaking
+it (Albert's aegis, the timed ward, the Boki owner shield: `HudStyle.NUM_SHIELD`, lavender, 85%) and a Fusion shell
+soaking it (`NUM_SHELL`, teal, 85%) print what they took (`SoakNumber`, also on a partly soaked hit), and an empowered
+hit (`heavy` / `payoff`: `NUM_EMPOWERED`, orange, 112%). Armour stays blue, a crit gold with the ember outline, a heal
+green with a `+`, damage you take red. No two kinds share a colour and a size. Check: `--dmg-number-check` (one of each
+kind through the real paths).
+
 Crits keep their colour, thick ember outline and bigger pop in the hit and Boki looks; armour keeps its colour.
 Numbers of different looks (or a heal, `Fx.Num.HEAL`) never add onto each other; a number on a Boki is
 smaller again (`Juice.BOKI_NUM_K`). All of them share one pool of `Fx.NUM_POOL` labels, so
@@ -134,8 +141,8 @@ for the squad rows). Verified 11-11:
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
 - An open deathbox does not open this window: the loot window (below) shows what you carry itself.
-- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`); 0.24.5 pass at 1280x720 and
-  3440x1440 in docs/shots/ui-inventory.
+- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`). `--inventory-check` also sweeps a full loadout at 1280x720, 1920x1080 and 3440x1440 (safe margin, clipping, every slot reachable); `--garden-fit-check` covers the garden Boki card at the same sizes.
+  0.24.5 pass at 1280x720 and 3440x1440 in docs/shots/ui-inventory.
 
 ## Pop-up budget
 

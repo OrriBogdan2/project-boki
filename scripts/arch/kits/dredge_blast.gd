@@ -18,7 +18,6 @@ const WAVE_PITCH := [1.0, 0.82]
 ## s each slug's look hangs at the fan edge fading. Like the source's orbs (f35-f38) the looks always fly the
 ## whole fan, even when the slug itself stops on a foe up close, so the wave reads as a fan.
 const SLUG_HOLD := 0.35
-const WAVE_HOLD := 0.25             # s a wave's wedge stays lit after its front reaches the rim
 
 var k: DredgeKit
 var h: Hunter
@@ -82,8 +81,6 @@ func tick(dt: float) -> void:
 	var charge := float(x["charge"])
 	if t < charge:
 		_charge_looks(t / charge)
-	elif int(blast["fired"]) > 0:
-		_wave_front(t - charge - float(x["gap"]) * float(int(blast["fired"]) - 1))
 	var n := int(x["waves"])
 	var fired := int(blast["fired"])
 	if fired < n and t >= charge + float(x["gap"]) * fired:
@@ -110,7 +107,7 @@ func _charge_looks(kc: float) -> void:
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
 	var reach := maxf(0.6, float(x["range"]) * grow)
 	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
-		"fill": kc, "all": true, "hot": 0.15 * kc, "soft": true})
+		"fill": kc, "all": true, "hot": 0.15 * kc})
 	if not k.tells_visible() or randf() > 0.5:
 		return
 	var hand_l := _hand(-1.0)
@@ -162,22 +159,12 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("ffe08a"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
 	HeroUlt.landed(k, e)
 
-## A wave goes: a small flash at his fists, the fan's lit front, a heavy thump. The wedge is the exact area (his gold
-## rim over a faint inside); its front runs out to the rim in the slugs' flight time (_wave_front), so the wave
-## reads as a sweep that lands with the hits. The bodies in it stay in view (the inside is under 0.25 alpha).
+## A wave goes: a small flash at his fists, the fan's edges, a heavy thump. Nothing sweeps the fan itself:
+## the slugs show the wave, and the bodies in it stay in view.
 func _wave_fx(i: int, at: Vector3, dir: Vector2) -> void:
-	k.vfx("blast_wave", at, dir, {"w2": i % 2 == 1})
-	_wave_front(0.0)
-	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
-	k.net_ring(at, float(xd()["range"]) * 0.5, WAVE_COL[i % 2])
-
-## The latest wave's wedge `e` s after it fired: the front covers 0..1 of the reach as the slugs fly, then the
-## rim flashes hot and holds WAVE_HOLD. Re-drawn each tick (AimDraw keeps an entry that long after a refresh).
-func _wave_front(e: float) -> void:
 	var x := xd()
-	var life := maxf(0.05, float(x["range"]) - MUZZLE) / float(x["speed"])
-	if e > life + WAVE_HOLD:
-		return
-	var f := clampf(e / life, 0.0, 1.0)
-	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": float(x["range"]), "deg": float(x["fan_deg"]),
-		"fill": maxf(f, 0.01), "all": true, "soft": true, "hot": 1.0 - 0.5 * f, "dur": WAVE_HOLD})
+	k.vfx("blast_wave", at, dir, {"w2": i % 2 == 1})
+	AimKit.cone(h, "x_fan", {"dir": dir, "len": float(x["range"]), "deg": float(x["fan_deg"]), "edges": true,
+		"all": true, "dur": 0.25})
+	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
+	k.net_ring(at, float(x["range"]) * 0.5, WAVE_COL[i % 2])

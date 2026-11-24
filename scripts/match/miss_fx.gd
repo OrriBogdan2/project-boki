@@ -15,10 +15,6 @@ const WALL_BACK := 0.6  # m a wall puff sits back from where the shot stopped, s
 const LIFT := 0.1  # m above the point the shot ended
 const SPECK_WHITE := 0.6  # how much of white the puff's specks carry
 const MISS_DB := -8.0  # a Hunter's own miss sound (<arch>_miss): under every hit
-const LANDED_MOVE := "slug_hit"  # the move look (content/vfx/<arch>.json) whose "sfx" sound a weapon round landing
-const LANDED_KEEP := 64  # volleys remembered by `_landed` (cleared past this)
-
-static var _landed := {}  # "volley|surface" -> true: that volley already sounded on that surface
 
 
 ## A shot ended on nothing: why is "wall" or "expire" (anything else, a dome or a crate, draws its own effect).
@@ -62,42 +58,3 @@ static func puff(m: Match, col: Color, at: Vector3, wall: bool) -> void:
 		DJFx.of(m).puff(spot, col, WALL_SIZE, WALL_S, speck)
 	else:
 		DJFx.of(m).puff(spot, Color(col, RANGE_ALPHA), RANGE_SIZE, RANGE_S, speck)
-
-
-## A Hunter's own weapon round ended on something solid: its "slug_hit" move look (a Hunter with no such move says
-## nothing) sounds it by what it struck, as the flags "hunter" (a Hunter or its Boki), "mob" and "wall" (terrain, a
-## wall, a crate or a dome); "mine" is on when the player fired it (Match.on_damage already plays your own hit, so the
-## look's own-hit sounds say `"unless": "mine"`). A volley sounds once per surface, so a seven-slug scattergun costs
-## at most three voices; running out of range or being caught says nothing here. Called by Match._shot_end.
-static func shot_landed(m: Match, s: Dictionary, at: Vector3, e: Ent, why: String) -> void:
-	var x: Dictionary = s["x"]
-	var by = s["by"]
-	if x.has("src") or x.has("boom") or x.has("lob") or x.get("mob", false) or x.get("melee", false):
-		return
-	if not is_instance_valid(by) or not by is Hunter or why in ["expire", "caught"]:
-		return
-	var surface := ""
-	if e is Hunter or e is Kin:
-		surface = "hunter"
-	elif e is Mob:
-		surface = "mob"
-	elif e == null and (why == "wall" or s.get("prop", false)):
-		surface = "wall"
-	if surface == "":
-		return
-	var vol := String(x.get("pg", ""))
-	if vol != "":
-		var key := "%s|%s" % [vol, surface]
-		if _landed.has(key):
-			return
-		if _landed.size() > LANDED_KEEP:
-			_landed.clear()
-		_landed[key] = true
-	var v: Vector2 = s["vel"]
-	HeroVfx.of(m).play(
-		by as Hunter,
-		LANDED_MOVE,
-		at,
-		v.normalized() if v.length() > 0.01 else Vector2.RIGHT,
-		{surface: true, "mine": by == m.player}
-	)
