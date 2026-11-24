@@ -197,7 +197,7 @@ func _wanted(kind: String) -> float:
 
 ## The stall just confirmed: skip it when a wall blocks by design, else file it by cell.
 func _stall(arch: String, kind: String, dir: Vector2) -> void:
-	var reach := Hunter.MANTLE_REACH + (Hunter.TALL_CLIMB_EXTRA if HunterMove.climbs_tall(P) else 0.0)
+	var reach := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(P) else 0.0)
 	var d := dir.normalized()
 	var slide := _ideal_slide(d, reach)
 	var ward: Dictionary = m.lairs.lair_of(P.pos, WARD_PAD) if m.lairs else {}
