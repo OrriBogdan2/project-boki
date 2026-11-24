@@ -29,15 +29,17 @@ static func admit(now_ms: int) -> bool:
 	recent.append(now_ms)
 	return true
 
+## Pitches roll on the looks generator: admit() is wall-clock gated, so a global randf here made seeded
+## sims depend on the box speed and on how heavy the effects are (--camp-clear-check, 11-21).
 static func death(m: Match, mb: Mob, big: bool) -> void:
 	var cue := death_cue(mb.mkind)
 	if cue == "":
-		m.sfx("die_big" if big else "die_small", mb.pos, DEATH_DB, randf_range(0.9, 1.15))
+		m.sfx("die_big" if big else "die_small", mb.pos, DEATH_DB, KitLooks.vis_rng.randf_range(0.9, 1.15))
 	elif admit(Time.get_ticks_msec()):
-		m.sfx(cue, mb.pos, DEATH_DB, float(BOSS_PITCH.get(mb.mkind, 1.0)) * randf_range(0.95, 1.05))
+		m.sfx(cue, mb.pos, DEATH_DB, float(BOSS_PITCH.get(mb.mkind, 1.0)) * KitLooks.vis_rng.randf_range(0.95, 1.05))
 
 static func stagger_open(m: Match, mb: Mob) -> void:
-	m.sfx("mstag_open", mb.pos, OPEN_DB, randf_range(0.95, 1.05))
+	m.sfx("mstag_open", mb.pos, OPEN_DB, KitLooks.vis_rng.randf_range(0.95, 1.05))
 
 static func stagger_hit(m: Match, mb: Mob) -> void:
 	m.sfx("mstag_hit", mb.pos, HIT_DB)
