@@ -78,6 +78,7 @@ func down(m: Match, A: Hunter) -> void:
 	A.down_hp = 60.0
 
 func run(mn: Node, md := "all") -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = mn
 	mode = md
 	Save.no_write = true

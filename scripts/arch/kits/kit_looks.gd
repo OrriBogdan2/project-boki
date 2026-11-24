@@ -367,7 +367,7 @@ func skin(s: Dictionary, kind: String) -> Node3D:
 		(sn as Node3D).visible = false
 	s["node"] = null
 	var n := _take(kind)
-	n.global_position = s["pos"]
+	n.global_position = ShotOrigin.drawn(s, s["pos"])
 	live.append({"s": s, "n": n, "kind": kind, "t": 0.0})
 	return n
 
@@ -438,6 +438,7 @@ func _tick_skins(delta: float) -> void:
 		e["t"] = float(e["t"]) + delta
 		var v: Vector2 = s["vel"]
 		var fwd := Vector3(v.x, 0, v.y).normalized() if v.length() > 0.1 else Vector3.FORWARD
+		p = ShotOrigin.drawn(s, p)      # out of the hand or weapon it left
 		n.global_position = p
 		if fwd.length() > 0.1:
 			n.look_at(p + fwd, Vector3.UP)
@@ -449,7 +450,7 @@ func _tick_skins(delta: float) -> void:
 				"spear": spin.rotate_z(delta * 6.0)
 				_: spin.rotate_z(delta * 3.0)
 
-func _tick_timed(e2: Dictionary, u: float, delta: float) -> void:
+func _tick_timed(e2: Dictionary, u: float, _delta: float) -> void:
 	var n2: Node3D = e2["n"]
 	match String(e2["kind"]):
 		"column":

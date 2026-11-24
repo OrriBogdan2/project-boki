@@ -5,26 +5,29 @@ extends RefCounted
 ## through), and it wobbles harder and faster. Progress is Incubator.progress(e), 0..1. A ready egg
 ## is HomeIncubator's job (the sharp rattle). Models.rare_egg_small is the egg this dresses.
 
-const STAGES := [0.3, 0.6, 0.85]      # progress where the next crack set shows
-const GLOW_MIN := 0.35                # the shell's glow on a cold egg (as Models.rare_egg_small)
-const GLOW_GAIN := 1.8                # extra glow at progress 1
-const WOBBLE_MIN := 0.03              # radians of sway on a cold egg
-const WOBBLE_GAIN := 0.14             # extra sway at progress 1
-const SHELL_R := 0.26                 # the shell's sphere radius, centre height and squash, as in Models
+const STAGES := [0.3, 0.6, 0.85]  # progress where the next crack set shows
+const GLOW_MIN := 0.35  # the shell's glow on a cold egg (as Models.rare_egg_small)
+const GLOW_GAIN := 1.8  # extra glow at progress 1
+const WOBBLE_MIN := 0.03  # radians of sway on a cold egg
+const WOBBLE_GAIN := 0.14  # extra sway at progress 1
+const SHELL_R := 0.26  # the shell's sphere radius, centre height and squash, as in Models
 const SHELL_Y := 0.3
 const SHELL_SQUASH := Vector3(0.9, 1.22, 0.9)
-const CRACK_W := 0.045                # a crack's width and length in egg units, wide enough to read
+const CRACK_W := 0.045  # a crack's width and length in egg units, wide enough to read
 const CRACK_LEN := 0.13
-const CRACKS := [                     # per stage: [turn round the egg (rad), angle down from the top (rad)]
-	[[0.3, 0.75], [3.4, 0.75]],       # on the upper cap, spread round the egg so some always face the camera
+const CRACKS := [  # per stage: [turn round the egg (rad), angle down from the top (rad)]
+	[[0.3, 0.75], [3.4, 0.75]],  # on the upper cap, spread round the egg so some always face the camera
 	[[1.4, 0.6], [4.5, 0.65], [5.6, 0.9]],
-	[[0.9, 0.35], [2.5, 0.5], [4.0, 0.4], [5.2, 0.45]]]
+	[[0.9, 0.35], [2.5, 0.5], [4.0, 0.4], [5.2, 0.45]]
+]
+
 
 static func _unshaded(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.albedo_color = c
 	return m
+
 
 ## The shell's surface at (turn, down), egg scale s, and the basis a crack sits in there: x across the
 ## crack, y along it (down the egg), z out of the shell.
@@ -36,6 +39,7 @@ static func _on_shell(turn: float, down: float, s: float) -> Transform3D:
 	along = (along - out * along.dot(out)).normalized()
 	var at := Vector3(0, SHELL_Y * s, 0) + dir * r + out * 0.003 * s
 	return Transform3D(Basis(along.cross(out), along, out), at)
+
 
 ## Adds the (hidden) cracks to an egg node from Models.rare_egg_small, scale s. Each crack is two
 ## short strokes at a kink, the last stage's lit gold.
@@ -61,9 +65,11 @@ static func dress(egg: Node3D, s: float) -> void:
 		cracks.add_child(group)
 	(egg.get_node("Shell") as Node3D).add_child(cracks)
 
+
 ## Which crack sets show at this progress (0..3).
 static func stage(p: float) -> int:
 	return STAGES.filter(func(t): return p >= t).size()
+
 
 ## Per frame: glow, cracks and wobble for an egg still warming. tt is seconds, ph its own phase.
 static func apply(egg: Node3D, p: float, tt: float, ph: float) -> void:

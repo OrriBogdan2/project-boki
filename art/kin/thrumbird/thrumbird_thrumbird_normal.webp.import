@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d0h4wlvk85guj"
-path="res://.godot/imported/thrumbird_thrumbird_normal.webp-cc52f64a75daa5484067ddb43f200a81.ctex"
+path.bptc="res://.godot/imported/thrumbird_thrumbird_normal.webp-cc52f64a75daa5484067ddb43f200a81.bptc.ctex"
+path.astc="res://.godot/imported/thrumbird_thrumbird_normal.webp-cc52f64a75daa5484067ddb43f200a81.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "fb7109442a58dc70eca72172ddb77e9a"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/thrumbird/thrumbird_thrumbird_normal.webp"
-dest_files=["res://.godot/imported/thrumbird_thrumbird_normal.webp-cc52f64a75daa5484067ddb43f200a81.ctex"]
+dest_files=["res://.godot/imported/thrumbird_thrumbird_normal.webp-cc52f64a75daa5484067ddb43f200a81.bptc.ctex", "res://.godot/imported/thrumbird_thrumbird_normal.webp-cc52f64a75daa5484067ddb43f200a81.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
