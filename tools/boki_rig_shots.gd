@@ -1,6 +1,9 @@
 extends RefCounted
 ## --boki-rig-shots --shots-dir=<dir> [--species=cindle] [--px=512] [--normal-k=1]: the review sheets of a rigged
 ## Boki, in the engine (--normal-k=0 leaves a Meshy body's normal map out, for an A/B).
+## --sheet=<id,id,..> is one contact sheet of the species listed; with --raw-dir=<dir> every species stands beside
+## <dir>/<id>.glb (the model it was ported from, loaded as it is: a Draco glb must be unpacked first), same stage,
+## same height, from the front and the front three-quarters: is the game showing the model the Bokidex shows?
 ## <dir>/turntable.png, faces.png, coats.png, anim_<clip>.png (a strip of each clip), match.png (match camera),
 ## farm.png and farm_close.png (farm camera) and frames/<clip>/NNN.png for the GIFs (tools/boki/review_gifs.sh).
 ## Needs a renderer.
@@ -8,6 +11,7 @@ extends RefCounted
 const YAWS := 8
 const SHEET_COLS := 6
 const SHEET_YAWS := [PI - 0.6, PI - PI / 2.0]    # front three-quarters, side
+const RAW_YAWS := [PI, PI - 0.6]                 # beside its source model: front, front three-quarters
 const STRIP := 6
 const FACES := ["neutral", "happy", "sad", "sleepy", "angry", "bliss"]
 const COATS := [
@@ -38,6 +42,7 @@ var out := ""
 var species := "cindle"
 var px := 512
 var clips: Array = CLIPS
+var raw_dir := ""
 
 func run(m: Node) -> void:
 	main = m
@@ -47,6 +52,7 @@ func run(m: Node) -> void:
 		if a.begins_with("--px="): px = int(a.substr(5))
 		if a.begins_with("--normal-k="): BokiRig.normal_k = float(a.substr(11))
 		if a.begins_with("--clips="): clips = Array(a.substr(8).split(","))
+		if a.begins_with("--raw-dir="): raw_dir = a.substr(10)
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -151,30 +157,87 @@ func _turntable() -> void:
 	vp.queue_free()
 
 ## The contact sheet: <dir>/sheet_<view>.png, a cell a species (its name on it), SHEET_COLS to a row, from the front
-## three-quarters and the side, standing (idle), as the game builds it.
+## three-quarters and the side, standing (idle), as the game builds it. With --raw-dir the cell after a species is
+## its source model and the views are RAW_YAWS.
 func _sheet(ids: PackedStringArray) -> void:
-	var rows := (ids.size() + SHEET_COLS - 1) / SHEET_COLS
-	for view in SHEET_YAWS.size():
+	var per := 1 if raw_dir == "" else 2
+	var yaws: Array = SHEET_YAWS if raw_dir == "" else RAW_YAWS
+	var rows := (ids.size() * per + SHEET_COLS - 1) / SHEET_COLS
+	for view in yaws.size():
 		var sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
-		for n in ids.size():
-			species = ids[n]
+		for n in ids.size() * per:
+			species = ids[n / per]
 			var vp := _stage(Vector2i(px, px))
 			var cam := _close_cam(vp)
 			cam.position = Vector3(0, 0.8, 3.3)
 			cam.look_at(Vector3(0, 0.42, 0))
 			var tag := Label.new()
-			tag.text = species
+			tag.text = species if n % per == 0 else species + " source"
 			tag.add_theme_font_size_override("font_size", px / 16)
 			vp.add_child(tag)
 			var kr := _kin(vp)
 			await RenderingServer.frame_post_draw
 			(kr[1] as BokiRig).seek(0.5)
-			(kr[0] as Node3D).rotation.y = SHEET_YAWS[view]
+			var body := kr[0] as Node3D
+			if n % per == 1:
+				var f: Dictionary = BokiRig.FRAME[species]    # the game model's height: a kin's mesh box also holds its hidden parts
+				var tall := maxf(float(f["top"]), maxf((f.get("ear_tip", Vector3.ZERO) as Vector3).y, (f.get("tail_tip", Vector3.ZERO) as Vector3).y))
+				body.queue_free()
+				body = _raw(vp, raw_dir.path_join(species + ".glb"), tall)
+			body.rotation.y = yaws[view]
 			var img: Image = await _grab(vp)
 			img.convert(Image.FORMAT_RGBA8)
 			sheet.blit_rect(img, Rect2i(0, 0, px, px), Vector2i(n % SHEET_COLS * px, n / SHEET_COLS * px))
 			vp.queue_free()
 		sheet.save_png(out.path_join("sheet_%d.png" % view))
+
+## The box around every mesh under `root`, in the world.
+func _bounds(root: Node) -> AABB:
+	var box := AABB()
+	var any := false
+	for mi: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		var b := mi.global_transform * mi.get_aabb()
+		box = box.merge(b) if any else b
+		any = true
+	return box
+
+## A glb read off the disk as it is (no import, no rig; its own texture under the game's shader), standing on the origin `tall` high and
+## facing the way a kin faces (glTF looks down +Z, a kin down -Z).
+func _raw(vp: SubViewport, path: String, tall: float) -> Node3D:
+	var pivot := Node3D.new()
+	vp.add_child(pivot)
+	var state := GLTFState.new()
+	if GLTFDocument.new().append_from_file(path, state) != OK:
+		push_error("boki_rig_shots: no source model at %s" % path)
+		return pivot
+	var scene := GLTFDocument.new().generate_scene(state) as Node3D
+	pivot.add_child(scene)
+	for imp: ImporterMeshInstance3D in scene.find_children("*", "ImporterMeshInstance3D", true, false):
+		var mi := MeshInstance3D.new()    # a glb read at run time comes as importer meshes, which do not draw
+		mi.mesh = imp.mesh.get_mesh()
+		mi.transform = imp.transform
+		for si in mi.mesh.get_surface_count():    # the game's shader on the model's own texture, so the colours compare
+			var paint := Models.toon(Color.WHITE, false)
+			Models.hero_look(paint)
+			paint.set_shader_parameter("use_tex", true)
+			paint.set_shader_parameter("albedo_tex", (mi.mesh.surface_get_material(si) as BaseMaterial3D).albedo_texture)
+			for k in WardenGlb.PAINTED:
+				paint.set_shader_parameter(k, WardenGlb.PAINTED[k])
+			mi.set_surface_override_material(si, paint)
+		imp.get_parent().add_child(mi)
+		imp.queue_free()
+	var box := _bounds(scene)
+	if box.size.y <= 0.0:
+		push_error("boki_rig_shots: no mesh in %s" % path)
+	var k := tall / maxf(box.size.y, 0.001)
+	var foot := Vector3(box.get_center().x, box.position.y, box.get_center().z)
+	scene.scale = Vector3.ONE * k
+	scene.position = -foot * k
+	pivot.rotation.y = PI
+	var turn := Node3D.new()
+	vp.add_child(turn)
+	pivot.reparent(turn)
+	return turn
 
 func _faces() -> void:
 	var vp := _stage(Vector2i(px, px), false)

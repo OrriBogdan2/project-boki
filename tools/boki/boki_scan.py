@@ -13,7 +13,8 @@ import numpy as np
 from boki_meshy import Meshy, MeshShape
 from boki_sdf import Cone, Shape, frame, v3
 
-ROOT = os.path.expanduser("~/meshy/boki")  # <ROOT>/<id>/run1: the raw Meshy files, never in git
+ROOT = os.path.expanduser("~/meshy/boki")  # <ROOT>/<id>/<run>: the raw model files, never in git ("run" of the row:
+# "dex" is the Bokidex master, tools/boki/dex_source.py; "run1" a fresh Meshy run, only for a Boki the dex has no 3D of)
 LUM = np.array([0.3, 0.59, 0.11])
 BROW_DARK = 0.55  # a brow is its patch of coat, darker
 # id: "height" (game m, before SCALE) and "tris" of the body; "x", "y", "z": (proxy, scan) landmark pairs, x for the
@@ -31,12 +32,10 @@ BROW_DARK = 0.55  # a brow is its patch of coat, darker
 # whole, never squashed).
 SCANS = {
     "kestrike": {
-        "height": 0.725,
-        "sink": 0.105,
+        "run": "dex",
+        "auto": True,
+        "height": 0.62,
         "tris": 16000,
-        "x": [(0.07, 0.09)],
-        "y": [(0.0, 0.0), (0.12, 0.076), (0.2, 0.21), (0.43, 0.35), (0.6, 0.527), (0.74, 0.62)],
-        "z": [(-0.27, -0.304), (-0.06, -0.152), (0.045, -0.10), (0.15, 0.023), (0.36, 0.29)],
         "merge": {
             "wing1.L": "spine",
             "wing1.R": "spine",
@@ -47,30 +46,23 @@ SCANS = {
             "tfan": "tail2",
         },
         "drop": ("spark",),
-        "pose": {"tail1": (-0.6, 0.0, 0.0)},
-        "limbs": [
-            ("tail1", (0, 0.11, 0.03), (0, 0.03, 0.13), 0.04, 0.07),
-            ("tail2", (0, 0.03, 0.13), (0, -0.06, 0.24), 0.07, 0.09),
-        ],
-        "eye_c": (0.068, 0.433, -0.225),
-        "eye_r": (0.037, 0.037, 0.02),
-        "eye_yaw": 0.35,
-        "face": {},
-        "sat": 0.6,
-    },
-    "cairnback": {
-        "height": 0.85,
-        "tris": 16000,
-        "x": [(0.165, 0.152)],
-        "y": [(0.0, 0.0), (0.09, 0.085), (0.21, 0.206), (0.31, 0.262), (0.40, 0.29), (0.66, 0.85)],
-        "z": [(-0.45, -0.285), (-0.28, -0.243), (-0.12, -0.176), (0.22, 0.067), (0.3, 0.158), (0.395, 0.273)],
-        "merge": {"horn.L": "head", "horn.R": "head", "ear1.L": "head", "ear1.R": "head"},
-        "eye_c": (0.045, 0.282, -0.24),
-        "eye_r": (0.02, 0.02, 0.012),
-        "eye_yaw": 0.6,
         "face": {},
         "sat": 0.8,
-        "gain": 1.15,
+        "eye_c": (0.07, 0.455, -0.2),
+        "eye_r": (0.024, 0.024, 0.012),
+        "eye_yaw": 0.6,
+    },
+    "cairnback": {
+        "run": "dex",
+        "auto": True,
+        "height": 0.6,
+        "tris": 16000,
+        "merge": {"horn.L": "head", "horn.R": "head", "ear1.L": "head", "ear1.R": "head"},
+        "face": {},
+        "sat": 0.8,
+        "eye_c": (0.047, 0.273, -0.405),
+        "eye_r": (0.016, 0.013, 0.01),
+        "eye_yaw": 0.5,
     },
     "gibbelle": {
         "height": 0.55,
@@ -133,27 +125,27 @@ SCANS = {
         "cover": 1.6,
     },
     "cindle": {
+        "run": "dex",
         "height": 0.9,
-        "mid": 0.045,
         "tris": 16000,
-        "x": [(0.1, 0.17), (0.235, 0.245)],
-        "y": [(0.0, 0.0), (0.25, 0.25), (0.4, 0.43), (0.6, 0.68), (0.905, 0.9)],
-        "z": [(-0.35, -0.38), (-0.08, -0.13), (0.2, 0.05), (0.42, 0.25)],
+        "x": [(0.1, 0.12), (0.235, 0.17)],
+        "y": [(0.0, 0.0), (0.25, 0.25), (0.4, 0.42), (0.6, 0.71), (0.905, 0.9)],
+        "z": [(-0.35, -0.375), (-0.08, -0.16), (0.2, 0.03), (0.42, 0.33)],
         "drop": ("clawL", "clawR"),
         "merge": {"arm.L": "spine", "arm.R": "spine", "claw.L": "spine", "claw.R": "spine", "nip.L": "spine",
                   "nip.R": "spine"},
         "limbs": [
-            ("tail1", (-0.12, 0.1, 0.08), (-0.27, 0.09, 0.22), 0.05, 0.05),
-            ("tail2", (-0.27, 0.09, 0.22), (-0.3, 0.2, 0.33), 0.05, 0.055),
-            ("tail3", (-0.3, 0.2, 0.33), (-0.31, 0.36, 0.35), 0.055, 0.055),
-            ("tail4", (-0.31, 0.36, 0.35), (-0.31, 0.52, 0.32), 0.055, 0.055),
-            ("tail5", (-0.31, 0.52, 0.32), (-0.3, 0.65, 0.26), 0.055, 0.055),
-            ("tail6", (-0.3, 0.65, 0.26), (-0.3, 0.71, 0.17), 0.055, 0.05),
-            ("tail7", (-0.3, 0.71, 0.17), (-0.3, 0.68, 0.11), 0.05, 0.05),
-            ("sting", (-0.3, 0.68, 0.11), (-0.3, 0.6, 0.08), 0.06, 0.06),
+            ("tail1", (0, 0.14, 0.1), (0, 0.13, 0.19), 0.07, 0.07),
+            ("tail2", (0, 0.13, 0.19), (0, 0.2, 0.265), 0.07, 0.07),
+            ("tail3", (0, 0.2, 0.265), (0, 0.29, 0.3), 0.07, 0.07),
+            ("tail4", (0, 0.29, 0.3), (0, 0.38, 0.315), 0.07, 0.07),
+            ("tail5", (0, 0.38, 0.315), (0, 0.46, 0.315), 0.07, 0.07),
+            ("tail6", (0, 0.46, 0.315), (0, 0.53, 0.305), 0.07, 0.065),
+            ("tail7", (0, 0.53, 0.305), (0, 0.6, 0.285), 0.065, 0.06),
+            ("sting", (0, 0.6, 0.285), (0, 0.7, 0.23), 0.085, 0.085),
         ],
-        "eye_c": (0.11, 0.497, -0.3),
-        "eye_r": (0.05, 0.05, 0.025),
+        "eye_c": (0.098, 0.545, -0.29),
+        "eye_r": (0.045, 0.052, 0.025),
         "eye_yaw": 0.35,
         "face": {},
         "sat": 0.8,
@@ -161,21 +153,19 @@ SCANS = {
     },
 
     "puddlet": {
+        "run": "dex",
+        "auto": True,
         "height": 0.45,
-        "mid": 0.045,
         "tris": 16000,
-        "x": [(0.205, 0.1), (0.34, 0.21)],
-        "y": [(0.0, 0.0), (0.215, 0.17), (0.352, 0.283), (0.42, 0.44), (0.61, 0.46)],
-        "z": [(-0.4, -0.29), (-0.11, -0.13), (0.285, 0.05), (0.4, 0.15), (0.93, 0.2)],
-        "limbs": [
-            ("tail1", (-0.07, 0.1, 0.15), (-0.165, 0.07, 0.2), 0.05, 0.045),
-            ("tail2", (-0.165, 0.07, 0.2), (-0.265, 0.05, 0.15), 0.045, 0.04),
-            ("tail3", (-0.265, 0.05, 0.15), (-0.3, 0.04, 0.05), 0.04, 0.035),
-            ("tail4", (-0.3, 0.04, 0.05), (-0.3, 0.04, -0.05), 0.035, 0.03),
-            ("tail5", (-0.3, 0.04, -0.05), (-0.285, 0.04, -0.12), 0.03, 0.025),
+        "limbs": [  # the Bokidex model's tail lies straight back; the proxy's curls round to the front
+            ("tail1", (0, 0.07, 0.08), (0, 0.065, 0.14), 0.07, 0.065),
+            ("tail2", (0, 0.065, 0.14), (0, 0.06, 0.2), 0.065, 0.06),
+            ("tail3", (0, 0.06, 0.2), (0, 0.05, 0.26), 0.06, 0.05),
+            ("tail4", (0, 0.05, 0.26), (0, 0.04, 0.31), 0.05, 0.04),
+            ("tail5", (0, 0.04, 0.31), (0, 0.03, 0.36), 0.04, 0.03),
         ],
-        "eye_c": (0.065, 0.283, -0.25),
-        "eye_r": (0.025, 0.025, 0.013),
+        "eye_c": (0.082, 0.265, -0.32),
+        "eye_r": (0.024, 0.03, 0.014),
         "eye_yaw": 0.35,
         "face": {},
         "sat": 0.8,
@@ -183,13 +173,12 @@ SCANS = {
     },
 
     "burrlet": {
+        "run": "dex",
+        "auto": True,
         "height": 0.5,
         "tris": 16000,
-        "x": [(0.14, 0.1), (0.2, 0.2)],
-        "y": [(0.0, 0.0), (0.172, 0.15), (0.286, 0.2), (0.42, 0.4), (0.55, 0.5)],
-        "z": [(-0.4, -0.31), (-0.31, -0.22), (-0.09, -0.12), (0.21, 0.1), (0.43, 0.31), (0.6, 0.33)],
-        "eye_c": (0.065, 0.2, -0.22),
-        "eye_r": (0.022, 0.022, 0.011),
+        "eye_c": (0.062, 0.228, -0.152),
+        "eye_r": (0.02, 0.027, 0.012),
         "eye_yaw": 0.35,
         "face": {},
         "sat": 0.8,
@@ -197,29 +186,27 @@ SCANS = {
     },
 
     "pebbit": {
+        "run": "dex",
+        "auto": True,
         "height": 0.55,
         "tris": 16000,
-        "x": [(0.15, 0.14), (0.25, 0.24)],
-        "y": [(0.0, 0.0), (0.238, 0.13), (0.309, 0.2), (0.547, 0.5), (0.7, 0.6)],
-        "z": [(-0.5, -0.4), (-0.43, -0.29), (-0.12, -0.15), (0.2, 0.15), (0.505, 0.51), (0.6, 0.55)],
         "merge": {"horn": "head"},
-        "eye_c": (0.08, 0.2, -0.29),
-        "eye_r": (0.03, 0.03, 0.015),
-        "eye_yaw": 0.35,
+        "eye_c": (0.118, 0.225, -0.23),
+        "eye_r": (0.025, 0.025, 0.012),
+        "eye_yaw": 1.2,
         "face": {},
         "sat": 0.8,
         "cover": 1.3,
     },
 
     "zapple": {
+        "run": "dex",
+        "auto": True,
         "height": 0.9,
         "tris": 16000,
-        "x": [(0.08, 0.07), (0.12, 0.17), (0.142, 0.25)],
-        "y": [(0.0, 0.0), (0.372, 0.43), (0.452, 0.5), (0.565, 0.62), (0.905, 0.9)],
-        "z": [(-0.34, -0.31), (-0.283, -0.24), (-0.11, -0.17), (0.13, 0.05), (0.31, 0.3), (0.45, 0.33)],
         "merge": {"wing1.L": "spine", "wing1.R": "spine", "wing2.L": "spine", "wing2.R": "spine"},
-        "eye_c": (0.075, 0.47, -0.215),
-        "eye_r": (0.03, 0.03, 0.015),
+        "eye_c": (0.052, 0.453, -0.195),
+        "eye_r": (0.022, 0.03, 0.014),
         "eye_yaw": 0.5,
         "iris": "8f7fa8",
         "face": {},
@@ -229,15 +216,14 @@ SCANS = {
     },
 
     "glomwort": {
+        "run": "dex",
+        "auto": True,
         "height": 0.49,
         "tris": 16000,
-        "x": [(0.06, 0.061), (0.28, 0.168)],
-        "y": [(0.0, 0.0), (0.255, 0.245), (0.44, 0.49)],
-        "z": [(-0.208, -0.235), (0.0, 0.0), (0.3, 0.29)],
         "drop": ("puffs",),
         "merge": {"lobe%d" % i: "root" for i in range(7)},
-        "eye_c": (0.061, 0.245, -0.235),
-        "eye_r": (0.032, 0.036, 0.02),
+        "eye_c": (0.078, 0.245, -0.153),
+        "eye_r": (0.035, 0.04, 0.02),
         "eye_yaw": 0.35,
         "face": {},
         "sat": 0.8,
@@ -245,13 +231,12 @@ SCANS = {
         "cover": 1.2,
     },
     "selenfin": {
+        "run": "dex",
+        "auto": True,
         "height": 0.73,
         "tris": 16000,
-        "x": [(0.082, 0.15), (0.27, 0.21)],
-        "y": [(0.0, 0.0), (0.515, 0.37), (0.7, 0.56)],
-        "z": [(-0.41, -0.423), (-0.25, -0.31), (0.435, 0.42)],
-        "eye_c": (0.2, 0.37, -0.29),
-        "eye_r": (0.05, 0.052, 0.03),
+        "eye_c": (0.2, 0.355, -0.285),
+        "eye_r": (0.05, 0.05, 0.025),
         "eye_yaw": 1.15,
         "iris": "8a6fa8",
         "face": {},
@@ -288,9 +273,23 @@ AUTO = {  # id: overrides on AUTO_BASE
     "velvorm": BORROWED,
     "casquebill": BORROWED,
     "caecilith": {},
-    "glintmole": {},
-    "gloamshell": {},
+    "glintmole": {"run": "dex", "eye_c": (0.1, 0.33, -0.16), "eye_r": (0.02, 0.022, 0.012), "eye_yaw": 1.0},
+    "gloamshell": {"run": "dex", "eye_c": (0.055, 0.282, -0.235), "eye_r": (0.028, 0.03, 0.015), "eye_yaw": 0.6},
     "hivara": {},
+    "rimeshrew": {
+        "run": "dex",
+        "height": 0.5,
+        "eye_c": (0.07, 0.225, -0.255),
+        "eye_r": (0.025, 0.028, 0.014),
+        "eye_yaw": 0.5,
+        "limbs": [  # the tail runs back and a little up from under the globe
+            ("tail1", (0, 0.2, 0.2), (0, 0.215, 0.235), 0.05, 0.045),
+            ("tail2", (0, 0.215, 0.235), (0, 0.23, 0.27), 0.045, 0.04),
+            ("tail3", (0, 0.23, 0.27), (0, 0.245, 0.305), 0.04, 0.035),
+            ("tail4", (0, 0.245, 0.305), (0, 0.26, 0.34), 0.035, 0.03),
+            ("tail5", (0, 0.26, 0.34), (0, 0.275, 0.37), 0.03, 0.025),
+        ],
+    },
     "kindlewren": {},
     "lodestick": {},
     "marchleaf": {},
@@ -368,7 +367,7 @@ class Scan:
     def __init__(self, species, creature, paint, anim):
         s = SCANS[species]
         self._mods = (creature, paint, anim)
-        self.model = Meshy.get(os.path.join(ROOT, species, "run1"), s["height"], s.get("sink", 0.0), s.get("mid", 0.0))
+        self.model = Meshy.get(os.path.join(ROOT, species, s.get("run", "run1")), s["height"], s.get("sink", 0.0), s.get("mid", 0.0))
         if s.get("auto"):
             s = self._auto(s, creature)
         self._s = s
@@ -504,9 +503,11 @@ class Scan:
         return q
 
 
-def frame_row(species, fit, scale):
+def frame_row(species, fit, scale, back=False):
     """The species' BokiRig.FRAME row (scripts/match/boki_rig.gd) moved through the fit, to paste back. A point on a
-    "limbs" part (a tail tip) still needs reading off the sheet."""
+    "limbs" part (a tail tip) still needs reading off the sheet. `back` takes a row that went through this fit to
+    where it was: a species that changes model (to its Bokidex one) starts again from that row."""
+    through = fit.back if back else fit.fwd
     path = os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "match", "boki_rig.gd")
     found = re.search(r'\t"%s": \{.*?\}\},\n' % species, open(path).read(), re.S)
     if not found:
@@ -514,11 +515,11 @@ def frame_row(species, fit, scale):
     row = found.group(0)
 
     def point(m):
-        at = fit.fwd(v3(*map(float, m.group(1).split(","))) / scale) * scale
+        at = through(v3(*map(float, m.group(1).split(","))) / scale) * scale
         return "Vector3(%s)" % ", ".join("%.3g" % c for c in at)
 
     def height(m):
-        return '"%s": %.3g' % (m.group(1), fit.fwd(v3(0, float(m.group(2)) / scale, 0))[1] * scale)
+        return '"%s": %.3g' % (m.group(1), through(v3(0, float(m.group(2)) / scale, 0))[1] * scale)
 
     return re.sub(r'"(top|hip)": ([0-9.]+)', height, re.sub(r"Vector3\(([^)]*)\)", point, row))
 

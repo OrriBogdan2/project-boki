@@ -1,7 +1,9 @@
-"""Puts a finished Meshy model where boki_meshy.Meshy reads it: ~/meshy/boki/<id>/run1/glb.glb and tex0_base_color.png
+"""Puts a finished model where boki_meshy.Meshy reads it: ~/meshy/boki/<id>/<run>/glb.glb and tex0_base_color.png
 (the model's own base-colour image), and prints its size in game metres (EXT json: height, half width x, nose z, tail z).
+<run> is "dex" for the Bokidex model (the approved one: tools/boki/dex_source.py finds it) and "run1", the default, for a
+fresh Meshy run (only for a Boki the Bokidex has no 3D of).
 
-  blender -b --factory-startup --python tools/boki/boki_prep.py -- <id> <model.glb>
+  blender -b --factory-startup --python tools/boki/boki_prep.py -- <id> <model.glb> [<run>]
 """
 import json
 import os
@@ -23,8 +25,8 @@ def base_colour_image(obj):
     raise SystemExit("no base-colour image on the model")
 
 
-def main(species, glb):
-    run = os.path.join(ROOT, species, "run1")
+def main(species, glb, run="run1"):
+    run = os.path.join(ROOT, species, run)
     os.makedirs(run, exist_ok=True)
     bpy.ops.import_scene.gltf(filepath=glb)
     obj = max((o for o in bpy.data.objects if o.type == "MESH"), key=lambda o: len(o.data.vertices))
@@ -48,4 +50,4 @@ def main(species, glb):
                              "zc": round(float(g[:, 2].mean() / h), 4)}))
 
 
-main(sys.argv[sys.argv.index("--") + 1], sys.argv[sys.argv.index("--") + 2])
+main(*sys.argv[sys.argv.index("--") + 1:][:3])

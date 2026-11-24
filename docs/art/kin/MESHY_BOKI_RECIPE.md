@@ -31,6 +31,38 @@ run A of 4 (all four turnaround views); the runs and `gen_log.tsv` are in `~/mes
 Gloamshell have their picks in `~/meshy/boki/<id>/run1` but no row yet. A new row may leave out `eye_c`, `eye_r` and `eye_yaw`
 for its first fit sheet: it starts on the proxy's eyes.
 
+## 0. The source is the Bokidex model (owner rule, 11-17)
+
+**The Bokidex 3D models are the approved ones. A game body is built from the Bokidex model of that Boki; a fresh
+Meshy run is only for a Boki the Bokidex has no 3D of.** The 11-15 starters above were in the game from new runs
+while the Bokidex showed a better model of each (owner on Vespyx, 11-17: "on bokidex there is a better vespyx ...
+you are not using the ones we already have"). They were moved to their Bokidex masters on 11-17
+(`ext/boki-dex-port-1117`); the old picks stay in `~/meshy/boki/<id>/run1`, unused. The same branch moved the
+three pilots that were not the Bokidex model either: Kestrike (master), Cairnback and Rimeshrew (the web copy: no
+master file is left of those two; Rimeshrew was still its hand-built body).
+
+    python3 tools/boki/dex_source.py <id>          # master | web | none, and the path
+
+- `master`: `~/meshy/boki3d/<dex name>/model.glb`, the full model the Bokidex's web copy is made from. Use it.
+- `web`: the Bokidex's own glb (25k triangles, Draco; Blender reads it). Use it.
+- `none`: only then sections 1 and 2 below (a new Meshy run), and say so in the commit.
+
+    $B -b --factory-startup --python tools/boki/boki_prep.py -- <id> <that path> dex
+
+puts it in `~/meshy/boki/<id>/dex/`, and the species' `SCANS`/`AUTO` row names it: `"run": "dex"` (no `run` key
+reads `run1`, which is how the rows of before 11-17 still build). `python3 tools/boki/auto_port.py <id> ...` does
+all of it for a new species and refuses a model that is not the Bokidex one while the Bokidex has one.
+
+A species that changes model: its FRAME row already went through the old fit, so take it back first
+(`build_boki.py -- --species=<id> --unfit` prints the row as it was, with the old row still in place), paste it,
+change the `SCANS` row to the new model, then `--fit-sheet` moves it through the new fit as for a new species.
+
+Check a port against its source in the engine, on a GPU worker (the game model beside the Bokidex glb, same stage
+and height, front and three-quarters; unpack a Draco glb through Blender first):
+
+    jobq submit --tree . --needs gpu --app godot --timeout 900 --out shots -- \
+        --boki-rig-shots --shots-dir=res://shots --sheet=<id>,<id> --raw-dir=res://<dir of <id>.glb>
+
 What one species ends as: a body of 16,000 triangles (the whole model 18-19k with face, tools and grown parts), a
 2048 colour atlas and a 2048 normal atlas baked from the dense model, in `art/kin/<id>/` (about 2-3 MB).
 
@@ -48,7 +80,7 @@ The pilot spent 165 credits on three species: 3 x 40, and 45 on five `edit` call
 Gongibbon. Budget 40-85 a species, one run; a second run (40) only when the first is broken (a missing limb, a
 fused pair of legs).
 
-## 1. Views
+## 1. Views (only for a Boki with no Bokidex 3D: see section 0)
 
     git show origin/ext/agent-briefs:briefs/boki-art/turnarounds/<Name>.jpg > ~/meshy/boki/<id>/sheet.jpg
     echo '{"auto": ["front", "tq", "side", "back"]}' > auto.json

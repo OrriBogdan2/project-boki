@@ -430,6 +430,9 @@ def main():
             image_from("fit", boki_scan.fit_sheet(creature.model, creature.BONES, creature.EYE_C), a[12:])
             print("FRAME row through the fit:\n" + boki_scan.frame_row(species, creature.fit, SCALE))
             return
+        if a == "--unfit":     # the FRAME row as it was before this fit: run it before the row changes model
+            print("FRAME row back through the fit:\n" + boki_scan.frame_row(species, creature.fit, SCALE, back=True))
+            return
     boki_rig.HIDE_AT.clear()
     boki_rig.HIDE_AT.update(anim.HIDE_AT)
     boki_rig.SCALED = set(getattr(anim, "SCALED", ()))

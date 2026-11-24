@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
-"""Puts finished Meshy models in the game on the rig each species has (or the glomwort one), with no hand-read landmarks:
-boki_prep (the model into ~/meshy/boki/<id>/run1), boki_scan's "auto" fit (proxy bounds to scan bounds), the FRAME row
+"""Puts Bokidex models in the game on the rig each species has (or the glomwort one), with no hand-read landmarks:
+boki_prep (the model into ~/meshy/boki/<id>/<run>), boki_scan's "auto" fit (proxy bounds to scan bounds), the FRAME row
 through that fit, the registrations in boki_rig_check.gd, then the build into art/kin/<id>/.
 
-  python3 tools/boki/auto_port.py <id>=<model.glb> ...      (a species once only: its FRAME row moves through the fit)
+The model is the species' Bokidex one (tools/boki/dex_source.py: the master, else the web copy), run "dex": the row in
+boki_scan.AUTO must say {"run": "dex"}. <id>=<model.glb> (run "run1") is only for a Boki the Bokidex has no 3D of; any
+other model is refused (owner 11-17: the Bokidex models are the approved ones).
+
+  python3 tools/boki/auto_port.py <id> ...      (a species once only: its FRAME row moves through the fit; a species
+                                                 that changes model goes back first, build_boki.py --unfit)
 """
 import os
 import re
 import subprocess
 import sys
+
+import dex_source
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 BLENDER = os.path.expanduser("~/tools/blender-4.5.15-linux-x64/blender")
@@ -52,11 +59,27 @@ def check_lists(species):
     open(CHECK, "w").write(text)
 
 
+def source(species, given):
+    """(model, run) to build the species from: its Bokidex model, or `given` where the Bokidex has none."""
+    kind, path = dex_source.find(species)
+    if kind == "none":
+        if not given:
+            raise SystemExit("%s: the Bokidex has no 3D of it; pass %s=<model.glb> (a fresh Meshy run)" % (species, species))
+        return given, "run1"
+    if given and os.path.realpath(given) != os.path.realpath(path):
+        raise SystemExit("%s: the Bokidex has a model (%s); the game is built from that one" % (species, path))
+    row = re.search(r'\n    "%s": .*?(?=\n    "|\n})' % species, open(os.path.join(TOOLS, "boki_scan.py")).read(), re.S)
+    if row is None or '"run": "dex"' not in row.group(0):
+        raise SystemExit('%s: give its boki_scan.AUTO row "run": "dex" first' % species)
+    return path, "dex"
+
+
 def main(pairs):
     for pair in pairs:
-        species, glb = pair.split("=")
+        species, _, glb = pair.partition("=")
         try:
-            print(species, re.search(r"EXT.*", blender(os.path.join(TOOLS, "boki_prep.py"), "--", species, glb)).group(0), flush=True)
+            glb, run = source(species, glb)
+            print(species, re.search(r"EXT.*", blender(os.path.join(TOOLS, "boki_prep.py"), "--", species, glb, run)).group(0), flush=True)
             frame(species)
             blender(os.path.join(TOOLS, "build_boki.py"), "--", "--species=" + species)
             print(species, "built", os.path.getsize(os.path.join(REPO, "art/kin", species, species + ".glb")) // 1024, "KB", flush=True)
