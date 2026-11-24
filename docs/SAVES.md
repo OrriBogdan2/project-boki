@@ -12,7 +12,11 @@ save marked "from a newer game", a lost kin or field, or a key `Settings` no lon
 | `feedback.json` | `Feedback` | `Feedback._load` reads minutes, answered versions and the queue back |
 | `warm_stamp.json` | `WarmStamp.save` (a cache; a stale one is ignored) | the file still has its fields |
 
-`save_v1.json` is the oldest format (hand-made, v1); `save_v20_*` (v20: per-Hunter stats, on top of main's v15-v19
+A check run (a registered check flag or `--check-child`) never touches the player's `settings.cfg`: `Settings` reads
+and writes `user://check_settings_<pid>.cfg`, which starts empty and is removed when the run ends; a check's second
+game boots from it with `--settings-file=<path>` (`Settings.file_path`, rpc6 11-16).
+
+`save_v1.json` is the oldest format (hand-made, v1); `save_v23_*` (v23: raising leans, `rec["raised"]`; the farm golden's first Boki has a lean) are the newest pair, after `save_v22_*` (v22: the time trial's personal bests, TimeTrial) and `save_v21_*`; `save_v20_*` (v20: per-Hunter stats, on top of main's v15-v19
 chain: drills, tutorial resume, clans, XP hints, sleepovers) are the newest pair: `save_v20_fresh.json` is a new save, `save_v20_farm.json` a
 populated farm (kin, bonds, incubator egg, home layout). `save_v15_*` are dev saves from the integ-1113-D1 line, whose v15 was the
 per-Hunter stats step (main's v15 is the drills); they load through v15 -> v20 like any v15 file.

@@ -33,7 +33,7 @@ var evo_root := ""
 var evo_paths: Array = []    # [{affinity, nodes: [ids]}]
 var voice := {}
 var egg := {}
-var avg_size := {}              # optional: {cm, kg} base height and weight of an average one (Unique.base_size)
+var avg_size := {}  # optional: {cm, kg, fit}: an average one's height, weight, model scale (Unique.base_size)
 var infusion := {}           # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
 
 const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "active", "auto", "merge", "evolution", "voice", "egg", "size", "infusion"]
@@ -167,8 +167,8 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 		for key in e: k.egg[key] = rep.text(e, key, "egg")
 	if d.has("size"):
 		var sz := rep.obj(d["size"], "size")
-		rep.keys(sz, "size", ["cm", "kg", "_doc"], ["cm", "kg"])
-		k.avg_size = {"cm": float(sz.get("cm", 0.0)), "kg": float(sz.get("kg", 0.0))}
+		rep.keys(sz, "size", ["cm", "kg", "fit", "_doc"], ["cm", "kg"])
+		k.avg_size = {"cm": float(sz["cm"]), "kg": float(sz["kg"]), "fit": float(sz.get("fit", 1.0))}
 	if d.has("infusion"):
 		k.infusion = _infusion(d["infusion"], rep)
 	return k

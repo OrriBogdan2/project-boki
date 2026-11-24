@@ -1,21 +1,25 @@
 {
+	"_doc": "HudReveal's table, the only HUD reveal gate. from_match: the expedition the group shows from (0 = only by its first event). every_match: counted by the save in every match type (duel, training, tutorial too), not only staged expeditions, with no Tab or Show full HUD bypass.",
 	"groups": {
 		"vitals": {"from_match": 1, "what": "health, level and the XP bar"},
-		"abilities": {"from_match": 1, "what": "ability and weapon slots with their keys"},
+		"abilities": {"from_match": 1, "tut_from": "shoot", "what": "ability row and the weapon card with their keys"},
 		"beat_clock": {"from_match": 4, "first": "beat", "what": "the match clock under the minimap, from the first Ways Out beat or the first kill"},
-		"summon_ring": {"from_match": 1, "what": "the Boki card and its summon ring"},
+		"summon_ring": {"from_match": 1, "tut_from": "gkey", "what": "the Boki box (and glove slots) and its summon ring"},
 		"objective": {"from_match": 1, "what": "the minimap, waypoints and prompts"},
-		"seat_pips": {"from_match": 0, "first": "seat_open", "what": "the Ways Out strip, from the first open seat"},
-		"belt": {"from_match": 4, "first": "item_matters", "what": "the utility belt, from the first time a held item could be used"},
+		"seat_pips": {"from_match": 0, "first": "seat_open", "lead_s": 30.0, "what": "the Ways Out strip's seat pips, from the first open seat; the strip itself waits (every match) until a seat is lead_s seconds from opening or open, in use, taken or lost, and always shows for a player who is out"},
+		"belt": {"from_match": 4, "tut_from": "glove", "first": "item_matters", "what": "the utility belt, from the first time a held item could be used"},
 		"counters": {"from_match": 4, "what": "squads left, kills, knocks, gems"},
 		"feed": {"from_match": 4, "what": "the kill feed"},
 		"gear": {"from_match": 4, "what": "the gear panel"},
 		"squad": {"from_match": 4, "what": "squad frames"},
 		"perks": {"from_match": 4, "what": "the perk row"},
 		"weather": {"from_match": 4, "what": "the weather and sight chip"},
-		"belt_spare": {"from_match": 0, "what": "belt slots 3 and 4 while they are empty (a filled one always shows)"},
+		"belt_spare": {"from_match": 0, "what": "belt slots 3 to 6 while they are empty (a filled one always shows)"},
 		"ult_tiles": {"from_match": 0, "what": "the locked ultimate tiles (X, and the Fusion box) until level 6"},
 		"pace_tags": {"from_match": 4, "what": "ahead / behind pace tags (no widget yet)"},
-		"plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"}
+		"plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"},
+		"kit_card": {"from_match": 4, "every_match": true, "show_s": 14.0, "what": "the 'Your kit' button card for show_s seconds after landing (the training room keeps it up and shows it from match 1)"},
+		"own_numbers": {"from_match": 4, "every_match": true, "what": "your own kills, knocks and gems; before, from the first one or while Tab / the map key is held"},
+		"newcomer_goal": {"from_match": 4, "every_match": true, "what": "the objective line may point at any seat; before, in a staged expedition only, at hud_groups.json newcomer_seats (HudReveal.newcomer)"}
 	}
 }

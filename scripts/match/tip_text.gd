@@ -32,6 +32,17 @@ static func ability(kit: bool, bond_ok := true) -> String:
 	return "%s: your Boki's ability%s" % [Settings.key_cap("signature"), bond]
 
 
+## The Summon key's one line, once the wisp can be called out ("" when it can't): the window and the rest, in seconds.
+static func summon(k: Kin) -> String:
+	var s := k.summon
+	if s == null or not k.wisp or s.cd > 0.0 or k.owner_h != k.m.player:
+		return ""
+	return (
+		"Press %s to call %s out for %d s, then it rests %d s"
+		% [Settings.key_cap("summon"), k.rec.get("name", "your Boki"), roundi(s.dur), roundi(s.cd_base)]
+	)
+
+
 static func bond_full(fuse_name: String, next: bool) -> String:
 	return "Bond full  ·  %s%s fuses: %s" % ["your next " if next else "", Settings.key_cap("ultimate"), fuse_name]
 

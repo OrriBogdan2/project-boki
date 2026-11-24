@@ -41,7 +41,8 @@ var stage := "intro"          # intro (the card) | create (yourself) | pick (egg
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
-var skipper: HatchSkip       # watches the hatch beat for a key (freed once the Boki's card is up)
+var skipper: CanvasLayer     # holds the hatch beat's HoldSkip ring (freed once the Boki's card is up)
+var hold_skip: HoldSkip      # a tap moves the hatch on a beat, a hold skips to the card
 var reveal: KinReveal
 var hover := -1
 var auto_warm := false        # test hook: hold the warmth on by itself
@@ -355,6 +356,9 @@ func _end_intro() -> void:
 		_after_create()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if hold_skip and hold_skip.feed(event):
+		get_viewport().set_input_as_handled()
+		return
 	if stage == "warm" and ((event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or event.is_action_pressed("jump")):
 		_tap_egg()
 		return
@@ -483,6 +487,7 @@ func _pick(i: int) -> void:
 ## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
 ## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
 const TAPS := 7
+const SKIP_ARM_S := 0.5   # s into the hatch before a tap counts (the last knock's own click must not skip the egg)
 const KNOCK_LINES := ["Knock on the shell", "Something stirs...", "Something knocks back.", "Again, gently.",
 	"The shell bulges.", "Cracks are spreading.", "Nearly.", "Here they come."]      # the title after each knock
 var taps := 0
@@ -586,8 +591,7 @@ func _process(delta: float) -> void:
 		wegg.rotation.z = lerpf(wegg.rotation.z, sin(t * (6.0 + warmth * 30.0)) * warmth * 0.05, minf(1.0, delta * 12.0))
 		if taps >= TAPS and warmth >= 0.98:
 			stage = "hatching"
-			skipper = HatchSkip.new(_skip_hatch)
-			add_child(skipper)
+			get_tree().create_timer(SKIP_ARM_S).timeout.connect(_arm_skip)
 			title.text = "Something's moving..."
 			_clear_bottom()
 			wegg.rotation.z = 0.0
@@ -601,7 +605,7 @@ func _process(delta: float) -> void:
 				rv.twin = kin_node
 				reveal = rv
 				add_child(rv)
-				rv.revealed.connect(skipper.queue_free)
+				rv.revealed.connect(_end_skip)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
 					stage = "name"
@@ -615,10 +619,38 @@ func _process(delta: float) -> void:
 			# a little wobble now and then, like something inside is awake
 			egg.rotation.z = sin(t * 2.0 + i * 2.1) * 0.06 * (1.0 + float(sin(t * 0.7 + i) > 0.7) * 3.0)
 
-## Any key or click while the egg hatches and the Boki meets you: straight to its card (HatchSkip).
-func _skip_hatch() -> void:
-	eggs[chosen]["egg"].skip()      # (its done opens the reveal, if the egg was still hatching)
-	reveal.skip()
+## SKIP_ARM_S into the hatch the beat can be skipped: a tap moves on one beat (the egg opens, then the Boki's
+## card), holding it skips both (HoldSkip, as the prologue).
+func _arm_skip() -> void:
+	if stage not in ["hatching", "reveal"] or (reveal != null and reveal.met):
+		return
+	skipper = CanvasLayer.new()
+	skipper.layer = 70
+	add_child(skipper)
+	hold_skip = HoldSkip.new()
+	hold_skip.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	hold_skip.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	hold_skip.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hold_skip.offset_right = -24
+	hold_skip.offset_bottom = -16
+	hold_skip.tapped.connect(_skip_hatch.bind(false))
+	hold_skip.skipped.connect(_skip_hatch.bind(true))
+	skipper.add_child(hold_skip)
+
+## The beat's end: the ring goes.
+func _end_skip() -> void:
+	if skipper:
+		skipper.queue_free()
+	skipper = null
+	hold_skip = null
+
+## `all`: straight to the Boki's card; else one beat on: the egg finishes hatching, or the Boki meets you.
+func _skip_hatch(all: bool) -> void:
+	var egg_open := reveal == null
+	if egg_open:
+		eggs[chosen]["egg"].skip()      # (its done opens the reveal, if the egg was still hatching)
+	if all or not egg_open:
+		reveal.skip()
 
 func _show_name() -> void:
 	_clear_bottom()

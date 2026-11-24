@@ -113,6 +113,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		IncomingHitSfx.hit(m, by, d, o)      # from where it came, so you know which way to turn
 		if armor:
 			m.sfx("armor_hit", null, -12.0, 0.85)
+
 	elif target != p and credit != p and not typed:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
 
@@ -316,7 +317,7 @@ static func footstep(h: Hunter) -> void:
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
 	var surf := StepSurface.at(m, h.pos)
-	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, surf, -13.0), StepSurface.vol_db(h, surf, -17.0))
+	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, -13.0), StepSurface.vol_db(h, -17.0))
 	HunterFoley.step(h)
 
 

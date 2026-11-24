@@ -22,9 +22,12 @@
   "garden_depart": "boki",
   "garden_arrive_bramblebank": "boki", "garden_arrive_glasswater": "boki", "garden_arrive_cinderstep": "boki",
   "garden_arrive_hushwood": "boki", "garden_arrive_ridge": "boki", "garden_locked": "step",
-  "garden_egg": "boki", "garden_friends": "boki", "garden_chime_part": "boki", "garden_evolve": "boki",
+  "garden_egg": "boki", "garden_friends": "boki", "garden_bond_up": "boki", "garden_chime_part": "boki",
+  "garden_evolve": "boki",
   "garden_cup_sprout": "boki", "garden_cup_bloom": "boki", "garden_cup_crown": "boki",
   "garden_visit_in": "boki", "garden_visit_out": "boki", "garden_season": "boki",
+  "garden_snack_ripe": "boki", "garden_snack_crisp": "boki", "garden_snack_juicy": "boki",
+  "garden_snack_hard": "boki", "garden_snack_soft": "boki",
   "kite_flap": "step", "kite_ring": "ui", "kite_updraft": "boki", "kite_finish": "boki",
   "lantern_flip": "ui", "lantern_match": "ui", "lantern_miss": "ui", "lantern_win": "boki"
  },

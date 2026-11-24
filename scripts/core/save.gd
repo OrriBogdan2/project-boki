@@ -8,18 +8,20 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 22
+const VERSION := 23
 const UNNAMED := "Hunter"      # the name of a player who never typed one (the results line then drops it)
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
+const SettingsScript := preload("res://scripts/core/settings.gd")   # where the last slot is remembered (file_path)
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
 		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
 		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19",
-		19: "_migrate_19_to_20", 20: "_migrate_20_to_21", 21: "_migrate_21_to_22"}
+		19: "_migrate_19_to_20", 20: "_migrate_20_to_21", 21: "_migrate_21_to_22",
+		22: "_migrate_22_to_23"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -27,7 +29,7 @@ var slot := 1                 # which save file is in play
 func _ready() -> void:
 	# the last save you played comes back (remembered next to the settings)
 	var cf := ConfigFile.new()
-	if cf.load("user://settings.cfg") == OK:
+	if cf.load(SettingsScript.file_path()) == OK:
 		slot = clampi(int(cf.get_value("save", "slot", 1)), 1, SLOTS)
 	load_game()
 
@@ -52,9 +54,9 @@ func use_slot(n: int) -> void:
 	slot = clampi(n, 1, SLOTS)
 	load_game()
 	var cf := ConfigFile.new()
-	cf.load("user://settings.cfg")
+	cf.load(SettingsScript.file_path())
 	cf.set_value("save", "slot", slot)
-	cf.save("user://settings.cfg")
+	cf.save(SettingsScript.file_path())
 
 func delete_slot(n: int) -> void:
 	for q in _copies(path_for(n)):
@@ -381,6 +383,10 @@ func _migrate_20_to_21(data: Dictionary) -> void:
 ## v21 -> v22: the Training Grounds' time trial. Every Hunter starts with no personal best (TimeTrial).
 func _migrate_21_to_22(data: Dictionary) -> void:
 	TimeTrial.migrate(data)
+
+## v22 -> v23: raising leans (BaseAxes): every Boki gets its zero lean.
+func _migrate_22_to_23(data: Dictionary) -> void:
+	BaseAxes.migrate(data)
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,

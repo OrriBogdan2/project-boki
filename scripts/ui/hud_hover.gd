@@ -164,7 +164,7 @@ func arch_tip(id: String, p: Hunter) -> Array:
 		)
 	if id == "r":
 		out.append(
-			["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], h_v.MUTED, 12]
+			["Unlocks at level %d, rank 2 at %d, rank 3 at %d. " % Hunter.ULT_AT, h_v.MUTED, 12]
 		)
 	if id == "sec":
 		var rd := p.ak.res_def()
@@ -410,7 +410,7 @@ func tip_lines(id: String, p: Hunter) -> Array:
 					13
 				]
 			)
-		"util1", "util2", "util3", "util4":
+		"util1", "util2", "util3", "util4", "util5", "util6":
 			out = BeltHud.tip(p, int(id.substr(4)) - 1)
 		"armor_level":
 			out = ArmorHud.tip(p)

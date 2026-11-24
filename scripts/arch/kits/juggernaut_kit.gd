@@ -28,6 +28,9 @@ const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his 
 const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
+const LUNGE_COIL_T := 0.2              # s on jug_lunge's clock where its held coil ends (kael.json "lead" -0.45 at
+                                       # "rate" 2.2): a longer Lunge holds it there to its stop, thrusting on the stop
+const LUNGE_SNAP_T := 0.05             # s of travel left when the coil lets go: the thrust's snap and a frame to see it
 const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
                                        # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
 
@@ -78,10 +81,6 @@ func res_frac() -> float:
 
 func res_text() -> String:
 	return "ENRAGED" if enraged_t > 0.0 else "%d" % int(res)
-
-func ready_label() -> String:
-	if not slam_w.is_empty(): return "SMASH  ·  aim it"
-	return "ENRAGED" if enraged_t > 0.0 else ""
 
 ## How hot it is, 0..1 (Enraged counts as all the way).
 func heat_k() -> float:
@@ -243,7 +242,8 @@ func _reset_riposte() -> bool:
 func _riposte_resettable() -> bool:
 	return float(cd["x"]) > 0.0 and h.lvl >= int(Hunter.ULT_AT[0])
 
-## The combo tag (ComboMark): the Warchain's hold on `t`, else the Slam's 2s window in which a knock readies X.
+## The combo state for the status row (HudPlate.row): the Warchain's hold on `t`, else the Slam's 2s window in
+## which a knock readies X.
 func combo_read(t: Ent) -> Dictionary:
 	if warchain.hooked() and warchain.target == t:
 		return {"icon": "chain", "n": 0, "max": 0, "left": warchain.tether_t, "total": float(e_def()["time"])}
@@ -848,6 +848,8 @@ func _lunge(k: float, perfect: bool) -> void:
 func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var dv: Vector2 = lunge["dir"]
+	if anim_id == "jug_lunge" and m.time - anim_at > LUNGE_COIL_T and h.roll_t > LUNGE_SNAP_T:
+		anim_at = m.time - LUNGE_COIL_T      # the coil holds while he travels: the thrust lands as the travel stops
 	for f in m.foes_of(h.team):
 		if f.hittable() and h.flat_dist(f) < h.r + f.r + LUNGE_REACH and absf(f.pos.y - h.pos.y) < 1.6:
 			var k := float(lunge["k"])
@@ -855,8 +857,6 @@ func _tick_lunge() -> void:
 			lunge = {}
 			h.roll_t = 0.0
 			h.vel = Vector3.ZERO
-			if was_chain:
-				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
 			var leffs: Array = [{"type": "damage", "amount": dmg}]
 			if float(ld["push"]) > 0.0:
@@ -1015,16 +1015,6 @@ func recast_window() -> Dictionary:
 	if not warchain.hooked():
 		return {}
 	return RecastCue.window("e", warchain.tether_t, float(warchain.data()["time"]), warchain.anchor)
-
-## RecastCue's badge: a foe the Finishing Slam hit; a knock on them in time resets the Riposte.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var reset_t := float(rmb_def()["slam"].get("reset_t", 2.0))
-	for key in slam_hit:
-		var f := instance_from_id(key) as Ent
-		var left: float = reset_t - (m.time - float(slam_hit[key]))
-		if f != null and not f.dead and left > 0.0:
-			out.append(RecastCue.mark(f, 0, left, reset_t, true))
 
 func use_e() -> void:
 	if not slam_w.is_empty() and warchain.state == "ready":

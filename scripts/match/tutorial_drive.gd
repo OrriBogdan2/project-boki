@@ -11,7 +11,7 @@ const MISS_RATE := 0.3     # share of 0.5 s aim windows that land MISS_OFF to th
 const MISS_OFF := 3.0      # m a missed aim is off the target
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
-const KEYS := [      # the action inputs
+const KEYS := [      # the action inputs (sec_hold too: a step ending mid-hold must not hold a charge for ever)
 		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var human := false
@@ -215,6 +215,7 @@ static func fire_key(m: Match) -> bool:
 	if p.wpn.get("melee", false):
 		return fmod(m.time, 0.5) < 0.1
 	return true
+
 
 ## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:

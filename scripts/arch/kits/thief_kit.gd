@@ -22,6 +22,7 @@ extends ArchKit
 ## - E, Shadow Knife: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
+const FLASH_HIT := 0.12        # s: the struck body's flash (Ent.hurt's own): 3 frames full violet, then a fade
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
 const BOLT_COL := Color("9a5cff")
 const BOLT_CORE := Color("e6d8ff")
@@ -259,9 +260,6 @@ func res_text() -> String:
 func dash_payoff_ready() -> bool:
 	return primed_t > 0.0
 
-func ready_label() -> String:
-	return "EMPOWERED  ·  land it to reset Vault" if primed_t > 0.0 else ""
-
 func _tick(dt: float) -> void:
 	haste_t = maxf(0.0, haste_t - dt)
 	if primed_t > 0.0:
@@ -444,6 +442,9 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	last_bolt_end = at
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
+	if e != null:
+		e.flash_tint = BOLT_COL                  # the struck body flashes in her violet
+		e.flash_t = maxf(e.flash_t, FLASH_HIT)
 	if e != null and emp:
 		fx().star(at, Color("d8c0ff"), 1.5, 0.24)
 		m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
@@ -824,16 +825,6 @@ func recast_window() -> Dictionary:
 		w["at"] = knife.get("pos", h.pos)
 		w["auto"] = true
 	return w
-
-## RecastCue's badge: your Marks on each foe; gold while the empowered bolt is ready to cash them in.
-func combo_marks(out: Array) -> void:
-	super(out)
-	for f in m.foes_of(h.team):
-		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
-		var e: Array = mk.get(h.nid, [0, 0.0])
-		if int(e[0]) > 0 and float(e[1]) > 0.0:
-			var dur := float(res_def().get("dur", 4.0))
-			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, primed_t > 0.0))
 
 func cast_e() -> bool:
 	play("thf_knife")

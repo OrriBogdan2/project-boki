@@ -99,11 +99,12 @@ func _names() -> void:
 	var cues: Array = ["glint_cast", "glint_plop", "glint_water", "glint_bite", "glint_reel", "tumble_push",
 			"tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal", "show_crowd",
 			"relay_handoff", "relay_fumble", "relay_finish", "kite_flap", "kite_ring", "kite_updraft", "kite_finish",
-			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win"]
+			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win", "garden_snack_ripe"]
+	for texture in SnackPatch.rules()["pick_textures"]:
+		cues.append("garden_snack_" + texture)
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
-	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo, Show Ring, Relay, Kite, Lantern cue exists (%d)"
-			% cues.size())
+	ok(cues.all(func(c): return Sfx.ensure(c)), "every game and snack patch cue exists (%d)" % cues.size())
 
 func _fishing() -> void:
 	var rec := _kin("zapple", "Pip")
@@ -224,6 +225,8 @@ func _games() -> void:
 			break
 		await main.get_tree().process_frame
 	home._close_panel()
+	home.life.r_v["doze"] = 0.0  # a random company doze would take a Boki off the games
+	home.life.r_v["doze_pile"] = 0.0
 	for k in home.kins:
 		k.erase("indoors")
 	# Boki at free play cue garden_go (tag) and cheers through the same library: off while the games are counted

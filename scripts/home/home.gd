@@ -1305,7 +1305,7 @@ func _move_player(d: float) -> void:
 			wedge_t = 0.0
 			unstick()
 	gh = _ground_h(ppos.x, ppos.z)
-	air = py > gh + 0.001 or pvy > 0.0
+	air = pvy > 0.0 or (py > gh + 0.001 and (air or not HunterMove.sticks(py - gh)))     # down a flight: still standing
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
 	var over := py - gh if gh > World.VOID + 1.0 else INF
 	var jump := mover.jump(can_act and lfl.is_empty() and mover.pressed(&"jump")
@@ -1349,7 +1349,7 @@ func _move_player(d: float) -> void:
 			pvy = 0.0
 			gliding = false
 			Sfx.step(null, -16.0)
-		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)):
+		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < _abyss_respawn_y(ppos, gliding)):
 			_respawn_safe()
 	else:
 		py = gh
@@ -3511,9 +3511,7 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
+	var o := Data.mode_opts(Data.saved_mode())      # trios or solos: its squads and hunters (bots fill)
 	if raid_squad > 0:
 		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
 	o["tier"] = exp_tier
@@ -5172,3 +5170,9 @@ func _econ_tests(dbg) -> void:
 				player.position = ppos; cam.snap(ppos)
 			if "--shrine-open" in dbg: hecon.open_shrine()
 			elif "--grave-open" in dbg: hecon.open_grave(Econ.graves()[Econ.graves().size() - 1]))
+
+
+## Below this height over the abyss the home respawns you: the abyss floor less the fall room (more while gliding).
+func _abyss_respawn_y(at: Vector3, gliding: bool) -> float:
+	var room := HunterFeel.abyss_extra + (HunterFeel.abyss_glide_room if gliding else 0.0)
+	return world.abyss_floor(at.x, at.z) - room

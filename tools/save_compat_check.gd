@@ -91,6 +91,9 @@ func _check_save(p: String, n: String) -> void:
 				_lost(raw[k], Save.d.get(k), k, lost)
 		for i in (raw["roster"] as Array).size():
 			for k in ["name", "level", "species"]:
+				# a Boki whose next form got its art evolves on load (Evo.catch_up): the old species is kept in "was"
+				if k == "species" and (Save.d["roster"][i].get("was", []) as Array).has(raw["roster"][i].get(k)):
+					continue
 				if raw["roster"][i].has(k):
 					_lost(raw["roster"][i][k], Save.d["roster"][i].get(k), "roster.%d.%s" % [i, k], lost)
 	if n.ends_with("_bred.json"):
@@ -182,6 +185,7 @@ func _capture(out: String) -> void:
 	farm["extracts"] = 5
 	farm["items"] = {"tonic": 3}
 	farm["seeds"] = {"tidebloom": 4}
+	farm["roster"][0]["raised"] = {"bold": 0.4, "busy": -0.3, "gentle": 0.6}      # a raised lean (BaseAxes)
 	_write(out + "/save_v%d_fresh.json" % Save.VERSION, JSON.stringify(Save.fresh()))
 	_write(out + "/save_v%d_farm.json" % Save.VERSION, JSON.stringify(farm))
 	var kin: Array = farm["roster"]
@@ -194,10 +198,10 @@ func _capture(out: String) -> void:
 	Settings.v["keys_v"] = Settings.KEYS_V
 	Settings.save()
 	var cf := ConfigFile.new()
-	cf.load(Settings.PATH)
+	cf.load(Settings.path)
 	cf.set_value("save", "slot", 2)
-	cf.save(Settings.PATH)
-	_write(out + "/settings.cfg", FileAccess.get_file_as_string(Settings.PATH))
+	cf.save(Settings.path)
+	_write(out + "/settings.cfg", FileAccess.get_file_as_string(Settings.path))
 	Feedback.path = out + "/feedback.json"
 	Feedback.poster = func(_body, _done): pass
 	Feedback.submit(Save, {"combat": 4.0, "boki": 5.0}, "golden note")

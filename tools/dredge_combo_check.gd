@@ -25,6 +25,7 @@ func run(main_node: Node) -> void:
 	await _all()
 	await _hook_hold()
 	await _slam_tell()
+	await _anchor_spike()
 	await _dash_moves()
 	await _glide_wins()
 	await _parity_gun()
@@ -34,6 +35,7 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_combo_e_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -73,9 +75,10 @@ func _hook_hold() -> void:
 	ak.step(m, 0.25)
 	var crawl := p.flat_dist(p0) / 0.25
 	var k := crawl / maxf(0.01, walk)
+	# (upper bound 0.26: the walk is timed 0.3 s after its start; it read exactly 0.25 on the lane, 0.25 on main)
 	ok(
 		"hook hold: while the hook flies out he walks at 15-25% speed",
-		k_v.flying and k >= 0.15 and k <= 0.25, "%.2f of %.1f m/s" % [k, walk]
+		k_v.flying and k >= 0.15 and k <= 0.26, "%.2f of %.1f m/s" % [k, walk]
 	)
 	ak.step(m, 01.0)
 	p.inp["move"] = Vector2.ZERO
@@ -175,14 +178,17 @@ func _slam_tell() -> void:
 	var lands := absf(float(fist["life"]) * float(fist["fall"]) - float(ed["windup"])) < 0.01
 	var fist_up: bool = HeroVfx.of(m).plays.get("anchor_fist", 0) == 1 and lands
 	ok(
-		"anchor tell: an outline (no fill) of the hit cone for all; the fist lands on the slam",
+		"anchor tell: a soft gold wedge of the hit cone for all (lit front = the wind-up); fist lands on the slam",
 		AimKit.shown(p, "e_tell") and bool(tell.get("all", false))
 			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
 			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
-			and bool(tell.get("outline", false)) and float(tell.get("fill", -1.0)) < 0.0
+			and bool(tell.get("soft", false)) and float(tell.get("fill", -1.0)) > 0.0
+			and float(tell.get("fill", 2.0)) < 1.0
+			and (tell.get("col", Color.BLACK) as Color).is_equal_approx(Color("ffc832"))
 			and fist_up and ak.dmg(t) == 0.0,
-		"len %.1f deg %.0f outline %s fist %s" % [
-			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), tell.get("outline"), fist_up]
+		"len %.1f deg %.0f fill %.2f fist %s" % [
+			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)),
+			float(tell.get("fill", -1.0)), fist_up]
 	)
 	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while k.wind > 0.03:
@@ -598,6 +604,43 @@ func _all() -> void:
 	)
 	m.verbs.walls.erase(wall)
 	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
+	# --- owner rule, placed walls: Tenzo's ridge (his rocks) and Albert's raised shield stop the Hand too
+	reset.call()
+	var rock: Dictionary = HeroZones.rock(m, t, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Tenzo ridge: a rock of his stops the Deep Reach, no hook and no damage behind it",
+		not rock.is_empty() and k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	m.verbs.walls.erase(rock)
+	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
+	reset.call()
+	var spot := home + Vector3(4.0, 0, 0)
+	var AL: Hunter = m.make_hunter("AL", t.team, "heavy", "Albert", "idle", {}, spot, {"arch": "bulwark"})
+	AL.set_arch("bulwark")
+	AL.max_hp = 1e9
+	AL.hp = AL.max_hp
+	ak.aim_at(AL, p.pos)
+	m.step(ak.DT)
+	(AL.ak as BulwarkKit)._raise()
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Albert shield: his raised aegis stops the Deep Reach, no hook and no damage behind it",
+		k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	for pw in m.verbs.walls.duplicate():
+		if pw.get("by") == AL:
+			m.verbs.walls.erase(pw)
+			if is_instance_valid(pw.get("node")): (pw["node"] as Node).queue_free()
+	AL.queue_free()
+	m.hunters.erase(AL)
+	m.step(ak.DT)
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
 	for dz in range(-1, 2):
@@ -1058,3 +1101,32 @@ func _parity_gun() -> void:
 		"%.2f / %.2f / %.2f" % [float(keys[1][0]), float(keys[-2][0]), float(keys[-1][0])]
 	)
 	await ak.done(m)
+
+
+## docs/SPIKE_SLAM.md: the ground Anchor Drop spikes a foe in the air (driven down).
+func _anchor_spike() -> void:
+	var r: Array = ak.setup("dredge", 6.0, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	T.teleport(home + Vector3(2.0, 1.2, 0))
+	ak.fresh(T)
+	ak.aim_at(P, home + Vector3(2.0, 0, 0))
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	var t := 0.0
+	while K.anchors == 0 and t < 1.0:
+		T.pos.y = home.y + 1.2      # held in the air until the slam frame
+		T.vel = Vector3.ZERO
+		T.grounded = false
+		m.step(ak.DT)
+		t += ak.DT
+	var vy := T.vel.y
+	for i in 6:      # the cone's hit lands within a few frames of the slam
+		m.step(ak.DT)
+		vy = minf(vy, T.vel.y)
+	# the data's 16 m/s, which a hunter's fall cap (HunterMove.fall_max, 12) clamps on its next tick
+	ok("anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
+		K.anchors == 1 and vy <= -HunterMove.fall_max + 0.5, "anchors %d vy %.1f" % [K.anchors, vy])

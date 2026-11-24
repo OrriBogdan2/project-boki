@@ -436,6 +436,8 @@ func _clear_inp() -> void:
 		"util2",
 		"util3",
 		"util4",
+		"util5",
+		"util6",
 		"gear1",
 		"gear2",
 		"glide",

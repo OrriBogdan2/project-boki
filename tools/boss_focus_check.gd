@@ -89,6 +89,9 @@ func run(main: Node) -> void:
 	var went := false
 	p.reveal_t = 2.5  # (seen whichever way the bot faces: it only sees what is in front of it)
 	for i in int(2.0 / Match.DT):
+		# (the player keeps firing, so the bot sees them whichever way its roam faces: its roam goal is a random
+		# draw that camp spawns shift, and from behind a player 3 m away is outside the view cone)
+		p.reveal_t = 1.0
 		_step()
 		if b.ai["tgt"] == p:
 			went = true

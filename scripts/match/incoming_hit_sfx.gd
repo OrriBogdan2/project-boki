@@ -1,15 +1,13 @@
 class_name IncomingHitSfx
 extends RefCounted
-## The incoming-hit cue (docs/AUDIO.md): a hit on you plays hit_in from where it came from, on a placed Sfx
-## voice so it pans, and a hit from behind or off screen tells you which way to turn. A shot plays from where it
-## was fired (Match._shot_apply gives the hit its start as "from"): for a long shot the shooter may have moved
-## or be out of sight. Any other hit plays at the attacker. The level follows the damage, not the distance:
-## quiet for chip damage, loud for a heavy hit, and a shot from 40 m away is still heard. A flurry is one
-## voice: a hit soon after the cue started folds into it and raises it to the flurry's damage so far (a shotgun
-## volley sounds like its total); only a hit clearly louder on its own moves the cue to its source and restarts
-## it. It takes its voice from the Sfx pool, so the voice cap counts it (a keep cue, content/rules/sfx_voices.json)
-## and the downed muffle dulls it. Only hits on you from someone else: never your own hits, damage over time or
-## falls (Juice.hit), the Blight or a hazard.
+## The incoming-hit cue (docs/AUDIO.md): a hit on you plays hit_in from where it came from, on a panned Sfx voice
+## (Sfx.play_toward), so a hit from behind or off screen tells you which way to turn. A shot plays from where it
+## was fired (Match._shot_apply gives the hit its start as "from"): for a long shot the shooter may have moved or
+## be out of sight. Any other hit plays at the attacker. The level follows the damage, not the distance: quiet for
+## chip damage, loud for a heavy hit, and a shot from 40 m away is still heard. A flurry is one voice: a hit soon
+## after the cue started folds into it and raises it to the flurry's damage so far (a shotgun volley sounds like
+## its total); only a hit clearly louder on its own moves the cue to its source and restarts it. Only hits on you
+## from someone else: never your own hits, damage over time or falls (Juice.hit), the Blight or a hazard.
 
 const SOUND := "hit_in"
 const CHIP_DMG := 4.0        # damage at or under which the cue is at its quietest (an SMG or minigun round)
@@ -20,11 +18,10 @@ const HEAVY_PITCH := 0.85    # pitch of the heaviest cue (a chip hit plays at 1.
 const GAP_MS := 110          # ms after the cue starts in which further hits are the same flurry
 const LOUDER_DB := 1.5       # dB louder than the cue a hit inside the flurry must be on its own to move it
 
-static var _p = null                # the cue's voice
+static var _p: AudioStreamPlayer = null  # the cue's voice
 static var _st: AudioStream = null  # the take it plays: the voice is the cue's only while it still plays this
 static var _t0 := -1000000          # ms: when the flurry started
 static var _sum := 0.0              # the flurry's damage so far
-static var _at := Vector3.INF       # where the cue was last placed
 
 ## A hit of d on m.player (Juice.hit), from by, with the hit's options o.
 static func hit(m: Match, by: Ent, d: float, o: Dictionary) -> void:
@@ -43,12 +40,11 @@ static func hit(m: Match, by: Ent, d: float, o: Dictionary) -> void:
 		_t0 = now
 	if live:
 		_p.stop()       # the flurry stays one voice: the cue moves to this hit
-	_at = from
-	_p = Sfx.play_voice(SOUND, from, level(_sum), lerpf(1.0, HEAVY_PITCH, _weight(_sum)))
+	_p = Sfx.play_toward(SOUND, from, level(_sum), level(_sum), 1.0, lerpf(1.0, HEAVY_PITCH, _weight(_sum)))
 	_st = _p.stream if _p != null else null
 
 ## Where a hit on p came from, or null when there is no one to turn to (you, your own Boki, the Blight).
-static func source(p: Hunter, by: Ent, o: Dictionary):
+static func source(p: Hunter, by: Ent, o: Dictionary) -> Variant:
 	if by == null or by == p or by is Blight or (by is Kin and (by as Kin).owner_h == p):
 		return null
 	return o.get("from", by.pos)
@@ -65,9 +61,5 @@ static func sounding() -> bool:
 	return _p != null and is_instance_valid(_p) and _p.playing and _p.stream == _st
 
 ## The cue's voice while it sounds, else null (tooling: --incoming-hit-check).
-static func voice():
+static func voice() -> AudioStreamPlayer:
 	return _p if sounding() else null
-
-## Where the cue was last placed (tooling).
-static func cue_at() -> Vector3:
-	return _at

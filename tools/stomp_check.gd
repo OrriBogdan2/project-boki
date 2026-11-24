@@ -51,6 +51,8 @@ func run(mn: Node) -> void:
 		_row(row[0], row[1], true)
 	for row in _soft():
 		_row(row[0], row[1], false)
+	_prompt()
+	_heard()
 	_finish()
 	print("STOMPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -139,13 +141,58 @@ func _baseline() -> void:
 	ok(not s.stomp.is_empty() and int(s.stomp["hits"]) >= 1, "a stomp a second in is running with a foot down")
 	ok(_cues() == {"stomp_windup": 1}, "the stomp's start plays the wind-up once at the stomper (%s)" % [cues])
 
+## The stomp prompt (StompTarget): the one closest downed enemy in reach, nothing for a teammate's wisp.
+func _prompt() -> void:
+	_stage()
+	Life.end_stomp(m, s, "reset")
+	var at := o.pos
+	var g := func(dx: float) -> Vector3: return Vector3(at.x + dx, m.world.ground_at(at.x + dx, at.z), at.z)
+	s.teleport(g.call(0.6))
+	f.teleport(g.call(0.7))
+	ok(StompTarget.target(m, f) == null, "a teammate's downed wisp (%s) shows no stomp prompt" % o.pname)
+	ok(StompTarget.target(m, s) == o, "an enemy wisp in reach is the stomp target")
+	var pr := StompTarget.prompt(m, s, {})
+	var lab := String(pr.get("label", ""))
+	var short: bool = pr.get("kind", "") == "finish" and HoldPrompt.is_hold(lab) and lab.ends_with("to stomp")
+	ok(short, "its prompt is a short HoldPrompt hold (%s)" % lab)
+	ok(StompTarget.prompt(m, f, {"kind": "x"}).get("kind", "") == "x", "no target leaves the prompt as it was")
+	s.teleport(g.call(2.0))
+	ok(StompTarget.target(m, s) == null, "outside stomp reach (2 m) there is no prompt")
+	s.teleport(Vector3(at.x + 0.6, at.y + 2.0, at.z))
+	ok(StompTarget.target(m, s) == null, "a wisp 2 m above or below is out of reach")
+	m.knock(f, s, {})
+	s.teleport(g.call(0.6))
+	f.teleport(g.call(1.6))
+	ok(StompTarget.target(m, s) == o, "two downed foes: the closer one (0.6 m, not 1.0 m) is the target")
+	f.teleport(g.call(0.9))
+	ok(StompTarget.target(m, s) == f, "two downed foes: the one at 0.3 m wins even if it is later in the list")
+	o.remote = true
+	ok(StompTarget.target(m, s) == f, "a remote client's wisp is skipped")
+	o.remote = false
+
+
+## A break is heard (a crack, and a relief chime for the wisp's squad); a stomp that runs out has neither.
+func _heard() -> void:
+	for sname in ["stomp_crack", "stomp_relief"]:
+		Sfx.last_played.erase(sname)
+	_stage()
+	Sfx.listener = s.pos      # (the camera sets it in a game)
+	s.hurt(1.0, f, {"src": "abil", "stun": 0.7})
+	_step(0.25)
+	ok(Sfx.last_played.has("stomp_crack"), "a break cracks at the stomper")
+	ok(Sfx.last_played.has("stomp_relief"), "a break plays the relief chime for the wisp's squad")
+	ok(m.player.team == o.team, "(the wisp is the listener's own, so the chime is its)")
+
 ## Last, since it kills the wisp: with no CC the animation finishes.
 func _finish() -> void:
+	for sname in ["stomp_crack", "stomp_relief"]:
+		Sfx.last_played.erase(sname)
 	_stage()
 	_step(Life.R["stomp_time"])
 	ok(s.stomp.is_empty() and o.out, "with no CC the animation finishes and the wisp dies")
 	ok(_cues() == {"stomp_windup": 1, "stomp_finish": 1}, "the kill plays the finish thud once, no crack (%s)" % [cues])
 	Sfx.cue_log = null
+	ok(not Sfx.last_played.has("stomp_relief"), "a finished stomp makes no relief chime")
 
 func _row(what: String, cc: Callable, cancels: bool) -> void:
 	_stage()

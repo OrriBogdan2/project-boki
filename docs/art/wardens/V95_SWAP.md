@@ -286,6 +286,7 @@ It must exit 0 (no FAIL: black/see-inside px, enclosed holes, loose blobs or sha
 rest and 5% in idle; no lost tris or clips; no new open edges). Open the `<id>_review.png` rows (live | fix | overlay: red = only
 in the fix, blue = only in live, yellow = black, magenta = looking into the shell) and look at them. The check is unlit and
 front/side only: an in-engine shadow wedge (pip hit_f, 11-19) still needs the in-game shot.
+
 ## Rebake, 2026-11-18 (ext/rig-ship-1117): spec `own.rebake`, for a master whose atlas is a patchwork of tiny islands
 Tenzo's pick (1.07M tris, 8k paint) has an atlas of thousands of small islands. `keep_uv`'s 60k collapse carries those
 UVs along, so many triangles span several islands and draw as black and orange specks (torso, sarong, arms), and the
