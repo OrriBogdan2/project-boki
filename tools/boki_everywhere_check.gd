@@ -243,7 +243,8 @@ func _visitor_close(h, sp: String, path: String) -> void:
 		await _grab_window(path, 30)
 		main.get_tree().process_frame.disconnect(aim)
 		# the eye-level shot: the camera at the model's eye height (FRAME head), 0.7 m out in front, a little to the side
-		var rig := n.find_child("BokiRig", true, false) as Node3D
+		var brig := n.find_child("BokiRig", true, false)  # a Node: its parent holds the model frame
+		var rig: Node3D = brig.get_parent() as Node3D if brig else null
 		if rig and BokiRig.FRAME.has(sp):
 			var eye: Vector3 = rig.global_transform * (BokiRig.FRAME[sp]["head"] as Vector3)
 			var fwd: Vector3 = -rig.global_transform.basis.z.normalized()
