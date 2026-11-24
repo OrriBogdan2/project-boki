@@ -74,6 +74,28 @@ static func environment(p: Dictionary) -> Environment:
 	return e
 
 
+## A Boki card's stage (the dex, the portraits): its own clear-colour world, a flat ambient, a plain linear map.
+## The key, rim and ambient summed to ~1.3x a coat's paint, so pale coats went past white (a pink or cream Boki
+## came out white, its stripes faint). The exposure brings the lit side back to the Bokidex master's paint (one
+## scale: hue and saturation kept, the toon shading as it was); the simpler renderer draws ~4 L darker, so less cut.
+## (boki-rig-shots --washout --stage=dex, 16 species vs the atlas: mean dE 11.5 -> 9.3 desktop, 13.2 -> 13.1 web)
+const CARD_EXPOSURE := 0.7
+const CARD_EXPOSURE_COMPAT := 0.8
+
+
+static func card_environment(exposure := -1.0) -> Environment:
+	var e := Environment.new()
+	e.background_mode = Environment.BG_CLEAR_COLOR
+	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	e.ambient_light_color = Color("8a93b8")
+	e.ambient_light_energy = 0.95
+	e.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	if exposure < 0.0:
+		exposure = CARD_EXPOSURE if full_renderer() else CARD_EXPOSURE_COMPAT
+	e.tonemap_exposure = exposure
+	return e
+
+
 ## Home's grade: warm and soft. A little more bloom so lamps and sunlit edges glow, a light honey
 ## haze for depth, gentle contrast, colour kept rich (the opposite of the expedition's look).
 static func cozy(e: Environment) -> void:
