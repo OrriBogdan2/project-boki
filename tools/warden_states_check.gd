@@ -1,5 +1,6 @@
 extends RefCounted
-## The v95 Hunters through all 15 ANIM_COVERAGE states (warden_clips_check runs it): each Hunter's .glb is bound (every
+## The v95 Hunters through all 15 ANIM_COVERAGE states and the three crowd-control looks (stun, rooted, knock)
+## (warden_clips_check runs it): each Hunter's .glb is bound (every
 ## clip track names a bone of its skeleton; each walk/run clip keys every bone of the contract's limbs), and every state
 ## is driven through HunterAnim and the clip tree: the pose leaves the rest pose (no T-pose) and the legs move in
 ## a walk, a run and a strafe (no frozen bone). One line per Hunter, the failing states named; `--verbose-states`
@@ -25,6 +26,12 @@ const STATES := [
 	"crouch",
 	"upper"
 ]
+## The crowd-control looks: a stun's sway, a root's strain and the knocked-down beat's fall (0..1 through HunterFall).
+const CC_STATES := ["stun", "rooted", "knock"]
+const KNOCK_FRAMES := 28  # frames of the knocked-down beat (0.45 s at 60 fps)
+const GROUND_TOL := 0.1  # m: a stunned or rooted Hunter's soles stay this close to where they stand in the idle
+const LIE_MAX := 0.30  # m: a knock ending this far over the idle's soles is said (KNOCK-HEIGHT)
+const LIE_SINK := 0.20  # m: ... or this far under them (bone origins sit inside the body: a hint)
 const MOVE_FRAMES := 45  # frames a held state is sampled over
 const MOVE_MAX_S := 1.2  # s: the longest a kit move is sampled for
 const T_POSE_RAD := 0.035  # rad (2 deg): a state whose every contract bone stays this near rest is a T-pose
@@ -37,6 +44,8 @@ const RUN_V := 4.8  # m/s (the run in warden_clips_check)
 var bad := 0
 var verbose := false
 var idle_pose := {}  # bone -> its local rotation in the standing idle
+var soles := {}  # leg bone -> the sole point in that bone's rest frame
+var idle_low := 0.0  # m: the soles' height in the standing idle (the ground, as far as this model's soles go)
 
 
 func run(holder: Node3D) -> int:
@@ -55,12 +64,27 @@ func _hunter(holder: Node3D, id: String) -> void:
 	var notes: Array = _bind(sync.clips, sk) if sync.clips else []
 	var an := HunterAnim.new(m)
 	idle_pose.clear()
-	for st in STATES:
+	_find_soles(m, sk)
+	for st in STATES + CC_STATES:
 		var r := _state(an, sync, sk, art, st)
 		var line := (
-			"%s %s: %.1f deg off rest, %.1f off idle, movers turn %.1f"
-			% [art, st, rad_to_deg(r["rest"]), rad_to_deg(r["idle"]), rad_to_deg(r["moved"])]
+			"%s %s: %.1f deg off rest, %.1f off idle, movers turn %.1f, lowest %.2f m up"
+			% [art, st, rad_to_deg(r["rest"]), rad_to_deg(r["idle"]), rad_to_deg(r["moved"]), r["low"] - idle_low]
 		)
+		if st == "idle":
+			idle_low = r["low"]
+		var off: float = r["low"] - idle_low
+		if st in ["stun", "rooted"] and absf(off) > GROUND_TOL:
+			notes.append("%s soles %.2f m off the ground" % [st, off])
+		if st == "knock" and (off < -LIE_SINK or off > LIE_MAX):  # the clip's height, not a mapping: said only
+			print(
+				"KNOCK-HEIGHT ",
+				art,
+				(
+					": the knocked-down beat ends %.2f m %s the idle's soles (clip)"
+					% [absf(off), "above" if off > 0.0 else "below"]
+				)
+			)
 		if r["rest"] < T_POSE_RAD:
 			notes.append("%s T-pose" % st)
 		if st != "idle" and r["idle"] < T_POSE_RAD:
@@ -76,13 +100,14 @@ func _hunter(holder: Node3D, id: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 	print(
 		(
-			"CLIPS %s %s: %d tris, %s, %d clips, 15 states driven%s"
+			"CLIPS %s %s: %d tris, %s, %d clips, %d states driven%s"
 			% [
 				"ok  " if notes.is_empty() else "FAIL",
 				art,
 				tris,
 				WardenGlb.DIR + "/%s/%s.glb" % [art, art],
 				sync.clips.lib.get_animation_list().size() if sync.clips else 0,
+				STATES.size() + CC_STATES.size(),
 				"" if notes.is_empty() else ": " + "; ".join(notes)
 			]
 		)
@@ -127,11 +152,12 @@ func _bind(clips: WardenClips, sk: Skeleton3D) -> Array:
 func _state(an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, art: String, st: String) -> Dictionary:
 	var base := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
 	play(an, sync, base, 40)
-	var out := {"rest": 0.0, "idle": 0.0, "moved": 0.0}
+	var out := {"rest": 0.0, "idle": 0.0, "moved": 0.0, "low": 0.0}
 	var first := {}
 	var movers := ["hips"] if art in LEGLESS else WardenGlb.LEG_BONES
 	for f in frames(an, sync, art, st, base):
 		play(an, sync, f, 1)
+		out["low"] = _lowest(sk, st == "knock")
 		for b in WardenGlb.BONES:
 			var bi := WardenSkeleton.find(sk, b)
 			if b == "root" or bi < 0:
@@ -147,6 +173,32 @@ func _state(an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, art: String, s
 				out["moved"] = maxf(out["moved"], q.angle_to(first[b]))
 	play(an, sync, base, 30)
 	return out
+
+
+## The lowest sole's height over the ground (a lying body: also the lowest bone), m. `lowest` of the soles
+## stands for the foot that carries him; a stagger may lift the other.
+func _lowest(sk: Skeleton3D, lying: bool) -> float:
+	var low := INF
+	for b in soles:
+		var bi := WardenSkeleton.find(sk, String(b))
+		low = minf(low, (sk.global_transform * sk.get_bone_global_pose(bi) * (soles[b] as Vector3)).y)
+	if lying:
+		for b in ["hips", "head", "hand.L", "hand.R"]:
+			var bi := WardenSkeleton.find(sk, b)
+			low = minf(low, (sk.global_transform * sk.get_bone_global_pose(bi).origin).y)
+	return low
+
+
+## The soles: the model's lowest point at rest, as a point in each shin's rest frame.
+func _find_soles(m: Node3D, sk: Skeleton3D) -> void:
+	var sole_y := INF
+	soles.clear()
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var box := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
+		sole_y = minf(sole_y, box.position.y)
+	for b in ["shin.L", "shin.R"]:
+		var rest := sk.global_transform * sk.get_bone_global_rest(WardenSkeleton.find(sk, b))
+		soles[b] = rest.affine_inverse() * Vector3(rest.origin.x, sole_y, rest.origin.z)
 
 
 ## The state dicts of one state, a frame each: a held state's dict repeated, a kit move's clock stepped.
@@ -169,6 +221,17 @@ func frames(an: HunterAnim, sync: WardenGlb.Sync, art: String, st: String, base:
 			s.merge({"grounded": false, "gliding": true, "vel": Vector3(0, -1, -RUN_V)})
 		"stomp":
 			s["stomp"] = 0.5
+		"stun":
+			s["stun"] = true
+		"rooted":
+			s["rooted"] = true
+		"knock":
+			var out: Array = []
+			for i in KNOCK_FRAMES:
+				var f := s.duplicate()
+				f["fall"] = float(i) / (KNOCK_FRAMES - 1)
+				out.append(f)
+			return out
 		"crouch":
 			s["crouch"] = 1.0
 		"land":
