@@ -19,6 +19,8 @@ const WARN_S := 2.0  # s before the window ends: the soft two-note warning
 const WARN_GAP_S := 0.18  # s between the two notes
 const WARN_UP := 1.26  # x pitch of the second note (a rising third: "going soon")
 const WARN_DB := Vector2(-8.0, -20.0)  # dB of a note: your own Boki's (in your ear), then anyone else's (positional)
+const BURST_CUE := "wisp_burst"  # content/sfx/wisp.json: the bloom as the Boki bursts out of its wisp
+const FOLD_CUE := "wisp_fold"  # the inward swish as it folds back in
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 const CALL_AT := "summon_call_at"  # meta on the Hunter: match time of the last call or recall gesture
 const CALL_K := "summon_call_k"  # meta on the Hunter: which ("call" on the burst, "recall" on the fold)
@@ -237,11 +239,12 @@ func popped(to_wisp: bool, gesture := true) -> void:
 		_pop(true, false)
 		if gesture:
 			_call("call")
-		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
+		_pop_sfx(true)
 	elif _folding:
 		_drop_pop()
 	else:
 		_pop(false, true)
+		_pop_sfx(false)
 	_folding = false
 
 
@@ -262,6 +265,16 @@ func _pop(burst_v: bool, stowing: bool) -> void:
 	k.add_child(pop)
 	k.model.visible = false
 	pop.play(burst_v)
+
+
+## The pop's sounds, at the Boki on every game: the bloom of the burst with the species' own happy cry layered on
+## it (the shared one when it has none), or the inward swish of the fold. Sfx.MIN_GAP applies to each.
+func _pop_sfx(burst_v: bool) -> void:
+	if not burst_v:
+		k.m.sfx(FOLD_CUE, k.pos, -6.0)
+		return
+	k.m.sfx(BURST_CUE, k.pos, -6.0)
+	k.m.sfx(KinVoice.cue(k.species, "happy"), k.pos, -6.0, Unique.voice(k.rec))
 
 
 ## The burst ended: the walking Boki takes over. A fold holds its last pose until the wisp flag flips.
@@ -299,6 +312,7 @@ func render() -> void:
 	if shrink > 0.0 and not k.wisp and not _folding:
 		_folding = true
 		_pop(false, false)
+		_pop_sfx(false)
 		_call("recall")
 	elif _folding and shrink <= 0.0 and not k.wisp:
 		_folding = false  # left behind mid-fold: it stays the walking Boki

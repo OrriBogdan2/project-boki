@@ -2007,7 +2007,7 @@ func _kill_y() -> float:
 	if p_v.has_method("abyss_kill_y"):
 		return p_v.call("abyss_kill_y")
 	var fl: float = w.abyss_floor(p_v.pos.x, p_v.pos.z, p_v.last_gy)
-	return fl - (Hunter.ABYSS_GLIDE_ROOM if p_v.gliding and p_v.glide_fuel > 0.001 else 0.0)
+	return fl - (HunterFeel.abyss_glide_room if p_v.gliding and p_v.glide_fuel > 0.001 else 0.0)
 
 
 func _abyss_depths(g: Vector3, d: Vector2) -> void:
@@ -2484,9 +2484,9 @@ func _drop() -> void:
 	for i in 60:
 		p_v.inp["move"] = Vector2(1, 0)
 		m.step(DT)
-		if tvy < 0.0 and -p_v.vel.y >= 0.9 * Hunter.DIVE_FALL:
+		if tvy < 0.0 and -p_v.vel.y >= 0.9 * HunterFeel.dive_fall:
 			tvy = (i + 1) * DT
-		if tst < 0.0 and p_v.vel.x >= 0.9 * Hunter.DIVE_SPEED:
+		if tst < 0.0 and p_v.vel.x >= 0.9 * HunterFeel.dive_speed:
 			tst = (i + 1) * DT
 		if not p_v.diving:
 			break
@@ -2498,7 +2498,7 @@ func _drop() -> void:
 	p_v.diving = true
 	p_v.gliding = true
 	p_v.glide_k = 1.0
-	p_v.vel = Vector3(0, -Hunter.DIVE_FALL, 0)
+	p_v.vel = Vector3(0, -HunterFeel.dive_fall, 0)
 	_steps(5)
 	p_v.inp["jump"] = true
 	var fd := -1
@@ -2507,7 +2507,7 @@ func _drop() -> void:
 		m.step(DT)
 		if fd < 0 and not p_v.diving:
 			fd = i + 1
-		if ts < 0.0 and not p_v.diving and absf(-p_v.vel.y - Hunter.DROP_FALL) <= 0.1 * Hunter.DROP_FALL:
+		if ts < 0.0 and not p_v.diving and absf(-p_v.vel.y - HunterFeel.drop_fall) <= 0.1 * HunterFeel.drop_fall:
 			ts = (i + 1) * DT
 	rec("drop_deploy_frames", fd)
 	rec("drop_deploy_settle_t", ts if ts > 0.0 else 9.0)
@@ -2518,7 +2518,7 @@ func _drop() -> void:
 	for i in 60:
 		p_v.inp["move"] = Vector2(0, 1)
 		m.step(DT)
-		if tg < 0.0 and p_v.vel.z >= 0.9 * Hunter.DROP_SPEED:
+		if tg < 0.0 and p_v.vel.z >= 0.9 * HunterFeel.drop_speed:
 			tg = (i + 1) * DT
 	rec("drop_glide_steer_t", tg if tg > 0.0 else 9.0)
 	# land and move off straight away
@@ -2526,7 +2526,7 @@ func _drop() -> void:
 	p_v.dropping = true
 	p_v.diving = false
 	p_v.gliding = true
-	p_v.vel = Vector3(0, -Hunter.DROP_FALL, 0)
+	p_v.vel = Vector3(0, -HunterFeel.drop_fall, 0)
 	var landed := false
 	for i in 120:
 		m.step(DT)
