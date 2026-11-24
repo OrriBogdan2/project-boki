@@ -506,8 +506,8 @@ func _log(
 ## The Summon press itself (KinSummon.press, as the match's fixed step does), logged with why it failed.
 func _summon_now(me: Hunter, t: float) -> void:
 	var k_v: Kin = me.kin
-	var why := "kin=%s wisp=%s cd=%.1f out=%s" % [
-		k_v != null, k_v != null and k_v.wisp, k_v.summon.cd if k_v != null and k_v.summon != null else -1.0, me.out]
+	var cd_v := k_v.summon.cd if k_v != null and k_v.summon != null else -1.0
+	var why := "kin=%s wisp=%s cd=%.1f out=%s" % [k_v != null, k_v != null and k_v.wisp, cd_v, me.out]
 	if k_v != null and k_v.summon != null and k_v.wisp:
 		k_v.summon.cd = 0.0  # (a fresh take: the wisp is rested)
 	print("PITCH_SUMMON t=%.2f ok=%s %s" % [t, KinSummon.press(me), why])
