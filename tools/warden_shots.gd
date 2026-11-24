@@ -23,6 +23,7 @@ var holder: Node3D
 var cam: Camera3D
 var anims: Array = []
 var tree: SceneTree
+var fight := {}               # state merged into every settle frame: _fight_faces' "hit 2.5 s ago"
 var close_cfg := {}           # a Warden's warden_look "closeup" {fov, up}: a wider head shot (Motley's raised orb)
 
 func run(main: Node) -> void:
@@ -90,6 +91,8 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	var face := await _head(row[0])
 	face.save_png(dir.path_join("closeup_front.png"))
 	caps.append("closeup_front.png: %s head and shoulders, from the front" % title)
+	if WardenClips.data(WardenGlb.art(id)).get("mood", {}).has("tex_faces"):
+		await _fight_faces(row, dir, caps, title)
 	# 3. the concept sheet beside the model
 	var sheet_path := sheets.path_join(id + ".png")
 	if sheets != "" and FileAccess.file_exists(sheet_path):
@@ -125,6 +128,21 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	f.store_string("\n".join(caps) + "\n")
 	f.close()
 
+## A Hunter whose face swaps in a fight (WardenMood "tex_faces": Breaker's porthole): the front close-up and the
+## match-camera turnaround again, as if hit 2.5 s ago (past the flinch, inside combat_t).
+func _fight_faces(row: Array, dir: String, caps: Array, title: String) -> void:
+	fight = {"hit_t": 2.5}
+	await _settle(10)
+	var glare := await _head(row[0])
+	glare.save_png(dir.path_join("closeup_front_fight.png"))
+	caps.append("closeup_front_fight.png: %s head and shoulders, from the front, in a fight" % title)
+	var game := await _game_strip(row)
+	game.save_png(dir.path_join("turnaround_game_fight.png"))
+	caps.append("turnaround_game_fight.png: turnaround_game.png in a fight (hit 2.5 s ago)")
+	fight = {}
+	await _settle(10)
+
+
 func _row(id: String, count: int) -> Array:
 	var out: Array = []
 	var cls := Arch.weight(id)
@@ -145,10 +163,9 @@ func _settle(frames: int, animate := true) -> void:
 	for k in frames:
 		if animate:
 			for a in anims:
-				(a[0] as HunterAnim).update(
-					1.0 / 60.0,
-					{"fired": 99.0, "face": (a[1] as Node3D).rotation.y, "grounded": true}
-				)
+				var s := {"fired": 99.0, "face": (a[1] as Node3D).rotation.y, "grounded": true}
+				s.merge(fight, true)
+				(a[0] as HunterAnim).update(1.0 / 60.0, s)
 		await tree.process_frame
 
 func _grab() -> Image:
