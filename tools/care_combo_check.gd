@@ -998,12 +998,13 @@ func tender() -> void:
 	ok(
 			"mm LMB: looks are pooled (no new nodes per ember)", K.lk().made - made0 <= 3,
 			"made %d -> %d" % [made0, K.lk().made])
-	# the ramp, footage 64 -> 93 (the data has no number): +45.3% at the plateau, its numbers white then yellow
+	# the ramp: footage 64 -> 93 was +45.3% on the 8 ember; ext/ttk-fix-1124 cut the ember to 6 and kept Kindle's flat +0.72 a
+	# stack on purpose (docs/TTK.md, Meeko), so the plateau is +60% of the ember now. Its numbers go white then yellow.
 	var res: Dictionary = Arch.def("tender")["resource"]
 	var ramp := float(res["per_stack"]) * float(res["max"]) / float(P.wpn["dmg"])
 	ok(
-			"mm passive: Kindle ramps embers +45% at 5 stacks (footage 64 -> 93)",
-			absf(ramp - (93.0 / 64.0 - 1.0)) < 0.03, "+%.1f%%" % (ramp * 100.0))
+			"mm passive: Kindle ramps embers +60% at 5 stacks (flat +0.72 a stack on the 6 ember, docs/TTK.md)",
+			absf(ramp - 0.6) < 0.03, "+%.1f%%" % (ramp * 100.0))
 	var shot := {"src": "shot"}
 	K.kind.clear()
 	K.add_kindle(T, int(res["max"]) - 1)
