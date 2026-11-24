@@ -18,8 +18,8 @@ LUM = np.array([0.3, 0.59, 0.11])
 BROW_DARK = 0.55  # a brow is its patch of coat, darker
 # id: "height" (game m, before SCALE) and "tris" of the body; "x", "y", "z": (proxy, scan) landmark pairs, x for the
 # right side only; "merge": proxy bones whose part the scan has fused into another bone's; "drop": proxy pieces the
-# scan has no shape for; "eye_c", "eye_r", "eye_yaw", "face": the Boki face on the scan's head; "sat", "gain": the
-# texture's grade; "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "iris": hex,
+# scan has no shape for; "eye_c", "eye_r", "eye_yaw", "face": the Boki face on the scan's head; "sat", "gain", "tint":
+# the texture's grade; "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "iris": hex,
 # when the art's eye colour is not the proxy's; "cover": eye
 # radii round each Boki eye inside which the scan's own painted eye is painted out (when it shows beside); "sink": how
 # far the scan stands above its lowest point (a hanging tail), "mid": how far right of its bounds' middle the
@@ -246,7 +246,7 @@ AUTO = {  # id: overrides on AUTO_BASE
     "tuatrune": BORROWED,
     "velvorm": BORROWED,
     "casquebill": BORROWED,
-    "basaltoad": {**BORROWED, "sat": 0.4, "gain": 0.9},  # lit game shot read orange (S 0.49 V 0.87 vs the 2D 0.34 0.70)
+    "basaltoad": {**BORROWED, "sat": 0.2, "gain": 1.2, "tint": (1.03, 1.0, 0.9)},  # lit toad read red-brown, 2D is tan
     "cindowary": {**BORROWED, "sat": 0.55},  # lit leather read pink (sat 0.68 vs the 2D 0.48)
     "caecilith": {},
     "glintmole": {},
@@ -271,12 +271,13 @@ def run_dir(species):
     return dex if os.path.isdir(dex) else os.path.join(ROOT, species, "run1")
 
 
-def grade(col, sat, gain):
+def grade(col, sat, gain, tint=(1.0, 1.0, 1.0)):
     """sRGB colours pulled toward their own grey (in linear light, as the toon shader's `desat` does) and scaled:
-    the game's warm light and tonemap push a painted texture's mid colours to pure hues."""
+    the game's warm light and tonemap push a painted texture's mid colours to pure hues. `tint`: linear RGB gains
+    (a white balance) for a scan whose hue is off the 2D art's, which pulling toward grey cannot move."""
     lin = np.where(col <= 0.04045, col / 12.92, ((col + 0.055) / 1.055) ** 2.4)
     lum = (lin @ LUM)[:, None]
-    lin = np.clip((lum + (lin - lum) * sat) * gain, 0, 1)
+    lin = np.clip((lum + (lin - lum) * sat) * gain * np.asarray(tint), 0, 1)
     return np.where(lin <= 0.0031308, lin * 12.92, 1.055 * lin ** (1 / 2.4) - 0.055)
 
 
@@ -395,8 +396,11 @@ class Scan:
                 centre + (right * math.cos(a) * self.EYE_R[0] + up * math.sin(a) * self.EYE_R[1]) * ring
                 for a in np.linspace(0, math.tau, 12, endpoint=False)
             ]
-        col = grade(self.model.colour(np.array(pts)), self._s.get("sat", 1.0), self._s.get("gain", 1.0))
+        col = self._grade(self.model.colour(np.array(pts)))
         return np.median(col, 0)
+
+    def _grade(self, col):
+        return grade(col, self._s.get("sat", 1.0), self._s.get("gain", 1.0), self._s.get("tint", (1.0, 1.0, 1.0)))
 
     def _deepest(self):
         """The point furthest inside the scan: an unused tool collapses there, so its ink shell never shows."""
@@ -451,7 +455,7 @@ class Scan:
     def paint_piece(self, pc, q, nn, _prim):
         if pc.name != "body":
             return self._mods[1].paint_piece(pc, self.fit.back(q), nn, self._proxy)
-        return grade(self.model.colour(self._off_eyes(q)), self._s.get("sat", 1.0), self._s.get("gain", 1.0))
+        return self._grade(self.model.colour(self._off_eyes(q)))
 
     def _off_eyes(self, q):
         """`q` with the points under a Boki eye moved out to the ring "cover" eye radii round it (met from the front,
