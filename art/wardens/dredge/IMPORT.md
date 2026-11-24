@@ -1,5 +1,10 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
+**Junk ball on the hips (2026-11-19, ext/hunter-shred-1119):** the `ball` bone hung off `root`, which a run barely pitches, while the hips lean forward up
+to 40 degrees: at a run the ball floated alone above and behind him (owner: "a dark faceted ball floating above his head"). It is a child of
+`hips` now (`extra_bones` "ball": "hips" in warden_anim/dredge.json), same rest world pose; the lunge, lunge_out and pounce keys were
+converted into the hips' space, so the barge roll looks the same (`tools/art1/grimble_ball_on_hips.py`, run on the glb with no Blender).
+
 **No floor puddle (2026-11-17, ext/grimble-puddle-1117):** the owner: "we can remove grimbles goo puddle if it helps.
 can just have it drip off him a bit on that arm". The puddle's vertices were split between `hook` and `foot.R`, so it tore into
 dark spikes when the arm moved. The master is now the 11-17 gun-hand pick minus the puddle
