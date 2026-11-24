@@ -277,8 +277,6 @@ func _dress_volley() -> void:
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
 		return
-	if not pull.is_empty():
-		HeroVfx.of(m).hold(h, "reel")         # grounded while he reels: a brass ring at his feet
 	if barge_t > 0.0:
 		barge_t -= dt
 		_barge_trail(dt)

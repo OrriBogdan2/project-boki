@@ -122,16 +122,20 @@ func sector(ctr: Vector2, r0: float, r1: float, a0: float, a1: float, c0: Color,
 	if c1.a < 0.0: c1 = c0
 	var segs := clampi(int(r1 * absf(a1 - a0) / 0.5), 8, 48)
 	var rings := maxi(1, int(ceil((r1 - r0) / (STEP * 1.5))))
+	var dirs := PackedVector2Array()      # the unit vector at each angle step, the same for every ring
+	dirs.resize(segs + 1)
+	for i in segs + 1:
+		var t := lerpf(a0, a1, float(i) / segs)
+		dirs[i] = Vector2(cos(t), sin(t))
 	for j in rings:
 		var ra := lerpf(r0, r1, float(j) / rings); var rb := lerpf(r0, r1, float(j + 1) / rings)
 		var ca := c0.lerp(c1, float(j) / rings); var cb := c0.lerp(c1, float(j + 1) / rings)
-		var e0 := Vector2(cos(a0), sin(a0))
+		var e0 := dirs[0]
 		var pc := _p(ctr) if ra < 0.001 else Vector3.ZERO
 		var pa0 := pc if ra < 0.001 else _p(ctr + e0 * ra)
 		var pb0 := _p(ctr + e0 * rb)
 		for i in segs:
-			var t1 := lerpf(a0, a1, float(i + 1) / segs)
-			var e1 := Vector2(cos(t1), sin(t1))
+			var e1 := dirs[i + 1]
 			var pb1 := _p(ctr + e1 * rb)
 			if ra < 0.001:
 				v.append(pc); v.append(pb0); v.append(pb1)
