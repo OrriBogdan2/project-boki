@@ -964,8 +964,9 @@ func _solos() -> void:
 	Sfx.last_played.clear()
 	m.squad_ping(P, P.pos + Vector3(5, 0, 0), true)
 	m.hud.mates.track(m.hud, P, 0.1)
+	var warns := int(Sfx.cue_plays.get("knock_warn", 0))  # (a squad cue: its own voice, counted in cue_plays)
 	m.knock(rivals[1], rivals[0], {})
 	_step(m, 0.5)
 	m.hud.mates.track(m.hud, P, 0.1)
-	ok(Sfx.last_played.has("ping") and Sfx.last_played.has("warn"),
-			"...with a squadmate the ping and 'teammate down' sound (%s)" % [Sfx.last_played.keys()])
+	ok(Sfx.last_played.has("ping") and int(Sfx.cue_plays.get("knock_warn", 0)) > warns,
+			"...with a squadmate the ping and 'teammate down' knock_warn (%s)" % [Sfx.last_played.keys()])
