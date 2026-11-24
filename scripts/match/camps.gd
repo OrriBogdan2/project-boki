@@ -43,7 +43,11 @@ func spawn_all() -> void:
 			"cleared_at": -1e9,
 			"xp": 0.0
 		}
-		cp["mobs"] = _stand(cp)
+		cp["mobs"] = []
+		cp["xp"] = 0.0
+		for kind in comp:
+			await m._slice()  # (a kind's first mob builds its model: one a frame behind the loading screen)
+			cp["mobs"].append(_stand_one(cp, String(kind)))
 		list.append(cp)
 
 
@@ -115,23 +119,28 @@ func _comp(c: Dictionary, dice: RandomNumberGenerator) -> Array:
 ## Spawn the camp's monsters, each a dice roll from its centre onto open ground, and total their XP.
 func _stand(cp: Dictionary) -> Array:
 	cp["xp"] = 0.0
+	var made: Array = []
+	for kind in cp["comp"]:
+		made.append(_stand_one(cp, String(kind)))
+	return made
+
+
+## One monster of camp cp put up near its spot (counted into the camp's xp).
+func _stand_one(cp: Dictionary, kind: String) -> Mob:
 	var p: Vector3 = cp["pos"]
 	var dice: RandomNumberGenerator = cp["dice"]
 	var spread := float(cfg["spread"])
-	var made: Array = []
-	for kind in cp["comp"]:
-		var q := p
-		for _t in 20:
-			var cand := p + Vector3(dice.randf_range(-spread, spread), 0, dice.randf_range(-spread, spread))
-			if not m.world.is_void(cand.x, cand.z) and not m.world.is_block(cand.x, cand.z):
-				q = Vector3(cand.x, m.world.ground_at(cand.x, cand.z), cand.z)
-				break
-		var mb := m.spawn_mob(String(kind), q)
-		if m.biomes:
-			m.biomes.dress(mb, dice)
-		made.append(mb)
-		cp["xp"] += mb.max_hp * KillXp.XP_PER_HP
-	return made
+	var q := p
+	for _t in 20:
+		var cand := p + Vector3(dice.randf_range(-spread, spread), 0, dice.randf_range(-spread, spread))
+		if not m.world.is_void(cand.x, cand.z) and not m.world.is_block(cand.x, cand.z):
+			q = Vector3(cand.x, m.world.ground_at(cand.x, cand.z), cand.z)
+			break
+	var mb := m.spawn_mob(kind, q)
+	if m.biomes:
+		m.biomes.dress(mb, dice)
+	cp["xp"] += mb.max_hp * KillXp.XP_PER_HP
+	return mb
 
 
 ## Has camp i (its camp_spots index) no monster standing? (SpawnPlan.free_guarded)

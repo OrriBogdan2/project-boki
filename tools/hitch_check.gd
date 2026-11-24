@@ -407,6 +407,20 @@ func _finish_load() -> void:
 		worst_cpu = maxf(worst_cpu, cpu)
 		if (cpu if cpu_only else float(f["wall"])) > budget: over += 1
 	lines.append("LOAD total %.0f ms over %d frames; longest frame %.0f ms (%.0f ms outside drawing); %d frames over %.0f ms%s" % [load_ms, fl.size(), worst, worst_cpu, over, budget, " (judged outside drawing)" if cpu_only else ""])
+	# the slow frames by the stage shown, and how many of each were drawing (shader compiles, uploads: the GPU's,
+	# a cold cache) rather than the build's own work (item 33: the build's frames are what slicing can fix)
+	var by_stage := {}
+	for f in fl:
+		if (float(f["cpu"]) if cpu_only else float(f["wall"])) <= budget:
+			continue
+		var stg := String(f["stage"]) if String(f["stage"]) != "" else "-"
+		var cnt: Array = by_stage.get(stg, [0, 0])
+		cnt[0] += 1
+		if float(f["cpu"]) <= budget: cnt[1] += 1
+		by_stage[stg] = cnt
+	if not by_stage.is_empty():
+		lines.append("LOAD slow frames by stage (drawing-bound of them): " + ", ".join(by_stage.keys().map(
+				func(k): return "%s %d (%d)" % [k, by_stage[k][0], by_stage[k][1]])))
 	# the spinner: frames the loading screen was up on, and how many of them drew it
 	var up := 0
 	var drawn := 0
