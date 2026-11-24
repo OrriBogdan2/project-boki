@@ -45,7 +45,9 @@ static func open(h, here: String) -> void:
 			var pick := func(): h.hway.hop(id)     # refused: the knock and what it still needs
 			if ready:
 				pick = func(): h.hway.attune(id)
-			row.add_child(_card(String(z["name"]), UI.FAINT, lines, pick, "Wake it" if ready else "Locked", true))
+			var card: Control = _card(String(z["name"]), UI.FAINT, lines, pick, "Wake it" if ready else "Locked", true)
+			card.tooltip_text = "\n".join(key_hints(id))  # where each key comes from, off the one-line card
+			row.add_child(card)
 
 ## The hub's games board: which game each zone hosts and whether it is open, this week's Dash twist and
 ## the showcase wall's winners.

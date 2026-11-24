@@ -58,12 +58,16 @@ func run(progress := Callable()) -> void:
 	var t0 := Time.get_ticks_msec()
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
-	var mob_warm := _mob_stand_ins()
+	var later: Array = []      # (stand-ins for the planning phase: _sweep_later)
+	var mob_warm := _mob_stand_ins(later)
 	var aim_warm := _aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
 	var batched: bool = await _batches(batch_cb, seen)
 	var t_first := Time.get_ticks_msec()
 	if is_instance_valid(aim_warm): aim_warm.queue_free()
-	mob_warm.queue_free()
+	# the mob and shader stand-ins stay, out of sight and still: freeing them cost the first view frame 0.5-0.7 s
+	# (rp2g, cold cache), and their shaders stay built for the mobs and effects that use them later
+	mob_warm.visible = false
+	mob_warm.process_mode = Node.PROCESS_MODE_DISABLED
 	if not batched:
 		return
 	var shown: Array = []
@@ -157,6 +161,7 @@ func run(progress := Callable()) -> void:
 			WarmStamp.save(seen)
 	await DashPace.rehearse(m)
 	PerfLog.skip()
+	if not later.is_empty(): _sweep(m, later)      # (not awaited: it runs on into the planning phase)
 
 ## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
 ## cheap and shrink when one costs more than FRAME_MS over a plain frame (a first draw is
@@ -172,67 +177,128 @@ const FRAME_MS := 45.0
 ## A mob kind's model is built when the first one spawns: a fight's pack mid-play compiled its materials
 ## then (a 400 ms frame on the bench at t=8 s). One model of each kind of roaming mob not in the match yet,
 ## out of sight below the map, so its materials join the stand-ins. (Bosses and wards are placed at build.)
-## Also one quad per kit effect shader (below).
-func _mob_stand_ins() -> Node3D:
-	var have := {}
-	for mb in m.mobs:
-		if is_instance_valid(mb): have[(mb as Mob).mkind] = true
+## Also the kit effect and shader file stand-ins (_makers). Those go in `later` instead when the planning phase
+## builds them (_sweep_later).
+func _mob_stand_ins(later: Array) -> Node3D:
 	var holder := Node3D.new()
 	holder.name = "WarmMobs"
 	m.add_child(holder)
 	holder.position = Vector3(0, MOB_DEPTH, 0)
-	for k in Data.MOBS:
-		var md: Dictionary = Data.MOBS[k]
-		if have.has(k) or md.get("boss", false) or md.get("ward", false):
-			continue
-		holder.add_child(Models.mob(k))
-	# and the kit effect libraries' own shaders, which a kit's first cast built mid-play (LDFx on the bench's
-	# ride, a 200 ms frame; CareLook, HeroVfx a second after landing); DJFx draws its own (DashPace.rehearse).
-	# A library's particle shaders run in an emitter drawn with each of its spatial shaders.
-	for lib: Script in [LDFx, VVFx, CareLook, UltLook, HeroVfx]:
-		var spatial: Array[Shader] = []
-		var particles: Array[Shader] = []
-		for v in lib.get_script_constant_map().values():
-			if v is Shader and (v as Shader).get_mode() == Shader.MODE_SPATIAL: spatial.append(v)
-			elif v is Shader and (v as Shader).get_mode() == Shader.MODE_PARTICLES: particles.append(v)
-		for sh in spatial:
-			var mi := MeshInstance3D.new()
-			mi.mesh = _fx_quad(sh)
-			holder.add_child(mi)
-			for ps in particles:
-				var p := GPUParticles3D.new()
-				p.amount = 1
-				p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
-				var pm := ShaderMaterial.new()
-				pm.shader = ps
-				p.process_material = pm
-				p.draw_pass_1 = _fx_quad(sh)
-				holder.add_child(p)
-	# and every shader file on a quad (a particle one in an emitter): a material made only when first needed (the
-	# last-alive aura, a downed hunter's wisp, a kit's ice strip) compiled its shader mid-match. Those the match
-	# already has share their key and add nothing; a later launch's stamp skips the rest.
-	for f in DirAccess.get_files_at("res://shaders"):
-		var fn := f.trim_suffix(".remap")
-		var sh: Shader = load("res://shaders/" + fn) as Shader if fn.ends_with(".gdshader") else null
-		if sh == null:
-			continue
-		if sh.get_mode() == Shader.MODE_SPATIAL:
-			var mi := MeshInstance3D.new()
-			mi.mesh = _fx_quad(sh)
-			holder.add_child(mi)
-		elif sh.get_mode() == Shader.MODE_PARTICLES:
-			var p := GPUParticles3D.new()
-			p.amount = 1
-			p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
-			var pm := ShaderMaterial.new()
-			pm.shader = sh
-			p.process_material = pm
-			p.draw_pass_1 = QuadMesh.new()
-			holder.add_child(p)
+	var makers := _makers()
+	if _sweep_later():
+		later.append_array(makers)
+	else:
+		for mk: Callable in makers:
+			var nd: Node3D = mk.call()
+			if nd: holder.add_child(nd)
 	# and a squad's drop rocket (built at launch, in the ride), and the soft dot's particles
 	holder.add_child(DropRocket.model(Color.WHITE))
 	holder.add_child(_dot_stand_in())
 	return holder
+
+## What _mob_stand_ins makes, one Callable (-> Node3D or null) each: a model of each roaming mob kind not in the
+## match yet, the kit effect libraries' own shaders, which a kit's first cast built mid-play (LDFx on the bench's
+## ride, a 200 ms frame; CareLook, HeroVfx a second after landing; DJFx draws its own, DashPace.rehearse; a
+## library's particle shaders run in an emitter drawn with each of its spatial shaders), and every shader file on
+## a quad (a particle one in an emitter): a material made only when first needed (the last-alive aura, a downed
+## hunter's wisp, a kit's ice strip) compiled its shader mid-match. Those the match already has share their key
+## and add nothing; a later launch's stamp skips the rest.
+func _makers() -> Array:
+	var out: Array = []
+	var have := {}
+	for mb in m.mobs:
+		if is_instance_valid(mb): have[(mb as Mob).mkind] = true
+	for k in Data.MOBS:
+		var md: Dictionary = Data.MOBS[k]
+		if have.has(k) or md.get("boss", false) or md.get("ward", false):
+			continue
+		out.append(func() -> Node3D: return Models.mob(k))
+	for lib: Script in [LDFx, VVFx, CareLook, UltLook, HeroVfx]:
+		out.append(func() -> Node3D: return _lib_quads(lib))
+	for fn in _shader_files():
+		out.append(func() -> Node3D: return _shader_quad(fn))
+	return out
+
+## A kit effect library's spatial shaders on quads, each with an emitter per particle shader of the library.
+static func _lib_quads(lib: Script) -> Node3D:
+	var box := Node3D.new()
+	var spatial: Array[Shader] = []
+	var particles: Array[Shader] = []
+	for v in lib.get_script_constant_map().values():
+		if v is Shader and (v as Shader).get_mode() == Shader.MODE_SPATIAL: spatial.append(v)
+		elif v is Shader and (v as Shader).get_mode() == Shader.MODE_PARTICLES: particles.append(v)
+	for sh in spatial:
+		var mi := MeshInstance3D.new()
+		mi.mesh = _fx_quad(sh)
+		box.add_child(mi)
+		for ps in particles:
+			var p := GPUParticles3D.new()
+			p.amount = 1
+			p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
+			var pm := ShaderMaterial.new()
+			pm.shader = ps
+			p.process_material = pm
+			p.draw_pass_1 = _fx_quad(sh)
+			box.add_child(p)
+	return box
+
+## The shader files of res://shaders (their imported names).
+static func _shader_files() -> PackedStringArray:
+	var out := PackedStringArray()
+	for f in DirAccess.get_files_at("res://shaders"):
+		var fn := f.trim_suffix(".remap")
+		if fn.ends_with(".gdshader"): out.append(fn)
+	return out
+
+## A stand-in for one shader file: a quad with it (a particle shader in an emitter), or null.
+static func _shader_quad(fn: String) -> Node3D:
+	var sh := load("res://shaders/" + fn) as Shader
+	if sh == null:
+		return null
+	if sh.get_mode() == Shader.MODE_SPATIAL:
+		var mi := MeshInstance3D.new()
+		mi.mesh = _fx_quad(sh)
+		return mi
+	if sh.get_mode() == Shader.MODE_PARTICLES:
+		var p := GPUParticles3D.new()
+		p.amount = 1
+		p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
+		var pm := ShaderMaterial.new()
+		pm.shader = sh
+		p.process_material = pm
+		p.draw_pass_1 = QuadMesh.new()
+		return p
+	return null
+
+## True when _makers' stand-ins wait for the planning phase. On Forward+ and Mobile a new shader compiles on the
+## first frame that draws 3D after its material exists, seen or not: under the loading screen the mob models and
+## the ~80 shader files were two frames of 0.5-1 s (rp2g, cold cache), for mobs that spawn after landing and
+## effects a match shows late or never. A match that opens with a planning phase (DropSquad) builds them there
+## instead, a few a frame, before anyone can land, fight or cast. Compatibility compiles a shader only when it
+## draws, so there they stay among the stand-ins.
+func _sweep_later() -> bool:
+	return RenderingServer.get_current_rendering_driver_name() != "opengl3" and m.skydrop != null \
+			and m.skydrop.planning
+
+const SWEEP_PER_FRAME := 2
+
+## The stand-ins _sweep_later held back, SWEEP_PER_FRAME a frame, below the map, kept and still.
+static func _sweep(mt: Match, makers: Array) -> void:
+	var holder := Node3D.new()
+	holder.name = "WarmLater"
+	holder.process_mode = Node.PROCESS_MODE_DISABLED
+	mt.add_child(holder)
+	holder.position = Vector3(0, MOB_DEPTH, 0)
+	var t0 := Time.get_ticks_msec()
+	for i in makers.size():
+		if i > 0 and i % SWEEP_PER_FRAME == 0:
+			await mt.get_tree().process_frame
+			if not is_instance_valid(mt) or not mt.is_inside_tree():
+				return
+		var nd: Node3D = (makers[i] as Callable).call()
+		if nd: holder.add_child(nd)
+	PerfLog.note("warm-up: %d stand-ins built in the planning phase over %d ms%s" % [makers.size(),
+			Time.get_ticks_msec() - t0, "" if mt.skydrop == null or mt.skydrop.planning else " (past its end)"])
 
 ## Particles drawn with FxDot's material (a Boki wisp's trail): its shader is made again with other code when the
 ## settings go low (Settings.lite), so after a quality step the redraw needs a new one of these.
@@ -244,7 +310,7 @@ func _dot_stand_in() -> CPUParticles3D:
 	p.material_override = FxDot.material()
 	return p
 
-func _fx_quad(sh: Shader) -> QuadMesh:
+static func _fx_quad(sh: Shader) -> QuadMesh:
 	var q := QuadMesh.new()
 	var mt := ShaderMaterial.new()
 	mt.shader = sh
@@ -254,7 +320,7 @@ func _fx_quad(sh: Shader) -> QuadMesh:
 const MOB_DEPTH := -600.0      # m: under every island and the void floor, so no view draws them
 
 ## The aim kit (AimKit: every kit's aim lines, rings and the Hem draw's fill line and perfect circle) draws one
-## ImmediateMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
+## ArrayMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
 ## aim after landing compiled its shader mid-play. A one-triangle mesh with the same material and vertex
 ## format stands in for it for the warm-up.
 func _aim_stand_in() -> MeshInstance3D:
@@ -313,8 +379,11 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	# (only the Compatibility renderer compiles a variant per light setup; Forward+ and Mobile shade lights from
 	# clusters in one shader, so there one setup is enough: a quarter of the frames a batch takes)
 	var setups := [[false, false]]
+	# (and there a batch's first frame compiles all it needs: its second added no pipeline on rp2g)
+	var frames := 1
 	if RenderingServer.get_current_rendering_driver_name() == "opengl3":
 		setups = [[false, false], [true, false], [false, true], [true, true]]
+		frames = 2
 	var n := BATCH
 	var i := 0
 	var batches := 0
@@ -336,12 +405,12 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 			px.global_transform = Transform3D(cb.scaled(Vector3.ONE * 0.04), front + cb.x * gx + cb.y * gy)
 			pxs.append(px)
 		var worst := 0.0
-		# two frames under each light setup (with one, a variant or two still slips through to the
-		# ride: --hitch-check from a cold shader cache)
+		# on Compatibility two frames under each light setup (with one, a variant or two still slipped through
+		# to the ride: --hitch-check from a cold shader cache)
 		for setup in setups:
 			wl[0].visible = setup[0]
 			wl[1].visible = setup[1]
-			for _f in 2:
+			for _f in frames:
 				await m.get_tree().process_frame
 				if not m.is_inside_tree():
 					return false
