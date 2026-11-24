@@ -127,6 +127,7 @@ func in_lava(f: Ent) -> bool:
 func _fly(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed or h.out:
 		_land()
+		KitWindup.broken(k, "x")
 		return
 	if h.inp.get("jump", false) and h.vel.y > 0.0:
 		_leap()
@@ -230,8 +231,8 @@ func _land() -> void:
 # ------------------------------------------------------------------ the carpet
 ## One carpet piece from a to b, only where both ends are over ground (never over the abyss).
 func _lay(a: Vector3, b: Vector3) -> void:
-	var W = m.world
-	if W.ground_at(a.x, a.z) <= World.VOID + 1.0 or W.ground_at(b.x, b.z) <= World.VOID + 1.0:
+	var w = m.world
+	if w.ground_at(a.x, a.z) <= World.VOID + 1.0 or w.ground_at(b.x, b.z) <= World.VOID + 1.0:
 		void_skips += 1
 		return
 	var x := xd()
@@ -289,7 +290,7 @@ func _lava_at(f: Ent):
 ## (content/vfx "liftoff").
 func _liftoff_fx() -> void:
 	k.vfx("liftoff", k.ground(h.pos), null, {"r": float(xd()["burst_r"])})
-	m.sfx("lw_jet", h.pos, -1.0, 1.0)
+	KitWindup.play(k, "x", "lw_jet", -1.0)
 
 ## The flight's lift: fire bursting from both heels and her tail, blown back and down, and its smoke
 ## (content/vfx "jets": the heel_l/heel_r/tail anchors are where it burns), with a roar now and then.
@@ -299,4 +300,4 @@ func _jet_fx() -> void:
 	HeroVfx.of(m).hold(h, "jets")
 	if m.time - last_roar >= ROAR_EVERY:
 		last_roar = m.time
-		m.sfx("lw_jet", h.pos, -6.0, 1.1)
+		KitWindup.play(k, "x", "lw_jet", -6.0, 1.1)

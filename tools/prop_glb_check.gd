@@ -59,7 +59,7 @@ func run(main: Node) -> void:
 			var b := mi.transform * mi.mesh.get_aabb()
 			box = b if box.size == Vector3.ZERO else box.merge(b)
 			for s in mi.mesh.get_surface_count():
-				tris += (mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+				tris += int((mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3.0)
 				var m := mi.get_surface_override_material(s) as ShaderMaterial
 				textured = (
 					textured

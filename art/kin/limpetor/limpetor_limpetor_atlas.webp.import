@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cu7birs67ax8b"
-path="res://.godot/imported/limpetor_limpetor_atlas.webp-92f0debc756f0bec8c0c8a4ecdd2c6a8.ctex"
+path.bptc="res://.godot/imported/limpetor_limpetor_atlas.webp-92f0debc756f0bec8c0c8a4ecdd2c6a8.bptc.ctex"
+path.astc="res://.godot/imported/limpetor_limpetor_atlas.webp-92f0debc756f0bec8c0c8a4ecdd2c6a8.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5c70f630f6dfcbcc604533270e0b70ee"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/limpetor/limpetor_limpetor_atlas.webp"
-dest_files=["res://.godot/imported/limpetor_limpetor_atlas.webp-92f0debc756f0bec8c0c8a4ecdd2c6a8.ctex"]
+dest_files=["res://.godot/imported/limpetor_limpetor_atlas.webp-92f0debc756f0bec8c0c8a4ecdd2c6a8.bptc.ctex", "res://.godot/imported/limpetor_limpetor_atlas.webp-92f0debc756f0bec8c0c8a4ecdd2c6a8.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

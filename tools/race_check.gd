@@ -221,7 +221,8 @@ func _formats() -> void:
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	rules["base_mode"] = false      # the "off" half walks the old farm
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 70.0)
@@ -305,7 +306,7 @@ func _on_base() -> void:
 		ok(race.pin(rec, game) and not race.pin(rec, game + "x"), "on: only a win in this week's event game is pinned")
 		ok(is_instance_valid(race.wall) and race.wall.get_child_count() > 1, "on: the wall shows the frame")
 	await _drill(home)
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame
 
@@ -468,10 +469,10 @@ func _plan_species() -> Dictionary:
 
 ## Every zone's course is its own, closed and gentle on the turns, and every body plan runs it to the line.
 func _courses() -> void:
-	var R: Dictionary = BaseRace.rules()
-	var band: Array = R["lap_band"]
+	var r_v: Dictionary = BaseRace.rules()
+	var band: Array = r_v["lap_band"]
 	var zones: Array = GardenZones.ids()
-	ok(R["courses"].keys() == zones, "a course for each zone: %s" % [R["courses"].keys()])
+	ok(r_v["courses"].keys() == zones, "a course for each zone: %s" % [r_v["courses"].keys()])
 	var plans := _plan_species()
 	ok(plans.keys().size() == BaseRace.PLANS.size(), "every body plan has a species to run (%s)" % [plans.keys()])
 	var shapes := {}
@@ -486,7 +487,8 @@ func _courses() -> void:
 		var worst := 0.0
 		for i in range(1, pts.size() - 1):
 			worst = maxf(worst, rad_to_deg(abs((pts[i] - pts[i - 1]).angle_to(pts[i + 1] - pts[i]))))
-		ok(worst <= float(R["max_turn"]), "%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(R["max_turn"])])
+		ok(worst <= float(r_v["max_turn"]),
+				"%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(r_v["max_turn"])])
 		GardenZones.here = z
 		for plan in plans:
 			var rec := _kin(plans[plan], "Run", 0, 50.0)
@@ -501,7 +503,7 @@ func _courses() -> void:
 ## The ridge track runs through an updraft vent (ZoneVents): its first vent stands on the stretch that names it, a
 ## winged runner is quicker there (vent_mult) than the same stats on the ground, and nobody else is.
 func _vent_stretch() -> void:
-	var R: Dictionary = BaseRace.rules()
+	var r: Dictionary = BaseRace.rules()
 	GardenZones.here = "ridge"
 	var c: Array = BaseRace.course("ridge")
 	var vents := ZoneVents.spots("ridge")
@@ -525,7 +527,7 @@ func _vent_stretch() -> void:
 	var other: int = c.find_custom(func(x): return x["kind"] == "straight" and not x.has("vent"))
 	var lift := BaseRace.stretch_pace(flier, s) / BaseRace.stretch_pace(flier, other)
 	lift *= float(c[other]["mult"]) / float(c[s]["mult"])
-	ok(is_equal_approx(lift, float(R["vent_mult"])), "ridge: a winged runner is %.2fx on the vent stretch" % lift)
+	ok(is_equal_approx(lift, float(r["vent_mult"])), "ridge: a winged runner is %.2fx on the vent stretch" % lift)
 	ok(is_equal_approx(BaseRace.stretch_pace(ground, s) / BaseRace.stretch_pace(ground, other),
 			float(c[s]["mult"]) / float(c[other]["mult"])), "ridge: a runner without wings gets no lift")
 	GardenZones.here = ""
@@ -555,7 +557,7 @@ func _zone_tracks() -> void:
 			_footing(z, home, race)
 		home.queue_free()
 		await main.get_tree().process_frame
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = true
 
 func _footing(z: String, home: Node, race: BaseRace) -> void:
 	var taken := {}
