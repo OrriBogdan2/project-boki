@@ -111,14 +111,16 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 	var tag := "%s %s" % [hunter, "skip" if skip else "finish"]
 	ok(kd != null and kd.plan.size() == KitDrill.SLOTS.size(), "%s: the first visit gets the drill" % tag)
 	if kd != null:
+		var banner := Rect2(m.get_viewport().get_visible_rect().size.x * 0.5 - 220.0, 12.0, 440.0, 54.0)
+		for st in kd.plan:
+			await tree.process_frame      # (the card's layout settles on the step's text)
+			_card_clear(m, kd, banner, "%s: step %s" % [tag, st["slot"]])
+			if st["how"] == "hold": kd.on_held(st["action"], KitDrill.HOLD_S)
+			else:
+				kd.on_press(st["action"])
+				kd.on_press(st["action"])
 		if skip:
 			kd.finish()
-		else:
-			for st in kd.plan:
-				if st["how"] == "hold": kd.on_held(st["action"], KitDrill.HOLD_S)
-				else:
-					kd.on_press(st["action"])
-					kd.on_press(st["action"])
 		ok(bool(Save.d["tutorial"].get(KitDrill.SAVE_KEY, false)), "%s: the save key is set" % tag)
 	m.queue_free()
 	await tree.process_frame
@@ -129,6 +131,12 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 	ok(Practice.of(again).get_node_or_null(KitDrill.NAME) == null, "%s: never shown again" % tag)
 	again.queue_free()
 
+
+## The card is on screen and clear of the Training Grounds banner (hud.gd: 12..66 px, 440 wide, centred), however
+## long the step's line is.
+func _card_clear(m: Match, kd: KitDrill, banner: Rect2, what: String) -> void:
+	var r := kd.panel_rect()
+	ok(m.get_viewport().get_visible_rect().encloses(r) and not r.intersects(banner), "%s: card on screen, off the banner %s" % [what, r])
 
 ## The recast drill station (RecastDrill) as Ostra (his E is a two-step: the seed, then E again) and as Vex (no
 ## two-step ability). Ostra: three reps read hit, early, hit; a press inside the 0.15 s buffer before the window

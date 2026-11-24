@@ -15,6 +15,11 @@ const SLOTS := ["lmb", "rmb", "e", "x", "dash"]      # "x" is the hunter ultimat
 const ACTIONS := {"lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult", "dash": "dash"}
 const HOLD_S := 0.4            # s: how long a "hold" step wants the key down
 const DONE_S := 2.0            # s: the closing line stays up
+const TOP_PRACTICE := 98.0     # px: the card hangs below the Training Grounds banner (hud.gd) and its key line (arena.gd)
+const TOP_ARENA := 36.0        # px: below the Arena's key line, which has no banner
+const SIDE_LANES := 800.0      # px of the screen's width left to the minimap and the guide box, either side
+const LINE_W_MIN := 260.0      # px: the step's line wraps inside this much at the least, and
+const LINE_W_MAX := 640.0      # ... this much at the most
 const GOLD := Color("f2c84a")
 const MINT := Color("8fe3c8")
 static var _again: RegEx       # "press it again" / "recast" in a slot's JSON text, compiled once
@@ -159,16 +164,19 @@ func build_ui() -> void:
 	layer.layer = 4
 	add_child(layer)
 	_panel = UI.glass(10, 14)
-	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 24)
+	var top := TOP_ARENA if m.opts.get("arena", false) else TOP_PRACTICE
+	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, int(top))
 	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(_panel)
 	var rows := VBoxContainer.new()
 	_panel.add_child(rows)
-	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 12)
-	rows.add_child(top)
-	_key = _label(top, Color.WHITE, 26)
-	_line = _label(top, GOLD, 22)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 12)
+	rows.add_child(head)
+	_key = _label(head, Color.WHITE, 26)
+	_line = _label(head, GOLD, 22)
+	_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_line.custom_minimum_size.x = clampf(m.get_viewport().get_visible_rect().size.x - SIDE_LANES, LINE_W_MIN, LINE_W_MAX)
 	_call = _label(rows, Color.WHITE, 20)
 	var bottom := HBoxContainer.new()
 	rows.add_child(bottom)
@@ -181,6 +189,10 @@ func build_ui() -> void:
 	bottom.add_child(skip)
 	if m.hud:
 		m.hud.ui_extra.append(skip)       # the mouse is over UI here: no shooting, the pointer shows
+
+## The card's rectangle on screen (empty while it is hidden).
+func panel_rect() -> Rect2:
+	return _panel.get_global_rect() if _panel != null and _panel.visible else Rect2()
 
 func _label(parent: Node, col: Color, px: int) -> Label:
 	var l := Label.new()
