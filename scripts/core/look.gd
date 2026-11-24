@@ -2,6 +2,10 @@ class_name Look
 ## The shared look of every outdoor scene: a painted sky, soft filmic colour, a little bloom, haze
 ## that swallows whatever hangs below the islands, a warm key light and a cool rim light.
 
+## A Boki card's exposure (card_environment), Forward+ and the Compatibility renderer
+const CARD_EXPOSURE := 0.7
+const CARD_EXPOSURE_COMPAT := 0.8
+
 static var SKY: Shader = preload("res://shaders/sky.gdshader")
 
 
@@ -78,11 +82,8 @@ static func environment(p: Dictionary) -> Environment:
 ## The key, rim and ambient summed to ~1.3x a coat's paint, so pale coats went past white (a pink or cream Boki
 ## came out white, its stripes faint). The exposure brings the lit side back to the Bokidex master's paint (one
 ## scale: hue and saturation kept, the toon shading as it was); the simpler renderer draws ~4 L darker, so less cut.
-## (boki-rig-shots --washout --stage=dex, 16 species vs the atlas: mean dE 11.5 -> 9.3 desktop, 13.2 -> 13.1 web)
-const CARD_EXPOSURE := 0.7
-const CARD_EXPOSURE_COMPAT := 0.8
-
-
+## (boki-rig-shots --washout --stage=dex, 16 species vs the atlas: mean dE 11.5 -> 9.3 desktop; web flat on
+## average, 13.2 -> 13.4, its pale coats better: puddlet 13.4 -> 11.7, rimeshrew 15.2 -> 11.2)
 static func card_environment(exposure := -1.0) -> Environment:
 	var e := Environment.new()
 	e.background_mode = Environment.BG_CLEAR_COLOR

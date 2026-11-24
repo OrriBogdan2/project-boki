@@ -10,29 +10,37 @@ extends RefCounted
 
 const YAWS := 8
 const SHEET_COLS := 6
-const SHEET_YAWS := [PI - 0.6, PI - PI / 2.0]    # front three-quarters, side
+const SHEET_YAWS := [PI - 0.6, PI - PI / 2.0]  # front three-quarters, side
 const STRIP := 6
 const FACES := ["neutral", "happy", "sad", "sleepy", "angry", "bliss"]
 const COATS := [
-	{"mark": "spots", "mark_col": "dark", "eye": "sky", "ears": "tufted", "tailv": "bobbed",
-		"birth": ["star", "chest"]},
+	{
+		"mark": "spots",
+		"mark_col": "dark",
+		"eye": "sky",
+		"ears": "tufted",
+		"tailv": "bobbed",
+		"birth": ["star", "chest"]
+	},
 	{"mark": "stripes", "mark_col": "light", "eye": "amber", "ears": "folded", "tailv": "kinked", "limb": 1.09},
 	{"mark": "patches", "mark_col": "glow", "eye": "rose", "ears": "splayed", "tailv": "tufted", "ear": 1.1},
-	{"mark": "plain", "eye": "classic", "ears": "standard", "tailv": "standard"}]
+	{"mark": "plain", "eye": "classic", "ears": "standard", "tailv": "standard"}
+]
 ## Far shots: [clip, at (s), face], left to right.
 const ACTION := [["idle", 0.5, "neutral"], ["run", 0.1, "cheer"], ["ability", 0.5, "angry"], ["hop", 0.45, "happy"]]
 const EMOTES := [["idle", 0.5, "happy"], ["idle", 0.5, "sad"], ["idle", 0.5, "sleepy"], ["idle", 0.5, "angry"]]
-const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend"]
+const CLIPS := [
+	"idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"
+]
 const GIF_FPS := 15
 const MATCH_PITCH := 66.0
 const MATCH_DIST := 23.0
 const MATCH_FOV := 32.0
-const FARM_BOKI_SCALE := 1.7        # Home's farm scale
-const FARM_DIST := 33.6             # 23 m x the farm's framing (1.216) x the old arrival zoom (1.2)
-const FARM_CLOSE_DIST := 22.4       # the wheel all the way in (0.8)
+const FARM_BOKI_SCALE := 1.7  # Home's farm scale
+const FARM_DIST := 33.6  # 23 m x the farm's framing (1.216) x the old arrival zoom (1.2)
+const FARM_CLOSE_DIST := 22.4  # the wheel all the way in (0.8)
 const ENLARGE := 4
-const FUSION_PART_K := 1.3            # merge_forms "part_k" of the fallback forms
+const FUSION_PART_K := 1.3  # merge_forms "part_k" of the fallback forms
 ## CamRig.char_lean, which BokiRig applies in the game: the top tips away from the camera.
 const LEAN := deg_to_rad(20.0)
 
@@ -41,28 +49,35 @@ var out := ""
 var species := "cindle"
 var px := 512
 var clips: Array = CLIPS
-var dex_dir := ""    # --dex-dir=<dir> with --sheet: also dex_sheet_N.png from <dir>/<id>.glb, same height
+var dex_dir := ""  # --dex-dir=<dir> with --sheet: also dex_sheet_N.png from <dir>/<id>.glb, same height
+
 
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--species="): species = a.substr(10)
-		if a.begins_with("--px="): px = int(a.substr(5))
-		if a.begins_with("--dex-dir="): dex_dir = a.substr(10)
-		if a.begins_with("--normal-k="): BokiRig.normal_k = float(a.substr(11))
-		if a.begins_with("--clips="): clips = Array(a.substr(8).split(","))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--species="):
+			species = a.substr(10)
+		if a.begins_with("--px="):
+			px = int(a.substr(5))
+		if a.begins_with("--dex-dir="):
+			dex_dir = a.substr(10)
+		if a.begins_with("--normal-k="):
+			BokiRig.normal_k = float(a.substr(11))
+		if a.begins_with("--clips="):
+			clips = Array(a.substr(8).split(","))
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--sheet="):    # one picture a view of every species listed, named, in a grid
+		if a.begins_with("--sheet="):  # one picture a view of every species listed, named, in a grid
 			await _sheet(a.substr(8).split(","))
 			print("BOKI_RIG_SHOTS_DONE")
 			main.get_tree().quit()
 			return
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--washout="):    # <id>_blank/_master/_game.png at the match camera, per species
+		if a.begins_with("--washout="):  # <id>_blank/_master/_game.png at the match camera, per species
 			await _washout(a.substr(10).split(","))
 			print("BOKI_RIG_SHOTS_DONE")
 			main.get_tree().quit()
@@ -80,6 +95,7 @@ func run(m: Node) -> void:
 	print("BOKI_RIG_SHOTS_DONE")
 	main.get_tree().quit()
 
+
 func _stage(px_size: Vector2i, ground := true) -> SubViewport:
 	var vp := SubViewport.new()
 	vp.size = px_size
@@ -88,8 +104,9 @@ func _stage(px_size: Vector2i, ground := true) -> SubViewport:
 	main.add_child(vp)
 	var env := WorldEnvironment.new()
 	vp.add_child(env)
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
-		"stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	Look.lights(vp, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	if ground:
 		var g := MeshInstance3D.new()
@@ -99,6 +116,7 @@ func _stage(px_size: Vector2i, ground := true) -> SubViewport:
 		g.material_override = Models.toon(Color("4f7a3e"), false)
 		vp.add_child(g)
 	return vp
+
 
 ## A kin wearing its rigged model, whether or not Models.kin is wired to it yet.
 static func rigged_kin(id: String, rec := {}) -> Node3D:
@@ -118,12 +136,14 @@ static func rigged_kin(id: String, rec := {}) -> Node3D:
 		BokiDna.wear(flex.get_node("BokiRig").skeleton(), flex, d, k.get_meta("mats"), rec)
 	return k
 
+
 func _kin(vp: SubViewport) -> Array:
 	var k := rigged_kin(species)
 	vp.add_child(k)
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	rig.manual = true
 	return [k, rig]
+
 
 func _close_cam(vp: SubViewport) -> Camera3D:
 	var cam := Camera3D.new()
@@ -135,13 +155,16 @@ func _close_cam(vp: SubViewport) -> Camera3D:
 	cam.look_at(Vector3(0, 0.45, 0))
 	return cam
 
+
 func _grab(vp: SubViewport) -> Image:
 	for k in 3:
 		await RenderingServer.frame_post_draw
 	return vp.get_texture().get_image()
 
+
 func _strip(n: int) -> Image:
 	return Image.create(px * n, px, false, Image.FORMAT_RGBA8)
+
 
 func _turntable() -> void:
 	var vp := _stage(Vector2i(px, px))
@@ -160,6 +183,7 @@ func _turntable() -> void:
 		img.save_png(out.path_join("frames_turn_%d.png" % i))
 	sheet.save_png(out.path_join("turntable.png"))
 	vp.queue_free()
+
 
 ## The contact sheet: <dir>/sheet_<view>.png, a cell a species (its name on it), SHEET_COLS to a row, from the front
 ## three-quarters and the side, standing (idle), as the game builds it.
@@ -191,7 +215,7 @@ func _sheet(ids: PackedStringArray) -> void:
 				if dex != null:
 					(kr[0] as Node3D).visible = false
 					vp.add_child(dex)
-					dex.rotation.y = SHEET_YAWS[view] - PI    # glTF models face +z, the game's face -z
+					dex.rotation.y = SHEET_YAWS[view] - PI  # glTF models face +z, the game's face -z
 					var dex_img: Image = await _grab(vp)
 					dex_img.convert(Image.FORMAT_RGBA8)
 					dex_sheet.blit_rect(dex_img, Rect2i(0, 0, px, px), at)
@@ -235,11 +259,12 @@ func _dex_model(id: String, height: float) -> Node3D:
 		for i in (n as MeshInstance3D).get_surface_override_material_count():
 			var mat := (n as MeshInstance3D).mesh.surface_get_material(i) as BaseMaterial3D
 			if mat != null:
-				mat.metallic = 0.0    # a Meshy glb is fully metallic: black without a sky to reflect
+				mat.metallic = 0.0  # a Meshy glb is fully metallic: black without a sky to reflect
 	var box := _box(model)
 	model.scale = Vector3.ONE * height / box.size.y
 	model.position = Vector3(-box.get_center().x, -box.position.y, -box.get_center().z) * model.scale.y
 	return holder
+
 
 func _faces() -> void:
 	var vp := _stage(Vector2i(px, px), false)
@@ -261,6 +286,7 @@ func _faces() -> void:
 		sheet.blit_rect(img, Rect2i(0, 0, px, px), Vector2i(i * px, 0))
 	sheet.save_png(out.path_join("faces.png"))
 	vp.queue_free()
+
 
 ## Each Boki its own: coat marks, eye colours, the shimmer palette.
 func _coats() -> void:
@@ -289,6 +315,7 @@ func _coats() -> void:
 	sheet.save_png(out.path_join("coats.png"))
 	vp.queue_free()
 
+
 ## The Fusion on a Hunter, close (front, 3/4, back) and at the match camera.
 func _fusion() -> void:
 	var key := BokiFusion.key_of(species)
@@ -300,8 +327,14 @@ func _fusion() -> void:
 	cam.fov = 26.0
 	cam.position = Vector3(0, 1.5, 5.6)
 	cam.look_at(Vector3(0, 1.0, 0))
-	var h := Models.hunter(Arch.weight("gunslinger"), Data.TEAM_COLORS[0], Arch.signature("gunslinger"), "",
-		PlayerLook.neutral(), "gunslinger")
+	var h := Models.hunter(
+		Arch.weight("gunslinger"),
+		Data.TEAM_COLORS[0],
+		Arch.signature("gunslinger"),
+		"",
+		PlayerLook.neutral(),
+		"gunslinger"
+	)
 	var box := Node3D.new()
 	box.scale = Vector3.ONE * FUSION_PART_K
 	h.get_node("Rig/Torso").add_child(box)
@@ -326,6 +359,7 @@ func _fusion() -> void:
 	sheet.blit_rect(crop, Rect2i(0, 0, px, px), Vector2i(3 * px, 0))
 	sheet.save_png(out.path_join("fusion.png"))
 	vp.queue_free()
+
 
 ## The four ways of growing up: Evo's tint and size with every part of that path, at level 2.
 func _grown() -> void:
@@ -357,6 +391,7 @@ func _grown() -> void:
 	sheet.save_png(out.path_join("grown.png"))
 	vp.queue_free()
 
+
 func _face_for(rig: BokiRig, clip_id: String, k: float) -> String:
 	var cf: Variant = BokiRig.CLIP_FACE.get(clip_id, "neutral")
 	if cf is Array:
@@ -366,6 +401,7 @@ func _face_for(rig: BokiRig, clip_id: String, k: float) -> String:
 				best = String(beat[1])
 		return best
 	return String(cf)
+
 
 func _anims() -> void:
 	var vp := _stage(Vector2i(px, px))
@@ -377,6 +413,7 @@ func _anims() -> void:
 	for c in clips:
 		await _clip(vp, rig, String(c))
 	vp.queue_free()
+
 
 func _clip(vp: SubViewport, rig: BokiRig, c: String) -> void:
 	rig.set_clip(c, 0.0)
@@ -402,6 +439,7 @@ func _clip(vp: SubViewport, rig: BokiRig, c: String) -> void:
 			next += every
 	sheet.save_png(out.path_join("anim_%s.png" % c))
 
+
 ## Home's carried item, as the real farm gives it.
 func _hold_load(rig: BokiRig, on: bool) -> void:
 	var old := rig.root.get_node_or_null("Held")
@@ -411,6 +449,7 @@ func _hold_load(rig: BokiRig, on: bool) -> void:
 		var it := WorkModels.held("chop", "")
 		rig.root.add_child(it)
 		it.position = BokiRig.FRAME[species]["carry"]
+
 
 func _far(file: String, dist: float, boki_scale: float, picks: Array, yaw: float) -> void:
 	var vp := _stage(Vector2i(1920, 1080))
@@ -449,8 +488,17 @@ func _washout(ids: PackedStringArray) -> void:
 	var close := dex_stage or "--close" in OS.get_cmdline_user_args()
 	if "--compat" in OS.get_cmdline_user_args() and Look.full_renderer():
 		# the web / mobile look: run the same shots in a child game on the Compatibility renderer
-		var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-method", "gl_compatibility",
-			"--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--"]
+		var args := [
+			"--path",
+			ProjectSettings.globalize_path("res://"),
+			"--rendering-method",
+			"gl_compatibility",
+			"--rendering-driver",
+			"opengl3",
+			"--audio-driver",
+			"Dummy",
+			"--"
+		]
 		args.append_array(OS.get_cmdline_user_args())
 		OS.execute(OS.get_executable_path(), args, [], true)
 		return
@@ -476,7 +524,7 @@ func _washout(ids: PackedStringArray) -> void:
 		var env := (vp.get_child(0) as WorldEnvironment).environment
 		var kr := _kin(vp)
 		var k := kr[0] as Node3D
-		for a in OS.get_cmdline_user_args():    # --coat=<param>:<value>: try a coat look value on every Boki surface
+		for a in OS.get_cmdline_user_args():  # --coat=<param>:<value>: try a coat look value on every Boki surface
 			if a.begins_with("--coat="):
 				var kv := a.substr(7).split(":")
 				for mi in k.find_children("*", "MeshInstance3D", true, false):
@@ -525,7 +573,7 @@ func _card_stage(vp: SubViewport) -> void:
 		ch.free()
 	var env := WorldEnvironment.new()
 	var ex := -1.0
-	for a in OS.get_cmdline_user_args():    # --card-exposure=<x>: try another exposure on the card stage
+	for a in OS.get_cmdline_user_args():  # --card-exposure=<x>: try another exposure on the card stage
 		if a.begins_with("--card-exposure="):
 			ex = float(a.substr(16))
 	env.environment = Look.card_environment(ex)
@@ -548,4 +596,3 @@ func _save_crop(vp: SubViewport, crop: Rect2i, file: String, whole := false) -> 
 	if not whole:
 		part.resize(part.get_width() * ENLARGE, part.get_height() * ENLARGE, Image.INTERPOLATE_NEAREST)
 	part.save_png(out.path_join(file))
-
