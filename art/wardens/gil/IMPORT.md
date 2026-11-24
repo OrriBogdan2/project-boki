@@ -78,3 +78,8 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - Swordfish: `scale hand.R` 1.3 -> 1.6 (fish length 0.756 -> ~0.93 of the splash ratio). Attack and Hit right-arm re-keyed (`r7/tools/rightfish.py`) so the bigger fish clears the head: Hit 0.003 -> 0.049 m off the head mesh, Attack sampled frames >= 0.043 m (one in-between pass to 0.008 m, no contact).
 - Legs: run LeftUpLeg 3 deg / RightUpLeg 6 deg out (about the forward axis). geo_check vs main: run shin_L>thigh_R 13.4 cm -> 0, held worst 6.8 cm (run foot_R>thigh_R), nothing worse than main.
 - Not changed: mesh, UVs, textures, fin/crest parts, other clips. Still open: fin recolour, closed grip, Jump_Run forearm>torso 8.8 cm, Crouch hand/forearm>thigh holds.
+
+## Native model r9 (gil_meshy.glb)
+- Back fin and coat: live's skin-v95 index list is back (the 1,171 triangles r7 cut were live's own dorsal fin; the cut left 95 open edges down the coat back). Open edges 95 -> 0; vertex data is byte-identical to main.
+- The Meshy `skin-fin-back` / `skin-crest` props and `tools/art1/gil_fin_crest.py` are gone; gil.glb and its textures are main's again.
+- Kept from r8: tail weights, Tail bone (zero weight), arm/leg re-keys, Hit clip, swordfish scale 1.6.
