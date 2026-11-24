@@ -385,6 +385,7 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 			m.fx.spark(at, back, Color("b4f7a8"), 6, 6.0, 70.0, 0.25, 6.0)    # leaf_lit debris
 			m.fx.spark(at, back, Color("ffb45a"), 3, 5.0, 60.0, 0.22, 9.0)    # amber ember debris: the hurt tell
 			burst("star", at, {"col": Color("5fdc6a"), "rim": Color("efffe4"), "r": 0.8, "dur": 0.22})
+			HeroVfx.of(m).play(h, "ember_hit", at, d2)
 		"shard":
 			m.fx.flash(at, Color("9af0ff"), 0.5, 0.06)
 			m.fx.spark(at, back, Color("6fd8f0"), 7, 7.0, 80.0, 0.22, 12.0, 0.9)
