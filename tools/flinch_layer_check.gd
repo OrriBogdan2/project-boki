@@ -122,6 +122,13 @@ func _hit(pair: Array, push: Vector2, k: float, want: Vector3, off: Vector3) -> 
 func _native(id: String, move: String, pair: Array) -> void:
 	var hit: Dictionary = pair[0]
 	var ctl: Dictionary = pair[1]
+	# (the first state read is Native's baseline, no new hit: read it with no move, then start the held move)
+	for p: Dictionary in pair:
+		(p["s"] as Dictionary)["kmove"] = ""
+		(p["s"] as Dictionary)["cast"] = 99.0
+	_frames(pair, 1)
+	for p: Dictionary in pair:
+		(p["s"] as Dictionary)["kmove"] = move
 	_frames(pair, 12)
 	var cur: String = hit["sync"].get("cur")
 	ok(cur == "attack", "%s: LMB hold: %s plays Meshy's attack clip (%s)" % [id, move, cur])

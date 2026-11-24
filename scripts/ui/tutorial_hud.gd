@@ -42,12 +42,14 @@ static func draw(h, sz: Vector2) -> void:
 	if tu.step < 0 or tu.step >= Tutorial.steps().size():
 		return
 	var r := TutorialStrip.shown(sz, tu.card_t)
-	var dir := Vector2.ZERO
-	if tu.target != Vector3.INF and h.m.cam and h.m.player:
-		dir = MarkerDir.off_dir(h.m.cam, sz, tu.target, h.m.player.pos)
-	_bar(h, r, tu, dir)
+	if not TutorialHints.quiet(tu.id()):  # (a hint step is one line in the message lane, no strip)
+		var dir := Vector2.ZERO
+		if tu.target != Vector3.INF and h.m.cam and h.m.player:
+			dir = MarkerDir.off_dir(h.m.cam, sz, tu.target, h.m.player.pos)
+		_bar(h, r, tu, dir)
 	_keep_sign_clear(h, sz, tu)
-	_pick_ring(h, tu)
+	if not TutorialHints.quiet(tu.id()):
+		_pick_ring(h, tu)
 	if not tu.card_up():
 		_extras(h, r, tu)
 	if tu.done_t > 0.0:
