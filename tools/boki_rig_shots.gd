@@ -3,7 +3,8 @@ extends RefCounted
 ## Boki, in the engine (--normal-k=0 leaves a Meshy body's normal map out, for an A/B).
 ## <dir>/turntable.png, faces.png, coats.png, anim_<clip>.png (a strip of each clip), match.png (match camera),
 ## farm.png and farm_close.png (farm camera) and frames/<clip>/NNN.png for the GIFs (tools/boki/review_gifs.sh).
-## --washout=<ids> [--close] [--compat]: a Boki's colour against its own atlas flat, at the match camera (or the 3.3 m view).
+## --washout=<ids> [--close] [--compat]: a Boki's colour against its own atlas flat, at the match camera (or
+## the 3.3 m view; --compat: on the Compatibility renderer, the web and mobile look).
 ## Needs a renderer.
 
 const YAWS := 8

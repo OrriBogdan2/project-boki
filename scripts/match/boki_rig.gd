@@ -904,6 +904,10 @@ const INK_FAR_THIN := 0.5
 
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
 const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amount": 0.25}
+## The renderers without the desktop grade (web and mobile, Look.full_renderer(): no tone curve, no x1.65 saturation)
+## drew the painted coats pale: the lights on top of a light atlas clip to white and the colour drains (dark coats
+## were fine). Richer, slightly darker pale paint before the lights puts them back to the Forward+ look.
+const COMPAT_LOOK := {"pale_fix": 0.8}
 const MARKS_DARK := preload("res://shaders/boki_marks.gdshader")
 const MARKS_LIGHT := preload("res://shaders/boki_marks_light.gdshader")
 const EYE_VALUE := 0.86  # iris brightness: the eye is the first thing read on a small face
@@ -1590,7 +1594,8 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	m.set_shader_parameter("albedo_tex", (src as BaseMaterial3D).albedo_texture)
 	for k in WardenGlb.PAINTED:
 		m.set_shader_parameter(k, WardenGlb.PAINTED[k])
-	var look: Dictionary = COAT_LOOK.merged(FRAME[species].get("coat", {}), true)
+	var look: Dictionary = COAT_LOOK if Look.full_renderer() else COAT_LOOK.merged(COMPAT_LOOK, true)
+	look = look.merged(FRAME[species].get("coat", {}), true)
 	for k in look:
 		m.set_shader_parameter(k, look[k])
 	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))

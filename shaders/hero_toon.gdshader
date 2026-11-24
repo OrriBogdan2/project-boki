@@ -84,6 +84,9 @@ uniform float paint_glow_width = 0.12;
 // near-black paint lifted to this linear floor (jacket, trousers and gun no longer merge to black at the match
 // camera); mid and light colours keep their value and saturation
 uniform float dark_lift = 0.0;
+// pale paint (light atlas colours) richer and a little darker before the lights: where the renderer skips the desktop
+// grade (Look.environment: tone curve, x1.65 saturation) the lights clip a pale coat to white; 0 = unchanged
+uniform float pale_fix = 0.0;
 // a painted atlas at the match camera (~2 cm a pixel at 23 m): its fine detail (belts, bullets, tattoos, the scan's
 // grain) breaks into speckle, so from ~8 to 18 m the texture blends toward a coarser mip of itself (far_smooth of
 // the way, far_smooth_bias mips up; more than ~1 mip mixes a baked atlas's UV islands into mud); close-ups keep
@@ -214,6 +217,11 @@ void fragment() {
 	if (use_vertex_color && vertex_weights) { c *= mat3(weight_r.rgb, weight_g.rgb, weight_b.rgb) * COLOR.rgb; }
 	else if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
 	if (desat > 0.0) { c = mix(c, vec3(dot(c, vec3(0.3, 0.59, 0.11))), desat); }
+	if (pale_fix > 0.0) {
+		float pl = dot(c, vec3(0.3, 0.59, 0.11));
+		float pw = smoothstep(0.3, 0.8, pl) * pale_fix;
+		c = max(mix(vec3(pl), c, 1.0 + pw), vec3(0.0)) * (1.0 - 0.3 * pw);
+	}
 	if (dark_lift > 0.0) {
 		float dl = dot(c, vec3(0.3, 0.59, 0.11));
 		c += max(vec3(dark_lift) - c, vec3(0.0)) * (1.0 - smoothstep(0.0, dark_lift * 2.5, dl));
