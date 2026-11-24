@@ -2,8 +2,9 @@ extends RefCounted
 ## --relics-fold-check: the expedition panel and the Relics page folds (docs/UI_FIRST15.md 5.5).
 ##   1. first visit (only the first Where open): the expedition panel shows the picked Relic, the Boki, one Where
 ##      and Start; other Relics, locked drops, match settings and the mode links are folded, each one click away
-##   2. the Relics page shows the picked and open Relics; the locked ones fold and the fold shows every one
-##   3. once a second drop is open the Relics page folds nothing; the expedition panel stays compact (Details)
+##   2. the Relics page (Hunters screen) shows a tile for every Hunter on a fresh save, locked ones included,
+##      with no fold; locked tiles keep their dim look and their challenge progress
+##   3. once a second drop is open the expedition panel stays compact (Details); the Relics page still shows all
 ##   4. at 1280x720 no Relic name is cut or wrapped, on the Relics tiles or the expedition cards
 ## Reads the real panels on the farm. Never touches the save.
 
@@ -45,14 +46,16 @@ func run(main: Node) -> void:
 	hm._close_panel()
 	HomeClasses.open(hm, Arch.of_save())
 	await _frames(tree)
-	var me := Arch.of_save()
 	var tiles: Array = (hm.get_meta("classes_grid") as GridContainer).get_children()
-	var want := tiles.filter(func(t): return _lit(t, me))
-	ok(tiles.size() == Arch.ids().size() and _shown(tiles).size() == want.size() and want.size() < tiles.size(),
-			"the Relics page shows %d of %d tiles on a first visit" % [_shown(tiles).size(), tiles.size()])
-	_button(hm.panel_host, "Locked Relics").pressed.emit()
-	await _frames(tree)
-	ok(_shown(tiles).size() == tiles.size(), "the fold shows every Relic tile")
+	var tiled: Array = tiles.map(func(t): return String(t.get_meta("arch")))
+	var missing: Array = Arch.ids().filter(func(id): return not tiled.has(id))
+	ok(missing.is_empty() and _shown(tiles).size() == Arch.ids().size(),
+			"the Relics page shows a tile for every Hunter on a fresh save (%d of %d, missing %s)"
+			% [_shown(tiles).size(), Arch.ids().size(), missing])
+	var locked := tiles.filter(func(t): return t.get_meta("class_status") in ["progress", "locked"])
+	ok(not locked.is_empty() and _shown(locked).size() == locked.size(),
+			"and the %d locked ones show, with no fold button" % locked.size())
+	ok(_button(hm.panel_host, "Locked Relics") == null, "no Locked Relics fold on this screen")
 	_names_whole(hm.panel_host, tree, "Relics page", _tile_name)
 	hm.queue_free()
 	await _frames(tree)
@@ -68,8 +71,7 @@ func run(main: Node) -> void:
 	HomeClasses.open(hm, Arch.of_save())
 	await _frames(tree)
 	var all_tiles: Array = (hm.get_meta("classes_grid") as GridContainer).get_children()
-	var unfolded := _button(hm.panel_host, "Locked Relics") == null
-	ok(_shown(all_tiles).size() == all_tiles.size() and unfolded, "and so are the tiles")
+	ok(_shown(all_tiles).size() == Arch.ids().size(), "and the Relics page still shows every tile")
 	hm.queue_free()
 	print("RELICSFOLD DONE, failures: %d" % bad)
 	tree.quit()
@@ -78,9 +80,6 @@ func run(main: Node) -> void:
 func _tile_name(id: String) -> String:
 	var base := HeroTitle.base_name(id)
 	return base if base != "" else Arch.name_of(id)
-
-func _lit(tile: Node, me: String) -> bool:
-	return tile.get_meta("class_status") in ["open", "ready"] or tile.get_meta("arch") == me
 
 func _frames(tree: SceneTree, n := 12) -> void:
 	for i in n: await tree.process_frame
