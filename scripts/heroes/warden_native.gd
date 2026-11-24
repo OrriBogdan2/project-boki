@@ -41,6 +41,7 @@ var attack_left := 0.0  # s the attack clip still owns the body
 var attack_move := false  # it was started by a kit move or a swing (not a cast or a shot): the open reach waits
 ## The state counters last frame; cast -1: none read yet (the first state read is the baseline, no new hit)
 var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
+var own_casts := false  # data "own_casts": her casts are her own kit moves (kmoves rows), no Meshy swing for them
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
@@ -56,6 +57,7 @@ var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest 
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
+var moves: WardenNativeMoves  # the Hunter's own clips for the kit's moves (data "kmoves"), or null
 
 
 ## The art's entry in warden_native.json ({} when it has none).
@@ -126,6 +128,8 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	skel = WardenGlb.skeleton(glb)
 	# (the clips advance in _process, then the layers go on top: WardenSync's order)
 	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	moves = WardenNativeMoves.make(glb, player, WardenGlb.skeleton(glb), d)
+	own_casts = bool(d.get("own_casts", false))
 	if d.has("bones"):
 		skel.set_meta(WardenSkeleton.BONE_MAP, d["bones"])
 	flinch = WardenFlinch.make(model, skel)
@@ -169,8 +173,15 @@ func _process(dt: float) -> void:
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
 	attack_left -= dt
 	var xt := float(s.get("extract_t", -1.0))
+	var mv := moves.pick(String(s.get("kmove", "")), float(s.get("kmove_t", 0.0))) if moves else {}  # (the kit's move)
+	var body_move := xt < 0.0 and not mv.is_empty() and not bool(mv["upper"])  # (its own full-body clip owns the body)
+	if not mv.is_empty():
+		attack_left = 0.0  # (a Meshy swing still playing from before gives way to the move)
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
+	elif body_move:
+		_attacked(s)  # (the counters move on: no Meshy swing after it)
+		_play_move(mv)
 	elif _attacked(s):
 		attack_left = _clip_len("attack") / float(d.get("attack_rate", 1.0))
 		_play("attack", float(d.get("attack_rate", 1.0)), true)
@@ -179,6 +190,10 @@ func _process(dt: float) -> void:
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
+	if moves:
+		if body_move:
+			player.seek(float(mv["t"]), true)
+		moves.lay(mv, dt)
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
@@ -270,17 +285,18 @@ func _attacked(s: Dictionary) -> bool:
 	var now := {
 		"kmove": String(s.get("kmove", "")),
 		"swing_n": int(s.get("swing_n", 0)),
-		# (a Boki's own ability, k1 or k2, is its move: the Hunter does not swing for it)
-		"cast": INF if String(s.get("cast_slot", "")) in BOKI_SLOTS else float(s.get("cast", INF)),
-		"recoil": float(s.get("recoil", 0.0)),
+		# (a Boki's own ability, k1 or k2, is its move: the Hunter does not swing for it; nor does a hand caster's cast)
+		"cast": INF if own_casts or String(s.get("cast_slot", "")) in BOKI_SLOTS else float(s.get("cast", INF)),
+		"recoil": 0.0 if own_casts else float(s.get("recoil", 0.0)),
 	}
 	if not s.has("cast"):
 		return false  # (Hunter._anim_state has not filled this model's state yet: no counters to read)
 	if float(last["cast"]) < 0.0:
 		last = now  # (the first state read is the baseline: counters a freshly dressed model finds are no new hit)
 		return false
+	var own_move: bool = moves != null and moves.has_row(now["kmove"])  # (it has its own clip: no Meshy swing)
 	var hit: bool = (
-		(now["kmove"] != "" and now["kmove"] != last["kmove"])
+		(now["kmove"] != "" and now["kmove"] != last["kmove"] and not own_move)
 		or now["swing_n"] > last["swing_n"]
 		or now["cast"] < last["cast"]
 		or now["recoil"] > last["recoil"]
@@ -296,6 +312,15 @@ func _attacked(s: Dictionary) -> bool:
 ## The loop's rate for this ground speed against the speed it was keyed at (data, m/s), clamped to the clip's range.
 func _rate(ground: float, key: String, lo: float) -> float:
 	return clampf(ground / float(d.get(key, 1.5)), lo, RATE_MAX)
+
+
+## A move's own full-body clip (WardenNativeMoves.pick), crossfaded in when it changes; its time is the kit's.
+func _play_move(mv: Dictionary) -> void:
+	var st := "move:%s" % mv["clip"]
+	if st != cur:
+		player.play(String(mv["clip"]), FADE)
+		cur = st
+	player.speed_scale = 1.0
 
 
 func _clip_len(st: String) -> float:
