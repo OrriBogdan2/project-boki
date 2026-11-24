@@ -325,6 +325,6 @@ rigs only (Kael, Lace, Grimble through Meshy's `include_fingers` rig; no hunter 
 | Lace left | 65 edges >3x | 44 |
 | Grimble right (left has no fingers) | 6, 12, 55.8 mm | 4, 2, 55.8 mm |
 
-Real-GPU stills (`gens/rig-tear-1124/<hunter>_<hand>.png`, grey = Meshy's weights, green = cleaned; rows open / fist / grip):
+Real-GPU stills (`docs/art/wardens/rig_tear_1124/<hunter>_<hand>.jpg`; the 11-23 sheets `rig_faults_1123/` are re-rendered with the graded fist, grey = Meshy's weights, green = cleaned; rows open / fist / grip):
 the graded fist and grip show no shards on Kael (both hands). Lace's fingertips still crumple in the fist (her fingers are tiny and
 fused; 44 left-hand edges stay over 3x) and Grimble's armoured hands hide the fingers: both open (see the PR text).
