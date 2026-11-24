@@ -653,7 +653,7 @@ Boki whose coat has no painted eyes of its own yet: they keep the face overlay (
 
 | Setting | Value |
 |---|---|
-| overlay_species | ["duskapi", "moundvark", "murmurling", "nacrolin", "sentrikat", "threadwyrm"] |
+| overlay_species | ["duskapi", "moundvark", "murmurling", "nacrolin", "threadwyrm"] |
 
 ## boki_fly (`content/rules/boki_fly.json`)
 
