@@ -18,19 +18,20 @@ from mathutils.bvhtree import BVHTree
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pip_companions as pc  # noqa: E402
 
-pc.SUN_R = 0.16          # was 0.105: span 0.50 m with the longer rays (27 px at the game camera, was 12)
+pc.SUN_R = 0.18          # was 0.105: a round ball 0.36 m wide, short rays to 1.4 R (span 0.50 m: 27 px at the game camera, was 12)
 pc.CLOUD_W = 0.52        # was 0.36
 pc.TRIS = {"sun": 620, "cloud": 760}
 # the cloud's face needs one smooth belly under it (the lumpy original left creases the decal could not lie on)
 pc.CLOUD_LOBES = [(0.0, 0.04, 0.31), (-0.03, 0.2, 0.24), (-0.31, -0.03, 0.2), (0.29, -0.01, 0.22), (-0.17, -0.19, 0.17), (0.2, -0.18, 0.17),
                   (-0.41, -0.11, 0.11)]
-TILT = math.radians(50)  # the sun disc and both faces lean back this far: the 66 deg camera sees them at 0.98 of full size
+TILT = 0.0               # (was 50 deg: facing is done in code now, warden_anim/pip.json companions.face 'camera': the disc squares up to the active camera in every pose)
 SUN_CELL = 0.145
 CLOUD_CELL = 0.16
 LIFT = 0.007             # m the face sits off the body
 MIN_OUT = 0.002          # m: the build fails when a decal vertex or triangle centre is closer to (or inside) the body
-SUN_RAY = 0.80           # ray length, x SUN_R (was 0.64)
-SUN_FLAT = 0.5           # ray thickness along the view axis (was 0.72)
+SUN_RAY = 0.34           # ray length past the ball's skin, x SUN_R: short and wide like the splash (was 0.64; 0.80 read as a spiky star)
+SUN_RAY_BASE = 0.38      # ray base radius, x SUN_R
+SUN_FLAT = 0.62          # ray thickness along the view axis (was 0.72)
 LEMON = (1.0, 0.86, 0.22)
 CLOUD_COL = (0.97, 0.97, 1.0)
 DROPS = ((-0.22, -0.60, 0.07), (0.02, -0.66, 0.085))   # x, z (x cloud width), radius (x cloud width): the drops hang clear of the nubs
@@ -131,9 +132,9 @@ def sun_body():
     for k in range(n):
         a = math.tau * (k + 0.5) / n
         out = Vector((math.sin(a), 0, math.cos(a)))
-        length = R * SUN_RAY + (R * 0.2 if k % 2 == 0 else 0)
+        length = R * SUN_RAY + (R * 0.14 if k % 2 == 0 else 0)
         m = Matrix.Translation(out * R * 0.82) @ Matrix.Rotation(a, 4, "Y") @ Matrix.Diagonal((1, SUN_FLAT, 1, 1))
-        bmesh.ops.create_cone(bm, cap_ends=True, segments=10, radius1=R * 0.3, radius2=R * 0.055, depth=length + R * 0.18,
+        bmesh.ops.create_cone(bm, cap_ends=True, segments=10, radius1=R * SUN_RAY_BASE, radius2=R * 0.07, depth=length + R * 0.18,
                               matrix=m @ Matrix.Translation((0, 0, (length + R * 0.18) / 2 - R * 0.1)))
     ob = pc.blob("sun", bm, 0.0065, 8, pc.TRIS["sun"])
     ob.data.transform(Matrix.Rotation(TILT, 4, "X"))
