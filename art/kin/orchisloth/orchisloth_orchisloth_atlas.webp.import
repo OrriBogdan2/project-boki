@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://db1pi6vumctqg"
-path="res://.godot/imported/orchisloth_orchisloth_atlas.webp-8d20c6ec3cd49e7841c8b64e53fd4330.ctex"
+path.bptc="res://.godot/imported/orchisloth_orchisloth_atlas.webp-8d20c6ec3cd49e7841c8b64e53fd4330.bptc.ctex"
+path.astc="res://.godot/imported/orchisloth_orchisloth_atlas.webp-8d20c6ec3cd49e7841c8b64e53fd4330.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6a5aff746fdf24d0da1bfd7e9b295f99"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/orchisloth/orchisloth_orchisloth_atlas.webp"
-dest_files=["res://.godot/imported/orchisloth_orchisloth_atlas.webp-8d20c6ec3cd49e7841c8b64e53fd4330.ctex"]
+dest_files=["res://.godot/imported/orchisloth_orchisloth_atlas.webp-8d20c6ec3cd49e7841c8b64e53fd4330.bptc.ctex", "res://.godot/imported/orchisloth_orchisloth_atlas.webp-8d20c6ec3cd49e7841c8b64e53fd4330.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

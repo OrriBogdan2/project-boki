@@ -71,7 +71,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var land: Vector3 = a.get("land", h.pos)
 		var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		# too far to glide to from this height: settle for the closest island spot in reach
-		var reach := maxf(0.0, (h.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.DROP_SPEED)
+		var reach := maxf(0.0, (h.pos.y + 1.0) / HunterFeel.drop_fall * HunterFeel.drop_speed)
 		if to.length() > reach * 0.85 and not a.get("retarget", false):
 			a["retarget"] = true
 			var best := land; var bd := 1e9
@@ -927,9 +927,9 @@ func _choose(m: Match, h: Hunter) -> void:
 		if lead_to != Vector3.INF:
 			a["wander"] = lead_to
 		elif spent or not BotWays.inside(m, a["wander"]):
-			var alive_mobs := m.mobs.filter(func(x): return not x.dead and not (x is Blight))     # (camps level you; the Blight doesn't)
-			if alive_mobs.size() > 0 and randf() < 0.6:
-				a["wander"] = alive_mobs.pick_random().pos
+			var camp := BotCamps.goal(m, h)     # (camps level you; the Blight doesn't)
+			if camp != Vector3.INF and randf() < m.camps.cfg["bot_camp_share"]:
+				a["wander"] = camp
 			else:
 				a["wander"] = m.world.random_ground()
 		goal = a["wander"]; gk = "roam"

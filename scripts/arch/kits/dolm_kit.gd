@@ -370,6 +370,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
+			if h.stun_t > 0.0 or h.downed: KitWindup.broken(self, "lmb")
 		return true
 	if slam.charging():
 		if pressed: slam.extend()            # a punch during the Quakefall charge carries her (and the circle) forward
@@ -397,7 +398,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			if anim_id != "breah_wind" or m.time - anim_at > 3.0: play("breah_wind")
 			_punch_tele(k)
 			HeroVfx.of(m).hold(h, "punch_charge", k)
-			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
+			if not KitLooks.of(m).holding("br_fist"): KitWindup.play(self, "lmb", "br_wind", -6.0)
 			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, COBALT.lerp(Color("9ad0ff"), k))
 	elif lmb_t >= 0.0:
 		# held as long as you like (the data: hold and release; no timeout), full stays full
@@ -738,7 +739,7 @@ func cast_e() -> bool:
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
-		m.later(tell, func(): if is_instance_valid(h): _raise(p2, dir))
+		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
 	return true
 
 ## One rock of the Stone Row rises; the row's rocks rise on the same step and the first to rise carries its sound.
