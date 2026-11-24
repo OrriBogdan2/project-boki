@@ -21,7 +21,7 @@ class's, `ArchKit.dash_charges`). **Vex**'s Slipstep is one charge too (a medium
 Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Vex's rifle falloff (100% to 50% over ten rounds, a pause starts over) now also thins the tracer, flash and impact (`content/vfx/gunslinger.json` `size_k`); her Longneedle yaw lock is 30 deg/s. Table: coord/reports/charges-sv-1116.md.
 
 ## Ultimate ranks vs the source (ult-ranks-source, 2026-11-19)
-Source: briefs/supervive-data/supervive_kits.md (ext/agent-briefs), "R has II/III only" (line 4); owner 11-18: ultimates
+Source: the reference kit data (ext/agent-briefs), "R has II/III only" (line 4); owner 11-18: ultimates
 rank with level, R rank 3 at level 10 (decision 0022 option 2). Ours: `x.per_rank` in content/archetypes/<id>.json, read
 by `HeroUlt.ranked` through `ArchKit.x_def()`; rank text `rank2.ult` / `rank_next.ult` (the R hover and the rank pick).
 Cooldown steps = source seconds x our base / source base (0.5 s); damage steps = the source's % of our base. Before: every
@@ -407,9 +407,9 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.08 (~12 rounds/s, docs/WEAPON_FIRING_DATA.md; was 0.12 until fun audit 11-11), mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
+| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.08 (~12 rounds/s: measured 12.0 hits/s in a magazine by `--ttk-matrix-check`, 9.6/s over a whole string with the ~1.3 s refill gap; `quill_rifle` is Vex's weapon, no rate multiplier; docs/WEAPON_FIRING_DATA.md; was 0.12 until f1faa19908, fun audit 11-11), mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
 | RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) |
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
+| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.08 (~12 rounds/s: measured 12.0 hits/s in a magazine by `--ttk-matrix-check`, 9.6/s over a whole string with the ~1.3 s refill gap; `quill_rifle` is Vex's weapon, no rate multiplier; docs/WEAPON_FIRING_DATA.md; was 0.12 until f1faa19908, fun audit 11-11), mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
 | RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) · **owner**; cd **open** (gap 10) |
 | Q | none | glove | ours |
 | E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, dmg 24 (the source's 0.157 of a target; 36 until 11-11), recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match |
@@ -421,7 +421,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage |
 | Slot | Source | Ours | Verdict | 0.24.4 main (11-12) |
 |---|---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match | still done (rate .12, mag 30, refill .35 s at 40/s; combo check 126 PASS) |
+| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12 (now 0.08, f1faa19908), mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match | still done (rate .12, mag 30, refill .35 s at 40/s; combo check 126 PASS) |
 | RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) | still differ (owner, item 112); cd 6.5 unchanged |
 | Q | none | glove | ours | ours |
 | E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match | still done (charge .6, range 18, width 0.9 each side = 1.8, shave .2/.3, cd 11.5) |
