@@ -573,6 +573,7 @@ func _tick(dt: float) -> void:
 		if float(pd["tick"]) <= 0.0:
 			pd["tick"] = 0.25
 			for f in foes_in(pd["at"], float(pd["r"])):
+				CcSfx.zone_slow(f)
 				f.slow_k = maxf(f.slow_k, float(pd["k"])) if f.slow_t > 0.0 else float(pd["k"])
 				f.slow_t = maxf(f.slow_t, 0.35)
 		if float(pd["left"]) <= 0.0:
