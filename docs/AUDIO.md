@@ -306,6 +306,17 @@ as_ignite, Motley's os_pop, the old Tarek kit's br_rise and br_rumble); they now
 their noise), levelled to cast (-18) and impact (-16). Left: Nightwell's close, Riptide's spout hit and the Tide
 lunge's cast have no own cue.
 
+## Grimble's slug hits (11-22, ext/sfx-grimble-slug-hits)
+The 11-21 silence audit listed Grimble's shots as silent on hit: a rival Grimble's slug made only the shared `hit` (or, past `Juice.FAR`, nothing), and no slug made a sound on a wall or crate. A slug that ends on something solid now plays the `slug_hit` move of `content/vfx/dredge.json` (`MissFx.shot_landed`, called by `Match._shot_end`), whose `sfx` entries pick by surface: a flag the call turns on (`hunter`, `mob`, `wall`) and `mine` (the player fired it).
+
+| Surface | Cue | Source | Level |
+|---|---|---|---|
+| Hunter or Boki | `dredge_hit` (his own pock, `heavy_impact`) | reused take | -6 dB |
+| Monster | `dr_slug_mob` (thick thump, scrap flick; 2 takes, `impact`) | `python3 tools/gen_sfx_grimble.py slugs` | -5 dB |
+| Wall, terrain, crate, dome | `dr_slug_wall` (stone chip, tin whine; 2 takes, `impact`) | same | -6 dB |
+
+Your own slug on a body keeps `Match.on_damage`'s `dredge_hit` (the entries say `"unless": "mine"`, so it never doubles); the wall cue is for everyone. A volley sounds once per surface (`MissFx._landed`, keyed by the volley id `pg`), so seven slugs are at most 3 voices; a slug that runs out of range or is caught plays nothing. A Hunter with no `slug_hit` move is untouched. `--sfx-set-check` ("slug hit" rows) lands a slug on each surface as a rival and as the player, checks the once-per-volley and 3-voice caps, range and caught silence, and that the move plays only Grimble's own files. `--sfx-silence-audit --audit-throw --audit-arch=dredge` (seed 31, 150 s): the `hit dredge>mob|hunter|kin shot` rows with no cue went from 283 (166 + 84 + 33, all beyond 24 m) to 61 (55 + 3 + 3; `hit dredge>mob shot [far]` is now 588 events with `dr_slug_mob` x519). Left: those 61, not traced (likely Broadside's `kx` waves and shots that end on a Mob without passing `Match._shot_end` with the target).
+
 ## The Hunter Wisp's hum
 A downed Hunter's Wisp is slow, heavy and low, so it hums: `wisp_hum`, a 2 s seamless loop of D2 and its low partials, with `wisp_hum_end` as the soft fall-away when the Wisp is revived or bleeds out (`tools/gen_wisp_sfx.py`, set `content/sfx/wisp.json`). It is never a chirp; the Boki wisps chirp. `WispHum` (called by `HunterWisp`) holds it as a keyed loop through `Sfx.loop_hold`, with no state of its own: it reads the Wisp as it is each frame, so a stomp lock (the revive drains, the pitch falls back) or a teammate's carry (the hum rides with the Wisp) just follows. Heard to 20 m, a teammate's a little louder than a rival's, the pitch rising up to 35% as the revive channel fills, and at most 6 hums at once (the nearest to the listener). Numbers: `content/rules/wisp_hum.json`. Check: `--wisp-hum-check`.
 
