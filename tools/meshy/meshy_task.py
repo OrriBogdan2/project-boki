@@ -8,8 +8,9 @@ repo, chmod 600). It is never printed or written anywhere else.
   meshy_task.py create OUT_DIR img1.png [img2 ...] [options]      one image: image-to-3d, 2-4: multi-image-to-3d
   meshy_task.py fetch OUT_DIR TASK_ID [--api multi-image-to-3d]
   meshy_task.py retexture OUT_DIR (TASK_ID | model.glb) front.png [more views] [--model meshy-7] [--original-uv]
-  meshy_task.py rig OUT_DIR (TASK_ID | model.glb) [--height 1.7] [--no-fingers]   auto-rig, 5 credits (sends
-      include_fingers unless --no-fingers, for a task id and an uploaded .glb alike)
+  meshy_task.py rig OUT_DIR (TASK_ID | model.glb) [--height 1.7] [--no-fingers] [--raw-weights]   auto-rig, 5 credits
+      (sends include_fingers unless --no-fingers, for a task id and an uploaded .glb alike; the hand weights are then
+      cleaned by finger_weights.py unless --raw-weights, the download kept as rigged_character.raw.glb)
   meshy_task.py remesh OUT_DIR TASK_ID [--polycount 40000] [--topology quad]
   meshy_task.py edit OUT_DIR ref.png [more refs] --prompt "..." [--model nano-banana-pro]   image-to-image
 
@@ -22,6 +23,7 @@ import argparse
 import base64
 import json
 import os
+import shutil
 import sys
 import time
 import urllib.error
@@ -179,6 +181,26 @@ def rig(o):
     else:
         body.update(input_task_id=o.source, animation_type="biped")
     post(o.out, "rigging", body, {"source": o.source})
+    glb = os.path.join(o.out, "rigged_character.glb")
+    if body["include_fingers"] and not o.raw_weights and os.path.exists(glb):
+        clean_hands(glb)
+
+
+def clean_hands(glb):
+    """finger_weights.py on the rig (the hand skin blended over nearby vertices: a curled hand does not tear); the
+    untouched download stays beside it as rigged_character.raw.glb."""
+    try:
+        import finger_weights
+    except ImportError as e:  # (numpy/scipy missing: keep Meshy's own weights and say so)
+        print("hand weights NOT cleaned (%s); run tools/meshy/finger_weights.py %s" % (e, glb))
+        return
+    j, bin_ = finger_weights.G.read(glb)
+    rep = finger_weights.clean(j, bin_)
+    raw = glb[: -len(".glb")] + ".raw.glb"
+    if not os.path.exists(raw):
+        shutil.copyfile(glb, raw)
+    finger_weights.G.write(glb, j, bin_)
+    print("hand weights cleaned: %d vertices re-weighted (raw copy %s)" % (rep["moved"], os.path.basename(raw)))
 
 
 def remesh(o):
@@ -227,6 +249,7 @@ def main():
     g.add_argument("source", help="a task id, or a .glb to upload")
     g.add_argument("--height", type=float, default=1.7, help="the character's height (m)")
     g.add_argument("--no-fingers", action="store_true", help="include_fingers=false")
+    g.add_argument("--raw-weights", action="store_true", help="keep Meshy's own finger weights (default: finger_weights.py)")
     m = sub.add_parser("remesh")
     m.add_argument("out")
     m.add_argument("task")
