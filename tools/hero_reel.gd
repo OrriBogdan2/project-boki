@@ -333,13 +333,22 @@ func _arena(me: Hunter, combo: Array) -> Dictionary:
 				probe.pos = c
 				for d: Vector2 in dirs:
 					if KnockWall.behind(m, probe, d, WALL_REACH_M) and _open(c - Vector3(d.x, 0, d.y) * GAP_M):
-						m.hunters.erase(probe)
-						probe.queue_free()
+						_drop_probe(probe)
 						return {"me": _ground(c - Vector3(d.x, 0, d.y) * GAP_M), "foe": c, "wall": true, "dir": d}
 	print("PITCH_HERO_WALL none found within %d m" % WALL_SEARCH_M)
+	_drop_probe(probe)
+	return out
+
+
+## The wall probe leaves with its Boki (a kin left behind sims a freed owner: kin.gd _sim_shoulder errors).
+func _drop_probe(probe: Hunter) -> void:
+	var k_v: Kin = probe.kin
+	if k_v != null and is_instance_valid(k_v):
+		m.kins.erase(k_v)
+		k_v.queue_free()
+		probe.kin = null
 	m.hunters.erase(probe)
 	probe.queue_free()
-	return out
 
 
 func _open(p: Vector3) -> bool:
