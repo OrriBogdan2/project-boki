@@ -69,9 +69,9 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in (parts() if only == "" else Array(only.split(","))):
-		print("REEL_MARK %d %s" % [frames, part])
-		await Callable(self, "_p_" + part).call()
+	for part_v: String in (parts() if only == "" else Array(only.split(","))):
+		print("REEL_MARK %d %s" % [frames, part_v])
+		await Callable(self, "_p_" + part_v).call()
 	print("REEL_DONE %d frames in %s" % [frames, frame_dir])
 	main.get_tree().quit(0)
 
@@ -151,7 +151,7 @@ func _close_cam() -> void:
 
 func _save_frame() -> void:
 	steps += 1
-	if steps % (60 / FRAME_FPS) == 0:
+	if steps % (int(60 / float(FRAME_FPS))) == 0:
 		super._save_frame()
 
 # ------------------------------------------------------------------ the parts
@@ -259,7 +259,7 @@ func _p_r() -> void:
 func _p_r_run() -> void:
 	P.ak.cd["x"] = 0.0
 	var rec := {}
-	var run := func(t: float) -> void:
+	var run_v := func(t: float) -> void:
 		P.inp["move"] = _toward_far(t)
 		if _at(t, 0.7):
 			r_down = true
@@ -267,7 +267,7 @@ func _p_r_run() -> void:
 			rec["at"] = P.pos
 		if rec.has("at") and not rec.has("m") and t >= 1.2:
 			rec["m"] = Vector2(P.pos.x - rec["at"].x, P.pos.z - rec["at"].z).length()
-	await _travel("Run, then R on the move", 3.2, run)
+	await _travel("Run, then R on the move", 3.2, run_v)
 	print("REEL_RRUN %s moved %.2f m in the 0.5 s after the R press" % [who, rec.get("m", -1.0)])
 
 func _r_presses(t: float) -> void:
@@ -355,13 +355,13 @@ func _travel(text: String, secs: float, each: Callable) -> void:
 func _east_run() -> float:
 	var W = m.world
 	var lv := int(W.level[W.idx(int(home.x), int(home.z))])
-	var run := 0
-	while run < 40:
-		var i: int = W.idx(int(home.x) + run + 1, int(home.z))
+	var run_v := 0
+	while run_v < 40:
+		var i: int = W.idx(int(home.x) + run_v + 1, int(home.z))
 		if W.kind[i] != World.T_GROUND or int(W.level[i]) != lv:
 			break
-		run += 1
-	return float(run)
+		run_v += 1
+	return float(run_v)
 
 ## East, towards the far dummy, until 2.2 s in or STOP_GAP short of it.
 func _toward_far(t: float) -> Vector2:
@@ -378,7 +378,7 @@ func _p_mantle() -> void:
 	if rims.is_empty():
 		print("REEL_MANTLE no rim")
 		return
-	var f: Dictionary = rims[rims.size() / 2]
+	var f: Dictionary = rims[int(rims.size() / 2.0)]
 	var dv := Vector2(f["d"])
 	var a: Vector2i = f["a"]
 	var face := Vector2(a.x + 0.5, a.y + 0.5) + dv * 0.5

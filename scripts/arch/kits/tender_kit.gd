@@ -182,6 +182,7 @@ func _dress_ember(s: Dictionary) -> void:
 	var from := Vector3(h.pos.x + d2.x * 0.5 + side.x, h.pos.y + 0.72, h.pos.z + d2.y * 0.5 + side.y)
 	s["pos"] = from
 	s["start"] = from
+	s["muzzle"] = HeroVfx.of(m).anchor_pos(h, "hand_r" if right else "hand_l")      # drawn out of that hand
 	var size_k: float = float(lmb_def()["size_k"]) if emp else 1.0
 	s["r"] = float(s["r"]) * size_k          # the hit grows with the look
 	lk().skin(s, "ember", {}, size_k)
@@ -416,6 +417,7 @@ func _throw_seed() -> void:
 		if e != null and e.team != h.team and not e.dead:
 			_stick(e)
 	var extra := {"src": "abil", "ab": "utility", "tracer": 0.0, "kb": 0.0, "kx": on_hit}
+	ShotOrigin.draw_from(extra, h, "rmb")      # out of her hand
 	m.spawn_shot(
 			h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5,
 			col_of(rmb_def()), extra)
@@ -459,9 +461,9 @@ func _tick_burrs(dt: float) -> void:
 		var t: Ent = tv if is_instance_valid(tv) else null
 		var key := "burr%d" % int(b["id"])
 		var gone := t == null or t.dead
-		var held := not gone and not (h.dead or h.downed) and h.pos.distance_to(t.pos) <= float(sd["leash"])
-		b["build"] = float(b["build"]) + (dt if held else -dt * float(sd["unwind"]))
-		if gone or (float(b["build"]) <= 0.0 and not held):
+		var held_v := not gone and not (h.dead or h.downed) and h.pos.distance_to(t.pos) <= float(sd["leash"])
+		b["build"] = float(b["build"]) + (dt if held_v else -dt * float(sd["unwind"]))
+		if gone or (float(b["build"]) <= 0.0 and not held_v):
 			_burr_off(b)
 			continue
 		var k := clampf(float(b["build"]) / need, 0.0, 1.0)
@@ -469,8 +471,8 @@ func _tick_burrs(dt: float) -> void:
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
-				{"b": t.pos + Vector3(0, 0.8, 0), "col": field()["vine"] if held else Color("ff8a6a"),
-				"a": lerpf(0.3, 0.9, k) if held else 0.25})
+				{"b": t.pos + Vector3(0, 0.8, 0), "col": field()["vine"] if held_v else Color("ff8a6a"),
+				"a": lerpf(0.3, 0.9, k) if held_v else 0.25})
 		if k >= 1.0:
 			_burr_off(b)
 			_burst(t)
@@ -492,10 +494,10 @@ func _show_field(b: Dictionary, key: String, at: Vector3, k: float, dt: float) -
 ## tender.json's "field", its palette names turned into colours (read once).
 func field() -> Dictionary:
 	if field_look.is_empty():
-		var d := HeroVfx.data("tender")
-		field_look = (d["field"] as Dictionary).duplicate()
+		var dd := HeroVfx.data("tender")
+		field_look = (dd["field"] as Dictionary).duplicate()
 		for key in ["col", "rim", "vine"]:
-			field_look[key] = Color(String(d["palette"][field_look[key]]))
+			field_look[key] = Color(String(dd["palette"][field_look[key]]))
 	return field_look
 
 func _burr_off(b: Dictionary) -> void:
@@ -783,7 +785,7 @@ func _start_call() -> bool:
 	stats["calls"] += 1
 	_call_loops(who)
 	play("mm_call")
-	m.sfx("tend_call", h.pos, -1.0, 1.0)
+	KitWindup.play(self, "x", "tend_call", -1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
 	vfx("call")
 	vfx("call_land", who.pos)
@@ -853,6 +855,7 @@ func _call_end(done: bool) -> void:
 	if not done or who == null:
 		stats["broken"] += 1
 		_call_snap(who)
+		KitWindup.broken(self, "x")
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return

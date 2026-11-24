@@ -23,8 +23,8 @@ and into each other. Plants his hammer where the fight is and heals the squad th
    beacon, shows foes near it to your team, and comes back hitting on a second tap.
 4. **Hold LMB** to spin the hammer up (a glint on its head, a flare when it's full), then let go for a
    **Crushing Blow**: a flaming crescent in front that carries you forward.
-5. Knock someone into a wall or into another foe with a Bash, Shield Charge or full Crushing Blow and
-   they're **Crushed**: stunned, and you heal.
+5. Knock someone into a wall with a 360 Smash, Shield Charge or full Crushing Blow and
+   they're **Crushed**: stunned for 1s and hit for 8 (no heal).
 6. **360 Smash** (Shift): a short dash, then one spinning hit all round you; with the aegis up it's a
    **Shield Charge**, invulnerable for its length.
 7. **Mending Ground** (E): a green light comes down on your planted hammer (or on you), then heals
@@ -34,7 +34,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 | Do this | And you get |
 |---|---|
-| A Crushing Blow, 360 Smash or Shield Charge into a wall or another foe | Crushed: stun 1.0, +8 damage |
+| A Crushing Blow, 360 Smash or Shield Charge into a wall | Crushed: stun 1.0, +8 damage |
 | Shift with the aegis raised | Shield Charge: invulnerable, heavier knock |
 | Throw the hammer, then E | Mending Ground lands where the hammer stands |
 | Hold LMB, then Shift | A short plain dash for half a charge; the spin keeps charging |
@@ -67,16 +67,16 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them. |
-| Passive: Crushed | Knocking a foe into a wall or another foe stuns it. |
+| Passive: Crushed | Knocking a foe into a wall stuns it. |
 | Dash: 360 Smash | Short dash ending in a spinning hit; with aegis up, Shield Charge. |
-| RMB: Aegis | Hold to block shots from the front; with it up, dash is a Shield Charge. |
+| RMB: Aegis | Hold to block shots from the front; your dash key becomes Shield Charge. |
 | E: Mending Ground | Healing zone around your hammer for 4s, ending in a burst. |
 | Hunter ultimate: Faultline | Plant and slam: the ground erupts down a lane, throwing foes up. |
 | Weapon: War Hammer & Aegis | Tap throws the hammer, tap again recalls; hold to spin and slam. |
 
 ### Abilities in full
 
-**Crushed (passive).** Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
+**Crushed (passive).** Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall stuns it 1.0 (8 damage).
 
 **360 Smash (dash, Shift, 8s cooldown).** 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
 
