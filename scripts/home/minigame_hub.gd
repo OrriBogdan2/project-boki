@@ -14,6 +14,9 @@ extends RefCounted
 
 const TITLE := "Play with Your Boki"
 
+## The game picked in another zone: it starts on arrival there, so the picker is not a second stop.
+static var queued := ""
+
 static func rules() -> Dictionary:
 	return Content.rules("minigames")
 
@@ -81,6 +84,12 @@ static func _stands(g: Dictionary, zone: String) -> bool:
 
 ## Opens the picker on the Home screen (home is the Home scene, built and showing).
 static func open(home) -> void:
+	var want := queued
+	queued = ""
+	for g in listed(home):
+		if g["id"] == want and g["game"] != null:
+			g["game"].use()
+			return
 	var v: VBoxContainer = home._new_panel(TITLE, 560.0)
 	var games := listed(home)
 	var sub := "Pick a game to play with your Boki."
@@ -104,10 +113,12 @@ static func _card(home, g: Dictionary) -> Control:
 		col.add_child(UI.label("Locked: it stands by the Training post", 12, UI.MUTED))
 	return card
 
-## Closes the picker and starts the game; one in another zone travels there and opens the picker on arrival.
+## Closes the picker and starts the game; one in another zone travels there and starts on arrival (the picker opens
+## there if it cannot).
 static func start(home, g: Dictionary) -> void:
 	home._close_panel()
 	if g["game"] == null:
-		home.hway.hop(String(g["zone"]), true)
+		if home.hway.hop(String(g["zone"]), true):
+			queued = String(g["id"])
 	else:
 		g["game"].use()
