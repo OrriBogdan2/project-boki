@@ -6,7 +6,7 @@ extends RefCounted
 ## ("rmb", "e_drag"...). An entry not refreshed for AimDraw.KEEP (0.1 s of match time) disappears, so
 ## stopping the calls hides it; `hide` drops it at once, and a `"dur": secs` param keeps a one-off (a
 ## placed ring, a stuck grenade's cone) up that long without more calls. A second call with the same
-## id replaces the first. Everything draws through one pooled ImmediateMesh per match (AimDraw): no
+## id replaces the first. Everything draws through one pooled ArrayMesh per match (AimDraw): no
 ## node is made per call or per frame. A Boki merge clears a hunter's set and keeps it clear: AimDraw
 ## drops every entry of a merged or transforming hunter (whichever path started the merge), and
 ## ArchKit.drop_holds() clears it on the spot.
