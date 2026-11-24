@@ -14,7 +14,8 @@ const SLOT_TAG := "sl"  # then the claimed and the stolen Boki in the slots (Cap
 const CHAN_TAG := "ch"  # then the channel's target nid ("" none) and its seconds left (ChannelBar)
 const REACH_TAG := "rch"  # then the reach wire (DredgeKit.net_reach; [] for every other Hunter)
 const MOVE_TAG := "hz"  # then the HazardMoves move (an enum int)
-const TAIL := 12  # fields: TAG, level, SLOT_TAG, claimed, stolen, CHAN_TAG, target, left, REACH_TAG, reach, MOVE_TAG, move
+## fields: TAG, level, SLOT_TAG, claimed, stolen, CHAN_TAG, target, left, REACH_TAG, reach, MOVE_TAG, move
+const TAIL := 12
 
 
 static func extra(h: Hunter) -> Array:
@@ -22,7 +23,8 @@ static func extra(h: Hunter) -> Array:
 	var slots := Capture.slots(h)
 	var reach: Array = (h.ak as DredgeKit).net_reach() if h.ak is DredgeKit else []
 	var left := snappedf(maxf(0.0, ch[1]), 0.05)
-	return [TAG, h.lvl, SLOT_TAG, slots[0], slots[1], CHAN_TAG, ch[0], left, REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)]
+	var slot_part := [SLOT_TAG, slots[0], slots[1]]
+	return [TAG, h.lvl] + slot_part + [CHAN_TAG, ch[0], left, REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)]
 
 
 static func apply(h: Hunter, it: Array) -> void:
