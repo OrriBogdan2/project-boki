@@ -650,8 +650,8 @@ func _tab_controls(v: VBoxContainer) -> void:
 	var shown := {}
 	var psc = Game.main.screen_node() if Game.main else null
 	var solo: bool = psc is Match and (psc as Match).player != null and not Life.has_mates(psc, (psc as Match).player)
-	for an in (["base", "ping", "pass_lead", "separate"] + MateLook.ACTIONS if solo else []):
-		shown[an] = true      # solos: the keys that need a squadmate are not listed (they stay bound for trios)
+	for an in ["base", "ping", "pass_lead", "separate"] + MateLook.ACTIONS if solo else []:
+		shown[an] = true  # solos: the keys that need a squadmate are not listed (they stay bound for trios)
 	var extra: Array = []
 	for g in groups:
 		var first_extra := v.get_child_count()
