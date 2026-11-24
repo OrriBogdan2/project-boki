@@ -3,8 +3,9 @@ extends RefCounted
 ## Boki, in the engine (--normal-k=0 leaves a Meshy body's normal map out, for an A/B).
 ## <dir>/turntable.png, faces.png, coats.png, anim_<clip>.png (a strip of each clip), match.png (match camera),
 ## farm.png and farm_close.png (farm camera) and frames/<clip>/NNN.png for the GIFs (tools/boki/review_gifs.sh).
-## --washout=<ids> [--close] [--compat]: a Boki's colour against its own atlas flat, at the match camera (or
-## the 3.3 m view; --compat: on the Compatibility renderer, the web and mobile look).
+## --washout=<ids> [--close|--stage=dex] [--compat] [--coat=<param>:<value>] [--card-exposure=<x>]: a Boki's
+## colour against its own atlas flat (no grade), at the match camera, the 3.3 m view or the dex / portrait card;
+## --compat: on the Compatibility renderer, the web and mobile look.
 ## Needs a renderer.
 
 const YAWS := 8
@@ -444,7 +445,8 @@ func _far(file: String, dist: float, boki_scale: float, picks: Array, yaw: float
 ## reveal card, the dex): per species <id>_blank.png (ground only), <id>_master.png (the painted atlas flat, linear
 ## tonemap: the Bokidex colours) and <id>_game.png (as the game dresses it).
 func _washout(ids: PackedStringArray) -> void:
-	var close := "--close" in OS.get_cmdline_user_args()
+	var dex_stage := "--stage=dex" in OS.get_cmdline_user_args()
+	var close := dex_stage or "--close" in OS.get_cmdline_user_args()
 	if "--compat" in OS.get_cmdline_user_args() and Look.full_renderer():
 		# the web / mobile look: run the same shots in a child game on the Compatibility renderer
 		var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-method", "gl_compatibility",
@@ -455,6 +457,8 @@ func _washout(ids: PackedStringArray) -> void:
 	for id in ids:
 		species = id
 		var vp := _stage(Vector2i(512, 512) if close else Vector2i(1920, 1080))
+		if dex_stage:
+			_card_stage(vp)
 		var cam := Camera3D.new()
 		vp.add_child(cam)
 		cam.make_current()
@@ -472,6 +476,14 @@ func _washout(ids: PackedStringArray) -> void:
 		var env := (vp.get_child(0) as WorldEnvironment).environment
 		var kr := _kin(vp)
 		var k := kr[0] as Node3D
+		for a in OS.get_cmdline_user_args():    # --coat=<param>:<value>: try a coat look value on every Boki surface
+			if a.begins_with("--coat="):
+				var kv := a.substr(7).split(":")
+				for mi in k.find_children("*", "MeshInstance3D", true, false):
+					for si in (mi as MeshInstance3D).get_surface_override_material_count():
+						var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+						if sm != null and sm.get_shader_parameter(kv[0]) != null:
+							sm.set_shader_parameter(kv[0], float(kv[1]))
 		k.basis = Basis(Vector3.UP, PI - 0.6) if close else Basis(Vector3.RIGHT, -LEAN) * Basis(Vector3.UP, PI * 0.8)
 		await RenderingServer.frame_post_draw
 		(kr[1] as BokiRig).seek(0.5)
@@ -479,9 +491,15 @@ func _washout(ids: PackedStringArray) -> void:
 		await _save_crop(vp, crop, "%s_blank.png" % id, close)
 		k.visible = true
 		await _save_crop(vp, crop, "%s_game.png" % id, close)
+		# the master is the atlas itself: no tone curve, no grade, glow, fog or SSAO on top of it
 		var tone := env.tonemap_mode
 		env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 		env.tonemap_exposure = 1.0
+		var fx := [env.adjustment_enabled, env.glow_enabled, env.fog_enabled, env.ssao_enabled]
+		env.adjustment_enabled = false
+		env.glow_enabled = false
+		env.fog_enabled = false
+		env.ssao_enabled = false
 		for mi in k.find_children("*", "MeshInstance3D", true, false):
 			var inst := mi as MeshInstance3D
 			for si in inst.mesh.get_surface_count():
@@ -493,7 +511,35 @@ func _washout(ids: PackedStringArray) -> void:
 					inst.set_surface_override_material(si, flat)
 		await _save_crop(vp, crop, "%s_master.png" % id, close)
 		env.tonemap_mode = tone
+		env.adjustment_enabled = fx[0]
+		env.glow_enabled = fx[1]
+		env.fog_enabled = fx[2]
+		env.ssao_enabled = fx[3]
 		vp.queue_free()
+
+
+## The dex / portrait card's stage (DexView, KinPortrait: Look.card_environment and their key and rim lights).
+func _card_stage(vp: SubViewport) -> void:
+	for ch in vp.get_children():
+		vp.remove_child(ch)
+		ch.free()
+	var env := WorldEnvironment.new()
+	var ex := -1.0
+	for a in OS.get_cmdline_user_args():    # --card-exposure=<x>: try another exposure on the card stage
+		if a.begins_with("--card-exposure="):
+			ex = float(a.substr(16))
+	env.environment = Look.card_environment(ex)
+	vp.add_child(env)
+	var key := DirectionalLight3D.new()
+	key.rotation_degrees = Vector3(-35, 200, 0)
+	key.light_color = Color("fff1dc")
+	key.light_energy = 1.15
+	vp.add_child(key)
+	var rim := DirectionalLight3D.new()
+	rim.rotation_degrees = Vector3(-10, 20, 0)
+	rim.light_color = Color("a8c8ff")
+	rim.light_energy = 0.5
+	vp.add_child(rim)
 
 
 func _save_crop(vp: SubViewport, crop: Rect2i, file: String, whole := false) -> void:
