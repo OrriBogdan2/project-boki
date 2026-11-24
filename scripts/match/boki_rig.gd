@@ -19,37 +19,37 @@ const PATH := "res://art/kin/%s/%s.glb"
 const FRAME := {
 	"cindowary":
 	{
-		"head": Vector3(0, 0.467, -0.105),
+		"head": Vector3(0, 0.439, -0.111),
 		"top": 0.464,
-		"carry": Vector3(0, 0.517, 0.042),
-		"ear_tip": Vector3(0.0199, 0.464, 0.0379),
+		"carry": Vector3(0, 0.517, 0.0416),
+		"ear_tip": Vector3(0.0196, 0.464, 0.0375),
 		"tail_tip": Vector3(0, 0.264, 0.124),
 		"tip_bone": "hips",
 		"hip": 0.184,
 		"marks":
 		{
-			"left flank": Vector3(-0.0492, 0.27, 0.0256),
-			"right flank": Vector3(0.0492, 0.27, 0.0256),
-			"back": Vector3(0, 0.37, 0.0667),
-			"chest": Vector3(0, 0.25, -0.0731)
+			"left flank": Vector3(-0.0485, 0.27, 0.0251),
+			"right flank": Vector3(0.0485, 0.27, 0.0251),
+			"back": Vector3(0, 0.37, 0.0664),
+			"chest": Vector3(0, 0.25, -0.0742)
 		},
 		"coat": {"paint_glow": 1.0, "paint_glow_color": Color(1.0, 0.478, 0.165), "paint_glow_width": 0.12},
 	},
 	"basaltoad":
 	{
-		"head": Vector3(0, 0.347, -0.178),
+		"head": Vector3(0, 0.355, -0.167),
 		"top": 0.464,
-		"carry": Vector3(0, 0.517, 0.0654),
-		"ear_tip": Vector3(0.054, 0.464, 0.0588),
-		"tail_tip": Vector3(0, 0.264, 0.197),
+		"carry": Vector3(0, 0.517, 0.07),
+		"ear_tip": Vector3(0.0574, 0.464, 0.0631),
+		"tail_tip": Vector3(0, 0.264, 0.208),
 		"tip_bone": "hips",
 		"hip": 0.184,
 		"marks":
 		{
-			"left flank": Vector3(-0.134, 0.27, 0.0391),
-			"right flank": Vector3(0.134, 0.27, 0.0391),
-			"back": Vector3(0, 0.37, 0.105),
-			"chest": Vector3(0, 0.25, -0.119)
+			"left flank": Vector3(-0.142, 0.27, 0.0423),
+			"right flank": Vector3(0.142, 0.27, 0.0423),
+			"back": Vector3(0, 0.37, 0.111),
+			"chest": Vector3(0, 0.25, -0.124)
 		}
 	},
 	"nimbostrich":

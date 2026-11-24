@@ -250,11 +250,11 @@ AUTO = {  # id: overrides on AUTO_BASE
     "casquebill": BORROWED,
     # eyes read off the fit sheet's painted eyes (front view seen from -z, the sheet's own front view is the back)
     "basaltoad": {**BORROWED, "sat": 0.3, "gain": 1.4, "tint": (0.96, 1.0, 0.88),  # three-patch fit (skin, moss, tower) to the 2D front, 11-24
-                  "eye_c": (0.106, 0.347, -0.163), "eye_r": (0.032, 0.03, 0.018), "eye_yaw": 0.5, "iris": "edc15a"},
+                  "eye_c": (0.105, 0.355, -0.142), "eye_r": (0.018, 0.019, 0.010), "eye_yaw": 0.5, "iris": "edc15a"},
     # lit leather read pink (sat 0.68 vs the 2D 0.48); the embers and the brass keep their own saturation, and a crack
     # a texel wide keeps a texel of the atlas (hot: reach in texture texels)
     "cindowary": {**BORROWED, "sat": 0.43, "gain": 1.7, "tint": (0.9, 1.0, 1.02), "hot_sat": 0.95, "hot": 3,  # fit: leather, black, blue
-                  "eye_c": (0.026, 0.467, -0.098), "eye_r": (0.011, 0.011, 0.006), "eye_yaw": 0.6, "iris": "f76e35"},
+                  "eye_c": (0.03, 0.439, -0.091), "eye_r": (0.011, 0.011, 0.006), "eye_yaw": 0.6, "iris": "f76e35"},
     "caecilith": {},
     "glintmole": {},
     "rimeshrew": {},

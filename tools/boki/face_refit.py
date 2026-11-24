@@ -23,7 +23,7 @@ SKIN = 0.002
 # id: (x, y) of the right eye's centre on the scan (its painted eye, or the socket the cover painted out, read off a
 # front orthographic render of the coat), and the scale on the lids' size that covers it
 EYES = {"puddlet": ((0.080, 0.267), 1.29), "burrlet": ((0.070, 0.213), 1.0),
-        "basaltoad": ((0.106, 0.347), 1.0), "cindowary": ((0.026, 0.467), 1.0)}
+        "basaltoad": ((0.105, 0.355), 1.1), "cindowary": ((0.03, 0.439), 0.8)}
 
 
 class Glb:
