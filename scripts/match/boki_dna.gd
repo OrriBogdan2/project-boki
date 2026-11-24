@@ -124,12 +124,16 @@ func _birthmark(d: Dictionary, mats: Array) -> void:
 	col = col.darkened(0.5) if col.v > 0.45 else col.lightened(0.55)
 	var at: Vector3 = frame["marks"][String(b[1])]
 	var mark := _stick("hips", at, Models.sphere(0.05, 8), Models.toon(col, false), "Birthmark", Vector3(0.9, 0.9, 0.9))
-	mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if mark:
+		mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
-## A small mesh on a bone, at `at` in the model's rest pose.
+## A small mesh on a bone, at `at` in the model's rest pose. Null when the skeleton lacks that bone.
 func _stick(bone: String, at: Vector3, mesh: Mesh, mat: Material, node_name: String, scl: Vector3) -> MeshInstance3D:
+	var bi := skel.find_bone(bone)
+	if bi < 0:
+		return null
 	var hold := BoneAttachment3D.new()
 	hold.bone_name = bone
 	skel.add_child(hold)
-	var local := skel.get_bone_global_rest(skel.find_bone(bone)).affine_inverse() * at
+	var local := skel.get_bone_global_rest(bi).affine_inverse() * at
 	return Models.part(hold, mesh, mat, local, scl, Vector3.ZERO, node_name)
