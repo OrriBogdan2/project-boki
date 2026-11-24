@@ -12,6 +12,8 @@ const MISS_OFF := 3.0      # m a missed aim is off the target
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
 const LOOKOUT_OFF := 7.0     # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
+const REST_S := 1.0   # s of standing with the stick neutral after which the stuck-hop timer starts over
+
 const KEYS := [      # the action inputs
 		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
@@ -29,6 +31,7 @@ static var _wait_run := 0.0
 static var last_step := -1
 static var still_t := 0.0     # s the player has stood in one place while walking
 static var last_pos := Vector3.INF
+static var _rest_t := 0.0      # s the stick has been neutral (waiting for the next foe is not being stuck)
 static var recalled_once := false  # the summon step: the first window is called back early, as a hasty player would
 
 static func drive(m: Match) -> void:
@@ -40,6 +43,7 @@ static func drive(m: Match) -> void:
 			" pts=", m.player.skill_pts, " kin=", m.player.kin != null, " seen=", tu.seen.keys())
 		last_step = tu.step
 	var p := m.player
+	_rest_t = _rest_t + Match.DT if p.inp["move"] == Vector2.ZERO else 0.0      # (last frame's stick)
 	for k in KEYS:
 		p.inp[k] = false
 	p.inp["sec_hold"] = false     # (a step that ends mid-hold must let go: a stuck hold charges forever)
@@ -49,7 +53,7 @@ static func drive(m: Match) -> void:
 		_log(tu)
 	if human and _read(tu):
 		return
-	still_t = still_t + Match.DT if p.pos.distance_to(last_pos) < 0.02 else 0.0
+	still_t = still_t + Match.DT if _rest_t < REST_S and p.pos.distance_to(last_pos) < 0.02 else 0.0
 	last_pos = p.pos
 	var goto := func(at: Vector3, r := 0.5):
 		var d := Vector2(at.x - p.pos.x, at.z - p.pos.z)

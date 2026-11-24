@@ -163,6 +163,7 @@ func run(main: Node) -> void:
 	await _scarf(main)
 	await _rime_ends(main)
 	_dots(m)
+	_decor_rings()
 	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
 	await _rocket(main)
@@ -1486,6 +1487,30 @@ func _streak_span(v: HeroVfx, fps: float) -> float:
 	dot.queue_free()
 	_clear(v)
 	return span
+
+
+## DECISIONS "a ground ring means gameplay": the moves that are a dash, a landing, a reset or a cast with no area
+## carry no ring layer, and no scorch under a wind-up (docs/VFX_QUALITY.md, "Ground ring audit").
+const NO_RING := {
+	"ashwick": ["flashover"],
+	"dredge": ["anchor_slam", "reel"],
+	"gil": ["dive", "tide_lunge", "beached", "wave_land"],
+	"gunslinger": ["e_fire"],
+	"juggernaut": ["slam_hit"],
+}
+const NO_SCORCH := {"dolm": ["row_tell"], "rimewright": ["rime", "rime_melt"]}
+
+
+func _decor_rings() -> void:
+	for table: Dictionary in [NO_RING, NO_SCORCH]:
+		var kind := "ring" if table == NO_RING else "scorch"
+		for arch: String in table:
+			var file := FileAccess.get_file_as_string("res://content/vfx/%s.json" % arch)
+			var moves: Dictionary = JSON.parse_string(file)["moves"]
+			for move: String in table[arch]:
+				var layers: Array = (moves[move] as Dictionary).get("fx", []) if moves.has(move) else []
+				var n := layers.filter(func(l: Dictionary): return l["p"] == kind).size()
+				ok(n == 0, "%s/%s draws no %s layer (a decoration, not an area)" % [arch, move, kind])
 
 
 ## Sable's Encore ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and the
