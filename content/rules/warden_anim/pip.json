@@ -5,9 +5,9 @@
 	"companions": {
 		"doc": "Meeko's sun and raincloud float round her on a mostly horizontal circle (scripts/heroes/warden_companions.gd): cut out of the body mesh at load, each on its own pivot instead of a shoulder bone. Metres, seconds, degrees; 'at' is the circle's centre in skeleton space, radius [side, front-back], phase 0 = her right.",
 		"bone": "hips", "at": [0.0, 1.0, 0.2], "radius": [1.1, 1.05], "period": 4.0, "dir": 1,
-		"wobble": [0.25, 5.3], "bob": 0.07, "lag": 7.0, "trail_max": 0.12, "face": "forward",
+		"wobble": [0.25, 5.3], "bob": 0.07, "lag": 7.0, "trail_max": 0.12, "face": "camera", "view_clear": true, "view_margin": 0.06,
 		"sway_deg": 8.0, "lean_deg": 5.0, "clear_min": 0.05,
-		"avoid": [{"bone": "head", "r": 0.30}, {"bone": "headfront", "r": 0.18}, {"bone": "head_end", "r": 0.22}, {"bone": "hand.R", "r": 0.16}, {"bone": "hand.L", "r": 0.16}, {"bone": "Bone_046", "r": 0.15}, {"bone": "Bone_047", "r": 0.12}, {"bone": "Bone_049", "r": 0.15}, {"bone": "Bone_050", "r": 0.12}, {"bone": "Bone_057", "r": 0.2}, {"bone": "Bone_059", "r": 0.2}],
+		"avoid": [{"bone": "hips", "r": 0.36}, {"bone": "root", "r": 0.30}, {"bone": "thigh.L", "r": 0.16}, {"bone": "thigh.R", "r": 0.16}, {"bone": "foot.L", "r": 0.14}, {"bone": "foot.R", "r": 0.14}, {"bone": "upper_arm.L", "r": 0.14}, {"bone": "upper_arm.R", "r": 0.14}, {"bone": "head", "r": 0.30}, {"bone": "headfront", "r": 0.18}, {"bone": "head_end", "r": 0.22}, {"bone": "hand.R", "r": 0.16}, {"bone": "hand.L", "r": 0.16}, {"bone": "Bone_046", "r": 0.15}, {"bone": "Bone_047", "r": 0.12}, {"bone": "Bone_049", "r": 0.15}, {"bone": "Bone_050", "r": 0.12}, {"bone": "Bone_057", "r": 0.2}, {"bone": "Bone_059", "r": 0.2}],
 		"list": [
 			{"id": "sun", "surfaces": ["cloth-sun", "glow-sun", "eyes-mood_sun"], "at": [-0.40, 1.10, -0.04], "phase_deg": 180.0, "bob_period": 2.7, "bob_phase": 0.0, "bone": "pauldron.L", "anchors": ["weapon_muzzle", "anchor_hang_lantern", "anchor_lantern_top"]},
 			{"id": "cloud", "surfaces": ["skin-cloud", "cloth-cloud", "ice-drop", "eyes-mood_cloud"], "at": [0.40, 1.06, -0.04], "phase_deg": 0.0, "bob_period": 3.3, "bob_phase": 1.9, "bone": "pauldron.R", "anchors": []}

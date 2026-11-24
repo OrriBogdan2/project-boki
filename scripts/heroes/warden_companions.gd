@@ -13,7 +13,8 @@ extends RefCounted
 ##   "bob": m, "lag": 1/s of the ease behind her, "trail_max": m the centre may fall behind
 ##   "avoid": [{"bone", "r"}]: spheres on her head and hands (contract bone names, r in metres) a part is pushed out of
 ##     when a lunge or an ult pose brings them to it (the push opens at once, eases off); "clear_min": the gap checks want
-##   "face": "forward" (as modelled) or "outward", "sway_deg": a slow yaw, "lean_deg": a roll into the turn
+##     "view_clear": true (+ "view_margin": m of extra air) measures that gap across the camera's line of sight (on screen), so a part never overlaps her silhouette
+##   "face": "forward" (as modelled), "outward", or "camera" (its front, as modelled, squares up to the active camera), "sway_deg": a slow yaw, "lean_deg": a roll into the turn
 ##   "list": [{"id", "surfaces": [material names], "at": [x, y, z] the part's centre at rest, "phase_deg" (0 = her
 ##     right), "bob_period", "bob_phase", "bone": the bone it was skinned to, "anchors": [empties that ride it]}]
 ## Cosmetic only; nothing here touches a kit (the FX empties on the sun follow it, so a shot leaves the sun).
@@ -37,6 +38,8 @@ class Part:
 	var pos := Vector3.ZERO           # last placed (skeleton space)
 	var radius := 0.0                 # the part's furthest vertex from its centre (skeleton space)
 	var push := Vector3.ZERO          # how far the avoid spheres moved it off its circle
+	var look := Basis.IDENTITY        # "face": "camera": the turn that points its front at the camera (eased)
+	var looked := false
 
 var skel: Skeleton3D
 var d: Dictionary
@@ -180,16 +183,48 @@ func spot(c: Vector3, a: float, bob_y: float) -> Vector3:
 ## `at` moved out of the avoid spheres (head, hands) by the part's own size: the push opens at once and eases off.
 func _clear(p: Part, at: Vector3, dt: float) -> Vector3:
 	var q := at
-	for _pass in 2:
+	var vdir := _view_dir(at)
+	for _pass in 3:
 		for av in avoid:
 			var c := skel.get_bone_global_pose(int(av[0])).origin
 			var d := q - c
-			var need := float(av[1]) + p.radius
+			if vdir != Vector3.ZERO:
+				d -= vdir * d.dot(vdir)      # (the gap on screen: along the line of sight does not count)
+			var need := float(av[1]) + p.radius + (float(d_margin()) if vdir != Vector3.ZERO else 0.0)
 			if d.length() < need:
-				q = c + (d.normalized() if d.length() > 0.001 else Vector3.UP) * need
+				var dn := d.normalized() if d.length() > 0.001 else (Vector3.UP - vdir * vdir.y).normalized()
+				q += dn * (need - d.length())
 	var off := q - at
 	p.push = off if off.length() >= p.push.length() else p.push.lerp(off, 1.0 - exp(-10.0 * dt))
 	return at + p.push
+
+func d_margin() -> float:
+	return float(d.get("view_margin", 0.0)) * maxf(skel.global_basis.y.length(), 0.01)
+
+## The active camera's line of sight to `at` (skeleton space), or ZERO when "view_clear" is off or there is no camera.
+func _view_dir(at: Vector3) -> Vector3:
+	if not bool(d.get("view_clear", false)) or not skel.is_inside_tree():
+		return Vector3.ZERO
+	var cam := skel.get_viewport().get_camera_3d()
+	if cam == null:
+		return Vector3.ZERO
+	return (skel.global_basis.inverse() * (skel.global_transform * at - cam.global_position)).normalized()
+
+## Eases `p.look` (in the data's axes) so its front, -Z as modelled, points at the active camera. False when there is no camera.
+func _face_camera(p: Part, dt: float) -> bool:
+	if not skel.is_inside_tree():
+		return false
+	var cam := skel.get_viewport().get_camera_3d()
+	if cam == null:
+		return false
+	var v := skel.global_basis.inverse() * (cam.global_position - skel.global_transform * p.pos)
+	v = axes.orthonormalized().inverse() * v
+	if v.length() < 0.001:
+		return false
+	var want := Basis.looking_at(v.normalized(), Vector3.UP)
+	p.look = want if not p.looked else p.look.slerp(want, 1.0 - exp(-8.0 * dt))
+	p.looked = true
+	return true
 
 func angle(p: Part, time: float) -> float:
 	var w: Array = d.get("wobble", [0.0, 1.0])
@@ -221,6 +256,7 @@ func step(dt: float) -> void:
 			centre = want + off.normalized() * trail
 	var c_s := skel.global_transform.affine_inverse() * centre
 	var outward := String(d.get("face", "forward")) == "outward"
+	var camera_face := String(d.get("face", "forward")) == "camera"
 	var sway := deg_to_rad(float(d.get("sway_deg", 0.0)))
 	var lean := deg_to_rad(float(d.get("lean_deg", 0.0)))
 	for p in parts:
@@ -229,7 +265,9 @@ func step(dt: float) -> void:
 		part.pos = _clear(part, spot(c_s, a, bob(part, t)), dt)
 		var roll := Basis(Vector3.FORWARD, lean * cos(2.0 * a + part.bob_phase))
 		var bas: Basis
-		if outward:
+		if camera_face and _face_camera(part, dt):
+			bas = part.look * roll
+		elif outward:
 			bas = Basis.looking_at(Vector3(cos(a), 0.0, -sin(a)), Vector3.UP) * roll
 		else:
 			bas = Basis(Vector3.UP, sway * sin(TAU * t / (1.7 * float(d.get("period", 4.0))) + part.bob_phase)) * roll

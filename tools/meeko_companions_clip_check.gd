@@ -15,6 +15,9 @@ const SUB_COMP := 3     # every 3rd companion vertex
 const CELL := 0.06
 const PAIR_MIN := 0.30  # m: the sun and the cloud never nearer than this
 const FRAMES := 130
+const SCREEN_MIN := 0.03   # m (at the player's depth, the match camera's view): no part of a companion nearer her silhouette than this on screen
+const CAM_PITCH := 66.0    # the match camera's default pitch and distance (content/rules/camera.json)
+const CAM_DIST := 23.0
 # state name -> [state dict (STATE meta), burst seconds (0: all the time)]
 const STATES := {
 	"idle": [{}, 0.0],
@@ -58,6 +61,10 @@ func run(main: Node) -> void:
 	ok(wc.avoid.size() >= 5, "the head and hand avoid spheres are found (%d)" % wc.avoid.size())
 	var body := _body(wc.skel)
 	ok(int(body["n"]) > 1000, "the skinned body has %d sampled vertices" % int(body["n"]))
+	var cam := Camera3D.new()      # the match camera: the companions face it and keep out of her silhouette across its line of sight
+	main.add_child(cam)
+	cam.fov = 32.0
+	cam.make_current()
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--only="):
@@ -72,6 +79,7 @@ func run(main: Node) -> void:
 			sync.call("_process", DT)
 		var swing := 0
 		var worst := {}      # companion id -> [m, part of her, frame]
+		var screen := {}     # companion id -> [on-screen gap m, frame]
 		var pair := 9.0
 		for f in FRAMES:
 			var s: Dictionary = (spec[0] as Dictionary).duplicate()
@@ -92,6 +100,9 @@ func run(main: Node) -> void:
 				s.erase("hit")
 			m.set_meta(WardenClips.STATE, s)
 			m.global_position += vel * DT
+			var look_at := m.global_position + Vector3(0, 1.0, 0)
+			cam.global_position = look_at + Vector3(0, sin(deg_to_rad(CAM_PITCH)), cos(deg_to_rad(CAM_PITCH))) * CAM_DIST
+			cam.look_at(look_at, Vector3.UP)
 			sync.call("_process", DT)
 			if f % EVERY != 0 or f < 6:
 				continue
@@ -102,10 +113,19 @@ func run(main: Node) -> void:
 				if not worst.has(part.id) or float(r[0]) < float(worst[part.id][0]):
 					worst[part.id] = [r[0], r[1], f, r[2]]
 			pair = minf(pair, _pair(wc.parts[0], wc.parts[1]))
+			var flat := _flat(wc.skel, g, cam)
+			for p in wc.parts:
+				var sg := _screen_gap(wc.skel, p as WardenCompanions.Part, flat, cam)
+				var pid := (p as WardenCompanions.Part).id
+				if not screen.has(pid) or sg < float(screen[pid][0]):
+					screen[pid] = [sg, f]
 		for id in worst:
 			var w: Array = worst[id]
 			ok(float(w[0]) >= clear_min, "%s: %s clear of her %s by %.0f mm (needs %.0f; frame %d) %s"
 					% [st, id, w[1], float(w[0]) * 1000.0, clear_min * 1000.0, w[2], w[3]])
+		for id in screen:
+			ok(float(screen[id][0]) >= SCREEN_MIN, "%s: %s keeps %.0f mm off her silhouette on screen (needs %.0f; frame %d)"
+					% [st, id, float(screen[id][0]) * 1000.0, SCREEN_MIN * 1000.0, screen[id][1]])
 		ok(pair >= PAIR_MIN, "%s: the sun and the cloud stay %.0f mm apart (needs %.0f)" % [st, pair * 1000.0, PAIR_MIN * 1000.0])
 	m.free()
 	_done(main)
@@ -238,3 +258,37 @@ func _pair(a: WardenCompanions.Part, b: WardenCompanions.Part) -> float:
 			for w: Vector3 in vb:
 				best = minf(best, q.distance_to(w))
 	return best
+
+## A world point on the match camera's screen plane, in metres at the player's depth (a perspective divide, no pixels).
+func _screen(cam: Camera3D, w: Vector3) -> Vector2:
+	var r := cam.global_transform.affine_inverse() * w
+	var k := CAM_DIST / maxf(-r.z, 0.1)
+	return Vector2(r.x, r.y) * k
+
+## The posed body's sampled vertices on screen, in a hash grid of cells SCREEN_MIN wide.
+func _flat(sk: Skeleton3D, grid: Dictionary, cam: Camera3D) -> Dictionary:
+	var out := {}
+	for k in grid:
+		for e in grid[k]:
+			var q := _screen(cam, sk.global_transform * (e[0] as Vector3))
+			var c := Vector2i(floori(q.x / SCREEN_MIN), floori(q.y / SCREEN_MIN))
+			if not out.has(c):
+				out[c] = []
+			out[c].append(q)
+	return out
+
+## The nearest any vertex of the part comes to the body on screen (a vertex of the part right on the body counts as 0).
+func _screen_gap(sk: Skeleton3D, part: WardenCompanions.Part, flat: Dictionary, cam: Camera3D) -> float:
+	var best := 9.0
+	for si in part.node.mesh.get_surface_count():
+		var v: PackedVector3Array = part.node.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]
+		for i in range(0, v.size(), SUB_COMP):
+			var q := _screen(cam, sk.global_transform * (part.node.transform * v[i]))
+			var c := Vector2i(floori(q.x / SCREEN_MIN), floori(q.y / SCREEN_MIN))
+			for dx in range(-1, 2):
+				for dy in range(-1, 2):
+					var l = flat.get(c + Vector2i(dx, dy))
+					if l:
+						for e: Vector2 in l:
+							best = minf(best, q.distance_to(e))
+	return best if best < 9.0 else 1.0
