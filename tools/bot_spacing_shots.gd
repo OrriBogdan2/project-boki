@@ -2,7 +2,7 @@ extends RefCounted
 ## --bot-spacing-shots --shots-dir=<dir> [--bs-seed=<n>]: an all-bot expedition run until two bots of one
 ## squad fight a rival hunter together, then two frames of that fight 1.5 s apart from the game camera's
 ## angle (<dir>/fight_1.png, fight_2.png), on a real GPU (jobq submit --needs gpu). Prints the squadmates'
-## distances at each frame ("BOTSPACE ..."), to set before/after frames of BotSquad.spread side by side.
+## distances and screen spots at each frame ("BOTSPACE ..."), for before/after frames of BotSquad.spread.
 
 const CAM_UP := 15.0  # m: camera height over the fight
 const CAM_BACK := 10.0  # m: camera distance back from the fight (about the match camera's tilt)
@@ -84,7 +84,8 @@ func _grab(cam: Camera3D, squad: Array, file: String) -> void:
 		for o in squad:
 			if o != h:
 				nd = minf(nd, (h as Hunter).flat_dist(o))
-		gaps.append("%.1f" % nd)
+		var sp := cam.unproject_position((h as Hunter).pos + Vector3(0, 0.9, 0))
+		gaps.append("%.1f@%d,%d" % [nd, int(sp.x), int(sp.y)])
 	for i in 6:
 		for e in m.hunters:
 			e.unseen = false
@@ -95,5 +96,5 @@ func _grab(cam: Camera3D, squad: Array, file: String) -> void:
 			e.render(Match.DT, 1.0)
 		m.render_shots(1.0)
 		await main.get_tree().process_frame
-	print("BOTSPACE %s t=%d squad %d nearest-mate m %s" % [file, int(m.time), squad.size(), " ".join(gaps)])
+	print("BOTSPACE %s t=%d squad %d nearest-mate m@screen %s" % [file, int(m.time), squad.size(), " ".join(gaps)])
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))

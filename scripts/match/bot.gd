@@ -172,7 +172,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if a["strafe_t"] <= 0.0:
 			a["strafe_t"] = randf_range(0.6, 1.6)
 			a["strafe"] = -a["strafe"]
-		move += BotSquad.spread(m, h, a, to)      # (before the strafe: it may turn the strafe side)
+		var keep_off := BotSquad.spread(m, h, a, to)      # (before the strafe: it may turn the strafe side)
+		move += keep_off
 		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8
 		if finishing:
 			# walk onto the wisp to stomp it, and finish it
@@ -203,7 +204,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		elif not los:
 			# no clear shot: work round to one (a path, not straight into the wall), and give up on it
 			# after a while rather than hopping at a ledge shooting the rock
-			move = _path_dir(m, h, tgt.pos)
+			move = _path_dir(m, h, tgt.pos) + keep_off      # (two on one path: not in single file under a ledge)
 			a["nolos_t"] = float(a.get("nolos_t", 0.0)) + dt
 			if float(a["nolos_t"]) > 2.5:
 				a["nolos_t"] = 0.0
