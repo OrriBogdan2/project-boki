@@ -56,7 +56,10 @@ func _skip_to_garden() -> void:
 	hx.stage = "name"
 	hx._show_name()
 	_press(hx, "Skip tutorial")
-	await _relic(hx)
+	await tree.process_frame
+	# a skip that goes straight to the garden frees the hatch: no Relic steps
+	if is_instance_valid(hx) and main.current == hx:
+		await _relic(hx)
 	await _wait(func(): return _is_screen("home.gd"), "'Skip tutorial' goes straight to the garden")
 	home = main.current
 	await _wait(func(): return home.panel_host != null, "the garden builds")

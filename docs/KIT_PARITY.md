@@ -35,6 +35,7 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Kael | `rmb.drop.radius` pinned 2.2, data 2.4 (owner) | **done** `ext/parity-kael-drop-pin` baa8eadd1 | no line |
 | Kael | RMB lunge 4.5 to 7.5 vs 5 flat | **done** `ext/kael-open-rows` | travels 4.5 to 5.4 m (JSON [5.3, 6.35] x0.85 feel; DECISIONS 11-11 short lunge); docs/heroes/juggernaut.md "Open rows closed, Nov 20" |
 | Kael | Riposte reset on a kill `[?]` | **done** `ext/kael-open-rows` | the data's "killing a living enemy": a hunter taken down or a monster killed (footage f99-f101 dummy); dash, pull exits: same section |
+| Kael | Riposte guard edges (item 13): 0.65 s invulnerable, then strike and recovery | **done** `ext/kael-guard-edges` | no code change, main already matches the 0.65 s data window; asserted: a hit one tick past the guard (strike 0.1 s, recovery 0.35 s) lands in full. No source row for crowd control that is not a hit, so main's stays and is ours: a pull is refused only in the guard; a wall slam from an earlier knock loses its 10 damage in the guard but keeps its stun; docs/heroes/juggernaut.md item 13 |
 | Lace | E reach 9 vs 10.8 | **done** `ext/lace-ranges-source` e026ace6b | no line; ext/parity-ranges-slice b0fae9f8e pins the same 10.8: merge one |
 | Lace | RMB range 14, R range 18 / width .5 `[?]` | **owner** | not determinable (ext/parity-ranges-slice); ours stands |
 | Lace | Spirit Walk ending inside a ledge | **done** `ext/combat-lace-spirit-ledges-rebased` 40f7865d8 | ext/w0246-combat-a |

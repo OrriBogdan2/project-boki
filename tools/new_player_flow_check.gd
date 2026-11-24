@@ -11,6 +11,7 @@ extends RefCounted
 
 const STALL_S := 60.0      # s of game time a screen may take to offer its next step before it is a stall
 const PREMATCH_STALL_S := 120.0      # s of game time the pre-match countdown may take
+const WAIT_SAY_MS := 15000  # ms between 'still waiting' lines in a long wait (the draft can wait 60 s for loads)
 const WALL_FACTOR := 12.0      # real s allowed per s of game time (a loaded box runs ~7x slow; a freeze fails)
 const EXPEDITION_SEED := 4242      # a fixed map and drop, so the driver's landing is the same every run
 const DROP_S := 90.0      # s of game time the opening drop may take
@@ -69,9 +70,14 @@ func _end() -> void:
 func _wait(cond: Callable, what: String, secs := STALL_S) -> bool:
 	var t0 := Time.get_ticks_msec()
 	var game_s := 0.0
+	var said_ms := t0
 	while not cond.call() and game_s < secs and Time.get_ticks_msec() - t0 < int(secs * WALL_FACTOR * 1000.0):
 		await tree.process_frame
 		game_s += tree.root.get_process_delta_time()
+		# a live wait says so: the watchdog quits a check that stays quiet 60 s after an error
+		if Time.get_ticks_msec() - said_ms > WAIT_SAY_MS:
+			said_ms = Time.get_ticks_msec()
+			print("NPF waiting: %s (%.0f s of game time)" % [what, game_s])
 	var got: bool = cond.call()
 	if not got:
 		print("NPF STALLED in '%s' on screen %s" % [stage_name, main.current])
@@ -357,6 +363,8 @@ func _knock_tip(m: Match) -> void:
 	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p_v.team)[0]
 	var mob: Mob = m.mobs[0]
 	ok(m.ktip != null and not m.ktip.shown, "the first expedition gets the first-knock card")
+	var tips_was = Settings.v.get("tips")
+	Settings.v["tips"] = true  # a new player's default; the box's own settings may have tips off; never written
 	m.on_damage(p_v, mob, 30.0, {})
 	m.on_damage(p_v, rival, 20.0, {})
 	m.on_damage(p_v, mob, 50.0, {})
@@ -364,6 +372,8 @@ func _knock_tip(m: Match) -> void:
 	m.knock(p_v, mob, {})
 	var lane: Array = m.hud.msgs._shown + m.hud.msgs._waiting
 	var texts: Array = lane.map(func(e): return e["text"])
+	if tips_was == null: Settings.v.erase("tips")
+	else: Settings.v["tips"] = tips_was
 	ok(texts.has(want) and want.count("\n") == 1, "the card is two lines and names monsters, the top damage")
 	ok(want.contains(Settings.key_cap("throw")), "its tip is the monster one: send your Boki")
 	ok(int(Save.d["tutorial"]["knock_tip"]) == 1 and m.ktip.shown, "it is counted once")
