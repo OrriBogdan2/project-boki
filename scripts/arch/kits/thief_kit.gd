@@ -303,10 +303,10 @@ func _fade_marks(dt: float, mine: Dictionary) -> void:
 			var e: Array = mk[h.nid]
 			e[1] = float(e[1]) - dt
 			if float(e[1]) <= 0.0: mk.erase(h.nid)
-	for id in mine.keys():
-		var t: Variant = mine[id]
+	for iid in mine.keys():
+		var t: Variant = mine[iid]
 		if not is_instance_valid(t) or not ((t as Node).get_meta("marks", {}) as Dictionary).has(h.nid):
-			mine.erase(id)
+			mine.erase(iid)
 
 func _track(t: Ent) -> void:
 	if not marked_by.has(h.nid):
