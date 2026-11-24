@@ -47,13 +47,15 @@ func run(m: Node) -> void:
 	main.get_tree().quit()
 
 
-## A front close-up on the coat's head (its vertices on the head bone, as posed), with the overlay `on` and off.
+## A front close-up on the coat's head (its vertices on the head bone, as posed), with the overlay on and off.
 func _close(id: String) -> void:
 	for on in [true, false]:
 		BokiRig.face_overlay = on
 		var vp := _stage(Vector2i(px, px), false)
-		var rig := _posed(vp, id, PI).get_node("Body/Flex/BokiRig") as BokiRig
-		var box := _head_box(rig)
+		var k := _posed(vp, id, PI)
+		var box := _head_box(k.get_node("Body/Flex/BokiRig") as BokiRig)
+		if not box.has_volume():  # a body weighted to other bones (Threadwyrm's lobes): the whole Boki
+			box = k.global_transform * Shots._box(k)
 		var mid := box.get_center()
 		var size := maxf(box.size.x, box.size.y) * CLOSE_MARGIN
 		var cam := Camera3D.new()
@@ -113,6 +115,8 @@ static func _head_box(rig: BokiRig) -> AABB:
 						top = j
 				if _bind_bone(inst.skin, skel, bones[v * per + top]) == head:
 					pts.append(lift * (into * verts[v]))
+	if pts.is_empty():
+		return AABB()
 	var box := AABB(pts[0], Vector3.ZERO)
 	for q in pts:
 		box = box.expand(q)
