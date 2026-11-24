@@ -33,3 +33,22 @@ shortened (great 0.7, good 0.85, miss none).
 **Checks.** `--fetch-check` (stat edges, machine, payout, on the base), the listing rows in
 `--minigame-hub-check`, `--race-check` (shares the rested-entrants rule), `--garden-games-vfx-check` (the
 landing ring), `--garden-sim-check` (unchanged bands).
+
+## Getting to a game from the hub (2026-11-23)
+
+A garden past its first day lands in the hub, but the Dash and the Fetch Cup stand in Bramblebank. Counted
+from a fresh garden save (base mode, landing at the Waystone's south side, run speed 5.28 m/s; the hop is
+`garden_zones.json` `hop_max_s` 2.0 s at most):
+
+| Path | Presses | Moving + loading | Notes |
+|---|---|---|---|
+| Before, Dash | 3 (E at the Waystone, Go on the Bramblebank card, E at the race post) | 0.1 s to the ring + hop <= 2.0 s + 0.5 s to the post (2.7 m) = about 2.6 s | |
+| Before, Fetch Cup | 3 (the same, E at the toss mat) | 0.1 + <= 2.0 + 0.95 s to the mat (5.0 m) = about 3.0 s | nothing in the hub names it: the board's Bramblebank row said only "The Dash" |
+| After, either | 2 (E at the Games board, the game's button) | 1.0 s to the board (5.3 m) + hop <= 2.0 s = about 3.0 s | the game is running on arrival: no walk at the other end |
+
+The Games board (an existing panel, no new HUD) now lists every game of every open zone as one button
+(`ZoneCards.board`); a press is `MinigameHub.start`, which queues the game (`MinigameHub.queued`) and hops, and
+`MinigameHub.open` runs it on arrival (with fewer than two rested Boki out it says what it needs, as at the
+post). From the title, "Play with Your Boki" was already 2 presses and no walking. The board stands 7.5 m
+from the landing against 2.6 m for the Waystone, so the seconds are level; the gain is one press less and
+Fetch Cup (and Seek) now showing in the hub. `--minigame-hub-check` (step 7) proves it.
