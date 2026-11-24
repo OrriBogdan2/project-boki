@@ -44,10 +44,12 @@ static func row(h) -> Array:
 static func draw(hud, sp: Vector2, h) -> void:
 	if not sp.is_finite():
 		return
+	var fight: bool = hud.m.music_dir != null and hud.m.music_dir.fight_on(hud.m)
+	if fight and h.ult < 1.0:
+		return      # (in a fight only a full bond's glow is drawn: skip building the row)
 	var c: CanvasItem = hud.c
 	var cs := centres(sp)
 	var items := row(h)
-	var fight: bool = hud.m.music_dir != null and hud.m.music_dir.fight_on(hud.m)
 	for i in 3:
 		var it: Dictionary = items[i]
 		var ctr: Vector2 = cs[i]
