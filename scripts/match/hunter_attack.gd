@@ -74,6 +74,8 @@ func trigger(dt: float) -> void:
 		return
 	if h.wpn.has("spin_up"):
 		if held and can_fire() and h.ammo > 0:
+			if h.spin <= 0.0 and h.wpn.has("spin_sfx"):
+				h.m.sfx(h.wpn["spin_sfx"], h.pos, -4.0 if h.is_local() else -8.0)  # the barrels start to turn
 			h.spin = minf(1.0, h.spin + dt / float(h.wpn["spin_up"]))
 			if h.spin >= 1.0:
 				h.spun_t += dt
@@ -410,7 +412,7 @@ func emit_shot() -> void:
 		extra["crit"] = true
 	Loot.rider(h, extra, dmg)
 	h._kin_riders(extra)
-	ShotOrigin.draw_from(extra, h, "lmb")      # drawn from the bow, the gun's mouth or the hand
+	ShotOrigin.draw_from(extra, h, "lmb")  # drawn from the bow, the gun's mouth or the hand
 	if pel > 1:
 		# a shotgun throws the same fixed fan every time, wider with each shot in a row. However
 		# few slugs land, the first one on a target still does a good share of the whole volley

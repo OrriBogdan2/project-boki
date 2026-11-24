@@ -19,33 +19,53 @@ const DashTravel := preload("res://tools/dash_travel.gd")
 const MIN_STEPS := 5
 const FRAME_MS := 33.0
 const SOFT_K := 2.5
-const MIN_POSE := 0.5            # rad: summed over the rig's main joints, away from the idle before the press
+const MIN_POSE := 0.5  # rad: summed over the rig's main joints, away from the idle before the press
 const WINDOW_S := 1.1
-const STEP_M := 0.02             # m: a drawn position this far from the last counts as a new one
-const JOIN_S := 0.1              # s between two rolls that are one dash
-const LUNGE_HOLD := 0.45         # s: RMB held, past the tap's Slam
-const SHOT_EVERY := 4            # --dash-shots: every nth drawn frame, at half size (15 fps at 60: a strip's worth)
+const STEP_M := 0.02  # m: a drawn position this far from the last counts as a new one
+const JOIN_S := 0.1  # s between two rolls that are one dash
+const LUNGE_HOLD := 0.45  # s: RMB held, past the tap's Slam
+const SHOT_EVERY := 4  # --dash-shots: every nth drawn frame, at half size (15 fps at 60: a strip's worth)
 ## Archetype -> [slot, s held, moves that count as this dash's pose].
 const CARTWHEEL := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist"]
 ## The other ten Hunters' ground dash, once each: its clip against the travel (DashTravel).
 const ONE := [["dash", 0.0, []]]
-const NO_TRAVEL := ["ostra"]     # the Trade is a lob and a teleport: no frames of travel to count
+const NO_TRAVEL := ["ostra"]  # the Trade is a lob and a teleport: no frames of travel to count
 const SEQ := {
 	"thief": [["dash", 0.0, CARTWHEEL], ["dash", 0.0, CARTWHEEL], ["dash", 0.0, CARTWHEEL]],
-	"juggernaut": [["rmb", LUNGE_HOLD, ["jug_lunge"]], ["rmb", LUNGE_HOLD, ["jug_lunge"]], ["rmb", 1.1, ["jug_lunge"]],
-			["dash", 0.0, ["jug_dash"]], ["dash", 0.0, ["jug_dash"]]],
-	"gunslinger": ONE, "archer": ONE, "ashwick": ONE, "tender": ONE, "dolm": ONE, "dredge": ONE,
-	"rimewright": ONE, "ostra": ONE, "bulwark": ONE, "mage": ONE,
+	"juggernaut":
+	[
+		["rmb", LUNGE_HOLD, ["jug_lunge"]],
+		["rmb", LUNGE_HOLD, ["jug_lunge"]],
+		["rmb", 1.1, ["jug_lunge"]],
+		["dash", 0.0, ["jug_dash"]],
+		["dash", 0.0, ["jug_dash"]]
+	],
+	"gunslinger": [["dash", 0.0, []], ["dash", 0.9, []]],  # (a tap, then a held slide)
+	"archer": ONE,
+	"ashwick": ONE,
+	"tender": ONE,
+	"dolm": ONE,
+	"dredge": ONE,
+	"rimewright": ONE,
+	"ostra": ONE,
+	"bulwark": ONE,
+	"mage": ONE,
 }
 const POSE_NODES := ["Rig", "Rig/Torso", "Rig/Torso/ArmLPivot", "Rig/Torso/ArmRPivot", "Rig/Legs/LegL", "Rig/Legs/LegR"]
 const POSE_BONES := ["root", "hips", "upper_arm.L", "upper_arm.R", "thigh.L", "thigh.R"]
-const CSV_HEAD := "arch,use,slot,frame,wall_ms,script_ms,render_ms,compiles,mtime,drawx,drawz,scrx,scry,roll_t,kmove," \
-		+ "model_vis,pose_rig,pose_bones,step_m,dt,clip,act_w,up_w,kmove_t,lean_deg,slip_m,drift_m,dpose_rad"
+const CSV_HEAD := (
+	"arch,use,slot,frame,wall_ms,script_ms,render_ms,compiles,mtime,drawx,drawz,scrx,scry,roll_t,kmove,"
+	+ "model_vis,pose_rig,pose_bones,step_m,dt,clip,act_w,up_w,kmove_t,lean_deg,slip_m,drift_m,dpose_rad"
+)
 
-class Tail extends Node:
+
+class Tail:
+	extends Node
 	var d
+
 	func _process(_dt: float) -> void:
 		d.tail()
+
 
 var todo: Array = []
 var arch := ""
@@ -55,11 +75,11 @@ var m: Match = null
 var P: Hunter = null
 var home := Vector3.ZERO
 var rows: PackedStringArray = [CSV_HEAD]
-var uses: Array = []             # this Hunter's dashes: each a list of frames, as dictionaries
+var uses: Array = []  # this Hunter's dashes: each a list of frames, as dictionaries
 var seq: Array = []
 var use := -1
 var state := "wait"
-var t_s := 0.0                   # game seconds in this state
+var t_s := 0.0  # game seconds in this state
 var idle := {}
 var sk: Skeleton3D = null
 var fr := 0
@@ -77,14 +97,19 @@ var travel: DashTravel = null
 var headless := false
 var software := false
 
+
 func run(main_node: Node) -> void:
 	main_node.add_child(self)
 
+
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--dash-only="): todo = [a.substr(12)]
-		if a.begins_with("--dash-out="): out_path = a.substr(11)
-		if a.begins_with("--dash-shots="): shots_dir = a.substr(13)
+		if a.begins_with("--dash-only="):
+			todo = [a.substr(12)]
+		if a.begins_with("--dash-out="):
+			out_path = a.substr(11)
+		if a.begins_with("--dash-shots="):
+			shots_dir = a.substr(13)
 	if todo.is_empty():
 		todo = SEQ.keys()
 	if shots_dir != "":
@@ -112,9 +137,14 @@ func _ready() -> void:
 		var tk := Save.new_kin("zapple", "Pip")
 		Save.d["roster"].append(tk)
 		Save.d["active"] = tk["uid"]
-	print("DASHF renderer=%s adapter=%s software=%s" % [RenderingServer.get_current_rendering_method(),
-			RenderingServer.get_video_adapter_name(), software])
+	print(
+		(
+			"DASHF renderer=%s adapter=%s software=%s"
+			% [RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), software]
+		)
+	)
 	_open(String(todo.pop_front()))
+
 
 func _open(a: String) -> void:
 	arch = a
@@ -129,6 +159,7 @@ func _open(a: String) -> void:
 	var o: Dictionary = Match.arena_opts(arch)
 	o["probe"] = true
 	Game.main.show_screen("match", o)
+
 
 ## Compiles that stop a frame: Forward+'s pipelines built at draw time (the ones it builds when a surface first shows
 ## and its specializations go on background threads, nothing waits for them), and shader variants written to the
@@ -145,6 +176,7 @@ func _compiles() -> int:
 		for s in da.get_directories():
 			stack.append(p + "/" + s)
 	return n
+
 
 ## Radians the rig and the skeleton have turned away from `idle`, over their main joints.
 func _pose() -> Array:
@@ -174,6 +206,7 @@ func _pose() -> Array:
 			a += ang
 	return [a, b]
 
+
 func _process(_dt: float) -> void:
 	head_us = Time.get_ticks_usec()
 	# (before Match's own _process: an action's "just pressed" lasts only for the frame it's pressed on)
@@ -190,6 +223,7 @@ func _process(_dt: float) -> void:
 			P = m.player
 			fr = 0
 
+
 func _log(wall: float) -> void:
 	var cam: Camera3D = m.cam
 	var scr: Vector2 = cam.unproject_position(P.position + Vector3(0, 1, 0))
@@ -197,18 +231,60 @@ func _log(wall: float) -> void:
 	var step := Vector2(P.position.x - was.x, P.position.z - was.z).length()
 	var c := _compiles()
 	var script_ms := (Time.get_ticks_usec() - head_us) / 1000.0
-	var e := {"f": fr - press_fr, "wall": wall, "script": script_ms, "render": render_us / 1000.0,
-		"comp": c - compiles_seen, "t": m.time, "x": P.position.x, "z": P.position.z, "scr": scr, "roll": P.roll_t,
-		"move": P.ak.anim_id, "vis": P.model.visible and P.visible, "rig": p[0], "bones": p[1], "step": step,
-		"dt": get_process_delta_time()}
+	var e := {
+		"f": fr - press_fr,
+		"wall": wall,
+		"script": script_ms,
+		"render": render_us / 1000.0,
+		"comp": c - compiles_seen,
+		"t": m.time,
+		"x": P.position.x,
+		"z": P.position.z,
+		"scr": scr,
+		"roll": P.roll_t,
+		"move": P.ak.anim_id,
+		"vis": P.model.visible and P.visible,
+		"rig": p[0],
+		"bones": p[1],
+		"step": step,
+		"dt": get_process_delta_time()
+	}
 	e.merge(travel.sample(P, m, step))
 	compiles_seen = c
 	was = P.position
 	(uses[use] as Array).append(e)
-	var row: Array = [arch, use, seq[use][0], e["f"], wall, script_ms, e["render"], e["comp"], e["t"],
-		e["x"], e["z"], scr.x, scr.y, e["roll"], e["move"], int(e["vis"]), e["rig"], e["bones"], step, e["dt"],
-		e["clip"], e["act"], e["up"], e["kt"], e["lean"], e["slip"], e["drift"], e["dpose"]]
+	var row: Array = [
+		arch,
+		use,
+		seq[use][0],
+		e["f"],
+		wall,
+		script_ms,
+		e["render"],
+		e["comp"],
+		e["t"],
+		e["x"],
+		e["z"],
+		scr.x,
+		scr.y,
+		e["roll"],
+		e["move"],
+		int(e["vis"]),
+		e["rig"],
+		e["bones"],
+		step,
+		e["dt"],
+		e["clip"],
+		e["act"],
+		e["up"],
+		e["kt"],
+		e["lean"],
+		e["slip"],
+		e["drift"],
+		e["dpose"]
+	]
 	rows.append(",".join(row.map(func(v): return str(v))))
+
 
 func tail() -> void:
 	var now := Time.get_ticks_usec()
@@ -240,10 +316,11 @@ func tail() -> void:
 				if img:
 					img.resize(int(img.get_width() / 2.0), int(img.get_height() / 2.0))
 					img.save_png("%s/%s_%d_%03d.png" % [shots_dir, arch, use, fr - press_fr])
-			if t_s >= 0.08:
+			if t_s >= (maxf(0.08, float(seq[use][1])) if seq[use][0] == "dash" else 0.08):
 				Input.action_release("dash")
 			if t_s >= WINDOW_S:
 				_next()
+
 
 func _next() -> void:
 	for a in ["dash", "secondary", "right"]:
@@ -256,11 +333,12 @@ func _next() -> void:
 	uses.append([])
 	P.teleport(home)
 	P.dashes = P.max_dashes()
-	P.ak.res = 0.0                   # (Kael's Rage filled by the lunges' hits roars over a later dash)
+	P.ak.res = 0.0  # (Kael's Rage filled by the lunges' hits roars over a later dash)
 	for k in P.ak.cd:
 		P.ak.cd[k] = 0.0
 	state = "gap"
 	t_s = 0.0
+
 
 func _press() -> void:
 	idle = {}
@@ -278,10 +356,12 @@ func _press() -> void:
 		Input.action_press("secondary")
 		state = "held"
 
+
 func _ok(what: String, good: bool, detail: String) -> void:
 	print("DASHFRAMES %s %s  %s" % ["ok" if good else "FAIL", what, detail])
 	if not good:
 		failures += 1
+
 
 ## The frames of the dash itself, and whether they read: see the header.
 func _judge() -> void:
@@ -301,12 +381,19 @@ func _judge() -> void:
 			at = here
 		var name_i := "%s %s #%d" % [arch, seq[i][0], i + 1]
 		if shots_dir != "":
-			print("DASHFRAMES shot %s: %d frames saved (a shot stalls its frame: the headless run judges)"
-					% [name_i, fs.size()])
+			print(
+				(
+					"DASHFRAMES shot %s: %d frames saved (a shot stalls its frame: the headless run judges)"
+					% [name_i, fs.size()]
+				)
+			)
 			continue
 		if not arch in NO_TRAVEL:
-			_ok(name_i + ": at least %d intermediate positions with the dash pose" % MIN_STEPS, shown >= MIN_STEPS + 1,
-					"%d frames posed and moving of %d in the dash" % [shown, run.size()])
+			_ok(
+				name_i + ": at least %d intermediate positions with the dash pose" % MIN_STEPS,
+				shown >= MIN_STEPS + 1,
+				"%d frames posed and moving of %d in the dash" % [shown, run.size()]
+			)
 		for v: Array in DashTravel.judge(arch, sim, run):
 			_ok("%s: %s" % [name_i, v[0]], bool(v[1]), String(v[2]))
 		if headless or run.is_empty():
@@ -321,8 +408,12 @@ func _judge() -> void:
 			worst = maxf(worst, float(e["wall"]))
 			comp += int(e["comp"])
 		var limit := med * SOFT_K if software else FRAME_MS
-		_ok(name_i + ": no hitch", worst <= limit and (comp == 0 or not software),
-				"worst %.0f ms, limit %.0f ms (window median %.0f), %d compiles" % [worst, limit, med, comp])
+		_ok(
+			name_i + ": no hitch",
+			worst <= limit and (comp == 0 or not software),
+			"worst %.0f ms, limit %.0f ms (window median %.0f), %d compiles" % [worst, limit, med, comp]
+		)
+
 
 ## The frames of the first dash in a window. Rampage's crouch and drive, under JOIN_S apart, are one; a later roll
 ## is the terrain's (running on into the rocks after the dash).
@@ -336,6 +427,7 @@ func _dash_of(fs: Array) -> Array:
 		out.append(e)
 	return out
 
+
 func _end_hunter() -> void:
 	if not todo.is_empty():
 		_open(String(todo.pop_front()))
@@ -347,4 +439,3 @@ func _end_hunter() -> void:
 		f.close()
 	print("DASH FRAMES CHECK DONE, failures: %d" % failures)
 	get_tree().quit(1 if failures > 0 else 0)
-

@@ -91,6 +91,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
+
 ## The whole check over `heroes`; the registry runs it in four shards (tools/dash_flow_shard_check.gd).
 func run_heroes(main: Node, heroes: Array) -> void:
 	for r in SOURCE_ROWS:
@@ -130,6 +131,7 @@ func _hero(main: Node, hero: String, rows: bool) -> int:
 		await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(_on_used)
 	return bad
+
 
 func _on_used(caster: Node, _ability: String, slot: String) -> void:
 	if caster == hunter:
@@ -228,6 +230,13 @@ func _clear_mobs(m: Match) -> void:
 	for mob in m.mobs:
 		mob.queue_free()
 	m.mobs.clear()
+	# wild Boki too (no owner): which species rolls onto which spot moves with the roster, and one near home
+	# turns a trial on whatever the roll put there
+	for k: Kin in m.kins.duplicate():
+		if k.owner_h == null:
+			k.dead = true
+			m.kins.erase(k)
+			k.queue_free()
 
 
 func _steps(m: Match, n: int) -> void:
@@ -249,8 +258,8 @@ func _ready_up(m: Match) -> void:
 			or k.ult_running()
 			or _last_shot() >= 0
 			or k.commit_left() > 0.0  # (a move's committed recovery: Vex's E and X)
-			or k.fire_wait() > 0.0  # (a kit's own cadence: Neve's burst pause would hold the next tap)
-		)
+			or k.fire_wait() > 0.0
+		)  # (a kit's own cadence: Neve's burst pause would hold the next tap)
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)

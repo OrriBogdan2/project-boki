@@ -457,25 +457,34 @@ func _garden_names() -> void:
 	var named := seen.size() >= 12 and silent.is_empty()
 	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
 
+
 ## 10. The carry cues: on file, capped, the take carrying, and wired where the swap, claim and steal happen.
 func _carry() -> void:
-	var re := RegEx.create_from_string("\"(carry_[a-z_]+)\"")
+	var re := RegEx.create_from_string('"(carry_[a-z_]+)"')
 	var names := []
 	for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/match/carry_sfx.gd")):
 		if not names.has(hit.get_string(1)):
 			names.append(hit.get_string(1))
 	var wrong := names.filter(func(n): return not Sfx.ensure(n) or not Sfx.MIN_GAP.has(n))
-	ok(names.size() == 5 and wrong.is_empty(),
-			"carry: %d cues on file with a MIN_GAP (wrong: %s)" % [names.size(), wrong])
+	ok(
+		names.size() == 5 and wrong.is_empty(),
+		"carry: %d cues on file with a MIN_GAP (wrong: %s)" % [names.size(), wrong]
+	)
 	var reach: float = Sfx.sound_reach.get("carry_take", 0.0)
 	ok(reach > Sfx.hear_range and reach <= REACH_MAX, "carry: the thief's take carries %.0f m" % reach)
-	var calls := {"scripts/match/match.gd": "CarrySfx.swap(", "scripts/match/capture.gd": "CarrySfx.claim(",
-			"scripts/kin/kin_track.gd": "CarrySfx.stolen(", "scripts/match/life.gd": "CarrySfx.from_box("}
+	var calls := {
+		"scripts/match/match.gd": "CarrySfx.swap(",
+		"scripts/match/capture.gd": "CarrySfx.claim(",
+		"scripts/kin/kin_track.gd": "CarrySfx.stolen(",
+		"scripts/match/life.gd": "CarrySfx.from_box("
+	}
 	var unwired := calls.keys().filter(func(f): return not _src(f).contains(calls[f]))
 	ok(unwired.is_empty(), "carry: swap, claim, steal and deathbox paths play the cues (missing: %s)" % [unwired])
 
+
 static func _src(path: String) -> String:
 	return FileAccess.get_file_as_string("res://" + path)
+
 
 ## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
 func _ult_cues() -> void:
@@ -1386,12 +1395,8 @@ func _step_on(_m: Match, h: Hunter, surf: String, p: Vector3) -> void:
 		Juice.footstep(h)
 		var got: Array = Sfx.last_played.keys().filter(func(s): return not String(s).ends_with("_foley"))
 		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
-		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
-	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]
-	ok(
-		spread == (surf in StepSurface.SHARED) and (surf in StepSurface.SHARED or vols[0] == vols[2]),
-		"%s: shared steps are louder the heavier the Hunter (%s)" % [surf, vols]
-	)
+		vols.append(StepSurface.vol_db(h, STEP_VOL))
+	ok(vols[0] < vols[1] and vols[1] < vols[2], "%s: steps are louder the heavier the Hunter (%s)" % [surf, vols])
 	h.arch = arch0
 
 

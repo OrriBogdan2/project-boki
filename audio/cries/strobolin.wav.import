@@ -1,0 +1,34 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+<<<<<<<< HEAD:audio/cries/strobolin.wav.import
+uid="uid://caq30e1x4hehb"
+path="res://.godot/imported/strobolin.wav-924fb9b21555ba6b34f318cc10eb4251.sample"
+
+[deps]
+
+source_file="res://audio/cries/strobolin.wav"
+dest_files=["res://.godot/imported/strobolin.wav-924fb9b21555ba6b34f318cc10eb4251.sample"]
+========
+uid="uid://b5eqbjnsw27e8"
+path="res://.godot/imported/dolm_foley.wav-19c489fff817ea6eef4ab357e6ace9aa.sample"
+
+[deps]
+
+source_file="res://audio/dolm_foley.wav"
+dest_files=["res://.godot/imported/dolm_foley.wav-19c489fff817ea6eef4ab357e6ace9aa.sample"]
+>>>>>>>> origin/main:audio/dolm_foley.wav.import
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

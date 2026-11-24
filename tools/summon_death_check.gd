@@ -11,6 +11,7 @@ const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
 var main: Node
+var downs := 0  # boki_downed starts, one a step at most (_heard_down)
 
 
 func run(main_node: Node) -> void:
@@ -54,6 +55,23 @@ func _frames(secs: float) -> void:
 	while t < secs:
 		m.step(DT)
 		t += DT
+		_heard_down()
+
+
+## Counts a boki_downed start into `downs` and clears Sfx's own last start: the steps run faster than real time,
+## so the real-time MIN_GAP would hide a repeat.
+func _heard_down() -> void:
+	if Sfx.last_played.has("boki_downed"):
+		downs += 1
+		Sfx.last_played.erase("boki_downed")
+		Sfx.recent.erase("boki_downed")
+
+
+## A fresh boki_downed count, heard from `at`.
+func _listen(at: Vector3) -> void:
+	Sfx.listener = at
+	_heard_down()
+	downs = 0
 
 
 ## The foe's Boki, summoned and ready to be hurt (its owner stands and stays put).
@@ -80,7 +98,9 @@ func _death() -> void:
 	ok(k.summon.out() and not k.wisp and not f.downed, "damage alone does not end the summon")
 	var pings := _wisp_pings()
 	k.teleport(f.pos + Vector3(12, 0, 0))  # (killed away from its owner, so there is a flight)
+	_listen(k.pos)
 	k.hurt(k.max_hp * 5.0, p)
+	_heard_down()
 	ok(
 		k.wisp and k.state == "shoulder" and not KinSteal.loose(k) and k.owner_h == f,
 		"killed by a rival: back to a wisp, with its owner"

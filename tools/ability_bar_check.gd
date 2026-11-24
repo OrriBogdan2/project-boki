@@ -6,20 +6,42 @@ extends RefCounted
 ## the drawn bar shows the same: a pip per charge, the recharging pip's fill, the next charge's countdown
 ## beside a ready one, and the airborne slot's own timer. Never touches the save.
 
+## Charges per rank [1, 2, 3] as the parity table sets them (KIT_PARITY "Charges vs the source"): dash, then RMB.
+## Tenzo (dolm) gets a second dash at rank 3; kits without a source row keep their class count.
+const COUNTS := {
+	"juggernaut": [[2, 3, 3], [1, 1, 1]],
+	"bulwark": [[1, 1, 1], [1, 1, 1]],
+	"dredge": [[3, 3, 3], [1, 1, 1]],
+	"ashwick": [[2, 2, 2], [1, 1, 2]],
+	"rimewright": [[1, 1, 1], [2, 2, 2]],
+	"gunslinger": [[1, 1, 1], [1, 1, 1]],
+	"archer": [[1, 1, 1], [1, 1, 1]],
+	"dolm": [[1, 1, 2], [1, 1, 1]],
+	"gil": [[1, 1, 1], [2, 2, 2]],
+	"mage": [[1, 1, 1], [1, 1, 1]],
+	"ostra": [[1, 1, 1], [1, 1, 1]],
+	"tender": [[1, 1, 1], [1, 1, 1]],
+	"thief": [[1, 1, 1], [1, 1, 1]],
+}
+
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("ABILITYBAR %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _drawn(hud) -> void:
 	await hud.panels.draw
 	await main.get_tree().process_frame
 
+
 func _near(a: Array, b: Array) -> bool:
 	return a.size() == b.size() and range(a.size()).all(func(i): return absf(float(a[i]) - float(b[i])) < 0.02)
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -28,8 +50,19 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "thief",
-		"cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 12,
+			"no_drop": true,
+			"arch": "thief",
+			"cls": Arch.weight("thief"),
+			"weapon": Arch.signature("thief")
+		}
+	)
 	m.set_process(false)
 	var p: Hunter = m.player
 	p.ctrl = "local"
@@ -39,11 +72,14 @@ func run(main_node: Node) -> void:
 			o.teleport(p.pos + Vector3(40, 0, 40))
 	for kit in ["juggernaut", "ashwick", "rimewright", "dredge"]:
 		await _kit(m, p, kit)
+	for kit in COUNTS:
+		await _counts(m, p, kit)
 	await _rebound(m, p)
 	m.free()
 	await _rebound_tutorial()
 	print("ABILITY BAR CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _pick(_m: Match, p: Hunter, kit: String, rank: int) -> void:
 	p.reclass(Arch.weight(kit), kit, Arch.signature(kit))
@@ -57,6 +93,7 @@ func _pick(_m: Match, p: Hunter, kit: String, rank: int) -> void:
 	p.ak.ch_rmb = float(p.ak.rmb_charges())
 	HudSlot.shown_pips.erase("sec")
 
+
 func _kit(m: Match, p: Hunter, kit: String) -> void:
 	var hid: int = m.hud.get_instance_id()
 	for rank in [1, 2, 3]:
@@ -67,6 +104,7 @@ func _kit(m: Match, p: Hunter, kit: String) -> void:
 	_pick(m, p, kit, 3)
 	await _airborne(m, p, hid, kit)
 
+
 ## Dash: a disc per charge (kit + rank; none for one charge), one ready and the next at 45%, the countdown of the next.
 func _dash(m: Match, p: Hunter, hid: int, tag: String) -> void:
 	var cap := int(p.max_dashes())
@@ -74,11 +112,14 @@ func _dash(m: Match, p: Hunter, hid: int, tag: String) -> void:
 	await _drawn(m.hud)
 	var sh: Dictionary = DashSlot.shown.get(hid, {})
 	var want: Array = []
-	for i in cap if cap > 1 else 0:        # a one-charge dash draws no charge discs (the source)
+	for i in cap if cap > 1 else 0:  # a one-charge dash draws no charge discs (the source)
 		want.append(clampf(p.dashes - i, 0.0, 1.0))
 	var text := HudSlot.cd_text((1.0 - fposmod(p.dashes, 1.0)) * p.dash_regen()) if cap > 1 else ""
-	ok(_near(sh.get("pips", []), want) and sh.get("text", "") == text,
-		"%s: dash %d pips %s, next charge in '%s'" % [tag, cap, sh.get("pips"), sh.get("text")])
+	ok(
+		_near(sh.get("pips", []), want) and sh.get("text", "") == text,
+		"%s: dash %d pips %s, next charge in '%s'" % [tag, cap, sh.get("pips"), sh.get("text")]
+	)
+
 
 ## RMB: pips exist exactly when the kit holds more than one charge; the recharging one fills, and a
 ## ready charge shows the next one's countdown.
@@ -96,14 +137,19 @@ func _rmb(m: Match, p: Hunter, tag: String) -> void:
 	for i in mx:
 		want.append(clampf(float(mx - 1) + 0.75 - i, 0.0, 1.0))
 	var left: float = float(p.ak.cd["rmb"])
-	ok(_near(pips, want) and m.hud.slot_text.get("sec", "") == HudSlot.cd_text(left),
-		"%s: RMB %d charges, pips %s, next in '%s' (%.1fs)" % [tag, mx, pips, m.hud.slot_text.get("sec", ""), left])
+	ok(
+		_near(pips, want) and m.hud.slot_text.get("sec", "") == HudSlot.cd_text(left),
+		"%s: RMB %d charges, pips %s, next in '%s' (%.1fs)" % [tag, mx, pips, m.hud.slot_text.get("sec", ""), left]
+	)
 	p.ak.ch_rmb = 0.0
 	await _drawn(m.hud)
 	var first: Array = HudSlot.shown_pips["sec"]
 	var rest_empty: bool = first.slice(1).all(func(f): return f == 0.0)
-	ok(absf(float(first[0]) - 0.75) < 0.02 and rest_empty and m.hud.slot_text.get("sec", "") == HudSlot.cd_text(left),
-		"%s: RMB none ready, first pip at 75%%, countdown %.1fs" % [tag, left])
+	ok(
+		absf(float(first[0]) - 0.75) < 0.02 and rest_empty and m.hud.slot_text.get("sec", "") == HudSlot.cd_text(left),
+		"%s: RMB none ready, first pip at 75%%, countdown %.1fs" % [tag, left]
+	)
+
 
 ## The contextual slot's own timer while airborne: Kael's Meteor Drop on the RMB slot, Grimble's air
 ## pounce beside the dash; on the ground neither is spelled out.
@@ -132,11 +178,14 @@ func _airborne(m: Match, p: Hunter, hid: int, kit: String) -> void:
 		p.grounded = false
 		await _drawn(m.hud)
 		var sh: Dictionary = DashSlot.shown[hid]
-		ok(absf(float(sh["air"]) - 0.5) < 0.01 and sh["air_text"] == HudSlot.cd_text(full * 0.5),
-			"Grimble airborne: the air pounce half back, its own '%s' of %.1f s (rank 3)" % [sh["air_text"], full])
+		ok(
+			absf(float(sh["air"]) - 0.5) < 0.01 and sh["air_text"] == HudSlot.cd_text(full * 0.5),
+			"Grimble airborne: the air pounce half back, its own '%s' of %.1f s (rank 3)" % [sh["air_text"], full]
+		)
 		p.grounded = true
 		await _drawn(m.hud)
 		ok(DashSlot.shown[hid]["air_text"] == "", "Grimble on the ground: no air countdown")
+
 
 ## E is the "signature" action (bar slot k1) and R the "hunter_ult" action (bar slot x; "ultimate" is the
 ## Fusion key on slot r): E goes to mouse 4 ("M4"), R to N. The bar's pills and tooltips must follow.
@@ -149,8 +198,10 @@ func _rebound(m: Match, p: Hunter) -> void:
 	n.physical_keycode = KEY_N
 	Settings.rebind("signature", m4, 0)
 	Settings.rebind("hunter_ult", n, 0)
-	ok(Settings.key_cap("signature") == "M4" and Settings.key_cap("hunter_ult") == "N",
-		"rebind: E is '%s', R is '%s'" % [Settings.key_cap("signature"), Settings.key_cap("hunter_ult")])
+	ok(
+		Settings.key_cap("signature") == "M4" and Settings.key_cap("hunter_ult") == "N",
+		"rebind: E is '%s', R is '%s'" % [Settings.key_cap("signature"), Settings.key_cap("hunter_ult")]
+	)
 	HudSlot.shown_keys.clear()
 	await _drawn(m.hud)
 	await _drawn(m.hud)
@@ -167,6 +218,7 @@ func _rebound(m: Match, p: Hunter) -> void:
 		var tip: String = String(m.hud.hover.tip_lines(id, p)[1][0])
 		var own := not tip.contains("  ·  M4  ·  ") and not tip.contains("  ·  N  ·  ")
 		ok(own, "rebind: the %s tooltip keeps its own key" % id)
+
 
 ## The tutorial's strip cap and every %E line say the new E key; no step still names "E" as a key.
 func _rebound_tutorial() -> void:
@@ -193,3 +245,44 @@ func _rebound_tutorial() -> void:
 			off.append("%s names E" % sid)
 	ok(seen > 0 and off.is_empty(), "rebind: the tutorial shows M4 on %d E steps, no hard-coded E" % seen + str(off))
 	m.free()
+
+
+## Every kit, every rank: the dash and RMB show the parity table's charge count, a spent charge draws the same
+## on all of them (an empty disc, the recharging one filling), and a rank that adds a charge adds a disc.
+func _counts(m: Match, p: Hunter, kit: String) -> void:
+	var hid: int = m.hud.get_instance_id()
+	var want: Array = COUNTS[kit]
+	for rank in [1, 2, 3]:
+		_pick(m, p, kit, rank)
+		var tag := "%s rank %d" % [kit, rank]
+		var dash_n: int = want[0][rank - 1]
+		var rmb_n: int = want[1][rank - 1]
+		ok(
+			int(p.max_dashes()) == dash_n and p.ak.rmb_charges() == rmb_n,
+			(
+				"%s: kit holds %d dash, %d RMB charges (table %d, %d)"
+				% [tag, int(p.max_dashes()), p.ak.rmb_charges(), dash_n, rmb_n]
+			)
+		)
+		await _dash(m, p, hid, tag)
+		await _rmb(m, p, tag)
+		await _spent_dash(m, p, hid, tag)
+
+
+## A dash with every charge spent and the next at 30%: one dark disc per charge, the first filling, the countdown
+## on the first (nothing for a one-charge dash, which draws no discs).
+func _spent_dash(m: Match, p: Hunter, hid: int, tag: String) -> void:
+	var cap := int(p.max_dashes())
+	p.dashes = 0.3
+	await _drawn(m.hud)
+	var sh: Dictionary = DashSlot.shown.get(hid, {})
+	var pips: Array = sh.get("pips", [])
+	var rest_empty: bool = pips.slice(1).all(func(f): return f == 0.0)
+	var text := HudSlot.cd_text(0.7 * p.dash_regen())
+	if cap <= 1:
+		ok(pips.is_empty(), "%s: one dash charge spent, no discs" % tag)
+	else:
+		ok(
+			pips.size() == cap and absf(float(pips[0]) - 0.3) < 0.02 and rest_empty and sh.get("text", "") == text,
+			"%s: dash all spent, %d discs, first at 30%%, countdown '%s'" % [tag, cap, sh.get("text")]
+		)

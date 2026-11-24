@@ -1,0 +1,14 @@
+{
+	"id": "anchorhorn",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/anchorhorn.json.",
+	"work": {
+		"haul": 2,
+		"stone": 3,
+		"timber": 1
+	},
+	"shiny": {
+		"belly": "#3c9c97",
+		"color": "#54363f",
+		"glow": "#61fff7"
+	}
+}
