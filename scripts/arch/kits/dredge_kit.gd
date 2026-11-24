@@ -528,6 +528,8 @@ func _end_pull(arrived: bool) -> void:
 		arrivals += 1
 		var rdf := rmb_def()
 		if not ally:
+			# the foe stays stunned through the Anchor's wind-up: Deep Reach then Anchor Drop is a sure stun
+			(f as Ent).stun_t = maxf((f as Ent).stun_t, float(rdf["arrive_stun"]))
 			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 	var queued := e_queued
 	e_queued = false
@@ -553,7 +555,7 @@ func cast_e() -> bool:
 	slam_dir = e_at if e_at != Vector2.ZERO else h.aim_dir()
 	play("dr_anchor")
 	KitWindup.play(self, "e", "dr_anchor_wind", -3.0)
-	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
+	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed.get("hop", 0.0))    # where the hop leaves him
 	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
 	return true
 
@@ -590,7 +592,7 @@ func _tick_wind(dt: float) -> void:
 ## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
 ## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
 func _hop(ed: Dictionary, t: float) -> void:
-	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
+	if float(ed.get("hop", 0.0)) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
 		return
 	if not h.grounded or h.roll_t > 0.0:
 		return
@@ -599,7 +601,7 @@ func _hop(ed: Dictionary, t: float) -> void:
 		h.vel.x -= slam_dir.x * fwd
 		h.vel.z -= slam_dir.y * fwd
 		return
-	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
+	var v: Vector2 = slam_dir * (float(ed.get("hop", 0.0)) / float(ed["hop_t"]))
 	h.vel.x = v.x
 	h.vel.z = v.y
 

@@ -23,7 +23,6 @@ extends ArchKit
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
-const FLASH_HIT := 0.12        # s: the struck body's flash (Ent.hurt's own): 3 frames full, then a fade
 const BOLT_COL := Color("9a5cff")
 const BOLT_CORE := Color("e6d8ff")
 const FIZZLE := Color("8e48ff")    # a bolt running out at the cursor: a violet puff
@@ -445,9 +444,6 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	last_bolt_end = at
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
-	if e != null:
-		e.flash_tint = Arch.color(id)      # the struck body flashes in her colour
-		e.flash_t = maxf(e.flash_t, FLASH_HIT)
 	if e != null and emp:
 		fx().star(at, Color("d8c0ff"), 1.5, 0.24)
 		m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)

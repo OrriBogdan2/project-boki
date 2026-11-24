@@ -61,7 +61,7 @@ What the in-game kit card (K) says.
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
 | Passive: Salvage | Knocks and assists add health, up to 10 stacks. |
 | Dash: Barge | A short low lunge where you move; a pounce in the air. |
-| RMB: Deep Reach | An abyssal arm grabs the first body and reels it in, stunned. |
+| RMB: Deep Reach | Abyssal arm reels a foe in, stunned: Anchor Drop stuns for sure. |
 | E: Anchor Drop | Slam your fist into the ground ahead: damage and a long stun. |
 | Hunter ultimate: Brass Broadside | Charge a fan while walking slowly, then two waves of brass slugs. |
 | Weapon: Shotgun | Seven slugs, 6m out: all seven fly in a tight group along your aim; rear hits hurt more. |
@@ -74,7 +74,7 @@ What the in-game kit card (K) says.
 
 **Deep Reach (RMB, 12s cooldown).**
 
-- *Tap:* Your abyssal arm coils back for 0.2s, then reaches 11.5m (slowly: a foe who sees it can sidestep) through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
+- *Tap:* Your abyssal arm coils back for 0.2s, then reaches 11.5m (slowly: a foe who sees it can sidestep) through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. The foe stays stunned for 0.9s after it lands: an Anchor Drop (E) pressed within half a second is a sure stun. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
 
 **Anchor Drop (E, 7s cooldown).** Raise your fist while the outline of the area shows on the ground in front of you (0.38s) and a giant ghost fist falls into it, then slam it down into that 3m cone: 25 damage, stun 1.1s, slammed to the ground. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
 

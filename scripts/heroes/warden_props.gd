@@ -32,7 +32,8 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 	var parts: Dictionary = contract(art, want).get("parts", {})
 	for cb: String in parts:
 		var p: Array = parts[cb]
-		var onto := _onto(skel, to_m, p[3], deg_to_rad(float((d.get("tilt", {}) as Dictionary).get(cb, 0.0))))
+		var tilt := deg_to_rad(float((d.get("tilt", {}) as Dictionary).get(cb, 0.0)))
+		var onto := _onto(skel, to_m, p[3], tilt)
 		var nb := WardenSkeleton.find(skel, cb)
 		if nb < 0 or onto.basis.determinant() == 0.0:
 			continue

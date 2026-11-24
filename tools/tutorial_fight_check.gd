@@ -6,6 +6,7 @@ extends RefCounted
 ## ability locked, the first pick can only be the right click, every ability ends up unlocked and used
 ## (right click, attack, dash, wall kick, Boki, E, glove), Fusion stays locked and unused (the tutorial never
 ## teaches it, 11-18), and only the camps paid XP.
+## Each run also judges the framing at 1280x720 (TutorialFraming).
 
 var bad := 0
 
@@ -50,10 +51,12 @@ func _play(main: Node, id: String) -> void:
 	var locked: bool = m.player.slot_lv.values().all(func(v): return int(v) == 0)
 	ok(locked and m.player.lvl == 1 and m.player.skill_pts == 1, id + ": lands at level 1, one point, all locked")
 	var forced := false
+	var framing := TutorialFraming.new()
 	while t < 400.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
+		framing.tick(m)
 		texts[tu.id()] = tu.text
 		if tu.id() == "pick_sec" and not forced:
 			forced = true
@@ -73,6 +76,7 @@ func _play(main: Node, id: String) -> void:
 	var names_move: bool = hint.contains(HINT_WORD[id]) and hint.length() <= 34
 	ok(names_move, "%s: the first fight line names its move ('%s')" % [id, hint])
 	ok(m.player.extracted, id + ": the course finishes")
+	framing.judge(id, ok)
 	var lv: Dictionary = m.player.slot_lv
 	var all_on: bool = lv.keys().all(func(k): return int(lv[k]) > 0 if k != "ult" else int(lv[k]) == 0)
 	ok(all_on, "%s: every ability unlocked, Fusion left locked %s" % [id, str(m.player.slot_lv)])
