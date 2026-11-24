@@ -124,3 +124,12 @@ Each clip key re-keys the two wing roots so they keep their rest-pose relation t
 the turnaround: wings spread evenly at shoulder height). Mesh, skin, node tree and every other track are unchanged (+31 KB of keys).
 `tools/anim/geo_check.py`: wing clips over 4 cm 400 -> 0, worst 13.8 -> 3.5 cm, wing-vs-arm/hand clips gone; wing+cape edge stretch
 p99 lower in all 6 clips (Attack 2.62 -> 1.63). `--ref=Idle@0` (keep the stand's head-tilted relation) was the runner-up: worst 5.8 cm.
+
+## 11-24 round 3: arms pushed off the belly, paw tips curled, Idle legs apart (keys only)
+Tool (job folder, not in the repo): `/home/boki/gens/hunter-round-1124/meeko/r3/tools/keys_r3.py`. Each value was picked by a grid
+scored with geo_check's own penetration test (every 2nd frame; grids in `r3/geo/search*.txt`). "push" swings the bone each key so the
+forearm/hand moves away from the Hips-Spine axis: run LeftArm 12; walk RightArm 4; Attack LeftArm 4, LeftForeArm 20, RightForeArm 10;
+Crouch LeftArm 8, RightForeArm 20; Jump_Run LeftForeArm 10, RightForeArm 30. Paws: Middle1 + Middle3 curled 30 deg toward the palm,
+all clips. Idle: thighs 3 deg apart each. Mesh, skin and textures are byte-identical.
+geo_check: worst clip 4.6 -> 4.4 cm, run 3.7 -> 3.2, Idle 3.8 -> 3.5, Attack paws into each other 2.5 -> under 2.5 cm (no longer
+reported); no pair is newly worse than live. Not done: the held Crouch forearm 4.0 cm stays as it was (every push made another pair worse).
