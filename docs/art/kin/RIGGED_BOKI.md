@@ -118,6 +118,14 @@ before its legs, then give the legs back with `auto_legs.py -- nacrolin legs=2 t
 `top=0.5 reach=0.8 hold=hips`): walk and run keep the species' own neck, head and spine motion, the root and hips
 are held so the planted feet can follow. Slide at home and match speed, borrowed walk -> own clips (x1): nacrolin
 18/22/21/29/32% -> 8/9/9/18/21, nimbostrich 18/19/18/33/44 -> 11/10/13/29/40.
+11-20: Crofthorn (`heatherhorn`) and Anvilbrock (`kilnbadger`) have their own clips (`heatherhorn_anim.py`,
+`kilnbadger_anim.py`) on the borrowed Glomwort skeleton: a cow's level-backed plod, horn sweep and proud bellow; a honey
+badger's low swagger, headbutt and ringing anvil. Their glbs were re-keyed with `tools/boki/reclip.py`. Then they got
+their real legs back on top: `auto_legs.py heatherhorn top=0.42 reach=1.15`, `auto_legs.py kilnbadger top=0.35
+reach=1.35` (the args main's leg pass used, read back off its bones and swing). To re-key them again, run `reclip.py`
+on the legless glb from before the legs (`git show 836178d90b:art/kin/<id>/<id>.glb`; its assert wants the module's
+skeleton), then `auto_legs.py` with those args. The trot touches down at the wrap, so heatherhorn's walk and run seams
+sit in SEAM_OVER (2.09, 1.62).
 
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.
