@@ -1,12 +1,24 @@
 {
-	"palette": {"main": "9a5cff", "hot": "e6d8ff", "soft": "c9a0ff", "ghost": "b890ff", "flash": "e070ff", "deep": "4a1f99", "char": "2a1450", "white": "ffffff"},
+	"palette": {"main": "9a5cff", "hot": "e6d8ff", "soft": "c9a0ff", "ghost": "b890ff", "flash": "e070ff", "deep": "3a1670", "slot": "b07aff", "char": "2a1450", "white": "ffffff"},
+	"fire_from": {"e": "hand_r"},
 	"anchors": {
+		"gun_r": {"nodes": ["weapon_muzzle"], "bone": "hand.R", "off": [0.0, 0.08, 0.0], "body": [0.28, 0.95, 0.6]},
+		"gun_l": {"nodes": ["weapon_muzzle_l"], "bone": "hand.L", "off": [0.0, 0.08, 0.0], "body": [-0.28, 0.95, 0.6]},
 		"hand_r": {"bone": "hand.R", "off": [0.0, 0.08, 0.0], "hand": "r", "body": [0.3, 1.0, 0.3]},
 		"foot_l": {"bone": "shin.L", "off": [0.0, 0.42, 0.0], "body": [-0.12, 0.1, 0.0]},
 		"chest": {"nodes": ["anchor_chest"], "body": [0.0, 0.8, 0.0]},
 		"feet": {"nodes": ["anchor_feet"], "body": [0.0, 0.15, 0.0]}
 	},
 	"moves": {
+		"bolt_trail": {"net": false,
+			"fx": [{"p": "ribbon", "streak": true, "size": 0.42, "life": 2.0, "tail": 0.022, "c": "deep", "c2": "main", "c3": "deep"},
+				{"p": "ribbon", "streak": true, "size": 0.26, "life": 2.0, "tail": 0.02, "head": 0.36, "head_len": 1.6, "c": "main", "c2": "slot", "c3": "deep"},
+				{"p": "ribbon", "streak": true, "size": 0.1, "life": 2.0, "tail": 0.016, "c": "white", "c2": "white", "c3": "hot"}]},
+		"bolt_hit": {"net": false,
+			"fx": [{"p": "flare", "size": 0.8, "grow": 1.2, "life": 0.16, "c": "slot", "c2": "white", "c3": "deep"},
+				{"p": "sweep", "size": 0.75, "arc": 150, "tilt": 62, "lean": 40, "life": 0.22, "c": "slot", "c2": "hot", "c3": "deep"},
+				{"p": "star", "n": 2, "speed": 0.2, "spread": 1.0, "life": 0.14, "size": 0.5, "c": "hot", "c2": "white", "c3": "main"},
+				{"p": "ember", "way": "fwd", "n": 9, "speed": 6.5, "spread": 0.6, "grav": 7.0, "drag": 1.5, "life": 0.28, "size": 0.05, "stretch": 0.05, "c": "slot", "c2": "hot", "c3": "deep", "near": true}]},
 		"dash": {"net": false, "fx": [
 			{"p": "ribbon", "at": "chest", "size": 0.5, "life": "t", "tail": 0.3, "c": "ghost", "c2": "hot"},
 			{"p": "ribbon", "at": "feet", "size": 0.35, "life": "t", "tail": 0.25, "c": "main", "c2": "ghost"}

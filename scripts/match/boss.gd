@@ -159,7 +159,7 @@ func blast(at: Vector3, rad: float, base: float, kb := 7.0, lift := 4.0, extra :
 	m.fx.ring(at, rad, c.lightened(0.3), 0.32)
 	m.fx.burst(at + Vector3(0, 0.4, 0), c, int(clampf(rad * 8.0, 10.0, 34.0)), 6.0, 0.5, 6.0, 1.3)
 	m.fx.dust(at, 12)
-	Shake.incoming_big(m, at, 0.35 if rad < 3.0 else 0.55)
+	Shake.big(m, at, "boss_slam" if rad < 3.0 else "boss_slam_wide")
 	for f in m.foes_of(team):
 		if f is Mob: continue
 		if _hits(f, at, rad):
@@ -187,6 +187,7 @@ func sim(dt: float) -> void:
 	if dead:
 		return
 	tick_status(dt)
+	StealReel.tick(self)
 	_tick_teles(dt)
 	_tick_hazards(dt)
 	_tick_flying(dt)
@@ -490,7 +491,7 @@ func _atk_fissure() -> void:
 			var q := a + Vector3(d.x, 0, d.y) * (1.0 + i * 2.0)
 			m.fx.burst(q + Vector3(0, 0.3, 0), Color("ffb04a"), 10, 5.0, 0.5, 8.0, 1.2)
 			m.fx.dust(q, 6)
-		Shake.incoming_big(m, a, 0.5)
+		Shake.big(m, a, "boss_fissure")
 		BossSfx.hit(m, self, "fissure", a))
 
 # ---- Sarcobra (serpent)
@@ -696,7 +697,7 @@ func _phase_up(p: int) -> void:
 	md["windup"] = 1.2
 	m.fx.ring(pos, 6.0, col(), 0.5)
 	m.fx.burst(pos + Vector3(0, 1.5, 0), col(), 40, 8.0, 0.7, 2.0, 1.6)
-	Shake.incoming_big(m, pos, 0.7)
+	Shake.big(m, pos, "boss_phase")
 	for f in foes_inside():
 		if flat_dist(f) < 5.5:
 			f.hurt(dmg(6.0), self, {"kb": dir_to(f) * 11.0, "lift": 4.0, "src": "mob"})

@@ -6,7 +6,9 @@ extends RefCounted
 ##   3. ticks are once-only, an unknown id does nothing, the reward is paid once, then the list is gone
 ##   4. a bot plays a fresh base: feeds a Boki, plays at a toy, runs a race, naps in a pile and pairs two
 ##      Boki in the Nook, and the list finishes by itself
-##   5. the screen stays quiet (GardenHudGroups): day 1 in the hub and two zones shows at most 5 HUD groups and one
+##   5. a fresh base_mode save with one Boki gets a second one at once: the Shelter is open at market stall level 1 and
+##      a stray costs less than the first-entry gems, so the three lines that need company (race, nap, pair) can be done
+##   6. the screen stays quiet (GardenHudGroups): day 1 in the hub and two zones shows at most 5 HUD groups and one
 ##      arrival card; day 5 (a journal, today's wishes) shows one arrival card, the wishes riding on the away card
 ## Never touches the real save.
 
@@ -42,6 +44,7 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	_list()
+	_second_boki()
 	await _bot()
 	await _screens()
 	print("FIRSTDAY DONE, failures: %d" % bad)
@@ -119,6 +122,37 @@ func _pair_after_grown() -> void:
 	ok(pair_shown.call() and GardenFirstDay.rows().size() == 5,
 			"a Grown Boki (level %d): the 'pair' line shows" % NookRules.GROWN_LV)
 	ok(GoalTracker.lines().any(func(r): return r["text"] == _pair_text()), "and the tracker lists it")
+
+## DECISIONS 2026-11-11: a player with few gems can always adopt. Three of the five first-day lines need a second Boki,
+## so a one-Boki base_mode save must be able to adopt a stray from the Shelter on day one (stall level 1).
+func _second_boki() -> void:
+	var rules: Dictionary = Content.rules("farm_build")
+	var was: bool = rules.get("base_mode", false)
+	rules["base_mode"] = true
+	Save.d = Save.fresh()
+	var starter := Save.new_kin("zapple", "Pip")
+	starter["starter"] = true
+	Save.d["roster"].append(starter)
+	Save.d["active"] = starter["uid"]
+	Save.d["tutorial"] = Save.fresh()["tutorial"]
+	Save.d["gems"] = maxi(int(Save.d["gems"]), HomeLayout.FS_GEMS)      # the first farm entry floors gems
+	HomeLayout.ensure(Save.d)
+	var hm := HomeMarket.new(null, Callable())
+	ok(Stalls.level() == 1 and hm.tabs().has("Shelter"),
+			"second Boki: a level-1 stall already opens the Shelter %s" % str(hm.tabs()))
+	var purse := int(Save.d["gems"])
+	ok(Shelter.cards().size() >= 1 and Shelter.cheapest() <= purse,
+			"second Boki: a stray (%d gems) is on offer and the purse (%d) pays it" % [Shelter.cheapest(), purse])
+	ok(GardenFirstDay.rows().size() == 4, "second Boki: one Boki, so race, nap and pair wait: 4 lines")
+	var cid := String(Shelter.cards()[0]["id"])
+	var r := Shelter.adopt(cid)
+	ok(bool(r["ok"]) and Save.d["roster"].size() == 2,
+			"second Boki: adopting the stray gives a second Boki (%s)" % str(r["why"]))
+	ok(GoalTracker.lines().filter(func(l): return l["source"] == "first_day").size() >= 4,
+			"second Boki: the first-day list is still on and now holds the lines that need company")
+	rules["base_mode"] = false
+	ok(Shelter.open_level() == 2, "second Boki: off base_mode the Shelter opens at stall level 2")
+	rules["base_mode"] = was
 
 func _pair_text() -> String:
 	for r in GardenFirstDay.rules()["rows"]:

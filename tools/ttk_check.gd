@@ -95,20 +95,20 @@ func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
 	var need := _src_hp(hero) / (1.0 - SOURCE_DR)
 	var shots := []
 	var t := 0.0
-	var n := 0
+	var n_v := 0
 	while t <= MAX_S:
-		var dmg := float(lmb[0]) + float(lmb[2]) * n
-		shots.append([t, minf(dmg, float(lmb[3])) if lmb.size() > 3 else dmg])
-		n += 1
+		var dmg_v := float(lmb[0]) + float(lmb[2]) * n_v
+		shots.append([t, minf(dmg_v, float(lmb[3])) if lmb.size() > 3 else dmg_v])
+		n_v += 1
 		t += float(lmb[1])
 	for slot in hero[5] if combo else {}:
 		var a: Array = hero[5][slot]
-		var dmg := float(a[0]) * (1.0 + float(a[1]) * float(max_rank))
+		var dmg_v := float(a[0]) * (1.0 + float(a[1]) * float(max_rank))
 		var cd := float(a[2]) - float(a[3]) * float(max_rank)
 		for c in int(a[4]) + int(a[5]) * int(max_rank):
 			t = 0.0
 			while t <= MAX_S:
-				shots.append([t, dmg])
+				shots.append([t, dmg_v])
 				t += cd
 	return _src_knock(shots, need)
 
@@ -121,7 +121,7 @@ func _median_src(label: String) -> float:
 	if times.is_empty():
 		return -1.0
 	times.sort()
-	var mid := times.size() / 2
+	var mid := int(times.size() / 2.0)
 	return times[mid] if times.size() % 2 == 1 else (times[mid - 1] + times[mid]) / 2.0
 
 func _src_hp(hero: Array) -> float:
@@ -188,12 +188,12 @@ func our_hit(arch: String, slot: String) -> float:
 	var P: Hunter = f[1]
 	var T: Hunter = f[2]
 	var wait := HIT_S
-	var hold: float = RMB_HOLD.get(arch, 0.0) if slot == "rmb" else 0.0
+	var hold_v: float = RMB_HOLD.get(arch, 0.0) if slot == "rmb" else 0.0
 	if slot == "x":
 		P.slot_lv["ult"] = 1
 		P.ak.cast_ult()
 		wait = ULT_WAIT
-	elif hold > 0.0:
+	elif hold_v > 0.0:
 		P.inp["sec_hold"] = true
 		P.ak.press_rmb()
 	else:
@@ -202,7 +202,7 @@ func our_hit(arch: String, slot: String) -> float:
 	while t < wait:
 		if slot == "e":
 			_abilities(P, [slot])      # (the recast that sets a planted E off)
-		P.inp["sec_hold"] = t < hold
+		P.inp["sec_hold"] = t < hold_v
 		P.inp["fire"] = P.ak.ult_running()      # an ult that empowers the next shots (Starpiercer) fires them
 		_tick(m, P, T, f[3])
 		t += DT

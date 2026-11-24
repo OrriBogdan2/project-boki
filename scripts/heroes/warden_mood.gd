@@ -6,6 +6,9 @@ extends RefCounted
 ##   "companion": the bone it wiggles and shivers; "lure": the material tag of its glow; "flare_kmoves": its moves
 ##   "faces": {material tag: {mood: atlas cell}}: faces drawn on an atlas (the glb's `eyes-mood_<tag>` texture)
 ##   in place of the glass, one per companion; "blink_cell" is the cell of a blink
+##   "tex_faces": {material name: {mood: texture path}}: a face baked in the paint, swapped whole on that surface
+##   (the .glb's own paint is the face of every mood not listed); loaded once, at the model's build
+##   "combat", "combat_t": the mood while the Hunter shot, cast or was hit in the last combat_t s
 ## Moods: calm, happy, angry, determined, sad (+ sleepy, shy, cry for atlas faces).
 ## A kit calls poke(model, "shiver") for a blocked hit, and sets the root
 ## meta FLARE while its big moment runs.
@@ -34,6 +37,8 @@ var skel: Skeleton3D
 var d: Dictionary
 var face: ShaderMaterial
 var atlas: Array = []         # [ShaderMaterial, {mood id: cell}] per atlas face
+var tex_faces: Array = []     # [ShaderMaterial, {mood id: Texture2D}, the .glb's own Texture2D] per baked face
+var tex_on := -1              # the mood id the baked faces show
 var lure: Array = []          # the lure's materials
 var lure_base := 1.0
 var lure_k := 0.0
@@ -75,6 +80,9 @@ func _setup(glb: Node3D) -> void:
 				am.set_shader_parameter("blink_cell", int(d.get("blink_cell", -1)))
 				atlas.append([am, d["faces"][tag]])
 				(mi as MeshInstance3D).set_surface_override_material(si, am)
+			elif d.get("tex_faces", {}).has(nm):
+				var glass := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+				_tex_face(glass, d["tex_faces"][nm])
 			elif nm.begins_with("eyes-mood"):
 				face = ShaderMaterial.new()
 				face.shader = FACE_SHADER
@@ -88,6 +96,16 @@ func _setup(glb: Node3D) -> void:
 	bone = WardenSkeleton.find(skel, String(d.get("companion", "")))
 	if bone >= 0:
 		rest = skel.get_bone_rest(bone).basis.get_rotation_quaternion()
+
+## A face baked in a surface's paint: its toon material's texture, and each listed mood's own.
+func _tex_face(over: ShaderMaterial, map: Dictionary) -> void:
+	if over == null:
+		return
+	var by_id := {}
+	for mood in map:
+		by_id[int(IDS[mood])] = load(String(map[mood])) as Texture2D
+	tex_faces.append([over, by_id, over.get_shader_parameter("albedo_tex")])
+
 
 ## The flare past the lure's own white: a soft additive puff that opens on its anchor, off at rest so the small lure
 ## never reads as a pickup.
@@ -123,6 +141,9 @@ func _want(s: Dictionary) -> String:
 		return String(moves[km])
 	if float(s.get("hit_t", 99.0)) < float(d.get("hit_t", 1.2)):
 		return String(d.get("hit", "angry"))
+	var fight := minf(float(s.get("fired", 99.0)), minf(float(s.get("cast", 99.0)), float(s.get("hit_t", 99.0))))
+	if d.has("combat") and fight < float(d.get("combat_t", 4.0)):
+		return String(d["combat"])
 	return String(d.get("default", "calm"))
 
 ## The atlas cell of mood id `id` in a face's map (a mood it has no cell for shows its calm one).
@@ -139,6 +160,10 @@ func step(dt: float) -> void:
 		cur = want
 		k = 0.0
 	k = minf(1.0, k + FADE * dt)
+	if cur != tex_on:
+		tex_on = cur
+		for f in tex_faces:
+			(f[0] as ShaderMaterial).set_shader_parameter("albedo_tex", (f[1] as Dictionary).get(cur, f[2]))
 	if face:
 		face.set_shader_parameter("from_mood", was)
 		face.set_shader_parameter("to_mood", cur)

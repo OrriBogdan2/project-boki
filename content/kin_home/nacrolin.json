@@ -1,0 +1,14 @@
+{
+	"id": "nacrolin",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/nacrolin.json.",
+	"shiny": {
+		"color": "#e0e1cf",
+		"belly": "#e8f8f6",
+		"glow": "#ffae9f"
+	},
+	"work": {
+		"tide": 3,
+		"craft": 2,
+		"mend": 1
+	}
+}

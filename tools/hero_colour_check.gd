@@ -31,7 +31,8 @@ const MEANING := {
 	"7dffb0": "Albert's heal burst",
 	"9ad8ff": "Aegis: a shield's blue",
 	"8fe3c8": "Mending Ground: a heal",
-	"ffd27a": "Hearthlight and Hearth Call: heals",
+	"ff8c32": "Meeko's hurts: embers that fall (her heals are her own leaf green)",
+	"ffb45a": "Meeko's hurts: the embers' lit edge",
 	"ff8a6a": "Hearth Call's tether snap",
 	"ffc02a": "Lace's perfect-release cue",
 	"ffe27a": "Lace's Deadeye payoff",
@@ -48,14 +49,10 @@ const MEANING := {
 	"b8946a": "earth dust",
 	"7a5c3a": "earth thrown up by a dive",
 	"1a5a6a": "the anchor spiral: seafoam stands off the grass",
-	"f6a6c8": "Hearthlight's rose heal motes"
+	"5cffd8": "Grimble's stun swirl: anchor seafoam, the stun cue"
 }
 ## Moves whose colours are the thing they act on or heal: a broken Boki's type, a heal.
-const EXEMPT_MOVES := {
-	"gil": ["shatter_air", "shatter_fire", "shatter_slime", "shatter_zeep"],
-	"tender":
-	["bloom", "call", "call_land", "call_plus", "heal_stars", "hearth", "hearth_land", "hearth_motes", "mended"]
-}
+const EXEMPT_MOVES := {"gil": ["shatter_air", "shatter_fire", "shatter_slime", "shatter_zeep"]}
 const HEX_LITERAL := '[Cc]olor\\("#?([0-9a-fA-F]{6})"'
 const FLOAT_LITERAL := "Color\\(\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*,\\s*([0-9.]+)\\s*[,)]"
 

@@ -16,6 +16,10 @@ crouch layer, and kit moves that play on the upper body over the legs. Boki: the
 ability (cast) and hop (jump: a cheer, and any leap, throw or dive in the air, `kact` hop from `Kin.render`; a
 species without a hop clip runs through the air); a hit and a landing spring `KinFlinch`; a downed Boki topples
 onto its side (`Kin.render`).
+No Bokidex .glb (all 48 in `art/kin/<id>/<id>.glb`, checked 11-20) carries a hit, flinch, faint or death clip: each has the same
+13 (ability, attack, carry, chop, eat, hop, idle, mine, pet, run, sleep, tend, walk). So the starters' `hit` and `death`
+stay `proc` (`KinFlinch`, the downed topple) and nothing is mapped; when a species gets such a clip, map it in the rig
+with a 0.1 s blend and keep `KinFlinch` as the fallback. `--boki-flinch-shots --video` renders each starter's hit and faint.
 
 Boki garden states (`tools/anim_coverage_boki.gd`): every species with a rigged .glb in the game (a `BokiRig.FRAME`
 row and `art/kin/<id>/<id>.glb`, the Bokidex 3D models, 48 today) through idle, walk, run, attack, cast (`ability`),
@@ -27,38 +31,40 @@ one whose every pose sits within 3 deg of a pose idle passes through. Rows run w
 `shared`, then the lowest Field Book number), and the five worst are written out as backlog lines.
 
 Bind rows (v95 swaps, `tools/warden_states_check.gd`, run by `--warden-clips-check`): each Hunter's game .glb is
-driven through all 15 Hunter states and fails on a T-pose (every contract bone within 2 deg of rest), a state that
+driven through all 15 Hunter states plus the stun, the root and the knocked-down beat (18 in all), and fails on a T-pose (every contract bone within 2 deg of rest), a state that
 shows the idle pose, frozen legs in a walk, run or strafe (Motley has no legs: his hips), a clip track that names no
-bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every state; `--warden-states-shots
---shots-dir=<dir>` (GPU) renders one frame per Hunter and state for a contact sheet.
+bone, a walk/run clip that keys no leg bone, or a stunned or rooted Hunter whose soles leave the idle's ground by 0.1 m.
+The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the death clip's own, and the strips judge it.
+`--verbose-states` prints every state; `--warden-states-shots
+--shots-dir=<dir>` (GPU) renders one frame per Hunter and state for a contact sheet; add `--cc` for the stun, root and knock strips (`--true-cam` for the match camera).
 
 <!-- table:begin -->
 ### Hunters
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp | strafe | crouch | upper |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
-| claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
+| breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
-| gil | clip | clip | clip | proc | clip | missing | clip | clip | proc | proc | proc | proc | clip | proc | proc |
-| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
-| kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
+| gil | clip | clip | clip | proc | clip | missing | clip | clip | proc | proc | proc | proc | clip | clip | proc |
+| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 
 ### Starter Boki
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
 
 ### Boki garden states
 
@@ -78,9 +84,7 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
 | nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
-| nimbostrich | shared | shared | shared | shared | shared | shared | proc | proc |
 | opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
-| orchisloth | shared | shared | shared | shared | shared | shared | proc | proc |
 | scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
 | sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
 | spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -89,6 +93,8 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
+| nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
+| orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
 | burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -131,9 +137,28 @@ Worst five, backlog-ready:
    legs move). His kit moves, stun, glide, knock-down, death and crouch stay `proc`. The rig pass still owes: his own
    loco and hit clips (a fencer's guard, not Meeko's skip), kit-move clips (thrusts, lunge, abilities), crouch, dash
    and death, foot bones; then drop `clips_from`.
-2. **Boki glide and stomp are `missing`**: the Boki is carried curled up through a glide
-   and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
-   the move and the landing squash settles it.
+2. **Boki stomp is `missing`** (the Wisp stomp is the Hunter's, a Boki has none). The glide is `proc` now: no starter
+   .glb has a glide clip, so a Boki on your shoulder or pack through your glide plays BokiHomeClips' `glide` (the
+   species' idle with all four legs swung out and the ears back, `BokiHomePoses._glide`); `Kin.render` sets `kact`
+   `glide` while `owner_h.gliding`, the rider already banks and pitches with your body (`ride_basis`), and BokiRig
+   blends in and out over 0.15 s (`GLIDE_FADE`). A big Boki's mount form curls into a ball on your back instead,
+   and since 11-22 it hops up and down in `KinCurl.CURL_S` (0.6 s smoothstep, the same for every species): its root,
+   facing, size and ball pitch ease from where it was last drawn, carried along with you. Before, it jumped there in
+   one frame. `--boki-curl-check` (60 fps, run, jump, glide off the jump, landing; root against your spot on the
+   ground, pose weight = ball pitch / 0.9):
+
+   | Boki (mass) | | curl-on (glider opens) | curl-off (landing) | biggest pose-weight step |
+   |---|---|---|---|---|
+   | pebbit (1.4) | before | 3.136 m in 1 frame (f046) | 2.293 m in 1 frame (f101) | 1.00 |
+   | pebbit (1.4) | after | 0.119 m max a frame | 0.101 m max a frame | 0.04 |
+   | goliathite (2.0) | before | 3.136 m in 1 frame (f046) | 2.293 m in 1 frame (f101) | 1.00 |
+   | goliathite (2.0) | after | 0.119 m max a frame | 0.101 m max a frame | 0.04 |
+
+   (The same numbers for both, on the GPU runner and headless: the seat and the flank do not depend on the species.
+   Limits: 0.15 m, 0.5. The check's biggest step after the fix, 0.144 m at f101, is the landing frame itself, with the
+   Boki still fully seated: your shown torso drops that far as the glider closes. That is the Hunter's land blend,
+   not the curl.)
+   The dash is `proc` too: `KinFlinch.dash` leans the body into the move and the landing squash settles it.
 3. **Hunter dash is `proc` for Gil only.** Albert (`shift_whirl`, `shift_charge`, `dash_short`, `dash_air`), Grimble
    (`lunge`, `lunge_out`, `pounce`), Motley (`swap_aim`, `swap`, `swap_air`) and Meeko (`skip`, `float`) already play a
    hand-keyed clip on their v95 .glb for the whole dash, with none of the procedural pose under it (`--dash-frames-check
@@ -141,9 +166,8 @@ Worst five, backlog-ready:
    owns the body through the 0.17 s dash and its spin (0.73 s); Meeko's skip (0.233 s) spans her 0.22 s hop; Grimble's
    lunge holds through the 0.18 s shove and its gap, then `lunge_out`; Motley's Trade is no travel dash (no roll), the
    aim then the lob. Their cells read `proc` only because the move names do not say dash, so `warden_anim/*.json`
-   marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
-   clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
-   theirs too.
+   marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) carry the
+   same mark, so both cells read `clip`; claire, kael, ryzz, sable, tarek and vex key theirs too.
 4. **25 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
    models, 9116769e95: casquebill to velvorm in the table; hoarheron has its own idle only). Nothing is `missing` on
    any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. That includes glomwort,

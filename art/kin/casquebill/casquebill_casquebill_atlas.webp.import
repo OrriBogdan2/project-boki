@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6feubojt6rij"
-path="res://.godot/imported/casquebill_casquebill_atlas.webp-d65c1b4df751e47c5067ed3bb520ae6d.ctex"
+path.bptc="res://.godot/imported/casquebill_casquebill_atlas.webp-d65c1b4df751e47c5067ed3bb520ae6d.bptc.ctex"
+path.astc="res://.godot/imported/casquebill_casquebill_atlas.webp-d65c1b4df751e47c5067ed3bb520ae6d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ec84d99140277795cbd90c7f5d94e5ba"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/casquebill/casquebill_casquebill_atlas.webp"
-dest_files=["res://.godot/imported/casquebill_casquebill_atlas.webp-d65c1b4df751e47c5067ed3bb520ae6d.ctex"]
+dest_files=["res://.godot/imported/casquebill_casquebill_atlas.webp-d65c1b4df751e47c5067ed3bb520ae6d.bptc.ctex", "res://.godot/imported/casquebill_casquebill_atlas.webp-d65c1b4df751e47c5067ed3bb520ae6d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
