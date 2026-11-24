@@ -1,6 +1,6 @@
 class_name GardenZones
 extends RefCounted
-## The garden's zones (briefs/design/GARDEN.md 10, docs/decisions/0022-garden-zones.md): which are
+## The garden's zones (briefs/design/GARDEN.md 10, docs/decisions/0120-garden-zones.md): which are
 ## open, who lives where and the two keys a locked one needs. Data: content/rules/garden_zones.json.
 ## On the save: Save.d["zones"] = {id: {"open": bool}} and rec["zone"] (missing = the start zone); a woken
 ## zone also has "reveal" until the hub has shown its stone lighting (ZoneReveal).
@@ -143,14 +143,21 @@ static func seed_zone_for(biome: String) -> String:
 			return id
 	return ""
 
-## A Boki out on the base that leans far enough toward the zone to wake it (the second key), or {}.
-static func leaner(id: String) -> Dictionary:
-	var need := float(rules()["lean_key"])
+## The Boki on the base leaning furthest toward the zone's types: {"rec", "type", "lean"} (lean in lean
+## points), or {} with no Boki.
+static func closest(id: String) -> Dictionary:
+	var best := {}
 	for rec in KinBox.farm():
 		for t in info(id).get("types", []):
-			if float(rec.get("lean", {}).get(t, 0.0)) >= need:
-				return rec
-	return {}
+			var pts := float(rec.get("lean", {}).get(t, 0.0))
+			if best.is_empty() or pts > float(best["lean"]):
+				best = {"rec": rec, "type": String(t), "lean": pts}
+	return best
+
+## A Boki out on the base that leans far enough toward the zone to wake it (the second key), or {}.
+static func leaner(id: String) -> Dictionary:
+	var best := closest(id)
+	return best["rec"] if not best.is_empty() and float(best["lean"]) >= float(rules()["lean_key"]) else {}
 
 ## The two keys of a locked zone: {"seed": have the Wayseed, "lean": have a Boki leaning toward it}.
 static func keys_for(id: String) -> Dictionary:

@@ -169,6 +169,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	ok(not BokiRig.has("no_model"), "an id without one keeps its KinModels body")
 	for id in SPECIES_LIST:
 		kin_id = id
@@ -229,7 +230,7 @@ func _contents(rig: BokiRig) -> void:
 	for mi in rig.model.find_children("*", "MeshInstance3D", true, false):
 		var m := (mi as MeshInstance3D).mesh
 		for si in m.get_surface_count():
-			tris += (m.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+			tris += int((m.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3.0)
 	var cap: int = OVER_TRIS.get(kin_id, MAX_TRIS)
 	ok(tris <= cap, "%d tris, budget %d" % [tris, cap])
 	_lods(rig)
