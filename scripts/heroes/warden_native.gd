@@ -56,7 +56,7 @@ var hit_prev := 99.0  # the state's s since a hit, last frame
 var land_prev := 0.0  # the state's landing squash, last frame
 ## The state counters last frame; cast -1: none read yet (the first state read is the baseline, no new hit)
 var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
-var own_casts := false  # data "own_casts": her casts are her own kit moves (kmoves rows), no Meshy swing for them
+var own_casts := false  # data "own_casts": her casts and shots are her own kit moves (kmoves rows), no Meshy Attack
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
@@ -352,9 +352,9 @@ func _swing(s: Dictionary) -> String:
 	var now := {
 		"kmove": String(s.get("kmove", "")),
 		"swing_n": int(s.get("swing_n", 0)),
-		# (a Boki's own ability, k1 or k2, is its move: the Hunter does not swing for it; nor does a hand caster's cast)
-		"cast": INF if own_casts or String(s.get("cast_slot", "")) in BOKI_SLOTS else float(s.get("cast", INF)),
-		"recoil": 0.0 if own_casts else float(s.get("recoil", 0.0)),
+		# (a Boki's own ability, k1 or k2, is its move: the Hunter does not swing for it)
+		"cast": INF if String(s.get("cast_slot", "")) in BOKI_SLOTS else float(s.get("cast", INF)),
+		"recoil": float(s.get("recoil", 0.0)),
 	}
 	if not s.has("cast"):
 		return ""  # (Hunter._anim_state has not filled this model's state yet: no counters to read)
@@ -376,6 +376,8 @@ func _swing(s: Dictionary) -> String:
 		slot = "lmb_hold" if melee and int(s.get("combo", 0)) < 0 else "lmb"
 	if not plays.has(slot):  # (an uncharged swing's slot stands in for a charged one's)
 		slot = "lmb" if slot == "lmb_hold" and plays.has("lmb") else "attack"
+	if own_casts and slot == "attack" and not (move or melee):
+		return ""  # (a hand caster's cast or shot with no slot clip plays no Meshy swing: data own_casts)
 	if not _fresh(slot):
 		return ""
 	attack_move = move or melee
