@@ -4,7 +4,7 @@ extends RefCounted
 ## stair flights (a face that grows along the flight), sheer cliff lips, ruin walls and boulders (World.BLOCK_H) and
 ## island rims over the abyss. Then a light, a medium and a heavy Hunter (Meeko, Vex, Albert) fly into faces of each
 ## height from a run (a running jump), a standing jump and a glide. A height inside the reach (a jump's apex plus
-## Hunter.MANTLE_REACH, or the glide's) must top every try with no snap; a height past it must never top by jumping.
+## HunterFeel.mantle_reach, or the glide's) must top every try with no snap; a height past it must never top by jumping.
 
 const HEROES := ["tender", "gunslinger", "bulwark"]  # light Meeko, medium Vex, heavy Albert (the brief's classes)
 const MODES := ["run", "jump", "glide"]
@@ -70,6 +70,12 @@ func _face(a: Vector2i, d: Vector2i) -> Dictionary:
 		kind = "sheer"
 	elif w.stairs.has(ib):
 		kind = "stair_side"
+	if kind == "stair_side":
+		# a flight's side grows along it: only a lip that is level across the body's width is a ledge of one height
+		var sv := Vector2(d.y, d.x) * 0.4
+		for sgn in [-1.0, 1.0]:
+			if absf(w.ground_at(edge.x + dv.x + sv.x * sgn, edge.y + dv.y + sv.y * sgn) - ga - hb) > 0.1:
+				return {}
 	hb = snappedf(hb, 0.4 if kind == "stair_side" else 0.01)
 	return {
 		"kind": kind,
@@ -126,4 +132,4 @@ func report() -> void:
 static func reach(mode: String) -> float:
 	if mode == "glide":
 		return 99.0
-	return Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + Hunter.MANTLE_REACH
+	return Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + HunterFeel.mantle_reach

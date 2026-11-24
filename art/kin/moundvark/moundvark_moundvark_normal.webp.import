@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c20lyrjskqode"
-path="res://.godot/imported/moundvark_moundvark_normal.webp-c723f6e11c73ceb73dd80b467d12ab65.ctex"
+path.bptc="res://.godot/imported/moundvark_moundvark_normal.webp-c723f6e11c73ceb73dd80b467d12ab65.bptc.ctex"
+path.astc="res://.godot/imported/moundvark_moundvark_normal.webp-c723f6e11c73ceb73dd80b467d12ab65.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0278c443b3ad72eff039226fa9104bc7"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/moundvark/moundvark_moundvark_normal.webp"
-dest_files=["res://.godot/imported/moundvark_moundvark_normal.webp-c723f6e11c73ceb73dd80b467d12ab65.ctex"]
+dest_files=["res://.godot/imported/moundvark_moundvark_normal.webp-c723f6e11c73ceb73dd80b467d12ab65.bptc.ctex", "res://.godot/imported/moundvark_moundvark_normal.webp-c723f6e11c73ceb73dd80b467d12ab65.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

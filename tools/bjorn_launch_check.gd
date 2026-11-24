@@ -8,7 +8,7 @@ extends "res://tools/pin_bjorn_owner_check.gd"
 
 const FAR := Vector3(30.0, 0, 6.0)      # the dummy parked out of the way
 ## s after the plant ends from which he must be at 90% of his run speed: a frame for the plant to lift, then
-## the shared ground acceleration (Hunter.GROUND_ACCEL, ~0.055 s from a stand)
+## the shared ground acceleration (HunterFeel.ground_accel, ~0.055 s from a stand)
 const FULL_STRIDE := 0.12
 
 func bjorn() -> void:
@@ -586,7 +586,7 @@ func _rmb_parity(m: Match, P: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	step(m, 0.3)
 
 # ------------------------------------------------------------------ kit audit (Nov 3 23:40)
-## The audit's fixes: the thrown hammer's knock into a wall Crushes (data: any knock into a wall), a knock
+## The audit's fixes: the thrown hammer has no knock, so it never Crushes (the card: damage only), a knock
 ## into another foe doesn't (data: walls only), and the raised aegis takes any blow from the front, melee
 ## included (data: Brightshield blocks all damage from the front), not one from behind.
 func _audit() -> void:
@@ -608,8 +608,8 @@ func _audit() -> void:
 	m.step(DT)
 	P.inp["fire"] = false
 	step(m, 0.6)
-	ok("bjorn audit: the thrown hammer knocking a foe into a wall Crushes it (stun)",
-		K.crushes == c0 + 1 and T.stun_t > 0.0, "crushes %d stun %.2f" % [K.crushes - c0, T.stun_t])
+	ok("bjorn audit: the thrown hammer has no knock: a foe at a wall isn't Crushed by it",
+		K.crushes == c0 and T.stun_t <= 0.0, "crushes %d stun %.2f" % [K.crushes - c0, T.stun_t])
 	_clear_wall(m, T.pos, lv, 1)
 	step(m, 1.5)
 	await done(m)

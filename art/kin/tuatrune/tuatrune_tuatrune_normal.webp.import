@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cq78aa80vluke"
-path="res://.godot/imported/tuatrune_tuatrune_normal.webp-be2a72afd0965e2e3437cc8a13c87512.ctex"
+path.bptc="res://.godot/imported/tuatrune_tuatrune_normal.webp-be2a72afd0965e2e3437cc8a13c87512.bptc.ctex"
+path.astc="res://.godot/imported/tuatrune_tuatrune_normal.webp-be2a72afd0965e2e3437cc8a13c87512.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "97a2610847ec39feeed621e16ac17aac"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/tuatrune/tuatrune_tuatrune_normal.webp"
-dest_files=["res://.godot/imported/tuatrune_tuatrune_normal.webp-be2a72afd0965e2e3437cc8a13c87512.ctex"]
+dest_files=["res://.godot/imported/tuatrune_tuatrune_normal.webp-be2a72afd0965e2e3437cc8a13c87512.bptc.ctex", "res://.godot/imported/tuatrune_tuatrune_normal.webp-be2a72afd0965e2e3437cc8a13c87512.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

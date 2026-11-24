@@ -20,6 +20,8 @@ const HIT_REVEAL := 1.0    # s: so does being hit
 const AWAY_DEG := 130.0    # degrees off your aim: well outside the wedge
 ## The lit world shaders that draw the fog: each greys its light where fogged (shaders/vis.gdshaderinc)
 const FOG_LIT := ["terrain", "grass", "flora", "wall", "wall_v1", "toon"]
+const FOG_DARK := Vector2(0.45, 0.8)     # albedo scale outside sight: a slight dark fog, not the flat dim, not black
+const FOG_GREY := Vector2(0.3, 0.8)      # grey share: clearly between own colours (0) and full grey (1)
 
 var bad := 0
 
@@ -171,8 +173,9 @@ func _reveal(m: Match) -> void:
 		return
 	ok(false, "an open spot %.0f degrees off your aim (seed 5101)" % AWAY_DEG)
 
-## No blue (or any hue) outside sight: the fog colour multiplies by greys only, and each lit world shader writes the
-## fog share for light(), greys the light colour and the cool shadow tint there, and swaps the ambient for its grey.
+## No blue (or any hue) outside sight: the fog colour multiplies by greys only (the albedo and the light part-grey),
+## and each lit world shader writes the fog share for light(), greys the light colour and the cool shadow tint there,
+## and swaps the ambient for its grey.
 func _grey_fog(m: Match) -> void:
 	var src := FileAccess.get_file_as_string("res://shaders/vis.gdshaderinc")
 	var at := src.find("vec3 vis_apply(")
@@ -183,12 +186,18 @@ func _grey_fog(m: Match) -> void:
 		var x := float(r.get_string(1))
 		if not (is_equal_approx(x, float(r.get_string(2))) and is_equal_approx(x, float(r.get_string(3)))):
 			tints += 1
-	ok(at >= 0 and tints == 0 and not src.contains("VIS_COOL"),
-		"the fog colour is grey: no tint in vis_apply (%d)" % tints)
+	var greys := body.contains("vis_grey(c, vis_greyness) * vis_dark")
+	ok(at >= 0 and tints == 0 and not src.contains("VIS_COOL") and greys,
+		"the fog colour is grey only: no tint in vis_apply (%d)" % tints)
+	ok(RaidLook.VIS_DARK >= FOG_DARK.x and RaidLook.VIS_DARK <= FOG_DARK.y,
+		"the fog is slightly dark: albedo x%.2f (%.2f-%.2f)" % [RaidLook.VIS_DARK, FOG_DARK.x, FOG_DARK.y])
+	ok(RaidLook.VIS_GREY >= FOG_GREY.x and RaidLook.VIS_GREY <= FOG_GREY.y,
+		"the fog is partly grey, not full, not none: %.2f (%.2f-%.2f)" % [RaidLook.VIS_GREY, FOG_GREY.x, FOG_GREY.y])
 	for n in FOG_LIT:
 		var s := FileAccess.get_file_as_string("res://shaders/%s.gdshader" % n)
 		var light := s.substr(s.find("void light()"))
-		var greyed := s.contains("vis_f = ") and light.contains("vis_grey(LIGHT_COLOR, vis_f)") \
+		var greyed := s.contains("vis_f = ") \
+			and light.contains("vis_grey(LIGHT_COLOR, vis_f)") \
 			and not light.contains("* LIGHT_COLOR")
 		var tone_ok := not light.contains("* tone;") and not light.contains("DIFFUSE_LIGHT += rim_color")
 		var amb_ok := s.contains("AO = vis_ao(vis_f)") \
