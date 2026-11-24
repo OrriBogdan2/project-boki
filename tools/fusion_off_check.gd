@@ -1,5 +1,5 @@
 extends RefCounted
-## --fusion-off-check: Fusion (X) is off by default (docs/decisions/0101). Prints PASS/FAIL lines.
+## --fusion-off-check: Fusion (X) is off by default (docs/decisions/0159). Prints PASS/FAIL lines.
 ##   1. the flag: content/rules/merge_forms.json ships `fusion_enabled` false
 ##   2. off: X, the bot's merge call, the Boki's leap and a full bond meter start nothing; the meter never fills;
 ##      no hunter in a bot match merges; the Boki-ability tip, loading tips, words, cards, controls and the
