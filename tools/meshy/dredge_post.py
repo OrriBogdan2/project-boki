@@ -20,6 +20,7 @@ Runs on the r7 body (tools/meshy/dredge_reskin.py output) and writes the game gl
   python3 tools/meshy/dredge_post.py --islands FILE.glb
   python3 tools/meshy/dredge_post.py --r11 OUT.glb IN_R10.glb [PACK.glb]   # r11 stages on the r10 glb (never build() twice)
   python3 tools/meshy/dredge_post.py --r17 OUT.glb IN_R16.glb   # r17: goo arm at bind abduction +HANG_OUT, chain hangs (env HANG_KEEP/HANG_OUT/HANG_FOLLOW)
+  python3 tools/meshy/dredge_post.py --r19 OUT.glb IN_R17.glb   # r19: goo arm turned HANG_BACK deg back about the shoulder, tail baked again
   python3 tools/meshy/dredge_post.py --r12 OUT.glb IN_R11.glb   # r12 tail gather (re-runnable on its own output)
   python3 tools/meshy/dredge_post.py --r13 OUT.glb IN_R12.glb [PACK.glb [UNDER.glb]]   # r13: skin weights, goo puddle, rim caps, retextured pack, straps
                                                      # r13b (same flag): rim caps split into simple cycles wound like their rims, faces
@@ -1367,6 +1368,32 @@ def hang_goo_arm(js, b, out, rig):  # r17 stage (run once per source file)
     return f"{done} shoulder/upper-arm tracks kept {HANG_KEEP} of their swing about the bind pose"
 
 
+# r19: after r17 the goo arm still hung forward of the chest (tail tip 0.2-0.57 m ahead of the hips in Idle/run/walk,
+# bind 0.08), so it showed past the chest from the gauntlet side and covered the front of the thigh in the 3/4 view;
+# in the turnaround ref it hangs beside the body (hidden from the gauntlet side). r19 turns the upper arm back about
+# the model's X axis (shoulder rest frame) in the hanging clips, then the tail is baked again (hang_tail). Attack keeps
+# its swing.
+HANG_BACK = float(_E.get("HANG_BACK", "14"))  # degrees the upper arm is turned back (hand toward -Z)
+
+
+def back_goo_arm(js, b, out, rig):  # r19 stage (run once per source file)
+    pw = rest_world(rig, "RightShoulder")[0]
+    pw = pw / np.linalg.norm(pw, axis=0)
+    turn = mat_quat(pw.T @ axis_turn(np.array([1.0, 0.0, 0.0]), np.radians(HANG_BACK)) @ pw)
+    done = 0
+    for a in js["animations"]:
+        if a["name"] not in HANG_CLIPS:
+            continue
+        for ch in a["channels"]:
+            node = js["nodes"][ch["target"]["node"]]
+            if node.get("name") != "RightArm" or ch["target"]["path"] != "rotation":
+                continue
+            smp = a["samplers"][ch["sampler"]]
+            smp["output"] = out.add_floats(qmul(turn, n.floats(js, b, smp["output"]).astype(float)), "VEC4")
+            done += 1
+    return f"{done} upper-arm tracks turned {HANG_BACK} deg back"
+
+
 def qmul(a, q):
     """a (xyzw) times every key q (frames x xyzw)."""
     ax, ay, az, aw = a
@@ -1584,6 +1611,8 @@ if __name__ == "__main__":
         rebuild_stages(sys.argv[2], sys.argv[3], [("idle", fix_idle), ("jump", fix_jump), ("tail gather", gather_tail)])
     elif sys.argv[1] == "--r17":  # r17 (on an r16 file): goo arm hangs at its bind abduction, chain hangs, tail baked again
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", hang_goo_arm), ("tail gather", hang_tail)])
+    elif sys.argv[1] == "--r19":  # r19 (on an r17 file): goo arm turned back beside the body, tail baked again
+        rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm back", back_goo_arm), ("tail gather", hang_tail)])
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
