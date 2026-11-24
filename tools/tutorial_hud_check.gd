@@ -13,7 +13,7 @@ extends RefCounted
 ##   4. the panel counter, the right click taught from its kit data, the Boki step's words
 ##   5. the strip's new-objective chime: once per step, none on a re-pulse, ducked in a fight
 ##   6. the course: every stop is walkable from the one before it on its island, and the lookout takes a
-##      wall kick (taller than a jump, within a jump and a kick's climb)
+##      wall kick (taller than a jump, within a jump and a kick's climb, its rim sheer so a jump alone can't mantle it)
 ##   7. the glide dive line (FirstMatchGuide): shown once per save after the glider has been open for
 ##      dive_open_s above dive_height, in the strip with the player's crouch key, gone at the dive and never
 ##      again; a save that has dived never sees it
@@ -315,6 +315,26 @@ func _reach() -> void:
 	var cr := tu.stop("crouch")
 	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
 	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
+	var rim := _lookout_rim(cr)
+	var msg2 := "the lookout's whole rim is sheer, so a jump alone never mantles it (%d rim tiles, %d open)"
+	ok(rim[0] > 0 and rim[1] == 0, msg2 % rim)
+
+## [rim tiles, rim tiles that are not sheer]: the tiles at the lookout's height with a drop of over a metre beside them.
+func _lookout_rim(top: Vector3) -> Array:
+	var rim := 0
+	var open := 0
+	var w: World = m.world
+	for tz in range(int(top.z) - 5, int(top.z) + 6):
+		for tx in range(int(top.x) - 5, int(top.x) + 6):
+			if not w.inb(tx, tz) or absf(w.ground_at(tx + 0.5, tz + 0.5) - top.y) > 0.01:
+				continue
+			var drop := false
+			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				drop = drop or w.ground_at(tx + 0.5 + d.x, tz + 0.5 + d.y) < top.y - 1.0
+			if drop:
+				rim += 1
+				open += 0 if w.is_sheer(tx, tz) else 1
+	return [rim, open]
 
 
 # ------------------------------------------------------------------ 7. the glide dive line

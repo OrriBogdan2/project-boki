@@ -135,15 +135,15 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip tutorial") and on the naming card.
 3. Done: `kin` and `ult` no longer nag and take 1 to 7 s (section 2, the slowest three).
 4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
-   in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. Separately, `--tutorial-fight-check`
-   sometimes reports "missing kick": the bot can reach the lookout without a wall kick (2 of 8 runs).
+   in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. (Done: `--tutorial-fight-check`
+   no longer reports "missing kick", see the lookout bullet in section 2.)
    2026-11-20 (`ext/tut-glove-stall`): the glove stall did not come back on main: 24 of 24 `--tutorial-playthrough-check`
    runs passed, glove 5.7 to 7.3 s, no void fall in the 8 traced runs. What did stall, every time, was `--tutorial-fight-check`'s second and third
    starters, stuck on `land` for the whole course: the first starter left its beat in the save, and the resume went to
    `TutorialResume.OUTPOST_START`, "goexit", a step the Ways Out course no longer has, so it fell back to step 0 and
    landing resumed again for ever. A player who quit after `wayout`, `uplink` or `defend` and pressed Continue was
    locked there the same way. Now it resumes at `wayout`. `--tutorial-resume-check` checks that every beat resumes past the landing
-   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left are "missing kick" for all three, now 3 of 3).
+   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3; those 3 were "missing kick", fixed by the lookout kick).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
@@ -262,6 +262,11 @@ The owner's first-match playtest on the PC build, and what each fix is:
   `SEND_R` of a monster, or the Boki on one; a tutorial Boki never refuses a send (`Kin.consider_throw`).
 - **The lookout (`crouch`).** `Tutorial.on_lookout` counts the whole top and its rim (`LOOKOUT_R`, `LOOKOUT_DROP`); the
   check crouches at all four far edges and at the foot of the cliff.
+- **The lookout takes a wall kick, nothing else.** A jump into a 2.4 m cliff used to mantle it (the aerial ledge rise
+  reaches 1.5 m above your feet, 2.4 m for Lace and Kael, whose jump peaks 1.57 m), so a player or the bot could skip the
+  lesson (`--tutorial-fight-check`: "missing kick", every run on 11-20). The Lookout Isle now has `"sheer_cliffs": true`
+  (`GroundShapes.sheer_cliffs`): the top tiles of its terraces are smooth sheer rims, which nothing can mantle from the air.
+  The wall kick still climbs it (jump, then jump again at the wall), and ledges everywhere else are unchanged.
 - **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
   half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
   `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
