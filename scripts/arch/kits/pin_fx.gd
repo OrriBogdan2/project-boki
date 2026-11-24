@@ -28,6 +28,7 @@ const POSTS := 9               # the Hail Wall's needle posts (8 gaps, each lace
 const LACE_W := 0.06           # m: a lace's thickness, a thread that still holds at the match camera
 const LACE_Y := Vector2(0.15, 0.9)  # m: where the upright laces cross between two posts, low and high
 const LACE_IN := 0.25          # s the laces take to draw across as the wall goes up
+const LACE_CLEAR := 0.8        # m of ground a lace keeps from a shown Hunter's feet, else it parts (COMBAT_CLARITY)
 ## her dash after-image: red fletch streaks left at hip, chest and shoulder height, how long each lasts
 ## (s), how many are pooled and how often a set is left (s)
 const WISP_T := 0.26
@@ -405,6 +406,25 @@ func _pull_laces(grow: float, thick: float) -> void:
 		n.look_at(b, Vector3.UP if absf((b - a).normalized().y) < 0.98 else Vector3.RIGHT)
 		n.scale = Vector3(thick, thick, a.distance_to(b))
 
+## A lace that runs within LACE_CLEAR of a shown Hunter's feet (ground distance) is hidden while it does, so the wall's
+## red threads never cut across a body (docs/COMBAT_CLARITY.md); the posts, flames and arrows still mark the wall.
+func _part_laces() -> void:
+	var feet: Array[Vector2] = []
+	for o: Hunter in h.m.hunters:
+		if not o.out and not o.unseen:
+			feet.append(Vector2(o.pos.x, o.pos.z))
+	for l in laces:
+		var a: Vector3 = l["a"]
+		var b: Vector3 = l["b"]
+		var near := false
+		for f in feet:
+			var c := Geometry2D.get_closest_point_to_segment(f, Vector2(a.x, a.z), Vector2(b.x, b.z))
+			if c.distance_to(f) < LACE_CLEAR:
+				near = true
+				break
+		(l["node"] as Node3D).visible = not near
+
+
 func _arc_pt(center: Vector3, yaw: float, radius: float, u: float) -> Vector3:
 	var a := yaw + u
 	var q := center + Vector3(-sin(a), 0, -cos(a)) * radius
@@ -436,6 +456,7 @@ func _tick_rain(dt: float) -> void:
 	if grow < 1.0 or thick < 1.0 or not rain.has("laced"):
 		_pull_laces(grow, thick)
 		if grow >= 1.0: rain["laced"] = true
+	_part_laces()
 	if float(rain["t"]) <= 0.0:
 		rain_off()
 		return
