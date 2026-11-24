@@ -818,7 +818,7 @@ func _core_kinds(main: Node, m: Match, v: HeroVfx, p: Hunter) -> void:
 
 
 ## Lace's tap shots and Sparkle's finger bolts: thick at match zoom with a bright head, the body in the Hunter's colour;
-## Lace's short and sharp, Sparkle's soft, sparkly and longer; Lace's drawn arrows stay above the tap; a head fits the
+## Lace's long and sharp, Sparkle's a wider, blunter streak; Lace's drawn arrows stay above the tap; a head fits the
 ## circle its shot hits in (the hit sizes are the weapons'). Flying: the head is part of the trail's own mesh, a pooled
 ## node keeps no look of the last Hunter's, and a volley makes no node once the pool is warm. The stock orb under such a
 ## round stays hidden (Oomph.hide_orb).
@@ -842,12 +842,12 @@ func _shot_trails(m: Match, v: HeroVfx, p: Hunter) -> void:
 	var tap := _ribbon_of("archer", "fire_tap")
 	var bolt := _ribbon_of("mage", "lmb_trail")
 	ok(
-		reach["archer"] < reach["mage"] and not tap.get("soft", false) and float(tap.get("head_len", 1.0)) >= 2.0,
-		"Lace's is short and sharp: %.1f m, a pointed head" % reach["archer"]
+		not tap.get("soft", false) and float(tap.get("head_len", 1.0)) >= 2.0,
+		"Lace's is sharp: %.1f m of trail, a pointed head" % reach["archer"]
 	)
 	ok(
-		bolt.get("soft", false) and float(bolt.get("head_len", 1.0)) <= 1.2,
-		"Sparkle's is soft and sparkly: %.1f m, a round head" % reach["mage"]
+		float(bolt["size"]) > float(tap["size"]) and float(bolt.get("head_len", 1.0)) < float(tap["head_len"]),
+		"Sparkle's is a wider, blunter streak than Lace's: %.1f m of trail" % reach["mage"]
 	)
 	var sizes := ["fire_tap", "fire_arrow", "fire_super"].map(func(mv): return float(_ribbon_of("archer", mv)["size"]))
 	ok(sizes[0] < sizes[1] and sizes[1] < sizes[2], "Lace's drawn arrows stay thicker than the tap %s" % [sizes])
