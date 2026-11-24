@@ -1249,6 +1249,8 @@ func _bulwark_combos() -> void:
 	aim_at(P, T.pos)
 	var sp0 := K.spins
 	var spin_plays := int(hv.plays.get("spin", 0))
+	var old_rings := hv.live.filter(func(e): return (e["node"] as MeshInstance3D).mesh == hv._arc(360.0))
+	old_rings = old_rings.map(func(e): return e["node"])      # (Lace's looks earlier in this run may still be up)
 	Sfx.listener = P.pos          # (the looks are drawn near the camera focus only)
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
@@ -1261,7 +1263,9 @@ func _bulwark_combos() -> void:
 		"mid %.0f spins %d took %.0f" % [mid, K.spins - sp0, dmg(T)]
 	)
 	var spin_r := float(K.dash_def().get("spin_r", 2.2))
-	var rings := hv.live.filter(func(e): return (e["node"] as MeshInstance3D).mesh == hv._arc(360.0))
+	var rings := hv.live.filter(
+		func(e): return (e["node"] as MeshInstance3D).mesh == hv._arc(360.0) and not old_rings.has(e["node"])
+	)
 	var ring_r: float = absf((rings[0]["s0"] as Vector3).x) if rings.size() == 1 else -1.0
 	ok("combo bjorn: one spin ring, a full circle whose outer edge is the hit radius",
 		int(hv.plays.get("spin", 0)) == spin_plays + 1 and absf(ring_r - spin_r) < 0.01, "plays %d rings %d r %.2f" % [
