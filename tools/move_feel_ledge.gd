@@ -97,7 +97,7 @@ func _run(id: String, mode: String, at: Vector3, air_press: bool) -> Dictionary:
 		"air_dash": false,
 		"air_wait": -1,
 		"landed": false,
-		"tail_v": 0.0
+		"tail_v": -1.0
 	}
 	var off := false
 	var was := false
@@ -151,7 +151,7 @@ func _row(id: String, mode: String, back: float, at: Vector3) -> void:
 		c.ok(bool(o["landed"]), "ledge_dash %s: the Trade takes him down below the edge" % what)
 		return
 	var exit_k := float(o["exit_v"]) / p.base_speed
-	var least_k := EXIT_MIN if float(o["tail_v"]) <= 0.0 else minf(EXIT_MIN, float(o["tail_v"]) / p.base_speed)
+	var least_k := EXIT_MIN if float(o["tail_v"]) < 0.0 else minf(EXIT_MIN, float(o["tail_v"]) / p.base_speed)
 	if id == "dolm":
 		# Rock Hop is a chain of hops (arcs, not a slide): it must leave the terrace at least at run speed (a hop
 		# aimed down the lip still springs up; a skid that runs off it goes at run speed: the 3.1 m chain's first
@@ -168,13 +168,19 @@ func _row(id: String, mode: String, back: float, at: Vector3) -> void:
 	# (Dredge's chain: a press made just before the lip is held through the 0.1 s gap and goes in the air, an air
 	# pounce that holds its height for its own 0.2 s: 12 steps, and the exit below is the one that follows it)
 	var hover_max := 13 if id == "dredge" and mode == "chain" else 1
+	var glide_max := 2
+	if id == "bulwark":
+		# (Albert's 360 Smash ends in a 1.6 m spin lunge, which holds its height in the air as a lunge does,
+		# decision 0061 breaker-swing-lunge: 0.23 s of it, and the glider is free once it ends)
+		hover_max = 16
+		glide_max = 17
 	var ok := (
 		bool(o["landed"])
 		and int(o["hover"]) <= hover_max
 		and bool(o["end_air"])
 		and exit_k >= least_k - 0.01
 		and int(o["glide"]) >= 0
-		and int(o["glide"]) <= 2
+		and int(o["glide"]) <= glide_max
 		and int(o["pose"]) == 0
 	)
 	var air := _run(id, mode, at, true)
