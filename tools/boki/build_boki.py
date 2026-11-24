@@ -47,6 +47,8 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "glaciyak": ("glomwort", "glomwort", "glaciyak_anim"),      # its own clips over the borrowed rig
          **{i: ("glomwort", "glomwort", i + "_anim") for i in ("moundvark", "murmurling", "spatewader")},  # own clips
          **{i: ("glomwort", "glomwort", i + "_anim") for i in ("squalltross", "threadwyrm", "tuatrune", "velvorm")},
+         "heatherhorn": ("glomwort", "glomwort", "heatherhorn_anim"),
+         "kilnbadger": ("glomwort", "glomwort", "kilnbadger_anim"),
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
          "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
          "lodestick": ("lodestick", "lodestick", "lodestick_anim"),

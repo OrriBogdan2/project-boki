@@ -200,14 +200,16 @@ func _finish() -> void:
 	var win := main.get_window()
 	print(
 		(
-			"BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f"
+			"BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f display=%s vsync=%d"
 			% [
 				Settings.quality(),
 				RenderingServer.get_current_rendering_method(),
 				RenderingServer.get_video_adapter_name(),
 				win.size.x,
 				win.size.y,
-				win.scaling_3d_scale
+				win.scaling_3d_scale,
+				DisplayServer.get_name(),
+				DisplayServer.window_get_vsync_mode()
 			]
 		)
 	)

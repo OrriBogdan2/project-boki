@@ -78,8 +78,8 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | casquebill | shared | shared | shared | shared | shared | shared | shared | shared |
 | duskapi | shared | shared | shared | shared | shared | shared | shared | shared |
 | glomwort | shared | shared | shared | shared | shared | shared | shared | shared |
-| heatherhorn | shared | shared | shared | shared | shared | shared | shared | shared |
-| kilnbadger | shared | shared | shared | shared | shared | shared | shared | shared |
+| heatherhorn | clip | clip | clip | clip | clip | clip | clip | clip |
+| kilnbadger | clip | clip | clip | clip | clip | clip | clip | clip |
 | limpetor | shared | shared | shared | shared | shared | shared | shared | shared |
 | moonloris | shared | shared | shared | shared | shared | shared | shared | shared |
 | nacrolin | shared | shared | shared | shared | shared | shared | shared | shared |
