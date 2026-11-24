@@ -105,6 +105,8 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 		mats.append_array(WardenGlb._toon(glb, lk, MantleLook.warden(arch), own, arch))
 		model.set_meta("mats", mats)
 	nat.mood = WardenMood.make(model, glb, nat.skel, nat.art_id)  # (after the toon pass: the faces' atlas shader replaces its override)
+	if nat.companions:
+		nat.companions.mood = nat.mood
 	model.set_meta(META, true)
 
 

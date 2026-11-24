@@ -40,6 +40,7 @@ class Part:
 	var push := Vector3.ZERO          # how far the avoid spheres moved it off its circle
 	var look := Basis.IDENTITY        # "face": "camera": the turn that points its front at the camera (eased)
 	var looked := false
+	var by_mood: Array = []           # [MeshInstance3D, [mood names]]: surfaces shown only in those moods ("mood_only")
 
 var skel: Skeleton3D
 var d: Dictionary
@@ -51,6 +52,7 @@ var centre := Vector3.ZERO          # the eased centre (world)
 var axes := Basis.IDENTITY          # the data's skeleton axes on this skeleton (`frame`'s basis)
 var primed := false
 var t := 0.0
+var mood: WardenMood                # set by the owner: "mood_only" surfaces follow its current mood
 
 ## Cuts the companions out of `glb`'s body mesh when `data` has them; returns the live helper or null.
 static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary, frame := Transform3D.IDENTITY) -> WardenCompanions:
@@ -94,6 +96,11 @@ static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary, frame := Trans
 		part.node.position = part.rest
 		part.node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		sk.add_child(part.node)
+		if (pc[2] as ArrayMesh).get_surface_count() > 0:
+			var mo := MeshInstance3D.new()
+			mo.mesh = pc[2]
+			part.node.add_child(mo)
+			part.by_mood.append([mo, (p.get("mood_only", {}) as Dictionary).values().reduce(func(a, b): return a + b, [])])
 		part.phase = deg_to_rad(float(p.get("phase_deg", 0.0)))
 		part.bob_period = float(p.get("bob_period", 2.7))
 		part.bob_phase = float(p.get("bob_phase", 0.0))
@@ -134,6 +141,7 @@ static func _cut_for(body: MeshInstance3D, dd: Dictionary, frame: Transform3D) -
 	var gone: Array = []
 	for p in dd["list"]:
 		var am := ArrayMesh.new()
+		var am_mood := ArrayMesh.new()     # (the "mood_only" surfaces: their own node, shown by mood)
 		var at: Array = p["at"]
 		var centre := frame * Vector3(at[0], at[1], at[2])
 		if frame != Transform3D.IDENTITY:
@@ -150,9 +158,10 @@ static func _cut_for(body: MeshInstance3D, dd: Dictionary, frame: Transform3D) -
 			arr[Mesh.ARRAY_VERTEX] = v
 			arr[Mesh.ARRAY_BONES] = null
 			arr[Mesh.ARRAY_WEIGHTS] = null
-			am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
-			am.surface_set_material(am.get_surface_count() - 1, src.surface_get_material(si))
-		parts[String(p["id"])] = [am, centre]
+			var tgt := am_mood if (p.get("mood_only", {}) as Dictionary).has(String(nm)) else am
+			tgt.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			tgt.surface_set_material(tgt.get_surface_count() - 1, src.surface_get_material(si))
+		parts[String(p["id"])] = [am, centre, am_mood]
 	gone.sort()
 	gone.reverse()
 	for si in gone:
@@ -273,6 +282,8 @@ func step(dt: float) -> void:
 			bas = Basis(Vector3.UP, sway * sin(TAU * t / (1.7 * float(d.get("period", 4.0))) + part.bob_phase)) * roll
 		var turn := axes.orthonormalized()
 		part.node.transform = Transform3D(turn * bas * turn.inverse(), part.pos)
+		for bm in part.by_mood:
+			(bm[0] as MeshInstance3D).visible = mood != null and WardenMood.IDS.find_key(mood.cur) in bm[1]
 		# (the empties the sun carries sit on a bone: put them where that bone must hold them to land on the sun)
 		for an in part.anchors:
 			var inv := skel.get_bone_global_pose(int(an[2])).affine_inverse()
