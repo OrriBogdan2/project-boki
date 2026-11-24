@@ -78,16 +78,14 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | casquebill | shared | shared | shared | shared | shared | shared | shared | shared |
 | duskapi | shared | shared | shared | shared | shared | shared | shared | shared |
 | glomwort | shared | shared | shared | shared | shared | shared | shared | shared |
-| heatherhorn | clip | clip | clip | clip | clip | clip | clip | clip |
-| kilnbadger | clip | clip | clip | clip | clip | clip | clip | clip |
 | limpetor | shared | shared | shared | shared | shared | shared | shared | shared |
-| moonloris | shared | shared | shared | shared | shared | shared | shared | shared |
 | nacrolin | shared | shared | shared | shared | shared | shared | shared | shared |
 | opalisk | shared | shared | shared | shared | shared | shared | shared | shared |
 | scaldamus | shared | shared | shared | shared | shared | shared | shared | shared |
 | sentrikat | shared | shared | shared | shared | shared | shared | shared | shared |
 | goliathite | clip | shared | shared | shared | shared | shared | shared | shared |
 | hoarheron | clip | shared | shared | shared | shared | shared | shared | shared |
+| moonloris | shared | clip | clip | shared | shared | shared | shared | shared |
 | nimbostrich | shared | clip | clip | shared | shared | shared | shared | shared |
 | orchisloth | shared | clip | clip | shared | shared | shared | shared | shared |
 | glaciyak | clip | shared | shared | clip | clip | clip | clip | clip |
@@ -106,7 +104,9 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | floenatee | clip | clip | clip | clip | clip | clip | clip | clip |
 | glintmole | clip | clip | clip | clip | clip | clip | clip | clip |
 | gloamshell | clip | clip | clip | clip | clip | clip | clip | clip |
+| heatherhorn | clip | clip | clip | clip | clip | clip | clip | clip |
 | kestrike | clip | clip | clip | clip | clip | clip | clip | clip |
+| kilnbadger | clip | clip | clip | clip | clip | clip | clip | clip |
 | kindlewren | clip | clip | clip | clip | clip | clip | clip | clip |
 | lilybara | clip | clip | clip | clip | clip | clip | clip | clip |
 | lodestick | clip | clip | clip | clip | clip | clip | clip | clip |
@@ -129,8 +129,8 @@ Worst five, backlog-ready:
 - [anim] Boki casquebill (No. 9): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki duskapi (No. 11): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki glomwort (No. 17): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/glomwort_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki heatherhorn (No. 19): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/heatherhorn_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki kilnbadger (No. 22): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/kilnbadger_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki limpetor (No. 25): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/limpetor_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki nacrolin (No. 32): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/nacrolin_anim.py, rebuild the .glb, rerun --anim-coverage-check
 
 ### Mobs
 
