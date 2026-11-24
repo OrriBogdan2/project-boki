@@ -1,7 +1,7 @@
 # Save chain from v11 (0.24.5 and the READY branches)
 
 One ordered line of save versions after v11, the last tagged release's (v0.24.3). Each READY branch that
-bumped `Save.VERSION` on its own takes the number below and nothing else. Decision: docs/decisions/0061-save-chain-0245.md.
+bumped `Save.VERSION` on its own takes the number below and nothing else. Decision: docs/decisions/0140-save-chain-0245.md.
 `--save-chain-check` (tools/save_chain_check.gd) loads a v11 save, runs every step in order, and fails if a
 step is missing, skipped or not listed here.
 
@@ -19,7 +19,7 @@ Rules:
 |---|---|---|
 | v11 -> v12 | release-integ-0245 (ext/evolution-rules-1108 + ext/garden-integrated) | `Evo.migrate` (levels capped, old form kept) and base life (`rec["bonds"] = {}`) |
 | v12 -> v13 | release-integ-0245 (ext/garden-waystone, ext/garden-items line) | v11 -> v12 again, then `GardenZones.migrate` and `Care.ensure` on every Boki |
-| v13 -> v14 | main (ext carry-pick, docs/decisions/0061-carry-pick.md) | carry 2: `d["active2"] = ""` (the second starts empty). Main took v14 before this chain landed, so the chain's v14-v18 moved up by one |
+| v13 -> v14 | main (ext carry-pick, docs/decisions/0146-carry-pick.md) | carry 2: `d["active2"] = ""` (the second starts empty). Main took v14 before this chain landed, so the chain's v14-v18 moved up by one |
 | v14 -> v15 | ext/tut-move-drills (was its v11 -> v12, then v13 -> v14) | v12 -> v13 again (heals the first-time-hints line's v13), then `d["drills"] = {}` |
 | v15 -> v16 | ext/tut-resume (was v11 -> v12, then v14 -> v15) | `TutorialResume.migrate`: a played save is past the combat tutorial |
 | v16 -> v17 | ext/clans-slice-1/-2 (was v11 -> v12, then v15 -> v16) | a guild becomes its clan as a member (`Social.clan_for`); a clan it already has stays |

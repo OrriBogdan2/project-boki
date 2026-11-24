@@ -446,7 +446,7 @@ func _stream_looks() -> void:
 	if live.size() < 4:
 		return
 	if flame_ticks % TONGUE_EVERY == 0:
-		var mid: Dictionary = live[live.size() / 2]
+		var mid: Dictionary = live[int(live.size() / 2.0)]
 		var v: Vector3 = mid["v"]
 		vfx("lance_tongue", ground(mid["p"]), Vector2(v.x, v.z).normalized())
 	if flame_ticks % LICK_EVERY == 0:

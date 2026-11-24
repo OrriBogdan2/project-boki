@@ -520,7 +520,7 @@ func _update_median() -> void:
 		return
 	lv.sort()
 	var n := lv.size()
-	median = float(lv[n / 2]) if n % 2 == 1 else 0.5 * float(lv[n / 2 - 1] + lv[n / 2])
+	median = float(lv[int(n / 2.0)]) if n % 2 == 1 else 0.5 * float(lv[int(n / 2.0) - 1] + lv[int(n / 2.0)])
 
 # ---- bounties
 func bounty_of(h: Hunter) -> int:
@@ -567,7 +567,7 @@ func on_knock(h: Hunter, credit) -> void:
 	if not m.world.is_void(at.x, at.z):
 		for _i in 4 + 2 * gap:
 			m.drop("gem", at + Vector3(0, 0.6, 0), maxi(1, int(round(3 * float(m.T.get("loot", 1.0))))))
-		m.spawn_val(Loot.valuable(Loot.roll_valuable(rng, mini(2, 1 + gap / 3))), at + Vector3(0.7, 0, -0.4))
+		m.spawn_val(Loot.valuable(Loot.roll_valuable(rng, mini(2, 1 + int(gap / 3.0)))), at + Vector3(0.7, 0, -0.4))
 	events.append([m.sess_time(), "%s claimed the bounty on %s (gap %d)" % [c.pname, h.pname, gap]])
 	m.add_feed("%s claimed the bounty on %s" % [c.pname, h.pname])
 	if m.hud and c == m.player:
@@ -717,4 +717,4 @@ func _track() -> void:
 
 static func fmt(t: float) -> String:
 	var s := int(maxf(0.0, t))
-	return "%d:%02d" % [s / 60, s % 60]
+	return "%d:%02d" % [int(s / 60.0), s % 60]
