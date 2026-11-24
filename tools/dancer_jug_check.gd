@@ -58,11 +58,11 @@ func thief(a) -> void:
 		),
 		p_v.wid
 	)
+	var dj_moves := ["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife"]
+	dj_moves += ["thf_arrive", "thf_encore", "thf_encore_dance", "thf_exdash", "thf_land"]
 	a_x.ok(
 		"dancer: her moves are keyed (KMovesDJ)",
-		["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife", "thf_arrive", "thf_encore", "thf_encore_dance", "thf_exdash", "thf_land"].all(
-			func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()
-		)
+		dj_moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty())
 	)
 	# LMB: a bolt every 0.45s from alternating hands, each one to the cursor
 	p_v.fire_cd = 0.0
