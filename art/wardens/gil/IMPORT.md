@@ -64,3 +64,11 @@ LMB, RMB, E + recast, X + leap, hit, death).
 ## Native model r6 (gil_meshy.glb)
 - Hat (brim and cone) texels recoloured from charcoal to dark navy, blue floor above the toon shader's dark_lift (0.07 linear; anything darker is lifted to neutral grey). Texture is now `gil_meshy_r6.jpg` (4096, q90, 4:2:0).
 - Attack: LeftArm/LeftForeArm re-keyed again, closest left hand/forearm to head and hat 0.021 -> 0.098 m. Other clips, mesh, UVs, skin and ink room unchanged from r5.
+
+## Native model r7 (gil_meshy.glb)
+- Swordfish: `scale hand.R 1.3` (uniform), grip in the palm at the tail stalk, bill 2.5 deg off forward and 18.6 deg up in Idle; fish length/body ratio 0.998 -> 0.756 of the splash.
+- Dorsal fin (`skin-fin-back`, hips, 1,100 tris, scale 0.75) and head crest (`skin-crest`, head, 900 tris) are Meshy create parts placed by `tools/art1/gil_fin_crest.py` (gil.glb), listed in `props`; ink room 0.02 m, magenta outline test clean on both.
+- The 630-vertex strand island behind the nape (1,171 tris) is cut from `Body` (index data only; verts stay in the buffer).
+- Rig: `Tail` bone under Hips (`glb_add_bone.py --from LeftUpLeg,RightUpLeg --behind -0.18`), swings 15 deg back in Idle/walk/Attack/Hit; the tail verts used to follow the thighs. Arms re-keyed off the thighs, torso and head in Idle/walk/run/Attack; new `Hit` clip and a slash `Attack` (`clips.hit`, `attack_rate` 2.0 unchanged).
+- geo_check vs main: hand_R/thigh_R held 8.7 cm -> 0 in Idle/walk/run/Attack, forearm_L pairs 0. Unchanged from main: Jump_Run and Crouch arm/torso pairs, run shin_L>thigh_R 13.4 cm (Meshy). New: outfit:tail>foot/shin 3.3 cm in Jump_Run (the tail verts now stay with the hips).
+- Not done: texture candidate (credits spent past the 250 cap on fin/crest); shoulder roll beyond the arm re-keys; the hand cannot close (no finger bones).

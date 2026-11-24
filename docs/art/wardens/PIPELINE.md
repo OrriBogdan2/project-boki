@@ -662,3 +662,6 @@ Pip body `01a1c20d-dc11-75b4` (enhance on), `01a1c20d-dbac-712c` (off), head `01
 Vex body `01a1c20d-dbe6-747e`, `01a1c20d-dc12-71ff`, head `01a1c20d-db57-7423` (raws: ~/meshy/<name>/rvA, rvB). None was
 used: side by side with the shipped raws they read the same (no sharper face, hands or weapon), and the shipped raws
 already carry the fit's tuned landmarks, so each build keeps its old dense raw.
+
+### Gil r7, 2026-11-24 (Meshy create for the dorsal fin and head crest; about 330 credits against a 250 cap, balance 1619 after)
+Seven image-to-3D creates (3 fin picks and 4 crest picks of 14 tries in `~/gens/hunter-round-1124/gil/r7/creates`), 30 credits each, from the r4 A_sheet back and side views. Placement only in Blender (`tools/art1/gil_fin_crest.py`: weld, cut to 1,100/900 tris, size, 1024 paint, ink alpha, weight 1.0 to one bone). Skinned tail verts: `glb_add_bone.py --from` takes the weight from named donor bones and `--behind` limits it to verts behind a Z. No retexture was run (credit cap).
