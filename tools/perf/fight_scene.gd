@@ -150,7 +150,9 @@ func _repeats(seen: Array) -> String:
 	var total := 0
 	for k in ks:
 		total += by[k][0]
-	var top := ks.slice(0, TOP).map(func(k): return "%s x%d (%.1fk)" % [by[k][2], by[k][0], by[k][0] * by[k][1] / 1000.0])
+	var top := ks.slice(0, TOP).map(
+		func(k): return "%s x%d (%.1fk)" % [by[k][2], by[k][0], by[k][0] * by[k][1] / 1000.0]
+	)
 	return "%d groups, %d copies: %s" % [ks.size(), total, ", ".join(top)]
 
 
@@ -167,7 +169,9 @@ func _lods(seen: Array) -> String:
 			with_n += 1
 			with_tris += tris
 		else:
-			var nm := _mesh_name(gi as MeshInstance3D) if gi is MeshInstance3D else "%s<%s" % [gi.get_class(), owner_name(gi)]
+			var nm := "%s<%s" % [gi.get_class(), owner_name(gi)]
+			if gi is MeshInstance3D:
+				nm = _mesh_name(gi as MeshInstance3D)
 			without.append([tris, nm])
 	without.sort_custom(func(a, b): return a[0] > b[0])
 	var all_without := 0
@@ -277,7 +281,8 @@ static func _shader_key(mat: Material) -> String:
 		return sh.resource_path.get_file() if sh.resource_path != "" else "code:%d" % sh.code.hash()
 	if mat is BaseMaterial3D:
 		var b := mat as BaseMaterial3D
-		return "std t%d b%d s%d c%d d%d" % [b.transparency, b.blend_mode, b.shading_mode, b.cull_mode, b.depth_draw_mode]
+		var keys := [b.transparency, b.blend_mode, b.shading_mode, b.cull_mode, b.depth_draw_mode]
+		return "std t%d b%d s%d c%d d%d" % keys
 	return mat.get_class()
 
 
