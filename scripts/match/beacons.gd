@@ -8,7 +8,8 @@ extends RefCounted
 ## the direction and a pulsing marker on the world, the minimap and the full map for every player
 ## (ReviveHud) until it goes off or its squad steps away.
 ## Online, the game that owns the Hunter on the beacon runs it and tells the others with the "bcn"
-## event: [i, team, "lit" | "out" | "used"]; each game brings back the dead Hunters it owns.
+## event: [i, team, "lit" | "out" | "used"] or [i, -1, "lamp", x, y, z] for a beacon set down mid-match
+## (Hearth Lamp, Revive Ember); each game brings back the dead Hunters it owns.
 
 const RADIUS := 2.2  # metres: stand this close to light it
 const COUNT := 6  # beacons per map (fewer if the islands are small)
@@ -73,6 +74,14 @@ static func lamp(m: Match, at: Vector3, net := false) -> void:
 	m.sfx("unlock", at, -4.0, 1.2)
 	if not net:
 		m.net_event(["bcn", m.beacons.size() - 1, -1, "lamp", at.x, at.y, at.z])
+
+
+## A beacon that goes off at once for a team (Revive Ember, a Bounty Banner kept).
+static func pop(m: Match, at: Vector3, team: int) -> void:
+	lamp(m, at)
+	var i := m.beacons.size() - 1
+	m.net_event(["bcn", i, team, "used"])
+	_use(m, m.beacons[i], team)
 
 
 static func _clear(m: Match, spots: Array, p: Vector3) -> bool:

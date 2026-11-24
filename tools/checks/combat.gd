@@ -12,6 +12,7 @@ const CHECKS := {
 	"--move-speed-2-check": ["res://tools/move_speed_check.gd", "move_speed_check", "gil,gunslinger,juggernaut,mage"],
 	"--move-speed-3-check": ["res://tools/move_speed_check.gd", "move_speed_check", "ostra,rimewright,tender,thief"],
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
+	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP

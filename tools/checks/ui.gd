@@ -8,6 +8,7 @@ const CHECKS := {
 	"--stomp-prompt-shots": ["res://tools/stomp_prompt_shots.gd", "stomp_prompt_shots", null],  # --shots-dir=<dir>
 	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # trios / solos (decision 0084)
 	"--solo-hud-shots": ["res://tools/solo_hud_shots.gd", "solo_hud_shots", null],  # GPU, --shots-dir=
+	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],  # in-match shops, the map legend
 	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
 	"--hatch-flow-shots": ["res://tools/hatch_flow_shots.gd", "hatch_flow_shots", null],  # --hatch-flow-shots=<dir>
 	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],  # GPU
