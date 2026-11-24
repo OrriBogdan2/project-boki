@@ -45,8 +45,8 @@ and off, the cast glint and ring, Boki bubbles and ability names in and out of a
 ## Toasts on the right rail (11-23)
 Toasts ("Fever is lit", "Bond full!") sit in the right rail under the alive counter and the kill feed (`TopStack.rail`), never in the top centre by the timer, level and HP. `--clarity-shots` pushes one on every fight frame and prints `CLARITYTOAST n/20`: n must be 0 (it was 20 before the rail).
 
-## One line for who downed you (11-24)
-Downed, the screen said it three times in the middle of the fight: "Knocked down by Kael", "You're down" and the card's "Downed by Kael with Warchain". The killcam line is now for a dead Hunter only (`Hud` draws `Match.killcam_text` when `p.out`); the downed screen is "You're down" plus the card. Baseline problem: centre text stacked over the Hunters.
+## Downed screen: one line for who, the tip clear of the card (11-24)
+Downed, the screen said who did it three times in the middle of the fight: "Knocked down by Kael", "You're down" and the card's "Downed by Kael with Warchain". The killcam line is now for a dead Hunter only (`Hud` draws `Match.killcam_text` when `p.out`); the downed screen is "You're down" plus the card. The "TIP" line was drawn through the card's two lines (and, moved under it, sat on your own wisp): it is now above "You're down" (`Hud._draw_downed`), where the screen is empty ground.
 
 ## What sits on a Hunter (11-20, stabilize sprint: declutter only)
 `--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
