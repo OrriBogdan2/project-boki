@@ -67,7 +67,7 @@ check: `--base-life-check`.
   do not pull). A trait moves at most `week_cap` per drift week (`rec["drift"] = {day, moved}`, optional, no
   migration). Crossing a band in `bands` writes one journal line ("is getting braver", same shape as
   `CareJournal.note`).
-- Raising leans (`docs/decisions/0102-raising-leans.md`; `scripts/home/base_axes.gd`, `content/rules/base_axes.json`,
+- Raising leans (`docs/decisions/0178-raising-leans.md`; `scripts/home/base_axes.gd`, `content/rules/base_axes.json`,
   checks `--base-life-check` and `--garden-sim-check`): the first care of each kind in a farm day (`Care.care_day`)
   steps three axes saved in `rec["raised"]` (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle, each -1..1,
   capped at `cap`; save v22 gives old Boki the zero lean). `BaseLife.choose` scales its odds by `BaseAxes.mult`: a
