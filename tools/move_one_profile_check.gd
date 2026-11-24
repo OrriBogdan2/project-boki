@@ -70,7 +70,7 @@ func _tables(rules: Dictionary, tune: Dictionary) -> void:
 
 
 ## Expedition solo against the files: the run is the arch's row, the jump apex is v^2/2g.
-func _anchor(got: Dictionary, rules: Dictionary) -> void:
+func _anchor(got: Dictionary, _rules: Dictionary) -> void:
 	mfc.ok(
 		absf(got["run"] - HunterMove.speed(ARCH)) < TOL,
 		"one profile: %s runs %.2f m/s = its row x body_scale %.2f" % [ARCH, got["run"], HunterMove.speed(ARCH)]
@@ -96,7 +96,7 @@ func _same(mode: String, got: Dictionary, base: Dictionary) -> void:
 
 
 # ---------------------------------------------------------------- the match modes
-func _match_mode(mode: String, rules: Dictionary) -> Dictionary:
+func _match_mode(mode: String, _rules: Dictionary) -> Dictionary:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	var o: Dictionary = SOLO.duplicate()
@@ -125,36 +125,36 @@ func _match_mode(mode: String, rules: Dictionary) -> Dictionary:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	var P: Hunter = m.player
-	if P.arch != ARCH:
-		P.reclass(Arch.weight(ARCH), ARCH)
+	var p: Hunter = m.player
+	if p.arch != ARCH:
+		p.reclass(Arch.weight(ARCH), ARCH)
 	var bad := []
 	for h in m.hunters:
 		if h.base_speed != HunterMove.speed(h.arch) or h.ground_accel != HunterMove.accel(h.arch):
 			bad.append("%s %s %.2f/%.0f" % [h.pname, h.arch, h.base_speed, h.ground_accel])
 	mfc.ok(bad.is_empty(), "one profile: %s: every hunter has its hunter_move.json row %s" % [mode, ", ".join(bad)])
 	mfc.ok(
-		P.base_speed == HunterMove.speed(ARCH) and P.ground_accel == HunterMove.accel(ARCH),
+		p.base_speed == HunterMove.speed(ARCH) and p.ground_accel == HunterMove.accel(ARCH),
 		"one profile: %s: the player is %s's row" % [mode, ARCH]
 	)
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
-		if h != P:
+		if h != p:
 			h.teleport(Vector3(-500, 50, -500))
 			h.out = true
 	# parked teammates would make the player the last one up (LastAlive +8%: a squad rule, not the profile)
-	P.team = -7
-	if P.kin:
-		(P.kin as Kin).stow()
-	P.ctrl = "local"
-	P.unlock_all()
+	p.team = -7
+	if p.kin:
+		(p.kin as Kin).stow()
+	p.ctrl = "local"
+	p.unlock_all()
 	m.biomes = null  # the map's ice and wind are terrain, not a mode's numbers
 	mfc.m = m
 	mfc.w = m.world
-	mfc.P = P
+	mfc.p_v = p
 	var spot := _match_spot(m)
-	var got := _measure_match(m, P, spot)
+	var got := _measure_match(m, p, spot)
 	m.queue_free()
 	await main.get_tree().process_frame
 	return got
@@ -187,56 +187,56 @@ func _match_spot(m: Match) -> Vector3:
 	return w.random_ground()
 
 
-func _hv(P: Hunter) -> Vector2:
-	return Vector2(P.vel.x, P.vel.z)
+func _hv(p: Hunter) -> Vector2:
+	return Vector2(p.vel.x, p.vel.z)
 
 
-func _measure_match(m: Match, P: Hunter, f: Vector3) -> Dictionary:
+func _measure_match(m: Match, p: Hunter, f: Vector3) -> Dictionary:
 	var out := {}
 	var right := Vector2(1, 0)
 	mfc._reset(f)
-	P.inp["move"] = right
+	p.inp["move"] = right
 	mfc._steps(3)
-	out["run_3"] = _hv(P).length()
+	out["run_3"] = _hv(p).length()
 	mfc._steps(20)
-	out["run"] = _hv(P).length()
-	P.inp["move"] = Vector2.ZERO
-	var x0 := P.pos.x
+	out["run"] = _hv(p).length()
+	p.inp["move"] = Vector2.ZERO
+	var x0 := p.pos.x
 	mfc._steps(60)
-	out["stop_m"] = P.pos.x - x0
+	out["stop_m"] = p.pos.x - x0
 	mfc._reset(f)
-	P.inp["jump"] = true
+	p.inp["jump"] = true
 	var apex := 0.0
 	for i in 60:
 		m.step(DT)
-		P.inp["jump"] = false
-		apex = maxf(apex, P.pos.y - f.y)
+		p.inp["jump"] = false
+		apex = maxf(apex, p.pos.y - f.y)
 	out["apex"] = apex
 	mfc._reset(f + Vector3(0, 3, 0), false)
-	P.vel = Vector3(-3, 0, 0)
-	P.inp["move"] = right
+	p.vel = Vector3(-3, 0, 0)
+	p.inp["move"] = right
 	mfc._steps(18)
-	out["air_vx"] = P.vel.x
+	out["air_vx"] = p.vel.x
 	mfc._reset(f + Vector3(0, 6, 0), false)
 	mfc._steps(1)
-	P.inp["jump"] = true
-	P.inp["glide"] = true
-	P.inp["glide_btn"] = true
+	p.inp["jump"] = true
+	p.inp["glide"] = true
+	p.inp["glide_btn"] = true
 	m.step(DT)
-	P.inp["jump"] = false
-	P.inp["move"] = right
-	mfc.ok(P.gliding, "one profile: the glider opens in the air (match)")
+	p.inp["jump"] = false
+	p.inp["move"] = right
+	mfc.ok(p.gliding, "one profile: the glider opens in the air (match)")
 	mfc._steps(36)
-	out["glide_v"] = _hv(P).length()
-	out["glide_vy"] = P.vel.y
+	out["glide_v"] = _hv(p).length()
+	out["glide_vy"] = p.vel.y
 	mfc._reset(f)
-	P.dash_with({"speed": 16.0, "time": 0.15, "dir": right})
-	x0 = P.pos.x
+	p.dash_with({"speed": 16.0, "time": 0.15, "dir": right})
+	x0 = p.pos.x
 	for i in 18:
 		m.step(DT)
 		if i == 4:
-			out["dash_mid"] = _hv(P).length()
-	out["dash_m"] = P.pos.x - x0
+			out["dash_mid"] = _hv(p).length()
+	out["dash_m"] = p.pos.x - x0
 	return out
 
 

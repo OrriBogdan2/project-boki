@@ -19,10 +19,12 @@ const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "tierup", "armour"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
-const LMB_RANGE := {"gunslinger": 8.0}    # m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
+## m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
+const LMB_RANGE := {"gunslinger": 8.0, "mage": 8.0}
 ## LMB sheet times for a round that flies in ~0.1 s (74 m/s over 8 m): a frame per step of the first flight.
 const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
-const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62]}
+const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62],
+	"mage": [0.06, 0.09, 0.12, 0.15, 0.18, 0.21, 0.25, 0.55, 0.62]}
 const FAN_CROP := Vector2i(900, 440)      # ... for Grimble's 5.9 m fan and the bodies in it
 const FRAME_W := 1280                     # px wide, each --reel-frames frame
 
@@ -90,7 +92,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 ## (--reel-frames) the frame last drawn, scaled down to FRAME_W
 func _save_frame() -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+	img.resize(FRAME_W, int(FRAME_W * img.get_height() / float(img.get_width())), Image.INTERPOLATE_BILINEAR)
 	img.save_jpg(frame_dir.path_join("%05d.jpg" % frames), 0.88)
 	frames += 1
 
