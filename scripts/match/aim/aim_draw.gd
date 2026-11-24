@@ -1,16 +1,17 @@
 class_name AimDraw
 extends Node3D
 ## The one node per match that draws every AimKit telegraph (docs/AIMKIT.md). Entries live in a
-## dictionary keyed by hunter and id; each frame the whole set is rebuilt into one surface of a single
-## ImmediateMesh, so showing, moving or hiding a telegraph never creates a node. Its child AimReticle
-## draws the cursor states. `all` entries of the hunters this game runs go to the other games through
-## AimNet (Net event "tele"); a remote hunter's arrive the same way and draw here like a local one.
+## dictionary keyed by hunter and id; each frame the whole set is rebuilt into a single ArrayMesh (AimGeo's
+## packed arrays in one call per surface, no per-vertex call), so showing, moving or hiding a telegraph never
+## creates a node. Its child AimReticle draws the cursor states. `all` entries of the hunters this game runs go
+## to the other games through AimNet (Net event "tele"); a remote hunter's arrive the same way and draw here
+## like a local one.
 
 const KEEP := 0.1          # s of match time an entry lives after its last refresh (kits refresh per step)
 
 var m: Node
 var entries := {}          # "<hunter id>:<id>" -> resolved entry (AimKit._entry)
-var mesh := ImmediateMesh.new()
+var mesh := ArrayMesh.new()
 var mi := MeshInstance3D.new()
 var geo := AimGeo.new()
 var mat := StandardMaterial3D.new()
@@ -72,7 +73,7 @@ func drop_all(h: Node) -> void:
 
 func live(e: Dictionary) -> bool:
 	var h = e["h"]
-	if not is_instance_valid(h) or (h as Hunter).out or AimKit.blocked(h):
+	if not is_instance_valid(h) or (h as Hunter).out:
 		return false
 	return float(m.time) - float(e["t"]) <= float(e["keep"])
 
@@ -101,7 +102,7 @@ func tick_reticle(delta: float) -> void:
 		var r: Dictionary = ret[k]
 		r["flare"] = maxf(0.0, float(r["flare"]) - delta)
 		r["perfect"] = maxf(0.0, float(r["perfect"]) - delta)
-		if not is_instance_valid(r["h"]) or AimKit.blocked(r["h"]) or (float(m.time) - float(r["t"]) > KEEP and r["flare"] <= 0.0 and r["perfect"] <= 0.0):
+		if not is_instance_valid(r["h"]) or (float(m.time) - float(r["t"]) > KEEP and r["flare"] <= 0.0 and r["perfect"] <= 0.0):
 			ret.erase(k)
 	reticle.queue_redraw()
 
@@ -171,8 +172,9 @@ func rebuild() -> void:
 func _surface(first: int, last: int, surf_mat: Material) -> void:
 	if last <= first:
 		return
-	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, surf_mat)
-	for i in range(first, last):
-		mesh.surface_set_color(geo.c[i])
-		mesh.surface_add_vertex(geo.v[i])
-	mesh.surface_end()
+	var arr := []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = geo.v.slice(first, last)
+	arr[Mesh.ARRAY_COLOR] = geo.c.slice(first, last)
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	mesh.surface_set_material(mesh.get_surface_count() - 1, surf_mat)

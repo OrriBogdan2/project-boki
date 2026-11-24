@@ -151,6 +151,7 @@ func _bola(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 ## frame (the source: under 0.2 s) and arrives with its clip; the forced return at 6 s steps to the dagger too,
 ## from a cartwheel as well.
 func _knife(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
+	m.mobs.clear()                  # a wandering mob in the dagger's lane would catch it short of the 8 m
 	A.aim_at(P, home + Vector3(8.0, 0, 0))
 	_settle(m, P, K, home, 0.3)
 	K.cd["e"] = 0.0

@@ -309,25 +309,28 @@ void fragment() {
 	}
 	if (depth_k > 0.0) { c = depth_cues(c, up, st); }
 	float fog = vis_fog(wpos);
+	vis_f = fog * vis_greyness;
 	c = vis_apply(c, fog);
 	ALBEDO = c;
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	EMISSION = rim_color.rgb * rim * rim_amount * (1.0 - fog) + gemit * 0.9 * (1.0 - fog * 0.85);
-	EMISSION += vis_edge(wpos);     // your sight wedge's sides
+	AO = vis_ao(vis_f);                      // out of sight: the coloured ambient out, its grey back in (vis.gdshaderinc)
+	EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }
 void light() {
+	vec3 lc = vis_grey(LIGHT_COLOR, vis_f);     // out of sight: grey light, grey shadow side, no ambient cast (vis.gdshaderinc)
 	if (!LIGHT_IS_DIRECTIONAL) {
 		// lamps and glows: plain falloff. (The cel shade floor below is only for the sun; on a lamp
 		// it lit whole screen clusters at once, which showed up as blocky squares at night.)
 		float pl = smoothstep(-0.1, 0.4, dot(NORMAL, LIGHT)) * ATTENUATION;
-		DIFFUSE_LIGHT += ALBEDO * LIGHT_COLOR / PI * pl;
+		DIFFUSE_LIGHT += ALBEDO * lc / PI * pl;
 	} else {
 		float ndl = dot(NORMAL, LIGHT);
 		float lit = smoothstep(-0.05, 0.25, ndl) * ATTENUATION;
 		float band = smoothstep(0.3, 0.7, lit);
 		vec3 tone = mix(vec3(shade) * shadow_tint.rgb, light_tint.rgb, band);
-		DIFFUSE_LIGHT += ALBEDO * LIGHT_COLOR / PI * tone;
+		DIFFUSE_LIGHT += ALBEDO * lc / PI * vis_grey(tone, vis_f);
 	}
 }

@@ -18,7 +18,7 @@ preview spot (where the slot shows one) against the edge, within 0.2 m.
 | Vex (gunslinger) | X Penny Drop | clamp [?]: "napalm at target location" [D] | `x.range` 14 m | `AimMode.point` | disc `x%d` at the shell, after the tap | ok |
 | Sparkle (mage) | E Undercurrent | clamp [?]: "strike target location" [D] | `e.reach` 11 m | `AimMode.point` | rim `e%d` + drag lane, after the press | ok |
 | Sparkle (mage) | X Stormfall | clamp [F] f29/f36, crown inside the ring | `x.range` 14.4 m | `land_point` (limit_length) | crown `x_aim` = the landing | ok |
-| Kael (juggernaut) | RMB in the air, Meteor Drop | clamp [F] 0263, 0286 | `rmb.drop.reach` 5 m | `JuggernautDrop.point` | `drop_aim` = the same point | ok |
+| Kael (juggernaut) | RMB in the air, Hit the Deck | clamp [F] 0263, 0286 | `rmb.drop.reach` 5 m | `JuggernautDrop.point` | `drop_aim` = the same point | ok |
 | Lace (archer) | E Hemline | clamp [?]: the arc's radius stops at its reach | `e.reach` 9 m (`rmin` 2) | radius clamped | `e` arc wall, same radius | ok |
 | Meeko (tender) | E again, Hearthlight throw | clamp [?]: "throw zone to target location" [D] | `e.reach` 9 m | `AimMode.point` | none (the source shows none either) | ok |
 | Neve (rimewright) | RMB Icebreaker | clamp [?]: the landing ring at the cursor | `rmb.lance.range` 12 m | `AimMode.point`, travelled from her palms | ring `rmb` | **FIXED** |

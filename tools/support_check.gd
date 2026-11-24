@@ -2,7 +2,8 @@ extends RefCounted
 ## --support-check: the support pair (Pip the Tender, Claire the Rimewright). Ally heals, downed
 ## teammates (heal, carry, drop, revive), the dash through a teammate, and that the Cold Front gives the
 ## squad nothing (no heal or shield). --tender-combo-check and --rimewright-combo-check also run each
-## hero's combos (tools/care_combo_check.gd). Mode: "all" | "tender" | "rimewright". Prints SUPPORT PASS/FAIL.
+## hero's combos (tools/care_combo_check.gd). Mode: "all" | "tender" | "rimewright" | "neve"
+## (tools/neve_feel_check.gd). Prints SUPPORT PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -77,6 +78,7 @@ func down(m: Match, A: Hunter) -> void:
 	A.down_hp = 60.0
 
 func run(mn: Node, md := "all") -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = mn
 	mode = md
 	Save.no_write = true
@@ -88,6 +90,8 @@ func run(mn: Node, md := "all") -> void:
 	carry.sc = self
 	var anims = load("res://tools/rimewright_anim_check.gd").new()
 	anims.sc = self
+	var feel = load("res://tools/neve_feel_check.gd").new()
+	feel.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
 		await _ranks("tender")
@@ -103,6 +107,8 @@ func run(mn: Node, md := "all") -> void:
 		await ults.rimewright()
 		await anims.rimewright()
 		await ults.burst_cap()
+	if mode in ["all", "rimewright", "neve"]:
+		await feel.run_all()
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -208,14 +214,11 @@ func _tender_support() -> void:
 	K.lock_t = 0.0; K.cd["e"] = 99.0
 	A.down_hp = 60.0
 	A.teleport(P.pos + Vector3(0.6, 0, 0)); step(m, 0.1)
-	ok("Carry the Day: running into a downed teammate carries them",
-		CareUtil.is_carried(A) and K.carrying().size() == 1)
-	ok("Carry the Day: no shield of ours and no slow while carrying",
-		P.shield <= 0.01 and absf(K.move_k() - 1.0) < 0.01, "shield %.0f k %.2f" % [P.shield, K.move_k()])
+	ok("Carrier: running into a downed teammate carries them", CareUtil.is_carried(A) and K.carrying().size() == 1)
+	ok("Carrier: no shield of ours and no slow while carrying", P.shield <= 0.01 and absf(K.move_k() - 1.0) < 0.01, "shield %.0f k %.2f" % [P.shield, K.move_k()])
 	var dh := A.down_hp
 	P.teleport(P.pos + Vector3(5, 0, 0)); step(m, 2.0)
-	ok("Carry the Day: the carried teammate rides along and does not bleed",
-		A.flat_dist(P) < 1.0 and A.down_hp >= dh - 0.5, "dist %.2f down_hp %.1f -> %.1f" % [A.flat_dist(P), dh, A.down_hp])
+	ok("Carrier: the carried teammate rides along and does not bleed", A.flat_dist(P) < 1.0 and A.down_hp >= dh - 0.5, "dist %.2f down_hp %.1f -> %.1f" % [A.flat_dist(P), dh, A.down_hp])
 	P.inp["crouch"] = true; step(m, 0.1); P.inp["crouch"] = false; step(m, 0.1)
 	ok("Carry the Day: crouch (never F) sets them down", not CareUtil.is_carried(A) and K.carrying().is_empty())
 	# --- carry then a stun drops them
@@ -223,11 +226,9 @@ func _tender_support() -> void:
 	P.slot_lv["dash"] = 3; P.ex_cd = 5.0
 	A.teleport(P.pos + Vector3(0.4, 0, 0)); K.lock_t = 0.0; step(m, 0.1)
 	var carried_again := CareUtil.is_carried(A)
-	ok("Foxtrot rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01,
-		"ex_cd %.2f" % P.ex_cd)
+	ok("Foxtrot rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01, "ex_cd %.2f" % P.ex_cd)
 	P.stun_t = 0.5; step(m, 0.1)
-	ok("Carry the Day: a stun drops them and locks pickup",
-		carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
+	ok("Carrier: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
 	# --- a hit drops them too, and costs you no stun of your own
 	P.stun_t = 0.0; K.lock_t = 0.0
 	A.teleport(P.pos + Vector3(0.4, 0, 0)); step(m, 0.1)
@@ -280,8 +281,7 @@ func _tender_support() -> void:
 	step(m, 0.05)
 	P.inp["sig"] = false
 	step(m, 3.2)
-	ok("Hearthlight rank 3: the flare no longer revives (Rise and Shine does), it heals the downed",
-		A.downed and A.down_hp > 40.0,
+	ok("Hearthlight rank 3: the flare no longer revives (Rise and Shine does), it heals the downed", A.downed and A.down_hp > 40.0,
 		"down_hp %.0f" % A.down_hp)
 	var boost3 := K.throw_boost()
 	P.slot_lv["kin"] = 1
@@ -296,8 +296,7 @@ func _tender_support() -> void:
 	P.inp["move"] = Vector2(1, 0); aim_at(P, P.pos + Vector3(5, 0, 0))
 	P.dashes = P.max_dashes()
 	P.inp["dash"] = true; step(m, 0.05); P.inp["dash"] = false
-	ok("Foxtrot: through a teammate refunds nothing", P.dashes <= P.max_dashes() - 0.95 and K.cd["e"] > 7.9,
-		"dashes %.2f e %.1f" % [P.dashes, K.cd["e"]])
+	ok("Foxtrot: through a teammate refunds nothing", P.dashes <= P.max_dashes() - 0.95 and K.cd["e"] > 7.9, "dashes %.2f e %.1f" % [P.dashes, K.cd["e"]])
 	m.queue_free()
 
 # ------------------------------------------------------------------ Rimewright
@@ -314,6 +313,5 @@ func _rime_support() -> void:
 	ok("Cold Front: raised ahead", not K.wall.is_empty() and m.verbs.walls.size() >= 1)
 	A.hp = A.max_hp * 0.5; var ah := A.hp
 	step(m, 1.5)
-	ok("Cold Front: no squad shield or heal (she copies her source: ice control only)",
-		A.shield < 0.5 and A.hp <= ah + 0.01, "shield %.1f hp %.1f -> %.1f" % [A.shield, ah, A.hp])
+	ok("Cold Front: no squad shield or heal (she copies her source: ice control only)", A.shield < 0.5 and A.hp <= ah + 0.01, "shield %.1f hp %.1f -> %.1f" % [A.shield, ah, A.hp])
 	m.queue_free()

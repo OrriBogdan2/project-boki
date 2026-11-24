@@ -71,7 +71,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var land: Vector3 = a.get("land", h.pos)
 		var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		# too far to glide to from this height: settle for the closest island spot in reach
-		var reach := maxf(0.0, (h.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.DROP_SPEED)
+		var reach := maxf(0.0, (h.pos.y + 1.0) / HunterFeel.drop_fall * HunterFeel.drop_speed)
 		if to.length() > reach * 0.85 and not a.get("retarget", false):
 			a["retarget"] = true
 			var best := land; var bd := 1e9
@@ -96,11 +96,11 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	# crossing to another island on a glide route: run off the edge, jump, open the glider at the
 	# top of the jump and steer for the landing (through any rings on the way)
 	if a.has("cross"):
-		var L: Dictionary = a["cross"]
-		var land: Vector3 = L["land"]
+		var l: Dictionary = a["cross"]
+		var land: Vector3 = l["land"]
 		var tol := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		a["cross_t"] = float(a.get("cross_t", 12.0)) - dt
-		if (h.grounded and m.world.island_of(h.pos.x, h.pos.z) == int(L["to"])) or float(a["cross_t"]) <= 0.0:
+		if (h.grounded and m.world.island_of(h.pos.x, h.pos.z) == int(l["to"])) or float(a["cross_t"]) <= 0.0:
 			a.erase("cross"); a.erase("cross_t"); a.erase("take_stall")
 		# (gives up only well under the landing: dipping under the far lip is normal on a climb, the glider's
 		# lift under the lip carries it up; at 1.2 m a bot bailed mid-glide and never crossed a climbing gap)
@@ -123,7 +123,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 		# (only heading for the landing: reaching the take-off spot from the landing's side and jumping on that
 		# momentum dropped the bot back on its own island, and it hopped there until the crossing timed out)
-		elif h.grounded and h.flat_dist(L["take"]) < 0.9 and h.glide_fuel > 0.6 \
+		elif h.grounded and h.flat_dist(l["take"]) < 0.9 and h.glide_fuel > 0.6 \
 				and Vector2(h.vel.x, h.vel.z).dot(tol) >= 0.0:
 			inp["move"] = tol.normalized()
 			inp["jump"] = true
@@ -131,7 +131,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 		else:
 			a["cross_go"] = false
-			_take_stall(m, h, a, L, dt)
+			_take_stall(m, h, a, l, dt)
 	# a downed squadmate comes first: go and pick them up unless a rival is right on top of us
 	var rv := _revive_plan(m, h)
 	if not rv.is_empty() and rv.has("danger"):
@@ -163,10 +163,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if h.wid == "sniper": pref = 11.0
 		if h.wpn.get("melee", false): pref = 1.2
 		elif h.wpn.has("pellets"): pref = 3.5
-		var reach: float = float(h.wpn["range"]) + 0.5
-		if h.ak and h.ak.bot_reach() > 0.0:
-			reach = h.ak.bot_reach()       # a short stream: close in until the foe stands well inside it
-			pref = minf(pref, reach - 1.5)
+		var stream: float = h.ak.bot_reach() if h.ak else 0.0      # >0: a short stream, closed to well inside it
+		if stream > 0.0: pref = minf(pref, stream - 1.5)
 		if d > pref + 1.5:
 			move = to
 		elif d < pref - 2.0:
@@ -191,16 +189,14 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		inp["aim"] = Vector3(aim.x, tgt.hit_y() + 0.9, aim.y)
 		inp["aim_y"] = tgt.hit_y()      # someone below a lip: their balloon, not their body
 		var los := los_to(m, h, tgt, dt)
-		# fast guns fire in bursts with a beat between them (to reposition); slow ones on cooldown
+		# fast guns fire in bursts, a beat between to reposition (longer on easier bots); slow ones on cooldown
 		a["burst"] = float(a.get("burst", 0.0)) - dt
-		# fast guns fire in bursts; on easier bots the pauses between them are longer
 		var duty := float(df.get("fire", 0.8))
 		if a["burst"] < -randf_range(0.35, 0.6) / maxf(0.25, duty) * (1.0 if duty >= 0.99 else 1.4):
 			a["burst"] = randf_range(0.7, 1.3) * (0.6 + 0.4 * duty)
-		# (0.5: after the Oct 31 weapon retune a burst rifle or greatsword still counts as a fast weapon
-		# and keeps its pauses, so bots don't hit harder than before)
+		# (rate > 0.5: a burst rifle or greatsword counts as a fast weapon and keeps its pauses)
 		var trig_ok: bool = float(a["react_t"]) <= 0.0 and (a["burst"] > 0.0 or ((float(h.wpn["rate"]) > 0.5 or h.wpn.has("spin_up")) and randf() < duty * dt * 8.0 + (0.0 if duty < 0.99 else 1.0)))
-		if los and d < reach and trig_ok:
+		if los and d < (stream if stream > 0.0 else float(h.wpn["range"]) + 0.5) and trig_ok:
 			inp["fire"] = true
 			a["nolos_t"] = 0.0
 		elif not los:
@@ -411,8 +407,8 @@ func _ease_aim(h: Hunter, dt: float) -> void:
 	var dead := a.get("tgt") == null and absf(wrapf(want - cur, -PI, PI)) < AIM_DEAD
 	if dv.length() >= AIM_NEAR and not dead:
 		cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
-	var L := maxf(dv.length(), 1.0)
-	inp["aim"] = Vector3(h.pos.x + cos(cur) * L, aim3.y, h.pos.z + sin(cur) * L)
+	var l := maxf(dv.length(), 1.0)
+	inp["aim"] = Vector3(h.pos.x + cos(cur) * l, aim3.y, h.pos.z + sin(cur) * l)
 
 ## The line-of-sight test (3 traces and 24 ground samples) once per LOS_RECHECK_S on the same target,
 ## or at once on a new one: a 10 Hz look is all the trigger needs, every step was most of a bot's fight.
@@ -653,7 +649,7 @@ func ability_aim(m: Match, h: Hunter, def: AbilityDef, tgt: Ent) -> Vector3:
 
 ## The kin's E when it fits the moment (read from the ability's cue), and the bond ultimate (R,
 ## the merge) once it's full. (The kin uses its auto active on its own; this is the hunter asking.)
-func _use_sig(m: Match, h: Hunter, tgt: Ent) -> void:
+func _use_sig(_m: Match, h: Hunter, tgt: Ent) -> void:
 	var k: Kin = h.kin
 	if k == null or not k.ready_to_fight() or tgt == null:
 		return
@@ -931,9 +927,9 @@ func _choose(m: Match, h: Hunter) -> void:
 		if lead_to != Vector3.INF:
 			a["wander"] = lead_to
 		elif spent or not BotWays.inside(m, a["wander"]):
-			var alive_mobs := m.mobs.filter(func(x): return not x.dead and not (x is Blight))     # (camps level you; the Blight doesn't)
-			if alive_mobs.size() > 0 and randf() < 0.6:
-				a["wander"] = alive_mobs.pick_random().pos
+			var camp := BotCamps.goal(m, h)     # (camps level you; the Blight doesn't)
+			if camp != Vector3.INF and randf() < m.camps.cfg["bot_camp_share"]:
+				a["wander"] = camp
 			else:
 				a["wander"] = m.world.random_ground()
 		goal = a["wander"]; gk = "roam"
@@ -943,7 +939,7 @@ func _choose(m: Match, h: Hunter) -> void:
 	if _banned(m, a, goal):
 		var dt: Vector3 = a.get("detour", Vector3.INF)
 		if dt == Vector3.INF or _banned(m, a, dt) or h.flat_dist(dt) < 2.0:
-			dt = m.world.random_ground()
+			dt = BotWays.keep_inside(m, m.world.random_ground())      # (a detour too stays out of the tide)
 			a["detour"] = dt
 		goal = dt; gk = "roam"
 	# outside the zone, or a goal outside it: head inside first
@@ -1078,7 +1074,8 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		return h.dir_to(goal)
 	if fresh or m.time - float(wp["t"]) > PATH_REPLAN_S:
 		var at := Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z)))
-		wp = {"goal": gt, "t": m.time, "path": _grid_path(m, at, gt, h)}
+		var wide: bool = String(h.ai.get("goal_kind", "")) in RING_GOALS
+		wp = {"goal": gt, "t": m.time, "path": _grid_path(m, at, gt, h, wide)}
 		h.ai["wp"] = wp
 	var path: Array = wp["path"]
 	if path.is_empty():
@@ -1119,9 +1116,9 @@ const TAKE_STALL_S := 3.0      # s at the take-off spot without jumping before i
 ## A bot that hangs about a crossing's take-off spot without ever jumping (too little glide fuel, or
 ## it keeps running past the spot away from the landing and back) gives the goal up after a few
 ## seconds instead of circling there until the crossing's own timer ran out and was set again.
-func _take_stall(m: Match, h: Hunter, a: Dictionary, L: Dictionary, dt: float) -> void:
+func _take_stall(m: Match, h: Hunter, a: Dictionary, l: Dictionary, dt: float) -> void:
 	var t: float = float(a.get("take_stall", 0.0))
-	if h.grounded and h.flat_dist(L["take"]) < TAKE_R:
+	if h.grounded and h.flat_dist(l["take"]) < TAKE_R:
 		t += dt
 	else:
 		t = maxf(0.0, t - dt * 0.5)
@@ -1148,54 +1145,76 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
-	var W: World = m.world
+	var w: World = m.world
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round)
-		if W.tile_kind(p.x, p.y) != World.T_GROUND:
+		if w.tile_kind(p.x, p.y) != World.T_GROUND:
 			return false
-		if W.tile_kind(p.x + side.x, p.y + side.y) == World.T_BLOCK:
+		if w.tile_kind(p.x + side.x, p.y + side.y) == World.T_BLOCK:
 			return false
-		if W.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
+		if w.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
 			return false
 		# ground a Boki can't handle (main's TerrainHazards): the walk goes round it
 		if TerrainHazards.avoid(m, h, p.x, p.y):
 			return false
 	return true
 
-## Breadth-first search over walkable tiles (a window around the trip), returning tile centres. With
+## Tiles of slack round the trip a tile path may use. Heading for the Heart ring or back in out of the
+## Blight (BotWays) a bot may also try a wide window, enough to reach a ramp beside a cliff (The Crown's
+## raised Heart has three stairs, 50-63 m out); everywhere a wide window had bots turning between detours.
+const PATH_SLACK := 8
+const PATH_SLACK_RING := 40      # tiles: The Crown's stairs are 50-63 m out, a bot below its raised ground is that far
+const PATH_STEPS := 4000         # tiles one search may open: the tight window...
+const PATH_STEPS_RING := 14000   # ...and the wide one
+const RING_GOALS := ["ring", "ring_in"]
+
+## A walkable tile path from a to b (tile centres), [] when none: the tight window, then (wide) the wide one.
+## No path leads deeper into the Blight's tide than the ring or where the bot stands (BotWays.path_r). With
 ## h, it keeps off hazard ground h's Boki can't handle, and only crosses it when there's no way round.
-func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null) -> Array:
-	var W: World = m.world
-	var lo := Vector2i(mini(a.x, b.x) - 8, mini(a.y, b.y) - 8)
-	var hi := Vector2i(maxi(a.x, b.x) + 8, maxi(a.y, b.y) + 8)
+func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, wide := false) -> Array:
+	var cap := BotWays.path_r(m, Vector3(a.x + 0.5, 0.0, a.y + 0.5))
+	var p := _grid_path_in(m, a, b, h, PATH_SLACK, cap, PATH_STEPS)
+	if p.is_empty() and wide:
+		p = _grid_path_in(m, a, b, h, PATH_SLACK_RING, cap, PATH_STEPS_RING)
+	if p.is_empty() and h:
+		return _grid_path(m, a, b, null, wide)
+	return p
+
+## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, no farther than
+## `cap` from the Heart, opening at most `max_steps` tiles, returning tile centres.
+func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, cap: float, max_steps: int) -> Array:
+	var w: World = m.world
+	var hc := Vector2(m.heart.site.x, m.heart.site.z) if cap < INF else Vector2.ZERO
+	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
+	var hi := Vector2i(maxi(a.x, b.x) + slack, maxi(a.y, b.y) + slack)
 	var prev := {a: a}
 	var q: Array = [a]
 	var found := false
 	var steps := 0
-	while q.size() > 0 and steps < 4000:
+	while q.size() > 0 and steps < max_steps:
 		steps += 1
 		var cur: Vector2i = q.pop_front()
-		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and W.is_block(b.x + 0.5, b.y + 0.5)):
+		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and w.is_block(b.x + 0.5, b.y + 0.5)):
 			b = cur
 			found = true
 			break
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var nx: Vector2i = cur + dv
-			if prev.has(nx) or nx.x < lo.x or nx.y < lo.y or nx.x > hi.x or nx.y > hi.y or not W.inb(nx.x, nx.y):
+			if prev.has(nx) or nx.x < lo.x or nx.y < lo.y or nx.x > hi.x or nx.y > hi.y or not w.inb(nx.x, nx.y):
 				continue
-			var i := W.idx(nx.x, nx.y)
-			if W.kind[i] != World.T_GROUND:
+			var i := w.idx(nx.x, nx.y)
+			if w.kind[i] != World.T_GROUND or Vector2(nx.x + 0.5, nx.y + 0.5).distance_to(hc) > cap:
 				continue
-			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
+			if absf(w.ground_at(nx.x + 0.5, nx.y + 0.5) - w.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
 				continue
 			if h and TerrainHazards.avoid(m, h, nx.x + 0.5, nx.y + 0.5):
 				continue
 			prev[nx] = cur
 			q.append(nx)
 	if not found:
-		return _grid_path(m, a, b) if h else []
+		return []
 	var out: Array = []
 	var c := b
 	while c != a:

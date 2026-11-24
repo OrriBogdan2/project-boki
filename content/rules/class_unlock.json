@@ -109,7 +109,7 @@
 			{"stat": "caught", "target": 2, "text": "Bring 2 wild Boki home", "reward": {"kind": "emote", "id": "heave_ho", "name": "Heave Ho"}}
 		],
 		"rimewright": [
-			{"stat": "slows", "target": 40, "text": "Slow 40 enemies", "reward": {"kind": "colourway", "id": "hoarfrost", "name": "Hoarfrost"}},
+			{"stat": "slows", "target": 40, "text": "Slow 40 enemies", "reward": {"kind": "colourway", "id": "hoarfrost", "name": "Cold Snap"}},
 			{"stat": "rings", "target": 10, "text": "Fly through 10 air rings", "reward": {"kind": "glider", "id": "frost_kite", "name": "Sugar Glider"}},
 			{"stat": "revives", "target": 2, "text": "Revive 2 teammates", "reward": {"kind": "emote", "id": "snow_angel", "name": "Snow Angel"}},
 			{"stat": "extracts", "target": 3, "text": "Make it out of 3 expeditions", "reward": {"kind": "title", "id": "rinkmaster", "name": "Rinkmaster"}}

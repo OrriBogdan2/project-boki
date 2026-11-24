@@ -12,24 +12,41 @@ extends RefCounted
 
 const GAP_MAX := 4.0       # s: the longest the player may be left without a prompt or marker
 const BOT_FARM_S := 6.0    # s the farm bot takes over each step before it does it
+const SLOW_WAIT_S := 5.0   # s the slow player stands still at the start of each match step
+const QUIET_MAX := 8.0     # s: the longest a slow player may go with nothing new to go on
+const HAMMER_BEAT_S := 0.8  # s one hammer swing of yours takes (farm_build.json)
+const MARKER_MOVE_M := 3.0  # m the marker has to shift to count as moving on
 const STARTERS := {"Lace": "archer", "Kael": "juggernaut", "Vex": "gunslinger"}
 
 var bad := 0
 var main: Node
 var gap := {}      # span -> s so far
 var worst := {}    # span -> longest s
+var quiet := []    # the stretches over QUIET_MAX s: "where | step | at s | long s"
+var calm := 0.0    # s since something new showed
+var last := {}     # what the player saw last frame: line, marker anchor, Boki and nag state
+var farm_t := 0.0  # s on the farm so far
 
 func ok(cond: bool, what: String) -> void:
 	print("DEADAIR %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+## The lane's lines but a fallen Boki's (URGENT, the one kind a banner lets through).
+func _lines(m: Match) -> Array[String]:
+	return m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t)
+
 func run(mn: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = mn
 	Save.no_write = true
 	for who in STARTERS:
 		await _farm(who, STARTERS[who])
 		_match(who, STARTERS[who])
+	for q in quiet:
+		print("DEADAIR quiet | ", q)
+	ok(quiet.is_empty(), "a slow player never goes %.0f s with nothing new (%d stretches)" % [QUIET_MAX, quiet.size()])
 	print("DEADAIR DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -45,6 +62,40 @@ func _judge(tag: String, key: String, what: String) -> void:
 func _reset() -> void:
 	gap.clear()
 	worst.clear()
+	calm = 0.0
+	last.clear()
+
+
+## Adds dt to the quiet clock, or ends the quiet stretch when something new shows (logging one over QUIET_MAX).
+func _calm(fresh: bool, dt: float, where: String, at: float) -> void:
+	if not fresh:
+		calm += dt
+		worst["quiet"] = maxf(float(worst.get("quiet", 0.0)), calm)
+		return
+	if calm > QUIET_MAX:
+		quiet.append("%s | %s | at %.1f s | %.1f s" % [where, last.get("sid", "?"), at - calm, calm])
+	calm = 0.0
+
+
+## Whether the match tutorial shows the player something new this frame (the step or its line, the marker moving
+## on, the Boki leading, speaking or nagging).
+func _match_fresh(m: Match, tu: Tutorial) -> bool:
+	var line := "%d|%s|%s" % [tu.step, tu.text, tu.label]
+	var anchor: Vector3 = last.get("anchor", Vector3.INF)
+	var moved := (tu.target == Vector3.INF) != (anchor == Vector3.INF)
+	moved = moved or (anchor != Vector3.INF and anchor.distance_to(tu.target) > MARKER_MOVE_M)
+	if moved or anchor == Vector3.INF:
+		last["anchor"] = tu.target
+	var comp: KinCompanion = m.player.kin.comp if m.player.kin else null
+	var says := m.bubbles.any(func(b): return b["ent"] == m.player.kin)
+	var nags := tu.nag_t > 0.0
+	var fresh: bool = line != last.get("line", "") or moved or (comp != null and comp.leading())
+	fresh = fresh or (says and not last.get("says", false)) or (nags and not last.get("nags", false))
+	last["line"] = line
+	last["says"] = says
+	last["nags"] = nags
+	last["sid"] = tu.id()
+	return fresh
 
 # ------------------------------------------------------------------ the match tutorial
 func _match(who: String, arch: String) -> void:
@@ -61,12 +112,22 @@ func _match(who: String, arch: String) -> void:
 	var t := 0.0
 	var steps_seen := {}
 	var place_steps := 0
+	var at_step := -1
+	var wait := 0.0
 	while t < 900.0 and not m.player.extracted:
-		TutorialDrive.drive(m)
+		if tu.step != at_step:
+			at_step = tu.step
+			wait = SLOW_WAIT_S
+		wait -= Match.DT
+		if wait > 0.0:
+			_stand_still(m.player)
+		else:
+			TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
 		if tu.step < 0 or tu.step >= Tutorial.steps().size():
 			continue
+		_calm(_match_fresh(m, tu), Match.DT, tag, t)
 		steps_seen[tu.id()] = true
 		var prompt := tu.intro or tu.text != ""
 		var marker := tu.target != Vector3.INF and tu.label != "" and tu.beams_on() > 0
@@ -74,16 +135,23 @@ func _match(who: String, arch: String) -> void:
 		if tu.goal(tu.id()) != Vector3.INF:
 			place_steps += 1
 			_span("m_marker", not marker, Match.DT)
-		var loud: bool = m.hud != null and (not m.hud.msgs.texts().is_empty() or not m.bubbles.is_empty())
+		var loud: bool = m.hud != null and (_lines(m).size() > 0 or not m.bubbles.is_empty())
 		if tu.intro and tu.text != "" or (tu.card_up() and loud):
 			rival += 1
 	ok(m.player.extracted, "%s: the course finishes (%d steps seen)" % [tag, steps_seen.size()])
 	_judge(tag, "m_dead", "no span without a prompt or a marker")
 	_judge(tag, "m_marker", "a step with a place keeps its marker (%d frames)" % place_steps)
 	ok(rival == 0, "%s: no two prompts compete (%d frames)" % [tag, rival])
-	print("DEADAIR match | %s | dead %.1f s | marker lost %.1f s | rival %d" % [who, worst.get("m_dead", 0.0),
-			worst.get("m_marker", 0.0), rival])
+	print("DEADAIR match | %s | dead %.1f s | marker lost %.1f s | rival %d | quiet %.1f s" % [who,
+			worst.get("m_dead", 0.0), worst.get("m_marker", 0.0), rival, worst.get("quiet", 0.0)])
 	m.queue_free()
+
+## The slow player's wait: no stick, no key.
+func _stand_still(p) -> void:
+	for k in TutorialDrive.KEYS:
+		p.inp[k] = false
+	p.inp["move"] = Vector2.ZERO
+
 
 # ------------------------------------------------------------------ the farm tutorial
 func _farm(who: String, arch: String) -> void:
@@ -118,9 +186,8 @@ func _farm(who: String, arch: String) -> void:
 		if id == "house":
 			g.place_house()
 			home._sync_fixtures()
-			rival += _farm_step(g, id)      # (the site is up: its "wait" hint)
 		elif id == "hammer":
-			FarmSites.finish(FarmHob.house_entry())
+			_hammer(g)
 		elif id == "crop":
 			rival += _crop_course(home, g)
 		FarmTutorial.mark(id)
@@ -128,8 +195,8 @@ func _farm(who: String, arch: String) -> void:
 	_judge(tag, "f_dead", "no span without a hint line or a marker")
 	_judge(tag, "f_marker", "a step with a place keeps its marker")
 	ok(rival == 0, "%s: no two prompts compete (%d ticks)" % [tag, rival])
-	print("DEADAIR farm | %s | dead %.1f s | marker lost %.1f s | rival %d" % [who, worst.get("f_dead", 0.0),
-			worst.get("f_marker", 0.0), rival])
+	print("DEADAIR farm | %s | dead %.1f s | marker lost %.1f s | rival %d | quiet %.1f s" % [who,
+			worst.get("f_dead", 0.0), worst.get("f_marker", 0.0), rival, worst.get("quiet", 0.0)])
 	home.queue_free()
 	await main.get_tree().process_frame
 
@@ -144,11 +211,13 @@ func _farm_step(g: FarmGuide, id: String, expect_id := true) -> int:
 	while t < BOT_FARM_S:
 		g.tick(0.1)
 		t += 0.1
-		var hint: bool = g.hint_visible() and g.hint_box.visible and g.hint_lbl.text != ""
+		var hint: bool = g.hint_visible() and g.hint_box.visible and g.hint_text() != ""
 		var marker: bool = is_instance_valid(g.marker) and g.marker.visible and g.marker.text != ""
 		_span("f_dead", not hint and not marker, 0.1)
 		if place:
 			_span("f_marker", not marker, 0.1)
+		farm_t += 0.1
+		_calm(_farm_fresh(g, cur), 0.1, "farm", farm_t)
 		# the same two checks while Hob is being talked to (the guide steps aside)
 		g.set_quiet(true)
 		if (g.hint_visible() and g.hint_box.visible) or (is_instance_valid(g.marker) and g.marker.visible):
@@ -156,6 +225,38 @@ func _farm_step(g: FarmGuide, id: String, expect_id := true) -> int:
 		g.set_quiet(false)
 	ok(cur == id or not expect_id, "%s: it is the step on show (%s)" % [id, cur])
 	return rival
+
+## The slow player hammers the house up, one swing a beat, with the quiet clock running each tick.
+func _hammer(g: FarmGuide) -> void:
+	var e := FarmHob.house_entry()
+	for m in ["wood", "stone"]:
+		Work.add_mat(m, int(FarmSites.build_cost("house").get(m, 0)))
+	var swings := 0
+	while FarmSites.has_site(e) and swings < 100:
+		swings += 1
+		FarmSites.add_swing(e)
+		var t := 0.0
+		while t < HAMMER_BEAT_S:
+			t += 0.1
+			farm_t += 0.1
+			g.tick(0.1)
+			_calm(_farm_fresh(g, "hammer"), 0.1, "farm", farm_t)
+	ok(not FarmSites.has_site(e), "hammer: the house goes up in %d swings" % swings)
+
+
+## Whether the farm guide shows something new this tick (the step's line, or the world marker's words or place).
+func _farm_fresh(g: FarmGuide, cur: String) -> bool:
+	var shown := "%s|%s" % [g.hint_text(), g.marker.text if is_instance_valid(g.marker) and g.marker.visible else ""]
+	var at: Vector3 = g.marker.position if is_instance_valid(g.marker) else Vector3.INF
+	var anchor: Vector3 = last.get("anchor", Vector3.INF)
+	var moved := at != Vector3.INF and (anchor == Vector3.INF or anchor.distance_to(at) > MARKER_MOVE_M)
+	if moved:
+		last["anchor"] = at
+	var fresh: bool = shown != last.get("line", "") or moved
+	last["line"] = shown
+	last["sid"] = cur
+	return fresh
+
 
 ## The crop step's stages after the patch hint: plant, water, wait for it to grow (another step may
 ## take the line meanwhile), pick. Returns the ticks in which two prompts competed.

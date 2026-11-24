@@ -10,7 +10,7 @@ every knock.
 |---|---|
 | Class title | the Unbroken |
 | Base character | Kael, male |
-| Personality | Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. The Blight burned white-hot cracks into his sword arm (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off. |
+| Personality | Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. His arms do not match. His sword hand is dark blood-red with ember-bright orange veins, and the demon in his blade changes whichever hand holds it. The first sword hand changed too far, so he swapped hands: once the demon let go, that arm settled into a slightly lighter red with white veins, and the new sword hand is going the same way. The Blight burned the veins into both arms (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off. |
 
 <!-- /gen:profile -->
 
@@ -82,18 +82,18 @@ What the in-game kit card (K) says.
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 4.5m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
+**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 4.5m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
 **Final Swing (RMB, 2s cooldown).**
 
 - *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a strike down a 4.3m lane, 0.72m wide: 26 and push 6; foes under 35% (outlined in red while the Final Swing is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Blow for Blow is ready again.
-- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you in his crimson, its rim flaring hot at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.
+- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you in his crimson, its rim flaring hot at full, 0.8s), held as long as you like; release to lunge 4.5 -> 5.4m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.
 - *In the air:* Hit the Deck: only in the air, mid-jump or falling. Press and you stop where you are, the blade hauled overhead for a split second, then slam straight down to the ground below you. It hits a 2.4m circle centred just ahead of where you land (everyone sees it from the press): 18, and everyone in it is knocked down for 0.45s (anyone in the air or gliding is spiked to the ground); the inner ring (1.2m) takes +50% and stays down 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Final Swing right before it does not hold it back. While it rests, a press in the air is the Final Swing as on the ground (tap a Slam, or hold to charge).
-- *During E:* With the Short Leash: press while it pulls you, or as you arrive, for a Full Circle at once (2.2m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30); charge while it's attached and let go aimed down it for a Chain Lunge along it (aimed elsewhere it is a plain Lunge; x1.25).
+- *During E:* With the Short Leash: press while it pulls you, a beat before the pull, or just after it, for a Full Circle at once (2.2m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30); charge while it's attached and let go aimed down it for a Chain Lunge along it (aimed elsewhere it is a plain Lunge; x1.25).
 
 **Short Leash (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (6 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press it again to be hauled to it: look aside (a held direction stacks) to swing out in an arc and land beside or past it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
-**Blow for Blow (hunter ultimate, from level 6, 36s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
+**Blow for Blow (hunter ultimate, from level 6, 36s cooldown).** Raise a gold guard for 0.65s, keeping the speed you cast it at (a run eases off, a rise gets a lift): nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter or kill a monster with it and it is ready again at once.
 
 ### Ranks
 
@@ -104,6 +104,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | +20% damage on every Final Swing. | +40% damage on every Final Swing in all, and the Hit the Deck rests 2.4s less (7.2s -> 4.8s). |
 | Dash (Shift) | recharge 10.4s -> 8.8s per charge; a third charge. | recharge 10.4s -> 6.4s per charge; a shot dodged through the Rampage feeds your Rage. |
 | E | cooldown 12.8s -> 11.2s. | cooldown 12.8s -> 8s. |
+| R (ultimate) | Blow for Blow cooldown 36s -> 32s, damage 43 -> 48.6. The Fusion lasts 30% longer. | Blow for Blow cooldown 36s -> 28s, damage 43 -> 54.2. |
 
 **Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 

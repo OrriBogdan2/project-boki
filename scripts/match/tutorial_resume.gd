@@ -3,11 +3,13 @@ extends RefCounted
 ## Quitting the combat tutorial part-way: Save.d.tutorial.tut_beat is the id of the last finished beat,
 ## and Continue on the title opens the tutorial again at the beat after it (Tutorial restores the
 ## state that beat needs). Finishing or skipping it (Match._finish) sets tutorial.match, which ends all this.
-## docs/decisions/0022-tutorial-resume.md.
+## docs/decisions/0115-tutorial-resume.md.
 
 ## Beats whose state lives in the world's outpost resume at the start of that run.
 const OUTPOST_RUN := ["uplink", "defend", "extract"]
-const OUTPOST_START := "goexit"
+## (It must be a step in content/rules/tutorial.json: an unknown one resumes at step 0, the landing, and
+## landing resumes again, so the course never gets past it. --tutorial-resume-check holds it.)
+const OUTPOST_START := "wayout"
 
 
 static func opts() -> Dictionary:

@@ -39,7 +39,8 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
     ~/meshy/grimble_v2/build.sh source                   # grimble_source.py -> grimble_art1.py -> grimble_clips.py; INSTALL=1 copies the glb here
 
 - **Art:** briefs/art-refs/grimble_v2/ (ext/agent-briefs): grimble_v2_turnaround.jpg (FINAL) and grimble_v2_master_sheet.jpg; index.md's
-  "Canon notes for 3D and animation" win. No nose or nostrils; a three-lens brass loupe over his right eye; the left eye a smug squint.
+  "Canon notes for 3D and animation" win, except the face: the owner's 11-09 turnaround gives him a short flat snub nose with two
+  nostrils. A three-lens brass loupe over his right eye; the left eye a smug squint.
 - **Scan fit (grimble_source.py):** the limbs keep the scan's spread and lean and take the rig's joint heights (moved onto the rig's narrow
   arms and wide hips, the hook hung through his right leg). Past a bone's ends the scan keeps its own scale, so the hook and the gauntlet
   keep their shape. The hunch stays: the head and neck keep the scan's lean ahead of the hips, and all of the head rides `head`.
@@ -48,7 +49,8 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   anchor_claw and anchor_hook_tip sit on its tip. The Abyssal Hand is this arm: while it is out, `WardenReach` (data `reach`) lays upper_arm.R and forearm.R on the line to the hook and stretches forearm.R, so the hand and everything on `hook` (the slime hand, the crescent) sit at the tip (owner playtest 11-11).
   collapses to the wrist and the stretched arm grows from there; it is back when the arm snaps back.
 - **Left hand:** the scan's gauntlet, rigid on hand.L; fingers.L, fingers2.L and thumb.L stay for the clips, unweighted. anchor_fist on its knuckles.
-- **Face (grimble_paint.scan_face):** the scan's blurred paint fixed: a heavy lid over the left eye (the squint), silver scrap-metal teeth,
+- **Face (grimble_paint.scan_face):** the snub nose is sculpted (grimble_sculpt nose(), rigid on `head`, painted with the face's
+  own scan skin and two dark nostrils, grimble_paint.nose). The scan's blurred paint fixed: a heavy lid over the left eye (the squint), silver scrap-metal teeth,
   the gold tooth, purple gums. The loupe is scripted (sculpt monocle(), three glowing lens discs, the gold chain on spring_hangmono).
 - **Veins:** found on the atlas by contrast (more purple than the skin round them) and painted VEIN_KEY; warden_look's skin paint_glow keys
   on that colour, so they glow. Bone spurs are the scan's. The sludge drips and puddles are not geometry.
@@ -64,3 +66,9 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   holes (about 2.4k of 14.9k triangles, mostly seams between the arms, hips and hook). Worst now 1.28. Spring chains and the junk ball's uniform growth are exempt.
 
 **Barge clips (2026-11-12):** `lunge` is re-keyed (the ball stays closed from shove to shove) and `lunge_out` is new, by `tools/art1/grimble_barge_clips.py` run on the .glb with no Blender (the .blend is not needed); `tools/art1/grimble_clips.py` still has the old `lunge` keys, so a clip rebuild from the .blend must re-run that script. Why and how it plays: docs/heroes/dredge.md, "Animation timing".
+
+**board1117 A colours (11-18, ext/hunter-picks-tcg-1117):** owner 11-17 "grimble your call", coordinator call A (masked grade of
+the grip1117 master's 8k paint: grey-mauve skin, legs matched to the torso, darker pack/belt/loincloth, gun bell iron grey and
+stock wood muted; goo, gold and goggle untouched). Master `~/meshy/v95/Grimble/board1117/A/cand.glb` has grip1117's mesh and
+UVs, so only `v95` (body) and `v95c` (gun) were swapped with `tools/art1/glb_image_swap.py` (game image + resize(A) -
+resize(live) at the game size, JPEG q92); the shard/puddle fixes, rig and clips are byte-equal.

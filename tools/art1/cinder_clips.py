@@ -318,7 +318,7 @@ def clips():
     wide = {"pel": (0, 0, 0.03), "prt": (-0.12, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.4, 0, 0), "G": (0.42, 0.06, 1.12), "LP": (-0.44, 0.06, 1.14), "cast": 1.0, "castl": 1.0, "fing": 0.0, "jaw": 1.0, "lid": 0.05, "brow": -0.8,
             "FLp": 0.5, "FRp": 0.5, "FL": (-0.15, 0.05, A_Z + 0.045), "FR": (0.17, -0.05, A_Z + 0.045), "skirt": 0.3}
     out.append(C("cloak", 0.24, [(0.0, tuck), (0.03, wide, "out"), (0.07, dict(wide, pel=(0, 0, 0.0), LP=(-0.42, 0.03, 1.11))), (0.24, END)]))
-    # a Flashover or a knock: the left fist punches up, a bounce on her heels, cackling
+    # a Boiling Point or a knock: the left fist punches up, a bounce on her heels, cackling
     pu = {"pel": (0, 0, -0.01), "tor": (-0.26, 0.15, 0.1), "hed": (-0.4, -0.2, 0.1), "G": (0.3, 0.1, 1.2), "LP": (-0.14, 0.08, 1.76), "cast": 1.0, "fistl": 1.0, "jaw": 1.0, "lid": 0.32, "brow": -0.7}
     out.append(C("stoke", 0.5, [(0.0, END), (0.1, pu, "out"), (0.22, dict(pu, pel=(0, 0, -0.09), LP=(-0.14, 0.08, 1.68))), (0.5, END)]))
     # X, Red Carpet: down into a crouch as the ring bursts, then up on the two heel jets: leaning into it with her arms back, legs trailing, howling

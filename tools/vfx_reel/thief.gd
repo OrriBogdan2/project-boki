@@ -1,10 +1,10 @@
 extends "res://tools/hero_vfx_reel.gd"
-## Sable's reel (tools/hero_vfx_reel.gd): Last Dance at match zoom, the ring growing out over its 0.4s, then a Vault
-## across the ring with the blade layer riding on her.
+## Sable's reel (tools/hero_vfx_reel.gd): her LMB tapped and held, RMB, dash and E, then Last Dance at match zoom, the
+## ring growing out over its 0.4s, then a Vault across the ring with the blade layer riding on her.
 
 
 func parts() -> Array:
-	return ["x"]
+	return ["lmb", "hold", "rmb", "dash", "e", "x"]
 
 
 func _part_x() -> void:

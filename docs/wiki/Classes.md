@@ -53,8 +53,8 @@ your class in the Expedition menu, and you can try every class against dummies i
 |---|---|---|---|---|---|---|---|
 | [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Drawstring | Red Thread | Slip Stitch | Pin Down | Hemline | none (Boki Fusion) |
 | [the Unbroken](Class-Unbroken.md) | 193 / 2 | Bitter End | Bad Blood | Rampage | Final Swing | Short Leash | none (Boki Fusion) |
-| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Brass Tacks | Hot Streak | Slipstep | Coin Blast | Palm Spear | none (Boki Fusion) |
-| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Blue Guard | Guard | Tideturner | Blue Guard | Safe Harbour | none (Boki Fusion) |
+| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Brass Tacks | Hot Streak | Slipstep | Coin Blast | Palm Lance | none (Boki Fusion) |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Crushed | Tideturner | Aegis | Safe Harbour | none (Boki Fusion) |
 | [the Snowglide](Class-Snowglide.md) | 124 / 1 | Ice Darts | Cold Snap | Skate | Icebreaker | Cold Front | none (Boki Fusion) |
 | [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Open Flame | Boiling Point | Lock Horns | Spitfire | Molten Hug | none (Boki Fusion) |
 | [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Stone's Throw | Jade Ward | Leap of Faith | Rock Bottom | Foothold | none (Boki Fusion) |
@@ -148,7 +148,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 ### Run levels
 
-Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
+Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Dash (Shift) 3, E 3, R (ultimate) 3. The ultimate opens at level 6 (rank 2 at 9, rank 3 at 10).
 
 | Level | Total XP |  |
 |---|---|---|
@@ -161,6 +161,6 @@ Every expedition starts at level 1 with one skill point and every ability locked
 | 7 | 870 |  |
 | 8 | 1120 |  |
 | 9 | 1400 | R rank 2 |
-| 10 | 1710 |  |
+| 10 | 1710 | R rank 3 |
 
 <!-- /gen:classes -->

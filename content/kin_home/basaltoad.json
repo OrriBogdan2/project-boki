@@ -1,0 +1,14 @@
+{
+	"id": "basaltoad",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/basaltoad.json.",
+	"shiny": {
+		"color": "#504d4a",
+		"belly": "#90bbc8",
+		"glow": "#509fff"
+	},
+	"work": {
+		"stone": 3,
+		"timber": 2,
+		"haul": 1
+	}
+}

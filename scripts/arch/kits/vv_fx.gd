@@ -522,7 +522,7 @@ func _tick_rider(r: Dictionary) -> void:
 		riders.erase(r)
 		return
 	if _alive(sd):
-		var p: Vector3 = sd["pos"]
+		var p := ShotOrigin.drawn(sd, sd["pos"])      # out of the gun's mouth
 		var v: Vector2 = sd["vel"]
 		r["last"] = p
 		r["vel"] = v

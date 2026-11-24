@@ -69,3 +69,7 @@ beside the game's skinned sword: three swords. `python3 tools/art1/glb_drop_mats
 them out (every other part, clip and image byte-identical; `kael_v95c.jpg` gone), and `own.drop_mats` now names
 `sword` and `sword.001`, so the next `v95_to_game.py Kael` drops them itself. The game's skinned sword is the one sword.
 Alternative not taken: the master's HD sword skinned to hand.R in place of the game's (anchors and blade FX follow the game's sword).
+
+**Restore branch (2026-11-17, ext/hunter-glb-restore-1117):** the restored e1 mesh (ca32bd97252) carried the same master swords (2440 triangles on the `*-v95c` materials, blade-shaped slabs at x 0.26..0.37). `glb_drop_mats.py kael.glb kael.glb '*-v95c'` took them out, so the restored picked Kael has one sword (the game's skinned one), like main's. Every other part, skin and the 54 clips are unchanged.
+
+Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): face-kael-1118 cand A_s2_FevHair texture-only: `python3 -I tools/art1/face_swap.py art/wardens/kael/kael.glb /home/boki/meshy/face-kael-1118/cand/A_s2_FevHair.glb /home/boki/meshy/kael-sword-1117/cand/A_keep_new.glb OUT.glb` blends the changed pixels into the embedded 4096 `v95` image (sword, rig, clips untouched). Re-run the same command on the rig-weights glb (PR #284) if it merges first.

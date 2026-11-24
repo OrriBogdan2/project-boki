@@ -1,6 +1,6 @@
 class_name PerfOverlay
 extends Label
-## The frame-rate readout in the top right (Settings > Video > Frame rate). "fps" shows the frame rate;
+## The frame-rate readout in the top right (Settings > Video > Show frame rate). "fps" shows the frame rate;
 ## "full" is the performance overlay: frames per second, frame time and its 1% low,
 ## draw calls, triangles and objects drawn, nodes, and the costliest sections of the match's step
 ## (Match.prof, switched on only while this is showing). Text refreshes REFRESH_S apart; the frame
@@ -48,7 +48,7 @@ func _full() -> String:
 	for x in worst: sum += x
 	worst.sort()
 	var avg := sum / maxf(1.0, _n)
-	var cut := maxi(1, _n / 100)          # the slowest 1% of frames
+	var cut := maxi(1, int(_n / 100.0))          # the slowest 1% of frames
 	var low := 0.0
 	for k in cut: low += worst[_n - 1 - k]
 	low /= cut
@@ -57,7 +57,7 @@ func _full() -> String:
 	var objs := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME)
 	var lines := PackedStringArray([
 		"%d fps   %.1f ms   1%% low %d fps" % [Engine.get_frames_per_second(), avg, roundi(1000.0 / maxf(low, 0.001))],
-		"draws %d   tris %dk   objects %d" % [draws, tris / 1000, objs],
+		"draws %d   tris %dk   objects %d" % [draws, int(tris / 1000.0), objs],
 		"script %.1f ms   physics %.1f ms   nodes %d" % [Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 			Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 			int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))]])

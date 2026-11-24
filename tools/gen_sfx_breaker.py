@@ -408,7 +408,7 @@ def reel():
 
 
 def ult_quake():
-    """Faultline's landing under the slam: a sub-heavy boom that drops the floor out, then the ground settling."""
+    """Groundswell's landing under the slam: a sub-heavy boom that drops the floor out, then the ground settling."""
     d = 1.6
     boom = mix(kick(80, 22, d, 0.06, 0.25, 4.0) * 1.0, sub(42, 22, d, 0.6) * 0.9)
     thump = crack(0.5, 80, 900, 0.07) * 1.6

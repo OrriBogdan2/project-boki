@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. held_fire.<dash|rmb|e|x|q|all>: {source, ours}: notes for the held-LMB rows (docs only: LMB is a held input everywhere, Hunter.trigger reads the key every frame and fire resumes the frame a slot's lock ends; --held-fire-resume-check). dash_jump.<ground|air|rise|same>: Space in a ground dash, Space in an air dash, Shift in a jump's rise, both on one step: {ours: cancel | both | ignore | end | buffer | dash (measured, --dash-jump-check), carry: share of the dash's speed kept, source, verdict: match | [?] (the source doesn't settle it)}.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. held_fire.<dash|rmb|e|x|q|all>: {source, ours}: notes for the held-LMB rows (docs only: LMB is a held input everywhere, Hunter.trigger reads the key every frame and fire resumes the frame a slot's lock ends; --held-fire-resume-check). dash_jump.<ground|air|rise|same>: Space in a ground dash, Space in an air dash, Shift in a jump's rise, both on one step: {ours: cancel | both | ignore | end | buffer | dash (measured, --dash-jump-check), carry: share of the dash's speed kept, source, verdict: match | [?] (the source doesn't settle it)}. into_cast.<first>.<second> (the Cast into cast table): <second> pressed at <first>'s at[0] s (windup) and at[1] s (recovery) after <first>'s press: fire (at once) | queue (goes <phase>_wait s later) | drop (never goes); lmb_hold is LMB held 0.75 s; asserted by --cast-into-cast-check.",
 	"dash": {
 		"ground": {
 			"lmb": {"mode": "fire", "source": "Not determinable. Data (sv/briefs/kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
@@ -18,7 +18,7 @@
 	},
 	"into_dash": {
 		"lmb": {"mode": "fire", "source": "Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once; the stream goes out for the ram and, still held, roars again the step it ends (hold.lmb)."},
-		"rmb": {"mode": "fire", "source": "Footage: the aim lane shows about 0.4s while he keeps moving. Ours: Shift while aiming rams; the bolt still goes on release."},
+		"rmb": {"mode": "fire", "source": "Footage: the bolt is a 0.4s cast (lane on the press, 0073 > 0075) while he keeps moving. Ours: Shift in the cast rams; the bolt still leaves 0.4s after the press."},
 		"e": {"mode": "fire", "source": "Heat Shield is instant (owner item 11): there is no wind-up to dash out of."},
 		"x": {"mode": "lock", "reason": "Owner decision (item 66): in Red Carpet only E works, so Shift does nothing there: no poof, no dash spent, not buffered (AshwickJet.lock_inputs).", "source": "Data: the flight is his movement; knockback impulses speed it up; reactivating lands. Footage: no dash during the flight. Ours (owner, item 66): in Red Carpet only E works, so Shift in the flight does nothing (no poof, no dash spent, not buffered); AshwickJet.lock_inputs."},
 		"q": {"mode": "fire", "source": "No source glove."}
@@ -29,9 +29,9 @@
 	"hold": {
 		"lmb": {"ground": {"mode": "keep", "source": "Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram the stream goes out and roars again the step it ends: no pilot, no relight gap. Red Carpet is no dash here (owner item 66): LMB is off for the whole flight, ignored, not buffered, a press ticks softly, and the lance lights as usual the step it ends."}, "air": {"mode": "keep", "source": "As on the ground: held through the poof, the stream is back the step it ends."}, "jump": {"mode": "keep", "source": "Ours: the hose keeps burning through a jump."}},
 		"rmb": {
-			"ground": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. Kept: the hold carries through (owner item 51)."},
-			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. Air dash not shown (linwick.md:278-279). Kept: the hold carries through (owner item 51)."},
-			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. No jump shown (linwick.md:285-286). Kept: the hold carries through (owner item 51)."}
+			"ground": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. Kept: the 0.4s cast carries through and the bolt leaves on time (owner item 51; a cast since 11-21, docs/heroes/ashwick.md)."},
+			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. Air dash not shown (linwick.md:278-279). Kept: the 0.4s cast carries through and the bolt leaves on time (owner item 51; a cast since 11-21, docs/heroes/ashwick.md)."},
+			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/linwick.md:55-63): Fire Bolt shows its aim lane about 0.4 s before the shot (frames 0073-0074, 0102-0103, 0131) while he keeps moving; the bash is only pressed outside those lanes (into the dummy 0143-0144, free 0159-0160; linwick.md:267-276), so no dash inside an RMB aim is shown. Data (sv/briefs/kits.md:41-42, Felix: Embry Bolt, Pyro Pounce) has no hold and nothing on a bolt through a dash. No jump shown (linwick.md:285-286). Kept: the 0.4s cast carries through and the bolt leaves on time (owner item 51; a cast since 11-21, docs/heroes/ashwick.md)."}
 		}
 	},
 	"dash_jump": {
@@ -47,6 +47,41 @@
 		"x": {"h": "push", "v": "slow", "ours": "the flight starts at once and holds the jump's height", "source": "Data: fly forward (sv/briefs/kits.md:44); footage: lift-off instant, a low flight over ground; a cast from the air not shown (hero-ref/linwick.md:206, 230, 281)", "verdict": "[?]"}
 	},
 	"held_fire": {
-		"x": {"source": "Data: reactivating ends the flight early; LMB is off for the whole flight.", "ours": "Held through Flue Flight, the lance lights the step the flight ends (pilot, then the roar), no relight gap (0 frames). E, RMB and a glove never stop the hose."}
+		"x": {"source": "Data: reactivating ends the flight early; LMB is off for the whole flight.", "ours": "Held through Red Carpet, the lance lights the step the flight ends (pilot, then the roar), no relight gap (0 frames). E, RMB and a glove never stop the hose."}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md)."}
+		},
+		"x": {
+			"at": [0.3, 2.1],
+			"lmb": {"windup": "drop", "recovery": "fire", "source": "[?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215)."},
+			"lmb_hold": {"windup": "drop", "recovery": "fire", "source": "[?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215)."},
+			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "Mid-flight [?] (briefs/hero-ref/linwick.md:198). Recovery: Flame Shield fires the moment he lands (briefs/hero-ref/linwick.md:216, f137-f139). Matches."}
+		}
 	}
 }

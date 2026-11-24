@@ -78,8 +78,10 @@ func _init(match_node: Match) -> void:
 		m.hud.guide_hidden = true
 	_next()
 
-## Whether this hunter can do a beat (the Boki beats need a Boki).
+## Whether this hunter can do a beat (the Boki beats need a Boki; the Fusion beat never runs in the tutorial).
 func applies(bid: String) -> bool:
+	if bid == "ult":
+		return false
 	return m.player.kin != null or bid not in ["boki", "ult"]
 
 ## The beat under way ({} once it's over).

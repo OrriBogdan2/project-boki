@@ -9,27 +9,31 @@ extends RefCounted
 ## is inside something, her whole body is darkened (PinFx wash) on every game, and a small portal everyone sees
 ## opens where she goes into something and where she comes out.
 
+const ORB_T := 4.0  # s an orb stays
+const ORB_R := 0.9  # m touch radius
+const FADE_T := 0.3  # s: her shell and her screen's wash fade out over the walk's last FADE_T
+
 var k: ArcherKit
 var h: Hunter
-var t := 0.0                   # s of Slip Stitch left (0: not walking)
-var total := 0.0               # the length of this walk (the inside boost fades over it)
-var entry := Vector3.ZERO      # the last spot she stood clear of everything
+var t := 0.0  # s of Slip Stitch left (0: not walking)
+var total := 0.0  # the length of this walk (the inside boost fades over it)
+var entry := Vector3.ZERO  # the last spot she stood clear of everything
 var inside := false
-var walks := 0                 # (checks)
-var snap_backs := 0               # times it ended inside something and put her back (checks)
-var passed := 0                # steps spent inside something (checks)
-var orbs: Array = []           # spirit orbs left where she walked into something: {pos, t, node}
-var granted: Array = []        # others the orbs gave a Slip Stitch to: [hunter, seconds left]
-const ORB_T := 4.0             # s an orb stays
-const ORB_R := 0.9             # m touch radius
-const FADE_T := 0.3            # s: her shell and her screen's wash fade out over the walk's last FADE_T
+var walks := 0  # (checks)
+var snap_backs := 0  # times it ended inside something and put her back (checks)
+var passed := 0  # steps spent inside something (checks)
+var orbs: Array = []  # spirit orbs left where she walked into something: {pos, t, node}
+var granted: Array = []  # others the orbs gave a Slip Stitch to: [hunter, seconds left]
+
 
 func _init(kit: ArcherKit) -> void:
 	k = kit
 	h = kit.h
 
+
 func active() -> bool:
 	return t > 0.0
+
 
 ## True from the roll until the walk is over, on every game: the owner's walk (spirit_t), or a remote copy's
 ## kit move: pin_roll for the roll, pin_walk for the base walk (the wire carries the move, not the rank).
@@ -39,6 +43,7 @@ func phasing() -> bool:
 	var dd := k.dash_def()
 	var span := float(dd.get("roll_t", 0.24)) if k.anim_id == "pin_roll" else float(dd.get("time", 2.8))
 	return k.anim_id in ["pin_roll", "pin_walk"] and k.m.time - k.anim_at < span
+
 
 func start() -> void:
 	var dd := k.dash_def()
@@ -58,10 +63,12 @@ func start() -> void:
 		_share_with_allies()
 	k.vfx("spirit_go", h.pos, dir)  # no ring or burst on a dash; the shell shows the walk
 
+
 ## Seconds of Slip Stitch after the roll: rank 3 adds "time_rank3".
 func walk_time() -> float:
 	var dd := k.dash_def()
 	return float(dd.get("time", 2.8)) + (float(dd.get("time_rank3", 0.5)) if k.rank("dash") >= 3 else 0.0)
+
 
 ## Rank 3: allies near her when she starts walk as spirits for the same time, with no roll.
 func _share_with_allies() -> void:
@@ -75,12 +82,14 @@ func _share_with_allies() -> void:
 		granted.append([x, walk])
 		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 
+
 ## Rank 3: extra move speed while inside something that fades to nothing as the walk runs out (the physics
 ## data's +150 on a 455 base speed is the 0.33 in "inside_boost").
 func inside_boost() -> float:
 	if not inside or k.rank("dash") < 3 or total <= 0.0:
 		return 0.0
 	return float(k.dash_def().get("inside_boost", 0.33)) * clampf(t / total, 0.0, 1.0)
+
 
 ## Walking into something leaves a spirit orb at the entry: anyone else who touches it (ally or foe) walks
 ## as a spirit too, for the same time (wiki: Phase Walk's phase orb).
@@ -92,6 +101,7 @@ func _drop_orb(at: Vector3) -> void:
 	orbs.append({"pos": at, "t": ORB_T, "node": n})
 	k.vfx("spirit_orb", at)
 
+
 ## The orbs and the walks they gave (run every step, walking or not).
 func tick_orbs(dt: float) -> void:
 	for o in orbs.duplicate():
@@ -102,7 +112,8 @@ func tick_orbs(dt: float) -> void:
 			continue
 		var op: Vector3 = o["pos"]
 		for x in k.m.hunters:
-			if x == h or x.downed or x.out or granted.any(func(g): return g[0] == x): continue
+			if x == h or x.downed or x.out or granted.any(func(g): return g[0] == x):
+				continue
 			if Vector2(x.pos.x - op.x, x.pos.z - op.z).length() < ORB_R + x.r and absf(x.pos.y - op.y) < 1.5:
 				var walk := walk_time()
 				x.spirit_t = walk
@@ -112,10 +123,12 @@ func tick_orbs(dt: float) -> void:
 		var x: Hunter = g[0]
 		g[1] = float(g[1]) - dt
 		if not is_instance_valid(x) or float(g[1]) <= 0.0:
-			if is_instance_valid(x): x.spirit_t = 0.0
+			if is_instance_valid(x):
+				x.spirit_t = 0.0
 			granted.erase(g)
 		else:
 			x.spirit_t = float(g[1])
+
 
 ## terrain: a ledge face still above her feet counts (the walk dims her screen); at the end it does not,
 ## she is set on top of it instead (end).
@@ -126,11 +139,12 @@ func blocked_here(terrain := true) -> bool:
 	var reach := h.hull_r() * 0.6
 	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, reach, h.pos.y) > 0.0
 
+
 func tick(dt: float) -> void:
 	if t <= 0.0:
 		return
 	if t <= dt:
-		end("time")             # before t reaches 0: end() skips a walk that is already over (natural expiry)
+		end("time")  # before t reaches 0: end() skips a walk that is already over (natural expiry)
 		return
 	t -= dt
 	h.spirit_t = t
@@ -153,6 +167,7 @@ func tick(dt: float) -> void:
 	k.fx.tint_to((1.0 if inside else PinFx.TINT_WALK) * fade)
 	k.fx.aura_on(fade)
 
+
 ## Ends the walk (time, damage, a merge). Inside something: back to the entry point.
 func end(why: String) -> void:
 	if t <= 0.0 and h.spirit_t <= 0.0:
@@ -163,7 +178,7 @@ func end(why: String) -> void:
 	k.fx.tint_to(0.0)
 	var top: float = k.m.world.ground_at(h.pos.x, h.pos.z)
 	if top > h.pos.y + World.STEP and not blocked_here(false):
-		h.pos.y = top      # ended mid-climb in a ledge: she stands on top of it, never inside terrain
+		h.pos.y = top  # ended mid-climb in a ledge: she stands on top of it, never inside terrain
 		h.vel.y = 0.0
 		h.grounded = true
 		_portal(h.pos, entry)
@@ -177,6 +192,7 @@ func end(why: String) -> void:
 		k.vfx("spirit_end")
 	if k.anim_id in ["pin_roll", "pin_walk"]:
 		k.anim_id = ""
+
 
 ## The portal where she goes into something or comes out of it: at `at` on the clear side, stood a little off the
 ## face (the data's "fwd") on the line from `behind`, a point on the far side of the face.

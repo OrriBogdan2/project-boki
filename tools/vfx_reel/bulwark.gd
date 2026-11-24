@@ -1,15 +1,14 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Albert's reel (tools/hero_vfx_reel.gd, docs/decisions/0061-breaker-swing-lunge.md), every slot at the match
 ## camera's zoom: the hammer thrown and called back, the charged swing, the swing's lunge standing and running (its
-## distance over him with the full performance overlay on), the raised shield, the Blue Guard boop on the dummy, its
-## Shield
-## Charge into a Shield Slam, a foe driven into a rock, the Tideturner (dash), Safe Harbour (e), the Groundswell hop and
+## distance over him with the full performance overlay on), the raised shield, the aegis boop on the dummy, its Shield
+## Charge, a foe driven into a rock, the Tideturner (dash), Safe Harbour (e), the Groundswell hop and
 ## slam (r), and the thrown hammer reeled home by its rope.
 
 const HOLD := 1.5              # s the swing is held: past full charge and its perfect window
 
 func parts() -> Array:
-	return ["throw", "charge", "swing", "shield", "boop", "bash", "wall", "dash", "e", "r", "rope"]
+	return ["throw", "charge", "swing", "shield", "boop", "bash", "wall", "dash", "e", "mend", "r", "rope"]
 
 ## Each part starts with the hammer in his hand and the shield down (the last part may have left it out).
 func _hand() -> void:
@@ -58,7 +57,6 @@ func _part_shield() -> void:
 func _part_bash() -> void:
 	await _reset(5.0)
 	_hand()
-	P.ak.res = 50.0          # (a full Guard: the charge ends in a Shield Slam)
 	var charge := func(t: float):
 		P.inp["sec_hold"] = t > 0.15
 		if _at(t, 0.2):
@@ -70,7 +68,7 @@ func _part_bash() -> void:
 		if t > 0.55:
 			P.inp["move"] = Vector2.ZERO
 		_aim(T.pos)
-	await _go(1.9, charge, _sheet("bash", "Shift behind the shield: the Full Ahead into a Shield Slam",
+	await _go(1.9, charge, _sheet("bash", "Shift behind the shield: the Full Ahead",
 		[0.45, 0.52, 0.6, 0.7, 0.8, 0.9, 1.0, 1.15, 1.5]), 2.0)
 	await _go(GAP)
 
@@ -135,11 +133,11 @@ func _part_swing() -> void:
 	await _reset(12.0)
 	_hand()
 	P.teleport(home + Vector3(-4.0, 0, 0))
-	var run := func(t: float):
+	var run_v := func(t: float):
 		P.inp["fire"] = t > 0.1 and t < 0.1 + HOLD
 		P.inp["move"] = Vector2(1, 0) if t < 2.0 else Vector2.ZERO
 		_aim(T.pos)
-	await _go(2.8, run, _sheet("swing", "LMB held and let go running: further", [1.5, 1.62, 1.75, 1.9, 2.2]), 1.5)
+	await _go(2.8, run_v, _sheet("swing", "LMB held and let go running: further", [1.5, 1.62, 1.75, 1.9, 2.2]), 1.5)
 	await _go(GAP)
 
 func _part_boop() -> void:
@@ -153,6 +151,18 @@ func _part_boop() -> void:
 			T.teleport(home + Vector3(2.3, 0, 0))
 		_aim(home + Vector3(6.0, 0, 0))
 	await _go(2.2, boop, _sheet("boop", "RMB up, LMB: the boop", [0.7, 0.75, 0.8, 0.9, 1.0, 1.35, 1.45]), 1.5)
+	await _go(GAP)
+
+## E held to its end: the zone's last ticks and the closing burst (cast 0.1 s + 1 s column + 4 s zone, ~5.1 s),
+## the burst's sparks in his palette's ivory (content/vfx/bulwark.json), not mint.
+func _part_mend() -> void:
+	await _reset(5.0)
+	_hand()
+	var cast := func(t: float):
+		P.inp["sig"] = _at(t, 0.1)
+		_aim(T.pos)
+	await _go(6.0, cast, _sheet("mend", "E to its end: the last tick and the closing burst",
+		[1.2, 4.9, 5.05, 5.12, 5.2, 5.3, 5.4, 5.55, 5.8]), 2.5)
 	await _go(GAP)
 
 func _part_r() -> void:

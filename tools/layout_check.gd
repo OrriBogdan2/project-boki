@@ -132,7 +132,7 @@ func _landings(m: Match) -> void:
 	for n in range(0, tiles.size(), every):
 		var i: int = tiles[n]
 		var x: int = i % w.w
-		var z: int = i / w.w
+		var z: int = int(i / float(w.w))
 		tried += 1
 		_clear(m)
 		var top := float(w.level[i]) * World.LEVEL + World.BLOCK_H
@@ -180,7 +180,7 @@ func _clump(m: Match) -> void:
 		for sp: Vector2 in spots:
 			_clear(m)
 			var top := float(w.level[i]) * World.LEVEL + World.BLOCK_H
-			h.teleport(Vector3(i % w.w + sp.x, top + 0.4, i / w.w + sp.y))
+			h.teleport(Vector3(i % w.w + sp.x, top + 0.4, int(i / float(w.w)) + sp.y))
 			h.vel = Vector3.ZERO
 			h.grounded = false
 			_idle(h)
@@ -188,7 +188,7 @@ func _clump(m: Match) -> void:
 				m.step(Match.DT)
 			if not _can_leave(m, h):
 				stuck += 1
-				print("LAYOUT stuck in the test clump at tile %d,%d (now %s)" % [i % w.w, i / w.w, h.pos])
+				print("LAYOUT stuck in the test clump at tile %d,%d (now %s)" % [i % w.w, int(i / float(w.w)), h.pos])
 	for i: int in tiles:
 		w.kind[i] = World.T_GROUND
 	ok(stuck == 0, "landing anywhere on a 3x3 clump never leaves you stuck (%d of %d)" % [
@@ -225,10 +225,10 @@ func _snags(m: Match) -> void:
 		if w.kind[i] != World.T_BLOCK:
 			continue
 		var hgt := World.BLOCK_H
-		if hgt > World.STEP and hgt < Hunter.MANTLE_REACH:
+		if hgt > World.STEP and hgt < HunterFeel.mantle_reach:
 			n += 1
 	ok(n == 0, "no colliding prop between step (%.2f m) and mantle (%.2f m) height: %d" % [
-		World.STEP, Hunter.MANTLE_REACH, n])
+		World.STEP, HunterFeel.mantle_reach, n])
 
 func run(main: Node) -> void:
 	Save.no_write = true

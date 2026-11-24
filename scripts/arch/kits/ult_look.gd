@@ -1,7 +1,7 @@
 class_name UltLook
 extends CareLook
 ## Pooled looks of the support pair's ultimates on X, on top of CareLook's (same pool, burst and keep):
-##   Pip, Rise and Shine: the lantern tether, a braid of warm lantern-gold light with two twisting strands.
+##   Pip, Rise and Shine: the lantern tether, a braid of leaf-green heal light with two twisting strands.
 ##   Claire, Freeze Frame: the rink (a faint sheet of ice whose cracks glow as it builds, a fringe of
 ##   crystals on its edge; the lit ring at the hit radius is the kit's AimKit circle), the frost bud
 ##   at her feet, the light pillar of the crash and the ice block on each stunned foe. Her body is
@@ -53,12 +53,12 @@ func _build_tether(n: Node3D) -> void:
 		var seg := Node3D.new()
 		seg.name = "Seg%d" % i
 		n.add_child(seg)
-		_off(Models.part(seg, Models.box(0.16, 0.16, 1.0), glow_mat(Color("ffe2b0", 0.95)), Vector3(0, 0, -0.5)))
-		_off(Models.part(seg, Models.box(0.5, 0.5, 1.0), glow_mat(Color("ffc46a", 0.3)), Vector3(0, 0, -0.5)))
+		_off(Models.part(seg, Models.box(0.16, 0.16, 1.0), glow_mat(Color("efffe4", 0.95)), Vector3(0, 0, -0.5)))
+		_off(Models.part(seg, Models.box(0.5, 0.5, 1.0), glow_mat(Color("5fdc6a", 0.3)), Vector3(0, 0, -0.5)))
 		var twist := Node3D.new()
 		twist.name = "Twist"
 		seg.add_child(twist)
-		var strand_mat := glow_mat(Color("ffe6a8", 0.85))
+		var strand_mat := glow_mat(Color("b4f7a8", 0.85))
 		for side in [-1.0, 1.0]:
 			_off(Models.part(twist, Models.box(0.07, 0.07, 1.0), strand_mat, Vector3(0.2 * side, 0, -0.5)))
 

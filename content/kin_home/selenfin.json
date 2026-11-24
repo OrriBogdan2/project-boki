@@ -1,0 +1,14 @@
+{
+	"id": "selenfin",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/selenfin.json.",
+	"shiny": {
+		"color": "#e1ccc7",
+		"belly": "#fff3e5",
+		"glow": "#a0afff"
+	},
+	"work": {
+		"frost": 3,
+		"mend": 2,
+		"craft": 1
+	}
+}

@@ -125,10 +125,10 @@ func ult_running() -> bool:
 
 ## While Finishing Touch is up the bow is the ult's: nock, then a beam (PinUlt.lmb). Otherwise one bow holds one
 ## arrow: a fresh LMB press drops a held Pin Down with no shot, and the bow rests while RMB holds one.
-func lmb_override(held: bool, dt: float) -> bool:
-	var pressed := held and not lmb_was
-	lmb_was = held
-	if ult.lmb(held, dt):
+func lmb_override(held_v: bool, dt: float) -> bool:
+	var pressed := held_v and not lmb_was
+	lmb_was = held_v
+	if ult.lmb(held_v, dt):
 		return true
 	if pressed and rmb_down:
 		rmb_down = false
@@ -346,10 +346,10 @@ func _pin(a: Vector3, k: float) -> void:
 		extra["hit_extra"] = {"heavy": true}
 	extra["on_foe"] = func(f: Ent, _c: Dictionary):
 		# the impact: an red-white burst, a white dust cloud as it's driven back, a white ring round it
-		var at := f.pos + Vector3(0, 1.0, 0)
+		var _at := f.pos + Vector3(0, 1.0, 0)
 		fx.note_hit(f.pos)
 		vfx("heavy_hit", f.pos, dir, {"k": k})
-		f.flash_t = 0.2                      # a hit flash on the body
+		f.flash_t = maxf(f.flash_t, ImpactWeight.flash_s(ImpactWeight.of_ability(h.arch, "rmb")))
 		# knocked while burning in the Hemline: Cremated (a burst of the blue fire)
 		if not rain.is_empty() and _in_rain(f):
 			cremations += 1
@@ -396,26 +396,26 @@ func arc_deg() -> float:
 
 func cast_e() -> bool:
 	var ed := e_def()
-	var d := h.aim_dir()
+	var dd := h.aim_dir()
 	var radius := clampf(AimMode.cursor_dist(h), float(ed.get("rmin", 2.0)), float(ed["reach"]))
-	var c := AimMode.ground(m, h.pos + Vector3(d.x, 0, d.y) * radius)
-	var tell := float(ed["tell"])
+	var c := AimMode.ground(m, h.pos + Vector3(dd.x, 0, dd.y) * radius)
+	var tell_v := float(ed["tell"])
 	var center := h.pos
 	# the arrows go up first (everyone sees the arc), then the rain starts
-	AimKit.arc_wall(h, "e", {"center": center, "dir": d, "radius": radius, "deg": arc_deg(), "thick": float(ed["width"]), "panels": 7, "all": true, "dur": tell, "col": col_of(ed), "lace": true})
+	AimKit.arc_wall(h, "e", {"center": center, "dir": dd, "radius": radius, "deg": arc_deg(), "thick": float(ed["width"]), "panels": 7, "all": true, "dur": tell_v, "col": col_of(ed), "lace": true})
 	for i in 5:
 		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(arc_deg()) * 0.4
-		var dv := d.rotated(u)
+		var dv := dd.rotated(u)
 		# (cosmetic: small and red so the five don't stack into one white blob at the bow; PinFx.lob draws
 		# the arrows going up)
-		var lob_v := dv * maxf(4.0, radius / tell)
-		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell, 0.05, PinFx.THREAD, {"lob": 3.5, "cos": true})
-	fx.lob(h.pos + Vector3(0, 1.6, 0), d)
-	vfx("hail_go", h.pos, d)
+		var lob_v := dv * maxf(4.0, radius / tell_v)
+		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell_v, 0.05, PinFx.THREAD, {"lob": 3.5, "cos": true})
+	fx.lob(h.pos + Vector3(0, 1.6, 0), dd)
+	vfx("hail_go", h.pos, dd)
 	play("arc_hail")
 	var t := float(ed["time"])
-	rain = {"center": center, "c": c, "d": d, "radius": radius, "t": t + tell, "start": tell, "tick": 0.0, "patter": 0.0}
-	e_t = t + tell
+	rain = {"center": center, "c": c, "d": dd, "radius": radius, "t": t + tell_v, "start": tell_v, "tick": 0.0, "patter": 0.0}
+	e_t = t + tell_v
 	return true
 
 func _in_rain(f: Ent) -> bool:
@@ -454,8 +454,8 @@ func _tick_rain(dt: float) -> void:
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
 	for f in inside:
 		# (a tick: the hit reactions stay off, so the slow only takes speed: no squash, flinch or hold)
-		var tick := cx("e", "hail_wall", f.pos, {"at": f.pos, "hit_extra": {"tick": true}})
-		KinExec.apply_foe(stg.effects, f, tick, f.pos, stg)
+		var tick_v := cx("e", "hail_wall", f.pos, {"at": f.pos, "hit_extra": {"tick": true}})
+		KinExec.apply_foe(stg.effects, f, tick_v, f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
 	for w in m.hunters:     # rival Wisps in the wall lose down_hp (no slow, no burn: they are not hit)
 		if w.downed and not w.dead and w.team != h.team and _in_rain(w):

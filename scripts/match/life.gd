@@ -22,7 +22,7 @@ const R := {
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
 	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
 	"stomp_cycle": 0.7,         # one foot-lift-and-slam
-	"kin_revive_time": 6.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
+	"kin_revive_time": 6.0,     # [design] your kin pulling you up (as long as the reference game's self-revive)
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
@@ -48,7 +48,7 @@ static func box_value(b: Dictionary) -> int:
 	v += (b["caught"] as Array).size() * 15
 	for st in (b.get("belt", []) as Array): v += int(st["n"]) * 4
 	for c in Pack._box_things(b):
-		v += Loot.value(c["it"]) / 2
+		v += int(Loot.value(c["it"]) / 2.0)
 	return v
 
 static func box_color(b: Dictionary) -> Color:
@@ -151,6 +151,7 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
 	h.finish_t = 0.0
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
+	m.sfx("stomp_windup", h.pos, -2.0)     # positional: both squads in reach hear it commit
 	if o == m.player and m.hud:
 		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
 
@@ -160,7 +161,7 @@ static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	trace(m, "stomp end %s (%s)" % [h.pname, why])
 	h.stomp = {}
 	if why == "broken":
-		m.sfx("whoosh", h.pos, -6.0, 1.3)
+		m.sfx("stomp_crack", h.pos)
 
 ## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
 ## root (the stomp's own hold on its feet is STOMP_ROOT, so only a bigger root counts), Grounded, or a tow
@@ -210,7 +211,7 @@ static func tick_stomps(m: Match, dt: float) -> void:
 				end_stomp(m, h, "done")
 				m.eliminate(o, h, "executed")
 				m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
-				m.sfx("crit", o.pos, -2.0, 0.7)
+				m.sfx("stomp_finish", o.pos)
 			else:
 				end_stomp(m, h, "missed")
 
@@ -374,6 +375,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 				else:
 					h.caught.append(rec)
+					CarrySfx.from_box(m, h, b)
 					if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 						h.stolen_carry = true
 		"belt":
@@ -475,6 +477,7 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 			left.append(rec)               # the box is full: this capsule stays in the deathbox
 			continue
 		h.caught.append(rec)
+		CarrySfx.from_box(m, h, b)
 		if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 			h.stolen_carry = true
 	if not left.is_empty():

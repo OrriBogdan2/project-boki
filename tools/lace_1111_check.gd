@@ -24,17 +24,17 @@ func run(main_node: Node) -> void:
 func lace() -> void:
 	var r := setup("archer", 7.0, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
 	var home: Vector3 = r[4]
-	var K: ArcherKit = P.ak
-	P.equip("longbow", 0)
+	var k: ArcherKit = p.ak
+	p.equip("longbow", 0)
 	step(m, 0.3)
-	_heavy_from_the_bow(m, P, T, K, home)
-	_roll(K)
-	_no_pink(K)
-	_reticle_laced(m, P, T, K)
-	_hail_laced(m, P, T, K, home)
+	_heavy_from_the_bow(m, p, t, k, home)
+	_roll(k)
+	_no_pink(k)
+	_reticle_laced(m, p, t, k)
+	_hail_laced(m, p, t, k, home)
 	await done(m)
 
 
@@ -52,63 +52,63 @@ static func red(c: Color) -> bool:
 
 
 # ------------------------------------------------------------------ RMB: from the bow
-func _heavy_from_the_bow(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3) -> void:
-	fresh(T)
-	T.teleport(home + Vector3(7.0, 0, 0))
-	K.cd["rmb"] = 0.0
-	var hold := rmb_at.bind(P, T.pos)
-	P.inp["sec_hold"] = true
-	K.press_rmb()
-	step(m, 0.5, hold)
-	var n := K.needle
-	var nock := HeroVfx.of(m).anchor_pos(P, "nock")
+func _heavy_from_the_bow(m: Match, p: Hunter, t: Hunter, k: ArcherKit, home: Vector3) -> void:
+	fresh(t)
+	t.teleport(home + Vector3(7.0, 0, 0))
+	k.cd["rmb"] = 0.0
+	var hold_v := rmb_at.bind(p, t.pos)
+	p.inp["sec_hold"] = true
+	k.press_rmb()
+	step(m, 0.5, hold_v)
+	var n_v := k.needle
+	var nock := HeroVfx.of(m).anchor_pos(p, "nock")
 	ok(
 		"RMB needle: nocked on her nock point (the model's anchor) while it winds up",
-		n.visible and n.eye.distance_to(nock) < 0.01,
-		"eye %s nock %s" % [str(n.eye), str(nock)]
+		n_v.visible and n_v.eye.distance_to(nock) < 0.01,
+		"eye %s nock %s" % [str(n_v.eye), str(nock)]
 	)
-	var bow := K.bow_mouth()
-	var bar := AimKit.entry(P, "rmb_bar")
+	var bow := k.bow_mouth()
+	var bar := AimKit.entry(p, "rmb_bar")
 	ok(
 		"RMB bar: starts at the bow's mouth, laced, in her red",
 		(
-			AimKit.shown(P, "rmb_bar")
+			AimKit.shown(p, "rmb_bar")
 			and (bar.get("from", Vector2.ZERO) as Vector2).distance_to(Vector2(bow.x, bow.z)) < 0.05
 			and bool(bar.get("lace", false))
 			and red(bar.get("col", Color.WHITE))
 		),
 		"from %s bow %s" % [str(bar.get("from")), str(bow)]
 	)
-	step(m, 0.7, hold)
-	bow = K.bow_mouth()
+	step(m, 0.7, hold_v)
+	bow = k.bow_mouth()
 	m.net_on = true  # (only to read the event the other games get; no peer is connected)
 	Net.out_events.clear()
-	P.inp["sec_hold"] = false
+	p.inp["sec_hold"] = false
 	m.step(DT)
 	m.net_on = false
 	var sh: Dictionary = {}
 	for i in range(m.shots.size() - 1, -1, -1):
-		if m.shots[i]["by"] == P:
+		if m.shots[i]["by"] == p:
 			sh = m.shots[i]
 			break
 	var start: Vector3 = sh.get("start", Vector3(999, 0, 999))
 	var v: Vector2 = sh.get("vel", Vector2.ZERO)
-	var to_cursor := Vector2(T.pos.x - bow.x, T.pos.z - bow.z).normalized()
+	var to_cursor := Vector2(t.pos.x - bow.x, t.pos.z - bow.z).normalized()
 	ok(
 		"RMB shot: leaves the bow's mouth at the release frame and flies bow -> cursor",
 		start.distance_to(bow) < 0.05 and v.normalized().distance_to(to_cursor) < 0.03,
 		"start %s bow %s" % [str(start), str(bow)]
 	)
-	var bow_node := WardenGlb.anchor(P.model, "anchor_bow_root")
+	var bow_node := WardenGlb.anchor(p.model, "anchor_bow_root")
 	ok(
 		"RMB shot: the bow's mouth is the model's own bow anchor (it rides the bow in the pose), at bow height",
 		(
 			bow_node != null
 			and bow_node.global_position.distance_to(bow) < 0.01
-			and bow.y > P.pos.y + 0.7
-			and bow.y < P.pos.y + 1.8
+			and bow.y > p.pos.y + 0.7
+			and bow.y < p.pos.y + 1.8
 		),
-		"bow - body %s" % str(bow - P.pos)
+		"bow - body %s" % str(bow - p.pos)
 	)
 	var sent := Vector3(999, 0, 999)
 	for e in Net.out_events:
@@ -131,8 +131,8 @@ func _heavy_from_the_bow(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vec
 
 
 # ------------------------------------------------------------------ Shift
-func _roll(K: ArcherKit) -> void:
-	var dd := K.dash_def()
+func _roll(k: ArcherKit) -> void:
+	var dd := k.dash_def()
 	var what := "Shift: the roll goes 12.5%% further (%.3f -> %.3f m) in the same %.2f s"
 	ok(
 		what % [ROLL_WAS, ROLL_WAS * ROLL_K, ROLL_T],
@@ -142,7 +142,7 @@ func _roll(K: ArcherKit) -> void:
 
 
 # ------------------------------------------------------------------ no pink
-func _no_pink(K: ArcherKit) -> void:
+func _no_pink(k: ArcherKit) -> void:
 	var bad: Array = []
 	var pal: Dictionary = HeroVfx.data("archer")["palette"]
 	for key in pal:
@@ -161,23 +161,23 @@ func _no_pink(K: ArcherKit) -> void:
 	ok("colours: nothing of her kit is pink (palette, ability colours, PinFx)", bad.is_empty(), str(bad))
 	ok(
 		"colours: her thread is her laces' crimson, set by the kit (not the model's tint)",
-		red(PinFx.THREAD) and Color(String(d["color"])) == PinFx.THREAD and red(K.col_of(K.e_def())),
+		red(PinFx.THREAD) and Color(String(d["color"])) == PinFx.THREAD and red(k.col_of(k.e_def())),
 		PinFx.THREAD.to_html(false)
 	)
 
 
 # ------------------------------------------------------------------ the draw reticle
-func _reticle_laced(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
-	step(m, 0.2, func(): aim_at(P, T.pos))
-	var rest := AimKit.entry(P, "draw_rest")
+func _reticle_laced(m: Match, p: Hunter, t: Hunter, _k: ArcherKit) -> void:
+	step(m, 0.2, func(): aim_at(p, t.pos))
+	var rest := AimKit.entry(p, "draw_rest")
 	ok(
 		"aim: the resting aim line is laced, in her red",
-		AimKit.shown(P, "draw_rest") and bool(rest.get("lace", false)) and red(rest.get("col", Color.WHITE)),
+		AimKit.shown(p, "draw_rest") and bool(rest.get("lace", false)) and red(rest.get("col", Color.WHITE)),
 		str(rest.get("col"))
 	)
-	step(m, 0.35, press_at.bind(P, T.pos))
-	var thin := AimKit.entry(P, "draw")
-	var fill := AimKit.entry(P, "draw_fill")
+	step(m, 0.35, press_at.bind(p, t.pos))
+	var thin := AimKit.entry(p, "draw")
+	var fill := AimKit.entry(p, "draw_fill")
 	ok(
 		"aim: drawing, the line and its fill are laced and red (no pale pink)",
 		(
@@ -200,15 +200,15 @@ func _reticle_laced(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		geo.v.size() > plain_v and geo.v.size() < plain_v * 12,
 		"%d vs %d vertices" % [geo.v.size(), plain_v]
 	)
-	P.inp["fire"] = false
+	p.inp["fire"] = false
 	step(m, 1.0)
 
 
 # ------------------------------------------------------------------ E: laces
-func _hail_laced(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3) -> void:
-	cast_e_at(P, K, home + Vector3(5.0, 0, 0))
+func _hail_laced(m: Match, p: Hunter, _t: Hunter, k: ArcherKit, home: Vector3) -> void:
+	cast_e_at(p, k, home + Vector3(5.0, 0, 0))
 	m.step(DT)
-	var arc := AimKit.entry(P, "e")
+	var arc := AimKit.entry(p, "e")
 	ok(
 		"E arc: the cast's arc is laced, in her red",
 		bool(arc.get("lace", false)) and red(arc.get("col", Color.WHITE)),
@@ -216,15 +216,15 @@ func _hail_laced(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3) ->
 	)
 	ok(
 		"E: no glowing panels or ground band left on the wall (her laces instead)",
-		not "panels" in K.fx and not "glow" in K.fx
+		not "panels" in k.fx and not "glow" in k.fx
 	)
-	step(m, float(K.e_def()["tell"]) + 0.1)
+	step(m, float(k.e_def()["tell"]) + 0.1)
 	for i in 30:  # (PinFx draws on the frame clock: step it with the match)
 		m.step(DT)
-		K.fx._process(DT)
+		k.fx._process(DT)
 	var shown := 0
 	var reds := 0
-	for l in K.fx.laces:
+	for l in k.fx.laces:
 		var node: MeshInstance3D = l["node"]
 		if node.visible and node.scale.z > 0.3:
 			shown += 1
@@ -234,17 +234,17 @@ func _hail_laced(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3) ->
 			reds += 1
 	ok(
 		"E laces: every gap between the needle posts laced (an upright X and a ground X), all drawn across",
-		shown == K.fx.laces.size() and shown == (PinFx.POSTS - 1) * 4,
-		"%d of %d" % [shown, K.fx.laces.size()]
+		shown == k.fx.laces.size() and shown == (PinFx.POSTS - 1) * 4,
+		"%d of %d" % [shown, k.fx.laces.size()]
 	)
-	ok("E laces: red thread, none of it pink", reds == K.fx.laces.size(), "%d red" % reds)
-	var up_a: Dictionary = K.fx.laces[0]
-	var up_b: Dictionary = K.fx.laces[1]
+	ok("E laces: red thread, none of it pink", reds == k.fx.laces.size(), "%d red" % reds)
+	var up_a: Dictionary = k.fx.laces[0]
+	var up_b: Dictionary = k.fx.laces[1]
 	ok(
 		"E laces: the upright pair crosses (one climbs as the other falls)",
 		(up_a["b"] as Vector3).y > (up_a["a"] as Vector3).y and (up_b["b"] as Vector3).y < (up_b["a"] as Vector3).y
 	)
-	for i in int((float(K.e_def()["time"]) + 0.3) / DT):
+	for i in int((float(k.e_def()["time"]) + 0.3) / DT):
 		m.step(DT)
-		K.fx._process(DT)
-	ok("E laces: gone when the wall ends", not K.fx.laces.any(func(l): return (l["node"] as Node3D).visible))
+		k.fx._process(DT)
+	ok("E laces: gone when the wall ends", not k.fx.laces.any(func(l): return (l["node"] as Node3D).visible))

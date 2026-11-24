@@ -27,7 +27,10 @@ var a: Arena
 var m: Match
 var stations: Array = []  # {kind, id, at: Vector3 (the pedestal), c: Vector3 (its perch's middle), label: Label3D}
 var near_i := -1
+var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
 var prompt: Label = null
+var trial: TimeTrial = null  # the time-trial course on the open floor
+
 var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null
 
@@ -103,6 +106,7 @@ func build() -> void:
 		_ring(String(st["kind"]), v3(st["at"]), float(st["ring"]))
 	if g.has("duel"):
 		_duel(v3(g["duel"]))
+	summon_pad = SummonStation.new(a)
 	GroundsLanes.build(m, g)
 	_layer = CanvasLayer.new()
 	_layer.layer = 20
@@ -117,6 +121,8 @@ func build() -> void:
 	prompt.visible = false
 	_layer.add_child(prompt)
 	m.add_child(_layer)
+	trial = TimeTrial.new(m)
+	trial.build(_layer, self)
 
 
 ## One ring of pedestals round a perch's middle, one per id of the kind.
@@ -189,19 +195,24 @@ func _duel(at: Vector3) -> void:
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at
+	m.duel_hint = DuelRingHint.make(m)
 
 
-## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home.
-func tick() -> void:
+## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home,
+## run the time trial.
+func tick(dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null or prompt == null:
 		return
+	summon_pad.tick()
 	if p.pos.y < FALL_Y and not p.downed:
 		p.teleport(a.home)
 		p.vel = Vector3.ZERO
+		trial.stop()
 		if m.hud:
 			m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
 		return
+	trial.tick(dt)
 	var best := -1
 	var bd := ACT_R
 	for i in stations.size():

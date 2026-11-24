@@ -28,16 +28,8 @@ def slow(d, rate, depth):
 
 
 def sweep_noise(d, f0, f1, width=0.35):
-    """Noise whose band glides f0 -> f1 (a bank of bands crossfaded along the glide: air rushing past)."""
-    n = N(d); u = np.arange(n) / max(1, n - 1)
-    lf = np.log(f0) + (np.log(f1) - np.log(f0)) * u
-    out = np.zeros(n); src = noise(d)
-    for fc in np.geomspace(120, 7000, 16):
-        g = np.exp(-((np.log(fc) - lf) / width) ** 2)
-        if g.max() < 0.02:
-            continue
-        out += bpf(src, fc * 0.8, fc * 1.25) * g
-    return out
+    """The shared sfx_lib glide, on this set's 16 bands from 120 Hz to 7 kHz."""
+    return S.sweep_noise(d, f0, f1, width, lo=120, hi=7000, bands=16)
 
 
 def flame(d, bright=2400, rumble=1.0, crackle=1.0):
@@ -105,7 +97,7 @@ def bolt_hit():
     return mix(smack, flare, at(embers, 0.03), sub(70, 40, 0.4, 0.07) * 0.3)
 
 
-# ------------------------------------------------------------------ Char: Ablaze and Flashover
+# ------------------------------------------------------------------ Char: Ablaze and Boiling Point
 def ignite():
     """A foe goes Ablaze: a rising whoomp as the Char catches."""
     d = 0.85
@@ -116,7 +108,7 @@ def ignite():
 
 
 def blaze():
-    """Flashover: the burn bursts fiercer. A deep double whoomp, a bright flare and a long crackling tail."""
+    """Boiling Point: the burn bursts fiercer. A deep double whoomp, a bright flare and a long crackling tail."""
     d = 1.1
     hit = mix(click(0.004, 2000, 7000) * 1.2, kick(140, 40, d, 0.03, 0.16, 2.8) * 0.8, sub(65, 32, d, 0.2) * 0.45)
     second = kick(100, 38, 0.6, 0.04, 0.12, 2.2) * 0.45

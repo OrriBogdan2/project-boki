@@ -1,6 +1,6 @@
 # The Barnacle Knight
 
-A heavy hammer-and-shield fighter. Blocks with his Blue Guard to build Guard, then slams people into walls
+A heavy hammer-and-shield fighter. Blocks with his aegis, then knocks people into walls
 and into each other. Plants his hammer where the fight is and heals the squad there.
 
 <!-- gen:profile -->
@@ -17,14 +17,14 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 ## How it plays
 
 1. **Hold RMB** to raise his **Blue Guard**, a curved gold shield: it has its own health, regenerates, and
-   blocks from the front while you walk slower. Damage it blocks becomes **Guard**.
-2. Let go (or tap) to **Bash**. At 50 Guard the Bash is a **Shield Slam** that stuns.
+   blocks from the front while you walk slower. Letting go only lowers it.
+2. **Shift** with the aegis up is the **Full Ahead**, a heavy shoulder-first knock (its own 6s cooldown).
 3. **Tap LMB** to throw the hammer where your cursor is (up to 9m): it stays planted under a gold
    beacon, shows foes near it to your team, and comes back hitting on a second tap.
 4. **Hold LMB** to spin the hammer up (a glint on its head, a flare when it's full), then let go for a
    **Crushing Blow**: a flaming crescent in front that carries you forward.
-5. Knock someone into a wall or into another foe with a Bash, Full Ahead or full Crushing Blow and
-   they're **Crushed**: stunned, and you heal.
+5. Knock someone into a wall with a Tideturner, Full Ahead or full Crushing Blow and
+   they're **Crushed**: stunned for 1s and hit for 8 (no heal).
 6. **Tideturner** (Shift): a short dash, then one spinning hit all round you; with the Blue Guard up it's a
    **Full Ahead**, invulnerable for its length.
 7. **Safe Harbour** (E): a green light comes down on your planted hammer (or on you), then heals
@@ -34,8 +34,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 | Do this | And you get |
 |---|---|
-| Bash, Full Ahead or full Crushing Blow into a wall or another foe | Crushed: stun 0.5, +8 damage, you heal 24 |
-| Bash with 50+ Guard | Shield Slam: push 12, stun 0.6 (spends 50) |
+| A Crushing Blow, Tideturner or Full Ahead into a wall | Crushed: stun 1.0, +8 damage |
 | Shift with the Blue Guard raised | Full Ahead: invulnerable, heavier knock |
 | Throw the hammer, then E | Safe Harbour lands where the hammer stands |
 | Hold LMB, then Shift | A short plain dash for half a charge; the spin keeps charging |
@@ -43,7 +42,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 ## Tips
 
-- Raise the Blue Guard into their fire first: the Guard pays for the Slam.
+- Raise the aegis into their fire, then Full Ahead them into a wall.
 - Fight near walls and pillars. A Crushed stun sets up a full Crushing Blow.
 - Throw the hammer round a corner to scout it, then heal there; it waits until you call it.
 - A broken Blue Guard locks you out for 3s: drop it before it breaks.
@@ -59,7 +58,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 | Signature weapon | War Hammer & Blue Guard (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's shield. Holds the line with his Blue Guard, plants his hammer where the fight is, and heals the spot. |
 | Silhouette | the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist |
-| Resource | Guard (max 100) |
+| Resource | Crushed (max 1) |
 
 ### Kit card
 
@@ -68,7 +67,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Frontline tank: block with your Blue Guard, then knock foes into walls with your hammer to stun them. |
-| Passive: Guard | Blocking builds Guard; at 50, Full Ahead becomes a Shield Slam. |
+| Passive: Crushed | Knocking a foe into a wall stuns it. |
 | Dash: Tideturner | Short dash ending in a spinning hit; with Blue Guard up, Full Ahead. |
 | RMB: Blue Guard | Hold to block shots from the front; your dash key becomes Full Ahead. |
 | E: Safe Harbour | Healing zone around your hammer for 4s, ending in a burst. |
@@ -77,7 +76,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Guard (passive).** Damage your Blue Guard blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Full Ahead ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, Tideturner, Full Ahead, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
+**Crushed (passive).** Crushed: any knock of yours (Crushing Blow, Tideturner, Full Ahead) that drives a foe into a wall stuns it 1.0 (8 damage).
 
 **Tideturner (dash, Shift, 8s cooldown).** Tideturner: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the Blue Guard raised it's a Full Ahead on its own 6s cooldown (it spends no dash charge): 4.2m behind the Blue Guard, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
 
@@ -86,7 +85,6 @@ What the in-game kit card (K) says.
 - *Hold:* Raise the Blue Guard: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Full Ahead on this slot's 6s cooldown.
 - *Tap:* A tap only raises and lowers the Blue Guard; the Bash is the Full Ahead on the dash key.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
-- *Resource full:* Guard 50+: the Full Ahead ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 
 **Safe Harbour (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your Blue Guard is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
@@ -101,6 +99,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | shield HP +25% (160 -> 200). | shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
 | Dash (Shift) | recharge 8s -> 6.5s per charge; the Full Ahead cooldown 6s -> 4.5s. | recharge 8s -> 5s; the Full Ahead cooldown 6s -> 3s; a Tideturner that hits refunds it. |
 | E | healing +25% (burst 18 -> 22). | cooldown 12s -> 8s, healing +50% in all. |
+| R (ultimate) | Groundswell cooldown 40s -> 36s, first-strike damage 4 -> 4.8, damage 18 -> 21.6. The Fusion lasts 30% longer. | Groundswell cooldown 40s -> 32s, first-strike damage 4 -> 5.6, damage 18 -> 25.2. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > Glove (Q).
 
@@ -108,8 +107,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | three rune pips over the helm light at 33 / 66 / 100 Guard |
-| Armed / full | a gold crest light and a hotter Blue Guard; a 0.3s flare before a Slam |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

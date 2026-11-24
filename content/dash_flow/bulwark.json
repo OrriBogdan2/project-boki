@@ -48,5 +48,40 @@
 	},
 	"held_fire": {
 		"all": {"source": "Hero sheet bjorn.md:69: 'Hold to charge. Release swings.' No button-up rule anywhere in the data or footage.", "ours": "Another ability ends the Crushing Blow's hold with no swing; the key still down starts a fresh hold the step he is free (0 frames). Before: the button had to come up first (owner item 30's cancel rule), so a held LMB never came back after an RMB, E or glove."}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a shot in the clip (briefs/hero-ref/bjorn.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a shot in the clip (briefs/hero-ref/bjorn.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a shot in the clip (briefs/hero-ref/bjorn.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a held shot in the clip (briefs/hero-ref/bjorn.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a held shot in the clip (briefs/hero-ref/bjorn.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a held shot in the clip (briefs/hero-ref/bjorn.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its RMB in the clip (briefs/hero-ref/bjorn.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its RMB in the clip (briefs/hero-ref/bjorn.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its RMB in the clip (briefs/hero-ref/bjorn.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "Barrier Shield to walk in, then Earthshatter is the source combo (briefs/hero-ref/bjorn.md:304): ours fires. Matches."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md)."}
+		},
+		"x": {
+			"at": [0.05, 0.75],
+			"lmb": {"windup": "drop", "recovery": "fire", "source": "[?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31)."},
+			"lmb_hold": {"windup": "queue", "windup_wait": 0.57, "recovery": "fire", "source": "[?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31)."},
+			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31)."}
+		}
 	}
 }

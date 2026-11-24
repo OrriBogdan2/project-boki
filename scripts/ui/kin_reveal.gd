@@ -17,6 +17,7 @@ signal proceed
 signal revealed       # it has met you and its card is up (by itself or skipped to)
 
 const RATE := 22050
+const DIM := Color(0.07, 0.07, 0.08, 0.94)      # the screen behind, greyed right down so only this Boki shows
 
 var species := "cindle"
 var rec: Dictionary = {}
@@ -44,6 +45,7 @@ var ready_to_name := false
 var met := false             # it has looked at you (the imprint moment is done)
 var moves: BokiMoves = null   # the move tiles on the card (hover or focus one for its tip)
 var rare := false            # hatched from a boss's Rare Egg (said on the card, never shouted)
+var twin: Node3D = null      # the same Boki out in the world behind: hidden while this look is up
 var moment: Tween
 
 func _init(sp_id: String, kin_rec := {}) -> void:
@@ -56,8 +58,14 @@ func _ready() -> void:
 	col = Shiny.col(species, rec, "color")
 	glow = Shiny.col(species, rec, "glow") if sp.has("glow") or rec.get("shimmer", false) else col
 	rare = bool(rec.get("rare", false)) or Data.is_rare(species)
+	if twin:
+		twin.visible = false
 	_build()
 	_play_intro()
+
+func _exit_tree() -> void:
+	if is_instance_valid(twin):
+		twin.visible = true
 
 # ------------------------------------------------------------------ layout
 func _build() -> void:
@@ -65,10 +73,10 @@ func _build() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(root)
-	# the world behind stays there, just dimmed: this is a closer look, not another place
+	# the world behind stays there, greyed out: this is a closer look at one Boki, not another place
 	bg = ColorRect.new()
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0.03, 0.025, 0.03, 0.0)
+	bg.color = Color(DIM, 0.0)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(bg)
 	pool = Control.new()
@@ -133,6 +141,7 @@ func _build() -> void:
 	kin.rotation.y = PI + 0.9      # glancing off to one side, until it notices you
 	kin.position.y = 0.06
 	turn.add_child(kin)
+	Fogless.apply(kin)
 	var pt: CPUParticles3D = kin.get_node_or_null("Aura")
 	if pt: pt.emitting = true
 	if rec.get("shimmer", false):
@@ -161,7 +170,8 @@ func _build() -> void:
 	root.add_child(info)
 	_place_card.call_deferred()      # once in the tree, so it is sized from its real fonts
 	# the hint under the kin
-	var turn := "Drag to turn it round  ·  %s / %s" % [Settings.key_cap("left"), Settings.key_cap("right")]
+	var keys := [Settings.key_cap("left"), Settings.key_cap("right")]
+	var turn := KinSpeak.about(rec, "Drag to turn {him} round  ·  %s / %s") % keys
 	hint = UI.label(turn, 15, UI.MUTED)
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	hint.offset_bottom = -40
@@ -225,9 +235,11 @@ func _info_card() -> PanelContainer:
 		v.add_child(_note(desc + "."))
 	if rare:
 		var boss := String(Data.MOBS.get(String(sp.get("boss", rec.get("from_boss", ""))), {}).get("name", "a lair boss"))
-		v.add_child(_note("Its egg was guarded by %s. Few of its kind are ever seen." % boss))
+		var kind := KinSpeak.about(rec, "{His} egg was guarded by %s. Few of {his} kind are ever seen.")
+		v.add_child(_note(kind % boss))
 	if rec.get("shimmer", false):
-		v.add_child(_note("Its coat came out in rare colours (about %s)." % Shiny.odds_text(Shiny.WILD)))
+		var coat := KinSpeak.about(rec, "{His} coat came out in rare colours (about %s).")
+		v.add_child(_note(coat % Shiny.odds_text(Shiny.WILD)))
 	var rare := BokiQuirks.rare_of(rec)
 	if not rare.is_empty():
 		v.add_child(_note("%s, a rare trait: %s" % [rare["name"], rare["note"]]))
@@ -287,7 +299,7 @@ func _stat(name: String, val: float, top: float) -> HBoxContainer:
 ## does its card slide in.
 func _play_intro() -> void:
 	var ft := create_tween().set_parallel(true)
-	ft.tween_property(bg, "color:a", 0.62, 0.6).set_trans(Tween.TRANS_SINE)
+	ft.tween_property(bg, "color:a", DIM.a, 0.6).set_trans(Tween.TRANS_SINE)
 	ft.tween_property(pool, "modulate:a", 1.0, 0.8).set_trans(Tween.TRANS_SINE)
 	ft.tween_property(vpc, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE)
 	var body := kin.get_node_or_null("Body") as Node3D
@@ -326,7 +338,7 @@ func skip() -> void:
 
 func _show_lines() -> void:
 	title_lbl.text = String(sp["name"])
-	sub_lbl.text = "It's looking at you. It knows your face now."
+	sub_lbl.text = KinSpeak.about(rec, "{He}'s looking at you. {He} knows your face now.")
 	var tt := create_tween().set_parallel(true)
 	tt.tween_property(title_lbl, "modulate:a", 1.0, 0.5)
 	tt.tween_property(sub_lbl, "modulate:a", 1.0, 0.7).set_delay(0.2)

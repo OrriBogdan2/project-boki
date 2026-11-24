@@ -1,10 +1,11 @@
 extends RefCounted
 ## --dash-dir-check: a plain dash follows the "Dash toward the cursor" setting for every hunter. With it off
-## (the default) you dash the way you're moving even while aiming the other way; with it on you dash at the
-## cursor. Hunters whose Shift is aimed movement by design (Archer's grapple, Mage's blink, Motley's swap,
-## Tarek's Leap of Faith to the cursor and Bulwark's shield charge) are left out. Never touches the save.
+## (the default) holding A with the cursor on the right dashes left, on the ground and in the air; with it on
+## you dash at the cursor. Left out: hunters whose Shift is aimed movement in their doc row (Mage's Wirerun
+## direction from the cursor, Motley's Musical Chairs, Tarek's Leap of Faith). Lace's roll follows WASD
+## (docs/heroes/archer.md, owner default), so she is checked. Never touches the save.
 
-const AIMED := ["archer", "mage", "ostra", "dolm"]
+const AIMED := ["mage", "ostra", "dolm"]
 
 var bad := 0
 
@@ -53,20 +54,25 @@ func _match(main: Node, arch: String) -> Match:
 		m.step(Match.DT)
 	return m
 
-## Moves "back" (+z) while aiming "forward" (-z), dashes, and returns which way the dash set off along z
-## (the sign of roll_dir, in metres it would cover: some dashes slide on only while Shift is held).
-func _dash_back(m: Match) -> float:
+## Holds `move` while the cursor is at `aim_off`, dashes (on the ground, or `high` metres up and still in the
+## air), and returns the way the dash set off in metres it would cover (some dashes slide on only while Shift is
+## held, so the kits that steer or drive the dash after a crouch are read from their own state).
+func _dash_vec(m: Match, move: Vector2, aim_off: Vector3, high := 0.0) -> Vector2:
 	var hunter: Hunter = m.player
+	if high > 0.0:
+		hunter.teleport(hunter.pos + Vector3(0, high, 0))
+		m.step(Match.DT)
+		assert(not hunter.grounded, "%s should be in the air" % hunter.arch)
 	hunter.dashes = hunter.max_dashes()
 	hunter.ex_cd = 0.0
-	hunter.inp["move"] = Vector2(0, 1)
-	hunter.inp["aim"] = hunter.pos + Vector3(0, 0.9, -8)
+	hunter.inp["move"] = move
+	hunter.inp["aim"] = hunter.pos + aim_off
 	hunter.do_dash()
 	if hunter.ak is RimewrightKit:
-		return ((hunter.ak as RimewrightKit).rinkrun["dir"] as Vector2).y * 3.0     # (its Rink Run steers along this)
+		return (hunter.ak as RimewrightKit).rinkrun["dir"] as Vector2 * 3.0     # (its Rink Run steers along this)
 	if hunter.ak is JuggernautKit:
-		return (hunter.ak as JuggernautKit).rampage_dir.y * 3.0     # (it drives this way after its crouch)
-	return hunter.roll_dir.y * hunter.roll_speed * hunter.roll_t
+		return (hunter.ak as JuggernautKit).rampage_dir * 3.0     # (it drives this way after its crouch)
+	return hunter.roll_dir * hunter.roll_speed * hunter.roll_t
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -74,17 +80,19 @@ func run(main: Node) -> void:
 	for cls in Arch.ORDER:
 		if cls in AIMED:
 			continue
-		Settings.set_v("dash_to_cursor", false, false)
-		var m := _match(main, cls)
-		var along := _dash_back(m)
-		ok(along > 1.0, "%s: setting off, moving back while aiming forward dashes back (%.1fm)" % [cls, along])
-		m.queue_free()
-		Settings.set_v("dash_to_cursor", true, false)
-		m = _match(main, cls)
-		along = _dash_back(m)
-		ok(along < -1.0, "%s: setting on, the dash goes to the cursor (%.1fm)" % [cls, along])
-		m.queue_free()
-		await main.get_tree().process_frame
+		for high in [0.0, 3.0]:
+			var where := "in the air" if high > 0.0 else "on the ground"
+			Settings.set_v("dash_to_cursor", false, false)
+			var m := _match(main, cls)
+			var along := _dash_vec(m, Vector2.LEFT, Vector3(8, 0.9, 0), high).x
+			ok(along < -1.0, "%s: setting off, A with the cursor right dashes left %s (%.1fm)" % [cls, where, along])
+			m.queue_free()
+			Settings.set_v("dash_to_cursor", true, false)
+			m = _match(main, cls)
+			along = _dash_vec(m, Vector2.LEFT, Vector3(8, 0.9, 0), high).x
+			ok(along > 1.0, "%s: setting on, the dash goes to the cursor %s (%.1fm)" % [cls, where, along])
+			m.queue_free()
+			await main.get_tree().process_frame
 	Settings.set_v("dash_to_cursor", was, false)
 	print("DASHDIR DONE, failures: %d" % bad)
 	main.get_tree().quit()

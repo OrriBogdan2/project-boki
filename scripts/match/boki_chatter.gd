@@ -26,9 +26,33 @@ static func say(m: Match, k: Kin, trigger_id: String, fill := {}) -> void:
 	if txt != "":
 		m.kin_bark(k, txt, trigger_id)
 
+## Fight-time Boki text the HUD let through (callout pins, others' lines; --clarity-shots counts it per frame).
+static var drawn := 0
+
 ## Is the line over this Boki's head drawn? In a fight only your own Boki's are: the rest print over the fight.
 static func heard(m: Match, k: Kin) -> bool:
-	return k.owner_h == m.player or m.music_dir == null or not m.music_dir.fight_on(m)
+	if k.owner_h == m.player:
+		return true
+	var ok := calm(m)
+	drawn += int(ok)
+	return ok
+
+
+## Is a Boki callout pin ("Behind you! · 3m") drawn? Not while your squad fights. Counted in `drawn`.
+static func pin_shown(m: Match) -> bool:
+	var ok := calm(m)
+	drawn += int(ok)
+	return ok
+
+
+## No fight on for you or a living squadmate: Boki callout pins and other Bokis' lines are drawn.
+static func calm(m: Match) -> bool:
+	if m.player == null:
+		return true
+	for h: Hunter in m.hunters:
+		if h.team == m.player.team and not h.dead and InCombat.is_in(h):
+			return false
+	return true
 
 ## Tutorial hints in its own voice, by step (grown speech, then what a hatchling does instead).
 const TUT_HINT := {
@@ -36,7 +60,7 @@ const TUT_HINT := {
 	"points": ["One point to start. Pick well!", "(holds up one paw, very serious)"],
 	"pick_sec": ["That one! Press %S!", "(points its nose at the glowing button)"],
 	"sec": ["Use your power on them!", "(watches your hands, tail going)"],
-	"shoot": ["Get them! They're worth XP!", "(growls at the monster)"],
+	"shoot": ["Get them!", "(growls at the monster)"],
 	"pick_dash": ["You leveled up! Take the dash!", "(zips off to the side and back, showing you)"],
 	"dash": ["Dash across, like this!", "(zips off to the side and back, showing you)"],
 	"exdash": ["Jump, then dash in the air!", "(leaps and darts forward in the air)"],

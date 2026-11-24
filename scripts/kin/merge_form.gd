@@ -15,6 +15,10 @@ extends RefCounted
 static func data() -> Dictionary:
 	return Content.rules("merge_forms")
 
+## Fusion (X) is switched off by default (docs/decisions/0159): nothing starts one and no screen mentions it.
+static func enabled() -> bool:
+	return bool(data().get("fusion_enabled", false))
+
 static func type_of(k: Kin) -> String:
 	var t := String(k.sp.get("type", "none"))
 	return t if (data().get("types", {}) as Dictionary).has(t) else "none"

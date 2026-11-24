@@ -9,7 +9,7 @@ extends Node3D
 
 const SHADER: Shader = preload("res://shaders/dj_fx.gdshader")
 const SHADER_MIX: Shader = preload("res://shaders/dj_fx_mix.gdshader")
-const CRESCENT_CHORD := 1.4          # m: the Searing Wave crescent across, at scale 1
+const CRESCENT_CHORD := 1.4  # m: the Searing Wave crescent across, at scale 1
 const M_STAR := 0
 const M_PILLAR := 1
 const M_COMET := 2
@@ -17,26 +17,29 @@ const M_CRESCENT := 3
 const M_PUFF := 4
 const M_LINKS := 5
 const M_BOLT := 6
-const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
-const CORE_W := 0.35           # of a streak's width: its bright core
-const WARM_PUFFS := 12         # puffs made at load for the miss puffs (MissFx)
-const KEEP := 0.1              # s an immediate-style look (place / chain) stays without a refresh
+const POOL_CAP := 24  # nodes per kind at most; past it the oldest is taken back
+const CORE_W := 0.35  # of a streak's width: its bright core
+const WARM_PUFFS := 12  # puffs made at load for the miss puffs (MissFx)
+const KEEP := 0.1  # s an immediate-style look (place / chain) stays without a refresh
 
 var m: Node
-var free_pools := {}           # kind -> Array of nodes made for it
-var live: Array = []           # one-shot effects: {node, t, dur, kind, s0, mat}
-var riders: Array = []         # looks riding on a shot: {node, sd, kind, spin, on_end}
-var placed := {}               # id -> {node, kind, t}: immediate-style projectile looks (kit-run projectiles)
-var chains := {}               # id -> {node, mesh, t}
-var _quad: QuadMesh
-var _cres := {}                # arc degrees -> crescent mesh (unit reach)
-var _col: ArrayMesh
-var _ribbon: ArrayMesh
-var made := 0                  # nodes made so far (tests: it stops growing once warm)
-var _warming: Array = []       # the loading screen's stand-ins (prewarm)
-var _solids: Array = []        # kept for the match: freeing the last material of a kind frees its compiled shader
+var free_pools := {}  # kind -> Array of nodes made for it
+var live: Array = []  # one-shot effects: {node, t, dur, kind, s0, mat}
+var riders: Array = []  # looks riding on a shot: {node, sd, kind, spin, on_end}
+var placed := {}  # id -> {node, kind, t}: immediate-style projectile looks (kit-run projectiles)
+var chains := {}  # id -> {node, mesh, t}
+var made := 0  # nodes made so far (tests: it stops growing once warm)
+
 # look-only randomness (shader seeds, spins): never the global randf the sim and bots draw from
 var rng := RandomNumberGenerator.new()
+
+var _quad: QuadMesh
+var _cres := {}  # arc degrees -> crescent mesh (unit reach)
+var _col: ArrayMesh
+var _ribbon: ArrayMesh
+var _warming: Array = []  # the loading screen's stand-ins (prewarm)
+var _solids: Array = []  # kept for the match: freeing the last material of a kind frees its compiled shader
+
 
 static func of(match_node: Node) -> DJFx:
 	if match_node.has_meta("dj_fx"):
@@ -50,6 +53,7 @@ static func of(match_node: Node) -> DJFx:
 	match_node.set_meta("dj_fx", n)
 	return n
 
+
 func _mat(mode: int, col: Color, col2: Color, bb := false, glow := false) -> ShaderMaterial:
 	var mt := ShaderMaterial.new()
 	mt.shader = SHADER if glow else SHADER_MIX
@@ -58,6 +62,7 @@ func _mat(mode: int, col: Color, col2: Color, bb := false, glow := false) -> Sha
 	mt.set_shader_parameter("color2", col2)
 	mt.set_shader_parameter("billboard", bb)
 	return mt
+
 
 ## A flat colour that keeps its hue on grass and sand (projectile heads, afterimages).
 static func solid(col: Color) -> StandardMaterial3D:
@@ -70,12 +75,14 @@ static func solid(col: Color) -> StandardMaterial3D:
 		mt.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 	return mt
 
+
 func _mi(mesh: Mesh, mat: Material) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return mi
+
 
 ## A pooled node of a kind: a hidden one, else a new one (up to POOL_CAP), else the oldest in use.
 func _take(kind: String, build: Callable) -> Node3D:
@@ -104,6 +111,7 @@ func _take(kind: String, build: Callable) -> Node3D:
 			break
 	return old
 
+
 ## The loading screen's stand-ins (Match.warm_up): each of this library's shaders on each of its mesh kinds and its two
 ## plain colours, drawn once so the first dash or shot of a match doesn't compile them mid-move (item 181).
 func prewarm(at: Vector3) -> void:
@@ -122,6 +130,7 @@ func prewarm(at: Vector3) -> void:
 		node.global_position = at
 	warm_puffs(WARM_PUFFS)
 
+
 ## Makes the miss puffs now, hidden, so the first misses of a fight take pooled nodes (MissFx).
 func warm_puffs(n: int) -> void:
 	while free_pools.get("puff", []).size() < mini(n, POOL_CAP):
@@ -129,10 +138,12 @@ func warm_puffs(n: int) -> void:
 	for node: Node3D in free_pools["puff"]:
 		node.visible = false
 
+
 func prewarm_end() -> void:
 	for node: MeshInstance3D in _warming:
 		node.queue_free()
 	_warming.clear()
+
 
 # ------------------------------------------------------------------ meshes
 func _quad_mesh() -> QuadMesh:
@@ -140,6 +151,7 @@ func _quad_mesh() -> QuadMesh:
 		_quad = QuadMesh.new()
 		_quad.size = Vector2(2, 2)
 	return _quad
+
 
 ## An open column 1 m tall, radius 1: UV.x round it, UV.y from the foot (0) to the top (1).
 func _column() -> ArrayMesh:
@@ -170,6 +182,7 @@ func _column() -> ArrayMesh:
 	_col = st.commit()
 	return _col
 
+
 ## Two crossed strips along +Z from the head (z 0, UV.x 0) to the tail (z 1): a trail seen from above or the side.
 func _ribbon_mesh() -> ArrayMesh:
 	if _ribbon:
@@ -192,6 +205,7 @@ func _ribbon_mesh() -> ArrayMesh:
 		st.add_vertex(-w + Vector3(0, 0, 1))
 	_ribbon = st.commit()
 	return _ribbon
+
 
 ## A crescent in the XZ plane, centred on -Z (forward), `arc_deg` wide, outer radius 1, thickest mid-sweep.
 func _crescent_mesh(arc_deg: float) -> ArrayMesh:
@@ -231,6 +245,7 @@ func _crescent_mesh(arc_deg: float) -> ArrayMesh:
 	_cres[key] = mesh
 	return mesh
 
+
 ## A flat star with `pts` points (a chakram seen from above), radius 1, in the XZ plane.
 static func star_mesh(pts: int, inner: float) -> ArrayMesh:
 	var st := SurfaceTool.new()
@@ -246,9 +261,11 @@ static func star_mesh(pts: int, inner: float) -> ArrayMesh:
 		st.add_vertex(Vector3(cos(a1) * r1, 0, sin(a1) * r1))
 	return st.commit()
 
+
 # ------------------------------------------------------------------ one-shot effects
 func _fx(kind: String, mode: int, mesh: Mesh, bb: bool) -> MeshInstance3D:
 	return _take(kind, func(): return _mi(mesh, _mat(mode, Color.WHITE, Color.WHITE, bb))) as MeshInstance3D
+
 
 func _play(n: MeshInstance3D, kind: String, col: Color, col2: Color, dur: float, s0: Vector3) -> void:
 	var mt := n.material_override as ShaderMaterial
@@ -260,32 +277,13 @@ func _play(n: MeshInstance3D, kind: String, col: Color, col2: Color, dur: float,
 	n.scale = s0
 	live.append({"node": n, "t": 0.0, "dur": maxf(0.05, dur), "kind": kind, "s0": s0, "mat": mt})
 
+
 ## A camera-facing four-point star (Sable's knock, a tip hit, the bolt's impact).
 func star(at: Vector3, col: Color, sz := 1.0, dur := 0.35, core := Color.WHITE) -> void:
 	var n := _fx("star", M_STAR, _quad_mesh(), true)
 	n.global_position = at
 	_play(n, "star", col, core, dur, Vector3.ONE * sz)
 
-## A streak lying along the ground behind `at` (pointing back from `dir`): a dash's own after-image (Sable's
-## cyan, Kael's orange flame). Hot `col2` at the head, `col` down the tail; it fades over `dur`.
-func streak(at: Vector3, dir: Vector2, length: float, width: float, col: Color, col2: Color, dur := 0.25) -> void:
-	var n := _fx("streak", M_COMET, _ribbon_mesh(), false)
-	n.global_position = at
-	var back := Vector3(-dir.x, 0, -dir.y)
-	if back.length() < 0.01: back = Vector3.BACK
-	n.basis = Basis.looking_at(-back.normalized(), Vector3.UP)
-	_play(n, "streak", col, col2, dur, Vector3(width, width, length))
-
-## A streak from `a` to `b` in space, hot at `b` and fading over `dur`: a trail laid in short pieces follows any path
-## (Sable's flip, whose hands and feet turn through the air).
-func seg(a: Vector3, b: Vector3, width: float, col: Color, col2: Color, dur := 0.25) -> void:
-	var d := b - a
-	if d.length() < 0.01:
-		return
-	var n := _fx("seg", M_COMET, _ribbon_mesh(), false)
-	n.global_position = b
-	n.basis = Basis.looking_at(d.normalized(), Vector3.RIGHT if absf(d.normalized().y) > 0.95 else Vector3.UP)
-	_play(n, "seg", col, col2, dur, Vector3(width, width, d.length()))
 
 ## A soft ring that opens and fades where a bolt ran out (at the cursor).
 func puff(at: Vector3, col: Color, sz := 0.6, dur := 0.3, speck := Color.WHITE) -> void:
@@ -293,24 +291,37 @@ func puff(at: Vector3, col: Color, sz := 0.6, dur := 0.3, speck := Color.WHITE) 
 	n.global_position = at
 	_play(n, "puff", col, speck, dur, Vector3.ONE * sz)
 
+
 ## A column of light rising on someone (the knock heal).
 func pillar(at: Vector3, col: Color, height := 3.2, radius := 0.55, dur := 0.7) -> void:
 	var n := _fx("pillar", M_PILLAR, _column(), false)
 	n.global_position = at
 	_play(n, "pillar", col, Color(1, 1, 1, 1), dur, Vector3(radius, height, radius))
 
+
 ## A two-tone blade arc in front of `at` facing `dir` (outer edge `col`, inner fill `col2`), swept over
 ## `dur`. `tilt` turns it about the facing (PI/2: a vertical arc, the Cartwheel's swoosh).
-func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Color, col2: Color, dur := 0.22,
-		tilt := 0.0, sweep := 1.6) -> void:
+func crescent(
+	at: Vector3,
+	dir: Vector2,
+	arc_deg: float,
+	reach: float,
+	col: Color,
+	col2: Color,
+	dur := 0.22,
+	tilt := 0.0,
+	sweep := 1.6
+) -> void:
 	var key := "cres%d" % int(round(arc_deg))
 	var n := _take(key, func(): return _mi(_crescent_mesh(arc_deg), _mat(M_CRESCENT, col, col2))) as MeshInstance3D
 	n.global_position = at
 	var d3 := Vector3(dir.x, 0, dir.y)
-	if d3.length() < 0.01: d3 = Vector3.FORWARD
+	if d3.length() < 0.01:
+		d3 = Vector3.FORWARD
 	n.basis = Basis.looking_at(d3.normalized(), Vector3.UP) * Basis(Vector3.FORWARD, tilt)
 	_play(n, key, col, col2, dur, Vector3.ONE * reach)
 	live[-1]["sweep"] = sweep
+
 
 ## A chain of afterimages from `from` to `to` (Sable's step to the dagger): `count` copies, the
 ## nearest to the start fading first.
@@ -323,8 +334,18 @@ func ghosts(from: Vector3, to: Vector3, count: int, yaw: float, col: Color, scl 
 		n.global_position = from.lerp(to, k) + Vector3(0, 0.7 * scl, 0)
 		n.rotation = Vector3(0, yaw, 0)
 		n.scale = Vector3(1.0, 1.0, 1.25) * scl
-		live.append({"node": n, "t": -0.04 * i, "dur": 0.32 + 0.05 * i, "kind": "ghost", "s0": n.scale,
-				"mat": n.material_override, "col": col})
+		live.append(
+			{
+				"node": n,
+				"t": -0.04 * i,
+				"dur": 0.32 + 0.05 * i,
+				"kind": "ghost",
+				"s0": n.scale,
+				"mat": n.material_override,
+				"col": col
+			}
+		)
+
 
 # ------------------------------------------------------------------ projectile looks
 ## The look of each projectile (built once per pooled node): a head that spins and a trail behind.
@@ -406,11 +427,13 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	n.add_child(tr)
 	return n
 
+
 ## A thin hot line down the middle of a streak (a bolt's or blade's bright core).
 func _add_core(rider: Node3D, hot: Color) -> void:
 	var core := _mi(_ribbon_mesh(), _mat(M_COMET, hot.lightened(0.6), Color.WHITE, false, true))
 	core.name = "Core"
 	rider.add_child(core)
+
 
 func _rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var n := _take("ride_" + kind, func(): return _build_rider(kind, col, col2))
@@ -421,35 +444,56 @@ func _rider(kind: String, col: Color, col2: Color) -> Node3D:
 		(tr.material_override as ShaderMaterial).set_shader_parameter("life", 0.0)
 	return n
 
+
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends; `on_end(at)` runs when it does.
-## trail: the streak's length in m, width: its width.
-func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3,
-		on_end := Callable()) -> void:
+## trail: the streak's length in m (0: none, a HeroVfx trail follows the returned node), width: its width.
+func ride(
+	sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3, on_end := Callable()
+) -> Node3D:
 	var n := _rider(kind, col, col2)
 	# this look replaces the shared shot mesh (a pale streak or blob that would show through it)
 	if sd.get("node") != null and is_instance_valid(sd["node"]):
 		(sd["node"] as Node3D).visible = false
-	riders.append({"node": n, "sd": sd, "kind": kind, "spin": rng.randf() * TAU, "trail": trail, "width": width,
-			"on_end": on_end, "last": sd["pos"]})
-	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
+	riders.append(
+		{
+			"node": n,
+			"sd": sd,
+			"kind": kind,
+			"spin": rng.randf() * TAU,
+			"trail": trail,
+			"width": width,
+			"on_end": on_end,
+			"last": sd["pos"]
+		}
+	)
+	_pose(n, kind, ShotOrigin.drawn(sd, sd["pos"]), sd["vel"], trail, width, 0.0)
+	return n
+
 
 ## Shows a projectile look this step (a kit-run projectile: the Dark Bola flying on). Stop calling and it hides.
-func place(id: String, kind: String, at: Vector3, vel: Vector2, col: Color, col2: Color, trail := 1.0,
-		width := 0.3) -> void:
+func place(
+	id: String, kind: String, at: Vector3, vel: Vector2, col: Color, col2: Color, trail := 1.0, width := 0.3
+) -> void:
 	var e: Dictionary = placed.get(id, {})
-	if (e.is_empty() or not is_instance_valid(e["node"]) or String(e["kind"]) != kind
-			or not (e["node"] as Node3D).visible):
+	if (
+		e.is_empty()
+		or not is_instance_valid(e["node"])
+		or String(e["kind"]) != kind
+		or not (e["node"] as Node3D).visible
+	):
 		e = {"node": _rider(kind, col, col2), "kind": kind, "spin": 0.0}
 		placed[id] = e
 	e["t"] = m.time
 	e["spin"] = float(e["spin"]) + 0.3
 	_pose(e["node"], kind, at, vel, trail, width, float(e["spin"]))
 
+
 func unplace(id: String) -> void:
 	var e: Dictionary = placed.get(id, {})
 	if not e.is_empty() and is_instance_valid(e["node"]):
 		(e["node"] as Node3D).visible = false
 	placed.erase(id)
+
 
 func _pose(n: Node3D, kind: String, at: Vector3, vel: Vector2, trail: float, width: float, spin: float) -> void:
 	n.global_position = at
@@ -459,21 +503,31 @@ func _pose(n: Node3D, kind: String, at: Vector3, vel: Vector2, trail: float, wid
 	var head := n.get_node_or_null("Head") as Node3D
 	if head:
 		match kind:
-			"chakram", "chakram_big", "blade", "bola": head.rotation.y = spin * (2.0 if kind == "bola" else 3.0)
-			"dagger": head.rotation.z = sin(spin) * 0.15
-			"crescent_bolt": head.scale = Vector3.ONE * (width / CRESCENT_CHORD)
+			"chakram", "chakram_big", "blade", "bola":
+				head.rotation.y = spin * (2.0 if kind == "bola" else 3.0)
+			"dagger":
+				head.rotation.z = sin(spin) * 0.15
+			"crescent_bolt":
+				head.scale = Vector3.ONE * (width / CRESCENT_CHORD)
 	var tr := n.get_node_or_null("Trail") as Node3D
-	if tr: tr.scale = Vector3(width, width, trail)
+	if tr:
+		tr.visible = trail > 0.0
+		tr.scale = Vector3(width, width, maxf(trail, 0.01))
 	var core := n.get_node_or_null("Core") as Node3D
-	if core: core.scale = Vector3(width * CORE_W, width * CORE_W, trail * 0.8)
+	if core:
+		core.visible = trail > 0.0
+		core.scale = Vector3(width * CORE_W, width * CORE_W, maxf(trail, 0.01) * 0.8)
 	var bolt := n.get_node_or_null("Bolt") as Node3D
-	if bolt: bolt.scale = Vector3(width * 1.6, width * 1.6, trail * 1.4)
+	if bolt:
+		bolt.scale = Vector3(width * 1.6, width * 1.6, trail * 1.4)
+
 
 # ------------------------------------------------------------------ chains (immediate style)
 ## Draws a chain from a to b this step. wavy 0..1: 0 = a straight striped link chain, 1 = a loose
 ## zig-zag in flight. `bow`: how far its middle bends out. Stop calling and it goes.
-func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Color, width := 0.12,
-		bow := Vector3.ZERO) -> void:
+func chain(
+	id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Color, width := 0.12, bow := Vector3.ZERO
+) -> void:
 	var e: Dictionary = chains.get(id, {})
 	if e.is_empty() or not is_instance_valid(e["node"]):
 		var im := ImmediateMesh.new()
@@ -493,17 +547,18 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 	var length := a.distance_to(b)
 	mt.set_shader_parameter("stripes", 1.0)
 	if wavy > 0.5:
-		mt.set_shader_parameter("color2", col)      # in flight: one orange ribbon, no links yet
+		mt.set_shader_parameter("color2", col)  # in flight: one orange ribbon, no links yet
 	var im2: ImmediateMesh = e["mesh"]
 	im2.clear_surfaces()
 	if length < 0.05:
 		return
 	var fwd := (b - a) / length
 	var side := fwd.cross(Vector3.UP)
-	if side.length() < 0.01: side = Vector3.RIGHT
+	if side.length() < 0.01:
+		side = Vector3.RIGHT
 	side = side.normalized()
 	var n := maxi(8, int(length / 0.08))
-	var links := length / maxf(0.2, width * 1.2)     # a bright and a dark link per ~1.2 widths (thick rope, not dots)
+	var links := length / maxf(0.2, width * 1.2)  # a bright and a dark link per ~1.2 widths (thick rope, not dots)
 	im2.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in n + 1:
 		var k := float(i) / n
@@ -518,6 +573,7 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 		im2.surface_set_uv(Vector2(k * links, 1))
 		im2.surface_add_vertex(p + across)
 	im2.surface_end()
+
 
 ## A thin flat line through `pts` this step (a predicted path). Stop calling and it goes.
 func path_line(id: String, pts: PackedVector3Array, col: Color, width: float) -> void:
@@ -544,17 +600,21 @@ func path_line(id: String, pts: PackedVector3Array, col: Color, width: float) ->
 		mesh.surface_add_vertex(pts[i] + across)
 	mesh.surface_end()
 
+
 func unchain(id: String) -> void:
 	var e: Dictionary = chains.get(id, {})
 	if not e.is_empty() and is_instance_valid(e["node"]):
 		(e["node"] as Node3D).visible = false
 
+
 # ------------------------------------------------------------------ per frame
 ## Is this shot still flying (the same dictionary, not just an equal one)?
 func _alive(sd: Dictionary) -> bool:
 	for s in m.shots:
-		if is_same(s, sd): return true
+		if is_same(s, sd):
+			return true
 	return false
+
 
 func _process(delta: float) -> void:
 	for e in live.duplicate():
@@ -576,8 +636,10 @@ func _process(delta: float) -> void:
 				mt.set_shader_parameter("life", u)
 			_:
 				mt.set_shader_parameter("life", u)
-				if e.has("sweep"): mt.set_shader_parameter("progress", minf(1.0, u * float(e["sweep"])))
-				elif String(e["kind"]) == "star": n.scale = (e["s0"] as Vector3) * (0.6 + 0.6 * sqrt(u))
+				if e.has("sweep"):
+					mt.set_shader_parameter("progress", minf(1.0, u * float(e["sweep"])))
+				elif String(e["kind"]) == "star":
+					n.scale = (e["s0"] as Vector3) * (0.6 + 0.6 * sqrt(u))
 		if u >= 1.0:
 			n.visible = false
 			live.erase(e)
@@ -586,17 +648,21 @@ func _process(delta: float) -> void:
 		var sd: Dictionary = r["sd"]
 		var gone: bool = sd.get("dj_end", false) or not _alive(sd)
 		if gone or not is_instance_valid(n):
-			if is_instance_valid(n): n.visible = false
+			if is_instance_valid(n):
+				n.visible = false
 			riders.erase(r)
-			if (r["on_end"] as Callable).is_valid(): (r["on_end"] as Callable).call(r["last"])
+			if (r["on_end"] as Callable).is_valid():
+				(r["on_end"] as Callable).call(r["last"])
 			continue
 		r["spin"] = float(r["spin"]) + delta * 9.0
 		r["last"] = sd["pos"]
-		_pose(n, String(r["kind"]), sd["pos"], sd["vel"], float(r["trail"]), float(r["width"]), float(r["spin"]))
+		var at := ShotOrigin.drawn(sd, sd["pos"])      # out of the blade it left
+		_pose(n, String(r["kind"]), at, sd["vel"], float(r["trail"]), float(r["width"]), float(r["spin"]))
 	for id in placed.keys():
 		var e: Dictionary = placed[id]
 		if m.time - float(e.get("t", 0.0)) > KEEP:
-			if is_instance_valid(e["node"]): (e["node"] as Node3D).visible = false
+			if is_instance_valid(e["node"]):
+				(e["node"] as Node3D).visible = false
 			placed.erase(id)
 	for id in chains.keys():
 		var e: Dictionary = chains[id]

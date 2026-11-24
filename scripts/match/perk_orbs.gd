@@ -21,6 +21,10 @@ static func rules() -> Dictionary:
 		_rules = d if d is Dictionary else {}
 	return _rules
 
+## The most perks a hunter holds in a run (content/rules/perk_orbs.json "slots").
+static func slots() -> int:
+	return int(rules().get("slots", 5))
+
 ## The match's orb state, kept on the match itself: {list, fan (fan id -> {nid: true}), n, rng, icons, peers (count)}.
 static func st(m) -> Dictionary:
 	if not m.has_meta("perk_orbs"):

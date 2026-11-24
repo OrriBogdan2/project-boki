@@ -72,8 +72,6 @@ const JL_HEAVY_OPEN := {
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
-	"ostra:idle": "x_fing seams 11-13 deg",
-	"ostra:stance": "x_fing seams 12-16 deg",
 }
 
 var bad := 0
@@ -86,6 +84,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
@@ -157,7 +156,7 @@ func _drop_poses(id: String, m: Node3D, sync: Node) -> void:
 	var flat := rad_to_deg(torso.angle_to(-f.z))
 	ok(flat < 25.0 and spread > 1.0 and lift > 0.0, ("%s: skydives belly down along the drop (%.0f deg off level),"
 			+ " hands out past the shoulders by %.1f upper arms, %.2f m above the hips") % [id, flat, spread, lift])
-	s["vel"] = Vector3(Hunter.DIVE_SPEED, -13.0, 0.0)     # (steering right of the facing)
+	s["vel"] = Vector3(HunterFeel.dive_speed, -13.0, 0.0)     # (steering right of the facing)
 	_drop_frames(m, sync, s, 40)
 	var bank := _hand(dp, "L").dot(f.y) - _hand(dp, "R").dot(f.y)
 	ok(bank > 0.1, "%s: banks into a right steer (right hand %.2f m lower)" % [id, bank])
@@ -198,7 +197,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		if mesh == null or not mesh is ArrayMesh:
 			continue
 		for si in mesh.get_surface_count():
-			tris += (mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+			tris += int((mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3.0)
 	ok(tris > 0 and tris <= TRI_BUDGET, "%s: %d tris, weapon included (budget %d)" % [id, tris, TRI_BUDGET])
 	var missing: Array = []
 	var named: Array = _named(dd)
@@ -212,7 +211,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_standing(id, dd, clips)
 	_rings(id, dd, clips)
 	_emotes(id, dd, clips)
+	_summon_call(id, dd, clips)
 	_jump_land(id, m, sync, clips, dd)
+	_beats(id, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -247,6 +248,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	m.free()
 	_turn(id)
 	await _cc(id, dd)
+	await _footing(id, dd)
 
 ## HunterAnim's FEEL over the clips: a landing flattens him, a run start tips him forward over his feet, and both
 ## leave nothing behind once they're over (the root's size isn't keyed, so it must not build up). A root on the Rig
@@ -277,8 +279,30 @@ func _feel(id: String, m: Node3D, sync: Node, clips: WardenClips, on_rig: bool) 
 
 ## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
 ## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
+
+
+## The result beats (WardenBeats): win and lose each map to a clip the .glb plays that is its own (no two beats share
+## one), and the state's "beat" picks it.
+func _beats(id: String, clips: WardenClips) -> void:
+	var mapped := 0
+	var picked := 0
+	var used: Array = []
+	for nm in WardenBeats.NAMES:
+		var b: Dictionary = clips.beats.get(nm, {})
+		mapped += 1 if not b.is_empty() else 0
+		var pick := clips._pick({"beat": nm, "beat_t": 0.7}, 0.0)
+		picked += 1 if not b.is_empty() and pick.get("clip", "") == b["clip"] else 0
+		if not b.is_empty():
+			used.append(b["clip"])
+	ok(mapped == 2 and picked == 2 and used[0] != used[1],
+			"%s: win and lose mapped to own clips (%d, %d picked: %s)" % [id, mapped, picked, str(used)])
+
+
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
+	for b in (dd.get("beats", {}) as Dictionary).values():
+		if b.has("clip"):
+			out.append(b["clip"])
 	for mv in (dd.get("kmoves", {}) as Dictionary).values():
 		out.append(mv["clip"])
 		if mv.has("alt"):
@@ -434,15 +458,15 @@ func _rings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 func _emotes(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var map: Dictionary = dd.get("emotes", {})
 	var seen := {}
-	var bad: Array = []
+	var bad_v: Array = []
 	for e in Truce.EMOTES:
 		var clip := String(map.get(e["id"], ""))
 		if not clips.lib.has_animation(clip) or clips.lib.get_animation(clip).length > Truce.BUBBLE_T:
-			bad.append(e["id"])
+			bad_v.append(e["id"])
 		seen[clip] = true
 	var n := Truce.EMOTES.size()
-	ok(bad.is_empty() and seen.size() == n, "%s: %d wheel emotes, %d clips, within %.1f s (bad %s)"
-			% [id, n, seen.size(), Truce.BUBBLE_T, str(bad)])
+	ok(bad_v.is_empty() and seen.size() == n, "%s: %d wheel emotes, %d clips, within %.1f s (bad %s)"
+			% [id, n, seen.size(), Truce.BUBBLE_T, str(bad_v)])
 	var wrong: Array = []
 	for e in Truce.EMOTES:
 		var clip := String(map.get(e["id"], ""))
@@ -452,6 +476,29 @@ func _emotes(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			wrong.append(e["id"])
 	ok(wrong.is_empty(), "%s: emotes play upper-body moving, full-body standing, then end (wrong %s)"
 			% [id, str(wrong)])
+
+## The summon call and recall (warden_anim "summon_call", KinSummon.anim_state): about 0.3 s each, keying only upper
+## bones, on the upper layer so he runs and aims under it; never over a kit move; nothing of it once it has ended.
+func _summon_call(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	var sc: Dictionary = dd.get("summon_call", {})
+	var bad_v: Array = []
+	for kind in ["call", "recall"]:
+		var clip := String(sc.get(kind, ""))
+		var anim := clips.lib.get_animation(clip) if clips.lib.has_animation(clip) else null
+		if anim == null or absf(anim.length - 0.32) > 0.05 or not _keys_upper(anim, dd):
+			bad_v.append(kind)
+			continue
+		var s := {"call": kind, "call_t": 0.1, "vel": Vector3(0, 0, -4)}
+		var run_v := clips._pick(s, 0.0)
+		s["kmove"] = String((dd.get("kmoves", {}) as Dictionary).keys()[0]) if dd.has("kmoves") else ""
+		var cast := clips._pick(s, 0.0) if s["kmove"] != "" else {}
+		s.erase("kmove")
+		s["call_t"] = anim.length + 0.01
+		if run_v.get("clip", "") != clip or not bool(run_v.get("upper", false)) or cast.get("clip", "") == clip \
+				or clips._pick(s, 0.0).get("clip", "") == clip:
+			bad_v.append(kind)
+	ok(bad_v.is_empty(), "%s: summon call and recall are ~0.3 s upper-body gestures, not over a cast, then end (bad %s)"
+			% [id, str(bad_v)])
 
 ## The state's emote picks this clip: standing on its own layer, moving on the upper one, and not after its end.
 func _emote_plays(clips: WardenClips, emote: String, clip: String) -> bool:
@@ -550,6 +597,15 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			continue
 		var end_t := float(def["keys"][-1][0])
 		var length := float(moves[km].get("fit", clips.lib.get_animation(String(moves[km]["clip"])).length))
+		var pts: Array = moves[km].get("time", [])
+		if not pts.is_empty():     # ("time": the clip ends at its last kit point; the map stays on the clip, in order)
+			var on := true
+			for i in pts.size():
+				var c := float(pts[i][1])
+				on = on and c >= 0.0 and c <= clips.lib.get_animation(String(moves[km]["clip"])).length + 0.001 \
+						and (i == 0 or pts[i][0] > pts[i - 1][0])
+			ok(on, "%s %s: the time map stays on the clip, in order" % [id, km])
+			length = float(pts[-1][0])
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
 		if off > worst:
 			worst = off
@@ -940,7 +996,7 @@ func _flinch(id: String) -> void:
 	var still := await _run_hit(id, 0.0, chip, 0.0)
 	var stagger := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 4.0)
 	var stagger_still := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 0.0)
-	var mid := hit.size() / 3
+	var mid := int(hit.size() / 3.0)
 	ok(float(still[mid]["act"]) <= 0.0, "%s: a chip hit standing still flinches the upper body only" % id)
 	ok(float(stagger[mid]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
 	ok(float(stagger_still[mid]["act"]) > 0.5, "%s: a stagger standing still takes the whole body" % id)
@@ -1050,6 +1106,51 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 		out.append({"legs": legs, "hand": hand.global_position, "act": clips.act_w})
 		t += DT
 	m.free()
+	return out
+
+## On ice with no footing (HazardMoves' "footing": the ice kind's "moves" in terrain_hazards.json) the run's stride is
+## shorter and each free arm (loco "arm_swing") rides out from the side, against the same run on sure ground.
+func _footing(id: String, dd: Dictionary) -> void:
+	var sure := await _run_gait(id, {})
+	var ice := await _run_gait(id, TerrainHazards.kind_def("ice")["moves"])
+	var legs := KMovesStone.gait(id) > 0.5      # (a hoverer's legs barely walk: no stride to shorten)
+	ok(not legs or float(ice["stride"]) < 0.9 * float(sure["stride"]),
+			"%s: on ice the stride is shorter (swing %.2f rad, %.2f on sure)" % [id, ice["stride"], sure["stride"]])
+	for side in (dd["loco"] as Dictionary).get("arm_swing", {}):
+		var gain := float(ice[side]) - float(sure[side])
+		ok(gain >= 0.1, "%s: on ice the free arm %s rides out (hand %.2f arm lengths further out)" % [id, side, gain])
+
+## 2 s of a run at 4 m/s with this "footing": the left thigh's swing (rad) and, per side, how far out from its
+## shoulder the hand rides on average (in arm lengths).
+func _run_gait(id: String, footing: Dictionary) -> Dictionary:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	m.set_meta("anim_seed", 1)
+	holder.add_child(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true, "fired": 99.0,
+			"footing": footing})
+	var thigh := WardenSkeleton.find(sk, "thigh.L")
+	var swing := Vector2(INF, -INF)
+	var out := {"L": 0.0, "R": 0.0}
+	var frames := 0
+	for i in 60:
+		sync.call("_process", DT)
+		if i < 15:
+			continue
+		var dir := sk.get_bone_global_pose(thigh).basis.y
+		var pitch := atan2(-dir.z, -dir.y)
+		swing = Vector2(minf(swing.x, pitch), maxf(swing.y, pitch))
+		frames += 1
+		for side in out:
+			var sh := sk.get_bone_global_pose(WardenSkeleton.find(sk, "upper_arm." + side)).origin
+			var hand := sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + side)).origin
+			out[side] += (hand.x - sh.x) * signf(sh.x) / maxf(0.01, hand.distance_to(sh))
+	m.free()
+	for side in out:
+		out[side] /= maxf(1, frames)
+	out["stride"] = swing.y - swing.x
 	return out
 
 ## The rescue carry (WardenCarry): the walk legs stay on the clips, both wrists come in round the socket the Boki

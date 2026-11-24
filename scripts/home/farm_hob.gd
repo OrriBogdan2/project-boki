@@ -7,7 +7,9 @@ extends RefCounted
 ## and he talks face to face (HobTalk: the farm tutorial, blueprints from FarmBuilder, and the second Mask).
 ## A "!" floats over him while he has something for you. Holding the same interact key hammers a house or
 ## building going up, beat after beat, when the tutorial option player_swing is on; your Boki nearby come and
-## help, and the materials are spent as it goes (FarmSites).
+## help, and the materials are spent as it goes (FarmSites). His own hammering is real work: every few seconds
+## (farm_builder.json "swing_s") a swing lands on the house, so it goes up on its own. When the site waits for
+## materials he stops, stands by it and says what it needs (the label over the site, his "!" and his talk).
 
 const FACE_YOU_M := 9.0          # m: closer than this he turns to watch you come
 const PAUSED_LINE := "Paused while you were away"      # on a site's label for the first visit
@@ -20,6 +22,7 @@ var t := 0.0
 var poll_t := 0.0
 var call_t := 0.0
 var site_u := -1                 # the construction site you are hammering (deco uid)
+var swing_t := 0.0               # s until his next swing on the house
 var pos := Vector3.INF           # where he is standing (or walking to)
 var spot := Vector3.INF          # his home spot with its clear ring (HobSpot), INF while he is not on the farm
 var paused: Array = []           # uids of sites that stood still during a run
@@ -76,10 +79,23 @@ func crowds(c: Vector2i) -> bool:
 func crowds_point(p: Vector3) -> bool:
 	return spot != Vector3.INF and Vector2(p.x - spot.x, p.z - spot.z).length() < HobSpot.clear_m()
 
-## Whether he is at work on the house site (hammering) rather than waiting by the stall.
+## Whether he is at the house site (rather than waiting by the stall).
 func at_site() -> bool:
 	var e := house_entry()
 	return not e.is_empty() and FarmSites.has_site(e)
+
+
+## At the house site that cannot go on: it is waiting for materials, so he does not hammer.
+func waiting() -> bool:
+	return at_site() and FarmSites.stalled(house_entry())
+
+
+## What he says about a waiting site ("" when it is not waiting).
+func wait_line() -> String:
+	if not waiting():
+		return ""
+	var need := FarmSites.need_text(house_entry()).to_lower()
+	return String(rules()["wait_line"]).format({"need": need})
 
 static func house_entry() -> Dictionary:
 	var L := HomeLayout.of(Save.d)
@@ -113,8 +129,9 @@ func tick(dt: float) -> void:
 	if not is_instance_valid(node):
 		return
 	_walk(dt)
+	_labour(dt)
 	node.tag.visible = not bool(FarmBuilder.state().get("met", false))
-	node.mark.visible = FarmBuilder.pending().size() > 0 or chat.offer_due()
+	node.mark.visible = FarmBuilder.pending().size() > 0 or chat.offer_due() or waiting()
 	chat.tick(dt)
 	_call_out(dt)
 	poll_t -= dt
@@ -145,13 +162,28 @@ func _walk(dt: float) -> void:
 		node.pose = "walk"
 		return
 	node.position = Vector3(pos.x, 0, pos.z)
-	node.pose = "hammer" if at_site() else "idle"
+	node.pose = "hammer" if at_site() and not waiting() else "idle"
 	if at_site():
 		node.face_to = HomeLayout.deco_center(house_entry())
 	elif chat.offer_due() or Vector2(h.ppos.x - pos.x, h.ppos.z - pos.z).length() < FACE_YOU_M:
 		node.face_to = h.ppos
 	else:
 		node.face_to = Vector3.INF
+
+## While he hammers a swing lands on the house every swing_s seconds (the same as a Boki's).
+func _labour(dt: float) -> void:
+	if node.pose != "hammer" or chat.busy():
+		swing_t = float(rules()["swing_s"])
+		return
+	swing_t -= dt
+	if swing_t > 0.0:
+		return
+	swing_t = float(rules()["swing_s"])
+	var e := house_entry()
+	paused.erase(int(e["u"]))
+	FarmSites.player_swing(h.hw, e, "Hob")
+	h._refresh_top()
+
 
 ## Until you have met him, and while he has the second Mask for you, he calls you over now and then.
 func _call_out(dt: float) -> void:
@@ -161,6 +193,8 @@ func _call_out(dt: float) -> void:
 	var line := "" if met or FarmTutorial.base() else String(talk["call"])      # in the base your Boki calls you
 	if chat.offer_due():
 		line = String(talk["call_offer"])
+	elif line == "":
+		line = wait_line()
 	if call_t > 0.0 or chat.busy() or line == "":
 		return
 	call_t = float(talk["call_every_s"])

@@ -33,7 +33,8 @@ func toys() -> Array:
 			out.append({"u": int(e["u"]), "id": String(e["id"]), "pos": HomeLayout.deco_center(e)})
 	return out
 
-## Sets the clip a rigged Boki plays for what it is doing (kact: munch at a feeder, a toy's clip at a toy); true
+## Sets the clip a rigged Boki plays for what it is doing (kact: munch at a feeder, a toy's clip at a toy, pet while it
+## is being scratched); true
 ## when this Boki has a rig, which poses its own body.
 func _act(k: Dictionary, n: Node3D) -> bool:
 	var act := ""
@@ -43,6 +44,8 @@ func _act(k: Dictionary, n: Node3D) -> bool:
 		act = "munch"
 	elif play is Dictionary and play["phase"] == "play":
 		act = String(rules()["toys"].get(String(_toy(int(play["u"])).get("id", "")), {}).get("clip", ""))
+	elif float(k.get("hold_t", 0.0)) > 0.0 and float(k.get("joy_t", 0.0)) > 0.0:
+		act = "pet"          # (a pat: PetReact holds it still and gives it joy)
 	if act != "" or n.has_meta("kact_home"):
 		n.set_meta("kact", act)
 		if act != "":
@@ -197,6 +200,8 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 		k["huff_t"] = HUFF_SECS
 		Care.change(k["rec"], "joy", -3.0)
 		_bond(k, others[0], "bond_squabble")      # a squabble over a toy builds rivalry (BaseLife)
+		if h.life:
+			h.life.sfx.squabble(k["rec"], k["pos"])
 		_stop(k)
 		k["t"] = float(R["sulk_secs"])
 		return
@@ -212,7 +217,7 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 ## Two Boki at one toy change their bond by base_life.json's `key` (base life on only).
 func _bond(k: Dictionary, o: Dictionary, key: String) -> void:
 	if h.life:
-		h.life.add_bond(k["rec"], o["rec"], float(h.life.R[key]))
+		h.life.add_bond(k["rec"], o["rec"], float(h.life.r_v[key]))
 
 func _temper(k: Dictionary) -> float:
 	return float(k["rec"]["traits"].get("temper", 0.5))
@@ -228,9 +233,12 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	if randf() < float(def.get("snack", 0.0)):
 		var item := String(R["snack_item"])
 		Save.add_item(item, 1)
-		h._toast("%s dug up a %s" % [rec["name"], String(Care.FOODS[item]["name"]).to_lower()])
+		h._toast("%s dug up a %s" % [rec["name"], String(Care.foods_v[item]["name"]).to_lower()])
 	h._emote(k, "♥" if gained > 0 else "♪", true)
+	if h.life and gained > 0:
+		h.life.sfx.toy_done(rec, k["pos"])
 	GardenFirstDay.mark("toy", h)
+	h._garden_xp(rec, "toy")      # play raises the Boki (docs/GARDEN_FIRST_HOUR.md item 7)
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)
 	_stop(k)

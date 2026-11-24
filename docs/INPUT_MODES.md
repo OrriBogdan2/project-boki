@@ -77,7 +77,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | RMB | hold-charge, release slam; jump while charging leaps | tap = small immediate slam, short hold (capped, auto-fires) = hop then slam, jump while holding leaps further | differ (owner #61) | O 61; D |
 | E | press | press | match | D; S:breah 27 |
 | R | tap, or hold-drag to set the angle | tap, or hold the key and drag, release casts | match | D "TAP ... HOLD and drag"; S:breah 28 |
-| Shift | press, one dash with a rock | Rock Hop: press, then press again within 0.6 s of each take-off, up to 3 hops | differ (owner #111) | O 111; DECISIONS 2026-11-08 lists it as a recast |
+| Shift | press, one dash with a rock | Leap of Faith: press, then press again within 0.6 s of each take-off, up to 3 hops | differ (owner #111) | O 111; DECISIONS 2026-11-08 lists it as a recast |
 
 ## Grimble (`dredge`, source ref-dredge, sheet dredge)
 

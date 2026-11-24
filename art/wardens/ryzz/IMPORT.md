@@ -44,3 +44,19 @@ Carried onto the v95 swap by `python3 tools/art1/glb_add_clips.py <this glb> <ex
 `run_f`: Not carried (2026-11-13): the pilot run_f above; `--anim-audit` on the game rig reads run slide 97% (sole sweep 1.03 m/s at a 4.83 m/s run) (main's own clip 9%, limit 25%), so main's clip stays. The candidate is `run_f` in ext/anim-pilot-four 37d910944's ryzz.glb, to copy with `glb_add_clips.py --hold-moved-rest` once the in-game foot slide is fixed.
 
 Merge 11-15 (ext/merge-lane-anim-hard2-1115): main's glb (45 clips, idle, pigtails) with only the key-pose-read `lmb_l` put back from the branch (`glb_add_clips.py <main ryzz.glb> <branch ryzz.glb> =lmb_l`, then `glb_compact.py`); the other 44 clips are main's byte for byte.
+
+Doll pass A (2026-11-18, ext/sparkle-dollA-game-1118, owner pick): `/home/boki/meshy/sparkle-doll-1118/A_face_skin_bust_hips.glb` (new face with smirk, violet-magenta eyes, matte skin; bust -14%, thighs -7%, hips -3%; same tris/UVs as the v95 `cand_A.glb`) swapped in with `python3 tools/art1/v95_to_game.py` (keep_uv own-paint swap, spec `art/wardens/src/ryzz_v95.json`, 60k tris; work dir `~/meshy/v95/_ingame_doll1118/`). Rig, 49 clips and anchors kept from the previous glb; `ryzz_v95.jpg`, `ryzz_v95b.jpg`, `ryzz_v95c.jpg` are the new textures. Height unchanged (y -0.014..1.684 vs -0.014..1.685).
+
+Gum onto the lips (2026-11-20, ext/ryzz-gum-mouth, owner 11-20 "why is sparkles gum still on her forehead?"): doll pass A
+put a face ~12 cm lower than the old one onto the kept rig, and the kept bubble (bone `gum`, 138 vertices skinned whole to
+it, child `anchor_gum`) stayed where the old lips were: on her hairline in every clip (it shows at 0.72 scale in idle/run,
+grows to 1.25 in `gum`, the laugh emote and `mage_gum`). `python3 tools/art1/glb_prop_move.py ryzz.glb ryzz.glb Body gum
+0 1.419 -0.119` puts the bone's head (glTF metres, Y up) just behind her lips (bubble from the lips, as on the splash); its
+inverse bind and the 47 clips' gum translation keys shift with it, nothing else changes. v95_to_game keeps a fixed-offset
+`move_bones` out of re-runs, so a re-swap keeps this spot; a new face needs the same step at its lips. The lid/brow/mouth
+bones and `anchor_eye_glow` also sit at the old face's height, but no vertex is weighted to them and no look uses the anchor.
+
+No-gum version (2026-11-20, ext/ryzz-gum-mouth, owner 11-20 "want TWO versions"): the look-only design variant
+`ryzz_nogum` (`content/rules/warden_look.json` `"ryzz_nogum": {"hide_bones": ["gum"]}`, no .glb of its own) is this
+same model with the `gum` bone shrunk away every frame (WardenSync), and no gum fidget (MageGum). Pick it with
+`--warden-variant=ryzz_nogum`; shipping it as the default would move `hide_bones` onto `"ryzz"`.

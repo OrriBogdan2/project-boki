@@ -4,7 +4,7 @@ extends RefCounted
 ##   prologue (held to skip) -> hatch (card, look, egg pick, knocks, the Boki's look, naming) -> the first
 ##   Relic -> the tutorial match (TutorialDrive) -> results -> the farm (its tutorial walked step by step)
 ##   -> Hob's second Relic -> the first expedition, played out through the Ways Out Uplink.
-## Also the skip paths: "Skip the tutorial" on the naming card, and skipping the farm tutorial.
+## Also the skip paths: "Skip tutorial" on the naming card, and skipping the farm tutorial.
 ## The first Mask is Lace, Kael or Vex: `-- --starter=archer|juggernaut|gunslinger` picks whose (default Vex).
 ## Every wait has a limit: a step that does not move on in time is a stall and fails the check. Each stage
 ## prints how long it took. Never touches the real save.
@@ -32,6 +32,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	tree = main.get_tree()
 	Save.no_write = true
@@ -141,6 +142,12 @@ func _prologue() -> void:
 	for s in pr.shots:
 		watched += float(s["dur"])
 	print("NPF the prologue runs %.0f s if watched" % watched)
+	var hs: HoldSkip = pr.hold_skip      # a watcher who presses nothing is told what skips it, after HINT_AT s
+	ok(hs.modulate.a == 0.0, "the prologue's skip hint is not up on the first frame")
+	hs._process(HoldSkip.HINT_AT - 0.5)
+	hs._process(0.6)
+	hs._process(0.4)
+	ok(hs.modulate.a > 0.9, "but shows by itself after %.0f s with nothing pressed" % HoldSkip.HINT_AT)
 	var key := InputEventKey.new()      # held (never let go) it skips it all after HoldSkip.HOLD_S
 	key.keycode = KEY_SPACE
 	key.pressed = true
@@ -167,6 +174,8 @@ func _hatch() -> void:
 	await _before_act("knock")
 	for i in hx.TAPS:
 		hx._unhandled_input(_key("jump"))
+		if i == 0:
+			ok(hx.title.text == hx.KNOCK_LINES[1], "a knock runs to its end (the title moves to the next line)")
 		await tree.create_timer(0.25).timeout
 	await _wait(func(): return hx.stage == "reveal", "seven knocks hatch it")
 	_begin("hatch: its look and naming")
@@ -175,8 +184,8 @@ func _hatch() -> void:
 		return rv != null and rv.met, "the new Boki meets you")
 	(_child_of(hx, "KinReveal") as KinReveal).name_btn.pressed.emit()
 	await _wait(func(): return hx.stage == "name", "then it can be named")
-	ok(_button(hx, "Tend the garden") != null, "the naming card offers 'Tend the garden' beside 'Learn to fight'")
-	_press(hx, "Learn to fight")
+	ok(_button(hx, "Skip tutorial") != null, "the naming card offers 'Skip tutorial' beside 'Tutorial'")
+	_press(hx, "Tutorial")
 	await _relic(hx)
 
 ## The starter's card on the starter pick (HobOffer), or null before it shows.
@@ -186,12 +195,20 @@ func _starter_card(hx) -> Control:
 			return c
 	return null
 
+## Takes a Relic off a pick the way a player does: clicks its card, then "Yes, take <name>" on the question.
+func _take(root: Node, card: Control, id: String) -> void:
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	card.gui_input.emit(click)
+	await tree.process_frame
+	await _press(root, "Yes, take " + HeroTitle.base_name(id))
+
 ## The first Relic: the starter pick, then it drifts in, is put on, its page is read, and "Into the portal" goes on.
 func _relic(hx) -> void:
 	_begin("first Relic")
 	await _wait(func(): return hx.stage == "mask" and _starter_card(hx) != null, "naming leads into the starter pick")
-	_starter_card(hx).mouse_entered.emit()      # (in focus: the Take button takes it)
-	_press(hx, "Take " + HeroTitle.base_name(starter))
+	await _take(hx, _starter_card(hx), starter)
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
@@ -208,7 +225,7 @@ func _course_tick(_m: Match) -> void:
 
 func _tutorial_match():
 	_begin("tutorial match: load")
-	await _wait(_match_running, "'Learn to fight' opens the tutorial match")
+	await _wait(_match_running, "'Tutorial' opens the tutorial match")
 	var m: Match = main.current
 	m.set_process(false)
 	ok(bool(m.opts.get("tutorial", false)), "it is the tutorial course")
@@ -309,9 +326,9 @@ func _second_relic(home) -> void:
 	ok(chat.offer != null, "talking to him, his lines lead to the three Relics")
 	var offer: HobOffer = chat.offer
 	var want := ClassUnlock.second_picks().filter(func(a): return a != starter).size()      # (Kael first leaves two)
-	ok(offer.ids.size() == want and offer.take_button != null, "%d to choose from, with a Take button" % want)
+	ok(offer.ids.size() == want, "%d to choose from" % want)
 	var pick := String(offer.ids[0])
-	offer.take_button.pressed.emit()
+	await _take(chat.box, offer.cards[0], pick)
 	ok(ClassUnlock.open_ids().has(pick) and not ClassUnlock.second_pending(), "taking one opens it (%s)" % pick)
 	await tree.create_timer(0.2).timeout
 	ok(HeroGrid.save_pick(pick) and Arch.of_save() == pick, "and it can be worn for the next expedition")
@@ -336,26 +353,26 @@ func _first_expedition(home) -> void:
 
 ## The first knock of the first expedition: one two-line card, the tip for what hit hardest; not again.
 func _knock_tip(m: Match) -> void:
-	var P: Hunter = m.player
-	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != P.team)[0]
+	var p_v: Hunter = m.player
+	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p_v.team)[0]
 	var mob: Mob = m.mobs[0]
 	ok(m.ktip != null and not m.ktip.shown, "the first expedition gets the first-knock card")
-	m.on_damage(P, mob, 30.0, {})
-	m.on_damage(P, rival, 20.0, {})
-	m.on_damage(P, mob, 50.0, {})
+	m.on_damage(p_v, mob, 30.0, {})
+	m.on_damage(p_v, rival, 20.0, {})
+	m.on_damage(p_v, mob, 50.0, {})
 	var want: String = KnockTip.card("monster")
-	m.knock(P, mob, {})
+	m.knock(p_v, mob, {})
 	var lane: Array = m.hud.msgs._shown + m.hud.msgs._waiting
 	var texts: Array = lane.map(func(e): return e["text"])
 	ok(texts.has(want) and want.count("\n") == 1, "the card is two lines and names monsters, the top damage")
 	ok(want.contains(Settings.key_cap("throw")), "its tip is the monster one: send your Boki")
 	ok(int(Save.d["tutorial"]["knock_tip"]) == 1 and m.ktip.shown, "it is counted once")
-	P.downed = false
-	m.on_damage(P, rival, 90.0, {})
-	m.knock(P, rival, {})
+	p_v.downed = false
+	m.on_damage(p_v, rival, 90.0, {})
+	m.knock(p_v, rival, {})
 	ok(int(Save.d["tutorial"]["knock_tip"]) == 1, "a second knock in the same match shows nothing")
-	P.downed = false
-	P.hp = P.max_hp
+	p_v.downed = false
+	p_v.hp = p_v.max_hp
 	var k := KnockTip.for_match(m, m.guide)
 	k.note(rival, 40.0, {})
 	ok(k.top() == "rival" and KnockTip.card("rival").contains("squad"), "a hunter's hits give the squad tip")
@@ -378,48 +395,48 @@ func _toward(p: Hunter, at: Vector3) -> Vector2:
 	return Vector2(at.x - p.pos.x, at.z - p.pos.z).normalized()
 
 func _ways_out(m: Match) -> void:
-	var P: Hunter = m.player
+	var p_v: Hunter = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
 	var fall_t := 0.0
-	ok(P.riding, "you start on the skyship")
-	while (P.riding or P.dropping or not P.grounded) and fall_t < DROP_S:
+	ok(p_v.riding, "you start on the skyship")
+	while (p_v.riding or p_v.dropping or not p_v.grounded) and fall_t < DROP_S:
 		# jump launches the rocket (DropRocket); aboard it, no keys: a press would jump out of it
-		P.inp["jump"] = (P.riding and P.rocket == null and fall_t > float(P.ai.get("jump_at", 0.0))
+		p_v.inp["jump"] = (p_v.riding and p_v.rocket == null and fall_t > float(p_v.ai.get("jump_at", 0.0))
 				and int(fall_t * 20.0) % 2 == 0)
-		P.inp["move"] = _toward(P, P.ai.get("land", P.pos)) if not P.riding else Vector2.ZERO
+		p_v.inp["move"] = _toward(p_v, p_v.ai.get("land", p_v.pos)) if not p_v.riding else Vector2.ZERO
 		m.step(Match.DT)
 		fall_t += Match.DT
-	P.inp["jump"] = false
-	P.inp["move"] = Vector2.ZERO
-	var landed: bool = P.grounded and not P.riding and not P.dropping
+	p_v.inp["jump"] = false
+	p_v.inp["move"] = Vector2.ZERO
+	var landed: bool = p_v.grounded and not p_v.riding and not p_v.dropping
 	ok(landed, "jumping off the ship ends with you on your feet (%.0f s)" % fall_t)
 	var x: Dictionary = m.exits.uplink_x()
 	ok(not x.is_empty() and m.exits.seats != null, "there is an Uplink to take out (the Ways Out seat)")
-	P.max_hp = 5000.0      # the driver stands in the yard while rivals and the wave come: the exit is what is tested
-	P.hp = P.max_hp
+	p_v.max_hp = 5000.0      # the driver stands in the yard while rivals and the wave come: the exit is what is tested
+	p_v.hp = p_v.max_hp
 	m.time = float(x["open_at"]) + 1.0      # (the seat opens at 6:00: the drop and the walk are not what this tests)
-	P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
+	p_v.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
 	for i in int(2.5 / Match.DT):
-		P.inp["interact"] = true
+		p_v.inp["interact"] = true
 		m.step(Match.DT)
-	P.inp["interact"] = false
-	ok(x["state"] == "charging" and int(x["team"]) == P.team, "holding interact at the console starts the uplink")
+	p_v.inp["interact"] = false
+	ok(x["state"] == "charging" and int(x["team"]) == p_v.team, "holding interact at the console starts the uplink")
 	var t0 := m.time
 	while x["state"] == "charging" and m.time - t0 < 120.0:
-		P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
-		P.hp = P.max_hp
+		p_v.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
+		p_v.hp = p_v.max_hp
 		for h in m.hunters:
-			if h.team != P.team and m.exits.in_yard(x, h):
+			if h.team != p_v.team and m.exits.in_yard(x, h):
 				h.teleport(m.world.random_ground())      # a rival in the yard stalls the charge past the seat's window
 		m.step(Match.DT)
 	ok(x["state"] == "open", "holding the yard charges it and opens the lift (%.0f s)" % (m.time - t0))
-	while not P.extracted and m.time - t0 < 150.0:
-		P.teleport(x["pos"])
-		P.hp = P.max_hp
+	while not p_v.extracted and m.time - t0 < 150.0:
+		p_v.teleport(x["pos"])
+		p_v.hp = p_v.max_hp
 		m.step(Match.DT)
-	ok(P.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
+	ok(p_v.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
 	await _press(main.current, "Back to the farm")
@@ -438,9 +455,9 @@ func _skip_paths() -> void:
 	hx.chosen = 0
 	hx.stage = "name"
 	hx._show_name()
-	_press(hx, "Tend the garden")
+	_press(hx, "Skip tutorial")
 	_begin("skip paths: farm")
-	await _wait(func(): return _is_screen("home.gd"), "'Tend the garden' goes straight to the farm, no Relic first")
+	await _wait(func(): return _is_screen("home.gd"), "'Skip tutorial' goes straight to the farm, no Relic first")
 	var home = main.current
 	await _wait(func(): return home.panel_host != null, "the farm builds")
 	ok(ClassUnlock.needs_starters(), "the Relic pick waits")
@@ -465,7 +482,6 @@ func _portal_relic(home) -> void:
 	var cards: Array = home.panel_host.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))
 	ok(cards.size() == 3, "three Relics to pick from")
-	cards[2].mouse_entered.emit()
-	_press(home.panel_host, "Take Vex")
+	await _take(home.panel_host, cards[2], "gunslinger")
 	ok(Save.d.get("arch", "") == "gunslinger" and not ClassUnlock.needs_starters(), "Vex is picked and worn")
 	await _wait(func(): return home.panel_open == "Expedition", "the put-on ends on the expedition panel")

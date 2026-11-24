@@ -17,6 +17,7 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm
 	await _stall_on_every_save()
 	_levels()
 	_shelter()
@@ -98,6 +99,10 @@ func _levels() -> void:
 	var hm := HomeMarket.new(null, Callable())
 	ok(FarmUnlocks.gated() and Stalls.level() == 1 and hm.tabs() == ["Vendor", "Relics", "Exchange"],
 		"L1: the vendor (and the Exchange) only: %s" % str(hm.tabs()))
+	FarmUnlocks.rules()["base_mode"] = true
+	ok(hm.tabs() == ["Vendor", "Relics", "Shelter"] and Shelter.open(),
+		"base_mode: the Shelter is open at L1 (no Upgrades tab there), no Exchange: %s" % str(hm.tabs()))
+	FarmUnlocks.rules()["base_mode"] = false
 	var keys := func(tab: String) -> Array:
 		hm.vendor_tab = tab
 		var out: Array = []
@@ -721,7 +726,7 @@ func _migration() -> void:
 	ok(not old.has("pens") and old["listings"].has("def") and not old["listings"].has("abc"),
 		"the pens are gone; seed listings stay")
 	ok(typeof(old["market"]) == TYPE_DICTIONARY and typeof(old["goods"]) == TYPE_DICTIONARY
-		and String(old.get("market_notice", "")).contains("Listed"),
+		and str(old.get("market_notice", "")).contains("Listed"),
 		"the market gets its defaults, and a one-time notice says who came home")
 	# a round trip through the file keeps everything open
 	_save()

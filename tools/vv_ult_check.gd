@@ -86,9 +86,9 @@ func mage() -> void:
 	var range_r := float(xd["range"])
 	var hang: Array = hc._looks_at(m, from)
 	var wide: Array = hang.filter(func(l): return l["mode"] == HeroVfx.MODES["scorch"] and float(l["size"]) > range_r)
-	ok("Stormfall look (footage): a dark ring band on the range edge, a gold crown at the cursor, no storm field yet",
+	ok("Stormfall look (footage): a dark ring band on the range edge, a pink crown at the cursor, no storm field yet",
 			not hc._pool(hang, range_r, 0.1).is_empty() and wide.size() == 1
-			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_GOLD,
+			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_PINK,
 			"%d range-wide looks (the band only)" % wide.size())
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
@@ -133,7 +133,7 @@ func mage() -> void:
 			and absf(ac.dmg(T) - want) < 0.5 and ac.dmg(T2) > 1.0,
 			"hits %d took %.1f want %.1f" % [int(U.last.get("hits", 0)), ac.dmg(T), want])
 	var moved: float = hc._flat(T.pos, t_at)
-	ok("Stormfall: a knockback and 1 Static each", moved > 0.4 and K.spark_n(T) >= 1 and K.spark_n(T2) >= 1,
+	ok("Stormfall: 1 Static each, no knock", moved < 0.3 and K.spark_n(T) >= 1 and K.spark_n(T2) >= 1,
 			"moved %.2f static %d %d" % [moved, K.spark_n(T), K.spark_n(T2)])
 	ok("Stormfall: the bond fills once, for the best event of the cast (a hit)",
 			is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"]))
@@ -527,7 +527,15 @@ func gunslinger() -> void:
 			U.casts == 1 and U.shells.size() == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])))
 	ok("Penny Drop: it lands exactly at the cursor", not s.is_empty() and hc._flat(s["at"], t_at) < 0.1)
 	ok("Penny Drop: the rifle goes straight up (gunslinger_x)", K.anim_id == "gunslinger_x")
-	ac.step(m, 0.5)
+	# owner 11-17: the ult never roots her; the 0.25 s wind-up (GunslingerUlt.WINDUP) only slows the walk
+	var w0 := P.pos
+	ac.step(m, 0.2, func(): P.inp["move"] = Vector2(0, 1))
+	var wind_v := Vector2(P.vel.x, P.vel.z).length()
+	P.inp["move"] = Vector2.ZERO
+	ok("Penny Drop: she walks through the cast, slowed not stopped",
+			hc._flat(P.pos, w0) > 0.4 and wind_v > 0.5 * P.base_speed and wind_v < 0.8 * P.base_speed,
+			"%.2f m in 0.2 s, %.2f m/s (run %.1f)" % [hc._flat(P.pos, w0), wind_v, P.base_speed])
+	ac.step(m, 0.3)
 	var disc := AimKit.entry(P, "x1")
 	var disc_r := float(disc.get("r", 0))
 	var core := AimKit.entry(P, "xc1")
@@ -538,7 +546,7 @@ func gunslinger() -> void:
 			and bool(core.get("all", false)) and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2
 			and is_equal_approx(float(core.get("fill", 0)), fill),
 			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
-	# past the shot's commit (GunslingerUlt.COMMIT) she is free while it falls: she walks and the rifle works
+	# past the wind-up (GunslingerUlt.WINDUP) she is free while it falls: she walks at full speed and the rifle works
 	ac.step(m, 0.3)
 	var p0 := P.pos
 	ac.step(m, 0.4, func(): P.inp["move"] = Vector2(-1, 0))

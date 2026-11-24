@@ -1,6 +1,6 @@
 # tools/
 
-Checks (`*_check.gd`, registered in `check_registry.gd`), shot tools (`*_shots.gd`), content generators (`gen_*.py`) and the repo gate.
+Checks (`*_check.gd`, registered in `tools/checks/<area>.gd`; the old `check_registry.gd` only shrinks, see AGENTS.md section 2), shot tools (`*_shots.gd`), content generators (`gen_*.py`) and the repo gate.
 
 ## The gate: `tools/check.sh`
 
@@ -43,6 +43,8 @@ here; see AGENTS.md. Pipeline detail lives in `docs/art/wardens/PIPELINE.md`, `d
 | `boki/build_boki.py`, `build_fusion.py` (blender) | Build every Boki species (and fusions) from `boki/<species>.py` into the game's .glb | `blender -b --factory-startup --python tools/boki/build_boki.py -- --no-export` |
 | `vendor_gltf.py` | Compact a CC0 glTF pack model into `art/vendor/*.glb` | `python3 tools/vendor_gltf.py src.gltf art/vendor/x.glb --anims Idle,Run` |
 | `gen_vfx_noise.py` | Bake `art/vfx/noise.png` for the hero VFX shaders | `python3 tools/gen_vfx_noise.py` |
+| `hunter_mesh_check.py` | Absolute mesh-quality gate for Hunter (`art/wardens`) and Boki (`art/kin`) GLBs: torn/spiky/degenerate triangles, floating islands, open boundary, bad skin weights, torn or crushed edges in every clip, static clips, see-through materials; PASS/WARN/FAIL + a PNG of the flagged triangles. Needs numpy (PIL for the PNG). Exit 1 on a FAIL or a new WARN vs `--base` | `python3 tools/hunter_mesh_check.py --base origin/main --changed-vs origin/main --out build/mesh` |
+| `hunter_mesh_review.py` | Hunter FIX review, used through `hunter_mesh_check.py --review`: renders live and fixed GLB the same way (CPU, textured, front+side, every clip) and FAILs on more black px / see-inside px / enclosed holes / loose blobs than live, a silhouette that moved vs live (rest 1.5%, idle 5%), lost tris or clips, new open edges; writes a live / fix / overlay PNG. A hunter tear-fix brief must not report done until it exits 0 | `python3 tools/hunter_mesh_check.py art/wardens/pip/pip.glb --review --base origin/main --out build/review` |
 
 ## Animation
 

@@ -7,16 +7,33 @@ extends RefCounted
 
 const SLOT := 44.0
 const GAP := 8.0
+const SPARE_FROM := 2        # slots 3 and 4 (index 2, 3) are held back while empty (HudReveal "belt_spare")
 const EMPTY_TIP := "Empty utility slot. Tonics, armor kits and gadgets you find or buy fill it."
+
+## Staged HUD (HudReveal "belt"): the belt stays folded away until a held item could be used (a tonic when
+## hurt, an armor kit when the armor is down); from then on this save keeps it. `see` is false for a read-only
+## count (HudGroups).
+static func shown(m: Match, p: Hunter, see := false) -> bool:
+	if HudReveal.on(m, "belt"):
+		return true
+	var matters := p.belt.any(func(s): return not s.is_empty() and UtilityUse.can_use(p, String(s["id"])))
+	if matters and see:
+		HudReveal.see("belt")
+	return matters
 
 ## Draws the slots with the last at the right edge `x`, top at `y`. Returns the x where the
 ## next slot to the left starts.
 static func draw(hud, p: Hunter, x: float, y: float) -> float:
+	if not shown(hud.m, p, true):
+		return x
 	var c: Control = hud.c
 	for k in range(UtilityBelt.SLOTS - 1, -1, -1):
 		var r := Rect2(Vector2(x, y), Vector2(SLOT, SLOT))
 		var key: String = UtilityBelt.KEYS[k]
 		var s: Dictionary = p.belt[k]
+		if s.is_empty() and k >= SPARE_FROM and not HudReveal.on(hud.m, "belt_spare"):
+			x -= SLOT + GAP      # slots 3 and 4 wait until something is in them (the others keep their places)
+			continue
 		if s.is_empty():
 			hud.hover_spots.append([r, key])
 			HudStyle.slot_frame(c, r, HudStyle.MUTED, "off")

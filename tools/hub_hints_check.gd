@@ -89,6 +89,7 @@ func _hub(m: Node) -> void:
 	hub.hhints.tick(gap)
 	ok(seen.has("keys") and not seen.has("nest") and "two keys" in lane.texts().back(), "next: the keys (no nest yet)")
 	hub.NEST_AT = hub.ppos + Vector3(3, 0, 0)
+	lane.clear()  # in play the earlier hints have faded by now (gap_s > TIP_LIFE); the lane shows 2 cards at most
 	hub.hhints.tick(gap)
 	ok(seen.has("nest") and "nest corner" in lane.texts().back(), "near the nest corner: its hint shows")
 	_egg(hub, lane, seen, gap)

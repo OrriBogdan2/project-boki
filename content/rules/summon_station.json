@@ -1,0 +1,6 @@
+{
+	"_doc": "The Training Grounds' Boki summon pad (scripts/match/summon_station.gd), on the Boki island. at: map tiles; r: metres, how close you stand to be on it. species: the practice Bokis the pad's interact key cycles; each has its own window and cooldown from boki_summon.json (short and strong, middle, long and supportive).",
+	"at": [24.4, 56.5],
+	"r": 1.6,
+	"species": ["kestrike", "cindowary", "moonloris"]
+}

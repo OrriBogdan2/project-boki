@@ -217,7 +217,7 @@ const MOVES := {
 			"p": -0.22, "lift": -0.06, "fr": Vector3(0.12, -0.3, -0.45), "rw": 1.0, "fl": Vector3(0.0, -0.12, -0.62),
 			"hw": 1.0, "lw": 1.0, "legs": [0.65, -0.95, -0.55, -0.4], "gp": -0.05
 		}]]},
-	# Flashover mid-roar: the off fist punches up over his head, the nozzle bucks up once and he bounces on his
+	# Boiling Point mid-roar: the off fist punches up over his head, the nozzle bucks up once and he bounces on his
 	# heels, then he settles back into the braced, bucking hold
 	"lw_stoke_lance": {"hold": true, "loop": 0.5, "keys": [
 		[0.0, {
@@ -333,7 +333,7 @@ const MOVES := {
 			"fr": Vector3(0.55, 0.25, -0.2), "rw": 0.5, "lw": 1.0, "legs": [-0.4, -0.25, 0.45, -0.35]
 		}],
 		[0.7, {"fx": -6.283}]]},
-	# Flashover payoff (a foe Flashes over, or a knock): the off fist punches up over his head and the flamer
+	# Boiling Point payoff (a foe Flashes over, or a knock): the off fist punches up over his head and the flamer
 	# swings up with it (the arm alone hides under the hat from the match camera), a lean back and a bounce
 	"lw_stoke": {"keys": [
 		[0.0, {}],

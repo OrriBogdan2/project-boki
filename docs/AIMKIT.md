@@ -8,10 +8,11 @@ cursor state plus `MANIFEST.txt`).
 |---|---|
 | `aim_mode.gd` (`AimMode`) | Where a shot or placement goes (cursor-clamped vs max range), plus membership tests that match the shapes |
 | `aim_kit.gd` (`AimKit`) | The API kit code calls: the shapes, hide/clear, the cursor states |
-| `aim_draw.gd` (`AimDraw`) | One node per match. Rebuilds every telegraph into one ImmediateMesh surface each frame |
+| `aim_draw.gd` (`AimDraw`) | One node per match. Rebuilds every telegraph into one ArrayMesh each frame (AimGeo's packed arrays, one call per surface) |
 | `aim_shapes.gd` (`AimShapes`) | The shape builders and the quiet default look |
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
+| `scripts/ui/reticle.gd`, `reticle_hud.gd` (`Reticle`, `ReticleHud`) | The cursor reticle under them: the broken ring that opens with bloom, the dot in the Hunter's accent (`Arch.color`, the Hunter's own colour: Vex green, Sparkle pink, Tenzo blue), the ammo / resource / charge arcs, the hit tick (raised by `hud.reticle`, one per landed hit, gold on a crit, longer on a knock). Thin strokes with a dark edge; numbers in `content/rules/tuning.json` "reticle" |
 | `aim_reach.gd` (`AimReach`) | The range preview of a ground-target slot: a faint max-range ring and the landing disc |
 
 Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
@@ -55,7 +56,7 @@ id replaces the previous one. Stop calling and it disappears after 0.1 s of matc
 - `AimKit.hide(h, id)` drops it at once.
 - A `"dur": secs` param keeps a one-off up that long with no further calls (a 0.2 s edge ring, a stuck
   grenade's cone for its fuse).
-- Nothing makes a node: every entry is drawn into one ImmediateMesh owned by the match's `AimDraw`.
+- Nothing makes a node: every entry is drawn into one ArrayMesh owned by the match's `AimDraw`.
 
 Common params (every shape):
 
@@ -106,6 +107,8 @@ AimKit.circle(h, "draw_mark", {"at": point, "r": 0.22})
 Nothing in the game uses it now (Lace's draw was the V until owner item 55b).
 ```gdscript
 AimKit.vee(h, "draw", {"k": stage_k, "glint": stage_k * 0.4, "col2": Color("b6ff8a")})
+# Grimble Buckshot: one aim line (a merged V) to the slug range
+AimKit.vee(h, "spread", {"len": 6.3, "k": 1.0, "follow": true})
 ```
 Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degrees, 25), `glint`
 (0..1 along the line, -1 for none).
@@ -114,8 +117,6 @@ Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degre
 ```gdscript
 # Vex wall cone: from the stuck point back out, everyone sees it for the fuse
 AimKit.cone(h, "wallcone", {"from": stick, "dir": back, "len": 6.0, "deg": 100.0, "fill": fuse_k, "all": true, "dur": 0.8})
-# Grimble Buckshot: just the two edge lines
-AimKit.cone(h, "spread", {"len": 6.3, "deg": 10.0 + h.wbloom, "edges": true, "follow": true, "ease": 35.0})
 ```
 Params: `from`, `dir`, `len` (4), `deg` (60), `inner` (0.3 m), `edges`, `fill`, `ease` (1/s, 0 = off: the drawn width
 glides toward `deg` each drawn frame, exponentially, so a changing spread never steps or snaps).
@@ -187,7 +188,7 @@ it stops where the cast lands (`<slot>_spot`). Aimed means:
 
 The ground-target slots: Vex R, Sparkle E and R, Meeko E (throw), Neve RMB, Motley E, R and Shift, Tenzo R.
 `--aimkit-check` aims each at twice its range and asserts the ring at the data range and the mark on it.
-Not ground-targeted here (a wall, lane or skillshot, no disc): Lace E, Neve E, Sable E; Kael's Meteor Drop lands
+Not ground-targeted here (a wall, lane or skillshot, no disc): Lace E, Neve E, Sable E; Kael's Hit the Deck lands
 `drop.ahead` in front of him, not at the cursor.
 
 ### Reading back, hiding, clearing
@@ -279,7 +280,7 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 | | Shift | fixed-length dash, not to the cursor | fixed | match |
 | Tenzo (breah) | LMB boulder | cursor or max range: **unrecorded** | full, 11 m | ? (sheet open question) |
 | | RMB slam | a short hop ahead toward the cursor | fixed hop | match |
-| | Shift Rock Hop | toward the cursor, length ? | clamp, 1.2..2.4 m a hop (owner item) | owner note |
+| | Shift Leap of Faith | toward the cursor, length ? | clamp, 1.2..2.4 m a hop (owner item) | owner note |
 | | X Backbone | centre at the cursor, clamped | clamp 11 m, **now no minimum** | fixed |
 | Grimble (dredge) | LMB | fixed range, does not stop at the cursor | full | match |
 | | RMB Grasp | full range, to the first foe | full, 11.5 m | match |
@@ -289,7 +290,7 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 | | E Palm Spear | fixed long lane | full, 18 m | match |
 | | X Mini Nuke | cursor-placed | clamp 14 m, **now no minimum** | fixed |
 | Kael (juggernaut) | LMB blast | full, past the cursor | full, by charge | match |
-| | RMB Meteor Drop | cursor-placed, clamped about 5 m | clamp 5 m, no minimum | match |
+| | RMB Hit the Deck | cursor-placed, clamped about 5 m | clamp 5 m, no minimum | match |
 | | E Short Leash | hook toward the cursor, length ? | full, 13 m | match (?) |
 | Sparkle (vireo) | LMB, RMB | full range | full | match |
 | | E Undercurrent | ground spot at the cursor | clamp 11 m, **now no minimum** | fixed |
@@ -311,7 +312,7 @@ Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace'
 1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
 footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.
 
-## 6. Online: `all` telegraphs on other games (Net 0.24.6, docs/decisions/0061-telegraph-net.md)
+## 6. Online: `all` telegraphs on other games (Net 0.24.6, docs/decisions/0151-telegraph-net.md)
 
 Remote hunters are puppets: their kits run only on their owner's game. `AimNet` (scripts/match/aim/aim_net.gd)
 sends every `all` entry AimDraw is given for a hunter this game runs (the player, the host's bots) as the
@@ -332,13 +333,13 @@ Now all of them arrive through "tele".
 | Tenzo (dolm, breah_*) | RMB slam `rmb`: sweet circle; Shift hop `leap`: circle; E tells `e_tell<n>`: circle; X cracks `x_cracks`: span | a ring at the slam, the blast and the spine |
 | Grimble (dredge) | E `e_tell`, `e_hit`: cone; dive quake: circle; X fan `x_fan`: cone | a ring at the hit |
 | Vex (gunslinger) | RMB burr cone `burr<n>`: cone; E Palm Spear `e`: lane; X nuke `x<n>`, `xr<n>`, `xz<n>`: circle | a bolt for the needle, a ring at the nuke |
-| Kael (juggernaut) | RMB slam `slam`: cone; Meteor Drop `drop`, `drop_core`: circle; R guard `ult`: lane | nothing |
+| Kael (juggernaut) | RMB slam `slam`: cone; Hit the Deck `drop`, `drop_core`: circle; R guard `ult`: lane | nothing |
 | Sparkle (mage) | Shift end `dash_end`: circle; E Undercurrent `e<n>`: circle; X `x_ring`, `x_land`: circle | a ring at the Undercurrent and the X |
 | Motley (ostra) | Shift Trade `swap_fly`: swap; E seed: circle; X Main Attraction `x`: circle | a bolt and ring for the Trade, the seed node (HeroZones), a ring at the well |
 | Neve (rimewright) | spear zones: circle; E Cold Front: lane; X rink `x`: circle | nothing |
 | Meeko (tender) | burr circles; X `x`, `x_me`, `x_pick`: circle | a bolt at the X pick |
 | Sable (thief) | Dark Bola ground rings `gnd2<n>`: circle; X `ult`, `ult_rim`: circle | a ring at the X |
 
-`--aimkit-check` round-trips every shape kind through JSON onto a remote copy; `--remote-anim-check` asserts,
+`--aimkit-check` round-trips every shape kind through JSON onto a remote copy; `--remote-anim-1|2|3|rest-check` assert,
 per shape kind, that every `all` telegraph up 0.15 s or more in each kit's casts shows on the other game;
 `--tele-net-shots --shots-dir=<dir>` (GPU, jobq) screenshots a foe's view of a few (docs/shots/tele-net: Lace's Hemline arc, Tenzo's held slam and E tells, Albert's E zone, from a GPU worker).

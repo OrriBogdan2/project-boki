@@ -435,6 +435,7 @@ func _swap_end(go: bool) -> void:
 		return
 	swaps += 1
 	vfx("trade_fold", from)
+	vfx("trade_swap", from)      # the spot he left sucks in (the landing rings out: trade_arrive)
 	if rank("dash") >= 3:
 		_shield_allies(from, dd)
 	_trade_bodies(land, from, float(dd["radius"]))
@@ -503,7 +504,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var wind := float(rmb_def()["snap"]["wind"])
 	snap = {"t": wind, "T": wind}
 	play("ostra_snap_wind")
-	m.sfx("os_snap_wind", h.pos, -5.0, 1.0)
+	KitWindup.play(self, "rmb", "os_snap_wind", -5.0)
 
 func _tick_snap(dt: float) -> void:
 	snap["t"] = float(snap["t"]) - dt
@@ -511,6 +512,7 @@ func _tick_snap(dt: float) -> void:
 	KitLooks.of(m).hold_on("os_snaporb", "dark", h, _hand(), lerpf(0.5, 1.3, grown))
 	if h.downed or h.stun_t > 0.0:
 		snap = {}
+		KitWindup.broken(self, "rmb")
 		return
 	if float(snap["t"]) <= 0.0:
 		snap = {}
@@ -527,21 +529,22 @@ func _snap_release() -> void:
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
 	var spd := float(sn["speed"])
 	var rng := AimMode.dist(h, float(sn["range"]), AimMode.MAX)
-	m.spawn_shot(
-		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), SEA,
-		{"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
-	)
+	var extra := {"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
+	ShotOrigin.draw_from(extra, h, "rmb")      # out of her orb hand
+	m.spawn_shot(h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), SEA, extra)
 	HeroVfx.of(m).trail(h, "snap_trail", KitLooks.of(m).skin(m.shots[-1], "spear"))
 	_boost(float(sn["boost"]["cast"]))
-	vfx("snap_cast", start, dir)
+	vfx("snap_cast", extra.get("hand", start), dir)
 	AimKit.hide(h, "snap")
 
 ## The bundle stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. The stun reads on
 ## anyone (the training dummy too): stars over the head for as long as it lasts.
 func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
-	vfx("snap_hit", at, null, {"hit": e != null})
+	vfx("snap_hit", at)
 	if e == null:
+		vfx("snap_miss", at)      # no one hit: the spring sags out of the spear
 		return
+	vfx("snap_struck", at)      # the crown stun, a look of its own so every game hears it
 	var sn: Dictionary = rmb_def()["snap"]
 	var st: Vector3 = s["start"]
 	var kd := clampf(Vector2(at.x - st.x, at.z - st.z).length() / float(sn["range"]), 0.0, 1.0)
@@ -549,7 +552,6 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	s["x"]["stun"] = stun
 	s["x"]["dr"] = true
 	_boost(float(sn["boost"]["hit"]))
-	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Gag Gift
 ## Where a ground cast (the seed, the well) starts: his feet, or the floor under him in a jump, a fall or a
@@ -667,6 +669,7 @@ func _pop(hit: bool) -> void:
 	if (m.net_on or HeroZones.capture) and not h.remote:
 		HeroZones.tx(m, ["zone", "pop", sid])
 	if not hit:
+		vfx("seed_fizz", p)      # gone unpopped: the crank unwinds
 		return
 	pops += 1
 	play("ostra_pop")

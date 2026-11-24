@@ -296,7 +296,7 @@ static func _pattern(shape: String, k: int, j: int, segs: int, um: float, cloth:
 		"wing":
 			return stripe if k % 4 == 1 or k % 4 == 2 else (edge if k == 0 or k == segs - 1 else cloth)
 		"leaf":
-			if k == segs / 2 - 1 or k == segs / 2: return stripe          # the midrib
+			if k == int(segs / 2.0) - 1 or k == int(segs / 2.0): return stripe          # the midrib
 			if j == 1 and k % 3 == 0: return cloth.lerp(stripe, 0.55)      # side veins
 			return edge if um > 0.88 else cloth
 		"bat":
@@ -311,7 +311,7 @@ static func _pattern(shape: String, k: int, j: int, segs: int, um: float, cloth:
 			if j == 1 and absf(um - 0.5) < 0.2: return stripe.lerp(cloth, 0.55)
 			return cloth.lerp(edge, 0.12 * j)
 		"crane":
-			if k == segs / 4 or k == segs - 1 - segs / 4: return edge          # the fold lines
+			if k == int(segs / 4.0) or k == segs - 1 - int(segs / 4.0): return edge          # the fold lines
 			if j == 1 and absf(um - 0.55) < 0.1: return stripe              # a stamp on each wing
 			return cloth.darkened(0.08 * j)                                 # each fold catches less light
 		"boki":

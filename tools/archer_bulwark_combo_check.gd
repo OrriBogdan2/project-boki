@@ -11,6 +11,7 @@ const HOLD := preload("res://tools/hold_release_check.gd")      # how Lace's and
 const IVORY_HUE := 10.0
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
 	main_node.set_meta("hero_combo_check", self)
@@ -971,9 +972,9 @@ func _archer_combos() -> void:
 func _impact_looks(stun_s: float) -> void:
 	var mv: Dictionary = HeroVfx.data("archer")["moves"]
 	var hit := _flare_reach(mv["heavy_hit"], 1.0)
-	var tap := _flare_reach(mv["heavy_hit"], 0.0)
+	var tap_v := _flare_reach(mv["heavy_hit"], 0.0)
 	var pin := _flare_reach(mv["heavy_pin"], 1.0)
-	ok("pin look: full-charge hit burst %.1f m is wider than an uncharged one %.1f m" % [hit, tap], hit > 1.2 * tap)
+	ok("pin look: full-charge hit burst %.1f m is wider than an uncharged one %.1f m" % [hit, tap_v], hit > 1.2 * tap_v)
 	ok("pin look: the wall pin burst %.1f m beats the plain hit %.1f m" % [pin, hit], pin > 1.3 * hit)
 	for move: String in ["heavy_hit", "heavy_pin"]:
 		var core := false
@@ -1096,8 +1097,10 @@ func _bulwark_combos() -> void:
 		"bjorn aim: the hammer lands at the cursor (5m) and stays planted",
 		K.throws == thr0 + 1 and String(
 			K.mace.get("st", "")
-		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and K.fx.beacon.visible and not AimKit.shown(P, "aim"),
-		"throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d, K.fx.beacon.visible]
+		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and HeroVfx.of(m).holding(P, "plant_beacon")
+		and not AimKit.shown(P, "aim"),
+		"throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d,
+			HeroVfx.of(m).holding(P, "plant_beacon")]
 	)
 	# (past "rope.max_t" s the rope reels it home: tools/albert_feel_check.gd)
 	step(m, float(K.lmb_def()["rope"]["max_t"]) - 1.5)
@@ -1124,7 +1127,8 @@ func _bulwark_combos() -> void:
 	P.ak.use_e()
 	ok(
 		"bjorn E: with the hammer in hand it comes down on him, the column and circle shown",
-		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5 and K.fx.column.visible,
+		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5
+			and HeroVfx.of(m).holding(P, "mend_fall"),
 		"mend %s" % str(K.mend.get("pos"))
 	)
 	step(m, 0.1)
@@ -1132,10 +1136,14 @@ func _bulwark_combos() -> void:
 		"bjorn E: the landing circle shows for everyone while it comes down",
 		AimKit.shown(P, "e") and bool(AimKit.entry(P, "e").get("all", false))
 	)
-	ok("bjorn E: the zone ring and the column are in his own colour, not a heal green",
+	ok("bjorn E: the zone ring is in his own colour, not a heal green, and the column is his ivory data (mend_fall)",
 		AimKit.entry(P, "e").get("col") == AimKit.hero_col(P)
-		and (K.fx.disc.material_override as ShaderMaterial).get_shader_parameter("color") == AimKit.hero_col(P))
-	step(m, 5.0)
+		and HeroVfx.data("bulwark")["moves"]["mend_fall"]["fx"][0]["c"] == "ivory")
+	step(m, 1.2)
+	ok("bjorn E: the standing zone is HeroVfx data (mend_zone: rising ivory specks inside his rim, no fill)",
+		HeroVfx.of(m).holding(P, "mend_zone") and not HeroVfx.of(m).holding(P, "mend_fall"),
+		"zone %s fall %s" % [HeroVfx.of(m).holding(P, "mend_zone"), HeroVfx.of(m).holding(P, "mend_fall")])
+	step(m, 3.8)
 	ok("bjorn E: the zone ends after the column (1s) and 4s of ticks", K.mend.is_empty())
 	P.fire_cd = 0.0
 	_clear_wall(m, home, lv, 3)
@@ -1457,31 +1465,26 @@ func _bulwark_combos() -> void:
 		)
 	CombatBus.dash_reset_cue.disconnect(on_cue)
 	P.slot_lv["dash"] = 1
-	# Guard at 50: the Full Ahead ends in a Shield Slam (stun 0.6, spends the Guard)
+	# the source kit: Shift behind the shield is the Bash on the source's 6 s cooldown; no Guard meter, no Shield Slam
 	step(m, 1.0)
 	reset.call()
-	K.res = 80.0
-	var guard_before := K.res
-	var slams_before := K.shield_slams
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.3, func(): P.inp["sec_hold"] = true; K.res = maxf(K.res, 80.0))
-	guard_before = K.res
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	var cd_full := float(K.cd["rmb"])
 	P.do_dash()
 	step(m, 0.5, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	step(m, 0.2)
 	ok(
-		"combo bulwark: Guard 50 + Shift behind the shield = Shield Slam, Guard spent",
-		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
-		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
+		"combo bulwark: Shift behind the shield = the Bash (6 s cooldown), no Guard meter, no Shield Slam",
+		float(K.rmb_def()["cooldown"]) == 6.0 and float(K.cd["rmb"]) > 4.5 and cd_full <= 0.0
+				and not K.has_meter() and not K.d["rmb"].has("slam"),
+		"cd %.2f" % float(K.cd["rmb"])
 	)
-	ok("bulwark vfx: the Full Ahead and Slam play their looks, the slam fan at the cone's angle",
-		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
-		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
+	ok("bulwark vfx: the Full Ahead plays its look; no Shield Slam look is left",
+		int(hv.plays.get("charge_go", 0)) >= 1 and not hv.plays.has("slam"),
 		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
-	ok("bulwark vfx: the Shield Slam fan and its flare are his ivory, not Kael's orange", _off_ivory("slam").is_empty(),
-		str(_off_ivory("slam")))
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()
@@ -1508,10 +1511,10 @@ func _bulwark_combos() -> void:
 	_clear_wall(m, home, lv, 3)
 	c0 = K.crushes
 	var ox := T.pos.x
-	var hold := func():
+	var hold_v := func():
 		P.inp["fire"] = true
 		aim_at(P, T.pos)
-	step(m, 1.55, hold)
+	step(m, 1.55, hold_v)
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(

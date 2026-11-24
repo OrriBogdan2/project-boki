@@ -14,10 +14,10 @@ Run: `godot --headless --path . -- --bot-kit-use[=<arch>] [--kit-use-t=120] [--k
 | Kael | E recast | Short Leash pulled in once hooked (`chain reel`) |
 | Mossy | RMB hold | Aegis raised (hold-only: a tap does nothing) |
 | Mossy | LMB | Hammer thrown (`hammer throw`) and recalled (`hammer recall`) |
-| Mossy | Shift behind the aegis | Full Ahead (`shield charge`), a Shield Slam at 50 Guard (`shield slam`, rare in a short duel) |
+| Mossy | Shift behind the aegis | Full Ahead (`shield charge`) |
 | Neve | Shift hold | Skate (`skate`) |
 | Neve | E recast | Cold Front frozen while it slides (`rink freeze`) |
-| Tenzo | Shift recast | Rock Hop hops after the first of a chain (`hop recast`) |
+| Tenzo | Shift recast | Leap of Faith hops after the first of a chain (`hop recast`) |
 | Cinder | E | Molten Hug drags foes in (`cloak pull`) |
 
 **Cinder and Gil rows.** Cinder's stream hits are tagged `flame`, so they count as LMB hits (before, the column read 1 while the bots held the stream all duel: about 900 hits a 3-seed run). Gil's bot used to press and release RMB inside one step, so no kit step saw the key down; it now holds the key `BOT_TAP` (0.1 s, still a tap) through `bot_hold` like the other kits.
@@ -37,7 +37,7 @@ Run: `godot --headless --path . -- --bot-kit-use[=<arch>] [--kit-use-t=120] [--k
 | Sparkle (`mage`) | 273 | 12 | 0 | 17 | 29 | 9 | 5 | 56 | 158 |  |
 | Grimble (`dredge`) | 2346 | 43 | 0 | 33 | 62 | 42 | 14 | 26 | 62 |  |
 | Sable (`thief`) | 321 | 68 | 0 | 45 | 33 | 18 | 7 | 63 | 126 |  |
-| Mossy (`bulwark`) | 21 | 167 | 166 | 0 | 13 | 0 | 0 | 45 | 151 | shield charge 1, hammer throw 1, hammer recall 1, shield slam 0 |
+| Mossy (`bulwark`) | 21 | 167 | 166 | 0 | 13 | 0 | 0 | 45 | 151 | shield charge 1, hammer throw 1, hammer recall 1 |
 
 Never used: Kael's perfect release (1 of 14 holds) and the Short Leash pull (1 reel for 30 hooks); Mossy's hammer (1 throw, then it lay on the ground for good because nothing recalled it, and the ultimate); Neve's Cold Front freeze; Lace's ultimate.
 
@@ -56,10 +56,10 @@ Never used: Kael's perfect release (1 of 14 holds) and the Short Leash pull (1 r
 | Sparkle (`mage`) | 273 | 12 | 0 | 17 | 29 | 9 | 5 | 56 | 158 |  |
 | Grimble (`dredge`) | 2346 | 43 | 0 | 33 | 62 | 42 | 14 | 26 | 62 |  |
 | Sable (`thief`) | 321 | 68 | 0 | 45 | 33 | 18 | 7 | 63 | 126 |  |
-| Mossy (`bulwark`) | 48 | 207 | 204 | 1 | 21 | 4 | 2 | 85 | 76 | shield charge 11, hammer throw 9, hammer recall 4, shield slam 1 |
+| Mossy (`bulwark`) | 48 | 207 | 204 | 1 | 21 | 4 | 2 | 85 | 76 | shield charge 11, hammer throw 9, hammer recall 4 |
 | Gil (`gil`) | 716 | 100 | 0 | 108 | 52 | 272 | 6 | 7 | 83 |  |
 
-**Gil (13th Hunter, 0.24.4; run on 0.24.4 main plus the fix below, seeds 3, 5, 9, 120 s).** Every column is used: the bag, the Riptide spin and spout, the Tidal Wave, Ground Swim and the glide. The check had one red on him: `rmb press` was 0, because `bot_use` pressed and released RMB in one step and no kit step saw the key down. It now sets `bot_hold["rmb"] = BOT_TAP` (0.1 s, still a tap under the 0.25 s hold) like the other kits (`gil_kit.gd`, +3). He has no hold or recast special: bots never take the held (50% further) throw, by design of the tap. Outlier, not changed: 7 dashes in 120 s, the fewest of the 13 (Ostra 12, Vex 13; Ground Swim has an 8 s cooldown, so 7 over 6 fighter-duels means the bots rarely reach for it; cause not traced). Cinder's LMB reads 1 hit because the check counts shot and primary tags, not the flame stream (fix on `ext/combat-bot-kit-use-reds`, not part of this change).
+**Gil (13th Hunter, 0.24.4; run on 0.24.4 main plus the fix below, seeds 3, 5, 9, 120 s).** Every column is used: the bag, the Riptide spin and spout, the Surf's Up, Deep End and the glide. The check had one red on him: `rmb press` was 0, because `bot_use` pressed and released RMB in one step and no kit step saw the key down. It now sets `bot_hold["rmb"] = BOT_TAP` (0.1 s, still a tap under the 0.25 s hold) like the other kits (`gil_kit.gd`, +3). He has no hold or recast special: bots never take the held (50% further) throw, by design of the tap. Outlier, not changed: 7 dashes in 120 s, the fewest of the 13 (Ostra 12, Vex 13; Deep End has an 8 s cooldown, so 7 over 6 fighter-duels means the bots rarely reach for it; cause not traced). Cinder's LMB reads 1 hit because the check counts shot and primary tags, not the flame stream (fix on `ext/combat-bot-kit-use-reds`, not part of this change).
 
 ## What changed (bot code only; no kit numbers)
 
@@ -67,11 +67,11 @@ Never used: Kael's perfect release (1 of 14 holds) and the Short Leash pull (1 r
 - **Mossy** (`bulwark_kit.gd`): the thrown hammer is recalled from the ground after 0.8 s (it used to stay out and block every other LMB); throws at a foe 3.6 m or more away; holds the Aegis 1.2 s up close so the Shift press is a Full Ahead (80% when the aegis is up); presses the ultimate at 4 to 13 m.
 - **Neve** (`rimewright_kit.gd`): the bot schedules the freeze 0.15 to 0.45 s into the wall's slide (its decision tick, 0.9 to 2.2 s, never landed inside the slide of 1 s or less).
 - **Lace** (`archer_kit.gd`): presses the ultimate at 4 to 14 m.
-- Unchanged and already fine: Tenzo's Rock Hop recasts (21), every Hunter's dash and glide.
+- Unchanged and already fine: Tenzo's Leap of Faith recasts (21), every Hunter's dash and glide.
 - **Cinder** (`ashwick_kit.gd`, `bot.gd`): the "1 LMB hit" in the Before table was mostly a counting gap: the hose's hits are tagged `flame`, which the check never counted as LMB, so it now reads the kit's `hose_hits` counter (887 ticks with the old bot). The bot also stood at 5.5 to 7 m against a 6.1 m stream, so many held ticks fell short. A kit hook `ArchKit.bot_reach()` (0 = the weapon's range) lets Cinder say her stream ends at 5.7 m: the shared bot brain closes in until the foe is inside it (preferred gap 4.2 m) and holds LMB only within it. Standing closer also puts foes in the 4.5 m Molten Hug more often (the existing E rule: cast when a foe is under 4 m; cloak pull 49 to 55). LMB 991 to 1216 over the same seeds.
-- **Meeko** (`tender_kit.gd`): `_bot_call` casts Rise and Shine (R) on a downed teammate, or one under 35% HP, in the 11.6 m reach once no rival Hunter is within 3 m of her; with no teammate in the match (a duel) it lights the tether on herself below 70% HP, as the player's key does in solo play (R 0 to 5). The check no longer skips Meeko's ultimate. The teammate path has no duel to exercise it; `--tender-combo-check` covers the tether.
-- Open: Gil (`gil`) is new in this table's check and fails `rmb press` (0 presses; its Grab Bag is never raised by the bot). Not in this pass.
-- Unchanged and already fine: Tenzo's Rock Hop recasts (21), Cinder's E pull (34), every Hunter's dash and glide. Meeko's ultimate heals a teammate, so the duel has none and the check skips it.
+- **Meeko** (`tender_kit.gd`): `_bot_call` casts Rise and Shine (R) on a downed teammate, or one under 35% HP, in the 11.6 m reach once no rival Hunter is within 3 m of her; with no teammate in the match (a duel) it does not press: Rise and Shine needs an ally in reach and refuses a self cast (since 11-12, b0f53485ead), so the self-tether this pass added was removed in ext/combat-gil-bot-grabbag. The duel check skips Meeko's ultimate (`NO_DUEL_ULT`); `--kit-use-match` and `--care-ult-check` cover it. The teammate path has no duel to exercise it; `--tender-combo-check` covers the tether.
+- Gil (`gil`): `rmb press` was 0 in the first run of this table (the bot pressed and released RMB inside one step); it holds the key `BOT_TAP` now, see the Gil bot section below.
+- Unchanged and already fine: Tenzo's Leap of Faith recasts (21), Cinder's E pull (34), every Hunter's dash and glide. Meeko's ultimate heals a teammate, so the duel has none and the check skips it.
 
 ## Lead casts: Motley and Tenzo (ext/bot-kit-lead-casts)
 
@@ -90,7 +90,23 @@ Both runs below use `--bot-kit-use=<arch>` (seeds 3, 5, 9, 120 s, both fighters 
 | Tenzo Rock Bottom | 25 hits / 14 slams | 35 hits / 18 slams |
 | Tenzo Foothold | 0 rock hits / 10 rocks raised, 7 launched | 4 rock hits / 31 raised, 27 launched |
 
-The Snap did not change: the bots' general aim already leads the target by the weapon's speed, so the cast aimed the same way; with the lead held through the wind-up it lands as often (28 of 38). The audit's other claims stand: Cinder's flamethrower and Meeko's R are not in this change.
+The Snap did not change: the bots' general aim already leads the target by the weapon's speed, so the cast aimed the same way; with the lead held through the wind-up it lands as often (28 of 38). Cinder's flamethrower and Meeko's R are in the bullets above (ext/bot-kit-cinder-meeko).
+
+## The landing gate (ext/bot-kit-lands)
+
+`ext/bot-kit-use-a` reached main (11-09); `ext/bot-kit-use` and `-b` did not (named in the stuck-integ READY lines, never merged), so main kept the counting gaps above. `ext/bot-kit-lead-casts` and `ext/bot-kit-cinder-meeko` (11-11) fixed the four Hunters but were two unmerged branches; this branch carries both, and adds the gate.
+
+**Gate.** Each duel (each seed) must land every damage slot at least once in its first 90 s (`LAND_T`), not just the three seeds summed: LMB for every Hunter (a hit tagged `primary`, a `shot`, or a cast `ab:primary`, which is how Cinder's `flame` stream now counts, so the kit's `hose_hits` test counter is gone), plus `LANDS` per Hunter: Cinder Spitfire and Molten Hug (`ab:utility`, `ab:k1`), Meeko Stick Around (`ab:utility`; her R heals, so it stays an `ultimate` press), Tenzo Rock Bottom and Foothold rocks (`ab:rmb`, `ab:rock`), Motley Stage Fright and Gag Gift (`ab:rmb`, `ab:e`). A miss prints `KITUSE miss <arch> seed <n>: '<key>' lands no hit in 90 s (miss 1)`; one miss per slot per Hunter over the seeds is allowed (`MISS_OK`), the second turns it into `KITUSE FAIL`. Why (11-13): main's ult pass (`ULT_LOOK_S`/`ULT_EAGER_ABIL` in `bot.gd`) has Tenzo ulting 3 to 7 times in 90 s, and her rock hits per seed swing 0 to 9 with the run order (Tenzo seed 5: 9 alone, 0 or 1 after the other Hunters; Motley seed 9 Gag Gift the same), so strict per-seed went red on noise. Two misses of three still catch a slot the bot never lands. The alternative, kept open: tune Tenzo and Motley so the row and Gag Gift land between ults, then set `MISS_OK` back to 0.
+
+**Foothold.** The gate failed Tenzo on seed 5 in a `--bot-kit-use=dolm` run (no rock hit in the duel; 8 rock hits over all three; one seed's RNG depends on the runs before it, so a single-Hunter run and the full run differ). Traced: the row went up 3 times in 90 s for both fighters, and after it rose the bot never punched it, because the row blocks the shot line and the shared bot brain only holds LMB with a clear shot. Now, in `dolm_kit.gd` only: while any rock stands, the bot checks every step (not only with LMB held) whether its nearest rock lines up with the foe's lead spot (the rock's own speed and range), aims the punch from that rock to the spot, and only when the foe is past the rock (a rock only flies away from her); and it raises the row whenever the foe is 3.5 to 9 m away with a shot line (was 60% of those thinks).
+
+| (seeds 3, 5, 9, 120 s, full run) | Before this branch | After |
+|---|---|---|
+| Tenzo Foothold rock hits | 6 | 12 (each seed lands by 90 s) |
+| Tenzo Rock Bottom hits | 30 | 32 |
+
+Every Hunter passes the gate on seeds 3, 5, 9, and Tenzo, Motley and Cinder on seeds 1, 2, 4, 6, 7, 8 too. bot.gd does not grow: the Cinder reach hook is 2 lines, and two comments next to it were merged.
+
 ## Ultimate and Boki in a match
 
 The duels above count presses; they don't say whether a bot fires its ultimate when it matters or brings its Boki to a fight. `--bot-kit-use --kit-use-match` (tools/bot_ult_use.gd) plays **one seeded 10-trio match per seed (3 and 5, 300 s each, bot difficulty "medium", every Hunter a bot)** with every Hunter raised to level 6 at the start, so the ultimate is open from the first fight. It takes about 3.5 minutes a seed.
@@ -160,4 +176,23 @@ No failures. Runs differ (the bots roll unseeded random numbers), so a row can m
 - **Gil** (`gil_kit.gd`): aims the Surf's Up at the rival (it rolled along whatever the bot was facing).
 - **Albert** (`bulwark_kit.gd`): the Groundswell before the E and from 1.5 m (its lane starts at his feet; a rival closer than 4 m never got one).
 - **Grimble** (`dredge_kit.gd`): the Broadside from 0.8 of its range (4.7 m) instead of 3.5 m.
-- Meeko's Rise and Shine is unchanged (it waits for a hurt teammate); Lace, Kael, Cinder, Neve, Sable were already on time.
+- Meeko's Rise and Shine is unchanged by this pass (see ext/bot-kit-cinder-meeko above); Lace, Kael, Cinder, Neve, Sable were already on time.
+
+## Gil's Grab Bag (ext/combat-gil-bot-grabbag)
+
+The "Open" line this replaced said the bot never raises Gil's Grab Bag. That was true of the first run and is not true of main: `gil_kit.gd bot_use` has thrown the potion since the `BOT_TAP` fix (`bot_hold["rmb"] = BOT_TAP`, then `press_rmb()`, when a charge is ready, there is a line of sight and the rival is within the bag's 8 m plus 1 m). The Grab Bag throws at the cursor and has no self effect (docs/heroes/gil.md), so there is nothing to throw at himself when hurt. No code was added.
+
+`--bot-kit-use` on origin/main 0a0db9747c (seeds 3, 5, 9, 120 s, both fighters counted; the bots roll random numbers, so a count moves between runs):
+
+| Gil (`gil`) | RMB presses | RMB holds | RMB hits (`utility`) |
+|---|---|---|---|
+| First run of the table (bot pressed and released in one step) | 0 | 0 | |
+| After the `BOT_TAP` fix (table above) | 100 | 0 | 108 |
+| origin/main 0a0db9747c, `--bot-kit-use=gil` | 158 | 0 | 108 |
+| origin/main 0a0db9747c, full `--bot-kit-use` | 117 | 0 | 82 |
+
+Other kits in the full run keep their rows (RMB presses 134 Lace, 159 Kael, 70 Vex, 172 Mossy, 47 Neve, 61 Cinder, 38 Tenzo, 34 Sparkle, 31 Grimble, 54 Meeko, 89 Sable, 36 Motley).
+
+**The all-Hunter ultimate red, fixed.** On 0a0db9747c the full run failed `never uses 'ultimate'` for 12 of the 13 Hunters (only Motley cast one, once). The ult opens at level 6 (`Hunter.ULT_AT`), and in the duel room a fighter only gains XP from knocks (90 each): about level 3 or 4 by 120 s, so the ult never opened. `bot_kit_use_check.gd` now raises both fighters to level 6 at the start of each duel, the way `--kit-use-match` (`bot_ult_use.gd`) already does. Meeko stayed at 0: her Rise and Shine needs an ally (see the Meeko line above), so the check skips her duel ultimate and her bot no longer presses a key the kit refuses.
+
+Full `--bot-kit-use` (seeds 3, 5, 9, 120 s) after the fix: **0 failures** (was 12). Ultimates: Lace 12, Kael 31, Vex 18, Albert 20, Neve 12, Cinder 23, Tenzo 18, Sparkle 14, Grimble 37, Sable 22, Motley 12, Gil 12 (Meeko 0, skipped). Gil's row: LMB hits 487, RMB presses 118, RMB hits 72, E 46, E hits 253. Level 6 gives the fighters more health and power (`LevelGrowth`), so the other columns move a little from the table above; no slot fell to 0.

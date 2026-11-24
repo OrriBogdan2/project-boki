@@ -42,7 +42,7 @@ func _kitefall() -> void:
 	marks.append([1.3, "full", "ult_key",
 			"Stormfall key frame: the gold landing circle flashes as she streaks down onto it", _landing])
 	marks.append([1.43, "full", "ult_impact",
-			"Stormfall impact: a gold pillar out of the sky, shock rings, sparks; the target knocked back with Static",
+			"Stormfall impact: a gold pillar out of the sky, shock rings, sparks; the target gains Static (no knock)",
 			_landing])
 	await vs._go(2.0, each, marks)
 

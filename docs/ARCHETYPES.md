@@ -29,7 +29,7 @@ repo (`sv/`, see AGENTS.md); public docs and data keep the labels.
 | **Weight class** (light, medium, heavy) | HP, run speed, mass and knockback, glide heat, **dash charges and recharge**, air dash | `Data.CLASSES` (unchanged) |
 | **Archetype** (2 per weight) | silhouette, **weapon family (LMB + RMB)**, **passive** (and its resource, if any), **E**, **R**, **dash shape** | new core data `content/archetypes/<id>.json` (reviewed, not community-authored) |
 | **Weapon** (2 per archetype) | LMB firing pattern, and the RMB's flavour within the archetype's verb | `content/weapons/*.json` (+ a `archetype` field) |
-| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (C), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
+| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (C), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin/*.json` (+ an optional `infusion` field) |
 | **Glove** (loot) | Q active, or passive stats | `content/gear` (unchanged) |
 
 | Weight | Archetypes | Charges / recharge (from the class) |
@@ -100,7 +100,7 @@ already exists), `ult` (R). Ranks stay 3/3/3/3/2.
 | Mage | **Heat** | casting | risk meter (overheat Vents) |
 | Gunslinger | **Chambers** | weapon hits | six-count |
 | Juggernaut | **Rage** | dealing and taking damage | brawl meter |
-| Bulwark | **Guard** | blocking | defence meter |
+| Bulwark | **Crushed** | knocking a foe into a wall | none (no meter) |
 
   The Gunslinger's is the lightest. If playtests show six resources is too much to read, cut that one first.
 
@@ -113,6 +113,15 @@ Priority when several apply: **resource full > during R > during E > airborne or
 - Variants share one cooldown unless stated otherwise.
 - Each variant is a normal grammar AbilitySpec (`from: owner`). The archetype's input router picks
   which one fires. The executor (Phase 2) only ever runs plain stages.
+
+### 3.3b Ability words: one reader
+
+`AbilityText` (`scripts/arch/ability_text.gd`) is the only code that reads a slot's name, short name,
+one-line text and full description from `content/archetypes/*.json`. The HUD slot and tooltip, the kit
+card and strip, the viewer, the pick and the E hint all call it. Texts hold `{action}` (the
+player's own key via `Settings.key_cap`, never a letter: `dash`, `secondary`, `signature`, `fire`) and
+`{slot.field}` (a number from the same JSON, e.g. `{e.time}`). `--ability-text-check` holds all twelve
+kits to one name and one set of numbers in every context, with the keys rebound.
 
 ### 3.4 Run levels and unlocks
 
@@ -688,7 +697,6 @@ on the shield icon.
 | tap | **Bash** (6s): a 2.5m, 90° cone, 10 damage, push 8. Stun 0.8 into a wall |
 | airborne / gliding | **Shield Surf**: hold to block from the front while gliding (frontal hits can't spike you); glider heat builds 25% faster while it's up |
 | during E (inside the Banner's radius) | the shield is +1.5m wider (it covers allies), and a Bash heals allies behind you 8 |
-| Guard 50+ | the Bash becomes **Shield Slam** (spends 50): push 12 and stun 0.6 even without a wall. A 0.3s shield flare is the tell |
 
 **E: Rally Banner** (18s, utility): plant a banner totem up to 7m away for 6s (60 HP, 4m radius).
 Allies inside get a shield of 6 per second (max 24). Foes inside are slowed 0.2.
@@ -718,8 +726,7 @@ whoever dives → Bastion when the squad is collapsing (bigger with more Guard).
 | E | the Banner's radius is 5m |
 | R rank 2 | the dome is 5.5m |
 
-**Counterplay:** flank the frontal shield. Glowing runes mean a Shield Slam is ready, so stay off the
-front. Break the Banner (60 HP). Melee inside Bastion.
+**Counterplay:** flank the frontal shield. Stay off the front. Break the Banner (60 HP). Melee inside Bastion.
 
 **Kin modifiers:**
 
@@ -768,7 +775,7 @@ front. Break the Banner (60 HP). Melee inside Bastion.
 - Kinfall: `docs/KIN_GRAMMAR.md`, `docs/ABILITIES.md`, `docs/KINFALL_CLASSES.md`,
   `sv/DATA.md` (§7 levels), `docs/DASHES_AND_ABILITY_FEEL.md`, `scripts/core/data.gd`,
   `scripts/core/game.gd` (binds), `scripts/match/hunter.gd` (XP_TO, ULT_AT, slot_lv),
-  `scripts/ui/hud.gd` (portrait cluster), `content/weapons`, `content/kin_v2`
+  `scripts/ui/hud.gd` (portrait cluster), `content/weapons`, `content/kin`
 - The reference structure references (public wiki): kit layout and contextual RMB, e.g.
   ref-juggernaut (tap, hold, airborne and during-Q RMB variants),
   ref-bulwark (shield + Shift context), and build-up passives such as
@@ -988,7 +995,7 @@ above is superseded by this:
 | Slot | What it does |
 |---|---|
 | LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (no stun); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
-| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
+| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). |
 | Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Full Ahead**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
 | Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Full Ahead or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
 | E | **Safe Harbour**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
@@ -997,8 +1004,7 @@ above is superseded by this:
 - Loop: raise the shield into their fire (Guard) -> Full Ahead or Slam them into a wall or into
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
   Throw the mace to scout a corner, then Safe Harbour on it.
-- Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
-  shield burns gold. Payoff: `pay_slam`, T4.
+- Tells: none for a meter (it has none). Payoff: `pay_slam`, T4.
 - Bots: shield toward whoever is shooting, Bash up close, Full Ahead / Whirl in from 1.5-4.5m,
   Safe Harbour when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.

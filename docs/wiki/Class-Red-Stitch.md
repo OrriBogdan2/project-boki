@@ -89,7 +89,7 @@ What the in-game kit card (K) says.
 
 **Hemline (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-10.8m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Pin Down that knocks a burning foe Cremates them: +10 and a longer burn.
 
-**Finishing Touch (hunter ultimate, from level 6, 60s cooldown).** Press: a big arrow leaves your bow at once, and your next 2 presses within 6s loose another (1s apart, no draw). Each flies 18m, pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
+**Finishing Touch (hunter ultimate, from level 6, 60s cooldown).** Press: a big arrow leaves your bow at once, and your next 2 presses within 6s loose another (1s apart, no draw). Each flies 18m, pierces every foe and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
 
 ### Ranks
 
@@ -100,6 +100,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 16s -> 13s, damage +20%. | cooldown 16s -> 10s, damage +40%; flies 3m farther and a wall stun gives a dash charge. |
 | Dash (Shift) | recharge 9.5s -> 8.5s per charge. | recharge 9.5s -> 7.5s per charge; Slip Stitch lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
 | E | cooldown 15s -> 13s, damage +30%. | cooldown 15s -> 9s, damage +60%; the Hemline is 30% wider. |
+| R (ultimate) | Finishing Touch cooldown 60s -> 55s, damage 18 -> 19.8, last-shot damage 23.3 -> 25.63. The Fusion lasts 30% longer. | Finishing Touch cooldown 60s -> 50s, damage 18 -> 21.6, last-shot damage 23.3 -> 27.96. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.
 

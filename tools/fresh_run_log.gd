@@ -136,7 +136,7 @@ func _farm_step(home, id: String) -> void:
 	for s in int(HOLD_S):
 		for i in 10:
 			g.tick(0.1)
-		var txt: String = g.hint_lbl.text if g.hint_visible() else ""
+		var txt: String = g.hint_text()
 		silent = 0.0 if txt != "" else silent + 1.0
 		var marker := "none (no place)"
 		if place:

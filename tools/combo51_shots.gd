@@ -546,8 +546,7 @@ func _mage_audit() -> void:
 		P.inp["e_down"] = t < 0.6
 	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
 	var marks := [
-		[0.45, "full", "audit_skycall_held",
-			"Sparkle Undercurrent held (audit: the data's hold, drag, release): the drag"
+		[0.45, "full", "audit_skycall_held", "Sparkle Undercurrent held (audit: the data's hold, drag, release): the drag"
 			+ " arrow follows the cursor back toward her, the rim chevron points it; nothing commits while E is held",
 			at_t],
 		[0.9, "full", "audit_skycall_count", "Released at 0.6s: committed, the pillar narrows over the 0.8s countdown",

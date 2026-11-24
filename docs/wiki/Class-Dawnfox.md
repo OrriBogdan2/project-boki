@@ -85,7 +85,7 @@ What the in-game kit card (K) says.
 
 **Hearthlight (E, 11s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press it again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you like a teammate, and a downed teammate five times over.
 
-**Rise and Shine (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate or downed teammate inside the ring, the key does nothing and the cooldown is kept.
+**Rise and Shine (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them about 5 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether tops up their bleed-out (five times over) instead of their health. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate or downed teammate inside the ring, the key does nothing and the cooldown is kept.
 
 ### Ranks
 
@@ -96,6 +96,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | damage +40% (seed 9 -> 12.6, burst 32 -> 44.8). | cooldown 10.5s -> 7.8s, damage +40%; the roots last 0.3s longer (1.1s -> 1.4s), the burst is twice as wide (2.2m -> 4.4m) and takes half again as much from ability power. |
 | Dash (Shift) | recharge 7s -> 6.25s; the air glide 14s -> 12.5s. | recharge 7s -> 5.5s; the air glide 14s -> 11s; picking up a teammate refreshes your long air dash. |
 | E | healing +22.5% (ring 10 -> 12.3, bloom 22 -> 27). | cooldown 11s -> 8.3s, healing +50% (ring 10 -> 15, bloom 22 -> 33); the thrown light's healing boost is 100% instead of 50%. |
+| R (ultimate) | Rise and Shine cooldown 46s -> 42s, healing a second 5.3 -> 6.63. The Fusion lasts 30% longer. | Rise and Shine cooldown 46s -> 38s, healing a second 5.3 -> 7.95. |
 
 **Suggested level-up order** (what bots follow): E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > Glove (Q).
 

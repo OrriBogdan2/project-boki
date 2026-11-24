@@ -1,7 +1,7 @@
 class_name VisionHint
 extends RefCounted
-## The first-time line about the sight wedge (docs/specs/VISION_LOOK.md): the screen outside your sight goes dim
-## and blue, which can look broken. The first time a rival is hidden only because it stands outside the wedge, or
+## The first-time line about the sight wedge (docs/specs/VISION_LOOK.md): the screen outside your sight goes grey
+## like fog, which can look broken. The first time a rival is hidden only because it stands outside the wedge, or
 ## the player swings the aim fast enough that the dim area sweeps across the screen, Match._tips says it once
 ## per save (Save.d["tutorial"][KEY]), in the usual hint lane, and never with tips off or in the tutorial course.
 

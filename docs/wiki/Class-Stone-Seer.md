@@ -53,7 +53,7 @@ What the in-game kit card (K) says.
 
 **Rock Bottom (RMB, 11s cooldown).**
 
-- *Tap:* An instant slam just ahead, no hop: a slightly smaller circle, 14 damage and a shove; the centre stuns, rocks in the ring fly outward.
+- *Tap:* An instant slam just ahead, no hop: a slightly smaller circle and 14 damage; the centre stuns, rocks in the ring fly outward.
 - *Hold:* Hold up to 0.45s (it goes by itself at the end): sink into a crouch for a moment, then lob yourself about 2.5m forward and up, keeping part of your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
 - *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. Over the abyss the plunge stops 3m under the edge and you fall on, free to glide. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
 
@@ -70,6 +70,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 11s -> 10s, damage +24%. | cooldown 11s -> 9s, damage +48%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
 | Dash (Shift) | recharge 12s -> 10s per charge. | recharge 12s -> 10s; a second charge, and each hop goes a third further. |
 | E | cooldown 12.5s -> 11.5s. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
+| R (ultimate) | Backbone cooldown 45s -> 40s, lasts 7s -> 9.5s. The Fusion lasts 30% longer. | Backbone cooldown 45s -> 35s, lasts 7s -> 12s. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 
