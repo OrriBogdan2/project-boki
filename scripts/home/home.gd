@@ -458,7 +458,7 @@ func _ready_rest() -> void:
 	var roster: Array = _farm_kin() if not fs else []
 	for i in mini(roster.size(), 6):
 		var bed := Models.kin_bed(Data.KIN[roster[i]["species"]]["color"])
-		bed.position = Vector3(33.4 + (i % 3) * 1.1, 0, 27.6 + (i / 3) * 1.1)
+		bed.position = Vector3(33.4 + (i % 3) * 1.1, 0, 27.6 + (int(i / 3.0)) * 1.1)
 		add_child(bed)
 	await _slice()
 	_build_lots()
@@ -701,10 +701,10 @@ func _ready_rest() -> void:
 		var sps: Array = Data.common_kin()
 		for i in 12:
 			var rr := Save.new_kin(sps[i % sps.size()])
-			rr["level"] = [1, 4, 8, 12, 16, 22][i / 2]
+			rr["level"] = [1, 4, 8, 12, 16, 22][int(i / 2.0)]
 			Evo.simulate(rr, lr)
 			var kn := Models.kin(rr["species"], rr)
-			kn.position = Vector3(33.5 + (i % 6) * 1.7, 0, 32.5 + (i / 6) * 1.8)
+			kn.position = Vector3(33.5 + (i % 6) * 1.7, 0, 32.5 + (int(i / 6.0)) * 1.8)
 			kn.rotation.y = PI * 0.1
 			kn.scale *= 1.3
 			add_child(kn)
@@ -775,7 +775,8 @@ func _build_lots() -> void:
 		var at := _rect_center(rc)
 		var holder := Node3D.new(); holder.position = at; holder.rotation.y = int(pl["r"]) * PI * 0.5; add_child(holder)
 		var built := _has_b(b)
-		holder.add_child(Models.building(b) if built else FarmLots.look(b, _d()))
+		if not HubLayout.is_hub(visit):      # (the hub holds none: a side isle's lots would float in its void)
+			holder.add_child(Models.building(b) if built else FarmLots.look(b, _d()))
 		lots[b] = {"node": holder, "built": built, "at": at, "door": HomeLayout.door_at(b, int(pl["x"]), int(pl["z"]), int(pl["r"]))}
 		if not HomeLayout.placed(b, _d()):
 			# a farm-start lot you haven't marked out yet (build mode, Buildings)
@@ -949,13 +950,13 @@ func _build_plots() -> void:
 func _plot_spots(cap: int) -> Array:
 	var out: Array = []
 	if not fs:
-		for i in cap: out.append(Vector3(44.2 + (i % 2) * 2.2, 0, 30.8 + (i / 2) * 2.0))
+		for i in cap: out.append(Vector3(44.2 + (i % 2) * 2.2, 0, 30.8 + (int(i / 2.0)) * 2.0))
 		return out
 	for e in HomeLayout.fixtures(_d(), "farm"):
 		var c := HomeLayout.deco_center(e)
 		for j in 4:
 			if out.size() >= cap: break
-			out.append(c + Vector3(-1.1 + (j % 2) * 2.2, 0, -1.0 + (j / 2) * 2.0).rotated(Vector3.UP, int(e.get("r", 0)) * PI * 0.5))
+			out.append(c + Vector3(-1.1 + (j % 2) * 2.2, 0, -1.0 + (int(j / 2.0)) * 2.0).rotated(Vector3.UP, int(e.get("r", 0)) * PI * 0.5))
 	return out
 
 func _plot_node(arr: String, i: int) -> Node3D:
@@ -1008,7 +1009,7 @@ func add_kin(rec: Dictionary, isl: int, slot := -1) -> Dictionary:
 	n.add_child(lbl)
 	var kd := {"rec": rec, "node": n, "pos": at, "vel": Vector3.ZERO, "goal": Vector3.INF, "t": randf() * 3.0, "emote": lbl, "emote_t": 0.0, "hop": randf() * 6.0, "pers": _personality(rec)}
 	if isl == 0 and slot >= 0 and slot < 6:
-		kd["bed"] = Vector3(32.9 + (slot % 3) * 1.6, 0, 27.2 + (slot / 3) * 1.6)
+		kd["bed"] = Vector3(32.9 + (slot % 3) * 1.6, 0, 27.2 + (int(slot / 3.0)) * 1.6)
 	kins.append(kd)
 	return kd
 
@@ -1348,7 +1349,7 @@ func _move_player(d: float) -> void:
 			pvy = 0.0
 			gliding = false
 			Sfx.step(null, -16.0)
-		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)):
+		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)):
 			_respawn_safe()
 	else:
 		py = gh
@@ -1617,12 +1618,12 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 
 ## One step of rising up a ledge (the match's Hunter._ledge_rise): sets pvy while it lasts and
 ## returns true; false once it's over (moved off the face, dashed, glided, or timed out). A jump
-## near the top (Hunter.LRISE_WINDOW) flings you higher and faster toward your keys.
+## near the top (HunterFeel.lrise_window) flings you higher and faster toward your keys.
 func _ledge_float(d: float, mv: Vector2) -> bool:
 	lfl["t"] = float(lfl["t"]) + d
 	var n: Vector2 = lfl["n"]
 	var glide_now := Input.is_action_pressed("glide")
-	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > Hunter.LRISE_OFF
+	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > HunterFeel.lrise_off
 	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and mover.pressed(&"glide")):
 		lfl = {}
 		return false
@@ -1630,18 +1631,18 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 	var dir: Vector2 = mv.normalized() if mv.length() > 0.3 else n
 	if mover.pressed(&"jump") and panel_open == "":
 		# the fling: strong in the window near the top, weaker before it
-		var timed := left <= Hunter.LRISE_WINDOW
+		var timed := left <= HunterFeel.lrise_window
 		lfl = {}
 		var hv := Vector2(pvel.x, pvel.z)
-		var spd := Hunter.FLING_SPEED if timed else walk_speed()
+		var spd := HunterFeel.fling_speed if timed else walk_speed()
 		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
 		pvel = Vector3(hv.x, 0, hv.y)
-		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
+		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (HunterFeel.fling_height if timed else HunterFeel.fling_early_height)))
 		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
 		return true
 	if left <= 0.0:
 		lfl = {}
-		pvy = Hunter.LRISE_POP
+		pvy = HunterFeel.lrise_pop
 		if mv.length() > 0.3:
 			var hv := Vector2(pvel.x, pvel.z)
 			var run := walk_speed()
@@ -1649,7 +1650,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 			if mv.normalized().dot(n) > 0.15 and hv.dot(n) < run * 0.6: hv += n * (run * 0.6 - hv.dot(n))
 			pvel = Vector3(hv.x, 0, hv.y)
 	else:
-		pvy = HunterMove.rise_vy(pvy, left, 1.0, Hunter.LRISE_SPEED, d)
+		pvy = HunterMove.rise_vy(pvy, left, 1.0, HunterFeel.lrise_speed, d)
 	return true
 
 ## The pull-up over a rim (the match's mantle): straight up the face, then forward over the lip.
@@ -1689,7 +1690,7 @@ func _abyss_tint(d: float) -> void:
 	var want := 0.0
 	if world.is_void(ppos.x, ppos.z) and climb.is_empty() and pvy <= ABYSS_FX.RISE_OFF:     # (rising back up: no tint)
 		var top := _abyss_lip() - 0.5
-		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)
+		var kill: float = world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)
 		want = ABYSS_FX.danger_depth(top - py, top - kill)
 	abyss_k = lerpf(abyss_k, want, 1.0 - exp(-(12.0 if want > abyss_k else 9.0) * d))     # in fast, out over a few frames
 	if abyss_fx == null and abyss_k > 0.004:
@@ -2133,9 +2134,11 @@ func _find_interact() -> void:
 		return
 	prompt_box.visible = true
 	var pairs: Array = []
+	var on_kin := false      # the care line: over the Boki, not at the screen foot
 	if best["kind"] == "kin" and visit.is_empty():
-		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], ["Hold " + Settings.key_cap("interact"), "to pick up"]]
+		pairs = CareLine.pairs(self, best["k"])
 		if life: pairs = life.hand.pairs(pairs)
+		on_kin = true
 	else:
 		pairs = [hg.prompt_pair(best) if best["kind"] == "wild" else [Settings.key_cap("interact"), _label_for(best)]]
 		if best["kind"] == "site": pairs.append([Settings.key_cap("details"), "Assign Boki"])
@@ -2154,12 +2157,16 @@ func _find_interact() -> void:
 			l.add_theme_font_override("font", UI.big)
 			l.add_theme_font_size_override("font_size", UI.fs(18))
 			l.add_theme_color_override("font_color", UI.GOLD if one.get_index() == 0 else UI.INK)
+		CareLine.grey(row, pairs)
 		prompt_box.add_child(row)
 		prompt_box.reset_size()
 		prompt_box.modulate.a = 0.0
 		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
+	if on_kin:
+		CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp)
+		return
 	var py_at := minf(vp.y - 110.0, (root_ui.get_node("Hints") as Control).global_position.y - prompt_box.size.y - 6.0)
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
 	_keep_off_hub(prompt_box)
@@ -4800,6 +4807,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide_i
 			(ke["node"] as Node3D).position = ke["pos"]
 		# a closer look (its card, and turning it round), then naming
 		var rv := KinReveal.new(baby["species"], baby)
+		if not ke.is_empty(): rv.twin = ke["node"]
 		add_child(rv)
 		panel_open = "reveal"; building_now = true      # hold the hunter still while you turn it round
 		rv.proceed.connect(func():
@@ -4831,6 +4839,7 @@ func _name_baby(baby: Dictionary) -> void:
 	var was_name := String(baby["name"])
 	var step := NameStep.new(baby["species"])      # (closing the panel keeps the suggestion)
 	v.add_child(step)
+	step.focus()
 	step.named.connect(func(nm: String, kept: bool):
 		baby["name"] = nm
 		if nm != was_name: Save.log_event("renamed", baby, {"from": was_name})
@@ -4961,14 +4970,14 @@ func _personality(rec: Dictionary) -> Dictionary:
 		"rest": lerpf(1.6, 0.7, hot * 0.5 + cur * 0.5),
 		"chatty": lerpf(0.35, 1.3, hot * 0.5 + cur * 0.5),
 		"haunt": h % 7,
-		"quirk": KinHabit.HABITS[(h / 7) % KinHabit.HABITS.size()],
+		"quirk": KinHabit.HABITS[(int(h / 7.0)) % KinHabit.HABITS.size()],
 	}
 
 ## A spot in a ring around a place, different for every kin, so a crowd fans out instead of piling up.
 func _seat(k: Dictionary, center: Vector3, r := 1.4) -> Vector3:
 	var i := maxi(0, kins.find(k))
 	var a := float(i) * 2.39996 + float(absi(String(k["rec"]["uid"]).hash()) % 100) * 0.013
-	var rr := r + float(i / 6) * 0.9
+	var rr := r + float(int(i / 6.0)) * 0.9
 	var p := center + Vector3(cos(a) * rr, 0, sin(a) * rr)
 	if world.is_void(p.x, p.z) or world.occupy(p.x, p.z, 0.3, 0.0, true) != 0.0:
 		return world.free_spot_near(p, kins.map(func(o): return o["pos"]), 1.0)

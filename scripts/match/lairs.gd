@@ -690,7 +690,7 @@ func _tick_show(L: Dictionary) -> void:
 ## m:ss, rounded up (a clock that reads 0:15 for the whole first second).
 static func clock(t: float) -> String:
 	var s := int(ceil(maxf(0.0, t)))
-	return "%d:%02d" % [s / 60, s % 60]
+	return "%d:%02d" % [int(s / 60.0), s % 60]
 
 func _tick_seal(L: Dictionary, dt: float) -> void:
 	lock._tick_seal(L, dt)

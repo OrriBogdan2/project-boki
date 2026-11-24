@@ -15,8 +15,8 @@ const LAND_SQUASH := 0.45      # model squash on touchdown
 ## model) up to DIVE_SPEED; the glider ramps toward `mv * DROP_SPEED` (a no-key drift decelerates, never snaps).
 static func steer(hv: Vector2, mv: Vector2, diving: bool, dt: float) -> Vector2:
 	if diving:
-		return Loco.air_step(hv, mv, Hunter.DIVE_SPEED, dt)
-	var want := mv * Hunter.DROP_SPEED
+		return Loco.air_step(hv, mv, HunterFeel.dive_speed, dt)
+	var want := mv * HunterFeel.drop_speed
 	var turning := hv.dot(want) < hv.length_squared() * 0.8      # slowing, reversing or letting go
 	return hv.move_toward(want, (BRAKE if turning else ACCEL) * dt)
 

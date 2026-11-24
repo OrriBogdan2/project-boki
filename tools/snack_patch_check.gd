@@ -27,7 +27,8 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	rules["base_mode"] = false
 	Save.d = _save()
 	HomeLayout.ensure(Save.d)
 	ok(HomeLayout.count_of(SnackPatch.ID, Save.d) == 0 and not FarmUnlocks.open(SnackPatch.ID),
@@ -38,7 +39,6 @@ func run(m: Node) -> void:
 	_ridge()
 	await _in_the_garden()
 	_market()
-	rules["base_mode"] = false
 	print("SNACK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
