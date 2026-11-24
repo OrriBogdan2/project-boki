@@ -225,7 +225,8 @@ func _hero() -> void:
 	var me := m.player
 	var foe_arch := foe_id
 	if not Arch.exists(foe_id):
-		foe_arch = "gunslinger" if hunter == "juggernaut" else "juggernaut"
+		# (never Kael by default: his ultimate form reads as a purple box on film)
+		foe_arch = "mage" if hunter == "gunslinger" else "gunslinger"
 	CombatBus.ability_used.connect(_on_cast)
 	var combo: Array = COMBOS.get(combo_key if combo_key != "" else hunter, [])
 	if combo.is_empty():
@@ -364,7 +365,6 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 	var end_t := -1.0
 	var finish := false
 	var summoned := false
-	var sum_rel := -1.0
 	steps_log.clear()
 	while true:
 		_purge()
@@ -393,11 +393,7 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 			break
 		if summon_at >= 0.0 and t >= summon_at and not summoned:
 			summoned = true
-			_key("summon", true)
-			sum_rel = t + 0.15
-		if summoned and sum_rel > 0.0 and t >= sum_rel:
-			_key("summon", false)
-			sum_rel = -1.0
+			_summon_now(me, t)
 		var ms := Vector2.ZERO
 		if end_t < 0.0:
 			if idx >= combo.size():
@@ -488,6 +484,16 @@ func _log(
 
 
 ## A real action press or release (Input.action_press is what a key down does inside the Input singleton).
+## The Summon press itself (KinSummon.press, as the match's fixed step does), logged with why it failed.
+func _summon_now(me: Hunter, t: float) -> void:
+	var k_v: Kin = me.kin
+	var why := "kin=%s wisp=%s cd=%.1f out=%s" % [
+		k_v != null, k_v != null and k_v.wisp, k_v.summon.cd if k_v != null and k_v.summon != null else -1.0, me.out]
+	if k_v != null and k_v.summon != null and k_v.wisp:
+		k_v.summon.cd = 0.0  # (a fresh take: the wisp is rested)
+	print("PITCH_SUMMON t=%.2f ok=%s %s" % [t, KinSummon.press(me), why])
+
+
 func _key(action: String, down: bool) -> void:
 	if down:
 		Input.action_press(action)
