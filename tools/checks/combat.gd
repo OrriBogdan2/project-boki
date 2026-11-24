@@ -6,6 +6,12 @@ extends RefCounted
 
 const CHECKS := {
 	"--hearth-lamp-check": ["res://tools/hearth_lamp_check.gd", "hearth_lamp_check", null],  # Hearth Lamp revive beacon
+	# one walk speed, run/walk/crouch gaits per Hunter (3 shards keep each under the gate's 300 s cap)
+	"--move-speed-1-check":
+	["res://tools/move_speed_check.gd", "move_speed_check", "archer,ashwick,bulwark,dolm,dredge"],
+	"--move-speed-2-check": ["res://tools/move_speed_check.gd", "move_speed_check", "gil,gunslinger,juggernaut,mage"],
+	"--move-speed-3-check": ["res://tools/move_speed_check.gd", "move_speed_check", "ostra,rimewright,tender,thief"],
+	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP

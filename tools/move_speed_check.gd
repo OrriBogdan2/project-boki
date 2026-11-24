@@ -32,10 +32,11 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-func run(m: Node) -> void:
+func run(m: Node, shard := "") -> void:
 	main = m
 	Save.no_write = true
-	for arch in Arch.ids():
+	var ids: Array = Array(shard.split(",")) if shard != "" else Arch.ids()
+	for arch in ids:
 		var want := HunterMove.speed(arch)
 		var rows := [
 			["expedition", await _match_walk(arch, false)],

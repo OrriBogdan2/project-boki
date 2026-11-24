@@ -86,6 +86,9 @@ extends RefCounted
 ##      without taking a slot, and a need falling to urgent sulks once
 ##  21. the carry cues (CarrySfx): every name it plays exists and has a MIN_GAP (the voice cap), the thief's
 ##      take carries past hearing range to nearby squads, and the swap, claim, steal and deathbox paths call it
+##  22. every ability of the 13 Hunters (LMB, RMB, E, Shift, R) is heard in its own set and its hit has an own
+##      sound beside it; each passive's proc is a sound that exists and is named by the script that plays it
+##      (tools/sfx_ability_rows.gd, runs a short training match per move)
 ##  10. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
 ##      tools/sfx_world_cues.gd
 ## Reads the files only; never touches the save.
@@ -191,6 +194,7 @@ func run(main: Node) -> void:
 	_carry()
 	_boki_impacts()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
+	preload("res://tools/sfx_ability_rows.gd").new().run(main, ok)
 	preload("res://tools/sfx_bar_check.gd").new().run(ok)
 	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
@@ -199,7 +203,7 @@ func run(main: Node) -> void:
 
 ## The ambience beds the match (AmbBeds) and the title ask for each have their loop file.
 func _ambience() -> void:
-	for bed in AmbBeds.BEDS + ["title", "match", "abyss", "ruins"]:
+	for bed in AmbBeds.BEDS + AmbBeds.rules()["beds"].values() + ["title", "match", "abyss", "ruins"]:
 		ok(ResourceLoader.exists("res://audio/amb_%s.ogg" % bed), "ambience bed amb_%s.ogg" % bed)
 
 
@@ -459,7 +463,9 @@ func _ult_cues() -> void:
 	var wired := press.contains("UltCue.cast(k)") and cue.contains('"ucast"')
 	wired = wired and match_src.contains('"ucast": UltCue.net_in')
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
-	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2 and cue.count("Sfx.play_foe(") == 2
+			and cue.count(", DB_FOE)") == 2 and UltCue.DB_FOE > UltCue.DB and AudioServer.get_bus_index("SFXFoe") >= 0,
+			"your team's cue and tag play at DB, a rival's the same sounds at DB_FOE (louder) on the SFXFoe bus")
 	var draw_src := FileAccess.get_file_as_string("res://scripts/match/aim/aim_draw.gd")
 	var tell_ok := Sfx.ensure("tell_foe") and Sfx.MIN_GAP.has("tell_foe") and TellCue.DB_BIG < UltCue.DB
 	tell_ok = tell_ok and draw_src.contains("TellCue.aim(")
@@ -1079,18 +1085,8 @@ func _glove_names(node, names: Dictionary) -> void:
 
 ## 11. The garden's moments: own cues, counted through GardenSfx.heard, and no "unlock" where they play.
 func _garden_moments() -> void:
-	var cues := (
-		[
-			"garden_egg",
-			"garden_friends",
-			"garden_chime_part",
-			"garden_evolve",
-			"garden_visit_in",
-			"garden_visit_out",
-			"garden_season"
-		]
-		+ GardenSfx.CUPS
-	)
+	var cues := ["garden_egg", "garden_friends", "garden_bond_up", "garden_chime_part", "garden_evolve",
+			"garden_visit_in", "garden_visit_out", "garden_season"] + GardenSfx.CUPS
 	var filed := cues.all(func(c): return Sfx.ensure(c) and not _takes(c).is_empty())
 	ok(filed, "moments: all %d cues have files" % cues.size())
 	var a := {"uid": "moment_a"}
@@ -1133,15 +1129,10 @@ func _garden_moments() -> void:
 		"game": GardenPrizes.ids()[0], "items": [], "first": false, "round": "", "ribbon": false, "reset": false
 	}
 	_cup_rounds(res)
-	var sites := {
-		"base_life.gd": '"garden_friends"',
-		"home_incubator.gd": '"garden_egg"',
-		"garden_prizes.gd": "GardenSfx.cup(",
-		"kin_bond_moment.gd": '"garden_friends"',
-		"home.gd": '"garden_evolve"',
-		"garden_visitor.gd": '"garden_visit_out"',
-		"garden_sfx.gd": '"garden_season"'
-	}
+	var sites := {"base_life.gd": "\"garden_friends\"", "home_incubator.gd": "\"garden_egg\"",
+			"garden_prizes.gd": "GardenSfx.cup(", "kin_bond_moment.gd": "\"garden_bond_up\"",
+			"home.gd": "\"garden_evolve\"",
+			"garden_visitor.gd": "\"garden_visit_out\"", "garden_sfx.gd": "\"garden_season\""}
 	var off := []
 	for f in sites:
 		var src := FileAccess.get_file_as_string("res://scripts/home/" + f)
@@ -1379,6 +1370,7 @@ func _steps(main: Node) -> void:
 		var deck := Vector3(car.origin.x, m.skytrain.deck_y(car.origin + Vector3(0, 0.3, 0)), car.origin.z)
 		ok(StepSurface.at(m, deck) == "metal", "a sky train car's deck is metal")
 		spots["metal"] = deck
+	_style_rows(m)
 	var plank: Vector3 = spots.get("grass", Vector3.ZERO)
 	for surf in ["grass", "stone", "snow", "metal", "wood"]:
 		if surf == "wood":  # last: lays a plank tile on the grass one
@@ -1393,6 +1385,42 @@ func _steps(main: Node) -> void:
 		var wade := "step_water_" + StepSurface.weight_of(WEIGHT_ARCH[cls])
 		ok(wade == "step_water_" + cls and Sfx.ensure(wade), "farm wading: %s plays %s" % [cls, wade])
 	m.queue_free()
+
+
+## Every biome style a tile can have (Flora.STYLES, the generated regions, the styles the Hollow Crown's islands
+## carry) maps to one of the four step sets every Hunter has (content/rules/step_biomes.json), and the map's ember
+## and gloom ground plays stone, its frost snow.
+func _style_rows(m: Match) -> void:
+	var known := ["grass", "stone", "wood", "snow"]
+	var styles: Array = Flora.STYLES.duplicate()
+	for i in m.world.w * m.world.h:
+		var st := m.world.style_at(i)
+		if not styles.has(st):
+			styles.append(st)
+	var rules: Dictionary = Content.rules(StepSurface.RULES)
+	var bad := []
+	for st in styles:
+		if not rules["styles"].has(st) or not known.has(StepSurface.for_style(st)):
+			bad.append(st)
+	var good: bool = bad.is_empty() and known.has(String(rules["default"]))
+	ok(good, "every biome style maps to a known step set (%s; unmapped %s)" % [styles, bad])
+	ok(rules["styles"].keys().all(func(k): return styles.has(k)), "step_biomes.json lists no style the game lacks")
+	var want := [["ember", "stone"], ["gloom", "stone"], ["frost", "snow"]]
+	want += [["meadow", "grass"], ["bloom", "grass"], ["storm", "grass"]]
+	for pair in want:
+		ok(StepSurface.for_style(pair[0]) == pair[1], "%s ground plays %s" % pair)
+	var walked := {}
+	for z in m.world.h:
+		for x in m.world.w:
+			var i := m.world.idx(x, z)
+			var w: World = m.world
+			if w.kind[i] == World.T_GROUND and not (w.bridge.has(i) or w.stairs.has(i) or w.paint.has(i)):
+				var p := Vector3(x + 0.5, m.world.ground_at(x + 0.5, z + 0.5), z + 0.5)
+				var st := m.world.style_at(i)
+				if not walked.has(st):
+					walked[st] = true
+					var sf := StepSurface.for_style(st)
+					ok(StepSurface.at(m, p) == sf, "a bare %s tile on the Hollow Crown plays %s" % [st, sf])
 
 
 ## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the
