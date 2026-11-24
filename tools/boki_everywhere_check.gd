@@ -231,16 +231,19 @@ func _visitor_close(h, sp: String, path: String) -> void:
 		cam.fov = 35
 		h.add_child(cam)
 		cam.make_current()
+		var side_k := [0.3]  # one list cell: the camera's sideways offset, in distances (a fence or a sign can stand in the way)
 		var aim := func() -> void:  # it wanders: keep it framed, near eye level
 			if not is_instance_valid(n):
 				return
 			var b := _box_of(n)
 			var d := maxf(b.size.y, b.size.x) * 2.2 + 0.4
-			cam.global_position = b.get_center() + Vector3(0.3 * d, 0.12 * d, d)
+			cam.global_position = b.get_center() + Vector3(side_k[0] * d, 0.12 * d, d)
 			cam.look_at(b.get_center())
 		aim.call()
 		main.get_tree().process_frame.connect(aim)
-		await _grab_window(path, 30)
+		for i in 4:  # four sides: the file keeps its name for the first, the others get _b, _c, _d
+			side_k[0] = [0.3, -0.9, 1.4, -1.6][i]
+			await _grab_window(path if i == 0 else path.replace(".png", "_" + "abcd"[i] + ".png"), 30)
 		main.get_tree().process_frame.disconnect(aim)
 		# the eye-level shot: the camera at the model's eye height (FRAME head), 0.7 m out in front, a little to the side
 		var brig := n.find_child("BokiRig", true, false)  # a Node: its parent holds the model frame
