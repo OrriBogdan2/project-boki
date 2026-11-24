@@ -3,6 +3,8 @@ extends "res://tools/clip_shots.gd"
 ## them (Models.hunter + the model's pose node), scratch-tree version of the e28953f4e4f harness. Per hunter and
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
 ## deg); with --close the same poses from eye height and knee height: <clip>_<k>_eye.jpg, <clip>_<k>_knee.jpg.
+## --contract: native-flagged Hunters play their contract model; --video: see var video.
+## --film [--clips= --yaws= --spans= --fstep=]: every clip at each yaw, 15 fps; --mfov/--mpitch/--mdist/--cfit: camera.
 ## marks.txt lists the model's kind (contract / native), tris and the state each clip was fed.
 
 const DT := 1.0 / 30.0
@@ -10,23 +12,41 @@ const SIDE_YAW := -PI / 2.0
 const THREE_Q_YAW := -PI / 2.0 - 0.55
 const RUN_MPS := 5.0
 const DASH_MPS := 9.0
-const ATTACK_MOVES := {"archer": "arc_loose", "bulwark": "bul_throw", "gunslinger": "gunslinger_lmb", "thief": "thf_lmb_r"}
+const ATTACK_MOVES := {
+	"archer": "arc_loose", "bulwark": "bul_throw", "gunslinger": "gunslinger_lmb", "thief": "thf_lmb_r"
+}
 const DASH_MOVES := {"gunslinger": "gunslinger_dash", "thief": "thf_exdash"}
-const SAMPLES := {"idle": [0.4, 1.0, 1.6], "run": [0.0, 0.12, 0.24], "dash": [0.0, 0.1, 0.2], "jump": [0.05, 0.3, 0.6],
-	"attack": [0.1, 0.25, 0.45], "hit": [0.05, 0.15, 0.35]}
+const SAMPLES := {
+	"idle": [0.4, 1.0, 1.6],
+	"run": [0.0, 0.12, 0.24],
+	"dash": [0.0, 0.1, 0.2],
+	"jump": [0.05, 0.3, 0.6],
+	"attack": [0.1, 0.25, 0.45],
+	"hit": [0.05, 0.15, 0.35]
+}
 const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
 var film := false
-var film_clips: Array = ["idle", "run", "attack", "hit"]   # --clips=a,b: the clips a film plays
-var film_yaws: Array = [-PI, -PI / 2.0, 0.0]   # --yaws=deg,deg,..: a film plays every clip once at each of these yaws (front, side, back)
-var film_span := {"idle": 1.0, "run": 0.9, "attack": 1.0, "hit": 0.7}   # --spans=idle:4.0,hit:1.4: seconds each film clip plays
-var film_step := 2   # --fstep=4: a film shoots every Nth step (2 = 15 fps)
+var film_clips: Array = ["idle", "run", "attack", "hit"]  # --clips=a,b: the clips a film plays
+## --yaws=deg,deg,..: a film plays every clip once at each of these yaws (front, side, back)
+var film_yaws: Array = [-PI, -PI / 2.0, 0.0]
+var film_span := {"idle": 1.0, "run": 0.9, "attack": 1.0, "hit": 0.7}  # --spans=idle:4.0,hit:1.4: seconds per film clip
+var film_step := 2  # --fstep=4: a film shoots every Nth step (2 = 15 fps)
 var native := false
-var mfov := 8.0     # --mfov=14: the match camera's field of view (wider = the hunter sits smaller in the tile)
+var mfov := 8.0  # --mfov=14: the match camera's field of view (wider = the hunter sits smaller in the tile)
 var mpitch := 66.0  # --mpitch=57: the match camera's pitch in degrees (the game plays ~57)
-var cfit := 0.85   # --cfit=0.6: the share of the close view's frame the body height fills (lower = more room for a long hammer and a wide shield)
-var mdist := 23.0   # --mdist: its distance to the hunter
+var cfit := 0.85  # --cfit=0.6: the share of the close view's frame the body fills (lower = room for a long hammer)
+var mdist := 23.0  # --mdist: its distance to the hunter
+var video := false  # --video: every frame (30 fps) of idle 1.2 s, run 1.0 s, attack 0.6 s as v0000.jpg ...
+var vn := 0
+var gripcam := false  # --grip: a close camera on the right fist (grip_<clip>_<k>.jpg)
+var fincam := false  # --fin: tight head-fin cameras (fin_<clip>_<k>.jpg top-down like the match camera, fins_ side)
+var probe := false  # --probe: probe.tsv, the fish and hand bones per frame
+## --probe: probe.json = bones, per-bone capsule radii (bind verts), the fish's verts + local transform, and every
+## frame's bone poses in world, for solving the fish's grip offline.
+var pj := {"frames": []}
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -34,41 +54,62 @@ func run(main: Node) -> void:
 	var ids: Array = Arch.ORDER.duplicate()
 	frame_px = 1024
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
-		if a.begins_with("--size="): frame_px = int(a.substr(7))
-		if a == "--close": close = true
-		if a == "--contract": WardenNative.contract_only = true      # LIVE: the contract model as main plays it
-		if a == "--film": film = true
-		if a.begins_with("--mfov="): mfov = float(a.substr(7))
-		if a.begins_with("--mpitch="): mpitch = float(a.substr(9))
-		if a.begins_with("--mdist="): mdist = float(a.substr(8))
-		if a.begins_with("--cfit="): cfit = float(a.substr(7))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--wardens="):
+			ids = Array(a.substr(10).split(",", false))
+		if a.begins_with("--size="):
+			frame_px = int(a.substr(7))
+		if a == "--close":
+			close = true
+		if a == "--film":
+			film = true
+		if a.begins_with("--mfov="):
+			mfov = float(a.substr(7))
+		if a.begins_with("--mpitch="):
+			mpitch = float(a.substr(9))
+		if a.begins_with("--mdist="):
+			mdist = float(a.substr(8))
+		if a.begins_with("--cfit="):
+			cfit = float(a.substr(7))
 		if a.begins_with("--clips="):
 			film_clips = Array(a.substr(8).split(",", false))
 		if a.begins_with("--spans="):
 			for kv in a.substr(8).split(",", false):
 				film_span[kv.get_slice(":", 0)] = float(kv.get_slice(":", 1))
-		if a.begins_with("--fstep="): film_step = maxi(1, int(a.substr(8)))
+		if a.begins_with("--fstep="):
+			film_step = maxi(1, int(a.substr(8)))
 		if a.begins_with("--yaws="):
 			film_yaws = []
 			for d in a.substr(7).split(",", false):
 				film_yaws.append(deg_to_rad(float(d)))
+		if a == "--video":
+			video = true
+		if a == "--probe":
+			probe = true
+		if a == "--grip":
+			gripcam = true
+		if a == "--fin":
+			fincam = true
+		if a == "--contract":
+			WardenNative.contract_only = true  # the live contract model of a native-flagged Hunter
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
-	await tree.create_timer(2.5).timeout       # (the title's logo fades in real time, not in frames)
+	await tree.create_timer(2.5).timeout  # (the title's logo fades in real time, not in frames)
 	for id in ids:
 		await _hunter(String(id), out.path_join(String(id)))
 	print("LIVE_AUDIT_DONE ", ids.size())
 	tree.quit()
 
+
 func _match_cam() -> void:
 	cam.fov = mfov
 	cam.position = Vector3(0, mdist * sin(deg_to_rad(mpitch)), mdist * cos(deg_to_rad(mpitch))) + Vector3(0, 0.8, 0)
 	cam.look_at(Vector3(0, 0.8, 0))
+
 
 ## The body's world box (visible meshes under Warden) -> [bottom y, height, tris].
 func _body_box(model: Node3D) -> Array:
@@ -88,6 +129,7 @@ func _body_box(model: Node3D) -> Array:
 				tris += (arr[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
 	return [lo, hi - lo, tris]
 
+
 ## Full-body close view: fov 30 and the distance that fits the body in 85% of the frame, from eye or knee height.
 func _close_cam(bx: Array, knee: bool) -> void:
 	var h := float(bx[1])
@@ -97,8 +139,10 @@ func _close_cam(bx: Array, knee: bool) -> void:
 	cam.position = Vector3(0, float(bx[0]) + h * (0.3 if knee else 0.88), dist)
 	cam.look_at(Vector3(0, cy, 0))
 
+
 func _forward(yaw: float) -> Vector3:
 	return Vector3(-sin(yaw), 0.0, -cos(yaw))
+
 
 func _state(id: String, clip: String, yaw: float, t: float) -> Dictionary:
 	var fw := _forward(yaw)
@@ -124,6 +168,7 @@ func _state(id: String, clip: String, yaw: float, t: float) -> Dictionary:
 			s["hit_dir"] = Vector2(0, -1)
 	return s
 
+
 func _hunter(id: String, dir: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
@@ -141,21 +186,32 @@ func _hunter(id: String, dir: String) -> void:
 	poser.set_process(false)
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
-	marks.append("kind %s glb %s tris %d body_h %.2f bottom_y %.3f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1], bx[0]])
-	var plays: Array = []   # [clip, yaw index, yaw]
-	for clip in (film_clips if film else CLIPS):
+	var kind := "native" if native else "contract"
+	marks.append(
+		"kind %s glb %s tris %d body_h %.2f bottom_y %.3f" % [kind, WardenGlb.path(id), bx[2], bx[1], bx[0]]
+	)
+	var plays: Array = []  # [clip, yaw index, yaw]
+	var clips: Array = film_clips if film else (["idle", "run", "attack"] if video else CLIPS)
+	for clip in clips:
 		for yi in (film_yaws.size() if film else 1):
-			plays.append([clip, yi, float(film_yaws[yi]) if film else (SIDE_YAW if clip == "run" and not close else THREE_Q_YAW)])
+			var cy := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+			plays.append([clip, yi, float(film_yaws[yi]) if film else cy])
 	for pl in plays:
 		var clip: String = pl[0]
 		var yaw: float = pl[2]
 		var tag: String = clip if not film else "%s_y%d" % [clip, pl[1]]
 		model.rotation.y = yaw
-		var times: Array = SAMPLES[clip]
-		if film:       # every film_step-th step (2 = 15 fps) over a clip's span
+		var times: Array = SAMPLES.get(clip, SAMPLES["idle"])
+		if film:  # every film_step-th step (2 = 15 fps) over a clip's span
 			times = []
 			for j in int(float(film_span.get(clip, 1.0)) / (film_step * DT)):
 				times.append(j * film_step * DT)
+		if probe:
+			times = [{"idle": 3.2, "run": 1.2, "dash": 1.0, "jump": 1.4, "attack": 2.4, "hit": 0.8}[clip]]
+		if video:
+			times = []
+			for k in int({"idle": 1.2, "run": 1.0, "attack": 0.6}[clip] / DT):
+				times.append(k * DT)
 		# settle: the pre-state (standing, or running for a hit/jump) for 25 frames, then the clip's own state
 		var s := _state(id, "idle" if clip != "dash" else "run", yaw, 0.0)
 		model.set_meta(WardenClips.STATE, s)
@@ -169,23 +225,139 @@ func _hunter(id: String, dir: String) -> void:
 			s = _state(id, clip, yaw, t)
 			model.set_meta(WardenClips.STATE, s)
 			poser.call("_process", DT)
+			if probe:
+				_probe(model, clip, i)
 			if want < times.size() and t + DT * 0.5 >= float(times[want]):
-				await _shoot(model, dir, "%s_%d" % [tag, want], bx)
+				await _shoot(model, dir, ("v%04d" % vn) if video else "%s_%d" % [tag, want], bx)
+				vn += 1
 				marks.append("%s %d t=%.3f state=%s" % [tag, want, t, str(s)])
 				want += 1
 		model.set_meta(WardenClips.STATE, {})
 	var f := FileAccess.open(dir.path_join("marks.txt"), FileAccess.WRITE)
 	f.store_string("\n".join(marks) + "\n")
 	f.close()
+	if probe:
+		var pf := FileAccess.open(dir.path_join("probe.json"), FileAccess.WRITE)
+		pf.store_string(JSON.stringify(pj))
+		pf.close()
 	model.queue_free()
 
+
+func _xf9(t: Transform3D) -> Array:
+	var b := t.basis
+	return [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z, t.origin.x, t.origin.y, t.origin.z]
+
+
+func _probe(model: Node3D, clip: String, i: int) -> void:
+	var sk := WardenGlb.skeleton(model.get_node("Warden"))
+	var fish := WardenProps.part(sk, "hand.R")
+	if fish == null:
+		return
+	if not pj.has("bones"):
+		_probe_geom(model, sk, fish)
+	var poses := []
+	for bi in sk.get_bone_count():
+		poses.append(_xf9(sk.global_transform * sk.get_bone_global_pose(bi)))
+	(pj["frames"] as Array).append({"clip": clip, "i": i, "pose": poses, "fish": _xf9(fish.transform)})
+
+
+func _probe_geom(model: Node3D, sk: Skeleton3D, fish: MeshInstance3D) -> void:
+	var names := []
+	var parents := []
+	var rest := []
+	for bi in sk.get_bone_count():
+		names.append(sk.get_bone_name(bi))
+		parents.append(sk.get_bone_parent(bi))
+		rest.append(_xf9(sk.get_bone_global_rest(bi)))
+	pj["bones"] = names
+	pj["parents"] = parents
+	pj["rest"] = rest
+	var vb := {}  # bone -> [verts in skeleton rest space]
+	for mi in model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if m.skin == null or m.mesh == null or m == fish:
+			continue
+		var to_sk := sk.global_transform.affine_inverse() * m.global_transform
+		for sidx in m.mesh.get_surface_count():
+			var arr := m.mesh.surface_get_arrays(sidx)
+			var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bs := PackedInt32Array()
+			if arr[Mesh.ARRAY_BONES] is PackedInt32Array:
+				bs = arr[Mesh.ARRAY_BONES]
+			var ws: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+			if bs.is_empty():
+				continue
+			var per := bs.size() / vs.size()
+			for v in vs.size():
+				var bestw := 0.0
+				var bestb := -1
+				for k in per:
+					if ws[v * per + k] > bestw:
+						bestw = ws[v * per + k]
+						bestb = bs[v * per + k]
+				if bestb < 0 or bestw < 0.5:
+					continue
+				var bname := m.skin.get_bind_name(bestb)
+				var jb := sk.find_bone(bname) if bname != "" else m.skin.get_bind_bone(bestb)
+				if jb < 0:
+					continue
+				if not vb.has(jb):
+					vb[jb] = []
+				(vb[jb] as Array).append(to_sk * vs[v])
+	var caps := {}
+	for jb in vb:
+		var vl: Array = vb[jb]
+		var vs2: Array = []
+		for k in range(0, vl.size(), maxi(1, vl.size() / 200)):
+			vs2.append([vl[k].x, vl[k].y, vl[k].z])
+		caps[sk.get_bone_name(jb)] = vs2
+	pj["bind_verts"] = caps
+	var arr2 := fish.mesh.surface_get_arrays(0)
+	var fv: PackedVector3Array = arr2[Mesh.ARRAY_VERTEX]
+	var fl := []
+	for k in range(0, fv.size(), maxi(1, fv.size() / 600)):
+		fl.append([fv[k].x, fv[k].y, fv[k].z])
+	pj["fish_verts"] = fl
+
+
 func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
+	if probe:
+		return
+	if fincam:
+		var sk2 := WardenGlb.skeleton(model.get_node("Warden"))
+		var hb: Vector3 = sk2.global_transform * sk2.get_bone_global_pose(sk2.find_bone("Head")).origin
+		cam.fov = 5.0
+		cam.position = hb + Vector3(0, 21.0, 9.4).normalized() * 12.0
+		cam.look_at(hb + Vector3(0.0, 0.0, 0.0))
+		await RenderingServer.frame_post_draw
+		await RenderingServer.frame_post_draw
+		tree.root.get_texture().get_image().save_jpg(dir.path_join("fin_" + name + ".jpg"), 0.93)
+		cam.fov = 22.0
+		cam.position = hb + Vector3(-1.2, 0.5, 1.6)
+		cam.look_at(hb)
+		await RenderingServer.frame_post_draw
+		await RenderingServer.frame_post_draw
+		tree.root.get_texture().get_image().save_jpg(dir.path_join("fins_" + name + ".jpg"), 0.93)
+		return
+	if gripcam:
+		var sk := WardenGlb.skeleton(model.get_node("Warden"))
+		var hp: Vector3 = sk.global_transform * sk.get_bone_global_pose(sk.find_bone("RightHand")).origin
+		var hand_basis := sk.get_bone_global_pose(sk.find_bone("RightHand")).basis
+		hp += sk.global_transform.basis * hand_basis * Vector3(0.0, 0.1, 0.0)
+		cam.fov = 30.0
+		cam.position = hp + Vector3(0.0, 0.35, 1.7)
+		cam.look_at(hp)
+		await RenderingServer.frame_post_draw
+		await RenderingServer.frame_post_draw
+		tree.root.get_texture().get_image().save_jpg(dir.path_join("grip_" + name + ".jpg"), 0.93)
+		return
 	if close:
 		for knee in ([false] if film else [false, true]):
 			_close_cam(bx, knee)
 			await RenderingServer.frame_post_draw
 			await RenderingServer.frame_post_draw
-			tree.root.get_texture().get_image().save_jpg(dir.path_join("%s_%s.jpg" % [name, "knee" if knee else "eye"]), 0.93)
+			var view := "knee" if knee else "eye"
+			tree.root.get_texture().get_image().save_jpg(dir.path_join("%s_%s.jpg" % [name, view]), 0.93)
 	else:
 		_match_cam()
 		await RenderingServer.frame_post_draw
