@@ -24,8 +24,8 @@ const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chai
 ## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
 static var contract_only := false
 static var _data = null  # art name -> its entry (parsed once)
-## "art orbit" -> [the orbit node packed (instanced per Hunter), its rest, the head's, its bone's, the contract scene]. The scene is
-## kept loaded: letting it go freed Tarek's contract .glb on the main thread mid-build (480 ms on rp2g).
+## "art orbit" -> [the orbit node packed (instanced per Hunter), its rest, the head's, its bone's, the contract scene].
+## The scene is kept loaded: letting it go freed Tarek's contract .glb on the main thread mid-build (480 ms on rp2g).
 static var _orbit_src := {}
 static var _contracts := {}  # art -> what its contract .glb gives the native path (contract(): sk_m, anchors)
 
