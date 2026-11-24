@@ -83,8 +83,11 @@ jobs:
           grep -E "^FAIL|SCRIPT ERROR" check.log | head -n 40 || true
           grep -q "CHECK DONE, failures: 0" check.log
 
-      - name: Wiki is current (gen_wiki --check)
-        run: python3 tools/gen_wiki.py --check
+      # Advisory only (owner 11-23): docs/wiki lagging the data is not a reason to fail a PR.
+      # A stale page shows as a warning; the wiki is regenerated on main instead.
+      - name: Wiki is current (gen_wiki --check, advisory)
+        continue-on-error: true
+        run: python3 tools/gen_wiki.py --check || { echo "::warning::docs/wiki is out of date; run python3 tools/gen_wiki.py (not a failure)"; exit 1; }
 
       - name: Matchmaker unit tests
         run: python3 -m unittest discover -s server/matchmaker/tests

@@ -149,7 +149,7 @@ static func _label(m: Match, h: Hunter, st: String) -> Array:
 		"DEATHBOX":
 			var b: Dictionary = Life.box_of(m, h)
 			var left := maxf(0.0, float(b.get("soul_until", 0.0)) - m.time)
-			return ["DEAD  %d:%02d" % [int(left) / 60, int(left) % 60], DEAD_COL]
+			return ["DEAD  %d:%02d" % [int(int(left) / 60.0), int(left) % 60], DEAD_COL]
 		"DEAD":
 			return ["DEAD", DEAD_COL]
 		"EXTRACTED":
@@ -162,8 +162,11 @@ static func _label(m: Match, h: Hunter, st: String) -> Array:
 
 ## Condensed, leaning text (the state label).
 static func _lean_text(c: CanvasItem, at: Vector2, s: String, col: Color) -> void:
-	c.draw_set_transform_matrix(Transform2D(Vector2(CONDENSE, 0.0), Vector2(LEAN, 1.0), at))
+	var xf := Transform2D(Vector2(CONDENSE, 0.0), Vector2(LEAN, 1.0), at)
+	c.draw_set_transform_matrix(xf)
+	TextCache.draw_xf = xf
 	HudStyle.text(c, Vector2.ZERO, s, LABEL_PX, col, 3)
+	TextCache.draw_xf = Transform2D.IDENTITY
 	c.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 

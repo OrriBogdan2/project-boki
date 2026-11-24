@@ -119,6 +119,94 @@ func _rival_beat(home) -> void:
 	ok(not fa.is_in(BaseLife.S.PLAY_WITH) and not fb.is_in(BaseLife.S.PLAY_WITH), "rivals never play tag together")
 
 
+## You come back (BaseGreet, base_life.json "notice"): a Boki that had you far off for away_s looks at you when you come
+## within near_m; at bond rank Close or more it runs to you, follows a few steps, and goes back to roaming. It rolls
+## once per return, and the roll is weighted by bond rank.
+func _notice_part(home, center: Vector3) -> void:
+	var life: BaseLife = home.life
+	var r: Dictionary = BaseGreet.rules()
+	var kept_chance: float = r["chance"]
+	home.day_t = 0.4
+	life.night = false
+	for k in home.kins:
+		for key in ["play", "eat", "nap_t", "life_at", "life_rival", "rival_cd", "notice_away", "life_greet", "led"]:
+			k.erase(key)
+		k["rec"]["bonds"] = {}
+		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
+	_gather(home, center)
+	var k: Dictionary = home.kins[0]
+	var m: Fsm = k["life"]
+	var away := Vector3(-500, 0, -500)
+	var back: Vector3 = home.world.free_spot_near(k["pos"] + Vector3(float(r["near_m"]) - 0.5, 0, 0), [], 0.8)
+	r["chance"] = 1.0
+	k["rec"]["trust"] = 0.0  # Wary
+	home.ppos = away
+	for _i in int(float(r["away_s"]) / 0.1) + 5:
+		life.step(0.1)
+	ok(m.is_in(BaseLife.S.ROAM), "you far off: a roaming Boki does not react")
+	home.ppos = back
+	life.step(0.1)
+	var g: Dictionary = k.get("life_greet", {})
+	ok(
+		m.is_in(BaseLife.S.GREET) and not g.is_empty() and not g["runs"],
+		"back within %.1f m: a Wary Boki looks" % float(r["near_m"])
+	)
+	for _i in int(float(r["look_s"]) / 0.1) + 3:
+		life.step(0.1)
+	ok(
+		m.is_in(BaseLife.S.ROAM) and not k.has("life_greet"),
+		"it looked for %.1f s, then went back to roaming" % float(r["look_s"])
+	)
+	for _i in 100:
+		life.step(0.1)
+	ok(m.is_in(BaseLife.S.ROAM), "you stay near: no second greeting until you have been away again")
+	k["rec"]["trust"] = 60.0  # Close
+	home.ppos = away
+	for _i in int(float(r["away_s"]) / 0.1) + 5:
+		life.step(0.1)
+	k["pos"] = home.world.free_spot_near(back + Vector3(-float(r["near_m"]) + 0.5, 0, 0), [], 0.8)
+	(k["node"] as Node3D).position = k["pos"]
+	home.ppos = back
+	life.step(0.1)
+	g = k.get("life_greet", {})
+	ok(m.is_in(BaseLife.S.GREET) and not g.is_empty() and g["runs"], "a Close Boki runs over")
+	var t := 0.0
+	while t < float(r["give_up_s"]) and float(k.get("life_greet", {}).get("reached", 0.0)) < 0.0:
+		home._move_kin(DT)
+		t += DT
+	ok(
+		k.has("life_greet") and float(k["life_greet"]["reached"]) >= 0.0 and not k.has("led"),
+		"it reached you in %.1f s and slowed to a walk" % t
+	)
+	home.ppos = home.world.free_spot_near(home.ppos + Vector3(3.0, 0, 0), [], 0.8)
+	var gap := BaseLife._dist(k, {"pos": home.ppos})
+	for _i in int(float(r["follow_s"]) / DT) + 6:
+		home._move_kin(DT)
+		if m.is_in(BaseLife.S.ROAM):
+			break
+	var now := BaseLife._dist(k, {"pos": home.ppos})
+	ok(now < gap, "it followed you as you walked off (%.1f m gap, was %.1f)" % [now, gap])
+	for _i in int(float(r["follow_s"]) / DT) + 6:
+		home._move_kin(DT)
+	ok(
+		m.is_in(BaseLife.S.ROAM) and not k.has("life_greet") and not k.has("led"),
+		"then it went back to what it was doing"
+	)
+	r["chance"] = kept_chance
+	var hits := {0.0: 0, 95.0: 0}
+	seed(11)
+	for trust in hits:
+		for _i in 200:
+			m.go(BaseLife.S.ROAM, "test")
+			k["rec"]["trust"] = trust
+			k["notice_away"] = float(r["away_s"])
+			k["pos"] = back + Vector3(-1.0, 0, 0)
+			life.step(0.1)
+			hits[trust] += 1 if m.is_in(BaseLife.S.GREET) else 0
+	var weighed := "bond rank weights it: Soulbound %d of 200 returns, Wary %d" % [hits[95.0], hits[0.0]]
+	ok(hits[95.0] > hits[0.0] + 40, weighed)
+
+
 ## Free play sounds (PlaySfx): a tag starts, a catch, a cheer when it runs out, a huff for a squabble; each once, quiet,
 ## and a zone plays at most MAX_CUES of them inside WINDOW_S however many Boki play.
 func _play_sounds(home) -> void:
@@ -184,7 +272,7 @@ func _cues(sname: String) -> int:
 func _nap_sounds(home) -> void:
 	var pile := []
 	for i in 30:
-		pile.append({"pos": Vector3(float(i % 6) * 1.2, 0, float(i / 6) * 1.2)})
+		pile.append({"pos": Vector3(float(i % 6) * 1.2, 0, float(int(i / 6.0)) * 1.2)})
 	var heard := BokiNapSfx.heard(pile, Vector3.ZERO)
 	var reach := float(Sfx.sound_reach.get(BokiNapSfx.LOOP, 0.0))
 	var inside := heard.all(func(k): return Vector2(k["pos"].x, k["pos"].z).length() < reach)
@@ -421,6 +509,7 @@ func run(m: Node) -> void:
 	_spots_part(home, center)
 	_rival_beat(home)
 	_play_sounds(home)
+	_notice_part(home, center)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

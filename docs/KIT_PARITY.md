@@ -20,6 +20,29 @@ class's, `ArchKit.dash_charges`). **Vex**'s Slipstep is one charge too (a medium
 `DredgeKit.extra_dashes()` to `dredge.json` `dash.charges`. Tenzo (Tetra +1 at an upgrade), Kael (Brall +1 at tier II),
 Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Vex's rifle falloff (100% to 50% over ten rounds, a pause starts over) now also thins the tracer, flash and impact (`content/vfx/gunslinger.json` `size_k`); her Longneedle yaw lock is 30 deg/s. Table: coord/reports/charges-sv-1116.md.
 
+## Ultimate ranks vs the source (ult-ranks-source, 2026-11-19)
+Source: briefs/supervive-data/supervive_kits.md (ext/agent-briefs), "R has II/III only" (line 4); owner 11-18: ultimates
+rank with level, R rank 3 at level 10 (decision 0022 option 2). Ours: `x.per_rank` in content/archetypes/<id>.json, read
+by `HeroUlt.ranked` through `ArchKit.x_def()`; rank text `rank2.ult` / `rank_next.ult` (the R hover and the rank pick).
+Cooldown steps = source seconds x our base / source base (0.5 s); damage steps = the source's % of our base. Before: every
+X was the same at R ranks 1 and 2 (rank 2 only lengthened the Merge) and R stopped at rank 2. Asserted by `--ult-rank-check`.
+
+| Hunter | Source R (line) | Source tiers II / III | Ours: rank 1 -> 2 -> 3 | Mark |
+|---|---|---|---|---|
+| Tenzo (`dolm`) | Tetraform 45s (109) | -5s, +2.5s terrain life, x2 | Basalt Spine cd 45 -> 40 -> 35s; wall 7 -> 9.5 -> 12s | match |
+| Lace (`archer`) | Virideth's Fury 60s (77) | +10% dmg, -5s, x2 | Starpiercer cd 60 -> 55 -> 50s; dmg 18 -> 19.8 -> 21.6; last 23.3 -> 25.63 -> 27.96 | match |
+| Cinder (`ashwick`) | Flight of the Firefox 45s (44) | -15s / +25% dmg | Flue Flight cd 36 -> 24 -> 24s; trail 4.5 -> 4.5 -> 5.625/s | match (cd scaled) |
+| Albert (`bulwark`) | Abyssalbreaker 50s (93) | +20% dmg, -5s, x2 | Faultline cd 40 -> 36 -> 32s; strike 4 -> 4.8 -> 5.6; dmg 18 -> 21.6 -> 25.2 | match (cd scaled) |
+| Grimble (`dredge`) | Slugwave 36s (61) | +20% dmg, -5s, x2 | Brass Broadside cd 21 -> 18 -> 15s; dmg 4 -> 4.8 -> 5.6 | match (cd scaled) |
+| Vex (`gunslinger`) | Summon Napalm 55s (52) | +20% dmg, -5s, x2 | Cinderfall cd 42 -> 38 -> 34s; dmg 24 -> 28.8 -> 33.6; fire 3.5 -> 4.2 -> 4.9/tick | match (cd scaled) |
+| Kael (`juggernaut`) | Volcanic Rebuke 45s (28) | +30 dmg, +5% AP, -5s, x2 | Gilded Riposte cd 36 -> 32 -> 28s; dmg 43 -> 48.6 -> 54.2 (+30/230) | partial: +5% AP [?] (our ult has no AP ratio) |
+| Sparkle (`mage`) | Thunderstorm 60s (69) | +50% impact dmg, -7.5s / -7.5s | Kitefall cd 42 -> 37 -> 32s; dmg 9 -> 13.5 -> 13.5 | match (cd scaled) |
+| Motley (`ostra`) | Singularity 70s (117) | -5s, x2 | Nightwell cd 70 -> 65 -> 60s | match |
+| Neve (`rimewright`) | Chilling Finale 80s (36) | +40% dmg, -10s / -10s | Rimelock cd 80 -> 70 -> 60s; dmg 18 -> 25.2 -> 25.2 | match |
+| Sable (`thief`) | Fusillade 50s (101) | +10% dmg, -5s, x2 | Encore cd 24 -> 21.5 -> 19s; dmg 4.5 -> 4.95 -> 5.4; rim 3.1 -> 3.41 -> 3.72 | match (cd scaled) |
+| Meeko (`tender`) | Elluna's channel heal 60s (13) | +25% heal, -5s, x2 | Hearth Call cd 46 -> 42 -> 38s; heal 5.3 -> 6.63 -> 7.95/s | match (cd scaled) |
+| Gil (`gil`) | none (ours) | [?] | Tidal Wave 90s at every rank (as before) | [?] kept |
+
 ## Still open: 0.24.5 re-read (ext/release-integ-0245 272368589 and the 0.24.6 waves, 2026-11-11)
 
 Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read against ext/release-integ-0245 272368589 (data and kit code, no number changed) and against the branches that moved since: the 0.24.6 waves (ext/w0246-*, by ancestry and their docs/MERGE_0246_*.md), the riders, aegis, guard-cut, range and anim-time branches, and the READY lines after the 0.24.4 audit. Marks: **done** `ext/<branch>` (the fix exists; *where* says which line carries it), **open** (no fix anywhere; a task below), **owner** (an owner call decides it, or the source cannot settle it so ours stands). "No line" = READY but on neither 0.24.5 nor a 0.24.6 wave. On 0.24.5 itself nothing below changed: every kit cooldown, rider and range reads as the 0.24.4 re-audit found it.
@@ -488,7 +511,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Slot | Source | Ours | Verdict | Re-check 2026-11-10 (ext/release-integ-0244-fix ec3c9dafb, Training Area) |
 |---|---|---|---|---|
 | LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match | A round every 0.13 s held (0.12 on the clock, frame-rounded), first 0.07 s after the press; 6.0, 5.7, 5.4, 5.1 on the first hits, 3.0 by round 10; 82 dmg in 3 s. **match** |
-| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) | 22 dmg + Dazed, lands 0.20 s after the press at 6 m, cd 6.5 s; wall cone 16 + shove, fuse 0.9 s (combo check). Still named Burr Charge: owner 11-08 Coin Blast not on this branch (gap A). **match, rename missing** |
+| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) | 22 dmg + Dazed, lands 0.20 s after the press at 6 m, cd 6.5 s; wall cone 16 + shove, fuse 0.9 s (combo check). Named Coin Blast and flicked from her free hand since 11-17 (gap A closed). **match, rename missing** |
 | Q | none | glove | ours | not measured (ours) |
 | E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match | Beam at 0.63 s, 36 dmg (+20% on Dazed, passes a wall), cd 11.5 s, shave 20%/30%. Still fires from the rifle: owner 11-08 Palm Lance (palm origin) not on this branch (gap A). **match, palm missing** |
 | R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) | Impact 1.62 s after the press (24, 36 in the core), then 3.5 per tick, 6 ticks 0.5 s apart over 3 s (21), cd 42 s. **match** |
@@ -761,7 +784,7 @@ DECISIONS 2026-11-10: the first pick is Lace, Kael or Vex, so every new player t
 - Vex Coin Blast and Palm Lance: **not on this branch**, gap A.
 
 **Gaps, none an integration regression.**
-- **A. Vex Coin Blast / Palm Lance (owner 11-08).** `content/archetypes/gunslinger.json:59` still "Burr Charge", `:92` still "Longneedle", fired from the rifle. The work is READY as ext/vex-coin-palm-1108 `0478765f6` (9 commits on ext/vfx-gunslinger) and was never merged into the integration or main.
+- **A. Vex Coin Blast / Palm Lance (owner 11-08).** `content/archetypes/gunslinger.json:59` still "Burr Charge", `:92` still "Longneedle", fired from the rifle. The work is READY as ext/vex-coin-palm-1108 `0478765f6` (9 commits on ext/vfx-gunslinger) and was never merged into the integration or main. **Closed 11-17 (ext/vex-coin-palm-1117, owner 11-17 playtest):** RMB is the Coin Blast, a gold coin flicked from her free hand; E is the Palm Lance, charged at and fired from her open left palm; the gun arm stays down in both. Numbers unchanged.
 - **B. Vex hold slide is 10.3 m, not 7.** `scripts/arch/kits/gunslinger_kit.gd:369-372`: a held Shift joins the slide at the tap's 0.18 s mark, after the skid has already gone about 3.2 m; `:392` then adds the data's 7 m. Main did the same (9.1 m). Source length for a hold `[?]`; decide whether the 7 m includes the skid.
 - **C. Zone ticks run 0.52 s, not 0.5.** `scripts/arch/kits/gunslinger_ult.gd:181-183` (Cinderfall) and `scripts/arch/kits/archer_kit.gd:401-404` (Hail Wall) reset the tick timer and drop the remainder, so 0.5 s costs 31 frames. 3% slow, same on main. Keep the remainder (`+= every`) in both.
 
@@ -868,8 +891,8 @@ words, not a number. So nothing changed in the kits. The table's numbers come fr
 - Footage reads that are far off: Vex's wall cone (ours 4.43 m vs 6.3 m; a push near 13.5 would land about 6.3 m), Sparkle's Skycall
   slide (3.4 m vs 7.2 m), Tenzo's full punch (4.43 m vs 5.4 m), Vex's recoil (1.56 m vs 0.9 m). Each needs an owner call
   or a sharper clip before it changes.
-- `docs/MOVEMENT_FEEL.md` "Knock arc" is stale on main: push 12 rests at 5.12 m, not 4.45 m, push 9 at 3.07, not 2.79,
-  and `--move-feel-check` is red on `knock_lace_04_m`, `knock_sparkle_04_m` and `knock_done_04` before this branch.
+- `docs/MOVEMENT_FEEL.md` "Knock arc" was stale (push 12 rests at 5.12 m, push 9 at 3.07); the table and the
+  `knock_lace_04_m`, `knock_sparkle_04_m` and `knock_done_04` asserts now match the sweep; `knock_done_04` (>= 0.85, footage) is asserted on Storm Rod, the Joule spear's knock.
 
 ## Moving while casting: the slice four (main 88b06b9e7, 2026-11-12)
 

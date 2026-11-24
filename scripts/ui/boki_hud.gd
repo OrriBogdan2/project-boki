@@ -64,7 +64,7 @@ static func r_slot(h_v, p: Hunter, ur: Rect2) -> void:
 	if ulv < Hunter.SLOT_MAX["ult"]:
 		var trap := Rect2(Vector2(ur.end.x - 16, ur.position.y + 2), Vector2(14, 14))
 		h_v._rounded(trap, Color(0.03, 0.03, 0.05, 0.9), 5, Color(h_v.MUTED, 0.6), 1)
-		h_v._ctext(trap.get_center() + Vector2(0, 4), str(int(Hunter.ULT_AT[1])), 10, h_v.MUTED, h_v.big)
+		h_v._ctext(trap.get_center() + Vector2(0, 4), str(int(Hunter.ULT_AT[ulv])), 10, h_v.MUTED, h_v.big)
 	if not merged:
 		return
 	var ml: Dictionary = p.merge_st
@@ -267,7 +267,7 @@ static func cg_slots(h_v, p: Hunter, x: float, y: float, s: float) -> float:
 	if k.ks and (not k.ks.carry_passives.is_empty() or not k.ks.carry_on_shot.is_empty()):
 		# its carried bonuses: on while it is on you, greyed while it is out beside you
 		var on := p.kin_carry_on()
-		h_v._ctext(Vector2(gr.get_center().x, gr.position.y - 17.0), "CARRY ON" if on else "CARRY OFF", 8, Color(k.sp["color"], 0.95) if on else Color(h_v.INK, 0.4), h_v.big)
+		h_v._ctext(Vector2(gr.get_center().x, gr.position.y - 22.0), "CARRY ON" if on else "CARRY OFF", 8, Color(k.sp["color"], 0.95) if on else Color(h_v.INK, 0.4), h_v.big)
 	if down:
 		h_v._rounded(gr, Color(0.3, 0.02, 0.02, 0.5), 12)
 		h_v._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.down_t))), 14, DOWN_COL, h_v.big)
@@ -394,6 +394,8 @@ static func order_tip(h_v, p: Hunter) -> Array:
 	out.append(["Hold and flick: up Chase (stick to a foe), right Guard (hold this spot), down Return (back on you), left Follow (at your side).", h_v.INK, 14])
 	if k.ks and not k.ks.throw_effects.is_empty():
 		out.append(["Its Sic also: " + KinText.effects(k.ks.throw_effects), KinRules.effects_color(k.ks.throw_effects), 13])
+	if k.wisp or k.summon and k.summon.out():
+		out.append([KinSummon.perk_line(), h_v.MUTED, 13])
 	if k.ks:
 		out.append([KinText.carry(k.ks), KinRules.cat_color("sustain"), 13])
 		var off := KinText.carry_off(k.ks)

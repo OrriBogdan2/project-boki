@@ -4,7 +4,7 @@ extends Node
 
 signal changed(key: String)
 
-const PATH := "user://settings.cfg"
+const PLAYER_PATH := "user://settings.cfg"
 
 ## The Interface size slider's range. The layout needs at least a 1100x640 space, 1/1.125 of the 1240x720
 ## it fits to the window, so the top stays under 1.125: a bigger setting could not grow the menus without
@@ -53,8 +53,10 @@ const DEFAULTS := {
 	"kin_chatter": "normal",
 	"mod_mode": false,
 	"bot_diff": "auto",
-	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
-	"boki_wisps": false,
+	# Boki ride as wisps (KinWisp): in expeditions the perks are on while it rides with you, off while summoned.
+	# wisps_v 1: the default became on (a file from before it has the old default saved: load_file turns it on once)
+	"boki_wisps": true,
+	"wisps_v": 1,
 	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
 	"hold_done": {},
 	# how keys behave (Controls)
@@ -370,6 +372,8 @@ const SHARED_OK := [
 ## so a row of caps (UI.key_hints) never splits one into two.
 const MOUSE_CAPS := {1: "LMB", 2: "RMB", 3: "MMB", 4: "WHEEL-UP", 5: "WHEEL-DN", 8: "M4", 9: "M5"}
 
+## The file settings are read from and written to (file_path()).
+var path := file_path()
 var v: Dictionary = {}
 
 ## Exported desktop builds open fullscreen until the player picks windowed; the editor and the browser start windowed.
@@ -458,6 +462,25 @@ static func migrate_cam(d: Dictionary) -> void:
 			d[k] = CAM_IDS[k][old]
 
 
+## The player's settings file, or for a check run (a registered check flag or --check-child) a file of its own that
+## starts empty and goes when the run ends: checks never change a player's or a gate box's settings (rpc6, 11-16:
+## a check left sfx=0.0 and ult_ready_cue=false behind and later gates heard no effects). A check's second game boots
+## from the check's own file with --settings-file=<path>.
+static func file_path() -> String:
+	var args := OS.get_cmdline_user_args()
+	for a in args:
+		if a.begins_with("--settings-file="):
+			return a.substr(16)
+	if args.has("--check-child") or CheckRegistry.flag_in(args) != "":
+		return "user://check_settings_%d.cfg" % OS.get_process_id()
+	return PLAYER_PATH
+
+
+func _exit_tree() -> void:
+	if path == "user://check_settings_%d.cfg" % OS.get_process_id() and Settings == self:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var cf := load_file()
@@ -481,7 +504,7 @@ func load_file() -> ConfigFile:
 	v = DEFAULTS.duplicate(true)
 	v["fullscreen"] = desktop_export
 	var cf := ConfigFile.new()
-	if cf.load(PATH) == OK:
+	if cf.load(path) == OK:
 		for k in DEFAULTS:
 			if cf.has_section_key("s", k):
 				v[k] = cf.get_value("s", k)
@@ -520,6 +543,8 @@ func load_file() -> ConfigFile:
 		# saves wrote "fullscreen: false" for anyone who never chose, so a windowed start looked like a choice: start over once
 		v["fullscreen"] = desktop_export
 		v["video_v"] = 5
+	if not cf.has_section_key("s", "wisps_v"):
+		v["boki_wisps"] = true  # (saves wrote the old default for everyone: an untouched toggle reads as off)
 	v["hud_scale"] = HudScale.setting()  # (saves from before HUD size load at 100%; hand edits stay in range)
 	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
 		v[SideColor.KEY] = "default"  # missing in older files, or a palette that is gone
@@ -644,13 +669,13 @@ func set_v(k: String, val, write := true) -> void:
 
 func save() -> void:
 	var cf := ConfigFile.new()
-	cf.load(PATH)  # keeps the other sections (the last save slot)
+	cf.load(path)  # keeps the other sections (the last save slot)
 	for k in REMOVED:
 		if cf.has_section_key("s", k):
 			cf.erase_section_key("s", k)
 	for k in v:
 		cf.set_value("s", k, v[k])
-	cf.save(PATH)
+	cf.save(path)
 
 
 func reset_all() -> void:

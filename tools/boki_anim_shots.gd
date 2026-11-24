@@ -137,7 +137,7 @@ func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, ro
 				await RenderingServer.frame_post_draw
 			var img := vp.get_texture().get_image()
 			img.convert(Image.FORMAT_RGBA8)
-			sheet.blit_rect(img, Rect2i(0, 0, PX, PX), Vector2i((f / steps) * PX, row * PX))
+			sheet.blit_rect(img, Rect2i(0, 0, PX, PX), Vector2i((int(f / float(steps))) * PX, row * PX))
 	k.queue_free()
 
 ## A contact sheet of the rig's clips: a row each, FRAMES poses evenly across the loop, front quarter.
@@ -231,7 +231,7 @@ func _seam(shots: Shots, id: String, what: String) -> Image:
 		rig._pos_prev = k.global_position
 	else:
 		rig.set_clip(what, 0.0)
-		rig.player.seek(rig.player.get_animation(what).length - SEAM_FRAMES / 2 * DT, true)
+		rig.player.seek(rig.player.get_animation(what).length - int(SEAM_FRAMES / 2.0) * DT, true)
 		lead = 0
 	var sheet := Image.create(SEAM_PX * SEAM_FRAMES, SEAM_PX, false, Image.FORMAT_RGBA8)
 	for i in lead + SEAM_FRAMES:
@@ -245,7 +245,7 @@ func _seam(shots: Shots, id: String, what: String) -> Image:
 		var img: Image = await shots._grab(vp)
 		img.convert(Image.FORMAT_RGBA8)
 		var mid := Vector2i(cam.unproject_position(k.position + Vector3(0, 0.5 * Shots.FARM_BOKI_SCALE, 0)))
-		var at := mid - Vector2i(SEAM_PX, SEAM_PX) / 2
+		var at := mid - Vector2i(Vector2(Vector2i(SEAM_PX, SEAM_PX)) / 2.0)
 		sheet.blit_rect(img, Rect2i(at, Vector2i(SEAM_PX, SEAM_PX)), Vector2i((i - lead) * SEAM_PX, 0))
 	vp.queue_free()
 	return sheet

@@ -374,7 +374,7 @@ func _case_glide_land(t: float) -> void:
 		"glide_land: a glide along the train lands on a car (%.2f s%s)" % [landed, _tags()]
 	)
 	ok(
-		jolt <= JOLT + Hunter.GROUND_ACCEL * DT,
+		jolt <= JOLT + HunterFeel.ground_accel * DT,
 		"glide_land: no jolt touching down (world speed changed %.2f m/s that step)" % jolt
 	)
 	if trace.size() > 12:

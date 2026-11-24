@@ -155,10 +155,10 @@ func _emit(chunk: int, bands := 0) -> void:
 				if chunk > 0: _ranges.append([Vector2i(q.x / chunk, q.y / chunk), s0, V.size()])
 			continue
 		var org := _flight_origin(tiles, F["dir"])
-		var mid: Vector2i = tiles[tiles.size() / 2]
+		var mid: Vector2i = tiles[int(tiles.size() / 2.0)]
 		var s1 := V.size()
 		_stairs(org.x, org.y, F["dir"], W.level[W.idx(org.x, org.y)] * LEVEL, tiles.size())
-		if chunk > 0: _ranges.append([Vector2i(mid.x / chunk, mid.y / chunk), s1, V.size()])
+		if chunk > 0: _ranges.append([Vector2i(int(mid.x / float(chunk)), int(mid.y / float(chunk))), s1, V.size()])
 
 const BANDS_MAX := 8        # tracers at once: more only splits the rows finer than the pool has cores
 var _bands: Array = []      # the band tracers while _emit runs
@@ -183,7 +183,7 @@ func _trace_rows(z0: int, z1: int, chunk: int) -> void:
 		var start := V.size()
 		for cx in range(-1, w):
 			if chunk > 0:
-				var key := Vector2i(clampi(cx, 0, w - 1) / chunk, clampi(cz, 0, h - 1) / chunk)
+				var key := Vector2i(int(clampi(cx, 0, w - 1) / float(chunk)), int(clampi(cz, 0, h - 1) / float(chunk)))
 				if key != cur:
 					if cur.x != -99:
 						_ranges.append([cur, start, V.size()])
@@ -269,7 +269,7 @@ func _fill_under() -> void:
 	var d := PackedFloat32Array(); d.resize(w * h)
 	var big := 1.0e6
 	for i in w * h:
-		d[i] = big if v(i % w, i / w) >= 0 else 0.0
+		d[i] = big if v(i % w, int(i / float(w))) >= 0 else 0.0
 	var dg := 1.4142
 	# two-pass chamfer distance to the nearest void tile
 	for z in h:
@@ -312,7 +312,7 @@ func _fill_under() -> void:
 	for i in w * h:
 		if d[i] <= 0.0:
 			continue
-		var x := i % w; var z := i / w
+		var x := i % w; var z := int(i / float(w))
 		var R: float = maxf(1.5, float(reach.get(island[i], 1.5)))
 		var dc := d[i] - 0.5
 		var deep := clampf(3.0 + R * 0.7, 4.0, 15.0)
@@ -441,7 +441,8 @@ func _cell(cx: int, cz: int) -> void:
 				p3.append(Vector3(pts[k].x, inf["rim"], pts[k].y)); lv.append(-1)
 			else:
 				var ti: int = inf
-				p3.append(Vector3(pts[k].x, under[ti], pts[k].y)); lv.append(vals[(ti / w + PAD) * pw + ti % w + PAD])
+				p3.append(Vector3(pts[k].x, under[ti], pts[k].y))
+				lv.append(vals[(int(ti / float(w)) + PAD) * pw + ti % w + PAD])
 		for k in range(1, p3.size() - 1):
 			_under_tri([p3[0], p3[k], p3[k + 1]], [lv[0], lv[k], lv[k + 1]], bio)
 	else:
