@@ -38,6 +38,7 @@ import numpy as np
 import scipy.sparse as sp
 from scipy.sparse.csgraph import connected_components
 from PIL import Image
+from scipy import ndimage
 from scipy.spatial import cKDTree
 
 ISLAND_TOL = 0.001  # m: vertices this close are one vertex (UV seams, decimation splits)
@@ -1715,6 +1716,294 @@ def drop_under(js, b, out, rig):
     return int(gone.sum())
 
 
+# r20: the r11 socket dome is a flat disc of 2198 triangles over the whole right torso side (y 1.20-1.71, z -0.41-0.10 m)
+# with a quarter of its weight on the head bones (headfront/Head), so once the slim arm stopped hiding it it read as a
+# flat grey panel that slid with the head in the attack. Its vertices move onto the mirrored left torso/shoulder (the
+# Meshy surface there) and take the mirrored left skin weights, both fading in over DOME_BLEND from the open rim (the
+# rim stays welded to Meshy's skin round it).
+DOME_SMOOTH = (40, 6)  # rounds: offset smoothing, position relax
+DOME_BLEND, DOME_MAX_MOVE, DOME_CORE = 0.05, 0.12, (0.06, (1.30, 1.62), -0.15)  # m; core: x, y clamp, z (left space)
+
+
+def mirror_name(s):
+    return s.replace("Left", "\0").replace("Right", "Left").replace("\0", "Right")
+
+
+def reshape_socket(js, b, out, rig):
+    prim = js["meshes"][0]["primitives"][0]
+    att = prim["attributes"]
+    arr = read_attrs(js, b, att)
+    P, f = arr["POSITION"].copy(), prim_faces(js, b, prim).astype(np.int64)
+    lo, hi = SOCKET_BOX
+    c = P[f].mean(1)
+    inbox = ((c >= lo) & (c <= hi)).all(1)
+    g = sp.coo_matrix((np.ones(len(f) * 3), (np.r_[f[:, 0], f[:, 1], f[:, 2]], np.r_[f[:, 1], f[:, 2], f[:, 0]])), (len(P),) * 2)
+    lab = connected_components(g, directed=False)[1]
+    flab = lab[f[:, 0]]
+    cnt, cin = np.bincount(flab, minlength=lab.max() + 1), np.bincount(flab, inbox, minlength=lab.max() + 1)
+    domes = np.where((cnt >= 500) & (cin == cnt))[0]  # a vertex-separate island wholly in the socket box: r19's dome
+    dome = np.isin(flab, domes)
+    dv = np.unique(f[dome])
+    rest = np.unique(f[~dome])
+    tree = cKDTree(P[rest])
+    rim_d = cKDTree(P[dv[tree.query(P[dv])[0] < ISLAND_TOL]]).query(P[dv])[0]  # distance to the welded rim
+    a = np.clip(rim_d / DOME_BLEND, 0, 1)
+    a = a * a * (3 - 2 * a)
+    flip = np.array([-1.0, 1.0, 1.0])
+    lf = f[~dome & (P[f].mean(1)[:, 0] > 0.02)]  # the left side's skin (no dome there)
+    tri = P[lf]
+    tri = tri[(tri.mean(1)[:, 1] > 1.0)]
+    e1, e2 = tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]
+    moved = 0
+    disp = np.zeros((len(dv), 3))
+    for i, v in enumerate(P[dv]):
+        vm = v * flip
+        o = np.array([DOME_CORE[0], np.clip(vm[1], *DOME_CORE[1]), DOME_CORE[2]])
+        d = vm - o
+        r0 = np.linalg.norm(d)
+        d /= r0
+        h = np.cross(d, e2)
+        det = (e1 * h).sum(1)
+        ok = np.abs(det) > 1e-9
+        ia = np.where(ok, 1 / np.where(ok, det, 1), 0)
+        s = o - tri[:, 0]
+        q = np.cross(s, e1)
+        u, w, t = ia * (s * h).sum(1), ia * (q * d).sum(1), ia * (e2 * q).sum(1)
+        t = t[ok & (u >= 0) & (w >= 0) & (u + w <= 1) & (t > 0)]
+        if not len(t):
+            continue
+        t = t[np.argmin(np.abs(t - r0))]  # the left surface nearest the dome's own radius (not an inner layer)
+        if abs(t - r0) > DOME_MAX_MOVE:
+            continue
+        disp[i] = a[i] * (((o + d * t) * flip) - v)
+        moved += 1
+    # the offsets are smoothed over the dome (rim pinned at 0): per-vertex hits jump between surface layers and fold the
+    # cap; then the positions relax a little (same pin), which also unfolds the r11 rings
+    df = f[dome]
+    li = {v: i for i, v in enumerate(dv)}
+    e = np.array([[li[x] for x in r] for r in df])
+    A = sp.coo_matrix((np.ones(len(e) * 6), (np.r_[e[:, 0], e[:, 1], e[:, 2], e[:, 1], e[:, 2], e[:, 0]],
+                                             np.r_[e[:, 1], e[:, 2], e[:, 0], e[:, 0], e[:, 1], e[:, 2]])), (len(dv),) * 2).tocsr()
+    A.data[:] = 1.0
+    deg = np.maximum(np.asarray(A.sum(1)).ravel(), 1)[:, None]
+    free = (rim_d > ISLAND_TOL)[:, None]
+    for _ in range(DOME_SMOOTH[0]):
+        disp = np.where(free, 0.5 * disp + 0.5 * (A @ disp) / deg, 0.0)
+    Q = P[dv] + disp
+    for _ in range(DOME_SMOOTH[1]):
+        Q = np.where(free, 0.6 * Q + 0.4 * (A @ Q) / deg, Q)
+    P[dv] = Q
+    # weights and normals of the mirrored left vertex nearest each moved point
+    lv = np.unique(lf)
+    near = lv[cKDTree(P[lv] * flip).query(P[dv])[1]]
+    nb = len(rig.names)
+    remap = np.array([rig.names.index(mirror_name(s)) if mirror_name(s) in rig.names else k for k, s in enumerate(rig.names)])
+    mj = remap[arr["JOINTS_0"][near].astype(np.int64)]
+    dm = rs.dense(mj, arr["WEIGHTS_0"][near], nb)
+    do = rs.dense(arr["JOINTS_0"][dv].astype(np.int64), arr["WEIGHTS_0"][dv], nb)
+    nj, nw = rs.top4((1 - a[:, None]) * do + a[:, None] * dm)
+    arr["JOINTS_0"][dv], arr["WEIGHTS_0"][dv] = nj, nw
+    if "NORMAL" in arr:
+        nm = arr["NORMAL"][near] * flip
+        nn = (1 - a[:, None]) * arr["NORMAL"][dv] + a[:, None] * nm
+        arr["NORMAL"][dv] = nn / np.maximum(np.linalg.norm(nn, axis=1, keepdims=True), 1e-9)
+    uv_note = ""
+    if "TEXCOORD_0" in arr:  # the dome gets its own texture: the mirrored left skin baked onto planar UVs
+        uv_note = bake_dome(js, b, out, prim, arr, P, f, dome, dv, lf)
+    arr["POSITION"] = P
+    for k, acc in list(att.items()):  # rewrite in place (same count): every primitive sharing the arrays follows
+        v = arr[k]
+        if js["accessors"][acc]["componentType"] == 5126:
+            new = out.add_floats(v.astype(np.float32), js["accessors"][acc]["type"])
+            if k == "POSITION":
+                js["accessors"][new].update(min=v.min(0).tolist(), max=v.max(0).tolist())
+        else:
+            js["accessors"].append({"bufferView": out.add_view(v.astype(np.uint16).tobytes()), "componentType": 5123,
+                                    "count": len(v), "type": "VEC4"})
+            new = len(js["accessors"]) - 1
+        for p2 in js["meshes"][0]["primitives"]:
+            if p2["attributes"].get(k) == acc:
+                p2["attributes"][k] = new
+    head = sum(nw[:, j][np.isin(nj[:, j], [rig.names.index(s) for s in STRAY if s in rig.names])].sum() for j in range(4))
+    return "dome tris %d, verts %d, moved %d, head/spine weight left %.0f; %s" % (dome.sum(), len(dv), moved, head, uv_note)
+
+
+DOME_UV_CORE_X = 0.15  # m: x of the point the dome's UV angles are taken from
+DOME_TEX = 512  # px: the dome's own baked texture (its planar UVs, 2% margin)
+
+
+def bake_dome(js, b, out, prim, arr, P, f, dome, dv, lf):
+    """Per-vertex UVs taken from the atlas interpolate across Meshy's UV islands (stripes, and the brass/strap texels gave
+    r19's bronze sheen). The dome instead gets planar UVs (its own two main axes) and a DOME_TEX texture where each texel
+    holds the atlas colour of the mirrored point on the left skin (closest left triangle, barycentric UV, so texels never
+    straddle islands). Its triangles move to their own primitive: a copy of the skin material with that texture, no normal
+    map, the skin's median roughness/metal as constants."""
+    flip = np.array([-1.0, 1.0, 1.0])
+    D = P[dv]
+    ctr = D.mean(0)
+    core = np.array([DOME_UV_CORE_X, ctr[1], ctr[2]])  # angles seen from inside the torso: the dome wraps the shoulder,
+    d = D - core  # so a flat projection folds; from the core it is star-shaped
+    uv = np.c_[np.arctan2(d[:, 2], -d[:, 0]), np.arctan2(d[:, 1], np.hypot(d[:, 0], d[:, 2]))]
+    uv = (uv - uv.min(0)) / np.ptp(uv, 0).max()
+    uv = 0.02 + 0.96 * uv
+    mat = js["materials"][prim["material"]]
+
+    def tex_of(ti):
+        img = js["images"][js["textures"][ti]["source"]]
+        return np.asarray(Image.open(io.BytesIO(bytes(n.view_bytes(js, b, img["bufferView"])))).convert("RGB"), np.float32)
+
+    atlas = tex_of(mat["pbrMetallicRoughness"]["baseColorTexture"]["index"])
+    UV = arr["TEXCOORD_0"]
+    lt = P[lf]
+    lc = cKDTree(lt.mean(1))
+    S = DOME_TEX
+    img = np.zeros((S, S, 3), np.float32)
+    have = np.zeros((S, S), bool)
+    slot = {v: i for i, v in enumerate(dv)}
+    for tri3 in f[dome]:
+        t2 = uv[[slot[v] for v in tri3]] * S
+        x0, y0 = np.floor(t2.min(0)).astype(int)
+        x1, y1 = np.ceil(t2.max(0)).astype(int)
+        xs, ys = np.meshgrid(np.arange(max(x0, 0), min(x1 + 1, S)), np.arange(max(y0, 0), min(y1 + 1, S)))
+        pts = np.c_[xs.ravel() + 0.5, ys.ravel() + 0.5]
+        m = np.c_[t2[1] - t2[0], t2[2] - t2[0]]
+        if abs(np.linalg.det(m)) < 1e-9:
+            continue
+        bc = np.linalg.solve(m, (pts - t2[0]).T).T
+        w = np.c_[1 - bc.sum(1), bc]
+        inside = (w >= -0.02).all(1)
+        if not inside.any():
+            continue
+        q = (w[inside] @ P[tri3]) * flip  # the texel's 3D point, mirrored onto the left side
+        k = lc.query(q, k=4)[1]
+        best = np.zeros((len(q), 2))
+        bd = np.full(len(q), np.inf)
+        for j in range(4):  # closest point among the 4 nearest left triangles, as barycentric UV
+            T = lt[k[:, j]]
+            e0, e1 = T[:, 1] - T[:, 0], T[:, 2] - T[:, 0]
+            d = q - T[:, 0]
+            a00, a01, a11 = (e0 * e0).sum(1), (e0 * e1).sum(1), (e1 * e1).sum(1)
+            b0, b1 = (d * e0).sum(1), (d * e1).sum(1)
+            den = np.maximum(a00 * a11 - a01 * a01, 1e-12)
+            s_, t_ = np.clip((a11 * b0 - a01 * b1) / den, 0, 1), np.clip((a00 * b1 - a01 * b0) / den, 0, 1)
+            over = s_ + t_ > 1
+            s_[over], t_[over] = s_[over] / (s_ + t_)[over], t_[over] / (s_ + t_)[over]
+            dist = np.linalg.norm(T[:, 0] + s_[:, None] * e0 + t_[:, None] * e1 - q, axis=1)
+            u3 = UV[lf[k[:, j]]]
+            uvq = u3[:, 0] * (1 - s_ - t_)[:, None] + u3[:, 1] * s_[:, None] + u3[:, 2] * t_[:, None]
+            nearer = dist < bd
+            best[nearer], bd[nearer] = uvq[nearer], dist[nearer]
+        th, tw = atlas.shape[:2]
+        px = np.clip((best[:, 0] % 1) * tw, 0, tw - 1).astype(int)
+        py = np.clip((best[:, 1] % 1) * th, 0, th - 1).astype(int)
+        gx, gy = xs.ravel()[inside], ys.ravel()[inside]
+        img[gy, gx] = atlas[py, px]
+        have[gy, gx] = True
+    idx = ndimage.distance_transform_edt(~have, return_distances=False, return_indices=True)
+    img = img[idx[0], idx[1]]  # empty texels take the nearest filled one (filter/mip margin)
+    img = ndimage.gaussian_filter(img, (0.7, 0.7, 0))  # one-texel soften: neighbouring atlas islands shade apart
+    buf = io.BytesIO()
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(buf, "JPEG", quality=92)
+    js["images"].append({"bufferView": out.add_view(buf.getvalue()), "mimeType": "image/jpeg"})
+    js["textures"].append({"source": len(js["images"]) - 1, **({"sampler": js["textures"][0]["sampler"]} if "sampler" in js["textures"][0] else {})})
+    pbr = dict(mat["pbrMetallicRoughness"])
+    pbr["baseColorTexture"] = {"index": len(js["textures"]) - 1}
+    rough = 0.85
+    if "metallicRoughnessTexture" in pbr:
+        mr = tex_of(pbr.pop("metallicRoughnessTexture")["index"])
+        su = UV[np.unique(lf)]
+        g_ = mr[np.clip((su[:, 1] % 1) * mr.shape[0], 0, mr.shape[0] - 1).astype(int), np.clip((su[:, 0] % 1) * mr.shape[1], 0, mr.shape[1] - 1).astype(int)]
+        rough = float(np.median(g_[:, 1]) / 255)
+        pbr["metallicFactor"], pbr["roughnessFactor"] = float(np.median(g_[:, 2]) / 255), rough
+    dm = {k: v for k, v in mat.items() if k not in ("normalTexture", "pbrMetallicRoughness", "name")}
+    dm.update(name="skin-native-dome", pbrMetallicRoughness=pbr)
+    js["materials"].append(dm)
+    arr["TEXCOORD_0"][dv] = uv.astype(np.float32)
+    keep = f[~dome].astype(np.uint32).ravel()
+    js["accessors"].append({"bufferView": out.add_view(keep.tobytes()), "componentType": 5125, "count": int(keep.size), "type": "SCALAR"})
+    prim["indices"] = len(js["accessors"]) - 1
+    dp_ = {k: v for k, v in prim.items() if k not in ("indices", "material")}
+    dfl = f[dome].astype(np.uint32).ravel()
+    js["accessors"].append({"bufferView": out.add_view(dfl.tobytes()), "componentType": 5125, "count": int(dfl.size), "type": "SCALAR"})
+    dp_.update(indices=len(js["accessors"]) - 1, material=len(js["materials"]) - 1)
+    js["meshes"][0]["primitives"].append(dp_)  # (attributes are repointed below with the skin's: same dict objects)
+    u2 = uv[np.array([slot[v] for v in f[dome].ravel()])].reshape(-1, 3, 2)
+    a2 = (u2[:, 1, 0] - u2[:, 0, 0]) * (u2[:, 2, 1] - u2[:, 0, 1]) - (u2[:, 2, 0] - u2[:, 0, 0]) * (u2[:, 1, 1] - u2[:, 0, 1])
+    folds = int(min((a2 < 0).sum(), (a2 > 0).sum()))
+    return "dome texture %dpx, %d texels, uv folds %d, roughness %.2f" % (S, int(have.sum()), folds, rough)
+
+
+# r20: the r19 grey sheet at the right shoulder was the RIGHT STRAP itself (a recoloured render shows it): r14 cast each
+# of its three columns onto the skin separately, the right ones landed at uneven depths on the old socket dome, so its
+# rows were 0.13-0.16 m across (left 0.06-0.07) and tilted into a wide wedge that the arm swings up in the attack.
+# The right rows become the x-mirror of the clean left rows, each moved as a whole along its normal onto the right skin.
+MIRROR_LIFT, MIRROR_CAP, MIRROR_PROBE = 0.006, 0.04, 0.08  # m: clearance off the skin, largest move, search half-depth
+
+
+def mirror_strap(js, b, out, rig):
+    """r20: right strap rows = mirrored left rows (column order reversed so UVs and winding stay), each row shifted rigidly
+    along its normal to sit MIRROR_LIFT over the outermost right skin under its columns; r14's weights (mean of the
+    STRAP_K skin vertices nearest the row middle) taken again on the right."""
+    import dredge_r14 as r14
+    prims = js["meshes"][0]["primitives"]
+    st = next(p for p in prims if js["materials"][p["material"]]["name"] == "strap-leather")
+    skin = prims[0]
+    S = n.floats(js, b, st["attributes"]["POSITION"]).copy()
+    N = n.floats(js, b, st["attributes"]["NORMAL"]).copy()
+    k, rows = STRAP_ACROSS, len(S) // STRAP_ACROSS
+    half = rows // 2  # rows of the right strap (first), then the left
+    sp_ = n.floats(js, b, skin["attributes"]["POSITION"])
+    sf = prim_faces(js, b, skin).astype(np.int64)
+    tri = sp_[sf]
+    c = tri.mean(1)
+    tri = tri[(c[:, 0] < 0.0) & (c[:, 0] > -0.45) & (c[:, 1] > 1.0)]
+    flip = np.array([-1.0, 1.0, 1.0])
+    shifts = []
+    for r in range(half):
+        L = S[k * (half + r):k * (half + r) + k][::-1] * flip
+        nn = N[k * (half + r) + k // 2] * flip
+        nn = nn / np.linalg.norm(nn)
+        need = []
+        for v in L:
+            o = v - MIRROR_PROBE * nn
+            e1, e2 = tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]
+            h = np.cross(nn, e2)
+            a = (e1 * h).sum(1)
+            ok = np.abs(a) > 1e-9
+            ia = np.where(ok, 1 / np.where(ok, a, 1), 0)
+            s = o - tri[:, 0]
+            q = np.cross(s, e1)
+            u, w, t = ia * (s * h).sum(1), ia * (q * nn).sum(1), ia * (e2 * q).sum(1)
+            t = t[ok & (u >= 0) & (w >= 0) & (u + w <= 1) & (t > 0) & (t < 2 * MIRROR_PROBE)]
+            if len(t):
+                need.append(t.max() - MIRROR_PROBE)  # the outermost skin layer's offset from v along nn
+        sh = float(np.clip(max(need) + MIRROR_LIFT, -MIRROR_CAP, MIRROR_CAP)) if need else 0.0
+        shifts.append(sh)
+        S[k * r:k * r + k] = L + sh * nn
+        N[k * r:k * r + k] = nn
+    shifts = np.array(shifts)
+    sm = np.convolve(np.pad(shifts, 1, mode="edge"), np.ones(3) / 3, "valid")  # no step between neighbour rows
+    for r in range(half):
+        S[k * r:k * r + k] += (sm[r] - shifts[r]) * N[k * r + k // 2]
+    sj, sw = r14.joints_weights(js, b, skin["attributes"])
+    ids = np.unique(sf)
+    near = ids[cKDTree(sp_[ids]).query(S[1:k * half:k], k=r14.STRAP_K)[1]]
+    dn = rs.dense(sj, sw, len(rig.names))
+    jn, wt = rs.top4(dn[near].mean(1))
+    J, W = r14.joints_weights(js, b, st["attributes"])
+    J, W = J.astype(np.uint16).copy(), W.copy()
+    J[:k * half], W[:k * half] = jn.repeat(k, axis=0), wt.repeat(k, axis=0)
+    acc = out.add_floats(S.astype(np.float32), "VEC3")
+    js["accessors"][acc].update(min=S.min(0).tolist(), max=S.max(0).tolist())
+    st["attributes"]["POSITION"] = acc
+    st["attributes"]["NORMAL"] = out.add_floats(N.astype(np.float32), "VEC3")
+    st["attributes"]["WEIGHTS_0"] = out.add_floats(W.astype(np.float32), "VEC4")
+    js["accessors"].append({"bufferView": out.add_view(J.tobytes()), "componentType": 5123, "count": len(J), "type": "VEC4"})
+    st["attributes"]["JOINTS_0"] = len(js["accessors"]) - 1
+    width = np.linalg.norm(S[0:k * half:k] - S[k - 1:k * half:k], axis=1)
+    return "right rows %d, width %.3f-%.3f m, shift %.3f..%.3f m" % (half, width.min(), width.max(), sm.min(), sm.max())
+
+
 def rebuild_stages(out_path, in_path, stages):
     """Each stage writes the file and the next reloads it (new arrays live in the new file's buffer)."""
     src = in_path
@@ -1809,6 +2098,8 @@ if __name__ == "__main__":
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm swap", lambda js, b, out, rig: swap_goo_arm(js, b, out, rig, sys.argv[4]))])
     elif sys.argv[1] == "--r19":  # r19: r18 glb: socket dome skin UVs, strap lift, under layer cut (argv: OUT IN)
         rebuild_stages(sys.argv[2], sys.argv[3], [("socket skin", skin_socket), ("strap lift", lift_strap), ("under layer", drop_under)])
+    elif sys.argv[1] == "--r20":  # r20: r19b glb: right strap = mirrored left strap on the right skin (argv: OUT IN)
+        rebuild_stages(sys.argv[2], sys.argv[3], [("socket reshape", reshape_socket), ("strap mirror", mirror_strap)])
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
