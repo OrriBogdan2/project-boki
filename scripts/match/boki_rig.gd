@@ -876,9 +876,9 @@ const STRIDE := {
 	"orchisloth": [0.33, 1.35],
 	"limpetor": [0.30, 1.25],
 	"opalisk": [0.30, 1.24],
-	"nimbostrich": [0.30, 1.22],
+	"nimbostrich": [0.34, 1.73],
 	"sentrikat": [0.34, 1.33],
-	"nacrolin": [0.34, 1.34],
+	"nacrolin": [0.33, 1.59],
 	"murmurling": [0.29, 1.17],
 	"squalltross": [0.29, 1.17],
 }
