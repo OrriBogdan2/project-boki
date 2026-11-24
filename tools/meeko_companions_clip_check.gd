@@ -163,10 +163,13 @@ func run(main: Node) -> void:
 	_done(main)
 
 
-## The head bone's height minus the higher hand bone's, in world space (the posed skeleton, this frame).
+## The head bone's height minus the highest wrist or paw tip, in world space (the posed skeleton, this frame).
 func _hands_gap(sk: Skeleton3D) -> float:
 	var y := func(b: String) -> float: return (sk.global_transform * sk.get_bone_global_pose(sk.find_bone(b))).origin.y
-	return float(y.call("Head")) - maxf(float(y.call("LeftHand")), float(y.call("RightHand")))
+	var top := -INF
+	for b in ["LeftHand", "RightHand", "LeftHand_End", "RightHand_End"]:  # (the wrists and the paw tips)
+		top = maxf(top, float(y.call(b)))
+	return float(y.call("Head")) - top
 
 
 func _done(main: Node) -> void:
