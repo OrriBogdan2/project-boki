@@ -14,6 +14,7 @@ const KIN := ["cindle", "pebbit", "zapple", "wisplet", "burrlet", "puddlet"]  # 
 const GAP := 6.0  # m between the squads at the start
 const LEAD_S := 2.0  # s of fight before the first counted frame
 const EVERY_S := 1.0  # s between counted frames
+const BODY_SHADERS := ["blob_shadow.gdshader", "wisp_core.gdshader", "boki_wisp.gdshader"]  # body looks, not fx
 const NEAR_K := 1.0  # body widths round a Hunter's screen box that count as on it
 ## --clarity-check's element budget: "kind what" prefix -> the most element-Hunter pairs a frame, on average.
 ## Plates, ownership rings, telegraphs and your own damage numbers are gameplay and not held here.
@@ -85,8 +86,11 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		await main.get_tree().process_frame
 		t += DT
 		if t >= next:
+			# the bots wander off for seconds at a time (and differently each run): a counted frame is a fight frame
+			p.combat_at = m.time
 			SafeArea.seen.clear()  # the HUD's drawn marks (plates, icons, badges) are recorded for tally()
 			SafeArea.recording = true
+			BokiChatter.drawn = 0  # fight-time Boki text the HUD draws this frame
 			m.hud.c.queue_redraw()
 			m.hud.panels.queue_redraw()
 			await main.get_tree().process_frame
@@ -140,8 +144,9 @@ static func _centre(m: Match) -> Vector3:
 	return c / maxf(1.0, n)
 
 
-## A Hunter's, Boki's or monster's own body (skinned or under a skeleton), the map itself, or an interactable's
-## own badge (Models.icon_badge, a perk orb's icon: scenery a Hunter happens to stand in front of, not a mark on them).
+## A Hunter's, Boki's or monster's own body (skinned or under a skeleton, a downed Hunter's or a Boki's wisp body,
+## the blob shadow under a body: docs/COMBAT_CLARITY.md), the map itself, or an interactable's own badge
+## (Models.icon_badge, a perk orb's icon: scenery a Hunter happens to stand in front of, not a mark on them).
 static func _body(v: VisualInstance3D) -> bool:
 	if v is Sprite3D:
 		return String(v.name) == "Icon" or String(v.get_parent().name) == "Icon"
@@ -149,6 +154,13 @@ static func _body(v: VisualInstance3D) -> bool:
 		return false
 	var mi := v as MeshInstance3D
 	if mi and mi.skin != null:
+		return true
+	if (
+		mi
+		and mi.material_override is ShaderMaterial
+		and (mi.material_override as ShaderMaterial).shader
+		and (mi.material_override as ShaderMaterial).shader.resource_path.get_file() in BODY_SHADERS
+	):
 		return true
 	var p := v.get_parent()
 	while p:

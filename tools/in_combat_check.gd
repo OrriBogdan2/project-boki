@@ -42,6 +42,7 @@ func _case(what: String, want: bool, act: Callable) -> void:
 
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	var d := Save.fresh()
 	var rec := Save.new_kin("zapple", "Pip")
