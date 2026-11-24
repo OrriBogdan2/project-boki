@@ -60,7 +60,7 @@ func _gather(at: Vector3) -> void:
 		k["t"] = 5.0
 		k["hold_t"] = 0.0
 		k["say_t"] = 0.0
-		for key in ["nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t"]:
+		for key in ["nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t", "play"]:      # play: a toy left from before
 			k.erase(key)
 	_entry("E")["nap_t"] = 60.0
 
@@ -91,6 +91,10 @@ func _watch(at: Vector3) -> Dictionary:
 			if l["k"].has("q_as"):
 				pose[nm] = l["k"]["q_as"]
 	return {"spoke": spoke, "stood": stood, "pose": pose}
+
+## How many come-look memory lines `nm` keeps (farm life in _watch may add others of its own: races, duos, fetch).
+func _look_mems(nm: String) -> int:
+	return (_entry(nm)["rec"]["memory"] as Array).filter(func(e): return String(e.get("kind", "")) == "look").size()
 
 func _mem_size(nm: String) -> int:
 	return (_entry(nm)["rec"]["memory"] as Array).size()
@@ -140,6 +144,15 @@ func _newcomer(rare: bool) -> void:
 	ok(same, "%s: nobody else wrote a line" % tag)
 
 ## You come home: the expeditions count goes up and the farm looks.
+## The toys put down so far leave the farm: a Boki at play or fetching a ball is busy and writes its own journal lines.
+func _clear_toys() -> void:
+	var deco: Array = home.hb.L()["deco"]
+	for e in deco.duplicate():
+		if (home.toys.rules()["toys"] as Dictionary).has(String(e["id"])):
+			deco.erase(e)
+	for k in home.kins:
+		k.erase("play")
+
 func _trip() -> void:
 	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1
 	FarmChatter._look_t = 0.0
@@ -152,7 +165,7 @@ func _item_home(id: String, who: String, pose: String, verb: String) -> void:
 	var k := _entry(who)
 	k["pos"] = home.world.free_spot_near(home.ppos + Vector3(1.5, 0, 0))
 	(k["node"] as Node3D).position = k["pos"]
-	var mem := _mem_size(who)
+	var looks := _look_mems(who)
 	var jr: int = (k["rec"].get("journal", []) as Array).size()
 	Save.d["items"][id] = 1
 	_trip()
@@ -167,7 +180,7 @@ func _item_home(id: String, who: String, pose: String, verb: String) -> void:
 	ok((k["rec"]["journal"] as Array).size() == jr + 1 and line.begins_with(verb) and named,
 		"%s: one journal line '%s'" % [tag, line])
 	var seen: bool = Save.d["tutorial"].get(ComeLook.ITEM_KEY + id, false)
-	ok(_mem_size(who) == mem and seen, "%s: no memory line, kind marked seen" % tag)
+	ok(_look_mems(who) == looks and seen, "%s: no memory line, kind marked seen" % tag)
 
 ## A claimed Boki rides home (CarryArrival): `crowded` = the garden already has its cap out, so it goes to the Burrow.
 func _carried_home(crowded: bool) -> void:
@@ -264,6 +277,7 @@ func run(m: Node) -> void:
 	ok(_mem_size("A") == before + 1 and _last_mem("A").contains("play ball"),
 			"a base toy: A keeps '%s'" % _last_mem("A"))
 	_watch(Vector3(tile.x + 0.5, 0, tile.y + 0.5))
+	_clear_toys()
 	# ------------------------------------------------ you arrive with loot
 	_gather(home.ppos)
 	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1
