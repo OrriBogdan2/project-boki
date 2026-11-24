@@ -60,7 +60,7 @@ func _gather(at: Vector3) -> void:
 		k["t"] = 5.0
 		k["hold_t"] = 0.0
 		k["say_t"] = 0.0
-		for key in ["nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t"]:
+		for key in ["nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t", "play"]:      # play: a toy left from before
 			k.erase(key)
 	_entry("E")["nap_t"] = 60.0
 
@@ -140,6 +140,15 @@ func _newcomer(rare: bool) -> void:
 	ok(same, "%s: nobody else wrote a line" % tag)
 
 ## You come home: the expeditions count goes up and the farm looks.
+## The toys put down so far leave the farm: a Boki at play or fetching a ball is busy and writes its own journal lines.
+func _clear_toys() -> void:
+	var deco: Array = home.hb.L()["deco"]
+	for e in deco.duplicate():
+		if (home.toys.rules()["toys"] as Dictionary).has(String(e["id"])):
+			deco.erase(e)
+	for k in home.kins:
+		k.erase("play")
+
 func _trip() -> void:
 	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1
 	FarmChatter._look_t = 0.0
@@ -216,6 +225,7 @@ func run(m: Node) -> void:
 	ok(_mem_size("A") == before + 1 and _last_mem("A").contains("play ball"),
 			"a base toy: A keeps '%s'" % _last_mem("A"))
 	_watch(Vector3(tile.x + 0.5, 0, tile.y + 0.5))
+	_clear_toys()
 	# ------------------------------------------------ you arrive with loot
 	_gather(home.ppos)
 	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1
