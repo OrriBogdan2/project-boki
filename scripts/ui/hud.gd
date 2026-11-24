@@ -357,6 +357,7 @@ func _draw_world_labels() -> void:
 	ObjectiveTracker.world(self)      # the first expedition's next step: a pin, or an arrow at the screen edge
 	_draw_exit_labels()
 	_draw_lair_labels()
+	CampMark.world(self)
 	_draw_truce_marks()
 	_draw_wisp_rings()
 	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
@@ -686,6 +687,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	NestMap.minimap(self, to_map, on_map, hold)
+	CampMark.minimap(self, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.zone: m.zone.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
