@@ -98,7 +98,7 @@ func _shoot(
 	var model := doc.generate_scene(state) as Node3D
 	holder.add_child(model)
 	var sk := model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
-	if (pose[1] as PackedFloat32Array)[0] > 0.0:
+	if not (pose[1] as PackedFloat32Array).is_empty() and (pose[1] as PackedFloat32Array)[0] > 0.0:
 		_curl(sk, pose[1], axis, pose[2])
 	await _frames(4)
 	await _game(model, out.path_join(tag + "_game.png"))

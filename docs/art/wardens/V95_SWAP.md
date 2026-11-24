@@ -299,3 +299,32 @@ Scratch copies only (no hunter .glb touched), real GPU, `--rig-hands-shots` (mat
 - `fault3_weapon.jpg`: Albert's game .glb with the body mesh stood in for the swap's new body: the 625 `x_shield` faces are gone (grey) vs carried as their own mesh (green, shield beside the left hand).
 Not run: a full `v95_swap` on a real master (masters are not on this worker), so the hand-ball and weapon pieces are proved as functions on scratch copies.
 
+## Torn fist, 2026-11-24 (same branch)
+The 11-23 finger fix closed the hand, and the fist tore: red shards split off it (Kael's shackled hand worst). Findings, on scratch
+rigs only (Kael, Lace, Grimble through Meshy's `include_fingers` rig; no hunter .glb touched):
+- **Not** a weld problem (no zero-area triangles; vertices split per UV seam already carry equal weights) and **not** bleed between
+  neighbouring fingers (re-weighting each vertex to its nearest finger chain left the tear as it was, `finger_weights` history).
+- Two causes. (1) Meshy's skin is layered (crack plates over the base skin, finger slabs that touch) and weights each vertex alone:
+  vertices a few mm apart carry different bones, so a fist pulls the layers apart. (2) The test pose turned all three joints by the
+  same 70 deg; Meshy's fingers run longer than its finger bones, so 210 deg sends the fingertips through the back of the hand (the
+  dark/red patches).
+- Fix 1, `tools/meshy/finger_weights.py` (no Blender, edits JOINTS_0/WEIGHTS_0 in place; `meshy_task.py rig` runs it, `--raw-weights`
+  skips it, the download stays as `rigged_character.raw.glb`): Gaussian blend of every hand vertex's weights over the vertices
+  within 7 mm per metre of height (any mesh piece), two passes, welded vertices share one result, 4 influences, normalised.
+- Fix 2, `--rig-hands-shots --pose=name:80,60,30:0.6` (joint 1, 2, 3 and the thumb's scale): a fist turns the knuckle most, the tip least.
+- The weights alone do not cure the over-curl: at 70/70/70 deg Kael's clean rig has the stretch numbers of a good rig (0 edges over 3x)
+  but the fingertips still go through the back of the hand in Blender; keep joint turns graded.
+- Measure, no renderer: `python3 tools/meshy/finger_curl.py rig.glb --curl=80,60,30 --thumb=0.6` poses the fingers in numpy and
+  prints edge stretch and near-pair gaps (vertices <4 mm apart at rest that part).
+
+| rig, hand | before: edges >3x, gaps >5 mm, worst gap | after |
+|---|---|---|
+| Kael right | 15, 29, 12.3 mm | 0, 0, 3.4 mm |
+| Kael left | 1, 9, 10.0 mm | 0, 0, 2.4 mm |
+| Lace right | 10 edges >3x | 2 |
+| Lace left | 65 edges >3x | 44 |
+| Grimble right (left has no fingers) | 6, 12, 55.8 mm | 4, 2, 55.8 mm |
+
+Real-GPU stills (`gens/rig-tear-1124/<hunter>_<hand>.png`, grey = Meshy's weights, green = cleaned; rows open / fist / grip):
+the graded fist and grip show no shards on Kael (both hands). Lace's fingertips still crumple in the fist (her fingers are tiny and
+fused; 44 left-hand edges stay over 3x) and Grimble's armoured hands hide the fingers: both open (see the PR text).
