@@ -247,7 +247,7 @@ AUTO = {  # id: overrides on AUTO_BASE
     "tuatrune": BORROWED,
     "velvorm": BORROWED,
     "casquebill": BORROWED,
-    "basaltoad": {**BORROWED, "sat": 0.2, "gain": 1.2, "tint": (1.03, 1.0, 0.9)},  # lit toad read red-brown, 2D is tan
+    "basaltoad": {**BORROWED, "sat": 0.35, "gain": 1.15, "tint": (1.03, 1.0, 0.85)},  # lit toad read red-brown, 2D is tan
     # lit leather read pink (sat 0.68 vs the 2D 0.48); the embers and the brass keep their own saturation, and a crack
     # a texel wide keeps a texel of the atlas (hot: reach in texture texels)
     "cindowary": {**BORROWED, "sat": 0.55, "hot_sat": 0.95, "hot": 3},
