@@ -592,6 +592,8 @@ func _tag(k: Dictionary, o: Dictionary) -> void:
 	var om := machine(o)
 	if not m.can(S.PLAY_WITH) or not om.can(S.PLAY_WITH) or bond(k["rec"], o["rec"]) <= float(r_v["rival_at"]):
 		return  # rivals never play together
+	if Care.need(o["rec"], "food") < HomeToys.PLAY_FOOD:
+		return  # too hungry to play (HomeToys.PLAY_FOOD): a hungry Boki is not pulled off its meal into tag
 	m.go(S.PLAY_WITH, "tag")
 	om.go(S.PLAY_WITH, "tagged")
 	var secs := randf_range(r_v["play_with"][0], r_v["play_with"][1])

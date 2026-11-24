@@ -15,6 +15,7 @@ const CROWD := 1.9            # m: a toy with a Boki lying this close to it is l
 const ARRIVE := 0.7           # tiles: close enough to start
 const HUFF_SECS := 1.5        # the growl after a squabble
 const BALL_R := 0.28          # the ball's resting height (its radius)
+const PLAY_FOOD := 30.0       # food need below which a Boki is too hungry to play (a toy, or tag in BaseLife)
 
 var h
 
@@ -89,6 +90,8 @@ func pick(k: Dictionary, want := false) -> bool:
 	var rec: Dictionary = k["rec"]
 	if not FarmUnlocks.base_mode() or not h.visit.is_empty() or k.has("play"):
 		return k.has("play")
+	if _busy(k):
+		return false      # step() would drop it at once and its 30 s think timer would keep it idle (hungry: no bowl)
 	if BaseShy.shy(rec):
 		return false      # a newly adopted Boki keeps to the edge for its first day
 	if not want and (Care.need(rec, "joy") >= float(R["joy_below"]) or randf() > float(R["pick_chance"])):
@@ -135,7 +138,7 @@ func _busy(k: Dictionary) -> bool:
 	var rec: Dictionary = k["rec"]
 	return k.get("busy", false) or k.has("chase") or k.has("job") or k.has("fetch") or k.has("bath") or k.has("eat") \
 			or k.has("called_t") or k.has("going_in") or float(k.get("nap_t", 0.0)) > 0.0 \
-			or Care.need(rec, "food") < 30.0 or Care.need(rec, "energy") < 22.0
+			or Care.need(rec, "food") < PLAY_FOOD or Care.need(rec, "energy") < 22.0
 
 func _spot(k: Dictionary, t: Dictionary) -> Vector3:
 	return stand(k, t["pos"], 0.8 + float(k["play"]["slot"]) * PI)
