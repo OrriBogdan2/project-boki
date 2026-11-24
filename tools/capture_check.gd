@@ -433,7 +433,7 @@ func _bots() -> void:
 	var rec := Save.new_kin("puddlet", "", 31)
 	rec["level"] = 3
 	var at: Vector3 = bot.pos + Vector3(4.0, 0, 0.0)
-	var k := m.spawn_wild(rec, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), true)
+	m.spawn_wild(rec, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), true)
 	var scanned := false
 	var t := 0.0
 	while t < 40.0 and bot.caught.is_empty():
@@ -464,7 +464,7 @@ func _mid_scan() -> void:
 	# the match ending mid-scan stops the hum (loop keys outlive the node)
 	_fresh()
 	var P2 := m.player
-	var k2 := wild()
+	wild()
 	begin(P2)
 	run_for(0.3)
 	var hum2 := "scanhum" + P2.nid
