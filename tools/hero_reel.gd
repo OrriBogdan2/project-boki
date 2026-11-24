@@ -454,7 +454,8 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 							_log(me, foe, st, idx, true, landed, hp0, charges0, casts.size() > casts0)
 							if not landed and String(st[5]) == "again" and tries < AGAIN_MAX:
 								tries += 1
-								if me.ak != null and String(st[2]) == "sec":  # (staged: the charge is back for the retry)
+								# (staged: the charge is back for the retry)
+								if me.ak != null and String(st[2]) == "sec":
 									me.ak.cd["rmb"] = 0.0
 									me.ak.ch_rmb = float(me.ak.rmb_charges())
 							else:
