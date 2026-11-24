@@ -327,7 +327,7 @@ func _case_glide_land(t: float) -> void:
 	P.grounded = false
 	st.carried.erase(P)  # (set down in the air, not stepped off the deck)
 	P.gliding = true  # (open already and sinking: a glider opened right over the deck kicks up first)
-	P.vel = Vector3(fwd.x * Hunter.GLIDE_SPEED, -1.4, fwd.y * Hunter.GLIDE_SPEED)
+	P.vel = Vector3(fwd.x * HunterMove.glide_cruise, -1.4, fwd.y * HunterMove.glide_cruise)
 	P.inp["move"] = fwd
 	P.inp["glide"] = true
 	P.inp["glide_btn"] = true
@@ -374,7 +374,7 @@ func _case_glide_land(t: float) -> void:
 		"glide_land: a glide along the train lands on a car (%.2f s%s)" % [landed, _tags()]
 	)
 	ok(
-		jolt <= JOLT + Hunter.GROUND_ACCEL * DT,
+		jolt <= JOLT + HunterFeel.ground_accel * DT,
 		"glide_land: no jolt touching down (world speed changed %.2f m/s that step)" % jolt
 	)
 	if trace.size() > 12:

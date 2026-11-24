@@ -4,7 +4,7 @@ extends "res://tools/vv_shots.gd"
 ## stop range. Run it on main and on the branch (docs/heroes/dredge.md, Scattergun).
 
 const CROP := Vector2i(900, 520)  # px round the point 3.5 m ahead of him
-const AHEAD := 3.5                # m
+const AHEAD := 3.5  # m
 
 
 func run(main_node: Node) -> void:

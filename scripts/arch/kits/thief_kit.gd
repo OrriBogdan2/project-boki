@@ -3,8 +3,9 @@ extends ArchKit
 ## Sable (light, id "thief"): a port of SUPERVIVE's Shiv, matched to the footage (briefs/hero-ref/dancer.md),
 ## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours. docs/heroes/thief.md.
 ##
-## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
-##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
+## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies its full range (8.5m)
+##   along the aim, whatever the cursor distance, and fizzles at the end; a thin aim line shows that range, gold
+##   while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8 shown, no cap): each adds a flat +1.3 to your bolts on them. A knock or an assist heals you 25%.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
@@ -289,13 +290,13 @@ func _tick(dt: float) -> void:
 	_tick_aim_line()
 	_net_glint(dt)
 
-## The aim line (your screen only): thin and pale lilac to the cursor, clamped to the bolt's range, with an
+## The aim line (your screen only): thin and pale lilac along the aim to the bolt's full range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
 func _tick_aim_line() -> void:
 	if not h.is_local() or h.wid != "arc_bolts" or busy():
 		AimKit.hide(h, "aim_glow")
 		return
-	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
+	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0), AimMode.MAX)
 	if primed_t > 0.0:
 		AimKit.line(h, "aim", {"to": to, "col": EMP_LINE, "alpha": 1.6, "lw": 0.13})
 		AimKit.line(h, "aim_glow", {"to": to, "col": EMP_LINE, "alpha": 0.35, "lw": 0.34, "arrow": false})
@@ -377,7 +378,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 func _bolt() -> void:
 	var emp := primed_t > 0.0
 	var n0: int = m.shots.size()
-	h.shot_aim = AimMode.CURSOR
 	h.atk.fire()
 	if m.shots.size() <= n0:
 		return
@@ -392,12 +392,12 @@ func _bolt() -> void:
 	var off := right * HAND_OFF * (1.0 if hand == 1 else -1.0)
 	var side := Vector3(off.x, 0, off.y)
 	var start: Vector3 = (sd["pos"] as Vector3) + side
-	var gun: Vector3 = sd.get("muzzle", sd["pos"]) + side      # where it's drawn from; it hits from the body
+	var gun := HeroVfx.of(m).anchor_pos(h, "gun_r" if hand == 1 else "gun_l")      # drawn from it; hits from the body
 	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
-	var to := AimMode.point(h, rng)
+	var to := AimMode.point(h, rng, AimMode.MAX)
 	var v := Vector2(to.x - start.x, to.z - start.z)
 	var spd := (sd["vel"] as Vector2).length()
-	var dist := clampf(v.length(), AimMode.MIN_D, rng)
+	var dist := v.length()
 	sd["pos"] = start
 	sd["prev"] = start
 	sd["start"] = start
@@ -406,7 +406,7 @@ func _bolt() -> void:
 	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
-	if sd.has("muzzle"): sd["muzzle"] = gun
+	sd["muzzle"] = gun
 	# the throw: the torso unwinds into it and winds toward the other hand for the next bolt (KMovesDJ
 	# thf_lmb_r / thf_lmb_l) while the swing whips that hand's blade out (HunterAnim.SWINGS "arc_bolts"); the
 	# empowered one is both blades driven out together (thf_primed)
@@ -636,7 +636,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	bola_cast = {"t": float(bd["cast"])}
 	play("thf_bola")                  # the whirl overhead through the wind-up, the sling at the end
-	m.sfx("dj_bola_whirl", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
+	KitWindup.play(self, "rmb", "dj_bola_whirl", -4.0 if h.is_local() else -8.0)
 
 func lane_len() -> float:
 	var bd: Dictionary = rmb_def()["bola"]
@@ -647,6 +647,7 @@ func _tick_bola_cast(dt: float) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	if busy():
 		bola_cast = {}
+		KitWindup.broken(self, "rmb")
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
@@ -682,8 +683,7 @@ func _throw_bola() -> void:
 			"bounces": int(bd["bounces"]), "stg": stg}
 	m.sfx("dj_bola_throw", h.pos, -3.0, 1.0)
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
-	# the yellow flash of the throw
-	fx().star(h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), col_of(rmb_def()), 0.8, 0.12)
+	vfx("bola_throw", h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), dv)
 	net_bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(dv.x, 0, dv.y) * lane_len() + Vector3(0, 1.0, 0),
 			col_of(rmb_def()))
 
@@ -709,7 +709,7 @@ func _tick_bola(dt: float) -> void:
 				else: dir.y = -dir.y
 				bola["bounces"] = int(bola["bounces"]) - 1
 				bola_bounces += 1
-				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
+				vfx("bola_bounce", p)
 				m.sfx("thief_bola_bounce", p, -5.0)
 				continue
 			MissFx.puff(m, MissFx.colour_of(h), p, true)
@@ -756,7 +756,7 @@ func _walled(q: Vector3) -> bool:
 func _end_bola(at: Vector3) -> void:
 	bola = {}
 	fx().unplace("bola%d" % h.get_instance_id())
-	m.fx.burst(at, col_of(rmb_def()), 5, 2.0, 0.25, 6.0, 0.6)
+	vfx("bola_end", at)
 
 ## The Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
 func _wrap(f: Ent) -> void:
@@ -805,7 +805,7 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
-	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("c19bff"), 1.2, 0.3)
+	for t in both: vfx("bola_tangle", (t as Ent).pos)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
@@ -858,7 +858,7 @@ func _throw_knife() -> void:
 			if knife.is_empty() and e == null: _stick_ground(at, _why == "wall", land)}))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
 		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("b890ff"), 1.6, 0.26)
-	fx().star(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("b890ff"), 0.7, 0.1)
+	vfx("knife_throw", h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6))
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
 	m.sfx("thief_knife_whisk", h.pos, -6.0 if h.is_local() else -9.0)     # the blade spinning away
 
@@ -889,9 +889,8 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if f and rank("kin") >= 3:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
-	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("b890ff"), 0.8, 0.2)
+	vfx("knife_stick", at, null, {"foe": f != null})
 	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
-	net_ring(at, 0.8, col_of(ed))
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
 func _tick_knife() -> void:
@@ -989,15 +988,14 @@ func _shadow_step(tgt: Ent) -> void:
 ## The blink: a near-instant jump with a chain of cyan afterimages from where she was to where she lands.
 func _blink(to: Vector3) -> void:
 	var from := h.pos
-	var yaw := atan2(-(to.x - from.x), -(to.z - from.z))
-	fx().ghosts(from, to, int(e_def().get("ghosts", 5)), yaw, GHOST, float(h.cdat.get("scale", 1.0)))
+	var way := Vector2(to.x - from.x, to.z - from.z)
+	fx().ghosts(from, to, int(e_def().get("ghosts", 5)), atan2(-way.x, -way.y), GHOST, float(h.cdat.get("scale", 1.0)))
+	vfx("blink", from, way.normalized(), {"len": way.length()})
 	h.teleport(to)
 	h.vel = Vector3.ZERO
 	h.gliding = false
 	blinks += 1
-	fx().puff(to + Vector3(0, 0.9, 0), GHOST, 1.2, 0.3)
 	m.sfx("dj_blink", to, -3.0, 1.0)
-	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), GHOST)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. held_fire.<dash|rmb|e|x|q|all>: {source, ours}: notes for the held-LMB rows (docs only: LMB is a held input everywhere, Hunter.trigger reads the key every frame and fire resumes the frame a slot's lock ends; --held-fire-resume-check). dash_jump.<ground|air|rise|same>: Space in a ground dash, Space in an air dash, Shift in a jump's rise, both on one step: {ours: cancel | both | ignore | end | buffer | dash (measured, --dash-jump-check), carry: share of the dash's speed kept, source, verdict: match | [?] (the source doesn't settle it)}.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. held_fire.<dash|rmb|e|x|q|all>: {source, ours}: notes for the held-LMB rows (docs only: LMB is a held input everywhere, Hunter.trigger reads the key every frame and fire resumes the frame a slot's lock ends; --held-fire-resume-check). dash_jump.<ground|air|rise|same>: Space in a ground dash, Space in an air dash, Shift in a jump's rise, both on one step: {ours: cancel | both | ignore | end | buffer | dash (measured, --dash-jump-check), carry: share of the dash's speed kept, source, verdict: match | [?] (the source doesn't settle it)}. into_cast.<first>.<second> (the Cast into cast table): <second> pressed at <first>'s at[0] s (windup) and at[1] s (recovery) after <first>'s press: fire (at once) | queue (goes <phase>_wait s later) | drop (never goes); lmb_hold is LMB held 0.75 s; asserted by --cast-into-cast-check.",
 	"dash": {
 		"ground": {
 			"lmb": {"mode": "fire", "source": "[?] The source is silent: the data (sv/briefs/kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent)."},
@@ -48,5 +48,40 @@
 	},
 	"held_fire": {
 		"all": {"source": "Footage: the bow is drawn and loosed on the release; nothing shows a re-press after a cast.", "ours": "A cast that stops the bow drops the draw with no arrow; the key still down redraws the step she is free (0 frames). Starpiercer owns LMB while it runs; the draw is back the step it ends."}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md)."}
+		},
+		"x": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "drop", "recovery": "drop", "source": "Owner 11-08 items 18-20 (a19ee5fd4c): Starpiercer looses an arrow the frame X is pressed and on each LMB press after its 1.0 s recover (archer.json x.recover; 'footage: 1.5 s a shot, a 0.4-0.8 s draw', briefs/hero-ref/pin.md:257,268); the nock is gone, so a tap inside the recover is refused (PinUlt.lmb) and a held button goes the step it is recovered."},
+			"lmb_hold": {"windup": "drop", "recovery": "queue", "recovery_wait": 0.38, "source": "Owner 11-08 items 18-20 (a19ee5fd4c): Starpiercer looses an arrow the frame X is pressed and on each LMB press after its 1.0 s recover (archer.json x.recover; 'footage: 1.5 s a shot, a 0.4-0.8 s draw', briefs/hero-ref/pin.md:257,268); the nock is gone, so a tap inside the recover is refused (PinUlt.lmb) and a held button goes the step it is recovered. Held 0.75 s from 0.05 s in, it is let go before the recover ends."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281)."}
+		}
 	}
 }
