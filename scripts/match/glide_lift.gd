@@ -10,11 +10,12 @@ extends RefCounted
 ## (DECISIONS 11-08): a fall you bring into the glider is absorbed. Decision 0095. Under a lip, open_kick's
 ## pull (decision 0061) is the one exception: the abyss dive carries into the feather.
 
-const OPEN_KICK := 6.0      # [est] m/s of spring when the glider opens more than Hunter.ABYSS_BRAKE_DIST under the lip
+# [est] m/s of spring when the glider opens more than HunterFeel.abyss_brake_dist under the lip
+const OPEN_KICK := 6.0
 const KICK_HEAT := 0.08     # [est] share of a full glider's heat the spring costs
 const PULL_FWD := 0.6       # [est] share of the fall speed (m/s) a glider opened below the lip turns into forward speed
 const PULL_RISE := 0.3      # [est] share of it the spring adds upward
-const HANG_GRAV := 0.35     # [est] share of Hunter.GLIDE_GRAV while the lift's float lasts: a soft hang at the top
+const HANG_GRAV := 0.35     # [est] share of HunterFeel.glide_grav while the lift's float lasts: a soft hang at the top
 const HANG_T := 0.9         # [est] s the float lasts after the last lifting step
 const LEDGE_AIR_T := 0.5    # s in the air after which a ledge higher than where you last stood is yours to catch
 
@@ -59,10 +60,10 @@ func fall_vy(h: Hunter, usual: float, dt: float) -> float:
 		var cut := minf(built, caught - vy)
 		built = minf(built - cut, maxf(0.0, -caught - usual))
 		var gain := cut * Loco.glide_swoop * (1.0 if h.glide_fuel > 0.001 else 0.5)
-		swoop = minf(swoop + gain, Loco.glide_max - Hunter.GLIDE_SPEED)     # a cruise glide tops out at the max
+		swoop = minf(swoop + gain, Loco.glide_max - HunterMove.glide_cruise)     # a cruise glide tops out at the max
 		_swoop_drain = swoop / Loco.glide_swoop_fade
 		return caught
-	return build(h, maxf(vy - Hunter.GLIDE_GRAV * gravity_scale() * dt, -sink_vy), usual)
+	return build(h, maxf(vy - HunterFeel.glide_grav * gravity_scale() * dt, -sink_vy), usual)
 
 ## Notes the fall `vy` (m/s) the glider's own pull or dive reached this step past its sink rate `usual`.
 func build(h: Hunter, vy: float, usual: float) -> float:
@@ -90,10 +91,10 @@ func open_kick(h: Hunter) -> void:
 		return
 	var fall := maxf(0.0, -h.vel.y)
 	_pull_forward(h, fall * PULL_FWD)
-	if kicked or h.lip_y - h.pos.y <= Hunter.ABYSS_BRAKE_DIST:
+	if kicked or h.lip_y - h.pos.y <= HunterFeel.abyss_brake_dist:
 		return
 	kicked = true
-	h.vel.y = minf(maxf(h.vel.y, 0.0) + OPEN_KICK + fall * PULL_RISE, Hunter.ABYSS_LIFT_CAP)
+	h.vel.y = minf(maxf(h.vel.y, 0.0) + OPEN_KICK + fall * PULL_RISE, HunterFeel.abyss_lift_cap)
 	h.glide_fuel = maxf(0.0, h.glide_fuel - KICK_HEAT)
 
 ## Adds `add` m/s along where you're heading (or steering, from a straight drop), up to Loco.glide_max.
@@ -109,4 +110,4 @@ func _pull_forward(h: Hunter, add: float) -> void:
 ## Airborne long enough, gliding, or just off the glider: pressing into a wall means climbing it, not
 ## stepping back up a terrace you just left.
 static func airborne_long(h: Hunter) -> bool:
-	return h.gliding or h.glide_off_t < Hunter.FEATHER_KEEP or h.air_t > LEDGE_AIR_T
+	return h.gliding or h.glide_off_t < HunterFeel.feather_keep or h.air_t > LEDGE_AIR_T

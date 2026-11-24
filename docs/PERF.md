@@ -27,6 +27,18 @@ shipped game at the cost of a static call each. Zones, per `Match` frame: `bots`
 `vfx_render`, `camera`, `hud_tick`, `hud_draw`. `Prof.frame()` in `Match._process` marks the frame. A new zone is two
 lines around straight-line code (an early `return` between them would leave the zone open).
 
+## One harness
+`--perf-bench` is the only perf entry point. Its flags pick the part: none (the fixed load), `--tracy=<dir>`,
+`--bench-fight`, `--bench-ab`, `--bench-probe` (a scripted expedition, loading screen to fight, per phase:
+`tests/perf_probe.gd`) and `--bench-hunter-gpu` (Hunter model draw cost: `tools/perf/hunter_gpu.gd`).
+`--bench-fight` prints, in ms per frame: the match step and visual sections; every script `_process` by file (the
+bench calls them itself and times them: Hunter and Boki rigs, AimDraw, the HUD); the engine wait (the rest of the
+frame) split into the rest of the scene's process, the draw (before, during and after the viewports, from the
+renderer's own timestamps) and the physics ticks; and the shadow casters by owner. Its "match script" ms is the
+whole frame, Match code included. `--bench-novsync` and `--bench-noshadow` are probes (vsync off, shadows off).
+On rp2g the draw's frame end ("after viewports") swings 4-14 ms between runs of the same build: compare a
+script section across runs, and the wall time only over several runs on one worker.
+
 ## Capture (headless, real GPU)
 ```
 jobq submit --needs gpu --only rp1-0 --tree <tree> --out bench -- --perf-bench --bench-secs=30 --bench-view=1920x1080 --quality=medium --tracy=bench

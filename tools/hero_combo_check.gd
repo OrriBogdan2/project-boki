@@ -404,6 +404,7 @@ func _mage() -> void:
 	P.dashes = P.max_dashes()      # the press spends it; the pickup gives it back
 	K.motes.clear()
 	K.motes.append({"pos": home + Vector3(5, 0, 0), "t": 4.0, "node": K.own_node(), "owner": P})
+	T.teleport(home + Vector3(5, 0, 3))      # beside the orb, off the run's lane (the run itself stacks Static)
 	ac.aim_at(P, home + Vector3(8, 0, 0))
 	var ob0 := K.orb_bursts
 	_dash(m, P, 0.25)
@@ -504,6 +505,18 @@ func _mage() -> void:
 	ok("Skycall: 1 Static (data), Grounded, dragged toward you",
 			K.spark_n(T) == 1 and KitStatus.grounded(T) and ac.dmg(T) >= 15.0 and T.pos.x < tx0 - 0.5,
 			"sparks %d moved %.1f" % [K.spark_n(T), T.pos.x - tx0])
+	var ring := AimKit.entry(P, "gnd%d" % T.get_instance_id())
+	var ring2 := AimKit.entry(P, "gnd2%d" % T.get_instance_id())
+	var sl := StatusLooks.of(m)
+	sl.tick(0.0)
+	var cords: Dictionary = sl.rigs.get("%d/gnd" % T.get_instance_id(), {})
+	var pink := AimKit.hero_col(P).to_html(false)
+	var ring_ok := not ring.is_empty() and not ring2.is_empty() and bool(ring2.get("dashed", false))
+	var ring_col := (ring.get("col", Color.BLACK) as Color).to_html(false)
+	ring_ok = ring_ok and bool(ring.get("all", false)) and ring_col == pink and float(ring.get("band", 0.0)) > 0.0
+	ok("Skycall's Grounded: two thin pink binding rings (one dashed, seen by all, no fill), pink cords, no amber disc",
+			ring_ok and String(cords.get("tint", "")) == pink,
+			"rings %s/%s tint %s" % [not ring.is_empty(), not ring2.is_empty(), cords.get("tint", "-")])
 	ac.step(m, 0.9)
 	ok("Skycall: the drag is a modest slide (about 3.4 m)",
 			absf((tx0 - T.pos.x) - 3.4) < 0.5, "%.1f m" % (tx0 - T.pos.x))

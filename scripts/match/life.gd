@@ -22,7 +22,7 @@ const R := {
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
 	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
 	"stomp_cycle": 0.7,         # one foot-lift-and-slam
-	"kin_revive_time": 6.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
+	"kin_revive_time": 6.0,     # [design] your kin pulling you up (as long as the reference game's self-revive)
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
@@ -48,7 +48,7 @@ static func box_value(b: Dictionary) -> int:
 	v += (b["caught"] as Array).size() * 15
 	for st in (b.get("belt", []) as Array): v += int(st["n"]) * 4
 	for c in Pack._box_things(b):
-		v += Loot.value(c["it"]) / 2
+		v += int(Loot.value(c["it"]) / 2.0)
 	return v
 
 static func box_color(b: Dictionary) -> Color:
@@ -375,6 +375,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 				else:
 					h.caught.append(rec)
+					CarrySfx.from_box(m, h, b)
 					if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 						h.stolen_carry = true
 		"belt":
@@ -476,6 +477,7 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 			left.append(rec)               # the box is full: this capsule stays in the deathbox
 			continue
 		h.caught.append(rec)
+		CarrySfx.from_box(m, h, b)
 		if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 			h.stolen_carry = true
 	if not left.is_empty():

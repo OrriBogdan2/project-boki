@@ -7,11 +7,12 @@ extends RefCounted
 ## renderer.
 
 const DT := 1.0 / 30.0
-const SECS := 1.2          # one run of a move, to see the whole of it (the real ones last their item's cast time)
-const RUN := 4.0           # m/s along the facing for the _run strips
+const SECS := 1.2  # one run of a move, to see the whole of it (the real ones last their item's cast time)
+const RUN := 4.0  # m/s along the facing for the _run strips
 
 var tree: SceneTree
 var cam: Camera3D
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -19,13 +20,18 @@ func run(main: Node) -> void:
 	var id := "thief"
 	var px := 420
 	var frames := 8
-	var yaw_deg := 125.0     # turned so the left (free) hand faces the camera
+	var yaw_deg := 125.0  # turned so the left (free) hand faces the camera
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--warden="): id = a.substr(9)
-		if a.begins_with("--size="): px = int(a.substr(7))
-		if a.begins_with("--frames="): frames = int(a.substr(9))
-		if a.begins_with("--yaw="): yaw_deg = float(a.substr(6))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--warden="):
+			id = a.substr(9)
+		if a.begins_with("--size="):
+			px = int(a.substr(7))
+		if a.begins_with("--frames="):
+			frames = int(a.substr(9))
+		if a.begins_with("--yaw="):
+			yaw_deg = float(a.substr(6))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(px, px)
@@ -53,8 +59,10 @@ func run(main: Node) -> void:
 	print("UTILITY_POSE_SHOTS_DONE ", frames)
 	tree.quit()
 
-func _strip(anim: HunterAnim, model: Node3D, sync: Node, mv: String, running: bool, yaw: float, frames: int,
-		dir: String) -> void:
+
+func _strip(
+	anim: HunterAnim, model: Node3D, sync: Node, mv: String, running: bool, yaw: float, frames: int, dir: String
+) -> void:
 	var n := int(SECS / DT)
 	var shot := 0
 	var vel := Vector3(sin(yaw), 0.0, cos(yaw)) * (RUN if running else 0.0)
@@ -71,28 +79,32 @@ func _strip(anim: HunterAnim, model: Node3D, sync: Node, mv: String, running: bo
 		anim.update(DT, s)
 		if sync:
 			sync.call("_process", DT)
-		if step * frames / n == shot and shot < frames:
+		if int(step * frames / float(n)) == shot and shot < frames:
 			var hp := model.to_local(anim.hand_l.global_position) if anim.hand_l else Vector3.ZERO
 			print("UPOSE_HAND %s%s f%02d %s" % [mv, "_run" if running else "", shot, hp.snappedf(0.01)])
 			_aim()
 			await _grab(dir.path_join("f%02d.png" % shot))
 			shot += 1
 
+
 func _aim() -> void:
 	cam.fov = 28.0
 	cam.position = Vector3(0, 1.3, 5.0)
 	cam.look_at(Vector3(0, 0.9, 0))
 
+
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw
 	tree.root.get_texture().get_image().save_png(path)
+
 
 func _stage(main: Node) -> Node3D:
 	var holder := Node3D.new()
 	main.add_child(holder)
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
-		"stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ground := MeshInstance3D.new()
