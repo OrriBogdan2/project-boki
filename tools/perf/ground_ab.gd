@@ -12,6 +12,7 @@ extends RefCounted
 const BLOCK := 45
 const SKIP := 8
 const NAMES := ["old", "cut", "flat", "nosea"]
+const SHOT_AT := 1100  # first frame of the pictures: each variant 3 frames apart, saved 2 frames after it is set
 
 var mats: Array[ShaderMaterial] = []
 var sea: Array[MeshInstance3D] = []
@@ -19,9 +20,16 @@ var mode := -1
 var gpu_us := [0, 0, 0, 0]
 var n := [0, 0, 0, 0]
 var since := 0
+var shots_dir := ""  # --shots-dir=<dir>: also one picture per variant on neighbouring frames (frames SHOT_AT..)
+var root: Node
 
 
-func _init(root: Node, world: Node) -> void:
+func _init(root_node: Node, world: Node) -> void:
+	root = root_node
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--shots-dir="):
+			shots_dir = String(a).substr(12)
+			DirAccess.make_dir_recursive_absolute(shots_dir)
 	for node in root.find_children("*", "MeshInstance3D", true, false):
 		var sm := (node as MeshInstance3D).material_override as ShaderMaterial
 		if sm == null or sm.shader == null:
@@ -38,15 +46,31 @@ func _init(root: Node, world: Node) -> void:
 ## Called once per frame with the frame number: switches the variant at each block start.
 func frame(f: int) -> void:
 	since += 1
-	if f % BLOCK != 0:
+	if shots_dir != "" and f >= SHOT_AT and f <= SHOT_AT + 14:
+		_shot(f - SHOT_AT)
+		return
+	if f % BLOCK != 0 and f != SHOT_AT + 15:
 		return
 	mode = (f / BLOCK) % NAMES.size()
 	since = 0
+	_apply(mode)
+
+
+func _apply(i: int) -> void:
 	for m in mats:
-		m.set_shader_parameter("detail_range", Vector2(28, 55) if mode == 1 else Vector2(1e6, 1e6))
-		m.set_shader_parameter("flat_ground", mode == 2)
+		m.set_shader_parameter("detail_range", Vector2(28, 55) if i == 1 else Vector2(1e6, 1e6))
+		m.set_shader_parameter("flat_ground", i == 2)
 	for s in sea:
-		s.visible = mode != 3
+		s.visible = i != 3
+
+
+## The pictures: variant k is set at k * 3 and saved at k * 3 + 2 (the frame shown is the one drawn after the set).
+func _shot(k: int) -> void:
+	since = 0  # (these frames stay out of the GPU averages)
+	if k % 3 == 0:
+		_apply(k / 3)
+	elif k % 3 == 2:
+		root.get_viewport().get_texture().get_image().save_png("%s/ab_%s.png" % [shots_dir, NAMES[k / 3]])
 
 
 func add_gpu(us: int) -> void:
