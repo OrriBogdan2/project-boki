@@ -41,7 +41,7 @@ static func grass_on(root: Node3D, isl: MeshInstance3D, rr: RandomNumberGenerato
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(mi)
 	var fm := MultiMesh.new(); fm.transform_format = MultiMesh.TRANSFORM_3D; fm.use_colors = true; fm.mesh = Models.flower_mesh()
-	fm.instance_count = n / 8
+	fm.instance_count = int(n / 8.0)
 	var fc := [Color("fff3a8"), Color("ff9ac8"), Color("ffffff"), Color("b8a6ff")]
 	for k in fm.instance_count:
 		var a := rr.randf() * TAU

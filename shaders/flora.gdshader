@@ -87,7 +87,7 @@ void fragment() {
 	// light from the sky above, a little darker underneath
 	c *= mix(1.0 - sky_ao, 1.0 + sky_ao * 0.25, wy * 0.5 + 0.5);
 	float fog = vis_fog(wpos);
-	vis_f = fog;
+	vis_f = fog * vis_greyness;
 	c = vis_apply(c, fog);
 	ALBEDO = c;
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);

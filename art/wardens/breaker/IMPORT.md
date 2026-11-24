@@ -1,5 +1,23 @@
 # Mossy, the Breaker (Albert, bulwark): v95 master with the appeal3 face (owner pick 11-10)
 
+**11-16 superseded:** main's e3038a4866 (v95_to_game, all 13 hunters) re-made breaker.glb from the same i1 master with its own embedded paint, so the i1 swap below is history; the loose breaker_atlas/emit jpgs are main's. That glb has no `glow-lure` material, so --warden-clips-check's lure item is red on main and here (open).
+
+**11-14 i1 (live master):** the master is now `~/meshy/v95/Albert/r3/meshy1112/candidates/i1/glb.glb` (current.json since 11-12
+20:35Z: angry porthole eyes, no drum or shield over the front; the scan has no hammer, shield or lure ball, so the whole glb is the
+master). It starts from main's breaker.glb (the clean1 swap plus the x1.205 hammer): every moved point in the spec (`to`, the
+anchors, the screen) is absolute, so nothing applies twice and the hammer, shield (`keep`) and clips come through untouched.
+- **Cyan fix:** i1 has no emission map (its cracks are painted cyan), so `emit` baked the base colour as glow (PR #44's solid cyan).
+  `emit_paint` makes the emissive texture from the baked atlas's cyan texels instead (h 0.44-0.56, s >= 0.35, v >= 0.55).
+- **Face:** `screen_uvs` was lost from v95_swap.py in a merge before the clean1 swap, so since 11-11 the mood shader drew on atlas
+  UVs: a blank teal porthole in game. Restored; shaders/warden_mood.gdshader now draws i1's face (pale-cyan eyes under a lid
+  slanting to the middle, no mouth, near-black glass), the ring's copper past the glass edge so the porthole reads round.
+- Model top 1.774x a medium hunter (i1's masts stand higher): `height_3d` 1.77 in warden_model_check. Shots and the compare
+  sheet: `~/meshy/albert-ingame-i1-1114/`.
+
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/breaker_v95.json WORK OUT.glb
+    (WORK/game.glb: main's breaker.glb from before this swap; the hammer is already at 1.012 m, no glb_prop_scale step)
+
+
 **11-11 clean1:** the master is now `~/meshy/v95/Albert/r2/clean1/cand_A.glb` (masts pulled in to x 0.72, cleaned; job 20261111-172943-a4), as
 `albert_clean1_body.glb` beside it (its mesh `body.001` only; the copies of the hammer, shield and lure ball dropped). Same spec and
 steps; the game .glb the swap starts from is the pre-swap 11-08 one (`git show 8a738e4dd:art/wardens/breaker/breaker.glb` as WORK/game.glb).
@@ -31,9 +49,12 @@ hatch shield kept on `x_shield` (`keep`).
 - **Glow:** the cracks and lure glow from the master's emission map (`emit`), which WardenGlb tints to the bulwark
   model_glow; the lure ball is `glow-lure`.
 - **Fish:** hangs from his left mast on `x_fish`; the spring chain `spring_hangfish_*` moved there with it (`move_bones`).
-- **Face:** the porthole glass is `eyes-mood` with a flat disc UV (`screen`), so the baked face never shows: WardenMood swaps
-  the material for shaders/warden_mood.gdshader, which draws the approved face (cyan rounded half-moon eyes, D smile, pale
-  core, glossy teal glass) in its 5 moods. Mood data: warden_anim/breaker.json "mood".
+- **Face (11-18, ext/hunter-picks-1118):** the porthole glass is `eyes-v95` (since 28d0f88bc3 the baked paint shows, not
+  WardenMood's drawn glass face). The owner picked face A of ~/meshy/face-albert-1118 (`final_A.glb` = FhapS_1: fat cyan
+  crescent eyes, modest smile) as the default, keeping the old angry eyes in game. `v95` here = the happy face A embedded by ext/faces-ship-1118 (tools/art1/face_swap.py, main's glb kept at the merge); the pre-face image is kept the old image is kept
+  as `breaker_v95_angry.jpg` (import size limit 2048: 2.7 MB of VRAM). The master's new normal/roughness maps are not
+  ported (this glb has albedo only). WardenMood's `tex_faces` (warden_anim/breaker.json "mood") puts the angry texture
+  on the glass for angry/determined/sad and for `combat`: 4 s after he swings, casts or is hit; the smile otherwise.
 - **Old build:** the 11-08 scan-and-sculpt build (tools/art1/breaker_scan.py, breaker_art1.py, breaker_anims.py,
   `art/wardens/src/breaker_scan_joints.json`) made the skeleton and clips this swap keeps.
 

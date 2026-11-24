@@ -2,7 +2,7 @@ class_name Hunter
 extends Ent
 ## A player or bot hunter: movement, weapon, dash, jump, ledge grab, class signature, downed state.
 
-# Supervive feel (see docs/SUPERVIVE_FEEL.md): near-instant ground control, momentum that carries in
+# Target feel (see sv/FEEL_NOTES.md): near-instant ground control, momentum that carries in
 # the air and in the glider. Air, fall and glide-height tunables are in content/rules/hunter_move.json.
 const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^2, the same up and down
 # ---- movement feel (movefeel, Oct 31 2026): every value and its source is in docs/MOVEMENT_FEEL.md,
@@ -50,7 +50,6 @@ const LEDGE_REACH := 2.8
 const LEDGE_CD := 0.45
 const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
-const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
 # The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
 # itself near the ground (or earlier on jump) for a slower, floatier last stretch.
 const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
@@ -235,7 +234,7 @@ var phase_t := 0.0            # Light's Phase Step: shots pass through you while
 var dash_pass := {}           # a grammar dash or a kit dash: what it does to foes you pass through {hit, opts}
 var abil_charge := {}         # holding a charge-up weapon ability (Rail Charge): {t}
 var charge: Dictionary = {}   # Ram
-var idle_fire := 0.0
+var idle_fire := 99.0          # s since the last shot or ability; starts expired so a fresh spawn is not "in a fight"
 var dropping := false         # gliding down from the sky at the start of a match
 var drop_from := Vector2.INF  # where the drop started
 var diving := false           # the skydive part of the drop, before the glider opens
@@ -376,6 +375,8 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var n := DashState.base_charges(dodge_def, cdat)
+	if ak and ak.single_dash():
+		return 1.0
 	return ak.dash_charges(n) if ak else n
 
 func dash_regen() -> float:
@@ -895,7 +896,7 @@ func _dash_into_glide() -> bool:
 	roll_t = 0.0
 	glide_cd = 0.0
 	shove = {}
-	if Vector2(vel.x, vel.z).length() > GLIDE_SPEED * 1.25:
+	if Vector2(vel.x, vel.z).length() > HunterMove.glide_cruise * 1.25:
 		_glide_boost_fx()
 	return true
 
@@ -1672,7 +1673,7 @@ func _physics(dt: float) -> void:
 		# the glider keeps the speed you bring into it (a dash or a pad into a glide carries) and
 		# drifts on when you let go of the keys
 		var hot_k := HunterMove.overheat_speed if glide_fuel <= 0.001 else 1.0
-		var gs := GLIDE_SPEED * hot_k * (1.0 + gear_stat("glide_speed"))
+		var gs := HunterMove.glide_cruise * hot_k * (1.0 + gear_stat("glide_speed"))
 		var carry := Loco.glide_carry(arch) * (1.0 + gear_stat("glide_speed"))
 		if loco.since > 0.0:     # the step the glider opens keeps your velocity exactly (item 8)
 			var base := glide_lift.unswoop(hv)     # the swoop rides on top of the glide's steering
@@ -1935,7 +1936,7 @@ func _physics(dt: float) -> void:
 	_try_ledge_grab(dt)
 	moves.settle(dt)
 	if is_local():
-		Loco.report(loco, Vector2(vel.x, vel.z), vel.y, GLIDE_SPEED if gliding else spd)
+		Loco.report(loco, Vector2(vel.x, vel.z), vel.y, HunterMove.glide_cruise if gliding else spd)
 	if _in_abyss():
 		fall_out()
 
@@ -2559,6 +2560,8 @@ func perk_n(id: String) -> int:
 
 ## Can this perk still be offered to you (a free perk slot, not at its stack limit)?
 func perk_open(id: String) -> bool:
+	if id == "secondwind" and ak and ak.single_dash():
+		return false
 	var below_max := perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1))
 	return perks.size() < PerkOrbs.slots() and below_max and WeaponUps.fits(self, id)
 
@@ -2697,6 +2700,7 @@ func _anim_state(stretch: float) -> void:
 	wall_moves.anim_state(self, s)
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
+	HazardMoves.anim_state(self, s)
 	KinSummon.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
@@ -2789,7 +2793,7 @@ func render(delta: float, alpha: float) -> void:
 	HunterWisp.tick(self, delta)
 	UltGlow.tick(self, delta)
 	var body_face := HunterFall.face_of(self)      # a knocked-down body keeps facing the way it fell
-	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale)     # leaned toward the camera (CamRig.char_lean)
+	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale, not SkyDeck.upright(self))     # (CamRig.char_lean)
 	else: model.rotation.y = body_face
 	if out and has_meta("fling"):
 		# hit by the sky train: the body is flung tumbling through the air for a moment, then gone
@@ -2805,8 +2809,8 @@ func render(delta: float, alpha: float) -> void:
 		model.rotation = Vector3(0, face, 0)
 		if m.cam: model.basis = m.cam.char_basis(face, model.scale)
 	# riding a mount: you sit up on its back
-	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
-	model.position.y = lerpf(model.position.y, ride, minf(1.0, delta * 12.0))
+	var ride := (kin as Kin).ride_height() if mounted() and not downed else SkyDeck.lift(self)
+	model.position.y = lerpf(model.position.y, ride - HazardMoves.sink(self), minf(1.0, delta * 12.0))
 	if rocket:
 		rocket.seat(self)
 	if remote:
@@ -2855,7 +2859,7 @@ func render(delta: float, alpha: float) -> void:
 	elif gliding:
 		wind_t -= delta
 		# (movefeel) carrying a dash's momentum: a dense streak trail and afterimages until it bleeds off
-		var boosted := boost_fx_t > 0.0 and spd > GLIDE_SPEED * 1.25 and not dropping
+		var boosted := boost_fx_t > 0.0 and spd > HunterMove.glide_cruise * 1.25 and not dropping
 		boost_fx_t = maxf(0.0, boost_fx_t - delta) if boosted else 0.0
 		if wind_t <= 0.0:
 			wind_t = 0.035 if boosted else 0.09
