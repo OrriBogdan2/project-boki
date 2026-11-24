@@ -401,8 +401,9 @@ func _add_orbits(glb: Node3D) -> void:
 		skel.add_child(at)
 		var nd := src[0] as Node3D
 		var sk_m := glb.transform * WardenGlb.model_xf(glb, skel)
-		var ride := sk_m * skel.get_bone_global_rest(b)  # (Meshy's bone vs the contract's: the head for a head orbit,
-		var ref: Transform3D = src[2] if String(want[orb]) == "Head" else src[3]  # the bone it rides there for any other)
+		# Meshy's bone vs the contract's: the head for a head orbit, the bone it rides there for any other
+		var ride := sk_m * skel.get_bone_global_rest(b)
+		var ref: Transform3D = src[2] if String(want[orb]) == "Head" else src[3]
 		var shift := ride.origin - ref.origin
 		nd.transform = (sk_m.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D))
 		at.add_child(nd)
