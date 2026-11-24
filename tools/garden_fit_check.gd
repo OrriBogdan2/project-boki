@@ -94,7 +94,8 @@ func _wishes() -> void:
 	var v: VBoxContainer = home._new_panel("Today's wishes", 520)
 	var w := GardenWishes.today(Time.get_unix_time_from_system())
 	ok(not w["list"].is_empty(), "the wishes card has wishes")
-	# the wishes now ride on the away card as plain lines (GardenWishes.card_lines, c21b61357c): lay them out the same way
+	# the wishes now ride on the away card as plain lines (GardenWishes.card_lines, c21b61357c):
+	# lay them out the same way
 	for line in GardenWishes.card_lines():
 		var l := Label.new()
 		l.text = String(line)
