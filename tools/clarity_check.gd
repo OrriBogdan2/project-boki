@@ -142,7 +142,6 @@ func _fight_budget(main: Node) -> void:
 		ok(per <= cap, "3v3 fight: '%s' on a Hunter %.1f a frame (budget %.1f)" % [b, per, cap])
 	fm.queue_free()
 
-
 ## A stunned and a slowed dummy, then Ground and Daze (one of them a remote body, as the Net "kst" event
 ## leaves it): one icon per kind, each with its time left, shrinking, and nothing when nothing is active.
 func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:

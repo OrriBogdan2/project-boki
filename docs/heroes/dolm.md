@@ -66,7 +66,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | LMB hold walk | she stands through every punch hold (0118-0120, 0128-0150, 4 fps), and neither clip has a plain run to compare [footage] | 85% walk while held (`fire_slow`) | kept: not determinable (docs/MOVEMENT_FEEL.md) |
 | RMB Volcano Crusher | hold, crouch with glowing fists, hop forward and smash; jump while charging leaps forward [data, footage] | Quakefall: the same (Quakefall review, item 14) | matches |
 | E Rockwave | three rocks about 2 bh ahead, a slight curve, a red flash first [footage] | Stone Row: the same | matches |
-| R Tetraform | tap or hold-drag, rocks centre-out, slow [data, footage] | Basalt Spine: the same, rocks only (owner item 15) | owner rule over data |
+| R Tetraform | tap or hold-drag, rocks centre-out, slow [data, footage] | Basalt Spine: the same, rocks only, joined by one ridge fin (owner item 15) | owner rule over data |
 | Shift Landslide | a rock ahead, a shove dash, the rock launched [footage] | Rock Hop (owner item 111), dust only (no ring or blast) | owner design |
 
 ## Parity verify, Nov 9

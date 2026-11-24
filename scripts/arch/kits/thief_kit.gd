@@ -24,6 +24,7 @@ extends ArchKit
 
 const FLASH_HIT := 0.12        # s: the struck body's flash (Ent.hurt's own): 3 frames full violet, then a fade
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
+const FLASH_HIT := 0.12        # s: the struck body's flash (Ent.hurt's own): 3 frames full, then a fade
 const BOLT_COL := Color("9a5cff")
 const BOLT_CORE := Color("e6d8ff")
 const FIZZLE := Color("8e48ff")    # a bolt running out at the cursor: a violet puff
