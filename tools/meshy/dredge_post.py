@@ -19,6 +19,7 @@ Runs on the r7 body (tools/meshy/dredge_reskin.py output) and writes the game gl
   python3 tools/meshy/dredge_post.py OUT.glb IN.glb
   python3 tools/meshy/dredge_post.py --islands FILE.glb
   python3 tools/meshy/dredge_post.py --r11 OUT.glb IN_R10.glb [PACK.glb]   # r11 stages on the r10 glb (never build() twice)
+  python3 tools/meshy/dredge_post.py --r17 OUT.glb IN_R16.glb   # r17: goo arm at bind abduction +HANG_OUT, chain hangs (env HANG_KEEP/HANG_OUT/HANG_FOLLOW)
   python3 tools/meshy/dredge_post.py --r12 OUT.glb IN_R11.glb   # r12 tail gather (re-runnable on its own output)
   python3 tools/meshy/dredge_post.py --r13 OUT.glb IN_R12.glb [PACK.glb [UNDER.glb]]   # r13: skin weights, goo puddle, rim caps, retextured pack, straps
                                                      # r13b (same flag): rim caps split into simple cycles wound like their rims, faces
@@ -648,9 +649,10 @@ def tail_keys(rig, clip, rest_pts):
             wt = wt[:3, :3] / np.linalg.norm(wt[:3, :3], axis=0)
             ang = twist_angle(wt @ rt0.T, rest_dir[0])
             prev = carry
+            tf = FOLLOW_BY_CLIP.get(clip, TAIL_FOLLOW)
             for k in range(len(seg)):
                 follow = prev @ rest_dir[k]
-                u = TAIL_FOLLOW[k] * follow + (1 - TAIL_FOLLOW[k]) * rest_dir[k]
+                u = tf[k] * follow + (1 - tf[k]) * rest_dir[k]
                 u /= np.linalg.norm(u)
                 held[k] = LAG[k] * held[k] + (1 - LAG[k]) * u
                 held[k] /= np.linalg.norm(held[k])
@@ -1329,6 +1331,58 @@ def calm_goo_arm(js, b, out, rig):  # r15 stage (re-running it calms the swing a
     return f"{done} right-arm tracks kept {ARM_KEEP} of their swing"
 
 
+# r17: r15 turned the run arm toward the ORIGINAL Idle's first frame (the side-on fighting stance; r16 only fixed Idle
+# after it), so the arm stayed pulled in and the chain, which follows the hand fully, swung the goo diagonally across the
+# body (the sash in run 2 / dash 2). r17 turns the right-arm keys of the moving clips toward the bind pose (the A-pose the
+# Meshy goo was modelled hanging in: arm out at the side), and in those clips the chain follows the hand less, so the goo
+# hangs down beside the leg as in the turnaround ref. Attack keeps its full follow (the swing must carry the goo).
+_E = __import__("os").environ
+HANG_CLIPS = ARM_CLIPS + ("Idle",)
+HANG_KEEP = float(_E.get("HANG_KEEP", "0.4"))  # share of each clip's own arm swing kept (relative to the bind pose)
+HANG_OUT = float(_E.get("HANG_OUT", "12"))  # degrees the upper arm is lifted out to the side past that (goo off the hip)
+HANG_FOLLOW = tuple(float(x) for x in _E.get("HANG_FOLLOW", "0.7,0.3,0.2,0.15").split(","))
+FOLLOW_BY_CLIP = {}  # clip -> chain follow per segment (empty: every clip uses TAIL_FOLLOW, as before r17)
+
+
+def hang_goo_arm(js, b, out, rig):  # r17 stage (run once per source file)
+    pw = rest_world(rig, "RightShoulder")[0]
+    pw = pw / np.linalg.norm(pw, axis=0)
+    lift = mat_quat(pw.T @ axis_turn(np.array([0.0, 0.0, 1.0]), -np.radians(HANG_OUT)) @ pw)  # local pre-turn
+    done = 0
+    for a in js["animations"]:
+        if a["name"] not in HANG_CLIPS:
+            continue
+        for ch in a["channels"]:
+            node = js["nodes"][ch["target"]["node"]]
+            if node.get("name") not in ARM_BONES[:2] or ch["target"]["path"] != "rotation":
+                continue
+            rest = np.array(node.get("rotation", [0.0, 0.0, 0.0, 1.0]), float)
+            smp = a["samplers"][ch["sampler"]]
+            keys = n.floats(js, b, smp["output"]).astype(float)
+            keys = slerp_to(keys, rest / np.linalg.norm(rest), HANG_KEEP)
+            if node["name"] == "RightArm" and HANG_OUT:
+                keys = qmul(lift, keys)
+            smp["output"] = out.add_floats(keys, "VEC4")
+            done += 1
+    return f"{done} shoulder/upper-arm tracks kept {HANG_KEEP} of their swing about the bind pose"
+
+
+def qmul(a, q):
+    """a (xyzw) times every key q (frames x xyzw)."""
+    ax, ay, az, aw = a
+    x, y, z, w = q.T
+    return np.stack([aw * x + ax * w + ay * z - az * y, aw * y - ax * z + ay * w + az * x,
+                     aw * z + ax * y - ay * x + az * w, aw * w - ax * x - ay * y - az * z], 1)
+
+
+def hang_tail(js, b, out, rig):  # r17 stage: gather_tail with the moving clips' chain following the hand less
+    FOLLOW_BY_CLIP.update({c: HANG_FOLLOW for c in HANG_CLIPS})
+    try:
+        return gather_tail(js, b, out, rig)
+    finally:
+        FOLLOW_BY_CLIP.clear()
+
+
 # r16: the Idle clip stands (it was a side-on fighting stance: the chest turned up to 88 deg off the facing, hunched),
 # and Jump_Run, which also plays for the glide, becomes a held leaping pose instead of a run cycle.
 IDLE_KEEP = {"Spine": 0.5, "Spine01": 0.5, "Spine02": 0.5, "neck": 0.25, "Head": 0.25}  # share of Idle's own sway kept
@@ -1528,6 +1582,8 @@ if __name__ == "__main__":
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", calm_goo_arm), ("tail gather", gather_tail)])
     elif sys.argv[1] == "--r16":  # r16: standing Idle, held jump/glide pose, then the tail baked again
         rebuild_stages(sys.argv[2], sys.argv[3], [("idle", fix_idle), ("jump", fix_jump), ("tail gather", gather_tail)])
+    elif sys.argv[1] == "--r17":  # r17 (on an r16 file): goo arm hangs at its bind abduction, chain hangs, tail baked again
+        rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", hang_goo_arm), ("tail gather", hang_tail)])
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
