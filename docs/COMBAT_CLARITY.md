@@ -60,6 +60,11 @@ Frames covered of 20 (element-Hunter pairs), headless count, before -> after:
 | your Boki's ability name ("Stinger Hook") | 1 (3) | 1 (3) | kept (DECISIONS 11-11) |
 `--clarity-check` holds the fight to `ClarityFight.BUDGET` (element-Hunter pairs a frame): no words but your own
 Boki's ability name, no world icons, the glove row at most 6 (was 16), no merge ground ring.
+The budget is unchanged (a fight frame measures 0 to 3.6 glow icons; with the row on, a frame is 9 to 18). What was
+flaky was the sample, not the cost: the bot trio-vs-trio is not repeatable (the same seed gives a different fight each
+run, a global `randf()` and timing outside `Match.rng`), and the bots often wander off for the 2 s combat window
+(`InCombat`), where the row is meant to show. `ClarityFight.play` now marks your Hunter in combat on every counted frame,
+so each one is a fight frame whatever the bots did. 11 of 19 runs failed on a loaded host before, 0 of 10 after.
 
 ## Films
 `docs/shots/combat-clarity/fight_3v3_a.mp4` (Tenzo, Sparkle, Lace vs Kael, Cinder, Vex) and `fight_3v3_b.mp4` (Meeko,
