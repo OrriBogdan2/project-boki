@@ -14,7 +14,7 @@ const MISS_WINDOW := 0.5   # s one aim roll holds
 const REST_S := 1.0   # s of standing with the stick neutral after which the stuck-hop timer starts over
 
 const KEYS := [      # the action inputs
-		"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
+		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var human := false
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input
