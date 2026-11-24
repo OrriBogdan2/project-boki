@@ -210,7 +210,7 @@ func _land(d: Dictionary) -> void:
 func _impact(f: Ent, dir: Vector2) -> void:
 	var h := k.h
 	k.vfx("riposte_hit", f.pos, dir)
-	Shake.incoming_big(k.m, f.pos, ImpactWeight.shake("heavy"), h)
+	Shake.big(k.m, f.pos, "ult", h)
 
 ## A hunter who was up and went down to the cleave, or a monster it killed: it is ready again at once.
 func _reset() -> void:
@@ -231,8 +231,9 @@ func block(by: Ent, o: Dictionary) -> bool:
 		st["blocks"] = mini(int(st["blocks"]) + 1, int(data()["blocks_max"]))
 		var from := by.pos if by != null and is_instance_valid(by) else h.pos + Vector3(0, 0, -1)
 		var to := Vector3(from.x - h.pos.x, 0.3, from.z - h.pos.z).normalized()
-		k.vfx("guard_block", h.pos + Vector3(0, 1.2, 0) + to * 0.5, Vector2(to.x, to.z).normalized(),
-				{"pitch": 0.08 * float(st["blocks"])})
+		var at := h.pos + Vector3(0, 1.2, 0) + to * 0.5
+		k.vfx("guard_block", at, Vector2(to.x, to.z).normalized())
+		Juice.blocked(k.m, at, to, GOLD, 1.0 + 0.08 * float(st["blocks"]))
 	return true
 
 ## The gold shell over him while he guards (one node per hunter, shown and hidden).

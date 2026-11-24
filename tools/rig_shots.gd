@@ -42,7 +42,8 @@ func _states(id: String) -> Array:
 			break
 	for mv in keep:
 		var keys: Array = HunterAnim.km_def(mv)["keys"]
-		out.append([String(mv).trim_prefix(PREFIX_[id]), {"kmove": mv, "kmove_t": float(keys[keys.size() / 2][0])}])
+		out.append([String(mv).trim_prefix(PREFIX_[id]), {"kmove": mv,
+				"kmove_t": float(keys[int(keys.size() / 2.0)][0])}])
 	return out
 
 func _sheet(id: String, out: String) -> void:

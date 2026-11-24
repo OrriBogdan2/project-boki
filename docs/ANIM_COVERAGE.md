@@ -33,30 +33,32 @@ passes through (`BokiClipCover`). Rows run worst first (most `missing`, then mos
 `shared`, then the lowest Field Book number), and the five worst are written out as backlog lines.
 
 Bind rows (v95 swaps, `tools/warden_states_check.gd`, run by `--warden-clips-check`): each Hunter's game .glb is
-driven through all 15 Hunter states and fails on a T-pose (every contract bone within 2 deg of rest), a state that
+driven through all 15 Hunter states plus the stun, the root and the knocked-down beat (18 in all), and fails on a T-pose (every contract bone within 2 deg of rest), a state that
 shows the idle pose, frozen legs in a walk, run or strafe (Motley has no legs: his hips), a clip track that names no
-bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every state; `--warden-states-shots
---shots-dir=<dir>` (GPU) renders one frame per Hunter and state for a contact sheet.
+bone, a walk/run clip that keys no leg bone, or a stunned or rooted Hunter whose soles leave the idle's ground by 0.1 m.
+The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the death clip's own, and the strips judge it.
+`--verbose-states` prints every state; `--warden-states-shots
+--shots-dir=<dir>` (GPU) renders one frame per Hunter and state for a contact sheet; add `--cc` for the stun, root and knock strips (`--true-cam` for the match camera).
 
 <!-- table:begin -->
 ### Hunters
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp | strafe | crouch | upper |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
+| breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
 | gil | clip | clip | clip | proc | clip | missing | clip | clip | proc | proc | proc | proc | clip | clip | proc |
-| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
+| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 
 ### Starter Boki
 

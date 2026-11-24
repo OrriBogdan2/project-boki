@@ -124,7 +124,7 @@ func _run(m: Match, p: Hunter, secs: float, slot: String) -> Array:
 		a_v.aim_at(p, p.pos + Vector3(12.0, 0, 0))
 		p.inp["fire"] = slot == "lmb" and f < TAP
 		p.inp["sec"] = slot == "rmb" and f == 0
-		p.inp["sec_hold"] = slot == "rmb" and f < n / 3
+		p.inp["sec_hold"] = slot == "rmb" and f < int(n / 3.0)
 		p.inp["sig"] = slot == "e" and f == 0
 		for mb in m.mobs:
 			mb.queue_free()

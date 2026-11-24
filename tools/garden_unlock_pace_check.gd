@@ -126,7 +126,7 @@ func _route(pace: Dictionary) -> void:
 func _median(list: Array) -> float:
 	var v: Array = list.map(func(x): return 999 if int(x) < 0 else int(x))
 	v.sort()
-	return float(v[v.size() / 2])
+	return float(v[int(v.size() / 2.0)])
 
 func _table(pace: Dictionary, kind: String, days: Array) -> void:
 	print("UNLOCKPACE %s: percent of players with the 2nd 3rd 4th 5th zone open, by day" % kind)
