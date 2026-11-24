@@ -348,22 +348,24 @@ func _food(bb) -> void:
 			var k: Dictionary = bb._kin_entry(_rec(nm))
 			note(
 				(
-					"%s: keys %s t %.1f, likes %s, states per 10 s [%s ] (* night), now %s, life_eat %s, "
-					+ "food %.0f, %.1f m from the bowl, busy %s, indoors %s"
+					(
+						"%s: keys %s t %.1f, likes %s, states per 10 s [%s ] (* night), now %s, life_eat %s, "
+						+ "food %.0f, %.1f m from the bowl, busy %s, indoors %s"
+					)
+					% [
+						nm,
+						str(k.keys().filter(func(x): return x not in PLAIN_KEYS)),
+						float(k.get("t", 0.0)),
+						str(_rec(nm).get("likes", {})),
+						trace.get(nm, ""),
+						bb.life.machine(k).state_name(),
+						str(k.get("life_eat", {})),
+						Care.need(_rec(nm), "food"),
+						Vector2(c.x - k["pos"].x, c.z - k["pos"].z).length(),
+						k.get("busy", false),
+						k.has("indoors")
+					]
 				)
-				% [
-					nm,
-					str(k.keys().filter(func(x): return x not in PLAIN_KEYS)),
-					float(k.get("t", 0.0)),
-					str(_rec(nm).get("likes", {})),
-					trace.get(nm, ""),
-					bb.life.machine(k).state_name(),
-					str(k.get("life_eat", {})),
-					Care.need(_rec(nm), "food"),
-					Vector2(c.x - k["pos"].x, c.z - k["pos"].z).length(),
-					k.get("busy", false),
-					k.has("indoors")
-				]
 			)
 	var done: float = await _until(func(): return bb.kins.all(func(k): return FeedBowl.phase(k) == ""), STALL_S)
 	_took("everyone is done at the bowl", done, STALL_S)
