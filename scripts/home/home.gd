@@ -1370,7 +1370,8 @@ func _move_player(d: float) -> void:
 	# face the mouse; with the mouse outside the window, face where you're walking
 	var vp := get_viewport()
 	var mp := vp.get_mouse_position()
-	var aim_ok := panel_open == "" and not farm_cam.third() and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp)
+	var aim_ok := panel_open == "" and not farm_cam.third()
+	aim_ok = aim_ok and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp)
 	var want := pface
 	if aim_ok:
 		var aim := cam.mouse_on_plane(0.9)

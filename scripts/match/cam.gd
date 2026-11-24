@@ -131,7 +131,7 @@ var dist_mul := 1.0
 ## style, see Hunter.fit_scale).
 var hunter_scale := 1.0
 
-## How much of CHAR_LEAN the bodies get: the farm's low third-person view (FarmCam) turns it off, a match never touches it.
+## How much of CHAR_LEAN the bodies get: the farm's low third-person view (FarmCam) fades it out; a match keeps 1.
 var lean_scale := 1.0
 
 
