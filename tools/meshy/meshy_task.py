@@ -187,8 +187,8 @@ def rig(o):
 
 
 def clean_hands(glb):
-    """finger_weights.py on the rig (the hand skin blended over nearby vertices: a curled hand does not tear); the
-    untouched download stays beside it as rigged_character.raw.glb."""
+    """finger_weights.py on the rig (finger bones rolled to close toward the palm, the hand skin blended over nearby
+    vertices: a curled hand does not tear); the untouched download stays beside it as rigged_character.raw.glb."""
     try:
         import finger_weights
     except ImportError as e:  # (numpy/scipy missing: keep Meshy's own weights and say so)
@@ -200,7 +200,10 @@ def clean_hands(glb):
     if not os.path.exists(raw):
         shutil.copyfile(glb, raw)
     finger_weights.G.write(glb, j, bin_)
-    print("hand weights cleaned: %d vertices re-weighted (raw copy %s)" % (rep["moved"], os.path.basename(raw)))
+    print(
+        "hand rig cleaned: finger joints rolled %s, %d vertices re-weighted (raw copy %s)"
+        % (rep["rolled"], rep["moved"], os.path.basename(raw))
+    )
 
 
 def remesh(o):

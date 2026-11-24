@@ -1,5 +1,6 @@
 """Hand skin weights of a Meshy auto-rig (include_fingers), cleaned so a curled hand does not tear. No Blender: it edits the
-rig .glb's JOINTS_0/WEIGHTS_0 in place and leaves everything else in the file as it was.
+rig .glb's JOINTS_0/WEIGHTS_0 in place, after finger_roll.py has given every finger joint the same roll (local +z closes
+toward the palm); the mesh and the joint positions stay as they were.
 
 Why: Meshy weights every vertex of a hand on its own, and its skin is layered (crack plates over the base skin, finger
 slabs that touch): two vertices a few mm apart carry different finger bones, so a fist pulls the layers apart and the
@@ -22,6 +23,9 @@ from scipy.spatial import cKDTree
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "art1"))
 import glb_add_clips as G  # noqa: E402  (the .glb reader/writer shared with the clip tools)
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import finger_roll  # noqa: E402
 
 RADIUS = 0.007  # x the model's height (1.7 m: 12 mm): vertices this close blend their weights
 PASSES = 2
@@ -99,6 +103,7 @@ def blend(P, W, reg, rad, passes):
 
 def clean(j, bin_):
     """Re-weights the hands' vertices in bin_ (in place). Returns {side: vertices blended, "moved": vertices changed}."""
+    rolled = finger_roll.orient(j, lambda idx: accessor(j, bin_, idx))  # first: rest pose of the finger bones
     skin = j["skins"][0]
     P, JI, WT, _, views = skinned(j, bin_)
     jn = [strip(j["nodes"][ni]["name"]) for ni in skin["joints"]]
@@ -133,6 +138,7 @@ def clean(j, bin_):
         ji[sel] = top[n0 : n0 + len(ji)][sel].astype(ji.dtype)
         wt[sel] = tw[n0 : n0 + len(ji)][sel].astype(wt.dtype)
     report["moved"] = int(changed.sum())
+    report["rolled"] = rolled
     return report
 
 
@@ -146,8 +152,8 @@ def main():
         if not os.path.exists(raw):
             shutil.copyfile(src, raw)
     G.write(dst, j, bin_)
-    blended = {k: v for k, v in rep.items() if k != "moved"}
-    print("finger_weights: hand vertices blended %s, %d re-weighted -> %s" % (blended, rep["moved"], dst))
+    blended = {k: v for k, v in rep.items() if k not in ("moved", "rolled")}
+    print("finger_weights: joints rolled %s, hand vertices blended %s, %d re-weighted -> %s" % (rep["rolled"], blended, rep["moved"], dst))
 
 
 if __name__ == "__main__":
