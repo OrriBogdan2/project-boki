@@ -998,8 +998,9 @@ func tender() -> void:
 	ok(
 			"mm LMB: looks are pooled (no new nodes per ember)", K.lk().made - made0 <= 3,
 			"made %d -> %d" % [made0, K.lk().made])
-	# the ramp: footage 64 -> 93 was +45.3% on the 8 ember; ext/ttk-fix-1124 cut the ember to 6 and kept Kindle's flat +0.72 a
-	# stack on purpose (docs/TTK.md, Meeko), so the plateau is +60% of the ember now. Its numbers go white then yellow.
+	# the ramp: footage 64 -> 93 was +45.3% on the 8 ember; ext/ttk-fix-1124 cut the ember to 6 and kept Kindle's
+	# flat +0.72 a stack on purpose (docs/TTK.md, Meeko), so the plateau is +60% of the ember now.
+	# Its numbers go white then yellow.
 	var res: Dictionary = Arch.def("tender")["resource"]
 	var ramp := float(res["per_stack"]) * float(res["max"]) / float(P.wpn["dmg"])
 	ok(
