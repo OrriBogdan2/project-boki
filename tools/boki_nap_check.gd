@@ -124,7 +124,10 @@ func _wake() -> void:
 
 
 func _puppet() -> void:
+	# every species has a rig now: switch rigs off to get the KinPuppet body this part checks
+	BokiRig.enabled = false
 	var k := Models.kin(PRIMITIVE, {})
+	BokiRig.enabled = true
 	main.add_child(k)
 	await main.get_tree().process_frame
 	var pup := _puppet_of(k)
