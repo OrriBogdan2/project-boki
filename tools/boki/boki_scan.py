@@ -246,7 +246,7 @@ AUTO = {  # id: overrides on AUTO_BASE
     "tuatrune": BORROWED,
     "velvorm": BORROWED,
     "casquebill": BORROWED,
-    "basaltoad": {**BORROWED, "sat": 0.5, "gain": 1.0},  # the game light lifts saturation ~2.5x: 0.5 lands the lit toad on the 2D tan
+    "basaltoad": {**BORROWED, "sat": 0.4, "gain": 0.9},  # lit game shot read orange (S 0.49 V 0.87 vs the 2D 0.34 0.70)
     "cindowary": {**BORROWED, "sat": 0.55},  # lit leather read pink (sat 0.68 vs the 2D 0.48)
     "caecilith": {},
     "glintmole": {},
