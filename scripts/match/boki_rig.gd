@@ -32,7 +32,8 @@ const FRAME := {
 			"right flank": Vector3(0.0492, 0.27, 0.0256),
 			"back": Vector3(0, 0.37, 0.0667),
 			"chest": Vector3(0, 0.25, -0.0731)
-		}
+		},
+		"coat": {"paint_glow": 1.0, "paint_glow_color": Color(1.0, 0.478, 0.165), "paint_glow_width": 0.12},
 	},
 	"basaltoad":
 	{

@@ -13,6 +13,44 @@ NORMAL_SMOOTH = 2        # rounds of neighbour averaging on the model's normals:
 FLAT = np.array([0.5, 0.5, 1.0])
 
 
+def hot_mask(col):
+    """Ember and brass texels (sRGB rows): hero_toon's heat test (r > 0.66, r - b > 0.32, g >= b), or brass (hue 35-50,
+    saturation > 0.45, not dark)."""
+    r, g, b = col[..., 0], col[..., 1], col[..., 2]
+    top = col.max(-1)
+    sat = (top - col.min(-1)) / np.maximum(top, 1e-6)
+    hue = np.degrees(np.arctan2(np.sqrt(3) * (g - b), 2 * r - g - b)) % 360
+    brass = (hue >= 35) & (hue <= 50) & (sat > 0.45) & (top > 0.35)
+    return ((r > 0.66) & (r - b > 0.32) & (g >= b)) | brass
+
+
+def pool_hot(tex, to=TEX_PX, rows=256):
+    """`tex` shrunk to `to` texels a side: each block of texels takes the colour of its hottest ember or brass texel,
+    else the mean (a plain scale would average a crack a texel wide into the paint beside it)."""
+    k = len(tex) // to
+    out = np.zeros((to, to, 3), dtype=np.float32)
+    for y in range(0, to, rows):
+        blocks = tex[y * k:(y + rows) * k].reshape(-1, k, to, k, 3).transpose(0, 2, 1, 3, 4).reshape(-1, to, k * k, 3)
+        score = np.where(hot_mask(blocks), blocks[..., 0] + 1.0, 0.0)
+        hottest = np.take_along_axis(blocks, score.argmax(2)[..., None, None], 2)[:, :, 0]
+        out[y:y + rows] = np.where((score.max(2) > 0)[..., None], hottest, blocks.mean(2))
+    return out
+
+
+def keep_hot(tex, radius):
+    """`tex` with every texel within `radius` texels of an ember or brass texel taking the hottest one's colour, so a
+    crack a texel wide still lands on a 2048 atlas texel that samples one point of it."""
+    score = np.where(hot_mask(tex), tex[..., 0] + 1.0, 0.0)
+    out, best = tex.copy(), score.copy()
+    for dy in range(-radius, radius + 1):
+        for dx in range(-radius, radius + 1):
+            sc = np.roll(score, (dy, dx), (0, 1))
+            take = sc > best
+            out[take] = np.roll(tex, (dy, dx), (0, 1))[take]
+            best = np.where(take, sc, best)
+    return out
+
+
 def game_to_blender(n):
     return np.stack([n[..., 0], -n[..., 2], n[..., 1]], -1)
 
@@ -46,15 +84,15 @@ class Meshy:
     _loaded = {}
 
     @classmethod
-    def get(cls, src, height, sink=0.0, mid=0.0):
+    def get(cls, src, height, sink=0.0, mid=0.0, hot=0):
         """The model in directory `src`, scaled to `height` game metres, then lowered by `sink` (feet that stand
         above a hanging tail), its midline `mid` right of the middle of its bounds (a tail curled to one side pulls
-        the bounds off the head); loaded once."""
+        the bounds off the head), and `hot` texels of reach for its embers (keep_hot); loaded once."""
         if src not in cls._loaded:
-            cls._loaded[src] = cls(src, height, sink, mid)
+            cls._loaded[src] = cls(src, height, sink, mid, hot)
         return cls._loaded[src]
 
-    def __init__(self, src, height, sink=0.0, mid=0.0):
+    def __init__(self, src, height, sink=0.0, mid=0.0, hot=0):
         import bpy
         from mathutils.bvhtree import BVHTree
         glb = os.path.join(src, "glb.glb")
@@ -89,10 +127,13 @@ class Meshy:
         self.vn = smooth_normals(g, self.t, NORMAL_SMOOTH)
         self.bvh = BVHTree.FromPolygons(g.tolist(), self.t.tolist(), all_triangles=True)
         img = bpy.data.images.load(os.path.join(src, "tex0_base_color.png"))
-        img.scale(TEX_PX, TEX_PX)
-        px = np.zeros(TEX_PX * TEX_PX * 4, dtype=np.float32)
+        if not hot:
+            img.scale(TEX_PX, TEX_PX)
+        px = np.zeros(img.size[0] * img.size[1] * 4, dtype=np.float32)
         img.pixels.foreach_get(px)
-        self.tex = px.reshape(TEX_PX, TEX_PX, 4)[..., :3]
+        self.tex = px.reshape(img.size[1], img.size[0], 4)[..., :3]
+        if hot:
+            self.tex = keep_hot(pool_hot(self.tex), hot)
         for k, old in before.items():
             coll = getattr(bpy.data, k)
             for item in [i for i in coll if i not in old]:
