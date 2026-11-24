@@ -12,7 +12,8 @@ import sys
 import bpy
 import numpy as np
 
-ROOT = os.path.expanduser("~/meshy/boki")
+# BOKI_MESHY_ROOT: a scratch root, for a worker without the dex files
+ROOT = os.environ.get("BOKI_MESHY_ROOT") or os.path.expanduser("~/meshy/boki")
 
 
 def base_colour_image(obj):
