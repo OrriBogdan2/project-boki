@@ -3,7 +3,11 @@ extends RefCounted
 ## hot one on you), a Boki flashes in its type colour (the Field Book's, DexView.type_col) with a smaller
 ## number, a mob keeps its own. In a 30-Hunter fight the hits draw from the same fixed flash pool and make no
 ## new nodes, and a hit on a Boki costs no more flashes than a hit on a Hunter.
-## --hit-flash-kind-shots --shots-dir=<dir>: a Hunter and a Boki taking the same hit side by side, two frames.
+## Impact size is on our health scale (Juice.impact_power): a rifle round or a slash (6-7) lands at power 1 and
+## draws the rings, a dart or a pellet sits well above the floor, an ability hit stays big, and the size still grows
+## with damage up to the cap.
+## --hit-flash-kind-shots --shots-dir=<dir> [--hit=<damage>]: a Hunter and a Boki taking the same hit side by side,
+## two frames.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -82,7 +86,20 @@ func _check() -> void:
 	var nb := _number_size(wild)
 	var nh := _number_size(foe)
 	ok(nb > 0 and nb < nh, "a Boki's number is smaller than a Hunter's (%d vs %d)" % [nb, nh])
+	_power()
 	_budget()
+
+
+## Basic hits on our scale (11-24 TTK: Vex round 6.5, Kael slash 6.5, Meeko 7, Grimble pellet 3.5, Neve dart 4).
+func _power() -> void:
+	var shot := Juice.impact_power(6.5, true, false)
+	var pellet := Juice.impact_power(3.5, true, false)
+	ok(shot >= 1.0, "a rifle round or slash (6.5) lands at power 1 or more, rings drawn: %.2f" % shot)
+	ok(pellet >= 0.55, "a pellet (3.5) sits well above the 0.35 floor: %.2f" % pellet)
+	ok(Juice.impact_power(26.0, true, false) > shot, "a heavier hit lands bigger than a round")
+	ok(Juice.impact_power(500.0, true, false) == Juice.POWER_MAX, "the size caps at %.1f" % Juice.POWER_MAX)
+	ok(Juice.impact_power(3.0, true, true) >= Juice.POWER_ABILITY, "an ability hit stays big")
+	ok(Juice.impact_power(6.5, false, false) < shot, "a hit between two others draws smaller")
 
 
 ## Font size of the number the player's hit on t just printed (the newest in use).
@@ -121,9 +138,12 @@ func _budget() -> void:
 
 func _shots() -> void:
 	var dir := ""
+	var dmg := HIT
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		if String(a).begins_with("--hit="):
+			dmg = float(String(a).substr(6))
 	DirAccess.make_dir_recursive_absolute(dir)
 	var fade = main.get("fade")
 	if fade != null:
@@ -142,8 +162,8 @@ func _shots() -> void:
 			t.vel = Vector3.ZERO
 		m.cam.snap(home + Vector3(0, 0, 5))
 		await main.get_tree().process_frame
-	m.on_damage(foe, P, HIT, {"src": "primary"})
-	m.on_damage(wild, P, HIT, {"src": "primary"})
+	m.on_damage(foe, P, dmg, {"src": "primary"})
+	m.on_damage(wild, P, dmg, {"src": "primary"})
 	var last := 0
 	for f in SHOT_FRAMES:
 		for k in f - last:
