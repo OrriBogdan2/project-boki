@@ -49,15 +49,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
 | gil | clip | clip | clip | proc | clip | missing | clip | clip | proc | proc | proc | proc | clip | clip | proc |
-| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
-| kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
@@ -92,7 +83,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | eclipsowl | shared | shared | shared | shared | shared | shared | proc | proc |
 | effigoon | shared | shared | shared | shared | shared | shared | proc | proc |
 | embrook | shared | shared | shared | shared | shared | shared | proc | proc |
-| floenatee | shared | shared | shared | shared | shared | shared | proc | proc |
 | forgebrock | shared | shared | shared | shared | shared | shared | proc | proc |
 | geodemole | shared | shared | shared | shared | shared | shared | proc | proc |
 | geysirbara | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -103,31 +93,22 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | gloamspire | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomworth | shared | shared | shared | shared | shared | shared | proc | proc |
-| goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
 | gongrowl | shared | shared | shared | shared | shared | shared | proc | proc |
 | gravitank | shared | shared | shared | shared | shared | shared | proc | proc |
-| heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
 | howlop | shared | shared | shared | shared | shared | shared | proc | proc |
-| kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
 | lanceron | shared | shared | shared | shared | shared | shared | proc | proc |
 | lanternlong | shared | shared | shared | shared | shared | shared | proc | proc |
-| limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
 | lodestaff | shared | shared | shared | shared | shared | shared | proc | proc |
 | lyrewing | shared | shared | shared | shared | shared | shared | proc | proc |
-| moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | mossbastion | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmuron | shared | shared | shared | shared | shared | shared | proc | proc |
-| nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
-| opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
 | pipeworth | shared | shared | shared | shared | shared | shared | proc | proc |
 | rimefang | shared | shared | shared | shared | shared | shared | proc | proc |
-| scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
 | scythant | shared | shared | shared | shared | shared | shared | proc | proc |
 | seamwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
 | selenwhale | shared | shared | shared | shared | shared | shared | proc | proc |
-| sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
 | shinobant | shared | shared | shared | shared | shared | shared | proc | proc |
 | spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
 | sporcupine | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -141,9 +122,11 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | vaultara | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | vespox | shared | shared | shared | shared | shared | shared | proc | proc |
+| floenatee | clip | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
-| nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
-| orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
+| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
+| opalisk | clip | shared | shared | clip | clip | clip | proc | proc |
 | scaldamus | clip | shared | shared | clip | clip | clip | proc | proc |
 | sentrikat | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -155,7 +138,10 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
+| goliathite | clip | clip | clip | clip | clip | clip | proc | proc |
+| heatherhorn | clip | clip | clip | clip | clip | clip | proc | proc |
 | kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
+| kilnbadger | clip | clip | clip | clip | clip | clip | proc | proc |
 | kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
 | lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
 | lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -164,6 +150,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | nacrolin | clip | clip | clip | clip | clip | clip | proc | proc |
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
 | nimbostrich | clip | clip | clip | clip | clip | clip | proc | proc |
+| orchisloth | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
 | thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
