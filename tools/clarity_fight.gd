@@ -82,6 +82,7 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		m.step(DT)
 		for h in m.hunters:
 			h.render(DT, 1.0)
+		OcclusionOutline.for_match(m)  # the outline and ground rim, as Match._process (off here) puts them on
 		m.cam.snap(_centre(m))
 		await main.get_tree().process_frame
 		t += DT
