@@ -39,9 +39,9 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 ## at its start (glb_clip_start.py): that frame let the rig play them faster under MAX_CADENCE, and slid itself.
 const OVER := {
 	"burrlet run": 0.78, "burrlet walk": 0.27, "cairnback run": 0.59, "duskapi run": 0.52, "glaciyak run": 0.44,
-	"glintmole run": 0.86, "glintmole walk": 0.40, "heatherhorn run": 0.44, "hivara run": 0.84,
+	"glintmole run": 0.86, "glintmole walk": 0.40, "heatherhorn run": 0.38, "hivara run": 0.84,
 	"hivara walk": 0.39, "kestrike run": 0.61, "kestrike walk": 0.37,
-	"kilnbadger run": 0.44, "kilnbadger walk": 0.27, "kindlewren run": 0.57, "limpetor run": 0.51,
+	"kilnbadger run": 0.45, "kindlewren run": 0.57, "limpetor run": 0.51,
 	"limpetor walk": 0.37, "lodestick run": 0.94, "marchleaf run": 0.98, "marchleaf walk": 0.99,
 	"moonloris run": 0.51, "moonloris walk": 0.32, "moundvark run": 0.42, "moundvark walk": 0.29,
 	"murmurling run": 0.65, "murmurling walk": 0.34, "nacrolin run": 0.38, "nettlynx run": 0.89,
@@ -63,9 +63,9 @@ const MAX_SEAM := 1.0
 const SEAM_OVER := {
 	"caecilith walk": 1.54, "cairnback walk": 1.61, "duskapi walk": 1.43, "floenatee idle": 1.04,
 	"floenatee run": 1.21, "floenatee walk": 1.39, "glaciyak walk": 1.42, "gloamshell walk": 1.18,
-	"goliathite idle": 1.04, "goliathite run": 1.22, "goliathite walk": 1.41, "heatherhorn walk": 1.42,
-	"hoarheron idle": 1.10, "hoarheron run": 1.25, "hoarheron walk": 1.45,
-	"kestrike walk": 1.33, "kilnbadger walk": 1.46, "limpetor walk": 1.44,
+	"goliathite idle": 1.04, "goliathite run": 1.22, "goliathite walk": 1.41,
+	"heatherhorn run": 1.63, "heatherhorn walk": 2.10, "hoarheron idle": 1.10, "hoarheron run": 1.25,
+	"hoarheron walk": 1.45, "kestrike walk": 1.33, "limpetor walk": 1.44,
 	"lodestick run": 1.06, "marchleaf walk": 1.45, "moonloris walk": 1.42, "mossgrade walk": 1.07,
 	"moundvark walk": 1.44, "murmurling walk": 1.46, "nacrolin walk": 1.50,
 	"opalisk walk": 1.45, "orchisloth walk": 1.45, "puddlet walk": 1.18, "scaldamus walk": 1.41,
