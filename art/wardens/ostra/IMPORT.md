@@ -64,3 +64,12 @@ Hips: Attack z 0.84, Jump_Run 0.85, rest 1.17). The box and its lid now sit on a
 identity, no clip keys it), so the box stays upright on the floor in every clip; the spring and the void's root blend from BoxRoot (box top,
 y 0.34) to the body (y 0.74, smoothstep), so the spring squashes and stretches like a jack-in-the-box. Coat tails/bells stay on the body.
 Recipe: /home/boki/gens/hunter-round-1124/motley/r2/tools/mkfix3.py (input = the r1 glb).
+
+**r3 (2026-11-24, hunter-round-1124 job 20261124-204852-a1):** r2 snapped any vertex with y>0.56, r>0.26 to the body "for the coat tails", which
+caught the void's own S-curl: a weight step = black fins and the curl folding out of the box as a lobe (idle 31/40 spike frames). Now the box->body
+ramp is smoothstep(y 0.30->1.02) diffused over the welded mesh (box + lid pinned, coat tails pinned only off the void mask). Finger joints fold onto
+their Hand bone (rigid mitts), Left/RightHand clip rotations soft-clamp above 50 deg from rest (Attack bent the wrist 159 deg = spiky hand).
+New joints: `CoatLag` (Hips' channels delayed 0.10 s, up to 0.45 on the coat-tail tips: the tails trail and swing) and BoxRoot clip keys = half of
+the hips' horizontal travel (the box slides with the attack lunge, stays on the floor and upright). Void emission = r2 layer + a violet glow toward
+the box mouth + 246 sparse twinkle stars inside the void mask. Mesh and albedo unchanged. Spike frames (glbstretch, 10 fps) live -> r3:
+Idle 0->0 (r2 31), Attack 27->5, Jump_Run 1->0, Crouch 0->0. Recipe: /home/boki/gens/hunter-round-1124/motley/r3/tools/mkfix4.py fix3.glb out 0.10 0.45 0.5.
