@@ -13,19 +13,26 @@ const MAX_SIZE := 0.9  # m, widest a glow may be (axis-aligned, world) while wit
 const NEAR_R := 2.2  # m, ground distance from a Hunter's feet that counts as near
 const NEAR_ALPHA := 0.45  # share of its alpha a capped glow keeps
 const PUFF_CLEAR := 1.1  # m of ground between a smoke puff's edge and a Hunter's feet that it keeps
-const RESCAN_S := 0.5  # s between searches for new glow nodes (the match builds them anywhere)
+const RESCAN_S := 0.5  # s between looks at the mesh nodes that entered the match (it builds glows anywhere)
 const PARAM := &"near_a"  # instance uniform in glowball.gdshader
 const META := &"fhc_scale"  # a capped node's own scale, kept to put back
 const META_CAPPED := &"fhc_capped"  # the scale the cap gave it
+const META_ALPHA := &"fhc_alpha"  # the alpha last sent to the shader (an unchanged one is not sent again)
 
 var _match: Match
 var _glows: Array[MeshInstance3D] = []
+var _fresh: Array = []  # mesh nodes that entered the match since the last look
 var _scan_in := 0.0
 
 
 func _init(m: Match) -> void:
 	_match = m
 	name = "FxHunterCap"
+
+
+func _ready() -> void:
+	_fresh = _match.find_children("*", "MeshInstance3D", true, false)
+	get_tree().node_added.connect(_on_node_added)
 
 
 func _process(dt: float) -> void:
@@ -60,13 +67,24 @@ func _part(puff: MeshInstance3D, near: Array[Vector3]) -> void:
 	puff.visible = not open
 
 
+func _on_node_added(n: Node) -> void:
+	if n is MeshInstance3D and _match.is_ancestor_of(n):
+		_fresh.append(n)
+
+
+## Adds the glows among the mesh nodes that entered since the last look; drops the freed ones.
 func _rescan() -> void:
-	_glows.clear()
-	for n in _match.find_children("*", "MeshInstance3D", true, false):
+	for i in range(_glows.size() - 1, -1, -1):
+		if not is_instance_valid(_glows[i]):
+			_glows.remove_at(i)
+	for n in _fresh:
+		if not is_instance_valid(n) or not n.is_inside_tree() or _glows.has(n):
+			continue
 		var mi := n as MeshInstance3D
 		var mat := mi.material_override as ShaderMaterial
 		if mat != null and mat.shader == Models.GLOW and not _in_hunter(mi):
 			_glows.append(mi)
+	_fresh.clear()
 
 
 func _in_hunter(n: Node) -> bool:
@@ -98,4 +116,7 @@ func _apply(mi: MeshInstance3D, near: Array[Vector3]) -> void:
 			mi.scale = mi.get_meta(META)
 		mi.remove_meta(META)
 		mi.remove_meta(META_CAPPED)
-	mi.set_instance_shader_parameter(PARAM, NEAR_ALPHA if close else 1.0)
+	var alpha := NEAR_ALPHA if close else 1.0
+	if float(mi.get_meta(META_ALPHA, 1.0)) != alpha:
+		mi.set_meta(META_ALPHA, alpha)
+		mi.set_instance_shader_parameter(PARAM, alpha)
