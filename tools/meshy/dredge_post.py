@@ -1656,13 +1656,15 @@ def skin_socket(js, b, out, rig):
     return int(dome.sum()), len(dv), skin_rgb.round().tolist(), return_note
 
 
-STRAP_MAX_LIFT = 0.06  # m: a strap row never moves further than this
+STRAP_MAX_LIFT = 0.03  # m: a strap row never moves further than this
+STRAP_BACK_Z = 0.05  # m: only rows behind this z (the shoulder top and back) lift; the chest rows already clear the skin
+STRAP_ACROSS = 3  # r14 strap: 3 vertices across, rows of them, one strap after the other (right one first)
 
 
 def lift_strap(js, b, out, rig):
-    """r19: the right shoulder strap (add_straps) ran under the r11 socket dome, so only torn dark pieces of it showed
-    once the slim arm stopped hiding the shoulder. Each strap row is lifted along its normal until it clears the skin
-    under it by STRAP_LIFT (both sides; the left one already clears, so it barely moves), then smoothed along the path."""
+    """r19: the right shoulder strap (add_straps, r14 layout: 3 across x rows, right strap first) ran under the r11
+    socket dome. Each row is lifted as a whole along its middle vertex's normal until its worst column clears the skin
+    (dome included) by STRAP_LIFT, then smoothed along the path. Chest rows (z >= STRAP_BACK_Z) are left alone."""
     prims = js["meshes"][0]["primitives"]
     sp_ = next(p for p in prims if js["materials"][p["material"]]["name"] == "strap-leather")
     skin = prims[0]
@@ -1671,26 +1673,46 @@ def lift_strap(js, b, out, rig):
     B = B[((B >= lo) & (B <= hi)).all(1)]  # only the dome side's shoulder (not the jaw/ear the strap passes)
     S = n.floats(js, b, sp_["attributes"]["POSITION"]).copy()
     N = n.floats(js, b, sp_["attributes"]["NORMAL"])
-    rows = len(S) // 2
+    k = STRAP_ACROSS
+    rows = len(S) // k
     lifts = np.zeros(rows)
     for r in range(rows):
-        i = 2 * r
-        mid, nn = (S[i] + S[i + 1]) / 2, N[i] / np.linalg.norm(N[i])
-        d = B - mid
-        h = d @ nn
-        tang = np.linalg.norm(d - h[:, None] * nn, axis=1)
-        near = (np.abs(d[:, 0]) < STRAP_W / 2 + 0.01) & (tang < 0.03) & (np.abs(h) < STRAP_MAX_LIFT)
-        lifts[r] = min(STRAP_MAX_LIFT, max(0.0, h[near].max() + STRAP_LIFT)) if near.any() else 0.0
+        V, nn = S[k * r:k * r + k], N[k * r + k // 2] / np.linalg.norm(N[k * r + k // 2])
+        if V[:, 2].mean() >= STRAP_BACK_Z:
+            continue
+        need = 0.0
+        for v in V:
+            d = B - v
+            h = d @ nn
+            near = (np.linalg.norm(d - h[:, None] * nn, axis=1) < 0.03) & (np.abs(h) < STRAP_MAX_LIFT + STRAP_LIFT)
+            if near.any():
+                need = max(need, h[near].max() + STRAP_LIFT)
+        lifts[r] = min(STRAP_MAX_LIFT, max(0.0, need))
     side_rows = rows // 2  # rows of the first strap, then the second
-    for k in range(2):
-        seg = lifts[k * side_rows:(k + 1) * side_rows]
+    for s_ in range(2):
+        seg = lifts[s_ * side_rows:(s_ + 1) * side_rows]
         sm = np.maximum(seg, np.convolve(np.pad(seg, 1, mode="edge"), np.ones(3) / 3, "valid"))
-        lifts[k * side_rows:(k + 1) * side_rows] = sm
-    S += np.repeat(lifts, 2)[:, None] * N / np.linalg.norm(N, axis=1, keepdims=True)
+        lifts[s_ * side_rows:(s_ + 1) * side_rows] = sm
+    S += np.repeat(lifts, k)[:, None] * N / np.linalg.norm(N, axis=1, keepdims=True)
     acc = out.add_floats(S.astype(np.float32), "VEC3")
     js["accessors"][acc].update(min=S.min(0).tolist(), max=S.max(0).tolist())
     sp_["attributes"]["POSITION"] = acc
     return np.round(lifts.max(), 3), int((lifts > 0.002).sum())
+
+
+def drop_under(js, b, out, rig):
+    """r19: the 'under' skin layer (prim 4) shows through the socket dome as a grey sheet: its triangles inside
+    SOCKET_BOX are removed (the dome and the skin around it cover the shoulder)."""
+    prim = next(p for p in js["meshes"][0]["primitives"] if js["materials"][p["material"]].get("extras", {}).get("under"))
+    P = n.floats(js, b, prim["attributes"]["POSITION"])
+    f = prim_faces(js, b, prim).astype(np.int64)
+    lo, hi = SOCKET_BOX
+    c = P[f].mean(1)
+    gone = ((c >= lo) & (c <= hi)).all(1)
+    full = f[~gone].astype(np.uint32).ravel()
+    js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+    prim["indices"] = len(js["accessors"]) - 1
+    return int(gone.sum())
 
 
 def rebuild_stages(out_path, in_path, stages):
@@ -1785,8 +1807,8 @@ if __name__ == "__main__":
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", hang_goo_arm), ("tail gather", hang_tail)])
     elif sys.argv[1] == "--r18":  # r18: the slim Meshy goo arm swapped in (argv: OUT IN ARM.glb); the chain's clips stay
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm swap", lambda js, b, out, rig: swap_goo_arm(js, b, out, rig, sys.argv[4]))])
-    elif sys.argv[1] == "--r19":  # r19: the r18 glb's socket dome gets clean skin UVs (argv: OUT IN)
-        rebuild_stages(sys.argv[2], sys.argv[3], [("socket skin", skin_socket), ("strap lift", lift_strap)])
+    elif sys.argv[1] == "--r19":  # r19: r18 glb: socket dome skin UVs, strap lift, under layer cut (argv: OUT IN)
+        rebuild_stages(sys.argv[2], sys.argv[3], [("socket skin", skin_socket), ("strap lift", lift_strap), ("under layer", drop_under)])
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
