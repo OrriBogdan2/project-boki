@@ -9,6 +9,7 @@ const SHADOW_LIFT := 0.25      # m over the ground, so the blob doesn't flicker 
 const SLOT_GAP := 1.35         # m between riders across the deck
 const SLOT_Z := -1.2           # m ahead of the middle: the squad stands before the mast-to-cabin gap
 const ROW_GAP := 1.6           # m back for a fourth rider and on
+const LIFT_MAX := 0.25         # m: the most a rider is lifted (a body that sank deeper is not a deck matter)
 const WISP_AT := Vector3(0.55, 1.15, 0.5)    # m from a rider's feet (to their right, a little behind)
 
 ## One ship's tick (match._update_one_ship, after the node is placed along its line).
@@ -54,6 +55,19 @@ static func plan_ranks(m: Match) -> void:
 ## your own squad on deck.
 static func drawn(h: Hunter) -> bool:
 	return not h.riding or h.rocket != null or shown(h)
+
+## Whether a rider stands on the deck, upright: the camera's lean tips a body about its feet and sinks the toes
+## 2-8 cm into the planks, and the intro's low camera sees them stand.
+static func upright(h: Hunter) -> bool:
+	return h.riding and h.rocket == null
+
+## How far a rider's body is lifted so their boots stand on the planks: some bodies stand a few cm under their
+## origin (a heavy's soles hang low in the clips), which on the ground the grass hides. Eased by Hunter.render.
+static func lift(h: Hunter) -> float:
+	if not upright(h):
+		return 0.0
+	var sole := BootSole.low(h.model)
+	return clampf(h.model.position.y + h.pos.y - sole, 0.0, LIFT_MAX) if sole != INF else 0.0
 
 ## Whether a rider is drawn on the deck: your own squad only.
 static func shown(h: Hunter) -> bool:

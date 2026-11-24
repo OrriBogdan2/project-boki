@@ -4,7 +4,7 @@ extends RefCounted
 ## stair flights (a face that grows along the flight), sheer cliff lips, ruin walls and boulders (World.BLOCK_H) and
 ## island rims over the abyss. Then a light, a medium and a heavy Hunter (Meeko, Vex, Albert) fly into faces of each
 ## height from a run (a running jump), a standing jump and a glide. A height inside the reach (a jump's apex plus
-## Hunter.MANTLE_REACH, or the glide's) must top every try with no snap; a height past it must never top by jumping.
+## HunterFeel.mantle_reach, or the glide's) must top every try with no snap; a height past it must never top by jumping.
 
 const HEROES := ["tender", "gunslinger", "bulwark"]  # light Meeko, medium Vex, heavy Albert (the brief's classes)
 const MODES := ["run", "jump", "glide"]
@@ -132,4 +132,4 @@ func report() -> void:
 static func reach(mode: String) -> float:
 	if mode == "glide":
 		return 99.0
-	return Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + Hunter.MANTLE_REACH
+	return Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + HunterFeel.mantle_reach
