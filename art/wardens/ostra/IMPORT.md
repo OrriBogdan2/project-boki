@@ -56,5 +56,5 @@ Meshy's auto-rig skinned the box, spring, void tube and coat tails to two invisi
 attack and jump the box swung up behind him like a pair of feet and the coat panel kicked out. Every leg-chain influence now
 sits on Hips (31,601 verts; arms, hands, head untouched). The void tube's albedo already is the violet starfield, but the toon
 shading crushed it to black: the material gets an emissive texture (`ostra_meshy_void_emit.jpg`) = that same albedo under a
-void mask, capped at 0.5, so the game's emit layer (WardenGlb._toon use_emit) makes it glow. Albedo, mesh and clips unchanged.
-Recipe: /home/boki/gens/hunter-round-1124/motley/r1/tools (voidmask.py, uvmask.py, mkfix.py).
+void mask, capped at 0.5 (its pale lilac texels emit violet instead, like the turnaround's streaks), so the game's emit layer (WardenGlb._toon use_emit) makes it glow. Albedo, mesh and clips unchanged.
+Recipe: /home/boki/gens/hunter-round-1124/motley/r1/tools (voidmask.py, uvmask.py, mkfix2.py).
