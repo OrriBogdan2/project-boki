@@ -96,6 +96,11 @@ func run(main: Node) -> void:
 			if tu.id() in FOE_STEPS:
 				reach += _unreachable(m, tu.id())  # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
+	var banners := seen.keys().filter(func(k): return not TutorialHints.quiet(String(k)))
+	print("TUTCHECK STEPS banner %d, hint-only %d, total %d: %s" % [
+			banners.size(), seen.size() - banners.size(), seen.size(), str(banners)])
+	ok(banners.size() >= 7 and banners.size() <= 9,
+			"the match tutorial has about 8 banner steps (%d), the rest are hint lines" % banners.size())
 	_words(m.player, seen)
 	var teaches: Array = ["summon", "steal", "pack"] if wisps else ["gkey"]
 	var skipped: Array = ["gkey"] if wisps else ["summon", "pack"]
