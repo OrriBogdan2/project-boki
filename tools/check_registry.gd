@@ -397,6 +397,7 @@ const CHECKS := {
 	"--sable-wings-shots": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "shots"],      # --shots-dir=<dir>
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],      # no ring/disc/burst on movement
 	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
+	"--owner-shots": ["res://tools/owner_shots.gd", "owner_shots", null],
 	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],      # ability text vs slot data
 	"--key-caps-check": ["res://tools/key_caps_check.gd", "key_caps_check", null],      # drawn keys follow a rebind
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
