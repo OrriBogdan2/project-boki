@@ -131,6 +131,27 @@ func _surfaces() -> void:
 		if main.current and main.current.has_method("_close_panel"):
 			main.current._close_panel()  # the "while you were away" note
 		await _grab_window(out.path_join("visitor_%s.png" % sp), 30)
+		await _visitor_close(main.current, out.path_join("visitor_close_%s.png" % sp))
+
+
+## A close camera on the garden's visitor kin (the overhead view shows it a few pixels tall).
+func _visitor_close(h, path: String) -> void:
+	if h == null or not ("kins" in h):
+		return
+	for k in h.kins:
+		if not k["rec"].get("visitor", false):
+			continue
+		var n: Node3D = k["node"]
+		var cam := Camera3D.new()
+		cam.fov = 35
+		h.add_child(cam)
+		var at := n.global_position + Vector3(0, 0.5, 0)
+		cam.global_position = at + Vector3(0, 1.4, 3.2)
+		cam.look_at(at)
+		cam.make_current()
+		await _grab_window(path, 30)
+		cam.queue_free()
+		return
 
 
 func _grab_window(path: String, frames := 30) -> void:
