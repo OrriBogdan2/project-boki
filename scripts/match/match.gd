@@ -2938,7 +2938,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at}      # at: the contact (HitContact); pg: the volley id (a kit reads it)
+	# at: the contact (HitContact); pg: the volley id (a kit reads it); from: where it was fired (IncomingHitSfx)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at, "from": s["start"]}
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -4669,6 +4670,7 @@ func _finish() -> void:
 			player.kin.comp.on_loss()
 		if player.kin:
 			r["kin_say"] = BokiChatter.line(player.kin, "extract" if result.get("extracted", false) else "comfort")
+		r["wisps_home"] = KinSteal.carried_home      # stolen wisps you carried: the results say they go home
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
