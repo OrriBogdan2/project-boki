@@ -26,6 +26,7 @@ const SAMPLES := {
 const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
+var back := false  # --back: the model turned to show his back (the fin and crest)
 var native := false
 var video := false  # --video: every frame (30 fps) of idle 1.2 s, run 1.0 s, attack 0.6 s as v0000.jpg ...
 var vn := 0
@@ -51,6 +52,8 @@ func run(main: Node) -> void:
 			frame_px = int(a.substr(7))
 		if a == "--close":
 			close = true
+		if a == "--back":
+			back = true
 		if a == "--video":
 			video = true
 		if a == "--probe":
@@ -158,6 +161,8 @@ func _hunter(id: String, dir: String) -> void:
 	marks.append("kind %s glb %s tris %d body_h %.2f" % [kind, WardenGlb.path(id), bx[2], bx[1]])
 	for clip in ["idle", "run", "attack"] if video else CLIPS:
 		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+		if back:
+			yaw += PI
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
 		if probe:
