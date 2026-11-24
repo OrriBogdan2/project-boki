@@ -533,7 +533,7 @@ func _channel(m: Match, hud, p: Hunter) -> void:
 	await hud.panels.draw
 	ok(ChannelBar.shown.has(m_v.nid), "another machine: the snapshot's target and seconds left bring it back")
 	var bare := row.duplicate()
-	# the tail's channel target and seconds left (the slots and sickness ride before them, the reach and hazard move after)
+	# the tail's channel target and seconds left (slots and sickness ride before them; reach and hazard move after)
 	bare[bare.size() - HunterNet.TAIL + 8] = ""
 	bare[bare.size() - HunterNet.TAIL + 9] = 0.0
 	m._net_apply(m_v, bare)
