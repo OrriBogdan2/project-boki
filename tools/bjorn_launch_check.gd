@@ -8,7 +8,7 @@ extends "res://tools/pin_bjorn_owner_check.gd"
 
 const FAR := Vector3(30.0, 0, 6.0)      # the dummy parked out of the way
 ## s after the plant ends from which he must be at 90% of his run speed: a frame for the plant to lift, then
-## the shared ground acceleration (Hunter.GROUND_ACCEL, ~0.055 s from a stand)
+## the shared ground acceleration (HunterFeel.ground_accel, ~0.055 s from a stand)
 const FULL_STRIDE := 0.12
 
 func bjorn() -> void:
