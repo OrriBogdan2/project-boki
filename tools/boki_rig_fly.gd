@@ -24,7 +24,7 @@ func run(m: Node, c) -> void:
 	main = m
 	check = c
 	Save.no_write = true
-	seed(7)
+	seed(3)  # (7 no longer lets the fliers roam: the lane's BaseLife draws one more random number per choice)
 	var farm_rules: Dictionary = Content.rules("farm_build")
 	farm_rules["base_mode"] = true
 	_new_save()
@@ -98,6 +98,9 @@ func _roam() -> void:
 		fliers.all(func(k: Dictionary) -> bool: return not k.is_empty()) and not walker.is_empty(),
 		"fliers: %s and the walker %s are out" % [", ".join(FLIERS), WALKER]
 	)
+	# this check times flight while roaming: a random day nap or a hello (BaseLife) would take a flier off the clock
+	home.life.r_v["doze"] = 0.0
+	home.life.r_v["greet_chance"] = 0.0
 	var on_foot := {}  # flier uid -> s it has walked the ground in a row while roaming
 	var longest := 0.0
 	var roam_s := 0.0
@@ -127,7 +130,7 @@ func _roam() -> void:
 			still_up[uid] = float(still_up.get(uid, 0.0)) + DT if up and speed < BokiRig.WALK_SPEED else 0.0
 			if float(still_up[uid]) >= SETTLED:
 				var lift := float(k["fly"]["h"])
-				if not ZoneVents.over(k["pos"]):      # over a vent it holds vent_h (_vent)
+				if not ZoneVents.over(k["pos"]):  # over a vent it holds vent_h (_vent)
 					hover = Vector2(minf(hover.x, lift), maxf(hover.y, lift))
 				if not petted:
 					petted = true
@@ -158,9 +161,9 @@ func _roam() -> void:
 func _vent() -> void:
 	var k := _kin(FLIERS[0])
 	var n: Node3D = k["node"]
-	var R: Dictionary = BokiFly.rules()
+	var r: Dictionary = BokiFly.rules()
 	var vents := ZoneVents.spots("ridge")
-	var band: Array = R["height"]
+	var band: Array = r["height"]
 	var t := 0.0
 	while not BaseLife.roams(k) and t < SIM_SECS:
 		_step([k])
@@ -168,12 +171,12 @@ func _vent() -> void:
 	var free := BaseLife.roams(k) and not vents.is_empty()
 	check.ok(free, "fliers: one is free to roam over the ridge's %d vents" % vents.size())
 	k["vel"] = Vector3.ZERO
-	for i in int(R["vent_h"] / (float(R["vent_climb"]) * DT)) + 2:
+	for i in int(r["vent_h"] / (float(r["vent_climb"]) * DT)) + 2:
 		home.fly.step(k, vents[0], n, DT)
 	var held := float(k["fly"]["h"])
-	var rose := "fliers: over a vent it rises to %.1f m (%.2f)" % [R["vent_h"], held]
-	check.ok(is_equal_approx(held, float(R["vent_h"])), rose)
-	for i in int(R["vent_h"] / (float(R["sink"]) * DT)) + 2:
+	var rose := "fliers: over a vent it rises to %.1f m (%.2f)" % [r["vent_h"], held]
+	check.ok(is_equal_approx(held, float(r["vent_h"])), rose)
+	for i in int(r["vent_h"] / (float(r["sink"]) * DT)) + 2:
 		home.fly.step(k, vents[0] + Vector3(6.0, 0, 0), n, DT)
 	var down := float(k["fly"]["h"])
 	var sank := "fliers: off it it sinks back to %.2f m, inside %s" % [down, band]

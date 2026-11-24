@@ -45,7 +45,7 @@ void fragment() {
 		float fade = 1.0 - smoothstep(radius * 0.55, radius, length(a - b));
 		cut = fade;
 	}
-	vis_f = vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
+	vis_f = vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz) * vis_greyness;
 	c = vis_apply(c, vis_f);
 	ALBEDO = c;
 	ALPHA = 1.0 - cut * 0.78;     // see through the part of a wall that hides you, smoothly

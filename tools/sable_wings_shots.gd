@@ -9,18 +9,23 @@ extends "res://tools/warden_shots.gd"
 ## frame, from behind).
 
 const DT := 1.0 / 60.0
-const CELL := 0.03            # m: the body's depth columns
-const ROOT_M := 0.08          # m round a wing's root that is under the coat by design (as tools/art1/sable_wings.py)
-const MAX_INSIDE := 4         # card vertices inside the body a pose may have (the approved art has 2 near the edge)
-const MAX_STRETCH := 1.35     # a card edge at most this many times its rest length (past it, the card tears)
-const WING_POSES := [["folded", 0.0, {}], ["raised", -1.0, {}], ["run", 0.0, {"vel": 5.0}],
+const CELL := 0.03  # m: the body's depth columns
+const ROOT_M := 0.08  # m round a wing's root that is under the coat by design (as tools/art1/sable_wings.py)
+const MAX_INSIDE := 4  # card vertices inside the body a pose may have (the approved art has 2 near the edge)
+const MAX_STRETCH := 1.35  # a card edge at most this many times its rest length (past it, the card tears)
+const WING_POSES := [
+	["folded", 0.0, {}],
+	["raised", -1.0, {}],
+	["run", 0.0, {"vel": 5.0}],
 	["shoot", 0.0, {"kmove": "thf_lmb_r", "kmove_t": 0.15}],
 	["shoot raised", -1.0, {"kmove": "thf_lmb_r", "kmove_t": 0.15}],
-	["flip", -1.0, {"kmove": "thf_vault_f", "kmove_t": 0.25, "grounded": false}]]
-const BEHIND := 0.35         # rad: her back to the camera, turned a little to show the wings' depth
+	["flip", -1.0, {"kmove": "thf_vault_f", "kmove_t": 0.25, "grounded": false}]
+]
+const BEHIND := 0.35  # rad: her back to the camera, turned a little to show the wings' depth
 const OPEN_FRAMES := [0.0, -0.2, -0.45, -0.7, -0.9, -1.0, -0.6, -0.15]
 
 var fails := 0
+
 
 func run(main: Node, mode: String = "check") -> void:
 	tree = main.get_tree()
@@ -37,8 +42,12 @@ func run(main: Node, mode: String = "check") -> void:
 		var r := _measure(row[0] as Node3D)
 		var good: bool = r[0] <= MAX_INSIDE and r[1] <= MAX_STRETCH
 		fails += 0 if good else 1
-		print("WINGS %s %s: %d card vertices inside the body (worst %.1f cm), edges stretch x%.2f at most"
-				% ["ok  " if good else "FAIL", p[0], r[0], r[2] * 100.0, r[1]])
+		print(
+			(
+				"WINGS %s %s: %d card vertices inside the body (worst %.1f cm), edges stretch x%.2f at most"
+				% ["ok  " if good else "FAIL", p[0], r[0], r[2] * 100.0, r[1]]
+			)
+		)
 	_clear()
 	if mode == "shots":
 		DirAccess.make_dir_recursive_absolute(out)
@@ -46,6 +55,7 @@ func run(main: Node, mode: String = "check") -> void:
 		print("SABLE_WINGS_SHOTS_DONE")
 	print("sable-wings-check: %s (%d fails)" % ["PASS" if fails == 0 else "FAIL", fails])
 	tree.quit(1 if fails > 0 else 0)
+
 
 ## n frames of a pose with the wings held at `fold` (WING_FOLD: 0 folded, -1 raised), the springs settling.
 func _hold(i: int, fold: float, st: Dictionary, n: int) -> void:
@@ -59,6 +69,7 @@ func _hold(i: int, fold: float, st: Dictionary, n: int) -> void:
 		(anims[i][0] as HunterAnim).update(DT, s)
 		h.set_meta(WardenGlb.WING_FOLD, fold)
 		await tree.process_frame
+
 
 ## [card vertices inside the body, the most a card edge stretches over its rest length, the worst depth m].
 func _measure(h: Node3D) -> Array:
@@ -88,7 +99,7 @@ func _measure(h: Node3D) -> Array:
 			var we: PackedFloat32Array = ar[Mesh.ARRAY_WEIGHTS]
 			if bo.is_empty():
 				continue
-			var k := bo.size() / v.size()
+			var k := int(bo.size() / float(v.size()))
 			var wing := nm.begins_with("card-wing")
 			for vi in v.size():
 				var p := Vector3.ZERO
@@ -106,8 +117,10 @@ func _measure(h: Node3D) -> Array:
 					g[c] = Vector2(minf(lohi.x, p.z), maxf(lohi.y, p.z))
 			if wing:
 				idx = ar[Mesh.ARRAY_INDEX]
-	var roots := [sk.get_bone_global_pose(sk.find_bone("spring_wingR_0")).origin,
-		sk.get_bone_global_pose(sk.find_bone("spring_wingL_0")).origin]
+	var roots := [
+		sk.get_bone_global_pose(sk.find_bone("spring_wingR_0")).origin,
+		sk.get_bone_global_pose(sk.find_bone("spring_wingL_0")).origin
+	]
 	var n := 0
 	var worst := 0.0
 	for p in cards:
@@ -127,6 +140,7 @@ func _measure(h: Node3D) -> Array:
 			if r0 > 0.005:
 				stretch = maxf(stretch, ((cards[a] as Vector3) - (cards[b] as Vector3)).length() / r0)
 	return [n, stretch, worst]
+
 
 func _shots(out: String) -> void:
 	# 1. folded and raised at the match camera, three-quarter back and back
@@ -156,9 +170,17 @@ func _shots(out: String) -> void:
 	(await _close_strip(row, false)).save_png(out.path_join("open_close.png"))
 	_clear()
 	var f := FileAccess.open(out.path_join("captions.txt"), FileAccess.WRITE)
-	f.store_string(("game.png: Sable at the match camera (pitch %d, %d m, fov %d): folded, raised (3/4 back), "
-			+ "folded, raised (3/4 back, the other side); true pixels, then enlarged\n")
-			% [CAM_PITCH, CAM_DIST, CAM_FOV]
+	f.store_string(
+		(
+			(
+				(
+					"game.png: Sable at the match camera (pitch %d, %d m, fov %d): folded, raised (3/4 back), "
+					+ "folded, raised (3/4 back, the other side); true pixels, then enlarged\n"
+				)
+				% [CAM_PITCH, CAM_DIST, CAM_FOV]
+			)
 			+ "poses.png: %s, from behind\n" % ", ".join(WING_POSES.map(func(p): return p[0]))
-			+ "open_close.png: the open and close, WING_FOLD %s\n" % str(OPEN_FRAMES))
+			+ "open_close.png: the open and close, WING_FOLD %s\n" % str(OPEN_FRAMES)
+		)
+	)
 	f.close()

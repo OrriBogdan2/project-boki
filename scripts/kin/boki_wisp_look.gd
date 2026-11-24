@@ -128,7 +128,7 @@ static func build(species: String, rec := {}) -> Node3D:
 	body.set_instance_shader_parameter("rim_col", cols["glow"])
 	root.add_child(body)
 	root.add_child(_trail((cols["glow"] as Color).lightened(TRAIL_LIGHTEN)))
-	root.set_meta("phase", randf())
+	root.set_meta("phase", KitLooks.vis_rng.randf())
 	return root
 
 ## [ears, tail] feature names for a species: its hand-built body's, else its `look` data's.
