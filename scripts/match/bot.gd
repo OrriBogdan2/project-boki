@@ -172,6 +172,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if a["strafe_t"] <= 0.0:
 			a["strafe_t"] = randf_range(0.6, 1.6)
 			a["strafe"] = -a["strafe"]
+		move += BotSquad.spread(m, h, a, to)      # (before the strafe: it may turn the strafe side)
 		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8
 		if finishing:
 			# walk onto the wisp to stomp it, and finish it

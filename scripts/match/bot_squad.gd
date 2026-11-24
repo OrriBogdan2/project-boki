@@ -29,6 +29,10 @@ const CROWD_M := 12.0          # metres round a rival that count as its side of 
 const SIDE_M := 14.0           # metres round us that count as ours
 const CLOSE_M := 6.0           # a rival this close is fought whatever the odds
 const ODDS_SKILL := 0.45       # skill from which one extra rival is enough to hold back (below: two)
+const SPACE_BASE := 4.0        # metres a bot in a fight keeps off each squadmate (the least skilled bot)...
+const SPACE_SKILL := 2.0       # ...more per point of skill (an expert: about 6 m)
+const SPACE_PUSH := 1.2        # strength of the push off a squadmate standing right on us (1 = a full step)
+const BESIDE_M := 5.0          # metres round a squadmate (or the lead's roam goal) where a bot walks up
 
 ## Off for a match started with "bot_plain": bots as they were without squad play or retreats
 ## (the bot-human check measures both ways from one build). Off in the duel room too: one against
@@ -144,7 +148,7 @@ static func assist_goal(m, h: Hunter, a: Dictionary, fighting: Array) -> Vector3
 		a["assist"] = best
 	var mate := nearest(m, h)
 	if h.flat_dist(best) < ASSIST_REACH and mate:
-		return mate.pos
+		return BotWays.around(m, mate.pos, h, BESIDE_M)      # (beside them, not onto them)
 	return best.pos
 
 ## Would starting on rival `o` be a fight against more than we have here? Counted the way a player
@@ -179,8 +183,35 @@ static func lead(m, h: Hunter) -> Hunter:
 		return human
 	return null if first == h else first
 
+## Keep off squadmates in a fight, the way three players spread round one rival: a push away from each
+## squadmate closer than the spacing (wider for a skilled bot), and the strafe side that leads away from
+## the nearest of them, so two bots on one rival work round it on two angles instead of shoulder to
+## shoulder. `to` points at the target. Stacked within 2.5 m was a fifth of fight time (BOTS_HUMAN_1111).
+static func spread(m, h: Hunter, a: Dictionary, to: Vector2) -> Vector2:
+	if not on(m):
+		return Vector2.ZERO
+	var space := SPACE_BASE + SPACE_SKILL * float(a.get("skill", 0.5))
+	var push := Vector2.ZERO
+	var nd := space
+	var off := Vector2.ZERO      # away from the nearest squadmate inside the spacing
+	for o in m.hunters:
+		if o == h or o.team != h.team or not up(o):
+			continue
+		var d := h.flat_dist(o)
+		if d >= space:
+			continue
+		var away: Vector2 = -h.dir_to(o) if d > 0.05 else Vector2(-to.y, to.x)
+		push += away * (1.0 - d / space)
+		if d < nd:
+			nd = d
+			off = away
+	if off != Vector2.ZERO:
+		a["strafe"] = 1.0 if Vector2(-to.y, to.x).dot(off) >= 0.0 else -1.0
+	return push * SPACE_PUSH
+
 ## Where a bot with nothing to do roams: where its lead is roaming to, else to the lead, or INF for
-## the lead itself, which picks its own way. Next to a lead that is busy (looting, holding a spot, a
+## the lead itself, which picks its own way (each squadmate its own spot round that goal, so the squad
+## does not arrive, and meet a fight, stacked on one point). Next to a lead that is busy (looting, holding a spot, a
 ## player standing) it waits beside it, a few seconds on each spot 2.5-4.5 m out (never onto the
 ## lead: pushed back off every step, it turned on the spot for half a minute).
 static func roam_to(m, h: Hunter, a: Dictionary) -> Vector3:
@@ -190,7 +221,8 @@ static func roam_to(m, h: Hunter, a: Dictionary) -> Vector3:
 		return Vector3.INF
 	if ld.ctrl == "bot" and String(ld.ai.get("goal_kind", "")) == "roam":
 		a.erase("guard")
-		return ld.ai["goal"]
+		var lg: Vector3 = ld.ai["goal"]
+		return lg if lg == Vector3.INF else BotWays.around(m, lg, h, BESIDE_M)
 	if h.flat_dist(ld) > GUARD_M:
 		a.erase("guard")
 		return ld.pos
