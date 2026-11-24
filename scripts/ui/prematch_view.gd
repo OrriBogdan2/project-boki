@@ -266,6 +266,8 @@ func _tick_label() -> void:
 	else:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
 		note_label.text = "Your squad picks in turn, %d seconds each." % int(Prematch.TURN)
+		if pm.pick != "":
+			note_label.text = "Time's up: %s locked in. " % HunterViewer.display_name(pm.pick) + note_label.text
 	var mine := pm.my_turn() and not pm.locked
 	if s != _last_sec:
 		_last_sec = s
