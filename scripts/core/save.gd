@@ -13,6 +13,7 @@ const UNNAMED := "Hunter"      # the name of a player who never typed one (the r
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
+const SettingsScript := preload("res://scripts/core/settings.gd")   # where the last slot is remembered (file_path)
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
@@ -27,7 +28,7 @@ var slot := 1                 # which save file is in play
 func _ready() -> void:
 	# the last save you played comes back (remembered next to the settings)
 	var cf := ConfigFile.new()
-	if cf.load("user://settings.cfg") == OK:
+	if cf.load(SettingsScript.file_path()) == OK:
 		slot = clampi(int(cf.get_value("save", "slot", 1)), 1, SLOTS)
 	load_game()
 
@@ -52,9 +53,9 @@ func use_slot(n: int) -> void:
 	slot = clampi(n, 1, SLOTS)
 	load_game()
 	var cf := ConfigFile.new()
-	cf.load("user://settings.cfg")
+	cf.load(SettingsScript.file_path())
 	cf.set_value("save", "slot", slot)
-	cf.save("user://settings.cfg")
+	cf.save(SettingsScript.file_path())
 
 func delete_slot(n: int) -> void:
 	for q in _copies(path_for(n)):
@@ -79,6 +80,7 @@ func fresh() -> Dictionary:
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
+		"snack_picks": 0,     # snack patch batches picked; 0 = the first batch ripens early (SnackPatch.first_grow_secs)
 		"items": {"tonic": 1}.merged(GardenFirstDay.rules()["start_items"]),   # plus the first-day kibble
 		"treat": "",
 		"plots": _empty_plots(4),
@@ -327,7 +329,7 @@ func _migrate_12_to_13(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		Care.ensure(r)
 
-## v13 -> v14: carry 2 in (docs/decisions/0061-carry-pick.md). The lead is the current partner ("active"), the
+## v13 -> v14: carry 2 in (docs/decisions/0146-carry-pick.md). The lead is the current partner ("active"), the
 ## second starts empty: a save that auto-picked or once chose a second no longer brings one until you pick.
 func _migrate_13_to_14(data: Dictionary) -> void:
 	data["active2"] = ""
@@ -527,6 +529,8 @@ func load_from(p: String) -> void:
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	FirstCapture.migrate(parsed)      # likewise: no version step
 	FirstObjective.migrate(parsed)      # likewise
+	if not parsed.has("snack_picks"):
+		parsed["snack_picks"] = 1      # an older save had its first snack batch: no early 60 s one
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked
@@ -540,11 +544,28 @@ var no_write := _tool_run()   # headless checks play with a save without touchin
 ## from the very first frame (other autoloads may save while starting up).
 static func _tool_run() -> bool:
 	for a in OS.get_cmdline_user_args():
-		if a == "--no-save" or a == "--archetype-check":
+		if a == "--no-save" or NO_SAVE_FLAGS.has(a):
 			return true
-		if String(a).begins_with("--shot=") or String(a).begins_with("--demo="):
-			return true
+		for pre in ["--shot=", "--demo=", "--arena-shot=", "--rolling-shot="]:
+			if String(a).begins_with(pre):
+				return true
 	return false
+## Checks that play on a copy of the save (they used to be listed in main.gd).
+const NO_SAVE_FLAGS := [
+	"--archetype-check",
+	"--kit-combo-check",
+	"--mage-combo-check",
+	"--gunslinger-combo-check",
+	"--zone-check",
+	"--dolm-combo-check",
+	"--ostra-combo-check",
+	"--hero-combo-check",
+	"--archer-combo-check",
+	"--bulwark-combo-check",
+	"--arena-check",
+	"--dredge-combo-check",
+	"--ashwick-combo-check",
+]
 var newer := false            # the slot holds a save from a newer game: never overwrite it
 
 func save_game() -> void:
@@ -617,7 +638,7 @@ func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> 
 		mem.append({"m": m, "kind": kind, "text": text})
 	while mem.size() > MAX_MEMORY:
 		mem.pop_front()
-	k["trust"] = clampf(float(k["trust"]) + trust_delta, 0.0, 100.0)
+	Care.trust_add(k, trust_delta, Time.get_unix_time_from_system())
 
 func has_building(b: String) -> bool:
 	return d.get("buildings", []).has(b)

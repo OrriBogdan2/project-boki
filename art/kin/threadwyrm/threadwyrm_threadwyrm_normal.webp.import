@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://7mx41m17k7qe"
-path="res://.godot/imported/threadwyrm_threadwyrm_normal.webp-255501991b24233c35b481f7e3a41c74.ctex"
+path.bptc="res://.godot/imported/threadwyrm_threadwyrm_normal.webp-255501991b24233c35b481f7e3a41c74.bptc.ctex"
+path.astc="res://.godot/imported/threadwyrm_threadwyrm_normal.webp-255501991b24233c35b481f7e3a41c74.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9d29208f7bb3540e8d147733e387f8e0"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/threadwyrm/threadwyrm_threadwyrm_normal.webp"
-dest_files=["res://.godot/imported/threadwyrm_threadwyrm_normal.webp-255501991b24233c35b481f7e3a41c74.ctex"]
+dest_files=["res://.godot/imported/threadwyrm_threadwyrm_normal.webp-255501991b24233c35b481f7e3a41c74.bptc.ctex", "res://.godot/imported/threadwyrm_threadwyrm_normal.webp-255501991b24233c35b481f7e3a41c74.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

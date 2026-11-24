@@ -293,7 +293,7 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
-			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
+			if sl == "ult" and not Arch.def(a).get("x", {}).has("per_rank"): continue  # source R tiers only (Gil: none)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
@@ -574,7 +574,8 @@ func _burr_terrain(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vecto
 		tap(m, P)
 		step(m, 0.8)
 		return K.direct_hits - hits
-	shape.call(func(dx: int) -> int: return clampi((dx - 2) / 2, 0, 2), [3, 5], -1)      # flights on tiles 3 and 5
+	shape.call(func(dx: int) -> int: return clampi(int((dx - 2) / 2.0), 0, 2), [3, 5],
+			-1)      # flights on tiles 3 and 5
 	var top := Vector3(home.x + 8.0, (lv + 2) * World.LEVEL, home.z)
 	var climbed: int = shoot.call(top)
 	var info := "hits %d took %.0f" % [climbed, dmg(T)]
