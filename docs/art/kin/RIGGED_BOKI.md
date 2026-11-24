@@ -97,12 +97,13 @@ species' head as the game builds it, with the overlay forced on, and the match c
 
 **Eye-paint pass** (Meshy paints, no Blender painting): cindle and puddlet got eyes from a Meshy retexture on the
 coat's own UVs (`tools/boki/eye_blend.py` keeps the live coat and takes only the Meshy eye patch). Gibbelle,
-goliathite, floenatee, lilybara, hoarheron, burrlet, pebbit, selenfin and zapple got theirs from a Meshy image edit of a
+goliathite, floenatee, lilybara, burrlet, pebbit, selenfin and zapple got theirs from a Meshy image edit of a
 head render: `tools/boki/eye_headcam.py` (Blender renders only) draws the coat's head flat-lit from the front and both
 sides, Meshy repaints just the eyes from the dex face, and `tools/boki/eye_reproject.py` puts back only the texels the
 edit changed (`tools/boki/swap_atlas.py` puts the atlas into the glb). Still listed: sentrikat (no Meshy credits left
-for its edit), and duskapi, moundvark, murmurling, nacrolin, threadwyrm, whose head gets under 40 atlas texels across
-(gibbelle 284, hoarheron 94): too few for a readable eye until a UV pass gives the head more of the atlas.
+for its edit), hoarheron (its edit scored 6.5: the side eye smears on 94 texels across the head), and duskapi,
+moundvark, murmurling, nacrolin, threadwyrm, whose head gets under 40 atlas texels across (gibbelle 284): too few for a
+readable eye until a UV pass gives the head more of the atlas.
 
 ### A summoned Boki (out of the wisp)
 
