@@ -26,8 +26,8 @@ const MAX_APART := 0.3  # share of samples with no teammate within APART_M (3 ru
 const MAX_CALM_UNHEALED := 0.7  # share of calm, hurt samples with a heal in the belt and no drink started
 # (0.03 to 0.58 measured on fourteen runs; the old behaviour 0.42 to 0.95)
 const MIN_ASSIST := 0.6  # share of near teammates that join a squadmate's fight (0.74 to 0.91 measured)
-const MIN_FIGHT_GAP_P10 := 1.8  # m: 10th percentile of the nearest squadmate's distance in a fight (BotSquad.spread;
-# 2.26 to 3.36 measured on four runs, without the spread 0.89 to 1.11)
+const MIN_FIGHT_GAP_P10 := 1.5  # m: 10th percentile of the nearest squadmate's distance in a fight (BotSquad.spread;
+# 1.73 to 3.59 measured on twelve runs, without the spread 0.89 to 1.11 on six)
 const TIGHT_M := 2.5  # metres: a squadmate this close in a fight is stacked on you
 
 var n := {}  # counters

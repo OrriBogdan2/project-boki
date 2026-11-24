@@ -162,8 +162,23 @@ static func assist_goal(m, h: Hunter, a: Dictionary, fighting: Array) -> Vector3
 		a["assist"] = best
 	var mate := nearest(m, h)
 	if h.flat_dist(best) < ASSIST_REACH and mate:
-		return BotWays.around(m, mate.pos, h, BESIDE_M)  # (beside them, not onto them)
+		return _beside(m, h, mate, best)
 	return best.pos
+
+
+## A spot BESIDE_M off a squadmate, square to their line onto rival `f` on our side of it: the mate's shot
+## without standing on them (a spot at any angle round the mate was often behind cover, and assists slid).
+static func _beside(m, h: Hunter, mate: Hunter, f: Hunter) -> Vector3:
+	var to := mate.dir_to(f)
+	var side := Vector2(-to.y, to.x)
+	if side.dot(mate.dir_to(h)) < 0.0:
+		side = -side
+	var p: Vector3 = mate.pos + Vector3(side.x, 0.0, side.y) * BESIDE_M
+	if m.world.is_void(p.x, p.z) or m.world.is_block(p.x, p.z):
+		p = mate.pos - Vector3(side.x, 0.0, side.y) * BESIDE_M
+		if m.world.is_void(p.x, p.z) or m.world.is_block(p.x, p.z):
+			return mate.pos
+	return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
 
 
 ## Would starting on rival `o` be a fight against more than we have here? Counted the way a player
@@ -204,7 +219,7 @@ static func lead(m, h: Hunter) -> Hunter:
 ## squadmate closer than the spacing (wider for a skilled bot), and the strafe side that leads away from
 ## the nearest of them, so two bots on one rival work round it on two angles instead of shoulder to
 ## shoulder. `to` points at the target. Without it a squadmate stood within 2.5 m for 31% of fight time,
-## with it 9% (docs/BOTS_HUMAN_1111.md, Spacing in a fight).
+## with it 10% (docs/BOTS_HUMAN_1111.md, Spacing in a fight).
 static func spread(m, h: Hunter, a: Dictionary, to: Vector2) -> Vector2:
 	if not on(m):
 		return Vector2.ZERO
