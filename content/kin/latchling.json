@@ -1,0 +1,14 @@
+{
+	"grammar": 1,
+	"id": "latchling",
+	"name": "Latchling",
+	"theme": "titan",
+	"type2": "gravity",
+	"flavor": "Tiny tuatara with a little latch crest.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "latchling",
+		"stage": 1
+	}
+}
