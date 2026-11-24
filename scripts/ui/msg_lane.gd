@@ -183,6 +183,8 @@ func _layout(delta: float) -> void:
 		box.reset_size()
 		var x := (size.x - box.size.x) * 0.5 if right_edge <= 0.0 else right_edge - box.size.x
 		var y := want if not e.has("placed") else lerpf(box.position.y, want, k)
+		# the right rail never slides down through the feed above it (only up, into a freed row)
+		if right_edge > 0.0: y = maxf(y, want)
 		e["placed"] = true
 		y = maxf(y, above + GAP)
 		x += HunterZone.slide(Rect2(Vector2(x, y), box.size), avoid)

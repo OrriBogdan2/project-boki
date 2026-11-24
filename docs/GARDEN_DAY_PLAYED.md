@@ -33,7 +33,7 @@ and `Save.no_write`: the real save file's md5 is checked unchanged.
 | F | A fresh Boki cannot pair on day one: Grown is level 8 and the first-day list asks for "Pair two Boki" (known: GARDEN_SLICE_CHECK row 11; the tile now at least says Lv 8) | Follow-up 5 |
 | E | The Crown needs 3 wins in a row against rivals whose stat TOTAL is at least 1.1x yours, but the Dash is run on Speed and friends run together (pace pull), so the demo's friend pair is a coin flip against each other. With near-equal Boki (Pip 20 each, rivals 1.15x) one try gave the Crown in 5 races, another 5 wins in 30 races and no Crown; with Pip fast (Speed 70, friend bonds cleared) it took 3 races. | | Follow-ups 3 and 4 (balance, owner) |
 | F | A fresh Boki cannot pair on day one: Grown is level 8 and the first-day list asks for "Pair two Boki" (known: GARDEN_SLICE_CHECK row 11; the tile now at least says Lv 8) | **Fixed** (`farm_tutorial.json` row `pair` has `needs_grown`: `GardenFirstDay.rows` shows it only once a roster Boki is level `NookRules.GROWN_LV`; asserted in `--garden-first-day-check`) |
-| G | The Heirloom Thread (a nest item) has no row in the feed menu and nothing there says it works only in the Nook | Follow-up 6 (low) |
+| G | The Heirloom Thread (a nest item) has no row in the feed menu and nothing there says it works only in the Nook | **Fixed** (`GardenItemRows.add_bag` lists each nest item in the bag with its `desc`, "Goes in the Nook", and no Feed button; `--nest-items-check` asserts it for every item of kind nest; Hatchling Down is eaten, so it keeps its Feed row) |
 | I | Every zone arrival shows its own "While you were away: A Rare Spore Egg is ready to hatch" card for the same egg (it showed again on arriving in Cinderstep, though the Nook is in Bramblebank), until the egg is hatched | Follow-up 7 |
 | H | The away card is one flat list with two zones open: gifts and toy lines are not under zone names, a gift can come from a Boki living in another zone, and the other zone's toys never train while away (the shared `away_seen` is used up by the first arrival) | **Fixed** (`GardenAway.mark` keeps `Save.d["away_zone"]` per zone; gifts come only from Boki that walk the arrival zone; the lines sit under the zone name via `ZoneAway.grouped`). Beat 9 asserts both |
 | J | Back after 2 h, 24 h or 7 days the garden opened a 520 px "While you were away" panel with a dimmed backdrop over the Boki | **Fixed** (`ZoneAway.card`: in the garden the return is the HUD card's one line, `BaseCard.away_line`, with no zone name as its first fact; the classic home keeps its card). Work is capped per return (`Work.ASSIGN` `cap`, `AWAY_MAX` 2 h), credited once, and a clock moved back credits nothing: rows in `--garden-daily-check` |
@@ -48,7 +48,7 @@ and `Save.no_write`: the real save file's md5 is checked unchanged.
 3. Dash/Cup: make the weekly Crown reachable by intent. Either compare the game's own stat (Speed for the Dash) in `GardenPrizes._cup`, or show the Crown rival's total on the Dash card.
 4. Same as 3 for friends in a race: say on the card that friends pull together.
 5. ~~First-day list: "Pair two Boki" behind Grown~~ done (row F).
-6. Feed menu: a one-line "Goes in the Nook" row for the nest items.
+6. ~~Feed menu: a one-line "Goes in the Nook" row for the nest items~~ done (row G).
 7. Ready-egg line: show it once per ready egg, not on every zone arrival (`CareJournal.arrival` adds it each time).
 
 ## Shots

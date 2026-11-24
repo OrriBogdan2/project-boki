@@ -328,7 +328,7 @@ func _migrate_12_to_13(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		Care.ensure(r)
 
-## v13 -> v14: carry 2 in (docs/decisions/0061-carry-pick.md). The lead is the current partner ("active"), the
+## v13 -> v14: carry 2 in (docs/decisions/0146-carry-pick.md). The lead is the current partner ("active"), the
 ## second starts empty: a save that auto-picked or once chose a second no longer brings one until you pick.
 func _migrate_13_to_14(data: Dictionary) -> void:
 	data["active2"] = ""
@@ -543,11 +543,28 @@ var no_write := _tool_run()   # headless checks play with a save without touchin
 ## from the very first frame (other autoloads may save while starting up).
 static func _tool_run() -> bool:
 	for a in OS.get_cmdline_user_args():
-		if a == "--no-save" or a == "--archetype-check":
+		if a == "--no-save" or NO_SAVE_FLAGS.has(a):
 			return true
-		if String(a).begins_with("--shot=") or String(a).begins_with("--demo="):
-			return true
+		for pre in ["--shot=", "--demo=", "--arena-shot=", "--rolling-shot="]:
+			if String(a).begins_with(pre):
+				return true
 	return false
+## Checks that play on a copy of the save (they used to be listed in main.gd).
+const NO_SAVE_FLAGS := [
+	"--archetype-check",
+	"--kit-combo-check",
+	"--mage-combo-check",
+	"--gunslinger-combo-check",
+	"--zone-check",
+	"--dolm-combo-check",
+	"--ostra-combo-check",
+	"--hero-combo-check",
+	"--archer-combo-check",
+	"--bulwark-combo-check",
+	"--arena-check",
+	"--dredge-combo-check",
+	"--ashwick-combo-check",
+]
 var newer := false            # the slot holds a save from a newer game: never overwrite it
 
 func save_game() -> void:
@@ -620,7 +637,7 @@ func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> 
 		mem.append({"m": m, "kind": kind, "text": text})
 	while mem.size() > MAX_MEMORY:
 		mem.pop_front()
-	k["trust"] = clampf(float(k["trust"]) + trust_delta, 0.0, 100.0)
+	Care.trust_add(k, trust_delta, Time.get_unix_time_from_system())
 
 func has_building(b: String) -> bool:
 	return d.get("buildings", []).has(b)

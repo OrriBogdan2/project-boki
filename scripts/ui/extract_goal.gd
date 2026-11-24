@@ -35,7 +35,7 @@ static func status(m: Match, i: int, s: Dictionary) -> String:
 	var name: String = WaysOutMap.WORDS[i]
 	if int(s["st"]) == WaysOutHud.St.LOCKED:
 		var t := int(ceil(float(s["t"])))
-		return "%s opens %d:%02d" % [name, t / 60, t % 60]
+		return "%s opens %d:%02d" % [name, int(t / 60.0), t % 60]
 	return "%s open · %d m" % [name, int(m.player.flat_dist(WaysOutMap.sites(m)[i]))]
 
 
