@@ -62,6 +62,10 @@ func _gather(at: Vector3) -> void:
 		k["say_t"] = 0.0
 		for key in ["nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t"]:
 			k.erase(key)
+		if home.life and k.has("life"):  # a chore, toy or meal base life was in the middle of would keep it from coming
+			home.life.machine(k).go(BaseLife.S.ROAM, "test")
+			for key in ["play", "life_chore", "eat", "life_eat"]:
+				k.erase(key)
 	_entry("E")["nap_t"] = 60.0
 
 func _entry(nm: String) -> Dictionary:
@@ -162,10 +166,10 @@ func _item_home(id: String, who: String, pose: String, verb: String) -> void:
 	var res := _watch(home.ppos)
 	ok(res["pose"].get(who, "") == pose and res["spoke"].has(who),
 		"%s: %s does a %s and says a line" % [tag, who, pose])
-	var line := CareJournal.text(k["rec"]["journal"][-1]) if not k["rec"].get("journal", []).is_empty() else ""
-	var named := line.contains(GardenItems.item_name(id))
-	ok((k["rec"]["journal"] as Array).size() == jr + 1 and line.begins_with(verb) and named,
-		"%s: one journal line '%s'" % [tag, line])
+	var added: Array = (k["rec"].get("journal", []) as Array).slice(jr).map(func(e): return CareJournal.text(e))
+	var about: Array = added.filter(func(t): return String(t).contains(GardenItems.item_name(id)))  # (its day goes on)
+	var line: String = about[0] if about.size() == 1 else str(added)
+	ok(about.size() == 1 and line.begins_with(verb), "%s: one journal line '%s'" % [tag, line])
 	var seen: bool = Save.d["tutorial"].get(ComeLook.ITEM_KEY + id, false)
 	ok(_mem_size(who) == mem and seen, "%s: no memory line, kind marked seen" % tag)
 
