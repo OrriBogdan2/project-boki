@@ -11224,3 +11224,4 @@ READY ext/stuck-integ-4a904438 5cc7d8b8d9 (supersedes: anim-dash-drive-hold boki
 READY ext/tut-hint-once 6fd4b248f3 (bulk-rebase: origin/main merged in mechanically, was 046bc7e291; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/anim-relic-equip-5s 4d08cccc90 (bulk-rebase: origin/main merged in mechanically, was 5d476c3da1; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/parity-recheck-lace 47370674c6 (bulk-rebase: origin/main merged in mechanically, was 92c0343dd1; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/farm-garden-perf-30 2a24ad8c90 (merged origin/main; conflicts only tools/perf_bench.gd (kept main's --bench-hub plus branch's --bench-garden) and docs/GARDEN_PERF.md (both sections); --check 0 failures; health.py --strict HEALTH OK)
