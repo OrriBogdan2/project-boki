@@ -246,14 +246,19 @@ func _visitor_close(h, sp: String, path: String) -> void:
 		var brig := n.find_child("BokiRig", true, false)  # a Node: its parent holds the model frame
 		var rig: Node3D = brig.get_parent() as Node3D if brig else null
 		if rig and BokiRig.FRAME.has(sp):
-			var eye: Vector3 = rig.global_transform * (BokiRig.FRAME[sp]["head"] as Vector3)
-			var fwd: Vector3 = -rig.global_transform.basis.z.normalized()
-			var side: Vector3 = fwd.cross(Vector3.UP).normalized()
 			cam.fov = 30
-			cam.global_position = Vector3(eye.x, eye.y, eye.z) + (fwd * 0.7 + side * 0.18)
-			cam.look_at(eye)
-			print("BOKI_EVERYWHERE %s eye-level camera y=%.3f m (eye y=%.3f, FRAME head y=%.3f)" % [sp, cam.global_position.y, eye.y, BokiRig.FRAME[sp]["head"].y])
+			var at_eye := func() -> void:  # tracks the eye (FRAME head) as it wanders or hops: 0.7 m out in front, a little aside
+				if not is_instance_valid(rig):
+					return
+				var eye: Vector3 = rig.global_transform * (BokiRig.FRAME[sp]["head"] as Vector3)
+				var fwd: Vector3 = -rig.global_transform.basis.z.normalized()
+				cam.global_position = eye + fwd * 0.7 + fwd.cross(Vector3.UP).normalized() * 0.18
+				cam.look_at(eye)
+			at_eye.call()
+			main.get_tree().process_frame.connect(at_eye)
 			await _grab_window(path.replace("visitor_close_", "visitor_eye_"), 30)
+			main.get_tree().process_frame.disconnect(at_eye)
+			print("BOKI_EVERYWHERE %s eye-level camera y=%.3f m (FRAME head y=%.3f in the model, tracked)" % [sp, cam.global_position.y, BokiRig.FRAME[sp]["head"].y])
 		cam.queue_free()
 		return
 	print("BOKI_EVERYWHERE FAIL: %s is not in the garden as the visitor (%d kins out)" % [sp, h.kins.size()])
