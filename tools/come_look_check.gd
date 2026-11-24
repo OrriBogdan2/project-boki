@@ -60,7 +60,7 @@ func _gather(at: Vector3) -> void:
 		k["t"] = 5.0
 		k["hold_t"] = 0.0
 		k["say_t"] = 0.0
-		for key in ["nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t", "play"]:      # play: a toy left from before
+		for key in ["nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t", "play"]:  # play: a toy left
 			k.erase(key)
 	_entry("E")["nap_t"] = 60.0
 
