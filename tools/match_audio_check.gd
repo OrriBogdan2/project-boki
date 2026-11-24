@@ -40,6 +40,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	await _solos()
 	Save.d["music"] = Save.d.get("music", [])
 	await _abyss()
 	Game.goto("match", {"autoplay": true, "teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
@@ -833,3 +834,37 @@ func _void(w: World, x: int, z: int, d: Vector2i, from: int, to: int) -> bool:
 		if w.kind[w.idx(x + d.x * k, z + d.y * k)] != World.T_VOID:
 			return false
 	return true
+
+# ---------------------------------------------------------------- solos
+func _solos() -> void:
+	var opts := {"autoplay": true, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "demo_kin": "cindle"}
+	opts["squad"] = 1      # solos: every hunter is their own squad
+	opts["teams"] = 4
+	Game.goto("match", opts)
+	for i in 6:
+		await main.get_tree().process_frame
+	var m: Match = main.current
+	m.set_process(false)
+	var P: Hunter = m.player
+	var rivals: Array = m.hunters.filter(func(x): return x != P)
+	ok(not Life.has_mates(m, P) and not rivals.is_empty(), "solos: %d rivals, nobody on your squad" % rivals.size())
+	Sfx.last_played.clear()
+	for kind in ["", "enemy", "loot"]:
+		m.squad_ping(P, P.pos + Vector3(5, 0, 0), true, kind)
+	m.hud.mates.track(m.hud, P, 0.1)
+	m.knock(rivals[0], P, {})
+	_step(m, 0.5)
+	m.hud.mates.track(m.hud, P, 0.1)
+	ok(not Sfx.last_played.has("ping") and m.hud.mates.lines.is_empty(),
+			"solos: your ping and a rival down make no squad cue (%s)" % [Sfx.last_played.keys()])
+	m.kin_ping(P.kin, P.pos, Color.WHITE, "x")
+	ok(not Sfx.last_played.has("ping"), "solos: your Boki's callout marker is silent too")
+	rivals[1].team = P.team
+	Sfx.last_played.clear()
+	m.squad_ping(P, P.pos + Vector3(5, 0, 0), true)
+	m.hud.mates.track(m.hud, P, 0.1)
+	m.knock(rivals[1], rivals[0], {})
+	_step(m, 0.5)
+	m.hud.mates.track(m.hud, P, 0.1)
+	ok(Sfx.last_played.has("ping") and Sfx.last_played.has("warn"),
+			"...with a squadmate the ping and 'teammate down' sound (%s)" % [Sfx.last_played.keys()])
