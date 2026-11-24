@@ -17,7 +17,7 @@ extends RefCounted
 
 const PX := 512
 ## Species with data but no art/kin body yet (docs/art/kin/MESHY_BOKI_RECIPE.md): they must be the only FALLBACKs.
-const KNOWN_NO_MODEL := ["basaltoad", "cindowary"]
+const KNOWN_NO_MODEL := ["cindowary"]
 
 var main: Node
 var out := ""
