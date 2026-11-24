@@ -1,6 +1,7 @@
 extends RefCounted
 ## --occlusion-outline-check: your side (you behind a cliff, your teammate, your Boki) wears the cover
-## outline in its side colour, a rival only while in sight (red), an unseen rival never; Low takes it off.
+## outline in its side colour, a rival only while in sight (red), an unseen rival never; Low takes it off. The
+## same overlay draws the dark ground rim on an uncovered silhouette (CLARITYCONTRAST in --clarity-shots measures it).
 ## --occlusion-outline-shots --shots-dir=<dir> (needs a GPU renderer): on the Hollow Crown, you and a
 ## teammate stand behind a cliff, two trees and the stone covers it has (ruin pillars, walls, boulders)
 ## with a rival beside you, once with the outline (<cover>_on.png) and once without (<cover>_off.png),
@@ -62,6 +63,10 @@ func _check() -> void:
 	_expect("a rival in sight wears it in red", _covered(rival) and _tint(rival) == SideColor.foe())
 	rival.unseen = true
 	await _go(0.1)
+	var code: String = (preload("res://shaders/occlusion_outline.gdshader") as Shader).code  # (no defaults headless)
+	var found := RegEx.create_from_string("rim_alpha = ([0-9.]+)").search(code)
+	var rim := found.get_string(1).to_float() if found else 0.0
+	_expect("it draws the ground rim too (rim_alpha %.2f)" % rim, rim > 0.5)
 	_expect("an unseen rival does not", not _covered(rival))
 	_expect("but your side still does", _covered(P) and _covered(mate))
 	rival.unseen = false
@@ -94,7 +99,7 @@ func _shots() -> void:
 	var off := m.cam.global_position - P.pos      # the camera's fixed offset from what it follows
 	m.hud.visible = false
 	var covers := {"cliff": _cliff_spot(off), "tree": _prop_spot(off, m.world.tree_spots)}
-	covers["tree2"] = _prop_spot(off, m.world.tree_spots.slice(m.world.tree_spots.size() / 2))
+	covers["tree2"] = _prop_spot(off, m.world.tree_spots.slice(int(m.world.tree_spots.size() / 2.0)))
 	var stone := _stone_spots()
 	for k in stone:      # low stone covers: stand right behind them or they hide nothing
 		covers[k] = _prop_spot(off, stone[k], STONE_BEHIND)
@@ -170,7 +175,7 @@ func _stone_spots() -> Dictionary:
 		if w.kind[i] != World.T_BLOCK:
 			continue
 		var x := i % w.w
-		var z := i / w.w
+		var z := int(i / float(w.w))
 		var foot := Vector3(x + 0.5, w.ground_at(x + 0.5, z + 0.5), z + 0.5)
 		if w.props.get(i, "") == "ruin":
 			by["pillar"].append(foot)

@@ -18,7 +18,7 @@ static func rules() -> Dictionary:
 
 ## A chest key picked up off the ground (a carrier's drop, or one lost from a deathbox).
 static func on_pickup(m: Match, h: Hunter) -> void:
-	KeyChest.give(h, 1)
+	BeltKeys.give(h, "chest_key", 1)      # belt synced this step, with the cue
 	if h == m.player:
 		m.hud.toast_small("Chest key found", KeyModels.BRASS)
 		m.sfx("key_get", null, -4.0, 1.0)
@@ -77,11 +77,11 @@ func build_patches() -> void:
 		seen[bi] = true
 		while not q.is_empty():
 			var cur: int = q.pop_back()
-			tiles.append(Vector2i(cur % w.w, cur / w.w))
+			tiles.append(Vector2i(cur % w.w, int(cur / float(w.w))))
 			for dz in [-1, 0, 1]:
 				for dx in [-1, 0, 1]:
 					var nx: int = cur % w.w + dx
-					var nz: int = cur / w.w + dz
+					var nz: int = int(cur / float(w.w)) + dz
 					if not w.inb(nx, nz):
 						continue
 					var ni := w.idx(nx, nz)
