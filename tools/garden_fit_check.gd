@@ -128,7 +128,7 @@ func _nook() -> void:
 	home._open_nook()
 
 func _feed() -> void:
-	Save.d["items"][Care.FOODS.keys()[0]] = 3
+	Save.d["items"][Care.foods_v.keys()[0]] = 3
 	home._open_feed(Save.d["roster"][0])
 
 func _boki_card() -> void:
