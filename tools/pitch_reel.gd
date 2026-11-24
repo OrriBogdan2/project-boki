@@ -326,8 +326,7 @@ func _kit() -> void:
 	var kz := float(_arg("--zoom=", str(KIT_ZOOM)))
 	m.set_meta("zoom_hold", kz)  # the match camera re-reads its zoom every frame; this holds it
 	hold_zoom = kz
-	m.objective = null  # no "Find a wild Boki" card under the minimap
-	m.set_meta("pitch_no_foe_plates", true)  # no numeral / BURNING plate over the foe (HudPlate.hidden)
+	_clean_take()
 	_zoom(kz)
 	mark("kit")
 	var t := 0.0
@@ -338,6 +337,18 @@ func _kit() -> void:
 		_step_frame(me.pos.lerp(foe.pos, 0.5))
 		await main.get_tree().process_frame
 		t += 1.0 / FPS
+
+
+## No game text a take must not show: the locked chest's "needs a key" prompt (chests freed), tips, the objective card,
+## the numeral / BURNING plate over the foe (HudPlate.hidden).
+func _clean_take() -> void:
+	Settings.v["tips"] = false
+	for c in m.chests:
+		if is_instance_valid(c.get("node")):
+			(c["node"] as Node).queue_free()
+	m.chests.clear()
+	m.objective = null
+	m.set_meta("pitch_no_foe_plates", true)
 
 
 ## The value of the `--name=` user arg, else `dflt`.
