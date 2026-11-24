@@ -35,8 +35,7 @@ static func open(home: Node, sel := "") -> void:
 	home.set_meta("hunters_sel", sel)
 	home.set_meta("hero_hover", sel)          # (K opens its kit card)
 	var v: VBoxContainer = home._new_panel(TITLE, 1210, true)
-	UI.subtitle(v, "Who you play. Every Hunter opens with its own challenge, then hold to unlock it. "
-			+ "K: the full kit card.")
+	UI.subtitle(v, "Pick who you play. Finish a Hunter's challenge, then hold it to unlock.")
 	v.add_child(HunterStats.tab_row(home, TITLE))
 	var cols := UI.hbox(16)
 	v.add_child(cols)
@@ -48,14 +47,8 @@ static func open(home: Node, sel := "") -> void:
 	grid.add_theme_constant_override("v_separation", int(TILE_GAP))
 	grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	left.add_child(grid)
-	var folded: Array = []      # (first visit: only open and ready Relics and the picked one show; the rest fold)
 	for id in ordered():
-		var tile := _tile(home, String(id), String(id) == sel)
-		grid.add_child(tile)
-		if ExpFold.first_visit() and String(id) != sel and ClassUnlock.status(String(id)) in ["progress", "locked"]:
-			folded.append(tile)
-	if not folded.is_empty():
-		ExpFold.add(left, folded, "Locked Relics")
+		grid.add_child(_tile(home, String(id), String(id) == sel))      # (every Hunter shows, locked ones dim)
 	home.set_meta("classes_grid", grid)
 	home.set_meta("hero_grid", grid)
 	var details := UI.vbox(10)
@@ -124,13 +117,17 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 		"open":
 			if cur: c.add_child(UI.label("Playing", 11, UI.GOOD, UI.semi))      # (other open Hunters: just the name)
 		"ready": c.add_child(UI.label("Hold to unlock", 11, ClassCard.GOAL_COL, UI.semi))
+		_ when ClassUnlock.is_bonus(id):      # (waits for the first expedition: one wrapped line says so)
+			var wl := UI.label(ClassUnlock.locked_line(id), 11, UI.FAINT)
+			wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			wl.set_meta("locked_line", id)
+			c.add_child(wl)
 		_:
 			var gp := ClassUnlock.challenge_progress(id)
 			c.add_child(UI.label("%d / %d" % [int(gp["have"]), int(gp["need"])] if st == "progress" else "Locked", 11,
 					ClassCard.GOAL_COL if st == "progress" else UI.FAINT))
-			var gb := UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, tile_w(home) - 56.0, 5.0)
-			gb.set_meta("tile_bar", id)
-			c.add_child(gb)
+			if st == "progress":      # (no empty bar on a tile that hasn't started)
+				c.add_child(UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, tile_w(home) - 56.0, 5.0))
 	card.tooltip_text = ClassCard.kit_tip(id)
 	if st != "open": card.tooltip_text = ("Locked: %s\n" % ClassUnlock.requirement(id)) + card.tooltip_text
 	if st == "locked": card.modulate = Color(0.62, 0.62, 0.68, 0.9)
@@ -160,6 +157,12 @@ static func _actions(home: Node, id: String, viewer: HunterViewer) -> Control:
 			var wl := UI.label("Challenge done: %s" % ClassUnlock.challenge_text(id), 12, UI.MUTED)
 			wl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			box.add_child(wl)
+		_ when ClassUnlock.is_bonus(id):
+			var ll := UI.para(ClassUnlock.locked_line(id), 13, UI.INK)
+			ll.custom_minimum_size.x = 300.0
+			ll.set_meta("locked_line", id)
+			ll.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			box.add_child(ll)
 		_:
 			var gb := ClassCard.challenge_block(id, 300.0)
 			gb.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -194,7 +197,6 @@ static func _show(home: Node, id: String) -> void:
 			grid.remove_child(old)
 			old.queue_free()
 			var tile := _tile(home, aid, aid == id)
-			tile.visible = old.visible or aid == id      # (a folded tile stays folded; the picked one shows)
 			(grid as GridContainer).add_child(tile)
 			(grid as GridContainer).move_child(tile, at)
 	_fill(home, id, viewer)

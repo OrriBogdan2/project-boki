@@ -91,6 +91,8 @@ func _queue() -> void:
 	host.queue_free()
 
 func _chips() -> void:
+	var was := FarmUnlocks.base_mode()
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm's counters
 	Save.d["tutorial"] = {"hatched": true}      # a new player: the welcome not seen yet
 	Save.d["items"] = {}
 	Save.d["crops"] = {}
@@ -100,6 +102,15 @@ func _chips() -> void:
 	ok(TopChips.shows("wood", 0), "chips: and stays when it is spent")
 	Save.d["tutorial"] = {"hatched": true, "home": true}      # a save that had seen the farm before
 	ok(TopChips.shows("coals", 0) and TopChips.shows("tonic", 0), "chips: an old save sees them all")
+	Save.d["tutorial"] = {"hatched": true}
+	FarmSites.refund({"wood": 3, "coals": 2})
+	var row := HBoxContainer.new()
+	TopChips.add_to(row)
+	ok(row.get_child_count() == 1, "chips: the four materials are one Materials chip, not four")
+	ok((row.get_child(0) as Control).tooltip_text.contains("Wood  3") and
+		(row.get_child(0) as Control).tooltip_text.contains("Ember Coals  2"), "chips: its tooltip lists each material")
+	row.free()
+	FarmUnlocks.rules()["base_mode"] = was
 
 func _keys() -> void:
 	Save.d["tutorial"] = {"home": true, "day1_done": true}      # tutorial over

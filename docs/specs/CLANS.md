@@ -83,7 +83,7 @@ Out of slice: breeding loans (section 7 has their own slice), officer tools, kic
 
 ## 7. Breeding loans
 
-DECISIONS 11-09: breeding is a main garden path, and some members stay home and raise. A loan lets a clanmate have your Boki in their Nook for a day. It is a **sleepover to a clanmate** (`Sleepover`, decision 0022-sleepovers): it reuses that away list, the one-day timer and the trip home.
+DECISIONS 11-09: breeding is a main garden path, and some members stay home and raise. A loan lets a clanmate have your Boki in their Nook for a day. It is a **sleepover to a clanmate** (`Sleepover`, decision 0127-sleepovers): it reuses that away list, the one-day timer and the trip home.
 
 - **Who can lend:** a clan member, any Boki a sleepover could take (not the lead Boki, never the last one at home, at most two away counting sleepovers), one loan open at a time. **To whom:** one clanmate you name (a member by profile, never yourself).
 - **One day:** the loan runs one garden day (`Sleepover.DAY_SECS`) from the offer. The clanmate takes it in (accepts) any time in that day. If nobody does, it waits out the day and comes home anyway.
@@ -94,3 +94,13 @@ DECISIONS 11-09: breeding is a main garden path, and some members stay home and 
 - **Net:** no Net message, so `Net.VERSION` stays as it is.
 
 First slice (built): offer from a Boki's card in your Nook (one button per clanmate), take it in from the Nook's side panel, the guest shows there for the rest of the day, it comes home after the day. `--clan-check` covers it. Not built yet: pairing with a guest (both get an egg, each rebuilt fresh for its owner, as `Social.clean_kin` does), showing the guest walking in the host's garden, and taking back a loan early.
+
+## 8. Clan chat
+
+A channel for the clan, in the Nesting Nook's side panel (`ClanChatPanel`, logic in `ClanChat`). It uses the social store like the notice board, no other transport and no Net message.
+
+- **Doc:** `clanchat/<auto id>` `{guild, tag, by, name, text, t}` (`t` in ms). A member reads `guild == <gid>` and keeps a row only if its author is a current member, the text is non-empty (one line, at most `Prematch.CHAT_MAX`), the id is new and the author is not muted. The tag shown is always the clan's own, whatever a row claims.
+- **Rate limit:** one line per `ClanChat.RATE_MS` (3 s) per member, on send and again on read (a forged flood is dropped). The newest 12 lines show; each member keeps their newest 40 in the store.
+- **Mute:** `MuteList` (session only, by name) drops a clanmate's lines for you alone. There is no separate block list.
+- **Offline:** no store, so a line is echoed to you alone and is not kept.
+- **Save / Net:** no save field, `Net.VERSION` unchanged. `--clan-check` covers it (chat rows).

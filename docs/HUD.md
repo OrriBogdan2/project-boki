@@ -1,5 +1,7 @@
 # In-match HUD: widget files and the shared style
 
+New sections go in `docs/HUD.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
+
 `scripts/ui/hud.gd` is wiring only (a frozen god file). The pieces that draw the fight-facing HUD live
 in their own files and share one look, `HudStyle`. Reference study and gap list: `hero-ref/HUD.md`
 (outside the repo, on the dev box).
@@ -12,8 +14,8 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin (a rival's turns warm with an up triangle 2+ levels above you, cool with a down triangle 2+ below: `LevelGap`), name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour strip flashing white as it loses some, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
-| `hud_reveal.gd` (`HudReveal`) | the staged HUD (DECISIONS 2026-11-08, design review 11-10 fix 8): one table, `content/rules/hud_reveal.json`, gives each group its first match (`belt_spare`, `ult_tiles`: no match, they wait for a filled slot / level 6) (1: vitals, abilities, clock, Boki card, minimap; 4: counters, feed, gear, squad, perks, weather, plate name colours) or its first event (the Ways Out strip on the first open seat, kept in `Save.d.hud_reveal`). Tab shows all; so do Settings > Accessibility "Show full HUD", older saves (no `hud_reveal`) and every non-expedition match. Check: `--hud-reveal-check` |
-| `reticle.gd` (`Reticle`, one on `hud.reticle` for the tick) | the aiming reticle in the player's style (static `draw`), and the hit tick: four short strokes out of the reticle in the Hunter's colour (`AimKit.hero_col`) for 0.09 s on each hit you land on a foe's Hunter, Boki or a monster (`CombatBus.hit_landed`), longer and ringed for 0.12 s on a knock; none for misses, zone (DoT) ticks, your Boki's or teammates' hits (`--hit-marker-check`, `--hit-marker-shots`) |
+| `hud_reveal.gd` (`HudReveal`) | the staged HUD (DECISIONS 2026-11-08, design review 11-10 fix 8): one table, `content/rules/hud_reveal.json`, gives each group its first match (`belt_spare`, `ult_tiles`: no match, they wait for a filled slot / level 6) (1: vitals, abilities, Boki card, minimap; 4: counters, feed, gear, squad, perks, weather, plate name colours) or its first event (the Ways Out strip on the first open seat; the clock/status strip under the minimap on the first Ways Out beat or your first kill or knock, `HudGroups.clock_shown`; kept in `Save.d.hud_reveal`). Tab shows all; so do Settings > Accessibility "Show full HUD", older saves (no `hud_reveal`) and every non-expedition match. Check: `--hud-reveal-check` |
+| `reticle.gd` (`Reticle`, one on `hud.reticle` for the tick) | the aiming reticle in the player's style (static `draw`), and the hit tick: four thin strokes out of the reticle (white, gold on a crit, pale on armour; drawn by `ReticleHud`, `hud.ret`, from this state) for 0.09 s on each hit you land on a foe's Hunter, Boki or a monster (`CombatBus.hit_landed`), longer and ringed for 0.12 s on a knock or a crit (numbers: tuning.json "reticle"); none for misses, zone (DoT) ticks, your Boki's or teammates' hits (`--hit-marker-check`, `--hit-marker-shots`) |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
@@ -29,12 +31,14 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): HudSlot's charge discs (2+ charges), a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `recast_cue.gd` (`RecastCue`) | two-step abilities, one language for every hunter (see below) |
 | `map_detail.gd` (`MapDetail`) | what the minimap draws: six default kinds (you, squad, Boki, nearest exit, Blight, pings); the rest (places, train, the hot zone ring, far exits, lairs, caches, beacons, rivals' boxes, ships, bounties, allies) show while Tab or the map key is held, while riding in, or once they matter (awake lair, scouted cache, lit beacon). One icon radius (`ICON_R`). The full map shows everything. `--minimap-check` counts the kinds; `--minimap-shots` takes 720p before/after crops |
+| `full_map.gd` (`FullMap`) names | one label pass per frame (`label`, `label_near`): region names first, each at the first try (its spot, then a line up or down, a little left or right, within its island) that clears every marker (spawn spots, ways out, the Heart, seat words, the hot zone caption); halt and Heart Gate names that would print over another are left off (the hover card names them); a countdown steps to a free line. `--map-names-check` runs it on real Hollow Crown matches |
 | `exit_mark.gd` (`ExitMark`) | the way to extract on both maps: one icon (disc and rising arrow) in three states, closed (grey), opening (ring fills, cyan), open (solid green, pulsing); the full map adds a pill with the timer ("OPENS 1:20", "OPENING 40%", "OPEN 0:12"); an opening or open one off the minimap pings on its edge. The same words feed the tooltip and the key |
 | `map_hover.gd` (`MapHover`) | full-map tooltips: rest the cursor 0.6 s on any marker (exits, ways-out seats, hunters, your Boki, spawns, shrines, lairs, beacons, boxes, halts, the train, ships, pings, places, the hot zone) and a card gives its name and one line. `--map-hover-check`; `--map-clear-shots` takes before/after shots |
 | `train_map.gd` (`TrainMap`, one on `hud.train_map`) | the sky train on both maps, one draw path (`draw`): the loop as a thin gold line, a small square per halt (named on the full map), the train as a chevron with its cars, and 'Next train: 0:24' at the halt nearest you (`SkyTrain.halt_eta`). On the minimap it is the `train` detail kind and shows by itself only while the loop is within 34 m of you. `--train-map-check` asserts halts, marker and countdown; `--train-map-shots` takes the shots (docs/train_map_shots/, on the 2x Hollow Crown) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `heart_hud.gd` (`HeartHud.zone_line`) | the zone clock, in the clock chip's middle under the minimap (where ISLANDS FALLING shows in the last 30 s, so it takes no room of its own): "CLOSES IN 0:30" before the Blight's tide starts to move, "CLOSING 7:12" while it closes, gone once the ring holds (`Heart.close_in` / `close_left`). Check: `--minimap-check` (zone rows); shots: `--zone-next-shots` (GPU) |
 | `quest_tracker.gd` (`QuestTracker`, drawn by `WaysOutHud.draw`) | Ways Out: while your squad is on a quest seat (sealed in with the Sealed Lair's boss, or charging the Uplink), a 28 px card under the strip, above the message lane: the quest in plain words, your progress (charge, or the boss's health taken off), the leading rival squad's progress on a quest seat as a thin second bar, the distance to the site. Hidden otherwise, when you are out, and while the boss bar is up. `--ways-out-hud-check` section 8 |
+| `objective_tracker.gd` (`ObjectiveTracker`, state in `scripts/match/first_objective.gd`) | the first expedition's next step: a card under the minimap's clock (one verb-first line, step pips, a tick when a step is done), a pin over the wild Boki or the outpost it names (an arrow on the screen edge when it is off screen; the running uplink keeps its own pin), and a ring on the minimap. Find a wild Boki, knock it out, scan it, go to the outpost, start the uplink, hold the yard, step into the lift. Runs until the save has got out of one expedition (`Save.d.tutorial.first_objective`). Numbers and words: `content/rules/first_objective.json`. Check: `--first-objective-check`; shots: `--first-objective-shots` |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 2 at once (1 in a fight), the most important first, short lives (2 s at most in a fight); a small (`toast_small`) line only shows on an empty lane and is dropped in a fight; a card slides aside off your hunter (`avoid`); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check`, `--hunter-zone-check` |
 | `top_stack.gd` (`TopStack`) | the top-centre of a real match is one column: Ways Out strip, then the one-line banner (the first-match guide, else the crouch hint), then the message lane. The lane sits under the banner and holds its lines while the banner is fresh (`Tutorial.CARD_T`; URGENT passes); the guide's Boki-key line takes the Boki-key hint's place (`Match.tip_once("ability")`). Check: `--prompt-queue-check` |
 | `hunter_zone.gd` (`HunterZone`) | the screen area over your own hunter (feet to plate): floating numbers and words (`Fx`), message cards and the knock banner slide sideways out of it, plate labels fade under it (`LabelSpacing`). Nothing prints over your hunter. Check: `--hunter-zone-check`; shots: `--hunter-zone-shots` |
@@ -114,7 +118,9 @@ for the squad rows). Verified 11-11:
 ## The inventory window (I)
 
 - `LoadoutPanel` (in `Hud._build_pack`): what you wear (two gloves with their keys Q and V, armor, boots), the four
-  utility slots with keys 1 to 4, your perks, then the backpack list. Every slot names its key.
+  utility slots with keys 1 to 4, your perks, then the backpack list. Every slot names its key; a belt stack shows
+  its count apart from its name. Each backpack thing is one line (icon, plain name, worth, Wear/Drop) so a full
+  6-slot pack shows whole at 1280x720; what it does is on its hover card, which also names the keys.
 - Point at a thing for a hover card (`InvTip`, words in `InvText`). A piece of gear is compared with what you wear
   in its slot (`GearCompare`): only the numbers that change, green when better and red when worse.
 - Press, hold and move a thing onto another slot (`SlotDrag`, `scripts/ui/slot_drag.gd`): a backpack piece onto
@@ -127,10 +133,9 @@ for the squad rows). Verified 11-11:
   row to wear it there (the one you wear: the two swap). Check: `--lpage-drag-check`.
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
-- Swap by dragging a backpack piece onto a slot (or a glove onto the other glove), or point and press Enter to
-  wear it (a worn piece: take it off) and Delete to drop it on the ground. The Wear and Drop buttons stay.
 - An open deathbox does not open this window: the loot window (below) shows what you carry itself.
-- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`).
+- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`); 0.24.5 pass at 1280x720 and
+  3440x1440 in docs/shots/ui-inventory.
 
 ## Pop-up budget
 
@@ -288,8 +293,8 @@ rival can steal a boss. The counterplay needs a readable line, drawn by `scripts
 - **Mark.** A gold diamond with a burst glyph and the word STEAL, right of the world bar (under the top bar's left
   end), only while a Hunter of your squad still in the match is within `KillXp.SHARE_R` (30 m) of the boss: close
   enough to be paid for the kill, so the squad that can steal (or must guard) sees it.
-- Read off the health every machine already sees: nothing synced, no stat or damage change. Camp Chiefs join when
-  the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
+- Read off the health every machine already sees: nothing synced. The reel on the first drop under the line
+  is `StealReel` (docs/CAMPS.md). Camp Chiefs join when the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
 
 ## Two-step abilities (RecastCue)
 
@@ -454,6 +459,14 @@ starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `
   `--tutorial-hud-check` fires a toast and a world prompt under a fresh strip and asserts one prompt shows.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
   never again after a dive; one prompt under a fresh strip), `--tutorial-strip-shots`.
+
+## Care line (CareLine)
+
+Standing next to a Boki on the farm puts the prompt over it (`CareLine.LINE_M` above its feet, kept on screen)
+as one line of the four care actions: pet (or what its want needs: tuck in, bath, brush), feed, play and pick up
+(held interact key; lead or let go when it applies), each with its live key. The one a tap of the interact key
+would do is lit and the rest greyed (`GREY_A`); Feed says "(no food)" when it is hungry and you have none. Talk
+and details stay on the hover card. Visiting another farm keeps the old bottom prompt. Check: `--care-prompt-check`.
 
 ## Hold prompts (HoldPrompt, HoldTeach)
 

@@ -1,6 +1,6 @@
 class_name ShrinkZone
 extends RefCounted
-## The closing zone (docs/decisions/0060-shrinking-zone.md, the 11-11 order). Each expedition picks
+## The closing zone (docs/decisions/0138-shrinking-zone.md, the 11-11 order). Each expedition picks
 ## its final area from the shared match seed, the way HotZone picks its region, so every player gets
 ## the same one: a dock or outpost, and the circle round it leaning into its island, so the last exits
 ## are inside. The playable circle closes toward it in phases (content/rules/shrink_zone.json): it
@@ -83,10 +83,10 @@ static func make(match_node: Match) -> ShrinkZone:
 
 func _init(match_node: Match) -> void:
 	m = match_node
-	var R := rules()
-	var tk := m.length / float(R["length_ref"])
-	var mk := float(m.world.w) / float(R["map_ref"])
-	var ph: Array = R["phases"]
+	var r_v := rules()
+	var tk := m.length / float(r_v["length_ref"])
+	var mk := float(m.world.w) / float(r_v["map_ref"])
+	var ph: Array = r_v["phases"]
 	var n := ph.size()
 	for arr in [cs, rs, t0, t1, dps]:
 		arr.resize(n + 1)
@@ -96,15 +96,15 @@ func _init(match_node: Match) -> void:
 	cs[n] = exit_at
 	var ii := m.world.island_of(exit_at.x, exit_at.y)
 	if ii >= 0:
-		var I: Dictionary = m.world.islands[ii]
-		area_name = String(I.get("name", ""))
-		var inland: Vector2 = I.get("poi_at", I["c"])
-		cs[n] = exit_at + (inland - exit_at).limit_length(rs[n] * float(R["final_lean"]))
+		var i: Dictionary = m.world.islands[ii]
+		area_name = String(i.get("name", ""))
+		var inland: Vector2 = i.get("poi_at", i["c"])
+		cs[n] = exit_at + (inland - exit_at).limit_length(rs[n] * float(r_v["final_lean"]))
 	# back out from the final circle: each earlier one holds the next and leans toward the middle
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([m.seed_val, "shrink_zone_drift"])
 	var mid := Vector2(m.world.w, m.world.h) * 0.5
-	var drift: Array = R["drift"]
+	var drift: Array = r_v["drift"]
 	for j in range(n - 1, 0, -1):
 		rs[j] = float(ph[j - 1]["r"]) * mk
 		var to_mid := mid - cs[j + 1]
@@ -114,7 +114,7 @@ func _init(match_node: Match) -> void:
 	var far := 0.0
 	for corner in [Vector2.ZERO, Vector2(m.world.w, 0), Vector2(0, m.world.h), Vector2(m.world.w, m.world.h)]:
 		far = maxf(far, cs[1].distance_to(corner))
-	rs[0] = far + float(R["start_pad"])
+	rs[0] = far + float(r_v["start_pad"])
 	var t := 0.0
 	for j in range(1, n + 1):
 		t += float(ph[j - 1]["wait"]) * tk
@@ -206,13 +206,13 @@ func _warn() -> void:
 ## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain; a tick, so no
 ## flinch or hitstop either, and the player hears ZoneSfx's tick instead of a hurt voice).
 func _hurt_outside(dt: float) -> void:
-	var R := rules()
+	var r_v := rules()
 	for h in m.hunters:
 		if h.out or h.extracted or h.remote or h.riding or h.dropping or h.downed or not outside(h.pos):
 			_owed.erase(h)
 			continue
 		var owed: float = float(_owed.get(h, 0.0)) + dps[k] * h.max_hp * dt
-		if owed >= dps[k] * h.max_hp * float(R["tick_s"]):
+		if owed >= dps[k] * h.max_hp * float(r_v["tick_s"]):
 			if h.hurt(owed, null, {"src": "zone", "tick": true}) > 0.0 and h == m.player:
 				audio.tick()
 			owed = 0.0

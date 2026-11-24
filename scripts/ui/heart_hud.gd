@@ -80,9 +80,9 @@ static func zone_line(m: Match) -> String:
 		return ""
 	var t := Heart.close_in(m)
 	if t > 0.0:
-		return "Closes in %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60]
+		return "Closes in %d:%02d" % [int(int(ceil(t)) / 60.0), int(ceil(t)) % 60]
 	t = Heart.close_left(m)
-	return "Closing %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60] if t > 0.0 else ""
+	return "Closing %d:%02d" % [int(int(ceil(t)) / 60.0), int(ceil(t)) % 60] if t > 0.0 else ""
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
@@ -116,16 +116,16 @@ static func full_map(fm) -> void:
 	var gv: Vector2 = fm.to_screen(ht.gate)
 	if area.has_point(gv):
 		gate_glyph(c, gv, 7.0, ht.carrier != null)
-		fm.hud._ctext(gv + Vector2(0, 18), "Heart Gate", 11, Heart.gate_col(), fm.hud.big)
+		fm.label("Heart Gate", gv + Vector2(0, 18), 11, Heart.gate_col())
 	var hv: Vector2 = fm.to_screen(ht.site)
 	if area.has_point(hv):
 		heart_glyph(c, hv, 9.0, ht, m.time)
-		fm.hud._ctext(hv + Vector2(0, -20), _word(ht), 12, Heart.col(), fm.hud.big)
+		fm.label_near(_word(ht), hv + Vector2(0, -20), 12, Heart.col(), -1.0)
 	if ht.carrier:
 		var cv: Vector2 = fm.to_screen(ht.carrier.pos)
 		if area.has_point(cv):
 			spark_glyph(c, cv, 7.0, m.time)
-			fm.hud._ctext(cv + Vector2(0, -16), "%s  ·  Heartspark" % ht.carrier.pname, 12, Heart.col(), fm.hud.big)
+			fm.label_near("%s  ·  Heartspark" % ht.carrier.pname, cv + Vector2(0, -16), 12, Heart.col(), -1.0)
 
 static func _word(ht: Heart) -> String:
 	match ht.state:

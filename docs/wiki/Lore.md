@@ -43,7 +43,7 @@ Each fallen Hunter's self is held in the object they were most bound to. Wearing
 
 ### Banter pairs
 
-- Kael and Cinder: the Blight she distilled burned the cracks into his arm.
+- Kael and Cinder: the Blight she distilled burned the veins into his arms.
 - Lace and anyone who served Malgrave.
 - Everyone and Sable: she started the Hollowing.
 - Vex and whoever didn't pay her.

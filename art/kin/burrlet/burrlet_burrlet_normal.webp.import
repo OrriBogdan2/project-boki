@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b81x7ihaubx8y"
-path="res://.godot/imported/burrlet_burrlet_normal.webp-2159da758da6f62a8eda0e46b5caad9d.ctex"
+path.bptc="res://.godot/imported/burrlet_burrlet_normal.webp-2159da758da6f62a8eda0e46b5caad9d.bptc.ctex"
+path.astc="res://.godot/imported/burrlet_burrlet_normal.webp-2159da758da6f62a8eda0e46b5caad9d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "3a4df8e28022007a13f0d927dc572fc8"
+"md5": "56d3cde92eabd369f61f4421846ff987"
 }
 
 [deps]
 
 source_file="res://art/kin/burrlet/burrlet_burrlet_normal.webp"
-dest_files=["res://.godot/imported/burrlet_burrlet_normal.webp-2159da758da6f62a8eda0e46b5caad9d.ctex"]
+dest_files=["res://.godot/imported/burrlet_burrlet_normal.webp-2159da758da6f62a8eda0e46b5caad9d.bptc.ctex", "res://.godot/imported/burrlet_burrlet_normal.webp-2159da758da6f62a8eda0e46b5caad9d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
