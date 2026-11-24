@@ -82,7 +82,7 @@ func _before_act(what: String) -> void:
 
 func _count_line(where: String, want: int) -> void:
 	var line := String(Content.rules("lore")["mask_line"])
-	ok(line == "This Mask holds a fallen Hunter. Put it on, and you become them.", "the Mask line's words: " + line)
+	ok(line == "This Relic holds a fallen Hunter. Put it on, and you become them.", "the Mask line's words: " + line)
 	var n := _labels_with(tree.root, line)
 	line_seen += n
 	ok(n == want, "the Mask line shows %d time(s) before '%s', want %d" % [n, where, want])
