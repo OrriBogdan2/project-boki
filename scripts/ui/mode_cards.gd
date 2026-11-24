@@ -3,11 +3,13 @@ extends RefCounted
 ## The expedition modes as two cards, one above the other (Data.MODES): a title and one plain line each. Used by the
 ## expedition panel and the online lobby; the picked mode is Save.d["exp_mode"] (Data.saved_mode).
 
+
 ## Pick a mode: remembers it for next time, then `cb` runs (a rebuild of the page).
 static func pick(mode: String, cb: Callable) -> void:
 	Save.d["exp_mode"] = mode
 	Save.save_game()
 	cb.call()
+
 
 ## A stack of one card per mode, `cur` lit. A card press calls `cb(mode)`.
 static func make(cur: String, cb: Callable) -> VBoxContainer:
