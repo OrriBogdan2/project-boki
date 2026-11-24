@@ -76,8 +76,8 @@ circle her as on the contract path, the data's skeleton space carried onto Meshy
 
 ## Own clips for kit moves (Cinder)
 A Hunter whose kit moves Meshy's one Attack does not fit gets its own clips on Meshy's skeleton: a clips-only `.glb`
-(`art/wardens/<art>/<art>_clips.glb`, an animation file, never the model) listed in data `clip_files`, played by data
-`kmoves` (kit move id -> {clip, then, hold, upper}; WardenNativeMoves). They run on the kit's own clock (state `kmove`,
+(`art/wardens/<art>/<art>_clips.glb`, an animation file, never the model, read by clip name like the slots'), played by
+data `kmoves` (kit move id -> {clip, then, hold, upper}; WardenNativeMoves, the same rows as the kit-move clips below). They run on the kit's own clock (state `kmove`,
 `kmove_t`), so the pose lands on the frame the kit fires. An `upper` clip keys only torso, head and arms and lies over
 the legs' clip (walk, run, idle, the air) at a weight that rises in 0.08 s and falls in 0.2 s; any other row is a
 full-body clip on the main player. Data `own_casts` stops her casts and recoils playing Meshy's swing.
@@ -89,6 +89,20 @@ spawns (the palm already at the eye, the push 0.07 s in), `as_cloak` a tuck then
 The fire leaves from `weapon_muzzle` on her right hand (the palm), which rides the posed bone. Checks:
 `--warden-native-check` (each row's clip, pose and hand-over), `--muzzle-check`; renders: `--clip-shots --warden=ashwick
 --states [--match] [--no-moves]` (`move_<id>_<stand|run>/`).
+
+## Kit-move clips (data `kmoves`)
+A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
+"rate": x, "fade": s}}` (`WardenNativeMoves`). While the move lasts the clip is laid at the move's clock (`kmove_t`), so a
+release move, which the kit starts at the frame the arrow leaves, shows its release on its first frames. `hold_from` loops
+the clip from there to its end for as long as the move lasts; the kit ends the draw move with the hold input, so the loop
+never shows without it. A move with no clip, or whose clip no file has, keeps the slot clips above. The clips come from
+`<art>_clips.glb` by name like the slots'. Lace's (`tools/meshy/lace_clips.py`, poses by limb direction on her skeleton,
+no retarget; the string follows the drawing hand on `StringMid`): `lace_draw`, `lace_over`, `lace_tap`, `lace_loose`,
+`lace_super`, `lace_heavy_wind`, `lace_heavy`, `lace_spirit`, `lace_ult`, `lace_ult_final`. The clips are the whole body
+(the contract's upper-body layer is not on this path): the feet of the draw and Spirit Walk clips do not follow the ground.
+`--warden-native-check` rows (per kit move): the clip is there, plays on the move and is no T-pose; a hold loop stays in
+`[hold_from, end]` while the move lasts and is gone when it ends; a release has the string drawn on its first frame and
+back on the bow a frame later.
 
 ## Not on the native path (yet)
 Death, stun, ledge, glide, emote and the per-move clips of every Hunter but Cinder (Meshy gave six); the contract's per-hunter extras (Tenzo's

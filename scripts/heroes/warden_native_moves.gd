@@ -1,84 +1,122 @@
 class_name WardenNativeMoves
 extends RefCounted
-## A native Hunter's own clips for the kit's moves (warden_native.json data "clip_files" and "kmoves"): clips-only
-## .glb files written on Meshy's skeleton (tools/meshy/cinder_native_clips.py), played by the kit's own clock
-## (state "kmove" and "kmove_t") so the pose lands on the frame the kit fires. A row {clip, then, hold, upper}: `clip`
-## plays from the move's start; then `then` loops, or the last pose holds (`hold`), or the move is over. An `upper`
-## row is a layer: its clip keys only the torso, head and arms and lies over whatever the legs play (walk, run, idle,
-## the air), faded in and out; any other row is a full-body clip on the main player.
+## The kit moves a native Hunter has its own clip for (data "kmoves" in warden_native.json, docs/art/wardens/
+## MESHY_NATIVE.md): {kmove: {"clip": name, "then": name, "hold": bool, "hold_from": s, "rate": x, "fade": s,
+## "upper": bool}}. The clips come from <art>_clips.glb by name like the slot clips (WardenNative._borrow_clips); a row
+## whose clip no file has is dropped. While the kit's move is on the body its clip is laid at the move's own clock
+## (state "kmove_t"), so a release move starts at the frame the arrow leaves. Past the clip's end: "hold_from" loops
+## the clip from there to its end, "then" loops a second clip, "hold" keeps the last pose (a full-body row's default),
+## and an upper row without either is over (the legs' clips show again). An "upper" row is a layer: its clip keys only
+## the torso, head and arms and lies over whatever the legs play (walk, run, idle, the air), faded in and out; any
+## other row is a full-body clip on the main player that owns the body while it shows.
 
+const FADE := 0.06  # s: the previous clip into a full-body move's, unless the row says
 const FADE_IN := 0.08  # s: an upper clip's weight rises
 const FADE_OUT := 0.2  # s: and falls when the move is over
+const KEY := "km:%s"  # the name a move's clip has in WardenNative.plays
+const THEN := "km:%s>"  # and its "then" loop's
 const REST_DOT := 0.9999  # a key this close to the bone's rest (|dot| of the two turns) leaves it at rest
 
-var rows: Dictionary = {}  # kit move id -> its row
-var anims: Dictionary = {}  # clip name -> Animation
+var player: AnimationPlayer
 var skel: Skeleton3D
-var weight := 0.0
+var rows: Dictionary  # kit move id -> its row
+var cur := ""  # the full-body move playing now ("" none)
+var prev_t := 0.0  # its clock last frame (a clock that goes back is the same move again)
+var weight := 0.0  # the upper layer's
 var shown := ""  # the upper clip last laid over the legs
 var shown_t := 0.0  # and its time (it holds while the weight falls)
 var keyed: Dictionary = {}  # upper clip -> [[bone index, rotation track]]
 
 
-## The moves of `d` for Meshy's skeleton `skel` under `glb`, whose main player is `player`; null when the data has none.
-## Full-body clips join the main player's library; upper clips stay here.
-static func make(glb: Node3D, player: AnimationPlayer, skel_in: Skeleton3D, d: Dictionary) -> WardenNativeMoves:
-	if not d.has("kmoves"):
-		return null
-	var mv := WardenNativeMoves.new()
-	mv.rows = d["kmoves"]
-	mv.skel = skel_in
-	mv.anims = WardenClipFile.read(glb.get_path_to(skel_in), d.get("clip_files", []))
-	var first := player.get_animation(player.get_animation_list()[0])
-	var lib := player.get_animation_library(player.find_animation_library(first))
-	for row: Dictionary in mv.rows.values():
-		for key in ["clip", "then"]:
-			if not row.has(key):
-				continue
-			var clip := String(row[key])
-			var anim: Animation = mv.anims[clip]
-			if key == "then":
-				anim.loop_mode = Animation.LOOP_LINEAR
-			if bool(row.get("upper", false)):
-				mv.keyed[clip] = mv._bones(anim)
-			elif not lib.has_animation(clip):
-				lib.add_animation(clip, anim)
+func _init(p: AnimationPlayer, skel_in: Skeleton3D, data: Dictionary) -> void:
+	player = p
+	skel = skel_in
+	rows = data.get("kmoves", {})
+
+
+## The clips by their plays key: {"km:arc_draw": clip name, "km:lw_jet>": its loop}.
+func clips() -> Dictionary:
+	var out := {}
+	for km in rows:
+		out[KEY % km] = String(rows[km]["clip"])
+		if rows[km].has("then"):
+			out[THEN % km] = String(rows[km]["then"])
+	return out
+
+
+## Call once the clips are in the player (`plays` is WardenNative.plays, missing clips dropped): loops and upper bones.
+func ready(plays: Dictionary) -> void:
+	for km in rows:
+		if plays.has(THEN % km):
+			player.get_animation(String(plays[THEN % km])).loop_mode = Animation.LOOP_LINEAR
+		if bool(rows[km].get("upper", false)):
+			for key in [KEY % km, THEN % km]:
+				if plays.has(key) and not keyed.has(plays[key]):
+					keyed[String(plays[key])] = _bones(player.get_animation(String(plays[key])))
+
+
+## Whether the kit's move `km` has a clip here (played out or not): it plays no Meshy swing.
+func has_clip(km: String, plays: Dictionary) -> bool:
+	return rows.has(km) and plays.has(KEY % km)
+
+
+## The clip move `km` shows `kt` s into it: {clip, t, upper, fade, km, kt}, or {} when it has none or has played out.
+func pick(km: String, kt: float, plays: Dictionary) -> Dictionary:
+	if not has_clip(km, plays):
+		return {}
+	var mv := _pick(rows[km], km, kt, plays)
+	if not mv.is_empty():
+		mv["km"] = km
+		mv["kt"] = kt
 	return mv
 
 
-## Whether the kit's move `km` has a row (played out or not).
-func has_row(km: String) -> bool:
-	return rows.has(km)
-
-
-## The clip `km` shows `kt` seconds into the move: {clip, t, upper}, or {} when it has no row or has played out.
-func pick(km: String, kt: float) -> Dictionary:
-	var row: Dictionary = rows.get(km, {})
-	if row.is_empty():
-		return {}
-	var first := anims[String(row["clip"])] as Animation
+func _pick(row: Dictionary, km: String, kt: float, plays: Dictionary) -> Dictionary:
 	var up := bool(row.get("upper", false))
-	if kt < first.length:
-		return {"clip": row["clip"], "t": kt, "upper": up}
-	if row.has("then"):
-		var loop := anims[String(row["then"])] as Animation
-		return {"clip": row["then"], "t": fposmod(kt - first.length, loop.length), "upper": up}
-	if bool(row.get("hold", false)):
-		return {"clip": row["clip"], "t": first.length, "upper": up}
+	var clip := String(plays[KEY % km])
+	var fade := float(row.get("fade", FADE))
+	var length := player.get_animation(clip).length
+	var pos := kt * float(row.get("rate", 1.0))
+	var hold := float(row.get("hold_from", -1.0))
+	if hold >= 0.0 and pos > hold and length > hold:
+		return {"clip": clip, "t": hold + fposmod(pos - hold, length - hold), "upper": up, "fade": fade}
+	if pos < length:
+		return {"clip": clip, "t": pos, "upper": up, "fade": fade}
+	if plays.has(THEN % km):
+		var loop := String(plays[THEN % km])
+		var t := fposmod(pos - length, player.get_animation(loop).length)
+		return {"clip": loop, "t": t, "upper": up, "fade": FADE}
+	if bool(row.get("hold", not up)):
+		return {"clip": clip, "t": length, "upper": up, "fade": fade}
 	return {}
 
 
-## Lays the upper clip of `pick` (or none: {}) over the pose the main player just set, at its weight.
+## Lays full-body pick `mv` on the main player at its time; call before the player's advance by `dt`.
+func play(mv: Dictionary, dt: float) -> void:
+	var clip := String(mv["clip"])
+	if mv["km"] != cur or float(mv["kt"]) < prev_t or player.assigned_animation != clip:
+		player.play(clip, float(mv["fade"]))
+	cur = String(mv["km"])
+	prev_t = float(mv["kt"])
+	player.speed_scale = 1.0
+	player.seek(maxf(float(mv["t"]) - dt, 0.0), false)
+
+
+## The body is back with the walk clips.
+func release() -> void:
+	cur = ""
+
+
+## Lays the upper clip of `mv` (or none: {}, a full-body pick) over the pose the main player just set, at its weight.
 func lay(mv: Dictionary, dt: float) -> void:
 	var on := not mv.is_empty() and bool(mv["upper"])
 	if on:
 		shown = String(mv["clip"])
 		shown_t = float(mv["t"])
-	var fade := FADE_IN if on else FADE_OUT
-	weight = move_toward(weight, float(on), dt / fade)
-	if weight <= 0.0 or shown == "":
+	weight = move_toward(weight, float(on), dt / (FADE_IN if on else FADE_OUT))
+	if weight <= 0.0 or not keyed.has(shown):
 		return
-	var anim := anims[shown] as Animation
+	var anim := player.get_animation(shown)
 	for key: Array in keyed[shown]:
 		var base := skel.get_bone_pose_rotation(key[0])
 		skel.set_bone_pose_rotation(key[0], base.slerp(anim.rotation_track_interpolate(key[1], shown_t), weight))
@@ -89,7 +127,7 @@ func lay(mv: Dictionary, dt: float) -> void:
 func _bones(anim: Animation) -> Array:
 	var out: Array = []
 	for t in anim.get_track_count():
-		var b := skel.find_bone(anim.track_get_path(t).get_concatenated_subnames())
+		var b := skel.find_bone(String(anim.track_get_path(t).get_concatenated_subnames()))
 		if b >= 0 and anim.track_get_type(t) == Animation.TYPE_ROTATION_3D and _moves_bone(anim, t, b):
 			out.append([b, t])
 	return out
