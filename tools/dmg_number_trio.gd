@@ -32,7 +32,7 @@ static func hit(s: Dictionary, f: int) -> void:
 	var every := [18, 21, 24]
 	for i in who.size():
 		if f % int(every[i]) == i * 5:
-			var k: int = f / int(every[i])
+			var k: int = int(f / float(int(every[i])))
 			dummy.hurt(22.0, who[i], {"src": "shot", "crit": k % 3 == 2})
 	if f % 15 == 0:
 		dummy.hurt(4.0, p, {"src": "burn"})
