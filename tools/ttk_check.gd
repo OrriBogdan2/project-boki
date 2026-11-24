@@ -20,7 +20,8 @@ const DT_SRC := 0.01       # s step of the source model
 
 ## One row per Hunter: [id, source name, our LMB mode (hold / tap / draw), level the numbers were read at,
 ## source LMB, abilities]. The source target is the mean Hunter at that level.
-## LMB is [damage, interval s, extra damage per consecutive hit(, cap per hit)]. Abilities map a slot to
+## LMB is [damage, interval s, extra damage per consecutive hit(, cap per hit(, every Nth hit, its bonus))]; the
+## bonus is a stack payoff the footage shows landing on a held target (Celeste's Shatter). Abilities map a slot to
 ## [damage, damage gain at max rank, cooldown s, cooldown cut at max rank, charges, extra charges at max rank].
 ## Every number is a supervive_kits.md tooltip (level 1, or level 15 where its section says so), except the LMB of
 ## Myth, Elluna, Tetra, Kingpin and Celeste: the tooltips have no damage there, so it is read from the floating
@@ -46,7 +47,7 @@ const HEROES := [
 	["tender", "Elluna", "hold", 9, [64.0, 0.4, 7.25, 93.0], {}],
 	["dolm", "Tetra", "tap", 18, [169.0, 0.6, 0.0], {}],
 	["dredge", "Kingpin", "hold", 9, [339.0, 0.5, 0.0], {}],
-	["rimewright", "Celeste", "hold", 9, [35.0, 0.2, 0.0], {}],
+	["rimewright", "Celeste", "hold", 9, [35.0, 0.2, 0.0, 35.0, 8, 520.0], {}],
 	["gil", MEDIAN_BAR, "tap", false, [], {"rmb": [], "dash": [], "e": []}],      # last: needs the rows above
 ]
 const MEDIAN_BAR := "roster median"      # source name of a Hunter with no source hero
@@ -98,8 +99,11 @@ func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
 	var n_v := 0
 	while t <= MAX_S:
 		var dmg_v := float(lmb[0]) + float(lmb[2]) * n_v
-		shots.append([t, minf(dmg_v, float(lmb[3])) if lmb.size() > 3 else dmg_v])
+		dmg_v = minf(dmg_v, float(lmb[3])) if lmb.size() > 3 else dmg_v
 		n_v += 1
+		if lmb.size() > 5 and n_v % int(lmb[4]) == 0:
+			dmg_v += float(lmb[5])
+		shots.append([t, dmg_v])
 		t += float(lmb[1])
 	for slot in hero[5] if combo else {}:
 		var a: Array = hero[5][slot]
