@@ -19,5 +19,8 @@ const CHECKS := {
 	"--mage-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],
 	# Vex's cross-ability interactions
 	"--gunslinger-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],
+	# Meshy-native Hunters: visible body vs hit_h / hit ring
+	"--native-hitbox-check": ["res://tools/native_hitbox_check.gd", "native_hitbox_check", null],
+	"--native-hitbox-shots": ["res://tools/native_hitbox_shots.gd", "native_hitbox_shots", null],
 	"--boss-check": ["res://tools/boss_check.gd", "boss_check", null],  # boss lairs: dial, wards, phases, the Rare Egg
 }
