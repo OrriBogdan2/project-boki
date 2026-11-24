@@ -12,7 +12,7 @@ extends RefCounted
 const KINDS := ["stun", "root", "ground", "daze", "slow"]  # strongest first: the one a stacked hit plays
 const CAP_S := 0.4  # s of match time: CC stacked inside this plays once (per audience: you, your squad)
 const ZONE_GAP_S := 1.5  # s: a body leaving and re-entering a slow zone (or its tick lapsing) replays no sooner
-const MIN_SLOW_S := 0.4 # s: a shorter slow is a hit's nudge, not crowd control
+const MIN_SLOW_S := 0.4  # s: a shorter slow is a hit's nudge, not crowd control
 const FOE_DB := -2.0  # dB on top of the quiet file: a slowed or stunned monster or Boki, heard where it stands
 const OWN_DB := 0.0  # dB at the call: the file sits at the cast level, the clearest of the cues
 const MATE_DB := -4.0  # dB on top of the mate file's quieter category, so a squadmate's never masks yours
