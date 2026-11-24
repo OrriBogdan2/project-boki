@@ -705,7 +705,7 @@ and fling asserts in `--juggernaut-combo-check` read the JSON. Not changed here:
 against the footage's 0.2 s).
 
 ## Native clips (11-23, ext/anim-kael-native-clips)
-Kael plays his own clips on Meshy's skeleton (`art/wardens/kael/kael_clips.glb`, `warden_native.json` `moves`) instead
+Kael plays his own clips on Meshy's skeleton (`art/wardens/kael/kael_clips.glb`, `warden_native.json` `kmoves`) instead
 of Meshy's one `Attack` for every move. Poses are ours; timing is the table above, on the kit clock (clip second 0 = the
 second the kit starts the move), the hit pose exactly on the kit's hit: slash 0.033, wave 0.033 (the tip's fastest
 frame 0.021), slam 0.583 (lowest tip 0.567), lunge 0.217 (full reach 0.229), chain throw 0.02 (0.033), riposte 0.117

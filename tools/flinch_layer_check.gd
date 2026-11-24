@@ -131,8 +131,8 @@ func _native(id: String, move: String, pair: Array) -> void:
 		(p["s"] as Dictionary)["kmove"] = move
 	_frames(pair, 12)
 	var cur: String = hit["sync"].get("cur")
-	# (a hero with its own Meshy clip for the move, data "moves", plays it as "move:<kit move>"; the rest play "attack")
-	ok(cur == "attack" or cur == "move:" + move, "%s: LMB hold: %s plays Meshy's attack clip (%s)" % [id, move, cur])
+	# ("kmove": the move has a clip of its own, data "kmoves": Lace's arc_draw is laid at the move's clock)
+	ok(cur == "attack" or cur == "kmove", "%s: LMB hold: %s plays Meshy's attack clip (%s)" % [id, move, cur])
 	var off := _gap(pair)
 	var legs0 := _bone(ctl, "thigh.L").angle_to(_bone(hit, "thigh.L"))
 	var peaks := {}
