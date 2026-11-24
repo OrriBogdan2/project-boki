@@ -64,9 +64,9 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
 
 ### Boki garden states
 
@@ -139,6 +139,13 @@ Worst five, backlog-ready:
    legs move). His kit moves, stun, glide, knock-down, death and crouch stay `proc`. The rig pass still owes: his own
    loco and hit clips (a fencer's guard, not Meeko's skip), kit-move clips (thrusts, lunge, abilities), crouch, dash
    and death, foot bones; then drop `clips_from`.
+2. **Boki stomp is `missing`** (the Wisp stomp is the Hunter's, a Boki has none). The glide is a `clip` now: each starter
+   .glb bakes a 1.6 s `glide` loop (`boki_clips.glide`: ears pinned, a slow roll and yaw, Cindle spread like a flying
+   squirrel, Puddlet splayed flat with its tail sculling, Burrlet tucked into its cap; added by `tools/boki/glb_clip.py`
+   on the live Bokidex models), and BokiHomeClips builds its `glide` pose (`BokiHomePoses._glide`, legs swung out)
+   only for a species without one, every other Boki; `--glide-shots --boki=<ids>` films it. `Kin.render` sets `kact`
+   `glide` while `owner_h.gliding`, the rider already banks and pitches with your body (`_ride_basis`), and BokiRig
+   blends in and out over 0.15 s (`GLIDE_FADE`). A big Boki's mount form still curls into a ball on your back.
 2. **Boki stomp is `missing`** (the Wisp stomp is the Hunter's, a Boki has none). The glide is `proc` now: no starter
    .glb has a glide clip, so a Boki on your shoulder or pack through your glide plays BokiHomeClips' `glide` (the
    species' idle with all four legs swung out and the ears back, `BokiHomePoses._glide`); `Kin.render` sets `kact`
