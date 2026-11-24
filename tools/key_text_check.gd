@@ -98,15 +98,33 @@ const NOT_TEXT := ["desc", "options", "id", "needs", "waits", "spot", "gives_too
 ## Terms a line may only use from the step that explains them on: [pattern, that step's id]. A step's id is its
 ## "id" (a tutorial.json step's first entry, a farm step's "id", a hub hint's "id", else its title).
 const TERMS := {
-	"tutorial": [["(?i)uplink|capture", "uplink"], ["(?i)outpost", "wayout"], ["(?i)glove", "glove"],
-		["Sentinel", "hook"], ["(?i)summon", "summon"], ["(?i)\\branks?\\b", "ranks"]],
-	"farm": [["(?i)trough", "feed"], ["(?i)pantry", "feed"], ["(?i)\\bpatch", "crop"],
-		["(?i)\\bstall\\b", "buy"]],
+	"tutorial":
+	[
+		["(?i)uplink|capture", "uplink"],
+		["(?i)outpost", "wayout"],
+		["(?i)glove", "glove"],
+		["Sentinel", "hook"],
+		["(?i)summon", "summon"],
+		["(?i)\\branks?\\b", "ranks"]
+	],
+	"farm": [["(?i)trough", "feed"], ["(?i)pantry", "feed"], ["(?i)\\bpatch", "crop"], ["(?i)\\bstall\\b", "buy"]],
 	"hub": [["Waystone", "waystone"], ["Wayseed", "keys"]],
 }
 ## Files whose quoted lines are first-time hints (every string with a space in it is read as written).
-const HINT_FILES := ["armour_hint", "xp_hints", "hazard_hint", "first_capture", "first_ult_hint", "vision_hint",
-	"heart_raid_hints", "duel_ring_hint", "belt_tips", "knock_tip", "tutorial_summon", "tip_text"]
+const HINT_FILES := [
+	"armour_hint",
+	"xp_hints",
+	"hazard_hint",
+	"first_capture",
+	"first_ult_hint",
+	"vision_hint",
+	"heart_raid_hints",
+	"duel_ring_hint",
+	"belt_tips",
+	"knock_tip",
+	"tutorial_summon",
+	"tip_text"
+]
 var internal := RegEx.create_from_string(INTERNAL)
 
 var bad := 0
@@ -229,7 +247,7 @@ func _tutorial() -> void:
 	var tu: Tutorial = m.tut
 	var fill := func(s: String) -> String: return tu.fill(TutorialText.fill(s, m.player))
 	var rules := Content.rules("tutorial").duplicate()
-	rules["steps"] = rules["steps"].map(func(st: Array) -> String: return st[1])      # [id, line]: the lines
+	rules["steps"] = rules["steps"].map(func(st: Array) -> String: return st[1])  # [id, line]: the lines
 	var n := _walk("tutorial", rules, fill)
 	for id: String in BokiChatter.TUT_HINT:
 		for s: String in BokiChatter.TUT_HINT[id]:
@@ -251,17 +269,21 @@ func _tutorial_steps(fill: Callable) -> Array:
 		var id: String = st[0]
 		var lines := [st[1], tut["detail"].get(id, ""), tut["retry"].get(id, ""), tut["labels"].get(id, "")]
 		for k: String in tut["alt"]:
-			if k.begins_with(id + "_"): lines.append(tut["alt"][k])
+			if k.begins_with(id + "_"):
+				lines.append(tut["alt"][k])
 		for k: String in tut["detail"]:
-			if k.begins_with(id + "_"): lines.append(tut["detail"][k])
+			if k.begins_with(id + "_"):
+				lines.append(tut["detail"][k])
 		lines.append_array(BokiChatter.TUT_HINT.get(id, []))
 		out.append([id, lines.map(func(s: String) -> String: return fill.call(s))])
 	return out
 
+
 ## No line of a step names a TERMS entry whose step comes later.
 func _terms(group: String, steps: Array) -> void:
 	var at := {}
-	for i in steps.size(): at[steps[i][0]] = i
+	for i in steps.size():
+		at[steps[i][0]] = i
 	for t: Array in TERMS[group]:
 		var re := RegEx.create_from_string(t[0])
 		ok(at.has(t[1]), "%s: the step that explains '%s' exists (%s)" % [group, t[0], t[1]])
@@ -269,6 +291,7 @@ func _terms(group: String, steps: Array) -> void:
 			for ln: String in steps[i][1]:
 				if at.has(t[1]) and i < at[t[1]] and re.search(ln) != null:
 					ok(false, "%s step %s uses '%s' before step %s: %s" % [group, steps[i][0], t[0], t[1], ln])
+
 
 func _training() -> void:
 	var rows: Array = m.training.rows()
@@ -330,31 +353,43 @@ func _farm() -> void:
 	var wait: String = FarmTutorial.fill(String(house.get("hints", {}).get("wait", "")))
 	ok(wait.contains(Settings.key_cap("interact")), "the farm house hint names the rebound use key: " + wait)
 
+
 ## The garden hub's first-time hints, in the order the hub shows them.
 func _hub() -> void:
 	var rules := HubHints.rules()
 	var steps := []
 	for e: Dictionary in rules["list"]:
 		steps.append([e["id"], [String(e["text"]).replace("{interact}", Settings.key_cap("interact"))]])
-	for s in steps: _line("hub hint " + s[0], s[1][0])
+	for s in steps:
+		_line("hub hint " + s[0], s[1][0])
 	_line("hub hint wayseed", String(rules["wayseed_text"]))
 	_terms("hub", steps)
 
+
 ## TipText's lines (the ones _tips() does not reach) and every quoted line of the first-time hint files.
 func _hint_files() -> void:
-	for s: String in [TipText.rings(), TipText.stagger(), TipText.send("Pip"), TipText.scan(),
-			TipText.ability(true), TipText.ability(false), TipText.bond_full("Fuse", true)]:
+	for s: String in [
+		TipText.rings(),
+		TipText.stagger(),
+		TipText.send("Pip"),
+		TipText.scan(),
+		TipText.ability(true),
+		TipText.ability(false),
+		TipText.bond_full("Fuse", true)
+	]:
 		_line("TipText", s)
 	for kind: String in TerrainHazards.rules()["kinds"]:
 		_line("hazard hint " + kind, String(TerrainHazards.kind_def(kind).get("tip", "")))
 	for id: String in UtilityBelt.ids():
 		_line("belt hint " + id, BeltTips.line(id, 0))
-	for k: String in HoldTeach.HINTS: _line("hold hint " + k, HoldTeach.HINTS[k] % Settings.key_cap("jump"))
-	var quoted := RegEx.create_from_string("\"([^\"\\n]*\\s[^\"\\n]*)\"")
+	for k: String in HoldTeach.HINTS:
+		_line("hold hint " + k, HoldTeach.HINTS[k] % Settings.key_cap("jump"))
+	var quoted := RegEx.create_from_string('"([^"\\n]*\\s[^"\\n]*)"')
 	var n := 0
 	for f: String in HINT_FILES:
 		for ln in FileAccess.get_file_as_string("res://scripts/match/%s.gd" % f).split("\n"):
-			if ln.strip_edges().begins_with("#"): continue
+			if ln.strip_edges().begins_with("#"):
+				continue
 			for hit in quoted.search_all(ln.get_slice(" # ", 0)):
 				_line(f + ".gd", hit.get_string(1))
 				n += 1

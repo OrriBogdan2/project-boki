@@ -6,12 +6,13 @@ extends RefCounted
 ## 0.6 at 6 m, 1 for a dive's plunge). It rides the clip's own crouch, so it begins and ends with it and never holds
 ## the body longer: the control is the terrace drop's (a landing locks no input). Runs after the clips each frame.
 
-const FADE_OUT := 0.3        # share of the hold the push eases off over, so the clip's recovery is not cut short
+const FADE_OUT := 0.3  # share of the hold the push eases off over, so the clip's recovery is not cut short
 
 var clips: WardenClips
 var skel: Skeleton3D
 var bone := -1
-var push := 0.0              # how far past the clip's crouch the pose is pushed now (x the clip's own, 0 = none)
+var push := 0.0  # how far past the clip's crouch the pose is pushed now (x the clip's own, 0 = none)
+
 
 static func make(c: WardenClips, sk: Skeleton3D) -> WardenHeavyLand:
 	var h := WardenHeavyLand.new()
@@ -19,6 +20,7 @@ static func make(c: WardenClips, sk: Skeleton3D) -> WardenHeavyLand:
 	h.skel = sk
 	h.bone = WardenSkeleton.find(sk, "root")
 	return h
+
 
 func step() -> void:
 	push = 0.0

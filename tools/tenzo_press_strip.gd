@@ -6,8 +6,8 @@ extends RefCounted
 ##   xvfb-run -a -s "-screen 0 960x540x24" godot --path . --rendering-driver opengl3 --audio-driver Dummy
 ##       --resolution 960x540 --fixed-fps 144 -- --tenzo-press-strip --shots-dir=/tmp/strip144
 
-const SETTLE_S := 1.2   # s of idle frames before the press, so the pose is at rest
-const ZOOM := 0.3     # closer than play (smaller = nearer), held through Match._process (MatchCam zoom_hold)
+const SETTLE_S := 1.2  # s of idle frames before the press, so the pose is at rest
+const ZOOM := 0.3  # closer than play (smaller = nearer), held through Match._process (MatchCam zoom_hold)
 
 var main: Node
 var dir := ""

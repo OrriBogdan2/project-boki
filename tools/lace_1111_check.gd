@@ -223,8 +223,14 @@ func _hail_laced(m: Match, p: Hunter, _t: Hunter, k: ArcherKit, home: Vector3) -
 	var live_col: Color = live.get("col", Color.WHITE)
 	ok(
 		"E laces: the live wall is the same laced arc, red, shown to everyone, and PinFx keeps no thread meshes",
-		bool(live.get("lace", false)) and bool(live.get("all", false)) and red(live_col) and not pinkish(live_col)
-		and not "laces" in k.fx and not "posts" in k.fx,
+		(
+			bool(live.get("lace", false))
+			and bool(live.get("all", false))
+			and red(live_col)
+			and not pinkish(live_col)
+			and not "laces" in k.fx
+			and not "posts" in k.fx
+		),
 		str(live.get("col"))
 	)
 	step(m, float(k.e_def()["time"]) + 0.3)
