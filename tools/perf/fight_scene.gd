@@ -8,8 +8,10 @@ extends RefCounted
 ##   an emitter, label or sprite counts once), with the owners covering most;
 ##   repeats: mesh+material pairs drawn as several MeshInstance3D copies (MultiMesh candidates: the renderer already
 ##   instances same-mesh copies, so a MultiMesh saves their per-object cull and transform work, not draw calls);
+##   lods: the visible meshes with mesh LODs (the renderer draws a coarser index set when a mesh is small on
+##   screen, in the shadow passes too) against those without, by triangles, and the biggest without;
 ##   hunter <arch>: a Hunter's model: mesh instances, surfaces, outline passes, distinct materials, shadow casters,
-##   triangles and bones (at the peak only).
+##   triangles, surfaces with LODs and bones (at the peak only).
 
 const TOP := 12  # entries per line
 const REPEAT_MIN := 3  # copies before a mesh+material pair counts as a MultiMesh candidate
@@ -35,6 +37,7 @@ func report(root: Node, m: Match, viewport: Viewport, tag: String) -> void:
 	print("%s materials: %s" % [head, _materials(seen)])
 	print("%s transparent: %s" % [head, _transparent(seen)])
 	print("%s repeats (MultiMesh candidates, copies x tris): %s" % [head, _repeats(seen)])
+	print("%s lods: %s" % [head, _lods(seen)])
 	if tag == "peak":
 		for h: Hunter in m.hunters:
 			print("%s hunter %s %s: %s" % [head, h.pname, h.arch, _hunter(h)])
@@ -151,6 +154,41 @@ func _repeats(seen: Array) -> String:
 	return "%d groups, %d copies: %s" % [ks.size(), total, ", ".join(top)]
 
 
+func _lods(seen: Array) -> String:
+	var with_n := 0
+	var with_tris := 0
+	var without: Array = []  # [tris, name] of the meshes with no LODs
+	for gi in seen:
+		var mesh := _mesh_of(gi)
+		if mesh == null or gi is GPUParticles3D or gi is CPUParticles3D:
+			continue
+		var tris := _tris(mesh)
+		if _lod_surfaces(mesh) > 0:
+			with_n += 1
+			with_tris += tris
+		else:
+			var nm := _mesh_name(gi as MeshInstance3D) if gi is MeshInstance3D else "%s<%s" % [gi.get_class(), owner_name(gi)]
+			without.append([tris, nm])
+	without.sort_custom(func(a, b): return a[0] > b[0])
+	var all_without := 0
+	for w in without:
+		all_without += w[0]
+	var top := without.slice(0, TOP).map(func(w): return "%s %.1fk" % [w[1], w[0] / 1000.0])
+	return (
+		"with %d meshes %.0fk tris, without %d meshes %.0fk tris: %s"
+		% [with_n, with_tris / 1000.0, without.size(), all_without / 1000.0, ", ".join(top)]
+	)
+
+
+## How many of a mesh's surfaces carry LOD index sets.
+static func _lod_surfaces(mesh: Mesh) -> int:
+	var n := 0
+	for si in mesh.get_surface_count():
+		var sd := RenderingServer.mesh_get_surface(mesh.get_rid(), si)
+		n += 1 if (sd.get("lods", []) as Array).size() > 0 else 0
+	return n
+
+
 func _hunter(h: Hunter) -> String:
 	if h.model == null:
 		return "no model"
@@ -159,6 +197,7 @@ func _hunter(h: Hunter) -> String:
 	var next_passes := 0
 	var casters := 0
 	var tris := 0
+	var lod_surfaces := 0
 	var mats := {}
 	for n in h.model.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
@@ -166,6 +205,7 @@ func _hunter(h: Hunter) -> String:
 			continue
 		meshes += 1
 		tris += _tris(mi.mesh)
+		lod_surfaces += _lod_surfaces(mi.mesh)
 		casters += 1 if mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF else 0
 		for first in _surface_materials(mi):
 			surfaces += 1
@@ -178,8 +218,12 @@ func _hunter(h: Hunter) -> String:
 	var skels := h.model.find_children("*", "Skeleton3D", true, false)
 	for s in skels:
 		bones += (s as Skeleton3D).get_bone_count()
+	var line := (
+		"meshes %d, surfaces %d (+%d next passes), materials %d, casters %d, %.1fk tris, lods on %d surfaces, "
+		+ "skeletons %d (%d bones), %.0f m"
+	)
 	return (
-		"meshes %d, surfaces %d (+%d next passes), materials %d, casters %d, %.1fk tris, skeletons %d (%d bones), %.0f m"
+		line
 		% [
 			meshes,
 			surfaces,
@@ -187,6 +231,7 @@ func _hunter(h: Hunter) -> String:
 			mats.size(),
 			casters,
 			tris / 1000.0,
+			lod_surfaces,
 			skels.size(),
 			bones,
 			cam.global_position.distance_to(h.model.global_position)
