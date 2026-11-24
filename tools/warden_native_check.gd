@@ -117,11 +117,92 @@ func _states(main: Node, a: String) -> void:
 	var anchors := ["anchor_head_top", "anchor_chest", "anchor_gun_R"].filter(func(an): return WardenGlb.anchor(m, an))
 	ok(anchors.size() == 3, "%s: the anchors ride Meshy's bones (%s)" % [a, str(anchors)])
 	_toon(a, m)
+	_moves(a, m, nat)
 	_crouch_arms(a, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
 	_drop_poses(a, m, nat)
 	m.free()
+
+
+## The Hunter's own clips for its kit moves (data "kmoves", Cinder's hands): each plays instead of Meshy's one swing,
+## on the kit's clock, with its pose where the move says: the lance's hand held out ahead, the sighting hand up at the
+## eye, the push's palm ahead on the bolt's frame, the cloak's arms flung wide on the blast frame, the flight leaning
+## in with the take-off clip then the loop, the landing clip; an upper clip lets go once played out.
+func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
+	if nat.moves == null:
+		return
+	var s := {"grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	var mv := nat.moves
+	var swing := String(nat.plays["attack"])
+	var before := _at(m, nat, s, "as_aim", 0.0)
+	var held := _at(m, nat, s, "as_lance", 0.6)
+	var own: bool = nat.player.current_animation != swing and mv.shown == "cn_u_lance_loop" and mv.weight >= 1.0
+	ok(own, "%s: the lance holds its own clip over Meshy's idle (no swing; %s)" % [a, mv.shown])
+	var reach: Vector3 = held["hand"]
+	ok(reach.z < -0.2 and reach.y > 0.8, "%s: the lance's hand is held out ahead (%s)" % [a, reach])
+	s["vel"] = Vector3(0.0, 0.0, -4.6)
+	var leg := nat.skel.find_bone("LeftUpLeg")
+	_at(m, nat, s, "as_lance", 0.6)
+	var stride := nat.skel.get_bone_pose_rotation(leg)
+	_at(m, nat, s, "as_lance", 0.7)
+	var running: bool = nat.player.current_animation == String(nat.plays["run"])
+	ok(
+		running and not stride.is_equal_approx(nat.skel.get_bone_pose_rotation(leg)),
+		"%s: the legs keep running under the lance (%s)" % [a, nat.player.current_animation]
+	)
+	s.erase("vel")
+	var sight := _at(m, nat, s, "as_aim", 0.35)
+	var up: float = sight["hand"].y - held["hand"].y
+	ok(up > 0.1, "%s: the sighting hand rises to the eye (%.2f m over the lance's)" % [a, up])
+	var fire := _at(m, nat, s, "as_shot", 0.0)
+	var push := _at(m, nat, s, "as_shot", 0.1)
+	var out_at: Vector3 = fire["muzzle"]
+	ok(out_at.z < -0.2 and out_at.y > 1.0, "%s: the bolt leaves her palm on its frame (%s)" % [a, out_at])
+	var from_z: float = fire["hand"].z
+	var to_z: float = push["hand"].z
+	ok(to_z < from_z - 0.03, "%s: the palm pushes on (%.2f to %.2f)" % [a, from_z, to_z])
+	var blast := _at(m, nat, s, "as_cloak", 0.05)
+	var span: float = blast["span"]
+	ok(span > before["span"] + 0.4, "%s: both arms wide on the blast frame (%.2f m across)" % [a, span])
+	_at(m, nat, s, "as_cloak", 1.0)
+	_at(m, nat, s, "as_cloak", 1.0)
+	ok(mv.weight <= 0.0, "%s: the cloak clip lets go once played out" % a)
+	_at(m, nat, s, "lw_jet", 0.1)
+	var clip := nat.player.current_animation
+	ok(clip == "cn_f_takeoff", "%s: Flue Flight takes off (%s)" % [a, clip])
+	var fly := _at(m, nat, s, "lw_jet", 0.9)
+	ok(nat.player.current_animation == "cn_f_fly", "%s: then the flight loop (%s)" % [a, nat.player.current_animation])
+	var lean: float = fly["lean"]
+	ok(lean > before["lean"] + 0.25, "%s: flying leans into it (head %.2f m ahead of the hips)" % [a, lean])
+	_at(m, nat, s, "lw_land", 0.1)
+	ok(nat.player.current_animation == "cn_f_land", "%s: the landing clip (%s)" % [a, nat.player.current_animation])
+	_at(m, nat, s, "", 0.0)
+	clip = nat.player.current_animation
+	ok(clip != "cn_f_land", "%s: back to the legs' own clip (%s)" % [a, clip])
+
+
+## The state with kit move `km` `kt` s in, run on 0.1 s twice: the right hand, the muzzle (model frame: forward is -Z),
+## the hands' span and the head's lead over the hips.
+func _at(m: Node3D, nat: WardenNative, s: Dictionary, km: String, kt: float) -> Dictionary:
+	s["kmove"] = km
+	s["kmove_t"] = kt
+	nat.call("_process", 0.1)
+	nat.call("_process", 0.1)
+	var hand := m.to_local(nat.hand_position())
+	var left := _bone_in(m, nat, "LeftHand")
+	var head := _bone_in(m, nat, "Head")
+	var hips := _bone_in(m, nat, "Hips")
+	var out := {"hand": hand, "span": hand.distance_to(left), "lean": hips.z - head.z}
+	if nat.mouth:
+		out["muzzle"] = m.to_local(nat._now(nat.mouth))
+	return out
+
+
+## Meshy's bone `bone` this frame, in the model's frame.
+func _bone_in(m: Node3D, nat: WardenNative, bone: String) -> Vector3:
+	return m.to_local(nat.skel.global_transform * nat.skel.get_bone_global_pose(nat.skel.find_bone(bone)).origin)
 
 
 ## The drop's shared poses (WardenDropPose) on Meshy's bones, held to the contract Heroes' bars (--clip-check's
