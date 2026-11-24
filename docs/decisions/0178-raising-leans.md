@@ -1,4 +1,4 @@
-# 0102: Raising leans a Boki's personality
+# 0178: Raising leans a Boki's personality
 
 - **Status:** accepted
 - **Date:** 2026-11-20
