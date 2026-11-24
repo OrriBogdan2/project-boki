@@ -24,6 +24,10 @@ The outpost uplinks (scripts/match/exits.gd), positional, the same crimson glass
   uplink_sputter    one flicker as it dies: a short dry crackle (pitched up flicker by flicker)
   uplink_shut       the uplink goes dark: a heavy shutter clunk with a low hum dying under it
   uplink_lift       the lift of light opens: a rising airy column and a bright chord
+Match events that used to borrow stock sounds (docs/SFX_WORLD.md rows 7-10):
+  heart_charged     the Heartspark finished charging: a held low hum lifting into a bright three-bell rise, positional
+  tide_bite         a Blight tide tick hurts you outside the ring: a dull cold thud under a short glassy crackle
+  lair_reseal      the Sealed Lair's gate closes again: a heavy iron slam and a low falling hum, positional
 """
 import numpy as np
 import sfx_lib as S
@@ -133,6 +137,19 @@ def uplink_lift():
     column = bpf(S.noise(d), 400, 4000) * S.shape(d, 0.9, 0.1, 0.4) * 0.45
     chord = mix(*[at(S.chime(f, 1.0, 0.45), 0.25 + 0.06 * i) for i, f in enumerate((440.0, 554.0, 659.0, 880.0))])
     return mix(column, chord * 0.7)
+def heart_charged():
+    d = 1.4
+    hum = sum(S.sweep(f * 0.8, f, d) * S.shape(d, 0.6, 0.2, 0.5) for f in (165.0, 247.0)) * 0.35
+    bells = mix(*[at(S.chime(f, 0.9, 0.4), 0.3 + 0.12 * i) for i, f in enumerate((523.0, 659.0, 784.0))])
+    return mix(hum, bells * 0.75, at(thump(60.0, 0.3, 0.07) * 0.7, 0.28))
+def tide_bite():
+    return mix(thump(44.0, 0.35, 0.09) * 1.1, at(crackle(0.22, 45) * 0.3, 0.02), lpf(S.noise(0.3), 500) * S.shape(0.3, 0.0, 0.1, 0.25) * 0.3)
+def lair_reseal():
+    hum = lpf(S.sweep(95.0, 48.0, 1.0), 350) * S.shape(1.0, 0.0, 0.1, 0.8) * 0.5
+    clank = S.rattle(0.2, rate=45, lo=700, hi=3500) * 0.45
+    return mix(thump(42.0, 0.6, 0.13) * 1.3, at(clank, 0.03), at(thump(70.0, 0.25, 0.05) * 0.5, 0.12), hum)
+
+
 def main():
     S.save_loop('heart_charge', charge(), 'loop')
     S.save_cat('heart_take', take(), 'signature')
@@ -145,7 +162,8 @@ def main():
             ("ways_tick", ways_tick)):
         S.save_cat(name, make(), 'ui')
     for name, make in (("uplink_start", uplink_start), ("uplink_steal", uplink_steal), ("uplink_fizzle", uplink_fizzle),
-            ("uplink_sputter", uplink_sputter), ("uplink_shut", uplink_shut), ("uplink_lift", uplink_lift)):
+            ("uplink_sputter", uplink_sputter), ("uplink_shut", uplink_shut), ("uplink_lift", uplink_lift),
+            ("heart_charged", heart_charged), ("tide_bite", tide_bite), ("lair_reseal", lair_reseal)):
         S.save_cat(name, make(), 'cast')
 
 
