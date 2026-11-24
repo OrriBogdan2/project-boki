@@ -174,6 +174,11 @@ const VOICES := [
 ]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {
+	"carry_swap_out": 200,
+	"carry_swap_in": 200,
+	"carry_claim": 200,
+	"carry_stolen": 400,
+	"carry_take": 200,
 	"scan_pop": 150,
 	"scan_pop_fine": 150,
 	"scan_pop_rare": 150,
@@ -183,6 +188,7 @@ const MIN_GAP := {
 	"break_wood": 40,
 	"break_clay": 40,
 	"break_metal": 40,
+	"hostile_cast": 100,
 	"tell_foe": 120,
 	"keg_fuse": 80,
 	"keg_blast": 100,
@@ -221,13 +227,29 @@ const MIN_GAP := {
 	"steal_won": 400,
 	"steal_lost": 400,
 	"training_dummy_hit": 70,
-	"hostile_cast": 100,
-	"armor_up": 120
+	"armor_up": 120,
+	"boki_downed": 150,
+	"boki_revive": 300,
+	"boki_eat": 150,
+	"boki_sleep": 400,
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
+## A Boki type's impact ki_<type> is the take set of its cast cue k_<type> (BokiImpact), with its own gap and cap.
+const IMPACT_PREFIX := "ki_"
+const IMPACT_PREFIX_OF := "k_"
+const IMPACT_GAP := 90
 const STACK_MS := 90
 const STACK_DB := 3.5
+const SAME_CAP := 5  # one sound sounding in this many pool voices at once; a rival's wind-up cue is exempt
+## dB your own held fire drops while a rival's wind-up or ult cue sounds, so the warning cuts through it
+## (docs/AUDIO.md, enemy priority); the duck lasts as long as the cue, and 0 turns the rule off
+var fire_duck_db := -4.0
+var _fire_duck_until := 0
+var _fire_names := {}  # held-fire sounds FireSfx has played: always ducked
+const REPEAT_MS := 400  # a sound of yours started again within this is repeating (hit confirms, hurt spam): ducked too
+var _you_last := {}  # sound -> ms one of yours last started
+var _you_rep := {}  # sound -> its last start of yours was a repeat (within REPEAT_MS of the one before)
 ## The explosion category: the generic blast sounds (a Boki's burst or rider, an area hit, an ability blast) sit
 ## this far under every call's own level, so a blast reads as a thump in the mix rather than the loudest thing
 ## on screen. BLAST_PEAK_DB is the agreed ceiling for a blast's file peak plus this gain (checked in
@@ -235,7 +257,7 @@ const STACK_DB := 3.5
 const BLAST := ["boom", "ab_blast", "ab_slam"]
 const BLAST_DB := -7.0
 const BLAST_PEAK_DB := -6.0
-## Distance falloff, sized to the match view (SUPERVIVE camera, ~37 m across, so ~18.5 m to the side edge): what you
+## Distance falloff, sized to the match view (the target camera, ~37 m across, so ~18.5 m to the side edge): what you
 ## can see you can hear. Full volume within NEAR metres, then a gentle roll-off (SPREAD is the metres per
 ## doubling-ish step: 1 + (d - NEAR) / SPREAD); muffled beyond FAR (just past the side edge); silent past hear_range
 ## (30 m: ~10 m off screen, fading from 0.7 of it). Docs: AUDIO.md "Falloff".
@@ -252,6 +274,11 @@ var streams := {}
 var players: Array[AudioStreamPlayer] = []
 var next := 0
 var voices := SfxVoices.new(POOL)  # who keeps a voice when the pool or the loops are full
+## A handle (from play) names one sound on one pool voice: starts * POOL + the voice, so a handle to a sound
+## that has ended, its voice gone on to another, cuts nothing.
+var starts := PackedInt32Array()  # per pool voice: how many sounds it has started
+var _cut_tw: Array[Tween] = []  # per pool voice: its fade-out under way (cut)
+const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a broken cast)
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
@@ -264,7 +291,6 @@ var last_played := {}
 var cue_log = null
 var rng := RandomNumberGenerator.new()
 
-signal new_track(name: String)
 ## A one-shot started: where (null for UI), its dB before distance and pitch. SfxCast and the audio checks listen.
 signal played(sname: String, at: Variant, vol_db: float, pitch: float)
 var music: Array[AudioStreamPlayer] = []  # two players so tracks can crossfade
@@ -308,6 +334,8 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+	starts.resize(POOL)
+	_cut_tw.resize(POOL)
 	cue_voice = AudioStreamPlayer.new()
 	cue_voice.bus = "SFX"
 	add_child(cue_voice)
@@ -383,7 +411,6 @@ func play_music(name: String, fade := 1.5) -> void:
 			Save.d["music"] = []
 		Save.d["music"].append(name)
 		Save.save_game()
-		new_track.emit(name)
 	var old := music[music_i]
 	music_i = 1 - music_i
 	var nw := music[music_i]
@@ -393,12 +420,12 @@ func play_music(name: String, fade := 1.5) -> void:
 	var tw := create_tween().set_parallel(true)
 	_music_tw = tw
 	tw.tween_property(old, "volume_db", -80.0, fade).set_trans(Tween.TRANS_SINE)
-	tw.chain().tween_callback(old.stop)
 	if name != "":
 		nw.stream = _loop_stream("res://audio/music_%s.ogg" % name)
 		nw.volume_db = -40.0
 		nw.play()
 		tw.tween_property(nw, "volume_db", -9.0, fade).set_trans(Tween.TRANS_SINE)
+	tw.chain().tween_callback(old.stop)      # after both fades: chained before the fade-in, it waited for the fade-out
 
 
 func play_ambience(name: String) -> void:
@@ -641,6 +668,10 @@ func _voice(pos, rk: float, sname: String) -> AudioStreamPlayer:
 	if i < 0:
 		return null
 	next = (i + 1) % POOL
+	if _cut_tw[i] != null:
+		_cut_tw[i].kill()
+		_cut_tw[i] = null
+	starts[i] += 1
 	voices.rank[i] = rk
 	voices.sound[i] = sname
 	var p := players[i]
@@ -671,11 +702,26 @@ func play_sample(bus_name: String) -> void:
 	p.pitch_scale = 1.0
 	p.play()
 
+## Fades out the sound `handle` names (from play) if its voice still plays it: a wind-up whose cast was broken.
+func cut(handle: int, fade := CUT_FADE) -> void:
+	if not sounding(handle):
+		return
+	var p := players[handle % POOL]
+	var tw := p.create_tween()
+	tw.tween_property(p, "volume_db", -60.0, fade)
+	tw.tween_callback(p.stop)
+	_cut_tw[handle % POOL] = tw
+
+## Whether the sound `handle` names (from play) is still playing.
+func sounding(handle: int) -> bool:
+	var i := handle % POOL
+	return handle >= 0 and handle == starts[i] * POOL + i and players[i].playing
+
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the sound's own
 ## "reach", else hear_range). mine: your own sound played away from you (a hit tick on the one you hit), so the pool
 ## keeps it as it keeps your other sounds (SfxVoices). take: a given take of a sound that has several (FireSfx
-## round-robins them), else a random one that isn't the last.
+## round-robins them), else a random one that isn't the last. Returns a handle for cut, -1 when nothing played.
 func play(
 	sname: String,
 	pos = null,
@@ -685,35 +731,44 @@ func play(
 	reach := 0.0,
 	mine := false,
 	take := -1
-) -> void:
+) -> int:
 	if cue_log != null: cue_log.append([sname, pos, not sname in skip and ensure(sname)])
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
-		return
+		return -1
 	if sname in CUES:
 		cue_plays[sname] = int(cue_plays.get(sname, 0)) + 1
 		cue_voice.stream = streams[sname]
 		cue_voice.volume_db = vol_db
 		cue_voice.pitch_scale = pitch
 		cue_voice.play()
-		return
+		return -1
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
 	if sname.contains("step_"):
 		gap = 25  # footsteps: several people can walk at once
+	if sname.begins_with(IMPACT_PREFIX): gap = IMPACT_GAP
 	var rk := voices.rank_of(pos, listener, mine)
 	if now - int(last_played.get(sname, -1000)) < gap:
 		voices.cut.emit(sname, rk, &"gap")
-		return
+		return -1
 	var r := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
 	var v := vol_db + float(sound_gain.get(sname, 0.0)) + _distance_db(pos, r) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
-		return
+		return -1
+	if _same_full(sname, rk):
+		voices.cut.emit(sname, rk, &"same")
+		return -1
+	if rk == SfxVoices.YOU:
+		_you_rep[sname] = _fire_names.has(sname) or now - int(_you_last.get(sname, -100000)) < REPEAT_MS
+		_you_last[sname] = now
+		if now < _fire_duck_until and _you_rep[sname]:
+			v += fire_duck_db
 	var times: Array = recent.get(sname, [])
 	while not times.is_empty() and now - int(times[0]) > STACK_MS:
 		times.pop_front()
 	if times.size() >= STACK_MAX:
 		voices.cut.emit(sname, rk, &"stack")
-		return
+		return -1
 	v -= STACK_DB * times.size()
 	times.append(now)
 	recent[sname] = times
@@ -722,21 +777,98 @@ func play(
 		mix.big_event()
 	var p := _voice(pos, rk, sname)
 	if p == null:
-		return
+		return -1
+	var vi := players.find(p)
+	p.stream = _take(sname, take)
+	p.volume_db = v
+	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
+	p.play()
+	played.emit(sname, pos, vol_db, pitch)
+	return starts[vi] * POOL + vi
+
+
+## Where `at` sits across the screen, -1 (left) to 1 (right) as the camera sees it: 0 straight up or down the
+## screen, or when `at` is on top of the listener (what the SFXPan bus's panner is set to).
+func pan_toward(at: Vector3) -> float:
+	var cam := get_viewport().get_camera_3d()
+	var side := Vector2(at.x - listener.x, at.z - listener.z)
+	if cam == null or side.length() <= 1.0:
+		return 0.0
+	var right := Vector2(cam.global_transform.basis.x.x, cam.global_transform.basis.x.z).normalized()
+	return clampf(side.normalized().dot(right), -1.0, 1.0)
+
+
+func _set_pan(pan: float) -> void:
+	var bus := AudioServer.get_bus_index("SFXPan")
+	(AudioServer.get_bus_effect(bus, 1) as AudioEffectPanner).pan = pan
+
+
+## Starts sname on a voice panned toward pos (SFXPan, as play_toward) at exactly vol_db and returns the voice, or
+## null when the pool drops it. No distance falloff and no repeat gap: the caller sets the level and keeps the
+## one voice (IncomingHitSfx: a flurry of hits on you is one voice). It ranks as yours (a hit on you).
+func play_voice(sname: String, pos: Vector3, vol_db: float, pitch := 1.0) -> AudioStreamPlayer:
+	if not streams.has(sname) and not _lazy(sname):
+		return null
+	var p := _voice(null, voices.rank_of(null, listener, true), sname)
+	if p == null:
+		return null
+	_set_pan(pan_toward(pos))
+	p.bus = "SFXPan"
+	p.stream = _take(sname)
+	p.volume_db = vol_db
+	p.pitch_scale = pitch
+	p.play()
+	return p
+
+
+## The stream to play for sname: take `take` of it when it has several (-1: a random one that isn't the last).
+func _take(sname: String, take := -1) -> AudioStream:
 	var st = streams[sname]
 	if st is Array:
-		# a different take from last time
 		var arr: Array = st
 		var i := take % arr.size() if take >= 0 else rng.randi_range(0, arr.size() - 1)
 		if take < 0 and arr.size() > 1 and i == int(last_take.get(sname, -1)):
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
-	p.stream = _once(st)
-	p.volume_db = v
-	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
-	p.play()
-	played.emit(sname, pos, vol_db, pitch)
+	return _once(st)
+
+
+## A rival's wind-up or ult cue `cue` just started: your repeating sounds (held fire, and any of yours started
+## again within REPEAT_MS: hit confirms, hurt spam) sit fire_duck_db under it for its length, those already
+## sounding included.
+func priority_cue(cue: String) -> void:
+	if not ensure(cue):
+		return
+	var now := Time.get_ticks_msec()
+	var already := now < _fire_duck_until
+	_fire_duck_until = maxi(_fire_duck_until, now + int(take_len(cue, 0) * 1000.0))
+	if already:
+		return
+	for i in POOL:
+		if players[i].playing and voices.rank[i] == SfxVoices.YOU and _you_rep.get(voices.sound[i], false):
+			players[i].volume_db += fire_duck_db
+
+
+## The dB the priority rule takes off a sound of yours `sname` that starts now (0 when no rival cue sounds).
+func priority_duck(sname: String) -> float:
+	return fire_duck_db if Time.get_ticks_msec() < _fire_duck_until and _you_rep.get(sname, false) else 0.0
+
+
+## Marks `sname` as your held fire (FireSfx.shot), the sound priority_cue ducks.
+func mark_fire(sname: String) -> void:
+	_fire_names[sname] = true
+
+
+## A sound of yours always plays; any other is refused once SAME_CAP voices sound it (a rival's cue never is).
+func _same_full(sname: String, rk: float) -> bool:
+	if rk == SfxVoices.YOU or sname == HostileCue.NAME or sname == "ult_tag_foe":
+		return false
+	var n := 0
+	for i in POOL:
+		if players[i].playing and voices.sound[i] == sname:
+			n += 1
+	return n >= SAME_CAP
 
 
 ## A distant sound every player hears, panned toward `at` as seen from the camera (a legendary's roar).
@@ -744,14 +876,8 @@ func play(
 func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m: float) -> void:
 	if not streams.has(sname) and not _lazy(sname):
 		return
-	var cam := get_viewport().get_camera_3d()
 	var side := Vector2(at.x - listener.x, at.z - listener.z)
-	var pan := 0.0
-	if cam and side.length() > 1.0:
-		var right := Vector2(cam.global_transform.basis.x.x, cam.global_transform.basis.x.z).normalized()
-		pan = clampf(side.normalized().dot(right), -1.0, 1.0)
-	var bus := AudioServer.get_bus_index("SFXPan")
-	(AudioServer.get_bus_effect(bus, 1) as AudioEffectPanner).pan = pan
+	_set_pan(pan_toward(at))
 	var p := _voice(null, voices.rank_of(null, listener), sname)
 	if p == null:
 		return
@@ -913,9 +1039,10 @@ func _lazy(sname: String) -> bool:
 	if _lazy_miss.has(sname):
 		return false
 	var takes: Array = []
-	var paths: Array = ["res://audio/%s.wav" % sname]
+	var file := IMPACT_PREFIX_OF + sname.trim_prefix(IMPACT_PREFIX) if sname.begins_with(IMPACT_PREFIX) else sname
+	var paths: Array = ["res://audio/%s.wav" % file]
 	for i in range(1, 5):
-		paths.append("res://audio/%s_%d.wav" % [sname, i])
+		paths.append("res://audio/%s_%d.wav" % [file, i])
 	for path in paths:
 		if ResourceLoader.exists(path):
 			takes.append(load(path))

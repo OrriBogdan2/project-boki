@@ -56,6 +56,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Empowered damage | +214 on a 160 bolt, so 2.34x [game data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add a flat 1.3 each, as the source's +16 a stack |
 | Empowered ranks | +20% damage twice [game data] | +20% / +40% on the whole shot | +20% / +40% on the bonus (2.61x, 2.88x) |
 | Empowered extras | an Arcslinger hit: 1 stack [game data] | 2 Marks and Shred (+15% damage taken, 3s; code removed) | 2 Marks (the owner's spec: the empowered hit stacks faster; MAIN_TO_EXT 03:20); Shred gone (not in the source) |
+| Empowered knock | none: "+214 dmg" only [D, KIT_PARITY] | none: `dash.prime_kb` 0 (was a hard-coded 3.0 in `thief_kit.gd`, a 0.47 m shove) | `ext/sparkle-sable-knock-cut` |
 | Empowered range, look | 850 -> 950 units (+12%) [game data, wiki]; a large yellow lightning streak carrying a blue chakram, a vertical blue blade flash at her hands, a red-white flash on the target (0143, 0187) [footage] | +12%; the blue chakram in a gold streak; the shared payoff burst (two rings and 36 sparks) on the target | +12%; the same bolt; on the hit a blue-white star and an upright blue blade arc, no rings or burst |
 | The throw | 2-3 frames, one arm whipped from a wide stance [footage] | the body pitched, no arm keys | `thf_primed`: coiled with both blades cocked behind the shoulders, both driven out at 0.04, held to 0.12, a recoil onto the heels by 0.24, settled by 0.55 |
 | Auto rate | 0.45s [footage card] | 0.45s | unchanged |
@@ -122,7 +123,7 @@ Asserted in `--dancer-combo-check` (`dancer quick: ...`).
 
 | What | Source | Ours before | Ours now |
 |---|---|---|---|
-| Stops at the cursor | the bolt fizzles in a blue-violet puff at the cursor, 4.7 bh away (0004 -> 0005, 0009 -> 0010) [footage] | cursor-placed | unchanged |
+| Stops at the cursor | the bolt fizzles in a blue-violet puff at the cursor, 4.7 bh away (0004 -> 0005, 0009 -> 0010) [footage] | cursor-placed | tester note 11-19: always the full 8.5 m along the aim, whatever the cursor distance (`--tester-feedback-check`) |
 | Range | 850 units = 8.5m, "the aim laser length" (sv/FEEL.md, wiki rules); the empowered 850 -> 950 (+12%, wiki patch 26.11.2024). sv/briefs/kits.md gives no range [reference data]. Footage: every bolt hits a dummy about 7 bh away (11-12.6m) [footage, disagrees] | 12m, 13.4m empowered | 8.5m, 9.5m empowered (data beats footage) |
 | Projectile speed | no figure in the data; the footage shows a bolt cover 200 px in about 0.2s, 1000 px/s x 0.0375 = 37.5 m/s [footage, one frame at 5 fps, so rough] | 34 m/s | 37.5 m/s (8.5m in 0.23s) |
 
@@ -249,7 +250,7 @@ channel swap; a 0.03 s hit-stop on the empowered bolt.
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 37.5 m/s; it flies to the cursor (8.5m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 8.5m (the wiki's 850 units); no magazine |
+| LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 37.5 m/s; it always flies its full 8.5m along the aim (the cursor only turns it) and fizzles at the end in a blue-violet puff. A thin white aim line to its full range with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 8.5m (the wiki's 850 units); no magazine |
 | Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): a flat +1.3 bolt damage per Mark (the data's +16 on 160), weapon upgrades do not grow it. A knock heals 20% on top of the takedown's 5% (25% in all, the data's) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
 | Dash, Vault | Shift | A 4.5m sideways cartwheel in 0.48s (the source's measured one, off the global dash feel) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed for 2s at most; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 2.34x (Marks add flat), 2 Marks; landing it gives the Vault back at once; rank 2: the bonus +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
@@ -473,7 +474,7 @@ clips are keyed on KMovesDJ's beats, so no row needed a fix.
 | LMB hold | a hit every 2-3 frames, 0.45 s on the card, left then right [0001-0045] | every 0.45 s, hands alternating, each throw from the other's 0.45 pose | matches (`parity` rows) |
 | Empowered LMB (`thf_primed`) | a big streak and a blade flash at her hands, the same beat [0143] | 0.00 / 0.02 / 0.53 | matches; asserted |
 | RMB (`thf_bola`) | a 0.4-0.6 s lane with the bolas whirled overhead, slung with a lunge [0085-0087, 0100-0102] | 0.40 (data `cast`) / sling 0.38 / 0.73 | matches; asserted (the whirl's raise is skipped) |
-| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_OUT`) / 0.08 / 0.47 | matches; asserted |
+| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_RELEASE_S`) / 0.08 / 0.47 | matches; asserted |
 | E recast (`thf_arrive`) | a blink under one frame [0237-0238] | at the dagger at once / the pop 0.6 | matches |
 | Shift ground (`thf_vault_*`) | a 0.05 s crouch, over the top 0.25-0.3 s, up by about 0.5 s [0176-0178] | dash 0.48 (data) / hips over by 0.12-0.18 / 0.47 | matches |
 | Air dash (`thf_exdash`, `thf_land`) | over in about 0.25 s, landing crouch about 0.1 s, up by 0.15 [0129-0134] | turned over by 0.23, carried flat from 0.46 until she lands (0.95 s at most) / a 0.17 s landing | matches |
@@ -520,9 +521,10 @@ dagger is lost; holding the step until she is free would read better.
 ## Look and sound (all ours)
 
 - Arc Bolts model: two dark ring blades with swept spikes and a gold inner edge (scripts/match/hero_arms_dj.gd).
-- Effects: scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader, every node pooled: the gold chakram and its
-  comet trail, the empowered blue chakram in a lightning streak, the fizzle puff, the Bola's two weights, the
-  dagger, the cyan afterimage chain, the knock star and heal pillar, the cartwheel arc.
+- Effects: scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader, every node pooled: the spinning chakram, the
+  empowered blue chakram in a lightning streak, the fizzle puff, the Bola's two weights, the dagger, the cyan
+  afterimage chain, the knock star and heal pillar, the cartwheel arc. The plain bolt's cel tracer and its hit
+  (a lit violet burst, crescent rim, cross flare and sparks) are HeroVfx data: content/vfx/thief.json.
 - Sounds: tools/gen_sfx_sable.py (`dj_*`, `thief_*`), synthesized; set in content/sfx/thief.json.
 
 ## Engine notes
@@ -540,3 +542,7 @@ dagger is lost; holding the step until she is free would read better.
   Sounds: `dj_encore` (the ring opening), `dj_encore_rise` (the 0.4s grow), `dj_encore_whirr` (a loop held at her position while the ring runs, stopped by `ThiefUlt.drop`), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on R it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).
+
+
+## Tester note 11-19
+The empowered bolt must land to refresh the Vault: a Shift press waiting for it (`ThiefChain.waiting`) is dropped when the bolt misses, so a miss gives no Vault and no long dash. Checked by `--tester-feedback-check` and the `_miss` row of `--dancer-combo-check`.

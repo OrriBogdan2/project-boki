@@ -32,20 +32,33 @@ const OFF_PATH := 0.3         # m from the true path that counts as an overshoot
 const LIFT := 5.0             # m the glide phase teleports the Hunter up
 const NET_CAP := 4.0          # m in one frame: Ent.net_follow's snap distance, NetSmooth's SNAP_SPEED x 0.1 s
 const KITE_OFF := Vector3(12.0, 0, 0)   # m from the take-off to the Kitefall landing, inside the flat strip
+const MAX_LAG := 0.27         # s: NetSmooth's worst delay on this line: GAP + JITTER_MAX + the slowest packet + 10 ms
+const SEED := 82              # the line's draws
 const DN := preload("res://tools/displace_net_check.gd")
 
 ## The relay with a bad line: every send waits its one-way time; snapshots may be lost or overtaken.
 class LagRelay extends RelayServer:
-	var rng := RandomNumberGenerator.new()
+	var rngs := {}                # peer id -> the draws (loss, jitter) for what is sent to it
 	var wire: Array = []          # [due msec, peer id, message, fast]
 	var last_due := {}            # peer id -> due msec of the last message sent to it (they stay in order)
 	var dropped := 0
+	var one_way := ONE_WAY_MS     # ms: this line's one-way time (the move check sets it)
+
+	## Starts every peer's draws again, so what a send is dealt depends on its place in the run, not the clock.
+	func restart() -> void:
+		for id in rngs:
+			rngs[id].seed = SEED + rngs.keys().find(id)
 
 	func _send(id: int, d: Dictionary, fast := false) -> void:
+		var rng: RandomNumberGenerator = rngs.get(id, null)
+		if rng == null:
+			rng = RandomNumberGenerator.new()
+			rng.seed = SEED + rngs.size()
+			rngs[id] = rng
 		if fast and rng.randf() < LOSS:
 			dropped += 1
 			return
-		var due := Time.get_ticks_msec() + ONE_WAY_MS + rng.randi_range(-JITTER_MS, JITTER_MS)
+		var due := Time.get_ticks_msec() + one_way + rng.randi_range(-JITTER_MS, JITTER_MS)
 		due = maxi(due, int(last_due.get(id, 0)))
 		last_due[id] = due
 		wire.append([due, id, d, fast])
@@ -74,9 +87,12 @@ var stalls: Array = []         # [wall s, s]: frames over the 0.1 s clamp, the m
 var guest_stalls: Array = []   # the guest's, written with its record
 var guest_pid := 0
 var dir := ""
+var tag := "RSMOOTH"           # the prefix of every line (the move check reuses this harness)
+var flag := "--remote-smooth-check"   # the check's own flag; the guest runs it with =guest
+var one_way_ms := ONE_WAY_MS
 
 func ok(cond: bool, what: String, info := "") -> void:
-	print("RSMOOTH %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
+	print("%s %s %s  %s" % [tag, "ok  " if cond else "FAIL", what, info])
 	if not cond: bad += 1
 
 func run(main_node: Node) -> void:
@@ -88,8 +104,9 @@ func run(main_node: Node) -> void:
 	dn.main = main
 	var guest := false
 	for a in OS.get_cmdline_user_args():
-		if a == "--remote-smooth-check=guest": guest = true
+		if a == flag + "=guest": guest = true
 		if a.begins_with("--rs-port="): dn.port = int(a.substr(10))
+		if a.begins_with("--rs-ms="): one_way_ms = int(a.substr(8))
 		if a.begins_with("--rs-dir="): dir = a.substr(9)      # the guest writes its record where the host reads it
 	if dir == "":
 		dir = ProjectSettings.globalize_path("user://remote_smooth")
@@ -105,13 +122,13 @@ func _host() -> void:
 	dn.port = CheckChild.free_port(7990 + OS.get_process_id() % 40)
 	RenderingServer.render_loop_enabled = false
 	var relay := LagRelay.new()
-	relay.rng.seed = 80
+	relay.one_way = one_way_ms
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
 	CheckChild.hold(relay.peer, START_S)
 	ok(await dn._connect(), "the host is on the relay")
-	guest_pid = CheckChild.start("--remote-smooth-check=guest --rs-port=%d '--rs-dir=%s'" % [dn.port, dir],
+	guest_pid = CheckChild.start("%s=guest --rs-port=%d '--rs-dir=%s'" % [flag, dn.port, dir],
 			dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
@@ -137,6 +154,9 @@ func _host() -> void:
 	ok(G != null, "the guest's game is sending")
 	await _host_run(2.0, "", [])      # the guest settles its clock and buffer
 	var truth: Array = []
+	Net.send_t = 0.0                   # the run starts on a send, and the line deals the same hand from here
+	Net.host_send_t = 0.0
+	relay.restart()
 	await _script(truth)
 	Net.lobby_emit("rs", {"c": "dump"})
 	var t2 := Time.get_ticks_msec()
@@ -233,7 +253,7 @@ func _finish() -> void:
 	await main.get_tree().create_timer(1.0).timeout
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
-	print("RSMOOTH DONE, failures: ", bad)
+	print(tag + " DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 # ------------------------------------------------------------------ the numbers
@@ -285,9 +305,9 @@ func _report(truth: Array, drawn, lost: int) -> void:
 			if tv.length() > 1.0 and step.dot(tv.normalized()) < -0.01: r["backsteps"] += 1
 			if off > OFF_PATH: r["overshoot"] += 1
 			r["max_off"] = maxf(r["max_off"], off)
-	print("RSMOOTH line: %d ms +-%d ms one way, %.0f%% loss (%d snapshots lost); drawn %.0f ms behind" % [
-		ONE_WAY_MS, JITTER_MS, LOSS * 100.0, lost, lag * 1000.0])
-	print("RSMOOTH load: frames over 0.1 s cost the host's match clock %.0f ms, the guest's %.0f ms (not the line)" % [
+	print(tag + " line: %d ms +-%d ms one way, %.0f%% loss (%d snapshots lost); drawn %.0f ms behind" % [
+		one_way_ms, JITTER_MS, LOSS * 100.0, lost, lag * 1000.0])
+	print(tag + " load: frames over 0.1 s cost the host's match clock %.0f ms, the guest's %.0f ms (not the line)" % [
 		_stalled(stalls, w0, w1) * 1000.0, _stalled(guest_stalls, w0 + lag, w1 + lag) * 1000.0])
 	for ph in phases:
 		var r: Dictionary = tot[ph]
@@ -301,7 +321,7 @@ func _report(truth: Array, drawn, lost: int) -> void:
 	ok(a["jerks"] <= 15, "the drawn speed changes only where the true one does", "%d jerks" % a["jerks"])
 	ok(a["backsteps"] == 0, "the drawn body never steps back", "%d backsteps" % a["backsteps"])
 	ok(a["overshoot"] == 0, "the drawn body stays on the true path", "max %.2f m off" % a["max_off"])
-	ok(lag < 0.25, "drawn at most 250 ms behind", "%.0f ms" % (lag * 1000.0))
+	ok(lag <= MAX_LAG, "drawn at most %.0f ms behind" % (MAX_LAG * 1000.0), "%.0f ms" % (lag * 1000.0))
 	var f: Dictionary = tot["fall"]
 	ok(f["n"] > 60 and f["max_step"] < NET_CAP, "Kitefall's fall is drawn as a drop, not a jump",
 		"%d frames, max step %.2f m" % [f["n"], f["max_step"]])
@@ -365,7 +385,7 @@ static func _off_path(truth: Array, j: int, q: Vector3) -> float:
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
 	if not await dn._connect():
-		print("RSMOOTH guest: no relay")
+		print(tag + " guest: no relay")
 		main.get_tree().quit(1)
 		return
 	var t0 := Time.get_ticks_msec()

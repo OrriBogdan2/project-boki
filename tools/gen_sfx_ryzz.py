@@ -20,6 +20,10 @@ cheeky rubbery pop. Her voice is a young woman's, bright and brash.
   vv_ult_charge/_rise/_hum/_crack/_slam
                              Kitefall by beat: the crouch gathering, the lift-off, the hover (a loop, stops on the
                              drop), the bolt leaving the sky as she drops, the landing boom
+  mage_miss (3 takes)        a finger bolt that hit nothing fizzling out (MissFx, HeroSfx kind "miss")
+  mage_wire_hit (3 takes)    Wirerun streaking through a foe
+  mage_rod_fizzle            Storm Rod landing on nothing
+  mage_sky_ground (2 takes)  Skycall pinning a foe Grounded
   mage_step_<surface>        light boots, bangles, a static tick (3 takes each)
   mage_hurt/down/death       wordless voice
 
@@ -342,6 +346,48 @@ def death():
     return pad(mix(fo(lpf(v, 6000), 0.4), exhale, die, out_), 1.6)
 
 
+# ------------------------------------------------------------------ the cues each ability lacked (VFX_QUALITY Snd)
+def miss(i):
+    """A finger bolt that hit nothing (`mage_miss`, MissFx): its hot-pink crackle thinning out, a falling fizz,
+    a tiny spit of a pop. Quieter and drier than any of her hits."""
+    d = 0.36
+    fizz = sat(bpf(S.sweep(1900 + 120 * i, 300, 0.22, 'saw', 0.7), 250, 5000) * 1.2, 1.5) * env(N(0.22), 0.002, 0.06)
+    spit = mix(click(0.002, 2500, 7000) * 0.7, bpf(noise(0.04), 1500, 5000) * env(N(0.04), 0.0005, 0.01) * 0.8)
+    return lpf(pad(mix(soft(spit, 0.5), at(fizz * 0.55, 0.005), crackle(0.32, 220, fall=0.07) * 1.1), d), 9000)
+
+
+def wire_hit(i):
+    """Wirerun streaking through a foe (`mage_wire_hit`): a hot electric rip as the arc passes their body, its buzz
+    dropping away behind her (she is already past), a short dull thump under it."""
+    d = 0.38
+    rip = sat(bpf(S.sweep(5200 - 250 * i, 900, 0.12, 'saw', 0.4), 600, 7500) * 1.6, 2.0) * env(N(0.12), 0.0005, 0.035)
+    tail_ = fo(buzz(0.26, 190 - 12 * i, 0.2, 3600) * np.linspace(1.0, 0.25, N(0.26)), 0.5) * 0.45
+    thump = kick(240 + 20 * i, 90, 0.16, 0.006, 0.03, 2.2) * 0.45
+    return lpf(pad(mix(rip, at(tail_, 0.02), thump, crackle(0.3, 300, fall=0.06) * 1.0), d), 9500)
+
+
+def rod_fizzle():
+    """The Storm Rod lands on nothing (`mage_rod_fizzle`): the copper rod clatters on the ground twice, its charge
+    spitting out of it into the dirt. Dry, no blast: the clang belongs to a hit."""
+    d = 0.7
+    tap1 = mix(click(0.003, 1500, 6000) * 1.0, fo(ring((1320, 3010), 0.25, (0.05, 0.03), (0.18, 0.07)), 0.5))
+    tap2 = mix(click(0.003, 1500, 6000) * 0.6, fo(ring((1350, 3080), 0.18, (0.035, 0.02), (0.1, 0.04)), 0.5))
+    grit = bpf(noise(0.12), 700, 3500) * env(N(0.12), 0.002, 0.03) * 0.5
+    spit = at(crackle(0.5, 180, fall=0.14) * 0.9, 0.02)
+    die = at(fo(buzz(0.35, 130, 0.25, 2600) * np.linspace(0.8, 0.0, N(0.35)), 0.4) * 0.22, 0.05)
+    return lpf(pad(mix(soft(tap1, 0.5), grit, at(tap2, 0.14), spit, die), d), 9500)
+
+
+def sky_ground(i):
+    """Skycall's lightning pinning a foe Grounded (`mage_sky_ground`): an arc clamps down on them, a magnetic clunk,
+    then a short held buzz with pink sparks round their feet."""
+    d = 0.55
+    clamp = sat(bpf(S.sweep(3000, 700 + 60 * i, 0.07, 'saw', 0.5), 300, 6000) * 1.5, 1.8) * env(N(0.07), 0.0005, 0.02)
+    clunk = mix(kick(170 + 10 * i, 75, 0.2, 0.008, 0.035, 2.4) * 0.6, click(0.003, 900, 3500) * 0.7)
+    hold = at(fo(buzz(0.42, 92 + 5 * i, 0.06, 2400) * env(N(0.42), 0.01, 0.2), 0.45) * 0.42, 0.03)
+    return lpf(pad(mix(clamp, at(clunk, 0.01), hold, at(crackle(0.45, 160, fall=0.16) * 0.8, 0.03)), d), 9000)
+
+
 def build():
     S.takes_cat('vv_bolt', bolt, 3, 'fire')
     S.takes_cat('mage_zap', zap, 3, 'signature')
@@ -368,6 +414,11 @@ def build():
     S.takes_cat('mage_hurt', hurt, 3, 'grunt')
     S.save_cat('mage_down', down(), 'grunt')
     S.save_cat('mage_death', death(), 'grunt')
+    # (after the rest, so the seeded takes above stay as they were)
+    S.takes_cat('mage_miss', miss, 3, 'impact')
+    S.takes_cat('mage_wire_hit', wire_hit, 3, 'impact')
+    S.save_cat('mage_rod_fizzle', rod_fizzle(), 'impact')
+    S.takes_cat('mage_sky_ground', sky_ground, 2, 'impact')
 
 
 if __name__ == '__main__':

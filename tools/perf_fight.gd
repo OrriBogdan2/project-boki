@@ -3,7 +3,7 @@ extends RefCounted
 ## 50 ms after warm-up). First every Hunter alone, casting E then R at a dummy, so the particles and the nodes made
 ## by each kit are its own; then three trios of Hunters with their Boki sent out, fighting in one camp beside a
 ## monster camp, every Hunter casting E and R in waves. Run by --perf-bench --bench-fight and --perf-budget-check.
-## Particles are counted with ParticleCount (every emitting emitter, on screen or not: an upper bound).
+## Particles are counted with ParticleCount (every emitting, unpaused emitter, on screen or not: an upper bound).
 
 const ARCHS := ["ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "rimewright", "thief"]
 const CAMP := ["brute", "skitter", "spitter", "skitter", "bomber", "brute", "skitter", "spitter"]
@@ -20,6 +20,16 @@ var peak := {"n": 0, "by": {}, "t": 0.0, "nodes": 0}
 var made := {}  # "Class:name" -> nodes that entered the tree after the warm-up
 var kits := {}  # arch -> {n: particles over the quiet floor at its peak, made: nodes made}
 var counting := false
+var engine_us := 0  # us spent waiting on the engine's own frame (scene processing, animation, drawing)
+var taken := {}  # script file -> nodes whose _process the bench calls itself during the camp (timed per script)
+var phase_us := {"process rest": 0, "draw": 0, "between": 0, "physics ticks": 0}  # the engine wait, split
+var t_pre := 0  # us: this frame's RenderingServer.frame_pre_draw, frame_post_draw, first physics tick
+var t_post := 0
+var t_phys := 0
+var stamp_us := {}  # RenderingDevice timestamp name -> us of CPU from it to the next one (the draw, split)
+var stamp_frame := -1
+var draws: Array = []  # [pre, post] us of the last few draws
+var taken_us := {}  # script file -> us spent in those _process calls
 
 
 func _init(perf_bench) -> void:
@@ -75,8 +85,29 @@ func _step(n: int) -> void:
 		for h in m.hunters:
 			h.hp = h.max_hp
 		m.step(Match.DT)
+		m.acc -= Match.DT  # _process steps on its own clock: without this every frame ran two steps
 		m._process(Match.DT)
+		_run_taken()
+		var t_wait := Time.get_ticks_usec()
+		t_pre = 0
+		t_post = 0
+		t_phys = 0
 		await bench.main.get_tree().process_frame
+		var t_back := Time.get_ticks_usec()
+		engine_us += t_back - t_wait
+		_split_wait(t_wait, t_back)
+
+
+## The engine wait from t_wait to t_back in its phases: the rest of the scene's process, the draw, the gap before
+## the next frame's physics ticks (input, audio) and the physics ticks (several when a frame runs long).
+func _split_wait(t_wait: int, t_back: int) -> void:
+	if t_pre == 0 or t_post == 0:
+		return  # (no draw signals: headless)
+	var phys := t_phys if t_phys > t_post else t_back
+	phase_us["process rest"] += t_pre - t_wait
+	phase_us["draw"] += t_post - t_pre
+	phase_us["between"] += phys - t_post
+	phase_us["physics ticks"] += t_back - phys
 
 
 func _particles() -> Dictionary:
@@ -149,6 +180,21 @@ func _camp() -> Array:
 			(h.kin as Kin).throw_to(mid)
 	made.clear()
 	counting = true
+	Match.prof.clear()
+	engine_us = 0
+	Match.vprof.clear()
+	Match.prof_on = true
+	_take_process(bench.main.get_tree().root)
+	if "--bench-novsync" in OS.get_cmdline_user_args():
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)  # (after Settings applied the player's)
+		print("BENCH fight vsync off: mode %d" % DisplayServer.window_get_vsync_mode())
+	if "--bench-noshadow" in OS.get_cmdline_user_args():  # (a probe: what the shadow pass costs the frame's end)
+		for l in bench.main.get_tree().root.find_children("*", "Light3D", true, false):
+			(l as Light3D).shadow_enabled = false
+		print("BENCH fight shadows off")
+	RenderingServer.frame_pre_draw.connect(_on_pre_draw)
+	RenderingServer.frame_post_draw.connect(_on_post_draw)
+	bench.main.get_tree().physics_frame.connect(_on_physics)
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var f := 0
@@ -168,9 +214,110 @@ func _camp() -> Array:
 		last = now
 		if f % SAMPLE == 0:
 			_sample(f / 60.0)
+			last = Time.get_ticks_usec()  # (the particle count walks the tree: it stays out of the frame times)
 		f += 1
 	counting = false
+	Match.prof_on = false
+	print("BENCH fight engine wait (not Match code): %.2f ms per frame" % (engine_us / 1000.0 / fl.size()))
+	_print_sections(Match.prof, "step", fl.size())
+	_print_sections(Match.vprof, "visual", fl.size())
+	_print_sections(taken_us, "node _process", fl.size())
+	_print_sections(phase_us, "engine wait", fl.size())
+	_print_sections(stamp_us, "draw stamps (cpu)", fl.size())
+	_print_casters()
+	_give_back()
 	return fl
+
+
+## Every node (but Match) running a script _process: the engine stops calling it and _run_taken calls it instead, same
+## dt, timed per script file. The engine wait then no longer hides the Hunter and Boki rigs, springs and look scripts.
+## Nodes made later in the fight stay with the engine (they land in the wait line).
+func _take_process(n: Node) -> void:
+	if n != m and n.get_script() != null and n.is_processing() and n.has_method("_process"):
+		var k := String((n.get_script() as Script).resource_path).get_file()
+		if not taken.has(k):
+			taken[k] = []
+			taken_us[k] = 0
+		taken[k].append(n)
+		n.set_process(false)
+	for c in n.get_children():
+		_take_process(c)
+
+
+func _run_taken() -> void:
+	var dt: float = bench.main.get_process_delta_time()
+	for k in taken:
+		var t0 := Time.get_ticks_usec()
+		for n in taken[k]:
+			if is_instance_valid(n) and n.is_inside_tree():
+				n._process(dt)
+		taken_us[k] += Time.get_ticks_usec() - t0
+
+
+## The visible shadow casters by who made them (each is drawn again per cascade: the frame end's biggest cost).
+func _print_casters() -> void:
+	var by := {}
+	for n in bench.main.get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+		var g := n as GeometryInstance3D
+		if g.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF and g.is_visible_in_tree():
+			var k := "%s<%s" % [g.get_class(), _owner_name(g)]
+			by[k] = int(by.get(k, 0)) + 1000  # (_print_sections prints thousandths)
+	_print_sections(by, "shadow casters (count)", 1)
+
+
+func _on_pre_draw() -> void:
+	t_pre = Time.get_ticks_usec()
+
+
+func _on_post_draw() -> void:
+	t_post = Time.get_ticks_usec()
+	_add_stamps()
+
+
+## The renderer's own timestamps (captured while the bench measures render time, a frame or two late): matched to
+## the pre/post-draw clocks of the frame they fall in, the draw splits into before the first viewport (scene and
+## instance updates, skinning, particles), the viewports and after the last one (frame end, present).
+func _add_stamps() -> void:
+	draws.append([t_pre, t_post])
+	if draws.size() > 8:
+		draws.pop_front()
+	var rd := RenderingServer.get_rendering_device()
+	if rd == null or rd.get_captured_timestamps_count() < 2 or rd.get_captured_timestamps_frame() == stamp_frame:
+		return
+	stamp_frame = rd.get_captured_timestamps_frame()
+	var first := rd.get_captured_timestamp_cpu_time(0)
+	var last := rd.get_captured_timestamp_cpu_time(rd.get_captured_timestamps_count() - 1)
+	for d in draws:
+		if d[0] <= first and last <= d[1]:
+			stamp_us["before viewports"] = int(stamp_us.get("before viewports", 0)) + first - d[0]
+			stamp_us["viewports"] = int(stamp_us.get("viewports", 0)) + last - first
+			stamp_us["after viewports"] = int(stamp_us.get("after viewports", 0)) + d[1] - last
+			stamp_us["(frames matched)"] = int(stamp_us.get("(frames matched)", 0)) + 1000
+			return
+
+
+func _on_physics() -> void:
+	if t_phys == 0 and t_post != 0:
+		t_phys = Time.get_ticks_usec()
+
+
+func _give_back() -> void:
+	RenderingServer.frame_pre_draw.disconnect(_on_pre_draw)
+	RenderingServer.frame_post_draw.disconnect(_on_post_draw)
+	bench.main.get_tree().physics_frame.disconnect(_on_physics)
+	for k in taken:
+		for n in taken[k]:
+			if is_instance_valid(n):
+				n.set_process(true)
+	taken.clear()
+
+
+## The costliest sections of the match step or visuals, ms per frame (Match._prof labels).
+static func _print_sections(by: Dictionary, what: String, frames: int) -> void:
+	var ks := by.keys()
+	ks.sort_custom(func(a, b): return by[a] > by[b])
+	var per := ks.slice(0, 12).map(func(k): return "%s %.2f" % [k, by[k] / 1000.0 / frames])
+	print("BENCH fight %s sections (ms per frame): %s" % [what, ", ".join(per)])
 
 
 func _sample(t: float) -> void:

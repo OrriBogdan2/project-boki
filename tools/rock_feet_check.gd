@@ -33,6 +33,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	A = load("res://tools/archetype_check.gd").new()
 	A.main = main
@@ -61,7 +62,7 @@ func _stand_row() -> void:
 	_rise(0.6)
 	var row := _rocks()
 	row.sort_custom(func(a, b): return _mid(a).x < _mid(b).x)
-	var mid: Dictionary = row[row.size() / 2]
+	var mid: Dictionary = row[int(row.size() / 2.0)]
 	_place(_mid(mid) + Vector3(0, float(mid["top"]), 0))
 	_score("stand on a Stone Row rock", Vector2.ZERO, SETTLE)
 
@@ -110,6 +111,7 @@ func _score(what: String, how: Variant, settle: int, stop := Callable(), step :=
 	var jump := 0.0               # the drawn body's biggest move up or down in a grounded frame
 	var unplanted := 0            # grounded frames FootPlant left alone
 	var was := P.position.y
+	var edge := false             # the last frame was grounded and scored (the next one, airborne, takes it back)
 	for f in int(WALK_T / DT):
 		if stop.is_valid() and stop.call():
 			break
@@ -120,13 +122,18 @@ func _score(what: String, how: Variant, settle: int, stop := Callable(), step :=
 			unplanted += 1 if P.anim.feet.weight < 0.01 and P.anim.air_k < 0.01 else 0
 		was = P.position.y
 		if not grounded:
+			if edge and not seen.is_empty():
+				seen.pop_back()       # the frame he stepped off the rock on: FootPlant let go of it as he left
+			edge = false
 			continue
+		edge = true
 		var t_ank := _ankles(twin)
 		var low := 0 if (t_ank[0] as Vector3).y < (t_ank[1] as Vector3).y else 1
 		var clip: float = (t_ank[low] as Vector3).y - home.y
 		var ank: Vector3 = _ankles(P.model)[low]
 		var under := _surface(ank)
 		if under - P.pos.y <= -FootPlant.REACH_DOWN or under - P.pos.y >= FootPlant.REACH_UP:
+			edge = false
 			continue
 		seen.append([clip, absf(ank.y - under - clip)])
 		var c := _crown_gap(ank) - clip
