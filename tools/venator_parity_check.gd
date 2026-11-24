@@ -27,7 +27,7 @@ func run(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) -> voi
 	_shift_charges(p)
 	_brackets(m, p, home)
 	_rifle_pose()
-	_launcher(m, p, k, t, home)
+	_coin_throw(m, p, k, t, home)
 	_needle(m, p, k, t, home)
 	_audit(m, p, k, t, home)
 	CANCEL_ROWS.new(c).run(m, p, k, t, home)
@@ -307,16 +307,22 @@ func _rifle_pose() -> void:
 			and bool(mv.get("stance", false)),
 			"gp %.2f, torso %.2f -> %.2f" % [kick["gp"], a["p"], kick["p"]])
 
-## Item 112: the Burr Charge is a tap fired from the cannon's launcher: no throw in the move, a kick on the gun, out
-## within a step of the press, once however long the key stays down, and she keeps walking.
-func _launcher(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) -> void:
-	var kick := HunterAnim.km_sample("gunslinger_rmb", 0.04)
+## Item 112 and the 11-17 playtest: the Coin Blast is a tap, a coin flicked off her free hand: a hand flick in the
+## move and no kick on the gun, out within a step of the press, once however long the key stays down, and she keeps
+## walking.
+func _coin_throw(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) -> void:
+	var keys := KMovesVV.MOVES["gunslinger_rmb"]["keys"] as Array
 	var stance := bool(KMovesVV.MOVES["gunslinger_rmb"].get("stance", false))
-	var no_hand := (KMovesVV.MOVES["gunslinger_rmb"]["keys"] as Array).all(func(key: Array) -> bool:
-		return float((key[1] as Dictionary).get("hw", 0.0)) == 0.0 and not (key[1] as Dictionary).has("fl"))
-	c.ok("Vex item 112: no throw pose, the left hand stays out of it, a recoil kick on the cannon",
-			no_hand and stance and float(kick["gp"]) > 0.3,
-			"gp %.2f" % kick["gp"])
+	var thrown := keys.any(
+		func(key: Array) -> bool:
+			return float((key[1] as Dictionary).get("hw", 0.0)) > 0.5 and (key[1] as Dictionary).has("fl")
+	)
+	var gun_still := keys.all(func(key: Array) -> bool: return not (key[1] as Dictionary).has("gp"))
+	c.ok(
+		"Vex coin: a flick of the free hand throws the coin, the gun arm out of it, legs free to walk",
+		thrown and stance and gun_still,
+		"%d keys" % keys.size()
+	)
 	t.teleport(home + Vector3(30, 0, 8))
 	p.teleport(home)
 	k.cd["rmb"] = 0.0
@@ -324,86 +330,75 @@ func _launcher(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) 
 	c.ac.aim_at(p, home + Vector3(6.0, 0, 0))
 	var plain := _walk_speed(m, p)
 	var p0 := p.pos
-	var puffs0 := k.puffs
+	var flicks0 := k.flicks
 	var burrs0 := k.burrs.size()
 	p.inp["sec"] = true
 	p.inp["sec_hold"] = true
 	m.step(c.DT)
-	# (the charge goes at once; on her model the puff waits for the bell, TUBE_SWING)
 	var out_now := k.burrs.size() == burrs0 + 1 and float(k.cd["rmb"]) > 0.0
 	var b: Dictionary = k.burrs[-1] if not k.burrs.is_empty() else {}
-	var gun := p.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D
-	var from_gun := not b.is_empty() and gun != null and (b["pos"] as Vector3).y >= gun.global_position.y
-	var was_at: Vector3 = b.get("y0", 0.0) * Vector3.UP
+	var coin: Node3D = b.get("node")
+	var faces := coin != null and coin.has_node("Spin/Glow")
+	var spin0 := float(b.get("spin", 0.0))
+	m.step(c.DT)
+	var flipping := float(b.get("spin", 0.0)) > spin0
 	c.ac.step(m, 1.0, func(): p.inp["sec_hold"] = true)
 	p.inp["sec_hold"] = false
-	var walked: float = p.flat_dist(p0) / (1.0 + c.DT)
+	var walked: float = p.flat_dist(p0) / (1.0 + 2.0 * c.DT)
 	p.inp["move"] = Vector2.ZERO
-	# (her model has the launcher's own firing point, which the empties check below covers)
-	from_gun = from_gun or WardenGlb.anchor(p.model, GunslingerKit.TUBE_FIRE) != null
-	c.ok("Vex item 112: a tap fires within one step, from above the gun's muzzle on a model with no launcher",
-			out_now and from_gun, "y %.2f" % was_at.y)
-	c.ok("Vex item 112: a 1s hold fires once, at the press", k.puffs == puffs0 + 1 and not k.rmb_down,
-			"%d puffs" % (k.puffs - puffs0))
+	c.ok(
+		"Vex coin: a tap throws the coin within one step, a gold coin with a green-fire rim, flipping end over end",
+		out_now and faces and flipping,
+		"spin %.2f -> %.2f" % [spin0, float(b.get("spin", 0.0))]
+	)
+	c.ok(
+		"Vex item 112: a 1s hold throws once, at the press",
+		k.flicks == flicks0 + 1 and not k.rmb_down,
+		"%d flicks" % (k.flicks - flicks0)
+	)
 	c.ac.step(m, 1.2)
-	_launcher_empties(m, p, k, home)
-	c.ok("Vex item 112: she keeps walking through the shot (85% of her walk or more)",
-			walked >= plain * WALK_KEEP, "%.2f of %.2f m/s" % [walked, plain])
+	_from_palm(m, p, k, home)
+	c.ok(
+		"Vex item 112: she keeps walking through the throw (85% of her walk or more)",
+		walked >= plain * WALK_KEEP,
+		"%.2f of %.2f m/s" % [walked, plain]
+	)
 	c.ac.step(m, 1.5)
 
-## On the new model: the charge leaves from launcher_fire at the press, read live, and the flash waits for the bell
-## (launcher_muzzle), which starts the shot behind her shoulder. Her real empties, held at known spots for the shot,
-## or stand-ins on a stand-in Warden node on a model that has none.
-func _launcher_empties(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
-	var w := p.model.get_node_or_null("Warden") as Node3D
-	var made := w == null
-	if made:
-		w = Node3D.new()
-		w.name = "Warden"
-		p.model.add_child(w)
-	var spot := WardenGlb.anchor(p.model, GunslingerKit.TUBE_FIRE)
-	var bell := WardenGlb.anchor(p.model, GunslingerKit.TUBE_BELL)
-	var stand_in := spot == null or bell == null
-	if stand_in:
-		spot = Node3D.new()
-		spot.name = GunslingerKit.TUBE_FIRE
-		bell = Node3D.new()
-		bell.name = GunslingerKit.TUBE_BELL
-		w.add_child(spot)
-		w.add_child(bell)
-	var spot0 := spot.transform
-	var bell0 := bell.transform
+
+## 11-17 playtest: the coin leaves her free hand's palm at the press and the Palm Lance's beam starts there too
+## (its charge orb sits there in the data); neither comes out of the gun's muzzle.
+func _from_palm(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	p.teleport(home)
 	c.ac.step(m, 0.1)
-	spot.global_position = p.pos + Vector3(0.7, 1.4, 0.2)
-	bell.global_position = p.pos + Vector3(-0.5, 1.7, 0.0)
-	var fire_at := spot.global_position
-	var bell_at := bell.global_position
+	var at := HeroVfx.of(m).anchor_pos(p, "palm")
 	k.cd["rmb"] = 0.0
 	k.ch_rmb = 1.0
-	var puffs0 := k.puffs
 	k.press_rmb()
 	var b: Dictionary = k.burrs[-1] if not k.burrs.is_empty() else {}
-	var from_spot := not b.is_empty() and (b["pos"] as Vector3).distance_to(fire_at) < 0.01
-	var waits := k.puffs == puffs0
-	c.ac.step(m, 0.05)
-	waits = waits and k.puffs == puffs0
-	bell.global_position = bell_at
-	c.ac.step(m, 0.1)
-	c.ok("Vex item 112: the charge leaves launcher_fire at the press, the flash launcher_muzzle after 0.1s",
-			from_spot and waits and k.puffs == puffs0 + 1 and k.last_puff.distance_to(bell_at) < 0.01,
-			"from spot %s, waited %s, %d puff" % [from_spot, waits, k.puffs - puffs0])
-	spot.transform = spot0
-	bell.transform = bell0
-	if stand_in:
-		w.remove_child(spot)
-		w.remove_child(bell)
-		spot.free()
-		bell.free()
-	if made:
-		p.model.remove_child(w)
-		w.free()
+	var coin := not b.is_empty() and (b["pos"] as Vector3).distance_to(at) < 0.01
+	var flash := k.last_flick.distance_to(at) < 0.01
+	c.ok("Vex coin: the coin and its glint leave her palm", coin and flash, "coin %s, glint %s" % [coin, flash])
 	c.ac.step(m, 1.2)
+	k.cd["e"] = 0.0
+	k.use_e()
+	var t := 0.0
+	var palm := Vector3.INF
+	while not k.needle.is_empty() and t < 1.0:
+		palm = k.palm_at()
+		m.step(c.DT)
+		t += c.DT
+	var gun := k._gun_muzzle()
+	var off_gun := gun == null or k.last_beam.distance_to(gun.global_position) > 0.2
+	var looks: Dictionary = HeroVfx.data("gunslinger")["moves"]
+	var orb := (looks["e_charge"]["fx"] as Array).all(func(l: Dictionary) -> bool: return l.get("at") == "palm")
+	c.ok(
+		"Vex palm: the Palm Lance charges at her palm and its beam starts there, not at the gun's muzzle",
+		k.last_beam.distance_to(palm) < 0.2 and off_gun and orb,
+		"beam %.2f m off the palm, off the gun %s, orb at the palm %s" % [k.last_beam.distance_to(palm), off_gun, orb]
+	)
+	c.ac.step(m, 1.2)
+
 
 ## Item 68: the Longneedle hits a line at least 1.5x as wide, the view pushes out at least 15% through the cast, along
 ## the aim, with no shake, and is back within 0.3 s of the shot; the beam goes exactly where the line last pointed.

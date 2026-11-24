@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3x8qoaiv5w21"
-path="res://.godot/imported/cinder_meshy_emit_4.jpg-87a57ab2bc98c38ec388707b615a004c.ctex"
+path.s3tc="res://.godot/imported/cinder_meshy_emit_4.jpg-87a57ab2bc98c38ec388707b615a004c.s3tc.ctex"
+path.etc2="res://.godot/imported/cinder_meshy_emit_4.jpg-87a57ab2bc98c38ec388707b615a004c.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f90711684945fd8d7eebd6ec2e6bfeb1"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/cinder/cinder_meshy_emit_4.jpg"
-dest_files=["res://.godot/imported/cinder_meshy_emit_4.jpg-87a57ab2bc98c38ec388707b615a004c.ctex"]
+dest_files=["res://.godot/imported/cinder_meshy_emit_4.jpg-87a57ab2bc98c38ec388707b615a004c.s3tc.ctex", "res://.godot/imported/cinder_meshy_emit_4.jpg-87a57ab2bc98c38ec388707b615a004c.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

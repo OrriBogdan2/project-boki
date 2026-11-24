@@ -9,8 +9,8 @@ extends RefCounted
 ## docs/EXPEDITION_SPEC.md "Camp clear pacing"). SPREAD_MAX is a ratchet: lower it toward BAND as
 ## the bots improve. Mob hp/damage live in Data.MOBS; never tune kit numbers for this.
 ## --arch=<id> runs one Hunter (prints its rows, skips the band). The registry splits the run into one flag per camp
-## (--camp-clear-<camp>-<level>-check): a shard runs every Hunter against one camp at one level, so each cell's spread is still
-## judged over all 12 Hunters and each shard stays under the gate's 300 s cap.
+## (--camp-clear-<camp>-<level>-check): a shard runs every Hunter against one camp at one level, so each cell's
+## spread is still judged over all 12 Hunters and each shard stays under the gate's 300 s cap.
 
 const BAND := 1.6        # target: slowest median clear time / fastest, per camp and level
 const SPREAD_MAX := 14.0 # ratchet on that ratio (worst seen 11.9x on brute@5)
@@ -121,7 +121,7 @@ func _camp_spot(m: Match, home: Vector3, i: int) -> Vector3:
 func _median(xs: Array) -> float:
 	var s := xs.duplicate()
 	s.sort()
-	return float(s[s.size() / 2])
+	return float(s[int(s.size() / 2.0)])
 
 func _band() -> void:
 	for key in res:
