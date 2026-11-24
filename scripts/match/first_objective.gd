@@ -162,7 +162,7 @@ func _leave_text() -> String:
 
 
 static func _clock(s: float) -> String:
-	return "%d:%02d" % [int(s) / 60, int(s) % 60]
+	return "%d:%02d" % [int(int(s) / 60.0), int(s) % 60]
 
 
 ## What the pin over the target says.
