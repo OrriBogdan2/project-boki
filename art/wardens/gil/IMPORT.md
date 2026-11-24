@@ -72,3 +72,9 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - Rig: `Tail` bone under Hips (`glb_add_bone.py --from LeftUpLeg,RightUpLeg --behind -0.18`), swings 15 deg back in Idle/walk/Attack/Hit; the tail verts used to follow the thighs. Arms re-keyed off the thighs, torso and head in Idle/walk/run/Attack; new `Hit` clip and a slash `Attack` (`clips.hit`, `attack_rate` 2.0 unchanged).
 - geo_check vs main: hand_R/thigh_R held 8.7 cm -> 0 in Idle/walk/run/Attack, forearm_L pairs 0. Unchanged from main: Jump_Run and Crouch arm/torso pairs, run shin_L>thigh_R 13.4 cm (Meshy). New: outfit:tail>foot/shin 3.3 cm in Jump_Run (the tail verts now stay with the hips).
 - Not done: texture candidate (credits spent past the 250 cap on fin/crest); shoulder roll beyond the arm re-keys; the hand cannot close (no finger bones).
+
+## Native model r8 (gil_meshy.glb)
+- Tail: the 965 tail verts get main's JOINTS_0/WEIGHTS_0 back (Meshy thigh weights). r7's partial move to `Tail` tore the ring on every leg swing (run 110 spike edges, crouch 238). Now run 31 / walk 15 / crouch 111 (main 33 / 15 / 138). The `Tail` bone stays in the rig with zero weight; its keys move nothing.
+- Swordfish: `scale hand.R` 1.3 -> 1.6 (fish length 0.756 -> ~0.93 of the splash ratio). Attack and Hit right-arm re-keyed (`r7/tools/rightfish.py`) so the bigger fish clears the head: Hit 0.003 -> 0.049 m off the head mesh, Attack sampled frames >= 0.043 m (one in-between pass to 0.008 m, no contact).
+- Legs: run LeftUpLeg 3 deg / RightUpLeg 6 deg out (about the forward axis). geo_check vs main: run shin_L>thigh_R 13.4 cm -> 0, held worst 6.8 cm (run foot_R>thigh_R), nothing worse than main.
+- Not changed: mesh, UVs, textures, fin/crest parts, other clips. Still open: fin recolour, closed grip, Jump_Run forearm>torso 8.8 cm, Crouch hand/forearm>thigh holds.
