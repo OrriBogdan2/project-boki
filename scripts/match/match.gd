@@ -2257,9 +2257,9 @@ func _update_tracking(dt: float) -> void:
 	if track_t > 0.0:
 		return
 	track_t = 22.0
-	for tr in tracked:
-		var k: Kin = tr["kin"]
-		var h: Hunter = tr["holder"]
+	for trk in tracked:
+		var k: Kin = trk["kin"]
+		var h: Hunter = trk["holder"]
 		if k.dead or h.out:
 			continue
 		var at: Vector3 = k.pos if k.state != "bench" else h.pos

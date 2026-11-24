@@ -8,13 +8,20 @@ extends RefCounted
 ## 3 s no more than DmgNumberTrio.MAX_OVERLAP numbers print over one spot. Prints DMGNUM PASS/FAIL.
 
 const Trio := preload("res://tools/dmg_number_trio.gd")
+## One hit of every kind through the real damage paths: the number it prints reads in its style (HudStyle),
+## and any two kinds differ by colour (RGB distance >= KIND_DIST) or size (>= KIND_PX px at the same 30 dmg).
+const KIND_DIST := 0.2
+const KIND_PX := 3
 
 var main: Node
 var fails := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("DMGNUM %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -25,24 +32,26 @@ func run(main_node: Node) -> void:
 	var fx: Fx = m.fx
 	fx.set_process(false)
 	await main.get_tree().process_frame
-	var P: Hunter = m.player
-	var foes := m.hunters.filter(func(x): return x.team != P.team)
+	var p_v: Hunter = m.player
+	var foes := m.hunters.filter(func(x): return x.team != p_v.team)
 	ok(not foes.is_empty(), "setup: a rival")
-	_ticks(m, fx, P, foes[0])
+	_ticks(m, fx, p_v, foes[0])
 	_sizes(fx)
 	_reticle(fx)
 	_pool(fx)
-	_kinds_read(m, fx, P, foes[0])
+	_kinds_read(m, fx, p_v, foes[0])
 	m.queue_free()
 	await _trio()
 	print("DMGNUM DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _live(fx: Fx) -> Array:
 	return fx.nums.filter(func(n): return n["node"].visible)
 
+
 ## 10 burn-style ticks (a quarter second apart) through the real damage path.
-func _ticks(m: Match, fx: Fx, src: Hunter, foe: Hunter) -> void:
+func _ticks(_m: Match, fx: Fx, src: Hunter, foe: Hunter) -> void:
 	foe.max_hp = 1e6
 	foe.hp = 1e6
 	fx.nums.clear()
@@ -58,6 +67,7 @@ func _ticks(m: Match, fx: Fx, src: Hunter, foe: Hunter) -> void:
 	src.hurt(7.0, foe, {"src": "abil"})
 	ok(_live(fx).size() == 2, "a different source and target gets its own label")
 	fx.nums.clear()
+
 
 func _sizes(fx: Fx) -> void:
 	var hit := Fx._num_size(30.0, false)
@@ -75,6 +85,7 @@ func _sizes(fx: Fx) -> void:
 	fx.number(at, 5.0, Color.WHITE, false, "", "k")
 	ok(_live(fx).size() == 2, "a normal hit does not roll into a crit's number later")
 	fx.nums.clear()
+
 
 func _reticle(fx: Fx) -> void:
 	var r := Fx.RETICLE_CLEAR_PX
@@ -97,6 +108,7 @@ func _reticle(fx: Fx) -> void:
 	ok(gap >= r - 40.0, "a number aimed at the reticle spawns clear of it (%.0f px, minus jitter)" % gap)
 	fx.nums.clear()
 
+
 func _pool(fx: Fx) -> void:
 	var kids := fx.get_child_count()
 	fx.nums.clear()
@@ -105,6 +117,7 @@ func _pool(fx: Fx) -> void:
 	ok(fx.get_child_count() == kids, "numbers reuse the pool, no labels are created")
 	ok(_live(fx).size() <= Fx.NUM_POOL, "no more than %d live at once (%d)" % [Fx.NUM_POOL, _live(fx).size()])
 	fx.nums.clear()
+
 
 ## Three attackers on one dummy for Trio.SECS s: the most numbers over one spot in any frame.
 func _trio() -> void:
@@ -132,60 +145,91 @@ func _trio() -> void:
 		most = maxi(most, c)
 		over += 1 if c > Trio.MAX_OVERLAP else 0
 	ok((s["dummy"] as Hunter).hp < 1e6, "setup: the dummy took the hits")
-	ok(most <= Trio.MAX_OVERLAP, "trio focus %.0f s: at most %d numbers over one spot (%d; %d frames over)" % [
-		Trio.SECS, Trio.MAX_OVERLAP, most, over])
+	ok(
+		most <= Trio.MAX_OVERLAP,
+		(
+			"trio focus %.0f s: at most %d numbers over one spot (%d; %d frames over)"
+			% [Trio.SECS, Trio.MAX_OVERLAP, most, over]
+		)
+	)
 	fx.nums.clear()
 	m.queue_free()
 
-## One hit of every kind through the real damage paths: the number it prints reads in its style (HudStyle),
-## and any two kinds differ by colour (RGB distance >= KIND_DIST) or size (>= KIND_PX px at the same 30 dmg).
-const KIND_DIST := 0.2
-const KIND_PX := 3
 
 func _last(fx: Fx) -> Dictionary:
 	var live := _live(fx)
 	return {} if live.is_empty() else live[live.size() - 1]
+
 
 func _read(fx: Fx) -> Dictionary:
 	var n := _last(fx)
 	if n.is_empty():
 		return {}
 	var l: Label3D = n["node"]
-	return {"col": l.modulate, "px": l.font_size, "text": l.text, "kind": int(n["kind"]), "crit": bool(n["crit"]),
-		"outline": l.outline_size}
+	return {
+		"col": l.modulate,
+		"px": l.font_size,
+		"text": l.text,
+		"kind": int(n["kind"]),
+		"crit": bool(n["crit"]),
+		"outline": l.outline_size
+	}
 
-func _kinds_read(m: Match, fx: Fx, P: Hunter, foe: Hunter) -> void:
+
+func _kinds_read(_m: Match, fx: Fx, p_v: Hunter, foe: Hunter) -> void:
 	Settings.set_v("damage_numbers", true, false)
 	foe.max_hp = 1e6
-	P.max_hp = 1e6
+	p_v.max_hp = 1e6
 	var got := {}
 	var land := func(name: String, prep: Callable, who: Hunter, by: Hunter, opts: Dictionary) -> void:
 		foe.armor = 0.0
 		foe.shield = 0.0
 		foe.shield_t = 0.0
 		foe.merge_st = {}
-		for h: Hunter in [foe, P]:
+		for h: Hunter in [foe, p_v]:
 			h.inv_t = 0.0
 			h.hp = 1e6
 		fx.nums.clear()
 		fx.set_process(false)
 		prep.call()
-		who.hurt(30.0, by, opts) if name != "heal" else fx.healed(who, 30.0)
+		if name != "heal":
+			who.hurt(30.0, by, opts)
+		else:
+			fx.healed(who, 30.0)
 		got[name] = _read(fx)
 		ok(not (got[name] as Dictionary).is_empty(), "kind %s prints a number" % name)
-	land.call("hit", func(): pass, foe, P, {"src": "shot"})
-	land.call("armour", func(): foe.armor = 200.0, foe, P, {"src": "shot"})
-	land.call("crit", func(): pass, foe, P, {"src": "shot", "crit": true})
-	land.call("empowered", func(): pass, foe, P, {"src": "shot", "heavy": true})
-	land.call("shield", func():
-		foe.shield = 200.0
-		foe.shield_t = 30.0, foe, P, {"src": "shot"})
-	land.call("shell", func(): foe.merge_st = {"shell": 200.0, "shell_max": 200.0, "form": {"glow": Color.RED}},
-		foe, P, {"src": "shot"})
-	land.call("heal", func(): foe.hp = 1.0, foe, P, {})
-	land.call("hurt", func(): pass, P, foe, {"src": "shot"})
-	var want := {"hit": "hit", "armour": "armour", "crit": "crit", "empowered": "empowered", "shield": "shield",
-		"shell": "shell", "heal": "heal", "hurt": "hurt"}
+	land.call("hit", func(): pass, foe, p_v, {"src": "shot"})
+	land.call("armour", func(): foe.armor = 200.0, foe, p_v, {"src": "shot"})
+	land.call("crit", func(): pass, foe, p_v, {"src": "shot", "crit": true})
+	land.call("empowered", func(): pass, foe, p_v, {"src": "shot", "heavy": true})
+	land.call(
+		"shield",
+		func():
+			foe.shield = 200.0
+			foe.shield_t = 30.0,
+		foe,
+		p_v,
+		{"src": "shot"}
+	)
+	land.call(
+		"shell",
+		func(): foe.merge_st = {"shell": 200.0, "shell_max": 200.0, "form": {"glow": Color.RED}},
+		foe,
+		p_v,
+		{"src": "shot"}
+	)
+	land.call("heal", func(): foe.hp = 1.0, foe, p_v, {})
+	land.call("hurt", func(): pass, p_v, foe, {"src": "shot"})
+	var want := {
+		"hit": "hit",
+		"armour": "armour",
+		"crit": "crit",
+		"empowered": "empowered",
+		"shield": "shield",
+		"shell": "shell",
+		"heal": "heal",
+		"hurt": "hurt"
+	}
 	for k in want:
 		var r: Dictionary = got.get(k, {})
 		if r.is_empty():

@@ -30,30 +30,75 @@ const FAR_M := 70.0  # m the foe waits away during the intro
 const MOVES := ["left", "right", "up", "down"]
 ## [label key (slot), action, slot, hold s, range m, tag]. fire has no slot (checked by the foe's hp).
 const COMBOS := {
-	"mage": [["sec", "secondary", "sec", 0.35, 9.0, "wall"], ["fire", "fire", "", 1.7, 9.0, ""],
-		["dash", "dash", "dash", 0.2, 7.0, "through"], ["x", "hunter_ult", "x", 0.35, 8.0, ""],
-		["x", "hunter_ult", "x", 0.1, 20.0, "recast"]],
-	"thief": [["sec", "secondary", "sec", 0.3, 9.0, ""], ["dash", "dash", "dash", 0.2, 8.0, "in"],
-		["fire", "fire", "", 1.6, 3.5, ""], ["kin", "signature", "e", 0.3, 6.0, ""],
-		["x", "hunter_ult", "x", 0.3, 6.0, ""]],
-	"dolm": [["kin", "signature", "e", 0.3, 8.0, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""],
-		["dash", "dash", "dash", 0.2, 6.0, "in"], ["x", "hunter_ult", "x", 0.3, 6.0, ""]],
-	"juggernaut": [["dash", "dash", "dash", 0.5, 9.0, "in"], ["kin", "signature", "e", 0.3, 7.0, ""],
-		["fire", "fire", "", 1.6, 3.0, ""], ["sec", "secondary", "sec", 0.3, 4.0, ""],
-		["x", "hunter_ult", "x", 0.3, 4.0, ""]],  # ends on Gilded Riposte (Fable edit 2)
-	"ashwick": [["dash", "dash", "dash", 0.2, 8.0, "in"], ["kin", "signature", "e", 0.3, 4.0, ""],
-		["fire", "fire", "", 1.8, 4.5, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""]],
-	"tender": [["sec", "secondary", "sec", 0.3, 9.0, ""], ["fire", "fire", "", 1.6, 7.0, ""],
-		["dash", "dash", "dash", 0.2, 6.0, "in"], ["sec", "secondary", "sec", 0.3, 6.0, ""]],
-	"ostra": [["kin", "signature", "e", 0.3, 8.0, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""],
-		["x", "hunter_ult", "x", 0.3, 8.0, ""], ["fire", "fire", "", 1.6, 5.0, ""]],
+	"mage":
+	[
+		["sec", "secondary", "sec", 0.35, 9.0, "wall"],
+		["fire", "fire", "", 1.7, 9.0, ""],
+		["dash", "dash", "dash", 0.2, 7.0, "through"],
+		["x", "hunter_ult", "x", 0.35, 8.0, ""],
+		["x", "hunter_ult", "x", 0.1, 20.0, "recast"]
+	],
+	"thief":
+	[
+		["sec", "secondary", "sec", 0.3, 9.0, ""],
+		["dash", "dash", "dash", 0.2, 8.0, "in"],
+		["fire", "fire", "", 1.6, 3.5, ""],
+		["kin", "signature", "e", 0.3, 6.0, ""],
+		["x", "hunter_ult", "x", 0.3, 6.0, ""]
+	],
+	"dolm":
+	[
+		["kin", "signature", "e", 0.3, 8.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["x", "hunter_ult", "x", 0.3, 6.0, ""]
+	],
+	"juggernaut":
+	[
+		["dash", "dash", "dash", 0.5, 9.0, "in"],
+		["kin", "signature", "e", 0.3, 7.0, ""],
+		["fire", "fire", "", 1.6, 3.0, ""],
+		["sec", "secondary", "sec", 0.3, 4.0, ""],
+		["x", "hunter_ult", "x", 0.3, 4.0, ""]
+	],
+	"ashwick":
+	[  # ends on Gilded Riposte (Fable edit 2)
+		["dash", "dash", "dash", 0.2, 8.0, "in"],
+		["kin", "signature", "e", 0.3, 4.0, ""],
+		["fire", "fire", "", 1.8, 4.5, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""]
+	],
+	"tender":
+	[
+		["sec", "secondary", "sec", 0.3, 9.0, ""],
+		["fire", "fire", "", 1.6, 7.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["sec", "secondary", "sec", 0.3, 6.0, ""]
+	],
+	"ostra":
+	[
+		["kin", "signature", "e", 0.3, 8.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["x", "hunter_ult", "x", 0.3, 8.0, ""],
+		["fire", "fire", "", 1.6, 5.0, ""]
+	],
 	"gil": [["fire", "fire", "", 1.6, 3.0, ""]],  # portrait-only (crouch beat)
-	# same move for every hunter (learnings beat)
-	"learn": [["dash", "dash", "dash", 0.2, 8.0, "in"], ["fire", "fire", "", 2.0, 4.0, ""],
-		["sec", "secondary", "sec", 0.3, 8.0, ""], ["dash", "dash", "dash", 0.2, 6.0, "in"],
-		["fire", "fire", "", 2.0, 4.0, ""]],
-	"rimewright": [["fire", "fire", "", 1.6, 8.0, ""], ["kin", "signature", "e", 0.3, 7.0, ""],
-		["sec", "secondary", "sec", 0.3, 8.0, ""], ["x", "hunter_ult", "x", 0.3, 6.0, ""]],
+	"learn":
+	[
+		# same move for every hunter (learnings beat)
+		["dash", "dash", "dash", 0.2, 8.0, "in"],
+		["fire", "fire", "", 2.0, 4.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["fire", "fire", "", 2.0, 4.0, ""]
+	],
+	"rimewright":
+	[
+		["fire", "fire", "", 1.6, 8.0, ""],
+		["kin", "signature", "e", 0.3, 7.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["x", "hunter_ult", "x", 0.3, 6.0, ""]
+	],
 }
 
 var hero_pass := "hud"
@@ -133,9 +178,22 @@ func play() -> void:
 func _start_hero(arch: String) -> void:
 	Save.d["first_guide"] = 99
 	Save.d["name"] = HeroTitle.base_name(arch)
-	var o := {"teams": 2, "squad": 3, "total": 1, "tier": 1, "seed": hero_seed, "length": 1e9, "no_drop": true,
-		"raid": "clear", "blight": false, "sim_keep": true, "demo_kin": "cindle", "demo_kin_lv": "8:95",
-		"bot_diff": diff, "boki_wisps": true}
+	var o := {
+		"teams": 2,
+		"squad": 3,
+		"total": 1,
+		"tier": 1,
+		"seed": hero_seed,
+		"length": 1e9,
+		"no_drop": true,
+		"raid": "clear",
+		"blight": false,
+		"sim_keep": true,
+		"demo_kin": "cindle",
+		"demo_kin_lv": "8:95",
+		"bot_diff": diff,
+		"boki_wisps": true
+	}
 	o.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
 	m = Match.new()
 	main.add_child(m)
@@ -185,8 +243,12 @@ func _hero() -> void:
 	squad_b = [foe] + squad_b_extra
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	print("PITCH_HERO_INFO hunter=%s foe=%s seed=%d diff=%s bot_diff=%s lvl=%d pass=%s wall=%s" %
-			[hunter, foe_arch, hero_seed, diff, m.bot_diff, me.lvl, hero_pass, spot["wall"]])
+	print(
+		(
+			"PITCH_HERO_INFO hunter=%s foe=%s seed=%d diff=%s bot_diff=%s lvl=%d pass=%s wall=%s"
+			% [hunter, foe_arch, hero_seed, diff, m.bot_diff, me.lvl, hero_pass, spot["wall"]]
+		)
+	)
 	_zoom(KIT_ZOOM)
 	if shot == PORT_SHOT:
 		await _portrait(me)
@@ -380,13 +442,18 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 		await main.get_tree().process_frame
 		t += 1.0 / FPS
 		seen_down = seen_down or down
-	print("PITCH_HERO_RESULT hunter=%s kill=%s t=%.2f reseats=%d steps=%s casts=%s" % [
-		hunter, end_t >= 0.0, t, reseats, steps_log, casts])
+	print(
+		(
+			"PITCH_HERO_RESULT hunter=%s kill=%s t=%.2f reseats=%d steps=%s casts=%s"
+			% [hunter, end_t >= 0.0, t, reseats, steps_log, casts]
+		)
+	)
 
 
 ## One step's outcome: `fired` = the ability went on cooldown (or, for the basic attack, the foe lost hp).
-func _log(me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: bool, hp0: float, ch0: int,
-		cast: bool) -> void:
+func _log(
+	me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: bool, hp0: float, ch0: int, cast: bool
+) -> void:
 	var slot := String(st[2])
 	var info: Dictionary = me.slot_info(slot) if slot != "" else {}
 	var name := String(info.get("name", "Finger Guns / basic"))
@@ -395,11 +462,15 @@ func _log(me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: b
 		fired = foe.hp < hp0 - 0.5
 	elif pressed:
 		fired = cast or int(info.get("charges", 0)) < ch0 or not bool(info.get("ready", true))
-	print("PITCH_HERO_STEP %d %s (%s) fired=%s landed=%s foe_hp=%.0f" % [
-		idx + 1, name, String(st[1]), fired, landed, foe.hp])
-	var mark := "F" if fired else "-"
-	mark += "L" if landed else "-"
-	steps_log.append(name + ":" + mark)
+	print(
+		(
+			"PITCH_HERO_STEP %d %s (%s) fired=%s landed=%s foe_hp=%.0f"
+			% [idx + 1, name, String(st[1]), fired, landed, foe.hp]
+		)
+	)
+	var mark_s := "F" if fired else "-"
+	mark_s += "L" if landed else "-"
+	steps_log.append(name + ":" + mark_s)
 
 
 ## A real action press or release (Input.action_press is what a key down does inside the Input singleton).

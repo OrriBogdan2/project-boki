@@ -142,12 +142,12 @@ func _shade(offs: Array, alphas: Array, dir: Vector2) -> TextureRect:
 	var gt := GradientTexture2D.new()
 	gt.gradient = g
 	gt.fill_to = dir
-	var tr := TextureRect.new()
-	tr.texture = gt
-	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tr.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	return tr
+	var tex_rect := TextureRect.new()
+	tex_rect.texture = gt
+	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tex_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	return tex_rect
 
 ## Your squad on the left and the turn caption over the countdown in the middle, the note under both.
 func _top_bar() -> Control:

@@ -381,10 +381,10 @@ func _attack_move(spd: float) -> Vector2:
 
 # ------------------------------------------------------------------ attacks
 ## Starts an attack `length` s long whose first blow lands `hit` s in (its wind-up, the tell before it): WINDUP.
-func _begin(name: String, length: float, anim: String, hit: float) -> void:
-	_go(S.WINDUP, name)
-	atk = name; atk_t = 0.0; atk_began = m.time; atk_end = length; atk_hit = hit; atk_last = hit; steps = []
-	anim_kind = anim;
+func _begin(beat_name: String, length: float, beat_anim: String, hit: float) -> void:
+	_go(S.WINDUP, beat_name)
+	atk = beat_name; atk_t = 0.0; atk_began = m.time; atk_end = length; atk_hit = hit; atk_last = hit; steps = []
+	anim_kind = beat_anim;
 
 func _at(t: float, f: Callable) -> void:
 	steps.append({"t": t, "f": f, "done": false})
@@ -550,9 +550,9 @@ func _atk_boulders() -> void:
 		_at(delay, func(): _throw(to, 1.0, 1.9, 20.0, Color("9c968a"), "boulder", tn))
 
 ## Throws a boulder or glob at `to`; its landing tell `tele` now stays up even if the attack is cut.
-func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: String, tele: Node3D) -> void:
+func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: String, tele_n: Node3D) -> void:
 	for t in teles:
-		if t["n"] == tele: t["thrown"] = true
+		if t["n"] == tele_n: t["thrown"] = true
 	var n := Node3D.new()
 	if what == "boulder":
 		Models.part(n, Models.sphere(0.55, 7), Models.toon(c), Vector3.ZERO, Vector3(1.1, 0.9, 1.0))

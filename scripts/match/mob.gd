@@ -33,8 +33,13 @@ const LOOKS: PackedStringArray = ["idle", "chase", "chase", "windup", "lunge", "
 const CUT_HOLD := 0.4  # s a stun that cuts a wind-up holds it, at the least
 const WALL_HOLD := 1.0  # s stunned by a knock into a wall or rock
 const AMBLE_M := 3.0  # m from its camp it ambles while calm; a RETURN is home inside this
-static var watched: WeakRef = null  # the monster the local player last hit: the F7 readout shows its machine
 
+## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
+## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
+## hit, is stunned for a few seconds, takes extra damage the whole time, and the ability that did
+## it comes straight back off cooldown.
+const STAGGER_DMG := 2.5
+static var watched: WeakRef = null  # the monster the local player last hit: the F7 readout shows its machine
 var mkind := "skitter"
 var damage_by := {}  # Hunter team -> damage dealt to it: who did the most (lair XP shares, KillCues steals)
 var md: Dictionary = {}
@@ -50,8 +55,6 @@ var st_t: float:  # s left in the timed state (the wind-up's fill, the lunge, a 
 		return _net_left if remote else maxf(0.0, span - fsm.since)
 	set(_v):
 		push_error("Mob.st_t is read-only: the machine owns it")
-var _net_st := "idle"  # a proxy's state and the time left in it, from the host's snapshot (follow)
-var _net_left := 0.0
 var tgt: Ent = null
 var camp := Vector3.ZERO
 var atk_dir := Vector2.ZERO
@@ -67,11 +70,6 @@ var held := false  # a tutorial dummy: it stands at its camp and notices nobody 
 var team_hit := {}  # team -> match time of its latest hit that left this alive (XpHints: who was fighting it)
 var noticed_at := -INF  # match time of this monster's last notice cue (MobNotice)
 var death_t := 0.0
-## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
-## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
-## hit, is stunned for a few seconds, takes extra damage the whole time, and the ability that did
-## it comes straight back off cooldown.
-const STAGGER_DMG := 2.5
 var stag_open := 0.0
 var stag_next := 0.0
 var stagger_t := 0.0
@@ -80,6 +78,8 @@ var win_cried := false  # the kill window's cry sounded here (StealReel)
 var win_reeled := false  # the kill window's reel already happened (StealReel)
 var stag_ring: MeshInstance3D = null
 var stag_stars: Node3D = null  # a treasure kin slips away if nobody hurts it for a while
+var _net_st := "idle"  # a proxy's state and the time left in it, from the host's snapshot (follow)
+var _net_left := 0.0
 
 
 func init_mob(match_node: Node, id: String, k: String, at: Vector3, tier := 1.0) -> void:
@@ -588,11 +588,11 @@ func _begin_attack() -> void:
 func _strike() -> void:
 	_cancel_tele()
 	cd = md["cd"] * randf_range(0.85, 1.15)
-	var kind := String(md["attack"])
+	var atk_kind := String(md["attack"])
 	_go(S.ATTACK, "tell full", MobAnim.LUNGE_S)
-	if kind != "lunge" and kind != "fuse":
-		_go(S.RECOVER, kind, float(MobAnim.RECOVER_S.get(kind, 0.0)))
-	match kind:
+	if atk_kind != "lunge" and atk_kind != "fuse":
+		_go(S.RECOVER, atk_kind, float(MobAnim.RECOVER_S.get(atk_kind, 0.0)))
+	match atk_kind:
 		"lunge":
 			lunge_hit = {}
 		"spit":
@@ -709,18 +709,18 @@ func render(delta: float, alpha: float) -> void:
 ## there as the attack goes off. Off-screen ones stop animating.
 func _pack_anim(delta: float, moving: bool, spd: float, wind: float) -> void:
 	var ap: AnimationPlayer = model.get_meta("anim")
-	var C: Dictionary = model.get_meta("clips")
+	var c_v: Dictionary = model.get_meta("clips")
 	var cam = m.get("cam")
 	var far := cam != null and Vector2(pos.x - cam.focus.x, pos.z - cam.focus.z).length() > 30.0
 	ap.active = not far
 	if far:
 		return
-	var atk := String(C["attack"])
+	var atk := String(c_v["attack"])
 	if st == "windup":
 		if ap.current_animation != atk:
 			ap.play(atk, 0.12)
 		ap.speed_scale = 0.0
-		ap.seek(ap.get_animation(atk).length * float(C["hit"]) * clampf(wind, 0.0, 1.0), true)
+		ap.seek(ap.get_animation(atk).length * float(c_v["hit"]) * clampf(wind, 0.0, 1.0), true)
 		return
 	if (
 		ap.current_animation == atk
@@ -729,12 +729,12 @@ func _pack_anim(delta: float, moving: bool, spd: float, wind: float) -> void:
 	):
 		ap.speed_scale = 1.4  # the blow and the follow-through
 		return
-	var want := String(C["idle"])
+	var want := String(c_v["idle"])
 	var rate := 1.0
 	if stagger_t > 0.0:
 		rate = 0.35
 	elif moving:
-		want = String(C["run"]) if spd > 3.6 else String(C["walk"])
+		want = String(c_v["run"]) if spd > 3.6 else String(c_v["walk"])
 		rate = clampf(spd / (4.5 if spd > 3.6 else 2.2), 0.6, 1.7)
 	if ap.current_animation != want:
 		ap.play(want, 0.2)
