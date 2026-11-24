@@ -33,6 +33,9 @@ const LOOKS := {
 	"dragon": {"col": "4a55ff",
 		"dots": {"n": 4, "speed": 3.0, "life": 0.7, "grav": -2.0, "size": 3.1, "spread": 35.0},
 		"streaks": {"n": 4, "speed": 6.0, "life": 0.45, "grav": -4.0, "size": 2.9, "spread": 35.0}},
+	"wyrm": {"col": "c8344f",
+		"dots": {"n": 5, "speed": 3.6, "life": 0.8, "grav": -1.0, "size": 3.4, "spread": 28.0},
+		"streaks": {"n": 3, "speed": 7.5, "life": 0.4, "grav": -2.0, "size": 3.3, "spread": 22.0, "fwd": true}},
 	"dark": {"col": "5a3d86",
 		"dots": {"n": 6, "speed": 1.2, "life": 1.1, "grav": -0.5, "size": 6.2, "spread": 180.0}},
 	"poison": {"col": "a6e22e",
@@ -53,7 +56,8 @@ const LOOKS := {
 ## (11-17: LOOKS came from a lane keyed by another type list, so only spore and dark ever matched.)
 const BY_THEME := {"venom": "poison", "spore": "spore", "gravity": "dragon", "prism": "crystal", "lunar": "fairy",
 	"echo": "sound", "ember": "fire", "frost": "ice", "storm": "electric", "stone": "rock", "bloom": "grass",
-	"ghost": "psychic", "dark": "dark", "titan": "steel", "swarm": "bug", "tempest": "flying"}
+	"ghost": "psychic", "dark": "dark", "titan": "steel", "swarm": "bug", "tempest": "flying",
+	"tide": "water", "wyrm": "wyrm", "wild": "normal"}
 
 ## The LOOKS key for a type: a theme maps through BY_THEME, a look name stays itself, else "".
 static func key(type: String) -> String:
