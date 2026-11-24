@@ -1,12 +1,14 @@
-"""The stomp's three cues (Life.start_stomp / tick_stomps / end_stomp, DECISIONS 2026-11-11), set content/sfx/stomp.json.
+"""The stomp's four cues (Life.start_stomp / tick_stomps / end_stomp, DECISIONS 2026-11-11), set content/sfx/stomp.json.
 
     python3 tools/gen_sfx_stomp.py      (then: godot --headless --import)
 
-Our own sounds, numpy only, own random stream. All three play at a position, so both squads in reach hear them.
+Our own sounds, numpy only, own random stream. The first three play at a position, so both squads in reach hear them.
   stomp_windup : ~0.7 s, the stomp commits: a low rising groan and a heel scuff, "locked in, it is coming".
   stomp_finish : ~0.8 s, the last slam as the wisp dies: a deep crushing thud, a crunch and the wisp's light
                  squeezed out under the foot (a falling tone choked off).
   stomp_crack  : ~0.5 s, hard CC breaks the stomp: a bright crack and a short rising ring as the wisp is let go.
+  stomp_relief : ~0.7 s, the same break for the saved wisp's squad (no position): a soft rising two-note chime
+                 and an exhale of air under it, "you're free".
 """
 
 import numpy as np
@@ -42,7 +44,15 @@ def crack():
     return hpf(mix(snap, glass, lift), 200)
 
 
+def relief():
+    lo = S.chime(523, 0.55, 0.22, partials=((1.0, 1.0), (2.0, 0.25)))
+    hi = at(S.chime(784, 0.6, 0.28, partials=((1.0, 1.0), (2.0, 0.25))), 0.11)
+    breath = at(lpf(noise(0.4), 1800) * env(N(0.4), 0.06, 0.2), 0.02) * 0.3
+    return mix(lo * 0.7, hi * 0.8, breath)
+
+
 if __name__ == "__main__":
     S.save_cat("stomp_windup", windup(), "cast")
     S.save_cat("stomp_finish", finish(), "heavy_impact")
     S.save_cat("stomp_crack", crack(), "impact")
+    S.save_cat("stomp_relief", relief(), "cast")
