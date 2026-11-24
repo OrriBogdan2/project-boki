@@ -303,10 +303,11 @@ func _held(s: Dictionary) -> String:
 ## order. Every counter is read each frame, so a one-shot that loses to another one is not played later.
 func _one_shot(s: Dictionary) -> String:
 	var swing := _swing(s)
-	var hurt := _new_hit(float(s.get("hit_t", 99.0)))
+	# (only a stagger plays the hit clip, as on the contract path: a chip hit is WardenFlinch's lean over the running clip)
+	var hurt := _new_hit(float(s.get("hit_t", 99.0))) and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
 	var landed := _landed()
 	var hit_slot := _hit_slot(s)
-	if hurt and hit_slot != "" and (cur != hit_slot or _fresh(hit_slot)):  # (a hit cuts in on any swing)
+	if hurt and hit_slot != "" and (cur != hit_slot or _fresh(hit_slot)):  # (a stagger cuts in on any swing)
 		return hit_slot
 	if swing != "":
 		return swing
