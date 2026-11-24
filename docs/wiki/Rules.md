@@ -1742,6 +1742,19 @@ A big Boki led at home (scripts/home/home_carry.gd _lead). It walks at your own 
 |---|---|
 | groups | {"vitals": {"from_match": 1, "what": "health, level and the XP bar"}, "abilities": {"from_match": 1, "what": "ability and weapon slots with their keys"}, "beat_clock": {"from_match": 4, "first": "beat", "what": "the match clock under the minimap, from the first Ways Out beat or the first kill"}, "summon_ring": {"from_match": 1, "what": "the Boki card and its summon ring"}, "objective": {"from_match": 1, "what": "the minimap, waypoints and prompts"}, "seat_pips": {"from_match": 0, "first": "seat_open", "what": "the Ways Out strip, from the first open seat"}, "belt": {"from_match": 4, "first": "item_matters", "what": "the utility belt, from the first time a held item could be used"}, "counters": {"from_match": 4, "what": "squads left, kills, knocks, gems"}, "feed": {"from_match": 4, "what": "the kill feed"}, "gear": {"from_match": 4, "what": "the gear panel"}, "squad": {"from_match": 4, "what": "squad frames"}, "perks": {"from_match": 4, "what": "the perk row"}, "weather": {"from_match": 4, "what": "the weather and sight chip"}, "belt_spare": {"from_match": 0, "what": "belt slots 3 and 4 while they are empty (a filled one always shows)"}, "ult_tiles": {"from_match": 0, "what": "the locked ultimate tiles (X, and the Fusion box) until level 6"}, "pace_tags": {"from_match": 4, "what": "ahead / behind pace tags (no widget yet)"}, "plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"}} |
 
+## hunter_foley (`content/rules/hunter_foley.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Each Hunter's quiet foley layer under its steps and dashes (MoveSfx, docs/AUDIO.md). One row per archetype: note = what makes the sound (from its final design); step_db / dash_db = that Hunter's level trim in dB (its sounds are <arch>_foley and <arch>_foley_dash, made by tools/gen_sfx_foley.py). A step's foley follows the Hunter's speed: walk_db quieter at a standstill, full level at its base run speed. Foley is carried to step_reach_m like the step itself; at most voice_cap foley sounds start per voice_window_ms across all Hunters, so a crowd of 30 stays readable. base_db: the level before the role (own/ally/enemy) and fight trims MoveSfx.level adds. |
+| base_db | -6 |
+| walk_db | -8 |
+| voice_cap | 5 |
+| voice_window_ms | 200 |
+| rows | {"dredge": {"note": "Grimble: the junk hoard on his back rattles and clinks (chests, tin, coins, a dull bell)", "step_db": 0.0, "dash_db": 0.0}, "bulwark": {"note": "Albert: barnacle armour clanks, plate on plate and shell crunch", "step_db": 0.0, "dash_db": 0.0}, "rimewright": {"note": "Neve: skate blades hiss on the ground", "step_db": 2.0, "dash_db": 0.0}, "juggernaut": {"note": "Kael: the chain at his collar and wrists", "step_db": 0.0, "dash_db": 0.0}, "ashwick": {"note": "Cinder: living-fire hair and molten seams crackle", "step_db": 0.0, "dash_db": 0.0}, "thief": {"note": "Sable: coat and buckle on steps, moth wings flutter on dashes", "step_db": -2.0, "dash_db": 2.0}, "archer": {"note": "Lace: porcelain joints click, the wooden control cross knocks", "step_db": 0.0, "dash_db": 0.0}, "dolm": {"note": "Tenzo: pebbles and the floating eye stones, a soft jade ring", "step_db": 0.0, "dash_db": 0.0}, "gunslinger": {"note": "Vex: brass ammo strap and the coin chain jingle", "step_db": 0.0, "dash_db": 0.0}, "mage": {"note": "Sparkle: copper coils at the wrists spit static", "step_db": -1.0, "dash_db": 0.0}, "ostra": {"note": "Motley: tiny jester bells and a flick of cards", "step_db": 0.0, "dash_db": 0.0}, "tender": {"note": "Meeko: the glass globe tinks, a raindrop drips", "step_db": 1.0, "dash_db": 0.0}, "gil": {"note": "Gil: potion vials clink in his bag, a wet slap of robe hem", "step_db": 1.0, "dash_db": 0.0}} |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 
@@ -2076,13 +2089,13 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 
 ## mask_moment (`content/rules/mask_moment.json`)
 
-Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, the fallen Hunter on grey panels of their painted art (three memories: their past, their fall, the legend, the last held with a whisper; a Hunter without them shows their face, then their pose), the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. About 2.3x its first cut, the panels 4-6 s in all (owner 11-11: too fast to read; 'like 5 s, not 1 s'; owner 11-17: they went by in 1-2 s because the farm's first Relic ran the short cut and a click cut it short: now the first Mask anywhere is the full cut and clicks never skip the memories until one has been seen). MaskBeat holds the whisper and the name for at least its reading time (3 s, or 0.06 s per character), stretching memory_s and reveal_s if a line needs it. A click moves on a beat; after the first one, holding skips.
+Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, the fallen Hunter on a grey panel of their painted art (their face, then their pose held with a whisper), the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. About 2.3x its first cut, the panel about 5 s (owner 11-11: too fast to read; 'like 5 s, not 1 s'). MaskBeat holds the whisper and the name for at least its reading time (3 s, or 0.06 s per character), stretching memory_s and reveal_s if a line needs it. A click moves on a beat; after the first one, holding skips.
 
 | Setting | Value |
 |---|---|
-| full | {"build_s": 2.0, "rise_s": 2.4, "black_s": 0.6, "memory_s": [1.6, 1.8, 2.0], "reveal_s": 3.4, "push_in": 0.7} |
-| short | {"build_s": 0.9, "rise_s": 1.4, "black_s": 0.7, "memory_s": [1.4, 2.0], "reveal_s": 3.4, "push_in": 0.6} |
-| times_doc | build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted memories, or their face and then their splash: the same total shared out when the count differs), the last held with the whisper. reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face). |
+| full | {"build_s": 2.0, "rise_s": 2.4, "black_s": 0.6, "memory_s": [1.4, 3.6], "reveal_s": 3.4, "push_in": 0.7} |
+| short | {"build_s": 0.9, "rise_s": 1.4, "black_s": 0.7, "memory_s": [3.4], "reveal_s": 3.4, "push_in": 0.6} |
+| times_doc | build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted art): the face first, the pose (the splash) last, held with the whisper. reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face). |
 | music_duck_db | -30 |
 | heart_gaps_s | [0.62, 0.5, 0.4, 0.32] |
 | punch_fov | 5 |

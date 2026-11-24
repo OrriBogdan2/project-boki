@@ -64,3 +64,9 @@ Native bow clips (ext/anim-lace-native-clips, 11-23): `hem_clips.glb` is the ani
 (`hem_meshy.glb`, untouched): `/home/boki/venv-img/bin/python3 tools/meshy/lace_clips.py art/wardens/hem/hem_clips.glb`.
 No mesh, skeleton nodes and ten clips, 30 fps, keyed from poses (no Meshy animation, no retarget). Mapped by `kmoves` in
 `content/rules/warden_native.json` (docs/art/wardens/MESHY_NATIVE.md).
+
+11-23 hem_meshy.glb (native path, ext/lace-face-dress-1123): the face, hood hair and bun of the body soup are replaced by a Meshy head
+(own skinned mesh `Head_new`, material `body-face`, 8k tris, grafted at the choker, weighted Head/neck) plus two hair pins (`Pins`, material `metal-pin`).
+The skirt is welded (1.5 mm), gets a flipped red inner face (2 mm inset) and eight `SkirtSw*` billow bones on the Hips that swing the cloth out
+of the legs in every frame of every clip (radius margin 0.12 m = thigh radius; pivot 1.1 m). The stray unskinned Icosphere is gone.
+Build scripts and renders: /home/boki/gens/lace-face-dress-1123 (tools/build_b.py, tools/graft_head.py). Needs an owner visual check before it goes live.
