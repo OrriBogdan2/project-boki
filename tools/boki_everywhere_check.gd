@@ -208,8 +208,8 @@ func _surfaces() -> void:
 		Demo.setup("farm")
 		var vz := GardenZones.current()
 		var vrec := GardenVisitor.begin(vz, sp, Time.get_unix_time_from_system())
-		print("BOKI_EVERYWHERE %s visitor muts=%s (shot with a plain record: muts cleared)" % [sp, str(vrec.get("muts", []))])
-		vrec["muts"] = []  # a grown part (antennae, a ball on the hips) is the record's; the model's own look is what is judged
+		print("BOKI_EVERYWHERE %s visitor muts=%s (plain record: muts cleared)" % [sp, str(vrec.get("muts", []))])
+		vrec["muts"] = []  # a grown part is the record's; the model's own look is what is judged
 		main.show_screen("home", {"zone": vz})  # base-mode saves land on the hub, where no visitor walks
 		for i in 120:
 			await RenderingServer.frame_post_draw
@@ -231,7 +231,7 @@ func _visitor_close(h, sp: String, path: String) -> void:
 		cam.fov = 35
 		h.add_child(cam)
 		cam.make_current()
-		var side_k := [0.3]  # one list cell: the camera's sideways offset, in distances (a fence or a sign can stand in the way)
+		var side_k := [0.3]  # a one-cell list: the camera's sideways offset in distances (a fence can stand in the way)
 		var aim := func() -> void:  # it wanders: keep it framed, near eye level
 			if not is_instance_valid(n):
 				return
@@ -245,12 +245,12 @@ func _visitor_close(h, sp: String, path: String) -> void:
 			side_k[0] = [0.3, -0.9, 1.4, -1.6][i]
 			await _grab_window(path if i == 0 else path.replace(".png", "_" + "abcd"[i] + ".png"), 30)
 		main.get_tree().process_frame.disconnect(aim)
-		# the eye-level shot: the camera at the model's eye height (FRAME head), 0.7 m out in front, a little to the side
+		# the eye-level shot: the camera at the eye height (FRAME head), 0.7 m out in front, a little aside
 		var brig := n.find_child("BokiRig", true, false)  # a Node: its parent holds the model frame
 		var rig: Node3D = brig.get_parent() as Node3D if brig else null
 		if rig and BokiRig.FRAME.has(sp):
 			cam.fov = 30
-			var at_eye := func() -> void:  # tracks the eye (FRAME head) as it wanders or hops: 0.7 m out in front, a little aside
+			var at_eye := func() -> void:  # tracks the eye (FRAME head) as it wanders or hops
 				if not is_instance_valid(rig):
 					return
 				var eye: Vector3 = rig.global_transform * (BokiRig.FRAME[sp]["head"] as Vector3)
@@ -261,7 +261,8 @@ func _visitor_close(h, sp: String, path: String) -> void:
 			main.get_tree().process_frame.connect(at_eye)
 			await _grab_window(path.replace("visitor_close_", "visitor_eye_"), 30)
 			main.get_tree().process_frame.disconnect(at_eye)
-			print("BOKI_EVERYWHERE %s eye-level camera y=%.3f m (FRAME head y=%.3f in the model, tracked)" % [sp, cam.global_position.y, BokiRig.FRAME[sp]["head"].y])
+			var fy: float = BokiRig.FRAME[sp]["head"].y
+			print("BOKI_EVERYWHERE %s eye-level camera y=%.3f m (FRAME head y=%.3f)" % [sp, cam.global_position.y, fy])
 		cam.queue_free()
 		return
 	print("BOKI_EVERYWHERE FAIL: %s is not in the garden as the visitor (%d kins out)" % [sp, h.kins.size()])
