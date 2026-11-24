@@ -21,6 +21,7 @@ uniform sampler2D path_tex : filter_linear, repeat_disable;
 uniform bool use_biome = false;
 uniform float detail = 1.0;
 uniform float depth_k = 0.0;    // height cues (DepthCues): 0 off, 1 on
+uniform bool flat_ground = false;      // bench probe (--bench-flat-ground): the base colour, no noise
 uniform float paint2 = 1.0;     // the second art pass's larger painted structure (0 = off, --art1)
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
@@ -245,7 +246,8 @@ void fragment() {
 	int st = int(style + 0.5);
 	vec3 gemit = vec3(0.0);
 	float up = wnorm.y;
-	if (st == 0) {
+	if (flat_ground) {
+	} else if (st == 0) {
 		if (up > 0.5) {
 			c = ground(c);
 		} else if (up > -0.5) {

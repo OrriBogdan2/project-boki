@@ -209,6 +209,18 @@ func _camp() -> Array:
 			(we as WorldEnvironment).environment.glow_enabled = false
 		bench.main.get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 		print("BENCH fight post off")
+	if "--bench-flat-ground" in OS.get_cmdline_user_args():  # (a probe: what the terrain's noise costs the GPU)
+		for n in bench.main.get_tree().root.find_children("*", "MeshInstance3D", true, false):
+			var tm := (n as MeshInstance3D).material_override as ShaderMaterial
+			if tm and tm.shader and tm.shader.resource_path.ends_with("terrain.gdshader"):
+				tm.set_shader_parameter("flat_ground", true)
+		print("BENCH fight ground flat")
+	if "--bench-nosea" in OS.get_cmdline_user_args():  # (a probe: what the cloud-sea plane costs the GPU)
+		for n in m.world.find_children("*", "MeshInstance3D", false, false):
+			var sm := (n as MeshInstance3D).material_override as ShaderMaterial
+			if sm and sm.shader and sm.shader.resource_path.ends_with("clouds.gdshader"):
+				(n as MeshInstance3D).visible = false
+		print("BENCH fight sea off")
 	if "--bench-nohud" in OS.get_cmdline_user_args():  # (a probe: what the HUD's canvas costs the draw)
 		m.hud.visible = false
 		print("BENCH fight hud off")
