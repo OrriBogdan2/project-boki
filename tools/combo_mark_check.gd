@@ -1,5 +1,6 @@
 extends RefCounted
-## The overhead combo tag (scripts/ui/combo_mark.gd) for Sable's Marks, Vex's Daze, Sparkle's Static,
+## The combo state on a foe (scripts/ui/combo_mark.gd; the plate status row shows it) for Sable's Marks, Vex's Daze,
+## Sparkle's Static,
 ## Cinder's Ignite (Ablaze/Flashover), Neve's Chill and Meeko's Kindle, Gil's splash marks, and Kael's Slam
 ## window (a knock readies the Riposte) and Warchain hold (the pull):
 ## it reads the kit's own status (ArchKit.combo_read), so it shows while the status runs, counts down, is

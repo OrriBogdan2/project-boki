@@ -333,8 +333,8 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 		vfx("mark", f.pos)
 
-## The splash marks on `f`, for the ComboMark tag: a pip per different mark (three Beach it); the ring is the
-## time the oldest mark has left (when it runs out the count drops).
+## The splash marks on `f`, for the status row (HudPlate.row): a pip per different mark (three Beach it); the ring is
+## the time the oldest mark has left (when it runs out the count drops).
 func combo_read(f: Ent) -> Dictionary:
 	var pd: Dictionary = d.get("passive", {})
 	var win := float(pd.get("window", 5.0))
