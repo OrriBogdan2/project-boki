@@ -186,7 +186,8 @@ static func lead(m, h: Hunter) -> Hunter:
 ## Keep off squadmates in a fight, the way three players spread round one rival: a push away from each
 ## squadmate closer than the spacing (wider for a skilled bot), and the strafe side that leads away from
 ## the nearest of them, so two bots on one rival work round it on two angles instead of shoulder to
-## shoulder. `to` points at the target. Stacked within 2.5 m was a fifth of fight time (BOTS_HUMAN_1111).
+## shoulder. `to` points at the target. Without it a squadmate stood within 2.5 m for 31% of fight time,
+## with it 9% (docs/BOTS_HUMAN_1111.md, Spacing in a fight).
 static func spread(m, h: Hunter, a: Dictionary, to: Vector2) -> Vector2:
 	if not on(m):
 		return Vector2.ZERO

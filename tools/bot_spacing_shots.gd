@@ -8,6 +8,7 @@ const CAM_UP := 15.0  # m: camera height over the fight
 const CAM_BACK := 10.0  # m: camera distance back from the fight (about the match camera's tilt)
 const MAX_T := 700.0  # s of match time to look for a fight in
 const GAP_S := 1.5  # s of match time between the two frames
+const FIGHT_T := 100.0  # s of match time before a fight counts (the ride and the drop are over)
 
 var main: Node
 var m: Match
@@ -55,7 +56,8 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(0)
 
 
-## Bots of one squad (two or more, on their feet) shooting a rival hunter within 12 m of each other, or [].
+## Bots of one squad (two or more, on their feet, within 12 m) shooting the same rival hunter, once the squads
+## have landed (FIGHT_T), or [].
 func _fight(mm: Match) -> Array:
 	for h in mm.hunters:
 		var t = h.ai.get("tgt")
@@ -63,9 +65,9 @@ func _fight(mm: Match) -> Array:
 			continue
 		var side: Array = [h]
 		for o in mm.hunters:
-			if o != h and o.team == h.team and BotSquad.up(o) and o.ai.get("tgt") is Hunter and h.flat_dist(o) < 12.0:
+			if o != h and o.team == h.team and BotSquad.up(o) and o.ai.get("tgt") == t and h.flat_dist(o) < 12.0:
 				side.append(o)
-		if mm.time > 80.0 and side.size() >= 2:
+		if mm.time > FIGHT_T and side.size() >= 2:
 			return side
 	return []
 
