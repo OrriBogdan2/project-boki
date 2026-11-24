@@ -3,7 +3,7 @@ clip's first pose (the Idle) just enough that both hand bones stay `margin` (mod
 per-key amount is widened (max over +-2 keys) and smoothed so the arms do not jitter. Only those rotation values
 change, written in place: the key times, every other track, mesh, skin and the rest of the file stay byte-identical.
 Meeko's Meshy `Attack` swung both forearms up through her muzzle (PLAN meeko-comp-plan-1124 4A).
-Meeko (11-24): --margin=0.08 --hands=LeftHand,RightHand,LeftHand_End,RightHand_End (the paw tips, not only the wrists).
+Meeko (11-24): --margin=0.16 --hands=LeftHand,RightHand,LeftHand_End,RightHand_End (the paw tips, not only the wrists).
 Run: python3 tools/art1/glb_clip_hands_cap.py IN.glb OUT.glb --clip=Attack --pose=Idle --margin=0.07
      [--head=Head] [--hands=LeftHand,RightHand] [--bones=LeftShoulder,LeftArm,RightShoulder,RightArm]"""
 

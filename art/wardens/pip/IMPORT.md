@@ -99,7 +99,7 @@ is a tint over the texture, low glow and no far-glow boost (the boost clipped th
     G=art/wardens/pip/pip_meshy.glb
     python3 tools/art1/glb_mat_rename.py $G $G meshy_textured=meshy_textured-wing
     python3 tools/art1/glb_island_dilate.py $G $G --material=meshy_textured-wing --px=8
-    python3 tools/art1/glb_clip_hands_cap.py $G $G --clip=Attack --pose=Idle --margin=0.08 \
+    python3 tools/art1/glb_clip_hands_cap.py $G $G --clip=Attack --pose=Idle --margin=0.16 \
         --hands=LeftHand,RightHand,LeftHand_End,RightHand_End
 
 - Wings (4C): `meshy_textured` holds only the wings (17,492 tris, all on the Bone_046-051 chains), so the rename puts them on
@@ -108,7 +108,7 @@ is a tint over the texture, low glow and no far-glow boost (the boost clipped th
   with their mean colour (the pale broken edge at the eye camera; the glb 0.5 MB smaller).
 - Fire pose (4A): Meshy's `Attack` lifted both paws through her muzzle (paw tips 476 mm over the head bone, model units).
   The Meshy rig task (pip-method-1119/A_rig) has expired, so no re-animate: the shoulder and upper-arm keys are slerped
-  toward the Idle pose per key, only as far as needed, so the wrists and paw tips stay 0.08 under the head bone (59 mm in
+  toward the Idle pose per key, only as far as needed, so the wrists and paw tips stay 0.16 under the head bone (119 mm in
   game, `--meeko-companions-clip-check` "attack hands"); key times, the forearms and every other track are unchanged.
 - The dark patch at her shoulder in the knee idle (4B) is her dark-purple paw held at the chest (it moves with the hand,
   the portrait's pose): kept.
