@@ -49,11 +49,15 @@ func run(m: Node) -> void:
 
 ## A front close-up on the coat's head (its vertices on the head bone, as posed), with the overlay on and off.
 func _close(id: String) -> void:
+	var face_box := AABB()  # the overlay's own bounds (it sits on the scan's eyes): both close-ups frame on it
 	for on in [true, false]:
 		BokiRig.face_overlay = on
 		var vp := _stage(Vector2i(px, px), false)
 		var k := _posed(vp, id, PI)
-		var box := _head_box(k.get_node("Body/Flex/BokiRig") as BokiRig)
+		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+		if on:
+			face_box = _head_box(rig, true)
+		var box := face_box if face_box.has_volume() else _head_box(rig, false)
 		if not box.has_volume():  # a body weighted to other bones (Threadwyrm's lobes): the whole Boki
 			box = k.global_transform * Shots._box(k)
 		var mid := box.get_center()
@@ -82,15 +86,17 @@ func _game(id: String) -> void:
 	cam.rotation = Vector3(-pitch, 0, 0)
 	cam.make_current()
 	var img: Image = await _grab(vp)
-	var c := Vector2i(cam.unproject_position(Vector3(0, 0.3, 0))) - Vector2i(GAME_CROP, GAME_CROP) / 2
+	var c := (
+		Vector2i(cam.unproject_position(Vector3(0, 0.3, 0))) - Vector2i(GAME_CROP, GAME_CROP) / 2
+	)
 	var crop := img.get_region(Rect2i(c, Vector2i(GAME_CROP, GAME_CROP)))
 	crop.resize(GAME_CROP * GAME_ENLARGE, GAME_CROP * GAME_ENLARGE, Image.INTERPOLATE_NEAREST)
 	crop.save_png(out.path_join("%s_game.png" % id))
 	vp.queue_free()
 
 
-## World bounds of the coat's vertices that mostly follow the head bone, moved from the rest pose to the held frame.
-static func _head_box(rig: BokiRig) -> AABB:
+## World bounds of the coat's (or, `face_only`, the overlay's) vertices that mostly follow the head bone, moved from the rest pose to the held frame.
+static func _head_box(rig: BokiRig, face_only: bool) -> AABB:
 	var skel := rig.skeleton()
 	var head := skel.find_bone(HEAD_BONE)
 	var to_skel := skel.global_transform.affine_inverse()
@@ -99,7 +105,7 @@ static func _head_box(rig: BokiRig) -> AABB:
 	var pts := PackedVector3Array()
 	for mi in rig.model.find_children("*", "MeshInstance3D", true, false):
 		var inst := mi as MeshInstance3D
-		if inst == rig.face or inst.skin == null:
+		if (inst == rig.face) != face_only or inst.skin == null:
 			continue
 		var into := to_skel * inst.global_transform
 		for si in inst.mesh.get_surface_count():

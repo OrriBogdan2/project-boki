@@ -90,9 +90,11 @@ stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids l
 The game drops the Face mesh at load and shows the coat's own painted eyes; expressions, blinks and eye looks stop
 with it. `face.py` and the Face in each glb stay, so `face_overlay = true` brings them back (the face checks turn it on).
 `--boki-eyes-shots --shots-dir=<dir>` (GPU) renders each species' head with the overlay on and off plus the match
-camera. 17 of 48 coats have no usable eyes of their own under the overlay (most had them painted out by
-`boki_scan.py`'s `"cover"`): cindle, puddlet, burrlet, pebbit, selenfin, zapple, gibbelle, goliathite, hoarheron,
-floenatee, duskapi, moundvark, murmurling, nacrolin, sentrikat, threadwyrm, lilybara. They need an art pass
+camera. 10 of 48 coats still have no usable eyes of their own under the overlay (most had them painted out by
+`boki_scan.py`'s `"cover"`): gibbelle, goliathite, hoarheron, floenatee, duskapi, moundvark, murmurling, nacrolin,
+threadwyrm, lilybara. The other 7 of the first 17 (cindle, puddlet, burrlet, pebbit, selenfin, zapple, sentrikat) got
+eyes painted by a Meshy retexture on the coat's own UVs (`tools/boki/swap_atlas.py` puts the atlas into the glb;
+`tools/boki/eye_blend.py` keeps the live coat and takes only the Meshy eye patch). The 10 need another art pass
 (rebake with `cover` 0 where the scan has eyes, else a Meshy eye retexture).
 
 ### A summoned Boki (out of the wisp)
