@@ -13,7 +13,8 @@ import numpy as np
 from boki_meshy import Meshy, MeshShape, hot_mask
 from boki_sdf import Cone, Shape, frame, v3
 
-ROOT = os.path.expanduser("~/meshy/boki")  # <ROOT>/<id>/dex (the Bokidex model) or run1 (a Meshy run): never in git
+# <ROOT>/<id>/dex (the Bokidex model) or run1 (a Meshy run): never in git; BOKI_MESHY_ROOT: a scratch root
+ROOT = os.environ.get("BOKI_MESHY_ROOT") or os.path.expanduser("~/meshy/boki")
 LUM = np.array([0.3, 0.59, 0.11])
 BROW_DARK = 0.55  # a brow is its patch of coat, darker
 # id: "height" (game m, before SCALE) and "tris" of the body; "x", "y", "z": (proxy, scan) landmark pairs, x for the
