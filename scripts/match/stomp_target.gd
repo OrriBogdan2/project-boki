@@ -1,4 +1,4 @@
-class_name StompPick
+class_name StompTarget
 extends RefCounted
 ## Which downed enemy a Hunter can stomp right now, and the one prompt for it (match.gd _update_interact).
 ## Only the closest enemy Wisp inside stomp reach (Life.R revive_radius, the same height gate as Life.tick_stomp),
