@@ -15,6 +15,8 @@ extends RefCounted
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
 const SHRINK_S := BokiWispPop.DURATION  # s: the fold back into the wisp
+const BURST_CUE := "wisp_burst"  # content/sfx/wisp.json: the bloom as the Boki bursts out of its wisp
+const FOLD_CUE := "wisp_fold"  # the inward swish as it folds back in
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 const CALL_AT := "summon_call_at"  # meta on the Hunter: match time of the last call or recall gesture
 const CALL_K := "summon_call_k"  # meta on the Hunter: which ("call" on the burst, "recall" on the fold)
@@ -25,7 +27,6 @@ var cd_base := 60.0  # s: this species' cooldown
 var left := 0.0  # s of the window left (0: a wisp, or shrinking)
 var win := 0.0  # s: the window it started with (the most `left` seen), for SummonRing
 var shrink := 0.0  # s of the shrink back left
-var _folding := false  # drawing: a fold pop has started for this shrink
 var cd := 0.0  # s until it can be summoned again
 var cd_full := 1.0  # s: the cooldown now running (longer after a rival's kill), for the HUD ring
 var fly := 0.0  # s of the flight home left after a kill (drawing only)
@@ -33,6 +34,8 @@ var fly_len := 1.0  # s: that flight in all
 var fly_from := Vector3.ZERO  # where it was killed
 var rival: Hunter = null  # the last rival hunter who damaged it while out
 var rival_t := -1e9  # Match.time of that hit
+
+var _folding := false  # drawing: a fold pop has started for this shrink
 
 
 func _init(kin: Kin) -> void:
@@ -57,6 +60,20 @@ static func times(ks: KinSpec) -> Vector2:
 	return Vector2(float(cell[0]), float(cell[1]))
 
 
+## The cards' plain line for a window ("Short summon, strong"): the last card_lines entry whose from (s) it reaches.
+static func card_line(window: float) -> String:
+	var out_v := ""
+	for cl in rules()["card_lines"]:
+		if window >= float(cl[0]):
+			out_v = String(cl[1])
+	return out_v
+
+
+## The one plain line for the perks rule (Field Book card, Boki tooltip), with the Summon key's cap.
+static func perk_line() -> String:
+	return String(rules()["perk_line"]) % Settings.key_cap("summon")
+
+
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
@@ -71,19 +88,19 @@ func leash(aggression: float) -> float:
 static func press(h: Hunter) -> bool:
 	if h.downed or h.out or h.riding or h.dropping:
 		return false
-	var k: Kin = h.kin
-	if k == null or k.summon == null or k.owner_h != h:
+	var k_v: Kin = h.kin
+	if k_v == null or k_v.summon == null or k_v.owner_h != h:
 		return KinSteal.press(h)  # (your own Boki is gone or stolen: a stolen wisp's one summon)
-	var s := k.summon
+	var s := k_v.summon
 	if s.left > 0.0:
 		s.end()
 		return true
-	if not k.wisp:
+	if not k_v.wisp:
 		return KinSteal.press(h)
 	if s.cd > 0.0:
 		if KinSteal.press(h):
 			return true
-		KinCommand.say(h, "%s gathers itself: %d s" % [k.rec.get("name", "Your Boki"), ceili(s.cd)], Color("a2a8bb"))
+		KinCommand.say(h, "%s gathers itself: %d s" % [k_v.rec.get("name", "Your Boki"), ceili(s.cd)], Color("a2a8bb"))
 		return false
 	s.burst(s.dur)
 	return true
@@ -99,6 +116,16 @@ func burst(window: float) -> void:
 	k.fly = {}
 	k.vel = Vector3.ZERO
 	left = window
+
+
+## R fused the Boki into its hunter (KinMerge): a window still running is over, with the full cooldown of
+## sending it back early. A wisp's cooldown is left as it is: the merge is a separate resource.
+func fused() -> void:
+	if out():
+		left = 0.0
+		shrink = 0.0
+		cd = cd_base
+		cd_full = cd_base
 
 
 ## The window is over (timer or sent back early): the shrink starts.
@@ -136,6 +163,7 @@ func killed(by: Ent) -> bool:
 	elif foe and (o.downed or o.out):
 		KinSteal.break_loose(k, at)  # its owner is down: anyone may grab it
 	else:
+		k.m.sfx("boki_downed", at, -4.0)          # (a loose one says it as it breaks loose)
 		k.back_home = true
 		fly_len = maxf(0.1, Vector2(at.x - o.pos.x, at.z - o.pos.z).length() / float(rules()["home_speed"]))
 		fly = fly_len
@@ -201,17 +229,18 @@ func popped(to_wisp: bool, gesture := true) -> void:
 		_pop(true, false)
 		if gesture:
 			_call("call")
-		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
+		_pop_sfx(true)
 	elif _folding:
 		_drop_pop()
 	else:
 		_pop(false, true)
+		_pop_sfx(false)
 	_folding = false
 
 
 ## A BokiWispPop over the kin: its wisp home at the hunter's shoulder, the Boki's feet where the kin stands
 ## now. stowing: the kin is about to move to the shoulder itself (KinSummon._back), so the pop sits on it.
-func _pop(burst: bool, stowing: bool) -> void:
+func _pop(burst_v: bool, stowing: bool) -> void:
 	_drop_pop()
 	var o := k.owner_h
 	if o == null or k.model == null:
@@ -225,12 +254,22 @@ func _pop(burst: bool, stowing: bool) -> void:
 	pop.finished.connect(_popped)
 	k.add_child(pop)
 	k.model.visible = false
-	pop.play(burst)
+	pop.play(burst_v)
+
+
+## The pop's sounds, at the Boki on every game: the bloom of the burst with the species' own happy cry layered on
+## it (the shared one when it has none), or the inward swish of the fold. Sfx.MIN_GAP applies to each.
+func _pop_sfx(burst_v: bool) -> void:
+	if not burst_v:
+		k.m.sfx(FOLD_CUE, k.pos, -6.0)
+		return
+	k.m.sfx(BURST_CUE, k.pos, -6.0)
+	k.m.sfx(KinVoice.cue(k.species, "happy"), k.pos, -6.0, Unique.voice(k.rec))
 
 
 ## The burst ended: the walking Boki takes over. A fold holds its last pose until the wisp flag flips.
-func _popped(burst: bool) -> void:
-	if burst or k.wisp:
+func _popped(burst_v: bool) -> void:
+	if burst_v or k.wisp:
 		_drop_pop()
 
 
@@ -260,6 +299,7 @@ func render() -> void:
 	if shrink > 0.0 and not k.wisp and not _folding:
 		_folding = true
 		_pop(false, false)
+		_pop_sfx(false)
 		_call("recall")
 	elif _folding and shrink <= 0.0 and not k.wisp:
 		_folding = false  # left behind mid-fold: it stays the walking Boki

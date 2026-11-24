@@ -197,7 +197,7 @@ func _line(id: String) -> String:
 			return "Hold %s to glide, then hold %s to dive onto the mat%s" % [jump, Settings.key_cap("crouch"), tail]
 		"wall":
 			return "Wall kick: jump at the wall, press %s on it again and again, up to the top%s" % [jump, tail]
-	return "Mantle: jump at the ledge and keep pushing in to climb onto it%s" % tail
+	return "Ledge climb: jump at the ledge and keep pushing in to climb onto it%s" % tail
 
 
 # ------------------------------------------------------------------ the drills
@@ -247,7 +247,7 @@ func _tick_climb(P: Hunter, kick: bool) -> void:
 		if kick and not _flags.get("kicked", false):
 			_finish_drill(false, "Climbed without a kick")
 		elif not kick and not _flags.get("mantle", false):
-			_finish_drill(false, "Climbed without a mantle")
+			_finish_drill(false, "Climbed without a ledge climb")
 		else:
 			_finish_drill(true, "")
 

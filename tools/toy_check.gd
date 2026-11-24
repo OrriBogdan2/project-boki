@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. data: a ball, post, tub, warm stone and dig patch in the Base category, each with a stat Care knows
 ##   2. lean: Flying and Rock Boki weigh the post up, Water, Ice and Crystal the tub
 ##   3. off: with base_mode off (the shipped default) nothing plays
-##   4. on: a placed ball is used by an idle Boki within 60 s, a second Boki joins, the stat rises
+##   4. on: a placed ball is used by an idle Boki within 60 s, a second joins, the stat rises, each play pays XP
 ##   5. a squabble between two hot tempers, the stat cap, and the rest pose
 ##   6. each toy placed alone: a fitting Boki uses it within 60 s and its stat rises; a dig turns up a snack
 ##   7. only a ball for 3 days: it is the favourite, shown on the card, picked first, and a baby inherits it
@@ -50,7 +50,8 @@ func run(m: Node) -> void:
 		return HomeLayout.CATALOG[id]["cat"] == "Base" and Care.STATS.has(String(R["toys"][id]["stat"]))
 	ok(ids.all(in_base),
 			"all five toys are in the Base category, each training a Care stat")
-	ok(not FarmUnlocks.rules()["base_mode"], "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.rules()["base_mode"], "base_mode is on in the shipped rules")
+	FarmUnlocks.rules()["base_mode"] = false
 	Save.d = _new_save()
 	var lay := HomeLayout.ensure(Save.d)
 	_place(lay)
@@ -96,6 +97,7 @@ func run(m: Node) -> void:
 	ok(base_toys.size() == 5, "and it offers all five toys (the Feeding bowl sits in the tab too)")
 	home.hb.toggle()
 	var speed0 := int(home.kins[0]["rec"]["stats"]["speed"]) + int(home.kins[1]["rec"]["stats"]["speed"])
+	var xp0 := int(home.kins[0]["rec"]["xp"]) + int(home.kins[1]["rec"]["xp"])
 	var first_t := -1.0
 	var second_t := -1.0
 	var posed := false
@@ -125,6 +127,14 @@ func run(m: Node) -> void:
 			+ int(home.kins[0]["rec"]["stats"]["power"]) + int(home.kins[1]["rec"]["stats"]["power"]) \
 			+ int(home.kins[0]["rec"]["stats"]["focus"]) + int(home.kins[1]["rec"]["stats"]["focus"]) - speed0
 	ok(gained >= 1, "play trained a stat (+%d)" % gained)
+	var xp_gain := int(home.kins[0]["rec"]["xp"]) + int(home.kins[1]["rec"]["xp"]) - xp0
+	var per := int(GardenXp.rules()["toy"])
+	ok(per > 0 and xp_gain >= per and xp_gain % per == 0,
+			"each finished play gave the Boki the toy XP (+%d xp, %d a play)" % [xp_gain, per])
+	var probe := {"xp": 0, "level": 1}
+	GardenXp.give(probe, "toy")
+	GardenXp.give(probe, "toy")
+	ok(int(probe["xp"]) == 2 * per, "a toy pays every play, not once a day (%d xp)" % int(probe["xp"]))
 	# 5. squabble, cap, pose
 	var a: Dictionary = home.kins[0]
 	var b: Dictionary = home.kins[1]
@@ -166,7 +176,7 @@ func run(m: Node) -> void:
 	for f in FITTING:
 		await _alone(String(f[0]), String(f[1]))
 	await _favourite()
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = true
 	print("TOY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

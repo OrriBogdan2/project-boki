@@ -36,20 +36,6 @@ static func drop_class_holds(hunter: Hunter) -> void:
 	if hunter.ak != null and hunter.ak.rmb_down:
 		hunter.ak.rmb_down = false
 
-## Hunter._tick, once a step after the inputs are gated. Mid-transformation: untouchable, and nothing fires.
-## Live: your abilities work as the hero's own; only the Boki's own ability stays off while the Boki is inside you.
-static func route(h: Hunter) -> void:
-	if not KinMerge.active(h):
-		return
-	if KinMerge.transforming(h):
-		drop_class_holds(h)
-		h.inp["fire"] = false
-		h.inp["sig"] = false
-		h.inp["sec"] = false
-		h.inp["kin_ab"] = false
-	elif KinMerge.in_form(h):
-		h.inp["kin_ab"] = false
-
 # ------------------------------------------------------------------ LMB
 ## Hunter._kin_riders: the form's rider on this attack, written into the shot's extras.
 static func lmb(h: Hunter, extra: Dictionary) -> void:
@@ -150,6 +136,7 @@ static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 	if r.has("burn"):
 		t.burn_t = maxf(t.burn_t, float(r.get("burn_for", 3.0))); t.burn_dps = maxf(t.burn_dps, float(r["burn"])); t.burn_by = h
 	if r.has("slow_k"):
+		CcSfx.zone_slow(t)
 		t.slow_k = maxf(t.slow_k, float(r["slow_k"])) if t.slow_t > 0.0 else float(r["slow_k"])
 		t.slow_t = maxf(t.slow_t, float(r.get("slow_s", 1.5)))
 	if r.has("kb"):

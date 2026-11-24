@@ -1,0 +1,9 @@
+{
+	"_doc": "Stomp styles (docs/decisions/0062-stomp-styles.md, StompLook): how a stomp on an enemy wisp looks. Every style keeps the stomp's timing (Life.R stomp_time, stomp_cycle); only the body changes. A style lists what it changes from 'base'. A Hunter with its own stomp clip (content/rules/warden_anim/<art>.json states.stomp) stomps with that clip; 'hunter' gives a rig without one its own style. A style with 'cost' is bought with gems and worn in the 'stomp' slot (Save.d.look.stomp, bought ones in Save.d.stomps); worn, it plays on the rig in place of the clip. foot: r | l | both (a two-footed jump) | alt (right, then left). lift and knee: hip and knee angles in radians at the top of the lift. hop: metres the body rises before the slam. lean: forward tilt in radians. twist: shoulder turn in radians at the top. crouch: 0..1 how low the standing leg sits. arms: out (left arm out for balance) | wide (both out) | up (both fists overhead, down with the slam) | fists (both fists hammer the ground) | hips (hands on hips).",
+	"base": {"name": "Stomp", "foot": "r", "lift": 1.35, "knee": -1.6, "hop": 0.0, "lean": 0.12, "twist": 0.0, "crouch": 0.0, "arms": "out"},
+	"styles": {
+		"fin_slap": {"name": "Fin Slap", "hunter": "gil", "foot": "l", "lift": 1.6, "knee": -0.5, "lean": -0.1, "arms": "up"},
+		"thunder_stomp": {"name": "Thunder Stomp", "desc": "A twisting leap and both feet down like a dropped anvil.", "cost": 300,
+			"foot": "both", "lift": 1.2, "knee": -2.0, "hop": 0.5, "twist": 1.2, "lean": 0.1, "arms": "up"}
+	}
+}
