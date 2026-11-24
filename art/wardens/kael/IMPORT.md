@@ -87,3 +87,13 @@ Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): face-k
   frequency (s_along 3, s_round 60) so they run lengthwise and branch, 1.6 texels (orange, sword arm) / 1.3 (white,
   off arm), no halo. Scripts: `/home/boki/gens/hunter-round-1124/kael/hands/` (`rast4.py live.glb 0.20`,
   `edit12.py h1.jpg o_halo=0 o_hk=0 og=130 s_along=3 s_round=60 o_w=1.6 w_w=1.3`).
+
+**Round 22 (2026-11-24, ext/hunter-round-kael-1124, hair):** the black flecks on Kael's mane at the match camera were
+the painted ink shell (outline.gdshader): the raw Meshy glb has one material (`Material_0`) and no vertex colour, so the
+whole mesh, every thin hair strand included, took the ink line. `kael_meshy.glb` now has two primitives on the SAME
+vertex buffers: body (`Material_0`, 40,694 tris, unchanged) and hair (`hair-meshy`, 39,284 tris, same three images),
+so the hair takes WardenGlb's `hair` slot (NO_INK, hair shading + warden_look.json `slots.hair`). Positions, UVs,
+skin, clips and images are byte-identical; only the index buffer is split. Hair = neutral-white paint (luminance > 150,
+saturation < 28) above 1.0 m, majority-smoothed over welded neighbours (cloak cream is warm, sat > 55; face skin out).
+Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GLB Image_0.png mask.npy`,
+`split_hair.py GLB mask.npy OUT.glb`); re-run both on any new kael_meshy.glb.
