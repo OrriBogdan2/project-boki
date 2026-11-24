@@ -13,7 +13,7 @@ const CRACK_A := 0.95  # a fresh rock's cracks' alpha (cool fades it; a reused r
 const CRUMBLE_T := 0.34  # s: a broken rock slumps into the ground
 const CRACK_COL := Color(KitLooks.RUNE_TEAL, CRACK_A)  # the ground cracks: the rune teal of his arm
 const RIM := 0.22
-const HEAT := 0.12  # teal cracks like the runes on his arm, wide enough to read from the match camera; the stone stays cobalt slate
+const HEAT := 0.12  # teal cracks like his arm runes, wide enough to read from the match camera
 const RUMBLE_GAP := 0.09  # s: a ridge of rocks rumbles as one, not nine times over
 const SIDES := 6
 # a crag's rings going up: [share of its height, share of its base radius]

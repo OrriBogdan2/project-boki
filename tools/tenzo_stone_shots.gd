@@ -1,6 +1,6 @@
 extends RefCounted
 ## --tenzo-stone-shots --shots-dir=<dir>: stills of Tenzo's stone on the real GPU, through the game's own camera, for
-## the colour audit (owner 11-24: "why are tenzo's stones grey?"): <dir>/clipN.png with the MEDIA_TSV map printed
+## the colour audit (cobalt + teal, never grey): <dir>/clipN.png with the MEDIA_TSV map printed
 ## (N -> what). Stone Row (E), Basalt Spine (R), a thrown boulder at a foe, Rock Hop, and his arm eye-level.
 ## Recorded like tools/tenzo_stone_video.gd (a child Godot under the movie writer; run it with jobq --needs gpu).
 

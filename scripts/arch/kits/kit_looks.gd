@@ -23,8 +23,8 @@ extends Node3D
 const ROCK_SH := preload("res://shaders/molten_rock.gdshader")
 const GLASS_SH := preload("res://shaders/void_glass.gdshader")
 const TINT_SH := preload("res://shaders/cel_tint.gdshader")
-const SLATE := Color("152848")          # Tenzo's stone: cobalt slate (owner 11-24: "why are his stones grey?"), in the cracks and shadows
-const SLATE_HI := Color("34569a")       # and on its faces (it rendered rgb 43 66 77, a dark grey-teal, before)
+const SLATE := Color("152848")          # Tenzo's stone: cobalt slate, in the cracks and shadows
+const SLATE_HI := Color("34569a")       # and on its faces (cobalt, never grey)
 const SLATE_CAP := Color("8fb6f0")      # its upward faces in the sun
 const RUNE_TEAL := Color("5ce6b8")      # the glow of his runes and eye-stones (warden_look tarek rim_far_color)
 const RUNE_HOT := Color("b4f5e0")       # the rim light: the rune teal, lifted
