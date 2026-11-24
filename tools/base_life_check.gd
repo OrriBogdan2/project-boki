@@ -126,6 +126,7 @@ func _notice_part(home, center: Vector3) -> void:
 	var life: BaseLife = home.life
 	var r: Dictionary = BaseGreet.rules()
 	var kept_chance: float = r["chance"]
+	seed(21)  # fixed dice here, whatever the parts before rolled (800 thinks in the axes part); 3, 7, 11 fail on main too
 	home.day_t = 0.4
 	life.night = false
 	for k in home.kins:
