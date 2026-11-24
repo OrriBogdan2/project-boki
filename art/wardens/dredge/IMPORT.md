@@ -5,6 +5,10 @@ to 40 degrees: at a run the ball floated alone above and behind him (owner: "a d
 `hips` now (`extra_bones` "ball": "hips" in warden_anim/dredge.json), same rest world pose; the lunge, lunge_out and pounce keys were
 converted into the hips' space, so the barge roll looks the same (`tools/art1/grimble_ball_on_hips.py`, run on the glb with no Blender).
 
+**Native model r21 (2026-11-24, ext/grimble-native):** `dredge_meshy.glb` = r20 + `tools/meshy/dredge_post.py --r21`, `--r21-graft`,
+`--r21-keys` (docs/art/wardens/MESHY_NATIVE.md): one junk ball, orphan vertices gone, strap on the spine/shoulders with ink, skin and goo
+graded toward the turnaround, a Meshy gauntlet fist and knobbed pack rod, keys eased off every held clip pair (geo_check PASS), size 1.025.
+
 **No floor puddle (2026-11-17, ext/grimble-puddle-1117):** the owner: "we can remove grimbles goo puddle if it helps.
 can just have it drip off him a bit on that arm". The puddle's vertices were split between `hook` and `foot.R`, so it tore into
 dark spikes when the arm moved. The master is now the 11-17 gun-hand pick minus the puddle

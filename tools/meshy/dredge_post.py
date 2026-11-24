@@ -2314,7 +2314,7 @@ STRAP_BONES = ("Spine02", "Spine01", "LeftShoulder", "RightShoulder")
 SKIN_HUE = (290.0, 355.0)  # deg: atlas texels in this hue band (and S > SKIN_MIN_S) are skin
 SKIN_MIN_S = 0.15
 SKIN_DS, SKIN_DV = -0.10, 0.07  # turnaround skin S 0.38 vs r20 0.48 (PLAN 2.5)
-GOO_DH = float(_E.get("GOO_DH", "-7"))  # deg: r18 goo texture hue turn (turnaround goo H 301, r20 310-323)
+GOO_DH = float(_E.get("GOO_DH", "-5"))  # deg: r18 goo texture hue turn (turnaround goo H 301, r20 310-323)
 
 
 def _image(js, b, ii):

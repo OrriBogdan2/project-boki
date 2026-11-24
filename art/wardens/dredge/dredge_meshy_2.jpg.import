@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crhm7v6rimg0v"
-path="res://.godot/imported/dredge_meshy_16.jpg-2b4d090c130a8d71dffdaad550506167.ctex"
+uid="uid://l42qu1878b6w"
+path="res://.godot/imported/dredge_meshy_2.jpg-940202f6fa6b54f838c805c92f43b197.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "c3daf2f583317646e771e96efd22c628"
+"md5": "52080e196dcd67e4380b2d13bf70f091"
 }
 
 [deps]
 
-source_file="res://art/wardens/dredge/dredge_meshy_16.jpg"
-dest_files=["res://.godot/imported/dredge_meshy_16.jpg-2b4d090c130a8d71dffdaad550506167.ctex"]
+source_file="res://art/wardens/dredge/dredge_meshy_2.jpg"
+dest_files=["res://.godot/imported/dredge_meshy_2.jpg-940202f6fa6b54f838c805c92f43b197.ctex"]
 
 [params]
 
