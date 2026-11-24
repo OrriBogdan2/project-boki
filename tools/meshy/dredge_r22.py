@@ -6,6 +6,9 @@
   dredge_r22.py --dome OUT IN           the socket dome's head weights moved to the shoulder (strand web)
   dredge_r22.py --dometex OUT IN        r23: the socket dome repainted from the nearby skin (its streaked bake = strand web)
   dredge_r22.py --posts OUT IN POST.glb  r23: the knob rod replaced by two hooked posts (bell, chain, lantern), one per side
+  dredge_r22.py --loinpart OUT.glb IN   r24: the loincloth faces (atlas colour mask) cut out as a static glb for Meshy
+  dredge_r22.py --loincloth OUT IN TEX  r24: a Meshy retexture of that part composited into the atlas inside the mask
+  dredge_r22.py --horns OUT IN HORN.glb r24: the 2D's cream crescent horns along the goo arm (one Meshy part, rigid)
   dredge_r22.py --nodome OUT IN         variant: the socket dome removed
   dredge_r22.py --all OUT IN            every r22 stage in order
 
@@ -491,13 +494,259 @@ def posts(js, b, out, rig, part_path):
     return "; ".join(msg)
 
 
+# r24 loincloth: the 2D cloth is brown leather; the r21 model's is skin-native atlas texels (H 333 S 0.36 V 0.53, thigh
+# skin H 322 S 0.30 V 0.71). Faces are picked by colour inside the hip band, then the pick is smoothed over neighbours.
+LOIN_BAND = (0.50, 0.98, 0.36)  # m: y from, y to (under the belt), |x| max
+LOIN_HUE, LOIN_V = (327.0, 40.0), 0.62  # deg: hue above the first or below the second; value under LOIN_V
+
+
+def _loin_faces(js, b):
+    """Per skin-native primitive: (index, faces, picked mask)."""
+    from PIL import Image
+
+    img = d._image(js, b, 0)[..., :3]
+    H, W = img.shape[:2]
+    hsv = np.asarray(Image.fromarray(img).convert("HSV")).astype(np.float32)
+    res = []
+    for pi, p in enumerate(js["meshes"][0]["primitives"]):
+        if js["materials"][p["material"]]["name"] != "skin-native":
+            continue
+        P = n.floats(js, b, p["attributes"]["POSITION"])
+        U = n.floats(js, b, p["attributes"]["TEXCOORD_0"])
+        f = d.prim_faces(js, b, p)
+        c = P[f].mean(1)
+        votes = np.zeros(len(f))
+        for w in ((1 / 3, 1 / 3, 1 / 3), (0.6, 0.2, 0.2), (0.2, 0.6, 0.2), (0.2, 0.2, 0.6)):
+            uv = np.einsum("j,fjk->fk", np.array(w), U[f])
+            hv = hsv[(uv[:, 1] * H).astype(int) % H, (uv[:, 0] * W).astype(int) % W]
+            hd, v = hv[:, 0] * 360 / 255, hv[:, 2] / 255
+            votes += ((hd > LOIN_HUE[0]) | (hd < LOIN_HUE[1])) & (v < LOIN_V)
+        band = (c[:, 1] > LOIN_BAND[0]) & (c[:, 1] < LOIN_BAND[1]) & (np.abs(c[:, 0]) < LOIN_BAND[2])
+        sel = band & (votes >= 2)
+        key = np.round(P / 0.002).astype(np.int64)  # weld UV-seam copies for the neighbour vote
+        _, wid = np.unique(key, axis=0, return_inverse=True)
+        wf = wid.ravel()[f]
+        for _ in range(2):
+            vs = np.zeros(wid.max() + 1)
+            vc = np.zeros(wid.max() + 1)
+            np.add.at(vs, wf.ravel(), np.repeat(sel, 3))
+            np.add.at(vc, wf.ravel(), 1)
+            share = (vs / np.maximum(vc, 1))[wf].mean(1)
+            sel = band & ((sel & (share > 0.3)) | (~sel & (share > 0.65)))
+        res.append((pi, f, sel, P, U))
+    return res
+
+
+def _write_glb(path, P, N, UV, F, img):
+    import io
+    import json
+    import struct
+
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.fromarray(img).save(buf, "PNG")
+    png = buf.getvalue()
+    parts = [P.astype(np.float32).tobytes(), N.astype(np.float32).tobytes(), UV.astype(np.float32).tobytes()]
+    parts += [F.astype(np.uint32).ravel().tobytes(), png]
+    views, off = [], 0
+    for k, raw in enumerate(parts):
+        views.append({"buffer": 0, "byteOffset": off, "byteLength": len(raw)})
+        off += (len(raw) + 3) // 4 * 4
+    binb = b"".join(r + b"\0" * ((4 - len(r) % 4) % 4) for r in parts)
+    acc = [
+        {
+            "bufferView": 0,
+            "componentType": 5126,
+            "count": len(P),
+            "type": "VEC3",
+            "min": P.min(0).tolist(),
+            "max": P.max(0).tolist(),
+        },
+        {"bufferView": 1, "componentType": 5126, "count": len(P), "type": "VEC3"},
+        {"bufferView": 2, "componentType": 5126, "count": len(P), "type": "VEC2"},
+        {"bufferView": 3, "componentType": 5125, "count": F.size, "type": "SCALAR"},
+    ]
+    js = {
+        "asset": {"version": "2.0"},
+        "scene": 0,
+        "scenes": [{"nodes": [0]}],
+        "nodes": [{"mesh": 0}],
+        "meshes": [
+            {"primitives": [{"attributes": {"POSITION": 0, "NORMAL": 1, "TEXCOORD_0": 2}, "indices": 3, "material": 0}]}
+        ],
+        "materials": [
+            {"name": "loincloth", "pbrMetallicRoughness": {"baseColorTexture": {"index": 0}, "metallicFactor": 0.0}}
+        ],
+        "textures": [{"source": 0}],
+        "images": [{"bufferView": 4, "mimeType": "image/png"}],
+        "accessors": acc,
+        "bufferViews": views,
+        "buffers": [{"byteLength": len(binb)}],
+    }
+    j = json.dumps(js).encode()
+    j += b" " * ((4 - len(j) % 4) % 4)
+    with open(path, "wb") as fh:
+        fh.write(struct.pack("<III", 0x46546C67, 2, 12 + 8 + len(j) + 8 + len(binb)))
+        fh.write(struct.pack("<II", len(j), 0x4E4F534A) + j)
+        fh.write(struct.pack("<II", len(binb), 0x004E4942) + binb)
+
+
+def loin_part(out_path, in_path):
+    """r24: the picked loincloth faces of every skin-native primitive, with the atlas UVs, as one static glb."""
+    js, b = n.load(in_path)
+    Ps, Us, Fs, off = [], [], [], 0
+    for pi, f, sel, P, U in _loin_faces(js, b):
+        ff = f[sel]
+        u, inv = np.unique(ff, return_inverse=True)
+        Ps.append(P[u])
+        Us.append(U[u])
+        Fs.append(inv.reshape(-1, 3) + off)
+        off += len(u)
+        print("prim %d: %d of %d faces picked" % (pi, int(sel.sum()), len(f)))
+    P, U, F = np.concatenate(Ps), np.concatenate(Us), np.concatenate(Fs)
+    N = np.zeros_like(P)
+    fn = np.cross(P[F[:, 1]] - P[F[:, 0]], P[F[:, 2]] - P[F[:, 0]])
+    for k in range(3):
+        np.add.at(N, F[:, k], fn)
+    N /= np.maximum(np.linalg.norm(N, axis=1, keepdims=True), 1e-9)
+    _write_glb(out_path, P, N, U, F, d._image(js, b, 0)[..., :3].copy())
+    print("written", out_path, len(F), "tris")
+
+
+def _raster(UVt, S):
+    """UV triangles (n, 3, 2) -> bool texel mask (S x S), rows = v * S (glTF v down, as d._image reads it)."""
+    m = np.zeros((S, S), bool)
+    Pt = UVt * S - 0.5
+    for a, bb, c in Pt:
+        x0, y0 = np.floor(np.minimum(np.minimum(a, bb), c)).astype(int) - 1
+        x1, y1 = np.ceil(np.maximum(np.maximum(a, bb), c)).astype(int) + 1
+        x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, S - 1), min(y1, S - 1)
+        if x1 < x0 or y1 < y0:
+            continue
+        gx, gy = np.meshgrid(np.arange(x0, x1 + 1), np.arange(y0, y1 + 1))
+        den = (bb[1] - c[1]) * (a[0] - c[0]) + (c[0] - bb[0]) * (a[1] - c[1])
+        if abs(den) < 1e-12:
+            continue
+        l1 = ((bb[1] - c[1]) * (gx - c[0]) + (c[0] - bb[0]) * (gy - c[1])) / den
+        l2 = ((c[1] - a[1]) * (gx - c[0]) + (a[0] - c[0]) * (gy - c[1])) / den
+        l3 = 1 - l1 - l2
+        e = 0.08  # a texel past the edge (bilinear reads at the island rim)
+        m[gy, gx] |= (l1 >= -e) & (l2 >= -e) & (l3 >= -e)
+    return m
+
+
+LOIN_FEATHER = 1.5  # px: blur of the paste mask edge
+LOIN_WRAP = 0.05  # UV extent over which a face is a wrapped seam face (never pasted)
+
+
+def loincloth(js, b, out, rig, tex_path):
+    """r24: the Meshy retexture (original UVs) of the loin part is pasted into the atlas inside the picked faces' UV
+    triangles only; every other texel keeps its value."""
+    from PIL import Image
+    from scipy import ndimage
+
+    atlas = d._image(js, b, 0)[..., :3].astype(np.float32)
+    S = atlas.shape[0]
+    tex = np.asarray(Image.open(tex_path).convert("RGB").resize((S, S), Image.LANCZOS)).astype(np.float32)
+    m = np.zeros((S, S), bool)
+    nf, good = 0, []
+    picked = _loin_faces(js, b)
+    for pi, f, sel, P, U in picked:
+        ext = np.ptp(U[f], axis=1).max(1)
+        ok = sel & (ext > 0) & (ext < LOIN_WRAP)  # (seam faces whose UVs span the atlas would paste across it)
+        if ok.any():
+            m |= _raster(U[f[ok]], S)
+            good.append((P[f[ok]].mean(1), U[f[ok]].mean(1)))
+        nf += int(ok.sum())
+    gc, gu = np.concatenate([g[0] for g in good]), np.concatenate([g[1] for g in good])
+    tree = cKDTree(gc)
+    moved = 0
+    for pi, f, sel, P, U in picked:  # one-texel faces (the hole fills): their texel -> the nearest pasted face's UV
+        one = sel & (np.ptp(U[f], axis=1).max(1) == 0)
+        if not one.any():
+            continue
+        _, k = tree.query(P[f[one]].mean(1))
+        U2 = U.copy()
+        U2[f[one]] = gu[k][:, None, :]
+        prim = js["meshes"][0]["primitives"][pi]
+        prim["attributes"]["TEXCOORD_0"] = out.add_floats(U2.astype(np.float32), "VEC2")
+        moved += int(one.sum())
+    a = ndimage.gaussian_filter(m.astype(np.float32), LOIN_FEATHER)
+    a = np.clip(a * 2, 0, 1) * m  # inside the picked triangles only; soft at the rim
+    img = atlas * (1 - a[..., None]) + tex * a[..., None]
+    d._set_image(js, out, 0, np.clip(img, 0, 255).astype(np.uint8))
+    return "loincloth: %d faces pasted (%d texels), %d one-texel faces re-pointed" % (nf, int(m.sum()), moved)
+
+
+# r24 horns: the 2D goo arm carries big cream crescent horns along its outer edge (the goal-9 item). One Meshy horn
+# (root at the part's lowest point, the goo collar), placed at stations (rest pose) on the goo prim's outermost point
+# of a y slab, rigid on that slab's main bone: (slab y, direction root -> tip, length m, side of the slab: x min or z min)
+HORNS = (  # r24b: lengths 1.8x r24a (2D horns ~0.3-0.35 m on a ~1.1 m arm; r24a's read as stubs at game view)
+    (1.52, (-0.45, 1.0, -0.1), 0.30, "x"),
+    (1.24, (-1.0, 0.55, -0.1), 0.34, "x"),
+    (1.00, (-1.0, 0.45, -0.25), 0.36, "x"),
+    (0.74, (-1.0, 0.35, -0.1), 0.32, "x"),
+    (1.10, (-0.45, 0.45, -1.0), 0.26, "z"),
+)
+HORN_SINK = 0.04  # m: the root goes this far into the goo (its goo collar sits on the surface)
+HORN_SLAB = 0.03  # m: half height of the slab a station's surface point is taken from
+
+
+def horns(js, b, out, rig, part_path):
+    """r24: HORNS placed on the goo arm (prim skin-goo), each a copy of one Meshy horn rigid on its slab's bone. The
+    part's chord (lowest point -> point farthest from it) maps onto the station direction; its bend (mid-arc offset
+    from the chord) points up/outward the way the station's up is."""
+    prims = js["meshes"][0]["primitives"]
+    gp = next(p for p in prims if js["materials"][p["material"]]["name"] == "skin-goo")
+    A = d.read_attrs(js, b, gp["attributes"])
+    G, J, W = A["POSITION"], A["JOINTS_0"], A["WEIGHTS_0"]
+    top = J[np.arange(len(G)), W.argmax(1)].astype(int)
+    P, N, UV, F, img = d._part(part_path)
+    root = P[P[:, 1] < P[:, 1].min() + 0.06 * np.ptp(P[:, 1])].mean(0)
+    tip = P[np.linalg.norm(P - root, axis=1).argmax()]
+    chord = tip - root
+    L = float(np.linalg.norm(chord))
+    t = (P - root) @ chord / L**2
+    mid = P[(t > 0.4) & (t < 0.6)].mean(0) - (root + 0.5 * chord)
+    M = _frame(chord, mid)  # part frame: columns = chord, bend, normal
+    msg = []
+    first = len(js["materials"])  # (every horn shares the first horn's texture: add_rigid appends one per call)
+    for y, dr, length, side in HORNS:
+        m = np.abs(G[:, 1] - y) < HORN_SLAB
+        k = np.where(m)[0][G[m, 0 if side == "x" else 2].argmin()]
+        u, c = np.unique(top[m], return_counts=True)
+        bone = rig.names[int(u[c.argmax()])]
+        dv = np.array(dr, float)
+        dv /= np.linalg.norm(dv)
+        up = np.array([0.0, 1.0, 0.0]) if abs(dv[1]) < 0.9 else np.array([-1.0, 0.0, 0.0])
+        T = _frame(dv, up)
+        R = T @ M.T
+        sc = length / L
+        tt = G[k] - dv * HORN_SINK - sc * root @ R.T
+        Q = d.add_rigid(js, b, out, rig, (P, N, UV, F, img), R, sc, tt, bone, "leather-horn")
+        msg.append(
+            "y %.2f %s %s tip %s" % (y, side, bone, Q[np.linalg.norm(Q - G[k], axis=1).argmax()].round(2).tolist())
+        )
+    tex = js["materials"][first]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    for mat in js["materials"][first + 1 :]:
+        mat["pbrMetallicRoughness"]["baseColorTexture"]["index"] = tex
+    del js["textures"][tex + 1 :], js["images"][js["textures"][tex]["source"] + 1 :]
+    return "%d tris each; " % len(F) + "; ".join(msg)
+
+
 STAGES = {"--strap": [("strap", strap_r22)], "--slivers": [("slivers", drop_slivers)]}
 STAGES["--goo"] = [("goo flare", flare_goo)]
 STAGES["--dome"] = [("dome weights", dome_weights)]
 STAGES["--nodome"] = [("dome", drop_dome)]
 STAGES["--dometex"] = [("dome texture", dome_texture)]
 STAGES["--posts"] = [("posts", lambda js, b, out, rig: posts(js, b, out, rig, sys.argv[4]))]
+STAGES["--loincloth"] = [("loincloth", lambda js, b, out, rig: loincloth(js, b, out, rig, sys.argv[4]))]
+STAGES["--horns"] = [("horns", lambda js, b, out, rig: horns(js, b, out, rig, sys.argv[4]))]
 STAGES["--all"] = STAGES["--strap"] + STAGES["--slivers"] + STAGES["--goo"] + STAGES["--dome"]
 
 if __name__ == "__main__":
+    if sys.argv[1] == "--loinpart":
+        loin_part(sys.argv[2], sys.argv[3])
+        sys.exit(0)
     d.rebuild_stages(sys.argv[2], sys.argv[3], STAGES[sys.argv[1]])
