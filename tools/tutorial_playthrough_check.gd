@@ -1,8 +1,9 @@
 extends "res://tools/new_player_flow_check.gd"
 ## --tutorial-playthrough-check: ABSOLUTE gate check (not "new red vs main"). A new player's first run on a fresh
-## save (prologue, hatch, starter pick, "Learn to fight"), then the tutorial course played by TutorialDrive. Fails
-## when any step takes longer than STEP_LIMIT_S of game time, or the course does not reach its end (the lift and
-## the results). Prints one "TUTPLAY step <id> <seconds>" row per step. The screens before and after the course
+## save (prologue, hatch, starter pick, "Learn to fight"), then the tutorial course played by TutorialDrive. The
+## starter is Vex, or `-- --starter=archer|juggernaut|gunslinger` (Lace, Kael). Fails when any step takes longer
+## than STEP_LIMIT_S of game time, or the course does not reach its end (the lift and the results). Prints one
+## "TUTPLAY step <id> <seconds>" row per step. The screens before and after the course
 ## are --new-player-flow-check's, so a stall there fails too. Seconds are game time, the same on any box.
 ## Options: `--fps=N` caps the frame rate and runs the course on the match's own frame loop (the driver acts once
 ## per drawn frame, so at 30 fps an input is held for two sim steps and at 144 a frame may run none);
@@ -12,6 +13,8 @@ extends "res://tools/new_player_flow_check.gd"
 
 const STEP_LIMIT_S := 40.0  # s of game time one step may take (the flow check's own limit is 45)
 const TIME_SCALE := 4.0  # the hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
+
+const STARTERS := {"Lace": "archer", "Kael": "juggernaut", "Vex": "gunslinger"}  # the tutorial's starter pick
 
 var step_id := ""
 var step_s := 0.0
@@ -34,6 +37,9 @@ func run(m: Node) -> void:
 		elif a.begins_with("--window="):
 			var wh := a.substr(9).split("x")
 			window = Vector2i(int(wh[0]), int(wh[1]))
+		elif a.begins_with("--starter="):
+			starter = a.substr(10)
+	ok(starter in STARTERS.values(), "the starter is Lace, Kael or Vex (%s)" % starter)
 	main.get_window().size = window
 	Engine.time_scale = TIME_SCALE
 	print("TUTPLAY CASE fps cap %d, window %dx%d" % [Engine.max_fps, window.x, window.y])
@@ -57,7 +63,7 @@ func run(m: Node) -> void:
 func _garden() -> void:
 	var da = load("res://tools/tutorial_dead_air_check.gd").new()
 	da.main = main
-	await da._farm("Lace", "archer")
+	await da._farm(STARTERS.find_key(starter), starter)
 	ok(da.bad == 0, "the garden tutorial plays to its end with no stall (%d dead-air failures)" % da.bad)
 	print("TUTPLAY garden steps %d, done %s" % [FarmTutorial.steps().size(), FarmTutorial.state().get("done", false)])
 
