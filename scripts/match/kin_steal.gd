@@ -23,6 +23,8 @@ const STING_DUCK_S := 0.4  # s the music dips under the sting
 const STING_DUCK_DB := -4.0  # dB of that dip
 const POP_M := 2.5  # m from the fallen hunter it floats: clear of their stomp and revive ring (Life revive_radius)
 
+static var carried_home: Array = []  # records of the stolen wisps the player carried when the match ended
+
 
 static func rules() -> Dictionary:
 	return KinSummon.rules()["steal"]
@@ -245,6 +247,9 @@ static func render(k: Kin) -> void:
 
 ## Match end: every loose or stolen wisp goes home to its own hunter.
 static func match_end(m: Match) -> void:
+	carried_home = []
 	for k in m.kins:
+		if m.player != null and k.owner_h == m.player and stolen(k) and not k.dead:
+			carried_home.append(k.rec.duplicate())
 		if taken(k) and k.home_h and not k.dead:
 			go_home(k)
