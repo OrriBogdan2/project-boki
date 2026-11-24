@@ -23,7 +23,7 @@ const SHOT_FRAME := 2  # frames after the hit the strip is taken at (the flash h
 var bad := 0
 var main: Node
 var m: Match
-var P: Hunter
+var _p: Hunter
 
 
 func ok(cond: bool, what: String) -> void:
@@ -42,7 +42,7 @@ func run(root: Node, mode: String = "check") -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	P = m.player
+	_p = m.player
 	if mode == "shots":
 		await _shots()
 	else:
@@ -77,12 +77,12 @@ func _near(a: Color, b: Color) -> bool:
 
 
 func _check() -> void:
-	var foe := _foe(P.pos + Vector3(4, 0, 0))
-	var mob := m.spawn_mob("skitter", P.pos + Vector3(0, 0, 4))
+	var foe := _foe(_p.pos + Vector3(4, 0, 0))
+	var mob := m.spawn_mob("skitter", _p.pos + Vector3(0, 0, 4))
 	var ability := {"src": "kin", "ab": "k1"}
 	var seen: Array = []
 	for sp in READ:
-		var k := _wild(sp, P.pos + Vector3(-4, 0, float(seen.size())))
+		var k := _wild(sp, _p.pos + Vector3(-4, 0, float(seen.size())))
 		var want := DexView.type_col(String(SAMPLE[sp]))
 		var r := _hit(foe, k, ability)
 		var glow := want.lerp(Color.WHITE, SPARK_WHITE)
@@ -94,11 +94,11 @@ func _check() -> void:
 		not _near(seen[0], seen[1]) and not _near(seen[1], seen[2]) and not _near(seen[0], seen[2]),
 		"the three types differ"
 	)
-	var k := _wild("cindowary", P.pos + Vector3(-4, 0, 4))
+	var k := _wild("cindowary", _p.pos + Vector3(-4, 0, 4))
 	var ember := DexView.type_col("ember")
 	ok(_near(_hit(mob, k, ability)[0], ember), "an ember Boki's hit on a mob is ember too")
 	ok(_near(_hit(foe, k, {"src": "kin"})[0], ember), "its plain strike (no ability) is ember")
-	ok(_near(_hit(foe, P, {"src": "primary"})[0], Juice.HIT_COL), "a Hunter's hit on a Hunter keeps the white flash")
+	ok(_near(_hit(foe, _p, {"src": "primary"})[0], Juice.HIT_COL), "a Hunter's hit on a Hunter keeps the white flash")
 	var grey := DexView.type_col("")
 	var missing: Array = []
 	for id in Data.KIN:
@@ -118,7 +118,7 @@ func _shots() -> void:
 		await fade.reveal(0.01)
 	if m.hud:
 		m.hud.visible = false
-	var home := P.pos
+	var home := _p.pos
 	var foes: Array = []
 	var kins: Array = []
 	var i := 0

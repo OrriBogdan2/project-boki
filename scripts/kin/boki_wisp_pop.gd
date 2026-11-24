@@ -106,8 +106,11 @@ func glow_at(u: float, burst: bool) -> Color:
 
 ## 0..1: how far the light is tinted at progress u.
 func _k(u: float, burst: bool) -> float:
-	return smoothstep(0.0, TINT_RISE, u) * (1.0 - smoothstep(TINT_HOLD, 1.0, u)) if burst \
+	return (
+		smoothstep(0.0, TINT_RISE, u) * (1.0 - smoothstep(TINT_HOLD, 1.0, u))
+		if burst
 		else smoothstep(FOLD_WISP_FROM, FOLD_ZIP_FROM, u) * (1.0 - smoothstep(FOLD_ZIP_FROM, 1.0, u))
+	)
 
 
 func _tint(u: float, burst: bool) -> void:

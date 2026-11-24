@@ -6,6 +6,7 @@ extends RefCounted
 const US := [0.0, 0.15, 0.3, 0.4, 0.55, 0.75]
 const TYPES := ["ember", "tempest", "bloom"]
 
+
 func run(main: Node) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
