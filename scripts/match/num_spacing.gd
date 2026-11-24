@@ -10,8 +10,7 @@ const GAP := 4.0  # px left between a slid number and the one it cleared
 
 
 ## `nums`: Fx.nums. Only damage and heal numbers ("val") are spaced; words stack on their own (Fx._clear_spot).
-## `zone` (HunterZone.rect, may be empty): a number never slides back into it while clearing another.
-static func spread(nums: Array, cam: Camera3D, zone := Rect2()) -> void:
+static func spread(nums: Array, cam: Camera3D) -> void:
 	if cam == null:
 		return
 	var live: Array = []
@@ -30,8 +29,6 @@ static func spread(nums: Array, cam: Camera3D, zone := Rect2()) -> void:
 		for r in placed:
 			if box.intersects(r):
 				box.position.x += _slide(box, r)
-		if zone.has_area() and box.intersects(zone):
-			box.position.x += _clear_zone(box, zone, placed)
 		var dx := box.position.x - x0
 		if dx != 0.0:
 			var depth := (l.global_position - cam.global_position).dot(-cam.global_basis.z)
@@ -51,19 +48,4 @@ static func _first(a: Dictionary, b: Dictionary) -> bool:
 static func _slide(box: Rect2, r: Rect2) -> float:
 	var left := r.position.x - box.end.x - GAP
 	var right := r.end.x - box.position.x + GAP
-	return left if -left < right else right
-
-
-## The sideways move (px) that takes `box` out of the hunter's `zone`: to the side where it also lands clear of the
-## numbers already `placed`, else the nearer side (a number beside another beats a number over your hunter).
-static func _clear_zone(box: Rect2, zone: Rect2, placed: Array[Rect2]) -> float:
-	var left := zone.position.x - box.end.x - GAP
-	var right := zone.end.x - box.position.x + GAP
-	var left_free := true
-	var right_free := true
-	for r in placed:
-		left_free = left_free and not Rect2(box.position + Vector2(left, 0.0), box.size).intersects(r)
-		right_free = right_free and not Rect2(box.position + Vector2(right, 0.0), box.size).intersects(r)
-	if left_free != right_free:
-		return left if left_free else right
 	return left if -left < right else right

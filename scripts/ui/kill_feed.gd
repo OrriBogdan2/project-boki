@@ -43,7 +43,6 @@ const SLOT_OF := {
 }
 
 static var shown: Array[Dictionary] = []  # what the last draw put up, top to bottom (--kill-feed-check reads it)
-static var _screen: Array[Rect2] = []  # the same rows in screen px (rects())
 static var _fitted := {}  # name -> the name cut to NAME_W
 
 
@@ -110,22 +109,9 @@ static func _src(by: Ent, from: Hunter) -> String:
 	return "Blight" if by is Blight else String(by.kind).capitalize().replace("_", " ")
 
 
-## Nothing drawn this frame (the feed is held back).
-static func clear() -> void:
-	shown.clear()
-	_screen.clear()
-
-
-## The rows drawn last frame, in screen px (MsgLane keeps its cards off them; the rows are drawn under HudScale.xf,
-## on the canvas at SafeArea.origin).
-static func rects() -> Array[Rect2]:
-	return _screen.duplicate()
-
-
 ## Draws the feed down from Hud.feed_top at the safe margin's right edge, oldest on top.
 static func draw(h_v, sz: Vector2) -> void:
 	shown.clear()
-	_screen.clear()
 	var pad := HudStyle.safe_pad(sz)
 	var y: float = maxf(h_v.feed_top, pad.y)
 	for f: Dictionary in h_v.m.feed:
@@ -133,9 +119,6 @@ static func draw(h_v, sz: Vector2) -> void:
 		var right := sz.x - pad.x
 		var row := _face_row(h_v, f, right, y, a) if is_instance_valid(f.get("who")) else _text_row(h_v, f, right, y, a)
 		shown.append(row)
-		var on: Rect2 = HudScale.xf * (row["rect"] as Rect2)
-		on.position += SafeArea.origin  # (on 21:9 and wider the HUD canvas sits in a centred 16:9 frame)
-		_screen.append(on)
 		y = (row["rect"] as Rect2).end.y + GAP
 
 

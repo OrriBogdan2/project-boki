@@ -112,6 +112,8 @@ def gd_const(script, name):
                 if depth == 0: break
             j += 1
         txt = _strip_gd(src[i:j + 1])
+    # a long string wrapped as "..." + "..." (the line-length rule): Python reads adjacent strings as one
+    txt = re.sub(r'(?<!\\)"\s*\+\s*"', '" "', txt)
     try:
         return ast.literal_eval(txt)
     except Exception as e:
@@ -290,7 +292,7 @@ def gen_classes():
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
         rows.append([link(class_page_name(aid), the(d["title"])), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none yet"])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Fusion)"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
     cu_rows = []

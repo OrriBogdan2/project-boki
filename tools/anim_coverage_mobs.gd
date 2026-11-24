@@ -8,9 +8,8 @@ extends RefCounted
 const KINDS := ["skitter", "spitter", "brute", "warden", "bomber", "sentinel", "glimmer"]
 const COLS := ["idle", "walk", "attack", "hit", "death"]
 ## the MobAnim state each column plays; attack is the wind-up tell and, for a kind whose blow lasts, the strike
-const STATES := {
-	"idle": ["idle"], "walk": ["walk"], "attack": ["windup", "strike"], "hit": ["flinch"], "death": ["death"]
-}
+const STATES := {"idle": ["idle"], "walk": ["walk"], "attack": ["windup", "strike"], "hit": ["flinch"],
+	"death": ["death"]}
 
 
 ## The names of the animations baked into a .glb (its JSON chunk), empty when it has none.

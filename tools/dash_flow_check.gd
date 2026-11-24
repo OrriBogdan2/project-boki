@@ -228,6 +228,13 @@ func _clear_mobs(m: Match) -> void:
 	for mob in m.mobs:
 		mob.queue_free()
 	m.mobs.clear()
+	# wild Boki too (no owner): which species rolls onto which spot moves with the roster, and one near home
+	# turns a trial on whatever the roll put there
+	for k: Kin in m.kins.duplicate():
+		if k.owner_h == null:
+			k.dead = true
+			m.kins.erase(k)
+			k.queue_free()
 
 
 func _steps(m: Match, n: int) -> void:

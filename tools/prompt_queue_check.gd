@@ -115,7 +115,7 @@ func _send_and_hint() -> void:
 		"the settled lane shows the rest, not the Boki-key hint (%s)" % str(texts)
 	)
 	ok(
-		lane.waiting() == 0 or lane.texts().size() == lane.max_shown,
+		lane.waiting() == 0 or lane.texts().size() == lane.MAX_SHOWN,
 		"nothing is left behind (%d waiting)" % lane.waiting()
 	)
 	var cards: Array[Rect2] = lane.rects()

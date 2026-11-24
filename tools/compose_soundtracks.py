@@ -49,66 +49,24 @@ def major_v(s, ch, bar, dur, vel, octave=-1):
 
 
 # ------------------------------------------------------------------ Classic Adventure
-def title_groove(s, start, stop, fill_every=8):
-    """The title's kit: kick on 1 and 3, snare on 2 and 4, eighth hats, a tambourine on the backbeat, and a tom
-    fill in the last bar of each phrase that ends in a crash on the next downbeat."""
-    drums(
-        s,
-        [(0, "kick", 1.0), (2, "kick", 0.85), (2.5, "kick", 0.6), (1, "snare", 0.8), (3, "snare", 0.85)],
-        stop,
-        84,
-        start,
-    )
-    drums(
-        s,
-        [(i / 2, "hat", 0.34 if i % 2 else 0.5) for i in range(8)] + [(1, "tamb", 0.5), (3, "tamb", 0.5)],
-        stop,
-        84,
-        start,
-    )
-    for bar in range(start + fill_every - 1, stop, fill_every):
-        fill = [
-            (2, "tom_hi", 0.8),
-            (2.5, "tom_hi", 0.7),
-            (3, "tom_lo", 0.9),
-            (3.25, "tom_lo", 0.8),
-            (3.5, "tom_lo", 0.9),
-            (3.75, "snare", 0.9),
-        ]
-        for t, dk, vs in fill:
-            s.note(9, bar * s.beats + t, D[dk], 1.0, 84 * vs)
-        s.note(9, (bar + 1) * s.beats, D["crash"], 2.0, 96)
-
-
 def classic_menu():
-    # "Hearthlight" as a trailer: the same D-major theme at 108 BPM. Two bars of toms and shaker lead in, a cello
-    # drive runs under the flute, the trumpet takes the second A, the horn answers, then everyone plays the last A.
-    # Dynamics rise over the 32 bars; the loop's last fill falls into the intro.
-    intro = 2
-    s = Song("classic_menu", 108, 32 + intro, root=62, mode="major", seed=101)
+    # "Hearthlight": the main theme. D major, flute over harp and lute; the horn answers, then everyone.
+    s = Song("classic_menu", 84, 32, root=62, mode="major", seed=101)
     s.inst(0, "flute", 100)
-    s.inst(1, "harp", 80)
-    s.inst(2, "nylon", 70)
-    s.inst(3, "ac_bass", 90)
-    s.inst(4, "strings", 62)
-    s.inst(5, "horn", 92)
+    s.inst(1, "harp", 84)
+    s.inst(2, "nylon", 74)
+    s.inst(3, "ac_bass", 84)
+    s.inst(4, "strings", 60)
+    s.inst(5, "horn", 90)
     s.inst(6, "oboe", 80)
-    s.inst(7, "cello", 92)
-    s.inst(8, "trumpet", 88)
-    s.inst(10, "taiko", 100)
     A = [0, 4, 5, 3, 0, 3, 4, 4]
     A2 = [0, 4, 5, 3, 0, 3, 4, 0]
     B = [5, 3, 0, 4, 5, 3, 1, 4]
     prog = A + A2 + B + A
-    arp(s, 1, prog, [0, 1, 2, 3, 2, 1, 0, 2], step=0.5, vel=60, octave=-1, ring=1.5)
-    strum(s, 2, prog, [(0, 1.0), (1.5, 0.5), (2, 1.0), (3.5, 0.5)], vel=60)
-    bass(s, 3, prog, [(0, 1.0), (1.5, 0.5), (2, 1.0), (3.5, 0.5)], vel=84)
-    pad(s, 4, prog[8:], vel=52)
-    for bar, d in enumerate(prog):
-        for i in range(8):
-            s.note(7, bar * s.beats + i * 0.5, s.deg(d + (4 if i % 4 == 3 else 0), -2), 0.45, 80 - (14 if i % 2 else 0))
-        if bar % 2 == 0:
-            s.note(10, bar * s.beats, s.deg(d, -3), 1.5, 100)
+    arp(s, 1, prog, [0, 1, 2, 3, 2, 1, 0, 2], step=0.5, vel=62, octave=-1, ring=2.0)
+    strum(s, 2, prog, [(0, 1.8), (2, 1.8)], vel=58)
+    bass(s, 3, prog, [(0, 2.0), (2, 2.0)], vel=78)
+    pad(s, 4, prog[8:], vel=50)
     theme = [
         (4, 1.5),
         (2, 0.5),
@@ -136,6 +94,8 @@ def classic_menu():
         (4, 1),
         (6, 1),
     ]
+    tune(s, 0, theme + [(4, 3), (None, 1)], 0, 98)
+    tune(s, 0, theme + [(7, 3), (None, 1)], 8, 100)
     answer = [
         (5, 3),
         (4, 1),
@@ -153,37 +113,11 @@ def classic_menu():
         (4, 2),
         (6, 2),
     ]
-    tune(s, 0, theme + [(4, 3), (None, 1)], 0, 98)
-    tune(s, 0, theme + [(7, 3), (None, 1)], 8, 100)
-    tune(s, 8, theme + [(7, 3), (None, 1)], 8, 90)
-    tune(s, 5, answer, 16, 94, octave=-1)
-    tune(s, 6, answer, 16, 70)
+    tune(s, 5, answer, 16, 88, octave=-1)
     tune(s, 0, theme + [(4, 3), (None, 1)], 24, 102)
-    tune(s, 6, theme + [(4, 3), (None, 1)], 24, 76, octave=-1)
-    tune(s, 8, theme + [(4, 3), (None, 1)], 24, 86)
-    title_groove(s, 8, 32)
-    title_groove(s, 0, 8)
-    for i, (beat, ch, key, vel, dur) in enumerate(s.ev):
-        s.ev[i] = (
-            beat + intro * s.beats,
-            ch,
-            key,
-            int(min(127, vel * (0.98, 1.0, 1.02, 1.05)[min(3, int(beat // (8 * s.beats)))])),
-            dur,
-        )
-    for bar in range(intro):
-        s.note(10, bar * s.beats, s.deg(0, -3), 2.0, 110)
-        drums(
-            s,
-            [(0, "tom_lo", 1.0), (1, "tom_lo", 0.6), (2, "tom_lo", 0.8), (3, "tom_lo", 0.6), (3.5, "tom_lo", 0.8)],
-            bar + 1,
-            84,
-            bar,
-        )
-        drums(s, [(i / 2, "shaker", 0.5 + 0.06 * i) for i in range(8)], bar + 1, 84, bar)
-    for i in range(8):
-        s.note(9, s.beats + 2 + i * 0.25, D["snare"], 0.25, 50 + 6 * i)
-    s.note(9, intro * s.beats, D["crash"], 3.0, 100)
+    tune(s, 6, theme + [(4, 3), (None, 1)], 24, 70, octave=-1)
+    drums(s, [(1, "tamb", 0.45), (3, "tamb", 0.5), (0, "tom_lo", 0.5)], start=16)
+    s.note(9, 0, D["triangle"], 1, 50)
     return s
 
 

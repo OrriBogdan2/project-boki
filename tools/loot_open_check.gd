@@ -141,8 +141,6 @@ func _live(main: Node) -> void:
 	if op == null:
 		return
 	sync.set_process(false)
-	p.inp["aim"] = p.pos + Vector3(0, 0.9, -10.0)  # (face the chest, ahead along -z, wherever the seed spawns him)
-	p.inp["aim_y"] = p.pos.y
 	p.ak.play(LIVE_MOVE)
 	for i in int(LIVE_SETTLE / DT):
 		_frame(m, p, sync)

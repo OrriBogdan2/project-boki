@@ -101,7 +101,7 @@ var vp: RID
 
 func run(main_node: Node) -> void:
 	var args := OS.get_cmdline_user_args()
-	if "--bench-probe" in args:  # the two own-setup parts: their window, save and camera, not setup()'s
+	if "--bench-probe" in args:      # the two own-setup parts: their window, save and camera, not setup()'s
 		main_node.add_child(load("res://tests/perf_probe.gd").new())
 		return
 	if "--bench-hunter-gpu" in args:
@@ -670,7 +670,6 @@ func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 		)
 	)
 	return f
-
 
 ## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as tests/perf_probe.gd does.
 func _hook_hud(m: Match) -> void:

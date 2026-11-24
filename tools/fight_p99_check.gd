@@ -25,22 +25,14 @@ func run(main: Node) -> void:
 	var base := baseline_for(adapter, cpu, Settings.quality(), res)
 	var fail := false
 	if base < 0.0:
-		print(
-			(
-				"FIGHT P99 no baseline for %s | %s | %s | %s; measured %.1f ms. Add to tools/perf.tsv:"
-				% [adapter, cpu, Settings.quality(), res, p99]
-			)
-		)
+		print("FIGHT P99 no baseline for %s | %s | %s | %s; measured %.1f ms. Add to tools/perf.tsv:" % [
+			adapter, cpu, Settings.quality(), res, p99])
 		print("%s|%s|%s|%s\t%.1f" % [adapter.to_lower(), cpu.to_lower(), Settings.quality(), res, p99])
 	else:
 		var cap := base * (1.0 + MAX_REGRESS)
 		fail = p99 > cap
-		print(
-			(
-				"FIGHT P99 %s: %.1f ms over %d frames on %s | %s, cap %.1f (baseline %.1f +%d%%)"
-				% ["FAIL" if fail else "PASS", p99, frames.size(), adapter, cpu, cap, base, roundi(MAX_REGRESS * 100.0)]
-			)
-		)
+		print("FIGHT P99 %s: %.1f ms over %d frames on %s | %s, cap %.1f (baseline %.1f +%d%%)" % [
+			"FAIL" if fail else "PASS", p99, frames.size(), adapter, cpu, cap, base, roundi(MAX_REGRESS * 100.0)])
 	var advisory := fail and not strict
 	if advisory:
 		print("FIGHT P99 ADVISORY: not a real GPU run or no --timing-strict; judged by fight-p99-gpu")

@@ -22,7 +22,8 @@ func _up(preset: String) -> bool:
 	var c: Node = main.current
 	if not is_instance_valid(c): return false
 	if preset in ["farm", "care"]: return c.get("building") == false and not (c.get("kins") as Array).is_empty()
-	return c is Match and c.player != null and not c.hunters.is_empty()
+	# (built: Match turns its process on at build.finish; hunters spawn over frames, so the first one is not "up")
+	return c is Match and c.player != null and not c.hunters.is_empty() and c.is_processing()
 
 func _boot(preset: String, args: PackedStringArray) -> bool:
 	Demo.setup(preset)

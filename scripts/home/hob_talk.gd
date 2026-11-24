@@ -134,7 +134,7 @@ func _after_beat(id: String) -> void:
 
 func _on_line(_i: int, line: Dictionary) -> void:
 	var at: Vector3 = line.get("at", _where(String(line.get("show", ""))))
-	if look != null and (at.x == INF or not look.look(at)):   # (look is made on the first frame)
+	if at.x == INF or not look.look(at):
 		look.release()
 	hob.node.point_at = at
 	hob.node.pose = "point" if at.x != INF else String(line.get("pose", "talk"))
@@ -158,8 +158,7 @@ func _closed() -> void:
 	var h = hob.h
 	box = null
 	offer = null
-	if look != null:
-		look.release()
+	look.release()
 	if h.panel_open == TALK:
 		h.panel_open = ""
 	h.cam.zoom_to = CamWheel.far()
