@@ -291,7 +291,20 @@ func _base_world() -> void:
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
 	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
+	var hint := FarmTutorial.hint_text("toy")
+	var price := str(HomeLayout.price("toy_ball")[0])
+	ok(
+		hint.contains(Settings.key_cap("build")) and hint.contains(price) and hint.contains("free"),
+		"toy: the line names the build key, the ball's price and that the patch is free: %s" % hint
+	)
+	var marked: Array = []
+	for tab in ["Base", "Garden"]:
+		for e in home.hb.entries.tab(tab):
+			if bool(e.get("hl", false)):
+				marked.append(String(e["id"]))
+	ok(marked == ["toy_ball", "snack_patch"], "toy: the ball and the patch glow in their tabs: %s" % str(marked))
 	guide.place_toy()
+	ok(FarmTutorial.marks().is_empty(), "toy: nothing glows once a toy is down")
 	ok(
 		guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
 		"toy: the marker is on the toy you put down, not a side isle"
