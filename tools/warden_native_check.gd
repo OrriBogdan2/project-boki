@@ -4,11 +4,34 @@ extends RefCounted
 ## contract bones, no WardenSync), its clips play for the game states (idle, walk, run, jump, attack, crouch), it
 ## stands as tall as the contract model, faces the way the Hunter faces, keeps the hit ring, hides the rig's procedural
 ## weapon, puts the aim node on Meshy's hand, hangs the anchor empties on Meshy's bones and wears the drop poses (the
-## landing squash: --land-weight-check). Every other Warden keeps the contract path.
+## landing squash: --land-weight-check). Every other Warden keeps the contract path. The clip slots (data "clips": lmb,
+## lmb_hold, rmb, e, r, dash, glide, land, hit, downed, stomp): each is picked by its state or move, a missing one
+## plays today's clip, a clips file's clips load onto Meshy's bones, and no switch shows the T-pose.
 
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
+const POSED_MIN := 10  # bones turned off Meshy's T-pose rest in a playing clip (the T-pose turns none)
+const TURNED := 0.03  # rad: a bone this far off its rest is posed
+const CALM_CAST := 99.0  # s since the last cast: Hunter._anim_state always sends "cast" (WardenNative baselines on it)
+const SYNTH := "Zz_Clip"  # the test clip a synthetic clips file carries
+const STRING_PULL := 0.08  # m, Meshy scale: the string is drawn this far off the bow at a release move's first frame
+const STRING_BACK := 0.03  # and this near it a frame later
+## Slot -> [state before, state that starts it, the clip today's game plays for it]. A cast's state names its cast
+## slot, which HunterAnim's counters turn into a new cast (cast 5 -> 0).
+const SLOT_CASES := {
+	"lmb": [{"swing_n": 0}, {"swing_n": 1, "combo": 0}, "attack"],
+	"lmb_hold": [{"swing_n": 0}, {"swing_n": 1, "combo": -1}, "attack"],
+	"rmb": [{"cast": 5.0, "cast_slot": "secondary"}, {"cast": 0.0, "cast_slot": "secondary", "kmove": "x"}, "attack"],
+	"e": [{"cast": 5.0, "cast_slot": "utility"}, {"cast": 0.0, "cast_slot": "utility", "kmove": "x"}, "attack"],
+	"r": [{"cast": 5.0, "cast_slot": "ult"}, {"cast": 0.0, "cast_slot": "ult", "kmove": "x"}, "attack"],
+	"dash": [{}, {"rolling": true}, "idle"],
+	"glide": [{"grounded": false}, {"grounded": false, "gliding": true}, "jump"],
+	"land": [{}, {"feel": Vector2(0.8, 0.0)}, "idle"],
+	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0}, "idle"],
+	"downed": [{}, {"fall": 0.5}, "idle"],
+	"stomp": [{}, {"stomp": 0.4}, "idle"],
+}
 
 var bad := 0
 var n := 0
@@ -88,8 +111,9 @@ func _height(a: String) -> void:
 func _states(main: Node, a: String) -> void:
 	var m := _model(a)
 	var nat := m.get_node("Warden/Native") as WardenNative
-	# (every state carries "cast" like Hunter._anim_state's: without it WardenNative reads the state as not yet filled and
-	# ignores the swing; the idle case is the first read, the baseline the attack's swing_n 1 is counted against)
+	# (every state carries "cast" like Hunter._anim_state's: without it WardenNative reads the state
+	# as not yet filled and ignores the swing; the idle case is the first read, the baseline
+	# the attack's swing_n 1 is counted against)
 	var cases := [
 		["idle", {"cast": 99.0, "grounded": true}],
 		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
@@ -99,7 +123,7 @@ func _states(main: Node, a: String) -> void:
 		["attack", {"cast": 99.0, "grounded": true, "swing_n": 1}],
 	]
 	for c in cases:
-		m.set_meta(WardenClips.STATE, c[1])
+		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST}.merged(c[1], true))
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
 		var want := String(nat.plays[c[0]])
@@ -120,6 +144,8 @@ func _states(main: Node, a: String) -> void:
 	ok(anchors.size() == 3, "%s: the anchors ride Meshy's bones (%s)" % [a, str(anchors)])
 	_toon(a, m)
 	_crouch_arms(a, nat)
+	await _slots(main, a, m, nat)
+	await _kmoves(main, a, m, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
 	_drop_poses(a, m, nat)
@@ -209,3 +235,132 @@ func _orbits(main: Node, a: String, nat: WardenNative) -> void:
 				% [a, orb, want[orb], props.size(), far, moved]
 			)
 		)
+
+
+## Plays state `s` for two frames (`calm` first, so the counters take it as their baseline) from a clean slate.
+func _feed(main: Node, nat: WardenNative, m: Node3D, calm: Dictionary, s: Dictionary) -> void:
+	nat.attack_left = 0.0
+	nat.last = {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
+	nat.hit_prev = 99.0
+	nat.land_prev = 0.0
+	for st in [calm, s]:
+		var state := {"grounded": true, "cast": CALM_CAST}
+		state.merge(st, true)
+		m.set_meta(WardenClips.STATE, state)
+		m.set_meta(WardenClips.FEEL, state.get("feel", Vector2.ZERO))
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+
+
+## How many bones the playing pose has turned off Meshy's rest (a T-pose turns none).
+func _turned(nat: WardenNative) -> int:
+	var sk := nat.skel
+	var n_turned := 0
+	for b in sk.get_bone_count():
+		var rest := sk.get_bone_rest(b).basis.get_rotation_quaternion()
+		n_turned += int(sk.get_bone_pose_rotation(b).angle_to(rest) > TURNED)
+	return n_turned
+
+
+## Each slot: with no clip in the data a state plays today's clip; with one it plays that clip, in a pose that is not
+## the T-pose on the switch nor once the crossfade is done; a charged swing without lmb_hold takes lmb; a clips
+## file's clip is found, laid on Meshy's bones and plays; every slot the data names has its clip.
+func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	var named: Array = SLOT_CASES.keys().filter(func(sl): return (nat.d["clips"] as Dictionary).has(sl))
+	var all_there: bool = named.all(func(sl): return nat.plays.has(sl))
+	ok(all_there, "%s: every clip slot the data names has its clip (%s)" % [a, named])
+	var pick := String(nat.d["clips"]["crouch"])  # (Meshy's clip no fallback plays)
+	for sl in SLOT_CASES:
+		var c: Array = SLOT_CASES[sl]
+		if not nat.plays.has(sl):
+			await _feed(main, nat, m, c[0], c[1])
+			var want := String(nat.plays[c[2]])
+			var now := nat.player.current_animation
+			ok(now == want, "%s: slot %s empty plays %s" % [a, sl, now])
+		nat.plays[sl] = pick
+		await _feed(main, nat, m, c[0], c[1])
+		var first := _turned(nat)
+		nat.player.advance(WardenNative.FADE * 2.0)
+		var done := _turned(nat)
+		var got := nat.player.current_animation
+		ok(
+			got == pick and first >= POSED_MIN and done >= POSED_MIN,
+			"%s: slot %s plays %s, no T-pose (%d, %d bones posed)" % [a, sl, got, first, done]
+		)
+		nat.plays.erase(sl)
+	nat.plays["lmb"] = pick
+	await _feed(main, nat, m, {"swing_n": 0}, {"swing_n": 1, "combo": -1})
+	ok(nat.player.current_animation == pick, "%s: a charged swing takes lmb without lmb_hold" % a)
+	nat.plays.erase("lmb")
+	await _synthetic_clips(main, a, m, nat)
+
+
+## A clips file (made here: a skeleton under another node name, one clip named SYNTH) lends its clip to a slot.
+func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	var src := Node3D.new()
+	var holder_node := Node3D.new()
+	holder_node.name = "Elsewhere"
+	src.add_child(holder_node)
+	var sk := nat.skel.duplicate() as Skeleton3D
+	sk.name = "Rig"
+	holder_node.add_child(sk)
+	var clip := nat.player.get_animation(String(nat.plays["attack"])).duplicate(true) as Animation
+	for ti in clip.get_track_count():
+		clip.track_set_path(ti, NodePath("Elsewhere/Rig:%s" % clip.track_get_path(ti).get_concatenated_subnames()))
+	var lib := AnimationLibrary.new()
+	lib.add_animation(SYNTH, clip)
+	var sp := AnimationPlayer.new()
+	sp.add_animation_library(&"", lib)
+	src.add_child(sp)
+	nat.plays["dash"] = SYNTH
+	nat.borrow(src)
+	var got := nat.player.get_animation(SYNTH) if nat.player.has_animation(SYNTH) else null
+	var home := nat.player.get_node(nat.player.root_node)
+	var on_bones := got != null and got.get_track_count() == clip.get_track_count()
+	for ti in got.get_track_count() if got else 0:
+		var p := got.track_get_path(ti)
+		var bone := nat.skel.find_bone(p.get_concatenated_subnames())
+		on_bones = on_bones and home.get_node_or_null(p) == nat.skel and bone >= 0
+	var tracks := got.get_track_count() if got else 0
+	ok(on_bones, "%s: a clips file's clip is laid on Meshy's bones (%d tracks)" % [a, tracks])
+	await _feed(main, nat, m, {}, {"rolling": true})
+	var plays_it := nat.player.current_animation == SYNTH and _turned(nat) >= POSED_MIN
+	ok(plays_it, "%s: the slot plays the clips file's clip" % a)
+	nat.player.stop()  # (a clip removed while it plays errors on every advance)
+	nat.player.get_animation_library(&"").remove_animation(SYNTH)
+	nat.plays.erase("dash")
+	src.free()
+
+
+## Each kit move the data gives a clip (data "kmoves"): the clip is there, plays on the move and is no T-pose; a hold
+## loop stays inside [hold_from, end] while the move lasts and is gone the frame it ends; a release has the string
+## drawn on its first frame and back on the bow on the next (the arrow leaves within a frame of the kit's fire time).
+func _kmoves(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	var kms: Dictionary = nat.d.get("kmoves", {})
+	var string_bi := nat.skel.find_bone("StringMid")
+	for km in kms:
+		var mv: Dictionary = kms[km]
+		var clip := String(mv["clip"])
+		mv["fade"] = 0.0  # (the blend from the calm pose would be in every reading)
+		ok(
+			nat.plays.has("km:" + km) and nat.player.has_animation(clip),
+			"%s: kit move %s has its clip %s" % [a, km, clip]
+		)
+		var length := nat.player.get_animation(clip).length
+		var hold := float(mv.get("hold_from", -1.0))
+		await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": 0.2})
+		ok(nat.player.current_animation == clip and _turned(nat) >= POSED_MIN, "%s: %s plays %s" % [a, km, clip])
+		if hold >= 0.0:
+			var late := hold + 2.5 * (length - hold)
+			await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": late})
+			var pos := nat.player.current_animation_position
+			ok(pos >= hold - 0.05 and pos < length, "%s: %s holds in its loop (%.2f s of %.2f)" % [a, km, pos, length])
+			await _feed(main, nat, m, {}, {})
+			ok(nat.player.current_animation != clip, "%s: no %s once the move ends" % [a, km])
+		elif string_bi >= 0:
+			var pulls := []
+			for t in [0.0, 1.0 / 30.0]:
+				await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": t})
+				var off := nat.skel.get_bone_pose_position(string_bi) - nat.skel.get_bone_rest(string_bi).origin
+				pulls.append(off.length())
+			ok(pulls[0] > STRING_PULL and pulls[1] < STRING_BACK, "%s: %s lets go within a frame (%s)" % [a, km, pulls])
