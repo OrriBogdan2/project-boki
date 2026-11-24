@@ -681,6 +681,8 @@ func goal(sid: String) -> Vector3:
 			var best := camps.nearest("sentinel" if sid == "hook" else "")
 			if best == null:
 				best = camps.nearest()
+			if best == null and not camps.coming.is_empty():
+				return camps.coming["at"]  # (the telegraphed camp: the marker holds on its ring)
 			return best.pos if best else camps.last_at  # (a camp felled with you on the edge respawns once you're back)
 		"wayout", "uplink", "defend", "extract":
 			var o := outpost()

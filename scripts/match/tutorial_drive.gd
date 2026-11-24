@@ -159,6 +159,9 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if sid == "sec":
 		_rmb(m, tu)
 	if best == null:
+		if not tu.camps.coming.is_empty():
+			var ring: Vector3 = tu.camps.coming["at"]
+			if Vector2(p.pos.x - ring.x, p.pos.z - ring.z).length() > 8.0: goto.call(ring)  # (walk to the telegraphed ring)
 		if sid == "summon" or sid == "pack":
 			_summon(m, tu)      # (the monster fell in a window called back early: the Boki still comes out again)
 		return
