@@ -847,7 +847,8 @@ func _fire_needle() -> void:
 	var d := h.aim_dir()
 	var a := _muzzle(d)
 	var l_v := float(ed["range"])
-	l_v = minf(l_v, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * l_v, h.team, "pierce"))  # placed walls stop it
+	# placed walls stop it
+	l_v = minf(l_v, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * l_v, h.team, "pierce"))
 	needle_dir = d
 	# a taut needle of light (deep body, white-hot core, sparks shed along it) out of her open palm to where the
 	# measured line ends, a bloom on the palm, recoil smoke round her

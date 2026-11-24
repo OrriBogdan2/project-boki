@@ -12,7 +12,8 @@ const SIM_SECS := 240.0  # simulated seconds
 const DT := 0.25  # s per farm step
 const HATCH_S := 600.0  # s of home hatch time the egg starts with (home.gd _start_egg)
 const ISLAND_SEED := 7  # the farm-start island (a random one each run moved the toy and the ball)
-const CHORE_WORDS := ["minded the egg", "cheered up ", "fetched the ball back", "watered the snack patch"]  # BaseChore's journal lines
+# BaseChore's journal lines
+const CHORE_WORDS := ["minded the egg", "cheered up ", "fetched the ball back", "watered the snack patch"]
 const GLUM_JOY := 25.0  # Bur's joy at the start: glum, but one cheer lifts it out of it
 const HUB_FRAMES := 600  # frames to wait for the hub to load
 
