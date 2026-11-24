@@ -123,3 +123,10 @@ ran `OcclusionOutline.for_match` (`Match._process` is off there), so no outline 
 Results (rpg6, GPU, 4090, three runs): rim on vs off +35%, +48%, +20% (10, 12, 7 frames); pooled over the 29 frames
 24.1 vs 17.6, +37%. The +30% goal (focus baseline 11-22) is met on the pooled number; a run of under ~10 frames swings
 ±15%.
+
+## Smoke puffs part on screen too (11-24)
+A smoke cloud (`Models.gear_smoke`: 14 opaque spheres up to 2.6 m, lit pink on the Hollow Crown) parted only round a
+Hunter's feet on the ground (`FxHunterCap._part`, radius + `PUFF_CLEAR`). The camera looks down at a slant, so a puff
+on its side of a Hunter still buried the body: the "pink sphere clusters" over a fight. A puff now also hides while its
+disc on screen covers a shown Hunter's box (`HunterZone.rect_of`). Concealment (`Match.in_smoke`) is untouched.
+`--fx-hunter-cap-check` holds it (a puff 3.6 m off on the ground, between the camera and the Hunter, parts).
