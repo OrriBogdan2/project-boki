@@ -89,6 +89,9 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
+	# (no turning on the spot: the TurnStep holds the feet where they stood while the shots turn the model under them,
+	# so the legs kept one world yaw, the back below the waist in every turned frame; found on Sparkle 11-20)
+	model.remove_meta(TurnStep.META)
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")

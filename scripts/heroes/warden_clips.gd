@@ -141,6 +141,8 @@ var stride: WardenStride
 static func data(art_name: String) -> Dictionary:
 	if not _data.has(art_name):
 		var p := DIR + art_name + ".json"
+		if not FileAccess.file_exists(p):
+			p = DIR + art_name.get_slice("_", 0) + ".json"  # a design variant (vex_r3b) plays its Warden's clips
 		var parsed = JSON.parse_string(FileAccess.get_file_as_string(p)) if FileAccess.file_exists(p) else null
 		_data[art_name] = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
 	return _data[art_name]
