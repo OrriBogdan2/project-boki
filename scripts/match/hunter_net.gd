@@ -19,12 +19,14 @@ static func extra(h: Hunter) -> Array:
 	var ch := ChannelBar.read(h)
 	var reach: Array = (h.ak as DredgeKit).net_reach() if h.ak is DredgeKit else []
 	var left := snappedf(maxf(0.0, ch[1]), 0.05)
-	return [TAG, h.lvl, SICK_TAG, snappedf(h.sick_t, 0.1), CHAN_TAG, ch[0], left, REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)]
+	var sick := snappedf(h.sick_t, 0.1)
+	return [TAG, h.lvl, SICK_TAG, sick, CHAN_TAG, ch[0], left, REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)]
 
 
 static func apply(h: Hunter, it: Array) -> void:
 	var i := it.size() - TAIL
-	if i < 0 or it[i] != TAG or it[i + 2] != SICK_TAG or it[i + 4] != CHAN_TAG or it[i + 7] != REACH_TAG or it[i + 9] != MOVE_TAG:
+	var tags_ok := i >= 0 and it[i] == TAG and it[i + 2] == SICK_TAG and it[i + 4] == CHAN_TAG
+	if not tags_ok or it[i + 7] != REACH_TAG or it[i + 9] != MOVE_TAG:
 		return
 	h.lvl = maxi(1, int(it[i + 1]))
 	h.sick_t = float(it[i + 3])
