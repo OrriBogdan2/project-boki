@@ -2799,6 +2799,7 @@ func render(delta: float, alpha: float) -> void:
 		if grounded and spd > 4.0:     # (running: the surface's step and little puffs of dust, on the plant)
 			m.fx.dust(pos, 2)
 			Juice.footstep(self)
+	if posed: HazardMoveSfx.play(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
