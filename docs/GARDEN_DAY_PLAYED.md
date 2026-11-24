@@ -94,6 +94,10 @@ now calls `BaseLife.hungry_wake`: a hungry day napper or tag player gets up at o
 measured with two napping Boki, 45.4 and 48.6 s before, 7.2 and 8.4 s after. A second, smaller one, fixed: a hungry Boki
 that had wandered more than 9 m from the bowl never answered it (one sat in Roam, food 8, 10 m away, for 120 s).
 `FeedBowl.reach(food)` now grows from 9 m (just hungry) to 27 m (starving).
+A third, found on the integration tree (`ext/stuck-integ-4409db43`), fixed: a hungry Boki with low joy was sent to a
+toy (`HomeToys.pick`), dropped from it the next frame (food under 30 is "busy"), and kept the toy's 30 s think timer, so
+it stood in Roam ignoring the bowl, 30 s at a time; a hungry Boki could also be pulled into tag. 2 of 6 full runs
+failed the bowl row before (Moss 64 s; Moss 104 s and Rocky never), 6 of 6 green after (worst 14.4 s).
 
 **Not fixed, listed.**
 
