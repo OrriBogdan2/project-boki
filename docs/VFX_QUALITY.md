@@ -135,6 +135,11 @@ Next in line (24-25, smaller): Lace's deep red against Kael's crimson (owner's c
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
+  rimewright, tender, thief (Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `bjorn_fx`, `breah_*`).
+  Lace (`pin_fx`) is on data except her arrow bodies, spent arrows, and the Spirit Walk body wash, screen tint and shell
+  (ext/lace-vfx-data): the perfect-release burst, the Heavy Shot's glint and release, the Hail Wall's burn, the dash
+  trail and the Spirit Walk shares are `archer.json` moves; the live Hail Wall is the same laced AimKit arc as its tell.
+  rimewright, tender, thief (Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
   rimewright, tender, thief (Grimble is all `content/vfx/dredge.json` now; Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
