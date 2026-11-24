@@ -424,7 +424,7 @@ func _finish_load() -> void:
 	walls.sort()
 	if not walls.is_empty():
 		var p95: float = walls[mini(walls.size() - 1, int(walls.size() * 0.95))]
-		lines.append("LOAD frame ms p50 %.1f p95 %.1f max %.1f" % [walls[walls.size() / 2], p95, walls[-1]])
+		lines.append("LOAD frame ms p50 %.1f p95 %.1f max %.1f" % [walls[int(walls.size() / 2.0)], p95, walls[-1]])
 	lines.append("LOAD spinner drew on %d of %d loading-screen frames" % [drawn, up])
 	var ranked := fl.duplicate()
 	ranked.sort_custom(func(a, b): return float(a["cpu" if cpu_only else "wall"]) > float(b["cpu" if cpu_only else "wall"]))
@@ -563,14 +563,14 @@ func _local_median(i: int) -> float:
 		if j != i: v.append(float(frames[j]["wall"]) - float(frames[j].get("sim_extra", 0.0)))
 	if v.is_empty(): return 0.0
 	v.sort()
-	return v[v.size() / 2]
+	return v[int(v.size() / 2.0)]
 
 func _median(list: Array, key: String) -> float:
 	var v: Array = []
 	for f in list: v.append(float(f.get(key, 0.0)) - float(f.get("sim_extra", 0.0)) if key == "wall" else float(f.get(key, 0.0)))
 	if v.is_empty(): return 0.0
 	v.sort()
-	return v[v.size() / 2]
+	return v[int(v.size() / 2.0)]
 
 ## Shader variants the engine has compiled and cached (user://shader_cache: one file per variant).
 ## Counted every frame, a jump means that frame compiled shaders. Only a cold cache shows them:
