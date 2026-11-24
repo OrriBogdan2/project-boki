@@ -5,8 +5,9 @@ extends RefCounted
 ## the row flashes green on a sale and the button says why when you can't. The use key closes it.
 
 const WIDTH := 520.0
-const BELT_CLEAR := 170.0      # px kept free at the bottom for the belt and weapon slots
-const FLASH_S := 0.5      # seconds a bought row glows
+const BELT_CLEAR := 170.0  # px kept free at the bottom for the belt and weapon slots
+const FLASH_S := 0.5  # seconds a bought row glows
+
 
 ## Builds the panel on the HUD, beside the screen centre, and returns it.
 static func open(m, v: Dictionary) -> PanelContainer:
@@ -27,9 +28,11 @@ static func open(m, v: Dictionary) -> PanelContainer:
 	UI.pop_in(pc)
 	return pc
 
+
 ## Redraws the rows (after a sale, or a sale by another game) keeping the panel where it is.
 static func refresh(m, pc: PanelContainer, v: Dictionary) -> void:
 	_fill(m, pc, v, -1)
+
 
 static func _fill(m, pc: PanelContainer, v: Dictionary, flash: int) -> void:
 	for c in pc.get_children():
@@ -52,6 +55,7 @@ static func _fill(m, pc: PanelContainer, v: Dictionary, flash: int) -> void:
 	box.add_child(UI.label("Spending gems here means fewer to extract.", 12, HudStyle.MUTED))
 	for i in (v["rows"] as Array).size():
 		box.add_child(_row(m, pc, v, i, i == flash))
+
 
 static func _row(m, pc: PanelContainer, v: Dictionary, i: int, flash: bool) -> Control:
 	var row: Dictionary = v["rows"][i]
@@ -83,6 +87,7 @@ static func _row(m, pc: PanelContainer, v: Dictionary, i: int, flash: bool) -> C
 	line.add_child(buy)
 	return card
 
+
 ## One Buy click: the sale, the feedback and a green flash on the row.
 static func buy_row(m, pc: PanelContainer, v: Dictionary, i: int) -> void:
 	var why := Shops.buy(m, m.player, v, i)
@@ -91,6 +96,8 @@ static func buy_row(m, pc: PanelContainer, v: Dictionary, i: int) -> void:
 		return
 	_fill(m, pc, v, i)
 	var t := pc.get_tree().create_timer(FLASH_S)
-	t.timeout.connect(func():
-		if is_instance_valid(pc) and pc.is_inside_tree():
-			_fill(m, pc, v, -1))
+	t.timeout.connect(
+		func():
+			if is_instance_valid(pc) and pc.is_inside_tree():
+				_fill(m, pc, v, -1)
+	)

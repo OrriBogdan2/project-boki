@@ -19,23 +19,32 @@ extends RefCounted
 
 const PAD_R := 0.8
 
-static func start(h: Hunter, id: String, d: Dictionary) -> bool:
+
+static func start(h: Hunter, d: Dictionary) -> bool:
 	match String(d.get("use", "")):
-		"pad": _pad(h, d)
-		"field": return _field(h, id, d)
-		"pilfer": _pilfer(h, d)
-		"lamp": Beacons.lamp(h.m, h.pos)
-		"ember": Beacons.pop(h.m, h.pos, h.team)
+		"pad":
+			_pad(h, d)
+		"field":
+			return _field(h, d)
+		"pilfer":
+			_pilfer(h, d)
+		"lamp":
+			Beacons.lamp(h.m, h.pos)
+		"ember":
+			Beacons.pop(h.m, h.pos, h.team)
 	return true
+
 
 ## Anything stopping the item right now (nothing to revive, a banner already running).
 static func can_use(h: Hunter, id: String) -> bool:
 	match String(UtilityBelt.def(id).get("use", "")):
-		"ember": return not Beacons.targets(h.m, h.team).is_empty()
+		"ember":
+			return not Beacons.targets(h.m, h.team).is_empty()
 		"field":
 			if String(UtilityBelt.def(id).get("field", "")) == "banner":
 				return not bool(h.m.get_meta("banner_%d" % h.team, false))
 	return true
+
 
 # ------------------------------------------------------------------ pads
 static func _spot(h: Hunter, dist: float) -> Vector3:
@@ -46,17 +55,32 @@ static func _spot(h: Hunter, dist: float) -> Vector3:
 	at.y = h.m.world.ground_at(at.x, at.z)
 	return at
 
+
 static func _pad(h: Hunter, d: Dictionary) -> void:
 	var at := _spot(h, 1.6)
 	var n := Models.gear_pad(d.get("col", Color.WHITE))
 	n.position = at
 	h.m.add_child(n)
-	h.m.gpads.append({
-		"pos": at, "t": float(d.get("life", 20.0)), "arm": float(d.get("arm", 0.0)),
-		"after": float(d.get("after", 0.0)), "push": float(d.get("push", 6.0)),
-		"lift": float(d.get("lift", 17.0)), "col": d.get("col", Color.WHITE), "node": n, "cd": {},
-	})
+	(
+		h
+		. m
+		. gpads
+		. append(
+			{
+				"pos": at,
+				"t": float(d.get("life", 20.0)),
+				"arm": float(d.get("arm", 0.0)),
+				"after": float(d.get("after", 0.0)),
+				"push": float(d.get("push", 6.0)),
+				"lift": float(d.get("lift", 17.0)),
+				"col": d.get("col", Color.WHITE),
+				"node": n,
+				"cd": {},
+			}
+		)
+	)
 	h.m.sfx("throw", h.pos, -2.0, 1.2)
+
 
 ## Every step: pads count down, arm, and launch whoever stands on them.
 static func pads(m: Node, dt: float) -> void:
@@ -68,7 +92,8 @@ static func pads(m: Node, dt: float) -> void:
 			m.gpads.erase(gp)
 			continue
 		var top: Node3D = (gp["node"] as Node3D).get_node_or_null("Top")
-		if top: top.scale = Vector3.ONE * (1.0 + sin(m.time * 6.0) * 0.06) * (0.6 if float(gp["arm"]) > 0.0 else 1.0)
+		if top:
+			top.scale = Vector3.ONE * (1.0 + sin(m.time * 6.0) * 0.06) * (0.6 if float(gp["arm"]) > 0.0 else 1.0)
 		if float(gp["arm"]) > 0.0:
 			continue
 		for h in m.hunters:
@@ -83,14 +108,15 @@ static func pads(m: Node, dt: float) -> void:
 				var dir: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
 				var sp := maxf(hv.length(), float(gp["push"]))
 				h.vel = Vector3(dir.x * sp, float(gp["lift"]), dir.y * sp)
-				h.roll_t = 0.0      # a dash ends here, its speed carries
+				h.roll_t = 0.0  # a dash ends here, its speed carries
 				h.grounded = false
 				h.glide_cd = 0.0
 				m.fx.burst(gp["pos"] + Vector3(0, 0.3, 0), gp["col"], 16, 5.0, 0.4, -2.0)
 				m.sfx("jump", h.pos, -2.0, 0.8)
 
+
 # ------------------------------------------------------------------ fields
-static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
+static func _field(h: Hunter, d: Dictionary) -> bool:
 	var m = h.m
 	var col: Color = d.get("col", Color.WHITE)
 	var time := float(d.get("time", 10.0))
@@ -105,8 +131,11 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 		"seed":
 			var held := {}
 			var hold := float(d.get("hold", 1.5))
-			UtilityLook.anomaly(m.fields.add_kx(h, at, r, time, 0.25, col, func(p, _z): _seed_tick(m, p, r, hold, held),
-				Callable(), null, ""))
+			UtilityLook.anomaly(
+				m.fields.add_kx(
+					h, at, r, time, 0.25, col, func(p, _z): _seed_tick(m, p, r, hold, held), Callable(), null, ""
+				)
+			)
 		"banner":
 			var key := "banner_%d" % h.team
 			var t0: float = m.time
@@ -114,27 +143,43 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 			h.reveal_t = maxf(h.reveal_t, time)
 			m.fx.word(h.pos + Vector3(0, 2.4, 0), "MOST WANTED", col)
 			m.add_feed("%s shows themselves to everyone" % h.pname)
-			m.fields.add_kx(h, h.pos, 1.0, time, 0.2, col, func(_p, z): _banner_tick(m, h, d, z),
-				func(_p): _banner_end(m, h, d, key, t0), h, "")
+			m.fields.add_kx(
+				h,
+				h.pos,
+				1.0,
+				time,
+				0.2,
+				col,
+				func(_p, z): _banner_tick(m, h, d, z),
+				func(_p): _banner_end(m, h, d, key, t0),
+				h,
+				""
+			)
 		"ward":
-			m.fields.add_kx(h, at, 0.6, time, 0.5, col, func(p, _z): _ward_tick(m, h.team, p, r),
-				Callable(), null, "totem")
+			m.fields.add_kx(
+				h, at, 0.6, time, 0.5, col, func(p, _z): _ward_tick(m, h.team, p, r), Callable(), null, "totem"
+			)
 		"pack":
 			var done := [false]
 			m.fields.add_kx(h, at, r, time, 0.2, col, func(p, z): _pack_tick(m, p, z, d, done), Callable(), null, "")
 	m.sfx("throw", h.pos, -2.0, 1.0)
 	return true
 
+
 static func _near(m: Node, at: Vector3, r: float) -> Array:
-	return m.hunters.filter(func(x):
-		var live: bool = not x.out and not x.downed and not x.remote
-		return live and x.flat_dist(at) < r + x.r and absf(x.pos.y - at.y) < 2.0)
+	return m.hunters.filter(
+		func(x):
+			var live: bool = not x.out and not x.downed and not x.remote
+			return live and x.flat_dist(at) < r + x.r and absf(x.pos.y - at.y) < 2.0
+	)
+
 
 static func _put(m: Node, x: Node, p: Vector3) -> void:
 	m.fx.ghost(x.position, x.face, Color("c9a0ff"), 0.6)
 	x.teleport(Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
 	x.vel = Vector3.ZERO
 	m.fx.burst(x.pos + Vector3(0, 0.9, 0), Color("c9a0ff"), 12, 3.0, 0.4)
+
 
 static func _swap(m: Node, a: Vector3, b: Vector3, r: float) -> void:
 	var ina := _near(m, a, r)
@@ -146,6 +191,7 @@ static func _swap(m: Node, a: Vector3, b: Vector3, r: float) -> void:
 	if not ina.is_empty() or not inb.is_empty():
 		m.sfx("blink", a, -2.0, 0.9)
 
+
 static func random_spot(m: Node) -> Vector3:
 	for i in 8:
 		var p: Vector3 = m.world.random_ground(randi() % maxi(1, m.world.islands.size()))
@@ -153,10 +199,12 @@ static func random_spot(m: Node) -> Vector3:
 			return p
 	return Vector3.INF
 
+
 static func warp(h: Hunter) -> void:
 	var p := random_spot(h.m)
 	if p != Vector3.INF:
 		_put(h.m, h, p)
+
 
 static func _seed_tick(m: Node, at: Vector3, r: float, hold: float, held: Dictionary) -> void:
 	var inside := _near(m, at, r)
@@ -168,6 +216,7 @@ static func _seed_tick(m: Node, at: Vector3, r: float, hold: float, held: Dictio
 	for k in held.keys():
 		if not inside.any(func(x): return x.nid == k):
 			held.erase(k)
+
 
 ## Knocked under the banner: out at once (no wisp, no spare life) and the knocker pockets the bounty.
 static func _banner_tick(m: Node, h: Hunter, d: Dictionary, z: Dictionary) -> void:
@@ -183,6 +232,7 @@ static func _banner_tick(m: Node, h: Hunter, d: Dictionary, z: Dictionary) -> vo
 	m.eliminate(h, h.last_hit_by, "bounty", true)
 	z["t"] = 0.0
 
+
 static func _banner_end(m: Node, h: Hunter, d: Dictionary, key: String, t0: float) -> void:
 	m.remove_meta(key)
 	if h.out or h.downed or m.time - t0 < float(d.get("time", 120.0)) - 1.5:
@@ -193,10 +243,12 @@ static func _banner_end(m: Node, h: Hunter, d: Dictionary, key: String, t0: floa
 	Beacons.pop(m, h.pos, h.team)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+%d gems" % int(d.get("reward", 0)), Color("ffd27a"))
 
+
 static func _ward_tick(m: Node, team: int, at: Vector3, r: float) -> void:
 	for o in m.hunters:
 		if o.team != team and not o.out and o.flat_dist(at) < r:
 			o.reveal_t = maxf(o.reveal_t, 3.0)
+
 
 static func _pack_tick(m: Node, at: Vector3, z: Dictionary, d: Dictionary, done: Array) -> void:
 	if done[0]:
@@ -210,6 +262,7 @@ static func _pack_tick(m: Node, at: Vector3, z: Dictionary, d: Dictionary, done:
 		m.sfx("heal", at, -2.0, 1.2)
 		return
 
+
 ## Heals `total` over `secs` in steps; getting hit stops it.
 static func _regen(m: Node, x: Hunter, total: float, secs: float, step: float, last_hp: float) -> void:
 	if x.out or x.downed or x.hp < last_hp - 0.01 or secs <= 0.0:
@@ -217,6 +270,7 @@ static func _regen(m: Node, x: Hunter, total: float, secs: float, step: float, l
 	x.heal(total * step / secs)
 	m.fx.burst(x.pos + Vector3(0, 1.0, 0), Color("8fe0a0"), 4, 2.0, 0.4, -3.0)
 	m.later(step, func(): _regen(m, x, total, secs - step, step, x.hp))
+
 
 # ------------------------------------------------------------------ the rest
 static func _pilfer(h: Hunter, d: Dictionary) -> void:
@@ -237,12 +291,14 @@ static func _pilfer(h: Hunter, d: Dictionary) -> void:
 	if took > 0:
 		m.add_feed("Raccoons carried off %d gems" % took)
 
+
 ## The end of a drink: Lostway Scroll's warp, Omen Draught's wardens.
 static func drank(h: Hunter, d: Dictionary) -> void:
 	if d.get("warp", false):
 		warp(h)
 	if float(d.get("omen", 0.0)) > 0.0:
 		_omen(h.m, h.team, float(d["omen"]), d.get("col", Color.WHITE))
+
 
 static func _omen(m: Node, team: int, left: float, col: Color) -> void:
 	if left <= 0.0 or m.blight == null:

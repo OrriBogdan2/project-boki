@@ -7,15 +7,16 @@ extends RefCounted
 ## frees (the field, the wall) or frees itself on a step timer, and sits in group GROUP.
 
 const GROUP := "util_look"
-const FUSE_END_PAD := 0.3       # s a fuse ring lingers after the blast
-const WARHEAD_HEIGHT := 28.0    # m above the target the Skyfall warhead starts
-const BLIGHT_EDGE := Color("c9e84a")     # a sickly lime: never a friendly colour
+const FUSE_END_PAD := 0.3  # s a fuse ring lingers after the blast
+const WARHEAD_HEIGHT := 28.0  # m above the target the Skyfall warhead starts
+const BLIGHT_EDGE := Color("c9e84a")  # a sickly lime: never a friendly colour
 const BLIGHT_BAND := Color("3a1a52")
-const BLOBS := 22               # bubbles round the Blight patch edge
-const SPIKE_GAP := 0.5          # m between Thorn Wall spikes
-const BEADS := 4                # lights running along the Twin Gate link
-const PORTAL_R := 1.0           # m, the Twin Gate ring's radius
-const MOTES := 5                # lights orbiting the Warp Seed anomaly
+const BLOBS := 22  # bubbles round the Blight patch edge
+const SPIKE_GAP := 0.5  # m between Thorn Wall spikes
+const BEADS := 4  # lights running along the Twin Gate link
+const PORTAL_R := 1.0  # m, the Twin Gate ring's radius
+const MOTES := 5  # lights orbiting the Warp Seed anomaly
+
 
 ## Item looks that need the cast point or the thing it made: called once the item's effects ran.
 static func cast(h: Hunter, id: String) -> void:
@@ -34,10 +35,12 @@ static func cast(h: Hunter, id: String) -> void:
 			if not m.verbs.walls.is_empty():
 				spikes(m.verbs.walls.back())
 
+
 static func _tag(n: Node, nm: String) -> Node:
 	n.name = nm
 	n.add_to_group(GROUP)
 	return n
+
 
 static func _flat(parent: Node3D, r: float, col: Color, thick: float, y: float) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
@@ -48,18 +51,22 @@ static func _flat(parent: Node3D, r: float, col: Color, thick: float, y: float) 
 	parent.add_child(mi)
 	return mi
 
+
 ## A lit, shadowless part.
-static func _glow(parent: Node3D, mesh: Mesh, col: Color, pos := Vector3.ZERO, scl := Vector3.ONE,
-		rot := Vector3.ZERO) -> MeshInstance3D:
+static func _glow(
+	parent: Node3D, mesh: Mesh, col: Color, pos := Vector3.ZERO, scl := Vector3.ONE, rot := Vector3.ZERO
+) -> MeshInstance3D:
 	var mi := Models.part(parent, mesh, Models.glow_mat(col), pos, scl, rot)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return mi
+
 
 static func _loop(n: Node, prop: String, to: Variant, secs: float, from: Variant = null) -> void:
 	var tw := n.create_tween().set_loops()
 	var tp := tw.tween_property(n, prop, to, secs)
 	if from != null:
 		tp.from(from)
+
 
 # ------------------------------------------------------------------ Skyfall
 ## A hot disc grows from the middle to the rim over the whole fuse while a warhead falls on it; the
@@ -77,8 +84,14 @@ static func fuse(m: Node, at: Vector3, r: float, secs: float, col: Color) -> Nod
 	var tw := root.create_tween().set_loops()
 	var tick := func(_v): _fuse_step(clampf((m.time - t0) / secs, 0.0, 1.0), rim, disc, head, col, secs)
 	tw.tween_method(tick, 0.0, 1.0, 0.05)
-	m.later(secs + FUSE_END_PAD, func(): if is_instance_valid(root): root.queue_free())
+	m.later(
+		secs + FUSE_END_PAD,
+		func():
+			if is_instance_valid(root):
+				root.queue_free()
+	)
 	return root
+
 
 static func _fuse_step(k: float, rim: MeshInstance3D, disc: Node3D, head: Node3D, col: Color, secs: float) -> void:
 	var s := maxf(0.02, k)
@@ -87,6 +100,7 @@ static func _fuse_step(k: float, rim: MeshInstance3D, disc: Node3D, head: Node3D
 	var blink := 0.5 + 0.5 * sin(k * secs * (3.0 + 14.0 * k * k))
 	var lit := Color(col.lightened(0.3 * blink), 0.6 + 0.4 * blink)
 	(rim.material_override as ShaderMaterial).set_shader_parameter("color", lit)
+
 
 # ------------------------------------------------------------------ Blight Flask
 ## A dark band at the very edge and a slow ring of lime bubbles: you can see where the patch stops.
@@ -106,6 +120,7 @@ static func blight_edge(z: Dictionary) -> void:
 		var at := Vector3(cos(a), 0.0, sin(a)) * r * 0.97 + Vector3(0, 0.18 + 0.12 * (1.0 - s), 0)
 		_glow(ring, blob, Color(BLIGHT_EDGE, 0.75), at, Vector3.ONE * s)
 	_loop(ring, "rotation:y", TAU, 14.0, 0.0)
+
 
 # ------------------------------------------------------------------ Thorn Wall
 ## Spikes along the top and out of both faces, so it reads as a hazard and not a shield.
@@ -127,6 +142,7 @@ static func spikes(w: Dictionary) -> void:
 		for side in [-1.0, 1.0]:
 			var y := 0.55 + 0.8 * float(i % 2)
 			Models.part(look, cone, mat, Vector3(x, y, side * 0.5), Vector3.ONE * 0.8, Vector3(side * 1.25, 0, 0))
+
 
 # ------------------------------------------------------------------ Twin Gate
 ## Two upright rings that face along the line between them, each with a turning swirl inside, and a
@@ -152,6 +168,7 @@ static func gate(za: Dictionary, zb: Dictionary) -> void:
 		var tw := bead.create_tween().set_loops()
 		tw.tween_property(bead, "position:z", half, half * 0.5).from(-half).set_delay(float(i) * 0.25)
 
+
 static func _portal(n: Node3D, face: Basis, col: Color) -> void:
 	var root := _tag(Node3D.new(), "GatePortal") as Node3D
 	n.add_child(root)
@@ -176,6 +193,7 @@ static func _portal(n: Node3D, face: Basis, col: Color) -> void:
 		arc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		swirl.add_child(arc)
 	_loop(swirl, "rotation:z", -TAU, 4.0, 0.0)
+
 
 # ------------------------------------------------------------------ Warp Seed
 ## A dark core hanging in the air in a lilac shell, motes circling it, a beam up so it shows from

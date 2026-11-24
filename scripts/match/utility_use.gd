@@ -91,7 +91,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			m.fx.ring(h.pos, minf(rng, 40.0), Color(col, 0.6), 0.8)
 			m.sfx("ping", h.pos, 0.0, 0.8)
 		"pad", "field", "pilfer", "lamp", "ember":
-			UtilityMore.start(h, id, d)
+			UtilityMore.start(h, d)
 		_:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
 					{"slot": "utility", "ability": id, "level": 1})

@@ -7,14 +7,37 @@ extends RefCounted
 ## gems buys; the source utilities (docs/SOURCE_UTILITIES.md) each work and cost what the doc says;
 ## an online purchase goes buyer -> host -> every game. Prints SHOPS PASS/FAIL.
 
+const PRICES := {
+	"deep_draught": 40,
+	"hearth_lamp": 110,
+	"cloud_raft": 45,
+	"gust_fan": 40,
+	"twin_gate": 60,
+	"warp_seed": 60,
+	"lostway_scroll": 60,
+	"shatter_charge": 45,
+	"thorn_wall": 40,
+	"blight_flask": 50,
+	"skyfall_charge": 60,
+	"pilfer_pouch": 60,
+	"lookout_lantern": 40,
+	"hawk_whistle": 45,
+	"omen_draught": 40,
+	"bounty_banner": 60,
+	"toss_satchel": 45,
+}
+
 var main: Node
 var fails := 0
 var n := 0
 
+
 func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
 	print("SHOPS %-62s %s  %s" % [label, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -38,6 +61,7 @@ func run(main_node: Node) -> void:
 	print("SHOPS DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _build(seed_i: int) -> Match:
 	var m := Match.new()
 	main.add_child(m)
@@ -45,17 +69,20 @@ func _build(seed_i: int) -> Match:
 	m.set_process(false)
 	return m
 
+
 func _row(v: Dictionary, entry: String) -> int:
 	for i in (v["rows"] as Array).size():
 		if String(v["rows"][i]["id"]) == entry:
 			return i
 	return -1
 
+
 func _vendor_of(m: Match, theme: String) -> Dictionary:
 	for v in Shops.list(m):
 		if v["theme"] == theme:
 			return v
 	return {}
+
 
 # ------------------------------------------------------------------ stock
 func _stock() -> void:
@@ -68,29 +95,37 @@ func _stock() -> void:
 	for t in themes:
 		var ids: Array = ShopStock.stock_of(String(t)).map(func(r): return String(r["id"]))
 		for s in staples:
-			if not ids.has(s): every_staple = false
+			if not ids.has(s):
+				every_staple = false
 		var seen := {}
 		for i in ids:
 			seen[i] = true
 			count[i] = int(count.get(i, 0)) + 1
-		if seen.size() != ids.size(): distinct = false
-		if ids.size() < 6: valid = false
+		if seen.size() != ids.size():
+			distinct = false
+		if ids.size() < 6:
+			valid = false
 	ok("every shop sells tonic and armor kit", every_staple)
 	ok("a shop never lists the same entry twice", distinct)
 	ok("every shop has a real stock (6 or more entries)", valid)
 	var once := true
 	for e in count:
-		if not staples.has(e) and int(count[e]) != 1: once = false
+		if not staples.has(e) and int(count[e]) != 1:
+			once = false
 	ok("every other entry is sold in exactly one shop", once)
 	var missing: Array = []
 	var all := ShopStock.all_entries()
 	for id in UtilityBelt.stock_ids():
-		if id != "revive_ember" and not all.has(id): missing.append(id)
+		if id != "revive_ember" and not all.has(id):
+			missing.append(id)
 	ok("every belt item but the Revive Ember is on sale somewhere", missing.is_empty(), str(missing))
 	var same := true
 	for t in themes:
-		if str(ShopStock.stock_of(String(t))) != str(ShopStock.stock_of(String(t))): same = false
+		var again := str(ShopStock.stock_of(String(t)))
+		if str(ShopStock.stock_of(String(t))) != again:
+			same = false
 	ok("the stock reads the same every time", same)
+
 
 func _never_sold() -> void:
 	var bad: Array = []
@@ -110,6 +145,7 @@ func _never_sold() -> void:
 			bad.append(e)
 	ok("no keys, shards or match-only items are for sale", bad.is_empty(), str(bad))
 
+
 # ------------------------------------------------------------------ the map's vendors and buying
 func _vendors(m: Match) -> void:
 	var themes := {}
@@ -119,14 +155,17 @@ func _vendors(m: Match) -> void:
 	ok("The Hollow Crown has 4 vendors, one per theme", four, str(themes.keys()))
 	var on_ground := true
 	for v in Shops.list(m):
-		if m.world.is_void(v["pos"].x, v["pos"].z): on_ground = false
+		if m.world.is_void(v["pos"].x, v["pos"].z):
+			on_ground = false
 	ok("every vendor stands on ground", on_ground)
 	var b: Match = await _build(12)
 	var same := Shops.list(m).size() == Shops.list(b).size()
 	for i in Shops.list(m).size():
-		if str(Shops.list(m)[i]["rows"]) != str(Shops.list(b)[i]["rows"]): same = false
+		if str(Shops.list(m)[i]["rows"]) != str(Shops.list(b)[i]["rows"]):
+			same = false
 	ok("a different match seed has exactly the same stock", same)
 	b.queue_free()
+
 
 func _buying(m: Match) -> void:
 	var h: Hunter = m.player
@@ -163,6 +202,7 @@ func _buying(m: Match) -> void:
 	var boots := _row(mv, "boots:quickstep_boots")
 	ok("a boots sale wears them", Shops.buy(m, h, mv, boots) == "" and String(h.gear[3]["id"]) == "quickstep_boots")
 
+
 func _poor_refused(m: Match, v: Dictionary) -> bool:
 	var h: Hunter = m.player
 	h.gems = 0
@@ -171,13 +211,9 @@ func _poor_refused(m: Match, v: Dictionary) -> bool:
 	h.gems = 500
 	return refused
 
+
 # ------------------------------------------------------------------ the source utilities
-const PRICES := {
-	"deep_draught": 40, "hearth_lamp": 110, "cloud_raft": 45, "gust_fan": 40, "twin_gate": 60,
-	"warp_seed": 60, "lostway_scroll": 60, "shatter_charge": 45, "thorn_wall": 40, "blight_flask": 50,
-	"skyfall_charge": 60, "pilfer_pouch": 60, "lookout_lantern": 40,
-	"hawk_whistle": 45, "omen_draught": 40, "bounty_banner": 60, "toss_satchel": 45,
-}
+
 
 func _fresh(h: Hunter, id: String) -> bool:
 	h.hp = h.max_hp * 0.3
@@ -188,14 +224,17 @@ func _fresh(h: Hunter, id: String) -> bool:
 	UtilityBelt.grant(h, id, 1)
 	return UtilityBelt.use_id(h, id)
 
+
 func _items(m: Match) -> void:
 	var h: Hunter = m.player
 	var bot: Hunter = null
 	for x in m.hunters:
-		if x != h and x.ctrl == "bot": bot = x
+		if x != h and x.ctrl == "bot":
+			bot = x
 	var priced := true
 	for id in PRICES:
-		if UtilityBelt.price_of(id) != int(PRICES[id]): priced = false
+		if UtilityBelt.price_of(id) != int(PRICES[id]):
+			priced = false
 	ok("the 17 new items cost what the doc says", priced and UtilityBelt.is_item("revive_ember"))
 	var smoke: Array = []
 	for id in UtilityBelt.stock_ids():
@@ -261,7 +300,8 @@ func _items(m: Match) -> void:
 	ok("and opens two gates", m.fields.list.size() == fl + 2)
 	h.pos = a
 	var held := {}
-	for i in 6: UtilityMore._seed_tick(m, a, 1.6, 1.5, held)
+	for i in 6:
+		UtilityMore._seed_tick(m, a, 1.6, 1.5, held)
 	ok("a Warp Seed throws you after 1.5s inside it", h.flat_dist(a) > 1.0 or m.world.islands.size() < 2)
 	h.pos = b
 	h.gems = 0
@@ -297,6 +337,7 @@ func _items(m: Match) -> void:
 	ok("a Toss Satchel heals whoever grabs it, once", h.hp > before and done[0] and float(z["t"]) == 0.0)
 	m.fields.clear()
 
+
 # ------------------------------------------------------------------ legend
 func _legend(m: Match) -> void:
 	var rows := Shops.legend_rows(m)
@@ -304,13 +345,15 @@ func _legend(m: Match) -> void:
 	var areas: Array = rows.filter(func(r): return r["kind"] == "area")
 	var biomes := {}
 	for isl in m.world.islands:
-		if String(isl.get("biome", "")) != "": biomes[isl["biome"]] = true
+		if String(isl.get("biome", "")) != "":
+			biomes[isl["biome"]] = true
 	ok("the legend has a row for every vendor", shops.size() == Shops.list(m).size())
 	ok("the legend has a row for every area", areas.size() == biomes.size(), "%d vs %d" % [areas.size(), biomes.size()])
 	var texted := rows.all(func(r): return String(r["name"]) != "" and String(r["text"]) != "")
 	ok("every legend row has a name and a line of text", texted)
 	var stormy := areas.filter(func(r): return String(r["text"]).contains("boots"))
 	ok("an area's lean comes from its loot data (the storm lands lean to boots)", stormy.size() == 1)
+
 
 # ------------------------------------------------------------------ bots
 func _bot(m: Match) -> void:
@@ -330,9 +373,11 @@ func _bot(m: Match) -> void:
 	bot.gems = 0
 	await main.get_tree().process_frame
 
+
 # ------------------------------------------------------------------ online
 func _wire(e: Array) -> Array:
-	return JSON.parse_string(JSON.stringify(e))      # (through the wire's JSON, as Net sends it)
+	return JSON.parse_string(JSON.stringify(e))  # (through the wire's JSON, as Net sends it)
+
 
 func _online() -> void:
 	var host: Match = await _build(21)

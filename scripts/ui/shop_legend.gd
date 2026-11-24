@@ -6,8 +6,9 @@ extends RefCounted
 const SLOT_WORDS := {"glove": "gloves", "passive": "gloves", "armor": "armor", "boots": "boots"}
 const ROW_H := 31.0
 const HEAD_H := 22.0
-const TOP_MIN := 284.0      # px: below the minimap and the clock chips that show through the map
+const TOP_MIN := 284.0  # px: below the minimap and the clock chips that show through the map
 const PAD := 14.0
+
 
 ## One row per region on the map: {kind: "area", name, text, col, icon, pos}.
 static func area_rows(m) -> Array:
@@ -19,9 +20,18 @@ static func area_rows(m) -> Array:
 			continue
 		seen[b] = true
 		var def: Dictionary = m.biomes.defs[b]
-		out.append({"kind": "area", "name": String(def.get("name", b)), "text": lean_text(def),
-			"col": Color(String(def.get("tint", "ffffff"))), "icon": "", "pos": Vector3.INF})
+		out.append(
+			{
+				"kind": "area",
+				"name": String(def.get("name", b)),
+				"text": lean_text(def),
+				"col": Color(String(def.get("tint", "ffffff"))),
+				"icon": "",
+				"pos": Vector3.INF
+			}
+		)
 	return out
+
 
 ## "gloves and armor more likely" and a rarity note, from a biome's loot data.
 static func lean_text(def: Dictionary) -> String:
@@ -38,6 +48,7 @@ static func lean_text(def: Dictionary) -> String:
 		text += ("; " if text != "" else "") + "rarer loot"
 	return text if text != "" else "no particular lean"
 
+
 ## Marks every vendor on the map itself.
 static func markers(fm, c: Control) -> void:
 	for v in Shops.list(fm.m):
@@ -50,13 +61,16 @@ static func markers(fm, c: Control) -> void:
 		c.draw_arc(pv, 11.0, 0.0, TAU, 24, col, 2.0, true)
 		Icons.draw(c, String(th["icon"]), pv, 7.0, col)
 
+
 ## How tall the legend wants to be.
 static func height(m) -> float:
 	return HEAD_H * 2.0 + ROW_H * Shops.legend_rows(m).size() + PAD
 
+
 ## Where the legend goes in the left column: under the squad panel, never above TOP_MIN.
 static func place(m, x: float, width: float, below: float) -> Rect2:
 	return Rect2(Vector2(x, maxf(below + 10.0, TOP_MIN)), Vector2(width, height(m)))
+
 
 ## The legend panel in r: SHOPS (icon, name, theme) then AREAS (name, lean).
 static func draw(fm, c: Control, r: Rect2) -> void:

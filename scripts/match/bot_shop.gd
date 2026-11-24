@@ -3,7 +3,8 @@ extends RefCounted
 ## What a bot does about shops: with gems to spare and a vendor close, walk there and buy a belt
 ## item it is short of, or a repair when its armor is worn. It keeps a reserve of gems to take home.
 
-const BUY_REACH := 1.8      # m: a bot buys from a little further out than a player uses the stall
+const BUY_REACH := 1.8  # m: a bot buys from a little further out than a player uses the stall
+
 
 ## [goal, "shop"] for a bot that wants to shop, or [].
 static func goal(m, h: Hunter) -> Array:
@@ -16,6 +17,7 @@ static func goal(m, h: Hunter) -> Array:
 			best = v
 	return [best["pos"], "shop"] if not best.is_empty() else []
 
+
 ## Buys what the bot wants when it stands at a vendor. Returns true if it bought something.
 static func think(m, h: Hunter) -> bool:
 	var v := Shops.vendor_near(m, h, BUY_REACH)
@@ -26,8 +28,10 @@ static func think(m, h: Hunter) -> bool:
 		return false
 	return Shops.buy(m, h, v, int(want["i"])) == ""
 
+
 static func _bot() -> Dictionary:
 	return ShopStock.rules().get("bot", {})
+
 
 ## {i: row index} of the row this bot would buy here, or {}.
 static func _want(h: Hunter, v: Dictionary) -> Dictionary:
