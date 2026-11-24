@@ -95,14 +95,14 @@ pass. `BokiRig.face_overlay = true` is the global override that brings the overl
 checks turn it on). `face.py` and the Face in each glb stay. `--boki-eyes-shots --shots-dir=<dir>` (GPU) renders each
 species' head as the game builds it, with the overlay forced on, and the match camera.
 
-**Eye-paint pass** (no Blender painting): cindle, puddlet, burrlet, pebbit, selenfin, zapple and sentrikat got eyes
-from a Meshy retexture on the coat's own UVs (`tools/boki/eye_blend.py` keeps the live coat and takes only the Meshy
-eye patch; `tools/boki/swap_atlas.py` puts the atlas into the glb). Gibbelle, goliathite, floenatee, lilybara and
-hoarheron got theirs from a Meshy image edit of a head render: `tools/boki/eye_headcam.py` (Blender renders only) draws
-the coat's head flat-lit from the front and both sides, Meshy repaints just the eyes from the dex face, and
-`tools/boki/eye_reproject.py` puts back only the texels the edit changed. The 5 still listed (duskapi, moundvark,
-murmurling, nacrolin, threadwyrm) give their head under 40 atlas texels across (gibbelle 284, hoarheron 94), too few
-for a readable eye: they need a UV pass that gives the head more of the atlas before a paint pass can land.
+**Eye-paint pass** (Meshy paints, no Blender painting): cindle and puddlet got eyes from a Meshy retexture on the
+coat's own UVs (`tools/boki/eye_blend.py` keeps the live coat and takes only the Meshy eye patch). Gibbelle,
+goliathite, floenatee, lilybara, hoarheron, burrlet, pebbit, selenfin and zapple got theirs from a Meshy image edit of a
+head render: `tools/boki/eye_headcam.py` (Blender renders only) draws the coat's head flat-lit from the front and both
+sides, Meshy repaints just the eyes from the dex face, and `tools/boki/eye_reproject.py` puts back only the texels the
+edit changed (`tools/boki/swap_atlas.py` puts the atlas into the glb). Still listed: sentrikat (no Meshy credits left
+for its edit), and duskapi, moundvark, murmurling, nacrolin, threadwyrm, whose head gets under 40 atlas texels across
+(gibbelle 284, hoarheron 94): too few for a readable eye until a UV pass gives the head more of the atlas.
 
 ### A summoned Boki (out of the wisp)
 
