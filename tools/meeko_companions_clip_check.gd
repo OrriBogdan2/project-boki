@@ -35,7 +35,8 @@ const STATES := {
 	"hit": [{"hit": 2.0}, 0.0],
 	"death": [{"dead": true}, 0.0],
 }
-const HANDS_MIN := 0.03  # m: in the attack swing both hands stay this far below the head bone (PLAN 4A: not through her face)
+# m: in the attack swing both hands stay this far below the head bone (PLAN 4A: not through her face)
+const HANDS_MIN := 0.03
 const KEYS := ["hand", "forearm", "arm", "shoulder", "head", "neck", "spine", "hips", "leg", "foot", "toe"]
 
 var bad := 0
@@ -150,7 +151,10 @@ func run(main: Node) -> void:
 				)
 			)
 		if st == "attack":
-			ok(hands >= HANDS_MIN, "attack hands: %.0f mm below the head (needs %.0f)" % [hands * 1000.0, HANDS_MIN * 1000.0])
+			ok(
+				hands >= HANDS_MIN,
+				"attack hands: %.0f mm below the head (needs %.0f)" % [hands * 1000.0, HANDS_MIN * 1000.0]
+			)
 		ok(
 			pair >= PAIR_MIN,
 			"%s: the sun and the cloud stay %.0f mm apart (needs %.0f)" % [st, pair * 1000.0, PAIR_MIN * 1000.0]
