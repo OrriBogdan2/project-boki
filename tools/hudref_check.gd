@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
 ##   3. armour (a strip above health) and shields (past the end of health) are drawn; your own shield
 ##      is a strip over your health with its source's icon, drains before health, fades before it drops
-##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
+##   4. a downed hunter shows the downed plate and a held rival's status rides in the plate's icon row
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, one G slot, an X tile for the hunter ultimate
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
@@ -111,7 +111,11 @@ func run(main_node: Node) -> void:
 	ok(arm.shield > 0.0 and bool(as_v.get("shield", false)) and HudPlate.shield_frac(arm) > 0.0,
 		"a shielded rival's plate draws the shield past their health (%.2f of the bar)" % HudPlate.shield_frac(arm))
 	arm.armor = 0.0
-	await main.get_tree().process_frame
+	arm.reveal_t = 3.0      # seen however the headless camera faces: an unseen rival's plate is not drawn
+	for i in 60:            # vision refreshes every 0.05s; wait for the first draw after the drop
+		await main.get_tree().process_frame
+		if float(_state(hud, arm).get("armor", 1.0)) <= 0.5:
+			break
 	ok(float(_state(hud, arm).get("brk", 0.0)) > 0.0, "armour hitting zero cracks the strip")
 	await _check_strip(p)
 	# ---------------------------------------------------------------- 4. downed, and status words
@@ -120,18 +124,18 @@ func run(main_node: Node) -> void:
 	var down_word := String(ds.get("word", ""))
 	ok(dn.downed and bool(ds.get("downed", false)) and down_word.begins_with("DOWN"),
 		"a downed rival shows the downed plate ('%s')" % down_word)
-	var sl: Hunter = foes[3]  # the demo holds the whole CC row on them: the bar's word is the worst, STUNNED
+	var sl: Hunter = foes[3]  # the demo holds the whole CC row on them: stunned first, slowed in the row
 	sl.reveal_t = 3.0       # seen however the headless camera faces
-	var sw := ""
+	var icons: Array = []
 	for i in 60:            # vision refreshes every 0.05s and line of sight can lag a few frames headless
 		await main.get_tree().process_frame
-		sw = String(_shown(hud, sl).get("word", ""))
-		if sw == "STUNNED":
+		icons = _row_icons(hud, sl)
+		if "status_stunned" in icons:
 			break
 	var why := "slow %.2f, unseen %s, drawn %s" % [sl.slow_t, sl.unseen, not _shown(hud, sl).is_empty()]
-	var cc_row: Array = HudPlate.statuses(sl).map(func(ic): return String(ic[2]))
-	ok(sw == "STUNNED" and "SLOWED" in cc_row,
-		"a stunned, slowed rival's plate: STUNNED over the bar, SLOWED in its row ('%s', %s, %s)" % [sw, cc_row, why])
+	ok(icons.size() == HudPlate.ROW_MAX and icons[0] == "status_stunned",
+		"a rival held by the whole CC row: a full plate row, stun first ('%s', %s)" % [icons, why])
+	ok(not _shown(hud, sl).has("word"), "a plate carries no status word")
 	await _cc_words(m, hud, sl)
 	m.knock(foes[0], p, {})
 	await main.get_tree().process_frame
@@ -409,39 +413,41 @@ func _redraw(hud) -> void:
 func _shown(hud, h: Hunter) -> Dictionary:
 	return hud.plates.shown.get(h.nid, {})
 
-## One crowd-control effect at a time on a rival (KIT_PARITY "Crowd control"): the plate's word is its own,
+## One crowd-control effect at a time on a rival (KIT_PARITY "Crowd control"): the plate's row shows its own icon,
 ## in its own colour, and no two effects share a colour.
 func _cc_words(m: Match, hud, h: Hunter) -> void:
 	m.remove_meta("hudref_stun")           # (the demo stops holding the whole row on them)
 	var cc := {
-		"STUNNED": [Color("fff27a"), func(): h.stun_t = 3.0],
-		"ROOTED": [Color("8fe0a0"), func(): h.root_t = 3.0],
-		"GROUNDED": [KitStatus.GROUND_COL, func(): KitStatus.apply(h, "gnd", 3.0, 0.0, false, "demo")],
-		"DAZED": [KitStatus.RATTLE_COL, func(): KitStatus.apply(h, "rat", 3.0, 0.0, false)],
-		"SLOWED": [Color("9ae8ff"), func(): h.slow_t = 3.0],
+		"status_stunned": [Color("fff27a"), func(): h.stun_t = 3.0],
+		"status_rooted": [Color("8fe0a0"), func(): h.root_t = 3.0],
+		"status_grounded": [KitStatus.GROUND_COL, func(): KitStatus.apply(h, "gnd", 3.0, 0.0, false, "demo")],
+		"status_dazed": [KitStatus.RATTLE_COL, func(): KitStatus.apply(h, "rat", 3.0, 0.0, false)],
+		"status_slowed": [Color("9ae8ff"), func(): h.slow_t = 3.0],
 	}
 	var cols := {}
-	for word in cc:
+	for icon in cc:
 		h.stun_t = 0.0
 		h.root_t = 0.0
 		h.slow_t = 0.0
 		h.set_meta("gnd_until", 0.0)
 		KitStatus.clear_rattled(h)
 		h.reveal_t = 3.0
-		(cc[word][1] as Callable).call()
-		var got := {}
+		(cc[icon][1] as Callable).call()
+		var items: Array = []
 		for i in 60:
 			await main.get_tree().process_frame
-			got = _shown(hud, h)
-			if String(got.get("word", "")) == word:
+			items = _shown(hud, h).get("row", [])
+			if not items.is_empty():
 				break
-		var col: Color = got.get("word_col", Color.BLACK)
-		var row: Array = HudPlate.statuses(h).map(func(ic): return String(ic[2]))
-		var own: bool = String(got.get("word", "")) == word and col.is_equal_approx(cc[word][0])
-		ok(own and row == [word],
-			"%s alone: plate word %s in its colour, row %s" % [word, got.get("word", ""), row])
+		var col: Color = items[0]["col"] if not items.is_empty() else Color.BLACK
+		var only: bool = items.size() == 1 and items[0]["icon"] == icon and col.is_equal_approx(cc[icon][0])
+		ok(only, "%s alone: its icon in its colour in the plate's row (%s)" % [icon, _row_icons(hud, h)])
 		cols[col.to_html()] = true
-	ok(cols.size() == cc.size(), "the %d crowd-control words use %d different colours" % [cc.size(), cols.size()])
+	ok(cols.size() == cc.size(), "the %d crowd-control icons use %d different colours" % [cc.size(), cols.size()])
+
+## The icons of what the last frame drew in this hunter's plate row.
+func _row_icons(hud, h: Hunter) -> Array:
+	return (_shown(hud, h).get("row", []) as Array).map(func(it): return String(it["icon"]))
 
 ## The plate's animation state (chip, crack, burst ...) for this hunter.
 func _state(hud, h: Hunter) -> Dictionary:
