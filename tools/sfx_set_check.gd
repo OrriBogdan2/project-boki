@@ -1081,6 +1081,7 @@ func _garden_moments() -> void:
 		[
 			"garden_egg",
 			"garden_friends",
+			"garden_bond_up",
 			"garden_chime_part",
 			"garden_evolve",
 			"garden_visit_in",
@@ -1135,7 +1136,7 @@ func _garden_moments() -> void:
 		"base_life.gd": '"garden_friends"',
 		"home_incubator.gd": '"garden_egg"',
 		"garden_prizes.gd": "GardenSfx.cup(",
-		"kin_bond_moment.gd": '"garden_friends"',
+		"kin_bond_moment.gd": '"garden_bond_up"',
 		"home.gd": '"garden_evolve"',
 		"garden_visitor.gd": '"garden_visit_out"',
 		"garden_sfx.gd": '"garden_season"'
