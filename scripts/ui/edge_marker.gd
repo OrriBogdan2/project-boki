@@ -21,7 +21,7 @@ var _half := Vector2.ZERO        # half the rim rectangle's width and height (px
 var _radius := 0.0               # > 0: the rim is a circle of this radius round _ctr
 var _size := 4.0                 # arrow scale: its tip is 1.4 and its wings 0.8 of this, px
 var _items: Array[Dictionary] = []
-var fight := false               # a fight is on: a goal marker keeps its arrow but loses its label (no words over the field)
+var fight := false               # a fight is on: a goal marker keeps its arrow, loses its label
 
 ## The safe box world markers sit on: under the tutorial panel, above the ability bar.
 static func world_rim(sz: Vector2) -> Rect2:
