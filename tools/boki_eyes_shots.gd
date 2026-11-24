@@ -1,8 +1,10 @@
 extends RefCounted
 ## --boki-eyes-shots --shots-dir=<dir> [--species=a,b] [--px=480]: does each rigged Boki's coat carry its own eyes?
 ## Per species, as the game builds it (idle at 0.5 s, neutral): <dir>/<id>_off.png, a front close-up of its head with
-## the face overlay off (BokiRig.face_overlay, the default), <id>_on.png the same with it on, and <id>_game.png, a
-## crop at the match camera (overlay off). <dir>/eyes.tsv: id, Face tris dropped, coat tris.
+## the species' own face (the overlay only for the ones in content/rules/boki_eyes.json), <id>_on.png the same with the
+## overlay forced on (BokiRig.face_overlay), and <id>_game.png, a crop at the match camera (the species' own face).
+## <dir>/eyes.tsv: id, Face tris, coat tris. --turn: also <id>_turn_<n>.png, the whole Boki with no overlay from 4 sides
+## (front, its right, back, its left), for a coat whose head close-up misses the face.
 ## Needs a renderer (a GPU worker: jobq submit --needs gpu).
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
@@ -14,12 +16,15 @@ const HEAD_BONE := "head"  # every Boki rig has one
 const GAME_RES := Vector2i(1920, 1080)
 const GAME_CROP := 96  # px of the 1080p match frame kept round the Boki
 const GAME_ENLARGE := 3  # nearest-neighbour, so the game's pixels stay readable
+const TURN_YAWS := [PI, PI * 1.5, 0.0, PI * 0.5]  # PI faces the camera
+const TURN_PITCH := deg_to_rad(20.0)
 const GAME_YAW := PI * 0.8  # its front three-quarters, as boki_rig_shots' match.png
 
 var main: Node
 var out := ""
 var px := 480
 var only: Array = []
+var turn := false
 
 
 func run(m: Node) -> void:
@@ -31,6 +36,8 @@ func run(m: Node) -> void:
 			px = int(a.substr(5))
 		if a.begins_with("--species="):
 			only = Array(a.substr(10).split(","))
+		if a == "--turn":
+			turn = true
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -40,6 +47,8 @@ func run(m: Node) -> void:
 		tsv.append("%s\t%d\t%d" % [id, _face_tris(String(id)), _coat_tris(String(id))])
 		await _close(String(id))
 		await _game(String(id))
+		if turn:
+			await _turn(String(id))
 	var f := FileAccess.open(out.path_join("eyes.tsv"), FileAccess.WRITE)
 	f.store_string("\n".join(tsv) + "\n")
 	f.close()
@@ -71,6 +80,25 @@ func _close(id: String) -> void:
 		cam.look_at(mid)
 		cam.make_current()
 		await _save(vp, "%s_%s.png" % [id, "on" if on else "off"])
+
+
+## The whole Boki, no overlay, from each of TURN_YAWS.
+func _turn(id: String) -> void:
+	BokiRig.face_overlay = false
+	for n in TURN_YAWS.size():
+		var vp := _stage(Vector2i(px, px), false)
+		var k := _posed(vp, id, TURN_YAWS[n])
+		var box := k.global_transform * Shots._box(k)
+		var size := box.size.length() * CLOSE_MARGIN
+		var cam := Camera3D.new()
+		vp.add_child(cam)
+		cam.fov = CLOSE_FOV
+		cam.near = 0.02
+		var dist := size * 0.5 / tan(deg_to_rad(CLOSE_FOV) * 0.5)
+		cam.position = box.get_center() + Vector3(0, sin(TURN_PITCH), cos(TURN_PITCH)) * dist
+		cam.look_at(box.get_center())
+		cam.make_current()
+		await _save(vp, "%s_turn_%d.png" % [id, n])
 
 
 ## At the match camera, leaned like the game (boki_rig_shots' match.png), cropped round it and enlarged.

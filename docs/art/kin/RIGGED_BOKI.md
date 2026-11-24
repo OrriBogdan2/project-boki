@@ -86,16 +86,18 @@ them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
 stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids lie folded.
 
-**The face overlay is off by default** (`BokiRig.face_overlay`, owner 11-24: the overlay eyes read as glued on).
-The game drops the Face mesh at load and shows the coat's own painted eyes; expressions, blinks and eye looks stop
-with it. `face.py` and the Face in each glb stay, so `face_overlay = true` brings them back (the face checks turn it on).
-`--boki-eyes-shots --shots-dir=<dir>` (GPU) renders each species' head with the overlay on and off plus the match
-camera. 10 of 48 coats still have no usable eyes of their own under the overlay (most had them painted out by
-`boki_scan.py`'s `"cover"`): gibbelle, goliathite, hoarheron, floenatee, duskapi, moundvark, murmurling, nacrolin,
-threadwyrm, lilybara. The other 7 of the first 17 (cindle, puddlet, burrlet, pebbit, selenfin, zapple, sentrikat) got
-eyes painted by a Meshy retexture on the coat's own UVs (`tools/boki/swap_atlas.py` puts the atlas into the glb;
-`tools/boki/eye_blend.py` keeps the live coat and takes only the Meshy eye patch). The 10 need another art pass
-(rebake with `cover` 0 where the scan has eyes, else a Meshy eye retexture).
+**The face overlay is per species** (`BokiRig.uses_overlay`, owner 11-24: the overlay eyes read as glued on). A species
+not listed in `content/rules/boki_eyes.json` drops the Face mesh at load and shows the coat's own painted eyes;
+expressions, blinks and eye looks stop with it. The 17 listed species have no usable eyes of their own under the
+overlay (most had them painted out by `boki_scan.py`'s `"cover"`) and keep the overlay until their eye-paint pass
+lands (rebake with `cover` 0 where the scan has eyes, else a Meshy eye retexture): remove the id from the list in that
+pass. `BokiRig.face_overlay = true` is the global override that brings the overlay back on every species (the face
+checks turn it on). `face.py` and the Face in each glb stay. `--boki-eyes-shots --shots-dir=<dir>` (GPU) renders each
+species' head as the game builds it, with the overlay forced on, and the match camera.
+
+**Eye-paint pass** (no Blender painting): cindle, puddlet, burrlet, pebbit, selenfin, zapple and sentrikat got eyes
+from a Meshy retexture on the coat's own UVs (`tools/boki/eye_blend.py` keeps the live coat and takes only the Meshy
+eye patch; `tools/boki/swap_atlas.py` puts the atlas into the glb).
 
 ### A summoned Boki (out of the wisp)
 

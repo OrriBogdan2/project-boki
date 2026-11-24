@@ -1051,8 +1051,9 @@ const SWAY_RATE := 4.0  # rad/s of the knocked-out sway
 const SHIVER_RATE := 45.0  # rad/s
 
 static var enabled := true
-## The face overlay (tools/boki/face.py: eye domes, lids, brows, mouth) on top of the coat. Off (the default): the eyes
-## are the model's own painted ones and the Face mesh is dropped at load; on brings the old face and expressions back.
+## The face overlay (tools/boki/face.py: eye domes, lids, brows, mouth) on top of the coat, for every species. Off (the
+## default): a species wears it only while it is in content/rules/boki_eyes.json (no painted eyes of its own yet) and
+## the others drop the Face mesh at load; on brings the old face and expressions back for all.
 static var face_overlay := false
 
 ## How deep a body's baked normal map cuts (a Meshy body has one, docs/art/kin/MESHY_BOKI_RECIPE.md); 0 leaves it out.
@@ -1117,6 +1118,12 @@ var _gait_w := 0.0  # how far the planted timing is blended in
 ## True when this species has a rigged model.
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
+
+
+## True when this species wears the face overlay: all of them with `face_overlay`, else the ones whose coat has no
+## painted eyes yet (content/rules/boki_eyes.json).
+static func uses_overlay(kin_id: String) -> bool:
+	return face_overlay or (Content.rules("boki_eyes")["overlay_species"] as Array).has(kin_id)
 
 
 ## A Water type (wade.json "swim", by its species' theme): it swims level in deep water instead of paddling.
@@ -1567,7 +1574,7 @@ func _dress(c: Dictionary, mats: Array) -> void:
 		var inst := mi as MeshInstance3D
 		inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		if inst.get_blend_shape_count() > 0 or inst.mesh.get_blend_shape_count() > 0:
-			if not face_overlay:
+			if not uses_overlay(species):
 				inst.free()
 				continue
 			face = inst
