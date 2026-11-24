@@ -309,7 +309,7 @@ void fragment() {
 	}
 	if (depth_k > 0.0) { c = depth_cues(c, up, st); }
 	float fog = vis_fog(wpos);
-	vis_f = fog;
+	vis_f = fog * vis_greyness;
 	c = vis_apply(c, fog);
 	ALBEDO = c;
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);

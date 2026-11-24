@@ -22,6 +22,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node, mode := "check") -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
@@ -235,7 +236,7 @@ func _shots(main: Node) -> void:
 		var pair := Image.create(open_img.get_width() * 2, open_img.get_height(), false, Image.FORMAT_RGBA8)
 		pair.blit_rect(open_img, Rect2i(Vector2i.ZERO, open_img.get_size()), Vector2i.ZERO)
 		pair.blit_rect(shut_img, Rect2i(Vector2i.ZERO, shut_img.get_size()), Vector2i(open_img.get_width(), 0))
-		pair.resize(pair.get_width() / 2, pair.get_height() / 2)
+		pair.resize(int(pair.get_width() / 2.0), int(pair.get_height() / 2.0))
 		pair.save_png(out.path_join("blink_%s.png" % art_name))
 		ok(shut_ok, "%s: shot blink_%s.png (open | closed)" % [art_name, art_name])
 		made += 1

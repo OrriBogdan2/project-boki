@@ -57,7 +57,11 @@ def live_rules(sim):
     else:
         items = fb["items"]
     paths = load("evo_paths.json")
-    line = dict(paths["lines"][sim["line"]], pips=paths["pips"]) if paths else fb["line"]
+    # the sim's line can leave evo_paths.json (burrlet did); fall back to the frozen copy then
+    if paths and sim["line"] in paths.get("lines", {}):
+        line = dict(paths["lines"][sim["line"]], pips=paths["pips"])
+    else:
+        line = fb["line"]
     toys = load("toys.json") or {}
     joy = {"gain": toys.get("joy_gain", 10.0), "below": toys.get("joy_below", 85.0)}
     gems_win = (load("base_race.json") or {}).get("gems_win", sim["gems_win"])
@@ -113,7 +117,9 @@ class Boki:
 
 
 def need(curve, level):
-    """XP from level to level + 1: per_level x level, flat from flat_from on (null: never)."""
+    """XP from level to level + 1: round(base x level^power), or per_level x level, flat from flat_from on (null: never)."""
+    if "base" in curve:
+        return round(curve["base"] * level ** curve["power"])
     flat = curve["flat_from"]
     return curve["per_level"] * (min(level, flat) if flat else level)
 

@@ -19,13 +19,13 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.6, "run_cycle": 0.34, "stride": [1.0, 1.0], "foot_mps": [2.0, 4.4], "foot_lock": [0.0, 1.0]
+		"walk_speed": 2.2, "run_speed": 4.6, "run_cycle": 0.34, "stride": [1.0, 1.0], "foot_mps": [2.0, 5.6], "foot_lock": [0.0, 1.0]
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.13,
 		"plants": {"crouch_b": {"L": [0.25], "R": [0.2]}, "crouch_f": {"L": [0.217], "R": [0.517]}, "crouch_l": {"L": [0.25], "R": [0.55]}, "crouch_r": {"L": [0.25], "R": [0.533]}}
 	},
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
-	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.2, "dur": 0.33, "moving": 0.12}},
+	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08, "fade": 0.25}, "drop": {"rate": 1.2, "dur": 0.33, "moving": 0.12, "fade": 0.25}},
 	"kmoves": {
 		"tm_dart_r": {"clip": "dart_r", "upper": "moving", "air_legs": true}, "tm_dart_l": {"clip": "dart_l", "upper": "moving", "air_legs": true}, "tm_dart_heavy": {"clip": "dart_heavy", "upper": "moving", "air_legs": true},
 		"tm_beam": {"clip": "beam", "upper": true},
@@ -49,8 +49,9 @@
 		"mantle": {"clip": "mantle", "rise": 0.28},
 		"ledge": {"clip": "ledge", "rise": 0.3}
 	},
-	"procedural": ["ledge", "mantle", "base"],
+	"procedural": ["ledge", "mantle", "base", "swim"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"],
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["tm_spear_aim", 0.4, "tm_rime"],
 		["tm_spear_aim", 0.3, "tm_dart_r"],

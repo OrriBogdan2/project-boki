@@ -56,12 +56,18 @@ static func begin(group_name: String) -> void:
 static func note(r: Rect2) -> void:
 	if group != "":
 		HudScale.grow(r)
-	note_as(group, r)
+	_record(group, r)
 
 
 ## `r` under a group of its own: for widgets drawn outside the panel pass (the Ways Out strip, markers, prompts).
 ## It is recorded where it ends up: under the HUD size scale of the group being drawn (none outside the panel pass).
+## The camera's lean keeps clear of it too (HudScale.drawn).
 static func note_as(group_name: String, r: Rect2) -> void:
+	HudScale.overlay(group_name, r)
+	_record(group_name, r)
+
+
+static func _record(group_name: String, r: Rect2) -> void:
 	if recording and group_name != "":
 		if not seen.has(group_name):
 			seen[group_name] = []
@@ -143,6 +149,6 @@ static func clipped(root: Node) -> Array:
 static func wider(c: Control, s: String, room: float) -> bool:
 	var font := c.get_theme_font("font")
 	var w := 0.0
-	for line in s.split("\n"):      # (a plain label with line breaks is as wide as its longest line)
+	for line in s.split("\n"):  # (a plain label with line breaks is as wide as its longest line)
 		w = maxf(w, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, c.get_theme_font_size("font_size")).x)
 	return w > room + 1.0

@@ -186,7 +186,7 @@ static func profile_doc() -> Dictionary:
 		"guild": String(Save.d.get("guild_id", "")), "updated": Time.get_unix_time_from_system() * 1000.0,
 		"tag": ClanInfo.my_tag(), "last": ClanInfo.last_deed(Save.d.get("log", [])),
 		"decor": Save.d.get("decor", {}).get("house", []),
-		"showcase": Save.d.get("showcase", []),
+		"showcase": Save.d.get("showcase", []), "fish": FishingDerby.stored(),
 	}
 	d.merge(VisitZones.doc())
 	return d
@@ -543,7 +543,7 @@ func contribute(project: String, gems: int, cb: Callable) -> void:
 ## Fair prices for one item: listings outside this range are ignored by every player.
 static func price_range(kind: String, key: String) -> Vector2i:
 	var base := int(Data.CROPS[key]["price"]) * (2 if kind == "crop" else 1)
-	return Vector2i(maxi(1, base / 2), base * 3)
+	return Vector2i(maxi(1, int(base / 2.0)), base * 3)
 
 ## Only the parts of a kin that are safe to pass between players: species, name, level, how it's
 ## grown, its personality. Anything else is rebuilt fresh for the new owner.
@@ -875,7 +875,8 @@ static func clean_island(d: Dictionary) -> Dictionary:
 		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor")),
 		"tag": ClanInfo.clean_tag(d.get("tag")),
 		"last": ClanInfo.clean_deed(d.get("last"), int(Time.get_unix_time_from_system())),
-		"showcase": BaseShowcase.clean(d.get("showcase"))}.merged(VisitZones.clean(d))
+		"showcase": BaseShowcase.clean(d.get("showcase")), "fish": FishingDerby.clean(d.get("fish"))}\
+		.merged(VisitZones.clean(d))
 
 ## One Boki from someone else's snapshot: {} if its species is unknown, else only safe fields, numbers clamped.
 static func clean_snap_kin(rv) -> Dictionary:

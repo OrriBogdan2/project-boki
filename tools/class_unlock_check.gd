@@ -608,7 +608,7 @@ func _home(tree: SceneTree) -> void:
 	# some play: Kael's challenge done (ready to hold), Sable's half way, Lace's ring goal done
 	var jt := int(ClassUnlock.challenge("juggernaut")["target"])
 	var gt := int(ClassUnlock.challenge("thief")["target"])
-	Game.apply_result(result("archer", true, {"slams": jt, "air_hits": gt / 2, "rings": 8, "stuns": 5}))
+	Game.apply_result(result("archer", true, {"slams": jt, "air_hits": int(gt / 2.0), "rings": 8, "stuns": 5}))
 	var hm = await main._hb_home()
 	for i in 30: await tree.process_frame
 	var items: Array = hm.hub_items().filter(func(it): return String(it[0]) == "hero")
@@ -684,12 +684,26 @@ func _home(tree: SceneTree) -> void:
 	var cb := _find_meta(hm.panel_host, "challenge_block")
 	ok(cb != null and String(cb.get_meta("challenge_block")) == "thief" and float(cb.get_meta("frac")) > 0.4,
 			"a locked Hunter shows its challenge and progress bar")
-	ok(_any_text(hm.panel_host, "%d/%d" % [gt / 2, gt]) and _any_text(hm.panel_host, "Medium challenge"),
+	ok(_any_text(hm.panel_host, "%d/%d" % [int(gt / 2.0), gt]) and _any_text(hm.panel_host, "Medium challenge"),
 			"with its counter and tier")
 	var ml := _find_meta(hm.panel_host, "mastery_list")
 	ok(ml != null and _count_meta(ml, "mastery_goal") == ClassUnlock.mastery("thief").size(),
 			"and its mastery goals with their rewards")
 	await shot(tree, "hunters_screen", 50)
+	# --- a garden-only save (first Relic picked, no expedition yet): the second-Relic choices say what they wait for
+	var keep_save: Dictionary = Save.d.duplicate(true)
+	new_save()
+	ClassUnlock.choose_starters([FIRST])
+	HomeClasses.open(hm, "juggernaut")
+	await tree.process_frame
+	var plain := "Finish an expedition to choose your second Hunter"
+	ok(ClassUnlock.locked_line("juggernaut") == plain
+			and ClassUnlock.locked_line("thief") == ClassUnlock.challenge_text("thief"),
+			"a waiting second Hunter's line is plain; a challenge Hunter's line is its challenge")
+	var n_lines := _count_meta(hm.panel_host, "locked_line")
+	ok(n_lines >= SECOND.size() + 1 and _any_text(hm.panel_host, plain),
+			"the Relics screen shows that line on each waiting tile and under the viewer (%d)" % n_lines)
+	Save.d = keep_save
 	# --- an open Hunter with a mastery glider earned: the glider pick
 	HomeClasses.open(hm, "archer")
 	await tree.process_frame

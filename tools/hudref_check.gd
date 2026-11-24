@@ -51,8 +51,8 @@ func run(main_node: Node) -> void:
 	m.start(opts)
 	var hud = m.hud
 	await frames_until(m, 1.0)
-	var P: Hunter = m.player
-	var foes: Array = m.hunters.filter(func(x): return x != P)
+	var p: Hunter = m.player
+	var foes: Array = m.hunters.filter(func(x): return x != p)
 	ok(hud != null and foes.size() >= 5, "a match with the HUD and five rivals in a row (%d)" % foes.size())
 	if foes.size() < 5:
 		return _done()
@@ -106,14 +106,14 @@ func run(main_node: Node) -> void:
 	ok(absf(hit_chip - hit.hp / hit.max_hp) < 0.01, "... and a second later it has drained (%.2f)" % hit_chip)
 	# ---------------------------------------------------------------- 3. armour and shield
 	var arm: Hunter = foes[2]
-	var as_: Dictionary = hud.plates.shown.get(arm.nid, {})
-	ok(arm.armor > 0.5 and bool(as_.get("armor", false)), "an armoured rival's plate draws the armour strip")
-	ok(arm.shield > 0.0 and bool(as_.get("shield", false)) and HudPlate.shield_frac(arm) > 0.0,
+	var as_v: Dictionary = hud.plates.shown.get(arm.nid, {})
+	ok(arm.armor > 0.5 and bool(as_v.get("armor", false)), "an armoured rival's plate draws the armour strip")
+	ok(arm.shield > 0.0 and bool(as_v.get("shield", false)) and HudPlate.shield_frac(arm) > 0.0,
 		"a shielded rival's plate draws the shield past their health (%.2f of the bar)" % HudPlate.shield_frac(arm))
 	arm.armor = 0.0
 	await main.get_tree().process_frame
 	ok(float(_state(hud, arm).get("brk", 0.0)) > 0.0, "armour hitting zero cracks the strip")
-	await _check_strip(P)
+	await _check_strip(p)
 	# ---------------------------------------------------------------- 4. downed, and status words
 	var dn: Hunter = foes[4]
 	var ds: Dictionary = hud.plates.shown.get(dn.nid, {})
@@ -133,11 +133,11 @@ func run(main_node: Node) -> void:
 	ok(sw == "STUNNED" and "SLOWED" in cc_row,
 		"a stunned, slowed rival's plate: STUNNED over the bar, SLOWED in its row ('%s', %s, %s)" % [sw, cc_row, why])
 	await _cc_words(m, hud, sl)
-	m.knock(foes[0], P, {})
+	m.knock(foes[0], p, {})
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
-	await _knock_banners(m, hud, P)
-	await _channel(m, hud, P)
+	await _knock_banners(m, hud, p)
+	await _channel(m, hud, p)
 	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
 	var lv_ok := true
 	var seen := 0
@@ -152,32 +152,32 @@ func run(main_node: Node) -> void:
 			print("  level not shown for %s: shown %d, is %d" % [fh.pname, int(fs.get("lvl", -1)), fh.lvl])
 	ok(lv_ok and seen >= 5, "every visible plate (%d), rivals and the downed included, shows the level" % seen)
 	# a hunter from another machine: their level comes in the snapshot, the badge updates and pulses
-	var R: Hunter = foes[2]
-	R.lvl = 9
-	var row: Array = m._ser(R)
-	R.lvl = 4
-	R.remote = true
+	var r: Hunter = foes[2]
+	r.lvl = 9
+	var row: Array = m._ser(r)
+	r.lvl = 4
+	r.remote = true
 	await main.get_tree().process_frame
-	ok(int(_shown(hud, R).get("lvl", -1)) == 4, "a remote rival's plate shows level 4")
-	m._net_apply(R, row)
-	ok(R.lvl == 9, "their snapshot carries the run level (now %d)" % R.lvl)
+	ok(int(_shown(hud, r).get("lvl", -1)) == 4, "a remote rival's plate shows level 4")
+	m._net_apply(r, row)
+	ok(r.lvl == 9, "their snapshot carries the run level (now %d)" % r.lvl)
 	await main.get_tree().process_frame
-	var rs := _shown(hud, R)
+	var rs := _shown(hud, r)
 	var lvl_pop := float(rs.get("lvl_pop", 0.0))
 	ok(int(rs.get("lvl", -1)) == 9 and lvl_pop > 0.0, "the plate updates to 9 and the badge pulses (%.2fs)" % lvl_pop)
 	await frames_until(m, m.time + HudPlate.LVL_POP_T + 0.2)
-	ok(float(_shown(hud, R).get("lvl_pop", 1.0)) == 0.0, "... and the pulse settles")
+	ok(float(_shown(hud, r).get("lvl_pop", 1.0)) == 0.0, "... and the pulse settles")
 	# ---------------------------------------------------------------- 4c. plate height per hunter
-	var arch_was := P.arch
-	P.arch = "gunslinger"
-	var no_offset := not Arch.def(P.arch).has("plate_offset")
-	ok(no_offset and HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET and HudPlate.PLATE_OFFSET == 2.35,
-		"an archetype without plate_offset puts the plate at the 2.35 m fallback (%.2f)" % HudPlate.plate_offset(P))
-	P.arch = ""
-	ok(HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
-	P.arch = arch_was
+	var arch_was := p.arch
+	p.arch = "gunslinger"
+	var no_offset := not Arch.def(p.arch).has("plate_offset")
+	ok(no_offset and HudPlate.plate_offset(p) == HudPlate.PLATE_OFFSET and HudPlate.PLATE_OFFSET == 2.35,
+		"an archetype without plate_offset puts the plate at the 2.35 m fallback (%.2f)" % HudPlate.plate_offset(p))
+	p.arch = ""
+	ok(HudPlate.plate_offset(p) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
+	p.arch = arch_was
 	# ---------------------------------------------------------------- 4d. each squad row wears its Boki's icon
-	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and x.kin != null)
+	var mates: Array = m.hunters.filter(func(x): return x != p and x.team == p.team and x.kin != null)
 	await hud.panels.draw
 	ok(mates.size() >= 1 and mates.all(func(x): return TeamBoki.shown.has(x.nid)),
 		"each of the %d teammates' squad rows draws its Boki icon" % mates.size())
@@ -202,21 +202,21 @@ func run(main_node: Node) -> void:
 		ok(TeamBoki.shown[mate.nid]["state"] == "wisp", "a Boki whose owner is a wisp is tinted wisp")
 		mate.downed = false
 	# ---------------------------------------------------------------- 5. cooldown text
-	P.slot_lv["kin"] = 1
-	P.ak.cd["e"] = 6.4
+	p.slot_lv["kin"] = 1
+	p.ak.cd["e"] = 6.4
 	await hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
 	await main.get_tree().process_frame
-	var ei := P.slot_info("k1")
+	var ei := p.slot_info("k1")
 	var txt := String(hud.slot_text.get("k1", ""))
 	ok(txt != "" and txt == HudSlot.cd_text(float(ei["cd"])),
 		"E cooling down shows its seconds on the slot ('%s' for %.2fs)" % [txt, float(ei["cd"])])
 	ok(HudSlot.cd_text(0.42) == "0.4" and HudSlot.cd_text(3.2) == "4", "whole seconds, tenths under one second")
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
-	await _check_keys(P)
-	_check_deny(P)
-	await _check_ult(P)
+	await _check_keys(p)
+	_check_deny(p)
+	await _check_ult(p)
 	_check_safe(hud)
-	await _frames(m, hud, P)
+	await _frames(m, hud, p)
 	await _hud_size(m)
 	_done()
 
@@ -251,48 +251,48 @@ func _check_safe(hud) -> void:
 
 ## 3. Your shield in the vitals: a heal shield lays a strip over the top of your health with the heal icon,
 ## a hit drains it before health, and it fades over its last ShieldStrip.FADE_S before it drops.
-func _check_strip(P: Hunter) -> void:
-	var hud = P.m.hud
-	P.shield = 0.0
-	P.kin_shield = 0.0
+func _check_strip(p: Hunter) -> void:
+	var hud = p.m.hud
+	p.shield = 0.0
+	p.kin_shield = 0.0
 	await hud.panels.draw
 	ok(ShieldStrip.shown.is_empty(), "no shield: no strip in your vitals")
-	Effects.run([{"type": "ally_area", "shield": 60.0, "radius": 3.0, "time": 30.0}], P, {"at": P.pos})
+	Effects.run([{"type": "ally_area", "shield": 60.0, "radius": 3.0, "time": 30.0}], p, {"at": p.pos})
 	await hud.panels.draw
 	var ss: Dictionary = ShieldStrip.shown
-	ok(String(ss.get("icon", "")) == ShieldSrc.HEAL and absf(float(ss.get("amount", 0.0)) - P.shield) < 0.5
+	ok(String(ss.get("icon", "")) == ShieldSrc.HEAL and absf(float(ss.get("amount", 0.0)) - p.shield) < 0.5
 		and float(ss.get("frac", 0.0)) > 0.0 and float(ss.get("alpha", 0.0)) == 1.0,
 		"a heal shield lays a full-strength strip over your health with the heal icon (%s)" % str(ss))
-	var hp0 := P.hp
-	var sh0 := P.shield
-	P.hurt(20.0, null)
+	var hp0 := p.hp
+	var sh0 := p.shield
+	p.hurt(20.0, null)
 	await hud.panels.draw
 	ss = ShieldStrip.shown
-	ok(P.hp == hp0 and P.shield < sh0 and float(ss.get("amount", 0.0)) < sh0,
-		"a hit drains the strip before health (hp %.0f -> %.0f, strip %.0f -> %.0f)" % [hp0, P.hp, sh0,
+	ok(p.hp == hp0 and p.shield < sh0 and float(ss.get("amount", 0.0)) < sh0,
+		"a hit drains the strip before health (hp %.0f -> %.0f, strip %.0f -> %.0f)" % [hp0, p.hp, sh0,
 			float(ss.get("amount", 0.0))])
-	P.shield_t = ShieldStrip.FADE_S * 0.4
+	p.shield_t = ShieldStrip.FADE_S * 0.4
 	await hud.panels.draw
 	var a := float(ShieldStrip.shown.get("alpha", 1.0))
-	ok(a < 1.0 and a >= ShieldStrip.FADE_MIN, "with %.1f s left the strip has faded (alpha %.2f)" % [P.shield_t, a])
-	await frames_until(P.m, P.m.time + ShieldStrip.FADE_S)
+	ok(a < 1.0 and a >= ShieldStrip.FADE_MIN, "with %.1f s left the strip has faded (alpha %.2f)" % [p.shield_t, a])
+	await frames_until(p.m, p.m.time + ShieldStrip.FADE_S)
 	await hud.panels.draw
-	ok(P.shield == 0.0 and ShieldStrip.shown.is_empty(), "its time out, the shield and its strip are gone")
+	ok(p.shield == 0.0 and ShieldStrip.shown.is_empty(), "its time out, the shield and its strip are gone")
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
 ## right-side Boki box); every hunter has an X tile with a lock until level 6 and a cooldown after a cast.
-func _check_keys(P: Hunter) -> void:
-	var hud = P.m.hud
+func _check_keys(p: Hunter) -> void:
+	var hud = p.m.hud
 	var all_x := Arch.ids().all(func(id): return Arch.def(id).has("x"))
 	ok(all_x, "every hunter has a hunter ultimate tile (%d)" % Arch.ids().size())
 	var actions := {"sec": "secondary", "dash": "dash", "k1": "signature", "x": "hunter_ult", "r": "ultimate",
 		"throw": "throw", "base": "base", "gear0": "gear1", "gear1": "gear2"}
-	P.lvl = 1
+	p.lvl = 1
 	HudSlot.shown_keys.clear()
 	await hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
 	await main.get_tree().process_frame
 	var x_key := String(HudSlot.shown_keys.get("x", ""))
-	ok(bool(P.slot_info("x")["locked"]) and x_key == Settings.key_cap("hunter_ult"),
+	ok(bool(p.slot_info("x")["locked"]) and x_key == Settings.key_cap("hunter_ult"),
 		"level 1: the ultimate tile is drawn locked, with the hunter ultimate key '%s'" % x_key)
 	var wrong := []
 	for id in HudSlot.shown_keys:
@@ -307,68 +307,68 @@ func _check_keys(P: Hunter) -> void:
 	var merge_slots: Array = hud.hover_spots.filter(func(x): return String(x[1]) == "r")
 	ok(merge_slots.size() == 1, "one Merge slot only (the Boki box on the right)")
 	var throw_slots: Array = hud.hover_spots.filter(func(x): return String(x[1]) == "throw")
-	ok(throw_slots.size() == (1 if P.kin else 0),
+	ok(throw_slots.size() == (1 if p.kin else 0),
 		"the G slot is drawn once, not again beside the utility belt (%d)" % throw_slots.size())
-	P.lvl = int(Hunter.ULT_AT[0])
-	P.ak.cd["x"] = 12.3
+	p.lvl = int(Hunter.ULT_AT[0])
+	p.ak.cd["x"] = 12.3
 	await hud.panels.draw
 	await main.get_tree().process_frame
 	var xt := String(hud.slot_text.get("x", ""))
-	ok(not bool(P.slot_info("x")["locked"]) and xt == HudSlot.cd_text(float(P.ak.cd["x"])),
-		"level %d: the X tile shows its cooldown ('%s')" % [P.lvl, xt])
-	P.ak.cd["x"] = 0.0
+	ok(not bool(p.slot_info("x")["locked"]) and xt == HudSlot.cd_text(float(p.ak.cd["x"])),
+		"level %d: the X tile shows its cooldown ('%s')" % [p.lvl, xt])
+	p.ak.cd["x"] = 0.0
 
 ## 7. A refused press (hero-ref/HUD.md section 2): E on cooldown pulses its slot and ticks once, and a second press
 ## inside PressDeny.THROTTLE_S adds nothing. E pressed mid-dash on a hero whose row buffers it (Cinder) is held by
 ## DashFlow and raises nothing, nor while it waits out Loco.press_buffer past the dash's end. Runs in one frame.
-func _check_deny(P: Hunter) -> void:
-	var hud = P.m.hud
+func _check_deny(p: Hunter) -> void:
+	var hud = p.m.hud
 	PressDeny.last.clear()
 	hud.slot_fx.erase("k1")
-	P.ak.cd["e"] = 6.0
+	p.ak.cd["e"] = 6.0
 	var n0 := PressDeny.raised
-	P.ak.use_e()
+	p.ak.use_e()
 	ok(PressDeny.raised == n0 + 1 and String(hud.slot_fx.get("k1", {}).get("kind", "")) == "deny",
 		"E pressed on cooldown: one deny on the k1 slot (%d)" % (PressDeny.raised - n0))
-	P.ak.use_e()
+	p.ak.use_e()
 	ok(PressDeny.raised == n0 + 1, "pressed again inside %.1fs: still one deny" % PressDeny.THROTTLE_S)
-	P.cls = Arch.weight("ashwick")
-	P.set_arch("ashwick")
-	P.unlock_all()
-	var flow := P.ak.flow
-	ok(P.ak.id == "ashwick" and String(DashFlow.row_of("ashwick", "e", false)["mode"]) == "buffer",
+	p.cls = Arch.weight("ashwick")
+	p.set_arch("ashwick")
+	p.unlock_all()
+	var flow := p.ak.flow
+	ok(p.ak.id == "ashwick" and String(DashFlow.row_of("ashwick", "e", false)["mode"]) == "buffer",
 		"Cinder's ground dash buffers E (its row)")
 	PressDeny.last.clear()
-	P.ak.cd["e"] = 6.0
-	P.move_kind = "dash"
-	P.roll_t = 0.3
-	P.inp["sig"] = true
+	p.ak.cd["e"] = 6.0
+	p.move_kind = "dash"
+	p.roll_t = 0.3
+	p.inp["sig"] = true
 	flow.route(Match.DT)
-	var held_mid := flow.held.has("e") and not bool(P.inp["sig"])
-	P.roll_t = 0.0
-	P.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
+	var held_mid := flow.held.has("e") and not bool(p.inp["sig"])
+	p.roll_t = 0.0
+	p.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
 	flow.route(Match.DT)
 	ok(held_mid and flow.held.has("e") and PressDeny.raised == n0 + 1,
 		"E on cooldown pressed mid-dash stays buffered through Loco.press_buffer and raises no deny")
-	P.stun_t = 0.0
+	p.stun_t = 0.0
 	flow.held.clear()
 
 ## 9. The ultimate tile reads "ready" at a glance, one look for every hero: the cooldown running out starts the
 ## shine at once, which settles into the steady lit frame; a stun puts the padlock over it and lifting it goes
 ## back to ready with no second shine; reaching the unlock level shines too.
-func _check_ult(P: Hunter) -> void:
-	var hud = P.m.hud
-	var m: Match = P.m
+func _check_ult(p: Hunter) -> void:
+	var hud = p.m.hud
+	var m: Match = p.m
 	var plain := Arch.ids().filter(func(id):
 		var xd: Dictionary = Arch.def(id)["x"]
 		return not (xd.has("col") and xd.has("icon")))
 	ok(plain.is_empty(),
 		"every hero's ultimate has its own ability colour and icon for the tile (missing: %s)" % [plain])
-	P.ak.cd["x"] = 0.4
+	p.ak.cd["x"] = 0.4
 	await _redraw(hud)
 	ok(HunterUltTile.state == "cooling", "cooling: the tile is in its cooldown state (%s)" % HunterUltTile.state)
 	var guard := 0
-	while float(P.ak.cd["x"]) > 0.0 and guard < 600:
+	while float(p.ak.cd["x"]) > 0.0 and guard < 600:
 		await main.get_tree().process_frame
 		guard += 1
 	var back_at := m.time
@@ -383,18 +383,18 @@ func _check_ult(P: Hunter) -> void:
 	ok(HunterUltTile.state == "ready" and HunterUltTile.shine(m.time) == 0.0,
 		"%.1fs later: the steady lit frame, no shine" % HunterUltTile.SHINE_T)
 	var shone_at := HunterUltTile.shine_from
-	P.stun_t = 3.0
+	p.stun_t = 3.0
 	await _redraw(hud)
-	ok(HunterUltTile.state == "blocked" and not bool(P.slot_info("x")["ready"]),
+	ok(HunterUltTile.state == "blocked" and not bool(p.slot_info("x")["ready"]),
 		"stunned with the ultimate off cooldown: the padlock over it, not ready")
-	P.stun_t = 0.0
+	p.stun_t = 0.0
 	await _redraw(hud)
 	ok(HunterUltTile.state == "ready" and HunterUltTile.shine_from == shone_at,
 		"the stun ends: ready again, steady, no second shine")
-	P.lvl = 1
+	p.lvl = 1
 	await _redraw(hud)
 	ok(HunterUltTile.state == "locked", "below level %d: locked" % int(Hunter.ULT_AT[0]))
-	P.lvl = int(Hunter.ULT_AT[0])
+	p.lvl = int(Hunter.ULT_AT[0])
 	await _redraw(hud)
 	ok(HunterUltTile.state == "ready" and HunterUltTile.shine_from > shone_at,
 		"reaching the unlock level: ready, with the shine")
@@ -447,19 +447,19 @@ func _state(hud, h: Hunter) -> Dictionary:
 	return hud.plates.st.get(h.nid, {})
 
 ## 8. The knock banners: the player knocks a rival, then a rival knocks a teammate.
-func _knock_banners(m: Match, hud, P: Hunter) -> void:
+func _knock_banners(m: Match, hud, p: Hunter) -> void:
 	var kb: KnockBanner = hud.knocks
-	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team and not x.downed and not x.out)
+	var rivals: Array = m.hunters.filter(func(x): return x.team != p.team and not x.downed and not x.out)
 	ok(rivals.size() >= 2, "two rivals up to knock (%d)" % rivals.size())
 	if rivals.size() < 2:
 		return
 	var knocked: Hunter = rivals[0]
 	var other: Hunter = rivals[1]
-	m.knock(knocked, P, {})
+	m.knock(knocked, p, {})
 	await main.get_tree().process_frame
 	ok(kb.word() == KnockBanner.FOE_WORD and kb.ring_color() == KnockBanner.FOE_RING and kb.who == knocked,
 		"you knock a rival: KNOCK in the red ring, their face and name ('%s')" % kb.word())
-	kb.knocked(P, other, P)
+	kb.knocked(p, other, p)
 	ok(kb.count == 2 and kb.who == other, "a second knock within %.1fs: the newest, x%d" % [
 		float(KnockBanner.rules()["combo_s"]), kb.count])
 	var back := float(KnockBanner.rules()["back_alpha"])
@@ -467,7 +467,7 @@ func _knock_banners(m: Match, hud, P: Hunter) -> void:
 		and not Geometry2D.triangulate_polygon(kb._slash_dark).is_empty(),
 		"the slash and pill are see-through (alpha %.2f, 0.45-0.6) and the slash blades are clean shapes" % back)
 	await _banner_closes(kb)
-	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.downed)
+	var mates: Array = m.hunters.filter(func(x): return x != p and x.team == p.team and not x.downed)
 	ok(not mates.is_empty(), "a teammate to knock (%d)" % mates.size())
 	if mates.is_empty():
 		return
@@ -493,65 +493,69 @@ func _banner_closes(kb: KnockBanner) -> void:
 		"the banner held %.2fs (1-1.5 s) and is gone" % shown_for)
 
 ## 9. Meeko's Hearth Call on you: the ChannelBar under your vitals, from her kit and from a snapshot.
-func _channel(m: Match, hud, P: Hunter) -> void:
-	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.out)
+func _channel(m: Match, hud, p: Hunter) -> void:
+	var mates: Array = m.hunters.filter(func(x): return x != p and x.team == p.team and not x.out)
 	ok(not mates.is_empty(), "an ally to be Meeko (%d)" % mates.size())
 	if mates.is_empty():
 		return
-	var M: Hunter = mates[0]
-	M.downed = false         # (section 7 knocked them)
-	M.reclass(Arch.weight("tender"), "tender")
-	var K: TenderKit = M.ak
-	var total := float(K.x_def()["time"])
+	var m_v: Hunter = mates[0]
+	m_v.downed = false         # (section 7 knocked them)
+	m_v.reclass(Arch.weight("tender"), "tender")
+	var k: TenderKit = m_v.ak
+	var total := float(k.x_def()["time"])
 	await main.get_tree().process_frame
 	ok(ChannelBar.shown.is_empty(), "no channel, no bar")
-	K.hearth_call = {"who": P, "left": total, "tick": 0.0, "fx": 0.0}
+	k.hearth_call = {"who": p, "left": total, "tick": 0.0, "fx": 0.0}
 	await hud.panels.draw
 	# the match may tick a step before the HUD draws, so the bar is read against the seconds left at that draw
-	var bar: Dictionary = ChannelBar.shown.get(M.nid, {})
-	var live := float(K.hearth_call["left"]) / total
+	var bar: Dictionary = ChannelBar.shown.get(m_v.nid, {})
+	var live := float(k.hearth_call["left"]) / total
 	ok(not bar.is_empty() and absf(float(bar["frac"]) - live) < 0.01 and live > 0.85 and total == 5.0,
 		"her channel on you (%.1f s): the bar is up, full (%s)" % [total, bar])
-	K.hearth_call["left"] = total * 0.4
+	k.hearth_call["left"] = total * 0.4
 	await hud.panels.draw
-	var drained := float(ChannelBar.shown.get(M.nid, {}).get("frac", -1.0))
-	live = float(K.hearth_call["left"]) / total
+	var drained := float(ChannelBar.shown.get(m_v.nid, {}).get("frac", -1.0))
+	live = float(k.hearth_call["left"]) / total
 	# the match drains it a few steps before each HUD draw (up to 8 a slow frame: 0.36 / 0.34 seen on a loaded box,
 	# the full read 0.97), so: the bar follows the seconds left, which sit under the 0.4 set, never above it
 	ok(absf(drained - live) < 0.01 and live <= 0.4 and live > 0.2,
 		"it drains with the seconds left (%.2f, want %.2f)" % [drained, live])
-	var row: Array = m._ser(M)
-	K.hearth_call = {}
-	M.remote = true
-	m._net_apply(M, row)
+	var row: Array = m._ser(m_v)
+	k.hearth_call = {}
+	m_v.remote = true
+	m._net_apply(m_v, row)
 	await hud.panels.draw
-	ok(ChannelBar.shown.has(M.nid), "another machine: the snapshot's target and seconds left bring it back")
-	m._net_apply(M, row.slice(0, row.size() - 2) + ["", 0.0])
+	ok(ChannelBar.shown.has(m_v.nid), "another machine: the snapshot's target and seconds left bring it back")
+	var bare := row.duplicate()
+	# the tail's channel target and seconds left (not its last two fields: the hazard move rides after them)
+	bare[bare.size() - HunterNet.TAIL + 3] = ""
+	bare[bare.size() - HunterNet.TAIL + 4] = 0.0
+	m._net_apply(m_v, bare)
 	await hud.panels.draw
 	ok(ChannelBar.shown.is_empty(), "a snapshot with no channel: the bar is gone")
-	ChannelBar.store(M, P.nid, 0.05)
+	ChannelBar.store(m_v, p.nid, 0.05)
 	await frames_until(m, m.time + 0.1)
 	await hud.panels.draw
 	ok(ChannelBar.shown.is_empty(), "the seconds run out: gone with no further snapshot")
-	ChannelBar.store(M, P.nid, 3.0)
+	ChannelBar.store(m_v, p.nid, 3.0)
 	await hud.panels.draw
-	M.downed = true
+	m_v.downed = true
 	await hud.panels.draw
 	ok(ChannelBar.shown.is_empty(), "Meeko knocked down mid-channel: gone that frame")
-	M.downed = false
-	M.remote = false
+	m_v.downed = false
+	m_v.remote = false
 
 ## 9. The squad frames follow the match: knocked, dead, squad size, solo.
-func _frames(m: Match, hud, P: Hunter) -> void:
-	var mate: Hunter = m.hunters.filter(func(x): return x != P and x.team == P.team)[0]
+func _frames(m: Match, hud, p: Hunter) -> void:
+	var mate: Hunter = m.hunters.filter(func(x): return x != p and x.team == p.team)[0]
 	mate.downed = false
-	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
 	m.knock(mate, foe, {})
 	mate.last_hit_by = foe      # (a hit does this; knock() alone does not)
 	await main.get_tree().process_frame
 	await hud.panels.draw
-	var squad: Array = m.hunters.filter(func(x): return x.team == P.team)
-	var mine: Dictionary = SquadFrames.shown.get(P.nid, {})
+	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
+	var mine: Dictionary = SquadFrames.shown.get(p.nid, {})
 	ok(SquadFrames.shown.size() == squad.size() and int(mine.get("row", -1)) == squad.size() - 1,
 		"a row per squad member (%d), you last (row %d)" % [SquadFrames.shown.size(), int(mine.get("row", -1))])
 	var row: Dictionary = SquadFrames.shown.get(mate.nid, {})
@@ -564,12 +568,12 @@ func _frames(m: Match, hud, P: Hunter) -> void:
 	row = SquadFrames.shown.get(mate.nid, {})
 	ok(row.get("state", "") == "DEAD" and float(row.get("hp", 1.0)) == 0.0 and float(row.get("bleed", 1.0)) == 0.0,
 		"a dead teammate's row shows DEAD and no bars (%s)" % str(row))
-	ok(row.get("killer", "") == foe.nid and SquadFrames.shown.get(P.nid, {}).get("killer", "x") == "",
+	ok(row.get("killer", "") == foe.nid and SquadFrames.shown.get(p.nid, {}).get("killer", "x") == "",
 		"the dead row carries the finisher's face (%s); live rows carry none" % str(row.get("killer", "")))
 	var teams := {}
 	for h in squad:
 		teams[h] = h.team
-	var others: Array = squad.filter(func(x): return x != P and x != mate)
+	var others: Array = squad.filter(func(x): return x != p and x != mate)
 	for h in others:
 		h.team = 99
 	await hud.panels.draw
@@ -596,6 +600,9 @@ func _hud_size(demo: Match) -> void:
 	ok(is_equal_approx(HudScale.setting(), HudScale.MIN), "... and one under it to 80%")
 	demo.queue_free()      # (a plain squad match: the demo's own banners and pop-ins are not the HUD under test)
 	Settings.set_v("hud_full", true, false)      # (every group is drawn: the staged HUD would hide some)
+	var had_obj = Save.d["tutorial"].get(FirstObjective.KEY)
+	# A save past its first expedition: the objective card (--first-objective-check) would crowd the minimap.
+	Save.d["tutorial"][FirstObjective.KEY] = true
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
@@ -641,6 +648,8 @@ func _hud_size(demo: Match) -> void:
 						"%s: 130%% draws the minimap bigger (held to the room above the bottom block)" % tag)
 	Settings.v["hud_scale"] = keep
 	Settings.set_v("hud_full", false, false)
+	if had_obj == null: Save.d["tutorial"].erase(FirstObjective.KEY)
+	else: Save.d["tutorial"][FirstObjective.KEY] = had_obj
 	main.get_tree().root.size = Vector2i(1280, 720)
 
 ## 10. the kill feed (KillFeed): a knock, a finish, a Boki's kill and a monster's knock as rows with faces and the
