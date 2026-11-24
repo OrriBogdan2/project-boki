@@ -9,28 +9,31 @@ extends RefCounted
 ## place, the pin or the edge arrow, the label and the distance: DECISIONS, First 10 minutes); the table of
 ## frames lost per step is printed.
 
-var bad := 0
-var arch := "gunslinger"
-var wisps := false
-var rng_seed := 7               # --tutorial-seed=N: the seed for the course's random draws
-
 ## Words no kit-neutral line may use: not every first Relic has a rifle or ammo.
 const KIT_WORDS := ["ammo", "reload", "rifle", "bullet", "magazine"]
-const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack",
-		"kin", "hook", "ult"]
-const MAX_RUN_T := 900.0       # s of game time before the course counts as stuck
-const IDLE_E_T := 3.0          # s the E step must keep waiting while E is not pressed
-const LEAD_FAR := 10.0         # m: a player this far from a lead step target is where the Boki should be out ahead
-const LEAD_STOP := 6.0         # m: the Boki ends a lead step this close to the target
+const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult"]
+const MAX_RUN_T := 900.0  # s of game time before the course counts as stuck
+const IDLE_E_T := 3.0  # s the E step must keep waiting while E is not pressed
+const LEAD_FAR := 10.0  # m: a player this far from a lead step target is where the Boki should be out ahead
+const LEAD_STOP := 6.0  # m: the Boki ends a lead step this close to the target
+
 ## sim steps far from the target before "it runs ahead" is asked: from your side at run_speed it needs
 ## ~0.7 s to be 2 m ahead of a running Hunter (a shorter leg ends in a glide carry first)
 const LEAD_MIN_FRAMES := 60
 const SCREEN := Vector2(1920, 1080)  # px: the screen the edge arrow is laid out on
-const REACH_FLAT := 12.0       # m: a dummy farther than this on foot is out of reach of any kit
+const REACH_FLAT := 12.0  # m: a dummy farther than this on foot is out of reach of any kit
+
+var bad := 0
+var arch := "gunslinger"
+var wisps := false
+var rng_seed := 7  # --tutorial-seed=N: the seed for the course's random draws
+
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTCHECK %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
@@ -39,13 +42,25 @@ func run(main: Node) -> void:
 			wisps = a.ends_with(":wisps")
 		elif a.begins_with("--tutorial-seed="):
 			rng_seed = int(a.substr(16))
-	seed(rng_seed)       # (the camps' random draws: a box-proof run; --tutorial-seed=N tries another course)
+	seed(rng_seed)  # (the camps' random draws: a box-proof run; --tutorial-seed=N tries another course)
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle",
-			"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch), "tut_test": true,
-			"boki_wisps": wisps})
+	m.start(
+		{
+			"tutorial": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1500.0,
+			"demo_kin": "cindle",
+			"cls": Arch.weight(arch),
+			"arch": arch,
+			"weapon": Arch.signature(arch),
+			"tut_test": true,
+			"boki_wisps": wisps
+		}
+	)
 	m.set_process(false)
 	ok(m.player.ak != null and m.player.ak.id == arch, "the Hunter is forced to %s" % arch)
 	var tu: Tutorial = m.tut
@@ -54,10 +69,10 @@ func run(main: Node) -> void:
 	var t := 0.0
 	var idle_ok := true
 	var reach := ""
-	var early_seen := false      # the summon step: the first window was called back early, and the step stayed
-	var second_seen := false     # the pack step: summoned again after the ring went bright
-	var lead := {}               # per leading step: how the Boki (or its wisp) moves to the step's target
-	var lost := {}               # step id -> frame counts the marker was missing (see _marker)
+	var early_seen := false  # the summon step: the first window was called back early, and the step stayed
+	var second_seen := false  # the pack step: summoned again after the ring went bright
+	var lead := {}  # per leading step: how the Boki (or its wisp) moves to the step's target
+	var lost := {}  # step id -> frame counts the marker was missing (see _marker)
 	while t < MAX_RUN_T and not m.player.extracted:
 		if tu.id() == "kin" and tu.t < IDLE_E_T:
 			idle_ok = idle_ok and tu.got == 0
@@ -77,13 +92,20 @@ func run(main: Node) -> void:
 			seen[tu.id()] = {"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}
 			print("TUTCHECK STEP %d %s: %s" % [seen.size(), tu.id(), tu.text])
 			if tu.id() in FOE_STEPS:
-				reach += _unreachable(m, tu.id())      # (the step's dummies were just placed by its start)
+				reach += _unreachable(m, tu.id())  # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
+	var banners := seen.keys().filter(func(k): return not TutorialHints.quiet(String(k)))
+	print("TUTCHECK STEPS banner %d, hint-only %d, total %d: %s" % [
+			banners.size(), seen.size() - banners.size(), seen.size(), str(banners)])
+	ok(banners.size() >= 7 and banners.size() <= 9,
+			"the match tutorial has about 8 banner steps (%d), the rest are hint lines" % banners.size())
 	_words(m.player, seen)
 	var teaches: Array = ["summon", "pack"] if wisps else ["gkey"]
 	var skipped: Array = ["gkey"] if wisps else ["summon", "pack"]
-	ok(teaches.all(func(k): return seen.has(k)) and not skipped.any(func(k): return seen.has(k)),
-			"%s steps %s ran, %s did not" % ["wisp" if wisps else "walking Boki", teaches, skipped])
+	ok(
+		teaches.all(func(k): return seen.has(k)) and not skipped.any(func(k): return seen.has(k)),
+		"%s steps %s ran, %s did not" % ["wisp" if wisps else "walking Boki", teaches, skipped]
+	)
 	if wisps:
 		var sk: Dictionary = seen.get("summon", {})
 		ok(String(sk.get("cap", "")) == Settings.key_cap("summon"), "the summon line shows the Summon key")
@@ -95,6 +117,7 @@ func run(main: Node) -> void:
 	ok(reach == "", "every dummy stands where this kit can reach it" + reach)
 	print("TUTCHECK DONE %s, failures: %d" % [arch, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## One frame of a step with a place: the beam stands at it, and it has a label and a distance, and either its pin
 ## is in the play box or an edge arrow for it lays out on the screen (a frame short of any of these is counted).
@@ -121,15 +144,21 @@ func _marker(m: Match, lost: Dictionary) -> void:
 		if arrows.size() != 1 or not Rect2(Vector2.ZERO, SCREEN).encloses(arrows[0]["rect"]):
 			row["arrow"] += 1
 
+
 ## The per-step table, and a failure for every step that lost its marker on any frame.
 func _marker_rows(lost: Dictionary) -> void:
 	for sid in lost:
 		var r: Dictionary = lost[sid]
 		var gone: int = int(r["beam"]) + int(r["label"]) + int(r["arrow"])
-		print("TUTCHECK MARKER %s: %d frames (%d off screen), beam lost %d, label lost %d, arrow lost %d" % [sid,
-				r["frames"], r["edge"], r["beam"], r["label"], r["arrow"]])
+		print(
+			(
+				"TUTCHECK MARKER %s: %d frames (%d off screen), beam lost %d, label lost %d, arrow lost %d"
+				% [sid, r["frames"], r["edge"], r["beam"], r["label"], r["arrow"]]
+			)
+		)
 		ok(gone == 0, "%s keeps its beam, label, distance and edge arrow on all %d frames" % [sid, r["frames"]])
 	ok(not lost.is_empty(), "%d steps with a place were watched" % lost.size())
+
 
 ## Stands still and does nothing at the E step's start: any progress here would not be E.
 func _hold_fire(m: Match) -> void:
@@ -138,13 +167,14 @@ func _hold_fire(m: Match) -> void:
 		p.inp[k] = false
 	p.inp["move"] = Vector2.ZERO
 
+
 ## " name@dist" for each live dummy off the player's island or too far to walk to.
 func _unreachable(m: Match, sid: String) -> String:
 	var out := ""
 	var p := m.player
 	var reach := REACH_FLAT
 	var c: Dictionary = Content.rules("tutorial")["camps"].get(sid, {})
-	if c.get("row", false):     # a row starts past an idle monster's notice by design: its far end may lie past 12 m
+	if c.get("row", false):  # a row starts past an idle monster's notice by design: its far end may lie past 12 m
 		reach = maxf(reach, TutorialCamps.ROW_FROM + TutorialCamps.ROW_STEP * (c.get("foes", []).size() - 1) + 1.0)
 	for mb in m.mobs:
 		if mb.dead:
@@ -154,6 +184,7 @@ func _unreachable(m: Match, sid: String) -> String:
 			out += " %s %s@%.1f" % [sid, mb.kind, p.flat_dist(mb)]
 	return out
 
+
 ## The kit's lines: ability and key named, no rifle or ammo talk, no unfilled %tokens.
 func _words(p: Hunter, seen: Dictionary) -> void:
 	var all := ""
@@ -162,7 +193,7 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 		all += " " + String(seen[sid]["text"]) + " " + String(seen[sid]["detail"])
 		banners += " " + String(seen[sid]["text"])
 	ok(not RegEx.create_from_string("%[A-Za-z]").search(all), "no unfilled token in any line")
-	var low := banners.to_lower()      # (a detail may quote the kit's own card: Vex does have a rifle)
+	var low := banners.to_lower()  # (a detail may quote the kit's own card: Vex does have a rifle)
 	var hit := KIT_WORDS.filter(func(w): return low.contains(w))
 	ok(hit.is_empty(), "no line assumes ammo or a rifle %s" % str(hit))
 	var e_name := String(p.ak.e_def().get("name", ""))
@@ -182,6 +213,7 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 		want = "Step in and swing"
 	ok(String(sh.get("text", "")).begins_with(want), "the attack line fits the weapon ('%s')" % sh.get("text", ""))
 	ok(String(sh.get("cap", "")) == Settings.key_cap("fire"), "and shows the attack key (%s)" % sh.get("cap", ""))
+
 
 ## The Boki leads (DECISIONS Nov 3: it runs ahead, waits, looks back; TutorialLead). One sample per sim step on every
 ## step with a lead goal (Tutorial.leads), while the player is still far from the target and the Boki is not being
@@ -207,7 +239,7 @@ func _lead_sample(m: Match, tu: Tutorial, lead: Dictionary) -> void:
 	r["still"] = float(r["still"]) + Match.DT if sp < 0.3 else 0.0
 	r["last"] = kp
 	if k.state == "shoulder" and not k.wisp:
-		return          # (carried over a gap or a glide: it cannot lead then)
+		return  # (carried over a gap or a glide: it cannot lead then)
 	r["min"] = minf(float(r["min"]), d)
 	if pd < LEAD_FAR:
 		return
@@ -221,12 +253,17 @@ func _lead_sample(m: Match, tu: Tutorial, lead: Dictionary) -> void:
 		if rad_to_deg(acos(clampf(fw.dot(tp), -1.0, 1.0))) > 60.0:
 			r["bad"] += 1
 
+
 func _lead_rows(lead: Dictionary) -> void:
 	ok(not lead.is_empty(), "the course has steps with a lead goal")
 	for id in lead:
 		var r: Dictionary = lead[id]
-		print("TUTCHECK LEAD %s far %d ahead %d wait %d bad %d min %.1f" % [id, r["far"], r["ahead"], r["wait"],
-				r["bad"], r["min"]])
+		print(
+			(
+				"TUTCHECK LEAD %s far %d ahead %d wait %d bad %d min %.1f"
+				% [id, r["far"], r["ahead"], r["wait"], r["bad"], r["min"]]
+			)
+		)
 		var near: bool = float(r["min"]) <= LEAD_STOP or float(r["min"]) == 999.0
 		ok(near, "%s: the Boki gets within %.0f m of the target (closest %.1f)" % [id, LEAD_STOP, r["min"]])
 		var ahead: bool = int(r["far"]) < LEAD_MIN_FRAMES or int(r["ahead"]) > 0

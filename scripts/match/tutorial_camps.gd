@@ -15,6 +15,7 @@ var tu: Tutorial
 var granting := false        # the tutorial is paying XP right now (any other XP is ignored)
 var ledger: Array = []       # this camp's monsters: {mb, to, paid}
 var count := 0               # how many the latest camp had
+var last_at := Vector3.INF   # where the camp last stood (the marker holds there while a fallen camp can't respawn yet)
 
 func _init(t: Tutorial) -> void:
 	tu = t
@@ -142,8 +143,10 @@ func _cull_strays() -> void:
 	var isl := tu.m.world.island_of(p.pos.x, p.pos.z)
 	var culled := false
 	for e: Dictionary in ledger:
+		if not is_instance_valid(e["mb"]):
+			continue
 		var mb: Mob = e["mb"]
-		if is_instance_valid(mb) and not mb.dead and tu.m.world.island_of(mb.pos.x, mb.pos.z) != isl:
+		if not mb.dead and tu.m.world.island_of(mb.pos.x, mb.pos.z) != isl:
 			mb.dead = true
 			mb.visible = false
 			culled = true
@@ -157,10 +160,14 @@ func clear() -> void:
 			(e["mb"] as Mob).vanish()
 	ledger.clear()
 	count = 0
+	last_at = Vector3.INF
 
 ## Each kill pays its share of what is left to the camp's level; the last one tips it over.
 func update() -> void:
 	_cull_strays()
+	var near := nearest()
+	if near:
+		last_at = near.pos
 	for e: Dictionary in ledger:
 		if e["paid"] or (is_instance_valid(e["mb"]) and not (e["mb"] as Mob).dead):
 			continue
