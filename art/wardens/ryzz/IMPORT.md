@@ -102,3 +102,14 @@ the close views (copper vs skin value gap 0.08 -> 0.29 at eye level) and the boo
 - Forearm rotation keys nudged 6-12 deg where a hand entered the body (`arm.py`): Attack L, Jump L and R, walk L. Frames deeper than 8 mm:
   Attack L 5 -> 0, Jump L 2 -> 0, Jump R 1 -> 0, walk L 2 -> 0. No other animation channel differs from live.
 Scripts: `~/gens/hunter-round-1124/sparkle/o/tools/` (build.sh, tail2.py, arm.py).
+
+### Round 1124o-2, same branch (glb 292acacd05df, supersedes the copper/boot grade lines above)
+- Image_3: back to the live texels everywhere except the fishnet inner-leg fix from the follow-up above (DCT splice, 220 MCUs from the
+  follow-up atlas, all other MCUs bit-exact live). This drops the copper pack grade and the red boot grade (the review flagged both as pixel
+  recolours); they need an AI masked edit, which this round could not run (Meshy balance 6 credits, every edit HTTP 402).
+- Side torso / armpit weights: the crouch and attack tears at bind x 0.09-0.22, y 1.17-1.28 come from LeftArm/RightArm + Spine02 weights next
+  to Hips + Spine02 weights. Weights diffused along the welded mesh edge graph (10 iterations, 5 cm Gaussian fade around the stretched verts,
+  top 4 kept). Stretched-edge frames (edge >3x bind and >6% height): Attack 10/42 -> 0/42, Crouch 16/16 -> 0/16, the other clips stay 0.
+  Largest edge gain: Attack 26.7 -> 11.9 cm, Crouch 20.5 -> 12.3 cm. JOINTS_0/WEIGHTS_0 change only near the armpits.
+- geo_check vs live: PASS; held clip frames 6 (live) -> 0, held worst 3.83 cm (follow-up) -> 0.4 cm.
+Scripts: `~/gens/hunter-round-1124/sparkle/p2/tools/` (armpit_g.py, vis.py, ctree.sh, submit.sh).
