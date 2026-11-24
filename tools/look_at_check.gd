@@ -105,7 +105,7 @@ func _hunter(id: String) -> int:
 
 ## One frame on this state; `look` is the aim (ZERO: none).
 func _frame(look: Vector3, extra := {}) -> void:
-	var s := {"face": face, "grounded": true, "fired": 99.0, "vel": Vector3.ZERO}
+	var s := {"face": face, "grounded": true, "fired": 99.0, "cast": 99.0, "vel": Vector3.ZERO}
 	s.merge(extra)
 	s[WardenLookAt.LOOK] = look
 	sync.root.rotation.y = face
