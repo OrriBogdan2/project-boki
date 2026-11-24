@@ -112,3 +112,15 @@ is a tint over the texture, low glow and no far-glow boost (the boost clipped th
   game, `--meeko-companions-clip-check` "attack hands"); key times, the forearms and every other track are unchanged.
 - The dark patch at her shoulder in the knee idle (4B) is her dark-purple paw held at the chest (it moves with the hand,
   the portrait's pose): kept.
+
+**11-24 (plan /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md): the wings ride the upper back, not the head.** Meshy hung
+both wing chains (`Bone_048` = Bone_046-048, `Bone_051` = Bone_049-051) under `Head` with keys constant to the head, so every head
+turn (up to 67 deg against the chest in Idle, 79 in Attack) swung the wings and the 4,066 cape/back verts that share their weight
+through her body (wing into torso 13.8 cm in Attack, 12.8 Jump_Run, 11.9 run). Keys only, after the steps above:
+
+    python3 tools/art1/glb_chain_follow.py $G $G --roots=Bone_048,Bone_051 --follow=Spine
+
+Each clip key re-keys the two wing roots so they keep their rest-pose relation to `Spine` (the rest pose is the Meshy model built from
+the turnaround: wings spread evenly at shoulder height). Mesh, skin, node tree and every other track are unchanged (+31 KB of keys).
+`tools/anim/geo_check.py`: wing clips over 4 cm 400 -> 0, worst 13.8 -> 3.5 cm, wing-vs-arm/hand clips gone; wing+cape edge stretch
+p99 lower in all 6 clips (Attack 2.62 -> 1.63). `--ref=Idle@0` (keep the stand's head-tilted relation) was the runner-up: worst 5.8 cm.
