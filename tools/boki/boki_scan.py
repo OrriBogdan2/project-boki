@@ -147,6 +147,8 @@ SCANS = {
         "auto": True,
         "height": 0.45,
         "tris": 16000,
+        "eye_c": (0.08, 0.267, -0.295),  # on the dex scan's painted eyes (face_refit.py, 11-23)
+        "eye_r": (0.04, 0.045, 0.022),
         "eye_yaw": 0.35,
         "face": {},
         "sat": 0.8,
@@ -157,6 +159,8 @@ SCANS = {
         "auto": True,
         "height": 0.5,
         "tris": 16000,
+        "eye_c": (0.07, 0.213, -0.143),  # on the dex scan's painted eyes (face_refit.py, 11-23)
+        "eye_r": (0.03, 0.034, 0.016),
         "eye_yaw": 0.35,
         "face": {},
         "sat": 0.8,
