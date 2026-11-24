@@ -138,7 +138,8 @@ func _drop_poses(a: String, m: Node3D, nat: WardenNative) -> void:
 
 
 ## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats"); a
-## flame slot's surface (Cinder's heel jets, WardenProps) wears the toon pass's flame shader instead.
+## flame slot's surface (Cinder's heel jets, WardenProps) wears the toon pass's flame shader instead, and a mood face
+## (Meeko's sun and cloud, WardenMood) its face shader.
 func _toon(a: String, m: Node3D) -> void:
 	var surfaces := 0
 	var toon := 0
@@ -147,7 +148,8 @@ func _toon(a: String, m: Node3D) -> void:
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
 			var game := sm != null and (sm.shader == Models.HERO or sm.shader == WardenGlb.FLAME)
-			toon += int(game and (m.get_meta("mats", []) as Array).has(sm))
+			var face := sm != null and (sm.shader == WardenMood.ATLAS_SHADER or sm.shader == WardenMood.FACE_SHADER)
+			toon += int(face or (game and (m.get_meta("mats", []) as Array).has(sm)))
 	ok(surfaces > 0 and toon == surfaces, "%s: hero-toon on %d of %d surfaces" % [a, toon, surfaces])
 
 
