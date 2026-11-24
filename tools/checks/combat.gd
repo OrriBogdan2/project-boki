@@ -9,6 +9,8 @@ const CHECKS := {
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 	"--stomp-prompt-shots": ["res://tools/stomp_prompt_shots.gd", "stomp_prompt_shots", null],  # --shots-dir=<dir>
+	# 0022 ult ranks
+	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],
 	# the Arena, training's practice tools, the kit card
 	"--arena-check": ["res://tools/arena_check.gd", "arena_check", null],
 	# every archetype kit, controls, locks, infusion, feel
