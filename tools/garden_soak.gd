@@ -89,6 +89,7 @@ func run(m: Node) -> void:
 	print("SOAK %d days (%d steps) in %.0f s of wall time" % [DAYS, steps, secs])
 	await loop.finish()
 	_report()
+	_report_toys()
 	loop.report()
 	_report_toys()
 	ok(size1 <= size_base * SAVE_GROWTH, "save size from day %d: %d -> %d bytes (limit x%.0f)"
@@ -272,7 +273,7 @@ func _check_toy(k: Dictionary, nm: String) -> void:
 func _check_joy(rec: Dictionary, nm: String) -> void:
 	var joy := Care.need(rec, "joy")
 	joy_low[nm] = minf(float(joy_low.get(nm, 100.0)), joy)
-	if joy < float(home.life.R["whistle"]["sulky_joy"]):
+	if joy < float(home.life.r_v["whistle"]["sulky_joy"]):
 		sulky_s[nm] = float(sulky_s.get(nm, 0.0)) + DT
 
 ## Toy use per Boki per in-game day (the play that trains stats, GARDEN.md 4) and how glum each got. A Boki you

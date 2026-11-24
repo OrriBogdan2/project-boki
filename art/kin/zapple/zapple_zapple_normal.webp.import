@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://hvcji27moujr"
-path="res://.godot/imported/zapple_zapple_normal.webp-28095872a35f37a7d5003b109c81d40d.ctex"
+path.bptc="res://.godot/imported/zapple_zapple_normal.webp-28095872a35f37a7d5003b109c81d40d.bptc.ctex"
+path.astc="res://.godot/imported/zapple_zapple_normal.webp-28095872a35f37a7d5003b109c81d40d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "21bc61cc1a68e718d9fd9f489ad2c930"
+"md5": "d2266f7782b543373768ce75f961db32"
 }
 
 [deps]
 
 source_file="res://art/kin/zapple/zapple_zapple_normal.webp"
-dest_files=["res://.godot/imported/zapple_zapple_normal.webp-28095872a35f37a7d5003b109c81d40d.ctex"]
+dest_files=["res://.godot/imported/zapple_zapple_normal.webp-28095872a35f37a7d5003b109c81d40d.bptc.ctex", "res://.godot/imported/zapple_zapple_normal.webp-28095872a35f37a7d5003b109c81d40d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

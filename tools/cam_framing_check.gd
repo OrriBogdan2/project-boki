@@ -4,7 +4,7 @@ extends RefCounted
 ##   1. the default style takes its numbers from content/rules/camera.json and sits inside the source's
 ##      bands there: pitch, lens, and your feet a little below the screen's centre
 ##   2. the source_scale test style (off by default) shows the source's ground across and scales Hunters; the
-##      home keeps the Supervive view under it
+##      home keeps the default view under it
 ##   3. the cursor lean: none inside the deadzone, never past its cap, and at full lean every way (16
 ##      directions, at the sneak, normal and close zooms) you stay on screen, feet and head
 ##   4. the garden's Boki framing (HomeKinFrame): eased in 30% nearer over 0.3 s, you and the Boki on screen
@@ -15,7 +15,7 @@ extends RefCounted
 const VIEW := Vector2i(1920, 1080)
 const HEAD := 2.0                    # m: the top of a medium hunter's head above its feet
 const ZOOMS := [0.6, 1.0, 1.45]      # a close-up, the usual view, sneaking (Match: 1.45 while crouched)
-const HOME_ZOOMS := [0.55, 1.2, 1.6]  # the farm: the wheel's closest, arriving home (HOME_ZOOM), the widest
+const HOME_ZOOMS := [0.55, 1.2, 1.6]  # the farm: the wheel's closest, a middle notch, the widest (arriving home)
 const HOME_STYLE := "classic"         # the style the farm's framing is measured in (home.gd HOME_ACROSS_REF)
 const SHOTS := [
 	["framing_default", 1.0, Vector2(0.5, 0.5)],
@@ -48,8 +48,8 @@ func run(main: Node, what: String) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _style(cam: CamRig) -> void:
-	var src: Dictionary = CamRig.RULES["source"]
-	var st: Dictionary = CamRig.RULES["styles"]["default"]
+	var src: Dictionary = CamRig.rules["source"]
+	var st: Dictionary = CamRig.rules["styles"]["default"]
 	cam.use_style("default")
 	ok(is_equal_approx(rad_to_deg(cam.pitch), float(st["pitch"])) and is_equal_approx(cam.dist, float(st["dist"]))
 			and is_equal_approx(cam.lens, float(st["fov"])) and is_equal_approx(cam.rise, float(st["rise"])),
@@ -63,7 +63,7 @@ func _style(cam: CamRig) -> void:
 			% [feet, str(src["feet_below_pct"])])
 
 func _lean(cam: CamRig) -> void:
-	var fm: Array = CamRig.FOLLOW["lean"]
+	var fm: Array = CamRig.follow_v["lean"]
 	var deadzone := float(fm[0])
 	ok(cam.lean_to(Vector3(deadzone * 0.9, 0, 0)) == Vector3.ZERO, "no lean inside the %.1f m deadzone" % deadzone)
 	for z in ZOOMS:
@@ -84,7 +84,7 @@ func _lean(cam: CamRig) -> void:
 	cam.zoom = 1.0
 
 func _source_style(cam: CamRig) -> void:
-	var src: Dictionary = CamRig.RULES["source"]
+	var src: Dictionary = CamRig.rules["source"]
 	ok(Settings.DEFAULTS["cam_style"] != "source_scale", "source_scale is off by default (the Settings camera is %s)"
 			% Settings.DEFAULTS["cam_style"])
 	cam.use_style("source_scale")
@@ -96,7 +96,7 @@ func _source_style(cam: CamRig) -> void:
 	Settings.set_v("cam_style", "source_scale", false)
 	cam.apply_settings()
 	ok(cam.style_id == "default" and is_equal_approx(cam.hunter_scale, 1.0),
-			"the home keeps the Supervive view under source_scale")
+			"the home keeps the default view under source_scale")
 	Settings.set_v("cam_style", was, false)
 	cam.use_style("default")
 

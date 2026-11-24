@@ -27,7 +27,7 @@ func run(main_node: Node) -> void:
 	if Array(OS.get_cmdline_user_args()).has(PROBE):
 		_probe()
 		return
-	var keep := FileAccess.get_file_as_string(Settings.PATH)
+	var keep := FileAccess.get_file_as_string(Settings.path)
 	await _sliders("title")
 	_routes("title")
 	await _heard()
@@ -64,14 +64,21 @@ func _sliders(where: String) -> void:
 			var got := _db(Settings.BUSES[key])
 			var what := "%s: %s slider %.2f -> %s bus" % [where, key, lin, Settings.BUSES[key]]
 			ok(absf(got - want) < TOL, "%s %.1f dB (want %.1f)" % [what, got, want])
-	# the same through the Settings > Audio page's own sliders (the order they are listed in)
+	# the same through the settings pages' own sliders: Master is the last one on Main, the rest are listed on Audio
+	Overlay.tab = "Main"
+	Overlay.open_settings()
+	var master := Overlay.find_children("*", "HSlider", true, false).back() as HSlider
+	master.value = 0.35
+	var moved_master := absf(_db("Master") - Sfx.slider_db(0.35)) < TOL
+	ok(moved_master, "%s: dragging the master slider moves the Master bus (%.1f dB)" % [where, _db("Master")])
 	Overlay.tab = "Audio"
 	Overlay.open_settings()
+	await main.get_tree().process_frame          # (the Main page is freed at the end of the frame)
 	var sliders := Overlay.find_children("*", "HSlider", true, false)
-	ok(sliders.size() >= 4, "%s: the Audio page has its volume sliders (%d)" % [where, sliders.size()])
-	# the page lists one slider per Settings.BUSES entry, in that order (Voices and UI sit between the others)
-	for i in mini(Settings.BUSES.size(), sliders.size()):
-		var key: String = Settings.BUSES.keys()[i]
+	ok(sliders.size() >= 3, "%s: the Audio page has its volume sliders (%d)" % [where, sliders.size()])
+	# one slider per Settings.BUSES entry after Master, in that order (Voices and UI sit between the others)
+	for i in mini(Settings.BUSES.size() - 1, sliders.size()):
+		var key: String = Settings.BUSES.keys()[i + 1]
 		var bus: String = Settings.BUSES[key]
 		(sliders[i] as HSlider).value = 0.35
 		var moved := absf(_db(bus) - Sfx.slider_db(0.35)) < TOL
@@ -164,9 +171,9 @@ func _stays(where: String) -> void:
 
 ## A real mouse press on the Music slider's track (not a script write), as a player does it.
 func _mouse_drag(where: String, sliders: Array) -> void:
-	if sliders.size() < 2:
+	if sliders.is_empty():
 		return
-	var sl: HSlider = sliders[1]
+	var sl: HSlider = sliders[0]
 	Settings.set_v("music", 1.0, false)
 	sl.value = 1.0
 	await main.get_tree().process_frame
@@ -191,7 +198,7 @@ func _mouse_drag(where: String, sliders: Array) -> void:
 	var what := "%s: a mouse click near the left of the Music slider turns the Music bus down" % where
 	ok(_db("Music") < -12.0, "%s (%.1f dB)" % [what, _db("Music")])
 
-## A saved settings.cfg is what the game boots with: write one, start the game again on the same user dir.
+## A saved settings.cfg is what the game boots with: write one, start the game again on it (--settings-file).
 ## A file from before the perceptual curve (no audio_v) boots sounding as it did: gain = its old slider.
 func _boot_with_saved_cfg(current: bool) -> void:
 	var cf := ConfigFile.new()
@@ -199,9 +206,9 @@ func _boot_with_saved_cfg(current: bool) -> void:
 		cf.set_value("s", k, SAVED[k])
 	if current:
 		cf.set_value("s", "audio_v", 2)
-	cf.save(Settings.PATH)
+	cf.save(Settings.path)
 	var out := []
-	var args := ["--headless", "--", "--audio-settings-check", PROBE]
+	var args := ["--headless", "--", "--audio-settings-check", PROBE, "--settings-file=" + Settings.path]
 	if OS.has_feature("editor"):
 		args = ["--path", ProjectSettings.globalize_path("res://")] + args
 	var code := OS.execute(OS.get_executable_path(), args, out, true)
@@ -216,9 +223,9 @@ func _boot_with_saved_cfg(current: bool) -> void:
 
 func _put_back(keep: String) -> void:
 	if keep == "":
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
 		return
-	var f := FileAccess.open(Settings.PATH, FileAccess.WRITE)
+	var f := FileAccess.open(Settings.path, FileAccess.WRITE)
 	f.store_string(keep)
 	f.close()
 

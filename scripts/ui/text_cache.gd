@@ -13,6 +13,8 @@ static var world := false      # drawing world-hung text (the plates over heads)
 static var shaped := 0         # lines shaped so far (checks and the probe read it)
 static var seen: Array = []    # --keys-check: every string drawn while `recording`
 static var recording := false
+static var seen_at: Array = []  # --ui-text-probe-check: [text, window rect, item] drawn while `recording`
+static var draw_xf := Transform2D.IDENTITY  # the caller's draw transform (condensed, leaning text); seen_at only
 
 static func line(font: Font, s: String, design_fs: int) -> TextLine:
 	var fs := design_fs if world else UI.fs(design_fs)      # Settings > Text size
@@ -33,15 +35,25 @@ static func line(font: Font, s: String, design_fs: int) -> TextLine:
 static func width(font: Font, s: String, fs: int) -> float:
 	return line(font, s, fs).get_size().x
 
+## `s` cut at a word and ended with "…" so it is at most `max_w` px wide (as it is when it already fits).
+static func fit(font: Font, s: String, fs: int, max_w: float) -> String:
+	var out := s
+	while width(font, out, fs) > max_w and out.contains(" "):
+		out = out.substr(0, out.rfind(" ")).trim_suffix(",").trim_suffix(":") + "…"
+	return out
+
 ## Left-aligned at `p` (the baseline, as CanvasItem.draw_string), with an outline under it when
 ## `outline` > 0.
 static func draw(c: CanvasItem, font: Font, p: Vector2, s: String, fs: int, col: Color, outline := 0,
 		outline_col := Color(0, 0, 0, 0.55)) -> void:
 	if s == "":
 		return
-	if recording: seen.append(s)
 	var tl := line(font, s, fs)
 	var at := Vector2(p.x, p.y - tl.get_line_ascent())
+	if recording:
+		seen.append(s)
+		if not world:
+			seen_at.append([s, c.get_global_transform_with_canvas() * draw_xf * Rect2(at, tl.get_size()), c])
 	var rid := c.get_canvas_item()
 	if outline > 0:
 		tl.draw_outline(rid, at, outline, outline_col)

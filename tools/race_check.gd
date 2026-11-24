@@ -25,6 +25,9 @@ extends RefCounted
 ## Never touches the real save.
 
 const RACES := 20
+const SIM_RACES := 200
+const SIM_GAP := 10              # Speed points the raised Boki leads by
+const SIM_SHARE := 0.75          # the higher-Speed Boki must win at least this share of SIM_RACES
 const WIN_SHARE := 0.6           # the favourite must win at least this share
 const DT := 1.0 / 30.0           # s per step
 const MAX_S := 120.0             # s: a race that runs longer is stuck
@@ -49,9 +52,12 @@ func run(m: Node) -> void:
 	_leans()
 	_friends_rivals()
 	_settle()
+	_raised()
+	_carried()
 	_twists()
 	_formats()
 	_courses()
+	_vent_stretch()
 	await _zone_tracks()
 	_beats_keep_order()
 	await _on_base()
@@ -172,6 +178,39 @@ func _settle() -> void:
 	ok(not mem_w.is_empty() and mem_w[-1]["kind"] == "race" and not mem_l.is_empty() and mem_l[-1]["kind"] == "race",
 			"both remember it: \"%s\"" % (mem_w[-1]["text"] if not mem_w.is_empty() else ""))
 
+## SIM_RACES seeded two-Boki races, same species, joy and zone, the only gap SIM_GAP raised Speed points: the
+## raised one wins most (raising decides, the wobble keeps an upset possible).
+func _raised() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261123
+	var raised_wins := 0
+	for n in SIM_RACES:
+		var low := rng.randi_range(0, 30)
+		var recs := [_kin("zapple", "Lo", low, 60.0), _kin("zapple", "Hi", low + SIM_GAP, 60.0)]
+		if rng.randi() % 2 == 0:
+			recs.reverse()
+		var r := _race(recs, 0, rng, false)
+		raised_wins += 1 if recs[r.order()[0]]["name"] == "Hi" else 0
+	print("RACE sim: the +%d Speed Boki won %d of %d" % [SIM_GAP, raised_wins, SIM_RACES])
+	ok(raised_wins >= int(SIM_RACES * SIM_SHARE), "+%d Speed wins %d of %d races (needs %d)"
+			% [SIM_GAP, raised_wins, SIM_RACES, int(SIM_RACES * SIM_SHARE)])
+
+## The line after the race names what won it.
+func _carried() -> void:
+	var fast := _kin("zapple", "Fast", 30, 60.0)
+	var slow := _kin("zapple", "Slow", 0, 60.0)
+	ok(BaseRace.carried(fast, slow) == "Speed carried it", "a Speed gap: \"%s\"" % BaseRace.carried(fast, slow))
+	var happy := _kin("zapple", "Happy", 0, 100.0)
+	var glum := _kin("zapple", "Glum", 0, 0.0)
+	var mood_line := BaseRace.carried(happy, glum)
+	ok(mood_line == "A happy mood carried it", "a mood gap: \"%s\"" % mood_line)
+	var luck_line := BaseRace.carried(slow, fast)
+	ok(luck_line == "A lucky run carried it", "the underdog's win: \"%s\"" % luck_line)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var res := BaseRace.settle(_race([fast, slow], 0, rng))
+	ok(res["why"] == "Speed carried it", "settle hands the card its line: \"%s\"" % res["why"])
+
 func _twists() -> void:
 	var rec := _kin("zapple", "Tw", 10, 60.0)
 	var st: Array = BaseRace.stretches()
@@ -220,7 +259,8 @@ func _formats() -> void:
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	rules["base_mode"] = false      # the "off" half walks the old farm
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 70.0)
@@ -244,6 +284,7 @@ func _on_base() -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	ok(home.hrace != null, "on: the base has the Dash")
+	ok(home.hfetch != null and is_instance_valid(home.hfetch.mat), "on: Fetch Cup's mat stands beside the Dash's post")
 	if home.hrace != null:
 		var race: BaseRace = home.hrace
 		_footing(GardenZones.start(), home, race)
@@ -303,7 +344,7 @@ func _on_base() -> void:
 		ok(race.pin(rec, game) and not race.pin(rec, game + "x"), "on: only a win in this week's event game is pinned")
 		ok(is_instance_valid(race.wall) and race.wall.get_child_count() > 1, "on: the wall shows the frame")
 	await _drill(home)
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame
 
@@ -466,10 +507,10 @@ func _plan_species() -> Dictionary:
 
 ## Every zone's course is its own, closed and gentle on the turns, and every body plan runs it to the line.
 func _courses() -> void:
-	var R: Dictionary = BaseRace.rules()
-	var band: Array = R["lap_band"]
+	var r_v: Dictionary = BaseRace.rules()
+	var band: Array = r_v["lap_band"]
 	var zones: Array = GardenZones.ids()
-	ok(R["courses"].keys() == zones, "a course for each zone: %s" % [R["courses"].keys()])
+	ok(r_v["courses"].keys() == zones, "a course for each zone: %s" % [r_v["courses"].keys()])
 	var plans := _plan_species()
 	ok(plans.keys().size() == BaseRace.PLANS.size(), "every body plan has a species to run (%s)" % [plans.keys()])
 	var shapes := {}
@@ -484,7 +525,8 @@ func _courses() -> void:
 		var worst := 0.0
 		for i in range(1, pts.size() - 1):
 			worst = maxf(worst, rad_to_deg(abs((pts[i] - pts[i - 1]).angle_to(pts[i + 1] - pts[i]))))
-		ok(worst <= float(R["max_turn"]), "%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(R["max_turn"])])
+		ok(worst <= float(r_v["max_turn"]),
+				"%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(r_v["max_turn"])])
 		GardenZones.here = z
 		for plan in plans:
 			var rec := _kin(plans[plan], "Run", 0, 50.0)
@@ -495,6 +537,38 @@ func _courses() -> void:
 			ok(r.over() and r.t < MAX_S, "%s: a %s runs it to the line (%.1f s)" % [z, plan, r.t])
 	GardenZones.here = ""
 	ok(shapes.size() == zones.size(), "no two zones share a course")
+
+## The ridge track runs through an updraft vent (ZoneVents): its first vent stands on the stretch that names it, a
+## winged runner is quicker there (vent_mult) than the same stats on the ground, and nobody else is.
+func _vent_stretch() -> void:
+	var r: Dictionary = BaseRace.rules()
+	GardenZones.here = "ridge"
+	var c: Array = BaseRace.course("ridge")
+	var vents := ZoneVents.spots("ridge")
+	var s: int = c.map(func(x): return x.has("vent")).find(true)
+	var named := s >= 0 and int(c[s]["vent"]) < vents.size()
+	ok(named, "ridge: a stretch of the track names one of its %d vents" % vents.size())
+	var line := Vector3(BaseRace.post_spot()[0], 0.0, BaseRace.post_spot()[1]) + BaseRace.LOOP_OFF
+	var pts := BaseRace.path(c, s)
+	var gap: float = INF
+	for i in range(1, pts.size()):
+		var v: Vector3 = vents[int(c[s]["vent"])] - line
+		var a := pts[i - 1]
+		var b := pts[i]
+		var t := clampf((Vector2(v.x, v.z) - a).dot(b - a) / (b - a).length_squared(), 0.0, 1.0)
+		gap = minf(gap, (a + (b - a) * t).distance_to(Vector2(v.x, v.z)))
+	ok(gap <= BaseRace.TRACK_W * 0.5, "ridge: the vent stands on the track (%.2f m off its line)" % gap)
+	var wings: String = Data.KIN.keys().filter(func(sp): return BaseRace.winged({"species": sp}))[0]
+	var walker: String = Data.KIN.keys().filter(func(sp): return not BaseRace.winged({"species": sp}))[0]
+	var flier := _kin(wings, "Wing", 10, 60.0)
+	var ground := _kin(walker, "Foot", 10, 60.0)
+	var other: int = c.find_custom(func(x): return x["kind"] == "straight" and not x.has("vent"))
+	var lift := BaseRace.stretch_pace(flier, s) / BaseRace.stretch_pace(flier, other)
+	lift *= float(c[other]["mult"]) / float(c[s]["mult"])
+	ok(is_equal_approx(lift, float(r["vent_mult"])), "ridge: a winged runner is %.2fx on the vent stretch" % lift)
+	ok(is_equal_approx(BaseRace.stretch_pace(ground, s) / BaseRace.stretch_pace(ground, other),
+			float(c[s]["mult"]) / float(c[other]["mult"])), "ridge: a runner without wings gets no lift")
+	GardenZones.here = ""
 
 ## In each built zone's own Home (the start zone's is the farm, below): a race post, and the loop lies on
 ## land clear of its toys and props without a step the ground can't take.
@@ -521,7 +595,7 @@ func _zone_tracks() -> void:
 			_footing(z, home, race)
 		home.queue_free()
 		await main.get_tree().process_frame
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = true
 
 func _footing(z: String, home: Node, race: BaseRace) -> void:
 	var taken := {}

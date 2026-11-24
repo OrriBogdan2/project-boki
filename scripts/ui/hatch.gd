@@ -4,14 +4,14 @@ extends Node3D
 ## comes out; then your first Relic drifts to you (MaskMoment) and you head into the tutorial together.
 
 ## The three starter eggs up front plus the black mystery egg in its basket at the back (MysteryEgg).
-## Names, tempers and blurbs come from each species' "egg" block in content/kin/<id>.json, so every
+## Names, tempers and blurbs come from each species' "egg" block in content/kin_home/<id>.json, so every
 ## egg is named for its element (Venom Egg, ...).
+const TOP_MARGIN := 48.0       # px: room kept clear of the window edges by the title block (both sides together)
 const STARTERS := ["cindle", "puddlet", "burrlet"]
 const MYSTERY := {
 	"species": "mystery", "name": "Mystery Egg", "temper": "???",
-	"desc": "Black as a moonless night, tucked in an old basket at the back. Nobody knows what's inside.",
-	"play": "Almost anything from the wilds could be in there, even a rare one,"
-		+ " and it's more likely than most to hatch a little strange.",
+	"desc": "Black as night, in an old basket. Who knows?",
+	"play": "Could be anything, even a rare one.",
 }
 
 static func starter_eggs() -> Array:
@@ -27,6 +27,11 @@ static func starter_eggs() -> Array:
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
+const NAME_LOOK := Vector3(1.4, 0.25, 0.5)     # m: the naming shot aims right of the Boki, so it sits left of the card
+const NAME_CARD_W := 520.0      # px: the naming card
+const NAME_MARGIN := 32.0       # px: its gap to the screen edge
+const LABEL_W := 130.0          # px: the naming card's row labels
+const DICE_W := 44.0            # px: the dice button and its gap, in the Name row (so both boxes line up)
 const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
 
 var cam: Camera3D
@@ -50,7 +55,7 @@ var root_ui: Control
 var bottom: VBoxContainer
 var title: Label
 var cam_from := Vector3(0, 3.6, 6.4)
-var new_rec: Dictionary = {}  # the hatchling's record, made when the name card opens (so its sex mark shows there) and kept by _finish
+var new_rec: Dictionary = {}  # the hatchling's record, made as it pops out (so the reveal and the name card show its sex) and kept by _finish
 var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mutations) decided
 var mystery_found := false    # its card shows once you've hovered or picked the black egg
 var locker: LookLocker      # making yourself (stage "create")
@@ -418,6 +423,10 @@ func _top_over(x_frac: float) -> void:
 	if top_box:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
+		# the line wraps inside the room either side of that centre, so a big Text size never pushes it off screen
+		var room := 2.0 * minf(x_frac, 1.0 - x_frac) * get_viewport().get_visible_rect().size.x - TOP_MARGIN
+		sub_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		sub_lbl.custom_minimum_size.x = room
 
 func _show_pick() -> void:
 	_clear_bottom()
@@ -450,7 +459,7 @@ func _show_pick() -> void:
 		v.add_child(dl)
 		if i == chosen:
 			var pl := UI.label(d["play"], 13, UI.INK)
-			pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			UI.wrapped(pl)
 			v.add_child(pl)
 		var ii := i
 		v.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -479,6 +488,8 @@ func _pick(i: int) -> void:
 ## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
 ## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
 const TAPS := 7
+const KNOCK_LINES := ["Knock on the shell", "Something stirs...", "Something knocks back.", "Again, gently.",
+	"The shell bulges.", "Cracks are spreading.", "Nearly.", "Here they come."]      # the title after each knock
 var taps := 0
 func _tap_egg() -> void:
 	if taps >= TAPS or chosen < 0:
@@ -499,26 +510,27 @@ func _tap_egg() -> void:
 	# a new crack each time, and a few flakes of shell
 	var base := 8 + taps * 3
 	wegg._crack(base, base + 2 + int(k * 2.0))
-	fx.burst(holder.position + Vector3(0, 0.5, 0), wegg.col.lightened(0.2), int(2 + 4 * k), 1.2, 0.35, 6.0, 0.5)
+	fx.burst(holder.position + Vector3(0, 0.5, 0), EggModels.TINT[wegg.kind].lightened(0.2), int(2 + 4 * k), 1.2, 0.35, 6.0, 0.5)
 	# your knock, then its knock back from inside
 	Sfx.play("thump", null, -16.0 + 4.0 * k, 0.04, 1.3)
 	get_tree().create_timer(0.22).timeout.connect(func(): Sfx.play("thump", null, -20.0 + 8.0 * k, 0.05, 1.6 - 0.2 * k))
 	cam_to = Vector3(0, 2.5, 5.4).lerp(Vector3(0, 1.9, 4.2), k)
 	if title:
-		title.text = ["Knock on the shell", "Something stirs...", "It knocks back.", "Again, gently.", "It's pushing.", "It's cracking.", "Nearly.", "Here it comes."][mini(taps, 7)]
+		title.text = KNOCK_LINES[mini(taps, KNOCK_LINES.size() - 1)]
 
 func _start_hatch() -> void:
 	stage = "warm"
 	hatch_t = 0.0
 	_clear_bottom()
 	title.text = "Knock on the shell"
+	sub_lbl.hide()
 	taps = 0
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var knock := "Knock on the egg: click (or press %s). Every knock wakes it a little more, and it knocks back."
+	var knock := "Click (or press %s) to knock. The Boki inside wakes a little more."
 	var l := UI.label(knock % Settings.key_cap("jump"), 15)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	v.add_child(l)
 	warm_bar = Control.new()
 	warm_bar.custom_minimum_size = Vector2(420, 16)
@@ -555,7 +567,7 @@ func _process(delta: float) -> void:
 	if stage == "mask" or stage == "create":
 		pass       # (MaskMoment, or the LookLocker, moves the camera)
 	else:
-		cam.look_at(Vector3(0, (0.25 if stage != "pick" else 0.55) if stage != "name" else -0.55, 0.5))
+		cam.look_at(NAME_LOOK if stage == "name" else Vector3(0, 0.25 if stage != "pick" else 0.55, 0.5))
 	if stage == "pick":
 		var hv := _egg_under_mouse()
 		if hv != hover:
@@ -585,20 +597,18 @@ func _process(delta: float) -> void:
 			_clear_bottom()
 			wegg.rotation.z = 0.0
 			wegg.position.y = 0.12
-			wegg.popped.connect(func(k: Node3D):
-				kin_node = k
-				title.text = "It's looking at you.")
+			wegg.popped.connect(_popped)
 			wegg.done.connect(func():
 				stage = "reveal"
 				cam_to = Vector3(0, 2.2, 5.6)
 				# a closer look (its card, and turning it round), then naming
-				var rv := KinReveal.new(egg_defs[chosen]["species"], egg_defs[chosen].get("rec", {}))
+				var rv := KinReveal.new(egg_defs[chosen]["species"], new_rec)
+				rv.twin = kin_node
 				reveal = rv
 				add_child(rv)
 				rv.revealed.connect(skipper.queue_free)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
-					if top_box: top_box.visible = true
 					stage = "name"
 					_show_name()))
 			wegg.start()
@@ -617,13 +627,21 @@ func _skip_hatch() -> void:
 
 func _show_name() -> void:
 	_clear_bottom()
+	top_box.visible = false      # (its line, "He's looking at you", is the reveal's: stale here)
+	# the card on the right and the Boki whole on the left, never a card over its body
+	var side := bottom.get_parent() as Control
+	side.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+	side.offset_left = -(NAME_CARD_W + 2.0 * NAME_MARGIN)
+	side.offset_right = 0.0
+	side.offset_top = NAME_MARGIN
+	side.offset_bottom = -NAME_MARGIN
 	var sp_id: String = egg_defs[chosen]["species"]
 	var sp: Dictionary = Data.KIN[sp_id]
 	var card := UI.card(UI.CARD, 16, 18)
-	card.custom_minimum_size = Vector2(520, 0)
+	card.custom_minimum_size = Vector2(NAME_CARD_W, 0)
 	var v := UI.vbox(10); card.add_child(v)
 	if new_rec.is_empty() or String(new_rec.get("species", "")) != sp_id:
-		new_rec = Save.new_kin(sp_id)          # rolled now: its sex (and he/she) is known before it is named
+		new_rec = _hatched_rec(sp_id)
 	var she: bool = Unique.sex(new_rec) == "f"
 	# (lifted like the egg names: a dark species colour, Vespyx's plum, vanished on the dark card)
 	var scol: Color = sp["color"]
@@ -634,75 +652,76 @@ func _show_name() -> void:
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
 	var sex_row := UI.hbox(8)
 	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
-	# (a long line wraps, so it must be given the row's width: in an HBox with no expand it shrank to ~0 wide
-	# and wrapped one letter per line, a column running off the top of the screen)
 	var sex_line := UI.para("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
 		"A babbler for now; any name you give will stick."], 16, UI.MUTED)
+	# (a wrapping Label asks for ~0 width: with no floor, a row that did not hand it room broke it one letter
+	# per line, a column running off the top of the screen; the floor holds even if the row stops expanding)
+	UI.wrapped(sex_line, 300.0)
 	sex_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sex_row.add_child(sex_line)
 	v.add_child(sex_row)
 	v.add_child(UI.label("Voice: %s." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)
-	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
+	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = LABEL_W - DICE_W
 	name_row.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_row.add_child(ne)
+	var step := NameStep.new(sp_id, "")      # (both ways on below keep the name)
+	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_row.add_child(step)
 	v.add_child(name_row)
-	# a few ideas, and a button for a fresh handful
-	var picks := UI.hbox(6)
-	var fill_picks := func(self_ref: Callable) -> void:
-		for ch in picks.get_children(): ch.queue_free()
-		var il := UI.label("Ideas", 13, UI.MUTED); il.custom_minimum_size.x = 120; il.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		picks.add_child(il)
-		var pool: Array = Data.KIN_NAMES.duplicate(); pool.shuffle()
-		for nm in pool.slice(0, 4):
-			var n2: String = nm
-			picks.add_child(UI.button(n2, func(): ne.text = n2; ne.caret_column = n2.length()))
-		var more := UI.button("More", func(): self_ref.call(self_ref))
-		more.flat = true
-		picks.add_child(more)
-	fill_picks.call(fill_picks)
-	v.add_child(picks)
 	var you_row := UI.hbox(8)
-	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
+	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = LABEL_W
 	you_row.add_child(yl)
-	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var ye := _your_name_edit()
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
-	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, ne.text, ye.text, false)))
-	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, ne.text, ye.text, true)))
+	btns.add_child(_path_card("Tutorial", "A short practice run with your Boki, then home.",
+			func(): _finish(sp_id, step.chosen(), ye.text, true), true))
+	btns.add_child(_path_card("Skip tutorial", "Raise your Boki at home. Fighting waits for the portal.",
+			func(): _finish(sp_id, step.chosen(), ye.text, false), false))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
-	# Enter in either box is the same as "Tend the garden"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ne.grab_focus()
-	ne.select_all()
+	# Enter in either box is the same as "Skip tutorial"
+	step.box.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	step.focus()
 
-## One of the two equal ways on from the naming card: a button and a line under it, one click.
-func _path_card(label: String, line: String, go: Callable) -> Control:
+## One of the two ways on from the naming card: a button and a line under it, one click.
+## The main way is bright; the other is a flat grey button.
+func _path_card(label: String, line: String, go: Callable, main_way: bool) -> Control:
 	var c := UI.vbox(6)
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	c.add_child(UI.primary(label, go, 240))
+	if main_way:
+		c.add_child(UI.primary(label, go, 240))
+	else:
+		var b := UI.button(label, go, 240)
+		b.flat = true
+		c.add_child(b)
 	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
 	return c
 
+## The player's name box: empty (with a hint) until they type one; an unnamed player stays Save.UNNAMED.
+func _your_name_edit() -> LineEdit:
+	var le := LineEdit.new()
+	var cur := String(Save.d.get("name", Save.UNNAMED))
+	le.text = "" if cur == Save.UNNAMED else cur
+	le.placeholder_text = "Type your name"
+	le.max_length = 16
+	le.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return le
+
+
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
-	var rec: Dictionary = new_rec if String(new_rec.get("species", "")) == sp_id else Save.new_kin(sp_id)
+	var rec: Dictionary = new_rec if String(new_rec.get("species", "")) == sp_id else _hatched_rec(sp_id)
 	rec["name"] = kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id)
 	rec["trust"] = 55.0
-	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
-	if not muts.is_empty(): rec["mutations"] = muts
 	Save.remember(rec, "hatched", "hatched from an egg you chose")
 	rec["starter"] = true          # your first kin: it always stays on the farm with you
 	rec["got_t"] = Time.get_unix_time_from_system()
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
-	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else "Hunter"
+	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else Save.UNNAMED
 	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
@@ -711,6 +730,19 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 		_mask_moment(func(): _head_out(tutorial))
 		return
 	_head_out(tutorial)
+
+## Out of the shell: the Boki's record is made now, so the reveal, the name card and the save share one sex.
+func _popped(k: Node3D) -> void:
+	kin_node = k
+	new_rec = _hatched_rec(egg_defs[chosen]["species"])
+	title.text = KinSpeak.about(new_rec, "{He}'s looking at you.")
+
+## A new Boki's record with its egg's mutations; its sex and the rest of its rolls are decided here.
+func _hatched_rec(sp_id: String) -> Dictionary:
+	var rec := Save.new_kin(sp_id)
+	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
+	if not muts.is_empty(): rec["mutations"] = muts
+	return rec
 
 ## Your first Relic: pick one of the three starters (Lace, Kael or Vex; HobOffer), then it drifts to you and you
 ## put it on in the world (MaskMoment), then `then`.

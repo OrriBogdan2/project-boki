@@ -3,15 +3,18 @@ extends RefCounted
 ## The dash slot: ONE component for the bottom bar in a match (Hud) and at home (HomeDashSlot). It is an
 ## ordinary ability slot (HudSlot.ab_slot: icon, dark sweep, countdown, red frame, key pill) with, for a
 ## dash of 2+ charges, a disc per charge on the top edge (HudSlot.charge_discs) that fills as the next one
-## recharges, a countdown for that next charge, a flash and a soft tick when a charge returns, and a small
-## diamond for the long air dash. Both callers hand it the same numbers (src): a match from the Hunter
-## (of_hunter), the farm from its mirror of the same state.
+## recharges, a countdown for that next charge, a flash and one quiet cue (ab_ready, ducked in a fight) when a
+## charge returns, and a small diamond for the long air dash. Both callers hand it the same numbers (src): a
+## match from the Hunter (of_hunter), the farm from its mirror of the same state.
 
 const PIP_Y := 16.0                     # px from the slot's bottom edge to the rank pips (clears the key pill)
 const AIR_R := 4.5                      # px, the air-dash diamond's half-size
 const AIR_Y := 18.0                     # px from the slot's top edge to the air diamond (under the charge discs)
-const TICK_VOL := -15.0                 # dB of the charge-returned tick
-const TICK_PITCH := 1.9
+const REFILL_SOUND := "ab_ready"        # the ability-back chime from the sound library, played small
+const REFILL_VOL := -19.0               # dB of the charge-returned cue: under the dash and the fight
+const REFILL_PITCH := 1.8               # x: up an octave-ish so the 0.5 s chime is a short blip (~0.28 s)
+const REFILL_DUCK_DB := -7.0            # dB lower still while a fight is on (Sfx.busy_voices() >= REFILL_DUCK_VOICES)
+const REFILL_DUCK_VOICES := 6           # playing voices that make a fight (the low-health heartbeat's line)
 const AIR_CD_FS := 10                   # the air dash's countdown while airborne
 const AIR_COL := Color("bfe6ff")        # the long air dash, ready
 
@@ -58,7 +61,8 @@ static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:
 	if _was.has(hid) and n > int(_was[hid]):
 		H.ready_flash["dash"] = HudSlot.READY_FLASH
 		if audible:
-			Sfx.play("click", null, TICK_VOL, 0.0, TICK_PITCH)
+			var fight: bool = Sfx.busy_voices() >= REFILL_DUCK_VOICES
+			Sfx.play(REFILL_SOUND, null, REFILL_VOL + (REFILL_DUCK_DB if fight else 0.0), 0.0, REFILL_PITCH)
 	_was[hid] = n
 	var key := Settings.key_cap("dash")
 	var cap := int(s["cap"])

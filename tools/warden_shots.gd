@@ -23,6 +23,7 @@ var holder: Node3D
 var cam: Camera3D
 var anims: Array = []
 var tree: SceneTree
+var fight := {}               # state merged into every settle frame: _fight_faces' "hit 2.5 s ago"
 var close_cfg := {}           # a Warden's warden_look "closeup" {fov, up}: a wider head shot (Motley's raised orb)
 
 func run(main: Node) -> void:
@@ -90,6 +91,8 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	var face := await _head(row[0])
 	face.save_png(dir.path_join("closeup_front.png"))
 	caps.append("closeup_front.png: %s head and shoulders, from the front" % title)
+	if WardenClips.data(WardenGlb.art(id)).get("mood", {}).has("tex_faces"):
+		await _fight_faces(row, dir, caps, title)
 	# 3. the concept sheet beside the model
 	var sheet_path := sheets.path_join(id + ".png")
 	if sheets != "" and FileAccess.file_exists(sheet_path):
@@ -117,13 +120,28 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 			(row[i] as Node3D).rotation.y = PI * 0.7
 			_frame(anims[i][0], row[i], some[i])
 		var moves := await _close_strip(row, false)
-		var nm := "moves_close_%d.png" % (part / MOVES_PER_STRIP + 1)
+		var nm := "moves_close_%d.png" % (int(part / float(MOVES_PER_STRIP)) + 1)
 		moves.save_png(dir.path_join(nm))
 		caps.append("%s: %s, left to right: %s" % [nm, title, ", ".join(some.map(func(f): return f[0]))])
 		_clear()
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	f.store_string("\n".join(caps) + "\n")
 	f.close()
+
+## A Hunter whose face swaps in a fight (WardenMood "tex_faces": Breaker's porthole): the front close-up and the
+## match-camera turnaround again, as if hit 2.5 s ago (past the flinch, inside combat_t).
+func _fight_faces(row: Array, dir: String, caps: Array, title: String) -> void:
+	fight = {"hit_t": 2.5}
+	await _settle(10)
+	var glare := await _head(row[0])
+	glare.save_png(dir.path_join("closeup_front_fight.png"))
+	caps.append("closeup_front_fight.png: %s head and shoulders, from the front, in a fight" % title)
+	var game := await _game_strip(row)
+	game.save_png(dir.path_join("turnaround_game_fight.png"))
+	caps.append("turnaround_game_fight.png: turnaround_game.png in a fight (hit 2.5 s ago)")
+	fight = {}
+	await _settle(10)
+
 
 func _row(id: String, count: int) -> Array:
 	var out: Array = []
@@ -145,10 +163,9 @@ func _settle(frames: int, animate := true) -> void:
 	for k in frames:
 		if animate:
 			for a in anims:
-				(a[0] as HunterAnim).update(
-					1.0 / 60.0,
-					{"fired": 99.0, "face": (a[1] as Node3D).rotation.y, "grounded": true}
-				)
+				var s := {"fired": 99.0, "face": (a[1] as Node3D).rotation.y, "grounded": true}
+				s.merge(fight, true)
+				(a[0] as HunterAnim).update(1.0 / 60.0, s)
 		await tree.process_frame
 
 func _grab() -> Image:
@@ -171,7 +188,7 @@ func _game_strip(row: Array, animate := true) -> Image:
 	var b := cam.unproject_position((row[row.size() - 1] as Node3D).position + Vector3(1.1, -0.3, 1.6))
 	var crop := img.get_region(Rect2i(Vector2i(a), Vector2i(b - a)))
 	var big := crop.duplicate() as Image
-	var k := clampi(OUT_W / crop.get_width(), 1, ENLARGE)
+	var k := clampi(int(OUT_W / float(crop.get_width())), 1, ENLARGE)
 	big.resize(crop.get_width() * k, crop.get_height() * k, Image.INTERPOLATE_NEAREST)
 	var out := Image.create(
 		maxi(big.get_width(), crop.get_width()),
@@ -180,7 +197,8 @@ func _game_strip(row: Array, animate := true) -> Image:
 		Image.FORMAT_RGBA8
 	)
 	out.fill(Color("1c1a24"))
-	out.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()), Vector2i((out.get_width() - crop.get_width()) / 2, 0))
+	out.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()),
+			Vector2i(int((out.get_width() - crop.get_width()) / 2.0), 0))
 	out.blit_rect(big, Rect2i(Vector2i.ZERO, big.get_size()), Vector2i(0, crop.get_height() + 8))
 	return _fit(out)
 
@@ -220,10 +238,10 @@ func _pair(row: Array, a: int, b: int) -> Image:
 		cam.rotation = Vector3(-0.04, 0, 0)
 		await _settle(4)
 		var img := await _grab()
-		var half := img.get_width() / 4
-		var crop := img.get_region(Rect2i(img.get_width() / 2 - half, 0, half * 2, img.get_height()))
-		crop.resize(OUT_W / 2, 720, Image.INTERPOLATE_LANCZOS)
-		out.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()), Vector2i(i * OUT_W / 2, 0))
+		var half := int(img.get_width() / 4.0)
+		var crop := img.get_region(Rect2i(int(img.get_width() / 2.0) - half, 0, half * 2, img.get_height()))
+		crop.resize(int(OUT_W / 2.0), 720, Image.INTERPOLATE_LANCZOS)
+		out.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()), Vector2i(int(i * OUT_W / 2.0), 0))
 	return out
 
 func _head(h: Node3D) -> Image:
@@ -245,11 +263,11 @@ func _head(h: Node3D) -> Image:
 	await _settle(4)
 	var img := await _grab()
 	var w := img.get_height()
-	return img.get_region(Rect2i((img.get_width() - w) / 2, 0, w, w))
+	return img.get_region(Rect2i(int((img.get_width() - w) / 2.0), 0, w, w))
 
 ## The concept sheet on the left, the close turnaround on the right, the match-camera strip below.
 func _beside(sheet: Image, close: Image, game: Image) -> Image:
-	var half := OUT_W / 2
+	var half := int(OUT_W / 2.0)
 	sheet.convert(Image.FORMAT_RGBA8)
 	sheet.resize(half, int(sheet.get_height() * float(half) / sheet.get_width()), Image.INTERPOLATE_LANCZOS)
 	var c := close.duplicate() as Image
@@ -262,7 +280,7 @@ func _beside(sheet: Image, close: Image, game: Image) -> Image:
 	out.fill(Color("1c1a24"))
 	out.blit_rect(sheet, Rect2i(Vector2i.ZERO, sheet.get_size()), Vector2i.ZERO)
 	out.blit_rect(c, Rect2i(Vector2i.ZERO, c.get_size()), Vector2i(half, 0))
-	out.blit_rect(g, Rect2i(Vector2i.ZERO, g.get_size()), Vector2i((OUT_W - g.get_width()) / 2, top + 6))
+	out.blit_rect(g, Rect2i(Vector2i.ZERO, g.get_size()), Vector2i(int((OUT_W - g.get_width()) / 2.0), top + 6))
 	return out
 
 ## At most OUT_W wide.
@@ -298,6 +316,8 @@ func _move_frames(id: String) -> Array:
 const KIT_FRAMES := {
 	"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94], ["Spirit Walk roll", "pin_roll", 0.58],
 		["Heavy Shot", "arc_heavy", 1.42]],
+	"gil": [["thrust", "gil_thrust_1", 0.08], ["third-thrust lunge", "gil_lunge", 0.12],
+		["RMB potion toss", "gil_throw", 0.16], ["E spin", "gil_spin", 0.2], ["R wave surf", "gil_surf", 0.2]],
 	"dolm": [["punch", "breah_punch", 0.12], ["throw", "breah_throw", 0.2], ["leap", "breah_leap", 0.2],
 		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_hop", 0.15]],
 	"ostra": [["orb", "ostra_orb", 0.1], ["snap", "ostra_snap", 0.1], ["swap", "ostra_swap", 0.3],

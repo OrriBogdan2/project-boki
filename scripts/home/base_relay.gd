@@ -57,7 +57,7 @@ static func cup_round(rec: Dictionary) -> Dictionary:
 
 ## The relay itself: two teams' batons along the lap, stepped in time. Team 0 is yours.
 class Run:
-	var R: Dictionary
+	var r_x: Dictionary
 	var legs: Array
 	var teams: Array                # [yours, theirs], each three recs in leg order
 	var rng: RandomNumberGenerator
@@ -75,8 +75,8 @@ class Run:
 	var duo: Array = []             # [from, to] pairs of yours that handed off as duo friends
 
 	func _init(mine: Array, theirs: Array, r: RandomNumberGenerator) -> void:
-		R = BaseRelay.rules()
-		legs = R["legs"]
+		r_x = BaseRelay.rules()
+		legs = r_x["legs"]
 		teams = [mine, theirs]
 		rng = r
 		var at := 0.0
@@ -141,19 +141,19 @@ class Run:
 			if grades.size() < int(leg[0]):
 				grades.append("miss")            # no press before the mark
 			grade = grades[int(leg[0]) - 1]
-		var s := float(R["handoff"][grade])
+		var s := float(r_x["handoff"][grade])
 		boost[team] = BaseDuo.friends(from, to)
 		if boost[team]:
 			s = 0.0
 			if team == 0:
 				duo.append([from, to])
 		elif BaseRace.bond(from, to) <= float(BaseRace.rules()["rival_at"]) and grade != "great":
-			s += float(R["fumble"])
+			s += float(r_x["fumble"])
 		wait[team] = s
 		lost[team].append(s)
 
 	func _rival_grade() -> String:
-		var w: Dictionary = R["rival_grades"]
+		var w: Dictionary = r_x["rival_grades"]
 		var at := rng.randi_range(1, int(w["great"]) + int(w["good"]) + int(w["miss"]))
 		for g in ["great", "good", "miss"]:
 			at -= int(w[g])
@@ -164,26 +164,26 @@ class Run:
 ## Pays out a finished relay to your team: joy, trust, memories, bonds, gems and the prize roll for
 ## `anchor` (one of yours) against its mirror. Returns what the card shows.
 static func settle(run: Run, anchor: Dictionary) -> Dictionary:
-	var R := rules()
-	var RR := BaseRace.rules()
+	var r_v := rules()
+	var rr := BaseRace.rules()
 	var mine: Array = run.teams[0]
 	var won := run.won()
 	for rec in mine:
-		Care.change(rec, "energy", -float(RR["energy"]))
+		Care.change(rec, "energy", -float(rr["energy"]))
 		if won:
-			Care.change(rec, "joy", float(RR["win_joy"]))
-			Save.remember(rec, "relay", "won the Relay Cup with %s" % _mates(mine, rec), float(RR["win_trust"]))
+			Care.change(rec, "joy", float(rr["win_joy"]))
+			Save.remember(rec, "relay", "won the Relay Cup with %s" % _mates(mine, rec), float(rr["win_trust"]))
 		else:
-			Care.change(rec, "joy", float(RR["lose_joy"]))
-			Save.remember(rec, "relay", "lost the Relay Cup to the %s" % R["rival_team"])
+			Care.change(rec, "joy", float(rr["lose_joy"]))
+			Save.remember(rec, "relay", "lost the Relay Cup to the %s" % r_v["rival_team"])
 	if won:
 		BaseRival.won_together(mine)
 	for i in run.grades.size():
 		if run.grades[i] == "great" or BaseDuo.friends(mine[i], mine[i + 1]):
-			BaseRace.nudge_bond(mine[i], mine[i + 1], float(R["close_step"]))
+			BaseRace.nudge_bond(mine[i], mine[i + 1], float(r_v["close_step"]))
 	for pair in run.duo:
 		BaseDuo.note_first(pair[0], pair[1], "handed the baton cleanly to")
-	var gems := int(R["gems_win"]) if won else int(R["gems_ran"])
+	var gems := int(r_v["gems_win"]) if won else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var foe: Dictionary = run.teams[1][mine.find(anchor)]
 	var prize := GardenPrizes.settle("relay", anchor, foe, won)

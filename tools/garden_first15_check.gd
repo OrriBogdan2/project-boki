@@ -1,6 +1,6 @@
 extends "res://tools/new_player_flow_check.gd"
 ## --garden-first-15-check: the first 15 minutes of a player who never extracts. A fresh save skips the
-## match tutorial ("Skip the tutorial" on the naming card), takes its first Relic and lands on the garden;
+## match tutorial ("Skip tutorial" on the naming card), takes its first Relic and lands on the garden;
 ## a bot then raises, plays, races and breeds there for 15 minutes of garden time and never opens a match.
 ## Every second it asks what is on screen to guide the player: the tutorial line, the world marker, the
 ## interact prompt, a Boki's want bubble, or a Goals row that can be done at home. A stretch with none of
@@ -55,9 +55,9 @@ func _skip_to_garden() -> void:
 	hx.chosen = 0
 	hx.stage = "name"
 	hx._show_name()
-	_press(hx, "Skip the tutorial")
+	_press(hx, "Skip tutorial")
 	await _relic(hx)
-	await _wait(func(): return _is_screen("home.gd"), "'Skip the tutorial' goes straight to the garden")
+	await _wait(func(): return _is_screen("home.gd"), "'Skip tutorial' goes straight to the garden")
 	home = main.current
 	await _wait(func(): return home.panel_host != null, "the garden builds")
 	home._close_panel()

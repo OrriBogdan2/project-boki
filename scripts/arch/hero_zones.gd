@@ -15,7 +15,7 @@ extends RefCounted
 ##   ["zone", "trade",  nid, x, y, z, r, secs]   Motley's Trade in flight: its landing sigil fills over secs
 ##   ["zone", "tradego", nid]                    the Trade was cut short: the sigil goes
 
-const ROCK_COL := Color("4a6fb0")  # Tenzo's rocks: cobalt slate (their hit and break bursts)
+const ROCK_COL := KitLooks.RUNE_TEAL
 const ROCK_R := 0.5  # a rock's footprint when it asks the world if it fits
 # m: a rock's top above its base (StoneStand: you stand on it), taller than a hunter's head; dolm.json rock.top
 const ROCK_TOP := 2.2
@@ -114,8 +114,9 @@ static func rock(
 	send := true,
 	top := ROCK_TOP
 ) -> Dictionary:
-	var e := {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true}
-	e["color"] = "#" + ROCK_COL.to_html(false)
+	var e := {
+		"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#" + ROCK_COL.to_html(false)
+	}
 	var w: Dictionary = m.verbs.add_wall(by, at, dir, e, 1.0)
 	var old: Node3D = w["node"]
 	var n := RockLook.take(m)
@@ -196,7 +197,7 @@ static func bridge(
 	width: float,
 	time_: float,
 	send := true,
-	color := "#d9b27a",
+	color := "#3e5560",
 	warn := 0.0,
 	rise := 0.0
 ) -> int:
@@ -226,11 +227,7 @@ static func bridge(
 
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
-## The seed: a teal glass globe on the ground with a slow swirl (shaders/void_glass), clear inside and lit at its
-## rim (docs/VFX_QUALITY.md zone rule: SEED_A x (SEED_BODY + 0.1) at the centre), growing to its full width, with a
-## teal rim ring. Ostra's own shape; no other zone looks like it.
 const SEED_R0 := 0.08  # share of full size a fresh seed starts at (a speck, never zero)
-
 
 ## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
 static func seed_r(rmax: float, grow: float, t: float) -> float:
@@ -243,6 +240,9 @@ static func seed_size(n: Node3D, r: float) -> void:
 	n.scale = Vector3.ONE * r
 
 
+## The seed: a teal glass globe on the ground with a slow swirl (shaders/void_glass), clear inside and lit at its
+## rim (docs/VFX_QUALITY.md zone rule: SEED_A x (SEED_BODY + 0.1) at the centre), growing to its full width, with a
+## teal rim ring. Ostra's own shape; no other zone looks like it.
 static func seed_visual(
 	m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color, remote := false
 ) -> Node3D:
@@ -311,7 +311,7 @@ static func net_in(m: Node, x: Array) -> void:
 				return
 			var by2: Ent = m.ents_by_id.get(String(x[2]), null)
 			if by2 != null:
-				var tint := String(x[11]) if x.size() > 11 else "#d9b27a"
+				var tint := String(x[11]) if x.size() > 11 else "#3e5560"
 				var warn := float(x[12]) if x.size() > 13 else 0.0
 				var rise := float(x[13]) if x.size() > 13 else 0.0
 				bridge(

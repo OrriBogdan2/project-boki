@@ -9,10 +9,25 @@ const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tam
 	"Mossy", "Hem", "Flame Queen", "Undying Queen"]
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
+## The five words DECISIONS "Identity and Masks" retires; every content/**/*.json text field is scanned for them.
+const FIVE_RETIRED := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|merging|unmasked)\\b"
+## Not player text: notes for developers, ids, file names (keys), and lowercase id values ("mantle", "warden").
+const DEV_KEY := "(?i)(^_.*|.*notes?|.*doc|desc|why|reason|src|source|file|path|clip|states|procedural|ids?|no_carry)$"
+const ID_VALUE := "^[a-z0-9_./:-]+$"
 const CANONICAL_ORDER := [
 	"archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm",
 	"mage", "dredge", "tender", "thief", "ostra", "gil",
 ]
+## Canon titles, stored without "the" (newest owner lines in briefs/DECISIONS.md: 11-07 evening "Snowglide",
+## 11-08 "Ashen Kiss"). A change of title is a new owner line plus one edit here and in content/archetypes/<id>.json.
+const CANON_TITLES := {
+	"gunslinger": "Hired Gun", "juggernaut": "Unbroken", "ashwick": "Ashen Kiss", "tender": "Dawnfox",
+	"dolm": "Stone Seer", "archer": "Red Stitch", "dredge": "Scrap King", "rimewright": "Snowglide",
+	"mage": "Storm Chaser", "bulwark": "Barnacle Knight", "thief": "Silver Thief", "ostra": "Void Jester",
+	"gil": "Novice Mage",
+}
+## A name and its title joined by a dot, bullet, bar, dash or comma instead of "the" ("Neve · Snowglide").
+const DOT_JOIN := "\\s*[·•|,–—-]\\s*"
 const RELIC_STATUS := ["locked", "proposed"]
 const GENDERS := ["male", "female", "robot"]
 const HOWTO_MAX := 64        # chars, one how-to line once its key caps are filled in (the pick cards are narrow)
@@ -45,8 +60,19 @@ func run(main: Node) -> void:
 		ok(story_lines <= 3, "%s personality is three lines at most" % id)
 		var label := HeroTitle.label("Orri", id)
 		var bare := HeroTitle.title(id)
+		var unnamed := HeroTitle.label(Save.UNNAMED, id)
+		var blank := HeroTitle.label("", id)
+		ok(unnamed == "The %s" % bare and blank == unnamed, "%s: unnamed reads '%s'" % [id, unnamed])
 		var title := String(data["title"])
 		ok(not title.begins_with("The ") and not title.begins_with("the "), "%s stores its title without 'the'" % id)
+		var canon := String(CANON_TITLES.get(id, "?"))
+		ok(title == canon, "%s title '%s' matches the canon list ('%s')" % [id, title, canon])
+		var base := HeroTitle.base_name(id)
+		var joined := RegEx.create_from_string("(?i)(%s%s%s|%s%s%s)" % [base, DOT_JOIN, title, title, DOT_JOIN, base])
+		var joined_in: Array = [label, Arch.label(id), Arch.name_of(id), Arch.name_of(id, true),
+				HunterViewer.display_name(id), _plain_text(data)]
+		var clean := not joined_in.any(func(t): return _bad_join(joined, String(t)))
+		ok(clean, "%s: no 'the The' and no dot join of name and title" % id)
 		ok(label == "Orri the %s" % bare and not label.contains("the The"), "%s label reads '%s'" % [id, label])
 		var shown: Array = [Arch.name_of(id), Arch.label(id), label, _plain_text(data)]
 		for text in shown:
@@ -59,6 +85,7 @@ func run(main: Node) -> void:
 				"%s shows as '%s', with no gender line" % [id, shown_name])
 		_howto_check(id)
 	_lore_check()
+	_retired_words_check()
 	_results_name_line(main)
 	print("HEROTITLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -78,6 +105,7 @@ func _lore_check() -> void:
 		var known: bool = RELIC_STATUS.has(relic.get("status", "")) and String(relic.get("name", "")) != ""
 		ok(known, "%s has a relic with a status" % id)
 	var text := JSON.stringify(lore)
+	ok(not text.contains("the The") and not text.contains("The the"), "lore.json: no 'the The'")
 	ok(_old_name_in(text) == "", "lore.json: no old name (%s)" % _old_name_in(text))
 	ok(RegEx.create_from_string(RETIRED_TERMS).search(text) == null, "lore.json: no retired term")
 	var cinder := _plain_text(Arch.def("ashwick")) + JSON.stringify(lore["hunters"]["ashwick"])
@@ -85,6 +113,41 @@ func _lore_check() -> void:
 	ok(banned.search(cinder) == null, "Cinder: no goggles, tank or hose")
 	var meeko := _plain_text(Arch.def("tender")) + JSON.stringify(lore["hunters"]["tender"])
 	ok(not meeko.replace("lantern_crook", "").to_lower().contains("lantern"), "Meeko: no lantern (her weapon id aside)")
+
+## Every player-facing string in content/**/*.json: none of the five retired words (ids and dev notes are skipped).
+func _retired_words_check() -> void:
+	var hits: Array = []
+	var re := RegEx.create_from_string(FIVE_RETIRED)
+	var dev := RegEx.create_from_string(DEV_KEY)
+	var idv := RegEx.create_from_string(ID_VALUE)
+	var files: Array = []
+	_json_files("res://content", files)
+	for f in files:
+		var data = JSON.parse_string(FileAccess.get_file_as_string(f))
+		_retired_walk(data, f, "", re, dev, idv, hits)
+	for h in hits:
+		print("HEROTITLE retired word: ", h)
+	ok(hits.is_empty(), "content json: no retired word in player text (%d)" % hits.size())
+
+func _json_files(dir: String, out: Array) -> void:
+	for d in DirAccess.get_directories_at(dir):
+		_json_files(dir + "/" + d, out)
+	for f in DirAccess.get_files_at(dir):
+		if f.ends_with(".json"):
+			out.append(dir + "/" + f)
+
+func _retired_walk(v: Variant, f: String, key: String, re: RegEx, dev: RegEx, idv: RegEx, hits: Array) -> void:
+	if v is Dictionary:
+		for k in v:
+			if dev.search(String(k)) == null:
+				_retired_walk(v[k], f, String(k), re, dev, idv, hits)
+	elif v is Array:
+		for x in v:
+			_retired_walk(x, f, key, re, dev, idv, hits)
+	elif v is String:
+		var t := String(v)
+		if idv.search(t) == null and not t.begins_with("res://") and re.search(t) != null:
+			hits.append("%s [%s]: %s" % [f, key, t.left(80)])
 
 ## The three how-to lines (what you do, the combo to learn first, what to avoid): short, with key caps from
 ## Settings.key_cap and no typed key names.
@@ -103,6 +166,9 @@ func _howto_check(id: String) -> void:
 	if lines.size() == 3:
 		ok(String(lines[0]).begins_with("Play:") and String(lines[1]).begins_with("Combo:")
 				and String(lines[2]).begins_with("Avoid:"), "%s how-to reads Play, Combo, Avoid" % id)
+
+func _bad_join(joined: RegEx, text: String) -> bool:
+	return joined.search(text) != null or text.contains("the The") or text.contains("The the")
 
 ## The class JSON as text with the base-character fields removed: the rest is shown to players.
 func _plain_text(data: Dictionary) -> String:
@@ -130,8 +196,15 @@ func _results_name_line(main: Node) -> void:
 	main.add_child(screen)
 	screen.show_result({"extracted": true, "knocks": 1, "time": 60.0})
 	var texts: Array = screen.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
-	var player := String(Save.d.get("name", "Hunter"))
-	ok(texts.has("%s made it out" % player.substr(0, 16)), "results: the headline carries the name '%s'" % player)
+	var player := String(Save.d.get("name", Save.UNNAMED)).substr(0, 16)
+	# unnamed: the Hunter's own title
+	var shown := HeroTitle.label(player, Arch.of_save()) if player in ["", Save.UNNAMED] else player
+	ok(texts.has("%s made it out" % shown), "results: the headline carries the name '%s'" % shown)
+	Save.d["name"] = "Orri"
+	screen.show_result({"extracted": true, "knocks": 1, "time": 60.0})
+	texts = screen.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	ok(texts.has("Orri made it out"), "results: a named player's headline is their plain name")
+	Save.d["name"] = player
 	ok(not texts.any(func(t): return String(t).begins_with(player + " the ")), "results: no 'Name the Title' line")
 	ok(texts.has("HUNTERS DOWNED"), "results: the strip says Hunters downed (main's wording)")
 	screen.queue_free()

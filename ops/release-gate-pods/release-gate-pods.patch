@@ -1,0 +1,99 @@
+--- a/suite-pod
++++ b/suite-pod
+@@ -13,6 +13,8 @@
+ # main-side checks listed in $OUT/main_order.txt on MW (synced to $R/mw) with the same claim protocol ($OUT/main/<n>.claim,
+ # suite-fast's run() claims main too now) and the same rule: only passes are delivered, everything else is rerun on the
+ # server. A wrong pod pass on main can only turn "same" into NEW-RED (the branch is dropped and retried), never hide one.
++# 11-19 SUITE_POD_CONFIRM=1 (release-gate.sh, idle dedicated pods ~/.release_pods): a red is run once more on the pod and a red-red
++# result (or a timeout, rc 124, not rerun) is delivered as the verdict, so the server no longer reruns every pod red (11-19 gate: 147 pod reds, 13.1 of 21.9 server hours).
+ # Heartbeat: /home/boki/cj/pod-gate/<POD> is touched per check, so stall-watch counts gate work as pod activity.
+ set -u
+ POD=${1:?usage: suite-pod POD SLOTS [merge|main]}; SLOTS=${2:-8}; SIDE=${3:-merge}
+@@ -27,17 +29,23 @@
+ t0=$(date +%s)
+ rsync -a --delete --timeout=120 -e "ssh $SSHO" --exclude=.git --exclude='*.log' "$TREE/" "$POD:$R/$SUB/" || { echo "suite-pod $POD: rsync failed, skipped"; exit 0; }
+ echo "suite-pod $POD: $SIDE tree synced in $(( $(date +%s) - t0 ))s, $SLOTS slots"
+-export POD SSHO R GB OUT SIDE SUB HB
++export POD SSHO R GB OUT SIDE SUB HB SUITE_POD_CONFIRM
+ one() { local flag=$1 n rc t0 L D=$OUT/$SIDE; n=$(echo "$flag" | tr -c 'a-z0-9\n' _)
+   [ -f $D/$n.rc ] || [ -f $D/$n.log.podred ] && return 0   # a pod already got a red/timeout here: the server reruns it, other pods skip it
+   (set -o noclobber; echo "pod-$POD" > $D/$n.claim) 2>/dev/null || return 0
+   L=$D/$n.log.pod; t0=$(date +%s); touch $HB/$POD
+-  timeout -k 30 1500 ssh $SSHO $POD "cd $R/$SUB && X=\$(mktemp -d /tmp/xdg.XXXX) && XDG_DATA_HOME=\$X LP_NUM_THREADS=2 nice -n 10 timeout 1200 xvfb-run -a $GB --rendering-driver opengl3 --audio-driver Dummy --path $R/$SUB -- $flag 2>&1; r=\$?; rm -rf \$X; exit \$r" 2>&1 | tail -c 20000000 > $L
+-  rc=${PIPESTATUS[0]}; fc=$(grep -cE 'FAIL|SCRIPT ERROR' $L); touch $HB/$POD
++  for try in 1 2; do
++    timeout -k 30 1500 ssh $SSHO $POD "cd $R/$SUB && X=\$(mktemp -d /tmp/xdg.XXXX) && XDG_DATA_HOME=\$X LP_NUM_THREADS=2 nice -n 10 timeout 1200 xvfb-run -a $GB --rendering-driver opengl3 --audio-driver Dummy --path $R/$SUB -- $flag 2>&1; r=\$?; rm -rf \$X; exit \$r" 2>&1 | tail -c 20000000 > $L
++    rc=${PIPESTATUS[0]}; fc=$(grep -cE 'FAIL|SCRIPT ERROR' $L); touch $HB/$POD
++    # SUITE_POD_CONFIRM=1 (dedicated release pods only): a failing run (exit code 1-123: not a timeout, crash, not-run or ssh loss) is run once more here; red twice is a verdict
++    [ "${SUITE_POD_CONFIRM:-0}" = 1 ] && [ "$rc $fc" != "0 0" ] && [ $rc -lt 124 ] && [ $try = 1 ] || break
++  done
+   echo "$flag	$rc	$fc	$(( $(date +%s) - t0 ))" >> $OUT/pod-$POD.$SIDE.tsv   # every pod result, for audits (pod vs server)
+   if [ "$rc $fc" = "0 0" ] && [ ! -f $D/$n.rc ]; then
+     mv -f $L $D/$n.log; echo $(( $(date +%s) - t0 )) > $D/$n.secs; echo "pod-$POD" > $D/$n.pod
+     echo "0 0" > $D/$n.rc
++  elif [ "${SUITE_POD_CONFIRM:-0}" = 1 ] && [ $rc -le 124 ] && [ ! -f $D/$n.rc ]; then   # red on both runs, or a 1200 s timeout (idle pod, 6 of 6 matched the server's): deliver the red
++    mv -f $L $D/$n.log; echo $(( $(date +%s) - t0 )) > $D/$n.secs; echo "pod-$POD" > $D/$n.pod; echo "$rc $fc" > $D/$n.rc
+   else mv -f $L $D/$n.log.podred; echo "suite-pod $POD: $flag rc=$rc fails=$fc -> left to the server (log $n.log.podred)"; fi
+   rm -f $D/$n.claim
+ }
+--- a/release-gate.sh
++++ b/release-gate.sh
+@@ -5,6 +5,10 @@
+ set -u; B=${1:?branch}; REPO=/home/boki/project-boki; WT=/home/boki/wt-merge-claude; MW=/home/boki/wt-rel-main; S=/home/boki/suite-claude
+ export PATH=/home/boki/bin:/home/boki/.local/bin:/usr/local/bin:/usr/bin:/bin
+ cd $REPO && gitnet fetch -q origin main "$B" || { echo "FAIL fetch"; exit 1; }
++# 11-19: reserve ~/.release_pods for this gate from now (the 20 min import below lets PR gates already on them finish): regate-bot places no
++# new PR gate on them and merge-candidate skips them, until this script exits (~/cj/release-pods.lock = pid + aliases).
++RELEASE_LOCK=/home/boki/cj/release-pods.lock; { echo $$; cat /home/boki/.release_pods 2>/dev/null; } | tr '\n' ' ' | sed 's/ /\n/;s/ *$//' > $RELEASE_LOCK
++trap 'rm -f $RELEASE_LOCK' EXIT
+ cd $WT || exit 1
+ [ -z "$(git status --porcelain | grep -v "^?? .*\.uid$")" ] || { echo "FAIL: $WT dirty"; exit 1; }  # untracked Godot .uid files are regenerated, not dirt
+ git checkout -q --detach origin/main && git merge -q --no-edit "origin/$B" || { git merge --abort; echo "FAIL merge"; exit 1; }
+@@ -19,6 +23,14 @@
+ python3 /home/boki/bin/check-map.py build --repo $MW --out $S/check_map.json > $S/check_map.log 2>&1 || rm -f $S/check_map.json
+ timeout 120 /home/boki/bin/merge-first-ready >> $S/merge-first-ready.log 2>&1   # drafts in merge-first.txt must be ready before a release gate starts
+ grep -q SUITE_CACHE_REUSE /home/boki/bin/suite-fast.sh && [ -x /home/boki/bin/merge-first-ready ] && [ -x /home/boki/bin/suite-eta ] || { echo "FAIL: install suite-fast.sh, suite-eta, merge-first-ready first"; exit 1; }
++# 11-19 DEDICATED RELEASE PODS: ~/.release_pods ("rpg1:8 rpg2:8 rpg3:8"; 64 GB per pod, ~5 GB per Godot run) run with SUITE_POD_CONFIRM=1 (a red-red pod result is a verdict, so the server
++# does not rerun every pod red). Only pods idle in their own cgroup (<half the cores busy; cgroup v1 pods rpg1/2/4 have no cpu.stat, so cpuacct.usage) join. None idle: ~/.mc_pods as before.
++KEYF=/home/boki/.ssh/boki_s2_deploy; RP=""
++for p in $(cat /home/boki/.release_pods 2>/dev/null); do
++  l=$(timeout 25 ssh -i $KEYF -o BatchMode=yes -o ConnectTimeout=10 ${p%%:*} 'u() { if [ -r /sys/fs/cgroup/cpu.stat ]; then awk "/usage_usec/{print \$2}" /sys/fs/cgroup/cpu.stat; else echo $(( $(cat /sys/fs/cgroup/cpuacct/cpuacct.usage) / 1000 )); fi; }; a=$(u); sleep 3; b=$(u); echo $(nproc) $(( (b - a) / 3000000 ))' 2>/dev/null)
++  [ -n "$l" ] && awk -v l="$l" 'BEGIN{split(l,a," "); exit !(a[2] < a[1]/2)}' && RP="$RP $p"; done
++RP=${RP# }; echo "release pods: ${RP:-none idle, using ~/.mc_pods}"
++SUITE_PODS=${RP:-$(cat /home/boki/.mc_pods 2>/dev/null)}; export SUITE_PODS; [ -n "$RP" ] && export SUITE_POD_CONFIRM=1
+ CHECK_MAP=$S/check_map.json SUITE_CACHE_REUSE=${RELEASE_CACHE:-0} SUITE_ETA_FILE=/home/boki/coord/release-eta.txt SUITE_PRIORITY=2 OUT=$S GW=$WT MW=$MW bash /home/boki/bin/suite-fast.sh 8 > $S/suite.log 2>&1
+ wait $RD
+ echo "== suite"; head -3 $S/summary.txt; grep -E "^(NEW-RED|WORSE)" $S/summary.txt | head -30
+--- a/regate_common.py
++++ b/regate_common.py
+@@ -153,7 +153,19 @@
+ def gate_workers():
+     """11-16: ~/cj/gate-workers = dedicated merge-gate pods (same line format). Only regate-bot reads it, so
+     claude-job/w2-dispatch/pickhost/jobq never place a worker job there."""
+-    return _registry("gate-workers")
++    reserved = release_reserved()
++    return {k: v for k, v in _registry("gate-workers").items() if k not in reserved}
++
++
++def release_reserved():
++    """11-19: release-gate.sh writes ~/cj/release-pods.lock (line 1 its pid, line 2 the pod aliases with slots) for as long as it runs;
++    those pods belong to the release gate, so regate-bot places no PR gate on them (a gate already running there finishes)."""
++    try:
++        pid, pods = (CJ / "release-pods.lock").read_text().splitlines()[:2]
++        os.kill(int(pid), 0)
++    except (OSError, ValueError):
++        return set()
++    return {p.split(":")[0] for p in pods.split()}
+ 
+ 
+ def ssh_cmd(ip, remote, timeout=60):
+--- a/merge-candidate.sh
++++ b/merge-candidate.sh
+@@ -270,6 +270,7 @@
+ # pods: reachable and idle: fewer than half their cores busy over 3 s, measured in the container's own cgroup (a RunPod
+ # container's /proc/loadavg is the HOST's load: an idle rpc5 showed 37 on 11-12)
+ PODS=""; for p in ${MC_PODS:-$(cat ~/.mc_pods 2>/dev/null || echo "rpc3:10 rpc5:10")}; do
++  grep -qwF "${p%%:*}" $HOME/cj/release-pods.lock 2>/dev/null && kill -0 "$(head -1 $HOME/cj/release-pods.lock)" 2>/dev/null && continue   # 11-19: reserved for a running release gate
+   l=$(timeout 25 ssh -i $KEYF -o BatchMode=yes -o ConnectTimeout=10 ${p%%:*} 'u() { awk "/usage_usec/{print \$2}" /sys/fs/cgroup/cpu.stat; }; a=$(u); sleep 3; b=$(u); echo $(nproc) $(( (b - a) / 3000000 ))' 2>/dev/null)
+   [ -n "$l" ] && awk -v l="$l" 'BEGIN{split(l,a," "); exit !(a[2] < a[1]/2)}' && PODS="$PODS $p"; done
+ PODS=${PODS# }

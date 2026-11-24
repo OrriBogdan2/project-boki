@@ -21,15 +21,15 @@ func ok(what: String, cond: bool, info := "") -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	var keep := ConfigFile.new()
-	var had := keep.load(Settings.PATH) == OK
+	var had := keep.load(Settings.path) == OK
 	_buses()
 	await _sliders()
 	_save_load()
 	_old_file()
 	if had:
-		keep.save(Settings.PATH)
+		keep.save(Settings.path)
 	else:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
 	Settings.load_file()
 	print("BUSSLIDERS DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -65,26 +65,33 @@ func _buses() -> void:
 
 func _sliders() -> void:
 	Overlay.ctx = "title"
+	Overlay.tab = "Main"
+	Overlay.open_settings()
+	await main.get_tree().process_frame
+	var master := _find_sliders(Overlay.root).back() as HSlider  # (Main: Interface size, then Master)
+	_slider_ok(master, "master", 0.25)
 	Overlay.tab = "Audio"
 	Overlay.open_settings()
 	await main.get_tree().process_frame
 	var sliders := _find_sliders(Overlay.root)
-	var keys: Array = Settings.BUSES.keys()
-	ok("Settings > Audio has one slider per bus", sliders.size() == keys.size(), "%d sliders" % sliders.size())
+	var keys: Array = Settings.BUSES.keys().slice(1)
+	ok("Settings > Audio: one slider per bus but Master", sliders.size() == keys.size(), "%d sliders" % sliders.size())
 	for i in mini(sliders.size(), keys.size()):
-		var sl: HSlider = sliders[i]
-		var key: String = keys[i]
-		var want := 0.25 + 0.1 * i
-		sl.value = want
-		ok(
-			"'%s' slider sets bus %s" % [key, Settings.BUSES[key]],
-			is_equal_approx(_bus_slider(key), want) and is_equal_approx(float(Settings.get_v(key)), want),
-			"%.3f" % _bus_slider(key)
-		)
-		sl.drag_ended.emit(true)
-		var heard := Sfx.players.any(func(p: AudioStreamPlayer): return p.playing and p.bus == Settings.BUSES[key])
-		ok("...and letting go plays the sample on %s" % Settings.BUSES[key], heard)
+		_slider_ok(sliders[i], keys[i], 0.25 + 0.1 * (i + 1))
 	Overlay.close()
+
+
+## Moves a slider to `want`: its bus follows, the value is saved, and letting go plays the sample on that bus.
+func _slider_ok(sl: HSlider, key: String, want: float) -> void:
+	sl.value = want
+	ok(
+		"'%s' slider sets bus %s" % [key, Settings.BUSES[key]],
+		is_equal_approx(_bus_slider(key), want) and is_equal_approx(float(Settings.get_v(key)), want),
+		"%.3f" % _bus_slider(key)
+	)
+	sl.drag_ended.emit(true)
+	var heard := Sfx.players.any(func(p: AudioStreamPlayer): return p.playing and p.bus == Settings.BUSES[key])
+	ok("...and letting go plays the sample on %s" % Settings.BUSES[key], heard)
 
 
 func _find_sliders(n: Node) -> Array:
@@ -116,7 +123,7 @@ func _old_file() -> void:
 	var cf := ConfigFile.new()
 	for pair in [["master", 0.6], ["music", 0.5], ["sfx", 0.4], ["ambience", 0.3], ["keys_v", Settings.KEYS_V]]:
 		cf.set_value("s", pair[0], pair[1])
-	cf.save(Settings.PATH)
+	cf.save(Settings.path)
 	Settings.load_file()
 	var got := [Settings.get_v("master"), Settings.get_v("music"), Settings.get_v("ambience")]
 	var want := [sqrt(0.6), sqrt(0.5), sqrt(0.3)]  # audio_v 2 moves a linear level to the slider that sounds the same

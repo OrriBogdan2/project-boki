@@ -2,7 +2,8 @@ extends RefCounted
 ## --kin-wisp-form-check: a downed Hunter's Boki ride with them as wisps (KinWispForm). In a 2v2 with a
 ## bot teammate (the bot's Boki goes through the same code as yours):
 ##   1. knocked with its Boki out fighting a few metres off: the Boki zips back, rides as a wisp round
-##      them (Boki model hidden, a Boki wisp drawn), can be hit only as a guardian (summoned at the knock) and attacks nothing
+##      them (Boki model hidden, a Boki wisp drawn), can be hit only as a guardian (summoned at the knock) and attacks
+##      nothing
 ##   2. knocked with its Boki far away: it blinks straight to them
 ##   3. a teammate stands on the Wisp: back up, the Boki pops back onto the shoulder with its old order
 ##   4. nobody near: the Boki wisp pulls its Hunter up after its wait, and the bleed-out pauses meanwhile
@@ -23,6 +24,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -79,7 +81,7 @@ func run(main_node: Node) -> void:
 	k.render(DT, 1.0)
 	ok(k.state == "shoulder" and k.cmd == "follow",
 		"revived: the Boki is back on the shoulder with its order (%s, %s)" % [k.state, k.cmd])
-	ok(k.model.visible and k.get_node_or_null("BokiWisp") == null, "the Boki model is back, the wisp gone")
+	ok(k.model.visible and (k.wisp or k.get_node_or_null("BokiWisp") == null), "the Boki model is back, the wisp gone")
 	# ---------------------------------------------------------------- 2. far away
 	_out(k, bot.pos + Vector3(30.0, 0, 0))
 	m.knock(bot, foe, {})

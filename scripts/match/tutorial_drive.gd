@@ -11,8 +11,10 @@ const MISS_RATE := 0.3     # share of 0.5 s aim windows that land MISS_OFF to th
 const MISS_OFF := 3.0      # m a missed aim is off the target
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
+const REST_S := 1.0   # s of standing with the stick neutral after which the stuck-hop timer starts over
+
 const KEYS := [      # the action inputs
-		"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
+		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var human := false
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input
@@ -27,6 +29,8 @@ static var _wait_run := 0.0
 static var last_step := -1
 static var still_t := 0.0     # s the player has stood in one place while walking
 static var last_pos := Vector3.INF
+static var _rest_t := 0.0      # s the stick has been neutral (waiting for the next foe is not being stuck)
+static var recalled_once := false  # the summon step: the first window is called back early, as a hasty player would
 
 static func drive(m: Match) -> void:
 	var tu: Tutorial = m.tut
@@ -37,6 +41,7 @@ static func drive(m: Match) -> void:
 			" pts=", m.player.skill_pts, " kin=", m.player.kin != null, " seen=", tu.seen.keys())
 		last_step = tu.step
 	var p := m.player
+	_rest_t = _rest_t + Match.DT if p.inp["move"] == Vector2.ZERO else 0.0      # (last frame's stick)
 	for k in KEYS:
 		p.inp[k] = false
 	p.inp["move"] = Vector2.ZERO
@@ -45,7 +50,7 @@ static func drive(m: Match) -> void:
 		_log(tu)
 	if human and _read(tu):
 		return
-	still_t = still_t + Match.DT if p.pos.distance_to(last_pos) < 0.02 else 0.0
+	still_t = still_t + Match.DT if _rest_t < REST_S and p.pos.distance_to(last_pos) < 0.02 else 0.0
 	last_pos = p.pos
 	var goto := func(at: Vector3, r := 0.5):
 		var d := Vector2(at.x - p.pos.x, at.z - p.pos.z)
@@ -76,11 +81,13 @@ static func drive(m: Match) -> void:
 			else:
 				p.inp["move"] = to.normalized()
 				if sid == "exdash" and p.vel.y < 0.5: p.inp["dash"] = true
-				if sid == "glide": p.inp["glide"] = true
+				if sid == "glide":
+					var press: bool = not p.gliding and p.coyote <= 0.0 and p.can_glide()
+					p.inp["jump"] = press     # the second press opens it
+					p.inp["glide"] = p.gliding or press     # holding only keeps it open
 		"wallkick":
 			goto.call(tu.stop("crouch"), 0.4)
-			if not p.grounded and p.vel.y < 1.0 and p.pos.y < tu.stop("crouch").y - 0.2:
-				p.inp["jump"] = int(m.time * 10.0) % 2 == 0      # (again, against the cliff: the kick)
+			_kick_up(m, tu.stop("crouch").y)
 		"crouch":
 			goto.call(dest, 0.4)
 			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
@@ -92,7 +99,7 @@ static func drive(m: Match) -> void:
 				else:
 					goto.call(wp["pos"])
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
-		"sec", "shoot", "gkey", "kin", "hook", "ult":
+		"sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult":
 			_fight(m, tu, goto)
 		"ranks":
 			for slot in ["sec", "dash", "kin"]:
@@ -140,6 +147,13 @@ static func _aim_at(m: Match, at: Vector3) -> Vector3:
 		_miss = _rng.randf() < MISS_RATE
 	return at + Vector3(MISS_OFF if human and _miss else 0.0, 0.9, 0)
 
+## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
+## take-off on, or the mantle climbs a low cliff first and the kick never counts).
+static func _kick_up(m: Match, top_y: float) -> void:
+	var p := m.player
+	if not p.grounded and p.pos.y < top_y - 0.2:
+		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
+
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
 	var sid := tu.id()
@@ -149,6 +163,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if sid == "sec":
 		_rmb(m, tu)
 	if best == null:
+		if sid == "summon" or sid == "pack":
+			_summon(m, tu)      # (the monster fell in a window called back early: the Boki still comes out again)
 		return
 	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)
@@ -160,11 +176,15 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if p.flat_dist(best) > reach: goto.call(best.pos)
 	match sid:
 		"shoot": p.inp["fire"] = fire_key(m)
+		"sec": p.inp["fire"] = bool(tu.seen.get("sec", false)) and fire_key(m)      # (the cast first, then the rest)
 		"gkey":
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)       # a tap sends it when it is beside you, a tap calls it back when it is out
 				_acted = true
 			p.inp["fire"] = tu.flag and fire_key(m)
+		"summon", "pack":
+			_summon(m, tu)
+			p.inp["fire"] = fire_key(m)
 		"kin":
 			p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 			p.inp["fire"] = tu.flag and fire_key(m)
@@ -175,6 +195,17 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 			p.inp["ult"] = not tu.flag and int(m.time * 10.0) % 2 == 0
 			p.inp["fire"] = tu.flag and fire_key(m)
 			p.inp["sig"] = tu.flag and int(m.time * 2.0) % 2 == 0
+
+## The Summon key: out of the wisp whenever it is ready (the first window, once, is called back early).
+static func _summon(m: Match, tu: Tutorial) -> void:
+	var s: KinSummon = m.player.kin.summon
+	if s.left > 0.0 and not recalled_once and tu.id() == "summon" and tu.sm.phase == TutorialSummon.OUT \
+			and s.left < s.dur - 1.0:
+		recalled_once = true
+		KinSummon.press(m.player)
+	elif not s.out() and s.cd <= 0.0:
+		KinSummon.press(m.player)
+
 
 ## The attack key as a player works each weapon: a bow is drawn to its first stage then let go, a blade is
 ## tapped (a hold would charge it), a gun is held.

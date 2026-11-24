@@ -35,6 +35,7 @@ func _watch_boki(secs: float, steer := Vector2.ZERO) -> String:
 	var t := 0.0
 	var k: Kin = m.player.kin
 	var hp0 := k.hp
+	var lesson := false
 	while t < secs:
 		# the ship waits during planning, and the match clock with it: not part of the window
 		var planning: bool = m.skydrop != null and m.skydrop.planning
@@ -50,7 +51,10 @@ func _watch_boki(secs: float, steer := Vector2.ZERO) -> String:
 		if (m.player.riding or m.player.dropping) and k.flat_dist(m.player) > 6.0:
 			var gap := k.flat_dist(m.player)
 			return "t=%.2fs left behind (%s, kin y %.1f), %.0f m from you" % [t, k.state, k.pos.y, gap]
-		if k.dead or k.state == "downed" or k.hp < hp0 - 0.01:
+		# the tutorial's first lesson (LMB) brings its camp in once you are down: from then on its monsters may
+		# nip the Boki (that is the lesson, not the drop), but it still must not go down
+		lesson = lesson or (m.tut != null and not (m.player.riding or m.player.dropping) and m.tut.camps.alive() > 0)
+		if k.dead or k.state == "downed" or (k.hp < hp0 - 0.01 and not lesson):
 			return "t=%.2fs state=%s hp=%.1f/%.1f at %s" % [t, k.state, k.hp, hp0, str(k.pos)]
 	return ""
 
@@ -122,7 +126,8 @@ func _steering() -> void:
 		prev = hv
 		tmax = maxf(tmax, hv.length())
 	ok(snap <= Loco.air_accel + 1.0, "dive steering ramps (peak %.1f m/s^2)" % snap)
-	ok(tmax > Hunter.DROP_SPEED * 1.4 and tmax <= Hunter.DIVE_SPEED + 0.1, "the dive tops out at %.1f m/s" % tmax)
+	ok(tmax > HunterFeel.drop_speed * 1.4 and tmax <= HunterFeel.dive_speed + 0.1,
+			"the dive tops out at %.1f m/s" % tmax)
 	P.inp["move"] = Vector2.ZERO
 	m.step(Match.DT)
 	var left := Vector2(P.vel.x, P.vel.z).length()
@@ -220,12 +225,12 @@ func _rocket_steer() -> void:
 			_keys(P, mv, false, false)
 			m.step(Match.DT)
 			t += Match.DT
-			var want := Loco.air_step(hv0, mv, Hunter.DIVE_SPEED, Match.DT)
+			var want := Loco.air_step(hv0, mv, HunterFeel.dive_speed, Match.DT)
 			worst = maxf(worst, want.distance_to(Vector2(P.vel.x, P.vel.z)))
 			if mv.x < 0.0 and turn_t < 0.0 and P.vel.x < 0.0:
 				turn_t = t - 0.6
 	ok(P.diving and worst < 0.01,
-			"free-fall steering is Loco.air_step at %.0f m/s (worst step off by %.3f m/s)" % [Hunter.DIVE_SPEED, worst])
+			"free-fall steering is Loco.air_step at %.0f m/s (worst off by %.3f m/s)" % [HunterFeel.dive_speed, worst])
 	ok(turn_t > 0.0 and turn_t < 0.5, "counter-steer turns the fall around in %.2f s" % turn_t)
 
 ## A fresh press pulls the glider wherever you are; Space or the glide key held from before never does.

@@ -1,8 +1,10 @@
 class_name HunterMove
 extends RefCounted
 ## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit,
-## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
+## fall, glide, dive, mantle and glider heat tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
+
+const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
 
 static var _rules: Dictionary = MoveRules.data()
 static var _phys: Dictionary = _rules["physics"]
@@ -19,10 +21,15 @@ static var abyss_slow_from: float = _phys["abyss_slow_from"]
 static var abyss_slow_to: float = _phys["abyss_slow_to"]
 static var glide_height: float = _phys["glide_height"]
 static var glide_pull_vy: float = _phys["glide_pull_vy"]
-static var glide_accel: float = _phys["glide_accel"]
 static var glide_start_vy: float = _phys["glide_start_vy"]
 static var glide_sink: float = _phys["glide_sink"]
 static var glide_heat_s: float = _phys["glide_heat_s"]
+static var lift_heat: float = _phys["lift_heat"]
+static var lift_tap_heat: float = _phys["lift_tap_heat"]
+static var hit_heat_per_dmg: float = _phys["hit_heat"] * 0.30 / 34.5      # 34.5 damage heats it hit_heat x 30%
+static var overheat_burn: float = _phys["overheat_burn"]
+static var overheat_speed: float = _phys["overheat_speed"]
+static var overheat_lift: float = _phys["overheat_lift"]
 static var turn_rate: float = deg_to_rad(_phys["turn_rate"])      # rad/s, the body turning to the cursor
 static var mantle_vy_cap: float = _phys["mantle_vy_cap"]
 static var mantle_pull: float = _phys["mantle_pull"]
@@ -35,11 +42,14 @@ static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
 static var speed_cap: float = _phys["speed_cap"]
 static var haste: float = _phys["haste"]
-const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
-static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed and accel)
+static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed, accel, glide)
+## m/s, the glide cruise every hunter shares (MaxGlide), at body scale so a run into a glide keeps the source's ratio
+static var glide_cruise: float = _phys["glide_cruise"] * body_scale
+## m/s^2, the glider's pull toward where you steer at or under cruise, scaled with the cruise so a turn takes as long
+static var glide_accel: float = _phys["glide_accel"] * body_scale
 
 static func rules() -> Dictionary:
 	return _rules
@@ -91,8 +101,8 @@ static func climbs_tall(h: Hunter) -> bool:
 
 ## The source's walking brake at `speed` (m/s^2): brake_friction's share of the speed plus brake_decel. UE
 ## sheds any speed over the run this way, keys held or not, so a knock or a kit step slides out the same.
-static func brake_rate(speed: float) -> float:
-	return brake_friction * speed + brake_decel
+static func brake_rate(speed_v: float) -> float:
+	return brake_friction * speed_v + brake_decel
 
 ## Ground speed after a step with no keys: UE's walking brake (ApplyVelocityBraking) exactly, so a let-go from a
 ## run slides 0.31-0.37 m and a knock or kit step slides out under the same rule. A step longer than
@@ -173,9 +183,17 @@ static func slide_speed(dist: float, to_speed := 0.0) -> float:
 
 ## `hv` pushed along unit `dir` up to at least `speed` there, everything across `dir` kept (a knock, a lunge, a
 ## kit's air step): it adds to what you carry instead of overwriting it, so air steering lives on (DECISIONS 11-08).
-static func push(hv: Vector2, dir: Vector2, speed: float) -> Vector2:
+static func push(hv: Vector2, dir: Vector2, speed_v: float) -> Vector2:
 	var along := hv.dot(dir)
-	return hv + dir * (maxf(along, speed) - along)
+	return hv + dir * (maxf(along, speed_v) - along)
+
+## Gravity for a step in the air, capped at fall_cap. The step moves at its mean vertical speed (the half of
+## the speed change the position integration in Hunter._physics misses is added here), so a jump's apex and
+## a fall's depth are the same at any step size.
+static func fall(h: Hunter, dt: float) -> void:
+	var vy := maxf(h.vel.y - Hunter.H_GRAV * dt, -fall_cap(h))
+	h.pos.y += 0.5 * (h.vel.y - vy) * dt
+	h.vel.y = vy
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
@@ -188,13 +206,13 @@ static func fall_cap(h: Hunter) -> float:
 	var k := clampf((h.lip_y - h.pos.y - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
 	return lerpf(fall_max, abyss_fall_max, k)
 
-## Vertical speed after one step up a ledge's face, `left` metres under its lip. Within Hunter.MANTLE_REACH it's the
+## Vertical speed after one step up a ledge's face, `left` metres under its lip. Within HunterFeel.mantle_reach it's the
 ## source's suction: gravity as in any jump, plus mantle_pull while you rise slower than mantle_vy_cap, so a
 ## jump's momentum carries you over and a slow arrival is lifted at the cap. Deeper (the abyss catch, ours) you
 ## rise as if thrown to clear the lip at the cap, never faster than `deep_max`. `k` scales the rise (downed).
 static func rise_vy(vy: float, left: float, k: float, deep_max: float, dt: float) -> float:
 	var cap := mantle_vy_cap * k
-	if left > Hunter.MANTLE_REACH:
+	if left > HunterFeel.mantle_reach:
 		return minf(sqrt(cap * cap + 2.0 * Hunter.H_GRAV * left), deep_max * k)
 	vy -= Hunter.H_GRAV * dt
 	if vy < cap:
@@ -204,7 +222,7 @@ static func rise_vy(vy: float, left: float, k: float, deep_max: float, dt: float
 ## The longest a rise from `depth` metres under a lip takes under rise_vy (s): thrown up to the suction band,
 ## then the band at the cap from a standstill.
 static func rise_time(depth: float) -> float:
-	var band := minf(depth, Hunter.MANTLE_REACH)
+	var band := minf(depth, HunterFeel.mantle_reach)
 	var c2 := mantle_vy_cap * mantle_vy_cap
 	var deep := (sqrt(c2 + 2.0 * Hunter.H_GRAV * depth) - sqrt(c2 + 2.0 * Hunter.H_GRAV * band)) / Hunter.H_GRAV
 	return deep + band / mantle_vy_cap

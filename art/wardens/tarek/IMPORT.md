@@ -67,6 +67,12 @@ on the A swatch [62,78,85]. Runes are masked out and keep their emission.
 - Re-running `v95_swap` on this rig drops the split. The recolour scripts (grade.py, gamesplit.py, armprim.py) and their
   inputs are in /home/boki/meshy/tenzo-arm-3d-1113/ (NOTES.md, work/).
 
+walk and run b, l, r, fl, fr, bl, br (2026-11-11): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/tarek/tarek.glb OUT.glb 2.2 5.0`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/tarek/tarek.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`
+(judge: docs/art/wardens/dirloops/JUDGE.md).
+
+Merge of origin/main (2026-11-13): tarek.glb is main's v95 model; the 16 walk/run clips (f, b, l, r, fl, fr, bl, br; pilot-length rings, pelvis on the forward loop) were put back with `python3 tools/art1/glb_add_clips.py art/wardens/tarek/tarek.glb <branch glb> walk_f,...,run_br` (same rig, rest pose checked equal).
+
 The strikes lmb_punch and lmb_throw are keyed at 60 fps (`bake(fps=60)`; tools/art1/fine_export.py exports them at that rate and splices
 them in), so the .glb.import keeps `animation/fps=60`. Clips only, with no raw files: import the shipped .glb in Blender
 (bone_heuristic BLENDER, actions dropped, the armature named `Armature`) as WORK, run the clip script on it, and splice
@@ -74,10 +80,3 @@ the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.p
 other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
-
-## 11-18 (ext/rig-ship-1117): the owner's 11-15 age-down pick in game
-tarek.glb is `~/meshy/v95/tarek/r2/hunter3d1115/A.glb` (CURRENT_OVERRIDES, early 20s face and body, ONE cobalt-slate stone arm, teal runes
-from its emission map, black trousers), built with `python3 tools/art1/v95_to_game.py tarek --weights meshy` (spec `art/wardens/src/tarek_v95.json`:
-joints read off the pick's v95_grid renders, `emit`, own paint, Meshy's skin weights). Texture diff vs the pick: base colour 0.57, emission 0.06
-(out of 255; the 11-13 c01arm body was 39.9). Skeleton, node and clip names are the game glb's. The game's eye stones, shards and rings stay.
-warden_model_check `height_3d` for dolm re-measured to 1.13 (the pick's dreads stand over the head). `--stretch-check --wardens=dolm` worst 11.56 (crouch_f; 14.3 on the first rig build, 7.0 on main's old body).

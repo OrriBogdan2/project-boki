@@ -62,6 +62,7 @@ static func tex(rec: Dictionary, tree: SceneTree) -> Texture2D:
 	cam.transform = Transform3D(Basis(), look_at + Vector3(0.75, 0.32, -1.75)).looking_at(look_at + Vector3(0, -0.02, 0), Vector3.UP)
 	cam.current = true
 	holder.add_child(vp)
+	Fogless.apply(mdl)
 	_cache[k] = vp
 	_order.append(k)
 	while _order.size() > KEEP:

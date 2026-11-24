@@ -40,7 +40,14 @@ forearm and hand are brass machine parts, rigid per bone, with the gold coin on 
 the shoulder tattoos and freckles are texture. The gold coin hip chain is rigid on `hips`.
 
 v2 has no launcher tube: the `launcher` bone stays for the clip set and carries no mesh; `launcher_muzzle` sits on its pivot (the swing leaves
-it in place) at the drum's mouth, the same spot as `launcher_fire` on `forearm.R`. The Burr Charge leaves from there.
+it in place) at the drum's mouth, the same spot as `launcher_fire` on `forearm.R`. Nothing leaves from there now: the coin (RMB) and
+the Palm Lance (E) leave her left palm (owner, 11-17 playtest).
+
+Cast clips (11-17): `vex_cast_clips.glb` is a clips-only file (her rig's nodes and skin, no mesh, material or image) with `coin_flick`
+(0.5 s: the left hand flicks the coin out, the gun arm down) and `palm_cast` (1.07 s: the left arm up, palm out, the gun arm down).
+The game adds them to her library at load (warden_anim `clip_files`, `scripts/heroes/warden_clip_file.gd`), so `vex.glb` is never
+re-exported for a clip. Built by `python3 -I tools/art1/glb_clips_only.py art/wardens/vex/vex.glb <source.glb> rmb=coin_flick,e=palm_cast
+art/wardens/vex/vex_cast_clips.glb`, the source being the 11-13 coin build of her glb (commit 775e4a78e3b, clips `rmb` and `e`).
 
 FX points (empties on bones): `gatling_muzzle` (= `weapon_muzzle`), `launcher_muzzle`, `launcher_fire`, `anchor_gatling_root`, `anchor_sleeve_mouth`
 (the cuff's top), `anchor_grenade_drum`, `anchor_eye_glow` (= `anchor_lens`: her mechanical left eye; nothing glows there), `anchor_spine`,
@@ -55,3 +62,5 @@ then `python3 tools/art1/glb_add_clips.py art/wardens/vex/vex.glb OUT.glb walk_b
 (judge: docs/art/wardens/dirloops/JUDGE.md).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): vex-face3d-r2 c_4 ("A") texture-only: `python3 -I tools/art1/face_swap.py art/wardens/vex/vex.glb /home/boki/meshy/vex-face3d-r2-1118/final/c_4.glb /home/boki/meshy/v95/Vex/face1117/alive1117/cand_A.glb OUT.glb` blends the changed face pixels into the embedded 4096 `v95` image (hair shade A and the rest stay as game; mesh, rig, clips, gatling untouched).

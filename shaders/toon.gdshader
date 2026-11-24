@@ -5,6 +5,7 @@ shader_type spatial;
 // catches the key and fill lights, and an optional glossy highlight. Plus the hit flash.
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform bool use_vertex_color = false;
+uniform bool color_srgb = false;   // with use_vertex_color: the vertex colour is sRGB, as albedo is (PaintMerge)
 uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
 // With use_vertex_color: the vertex colour's red, green and blue weigh these three colours instead of
 // being the colour, so one mesh wears many colour sets (a glider canopy: one per skin, each Hunter's
@@ -77,6 +78,10 @@ void vertex() {
 	wnorm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
+// the exact sRGB curve, as a source_color uniform is turned linear
+vec3 srgb_lin(vec3 c) {
+	return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
+}
 vec3 rgb2hsv(vec3 c) {
 	vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 	vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -139,6 +144,7 @@ void fragment() {
 		c *= mix(t, painted, band * recolor);
 		if (use_vertex_color) { c *= mix(vec3(1.0), COLOR.rgb, color_tint * (1.0 - band * recolor)); }
 	} else if (use_vertex_color && vertex_weights) { c *= mat3(weight_r.rgb, weight_g.rgb, weight_b.rgb) * COLOR.rgb; }
+	else if (use_vertex_color && color_srgb) { c *= srgb_lin(COLOR.rgb); }
 	else if (use_vertex_color) { c *= COLOR.rgb; }
 	else if (vertex_ao) { c *= COLOR.rgb; }
 	float mk = 0.0;
@@ -186,22 +192,26 @@ void fragment() {
 	float ember = canopy_ember(lpos.xz);
 	c = canopy_tint(c, ember);
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
+	vis_f = fog * vis_greyness;
 	c = vis_apply(c, fog);
 	ALBEDO = mix(c, flash_color.rgb, flash);
 	// a faint rim everywhere (so silhouettes lift off dark ground even in shadow); the crisp,
 	// light-facing rim is added per light below
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	EMISSION = canopy_glow(ember) * (1.0 - fog) + flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow;
+	AO = vis_ao(vis_f);                      // out of sight: the coloured ambient out, its grey back in (vis.gdshaderinc)
+	EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }
 
 void light() {
+	vec3 lc = vis_grey(LIGHT_COLOR, vis_f);     // out of sight: grey light, grey shadow side, no ambient cast (vis.gdshaderinc)
 	if (!LIGHT_IS_DIRECTIONAL) {
 		// lamps and glows: plain falloff. (The cel shade floor below is only for the sun; on a lamp
 		// it lit whole screen clusters at once, which showed up as blocky squares at night.)
 		float pl = smoothstep(-0.1, 0.4, dot(NORMAL, LIGHT)) * ATTENUATION;
-		DIFFUSE_LIGHT += ALBEDO * LIGHT_COLOR / PI * pl;
+		DIFFUSE_LIGHT += ALBEDO * lc / PI * pl;
 	} else {
 		float ndl = dot(NORMAL, LIGHT);
 		// the main split: a soft but clean terminator, then a gentle lift on faces turned to the light
@@ -212,17 +222,17 @@ void light() {
 		// warm light bleeding through just past the terminator, like skin or fur
 		float term = smoothstep(-0.34, 0.02, ndl) * (1.0 - smoothstep(0.02, 0.32, ndl)) * mix(0.35, 1.0, ATTENUATION);
 		tone += sss_color.rgb * term * sss;
-		DIFFUSE_LIGHT += ALBEDO * LIGHT_COLOR / PI * tone;
+		DIFFUSE_LIGHT += ALBEDO * lc / PI * vis_grey(tone, vis_f);
 		// a crisp rim on the edge that faces this light (key light rims gold, the fill rims cool)
 		float fres = 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0);
 		float rim_l = smoothstep(0.7, 0.8, fres) * smoothstep(-0.25, 0.45, ndl);
-		DIFFUSE_LIGHT += rim_color.rgb * LIGHT_COLOR * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, ATTENUATION);
+		DIFFUSE_LIGHT += vis_grey(rim_color.rgb, vis_f) * lc * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, ATTENUATION);
 		vec3 hv = normalize(LIGHT + VIEW);
 		float nh = max(dot(NORMAL, hv), 0.0);
-		SPECULAR_LIGHT += LIGHT_COLOR * pow(nh, 16.0) * sheen * band;
+		SPECULAR_LIGHT += lc * pow(nh, 16.0) * sheen * band;
 		if (gloss > 0.0) {
 			float sp = pow(nh, mix(14.0, 110.0, gloss));
-			SPECULAR_LIGHT += LIGHT_COLOR * (smoothstep(0.42, 0.52, sp) * 0.55 + sp * 0.25) * gloss * band * ATTENUATION;
+			SPECULAR_LIGHT += lc * (smoothstep(0.42, 0.52, sp) * 0.55 + sp * 0.25) * gloss * band * ATTENUATION;
 		}
 	}
 }

@@ -32,6 +32,19 @@ static func wind_mix(depth: float) -> Vector2:
 	var k := clampf((depth - HunterMove.abyss_slow_from) / span, 0.0, 1.0)
 	return Vector2(lerpf(WIND_QUIET_DB, WIND_LOUD_DB, k), lerpf(WIND_LOW, WIND_HIGH, k))
 
+## The warning heartbeat at abyss danger k (0..1, AbyssFx.danger): its level in dB and its beats a second.
+## Silent (-INF dB, no beat) below warn_from; from there both climb to full at k = 1 (content/rules/abyss_danger.json).
+static func warn_db(k: float) -> float:
+	var r := Content.rules("abyss_danger")
+	var from := float(r["warn_from"])
+	if k <= from:
+		return -INF
+	return lerpf(float(r["warn_db_min"]), float(r["warn_db_max"]), clampf((k - from) / (1.0 - from), 0.0, 1.0))
+
+static func warn_rate(k: float) -> float:
+	var r := Content.rules("abyss_danger")
+	return lerpf(float(r["warn_rate_min"]), float(r["warn_rate_max"]), clampf(k, 0.0, 1.0))
+
 func tick(h: Hunter) -> void:
 	if not h.is_local():
 		_other(h)

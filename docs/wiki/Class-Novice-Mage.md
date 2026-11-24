@@ -63,7 +63,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Control mage: fence up close, throw the bag's potions, and land three different effects to Beach a foe. |
 | Passive: Fish Out of Water | Each different potion marks a foe; three marks in 5s Beach them. |
-| Dash: Ground Swim | Dive and swim 6m in 0.4s; surfacing knocks nearby foes up. |
+| Dash: Ground Swim | Dive and swim 4.5m in 0.55s; surfacing knocks nearby foes up. |
 | RMB: Grab Bag | Lob the next potion from your bag in an arc. |
 | E: Riptide | Spin up to 2s, then send a knock-up waterspout down a line. |
 | Hunter ultimate: Tidal Wave | Surf a tidal wave that knocks up and slows; land shielded. |
@@ -73,12 +73,11 @@ What the in-game kit card (K) says.
 
 **Fish Out of Water (passive).** Each different potion effect (shock, slime, gust, fire, Super Zeep) and a full Tide Lunge (soak) puts a splash mark on the foe it hits. Three different marks within 5s Beach them: stunned 0.75s, then the marks clear. Each foe can be Beached once every 8s.
 
-**Ground Swim (dash, Shift, 8s cooldown).** Dive into the ground and swim about 6m in 0.4s, the fin cutting the surface (you can still be hit). Surfacing next to foes (2.2m) knocks them up for 0.5s.
+**Ground Swim (dash, Shift, 8s cooldown).** Dive into the ground and swim about 4.5m in 0.55s, the fin cutting the surface (you can still be hit). Surfacing next to foes (2.2m) knocks them up for half a second.
 
 **Grab Bag (RMB, 5s cooldown, 2 charges).**
 
 - *Tap:* Throw the next potion from the bag in an arc to the cursor (8m at most).
-- *Hold:* The landing circle shows while you hold, and the throw reaches 50% further.
 - *In the air:* In the air or gliding, the potion drops straight down under you.
 
 **Riptide (E, 12s cooldown).** Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press it again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.
@@ -94,6 +93,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 5s -> 4.5s per charge, damage +15%. | cooldown 5s -> 4s, damage +30%. |
 | Dash (Shift) | cooldown 8s -> 7s, surfacing radius +0.3m. | cooldown 8s -> 6s. |
 | E | cooldown 12s -> 10.8s, damage +15%. | cooldown 12s -> 9.6s, damage +30%. |
+| R (ultimate) |  | Tidal Wave does not change (Gil has no source R tiers). |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 
