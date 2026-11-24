@@ -206,7 +206,7 @@ func _tick_sparks(dt: float) -> void:
 			fx().unmark("vs%d" % key)
 			continue
 		var n := int(s["n"])
-		var badge := not h.is_local()      # yours: the badge
+		var badge := not h.is_local() and not m.has_meta("pitch_no_foe_plates")  # your own: no badge
 		fx().marker("vs%d" % key, f, n, mx, PINK_WHITE, PINK, _top(f) + MARK_LIFT, badge)
 		StatusLooks.of(m).keep(f, "static")
 		if f.visible and int(m.time / STATIC_GAP) != int((m.time - dt) / STATIC_GAP):
