@@ -92,6 +92,7 @@ func _cards(m: Match, zone: Rect2) -> void:
 	lane.clear()
 	lane.fight = false
 	lane.top = zone.position.y + 4.0  # the column starts right on the hunter
+	lane.right_edge = 0.0  # (centred: the match's own lane sits on the right rail, TopStack.rail)
 	lane.avoid = zone
 	lane.push("Bramble Isle  ·  low ground, lots of cover", Color.GOLD)
 	lane._process(0.5)
