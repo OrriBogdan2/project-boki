@@ -10,7 +10,9 @@ Usage: python3 tools/old_names_lint.py      exit 1 and list file:line when a ret
 import json, os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RETIRED = ("Pin Hem Zedran Ryzz Vireo Bjorn Breaker Mossy Claire Nivi Tarek Kibo Pip Lumi Ravel Ravyl Lisette Ostra Dancer").split()
+RETIRED = (
+    "Pin Hem Zedran Ryzz Vireo Bjorn Breaker Mossy Claire Nivi Tarek Kibo Pip Lumi Ravel Ravyl Lisette Ostra Dancer"
+).split()
 NAME = re.compile(r"\b(%s)\b" % "|".join(RETIRED))
 # Not the retired hunters: the verb "Pin a note/it/a Boki", Lace's "Pin Down" shot, and the starter Boki's nickname "Pip".
 ALLOW = re.compile(r"\bPin (a|an|it|the|to|Downs?)\b|\"Pip\"|\bPip\b(?=\")")
