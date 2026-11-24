@@ -315,8 +315,6 @@ const CHECKS := {
 	"--heal-read-check": ["res://tools/heal_read_check.gd", "heal_read_check", null],  # every heal: one read
 	"--results-ways-check": ["res://tools/results_ways_check.gd", "results_ways_check", null],  # 0051 results
 	"--results-five-check": ["res://tools/results_five_check.gd", "results_five_check", "check"],
-	"--results-boki-line-check": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "check"],
-	"--results-boki-line-shots": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "shots"],
 	"--results-five-shots": ["res://tools/results_five_check.gd", "results_five_check", "shots"],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--xp-cue-check": ["res://tools/xp_cue_check.gd", "xp_cue_check", null],  # kill XP tick, steal stings

@@ -510,6 +510,7 @@ func _show_settings() -> void:
 		SettingsSearch.fill(v, search, SETTINGS_TABS, _build_tab)
 	else:
 		_build_tab(tab, v)
+	SettingsHelp.attach(v)
 	var cb_516 := func():
 		UI.confirm(
 			root,
@@ -550,17 +551,10 @@ func _build_tab(t: String, v: VBoxContainer) -> void:
 ## What most players change: picture quality, window, volume. Keys are the next tab.
 func _tab_main(v: VBoxContainer) -> void:
 	_group(v, "Picture")
-	_choice(
-		v,
-		"Graphics quality",
-		"quality",
-		_quality_options(),
-		func(): _show_settings.call_deferred(),
-		"From your next expedition"
-	)
-	_toggle(v, "Fullscreen", "fullscreen", "F11 or Alt+Enter")
+	_choice(v, "Graphics quality", "quality", _quality_options(), func(): _show_settings.call_deferred())
+	_toggle(v, "Fullscreen", "fullscreen")
 	_sync_fullscreen_switch(Settings.window_is_fullscreen(), v)  # (the window as it is; the choice stays)
-	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD")
+	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05)
 	_group(v, "Volume")
 	_slider(v, "Master", "master", 0.0, 1.0)
 
@@ -576,7 +570,7 @@ func _quality_options() -> Array:
 
 func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "You")
-	var name_row := _row(v, "Your name", "What other hunters and your Boki call you")
+	var name_row := _row(v, "Your name")
 	var ne := LineEdit.new()
 	ne.text = Save.d.get("name", "Hunter")
 	ne.max_length = 16
@@ -589,31 +583,26 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	)
 	name_row.add_child(ne)
 	_group(v, "Expeditions")
-	_toggle(v, "Damage numbers", "damage_numbers", "Numbers pop up where your hits land")
-	_toggle(v, "Tips during expeditions", "tips", "Short hints about what's around you")
+	_toggle(v, "Damage numbers", "damage_numbers")
+	_toggle(v, "Tips during expeditions", "tips")
 	_reticle_rows(v)
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
-	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger. Chatty: all of it")
-	var wisp_hint := (
-		"In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. "
-		+ "Off: it walks beside you"
-	)
-	_toggle(v, "Boki ride as wisps", "boki_wisps", wisp_hint)
+	_choice(v, "How much your Boki talks", "kin_chatter", talk)
+	_toggle(v, "Boki ride as wisps", "boki_wisps")
 	if admin_allowed():
 		_group(v, "Admin")
-		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
-		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (`)")
+		_toggle(v, "Pre-match lobby", "lobby_enabled")
+		_toggle(v, "Mod mode", "mod_mode")
 
 
 func _tab_controls(v: VBoxContainer) -> void:
 	_group(v, "How keys behave")
-	_toggle(v, "Quick cast", "cast_on_press", "Fire on press. Off: hold to aim, release to cast")
-	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: dash the way you are moving")
-	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
-	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
-	_toggle(v, "Movement readout", "move_readout", readout_tip)
-	_toggle(v, "Keep cursor in window", "cursor_confine", "In a fight the cursor stays inside the window")
+	_toggle(v, "Quick cast", "cast_on_press")
+	_toggle(v, "Dash toward the cursor", "dash_to_cursor")
+	_toggle(v, "Tap to sneak", "crouch_toggle")
+	_toggle(v, "Movement readout", "move_readout")
+	_toggle(v, "Keep cursor in window", "cursor_confine")
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [
 		["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch", "scout"]],
@@ -673,7 +662,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 func _tab_camera(v: VBoxContainer) -> void:
 	_group(v, "View")
 	var styles: Array = CamRig.styles.keys().map(func(k): return [k, CamRig.styles[k]["name"]])
-	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
+	_choice(v, "Camera", "cam_style", styles)
 	var follow := [
 		["centred", "Centred on you"],
 		["lean", "Cursor lean"],
@@ -681,101 +670,66 @@ func _tab_camera(v: VBoxContainer) -> void:
 		["dynamic", "Fully dynamic"],
 		["locked", "Locked"]
 	]
-	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Centred on you, or sliding toward where you aim")
+	_choice(v, "Camera follow", "cam_follow", follow)
 	_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
 
 
 func _tab_audio(v: VBoxContainer) -> void:
 	_group(v, "Volume")
 	_slider(v, "Music", "music", 0.0, 1.0)
-	_slider(v, "Effects", "sfx", 0.0, 1.0, 0.05, "Shots, hits, steps and abilities")
-	_slider(v, "Voices", "voices", 0.0, 1.0, 0.05, "Hunters, Boki and monsters calling out")
-	_slider(v, "Ambience", "ambience", 0.0, 1.0, 0.05, "Wind, rain and the sea")
-	_slider(v, "UI", "ui_sounds", 0.0, 1.0, 0.05, "Menu clicks, tabs and pop-ups")
+	_slider(v, "Effects", "sfx", 0.0, 1.0)
+	_slider(v, "Voices", "voices", 0.0, 1.0)
+	_slider(v, "Ambience", "ambience", 0.0, 1.0)
+	_slider(v, "UI", "ui_sounds", 0.0, 1.0)
 	_group(v, "Music")
 	var styles: Array = Soundtrack.styles().keys().map(func(k): return [k, Soundtrack.styles()[k]["name"]])
-	_choice(v, "Soundtrack", "soundtrack", styles, Soundtrack.replay, "The music everywhere; a track picked below wins")
-	_toggle(v, "Shuffle soundtracks", "music_shuffle", "Each screen and expedition rolls a soundtrack")
+	_choice(v, "Soundtrack", "soundtrack", styles, Soundtrack.replay)
+	_toggle(v, "Shuffle soundtracks", "music_shuffle")
 	for pl in Soundtrack.places():
 		var id := String(pl["id"])
 		_choice(v, String(pl["name"]), Soundtrack.HAND_PICK[id], Soundtrack.options(id), Soundtrack.replay)
 	_group(v, "Sounds")
 	var cues := [["a", "Rising bells"], ["b", "Bell with a glide"], ["c", "Soft whoomp and ping"]]
-	_choice(
-		v,
-		"Ability ready again",
-		"reset_cue",
-		cues,
-		func(): Sfx.play_reset_cue(),
-		"Plays when a kill resets your cooldowns"
-	)
-	_toggle(
-		v, "Ultimate ready", "ult_ready_cue", "A chime when your ultimate (%s) is back" % Settings.key_cap("hunter_ult")
-	)
-	_toggle(v, "Hunter callouts", "hunter_barks", "Your Hunter calls ultimate ready, low health, knocks, Boki down")
-	_toggle(v, "Low-health heartbeat", "low_hp_pulse", "A soft heartbeat, faster as you near down")
+	_choice(v, "Ability ready again", "reset_cue", cues, func(): Sfx.play_reset_cue())
+	_toggle(v, "Ultimate ready", "ult_ready_cue")
+	_toggle(v, "Hunter callouts", "hunter_barks")
+	_toggle(v, "Low-health heartbeat", "low_hp_pulse")
 	_group(v, "Window")
 	_toggle(v, "Mute when the window isn't focused", "mute_unfocused")
 	_group(v, "Sound tester")
-	(
-		_row(v, "Try other sounds", "Glider, dash and Vex's rifle: hear the candidates, play with them, lock one in")
-		. add_child(UI.button("Open", open_sfx_tester, 120))
-	)
+	_row(v, "Try other sounds").add_child(UI.button("Open", open_sfx_tester, 120))
 
 
 func _tab_video(v: VBoxContainer) -> void:
 	_group(v, "Display")
 	if not OS.has_feature("web"):
-		_toggle(v, "V-sync", "vsync", "Stops tearing; can add a little input delay")
+		_toggle(v, "V-sync", "vsync")
 	var fps := [[0, "None"], [30, "30"], [60, "60"], [120, "120"], [144, "144"]]
 	_choice(v, "Frame rate cap", "max_fps", fps)
 	_group(v, "Quality")
 	_choice(v, "Smooth edges", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]])
 	_toggle(v, "Shadows", "shadows")
-	_choice(
-		v,
-		"Show frame rate",
-		"show_fps",
-		[[0, "Hidden"], [1, "Frame rate"], [2, "Performance overlay"]],
-		Callable(),
-		"Top right. The overlay adds draw calls and timings"
-	)
+	_choice(v, "Show frame rate", "show_fps", [[0, "Hidden"], [1, "Frame rate"], [2, "Performance overlay"]])
 
 
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
 	var sizes := Settings.TEXT_SIZES.map(func(x): return [x, "%d%%" % roundi(x * 100.0)])
-	_choice(
-		v,
-		"Text size",
-		"text_size",
-		sizes,
-		func(): _show_settings.call_deferred(),
-		"How big the words are in menus and the HUD; long lines wrap or shorten instead of shrinking"
-	)
-	_slider(v, "HUD size", "hud_scale", HudScale.MIN, HudScale.MAX, 0.05, "Match HUD only, each part from its corner")
-	_toggle(v, "Show full HUD", "hud_full", "Every HUD panel from the first expedition")
-	_toggle(v, "Show heights clearly", "depth_cues", "Shaded cliffs and a shadow under each hunter")
+	_choice(v, "Text size", "text_size", sizes, func(): _show_settings.call_deferred())
+	_slider(v, "HUD size", "hud_scale", HudScale.MIN, HudScale.MAX, 0.05)
+	_toggle(v, "Show full HUD", "hud_full")
+	_toggle(v, "Show heights clearly", "depth_cues")
 	var palettes: Array = SideColor.ORDER.map(func(id): return [id, SideColor.NAMES[id]])
-	_choice(
-		v,
-		"Colour vision",
-		SideColor.KEY,
-		palettes,
-		Callable(),
-		"Swaps the colours that tell you, your squad and rivals apart. Ability colours stay"
-	)
+	_choice(v, "Colour vision", SideColor.KEY, palettes)
 	_group(v, "Comfort")
-	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
-	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")
+	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05)
+	_toggle(v, "Fewer flashes", "reduce_flashes")
 
 
 ## Filming: kept between launches, applied when the next offline match starts.
 func _tab_demo(v: VBoxContainer) -> void:
 	_group(v, "Recording")
-	var rec_hint := "Clean HUD hides tips and debug text and smooths the camera. %s cycles it in a match, %s orbits the camera with No HUD"
-	var rec_keys := [Settings.key_cap("record"), Settings.key_cap("record_orbit")]
-	var rec_row := _row(v, "Recording mode", rec_hint % rec_keys, "rec_level")
+	var rec_row := _row(v, "Recording mode", "rec_level")
 	var rec_ob := OptionButton.new()
 	rec_ob.custom_minimum_size.x = 280
 	rec_ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -795,14 +749,14 @@ func _tab_demo(v: VBoxContainer) -> void:
 		["normal", "Normal (%d s)" % int(Bot.FRESH_T)], ["long", "Longer (%d s)" % int(Settings.DEMO_FRESH_T)]
 	]
 	_choice(v, "Bots leave you be after landing", "demo_fresh", fresh)
-	_toggle(v, "All Relics open (offline only)", "demo_all_masks", "Every Relic is pickable. Unlocks are untouched")
+	_toggle(v, "All Relics open (offline only)", "demo_all_masks")
 	_note(v, "These apply from the next match you start, offline only. Online matches play the host's rules.")
 
 
 ## Settings > Gameplay > Reticle: the aiming reticle's shape (with a preview), size, colour, opacity and outline.
 func _reticle_rows(v: VBoxContainer) -> void:
 	_group(v, "Reticle")
-	_choice(v, "Shape", "reticle_shape", Reticle.SHAPES, Callable(), "Default: a small broken ring with a dot")
+	_choice(v, "Shape", "reticle_shape", Reticle.SHAPES)
 	var preview := Control.new()
 	preview.custom_minimum_size = Vector2(40, 40)
 	preview.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -814,7 +768,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 	Settings.changed.connect(preview.queue_redraw.unbind(1))
 	v.get_child(v.get_child_count() - 1).add_child(preview)
 	_slider(v, "Size", "reticle_size", 0.5, 2.0)
-	var row := _row(v, "Colour", "High-vis yellow stands out best on busy ground", "reticle_col")
+	var row := _row(v, "Colour", "reticle_col")
 	for id in Reticle.COLORS:
 		var sw := Button.new()
 		sw.custom_minimum_size = Vector2(26, 26)
@@ -832,7 +786,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 		)
 		row.add_child(sw)
 	_slider(v, "Opacity", "reticle_alpha", 0.2, 1.0)
-	_toggle(v, "Dark outline", "reticle_outline", "Keeps it readable over bright effects")
+	_toggle(v, "Dark outline", "reticle_outline")
 
 
 ## A small heading over a group of settings rows.
@@ -842,8 +796,8 @@ func _group(v: VBoxContainer, txt: String) -> void:
 	v.add_child(UI.section(txt))
 
 
-## One settings row: the name on the left (with an optional hint under it), the control on the right.
-func _row(v: VBoxContainer, label_txt: String, hint := "", key := "") -> HBoxContainer:
+## One settings row: the name on the left, the control on the right (its description is SettingsHelp's).
+func _row(v: VBoxContainer, label_txt: String, key := "") -> HBoxContainer:
 	var r := UI.hbox(16)
 	r.set_meta("setting", key)
 	r.set_meta("label", label_txt)  # what SettingsSearch matches
@@ -854,15 +808,13 @@ func _row(v: VBoxContainer, label_txt: String, hint := "", key := "") -> HBoxCon
 	var head := UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi)
 	UI.wrapped(head)  # a long action name wraps, never widens the panel
 	lc.add_child(head)
-	if hint != "":
-		lc.add_child(UI.para(hint, UI.T_SMALL - 1, UI.MUTED))
 	r.add_child(lc)
 	v.add_child(r)
 	return r
 
 
 func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
-	var r := _row(v, what, "", "bind:" + an)
+	var r := _row(v, what, "bind:" + an)
 	r.custom_minimum_size.y = 34
 	var sl := Settings.slots(an)
 	var red: Array = [[an, 0] in bind_hot, [an, 1] in bind_hot]
@@ -914,8 +866,8 @@ func _bind_text(code: String, slot: int) -> String:
 	return "Not set" if slot == 0 else "+ second key"
 
 
-func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: float, step := 0.05, hint := "") -> void:
-	var r := _row(v, label_txt, hint, key)
+func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: float, step := 0.05) -> void:
+	var r := _row(v, label_txt, key)
 	var sl := HSlider.new()
 	sl.min_value = lo
 	sl.max_value = hi
@@ -959,8 +911,8 @@ func _sync_fullscreen_switch(on: bool = bool(Settings.get_v("fullscreen")), unde
 				(cb as CheckButton).set_pressed_no_signal(on)
 
 
-func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> void:
-	var r := _row(v, label_txt, hint, key)
+func _toggle(v: VBoxContainer, label_txt: String, key: String) -> void:
+	var r := _row(v, label_txt, key)
 	var cb := CheckButton.new()
 	cb.button_pressed = bool(Settings.get_v(key))
 	cb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -973,8 +925,8 @@ func _note(v: VBoxContainer, txt: String) -> void:
 	v.add_child(UI.para(txt, UI.T_SMALL, UI.MUTED))
 
 
-func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then := Callable(), hint := "") -> void:
-	var r := _row(v, label_txt, hint, key)
+func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then := Callable()) -> void:
+	var r := _row(v, label_txt, key)
 	var ob := OptionButton.new()
 	ob.custom_minimum_size.x = 280
 	ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER

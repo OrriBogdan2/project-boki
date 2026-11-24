@@ -9,7 +9,6 @@ const READ_WPS := 3.5      # words/s a new player reads at (about 210 words a mi
 const REACT_S := 0.45      # s from the end of reading to the first input
 const MISS_RATE := 0.3     # share of 0.5 s aim windows that land MISS_OFF to the side
 const MISS_OFF := 3.0      # m a missed aim is off the target
-const LEDGE_DROP := 1.5     # m: a monster this far below the player cannot be shot from where they stand (a cliff top)
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
 const REST_S := 1.0   # s of standing with the stick neutral after which the stuck-hop timer starts over
@@ -102,6 +101,11 @@ static func drive(m: Match) -> void:
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult":
 			_fight(m, tu, goto)
+		"steal":
+			var wisp := tu.st.goal()
+			if wisp != Vector3.INF:
+				goto.call(wisp, 0.4)
+				p.inp["interact"] = p.flat_dist(wisp) < 1.0 and tu.st.foe.downed
 		"ranks":
 			for slot in ["sec", "dash", "kin"]:
 				p.level_slot(slot)
@@ -174,8 +178,7 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 		reach = 9.0
 	elif sid == "kin" and not tu.flag:
 		reach = 14.0       # (the E line reaches the row from where you stand)
-	# (a monster far below the ledge the player stands on is out of reach however near it is: walk down to it)
-	if p.flat_dist(best) > reach or p.pos.y - best.pos.y > LEDGE_DROP: goto.call(best.pos)
+	if p.flat_dist(best) > reach: goto.call(best.pos)
 	match sid:
 		"shoot": p.inp["fire"] = fire_key(m)
 		"sec": p.inp["fire"] = bool(tu.seen.get("sec", false)) and fire_key(m)      # (the cast first, then the rest)
@@ -221,7 +224,6 @@ static func fire_key(m: Match) -> bool:
 	if p.wpn.get("melee", false):
 		return fmod(m.time, 0.5) < 0.1
 	return true
-
 
 ## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:

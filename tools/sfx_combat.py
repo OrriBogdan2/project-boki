@@ -561,13 +561,6 @@ def build():
                              at(note(880, 0.8, 0.22), 0.02) * 1.3, at(note(659, 0.8, 0.26), 0.1) * 1.3, at(note(440, 1.0, 0.4), 0.18) * 1.5,
                              at(shimmer, 0.12)), rms_db=-15)
 
-    # a squadmate knocked down (heard by their squad only): the dark mirror of knock_confirm, a dull low thud
-    # under two FALLING minor notes (A3 down to F3 sharp) with a muted tail, so it reads as a loss at once
-    dark = grains(0.8, 90, 500, 2200, 0.002, 0.006, fall=0.25) * 0.8
-    save('knock_warn', mix(kick(120, 44, 0.8, 0.03, 0.1, 2.4) * 0.6, sub(46, 30, 0.8, 0.2) * 0.5,
-                           at(note(220, 0.8, 0.22), 0.02) * 1.3, at(note(165, 0.9, 0.3), 0.13) * 1.4,
-                           at(dark, 0.04)), rms_db=-16)
-
 
 if __name__ == '__main__':
     build()

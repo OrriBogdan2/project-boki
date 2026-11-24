@@ -80,7 +80,7 @@ func _share_with_allies() -> void:
 		var walk := walk_time()
 		x.spirit_t = walk
 		granted.append([x, walk])
-		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
+		k.vfx("spirit_share", x.pos)
 
 
 ## Rank 3: extra move speed while inside something that fades to nothing as the walk runs out (the physics
@@ -118,7 +118,7 @@ func tick_orbs(dt: float) -> void:
 				var walk := walk_time()
 				x.spirit_t = walk
 				granted.append([x, walk])
-				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
+				k.vfx("spirit_share", x.pos)
 	for g in granted.duplicate():
 		var x: Hunter = g[0]
 		g[1] = float(g[1]) - dt

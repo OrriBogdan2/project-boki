@@ -70,6 +70,7 @@ func run(main: Node) -> void:
 	var idle_ok := true
 	var reach := ""
 	var early_seen := false  # the summon step: the first window was called back early, and the step stayed
+	var steal_grabbed := false  # the steal step: the dummy's wisp was grabbed through KinSteal
 	var second_seen := false  # the pack step: summoned again after the ring went bright
 	var lead := {}  # per leading step: how the Boki (or its wisp) moves to the step's target
 	var lost := {}  # step id -> frame counts the marker was missing (see _marker)
@@ -87,6 +88,7 @@ func run(main: Node) -> void:
 			_marker(m, lost)
 		early_seen = early_seen or (tu.id() == "summon" and tu.sm.early)
 		second_seen = second_seen or (tu.id() == "pack" and tu.sm.second)
+		steal_grabbed = steal_grabbed or (tu.id() == "steal" and tu.st.got)
 		if tu.step != last:
 			last = tu.step
 			seen[tu.id()] = {"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}
@@ -100,7 +102,7 @@ func run(main: Node) -> void:
 	ok(banners.size() >= 7 and banners.size() <= 9,
 			"the match tutorial has about 8 banner steps (%d), the rest are hint lines" % banners.size())
 	_words(m.player, seen)
-	var teaches: Array = ["summon", "pack"] if wisps else ["gkey"]
+	var teaches: Array = ["summon", "steal", "pack"] if wisps else ["gkey"]
 	var skipped: Array = ["gkey"] if wisps else ["summon", "pack"]
 	ok(
 		teaches.all(func(k): return seen.has(k)) and not skipped.any(func(k): return seen.has(k)),
@@ -111,6 +113,10 @@ func run(main: Node) -> void:
 		ok(String(sk.get("cap", "")) == Settings.key_cap("summon"), "the summon line shows the Summon key")
 		ok(early_seen, "a window called back early keeps the summon step (and says so)")
 		ok(second_seen, "the pack step waited for a second summon after the ring went bright")
+		var st: Dictionary = seen.get("steal", {})
+		ok(String(st.get("cap", "")) == Settings.key_cap("interact"), "the steal line shows the interact key")
+		ok(String(st.get("detail", "")).contains(Settings.key_cap("interact")), "...and its plain line names it too")
+		ok(steal_grabbed and m.tut.st.foe == null, "the steal step ended with a real grab, and its dummy is gone")
 	_lead_rows(lead)
 	_marker_rows(lost)
 	ok(idle_ok, "the E step waits for E (no progress in the first %.0fs without it)" % IDLE_E_T)

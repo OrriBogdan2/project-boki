@@ -23,6 +23,7 @@ const KEYS := {
 	"gkey": "throw",
 	"summon": "summon",
 	"pack": "summon",
+	"steal": "interact",
 	"hook": "gear1",
 	"ult": "ultimate",
 	"uplink": "interact",
@@ -70,7 +71,7 @@ const DONE_T := 0.9  # s of the step-done sting
 const LOOKOUT_R := 5.0  # m from the stop: the whole top (3.6 m radius) and its rim count
 const LOOKOUT_DROP := 1.2  # m: how far under the top you may stand and still be up on it (the cliff is 2.4 m)
 const SEND_R := 5.0  # m: a Boki leap that lands this near a monster counts as sent at it
-const CROUCH_HOLD := 0.8  # s of crouching at the lookout
+const CROUCH_HOLD := 1.5  # s of crouching at the lookout
 const RANK_WAIT_T := 20.0  # s before the ranks step moves on by itself
 const DOWN_T := 3.0  # s a downed player lies there before the tutorial picks them up (the fight goes on)
 const FAR_SCOUT := 38.0  # m: a target this far off gets "crouch to scout ahead"
@@ -111,6 +112,7 @@ var hits := 0  # your weapon hits on a monster this step
 var seen := {}  # what this run has used: sec, fire, dash, kick, boki, kin, glove, ult (the checks)
 var camps: TutorialCamps
 var sm: TutorialSummon  # the two summon steps, for a Boki that rides as a wisp
+var st: TutorialSteal  # the steal step, the same
 var crouch_t := 0.0
 var rmb_t_prev := 0.0
 var pell: TutorialPell = null  # the guide, by each stop (TutorialPell)
@@ -136,6 +138,7 @@ func _init(match_node: Match) -> void:
 	_course = World.load_layout("tutorial").get("course", {})
 	camps = TutorialCamps.new(self)
 	sm = TutorialSummon.new(self)
+	st = TutorialSteal.new(self)
 
 
 # ------------------------------------------------------------------ the course
@@ -242,7 +245,7 @@ func applies(sid: String) -> bool:
 			return false
 		"gkey":
 			return m.player.kin != null and not sm.active()
-		"summon", "pack":
+		"summon", "pack", "steal":
 			return sm.active()
 	return true
 
@@ -442,6 +445,7 @@ func _enter() -> void:
 	hits = 0
 	used0 = p.used.duplicate()
 	sm.begin()
+	st.begin()
 	kicks0 = int(p.stats.get("wall_kicks", 0))
 	if p.kin:
 		throws0 = p.kin.st_throws
@@ -458,6 +462,8 @@ func _enter() -> void:
 			if ground_item().is_empty():  # (a retry finds the glove still lying there)
 				m.spawn_gear("grapple", 1, stop("pickup"), "", false)
 				m.wpicks[-1]["tut"] = true
+		"steal":
+			st.spawn()
 		"wayout":
 			var o := outpost()
 			if not o.is_empty():
@@ -562,6 +568,8 @@ func _is_done(sid: String, dt: float) -> bool:
 			return sm.summon_done(dt)
 		"pack":
 			return sm.pack_done()
+		"steal":
+			return st.done(dt)
 		"kin":
 			got = int(p.used.get("k1", 0)) - int(used0.get("k1", 0))
 			flag = got > 0
@@ -682,6 +690,8 @@ func goal(sid: String) -> Vector3:
 			if best == null:
 				best = camps.nearest()
 			return best.pos if best else camps.last_at  # (a camp felled with you on the edge respawns once you're back)
+		"steal":
+			return st.goal()
 		"wayout", "uplink", "defend", "extract":
 			var o := outpost()
 			return o["pos"] if not o.is_empty() else Vector3.INF
@@ -800,6 +810,8 @@ func _words() -> void:
 		line = String(alt["sec_hold"])
 	elif sid in ["summon", "pack"] and sm.alt_key(sid) != "":
 		line = String(alt[sm.alt_key(sid)])
+	elif sid == "steal" and st.got:
+		line = String(alt["steal_got"])
 	if TutorialHints.line(sid) != "":
 		line = TutorialHints.line(sid)
 	key_cap = ""

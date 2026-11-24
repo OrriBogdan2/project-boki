@@ -23,7 +23,6 @@ const BRONZE := Color("b9732f")  # Cinderfall's shell (gunslinger_ult)
 const GOLD := Color("ffcf3f")  # her coin (unshaded: the toon light turns gold red-brown)
 const GOLD_DARK := Color("d99a1e")  # its struck faces
 const DUD_DUST := Color("6b4a2e")  # a dud Burr Charge's dull dust puff where its lane ended
-const FEVER_DB := -9.0  # dB: the stim as Fever lights, under a knock's -3
 const DAZE_PINK := Color("ff4fb0")  # palette "daze": the Daze's own colour, so its bonus is not a plain crit
 const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const DAZE_NUM_LIFT := 2.1  # m over a foe's feet: the "+N" floats above its hit number
@@ -209,8 +208,6 @@ func gate_inputs() -> void:
 
 
 func add_fever(n := 1) -> void:
-	if res <= 0.0:
-		m.sfx("vn_stim", h.pos, FEVER_DB, 1.3)  # Hot Streak lights: the stim, quieter and higher than a knock's
 	res = minf(res_max(), res + float(n))
 	touch_res(float(res_def()["wait"]))
 

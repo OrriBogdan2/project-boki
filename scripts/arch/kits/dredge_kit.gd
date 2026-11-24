@@ -528,8 +528,6 @@ func _end_pull(arrived: bool) -> void:
 		arrivals += 1
 		var rdf := rmb_def()
 		if not ally:
-			# the foe stays stunned through the Anchor's wind-up: Deep Reach then Anchor Drop is a sure stun
-			(f as Ent).stun_t = maxf((f as Ent).stun_t, float(rdf["arrive_stun"]))
 			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 	var queued := e_queued
 	e_queued = false
@@ -555,7 +553,7 @@ func cast_e() -> bool:
 	slam_dir = e_at if e_at != Vector2.ZERO else h.aim_dir()
 	play("dr_anchor")
 	KitWindup.play(self, "e", "dr_anchor_wind", -3.0)
-	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed.get("hop", 0.0))    # where the hop leaves him
+	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
 	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
 	return true
 
@@ -592,7 +590,7 @@ func _tick_wind(dt: float) -> void:
 ## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
 ## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
 func _hop(ed: Dictionary, t: float) -> void:
-	if float(ed.get("hop", 0.0)) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
+	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
 		return
 	if not h.grounded or h.roll_t > 0.0:
 		return
@@ -601,7 +599,7 @@ func _hop(ed: Dictionary, t: float) -> void:
 		h.vel.x -= slam_dir.x * fwd
 		h.vel.z -= slam_dir.y * fwd
 		return
-	var v: Vector2 = slam_dir * (float(ed.get("hop", 0.0)) / float(ed["hop_t"]))
+	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
 	h.vel.x = v.x
 	h.vel.z = v.y
 
@@ -620,8 +618,8 @@ func _foe_at_feet() -> bool:
 func slam_tell(k: float) -> Dictionary:
 	var ed := e_def()
 	return {
-		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "outline": true,
-		"all": true, "col": anchor_col(), "alpha": 1.8, "hot": 0.5 * k
+		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "soft": true, "fill": k,
+		"all": true, "col": HeroVfx.of(m).color(h, "gold"), "hot": 0.5 * k
 	}
 
 ## The slam: his fist into the ground in front, on this frame: the cone's damage and stun, cracks, dust and a
@@ -643,7 +641,7 @@ func _anchor() -> void:
 	var fist := ground(h.pos + Vector3(dd.x, 0, dd.y) * 1.1)
 	vfx("anchor_slam", ground(h.pos), dd, {"r": float(ed["radius"])})
 	m.fx.burst(fist + Vector3(0, 0.2, 0), Color("c8b8a0"), 18, 5.0, 0.45, 10.0, 1.3, Vector3(dd.x, 0.8, dd.y), 70.0)
-	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "alpha": 0.7}, true))
+	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "hot": 1.0}, true))
 	m.later(0.06, _anchor_dust.bind(at))
 	m.sfx("dr_anchor", h.pos, -1.0, 1.0)
 	if not h.grounded and not over_void and not h.gliding:

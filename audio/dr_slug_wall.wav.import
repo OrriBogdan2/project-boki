@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://b2pihyj8gi1f0"
-path="res://.godot/imported/knock_warn.wav-220124103d2b062d707e23314387aaea.sample"
+uid="uid://csktt0dpf6h8"
+path="res://.godot/imported/dr_slug_wall.wav-5e2a09f5dbaf93c1dba4838333b51fee.sample"
 
 [deps]
 
-source_file="res://audio/knock_warn.wav"
-dest_files=["res://.godot/imported/knock_warn.wav-220124103d2b062d707e23314387aaea.sample"]
+source_file="res://audio/dr_slug_wall.wav"
+dest_files=["res://.godot/imported/dr_slug_wall.wav-5e2a09f5dbaf93c1dba4838333b51fee.sample"]
 
 [params]
 
