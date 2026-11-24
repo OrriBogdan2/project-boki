@@ -87,7 +87,7 @@ What made the menus feel blocky, samey and hard to get through:
    outline unless they are *selected*. Group with spacing and eyebrows before reaching for a card.
 4. **Three button tiers.** `primary()` (the magenta ticket, pink text): the one thing the screen is for,
    at most one per screen, usually in the footer. `button()` (torn violet face, neon on hover): normal actions.
-   `ghost()` (text only): rare or small actions. `danger()` (red outline) for things that can't be
+   `ghost()` (dark glass pill with a thin light rim, so it shows on any background): rare or small actions. `danger()` (red outline) for things that can't be
    undone, always behind `confirm()`.
 5. **Colour roles.** `ACCENT` (magenta) means "act here" and "selected". `GOLD` means gems and rewards.
    `GOOD` owned/ready/success, `BAD` danger/loss/locked, `TEAL` info and extraction. Item rarity uses
@@ -149,6 +149,7 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 - `title(text, size=34, col=INK)` - Lilita One, one line.
 - `label(text, size=16, col=INK, font=null)` - wraps only past 48 characters.
 - `para(text, size=T_SMALL, col=MUTED)` - always wraps.
+- `wrapped(label, min_w=WRAP_MIN_W)` - makes any Label wrap and gives it a width floor (120 px by default, small enough for the 150 px cards; pass more where a line must stay wide, e.g. the name card's 300). `label` (past 48 characters) and `para` already do. A wrapping Label reports ~0 minimum width, so in a row or card sized by its content it got no room and broke one letter per line (the Name-your-Boki line); EXPAND_FILL only shares spare room, so never rely on it alone. Never set `autowrap_mode` by hand on a label that has no width from its parent: use `wrapped`. `--name-card-check` fails if a wrapping Label on the name card is under 200 px or breaks into a column.
 - `section(text, col)` - a spaced caps eyebrow over a group (pages keep it with what follows). Pink by default; pass a colour only when it means something (GOOD, a temper), never a blend toward grey (--uipolish-check).
 - `kv(key, value, col)` - a muted key on the left, the value on the right.
 

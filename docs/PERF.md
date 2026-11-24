@@ -27,6 +27,26 @@ shipped game at the cost of a static call each. Zones, per `Match` frame: `bots`
 `vfx_render`, `camera`, `hud_tick`, `hud_draw`. `Prof.frame()` in `Match._process` marks the frame. A new zone is two
 lines around straight-line code (an early `return` between them would leave the zone open).
 
+## One harness
+`--perf-bench` is the only perf entry point. Its flags pick the part: none (the fixed load), `--tracy=<dir>`,
+`--bench-fight`, `--bench-ab`, `--bench-probe` (a scripted expedition, loading screen to fight, per phase:
+`tests/perf_probe.gd`) and `--bench-hunter-gpu` (Hunter model draw cost: `tools/perf/hunter_gpu.gd`).
+`--bench-fight` prints, in ms per frame: the match step and visual sections; every script `_process` by file (the
+bench calls them itself and times them: Hunter and Boki rigs, AimDraw, the HUD); the engine wait (the rest of the
+frame) split into the rest of the scene's process, the draw (before, during and after the viewports, from the
+renderer's own timestamps) and the physics ticks; and the shadow casters by owner. Its "match script" ms is the
+whole frame, Match code included. The draw's steps come from the renderer's own stamps, GPU and CPU us from each stamp
+to the next ("draw steps (gpu)" and "(cpu)" lines: shadows, the opaque and transparent passes, post, the canvas), and
+twice in the camp (an FX peak at 19.5 s, a quiet spell at 23.5 s) `tools/perf/fight_scene.gd` prints what the camera
+sees: things by class, distinct materials and shaders, see-through surfaces and the screens their boxes cover, repeated
+mesh+material pairs (MultiMesh candidates) and each Hunter's meshes, surfaces, outline passes and casters.
+`--bench-novsync`, `--bench-noshadow`, `--bench-nofx`, `--bench-noink` and `--bench-nopost` are probes (vsync off,
+shadows off, the Fx and HeroVfx roots hidden, the Hunters' ink outline shells and passes off, glow and FXAA off);
+`--bench-3d-scale=2.0` with `--bench-view=960x540` draws the 3D at 1080p inside a quarter-size window, which keeps
+the pods' X11 copy of the window small (docs/PERF_DRAW_1124.md).
+On rp2g the draw's frame end ("after viewports") swings 4-14 ms between runs of the same build: compare a
+script section across runs, and the wall time only over several runs on one worker.
+
 ## Capture (headless, real GPU)
 ```
 jobq submit --needs gpu --only rp1-0 --tree <tree> --out bench -- --perf-bench --bench-secs=30 --bench-view=1920x1080 --quality=medium --tracy=bench

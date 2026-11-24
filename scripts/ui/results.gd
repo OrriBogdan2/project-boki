@@ -10,6 +10,7 @@ func show_result(r: Dictionary) -> void:
 	shown_at = Time.get_ticks_msec()
 	var s := Game.apply_result(r)
 	s["kin_say"] = String(r.get("kin_say", ""))     # what your Boki said as the run ended
+	s["wisps_home"] = r.get("wisps_home", [])      # stolen wisps you carried
 	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
 	_stage(r, s)
 	var won: bool = r.get("extracted", false)
@@ -45,7 +46,10 @@ func show_result(r: Dictionary) -> void:
 	sc.tree_entered.connect(func(): fit.call_deferred())
 	# header: one tag, the outcome with the Hunter's name in it, then how you left or where your squad placed
 	var tag := UI.tag("First expedition" if r.get("tutorial", false) and won else ("Extracted" if won else "Didn't make it"), UI.TEAL if won else Color("ff9a8a"))
-	var hunter := String(Save.d.get("name", "Hunter")).substr(0, 16)
+	var hunter := String(Save.d.get("name", Save.UNNAMED)).substr(0, 16)
+	if hunter.strip_edges() in ["", Save.UNNAMED]:
+		# a player who never gave a name: "The Red Stitch made it out"
+		hunter = HeroTitle.label(hunter, Arch.of_save())
 	var head := UI.vbox(6)
 	head.add_child(tag)
 	head.add_child(UI.title("%s made it out" % hunter if won else _lost_title(r.get("why", "")), 46, UI.INK))
@@ -125,6 +129,10 @@ func show_result(r: Dictionary) -> void:
 				var why := "You already have that kind out on the farm." if to_box.all(KinBox.dup_on_farm) else full
 				var names := ", ".join(to_box.map(func(k): return String(k["name"])))
 				kept.add_child(_notes(["Sent to the Boki Burrow: %s." % names, why], Color("cdb8ff")))
+			var caught: Array = s["caught"]
+			# the first Boki you ever caught
+			if not caught.is_empty() and int(Save.d["stats"].get("caught", 0)) == caught.size():
+				kept.add_child(_first_catch_name(caught[0]))
 	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it) and not Loot.is_ink(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
@@ -152,6 +160,9 @@ func show_result(r: Dictionary) -> void:
 		kept.add_child(_note("Left in your deathbox: %s." % ", ".join(names), Color("ffb0a0")))
 	if s.has("kin"):
 		boki.add_child(_kin_card(s, det))
+	var lines := ResultsBokiLines.card(s, get_tree())
+	if lines != null:
+		boki.add_child(lines)
 	for back in s.get("rescued", []):
 		boki.add_child(_notes(HomeNotices.fill(HomeNotices.BACK_HOME, back["name"]), UI.GOOD))
 	# kin left behind when you went down, and where they ended up
@@ -213,7 +224,7 @@ func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: fl
 	lr.add_child(lab)
 	col.add_child(lr)
 	var show := func(x: float) -> void:
-		num.text = ("%d:%02d" % [int(x) / 60, int(x) % 60]) if fmt == "time" else str(int(round(x)))
+		num.text = ("%d:%02d" % [int(int(x) / 60.0), int(x) % 60]) if fmt == "time" else str(int(round(x)))
 	var tw := create_tween()
 	tw.tween_interval(delay)
 	tw.tween_method(show, 0.0, value, clampf(0.4 + value * 0.01, 0.5, 1.1)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -231,6 +242,17 @@ func _chip(icon: String, txt: String, col: Color, delay: float) -> Control:
 	tw.tween_interval(delay)
 	tw.tween_callback(func(): Sfx.play("pickup", null, -8.0, 0.08, 1.0 + delay * 0.1); UI.pop_in(c))
 	return c
+
+## Your first caught Boki gets its name here (NameStep); leaving the screen keeps the suggestion.
+func _first_catch_name(rec: Dictionary) -> Control:
+	var box := UI.vbox(4)
+	box.add_child(_note("Your first catch! Give your %s a name." % Data.KIN[rec["species"]]["name"], UI.INK))
+	var step := NameStep.new(rec["species"])
+	step.named.connect(func(nm: String, _kept: bool):
+		rec["name"] = nm
+		Save.save_game())
+	box.add_child(step)
+	return box
 
 ## Your kin's card: how it feels about you now (the trust bar slides to where it ended up), and
 ## what it will remember about this one.
@@ -265,7 +287,7 @@ func _kin_card(s: Dictionary, det: Control) -> Control:
 		kv.add_child(UI.label(String(s["trust_why"]), 14, UI.GOOD))
 	if String(s.get("kin_say", "")) != "":
 		var say := UI.label("\u201c%s\u201d" % String(s["kin_say"]), 16, UI.INK)
-		say.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(say)
 		kv.add_child(say)
 	var tw := create_tween()
 	tw.tween_interval(1.0)
@@ -315,7 +337,7 @@ func _details_toggle(det: Control, sc: ScrollContainer) -> Button:
 
 func _note(txt: String, col: Color) -> Label:
 	var l := UI.label(HomeNotices.bullet(txt), 15, col)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	return l
 
 ## Several short bullets under one another, one colour.
@@ -334,7 +356,8 @@ func _unhandled_input(e: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		Game.goto("home")
 
-## Behind the card: your squad on a little island, in their poses if you made it out, as dimmed Wisps if not.
+## Behind the card: your squad on a little island, each on its win beat if you made it out and its lose beat if
+## not, the eliminated as dimmed Wisps (ResultsStage).
 func _stage(r: Dictionary, s: Dictionary) -> void:
 	var squad: Array = r.get("squad", [])
 	if squad.is_empty():

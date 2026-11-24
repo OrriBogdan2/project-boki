@@ -144,7 +144,7 @@ static func _elim_start(h: Hunter, st: Dictionary) -> void:
 	h.visible = true                  # (render() ran before this switch: the node holds the Wisp from this frame)
 
 ## The beat's end (or a revive in the middle of it): the Wisp is freed, the box stands at full size.
-static func _elim_end(h: Hunter, st: Dictionary) -> void:
+static func _elim_end(_h: Hunter, st: Dictionary) -> void:
 	_box_scale(st, 1.0)
 	_free_node(st)
 	st["mode"] = ""

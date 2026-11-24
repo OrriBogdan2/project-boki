@@ -28,10 +28,11 @@ func frames(n: int) -> void:
 
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
-	Save.d.erase("hud_reveal")      # the full HUD (staging is --hud-reveal-check's)
+	Save.d.erase("hud_reveal")  # the full HUD (staging is --hud-reveal-check's)
 	Econ.ensure()
 	main.get_window().size = Vector2i(SIZE)
 	var m := Match.new()

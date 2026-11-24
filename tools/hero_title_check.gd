@@ -9,10 +9,13 @@ const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tam
 	"Mossy", "Hem", "Flame Queen", "Undying Queen"]
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
-## The five words DECISIONS "Identity and Masks" retires; every content/**/*.json text field is scanned for them.
-const FIVE_RETIRED := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|merging|unmasked)\\b"
+## The five words DECISIONS "Identity and Masks" retires, plus the retired ability names (Burr Charge -> Coin Blast,
+## Longneedle -> Palm Lance, Grapnel -> Abyssal Hand, Gale/Venom Mantle -> Gale Cloak/Venom Fusion);
+## every content/**/*.json text field is scanned for them.
+const FIVE_RETIRED := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|merging|unmasked)\\b" \
+	+ "|\\b(burr charges?|longneedle|grapnel|gale mantle|venom mantle|finger gun)\\b"
 ## Not player text: notes for developers, ids, file names (keys), and lowercase id values ("mantle", "warden").
-const DEV_KEY := "(?i)(^_.*|.*notes?|.*doc|desc|why|reason|src|source|file|path|clip|states|procedural|ids?|no_carry)$"
+const DEV_KEY := "(?i)(^_.*|.*notes?|.*doc|why|reason|src|source|file|path|clip|states|procedural|ids?|no_carry)$"
 const ID_VALUE := "^[a-z0-9_./:-]+$"
 const CANONICAL_ORDER := [
 	"archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm",
@@ -139,7 +142,10 @@ func _json_files(dir: String, out: Array) -> void:
 func _retired_walk(v: Variant, f: String, key: String, re: RegEx, dev: RegEx, idv: RegEx, hits: Array) -> void:
 	if v is Dictionary:
 		for k in v:
-			if dev.search(String(k)) == null:
+			# "desc" is player text in content/archetypes etc., a developer note in content/rules/.
+			var rules_desc: bool = String(k) == "desc" and f.contains("/content/rules/")
+			var dev_note: bool = dev.search(String(k)) != null or rules_desc
+			if not dev_note:
 				_retired_walk(v[k], f, String(k), re, dev, idv, hits)
 	elif v is Array:
 		for x in v:
@@ -196,8 +202,15 @@ func _results_name_line(main: Node) -> void:
 	main.add_child(screen)
 	screen.show_result({"extracted": true, "knocks": 1, "time": 60.0})
 	var texts: Array = screen.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
-	var player := String(Save.d.get("name", "Hunter"))
-	ok(texts.has("%s made it out" % player.substr(0, 16)), "results: the headline carries the name '%s'" % player)
+	var player := String(Save.d.get("name", Save.UNNAMED)).substr(0, 16)
+	# unnamed: the Hunter's own title
+	var shown := HeroTitle.label(player, Arch.of_save()) if player in ["", Save.UNNAMED] else player
+	ok(texts.has("%s made it out" % shown), "results: the headline carries the name '%s'" % shown)
+	Save.d["name"] = "Orri"
+	screen.show_result({"extracted": true, "knocks": 1, "time": 60.0})
+	texts = screen.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	ok(texts.has("Orri made it out"), "results: a named player's headline is their plain name")
+	Save.d["name"] = player
 	ok(not texts.any(func(t): return String(t).begins_with(player + " the ")), "results: no 'Name the Title' line")
 	ok(texts.has("HUNTERS DOWNED"), "results: the strip says Hunters downed (main's wording)")
 	screen.queue_free()

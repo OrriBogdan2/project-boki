@@ -23,9 +23,9 @@ static func mark() -> void:
 
 ## The practice run's rules: Tumble's own, with the teach block over them.
 static func rules() -> Dictionary:
-	var R: Dictionary = BaseTumble.rules().duplicate(true)
-	R.merge(R["teach"]["rules"], true)
-	return R
+	var r: Dictionary = BaseTumble.rules().duplicate(true)
+	r.merge(r["teach"]["rules"], true)
+	return r
 
 
 ## Each move's pick key, from Settings (Controls), in the order of base_tumble.json "moves".
@@ -50,7 +50,7 @@ func open(root: Control, skip: Callable) -> void:
 
 ## The line for the run's state.
 func sync(run: BaseTumble.Run) -> void:
-	var moves: Dictionary = run.R["moves"]
+	var moves: Dictionary = run.r_x["moves"]
 	var theirs: String = run.recs[1]["name"]
 	match run.state:
 		"intro":

@@ -1,6 +1,6 @@
 extends RefCounted
 ## --vision-check: the sight wedge (Match.sees, shaders/vis.gdshaderinc, docs/specs/VISION_LOOK.md). The wedge is
-## 120 degrees wide and the shader draws the same angle; a rival just inside its side is seen, just outside is
+## 90 degrees wide and the shader draws the same angle; a rival just inside its side is seen, just outside is
 ## not; one right behind you is (the near circle); crouching hides you at a range a standing rival is seen from;
 ## a hiding rival (crouched, in grass) shows no plate unless revealed, downed or a teammate; a rival out past the
 ## wedge's side who shoots or is hit is seen for the reveal's time inside her own soft lit circle (RevealLight), which
@@ -8,9 +8,9 @@ extends RefCounted
 ## colour has no tint constant, and every lit world shader greys its light, shadow tint and ambient where fogged
 ## (a blue cast fails here; GPU numbers in docs/specs/VISION_LOOK.md). Never touches the save.
 
-const WEDGE_DEG := 120.0   # degrees: a wide cone in front of you
-const SIDE_IN := 50.0      # degrees off your aim: inside the cone's side (60)
-const SIDE_OUT := 70.0     # degrees off your aim: outside it
+const WEDGE_DEG := 90.0   # degrees: a wide cone in front of you
+const SIDE_IN := 40.0      # degrees off your aim: inside the cone's side (45)
+const SIDE_OUT := 55.0     # degrees off your aim: outside it
 const SIDE_M := 10.0       # m: how far out the side probes stand (inside VIEW_RANGE, outside the near circle)
 const FAR_M := 18.0        # m: past the crouched range (14), inside the standing one (24)
 const BEHIND_M := 1.5      # m: inside the near circle (NEAR_SENSE 2.0)
@@ -20,6 +20,8 @@ const HIT_REVEAL := 1.0    # s: so does being hit
 const AWAY_DEG := 130.0    # degrees off your aim: well outside the wedge
 ## The lit world shaders that draw the fog: each greys its light where fogged (shaders/vis.gdshaderinc)
 const FOG_LIT := ["terrain", "grass", "flora", "wall", "wall_v1", "toon"]
+const FOG_DARK := Vector2(0.45, 0.8)     # albedo scale outside sight: a slight dark fog, not the flat dim, not black
+const FOG_GREY := Vector2(0.3, 0.8)      # grey share: clearly between own colours (0) and full grey (1)
 
 var bad := 0
 
@@ -45,6 +47,7 @@ func run(main: Node) -> void:
 	_plates(m)
 	_reveal(m)
 	_grey_fog(m)
+	_aim_line(m)
 	m.queue_free()
 	print("VISION DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
@@ -171,8 +174,9 @@ func _reveal(m: Match) -> void:
 		return
 	ok(false, "an open spot %.0f degrees off your aim (seed 5101)" % AWAY_DEG)
 
-## No blue (or any hue) outside sight: the fog colour multiplies by greys only, and each lit world shader writes the
-## fog share for light(), greys the light colour and the cool shadow tint there, and swaps the ambient for its grey.
+## No blue (or any hue) outside sight: the fog colour multiplies by greys only (the albedo and the light part-grey),
+## and each lit world shader writes the fog share for light(), greys the light colour and the cool shadow tint there,
+## and swaps the ambient for its grey.
 func _grey_fog(m: Match) -> void:
 	var src := FileAccess.get_file_as_string("res://shaders/vis.gdshaderinc")
 	var at := src.find("vec3 vis_apply(")
@@ -183,12 +187,18 @@ func _grey_fog(m: Match) -> void:
 		var x := float(r.get_string(1))
 		if not (is_equal_approx(x, float(r.get_string(2))) and is_equal_approx(x, float(r.get_string(3)))):
 			tints += 1
-	ok(at >= 0 and tints == 0 and not src.contains("VIS_COOL"),
-		"the fog colour is grey: no tint in vis_apply (%d)" % tints)
+	var greys := body.contains("vis_grey(c, vis_greyness) * vis_dark")
+	ok(at >= 0 and tints == 0 and not src.contains("VIS_COOL") and greys,
+		"the fog colour is grey only: no tint in vis_apply (%d)" % tints)
+	ok(RaidLook.VIS_DARK >= FOG_DARK.x and RaidLook.VIS_DARK <= FOG_DARK.y,
+		"the fog is slightly dark: albedo x%.2f (%.2f-%.2f)" % [RaidLook.VIS_DARK, FOG_DARK.x, FOG_DARK.y])
+	ok(RaidLook.VIS_GREY >= FOG_GREY.x and RaidLook.VIS_GREY <= FOG_GREY.y,
+		"the fog is partly grey, not full, not none: %.2f (%.2f-%.2f)" % [RaidLook.VIS_GREY, FOG_GREY.x, FOG_GREY.y])
 	for n in FOG_LIT:
 		var s := FileAccess.get_file_as_string("res://shaders/%s.gdshader" % n)
 		var light := s.substr(s.find("void light()"))
-		var greyed := s.contains("vis_f = ") and light.contains("vis_grey(LIGHT_COLOR, vis_f)") \
+		var greyed := s.contains("vis_f = ") \
+			and light.contains("vis_grey(LIGHT_COLOR, vis_f)") \
 			and not light.contains("* LIGHT_COLOR")
 		var tone_ok := not light.contains("* tone;") and not light.contains("DIFFUSE_LIGHT += rim_color")
 		var amb_ok := s.contains("AO = vis_ao(vis_f)") \
@@ -197,3 +207,25 @@ func _grey_fog(m: Match) -> void:
 			"%s greys its light, shadow tint, ambient and haze outside sight" % n)
 	var amb := RaidLook.vis_amb(m.env.environment)
 	ok(amb > 0.05 and amb < 2.0, "the ambient's grey is set for the fog (vis_amb %.3f)" % amb)
+
+## The shared aim line points down the cone's centre (vis_dir = aim_dir()): a far cursor, one close to the body (inside
+## the dead zone, aim_dir keeps the last good direction) and an aim lock that differs from the cursor.
+func _aim_line(m: Match) -> void:
+	var P := m.player
+	var saved_ak := P.ak
+	P.out = false
+	P.downed = false
+	var cases := {"far": Vector3(7, 0, -3), "close": Vector3(0.4, 0, 0.3), "locked": Vector3(-6, 0, 2)}
+	var lock := GDScript.new()
+	lock.source_code = "extends ArchKit\nfunc aim_lock() -> Vector2: return Vector2(0.0, 1.0)\n"
+	lock.reload()
+	for key in cases:
+		P.ak = lock.new() if key == "locked" else null
+		P.inp["aim"] = P.pos + cases[key]
+		m._update_aim(1.0)
+		var along: Vector3 = -m.aim_line.global_transform.basis.z   # look_at aims -Z
+		var line := Vector2(along.x, along.z).normalized()
+		var off := rad_to_deg(line.angle_to(P.aim_dir())) if m.aim_line.visible else 0.0
+		var seen: bool = m.aim_line.visible and absf(off) < 1.0
+		ok(seen, "aim line vs cone centre, %s cursor: %.2f degrees apart" % [key, off])
+	P.ak = saved_ak

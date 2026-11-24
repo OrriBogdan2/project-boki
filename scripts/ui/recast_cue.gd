@@ -61,16 +61,16 @@ static func track(k: ArchKit, dt: float) -> void:
 		if float(pop["t"]) <= 0.0: cue["pop"] = {}
 
 ## The line "<KEY> again to <verb>" for a slot: the verb is the archetype's own "recast_hint" ("" when it has none).
-static func hint_line(k: ArchKit, slot: String) -> String:
-	var verb := String((k.d.get("recast_hint", {}) as Dictionary).get(slot, ""))
-	return "" if verb == "" else "%s again to %s" % [key_of(slot), verb]
+static func hint_line(k: ArchKit, slot_v: String) -> String:
+	var verb := String((k.d.get("recast_hint", {}) as Dictionary).get(slot_v, ""))
+	return "" if verb == "" else "%s again to %s" % [key_of(slot_v), verb]
 
 ## The first time this Hunter's recast opens in a real match: that line as a hint, never again (the lane skips it
 ## while recording a clean take; the tutorial, training, the arena and autoplay teach it their own way).
-static func _first_hint(k: ArchKit, slot: String) -> void:
+static func _first_hint(k: ArchKit, slot_v: String) -> void:
 	var seen: Dictionary = Save.d["tutorial"]
 	var o: Dictionary = k.m.opts
-	var line := hint_line(k, slot)
+	var line := hint_line(k, slot_v)
 	if line == "" or k.m.hud == null or seen.get("recast_" + k.id, false) or not Settings.get_v("tips"):
 		return
 	if o.get("tutorial", false) or o.get("training", false) or o.get("arena", false) or o.get("autoplay", false):
@@ -99,16 +99,16 @@ static func window(slot_id: String, left: float, total: float, at: Vector3, arme
 static func mark(e: Ent, n: int, left: float, total: float, ready: bool) -> Dictionary:
 	return {"e": e, "n": n, "left": left, "total": total, "ready": ready}
 
-static func slot_col(k: ArchKit, slot: String) -> Color:
-	match slot:
+static func slot_col(k: ArchKit, slot_v: String) -> Color:
+	match slot_v:
 		"e": return k.col_of(k.e_def())
 		"x": return k.col_of(k.x_def())
 		"dash": return k.col_of(k.dash_def())
 		"lmb": return k.col_of(k.lmb_def()) if k.lmb_def().has("col") else k.res_col()
 	return k.col_of(k.rmb_def())
 
-static func key_of(slot: String) -> String:
-	return Settings.key_cap(String(KEYS.get(slot, slot)))
+static func key_of(slot_v: String) -> String:
+	return Settings.key_cap(String(KEYS.get(slot_v, slot_v)))
 
 ## On the slot's rect in the ability row. True when it drew (the slot's own "up" ring stays off then).
 static func slot(H: Node, p: Hunter, slot_id: String, r: Rect2) -> bool:
@@ -159,7 +159,10 @@ static func world(H: Node, cam: Camera3D, p: Hunter) -> void:
 		_marker(H, cam.unproject_position(w["at"] + Vector3(0, 1.1, 0)), w, cue.get("col", Color.WHITE))
 	var pop: Dictionary = cue.get("pop", {})
 	var seen := {}                 # foe -> badges already drawn on it (a second one sits beside the first)
+	var no_badges: bool = H.m.has_meta("pitch_no_foe_plates")  # pitch-reel films: no text over foes
 	for mk in cue.get("marks", []):
+		if no_badges:
+			break
 		var o: Variant = mk["e"]              # untyped first: a typed Ent var errors on a freed foe
 		if not is_instance_valid(o):
 			continue

@@ -9,6 +9,8 @@ extends RefCounted
 ##      five, and from the hub (where none is placed) every game of every open zone, a pick there
 ##      travelling to its zone; each pick starts that game (and it is put back); a whole Stump Shove bout ends on its
 ##      card and the winner becomes the picker's best Boki
+##   7. the hub's games board: the Dash and the Fetch Cup are one button each, and a press lands in the start
+##      zone with that game running (no picker, no walk)
 ##   5. every game has a card (name, rule, result line), locked when this base lacks it; a pick on an open
 ##      one closes the picker and starts it; a stand-in game proves the start path where the base has none
 ## Never touches the real save.
@@ -44,6 +46,7 @@ func run(m: Node) -> void:
 	await _title()
 	await _picker()
 	await _garden()
+	await _board()
 	print("MINIGAMEHUB DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -139,8 +142,8 @@ func _picker() -> void:
 
 const STARTED := {"race": "run", "shove": "run", "volley": "run"}
 
-func _garden() -> void:
-	var rules: Dictionary = FarmUnlocks.rules()
+## A garden save past its first day with three rested Boki and the base on (what lands in the hub).
+func _base_save() -> Dictionary:
 	var d := Save.fresh()
 	for i in 3:
 		var k := Save.new_kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i])
@@ -154,7 +157,12 @@ func _garden() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
-	rules["base_mode"] = true
+	FarmUnlocks.rules()["base_mode"] = true
+	return d
+
+func _garden() -> void:
+	var d := _base_save()
+	var rules: Dictionary = FarmUnlocks.rules()
 	var old: Node = main.screen_node()
 	main.show_screen("home", {"play_hub": true})
 	var home: Node = null
@@ -222,3 +230,46 @@ func _hub(d: Dictionary) -> void:
 	var far: Dictionary = games.filter(func(g): return g["zone"] == "cinderstep")[0]
 	MinigameHub.start(home, far)
 	ok(home.hway.hopping == "cinderstep" and home.hway.picker_after, "hub: a pick in another zone travels there")
+
+## The hub's games board lists the Dash and the Fetch Cup as one button each; a press travels to the start zone
+## and the game is running on arrival, no picker and no walk to its post.
+func _board() -> void:
+	_base_save()
+	var old: Node = main.screen_node()
+	main.show_screen("home", {"zone": GardenZones.HUB})
+	var home: Node = null
+	for f in SETTLE_FRAMES:
+		await main.get_tree().process_frame
+		home = main.screen_node()
+		var built: bool = home != old and home != null and home.get("panel_host") != null and home.get("hway") != null
+		if built and home.hway.board != null:
+			break
+	ZoneCards.board(home)
+	var names := {"race": "The Dash", "fetch": "Fetch Cup"}
+	for id in names:
+		var b := _button(home.panel_host, "%s · Bramblebank" % names[id])
+		ok(b != null, "board: %s is one button on the hub's games board" % names[id])
+	home._close_panel()
+	var pick := MinigameHub.listed(home).filter(func(g): return g["id"] == "fetch" and g["zone"] == GardenZones.start())
+	MinigameHub.start(home, pick[0])
+	var queued: bool = home.hway.hopping == GardenZones.start() and MinigameHub.queued == "fetch"
+	ok(queued, "board: a press on Fetch Cup travels with it queued")
+	home.hway.hopping = ""
+	old = home
+	main.show_screen("home", {"zone": GardenZones.start(), "play_hub": true})
+	for f in SETTLE_FRAMES:
+		await main.get_tree().process_frame
+		home = main.screen_node()
+		if home != old and home != null and home.get("hfetch") != null and home.hfetch.mat != null:
+			break
+	var played: bool = home.hfetch.run != null
+	var ran := "board: on arrival the Fetch Cup is running, no picker"
+	ok(home.panel_open == "" and MinigameHub.queued == "" and played, ran)
+	if home.hfetch.run != null:
+		home.hfetch._end(false)
+
+func _button(root: Node, text: String) -> Button:
+	for n in root.find_children("*", "Button", true, false):
+		if (n as Button).text == text:
+			return n
+	return null
