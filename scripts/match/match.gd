@@ -4671,6 +4671,7 @@ func _finish() -> void:
 			player.kin.comp.on_loss()
 		if player.kin:
 			r["kin_say"] = BokiChatter.line(player.kin, "extract" if result.get("extracted", false) else "comfort")
+		r["wisps_home"] = KinSteal.carried_home      # stolen wisps you carried: the results say they go home
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
