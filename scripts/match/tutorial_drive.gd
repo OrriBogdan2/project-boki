@@ -12,8 +12,8 @@ const MISS_OFF := 3.0  # m a missed aim is off the target
 const MISS_WINDOW := 0.5  # s one aim roll holds
 
 const LOOKOUT_OFF := 7.0  # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
-# the action inputs
-const KEYS := ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
+const KEYS := [      # the action inputs
+		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var _retreat := false  # a wall kick step bot that got up without a kick, walking off to retry
 static var human := false
