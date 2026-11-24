@@ -4,6 +4,7 @@ extends "res://tools/clip_shots.gd"
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
 ## deg); with --close the same poses from eye height and knee height: <clip>_<k>_eye.jpg, <clip>_<k>_knee.jpg.
 ## --contract: native-flagged Hunters play their contract model; --video: see var video.
+## --yaws=0,90,180,270: every clip at each model yaw (deg, 0 = facing the camera's side view) into <id>/y<deg>/.
 ## marks.txt lists the model's kind (contract / native), tris and the state each clip was fed.
 
 const DT := 1.0 / 30.0
@@ -31,6 +32,8 @@ var video := false  # --video: every frame (30 fps) of idle 1.2 s, run 1.0 s, at
 var vn := 0
 var gripcam := false  # --grip: a close camera on the right fist (grip_<clip>_<k>.jpg)
 var fincam := false  # --fin: tight head-fin cameras (fin_<clip>_<k>.jpg top-down like the match camera, fins_ side)
+var yaws: Array = []  # --yaws=: forced model yaws in degrees (empty: the run side view, else three-quarter)
+var yaw_force := NAN
 var probe := false  # --probe: probe.tsv, the fish and hand bones per frame
 ## --probe: probe.json = bones, per-bone capsule radii (bind verts), the fish's verts + local transform, and every
 ## frame's bone poses in world, for solving the fish's grip offline.
@@ -59,6 +62,8 @@ func run(main: Node) -> void:
 			gripcam = true
 		if a == "--fin":
 			fincam = true
+		if a.begins_with("--yaws="):
+			yaws = Array(a.substr(7).split(",", false))
 		if a == "--contract":
 			WardenNative.contract_only = true  # the live contract model of a native-flagged Hunter
 	if main.get("fade") != null:
@@ -68,7 +73,9 @@ func run(main: Node) -> void:
 	_stage(main)
 	await tree.create_timer(2.5).timeout  # (the title's logo fades in real time, not in frames)
 	for id in ids:
-		await _hunter(String(id), out.path_join(String(id)))
+		for y in yaws if yaws else [""]:
+			yaw_force = deg_to_rad(float(y)) if y else NAN
+			await _hunter(String(id), out.path_join(String(id)).path_join(("y" + y) if y else ""))
 	print("LIVE_AUDIT_DONE ", ids.size())
 	tree.quit()
 
@@ -158,6 +165,8 @@ func _hunter(id: String, dir: String) -> void:
 	marks.append("kind %s glb %s tris %d body_h %.2f" % [kind, WardenGlb.path(id), bx[2], bx[1]])
 	for clip in ["idle", "run", "attack"] if video else CLIPS:
 		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+		if not is_nan(yaw_force):
+			yaw = SIDE_YAW + yaw_force
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
 		if probe:
