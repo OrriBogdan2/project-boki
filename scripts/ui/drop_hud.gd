@@ -36,6 +36,16 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 		y += LINE_GAP
 
 
+## Where the message lane may start so its cards never cover the drop lines (`top` when there are none).
+static func lane_top(m: Match, p: Hunter, top: float) -> float:
+	if p == null or not (aboard(p) or p.dropping):
+		return top
+	var n := lines(m, p).size()
+	if n == 0:
+		return top
+	return maxf(top, LINE_Y + (n - 1) * LINE_GAP + UI.fs(18) * 0.4 + 8.0)
+
+
 ## The four move keys as bound, "WASD" by default.
 static func move_keys() -> String:
 	return Settings.key_cap("up") + Settings.key_cap("left") + Settings.key_cap("down") + Settings.key_cap("right")
