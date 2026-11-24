@@ -129,7 +129,7 @@ func _boss(m: Match) -> void:
 func _wipe(m: Match) -> void:
 	var pack: Array = []
 	for i in 6:
-		pack.append(m.spawn_mob("skitter", m.player.pos + Vector3(-6.0 - (i % 3) * 0.8, 0, i / 3 * 0.8)))
+		pack.append(m.spawn_mob("skitter", m.player.pos + Vector3(-6.0 - (i % 3) * 0.8, 0, int(i / 3.0) * 0.8)))
 	for mb in pack:
 		mb.hurt(mb.hp + mb.max_hp, m.player, {"src": "shot"})
 	var lags: Array = pack.map(func(mb): return float(mb.get_meta("dis_lag", -1.0)))
