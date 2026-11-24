@@ -1,5 +1,6 @@
 extends "res://tools/gameplay_media.gd"
-## --meeko-companions-shots --shots-dir=<dir> [--hero=tender] [--face] [--eye=<m>]: Meeko alone in a real match, her sun and cloud
+## --meeko-companions-shots --shots-dir=<dir> [--hero=tender] [--face] [--eye=<m>]: Meeko alone in a real match, her sun
+##   and cloud
 ## in game view (zoom 1.0), mid (0.5) and close (zoom --close=<z>, default 0.2), over 4 orbit phases, as
 ## <dir>/<tag>_<phase>_<view>.png. Needs a renderer (jobq --needs gpu).
 
@@ -7,13 +8,19 @@ const SIZE := Vector2i(1600, 900)
 const FACE_CAM := Vector3(0, 0.9, 3.0)
 const PHASES := 4
 const STATES := [  # [name, held inputs, s held before the shot]
-	["run", {"move": Vector2(1, 0.4)}, 1.0], ["fire", {"fire": true}, 0.25], ["ult", {"ult": true}, 0.4],
-	["dash", {"dash": true, "move": Vector2(1, 0)}, 0.2], ["jump", {"jump": true}, 0.35], ["crouch", {"crouch": true}, 0.8],
+	["run", {"move": Vector2(1, 0.4)}, 1.0],
+	["fire", {"fire": true}, 0.25],
+	["ult", {"ult": true}, 0.4],
+	["dash", {"dash": true, "move": Vector2(1, 0)}, 0.2],
+	["jump", {"jump": true}, 0.35],
+	["crouch", {"crouch": true}, 0.8],
 ]
 const PHASE_SECS := 1.0
 var face := false
 var close := 0.2
-var eye := -1.0  # --eye=<m>: the game camera dropped to this height above her feet, level, three-quarter front; each state also writes game_<state>.png at the game camera
+# --eye=<m>: the game camera dropped to this height above her feet, level, three-quarter front; each state also writes
+# game_<state>.png at the game camera
+var eye := -1.0
 const EYE_OFF := Vector2(2.4, 3.8)  # m: where it stands (x, z) from her
 const EYE_STATES := [["idle", {}, 1.5], ["run", {"move": Vector2(1, 0.4)}, 1.0], ["fire", {"fire": true}, 0.25]]
 
@@ -42,7 +49,8 @@ func run(main_node: Node) -> void:
 	if eye >= 0.0:
 		for st in EYE_STATES:
 			await _take(st[2], 1.0, "eye%03d_%s.png" % [int(eye * 100), st[0]], st[1])
-			var keep := eye  # (and the same beat at the game camera, so an eye-level sheet always has its game-view row)
+			# (and the same beat at the game camera, so an eye-level sheet always has its game-view row)
+			var keep := eye
 			eye = -1.0
 			await _take(0.05, 1.0, "game_%s.png" % st[0], st[1])
 			eye = keep
