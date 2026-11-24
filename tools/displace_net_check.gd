@@ -43,6 +43,7 @@ var paced_us := 0            # the wall clock (µs) the match clock has been ste
 var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
 var guest_flag := "--displace-net-check=guest"
 var early := {}              # the guest's reply one snapshot after a Boki move on it
+var door_gap := 0            # a check that puts a proxy on the guest's link keeps the port this far above free
 
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
@@ -71,7 +72,7 @@ func _relay() -> RelayServer:
 	return RelayServer.new()
 
 func _host_up() -> Hunter:
-	port = CheckChild.free_port(7930 + OS.get_process_id() % 60)
+	port = CheckChild.free_port(7930 + OS.get_process_id() % 60, door_gap)
 	dir = ProjectSettings.globalize_path("user://displace_net")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var relay := _relay()
@@ -80,7 +81,7 @@ func _host_up() -> Hunter:
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	CheckChild.hold(relay.peer, START_S)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	guest_pid = CheckChild.start("%s --dn-port=%d" % [guest_flag, port], dir.path_join("guest.log"))
+	guest_pid = CheckChild.start("%s --dn-port=%d" % [guest_flag, _guest_door()], dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
@@ -107,6 +108,10 @@ func _host_up() -> Hunter:
 			Net.lobby_emit("dn", {"c": "start", "d": d})
 	ok(g != null and g.remote and g.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
 	return g if g != null and g.net_t >= 0.0 else null
+
+## The port the guest joins the relay on (a check with a proxy on the guest's link returns the proxy's).
+func _guest_door() -> int:
+	return port
 
 func _host() -> void:
 	var g := await _host_up()
