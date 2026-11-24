@@ -50,3 +50,17 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 **Shard Snap's free arm (2026-11-17, port of ext/ostra-gait-rebased):** `snap_wind` and `snap` hold the fan in at the ruff (`HELD_L`), re-keyed on this glb's rig
 (`ostra_anim.py -- snap_wind,snap --from`) and copied in with `glb_add_clips.py ... snap_wind,snap --hold-moved-rest` (nothing held). The old branch's
 bounding walk and run were not ported: main's tread gait (Nov 11) stays.
+
+## 2026-11-24 native fix (hunter-round-1124, ostra_meshy.glb only)
+Meshy's auto-rig skinned the box, spring, void tube and coat tails to two invisible legs (LeftUpLeg..RightToe_end), so in run,
+attack and jump the box swung up behind him like a pair of feet and the coat panel kicked out. Every leg-chain influence now
+sits on Hips (31,601 verts; arms, hands, head untouched). The void tube's albedo already is the violet starfield, but the toon
+shading crushed it to black: the material gets an emissive texture (`ostra_meshy_void_emit.jpg`) = that same albedo under a
+void mask, capped at 0.5 (its pale lilac texels emit violet instead, like the turnaround's streaks), so the game's emit layer (WardenGlb._toon use_emit) makes it glow. Albedo, mesh and clips unchanged.
+Recipe: /home/boki/gens/hunter-round-1124/motley/r1/tools (voidmask.py, uvmask.py, mkfix2.py).
+
+**Box on the floor (2026-11-24 r2):** riding Hips rigidly sank the box up to 30 cm under the floor and tipped it 42 deg (the clips drop and lean
+Hips: Attack z 0.84, Jump_Run 0.85, rest 1.17). The box and its lid now sit on a new unanimated bone `BoxRoot` (child of SmartRigArmature,
+identity, no clip keys it), so the box stays upright on the floor in every clip; the spring and the void's root blend from BoxRoot (box top,
+y 0.34) to the body (y 0.74, smoothstep), so the spring squashes and stretches like a jack-in-the-box. Coat tails/bells stay on the body.
+Recipe: /home/boki/gens/hunter-round-1124/motley/r2/tools/mkfix3.py (input = the r1 glb).
