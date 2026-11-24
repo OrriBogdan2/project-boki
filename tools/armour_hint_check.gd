@@ -3,7 +3,8 @@ extends RefCounted
 ## a rival Hunter fills armour progress, 'Hits on Hunters build armour. XP comes from monster kills.'
 ## shows next to the armour readout (not in the message lane) and the badge pops; damage to a
 ## monster says nothing; it shows once per save (also after the save is written
-## and read back); the tutorial match and the "tips" setting keep it quiet. Never touches the save file.
+## and read back); in a fight it waits for the next lull; the tutorial match and the "tips" setting keep it
+## quiet. Never touches the save file.
 
 var bad := 0
 
@@ -82,6 +83,16 @@ func run(main: Node) -> void:
 		ok(not _hit(m, mob), "a hit on a monster says nothing")
 	ok(_hit(m, foe), "the first hit on a Hunter shows it next to the armour readout")
 	ok(float(m.hud.get_meta("armor_pop", 0.0)) > 0.0, "the armour badge pops with it")
+	# COMBAT_CLARITY: while you fight the box waits (it sat on the vitals and the fight), then gets its whole time
+	m.time += 10.0
+	m.player.hurt_at = m.time
+	ArmorHud.note(m.hud, Vector2.ZERO)
+	var held: Array = m.hud.get_meta("armor_note", [])
+	var kept: bool = not held.is_empty() and float(held[1]) >= m.time + m.hud.TIP_LIFE - 0.01
+	ok(kept, "in a fight the hint waits for the lull, its whole time kept")
+	m.player.hurt_at = -1e9
+	m.hud.reticle.dealt_at = -1e9
+	ok(not m.hud.in_fight(), "the lull after the fight is not a fight")
 	ok(seen.get(ArmourHint.FLAG, false), "the save remembers it")
 	# once only: the next hits, a tier-up, then the same save read back in a new match
 	ok(not _hit(m, foe), "the second hit does not repeat it")

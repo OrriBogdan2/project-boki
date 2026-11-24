@@ -123,6 +123,13 @@ static func full_map(fm: FullMap) -> void:
 		pill(fm, pv + Vector2(0, r + 13.0), word(m, x), color(x))
 
 
+## The pill's box under exit `x` on the full map (FullMap keeps place names off it).
+static func pill_box(fm: FullMap, x: Dictionary) -> Rect2:
+	var at: Vector2 = fm.to_screen(x["pos"]) + Vector2(0, clampf(6.0 + fm.k() * 0.7, 9.0, 15.0) + 13.0)
+	var w := TextCache.width(HudStyle.BIG, word(fm.m, x), 11) + 12.0
+	return Rect2(at + Vector2(-w * 0.5, -10.0), Vector2(w, 16.0))
+
+
 static func pill(fm: FullMap, at: Vector2, txt: String, col: Color) -> void:
 	var w := TextCache.width(HudStyle.BIG, txt, 11) + 12.0
 	var box := Rect2(at + Vector2(-w * 0.5, -10.0), Vector2(w, 16.0))
