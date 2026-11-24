@@ -211,8 +211,8 @@ static func fire_key(m: Match) -> bool:
 	var st: Array = p.wpn.get("draw", [])
 	if not st.is_empty():
 		return p.draw_t < float((st[0] as Array)[0]) + 0.05
-	if p.wpn.has("charge_time"):
-		return fmod(m.time, 0.6) < 0.1      # a charged blade acts on release: tap it
+	if p.wpn.has("charge_time") and p.arch != "juggernaut":
+		return fmod(m.time, 0.6) < 0.1      # a charged blade acts on release: tap it (Kael's swings on the press)
 	if p.wpn.get("melee", false):
 		return fmod(m.time, 0.5) < 0.1
 	return true
