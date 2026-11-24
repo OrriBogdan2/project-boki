@@ -70,7 +70,7 @@ func inb(x: int, z: int) -> bool:
 func ground_at(x: float, z: float) -> float:
 	var ix := floori(x)
 	var iz := floori(z)
-	if ix < 0 or iz < 0 or ix >= w or iz >= h:      # (inb and idx written out: the hottest lookup, per telegraph vertex)
+	if ix < 0 or iz < 0 or ix >= w or iz >= h:      # (inb and idx written out: called per telegraph vertex)
 		return VOID
 	var i := iz * w + ix
 	if kind[i] == T_VOID:
