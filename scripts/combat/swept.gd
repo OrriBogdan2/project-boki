@@ -1,6 +1,6 @@
 class_name Swept
 extends RefCounted
-## Swept hit tests (docs/decisions/0022-swept-hits.md). At 30 fps a 40 m/s shot or dash moves 1.3 m a frame,
+## Swept hit tests (docs/decisions/0123-swept-hits.md). At 30 fps a 40 m/s shot or dash moves 1.3 m a frame,
 ## more than a Hunter is wide, so testing only where it ends up can skip a body or a thin wall. These test
 ## the segment from the last position to the new one. Shots already walk their segment in STEP slices
 ## (Match._update_shots); dashes use these.

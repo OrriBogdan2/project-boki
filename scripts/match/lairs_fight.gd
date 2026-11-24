@@ -24,7 +24,7 @@ func wake(l_v: Dictionary, _by: Ent) -> void:
 	var lbl: Label3D = l_v["nodes"]["label"]
 	lbl.text = "%s\n%s" % [l_v["name"], b.md["name"]]
 	BossSfx.wake(m, b)
-	Shake.incoming_big(m, l_v["c"], 0.6)
+	Shake.big(m, l_v["c"], "boss_wake")
 	m.fx.burst(b.pos + Vector3(0, 2.0, 0), Lairs.color_of(l_v), 50, 7.0, 0.8, 0.0, 1.6)
 	m.add_feed("%s has woken in %s" % [b.md["name"], l_v["name"]])
 	ls.lock_in(l_v)
