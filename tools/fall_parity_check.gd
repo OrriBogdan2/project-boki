@@ -34,6 +34,9 @@ const LANE := Rect2i(-6, -2, 11, 5)  # tiles round the drop spot the runs cross 
 var bad := 0
 var arcs := {}  # mode -> [air steps, apex m] of the running jump
 
+var m: Match
+var h: Hunter
+
 
 func ok(cond: bool, what: String) -> void:
 	print("FCHECK %s %s" % ["ok  " if cond else "FAIL", what])
@@ -99,8 +102,6 @@ func _unlay(w: World, old: Array) -> void:
 
 
 # ---------------------------------------------------------------- the match modes (one Hunter._physics)
-var m: Match
-var h: Hunter
 
 
 func _reset(at: Vector3, v: Vector3, standing: bool) -> void:
@@ -224,7 +225,7 @@ func _match_mode(main: Node, mode: String) -> void:
 	await main.get_tree().process_frame
 
 
-func _jump(mode: String, at: Vector3, run: float) -> void:
+func _jump(mode: String, at: Vector3, _run: float) -> void:
 	_reset(at + Vector3(-3.5, 0, 0), Vector3.ZERO, true)
 	h.inp["move"] = Vector2(1, 0)
 	for i in 20:

@@ -6,6 +6,13 @@ extends RefCounted
 ## (active on E, an optional auto active, the merge) and its evolution paths.
 ## Parsing checks structure; check_refs() then checks it against the abilities, merges and nodes.
 
+const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "active", "auto", "merge", "evolution", "voice", "egg", "size", "infusion", "type2", "roster"]
+## A data-only species (no model yet) is just its roster entry.
+const STUB_FIELDS := ["grammar", "id", "name", "theme", "type2", "flavor", "roster", "data_only"]
+const STUB_REQUIRED := ["grammar", "id", "name", "theme", "roster", "data_only"]
+const ROSTER_ART := ["locked", "todo", "new"]
+const REQUIRED := ["grammar", "id", "name", "animals", "colors", "look", "body", "stats", "personality", "ai", "carry", "active", "merge"]
+
 var id := ""
 var display_name := ""
 var animals: Array = []
@@ -39,12 +46,6 @@ var egg := {}
 var avg_size := {}              # optional: {cm, kg} base height and weight of an average one (Unique.base_size)
 var infusion := {}           # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
 
-const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "active", "auto", "merge", "evolution", "voice", "egg", "size", "infusion", "type2", "roster"]
-## A data-only species (no model yet) is just its roster entry.
-const STUB_FIELDS := ["grammar", "id", "name", "theme", "type2", "flavor", "roster", "data_only"]
-const STUB_REQUIRED := ["grammar", "id", "name", "theme", "roster", "data_only"]
-const ROSTER_ART := ["locked", "todo", "new"]
-const REQUIRED := ["grammar", "id", "name", "animals", "colors", "look", "body", "stats", "personality", "ai", "carry", "active", "merge"]
 
 static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	var k := KinSpec.new()

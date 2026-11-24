@@ -104,14 +104,14 @@ static func pads(m: Node, dt: float) -> void:
 				gp["cd"][h.nid] = m.time + 1.0
 				if float(gp.get("after", 0.0)) > 0.0:
 					gp["t"] = minf(float(gp["t"]), float(gp["after"]))
-				var push := float(gp.get("push", UtilityUse.PAD_MIN_HV))
-				UtilityUse.pad_launch(h, push, float(gp.get("lift", UtilityUse.PAD_VY)))
+				var push := float(gp.get("push", UtilityUse.pad_min_hv))
+				UtilityUse.pad_launch(h, push, float(gp.get("lift", UtilityUse.pad_vy)))
 				m.fx.burst(gp["pos"] + Vector3(0, 0.3, 0), gp.get("col", Color("8ff0c8")), 16, 5.0, 0.4, -2.0)
 				m.sfx("jump", h.pos, -2.0, 0.8)
 
 
 # ------------------------------------------------------------------ fields
-static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
+static func _field(h: Hunter, _id: String, d: Dictionary) -> bool:
 	var m = h.m
 	var col: Color = d.get("col", Color.WHITE)
 	var time := float(d.get("time", 10.0))

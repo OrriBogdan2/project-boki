@@ -98,6 +98,7 @@ var live_n := 0  # GPU particles alive (asked for) now
 var made := 0  # nodes made so far (tests: it stops growing once warm)
 var plays := {}  # (tests) move -> times played
 var scarves := HeroScarf.new(self)  # the cloth ends some Heroes trail (data "scarf")
+var zones := HeroVfxZone.new(self)  # remote hunters' kit zones (a move's data "zone", life on the message)
 
 # shader seeds only: a look never draws from the global randf the sim uses
 var _look_rng := RandomNumberGenerator.new()
@@ -105,7 +106,6 @@ var _arcs := {}  # arc degrees -> arc mesh
 var _cyl: ArrayMesh
 var _warming: Array = []  # the loading screen's stand-ins (prewarm)
 var _anchors := {}  # "<model id>/<anchor>" -> the node found for it (null: none)
-var zones := HeroVfxZone.new(self)  # remote hunters' kit zones (a move's data "zone", life on the message)
 
 
 static func of(match_node: Node) -> HeroVfx:

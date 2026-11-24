@@ -9,14 +9,15 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 
+const AIM := Vector3(-5.0, 0.0, 0.0)  # every cast lands this far from the player, in clear screen
+
 var main: Node
 var m: Match
-var P: Hunter
+var p_h: Hunter
 var rival: Hunter
 var dir := ""
 var focus := Vector3.ZERO  # the camera centres here: the effect, not the player
 var park := Vector3.ZERO  # solid ground far off where the rival waits
-const AIM := Vector3(-5.0, 0.0, 0.0)  # every cast lands this far from the player, in clear screen
 var lines: Array = []
 
 
@@ -45,11 +46,11 @@ func _setup() -> void:
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
-	P = m.player
+	p_h = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	rival = m.hunters.filter(func(x): return x != P)[0]
+	rival = m.hunters.filter(func(x): return x != p_h)[0]
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
@@ -58,11 +59,11 @@ func _setup() -> void:
 		await fade.reveal(0.01)
 	if m.hud:
 		m.hud.visible = false  # the panels sit over the effects; the shots are about the ground
-	P.teleport(_roomy())
-	focus = P.pos
+	p_h.teleport(_roomy())
+	focus = p_h.pos
 	park = _roomy()
 	for k in 50:
-		if park.distance_to(P.pos) > 30.0:
+		if park.distance_to(p_h.pos) > 30.0:
 			break
 		park = _roomy()
 	rival.teleport(park)
@@ -84,12 +85,12 @@ func _roomy() -> Vector3:
 
 
 func _use(id: String) -> void:
-	P.hp = P.max_hp
-	P.belt = UtilityBelt.empty()
-	UtilityBelt.grant(P, id, 1)
-	P.inp["aim"] = P.pos + AIM
-	focus = P.pos + AIM * 0.5
-	UtilityBelt.use_id(P, id)
+	p_h.hp = p_h.max_hp
+	p_h.belt = UtilityBelt.empty()
+	UtilityBelt.grant(p_h, id, 1)
+	p_h.inp["aim"] = p_h.pos + AIM
+	focus = p_h.pos + AIM * 0.5
+	UtilityBelt.use_id(p_h, id)
 
 
 ## Nothing left over from the last item on the ground.
@@ -104,7 +105,7 @@ func _item(id: String, file: String, with_rival: bool, caption: String) -> void:
 	await _go(0.2)
 	_use(id)
 	if with_rival:
-		rival.teleport(P.pos + AIM + Vector3(1.5, 0, 1.0))
+		rival.teleport(p_h.pos + AIM + Vector3(1.5, 0, 1.0))
 	await _go(0.5)
 	await _real(1.2)  # (the rings and orbits turn in real time)
 	_take(file, caption)
@@ -116,7 +117,7 @@ func _item(id: String, file: String, with_rival: bool, caption: String) -> void:
 
 func _skyfall() -> void:
 	_use("skyfall_charge")
-	focus = P.pos + AIM  # the whole 6 m circle on screen
+	focus = p_h.pos + AIM  # the whole 6 m circle on screen
 	await _go(0.6)  # (the fill follows match time)
 	_take("skyfall_start", "Skyfall, fuse start: rim up, disc begins to fill, warhead high")
 	await _go(3.8)

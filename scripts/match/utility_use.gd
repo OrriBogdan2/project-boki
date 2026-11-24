@@ -17,14 +17,15 @@ extends RefCounted
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
 ## spent unless they finish. The rest take effect at once and spend one charge.
 
-## Spring pad launch (content/rules/hunter_move.json "jump_pad", both [?]: no source number). A pad item's own
-## "lift" and "push" (UtilityMore._pad) replace these two for that pad.
-static var PAD_VY: float = MoveRules.data()["jump_pad"]["vy"]  # m/s up: ~9.8 m apex, ~2.3 s aloft
-static var PAD_MIN_HV: float = MoveRules.data()["jump_pad"]["min_hv"]  # m/s on, at least (toward your aim)
-
 const DRINK_HEAL := 0.4         # of max health, for a drink with no number of its own
 const MEND_HP := 40.0
 const MEND_ARMOR := 20.0
+
+## Spring pad launch (content/rules/hunter_move.json "jump_pad", both [?]: no source number). A pad item's own
+## "lift" and "push" (UtilityMore._pad) replace these two for that pad.
+static var pad_vy: float = MoveRules.data()["jump_pad"]["vy"]  # m/s up: ~9.8 m apex, ~2.3 s aloft
+static var pad_min_hv: float = MoveRules.data()["jump_pad"]["min_hv"]  # m/s on, at least (toward your aim)
+
 
 ## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
 static func channel(id: String, key: String) -> float:
@@ -122,14 +123,14 @@ static func repair_frac(h: Hunter) -> float:
 	var r: Array = UtilityBelt.def("armor_kit").get("repair", [1.0])
 	return float(r[clampi(h.armor_tier, 0, r.size() - 1)])
 
-## Spring pad: up at `lift` (PAD_VY), on with the speed you brought (at least `push`, PAD_MIN_HV). A dash ends
+## Spring pad: up at `lift` (pad_vy), on with the speed you brought (at least `push`, pad_min_hv). A dash ends
 ## here and its speed carries ([wiki] dashing into a jump pad keeps the forward momentum); in the arc your keys
 ## steer as in any jump (HunterMove.air_steer) and the glider stays shut until you open it.
 static func pad_launch(h: Hunter, push: float = -1.0, lift: float = -1.0) -> void:
 	var hv := Vector2(h.vel.x, h.vel.z)
 	var d: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
-	hv = d * maxf(hv.length(), PAD_MIN_HV if push < 0.0 else push)
-	h.vel = Vector3(hv.x, PAD_VY if lift < 0.0 else lift, hv.y)
+	hv = d * maxf(hv.length(), pad_min_hv if push < 0.0 else push)
+	h.vel = Vector3(hv.x, pad_vy if lift < 0.0 else lift, hv.y)
 	h.roll_t = 0.0
 	h.grounded = false
 	h.glide_cd = 0.0

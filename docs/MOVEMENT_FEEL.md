@@ -659,7 +659,7 @@ Parity pass (DECISIONS 2026-11-07). Sources: sv/briefs/physics.md, SOURCE_UTILIT
 |---|---|---|---|
 | Pad launch speed | not published or decoded | 17 m/s up (hunter_move.json `jump_pad.vy`) | [?] |
 | Pad apex | not published | 9.7 m at 1.15 s, back to pad height after ~2.3 s | [?] (gravity [game data] 14.7) |
-| Pad sideways speed | launches whatever walks onto it | what you brought, at least 6 m/s (`PAD_MIN_HV`; toward your aim if you stood still) | [?] floor |
+| Pad sideways speed | launches whatever walks onto it | what you brought, at least 6 m/s (`pad_min_hv`; toward your aim if you stood still) | [?] floor |
 | Dash into the pad | keeps the forward momentum, plus a small boost | **was: the dash held you level and ran over the pad, no launch.** Now the pad ends the dash and keeps its speed (10.5 of 10.7 m/s), 1.6x the walk-on's travel | [wiki] fixed; boost size [?], not added |
 | WASD in the arc | AirControl 0.015, FallingLateralFriction 0.375 | the one model, `HunterMove.air_steer`: keys reversed the whole arc take 2.3 m/s off, sideways keys drift 1.3 m; a walk-on carries 9.5 m | [game data] match |
 | Glider after a pad | you open it to slow the fall, as after any launch (wiki Gliding) | stays shut; a second press opens it the same frame | [wiki] match (DECISIONS allows a pad auto-glide; the source has none, so none) |

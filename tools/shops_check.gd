@@ -7,6 +7,26 @@ extends RefCounted
 ## gems buys; the source utilities (docs/SOURCE_UTILITIES.md) each work and cost what the doc says;
 ## an online purchase goes buyer -> host -> every game. Prints SHOPS PASS/FAIL.
 
+const PRICES := {
+	"deep_draught": 40,
+	"hearth_lamp": 110,
+	"cloud_raft": 45,
+	"gust_fan": 40,
+	"twin_gate": 60,
+	"warp_seed": 60,
+	"lostway_scroll": 60,
+	"shatter_charge": 45,
+	"thorn_wall": 40,
+	"blight_flask": 50,
+	"skyfall_charge": 60,
+	"pilfer_pouch": 60,
+	"lookout_lantern": 40,
+	"hawk_whistle": 45,
+	"omen_draught": 40,
+	"bounty_banner": 60,
+	"toss_satchel": 45,
+}
+
 var main: Node
 var fails := 0
 var n := 0
@@ -101,7 +121,8 @@ func _stock() -> void:
 	ok("every belt item but the Revive Ember is on sale somewhere", missing.is_empty(), str(missing))
 	var same := true
 	for t in themes:
-		if str(ShopStock.stock_of(String(t))) != str(ShopStock.stock_of(String(t))):
+		var first := str(ShopStock.stock_of(String(t)))
+		if first != str(ShopStock.stock_of(String(t))):
 			same = false
 	ok("the stock reads the same every time", same)
 
@@ -192,25 +213,6 @@ func _poor_refused(m: Match, v: Dictionary) -> bool:
 
 
 # ------------------------------------------------------------------ the source utilities
-const PRICES := {
-	"deep_draught": 40,
-	"hearth_lamp": 110,
-	"cloud_raft": 45,
-	"gust_fan": 40,
-	"twin_gate": 60,
-	"warp_seed": 60,
-	"lostway_scroll": 60,
-	"shatter_charge": 45,
-	"thorn_wall": 40,
-	"blight_flask": 50,
-	"skyfall_charge": 60,
-	"pilfer_pouch": 60,
-	"lookout_lantern": 40,
-	"hawk_whistle": 45,
-	"omen_draught": 40,
-	"bounty_banner": 60,
-	"toss_satchel": 45,
-}
 
 
 func _fresh(h: Hunter, id: String) -> bool:

@@ -20,21 +20,21 @@ func _init() -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	var G := await _host_up()
-	if G == null:
+	var g_h := await _host_up()
+	if g_h == null:
 		return _finish()
-	var P := m.player
+	var p_h := m.player
 	_kit("archer")
-	await _place(G, home + PARK)
+	await _place(g_h, home + PARK)
 	var at := home + Vector3(3.0, 0, 0)
-	var B: Hunter = m.make_hunter("B", 1, "medium", "Wisp", "idle", {}, at, {"arch": "none"})
-	for k in [B.kin, B.kin2]:
+	var b_h: Hunter = m.make_hunter("B", 1, "medium", "Wisp", "idle", {}, at, {"arch": "none"})
+	for k in [b_h.kin, b_h.kin2]:
 		if k:
 			(k as Kin).dead = true
-	_fresh(B)
-	B.lives = 1
-	m.knock(B, P, {})
-	P.teleport(at + Vector3(0.6, 0, 0))
+	_fresh(b_h)
+	b_h.lives = 1
+	m.knock(b_h, p_h, {})
+	p_h.teleport(at + Vector3(0.6, 0, 0))
 	var seen := await _see(0.4)
 	for i in 10:
 		if seen.get("wisp", false) and seen["down"]:
@@ -45,17 +45,17 @@ func _host() -> void:
 		"before it the wisp is down and nobody stomps",
 		str(seen)
 	)
-	Life.start_stomp(m, P, B)
+	Life.start_stomp(m, p_h, b_h)
 	seen = await _see(SEE_S)
 	ok(seen["stomp"], "the guest's copy of the stomper is stomping", str(seen))
 	ok(
 		seen["k"] > POSE_K and seen["beat"] >= 0.0,
 		"...and plays the stomp pose (k %.2f, beat %.2f)" % [seen["k"], seen["beat"]]
 	)
-	P.hurt(5.0, B, {"stun": 0.6})
+	p_h.hurt(5.0, b_h, {"stun": 0.6})
 	seen = await _see(SEE_S)
 	ok(
-		P.stomp.is_empty() and not seen["stomp"],
+		p_h.stomp.is_empty() and not seen["stomp"],
 		"a stun on the stomper cuts the stomp on the guest's copy too",
 		str(seen)
 	)
@@ -65,12 +65,12 @@ func _host() -> void:
 		str(seen)
 	)
 	await _run(0.8)  # (the stun runs out)
-	Life.start_stomp(m, P, B)
+	Life.start_stomp(m, p_h, b_h)
 	seen = await _see(Life.R["stomp_time"] * 0.5)
 	ok(seen["stomp"] and not seen["out"], "a second stomp is on the guest halfway, the wisp still down", str(seen))
 	seen = await _see(Life.R["stomp_time"] * 0.5 + 0.3)
 	ok(
-		not seen["stomp"] and seen["out"] and B.out,
+		not seen["stomp"] and seen["out"] and b_h.out,
 		"left alone it ends and the wisp is executed on the guest too",
 		str(seen)
 	)
@@ -96,16 +96,19 @@ func _on_msg(topic: String, data, from: String) -> void:
 
 ## The guest's copy of the stomper (the host's hunter) and of the wisp ("B"), as they look now.
 func _look() -> Dictionary:
-	var S: Hunter = m.player
+	var s_h: Hunter = m.player
 	for h in m.hunters:
 		if h.remote and h.nid.begins_with("P"):
-			S = h
+			s_h = h
 	for i in EASE_FRAMES:
-		S.render(DT, 1.0)  # (Match's own render pass is off in the checks)
-	var B := m.ents_by_id.get("B", null) as Hunter
+		s_h.render(DT, 1.0)  # (Match's own render pass is off in the checks)
+	var b_h := m.ents_by_id.get("B", null) as Hunter
 	var out := {
-		"stomp": not S.stomp.is_empty(), "k": S.anim.stomp_k, "beat": S.anim_s.get("stomp", -1.0), "wisp": B != null
+		"stomp": not s_h.stomp.is_empty(),
+		"k": s_h.anim.stomp_k,
+		"beat": s_h.anim_s.get("stomp", -1.0),
+		"wisp": b_h != null
 	}
-	if B:
-		out.merge({"down": B.downed, "out": B.out})
+	if b_h:
+		out.merge({"down": b_h.downed, "out": b_h.out})
 	return out
