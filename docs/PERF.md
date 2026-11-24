@@ -40,8 +40,10 @@ to the next ("draw steps (gpu)" and "(cpu)" lines: shadows, the opaque and trans
 twice in the camp (an FX peak at 19.5 s, a quiet spell at 23.5 s) `tools/perf/fight_scene.gd` prints what the camera
 sees: things by class, distinct materials and shaders, see-through surfaces and the screens their boxes cover, repeated
 mesh+material pairs (MultiMesh candidates) and each Hunter's meshes, surfaces, outline passes and casters.
-`--bench-novsync`, `--bench-noshadow`, `--bench-nofx` and `--bench-noink` are probes (vsync off, shadows off, the Fx
-and HeroVfx roots hidden, the Hunters' ink outline shells and passes off).
+`--bench-novsync`, `--bench-noshadow`, `--bench-nofx`, `--bench-noink` and `--bench-nopost` are probes (vsync off,
+shadows off, the Fx and HeroVfx roots hidden, the Hunters' ink outline shells and passes off, glow and FXAA off);
+`--bench-3d-scale=2.0` with `--bench-view=960x540` draws the 3D at 1080p inside a quarter-size window, which keeps
+the pods' X11 copy of the window small (docs/PERF_DRAW_1124.md).
 On rp2g the draw's frame end ("after viewports") swings 4-14 ms between runs of the same build: compare a
 script section across runs, and the wall time only over several runs on one worker.
 
