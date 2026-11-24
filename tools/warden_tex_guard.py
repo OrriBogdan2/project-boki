@@ -6,11 +6,47 @@ Run: python3 tools/warden_tex_guard.py"""
 
 import glob
 import re
+import struct
 import sys
 
-from PIL import Image
-
 MAX_PX = 2048  # px: longest side a Hunter texture may ship at
+
+
+def image_size(path):
+    """(width, height) from the file header, stdlib only (CI has no Pillow)."""
+    with open(path, "rb") as f:
+        head = f.read(32)
+        if head[:8] == b"\x89PNG\r\n\x1a\n":
+            return struct.unpack(">II", head[16:24])
+        if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+            kind = head[12:16]
+            if kind == b"VP8X":
+                return 1 + int.from_bytes(head[24:27], "little"), 1 + int.from_bytes(head[27:30], "little")
+            if kind == b"VP8L":
+                b = int.from_bytes(head[21:25], "little")
+                return (b & 0x3FFF) + 1, ((b >> 14) & 0x3FFF) + 1
+            if kind == b"VP8 ":
+                w, h = struct.unpack("<HH", head[26:30])
+                return w & 0x3FFF, h & 0x3FFF
+        if head[:2] == b"\xff\xd8":
+            f.seek(2)
+            while True:
+                byte = f.read(1)
+                if not byte:
+                    break
+                if byte != b"\xff":
+                    continue
+                marker = f.read(1)
+                while marker == b"\xff":
+                    marker = f.read(1)
+                if marker in (b"\xd8", b"\x01") or b"\xd0" <= marker <= b"\xd7":
+                    continue
+                seg_len = struct.unpack(">H", f.read(2))[0]
+                if marker[0] in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+                    h, w = struct.unpack(">xHH", f.read(5))
+                    return w, h
+                f.seek(seg_len - 2, 1)
+    raise ValueError(f"unreadable image header: {path}")
 
 
 def main():
@@ -20,8 +56,7 @@ def main():
         src = imp.removesuffix(".import")
         if not src.endswith((".jpg", ".png", ".webp")):
             continue
-        with Image.open(src) as im:
-            side = max(im.size)
+        side = max(image_size(src))
         m = re.search(r"^process/size_limit=(\d+)$", open(imp).read(), re.M)
         limit = int(m.group(1)) if m else 0
         if side > MAX_PX and not 0 < limit <= MAX_PX:

@@ -159,7 +159,10 @@ static func world(H: Node, cam: Camera3D, p: Hunter) -> void:
 		_marker(H, cam.unproject_position(w["at"] + Vector3(0, 1.1, 0)), w, cue.get("col", Color.WHITE))
 	var pop: Dictionary = cue.get("pop", {})
 	var seen := {}                 # foe -> badges already drawn on it (a second one sits beside the first)
+	var no_badges: bool = H.m.has_meta("pitch_no_foe_plates")  # pitch-reel films: no text over foes
 	for mk in cue.get("marks", []):
+		if no_badges:
+			break
 		var o: Variant = mk["e"]              # untyped first: a typed Ent var errors on a freed foe
 		if not is_instance_valid(o):
 			continue

@@ -106,7 +106,7 @@ code read (the strips are silent). The worker's ground renders yellow, so read c
 | 3 | Vex | gunslinger | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 24 | 25 | X Nuke: the zone ends as a near-opaque dark green disc that hides the foe; E cone is a flat pale lime band; LMB tracer is a short lime dart (reads) |
 | 4 | Sable | thief | 4 | 3 | 3 | 3 | 4 | 4 | 3 | 24 | 24 | RMB Bola wind-up lane: a flat lavender slab; LMB bolt and hit now read, X rings are lit rims and read |
 | 5 | Sparkle | mage | 4 | 3 | 3 | 3 | 4 | 4 | 3 | 24 | 24 | E Skycall: a big white blob over a brown disc hides the foe for 3 frames; RMB orb sits in an orange haze (off pink); LMB bolt thin; X dome is a pink rim and reads |
-| 6 | Meeko | tender | 4 | 3 | 3 | 3 | 4 | 3 | 4 | 24 | 26 | LMB orb is orange with a gold ring (not leaf green); E ring is a thick flat green band; Hearth Call tether and heal rise read |
+| 6 | Meeko | tender | 4 | 3 | 3 | 3 | 4 | 4 | 4 | 25 | 26 | re-scored 11-23 (ext/vfx-meeko-weak-col; C 3 -> 4, was 24): the LMB comet, trail and hit are leaf green now (pale-green hot core, leaf halo, leaf-star and amber debris, was an orange orb with a gold ring; Cinder's colour); GPU strip `docs/shots/vfx-meeko-weak-col/lmb_before_after.jpg` (grey = main 5a246f9696, jobq 20261123-021310-01890; green = after, -021623-09694). Still open: the Burrseed (RMB) field and its cast flare stay amber on purpose (a hostile zone reads against the green heals), E ring is a thick flat green band; Hearth Call tether and heal rise read |
 | 7 | Lace | archer | 3 | 3 | 3 | 4 | 4 | 4 | 4 | 25 | 25 | tap shots and misses: thin faint red lines at match zoom; Heavy Shot and X are layered and read |
 | 8 | Neve | rimewright | 4 | 3 | 4 | 3 | 3 | 4 | 4 | 25 | 25 | X Rimelock: no longer one cyan screen, but a grey-cyan veil with ice cracks still covers the whole frame for 0.4 s; dash plates read as ice |
 | 9 | Tenzo | dolm | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 25 | 23 | cobalt lane, rings and Rockfall slam layered; boulder is blue slate with rune-teal; dust is thin now. LMB punch has no own part in his reel |
@@ -129,13 +129,13 @@ Kael 27, Cinder 28), the 11-09 and 11-12 re-scores and each fix branch's own not
 4. Sable, `scripts/arch/kits/thief_kit.gd` (RMB Bola wind-up lane): a flat lavender slab; use the `soft` AimKit lane (lit rim, inside at most 0.1).
 5. Sparkle, `scripts/arch/kits/mage_sky.gd` (E Skycall): a white blob over a brown disc hides the foe; thin it to a pink-white column on a soft rim. The RMB orb's orange haze (`mage_gum.gd`) goes pink too.
 
-Next in line (24-25, smaller): Meeko LMB orb palette (`content/vfx/tender.json`), Lace's deep red against Kael's crimson (owner's call), Neve's X veil, Lace/Sparkle thin tap trails.
+Next in line (24-25, smaller): Lace's deep red against Kael's crimson (owner's call), Neve's X veil, Lace/Sparkle thin tap trails.
 - `fx_dot` particles are `blend_mix` and have no soft-particle depth fade, so they clip hard into the ground. A depth fade
   breaks gl_compatibility, so it needs a mobile fallback.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
-  rimewright, tender, thief (Grimble is all `content/vfx/dredge.json` now; Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
+  rimewright, tender, thief (Grimble is all `content/vfx/dredge.json` now; Sable's X, dash, LMB, RMB and E are data; only her blade, bola and dagger meshes and the blink's afterimage copies are `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
@@ -202,6 +202,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered (11-20, ext/vfx-meeko-heal-hurt: heals leaf green rising, hurts embers falling, Hearthlight / root field inside at most 0.25 to the rim, bloom a rim swirl; not re-scored) |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
 | Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
+| Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | Grounded's flat orange disc on the target (LMB finger bolt fixed 11-22, ext/vfx-sparkle-bolt: a hot pink body ~0.75 m wide with a white core and a short 1.8 m tail, `content/vfx/mage.json` `lmb_trail`; strip `docs/shots/vfx-sparkle-bolt/lmb_before_after.jpg`, jobq 20261122-085823-02083 before / 20261122-091902-07818 after, `--hero-vfx-reel --reel-hero=mage --reel-only=lmb`; grey = main, green = better; not re-scored) |
 | Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded fixed 11-22 (ext/vfx-sparkle-grounded): two thin pink binding rings round the target, one dashed, seen by all (`MageSky._tick_bound`, the Bola's look without a filled disc), and the shared cords and arrow in the caster's colour (`KitStatus` meta `gnd_by` from the `kst` caster nid, `StatusLooks._tint`; Bola and Warchain stay amber); before/after `docs/shots/vfx-sparkle-grounded/grounded_before_after.jpg` |
 | Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
@@ -335,6 +336,67 @@ the dark edge pieces, the outlines and the rivet cubes are gone, the plated shap
 standing disc keeps to the ring rule: a lit ivory rim on the zone's edge, a soft falloff to 0.25 or less inside
 (`swirl` `edge` 1, was brightest mid-band). Strips at match zoom (grey = main, green = after):
 `docs/shots/vfx-albert-e-slab/{aegis,e}_before_after.jpg` (GPU jobq 20261120-031447-00628 / -032527-24137 aegis, -24307 / -26463 E). The dash dome colour is a separate item.
+## Ground ring audit, the other 11 kits (ext/vfx-ground-ring-audit)
+
+Same rule and method as the Meeko and Albert table above (DECISIONS: no bursts, rings or discs on dashes, landings or
+resets; a ground ring means gameplay: a hit area, a zone, a range). Every `ring`, `vortex` and ground `scorch` layer in
+`content/vfx/<kit>.json` and every `AimKit.circle`, `Fx.ring` or `net_ring` a kit script draws was read against what its
+move does. Gameplay = it sits on a real hit area, zone, range or target pick. Decoration on a dash, landing, reset, payoff
+or a cast with no area = cut. A fixed-size flash on a foe that was hit is hit feedback, not an area: kept, listed as
+"hit flash" so the owner can say if those go too. `--hero-vfx-check` asserts the cut moves stay ring-free
+(`_decor_rings`). Lace and Sable have no decorative ring: their circles are all areas.
+
+| Kit | Ring or disc | Class | Now |
+|---|---|---|---|
+| Cinder | `flashover` ring, fixed 2.0 m on the foe (the Flashover payoff; the kit comment already kept payoff rings out) | decoration | cut |
+| Cinder | `cloak` thin vortex pair at the blast radius `r` | gameplay, the cloak blast | kept |
+| Cinder | cloak shield swirls up her body (`_shield_swirls`, one per foe caught) | gameplay, a count; on the body, not the ground | kept |
+| Cinder | `lance_lick`, `shot_hit`, `ram_hit`, `flashover` scorch decals (0.8-1.4 m) | burn marks where a hit lands, not rings | kept |
+| Grimble | `reel` ring on him while he reels (`_tick_looks` hold) | decoration, no area | cut (move and call) |
+| Grimble | `anchor_slam` ring, fixed 1.8 m, 1.8 m ahead | decoration (the 110 degree cone is the area and keeps its scorch and arc) | cut |
+| Grimble | `quake` outer ring at `r` | gameplay, the quake radius | kept |
+| Grimble | `quake` inner ring at 0.6 r | decoration (a second ring, not an area) | cut |
+| Grimble | `dive` thin ring at the landing spot, radius `quake_r`, and its `AimKit` circle | gameplay, where the fist lands | kept |
+| Grimble | back-bonus ring on the foe, 0.9 m (`dredge_kit`) | hit flash (the cue that the back bonus landed) | kept |
+| Gil | `dive` (Ground Swim) four rings at the head, 1.1 m and 3 x 0.85 m | decoration on a dash | cut |
+| Gil | `tide_lunge` full-charge ring, 1.2 m ahead | decoration on a dash | cut |
+| Gil | `wave_land` ring, 2.6 m (Tidal Wave landing: a shield, no hit) | decoration on a landing | cut |
+| Gil | `beached` ring, 1.4 m on the foe (the Beach payoff) | decoration (a payoff; no area) | cut |
+| Gil | `surface` ring at `dash.radius` (the dive's exit knocks foes up inside it) | gameplay, hit area | kept |
+| Gil | `shatter_*` rings and the fire scorch at `r`; potion and slime aim circles | gameplay, the potion's area | kept |
+| Gil | `lunge_hit` ring, 0.9 m | hit flash | kept |
+| Vex | `e_fire` smoke ring at the palm, 1.3 m (a muzzle puff; the beam is the area) | decoration, cast with no area | cut |
+| Vex | `x_impact` ring and scorch at `r`, countdown disc and burning patch (`gunslinger_ult`) | gameplay, ult area and zone | kept |
+| Vex | `rmb_hit` ring at victim radius + 0.9 m | hit flash | kept |
+| Kael | `slam_hit` ring, fixed 1.3 m, 1.6 m ahead (the slam's lane scorch is the area) | decoration on a landing | cut |
+| Kael | LMB wave self ring, 1.35 m, filling with the hold (`AimKit.circle "wave"`; the charge reticle stays) | decoration, wind-up glow with no area (same call as Meeko's 1.4 m Burrseed glow) | cut |
+| Kael | `drop_hit` ring and scorch at the shock radius, Meteor Drop disc (`drop_aim`, hidden on a dash) | gameplay, hit area | kept |
+| Kael | execute rings on low-health foes, chain marker ring on the hooked foe | gameplay, target picks | kept |
+| Sparkle | `e_strike` / `x_strike` ring and scorch at `r`; `x_dive` ring and `x_land` marker, `x_ring` range ring, Skycall rim | gameplay, true hit areas and range | kept |
+| Sparkle | `orb_drop` ring at the pickup radius + 0.3 m, `dash_end` ring at `end_r` | gameplay, pickup range, dash blast | kept |
+| Sparkle | `grounded` two rings round a foe's body (a status, vertical) | status marker, not a ground ring | kept |
+| Sparkle | `rmb_hit` ring, fixed 2.2 m | hit flash | kept |
+| Tenzo | `row_tell` scorch disc under each rising rock (the cobalt `AimKit` circle already shows the 0.75 m area) | decoration, wind-up glow | cut |
+| Tenzo | `rock_burst`, `quakefall`, `spine_rock` scorch decals; `boulder_hit` ring at the splash radius; X rock-rise rings at `slow_r` | gameplay or ground cracks at a real hit | kept |
+| Motley | `well_open` ring, `well_close` and `seed_pop` vortex at the area radius; swap and dash circles | gameplay, zone, seed area, trade range | kept |
+| Motley | `orb_hit` ring (hot orbs only) | hit flash | kept |
+| Neve | `rime` scorch, fixed 2.2 m under her at the X wind-up (the true radius is 7.5 m: the rink ring and `AimKit` "x") | decoration, wind-up glow at the wrong size | cut |
+| Neve | `rime_melt` scorch, fixed 1.1 m under her when the crash ends | decoration, a reset | cut |
+| Neve | `rime_crash` ring and scorch at `r`; `spear_land` / `spear_burst` scorch at `zone_r` / `r` | gameplay, hit area and zone | kept |
+| Neve | `shatter` scorch, 1.6 m on the Shattered foe | hit decal | kept |
+| Sable | Encore rings (`thief_ult`), Bola wrap rings on held foes (`thief_kit`: who is held) | gameplay | kept |
+| Lace | no ring layer; the RMB bar, E arc wall and charge ring are aim previews | gameplay | kept |
+
+GPU strips after the cut (`--hero-vfx-reel`, jobq 20261122-071231-04549 Cinder, -32049 Grimble, -23864 Gil, -29461 Vex,
+-21003 Kael, -22995 Tenzo, -14895 Neve): `docs/shots/vfx-ground-ring-audit/` (Gil dash and Tidal
+Wave, Grimble E and hook, Vex E, Kael slam and wave, Tenzo rocks, Neve R, Cinder E). No ring on the swim, the lunge, the
+slam or the wind-ups; the kept area rings (Gil's surfacing, Kael's drop shock, Neve's rink) are still there. No before
+strips were filmed: the cut layers are in the diff.
+
+Net: 16 data layers (one whole move) and 2 code lines cut, none added. Sounds, timings and hit shapes are untouched.
+Left for the owner: the "hit flash" rows (Gil lunge, Vex RMB, Sparkle RMB, Motley orb, Grimble back bonus) are
+fixed-size flashes on a foe, not areas; the rule as written does not name hits, so they stay.
+
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
 carried from the code read, the strips are silent). **Before** is the 11-08 score from the `vfxq-before-*` strips.
@@ -363,6 +425,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered (11-20, ext/vfx-meeko-heal-hurt: heals leaf green rising, hurts embers falling, Hearthlight / root field inside at most 0.25 to the rim, bloom a rim swirl; not re-scored) |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
 | Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
+| Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | Grounded's flat orange disc on the target (LMB finger bolt fixed 11-22, ext/vfx-sparkle-bolt: a hot pink body ~0.75 m wide with a white core and a short 1.8 m tail, `content/vfx/mage.json` `lmb_trail`; strip `docs/shots/vfx-sparkle-bolt/lmb_before_after.jpg`, jobq 20261122-085823-02083 before / 20261122-091902-07818 after, `--hero-vfx-reel --reel-hero=mage --reel-only=lmb`; grey = main, green = better; not re-scored) |
 | Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded fixed 11-22 (ext/vfx-sparkle-grounded): two thin pink binding rings round the target, one dashed, seen by all (`MageSky._tick_bound`, the Bola's look without a filled disc), and the shared cords and arrow in the caster's colour (`KitStatus` meta `gnd_by` from the `kst` caster nid, `StatusLooks._tint`; Bola and Warchain stay amber); before/after `docs/shots/vfx-sparkle-grounded/grounded_before_after.jpg` |
 | Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
