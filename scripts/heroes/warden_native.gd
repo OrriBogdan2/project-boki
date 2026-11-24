@@ -39,7 +39,7 @@ var built_off := 0  # and the rig's Offhand last hidden (instance id)
 var cur := ""  # the game state playing ("idle", "walk", ...)
 var attack_left := 0.0  # s the attack clip still owns the body
 var attack_move := false  # it was started by a kit move or a swing (not a cast or a shot): the open reach waits
-## The state counters last frame; cast -1: none read yet (the first frame's seconds since a cast is no new cast)
+## The state counters last frame; cast -1: none read yet (the first state read is the baseline, no new hit)
 var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
@@ -154,6 +154,12 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	_play("idle", 1.0)
 
 
+## The idle pose at once: a model dressed mid-frame (a re-class, a remote copy built off a snapshot) would draw
+## Meshy's rest T-pose until its first _process advance.
+func _ready() -> void:
+	player.advance(0.0)
+
+
 func _process(dt: float) -> void:
 	_hide_rig_weapon()
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
@@ -264,8 +270,11 @@ func _attacked(s: Dictionary) -> bool:
 		"cast": INF if String(s.get("cast_slot", "")) in BOKI_SLOTS else float(s.get("cast", INF)),
 		"recoil": float(s.get("recoil", 0.0)),
 	}
+	if not s.has("cast"):
+		return false  # (Hunter._anim_state has not filled this model's state yet: no counters to read)
 	if float(last["cast"]) < 0.0:
-		last["cast"] = now["cast"]
+		last = now  # (the first state read is the baseline: counters a freshly dressed model finds are no new hit)
+		return false
 	var hit: bool = (
 		(now["kmove"] != "" and now["kmove"] != last["kmove"])
 		or now["swing_n"] > last["swing_n"]
