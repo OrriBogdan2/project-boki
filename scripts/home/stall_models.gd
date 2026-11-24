@@ -21,9 +21,9 @@ static func build(level: int) -> Node3D:
 	if level >= 3:
 		_bell(n, Vector3(1.22, 0, 0.62))
 		_bunting(n)
-	# nothing moves or recolours a part: a mesh per material (L3 69 draws to 38)
-	Models.merge_static(counter, false, true)
-	Models.merge_static(n, false, true)
+	# nothing moves or recolours a part: a mesh per painted look
+	PaintMerge.node(counter)
+	PaintMerge.node(n)
 	return n
 
 static func _crate(n: Node3D, at: Vector3) -> void:
