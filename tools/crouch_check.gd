@@ -178,7 +178,7 @@ func _planted_speed(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, speed:
 		if ys[i] <= low + PLANTED:
 			down.append(vz[i])
 	down.sort()
-	return down[down.size() / 2] / speed
+	return down[int(down.size() / 2.0)] / speed
 
 ## A Hero's foot bone (Breaker's clip bones carry an x_ prefix).
 ## m: the rise and fall a floating hero's hover adds on its own (Motley's bob, KMovesStone), allowed on top.

@@ -1,7 +1,7 @@
 extends "res://tools/clip_shots.gd"
 ## --meeko-orbit-shots --shots-dir=<dir> [--size=480] [--yaw=deg] [--frames=3] [--step=0.9]: Meeko with her sun and
 ## raincloud floating round her (WardenCompanions), a few frames a moment apart: <dir>/orbit_<view>_f<N>.png, once from
-## the front three-quarter and once from above and behind. Needs a renderer.
+## the front three-quarter, once from above and behind and once at eye level. Needs a renderer.
 
 const DT := 1.0 / 30.0
 
@@ -33,12 +33,15 @@ func run(main: Node) -> void:
 		ring.visible = false
 	for k in 30:
 		await tree.process_frame
-	var sync := model.get_node("Warden/Sync")
+	var sync := model.get_node_or_null("Warden/Native")  # (the live Meshy model; the contract one: Warden/Sync)
+	if sync == null:
+		sync = model.get_node("Warden/Sync")
 	sync.set_process(false)
 	cam.fov = 30.0
 	var views := {
 		"front": [Vector3(0, 1.9, 4.6), Vector3(0, 1.05, 0)],
 		"above": [Vector3(0, 4.0, 3.2), Vector3(0, 1.0, 0)],
+		"eye": [Vector3(0, 1.1, 4.6), Vector3(0, 1.05, 0)],  # her glow on the sun, none where a lantern hung
 	}
 	for view in views:
 		cam.position = views[view][0]

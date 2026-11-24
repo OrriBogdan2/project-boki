@@ -232,7 +232,7 @@ func _arc(center: Vector2, radius: float, frac: float, col: Color, width := 3.0)
 
 func _fmt(t: float) -> String:
 	t = maxf(0.0, t)
-	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]
 
 # ------------------------------------------------------------------ frame
 var hover_spots: Array = []     # [rect, id] for things on the HUD you can point at
@@ -1290,7 +1290,8 @@ func _mate_state(h: Hunter) -> Array:
 			return ["DEAD", Color("8a8f9e"), Vector3.INF, ""]
 		var left := float(b.get("soul_until", 0.0)) - m.time
 		if left > 0.0:
-			return ["DEATHBOX", Color("ff6a5a"), b.get("pos", h.pos), "%d:%02d" % [int(left) / 60, int(left) % 60]]
+			return ["DEATHBOX", Color("ff6a5a"), b.get("pos", h.pos), "%d:%02d" % [int(int(left) / 60.0),
+					int(left) % 60]]
 		return ["DEAD", Color("8a8f9e"), b.get("pos", h.pos), ""]
 	if h.downed:
 		return ["WISP", Color("ffb36a"), h.pos, ""]
@@ -1479,8 +1480,8 @@ func _draw_squad_pings(p: Hunter) -> void:
 		_draw_waypoint(pg["pos"], PingInput.label(pg, p), Color(pg["col"], a), EdgeMarker.PRIO_LOW)
 	# a Boki's callout: a marker with what it spotted, fading after a few seconds
 	for pg in m.pings:
-		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null:
-			continue      # (the tutorial has one marker: no Boki callout pins)
+		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null or not BokiChatter.pin_shown(m):
+			continue      # (the tutorial has one marker: no Boki callout pins; none in a fight either)
 		var kk: Kin = pg["kin"] if is_instance_valid(pg["kin"]) else null
 		var a2 := clampf(float(pg.get("life", 5.0)) - float(pg["t"]), 0.0, 1.0) * clampf(float(pg["t"]) * 6.0, 0.0, 1.0)
 		var who := String(kk.rec.get("name", "Boki")) if kk and kk.owner_h != p else ""
