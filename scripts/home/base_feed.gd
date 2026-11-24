@@ -91,6 +91,7 @@ static func meal(h, k: Dictionary, food: String) -> Dictionary:
 	if not res.get("ok", false):
 		h._emote(k, "?")
 		return res
+	HomeVoice.say(k["rec"], "boki_eat", k["pos"])      # one bite cue per meal (a patch, the pantry or a bowl)
 	h._emote(k, "♥" if res.get("love", false) else "♪")
 	GardenFirstDay.mark("feed", h)
 	return res

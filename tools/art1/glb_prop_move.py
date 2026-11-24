@@ -16,9 +16,13 @@ from kael_retarget import get, set_
 def _local(n):
     """A node's TRS as a 4x4 (column vectors)."""
     x, y, z, w = n.get("rotation", [0.0, 0.0, 0.0, 1.0])
-    r = np.array([[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
-                  [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
-                  [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
+    r = np.array(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
+        ]
+    )
     m = np.eye(4)
     m[:3, :3] = r * np.array(n.get("scale", [1.0, 1.0, 1.0]))
     m[:3, 3] = n.get("translation", [0.0, 0.0, 0.0])
@@ -61,7 +65,10 @@ def move(j, b, mesh_name, bone_name, to):
         xyz[hit] += d
         out = xyz.astype(np.float32)
         set_(j, b, at["POSITION"], out)
-        j["accessors"][at["POSITION"]]["min"], j["accessors"][at["POSITION"]]["max"] = out.min(0).tolist(), out.max(0).tolist()
+        j["accessors"][at["POSITION"]]["min"], j["accessors"][at["POSITION"]]["max"] = (
+            out.min(0).tolist(),
+            out.max(0).tolist(),
+        )
         moved += int(hit.sum())
     users = {}
     for an in j.get("animations", []):
