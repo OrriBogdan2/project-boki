@@ -10,7 +10,7 @@ extends RefCounted
 ## the real save.
 
 const SettingsScript := preload("res://scripts/core/settings.gd")
-const HudGroups := preload("res://tools/garden_hud_groups.gd")
+const GardenGroups := preload("res://tools/garden_hud_groups.gd")
 const SIZES := [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector2i(2560, 1080), 1.0],
 		[Vector2i(3440, 1440), 1.0], [Vector2i(960, 540), 1.0],
 		[Vector2i(1280, 720), SettingsScript.UI_SCALE_MAX]]      # [window, "ui_scale"]
@@ -146,7 +146,7 @@ func _scan(tag: String) -> void:
 ## The HUD's blocks: inside the safe frame, no two overlapping, no text cut short.
 func _scan_hud(tag: String) -> void:
 	var win := Rect2(Vector2.ZERO, home.get_viewport().get_visible_rect().size)
-	var blocks: Array = HudGroups.blocks_of(home).filter(
+	var blocks: Array = GardenGroups.blocks_of(home).filter(
 			func(c): return not c is HomeDashSlot and c.get_global_rect().size.x < win.size.x * HOST_FRAC)
 	ok(not blocks.is_empty(), "%s: the HUD has blocks" % tag)
 	var out: Array = blocks.filter(func(c): return not win.grow(-HUD_SAFE + 1.0).encloses(c.get_global_rect()))

@@ -94,5 +94,10 @@ static func shot_landed(m: Match, s: Dictionary, at: Vector3, e: Ent, why: Strin
 			_landed.clear()
 		_landed[key] = true
 	var v: Vector2 = s["vel"]
-	HeroVfx.of(m).play(by as Hunter, LANDED_MOVE, at, v.normalized() if v.length() > 0.01 else Vector2.RIGHT,
-			{surface: true, "mine": by == m.player})
+	HeroVfx.of(m).play(
+		by as Hunter,
+		LANDED_MOVE,
+		at,
+		v.normalized() if v.length() > 0.01 else Vector2.RIGHT,
+		{surface: true, "mine": by == m.player}
+	)

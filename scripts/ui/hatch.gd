@@ -8,22 +8,12 @@ extends Node3D
 ## egg is named for its element (Venom Egg, ...).
 const TOP_MARGIN := 48.0       # px: room kept clear of the window edges by the title block (both sides together)
 const STARTERS := ["cindle", "puddlet", "burrlet"]
+const SKIP_ARM_S := 0.5   # s into the hatch before a tap counts (the last knock's own click must not skip the egg)
 const MYSTERY := {
 	"species": "mystery", "name": "Mystery Egg", "temper": "???",
 	"desc": "Black as night, in an old basket. Who knows?",
 	"play": "Could be anything, even a rare one.",
 }
-
-static func starter_eggs() -> Array:
-	var out: Array = []
-	for sp in STARTERS:
-		var e: Dictionary = Data.egg_info(sp)
-		e["species"] = sp
-		for k in ["temper", "desc", "play"]:
-			if not e.has(k): e[k] = ""
-		out.append(e)
-	out.append(MYSTERY.duplicate())
-	return out
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
@@ -64,6 +54,18 @@ var edit_only := false
 var sub_lbl: Label        # opened from the menu just to change how you look
 var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make yourself
 var cam_to := Vector3(0, 3.6, 6.4)
+
+static func starter_eggs() -> Array:
+	var out: Array = []
+	for sp in STARTERS:
+		var e: Dictionary = Data.egg_info(sp)
+		e["species"] = sp
+		for k in ["temper", "desc", "play"]:
+			if not e.has(k): e[k] = ""
+		out.append(e)
+	out.append(MYSTERY.duplicate())
+	return out
+
 
 func _ready() -> void:
 	CursorMode.menu()
@@ -492,7 +494,6 @@ func _pick(i: int) -> void:
 ## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
 ## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
 const TAPS := 7
-const SKIP_ARM_S := 0.5   # s into the hatch before a tap counts (the last knock's own click must not skip the egg)
 const KNOCK_LINES := ["Knock on the shell", "Something stirs...", "Something knocks back.", "Again, gently.",
 	"The shell bulges.", "Cracks are spreading.", "Nearly.", "Here they come."]      # the title after each knock
 var taps := 0
