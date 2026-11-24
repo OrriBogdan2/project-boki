@@ -2,6 +2,8 @@
 tools/art1/pip_companions_native.py builds: its geometry is taken in at 1.179 x (contract metres to Meshy units), turned
 a half turn about Y (Meshy faces +Z) and put where the old part's bounding box sat; materials are renamed/recoloured
 (`glow-sun`, `cloth-cloud`), the face atlas PNG replaced (face UVs 0..1 over a cell: WardenNative runs WardenMood). Everything else of IN.glb stays (body, skin, clips).
+A body whose COMPANIONS.glb material has a base colour texture (the Meshy sun/cloud, 11-24) keeps its UVs and that image
+(embedded as is; the builder already sized it); IN.glb may be an earlier graft (its materials already renamed).
 
   python3 graft_companions.py OUT.glb IN.glb COMPANIONS.glb FACES.png
 """
@@ -28,10 +30,26 @@ def prims(js, bin_):
     return {js["materials"][p["material"]]["name"]: p for m in js["meshes"] for p in m["primitives"]}
 
 
+def carry_texture(js, out, mt, cjs, cbin, cm):
+    """Puts COMPANIONS.glb material cm's base colour image on IN.glb material mt (replacing the image of an earlier graft)."""
+    cimg = cjs["images"][cjs["textures"][cm["pbrMetallicRoughness"]["baseColorTexture"]["index"]]["source"]]
+    view = out.add_view(npk.view_bytes(cjs, cbin, cimg["bufferView"]))
+    pbr = mt.get("pbrMetallicRoughness", {})
+    if "baseColorTexture" in pbr:
+        img = js["images"][js["textures"][pbr["baseColorTexture"]["index"]]["source"]]
+        img.update(bufferView=view, mimeType=cimg["mimeType"])
+        return
+    js["images"].append({"bufferView": view, "mimeType": cimg["mimeType"], "name": mt["name"] + "_albedo"})
+    js["textures"].append({"sampler": 0, "source": len(js["images"]) - 1})
+    mt["pbrMetallicRoughness"] = {"baseColorTexture": {"index": len(js["textures"]) - 1}, "metallicFactor": 0,
+                                  "roughnessFactor": cm["pbrMetallicRoughness"].get("roughnessFactor", 0.5)}
+
+
 def main(out_path, in_path, comp_path, faces_png):
     js, bin_ = npk.load(in_path)
     cjs, cbin = npk.load(comp_path)
     old, new = prims(js, bin_), prims(cjs, cbin)
+    old.update({n: old[NEW_NAME[n]] for n in NEW_NAME if n not in old and NEW_NAME[n] in old})   # (an earlier graft)
     cmat = {m["name"]: m for m in cjs["materials"]}
     out = npk.Out(js, bin_)
     for grp, names in GROUPS.items():
@@ -46,7 +64,8 @@ def main(out_path, in_path, comp_path, faces_png):
             pos = (src[n] - (nlo + nhi) / 2) * SCALE + old_c
             nrm = graft.read(cjs, cbin, q["attributes"]["NORMAL"]) * np.array([-1, 1, -1], np.float32)
             idx = graft.read(cjs, cbin, q["indices"]).ravel()
-            if n in FACES:  # (0..1 over the face's cell: WardenMood's atlas shader picks the cell)
+            textured = "baseColorTexture" in cmat[SRC_NAME.get(n, n)].get("pbrMetallicRoughness", {})
+            if n in FACES or textured:  # (faces: 0..1 over the face's cell, WardenMood's atlas shader picks it; Meshy bodies: their atlas)
                 uv = graft.read(cjs, cbin, q["attributes"]["TEXCOORD_0"])
             else:
                 uv = np.tile(np.array([0.0, 1.0], np.float32), (len(pos), 1))
@@ -73,7 +92,10 @@ def main(out_path, in_path, comp_path, faces_png):
             if n in NEW_NAME:
                 mt = js["materials"][p["material"]]
                 mt["name"] = NEW_NAME[n]
-                mt["pbrMetallicRoughness"] = cmat[SRC_NAME[n]]["pbrMetallicRoughness"]
+                if textured:
+                    carry_texture(js, out, mt, cjs, cbin, cmat[SRC_NAME[n]])
+                else:
+                    mt["pbrMetallicRoughness"] = cmat[SRC_NAME[n]]["pbrMetallicRoughness"]
     face_mat = next(m for m in js["materials"] if m["name"] == "eyes-mood_sun")
     img = js["images"][js["textures"][face_mat["pbrMetallicRoughness"]["baseColorTexture"]["index"]]["source"]]
     img["bufferView"] = out.add_view(open(faces_png, "rb").read())
