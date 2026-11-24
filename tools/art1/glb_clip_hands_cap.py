@@ -88,7 +88,12 @@ def main():
         s = anims[clip]["samplers"][ch["sampler"]]
         _, t = acc(s["input"])
         off, v = acc(s["output"])
-        tracks[(ch["target"]["node"], ch["target"]["path"])] = (t[:, 0], v.copy(), off, s.get("interpolation", "LINEAR"))
+        tracks[(ch["target"]["node"], ch["target"]["path"])] = (
+            t[:, 0],
+            v.copy(),
+            off,
+            s.get("interpolation", "LINEAR"),
+        )
     first = {}
     for ch in anims[pose]["channels"]:
         if ch["target"]["path"] == "rotation":
@@ -108,7 +113,11 @@ def main():
             return v[min(i, len(tt) - 1)]
         f = (x - tt[i]) / (tt[i + 1] - tt[i])
         return v[i] * (1 - f) + v[i + 1] * f
-    rest = {i: (nd.get("translation", [0, 0, 0]), nd.get("rotation", [0, 0, 0, 1]), nd.get("scale", [1, 1, 1])) for i, nd in enumerate(nodes)}
+
+    rest = {
+        i: (nd.get("translation", [0, 0, 0]), nd.get("rotation", [0, 0, 0, 1]), nd.get("scale", [1, 1, 1]))
+        for i, nd in enumerate(nodes)
+    }
 
     def local(i, k, over):
         t, r, s = rest[i]
