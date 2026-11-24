@@ -21,7 +21,7 @@ static func art(id: String) -> Texture2D:
 		_art[id] = tex
 	return _art[id]
 
-static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> void:
+static func draw(c: CanvasItem, id: String, at: Vector2, s: float, col: Color) -> void:
 	if not (is_finite(at.x) and is_finite(at.y)) or absf(at.x) > 8000.0 or absf(at.y) > 8000.0:
 		# (way off screen, e.g. a status icon over someone far below the camera: at that size small polygons lose their
 		# area to float rounding and error "triangulation failed")

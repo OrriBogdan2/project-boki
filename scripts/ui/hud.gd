@@ -242,6 +242,7 @@ var hover := HudHover.new(self)      # the hover tips (HUD slots and things in t
 func _draw_all() -> void:
 	Prof.begin("hud_draw")
 	_draw_parts()
+	plates.end_frame()      # (plates not placed this frame hide)
 	Prof.end()
 
 func _draw_parts() -> void:
