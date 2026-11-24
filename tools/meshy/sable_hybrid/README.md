@@ -10,3 +10,7 @@ the coat bones change. Python with numpy and scipy.
    (roots Bone_009/Bone_013: root, mid, stub, leaf).
 4. `native_pack.py` builds `art/wardens/sable/sable_meshy.glb`. Checks: `glbstretch.py OUT.json GLB` (torn frames),
    `coathit.py GLB...` (coat verts under the floor / inside the legs).
+5. `facenorm.py IN.glb OUT.glb` (sable-face-1123, last step, run on `sable_meshy.glb`): the face's stored normals were
+   5-20 deg off the geometry and the head/body graft seam at y=1.519 was open (2.2 mm mean, 8.9 mm max). It snaps the
+   145 body ring verts onto the head ring and writes smooth area-weighted normals on the face; normal-split groups over
+   10 deg in the face box 161 -> 3. Only POSITION (ring) and NORMAL bytes change: tris, UVs, weights, clips identical.

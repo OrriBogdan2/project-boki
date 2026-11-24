@@ -163,7 +163,7 @@ func _impact(s: Dictionary) -> void:
 ## a boom, and a cracked, see-through scorch under the patch's lit rim (_burn_tick).
 func _impact_fx(at: Vector3, r: float) -> void:
 	kit.vfx("x_impact", at, null, {"r": r})
-	Shake.incoming_big(kit.m, at, ImpactWeight.shake("heavy"), kit.h)
+	Shake.big(kit.m, at, "ult", kit.h)
 
 ## The burning patch: every tick it hurts and slows everyone on it; its rim stays lit for everyone and flames
 ## flicker across it. Ticks pay no bond (only the impact does).

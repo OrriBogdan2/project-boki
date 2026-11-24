@@ -5,6 +5,7 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 
 ## Switch
 `content/rules/warden_native.json`, keyed by art name: `"meshy_native": true` and the file
+`art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sable (sable, the hybrid rig below) and the six hunters packed by `tools/meshy/native_hunters` (Sparkle ryzz, Tenzo tarek, Cinder cinder, Kael kael, Motley ostra, Meeko pip). Neve (claire, native Meshy r2) is on too. Gil is off: his only rigged file is a Tripo skeleton, not Meshy's. The contract `<art>.glb` stays beside it untouched.
 `art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sable (sable, the hybrid rig below) and the six hunters packed by `tools/meshy/native_hunters` (Sparkle ryzz, Tenzo tarek, Cinder cinder, Kael kael, Motley ostra, Meeko pip), and Gil (gil, r6: `gil_meshy.glb`, Meshy rig, 60k-tri body plus the 3k swordfish; the fish is the contract's `metal-swordfish` part carried on the right hand with data "scale" and "grip"). The contract `<art>.glb` stays beside it untouched.
 
 ## What changes on the native path (scripts/heroes/warden_native.gd)
@@ -12,8 +13,12 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
   need only bones run on Meshy's bones through the one bone lookup `WardenSkeleton.find` (contract name -> Meshy bone,
   RIG_CONTRACT.md "Bone lookup"; data `bones` adds a Hunter's own): the hit flinch (WardenFlinch on `Spine02`), the
   wall kick's plant and push (WardenWall), the open channel's reach (WardenOpen.make_on) and the Heartspark carry
-  (WardenCarry.hold_mote). The clips advance by hand in `_process` (AnimationMixer manual mode), then the layers. Still
-  off: springs, look-at, drop pose, squash, blink, moods. `WardenGlb.layers(model)` is the layer node either way.
+  (WardenCarry.hold_mote), the drop's ride and skydive poses (WardenDropPose, the contract numbers of
+  content/rules/drop_poses.json) and the landing squash (WardenClips.lay_feel: HunterAnim's land_k by weight class,
+  content/rules/land_feel.json, times WardenClips.LAND_SQUASH, on Meshy's `Hips` about the feet; the Hips scale goes
+  back to rest each frame, as Meshy keys none). The clips advance by hand in `_process` (AnimationMixer manual mode),
+  then the layers. Still off: springs, look-at, the run-start lean, blink, moods. `WardenGlb.layers(model)` is the
+  layer node either way.
 - Extract: the beat (`WardenClips.leave_t`, 0.7 s) plays Meshy's crouch for the dip, then its jump for the take-off.
 - Anchors from the contract `.glb` (every `anchor_*` and `weapon_muzzle*` data `anchors` does not place) ride the Meshy
   bone `find` names for their contract bone at the same offset from its head; one on a bone with no stand-in (a tail
@@ -43,8 +48,16 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
-crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
+crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns,
+the drop poses hold --clip-check's bars); `--land-weight-check` measures every native Hunter's squash off the model
+(head height against the same frames unsquashed: depth and seconds within 10% of the contract numbers, feet on the
+ground); `--land-weight-shots [--before]` renders light, medium and heavy native Hunters landing (GPU);
 `--warden-glb-check` counts native Hunters apart. Renders: `--clip-shots --warden=<arch> --states [--match]`.
+Online: each `--remote-anim-1|2|3|rest-check` shard ends with a native row (Lace, Kael, Sable, Gil): through the
+online-feel proxy at 100 ms each way, the other player's copy plays the same state and clip as the owner's (idle,
+walk, run, air, attack, crouch, the extract beat) in order, at the same pace per state, with no stalled loop and no
+one-frame snap of the hand. A freshly dressed model reads its first filled state as the baseline (no phantom attack
+from old counters) and poses its idle at once (no rest T-pose frame).
 
 ## Weapons and orbit props
 Meshy's mesh carries the weapons (Sable's two pistols, Tenzo's one stone arm), so the rig's Gun and HunterAnim's

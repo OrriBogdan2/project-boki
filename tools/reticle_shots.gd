@@ -87,7 +87,7 @@ func _hunters() -> void:
 					m.hud.reticle.raise(false)
 					m.hud.reticle.flavour(st == "crit", false)
 			var img := await _frame(12, hold)
-			var crop := img.get_region(Rect2i(_cursor_px(img) - CROP / 2, CROP))
+			var crop := img.get_region(Rect2i(_cursor_px(img) - Vector2i(CROP / 2.0), CROP))
 			crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
 			tiles.append(crop)
 		var strip := Image.create(strip_w, CROP.y * 3, false, Image.FORMAT_RGBA8)
@@ -117,7 +117,7 @@ func _hits() -> void:
 func _save(img: Image, file: String) -> void:
 	img.save_png(dir.path_join(file + ".png"))
 	var c := Vector2i(Vector2(img.get_size()) * AT)
-	var crop := img.get_region(Rect2i(c - CROP / 2, CROP))
+	var crop := img.get_region(Rect2i(c - Vector2i(Vector2(CROP) / 2.0), CROP))
 	crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
 	crop.save_png(dir.path_join(file + "_zoom.png"))
 
@@ -164,7 +164,7 @@ func _cursor_px(img: Image) -> Vector2i:
 		local = m.hud.ret.pin
 	var at: Vector2 = m.hud.c.get_global_transform_with_canvas() * local
 	var px := at * Vector2(img.get_size()) / vp.get_visible_rect().size
-	var half := Vector2(CROP / 2)
+	var half := Vector2(CROP) / 2.0
 	return Vector2i(px.clamp(half, Vector2(img.get_size()) - half))
 
 ## A few frames with the cursor held at AT, then the frame as an image.
