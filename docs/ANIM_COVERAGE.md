@@ -141,6 +141,8 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | floenatee | clip | shared | shared | shared | shared | shared | proc | proc |
 | vespox | shared | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
+| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
+| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
