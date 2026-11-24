@@ -3,8 +3,9 @@ extends RefCounted
 ## Show only what is needed (DECISIONS 2026-11-08, design review 11-10 fix 8): each HUD group has a
 ## reveal stage in content/rules/hud_reveal.json. A group shows from its match number ("from_match"),
 ## or once its first event has happened ("first", remembered in Save.d.hud_reveal), or while Tab
-## (the scoreboard key) is held. Everything shows outside expeditions (duel, training, tutorial,
-## arena), with Settings "Show full HUD", and on saves from before the reveal (no "hud_reveal" key).
+## (the scoreboard key) is held. The tutorial reveals by step ("tut_from"). Everything else shows outside
+## expeditions (duel, training, arena), with Settings "Show full HUD", and on saves from before the
+## reveal (no "hud_reveal" key).
 ##   if HudReveal.on(m, "feed"): ...       # draw the group
 ##   HudReveal.see("seat_pips")            # its first event happened: it stays from now on
 
@@ -26,6 +27,8 @@ static func match_no() -> int:
 
 ## Whether `key` draws now.
 static func on(m: Match, key: String) -> bool:
+	if m.tut != null and not (Settings.get_v("hud_full") or Input.is_action_pressed("scores")):
+		return tut_on(m.tut, key)
 	if not staged(m) or Input.is_action_pressed("scores"):
 		return true
 	var seen: Dictionary = Save.d["hud_reveal"]
@@ -34,6 +37,13 @@ static func on(m: Match, key: String) -> bool:
 	var g: Dictionary = groups().get(key, {})
 	var from := int(g.get("from_match", 1))
 	return from > 0 and match_no() >= from
+
+
+## The tutorial's HUD grows with its steps: a group with a "tut_from" step id shows from that step on;
+## a group without one always shows.
+static func tut_on(tu: Tutorial, key: String) -> bool:
+	var from: String = groups().get(key, {}).get("tut_from", "")
+	return from == "" or tu.step >= Tutorial.step_index(from)
 
 
 ## Whether this match stages the HUD at all.

@@ -530,6 +530,8 @@ func _end_pull(arrived: bool) -> void:
 		arrivals += 1
 		var rdf := rmb_def()
 		if not ally:
+			# the foe stays stunned through the Anchor's wind-up: Deep Reach then Anchor Drop is a sure stun
+			(f as Ent).stun_t = maxf((f as Ent).stun_t, float(rdf["arrive_stun"]))
 			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 	var queued := e_queued
 	e_queued = false

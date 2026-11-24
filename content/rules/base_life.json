@@ -10,6 +10,8 @@
 	"chore_chance": 0.3,
 	"chore_chance_doc": "chance a roaming Boki whose knack has a chore to do right now (scripts/home/base_chore.gd) does it.",
 	"chore_mind": 15.0,
+	"chore_water": 6.0,
+	"chore_water_doc": "s a Tide Boki stands at the dry snack patch before it is watered.",
 	"chore_mind_doc": "s an Ember Boki sits by the egg before the egg's hatch time halves.",
 	"nap": [20.0, 40.0],
 	"nap_doc": "s of a day nap (energy low or bored); at night a non-nocturnal Boki naps till dawn.",

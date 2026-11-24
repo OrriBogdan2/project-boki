@@ -1,17 +1,20 @@
 """The pickup guns' shots (docs/AUDIO.md, briefs/SFX_AUDIT.md row 3). Run from tools/: python3 gen_sfx_guns.py
 
 The five guns a hunter without a Hunter kit carries (content/weapons smg, rifle, burst_rifle, shotgun,
-sniper) each get their own shot, told apart by three things at once:
+sniper) and the heavy's minigun each get their own shot, told apart by three things at once:
   body   the pitch and weight of the kick under the crack (a light pop up to a deep boom),
   tail   how long the report hangs and how dark it is (dry and short up to a long roll off the islands),
   pitch  where the crack's noise band sits (a high snap down to a broad, low blast).
 SMG: a tiny high pop, almost no tail. Rifle: a mid crack with a short slap. Burst rifle: a tighter,
 metallic crack with a bolt clack after it. Shotgun: a low, wide blast and a thick tail. Sniper: the
-sharpest crack, a deep body and a long rolling report. Original synthesis, no samples.
+sharpest crack, a deep body and a long rolling report. Minigun: a dry, brassy tick built for ten a second, and
+the barrels' spin-up (0.7 s, matching content/weapons/minigun.json spin_up): a motor whine climbing under
+ratchet clicks that speed up until they blur. Original synthesis, no samples.
 """
 
+import numpy as np
 import sfx_lib as S
-from sfx_lib import mix, at, kick, click, crack, sub, tail, reflections, ring
+from sfx_lib import SR, N, T, noise, lpf, mix, at, kick, click, crack, sub, tail, reflections, ring
 
 S.reseed(5309)
 
@@ -62,9 +65,61 @@ def sniper(i):
     return mix(crk, body, sub(58, 32, d, 0.18) * 0.5, reflections(tail(1.4, 1100, 0.38, 0.01) * 1.5, taps))
 
 
+def minigun(i):
+    d = 0.16
+    body = kick(380 + 14 * i, 170, d, 0.005, 0.02, 2.2) * 0.5
+    snap = crack(d, 1400, 6500 + 250 * i, 0.008) * 2.2
+    brass = ring((2300 + 60 * i, 3700), d, (0.012, 0.008), (0.14, 0.08))
+    return mix(click(0.002, 3500, 11000) * 1.5, body, snap, brass, tail(0.09, 2600, 0.02) * 0.5)
+
+
+def minigun_spin():
+    """The barrels coming up to speed over 0.7 s: a whine climbing 70 -> 420 Hz and ratchet clicks speeding up."""
+    d = 0.7
+    t = T(d)
+    hz = 70 + 350 * (t / d) ** 1.6
+    ph = 2 * np.pi * np.cumsum(hz) / SR
+    whine = (
+        (np.sin(ph) + 0.4 * np.sin(2 * ph) + 0.15 * np.sin(3 * ph)) * np.minimum(1.0, t / 0.08) * (0.3 + 0.7 * t / d)
+    )
+    out = np.zeros(N(d + 0.1))
+    when = 0.0
+    while when < d:
+        c = click(0.004, 1800, 7000, 0.0016) * 0.9
+        out[N(when) : N(when) + len(c)] += c[: len(out) - N(when)]
+        when += 1.0 / (6 + 34 * (when / d) ** 1.4)
+    out[: N(d)] += whine * 0.7 + lpf(noise(d), 1800) * (t / d) ** 2 * 0.25
+    return out
+
+
 S.takes_cat("gun_smg", smg, 2, "fire")
 S.takes_cat("gun_rifle", rifle, 2, "fire")
 S.takes_cat("gun_burst", burst, 2, "fire")
 S.takes_cat("gun_shotgun", shotgun, 2, "heavy_fire")
 S.takes_cat("gun_sniper", sniper, 1, "heavy_fire")
-print("pickup gun shots written")
+S.takes_cat("gun_minigun", minigun, 3, "fire")
+S.save_cat("gun_minigun_spin", minigun_spin(), "cast")
+print("pickup gun and minigun shots written")
+
+
+# Hold takes (FireSfx plays <shot>_hold from the 2nd round of a held burst; the 1st keeps the full crack above).
+# Written last so the shots above keep their noise (one seeded generator). The same voice, a crack and a kick
+# with a 40-70 ms tail instead of 0.1-0.35 s: at 12 rounds a second the takes no longer pile into a smear.
+def smg_hold(i):
+    d = 0.11
+    body = kick(470 + 20 * i, 210, d, 0.004, 0.012, 2.0) * 0.45
+    snap = crack(d, 2400, 9000 + 300 * i, 0.007) * 2.4
+    return mix(click(0.002, 4000, 12000) * 1.4, body, snap, tail(0.06, 3200, 0.02) * 0.5)
+
+
+def rifle_hold(i):
+    d = 0.17
+    body = kick(260 + 10 * i, 95, d, 0.01, 0.03, 2.6) * 0.6
+    snap = crack(d, 900, 6000 + 200 * i, 0.012) * 2.6
+    low = crack(d, 200, 900, 0.022) * 1.8
+    return mix(click(0.004, 2800, 11000) * 1.6, body, snap, low, tail(0.1, 2000, 0.035) * 0.8)
+
+
+S.takes_hold("gun_smg_hold", smg_hold, 3, "fire")
+S.takes_hold("gun_rifle_hold", rifle_hold, 3, "fire")
+print("pickup gun, minigun and hold takes written")
