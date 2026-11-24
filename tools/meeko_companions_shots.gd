@@ -13,7 +13,7 @@ const STATES := [  # [name, held inputs, s held before the shot]
 const PHASE_SECS := 1.0
 var face := false
 var close := 0.2
-var eye := -1.0  # --eye=<m>: the game camera dropped to this height above her feet, level, three-quarter front
+var eye := -1.0  # --eye=<m>: the game camera dropped to this height above her feet, level, three-quarter front; each state also writes game_<state>.png at the game camera
 const EYE_OFF := Vector2(2.4, 3.8)  # m: where it stands (x, z) from her
 const EYE_STATES := [["idle", {}, 1.5], ["run", {"move": Vector2(1, 0.4)}, 1.0], ["fire", {"fire": true}, 0.25]]
 
@@ -42,6 +42,10 @@ func run(main_node: Node) -> void:
 	if eye >= 0.0:
 		for st in EYE_STATES:
 			await _take(st[2], 1.0, "eye%03d_%s.png" % [int(eye * 100), st[0]], st[1])
+			var keep := eye  # (and the same beat at the game camera, so an eye-level sheet always has its game-view row)
+			eye = -1.0
+			await _take(0.05, 1.0, "game_%s.png" % st[0], st[1])
+			eye = keep
 			for _i in 40:
 				m.step(STEP)
 		print("MEEKOSHOTS done in %s" % dir)
