@@ -170,7 +170,7 @@ func _side_fx(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 func _melee_stack(m: Match, p: Hunter, ally: Hunter, foes: Array) -> void:
 	var at := p.pos
 	for h: Hunter in m.hunters:
-		h.teleport(at + Vector3(0.4 * float(m.hunters.find(h) % 3), 0, 0.4 * float(m.hunters.find(h) / 3)))
+		h.teleport(at + Vector3(0.4 * float(m.hunters.find(h) % 3), 0, 0.4 * float(int(m.hunters.find(h) / 3.0))))
 		if h.kin:
 			(h.kin as Kin).state = "active"
 			(h.kin as Kin).teleport(h.pos + Vector3(0.3, 0, 0))
@@ -278,11 +278,17 @@ func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	if ally.kin == null or foe.kin == null:
 		return
 	p.combat_at = -99.0
+	ally.combat_at = -99.0
 	ok(BokiChatter.heard(m, foe.kin) and BokiChatter.heard(m, ally.kin), "no fight: every Boki's line is drawn")
 	p.combat_at = m.time
 	ok(BokiChatter.heard(m, mine), "in a fight: your own Boki's line is drawn")
 	ok(not BokiChatter.heard(m, foe.kin) and not BokiChatter.heard(m, ally.kin), "... the others' are not")
+	ok(not BokiChatter.calm(m), "in a fight: no Boki callout pins (\"Behind you!\") over the field")
 	p.combat_at = -99.0
+	ok(BokiChatter.calm(m), "no fight: callout pins are drawn")
+	ally.combat_at = m.time
+	ok(not BokiChatter.calm(m) and not BokiChatter.heard(m, foe.kin), "squadmate fights: no pins or others' lines")
+	ally.combat_at = -99.0
 	for k: Kin in [mine, foe.kin]:
 		k.unseen = false
 		k.teleport(p.pos + Vector3(6.0 if k == mine else -6.0, 0, 0))

@@ -70,23 +70,12 @@ func thief(a) -> void:
 	a_x.ok("dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
 			int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
 			"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)])
-	a_x.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
+	a_x.ok("dancer LMB: the aim line is pale lilac",
 			AimKit.shown(p_v, "aim") and (AimKit.entry(p_v, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
-	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
-	var spot := home + Vector3(-4.0, 0, -3.0)
-	a_x.aim_at(p_v, spot)
-	p_v.fire_cd = 0.0
-	var fz := k.fizzles
-	p_v.inp["fire"] = true
-	m.step(a_x.DT)
-	p_v.inp["fire"] = false
-	a_x.step(m, 0.5)
-	var off := Vector2(k.last_bolt_end.x - spot.x, k.last_bolt_end.z - spot.z).length()
-	a_x.ok("dancer LMB: a bolt lands at the cursor and fizzles (cursor-placed)",
-			k.fizzles == fz + 1 and off < 0.75, "%.2f m off the cursor" % off)
+	# a bolt with nothing in its way flies its full range whatever the cursor (--tester-feedback-check)
 	a_x.aim_at(p_v, home + Vector3(-30.0, 0, 0))
 	p_v.fire_cd = 0.0
-	fz = k.fizzles
+	var fz := k.fizzles
 	p_v.inp["fire"] = true
 	m.step(a_x.DT)
 	p_v.inp["fire"] = false

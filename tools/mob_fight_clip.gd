@@ -78,8 +78,8 @@ func _shoot(dir: String, n: int, mid: Vector3) -> void:
 	await RenderingServer.frame_post_draw
 	var img := main.get_viewport().get_texture().get_image()
 	var c := Vector2i(m.cam.unproject_position(mid + Vector3(0, 0.8, 0)))
-	var x := clampi(c.x - CLIP_W / 2, 0, img.get_width() - CLIP_W)
-	var y := clampi(c.y - CLIP_H / 2, 0, img.get_height() - CLIP_H)
+	var x := clampi(c.x - int(CLIP_W / 2.0), 0, img.get_width() - CLIP_W)
+	var y := clampi(c.y - int(CLIP_H / 2.0), 0, img.get_height() - CLIP_H)
 	img.get_region(Rect2i(x, y, CLIP_W, CLIP_H)).save_jpg(dir.path_join("%05d.jpg" % n), 0.9)
 
 

@@ -234,7 +234,7 @@ var phase_t := 0.0            # Light's Phase Step: shots pass through you while
 var dash_pass := {}           # a grammar dash or a kit dash: what it does to foes you pass through {hit, opts}
 var abil_charge := {}         # holding a charge-up weapon ability (Rail Charge): {t}
 var charge: Dictionary = {}   # Ram
-var idle_fire := 0.0
+var idle_fire := 99.0          # s since the last shot or ability; starts expired so a fresh spawn is not "in a fight"
 var dropping := false         # gliding down from the sky at the start of a match
 var drop_from := Vector2.INF  # where the drop started
 var diving := false           # the skydive part of the drop, before the glider opens
@@ -375,6 +375,8 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var n := DashState.base_charges(dodge_def, cdat)
+	if ak and ak.single_dash():
+		return 1.0
 	return ak.dash_charges(n) if ak else n
 
 func dash_regen() -> float:
@@ -1086,6 +1088,7 @@ func dash_with(e: Dictionary) -> void:
 	fly_t = 0.0
 	if wpn.get("bloom_dash_reset", false): wbloom = 0.0
 	m.sfx(HeroSfx.dash_name(self), pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
+	HunterFoley.dash(self)
 	if not (ak and ak.own_dash_trail()):
 		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
 
@@ -2558,6 +2561,8 @@ func perk_n(id: String) -> int:
 
 ## Can this perk still be offered to you (a free perk slot, not at its stack limit)?
 func perk_open(id: String) -> bool:
+	if id == "secondwind" and ak and ak.single_dash():
+		return false
 	var below_max := perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1))
 	return perks.size() < PerkOrbs.slots() and below_max and WeaponUps.fits(self, id)
 
@@ -2696,6 +2701,7 @@ func _anim_state(stretch: float) -> void:
 	wall_moves.anim_state(self, s)
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
+	HazardMoves.anim_state(self, s)
 	KinSummon.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
@@ -2788,7 +2794,7 @@ func render(delta: float, alpha: float) -> void:
 	HunterWisp.tick(self, delta)
 	UltGlow.tick(self, delta)
 	var body_face := HunterFall.face_of(self)      # a knocked-down body keeps facing the way it fell
-	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale)     # leaned toward the camera (CamRig.char_lean)
+	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale, not SkyDeck.upright(self))     # (CamRig.char_lean)
 	else: model.rotation.y = body_face
 	if out and has_meta("fling"):
 		# hit by the sky train: the body is flung tumbling through the air for a moment, then gone
@@ -2804,8 +2810,8 @@ func render(delta: float, alpha: float) -> void:
 		model.rotation = Vector3(0, face, 0)
 		if m.cam: model.basis = m.cam.char_basis(face, model.scale)
 	# riding a mount: you sit up on its back
-	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
-	model.position.y = lerpf(model.position.y, ride, minf(1.0, delta * 12.0))
+	var ride := (kin as Kin).ride_height() if mounted() and not downed else SkyDeck.lift(self)
+	model.position.y = lerpf(model.position.y, ride - HazardMoves.sink(self), minf(1.0, delta * 12.0))
 	if rocket:
 		rocket.seat(self)
 	if remote:
