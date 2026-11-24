@@ -424,16 +424,23 @@ func _roomy_ground(p: Vector3) -> Vector3:
 	return _ground(best if best != Vector3.INF else p)
 
 
-## How cluttered the ground within `r` m of (x, z) is: 3 a tree, rock or wall tile, 1 a tall-grass tile.
+## How cluttered the ground within `r` m of (x, z) is: 3 a tree, rock or wall tile, 2 a void or other-terrace
+## tile (a cliff or wall face hides the fight), 1 a tall-grass tile.
 func _clutter(x: int, z: int, r: int) -> float:
 	var w: World = m.world
+	var lv := w.level[w.idx(x, z)]
 	var c := 0.0
 	for dz in range(-r, r + 1):
 		for dx in range(-r, r + 1):
 			if dx * dx + dz * dz > r * r or not w.inb(x + dx, z + dz):
 				continue
 			var i := w.idx(x + dx, z + dz)
-			c += 3.0 if w.kind[i] == World.T_BLOCK else (1.0 if w.bush.has(i) else 0.0)
+			if w.kind[i] == World.T_BLOCK:
+				c += 3.0
+			elif w.kind[i] == World.T_VOID or w.level[i] != lv:
+				c += 2.0
+			elif w.bush.has(i):
+				c += 1.0
 	return c
 
 
