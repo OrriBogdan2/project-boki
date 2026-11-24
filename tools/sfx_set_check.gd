@@ -244,7 +244,7 @@ func _summon_cues() -> void:
 	s.popped(true)
 	var fold: Array = Sfx.cue_log.duplicate()
 	Sfx.cue_log = null
-	var heard := func(entries: Array) -> Array: return entries.map(func(c): return c[0])
+	var heard := func(calls: Array) -> Array: return calls.map(func(c): return c[0])
 	ok(own.begins_with("bk_"), "summon: a Cindle has its own happy cry to layer (%s)" % own)
 	var want := ["wisp_burst", own]
 	ok(heard.call(burst) == want, "summon: the burst plays the bloom, then its own cry (%s)" % [heard.call(burst)])

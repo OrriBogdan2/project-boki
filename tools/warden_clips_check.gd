@@ -15,8 +15,13 @@ const GRIP_TOL := 0.03  # m: the weapon's bone stays this close to where the han
 const WHIRL_TOL := 0.05  # m (neutral): BjornFx's whirl trail runs this close to the farthest the head goes
 const PREFIX := {"breaker": ["bulwark", "bul_"], "tarek": ["dolm", "breah_"]}
 const SKIP := ["bul_smash_late"]
-const LEGS_TOL := 0.02  # rad: an air cast's leg bones off the plain fall's
-const AIR_FRAMES := 20  # frames of each air cast checked
+const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
+const AIR_FRAMES := 20          # frames of each air cast checked
+## Clips a Hunter's GLB carries that no kit move plays, with why they stay (the known-unused list). Each one is in the
+## GLB, is mapped by no kmove, and is still held by the named user (so it can't rot into a silent orphan).
+## ostra flurry: authored for owner item 136's 8-card RMB flurry; DECISIONS 11-07 (parity first) put the source's Snap
+## back and no data/wiki/footage beat is a card volley, so no move plays it. The results stage holds it as his pose.
+const MOVELESS := {"ostra": {"flurry": "results_pose"}}
 
 ## Clips a Hunter's GLB carries that no kit move plays, with why they stay (the known-unused list). Each one is in the
 ## GLB, is mapped by no kmove, and is still held by the named user (so it can't rot into a silent orphan).
@@ -513,8 +518,7 @@ func _air_legs(id: String) -> void:
 	for p in pair:
 		p[0].free()
 
-
-func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
+func _play(_m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:
 		an.update(DT, s)
 		sync._process(DT)

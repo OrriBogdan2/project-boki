@@ -51,33 +51,33 @@ func run(main: Node) -> void:
 			"weapon": Arch.signature("thief")
 		}
 	)
-	var ply: Hunter = m.player
-	ply.ctrl = "local"
+	var p: Hunter = m.player
+	p.ctrl = "local"
 	var bot: Hunter = null
 	for o in m.hunters:
-		if o != ply:
+		if o != p:
 			o.ctrl = "idle"
 			bot = o
 	ok(WANT.size() == Arch.ids().size(), "every Hunter has a row (%d of %d)" % [WANT.size(), Arch.ids().size()])
 	for id in WANT:
-		_numbers(ply, String(id))
-	ply.reclass(Arch.weight("thief"), "thief")
-	_player_picks(ply)
+		_numbers(p, String(id))
+	p.reclass(Arch.weight("thief"), "thief")
+	_player_picks(p)
 	_bot_rank3(bot)
 	print("ULTRANK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 
 ## 1: the hero's X at R ranks 2 and 3 against the table; rank 1 is the JSON's own number.
-func _numbers(ply: Hunter, id: String) -> void:
-	ply.reclass(Arch.weight(id), id)
+func _numbers(p: Hunter, id: String) -> void:
+	p.reclass(Arch.weight(id), id)
 	var base: Dictionary = Arch.def(id)["x"]
 	var got := []
-	var good := ply.arch == id
+	var good := p.arch == id
 	for r in [1, 2, 3]:
-		ply.slot_lv["ult"] = r
+		p.slot_lv["ult"] = r
 		for key in WANT[id]:
-			var v := HeroUlt.cooldown(ply.ak) if key == "cooldown" else float(ply.ak.x_def()[key])
+			var v := HeroUlt.cooldown(p.ak) if key == "cooldown" else float(p.ak.x_def()[key])
 			var want := float(base[key]) if r == 1 else float(WANT[id][key][r - 2])
 			got.append("%s%d %.2f" % [key, r, v])
 			good = good and is_equal_approx(v, want)
@@ -85,32 +85,32 @@ func _numbers(ply: Hunter, id: String) -> void:
 
 
 ## 2: rank 3 waits for level 10, and the point there is the player's to place.
-func _player_picks(ply: Hunter) -> void:
-	ply.slot_lv = {"sec": 2, "dash": 2, "kin": 1, "ult": 2}
-	ply.lvl = 9
-	ply.skill_pts = 1
-	ok(not ply.can_level("ult"), "R rank 3 is shut at level 9")
-	ply.gain_xp(float(Hunter.XP_TO[9]) - ply.xp + 1.0)
+func _player_picks(p: Hunter) -> void:
+	p.slot_lv = {"sec": 2, "dash": 2, "kin": 1, "ult": 2}
+	p.lvl = 9
+	p.skill_pts = 1
+	ok(not p.can_level("ult"), "R rank 3 is shut at level 9")
+	p.gain_xp(float(Hunter.XP_TO[9]) - p.xp + 1.0)
 	ok(
-		ply.lvl == 10 and ply.skill_pts == 2 and int(ply.slot_lv["ult"]) == 2,
-		"level 10: the player's points wait for a choice (R %d, %d points)" % [int(ply.slot_lv["ult"]), ply.skill_pts]
+		p.lvl == 10 and p.skill_pts == 2 and int(p.slot_lv["ult"]) == 2,
+		"level 10: the player's points wait for a choice (R %d, %d points)" % [int(p.slot_lv["ult"]), p.skill_pts]
 	)
-	ok(ply.can_level("ult") and ply.can_level("kin"), "level 10: R and E can both take the point")
+	ok(p.can_level("ult") and p.can_level("kin"), "level 10: R and E can both take the point")
 	ok(
-		ply.rank_text("r").begins_with("Rank 2 / 3") and ply.rank_text("r").contains("19s"),
-		"R hover: rank 2 of 3, next rank's numbers (%s)" % ply.rank_text("r")
+		p.rank_text("r").begins_with("Rank 2 / 3") and p.rank_text("r").contains("19s"),
+		"R hover: rank 2 of 3, next rank's numbers (%s)" % p.rank_text("r")
 	)
-	ply.level_slot("kin")
-	ok(int(ply.slot_lv["ult"]) == 2 and int(ply.slot_lv["kin"]) == 2, "a point put into E leaves R at rank 2")
-	var cd2 := HeroUlt.cooldown(ply.ak)
-	ply.level_slot("ult")
+	p.level_slot("kin")
+	ok(int(p.slot_lv["ult"]) == 2 and int(p.slot_lv["kin"]) == 2, "a point put into E leaves R at rank 2")
+	var cd2 := HeroUlt.cooldown(p.ak)
+	p.level_slot("ult")
 	ok(
-		int(ply.slot_lv["ult"]) == 3 and ply.skill_pts == 0 and not ply.can_level("ult"),
+		int(p.slot_lv["ult"]) == 3 and p.skill_pts == 0 and not p.can_level("ult"),
 		"the player picked R rank 3, the cap"
 	)
 	ok(
-		HeroUlt.cooldown(ply.ak) < cd2 and int(HeroUlt.slot_info(ply.ak)["level"]) == 3,
-		"rank 3 rests less (%.1fs -> %.1fs) and the X tile reads rank 3" % [cd2, HeroUlt.cooldown(ply.ak)]
+		HeroUlt.cooldown(p.ak) < cd2 and int(HeroUlt.slot_info(p.ak)["level"]) == 3,
+		"rank 3 rests less (%.1fs -> %.1fs) and the X tile reads rank 3" % [cd2, HeroUlt.cooldown(p.ak)]
 	)
 
 

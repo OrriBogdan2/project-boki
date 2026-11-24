@@ -109,10 +109,10 @@ func _attacker(a: String, order: Array, src: Dictionary) -> void:
 func _row(a: String, order: Array, mode: String, dist: float) -> Array:
 	var r := setup(a, FAR)
 	var rows: Array = []
-	var ply: Hunter = r[1]
+	var pl: Hunter = r[1]
 	if v_level > 1:
-		ply.lvl = v_level
-		LevelGrowth.apply(ply)
+		pl.lvl = v_level
+		LevelGrowth.apply(pl)
 	var tier := maxi(v_tier, 0)
 	for d in order:
 		var hp := float(Data.CLASSES[Arch.weight(d)]["hp"]) * (1.0 + LevelGrowth.hp_pct(v_level))
@@ -128,48 +128,48 @@ func _row(a: String, order: Array, mode: String, dist: float) -> Array:
 
 ## [seconds until the dummy is down (INF if still up after CAP), hits that landed on the dummy].
 func _time_to_down(
-	m: Match, ply: Hunter, tgt: Hunter, mode: String, dist: float, hp: float, armor: float, tier := 0
+	m: Match, pl: Hunter, tg: Hunter, mode: String, dist: float, hp: float, armor: float, tier := 0
 ) -> Array:
-	step(m, 1.5, func(): ply.inp["fire"] = false)  # rest: magazines refill, combos and cooldowns end
-	ply.fire_cd = 0.0
-	ply.warm_t = 0.0
-	tgt.max_hp = hp
-	tgt.hp = hp
-	tgt.armor_tier = tier
-	tgt.max_armor = armor
-	tgt.armor = armor
-	tgt.downed = false
-	var home := ply.pos
+	step(m, 1.5, func(): pl.inp["fire"] = false)  # rest: magazines refill, combos and cooldowns end
+	pl.fire_cd = 0.0
+	pl.warm_t = 0.0
+	tg.max_hp = hp
+	tg.hp = hp
+	tg.armor_tier = tier
+	tg.max_armor = armor
+	tg.armor = armor
+	tg.downed = false
+	var home := pl.pos
 	var t := 0.0
 	var hits := [0]
 	var stamps := []
 	var clock := [0.0]  # (a lambda copies a plain float, so the clock is a one-element array)
 	var count := func(by: Node, target: Node, _amount: float, _tags: Array):
-		if by == ply and target == tgt:
+		if by == pl and target == tg:
 			hits[0] += 1
 			stamps.append(clock[0])
 	CombatBus.hit_landed.connect(count)
-	while t < CAP and tgt.hp > 0.0 and not tgt.downed:
-		tgt.teleport(home + Vector3(dist, 0, 0))
-		tgt.vel = Vector3.ZERO
-		aim_at(ply, tgt.pos)
+	while t < CAP and tg.hp > 0.0 and not tg.downed:
+		tg.teleport(home + Vector3(dist, 0, 0))
+		tg.vel = Vector3.ZERO
+		aim_at(pl, tg.pos)
 		match mode:
 			"tap":
-				ply.inp["fire"] = int(t / 0.05) % 2 == 0
+				pl.inp["fire"] = int(t / 0.05) % 2 == 0
 			"charge":
-				ply.inp["fire"] = not (ply.inp["fire"] and ply.atk.charge_k() >= 1.0)
+				pl.inp["fire"] = not (pl.inp["fire"] and pl.atk.charge_k() >= 1.0)
 			"draw":
-				ply.inp["fire"] = fmod(t, DRAW_S + DT) < DRAW_S  # drawn to the last stage, let go for one step
+				pl.inp["fire"] = fmod(t, DRAW_S + DT) < DRAW_S  # drawn to the last stage, let go for one step
 			_:
-				ply.inp["fire"] = true
-		ply.teleport(home)  # (lunges and recoil would walk the shooter off the mark)
-		ply.vel = Vector3.ZERO
+				pl.inp["fire"] = true
+		pl.teleport(home)  # (lunges and recoil would walk the shooter off the mark)
+		pl.vel = Vector3.ZERO
 		m.step(DT)
 		for mb in m.mobs:
 			mb.queue_free()
 		m.mobs.clear()
 		t += DT
 		clock[0] = t
-	ply.inp["fire"] = false
+	pl.inp["fire"] = false
 	CombatBus.hit_landed.disconnect(count)
-	return [t if (tgt.hp <= 0.0 or tgt.downed) else INF, hits[0], stamps]
+	return [t if (tg.hp <= 0.0 or tg.downed) else INF, hits[0], stamps]
