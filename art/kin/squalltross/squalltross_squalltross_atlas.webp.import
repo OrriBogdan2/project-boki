@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7evt6347scli"
-path="res://.godot/imported/squalltross_squalltross_atlas.webp-0df266aaa0f81249a3e9d3008362a97f.ctex"
+path.bptc="res://.godot/imported/squalltross_squalltross_atlas.webp-0df266aaa0f81249a3e9d3008362a97f.bptc.ctex"
+path.astc="res://.godot/imported/squalltross_squalltross_atlas.webp-0df266aaa0f81249a3e9d3008362a97f.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "268cd6de4e14d3f4636fcc8f206568e1"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/squalltross/squalltross_squalltross_atlas.webp"
-dest_files=["res://.godot/imported/squalltross_squalltross_atlas.webp-0df266aaa0f81249a3e9d3008362a97f.ctex"]
+dest_files=["res://.godot/imported/squalltross_squalltross_atlas.webp-0df266aaa0f81249a3e9d3008362a97f.bptc.ctex", "res://.godot/imported/squalltross_squalltross_atlas.webp-0df266aaa0f81249a3e9d3008362a97f.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

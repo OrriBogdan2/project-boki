@@ -106,7 +106,7 @@ func cast() -> bool:
 	h.vel = Vector3(0, h.vel.y, 0)
 	leap = h.grounded
 	k.play("bul_ult_wind")
-	k.m.sfx("bjorn_ult_wind", h.pos, -3.0 if h.is_local() else -7.0)
+	KitWindup.play(k, "x", "bjorn_ult_wind", -3.0 if h.is_local() else -7.0)
 	return true
 
 func cell_len() -> float:
@@ -220,6 +220,7 @@ func _interrupt() -> void:
 	interrupts += 1
 	k.cd["x"] = minf(float(k.cd["x"]), float(xd().get("refund", 8.0)))
 	k.m.sfx("warn", h.pos, -4.0, 0.8)
+	KitWindup.broken(k, "x")
 	_hide_lane()
 
 ## A merge drops the wind-up with no slam; a fissure already running finishes (it's a cast).
@@ -262,7 +263,7 @@ func _impact(at: Vector3) -> void:
 	for f in k.foes_in(origin, cell_len() * 1.2):
 		if hit.has(f.get_instance_id()):
 			Feel.hitstop(m, h, f, float(xd().get("strike_dmg", 4.0)), {"heavy": true, "payoff": true})
-	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)      # the players near the landing (never his own)
+	Shake.big(m, at, "ult", h)      # the players near the landing (never his own)
 	HeroVfx.of(m).play(h, "fault_land", at, dir)
 	m.sfx("bjorn_ult_quake", at, 0.0 if h.is_local() else -4.0)
 

@@ -6,9 +6,15 @@ extends RefCounted
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const STEP := 1.0 / 60.0
 ## [label, pose, speed (m/s), clip time (s)]; the lifted Boki is scaled and raised as Capture.dissolve does at 50%.
-const FRAMES := [["wander", "", 1.0, 0.2], ["startle", "alert", 0.0, 0.5], ["bolt", "whine", 4.0, 0.1],
-	["charge", "growl", 4.0, 0.25], ["dazed", "dazed", 0.0, 0.5], ["dazed later", "dazed", 0.0, 1.4],
-	["scan", "scan", 0.0, 0.3]]
+const FRAMES := [
+	["wander", "", 1.0, 0.2],
+	["startle", "alert", 0.0, 0.5],
+	["bolt", "whine", 4.0, 0.1],
+	["charge", "growl", 4.0, 0.25],
+	["dazed", "dazed", 0.0, 0.5],
+	["dazed later", "dazed", 0.0, 1.4],
+	["scan", "scan", 0.0, 0.3]
+]
 const LIFT := Vector3(0, 0.45, 0)
 const LIFT_SCALE := 0.56
 const SPACING := 1.5
@@ -19,11 +25,14 @@ var main: Node
 var out := ""
 var species := ["cindle", "zapple", "zephyrak"]
 
+
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--species="): species = Array(a.substr(10).split(","))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--species="):
+			species = Array(a.substr(10).split(","))
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -36,6 +45,7 @@ func run(m: Node) -> void:
 	sheet.save_png(out.path_join("wild_states.png"))
 	print("WILD_BOKI_SHOTS_DONE")
 	main.get_tree().quit()
+
 
 func _row(id: String) -> Image:
 	var shots := Shots.new()

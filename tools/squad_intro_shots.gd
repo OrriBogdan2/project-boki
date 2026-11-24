@@ -19,14 +19,18 @@ func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	var dir := "user://squad_intro_shots"
+	var opts := {"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242, "squad_intro": true}
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		if String(a).begins_with("--arch="):      # the player's Hunter (the rest of the squad is the seed's)
+			opts["arch"] = String(a).substr(7)
+			opts["cls"] = Arch.weight(String(opts["arch"]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	SquadIntro._last_lineup = ""
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242, "squad_intro": true})
+	await m.start(opts)
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)      # the boot splash stays up when a check starts the match by hand
