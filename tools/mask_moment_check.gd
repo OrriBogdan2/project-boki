@@ -219,7 +219,7 @@ func _swap_cut() -> void:
 	var whisper := String(Content.rules(MaskBeat.RULES)["whispers"][hid])
 	var title := HunterViewer.display_name(hid)
 	for line in [[whisper, clock[2]], [title, clock[3]]]:
-		ok(float(line[1]) >= MaskBeat.read_s(line[0]) - float(clock[1]),
+		ok(float(line[1]) >= MaskBeat.read_s(line[0]) - 0.1 - 2.0 * float(clock[1]),      # (a line starts and ends on a frame)
 				"short cut: \"%s\" stays up %.2f s (reading time %.2f s)"
 				% [line[0], line[1], MaskBeat.read_s(line[0])])
 	host.queue_free()
