@@ -29,6 +29,7 @@ Needs numpy and scipy (the venv).
 """
 
 import io
+import os
 import sys
 
 import dredge_reskin as rs
@@ -1484,6 +1485,103 @@ def fix_jump(js, b, out, rig):  # r16 stage: run once per source file
     return f"{done} Jump_Run tracks hold the leap pose"
 
 
+# r18: the goo arm is replaced by a slim Meshy arm (image-to-3D of a slim goo-arm drawing made from the turnaround's arm).
+# Fit: length ARM_TOP..ARM_BOT (m), thickness x ARM_THICK, set ARM_Z behind the old line, bent along the chain's rest line.
+ARM_TOP, ARM_BOT, ARM_THICK, ARM_Z, ARM_TEX, ARM_PUDDLE, ARM_GAIN = 1.66, 0.30, 1.5, -0.10, 2048, 0.045, "1.45,0.9,1.15"
+ARM_BULB, ARM_BULB_Y, ARM_SOCKET = 1.0, 1.36, "-0.17,-0.12"  # bulb 1 = none (a goo shoulder flare read as a wing, r18 try d/e)
+
+
+def poly_xz(pts, y):
+    """x and z of the polyline pts (top to bottom, y falling) at heights y; linear beyond both ends."""
+    ys = pts[:, 1]
+    k = np.clip(np.searchsorted(-ys, -np.asarray(y)) - 1, 0, len(pts) - 2)
+    f = (ys[k] - y) / (ys[k] - ys[k + 1])
+    return pts[k, 0] + f * (pts[k + 1, 0] - pts[k, 0]), pts[k, 2] + f * (pts[k + 1, 2] - pts[k, 2])
+
+
+def swap_goo_arm(js, b, out, rig, arm_path):
+    """r18: both goo primitives (skin and liner shell) are dropped; the Meshy slim arm is set along the goo chain's rest
+    line (RightArm, RightForeArm, GooTail0..3 origins), weighted arm/forearm above FADE_Y and on the chain below."""
+    top, bot = float(os.environ.get("ARM_TOP", ARM_TOP)), float(os.environ.get("ARM_BOT", ARM_BOT))
+    thick, az = float(os.environ.get("ARM_THICK", ARM_THICK)), float(os.environ.get("ARM_Z", ARM_Z))
+    flip = os.environ.get("ARM_FLIP", "0") == "1"
+    aj, ab = n.load(arm_path)
+    ap = aj["meshes"][0]["primitives"][0]
+    at = ap["attributes"]
+    P, N, UV = (n.floats(aj, ab, at[k]) for k in ("POSITION", "NORMAL", "TEXCOORD_0"))
+    F = prim_faces(aj, ab, ap).astype(np.int64)
+    lo, hi = P.min(0), P.max(0)
+    H = hi[1] - lo[1]
+    F = F[P[F].mean(1)[:, 1] >= lo[1] + ARM_PUDDLE * H]  # the flat slime puddle under the hook
+    used = np.unique(F)
+    remap = np.full(len(P), -1)
+    remap[used] = np.arange(len(used))
+    P, N, UV, F = P[used], N[used], UV[used], remap[F]
+    lo, hi = P.min(0), P.max(0)
+    s = (top - bot) / (hi[1] - lo[1])
+    mid = P[P[:, 1] > lo[1] + 0.4 * (hi[1] - lo[1])][:, [0, 2]].mean(0)
+    cx, cz = (lo[0] + hi[0]) / 2, mid[1]
+    if flip:
+        P[:, 0], N[:, 0] = -(P[:, 0] - mid[0]) + mid[0], -N[:, 0]
+        F = F[:, ::-1]
+    first = rig.names.index("GooTail0")
+    pts = [rest_world(rig, nm)[1] for nm in ("RightArm", "RightForeArm", "GooTail0", "GooTail1", "GooTail2", "GooTail3")]
+    pts = np.array(pts)
+    # tip: one more step down the chain's last segment
+    pts = np.vstack([pts, pts[-1] + (pts[-1] - pts[-2])])
+    y = bot + (P[:, 1] - lo[1]) * s
+    px, pz = poly_xz(pts, y)
+    bulb, by = float(os.environ.get("ARM_BULB", ARM_BULB)), float(os.environ.get("ARM_BULB_Y", ARM_BULB_Y))
+    g = np.clip((y - by) / (top - by), 0, 1)
+    g = 1 + (bulb - 1) * g * g * (3 - 2 * g)  # a goo shoulder mass over the open socket (the turnaround's goo arm is bulky there)
+    w = (g - 1) / max(bulb - 1, 1e-6)  # 0 on the arm, 1 at the top: the mass is centred on the socket
+    sx, sz = (float(v) for v in os.environ.get("ARM_SOCKET", ARM_SOCKET).split(","))
+    px, pz = px + w * (sx - px), pz + w * (sz - pz - az)
+    Q = np.stack([px + (P[:, 0] - mid[0]) * s * thick * g, y, pz + az + (P[:, 2] - mid[1]) * s * thick * g], 1)
+    N = N / np.maximum(np.linalg.norm(N, axis=1, keepdims=True), 1e-9)
+    ys = np.array([rest_world(rig, f"GooTail{k}")[1][1] for k in range(4)])
+    nb = first + len(CHAIN_Y)
+    d = np.zeros((len(Q), nb))
+    arm, fore = rig.names.index("RightArm"), rig.names.index("RightForeArm")
+    elbow = pts[1][1]
+    t = np.clip((pts[0][1] - 0.1 - Q[:, 1]) / (pts[0][1] - 0.1 - elbow), 0, 1)
+    t = t * t * (3 - 2 * t)
+    d[:, arm], d[:, fore] = 1 - t, t
+    c = np.clip((FADE_Y - Q[:, 1]) / (FADE_Y - ys[0]), 0, 1)
+    c = (c * c * (3 - 2 * c))[:, None]
+    d = (1 - c) * d
+    d[:, first:] = c * hat_weights(Q[:, 1], ys)
+    jn, wt = rs.top4(d)
+    tex = aj["materials"][ap["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    img = aj["images"][aj["textures"][tex]["source"]]
+    im = Image.open(io.BytesIO(bytes(n.view_bytes(aj, ab, img["bufferView"])))).convert("RGB")
+    im.thumbnail((ARM_TEX, ARM_TEX))
+    gain = np.array([float(x) for x in os.environ.get("ARM_GAIN", ARM_GAIN).split(",")])  # albedo level match to the body's goo atlas
+    im = Image.fromarray(np.clip(np.asarray(im, np.float32) * gain, 0, 255).astype(np.uint8))
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=90)
+    js["images"].append({"bufferView": out.add_view(buf.getvalue()), "mimeType": "image/jpeg"})
+    js["textures"].append({"source": len(js["images"]) - 1})
+    js["materials"].append({"name": "skin-goo", "doubleSided": True, "pbrMetallicRoughness": {
+        "baseColorTexture": {"index": len(js["textures"]) - 1}, "metallicFactor": 0.0, "roughnessFactor": 0.6}})
+    col = np.ones((len(Q), 4), np.float32)
+    col[:, 3] = float(os.environ.get("ARM_INK", "0.5"))
+    attrs = {"POSITION": out.add_floats(Q, "VEC3"), "NORMAL": out.add_floats(N, "VEC3"),
+             "TEXCOORD_0": out.add_floats(UV, "VEC2"), "WEIGHTS_0": out.add_floats(wt, "VEC4"),
+             "COLOR_0": out.add_floats(col, "VEC4")}
+    js["accessors"][attrs["POSITION"]].update(min=Q.min(0).tolist(), max=Q.max(0).tolist())
+    js["accessors"].append({"bufferView": out.add_view(jn.astype(np.uint16).tobytes()), "componentType": 5123,
+                            "count": len(Q), "type": "VEC4"})
+    attrs["JOINTS_0"] = len(js["accessors"]) - 1
+    f = F.astype(np.uint32)
+    js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
+    prims = js["meshes"][0]["primitives"]
+    keep = [p for p in prims if js["materials"][p["material"]]["name"] != "skin-goo"]
+    keep.append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
+    js["meshes"][0]["primitives"] = keep
+    return len(F), Q.min(0).round(2).tolist(), Q.max(0).round(2).tolist()
+
+
 def rebuild_r11(out_path, in_path, pack_path=None):
     """The r11 stages on an r10 glb; each one writes the file and the next reloads it (new arrays live in the new
     file's buffer)."""
@@ -1584,6 +1682,8 @@ if __name__ == "__main__":
         rebuild_stages(sys.argv[2], sys.argv[3], [("idle", fix_idle), ("jump", fix_jump), ("tail gather", gather_tail)])
     elif sys.argv[1] == "--r17":  # r17 (on an r16 file): goo arm hangs at its bind abduction, chain hangs, tail baked again
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", hang_goo_arm), ("tail gather", hang_tail)])
+    elif sys.argv[1] == "--r18":  # r18: the slim Meshy goo arm swapped in (argv: OUT IN ARM.glb); the chain's clips stay
+        rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm swap", lambda js, b, out, rig: swap_goo_arm(js, b, out, rig, sys.argv[4]))])
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
