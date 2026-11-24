@@ -20,9 +20,9 @@ const AIR_FRAMES := 20  # frames of each air cast checked
 
 ## Clips a Hunter's GLB carries that no kit move plays, with why they stay (the known-unused list). Each one is in the
 ## GLB, is mapped by no kmove, and is still held by the named user (so it can't rot into a silent orphan).
-## ostra flurry: authored for owner item 136's 8-card RMB flurry; DECISIONS 11-07 (parity first) put the source's Snap
-## back and no data/wiki/footage beat is a card volley, so no move plays it. The results stage holds it as his pose.
-const MOVELESS := {"ostra": {"flurry": "results_pose"}}
+## The holder is a result beat (WardenBeats: warden_anim/<art>.json "beats"). Empty since main moved results onto beats
+## and gave Ostra an emote win: his `flurry` (owner item 136's card volley, no source beat) is held by nothing (DEBT).
+const MOVELESS := {}
 var bad := 0
 var holder: Node3D
 
@@ -51,7 +51,6 @@ func run(main: Node) -> void:
 
 
 func _moveless_clips() -> void:
-	var poses: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/results_pose.json"))
 	for id in MOVELESS:
 		var cfg := WardenClips.data(String(id))
 		var hid := String(id)
@@ -71,10 +70,9 @@ func _moveless_clips() -> void:
 				if String((cfg["kmoves"][k] as Dictionary)["clip"]) == clip:
 					played_by.append(k)
 			ok(played_by.is_empty(), "%s: no kmove plays %s any more (%s)" % [id, clip, str(played_by)])
-			ok(
-				String((poses.get(id, {}) as Dictionary).get("clip", "")) == clip,
-				"%s: %s is still his results pose (%s), else cut it from the list" % [id, clip, MOVELESS[id][clip]]
-			)
+			var beat := String(MOVELESS[id][clip])
+			var held := String(((cfg.get("beats", {}) as Dictionary).get(beat, {}) as Dictionary).get("clip", ""))
+			ok(held == clip, "%s: %s is still his %s beat (%s), else cut it from the list" % [id, clip, beat, held])
 
 
 func _hunter(art_name: String, id: String, prefix: String) -> void:
