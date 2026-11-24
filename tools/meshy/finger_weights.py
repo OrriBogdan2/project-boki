@@ -153,7 +153,10 @@ def main():
             shutil.copyfile(src, raw)
     G.write(dst, j, bin_)
     blended = {k: v for k, v in rep.items() if k not in ("moved", "rolled")}
-    print("finger_weights: joints rolled %s, hand vertices blended %s, %d re-weighted -> %s" % (rep["rolled"], blended, rep["moved"], dst))
+    print(
+        "finger_weights: joints rolled %s, hand vertices blended %s, %d re-weighted -> %s"
+        % (rep["rolled"], blended, rep["moved"], dst)
+    )
 
 
 if __name__ == "__main__":

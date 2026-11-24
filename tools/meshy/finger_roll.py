@@ -70,7 +70,9 @@ def unit(v):
 
 def knuckles(pos, side):
     """Rest positions of the hand's finger joints 1, index first (pos: joint name -> rest position)."""
-    return [pos[side + "Hand" + f + "1"] for f in ("Index", "Middle", "Ring", "Pinky") if side + "Hand" + f + "1" in pos]
+    return [
+        pos[side + "Hand" + f + "1"] for f in ("Index", "Middle", "Ring", "Pinky") if side + "Hand" + f + "1" in pos
+    ]
 
 
 def palm_normal(pos, side):
