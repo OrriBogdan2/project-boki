@@ -9,7 +9,7 @@ extends RefCounted
 ## <sp>_reveal.png (the whole window with the reveal card up). Fails if any listed species is not rigged.
 ## --pack=<abs .pck>: load an exported pck over res:// first (for a GPU box that can only run the tree; the strict
 ## form is still `godot --main-pack <pck>`). --surfaces (with --shots-dir): also the real farm (the demo farm save,
-## all three starters on it) as farm.png, each listed species' Field Book page as dex_<sp>.png and as the garden's wild visitor as visitor_<sp>.png.
+## all three starters on it) as farm.png, each listed species' Field Book page as dex_<sp>.png, and as the garden's wild visitor in its zone as visitor_<sp>.png plus a close camera on it (visitor_close_<sp>.png; FAIL line if it is not out).
 
 const PX := 512
 
@@ -124,18 +124,19 @@ func _surfaces() -> void:
 		Overlay.close()
 	for sp in species:  # each listed species as the wild visitor of the zone you stand in (GardenVisitor)
 		Demo.setup("farm")
-		GardenVisitor.begin(GardenZones.current(), sp, Time.get_unix_time_from_system())
-		main.show_screen("home", {})
+		var vz := GardenZones.current()
+		GardenVisitor.begin(vz, sp, Time.get_unix_time_from_system())
+		main.show_screen("home", {"zone": vz})  # base-mode saves land on the hub, where no visitor walks
 		for i in 120:
 			await RenderingServer.frame_post_draw
 		if main.current and main.current.has_method("_close_panel"):
 			main.current._close_panel()  # the "while you were away" note
 		await _grab_window(out.path_join("visitor_%s.png" % sp), 30)
-		await _visitor_close(main.current, out.path_join("visitor_close_%s.png" % sp))
+		await _visitor_close(main.current, sp, out.path_join("visitor_close_%s.png" % sp))
 
 
 ## A close camera on the garden's visitor kin (the overhead view shows it a few pixels tall).
-func _visitor_close(h, path: String) -> void:
+func _visitor_close(h, sp: String, path: String) -> void:
 	if h == null or not ("kins" in h):
 		return
 	for k in h.kins:
@@ -145,13 +146,31 @@ func _visitor_close(h, path: String) -> void:
 		var cam := Camera3D.new()
 		cam.fov = 35
 		h.add_child(cam)
-		var at := n.global_position + Vector3(0, 0.5, 0)
-		cam.global_position = at + Vector3(0, 1.4, 3.2)
-		cam.look_at(at)
 		cam.make_current()
+		var aim := func() -> void:  # it wanders: keep it framed every frame, from its front-ish side
+			if not is_instance_valid(n):
+				return
+			var b := _box_of(n)
+			var d := maxf(b.size.y, b.size.x) * 2.2 + 0.4
+			cam.global_position = b.get_center() + Vector3(0.3 * d, 0.3 * d, d)
+			cam.look_at(b.get_center())
+		aim.call()
+		main.get_tree().process_frame.connect(aim)
 		await _grab_window(path, 30)
+		main.get_tree().process_frame.disconnect(aim)
 		cam.queue_free()
 		return
+	print("BOKI_EVERYWHERE FAIL: %s is not in the garden as the visitor (%d kins out)" % [sp, h.kins.size()])
+
+
+func _box_of(n: Node3D) -> AABB:
+	var box := AABB()
+	var first := true
+	for m in n.find_children("*", "MeshInstance3D", true, false):
+		var b: AABB = (m as MeshInstance3D).global_transform * (m as MeshInstance3D).get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	return box
 
 
 func _grab_window(path: String, frames := 30) -> void:
