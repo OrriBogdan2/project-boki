@@ -105,7 +105,8 @@ retexture through `eye_blend.py --extract`: only the retexture's eye texels (col
 eye, weighted by 3D distance from the eye, never filtered in UV space, as the atlas has one island per triangle), and
 its old painted eye blobs filled with the dark of its eye patch first. Still listed: hoarheron (its eye edit scored
 6.5: the side eye smears on 94 texels across the head), and duskapi, moundvark, murmurling, nacrolin, threadwyrm, whose
-head gets under 40 atlas texels across (gibbelle 284): too few for a readable eye until a UV pass gives the head more of the atlas.
+head gets under 40 atlas texels across (gibbelle 284): too few for a readable eye
+until a UV pass gives the head more of the atlas.
 
 ### A summoned Boki (out of the wisp)
 
