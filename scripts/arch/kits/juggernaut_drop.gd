@@ -180,10 +180,9 @@ func _hit(at: Vector3) -> void:
 func stunned_at(p: Vector3, r: float, at: Vector3) -> bool:
 	return Vector2(p.x - at.x, p.z - at.z).length() < float(data()["core"]) + r
 
-## The landing: the ground cracking across the hit circle, a shock ring and cel dust, debris, the boom, and a light
-## shake for anyone else close by (Shake: your own moves never shake your screen).
+## The landing: the ground cracking across the hit circle, a shock ring and cel dust, debris, and the boom.
+## No shake (shake.json landing_strike: a landing shakes no one; the struck take their hit's tier).
 func _impact_fx(at: Vector3) -> void:
 	var dd := data()
 	last_shock_r = float(dd["radius"])
 	k.vfx("drop_hit", at, dir, {"r": last_shock_r, "core": float(dd["core"])})
-	Shake.incoming_big(k.m, at, 0.35, k.h)

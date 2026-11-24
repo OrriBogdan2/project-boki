@@ -201,6 +201,7 @@ const CHECKS := {
 	# the Boki summon pad
 	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],  # --shots-dir=<dir>, GPU only
+	"--vex-cast-closeup": ["res://tools/vex_cast_closeup.gd", "vex_cast_closeup", null],  # Vex RMB / E close-up film
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--time-trial-check": ["res://tools/time_trial_check.gd", "time_trial_check", null],  # the Grounds course
 	"--ult-label-scan": ["res://tools/ult_label_scan.gd", "ult_label_scan", null],  # no bare number over an ult
@@ -1020,7 +1021,6 @@ const CHECKS := {
 	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],  # air casts, frame by frame
 	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],  # WardenBreak
 	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],  # WardenBreak frames
-	"--next-form-shots": ["res://tools/next_form_shots.gd", "next_form_shots", null],  # GPU, =<dir>
 	# moved out of main.gd (ext/checks-out-of-main-c)
 }
 
