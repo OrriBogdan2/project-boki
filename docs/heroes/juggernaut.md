@@ -78,7 +78,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (a tall crescent standing at the strip's far end, taller than he is, in his gold run white-hot at the edge, then a white cloud on the foe): 34, he heals 80% of what it deals (less while blighted); a knock (or a monster killed) with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our colours (gold guard, white-hot gold cleave) replace its red |
 | E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
 | R, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (a tall crescent standing at the strip's far end, taller than he is, in his gold run white-hot at the edge, then a white cloud on the foe): 34, he heals 80% of what it deals (less while blighted); a knock (or a monster killed) with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our colours (gold guard, white-hot gold cleave) replace its red |
-| Dash, Rampage | Shift | 2 charges, a third at rank 2: a 0.07s dip, then 4.5m in 0.17s (x the global dash feel; owner 113.8: much shorter than the 0.15s + 0.3s it was), flat and stretched, and a low recovery with the blade dragging: 9 along it, the tip 18 and a big knock (10.4s recharge), orange flame streaks; rank 3: a shot dodged through it feeds Rage (+15) | Quick Dash: 3 charges, about 2 bh | As the source, ours 2 charges (3 at rank 2); sync62's slower heavy dash kept (0.3s) |
+| Dash, Rampage | Shift | 2 charges, a third at rank 2: a 0.07s dip, then 4.5m in 0.17s (x the global dash feel; owner 113.8: much shorter than the 0.15s + 0.3s it was), flat and stretched, and a low recovery with the blade dragging: 9 along it, the tip 18, no knock back (Brall's Flame Step has none; DECISIONS 2026-11-07; 10.4s recharge), orange flame streaks; rank 3: a shot dodged through it feeds Rage (+15) | Quick Dash: 3 charges, about 2 bh | As the source, ours 2 charges (3 at rank 2); sync62's slower heavy dash kept (0.3s) |
 | E, Warchain | tap, recast | 13m (12.8s cooldown, -12.5% at rank 2, -37.5% at rank 3): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
 | X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (a tall crescent standing at the strip's far end, taller than he is, in his gold run white-hot at the edge, then a white cloud on the foe): 43, he heals 80% of what it deals (less while blighted); a knock (or a monster killed) with it makes it ready at once. About 1.1s in all; 36s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our colours (gold guard, white-hot gold cleave) replace its red |
 | E, Warchain | tap, recast | 13m (12.8s cooldown, 11.2s at rank 2, 8s at rank 3): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
@@ -260,8 +260,8 @@ Gilded Riposte's guard and cleave) is held for 0.12 s before it ends and goes of
 | In the air, the Meteor Drop resting | tap / hold | as on the ground: a Finishing Slam, or the Lunge charge (E while it charges: a Haul Slam); never a dead press | owner 11-10 (the combo below) |
 | Throwing (chain in flight) | any | as on the ground or in the air; the throw goes on | ours |
 | Hooked, on the ground | tap | Finishing Slam; the chain stays on | ours |
-| Hooked | hold, release | Aimed within 30 deg of the chain (`lunge.chain_deg`; the lane snaps onto it): Chain Lunge along the chain to its anchor (x1.25, no stun: DECISIONS 2026-11-07), the chain spent. Aimed elsewhere: a plain Lunge along the aim, the chain kept; he faces and re-aims freely the whole hold (owner 0.24.4) | ours |
-| Hooked, RMB held 0.12 s or more | E | Pulling, then a Haul Slam on arrival (2.8 m, 16 to 30, no stun: DECISIONS 2026-11-07) | ours |
+| Hooked | hold, release | Aimed within 30 deg of the chain (`lunge.chain_deg`; the lane snaps onto it): Chain Lunge along the chain to its anchor (x1.25, no stun and no knock-back: DECISIONS 2026-11-07), the chain spent. Aimed elsewhere: a plain Lunge along the aim, the chain kept; he faces and re-aims freely the whole hold (owner 0.24.4) | ours |
+| Hooked, RMB held 0.12 s or more | E | Pulling, then a Haul Slam on arrival (2.8 m, 16 to 30, no stun, no knock-back: DECISIONS 2026-11-07) | ours |
 | Hooked, Slam wind-up, Lunge, Meteor Drop hang or dive | E | the pull is kept and goes the moment the Smash lands (the drop's recovery doesn't hold it: the pull ends it) | owner 11-10 |
 | Hooked, RMB pressed under 0.12 s before E (tapped, or still down; a Slam wound up that short a time) | E | the pull starts with the Cinder Spin (the spin wins over the Slam and the Haul Slam) | owner 11-17 |
 | Pulling | press | Cinder Spin at once (2.2 m, blights 4 s); the pull goes on | [D] "DURING Feysteel Chain pull" |
@@ -283,6 +283,9 @@ Gilded Riposte's guard and cleave) is held for 0.12 s before it ends and goes of
 Differences from the source, and why:
 - **The Haul Slam and the Chain Lunge** are ours (the source has only the spin in the pull); they give the hold
   a meaning while chained instead of a plain Lunge away from the chain.
+  Neither knocks back (`rmb.lunge.push` and `rmb.haul.push` are 0), nor do the Rampage (`dash.hit_kb`, `dash.tip_kb`)
+  or the Riposte strike (`x.strike_kb`): Brall's card lists no knock-back on any of them (DECISIONS 2026-11-07, KIT_PARITY
+  "Knock distances"). Damage and the stuns are unchanged; only the Finishing Slam keeps its push (`[?]`).
 - **During the pull a press spins at once** (the source's Scorching Spin) rather than waiting to tell a tap from a
   hold; a Smash held when the pull starts (however briefly) becomes a Haul Slam.
 - **Exits:** the footage never shows a dash or a jump in the pull; we let Shift cancel it and a jump launch out of
@@ -387,7 +390,7 @@ From the wiki's ability page and patch notes (reference notes) and the owner's n
 | The ult: 0.65s of invulnerability, then the strike | wiki R | yes (ult f33-f39) | Built: blocks every hit and its crowd control; asserted |
 | The ult heals for a share of the damage dealt (80% on the newer card) | wiki R, in-game card | n/a | Built (80%); asserted |
 | No heal while anti-healed | wiki patch 08.21.2024 | n/a | Built through blight (healing barely takes); asserted |
-| No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted |
+| No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted. Owner 11-08 (item 11) over the footage: the cast keeps his speed (80% of a run, easing off at 1.6/s; a rise of 1 m/s or more gets +2.2 m/s, a ledge rise hands over to it; `x.carry_k` and the rest); asserted (`tools/kael_tap_ult_check.gd`) |
 | Killing a living enemy with the ult resets it (data: "Killing a living enemy with it resets its CD"; footage: reusable at once after the kill) | wiki R, in-game card | yes (ult f99-f101) | Built: the cleave's own hit takes a hunter down (our lethal hit is a knock, the source's kill): cooldown to 0 at once, no other window. A plain hit resets nothing; a hunter already down takes nothing from it; a monster or a wisp resets nothing. Shared path: `HeroUlt.landed` names the result, `HeroUlt.reset` clears the cooldown; asserted |
 | A sweet-spot Execution Slam knock resets the ult | wiki RMB | n/a | Built (within 2s of the sweet spot); asserted |
 | No reset from monsters or wisps | wiki patch 22.01.25 | n/a | Built: hunters only |
@@ -636,9 +639,9 @@ Kael on origin/main d255acbee against the source (docs/KIT_PARITY.md Kael block,
 sv/briefs/kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (owner)**, **regressed**, **open**.
 `kit` is scripts/arch/kits/juggernaut_kit.gd, `chain` juggernaut_chain.gd, `ult` juggernaut_ult.gd, `drop`
 juggernaut_drop.gd, `json` content/archetypes/juggernaut.json, `flow` content/dash_flow/juggernaut.json.
-`--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main. Many Kael branches are unmerged (kael-lunge-length,
-kael-rmb-dash-turn, kael-riposte-knock, kael-ult-reset-rebased-rebased, kael-tap-ult-1108, kael-chain-length, gaps-juggernaut):
-their files were left alone, so rows they touch are listed, not fixed.
+`--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main (Nov 9). Nov 20: kael-lunge-length (`4ea2625c13`,
+`e738af1ca7`), kael-riposte-knock, kael-ult-reset and gaps-juggernaut are on main or their branches are gone; kael-rmb-dash-turn
+and kael-tap-ult-1108 are still not merged. Rows below say which.
 
 | Row | Verdict | Where | Note |
 |---|---|---|---|
@@ -652,7 +655,7 @@ their files were left alone, so rows they touch are listed, not fixed.
 | RMB hold: held indefinitely, never auto-fires | match | kit:546 (base arch_kit.gd:111 is 9s) | owner; asserted "jug parity rmb" |
 | RMB hold: perfect release | differ (owner) | kit:583, kit:769, json:26 | +20% distance, cue and ring; no source equivalent |
 | RMB hold: lane, magenta at full, pose only while held | match | kit:551, kit:680 | |
-| RMB hold: Lunge length 4.5 to 5.4 m | done (ext/kael-open-rows) | json:30 | [F] 2.5 to 3 bh (about 5 m) at any charge; DECISIONS 2026-11-11 a short lunge. See "Open rows closed, Nov 20" |
+| RMB hold: Lunge length 4.5 to 5.4 m | done `4ea2625c13` (ext/kael-open-rows, on main) | json:30 | [F] 2.5 to 3 bh (about 5 m) at any charge; DECISIONS 2026-11-11 a short lunge. See "Open rows closed, Nov 20" |
 | RMB hold: a miss doubles the cooldown | match | kit:787 | [W] |
 | RMB air: Meteor Drop at the cursor, own 7.2s slot, stun core | match | drop:62, drop:145, json:27 | 0.8x of the data's 9s |
 | RMB in the pull: Cinder Spin, blights | match | kit:909, json:29 | [D] |
@@ -674,7 +677,7 @@ their files were left alone, so rows they touch are listed, not fixed.
 | Hold rows: LMB and RMB keep through dash and jump | match | flow:71, flow:84 | [O] |
 | Into-jump: X locked | match | flow:97 | planted guard |
 | Clips: 21 kmoves, locomotion and states map to kael.glb clips | match | content/rules/warden_anim/kael.json:51 | all 49 clips resolve; KIT_PARITY still says "missing" (stale doc) |
-| Rank text: Warchain and dash cooldown numbers | regressed | json:42, json:43 | text says 9.5 / 8.3 / 5.9s and 9s, real 12.8 / 11.2 / 8.0s and 10.4s; juggernaut.json is in flight (kael-lunge-length, kael-rmb-dash-turn), left for the next pass |
+| Rank text: Warchain and dash cooldown numbers | done (checked 2026-11-20) | json:51 to json:53 | rank text now reads 12.8 / 11.2 / 8.0s Warchain and 10.4 / 8.8 / 6.4s dash, the real numbers |
 
 Fixed on this branch (docs only; the code was right): the Warchain per-slot row (cooldown 12.8s, not 9.5s), the state-machine
 row (no blight from the hook, as `--juggernaut-combo-check` already asserts), and the dash-on-knock row. No code change, so no

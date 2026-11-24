@@ -20,7 +20,6 @@ extends Node3D
 ## Bond: every hunter it hits goes to HeroUlt.landed; the best event of the cast pays.
 
 const EMBER := Color("ff9a3a")
-const ROCK := Color("5a4a42")       # the Faultline slam's rock debris
 const MAX_CELLS := 6           # pooled eruption columns
 const COLUMN_H := 4.5          # m, how high an eruption column stands at its peak
 const COLUMN_T := 0.9          # s an eruption column lives
@@ -32,7 +31,6 @@ const LEAP_TOP := 0.5          # by here he is "leap_h" up (easing out)
 const LEAP_HANG := 0.8         # he hangs to here, sinking to HANG_SINK of the top, then drives down
 const HANG_SINK := 0.9
 const DRIVE_CAP := 40.0        # m/s the drive down may fall at (past the usual 12 m/s fall cap)
-const DUST := Color("b8a58a")
 
 var k: BulwarkKit
 var h: Hunter
@@ -108,7 +106,7 @@ func cast() -> bool:
 	h.vel = Vector3(0, h.vel.y, 0)
 	leap = h.grounded
 	k.play("bul_ult_wind")
-	k.m.sfx("bjorn_ult_wind", h.pos, -3.0 if h.is_local() else -7.0)
+	KitWindup.play(k, "x", "bjorn_ult_wind", -3.0 if h.is_local() else -7.0)
 	return true
 
 func cell_len() -> float:
@@ -222,6 +220,7 @@ func _interrupt() -> void:
 	interrupts += 1
 	k.cd["x"] = minf(float(k.cd["x"]), float(xd().get("refund", 8.0)))
 	k.m.sfx("warn", h.pos, -4.0, 0.8)
+	KitWindup.broken(k, "x")
 	_hide_lane()
 
 ## A merge drops the wind-up with no slam; a fissure already running finishes (it's a cast).
@@ -249,15 +248,13 @@ func _slam() -> void:
 	_flood_t = 0.3
 	_place_flat(_flood, c0 + Vector3(0, 0.08, 0), Vector2(cell_len(), float(x.get("width", 5.5))))
 	_streak_t = float(x.get("cell_t", 0.15)) * cells.size() + float(x.get("lead", 0.2))
-	k.m.fx.burst(c0 + Vector3(0, 0.4, 0), AimKit.hero_col(h), 24, 7.0, 0.4, 3.0, 1.3)
-	k.m.fx.dust(c0, 14)
+	HeroVfx.of(k.m).play(h, "fault_slam", c0, dir)
 	_impact(origin + Vector3(dir.x, 0, dir.y) * 1.0)
 
-## The landing's weight: hit-stop, a shake for the players round it, a dust ring, rock debris, cracked ground
+## The landing's weight: hit-stop, a shake for the players round it, rock debris, cracked ground
 ## and the quake.
 func _impact(at: Vector3) -> void:
 	var m: Node = k.m
-	var w := float(xd().get("width", 5.5))
 	var stop := ImpactWeight.hold_s("heavy")       # his landing holds him a heavy hit's hit-stop, foes or none
 	if h == m.get("player") and not bool(m.get("net_on")):
 		m.freeze_frame(stop)
@@ -266,12 +263,8 @@ func _impact(at: Vector3) -> void:
 	for f in k.foes_in(origin, cell_len() * 1.2):
 		if hit.has(f.get_instance_id()):
 			Feel.hitstop(m, h, f, float(xd().get("strike_dmg", 4.0)), {"heavy": true, "payoff": true})
-	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)      # the players near the landing (never his own)
-	m.fx.ring(at + Vector3(0, 0.15, 0), w * 0.5, DUST, 0.45)
-	m.fx.ring(at + Vector3(0, 0.1, 0), w * 0.8, DUST, 0.7)
-	m.fx.burst(at + Vector3(0, 0.3, 0), ROCK, 18, 8.0, 0.8, 18.0, 1.6, Vector3.UP, 55.0)
-	m.fx.burst(at + Vector3(0, 0.2, 0), DUST, 14, 5.0, 0.6, 2.0, 1.8)
-	LDFx.of(m).scorch(at, 2.0, 1.8, Color("8a7a66"), Color("2a241e"))
+	Shake.big(m, at, "ult", h)      # the players near the landing (never his own)
+	HeroVfx.of(m).play(h, "fault_land", at, dir)
 	m.sfx("bjorn_ult_quake", at, 0.0 if h.is_local() else -4.0)
 
 ## The racing fissure reaches cell `i`: each foe in it not struck yet takes the strike and the stun.
@@ -295,8 +288,7 @@ func _erupt(i: int) -> void:
 	var slab: Dictionary = _slabs[i % MAX_CELLS]
 	slab["t"] = COLUMN_T
 	slab["at"] = mid
-	k.m.fx.dust(mid, 10)
-	k.m.fx.burst(mid + Vector3(0, 0.6, 0), EMBER, 12, 6.0, 0.4, 6.0, 1.1, Vector3.UP, 30.0)
+	HeroVfx.of(k.m).play(h, "fault_cell", mid, dir)
 	k.m.sfx("bjorn_slam", mid, -8.0, 0.7 + 0.08 * i)
 	var dmg: float = float(x.get("dmg", 18.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	for f in _foes_in(i):
@@ -307,7 +299,7 @@ func _erupt(i: int) -> void:
 		f.hurt(dmg, h, {"src": "abil", "ab": "ultimate", "lift": float(x.get("lift", 7.0)),
 			"slow": float(x.get("slow_t", 1.5)), "slow_k": float(x.get("slow", 0.5)),
 			"dr": true, "tags": ["ultimate"]})
-		k.m.fx.burst(f.pos + Vector3(0, 1.0, 0), Color("ff5a3a"), 10, 5.0, 0.3, 2.0, 1.0)
+		HeroVfx.of(k.m).play(h, "fault_foe", f.pos, dir)
 		if f is Hunter:
 			hunters += 1
 			HeroUlt.landed(k, f)
@@ -342,6 +334,7 @@ func _tick_scar(dt: float) -> void:
 		if not f.hittable() or absf(f.pos.y - a.y) > 1.5:
 			continue
 		if AimMode.in_lane(a, dir, length, float(x.get("scar_w", 1.4)), f.pos):
+			CcSfx.zone_slow(f)
 			f.slow_k = maxf(f.slow_k, slow) if f.slow_t > 0.0 else slow
 			f.slow_t = maxf(f.slow_t, 0.25)
 	scar["fx"] = float(scar["fx"]) - dt

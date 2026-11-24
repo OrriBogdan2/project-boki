@@ -86,9 +86,9 @@ func mage() -> void:
 	var range_r := float(xd["range"])
 	var hang: Array = hc._looks_at(m, from)
 	var wide: Array = hang.filter(func(l): return l["mode"] == HeroVfx.MODES["scorch"] and float(l["size"]) > range_r)
-	ok("Kitefall look (footage): a dark ring band on the range edge, a gold crown at the cursor, no storm field yet",
+	ok("Kitefall look (footage): a dark ring band on the range edge, a pink crown at the cursor, no storm field yet",
 			not hc._pool(hang, range_r, 0.1).is_empty() and wide.size() == 1
-			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_GOLD,
+			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_PINK,
 			"%d range-wide looks (the band only)" % wide.size())
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
@@ -133,7 +133,7 @@ func mage() -> void:
 			and absf(ac.dmg(T) - want) < 0.5 and ac.dmg(T2) > 1.0,
 			"hits %d took %.1f want %.1f" % [int(U.last.get("hits", 0)), ac.dmg(T), want])
 	var moved: float = hc._flat(T.pos, t_at)
-	ok("Kitefall: a knockback and 1 Static each", moved > 0.4 and K.spark_n(T) >= 1 and K.spark_n(T2) >= 1,
+	ok("Kitefall: 1 Static each, no knock", moved < 0.3 and K.spark_n(T) >= 1 and K.spark_n(T2) >= 1,
 			"moved %.2f static %d %d" % [moved, K.spark_n(T), K.spark_n(T2)])
 	ok("Kitefall: the bond fills once, for the best event of the cast (a hit)",
 			is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"]))

@@ -577,7 +577,7 @@ func _sync_deco() -> void:
 		var e: Dictionary = want[u]
 		if not nodes.has(u):
 			var n := make_deco(e)
-			Models.merge_tree(n, true)      # its plain parts, in every group: a mesh per material, shadows unchanged
+			PaintMerge.tree(n)      # its plain parts, in every group: a mesh per painted look, shadows unchanged
 			n.set_meta("sig", _sig(e))
 			_place_node(n, e)
 			ShadowPolicy.judge_tree(n, n.scale.x)      # small props throw no shadow (item 94)
@@ -840,7 +840,7 @@ func _reach(free_cells: Array, solid_cells: Array) -> PackedByteArray:
 	var head := 0
 	while head < q.size():
 		var i: int = q[head]; head += 1
-		var x := i % w.w; var z := i / w.w
+		var x := i % w.w; var z := int(i / float(w.w))
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var nx: int = x + dv.x; var nz: int = z + dv.y
 			if nx < 0 or nz < 0 or nx >= w.w or nz >= w.h: continue
@@ -2071,6 +2071,7 @@ func _extras() -> Array:
 			var face := UI.frame(Color(String(HomeLayout.COLOURS[i])), 13, UI.INK if i == colour else Color(0, 0, 0, 0), 3)
 			for state in ["normal", "hover", "pressed"]:
 				sw.add_theme_stylebox_override(state, face)
+			UI.sfx(sw, false)
 			sw.pressed.connect(func():
 				Sfx.play("click")
 				set_colour(pick))

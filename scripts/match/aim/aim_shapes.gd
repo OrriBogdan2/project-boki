@@ -226,7 +226,7 @@ static func _circle(g: AimGeo, e: Dictionary) -> void:
 		_soft_circle(g, e, ctr, r, maxf(band, lw))
 	elif band > 0.0:
 		g.disc(ctr, r, _fill(e, 0.2))               # a thin ring, its outer edge on r, a faint tint inside
-		g.ring(ctr, r - band * 0.5, band, _rim(e))
+		_circle_edge(g, e, ctr, r - band * 0.5, band)
 	else:
 		g.disc(ctr, r, _fill(e, 0.5), _fill(e, 1.2))
 		_circle_edge(g, e, ctr, r, lw)

@@ -96,7 +96,7 @@ func slot_info(slot: String) -> Dictionary:
 ## Each click thrusts (no auto-repeat for a player: holding is the Tide Lunge). Kept held past lmb.tide.after
 ## the press, he draws back into the Tide Lunge and lets it go on release. Bots keep the held chain.
 func lmb_override(held: bool, dt: float) -> bool:
-	if h.wid != "swordfish" or KinMerge.active(h):
+	if h.wid != "swordfish":
 		_drop_tide()
 		return false
 	var pressed := held and not lmb_was
@@ -481,6 +481,7 @@ func _tick_lines(list: Array, dt: float) -> void:
 				o["slow_k"] = float(s["slow_k"])
 			f.hurt(float(s["dmg"]), h, o)
 			if s["ab"] == "ult": HeroUlt.landed(self, f)
+			else: vfx("spout_hit", f.pos, s["dir"])
 		if float(s["left"]) <= 0.0:
 			list.erase(s)
 
@@ -572,6 +573,7 @@ func _tick(dt: float) -> void:
 		if float(pd["tick"]) <= 0.0:
 			pd["tick"] = 0.25
 			for f in foes_in(pd["at"], float(pd["r"])):
+				CcSfx.zone_slow(f)
 				f.slow_k = maxf(f.slow_k, float(pd["k"])) if f.slow_t > 0.0 else float(pd["k"])
 				f.slow_t = maxf(f.slow_t, 0.35)
 		if float(pd["left"]) <= 0.0:

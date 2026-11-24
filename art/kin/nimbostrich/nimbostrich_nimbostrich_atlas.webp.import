@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://beoj1e0cxgwpv"
-path="res://.godot/imported/nimbostrich_nimbostrich_atlas.webp-a0bf4b4dbef68dbbb4a8a8357054cdd7.ctex"
+path.bptc="res://.godot/imported/nimbostrich_nimbostrich_atlas.webp-a0bf4b4dbef68dbbb4a8a8357054cdd7.bptc.ctex"
+path.astc="res://.godot/imported/nimbostrich_nimbostrich_atlas.webp-a0bf4b4dbef68dbbb4a8a8357054cdd7.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "be0227e49d9916a69b47bae0d8f1f3f9"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/nimbostrich/nimbostrich_nimbostrich_atlas.webp"
-dest_files=["res://.godot/imported/nimbostrich_nimbostrich_atlas.webp-a0bf4b4dbef68dbbb4a8a8357054cdd7.ctex"]
+dest_files=["res://.godot/imported/nimbostrich_nimbostrich_atlas.webp-a0bf4b4dbef68dbbb4a8a8357054cdd7.bptc.ctex", "res://.godot/imported/nimbostrich_nimbostrich_atlas.webp-a0bf4b4dbef68dbbb4a8a8357054cdd7.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -16,7 +16,6 @@ const PAD_R := 0.8  # [m] how close to the pad's middle you step to be thrown (a
 const MOVE_TAG := {"dash": "DASH", "kick": "WALL KICK", "pad": "JUMP PAD", "glide": "GLIDE"}
 const NEXT_COL := Color("ffd25a")  # the gate you go through next
 const ARCH_COL := Color("8fe3c8")
-const CLOCK_Y := 188.0  # [px] the run clock's top: clear of the kit drill panel and the HUD's top-right lines
 
 var m: Match
 var gates: Array[Gate] = []
@@ -30,10 +29,19 @@ var next_i := 0  # the gate you go through next (gates.size(): on to the finish)
 var run_arch := ""  # the Hunter the run counts for
 var last_time := 0.0  # [s] the last finished run (tests read it)
 var clock: Label = null
+
 var _nag_i := -1  # the dash gate you were told to dash through, so it's said once
 var _next_mat: Material = null
 var _best_lb: Label3D = null
 var _shown_arch := ""  # the Hunter whose best the start arch shows
+
+
+## One gate: where its middle is, the move it asks for ("" none), its ring mesh.
+class Gate:
+	var at := Vector3.ZERO
+	var move := ""
+	var node: Node3D = null
+	var ring: MeshInstance3D = null
 
 
 ## The map's "trial" block ({} when this map has none).
@@ -46,10 +54,10 @@ static func best(arch: String) -> float:
 	return float((Save.d.get("time_trial", {}) as Dictionary).get(arch, 0.0))
 
 
-## Save v20 -> v21: the time trial's personal bests start empty.
-static func migrate(data: Dictionary) -> void:
-	if typeof(data.get("time_trial")) != TYPE_DICTIONARY:
-		data["time_trial"] = {}
+## Save v12 -> v13: the time trial's personal bests start empty.
+static func migrate(data_v: Dictionary) -> void:
+	if typeof(data_v.get("time_trial")) != TYPE_DICTIONARY:
+		data_v["time_trial"] = {}
 
 
 ## Keeps secs as arch's best if it beats the old one, and saves. True for a new best.
@@ -69,7 +77,7 @@ func _init(match_node: Match) -> void:
 
 
 ## Builds the arches, gates, pad and clock from the map's trial block (nothing when there is none).
-func build(layer: CanvasLayer) -> void:
+func build(layer: CanvasLayer, grounds: Grounds) -> void:
 	var t := data()
 	if t.is_empty():
 		return
@@ -85,23 +93,22 @@ func build(layer: CanvasLayer) -> void:
 	pad_land = _on_ground(Grounds.v3(t["pad"]["land"]))
 	_next_mat = Models.toon(NEXT_COL, true, 0.6)
 	for i in gates.size():
-		_place_gate(i)
-	_best_lb = _arch(start, gates[0].at, "TIME TRIAL")
-	_arch(finish, finish * 2.0 - gates[-1].at, "FINISH")
+		_place_gate(i, grounds)
+	_best_lb = _arch(start, gates[0].at, "TIME TRIAL", grounds)
+	_arch(finish, finish * 2.0 - gates[-1].at, "FINISH", grounds)
 	var pad := Models.jump_pad(ARCH_COL)
 	pad.position = pad_at
 	pad.rotation.y = atan2(-(pad_land.x - pad_at.x), -(pad_land.z - pad_at.z))
 	m.add_child(pad)
 	clock = Label.new()
+	clock.position = Vector2(0, 104)
+	clock.size = Vector2(1280, 30)
 	clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	clock.add_theme_font_size_override("font_size", 26)
 	clock.add_theme_color_override("font_color", NEXT_COL)
 	clock.add_theme_color_override("font_outline_color", Color.BLACK)
 	clock.add_theme_constant_override("outline_size", 8)
-	clock.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)  # centred, under the kit drill's top panel
-	clock.offset_top = CLOCK_Y
-	clock.offset_bottom = CLOCK_Y + 32.0
-	clock.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	clock.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	clock.visible = false
 	layer.add_child(clock)
 	_light(0)
@@ -113,7 +120,7 @@ func _on_ground(p: Vector3) -> Vector3:
 
 
 ## An air ring facing from the gate before it to the one after, with the move it asks for over it.
-func _place_gate(i: int) -> void:
+func _place_gate(i: int, _grounds: Grounds) -> void:
 	var g := gates[i]
 	var from := start if i == 0 else gates[i - 1].at
 	var to := finish if i == gates.size() - 1 else gates[i + 1].at
@@ -132,7 +139,7 @@ func _place_gate(i: int) -> void:
 
 
 ## The lair gate without its bars, facing toward `ahead`, with a sign over it. Returns the sign.
-func _arch(at: Vector3, ahead: Vector3, text: String) -> Label3D:
+func _arch(at: Vector3, ahead: Vector3, text: String, _grounds: Grounds) -> Label3D:
 	var arch := BossModels.gate(ARCH_W, ARCH_COL)
 	arch.get_node("Bars").free()
 	arch.position = at
@@ -167,28 +174,28 @@ func stop() -> void:
 
 ## Per frame (from Grounds.tick): the pad, the start arch, the next gate, the finish, the clock.
 func tick(dt: float) -> void:
-	var hunter: Hunter = m.player
-	if gates.is_empty() or hunter == null or hunter.downed:
+	var p_v: Hunter = m.player
+	if gates.is_empty() or p_v == null or p_v.downed:
 		return
-	_pad(hunter)
-	if hunter.arch != _shown_arch:
+	_pad(p_v)
+	if p_v.arch != _shown_arch:
 		stop()
 		show_best()
-	if _under(hunter, start):
+	if _under(p_v, start):
 		running = true
 		run_t = 0.0
 		next_i = 0
 		_nag_i = -1
-		run_arch = hunter.arch
+		run_arch = p_v.arch
 		_light(0)
 		clock.visible = true
 	if not running:
 		return
 	run_t += dt
 	if next_i < gates.size():
-		_try_gate(hunter)
-	elif _under(hunter, finish):
-		_finish(hunter)
+		_try_gate(p_v)
+	elif _under(p_v, finish):
+		_finish(p_v)
 		return
 	clock.text = (
 		"%s   ·   gate %d / %d   ·   best %s"
@@ -201,15 +208,15 @@ func tick(dt: float) -> void:
 	)
 
 
-func _under(hunter: Hunter, arch_at: Vector3) -> bool:
-	return hunter.flat_dist(arch_at) < ARCH_R and hunter.pos.y - arch_at.y < ARCH_H and hunter.pos.y > arch_at.y - 0.5
+func _under(p_v: Hunter, arch_at: Vector3) -> bool:
+	return p_v.flat_dist(arch_at) < ARCH_R and p_v.pos.y - arch_at.y < ARCH_H and p_v.pos.y > arch_at.y - 0.5
 
 
-func _try_gate(hunter: Hunter) -> void:
+func _try_gate(p_v: Hunter) -> void:
 	var g := gates[next_i]
-	if (hunter.pos + Vector3(0, BODY_UP, 0)).distance_to(g.at) > GATE_R:
+	if (p_v.pos + Vector3(0, BODY_UP, 0)).distance_to(g.at) > GATE_R:
 		return
-	if g.move == "dash" and not (hunter.roll_t > 0.0 and hunter.move_kind == "dash"):
+	if g.move == "dash" and p_v.roll_t <= 0.0:
 		if _nag_i != next_i and m.hud:
 			m.hud.toast_small("Dash through this gate", NEXT_COL)
 		_nag_i = next_i
@@ -220,13 +227,13 @@ func _try_gate(hunter: Hunter) -> void:
 	_light(next_i)
 
 
-func _finish(hunter: Hunter) -> void:
+func _finish(p_v: Hunter) -> void:
 	running = false
 	last_time = run_t
 	clock.visible = false
 	var old := best(run_arch)
 	var beat := record(run_arch, run_t)
-	m.sfx("unlock", hunter.pos, -4.0, 1.2 if beat else 1.0)
+	m.sfx("unlock", p_v.pos, -4.0, 1.2 if beat else 1.0)
 	_light(0)
 	show_best()
 	if m.hud == null:
@@ -248,18 +255,10 @@ func _light(from: int) -> void:
 
 
 ## The course's jump pad throws you onto the glide tower, as the map's own pads do.
-func _pad(hunter: Hunter) -> void:
-	if not hunter.pad.is_empty() or hunter.vel.y > 0.5 or hunter.flat_dist(pad_at) > PAD_R:
+func _pad(p_v: Hunter) -> void:
+	if not p_v.pad.is_empty() or p_v.vel.y > 0.5 or p_v.flat_dist(pad_at) > PAD_R:
 		return
-	if hunter.pos.y - pad_at.y < 0.4 and hunter.pos.y - pad_at.y > -0.3:
-		hunter.pad_launch(pad_land)
-		m.sfx("jump", hunter.pos, -2.0, 0.8)
-		m.fx.burst(hunter.pos + Vector3(0, 0.3, 0), ARCH_COL, 16, 5.0, 0.5, 2.0)
-
-
-## One gate: where its middle is, the move it asks for ("" none), its ring mesh.
-class Gate:
-	var at := Vector3.ZERO
-	var move := ""
-	var node: Node3D = null
-	var ring: MeshInstance3D = null
+	if p_v.pos.y - pad_at.y < 0.4 and p_v.pos.y - pad_at.y > -0.3:
+		p_v.pad_launch(pad_land)
+		m.sfx("jump", p_v.pos, -2.0, 0.8)
+		m.fx.burst(p_v.pos + Vector3(0, 0.3, 0), ARCH_COL, 16, 5.0, 0.5, 2.0)

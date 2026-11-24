@@ -23,6 +23,9 @@ extends RefCounted
 ##    two-bone IK (WardenSkeleton.reach_bones), at most LOCK_PULL of the leg off the clip's ankle; lifted, it eases back
 ##    onto the clip. For run clips whose planted foot sweeps back unevenly, which no playback rate keeps planted
 ##    (Albert, Lace, Neve). The ground's way is the blend's (`pos`), so a run-and-aim's turned legs lock true.
+##  - with no footing (state "footing", HazardMoves on ice: the hazard's "moves" data) the stride shortens by "stride",
+##    the foot lock lets go, the clip quickens by "cadence" and the free arms (those in "arm_swing") lift
+##    "arms_out" rad out from the side.
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
@@ -58,10 +61,13 @@ var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
 var feet: Array = []         # [thigh, shin, leg length, lock offset, last clip ankle, lowest, highest, down]
-var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch]
+# [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch, out sign]
+var arms: Array = []
 var settle: Array = []       # [leg bone, the rotation it showed last frame]
 var walk_len := 1.0          # s: one cycle of the forward walk clip at rate 1
 var run_len := 1.0           # s: of the forward run clip
+var ice := {}               # the last "footing" data (kept while it fades out)
+var ice_w := 0.0            # 0 sure footing .. 1 none
 
 func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed := false) -> void:
 	skel = sk
@@ -88,13 +94,23 @@ func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed
 		var hi := WardenSkeleton.find(sk, "hand." + String(side))
 		var ti := WardenSkeleton.find(sk, "thigh." + String(side))
 		if ai >= 0 and hi >= 0 and ti >= 0:
-			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN])
+			var out := signf(sk.get_bone_global_rest(ai).origin.x)      # (turning toward this side lifts it out)
+			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN, out])
+
+## Eases toward the state's "footing" ({} on sure ground) before plan.
+func footing(dt: float, ft: Dictionary) -> void:
+	ice_w = move_toward(ice_w, 0.0 if ft.is_empty() else 1.0, FADE_RATE * dt)
+	if not ft.is_empty():
+		ice = ft
 
 
 ## The loco_rate scale for speed `spd` (m/s) at `w` of the way from the walk ring to the run ring, from the "loco"
 ## data, and sets `gain` and `bob`: "stride": [walk, run] stretch of the thighs, "foot_mps": [walk, run] foot speed of
-## the clips with it at rate 1 (m/s, tools/anim_audit.gd), "bob": [walk, run]. "side_foot_mps" (optional, same shape)
-## is the strafe loops' own, mixed in by how far `pos` (the blend position, x right, y forward) points sideways. The
+## the clips with it at rate 1 on the model at its own scale (m/s, tools/anim_audit.gd; the run's fitted on the
+## --foot-slide-check STEP line), "bob": [walk, run]. `spd` is at that scale too (WardenClips divides a match's
+## draw scale out). "side_foot_mps" (optional, same shape) is the strafe loops' own, mixed in by how far `pos` (the
+## blend position, x right, y forward) points sideways, and "back_foot_mps" (optional) the back loops', by how far
+## it points back (tools/foot_slide_check.gd --fit-dirs). The
 ## walk plays stretched to the run's cycle (WardenClips._gait_loop), so the blend steps as one cycle of the blended
 ## length and covers the blended stride: the rate that keeps that stride planted at this speed, clamped as the clips
 ## feel it (a hasted run, up to HunterMove.speed_cap, keeps its feet planted instead of sliding at RATE_MAX).
@@ -105,12 +121,15 @@ func plan(spd: float, lc: Dictionary, pos: Vector2, w: float, moving := 1.0) -> 
 	var stride: Array = lc.get("stride", [1.0, 1.0])
 	var foot: Array = lc.get("foot_mps", [lc.get("walk_speed", 2.2), lc.get("run_speed", 4.6)])
 	var side: Array = lc.get("side_foot_mps", foot)
-	var side_k := absf(pos.x) / maxf(absf(pos.x) + absf(pos.y), 0.01)
-	var walk_mps := lerpf(float(foot[0]), float(side[0]), side_k)
-	var run_mps := lerpf(float(foot[1]), float(side[1]), side_k)
-	gain = lerpf(float(stride[0]), float(stride[1]), w)
+	var back: Array = lc.get("back_foot_mps", foot)
+	var sum := maxf(absf(pos.x) + absf(pos.y), 0.01)
+	var side_k := absf(pos.x) / sum
+	var back_k := maxf(-pos.y, 0.0) / sum
+	var walk_mps := lerpf(float(foot[0]), float(side[0]), side_k) + (float(back[0]) - float(foot[0])) * back_k
+	var run_mps := lerpf(float(foot[1]), float(side[1]), side_k) + (float(back[1]) - float(foot[1])) * back_k
+	gain = lerpf(float(stride[0]), float(stride[1]), w) * lerpf(1.0, float(ice.get("stride", 1.0)), ice_w)
 	var fl: Array = lc.get("foot_lock", [0.0, 0.0])
-	lock = lerpf(float(fl[0]), float(fl[1]), w)
+	lock = lerpf(float(fl[0]), float(fl[1]), w) * (1.0 - ice_w)      # (no footing, nothing to plant)
 	ground_v = Vector3(pos.x, 0.0, -pos.y).normalized() * spd
 	var b: Array = lc.get("bob", [1.0, 1.0])
 	bob = lerpf(float(b[0]), float(b[1]), w)
@@ -123,7 +142,7 @@ func plan(spd: float, lc: Dictionary, pos: Vector2, w: float, moving := 1.0) -> 
 	var reach := lerpf(walk_mps * walk_len, run_mps * run_len, w)     # m a foot travels in a cycle
 	var top := RATE_MAX * maxf(1.0, spd / maxf(run_mps, 0.1))      # hasted past the run clip: ceiling grows
 	var rate := clampf(spd * cycle / maxf(reach * moving, 0.01), RATE_MIN * moving, top)
-	return follow(rate * run_len / cycle, moving)
+	return follow(rate * run_len / cycle, moving) * lerpf(1.0, float(ice.get("cadence", 1.0)), ice_w)
 
 ## The clip rate `rate` that keeps the feet planted, as much as the move owns the blend (`moving` 0..1; the idle
 ## breathes at 1).
@@ -164,14 +183,21 @@ func apply(dt: float, legs_k: float, arm_k: float, stand_k: float) -> void:
 	for r in arms:
 		var arm_p := _pitch(skel.get_bone_global_pose(r[3]).origin - skel.get_bone_global_pose(r[0]).origin)
 		var leg_p := _pitch(skel.get_bone_global_pose(r[2]).basis.y)
-		r[5] = arm_p if is_nan(r[5]) else lerp_angle(r[5], arm_p, a)  # (a first frame is its own mean)
+		# (a first frame is its own mean. A clip that owns the arm - a bow drawn over the run - is not the arm's mean
+		# pose: the mean stands still while the swing is off, or the arm whips round to it when the move ends)
+		if is_nan(r[5]):
+			r[5] = arm_p
+		elif arm_w > 0.0:
+			r[5] = lerp_angle(r[5], arm_p, a)
 		r[6] = leg_p if is_nan(r[6]) else lerp_angle(r[6], leg_p, a)
 		if arm_w <= 0.0:
 			continue
 		var turn := (float(r[5]) - float(r[4]) * angle_difference(r[6], leg_p) - arm_p) * arm_w
+		var spread := float(ice.get("arms_out", 0.0)) * ice_w * arm_w * float(r[7])
 		var pq := _basis_q(r[1])
 		var q := skel.get_bone_pose_rotation(r[0])
-		skel.set_bone_pose_rotation(r[0], pq.inverse() * Quaternion(Vector3.RIGHT, turn) * pq * q)
+		var turn_q := Quaternion(Vector3.BACK, spread) * Quaternion(Vector3.RIGHT, turn)
+		skel.set_bone_pose_rotation(r[0], pq.inverse() * turn_q * pq * q)
 
 
 ## The foot lock ("foot_lock"), skeleton space: a foot on the ground keeps its spot as the clip sweeps it back.
