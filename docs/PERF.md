@@ -35,7 +35,13 @@ lines around straight-line code (an early `return` between them would leave the 
 bench calls them itself and times them: Hunter and Boki rigs, AimDraw, the HUD); the engine wait (the rest of the
 frame) split into the rest of the scene's process, the draw (before, during and after the viewports, from the
 renderer's own timestamps) and the physics ticks; and the shadow casters by owner. Its "match script" ms is the
-whole frame, Match code included. `--bench-novsync` and `--bench-noshadow` are probes (vsync off, shadows off).
+whole frame, Match code included. The draw's steps come from the renderer's own stamps, GPU and CPU us from each stamp
+to the next ("draw steps (gpu)" and "(cpu)" lines: shadows, the opaque and transparent passes, post, the canvas), and
+twice in the camp (an FX peak at 19.5 s, a quiet spell at 23.5 s) `tools/perf/fight_scene.gd` prints what the camera
+sees: things by class, distinct materials and shaders, see-through surfaces and the screens their boxes cover, repeated
+mesh+material pairs (MultiMesh candidates) and each Hunter's meshes, surfaces, outline passes and casters.
+`--bench-novsync`, `--bench-noshadow` and `--bench-nofx` are probes (vsync off, shadows off, the Fx and HeroVfx roots
+hidden).
 On rp2g the draw's frame end ("after viewports") swings 4-14 ms between runs of the same build: compare a
 script section across runs, and the wall time only over several runs on one worker.
 
