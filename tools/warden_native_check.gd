@@ -3,8 +3,8 @@ extends RefCounted
 ## (content/rules/warden_native.json) builds from its <art>_meshy.glb with Meshy's bones as Meshy named them (no
 ## contract bones, no WardenSync), its clips play for the game states (idle, walk, run, jump, attack, crouch), it
 ## stands as tall as the contract model, faces the way the Hunter faces, keeps the hit ring, hides the rig's procedural
-## weapon, puts the aim node on Meshy's hand and hangs the anchor empties on Meshy's bones. Every other Warden keeps
-## the contract path.
+## weapon, puts the aim node on Meshy's hand, hangs the anchor empties on Meshy's bones and wears the drop poses (the
+## landing squash: --land-weight-check). Every other Warden keeps the contract path.
 
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
@@ -120,7 +120,18 @@ func _states(main: Node, a: String) -> void:
 	_crouch_arms(a, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
+	_drop_poses(a, m, nat)
 	m.free()
+
+
+## The drop's shared poses (WardenDropPose) on Meshy's bones, held to the contract Heroes' bars (--clip-check's
+## _drop_poses): upright aboard the rocket, belly down and spread in the skydive, banking into a steer, off for the
+## glider.
+func _drop_poses(a: String, m: Node3D, nat: WardenNative) -> void:
+	var clip_check = load("res://tools/clip_check.gd").new()
+	clip_check._drop_poses(a, m, nat)
+	ok(clip_check.bad == 0, "%s: the drop poses on Meshy's bones (%d misses)" % [a, clip_check.bad])
+	nat.set_process(true)
 
 
 ## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats"); a
