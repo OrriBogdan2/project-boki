@@ -1,17 +1,23 @@
 extends "res://tools/new_player_flow_check.gd"
 ## --tutorial-playthrough-check: ABSOLUTE gate check (not "new red vs main"). A new player's first run on a fresh
-## save (prologue, hatch, starter pick, "Learn to fight"), then the tutorial course played by TutorialDrive. Fails
-## when any step takes longer than STEP_LIMIT_S of game time, or the course does not reach its end (the lift and
-## the results). Prints one "TUTPLAY step <id> <seconds>" row per step. The screens before and after the course
+## save (prologue, hatch, starter pick, "Learn to fight"), then the tutorial course played by TutorialDrive. The
+## starter is Vex, or `-- --starter=archer|juggernaut|gunslinger` (Lace, Kael). Fails when any step takes longer
+## than STEP_LIMIT_S of game time, or the course does not reach its end (the lift and the results). Prints one
+## "TUTPLAY step <id> <seconds>" row per step. The screens before and after the course
 ## are --new-player-flow-check's, so a stall there fails too. Seconds are game time, the same on any box.
+## Also the Mask line (lore.json mask_line, DECISIONS 'Identity and Masks'): on screen once, when the first Relic
+## waits by your face, and on no other screen of the run.
 
 const STEP_LIMIT_S := 40.0  # s of game time one step may take (the flow check's own limit is 45)
 const TIME_SCALE := 4.0  # the hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
+
+const STARTERS := {"Lace": "archer", "Kael": "juggernaut", "Vex": "gunslinger"}  # the tutorial's starter pick
 
 var step_id := ""
 var step_s := 0.0
 var rows: Array = []
 var stalled := false
+var line_seen := 0
 
 
 func run(m: Node) -> void:
@@ -19,12 +25,17 @@ func run(m: Node) -> void:
 	tree = main.get_tree()
 	Save.no_write = true
 	Save.d = Save.fresh()
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--starter="):
+			starter = a.substr(10)
+	ok(starter in STARTERS.values(), "the starter is Lace, Kael or Vex (%s)" % starter)
 	main.get_window().size = Vector2i(1280, 720)
 	Engine.time_scale = TIME_SCALE
 	await _prologue()
 	await _hatch()
 	await _tutorial_match()
 	_end()
+	ok(line_seen == 1, "the Mask line shows exactly once, at the first Relic (%d times)" % line_seen)
 	Engine.time_scale = 1.0
 	if not stalled:
 		await _garden()
@@ -40,7 +51,7 @@ func run(m: Node) -> void:
 func _garden() -> void:
 	var da = load("res://tools/tutorial_dead_air_check.gd").new()
 	da.main = main
-	await da._farm("Lace", "archer")
+	await da._farm(STARTERS.find_key(starter), starter)
 	ok(da.bad == 0, "the garden tutorial plays to its end with no stall (%d dead-air failures)" % da.bad)
 	print("TUTPLAY garden steps %d, done %s" % [FarmTutorial.steps().size(), FarmTutorial.state().get("done", false)])
 
@@ -52,6 +63,7 @@ func _course_tick(m: Match) -> void:
 		return
 	var id: String = m.tut.id()
 	if id != step_id:
+		_count_line("tutorial step '%s'" % id, 0)
 		_close_step()
 		step_id = id
 		step_s = 0.0
@@ -70,3 +82,20 @@ func _close_step() -> void:
 		return
 	print("TUTPLAY step %s %.1f" % [step_id, step_s])
 	rows.append("%s %.1f" % [step_id, step_s])
+
+## The Mask line is shown only at the put-on prompt: one label there, none on any other screen.
+func _before_act(what: String) -> void:
+	_count_line(what, 1 if what == "put the Relic on" else 0)
+
+func _count_line(where: String, want: int) -> void:
+	var line := String(Content.rules("lore")["mask_line"])
+	ok(line == "This Relic holds a fallen Hunter. Put it on, and you become them.", "the Mask line's words: " + line)
+	var n := _labels_with(tree.root, line)
+	line_seen += n
+	ok(n == want, "the Mask line shows %d time(s) before '%s', want %d" % [n, where, want])
+
+func _labels_with(node: Node, text: String) -> int:
+	var n := 1 if node is Label and (node as Label).text == text and (node as Label).is_visible_in_tree() else 0
+	for c in node.get_children():
+		n += _labels_with(c, text)
+	return n
