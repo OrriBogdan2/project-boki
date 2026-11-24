@@ -244,7 +244,7 @@ func _summon_cues() -> void:
 	s.popped(true)
 	var fold: Array = Sfx.cue_log.duplicate()
 	Sfx.cue_log = null
-	var heard := func(log: Array) -> Array: return log.map(func(c): return c[0])
+	var heard := func(entries: Array) -> Array: return entries.map(func(c): return c[0])
 	ok(own.begins_with("bk_"), "summon: a Cindle has its own happy cry to layer (%s)" % own)
 	var want := ["wisp_burst", own]
 	ok(heard.call(burst) == want, "summon: the burst plays the bloom, then its own cry (%s)" % [heard.call(burst)])
@@ -459,25 +459,34 @@ func _garden_names() -> void:
 	var named := seen.size() >= 12 and silent.is_empty()
 	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
 
+
 ## 10. The carry cues: on file, capped, the take carrying, and wired where the swap, claim and steal happen.
 func _carry() -> void:
-	var re := RegEx.create_from_string("\"(carry_[a-z_]+)\"")
+	var re := RegEx.create_from_string('"(carry_[a-z_]+)"')
 	var names := []
 	for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/match/carry_sfx.gd")):
 		if not names.has(hit.get_string(1)):
 			names.append(hit.get_string(1))
 	var wrong := names.filter(func(n): return not Sfx.ensure(n) or not Sfx.MIN_GAP.has(n))
-	ok(names.size() == 5 and wrong.is_empty(),
-			"carry: %d cues on file with a MIN_GAP (wrong: %s)" % [names.size(), wrong])
+	ok(
+		names.size() == 5 and wrong.is_empty(),
+		"carry: %d cues on file with a MIN_GAP (wrong: %s)" % [names.size(), wrong]
+	)
 	var reach: float = Sfx.sound_reach.get("carry_take", 0.0)
 	ok(reach > Sfx.hear_range and reach <= REACH_MAX, "carry: the thief's take carries %.0f m" % reach)
-	var calls := {"scripts/match/match.gd": "CarrySfx.swap(", "scripts/match/capture.gd": "CarrySfx.claim(",
-			"scripts/kin/kin_track.gd": "CarrySfx.stolen(", "scripts/match/life.gd": "CarrySfx.from_box("}
+	var calls := {
+		"scripts/match/match.gd": "CarrySfx.swap(",
+		"scripts/match/capture.gd": "CarrySfx.claim(",
+		"scripts/kin/kin_track.gd": "CarrySfx.stolen(",
+		"scripts/match/life.gd": "CarrySfx.from_box("
+	}
 	var unwired := calls.keys().filter(func(f): return not _src(f).contains(calls[f]))
 	ok(unwired.is_empty(), "carry: swap, claim, steal and deathbox paths play the cues (missing: %s)" % [unwired])
 
+
 static func _src(path: String) -> String:
 	return FileAccess.get_file_as_string("res://" + path)
+
 
 ## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
 func _ult_cues() -> void:
@@ -1386,12 +1395,12 @@ func _style_rows(m: Match) -> void:
 		if not styles.has(st):
 			styles.append(st)
 	var rules: Dictionary = Content.rules(StepSurface.RULES)
-	var bad := []
+	var bad_l := []
 	for st in styles:
 		if not rules["styles"].has(st) or not known.has(StepSurface.for_style(st)):
-			bad.append(st)
-	var good: bool = bad.is_empty() and known.has(String(rules["default"]))
-	ok(good, "every biome style maps to a known step set (%s; unmapped %s)" % [styles, bad])
+			bad_l.append(st)
+	var good: bool = bad_l.is_empty() and known.has(String(rules["default"]))
+	ok(good, "every biome style maps to a known step set (%s; unmapped %s)" % [styles, bad_l])
 	ok(rules["styles"].keys().all(func(k): return styles.has(k)), "step_biomes.json lists no style the game lacks")
 	var want := [["ember", "stone"], ["gloom", "stone"], ["frost", "snow"]]
 	want += [["meadow", "grass"], ["bloom", "grass"], ["storm", "grass"]]
@@ -1938,6 +1947,7 @@ func _boki_impacts() -> void:
 	var caps := [Sfx.IMPACT_GAP, Sfx.STACK_MAX]
 	ok(caps[0] >= 60 and caps[1] <= 4, "impacts keep their own gap (%d ms) and the stack cap (%d)" % caps)
 
+
 ## The Boki leaving the fight to fly back to you (active>flying_home) has a cue of the Boki set: the `recall` takes
 ## (Kin.recall, the ordered call; KinFollow.leap, its own hop; Kin.merge_leap), played at the Boki so you and nearby
 ## players hear it at normal attenuation. --sfx-silence-audit (--audit-throw) counts it: 0 silent.
@@ -1947,8 +1957,11 @@ func _boki_fly_home() -> void:
 	ok(_takes("recall").size() >= 2 and Sfx.ensure("recall"), "recall has %d takes" % _takes("recall").size())
 	var kin := FileAccess.get_file_as_string("res://scripts/match/kin.gd")
 	var fol := FileAccess.get_file_as_string("res://scripts/match/kin_follow.gd")
-	ok(kin.count('m.sfx("recall", pos, ') == 2 and fol.count('k.m.sfx("recall", k.pos, HOP_DB)') == 1,
-			"recall and merge_leap play it at the Boki, a hop home at HOP_DB (no `mine`: everyone in reach hears it)")
+	ok(
+		kin.count('m.sfx("recall", pos, ') == 2 and fol.count('k.m.sfx("recall", k.pos, HOP_DB)') == 1,
+		"recall and merge_leap play it at the Boki, a hop home at HOP_DB (no `mine`: everyone in reach hears it)"
+	)
+
 
 func _impact_ok(types: Dictionary, t: String) -> bool:
 	return String(types.get(t, "")) == "ki_" + t and not _takes("k_" + t).is_empty() and Sfx.ensure("ki_" + t)
@@ -1957,6 +1970,7 @@ func _impact_ok(types: Dictionary, t: String) -> bool:
 func _type_of(id: String) -> String:
 	return String(KinLib.species(id).get("type", ""))
 
+
 ## 17. Grimble's slugs sound where they land (11-22, content/vfx/dredge.json "slug_hit", MissFx.shot_landed): a Hunter
 ## (his own dredge_hit), a monster (dr_slug_mob) and a wall or crate (dr_slug_wall), each once per volley, so a
 ## seven-slug scattergun is at most 3 voices; the player's own hits on bodies stay Match.on_damage's (no double),
@@ -1964,8 +1978,19 @@ func _type_of(id: String) -> String:
 func _slug_hits(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "arch": "dredge",
-			"cls": Arch.weight("dredge"), "weapon": Arch.signature("dredge")})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 77,
+			"no_drop": true,
+			"arch": "dredge",
+			"cls": Arch.weight("dredge"),
+			"weapon": Arch.signature("dredge")
+		}
+	)
 	m.set_process(false)
 	var me: Hunter = m.player
 	var rival: Hunter = null
@@ -1980,11 +2005,13 @@ func _slug_hits(main: Node) -> void:
 		by.arch = "dredge"
 		for surface in want:
 			var e: Ent = null
-			if surface == "hunter": e = me if who == "rival" else rival
-			elif surface == "mob": e = mob
+			if surface == "hunter":
+				e = me if who == "rival" else rival
+			elif surface == "mob":
+				e = mob
 			var heard := _slug_land(m, by, e, "wall" if surface == "wall" else "hit", "t_%s_%s" % [who, surface])
-			var exp: Array = [] if who == "player" and surface != "wall" else [want[surface]]
-			ok(heard == exp, "slug hit: the %s's slug on a %s plays %s (%s)" % [who, surface, exp, heard])
+			var expect: Array = [] if who == "player" and surface != "wall" else [want[surface]]
+			ok(heard == expect, "slug hit: the %s's slug on a %s plays %s (%s)" % [who, surface, expect, heard])
 		var volley := _slug_volley(m, by, mob)
 		var one: Array = [] if who == "player" else ["dr_slug_mob"]
 		ok(volley == one, "slug hit: %s's seven-slug volley on one monster sounds %s, once" % [who, volley])
@@ -2002,6 +2029,7 @@ func _slug_hits(main: Node) -> void:
 	mob.free()
 	m.queue_free()
 
+
 ## The cues one slug landing on `e` (null: nothing, with `why`) asks for, in order.
 func _slug_land(m: Match, by: Hunter, e: Ent, why: String, pg: String) -> Array:
 	var s := {"x": {"pg": pg}, "by": by, "vel": Vector2(1, 0), "pos": by.pos}
@@ -2012,6 +2040,7 @@ func _slug_land(m: Match, by: Hunter, e: Ent, why: String, pg: String) -> Array:
 		out.append(c[0])
 	Sfx.cue_log = null
 	return out
+
 
 ## Seven slugs of one volley: all on `e` (a monster), or with `mixed` on a Hunter, a monster and a wall in turn.
 func _slug_volley(m: Match, by: Hunter, e: Ent, mixed := false) -> Array:
@@ -2032,6 +2061,7 @@ func _slug_volley(m: Match, by: Hunter, e: Ent, mixed := false) -> Array:
 		out.append(c[0])
 	Sfx.cue_log = null
 	return out
+
 
 ## 10. What you can see you can hear: the cue at the side edge of the reference view (half of CamRig.style_across)
 ## is within -12 dB and on the clear bus, 10 m further is at least 4 dB quieter, past 30 m nothing plays.

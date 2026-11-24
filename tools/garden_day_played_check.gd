@@ -140,7 +140,7 @@ func run(m: Node) -> void:
 ## and says a line, its journal keeps one line, no pop-up opens, and the same kind is not news a second time.
 func _loot_react(bb) -> void:
 	FarmChatter._look_t = 0.0
-	FarmChatter.tick(bb, 0.01)      # the farm learns who is home and what is in the bag
+	FarmChatter.tick(bb, 0.01)  # the farm learns who is home and what is in the bag
 	ComeLook._looks.clear()
 	var panel: String = bb.panel_open
 	Save.d["items"]["hushpearl"] = int(Save.d["items"].get("hushpearl", 0)) + 1
@@ -148,8 +148,10 @@ func _loot_react(bb) -> void:
 	FarmChatter._look_t = 0.0
 	FarmChatter.tick(bb, 0.01)
 	var looks: Array = ComeLook._looks.duplicate()
-	ok(looks.size() == 1 and looks[0]["kind"] == "item",
-		"react: one Boki walks up to the new Hushpearl (%d)" % looks.size())
+	ok(
+		looks.size() == 1 and looks[0]["kind"] == "item",
+		"react: one Boki walks up to the new Hushpearl (%d)" % looks.size()
+	)
 	if looks.is_empty():
 		return
 	var k: Dictionary = looks[0]["k"]

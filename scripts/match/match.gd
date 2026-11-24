@@ -2259,9 +2259,9 @@ func _update_tracking(dt: float) -> void:
 	if track_t > 0.0:
 		return
 	track_t = 22.0
-	for tr in tracked:
-		var k: Kin = tr["kin"]
-		var h: Hunter = tr["holder"]
+	for trk in tracked:
+		var k: Kin = trk["kin"]
+		var h: Hunter = trk["holder"]
 		if k.dead or h.out:
 			continue
 		var at: Vector3 = k.pos if k.state != "bench" else h.pos
@@ -2427,7 +2427,7 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 	var in_grass := world.in_bush(p.x, p.z) or in_smoke(p)
 	var near := NEAR_SENSE * (0.5 if crouched else 1.0)
 	# (muzzle flashes and a Warden's light give you away at full range, whatever the raid condition)
-	var rng := VIEW_RANGE + 2.0 if revealed else view_range(crouched)
+	var roll_rng := VIEW_RANGE + 2.0 if revealed else view_range(crouched)
 	for h in hunters:
 		if h.team != team_i or h.out or h.extracted or h.riding:
 			continue
@@ -2438,7 +2438,7 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 		# sneaking (Ctrl) slows you but lets you see further, as in Supervive
 		var far: float = (1.25 if h.crouch else 1.0) * (1.0 + h.gear_stat("sight"))
 		far *= ScoutLook.sight_mul(h, rel / maxf(d, 0.001))
-		if d > rng * far or (in_grass and not revealed):
+		if d > roll_rng * far or (in_grass and not revealed):
 			continue
 		if not revealed and rel.normalized().dot(h.aim_dir()) < VIEW_COS:
 			continue
@@ -2670,14 +2670,14 @@ func _update_shots(dt: float) -> void:
 				continue
 			v = v * (sp1 / sp0)
 			s["vel"] = v
-		var step := Vector3(v.x, 0, v.y) * dt
-		var n := int(ceil(step.length() / 0.25))
+		var stp := Vector3(v.x, 0, v.y) * dt
+		var n := int(ceil(stp.length() / 0.25))
 		var hit := false
 		var sx: Dictionary = s["x"]
-		var near := _shot_targets(s, p, step.length() + float(s["r"]) + HIT_SLACK)      # once a step, not per 0.25 m
-		var nbrk := Breakables.near(breaks, p, step.length() + float(s["r"]) + Breakables.HIT_R)
+		var near := _shot_targets(s, p, stp.length() + float(s["r"]) + HIT_SLACK)      # once a step, not per 0.25 m
+		var nbrk := Breakables.near(breaks, p, stp.length() + float(s["r"]) + Breakables.HIT_R)
 		for i in n:
-			p += step / n
+			p += stp / n
 			if sx.has("lob"):
 				var tr0 := Vector2(p.x - (s["start"] as Vector3).x, p.z - (s["start"] as Vector3).z).length()
 				var tot := float(s["life0"]) * (s["vel"] as Vector2).length()
@@ -2699,7 +2699,7 @@ func _update_shots(dt: float) -> void:
 			if rock_hit or (gp > p.y and not over_ok and not pierces):
 				if int(sx.get("bounce", 0)) > 0:
 					# ricochet: flip whichever way took it into the wall and keep going
-					var back := p - step / n
+					var back := p - stp / n
 					var bv: Vector2 = s["vel"]
 					var gx := world.ground_at(p.x, back.z)
 					if (world.is_block(p.x, back.z) and gx + World.BLOCK_H > p.y) or gx > p.y: bv.x = -bv.x
@@ -2712,7 +2712,7 @@ func _update_shots(dt: float) -> void:
 					p = back
 					s["pos"] = p
 					hit = true; break
-				_shot_end(s, p - step / n, null, "wall")      # at the face, so the miss puff is in view
+				_shot_end(s, p - stp / n, null, "wall")      # at the face, so the miss puff is in view
 				hit = true; break
 			var vr: String = verbs.shot_check(s, p) if verbs else ""
 			if vr == "end":
@@ -4371,8 +4371,8 @@ static func duel_opts() -> Dictionary:
 	return {"training": true, "duel": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 5151, "no_drop": true}
 
 # ------------------------------------------------------------------ hero zones
-func add_zone(kind_s: String, at: Vector3, radius: float, dur: float, team_i: int, owner: Hunter, from_net := false) -> void:
-	var col: Color = owner.accent() if owner else Color.WHITE
+func add_zone(kind_s: String, at: Vector3, radius: float, dur: float, team_i: int, own_by: Hunter, from_net := false) -> void:
+	var col: Color = own_by.accent() if own_by else Color.WHITE
 	var n := Node3D.new()
 	add_child(n)
 	n.position = at
@@ -4388,11 +4388,11 @@ func add_zone(kind_s: String, at: Vector3, radius: float, dur: float, team_i: in
 			ring.material_override = Models.ring_mat(Color(col if kind_s == "sanctuary" else Color("b06ae0"), 0.9), 0.06)
 			ring.position.y = 0.08
 			n.add_child(ring)
-	zones.append({"kind": kind_s, "pos": at, "r": radius, "t": 0.0, "dur": dur, "team": team_i, "owner": owner, "node": n, "tick": 0.0})
+	zones.append({"kind": kind_s, "pos": at, "r": radius, "t": 0.0, "dur": dur, "team": team_i, "owner": own_by, "node": n, "tick": 0.0})
 	if kind_s == "well":
 		sfx("warn", at, -2.0, 1.4)
-	if net_on and not from_net and owner:
-		net_event(["zone", kind_s, _r(at.x), _r(at.y), _r(at.z), radius, dur, team_i, owner.nid])
+	if net_on and not from_net and own_by:
+		net_event(["zone", kind_s, _r(at.x), _r(at.y), _r(at.z), radius, dur, team_i, own_by.nid])
 
 func _dome_blocks(s: Dictionary, p: Vector3) -> bool:
 	for z in zones:
@@ -4417,8 +4417,8 @@ func _update_zones(dt: float) -> void:
 		var n: Node3D = z["node"]
 		var k: float = z["t"] / z["dur"]
 		n.scale = Vector3.ONE * minf(1.0, z["t"] * 6.0) * (1.0 if k < 0.9 else (1.0 - k) * 10.0)
-		var owner: Hunter = z["owner"]
-		var mine: bool = owner != null and not owner.remote
+		var own_by: Hunter = z["owner"]
+		var mine: bool = own_by != null and not own_by.remote
 		var c: Vector3 = z["pos"]
 		if z["tick"] <= 0.0:
 			z["tick"] = 0.25
@@ -4440,10 +4440,10 @@ func _update_zones(dt: float) -> void:
 						for f in foes_of(z["team"]):
 							var rel := Vector2(c.x - f.pos.x, c.z - f.pos.z)
 							if rel.length() < z["r"] and rel.length() > 0.4:
-								f.hurt(1.0, owner, {"kb": rel.normalized() * 4.5, "slow": 0.5, "src": "abil"})
+								f.hurt(1.0, own_by, {"kb": rel.normalized() * 4.5, "slow": 0.5, "src": "abil"})
 		if z["t"] >= z["dur"]:
 			if z["kind"] == "well" and mine:
-				Abil._blast(owner, c, z["r"] * 0.6, 26.0, 7.0, Color("b06ae0"), 5.0)
+				Abil._blast(own_by, c, z["r"] * 0.6, 26.0, 7.0, Color("b06ae0"), 5.0)
 			n.queue_free()
 			zones.erase(z)
 

@@ -5,25 +5,29 @@ extends RefCounted
 ## auto and merge ability must draw one of them (the stock fallback is none), and the accent must keep the hue
 ## of the type colour. --verbose prints the table that docs/HERO_VFX.md holds. Never touches the save.
 
-const HUE_TOL := 30.0            # degrees: how far an accent may sit from its type's Bokidex hue
-const MIN_SAT := 0.1             # below this a colour is grey, and grey has no hue to keep
+const HUE_TOL := 30.0  # degrees: how far an accent may sit from its type's Bokidex hue
+const MIN_SAT := 0.1  # below this a colour is grey, and grey has no hue to keep
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		print("BOKITYPECOL FAIL ", what)
 		bad += 1
 
+
 func _hue_gap(a: Color, b: Color) -> float:
 	var d := absf(a.h - b.h)
 	return minf(d, 1.0 - d) * 360.0
+
 
 func _stages(list: Array, out: Array) -> void:
 	for st: StageSpec in list:
 		out.append(st)
 		for ev in st.then:
 			_stages(st.then[ev], out)
+
 
 ## Every stage an ability or merge form draws: [[label, StageSpec]].
 func _drawn(ks: KinSpec) -> Array:
@@ -46,6 +50,7 @@ func _drawn(ks: KinSpec) -> Array:
 			rows.append(["merge %s" % mg.id, st])
 	return rows
 
+
 func run(_main: Node) -> void:
 	Save.no_write = true
 	var verbose := OS.get_cmdline_user_args().has("--verbose")
@@ -59,8 +64,10 @@ func run(_main: Node) -> void:
 			continue
 		var accent := Color(String(look["col"]))
 		var gap := _hue_gap(accent, dex)
-		ok(gap <= HUE_TOL or minf(accent.s, dex.s) < MIN_SAT,
-			"%s accent #%s is %.0f degrees off its Bokidex colour #%s" % [t, accent.to_html(), gap, dex.to_html()])
+		ok(
+			gap <= HUE_TOL or minf(accent.s, dex.s) < MIN_SAT,
+			"%s accent #%s is %.0f degrees off its Bokidex colour #%s" % [t, accent.to_html(), gap, dex.to_html()]
+		)
 		var palette: Array = cats + [dex, accent]
 		var seen := {}
 		for id in KinLib.kin_ids():

@@ -87,12 +87,20 @@ const MEEKO_HEALS := [
 	"heal_stars", "hearth", "hearth_land", "hearth_motes", "bloom", "call", "call_land", "call_plus", "mended"
 ]
 const MEEKO_HURTS := [
-	"cast", "cast_trail", "kindled", "seed_aim", "seed_cast", "seed_trail", "seed_stick", "seed_field", "seed_burst",
+	"cast",
+	"cast_trail",
+	"kindled",
+	"seed_aim",
+	"seed_cast",
+	"seed_trail",
+	"seed_stick",
+	"seed_field",
+	"seed_burst",
 	"seed_root"
 ]
 const SHOT_TRAILS := {"archer": "fire_tap", "mage": "lmb_trail"}
 const TRAIL_MIN := 0.45  # m across at the head, so a shot trail reads at match zoom (the hairlines were 0.26)
-const FIRE_HUE := Vector2(0.04, 0.2)    # hue (0..1) of orange through yellow: Kael's red keys stay out of it
+const FIRE_HUE := Vector2(0.04, 0.2)  # hue (0..1) of orange through yellow: Kael's red keys stay out of it
 ## Moves a kit doesn't name in full: every Hero's own, built from a kind, or played by a shared look (rock crumble).
 const CALLED_ELSEWHERE := [
 	"hurt",
@@ -113,6 +121,23 @@ const CALLED_ELSEWHERE := [
 const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
 
 const DT_FILL := 1.0 / 60.0  # s per step while timing the Faultline fill
+# ------------------------------------------------------------------ status looks
+## The statuses the source makes readable on a body: each has a look in content/rules/status_looks.json.
+const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
+const RIG_PARTS := 16  # meshes one status look may use (30 Hunters each with a few stay cheap)
+## The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md) on its body: the Hunter's look, colours and
+## pace, sized to the Boki (over its head, round its body), from the pool; Grounded never lands so shows nothing.
+const BOKI_CC := ["stun", "root", "slow", "daze"]
+## DECISIONS "a ground ring means gameplay": the moves that are a dash, a landing, a reset or a cast with no area
+## carry no ring layer, and no scorch under a wind-up (docs/VFX_QUALITY.md, "Ground ring audit").
+const NO_RING := {
+	"ashwick": ["flashover"],
+	"dredge": ["anchor_slam", "reel"],
+	"gil": ["dive", "tide_lunge", "beached", "wave_land"],
+	"gunslinger": ["e_fire"],
+	"juggernaut": ["slam_hit"],
+}
+const NO_SCORCH := {"dolm": ["row_tell"], "rimewright": ["rime", "rime_melt"]}
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
@@ -246,6 +271,7 @@ func _recipes(arch: String) -> void:
 				loops.append(s["n"])
 	ok(loops.is_empty(), "%s: every sound is a one-shot, nothing can outlive the match %s" % [arch, loops])
 
+
 ## Kael's black-red: his red keys and the model's crack colour stay out of orange and yellow
 ## (Cinder owns fire). The Gilded Riposte's gold keys stay gold on purpose.
 func _looks(arch: String) -> void:
@@ -253,8 +279,21 @@ func _looks(arch: String) -> void:
 		return
 	var pal: Dictionary = HeroVfx.data(arch)["palette"]
 	var cols := {"model_glow.core": Arch.def(arch).get("model_glow", {}).get("core", "")}
-	for k: String in ["main", "hot", "char", "smoke", "red", "wave", "peak", "chain", "chain_iron",
-			"chain_hot", "chain_hook", "haul", "haul_hot"]:
+	for k: String in [
+		"main",
+		"hot",
+		"char",
+		"smoke",
+		"red",
+		"wave",
+		"peak",
+		"chain",
+		"chain_iron",
+		"chain_hot",
+		"chain_hook",
+		"haul",
+		"haul_hot"
+	]:
 		cols[k] = pal.get(k, "")
 	var warm: Array = []
 	for k: String in cols:
@@ -262,6 +301,7 @@ func _looks(arch: String) -> void:
 		if c.s > 0.3 and c.v > 0.25 and c.h > FIRE_HUE.x and c.h < FIRE_HUE.y:
 			warm.append(k)
 	ok(warm.is_empty(), "%s: no red key is orange or yellow %s" % [arch, warm])
+
 
 func _sound_exists(sname: String) -> bool:
 	return ResourceLoader.exists("res://audio/%s.wav" % sname) or ResourceLoader.exists("res://audio/%s_1.wav" % sname)
@@ -641,13 +681,12 @@ func _meeko_field() -> void:
 		"Hearthlight thrown": float(hd["thrown_fill"]) * 1.1 * rim_k,
 	}
 	for what: String in inside:
-		ok(inside[what] <= ZONE_CORE_A, "Meeko's %s: inside alpha at most %.2f to the rim (%.2f)" % [
-			what, ZONE_CORE_A, inside[what]])
+		ok(
+			inside[what] <= ZONE_CORE_A,
+			"Meeko's %s: inside alpha at most %.2f to the rim (%.2f)" % [what, ZONE_CORE_A, inside[what]]
+		)
 	var hurt := Color(String(d["palette"][fd["col"]]))
-	ok(
-		not _heal_hue(hurt),
-		"Meeko's root field: the hurt colour, not her heal green (%s)" % hurt.to_html(false)
-	)
+	ok(not _heal_hue(hurt), "Meeko's root field: the hurt colour, not her heal green (%s)" % hurt.to_html(false))
 	var ring: Array = (d["moves"]["seed_burst"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
 	ok(
 		ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,
@@ -659,10 +698,7 @@ func _meeko_field() -> void:
 		"Meeko's Ember Cast hit: a leaf chunk-and-spark burst"
 	)
 	var call_ring: Array = (d["moves"]["call"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
-	ok(
-		call_ring.size() == 1 and call_ring[0]["size"] == "r",
-		"Meeko's Hearth Call: a ring at the tether's reach"
-	)
+	ok(call_ring.size() == 1 and call_ring[0]["size"] == "r", "Meeko's Hearth Call: a ring at the tether's reach")
 
 
 ## Meeko's heals and hurts read apart (COMBAT_CLARITY): every heal look is her leaf green family and its motes rise,
@@ -1123,12 +1159,6 @@ func _dots(m: Match) -> void:
 	ok(is_equal_approx(float(p.get_instance_shader_parameter("ground_y")), g), "a burst gives its ground (%.2f)" % g)
 
 
-# ------------------------------------------------------------------ status looks
-## The statuses the source makes readable on a body: each has a look in content/rules/status_looks.json.
-const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
-const RIG_PARTS := 16  # meshes one status look may use (30 Hunters each with a few stay cheap)
-
-
 ## Puts `st` on `F` the way the game does (its timers, KitStatus, a kit's keep) or takes it off.
 func _set_status(m: Match, f: Hunter, st: String, on: bool) -> void:
 	var t := 1.5 if on else 0.0
@@ -1200,11 +1230,6 @@ func _statuses(m: Match, p: Hunter) -> void:
 	f.teleport(p.pos + Vector3(StatusLooks.LOD_FAR + 4.0, 0, 0))
 	ok(not l.showing(f, "stun"), "status looks: nothing draws past LOD_FAR")
 	f.stun_t = 0.0
-
-
-## The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md) on its body: the Hunter's look, colours and
-## pace, sized to the Boki (over its head, round its body), from the pool; Grounded never lands so shows nothing.
-const BOKI_CC := ["stun", "root", "slow", "daze"]
 
 
 func _boki_statuses(m: Match, p: Hunter) -> void:
@@ -1487,18 +1512,6 @@ func _streak_span(v: HeroVfx, fps: float) -> float:
 	dot.queue_free()
 	_clear(v)
 	return span
-
-
-## DECISIONS "a ground ring means gameplay": the moves that are a dash, a landing, a reset or a cast with no area
-## carry no ring layer, and no scorch under a wind-up (docs/VFX_QUALITY.md, "Ground ring audit").
-const NO_RING := {
-	"ashwick": ["flashover"],
-	"dredge": ["anchor_slam", "reel"],
-	"gil": ["dive", "tide_lunge", "beached", "wave_land"],
-	"gunslinger": ["e_fire"],
-	"juggernaut": ["slam_hit"],
-}
-const NO_SCORCH := {"dolm": ["row_tell"], "rimewright": ["rime", "rime_melt"]}
 
 
 func _decor_rings() -> void:

@@ -20,59 +20,63 @@ func _init() -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	var G := await _host_up()
-	if G == null:
+	var host := await _host_up()
+	if host == null:
 		return _finish()
-	var P := m.player
+	var ply := m.player
 	_kit("archer")
-	await _place(G, home + PARK)
+	await _place(host, home + PARK)
 	var at := home + Vector3(3.0, 0, 0)
-	var B: Hunter = m.make_hunter("B", 1, "medium", "Wisp", "idle", {}, at, {"arch": "none"})
-	for k in [B.kin, B.kin2]:
+	var bot: Hunter = m.make_hunter("B", 1, "medium", "Wisp", "idle", {}, at, {"arch": "none"})
+	for k in [bot.kin, bot.kin2]:
 		if k:
 			(k as Kin).dead = true
-	_fresh(B)
-	B.lives = 1
-	m.knock(B, P, {})
-	P.teleport(at + Vector3(0.6, 0, 0))
-	var seen := await _see(0.4)
+	_fresh(bot)
+	bot.lives = 1
+	m.knock(bot, ply, {})
+	ply.teleport(at + Vector3(0.6, 0, 0))
+	var seen_l := await _see(0.4)
 	for i in 10:
-		if seen.get("wisp", false) and seen["down"]:
+		if seen_l.get("wisp", false) and seen_l["down"]:
 			break
-		seen = await _see(0.5)  # (the wisp is a late spawn: the guest builds its copy from the snapshots)
+		seen_l = await _see(0.5)  # (the wisp is a late spawn: the guest builds its copy from the snapshots)
 	ok(
-		seen.get("wisp", false) and seen["down"] and not seen["stomp"],
+		seen_l.get("wisp", false) and seen_l["down"] and not seen_l["stomp"],
 		"before it the wisp is down and nobody stomps",
-		str(seen)
+		str(seen_l)
 	)
-	Life.start_stomp(m, P, B)
-	seen = await _see(SEE_S)
-	ok(seen["stomp"], "the guest's copy of the stomper is stomping", str(seen))
+	Life.start_stomp(m, ply, bot)
+	seen_l = await _see(SEE_S)
+	ok(seen_l["stomp"], "the guest's copy of the stomper is stomping", str(seen_l))
 	ok(
-		seen["k"] > POSE_K and seen["beat"] >= 0.0,
-		"...and plays the stomp pose (k %.2f, beat %.2f)" % [seen["k"], seen["beat"]]
+		seen_l["k"] > POSE_K and seen_l["beat"] >= 0.0,
+		"...and plays the stomp pose (k %.2f, beat %.2f)" % [seen_l["k"], seen_l["beat"]]
 	)
-	P.hurt(5.0, B, {"stun": 0.6})
-	seen = await _see(SEE_S)
+	ply.hurt(5.0, bot, {"stun": 0.6})
+	seen_l = await _see(SEE_S)
 	ok(
-		P.stomp.is_empty() and not seen["stomp"],
+		ply.stomp.is_empty() and not seen_l["stomp"],
 		"a stun on the stomper cuts the stomp on the guest's copy too",
-		str(seen)
+		str(seen_l)
 	)
 	ok(
-		seen["k"] < GONE_K and seen["down"] and not seen["out"],
-		"the pose eases out (k %.2f) and the wisp lives on the guest" % seen["k"],
-		str(seen)
+		seen_l["k"] < GONE_K and seen_l["down"] and not seen_l["out"],
+		"the pose eases out (k %.2f) and the wisp lives on the guest" % seen_l["k"],
+		str(seen_l)
 	)
 	await _run(0.8)  # (the stun runs out)
-	Life.start_stomp(m, P, B)
-	seen = await _see(Life.R["stomp_time"] * 0.5)
-	ok(seen["stomp"] and not seen["out"], "a second stomp is on the guest halfway, the wisp still down", str(seen))
-	seen = await _see(Life.R["stomp_time"] * 0.5 + 0.3)
+	Life.start_stomp(m, ply, bot)
+	seen_l = await _see(Life.R["stomp_time"] * 0.5)
 	ok(
-		not seen["stomp"] and seen["out"] and B.out,
+		seen_l["stomp"] and not seen_l["out"],
+		"a second stomp is on the guest halfway, the wisp still down",
+		str(seen_l)
+	)
+	seen_l = await _see(Life.R["stomp_time"] * 0.5 + 0.3)
+	ok(
+		not seen_l["stomp"] and seen_l["out"] and bot.out,
 		"left alone it ends and the wisp is executed on the guest too",
-		str(seen)
+		str(seen_l)
 	)
 	_finish()
 
@@ -96,16 +100,19 @@ func _on_msg(topic: String, data, from: String) -> void:
 
 ## The guest's copy of the stomper (the host's hunter) and of the wisp ("B"), as they look now.
 func _look() -> Dictionary:
-	var S: Hunter = m.player
+	var src: Hunter = m.player
 	for h in m.hunters:
 		if h.remote and h.nid.begins_with("P"):
-			S = h
+			src = h
 	for i in EASE_FRAMES:
-		S.render(DT, 1.0)  # (Match's own render pass is off in the checks)
-	var B := m.ents_by_id.get("B", null) as Hunter
+		src.render(DT, 1.0)  # (Match's own render pass is off in the checks)
+	var bot := m.ents_by_id.get("B", null) as Hunter
 	var out := {
-		"stomp": not S.stomp.is_empty(), "k": S.anim.stomp_k, "beat": S.anim_s.get("stomp", -1.0), "wisp": B != null
+		"stomp": not src.stomp.is_empty(),
+		"k": src.anim.stomp_k,
+		"beat": src.anim_s.get("stomp", -1.0),
+		"wisp": bot != null
 	}
-	if B:
-		out.merge({"down": B.downed, "out": B.out})
+	if bot:
+		out.merge({"down": bot.downed, "out": bot.out})
 	return out
