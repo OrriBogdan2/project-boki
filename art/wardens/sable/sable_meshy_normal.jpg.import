@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://f4sjanpmgpvl"
-path="res://.godot/imported/sable_meshy_normal.jpg-772e66e0460978a01fd38e66bccd3f0b.ctex"
+path.s3tc="res://.godot/imported/sable_meshy_normal.jpg-772e66e0460978a01fd38e66bccd3f0b.s3tc.ctex"
+path.etc2="res://.godot/imported/sable_meshy_normal.jpg-772e66e0460978a01fd38e66bccd3f0b.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "21c8faab487b0f3c873198d43d9e4dbb"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/sable/sable_meshy_normal.jpg"
-dest_files=["res://.godot/imported/sable_meshy_normal.jpg-772e66e0460978a01fd38e66bccd3f0b.ctex"]
+dest_files=["res://.godot/imported/sable_meshy_normal.jpg-772e66e0460978a01fd38e66bccd3f0b.s3tc.ctex", "res://.godot/imported/sable_meshy_normal.jpg-772e66e0460978a01fd38e66bccd3f0b.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

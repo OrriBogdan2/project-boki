@@ -171,7 +171,7 @@ func _wild_jobs() -> void:
 			var n := 0
 			for it in near:
 				if n >= 3: break
-				var stand := _beside(Vector2i(int(it[1]) % w.w, int(it[1]) / w.w), c)
+				var stand := _beside(Vector2i(int(it[1]) % w.w, int(int(it[1]) / float(w.w))), c)
 				if stand == Vector3.INF: continue
 				_job("%s:%d" % [pair[3], int(it[1])], String(pair[2]), String(pair[3]), stand, it[2], {"tile": int(it[1]), "u": int(s["e"]["u"])})
 				n += 1
@@ -364,7 +364,7 @@ func _haul_jobs() -> void:
 		return      # no chest and no pot (a farm-start island early on): nowhere to take food from
 	var pick: Vector3 = to if to != Vector3.INF else h._seat({"rec": {"uid": "pantry"}}, h.spots["pot"], 1.3)
 	for f in Econ.feeders():
-		if Econ.fill(f) > int(Econ.fdef(f)["cap"]) / 2 or Econ._auto_food() == "":
+		if Econ.fill(f) > int(int(Econ.fdef(f)["cap"]) / 2.0) or Econ._auto_food() == "":
 			continue
 		var ss: Array = h.hecon.seats(f)
 		var fp: Vector3 = h.hecon._fpos(f)
@@ -752,7 +752,7 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 		"chop", "break":
 			var tile := int(J["tile"])
 			var w: World = h.world
-			if h.hb.clear_wild(Vector2i(tile % w.w, tile / w.w)):
+			if h.hb.clear_wild(Vector2i(tile % w.w, int(tile / float(w.w)))):
 				h.hb.mesh_t = 0.15
 				h.hb.ver += 1
 				h.hb._reach_cache.clear()

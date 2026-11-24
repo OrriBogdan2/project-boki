@@ -1,5 +1,5 @@
 extends RefCounted
-## --sleepover-check (docs/decisions/0022-sleepovers.md): a Boki goes to a friend's garden and is off the roster;
+## --sleepover-check (docs/decisions/0127-sleepovers.md): a Boki goes to a friend's garden and is off the roster;
 ## nothing happens before a day; then it comes home with a memory line, traits nudged toward the host's lead Boki,
 ## a seed from their patch and, for a trade species, its next form; the last/lead Boki cannot go; a v12 save
 ## upgrades with no Boki away. Never touches the real save.

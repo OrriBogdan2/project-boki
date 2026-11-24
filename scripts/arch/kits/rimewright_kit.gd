@@ -178,7 +178,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
 			var tid := t.get_instance_id()
-			var fan_r := float(pd["splinter_r"]) * 0.8
+			var fan_r := float(pd["fan_r"])  # m, the 8-dart Shatter (0.8 x the knock Shatter's radius)
 			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
 
 
@@ -314,6 +314,7 @@ func _throw_dart(heavy: bool) -> void:
 	var rng := float(wd["range"]) * h.shot_range_k * _heavy_k("range_k", heavy)
 	h.shot_range_k = 1.0
 	var extra := {"src": "shot", "ab": "fan", "kb": float(wd["kb"]), "tracer": 1.0, "heavy": heavy}
+	ShotOrigin.draw_from(extra, h, "lmb")      # out of her casting hand
 	m.spawn_shot(
 		h,
 		start,
@@ -369,14 +370,14 @@ func _play_dart(heavy: bool, side: float) -> void:
 		play("tm_dart_r" if side > 0.0 else "tm_dart_l")
 
 
-## Homing: late in its flight each dart (and each skating beam) turns toward the foe nearest the cursor (or,
-## with none there, the nearest one ahead of it, or else the cursor point itself).
+## Homing: late in its flight each dart (and each skating beam) bends toward the foe nearest the cursor, or else
+## toward the cursor point itself. A foe that is not at the cursor pulls on nothing: you have to aim.
 func _tick_darts(dt: float) -> void:
 	var wd: Dictionary = h.wpn
 	var turn := float(wd.get("turn", 7.0))
 	var aimp: Vector3 = h.inp.get("aim", h.pos)
 	var near_cur: Ent = null
-	var nd := float(wd.get("cursor_r", 3.5))
+	var nd := float(wd.get("cursor_r", 2.4))
 	for f in m.foes_of(h.team):
 		if not f.hittable():
 			continue
@@ -394,26 +395,11 @@ func _tick_darts(dt: float) -> void:
 		var want := Vector2.ZERO
 		if near_cur != null:
 			want = Vector2(near_cur.pos.x - p.x, near_cur.pos.z - p.z)
-		else:
-			var best: Ent = null
-			var bd := float(wd.get("acquire", 9.0))
-			for f in m.foes_of(h.team):
-				var to := Vector2(f.pos.x - p.x, f.pos.z - p.z)
-				if (
-					to.length() < bd
-						and to.length() > 0.3
-						and absf(v.angle_to(to)) < deg_to_rad(float(wd.get("cone_deg", 75.0)))
-					and f.hittable()
-				):
-					bd = to.length()
-					best = f
-			if best != null:
-				want = Vector2(best.pos.x - p.x, best.pos.z - p.z)
-			elif not bool(dd["passed"]):
-				want = Vector2(aimp.x - p.x, aimp.z - p.z)
-				if want.length() < 0.8 or v.dot(want) < 0.0:
-					dd["passed"] = true          # past the cursor: it flies on straight
-					want = Vector2.ZERO
+		elif not bool(dd["passed"]):
+			want = Vector2(aimp.x - p.x, aimp.z - p.z)
+			if want.length() < 0.8 or v.dot(want) < 0.0:
+				dd["passed"] = true          # past the cursor: it flies on straight
+				want = Vector2.ZERO
 		if want.length() < 0.05 or absf(v.angle_to(want)) > PI * 0.6:
 			continue             # nothing to chase, or it is already past it: it flies on
 		var rate := turn * _homing_k(s, want.length())
@@ -700,7 +686,7 @@ func rmb_charge_full() -> float:
 ## Held: the landing ring at the cursor (clamped to range); she draws both palms in to her chest and the
 ## spear forms between them, pointing at the cursor.
 func rmb_hold_tick(t: float) -> void:
-	if not rmb_ready() or busy():
+	if not rmb_ready() or busy() or not rime.is_empty():
 		return
 	var ld: Dictionary = rmb_def()["lance"]
 	AimKit.circle(
@@ -732,6 +718,12 @@ func _spear_at(ahead: float) -> Vector3:
 	var dir := h.aim_dir() * (SPEAR_AHEAD + ahead)
 	return h.position + Vector3(dir.x, SPEAR_Y, dir.y)
 
+## The statue casts nothing (item 65): an RMB press in Rimelock is refused, no charge spent.
+func press_rmb() -> void:
+	if not rime.is_empty():
+		h._ab_feedback("sec", "deny")
+		return
+	super()
 
 ## RMB let go: both palms drive forward (PUSH_T later the spear leaves them). A push, not a throw: no arm
 ## drawn back, no release flick.
@@ -739,6 +731,9 @@ func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	spear_aim = false
 	AimKit.hide(h, "rmb")
+	if not rime.is_empty():
+		h._ab_feedback("sec", "deny")      # held into the seal: let go in the statue, nothing goes
+		return
 	if not spend_rmb():
 		lk().drop("spear_prop")
 		if anim_id == "tm_spear_aim":
@@ -859,7 +854,7 @@ func _detonate(at: Vector3) -> void:
 	vfx("spear_burst", at, null, {"r": rr})
 	m.sfx("rime_burst", at, 1.0, 0.9)
 	m.sfx("rime_splinter", at, -3.0, 0.75)
-	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)
+	Shake.big(m, at, "explosion", h)
 	play_soft("tm_clench")
 	for f in foes_in(at, rr):
 		f.hurt(
