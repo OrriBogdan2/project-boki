@@ -1021,7 +1021,6 @@ const CHECKS := {
 	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],  # air casts, frame by frame
 	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],  # WardenBreak
 	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],  # WardenBreak frames
-	"--next-form-shots": ["res://tools/next_form_shots.gd", "next_form_shots", null],  # GPU, =<dir>
 	# moved out of main.gd (ext/checks-out-of-main-c)
 }
 
