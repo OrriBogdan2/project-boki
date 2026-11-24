@@ -118,6 +118,7 @@ func _surfaces() -> void:
 	main.show_screen("home", {})
 	await _grab_window(out.path_join("farm.png"), 150)
 	for sp in species:
+		Care.dex_mark(sp, "caught")  # the page shows the model once the species is caught
 		Overlay.shot_demo(PackedStringArray(["dex", sp]))
 		await _grab_window(out.path_join("dex_%s.png" % sp), 60)
 		Overlay.close()
@@ -125,7 +126,11 @@ func _surfaces() -> void:
 		Demo.setup("farm")
 		GardenVisitor.begin(GardenZones.current(), sp, Time.get_unix_time_from_system())
 		main.show_screen("home", {})
-		await _grab_window(out.path_join("visitor_%s.png" % sp), 150)
+		for i in 120:
+			await RenderingServer.frame_post_draw
+		if main.current and main.current.has_method("_close_panel"):
+			main.current._close_panel()  # the "while you were away" note
+		await _grab_window(out.path_join("visitor_%s.png" % sp), 30)
 
 
 func _grab_window(path: String, frames := 30) -> void:

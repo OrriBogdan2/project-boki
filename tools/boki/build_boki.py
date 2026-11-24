@@ -42,6 +42,8 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "goliathite": ("glomwort", "glomwort", "glomwort_anim"),   # scans too: every lobe on root, the body rides it
          "hoarheron": ("glomwort", "glomwort", "glomwort_anim"),
          "floenatee": ("glomwort", "glomwort", "glomwort_anim"),
+         "basaltoad": ("glomwort", "glomwort", "glomwort_anim"),   # AUTO rows with their own grade (sat, gain)
+         "cindowary": ("glomwort", "glomwort", "glomwort_anim"),
          **{i: ("glomwort",) * 2 + ("glomwort_anim",)
            for i in boki_scan.AUTO if boki_scan.AUTO[i] is boki_scan.BORROWED},
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),

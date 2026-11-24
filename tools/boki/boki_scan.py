@@ -242,8 +242,8 @@ AUTO = {  # id: overrides on AUTO_BASE
     "tuatrune": BORROWED,
     "velvorm": BORROWED,
     "casquebill": BORROWED,
-    "basaltoad": BORROWED,
-    "cindowary": BORROWED,
+    "basaltoad": {**BORROWED, "sat": 0.6, "gain": 1.0},  # the toon pass turned its tan and moss orange
+    "cindowary": {**BORROWED, "sat": 0.75},
     "caecilith": {},
     "glintmole": {},
     "rimeshrew": {},
