@@ -12,6 +12,9 @@ static var _rules := {}
 static var _recent := {}  # boki id -> Array of its last lines, oldest first
 static var _quiet_until := {}  # boki id -> clock seconds before it may speak up again
 static var _word_re: RegEx = null
+# Its own random stream: which line a Boki picks is only speech, so it must not move the global RNG a seeded
+# match/check plays on (a bark that fires or not would otherwise shift every later roll).
+static var _pick := RandomNumberGenerator.new()
 static var _two_re: RegEx = null
 
 
@@ -136,6 +139,7 @@ static func fits(text: String) -> bool:
 static func reset() -> void:
 	_recent.clear()
 	_quiet_until.clear()
+	_pick.seed = 1
 
 
 ## A line from the pool this Boki hasn't said lately; if it said them all, the one it said longest ago.
@@ -143,7 +147,7 @@ static func _fresh(boki_id: String, pool: Array) -> String:
 	var recent: Array = _recent.get(boki_id, [])
 	var unsaid := pool.filter(func(s): return not recent.has(s))
 	if not unsaid.is_empty():
-		return String(unsaid.pick_random())
+		return String(unsaid[_pick.randi() % unsaid.size()])
 	var oldest := String(pool[0])
 	for s in pool:
 		if recent.find(s) < recent.find(oldest):
