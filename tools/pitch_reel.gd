@@ -30,7 +30,8 @@ const ESCAPE_CHARGE_LEFT := 4.0  # s of the uplink's charge left when shot 10 st
 const CLOCK_LEFT_S := 840.0  # s on the match clock when a stepped shot starts (1e9 reads as junk)
 const KIT_GAP_M := 4.5  # m between the Hunter and its foe in the kit shot (both well inside the frame)
 const KIT_ZOOM := 0.85  # the kit shot's camera zoom (0.55 frames only ~8 m: the pair sat on its edges)
-const KIT_FOE_REACH := 7.0  # m: a foe that has walked further than this from the Hunter is put back at the fight
+# m: a foe that has walked further than this from the Hunter is put back at the fight (--reach=)
+const KIT_FOE_REACH := 7.0
 const KIT_ROOM_M := 10  # m of solid ground all round the kit fight (at a cliff edge both fell off)
 const KIT_LEASH_M := 3.0  # m the Hunter may stray from the fight's centre before it walks back (dashes)
 const KIT_SEARCH_M := 30  # m from the start the kit shot looks for that much room
@@ -40,6 +41,7 @@ const KO_TAIL_S := 1.5  # s shot 9 keeps playing after the Hunter dies (the enco
 
 var shot := 2
 var take := 1
+var hold_zoom := 0.0  # > 0: _step_frame holds the camera at this zoom (the kit shot)
 var hunter := Demo.DEFAULT_HUNTER
 var failed := false  # a shot that cannot be filmed on this build says so (fail()), and the take is dropped
 var marks := {}  # part -> the frame it started on (mark())
@@ -290,6 +292,10 @@ func _escape() -> void:
 func _step_frame(at: Vector3) -> void:
 	_purge()
 	m.step(1.0 / FPS)
+	if hold_zoom > 0.0:
+		m.cam.user_zoom = hold_zoom  # (the match camera re-reads the wheel's zoom each frame)
+		m.cam.zoom = hold_zoom
+		m.cam.zoom_to = hold_zoom
 	m.cam.snap(at)
 	for h in m.hunters:
 		h.render(1.0 / FPS, 1.0)
@@ -300,28 +306,46 @@ func _step_frame(at: Vector3) -> void:
 ## Stepped by hand at 1/60 s a frame (the base clips' way) so the abilities land on the rota exactly.
 func _kit() -> void:
 	Save.d["first_guide"] = 99
+	Settings.v["damage_numbers"] = false
 	await _start(hunter, "cindle")
 	m.length = m.time + CLOCK_LEFT_S
 	var me := m.player
 	me.ctrl = "idle"
-	var base := _roomy_ground(me.pos)
+	var off := _arg("--off=", "0,0").split(",")
+	var base := _roomy_ground(me.pos + Vector3(float(off[0]), 0, float(off[1])))
 	me.pos = base
 	var foe_arch := String(Arch.ids()[(Arch.ids().find(hunter) + 3) % Arch.ids().size()])
-	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(base + Vector3(KIT_GAP_M, 0, 0)))
+	foe_arch = _arg("--foe=", foe_arch)
+	var gap := float(_arg("--gap=", str(KIT_GAP_M)))
+	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(base + Vector3(gap, 0, 0)))
 	foe.ai = m.bot_brain.new_mind(m.rng, KIT_FOE_SKILL, m.bot_cfg)
 	squad_a = [me]
 	squad_b = [foe]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	_zoom(KIT_ZOOM)
+	var kz := float(_arg("--zoom=", str(KIT_ZOOM)))
+	m.set_meta("zoom_hold", kz)  # the match camera re-reads its zoom every frame; this holds it
+	hold_zoom = kz
+	m.objective = null  # no "Find a wild Boki" card under the minimap
+	m.set_meta("pitch_no_foe_plates", true)  # no numeral / BURNING plate over the foe (HudPlate.hidden)
+	_zoom(kz)
 	mark("kit")
 	var t := 0.0
 	while t < SECS[7]:
 		_purge()
+		m.hud.msgs.clear()
 		_kit_press(t, me, foe, base)
 		_step_frame(me.pos.lerp(foe.pos, 0.5))
 		await main.get_tree().process_frame
 		t += 1.0 / FPS
+
+
+## The value of the `--name=` user arg, else `dflt`.
+func _arg(name: String, dflt: String) -> String:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with(name):
+			return String(a).substr(name.length())
+	return dflt
 
 
 ## The ground nearest `p` with no void within KIT_ROOM_M (`p` itself when there is none that roomy nearby).
@@ -344,8 +368,9 @@ func _roomy_ground(p: Vector3) -> Vector3:
 func _kit_press(t: float, me: Hunter, foe: Hunter, base: Vector3) -> void:
 	me.hp = me.max_hp  # neither of them goes down or walks off: the shot is about the kit
 	foe.hp = foe.max_hp
-	if me.flat_dist(foe) > KIT_FOE_REACH:
-		foe.teleport(_ground(me.pos + (foe.pos - me.pos).normalized() * KIT_GAP_M))
+	var reach := float(_arg("--reach=", str(KIT_FOE_REACH)))
+	if me.flat_dist(foe) > reach:
+		foe.teleport(_ground(me.pos + (foe.pos - me.pos).normalized() * minf(KIT_GAP_M, reach)))
 	me.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
 	var back := Vector2(base.x - me.pos.x, base.z - me.pos.z)
 	me.inp["move"] = back.normalized() if back.length() > KIT_LEASH_M else Vector2.ZERO
