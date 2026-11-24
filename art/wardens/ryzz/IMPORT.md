@@ -113,3 +113,11 @@ Scripts: `~/gens/hunter-round-1124/sparkle/o/tools/` (build.sh, tail2.py, arm.py
   Largest edge gain: Attack 26.7 -> 11.9 cm, Crouch 20.5 -> 12.3 cm. JOINTS_0/WEIGHTS_0 change only near the armpits.
 - geo_check vs live: PASS; held clip frames 6 (live) -> 0, held worst 3.83 cm (follow-up) -> 0.4 cm.
 Scripts: `~/gens/hunter-round-1124/sparkle/p2/tools/` (armpit_g.py, vis.py, ctree.sh, submit.sh).
+
+### Round 1124o-3, same branch (glb d9e0dbfb1f55, 79,980 tris, on top of 292acacd05df)
+- Image_3: copper pack, coils, bronze rods, shoulder straps and both boots repainted by Meshy nano-banana-pro edits of flat unlit views
+  (A1, B2, C3, D2), projected back onto the atlas (z-buffer, diff masks) and spliced at JPEG MCU level. Image_0 to Image_2 and Image_4 to
+  Image_6 are byte-identical; the face, eyes, hair, skin and top texels keep their old values.
+- Attack: LeftArm/RightArm rotation keys bent around t .87 s and 1.8 s (`p3/atk/S6.spec`), so the forearms pass outside the head.
+  geo_check worst 8.2 -> 1.8 cm, frames 25 -> 13. No other channel differs from 292acacd05df.
+Scripts: `~/gens/hunter-round-1124/sparkle/p3/tools/` (views.py, proj.py, swap.sh, atk.py).
