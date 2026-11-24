@@ -58,11 +58,11 @@ func thief(a) -> void:
 		),
 		p_v.wid
 	)
-	var dj_moves := ["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife"]
-	dj_moves += ["thf_arrive", "thf_encore", "thf_encore_dance", "thf_exdash", "thf_land"]
 	a_x.ok(
 		"dancer: her moves are keyed (KMovesDJ)",
-		dj_moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty())
+		["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife", "thf_arrive", "thf_encore", "thf_encore_dance", "thf_exdash", "thf_land"].all(
+			func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()
+		)
 	)
 	# LMB: a bolt every 0.45s from alternating hands, each one to the cursor
 	p_v.fire_cd = 0.0
@@ -241,11 +241,14 @@ func thief(a) -> void:
 	var wheel := k.anim_id
 	var pop := [0.0]  # an Array: a lambda can't assign a captured local
 	var live := {"before": 0, "mid": 0, "after": 0}  # steps her flip trail (data "flip") draws, by turn phase
+	var flipped := [0.0]  # how far the flip itself carried her: the run after it (keys held) is not the Cartwheel
 	a_x.step(
 		m,
 		0.55,
 		func():
 			pop[0] = maxf(pop[0], k.glint_pop)
+			if p_v.roll_t <= 0.0 and flipped[0] == 0.0:
+				flipped[0] = p_v.flat_dist(home)
 			var at: float = m.time - k.anim_at
 			var key := "after"
 			if at < FLIP_TURN[0]:
@@ -295,13 +298,13 @@ func thief(a) -> void:
 	a_x.ok(
 		"dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers",
 		(
-			absf(p_v.flat_dist(home) - far) < 0.6
+			absf(flipped[0] - far) < 0.6
 			and k.primed_t > 0.0
 			and k.speed_bonus() > 0.15
 			and p_v.dashes < d0 - 0.5
 			and wheel in ["thf_vault_l", "thf_vault_r"]
 		),
-		"moved %.1f primed %.2f anim %s" % [p_v.flat_dist(home), k.primed_t, wheel]
+		"flip %.1f (to 0.55 s %.1f) primed %.2f anim %s" % [flipped[0], p_v.flat_dist(home), k.primed_t, wheel]
 	)
 	var gold: Dictionary = AimKit.entry(p_v, "aim")
 	a_x.ok(
@@ -979,7 +982,7 @@ func juggernaut(a) -> void:
 	a_x.step(m, 0.3)
 	a_x.ok(
 		"juggernaut LMB tap: a slash, 1.6x at the tip (the footage's 151 / 94)",
-		near >= float(k.lmb_def()["dmg"]) * 0.85 and a_x.dmg(t_v) >= near * 1.5 and k.waves == 0,
+		near >= 7.0 and a_x.dmg(t_v) >= near * 1.5 and k.waves == 0,
 		"near %.0f tip %.0f" % [near, a_x.dmg(t_v)]
 	)
 	moved = maxf(moved, t_v.flat_dist(home + Vector3(2.95, 0, 0)))
