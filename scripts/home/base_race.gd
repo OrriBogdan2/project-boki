@@ -89,11 +89,11 @@ static func post_spot() -> Array:
 
 ## The loop's points in the world when the zone has a post spot: what its scatter keeps clear.
 static func loop_points() -> Array:
-	var S := post_spot()
+	var s_v := post_spot()
 	var out: Array = []
-	if S.is_empty():
+	if s_v.is_empty():
 		return out
-	var line := Vector3(S[0], 0.0, S[1]) + LOOP_OFF
+	var line := Vector3(s_v[0], 0.0, s_v[1]) + LOOP_OFF
 	for s in course(GardenZones.here):
 		for q in s["pts"]:
 			out.append(line + Vector3(q[0], 0.0, q[1]))
@@ -130,23 +130,23 @@ static func stretches(tw := {}) -> Array:
 
 ## Its pace on stretch i before the wobble and your cheers (m/s).
 static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
-	var R := rules()
+	var r_v := rules()
 	var s: Dictionary = stretches(tw)[i]
 	var speed := float(rec.get("stats", {}).get("speed", 0))
-	var mood: Array = R["mood"]
-	var p := float(R["pace"]) * float(s["mult"]) * (1.0 + speed * float(R["speed_per_point"]))
+	var mood: Array = r_v["mood"]
+	var p := float(r_v["pace"]) * float(s["mult"]) * (1.0 + speed * float(r_v["speed_per_point"]))
 	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
 	p *= float(tw.get("mult", {}).get(String(s["kind"]), 1.0))
 	var lean: Dictionary = rec.get("lean", {})
 	match String(s["kind"]):
 		"water":
 			var tide := maxf(Work.level(rec, "tide"), 4.0 * float(lean.get("water", 0.0)))
-			p *= 1.0 + float(R["swim_per_tide"]) * tide
+			p *= 1.0 + float(r_v["swim_per_tide"]) * tide
 		"jump":
 			var g := 1.0 if winged(rec) else clampf(float(lean.get("flying", 0.0)), 0.0, 1.0)
-			p *= lerpf(1.0, float(R["glide"]), g)
+			p *= lerpf(1.0, float(r_v["glide"]), g)
 	if s.has("vent") and winged(rec):
-		p *= float(R["vent_mult"])
+		p *= float(r_v["vent_mult"])
 	return p
 
 ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
@@ -159,7 +159,7 @@ static func expected_time(rec: Dictionary, tw := {}) -> float:
 
 ## The race itself: runners' distance along the lap, stepped in time.
 class Run:
-	var R: Dictionary
+	var r_x: Dictionary
 	var recs: Array
 	var backed := 0                 # index in recs: the Boki you cheer for
 	var rng: RandomNumberGenerator
@@ -177,7 +177,7 @@ class Run:
 	var duo := {}                   # runner index -> duo friend's index it handed off cleanly with
 
 	func _init(runners: Array, back: int, r: RandomNumberGenerator, twist := {}) -> void:
-		R = BaseRace.rules()
+		r_x = BaseRace.rules()
 		tw = twist
 		recs = runners
 		backed = back
@@ -195,7 +195,7 @@ class Run:
 			_roll(i)
 
 	func _roll(i: int) -> void:
-		var w := float(tw.get("wobble", R["wobble"]))
+		var w := float(tw.get("wobble", r_x["dash_wobble"]))
 		var p := BaseRace.stretch_pace(recs[i], int(stretch[i]), tw) * rng.randf_range(1.0 - w, 1.0 + w)
 		if i == backed and int(stretch[i]) > 0:
 			p *= cheer_mult
@@ -212,7 +212,7 @@ class Run:
 		return float(done_t[backed]) < 0.0 and cheered == int(stretch[backed]) and cheered < ends.size() - 1
 
 	func cheer(grade: String) -> void:
-		cheer_mult = float(R["cheer"][grade])
+		cheer_mult = float(r_x["cheer"][grade])
 		cheered += 1
 
 	func over() -> bool:
@@ -225,29 +225,29 @@ class Run:
 		return out
 
 	func friends(i: int, j: int) -> bool:
-		return BaseRace.bond(recs[i], recs[j]) >= float(R["friend_at"])
+		return BaseRace.bond(recs[i], recs[j]) >= float(r_x["friend_at"])
 
 	## A duo friend running alongside runner i (-1 if none): the hand-off into the next stretch is clean.
 	func _duo_mate(i: int) -> int:
 		for j in recs.size():
-			if j != i and _running(j) and _gap(i, j) < float(R["friend_near"]) and BaseDuo.friends(recs[i], recs[j]):
+			if j != i and _running(j) and _gap(i, j) < float(r_x["friend_near"]) and BaseDuo.friends(recs[i], recs[j]):
 				return j
 		return -1
 
 	func rivals(i: int, j: int) -> bool:
-		return BaseRace.bond(recs[i], recs[j]) <= float(R["rival_at"])
+		return BaseRace.bond(recs[i], recs[j]) <= float(r_x["rival_at"])
 
 	func step(dt: float) -> void:
 		t += dt
 		var eff: Array = []
 		for i in recs.size():
-			eff.append(float(pace[i]) * (float(R["bump_slow"]) if float(bump_t[i]) > 0.0 else 1.0))
+			eff.append(float(pace[i]) * (float(r_x["bump_slow"]) if float(bump_t[i]) > 0.0 else 1.0))
 			bump_t[i] = maxf(0.0, float(bump_t[i]) - dt)
 		var pulled := eff.duplicate()
 		for i in recs.size():
 			for j in recs.size():
-				if i != j and _running(i) and _running(j) and friends(i, j) and _gap(i, j) < float(R["friend_near"]):
-					pulled[i] = lerpf(float(pulled[i]), float(eff[j]), float(R["friend_pull"]))
+				if i != j and _running(i) and _running(j) and friends(i, j) and _gap(i, j) < float(r_x["friend_near"]):
+					pulled[i] = lerpf(float(pulled[i]), float(eff[j]), float(r_x["friend_pull"]))
 		for i in recs.size():
 			if _running(i):
 				_advance(i, float(pulled[i]), dt)
@@ -274,14 +274,14 @@ class Run:
 			for j in range(i + 1, recs.size()):
 				var key := "%d-%d-%d" % [i, j, int(stretch[i])]
 				if _running(i) and _running(j) and stretch[i] == stretch[j] and not bumped.has(key) \
-						and rivals(i, j) and _gap(i, j) < float(R["bump_near"]):
+						and rivals(i, j) and _gap(i, j) < float(r_x["bump_near"]):
 					bumped[key] = true
-					bump_t[i] = float(R["bump_s"])
-					bump_t[j] = float(R["bump_s"])
+					bump_t[i] = float(r_x["bump_s"])
+					bump_t[j] = float(r_x["bump_s"])
 
 ## Pays out a finished race: joy, trust, memories, gems and bonds. Returns what the card shows.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var r_v := rules()
 	var order := run.order()
 	var pull := false           # two friends in the field: they run together (friend_pull)
 	for i in run.recs.size():
@@ -290,24 +290,24 @@ static func settle(run: Run) -> Dictionary:
 	var win: Dictionary = run.recs[order[0]]
 	var lose: Dictionary = run.recs[order[-1]]
 	for rec in run.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]))
+		Care.change(rec, "energy", -float(r_v["energy"]))
+	Care.change(win, "joy", float(r_v["win_joy"]))
+	Care.change(lose, "joy", float(r_v["lose_joy"]))
 	MinigameHub.record("race", String(win["name"]))     # best Boki on the title's picker
-	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(R["win_trust"]))
+	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(r_v["win_trust"]))
 	Save.remember(lose, "race", "came last in the Dash, behind %s" % win["name"])
-	nudge_bond(win, lose, -float(R["rival_step"]))
+	nudge_bond(win, lose, -float(r_v["rival_step"]))
 	for n in range(1, order.size()):
 		var a: Dictionary = run.recs[order[n - 1]]
 		var b: Dictionary = run.recs[order[n]]
-		var close := float(run.done_t[order[n]]) - float(run.done_t[order[n - 1]]) < float(R["close_s"])
-		if close and bond(a, b) > float(R["rival_at"]) and not (a == win and b == lose):
-			nudge_bond(a, b, float(R["friend_step"]))
+		var close := float(run.done_t[order[n]]) - float(run.done_t[order[n - 1]]) < float(r_v["close_s"])
+		if close and bond(a, b) > float(r_v["rival_at"]) and not (a == win and b == lose):
+			nudge_bond(a, b, float(r_v["friend_step"]))
 	for i in run.duo:
 		BaseDuo.note_first(run.recs[i], run.recs[run.duo[i]], "handed off cleanly with")
 	var backed_won: bool = order[0] == run.backed
 	if backed_won: ClanBoard.add("cup")       # the garden cup for the clan board (until cups land)
-	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	var gems := int(r_v["gems_win"]) if backed_won else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var mine: Dictionary = run.recs[run.backed]
 	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine, "dash"), backed_won)
@@ -315,16 +315,16 @@ static func settle(run: Run) -> Dictionary:
 
 ## Pays out a solo training lap (grades: three of great/good/miss). Returns the Speed gained.
 static func settle_solo(rec: Dictionary, grades: Array) -> int:
-	var T: Dictionary = rules()["train"]
+	var t_v: Dictionary = rules()["train"]
 	var pts := 0
 	for g in grades:
 		if g != "miss":
-			pts += int(T[g]) + (int(T["dojo"]) if Save.has_building("dojo") else 0)
-	var mult := float(T["happy_mult"]) if Care.need(rec, "joy") >= float(T["happy_at"]) else 1.0
+			pts += int(t_v[g]) + (int(t_v["dojo"]) if Save.has_building("dojo") else 0)
+	var mult := float(t_v["happy_mult"]) if Care.need(rec, "joy") >= float(t_v["happy_at"]) else 1.0
 	var gained := Care.add_stat(rec, "speed", int(round(pts * mult)))
 	Care.change(rec, "energy", -float(rules()["energy"]))
-	Care.change(rec, "food", -float(T["food"]))
-	Care.change(rec, "joy", float(T["joy_great"]) if grades.has("great") else float(T["joy_else"]))
+	Care.change(rec, "food", -float(t_v["food"]))
+	Care.change(rec, "joy", float(t_v["joy_great"]) if grades.has("great") else float(t_v["joy_else"]))
 	Evo.add(rec, "swift", 2.0)
 	if gained > 0:
 		Save.remember(rec, "trained", "ran a training lap of the Dash with you", 1.0)
@@ -446,12 +446,12 @@ func label() -> String:
 
 ## Up to 4 rested Boki out on the base, your partner first.
 func entrants() -> Array:
-	var R := rules()
+	var r_v := rules()
 	var out: Array = []
 	var ak := Save.active_kin()
 	for k in h.kins:
 		var rec: Dictionary = k["rec"]
-		if k.get("busy", false) or k.has("indoors") or Care.need(rec, "energy") < float(R["min_energy"]):
+		if k.get("busy", false) or k.has("indoors") or Care.need(rec, "energy") < float(r_v["min_energy"]):
 			continue
 		if rec == ak:
 			out.push_front(k)
@@ -484,10 +484,10 @@ func _practice(k: Dictionary) -> void:
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
 	var k: Dictionary = h._kin_entry(rec)
-	var T: Dictionary = rules()["train"]
+	var t_v: Dictionary = rules()["train"]
 	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
 		h._toast("%s is not out on the base" % rec["name"])
-	elif Care.need(rec, "energy") < float(rules()["min_energy"]) or Care.need(rec, "food") < float(T["min_food"]):
+	elif Care.need(rec, "energy") < float(rules()["min_energy"]) or Care.need(rec, "food") < float(t_v["min_food"]):
 		h._toast(KinSpeak.about(rec, "%s is too tired or hungry to train. Nap or feed {him} first") % rec["name"])
 	elif int(rec["stats"]["speed"]) >= Care.stat_cap(rec):
 		h._toast(KinSpeak.about(rec, "%s can't train Speed any further until {he} levels up") % rec["name"])

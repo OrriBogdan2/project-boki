@@ -32,6 +32,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	tree = main.get_tree()
 	Save.no_write = true
@@ -141,6 +142,12 @@ func _prologue() -> void:
 	for s in pr.shots:
 		watched += float(s["dur"])
 	print("NPF the prologue runs %.0f s if watched" % watched)
+	var hs: HoldSkip = pr.hold_skip      # a watcher who presses nothing is told what skips it, after HINT_AT s
+	ok(hs.modulate.a == 0.0, "the prologue's skip hint is not up on the first frame")
+	hs._process(HoldSkip.HINT_AT - 0.5)
+	hs._process(0.6)
+	hs._process(0.4)
+	ok(hs.modulate.a > 0.9, "but shows by itself after %.0f s with nothing pressed" % HoldSkip.HINT_AT)
 	var key := InputEventKey.new()      # held (never let go) it skips it all after HoldSkip.HOLD_S
 	key.keycode = KEY_SPACE
 	key.pressed = true
@@ -346,26 +353,26 @@ func _first_expedition(home) -> void:
 
 ## The first knock of the first expedition: one two-line card, the tip for what hit hardest; not again.
 func _knock_tip(m: Match) -> void:
-	var P: Hunter = m.player
-	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != P.team)[0]
+	var p_v: Hunter = m.player
+	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p_v.team)[0]
 	var mob: Mob = m.mobs[0]
 	ok(m.ktip != null and not m.ktip.shown, "the first expedition gets the first-knock card")
-	m.on_damage(P, mob, 30.0, {})
-	m.on_damage(P, rival, 20.0, {})
-	m.on_damage(P, mob, 50.0, {})
+	m.on_damage(p_v, mob, 30.0, {})
+	m.on_damage(p_v, rival, 20.0, {})
+	m.on_damage(p_v, mob, 50.0, {})
 	var want: String = KnockTip.card("monster")
-	m.knock(P, mob, {})
+	m.knock(p_v, mob, {})
 	var lane: Array = m.hud.msgs._shown + m.hud.msgs._waiting
 	var texts: Array = lane.map(func(e): return e["text"])
 	ok(texts.has(want) and want.count("\n") == 1, "the card is two lines and names monsters, the top damage")
 	ok(want.contains(Settings.key_cap("throw")), "its tip is the monster one: send your Boki")
 	ok(int(Save.d["tutorial"]["knock_tip"]) == 1 and m.ktip.shown, "it is counted once")
-	P.downed = false
-	m.on_damage(P, rival, 90.0, {})
-	m.knock(P, rival, {})
+	p_v.downed = false
+	m.on_damage(p_v, rival, 90.0, {})
+	m.knock(p_v, rival, {})
 	ok(int(Save.d["tutorial"]["knock_tip"]) == 1, "a second knock in the same match shows nothing")
-	P.downed = false
-	P.hp = P.max_hp
+	p_v.downed = false
+	p_v.hp = p_v.max_hp
 	var k := KnockTip.for_match(m, m.guide)
 	k.note(rival, 40.0, {})
 	ok(k.top() == "rival" and KnockTip.card("rival").contains("squad"), "a hunter's hits give the squad tip")
@@ -388,48 +395,48 @@ func _toward(p: Hunter, at: Vector3) -> Vector2:
 	return Vector2(at.x - p.pos.x, at.z - p.pos.z).normalized()
 
 func _ways_out(m: Match) -> void:
-	var P: Hunter = m.player
+	var p_v: Hunter = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
 	var fall_t := 0.0
-	ok(P.riding, "you start on the skyship")
-	while (P.riding or P.dropping or not P.grounded) and fall_t < DROP_S:
+	ok(p_v.riding, "you start on the skyship")
+	while (p_v.riding or p_v.dropping or not p_v.grounded) and fall_t < DROP_S:
 		# jump launches the rocket (DropRocket); aboard it, no keys: a press would jump out of it
-		P.inp["jump"] = (P.riding and P.rocket == null and fall_t > float(P.ai.get("jump_at", 0.0))
+		p_v.inp["jump"] = (p_v.riding and p_v.rocket == null and fall_t > float(p_v.ai.get("jump_at", 0.0))
 				and int(fall_t * 20.0) % 2 == 0)
-		P.inp["move"] = _toward(P, P.ai.get("land", P.pos)) if not P.riding else Vector2.ZERO
+		p_v.inp["move"] = _toward(p_v, p_v.ai.get("land", p_v.pos)) if not p_v.riding else Vector2.ZERO
 		m.step(Match.DT)
 		fall_t += Match.DT
-	P.inp["jump"] = false
-	P.inp["move"] = Vector2.ZERO
-	var landed: bool = P.grounded and not P.riding and not P.dropping
+	p_v.inp["jump"] = false
+	p_v.inp["move"] = Vector2.ZERO
+	var landed: bool = p_v.grounded and not p_v.riding and not p_v.dropping
 	ok(landed, "jumping off the ship ends with you on your feet (%.0f s)" % fall_t)
 	var x: Dictionary = m.exits.uplink_x()
 	ok(not x.is_empty() and m.exits.seats != null, "there is an Uplink to take out (the Ways Out seat)")
-	P.max_hp = 5000.0      # the driver stands in the yard while rivals and the wave come: the exit is what is tested
-	P.hp = P.max_hp
+	p_v.max_hp = 5000.0      # the driver stands in the yard while rivals and the wave come: the exit is what is tested
+	p_v.hp = p_v.max_hp
 	m.time = float(x["open_at"]) + 1.0      # (the seat opens at 6:00: the drop and the walk are not what this tests)
-	P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
+	p_v.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
 	for i in int(2.5 / Match.DT):
-		P.inp["interact"] = true
+		p_v.inp["interact"] = true
 		m.step(Match.DT)
-	P.inp["interact"] = false
-	ok(x["state"] == "charging" and int(x["team"]) == P.team, "holding interact at the console starts the uplink")
+	p_v.inp["interact"] = false
+	ok(x["state"] == "charging" and int(x["team"]) == p_v.team, "holding interact at the console starts the uplink")
 	var t0 := m.time
 	while x["state"] == "charging" and m.time - t0 < 120.0:
-		P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
-		P.hp = P.max_hp
+		p_v.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
+		p_v.hp = p_v.max_hp
 		for h in m.hunters:
-			if h.team != P.team and m.exits.in_yard(x, h):
+			if h.team != p_v.team and m.exits.in_yard(x, h):
 				h.teleport(m.world.random_ground())      # a rival in the yard stalls the charge past the seat's window
 		m.step(Match.DT)
 	ok(x["state"] == "open", "holding the yard charges it and opens the lift (%.0f s)" % (m.time - t0))
-	while not P.extracted and m.time - t0 < 150.0:
-		P.teleport(x["pos"])
-		P.hp = P.max_hp
+	while not p_v.extracted and m.time - t0 < 150.0:
+		p_v.teleport(x["pos"])
+		p_v.hp = p_v.max_hp
 		m.step(Match.DT)
-	ok(P.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
+	ok(p_v.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
 	await _press(main.current, "Back to the farm")

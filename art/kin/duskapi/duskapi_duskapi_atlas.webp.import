@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dr3w1lqybnenp"
-path="res://.godot/imported/duskapi_duskapi_atlas.webp-c24feea68b3ca6b89353fa3383328942.ctex"
+path.bptc="res://.godot/imported/duskapi_duskapi_atlas.webp-c24feea68b3ca6b89353fa3383328942.bptc.ctex"
+path.astc="res://.godot/imported/duskapi_duskapi_atlas.webp-c24feea68b3ca6b89353fa3383328942.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a6f34171dbcdaecf9b3c2b98e5606f92"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/duskapi/duskapi_duskapi_atlas.webp"
-dest_files=["res://.godot/imported/duskapi_duskapi_atlas.webp-c24feea68b3ca6b89353fa3383328942.ctex"]
+dest_files=["res://.godot/imported/duskapi_duskapi_atlas.webp-c24feea68b3ca6b89353fa3383328942.bptc.ctex", "res://.godot/imported/duskapi_duskapi_atlas.webp-c24feea68b3ca6b89353fa3383328942.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
