@@ -306,18 +306,19 @@ func _add_stamps() -> void:
 
 
 ## The draw's steps from the renderer's own stamps: GPU and CPU us from each stamp to the next, by the stamp's name,
-## and the whole span (the stamps of one frame: shadows, the opaque and transparent passes, post, the canvas).
+## and the whole span. Without the engine's --gpu-profile flag only the viewport's own begin and end stamps exist;
+## with it the passes show (shadows, opaque, transparent, post, canvas). The GPU clock reads in ns on Vulkan.
 func _add_steps(rd: RenderingDevice) -> void:
 	stamp_frames += 1
 	var n := rd.get_captured_timestamps_count()
 	for i in n - 1:
 		var k := rd.get_captured_timestamp_name(i)
-		var gpu := rd.get_captured_timestamp_gpu_time(i + 1) - rd.get_captured_timestamp_gpu_time(i)
+		var gpu := int((rd.get_captured_timestamp_gpu_time(i + 1) - rd.get_captured_timestamp_gpu_time(i)) / 1000.0)
 		var cpu := rd.get_captured_timestamp_cpu_time(i + 1) - rd.get_captured_timestamp_cpu_time(i)
 		stamp_gpu_us[k] = int(stamp_gpu_us.get(k, 0)) + gpu
 		stamp_cpu_us[k] = int(stamp_cpu_us.get(k, 0)) + cpu
 	var whole := "(first to last stamp)"
-	var gpu_all := rd.get_captured_timestamp_gpu_time(n - 1) - rd.get_captured_timestamp_gpu_time(0)
+	var gpu_all := int((rd.get_captured_timestamp_gpu_time(n - 1) - rd.get_captured_timestamp_gpu_time(0)) / 1000.0)
 	var cpu_all := rd.get_captured_timestamp_cpu_time(n - 1) - rd.get_captured_timestamp_cpu_time(0)
 	stamp_gpu_us[whole] = int(stamp_gpu_us.get(whole, 0)) + gpu_all
 	stamp_cpu_us[whole] = int(stamp_cpu_us.get(whole, 0)) + cpu_all
