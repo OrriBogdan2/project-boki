@@ -36,15 +36,19 @@ const COMBOS := {
 	"thief": [["sec", "secondary", "sec", 0.3, 9.0, ""], ["dash", "dash", "dash", 0.2, 8.0, "in"],
 		["fire", "fire", "", 1.6, 3.5, ""], ["kin", "signature", "e", 0.3, 6.0, ""],
 		["x", "hunter_ult", "x", 0.3, 6.0, ""]],
-	"dolm": [["kin", "signature", "e", 0.3, 8.0, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""],
-		["dash", "dash", "dash", 0.2, 6.0, "in"], ["x", "hunter_ult", "x", 0.3, 6.0, ""]],
-	"juggernaut": [["dash", "dash", "dash", 0.5, 9.0, "in"], ["kin", "signature", "e", 0.3, 7.0, ""],
-		["fire", "fire", "", 1.6, 3.0, ""], ["sec", "secondary", "sec", 0.3, 4.0, ""],
+	"dolm": [["dash", "dash", "dash", 0.2, 11.0, "in"], ["fire", "fire", "", 1.2, 5.0, ""],
+		["kin", "signature", "e", 0.3, 5.5, ""],
+		["sec", "secondary", "sec", 0.3, 5.5, ""], ["x", "hunter_ult", "x", 0.3, 5.5, ""]],
+	"juggernaut": [["dash", "dash", "dash", 0.5, 9.0, "in"], ["fire", "fire", "", 1.6, 3.0, ""],
+		["kin", "signature", "e", 0.3, 7.0, ""], ["sec", "secondary", "sec", 0.3, 4.0, ""],
 		["x", "hunter_ult", "x", 0.3, 4.0, ""]],  # ends on Gilded Riposte (Fable edit 2)
 	"ashwick": [["dash", "dash", "dash", 0.2, 8.0, "in"], ["kin", "signature", "e", 0.3, 4.0, ""],
 		["fire", "fire", "", 1.8, 4.5, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""]],
 	"tender": [["sec", "secondary", "sec", 0.3, 9.0, ""], ["fire", "fire", "", 1.6, 7.0, ""],
-		["dash", "dash", "dash", 0.2, 6.0, "in"], ["sec", "secondary", "sec", 0.3, 6.0, ""]],
+		["dash", "dash", "dash", 0.2, 6.0, "in"], ["fire", "fire", "", 1.6, 6.0, ""]],
+	"gunslinger": [["sec", "secondary", "sec", 0.3, 9.0, ""], ["fire", "fire", "", 1.6, 8.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"], ["kin", "signature", "e", 0.3, 6.0, ""],
+		["x", "hunter_ult", "x", 0.3, 8.0, ""]],  # Coin Blast, rifle fire, Slipstep, Palm Lance, Cinderfall
 	"ostra": [["kin", "signature", "e", 0.3, 8.0, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""],
 		["x", "hunter_ult", "x", 0.3, 8.0, ""], ["fire", "fire", "", 1.6, 5.0, ""]],
 	"gil": [["fire", "fire", "", 1.6, 3.0, ""]],  # portrait-only (crouch beat)
@@ -153,6 +157,7 @@ func _start_hero(arch: String) -> void:
 
 func _hero() -> void:
 	await _start_hero(hunter)
+	_clean_take()
 	m.length = m.time + CLOCK_LEFT_S
 	var me := m.player
 	var foe_arch := foe_id
@@ -187,7 +192,11 @@ func _hero() -> void:
 		h.teleport(h.pos)
 	print("PITCH_HERO_INFO hunter=%s foe=%s seed=%d diff=%s bot_diff=%s lvl=%d pass=%s wall=%s" %
 			[hunter, foe_arch, hero_seed, diff, m.bot_diff, me.lvl, hero_pass, spot["wall"]])
-	_zoom(KIT_ZOOM)
+	var hz := float(_arg("--zoom=", str(KIT_ZOOM)))
+	_zoom(hz)
+	if shot != PORT_SHOT and _arg("--zoom=", "") != "":
+		m.set_meta("zoom_hold", hz)  # the match camera re-reads its zoom every frame; this holds it
+		hold_zoom = hz
 	if shot == PORT_SHOT:
 		await _portrait(me)
 		return
@@ -395,8 +404,8 @@ func _log(me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: b
 		fired = foe.hp < hp0 - 0.5
 	elif pressed:
 		fired = cast or int(info.get("charges", 0)) < ch0 or not bool(info.get("ready", true))
-	print("PITCH_HERO_STEP %d %s (%s) fired=%s landed=%s foe_hp=%.0f" % [
-		idx + 1, name, String(st[1]), fired, landed, foe.hp])
+	print("PITCH_HERO_STEP %d %s (%s) fired=%s landed=%s foe_hp=%.0f movie_frame=%d" % [
+		idx + 1, name, String(st[1]), fired, landed, foe.hp, Engine.get_frames_drawn()])
 	var mark := "F" if fired else "-"
 	mark += "L" if landed else "-"
 	steps_log.append(name + ":" + mark)
