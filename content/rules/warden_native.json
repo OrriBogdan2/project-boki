@@ -20,7 +20,7 @@
 		"plants": {"walk": {"L": [0.05], "R": [0.717]}, "run": {"L": [0.05], "R": [0.383]}, "crouch": {"L": [0.133], "R": [0.733]}},
 		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
 		"walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk",
-		"orbits": {"orbit_stones": "Head"}},
+		"orbits": {"orbit_stones": "Head", "orbit_shards": "LeftHand"}},
 	"breaker": {"meshy_native": false},
 	"cinder": {"meshy_native": true, "hand": "RightHand", "bones": {"jet.0": "RightFoot", "jet.1": "LeftFoot"},
 		"props": {"jet.0": ["flame-jet"], "jet.1": ["flame-jet"]}, "stretch": {"kmove": "lw_jet", "y": 3.0, "rest": 0.06},
