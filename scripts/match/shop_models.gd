@@ -3,6 +3,7 @@ extends RefCounted
 ## A vendor's stall: a counter under a striped awning in the stock theme's colour, with a lantern
 ## that bobs above it and the vendor's name floating over it. Procedural, like the rest of the props.
 
+
 static func stall(theme_id: String) -> Node3D:
 	var th := ShopStock.theme(theme_id)
 	var col := Color(String(th.get("col", "ffffff")))

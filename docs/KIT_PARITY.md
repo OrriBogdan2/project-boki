@@ -21,7 +21,7 @@ class's, `ArchKit.dash_charges`). **Vex**'s Slipstep is one charge too (a medium
 Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Vex's rifle falloff (100% to 50% over ten rounds, a pause starts over) now also thins the tracer, flash and impact (`content/vfx/gunslinger.json` `size_k`); her Longneedle yaw lock is 30 deg/s. Table: coord/reports/charges-sv-1116.md.
 
 ## Ultimate ranks vs the source (ult-ranks-source, 2026-11-19)
-Source: briefs/supervive-data/supervive_kits.md (ext/agent-briefs), "R has II/III only" (line 4); owner 11-18: ultimates
+Source: the private reference kit notes (reports repo, folder sv/), "R has II/III only" (line 4); owner 11-18: ultimates
 rank with level, R rank 3 at level 10 (decision 0022 option 2). Ours: `x.per_rank` in content/archetypes/<id>.json, read
 by `HeroUlt.ranked` through `ArchKit.x_def()`; rank text `rank2.ult` / `rank_next.ult` (the R hover and the rank pick).
 Cooldown steps = source seconds x our base / source base (0.5 s); damage steps = the source's % of our base. Before: every

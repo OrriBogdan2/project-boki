@@ -1,5 +1,6 @@
 """Spend guard of meshy_task.py: floor refusal (exit 3) and one ledger line per paid submit.
 Run: python3 tools/meshy/test_meshy_spend_guard.py"""
+
 import os
 import sys
 import tempfile
@@ -17,6 +18,7 @@ def fake_call(balance, calls):
         if url.endswith("balance"):
             return {"balance": balance}
         return {"result": "task123"}
+
     return call
 
 
@@ -33,8 +35,7 @@ class SpendGuard(unittest.TestCase):
 
     def submit(self, balance):
         calls = []
-        with mock.patch.object(mt, "call", fake_call(balance, calls)), \
-                mock.patch.object(mt, "fetch") as fetch:
+        with mock.patch.object(mt, "call", fake_call(balance, calls)), mock.patch.object(mt, "fetch") as fetch:
             mt.post(os.path.join(self.tmp.name, "out"), "multi-image-to-3d", {"a": 1}, {})
         return calls, fetch
 

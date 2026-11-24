@@ -10,9 +10,12 @@ var main: Node
 var m: Match
 var P: Hunter
 
+
 func ok(cond: bool, what: String) -> void:
 	print("UVFX %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(host: Node) -> void:
 	main = host
@@ -40,9 +43,11 @@ func run(host: Node) -> void:
 	print("UVFX DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _looks(prefix: String) -> Array:
 	var all := main.get_tree().get_nodes_in_group(UtilityLook.GROUP)
 	return all.filter(func(n): return String(n.name).begins_with(prefix))
+
 
 ## Uses `id`, aimed along the first free direction, with a fresh belt and a healthy caster.
 func _use(id: String) -> bool:
@@ -59,11 +64,13 @@ func _use(id: String) -> bool:
 			break
 	return UtilityBelt.use_id(P, id)
 
+
 func _steps(secs: float) -> void:
 	for i in int(secs / Match.DT):
 		m.step(Match.DT)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
+
 
 func _skyfall() -> void:
 	ok(_use("skyfall_charge"), "a Skyfall Charge is called")
@@ -78,6 +85,7 @@ func _skyfall() -> void:
 	ok(_looks("SkyfallFuse").is_empty(), "...and is gone after the blast")
 	await _steps(3.5)
 
+
 func _blight() -> void:
 	ok(_use("blight_flask"), "a Blight Flask is thrown")
 	var edge := _looks("BlightEdge")
@@ -89,6 +97,7 @@ func _blight() -> void:
 	await _steps(2.0)
 	ok(_looks("BlightEdge").is_empty(), "...and goes with the patch")
 
+
 func _gate() -> void:
 	ok(_use("twin_gate"), "a Twin Gate is opened")
 	ok(_looks("GatePortal").size() == 2, "...two portals")
@@ -98,6 +107,7 @@ func _gate() -> void:
 	await _steps(1.7)
 	ok(_looks("GatePortal").is_empty() and _looks("GateLink").is_empty(), "...and close together")
 
+
 func _seed() -> void:
 	ok(_use("warp_seed"), "a Warp Seed is planted")
 	ok(_looks("WarpAnomaly").size() == 1, "...the anomaly is drawn")
@@ -105,6 +115,7 @@ func _seed() -> void:
 	ok(_looks("WarpAnomaly").size() == 1, "...it stays for the 30 s")
 	await _steps(2.0)
 	ok(_looks("WarpAnomaly").is_empty(), "...and fades with the seed")
+
 
 func _thorn() -> void:
 	ok(_use("thorn_wall"), "a Thorn Wall goes up")

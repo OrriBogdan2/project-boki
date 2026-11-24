@@ -11,16 +11,19 @@ extends RefCounted
 ## For other parts: Shops.list(m) -> vendors {idx, pos, theme, rows, node, island}; Shops.buy(m, h, v, i)
 ## -> "" or the reason it failed; Shops.legend_rows(m) -> what the full map shows.
 
-const BOB_HEIGHT := 0.12      # m: the lantern's bob
+const BOB_HEIGHT := 0.12  # m: the lantern's bob
 const TOAST_COL := Color("ffd27a")
+
 
 static func list(m) -> Array:
 	return _st(m)["list"]
+
 
 static func _st(m) -> Dictionary:
 	if not m.has_meta("shops"):
 		m.set_meta("shops", {"list": [], "pending": {}, "panel": null, "vendor": null})
 	return m.get_meta("shops")
+
 
 ## Stands every vendor the map lists and stocks them (not in the arena, duels or training).
 static func build(m) -> void:
@@ -38,6 +41,7 @@ static func build(m) -> void:
 			v["node"] = n
 			(s["list"] as Array).append(v)
 
+
 static func update(m, dt: float) -> void:
 	var s := _st(m)
 	for v in s["list"]:
@@ -48,9 +52,11 @@ static func update(m, dt: float) -> void:
 	if v != null and (m.player == null or not near(m, m.player, v) or m.player.out or m.player.downed):
 		close(m)
 
+
 static func near(_m, h, v: Dictionary, reach := 0.0) -> bool:
 	var r := float(ShopStock.rules().get("use_radius", 2.8)) + reach
 	return h.flat_dist(v["pos"]) < r and absf(h.pos.y - float(v["pos"].y)) < 1.5
+
 
 ## The vendor within reach of a hunter, or {}.
 static func vendor_near(m, h, reach := 0.0) -> Dictionary:
@@ -58,6 +64,7 @@ static func vendor_near(m, h, reach := 0.0) -> Dictionary:
 		if near(m, h, v, reach):
 			return v
 	return {}
+
 
 ## The use prompt for the interact chain (empty when no vendor is close).
 static func prompt(m, h) -> Dictionary:
@@ -67,8 +74,13 @@ static func prompt(m, h) -> Dictionary:
 	var th := ShopStock.theme(String(v["theme"]))
 	var open: bool = _st(m)["vendor"] == v
 	var verb := "close" if open else "shop at %s  ·  %s" % [th["name"], String(th["tag"]).to_lower()]
-	return {"kind": "shop", "vendor": v, "label": "Press %s to %s" % [Settings.key_cap("interact"), verb],
-		"col": Color(String(th["col"]))}
+	return {
+		"kind": "shop",
+		"vendor": v,
+		"label": "Press %s to %s" % [Settings.key_cap("interact"), verb],
+		"col": Color(String(th["col"]))
+	}
+
 
 ## The use key at a vendor: opens the panel, or closes it.
 static func use(m, h, best: Dictionary) -> void:
@@ -83,6 +95,7 @@ static func use(m, h, best: Dictionary) -> void:
 	s["panel"] = ShopPanel.open(m, best["vendor"])
 	Sfx.play("whoosh", null, -10.0, 0.05, 1.3)
 
+
 static func close(m) -> void:
 	var s := _st(m)
 	s["vendor"] = null
@@ -92,7 +105,9 @@ static func close(m) -> void:
 		m.hud.ui_extra.erase(p)
 		(p as Node).queue_free()
 
+
 # ------------------------------------------------------------------ buying
+
 
 ## One purchase by a hunter of this game (the player or a bot). "" on success (or sent), else why not.
 static func buy(m, h, v: Dictionary, i: int) -> String:
@@ -109,6 +124,7 @@ static func buy(m, h, v: Dictionary, i: int) -> String:
 		return ""
 	return _complete(m, h, v, i)
 
+
 static func _complete(m, h, v: Dictionary, i: int) -> String:
 	var row: Dictionary = v["rows"][i]
 	var gems_before: int = h.gems
@@ -120,9 +136,11 @@ static func _complete(m, h, v: Dictionary, i: int) -> String:
 	_bought(m, h, row, gems_before - int(h.gems))
 	return ""
 
+
 ## Why a hunter can't buy this row (sold out, or ShopStock.can_buy's reason); "" when they can.
 static func why_not(h, row: Dictionary) -> String:
 	return "Sold out" if int(row["left"]) <= 0 else ShopStock.can_buy(h, row)
+
 
 static func _bought(m, h, row: Dictionary, paid: int) -> void:
 	var s := _st(m)
@@ -134,6 +152,7 @@ static func _bought(m, h, row: Dictionary, paid: int) -> void:
 	if h == m.player and m.hud:
 		m.hud.toast_small("Bought %s  ·  %d gems left" % [ShopStock.name_of(row), int(h.gems)], TOAST_COL)
 		m.fx.word(h.pos + Vector3(0, 2.4, 0), "-%d" % paid, TOAST_COL, false)
+
 
 ## Remote events: "sbuy" (the host settles it), "sgot" (a sale happened), "sno" (it was gone).
 static func on_net(m, x: Array) -> void:
@@ -165,13 +184,16 @@ static func on_net(m, x: Array) -> void:
 				if m.hud:
 					m.hud.toast_small("Sold out", Color("ff8a6a"))
 
+
 static func _vendor_by_idx(m, idx: int) -> Dictionary:
 	for v in list(m):
 		if int(v["idx"]) == idx:
 			return v
 	return {}
 
+
 # ------------------------------------------------------------------ the full map
+
 
 ## What the full map's legend shows: one row per vendor, then one per region with the area's lean.
 ## Rows: {kind: "shop"|"area", name, text, col, icon, pos}.
@@ -179,8 +201,16 @@ static func legend_rows(m) -> Array:
 	var out: Array = []
 	for v in list(m):
 		var th := ShopStock.theme(String(v["theme"]))
-		out.append({"kind": "shop", "name": String(th["name"]), "text": String(th["tag"]),
-			"col": Color(String(th["col"])), "icon": String(th["icon"]), "pos": v["pos"]})
+		out.append(
+			{
+				"kind": "shop",
+				"name": String(th["name"]),
+				"text": String(th["tag"]),
+				"col": Color(String(th["col"])),
+				"icon": String(th["icon"]),
+				"pos": v["pos"]
+			}
+		)
 	if m.biomes != null:
 		out.append_array(ShopLegend.area_rows(m))
 	return out

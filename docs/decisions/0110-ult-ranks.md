@@ -87,7 +87,7 @@ rank 1.
   written as the flat 20% of our base), read by `HeroUlt.ranked` through `ArchKit.x_def()` (cached per rank),
   so no kit code changed. A kit with `per_rank` takes only its own steps (parity: no generic +15% / -10% on top).
   Damage steps are the source's % of OUR base (base numbers re-read on main cbb6b02f5). Tender takes the source
-  Elluna tiers (+25% heal, -5s x2, briefs/supervive-data/supervive_kits.md:13; this table's "none listed" was an
+  Elluna tiers (+25% heal, -5s x2, the private reference kit notes, line 13; this table's "none listed" was an
   older capture). Gil has no source: Tidal Wave keeps its base (`rank_next.ult` says so). Rimewright's ult no longer
   reads `power("ult")`.
 - Cooldown steps are the source deltas scaled by our base / the source's (last line below), rounded to 0.5s:
