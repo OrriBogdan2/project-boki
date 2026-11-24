@@ -370,7 +370,7 @@ func summary() -> Dictionary:
 
 
 static func result_line(rd: Dictionary) -> String:
-	var clock := "%d:%02d" % [int(rd["t"]) / 60, int(rd["t"]) % 60]
+	var clock := "%d:%02d" % [int(int(rd["t"]) / 60.0), int(rd["t"]) % 60]
 	var mode := "Heart Raid (%s)" % diff_name(String(rd.get("difficulty", "normal")))
 	if bool(rd["won"]):
 		return "%s won: %s fell and your squad held the Heart (%s)." % [mode, rd["boss"], clock]

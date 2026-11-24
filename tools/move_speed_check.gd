@@ -210,4 +210,4 @@ func _median_walk(pos: Callable, frame: Callable, secs := MEASURE_S, tilt := 1.0
 		steps.append(Vector2(p1.x - p0.x, p1.z - p0.z).length() / DT)
 	Input.action_release("right")
 	steps.sort()
-	return steps[steps.size() / 2]
+	return steps[int(steps.size() / 2.0)]

@@ -156,7 +156,7 @@ func _gait(m: Match, k: String) -> void:
 func _follow(_mb: Mob, rig: MobAnim.Rig, phase: float) -> float:
 	var tr: Array = rig.def["states"][MobAnim.WINDUP][0]
 	var tg: PackedInt32Array = tr[0]
-	var slot := tg[0] / MobAnim.STRIDE
+	var slot := int(tg[0] / float(MobAnim.STRIDE))
 	var ch := tg[0] % MobAnim.STRIDE
 	var cv: PackedFloat32Array = tr[2]
 	var x := phase * MobAnim.SAMPLES
@@ -183,7 +183,7 @@ func _perf(m: Match) -> void:
 	var crowd: Array = []
 	for i in 30:
 		var k: String = KINDS[i % KINDS.size()]
-		var mb := m.spawn_mob(k, p.pos + Vector3(2.0 + (i % 6) * 1.5, 0, (i / 6) * 1.5))
+		var mb := m.spawn_mob(k, p.pos + Vector3(2.0 + (i % 6) * 1.5, 0, (int(i / 6.0)) * 1.5))
 		match i % 6:
 			1:
 				mb.vel = Vector3(2.0, 0, 0)
