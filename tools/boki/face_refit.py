@@ -39,7 +39,7 @@ EYES = {
 AXIS = {"threadwyrm": 0.1125, "zephyrak": -0.0275}  # x of the painted face's midline when it is off x = 0
 FACING = {"threadwyrm": 0.12}
 REWEIGHT = {"threadwyrm"}
-MOUTH = {"zephyrak": 0.28}  # the mouth's own scale where the eyes' scale leaves it wider than the head
+MOUTH = {"zephyrak": 0.2}  # the mouth's own scale where the eyes' scale leaves it wider than the head
 
 
 class Glb:
