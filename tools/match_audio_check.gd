@@ -635,7 +635,7 @@ func _carry(m: Match, p_v: Hunter) -> void:
 	for d in [25.0, 40.0]:
 		R.pos = p_v.pos + Vector3(d, 0, 0)
 		Sfx.last_played.clear()
-		CarrySfx.stolen(m, R, B)
+		CarrySfx.stolen(m, R, bh)
 		var hears: bool = d < float(Sfx.sound_reach["carry_take"])
 		ok(
 			Sfx.last_played.has("carry_take") == hears,
@@ -645,7 +645,7 @@ func _carry(m: Match, p_v: Hunter) -> void:
 	Sfx.last_played.clear()
 	Sfx.recent.erase("carry_take")
 	for i in 3:
-		CarrySfx.stolen(m, R, B)
+		CarrySfx.stolen(m, R, bh)
 	ok((Sfx.recent.get("carry_take", []) as Array).size() == 1, "voice cap: three takes at once play one")
 	R.remove_meta(KinTrack.META)
 
