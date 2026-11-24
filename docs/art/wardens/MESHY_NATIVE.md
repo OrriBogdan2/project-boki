@@ -130,5 +130,24 @@ blend zone and the tube collapsed to a ribbon; flat clusters at Attack 0.5 s 31 
 goo move to RightArm, the open shoulder socket gets a dome (it showed as a black patch once the arm swung), and the hoard pack
 replaces the leather bedroll (rigid on the spine).
 
+r12 (`--r12`): the tail chain re-baked so a swung tail gathers (GooTail0 scale, GooTail1..3 translation per clip).
+r13/r13b (`--r13`): skin weights welded, the goo puddle trimmed, rim caps on the open goo/shoulder rims (simple cycles wound like
+their rims), faces below 1.2 m wound to their normals, the pack retextured, leather straps added (no ink room).
+r14 (`dredge_r14.py`): mesh rebuilt on the r13b glb (liner shell, 3-across strap rows); r16b `--ball` put the contract's junk ball
+rigid on Spine02. r15 (`--r15`): the goo arm's swing calmed in run/walk/jump. r16 (`--r16`): Idle stands on the walk's neutral
+frame, the jump/glide pose is held. r17 (`--r17`): the goo arm hangs at its bind abduction (+HANG_OUT), the chain follows less.
+r18 (`--r18 OUT IN ARM`): the fat goo is replaced by a slim Meshy arm (image-to-3D of the turnaround crop, 24k tris).
+r19 (`--r19`): socket dome UVs from the left shoulder, strap rows lifted off the skin, the liner cut under the dome.
+r20 (`--r20`): the dome reshaped on the mirrored left torso with its own baked texture; the right strap mirrored from the left.
+r21 (`--r21`, `--r21-graft OUT IN FIST ROD`, `--r21-keys`; build script in gens/hunter-round-1124/grimble/r21/build_r21.sh):
+the second junk ball copy dropped; every primitive keeps only the vertices its triangles use (the pre-r18 goo's ~80k
+orphan vertices were what geo_check measured as a 16 cm "tail" clip); strap UVs inside the stitch lines and weights on
+Spine02/Spine01/shoulders only, strap ink on; dome colour matched to the body round it; skin S -0.10 V +0.07 and goo hue -5
+(eye-level medians skin S 0.54 -> 0.40, goo H 322 -> ~296; turnaround 0.38 / 301). A Meshy gauntlet fist (image-to-3D of an
+edit of the turnaround crops, 6k tris after Blender decimate) replaces the r20 fist, its cuff ring blended onto LeftForeArm
+(geo_check hand_L sep 0.13 -> 0.23); a Meshy knobbed rod (1.5k tris) stands in the pack on his left, rigid on the pack's bone.
+Keys: per-key clearance eases (gauntlet arm out up to 15 deg, run/walk knees toward rest, run arm swing toward rest, goo
+chain out in the attack): geo_check held pairs over 1 cm 33 -> 0. `warden_native.json` size 1.025: the head joint within 3 % of the contract's (--warden-native-check; 1.09 gave body_h 2.42 but the head +9 %).
+
 Grimble has no hit clip: a hit is the Hips flinch spring (WardenFlinch) over the playing clip.
 The gun's hip is data (`holster.hip.pos`, x +0.17 = his left, where the gauntlet draws it).
