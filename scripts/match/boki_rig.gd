@@ -1051,7 +1051,7 @@ const SWAY_RATE := 4.0  # rad/s of the knocked-out sway
 const SHIVER_RATE := 45.0  # rad/s
 
 static var enabled := true
-## The face overlay (tools/boki/face.py: eye domes, lids, brows, mouth) on top of the coat. Off (owner 11-24): the eyes
+## The face overlay (tools/boki/face.py: eye domes, lids, brows, mouth) on top of the coat. Off (the default): the eyes
 ## are the model's own painted ones and the Face mesh is dropped at load; on brings the old face and expressions back.
 static var face_overlay := false
 

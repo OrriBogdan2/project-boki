@@ -2,7 +2,8 @@ extends RefCounted
 ## --boki-eyes-shots --shots-dir=<dir> [--species=a,b] [--px=480]: does each rigged Boki's coat carry its own eyes?
 ## Per species, as the game builds it (idle at 0.5 s, neutral): <dir>/<id>_off.png, a front close-up of its head with
 ## the face overlay off (BokiRig.face_overlay, the default), <id>_on.png the same with it on, and <id>_game.png, a
-## crop at the match camera (overlay off). <dir>/eyes.tsv: id, Face tris dropped, coat tris. Needs a renderer (GPU worker).
+## crop at the match camera (overlay off). <dir>/eyes.tsv: id, Face tris dropped, coat tris.
+## Needs a renderer (a GPU worker: jobq submit --needs gpu).
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Rig := preload("res://tools/boki_rig_check.gd")
@@ -59,8 +60,8 @@ func _close(id: String) -> void:
 		vp.add_child(cam)
 		cam.fov = CLOSE_FOV
 		cam.near = 0.02
-		cam.position = mid + Vector3(0, sin(CLOSE_PITCH), cos(CLOSE_PITCH)) * (size * 0.5 / tan(deg_to_rad(CLOSE_FOV) * 0.5)
-			+ box.size.z * 0.5)
+		var dist := size * 0.5 / tan(deg_to_rad(CLOSE_FOV) * 0.5) + box.size.z * 0.5
+		cam.position = mid + Vector3(0, sin(CLOSE_PITCH), cos(CLOSE_PITCH)) * dist
 		cam.look_at(mid)
 		cam.make_current()
 		await _save(vp, "%s_%s.png" % [id, "on" if on else "off"])
@@ -91,7 +92,8 @@ static func _head_box(rig: BokiRig) -> AABB:
 	var skel := rig.skeleton()
 	var head := skel.find_bone(HEAD_BONE)
 	var to_skel := skel.global_transform.affine_inverse()
-	var lift := skel.global_transform * skel.get_bone_global_pose(head) * skel.get_bone_global_rest(head).affine_inverse()
+	var rest := skel.get_bone_global_rest(head).affine_inverse()
+	var lift := skel.global_transform * skel.get_bone_global_pose(head) * rest
 	var pts := PackedVector3Array()
 	for mi in rig.model.find_children("*", "MeshInstance3D", true, false):
 		var inst := mi as MeshInstance3D
