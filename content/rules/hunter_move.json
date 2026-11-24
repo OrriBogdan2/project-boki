@@ -21,7 +21,7 @@
 		"glide_start_vy": 0.85,
 		"glide_sink": 1.4,
 		"glide_heat_s": 9.0,
-		"heat_doc": "Glider heat (HunterMove, --glider-heat-check). Tags: [footage] measured from the reference's play, [owner] the owner's pick, [est] ours where the reference's value is locked (its inbound-damage heat coefficients and overheat penalties are named in its data but not decoded). glide_heat_s [owner, Nov 2 'lasts too long']: seconds of level glide before the heat ring turns hot (the footage reads ~14 s; a parity move to it is held for the owner). lift_heat [footage]: heat rate while the glider lifts you out of the abyss, x a level glide (a ~1 s lift from 8 m deep burns a quarter to a third of the bar). lift_tap_heat [est]: the lift's first Hunter.FEATHER_TAP seconds (its quick impulse) heat at this x instead. hit_heat [est]: a hit on a glider heats it this x its damage share, where 34.5 damage is a 30% share (a knock's 250 of 1,050 hp). overheat_burn [est]: share of max health an overheated open glider burns a second, in 20-damage ticks. overheat_speed [owner 11-17]: glide speed share while overheated, a clean 30% slowdown (no extra sink; height and heading are a cool glide's). overheat_lift [owner 11-17]: share of the full abyss lift an overheated glider keeps; 1.0, it lifts like a cool one.",
+		"heat_doc": "Glider heat (HunterMove, --glider-heat-check). Tags: [footage] measured from the reference's play, [owner] the owner's pick, [est] ours where the reference's value is locked (its inbound-damage heat coefficients and overheat penalties are named in its data but not decoded). glide_heat_s [owner, Nov 2 'lasts too long']: seconds of level glide before the heat ring turns hot (the footage reads ~14 s; a parity move to it is held for the owner). lift_heat [footage]: heat rate while the glider lifts you out of the abyss, x a level glide (a ~1 s lift from 8 m deep burns a quarter to a third of the bar). lift_tap_heat [est]: the lift's first Hunter.FEATHER_TAP seconds (its quick impulse) heat at this x instead. hit_heat [est]: a hit on a glider heats it this x its damage share, where 34.5 damage is a 30% share (a knock's 250 of 1,050 hp). overheat_burn [?]: share of max health an overheated open glider burns a second, in 20-damage ticks; the source says only \"damage over time\" (sv/DATA.md 5) and its overheat penalty effects are named, not decoded (sv/briefs/physics.md); no hero-ref clip shows an overheated glider (briefs/hero-ref/*.md: none), so it stays ours (--move-feel-check overheat_burn_s). overheat_speed [owner 11-17]: glide speed share while overheated, a clean 30% slowdown (no extra sink; height and heading are a cool glide's). overheat_lift [owner 11-17]: share of the full abyss lift an overheated glider keeps; 1.0, it lifts like a cool one.",
 		"lift_heat": 4.0,
 		"lift_tap_heat": 1.0,
 		"hit_heat": 3.0,
@@ -45,7 +45,7 @@
 		"haste": 0.35
 	},
 	"glide_spike": {
-		"doc": "A spiked glider (scripts/match/glide_spike.gd, docs/decisions/0022). Spiked by heat (a player's hit that fills the glider's heat, or any player hit on an overheated one) [wiki Spike] or by a slam (a dunk driving it down at slam_min m/s or more, whatever its heat) [wiki Dunk; data SpikeSlamForceStrengthThreshold, value not decoded, ours est]. land_stun: the stun when a spiked glider lands over ground [wiki 0.7 s]. land_dmg: the additional damage then [wiki: 'additional damage', amount not stated, ours est]. air_stun: s stunned while it falls. fall_vy: m/s, the heat spike's plunge at least (SpikeSlamForceZ, value not decoded, ours est); a slam keeps its own speed. keep_hv: the share of horizontal speed the spike keeps. reopen_cd: s before the glider can open again. cool_by: the heat a gliding spiker's own glider sheds [wiki: spiking cools you; KINFALL 50 of 100].",
+		"doc": "A spiked glider (scripts/match/glide_spike.gd, docs/decisions/0022). Spiked by heat (a player's hit that fills the glider's heat, or any player hit on an overheated one) [wiki Spike] or by a slam (a dunk driving it down at slam_min m/s or more, whatever its heat) [wiki Dunk; data SpikeSlamForceStrengthThreshold, value not decoded, ours est]. land_stun: the stun when a spiked glider lands over ground [wiki 0.7 s]. land_dmg: the additional damage then [wiki: 'additional damage', amount not stated, ours est]. air_stun: s stunned while it falls. fall_vy [?]: m/s, the heat spike's plunge at least (SpikeSlamForceZ, value not decoded, sv/briefs/physics.md; sv/DATA.md 4 says only \"stun + plummet\"; no hero-ref clip shows a spike, briefs/hero-ref/*.md: none; ours, --move-feel-check spike_fall_vy); a slam keeps its own speed. keep_hv: the share of horizontal speed the spike keeps. reopen_cd: s before the glider can open again. cool_by: the heat a gliding spiker's own glider sheds [wiki: spiking cools you; KINFALL 50 of 100].",
 		"land_stun": 0.7,
 		"land_dmg": 8.0,
 		"air_stun": 0.35,
@@ -54,6 +54,11 @@
 		"reopen_cd": 2.5,
 		"slam_min": 10.0,
 		"cool_by": 0.5
+	},
+	"jump_pad": {
+		"doc": "The Spring pad (UtilityUse.pad_launch, docs/MOVEMENT_FEEL.md \"Launch arcs\"). vy [?]: m/s straight up; the source has no launch number (wiki Jump_Pad, sv/DATA.md 9: arm 2 s, 30 s life only) and the one pad use on camera (venator.md Mini Nuke cast 2, f103 of the 10 fps ult cut, 559 s + 10.2 s) is not on disk to measure (/home/claude/svvid gone 11-23); ours, --move-feel-check pad_vy. min_hv [?]: m/s, the least a pad sends you on with (toward your aim if you stood still); ours.",
+		"vy": 17.0,
+		"min_hv": 6.0
 	},
 	"default": {"speed": 4.55, "accel": 54.0},
 	"bulwark": {"speed": 4.85, "accel": 47.0},

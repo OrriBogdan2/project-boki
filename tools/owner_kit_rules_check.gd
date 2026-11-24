@@ -4,6 +4,9 @@ extends "res://tools/archetype_check.gd"
 ## archetype check's flat strip. Every row names the DECISIONS line it guards (line numbers as of Nov 11).
 ## Prints "OKRCHECK <row> PASS|FAIL" and "OKRCHECK DONE, failures: N".
 
+const WARDEN_MODEL_CHECK := preload("res://tools/warden_model_check.gd")
+const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
+const SIZE_COL := 0.3          # m: the head column _sizes measures the over-head height in
 const LOCK_S := [0.85, 1.25]      # s: Motley's Nightwell cast lock, "about 1 s"
 const GLIDE_S := 2.0              # s Space is held from the jump
 
@@ -168,7 +171,7 @@ func _neve() -> void:
 	var K: RimewrightKit = P.ak
 	var home: Vector3 = r[4]
 	var cursor := home + Vector3(8, 0, 0)
-	T.teleport(home + Vector3(8, 0, 2.5))      # off the aim line, inside the cursor's reach (wpn.cursor_r)
+	T.teleport(home + Vector3(8, 0, 1.8))      # off the aim line, inside the cursor's reach (wpn.cursor_r)
 	var seen := {"dart": {}, "v0": Vector2.ZERO, "skating": false}      # (a lambda can't assign the caller's locals)
 	drive(m, P, 0.6, func(i):
 		P.inp["move"] = Vector2(0, -1)
@@ -269,6 +272,177 @@ func _glide(arch: String) -> void:
 		t["held"] == 0.0 and t["fresh"] > 0.3, "held %.2fs, second press %.2fs" % [t["held"], t["fresh"]])
 	await done(m)
 
+## DECISIONS 2026-11-11, the owner's combat/UI call, "Kael LMB has no knockback". Both LMB hits (the quick slash and the
+## Searing Wave) must damage the dummy and leave it where it stood with no knock in flight (knock distance 0).
+func _fire_at(P: Hunter, at: Vector3) -> void:
+	P.inp["fire"] = true
+	aim_at(P, at)
+
+## Presses RMB on step 0 only (a tap), aimed at `at`.
+func _tap_at(P: Hunter, i: int, at: Vector3) -> void:
+	P.inp["sec"] = i == 0
+	aim_at(P, at)
+
+func _kael_lmb_noknock() -> void:
+	var r := setup("juggernaut", 2.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: JuggernautKit = P.ak
+	var hp0 := T.hp
+	var at := T.pos
+	var worst_knock := 0.0
+	drive(m, P, 0.1, func(_i): _fire_at(P, T.pos))
+	for i in int(0.8 / DT):
+		P.inp["fire"] = false
+		for mb in m.mobs: mb.queue_free()
+		m.mobs.clear()
+		m.step(DT)
+		worst_knock = maxf(worst_knock, T.knock_t)
+	var slide := Vector2(T.pos.x - at.x, T.pos.z - at.z).length()
+	ok("Kael LMB (11-11): the quick slash hurts the target and knocks it back 0 m",
+		T.hp < hp0 and slide < 0.01 and worst_knock == 0.0, "dmg %.1f, moved %.3fm, knock_t %.2f"
+			% [hp0 - T.hp, slide, worst_knock])
+	# the Searing Wave: held to full, let go, through a target 5 m out
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	T.teleport(home + Vector3(5.0, 0, 0))
+	K.cd["lmb"] = 0.0
+	P.fire_cd = 0.0
+	drive(m, P, 0.1, func(_i): pass)
+	hp0 = T.hp
+	at = T.pos
+	drive(m, P, 1.2, func(_i): _fire_at(P, T.pos))
+	worst_knock = 0.0
+	for i in int(1.0 / DT):
+		P.inp["fire"] = false
+		for mb in m.mobs: mb.queue_free()
+		m.mobs.clear()
+		m.step(DT)
+		worst_knock = maxf(worst_knock, T.knock_t)
+	slide = Vector2(T.pos.x - at.x, T.pos.z - at.z).length()
+	ok("Kael LMB (11-11): the Searing Wave hurts the target and knocks it back 0 m",
+		T.hp < hp0 and slide < 0.01 and worst_knock == 0.0, "dmg %.1f, moved %.3fm, knock_t %.2f"
+			% [hp0 - T.hp, slide, worst_knock])
+	await done(m)
+
+## Fires Kael's RMB tap (the Finishing Slam) at a dummy on the axis, with a second dummy `lat` m to the side at the
+## same range; returns [hurt on axis, hurt at the side].
+func _slam_at(lat: float, range_m: float) -> Array:
+	var r := setup("juggernaut", range_m, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
+	T2.teleport(home + Vector3(range_m, 0, lat))
+	var K: JuggernautKit = P.ak
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = float(K.rmb_charges())
+	for i in 5:
+		for mb in m.mobs: mb.queue_free()
+		m.mobs.clear()
+		m.step(DT)
+	var h1 := T.hp
+	var h2 := T2.hp
+	P.inp["sec_hold"] = false
+	drive(m, P, 1.2, func(i): _tap_at(P, i, home + Vector3(range_m, 0, 0)))
+	var out := [h1 - T.hp, h2 - T2.hp]
+	await done(m)
+	return out
+
+## DECISIONS 2026-11-11, owner combat/UI: "Kael RMB is a straight-line thrust ... not a cone". The tap's hit shape is
+## the lane of the data's rmb.slam.width and rmb.slam.len, not a wedge. A dummy at the lane's rim is hit, one just
+## past the rim (inside any cone's spread at that range) is not; the hold's Lunge runs straight ahead into the foe on
+## its line and leaves one off to the side alone.
+func _kael_rmb_lane() -> void:
+	var sl: Dictionary = Arch.def("juggernaut")["rmb"]["slam"]
+	var w := float(sl["width"])
+	var len_m := float(sl["len"])
+	var fr := 0.5          # the dummy's body radius is read from the hunter below; this is only the first guess
+	var probe := setup("juggernaut", 3.0)
+	fr = (probe[2] as Hunter).r
+	await done(probe[0])
+	var range_m := minf(3.0, len_m - 0.5)
+	var a: Array = await _slam_at(w * 0.5 + fr - 0.15, range_m)
+	ok("Kael RMB (11-11): the Slam hits a foe inside the lane's rim (data width %.2f m)" % w,
+		a[0] > 0.0 and a[1] > 0.0, "axis %.1f, rim %.1f" % [a[0], a[1]])
+	var b: Array = await _slam_at(w * 0.5 + fr + 0.35, range_m)
+	ok("Kael RMB (11-11): the Slam misses a foe just past the rim (a lane, not a cone)",
+		b[0] > 0.0 and b[1] == 0.0, "axis %.1f, beside %.1f at %.2f m out" % [b[0], b[1], w * 0.5 + fr + 0.35])
+	var c: Array = await _slam_at(0.0, len_m + fr + 0.5)
+	ok("Kael RMB (11-11): the Slam stops at the data length (%.1f m)" % len_m, c[0] == 0.0, "past the end %.1f" % c[0])
+	# the Lunge: a straight thrust along the aim into the first foe, one off to the side untouched
+	var r := setup("juggernaut", 5.0, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
+	T2.teleport(home + Vector3(2.5, 0, 3.0))
+	var K: JuggernautKit = P.ak
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = float(K.rmb_charges())
+	var h1 := T.hp
+	var h2 := T2.hp
+	P.inp["sec_hold"] = true
+	drive(m, P, 0.5, func(i): _tap_at(P, i, T.pos))
+	P.inp["sec_hold"] = false
+	var drift := 0.0
+	for i in int(1.0 / DT):
+		for k in ["fire", "sec", "dash", "jump"]: P.inp[k] = false
+		for mb in m.mobs: mb.queue_free()
+		m.mobs.clear()
+		m.step(DT)
+		drift = maxf(drift, absf(P.pos.z - home.z))
+	ok("Kael RMB (11-11): the hold's Lunge thrusts straight into the foe on its line, not the one beside it",
+		T.hp < h1 and T2.hp == h2 and drift < 0.2, "hit %.1f, side foe %.1f, sideways drift %.2f m"
+			% [h1 - T.hp, h2 - T2.hp, drift])
+	await done(m)
+
+## DECISIONS 2026-11-11, owner combat/UI: "Albert is the biggest Hunter by only ~10-15%, Kael smaller too": the
+## drawn height of every Hunter's current .glb (the model WardenGlb loads, vertices through the bones, as
+## --warden-model-check measures). Two heights: `top` the whole silhouette, `col` the highest vertex over the head
+## (within SIZE_COL m of the head pivot), which leaves out what stands off to the side (Albert's owner-approved
+## masts and sails, 11-12). Albert is the tallest on both; over the next Hunter by 5 to 16% on `col`; Kael below him.
+func _sizes() -> void:
+	var wm = WARDEN_MODEL_CHECK.new()
+	var holder := Node3D.new()
+	main.add_child(holder)
+	wm.holder = holder
+	var top := {}
+	var col := {}
+	for arch in Arch.ORDER:
+		if not WardenGlb.uses_model(arch): continue
+		var g: Node3D = wm._model(arch, PlayerLook.neutral(), true)
+		top[arch] = wm._glb_top(g)
+		var hp := g.get_node("Rig/Torso/HeadPivot") as Node3D
+		var hi := -INF
+		for nd in g.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+			var mi := nd as MeshInstance3D
+			if mi.skin == null: continue
+			for q in WARDEN_SKIN.points(mi):
+				if Vector2(q.x - hp.global_position.x, q.z - hp.global_position.z).length() < SIZE_COL:
+					hi = maxf(hi, q.y)
+		col[arch] = hi - g.global_position.y
+		g.free()
+	var rank: Array = col.keys()
+	rank.sort_custom(func(a, b): return col[a] > col[b])
+	var line := ""
+	for a in rank: line += "%s %.2f/%.2f  " % [a, col[a], top[a]]
+	var ratio := float(col[rank[0]]) / float(col[rank[1]])
+	var all_top := float(top["bulwark"]) / float(top["dredge"])
+	var label := "Albert (11-11): tallest Hunter, %.0f%% over the next (%s; whole silhouette %.0f%%)"
+	ok(label % [(ratio - 1.0) * 100.0, rank[1], (all_top - 1.0) * 100.0],
+		String(rank[0]) == "bulwark" and ratio >= 1.05 and ratio <= 1.16 and top["bulwark"] > top["dredge"],
+		"m over-head/whole: " + line)
+	var kr := float(col["juggernaut"]) / float(col["bulwark"])
+	ok("Kael (11-11): smaller than Albert (%.0f%% of his height) and under his 11-11 1.93 m" % (kr * 100.0),
+		kr <= 0.85 and col["juggernaut"] <= 1.93, "Kael %.2f m, Albert %.2f m" % [col["juggernaut"], col["bulwark"]])
+	holder.queue_free()
+	await main.get_tree().process_frame
+
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
@@ -276,6 +450,9 @@ func run(main_node: Node) -> void:
 	await _motley()
 	await _tenzo()
 	await _kael()
+	await _kael_lmb_noknock()
+	await _kael_rmb_lane()
+	await _sizes()
 	await _neve()
 	await _vex()
 	await _grimble(false)
