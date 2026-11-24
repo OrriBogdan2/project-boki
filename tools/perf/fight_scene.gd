@@ -37,7 +37,7 @@ func report(root: Node, m: Match, viewport: Viewport, tag: String) -> void:
 	print("%s repeats (MultiMesh candidates, copies x tris): %s" % [head, _repeats(seen)])
 	if tag == "peak":
 		for h: Hunter in m.hunters:
-			print("%s hunter %s: %s" % [head, h.arch, _hunter(h)])
+			print("%s hunter %s %s: %s" % [head, h.pname, h.arch, _hunter(h)])
 
 
 ## Who made a node: the nearest ancestor with a name of its own (pooled and made nodes are mostly unnamed).
