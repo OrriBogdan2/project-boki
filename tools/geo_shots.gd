@@ -56,9 +56,7 @@ func _stage(main: Node) -> void:
 
 
 func _shot(dir: String, name: String, out: String) -> void:
-	var meta: Dictionary = JSON.parse_string(
-		FileAccess.get_file_as_string("%s/%s.json" % [dir, name])
-	)
+	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("%s/%s.json" % [dir, name]))
 	var fa := FileAccess.open("%s/%s.bin" % [dir, name], FileAccess.READ)
 	var nv := int(meta["nv"])
 	var nt := int(meta["nt"])
