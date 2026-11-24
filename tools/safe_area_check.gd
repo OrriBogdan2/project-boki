@@ -139,7 +139,8 @@ func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2, root
 
 
 func _hud() -> void:
-	Save.d["matches"] = int(HudReveal.groups()["kit_card"]["from_match"]) - 1  # the whole HUD: a new save gets it staged (HudReveal)
+	# the whole HUD: a new save gets it staged (HudReveal)
+	Save.d["matches"] = int(HudReveal.groups()["kit_card"]["from_match"]) - 1
 	m = Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})

@@ -27,7 +27,8 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
-	Save.d["matches"] = int(HudReveal.groups()["kit_card"]["from_match"]) - 1      # the whole HUD: a new save gets it staged (HudReveal)
+	# the whole HUD: a new save gets it staged (HudReveal)
+	Save.d["matches"] = int(HudReveal.groups()["kit_card"]["from_match"]) - 1
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
