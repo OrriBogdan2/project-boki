@@ -93,7 +93,7 @@ func _beds() -> void:
 	await _shot("orbit_beds")
 	await _orbit(1.6)
 	var kin: Node3D = h.kins[1]["node"]
-	await _walk(kin.global_position + Vector3(1.8, 0, 1.8))
+	await _walk(kin.global_position, kin)
 	await _wait(0.5)
 	await _shot("boki")
 
@@ -112,9 +112,11 @@ func _hub() -> void:
 
 
 ## Walks to `goal` (xz) with the real keys, each frame held in the view's own terms.
-func _walk(goal: Vector3) -> void:
+func _walk(goal: Vector3, chase: Node3D = null) -> void:
 	var left := LEG_S * FPS
 	while left > 0 and Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length() > 0.5:
+		if chase != null:
+			goal = chase.global_position + Vector3(1.8, 0, 1.8)  # (a Boki that wanders: keep heading for it)
 		var way := Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).normalized().rotated(h.cam.yaw)
 		_keys(way)
 		await _wait(1.0 / FPS)
