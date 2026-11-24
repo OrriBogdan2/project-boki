@@ -361,28 +361,28 @@ func _net() -> void:
 # ------------------------------------------------------------------ 8b. the carry-out slot, the 4-wisp cap, the mate
 func _slots() -> void:
 	_fresh()
-	var P := m.player
+	var pl := m.player
 	var cap := int(Capture.rules()["wisp_cap"])
-	var mate: Hunter = m.hunters.filter(func(h): return h != P)[0]
-	mate.team = P.team
+	var mate: Hunter = m.hunters.filter(func(h): return h != pl)[0]
+	mate.team = pl.team
 	mate.ctrl = "idle"
 	var rec := Save.new_kin("puddlet", "Claimed")
-	ok(Capture.room(P, rec) and Capture.mate_with_room(m, P, rec) == mate, "a free slot fits; a mate has room")
-	P.caught.append(rec)
+	ok(Capture.room(pl, rec) and Capture.mate_with_room(m, pl, rec) == mate, "a free slot fits; a mate has room")
+	pl.caught.append(rec)
 	var wild_k := wild()
-	var why := Capture.block_reason(P, wild_k)
+	var why := Capture.block_reason(pl, wild_k)
 	ok(why.contains(mate.pname), "full slot: the toast names the teammate with room (\"%s\")" % why)
 	var taken := Save.new_kin("zapple", "Taken")
 	taken["lost_from"] = "Someone"
-	ok(Capture.room(P, taken), "...a stolen Boki has its own slot")
-	P.caught.append(taken)
-	ok(not Capture.room(P, taken), "...one stolen slot: a second stolen Boki has no room")
-	ok(Capture.wisps(P) <= cap, "wisps %d never pass the cap %d" % [Capture.wisps(P), cap])
+	ok(Capture.room(pl, taken), "...a stolen Boki has its own slot")
+	pl.caught.append(taken)
+	ok(not Capture.room(pl, taken), "...one stolen slot: a second stolen Boki has no room")
+	ok(Capture.wisps(pl) <= cap, "wisps %d never pass the cap %d" % [Capture.wisps(pl), cap])
 	mate.caught.append(Save.new_kin("puddlet", "Mate"))
-	ok(Capture.mate_with_room(m, P, rec) == null, "no team pool: a full teammate is no help")
+	ok(Capture.mate_with_room(m, pl, rec) == null, "no team pool: a full teammate is no help")
 	# online: a client knows a teammate's slots from the snapshot row
 	mate.caught.clear()
-	var row := HunterNet.extra(P)
+	var row := HunterNet.extra(pl)
 	m.is_host = false
 	mate.remote = true
 	HunterNet.apply(mate, row)
@@ -576,17 +576,17 @@ func _sound() -> void:
 	var rare := _scan_through(func(r): r["shimmer"] = true)
 	ok(rare["cues"] == _expect("scan_pop_rare"), "a shimmer Boki: the rare chime once %s" % rare["cues"])
 	_fresh()
-	var P := m.player
+	var pl := m.player
 	wild()
-	Sfx.listener = P.pos
+	Sfx.listener = pl.pos
 	_cue_reset()
-	begin(P)
+	begin(pl)
 	run_for(1.0)
-	P.inp["dash"] = true
+	pl.inp["dash"] = true
 	run_for(0.2)
-	P.inp["dash"] = false
+	pl.inp["dash"] = false
 	run_for(0.5)
-	ok(P.caught.is_empty() and _cue_counts() == _expect("", 1), "a dash cancels the scan: the snap once, no chime")
+	ok(pl.caught.is_empty() and _cue_counts() == _expect("", 1), "a dash cancels the scan: the snap once, no chime")
 	var reach := float(Sfx.sound_reach.get("scan_call", 0.0))
 	ok(is_equal_approx(reach, Sfx.hear_range * 0.5), "the call carries half of gunfire's range (%.0f m)" % reach)
 	var near := Sfx._distance_db(Sfx.listener + Vector3(reach - 1.0, 0, 0), reach)
