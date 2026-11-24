@@ -614,13 +614,13 @@ func _all() -> void:
 	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
 	reset.call()
 	var spot := home + Vector3(4.0, 0, 0)
-	var AL: Hunter = m.make_hunter("AL", t.team, "heavy", "Albert", "idle", {}, spot, {"arch": "bulwark"})
-	AL.set_arch("bulwark")
-	AL.max_hp = 1e9
-	AL.hp = AL.max_hp
-	ak.aim_at(AL, p.pos)
+	var alb: Hunter = m.make_hunter("AL", t.team, "heavy", "Albert", "idle", {}, spot, {"arch": "bulwark"})
+	alb.set_arch("bulwark")
+	alb.max_hp = 1e9
+	alb.hp = alb.max_hp
+	ak.aim_at(alb, p.pos)
 	m.step(ak.DT)
-	(AL.ak as BulwarkKit)._raise()
+	(alb.ak as BulwarkKit)._raise()
 	dm0 = ak.dmg(t)
 	gw0 = k.grapples
 	_throw(m, p)
@@ -630,11 +630,11 @@ func _all() -> void:
 		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
 	)
 	for pw in m.verbs.walls.duplicate():
-		if pw.get("by") == AL:
+		if pw.get("by") == alb:
 			m.verbs.walls.erase(pw)
 			if is_instance_valid(pw.get("node")): (pw["node"] as Node).queue_free()
-	AL.queue_free()
-	m.hunters.erase(AL)
+	alb.queue_free()
+	m.hunters.erase(alb)
 	m.step(ak.DT)
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()

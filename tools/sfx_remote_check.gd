@@ -142,11 +142,11 @@ func _side(key: String, foe: bool) -> String:
 ## for that side, once each, at that side's level (the enemy's UltCue.DB_FOE, over the squad's UltCue.DB), and
 ## not the other side's tag.
 func _ult_tag(arch: String, theirs: Array, foe: bool) -> String:
-	var tag := "ult_tag_foe" if foe else "ult_tag_ally"
+	var tag_id := "ult_tag_foe" if foe else "ult_tag_ally"
 	var other_tag := "ult_tag_ally" if foe else "ult_tag_foe"
 	var want_db := UltCue.DB_FOE if foe else UltCue.DB
 	var out: Array = []
-	for sname in [arch + "_ult_cue", tag]:
+	for sname in [arch + "_ult_cue", tag_id]:
 		var hits := theirs.filter(func(r): return r[0] == sname)
 		if hits.size() != 1:
 			out.append("%s x%d, want 1 (heard %s)" % [sname, hits.size(), theirs.map(func(r): return r[0])])
@@ -179,8 +179,8 @@ func _on_msg(topic: String, data, from: String) -> void:
 				if data.get("side", "") != "":
 					_team(data["side"] == "foe", String(data.get("arch", "")))
 			"log":
-				var played := rows.map(func(r): return [r[0], [r[1].x, r[1].y, r[1].z], r[2]])
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": played})
+				var got := rows.map(func(r): return [r[0], [r[1].x, r[1].y, r[1].z], r[2]])
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": got})
 		return
 	super._on_msg(topic, data, from)
 

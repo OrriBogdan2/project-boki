@@ -312,7 +312,7 @@ func _ult_cues(m: Match, p: Hunter) -> void:
 	r.pos = p.pos + Vector3(40, 0, 0)
 	Sfx.last_played.clear()
 	var dbs := {}
-	var grab := func(sname: String, _at, db: float, _pitch: float): dbs[sname] = db
+	var grab := func(sname: String, _at, db: float, _pt: float): dbs[sname] = db
 	Sfx.played.connect(grab)
 	for pl in Sfx.players:
 		pl.stop()
@@ -678,7 +678,7 @@ func _from_box(m: Match, h: Hunter, dropper: Hunter, rec: Dictionary) -> Array:
 		"node": null}
 	Life.take_item(m, h, b, {"key": "caught", "i": 0})
 	h.caught.clear()
-	return Sfx.last_played.keys().filter(func(n): return String(n).begins_with("carry_"))
+	return Sfx.last_played.keys().filter(func(nm): return String(nm).begins_with("carry_"))
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on

@@ -612,8 +612,8 @@ func _process(delta: float) -> void:
 	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
-		var step: float = full * delta / float(amb_layers[n].get("fade", AMB_FADE))
-		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, step)
+		var amount: float = full * delta / float(amb_layers[n].get("fade", AMB_FADE))
+		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, amount)
 		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
 		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
 			ap.queue_free()
@@ -968,10 +968,10 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 func loop_set(key: String, pos = null, pitch := 1.0) -> void:
 	if not loops.has(key):
 		return
-	var L: Dictionary = loops[key]
-	L["pos"] = pos
-	(L["p"] as AudioStreamPlayer).pitch_scale = maxf(0.05, pitch)
-	_loop_level(L)
+	var lp: Dictionary = loops[key]
+	lp["pos"] = pos
+	(lp["p"] as AudioStreamPlayer).pitch_scale = maxf(0.05, pitch)
+	_loop_level(lp)
 
 
 func loop_stop(key: String) -> void:
@@ -1007,16 +1007,16 @@ func loop_on(key: String) -> bool:
 	return loops.has(key)
 
 
-func _loop_level(L: Dictionary) -> void:
-	var p: AudioStreamPlayer = L["p"]
-	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
+func _loop_level(lp: Dictionary) -> void:
+	var p: AudioStreamPlayer = lp["p"]
+	var v := float(lp["vol"]) + _distance_db(lp["pos"], float(lp["reach"]))
 	v = -80.0 if is_nan(v) else v
 	# Set only on a change: each set on a playing voice queues new bus details in the AudioServer, and a
 	# loop held every step (LastAlive's bed) piled up enough to stall a headless check's exit for minutes.
 	if absf(p.volume_db - v) > 0.01:
 		p.volume_db = v
 	# A bed on another bus (LastAlive's on Music) stays there so it ducks with the score.
-	var bus: StringName = _bus_for(L["pos"], L["sound"]) if String(L["bus"]) == "SFX" else StringName(L["bus"])
+	var bus: StringName = _bus_for(lp["pos"], lp["sound"]) if String(lp["bus"]) == "SFX" else StringName(lp["bus"])
 	if p.bus != bus:
 		p.bus = bus
 

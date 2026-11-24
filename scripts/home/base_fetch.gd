@@ -221,7 +221,6 @@ func playing() -> bool:
 	return run != null
 
 
-
 func use() -> void:
 	var ks: Array = h.hrace.entrants()
 	if ks.size() < 2:
