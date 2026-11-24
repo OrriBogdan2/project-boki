@@ -5,8 +5,10 @@ extends Node3D
 ## What a floating number counts, and so its look: your direct hits, a heal, a Boki's hits (smaller, in
 ## its type colour) and over-time ticks (burn, poison: small, a second of them on one number). A number
 ## adds up only with its own kind on a target, so a heal never joins a damage number on the same body,
-## and a Boki's hits, your hits and a burn on one body stay three numbers.
-enum Num { HIT, HEAL, KIN, TICK }
+## and a Boki's hits, your hits and a burn on one body stay three numbers. What a hit landed on is its
+## look too (HudStyle.num_style, the one table): a shield or Fusion shell soaking it (SHIELD) and an
+## empowered hit (HEAVY: o.heavy / o.payoff) are numbers of their own, so none reads as another.
+enum Num { HIT, HEAL, KIN, TICK, SHIELD, HEAVY }
 
 const TELEGRAPH: Shader = preload("res://shaders/telegraph.gdshader")
 const RING: Shader = preload("res://shaders/fx_ring.gdshader")
@@ -59,11 +61,11 @@ const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)  # ... a crit's is a hot embe
 ## Font size by damage tier: [from this value up, size]. A crit adds CRIT_SIZE on top.
 const SIZE_TIERS := [[0.0, 34], [20.0, 40], [50.0, 48], [100.0, 58], [200.0, 70]]
 const CRIT_SIZE := 10
-const NUM_SCALE := [1.0, 1.0, 0.78, 0.62]  # size and outline by Num: a Boki's hits smaller, a tick's small
+const NUM_SCALE := [1.0, 1.0, 0.78, 0.62, 0.85, 1.12]  # size and outline by Num: a Boki's hits smaller, a tick's small
 
 ## m along the camera's right and up from your hits' spot, by Num: a Boki's beside yours, a tick lower on
 ## the body, so the three don't print over each other on one target (a heal has its own height)
-const LOOK_SPOT := [Vector2.ZERO, Vector2.ZERO, Vector2(0.6, -0.35), Vector2(0.0, -0.8)]
+const LOOK_SPOT := [Vector2.ZERO, Vector2.ZERO, Vector2(0.6, -0.35), Vector2(0.0, -0.8), Vector2.ZERO, Vector2.ZERO]
 const FLASH_MIN := 0.1  # s an impact flash holds at least: ~6 frames, so the hit frame reads
 
 static var _impact_quad: QuadMesh
@@ -606,7 +608,9 @@ func _second_up(n: Dictionary) -> bool:
 static func num_kind(by: Ent, o: Dictionary) -> Num:
 	if String(o.get("src", "")) == "burn" or o.get("tick", false):
 		return Num.TICK
-	return Num.KIN if by is Kin else Num.HIT
+	if by is Kin:
+		return Num.KIN
+	return Num.HEAVY if o.get("heavy", false) or o.get("payoff", false) else Num.HIT
 
 
 ## The number for `d` dealt to `target` by `by` (o: the hit's options), in the look its source picks.
@@ -620,7 +624,8 @@ func damage_number(target: Ent, by: Ent, d: float, o: Dictionary, you: Hunter, a
 	var crit: bool = o.get("crit", false)
 	var on_your_kin := target is Kin and (target as Kin).owner_h == you
 	var plain := DexView.type_col(String((by as Kin).sp.get("type", ""))) if kind == Num.KIN else HudStyle.HIT
-	var col := DotLook.COL if kind == Num.TICK else HudStyle.dmg_col(crit, armor_hit, target == you, on_your_kin, plain)
+	var col := DotLook.COL if kind == Num.TICK else HudStyle.dmg_col(
+		crit, armor_hit, target == you, on_your_kin, plain, kind == Num.HEAVY)
 	if credit is Hunter and (credit as Hunter).ak and target != you:
 		col = (credit as Hunter).ak.number_col(target, col, o)
 	var at := target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0) + _look_spot(kind)
