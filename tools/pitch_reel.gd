@@ -30,7 +30,8 @@ const ESCAPE_CHARGE_LEFT := 4.0  # s of the uplink's charge left when shot 10 st
 const CLOCK_LEFT_S := 840.0  # s on the match clock when a stepped shot starts (1e9 reads as junk)
 const KIT_GAP_M := 4.5  # m between the Hunter and its foe in the kit shot (both well inside the frame)
 const KIT_ZOOM := 0.85  # the kit shot's camera zoom (0.55 frames only ~8 m: the pair sat on its edges)
-const KIT_FOE_REACH := 7.0  # m: a foe that has walked further than this from the Hunter is put back at the fight (--reach=)
+# m: a foe that has walked further than this from the Hunter is put back at the fight (--reach=)
+const KIT_FOE_REACH := 7.0
 const KIT_ROOM_M := 10  # m of solid ground all round the kit fight (at a cliff edge both fell off)
 const KIT_LEASH_M := 3.0  # m the Hunter may stray from the fight's centre before it walks back (dashes)
 const KIT_SEARCH_M := 30  # m from the start the kit shot looks for that much room

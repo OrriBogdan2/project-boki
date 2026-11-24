@@ -48,8 +48,10 @@ const COMBOS := {
 	"ostra": [["kin", "signature", "e", 0.3, 8.0, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""],
 		["x", "hunter_ult", "x", 0.3, 8.0, ""], ["fire", "fire", "", 1.6, 5.0, ""]],
 	"gil": [["fire", "fire", "", 1.6, 3.0, ""]],  # portrait-only (crouch beat)
-	"learn": [["dash", "dash", "dash", 0.2, 8.0, "in"], ["fire", "fire", "", 2.0, 4.0, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""],
-		["dash", "dash", "dash", 0.2, 6.0, "in"], ["fire", "fire", "", 2.0, 4.0, ""]],  # same move for every hunter (learnings beat)
+	# same move for every hunter (learnings beat)
+	"learn": [["dash", "dash", "dash", 0.2, 8.0, "in"], ["fire", "fire", "", 2.0, 4.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""], ["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["fire", "fire", "", 2.0, 4.0, ""]],
 	"rimewright": [["fire", "fire", "", 1.6, 8.0, ""], ["kin", "signature", "e", 0.3, 7.0, ""],
 		["sec", "secondary", "sec", 0.3, 8.0, ""], ["x", "hunter_ult", "x", 0.3, 6.0, ""]],
 }
@@ -74,6 +76,11 @@ var port_y0 := 1.0
 var port_y1 := 1.35
 var port_eye := 1.45
 var port_crouch := false  # --port-crouch: hold crouch through the portrait (Gil crouch beat)
+var port_yaw := 0.0  # --port-yaw=<deg>: turn the whole sweep round the hunter (180 = from behind)
+var port_look := false  # --port-look: he turns to the camera and his orbit props (Tenzo's seeing-stones) watch it
+# --port-aim-off=<m>: with --port-look he faces this far to the camera's right of it (a profile for a thrust)
+var port_aim_off := 0.0
+var port_hold := ""  # --port-hold=<input>: hold this input (fire = a charged guard, the sword raised) in the portrait
 var steps_log: Array = []
 var reseats := 0
 var floor_on := false
@@ -99,6 +106,10 @@ func run(main_node: Node) -> void:
 		port_y1 = float(arg.substr(10)) if arg.begins_with("--port-y1=") else port_y1
 		port_eye = float(arg.substr(11)) if arg.begins_with("--port-eye=") else port_eye
 		port_crouch = port_crouch or arg == "--port-crouch"
+		port_yaw = float(arg.substr(11)) if arg.begins_with("--port-yaw=") else port_yaw
+		port_look = port_look or arg == "--port-look"
+		port_aim_off = float(arg.substr(15)) if arg.begins_with("--port-aim-off=") else port_aim_off
+		port_hold = arg.substr(12) if arg.begins_with("--port-hold=") else port_hold
 		ally_id = arg.substr(7) if arg.begins_with("--ally=") else ally_id
 		foe2_id = arg.substr(7) if arg.begins_with("--foe2=") else foe2_id
 		summon_at = float(arg.substr(12)) if arg.begins_with("--summon-at=") else summon_at
@@ -144,7 +155,9 @@ func _hero() -> void:
 	await _start_hero(hunter)
 	m.length = m.time + CLOCK_LEFT_S
 	var me := m.player
-	var foe_arch := foe_id if Arch.exists(foe_id) else ("gunslinger" if hunter == "juggernaut" else "juggernaut")
+	var foe_arch := foe_id
+	if not Arch.exists(foe_id):
+		foe_arch = "gunslinger" if hunter == "juggernaut" else "juggernaut"
 	CombatBus.ability_used.connect(_on_cast)
 	var combo: Array = COMBOS.get(combo_key if combo_key != "" else hunter, [])
 	if combo.is_empty():
@@ -161,10 +174,13 @@ func _hero() -> void:
 	var squad_b_extra: Array = []
 	squad_a = [me]
 	if shot == FIGHT_SHOT:
-		var ally_arch := ally_id if Arch.exists(ally_id) else String(Arch.ids()[(Arch.ids().find(hunter) + 1) % Arch.ids().size()])
+		var ally_arch := ally_id
+		if not Arch.exists(ally_id):
+			ally_arch = String(Arch.ids()[(Arch.ids().find(hunter) + 1) % Arch.ids().size()])
 		var ally := _hunter("a1", 0, ally_arch, "pebbit", _ground(spot["me"] + Vector3(-2.5, 0, 2.0)))
 		squad_a.append(ally)
-		squad_b_extra.append(_hunter("b1", 1, foe2_id if Arch.exists(foe2_id) else "gunslinger", "pebbit", _ground(spot["foe"] + Vector3(FAR_M, 0, 3))))
+		var foe2_arch := foe2_id if Arch.exists(foe2_id) else "gunslinger"
+		squad_b_extra.append(_hunter("b1", 1, foe2_arch, "pebbit", _ground(spot["foe"] + Vector3(FAR_M, 0, 3))))
 		(squad_b_extra[0] as Hunter).ctrl = "idle"
 	squad_b = [foe] + squad_b_extra
 	for h in squad_a + squad_b:
@@ -213,8 +229,6 @@ func _intro(me: Hunter) -> void:
 		var r := INTRO_R * lerpf(1.15, 0.85, k)
 		var eye := mid + Vector3(sin(ang) * r, intro_eye - 0.95, cos(ang) * r)
 		m.cam.global_transform = Transform3D(Basis.looking_at(mid - eye, Vector3.UP), eye)
-		if i % 30 == 0:
-			print("PITCH_HERO_DBG intro f=%d pos=%s vel=%s anim=%s ctrl=%s" % [i, me.pos, me.vel, me.get("anim_name"), me.ctrl])
 		await main.get_tree().process_frame
 	m.cam.fov = fov0
 	m.cam.near = near0
@@ -294,7 +308,7 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 			_release_all()
 			if idx < combo.size() and phase != "approach":
 				_log(me, foe, combo[idx], idx, true, true, hp0, charges0, casts.size() > casts0)
-			print("PITCH_HERO_KILL t=%.2f step=%d dead=%s downed=%s out=%s why=%s hp=%.0f/%.0f void=%s" % [t, idx, foe.dead, foe.downed, foe.out, foe.get_meta("died_why", "-"), foe.hp, foe.max_hp, m.world.is_void(foe.pos.x, foe.pos.z)])
+			print("PITCH_HERO_KILL t=%.2f step=%d dead=%s why=%s" % [t, idx, foe.dead, foe.get_meta("died_why", "-")])
 		if end_t >= 0.0 and t - end_t >= HOLD_END_S:
 			mark("hold_end")
 			break
@@ -346,12 +360,15 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 						if timer <= 0.0:
 							_key(String(st[1]), false)
 							phase = "after"
-							timer = AFTER_S if idx + 1 < combo.size() and String(combo[idx + 1][5]) == "recast" else ULT_AFTER_S if String(st[2]) == "x" else AFTER_S
+							timer = ULT_AFTER_S if String(st[2]) == "x" else AFTER_S
+							if idx + 1 < combo.size() and String(combo[idx + 1][5]) == "recast":
+								timer = AFTER_S
 					"after":
 						timer -= 1.0 / FPS
 						ms = Vector2.ZERO
 						if timer <= 0.0:
-							_log(me, foe, st, idx, true, foe.hp < hp0 - 0.5 or foe.stun_t > 0.0, hp0, charges0, casts.size() > casts0)
+							var landed := foe.hp < hp0 - 0.5 or foe.stun_t > 0.0
+							_log(me, foe, st, idx, true, landed, hp0, charges0, casts.size() > casts0)
 							idx += 1
 							phase = "approach"
 							wait_ready = -STEP_GAP_S
@@ -363,11 +380,13 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 		await main.get_tree().process_frame
 		t += 1.0 / FPS
 		seen_down = seen_down or down
-	print("PITCH_HERO_RESULT hunter=%s kill=%s t=%.2f reseats=%d steps=%s casts=%s" % [hunter, end_t >= 0.0, t, reseats, steps_log, casts])
+	print("PITCH_HERO_RESULT hunter=%s kill=%s t=%.2f reseats=%d steps=%s casts=%s" % [
+		hunter, end_t >= 0.0, t, reseats, steps_log, casts])
 
 
 ## One step's outcome: `fired` = the ability went on cooldown (or, for the basic attack, the foe lost hp).
-func _log(me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: bool, hp0: float, charges0: int, cast: bool) -> void:
+func _log(me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: bool, hp0: float, ch0: int,
+		cast: bool) -> void:
 	var slot := String(st[2])
 	var info: Dictionary = me.slot_info(slot) if slot != "" else {}
 	var name := String(info.get("name", "Finger Guns / basic"))
@@ -375,10 +394,12 @@ func _log(me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: b
 	if pressed and slot == "":
 		fired = foe.hp < hp0 - 0.5
 	elif pressed:
-		fired = cast or int(info.get("charges", 0)) < charges0 or not bool(info.get("ready", true))
-	var line := "PITCH_HERO_STEP %d %s (%s) fired=%s landed=%s foe_hp=%.0f" % [idx + 1, name, String(st[1]), fired, landed, foe.hp]
-	print(line)
-	steps_log.append("%s:%s%s" % [name, "F" if fired else "-", "L" if landed else "-"])
+		fired = cast or int(info.get("charges", 0)) < ch0 or not bool(info.get("ready", true))
+	print("PITCH_HERO_STEP %d %s (%s) fired=%s landed=%s foe_hp=%.0f" % [
+		idx + 1, name, String(st[1]), fired, landed, foe.hp])
+	var mark := "F" if fired else "-"
+	mark += "L" if landed else "-"
+	steps_log.append(name + ":" + mark)
 
 
 ## A real action press or release (Input.action_press is what a key down does inside the Input singleton).
@@ -411,8 +432,8 @@ func _release_all() -> void:
 		Input.action_release(a)
 
 
-## v6 portrait: HUD off, the Hunter idle, the camera starts 40 deg to one side of its FRONT at eye height, sweeps through the
-## front to 40 deg the other side while pushing in from a full-body frame to head and shoulders. Faces readable.
+## v6 portrait: HUD off, the Hunter idle, the camera starts 40 deg to one side of its FRONT at eye height, sweeps
+## through the front to 40 deg the other side while pushing in from a full-body frame to head and shoulders.
 func _portrait(me: Hunter) -> void:
 	Record.set_level(2)
 	var fov0 := m.cam.fov
@@ -431,21 +452,24 @@ func _portrait(me: Hunter) -> void:
 	for i in frames:
 		_purge()
 		m.step(1.0 / FPS)
+		if port_look:
+			var at := m.cam.global_position + m.cam.global_transform.basis.x * port_aim_off
+			me.inp["aim"] = at
+			me.inp["aim_y"] = at.y
+			me.model.set_meta(WardenGlb.ORBIT_LOOK, m.cam.global_position)
 		for h in m.hunters:
 			h.render(1.0 / FPS, 1.0)
 		var k := float(i) / float(frames - 1)
 		k = k * k * (3.0 - 2.0 * k)
-		var ang := deg_to_rad(-port_arc * 0.5 + port_arc * k)
+		var ang := deg_to_rad(port_yaw - port_arc * 0.5 + port_arc * k)
+		if port_hold != "" and i > 20:
+			me.inp[port_hold] = true
 		var fwd := Vector3(-sin(me.face), 0, -cos(me.face))
 		var dirv := fwd.rotated(Vector3.UP, ang)
 		var r := lerpf(port_r0, port_r1, k)
 		var look := me.pos + Vector3(0, lerpf(port_y0, port_y1, k), 0)
 		var eye := look + dirv * r + Vector3(0, port_eye - lerpf(port_y0, port_y1, k), 0)
 		m.cam.global_transform = Transform3D(Basis.looking_at(look - eye, Vector3.UP), eye)
-		if i % 15 == 0:
-			var mf: Vector3 = me.model.global_transform.basis * Vector3(0, 0, -1)
-			var cf: Vector3 = (look - eye).normalized()
-			print("PITCH_HERO_DBG port f=%d ang=%.0f face=%.2f modelfwd=%s camfwd=%s mpos=%s pos=%s anim=%s vel=%s" % [i, rad_to_deg(ang), me.face, mf.snapped(Vector3.ONE * 0.01), cf.snapped(Vector3.ONE * 0.01), me.model.global_position, me.pos, me.get("anim_name"), me.vel])
 		await main.get_tree().process_frame
 	m.cam.fov = fov0
 	print("PITCH_HERO_PORT frames=%d" % frames)
