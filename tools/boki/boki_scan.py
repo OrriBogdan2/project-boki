@@ -246,7 +246,7 @@ AUTO = {  # id: overrides on AUTO_BASE
     "tuatrune": BORROWED,
     "velvorm": BORROWED,
     "casquebill": BORROWED,
-    "basaltoad": {**BORROWED, "sat": 0.2, "gain": 1.2, "tint": (1.03, 1.0, 0.9)},  # lit toad read red-brown, 2D is tan
+    "basaltoad": {**BORROWED, "sat": 0.35, "gain": 1.15, "tint": (1.03, 1.0, 0.85)},  # lit toad read red-brown, 2D is tan
     "cindowary": {**BORROWED, "sat": 0.55},  # lit leather read pink (sat 0.68 vs the 2D 0.48)
     "caecilith": {},
     "glintmole": {},
