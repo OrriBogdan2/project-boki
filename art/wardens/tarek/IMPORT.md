@@ -80,3 +80,13 @@ the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.p
 other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+## Native albedo grade (2026-11-24, job 20261124-163412-a1, round 28 "H")
+`tarek_meshy.glb`: only the bytes of image `Image_0` (base colour, bufferView 1) changed; the other 1033 bufferViews
+(mesh, UVs, skin, 6 clips, Image_1/Image_2) are byte-identical. `tarek_meshy_Image_0.jpg` = the same jpg.
+Per-region HSV grade on the original UVs, regions baked from the skin weights (left-arm bones = stone, legs = pants,
+head dark texels = hair): stone hue +14 deg S x1.15 V x1.2 (runes untouched), pants V x1.4 S x0.6 toward H 346 (plum),
+hair V x1.6 to H 22 S x0.6 (dark brown), skin S x0.65 V x0.88 (sash S > 0.58 untouched). Measured at the game's eye view
+(idle f010): chest S 0.92 -> 0.73, pants V 0.25 -> 0.45 (plum), hair V 0.18 -> 0.22 brown. Four Meshy retextures with
+--original-uv (60 credits) came back with live's colours (stone S 0.35 V 0.36), so they were not used.
+Scripts, region map and renders: /home/boki/gens/hunter-round-1124/tenzo/A/ (grade.py, swap.py, masks.py).
