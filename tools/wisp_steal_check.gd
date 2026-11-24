@@ -13,7 +13,7 @@ const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
 var main: Node
-var downs := 0      # boki_downed starts, one a step at most (_heard_down)
+var downs := 0  # boki_downed starts, one a step at most (_heard_down)
 
 
 func run(main_node: Node) -> void:
@@ -59,6 +59,7 @@ func _frames(secs: float) -> void:
 		t += DT
 		_heard_down()
 
+
 ## Counts a boki_downed start into `downs` and clears Sfx's own last start: the steps run faster than real time,
 ## so the real-time MIN_GAP would hide a repeat.
 func _heard_down() -> void:
@@ -66,6 +67,7 @@ func _heard_down() -> void:
 		downs += 1
 		Sfx.last_played.erase("boki_downed")
 		Sfx.recent.erase("boki_downed")
+
 
 ## A fresh boki_downed count, heard from `at`.
 func _listen(at: Vector3) -> void:

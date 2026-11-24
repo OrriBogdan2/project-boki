@@ -239,8 +239,7 @@ func _archer_combos() -> void:
 	)
 	ok(
 		"pin reticle: no cursor ring and no bow glint (the line is the whole readout)",
-		float(AimKit.reticle(P).get("charge", 0.0)) < 0.0
-		and not HeroVfx.of(m).holds.has("%d/heavy_glint" % P.get_instance_id()),
+		float(AimKit.reticle(P).get("charge", 0.0)) < 0.0 and not K.fx.bow_glint.visible,
 		str(AimKit.reticle(P))
 	)
 	step(m, 1.08, func(): P.inp["fire"] = true; aim_at(P, T.pos))
@@ -460,7 +459,7 @@ func _archer_combos() -> void:
 	step(m, 1.6)
 	ok(
 		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
-		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and AimKit.shown(P, "e"),
+		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and (K.fx.laces[0]["node"] as Node3D).visible,
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it

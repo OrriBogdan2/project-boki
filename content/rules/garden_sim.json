@@ -12,9 +12,9 @@
 		"budget_full_day": [7, 30],
 		"stat_total": [216, 240],
 		"gems_day": [43, 300],
-		"joy": [40, 90]
+		"joy": [50, 90]
 	},
-	"bands_doc": "Target bands, [low, high], every player must land inside (docs/GARDEN.md Balance). form_lv4_day: median day of the first form step (Evo.on_level, level 4, 600 XP); evolution_day: median day of the first real form swap (first_evo_level) on garden XP alone, so a home-only player still evolves (DECISIONS 2026-11-09); budget_full_day: when the 240 budget fills (only checked where it fills inside the month: never trivial); stat_total: total at the end of the month (90% of 240 or more: even five minutes a day nearly fills it); gems_day: mean gems earned a day (at least a weekly Wayseed, 300 / 7, so home-only players reach every zone; at most one a day); joy: mean joy over a visit (above the whistle's sulky_joy 25, below always full so toys and cares still matter; the low end was 50 until the farm joy tune cut toys joy_gain 10 to 3, which puts 5 to 30 minute visits at 40 to 48).",
+	"bands_doc": "Target bands, [low, high], every player must land inside (docs/GARDEN.md Balance). form_lv4_day: median day of the first form step (Evo.on_level, level 4, 600 XP); evolution_day: median day of the first real form swap (first_evo_level) on garden XP alone, so a home-only player still evolves (DECISIONS 2026-11-09); budget_full_day: when the 240 budget fills (only checked where it fills inside the month: never trivial); stat_total: total at the end of the month (90% of 240 or more: even five minutes a day nearly fills it); gems_day: mean gems earned a day (at least a weekly Wayseed, 300 / 7, so home-only players reach every zone; at most one a day); joy: mean joy over a visit (above sulky, below always full so toys and cares still matter).",
 	"joy_model": {"away": 30.0, "care": 6.0, "decay_per_min": 0.6},
 	"joy_model_doc": "assume, copies of scripts/core/care.gd: a Boki away a day sits at the offline joy floor 30; each first care gives about 6 joy (Care.feed base); joy falls DECAY['joy'] 0.6 a minute. Toy joy_gain and joy_below are read from toys.json.",
 	"garden_xp_unbuilt": {"care_kinds": 3, "wish": 3, "sunsap": 40},

@@ -219,13 +219,32 @@ func _hail_laced(m: Match, p: Hunter, _t: Hunter, k: ArcherKit, home: Vector3) -
 		not "panels" in k.fx and not "glow" in k.fx
 	)
 	step(m, float(k.e_def()["tell"]) + 0.1)
-	var live := AimKit.entry(p, "e")
-	var live_col: Color = live.get("col", Color.WHITE)
+	for i in 30:  # (PinFx draws on the frame clock: step it with the match)
+		m.step(DT)
+		k.fx._process(DT)
+	var shown := 0
+	var reds := 0
+	for l in k.fx.laces:
+		var node: MeshInstance3D = l["node"]
+		if node.visible and node.scale.z > 0.3:
+			shown += 1
+		var mat := node.material_override as ShaderMaterial
+		var c: Color = mat.get_shader_parameter("albedo") if mat != null else Color.WHITE
+		if red(c) and not pinkish(c):
+			reds += 1
 	ok(
-		"E laces: the live wall is the same laced arc, red, shown to everyone, and PinFx keeps no thread meshes",
-		bool(live.get("lace", false)) and bool(live.get("all", false)) and red(live_col) and not pinkish(live_col)
-		and not "laces" in k.fx and not "posts" in k.fx,
-		str(live.get("col"))
+		"E laces: every gap between the needle posts laced (an upright X and a ground X), all drawn across",
+		shown == k.fx.laces.size() and shown == (PinFx.POSTS - 1) * 4,
+		"%d of %d" % [shown, k.fx.laces.size()]
 	)
-	step(m, float(k.e_def()["time"]) + 0.3)
-	ok("E laces: gone when the wall ends", not AimKit.shown(p, "e"))
+	ok("E laces: red thread, none of it pink", reds == k.fx.laces.size(), "%d red" % reds)
+	var up_a: Dictionary = k.fx.laces[0]
+	var up_b: Dictionary = k.fx.laces[1]
+	ok(
+		"E laces: the upright pair crosses (one climbs as the other falls)",
+		(up_a["b"] as Vector3).y > (up_a["a"] as Vector3).y and (up_b["b"] as Vector3).y < (up_b["a"] as Vector3).y
+	)
+	for i in int((float(k.e_def()["time"]) + 0.3) / DT):
+		m.step(DT)
+		k.fx._process(DT)
+	ok("E laces: gone when the wall ends", not k.fx.laces.any(func(l): return (l["node"] as Node3D).visible))

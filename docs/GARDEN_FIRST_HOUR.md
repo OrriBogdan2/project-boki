@@ -91,9 +91,7 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
    guide and is retired in base mode, so it needed no change. Re-timed first hour: the patch is down at about 10 s of play (one
    build-bar visit, free), so the 8-minute ripening clock starts about 5 s earlier than in the played run and the first meal and the
    Feed and Toy lines still tick together at about 580 s; nothing else moves (item 8 is what would shorten that wait).
-   *Done on `ext/garden-free-toy-hint`: the toy step's line names both tabs (Play ball with its price, Snack patch free) and the two tiles glow green in
-   the Build bar while that step is open (`marks` in the step; `hl` on the entry). The ball is not free: it costs 12 of the 200 starting gems.*
-10. **(fixed on ext/farm-tut-ends) The tutorial never ended on its own.** Step 4 "Head out or stay" stays on the banner after an hour (shot 10), and its line runs past
+10. **The tutorial never ends on its own.** Step 4 "Head out or stay" stays on the banner after an hour (shot 10), and its line runs past
     the 4/4 counter. Owner: `scripts/home/farm_tutorial.gd` `event` ("stay" is a button press only), banner width in
     `scripts/ui/`. *Proposal: finish the step when the first zone wakes or after the toy ticks, and wrap the banner text.*
 11. **`base_mode` ships off.** On `main` a fresh save gets the full farm (chop, mine, build a house) and the garden tutorial is not shown at all;

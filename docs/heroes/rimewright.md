@@ -370,6 +370,7 @@ Verified on origin/main d255acbee against the Neve block of docs/KIT_PARITY.md, 
 | Clips | Footage poses | every `tm_*` kit move has a clip in `claire.json`, 0 fails | match |
 
 Shatter slow (K:138): closed `f6c93c7a59`. Stale text in files held by other branches: J card `dash` ("your darts fly straight and thick") and the Neve block of docs/KIT_PARITY.md (still "Claire", "15% slow", "straight while skating") are fixed by ext/neve-lmb-celeste and ext/parity-neve-skate-home once merged.
+Open, not fixed (needs a file an unmerged Neve branch changes): the Shatter slow, K:138. Remove `"slow": 1.2, "slow_k": 0.3` from the `splinter` hit, and assert `foe.slow_t == 0` after a Shatter in `--rimewright-combo-check`. Stale text in files held by other branches: J card `dash` ("your darts fly straight and thick") and the Neve block of docs/KIT_PARITY.md (still "Claire", "15% slow", "straight while skating") are fixed by ext/neve-lmb-celeste and ext/parity-neve-skate-home once merged.
 
 
 ## Tester note 11-19

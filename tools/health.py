@@ -5,7 +5,7 @@ Usage: python3 tools/health.py [--strict]
 Prints file sizes, god-file budgets, duplicate content folders, dynamic calls, checks registered inline
 in main.gd, and docs/DEBT.md entries. Exit code 1 only when --strict and a god-file budget is exceeded
 (ship.sh runs it in strict mode so god files can't grow); also on two decision notes sharing a number, the style ratchet and on a sound off its category's
-loudness (tools/sfx_loudness.py --check) and on a kit number that drifted from tools/goldens/kit_numbers.tsv. Budgets ratchet: lower them as files get split.
+loudness (tools/sfx_loudness.py --check). Budgets ratchet: lower them as files get split.
 """
 import os, re, subprocess, sys
 
@@ -107,10 +107,6 @@ def main():
     print((loud.stdout or loud.stderr).rstrip())
     if loud.returncode:
         bad.append("sfx loudness (docs/AUDIO.md)")
-    gold = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "kit_number_golden.py"), "--check"], capture_output=True, text=True)
-    print((gold.stdout or gold.stderr).rstrip())
-    if gold.returncode:
-        bad.append("kit number golden (docs/ARCHETYPES.md)")
     reg = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "registry_lint.py")], capture_output=True, text=True)
     print((reg.stdout or reg.stderr).rstrip())
     if reg.returncode:

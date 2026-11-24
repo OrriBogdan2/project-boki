@@ -277,10 +277,9 @@
 				"needs": ["eat"],
 				"title": "Place a toy",
 				"hints": {
-					"place": "Press {build}: Base tab Play ball ({toy_cost} gems), Garden tab Snack patch (free).",
+					"place": "Press {build}, open Base and set a toy down.",
 					"watch": "Watch your Boki go and play with it."
 				},
-				"marks": {"place": ["toy_ball", "snack_patch"]},
 				"world": {"place": "", "watch": "Toy"},
 				"boki": "Can we have something to play with?"
 			},
@@ -288,7 +287,7 @@
 				"id": "out",
 				"needs": ["toy"],
 				"title": "Head out or stay",
-				"hints": {"go": "{interact} at the portal heads out, or Stay. Waystone: Wayseed + leaning Boki."},
+				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to play on. The Waystone in your hub opens the next zone: bring it a Wayseed and a Boki that leans its way."},
 				"world": {"go": "Portal"},
 				"boki": "Out there, or more play? Your call!"
 			}

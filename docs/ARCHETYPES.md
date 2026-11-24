@@ -1263,12 +1263,6 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
 
-## Kit number golden
-`tools/goldens/kit_numbers.tsv` snapshots every number and boolean in `content/archetypes/*.json` and `content/rules/kit_parity.json` (one sorted `file:dotted.path<TAB>value` row each; text is not snapshotted). `python3 tools/kit_number_golden.py --check` (run by `python3 tools/health.py --strict`, so by ship) fails with each changed, removed or new key and its old -> new value, so an unrelated change cannot silently retune a kit.
-- **Re-bless** after a deliberate retune: `python3 tools/kit_number_golden.py --bless`, then commit the TSV in the same commit as the JSON edit and say which source or owner call moved the number (the diff of the TSV is the list of changed keys).
-- A new hunter or ability adds rows the same way (new keys also fail until blessed). Adding a text-only field changes nothing.
-- It sits under `--archetype-check` (our spec) and `--kit-parity-check` (the source): this one only says *something moved*.
-
 ## Kit card text rules (11-11)
 
 Owner: "kit card is also very annoying to read, like a giant text block". Each row of the kit card (`KitCard`: Select, the L page, K in a match) is icon, key, name, key-number chips and one line of at most `KitCard.MAX_WORDS` (12) words; the rules show on hover and on the Details page. The line is authored per hunter in `content/archetypes/<id>.json` under `card` (`dash`, `passive`, `rmb`, `e`, `x`, and `weapons.<id>` for LMB). Chips: cooldown, charges, level and the weapon's damage come from the kit data; damage chips for abilities are authored in `card.chips.<slot>` and `--arena-check` fails if a number on a chip is not a number in that slot's data. Before/after: `docs/shots/kit-card-1111/`.

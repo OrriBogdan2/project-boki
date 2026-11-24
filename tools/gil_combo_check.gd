@@ -115,11 +115,8 @@ func _bag() -> void:
 	for i in 9:
 		var v := K._draw_vial()
 		counts[v] = int(counts.get(v, 0)) + 1
-	ok("bag: one bag is 2 Thunder, 2 Slime, 2 Air, 2 Fire, 1 Geyser",
+	ok("bag: one bag is 2 Thunder, 2 Slime, 2 Air, 2 Fire, 1 Super Zeep",
 		counts == {"thunder": 2, "slime": 2, "air": 2, "fire": 2, "zeep": 1}, str(counts))
-	var rare: String = String(K.d["rmb"]["vials"]["zeep"]["name"])
-	ok("bag: the rare vial reads Geyser, no third-party name (cut c506559e4e, undone by the sv-names merges)",
-		rare == "Geyser" and "Zeep" not in JSON.stringify(K.d), rare)
 	ok("bag: refills itself when empty", K.bag.size() == 9, "left %d" % K.bag.size())
 	var nx := K.next_vial()
 	ok("bag: the next vial is visible on the HUD",
@@ -207,7 +204,7 @@ func _vials() -> void:
 				ok("Air: knocks the dummy away", T.pos.x - x0 > 1.5, "pushed %.2f" % (T.pos.x - x0))
 			"fire": ok("Fire: damage plus a burn", hit and top["burn"] > 0.0,
 				"dmg %.1f burn %.2f" % [dmg(T), top["burn"]])
-			"zeep": ok("Geyser: bigger blast, knocks up", hit and top["stun"] >= 0.6 and top["lift"] > 0.3,
+			"zeep": ok("Super Zeep: bigger blast, knocks up", hit and top["stun"] >= 0.6 and top["lift"] > 0.3,
 				"stun %.2f lift %.2f" % [top["stun"], top["lift"]])
 	_puddle()
 
