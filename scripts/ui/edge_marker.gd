@@ -21,6 +21,7 @@ var _half := Vector2.ZERO        # half the rim rectangle's width and height (px
 var _radius := 0.0               # > 0: the rim is a circle of this radius round _ctr
 var _size := 4.0                 # arrow scale: its tip is 1.4 and its wings 0.8 of this, px
 var _items: Array[Dictionary] = []
+var fight := false               # a fight is on: a goal marker keeps its arrow but loses its label (no words over the field)
 
 ## The safe box world markers sit on: under the tutorial panel, above the ability bar.
 static func world_rim(sz: Vector2) -> Rect2:
@@ -40,8 +41,8 @@ func begin(rim: Rect2, arrow: float, radius := 0.0) -> void:
 func add(dir: Vector2, col: Color, prio := PRIO_ALLY, label := "", dist := -1.0, downed: Hunter = null) -> void:
 	if dir.length() < 0.1:
 		return
-	var text := label
-	if dist >= 0.0:
+	var text := "" if fight and prio == PRIO_GOAL else label
+	if dist >= 0.0 and text != "":
 		text = "%s  %dm" % [label, int(round(dist))]
 	_items.append({"d": dir.normalized(), "col": col, "prio": prio, "text": text, "downed": downed})
 

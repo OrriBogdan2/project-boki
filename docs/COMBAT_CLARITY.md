@@ -45,6 +45,9 @@ and off, the cast glint and ring, Boki bubbles and ability names in and out of a
 ## Toasts on the right rail (11-23)
 Toasts ("Fever is lit", "Bond full!") sit in the right rail under the alive counter and the kill feed (`TopStack.rail`), never in the top centre by the timer, level and HP. `--clarity-shots` pushes one on every fight frame and prints `CLARITYTOAST n/20`: n must be 0 (it was 20 before the rail).
 
+## Goal markers keep their words out of a fight (11-24)
+A goal waypoint ("Wild Boki 50m", Uplink, Beacon, Heart Gate) is the arrow or pin alone while you or a squadmate fights (`Hud._fight_on`, `EdgeMarker.fight`); the words and the distance come back when it is calm. Squad pings and ally arrows keep theirs, and the tutorial always does. Baseline problem 9: the word sat mid-field over the fight on 20/20 frames. `--edge-marker-check` holds it.
+
 ## What sits on a Hunter (11-20, stabilize sprint: declutter only)
 `--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
 Lace / Cinder, Vex, Kael and Cinder, Lace, Vex / Lace, Cinder, Kael), 10 frames a fight, and counts every element over

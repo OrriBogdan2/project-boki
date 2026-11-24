@@ -67,6 +67,21 @@ func _labels_clear(e: EdgeMarker, sz: Vector2, label: String) -> void:
 	ok(off == 0, "%s: '%s' stays on the screen (%d of 48 spill)" % [sz, label, off])
 
 
+## In a fight a goal marker is an arrow with no words; allies, pings and calm-time goals keep theirs.
+func _fight_labels(e: EdgeMarker) -> void:
+	_rim(e, true)
+	e.fight = true
+	e.add(Vector2.RIGHT, Color.GREEN, EdgeMarker.PRIO_GOAL, "Wild Boki", 50.0)
+	e.add(Vector2.LEFT, Color.WHITE, EdgeMarker.PRIO_ALLY, "Kael", 12.0)
+	e.add(Vector2.UP, Color.RED, EdgeMarker.PRIO_LOW, "Danger", 20.0)
+	var texts := e.layout().map(func(it: Dictionary) -> String: return it["text"])
+	ok(texts.has("") and texts.has("Kael  12m") and texts.has("Danger  20m"), "fight: only the goal loses its label")
+	_rim(e, true)
+	e.fight = false
+	e.add(Vector2.RIGHT, Color.GREEN, EdgeMarker.PRIO_GOAL, "Wild Boki", 50.0)
+	ok(e.layout()[0]["text"] == "Wild Boki  50m", "calm: the goal label is back")
+
+
 func run(main: Node) -> void:
 	var e := EdgeMarker.new()
 	for sz in [Vector2(1280, 720), Vector2(1920, 1080)]:
@@ -94,5 +109,6 @@ func run(main: Node) -> void:
 		for i in 8:
 			_add(e, world, Vector2.from_angle(0.1 * i), Color.WHITE, i % 3, i)
 		ok(_overlaps(e.layout()) == 0, "%s rim: eight markers close together do not overlap" % rid)
+	_fight_labels(e)
 	print("EDGEMARK DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
