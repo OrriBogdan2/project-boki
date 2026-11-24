@@ -72,12 +72,12 @@ static func set_rare_trait(rec: Dictionary) -> void:
 
 ## Does this Boki carry that rare trait? (Evo's 'trait' branches ask.)
 static func has_trait(rec: Dictionary, id: String) -> bool:
-	return String(rec.get("rare", "")) == id
+	return rec.get("rare", "") is String and rec["rare"] == id
 
 ## The rare trait this Boki carries, as {id, name, note} (the card's badge); {} if none.
 static func rare_of(rec: Dictionary) -> Dictionary:
-	var id := String(rec.get("rare", ""))
-	if id == "":
+	var id: Variant = rec.get("rare", "")
+	if not id is String or id == "":      # (a Rare Egg's baby has rare = true: the egg, not a trait)
 		return {}
 	for def in (data().get("rare_trait", {}) as Dictionary).values():
 		if def is Dictionary and def["id"] == id:

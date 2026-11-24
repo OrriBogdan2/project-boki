@@ -1,7 +1,7 @@
 # Online feel at 100 ms
 
 How an online game feels when one player's line has 100 ms added each way (200 ms round trip, what
-`tc netem delay 100ms` on loopback gives). Measured by `--online-feel-check` (`tools/online_feel_check.gd`).
+`tc netem delay 100ms` on loopback gives). Measured by `--online-feel-<n>-check` (one flag per Hunter) (`tools/online_feel_check.gd`).
 Local input latency is a separate job; this is only what the net adds.
 
 ## How it was measured
@@ -70,7 +70,7 @@ expected at 100 ms; the avoidable part was the wait for the next snapshot.
    server. Not measured here: the press-to-damage path (a first attempt at it was unreliable and was dropped).
 
 ## Re-running
-`godot --headless -- --online-feel-check` (about 6 minutes; needs `python3` for the proxy). It fails if the game adds
+`godot --headless -- --online-feel-1-check` (and 2, 3; about 2 minutes each; needs `python3` for the proxy). It fails if the game adds
 more than 60 ms to the line's delay for any press (`NET_SLACK_MS`). Before the fix 6 of the 11 measured rows failed that budget.
 The run takes ~330 s at 58 fps even pinned to one core. It picks a free relay port (`CheckChild.free_port`, proxy 100 above),
 stops pressing after 840 s (red, with an `OFEEL timing` line) and ends its helpers: the proxy gets `--parent-pid` and
@@ -143,6 +143,42 @@ last snapshot and the mover's own game (m); the net distance moved against the o
 
 The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows the same Sparkle crash step
 (4.98 m), so that step is not the delay's doing; with delay it was 0.76 to 5.71 m from run to run (see below).
+
+## Dash sweep: every Hunter's dash on the other game
+
+Set `ODISP_SWEEP=1` to add it (it doubles the run, over the suite's 300 s timeout, so it is off by default). The same check then also plays each Hunter's ground dash and air dash (Shift with the move keys held, the air one from
+8 m up, 7 m back from the strip's middle so the gliders have room) and Kael's Lunge on the host, and reads the
+host's Hunter on the guest's game, frame by frame. Neve's skate push-off, Motley's Trade, Grimble's Barge, Tenzo's
+Rock Hop and Sable's Cartwheel are those Hunters' dash rows. A row is **flagged** (`DISPNET FLAG`, not failed) when
+the guest's copy moves over 0.5 m in one frame and over 0.15 m more than the dasher's own game does (Kael's and
+Sparkle's dashes are 0.55-0.7 m a frame on both games: that is the dash, not a jump), or ends over 0.3 m from
+where the dasher's own game ends. A frame that took 50 ms or more on the box is left out of the jump (a loaded box
+stalls a game; that is not the net). Motley's Trade is a swap, so its rows are exempt from the jump.
+
+Result at 100 ms each way: **no flag, every end within 0.01 m.** The guest's copy follows a dash frame by frame at
+the dasher's own step. Step per frame (m) own / other, end off (m), net distance moved (m):
+
+| Hunter | Ground: step own / other | End off | Moved (m) | Air: step own / other | End off | Moved (m) |
+|---|---|---|---|---|---|---|
+| Vex | 0.32 / 0.32 | 0.00 | 4.8 | 0.24 / 0.25 | 0.00 | 8.8 |
+| Lace | 0.24 / 0.21 | 0.00 | 3.0 | 0.24 / 0.22 | 0.00 | 6.5 |
+| Cinder | 0.24 / 0.24 | 0.00 | 3.6 | 0.41 / 0.41 | 0.00 | 14.7 |
+| Meeko | 0.30 / 0.32 | 0.00 | 3.7 | 0.29 / 0.35 | 0.00 | 19.2 |
+| Albert | 0.42 / 0.44 | 0.00 | 4.9 | 0.42 / 0.44 | 0.00 | 12.0 |
+| Sable | 0.24 / 0.23 | 0.00 | 4.8 | 0.24 / 0.36 | 0.00 | 9.7 |
+| Kael | 0.56 / 0.57 | 0.00 | 4.2 | 0.56 / 0.55 | 0.00 | 9.8 |
+| Grimble | 0.25 / 0.25 | 0.00 | 2.7 | 0.33 / 0.33 | 0.00 | 14.3 |
+| Tenzo | 0.15 / 0.15 | 0.01 | 3.1 | 0.23 / 0.23 | 0.00 | 9.0 |
+| Sparkle | 0.58 / 0.63 | 0.00 | 5.6 | 0.58 / 0.71 | 0.00 | 10.2 |
+| Neve | 0.19 / 0.18 | 0.00 | 1.8 | 0.22 / 0.22 | 0.00 | 9.5 |
+| Motley | 5.97 / 5.97 | 0.00 | 6.0 | 6.45 / 6.44 | 0.00 | 8.1 |
+| Gil | 0.25 / 0.33 | 0.00 | 6.2 | 0.42 / 0.45 | 0.00 | 17.3 |
+
+Seen once and gone on the next runs (before the stall filter), left unexplained: Tenzo's ground hop 0.75 m a frame
+on the guest (own 0.15) and Meeko's ground dash 4.8 m (the copy stood over 4 m behind, `Ent.net_follow`'s
+teleport). Neither came back in three further runs, and both fit a stalled guest frame on a box with a load
+average near 80. If they come back on a quiet box they are real: queue a task on the dash fx event (as Kitefall's
+`fall`, `ext/feel-online-kitefall`) for them.
 
 ## Findings
 
