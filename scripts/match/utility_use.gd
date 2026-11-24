@@ -22,6 +22,7 @@ const SCAN_TIME := 3.0  # seconds rivals stay revealed
 static var PAD_VY: float = MoveRules.data()["jump_pad"]["vy"]  # m/s up: ~9.8 m apex, ~2.3 s aloft
 static var PAD_MIN_HV: float = MoveRules.data()["jump_pad"]["min_hv"]  # m/s on, at least (toward your aim)
 
+
 ## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
 static func channel(id: String, key: String) -> float:
 	return float((UtilityBelt.def(id).get("channel", {}) as Dictionary).get(key, 1.0))

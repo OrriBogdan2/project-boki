@@ -108,7 +108,6 @@ func _fields(m: Match) -> void:
 	p_v.inp["move"] = Vector2.ZERO
 
 
-
 ## Hold `move` until the player stands higher than the 6th terrace or `secs` pass; the highest ground reached.
 func _walk_up(m: Match, p: Hunter, move: Vector2, secs: float) -> float:
 	var top := 0.0
@@ -154,7 +153,6 @@ func _rides(m: Match) -> void:
 	p.vel = Vector3.ZERO
 	p.inp["move"] = Vector2.ZERO
 	p.inp["glide"] = false
-
 
 
 ## Hold `move` (and the glider once airborne) until you are back on the ground, up to `secs`.
@@ -242,7 +240,7 @@ func _worn(p: Hunter, id: String) -> bool:
 func _duel_and_fall(m: Match, g: Grounds) -> void:
 	var p: Hunter = m.player
 	ok("duel pad on the floor", m.duel_pad != Vector3.INF and m.world.island_id(m.duel_pad.x, m.duel_pad.z) == "floor")
-	p.teleport(Vector3(60, -20, 25))      # off the map
+	p.teleport(Vector3(60, -20, 25))  # off the map
 	g.tick(DT)
 	ok("a faller is brought home", p.flat_dist(m.arena.home) < 1.0 and p.pos.y > -1.0, "at %s" % p.pos)
 

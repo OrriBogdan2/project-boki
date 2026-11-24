@@ -15,6 +15,7 @@ const REACH_TAG := "rch"  # then the reach wire (DredgeKit.net_reach; [] for eve
 const MOVE_TAG := "hz"  # then the HazardMoves move (an enum int)
 const TAIL := 11  # fields: TAG, level, SICK_TAG, sick seconds, CHAN_TAG, target, left, REACH_TAG, reach, MOVE_TAG, move
 
+
 static func extra(h: Hunter) -> Array:
 	var ch := ChannelBar.read(h)
 	var reach: Array = (h.ak as DredgeKit).net_reach() if h.ak is DredgeKit else []

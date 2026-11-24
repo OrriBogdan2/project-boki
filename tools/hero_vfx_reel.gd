@@ -14,29 +14,34 @@ const HERO_PARTS := {
 	"juggernaut": ["lmb", "chain", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "far", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"],
-	"mage": ["lmb", "far", "hold", "rmb", "dash", "e", "r"]}
+	"mage": ["lmb", "far", "hold", "rmb", "dash", "e", "r"]
+}
 const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "tierup", "armour"]
-const GAP := 0.7               # s of quiet between parts
-const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
-const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
+const GAP := 0.7  # s of quiet between parts
+const SHEET_CROP := Vector2i(440, 300)  # px of each sheet frame
+const WIDE_CROP := Vector2i(640, 300)  # ... for a bow's long shots
 ## m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
 const LMB_RANGE := {"gunslinger": 8.0, "mage": 8.0}
 ## LMB sheet times for a round that flies in ~0.1 s (74 m/s over 8 m): a frame per step of the first flight.
 const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
-const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62],
-	"mage": [0.06, 0.09, 0.12, 0.15, 0.18, 0.21, 0.25, 0.55, 0.62]}
-const FAN_CROP := Vector2i(900, 440)      # ... for Grimble's 5.9 m fan and the bodies in it
-const FRAME_W := 1280                     # px wide, each --reel-frames frame
+const LMB_TIMES := {
+	"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62],
+	"mage": [0.06, 0.09, 0.12, 0.15, 0.18, 0.21, 0.25, 0.55, 0.62]
+}
+const FAN_CROP := Vector2i(900, 440)  # ... for Grimble's 5.9 m fan and the bodies in it
+const FRAME_W := 1280  # px wide, each --reel-frames frame
 
 var only := ""
-var frame_dir := ""            # --reel-frames: where each drawn frame goes
+var frame_dir := ""  # --reel-frames: where each drawn frame goes
 var crop_px := SHEET_CROP
 var crop_zoom := 1.0
 var frames := 0
 
+
 ## The parts this reel plays (a Hero's own script overrides it).
 func parts() -> Array:
 	return HERO_PARTS.get(who, GENERIC)
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -66,17 +71,18 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in (parts() if only == "" or only in parts() else [only]):     # (--reel-only may name a
-		if only != "" and part != only:                                                # part kept off the reel)
+	for part: String in parts() if only == "" or only in parts() else [only]:  # (--reel-only may name a
+		if only != "" and part != only:  # part kept off the reel)
 			continue
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
-		P.ak.res = 0.0              # (each part starts cool: Rage from the last one would go off in this one)
+		P.ak.res = 0.0  # (each part starts cool: Rage from the last one would go off in this one)
 		P.ak.set("enraged_t", 0.0)
 		var own_part := "_%s_%s" % [who, part]
 		await Callable(self, own_part if has_method(own_part) else "_part_" + part).call()
 	_write_captions()
 	print("REEL_DONE %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
 
 ## (the match's own step is off here, so the ears and the detail share follow from this)
 func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> void:
@@ -89,12 +95,14 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 				each.call(t)
 	await super._go(secs, step, marks, lead)
 
+
 ## (--reel-frames) the frame last drawn, scaled down to FRAME_W
 func _save_frame() -> void:
 	var img := main.get_viewport().get_texture().get_image()
 	img.resize(FRAME_W, int(FRAME_W * img.get_height() / float(img.get_width())), Image.INTERPOLATE_BILINEAR)
 	img.save_jpg(frame_dir.path_join("%05d.jpg" % frames), 0.88)
 	frames += 1
+
 
 ## Larger crops than the shared strips: an area look must fit, at the match camera's own scale.
 func _take(kind: String, _file: String, caption: String, focus: Callable) -> void:
@@ -108,12 +116,14 @@ func _take(kind: String, _file: String, caption: String, focus: Callable) -> voi
 	(strips[strip_file] as Array).append(crop)
 	_save_strip(strip_file)
 
+
 ## A strip's marks at match zoom, the crop following `focus` (the hero, if left out).
 func _sheet(part: String, caption: String, times: Array, focus := Callable()) -> Array:
 	var out: Array = []
 	for t in times:
 		out.append([t, part, "", caption, focus])
 	return out
+
 
 # ------------------------------------------------------------------ the generic parts
 func _part_lmb() -> void:
@@ -124,15 +134,25 @@ func _part_lmb() -> void:
 	await _go(2.1, shoot, _sheet("lmb", "LMB at the dummy", LMB_TIMES.get(who, LMB_TIMES_DEFAULT)), 1.5)
 	await _go(GAP)
 
+
 ## Three LMB shots at a dummy 8 m out, the frames mid-flight: the shot's trail and head at match zoom.
 func _part_far() -> void:
 	await _reset(8.0)
 	var shoot := func(t: float):
 		P.inp["fire"] = fmod(t, 0.7) < DT * 2.0 and t < 1.5
 		_aim(T.pos)
-	await _go(1.9, shoot, _sheet("far", "LMB at a dummy 8 m out: the trail and its head in flight",
-			[0.05, 0.1, 0.16, 0.75, 0.8, 0.86, 1.45, 1.5, 1.56]), 1.5)
+	await _go(
+		1.9,
+		shoot,
+		_sheet(
+			"far",
+			"LMB at a dummy 8 m out: the trail and its head in flight",
+			[0.05, 0.1, 0.16, 0.75, 0.8, 0.86, 1.45, 1.5, 1.56]
+		),
+		1.5
+	)
 	await _go(GAP)
+
 
 func _part_hold() -> void:
 	await _reset(LMB_RANGE.get(who, 3.3))
@@ -142,6 +162,7 @@ func _part_hold() -> void:
 	await _go(2.2, hold, _sheet("hold", "LMB held at the dummy", [0.2, 0.4, 0.6, 0.8, 1.0, 1.3, 1.55, 1.7, 2.0]), 1.5)
 	await _go(GAP)
 
+
 func _part_rmb() -> void:
 	await _reset(4.0)
 	var cast := func(t: float):
@@ -150,6 +171,7 @@ func _part_rmb() -> void:
 		_aim(T.pos)
 	await _go(2.4, cast, _sheet("rmb", "RMB at the dummy", [0.15, 0.25, 0.35, 0.5, 0.65, 0.8, 1.0, 1.4, 2.0]), 2.0)
 	await _go(GAP)
+
 
 func _part_dash() -> void:
 	await _reset(6.0)
@@ -163,6 +185,7 @@ func _part_dash() -> void:
 	await _go(1.8, dash, _sheet("dash", "Shift", [0.18, 0.25, 0.33, 0.42, 0.5, 0.6, 0.8, 1.1, 1.6]), 2.5)
 	await _go(GAP)
 
+
 func _part_e() -> void:
 	await _reset(5.0)
 	var cast := func(t: float):
@@ -170,6 +193,7 @@ func _part_e() -> void:
 		_aim(T.pos)
 	await _go(2.4, cast, _sheet("e", "E at the dummy", [0.15, 0.25, 0.35, 0.5, 0.65, 0.8, 1.0, 1.4, 2.0]), 2.5)
 	await _go(GAP)
+
 
 func _part_r() -> void:
 	await _reset(4.0)
@@ -181,6 +205,7 @@ func _part_r() -> void:
 	await _go(2.8, cast, _sheet("r", "R, the ultimate", [0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.4, 1.9, 2.6]), 2.5)
 	await _go(GAP)
 
+
 ## The armour tier-up sheen on a Hunter at match zoom: Rare (blue) at 0.2 s, then Legendary (gold) at 1.4 s.
 func _part_tierup() -> void:
 	await _reset(3.0)
@@ -190,10 +215,12 @@ func _part_tierup() -> void:
 				P.armor_gain(float(Hunter.ARMOR_TIERS[int(up[1])][2]) - P.armor_xp)
 				m._armor_up(P)
 		_aim(T.pos)
-	var marks := _sheet("tierup", "armour tier-up: Rare, then Legendary",
-		[0.22, 0.27, 0.32, 0.37, 0.42, 1.42, 1.47, 1.52, 1.57])
+	var marks := _sheet(
+		"tierup", "armour tier-up: Rare, then Legendary", [0.22, 0.27, 0.32, 0.37, 0.42, 1.42, 1.47, 1.52, 1.57]
+	)
 	await _go(2.2, ups, marks, 1.5)
 	await _go(GAP)
+
 
 ## The shared armour language on the dummy: two hits on the shell, the hit that breaks it, then a hit on health.
 func _part_armour() -> void:
@@ -208,9 +235,18 @@ func _part_armour() -> void:
 		if _at(t, 1.9):
 			T.hurt(10.0, P, {})
 		_aim(T.pos)
-	await _go(2.4, hits, _sheet("armour", "armour hit, armour hit, the break, then a health hit",
-		[0.17, 0.22, 0.72, 0.77, 1.22, 1.3, 1.45, 1.92, 1.98]), 1.5)
+	await _go(
+		2.4,
+		hits,
+		_sheet(
+			"armour",
+			"armour hit, armour hit, the break, then a health hit",
+			[0.17, 0.22, 0.72, 0.77, 1.22, 1.3, 1.45, 1.92, 1.98]
+		),
+		1.5
+	)
 	await _go(GAP)
+
 
 # ------------------------------------------------------------------ Kael
 func _juggernaut_lmb() -> void:
@@ -218,37 +254,68 @@ func _juggernaut_lmb() -> void:
 	var swing := func(t: float):
 		P.inp["fire"] = fmod(t, 0.5) < DT * 2.0 and t < 1.9
 		_aim(T.pos)
-	await _go(2.1, swing, _sheet("lmb",
-			"LMB Greatsword: a slash, the arc burning away, tip burst on the dummy; the next slash "
-			+ "back the other way",
-			[0.04, 0.09, 0.15, 0.22, 0.3, 0.54, 0.6, 0.68, 0.8]), 1.5)
+	await _go(
+		2.1,
+		swing,
+		_sheet(
+			"lmb",
+			(
+				"LMB Greatsword: a slash, the arc burning away, tip burst on the dummy; the next slash "
+				+ "back the other way"
+			),
+			[0.04, 0.09, 0.15, 0.22, 0.3, 0.54, 0.6, 0.68, 0.8]
+		),
+		1.5
+	)
 	await _go(GAP)
+
 
 ## The slash chain at the footage's own taps (hero-ref 0023-0034 at 5 fps: swings on 0026, 0029, 0033), a frame
 ## every 0.2 s to lay beside those frames.
 func _juggernaut_chain() -> void:
 	await _reset(3.3)
 	var taps := func(t: float):
-		P.inp["fire"] = [0.5, 1.1, 1.9].any(func(at: float) -> bool:
-			return t >= at and t < at + DT * 2.0)
+		P.inp["fire"] = [0.5, 1.1, 1.9].any(func(at: float) -> bool: return t >= at and t < at + DT * 2.0)
 		_aim(T.pos)
 	var times: Array = []
 	for i in 12:
 		times.append(i * 0.2)
-	await _go(2.4, taps, _sheet("chain", "LMB chain at the footage's taps (0023-0034 at 5 fps, swings on 0026, 0029, "
-			+ "0033): no step into a swing, the sides alternate, the blade back between swings", times), 1.5)
+	await _go(
+		2.4,
+		taps,
+		_sheet(
+			"chain",
+			(
+				"LMB chain at the footage's taps (0023-0034 at 5 fps, swings on 0026, 0029, "
+				+ "0033): no step into a swing, the sides alternate, the blade back between swings"
+			),
+			times
+		),
+		1.5
+	)
 	await _go(GAP)
+
 
 func _juggernaut_wave() -> void:
 	await _reset(8.5)
 	var hold := func(t: float):
 		P.inp["fire"] = t < 1.15
 		_aim(T.pos)
-	await _go(2.9, hold, _sheet("wave",
-			"LMB hold, Searing Wave: the blade heating (AimKit's lane fills), the release, the wave "
-			+ "burning a lane that cools to fissures",
-			[0.5, 1.0, 1.2, 1.3, 1.4, 1.6, 1.9, 2.3, 2.8]), 3.0)
+	await _go(
+		2.9,
+		hold,
+		_sheet(
+			"wave",
+			(
+				"LMB hold, Searing Wave: the blade heating (AimKit's lane fills), the release, the wave "
+				+ "burning a lane that cools to fissures"
+			),
+			[0.5, 1.0, 1.2, 1.3, 1.4, 1.6, 1.9, 2.3, 2.8]
+		),
+		3.0
+	)
 	await _go(GAP)
+
 
 func _juggernaut_slam() -> void:
 	await _reset(3.2)
@@ -257,11 +324,21 @@ func _juggernaut_slam() -> void:
 		if _at(t, 0.1):
 			K.press_rmb()
 		_aim(T.pos)
-	await _go(2.5, slam, _sheet("slam",
-			"RMB tap, Finishing Slam: the wind-up gathers at the blade, the strike opens a burning "
-			+ "cone, debris, sweet spot on the dummy, fissures cool",
-			[0.3, 0.6, 0.72, 0.76, 0.82, 0.92, 1.1, 1.5, 2.2]), 1.5)
+	await _go(
+		2.5,
+		slam,
+		_sheet(
+			"slam",
+			(
+				"RMB tap, Finishing Slam: the wind-up gathers at the blade, the strike opens a burning "
+				+ "cone, debris, sweet spot on the dummy, fissures cool"
+			),
+			[0.3, 0.6, 0.72, 0.76, 0.82, 0.92, 1.1, 1.5, 2.2]
+		),
+		1.5
+	)
 	await _go(GAP)
+
 
 func _juggernaut_lunge() -> void:
 	await _reset(7.0)
@@ -273,28 +350,39 @@ func _juggernaut_lunge() -> void:
 		if t >= 1.25:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
-	await _go(2.8, lunge, _sheet("lunge",
-			"RMB hold, Lunge: charging (the lane is AimKit's), full flash at the blade, the fling "
-			+ "with its mesh trails, the impact, the scorched line",
-			[0.5, 0.9, 1.2, 1.32, 1.4, 1.48, 1.6, 1.9, 2.6]), 3.0)
+	await _go(
+		2.8,
+		lunge,
+		_sheet(
+			"lunge",
+			(
+				"RMB hold, Lunge: charging (the lane is AimKit's), full flash at the blade, the fling "
+				+ "with its mesh trails, the impact, the scorched line"
+			),
+			[0.5, 0.9, 1.2, 1.32, 1.4, 1.48, 1.6, 1.9, 2.6]
+		),
+		3.0
+	)
 	await _go(GAP)
+
 
 ## (--reel-only=lunge_far) a perfect Lunge down a lane with nothing in it: the whole 7.6 m at the match camera
 ## (the coil holds to the stop, then the thrust; JuggernautKit.LUNGE_COIL_T).
 func _juggernaut_lunge_far() -> void:
 	await _reset(3.0, 6.0)
-	var K: JuggernautKit = P.ak
+	var jk: JuggernautKit = P.ak
 	var far := P.pos + Vector3(12.0, 0, 0)
-	var go := 0.1 + K.rmb_charge_full() + 0.05
+	var go := 0.1 + jk.rmb_charge_full() + 0.05
 	var lunge := func(t: float):
 		if _at(t, 0.1):
 			P.inp["sec_hold"] = true
-			K.press_rmb()
+			jk.press_rmb()
 		if t >= go:
 			P.inp["sec_hold"] = false
 		_aim(far)
 	await _go(2.4, lunge, [], 2.5)
 	await _go(GAP)
+
 
 ## Vex's Slipstep held 0.9 s down a lane with nothing in it: the slide's whole length at the match camera.
 func _gunslinger_dash() -> void:
@@ -310,6 +398,7 @@ func _gunslinger_dash() -> void:
 	await _go(2.4, slide, [], 2.5)
 	await _go(GAP)
 
+
 func _juggernaut_drop() -> void:
 	await _reset(2.4)
 	var K: JuggernautKit = P.ak
@@ -318,11 +407,21 @@ func _juggernaut_drop() -> void:
 		if _at(t, 0.3):
 			K.press_rmb()
 		_aim(T.pos)
-	await _go(3.0, drop, _sheet("drop",
-			"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle ahead of him), "
-			+ "the short hang, the straight drop, the ground cracking, the shock ring and cel dust",
-			[0.15, 0.31, 0.36, 0.42, 0.48, 0.55, 0.7, 1.0, 1.6]), 2.0)
+	await _go(
+		3.0,
+		drop,
+		_sheet(
+			"drop",
+			(
+				"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle ahead of him), "
+				+ "the short hang, the straight drop, the ground cracking, the shock ring and cel dust"
+			),
+			[0.15, 0.31, 0.36, 0.42, 0.48, 0.55, 0.7, 1.0, 1.6]
+		),
+		2.0
+	)
 	await _go(GAP)
+
 
 func _juggernaut_dash() -> void:
 	await _reset(6.0)
@@ -333,11 +432,18 @@ func _juggernaut_dash() -> void:
 		if t > 0.3:
 			P.inp["move"] = Vector2.ZERO
 		_aim(T.pos)
-	await _go(1.8, dash, _sheet("dash",
-			"Shift, Rampage: the crouch, the drive with its trail, the tip's arc, the scorched "
-			+ "line",
-			[0.2, 0.33, 0.42, 0.5, 0.58, 0.66, 0.8, 1.1, 1.7]), 2.5)
+	await _go(
+		1.8,
+		dash,
+		_sheet(
+			"dash",
+			"Shift, Rampage: the crouch, the drive with its trail, the tip's arc, the scorched " + "line",
+			[0.2, 0.33, 0.42, 0.5, 0.58, 0.66, 0.8, 1.1, 1.7]
+		),
+		2.5
+	)
 	await _go(GAP)
+
 
 func _juggernaut_e() -> void:
 	await _reset(10.0)
@@ -352,11 +458,22 @@ func _juggernaut_e() -> void:
 	var on_action := func() -> Vector3:
 		var at_foe: bool = K.warchain.state == "hooked"
 		return (T.position if at_foe else P.position) + Vector3(0, 0.9, 0)
-	await _go(2.6, chain, _sheet("e",
-			"E, Warchain: the throw from the hand, the hook biting the dummy (sparks, a scorch), the "
-			+ "chain straining as he backs off, E again: the haul with sparks off his feet, the arrival",
-			[0.13, 0.3, 0.38, 0.5, 0.9, 1.24, 1.32, 1.5, 1.8], on_action), 4.5)
+	await _go(
+		2.6,
+		chain,
+		_sheet(
+			"e",
+			(
+				"E, Warchain: the throw from the hand, the hook biting the dummy (sparks, a scorch), the "
+				+ "chain straining as he backs off, E again: the haul with sparks off his feet, the arrival"
+			),
+			[0.13, 0.3, 0.38, 0.5, 0.9, 1.24, 1.32, 1.5, 1.8],
+			on_action
+		),
+		4.5
+	)
 	await _go(GAP)
+
 
 func _juggernaut_spin() -> void:
 	await _reset(9.0)
@@ -369,11 +486,18 @@ func _juggernaut_spin() -> void:
 		if _at(t, 0.8):
 			K.press_rmb()
 		_aim(T.pos)
-	await _go(2.0, spin, _sheet("spin",
-			"Smash in the Warchain's pull, Cinder Spin: the full arc, the low wall of flame, the "
-			+ "burn under him",
-			[0.75, 0.82, 0.88, 0.96, 1.05, 1.15, 1.3, 1.5, 1.8]), 4.0)
+	await _go(
+		2.0,
+		spin,
+		_sheet(
+			"spin",
+			"Smash in the Warchain's pull, Cinder Spin: the full arc, the low wall of flame, the " + "burn under him",
+			[0.75, 0.82, 0.88, 0.96, 1.05, 1.15, 1.3, 1.5, 1.8]
+		),
+		4.0
+	)
 	await _go(GAP)
+
 
 func _juggernaut_r() -> void:
 	await _reset(3.0)
@@ -385,11 +509,21 @@ func _juggernaut_r() -> void:
 		if _at(t, 0.4):
 			K.riposte.block(T, {})
 		_aim(T.pos)
-	await _go(2.7, ult, _sheet("r",
-			"X, Gilded Riposte: the gold guard, a blocked hit, the cleave up through the strip, the "
-			+ "gold scorch and embers",
-			[0.2, 0.42, 0.77, 0.86, 0.89, 0.93, 0.98, 1.1, 2.0]), 1.5)
+	await _go(
+		2.7,
+		ult,
+		_sheet(
+			"r",
+			(
+				"X, Gilded Riposte: the gold guard, a blocked hit, the cleave up through the strip, the "
+				+ "gold scorch and embers"
+			),
+			[0.2, 0.42, 0.77, 0.86, 0.89, 0.93, 0.98, 1.1, 2.0]
+		),
+		1.5
+	)
 	await _go(GAP)
+
 
 func _juggernaut_rage() -> void:
 	await _reset(3.3)
@@ -399,10 +533,19 @@ func _juggernaut_rage() -> void:
 			K.gain_rage(K.res_max())
 		P.inp["fire"] = t > 0.8 and fmod(t, 0.5) < DT * 2.0
 		_aim(T.pos)
-	await _go(2.4, rage, _sheet("rage", "Enraged: the flare as Rage fills, the body burning, slashes keeping it fed",
-			[0.13, 0.2, 0.3, 0.6, 0.86, 1.0, 1.4, 1.9, 2.3]), 1.5)
+	await _go(
+		2.4,
+		rage,
+		_sheet(
+			"rage",
+			"Enraged: the flare as Rage fills, the body burning, slashes keeping it fed",
+			[0.13, 0.2, 0.3, 0.6, 0.86, 1.0, 1.4, 1.9, 2.3]
+		),
+		1.5
+	)
 	K.enraged_t = 0.0
 	await _go(GAP)
+
 
 ## The sounds with no key of their own: footsteps by surface, the hurt grunts and the downed grunt.
 func _juggernaut_voice() -> void:
@@ -428,13 +571,16 @@ func _archer_string() -> void:
 	for c in gun.get_children():
 		if c is MeshInstance3D and (c as MeshInstance3D).visible:
 			print("GUNMESH ", c.name, " ", (c as MeshInstance3D).get_aabb(), " ", c.scale)
-	var idle := func(_t: float):
-		_aim(T.pos)
+	var idle := func(_t: float): _aim(T.pos)
 	crop_px = Vector2i(220, 150)
 	crop_zoom = 3.0
 	var on_her := func() -> Vector3: return P.position + Vector3(0, 0.9, 0)
-	await _go(1.0, idle, _sheet("string", "The glowing thread bowstring at rest, then drawn back to the hand",
-			[0.3, 0.6, 0.95], on_her), 2.0)
+	await _go(
+		1.0,
+		idle,
+		_sheet("string", "The glowing thread bowstring at rest, then drawn back to the hand", [0.3, 0.6, 0.95], on_her),
+		2.0
+	)
 	var pull := func(t: float):
 		P.inp["fire"] = t < 0.5
 		_aim(T.pos)
@@ -443,16 +589,27 @@ func _archer_string() -> void:
 	crop_zoom = 1.0
 	await _go(GAP)
 
+
 func _archer_lmb() -> void:
 	await _reset(8.0)
 	var shots := func(t: float):
 		P.inp["fire"] = t < 0.04 or (t >= 0.8 and t < 1.5)
 		_aim(T.pos)
-	await _go(2.6, shots, _sheet("lmb",
-			"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
-			+ "red thread trailing, the laced aim line, the hit on the dummy",
-			[0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
+	await _go(
+		2.6,
+		shots,
+		_sheet(
+			"lmb",
+			(
+				"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
+				+ "red thread trailing, the laced aim line, the hit on the dummy"
+			),
+			[0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]
+		),
+		3.0
+	)
 	await _go(GAP)
+
 
 ## Grimble's RMB at the dummy: the arm stretches out, the hook bites, the reel hauls it in.
 func _dredge_hook() -> void:
@@ -462,10 +619,18 @@ func _dredge_hook() -> void:
 		if _at(t, 0.1):
 			K.press_rmb()
 		_aim(T.pos)
-	await _go(2.4, hook, _sheet("hook",
+	await _go(
+		2.4,
+		hook,
+		_sheet(
+			"hook",
 			"RMB, the hook: the arm stretches to the dummy, the hook bites, the reel hauls it in, the arm snaps back",
-			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
+			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]
+		),
+		3.0
+	)
 	await _go(GAP)
+
 
 ## Grimble's Shift: the barge rolls into a dummy 3 m out (the generic 6 m stops short), so the gold trail
 ## and the contact flash where they meet ("dash" / "dash_hit" in content/vfx/dredge.json) both draw.
@@ -478,9 +643,18 @@ func _dredge_dash() -> void:
 		if t > 0.3:
 			P.inp["move"] = Vector2.ZERO
 		_aim(T.pos)
-	await _go(1.8, dash, _sheet("dash", "Shift, the barge into the dummy: the gold trail, the flash where they meet",
-			[0.18, 0.26, 0.32, 0.36, 0.4, 0.45, 0.55, 0.8, 1.2]), 2.5)
+	await _go(
+		1.8,
+		dash,
+		_sheet(
+			"dash",
+			"Shift, the barge into the dummy: the gold trail, the flash where they meet",
+			[0.18, 0.26, 0.32, 0.36, 0.4, 0.45, 0.55, 0.8, 1.2]
+		),
+		2.5
+	)
 	await _go(GAP)
+
 
 ## Grimble's R over a crowd (docs/COMBAT_CLARITY.md): the dummy, a Hunter and the Boki of both stand
 ## inside the fan (the Hunter on his side, so its Boki leaves him be): every body and nameplate must read through it.
@@ -501,10 +675,20 @@ func _dredge_r() -> void:
 		_aim(T.pos)
 	var fan_mid := func() -> Vector3: return home + Vector3(3.0, 0.9, 0)
 	crop_px = FAN_CROP
-	await _go(2.8, cast, _sheet("r", "R over a crowd: the dummy, a Hunter and its Boki inside the fan",
-			[0.3, 0.7, 1.1, 1.22, 1.3, 1.45, 1.82, 1.9, 2.4], fan_mid), 3.0)
+	await _go(
+		2.8,
+		cast,
+		_sheet(
+			"r",
+			"R over a crowd: the dummy, a Hunter and its Boki inside the fan",
+			[0.3, 0.7, 1.1, 1.22, 1.3, 1.45, 1.82, 1.9, 2.4],
+			fan_mid
+		),
+		3.0
+	)
 	crop_px = SHEET_CROP
 	await _go(GAP)
+
 
 func _archer_miss() -> void:
 	await _reset(8.0)
@@ -512,21 +696,43 @@ func _archer_miss() -> void:
 	var shots := func(t: float):
 		P.inp["fire"] = fmod(t, 0.9) < 0.04 and t < 1.9
 		_aim(off + Vector3(0, 0, 1.6 * floor(t / 0.9)))
-	await _go(4.6, shots, _sheet("miss",
-			"Missed needles stay stuck in the ground with their red threads attached, 4 s, swaying, "
-			+ "then they run out",
-			[0.1, 0.3, 0.6, 1.2, 2.0, 2.8, 3.6, 4.2, 4.5], func() -> Vector3: return off), 3.0)
+	await _go(
+		4.6,
+		shots,
+		_sheet(
+			"miss",
+			(
+				"Missed needles stay stuck in the ground with their red threads attached, 4 s, swaying, "
+				+ "then they run out"
+			),
+			[0.1, 0.3, 0.6, 1.2, 2.0, 2.8, 3.6, 4.2, 4.5],
+			func() -> Vector3: return off
+		),
+		3.0
+	)
 	await _go(GAP)
+
 
 func _archer_super() -> void:
 	await _reset(11.0)
 	var shot := func(t: float):
 		P.inp["fire"] = t < 1.55
 		_aim(T.pos)
-	await _go(2.8, shot, _sheet("super",
-			"LMB held to Supercharged: the ready ring, the release (the gold perfect burst stays), the long thread, "
-			+ "the silver crack on the dummy", [0.6, 1.1, 1.5, 1.58, 1.64, 1.72, 1.85, 2.2, 2.7]), 3.0)
+	await _go(
+		2.8,
+		shot,
+		_sheet(
+			"super",
+			(
+				"LMB held to Supercharged: the ready ring, the release (the gold perfect burst stays), the long thread, "
+				+ "the silver crack on the dummy"
+			),
+			[0.6, 1.1, 1.5, 1.58, 1.64, 1.72, 1.85, 2.2, 2.7]
+		),
+		3.0
+	)
 	await _go(GAP)
+
 
 func _archer_heavy() -> void:
 	await _reset(8.0)
@@ -538,11 +744,21 @@ func _archer_heavy() -> void:
 		if t >= 1.3:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
-	await _go(3.0, heavy, _sheet("heavy",
-			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle leaving the bow (HEAVY_SCALE) "
-			+ "with its thick thread, the shove; nothing left behind",
-			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]), 3.0)
+	await _go(
+		3.0,
+		heavy,
+		_sheet(
+			"heavy",
+			(
+				"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle leaving the bow (HEAVY_SCALE) "
+				+ "with its thick thread, the shove; nothing left behind"
+			),
+			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]
+		),
+		3.0
+	)
 	await _go(GAP)
+
 
 func _archer_dash() -> void:
 	await _reset(7.0)
@@ -553,10 +769,19 @@ func _archer_dash() -> void:
 		P.inp["move"] = Vector2(1, 0) if t >= 0.15 and t < 2.0 else Vector2.ZERO
 		_aim(T.pos)
 	var on_her := func() -> Vector3: return P.position + Vector3(0, 0.9, 0)
-	await _go(3.6, dash, _sheet("dash",
+	await _go(
+		3.6,
+		dash,
+		_sheet(
+			"dash",
 			"Shift, Spirit Walk: the roll unspooling thread, the walk trailing loose threads through a rock, the end",
-			[0.2, 0.28, 0.36, 0.5, 0.9, 1.5, 2.2, 3.0, 3.4], on_her), 2.0)
+			[0.2, 0.28, 0.36, 0.5, 0.9, 1.5, 2.2, 3.0, 3.4],
+			on_her
+		),
+		2.0
+	)
 	await _go(GAP)
+
 
 func _archer_e() -> void:
 	await _reset(7.0)
@@ -566,11 +791,22 @@ func _archer_e() -> void:
 			K.cd["e"] = 0.0
 			K.cast_e()
 		_aim(T.pos)
-	await _go(5.4, hail, _sheet("e",
-			"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, her red "
-			+ "laces criss-crossing post to post and across the ground", [0.2, 0.42, 0.6, 1.0, 2.0, 3.0, 4.0, 4.7, 5.2],
-			func() -> Vector3: return T.position + Vector3(0, 0.9, 0)), 3.0)
+	await _go(
+		5.4,
+		hail,
+		_sheet(
+			"e",
+			(
+				"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, her red "
+				+ "laces criss-crossing post to post and across the ground"
+			),
+			[0.2, 0.42, 0.6, 1.0, 2.0, 3.0, 4.0, 4.7, 5.2],
+			func() -> Vector3: return T.position + Vector3(0, 0.9, 0)
+		),
+		3.0
+	)
 	await _go(GAP)
+
 
 func _archer_r() -> void:
 	await _reset(9.0)
@@ -581,10 +817,21 @@ func _archer_r() -> void:
 			K.cast_ult()
 		P.inp["fire"] = t > 1.2 and t < 1.26 or t > 2.3 and t < 2.36
 		_aim(T.pos)
-	await _go(4.6, ult, _sheet("r",
-			"X Starpiercer: the first beam the frame X is pressed, the seam across the ground, the hit, two more "
-			+ "on the presses, the last and deepest beam", [0.1, 0.15, 0.3, 0.5, 1.2, 1.3, 2.3, 2.4, 3.2]), 3.0)
+	await _go(
+		4.6,
+		ult,
+		_sheet(
+			"r",
+			(
+				"X Starpiercer: the first beam the frame X is pressed, the seam across the ground, the hit, two more "
+				+ "on the presses, the last and deepest beam"
+			),
+			[0.1, 0.15, 0.3, 0.5, 1.2, 1.3, 2.3, 2.4, 3.2]
+		),
+		3.0
+	)
 	await _go(GAP)
+
 
 func _archer_voice() -> void:
 	await _reset(12.0)
