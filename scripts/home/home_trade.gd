@@ -30,9 +30,7 @@ func _confirm(head: String, text: String, yes: String, on_yes: Callable, dangero
 	UI.confirm(m.h.panel_host.get_parent(), head, text, yes, on_yes, dangerous)
 
 func _para(text: String, font_px := 13, col := UI.MUTED) -> Label:
-	var l := UI.para(text, font_px, col)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	return l
+	return UI.para(text, font_px, col)
 
 ## A good as a compact card: icon, name, a rarity tag, a line under it, and whatever goes right.
 func _good_card(key: String, payload: Dictionary, sub: String, right: Control, width := 404.0) -> Control:
@@ -347,7 +345,7 @@ func _lot_pick(have: Array) -> HBoxContainer:
 
 func _lot_card(lot: Dictionary) -> Control:
 	var left := int(lot["ends"]) - MarketSave.now()
-	var when := ("%dh %02dm left" % [left / 3600, (left % 3600) / 60]) if left >= 60 else "ending now"
+	var when := ("%dh %02dm left" % [int(left / 3600.0), int((left % 3600) / 60.0)]) if left >= 60 else "ending now"
 	var mine := String(lot["seller"]) == "you"
 	var winning := String(lot["bidder"]) == "you"
 	var top := "no bids yet"

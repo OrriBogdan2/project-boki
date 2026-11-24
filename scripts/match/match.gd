@@ -50,10 +50,11 @@ var ktip: KnockTip = null           # the first-knock card, in a save's first tw
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var training := Training.new()   # the Training Grounds checklist and the train/balloon test hooks
+var camps: Camps = Camps.new(self)     # the map's fixed monster camps (see Camps)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
-var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
+var skydrop: DropSquad = null  # the planning phase before the ship sets off: drop leaders, formations (DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
 var acc := 0.0
@@ -185,7 +186,7 @@ static func take_prefetched(path: String) -> Resource:
 		if r != null:
 			return r
 	return load(path)
-## Roughly how long each step takes (ms, measured with --perf-probe), for the loading bar.
+## Roughly how long each step takes (ms, measured with --perf-bench --bench-probe), for the loading bar.
 const STAGE_MS := {"build.generate": 250, "world.terrain": 450, "world.roots": 40, "world.scatter_plan": 350, "world.scatter_batches": 250,
 	"world.walls": 650, "world.grass": 450, "world.sky": 60, "world.landmarks": 120, "world.air": 20, "build.systems": 40, "build.pads_exits": 80,
 	"build.hunters": 250, "build.mobs": 200, "build.chests": 60, "build.spawns": 200, "build.hud": 150, "build.finish": 30}
@@ -225,7 +226,7 @@ func warm_up(progress := Callable()) -> void:
 	SpanLooks.of(self).warm()      # bridge slabs and platform pads (a frost glove's first bridge: 8-10 ms)
 	await WarmUp.new(self).run(progress)
 
-## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
+## Tooling (--perf-bench --bench-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
 static var prof := {}
 var _prof_t := 0
@@ -343,6 +344,7 @@ func _start(o: Dictionary) -> void:
 	await world.build_meshes()
 	RaidLook.tune_world(world, raid)
 	if DepthCues.k() > 0.0: add_child(DepthCues.new(self))
+	add_child(FxHunterCap.new(self))
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
@@ -386,7 +388,7 @@ func _start(o: Dictionary) -> void:
 	if tut: tut.setup()
 	await _stage("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false) and not opts.get("arena", false):
-		await _spawn_mobs()        # the tutorial brings its own monsters, one step at a time
+		await camps.spawn_all()        # the tutorial brings its own monsters, one step at a time
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
@@ -519,7 +521,8 @@ func _build_env() -> void:
 	raid = RaidLook.pick(opts, seed_val)
 	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
 	sight_k = float(RaidLook.SIGHT.get(raid, 1.0))
-	RenderingServer.global_shader_parameter_set("vis_dark", 1.0 if "--shot-bright" in OS.get_cmdline_user_args() else float(RaidLook.VIS_DARK.get(raid, 0.7)))     # (--shot-bright: map screenshots without the sight shading)
+	RenderingServer.global_shader_parameter_set("vis_dark", 1.0 if "--shot-bright" in OS.get_cmdline_user_args() else RaidLook.VIS_DARK)     # (--shot-bright: map screenshots without the sight shading)
+	RenderingServer.global_shader_parameter_set("vis_greyness", RaidLook.VIS_GREY)
 	RenderingServer.global_shader_parameter_set("vis_ally_range", VIEW_RANGE * sight_k)
 	raid_fx = RaidLook.storm_fx(raid)
 	if raid_fx:
@@ -965,43 +968,6 @@ func _apply_treat(k: Kin) -> void:
 		"treat_hardy": k.max_hp *= 1.4; k.hp = k.max_hp
 		"treat_calm": k.trust = minf(100.0, k.trust + 12.0)
 
-func _spawn_mobs() -> void:
-	if net_on and not is_host:
-		return
-	for c in world.camp_spots:
-		await _slice()
-		var p: Vector3 = c["pos"]
-		var comp: Array
-		match String(c.get("kind", "normal")):
-			"heavy": comp = ["brute", "spitter", "skitter", "sentinel"]
-			"light":
-				var lr := rng.randf()
-				comp = ["skitter", "skitter"] if lr < 0.4 else (["spitter", "skitter"] if lr < 0.7 else ["bomber", "skitter"])
-			_:
-				var nr := rng.randf()
-				if nr < 0.15 * tier + 0.2:
-					comp = ["brute", "skitter", "bomber"]
-				elif nr < 0.5:
-					comp = ["skitter", "bomber", "spitter"]
-				elif nr < 0.75:
-					comp = ["sentinel", "skitter", "skitter"]
-				else:
-					comp = ["spitter", "skitter", "bomber"]
-		# a camp in a biome region spawns from that region's table instead
-		var bcomp: Array = biomes.camp_comp(c) if biomes else []
-		if not bcomp.is_empty(): comp = bcomp
-		var made: Array = []
-		for kk in comp:
-			var q := p
-			for _t in 20:
-				var cand := p + Vector3(rng.randf_range(-1.8, 1.8), 0, rng.randf_range(-1.8, 1.8))
-				if not world.is_void(cand.x, cand.z) and not world.is_block(cand.x, cand.z):
-					q = Vector3(cand.x, world.ground_at(cand.x, cand.z), cand.z); break
-			var smb := spawn_mob(kk, q)
-			if biomes: biomes.dress(smb)
-			made.append(smb)
-		if rolling: rolling.note_camp(p, comp, made)     # (cleared camps come back in a rolling session)
-
 func spawn_mob(kk: String, at: Vector3) -> Mob:
 	at = _clear_spot(at)
 	var mb := Mob.new()
@@ -1119,7 +1085,7 @@ func _spawn_breakables() -> void:
 		for row in [[-2.4, 0.0], [-4.6, 1.3], [0.0, 1.3], [2.4, 0.0], [4.6, 1.3]]:
 			# across the row from the middle out: 0, 2.6, -2.6, 5.2 ... (or 1.3, -1.3, 3.9 ... staggered)
 			for k in 6:
-				var x := (float(row[1]) + float((k + (1 if row[1] == 0.0 else 0)) / 2) * 2.6) * (1.0 if k % 2 == 0 else -1.0)
+				var x := (float(row[1]) + float(int((k + (1 if row[1] == 0.0 else 0)) / 2.0)) * 2.6) * (1.0 if k % 2 == 0 else -1.0)
 				if Vector2(x, float(row[0])).length() <= 6.2:
 					spots.append(Vector3(x, 0, float(row[0])))
 		var used: Array = [Vector3(-2.0, 0, 1.2), Vector3(-2.6, 0, 2.2), Vector3(1.4, 0, 1.6), Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(0, 0, 4.0)]
@@ -1456,7 +1422,7 @@ func _update_rings(dt: float) -> void:
 			var d: Vector2 = hv.normalized() if hv.length() > 1.0 else rd
 			if absf(d.dot(rd)) > 0.5:
 				d = rd if d.dot(rd) > 0.0 else -rd    # line up with the ring
-			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Loco.glide_max)
+			var spd := minf(maxf(hv.length(), HunterMove.glide_cruise) + 4.0, Loco.glide_max)
 			h.vel.x = d.x * spd; h.vel.z = d.y * spd
 			h.vel.y = maxf(h.vel.y, 2.0)
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
@@ -1628,10 +1594,6 @@ func dmg_mult(h: Hunter) -> float:
 func sfx(n: String, p = null, vol := 0.0, pitch := 1.0, mine := false) -> void:
 	Sfx.play(n, p, vol, 0.07, pitch, 0.0, mine)
 
-## Legacy door for world events (a boss slam, a lair gate): a big hit at `at`, caused by nobody on your team. Shake.incoming_big is the real one.
-func shake(a: float, at: Vector3) -> void:
-	Shake.incoming_big(self, at, a)
-
 func direction_word(from: Vector3, to: Vector3) -> String:
 	var d := Vector2(to.x - from.x, to.z - from.z)
 	var a := rad_to_deg(atan2(d.y, d.x))
@@ -1776,6 +1738,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if credit == player and target != player and src != "burn":
 		if not BokiImpact.play(self, by, target, o, crit, "you"):
 			sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
+		if hud:
+			hud.reticle.flavour(crit, armor_hit)  # the tick: gold on a crit, pale on armour
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
@@ -1847,8 +1811,10 @@ func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 			BokiChatter.say(self, h.kin, "owner_down")
 	_check_team(h.team)
 
+## Every offline freeze shares the player's cap (Feel.spend), charged for only the time it adds to a running one.
 func freeze_frame(t: float) -> void:
-	hitstop = maxf(hitstop, Feel.spend(player, t, time))      # every offline freeze shares the player's cap
+	var held := maxf(hitstop, 0.0)
+	hitstop = held + Feel.spend(player, maxf(0.0, t - held), time)
 
 ## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:
@@ -1967,7 +1933,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	elif not world.is_void(h.pos.x, h.pos.z) and not h.remote:
 		var n := mini(10, int(ceil(h.gems / 5.0)))
 		for i in n:
-			drop("gem", h.pos + Vector3(0, 0.5, 0), maxi(1, h.gems / maxi(1, n)))
+			drop("gem", h.pos + Vector3(0, 0.5, 0), maxi(1, int(h.gems / float(maxi(1, n)))))
 		for s in h.seeds:
 			drop("seed", h.pos + Vector3(0, 0.5, 0), int(h.seeds[s]), s)
 		for rec in h.caught:
@@ -2018,7 +1984,7 @@ func train_hit(e: Ent, fwd: Vector3, spd := 8.0) -> void:
 	fx.burst(at + Vector3(0, 0.4, 0), Color("6b5a4a"), 16, 4.0, 0.7, 10.0, 1.2)
 	fx.ring(at, 3.6, Color(1.0, 0.75, 0.4, 0.9), 0.45)
 	fx.flash(at + Vector3(0, 1.0, 0), Color("fff2c0"), 1.4, 0.1)
-	Shake.incoming_big(self, at, 0.9)
+	Shake.big(self, at, "train_hit")
 	if e is Hunter:
 		var h: Hunter = e
 		if h.out or h.extracted or h.remote:
@@ -2051,7 +2017,7 @@ func _lose_life(h: Hunter, by: Ent, why: String) -> void:
 			var n := mini(5, lose)
 			for i in n:
 				# the last pile takes the remainder so nothing is lost to rounding
-				drop("gem", h.pos + Vector3(0, 0.5, 0), (lose / n) + (lose % n if i == n - 1 else 0))
+				drop("gem", h.pos + Vector3(0, 0.5, 0), (int(lose / float(n))) + (lose % n if i == n - 1 else 0))
 	elif lose > 0:
 		h.lost_gems += lose
 	h.gems -= lose
@@ -2229,11 +2195,11 @@ func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 		if auto and hud and not train.has("_auto_told"):
 			train["_auto_told"] = true
 
-func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
+func on_kin_swap(h: Hunter, now_k: Kin, was: Kin) -> void:
 	kstat["swap"] += 1
 	fx.burst(h.pos + Vector3(0, 1.5, 0), now_k.sp["color"], 18, 3.5, 0.5)
 	fx.ring(h.pos, 1.4, now_k.sp["color"], 0.3)
-	sfx("swap", h.pos, -4.0)
+	CarrySfx.swap(self, h, now_k, was)
 	if h == player:
 		train["_swapped"] = true
 		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
@@ -2431,6 +2397,8 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 func on_armor_break(h: Hunter, by: Ent) -> void:
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	Juice.armor_break(self, h, credit)
+	if credit == player and hud:
+		hud.reticle.flavour(true, true)
 
 ## Knocked into a wall: stunned for a moment, which is the whole point of knockback near walls.
 func on_wall_slam(e: Ent, dir: Vector2) -> void:
@@ -2650,7 +2618,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 			halo.material_override.set_shader_parameter("color", look[2])
 		mi.scale = Vector3.ONE * vis_size
 		if not Oomph.legacy: vr = vis_size * 0.5
-		mi.global_position = at
+		mi.global_position = extra.get("hand", at)
 	var from := ShotOrigin.hit_from(by, at, v2, extra)      # the hit sweep starts at the body; `at` is the muzzle
 	life += ShotOrigin.extra_life(at, from, v2)
 	v2 = ShotOrigin.keep_reach(at, from, v2, extra)
@@ -2670,7 +2638,8 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		duel.note_shot(by)
 	shot_n += 1
 	var sd := {"vr": vr, "sid": shot_n, "pos": from, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": from, "start": from}
-	if from != at: sd["muzzle"] = at
+	var mouth: Vector3 = extra.get("hand", at)      # drawn from the hand or weapon it left (ShotOrigin.hand)
+	if from != mouth: sd["muzzle"] = mouth
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
@@ -2679,7 +2648,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
 		net_event(["s", _r(from.x), _r(from.y), _r(from.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
 	if by is Hunter and not extra.get("melee", false):
-		fx.flash(at, col.lightened(0.4), 0.22, 0.05)
+		fx.flash(mouth, col.lightened(0.4), 0.22, 0.05)
 		note_sound(by, at, "shot")
 
 func _update_shots(dt: float) -> void:
@@ -2969,7 +2938,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at}      # at: the contact (HitContact); pg: the volley id (a kit reads it)
+	# at: the contact (HitContact); pg: the volley id (a kit reads it); from: where it was fired (IncomingHitSfx)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at, "from": s["start"]}
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -3688,7 +3658,7 @@ func step(dt: float) -> void:
 		player.inp["crouch"] = opts.get("crouch_demo", false)
 	if opts.get("wall_behind", false) and player and time < 0.05:
 		for wi in world.walls:
-			var wx: int = int(wi) % world.w; var wz: int = int(wi) / world.w
+			var wx: int = int(wi) % world.w; var wz: int = int(int(wi) / float(world.w))
 			var gi := world.idx(wx, wz - 1)
 			if world.kind[gi] == World.T_GROUND and world.walls.has(world.idx(wx + 1, wz)) and world.walls.has(world.idx(wx - 1, wz)):
 				player.teleport(Vector3(wx + 0.5, world.ground_at(wx + 0.5, wz - 0.5), wz - 0.5))
@@ -3697,7 +3667,7 @@ func step(dt: float) -> void:
 		# stand in grass right beside a wall, with a rival hiding in grass nearby
 		var spot := Vector3.INF; var rival_spot := Vector3.INF
 		for bi in world.bush:
-			var bx: int = int(bi) % world.w; var bz: int = int(bi) / world.w
+			var bx: int = int(bi) % world.w; var bz: int = int(int(bi) / float(world.w))
 			var near_wall := false
 			for dz in range(-2, 3):
 				for dx in range(-2, 3):
@@ -4036,7 +4006,7 @@ func _hold_demo() -> void:
 		var i := 0
 		for h in hunters:
 			h.ctrl = "idle"; h.inp["move"] = Vector2.ZERO
-			var col := i % 4; var row := i / 4
+			var col := i % 4; var row := int(i / 4.0)
 			var at := base + Vector3((col - 1.5) * 2.4, 0, row * 2.6)
 			at = world.free_spot_near(at, [], 0.6, 0.5, 3.0)
 			h.teleport(Vector3(at.x, world.ground_at(at.x, at.z), at.z))
@@ -4378,7 +4348,8 @@ func demo_shielded(e: Ent) -> bool:
 ## can be lost, what you extract is kept).
 const DEMO_SEED := 5
 static func demo_opts() -> Dictionary:
-	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
+	return {"teams": int(Data.MATCH_PLAYERS / 2.0), "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1,
+			"seed": DEMO_SEED,
 		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true,
 		"live_lair": "The Thornhive"}     # (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
 
@@ -4533,7 +4504,7 @@ func _meteor_hit(at: Vector3) -> void:
 	fx.burst(at + Vector3(0, 0.3, 0), Color("ffcf8a"), 22, 6.0, 0.5, 6.0, 1.2)
 	fx.dust(at, 10)
 	sfx("boom", at, -3.0, 1.3)
-	Shake.incoming_big(self, at, 0.35)
+	Shake.big(self, at, "explosion")
 	for e in hunters + mobs + kins:
 		if e.remote or not e.hittable() or (e is Hunter and (e as Hunter).riding):
 			continue
@@ -5266,7 +5237,7 @@ func _net_ev(x, from: String) -> void:
 					var gems := int(x[4])
 					var n := mini(10, int(ceil(gems / 5.0)))
 					for i in n:
-						drop("gem", at + Vector3(0, 0.5, 0), maxi(1, gems / maxi(1, n)))
+						drop("gem", at + Vector3(0, 0.5, 0), maxi(1, int(gems / float(maxi(1, n)))))
 					for s in x[5]:
 						drop("seed", at + Vector3(0, 0.5, 0), int(x[5][s]), s)
 					for rec in x[6]:
