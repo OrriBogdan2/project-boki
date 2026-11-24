@@ -681,6 +681,8 @@ static func _num_size(v: float, crit: bool, small := false, kind := Num.HIT) -> 
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
+	if get_parent() != null and get_parent().has_meta("pitch_no_foe_plates"):  # pitch-reel films: no game words
+		return
 	for n in nums:
 		var w: Label3D = n["node"]
 		if (

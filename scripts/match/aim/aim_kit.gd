@@ -161,7 +161,11 @@ static func line(h: Hunter, id: String, p := {}) -> void:
 		var d := _dir(h, p)
 		t = f + Vector3(d.x, 0, d.y) * float(p["len"])
 	else:
-		t = h.inp.get("aim", h.pos)
+		# the cursor's distance along aim_dir (the vision cone's centre, and the aim lock), never the raw cursor ray
+		var cur: Vector3 = h.inp.get("aim", h.pos)
+		var ad := h.aim_dir()
+		t = f + Vector3(ad.x, 0, ad.y) * Vector2(cur.x - f.x, cur.z - f.z).length()
+		t.y = cur.y
 	e["from"] = Vector2(f.x, f.z); e["to"] = Vector2(t.x, t.z); e["y"] = AimMode.ground(h.m, f).y
 	e["arrow"] = bool(p.get("arrow", true))
 	_put(h, id, e)

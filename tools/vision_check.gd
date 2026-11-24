@@ -1,6 +1,6 @@
 extends RefCounted
 ## --vision-check: the sight wedge (Match.sees, shaders/vis.gdshaderinc, docs/specs/VISION_LOOK.md). The wedge is
-## 120 degrees wide and the shader draws the same angle; a rival just inside its side is seen, just outside is
+## 90 degrees wide and the shader draws the same angle; a rival just inside its side is seen, just outside is
 ## not; one right behind you is (the near circle); crouching hides you at a range a standing rival is seen from;
 ## a hiding rival (crouched, in grass) shows no plate unless revealed, downed or a teammate; a rival out past the
 ## wedge's side who shoots or is hit is seen for the reveal's time inside her own soft lit circle (RevealLight), which
@@ -8,9 +8,9 @@ extends RefCounted
 ## colour has no tint constant, and every lit world shader greys its light, shadow tint and ambient where fogged
 ## (a blue cast fails here; GPU numbers in docs/specs/VISION_LOOK.md). Never touches the save.
 
-const WEDGE_DEG := 120.0   # degrees: a wide cone in front of you
-const SIDE_IN := 50.0      # degrees off your aim: inside the cone's side (60)
-const SIDE_OUT := 70.0     # degrees off your aim: outside it
+const WEDGE_DEG := 90.0   # degrees: a wide cone in front of you
+const SIDE_IN := 40.0      # degrees off your aim: inside the cone's side (45)
+const SIDE_OUT := 55.0     # degrees off your aim: outside it
 const SIDE_M := 10.0       # m: how far out the side probes stand (inside VIEW_RANGE, outside the near circle)
 const FAR_M := 18.0        # m: past the crouched range (14), inside the standing one (24)
 const BEHIND_M := 1.5      # m: inside the near circle (NEAR_SENSE 2.0)
@@ -47,6 +47,7 @@ func run(main: Node) -> void:
 	_plates(m)
 	_reveal(m)
 	_grey_fog(m)
+	_aim_line(m)
 	m.queue_free()
 	print("VISION DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
@@ -206,3 +207,25 @@ func _grey_fog(m: Match) -> void:
 			"%s greys its light, shadow tint, ambient and haze outside sight" % n)
 	var amb := RaidLook.vis_amb(m.env.environment)
 	ok(amb > 0.05 and amb < 2.0, "the ambient's grey is set for the fog (vis_amb %.3f)" % amb)
+
+## The shared aim line points down the cone's centre (vis_dir = aim_dir()): a far cursor, one close to the body (inside
+## the dead zone, aim_dir keeps the last good direction) and an aim lock that differs from the cursor.
+func _aim_line(m: Match) -> void:
+	var P := m.player
+	var saved_ak := P.ak
+	P.out = false
+	P.downed = false
+	var cases := {"far": Vector3(7, 0, -3), "close": Vector3(0.4, 0, 0.3), "locked": Vector3(-6, 0, 2)}
+	var lock := GDScript.new()
+	lock.source_code = "extends ArchKit\nfunc aim_lock() -> Vector2: return Vector2(0.0, 1.0)\n"
+	lock.reload()
+	for key in cases:
+		P.ak = lock.new() if key == "locked" else null
+		P.inp["aim"] = P.pos + cases[key]
+		m._update_aim(1.0)
+		var along: Vector3 = -m.aim_line.global_transform.basis.z   # look_at aims -Z
+		var line := Vector2(along.x, along.z).normalized()
+		var off := rad_to_deg(line.angle_to(P.aim_dir())) if m.aim_line.visible else 0.0
+		var seen: bool = m.aim_line.visible and absf(off) < 1.0
+		ok(seen, "aim line vs cone centre, %s cursor: %.2f degrees apart" % [key, off])
+	P.ak = saved_ak

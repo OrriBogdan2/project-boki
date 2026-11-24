@@ -12,6 +12,8 @@ const CHECKS := {
 	"--title-loading-shots": ["res://tools/title_loading_shots.gd", "title_loading_shots", null],  # GPU, --shots-dir=
 	"--scoreboard-check": ["res://tools/scoreboard_check.gd", "scoreboard_check", null],  # the Tab squad board
 	"--scoreboard-shots": ["res://tools/scoreboard_shots.gd", "scoreboard_shots", null],  # --shots-dir=<dir>
+	"--ghost-visible-check": ["res://tools/ghost_visible_check.gd", "ghost_visible_check", "check"],
+	"--ghost-visible-shots": ["res://tools/ghost_visible_check.gd", "ghost_visible_check", "shots"],
 	"--hatch-flow-shots": ["res://tools/hatch_flow_shots.gd", "hatch_flow_shots", null],  # --hatch-flow-shots=<dir>
 	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],  # GPU
 	"--ui-text-probe-check": ["res://tools/ui_text_probe.gd", "ui_text_probe", null],  # no text per-letter/off screen

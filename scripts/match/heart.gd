@@ -291,11 +291,10 @@ func _force(to: S, why: String) -> void:
 		S.READY:
 			if carrier == null and spark_pos == site and why == "charged":
 				m.add_feed("The Heartspark is charged")
-				m.sfx("portal", site, 2.0, 0.7)
+				m.sfx("heart_charged", site, 2.0)
 				m.fx.ring(site + Vector3(0, 0.3, 0), 6.0, col(), 0.8)
 		S.FINAL:
 			m.add_feed("The Heart opens: hold its ring to leave")
-			m.sfx("portal", site, 3.0, 0.5)
 			m.fx.ring(site + Vector3(0, 0.3, 0), r("final_r"), col(), 1.0)
 	_broadcast()
 
@@ -379,7 +378,7 @@ func _tide_tick(dt: float) -> void:
 			h.hurt(d, null, {"src": "heat", "tags": ["tide"]})
 			if h == m.player:
 				hit_t = m.time
-				Sfx.play("thump", null, -8.0, 0.0, 0.7)
+				Sfx.play("tide_bite", null, -4.0)
 		elif finish and _by_blight(h):
 			h.down_hp -= d
 
