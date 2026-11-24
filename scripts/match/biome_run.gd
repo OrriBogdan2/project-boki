@@ -258,6 +258,7 @@ func _on_hit(attacker: Node, target: Node, amount: float, tags: Array) -> void:
 		return
 	var t := target as Ent
 	if muts.has("frozen"):
+		CcSfx.zone_slow(t)
 		t.slow_t = maxf(t.slow_t, 1.4)
 		m.fx.burst(t.pos + Vector3(0, 0.8, 0), Color("bff0ff"), 8, 2.5, 0.4, 2.0)
 	if muts.has("molten") or muts.has("toxic"):
