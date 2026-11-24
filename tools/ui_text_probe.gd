@@ -12,7 +12,8 @@ const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]
 const BIG_TEXT := 1.5  # Settings text size of the extra pass, at the first window size (the biggest choice)
 const SETTLE_S := 0.6  # seconds a screen gets to build and fade in before it is scanned
 ## [scene, node path prefix, rule, text prefix (optional)] of a known, filed hit; delete the entry when fixed.
-## The naming column of hatch.gd (ext/name-it-vertical-1117); drop plan map names, and the chat bar over the base race's cheer bar (docs/DEBT.md).
+## The naming column of hatch.gd (ext/name-it-vertical-1117); drop plan map names,
+## and the chat bar over the base race's cheer bar (docs/DEBT.md).
 const KNOWN := [
 	["hatch_name", "Main/", "narrow"],
 	["hatch_name", "Main/", "outside"],
