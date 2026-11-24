@@ -371,7 +371,7 @@ func _share_static(f: Ent, shared: int, source: Ent) -> void:
 func _strike_fx(at: Vector3, r: float) -> void:
 	kit.vfx("x_strike", at, null, {"r": r})
 	kit.m.sfx("vv_ult_slam", at, 1.0)
-	Shake.incoming_big(kit.m, at, ImpactWeight.shake("heavy"), kit.h)
+	Shake.big(kit.m, at, "ult", kit.h)
 
 ## Rose-pink lightning stays at her feet for a moment after the strike (she is free to act).
 func _after_fx(dt: float) -> void:
