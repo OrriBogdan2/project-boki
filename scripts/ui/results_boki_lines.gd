@@ -7,12 +7,14 @@ extends RefCounted
 const PORTRAIT_PX := 36.0
 const BOND_SHOWN := 0.5  # bond points; a smaller change reads as "unchanged"
 
+
 ## "+80 XP, bond up 3": plain words for one Boki's gains.
 static func gain_text(xp: int, bond: float) -> String:
 	var b := "bond unchanged"
 	if absf(bond) >= BOND_SHOWN:
 		b = "bond %s %d" % ["up" if bond > 0.0 else "down", int(round(absf(bond)))]
 	return "+%d XP, %s" % [xp, b]
+
 
 ## Every line's text, in order: the Boki you brought, then the wisps you carried home.
 static func texts(s: Dictionary) -> Array[String]:
@@ -22,6 +24,7 @@ static func texts(s: Dictionary) -> Array[String]:
 	for w in s.get("wisps_home", []):
 		out.append("%s  going home" % String(w.get("name", "A wisp")))
 	return out
+
 
 ## The card with the lines (null when there is nothing to say).
 static func card(s: Dictionary, tree: SceneTree) -> Control:

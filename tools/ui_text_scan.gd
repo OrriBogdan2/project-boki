@@ -170,9 +170,9 @@ func _text_box(c: Control, text: String) -> Rect2:
 		return r
 	var fs := _font_size(c)
 	var font := _font(c)
-	var wrap := _room_w(c) if _wrap_on(c) else -1.0
-	var sz := font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, wrap, fs)
-	sz.y = maxf(sz.y, font.get_height(fs) * _lines(c, text, wrap))
+	var wrap_w := _room_w(c) if _wrap_on(c) else -1.0
+	var sz := font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, wrap_w, fs)
+	sz.y = maxf(sz.y, font.get_height(fs) * _lines(c, text, wrap_w))
 	var trimmed := c is Label and (c as Label).text_overrun_behavior != TextServer.OVERRUN_NO_TRIMMING
 	trimmed = trimmed or (c is Label and (c as Label).clip_text) or (c is Button and (c as Button).clip_text)
 	if trimmed:
