@@ -13,7 +13,7 @@ const MISS_WINDOW := 0.5   # s one aim roll holds
 
 const LOOKOUT_OFF := 7.0     # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
 const KEYS := [      # the action inputs
-		"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
+		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var _retreat := false   # a wall kick step bot that got up without a kick, walking off to retry
 static var human := false
@@ -79,7 +79,10 @@ static func drive(m: Match) -> void:
 			else:
 				p.inp["move"] = to.normalized()
 				if sid == "exdash" and p.vel.y < 0.5: p.inp["dash"] = true
-				if sid == "glide": p.inp["glide"] = true
+				if sid == "glide":
+					var press: bool = not p.gliding and p.coyote <= 0.0 and p.can_glide()
+					p.inp["jump"] = press     # the second press opens it
+					p.inp["glide"] = p.gliding or press     # holding only keeps it open
 		"wallkick":
 			var top := tu.stop("crouch")
 			if tu.on_lookout() and not tu.seen.get("kick", false):
@@ -167,6 +170,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if sid == "sec":
 		_rmb(m, tu)
 	if best == null:
+		if sid == "summon" or sid == "pack":
+			_summon(m, tu)      # (the monster fell in a window called back early: the Boki still comes out again)
 		return
 	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)

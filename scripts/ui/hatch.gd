@@ -26,6 +26,11 @@ static func starter_eggs() -> Array:
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
+const NAME_LOOK := Vector3(1.4, 0.25, 0.5)     # m: the naming shot aims right of the Boki, so it sits left of the card
+const NAME_CARD_W := 520.0      # px: the naming card
+const NAME_MARGIN := 32.0       # px: its gap to the screen edge
+const LABEL_W := 130.0          # px: the naming card's row labels
+const DICE_W := 44.0            # px: the dice button and its gap, in the Name row (so both boxes line up)
 const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
 
 var cam: Camera3D
@@ -449,7 +454,7 @@ func _show_pick() -> void:
 		v.add_child(dl)
 		if i == chosen:
 			var pl := UI.label(d["play"], 13, UI.INK)
-			pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			UI.wrapped(pl)
 			v.add_child(pl)
 		var ii := i
 		v.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -520,7 +525,7 @@ func _start_hatch() -> void:
 	var v := UI.vbox(10); card.add_child(v)
 	var knock := "Click (or press %s) to knock. The Boki inside wakes a little more."
 	var l := UI.label(knock % Settings.key_cap("jump"), 15)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	v.add_child(l)
 	warm_bar = Control.new()
 	warm_bar.custom_minimum_size = Vector2(420, 16)
@@ -557,7 +562,7 @@ func _process(delta: float) -> void:
 	if stage == "mask" or stage == "create":
 		pass       # (MaskMoment, or the LookLocker, moves the camera)
 	else:
-		cam.look_at(Vector3(0, (0.25 if stage != "pick" else 0.55) if stage != "name" else -0.55, 0.5))
+		cam.look_at(NAME_LOOK if stage == "name" else Vector3(0, 0.25 if stage != "pick" else 0.55, 0.5))
 	if stage == "pick":
 		var hv := _egg_under_mouse()
 		if hv != hover:
@@ -593,12 +598,12 @@ func _process(delta: float) -> void:
 				cam_to = Vector3(0, 2.2, 5.6)
 				# a closer look (its card, and turning it round), then naming
 				var rv := KinReveal.new(egg_defs[chosen]["species"], new_rec)
+				rv.twin = kin_node
 				reveal = rv
 				add_child(rv)
 				rv.revealed.connect(skipper.queue_free)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
-					if top_box: top_box.visible = true
 					stage = "name"
 					_show_name()))
 			wegg.start()
@@ -617,10 +622,18 @@ func _skip_hatch() -> void:
 
 func _show_name() -> void:
 	_clear_bottom()
+	top_box.visible = false      # (its line, "He's looking at you", is the reveal's: stale here)
+	# the card on the right and the Boki whole on the left, never a card over its body
+	var side := bottom.get_parent() as Control
+	side.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+	side.offset_left = -(NAME_CARD_W + 2.0 * NAME_MARGIN)
+	side.offset_right = 0.0
+	side.offset_top = NAME_MARGIN
+	side.offset_bottom = -NAME_MARGIN
 	var sp_id: String = egg_defs[chosen]["species"]
 	var sp: Dictionary = Data.KIN[sp_id]
 	var card := UI.card(UI.CARD, 16, 18)
-	card.custom_minimum_size = Vector2(520, 0)
+	card.custom_minimum_size = Vector2(NAME_CARD_W, 0)
 	var v := UI.vbox(10); card.add_child(v)
 	if new_rec.is_empty() or String(new_rec.get("species", "")) != sp_id:
 		new_rec = _hatched_rec(sp_id)
@@ -634,54 +647,40 @@ func _show_name() -> void:
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
 	var sex_row := UI.hbox(8)
 	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
-	# (a long line wraps, so it must be given the row's width: in an HBox with no expand it shrank to ~0 wide
-	# and wrapped one letter per line, a column running off the top of the screen)
 	var sex_line := UI.para("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
 		"A babbler for now; any name you give will stick."], 16, UI.MUTED)
+	# (a wrapping Label asks for ~0 width: with no floor, a row that did not hand it room broke it one letter
+	# per line, a column running off the top of the screen; the floor holds even if the row stops expanding)
+	UI.wrapped(sex_line, 300.0)
 	sex_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sex_row.add_child(sex_line)
 	v.add_child(sex_row)
 	v.add_child(UI.label("Voice: %s." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)
-	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
+	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = LABEL_W - DICE_W
 	name_row.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_row.add_child(ne)
+	var step := NameStep.new(sp_id, "")      # (both ways on below keep the name)
+	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_row.add_child(step)
 	v.add_child(name_row)
-	# a few ideas, and a button for a fresh handful
-	var picks := UI.hbox(6)
-	var fill_picks := func(self_ref: Callable) -> void:
-		for ch in picks.get_children(): ch.queue_free()
-		var il := UI.label("Ideas", 13, UI.MUTED); il.custom_minimum_size.x = 120; il.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		picks.add_child(il)
-		var pool: Array = Data.KIN_NAMES.duplicate(); pool.shuffle()
-		for nm in pool.slice(0, 4):
-			var n2: String = nm
-			picks.add_child(UI.button(n2, func(): ne.text = n2; ne.caret_column = n2.length()))
-		var more := UI.button("More", func(): self_ref.call(self_ref))
-		more.flat = true
-		picks.add_child(more)
-	fill_picks.call(fill_picks)
-	v.add_child(picks)
 	var you_row := UI.hbox(8)
-	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
+	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = LABEL_W
 	you_row.add_child(yl)
 	var ye := _your_name_edit()
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
 	btns.add_child(_path_card("Tutorial", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, ne.text, ye.text, true), true))
+			func(): _finish(sp_id, step.chosen(), ye.text, true), true))
 	btns.add_child(_path_card("Skip tutorial", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, ne.text, ye.text, false), false))
+			func(): _finish(sp_id, step.chosen(), ye.text, false), false))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
 	# Enter in either box is the same as "Skip tutorial"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ne.grab_focus()
-	ne.select_all()
+	step.box.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	step.focus()
 
 ## One of the two ways on from the naming card: a button and a line under it, one click.
 ## The main way is bright; the other is a flat grey button.

@@ -31,19 +31,19 @@ func run(main: Node) -> void:
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	var ally: Hunter = null
 	var foes: Array = []
 	for h in m.hunters:
 		h.ctrl = "idle"
-		if h != P and h.team == P.team: ally = h
-		elif h.team != P.team: foes.append(h)
+		if h != p and h.team == p.team: ally = h
+		elif h.team != p.team: foes.append(h)
 	ok(ally != null and foes.size() == 3, "a 3v3: a teammate, three rivals")
 	_run(m, 0.2)
 	# ---------------------------------------------------------------- 1. the colour rule
-	ok(SideColor.of(m, P) == SideColor.you() and SideColor.of(m, ally) == SideColor.ally(), "you and your ally")
+	ok(SideColor.of(m, p) == SideColor.you() and SideColor.of(m, ally) == SideColor.ally(), "you and your ally")
 	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.foe()), "every rival is the foe colour")
-	ok(SideColor.of_team(P.team, (foes[0] as Hunter).team) != SideColor.of_team(P.team, P.team), "foe != ally")
+	ok(SideColor.of_team(p.team, (foes[0] as Hunter).team) != SideColor.of_team(p.team, p.team), "foe != ally")
 	for h in m.hunters:
 		var want := SideColor.of(m, h)
 		var ring := h.model.get_node_or_null("TeamRing") as MeshInstance3D
@@ -52,16 +52,16 @@ func run(main: Node) -> void:
 			ok(_same(SideRings.shown((h.kin as Kin).ring), want), "%s's Boki ring matches its Hunter" % h.pname)
 			ok(SideColor.of(m, h.kin) == want, "%s's Boki takes its Hunter's colour" % h.pname)
 		var edge := SideRings.edge_of(h)
-		var edge_ok := edge.a == 0.0 if h == P else (_same(edge, want) and edge.a > 0.5)
-		ok(edge_ok, "%s's body edge: %s (%s)" % [h.pname, "none on yours" if h == P else _side(m, h), edge])
-	_side_fx(m, P, ally, foes[0])
+		var edge_ok := edge.a == 0.0 if h == p else (_same(edge, want) and edge.a > 0.5)
+		ok(edge_ok, "%s's body edge: %s (%s)" % [h.pname, "none on yours" if h == p else _side(m, h), edge])
+	_side_fx(m, p, ally, foes[0])
 	_body_tell(m, foes[0])
-	_boki_text(m, P, ally, foes[0])
-	_melee_stack(m, P, ally, foes)
+	_boki_text(m, p, ally, foes[0])
+	_melee_stack(m, p, ally, foes)
 	# ---------------------------------------------------------------- 2. the downed teammate
-	ally.teleport(P.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
+	ally.teleport(p.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
-		f.teleport(P.pos + Vector3(-12.0, 0, 0))
+		f.teleport(p.pos + Vector3(-12.0, 0, 0))
 	if ally.kin: (ally.kin as Kin).stow()
 	m.knock(ally, foes[0], {})
 	var f0 := DownedMarks.bleed_frac(ally)
@@ -80,7 +80,7 @@ func run(main: Node) -> void:
 		k.state = KinWispForm.STATE
 	# ---------------------------------------------------------------- 3. tethers only for your squad
 	var tethered := _tethered(m)
-	ok(P.kin == null or P.kin.state == "shoulder" or tethered.has(P.kin), "your own Boki out: tethered to you")
+	ok(p.kin == null or p.kin.state == "shoulder" or tethered.has(p.kin), "your own Boki out: tethered to you")
 	ok(k == null or not tethered.has(k), "your downed teammate's Boki rides on them as a wisp: no tether")
 	for f: Hunter in foes:
 		ok(f.kin == null or not tethered.has(f.kin), "%s's Boki: no tether" % f.pname)
@@ -153,9 +153,9 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 		mob.stun_t = 0.0
 
 ## Other people's looks lean to their side: yours as made, a teammate's cooler, a rival's toward the hostile red.
-func _side_fx(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
+func _side_fx(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	var c := Color("ffc832")
-	ok(SideColor.fx(m, P, c) == c, "your own ability look keeps its colour")
+	ok(SideColor.fx(m, p, c) == c, "your own ability look keeps its colour")
 	var a := SideColor.fx(m, ally, c)
 	var f := SideColor.fx(m, foe, c)
 	ok(a.b > c.b and a != c, "a teammate's look leans cool (%s)" % a)
@@ -167,10 +167,10 @@ func _side_fx(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 ## A 3v3 melee, every Boki out, all of them piled on one spot: ownership rings are thin and sit under every cast, a
 ## rival's telegraph on top of yours on top of a teammate's, one full-strength fill under a body, and the rings
 ## fade while a telegraph covers them and come back after (docs/COMBAT_CLARITY.md, "Ground order").
-func _melee_stack(m: Match, P: Hunter, ally: Hunter, foes: Array) -> void:
-	var at := P.pos
+func _melee_stack(m: Match, p: Hunter, ally: Hunter, foes: Array) -> void:
+	var at := p.pos
 	for h: Hunter in m.hunters:
-		h.teleport(at + Vector3(0.4 * float(m.hunters.find(h) % 3), 0, 0.4 * float(m.hunters.find(h) / 3)))
+		h.teleport(at + Vector3(0.4 * float(m.hunters.find(h) % 3), 0, 0.4 * float(int(m.hunters.find(h) / 3.0))))
 		if h.kin:
 			(h.kin as Kin).state = "active"
 			(h.kin as Kin).teleport(h.pos + Vector3(0.3, 0, 0))
@@ -194,7 +194,7 @@ func _melee_stack(m: Match, P: Hunter, ally: Hunter, foes: Array) -> void:
 	ok(thin, "an ownership ring is the thinnest band")
 	ok(rings.all(func(r): return _prio(r) == SideColor.ORDER_RING), "ownership rings draw under every cast")
 	ok(is_equal_approx(SideRings.shown(rings[0]).a, full_a), "no telegraph: your ring is full strength")
-	var mine := _tele(m, P, at)
+	var mine := _tele(m, p, at)
 	var theirs := _tele(m, foes[0], at)
 	var mates := _tele(m, ally, at)
 	m.fx.stack_telegraphs()
@@ -207,7 +207,7 @@ func _melee_stack(m: Match, P: Hunter, ally: Hunter, foes: Array) -> void:
 	ok(landed, "a rival's landing ring is on the rival tier")
 	ground.call()
 	ok(rings.all(func(r): return SideRings.shown(r).a < 0.3), "every ownership ring is faded under the telegraphs")
-	_aim_order(m, P, foes[0])
+	_aim_order(m, p, foes[0])
 	for n: Node3D in [mine, theirs, mates]:
 		m.fx.end_telegraph(n)
 	m.fx.rings.clear()
@@ -225,16 +225,16 @@ func _alpha(n: Node3D) -> float:
 	return (n.material_override as ShaderMaterial).get_shader_parameter("color").a
 
 ## AimKit draws a rival's telegraph in its own surface after yours.
-func _aim_order(m: Match, P: Hunter, foe: Hunter) -> void:
-	AimKit.circle(P, "own", {"all": true, "at": P.pos, "r": 3.0})
-	AimKit.circle(foe, "rival", {"all": true, "at": P.pos, "r": 3.0})
+func _aim_order(m: Match, p: Hunter, foe: Hunter) -> void:
+	AimKit.circle(p, "own", {"all": true, "at": p.pos, "r": 3.0})
+	AimKit.circle(foe, "rival", {"all": true, "at": p.pos, "r": 3.0})
 	var d := AimKit.layer(m)
 	d.rebuild()
 	var n := d.mesh.get_surface_count()
 	ok(n == 2, "AimKit: yours and a rival's draw as two surfaces (%d)" % n)
 	ok(d.mat_foe.render_priority > d.mat.render_priority, "AimKit: the rival's surface draws after yours")
-	ok(d.covers(P.pos), "AimKit: the pile counts as covered")
-	AimKit.clear(P)
+	ok(d.covers(p.pos), "AimKit: the pile counts as covered")
+	AimKit.clear(p)
 	AimKit.clear(foe)
 
 ## Crowd control on a body, on the body: its look (StatusLooks) shows while it lasts, the tint pulses its colour, all
@@ -272,20 +272,26 @@ func _body_tell(m: Match, f: Hunter) -> void:
 
 ## Boki text over a fight: every Boki's line is drawn out of a fight, only your own in one; an ability name floats
 ## over your own Boki, not a rival's.
-func _boki_text(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
-	var mine: Kin = P.kin if P.kin else m.give_kin(P, Save.new_kin("puddlet"))
+func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
+	var mine: Kin = p.kin if p.kin else m.give_kin(p, Save.new_kin("puddlet"))
 	ok(ally.kin != null and foe.kin != null, "your ally and the rival each have a Boki")
 	if ally.kin == null or foe.kin == null:
 		return
-	P.combat_at = -99.0
+	p.combat_at = -99.0
+	ally.combat_at = -99.0
 	ok(BokiChatter.heard(m, foe.kin) and BokiChatter.heard(m, ally.kin), "no fight: every Boki's line is drawn")
-	P.combat_at = m.time
+	p.combat_at = m.time
 	ok(BokiChatter.heard(m, mine), "in a fight: your own Boki's line is drawn")
 	ok(not BokiChatter.heard(m, foe.kin) and not BokiChatter.heard(m, ally.kin), "... the others' are not")
-	P.combat_at = -99.0
+	ok(not BokiChatter.calm(m), "in a fight: no Boki callout pins (\"Behind you!\") over the field")
+	p.combat_at = -99.0
+	ok(BokiChatter.calm(m), "no fight: callout pins are drawn")
+	ally.combat_at = m.time
+	ok(not BokiChatter.calm(m) and not BokiChatter.heard(m, foe.kin), "squadmate fights: no pins or others' lines")
+	ally.combat_at = -99.0
 	for k: Kin in [mine, foe.kin]:
 		k.unseen = false
-		k.teleport(P.pos + Vector3(6.0 if k == mine else -6.0, 0, 0))
+		k.teleport(p.pos + Vector3(6.0 if k == mine else -6.0, 0, 0))
 	var words := func():
 		return m.fx.nums.filter(func(n): return n.get("word", false) and float(n["t"]) == 0.0).size()
 	var w0: int = words.call()

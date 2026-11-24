@@ -34,7 +34,7 @@ func build(mat: Material) -> Array:
 		var i: int = wi
 		if W.kind[i] != W.T_BLOCK:
 			continue
-		var x := i % ww; var z := i / ww
+		var x := i % ww; var z := int(i / float(ww))
 		var ls: Array = []
 		for k in 8:
 			var d: Vector2i = DIRS[k]
@@ -61,11 +61,11 @@ func build(mat: Material) -> Array:
 		var ls: Array = links[i]
 		if ls.size() != 2:
 			continue
-		var da := Vector2i(int(ls[0]) % ww - i % ww, int(ls[0]) / ww - i / ww)
-		var db := Vector2i(int(ls[1]) % ww - i % ww, int(ls[1]) / ww - i / ww)
+		var da := Vector2i(int(ls[0]) % ww - i % ww, int(int(ls[0]) / float(ww)) - int(i / float(ww)))
+		var db := Vector2i(int(ls[1]) % ww - i % ww, int(int(ls[1]) / float(ww)) - int(i / float(ww)))
 		if da.x * db.x + da.y * db.y != 0 or absi(da.x) + absi(da.y) != 1 or absi(db.x) + absi(db.y) != 1:
 			continue
-		var x := i % ww; var z := i / ww
+		var x := i % ww; var z := int(i / float(ww))
 		if is_wall(x + da.x * 2, z + da.y * 2) and is_wall(x + db.x * 2, z + db.y * 2):
 			fixed[i] = true
 	for _it in 3:
@@ -85,7 +85,7 @@ func build(mat: Material) -> Array:
 		var ls: Array = links[i]
 		var p: Vector3 = pos[i]
 		var n: int = height[i]
-		var key := Vector2i(int(p.x) / 24, int(p.z) / 24)
+		var key := Vector2i(int(int(p.x) / 24.0), int(int(p.z) / 24.0))
 		# runs to each neighbour (each pair once)
 		for j in ls:
 			if j < i and links.has(j):
