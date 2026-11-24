@@ -15,7 +15,7 @@ static func for_match(m) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
-	var on: bool = Settings.q("occ")
+	var on: bool = Settings.q("occ") and not m.has_meta("pitch_no_foe_plates")  # (pitch films: no x-ray ghosts)
 	for h in m.hunters:
 		_sync(h, h.model, on and (h.team == p.team or not h.unseen), SideColor.of(m, h))
 	for k in m.kins:

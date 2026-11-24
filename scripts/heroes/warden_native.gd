@@ -18,6 +18,16 @@ const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their k
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
 const LOOPS := ["idle", "walk", "run", "crouch"]
+## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
+## Swing and cast one-shots (the attack clip without them): lmb, lmb_hold (a charged swing), rmb, e, r (the kit's cast
+## slots, MOVE_SLOTS). One-shots: hit, land. Held while the state lasts: dash, glide and stomp (these two loop), downed.
+const HIT_SLOTS := ["hit", "land"]
+const SLOTS := ["lmb", "lmb_hold", "rmb", "e", "r", "dash", "glide", "land", "hit", "downed", "stomp"]
+const MOVE_SLOTS := {"secondary": "rmb", "utility": "e", "ult": "r"}  # the state's cast_slot -> its clip slot
+const SLOT_CAST := 0.5  # s: a kit move that starts this soon after a cast belongs to that cast's slot
+const LAND_MIN := 0.3  # a landing this hard (WardenClips.FEEL, 0..1) plays the land clip
+## An animation-only file beside the model: the clips the data names, matched by name.
+const CLIPS_FILE := "%s/%s/%s_clips.glb"
 const ARMS_CLIP := "%s_arms"  # the crouch with another clip's arms (data "crouch_arms_from"), added beside Meshy's
 const BOKI_SLOTS := ["k1", "k2"]  # cast slots that are the riding Boki's ability, not the Hunter's (no attack clip)
 const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chains are the arms (data "arm_roots")
@@ -37,8 +47,10 @@ var gun: Node3D
 var built := 0  # the rig weapon last hidden (instance id): Hunter.equip rebuilds it
 var built_off := 0  # and the rig's Offhand last hidden (instance id)
 var cur := ""  # the game state playing ("idle", "walk", ...)
-var attack_left := 0.0  # s the attack clip still owns the body
+var attack_left := 0.0  # s the clip of a swing, cast, hit or landing still owns the body
 var attack_move := false  # it was started by a kit move or a swing (not a cast or a shot): the open reach waits
+var hit_prev := 99.0  # the state's s since a hit, last frame
+var land_prev := 0.0  # the state's landing squash, last frame
 ## The state counters last frame; cast -1: none read yet (the first state read is the baseline, no new hit)
 var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
@@ -55,6 +67,7 @@ var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkelet
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
+var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 
 
@@ -121,9 +134,17 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	process_priority = 10  # (after Match renders the hunters: HunterAnim.update)
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	plays = (d["clips"] as Dictionary).duplicate()
-	for st in LOOPS:
-		player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
+	moves = WardenNativeMoves.new(player, d)
+	plays.merge(moves.clips())
 	skel = WardenGlb.skeleton(glb)
+	_borrow_clips()
+	for st in SLOTS + moves.clips().keys():  # (a slot whose clip is nowhere plays today's clip)
+		if plays.has(st) and not player.has_animation(String(plays[st])):
+			push_warning("warden_native %s: slot %s names clip %s, which no file has" % [art_id, st, plays[st]])
+			plays.erase(st)
+	for st in LOOPS + ["stomp", "glide"]:
+		if plays.has(st):
+			player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
 	# (the clips advance in _process, then the layers go on top: WardenSync's order)
 	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	if d.has("bones"):
@@ -168,12 +189,17 @@ func _process(dt: float) -> void:
 	_hide_rig_weapon()
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
 	attack_left -= dt
+	var one := _one_shot(s)
 	var xt := float(s.get("extract_t", -1.0))
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
-	elif _attacked(s):
-		attack_left = _clip_len("attack") / float(d.get("attack_rate", 1.0))
-		_play("attack", float(d.get("attack_rate", 1.0)), true)
+	elif moves.owns(s, plays):  # a kit move with its own clip (draw, release, Spirit Walk): laid at the move's clock
+		moves.play(s, plays, dt)
+		attack_left = 0.0
+		cur = "kmove"
+	elif one != "":
+		attack_left = _clip_len(one) / _shot_rate(one)
+		_play(one, _shot_rate(one), true)
 	elif attack_left <= 0.0:
 		_loco(s)
 	var hips := WardenSkeleton.find(skel, "root")
@@ -250,8 +276,11 @@ func hand_position() -> Vector3:
 func _loco(s: Dictionary) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var ground := Vector2(vel.x, vel.z).length()
+	var held := _held(s)
 	if bool(s.get("dead", false)):
 		_play("idle", 0.0)
+	elif held != "":
+		_play(held, 1.0)
 	elif not bool(s.get("grounded", true)):
 		_play("jump", float(d.get("jump_rate", 1.0)))
 	elif float(s.get("crouch", 0.0)) > 0.5:
@@ -264,9 +293,50 @@ func _loco(s: Dictionary) -> void:
 		_play("idle", 1.0)
 
 
-## A new hit, cast or kit move this frame (state counters moved on since the last frame; a swing count that drops back,
-## a fresh state, is no hit).
-func _attacked(s: Dictionary) -> bool:
+## The slot clip a state holds the body in while it lasts (the data names one for it; "" none).
+func _held(s: Dictionary) -> String:
+	if plays.has("downed") and float(s.get("fall", -1.0)) >= 0.0:
+		return "downed"
+	if plays.has("stomp") and float(s.get("stomp", -1.0)) >= 0.0:
+		return "stomp"
+	if plays.has("glide") and bool(s.get("gliding", false)):
+		return "glide"
+	if plays.has("dash") and bool(s.get("rolling", false)):
+		return "dash"
+	return ""
+
+
+## The clip a new one-shot starts this frame ("" none): a hit, a swing, cast or kit move, or a hard landing, in that
+## order. Every counter is read each frame, so a one-shot that loses to another one is not played later.
+func _one_shot(s: Dictionary) -> String:
+	var swing := _swing(s)
+	var hurt := _new_hit(float(s.get("hit_t", 99.0)))
+	var landed := _landed()
+	if hurt and plays.has("hit") and (cur != "hit" or _fresh("hit")):  # (a hit cuts in on any swing)
+		return "hit"
+	if swing != "":
+		return swing
+	return "land" if landed and plays.has("land") and _fresh("land") else ""
+
+
+func _new_hit(t: float) -> bool:
+	var fresh := WardenFlinch.is_new_hit(t, hit_prev)
+	hit_prev = t
+	return fresh
+
+
+## A landing hard enough for the land clip starts when HunterAnim's landing squash rises.
+func _landed() -> bool:
+	var k := (root.get_meta(WardenClips.FEEL, Vector2.ZERO) as Vector2).x
+	var fresh := k >= LAND_MIN and k > land_prev
+	land_prev = k
+	return fresh
+
+
+## The clip slot of a new swing, cast or kit move this frame ("" none): the state counters moved on since the last
+## frame (a swing count that drops back, a fresh state, is no hit). A swing takes lmb (lmb_hold when charged), a cast
+## its cast slot's (rmb, e, r); a slot the data leaves out plays "attack".
+func _swing(s: Dictionary) -> String:
 	var now := {
 		"kmove": String(s.get("kmove", "")),
 		"swing_n": int(s.get("swing_n", 0)),
@@ -275,22 +345,38 @@ func _attacked(s: Dictionary) -> bool:
 		"recoil": float(s.get("recoil", 0.0)),
 	}
 	if not s.has("cast"):
-		return false  # (Hunter._anim_state has not filled this model's state yet: no counters to read)
+		return ""  # (Hunter._anim_state has not filled this model's state yet: no counters to read)
 	if float(last["cast"]) < 0.0:
 		last = now  # (the first state read is the baseline: counters a freshly dressed model finds are no new hit)
-		return false
-	var hit: bool = (
-		(now["kmove"] != "" and now["kmove"] != last["kmove"])
-		or now["swing_n"] > last["swing_n"]
-		or now["cast"] < last["cast"]
-		or now["recoil"] > last["recoil"]
-	)
-	var by_move: bool = (now["kmove"] != "" and now["kmove"] != last["kmove"]) or now["swing_n"] > last["swing_n"]
+		return ""
+	var move: bool = now["kmove"] != "" and now["kmove"] != last["kmove"]
+	var melee: bool = now["swing_n"] > last["swing_n"]
+	var cast_new: bool = now["cast"] < last["cast"]
+	var shot: bool = now["recoil"] > last["recoil"]
 	last = now
-	var fresh := attack_left <= _clip_len("attack") * (1.0 - ATTACK_AGAIN) / float(d.get("attack_rate", 1.0))
-	if hit and fresh:
-		attack_move = by_move
-	return hit and fresh
+	if not (move or melee or cast_new or shot):
+		return ""
+	var slot := "attack"
+	if cast_new or (move and not melee and now["cast"] < SLOT_CAST):
+		slot = String(MOVE_SLOTS.get(String(s.get("cast_slot", "")), "attack"))
+	elif melee or shot:
+		slot = "lmb_hold" if melee and int(s.get("combo", 0)) < 0 else "lmb"
+	if not plays.has(slot):  # (an uncharged swing's slot stands in for a charged one's)
+		slot = "lmb" if slot == "lmb_hold" and plays.has("lmb") else "attack"
+	if not _fresh(slot):
+		return ""
+	attack_move = move or melee
+	return slot
+
+
+## Whether a clip may start now: nothing plays over the body, or the clip before it is past ATTACK_AGAIN of its length.
+func _fresh(st: String) -> bool:
+	return attack_left <= _clip_len(st) * (1.0 - ATTACK_AGAIN) / _shot_rate(st)
+
+
+## The play rate of a one-shot: data "attack_rate" for the swing and cast clips, 1 for a hit or a landing.
+func _shot_rate(st: String) -> float:
+	return 1.0 if st in HIT_SLOTS else float(d.get("attack_rate", 1.0))
 
 
 ## The loop's rate for this ground speed against the speed it was keyed at (data, m/s), clamped to the clip's range.
@@ -333,6 +419,38 @@ func _hide_rig_weapon() -> void:
 		for mi in off.find_children("*", "GeometryInstance3D", true, false):
 			(mi as GeometryInstance3D).visible = false
 			mi.set_meta("glb_hidden", true)
+
+
+## Clips the data names for the slots that Meshy's own file lacks come from the animation-only file beside the model
+## (CLIPS_FILE), matched by clip name. Its tracks are matched by bone name onto this skeleton; a track of a bone this
+## skeleton lacks is dropped. The copies are added to the shared library once, like the crouch arms.
+func _borrow_clips() -> void:
+	var path := CLIPS_FILE % [WardenGlb.DIR, art_id, art_id]
+	if ResourceLoader.exists(path):
+		var src := (load(path) as PackedScene).instantiate() as Node3D
+		borrow(src)
+		src.free()
+
+
+## Adds the clips the slots name that are missing here from the instanced animation file `src`.
+func borrow(src: Node3D) -> void:
+	var sp := src.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
+	var from := String(sp.get_node(sp.root_node).get_path_to(WardenGlb.skeleton(src)))
+	var to := String(player.get_node(player.root_node).get_path_to(skel))
+	var lib := player.get_animation_library(&"")
+	for st in plays:
+		var nm := String(plays[st])
+		if nm == "" or player.has_animation(nm) or not sp.has_animation(nm):
+			continue
+		var clip := sp.get_animation(nm).duplicate(true) as Animation
+		for ti in range(clip.get_track_count() - 1, -1, -1):
+			var p := clip.track_get_path(ti)
+			var bone := String(p.get_concatenated_subnames())
+			if String(p.get_concatenated_names()) == from and skel.find_bone(bone) >= 0:
+				clip.track_set_path(ti, NodePath("%s:%s" % [to, bone]))
+			else:
+				clip.remove_track(ti)
+		lib.add_animation(nm, clip)
 
 
 ## The state's clip with the arms of clip `from` (another state's), time-scaled onto it so they cycle once per loop:
