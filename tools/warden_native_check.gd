@@ -3,8 +3,8 @@ extends RefCounted
 ## (content/rules/warden_native.json) builds from its <art>_meshy.glb with Meshy's bones as Meshy named them (no
 ## contract bones, no WardenSync), its clips play for the game states (idle, walk, run, jump, attack, crouch), it
 ## stands as tall as the contract model, faces the way the Hunter faces, keeps the hit ring, hides the rig's procedural
-## weapon, puts the aim node on Meshy's hand and hangs the anchor empties on Meshy's bones. Every other Warden keeps
-## the contract path.
+## weapon, puts the aim node on Meshy's hand, hangs the anchor empties on Meshy's bones and wears the drop poses (the
+## landing squash: --land-weight-check). Every other Warden keeps the contract path.
 
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
@@ -88,13 +88,16 @@ func _height(a: String) -> void:
 func _states(main: Node, a: String) -> void:
 	var m := _model(a)
 	var nat := m.get_node("Warden/Native") as WardenNative
+	# (every state carries "cast" like Hunter._anim_state's: without it WardenNative reads the state
+	# as not yet filled and ignores the swing; the idle case is the first read, the baseline
+	# the attack's swing_n 1 is counted against)
 	var cases := [
-		["idle", {"grounded": true}],
-		["walk", {"grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
-		["run", {"grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}],
-		["jump", {"grounded": false, "vel": Vector3(0.0, 3.0, -4.0)}],
-		["crouch", {"grounded": true, "crouch": 1.0}],
-		["attack", {"grounded": true, "swing_n": 1}],
+		["idle", {"cast": 99.0, "grounded": true}],
+		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
+		["run", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}],
+		["jump", {"cast": 99.0, "grounded": false, "vel": Vector3(0.0, 3.0, -4.0)}],
+		["crouch", {"cast": 99.0, "grounded": true, "crouch": 1.0}],
+		["attack", {"cast": 99.0, "grounded": true, "swing_n": 1}],
 	]
 	for c in cases:
 		m.set_meta(WardenClips.STATE, c[1])
@@ -120,7 +123,18 @@ func _states(main: Node, a: String) -> void:
 	_crouch_arms(a, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
+	_drop_poses(a, m, nat)
 	m.free()
+
+
+## The drop's shared poses (WardenDropPose) on Meshy's bones, held to the contract Heroes' bars (--clip-check's
+## _drop_poses): upright aboard the rocket, belly down and spread in the skydive, banking into a steer, off for the
+## glider.
+func _drop_poses(a: String, m: Node3D, nat: WardenNative) -> void:
+	var clip_check = load("res://tools/clip_check.gd").new()
+	clip_check._drop_poses(a, m, nat)
+	ok(clip_check.bad == 0, "%s: the drop poses on Meshy's bones (%d misses)" % [a, clip_check.bad])
+	nat.set_process(true)
 
 
 ## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats"); a
