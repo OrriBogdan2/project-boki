@@ -7,9 +7,12 @@ var bad := 0
 var tree: SceneTree
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("RESULTSBOKI %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main_node: Node, mode := "check") -> void:
 	main = main_node
@@ -21,6 +24,7 @@ func run(main_node: Node, mode := "check") -> void:
 		_check()
 		print("RESULTSBOKI DONE, failures: %d" % bad)
 	tree.quit(0 if bad == 0 else 1)
+
 
 ## A fresh save with a lead and a second Boki, and a won match that carried one stolen wisp.
 func _setup() -> Dictionary:
@@ -35,17 +39,40 @@ func _setup() -> Dictionary:
 	a["trust"] = 40.0
 	b["trust"] = 40.0
 	var wisp := Save.new_kin("zapple", "Wren")
-	var runs := [{"uid": a["uid"], "events": [], "trust": 40.0, "stats": {}},
-		{"uid": b["uid"], "events": [], "trust": 40.0, "stats": {}}]
-	return {"a": a, "b": b, "r": {"extracted": true, "why": "test", "caught": [], "seeds": {}, "kin_runs": runs,
-			"tier": 0, "time": 400, "knocks": 2, "damage": 640, "kills": 5, "taken": 100, "downs": 0, "revives": 0,
-			"wisps_home": [wisp]}}
+	var runs := [
+		{"uid": a["uid"], "events": [], "trust": 40.0, "stats": {}},
+		{"uid": b["uid"], "events": [], "trust": 40.0, "stats": {}}
+	]
+	return {
+		"a": a,
+		"b": b,
+		"r":
+		{
+			"extracted": true,
+			"why": "test",
+			"caught": [],
+			"seeds": {},
+			"kin_runs": runs,
+			"tier": 0,
+			"time": 400,
+			"knocks": 2,
+			"damage": 640,
+			"kills": 5,
+			"taken": 100,
+			"downs": 0,
+			"revives": 0,
+			"wisps_home": [wisp]
+		}
+	}
+
 
 func _texts(n: Node, into: Array) -> Array:
 	if n is Label and (n as Label).is_visible_in_tree():
 		into.append((n as Label).text)
-	for c in n.get_children(): _texts(c, into)
+	for c in n.get_children():
+		_texts(c, into)
 	return into
+
 
 ## All the XP a Boki has earned: the levels behind it plus the pool toward the next.
 func _total_xp(k: Dictionary) -> int:
@@ -53,6 +80,7 @@ func _total_xp(k: Dictionary) -> int:
 	for lv in range(1, int(k["level"])):
 		n += Game.xp_need(lv)
 	return n
+
 
 func _check() -> void:
 	var t := _setup()
@@ -66,8 +94,10 @@ func _check() -> void:
 		var k: Dictionary = [a, b][i]
 		var xp := _total_xp(k) - int(before[i])
 		ok(int(gains[i]["xp"]) == xp, "%s: XP shown = XP the save gained (%d)" % [k["name"], xp])
-		ok(is_equal_approx(float(gains[i]["bond"]), float(k["trust"]) - 40.0),
-				"%s: bond shown = trust the save gained" % k["name"])
+		ok(
+			is_equal_approx(float(gains[i]["bond"]), float(k["trust"]) - 40.0),
+			"%s: bond shown = trust the save gained" % k["name"]
+		)
 	ok(float(gains[0]["bond"]) > 0.0, "a won run raised the lead's bond")
 	ok(int(gains[0]["xp"]) > int(gains[1]["xp"]), "the second Boki gets the smaller share")
 	t = _setup()
@@ -83,17 +113,20 @@ func _check() -> void:
 		ok(shown.has(line), "the screen shows '%s'" % line)
 	ok(shown.has("Wren  going home"), "a carried stolen wisp reads 'going home'")
 	var groups := scr.find_children("*", "", true, false).filter(
-			func(n): return n.has_meta("results_group") and (n as CanvasItem).is_visible_in_tree())
+		func(n): return n.has_meta("results_group") and (n as CanvasItem).is_visible_in_tree()
+	)
 	ok(groups.size() <= 5, "still at most 5 first-view groups (%d)" % groups.size())
 	scr.queue_free()
 	var tiny := ResultsBokiLines.gain_text(30, 0.2)
 	var loss := ResultsBokiLines.gain_text(30, -2.4)
 	ok(tiny == "+30 XP, bond unchanged" and loss == "+30 XP, bond down 2", "a tiny change reads unchanged, a loss down")
 
+
 func _shots() -> void:
 	var dir := "shots"
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): dir = a.substr(12)
+		if a.begins_with("--shots-dir="):
+			dir = a.substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	main.get_window().size = Vector2i(1280, 720)
 	for k in 240:
