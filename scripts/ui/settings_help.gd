@@ -9,6 +9,7 @@ const BIND_PREFIX := "bind:"
 
 static var _data := {}
 
+
 ## The line for a row: its setting's text, else its label's; every key bind shares one. "" when none is written.
 static func line(setting: String, label: String) -> String:
 	if _data.is_empty():
@@ -19,11 +20,12 @@ static func line(setting: String, label: String) -> String:
 		key = "bind"
 	return Settings.fill_keys(String(_data.get(key, "")))
 
+
 ## Shows each row's line in the panel's help line while the mouse is over it or a control in it has focus.
 ## `body` is the settings page; its rows are the ones `Overlay._row` made (meta "setting" and "label").
 static func attach(body: Control) -> void:
 	var help := UI.footer_help(body)
-	help.clip_text = true       # a long line is cut, never widens the panel
+	help.clip_text = true  # a long line is cut, never widens the panel
 	help.text = IDLE
 	for row in body.find_children("*", "HBoxContainer", true, false):
 		if not row.has_meta("label"):
