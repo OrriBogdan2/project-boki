@@ -854,7 +854,7 @@ func _detonate(at: Vector3) -> void:
 	vfx("spear_burst", at, null, {"r": rr})
 	m.sfx("rime_burst", at, 1.0, 0.9)
 	m.sfx("rime_splinter", at, -3.0, 0.75)
-	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)
+	Shake.big(m, at, "explosion", h)
 	play_soft("tm_clench")
 	for f in foes_in(at, rr):
 		f.hurt(
@@ -1237,6 +1237,7 @@ func _rime_skate_out() -> void:
 ## A slow zone's step (the spear's and the rink): foes in it are Chilled and slowed a flat k while they stay.
 func _chill_zone(at: Vector3, r: float, k: float) -> void:
 	for f in foes_in(at, r):
+		CcSfx.zone_slow(f)
 		f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, k)
 		f.slow_t = maxf(f.slow_t, ZONE_SLOW_T)
 		add_chill(f)
@@ -1273,7 +1274,7 @@ func _rime_crash(k: float) -> void:
 		if not m.world.los(at, f.pos, at.y + 0.95):
 			continue
 		f.hurt(
-			float(xd["dmg"]) * power("ult") * k,
+			float(xd["dmg"]) * power("x") * k,
 			h,
 			{"src": "abil", "ab": "ult", "stun": stun, "dr": true, "payoff": true, "tags": ["ult", "rimelock"]}
 		)

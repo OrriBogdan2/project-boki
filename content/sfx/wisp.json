@@ -2,7 +2,8 @@
  "group": "wisp",
  "name": "Hunter Wisp",
  "script": "tools/gen_wisp_sfx.py",
- "sounds": {"wisp_hum": "loop", "wisp_hum_end": "loop"},
+ "sounds": {"wisp_hum": "loop", "wisp_hum_end": "loop", "wisp_burst": "boki", "wisp_fold": "boki"},
  "signature": [],
- "loops": ["wisp_hum"]
+ "loops": ["wisp_hum"],
+ "reach": {"wisp_burst": 20, "wisp_fold": 16}
 }
