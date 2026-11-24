@@ -94,7 +94,13 @@ func _wishes() -> void:
 	var v: VBoxContainer = home._new_panel("Today's wishes", 520)
 	var w := GardenWishes.today(Time.get_unix_time_from_system())
 	ok(not w["list"].is_empty(), "the wishes card has wishes")
-	GardenWishes.fill(v, w)
+	# the wishes now ride on the away card as plain lines (GardenWishes.card_lines, c21b61357c):
+	# lay them out the same way
+	for line in GardenWishes.card_lines():
+		var l := Label.new()
+		l.text = String(line)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(l)
 
 func _nook() -> void:
 	home.nook_pick = [Save.d["roster"][0]["uid"], Save.d["roster"][1]["uid"]]

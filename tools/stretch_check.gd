@@ -126,7 +126,8 @@ func _collect(glb: Node) -> void:
 						rest.append(d)
 			var bones := arr[Mesh.ARRAY_BONES] as PackedInt32Array
 			parts.append({"verts": verts, "bones": bones, "weights": arr[Mesh.ARRAY_WEIGHTS],
-				"stride": bones.size() / verts.size(), "skin": inst.skin, "edges": edges, "rest": rest, "binds": binds})
+				"stride": int(bones.size() / float(verts.size())), "skin": inst.skin, "edges": edges, "rest": rest,
+				"binds": binds})
 
 ## Plays one clip from start to end; returns [worst ratio, its time, a note naming the bones on the worst edge].
 func _clip(clips: WardenClips, nm: String) -> Array:

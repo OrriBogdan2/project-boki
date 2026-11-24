@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bfh5rqwx74uij"
-path="res://.godot/imported/hem_meshy_tex0_base_color.png-11d351ba54bd9350ce8d30dc917e7c8d.ctex"
+uid="uid://rnf5w6576cyo"
+path="res://.godot/imported/hem_meshy_H1_tex.jpg-e527847a5f279848f8794ac8a234707a.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "dbafa1fa19066b76882583c244613c39"
+"md5": "cea3e4ab89d466f90e17f6c102b3457d"
 }
 
 [deps]
 
-source_file="res://art/wardens/hem/hem_meshy_tex0_base_color.png"
-dest_files=["res://.godot/imported/hem_meshy_tex0_base_color.png-11d351ba54bd9350ce8d30dc917e7c8d.ctex"]
+source_file="res://art/wardens/hem/hem_meshy_H1_tex.jpg"
+dest_files=["res://.godot/imported/hem_meshy_H1_tex.jpg-e527847a5f279848f8794ac8a234707a.ctex"]
 
 [params]
 

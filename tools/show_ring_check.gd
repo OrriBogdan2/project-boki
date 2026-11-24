@@ -95,7 +95,7 @@ func _judges() -> void:
 	ok(a.size() == 3 and a == ShowRing.tastes(7), "judges: three tastes a week, the same each time")
 	ok(a != ShowRing.tastes(8), "judges: next week's tastes differ")
 	var all: Array = ShowRing.rules()["tastes"]
-	var week := all.find(all.filter(func(t): return t["kind"] == "lean" and t["id"] == "grass")[0]) / 3
+	var week := int(all.find(all.filter(func(t): return t["kind"] == "lean" and t["id"] == "grass")[0]) / 3.0)
 	var k := _kin("Green", 70.0, 70.0, 50.0, 0.5)
 	var before := float(ShowRing.score(k, ["miss", "miss", "miss"], ["miss", "miss", "miss"], week)["total"])
 	k["lean"] = {"grass": Evo.LEAN_FULL}
