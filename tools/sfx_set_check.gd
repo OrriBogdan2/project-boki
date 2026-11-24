@@ -102,6 +102,8 @@ const SEAM_MAX := 0.05  # the jump at a loop's seam, as a share of full scale
 const INV_UNDER_DB := 10.0  # dB: an inventory cue sits at least this far under the quietest hit or shot
 const HELD_S := 3.0  # s of held fire per sound
 const HELD_STEP_MS := 80  # ms a round: the source cadence of Vex's rifle
+const HOLD_BASE := 10  # a hold take is logged as HOLD_BASE + its index (the shot's own takes are 0..3)
+const HOLD_PEAK_DB := -3.0  # hold takes peak under this (dBFS)
 const UNDER_COMBAT_DB := 10.0  # dB: the rank-ready cue as played sits at least this far under a weapon shot ("fire")
 const READY_SECS := 0.5  # s: the new-point chime's audible length at most
 const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
@@ -1252,17 +1254,78 @@ func _held_fire(main: Node) -> void:
 			% [sname, sounds[sname], HELD_S, HELD_STEP_MS, before["peak"], after["peak"], FireSfx.VOICES]
 		)
 		ok(int(after["peak"]) <= FireSfx.VOICES, "%s, %d of %d shots sound" % [shown, takes.size(), before["shots"]])
+		var hold: String = String(sname) + FireSfx.HOLD_SUFFIX
+		var has_hold: bool = Sfx.take_count(hold) > 0
 		var opens: bool = not takes.is_empty() and takes[0] == 0 and not run_v.has(0)
 		var others := _distinct(run_v)
 		var want_others := mini(3, Sfx.take_count(sname) - 1)  # a gun with 3 recorded takes rotates its 2 others
+		if has_hold:
+			# the rest of a burst plays the short hold takes (take + HOLD_BASE), never the full shot again
+			want_others = mini(3, Sfx.take_count(hold))
+			opens = opens and run_v.all(func(t): return int(t) >= HOLD_BASE)
 		ok(
 			opens and repeats == 0 and others >= want_others,
 			(
-				"%s: first shot is the base take, the rest go round %d other takes without repeating (%s)"
-				% [sname, others, str(takes.slice(0, 8))]
+				"%s: first shot is the base take, the rest go round %d %s takes without repeating (%s)"
+				% [sname, others, "hold" if has_hold else "other", str(takes.slice(0, 8))]
 			)
 		)
+		if has_hold:
+			_hold_files(sname, hold)
 		await main.get_tree().create_timer(1.0).timeout
+
+
+## A hold take is shorter than the shot it follows, peaks under HOLD_PEAK_DB, and sits within 3 dB of the shot's
+## loudness. Read from the source .wav (the import is QOA-compressed): the generators write 16-bit mono PCM.
+func _hold_files(sname: String, hold: String) -> void:
+	var shot_len := 0.0
+	var shot_rms := 0.0
+	for t in Sfx.take_count(sname):
+		shot_len = maxf(shot_len, Sfx.take_len(sname, t))
+		shot_rms += _rms_db(_samples(sname, t)) / Sfx.take_count(sname)
+	var longest := 0.0
+	var peak := -99.0
+	var rms := 0.0
+	for t in Sfx.take_count(hold):
+		longest = maxf(longest, Sfx.take_len(hold, t))
+		peak = maxf(peak, _peak_db(_samples(hold, t)))
+		rms += _rms_db(_samples(hold, t)) / Sfx.take_count(hold)
+	ok(
+		longest < shot_len * 0.7 and longest <= 0.2,
+		"%s: longest hold take %.2f s, the shot's longest take %.2f s" % [hold, longest, shot_len]
+	)
+	ok(peak < HOLD_PEAK_DB, "%s: peak %.1f dBFS (under %.1f)" % [hold, peak, HOLD_PEAK_DB])
+	ok(absf(rms - shot_rms) <= 3.0, "%s: loudness %.1f dBFS vs the shot's %.1f" % [hold, rms, shot_rms])
+
+
+func _samples(sname: String, take: int) -> PackedFloat32Array:
+	var d := FileAccess.get_file_as_bytes("res://audio/%s.wav" % (sname if take == 0 else "%s_%d" % [sname, take]))
+	var out := PackedFloat32Array()
+	out.resize(maxi(0, (d.size() - 44) / 2))
+	for i in out.size():
+		out[i] = float(d.decode_s16(44 + i * 2)) / 32768.0
+	return out
+
+
+func _peak_db(a: PackedFloat32Array) -> float:
+	var pk := 1e-6
+	for v in a:
+		pk = maxf(pk, absf(v))
+	return 20.0 * log(pk) / log(10.0)
+
+
+## RMS in dBFS over the audible part (above 2% of the peak), as tools/sfx_lib.py levels it.
+func _rms_db(a: PackedFloat32Array) -> float:
+	var pk := 1e-6
+	for v in a:
+		pk = maxf(pk, absf(v))
+	var sum := 0.0
+	var n := 0
+	for v in a:
+		if absf(v) > pk * 0.02:
+			sum += v * v
+			n += 1
+	return 20.0 * log(sqrt(sum / maxf(1.0, n))) / log(10.0)
 
 
 func _distinct(a: Array) -> int:
@@ -1288,12 +1351,15 @@ func _hold(main: Node, sname: String, held: bool) -> Dictionary:
 			due += HELD_STEP_MS
 			shots += 1
 			var seen: int = Sfx.last_played.get(sname, -1)
+			var hold_seen: int = Sfx.last_played.get(sname + FireSfx.HOLD_SUFFIX, -1)
 			if held:
 				FireSfx.shot(7, sname, null, -2.0, 0.08)
 			else:
 				Sfx.play(sname, null, -2.0)
 			if int(Sfx.last_played.get(sname, -1)) != seen:
 				takes.append(int(Sfx.last_take.get(sname, 0)))
+			elif int(Sfx.last_played.get(sname + FireSfx.HOLD_SUFFIX, -1)) != hold_seen:
+				takes.append(HOLD_BASE + int(Sfx.last_take.get(sname + FireSfx.HOLD_SUFFIX, 0)))
 		var live := 0
 		for pl in Sfx.players:
 			live += 1 if pl.playing else 0
