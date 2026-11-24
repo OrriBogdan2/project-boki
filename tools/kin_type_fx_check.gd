@@ -3,16 +3,19 @@ extends RefCounted
 ## maps to a look, no two share a colour or a shape, each stays inside the particle budget, and a real cast plays it.
 ## Never touches the save.
 
-const MIN_COLOUR_GAP := 0.12     # RGB distance between two types' accent colours
-const MAX_DOTS := 10             # full-quality dots per cast
+const MIN_COLOUR_GAP := 0.12  # RGB distance between two types' accent colours
+const MAX_DOTS := 10  # full-quality dots per cast
 const MAX_STREAKS := 8
 const MAX_RINGS := 3
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("KINTYPEFX %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 ## Dots / streaks / rings and their motion, with the colour left out: two types with the same one look alike.
 func _shape(look: Dictionary) -> String:
@@ -21,7 +24,9 @@ func _shape(look: Dictionary) -> String:
 		parts.append(str(look.get(key, "")))
 	return "|".join(parts)
 
+
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	var types: Array = KinParts.THEMES.filter(func(t): return t != "none")
 	var n_mapped := KinTypeFx.BY_THEME.size()
@@ -32,7 +37,8 @@ func run(main: Node) -> void:
 	for t: String in types:
 		var look: Dictionary = KinTypeFx.LOOKS.get(KinTypeFx.key(t), {})
 		ok(not look.is_empty(), "%s has an accent" % t)
-		if look.is_empty(): continue
+		if look.is_empty():
+			continue
 		var dots := int((look.get("dots", {}) as Dictionary).get("n", 0))
 		var streaks := int((look.get("streaks", {}) as Dictionary).get("n", 0))
 		var rings := (look.get("rings", []) as Array).size()
@@ -63,6 +69,7 @@ func run(main: Node) -> void:
 	print("KINTYPEFX DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _cast_test(main: Node) -> void:
 	var d := Save.fresh()
 	var rec := Save.new_kin("zapple", "Pip")
@@ -76,9 +83,12 @@ func _cast_test(main: Node) -> void:
 	m.set_process(false)
 	var k: Kin = m.player.kin
 	ok(k != null, "the player has a Boki")
-	if k == null: return
+	if k == null:
+		return
 	var type := String(k.sp.get("type", ""))
 	ok(KinTypeFx.LOOKS.has(KinTypeFx.key(type)), "its type '%s' has an accent" % type)
 	var before := m.fx.bi + m.fx.si + m.fx.rings.size()
 	k._cast("k1", k.pos + Vector3(3, 0, 0), true, k, 1.0)
+	if k.cast_do.is_valid():  # a rigged Boki winds up first and lets go on the cast clip's release frame
+		k.sim(BokiSwing.CAST_WIND + 0.02)
 	ok(m.fx.bi + m.fx.si + m.fx.rings.size() > before, "casting an ability plays the accent")

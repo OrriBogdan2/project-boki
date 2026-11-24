@@ -287,9 +287,12 @@ static func _shoot(st: StageSpec, cx: Dictionary, start: Vector3, dv: Vector2, s
 		extra["bounce"] = int(cx["wall_bounce"])      # ricochets off walls (an archetype's trick shot)
 	if cx.has("shot_crit"):
 		extra["crit"] = true
+	if cx.get("drawn", false):
+		extra["drawn"] = true      # the kit draws it (Grimble's arm): no ball, and no "s" copy for other games
 	if bool(p.get("rope", false)):
 		extra["rope"] = true
 		extra["deco"] = "hook"
+	ShotOrigin.draw_from(extra, cx["caster"], String(cx.get("fire_from", "")))      # the slot's hand or weapon
 	m.spawn_shot(cx["caster"], start, dv * spd, 0.0, rng / spd, size, col, extra)
 
 ## What a projectile does when it touches someone ("pass" or "hit") and when it ends.
@@ -461,7 +464,9 @@ static func _burst(st: StageSpec, cx: Dictionary) -> void:
 		if r <= KinParts.BIG_RADIUS:
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
-			if r > 2.0: m.shake(0.3, at)
+			if r > 2.0:      # a Boki's own burst never shakes its owner's camera (DASHES §5.5)
+				var cause: Ent = cx["owner"] if cx["owner"] else cx["caster"]
+				Shake.big(m, at, "explosion", cause)
 		else:
 			m.sfx("ping", at, -2.0, 1.1)
 		_hit(st.effects, st, _foes_near(cx, at, r), cx, at, r)

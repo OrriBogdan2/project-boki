@@ -291,7 +291,11 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
 - Every dash has a start pose of at least 0.05s (an animation, not a delay on movement) and a unique
   sound per archetype. The kin's rider adds a theme sweetener.
 - Wind-down: no glider for 0.12s after a ground dash ends, as the reference did. Dash → jump is unchanged.
-- Dash buffer (0.18s), rush cancels and the glide → dash → glide chains stay as built (KINFALL_CLASSES.md).
+- One press window for abilities: `press_buffer` in content/rules/tuning.json (0.15s, owner 11-08 "recasts
+  buffered ~0.15s"). An ability pressed that early still goes: held past a dash's end while the hunter can't
+  act, before a two-step's recast arms, before a stun, root or Grounded ends. A kit that needs another window
+  keeps a per-kit override with its source. `--dash-flow-check` asserts 0.1s early goes and 0.2s early doesn't
+  for all three. (The Shift buffer reads the same window; the jump buffer, 0.12s, is a movement press, not this window.)
 - Distances never grow with rank (ABILITIES.md rule). Ranks cut the recharge only.
 - Protection stays short: at most 0.16s, or partial (shots only, front only). No full-invulnerability dash.
 
@@ -316,7 +320,7 @@ protection. Those belong to the archetype and weight class.
 
 > **Retired (owner decision 2026-11-05, item 129; DECISIONS.md):** Boki dash riders are removed. Dashes are purely the hero's own; a Boki acts only through its own abilities. Kept for history only. `--boki-dash-check` asserts no Boki changes a dash.
 
-Riders today (content/kin_v2):
+Riders today (content/kin):
 
 - **Vespyx** Venom Trail: `on_pass` damage 3, poison 12, blight 3s.
 - **Gravadillo** Gravity Wake: `on_end` burst 3.5m, pull 8.
@@ -482,6 +486,10 @@ Rules:
   this to ref-tender's delayed root.
 - A victim of reveal, mark, blight or vulnerable gets a HUD status icon with a timer, and their model
   shows the mark to everyone (reveal outline, vulnerable crack overlay, blight sickly tint).
+- A status icon shows its seconds only while 0.5 s or more are left (HudPlate.shows_time): a zone that
+  tops a slow up every frame shows the icon, never a stuck "0.2". A hero's own hold (Neve's Rimelock
+  statue, ArchKit.holds_still) is not a status at all. `--ult-label-scan` fails any ult that leaves a
+  stray number on screen.
 - (Enemy dash pips were removed by owner item 84.) Each enemy's merge and resource states have tells
   (ARCHETYPES.md), so you can track their big tools.
 
@@ -532,11 +540,49 @@ Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/im
 - No weight: ticks (`tick`, burns, falls, heat), monster hits, and slow-only touches under the solid line.
 - Heavy stays under one 10 fps frame (100ms), the longest hold in the reference footage.
 
+**Hit feel per Hunter (measured on main 2026-11-20, `--impact-weight-check` HITFEEL rows).** Each Hunter
+presses LMB (light), RMB (heavy) and X (ult) at a still dummy 3 m away (its Boki benched); the tier is what Feel
+actually gave each of that Hunter's hits (the Hunter's own Boki's hits are left out). Hold = the struck body's hit-stop; a melee solid/heavy hit
+holds the attacker the same, a ranged one never does (your own heavy hit holds you, capped at 110 ms per 0.5 s).
+Flash = the struck body's white flash (`flash_ms`, the same 120 ms for every tier: 3 frames full, then a fade;
+a landed combo payoff flashes 153 ms, `ComboMark.payoff`, the owner's combo-clarity rule).
+Shake = the struck player's camera only (`Shake.incoming_big` power × the 30% default slider); the attacker's
+camera never moves (asserted). "Rules" = the slot's tier when the dummy took no hit in the check.
+
+| Hunter | LMB (light) | RMB (heavy) | X (ult) | Reference footage read (hero-ref briefs) |
+|---|---|---|---|---|
+| Archer | light 25 ms | rules: solid 50 ms | heavy 90 ms, shake 0.6 | no hit flash read |
+| Juggernaut | light 25 ms | heavy 90 ms, shake 0.6 | heavy 90 ms, shake 0.6 | a white star flash on a tip hit |
+| Gunslinger | light 25 ms | solid 50 ms | heavy 90 ms, shake 0.6 | the target flashes solid red on every hit |
+| Bulwark | light 25 ms | rules: solid 50 ms | heavy 90 ms, shake 0.6 | a red flash on the struck dummy |
+| Rimewright | light 25 ms (its passive Splinter is a payoff: solid 50 ms) | heavy 90 ms, shake 0.6 (the detonation is a payoff: one heavier) | no hit on the dummy (rules heavy) | no hit flash read |
+| Ashwick | light 25 ms | solid 50 ms | none: the lava carpet hits in burn/slow ticks (T0) | a red flash and an ember shower |
+| Dolm | solid 50 ms (the punch is an empowered hit; the boulder splash stays light) | heavy 90 ms, shake 0.6 | no hit on the dummy (rules heavy) | a white and purple flash on a wall hit |
+| Mage | light 25 ms | solid 50 ms | no hit on the dummy (rules heavy) | no hit flash read |
+| Dredge | light 25 ms | solid 50 ms | heavy 90 ms, shake 0.6 | a white flash on the target; a 1-frame muzzle flash |
+| Tender | light 25 ms | solid 50 ms | no hit on the dummy (rules heavy) | a small blue-violet flash on the target |
+| Thief | light 25 ms | solid 50 ms | heavy 90 ms, shake 0.6 | a solid red flash on some hits |
+| Ostra | light 25 ms | solid 50 ms | heavy 90 ms, shake 0.6 | no hit flash read |
+| Gil | light 25 ms | solid 50 ms | heavy 90 ms, shake 0.6 | no brief |
+
+The reference footage gives no hit-stop or shake number (5-10 fps frames; the source data has none either),
+only the flash reads above and the HUD plate's 1-2 frame flicker at 30 fps, so the tiers stay as set. Every
+row flashes 120 ms, the same as the footage's one-frame body flash at 5-10 fps.
+
+Strays fixed (2026-11-20): the Archer's Heavy Shot flashed 0.2 s and the Gunslinger's Burr Charge 0.3 s (now
+their tier's 120 ms); the Bulwark ult's quake shook the players near it 0.8 (now the heavy tier's 0.6) and held
+him with its own 0.09 s outside the per-body cap (now the heavy hold through `Feel.hold`); the other ults' 0.6
+literals read the heavy tier; a Boki's big burst went through the cause-less world shake (now it names the Boki,
+and `Shake` treats your own Boki as you, so it never shakes its owner; an enemy Boki's burst near you still does).
+The Meteor Drop's bystander shake is gone (11-23: landings shake no one; its hit still shakes the struck player heavy).
+`--impact-weight-check` 7-8 assert the tiers per slot (explained exceptions in `TIER_OK`) and that no kit file
+sets its own hit-stop, flash or shake number.
+
 - Take the max, never the sum. Within 0.25s, further hits on the same pair get a third of their
   tier (multi-hit rule). Echoes (`repeat`) use half.
 - Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
   hit direction (Sakurai). The shake starts big and shrinks.
-- Cap: 110ms in any 0.5s per player.
+- Cap: 110ms in any 0.5s per player. Every offline global freeze (`Match.freeze_frame`: hits, parries, armor breaks, the ult moment) spends the same budget, charged only for the time it adds to a freeze already running (`--impact-weight-check`).
 - A press inside the freeze is never lost: it acts on the first step after it, as if made then (Shift,
   Space, E and R latch in `pending_input`; an LMB tap is held by DashFlow's press buffer). `--hitstop-input-check`.
 - The spike tier is a bit longer than REFERENCE-era Kinfall's current max of 75ms. It's still short
@@ -559,13 +605,15 @@ flash, losing a life 0.6 s ×0.35 + red flash, a perfect dodge 0.25 s ×0.4, a b
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 
-Your own abilities, dashes, landings and hits never shake or kick your camera: impact reads through
+Your own abilities (your Boki's and your Fuse's too), dashes, landings and hits never shake or kick your
+camera: impact reads through
 hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
 that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
 `Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
 never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
 started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
-`--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
+Every shake is a hit class in `content/rules/shake.json` (power, duration, falloff per class, against the source:
+docs/MOVEMENT_FEEL.d/1123-shake-table.md). `--shake-check` asserts it for all 12 hunters, your Boki and every table row. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
 

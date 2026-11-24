@@ -26,6 +26,7 @@ uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
 uniform vec4 col2 : source_color = vec4(1.0, 0.85, 0.3, 1.0);  // its hot part
 uniform vec4 col3 : source_color = vec4(0.16, 0.05, 0.02, 1.0);  // char, what is left as it burns out
+uniform vec4 peak : source_color = vec4(1.0, 1.0, 1.0, 0.5);      // what the hottest part turns toward, alpha how far
 uniform float life = 0.0;   // 0..1 through the look
 uniform float seed = 0.0;
 uniform float gain = 1.0;   // the viewer's share of it (HeroVfx.view_k: allies' effects sit dimmer)
@@ -35,6 +36,7 @@ uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures ke
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float core_w = 0.0;  // M_BOLT: the bright core's half width as a share of the strip (0: the thread/strike default)
+uniform float nose = 0.0;    // M_BOLT: the share of the strip over which it opens out of a point at A (0: full width from A)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool rim_only = false;  // M_VORTEX: three comet arcs on the rim, no fill and no core
 uniform bool clean_streak = false;  // M_RIBBON "streak": a clean tracer (hot head, tail thins and cools, no burn-away)
@@ -81,7 +83,7 @@ vec3 ramp(float h) {
 	h = cel(clamp(h, 0.0, 1.0));
 	if (h < 0.3) { return mix(col3.rgb, col.rgb, h / 0.3); }
 	if (h < 0.72) { return mix(col.rgb, col2.rgb, (h - 0.3) / 0.42); }
-	return mix(col2.rgb, vec3(1.0), (h - 0.72) / 0.28 * 0.5);
+	return mix(col2.rgb, peak.rgb, (h - 0.72) / 0.28 * peak.a);
 }
 
 vec4 sweep(vec2 uv) {
@@ -280,11 +282,15 @@ vec4 bolt(vec2 uv) {
 	float thin = core_w > 0.0 ? core_w : (jag > 0.0 ? 0.07 : 0.16);
 	float grow = smoothstep(0.0, 0.12, life) * 1.2;          // runs out from A
 	float reach = 1.0 - smoothstep(grow - 0.1, grow, uv.x);
+	if (nose > 0.0) {
+		off /= mix(0.12, 1.0, smoothstep(0.0, nose, uv.x));      // a beam out of a hand: thin at A, the full strip by `nose`
+		reach *= 1.0 - smoothstep(0.8, 1.0, off);                // and its edge soft, the strip's own edge never seen
+	}
 	float fade = 1.0 - smoothstep(0.45, 1.0, life);
 	float core = (1.0 - smoothstep(thin * 0.5, thin, off)) * reach * fade;
 	float halo = (1.0 - smoothstep(thin, thin * 4.0, off)) * reach * fade * 0.6;
 	float flick = jag > 0.0 ? 0.7 + 0.3 * step(0.5, h21(vec2(tick, seed))) : 1.0;
-	vec3 c = col.rgb * halo + mix(col2.rgb, vec3(1.0), 0.5) * core;
+	vec3 c = col.rgb * halo + mix(col2.rgb, peak.rgb, peak.a) * core;
 	return vec4(c * flick, clamp(core + halo * 0.5, 0.0, 1.0) * flick);
 }
 
@@ -323,7 +329,7 @@ vec4 ring(vec2 uv) {
 	float fill = hard(go * 0.9 - mix(0.2, 0.03, go) - d) * 0.25 * (1.0 - hard(life - 0.35));   // a flash of dust inside
 	float fade = 1.0 - smoothstep(0.75, 1.0, life);
 	float a = (ring_v.x + fill * (1.0 - ring_v.x)) * fade;
-	vec3 c = mix(mix(col.rgb, col2.rgb, ring_v.y), mix(col2.rgb, vec3(1.0), 0.5), ring_v.y * (1.0 - hard(life - 0.2)));
+	vec3 c = mix(mix(col.rgb, col2.rgb, ring_v.y), mix(col2.rgb, peak.rgb, peak.a), ring_v.y * (1.0 - hard(life - 0.2)));
 	c = mix(col3.rgb, c, ring_v.x);
 	return vec4(c * a, a);
 }

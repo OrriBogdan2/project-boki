@@ -10,10 +10,11 @@ const DOC := "res://docs/ANIM_COVERAGE.md"
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Garden := preload("res://tools/anim_coverage_boki.gd")
 const ANIM_DIR := "res://content/rules/warden_anim/"
+const NATIVE := "res://content/rules/warden_native.json"
 const BEGIN := "<!-- table:begin -->"
 const END := "<!-- table:end -->"
 const HUNTER_COLS := ["idle", "walk", "run", "attack", "hit", "death", "jump", "land", "glide", "dash", "cast", "stomp",
-	"strafe", "crouch", "upper"]
+	"strafe", "crouch", "upper", "note"]
 const BOKI_COLS := ["idle", "walk", "run", "attack", "hit", "death", "jump", "land", "glide", "dash", "cast", "stomp"]
 ## A kit move key with one of these words is that state's clip (HunterAnim poses the rest); a move whose name says
 ## something else ("ostra_swap", "dr_lunge") is the dash when its warden_anim entry has "dash": true.
@@ -64,9 +65,36 @@ func _move(d: Dictionary, clips: Array, pattern: String, flag := "") -> bool:
 			return true
 	return false
 
+## Stomp: the clip WardenClips plays on the game's phase (states.stomp) when the glb has it; "proc"
+## (HunterAnim.stomp_k) when nothing is mapped; "missing" (and a FAIL line) when the mapped clip is not in the glb.
+func _stomp(art: String, st: Dictionary, clips: Array) -> String:
+	var v: Variant = st.get("stomp", "")
+	if not (v is String) or v == "":
+		return "proc"
+	if clips.has(v):
+		return "clip"
+	print("MISSING stomp clip '%s' in art/wardens/%s/%s.glb" % [v, art, art])
+	return "missing"
+
+## A Hunter on Meshy's skeleton (warden_native.json, WardenNative) plays Meshy's clips, not the contract .glb's: its
+## idle, walk, run, jump (Jump_Run) and crouch are its own `clip`s, attack is Meshy's Attack; every kit move (dash,
+## cast, stomp, upper) plays that Attack and glide and land fall back to Jump_Run/the ground loop, so they read `shared`
+## (when the contract row had one: a state it only posed stays `proc`). Hit and land are the flinch layer (`proc`);
+## no death clip (the extract beat plays); strafe has no 4-way ring (the forward loop).
+func _native_row(art: String, row: Array, nat: Dictionary) -> Array:
+	var c: Dictionary = nat.get("clips", {})
+	var own := func(k: String) -> String: return "clip" if c.has(k) else "missing"
+	var sh := func(i: int) -> String: return "shared" if row[i] != "proc" else "proc"
+	var i := HUNTER_COLS
+	return [own.call("idle"), own.call("walk"), own.call("run"), own.call("attack"), "proc", "shared",
+		own.call("jump"), "proc", sh.call(i.find("glide")), sh.call(i.find("dash")), sh.call(i.find("cast")),
+		sh.call(i.find("stomp")), "shared", own.call("crouch"), sh.call(i.find("upper")), "native: Meshy clips"]
+
 func _hunter_row(art: String) -> Array:
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ANIM_DIR + art + ".json"))
-	var clips := _glb_clips("res://art/wardens/%s/%s.glb" % [art, art])
+	var src := String(d.get("clips_from", art)) if _glb_clips("res://art/wardens/%s/%s.glb" % [art, art]).is_empty() \
+			else art     # (data "clips_from": a .glb with no clips plays another Hero's, WardenClips._borrow)
+	var clips := _glb_clips("res://art/wardens/%s/%s.glb" % [src, src])
 	var loco: Dictionary = d.get("loco", {})
 	var st: Dictionary = d.get("states", {})
 	var air: Dictionary = d.get("air", {})
@@ -88,27 +116,34 @@ func _hunter_row(art: String) -> Array:
 	var walk_ok := _has(clips, loco.get("walk"))
 	var run_ok := _has(clips, loco.get("run"))
 	var land_clip: String = d.get("land", {}).get("clip", "")
-	return [
+	var procs: Array = d.get("procedural", [])     # (states the rig poses although a clip is named for them)
+	var nat: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(NATIVE)).get(art, {})
+	var row := [
 		_cell(clips.has(loco.get("idle", ""))), _cell(walk_ok), _cell(run_ok),
 		_cell(attacks > 0), _cell(hit_ok),
 		_cell(clips.has(st.get("dead", "")), false), _cell(clips.has(air.get("rise", ""))), _cell(clips.has(land_clip)),
-		_cell(clips.has(air.get("glide", ""))), _cell(_move(d, clips, DASH_RE, "dash")),
-		_cell(_move(d, clips, CAST_RE)), "proc", _cell(walk_ok and run_ok), _cell(_has(clips, crouch.get("idle", ""))),
-		_cell(upper)]
+		_cell(clips.has(air.get("glide", "")) and not "gliding" in procs), _cell(_move(d, clips, DASH_RE, "dash")),
+		_cell(_move(d, clips, CAST_RE)), _stomp(src, st, clips), _cell(walk_ok and run_ok),
+		_cell(_has(clips, crouch.get("idle", ""))),
+		_cell(upper), ""]
+	return _native_row(art, row, nat) if bool(nat.get("meshy_native", false)) else row
 
 ## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits, landings and dashes
 ## spring KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side
 ## (Kin.render).
 ## Jump is the hop clip only when Kin.render asks for it in the air (kact hop): without that a leap runs.
+## Glide: a carried Boki spreads its legs (BokiHomeClips' glide, played when Kin.render sets kact glide); `_boki_air`
+## checks the live rig plays it.
 func _boki_row(id: String) -> Array:
 	var clips := _glb_clips("res://art/kin/%s/%s.glb" % [id, id])
 	var flinch := func(file: String, call: String) -> String:
 		return "proc" if FileAccess.get_file_as_string(file).contains(call) else "missing"
 	var kin_src := FileAccess.get_file_as_string("res://scripts/match/kin.gd")
-	var jump := _cell(clips.has("hop") and kin_src.contains('set_meta("kact", "hop" if airborne'), false)
+	var jump := _cell(clips.has("hop") and kin_src.contains('var act := "hop" if airborne'), false)
 	return [_cell(clips.has("idle")), _cell(clips.has("walk")), _cell(clips.has("run")), _cell(clips.has("attack")),
 		flinch.call("res://scripts/arch/oomph.gd", "KinFlinch.hit("), "proc", jump,
-		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("), "missing",
+		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("),
+		_cell(clips.has("glide"), kin_src.contains('act = "glide"')),
 		flinch.call("res://scripts/match/kin.gd", "KinFlinch.dash("),
 		_cell(clips.has("ability")), "missing"]
 
@@ -122,6 +157,9 @@ func _boki_air(main: Node, id: String) -> void:
 	ok(rig._state_clip() == "hop", "%s plays hop in the air, not %s" % [id, rig._state_clip()])
 	rig.player.get_animation_library("").remove_animation("hop")
 	ok(rig._state_clip() == "run", "%s without a hop clip runs in the air, not %s" % [id, rig._state_clip()])
+	k.set_meta("kact", "glide")
+	ok(rig._state_clip() == "glide" and rig.player.has_animation("glide"), "%s plays glide through a glide: %s" % [
+		id, rig._state_clip()])
 	k.free()
 
 func _table(cols: Array, rows: Dictionary) -> String:

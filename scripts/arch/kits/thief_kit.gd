@@ -3,8 +3,9 @@ extends ArchKit
 ## Sable (light, id "thief"): a port of SUPERVIVE's Shiv, matched to the footage (briefs/hero-ref/dancer.md),
 ## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours. docs/heroes/thief.md.
 ##
-## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
-##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
+## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies its full range (8.5m)
+##   along the aim, whatever the cursor distance, and fizzles at the end; a thin aim line shows that range, gold
+##   while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8 shown, no cap): each adds a flat +1.3 to your bolts on them. A knock or an assist heals you 25%.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
@@ -31,7 +32,6 @@ const GHOST := Color("b890ff")     # the blink's afterimages
 const KNOCK_STAR := Color("7b3aff")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
-const BOLT_TAIL := Color("7b3aff")     # the bolt's short deep-violet tail
 const BOLA_HOT := Color("b07aff")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
@@ -290,13 +290,13 @@ func _tick(dt: float) -> void:
 	_tick_aim_line()
 	_net_glint(dt)
 
-## The aim line (your screen only): thin and pale lilac to the cursor, clamped to the bolt's range, with an
+## The aim line (your screen only): thin and pale lilac along the aim to the bolt's full range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
 func _tick_aim_line() -> void:
-	if not h.is_local() or h.wid != "arc_bolts" or busy() or KinMerge.active(h):
+	if not h.is_local() or h.wid != "arc_bolts" or busy():
 		AimKit.hide(h, "aim_glow")
 		return
-	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
+	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0), AimMode.MAX)
 	if primed_t > 0.0:
 		AimKit.line(h, "aim", {"to": to, "col": EMP_LINE, "alpha": 1.6, "lw": 0.13})
 		AimKit.line(h, "aim_glow", {"to": to, "col": EMP_LINE, "alpha": 0.35, "lw": 0.34, "arrow": false})
@@ -363,8 +363,6 @@ func empowered_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "arc_bolts":
 		return false
-	if KinMerge.active(h):
-		return true
 	if held and not _fire_was:
 		bolt_buf = float(h.wpn.get("rate", 0.45))
 	else:
@@ -380,7 +378,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 func _bolt() -> void:
 	var emp := primed_t > 0.0
 	var n0: int = m.shots.size()
-	h.shot_aim = AimMode.CURSOR
 	h.atk.fire()
 	if m.shots.size() <= n0:
 		return
@@ -395,12 +392,12 @@ func _bolt() -> void:
 	var off := right * HAND_OFF * (1.0 if hand == 1 else -1.0)
 	var side := Vector3(off.x, 0, off.y)
 	var start: Vector3 = (sd["pos"] as Vector3) + side
-	var gun: Vector3 = sd.get("muzzle", sd["pos"]) + side      # where it's drawn from; it hits from the body
+	var gun := HeroVfx.of(m).anchor_pos(h, "gun_r" if hand == 1 else "gun_l")      # drawn from it; hits from the body
 	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
-	var to := AimMode.point(h, rng)
+	var to := AimMode.point(h, rng, AimMode.MAX)
 	var v := Vector2(to.x - start.x, to.z - start.z)
 	var spd := (sd["vel"] as Vector2).length()
-	var dist := clampf(v.length(), AimMode.MIN_D, rng)
+	var dist := v.length()
 	sd["pos"] = start
 	sd["prev"] = start
 	sd["start"] = start
@@ -409,7 +406,7 @@ func _bolt() -> void:
 	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
-	if sd.has("muzzle"): sd["muzzle"] = gun
+	sd["muzzle"] = gun
 	# the throw: the torso unwinds into it and winds toward the other hand for the next bolt (KMovesDJ
 	# thf_lmb_r / thf_lmb_l) while the swing whips that hand's blade out (HunterAnim.SWINGS "arc_bolts"); the
 	# empowered one is both blades driven out together (thf_primed)
@@ -424,30 +421,34 @@ func _bolt() -> void:
 		chain.bolt_thrown(float(sd["life"]))
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
-		x["kb"] = 3.0
+		x["kb"] = float(dash_def().get("prime_kb", 0.0))      # 0: the card has no knock
 		x["heavy"] = true          # the empowered hit's own thud and hold (ImpactWeight.of_hit)
 		fx().ride(sd, "chakram_big", Color("c9a8ff"), EMP_PALE, 3.4, 0.7)
 		fx().star(muzzle, EMP_PALE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
-	elif came_quick:            # the quick run after a Vault: the cartwheel's cyan in her hands and the tail
-		fx().ride(sd, "chakram", GHOST, BOLT_COL, 2.2, 0.42)
-		fx().star(muzzle, GHOST, 0.75, 0.1, Color("e0fbff"))
 	else:
-		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_COL, 1.8, 0.42)
-		fx().star(muzzle, BOLT_COL, 0.6, 0.1, BOLT_CORE)        # the violet muzzle star at the throwing hand
+		# the spinning chakram heads a short cel tracer (bolt_trail: dark edge, violet body, hot core, about the
+		# source's comet length); the quick run after a Vault keeps the cartwheel's pale lilac in her hands
+		var head := fx().ride(sd, "chakram", BOLT_COL, GHOST if came_quick else BOLT_COL, 0.0)
+		HeroVfx.of(m).trail(h, "bolt_trail", head)
+		if came_quick:
+			fx().star(muzzle, GHOST, 0.75, 0.1, Color("e0fbff"))
+		else:
+			fx().star(muzzle, BOLT_COL, 0.6, 0.1, BOLT_CORE)        # the violet muzzle star at the throwing hand
 	last_bolt_emp = emp
 
-## Where a bolt ends: a starburst on a hit, a blue-violet puff at the cursor, sparks on a wall.
+## Where a bolt ends: on a hit a lit violet burst facing her with a cross flare and sparks (bolt_hit; the empowered
+## one a big pale star), a blue-violet puff at the cursor, sparks on a wall.
 func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> void:
 	s["dj_end"] = true
 	last_bolt_end = at
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
-	if e != null:
-		fx().star(at, BOLT_COL if not emp else Color("d8c0ff"),
-				1.5 if emp else 0.7,
-				0.24 if emp else 0.14)
-		if emp: m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
+	if e != null and emp:
+		fx().star(at, Color("d8c0ff"), 1.5, 0.24)
+		m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
+	elif e != null:
+		vfx("bolt_hit", at, -(s["vel"] as Vector2).normalized())
 	elif why == "expire":
 		fizzles += 1
 		fx().puff(at, FIZZLE, 0.75 if not emp else 1.1, 0.34, Color("c8b8ff"))
@@ -635,7 +636,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	bola_cast = {"t": float(bd["cast"])}
 	play("thf_bola")                  # the whirl overhead through the wind-up, the sling at the end
-	m.sfx("dj_bola_whirl", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
+	KitWindup.play(self, "rmb", "dj_bola_whirl", -4.0 if h.is_local() else -8.0)
 
 func lane_len() -> float:
 	var bd: Dictionary = rmb_def()["bola"]
@@ -646,6 +647,7 @@ func _tick_bola_cast(dt: float) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	if busy():
 		bola_cast = {}
+		KitWindup.broken(self, "rmb")
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
@@ -709,9 +711,10 @@ func _tick_bola(dt: float) -> void:
 				bola["bounces"] = int(bola["bounces"]) - 1
 				bola_bounces += 1
 				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
-				m.sfx("click", p, -5.0, 1.4)
+				m.sfx("thief_bola_bounce", p, -5.0)
 				continue
 			MissFx.puff(m, MissFx.colour_of(h), p, true)
+			if bola["first"] == null: m.sfx("thief_bola_tie", p, -6.0)     # caught nobody: it ties off on itself
 			_end_bola(p)
 			return
 		p = q
@@ -741,6 +744,7 @@ func _tick_bola(dt: float) -> void:
 		if float(bola["left"]) <= 0.0:
 			if bola["first"] == null:
 				MissFx.puff(m, MissFx.colour_of(h), p, false)
+				m.sfx("thief_bola_tie", p, -6.0)
 			_end_bola(p)
 			return
 	bola["pos"] = p
@@ -857,6 +861,7 @@ func _throw_knife() -> void:
 		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("b890ff"), 1.6, 0.26)
 	fx().star(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("b890ff"), 0.7, 0.1)
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
+	m.sfx("thief_knife_whisk", h.pos, -6.0 if h.is_local() else -9.0)     # the blade spinning away
 
 ## The shot ended with no foe: in the barrier that stopped it, else on the ground (at the wall, or where aimed).
 func _stick_ground(at: Vector3, hit_wall: bool, land: Vector3) -> void:
@@ -886,7 +891,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("b890ff"), 0.8, 0.2)
-	m.sfx("thief_knife_stick", at, -6.0, 1.0)
+	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
@@ -980,7 +985,7 @@ func _shadow_step(tgt: Ent) -> void:
 	_blink(ground(at))
 	var dv := Vector2(tgt.pos.x - h.pos.x, tgt.pos.z - h.pos.z)
 	if dv.length() > 0.05: h.face = atan2(-dv.x, -dv.y)
-	m.sfx("swipe", h.pos, -4.0, 1.9)
+	m.sfx("thief_shadow_whisk", h.pos, -4.0)
 
 ## The blink: a near-instant jump with a chain of cyan afterimages from where she was to where she lands.
 func _blink(to: Vector3) -> void:

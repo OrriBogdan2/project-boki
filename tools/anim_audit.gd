@@ -44,7 +44,7 @@ const FRAME := 1.0 / 60.0    # s: an attack is read a game frame (the physics ti
 ## the slerp between two keys swung the hand off its path: 0.55 and 0.47); what is left is the speed their kit beats
 ## ask: the slam drops 1.5 body heights in 0.08 s, the punch drives 1.1 in 0.05 s. The others are listed open.
 const MAX_JUMP := {"bulwark": 0.4, "dolm": 0.45}
-const TURN_CEIL := 1.4       # the run turn's regression ceiling (share of the run): see _gate_turns
+const TURN_CEIL := 1.25      # the run turn's regression ceiling (share of the run): see _gate_turns
 const TURN := preload("res://tools/anim_audit_turn.gd")     # the 180 stick flip at a run
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
@@ -84,7 +84,7 @@ func _hero(main: Node, id: String) -> void:
 		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
-	soles = _soles(sk)
+	soles = sole_ends(sk)
 	var row := {}
 	var rest := _pose_at(sync, clips, sk, String(lc["idle"]), 0.0)
 	row["same_side"] = {"hand_foot": signf((rest["hand.L"] as Vector3).x) == signf((rest["foot.L"] as Vector3).x),
@@ -92,21 +92,21 @@ func _hero(main: Node, id: String) -> void:
 	row["height"] = _height(sync, clips, sk, String(lc["idle"]))
 	var hgt: float = row["height"]
 	var walk := String(lc["walk"]["f"])
-	var run := String(lc["run"]["f"])
+	var run_v := String(lc["run"]["f"])
 	row["cfg"] = {"walk_speed": lc.get("walk_speed"), "run_speed": lc.get("run_speed"),
-			"walk_len": clips.lib.get_animation(walk).length, "run_len": clips.lib.get_animation(run).length}
+			"walk_len": clips.lib.get_animation(walk).length, "run_len": clips.lib.get_animation(run_v).length}
 	var live := {}
 	for s in SPEEDS:
 		live[str(s)] = _gait(m, sync, clips, sk, s)
 	row["live"] = live
 	row["seam"] = {}
-	for nm in [walk, run, String(lc["idle"])]:
+	for nm in [walk, run_v, String(lc["idle"])]:
 		row["seam"][nm] = _seam(sync, clips, sk, nm, hgt)
 	var ph := float(lc.get("start_phase", 0.0))
 	row["pop"] = {"idle_walk": _start_gap(sync, clips, sk, String(lc["idle"]), walk, ph, hgt),
-			"walk_run": _first_pose_gap(sync, clips, sk, walk, ph, run, ph, hgt),
+			"walk_run": _first_pose_gap(sync, clips, sk, walk, ph, run_v, ph, hgt),
 			"idle_walk_best": _best_start(sync, clips, sk, String(lc["idle"]), walk, hgt),
-			"contact_walk_run": _contact_gap(sync, clips, sk, walk, run)}
+			"contact_walk_run": _contact_gap(sync, clips, sk, walk, run_v)}
 	var weapon := ""
 	row["attacks"] = {}
 	for nm in ATTACKS[id]:
@@ -128,7 +128,9 @@ func _hero(main: Node, id: String) -> void:
 	if not id in NO_LEGS:
 		_gate(id, live)
 	row["set_off_at"] = _set_off_at(m, sync, clips)
-	var want := ph * float(row["cfg"]["walk_len"])
+	# (the walk loop plays stretched to "cycle_s", else to the run clip's cycle: WardenClips._gait_loop)
+	var loop_s := float(lc.get("cycle_s", 0.0))
+	var want := ph * (loop_s if loop_s > 0.0 else float(row["cfg"]["run_len"]))
 	if absf(float(row["set_off_at"]) - want) > 2.0 * DT:
 		print("FAIL %s: setting off starts the walk at %.2f s, not its start_phase %.2f s" % [id, row["set_off_at"],
 				want])
@@ -197,7 +199,7 @@ static func points(sk: Skeleton3D) -> Dictionary:
 ## Each foot's heel and toe: the back and front ends of the verts skinned mostly to it that sit on its sole at rest,
 ## in the foot bone's frame. A pinned sole pivots on one of them, so the slide is read there, not at the ankle
 ## (which rolls forward over a heel-to-toe stance). Empty for a side without a foot bone or verts (the ankle then).
-func _soles(sk: Skeleton3D) -> Dictionary:
+static func sole_ends(sk: Skeleton3D) -> Dictionary:
 	var pts := {"L": [], "R": []}
 	for mi in sk.find_children("*", "MeshInstance3D", true, false):
 		var skin: Skin = (mi as MeshInstance3D).skin
@@ -308,9 +310,9 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 
 ## The gaits a Hunter stops in: name -> {mps, crouch}. Run is his full stick (hunter_move.json).
 static func gaits(id: String) -> Dictionary:
-	var run := HunterMove.speed(id)
-	return {"run": {"mps": run, "crouch": 0.0}, "walk": {"mps": WALK_MPS, "crouch": 0.0},
-			"crouch": {"mps": run * CROUCH_K, "crouch": 1.0}}
+	var run_v := HunterMove.speed(id)
+	return {"run": {"mps": run_v, "crouch": 0.0}, "walk": {"mps": WALK_MPS, "crouch": 0.0},
+			"crouch": {"mps": run_v * CROUCH_K, "crouch": 1.0}}
 
 ## His ground speed frame by frame after a let-go from `mps`, under the game's own walking brake.
 static func stop_speed(mps: float, n: int, dt: float) -> PackedFloat32Array:
@@ -406,8 +408,9 @@ func _gate_stops(id: String, stops: Dictionary) -> void:
 	print(line)
 
 ## A 180 stick flip at a run (anim_audit_turn.gd) should slide no more than MAX_SLIDE of the run, or than the run
-## slides on its own. No Hunter makes it yet (the loco blend trails a 0.1 s reversal: the "run turn slide" backlog
-## item), so past that it prints OPEN, and only past TURN_CEIL (today's worst plus a margin) does it FAIL.
+## slides on its own. WardenStride locks the feet through a reversal; most Hunters are still over it (the loops' own
+## run and backpedal slide, the locks let go as the clip lifts each foot), so past that it prints OPEN, and only past
+## TURN_CEIL (today's worst, archer 117% with the cursor flipped, plus a margin) does it FAIL.
 func _gate_turns(id: String, turns: Dictionary, steady: float) -> void:
 	var line := "TURNS %-10s" % id
 	for nm in turns:

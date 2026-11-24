@@ -3,7 +3,8 @@ extends RefCounted
 ## real renderer, e.g. xvfb-run --rendering-driver opengl3 --resolution 1280x720): the intro card,
 ## the drop, the landing, and each beat after it: the point, every forced pick (its gold ring), each camp
 ## and the move it teaches, the wall kick, the lookout, the glove, the fuse, the ranks and the way out.
-## Files are <dir>/<WxH>_NN_<what>.png. --arch=<id> plays it as that starter (archer, juggernaut, gunslinger).
+## --arch=<id> plays it as that hero (a starter: archer, juggernaut, gunslinger), else the save's.
+## Files are <dir>/<WxH>_NN_<what>.png.
 
 var main: Node
 var m: Match

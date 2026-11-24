@@ -1,16 +1,16 @@
 extends RefCounted
 ## --tutorial-fight-check: the tutorial fight beats suit each starter (Lace's charge bow, Kael's melee,
-## Vex's gun). The test driver plays the course with each one; the fight beats (sec..ult) must
+## Vex's gun). The test driver plays the course with each one; the fight beats (sec..hook) must
 ## take FIGHT_MIN..FIGHT_MAX s without the hunter being brought down, and the first fight line
 ## names the starter's own move (draw, step in, shoot). The run levels: it lands at level 1 with every
-## ability locked, the first pick can only be the right click, every ability but the ultimate ends up unlocked
-## and used (right click, attack, dash, wall kick, Boki, E, glove; the tutorial has no Fusion, so the ultimate
-## stays locked), and only the camps paid XP. Each run also judges the framing at 1280x720 (TutorialFraming).
+## ability locked, the first pick can only be the right click, every ability ends up unlocked and used
+## (right click, attack, dash, wall kick, Boki, E, glove), Fusion stays locked and unused (the tutorial never
+## teaches it, 11-18), and only the camps paid XP. Each run also judges the framing at 1280x720 (TutorialFraming).
 
 var bad := 0
 
 const STARTERS := ["archer", "juggernaut", "gunslinger"]
-const FIGHT_STEPS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]
+const FIGHT_STEPS := ["sec", "shoot", "gkey", "kin", "hook"]
 const USED := ["sec", "fire", "dash", "kick", "boki", "kin", "glove"]
 ## What each starter's first fight line says.
 const HINT_WORD := {"archer": "draw", "juggernaut": "step in", "gunslinger": "shoot"}
@@ -23,6 +23,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond: bad += 1
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	for id in STARTERS:
 		await _play(main, id)
@@ -59,8 +60,8 @@ func _play(main: Node, id: String) -> void:
 		if tu.id() == "pick_sec" and not forced:
 			forced = true
 			var p := m.player
-			var only: bool = p.can_level("sec") and not p.can_level("dash") and not p.can_level("kin")
-			ok(only and not p.can_level("ult"), id + ": the first pick can only be the right click")
+			var only: bool = int(p.slot_lv["sec"]) == 1 and not p.can_level("dash") and not p.can_level("kin")
+			ok(only and not p.can_level("ult"), id + ": the first pick (made for you) is the right click, no other")
 			p.gain_xp(500.0)
 			ok(p.lvl == 1, id + ": XP from anything but the camps is ignored")
 		if tu.id() in FIGHT_STEPS:
@@ -75,10 +76,12 @@ func _play(main: Node, id: String) -> void:
 	ok(names_move, "%s: the first fight line names its move ('%s')" % [id, hint])
 	ok(m.player.extracted, id + ": the course finishes")
 	framing.judge(id, ok)
-	var all_on: bool = m.player.slot_lv.keys().all(func(k): return k == "ult" or int(m.player.slot_lv[k]) > 0)
-	ok(all_on, "%s: every ability unlocked %s" % [id, str(m.player.slot_lv)])
+	var lv: Dictionary = m.player.slot_lv
+	var all_on: bool = lv.keys().all(func(k): return int(lv[k]) > 0 if k != "ult" else int(lv[k]) == 0)
+	ok(all_on, "%s: every ability unlocked, Fusion left locked %s" % [id, str(m.player.slot_lv)])
 	var missing := USED.filter(func(k): return not tu.seen.get(k, false))
 	ok(missing.is_empty(), "%s: every ability used (missing %s)" % [id, str(missing)])
+	ok(not tu.seen.get("ult", false), id + ": no Fusion in the tutorial")
 	var in_range: bool = fight_t >= FIGHT_MIN and fight_t <= FIGHT_MAX
 	ok(in_range, "%s: the fight beats take %.0f-%.0f s (%.1f)" % [id, FIGHT_MIN, FIGHT_MAX, fight_t])
 	ok(downed == 0 and damage <= DAMAGE_MAX, "%s: never brought down, damage %.0f <= %.0f" % [id, damage, DAMAGE_MAX])

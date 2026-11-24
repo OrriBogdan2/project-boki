@@ -1,6 +1,6 @@
 # Handoff: Sorbeast, T3 of Scoopsy > Sundormouse (owner 11-11)
 
-The game has no Scoopsy line (`content/kin` has 50 kin), so this lands in the Bokidex and the art lane, not in game data.
+The game has no Scoopsy line (`content/kin_home` has 50 kin), so this lands in the Bokidex and the art lane, not in game data.
 
 - **Name:** Sorbeast. Options were Sorbeast, Glaciermouse and Conequake; Glaciermouse is too close to Glaciatee and Glaciammoth. No clash in BOKI_NAMES.csv or dex.json.
 - **Type:** Ice/Normal (same as Sundormouse). Dex #205, right after Sundormouse #204 (chain_order). Line heroScale 0.72 / 0.8 / 1.0.

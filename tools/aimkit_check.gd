@@ -22,6 +22,7 @@ func ok(name: String, cond: bool, info := "") -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	ak = load("res://tools/archetype_check.gd").new()
+	_disc_rim()
 	ak.main = main
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
@@ -65,6 +66,9 @@ func _shot_dist(m: Match, P: Hunter) -> float:
 		var mz: Vector3 = s["muzzle"]
 		var st: Vector3 = s["start"]
 		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+		if (s["x"] as Dictionary).has("hand"):
+			# the drawn muzzle is the hand (ShotOrigin.draw_from); the sim still launches 0.6 m ahead of the body
+			lead = 0.6
 	return float(s["life0"]) * (s["vel"] as Vector2).length() - lead
 
 func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
@@ -412,20 +416,15 @@ func _cleanup(m: Match, P: Hunter) -> void:
 	var r := AimKit.reticle(P)
 	ok("drop_holds: every telegraph goes (dur ones too)", IDS.all(func(i): return not AimKit.shown(P, i)) and not AimKit.shown(P, "long") and L.built == 0)
 	ok("drop_holds: and the cursor states", r["charge"] < 0.0 and float(r["perfect"]) == 0.0 and float(r["flare"]) == 0.0)
-	# however a merge starts (KinMerge calls the kit's own _drop_holds on some paths), a merged hunter shows nothing
+	# a merge no longer hides anything (docs/decisions/0100): a merged or merging hunter's telegraphs and cursor states show like any other
 	_all_shapes(P, 0.5, P)
-	AimKit.circle(P, "long", {"dur": 5.0})
 	AimKit.charge(P, 0.7)
 	P.merge_st = {"phase": "xform"}
 	L.rebuild(); L.tick_reticle(0.0)
-	var none: bool = IDS.all(func(i): return not AimKit.shown(P, i)) and not AimKit.shown(P, "long") and L.built == 0 and AimKit.reticle(P)["charge"] < 0.0
 	AimKit.lane(P, "lane"); AimKit.perfect(P)
 	L.rebuild()
-	ok("merge: a merging hunter's telegraphs and cursor states go, and new ones don't show", none and not AimKit.shown(P, "lane") and float(AimKit.reticle(P)["perfect"]) == 0.0 and L.entries.is_empty())
+	ok("merge: a merging hunter's telegraphs and cursor states still show", AimKit.shown(P, "lane") and float(AimKit.reticle(P)["perfect"]) > 0.0 and AimKit.reticle(P)["charge"] >= 0.0)
 	P.merge_st = {}
-	# the base kit runs drop_holds every step while merged (ArchKit.tick); every kit's override runs first
-	var src := FileAccess.get_file_as_string("res://scripts/arch/arch_kit.gd")
-	ok("drop_holds: ArchKit's own merge paths call drop_holds, not _drop_holds", src.count("\t\tdrop_holds()") >= 2 and not src.contains("\t\t_drop_holds()"))
 
 ## Every ground-target slot ("ground" in content/archetypes) and the id of its landing mark: "<slot>_spot" is
 ## the held-key preview (Quick cast off, Match.aim_hold); the others are the kit's own aim hold.
@@ -501,3 +500,19 @@ func _aim_slot(m: Match, P: Hunter, key: String, slot: String) -> void:
 				ok("reach %s: Quick cast off, R holds to aim" % key, AimReach.holds(P.ak, "x"))
 			m.aim_hold = "signature" if slot == "e" else "hunter_ult"
 			m._update_indicators(1.0)
+
+## A disc's rim vertices sit on the angle grid (segs steps round), every ring cut at the same angles.
+func _disc_rim() -> void:
+	var g := AimGeo.new()
+	var ctr := Vector2(3.0, 4.0)
+	g.disc(ctr, 6.0, Color.WHITE)
+	var rim := 0
+	var on_grid := true
+	for p in g.v:
+		var q := Vector2(p.x, p.z) - ctr
+		if absf(q.length() - 6.0) < 0.001:
+			rim += 1
+			var steps := (fposmod(q.angle(), TAU) / TAU) * 48.0
+			on_grid = on_grid and absf(steps - roundf(steps)) < 0.001
+	ok("geo: a 6 m disc is 6 rings of 48 steps (1584 vertices)", g.v.size() == 1584, str(g.v.size()))
+	ok("geo: its rim vertices sit on the 48-step angle grid", rim > 0 and on_grid, "%d on the rim" % rim)

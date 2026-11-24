@@ -211,14 +211,16 @@ func _pulse(left: float) -> void:
 	timer_label.pivot_offset = timer_label.size * 0.5
 	timer_label.scale = Vector2.ONE * (1.0 + PULSE_GROW * beat)
 
-## Keeps the whole screen inside the HUD safe margin (HudStyle.safe_pad), so the countdown shows at every window size;
-## smaller windows get smaller digits. The Hunter grid keeps COLUMNS at every size: 5 x CARD_MIN_W plus
-## the STAGE_PX stage beside it fit 1142 px (a 1240 px square window's inside; 1224 at 1280x720).
+## Keeps the whole screen inside the HUD safe margin (HudStyle.safe_pad) and SafeArea's frame, so the
+## countdown shows at every window size; smaller windows get smaller digits. The Hunter grid keeps COLUMNS at
+## every size: 5 x CARD_MIN_W plus the STAGE_PX stage beside it fit 1142 px
+## (a 1240 px square window's inside; 1224 at 1280x720).
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var pad := HudStyle.safe_pad(win)
+	var side_m := int(pad.x + SafeArea.frame(win).position.x)  # (21:9 and wider: SafeArea's centred frame)
 	for side in ["left", "right"]:
-		_pad.add_theme_constant_override("margin_" + side, int(pad.x))
+		_pad.add_theme_constant_override("margin_" + side, side_m)
 	for side in ["top", "bottom"]:
 		_pad.add_theme_constant_override("margin_" + side, int(pad.y))
 	timer_label.add_theme_font_size_override("font_size", clampi(int(win.y * DIGITS_FRAC), DIGITS_MIN, TIMER_SIZE))
@@ -287,7 +289,7 @@ func _tile(ak: String) -> PanelContainer:
 		row.add_child(Padlock.new())
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 		card.tooltip_text = "Locked: %s\n%s" % [ClassUnlock.requirement(ak), card.tooltip_text]
-	ClassCard.add_start_chip(card, ak)
+	ClassCard.add_start_chip(card, ak, col)
 	card.set_meta("arch", ak)
 	return card
 
