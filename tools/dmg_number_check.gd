@@ -60,8 +60,12 @@ func _sizes(fx: Fx) -> void:
 	var hit := Fx._num_size(30.0, false)
 	var crit := Fx._num_size(30.0, true)
 	ok(crit > hit, "a crit is larger than a normal hit (%d vs %d)" % [crit, hit])
-	var tiers := [5.0, 60.0, 250.0].map(func(v): return Fx._num_size(v, false))
+	var tiers := [5.0, 18.0, 45.0].map(func(v): return Fx._num_size(v, false))
 	ok(tiers[2] > tiers[1] and tiers[1] > tiers[0], "bigger hits are in bigger tiers %s" % [tiers])
+	# our scale (a Hunter has 124 to 193): a rifle round, an ability and an ult each read as their own size
+	var ours := [8.0, 18.0, 45.0].map(func(v): return Fx._num_size(v, false))
+	ok(ours[0] > Fx._num_size(4.0, false) and ours[1] > ours[0] and ours[2] > ours[1],
+			"a round (8), an ability (18) and an ult (45) print at 3 sizes over a dart (4) %s" % [ours])
 	fx.nums.clear()
 	var at := Vector3(0, 1, 0)
 	fx.number(at, 10.0, Color.WHITE, false, "", "k")
