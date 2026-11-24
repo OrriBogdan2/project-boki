@@ -844,12 +844,13 @@ func _fire_needle() -> void:
 	var d := h.aim_dir()
 	var a := _muzzle(d)
 	var reach := float(ed["range"])
-	reach = minf(reach, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * reach, h.team, "pierce"))  # placed walls stop it
+	# placed walls stop it
+	reach = minf(reach, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * reach, h.team, "pierce"))
 	needle_dir = d
 	# a taut needle of light (deep body, white-hot core, sparks shed along it) out of her open palm to where the
 	# measured line ends, a bloom on the palm, recoil smoke round her
 	var palm := palm_at()
-	var to := a + Vector3(d.x, 0, d.y) * L - palm
+	var to := a + Vector3(d.x, 0, d.y) * reach - palm
 	last_beam = palm
 	vfx("e_fire", palm, Vector2(to.x, to.z).normalized(), {"len": Vector2(to.x, to.z).length(), "r": beam_width()})
 	h.impulse(-d * float(ed.get("recoil", 6.0)))  # the recoil shoves her back a step
@@ -861,7 +862,7 @@ func _fire_needle() -> void:
 			continue
 		var v := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
 		var along := v.dot(d)
-		if along < 0.0 or along > L + f.r:
+		if along < 0.0 or along > reach + f.r:
 			continue
 		if absf(v.cross(d)) > float(ed["width"]) + f.r:
 			continue
