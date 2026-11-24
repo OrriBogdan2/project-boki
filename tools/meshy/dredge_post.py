@@ -2913,6 +2913,11 @@ def drop_unused(js, b, out, rig):
             raw = n.view_bytes(js, b, a["bufferView"])
             arr = np.frombuffer(raw, _DT[a["componentType"]], a["count"] * _NC[a["type"]], a.get("byteOffset", 0))
             arr = np.ascontiguousarray(arr.reshape(a["count"], _NC[a["type"]])[used])
+            if k == "NORMAL":  # unit length (the pack underlay had 26 that were not: a glTF validator error)
+                ln = np.linalg.norm(arr, axis=1, keepdims=True)
+                arr = np.where(ln > 1e-8, arr / np.maximum(ln, 1e-8), np.array([0.0, 1.0, 0.0], np.float32)).astype(
+                    np.float32
+                )
             new = {kk: v for kk, v in a.items() if kk in ("componentType", "type", "normalized")}
             new.update(bufferView=out.add_view(arr.tobytes()), count=len(used))
             if k == "POSITION":
@@ -2926,6 +2931,22 @@ def drop_unused(js, b, out, rig):
         )
         p["indices"] = len(js["accessors"]) - 1
     return "vertices %d -> %d (unreferenced ones dropped)" % (before, after)
+
+
+def fit_sampler_counts(js, b, out, rig):
+    """r21: r16's held Jump_Run left 24 constant tracks with 2 key times and 62 values (glTF validator error): the
+    values are trimmed to the times (lossless, every value is the same)."""
+    fixed = 0
+    for a in js["animations"]:
+        for sm in a["samplers"]:
+            k = js["accessors"][sm["input"]]["count"]
+            o = js["accessors"][sm["output"]]
+            if o["count"] != k:
+                v = n.floats(js, b, sm["output"])
+                assert np.ptp(v, 0).max() < 1e-6, "only a constant track can be trimmed"
+                sm["output"] = out.add_floats(v[:k], o["type"])
+                fixed += 1
+    return "samplers trimmed to their key count: %d" % fixed
 
 
 def rebuild_stages(out_path, in_path, stages):
@@ -3048,6 +3069,7 @@ if __name__ == "__main__":
             sys.argv[3],
             [
                 ("ball copy", drop_ball_copy),
+                ("samplers", fit_sampler_counts),
                 ("unused vertices", drop_unused),
                 ("strap", strap_r21),
                 ("grade", grade_r21),
