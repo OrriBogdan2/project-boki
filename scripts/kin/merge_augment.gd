@@ -136,6 +136,7 @@ static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 	if r.has("burn"):
 		t.burn_t = maxf(t.burn_t, float(r.get("burn_for", 3.0))); t.burn_dps = maxf(t.burn_dps, float(r["burn"])); t.burn_by = h
 	if r.has("slow_k"):
+		CcSfx.zone_slow(t)
 		t.slow_k = maxf(t.slow_k, float(r["slow_k"])) if t.slow_t > 0.0 else float(r["slow_k"])
 		t.slow_t = maxf(t.slow_t, float(r.get("slow_s", 1.5)))
 	if r.has("kb"):

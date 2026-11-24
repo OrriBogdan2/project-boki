@@ -46,7 +46,7 @@ func run(main: Node) -> void:
 		var look := PlayerLook.neutral()
 		var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", look, id)
 		h.set_model(model)
-		var sync := model.get_node_or_null("Warden/Sync")
+		var sync := WardenGlb.layers(model)      # (Sync, or Native on Meshy's own skeleton)
 		var wall: WardenWall = sync.get("wall") if sync else null
 		if wall == null and id in NO_CLIPS:
 			print("WCHECK skip %s: no clip rig yet (add clips, then drop it from NO_CLIPS)" % id)
@@ -140,7 +140,7 @@ func _case(id: String, kind: String, wl: Dictionary, sync: Node, contact: int) -
 ## A drawn frame: the hunter posed (HunterAnim, then the Hero's clips and layers).
 func _frame(dt: float) -> void:
 	h.render(dt, 1.0)
-	h.model.get_node("Warden/Sync").call("_process", dt)
+	WardenGlb.layers(h.model).call("_process", dt)
 
 ## The carved wall drawn (the terrain mesh was built before _carve raised it): a stone block over its cells.
 func _stand_in(wl: Dictionary) -> void:

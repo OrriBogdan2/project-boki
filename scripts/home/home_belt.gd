@@ -67,7 +67,7 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 	var cap_line := "You can bring up to %s on this difficulty; " % _cap_text(tier)
 	cap_line += "what you bring is lost if you go down."
 	var note := UI.label(cap_line, 12, UI.MUTED)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(note)
 	parent.add_child(note)
 
 static func _cap_text(tier: int) -> String:
@@ -84,7 +84,7 @@ static func stash(v: VBoxContainer) -> void:
 		info.add_child(UI.label("%s  ×%d" % [UtilityBelt.name_of(id), Equal.stash_of(id)], 16, UtilityBelt.col_of(id),
 				UI.semi))
 		var d := UI.label(String(UtilityBelt.def(id).get("desc", "")), 12, UI.MUTED)
-		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(d)
 		info.add_child(d)
 		r.add_child(info)
 		var caps: Array = []

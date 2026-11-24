@@ -1,6 +1,6 @@
 extends RefCounted
 ## --farm-tutorial-check: Hob the builder, the guided farm tutorial and the Goals tracker
-## (docs/decisions/0011-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
+## (docs/decisions/0104-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
 ##   1. Hob: the starter set, blueprints drawn up on talking, the toast once, the spread over levels
 ##      2-5, hidden tabs and the footer line, a v7 save keeps what it could build
 ##   2. the tutorial: steps in order, free order with the house first, skip, the one reward, old saves
@@ -66,6 +66,8 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	FarmUnlocks.rules()["base_mode"] = false      # sections 1-4 are the old farm's Hob and twelve steps
 	_hob_rules()
 	_tutorial_rules()
 	_tracker_rules()
@@ -73,6 +75,7 @@ func run(m: Node, mode := "") -> void:
 	await _spotlight()
 	await _build_spotlight()
 	await _farm2()
+	FarmUnlocks.rules()["base_mode"] = true
 	await _base_mode()
 	await _base_tutorial()
 	await _hub_first_visit()
@@ -84,7 +87,7 @@ func run(m: Node, mode := "") -> void:
 func _base_mode() -> void:
 	var home = await _home(1)
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(rules["base_mode"] == false and not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	rules["base_mode"] = false
 	home.hb.toggle()
 	var off: Array = home.hb._tabs()
 	var kept: bool = off.has("Work") and off.has("Upgrades") and home.hmk.tabs().has("Exchange")
@@ -102,12 +105,13 @@ func _base_mode() -> void:
 	ok(not home.hmk.tabs().has("Exchange"), "on: no Exchange tab")
 	var wild: Array = (home.hb.wild_t as Dictionary).keys()
 	var w: World = home.world
-	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5, int(wild[0]) / w.w + 0.5)
+	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5,
+			int(int(wild[0]) / float(w.w)) + 0.5)
 	ok(home.hg.find(tree_at).is_empty(), "on: wild trees and boulders are not choppable")
 	home.hw.scan()
 	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
 	ok(not home.hw.jobs.any(func(j): return econ_kinds.has(String(j["kind"]))), "on: no wild, station or haul jobs")
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.hb.toggle()
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -116,6 +120,7 @@ func _base_mode() -> void:
 # ------------------------------------------------------------------ 6. the base tutorial (GARDEN.md section 8)
 func _base_tutorial() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
+	rules["base_mode"] = false
 	Save.d = _new_save()
 	HomeLayout.ensure(Save.d)
 	_stats()
@@ -182,7 +187,6 @@ func _base_tutorial() -> void:
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
 	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
 	await _base_world()
-	rules["base_mode"] = false
 
 
 ## The hint line's Skip button is up (and not hidden behind a quiet guide).

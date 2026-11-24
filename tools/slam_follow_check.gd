@@ -8,14 +8,14 @@ extends RefCounted
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const STRIKE_F := 18          # frames before the kit's hit the strike is looked for
-const HOLD_V := 1.5            # m/s: the strike point slower than this (2.5 cm a frame) has stopped: the impact
-const HOLD_R := 0.03           # m: the impact pose holds while the strike point stays this close to where it stopped
-const WHIP := 20.0             # m/s: the strike point's fastest frame while the body goes back to the legs
-const LAND_EARLY := 2          # frames the impact may land before the kit's hit (the swing reads into it)
-const LAND_LATE := 3           # frames it may land after
-const HOLD := [3, 9]           # frames the impact pose holds, at least and at most (a beat, not a freeze)
-const RECOVER_OFF := 0.05      # s: the body is back on the legs within this of the kit's recover
+const STRIKE_F := 18  # frames before the kit's hit the strike is looked for
+const HOLD_V := 1.5  # m/s: the strike point slower than this (2.5 cm a frame) has stopped: the impact
+const HOLD_R := 0.03  # m: the impact pose holds while the strike point stays this close to where it stopped
+const WHIP := 20.0  # m/s: the strike point's fastest frame while the body goes back to the legs
+const LAND_EARLY := 2  # frames the impact may land before the kit's hit (the swing reads into it)
+const LAND_LATE := 3  # frames it may land after
+const HOLD := [3, 9]  # frames the impact pose holds, at least and at most (a beat, not a freeze)
+const RECOVER_OFF := 0.05  # s: the body is back on the legs within this of the kit's recover
 ## [Hero id, kit move, the move it comes out of ("" none), strike point ("tip" or a bone), the kit's hit (s)]
 const SLAMS := [
 	["juggernaut", "jug_slam", "", "tip", 0.6],
@@ -29,16 +29,18 @@ const SLAMS := [
 ]
 
 const SHOT_KEYS := ["time", "fade", "blend_out"]
-const SHOT_DIST := {"bulwark": 15.0}      # m the camera stands off (default 10: the blade's whole arc in frame)
+const SHOT_DIST := {"bulwark": 15.0}  # m the camera stands off (default 10: the blade's whole arc in frame)
 var bad := 0
 var holder: Node3D
 var shots := ""
-var stage: RefCounted      # (the clip shots' stage: sky, light, ground, camera)
+var stage: RefCounted  # (the clip shots' stage: sky, light, ground, camera)
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SLAM %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -56,6 +58,7 @@ func run(main: Node) -> void:
 	print("SLAM_FOLLOW_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _stage(main: Node) -> void:
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -67,7 +70,8 @@ func _stage(main: Node) -> void:
 	var cam: Camera3D = stage.get("cam")
 	cam.fov = 30.0
 	for k in 30:
-		await main.get_tree().process_frame       # (past the title's fade)
+		await main.get_tree().process_frame  # (past the title's fade)
+
 
 ## (before: the move without its follow-through keys, shots only)
 func _slam(sl: Array, before: bool) -> void:
@@ -98,7 +102,7 @@ func _slam(sl: Array, before: bool) -> void:
 	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
 	m.set_meta(WardenClips.STATE, s)
 	var t := 0.0
-	while t < 0.5:        # standing, then the move it comes out of
+	while t < 0.5:  # standing, then the move it comes out of
 		if sl[2] != "" and t >= 0.2:
 			s["kmove"] = sl[2]
 			s["kmove_t"] = t - 0.2
@@ -129,6 +133,7 @@ func _slam(sl: Array, before: bool) -> void:
 	if not before:
 		_judge(id, km, float(sl[4]), end_t, ps, speeds, handed)
 
+
 ## The impact: the strike's fastest frame in the beat before the kit's hit, then its first still frame. The hold runs
 ## while it stays put; the recoil is how far it springs back up in the 0.3 s after; the blend-out is its fastest
 ## frame while the body goes back to the legs (a whip there undoes the weight).
@@ -154,12 +159,22 @@ func _judge(id: String, km: String, hit: float, end_t: float, ps: Array, speeds:
 	var lands := at - hf
 	var rec := end_t - hit
 	var shown := (handed if handed >= 0.0 else 99.0) - hit
-	print(("SLAM %s %s: strike %.0f m/s at f%d, impact f%d (kit hit f%d, %+d), hold %d f, recoil %.2f m, "
-			+ "blend-out top %.1f m/s, back to the legs %.2f s after the hit (kit recover %.2f s)")
-			% [id, km, float(speeds[top]), top, at, hf, lands, hold, recoil, whip, shown, rec])
-	ok(lands >= -LAND_EARLY and lands <= LAND_LATE,
-			"%s %s: the impact lands on the kit's hit (%+d f)" % [id, km, lands])
+	print(
+		(
+			(
+				"SLAM %s %s: strike %.0f m/s at f%d, impact f%d (kit hit f%d, %+d), hold %d f, recoil %.2f m, "
+				+ "blend-out top %.1f m/s, back to the legs %.2f s after the hit (kit recover %.2f s)"
+			)
+			% [id, km, float(speeds[top]), top, at, hf, lands, hold, recoil, whip, shown, rec]
+		)
+	)
+	ok(
+		lands >= -LAND_EARLY and lands <= LAND_LATE,
+		"%s %s: the impact lands on the kit's hit (%+d f)" % [id, km, lands]
+	)
 	ok(hold >= HOLD[0] and hold <= HOLD[1], "%s %s: the impact holds %d f (%d-%d)" % [id, km, hold, HOLD[0], HOLD[1]])
-	ok(absf(shown - rec) <= RECOVER_OFF,
-			"%s %s: back to the legs on the kit's recover (%.2f vs %.2f s)" % [id, km, shown, rec])
+	ok(
+		absf(shown - rec) <= RECOVER_OFF,
+		"%s %s: back to the legs on the kit's recover (%.2f vs %.2f s)" % [id, km, shown, rec]
+	)
 	ok(whip <= WHIP, "%s %s: no whip going back to the legs (%.1f m/s, at most %.1f)" % [id, km, whip, WHIP])

@@ -6,6 +6,8 @@ extends RefCounted
 ##   3. through Match._tips: shown once on the hint lane, remembered in the save, never with tips off or in the
 ##      tutorial course; the line is short and plain (no key names)
 
+const SEED0 := 5101  # the first match seed tried for a spawn with open ground round the player
+const SEEDS := 8  # seeds tried before giving up
 const SIDE_M := 8.0  # m: where the probe rival stands (outside the near circle, inside the view range)
 const NEAR_M := 1.5  # m: inside the near circle (NEAR_SENSE 2.0)
 const LINE_MAX := 52  # characters: one line on the hint lane
@@ -25,15 +27,25 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	Settings.v["tips"] = true
-	var m := Match.new()
-	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5101, "no_drop": true, "raid": "clear"})
-	m.set_process(false)
-	for h in m.hunters:
-		h.ctrl = "idle"
+	# the probe needs open ground round the player's spawn: the first seed of SEEDS that gives it (a seed's
+	# spawn is a sim roll: it moved when the looks left the sim's RNG, 11-21)
+	var m: Match = null
+	var a := INF
+	var sd := SEED0
+	while a == INF and sd < SEED0 + SEEDS:
+		if m != null:
+			main.remove_child(m)
+			m.free()
+		m = Match.new()
+		main.add_child(m)
+		m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": sd, "no_drop": true, "raid": "clear"})
+		m.set_process(false)
+		for h in m.hunters:
+			h.ctrl = "idle"
+		a = _open_angle(m)
+		sd += 1
 	var rival: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
-	var a := _open_angle(m)
-	ok(a != INF, "found open ground in front of and behind the player")
+	ok(a != INF, "found open ground in front of and behind the player (seed %d, %d tried)" % [sd - 1, sd - SEED0])
 	if a != INF:
 		_hidden(m, rival, a)
 		_turns(m)

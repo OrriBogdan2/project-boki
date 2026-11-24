@@ -3,6 +3,7 @@ extends RefCounted
 ## A one-line label that shrinks its text to fit the width it is given, so a big Text size never cuts a name
 ## or a short line off. Below `min_px` (design size, scaled by the Text size) it ends in an ellipsis.
 
+
 ## Keeps `l` on one line: when it is laid out or resized, its font size goes down (never below
 ## `min_design_px` at the Text size) until the text fits, and back up to its made size when there is room.
 static func shrink(l: Label, min_design_px := 9) -> void:

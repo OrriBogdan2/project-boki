@@ -59,7 +59,8 @@ func run(main_node: Node) -> void:
 ## Adds the whole view, shrunk, to the strip, and notes its time, state and zoom.
 func _frame(notes: Array, t: float) -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	img.resize(img.get_width() / FRAME_SCALE, img.get_height() / FRAME_SCALE, Image.INTERPOLATE_BILINEAR)
+	img.resize(int(img.get_width() / float(FRAME_SCALE)), int(img.get_height() / float(FRAME_SCALE)),
+			Image.INTERPOLATE_BILINEAR)
 	if not strips.has("glide_cam.png"):
 		strips["glide_cam.png"] = []
 	(strips["glide_cam.png"] as Array).append(img)
