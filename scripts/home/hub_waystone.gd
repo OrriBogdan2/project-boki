@@ -40,7 +40,8 @@ func place() -> void:
 		for id in GardenZones.ids():
 			var lit := is_open(id)
 			stones.append({"colour": String(GardenZones.info(id)["colour"]), "open": lit,
-				"keys": {} if lit or VisitZones.has(h.visit) else GardenZones.keys_for(id)})
+				"keys": {} if lit or VisitZones.has(h.visit) else GardenZones.keys_for(id),
+				"owed": ZoneReveal.owed(id) and not VisitZones.has(h.visit)})
 		node = FarmModels.waystone(stones)
 		node.position = HUB_AT
 		if not VisitZones.has(h.visit):

@@ -1984,7 +1984,7 @@ func train_hit(e: Ent, fwd: Vector3, spd := 8.0) -> void:
 	fx.burst(at + Vector3(0, 0.4, 0), Color("6b5a4a"), 16, 4.0, 0.7, 10.0, 1.2)
 	fx.ring(at, 3.6, Color(1.0, 0.75, 0.4, 0.9), 0.45)
 	fx.flash(at + Vector3(0, 1.0, 0), Color("fff2c0"), 1.4, 0.1)
-	Shake.incoming_big(self, at, 0.9)
+	Shake.big(self, at, "train_hit")
 	if e is Hunter:
 		var h: Hunter = e
 		if h.out or h.extracted or h.remote:
@@ -4504,7 +4504,7 @@ func _meteor_hit(at: Vector3) -> void:
 	fx.burst(at + Vector3(0, 0.3, 0), Color("ffcf8a"), 22, 6.0, 0.5, 6.0, 1.2)
 	fx.dust(at, 10)
 	sfx("boom", at, -3.0, 1.3)
-	Shake.incoming_big(self, at, 0.35)
+	Shake.big(self, at, "explosion")
 	for e in hunters + mobs + kins:
 		if e.remote or not e.hittable() or (e is Hunter and (e as Hunter).riding):
 			continue
