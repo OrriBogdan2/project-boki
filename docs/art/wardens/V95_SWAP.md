@@ -69,7 +69,7 @@ wide in her bow stance; Kael's master sword and the game's sword both show in hi
 `python3 tools/art1/glb_regions.py <glb>...` reports per-region triangles (head, hand per side, forearm, weapon bones ...)
 and finger bones of a game .glb (exit 1 when a hand holds under 6%). On main's 13 Hunters a hand held 0.0-11% (most
 0.4-3%) while the head held 27-58%: a uniform collapse spends the budget on the big smooth areas.
-1. **Rig** (`meshy_task.py rig OUT TASK [--no-fingers]`): sends `include_fingers`. The game skeleton stays `hand.*`
+1. **Rig** (`meshy_task.py rig OUT (TASK | model.glb) [--no-fingers]`): sends `include_fingers` for a task id and an uploaded .glb alike (11-23: the upload path sent none and got 24 joints; with it, 70 joints, a 5-finger chain per hand plus `*_End` tips; `meshy_weights` maps a finger to its hand's bone, a thumb to the game rig's `thumb1.R`/`thumb.R` where it has one, any other joint MESHY lacks to its parent's). The game skeleton stays `hand.*`
    plus the Warden's own extra bones (RIG_CONTRACT: more bones are fine and follow their parent; Hem, Sparkle, Albert and
    Motley already carry finger chains). No per-finger chain is added for the rest: no clip moves a finger, so a chain
    only costs skin_relax time. Meshy's finger joints are a reference for where a chain would go.
@@ -79,11 +79,12 @@ and finger bones of a game .glb (exit 1 when a hand holds under 6%). On main's 1
    A hand sphere holds only what is nearer the forearm-to-finger-tip line than the thighs and trunk (`LIMB_R`): Cinder's,
    Kael's and Tarek's hands hang within a sphere's reach of the thigh (11%, 4%, 7% of a thigh's surface fell inside).
    Before/after (11-21, two dense Sparkle Meshy bodies, 1.36-1.39M tris, to 60k, head 45%): a hand 0.8-1.0% -> 8.9%.
-   `fit_warden.py`'s `region_budget` (opt-in spec key) does the same for the non-keep_uv fit.
+   `fit_warden.py` does the same for the non-keep_uv fit by default (hands 8%, a body-weighted head 30%; spec `region_budget` replaces the shares, `false` goes back to one uniform collapse).
 3. **Geometry**: multi-image tasks cap at 2k; `meshy_task.py create OUT front.png side.png ... --detail-image front.png`
    adds a single-image 4k task into `OUT/detail` (the hand and head shapes a 2k mesh smooths). Compare the two, take the
    hands/head shapes you like into a body pass; a detail pass is not a replacement body (one view, no back).
-4. **Weapons**: the game .glb's weapon pieces (Hem's bow and arrow, Albert's hammer: meshes and empties of their own) are re-imported and exported with the swap; Hem's bow, 896 triangles, comes through unchanged. What a swap does lose: faces of the old body mesh on a weapon bone that `keep` does not list (Grimble's `gun`). The swap now prints that count ("SWAP weapons: ..."): list the bone in `keep` when it is not the master's own.
+4. **Weapons**: the game .glb's weapon pieces (Hem's bow and arrow, Albert's hammer: meshes and empties of their own) are re-imported and exported with the swap; Hem's bow, 896 triangles, comes through unchanged. What a swap does lose: faces of the old body mesh on a weapon bone that `keep` does not list (Grimble's `gun`). Since 11-23 the swap carries those faces itself (`weapon_piece`): a mesh of its own named after the bone, still skinned to it, so it rides the hand socket on the game rig's bind pose (Albert's `x_shield`, 625 faces, was dropped before). A bone the master brings its own weapon for goes in the spec's `master_weapons` (skipped); `keep` still joins a bone's faces into the body.
+5. **Game-code fit layers** (grip IK, `bone_scale`, `weapon_scale`/`weapon_offset`): a Meshy-native Hunter (`content/rules/warden_native.json`) never builds them (WardenNative plays Meshy's clips; HunterAnim's grip IK runs on the hidden rig only, the weapon rides Meshy's hand bone); `bone_scale` and the look data keys are per-Hunter data, absent = off.
 
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
@@ -290,3 +291,67 @@ shards that tore in every clip (the stretch check cannot see it; Blender renders
 death can). The rig is mirror-symmetric, so `python3 tools/art1/glb_mirror_limb.py IN.glb OUT.glb --below 0.42`
 dropped the right leg's 575 triangles under 0.42 m and put the left shin and foot there, mirrored (534 tris, same UVs and
 paint, .L joints renamed .R). Stretch-check unchanged (mean of 52 clips 4.66, worst 8.52 ledge).
+
+## Rig pipeline faults, 11-23 (ext/rig-pipeline-faults-1123): before/after stills
+Scratch copies only (no hunter .glb touched), real GPU, `--rig-hands-shots` (match camera and eye-level hand views). Grey = the pipeline as it was, green = with the fixes.
+- `docs/art/wardens/rig_faults_1123/fault1_fingers.jpg`: Kael's Meshy body rigged through the .glb upload, fingers curled 70 deg: 24 joints (no finger bones, the hand stays flat) vs 70 joints (a fist).
+- `fault2_decimate.jpg`: the same body 80k -> 12k triangles: hands 296 -> 992 triangles, head 2002 -> 3885 (`fit_warden.DEFAULT_REGIONS`; the uniform collapse gave the hands 13% of what they had).
+- `fault3_weapon.jpg`: Albert's game .glb with the body mesh stood in for the swap's new body: the 625 `x_shield` faces are gone (grey) vs carried as their own mesh (green, shield beside the left hand).
+Not run: a full `v95_swap` on a real master (masters are not on this worker), so the hand-ball and weapon pieces are proved as functions on scratch copies.
+
+## Torn fist, 2026-11-24 (same branch)
+The 11-23 finger fix closed the hand, and the fist tore: red shards split off it (Kael's shackled hand worst). Findings, on scratch
+rigs only (Kael, Lace, Grimble through Meshy's `include_fingers` rig; no hunter .glb touched):
+- **Not** a weld problem (no zero-area triangles; vertices split per UV seam already carry equal weights) and **not** bleed between
+  neighbouring fingers (re-weighting each vertex to its nearest finger chain left the tear as it was, `finger_weights` history).
+- Two causes. (1) Meshy's skin is layered (crack plates over the base skin, finger slabs that touch) and weights each vertex alone:
+  vertices a few mm apart carry different bones, so a fist pulls the layers apart. (2) The test pose turned all three joints by the
+  same 70 deg; Meshy's fingers run longer than its finger bones, so 210 deg sends the fingertips through the back of the hand (the
+  dark/red patches).
+- Fix 1, `tools/meshy/finger_weights.py` (no Blender, edits JOINTS_0/WEIGHTS_0 in place; `meshy_task.py rig` runs it, `--raw-weights`
+  skips it, the download stays as `rigged_character.raw.glb`): Gaussian blend of every hand vertex's weights over the vertices
+  within 7 mm per metre of height (any mesh piece), two passes, welded vertices share one result, 4 influences, normalised.
+- Fix 2, `--rig-hands-shots --pose=name:80,60,30:0.6` (joint 1, 2, 3 and the thumb's scale): a fist turns the knuckle most, the tip least.
+- The weights alone do not cure the over-curl: at 70/70/70 deg Kael's clean rig has the stretch numbers of a good rig (0 edges over 3x)
+  but the fingertips still go through the back of the hand in Blender; keep joint turns graded.
+- Measure, no renderer: `python3 tools/meshy/finger_curl.py rig.glb --curl=80,60,30 --thumb=0.6` poses the fingers in numpy and
+  prints edge stretch and near-pair gaps (vertices <4 mm apart at rest that part).
+
+| rig, hand | before: edges >3x, gaps >5 mm, worst gap | after |
+|---|---|---|
+| Kael right | 15, 29, 12.3 mm | 0, 0, 3.4 mm |
+| Kael left | 1, 9, 10.0 mm | 0, 0, 2.4 mm |
+| Lace right | 10 edges >3x | 2 |
+| Lace left | 65 edges >3x | 44 |
+| Grimble right (left has no fingers) | 6, 12, 55.8 mm | 4, 2, 55.8 mm |
+
+### Finger roll (follow-up, same day)
+The weights were half of it. Meshy rolls every finger joint its own way, so "turn about local z" is not one motion:
+- Lace's roll changes joint to joint (index 1 and 2 turn toward the palm about z, index 3 sideways): her fist swung the
+  fingertips sideways and crumpled them (the "tiny fused fingers" read above was wrong).
+- On Kael's and Lace's right hands, +z closed the fingers toward the **back** of the hand; the 11-24 morning stills took that for a fist.
+- The palm side is known from the thumb: its last joint sits 22 to 79 mm on the palm's side of the knuckles on all three rigs, and the
+  mesh fingertips hang the same way at rest.
+
+Fix 3, `tools/meshy/finger_roll.py` (run by `finger_weights.clean` first, so `meshy_task.py rig` gets it): every finger joint's local
++z becomes bone direction x palm side; thumbs aim across the palm (`THUMB_AIM`). It changes only the rest rotations of the finger
+nodes, their children's rest transforms and the inverse bind matrices: the rest pose is unchanged (max drift 0.0007 mm). The game
+rig is unaffected (`v95_swap` moves finger weights onto the hand bone); this is for Meshy rigs that keep their fingers and for
+`--rig-hands-shots`.
+
+| fist 80/60/30, thumb 0.6: edges >2x / >3x | weights only (morning) | roll + weights |
+|---|---|---|
+| Kael right | 2 / 0 | 2 / 0 |
+| Kael left | 6 / 0 | 0 / 0 |
+| Lace right | 40 / 2 | 25 / 1 |
+| Lace left | 94 / 44 | 35 / 0 |
+| Grimble right | 34 / 4 | 5 / 3 |
+
+Real-GPU stills (`docs/art/wardens/rig_tear_1124/<hunter>_<hand>.jpg`; rows open / fist / grip; grey = weights only (the morning
+state), green = roll + weights): Kael's and Lace's fists and grips now close toward the palm with no shards. Lace's left (bow) hand
+keeps a small flap at the little finger in the side view: Meshy weighted part of the bow to her fingers on the scratch rig, so the
+bow bends with them. Grimble's right hand barely changes on camera (armoured, nearly fingerless); his left hand has no finger bones.
+`rig_faults_1123/fault1_fingers.jpg` is Kael's right-hand sheet; `fault2_decimate.jpg` is re-rendered with the roll on both rigs.
+Open: the 12k-triangle decimate (`fault2_decimate.jpg`) still leaves a faceted, jagged fist (the hands keep 989 of 2265 triangles).
+Protected hands are clearly better than the uniform collapse, not yet clean: raise `DEFAULT_REGIONS`' hand share or decimate the hands
+last.
