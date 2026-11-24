@@ -92,6 +92,10 @@ func _watch(at: Vector3) -> Dictionary:
 				pose[nm] = l["k"]["q_as"]
 	return {"spoke": spoke, "stood": stood, "pose": pose}
 
+## How many come-look memory lines `nm` keeps (farm life in _watch may add others of its own: races, duos, fetch).
+func _look_mems(nm: String) -> int:
+	return (_entry(nm)["rec"]["memory"] as Array).filter(func(e): return String(e.get("kind", "")) == "look").size()
+
 func _mem_size(nm: String) -> int:
 	return (_entry(nm)["rec"]["memory"] as Array).size()
 
@@ -161,7 +165,7 @@ func _item_home(id: String, who: String, pose: String, verb: String) -> void:
 	var k := _entry(who)
 	k["pos"] = home.world.free_spot_near(home.ppos + Vector3(1.5, 0, 0))
 	(k["node"] as Node3D).position = k["pos"]
-	var mem := _mem_size(who)
+	var looks := _look_mems(who)
 	var jr: int = (k["rec"].get("journal", []) as Array).size()
 	Save.d["items"][id] = 1
 	_trip()
@@ -176,7 +180,7 @@ func _item_home(id: String, who: String, pose: String, verb: String) -> void:
 	ok((k["rec"]["journal"] as Array).size() == jr + 1 and line.begins_with(verb) and named,
 		"%s: one journal line '%s'" % [tag, line])
 	var seen: bool = Save.d["tutorial"].get(ComeLook.ITEM_KEY + id, false)
-	ok(_mem_size(who) == mem and seen, "%s: no memory line, kind marked seen" % tag)
+	ok(_look_mems(who) == looks and seen, "%s: no memory line, kind marked seen" % tag)
 
 func run(m: Node) -> void:
 	main = m
