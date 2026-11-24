@@ -81,7 +81,7 @@ func _stomp(art: String, st: Dictionary, clips: Array) -> String:
 ## cast, stomp, upper) plays that Attack and glide and land fall back to Jump_Run/the ground loop, so they read `shared`
 ## (when the contract row had one: a state it only posed stays `proc`). Hit and land are the flinch layer (`proc`);
 ## no death clip (the extract beat plays); strafe has no 4-way ring (the forward loop).
-func _native_row(art: String, row: Array, nat: Dictionary) -> Array:
+func _native_row(_art: String, row: Array, nat: Dictionary) -> Array:
 	var c: Dictionary = nat.get("clips", {})
 	var own := func(k: String) -> String: return "clip" if c.has(k) else "missing"
 	var sh := func(i: int) -> String: return "shared" if row[i] != "proc" else "proc"
