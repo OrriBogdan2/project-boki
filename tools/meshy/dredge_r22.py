@@ -4,6 +4,8 @@
   dredge_r22.py --slivers OUT IN        the long thin skin slivers (the ear/shoulder strand web) dropped
   dredge_r22.py --goo OUT IN            the goo arm root flared over the shoulder socket, the arm a little thicker
   dredge_r22.py --dome OUT IN           the socket dome's head weights moved to the shoulder (strand web)
+  dredge_r22.py --dometex OUT IN        r23: the socket dome repainted from the nearby skin (its streaked bake = strand web)
+  dredge_r22.py --posts OUT IN POST.glb  r23: the knob rod replaced by two hooked posts (bell, chain, lantern), one per side
   dredge_r22.py --nodome OUT IN         variant: the socket dome removed
   dredge_r22.py --all OUT IN            every r22 stage in order
 
@@ -348,10 +350,153 @@ def dome_weights(js, b, out, rig):
     return "dome: %.1f head weight units moved to %s (%d vertices)" % (moved.sum(), DOME_TO, int((moved > 0).sum()))
 
 
+DOME_K = 32  # skin faces whose colour a dome vertex takes (inverse-distance)
+DOME_TONE = 26.0  # RGB distance from the shoulder's median skin colour above which a skin face is not used (socket,
+# strap, earring and goo texels)
+DOME_TEX = 512  # px
+DOME_GRAIN = 3.0  # grain amplitude, 8-bit levels
+
+
+def dome_texture(js, b, out, rig):
+    """r23: the socket dome's own 512 px texture is a projection bake whose edges smear into radial streaks, with strap
+    and earring texels baked in: at game view these read as the dark strands from the earring to the shoulder (review
+    T1 STRAND WEB; r22's weight move did not change them). The dome gets a new texture: each vertex takes the colour
+    of its nearest skin-tone faces of the main skin atlas, painted across the dome's UVs (barycentric), gaps filled
+    from the nearest texel, softened, with a soft grain. Geometry and weights unchanged."""
+    from scipy import ndimage
+
+    prims = js["meshes"][0]["primitives"]
+    sk = prims[0]
+    dm = next(p for p in prims if js["materials"][p["material"]]["name"] == "skin-native-dome")
+    SV = n.floats(js, b, sk["attributes"]["POSITION"])
+    SU = n.floats(js, b, sk["attributes"]["TEXCOORD_0"])
+    sf = d.prim_faces(js, b, sk)
+    ti = js["materials"][sk["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    atlas = d._image(js, b, js["textures"][ti]["source"])[..., :3].astype(np.float32)
+    H, W = atlas.shape[:2]
+    cen = SV[sf].mean(1)
+    uv = SU[sf].mean(1)
+    col = atlas[(uv[:, 1] * H).astype(int) % H, (uv[:, 0] * W).astype(int) % W]
+    DV = n.floats(js, b, dm["attributes"]["POSITION"])
+    DU = n.floats(js, b, dm["attributes"]["TEXCOORD_0"])
+    df = d.prim_faces(js, b, dm)
+    u = np.unique(df)
+    lo, hi = DV[u].min(0) - 0.12, DV[u].max(0) + 0.12
+    near = np.all((cen > lo) & (cen < hi), axis=1)
+    med = np.median(col[near], 0)
+    ok = near & (np.linalg.norm(col - med, axis=1) < DOME_TONE)
+    dist, idx = cKDTree(cen[ok]).query(DV[u], k=DOME_K)
+    w = 1.0 / np.maximum(dist, 0.004)
+    vc = np.zeros((len(DV), 3), np.float32)
+    vc[u] = (col[ok][idx] * w[..., None]).sum(1) / w.sum(1, keepdims=True)
+    S = DOME_TEX
+    img = np.zeros((S, S, 3), np.float32)
+    have = np.zeros((S, S), bool)
+    P = DU * S - 0.5
+    for t in df:
+        a, bb, c = P[t]
+        x0, y0 = np.floor(np.minimum(np.minimum(a, bb), c)).astype(int)
+        x1, y1 = np.ceil(np.maximum(np.maximum(a, bb), c)).astype(int)
+        x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, S - 1), min(y1, S - 1)
+        if x1 < x0 or y1 < y0:
+            continue
+        gx, gy = np.meshgrid(np.arange(x0, x1 + 1), np.arange(y0, y1 + 1))
+        den = (bb[1] - c[1]) * (a[0] - c[0]) + (c[0] - bb[0]) * (a[1] - c[1])
+        if abs(den) < 1e-9:
+            continue
+        l1 = ((bb[1] - c[1]) * (gx - c[0]) + (c[0] - bb[0]) * (gy - c[1])) / den
+        l2 = ((c[1] - a[1]) * (gx - c[0]) + (a[0] - c[0]) * (gy - c[1])) / den
+        l3 = 1 - l1 - l2
+        m = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        img[gy[m], gx[m]] = l1[m, None] * vc[t[0]] + l2[m, None] * vc[t[1]] + l3[m, None] * vc[t[2]]
+        have[gy[m], gx[m]] = True
+    _, (iy, ix) = ndimage.distance_transform_edt(~have, return_indices=True)
+    img = ndimage.gaussian_filter(img[iy, ix], (3, 3, 0))
+    g = ndimage.gaussian_filter(np.random.default_rng(23).normal(0, 1, (S, S)), 1.5)  # soft skin grain (no tiling)
+    img += (DOME_GRAIN * g / g.std())[..., None]
+    ii = js["textures"][js["materials"][dm["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]]["source"]
+    d._set_image(js, out, ii, np.clip(img, 0, 255).astype(np.uint8))
+    return "dome texture: %d skin faces sampled (median %s), %d of %d texels painted" % (
+        int(ok.sum()),
+        med.round().astype(int).tolist(),
+        int(have.sum()),
+        S * S,
+    )
+
+
+# r23 posts: the 2D pack carries two hooked posts (spike top, crossbar with a bell, chain to a lantern), one each side;
+# r21 had one knobbed pole on his left. Both posts are the same Meshy part, the goo-side one mirrored.
+POSTS = (  # (foot, top) in rest pose, m; the gauntlet side is the r21 rod's line (dredge_post.ROD_BASE/ROD_TOP)
+    (np.array([0.20, 1.36, -0.70]), np.array([0.34, 2.06, -0.75])),
+    (np.array([-0.20, 1.36, -0.70]), np.array([-0.34, 2.06, -0.75])),
+)
+POST_GRADE = (0.55, 0.78)  # post texture S x, V x (the toon light adds saturation: ungraded, the Meshy copper
+# reads as hot orange at game view next to the dark-brown pack); lantern glass texels (bright yellow) keep theirs
+POST_OUT = 0.35  # z share of the crossbar's direction pointing back (the rest points out along x)
+
+
+def _frame(up, h):
+    up = up / np.linalg.norm(up)
+    h = h - up * (h @ up)
+    h /= np.linalg.norm(h)
+    return np.stack([up, h, np.cross(up, h)], 1)
+
+
+def _grade_post(img):
+    from PIL import Image
+
+    hsv = np.asarray(Image.fromarray(img.astype(np.uint8)).convert("HSV")).astype(np.float32)
+    glow = (hsv[..., 2] > 215) & (hsv[..., 0] > 22) & (hsv[..., 0] < 50)  # PIL hue 0-255: yellow ~ 30-45
+    g = hsv.copy()
+    g[..., 1] = np.where(glow, hsv[..., 1], hsv[..., 1] * POST_GRADE[0])
+    g[..., 2] = np.where(glow, hsv[..., 2], hsv[..., 2] * POST_GRADE[1])
+    return np.asarray(Image.fromarray(np.clip(g, 0, 255).astype(np.uint8), "HSV").convert("RGB"))
+
+
+def posts(js, b, out, rig, part_path):
+    """r23: the r21 knob rod (leather-rod) is replaced by two Meshy hooked posts rigid on the pack's bone. The part's
+    up is glTF +y; its crossbar side = the horizontal offset of the upper half's centroid from the foot's; that side
+    points outward (and a little back) on each side; scale = foot-to-top length / the part's height."""
+    prims = js["meshes"][0]["primitives"]
+    js["meshes"][0]["primitives"] = [p for p in prims if js["materials"][p["material"]]["name"] != "leather-rod"]
+    d.prune_materials(js)
+    P, N, UV, F, img = d._part(part_path)
+    img = _grade_post(img)
+    y0, y1 = P[:, 1].min(), P[:, 1].max()
+    foot = P[P[:, 1] < y0 + 0.15 * (y1 - y0)].mean(0)
+    upper = P[P[:, 1] > y0 + 0.5 * (y1 - y0)].mean(0)
+    h = upper - foot
+    h[1] = 0.0
+    M = _frame(np.array([0.0, 1.0, 0.0]), h)
+    foot[1] = y0
+    msg = []
+    for k, (a, top) in enumerate(POSTS):
+        side = np.sign(a[0])
+        T = _frame(top - a, np.array([side, 0.0, -POST_OUT]))
+        R = T @ M.T
+        sc = float(np.linalg.norm(top - a) / (y1 - y0))
+        Q, Nq, Fq = P, N, F
+        if side < 0:  # mirrored copy: x flipped after placing (a reflection), winding flipped
+            R = (
+                np.diag([-1.0, 1.0, 1.0])
+                @ _frame(top * [-1, 1, 1] - a * [-1, 1, 1], np.array([1.0, 0, -POST_OUT]))
+                @ M.T
+            )
+            Fq = F[:, ::-1]
+        t = a - sc * foot @ R.T
+        Pp = d.add_rigid(js, b, out, rig, (Q, Nq, UV, Fq, img), R, sc, t, d.ROD_BONE, "leather-rod")
+        msg.append(
+            "post %d: %d tris, top y %.2f, x %.2f..%.2f" % (k, len(F), Pp[:, 1].max(), Pp[:, 0].min(), Pp[:, 0].max())
+        )
+    return "; ".join(msg)
+
+
 STAGES = {"--strap": [("strap", strap_r22)], "--slivers": [("slivers", drop_slivers)]}
 STAGES["--goo"] = [("goo flare", flare_goo)]
 STAGES["--dome"] = [("dome weights", dome_weights)]
 STAGES["--nodome"] = [("dome", drop_dome)]
+STAGES["--dometex"] = [("dome texture", dome_texture)]
+STAGES["--posts"] = [("posts", lambda js, b, out, rig: posts(js, b, out, rig, sys.argv[4]))]
 STAGES["--all"] = STAGES["--strap"] + STAGES["--slivers"] + STAGES["--goo"] + STAGES["--dome"]
 
 if __name__ == "__main__":

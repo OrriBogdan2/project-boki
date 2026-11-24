@@ -9,6 +9,13 @@ converted into the hips' space, so the barge roll looks the same (`tools/art1/gr
 `--r21-keys` (docs/art/wardens/MESHY_NATIVE.md): one junk ball, orphan vertices gone, strap on the spine/shoulders with ink, skin and goo
 graded toward the turnaround, a Meshy gauntlet fist and knobbed pack rod, keys eased off every held clip pair (geo_check PASS), size 1.025.
 
+**Native model r23 (2026-11-24, ext/grimble-native):** `dredge_meshy.glb` = r22 + `tools/meshy/dredge_r22.py --dometex`
+then `--posts ... gens/hunter-round-1124/grimble/r23/meshy/post_23_4k.glb` (plan PLAN-1124o.md section 6). The goo-shoulder
+dome's own texture (a streaked projection bake with strap/earring texels: the earring-to-shoulder strand web) is repainted
+from the nearest skin-tone atlas faces. The r21 knob rod is replaced by the 2D's hooked post (spike top, crossbar bell,
+chain to a lantern), a Meshy part (image edit #23 of 30 -> image-to-3D, decimated to 3,998 tris), one per side (goo side
+mirrored), rigid on Spine, texture graded S x0.55 V x0.78 (lantern glass kept). 152,602 tris in game, body_h 2.29.
+
 **Native model r22 (2026-11-24, ext/grimble-native):** `dredge_meshy.glb` = r21 + `tools/meshy/dredge_r22.py --all` (plan
 gens/hunter-round-1124/grimble/PLAN-1124o.md): the r21 strap stopped under the armpit with its last rows 5.6-8.3 cm off the chest
 (the review's black tab and grey bands); it is now one closed leather band per side, shoulder blade to belt, snapped to the skin
