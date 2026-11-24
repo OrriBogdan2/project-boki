@@ -33,10 +33,12 @@ passes through (`BokiClipCover`). Rows run worst first (most `missing`, then mos
 `shared`, then the lowest Field Book number), and the five worst are written out as backlog lines.
 
 Bind rows (v95 swaps, `tools/warden_states_check.gd`, run by `--warden-clips-check`): each Hunter's game .glb is
-driven through all 15 Hunter states and fails on a T-pose (every contract bone within 2 deg of rest), a state that
+driven through all 15 Hunter states plus the stun, the root and the knocked-down beat (18 in all), and fails on a T-pose (every contract bone within 2 deg of rest), a state that
 shows the idle pose, frozen legs in a walk, run or strafe (Motley has no legs: his hips), a clip track that names no
-bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every state; `--warden-states-shots
---shots-dir=<dir>` (GPU) renders one frame per Hunter and state for a contact sheet.
+bone, a walk/run clip that keys no leg bone, or a stunned or rooted Hunter whose soles leave the idle's ground by 0.1 m.
+The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the death clip's own, and the strips judge it.
+`--verbose-states` prints every state; `--warden-states-shots
+--shots-dir=<dir>` (GPU) renders one frame per Hunter and state for a contact sheet; add `--cc` for the stun, root and knock strips (`--true-cam` for the match camera).
 
 <!-- table:begin -->
 ### Hunters
