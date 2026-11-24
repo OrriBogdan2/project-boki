@@ -86,6 +86,7 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		await main.get_tree().process_frame
 		t += DT
 		if t >= next:
+			p.combat_at = m.time  # the bots wander off for seconds at a time (and differently each run): a counted frame is a fight frame
 			SafeArea.seen.clear()  # the HUD's drawn marks (plates, icons, badges) are recorded for tally()
 			SafeArea.recording = true
 			BokiChatter.drawn = 0  # fight-time Boki text the HUD draws this frame
