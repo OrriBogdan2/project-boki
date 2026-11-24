@@ -184,8 +184,12 @@ def refit(species):
     lids = [p for p in pieces if len(p) > 50]  # 2 per eye; the rest are brows (8), the mouth (22) and its corners (3)
     rest = [p for p in pieces if len(p) <= 50]
     eye_from, eye_to, groups = {}, {}, []  # per side, and the pieces that ride with it
-    side = {sx: (np.where(np.sign(epos[:, 0]) == sx)[0], np.concatenate([p for p in lids if np.sign(fpos[p, 0].mean()) == sx]))
-            for sx in (-1, 1)}  # taken before anything moves
+    side = {}  # each eye's vertices and its lids', taken before anything moves
+    for sx in (-1, 1):
+        side[sx] = (
+            np.where(np.sign(epos[:, 0]) == sx)[0],
+            np.concatenate([p for p in lids if np.sign(fpos[p, 0].mean()) == sx]),
+        )
     for sx in (-1, 1):
         ev, lv = side[sx]
         c = epos[ev].mean(0)
@@ -230,7 +234,8 @@ def refit(species):
             print("%s Face -> bones %s" % (species, sorted(names[b] for b in used)))
     g.save(path)
     after = measure(Glb(path))
-    print("%s Face nearest body: median %.1f -> %.1f mm, max %.1f -> %.1f mm" % ((species,) + (before[0], after[0], before[1], after[1])))
+    m = (species, before[0], after[0], before[1], after[1])
+    print("%s Face nearest body: median %.1f -> %.1f mm, max %.1f -> %.1f mm" % m)
     print("%s FRAME head: Vector3(%.3g, %.3f, %.3f)" % (species, ax, ty, epos[:, 2].mean()))
 
 
