@@ -87,6 +87,10 @@ func _hunters(main: Node) -> void:
 	ok(rt.tick_t == knock_s and not rt.tick_crit, "a knock holds its tick for %.2f s" % knock_s)
 	rt.tick(Reticle.t("hit_knock_s") + 0.01)
 	ok(rt.tick_t == 0.0, "the tick runs out")
+	# 11-24 playtest ("hard to tell when I was doing damage"): the tick reads past the ring, for 9+ frames
+	ok(Reticle.t("hit_s") >= 0.15 and Reticle.t("hit_len") > Reticle.t("ring_r") and Reticle.t("hit_w") >= 2.0,
+			"a hit tick holds %.2f s, strokes %.1f px long (ring %.1f), %.1f px wide" % [
+				Reticle.t("hit_s"), Reticle.t("hit_len"), Reticle.t("ring_r"), Reticle.t("hit_w")])
 	canvas.queue_free()
 	m.queue_free()
 
