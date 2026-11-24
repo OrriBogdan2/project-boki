@@ -211,6 +211,10 @@
 				"desat": 0.3,
 				"far_lift": 0.2
 			},
+			"leather-body.001": {
+				"desat": 0.0,
+				"albedo": [0.3, 0.46, 0.8]
+			},
 			"glow": {
 				"glow": 1.8,
 				"fres": 0.0,
