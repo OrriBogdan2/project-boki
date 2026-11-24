@@ -320,7 +320,7 @@ static func _fx_quad(sh: Shader) -> QuadMesh:
 const MOB_DEPTH := -600.0      # m: under every island and the void floor, so no view draws them
 
 ## The aim kit (AimKit: every kit's aim lines, rings and the Hem draw's fill line and perfect circle) draws one
-## ImmediateMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
+## ArrayMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
 ## aim after landing compiled its shader mid-play. A one-triangle mesh with the same material and vertex
 ## format stands in for it for the warm-up.
 func _aim_stand_in() -> MeshInstance3D:
