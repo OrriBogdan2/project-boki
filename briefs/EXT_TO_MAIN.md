@@ -11261,3 +11261,4 @@ READY ext/ttk-fix-1124 f882c02655 (TTK: Vex, Grimble, Kael, Meeko, Neve to the p
 READY ext/feel-dmg-number-size 077a3be6f7 (damage number sizes on our health scale; GPU pair in gens/damage-feel-1124)
 READY ext/feel-hit-tick 7e4891563b (reticle hit tick 0.15 s / 7 px; GPU pair in gens/damage-feel-1124)
 READY ext/boki-own-clips-c f2896d1945 (bulk-rebase: origin/main merged in mechanically, was 0fcf21e059; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/perf-aim-circles dfb6ade5631b5dd1ed4e58ce2b68679b668aa1d7 (fight perf r2: circle telegraphs look each ground point up once; aim_draw 1.95->1.38 ms/frame GPU, same vertices)
