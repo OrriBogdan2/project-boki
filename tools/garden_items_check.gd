@@ -8,7 +8,7 @@ extends RefCounted
 ## touches the real save.
 
 const TRACKED := ["xp", "level", "path", "stay", "lean", "loose", "hold", "traits", "drift"]
-const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
+const SPECS := [["cindle", 2, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
 
 var bad := 0
 var main: Node
@@ -35,6 +35,7 @@ func _snap(rec: Dictionary) -> String:
 	return JSON.stringify(t)
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -119,7 +120,9 @@ func _samples(rec: Dictionary) -> void:
 				exact = exact and int(probe["stats"][s]) == int(rec["stats"][s])
 		ok(exact, "%s on %s: apply does exactly the preview (%s)" % [id, who, pv["text"]])
 		# a level-up the item causes (xp) adds its own evolution line (a mutation) next to the item's one
-		var fresh: Array = lines.slice(jn).filter(func(l): return CareJournal.text(l).contains(GardenItems.item_name(id)))
+		var fresh: Array = lines.slice(jn).filter(
+			func(l): return CareJournal.text(l).contains(GardenItems.item_name(id))
+		)
 		var named: bool = fresh.size() == 1 and (lines.size() == jn + 1 or pv["deltas"].has("level"))
 		ok(named, "%s on %s: one journal line names it" % [id, who])
 
@@ -136,7 +139,8 @@ func _tokens_and_stay() -> void:
 	ok(GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
-	rec["level"] = int(Evo.rules()["lines"]["cindle"]["level"])      # its line's form level (evolve.json)
+	# its line's form level (evolve.json), at least 6: a form with no art yet grows a part only at level % 4 == 2
+	rec["level"] = maxi(int(Evo.rules()["lines"]["cindle"]["level"]), 6)
 	ok(not Evo.on_level(rec.duplicate(true)).is_empty(),
 			"level %d changes it (a form, or a part while the form has no art)" % rec["level"])
 	GardenItems.apply(rec, "stayleaf")

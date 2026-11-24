@@ -64,9 +64,9 @@ func run(m: Node) -> void:
 		var a: Dictionary
 		var b: Dictionary
 		if i % 2 == 0:
-			var c: Array = clash_pairs[(i / 2) % clash_pairs.size()]
-			a = _kin(themes[c[i % 4 / 2]], 0.5)
-			b = _kin(themes[c[1 - i % 4 / 2]], 0.5)
+			var c: Array = clash_pairs[(int(i / 2.0)) % clash_pairs.size()]
+			a = _kin(themes[c[int(i % 4 / 2.0)]], 0.5)
+			b = _kin(themes[c[1 - int(i % 4 / 2.0)]], 0.5)
 		else:
 			var sp: String = themes.values()[i % themes.size()]
 			var hot: bool = i % 4 == 1          # hot-headed against mellow, otherwise bold against timid

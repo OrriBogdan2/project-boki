@@ -34,5 +34,40 @@
 		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (sv/briefs/kits.md:98); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
 		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (sv/briefs/kits.md:100); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
 		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (sv/briefs/kits.md:101); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a shot in the clip (briefs/hero-ref/dancer.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a shot in the clip (briefs/hero-ref/dancer.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a shot in the clip (briefs/hero-ref/dancer.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a held shot in the clip (briefs/hero-ref/dancer.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a held shot in the clip (briefs/hero-ref/dancer.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a held shot in the clip (briefs/hero-ref/dancer.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md)."}
+		},
+		"x": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."}
+		}
 	}
 }
