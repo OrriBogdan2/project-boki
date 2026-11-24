@@ -47,6 +47,11 @@ for o in list(don.values()):
 for a in dact.values(): bpy.data.actions.remove(a)
 for o in bpy.data.objects:
     if o.name.endswith('.001'): o.name = o.name[:-4]
+for m in list(bpy.data.materials):   # live names back (warden_look slots/tags key on them)
+    if m.name.endswith('.001'):
+        o = bpy.data.materials.get(m.name[:-4])
+        if o and o.users == 0: bpy.data.materials.remove(o)
+        if not bpy.data.materials.get(m.name[:-4]): m.name = m.name[:-4]
 for a in bpy.data.actions:
     if a.name.endswith('.001'): a.name = a.name[:-4]
 if larm.data.name.endswith('.001'): larm.data.name = larm.data.name[:-4]
