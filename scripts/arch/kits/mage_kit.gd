@@ -236,6 +236,9 @@ func _tick(dt: float) -> void:
 		_tick_wire(dt)
 	if run_t > 0.0:
 		_tick_run(dt)
+	if run_exit and h.dash_buf > 0.0 and h.dashes < 1.0:
+		h.dash_buf = 0.0           # Shift mashed in the streak with no charge back: dropped, not the 4 m plain dash
+		h._ab_feedback("dash", "deny")
 	if run_exit and h.roll_t <= 0.0:
 		_exit_run()
 	if rmb_down:
@@ -556,7 +559,9 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
 	vfx("wire_hit", f.pos)        # a hit on the way, not a burst
 	m.sfx("mage_wire_hit", f.pos, -4.0)
-	if was_live and is_instance_valid(f) and not f.dead:
+	if not was_live:
+		add_spark(f)              # the run stacks Static like every hit of hers
+	elif is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
 func _blowout(f: Ent) -> void:
