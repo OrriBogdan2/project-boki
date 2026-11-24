@@ -328,3 +328,6 @@ rigs only (Kael, Lace, Grimble through Meshy's `include_fingers` rig; no hunter 
 Real-GPU stills (`docs/art/wardens/rig_tear_1124/<hunter>_<hand>.jpg`; the 11-23 sheets `rig_faults_1123/` are re-rendered with the graded fist, grey = Meshy's weights, green = cleaned; rows open / fist / grip):
 the graded fist and grip show no shards on Kael (both hands). Lace's fingertips still crumple in the fist (her fingers are tiny and
 fused; 44 left-hand edges stay over 3x) and Grimble's armoured hands hide the fingers: both open (see the PR text).
+Open: the 12k-triangle decimate (`fault2_decimate.jpg`) still leaves a jagged fist (the hands keep 989 of 2265 triangles; Kael's rig
+curled in the same graded fist). Protected hands are clearly better than the uniform collapse, not yet clean: raise `DEFAULT_REGIONS`'
+hand share or decimate the hands last.
