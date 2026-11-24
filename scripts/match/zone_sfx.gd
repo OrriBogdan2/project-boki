@@ -15,29 +15,33 @@ extends RefCounted
 const HUM_KEY := "zone_hum"
 const HUM_DB := 0.0
 const WARN_DB := -2.0
-const DUCK_WARN := Vector2(1.5, -6.0)   # seconds held, dB: the score under the warning
+const DUCK_WARN := Vector2(1.5, -6.0)  # seconds held, dB: the score under the warning
 const CROSS_DB := -4.0
-const OUT_PITCH := 0.82                 # the crossing going out: lower, darker
-const IN_PITCH := 1.15                  # ... and coming back in: brighter
+const OUT_PITCH := 0.82  # the crossing going out: lower, darker
+const IN_PITCH := 1.15  # ... and coming back in: brighter
 const TICK_DB := -6.0
-const EDGE_PAD := 0.6                   # m past the edge before a crossing counts, so standing on it is quiet
+const EDGE_PAD := 0.6  # m past the edge before a crossing counts, so standing on it is quiet
 
-var cues: Array = []                    # every one-shot cue in order ("warn", "out", "in", "tick"), for the check
+var cues: Array = []  # every one-shot cue in order ("warn", "out", "in", "tick"), for the check
 var _z: ShrinkZone
-var _out := false                       # the player's side of the edge at the last crossing
-var _side_known := false                # whether _out is known (not after you are out of the match)
+var _out := false  # the player's side of the edge at the last crossing
+var _side_known := false  # whether _out is known (not after you are out of the match)
+
 
 func _init(zone: ShrinkZone) -> void:
 	_z = zone
+
 
 ## A close starts in warn_s.
 func warn() -> void:
 	_cue("warn", "zone_warn", WARN_DB)
 	Sfx.duck(DUCK_WARN.x, DUCK_WARN.y)
 
+
 ## The zone's damage landed on this game's player.
 func tick() -> void:
 	_cue("tick", "zone_tick", TICK_DB)
+
 
 ## Each match tick: the hum on the wall and the crossings.
 func update() -> void:
@@ -59,6 +63,7 @@ func update() -> void:
 	elif not _out and past > EDGE_PAD:
 		_out = true
 		_cue("out", "zone_cross", CROSS_DB, OUT_PITCH)
+
 
 func _cue(what: String, sname: String, db: float, pitch := 1.0) -> void:
 	cues.append(what)

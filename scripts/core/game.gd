@@ -275,7 +275,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 		out["kin"] = brought[0]
 	# the vault keeps a third of what you were carrying when you go down
 	if not won and Save.has_building("vault") and int(r.get("lost_gems", 0)) > 0:
-		out["vault_gems"] = int(r["lost_gems"]) / 3
+		out["vault_gems"] = int(int(r["lost_gems"]) / 3.0)
 		d["gems"] = int(d["gems"]) + out["vault_gems"]
 	# kin who stayed home rest in the cottages and train in the yard
 	var rest := (2.0 if Save.has_building("cottage") else 0.0) + (2.0 if Save.has_building("cottage2") else 0.0)
@@ -370,8 +370,7 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 
 ## XP a kin needs to go from level `lv` to the next (the curve is in content/rules/garden_xp.json).
 func xp_need(lv: int) -> int:
-	var c: Dictionary = GardenXp.rules()["curve"]
-	return int(c["per_level"]) * mini(lv, int(c["flat_from"]))
+	return GardenXp.need(lv)
 
 ## Gives a kin XP, runs each level up's evolution into `out`; returns the levels gained.
 func add_xp(k: Dictionary, xp: int, out: Dictionary) -> int:

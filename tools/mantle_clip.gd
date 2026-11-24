@@ -46,7 +46,7 @@ func run(mn: Node) -> void:
 		if pool.is_empty():
 			print("MCLIP %s: no edge" % c[0])
 			continue
-		await _clip(m, pool[pool.size() / 2], String(c[1]), dir.path_join(String(c[0])), String(c[0]))
+		await _clip(m, pool[int(pool.size() / 2.0)], String(c[1]), dir.path_join(String(c[0])), String(c[0]))
 	print("MCLIP DONE")
 	main.get_tree().quit()
 

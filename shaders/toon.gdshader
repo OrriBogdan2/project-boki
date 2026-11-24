@@ -5,6 +5,7 @@ shader_type spatial;
 // catches the key and fill lights, and an optional glossy highlight. Plus the hit flash.
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform bool use_vertex_color = false;
+uniform bool color_srgb = false;   // with use_vertex_color: the vertex colour is sRGB, as albedo is (PaintMerge)
 uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
 // With use_vertex_color: the vertex colour's red, green and blue weigh these three colours instead of
 // being the colour, so one mesh wears many colour sets (a glider canopy: one per skin, each Hunter's
@@ -77,6 +78,10 @@ void vertex() {
 	wnorm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
+// the exact sRGB curve, as a source_color uniform is turned linear
+vec3 srgb_lin(vec3 c) {
+	return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
+}
 vec3 rgb2hsv(vec3 c) {
 	vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 	vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -139,6 +144,7 @@ void fragment() {
 		c *= mix(t, painted, band * recolor);
 		if (use_vertex_color) { c *= mix(vec3(1.0), COLOR.rgb, color_tint * (1.0 - band * recolor)); }
 	} else if (use_vertex_color && vertex_weights) { c *= mat3(weight_r.rgb, weight_g.rgb, weight_b.rgb) * COLOR.rgb; }
+	else if (use_vertex_color && color_srgb) { c *= srgb_lin(COLOR.rgb); }
 	else if (use_vertex_color) { c *= COLOR.rgb; }
 	else if (vertex_ao) { c *= COLOR.rgb; }
 	float mk = 0.0;
@@ -186,7 +192,7 @@ void fragment() {
 	float ember = canopy_ember(lpos.xz);
 	c = canopy_tint(c, ember);
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
-	vis_f = fog;
+	vis_f = fog * vis_greyness;
 	c = vis_apply(c, fog);
 	ALBEDO = mix(c, flash_color.rgb, flash);
 	// a faint rim everywhere (so silhouettes lift off dark ground even in shadow); the crisp,
