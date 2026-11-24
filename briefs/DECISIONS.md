@@ -625,3 +625,4 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - No holding finished features for a "big release day": small player count, ship as soon as it is gated.
   Unfinished features ship behind a flag or a "(prototype)" label, never half-wired into the default path.
 - Post READY by ~1 PM EST to make that day's train.
+- 2026-11-24 (owner): hunter movement = ONE blended move; no walk/run/sprint states, NO sprint button; speed comes from movement tech (dash -> glide), SUPERVIVE model.
