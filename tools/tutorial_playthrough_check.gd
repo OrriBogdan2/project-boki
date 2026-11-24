@@ -35,10 +35,7 @@ func run(m: Node) -> void:
 	await _hatch()
 	await _tutorial_match()
 	_end()
-	ok(
-		line_seen == 1,
-		"the Mask line shows exactly once, at the first Relic (%d times)" % line_seen
-	)
+	ok(line_seen == 1, "the Mask line shows exactly once, at the first Relic (%d times)" % line_seen)
 	Engine.time_scale = 1.0
 	if not stalled:
 		await _garden()
@@ -55,16 +52,8 @@ func _garden() -> void:
 	var da = load("res://tools/tutorial_dead_air_check.gd").new()
 	da.main = main
 	await da._farm(STARTERS.find_key(starter), starter)
-	ok(
-		da.bad == 0,
-		"the garden tutorial plays to its end with no stall (%d dead-air failures)" % da.bad
-	)
-	print(
-		(
-			"TUTPLAY garden steps %d, done %s"
-			% [FarmTutorial.steps().size(), FarmTutorial.state().get("done", false)]
-		)
-	)
+	ok(da.bad == 0, "the garden tutorial plays to its end with no stall (%d dead-air failures)" % da.bad)
+	print("TUTPLAY garden steps %d, done %s" % [FarmTutorial.steps().size(), FarmTutorial.state().get("done", false)])
 
 
 ## One call per sim step of the course: closes a step's row when the next one starts, and ends the run at once on a
@@ -81,13 +70,7 @@ func _course_tick(m: Match) -> void:
 	step_s += Match.DT
 	if step_s > STEP_LIMIT_S:
 		stalled = true
-		ok(
-			false,
-			(
-				"step '%s' did not finish in %.0f s (stuck at game time %.0f s)"
-				% [id, STEP_LIMIT_S, m.time]
-			)
-		)
+		ok(false, "step '%s' did not finish in %.0f s (stuck at game time %.0f s)" % [id, STEP_LIMIT_S, m.time])
 		_close_step()
 		print("TUTPLAY STEPS: " + ", ".join(rows))
 		print("TUTPLAY DONE, failures: %d" % bad)
@@ -108,21 +91,14 @@ func _before_act(what: String) -> void:
 
 func _count_line(where: String, want: int) -> void:
 	var line := String(Content.rules("lore")["mask_line"])
-	ok(
-		line == "This Relic holds a fallen Hunter. Put it on, and you become them.",
-		"the Mask line's words: " + line
-	)
+	ok(line == "This Relic holds a fallen Hunter. Put it on, and you become them.", "the Mask line's words: " + line)
 	var n := _labels_with(tree.root, line)
 	line_seen += n
 	ok(n == want, "the Mask line shows %d time(s) before '%s', want %d" % [n, where, want])
 
 
 func _labels_with(node: Node, text: String) -> int:
-	var n := (
-		1
-		if node is Label and (node as Label).text == text and (node as Label).is_visible_in_tree()
-		else 0
-	)
+	var n := 1 if node is Label and (node as Label).text == text and (node as Label).is_visible_in_tree() else 0
 	for c in node.get_children():
 		n += _labels_with(c, text)
 	return n

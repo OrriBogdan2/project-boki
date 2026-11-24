@@ -61,9 +61,7 @@ func _kinds(seen: Array) -> String:
 		by[cls] = int(by.get(cls, 0)) + 1
 		if gi is MultiMeshInstance3D and (gi as MultiMeshInstance3D).multimesh:
 			var mm: MultiMesh = (gi as MultiMeshInstance3D).multimesh
-			copies += (
-				mm.instance_count if mm.visible_instance_count < 0 else mm.visible_instance_count
-			)
+			copies += (mm.instance_count if mm.visible_instance_count < 0 else mm.visible_instance_count)
 		elif gi is GPUParticles3D:
 			amount += (gi as GPUParticles3D).amount
 			emitting += 1 if (gi as GPUParticles3D).emitting else 0
@@ -73,10 +71,7 @@ func _kinds(seen: Array) -> String:
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
 	var parts := ks.map(func(k): return "%s %d" % [k, by[k]])
-	return (
-		"%s; multimesh copies %d; emitters emitting %d, amount %d"
-		% [", ".join(parts), copies, emitting, amount]
-	)
+	return "%s; multimesh copies %d; emitters emitting %d, amount %d" % [", ".join(parts), copies, emitting, amount]
 
 
 func _materials(seen: Array) -> String:
@@ -134,8 +129,7 @@ func _transparent(seen: Array) -> String:
 	ks.sort_custom(func(a, b): return by[a] > by[b])
 	var top := ks.slice(0, TOP).map(func(k): return "%s %.2f" % [k, by[k]])
 	return (
-		"%d things, %d see-through surfaces, boxes cover %.1f screens: %s"
-		% [things, surfaces, screens, ", ".join(top)]
+		"%d things, %d see-through surfaces, boxes cover %.1f screens: %s" % [things, surfaces, screens, ", ".join(top)]
 	)
 
 
@@ -145,9 +139,7 @@ func _repeats(seen: Array) -> String:
 		if not gi is MeshInstance3D or (gi as MeshInstance3D).mesh == null:
 			continue
 		var mi := gi as MeshInstance3D
-		var ids := _surface_materials(mi).map(
-			func(mat): return str(mat.get_instance_id()) if mat else "-"
-		)
+		var ids := _surface_materials(mi).map(func(mat): return str(mat.get_instance_id()) if mat else "-")
 		var key := "%d|%s" % [mi.mesh.get_instance_id(), "|".join(ids)]
 		var g: Array = by.get(key, [0, _tris(mi.mesh), _mesh_name(mi)])
 		g[0] += 1
@@ -299,10 +291,7 @@ func _see_through(first: Material) -> bool:
 	while mat != null:
 		if mat is BaseMaterial3D:
 			var b := mat as BaseMaterial3D
-			if (
-				b.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA
-				or b.blend_mode != BaseMaterial3D.BLEND_MODE_MIX
-			):
+			if b.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA or b.blend_mode != BaseMaterial3D.BLEND_MODE_MIX:
 				return true
 			if b.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS:
 				return true
