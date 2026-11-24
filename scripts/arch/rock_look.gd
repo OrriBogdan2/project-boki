@@ -83,8 +83,7 @@ static func _fresh(n: Node3D) -> void:
 		elif c.name == "Cracks":
 			(c as Node3D).visible = true
 			for mi in c.get_children():
-				((mi as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter(
-					"color", CRACK_COL)
+				((mi as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("color", CRACK_COL)
 		elif c.name == FIN:
 			(c as Node3D).visible = false
 			(c as Node3D).position = Vector3.ZERO
@@ -176,7 +175,10 @@ static func _fin() -> Array:
 ## The soft ground shadow: from the match camera it plants the rock on the ground.
 static func _shadow(n: Node3D) -> void:
 	var s := Models.part(
-		n, Models.cyl(1.0, 1.0, 0.01, 18), KitLooks.shade_mat(Color(0.02, 0.03, 0.05, 0.34)), Vector3(0.06, 0.03, 0.03),
+		n,
+		Models.cyl(1.0, 1.0, 0.01, 18),
+		KitLooks.shade_mat(Color(0.02, 0.03, 0.05, 0.34)),
+		Vector3(0.06, 0.03, 0.03),
 		Vector3(0.95, 1.0, 0.68)
 	)
 	s.name = "Shadow"
@@ -236,8 +238,12 @@ static func _cracks(n: Node3D) -> void:
 		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
 		var len_v := 0.35 + KitLooks.vis_rng.randf() * 0.45
 		Models.part(
-			cracks, Models.box(0.035, 0.012, len_v), KitLooks.shade_mat(CRACK_COL),
-			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_v * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
+			cracks,
+			Models.box(0.035, 0.012, len_v),
+			KitLooks.shade_mat(CRACK_COL),
+			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_v * 0.5),
+			Vector3.ONE,
+			Vector3(0, -a + PI * 0.5, 0)
 		)
 	for mi in cracks.get_children():
 		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
