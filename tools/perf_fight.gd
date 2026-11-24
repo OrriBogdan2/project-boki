@@ -204,6 +204,15 @@ func _camp() -> Array:
 					if mi.get_surface_override_material(si):
 						mi.get_surface_override_material(si).next_pass = null
 		print("BENCH fight ink off")
+	if "--bench-nopost" in OS.get_cmdline_user_args():  # (a probe: what glow and FXAA cost the draw)
+		for we in bench.main.get_tree().root.find_children("*", "WorldEnvironment", true, false):
+			(we as WorldEnvironment).environment.glow_enabled = false
+		bench.main.get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
+		print("BENCH fight post off")
+	for a in OS.get_cmdline_user_args():  # (a probe: the 3D at this scale of the window, so a small window can
+		if a.begins_with("--bench-3d-scale="):  # draw 1080p and keep only the window's copy to the screen small)
+			bench.main.get_viewport().scaling_3d_scale = float(a.substr(17))
+			print("BENCH fight 3d scale %.2f" % bench.main.get_viewport().scaling_3d_scale)
 	RenderingServer.frame_pre_draw.connect(_on_pre_draw)
 	RenderingServer.frame_post_draw.connect(_on_post_draw)
 	bench.main.get_tree().physics_frame.connect(_on_physics)
