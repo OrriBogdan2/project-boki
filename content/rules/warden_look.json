@@ -80,12 +80,7 @@
 			"rim_far": 0.34,
 			"rim_far_color": [1.0, 0.16, 0.14]
 		},
-		"no_ink": ["skirt"],
 		"slots": {
-			"skirt": {"albedo": [1.2, 1.1, 1.1], "dark_lift": 0.0},
-			"porcelain": {
-				"albedo": [0.97, 1.0, 1.02]
-			},
 			"skin": {
 				"albedo": [0.9, 0.87, 0.9],
 				"top_light": 0.22,
