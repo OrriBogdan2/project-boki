@@ -1,9 +1,7 @@
 {
- "_doc": "How many separately placed HUD blocks a new player scans at once (DECISIONS 2026-11-08: about 5) and when the 0.24.5 newcomers appear. Counted by scripts/ui/hud_groups.gd, asserted by --hud-groups-check.",
+ "_doc": "How many separately placed HUD blocks a new player scans at once (DECISIONS 2026-11-08: about 5) and the newcomer seats (when each block shows: content/rules/hud_reveal.json, HudReveal). Counted by scripts/ui/hud_groups.gd, asserted by --hud-groups-check.",
  "budget": 5,
  "_budget": "groups; the owner's number for a new player",
- "ways_out_lead_s": 30.0,
- "_ways_out_lead_s": "the Ways Out strip stays away until a seat is this many seconds from opening (or already open, in use, taken or lost); before that its four countdowns tell a new player nothing to act on",
  "always": ["minimap", "vitals"],
  "_always": "blocks the match HUD draws from the first second: the minimap (its clock strip hangs under it) and vitals. The ability row, weapon card, Boki and glove boxes and counters come by HudReveal (the tutorial by step); the glider ring and belt are folded in until they matter (see HudGroups.on_screen)",
  "newcomer_seats": [2, 3],
