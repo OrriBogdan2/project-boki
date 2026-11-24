@@ -47,6 +47,8 @@ Toasts ("Fever is lit", "Bond full!") sit in the right rail under the alive coun
 
 ## Downed screen: one line for who, the tip clear of the card (11-24)
 Downed, the screen said who did it three times in the middle of the fight: "Knocked down by Kael", "You're down" and the card's "Downed by Kael with Warchain". The killcam line is now for a dead Hunter only (`Hud` draws `Match.killcam_text` when `p.out`); the downed screen is "You're down" plus the card. The "TIP" line was drawn through the card's two lines (and, moved under it, sat on your own wisp): it is now above "You're down" (`Hud._draw_downed`), where the screen is empty ground.
+## First-time armour hint waits out the fight (11-24)
+"Hits on Hunters build armour. XP comes from monster kills." (`ArmourHint`, drawn by `ArmorHud.note` just over the LV / XP row) comes from your first hit on a Hunter, so it always landed mid-fight: its box sat on the vitals and on the fight next to them. While `Hud.in_fight()` is true it now waits, keeping its whole 6 s for the next lull. `--armour-hint-check` holds it.
 
 ## What sits on a Hunter (11-20, stabilize sprint: declutter only)
 `--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
@@ -101,3 +103,25 @@ Shared things still noisy in the films: Boki ability names (`Stinger Hook`, `Pri
 and other Boki's bubbles ("Echolope: behind you!") are now off in a fight (above). Still open: the "Hold F to
 stomp" prompt over a downed fight (the downed rework on `ext/wisp-clarity-1112` changes it); Boki rings and the
 Hunters' cast rings stack under a melee (fixed: Ground order, above).
+
+## Hunter against the ground (11-23)
+Every Hunter in sight wears a dark ground rim: the OcclusionOutline overlay (`shaders/occlusion_outline.gdshader`)
+draws its shell's fringe in ink (`rim_*`, >= 1.6 px of a 720 px view) wherever the scene behind it lies >= 0.25 m
+farther away, so only the outer silhouette against the ground gets it, never a belt or fold over the model (a full ink
+shell there read as speckle at the match camera). Off on Low with the cover outline.
+
+`--clarity-shots` prints `CLARITYCONTRAST <rim on> over <k> frames (rim off <n>, +x%)` for the bot 3v3 on the Hollow
+Crown (`tools/clarity_contrast.gd`). Each frame is drawn five ways with particles held still: as played, with the rim
+off, the Hunters' bodies alone (a clean silhouette mask on their own render layer) and an empty pass, and with the
+bodies out but their shadows kept. At each step across a silhouette the score is the strongest colour step (RGB, 0-100)
+from the body's edge pixel or the one just outside it to the bare ground beyond. Both numbers come from the same
+frames, so the bot fight's randomness (who is downed, which VFX cover whom) cancels out; two runs of one scene differ
+by up to ~25% otherwise.
+
+The first metric (the diff of the frame with and without the Hunters) counted their shadows, grass that moves with the
+bodies and HUD toasts as Hunter pixels: 60% of its edge samples were those, which is why the ground recolours
+(slate, teal-slate, sage, a whitened `rim_far`) never moved it. The fight harness (`tools/clarity_fight.gd`) also never
+ran `OcclusionOutline.for_match` (`Match._process` is off there), so no outline showed in clarity shots before 11-23.
+Results (rpg6, GPU, 4090, three runs): rim on vs off +35%, +48%, +20% (10, 12, 7 frames); pooled over the 29 frames
+24.1 vs 17.6, +37%. The +30% goal (focus baseline 11-22) is met on the pooled number; a run of under ~10 frames swings
+±15%.
