@@ -68,11 +68,11 @@ func inb(x: int, z: int) -> bool:
 
 # ------------------------------------------------------------------ queries
 func ground_at(x: float, z: float) -> float:
-	var ix := int(floor(x))
-	var iz := int(floor(z))
-	if not inb(ix, iz):
+	var ix := floori(x)
+	var iz := floori(z)
+	if ix < 0 or iz < 0 or ix >= w or iz >= h:      # (inb and idx written out: the hottest lookup, per telegraph vertex)
 		return VOID
-	var i := idx(ix, iz)
+	var i := iz * w + ix
 	if kind[i] == T_VOID:
 		return VOID
 	if not block_top.is_empty() and block_top.has(i):

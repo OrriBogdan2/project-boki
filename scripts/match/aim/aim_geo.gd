@@ -127,24 +127,29 @@ func sector(ctr: Vector2, r0: float, r1: float, a0: float, a1: float, c0: Color,
 	for i in segs + 1:
 		var t := lerpf(a0, a1, float(i) / segs)
 		dirs[i] = Vector2(cos(t), sin(t))
+	# each ring's outer row is the next ring's inner row (the same radius), so it is looked up once
+	var inner := PackedVector3Array()
+	inner.resize(segs + 1)
+	if r0 >= 0.001:
+		for i in segs + 1:
+			inner[i] = _p(ctr + dirs[i] * r0)
+	var outer := PackedVector3Array()
+	outer.resize(segs + 1)
 	for j in rings:
 		var ra := lerpf(r0, r1, float(j) / rings); var rb := lerpf(r0, r1, float(j + 1) / rings)
 		var ca := c0.lerp(c1, float(j) / rings); var cb := c0.lerp(c1, float(j + 1) / rings)
-		var e0 := dirs[0]
 		var pc := _p(ctr) if ra < 0.001 else Vector3.ZERO
-		var pa0 := pc if ra < 0.001 else _p(ctr + e0 * ra)
-		var pb0 := _p(ctr + e0 * rb)
+		outer[0] = _p(ctr + dirs[0] * rb)
 		for i in segs:
-			var e1 := dirs[i + 1]
-			var pb1 := _p(ctr + e1 * rb)
+			outer[i + 1] = _p(ctr + dirs[i + 1] * rb)
 			if ra < 0.001:
-				v.append(pc); v.append(pb0); v.append(pb1)
+				v.append(pc); v.append(outer[i]); v.append(outer[i + 1])
 				c.append(cb); c.append(cb); c.append(cb)
 			else:
-				var pa1 := _p(ctr + e1 * ra)
-				_quad3(pa0, pa1, pb1, pb0, ca, cb)
-				pa0 = pa1
-			pb0 = pb1
+				_quad3(inner[i], inner[i + 1], outer[i + 1], outer[i], ca, cb)
+		var row := inner
+		inner = outer
+		outer = row
 
 func disc(ctr: Vector2, r: float, col: Color, col_edge := Color(0, 0, 0, -1)) -> void:
 	sector(ctr, 0.0, r, 0.0, TAU, col, col if col_edge.a < 0.0 else col_edge)
