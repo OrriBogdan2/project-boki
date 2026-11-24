@@ -926,7 +926,7 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	await main.get_tree().process_frame
 	home.guide.tick(0.6)
 	await main.get_tree().process_frame
-	# the placing spotlight is modal (FarmSpotlight, owner 11-08 items 27-31): it turns the bar to the piece's tab itself,
+	# the placing spotlight is modal (FarmSpotlight): it turns the bar to the piece's tab itself,
 	# so the Buildings tab is never left for the player to find
 	ok(FarmSpotlight.showing() and hb.cat == "Buildings" and FarmSpotlight._node.phase == "tile",
 			"%s step, build mode on another tab: the bar turns to the Buildings tab" % what)

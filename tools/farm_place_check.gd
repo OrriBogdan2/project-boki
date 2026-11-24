@@ -13,10 +13,12 @@ var bad := 0
 var main: Node
 var shots := ""
 
+
 func ok(cond: bool, what: String) -> void:
 	print("FPLACE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -39,6 +41,7 @@ func run(m: Node) -> void:
 	print("FPLACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _home():
 	var d := Save.fresh()
 	var k := Save.new_kin("zapple", "Pip")
@@ -56,6 +59,7 @@ func _home():
 	home._close_panel()
 	return home
 
+
 ## A key press and release, a frame apart like a real keyboard.
 func _key(code: Key) -> void:
 	for down in [true, false]:
@@ -66,6 +70,7 @@ func _key(code: Key) -> void:
 		ev.physical_keycode = code
 		ev.pressed = down
 		main.get_viewport().push_input(ev)
+
 
 func _click(at: Vector2) -> void:
 	var mv := InputEventMouseMotion.new()
@@ -81,6 +86,7 @@ func _click(at: Vector2) -> void:
 		ev.global_position = at
 		main.get_viewport().push_input(ev)
 
+
 func _tutorial_home(done: Array):
 	var home = await _home()
 	Save.d["tutorial"]["home"] = true
@@ -90,14 +96,17 @@ func _tutorial_home(done: Array):
 	FarmTutorial.detect()
 	return home
 
+
 ## Runs the guide's poll and lets the spotlight catch up.
 func _poll(home) -> void:
 	home.guide.tick(0.6)
 	await _frames(3)
 
+
 func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
+
 
 # ------------------------------------------------------------------ Enter
 func _enter() -> void:
@@ -142,28 +151,37 @@ func _enter() -> void:
 	await _frames(2)
 	await _key(KEY_ENTER)
 	await _frames(3)
-	ok(home.panel_open != "" and Econ.fill(f) == 0,
-		"an empty pantry: Enter says so and keeps the panel (nothing to do)")
+	ok(
+		home.panel_open != "" and Econ.fill(f) == 0,
+		"an empty pantry: Enter says so and keeps the panel (nothing to do)"
+	)
 	home._close_panel()
 	home.queue_free()
 	await _frames(2)
 
+
 # ------------------------------------------------------------------ the placing spotlight
 func _modal() -> void:
 	var home = await _tutorial_home(["axe", "chop", "stone"])
-	ok(FarmTutorial.current() == "house" and FarmTutorial.stage("house") == "place",
-		"the house step is up (%s)" % FarmTutorial.current())
+	ok(
+		FarmTutorial.current() == "house" and FarmTutorial.stage("house") == "place",
+		"the house step is up (%s)" % FarmTutorial.current()
+	)
 	await _poll(home)
 	var n = FarmSpotlight._node
 	ok(FarmSpotlight.showing() and n.modal and n.phase == "hub", "step 1: the Build button is lit")
 	var btn: Control = home.hub_btns["build"]
 	await _frames(2)
 	var btn_at: Vector2 = btn.get_global_rect().get_center() - n.global_position
-	ok(n._block._has_point(Vector2(5, 5)) and not n._block._has_point(btn_at),
-			"clicks anywhere else are caught, the Build button is open")
+	ok(
+		n._block._has_point(Vector2(5, 5)) and not n._block._has_point(btn_at),
+		"clicks anywhere else are caught, the Build button is open"
+	)
 	await main.get_tree().create_timer(0.5).timeout
-	ok(n._mat.get_shader_parameter("dim") >= float(Tuning.of("farm_spotlight")["dim"]) - 0.01,
-		"everything else is dark (%.2f)" % n._mat.get_shader_parameter("dim"))
+	ok(
+		n._mat.get_shader_parameter("dim") >= float(Tuning.of("farm_spotlight")["dim"]) - 0.01,
+		"everything else is dark (%.2f)" % n._mat.get_shader_parameter("dim")
+	)
 	await _shot("place_1_build_button", 0.2)
 	home.hb.toggle()
 	await _poll(home)
@@ -174,8 +192,10 @@ func _modal() -> void:
 	var tile_r := Rect2()
 	if tile != null:
 		tile_r = Rect2(tile.get_global_rect().position - n.global_position, tile.size).grow(-4.0)
-	ok(tile != null and n._holes.size() == 1 and n._holes[0].grow(2.0).encloses(tile_r),
-			"the cut-out is exactly that tile")
+	ok(
+		tile != null and n._holes.size() == 1 and n._holes[0].grow(2.0).encloses(tile_r),
+		"the cut-out is exactly that tile"
+	)
 	ok(n.get_index() == n.get_parent().get_child_count() - 1, "the spotlight sits above the build bar")
 	var before: int = HomeLayout.ensure(Save.d)["deco"].size()
 	await _click(Vector2(12, 12))
@@ -187,12 +207,16 @@ func _modal() -> void:
 		tile.gui_input.emit(_tile_click())
 	await _poll(home)
 	n = FarmSpotlight._node
-	ok(String(home.hb.held.get("id", "")) == "house" and FarmSpotlight.showing() and n.phase == "spot",
-		"step 3: the House is in hand, the spot is lit")
+	ok(
+		String(home.hb.held.get("id", "")) == "house" and FarmSpotlight.showing() and n.phase == "spot",
+		"step 3: the House is in hand, the spot is lit"
+	)
 	var cells: Array = home.guide.place_cells()
 	await _shot("place_3_the_spot", 0.6)
-	ok(not cells.is_empty() and home.hb.debug_m != Vector2.INF,
-		"the ghost sits on the target (%d tiles)" % cells.size())
+	ok(
+		not cells.is_empty() and home.hb.debug_m != Vector2.INF,
+		"the ghost sits on the target (%d tiles)" % cells.size()
+	)
 	var hole := Rect2(n._holes[0].position + n.global_position, n._holes[0].size)
 	await _click(Vector2(12, 12))
 	await _frames(3)
@@ -201,16 +225,21 @@ func _modal() -> void:
 	await _frames(4)
 	ok(not FarmHob.house_entry().is_empty(), "a click in the cut-out puts the house exactly there")
 	await main.get_tree().create_timer(0.5).timeout
-	ok(not FarmSpotlight.showing() or FarmSpotlight._node.phase != "spot",
-		"the spot light fades after the house is down")
+	ok(
+		not FarmSpotlight.showing() or FarmSpotlight._node.phase != "spot",
+		"the spot light fades after the house is down"
+	)
 	ok(home.hb.debug_m == Vector2.INF, "the ghost is the player's again")
-	home.hb.toggle() if home.hb.active else null
+	if home.hb.active:
+		home.hb.toggle()
 	home.queue_free()
 	await _frames(2)
 	# the trough, the same way
 	home = await _tutorial_home(["axe", "chop", "stone", "house", "hammer", "task"])
-	ok(FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
-		"the trough step is up (%s)" % FarmTutorial.current())
+	ok(
+		FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
+		"the trough step is up (%s)" % FarmTutorial.current()
+	)
 	await _poll(home)
 	ok(FarmSpotlight.showing() and FarmSpotlight._node.phase == "hub", "the trough step starts on the Build button too")
 	home.hb.toggle()
@@ -220,19 +249,36 @@ func _modal() -> void:
 	home.queue_free()
 	await _frames(2)
 
+
 func _tile_click() -> InputEvent:
 	var ev := InputEventMouseButton.new()
 	ev.button_index = MOUSE_BUTTON_LEFT
 	ev.pressed = true
 	return ev
 
+
 # ------------------------------------------------------------------ Hob's relic
 func _relic() -> void:
 	# a fresh save: mid-tutorial, no offer; the last step done: the offer
 	var home = await _tutorial_home([])
 	ClassUnlock.choose_starters(["gunslinger"])
-	Game.apply_result({"arch": "gunslinger", "extracted": true, "why": "extracted", "knocks": 0, "kills": 0,
-			"gems": 0, "seeds": {}, "stats": {}, "lvl": 1, "caught": [], "kin_runs": [], "tutorial": true, "tonics": 0})
+	Game.apply_result(
+		{
+			"arch": "gunslinger",
+			"extracted": true,
+			"why": "extracted",
+			"knocks": 0,
+			"kills": 0,
+			"gems": 0,
+			"seeds": {},
+			"stats": {},
+			"lvl": 1,
+			"caught": [],
+			"kin_runs": [],
+			"tutorial": true,
+			"tonics": 0
+		}
+	)
 	ok(ClassUnlock.second_pending(), "the second relic is owed (the first expedition came home)")
 	ok(FarmTutorial.active() and not home.hob.chat.offer_due(), "a fresh farm: no relic while the tutorial runs")
 	for st in FarmTutorial.steps():
@@ -261,16 +307,17 @@ func _relic() -> void:
 	home.queue_free()
 	await _frames(2)
 
+
 # ------------------------------------------------------------------ hunger
 func _hunger() -> void:
 	var home = await _home()
 	var rec: Dictionary = Save.active_kin()
 	rec["starve"] = 24.0 * 3600.0
 	Care.ensure(rec)
-	rec["needs"]["food"] = 0.0               # a day without food: an empty belly (refuses_to_go needs food <= 0.5)
+	rec["needs"]["food"] = 0.0  # a day without food: an empty belly (refuses_to_go needs food <= 0.5)
 	var crops: Array = Data.CROPS.keys()
-	rec["likes"]["food"] = crops[0]          # likes are seeded from the random uid: pin them so kibble is never
-	rec["likes"]["hates"] = crops[1]         # the hated food (refused) nor the loved one (fills more)
+	rec["likes"]["food"] = crops[0]  # likes are seeded from the random uid: pin them so kibble is never
+	rec["likes"]["hates"] = crops[1]  # the hated food (refused) nor the loved one (fills more)
 	Save.d["items"]["kibble"] = 5
 	ok(HungerGate.meals_needed(rec) == 1, "24 h of starving, empty belly: one meal (%d)" % HungerGate.meals_needed(rec))
 	home._confirm_start()
@@ -278,8 +325,10 @@ func _hunger() -> void:
 	var gate := _find_gate(home)
 	await _shot("hunger_1_needs_one", 0.3)
 	ok(gate != null and home.panel_open == "Too hungry to go", "the Too hungry panel is up with the gate")
-	ok(_texts(gate).any(func(t): return t.contains("needs 1 more meal.")),
-		"it says exactly what it needs: %s" % [_texts(gate)])
+	ok(
+		_texts(gate).any(func(t): return t.contains("needs 1 more meal.")),
+		"it says exactly what it needs: %s" % [_texts(gate)]
+	)
 	ok(_button(gate, "Go") == null, "no Go while it is too hungry")
 	var feed := _button(gate, "Feed")
 	ok(feed != null and not feed.disabled, "a Feed button is right there")
@@ -304,11 +353,13 @@ func _hunger() -> void:
 	home.queue_free()
 	await _frames(2)
 
+
 func _primary(home) -> Button:
 	for ch in home.panel_host.get_children():
 		if ch.has_meta("primary"):
 			return ch.get_meta("primary")
 	return null
+
 
 func _find_gate(n: Node) -> HungerGate:
 	if n is HungerGate:
@@ -319,6 +370,7 @@ func _find_gate(n: Node) -> HungerGate:
 			return r
 	return null
 
+
 func _texts(n: Node, out: Array = []) -> Array:
 	if n is Label:
 		out.append((n as Label).text)
@@ -326,6 +378,7 @@ func _texts(n: Node, out: Array = []) -> Array:
 		if not c.is_queued_for_deletion():
 			_texts(c, out)
 	return out
+
 
 func _button(n: Node, starts: String) -> Button:
 	if n is Button and (n as Button).text.begins_with(starts) and not n.is_queued_for_deletion():
@@ -335,6 +388,7 @@ func _button(n: Node, starts: String) -> Button:
 		if r != null:
 			return r
 	return null
+
 
 func _shot(file: String, secs: float) -> void:
 	if shots == "":

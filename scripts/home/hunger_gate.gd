@@ -4,36 +4,41 @@ extends VBoxContainer
 ## cross, and a Feed button right there. It re-reads the Boki every poll_s (tuning.json "hunger_gate"), so a
 ## feeder or a meal moves the bar and the moment the line is crossed the panel offers Go, with no closing and reopening.
 
-const BAR_H_PX := 20.0          # px, the fed bar's height
+const BAR_H_PX := 20.0  # px, the fed bar's height
 const BAR_BACK := Color(0.09, 0.085, 0.12)
-const LINE_W_PX := 3.0          # px, the minimum line
-const FULL_AT := 92.0           # food, above this a Boki turns a meal down (Care.feed)
+const LINE_W_PX := 3.0  # px, the minimum line
+const FULL_AT := 92.0  # food, above this a Boki turns a meal down (Care.feed)
 
 var home: Node
-var go: Callable                # called by the Go button once the partner can come
+var go: Callable  # called by the Go button once the partner can come
 var back: Callable
 var _key := ""
 var _clock := 0.0
 
-## Meals still needed before `rec` stops being too weak to come: 0 when it can, else 1 (owner rule 11-23: any
+
+## Meals still needed before `rec` stops being too weak to come: 0 when it can, else 1 (any
 ## meal that fills the belly lifts the refusal at once, Care.refuses_to_go, even while the starve clock is high).
 static func meals_needed(rec: Dictionary) -> int:
 	return 1 if Care.refuses_to_go(rec) else 0
+
 
 ## How fed it is, 0..1 (a Boki that has starved the whole of STARVE["dead"] hours is at 0).
 static func fed_level(rec: Dictionary) -> float:
 	return clampf(1.0 - Care.starve_h(rec) / Care.STARVE["dead"], 0.0, 1.0)
 
+
 ## Where the minimum line sits on that bar, 0..1.
 static func line_level() -> float:
 	return 1.0 - Care.STARVE["refuse"] / Care.STARVE["dead"]
+
 
 ## The food to put down: its favourite if known, then kibble, the crops, a bun. "" when the pantry has none.
 static func pick_food(rec: Dictionary) -> String:
 	var known: Array = rec.get("known", [])
 	var likes: Dictionary = rec.get("likes", {})
 	var order: Array = []
-	if known.has("food"): order.append(String(likes.get("food", "")))
+	if known.has("food"):
+		order.append(String(likes.get("food", "")))
 	order.append("kibble")
 	order.append_array(Data.CROPS.keys())
 	order.append("sweetbun")
@@ -44,14 +49,17 @@ static func pick_food(rec: Dictionary) -> String:
 			return f
 	return ""
 
+
 func _init(home_node: Node, go_cb: Callable, back_cb: Callable) -> void:
 	home = home_node
 	go = go_cb
 	back = back_cb
 	add_theme_constant_override("separation", 10)
 
+
 func _ready() -> void:
 	_rebuild()
+
 
 func _process(dt: float) -> void:
 	_clock += dt
@@ -60,6 +68,7 @@ func _process(dt: float) -> void:
 		if _state_key() != _key:
 			_rebuild()
 
+
 func _state_key() -> String:
 	var rec := Save.active_kin()
 	if rec.is_empty():
@@ -67,6 +76,7 @@ func _state_key() -> String:
 	var starve_tenths := int(Care.starve_h(rec) * 10.0)
 	var full := int(Care.need(rec, "food") >= FULL_AT)
 	return "%s|%d|%s|%d|%d" % [rec["uid"], meals_needed(rec), pick_food(rec), starve_tenths, full]
+
 
 func _rebuild() -> void:
 	for c in get_children():
@@ -86,7 +96,7 @@ func _rebuild() -> void:
 	add_child(_Bar.new(fed_level(rec), line_level(), need == 0))
 	add_child(UI.para("One meal in its belly and it can come." if need > 0 else "Ready when you are.", UI.T_SMALL))
 	var row := UI.hbox(10)
-	var main_b: Button = null           # what Enter presses
+	var main_b: Button = null  # what Enter presses
 	if need == 0:
 		main_b = UI.primary("Go", go, 160)
 		row.add_child(main_b)
@@ -109,6 +119,7 @@ func _rebuild() -> void:
 		# Enter never sits on a dead button
 		shell.set_meta("primary", main_b if main_b != null and not main_b.disabled else back_b)
 
+
 ## One meal from the pantry, straight onto the starve clock (the same rules as feeding it at home).
 func _feed() -> void:
 	var rec := Save.active_kin()
@@ -117,25 +128,33 @@ func _feed() -> void:
 		return
 	var res := Care.feed(rec, f)
 	if res["ok"]:
-		if Data.CROPS.has(f): Save.d["crops"][f] = int(Save.d["crops"][f]) - 1
-		else: Save.d["items"][f] = int(Save.d["items"][f]) - 1
+		if Data.CROPS.has(f):
+			Save.d["crops"][f] = int(Save.d["crops"][f]) - 1
+		else:
+			Save.d["items"][f] = int(Save.d["items"][f]) - 1
 		for af in Evo.AFF:
-			if Data.CROPS.has(f) and Evo.AFF[af]["food"] == f: Evo.add(rec, af, 6.0)
-		if res.get("hungry", false): Save.remember(rec, "fed", "was fed when it was hungry", 2.0)
+			if Data.CROPS.has(f) and Evo.AFF[af]["food"] == f:
+				Evo.add(rec, af, 6.0)
+		if res.get("hungry", false):
+			Save.remember(rec, "fed", "was fed when it was hungry", 2.0)
 		Sfx.play("kin_happy", null, -8.0)
 		Save.save_game()
 	_rebuild()
 
+
 ## The fed bar: full up on the right, the minimum line where "too weak" ends.
-class _Bar extends Control:
+class _Bar:
+	extends Control
 	var level := 0.0
 	var line := 0.0
 	var ok := false
+
 	func _init(l: float, ln: float, enough: bool) -> void:
 		level = l
 		line = ln
 		ok = enough
 		custom_minimum_size = Vector2(0.0, BAR_H_PX + 8.0)
+
 	func _draw() -> void:
 		var r := Rect2(0.0, 4.0, size.x, BAR_H_PX)
 		draw_rect(r, BAR_BACK)

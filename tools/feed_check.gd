@@ -93,7 +93,7 @@ func _case(trough: bool) -> void:
 		(btns[0] as Button).pressed.emit()
 	var food1 := Care.need(k, "food")
 	ok(Econ.pantry("kibble") == 1 and food1 > food0, "%s: feeding eats a kibble, food %d -> %d" % [tag, food0, food1])
-	ok(not home.hecon.partner_too_weak() and home.hecon.refuse_reason() == "", "%s: it can go on an expedition again" % tag)
+	ok(not home.hecon.partner_too_weak() and home.hecon.refuse_reason() == "", "%s: can expedition again" % tag)
 	await _long_starved(home, k, tag)
 	home.queue_free()
 

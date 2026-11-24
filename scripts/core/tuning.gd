@@ -3,6 +3,7 @@ class_name Tuning
 
 static var _all: Dictionary = {}
 
+
 ## One system's numbers, e.g. Tuning.of("farm_spotlight")["pulse_hz"].
 static func of(section: String) -> Dictionary:
 	if _all.is_empty():

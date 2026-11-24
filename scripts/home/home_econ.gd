@@ -484,7 +484,9 @@ func open_feeder(f: Dictionary) -> void:
 			open_feeder(f)
 		else:
 			h._close_panel(), 160)
-	fill_b.tooltip_text = "Done" if full else "Fills it with kibble and everyday crops from your pantry (never treats or rare crops)"
+	fill_b.tooltip_text = "Done"
+	if not full:
+		fill_b.tooltip_text = "Fills it with kibble and everyday crops from your pantry (never treats or rare crops)"
 	UI.footer(v).add_child(fill_b)
 	(v.get_meta("shell") as Control).set_meta("primary", fill_b)
 	if Econ.self_fills(f):

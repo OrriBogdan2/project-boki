@@ -24,8 +24,8 @@ var face_to := Vector3.INF     # world point the NPC turns to face (INF: keeps t
 var tag: Label3D
 var mark: Label3D
 var bubble: Label3D
-var _plate: MeshInstance3D   # the dark plate behind a called-out line
 var anim: AnimationPlayer = null
+var _plate: MeshInstance3D   # the dark plate behind a called-out line
 var _spec: Dictionary = {}
 var _t := 0.0
 var _shout_t := 0.0

@@ -79,19 +79,19 @@ static func sync(home: Node, quiet: bool) -> void:
 		want = FarmTutorial.spot(id)
 		if not _free_to_show(home, want.has("tile")):
 			want = {}
-	var phase := _phase(home, want)
-	var key := JSON.stringify(want, "", true) + phase if not want.is_empty() else ""
+	var step_phase := _phase(home, want)
+	var key := JSON.stringify(want, "", true) + step_phase if not want.is_empty() else ""
 	if key == _key and is_instance_valid(_node):
 		return
 	close()
 	if key == "":
 		return
-	if phase == "tile" and home.hb.bar != null and home.hb.bar.tile_of(String(want["tile"])) == null:
+	if step_phase == "tile" and home.hb.bar != null and home.hb.bar.tile_of(String(want["tile"])) == null:
 		home.guide.show_tile(String(want["tile"]))
-	if _rects(home, id, want, phase).is_empty():
+	if _rects(home, id, want, step_phase).is_empty():
 		return
 	_key = key
-	_node = FarmSpotlight.new(home, id, want, phase, not _seen.has(key))
+	_node = FarmSpotlight.new(home, id, want, step_phase, not _seen.has(key))
 	_seen[key] = true
 	home.root_ui.add_child(_node)
 
@@ -136,14 +136,14 @@ static func _phase(home: Node, want: Dictionary) -> String:
 
 ## The screen boxes to light: the named bottom-bar button, and the step's marker in the world (a Boki); in a
 ## placing step the one thing for its phase (the button, the tile, the ground).
-static func _rects(home: Node, id: String, want: Dictionary, phase := "") -> Array[Rect2]:
+static func _rects(home: Node, id: String, want: Dictionary, step_phase := "") -> Array[Rect2]:
 	var out: Array[Rect2] = []
-	if phase == "tile":
+	if step_phase == "tile":
 		var tile: Control = home.hb.bar.tile_of(String(want["tile"])) if home.hb.bar != null else null
 		if tile != null and tile.is_visible_in_tree():
 			out.append(tile.get_global_rect())
 		return out
-	if phase == "spot":
+	if step_phase == "spot":
 		var cs: Array = home.guide.place_cells()
 		if not cs.is_empty():
 			out.append(_ground_box(home.cam, cs))

@@ -26,10 +26,10 @@ var tree_t := 0.0
 var tree_at := Vector3.INF
 var tab_for := ""
 var tree_what := ""
-var _cells: Array = []   # place_cells()'s answer, and what it was for
-var _cells_sig := ""
 var done_t := 0.0     # s left of the "Done!" in front of the strip line
 var done_seen := -1     # steps done when last looked at (-1: not yet), to tick one off when it goes up
+var _cells: Array = []   # place_cells()'s answer, and what it was for
+var _cells_sig := ""
 
 func _init(home) -> void:
 	h = home
@@ -245,16 +245,16 @@ func house_spot() -> Vector3:
 ## Puts the house down as a construction site on the free ground nearest the suggested spot (marking it
 ## out costs nothing; the materials are spent as it goes up).
 func place_house() -> bool:
-	return _place("house", house_spot())
+	return _place("house")
 
 ## The base's skip: a toy near the landing, from the inventory so it costs nothing.
 func place_toy() -> bool:
 	var id := String(FarmTutorial.rules()["base"]["skip_toy"])
 	var inv: Dictionary = h.hb.L()["inv"]
 	inv[id] = int(inv.get(id, 0)) + 1
-	return _place(id, HomeLayout.LANDING + Vector3(3, 0, -3))
+	return _place(id)
 
-func _place(id: String, p: Vector3) -> bool:
+func _place(id: String) -> bool:
 	var hb: HomeBuild = h.hb
 	var was_active := hb.active
 	if not was_active:
@@ -278,10 +278,10 @@ func place_cells() -> Array:
 	var hb: HomeBuild = h.hb
 	if hb.held.is_empty():
 		return []
-	var sig := "%s|%d|%d|%d" % [hb.held["id"], hb.ver, hb.L()["deco"].size(), Econ.feeders().size()]
-	if sig == _cells_sig:
+	var key := "%s|%d|%d|%d" % [hb.held["id"], hb.ver, hb.L()["deco"].size(), Econ.feeders().size()]
+	if key == _cells_sig:
 		return _cells
-	_cells_sig = sig
+	_cells_sig = key
 	_cells = []
 	var feeder: bool = hb.held["kind"] == "feeder"
 	var he := FarmHob.house_entry()
