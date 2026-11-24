@@ -33,7 +33,8 @@ func _boot(preset: String, args: PackedStringArray) -> bool:
 		t += 0.25
 	# the lobby spawns over frames (Match._slice): on a slow box the full count lands after the first
 	# hunter, so wait for it (a lobby that never fills still fails the count below, at BOOT_SECS)
-	while preset in ["match", "tier2"] and _up(preset) and main.current.hunters.size() < Data.MATCH_PLAYERS and t < BOOT_SECS:
+	var full: int = Data.MATCH_PLAYERS
+	while preset in ["match", "tier2"] and _up(preset) and main.current.hunters.size() < full and t < BOOT_SECS:
 		await _wait(0.25)
 		t += 0.25
 	await _wait(RUN_SECS)
