@@ -90,5 +90,7 @@ tail.py, jpgsplice.py, assemble.py); rerun `assemble.py LABEL body.png face.png`
 
 Limits: at the match camera (>= 8 m) the toon look's `far_lift` brightens the copper back to V ~0.92-0.98, so the grade shows in
 the close views (copper vs skin value gap 0.08 -> 0.29 at eye level) and the boots, much less at the match camera; the look
-(`content/rules/warden_look.json`, slot far_lift) is the other lever and is not changed here.
+(`content/rules/warden_look.json`) is the other lever and is not changed here. Scratch test (not shipped): `"far_lift": 0.0` in
+`ryzz.painted` on top of this glb moves the copper-vs-skin value gap at the match camera from -0.10 / +0.03 (idle / run) to +0.15 / +0.16
+(turnaround 0.22); it also changes every other colour on her at that range, so it is an owner call.
 
