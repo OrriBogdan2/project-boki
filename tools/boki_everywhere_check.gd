@@ -229,12 +229,13 @@ func _visitor_close(h, sp: String, path: String) -> void:
 		cam.fov = 35
 		h.add_child(cam)
 		cam.make_current()
-		var aim := func() -> void:  # it wanders: keep it framed every frame, from its front-ish side at eye level
+		var aim := func() -> void:  # it wanders: keep it framed from its front, near eye level
 			if not is_instance_valid(n):
 				return
 			var b := _box_of(n)
 			var d := maxf(b.size.y, b.size.x) * 2.2 + 0.4
-			cam.global_position = b.get_center() + Vector3(0.3 * d, 0.0, d)
+			var front := -n.global_transform.basis.z.normalized()  # the model faces -Z: look at its face and chest
+			cam.global_position = b.get_center() + front * d + front.cross(Vector3.UP) * 0.3 * d + Vector3.UP * 0.1 * d
 			cam.look_at(b.get_center())
 		aim.call()
 		main.get_tree().process_frame.connect(aim)
