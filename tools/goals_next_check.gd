@@ -4,8 +4,9 @@ extends "res://tools/new_player_flow_check.gd"
 ## recorded, and from the first hub arrival on it must list one to three rows (never empty, never more).
 ## Never touches the real save.
 
+
 func run(m: Node) -> void:
-	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = m
 	tree = main.get_tree()
 	Save.no_write = true
@@ -23,6 +24,7 @@ func run(m: Node) -> void:
 	_goals("back from the first expedition")
 	print("GOALS DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
+
 
 func _goals(moment: String) -> void:
 	var rows := GoalTracker.lines()
