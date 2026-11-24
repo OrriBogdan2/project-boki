@@ -78,6 +78,12 @@ func _hard() -> Array:
 					"stun": stun_s
 				}
 			)
+	var stun_pull := func():
+		s.hurt(1.0, f, {"src": "abil", "stun": 3.5})
+		tow.call(0.0).call()
+	var knockback := func():
+		s.impulse(Vector2(14.0, 0.0), -1.0)
+		s.kb_t = m.time
 	return [
 		["Vex wall slam stun 0.7", stun.call(0.7)],
 		["Zedran Meteor core stun 0.8", stun.call(0.8)],
@@ -98,26 +104,19 @@ func _hard() -> Array:
 		["Sable Bola Grounded 1.5", func(): KitStatus.apply(s, "gnd", 1.5)],
 		["Ryzz Skycall Grounded 1.5", func(): KitStatus.apply(s, "gnd", 1.5)],
 		["Grimble Anchor Grounded", func(): KitStatus.apply(s, "gnd", 1.0)],
-		[
-			"Ostra Nightwell stun and pull 3.5",
-			func():
-				s.hurt(1.0, f, {"src": "abil", "stun": 3.5})
-				tow.call(0.0).call()
-		],
+		["Ostra Nightwell stun and pull 3.5", stun_pull],
 		["Grimble hook reel (stun 0.2 and a haul)", func(): s.hurt(1.0, f, {"src": "abil", "stun": 0.2})],
 		["a pull with no stun (a bare tow)", tow.call(0.0)],
-		[
-			"a knockback",
-			func():
-				s.impulse(Vector2(14.0, 0.0), -1.0)
-				s.kb_t = m.time
-		],
+		["a knockback", knockback],
 	]
 
 
 func _soft() -> Array:
 	var slow := func(k: float, sec: float) -> Callable:
 		return func(): s.hurt(1.0, f, {"src": "abil", "slow": sec, "slow_k": k})
+	var daze_slow := func():
+		KitStatus.apply(s, "rat", 1.4)
+		s.hurt(1.0, f, {"src": "abil", "slow": 1.0, "slow_k": 0.3})
 	return [
 		["Vex Cinderfall slow 30%", slow.call(0.3, 0.6)],
 		["Zedran Meteor ring slow 40%", slow.call(0.4, 1.5)],
@@ -132,12 +131,7 @@ func _soft() -> Array:
 		["Sable Bola slow 30%", slow.call(0.3, 1.5)],
 		["Ostra Trade Disoriented", func(): KitStatus.apply(s, "dsr", 1.5, 0.4)],
 		["Vex Burr Charge Daze 1.4", func(): KitStatus.apply(s, "rat", 1.4)],
-		[
-			"Daze and a slow together",
-			func():
-				KitStatus.apply(s, "rat", 1.4)
-				s.hurt(1.0, f, {"src": "abil", "slow": 1.0, "slow_k": 0.3})
-		],
+		["Daze and a slow together", daze_slow],
 	]
 
 
