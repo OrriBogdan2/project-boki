@@ -13,6 +13,7 @@ const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips i
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 const POSED_MIN := 10  # bones turned off Meshy's T-pose rest in a playing clip (the T-pose turns none)
 const TURNED := 0.03  # rad: a bone this far off its rest is posed
+const CALM_CAST := 99.0  # s since the last cast: Hunter._anim_state always sends "cast" (WardenNative baselines on it)
 const SYNTH := "Zz_Clip"  # the test clip a synthetic clips file carries
 const STRING_PULL := 0.08  # m, Meshy scale: the string is drawn this far off the bow at a release move's first frame
 const STRING_BACK := 0.03  # and this near it a frame later
@@ -119,7 +120,7 @@ func _states(main: Node, a: String) -> void:
 		["attack", {"grounded": true, "swing_n": 1}],
 	]
 	for c in cases:
-		m.set_meta(WardenClips.STATE, c[1])
+		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST}.merged(c[1], true))
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
 		var want := String(nat.plays[c[0]])
@@ -240,7 +241,7 @@ func _feed(main: Node, nat: WardenNative, m: Node3D, calm: Dictionary, s: Dictio
 	nat.hit_prev = 99.0
 	nat.land_prev = 0.0
 	for st in [calm, s]:
-		var state := {"grounded": true}
+		var state := {"grounded": true, "cast": CALM_CAST}
 		state.merge(st, true)
 		m.set_meta(WardenClips.STATE, state)
 		m.set_meta(WardenClips.FEEL, state.get("feel", Vector2.ZERO))
@@ -322,6 +323,7 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	await _feed(main, nat, m, {}, {"rolling": true})
 	var plays_it := nat.player.current_animation == SYNTH and _turned(nat) >= POSED_MIN
 	ok(plays_it, "%s: the slot plays the clips file's clip" % a)
+	nat.player.stop()  # (a clip removed while it plays errors on every advance)
 	nat.player.get_animation_library(&"").remove_animation(SYNTH)
 	nat.plays.erase("dash")
 	src.free()
