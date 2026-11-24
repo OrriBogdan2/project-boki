@@ -627,3 +627,8 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Post READY by ~1 PM EST to make that day's train.
 - 2026-11-24 (owner): hunter movement = ONE blended move; no walk/run/sprint states, NO sprint button; speed comes from movement tech (dash -> glide), SUPERVIVE model.
 - 2026-11-24 (owner): farm / home garden = modern creature-raising garden with a CLOSE THIRD-PERSON camera, permanent. Problems in the farm get fixed in third person; never revert the farm to top-down. Expeditions and matches stay top-down. Our garden stays original (no copied look or assets).
+
+## 2026-11-24 7 PM EST: hunter 3D ship rule = +1.0 over the game (owner)
+Owner: "lets do merges if its at least 1 point higher than previously in game, not just 7/10".
+A hunter 3D model PR merges when its game-view score is at least 1.0 above the model in the game now, OR at 7.0+ and above live (the old path stays).
+Guard kept: no NEW T1 defect a player would notice (one live does not have); diff touches only that hunter; coordinator visual check before ready. Goal stays 9.0; shipped models stay in the fix queue.
