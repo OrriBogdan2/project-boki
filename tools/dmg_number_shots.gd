@@ -12,7 +12,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const Trio := preload("res://tools/dmg_number_trio.gd")
-const TICK_EVERY := 15     # frames: a quarter second
+const TICK_EVERY := 15  # frames: a quarter second
 
 var main: Node
 var m: Match
@@ -20,6 +20,7 @@ var P: Hunter
 var fx: Fx
 var dir := ""
 var foes: Array = []
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -44,6 +45,7 @@ func run(main_node: Node) -> void:
 	cap.close()
 	print("DMGNUMSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
 
 func _setup() -> void:
 	m = Match.new()
@@ -76,12 +78,14 @@ func _setup() -> void:
 	var cam := main.get_viewport().get_camera_3d()
 	main.get_viewport().warp_mouse(cam.unproject_position(foes[0].pos + Vector3(0, 1.5, 0)))
 
+
 func _tick(f: int) -> void:
 	for h in foes:
 		h.hurt(6.0, P, {"src": "abil", "tags": ["ult", "cinder_zone"]})
 	if f == 60:
 		foes[1].hurt(40.0, P, {"src": "shot", "crit": true})
 		foes[2].hurt(240.0, P, {"src": "shot"})
+
 
 ## One hit of each size from you on three rivals, the frame 4 frames later (numbers popped, flashes up).
 func _sizes(lines: Array) -> void:
@@ -97,6 +101,7 @@ func _sizes(lines: Array) -> void:
 		await _frame()
 	_take("dmgnum_3_sizes", lines, "A rifle round (8), an ability hit (18) and an ult (45) from you, 4 frames on")
 
+
 func _frame() -> void:
 	m.step(DT)
 	fx._process(DT)
@@ -105,9 +110,11 @@ func _frame() -> void:
 		h.render(DT, 1.0)
 	await main.get_tree().process_frame
 
+
 func _take(file: String, lines: Array, caption: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
 	lines.append("%s.png: %s" % [file, caption])
+
 
 ## The trio-focus case: three attackers on one dummy for Trio.SECS s, the frame after your ability hit
 ## shot whole and cropped round the dummy.
@@ -142,5 +149,9 @@ func _trio(lines: Array) -> void:
 			r = r.intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 			img.get_region(r).save_png(dir.path_join("dmgnum_2_trio_crop.png"))
 			lines.append("dmgnum_2_trio_crop.png: The dummy's numbers, cropped")
-	print("DMGNUMSHOTS trio max overlap %d (limit %d), per-second max %s" % [most, Trio.MAX_OVERLAP,
-		[per.slice(0, 60).max(), per.slice(60, 120).max(), per.slice(120, 180).max()]])
+	print(
+		(
+			"DMGNUMSHOTS trio max overlap %d (limit %d), per-second max %s"
+			% [most, Trio.MAX_OVERLAP, [per.slice(0, 60).max(), per.slice(60, 120).max(), per.slice(120, 180).max()]]
+		)
+	)
