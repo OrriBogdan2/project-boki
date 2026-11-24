@@ -5,6 +5,7 @@
   python3 tools/meshy/dredge_r14.py OUT.glb IN_R13.glb --coins 1   # r14: the head coins as separate discs in stacks
   python3 tools/meshy/dredge_r14.py OUT.glb IN_R13.glb --feet Y,K   # ink room x K below Y (m)
   python3 tools/meshy/dredge_r14.py OUT.glb IN_R13.glb --straps 1   # r14 straps: thin ribbons on the skin's own surface
+  python3 tools/meshy/dredge_r14.py OUT.glb IN_R13.glb --ball X,Y,Z,SCALE,YAW   # r16: the contract's junk ball rigid on Spine02 at that centre (m)
   python3 tools/meshy/dredge_r14.py OUT.glb IN_R13.glb --trim-pack Y   # drop the pack below Y (m, rest pose) and its shards
   python3 tools/meshy/dredge_r14.py OUT.glb IN_R13.glb --skin-native S.obj --skin-native+foot F.obj --skin-goo G.obj --pack-meshy P.obj   # the stages (shells from native_hunters/body_underlay.py)
 
@@ -149,6 +150,7 @@ def leather_image(w=96, h=384):
     return Image.fromarray(np.clip(px, 0, 255).astype(np.uint8))
 
 
+CONTRACT = "art/wardens/dredge/dredge.glb"  # the contract model (repo root): the junk ball comes from it
 COIN_R, COIN_T, COIN_SIDES = 0.03, 0.009, 14  # m: coin radius, thickness, polygon sides of a disc
 COIN_CAP = (np.array([0.0, 0.135]), np.array([0.15, 0.15]))  # x, z centre and semi-axes of the head's coin region
 
@@ -255,6 +257,58 @@ def add_coin_stacks(js, b, out, rig, seed=14):
     js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
     old["attributes"], old["indices"] = attrs, len(js["accessors"]) - 1
     return "%d coin triangles" % len(F)
+
+
+def add_ball(js, b, out, rig, spec):
+    """r16: Grimble's junk ball, the contract dredge.glb's own (the triangles its `ball` bone carries, same textures), rigid
+    on Spine02 so it rides the pack. spec = "x,y,z,scale,yaw": the ball's centre in this glb (m), the contract's size x scale, a turn about up (deg)."""
+    x, y, z, k, yaw = (float(v) for v in spec.split(","))
+    c_, s_ = np.cos(np.radians(yaw)), np.sin(np.radians(yaw))
+    turn = np.array([[c_, 0, s_], [0, 1, 0], [-s_, 0, c_]], np.float32)
+    cj, cb = n.load(CONTRACT)
+    names = [cj["nodes"][i]["name"] for i in cj["skins"][0]["joints"]]
+    ball = names.index("ball")
+    spine = [js["nodes"][i]["name"] for i in js["skins"][0]["joints"]].index("Spine02")
+    centre = None
+    info = []
+    for p in cj["meshes"][0]["primitives"]:
+        at = p["attributes"]
+        pos = n.floats(cj, cb, at["POSITION"])
+        jt, wt = joints_weights(cj, cb, at)
+        mine = jt[np.arange(len(jt)), wt.argmax(1)] == ball
+        f = dp.prim_faces(cj, cb, p)
+        f = f[mine[f].all(1)]
+        if not len(f):
+            continue
+        used, inv = np.unique(f, return_inverse=True)
+        P, N, UV = pos[used], n.floats(cj, cb, at["NORMAL"])[used], n.floats(cj, cb, at["TEXCOORD_0"])[used]
+        if centre is None:
+            centre = (P.min(0) + P.max(0)) / 2
+        P = (P - centre) @ turn.T * k + np.array([x, y, z], np.float32)
+        N = N @ turn.T
+        mat = dict(cj["materials"][p["material"]])
+        tex = cj["textures"][mat["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
+        img = cj["images"][tex["source"]]
+        js["images"].append({"bufferView": out.add_view(bytes(n.view_bytes(cj, cb, img["bufferView"]))), "mimeType": img["mimeType"]})
+        js["textures"].append({"source": len(js["images"]) - 1})
+        mat["name"] = "metal-ball" if "metal" in mat["name"] else mat["name"].replace("atlas", "ball")
+        mat["pbrMetallicRoughness"] = dict(mat["pbrMetallicRoughness"], baseColorTexture={"index": len(js["textures"]) - 1})
+        js["materials"].append(mat)
+        w = np.zeros((len(P), 4), np.float32)
+        w[:, 0] = 1.0
+        attrs = {"POSITION": out.add_floats(P.astype(np.float32), "VEC3"), "NORMAL": out.add_floats(N, "VEC3"),
+                 "TEXCOORD_0": out.add_floats(UV, "VEC2"), "WEIGHTS_0": out.add_floats(w, "VEC4"),
+                 "COLOR_0": out.add_floats(np.ones((len(P), 4), np.float32), "VEC4")}
+        js["accessors"][attrs["POSITION"]].update(min=P.min(0).tolist(), max=P.max(0).tolist())
+        j = np.zeros((len(P), 4), np.uint16)
+        j[:, 0] = spine
+        js["accessors"].append({"bufferView": out.add_view(j.tobytes()), "componentType": 5123, "count": len(P), "type": "VEC4"})
+        attrs["JOINTS_0"] = len(js["accessors"]) - 1
+        idx = inv.reshape(-1).astype(np.uint32)
+        js["accessors"].append({"bufferView": out.add_view(idx.tobytes()), "componentType": 5125, "count": int(idx.size), "type": "SCALAR"})
+        js["meshes"][0]["primitives"].append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
+        info.append("%s %d tris" % (mat["name"], len(f)))
+    return "; ".join(info)
 
 
 def first_hit(tri, o, d):
@@ -408,6 +462,8 @@ if __name__ == "__main__":
         stages.append(("feet ink", lambda js, b, out, rig: soften_feet(js, b, out, rig, y, k)))
     if "--straps" in opts:
         stages.append(("straps", add_straps))
+    if "--ball" in opts:  # X,Y,Z,SCALE,YAW
+        stages.append(("junk ball", lambda js, b, out, rig: add_ball(js, b, out, rig, opts["--ball"])))
     if "--trim-pack" in opts:
         stages.append(("pack trim", lambda js, b, out, rig: trim_pack(js, b, out, rig, float(opts["--trim-pack"]))))
     shells = [(k[2:], v) for k, v in opts.items() if k.startswith("--") and v.endswith(".obj")]
