@@ -248,7 +248,7 @@ AUTO = {  # id: overrides on AUTO_BASE
     "velvorm": BORROWED,
     "casquebill": BORROWED,
     # eyes read off the fit sheet's painted eyes (front view seen from -z, the sheet's own front view is the back)
-    "basaltoad": {**BORROWED, "sat": 0.21, "gain": 1.43, "tint": (0.9, 0.99, 0.97),  # three-patch fit (skin, moss, tower) to the 2D front, 11-24
+    "basaltoad": {**BORROWED, "sat": 0.3, "gain": 1.4, "tint": (0.96, 1.0, 0.88),  # three-patch fit (skin, moss, tower) to the 2D front, 11-24
                   "eye_c": (0.106, 0.347, -0.163), "eye_r": (0.032, 0.03, 0.018), "eye_yaw": 0.5, "iris": "edc15a"},
     # lit leather read pink (sat 0.68 vs the 2D 0.48); the embers and the brass keep their own saturation, and a crack
     # a texel wide keeps a texel of the atlas (hot: reach in texture texels)
