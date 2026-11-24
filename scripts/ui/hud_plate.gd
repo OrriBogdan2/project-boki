@@ -54,9 +54,13 @@ static func hidden(m: Match, h: Hunter) -> bool:
 	return h.crouch or m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos)
 
 
-## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
+## Advances the clock (Hud._process), hides plates not placed last frame and forgets hunters not drawn for a while.
 func tick(dt: float) -> void:
 	now += dt
+	var last := Engine.get_process_frames() - 1
+	for it: Item in _items.values():
+		if it.seen < last and it.visible:
+			it.visible = false  # (not placed last frame: off screen, hidden or gone)
 	if now >= _prune_at:
 		_prune_at = now + PRUNE_T
 		for k in st.keys():
@@ -241,14 +245,6 @@ func _place(h_v, nid, sp: Vector2) -> Item:
 	if not it.visible:
 		it.visible = true
 	return it
-
-
-## End of Hud's draw: plates not placed this frame (off screen, hidden, gone) hide.
-func end_frame() -> void:
-	var f := Engine.get_process_frames()
-	for it: Item in _items.values():
-		if it.seen != f and it.visible:
-			it.visible = false
 
 
 func _paint(it: Item) -> void:
