@@ -50,3 +50,11 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 **Shard Snap's free arm (2026-11-17, port of ext/ostra-gait-rebased):** `snap_wind` and `snap` hold the fan in at the ruff (`HELD_L`), re-keyed on this glb's rig
 (`ostra_anim.py -- snap_wind,snap --from`) and copied in with `glb_add_clips.py ... snap_wind,snap --hold-moved-rest` (nothing held). The old branch's
 bounding walk and run were not ported: main's tread gait (Nov 11) stays.
+
+## 2026-11-24 native fix (hunter-round-1124, ostra_meshy.glb only)
+Meshy's auto-rig skinned the box, spring, void tube and coat tails to two invisible legs (LeftUpLeg..RightToe_end), so in run,
+attack and jump the box swung up behind him like a pair of feet and the coat panel kicked out. Every leg-chain influence now
+sits on Hips (31,601 verts; arms, hands, head untouched). The void tube's albedo already is the violet starfield, but the toon
+shading crushed it to black: the material gets an emissive texture (`ostra_meshy_void_emit.jpg`) = that same albedo under a
+void mask, capped at 0.5, so the game's emit layer (WardenGlb._toon use_emit) makes it glow. Albedo, mesh and clips unchanged.
+Recipe: /home/boki/gens/hunter-round-1124/motley/r1/tools (voidmask.py, uvmask.py, mkfix.py).
