@@ -676,9 +676,10 @@ func _unlock_part(m: Node) -> void:
 		return
 	var ash: Dictionary = Save.d["roster"][1]
 	var key := float(GardenZones.rules()["lean_key"])
-	var stone: Node = hub.hway.node.get_node("Stone2")
-	var marks: bool = hub.hway.node.has_node("Lock2/Key0") and hub.hway.node.has_node("Lock2/Key1")
-	ok(not stone.get_meta("open") and marks, "the locked Cinderstep stone shows its two keys")
+	var lock := FarmModels.stone_lock("e0603a", GardenZones.keys_for("cinderstep"))
+	ok(not hub.hway.node.has_node("Stone2") and lock.get_child_count() == 3,
+		"the locked Cinderstep stone (owed no reveal) is merged into the Waystone, its lock with its two keys")
+	lock.free()
 	ok(not GardenZones.attune("cinderstep")["ok"], "no Wayseed and no lean: Cinderstep stays asleep")
 	ash["lean"] = {"fire": key}
 	hub.hway.attune("cinderstep")
@@ -724,8 +725,8 @@ func _reveal_part(m: Node, hub) -> void:
 	hub.hway.place()
 	way = hub.hway.node
 	var ridge := GardenZones.ids().find("ridge")
-	ok(way.has_node("Lock%d" % ridge) and not way.has_node("Lock2") and way.get_node("Cap2").scale == Vector3.ONE,
-		"the next hub plays it for that zone only")
+	ok(way.has_node("Lock%d" % ridge) and not way.has_node("Lock2") and not way.has_node("Cap2"),
+		"the next hub plays it for that zone only (Cinderstep's lit stone and cap are merged into the Waystone)")
 	way.free()
 	hub.hway.place()
 	ok(not hub.hway.node.has_node("Lock%d" % ridge), "and never again")

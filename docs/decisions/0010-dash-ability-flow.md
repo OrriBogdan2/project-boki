@@ -20,7 +20,7 @@ Option 2. Per ground or air dash and slot (LMB, RMB, E, X, Q) a row says `fire` 
 - A press at the end of a stun, root or Grounded goes through the same held slots (0022, `--cc-exit-buffer-check`).
 - Check `--dash-flow-check`; table `docs/heroes/dash_interactions.md` (gen_wiki). No Net or save change.
 
-## Amendment: dash buffering in the source (DECISIONS "match SUPERVIVE")
+## Amendment: dash buffering in the source (DECISIONS "match the reference")
 Re-checked 2026-11-23 (ext/feel-dash-buffer-source), building on the 11-03 finding (ext/dash-buffer-source 7690213d, `content/dash_flow/_source_buffering.json` there). Result: **not determinable**, so the default stands: a `buffer` press made at any point in a dash is held and goes the step the dash ends (then up to `Loco.press_buffer`, 0.15 s, while the hunter can't act). It never expires inside the dash and never cancels it.
 - **Game data: nothing.** No dump has an input-buffer, queue or cancel-window field; the ability system and C++ defaults are encrypted, and the named tunables list no input timing. The tooltips never say what a press inside a dash does.
 - **Frames checked (briefs/hero-ref on ext/agent-briefs):** every press seen inside a dash fires mid-dash, which is the `fire` rows, not a buffer: Shiv's empowered shot leaves on the Cartwheel's own frame (dancer.md:131-134, frame 0193); Ghost fires the rifle through the slide (venator.md:88, 0149-0151); Celeste fires the whole skate (tamsin.md:78-79, 0239-0245, 0285-0290); Tetra's "Punch to Extend Dash/RMB" (breah.md:8-9) resolves only its RMB half. A sweep of every hero-ref for buffer, queued, held to/until, a lost/dropped/eaten press or "after the dash ends" finds nothing new.
