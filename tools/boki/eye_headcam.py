@@ -49,6 +49,7 @@ def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=src)
     ev, m = coat()
+    dump_geo(ev, m, f"{out}/geo.npz")  # before rendering: a render frees the evaluated mesh
     pts = [ev.matrix_world @ v.co for v in m.vertices]
     lo = mathutils.Vector([min(p[i] for p in pts) for i in range(3)])
     hi = mathutils.Vector([max(p[i] for p in pts) for i in range(3)])
@@ -83,7 +84,6 @@ def main():
         rows = [list(r) for r in co.matrix_world.to_3x3()]
         cams[name] = {"loc": list(co.location), "R": rows, "scale": cam.ortho_scale, "res": RES, "d": list(d)}
     json.dump({"H": list(head), "hs": hs, "cams": cams}, open(f"{out}/cams.json", "w"), indent=1)
-    dump_geo(ev, m, f"{out}/geo.npz")
 
 
 main()
