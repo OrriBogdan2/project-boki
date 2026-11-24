@@ -4,6 +4,7 @@ extends RefCounted
 ## tile gap, or a single piece well clear of everyone, is fine; and a Boki that loads into a pocket (an old
 ## save) is set on open ground. Never touches the real save.
 
+const REST_DX := 9     # tiles east of the ring where the other Boki stays out in the open
 const PEN := 2          # tiles from the middle of the test ring to its fence (a 5x5 ring)
 
 var bad := 0
@@ -24,17 +25,21 @@ func _save() -> void:
 	Save.d = d
 
 ## The middle of a 5x5 block of open ground at least `from` tiles from the landing (nothing standing in it).
+## The farm is random: the tile past the ring's gap and the tile where the other Boki rests must be reachable too.
 func _open_block(hb: HomeBuild, from: Vector3) -> Vector2i:
 	var w: World = hb.h.world
+	var seen: PackedByteArray = hb._reach([], [])
 	var best := Vector2i(-1, -1)
 	var best_d := INF
-	for z in range(PEN, w.h - PEN):
-		for x in range(PEN, w.w - PEN):
+	for z in range(PEN + 1, w.h - PEN - 1):
+		for x in range(PEN, w.w - REST_DX):
 			var c := Vector2i(x, z)
 			var d := Vector2(x + 0.5 - from.x, z + 0.5 - from.z).length()
 			if d < 8.0 or d >= best_d:
 				continue
-			if _block_free(hb, c):
+			var past_gap := Vector3(x + 0.5, 0, z + PEN + 1.5)
+			var rest := Vector3(x + REST_DX + 0.5, 0, z + 0.5)
+			if _block_free(hb, c) and hb._hit(seen, past_gap) and hb._hit(seen, rest):
 				best = c
 				best_d = d
 	return best
@@ -82,7 +87,7 @@ func run(m: Node) -> void:
 	var name1: String = home.kins[1]["rec"]["name"]
 	home.ppos = PlaceClearance.start(home)
 	_stand(home, c)
-	var rest := Vector3(c.x + 9.5, 0, c.y + 0.5)
+	var rest := Vector3(c.x + REST_DX + 0.5, 0, c.y + 0.5)
 	home.kins[1]["pos"] = rest      # the other Boki stays out in the open, away from the ring
 	# 1. a ring of fence round a Boki shuts it in
 	_ghost(hb, _ring(c))
@@ -108,7 +113,7 @@ func run(m: Node) -> void:
 	_ghost(hb, [c + Vector2i(PEN, PEN)])
 	ok(hb.ghost_ok, "one fence piece away from everyone is allowed")
 	home.ppos = Vector3(c.x + 0.5, 0, c.y + 1.5)
-	_stand(home, Vector2i(c.x + 9, c.y))
+	_stand(home, Vector2i(c.x + REST_DX, c.y))
 	_ghost(hb, _ring(c))
 	ok(not hb.ghost_ok and hb.why == "This would shut you in", "a ring round you is refused: \"%s\"" % hb.why)
 	home.ppos = PlaceClearance.start(home)
