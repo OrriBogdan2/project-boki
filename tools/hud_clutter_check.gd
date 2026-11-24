@@ -115,7 +115,7 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 		)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	if main.fade != null:
 		await main.fade.reveal(0.01)
 	m.set_process(false)
