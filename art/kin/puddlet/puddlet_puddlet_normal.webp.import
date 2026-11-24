@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://byqkigs8rr8rl"
-path="res://.godot/imported/puddlet_puddlet_normal.webp-2b74b665205c72a6d0c07319a9a22849.ctex"
+path.bptc="res://.godot/imported/puddlet_puddlet_normal.webp-2b74b665205c72a6d0c07319a9a22849.bptc.ctex"
+path.astc="res://.godot/imported/puddlet_puddlet_normal.webp-2b74b665205c72a6d0c07319a9a22849.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9f5271b4eca7f76925ac09815bd5221b"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/puddlet/puddlet_puddlet_normal.webp"
-dest_files=["res://.godot/imported/puddlet_puddlet_normal.webp-2b74b665205c72a6d0c07319a9a22849.ctex"]
+dest_files=["res://.godot/imported/puddlet_puddlet_normal.webp-2b74b665205c72a6d0c07319a9a22849.bptc.ctex", "res://.godot/imported/puddlet_puddlet_normal.webp-2b74b665205c72a6d0c07319a9a22849.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -9,9 +9,7 @@ extends RefCounted
 ##
 ## A root holds abilities_v2/, merges_v2/, evolution_v2/ and kin/ (any may be missing).
 
-const FOLDERS := [
-	["abilities_v2", "abilities"], ["merges_v2", "merges"], ["evolution_v2", "evolution"], ["kin", "kin"]
-]
+const FOLDERS := [["abilities_v2", "abilities"], ["merges_v2", "merges"], ["evolution_v2", "evolution"], ["kin", "kin"]]
 
 
 ## Parses every file under root. Returns {abilities, merges, evolution, kin} (id -> spec) and
