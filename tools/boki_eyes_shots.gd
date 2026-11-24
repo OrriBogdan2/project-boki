@@ -114,16 +114,15 @@ func _game(id: String) -> void:
 	cam.rotation = Vector3(-pitch, 0, 0)
 	cam.make_current()
 	var img: Image = await _grab(vp)
-	var c := (
-		Vector2i(cam.unproject_position(Vector3(0, 0.3, 0))) - Vector2i(GAME_CROP, GAME_CROP) / 2
-	)
+	var c := Vector2i(cam.unproject_position(Vector3(0, 0.3, 0))) - Vector2i(GAME_CROP, GAME_CROP) / 2
 	var crop := img.get_region(Rect2i(c, Vector2i(GAME_CROP, GAME_CROP)))
 	crop.resize(GAME_CROP * GAME_ENLARGE, GAME_CROP * GAME_ENLARGE, Image.INTERPOLATE_NEAREST)
 	crop.save_png(out.path_join("%s_game.png" % id))
 	vp.queue_free()
 
 
-## World bounds of the coat's (or, `face_only`, the overlay's) vertices that mostly follow the head bone, moved from the rest pose to the held frame.
+## World bounds of the coat's (or, `face_only`, the overlay's) vertices that mostly follow the head bone, moved
+## from the rest pose to the held frame.
 static func _head_box(rig: BokiRig, face_only: bool) -> AABB:
 	var skel := rig.skeleton()
 	var head := skel.find_bone(HEAD_BONE)
