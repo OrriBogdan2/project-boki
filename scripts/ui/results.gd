@@ -10,6 +10,7 @@ func show_result(r: Dictionary) -> void:
 	shown_at = Time.get_ticks_msec()
 	var s := Game.apply_result(r)
 	s["kin_say"] = String(r.get("kin_say", ""))     # what your Boki said as the run ended
+	s["wisps_home"] = r.get("wisps_home", [])      # stolen wisps you carried
 	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
 	_stage(r, s)
 	var won: bool = r.get("extracted", false)
@@ -45,7 +46,10 @@ func show_result(r: Dictionary) -> void:
 	sc.tree_entered.connect(func(): fit.call_deferred())
 	# header: one tag, the outcome with the Hunter's name in it, then how you left or where your squad placed
 	var tag := UI.tag("First expedition" if r.get("tutorial", false) and won else ("Extracted" if won else "Didn't make it"), UI.TEAL if won else Color("ff9a8a"))
-	var hunter := String(Save.d.get("name", "Hunter")).substr(0, 16)
+	var hunter := String(Save.d.get("name", Save.UNNAMED)).substr(0, 16)
+	if hunter.strip_edges() in ["", Save.UNNAMED]:
+		# a player who never gave a name: "The Red Stitch made it out"
+		hunter = HeroTitle.label(hunter, Arch.of_save())
 	var head := UI.vbox(6)
 	head.add_child(tag)
 	head.add_child(UI.title("%s made it out" % hunter if won else _lost_title(r.get("why", "")), 46, UI.INK))
@@ -156,6 +160,9 @@ func show_result(r: Dictionary) -> void:
 		kept.add_child(_note("Left in your deathbox: %s." % ", ".join(names), Color("ffb0a0")))
 	if s.has("kin"):
 		boki.add_child(_kin_card(s, det))
+	var lines := ResultsBokiLines.card(s, get_tree())
+	if lines != null:
+		boki.add_child(lines)
 	for back in s.get("rescued", []):
 		boki.add_child(_notes(HomeNotices.fill(HomeNotices.BACK_HOME, back["name"]), UI.GOOD))
 	# kin left behind when you went down, and where they ended up
@@ -217,7 +224,7 @@ func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: fl
 	lr.add_child(lab)
 	col.add_child(lr)
 	var show := func(x: float) -> void:
-		num.text = ("%d:%02d" % [int(x) / 60, int(x) % 60]) if fmt == "time" else str(int(round(x)))
+		num.text = ("%d:%02d" % [int(int(x) / 60.0), int(x) % 60]) if fmt == "time" else str(int(round(x)))
 	var tw := create_tween()
 	tw.tween_interval(delay)
 	tw.tween_method(show, 0.0, value, clampf(0.4 + value * 0.01, 0.5, 1.1)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -349,7 +356,8 @@ func _unhandled_input(e: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		Game.goto("home")
 
-## Behind the card: your squad on a little island, in their poses if you made it out, as dimmed Wisps if not.
+## Behind the card: your squad on a little island, each on its win beat if you made it out and its lose beat if
+## not, the eliminated as dimmed Wisps (ResultsStage).
 func _stage(r: Dictionary, s: Dictionary) -> void:
 	var squad: Array = r.get("squad", [])
 	if squad.is_empty():

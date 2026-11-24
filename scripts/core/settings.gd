@@ -4,7 +4,7 @@ extends Node
 
 signal changed(key: String)
 
-const PATH := "user://settings.cfg"
+const PLAYER_PATH := "user://settings.cfg"
 
 ## The Interface size slider's range. The layout needs at least a 1100x640 space, 1/1.125 of the 1240x720
 ## it fits to the window, so the top stays under 1.125: a bigger setting could not grow the menus without
@@ -53,8 +53,10 @@ const DEFAULTS := {
 	"kin_chatter": "normal",
 	"mod_mode": false,
 	"bot_diff": "auto",
-	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
-	"boki_wisps": false,
+	# Boki ride as wisps (KinWisp): in expeditions the perks are on while it rides with you, off while summoned.
+	# wisps_v 1: the default became on (a file from before it has the old default saved: load_file turns it on once)
+	"boki_wisps": true,
+	"wisps_v": 1,
 	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
 	"hold_done": {},
 	# how keys behave (Controls)
@@ -130,7 +132,7 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_model
 ##   px: tallest 3D render in pixels (0: native); a bigger window renders the 3D smaller and FSR scales it
 ##   up (see _apply_render_scale), so a retina or 4K screen doesn't cost 2-4x the pixels  ·  scale: the most
 ##   of the window's size the 3D renders at (0.77 Low, 0.5 Very Low)  ·  fxaa: edge smoothing when MSAA is off
-##   ·  steps: physics catch-up steps a frame (Engine.max_physics_steps_per_frame)  ·  unlit: no lighting at all
+##   ·  unlit: no lighting at all
 ##   ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass and flowers kept  ·  draw: draw distance
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
@@ -147,7 +149,6 @@ const QUALITY := {
 		"px": 540,
 		"scale": 0.5,
 		"fxaa": false,
-		"steps": 2,
 		"unlit": true,
 		"lod": 8.0,
 		"grass": 0.15,
@@ -174,7 +175,6 @@ const QUALITY := {
 		"px": 900,
 		"scale": 0.77,
 		"fxaa": true,
-		"steps": 2,
 		"unlit": false,
 		"lod": 4.0,
 		"grass": 0.4,
@@ -201,7 +201,6 @@ const QUALITY := {
 		"px": 1080,
 		"scale": 1.0,
 		"fxaa": true,
-		"steps": 4,
 		"unlit": false,
 		"lod": 2.0,
 		"grass": 0.7,
@@ -228,7 +227,6 @@ const QUALITY := {
 		"px": 0,
 		"scale": 1.0,
 		"fxaa": false,
-		"steps": 8,
 		"unlit": false,
 		"lod": 1.0,
 		"grass": 1.0,
@@ -255,7 +253,6 @@ const QUALITY := {
 		"px": 0,
 		"scale": 1.0,
 		"fxaa": false,
-		"steps": 8,
 		"unlit": false,
 		"lod": 0.5,
 		"grass": 1.0,
@@ -375,6 +372,8 @@ const SHARED_OK := [
 ## so a row of caps (UI.key_hints) never splits one into two.
 const MOUSE_CAPS := {1: "LMB", 2: "RMB", 3: "MMB", 4: "WHEEL-UP", 5: "WHEEL-DN", 8: "M4", 9: "M5"}
 
+## The file settings are read from and written to (file_path()).
+var path := file_path()
 var v: Dictionary = {}
 
 ## Exported desktop builds open fullscreen until the player picks windowed; the editor and the browser start windowed.
@@ -463,6 +462,25 @@ static func migrate_cam(d: Dictionary) -> void:
 			d[k] = CAM_IDS[k][old]
 
 
+## The player's settings file, or for a check run (a registered check flag or --check-child) a file of its own that
+## starts empty and goes when the run ends: checks never change a player's or a gate box's settings (rpc6, 11-16:
+## a check left sfx=0.0 and ult_ready_cue=false behind and later gates heard no effects). A check's second game boots
+## from the check's own file with --settings-file=<path>.
+static func file_path() -> String:
+	var args := OS.get_cmdline_user_args()
+	for a in args:
+		if a.begins_with("--settings-file="):
+			return a.substr(16)
+	if args.has("--check-child") or CheckRegistry.flag_in(args) != "":
+		return "user://check_settings_%d.cfg" % OS.get_process_id()
+	return PLAYER_PATH
+
+
+func _exit_tree() -> void:
+	if path == "user://check_settings_%d.cfg" % OS.get_process_id() and Settings == self:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var cf := load_file()
@@ -486,7 +504,7 @@ func load_file() -> ConfigFile:
 	v = DEFAULTS.duplicate(true)
 	v["fullscreen"] = desktop_export
 	var cf := ConfigFile.new()
-	if cf.load(PATH) == OK:
+	if cf.load(path) == OK:
 		for k in DEFAULTS:
 			if cf.has_section_key("s", k):
 				v[k] = cf.get_value("s", k)
@@ -525,6 +543,8 @@ func load_file() -> ConfigFile:
 		# saves wrote "fullscreen: false" for anyone who never chose, so a windowed start looked like a choice: start over once
 		v["fullscreen"] = desktop_export
 		v["video_v"] = 5
+	if not cf.has_section_key("s", "wisps_v"):
+		v["boki_wisps"] = true  # (saves wrote the old default for everyone: an untouched toggle reads as off)
 	v["hud_scale"] = HudScale.setting()  # (saves from before HUD size load at 100%; hand edits stay in range)
 	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
 		v[SideColor.KEY] = "default"  # missing in older files, or a palette that is gone
@@ -649,13 +669,13 @@ func set_v(k: String, val, write := true) -> void:
 
 func save() -> void:
 	var cf := ConfigFile.new()
-	cf.load(PATH)  # keeps the other sections (the last save slot)
+	cf.load(path)  # keeps the other sections (the last save slot)
 	for k in REMOVED:
 		if cf.has_section_key("s", k):
 			cf.erase_section_key("s", k)
 	for k in v:
 		cf.set_value("s", k, v[k])
-	cf.save(PATH)
+	cf.save(path)
 
 
 func reset_all() -> void:
@@ -830,7 +850,6 @@ func _apply_quality() -> void:
 	_apply_render_scale()
 	root.mesh_lod_threshold = float(q_v["lod"])
 	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(q_v["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
-	Engine.max_physics_steps_per_frame = int(q_v["steps"])
 	RenderingServer.directional_soft_shadow_filter_set_quality(int(q_v["soft"]))
 	RenderingServer.directional_shadow_atlas_set_size(int(q_v["atlas"]), true)
 	for n in root.find_children("*", "Light3D", true, false):

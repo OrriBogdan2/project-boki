@@ -59,10 +59,9 @@ const TIER_OK := {
 	"dolm lmb": "solid",  # the punch is an empowered hit (o.heavy: never a poke); the boulder splash is light
 }
 
-## 8: kit files take hit-stop, body flash and shake from the tiers. A foe's flash_t, a freeze_frame / freeze_t
-## or a Shake.incoming_big set to a number or a CONSTANT is a stray (a Hunter's own flash, h.flash_t, is no hit).
-## The one lighter literal left: the Meteor Drop's bystander shake (its hit shakes the struck player heavy).
-const LITERAL_OK := ["juggernaut_drop.gd:Shake.incoming_big(k.m, at, 0.35, k.h)"]
+## 8: kit files take hit-stop, body flash and shake from the tiers (shake: a class in content/rules/shake.json,
+## --shake-check's table). A foe's flash_t, a freeze_frame / freeze_t or a Shake.incoming_big set to a number
+## or a CONSTANT is a stray (a Hunter's own flash, h.flash_t, is no hit).
 
 var bad := 0
 var dealt := {}  # slot -> true: the slot being pressed landed damage
@@ -123,7 +122,7 @@ func _rules() -> void:
 	var tiers: Dictionary = ImpactWeight.rules["tiers"]
 	ok(tiers.keys() == ImpactWeight.TIERS, "three tiers: %s" % ", ".join(tiers.keys()))
 	var ms := ImpactWeight.TIERS.map(func(w): return int(tiers[w]["hitstop_ms"]))
-	var sh := ImpactWeight.TIERS.map(func(w): return float(tiers[w]["shake"]))
+	var sh := ImpactWeight.TIERS.map(func(w): return ImpactWeight.shake(w))
 	ok(
 		ms[0] < ms[1] and ms[1] < ms[2] and sh[0] <= sh[1] and sh[1] < sh[2],
 		"each tier holds and shakes more than the last: %s ms, shake %s" % [ms, sh]
@@ -296,9 +295,7 @@ func _kit_literals() -> void:
 		if not f.ends_with(".gd"):
 			continue
 		for hit in rx.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
-			var at := "%s:%s" % [f, hit.get_string(0)]
-			if not LITERAL_OK.has(at):
-				strays.append(at)
+			strays.append("%s:%s" % [f, hit.get_string(0)])
 	ok(strays.is_empty(), "no kit sets its own hit-stop, body flash or shake number, strays: %s" % [strays])
 
 

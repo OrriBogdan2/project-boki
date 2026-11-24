@@ -32,7 +32,7 @@ func run(main: Node) -> void:
 	var row: Array = []
 	for i in ids.size():
 		var a: String = ids[i]
-		var at := home + Vector3((float(i % 6) - 2.5) * GAP, 0, 1.0 + 2.6 * float(i / 6))
+		var at := home + Vector3((float(i % 6) - 2.5) * GAP, 0, 1.0 + 2.6 * float(int(i / 6.0)))
 		var h := m.make_hunter("S%d" % i, i + 1, Arch.weight(a), Arch.bare_title(a), "idle", {}, at, {"arch": a})
 		h.face = PI
 		row.append(h)

@@ -1,7 +1,8 @@
 class_name ImpactWeight
 extends RefCounted
 ## How heavy a hit lands (docs/DASHES_AND_ABILITY_FEEL.md §5.4): light (a poke), solid (a real hit) or
-## heavy (an ult or a slam), each with a fixed hit-stop and shake (content/rules/impact_weight.json).
+## heavy (an ult or a slam), each with a fixed hit-stop (content/rules/impact_weight.json) and shake (its
+## "<tier>_hit" class in content/rules/shake.json).
 ## A Hunter's ability hit takes its ability's tier from the rules, a Boki's hit its basic or ability tier;
 ## anything else (a monster, the world) gets one from what the hit did. Feel applies the hit-stop, Shake the shake.
 
@@ -79,9 +80,9 @@ static func holds_attacker(w: String) -> bool:
 	return w != "" and bool(rules["tiers"][w]["attacker"])
 
 
-## The tier's shake power on the struck player's camera (Shake.incoming_big's 0-1).
+## The tier's shake power on the struck player's camera: its "<tier>_hit" class in content/rules/shake.json.
 static func shake(w: String) -> float:
-	return float(rules["tiers"][w]["shake"]) if w != "" else 0.0
+	return Shake.power(w + "_hit") if w != "" else 0.0
 
 
 ## How long the struck body flashes white for a hit of this tier (a tick, "", flashes the light one).

@@ -3,7 +3,8 @@ extends "res://tools/clip_shots.gd"
 ## juggernaut heavy: the footage's two) taking the plain jump and the 3 m terrace drop through HunterAnim as in a
 ## match (its squash over the .glb land clip, WardenClips.land_play), from CAM_PITCH (lower than the match camera's 66
 ## deg, so the squash's height reads) at CAM_DIST, every 1/30 s into <dir>/<way>/<class>/f000.png... plus
-## key.json (the landing frame).
+## key.json (the landing frame). A native Hunter (WardenNative) plays through its Meshy clips; --before zeroes
+## HunterAnim's squash (meta FEEL) on it, the native path as it was before its squash was built.
 ## tools/land_weight_video.sh tiles them into <way>.mp4. Needs a renderer (jobq --needs gpu).
 
 const DT := 1.0 / 30.0
@@ -13,10 +14,13 @@ const CAM_PITCH := 25.0  # deg down to the Hunter
 const RUN_UP := 0.4  # s of standing before the jump
 const TAIL := 0.9  # s on the ground after the landing
 
+var before := false
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
+	before = OS.get_cmdline_user_args().has("--before")
 	frame_px = 480
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):
@@ -45,7 +49,7 @@ func _hunter(id: String, dir: String, way: String) -> void:
 	holder.add_child(model)
 	for k in 30:
 		await tree.process_frame
-	var sync := model.get_node("Warden/Sync")
+	var sync := model.get_node("Warden/Native") if model.has_node("Warden/Native") else model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var anim := HunterAnim.new(model, 1)
 	var air: float = JumpLand.air_time(way)
@@ -55,6 +59,8 @@ func _hunter(id: String, dir: String, way: String) -> void:
 		var s: Dictionary = JumpLand.arc(t, false, way)
 		model.position.y = float(s["y"])
 		anim.update(DT, s)
+		if before:
+			model.set_meta(WardenClips.FEEL, Vector2.ZERO)
 		sync.call("_process", DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 		i += 1
@@ -62,6 +68,7 @@ func _hunter(id: String, dir: String, way: String) -> void:
 	var f := FileAccess.open(dir.path_join("key.json"), FileAccess.WRITE)
 	f.store_string(JSON.stringify({"land": int(round((RUN_UP + air) / DT)), "fps": 30}))
 	f.close()
-	print("LW %s %s %s frames=%d land=%d" % [Arch.weight(id), id, way, i, int(round((RUN_UP + air) / DT))])
+	var what := [Arch.weight(id), id, way, i, int(round((RUN_UP + air) / DT)), sync.name]
+	print("LW %s %s %s frames=%d land=%d path=%s" % what)
 	model.queue_free()
 	await tree.process_frame
