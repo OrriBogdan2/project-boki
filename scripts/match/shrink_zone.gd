@@ -1,6 +1,6 @@
 class_name ShrinkZone
 extends RefCounted
-## The closing zone (docs/decisions/0060-shrinking-zone.md, the 11-11 order). Each expedition picks
+## The closing zone (docs/decisions/0138-shrinking-zone.md, the 11-11 order). Each expedition picks
 ## its final area from the shared match seed, the way HotZone picks its region, so every player gets
 ## the same one: a dock or outpost, and the circle round it leaning into its island, so the last exits
 ## are inside. The playable circle closes toward it in phases (content/rules/shrink_zone.json): it

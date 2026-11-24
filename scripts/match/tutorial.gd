@@ -317,9 +317,12 @@ func _finish(sid: String) -> void:
 		step += 1
 	flag = false
 	m.player.stats.erase("glide_presses")
-	wait = 0.6
-	done_t = DONE_T
-	m.sfx("unlock", null, -9.0)
+	if not TutorialHints.quiet(sid):
+		wait = 0.6
+		done_t = DONE_T
+		m.sfx("unlock", null, -9.0)
+	elif TutorialHints.settles(sid):
+		wait = 0.6  # (the Boki gets its lead on the next leg: no banner, no sting, only the pause)
 	if resumed:
 		_restore()
 	_enter()
@@ -405,6 +408,7 @@ func retry() -> void:
 	_back()
 	_enter()
 	if m.hud:
+		m.hud.msgs.clear()  # (a hint step does not clear the lane when it starts: the retry line leads)
 		m.hud.toast(retry_tip(), MINT)
 
 
@@ -422,13 +426,15 @@ func _back() -> void:
 func _enter() -> void:
 	var p := m.player
 	var sid := id()
+	var quiet: bool = TutorialHints.quiet(sid)
 	t = 0.0
-	card_t = 0.0
-	TutorialStrip.chime(m)
-	m.bubbles.clear()  # one voice at a time: the old step's lines go, the banner has the floor
-	if m.hud:
-		m.hud.msgs.clear()
-		m.hud.msgs.hold = true
+	card_t = CARD_T if quiet else 0.0  # (a hint step has no banner, so nothing waits for it)
+	if not quiet:
+		TutorialStrip.chime(m)
+		m.bubbles.clear()  # one voice at a time: the old step's lines go, the banner has the floor
+		if m.hud:
+			m.hud.msgs.clear()
+			m.hud.msgs.hold = true
 	stall_t = 0.0
 	nag_t = 0.0
 	flash_t = 0.0
@@ -449,6 +455,7 @@ func _enter() -> void:
 	var slot := TutorialCamps.pick_slot(sid)
 	if slot != "":
 		camps.reach(int(TutorialCamps.PICK_LVL[slot]))  # (its point is always there to spend)
+		TutorialHints.auto_pick(self, sid)
 	match sid:
 		"sec", "gkey", "summon", "pack", "kin", "hook", "ult":
 			camps.spawn(sid)
@@ -468,7 +475,9 @@ func _enter() -> void:
 		p.gear[0] = {"id": "grapple", "rar": 1}  # (skipped ahead past the glove: it is yours anyway)
 		p.refresh_gear()
 	_words()
-	if detail != "" and m.hud:
+	if quiet:
+		TutorialHints.say(self)
+	elif detail != "" and m.hud:
 		m.hud.tip(detail)  # (once a step: the strip is one line, the plain words wait in the message lane)
 
 
@@ -512,7 +521,7 @@ func _is_done(sid: String, dt: float) -> bool:
 		"land":
 			return not p.dropping
 		"points":
-			return t >= POINTS_T or int(p.slot_lv["sec"]) > 0
+			return TutorialHints.quiet(sid) or t >= POINTS_T or int(p.slot_lv["sec"]) > 0
 		"sec":
 			var cast := _rmb_done()
 			if cast:
@@ -576,7 +585,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			seen["ult"] = seen.get("ult", false) or flag
 			return _camp_done(sid)
 		"ranks":
-			return p.skill_pts <= 0 or t >= RANK_WAIT_T
+			return TutorialHints.quiet(sid) or p.skill_pts <= 0 or t >= RANK_WAIT_T
 		"wayout":
 			var o := outpost()
 			return not o.is_empty() and m.exits.in_yard(o, p)
@@ -728,6 +737,8 @@ func _stall(dt: float) -> void:
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
 		nag_t = 2.5
 		flash_t = 2.5
+		if TutorialHints.quiet(id()):
+			TutorialHints.say(self, true)  # (stuck on a hint step: say its line again)
 		if m.player.kin and m.player.kin.comp:
 			m.player.kin.comp.nag()
 
@@ -796,6 +807,8 @@ func _words() -> void:
 		line = String(alt["sec_hold"])
 	elif sid in ["summon", "pack"] and sm.alt_key(sid) != "":
 		line = String(alt[sm.alt_key(sid)])
+	if TutorialHints.line(sid) != "":
+		line = TutorialHints.line(sid)
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()
