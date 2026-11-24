@@ -1592,6 +1592,107 @@ def rebuild_r11(out_path, in_path, pack_path=None):
     rebuild_stages(out_path, in_path, stages)
 
 
+
+# r19: the r11 socket dome (cap_shoulder) copied each ring's UV from its nearest rim vertex, so its fan showed the
+# rim's strap/goo texels smeared into grey/black streaks once the r18 slim arm stopped hiding it. Its triangles are
+# found by their near-zero UV area in SOCKET_BOX; their vertices are duplicated with one UV: the most uniform
+# skin texel of the left shoulder (closest to its median skin colour), so the dome reads as plain skin.
+SKIN_UV_RATIO, SKIN_TOL = 0.01, 25.0  # dome = UV/3D area below this x the median; skin = albedo within this of SKIN_RGB
+SKIN_MODE = os.environ.get("SKIN_MODE", "mirror")  # mirror: the left shoulder's UVs (one island); flat: one texel
+SKIN_BOX = (np.array([0.0, 1.15, -0.5]), np.array([0.45, 1.75, 0.15]))  # m: the left shoulder (UV source, rest pose)
+
+
+def skin_socket(js, b, out, rig):
+    prim = js["meshes"][0]["primitives"][0]
+    att = prim["attributes"]
+    arr = read_attrs(js, b, att)
+    P, UV, f = arr["POSITION"], arr["TEXCOORD_0"], prim_faces(js, b, prim).astype(np.int64)
+    a3 = np.linalg.norm(np.cross(P[f[:, 1]] - P[f[:, 0]], P[f[:, 2]] - P[f[:, 0]]), axis=1) / 2
+    u = UV[f]
+    a2 = np.abs((u[:, 1, 0] - u[:, 0, 0]) * (u[:, 2, 1] - u[:, 0, 1]) - (u[:, 2, 0] - u[:, 0, 0]) * (u[:, 1, 1] - u[:, 0, 1])) / 2
+    ratio = a2 / np.maximum(a3, 1e-12)
+    lo, hi = SOCKET_BOX
+    c = P[f].mean(1)
+    dome = ((c >= lo) & (c <= hi)).all(1) & (ratio < SKIN_UV_RATIO * np.median(ratio[a3 > 0]))
+    mat = js["materials"][prim["material"]]
+    img = js["images"][js["textures"][mat["pbrMetallicRoughness"]["baseColorTexture"]["index"]]["source"]]
+    tex = np.asarray(Image.open(io.BytesIO(bytes(n.view_bytes(js, b, img["bufferView"])))).convert("RGB"), np.float32)
+    th, tw = tex.shape[:2]
+    col = tex[np.clip((UV[:, 1] % 1) * th, 0, th - 1).astype(int), np.clip((UV[:, 0] % 1) * tw, 0, tw - 1).astype(int)]
+    used = np.zeros(len(P), bool)
+    used[f[~dome]] = True
+    slo, shi = SKIN_BOX
+    src = np.where(used & ((P >= slo) & (P <= shi)).all(1))[0]
+    skin_rgb = np.median(col[src], 0)
+    src = src[np.linalg.norm(col[src] - skin_rgb, axis=1) < SKIN_TOL]
+    dv = np.unique(f[dome])
+    new = {k: [arr[k][dv]] for k in arr}
+    if SKIN_MODE == "mirror":  # UVs of the mirrored point on the left shoulder's biggest UV island (smooth, textured)
+        keep = np.zeros(len(P), bool)
+        keep[src] = True
+        sf = f[~dome][keep[f[~dome]].all(1)]
+        g = sp.coo_matrix((np.ones(len(sf) * 2), (np.r_[sf[:, 0], sf[:, 1]], np.r_[sf[:, 1], sf[:, 2]])), (len(P),) * 2)
+        lab = connected_components(g, directed=False)[1]
+        isl = np.bincount(lab[src]).argmax()
+        src = src[lab[src] == isl]
+        near = src[cKDTree(P[src]).query(P[dv] * np.array([-1.0, 1.0, 1.0]))[1]]
+        new["TEXCOORD_0"] = [UV[near]]
+        return_note = ("mirror island", len(src))
+    else:  # one texel for the whole dome: per-vertex UVs from scattered atlas islands interpolate into noise
+        tu = np.clip((UV[src, 0] % 1) * tw, 4, tw - 5).astype(int)
+        tv = np.clip((UV[src, 1] % 1) * th, 4, th - 5).astype(int)
+        std = np.array([tex[y - 4:y + 5, x - 4:x + 5].std((0, 1)).sum() for x, y in zip(tu, tv)])
+        best = src[np.argmin(std + np.linalg.norm(col[src] - skin_rgb, axis=1))]
+        new["TEXCOORD_0"] = [np.repeat(UV[best][None], len(dv), 0)]
+        return_note = ("flat texel", col[best].round().tolist())
+    remap = np.full(len(P), -1)
+    remap[dv] = len(P) + np.arange(len(dv))
+    f2 = f.copy()
+    f2[dome] = remap[f[dome]]
+    append_attrs(js, out, att, arr, new)
+    full = f2.astype(np.uint32).ravel()
+    js["accessors"].append({"bufferView": out.add_view(full.tobytes()), "componentType": 5125, "count": int(full.size), "type": "SCALAR"})
+    prim["indices"] = len(js["accessors"]) - 1
+    return int(dome.sum()), len(dv), skin_rgb.round().tolist(), return_note
+
+
+STRAP_MAX_LIFT = 0.06  # m: a strap row never moves further than this
+
+
+def lift_strap(js, b, out, rig):
+    """r19: the right shoulder strap (add_straps) ran under the r11 socket dome, so only torn dark pieces of it showed
+    once the slim arm stopped hiding the shoulder. Each strap row is lifted along its normal until it clears the skin
+    under it by STRAP_LIFT (both sides; the left one already clears, so it barely moves), then smoothed along the path."""
+    prims = js["meshes"][0]["primitives"]
+    sp_ = next(p for p in prims if js["materials"][p["material"]]["name"] == "strap-leather")
+    skin = prims[0]
+    B = n.floats(js, b, skin["attributes"]["POSITION"])[np.unique(prim_faces(js, b, skin))]
+    lo, hi = SOCKET_BOX
+    B = B[((B >= lo) & (B <= hi)).all(1)]  # only the dome side's shoulder (not the jaw/ear the strap passes)
+    S = n.floats(js, b, sp_["attributes"]["POSITION"]).copy()
+    N = n.floats(js, b, sp_["attributes"]["NORMAL"])
+    rows = len(S) // 2
+    lifts = np.zeros(rows)
+    for r in range(rows):
+        i = 2 * r
+        mid, nn = (S[i] + S[i + 1]) / 2, N[i] / np.linalg.norm(N[i])
+        d = B - mid
+        h = d @ nn
+        tang = np.linalg.norm(d - h[:, None] * nn, axis=1)
+        near = (np.abs(d[:, 0]) < STRAP_W / 2 + 0.01) & (tang < 0.03) & (np.abs(h) < STRAP_MAX_LIFT)
+        lifts[r] = min(STRAP_MAX_LIFT, max(0.0, h[near].max() + STRAP_LIFT)) if near.any() else 0.0
+    side_rows = rows // 2  # rows of the first strap, then the second
+    for k in range(2):
+        seg = lifts[k * side_rows:(k + 1) * side_rows]
+        sm = np.maximum(seg, np.convolve(np.pad(seg, 1, mode="edge"), np.ones(3) / 3, "valid"))
+        lifts[k * side_rows:(k + 1) * side_rows] = sm
+    S += np.repeat(lifts, 2)[:, None] * N / np.linalg.norm(N, axis=1, keepdims=True)
+    acc = out.add_floats(S.astype(np.float32), "VEC3")
+    js["accessors"][acc].update(min=S.min(0).tolist(), max=S.max(0).tolist())
+    sp_["attributes"]["POSITION"] = acc
+    return np.round(lifts.max(), 3), int((lifts > 0.002).sum())
+
+
 def rebuild_stages(out_path, in_path, stages):
     """Each stage writes the file and the next reloads it (new arrays live in the new file's buffer)."""
     src = in_path
@@ -1684,6 +1785,8 @@ if __name__ == "__main__":
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm", hang_goo_arm), ("tail gather", hang_tail)])
     elif sys.argv[1] == "--r18":  # r18: the slim Meshy goo arm swapped in (argv: OUT IN ARM.glb); the chain's clips stay
         rebuild_stages(sys.argv[2], sys.argv[3], [("goo arm swap", lambda js, b, out, rig: swap_goo_arm(js, b, out, rig, sys.argv[4]))])
+    elif sys.argv[1] == "--r19":  # r19: the r18 glb's socket dome gets clean skin UVs (argv: OUT IN)
+        rebuild_stages(sys.argv[2], sys.argv[3], [("socket skin", skin_socket), ("strap lift", lift_strap)])
     elif sys.argv[1] == "--r12":  # the r12 stage on the r11 glb (re-runnable)
         rebuild_stages(sys.argv[2], sys.argv[3], [("tail gather", gather_tail)])
     elif sys.argv[1] == "--r11":
