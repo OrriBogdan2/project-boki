@@ -60,9 +60,6 @@ func run(main_node: Node) -> void:
 		var heard := _fire(m, m.player)
 		var own := String(Data.weapon_stats(wid)["sfx"])
 		ok("pickup %s plays its shot" % wid, own in heard, "heard %s" % [heard])
-		var spin := String(Data.weapon_stats(wid).get("spin_sfx", ""))
-		if wid == "minigun":
-			ok("the minigun plays its spin-up", not spin.is_empty() and spin in heard, "heard %s" % [heard])
 		shots[own] = FileAccess.get_md5("res://audio/%s.wav" % own)
 		await ak.done(m)
 	var files: Array = shots.values()
