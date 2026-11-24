@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://beeuow6vajsan"
-path="res://.godot/imported/limpetor_limpetor_normal.webp-f540725bd4b3297747d3e95a35479e8e.ctex"
+path.bptc="res://.godot/imported/limpetor_limpetor_normal.webp-f540725bd4b3297747d3e95a35479e8e.bptc.ctex"
+path.astc="res://.godot/imported/limpetor_limpetor_normal.webp-f540725bd4b3297747d3e95a35479e8e.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "325cba5cf59fb9ec07ce9ac1f7bdf7fb"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/limpetor/limpetor_limpetor_normal.webp"
-dest_files=["res://.godot/imported/limpetor_limpetor_normal.webp-f540725bd4b3297747d3e95a35479e8e.ctex"]
+dest_files=["res://.godot/imported/limpetor_limpetor_normal.webp-f540725bd4b3297747d3e95a35479e8e.bptc.ctex", "res://.godot/imported/limpetor_limpetor_normal.webp-f540725bd4b3297747d3e95a35479e8e.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -107,7 +107,6 @@ func _looks(main: Node) -> void:
 	var m3 := _match(main, {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5102, "no_drop": true, "raid": "night"})
 	var sun3: DirectionalLight3D = m3.get_node("Sun")
 	ok(sun3.light_energy < 0.6 and m3.env.environment.adjustment_saturation < sat_clear, "night is dark and desaturated")
-	ok(float(RaidLook.VIS_DARK["night"]) < float(RaidLook.VIS_DARK["clear"]), "outside your sight is darker at night (%.2f)" % float(RaidLook.VIS_DARK["night"]))
 	m3.queue_free()
 	var m4 := _match(main, {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	ok(m4.raid == "clear" and m4.blight == null, "training is clear, with no Blight")

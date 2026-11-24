@@ -1,5 +1,5 @@
 class_name BlightNests
-## Blight nests (docs/decisions/0061-blight-nests.md, docs/SPAWNS.md): the only place Skitters come
+## Blight nests (docs/decisions/0152-blight-nests.md, docs/SPAWNS.md): the only place Skitters come
 ## from. Fixed spots picked from the match seed and the world alone, so every client places them the
 ## same; each holds a fixed stock. Something wakes a nest (a hunter walking up, a loud noise, a hit,
 ## a Warden's shriek, the tide on its clock): it pulses and hisses for warn_s, then what it holds

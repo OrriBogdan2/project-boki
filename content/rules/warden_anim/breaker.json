@@ -181,7 +181,8 @@
 	"turn": {"dur": 0.34, "lift": 0.36},
 	"cc": {"pull": 0.22, "tug_hz": 0.8, "twist": 0.05, "bow": 0.2},
 	"procedural": [
-		"base"
+		"base",
+		"swim"
 	],
 	"upper": [
 		"hips",
@@ -207,6 +208,15 @@
 		"emote": "happy",
 		"hit": "angry",
 		"hit_t": 1.2,
+		"combat": "angry",
+		"combat_t": 4.0,
+		"tex_faces": {
+			"eyes-v95": {
+				"angry": "res://art/wardens/breaker/breaker_v95_angry.jpg",
+				"determined": "res://art/wardens/breaker/breaker_v95_angry.jpg",
+				"sad": "res://art/wardens/breaker/breaker_v95_angry.jpg"
+			}
+		},
 		"companion": "x_fish",
 		"lure": "lure",
 		"flare_kmoves": [

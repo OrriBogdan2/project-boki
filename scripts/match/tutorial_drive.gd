@@ -12,7 +12,7 @@ const MISS_OFF := 3.0      # m a missed aim is off the target
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
 const KEYS := [      # the action inputs
-		"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
+		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var human := false
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input
@@ -159,6 +159,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if sid == "sec":
 		_rmb(m, tu)
 	if best == null:
+		if sid == "summon" or sid == "pack":
+			_summon(m, tu)      # (the monster fell in a window called back early: the Boki still comes out again)
 		return
 	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)
