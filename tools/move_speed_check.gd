@@ -16,7 +16,7 @@ const DT := 1.0 / 60.0
 const SETTLE_S := 0.5  # s held before timing: well past the ~0.1 s to reach the walk
 const MEASURE_S := 1.0  # s timed
 const TOL := 0.02  # m/s: how far a walk may sit off its target (rounding over a step)
-const GAIT_S := 2.0  # s timed per gait row (run, walk, crouch)
+const GAIT_S := 1.0  # s timed per gait row (run, walk, crouch)
 const WALK_TILT := 0.5  # stick tilt of the walk row: the speed is that share of the run
 const GAIT_LANE := 20  # m of flat lane: 2.5 s at the fastest run is ~14 m
 const RULES := "res://content/rules/hunter_move.json"
@@ -46,7 +46,6 @@ func run(m: Node) -> void:
 			var v: Vector2 = row[1]
 			var line := "%-11s %-10s = %.2f m/s (%.3f screens/s)  target %.2f" % [arch, row[0], v.x, v.y, want]
 			ok(absf(v.x - want) <= TOL, line)
-		await _gait(arch)
 	print("MOVE SPEED CHECK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -61,33 +60,11 @@ func _data_run(arch: String, rules: Dictionary) -> float:
 ## One "MSPEED gait" row per gait for `arch` (run, walk, crouch): the median step speed over GAIT_S in an
 ## expedition on a flat lane, against the data's run speed (run), its WALK_TILT share (walk) and its sneak_speed
 ## share (crouch). Also fails when the hunter's base_speed is not the data's run speed.
-func _gait(arch: String) -> void:
+func _gait(arch: String, mt: Match, start: Vector3) -> void:
 	var rules: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(RULES))
 	var fast := _data_run(arch, rules)
 	var sneak := float(rules["physics"]["sneak_speed"])
-	var opts := {
-		"teams": 10,
-		"squad": 3,
-		"tier": 0,
-		"length": 1e9,
-		"seed": 4242,
-		"no_drop": true,
-		"cls": Arch.weight(arch),
-		"arch": arch,
-		"weapon": Arch.signature(arch)
-	}
-	Save.d = Save.fresh()
-	var mt := Match.new()
-	main.add_child(mt)
-	mt.start(opts)
-	for mb in mt.mobs:
-		mb.queue_free()
-	mt.mobs.clear()
 	var p: Hunter = mt.player
-	for h in mt.hunters:
-		if h != p:
-			h.teleport(h.pos + Vector3(0, 0, 80))
-	var start := flat_lane(mt.world, p.pos, GAIT_LANE)
 	ok(absf(p.base_speed - fast) <= 0.001, "gait %-11s base_speed = %.3f m/s  data %.3f" % [arch, p.base_speed, fast])
 	var rows := [
 		["run", 1.0, false, fast], ["walk", WALK_TILT, false, fast * WALK_TILT], ["crouch", 1.0, true, fast * sneak]
@@ -101,8 +78,6 @@ func _gait(arch: String) -> void:
 		Input.action_release("crouch")
 		var want: float = row[3]
 		ok(absf(v - want) <= TOL, "gait %-11s %-6s = %.2f m/s  data %.2f" % [arch, row[0], v, want])
-	mt.queue_free()
-	await main.get_tree().process_frame
 
 
 ## [m/s, screen widths/s] for `arch` walking on cleared flat ground in an expedition (10 trios) or the Training Grounds.
@@ -131,9 +106,12 @@ func _match_walk(arch: String, training: bool) -> Vector2:
 	for h in mt.hunters:
 		if h != p:
 			h.teleport(h.pos + Vector3(0, 0, 80))
-	p.teleport(flat_lane(mt.world, p.pos, 14))
+	var start := flat_lane(mt.world, p.pos, GAIT_LANE if not training else 14)
+	p.teleport(start)
 	p.vel = Vector3.ZERO
 	var v := _median_walk(func() -> Vector3: return p.pos, func() -> void: mt._process(DT))
+	if not training:
+		_gait(arch, mt, start)  # same match: no second Match.start per hunter
 	var across := CamRig.style_across(mt.cam.style_id) * mt.cam.dist_mul * mt.cam.zoom
 	mt.queue_free()
 	await main.get_tree().process_frame
