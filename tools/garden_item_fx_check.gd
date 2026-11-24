@@ -83,14 +83,14 @@ func run(m: Node, mode: String = "check") -> void:
 	rec["lean"] = {}
 	ok(_give(k, "bramble_honey") and fx.live.size() == GardenItemFx.RING_SEGS, "Bramble Honey: the lean ring")
 	ok(
-		_count(fx, "c0", grass) == 0 and _count(fx, "c1", grass) == GardenItemFx.RING_SEGS / 2,
+		_count(fx, "c0", grass) == 0 and _count(fx, "c1", grass) == int(GardenItemFx.RING_SEGS / 2.0),
 		"it fills from empty to half, in Grass's colour"
 	)
 	await _settle(fx)
 	ok(
 		(
 			_give(k, "rinse_melon")
-			and _count(fx, "c0", grass) == GardenItemFx.RING_SEGS / 2
+			and _count(fx, "c0", grass) == int(GardenItemFx.RING_SEGS / 2.0)
 			and _count(fx, "c1", GardenItemFx.DIM) == GardenItemFx.RING_SEGS
 		),
 		"Rinse Melon: the half ring drains to empty"
