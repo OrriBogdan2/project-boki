@@ -17,7 +17,10 @@ const STATES := [  # [name, held inputs, s held before the shot]
 ]
 const PHASE_SECS := 1.0
 const EYE_OFF := Vector2(2.4, 3.8)  # m: where the --eye camera stands (x, z) from her
-const EYE_STATES := [["idle", {}, 1.5], ["run", {"move": Vector2(1, 0.4)}, 1.0], ["fire", {"fire": true}, 0.25]]
+# (fire twice: 0.25 s and 0.45 s into the swing, both ends of the Attack clip's arm lift)
+const EYE_STATES := [
+	["idle", {}, 1.5], ["run", {"move": Vector2(1, 0.4)}, 1.0], ["fire", {"fire": true}, 0.25], ["fire2", {"fire": true}, 0.45]
+]
 var face := false
 var close := 0.2
 # --eye=<m>: the game camera dropped to this height above her feet, level, three-quarter front; each state also writes
