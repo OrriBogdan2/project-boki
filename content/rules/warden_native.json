@@ -18,7 +18,7 @@
 		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch",
 			"lmb": "tarek_throw", "lmb_hold": "tarek_punch", "rmb": "tarek_slam", "e": "tarek_row", "r": "tarek_spine"},
 		"walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "slot_rate": 1.0, "jump_rate": 1.3, "crouch_arms_from": "walk",
-		"orbits": {"orbit_stones": "Head"}},
+		"orbits": {"orbit_stones": "Head", "orbit_shards": "LeftHand"}},
 	"breaker": {"meshy_native": false},
 	"cinder": {"meshy_native": true, "hand": "RightHand", "bones": {"jet.0": "RightFoot", "jet.1": "LeftFoot"},
 		"props": {"jet.0": ["flame-jet"], "jet.1": ["flame-jet"]}, "stretch": {"kmove": "lw_jet", "y": 3.0, "rest": 0.06},

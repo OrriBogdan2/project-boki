@@ -103,11 +103,15 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	nat.name = "Native"
 	nat.art_id = WardenGlb.art(arch)
 	nat.setup(model, glb, e)
+	var look := WardenGlb.look(WardenGlb.art(arch))  # (the contract path's glow and far-hide, on the copied props)
+	WardenGlb._halos(model, glb, look)
+	WardenFx.bloom(model, glb, look)
+	WardenGlb._far_hide(glb, look)
 	if nat.wall:
 		nat.wall.heavy = Arch.weight(arch) == "heavy"  # (as WardenGlb.dress: a heavy Hero crouches deeper)
 	glb.add_child(nat)
 	if bool(e.get("toon", true)):
-		var own := WardenGlb.look(WardenGlb.art(arch))
+		var own := look
 		var mats: Array = model.get_meta("mats", [])
 		mats.append_array(WardenGlb._toon(glb, lk, MantleLook.warden(arch), own, arch))
 		model.set_meta("mats", mats)
@@ -494,14 +498,12 @@ func _chain(b: int, into: Dictionary) -> void:
 ## The contract model's orbits (data "orbits": orbit node -> Meshy bone; Tenzo's three seeing-stones round his head)
 ## are separate props, not in Meshy's mesh: each is copied from the Hunter's contract .glb onto a holder that follows
 ## Meshy's bone's place (not its turn, so the ring stays level when the clip bows the head), at the same place against
-## the head as on the contract model and at the same size in metres, and
+## the bone as on the contract model and at the same size in metres, and
 ## WardenOrbits turns it as on the contract path (circling, bobbing, the eyes turning to what the kit watches).
 func _add_orbits(glb: Node3D) -> void:
 	var want: Dictionary = d.get("orbits", {})
 	if want.is_empty():
 		return
-	var head_m := glb.transform * WardenGlb.model_xf(glb, skel)
-	head_m = head_m * skel.get_bone_global_rest(skel.find_bone("Head"))
 	for orb in want:
 		var src := _orbit(String(orb))
 		if src.is_empty():
@@ -514,15 +516,19 @@ func _add_orbits(glb: Node3D) -> void:
 		skel.add_child(at)
 		var nd := src[0] as Node3D
 		var sk_m := glb.transform * WardenGlb.model_xf(glb, skel)
-		var shift := head_m.origin - (src[2] as Transform3D).origin  # (Meshy's head pivot vs the contract's)
+		# Meshy's bone vs the contract's: the head for a head orbit, the bone it rides there for any other
+		var ride := sk_m * skel.get_bone_global_rest(b)
+		var ref: Transform3D = src[2] if String(want[orb]) == "Head" else src[3]
+		var shift := ride.origin - ref.origin
 		nd.transform = (sk_m.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D))
 		at.add_child(nd)
 		followers.append([at, b])
 	orbits.setup(skel)
 
 
-## The orbit node `orb` of this Hunter's contract model (a copy), its rest in model space and the contract head's ([]
-## if none). The contract .glb is loaded (ResourceLoader keeps it) and instanced only for the copy.
+## The orbit node `orb` of this Hunter's contract model (a copy), its rest in model space, the contract head's and the
+## rest of the contract bone it rides ([] if none). The contract .glb is loaded (ResourceLoader keeps it) and instanced
+## only for the copy.
 func _orbit(orb: String) -> Array:
 	var path := "%s/%s/%s.glb" % [WardenGlb.DIR, art_id, art_id]
 	if not ResourceLoader.exists(path):
@@ -535,8 +541,9 @@ func _orbit(orb: String) -> Array:
 	if csk and at and csk.find_bone(at.bone_name) >= 0:
 		var sk_m := WardenGlb.model_xf(con, csk)
 		var rest := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name)) * nd.transform
+		var bone := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name))
 		var head := sk_m * csk.get_bone_global_rest(WardenSkeleton.find(csk, "head"))
-		out = [nd.duplicate() as Node3D, rest, head]
+		out = [nd.duplicate() as Node3D, rest, head, bone]
 	con.free()
 	return out
 
