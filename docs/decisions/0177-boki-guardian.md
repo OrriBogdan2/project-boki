@@ -1,4 +1,4 @@
-# 0040: Guardian summon
+# 0177: Guardian summon
 
 - **Status:** accepted (prototype, behind the boki_wisps setting)
 - **Date:** 2026-11-09

@@ -717,7 +717,7 @@ authors see what the game will do.
 ## 7. Trigger edge: when each ability commits
 
 PARITY FIRST (briefs/DECISIONS.md, 2026-11-07): the source decides when a key commits. Owner notes win over the
-data, the data over the footage. Tags: **[O]** owner note, **[D]** `briefs/supervive-data/supervive_kits.md`
+data, the data over the footage. Tags: **[O]** owner note, **[D]** the target-feel kit brief (briefs/)
 (`kits:<line>`), **[F]** footage sheet `briefs/hero-ref/<sheet>.md:<line>`, **[?]** the source can't settle it
 (ours stays). Slots are the default binds; the HUD shows the bound key (`Settings.key_cap`).
 

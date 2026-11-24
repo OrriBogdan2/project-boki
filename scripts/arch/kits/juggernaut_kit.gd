@@ -748,7 +748,7 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	var spin: bool = c.get("e", false)
 	var dropping: bool = c.get("air", false) and not spin
-	var held: bool = c.get("hold", false)
+	var holding: bool = c.get("hold", false)
 	if dropping:
 		if not spend_air(): return
 	elif not spend_rmb():
@@ -759,7 +759,7 @@ func fire_rmb(c: Dictionary) -> void:
 		_chain_lunge(lunge_k(float(c.get("t", 0.0))))      # charged while tethered: along the chain
 	elif dropping:
 		meteor.start()
-	elif held:
+	elif holding:
 		var held_t := float(c.get("t", 0.0))
 		_lunge(lunge_k(held_t), perfect_window(held_t) >= 0)
 	else:
