@@ -48,6 +48,13 @@ Toasts ("Fever is lit", "Bond full!") sit in the right rail under the alive coun
 ## First-time armour hint waits out the fight (11-24)
 "Hits on Hunters build armour. XP comes from monster kills." (`ArmourHint`, drawn by `ArmorHud.note` just over the LV / XP row) comes from your first hit on a Hunter, so it always landed mid-fight: its box sat on the vitals and on the fight next to them. While `Hud.in_fight()` is true it now waits, keeping its whole 6 s for the next lull. `--armour-hint-check` holds it.
 
+## Lace's Hail Wall laces part round a Hunter (11-24)
+The wall's 32 red threads (`PinFx.rain_on`: an X between each pair of posts and an X across the ground) ran straight
+through any Hunter on or near the arc: a red zigzag over the fight. A lace whose ground line passes within
+`PinFx.LACE_CLEAR` (0.8 m) of a shown Hunter's feet is hidden while it does (`PinFx._part_laces`, every drawn frame);
+the posts, the ground laces elsewhere, the arrows and the blue burn flames still mark the wall. Purely visual.
+`--archer-combo-check` holds it.
+
 ## What sits on a Hunter (11-20, stabilize sprint: declutter only)
 `--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
 Lace / Cinder, Vex, Kael and Cinder, Lace, Vex / Lace, Cinder, Kael), 10 frames a fight, and counts every element over
