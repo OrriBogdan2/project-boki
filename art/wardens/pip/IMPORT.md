@@ -117,3 +117,12 @@ sampled at the key's time, so tracks with other key counts are read right). Ops:
 no pair worse. Stretch Crouch 13.7x / run 10.7x unchanged. Tried and dropped: Idle thighs 6/8 deg apart (cape hem into shins
 +0.4/+1.0 cm), any R-arm push in run (R forearm into torso 2.5 -> 4.6-5.0), Jump_Run arm pushes (wing into R paw +0.9),
 Attack wing yaw damp 30/50 % (wing into back +0.5-2.3 cm, and the A7-A9 fault is the chest's forward pitch, not yaw).
+
+## 11-25 round 7: sun/cloud back to live (body judged alone), wings on the card slot
+Tool (job folder, not in the repo): `/home/boki/gens/hunter-round-1124/meeko/r7/tools/r7_glb.py OUT BODY(r6) LIVE(main)`: surfaces 1-5
+(sun, cloud, drop, both mood faces), their materials and the faces atlas from origin/main's glb; body, skin, all 6 clips and the
+wing texture byte-identical to round 6 (hash-checked). PR #764's bigger sun/cloud stay in #764. The wing material
+`meshy_textured-wing` -> `card-wing`, so the wings draw with `warden_card.gdshader`: a wing seen edge-on at the match camera fades
+(far_edge), which removes the pale streak the far wing drew down her back and tail (live has it too). pip's `card` look in
+warden_look.json: albedo [0.62, 0.64, 0.72] x glow 1.6 keeps both wing sides the texture's pale lavender (looks A-D in
+r7/shots: A peach under the warm sun, C/D dark blue on the unlit side). Cards cast no shadow, so the big wing shadow is gone.
