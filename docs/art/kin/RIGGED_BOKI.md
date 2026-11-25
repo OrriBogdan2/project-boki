@@ -23,7 +23,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `tools/boki/*_fusion.py`, `build_fusion.py`, `scripts/match/boki_fusion.gd` | Fusion parts on the Hunter's torso |
 | `tools/boki/face.py` | Eye domes, lids, brows, mouth: one vertex grid, one blend shape per expression |
 | `tools/boki/boki_clips.py`, `*_anim.py` | Shared clips, then each species' skeleton and own clips |
-| `tools/boki/boki_rig.py`, `build_boki.py` | Armature, weights from the primitives, sampling, .glb export |
+| `tools/boki/boki_rig.py`, `build_boki.py`, `reclip.py` | Armature, weights from the primitives, sampling, .glb export; `reclip.py` re-keys a built .glb's clips from its `*_anim.py` (body, face and atlases kept) |
 | `tools/boki/boki_scan.py`, `boki_meshy.py`, `pose_shots.py` | A body from a Meshy model of the sheet on the same rig (Kestrike, Cairnback, Gongibbon `gibbelle`, Effigeetle `goliathite`, Skateron `hoarheron`, Frigatee `floenatee`): `MESHY_BOKI_RECIPE.md` |
 | `scripts/match/boki_rig.gd` | Loader and driver (`BokiRig`): clip from metas, face on top, marks and colours |
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
@@ -205,7 +205,7 @@ for 1/30 s and every loop stopped a frame at its wrap (and ran a frame long). `b
 rebake (only the key times change; `--check` lists any glb that still starts late). That took most seams from
 1.1-1.9 to under 1.0. What is left over 1.0 is a real break: a bone turns or changes speed at the loop point
 (on the 11-14 merge with main's planted-paw and scan glbs: gloamshell walk 2.0, cairnback walk 1.6, the
-three glomwort-rig scans 1.0-1.4, caecilith walk 1.4, kestrike walk 1.3, puddlet, lodestick, mossgrade,
+two glomwort-rig scans 1.0-1.4, caecilith walk 1.4, kestrike walk 1.3, puddlet, lodestick, mossgrade,
 burrlet and kindlewren walk 1.0-1.15; `SEAM_OVER`, `docs/DEBT.md`).
 
 A seam counts the wrap's jump, so a quick beat that runs up to the loop's end reads as a hitch: wisplet's idle wing
@@ -309,7 +309,8 @@ itself. Side-view strips, zapple, lodestick, mossgrade and cindle (top row 2.4 m
 | thrumbird | EXEMPT: flyer, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 8.1 |
 | selenfin | EXEMPT: flyer (fins), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.0 |
 | zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 0.9 |
-| glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
+| glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.5 |
+| goliathite | EXEMPT: scan (stumps ride the body), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.2 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
 
 ## Legs for borrowed-rig species (`tools/boki/auto_legs.py`)
