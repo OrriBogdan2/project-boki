@@ -21,7 +21,7 @@ func run(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	var opts := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "demo_kin": "cindle"}
-	await m.start(opts)
+	m.start(opts)
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)
 	var p: Hunter = m.player

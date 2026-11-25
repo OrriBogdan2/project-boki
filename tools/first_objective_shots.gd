@@ -29,7 +29,7 @@ func run(mn: Node) -> void:
 	m = Match.new()
 	main.add_child(m)
 	main.current = m
-	await m.start(
+	m.start(
 		{
 			"teams": 2,
 			"squad": 1,

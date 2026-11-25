@@ -176,7 +176,7 @@ func run(main: Node) -> void:
 	_boss_moves()
 	_cc_cues()
 	_inv_cues()
-	await _steps(main)
+	_steps(main)
 	_rank_cues()
 	_barks()
 	_ambience()

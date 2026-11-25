@@ -43,7 +43,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"tutorial": true,
 			"teams": 1,
