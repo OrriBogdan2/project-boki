@@ -43,4 +43,4 @@ static func _strike(k: Kin, f: Ent, dmg: float, stun: float, kb: float, dir: Vec
 	k.m.fx.burst(f.pos + Vector3(0, 0.6, 0), k.sp["color"], 10, 3.5)
 	k.m.sfx("kinhit", f.pos, -2.0)
 	if k.owner_h and k.owner_h.is_local():
-		k.m.freeze_frame(0.04)
+		k.m.freeze_frame(ImpactWeight.hold_s(ImpactWeight.of_boki(true)))
