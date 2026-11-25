@@ -105,6 +105,8 @@ code read (the strips are silent). The worker's ground renders yellow, so read c
 | 2 | Grimble | dredge | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 23 | 25 | E: flat translucent orange hex slabs, the palette `main` is copper `d89040`, not coin gold; LMB slugs small; hook, dash ribbon and X fan read |
 | 3 | Vex | gunslinger | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 24 | 25 | X Nuke: the zone ends as a near-opaque dark green disc that hides the foe; E cone is a flat pale lime band; LMB tracer is a short lime dart (reads) |
 | 4 | Sable | thief | 4 | 3 | 3 | 3 | 4 | 4 | 3 | 24 | 24 | RMB Bola wind-up lane: a flat lavender slab; LMB bolt and hit now read, X rings are lit rims and read |
+| 5 | Sparkle | mage | 4 | 3 | 3 | 3 | 4 | 5 | 3 | 25 | 24 | Fixed 11-23 (ext/vfx-sparkle-skycall): E Skycall was a big white blob over a brown disc hiding the foe; now a thin pink-white column (`e_count` skirt, size 0.28) on a soft pink rim (pool `band` 0.2; the strike's char disc is the same rim), strike flare 1.8 to 1.2; the RMB orb's orange haze was its pink OmniLight on the yellow ground (`MageKit._build_mote`: slot pink `#ff5ab4`, energy 1.2 to 0.6; it is not in `mage_gum.gd`, which is only the bubblegum). Timing and hit radius unchanged. Strips `docs/shots/vfx-sparkle-skycall/{e,rmb}_before_after.jpg` (grey = main, green border = after; jobq 20261123-151731-04969 before, 20261123-152220-00557 rmb after, 20261123-152546-13620 e after, `--hero-vfx-reel --reel-hero=mage`); LMB bolt thin; X dome is a pink rim and reads |
+| 6 | Meeko | tender | 4 | 3 | 3 | 3 | 4 | 3 | 4 | 24 | 26 | LMB orb is orange with a gold ring (not leaf green); E ring is a thick flat green band; Hearth Call tether and heal rise read |
 | 5 | Sparkle | mage | 4 | 3 | 3 | 3 | 4 | 4 | 3 | 24 | 24 | E Skycall: a big white blob over a brown disc hides the foe for 3 frames; RMB orb sits in an orange haze (off pink); LMB bolt thin; X dome is a pink rim and reads |
 | 6 | Meeko | tender | 4 | 3 | 3 | 3 | 4 | 4 | 4 | 25 | 26 | re-scored 11-23 (ext/vfx-meeko-weak-col; C 3 -> 4, was 24): the LMB comet, trail and hit are leaf green now (pale-green hot core, leaf halo, leaf-star and amber debris, was an orange orb with a gold ring; Cinder's colour); GPU strip `docs/shots/vfx-meeko-weak-col/lmb_before_after.jpg` (grey = main 5a246f9696, jobq 20261123-021310-01890; green = after, -021623-09694). Still open: the Burrseed (RMB) field and its cast flare stay amber on purpose (a hostile zone reads against the green heals), E ring is a thick flat green band; Hearth Call tether and heal rise read |
 | 7 | Lace | archer | 3 | 3 | 3 | 4 | 4 | 4 | 4 | 25 | 25 | tap shots and misses: thin faint red lines at match zoom; Heavy Shot and X are layered and read |
@@ -127,7 +129,7 @@ Kael 27, Cinder 28), the 11-09 and 11-12 re-scores and each fix branch's own not
 2. Grimble, `content/vfx/dredge.json`: the E fist/wedge slabs are flat translucent orange because palette `main` is copper `d89040`; move `main` to coin gold `#ffc832` and give the slab a lit rim.
 3. Vex, `content/vfx/gunslinger.json` `x_shell` / X zone end: the Nuke ends as a near-opaque dark green disc over the foe; cap the inside alpha at 0.25 and keep the lit rim.
 4. Sable, `scripts/arch/kits/thief_kit.gd` (RMB Bola wind-up lane): a flat lavender slab; use the `soft` AimKit lane (lit rim, inside at most 0.1).
-5. Sparkle, `scripts/arch/kits/mage_sky.gd` (E Skycall): a white blob over a brown disc hides the foe; thin it to a pink-white column on a soft rim. The RMB orb's orange haze (`mage_gum.gd`) goes pink too.
+5. (done 11-23, ext/vfx-sparkle-skycall) Sparkle, `scripts/arch/kits/mage_sky.gd` (E Skycall; the data is `content/vfx/mage.json` `e_count`/`e_strike`): a white blob over a brown disc hides the foe; thin it to a pink-white column on a soft rim. The RMB orb's orange haze (`mage_gum.gd`) goes pink too.
 
 Next in line (24-25, smaller): Lace's deep red against Kael's crimson (owner's call), Neve's X veil, Lace/Sparkle thin tap trails.
 - `fx_dot` particles are `blend_mix` and have no soft-particle depth fade, so they clip hard into the ground. A depth fade
@@ -197,7 +199,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Vex | gunslinger | 15 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | **25** | LMB / held LMB: the tracer is a thin faint line at match zoom (RMB beam and X burst are fine) |
 | Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
 | Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
-| Grimble | dredge | 16 | 4 | 4 | 4 | 3 | 3 | 4 | 3 | **25** | E / RMB wedges: flat pale sectors with no leading edge; slugs small at match zoom |
+| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 3 | 4 | 3 | **26** | was 25 (E / X wedges flat, no leading edge): fixed on ext/vfx-grimble-wedges, see below. Left: slugs small at match zoom; sound |
 | Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered (11-20, ext/vfx-meeko-heal-hurt: heals leaf green rising, hurts embers falling, Hearthlight / root field inside at most 0.25 to the rim, bloom a rim swirl; not re-scored) |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
@@ -244,7 +246,7 @@ marks a rock's footprint, not a hit or zone, so by the same rule it could go or 
 5. Albert: ivory swing arcs for LMB/RMB.
 6. Kael: crimson Smash telegraph instead of the flat magenta box.
 7. Cinder: flame-coloured Ignite orb.
-8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
+8. Meeko, Sable: zones as a lit rim over a faint inside (X root field, Encore/E). Grimble's wedges are done (below).
 9. Lace tap shots and Sparkle LMB: thicker trails.
 10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
 ## Scorecard (worst first)
@@ -420,7 +422,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Vex | gunslinger | 15 | 5 | 3 | 3 | 3 | 4 | 4 | 4 | **26** | was 25 (LMB / held LMB: a thin faint tracer): fixed on ext/vfx-vex-tracer-0246, see below. Left: Shift Slipstep, faint streaks and a flat band behind her |
 | Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
 | Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
-| Grimble | dredge | 16 | 4 | 4 | 4 | 3 | 3 | 4 | 3 | **25** | E / RMB wedges: flat pale sectors with no leading edge; slugs small at match zoom |
+| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 3 | 4 | 3 | **26** | was 25 (E / X wedges flat, no leading edge): fixed on ext/vfx-grimble-wedges, see below. Left: slugs small at match zoom; sound |
 | Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered (11-20, ext/vfx-meeko-heal-hurt: heals leaf green rising, hurts embers falling, Hearthlight / root field inside at most 0.25 to the rim, bloom a rim swirl; not re-scored) |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
@@ -468,10 +470,21 @@ train) moves them to green fire and replaces this tracer with a HeroVfx ribbon; 
 5. Albert: ivory swing arcs for LMB/RMB.
 6. Kael: crimson Smash telegraph instead of the flat magenta box.
 7. Cinder: flame-coloured Ignite orb.
-8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
+8. Meeko, Sable: zones as a lit rim over a faint inside (X root field, Encore/E). Grimble's wedges are done (below).
 9. Lace tap shots and Sparkle LMB: thicker trails.
 10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
 
+### Grimble wedges (ext/vfx-grimble-wedges, 2026-11-22): 25 -> 26
+The scorecard's "RMB wedge" is his X fan (his RMB is the Abyssal Hand, a reach with no wedge). Both wedges now use
+AimKit's `soft` cone, the lit-rim language main uses for zones: a faint inside (never above 0.25 alpha), a lit
+coin-gold (#ffc832, `HeroVfx` colour `gold` in `content/vfx/dredge.json`) rim on the exact edge and arc, and a
+bright front that sweeps out to the rim with the hit. E: the wind-up's front is the charge (`slam_tell(k)`, fill k),
+so it reaches the rim on the slam frame; the slam flashes the rim hot (`e_hit`). It was a thin seafoam outline with
+no fill. X: the charge fan is the same wedge (front = the charge); each wave's front runs out to the rim in the
+slugs' flight time (`(range - MUZZLE) / speed`, about 0.17 s) and holds lit 0.25 s (`DredgeBlast._wave_front`);
+it was two edge lines. The wedges are the hit cones (`e.radius`/`e.angle`, `x.range`/`x.fan_deg`); hit shapes are
+unchanged (`--hit-shape-check` Grimble rows). Timing 3 -> 4. Strips at match zoom, top before / bottom after, GPU
+reels (`--reel-only=e|r`): `docs/shots/vfx-grimble-wedges/e_before_after.jpg`, `r_before_after.jpg`.
 ## Foe telegraphs audit (ext/combat-foe-telegraphs, 2026-11-20)
 Stabilize sprint, combat clarity: does a rival see a cue before each hit, in the rival's colour, for the whole wind-up?
 Measured headless on a flat strip with a rival dummy 4 m ahead (every slot of the 13 kits cast once; first/last tick an
