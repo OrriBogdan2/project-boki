@@ -23,8 +23,8 @@ and into each other. Plants his hammer where the fight is and heals the squad th
    beacon, shows foes near it to your team, and comes back hitting on a second tap.
 4. **Hold LMB** to spin the hammer up (a glint on its head, a flare when it's full), then let go for a
    **Crushing Blow**: a flaming crescent in front that carries you forward.
-5. Knock someone into a wall with a 360 Smash, Shield Charge or full Crushing Blow and
-   they're **Crushed**: stunned for 1s and hit for 8 (no heal).
+5. Knock someone into a wall or into another foe with a Bash, Shield Charge or full Crushing Blow and
+   they're **Crushed**: stunned, and you heal.
 6. **360 Smash** (Shift): a short dash, then one spinning hit all round you; with the aegis up it's a
    **Shield Charge**, invulnerable for its length.
 7. **Mending Ground** (E): a green light comes down on your planted hammer (or on you), then heals
@@ -34,7 +34,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 | Do this | And you get |
 |---|---|
-| A Crushing Blow, 360 Smash or Shield Charge into a wall | Crushed: stun 1.0, +8 damage |
+| A Crushing Blow, 360 Smash or Shield Charge into a wall or another foe | Crushed: stun 1.0, +8 damage |
 | Shift with the aegis raised | Shield Charge: invulnerable, heavier knock |
 | Throw the hammer, then E | Mending Ground lands where the hammer stands |
 | Hold LMB, then Shift | A short plain dash for half a charge; the spin keeps charging |
