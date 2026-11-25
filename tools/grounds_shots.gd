@@ -32,7 +32,7 @@ func run(main_node: Node) -> void:
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("gunslinger"))
+	m.start(Match.arena_opts("gunslinger"))
 	m.set_process(false)
 	if main.fade:
 		await main.fade.reveal(0.01)
