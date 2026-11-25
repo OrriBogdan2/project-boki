@@ -4,13 +4,17 @@ extends RefCounted
 ## - frame(): every filmed frame, after the bodies are drawn, a fighter shows its own colours: no hit flash, burn
 ##   tint, crowd-control or cast tint (BodyTell), ult glow or side-colour rim (hero_toon), no x-ray or occlusion
 ##   overlay; no Boki wisp floats beside it and no AimKit telegraph line crosses it (they read as stray balls and
-##   white lines on film).
+##   white lines on film), and no skyship overhead drops its shadow blob on the ground.
 ## - clear_deco(): once, the map dressing (trees, rocks, pebbles, tall grass, camps, landmarks) near the fight spot
 ##   goes; short grass and flowers stay so the ground still looks like the game.
 
 const KEEP_DECO := ["Grass", "Flowers"]  # World._chunked labels left standing
-const XRAY_SHADERS := ["res://shaders/occlusion_outline.gdshader", "res://shaders/kin_aura_xray.gdshader"]
-const BODY_OFF := {"flash": 0.0, "ult_glow": 0.0, "side_rim": Color(0, 0, 0, 0), "tell": Color(0, 0, 0, 0)}
+const XRAY_SHADERS := [
+	"res://shaders/occlusion_outline.gdshader", "res://shaders/kin_aura_xray.gdshader"
+]
+const BODY_OFF := {
+	"flash": 0.0, "ult_glow": 0.0, "side_rim": Color(0, 0, 0, 0), "tell": Color(0, 0, 0, 0)
+}
 
 
 static func frame(m: Node) -> void:
@@ -27,6 +31,10 @@ static func frame(m: Node) -> void:
 	var aim := m.get_node_or_null("AimKit") as Node3D
 	if aim != null:
 		aim.visible = false
+	for s in m.ships + [m.ship]:  # skyships pass over the camera: only their soft ground shadow shows (dark blobs)
+		var sn: Variant = (s as Dictionary).get("node")
+		if is_instance_valid(sn) and sn is Node3D:
+			(sn as Node3D).visible = false
 
 
 static func _drop_overlays(model: Node3D) -> void:
