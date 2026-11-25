@@ -295,7 +295,7 @@ func _neve() -> void:
 	_row("Neve", "Rimelock crash", _watch(m, tg, 8.0), {"stun": 0.75, "slow": [0.15, 0.2], "slow_k": 0.35})
 	_reset(m, pl, tg, home, 3.0)
 	kt.splinter(tg.pos, 10.0, 2.0)
-	_row("Neve", "Shatter splinter", _watch(m, tg, 2.0), {"slow": 1.2, "slow_k": 0.3})
+	_row("Neve", "Shatter splinter", _watch(m, tg, 2.0), {})  # damage only since f6c93c7a59: no slow
 	await done(m)
 
 

@@ -28,7 +28,8 @@ other source cell is a 5 fps footage read (about +-0.2 s) or only the word "Slow
 | Grimble | Anchor Drop | stun 1.08 s, rank 3: 1.48 s | 1.1 s (+0.1 a rank, +0.2 rank 3) | match |
 | Grimble | Hook reel | foe stun 0.2 s refreshed; Grimble Grounded (up to 3.0 s, to the reel's end) | same | match |
 | Neve | Ice Spear hit | slow 35% 0.78 s (**was 45%**, see Fixed) | 35% 0.6 to 0.8 s | **fixed** |
-| Neve | Rink Wall touch, Shatter splinter | slow 30% 1.0 s, slow 30% 1.18 s | 30% 1 s, 30% 1.2 s | match |
+| Neve | Rink Wall touch | slow 30% 1.0 s | 30% 1 s | match |
+| Neve | Shatter splinter | none (damage only: `f6c93c7a59` took the slow out; the check asserts none) | none | match (see docs/heroes/rimewright.md) |
 | Neve | Rimelock | stun 0.73 s (an early crack is shorter), rink zone slow 35%, 0.18 s refreshed | 0.75 s, 35% | match |
 | Motley | Shard Snap | stun 1.12 s at 5 m (0.8 to 1.8 s by flight) | 0.8 to 1.8 s | match |
 | Motley | Tether Lantern orb | slow 6% 1.5 s | same | match |
