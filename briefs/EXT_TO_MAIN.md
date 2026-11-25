@@ -11304,3 +11304,4 @@ READY ext/merge-lane-N1-1122 653c0989f9d0b3b6f3af0f4d32a24b8510982fe8 (PR #641: 
 READY ext/merge-lane-n23c-1123 26522ef26a (PR #710: main merged, lint/style ratchet fixed, Net 0.24.31; shadow gate GREEN NEW-RED 0, 658 flags, export 1085 MB)
 READY ext/anim-boki-own-clips-mms 3158eb5525 (bulk-rebase: origin/main merged in mechanically, was 5ca0948253; union 2 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-M7-1121 fe0bfd301b (bulk-rebase: origin/main merged in mechanically, was d15e4fd63b; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/plate-status-declutter 8e96c6eb1b (PR #382: merged main; hud_plate = main's cached plate items + status row; plate-status 55/55, clarity 0 fail, hudref 4 fail vs 5 on main, health OK)
