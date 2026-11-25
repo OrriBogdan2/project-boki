@@ -459,7 +459,7 @@ func _archer_combos() -> void:
 	step(m, 1.6)
 	ok(
 		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
-		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and (K.fx.laces[0]["node"] as Node3D).visible,
+		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.laces.any(_lace_shown),
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
 	# the rain ticks every 0.5 s: 30 frames at 60 Hz, the remainder of a frame kept (it used to run 31 = 0.517 s)
@@ -474,6 +474,13 @@ func _archer_combos() -> void:
 		"pin E: Hail Wall ticks every 0.5 s (30 frames)",
 		tick_at.size() >= 2 and tick_at[1] - tick_at[0] == 30,
 		"tick frames %s" % str(tick_at)
+	)
+	K.fx._part_laces()  # (PinFx parts them each drawn frame; the check steps the match without frames)
+	var on_t: Array = K.fx.laces.filter(func(l: Dictionary) -> bool: return _lace_by(l, T.pos) < K.fx.LACE_CLEAR)
+	ok(
+		"pin E: the laces part round the foe on the arc (COMBAT_CLARITY), the rest of the wall shows",
+		not on_t.is_empty() and not on_t.any(_lace_shown) and K.fx.laces.filter(_lace_shown).size() >= 16,
+		"%d laces by the foe, %d shown" % [on_t.size(), K.fx.laces.filter(_lace_shown).size()]
 	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
 	var cr0 := K.cremations
@@ -1739,3 +1746,15 @@ func _bulwark_combos() -> void:
 	step(m, 0.3)
 	ok("merge hold: bulwark's raised shield comes down with the merge (hit points kept)", K.wall.is_empty() and not K.rmb_down and K.shield_hp >= hp0 - 1.0 and not m.verbs.walls.any(func(w): return w.get("by") == P), "wall %s rmb_down %s hp %.0f -> %.0f" % [not K.wall.is_empty(), K.rmb_down, hp0, K.shield_hp])
 	await done(m)
+
+
+static func _lace_shown(l: Dictionary) -> bool:
+	return (l["node"] as Node3D).visible
+
+
+## Ground distance from `at` to lace `l` (PinFx.laces entry).
+static func _lace_by(l: Dictionary, at: Vector3) -> float:
+	var a: Vector3 = l["a"]
+	var b: Vector3 = l["b"]
+	var f := Vector2(at.x, at.z)
+	return Geometry2D.get_closest_point_to_segment(f, Vector2(a.x, a.z), Vector2(b.x, b.z)).distance_to(f)

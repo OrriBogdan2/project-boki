@@ -641,7 +641,7 @@ The second ability pressed during the first one's wind-up and its recovery (the 
 | RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
 | ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
 | LMB tap during ult (X) | dropped (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
-| LMB hold during ult (X) | queued, goes 0.67 s later (0.3 s in; Kael swings on the press now, so the wait is counted from the press) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
+| LMB hold during ult (X) | queued, goes 0.67 s later (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
 | RMB during ult (X) | dropped (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
 | E during ult (X) | dropped (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
 ### Vex (gunslinger)
