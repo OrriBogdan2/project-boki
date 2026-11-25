@@ -27,7 +27,7 @@ const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
 const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his crimson
 const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
-const LUNGE_HOT := 0.25                # the Lunge lane's white-out at full charge (0..1): the rim stays crimson, not pale
+const LUNGE_HOT := 0.25                # 0..1: the Lunge lane's white-out at full charge (its rim stays crimson)
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
                                        # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
