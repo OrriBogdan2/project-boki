@@ -40,6 +40,11 @@ const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers ge
 const KNIFE_RELEASE_S := 0.12      # s into thf_knife: the throw's key pose, where the knife leaves her hand
 const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist", "thf_exdash"]
 
+## Hunter nid -> {target instance id: target}: every body that hunter's Marks went on (add_mark, set_marks, the
+## only writers). While a hunter's is empty no foe carries one of its Marks, so the step skips the fade walk over
+## every foe on the map. Static: a kit rebuilt mid-match still finds the Marks its hunter left.
+static var marked_by := {}
+
 var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
 var mark_gap := {}             # target id -> time of its last Mark from us
@@ -124,6 +129,7 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	mk[h.nid] = [c, float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
 	t.set_meta("marks_t", now)
+	_track(t)
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
 	sync_marks(t)
@@ -166,6 +172,7 @@ func set_marks(t: Ent, n: int) -> void:
 	var had := int(e[0]) if float(e[1]) > 0.0 else 0
 	mk[h.nid] = [n, float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
+	_track(t)
 	_pip_pop(t, n)
 	_on_marks(t, had, n)
 	sync_marks(t)
@@ -270,13 +277,9 @@ func _tick(dt: float) -> void:
 			primed_t = 0.0
 			fx().puff(hand_pos(hand == 0), FIZZLE, 0.3, 0.2)       # unused, it fades from the hand
 	_tick_pips(dt)
-	# marks fade on every target we've touched
-	for f in m.foes_of(h.team):
-		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
-		if mk.has(h.nid):
-			var e: Array = mk[h.nid]
-			e[1] = float(e[1]) - dt
-			if float(e[1]) <= 0.0: mk.erase(h.nid)
+	var mine: Dictionary = marked_by.get(h.nid, {})
+	if not mine.is_empty():
+		_fade_marks(dt, mine)
 	if not bola_cast.is_empty(): _tick_bola_cast(dt)
 	if not bola.is_empty(): _tick_bola(dt)
 	encore.tick(dt)
@@ -289,6 +292,26 @@ func _tick(dt: float) -> void:
 	_tick_glint(dt)
 	_tick_aim_line()
 	_net_glint(dt)
+
+## Marks fade on every foe that carries one of ours; then the bodies that no longer carry one leave `mine`.
+func _fade_marks(dt: float, mine: Dictionary) -> void:
+	for f in m.foes_of(h.team):
+		if not f.has_meta("marks"):      # (get_meta with a null default logs an engine error when the key is missing)
+			continue
+		var mk: Dictionary = f.get_meta("marks")
+		if mk.has(h.nid):
+			var e: Array = mk[h.nid]
+			e[1] = float(e[1]) - dt
+			if float(e[1]) <= 0.0: mk.erase(h.nid)
+	for iid in mine.keys():
+		var t: Variant = mine[iid]
+		if not is_instance_valid(t) or not ((t as Node).get_meta("marks", {}) as Dictionary).has(h.nid):
+			mine.erase(iid)
+
+func _track(t: Ent) -> void:
+	if not marked_by.has(h.nid):
+		marked_by[h.nid] = {}
+	marked_by[h.nid][t.get_instance_id()] = t
 
 ## The aim line (your screen only): thin and pale lilac along the aim to the bolt's full range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
@@ -683,8 +706,7 @@ func _throw_bola() -> void:
 			"bounces": int(bd["bounces"]), "stg": stg}
 	m.sfx("dj_bola_throw", h.pos, -3.0, 1.0)
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
-	# the yellow flash of the throw
-	fx().star(h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), col_of(rmb_def()), 0.8, 0.12)
+	vfx("bola_throw", h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), dv)
 	net_bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(dv.x, 0, dv.y) * lane_len() + Vector3(0, 1.0, 0),
 			col_of(rmb_def()))
 
@@ -710,7 +732,7 @@ func _tick_bola(dt: float) -> void:
 				else: dir.y = -dir.y
 				bola["bounces"] = int(bola["bounces"]) - 1
 				bola_bounces += 1
-				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
+				vfx("bola_bounce", p)
 				m.sfx("thief_bola_bounce", p, -5.0)
 				continue
 			MissFx.puff(m, MissFx.colour_of(h), p, true)
@@ -757,7 +779,7 @@ func _walled(q: Vector3) -> bool:
 func _end_bola(at: Vector3) -> void:
 	bola = {}
 	fx().unplace("bola%d" % h.get_instance_id())
-	m.fx.burst(at, col_of(rmb_def()), 5, 2.0, 0.25, 6.0, 0.6)
+	vfx("bola_end", at)
 
 ## The Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
 func _wrap(f: Ent) -> void:
@@ -806,7 +828,7 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
-	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("c19bff"), 1.2, 0.3)
+	for t in both: vfx("bola_tangle", (t as Ent).pos)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
@@ -859,7 +881,7 @@ func _throw_knife() -> void:
 			if knife.is_empty() and e == null: _stick_ground(at, _why == "wall", land)}))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
 		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("b890ff"), 1.6, 0.26)
-	fx().star(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("b890ff"), 0.7, 0.1)
+	vfx("knife_throw", h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6))
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
 	m.sfx("thief_knife_whisk", h.pos, -6.0 if h.is_local() else -9.0)     # the blade spinning away
 
@@ -890,9 +912,8 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if f and rank("kin") >= 3:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
-	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("b890ff"), 0.8, 0.2)
+	vfx("knife_stick", at, null, {"foe": f != null})
 	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
-	net_ring(at, 0.8, col_of(ed))
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
 func _tick_knife() -> void:
@@ -990,15 +1011,14 @@ func _shadow_step(tgt: Ent) -> void:
 ## The blink: a near-instant jump with a chain of cyan afterimages from where she was to where she lands.
 func _blink(to: Vector3) -> void:
 	var from := h.pos
-	var yaw := atan2(-(to.x - from.x), -(to.z - from.z))
-	fx().ghosts(from, to, int(e_def().get("ghosts", 5)), yaw, GHOST, float(h.cdat.get("scale", 1.0)))
+	var way := Vector2(to.x - from.x, to.z - from.z)
+	fx().ghosts(from, to, int(e_def().get("ghosts", 5)), atan2(-way.x, -way.y), GHOST, float(h.cdat.get("scale", 1.0)))
+	vfx("blink", from, way.normalized(), {"len": way.length()})
 	h.teleport(to)
 	h.vel = Vector3.ZERO
 	h.gliding = false
 	blinks += 1
-	fx().puff(to + Vector3(0, 0.9, 0), GHOST, 1.2, 0.3)
 	m.sfx("dj_blink", to, -3.0, 1.0)
-	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), GHOST)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
