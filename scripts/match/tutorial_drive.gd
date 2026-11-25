@@ -44,6 +44,7 @@ static func drive(m: Match) -> void:
 	_rest_t = _rest_t + Match.DT if p.inp["move"] == Vector2.ZERO else 0.0      # (last frame's stick)
 	for k in KEYS:
 		p.inp[k] = false
+	p.inp["sec_hold"] = false     # (a step that ends mid-hold must let go: a stuck hold charges forever)
 	p.inp["move"] = Vector2.ZERO
 	_acted = false
 	if human:
