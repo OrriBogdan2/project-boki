@@ -5,20 +5,24 @@ extends RefCounted
 ## it, lifted a little so it never z-fights, and keeps the shape's base height across cliffs and over
 ## the abyss (a lane doesn't climb a wall).
 
-const LIFT := 0.06        # m above the ground (no z-fighting with the terrain)
-const STEP := 0.7         # m: long ribbons are cut this fine so they follow terraces and stairs
-const MAX_DY := 1.5       # m: ground further than this from the base height is ignored (walls, pits)
+const LIFT := 0.06  # m above the ground (no z-fighting with the terrain)
+const STEP := 0.7  # m: long ribbons are cut this fine so they follow terraces and stairs
+const MAX_DY := 1.5  # m: ground further than this from the base height is ignored (walls, pits)
 
 var v := PackedVector3Array()
 var c := PackedColorArray()
 var world: World = null
 var base_y := 0.0
 
+
 func reset() -> void:
-	v.clear(); c.clear()
+	v.clear()
+	c.clear()
+
 
 func at_height(y: float) -> void:
 	base_y = y
+
 
 ## A point on the ground under p (x, z): LIFT over the ground, or over base_y where the ground is a wall, a pit or
 ## the abyss. One call per vertex of every telegraph every frame, so it is kept to this one function.
@@ -29,26 +33,44 @@ func _p(p: Vector2) -> Vector3:
 			return Vector3(p.x, g + LIFT, p.y)
 	return Vector3(p.x, base_y + LIFT, p.y)
 
+
 func tri(a: Vector2, b: Vector2, d: Vector2, col: Color) -> void:
-	v.append(_p(a)); v.append(_p(b)); v.append(_p(d))
-	c.append(col); c.append(col); c.append(col)
+	v.append(_p(a))
+	v.append(_p(b))
+	v.append(_p(d))
+	c.append(col)
+	c.append(col)
+	c.append(col)
+
 
 ## A quad a-b-d-e (in order round the edge), with a colour per side: ca on a/e, cb on b/d.
 func quad(a: Vector2, b: Vector2, d: Vector2, e: Vector2, ca: Color, cb := Color(0, 0, 0, -1)) -> void:
-	if cb.a < 0.0: cb = ca
+	if cb.a < 0.0:
+		cb = ca
 	_quad3(_p(a), _p(b), _p(d), _p(e), ca, cb)
+
 
 ## quad on points already on the ground: the strips below carry each step's far edge on as the next one's near
 ## edge, so a shared corner is looked up once (the same vertices as quad, in the same order).
 func _quad3(pa: Vector3, pb: Vector3, pd: Vector3, pe: Vector3, ca: Color, cb: Color) -> void:
-	v.append(pa); v.append(pb); v.append(pd)
-	c.append(ca); c.append(cb); c.append(cb)
-	v.append(pa); v.append(pd); v.append(pe)
-	c.append(ca); c.append(cb); c.append(ca)
+	v.append(pa)
+	v.append(pb)
+	v.append(pd)
+	c.append(ca)
+	c.append(cb)
+	c.append(cb)
+	v.append(pa)
+	v.append(pd)
+	v.append(pe)
+	c.append(ca)
+	c.append(cb)
+	c.append(ca)
+
 
 ## A flat strip of width w from p0 to p1, cut into STEP pieces; colour fades from c0 to c1.
 func ribbon(p0: Vector2, p1: Vector2, w: float, c0: Color, c1 := Color(0, 0, 0, -1)) -> void:
-	if c1.a < 0.0: c1 = c0
+	if c1.a < 0.0:
+		c1 = c0
 	var d := p1 - p0
 	var l := d.length()
 	if l < 0.001:
@@ -65,9 +87,11 @@ func ribbon(p0: Vector2, p1: Vector2, w: float, c0: Color, c1 := Color(0, 0, 0, 
 		al = bl
 		ar = br
 
+
 ## A filled strip p0 -> p1 of width w0 at p0 and w1 at p1 (lanes, taper), cut into STEP pieces.
 func band(p0: Vector2, p1: Vector2, w0: float, w1: float, c0: Color, c1 := Color(0, 0, 0, -1)) -> void:
-	if c1.a < 0.0: c1 = c0
+	if c1.a < 0.0:
+		c1 = c0
 	var d := p1 - p0
 	var l := d.length()
 	if l < 0.001:
@@ -88,6 +112,7 @@ func band(p0: Vector2, p1: Vector2, w0: float, w1: float, c0: Color, c1 := Color
 		al = bl
 		ar = br
 
+
 ## A dashed line: dash metres on, gap metres off.
 func dashes(p0: Vector2, p1: Vector2, w: float, col: Color, dash := 0.35, gap := 0.25) -> void:
 	var d := p1 - p0
@@ -100,11 +125,14 @@ func dashes(p0: Vector2, p1: Vector2, w: float, col: Color, dash := 0.35, gap :=
 		ribbon(p0 + u * s, p0 + u * minf(l, s + dash), w, col)
 		s += dash + gap
 
+
 ## A ring (or an arc of it from a0 to a1, radians, 0 = +x) of radius r and line width w.
 func ring(ctr: Vector2, r: float, w: float, col: Color, a0 := 0.0, a1 := TAU, col_in := Color(0, 0, 0, -1)) -> void:
-	if col_in.a < 0.0: col_in = col
+	if col_in.a < 0.0:
+		col_in = col
 	var segs := clampi(int(r * absf(a1 - a0) / 0.4), 10, 64)
-	var ri := maxf(0.0, r - w * 0.5); var ro := r + w * 0.5
+	var ri := maxf(0.0, r - w * 0.5)
+	var ro := r + w * 0.5
 	var e0 := Vector2(cos(a0), sin(a0))
 	var pi0 := _p(ctr + e0 * ri)
 	var po0 := _p(ctr + e0 * ro)
@@ -117,43 +145,59 @@ func ring(ctr: Vector2, r: float, w: float, col: Color, a0 := 0.0, a1 := TAU, co
 		pi0 = pi1
 		po0 = po1
 
+
 ## A filled annulus sector between radii r0 and r1, angles a0..a1 (discs, cones, wall bands).
 func sector(ctr: Vector2, r0: float, r1: float, a0: float, a1: float, c0: Color, c1 := Color(0, 0, 0, -1)) -> void:
-	if c1.a < 0.0: c1 = c0
+	if c1.a < 0.0:
+		c1 = c0
 	var segs := clampi(int(r1 * absf(a1 - a0) / 0.5), 8, 48)
 	var rings := maxi(1, int(ceil((r1 - r0) / (STEP * 1.5))))
-	var dirs := PackedVector2Array()      # the unit vector at each angle step, the same for every ring
+	var dirs := PackedVector2Array()  # the unit vector at each angle step, the same for every ring
 	dirs.resize(segs + 1)
 	for i in segs + 1:
 		var t := lerpf(a0, a1, float(i) / segs)
 		dirs[i] = Vector2(cos(t), sin(t))
+	# each ring's outer row is the next ring's inner row (the same radius), so it is looked up once
+	var inner := PackedVector3Array()
+	inner.resize(segs + 1)
+	if r0 >= 0.001:
+		for i in segs + 1:
+			inner[i] = _p(ctr + dirs[i] * r0)
+	var outer := PackedVector3Array()
+	outer.resize(segs + 1)
 	for j in rings:
-		var ra := lerpf(r0, r1, float(j) / rings); var rb := lerpf(r0, r1, float(j + 1) / rings)
-		var ca := c0.lerp(c1, float(j) / rings); var cb := c0.lerp(c1, float(j + 1) / rings)
-		var e0 := dirs[0]
+		var ra := lerpf(r0, r1, float(j) / rings)
+		var rb := lerpf(r0, r1, float(j + 1) / rings)
+		var ca := c0.lerp(c1, float(j) / rings)
+		var cb := c0.lerp(c1, float(j + 1) / rings)
 		var pc := _p(ctr) if ra < 0.001 else Vector3.ZERO
-		var pa0 := pc if ra < 0.001 else _p(ctr + e0 * ra)
-		var pb0 := _p(ctr + e0 * rb)
+		outer[0] = _p(ctr + dirs[0] * rb)
 		for i in segs:
-			var e1 := dirs[i + 1]
-			var pb1 := _p(ctr + e1 * rb)
+			outer[i + 1] = _p(ctr + dirs[i + 1] * rb)
 			if ra < 0.001:
-				v.append(pc); v.append(pb0); v.append(pb1)
-				c.append(cb); c.append(cb); c.append(cb)
+				v.append(pc)
+				v.append(outer[i])
+				v.append(outer[i + 1])
+				c.append(cb)
+				c.append(cb)
+				c.append(cb)
 			else:
-				var pa1 := _p(ctr + e1 * ra)
-				_quad3(pa0, pa1, pb1, pb0, ca, cb)
-				pa0 = pa1
-			pb0 = pb1
+				_quad3(inner[i], inner[i + 1], outer[i + 1], outer[i], ca, cb)
+		var row := inner
+		inner = outer
+		outer = row
+
 
 func disc(ctr: Vector2, r: float, col: Color, col_edge := Color(0, 0, 0, -1)) -> void:
 	sector(ctr, 0.0, r, 0.0, TAU, col, col if col_edge.a < 0.0 else col_edge)
+
 
 ## A chevron (a ">" pointing along u) of arm length s and line width w, its tip at p.
 func chevron(p: Vector2, u: Vector2, s: float, w: float, col: Color) -> void:
 	var n := Vector2(-u.y, u.x)
 	ribbon(p - u * s * 0.7 + n * s * 0.7, p, w, col)
 	ribbon(p - u * s * 0.7 - n * s * 0.7, p, w, col)
+
 
 ## A flat 4-point star (a glint) of radius s at p, turned by rot radians.
 func star(p: Vector2, s: float, col: Color, rot := 0.0) -> void:
@@ -163,7 +207,9 @@ func star(p: Vector2, s: float, col: Color, rot := 0.0) -> void:
 		var tip := p + Vector2(cos(a), sin(a)) * s
 		var l := p + Vector2(cos(a + PI * 0.25), sin(a + PI * 0.25)) * waist
 		var r := p + Vector2(cos(a - PI * 0.25), sin(a - PI * 0.25)) * waist
-		tri(p, r, tip, col); tri(p, tip, l, col)
+		tri(p, r, tip, col)
+		tri(p, tip, l, col)
+
 
 ## A leaf (a long pointed lozenge) of length s centred on p, lying along u: Hem's glint on her draw line.
 func leaf(p: Vector2, u: Vector2, s: float, col: Color) -> void:
@@ -172,6 +218,7 @@ func leaf(p: Vector2, u: Vector2, s: float, col: Color) -> void:
 	var tail := p - u * s * 0.5
 	tri(tail, p + n, tip, col)
 	tri(tail, tip, p - n, col)
+
 
 ## An open arrowhead at p pointing along u.
 func arrow(p: Vector2, u: Vector2, s: float, w: float, col: Color) -> void:
