@@ -91,6 +91,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
+
 ## The whole check over `heroes`; the registry runs it in four shards (tools/dash_flow_shard_check.gd).
 func run_heroes(main: Node, heroes: Array) -> void:
 	for r in SOURCE_ROWS:
@@ -131,6 +132,7 @@ func _hero(main: Node, hero: String, rows: bool) -> int:
 		await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(_on_used)
 	return bad
+
 
 func _on_used(caster: Node, _ability: String, slot: String) -> void:
 	if caster == hunter:
@@ -251,8 +253,8 @@ func _ready_up(m: Match) -> void:
 			or k.ult_running()
 			or _last_shot() >= 0
 			or k.commit_left() > 0.0  # (a move's committed recovery: Vex's E and X)
-			or k.fire_wait() > 0.0  # (a kit's own cadence: Neve's burst pause would hold the next tap)
-		)
+			or k.fire_wait() > 0.0
+		)  # (a kit's own cadence: Neve's burst pause would hold the next tap)
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
@@ -886,8 +888,14 @@ func _shift_window(m: Match, hero: String, slot: String) -> void:
 		var past := got.trim_prefix("end ").to_float() - float(lock - at) * Match.DT
 		cells.append(got if not got.begins_with("end") else "%+.2fs" % past)
 		right = right and got.begins_with("end") and past <= Loco.press_buffer + Match.DT
-	ok(right, "%s %s Shift in the cast: lock %.2fs, pressed at 0/25/50/75%%, goes from its end by: %s (row: buffer)" % [
-			hero, slot, lock * Match.DT, ", ".join(cells)])
+	ok(
+		right,
+		(
+			"%s %s Shift in the cast: lock %.2fs, pressed at 0/25/50/75%%, goes from its end by: %s (row: buffer)"
+			% [hero, slot, lock * Match.DT, ", ".join(cells)]
+		)
+	)
+
 
 ## The first step after the cast at which a Space press acts at once (the lock's end), by halving; the search
 ## assumes a press later in the recovery is never less free. Minus the steps searched when none acted at once
@@ -931,8 +939,13 @@ func _space_at(m: Match, slot: String, in_air: bool, at: int, move := "jump") ->
 	_steps(m, at)
 	if in_air and hunter.grounded:
 		return "n/a: landed first"
-	var moved := {"y": hunter.pos.y, "dashes": hunter.dashes, "ex": hunter.ex_cd, "roll": hunter.roll_t,
-			"dashing": hunter.ak.in_dash()}
+	var moved := {
+		"y": hunter.pos.y,
+		"dashes": hunter.dashes,
+		"ex": hunter.ex_cd,
+		"roll": hunter.roll_t,
+		"dashing": hunter.ak.in_dash()
+	}
 	hunter.inp[move] = true
 	hunter.inp["glide"] = in_air
 	var got := "never"

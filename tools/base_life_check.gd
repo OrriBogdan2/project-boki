@@ -495,8 +495,10 @@ func _left_alone(home) -> void:
 		var food := Care.need(k["rec"], "food")
 		ok(
 			food > floor_food + 10.0,
-			"%s left alone ate on its own (food %.0f, lowest %.0f, floor %.0f)"
-			% [k["rec"]["name"], food, lowest[uid], floor_food]
+			(
+				"%s left alone ate on its own (food %.0f, lowest %.0f, floor %.0f)"
+				% [k["rec"]["name"], food, lowest[uid], floor_food]
+			)
 		)
 
 
