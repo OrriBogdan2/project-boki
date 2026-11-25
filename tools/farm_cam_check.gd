@@ -63,6 +63,7 @@ func run(m: Node) -> void:
 	await _wheel_part(r)
 	await _wall_part()
 	await _prop_part()
+	await _game_part()
 	await _build_part()
 	await _flag_part()
 	r["third_person"] = on0
@@ -147,7 +148,7 @@ func _wall_part() -> void:
 	)
 	var inside := false
 	var s := 0.0
-	while s <= near:
+	while s <= near - 0.1:
 		var p: Vector3 = aim + (cam.global_position - aim).normalized() * s
 		inside = inside or FarmCam._blocked(home, p, 0.0)
 		s += 0.1
@@ -194,6 +195,45 @@ func _prop_part() -> void:
 	home.ppos = HomeLayout.LANDING + Vector3(-6, 0, -3)
 	home.cam.snap(home.ppos)
 	await _settle(1.0)
+
+
+class Round:
+	extends RefCounted
+
+	func playing() -> bool:
+		return true
+
+	func tick(_d: float) -> void:
+		pass
+
+	func input(_e: InputEvent) -> bool:
+		return false
+
+	func find(_p: Vector2) -> Dictionary:
+		return {}
+
+
+## A minigame round tips the view up and draws it back (to show the court), and eases it back after.
+func _game_part() -> void:
+	var cam: CamRig = home.cam
+	home.ppos = HomeLayout.LANDING + Vector3(-6, 0, -3)
+	cam.snap(home.ppos)
+	await _settle(1.0)
+	await _zoomed()
+	var before := float(FarmCam.rules()["dist_max"])
+	var games: Array = home.games
+	home.games = [Round.new()]
+	for i in 150:
+		await main.get_tree().process_frame
+	var rise := rad_to_deg(cam.pitch)
+	ok(
+		rise > float(FarmCam.rules()["game_pitch_deg"]) - 3.0 and _back() > before + 1.0,
+		"a minigame round: the view tips up (%.0f deg) and draws back (%.1f m, from %.1f)" % [rise, _back(), before]
+	)
+	home.games = games
+	for i in 150:
+		await main.get_tree().process_frame
+	ok(absf(_back() - before) < 0.3, "the round over, the view comes back to %.1f m" % _back())
 
 
 func _build_part() -> void:

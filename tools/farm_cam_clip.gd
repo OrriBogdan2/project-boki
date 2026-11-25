@@ -15,11 +15,11 @@ const DEADLINE_S := 150.0  # s of film at most
 const BUILDINGS := [
 	["house", 33, 28, 0], ["crop_patch", 42, 31, 0], ["cook_pot", 36, 35, 0], ["market_stall", 44, 37, 0]
 ]  # id, x, z, turns
-const GAMES := [  # member on Home, its fixture's name, shots (s into the game), the key held (kite steering)
-	["hvolley", "log_node", [1.0, 5.0], ""],
-	["hfetch", "mat", [1.0, 6.0], ""],
-	["hkite", "stand", [1.5, 4.0], "right"],
-	["hecho", "middle", [2.0, 9.0], ""]
+const GAMES := [  # member on Home, its fixture, zone ("" the classic base), shots (s into the game), key held
+	["hvolley", "log_node", "glasswater", [1.0, 5.0], ""],
+	["hfetch", "mat", "", [1.0, 6.0], ""],
+	["hkite", "stand", "ridge", [1.5, 4.0], "right"],
+	["hecho", "middle", "", [2.0, 9.0], ""]
 ]
 const GAME_FROM := Vector3(0.0, 0, 1.6)  # m south of a game's fixture: where you stand to start it
 const SPECS := [["cindle", "Ash", 95.0], ["burrlet", "Moss", 60.0], ["zapple", "Pip", 30.0]]  # species, name, trust
@@ -125,7 +125,12 @@ func _hub() -> void:
 ## Each minigame on the classic base (it holds them all round its Training post), started from where you would stand.
 func _games() -> void:
 	for g in GAMES:
-		await _open_base()
+		for rec in Save.d["roster"]:
+			rec["zone"] = g[2] if g[2] != "" else GardenZones.start()
+		if g[2] == "":
+			await _open_base()
+		else:
+			await _open(g[2])
 		var game: Object = h.get(g[0])
 		var fixture: Node3D = game.get(g[1])
 		h.ppos = fixture.position + GAME_FROM
@@ -134,9 +139,9 @@ func _games() -> void:
 		await _wait(1.2)
 		game.use()
 		var t := 0.0
-		for at in g[2]:
-			if g[3] != "":
-				Input.action_press(g[3])
+		for at in g[3]:
+			if g[4] != "":
+				Input.action_press(g[4])
 			await _wait(float(at) - t)
 			t = float(at)
 			await _shot(String(g[0]).substr(1) + "_%d" % int(at))

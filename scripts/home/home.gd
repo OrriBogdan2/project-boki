@@ -1088,7 +1088,7 @@ func _process(delta: float) -> void:
 	crouch_look.tick(cam, crouch_grounded, panel_open == "" and train.is_empty() and not building_now and not chat_open)
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
-	farm_cam.tick(cam, d, not building_now and train.is_empty() and not FarmSpotlight.showing())
+	farm_cam.tick(cam, d, not building_now and train.is_empty() and not FarmSpotlight.showing(), games)
 	var focus := kin_frame.frame(Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z))
 	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing() and not farm_cam.third()
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, lean)

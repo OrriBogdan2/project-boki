@@ -22,6 +22,7 @@ var k := 0.0  # 0 = the Settings view from above, 1 = third person
 var yaw := 0.0  # the orbit round you, radians (0: the camera south of you, looking north)
 var pitch := 0.0  # radians down from level (starts at the rules' pitch, a drag moves it)
 var back := 0.0  # m the camera sits from the point it aims at (after any wall pull-in)
+var play := 0.0  # 0..1: a minigame is on (the view tips up and draws back to show its court)
 var tip := 0.0  # rad the camera is raised over its pitch to keep wall_min_m from you (0 in the open)
 var _drag := false
 var _dist := 0.0  # m the view wants (from the wheel's zoom)
@@ -46,8 +47,9 @@ func keys(mv: Vector2, cam: CamRig) -> Vector2:
 
 
 ## Once a frame, after the Settings camera and the distance multiplier are set: `free` is false while the farm wants
-## the top-down view (building, a training session, a tutorial spotlight on something that may be behind you).
-func tick(cam: CamRig, delta: float, free: bool) -> void:
+## the top-down view (building, a training session, a tutorial spotlight on something that may be behind you);
+## `games` are the farm's minigames (a round on tips the view up and draws it back so the whole court shows).
+func tick(cam: CamRig, delta: float, free: bool, games: Array) -> void:
 	if not enabled():
 		return
 	var r := rules()
@@ -55,10 +57,14 @@ func tick(cam: CamRig, delta: float, free: bool) -> void:
 		pitch = deg_to_rad(float(r["pitch_deg"]))
 	k = move_toward(k, 1.0 if free else 0.0, delta / float(r["blend_s"]))
 	var e := smoothstep(0.0, 1.0, k)
+	play = move_toward(play, 1.0 if games.any(_is_playing) else 0.0, delta / float(r["blend_s"]))
+	var p := smoothstep(0.0, 1.0, play)
 	if free:
 		_orbit_pad(delta, r)
 	var style: Dictionary = CamRig.styles[cam.style_id]
-	cam.pitch = lerpf(deg_to_rad(float(style["pitch"])), pitch, e)
+	cam.pitch = lerpf(
+		deg_to_rad(float(style["pitch"])), lerpf(pitch, maxf(pitch, deg_to_rad(float(r["game_pitch_deg"]))), p), e
+	)
 	cam.lens = lerpf(float(style["fov"]), float(r["fov"]), e)
 	cam.rise = lerpf(float(style.get("rise", 0.0)), float(r["rise"]), e)
 	cam.yaw = lerp_angle(0.0, yaw, e)
@@ -67,7 +73,12 @@ func tick(cam: CamRig, delta: float, free: bool) -> void:
 	cam.near = lerpf(NEAR_TOP, NEAR_THIRD, e)
 	var t := inverse_lerp(CamWheel.near(), CamWheel.far(), cam.zoom)
 	_dist = lerpf(float(r["dist_min"]), float(r["dist_max"]), clampf(t, 0.0, float(r["look_out"])))
+	_dist *= lerpf(1.0, float(r["game_dist_mul"]), p)
 	cam.dist_mul = lerpf(cam.dist_mul, _dist / (cam.dist * maxf(cam.zoom, 0.01)), e)
+
+
+static func _is_playing(g: Object) -> bool:
+	return g.playing()
 
 
 ## After the camera moved this frame: pulls it in along the view so it stays clear of the ground and walls. With a
@@ -167,7 +178,8 @@ static func _blocked(home: Node3D, p: Vector3, gap: float) -> bool:
 	return false
 
 
-## Is (x, y, z) inside a block's top? `tall_from` > 0: only a block that tall (a building, whose roof reaches past its tile) counts.
+## Is (x, y, z) inside a block's top? `tall_from` > 0: only a block that tall (a building: its roof reaches past
+## its tile) counts.
 static func _solid(home: Node3D, x: float, z: float, y: float, gap: float, tall_from: float) -> bool:
 	var world: World = home.world
 	if not world.is_block(x, z):
