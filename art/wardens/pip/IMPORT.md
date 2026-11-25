@@ -61,7 +61,40 @@ Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.0
 
 - **Idle pilot (ext/anim-pilot-four): NOT carried (2026-11-14).** The Meshy idle's tracks key `brow.R`, which main's v95 model does not have, so `glb_add_clips.py` refuses it; Meeko's `idle` stays main's.
 
-**11-24, body reads (PLAN 4A-4C; Blender-free, in this order):**
+**11-23 (ext/meeko-companions-1123): the sun and cloud of `pip_meshy.glb` (the live match model) were rebuilt.** The old ones were the
+Meshy master's, cut by `native_hunters/decimate.py` to 124/164 tris: 12 px dots at the game camera, face decals sunk into the bodies,
+the cloud on the tinted `skin` slot (pink on pink). Now (Blender builds, `graft_companions.py` swaps them in; the body is untouched):
+
+    B=~/tools/blender-4.5.15-linux-x64/blender
+    $B -b --factory-startup --python tools/art1/pip_companions_native.py -- WORK/comp.glb WORK/faces.png
+    python3 tools/meshy/native_hunters/graft_companions.py art/wardens/pip/pip_meshy.glb art/wardens/pip/pip_meshy.glb WORK/comp.glb WORK/faces.png
+
+Sun 0.50 m across (was 0.21), cloud 0.52 m (was 0.23), both leant back 50 deg toward the 66 deg match camera, faces 1.7x bolder
+(eyes, mouth, blush, tears) on 8x8-quad patches the build asserts sit >= 2 mm off the body, the cloud on `cloth-cloud` (untinted,
+inked), the sun on `glow-sun` (emissive + halo), two bigger rain drops hung clear of the cloud. 1.8k tris. WardenNative now runs
+WardenMood (faces swap with her moves, blink). `pip.glb` (contract model) is not rebuilt. Orbit: radius [1.1, 1.05], trail_max 0.12,
+head/wing/hand avoid spheres (`companions.avoid`; the push opens at once). Checks: `--meeko-orbit-check`, `--meeko-companions-clip-check`
+(sun/cloud vs the CPU-skinned body in idle, walk, run, dash, crouch, jump, attack, ult), `--meeko-companions-shots` (GPU).
+
+**11-24 (plan /home/boki/gens/meeko-comp-plan-1124/PLAN.md): sun and cloud bodies from Meshy, faces as the portrait.** Faceless refs of
+the portrait's sun and cloud (`art/portraits/tender.jpg` crops, vertex-gen, 48 gens, raws + gen_log.tsv in
+/home/boki/gens/meeko-comp-fix-1124/), then Meshy image-to-3D (meshy-7.1, 2k texture, no pose). Picked: sun `01a20cbd-4517-706a-83b8-55ae9c7a5d29`
+(sun_q2_r2: a ball with 10 soft petals; its portrait-like side is Meshy's back, so `--sun-turn=180`), cloud
+`01a20cb8-573a-75d8-b9fc-08eb7f29876b` (cloud_p4_r1: round lobes, smooth belly, lavender-white). Build:
+
+    M=/home/boki/meshy/meeko-comp-1124     # (the two task folders: glb.glb + texture maps + task.json)
+    $B -b --factory-startup --python tools/art1/pip_companions_native.py -- WORK/comp.glb WORK/faces.png \
+        --sun-glb=$M/sun_q2_r2/glb.glb --sun-turn=180 --cloud-glb=$M/cloud_p4_r1/glb.glb
+    python3 tools/meshy/native_hunters/graft_companions.py art/wardens/pip/pip_meshy.glb art/wardens/pip/pip_meshy.glb WORK/comp.glb WORK/faces.png
+    cp WORK/faces.png art/wardens/pip/pip_meshy_faces.png
+
+The builder welds Meshy's UV-seam splits (decimated apart they open as cracks), scales to 0.50 / 0.52 m, decimates to 700 / 800 tris
+and keeps the albedo at 512 px; the graft carries that image + UVs (glow-sun, cloth-cloud). Atlas cells 0/1 (sun calm/happy) and 4/5
+(cloud calm/happy) are the portrait's dot eyes, thin level brows, small closed smile, soft blush; cells 2, 3, 6, 7 are byte-identical.
+Raindrops show only while the cloud cries (`warden_anim/pip.json` cloud `mood_only`). Look (`warden_look.json` pip): the sun's albedo
+is a tint over the texture, low glow and no far-glow boost (the boost clipped the gold to lemon), the cloud lavender, uninked.
+
+**11-24, body reads (PLAN 4A-4C; after the graft above, Blender-free, in this order):**
 
     G=art/wardens/pip/pip_meshy.glb
     python3 tools/art1/glb_mat_rename.py $G $G meshy_textured=meshy_textured-wing
@@ -118,34 +151,17 @@ no pair worse. Stretch Crouch 13.7x / run 10.7x unchanged. Tried and dropped: Id
 +0.4/+1.0 cm), any R-arm push in run (R forearm into torso 2.5 -> 4.6-5.0), Jump_Run arm pushes (wing into R paw +0.9),
 Attack wing yaw damp 30/50 % (wing into back +0.5-2.3 cm, and the A7-A9 fault is the chest's forward pitch, not yaw).
 
-## 11-25 round 7: sun/cloud back to live (body judged alone), wings on the card slot
-Tool (job folder, not in the repo): `/home/boki/gens/hunter-round-1124/meeko/r7/tools/r7_glb.py OUT BODY(r6) LIVE(main)`: surfaces 1-5
-(sun, cloud, drop, both mood faces), their materials and the faces atlas from origin/main's glb; body, skin, all 6 clips and the
-wing texture byte-identical to round 6 (hash-checked). PR #764's bigger sun/cloud stay in #764. The wing material
-`meshy_textured-wing` -> `card-wing`, so the wings draw with `warden_card.gdshader`: a wing seen edge-on at the match camera fades
-(far_edge), which removes the pale streak the far wing drew down her back and tail (live has it too). pip's `card` look in
-warden_look.json: albedo [0.62, 0.64, 0.72] x glow 1.6 keeps both wing sides the texture's pale lavender (looks A-D in
-r7/shots: A peach under the warm sun, C/D dark blue on the unlit side). Cards cast no shadow, so the big wing shadow is gone.
+Rounds 7-9 (11-25) tried the wings on the `card` slot (lost the body shadow, undone in round 8) and put the old companions back
+to judge the body alone; main has since taken PR #764's sun and cloud, so neither is in this file any more.
 
-## 11-25 round 8: wings back on their own toon material (round 7's card rename undone)
-art-gate (run zD5g) failed round 7: no body shadow, wings off the splash. Cause: `WardenGlb._toon` turns cast_shadow OFF for the
-whole MeshInstance3D when any surface is a `card`, and Meeko's wings share the body mesh, so the body lost its shadow too; and the
-card shader is lambert, so the unlit wing side drew dark blue (splash/live wings are pale). Tool (job folder):
-`/home/boki/gens/hunter-round-1124/meeko/r8/tools/mat_rename.py IN OUT card-wing meshy_textured-wing` (JSON only, BIN byte-identical
-to round 7: round 6 body + clips, live sun/cloud). pip's `card` block in warden_look.json is back to main. The edge-on wing streak
-(same as live) is open: a card wing needs its own mesh node (shadow) and a toon floor in warden_card (colour) first.
-
-## 11-25 round 9: the sun and raincloud at full resolution, their faces drawn off the atlas again
-art-gate (run 0pOi) scored sun_cloud 2.5 (live too): black jagged face patches, a cube for the sun. Two causes, both from the
-native switch (e0c5e67730): (1) the decimation cut the companions to about a quarter (sun 480 -> 124 tris, cloud 620 -> 164,
-faces 32/34 -> 8/9 tris) and baked the calm cell into the face UVs (whole-atlas coordinates); (2) `WardenNative.dress` never made
-a `WardenMood`, so the `eyes-mood_*` faces wore the opaque toon and their clear texels drew black. Fix: the contract pip.glb's
-companion surfaces (same design, materials and atlas) fitted onto the native ones (`tools/art1/glb_companions_restore.py`,
-similarity ICP, fit error 0.6-0.7 cm mean; body, wings, skin and clips byte-identical to round 8), and the native path makes
-the mood for arts with atlas faces (Meeko only; Breaker's baked faces untouched). 79,973 -> 80,936 tris.
 
 Round 10 (11-25, keys only): Meshy's clips sank the planted foot under the floor (model origin = the ground; lowest foot
 median Idle -3.3 cm, Attack -7.6, min -12.3) and dragged the tail through it (Idle every frame, -8.4 cm; Attack half the tail,
 -32.6 cm). `tools/art1/glb_ground_clips.py` lifts Hips per key until the lowest foot is +0.3 cm in every clip, and pitches the
 tail root (Bone_013) up in Idle (14 deg max) and Attack (capped 35 deg; tail min -6.8 cm). walk/run tail left alone (pitching
 it pushed the cape hem into the R shin). Mesh, skin, textures byte-identical; geo_check and stretch same as round 9.
+
+## 11-25 round 11: rounds 2-10 ported onto main's file (PR #764's sun and cloud)
+    python3 tools/art1/glb_port_body.py OUT.glb MAIN.glb R10.glb --prims=0 --anims && python3 tools/art1/glb_compact.py OUT.glb OUT.glb
+The body's skin weights (prim 0 JOINTS_0/WEIGHTS_0) and every clip channel come from round 10 (`ext/meeko-body-1124` @ bc0e3cc89b);
+the sun, cloud, drops, faces atlas and wing texture are main's (byte-identical). Plan + proof: /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md §15.

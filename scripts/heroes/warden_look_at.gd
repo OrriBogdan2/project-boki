@@ -6,6 +6,9 @@ extends RefCounted
 ## aim, inside a clamp, and gives it back as the body arrives, so it never looks past the aim. Eased off through a
 ## dash, a knock, a stun, an emote, a full-body move, a glide and a knock-out, and for a remote Hunter (the aim is
 ## not on the wire). docs/art/wardens/LOOK_AT.md.
+## On Meshy's own skeleton (WardenNative, make with native) the same turn is shared down the bones Meshy has: a capped
+## share of the yaw on the chest (Spine02), a share of it and of the pitch on the neck, the rest on the head, so the
+## head's total turn is the same figure as on the contract path.
 
 const LOOK := "look"                 # anim state key: Vector3 (x, z: the unit aim; y: its slope up), ZERO: none
 const YAW_MAX := deg_to_rad(70.0)    # rad [est]: a neck's comfortable turn; the source data and footage give none
@@ -15,12 +18,17 @@ const OFF_S := 0.06                  # s: eased off, inside the first third of a
 const ON_S := 0.15                   # s: eased back on after it
 const CHEST_M := 0.95                # m: the aim point rides this high over the ground under it (Match aim plane)
 const NEAR_M := 1.5                  # m: an aim point nearer than this pitches the head as if it were this far
+const CHEST_YAW := 0.2               # share [est]: of the yaw the chest takes (Meshy's skeleton only)
+const NECK_SHARE := 0.3              # share [est]: of the yaw and the pitch the neck takes there
 const OFF_FLAGS := ["rolling", "dead", "stun", "gliding", "diving", "ledge", "statue", "reviving"]
 const OFF_PHASES := ["mantle", "stomp", "base"]      # (anim state phases: -1 while not on)
 
 var root: Node3D
 var skel: Skeleton3D
 var bone := -1
+var neck := -1               # Meshy's neck and chest (Spine02) bones; -1 on the contract rig
+var chest := -1
+var owned := 0.0             # 0..1: how much a clip of its own owns the head, where there is no WardenClips (native)
 var weight := 0.0            # 0..1: how much of the turn is on
 var turn := Vector2.ZERO     # rad: x the yaw off the body's facing (+ his left), y the pitch (+ up)
 var shown := Vector2.ZERO    # rad: what the head bone got this frame
@@ -34,12 +42,18 @@ static func aim_of(h: Hunter) -> Vector3:
 	var flat := Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	return Vector3(dir.x, (at.y - h.pos.y - CHEST_M) / maxf(flat, NEAR_M), dir.y)
 
-## The layer for a model's skeleton (the bone is missing: it does nothing).
-static func make(model: Node3D, sk: Skeleton3D) -> WardenLookAt:
+## The layer for a model's skeleton (the bone is missing: it does nothing). native: Meshy's skeleton, which also
+## turns its neck and chest.
+static func make(model: Node3D, sk: Skeleton3D, native := false) -> WardenLookAt:
 	var l := WardenLookAt.new()
 	l.root = model
 	l.skel = sk
 	l.bone = WardenSkeleton.find(sk, "head")
+	if native and l.bone >= 0:
+		l.neck = sk.get_bone_parent(l.bone)
+		l.chest = WardenSkeleton.find(sk, "hips")
+		if l.neck == l.chest:
+			l.neck = -1
 	return l
 
 ## One frame, after the clips or the rig posed the bones and before the braids swing off the head.
@@ -57,17 +71,30 @@ func step(dt: float, clips: WardenClips) -> void:
 		if weight <= 0.0:
 			turn = Vector2.ZERO
 	# (a full-body clip owns the head for as much as it owns the body: a cast, a flinch, a landing)
-	var k := weight * (1.0 - clips.act_w) if clips else weight
+	var k := weight * (1.0 - (clips.act_w if clips else owned))
 	shown = turn * k
 	if shown.is_zero_approx():
 		shown = Vector2.ZERO
 		return
 	# (the turn is the model's: about its up, then its right; the skeleton may sit turned inside the model)
 	var to_skel := WardenGlb.model_xf(root, skel).basis.orthonormalized().inverse()
-	var in_model := Basis(Vector3.UP, shown.x) * Basis(Vector3.RIGHT, shown.y)
-	var pose := skel.get_bone_global_pose(bone)
+	var whole := Basis(Vector3.UP, shown.x) * Basis(Vector3.RIGHT, shown.y)
+	var lower := Basis.IDENTITY
+	if chest >= 0:
+		var q := Basis(Vector3.UP, shown.x * CHEST_YAW)
+		_lay(chest, q, to_skel)
+		lower = q * lower
+	if neck >= 0:
+		var q := Basis(Vector3.UP, shown.x * NECK_SHARE) * Basis(Vector3.RIGHT, shown.y * NECK_SHARE)
+		_lay(neck, q, to_skel)
+		lower = q * lower
+	_lay(bone, whole * lower.inverse(), to_skel)  # (the head takes what the bones under it left of the turn)
+
+## Lays a turn (the model's frame) over a bone's pose as it is now; its children follow.
+func _lay(bi: int, in_model: Basis, to_skel: Basis) -> void:
+	var pose := skel.get_bone_global_pose(bi)
 	pose.basis = to_skel * in_model * to_skel.inverse() * pose.basis
-	skel.set_bone_global_pose(bone, pose)
+	skel.set_bone_global_pose(bi, pose)
 
 ## The turn eases toward what is left between the body's facing and the aim, clamped.
 func _follow(aim: Vector3, face: float, dt: float) -> void:
