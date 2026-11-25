@@ -99,10 +99,12 @@ func _names() -> void:
 	var cues: Array = ["glint_cast", "glint_plop", "glint_water", "glint_bite", "glint_reel", "tumble_push",
 			"tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal", "show_crowd",
 			"relay_handoff", "relay_fumble", "relay_finish", "kite_flap", "kite_ring", "kite_updraft", "kite_finish",
-			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win"]
+			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win", "garden_snack_ripe"]
+	for texture in SnackPatch.rules()["pick_textures"]:
+		cues.append("garden_snack_" + texture)
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
-	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo, Show Ring, Relay, Kite, Lantern cue exists (%d)"
+	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo, Show Ring, Relay, Kite, Lantern and snack patch cue exists (%d)"
 			% cues.size())
 
 func _fishing() -> void:
