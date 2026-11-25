@@ -23,8 +23,20 @@ extends RefCounted
 enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD, APPROACH, HAND_EAT, DONE, GREET }
 
 const NAMES := [
-	"Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead", "Approach", "HandEat",
-	"Done", "Greet"
+	"Roam",
+	"Eat",
+	"Nap",
+	"Play",
+	"PlayWith",
+	"Watch",
+	"React",
+	"Mentor",
+	"Chore",
+	"Lead",
+	"Approach",
+	"HandEat",
+	"Done",
+	"Greet"
 ]
 const TABLE := {
 	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.APPROACH, S.GREET],

@@ -1,7 +1,8 @@
 extends "res://tools/new_player_flow_check.gd"
 ## --garden-first-15-check: the first 15 minutes of a player who never extracts. A fresh save skips the
-## match tutorial ("Skip tutorial" on the naming card), takes its first Relic and lands on the garden;
-## a bot then raises, plays, races and breeds there for 15 minutes of garden time and never opens a match.
+## match tutorial ("Skip tutorial" on the naming card) and lands on the garden (the first Relic waits
+## for the first portal use); a bot then raises, plays, races and breeds there for 15 minutes of garden time and
+## never opens a match.
 ## Every second it asks what is on screen to guide the player: the tutorial line, the world marker, the
 ## interact prompt, a Boki's want bubble, or a Goals row that can be done at home. A stretch with none of
 ## them is a gap: each 10 s window with no guidance is listed, and a gap of GAP_FAIL_S or more fails.
@@ -45,7 +46,7 @@ func _verdicts() -> void:
 	var what := "never %.0f s without a prompt, goal or target (worst %.1f s)"
 	ok(worst_gap < GAP_FAIL_S, what % [GAP_FAIL_S, worst_gap])
 
-## A new player who skips the match tutorial on the naming card: eggs, name, first Relic, garden.
+## A new player who skips the match tutorial on the naming card: eggs, name, garden (no Relic yet).
 func _skip_to_garden() -> void:
 	Save.d["tutorial"].merge({"intro": true, "prologue": true})
 	Save.d["look"] = Unmasked.default_look()
@@ -56,7 +57,6 @@ func _skip_to_garden() -> void:
 	hx.stage = "name"
 	hx._show_name()
 	_press(hx, "Skip tutorial")
-	await _relic(hx)
 	await _wait(func(): return _is_screen("home.gd"), "'Skip tutorial' goes straight to the garden")
 	home = main.current
 	await _wait(func(): return home.panel_host != null, "the garden builds")
