@@ -14,6 +14,7 @@
  ],
  "price": 40,
  "desc": "Drink for 1s: for 30s your squad sees every Blight guard and where the Blight is gathering.",
+ "tip": "Your squad sees every Blight guard",
  "heal": 0.0,
  "omen": 30.0,
  "channel": {
