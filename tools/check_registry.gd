@@ -451,7 +451,6 @@ const CHECKS := {
 	"--hunter-gpu-shots": ["res://tools/hunter_gpu_shots.gd", "hunter_gpu_shots", null],
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],  # no ring/disc/burst on movement
 	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
-	"--look-compare-shots": ["res://tools/look_compare_shots.gd", "look_compare_shots", null],
 	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],  # ability text vs slot data
 	"--key-caps-check": ["res://tools/key_caps_check.gd", "key_caps_check", null],  # drawn keys follow a rebind
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
