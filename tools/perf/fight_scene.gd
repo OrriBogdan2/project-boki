@@ -61,7 +61,7 @@ func _kinds(seen: Array) -> String:
 		by[cls] = int(by.get(cls, 0)) + 1
 		if gi is MultiMeshInstance3D and (gi as MultiMeshInstance3D).multimesh:
 			var mm: MultiMesh = (gi as MultiMeshInstance3D).multimesh
-			copies += mm.instance_count if mm.visible_instance_count < 0 else mm.visible_instance_count
+			copies += (mm.instance_count if mm.visible_instance_count < 0 else mm.visible_instance_count)
 		elif gi is GPUParticles3D:
 			amount += (gi as GPUParticles3D).amount
 			emitting += 1 if (gi as GPUParticles3D).emitting else 0

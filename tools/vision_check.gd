@@ -39,7 +39,17 @@ func run(main: Node) -> void:
 	_wedge_rule()
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 5101, "no_drop": true, "raid": "clear"})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 2,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 5101,
+			"no_drop": true,
+			"raid": "clear"
+		}
+	)
 	m.set_process(false)
 	for h in m.hunters:
 		h.ctrl = "idle"
@@ -65,11 +75,20 @@ func _wedge_rule() -> void:
 	ok(is_equal_approx(snappedf(Match.VIEW_COS, 0.001), want), "the wedge is %.0f degrees" % deg)
 	var src := FileAccess.get_file_as_string("res://shaders/vis.gdshaderinc")
 	var cos_s := str(Match.VIEW_COS)
-	ok(src.contains("const float VIS_COS = %s;" % cos_s), "the shader draws the rule's wedge (VIS_COS %s)" % cos_s)
+	ok(
+		src.contains("const float VIS_COS = %s;" % cos_s),
+		"the shader draws the rule's wedge (VIS_COS %s)" % cos_s
+	)
 	var reveal_s := String.num(REVEAL_R, 1)
-	ok(src.contains("const float VIS_REVEAL_R = %s;" % reveal_s), "a revealed rival's circle is %s m" % reveal_s)
+	ok(
+		src.contains("const float VIS_REVEAL_R = %s;" % reveal_s),
+		"a revealed rival's circle is %s m" % reveal_s
+	)
 	var near_s := String.num(Match.NEAR_SENSE, 1)
-	ok(src.contains("const float VIS_NEAR = %s;" % near_s), "the shader lights the near circle (%s m)" % near_s)
+	ok(
+		src.contains("const float VIS_NEAR = %s;" % near_s),
+		"the shader lights the near circle (%s m)" % near_s
+	)
 
 
 ## A ground point `deg` off the aim direction `a` (radians), `d` metres from the player; INF if not open ground at
@@ -77,7 +96,12 @@ func _wedge_rule() -> void:
 func _spot(m: Match, pl: Hunter, a: float, deg: float, d: float) -> Vector3:
 	var b := a + deg_to_rad(deg)
 	var q := pl.pos + Vector3(cos(b), 0, sin(b)) * d
-	if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z) or m.world.in_bush(q.x, q.z) or m.in_smoke(q):
+	if (
+		m.world.is_void(q.x, q.z)
+		or m.world.is_block(q.x, q.z)
+		or m.world.in_bush(q.x, q.z)
+		or m.in_smoke(q)
+	):
 		return Vector3.INF
 	q.y = m.world.ground_at(q.x, q.z)
 	if absf(q.y - pl.pos.y) > 0.5 or not m.world.los(pl.pos, q, pl.pos.y + 1.1):
@@ -160,12 +184,12 @@ func _lit(m: Match, h: Hunter) -> float:
 
 
 func _reveal(m: Match) -> void:
-	var P := m.player
+	var pl := m.player
 	var foe: Hunter = null
 	var mate: Hunter = null
 	for h in m.hunters:
-		if h.team == P.team:
-			if h != P:
+		if h.team == pl.team:
+			if h != pl:
 				mate = h
 		elif foe == null:
 			foe = h
@@ -173,24 +197,33 @@ func _reveal(m: Match) -> void:
 		mate.out = true  # your teammate's sight would see her too
 	for i in 32:
 		var a := TAU * i / 32.0
-		var q := _spot(m, P, a, AWAY_DEG, SIDE_M)
+		var q := _spot(m, pl, a, AWAY_DEG, SIDE_M)
 		if q == Vector3.INF:
 			continue
-		P.inp["aim"] = P.pos + Vector3(cos(a), 0, sin(a)) * 6.0
+		pl.inp["aim"] = pl.pos + Vector3(cos(a), 0, sin(a)) * 6.0
 		foe.teleport(q)
 		foe.crouch = false
 		foe.reveal_t = 0.0
 		var away := "%.0f degrees off your aim, %.0f m out" % [AWAY_DEG, SIDE_M]
 		ok(_lit(m, foe) == 0.0 and foe.unseen, away + ": hidden, no circle")
-		foe.inp["aim"] = P.pos
+		foe.inp["aim"] = pl.pos
 		foe.atk.fire()
-		ok(foe.reveal_t >= SHOT_REVEAL, "her shot gives her away for %.1f s (%.2f)" % [SHOT_REVEAL, foe.reveal_t])
+		ok(
+			foe.reveal_t >= SHOT_REVEAL,
+			"her shot gives her away for %.1f s (%.2f)" % [SHOT_REVEAL, foe.reveal_t]
+		)
 		ok(_lit(m, foe) == 1.0 and not foe.unseen, "she is seen, inside her own lit circle")
 		foe.reveal_t = 0.0
-		foe.hurt(1.0, P)
-		ok(foe.reveal_t >= HIT_REVEAL and m.can_see(P.team, foe), "being hit gives her away for %.1f s" % HIT_REVEAL)
+		foe.hurt(1.0, pl)
+		ok(
+			foe.reveal_t >= HIT_REVEAL and m.can_see(pl.team, foe),
+			"being hit gives her away for %.1f s" % HIT_REVEAL
+		)
 		foe.reveal_t = RevealLight.FADE * 0.5
-		ok(is_equal_approx(_lit(m, foe), 0.5), "the circle fades out over the reveal's last %.1f s" % RevealLight.FADE)
+		ok(
+			is_equal_approx(_lit(m, foe), 0.5),
+			"the circle fades out over the reveal's last %.1f s" % RevealLight.FADE
+		)
 		foe.reveal_t = 0.0
 		ok(_lit(m, foe) == 0.0 and foe.unseen, "once it runs out she is hidden again, no circle")
 		if mate:
@@ -212,7 +245,10 @@ func _grey_fog(m: Match) -> void:
 	var re := RegEx.create_from_string("vec3\\(([-0-9.]+), *([-0-9.]+), *([-0-9.]+)\\)")
 	for r in re.search_all(body):
 		var x := float(r.get_string(1))
-		if not (is_equal_approx(x, float(r.get_string(2))) and is_equal_approx(x, float(r.get_string(3)))):
+		if not (
+			is_equal_approx(x, float(r.get_string(2)))
+			and is_equal_approx(x, float(r.get_string(3)))
+		):
 			tints += 1
 	var greys := body.contains("vis_grey(c, vis_greyness) * vis_dark")
 	ok(
@@ -221,11 +257,17 @@ func _grey_fog(m: Match) -> void:
 	)
 	ok(
 		RaidLook.VIS_DARK >= FOG_DARK.x and RaidLook.VIS_DARK <= FOG_DARK.y,
-		"the fog is slightly dark: albedo x%.2f (%.2f-%.2f)" % [RaidLook.VIS_DARK, FOG_DARK.x, FOG_DARK.y]
+		(
+			"the fog is slightly dark: albedo x%.2f (%.2f-%.2f)"
+			% [RaidLook.VIS_DARK, FOG_DARK.x, FOG_DARK.y]
+		)
 	)
 	ok(
 		RaidLook.VIS_GREY >= FOG_GREY.x and RaidLook.VIS_GREY <= FOG_GREY.y,
-		"the fog is partly grey, not full, not none: %.2f (%.2f-%.2f)" % [RaidLook.VIS_GREY, FOG_GREY.x, FOG_GREY.y]
+		(
+			"the fog is partly grey, not full, not none: %.2f (%.2f-%.2f)"
+			% [RaidLook.VIS_GREY, FOG_GREY.x, FOG_GREY.y]
+		)
 	)
 	for n in FOG_LIT:
 		var s := FileAccess.get_file_as_string("res://shaders/%s.gdshader" % n)
@@ -235,12 +277,17 @@ func _grey_fog(m: Match) -> void:
 			and light.contains("vis_grey(LIGHT_COLOR, vis_f)")
 			and not light.contains("* LIGHT_COLOR")
 		)
-		var tone_ok := not light.contains("* tone;") and not light.contains("DIFFUSE_LIGHT += rim_color")
+		var tone_ok := (
+			not light.contains("* tone;") and not light.contains("DIFFUSE_LIGHT += rim_color")
+		)
 		var amb_ok := (
 			s.contains("AO = vis_ao(vis_f)")
 			and s.contains("EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX)")
 		)
-		ok(greyed and tone_ok and amb_ok, "%s greys its light, shadow tint, ambient and haze outside sight" % n)
+		ok(
+			greyed and tone_ok and amb_ok,
+			"%s greys its light, shadow tint, ambient and haze outside sight" % n
+		)
 	var amb := RaidLook.vis_amb(m.env.environment)
 	ok(amb > 0.05 and amb < 2.0, "the ambient's grey is set for the fog (vis_amb %.3f)" % amb)
 
@@ -248,21 +295,23 @@ func _grey_fog(m: Match) -> void:
 ## The shared aim line points down the cone's centre (vis_dir = aim_dir()): a far cursor, one close to the body (inside
 ## the dead zone, aim_dir keeps the last good direction) and an aim lock that differs from the cursor.
 func _aim_line(m: Match) -> void:
-	var P := m.player
-	var saved_ak := P.ak
-	P.out = false
-	P.downed = false
-	var cases := {"far": Vector3(7, 0, -3), "close": Vector3(0.4, 0, 0.3), "locked": Vector3(-6, 0, 2)}
+	var pl := m.player
+	var saved_ak := pl.ak
+	pl.out = false
+	pl.downed = false
+	var cases := {
+		"far": Vector3(7, 0, -3), "close": Vector3(0.4, 0, 0.3), "locked": Vector3(-6, 0, 2)
+	}
 	var lock := GDScript.new()
 	lock.source_code = "extends ArchKit\nfunc aim_lock() -> Vector2: return Vector2(0.0, 1.0)\n"
 	lock.reload()
 	for key in cases:
-		P.ak = lock.new() if key == "locked" else null
-		P.inp["aim"] = P.pos + cases[key]
+		pl.ak = lock.new() if key == "locked" else null
+		pl.inp["aim"] = pl.pos + cases[key]
 		m._update_aim(1.0)
 		var along: Vector3 = -m.aim_line.global_transform.basis.z  # look_at aims -Z
 		var line := Vector2(along.x, along.z).normalized()
-		var off := rad_to_deg(line.angle_to(P.aim_dir())) if m.aim_line.visible else 0.0
+		var off := rad_to_deg(line.angle_to(pl.aim_dir())) if m.aim_line.visible else 0.0
 		var seen: bool = m.aim_line.visible and absf(off) < 1.0
 		ok(seen, "aim line vs cone centre, %s cursor: %.2f degrees apart" % [key, off])
-	P.ak = saved_ak
+	pl.ak = saved_ak
