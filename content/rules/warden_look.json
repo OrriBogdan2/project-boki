@@ -9,7 +9,11 @@
 				0.55
 			]
 		},
+		"no_ink": ["ngun", "narm", "nring"],
 		"slots": {
+			"nbody": {"rim_far": 0.0, "fres": 0.0, "far_lift": 0.0, "sss": 0.0, "light_neutral_warm": 1.0, "desat": 0.15},
+			"ngun": {"rim_far": 0.0, "fres": 0.0, "far_lift": 0.1, "sss": 0.0, "light_neutral_warm": 1.0, "desat": 0.3},
+			"narm": {"rim_far": 0.0, "fres": 0.0, "far_lift": 0.1, "sss": 0.0, "light_neutral_warm": 1.0, "desat": 0.3},
 			"skin": {
 				"top_light": 0.45,
 				"fres": 0.2,
@@ -206,6 +210,10 @@
 				"rim_amount": 0.2,
 				"desat": 0.3,
 				"far_lift": 0.2
+			},
+			"leather-body.001": {
+				"desat": 0.0,
+				"albedo": [0.3, 0.46, 0.8]
 			},
 			"glow": {
 				"glow": 1.8,

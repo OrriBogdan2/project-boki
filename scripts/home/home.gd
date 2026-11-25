@@ -1149,6 +1149,7 @@ func _see_through() -> void:
 	SeeThrough.update(cam, player.global_position, b)
 
 func _exit_tree() -> void:
+	RigPace.crowd = 0
 	ZoneLayout.leave()
 	SeeThrough.off()
 	Sfx.clear_amb_layers()
@@ -1400,6 +1401,7 @@ func _move_kin(d: float) -> void:
 	_separate_kin(d)
 	if life: life.step(d)
 	nap_sound.step(kins, d)
+	RigPace.crowd = kins.size()
 	for k in kins:
 		if k.get("busy", false):
 			fly.land(k)
@@ -3253,7 +3255,7 @@ func _open_kin(rec: Dictionary) -> void:
 				c1.add_child(UI.kv("Parents", "%s and %s" % [rec["parents"][0], rec["parents"][1]]))
 	# looking after it: the care actions as one row, Feed first
 	var ft := UI.footer(v)
-	var fl := UI.hbox(4)
+	var fl := UI.hbox(8)
 	v.add_child(UI.spacer(2))
 	var roles := UI.hbox(6)
 	roles.add_child(UI.label("Role", UI.T_SMALL, UI.FAINT))
@@ -5019,7 +5021,10 @@ func _separate_kin(d: float) -> void:
 			if j == i: continue
 			var b: Dictionary = act[j]
 			var diff := ap - Vector2(b["pos"].x, b["pos"].z)
-			var need := (_kin_r(a) + _kin_r(b)) * (life.pile(a, b) if life else 1.0)
+			var reach := _kin_r(a) + _kin_r(b)  # (the pile scale is under 1: nobody past this is pushed)
+			if diff.length_squared() >= reach * reach:
+				continue
+			var need := reach * (life.pile(a, b) if life else 1.0)
 			var dl := diff.length()
 			if dl < need:
 				if dl < 0.001: diff = Vector2.from_angle(float(i) * 2.4); dl = 0.001

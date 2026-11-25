@@ -108,6 +108,24 @@ than what shows: the head covers its rim. Past that the high cameras and `CamRig
 Palettes live at the top of each species' coat section (`PLUM`, `SHELL`...); tools held in the tail are Vespyx's `chop`
 and `mine` clips, and `boki_clips.chop_mouth` / `mine_mouth` are the mouth versions the others use.
 
+11-20: Buckleron (`limpetor`) and Lanterloris (`moonloris`) have their own clips (`limpetor_anim.py`, `moonloris_anim.py`)
+on the borrowed Glomwort skeleton: a limpet that creeps under a rocking shield, bashes it down and clamps to brace, and
+a slow loris that climbs hand over hand, freezes and snaps, and floats up with its lantern belly. Their glbs were
+re-keyed with `tools/boki/reclip.py` (`blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>`):
+it reads the built .glb back, swaps the actions for the module's `CLIPS` and exports again, for a species whose raw Meshy
+model is not at hand.
+11-22: both have `auto_legs.py` legs (below), so reclip keeps the file's leg bones and its planted-paw walk and run
+and re-keys only the other 11 clips, legs at rest (the modules' own creep and climb walk/run glide the paws and are not
+used). A full rebuild with `build_boki.py` needs `auto_legs.py` again.
+11-20: Crofthorn (`heatherhorn`) and Anvilbrock (`kilnbadger`) have their own clips (`heatherhorn_anim.py`,
+`kilnbadger_anim.py`) on the borrowed Glomwort skeleton: a cow's level-backed plod, horn sweep and proud bellow; a honey
+badger's low swagger, headbutt and ringing anvil. Their glbs were re-keyed with `tools/boki/reclip.py`. Then they got
+their real legs back on top: `auto_legs.py heatherhorn top=0.42 reach=1.15`, `auto_legs.py kilnbadger top=0.35
+reach=1.35` (the args main's leg pass used, read back off its bones and swing). To re-key them again, run `reclip.py`
+on the legless glb from before the legs (`git show 836178d90b:art/kin/<id>/<id>.glb`; its assert wants the module's
+skeleton), then `auto_legs.py` with those args. The trot touches down at the wrap, so heatherhorn's walk and run seams
+sit in SEAM_OVER (2.09, 1.62).
+
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.
 

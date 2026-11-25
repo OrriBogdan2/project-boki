@@ -10,6 +10,7 @@ extends ArchKit
 ## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
 ## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
 
+const SLOT_PINK := Color("ff5ab4")   # her ability slot colour (docs/VFX_QUALITY.md palette)
 const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
 const DEEP_PINK := Color("e0148c")   # the aim kit whitens its accent: this lands as a rich hot pink
@@ -206,7 +207,7 @@ func _tick_sparks(dt: float) -> void:
 			fx().unmark("vs%d" % key)
 			continue
 		var n := int(s["n"])
-		var badge := not h.is_local()      # yours: the badge
+		var badge := not h.is_local() and not m.has_meta("pitch_no_foe_plates")  # your own: no badge
 		fx().marker("vs%d" % key, f, n, mx, PINK_WHITE, PINK, _top(f) + MARK_LIFT, badge)
 		StatusLooks.of(m).keep(f, "static")
 		if f.visible and int(m.time / STATIC_GAP) != int((m.time - dt) / STATIC_GAP):
@@ -774,9 +775,9 @@ func _build_mote() -> Node3D:
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var lt := OmniLight3D.new()
-	lt.light_color = PINK
+	lt.light_color = SLOT_PINK       # her slot pink (#ff5ab4): the haze on the ground stays pink, not orange
 	lt.omni_range = 2.4
-	lt.light_energy = 1.2
+	lt.light_energy = 0.6
 	n.add_child(lt)
 	mote_pool.append(n)
 	return n

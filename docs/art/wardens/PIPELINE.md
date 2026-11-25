@@ -674,3 +674,12 @@ already carry the fit's tuned landmarks, so each build keeps its old dense raw.
 | cloud_p4_r1 | 2026-11-24 | 01a20cb8-573a-75d8-b9fc-08eb7f29876b | meshy-7.1 | same | 35 | USED (round lobes, smooth belly) |
 | cloud_p0_r2 | 2026-11-24 | 01a20cb8-5733-72ec-aa23-004834b93804 | meshy-7.1 | same | 35 | flatter, fine: spare |
 | cloud_p5_r1 | 2026-11-24 | 01a20cb8-5743-72b9-92f0-80fa39f5093c | meshy-7.1 | same | 35 | taller, fewer lobes: spare |
+
+### Sparkle native polish, 2026-11-24 (3 retexture tasks, 45 credits; balance 2470 before, 2425 after)
+Source `art/wardens/ryzz/ryzz_meshy.glb` uploaded (original UV, meshy-7), the turnaround's front, side and back views as styles:
+`01a20d07-7e55-75f5-aab0-8ae5f67bdf49` (front, side, back), `01a20d07-7e64-700e-8aaf-72a625addb7d` (back, front, side),
+`01a20d07-7e5f-77d8-99fe-5fa54a5d55a0` (front, back). Meshy merges the three prims into one 8192 atlas on the same mesh
+(79,979 tris, y scaled to -1..1). Remapped onto the live UVs by triangle centroid, the copper stays at the live level (value
+0.66-0.72 against the 0.45-0.62 band) and the boots at 0.27-0.30, so none was used; the shipped textures are masked grades
+(see `art/wardens/ryzz/IMPORT.md`, "Meshy-native model").
+

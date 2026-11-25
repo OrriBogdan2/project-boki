@@ -79,5 +79,27 @@ func run(main: Node) -> void:
 		Sfx.play("hit", null, 0.0, 0.0)
 		Sfx.play("step%d" % (i % 3), null, 0.0, 0.0)
 	ok(Sfx.cue_voice.stream == fin and not Sfx.players.has(Sfx.cue_voice), "footsteps and hits leave the cue's voice")
+	# the other side: a rival knocks one of YOUR squad. Your squad hears the dark knock_warn (never the attacker's
+	# knock_confirm); you down yourself or a rival downs a rival and the cue stays quiet (no stray warning)
+	var w0 := _plays("knock_warn")
+	k0 = _plays("knock_confirm")
+	e0 = _plays("elim_confirm")
+	var warn_own: bool = Sfx.has("knock_warn") and Sfx.streams["knock_warn"] != Sfx.streams["knock_confirm"]
+	ok(warn_own, "knock_warn is its own sound, not the knock confirm")
+	m.knock(rival_b, rival_a, {})
+	ok(_plays("knock_warn") == w0, "a rival downs a rival: no warning")
+	m.knock(P, rival_a, {})
+	ok(_plays("knock_warn") == w0 and _plays("knock_confirm") == k0, "you are downed: no squad warning for yourself")
+	P.hp = P.max_hp
+	P.downed = false
+	m.knock(mate, rival_a, {})
+	var only_warn := _plays("knock_confirm") == k0 and _plays("elim_confirm") == e0
+	ok(_plays("knock_warn") == w0 + 1 and only_warn, "a rival downs your squadmate: warning once, not the confirm")
+	ok(Sfx.cue_voice.stream == Sfx.streams["knock_warn"], "the warning plays on the cue voice")
+	for i in Sfx.POOL * 2:
+		Sfx.play("step_stone", null, 0.0, 0.0)
+		Sfx.play("hit", null, 0.0, 0.0)
+	var kept: bool = Sfx.cue_voice.stream == Sfx.streams["knock_warn"] and not Sfx.players.has(Sfx.cue_voice)
+	ok(kept, "a flood of footsteps leaves the warning alone (under the stack cap)")
 	print("KNOCKSFX DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
