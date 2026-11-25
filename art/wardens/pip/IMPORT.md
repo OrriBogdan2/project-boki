@@ -165,3 +165,15 @@ it pushed the cape hem into the R shin). Mesh, skin, textures byte-identical; ge
     python3 tools/art1/glb_port_body.py OUT.glb MAIN.glb R10.glb --prims=0 --anims && python3 tools/art1/glb_compact.py OUT.glb OUT.glb
 The body's skin weights (prim 0 JOINTS_0/WEIGHTS_0) and every clip channel come from round 10 (`ext/meeko-body-1124` @ bc0e3cc89b);
 the sun, cloud, drops, faces atlas and wing texture are main's (byte-identical). Plan + proof: /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md §15.
+
+**Round 11 paws + feet (Meshy paint, masked) and the Idle tail.** The live paws and lower shins were painted dark purple-mauve
+(the "mitten"/"sock" read; the turnaround's paws are body pink with dark toe lines). Meshy retexture (meshy-7, original UVs) of
+the body alone (prim 0, rest pose) from the turnaround's front/side/back/3-4 views, task `01a213fe-0917-775d-aebf-7e21fe6bfca9`
+(raws /home/boki/meshy/meeko_r11_1125/rtA). Only the paws (hand + finger bones, fading out over the lower half of the forearm)
+and the feet (foot + toe bones, fading out over the lower 30-75 % of the shin) take its paint, per-vertex alpha rasterised into
+the 2048 atlas (job tool r11/tools/pawcomp.py, no colour gain); every other texel is live. Swapped into image #1:
+
+    python3 tools/art1/glb_image_swap.py $G '#1' WORK/comp_A0.jpg $G && cp WORK/comp_A0.jpg art/wardens/pip/pip_meshy_Image_0.jpg
+    python3 tools/art1/glb_bone_offset.py $G $G Idle Bone_013 0,1,0 -10
+
+The tail root is yawed 10 deg away from her right leg in Idle (geo_check Idle cloth>foot_R 0.61 -> 0 cm, cloth>shin_R 3.41 -> 3.07).
