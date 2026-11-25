@@ -2,7 +2,7 @@ extends "res://tools/gameplay_media.gd"
 ## --hunter-scale-shots --shots-dir=<dir> [--hero=arch,arch]: each hero standing on the same open ground, shot at the
 ## old match size (Hunter.VIS_SCALE 1.12) and at the camera.json match_hunter_scale, as <dir>/<hero>_<before|after>.png
 ## (no HUD) and <hero>_<before|after>_hud.png (with the overhead plate). Prints a HSCALE row per hero: on-screen
-## body height in px (feet to the top of the head), the model scale, and the hit radius (must not change).
+## body height in px at 1080p (feet to the top of the head), the model scale, and the hit radius (must not change).
 ## Needs a renderer (jobq --needs gpu); 1920x1080 so the px read against a 1080p reference.
 
 const SIZE := Vector2i(1920, 1080)
@@ -69,10 +69,12 @@ func _shot(hero: String, pass_name: String) -> void:
 	var top := _top(p.model)
 	var up := HunterZone.PLATE_UP * float(p.cdat["scale"]) * Hunter.VIS_SCALE / 1.12
 	var plate := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, up, 0))
+	# the viewport keeps the project's 1280x720 and the window shows it at 1920x1080: px are read at 1080p
+	var k := float(SIZE.y) / main.get_viewport().get_visible_rect().size.y
 	print(
 		(
 			"HSCALE %s %s: %.0f px tall, model scale %.3f, hit radius %.3f, plate anchor %.0f px over the head"
-			% [hero, pass_name, feet.y - top, p.vis_k, p.hit_radius(), top - plate.y]
+			% [hero, pass_name, (feet.y - top) * k, p.vis_k, p.hit_radius(), (top - plate.y) * k]
 		)
 	)
 
