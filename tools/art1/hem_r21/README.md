@@ -20,3 +20,5 @@ Shipped chain (from r20 glb 949ef89a):
 7. r21d: `legfollow21.py in.glb out.glb hmax=0.7` (numpy port of hem_r10/legfollow.py, weights written in place) on the TA2+wsmooth glb,
    then swscale 0.4 and repack. In-game attack/hit run the kmove clips from hem_clips.glb (arc_loose -> lace_loose), which have no
    SkirtSw keys, so the left knee punched through the closed panel; the thigh share moves the panel with the knee in every clip.
+8. r21e (shipped): legfollow21 hmax=0.85 ybot=0.60 pw=1.0 (thigh share full by knee height) — the hit pose still put the left knee
+   through the panel at hmax 0.7. geo PASS held 0.7; skirt edges >3x 130 (r20 358), whole model 1,786 (r20 2,014, live 4,415).
