@@ -80,7 +80,7 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 			var acol: Color = p.armor_col().lerp(Color.WHITE, h.plates.armor_flash_of(p))
 			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), acol)
 	ArmorHud.bar(h, x0, ar.position.y - 3, w, p)    # progress to the next armour tier, a hairline above the strip
-	if p.ak and p.ak.has_meter():
+	if p.ak and p.ak.has_gauge():
 		h._draw_res_bar(x0, hr.end.y + 4, w, p)
 	xp_row(h, pr, x0, w, p)
 	_hidden_tag(h, sz, p)
