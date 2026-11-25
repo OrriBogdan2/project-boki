@@ -39,7 +39,7 @@ func _start(o: Dictionary) -> void:
 		await main.get_tree().process_frame
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 
 func _frames(n: int) -> void:

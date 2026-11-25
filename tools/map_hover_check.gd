@@ -22,7 +22,7 @@ func run(main: Node) -> void:
 	_dwell()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	while m.hud.full_map == null:
 		await main.get_tree().process_frame

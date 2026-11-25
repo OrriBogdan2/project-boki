@@ -25,7 +25,7 @@ func run(main: Node) -> void:
 	Settings._apply_render_scale()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+	m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
 		"arch": "rimewright", "cls": Arch.weight("rimewright"), "weapon": Arch.signature("rimewright")})
 	m.set_process(false)
 	var fade = main.get("fade")
