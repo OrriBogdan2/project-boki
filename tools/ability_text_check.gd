@@ -173,7 +173,7 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"teams": 2,
 			"squad": 1,
