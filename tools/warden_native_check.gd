@@ -145,7 +145,7 @@ func _states(main: Node, a: String) -> void:
 		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST}.merged(c[1], true))
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
-		var want := String(nat.plays[c[0]])
+		var want := String(nat.plays["lmb" if c[0] == "attack" and nat.plays.has("lmb") else c[0]])
 		var sk := nat.skel
 		var up := (
 			sk.get_bone_global_pose(sk.find_bone("Head")).origin.y
@@ -326,6 +326,15 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var all_there: bool = named.all(func(sl): return nat.plays.has(sl))
 	ok(all_there, "%s: every clip slot the data names has its clip (%s)" % [a, named])
 	var pick := String(nat.d["clips"]["crouch"])  # (Meshy's clip no fallback plays)
+	for sl in named:  # (a Hunter's own clip: it plays on its move, posed, and ends within its length)
+		var own := String(nat.plays[sl])
+		await _feed(main, nat, m, SLOT_CASES[sl][0], SLOT_CASES[sl][1])
+		var posed := _turned(nat)
+		var len := nat.player.get_animation(own).length
+		ok(
+			nat.player.current_animation == own and posed >= POSED_MIN and len > 0.2,
+			"%s: slot %s plays its own clip %s (%.2f s, %d bones posed)" % [a, sl, own, len, posed]
+		)
 	for sl in SLOT_CASES:
 		var c: Array = SLOT_CASES[sl]
 		if not nat.plays.has(sl):
@@ -368,6 +377,9 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	var sp := AnimationPlayer.new()
 	sp.add_animation_library(&"", lib)
 	src.add_child(sp)
+	var own_dash: Variant = nat.plays.get("dash")  # (a Hunter's own dash clip comes back below)
+	nat.player.stop()  # (the library changes while nothing plays: a clip fading out of a library edit crashes)
+	nat.cur = ""
 	nat.plays["dash"] = SYNTH
 	nat.borrow(src)
 	var got := nat.player.get_animation(SYNTH) if nat.player.has_animation(SYNTH) else null
@@ -383,8 +395,11 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	var plays_it := nat.player.current_animation == SYNTH and _turned(nat) >= POSED_MIN
 	ok(plays_it, "%s: the slot plays the clips file's clip" % a)
 	nat.player.stop()  # (a clip removed while it plays errors on every advance)
+	nat.cur = ""
 	nat.player.get_animation_library(&"").remove_animation(SYNTH)
 	nat.plays.erase("dash")
+	if own_dash != null:
+		nat.plays["dash"] = own_dash
 	src.free()
 
 

@@ -17,6 +17,19 @@ extends RefCounted
 
 const ClipCheck := preload("res://tools/clip_check.gd")
 
+## --states on a Meshy-native Hunter then plays each clip slot its data names: [slot, the state that starts it]
+## (--attack-only first drops those clips: every move plays the one attack clip, the "before"; --before-after plays
+## each slot with its clip, then every slot with the attack clip: log lines SLOT then BEFORE).
+## The log line SLOT names its frames (a held slot, dash and glide, runs while its state does).
+const SLOT_SHOTS := [
+	["lmb", {"swing_n": 1}],
+	["lmb_hold", {"swing_n": 1, "combo": -1}],
+	["rmb", {"cast": 0.0, "cast_slot": "secondary"}],
+	["e", {"cast": 0.0, "cast_slot": "utility"}],
+	["r", {"cast": 0.0, "cast_slot": "ult"}],
+	["dash", {"rolling": true}],
+	["glide", {"gliding": true}],
+]
 ## --states: [state, the match's state for it (WardenClips.STATE), s it is held]
 const STATE_SHOTS := [
 	["idle", {"grounded": true}, 2.0],
@@ -263,6 +276,8 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
 	if native and not (native.d.get("kmoves", {}) as Dictionary).is_empty():
 		await _native_move_dirs(model, native, fps, out)
+	if native:
+		await _slot_shots(native, model, fps, dir, i)
 
 
 ## The kit moves a native Hunter has its own clips for (data "kmoves"), each pressed on the spot, an upper-body one
@@ -321,6 +336,62 @@ func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) 
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
+
+
+## --states, native: each slot of data "clips" from SLOT_SHOTS pressed once on the stand (held slots run 1 s).
+func _slot_shots(native: WardenNative, model: Node3D, fps: float, dir: String, first: int) -> void:
+	var args := OS.get_cmdline_user_args()
+	var named: Array = (
+		SLOT_SHOTS.map(func(sl): return sl[0]).filter(func(sl): return (native.d["clips"] as Dictionary).has(sl))
+	)
+	var kept: Dictionary = native.plays.duplicate()
+	var next := first
+	for before in [false, true] if args.has("--before-after") else [args.has("--attack-only")]:
+		native.plays = kept.duplicate()
+		if before:  # (every move plays Meshy's one attack clip)
+			for slot: String in named:
+				native.plays.erase(slot)
+		next = await _slot_pass(native, model, fps, dir, next, named, "BEFORE" if before else "SLOT")
+
+
+## One pass over the slots: each pressed once on the stand; returns the next frame number.
+func _slot_pass(
+	native: WardenNative, model: Node3D, fps: float, dir: String, first: int, named: Array, label: String
+) -> int:
+	var i := first
+	var press := first  # (a swing counts up and the frame number only grows: every press is a new swing)
+	for sl in SLOT_SHOTS:
+		var slot: String = sl[0]
+		if not slot in named:
+			continue
+		var held := slot in ["dash", "glide"]
+		var s := {"grounded": true, "face": model.rotation.y}
+		model.set_meta(WardenClips.STATE, s)
+		for k in int(0.3 * fps):
+			native.call("_process", 1.0 / fps)
+		var from := i
+		var clip := String(native.plays.get(slot, native.plays["attack"]))
+		var length := (
+			1.0
+			if held
+			else (
+				native.player.get_animation(clip).length
+				/ (1.0 if native.plays.has(slot) else float(native.d.get("attack_rate", 1.0)))
+			)
+		)
+		for k in int((length + 0.4) * fps):
+			if k == 0 or held:
+				s.merge(sl[1], true)
+			if k == 0 and s.has("swing_n"):
+				press += 1
+			if s.has("swing_n"):
+				s["swing_n"] = press
+			if not held and k > 0 and s.has("cast"):
+				s["cast"] = 5.0
+			native.call("_process", 1.0 / fps)
+			await _grab(dir.path_join("f%03d.png" % i))
+			i += 1
+		print("%s %s f%03d-f%03d (clip %.2f s, every 1/%d s)" % [label, slot, from, i - 1, length, int(fps)])
 	return i
 
 
