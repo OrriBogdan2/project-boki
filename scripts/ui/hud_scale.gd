@@ -8,7 +8,7 @@ extends RefCounted
 
 const MIN := 0.8
 const MAX := 1.3
-const GAP := 8.0  # logical px kept between a top cluster and the bottom one it grows toward
+const GAP := 8.0  # logical px kept between a top cluster and the bottom one it grows toward (or two side by side)
 
 const TL := Vector2(0.0, 0.0)
 const TC := Vector2(0.5, 0.0)
@@ -24,12 +24,11 @@ const ANCHOR := {
 	"boss": TC,
 	"ways_strip": TC,
 	"vitals": BL,
-	"abilities": BL,
+	"abilities": BC,
 	"kin": BL,
-	"status": BC,
 	"weapon": BR,
 	"gear": BR,
-	"perks": BC
+	"perks": BL
 }
 
 static var xf := Transform2D.IDENTITY  # what the group being drawn is under (identity between passes)
@@ -144,8 +143,20 @@ static func _grown_bl(sz: Vector2) -> Rect2:
 	return Rect2(at + (e.position - at) * up(), e.size * up())
 
 
+## The bottom-left cluster (vitals) and the bottom-centre one (the ability row) share the bottom edge, so a
+## growing HUD steps both down to what keeps them apart (never below 100%).
+static func _across(s: float, box: Rect2) -> float:
+	if not (_ext.has(BL) and _ext.has(BC)):
+		return s
+	var mid := box.position.x + box.size.x * 0.5
+	var need := ((_ext[BL] as Rect2).end.x - box.position.x) + (mid - (_ext[BC] as Rect2).position.x)
+	return minf(s, maxf((mid - box.position.x - GAP) / maxf(need, 1.0), 1.0))
+
+
 static func _factor(box: Rect2) -> float:
 	var s := setting()
+	if _anchor == BL or _anchor == BC:
+		s = _across(s, box)
 	if s <= 1.0 or not _ext.has(_anchor) or not _ext.has(Vector2(_anchor.x, 1.0 - _anchor.y)) or _anchor.y == 0.5:
 		return s
 	var mine: Rect2 = _ext[_anchor]

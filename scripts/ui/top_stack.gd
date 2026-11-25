@@ -33,13 +33,13 @@ static func place(h) -> void:
 static func rail(h) -> void:
 	var sz: Vector2 = h.c.size
 	var fr := SafeArea.frame(sz)   # (on 21:9 and wider the corner groups keep to a centred 16:9 frame)
-	var pad := HudStyle.safe_pad(fr.size)
+	var pad := HudStyle.hud_pad(fr.size)
 	var y: float = maxf(h.feed_top, pad.y)
 	if not KillFeed.shown.is_empty():
 		y = maxf(y, (KillFeed.shown.back()["rect"] as Rect2).end.y + KillFeed.GAP)
 	h.msgs.right_edge = fr.end.x - pad.x
 	h.msgs.max_w = fr.size.x * RAIL_W
-	h.msgs.top = maxf(h.msgs.top, y)
+	h.msgs.top = maxf(h.msgs.top, HudScale.from_edge(y))      # (under the feed as it is once the HUD has grown)
 
 
 const RAIL_W := 0.22   # of the screen width: the widest a rail card gets (a longer line wraps)

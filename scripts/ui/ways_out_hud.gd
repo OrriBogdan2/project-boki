@@ -92,7 +92,7 @@ static func _clock(t: float) -> String:
 # ------------------------------------------------------------------ the strip
 ## Where the strip starts: the top of the window's safe area.
 static func top_y(sz: Vector2) -> float:
-	return HudStyle.safe_pad(sz).y
+	return HudStyle.hud_pad(sz).y
 
 ## The lowest y the strip and the line under it reach (the pill ends 11 px under its middle), or 0 when the strip
 ## is not drawn (no Heart, a tutorial, training or a duel): what sits under it at the top-centre starts lower.

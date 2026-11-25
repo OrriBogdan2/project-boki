@@ -5,7 +5,7 @@
 "semicolon": 8
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 26,
+"long_line": 25,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -16,7 +16,7 @@
 },
 "scripts/arch/hero_demo.gd": {
 "long_line": 1,
-"semicolon": 13
+"semicolon": 12
 },
 "scripts/arch/kit_status.gd": {
 "nested_ternary": 1
@@ -151,7 +151,7 @@
 "nested_ternary": 2
 },
 "scripts/core/social.gd": {
-"long_line": 12,
+"long_line": 11,
 "semicolon": 1
 },
 "scripts/core/synth.gd": {
@@ -314,9 +314,6 @@
 "scripts/match/aim/aim_draw.gd": {
 "long_line": 2
 },
-"scripts/match/aim/aim_geo.gd": {
-"semicolon": 13
-},
 "scripts/match/aim/aim_kit.gd": {
 "long_line": 5,
 "semicolon": 21
@@ -364,8 +361,7 @@
 "long_line": 1
 },
 "scripts/match/bot.gd": {
-"long_line": 19,
-"semicolon": 48
+"long_line": 1
 },
 "scripts/match/bot_kin.gd": {
 "long_line": 4
@@ -434,8 +430,8 @@
 "semicolon": 26
 },
 "scripts/match/hunter.gd": {
-"history_comment": 24,
-"long_line": 69,
+"history_comment": 15,
+"long_line": 68,
 "nested_ternary": 12,
 "semicolon": 40
 },
@@ -510,7 +506,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 3,
-"long_line": 184,
+"long_line": 181,
 "nested_ternary": 14,
 "semicolon": 123
 },
@@ -531,9 +527,9 @@
 "semicolon": 39
 },
 "scripts/match/models.gd": {
-"long_line": 259,
+"long_line": 258,
 "nested_ternary": 10,
-"semicolon": 250
+"semicolon": 247
 },
 "scripts/match/music_dir.gd": {
 "nested_ternary": 1
@@ -587,7 +583,7 @@
 "scripts/match/terrain_mesh.gd": {
 "long_line": 49,
 "nested_ternary": 2,
-"semicolon": 85
+"semicolon": 84
 },
 "scripts/match/train_route.gd": {
 "long_line": 2,
@@ -635,6 +631,9 @@
 "long_line": 31,
 "nested_ternary": 5
 },
+"scripts/ui/bonus_stats.gd": {
+"long_line": 1
+},
 "scripts/ui/capture_hud.gd": {
 "long_line": 4
 },
@@ -670,7 +669,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 103,
+"long_line": 100,
 "nested_ternary": 17,
 "semicolon": 24
 },
@@ -982,7 +981,7 @@
 "semicolon": 5
 },
 "tools/raid_check.gd": {
-"long_line": 20,
+"long_line": 19,
 "semicolon": 5
 },
 "tools/revive_check.gd": {

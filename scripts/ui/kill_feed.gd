@@ -112,7 +112,7 @@ static func _src(by: Ent, from: Hunter) -> String:
 ## Draws the feed down from Hud.feed_top at the safe margin's right edge, oldest on top.
 static func draw(h_v, sz: Vector2) -> void:
 	shown.clear()
-	var pad := HudStyle.safe_pad(sz)
+	var pad := HudStyle.hud_pad(sz)
 	var y: float = maxf(h_v.feed_top, pad.y)
 	for f: Dictionary in h_v.m.feed:
 		var a := snappedf(clampf((LIFE_S - float(f["t"])) / FADE_S, 0.0, 1.0), 0.125)

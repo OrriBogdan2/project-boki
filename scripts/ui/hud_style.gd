@@ -60,8 +60,14 @@ const SAFE_FRAC := 0.05
 const KEY_REACH := 10.0        # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
 
 ## The margin on each side for a window of size `sz` (x for left and right, y for top and bottom).
+## Menus and cards use this one; the match HUD's groups hug the edges (hud_pad).
 static func safe_pad(sz: Vector2) -> Vector2:
 	return (sz * SAFE_FRAC).round()
+
+## The match HUD's own margin: every group sits on the screen edge or corner it hangs from, SafeArea.MARGIN
+## (12 units, 18 px at 1080p) in, so nothing floats in the middle of the screen.
+static func hud_pad(_sz: Vector2) -> Vector2:
+	return Vector2(SafeArea.MARGIN, SafeArea.MARGIN)
 
 ## The window less its safe margin: everything that matters sits inside this rect.
 static func safe_rect(sz: Vector2) -> Rect2:
@@ -209,9 +215,3 @@ static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 		sb.anti_aliasing = true
 		_boxes[key] = sb
 	return sb
-
-## Width of the clock chip: the time at the left, the phase in the middle and "LV nn" at the right never touch,
-## at every Text size (196 px is enough at 100%).
-static func clock_w(time_txt: String, phase: String) -> float:
-	var side := maxf(TextCache.width(BIG, time_txt, 16), TextCache.width(BIG, "LV 99", 12))
-	return maxf(196.0, TextCache.width(BIG, phase, 11) + 2.0 * side + 28.0)

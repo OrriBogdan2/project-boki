@@ -225,8 +225,8 @@ func run(main_node: Node) -> void:
 ## 1280x720 / 1920x1080.
 func _check_safe(hud) -> void:
 	var sz: Vector2 = hud.c.size
-	var pad := HudStyle.safe_pad(sz)
-	var safe := HudStyle.safe_rect(sz).grow(0.5)
+	var pad := HudStyle.hud_pad(sz)
+	var safe := Rect2(pad, sz - pad * 2.0).grow(0.5)
 	var out: Array = []
 	for spot in hud.hover_spots:
 		if not safe.encloses(spot[0]):
@@ -236,18 +236,17 @@ func _check_safe(hud) -> void:
 	for size: Vector2 in [Vector2(1280, 720), Vector2(1920, 1080)]:
 		var tag := "%dx%d" % [size.x, size.y]
 		var s := HudStyle.safe_rect(size)
+		var hs := Rect2(HudStyle.hud_pad(size), size - HudStyle.hud_pad(size) * 2.0)
 		var slot := Rect2(s.end - Vector2(20, 20), Vector2(20, 20))      # a slot in the safe corner
 		var tip := Rect2(HudTip.place(slot, Vector2(300, 120), size), Vector2(300, 120))
 		ok(s.encloses(tip), "%s: the tip card by a corner slot stays in the safe area" % tag)
 		var reach: float = hud.HUD_REACH
 		var origin: Vector2 = hud._hud_origin(size)
 		var vitals := Rect2(origin - Vector2(reach, 0.0), Vector2(HudVitals.BAR_W + 144.0 + reach, 132.0 + reach))
-		ok(s.encloses(vitals), "%s: the vitals block sits in the safe area" % tag)
-		var alive := AliveCounter.rects(size, 2)
-		var alive_in := s.encloses(alive[0]) and s.encloses(alive[1])
-		ok(alive_in, "%s: the alive counter hangs from the safe top-right corner" % tag)
+		ok(hs.encloses(vitals), "%s: the vitals block sits in the bottom-left corner margin" % tag)
+		ok(hs.encloses(AliveCounter.stats_rect(size)), "%s: your numbers hang from the top-right corner margin" % tag)
 		var strips := minf(WaysOutHud.top_y(size), TutorialStrip.rect(size).position.y)
-		ok(strips >= s.position.y, "%s: the top strips start under it" % tag)
+		ok(strips >= hs.position.y, "%s: the top strips start under it" % tag)
 
 ## 3. Your shield in the vitals: a heal shield lays a strip over the top of your health with the heal icon,
 ## a hit drains it before health, and it fades over its last ShieldStrip.FADE_S before it drops.
