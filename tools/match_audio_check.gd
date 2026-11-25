@@ -312,7 +312,7 @@ func _ult_cues(m: Match, p: Hunter) -> void:
 	r.pos = p.pos + Vector3(40, 0, 0)
 	Sfx.last_played.clear()
 	var dbs := {}
-	var grab := func(sname: String, _at, db: float, _pitch: float): dbs[sname] = db
+	var grab := func(sname: String, _at, db: float, _p: float): dbs[sname] = db
 	Sfx.played.connect(grab)
 	for pl in Sfx.players:
 		pl.stop()
@@ -496,13 +496,13 @@ func _steps(m: Match, p: Hunter) -> void:
 
 ## One rival per weight class (archer light, dolm medium, ashwick heavy) steps: heavier is lower and louder,
 ## on the foot's contact step and the surface step both. Motley (ostra) has no steps to weigh (gait < 0.5).
-func _step_weights(R: Hunter, P: Hunter) -> void:
-	var arch0 := R.arch
+func _step_weights(r: Hunter, p: Hunter) -> void:
+	var arch0 := r.arch
 	var got := {}
 	for a in ["archer", "dolm", "ashwick"]:
-		R.arch = a
-		got[a] = [_step_params(R, P, true), _step_params(R, P, false)]
-	R.arch = arch0
+		r.arch = a
+		got[a] = [_step_params(r, p, true), _step_params(r, p, false)]
+	r.arch = arch0
 	for i in 2:
 		var l: Vector2 = got["archer"][i]
 		var md: Vector2 = got["dolm"][i]
@@ -514,14 +514,14 @@ func _step_weights(R: Hunter, P: Hunter) -> void:
 	ok(KMovesStone.gait("ostra") < 0.5, "Motley floats: no footsteps (gait %.1f)" % KMovesStone.gait("ostra"))
 
 
-## (pitch scale, dB) of one step of R, 10 m from P, from the Sfx.played signal.
-func _step_params(R: Hunter, P: Hunter, contact: bool) -> Vector2:
+## (pitch scale, dB) of one step of r, 10 m from p, from the Sfx.played signal.
+func _step_params(r: Hunter, p: Hunter, contact: bool) -> Vector2:
 	var out := [Vector2.ZERO]
 	var on := func(sname: String, _at, db: float, pitch: float):
 		if sname.contains("step"):
 			out[0] = Vector2(pitch, db)
 	Sfx.played.connect(on)
-	_step_db(R, P, 10.0, contact)
+	_step_db(r, p, 10.0, contact)
 	Sfx.played.disconnect(on)
 	return out[0]
 
@@ -678,7 +678,7 @@ func _from_box(m: Match, h: Hunter, dropper: Hunter, rec: Dictionary) -> Array:
 		"node": null}
 	Life.take_item(m, h, b, {"key": "caught", "i": 0})
 	h.caught.clear()
-	return Sfx.last_played.keys().filter(func(n): return String(n).begins_with("carry_"))
+	return Sfx.last_played.keys().filter(func(s): return String(s).begins_with("carry_"))
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on

@@ -2,7 +2,6 @@
 pangolin that creeps low with its head tucked, scurries when pushed, and curls into a mirror-tiled ball for its
 hop, its ram and its disco-ball spell."""
 
-import math
 
 import glomwort_anim
 from boki_clips import LOOK_UP, TAU, add, s, seq

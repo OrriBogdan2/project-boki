@@ -239,9 +239,11 @@ const IMPACT_GAP := 90
 const STACK_MS := 90
 const STACK_DB := 3.5
 const SAME_CAP := 5  # one sound sounding in this many pool voices at once; a rival's wind-up cue is exempt
+const AMB_FADE := 2.5
 ## dB your own held fire drops while a rival's wind-up or ult cue sounds, so the warning cuts through it
 ## (docs/AUDIO.md, enemy priority); the duck lasts as long as the cue, and 0 turns the rule off
 var fire_duck_db := -4.0
+var foe_next := false       # play_foe is playing: _bus_for sends the voice to SFXFoe
 var _fire_duck_until := 0
 var _fire_names := {}  # held-fire sounds FireSfx has played: always ducked
 const REPEAT_MS := 400  # a sound of yours started again within this is repeating (hit confirms, hurt spam): ducked too
@@ -284,7 +286,6 @@ var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sf
 ## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
 var sound_gain := {}
 var last_played := {}
-var foe_next := false       # play_foe is playing: _bus_for sends the voice to SFXFoe
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
 var cue_log = null
 var rng := RandomNumberGenerator.new()
@@ -573,7 +574,6 @@ func _stop_layers(fade: float) -> void:
 ## and pond beds), each faded to a level by where you are; created on first use, freed once faded
 ## to nothing, stopped together by clear_amb_layers.
 var amb_layers := {}  # name -> {p, want, fade}  (fade: seconds from silent to full)
-const AMB_FADE := 2.5
 const MATCH_BEDS := ["abyss", "ruins"]  # MusicDir's beds; other amb_layers are the farm's
 
 

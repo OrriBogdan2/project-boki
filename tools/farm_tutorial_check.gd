@@ -198,7 +198,7 @@ func _base_tutorial() -> void:
 ## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a readable
 ## size (12 px is the shrink floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
 func _banner_fits() -> void:
-	var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
+	var font: Font = load("res://fonts/LilitaOne-Regular.ttf")
 	var worst := 99
 	var over := ""
 	for sz in [Vector2(1920, 1080), Vector2(1280, 720)]:

@@ -8,6 +8,10 @@ extends RefCounted
 ## 3 s no more than DmgNumberTrio.MAX_OVERLAP numbers print over one spot. Prints DMGNUM PASS/FAIL.
 
 const Trio := preload("res://tools/dmg_number_trio.gd")
+## One hit of every kind through the real damage paths: the number it prints reads in its style (HudStyle),
+## and any two kinds differ by colour (RGB distance >= KIND_DIST) or size (>= KIND_PX px at the same 30 dmg).
+const KIND_DIST := 0.2
+const KIND_PX := 3
 
 var main: Node
 var fails := 0
@@ -137,10 +141,6 @@ func _trio() -> void:
 	fx.nums.clear()
 	m.queue_free()
 
-## One hit of every kind through the real damage paths: the number it prints reads in its style (HudStyle),
-## and any two kinds differ by colour (RGB distance >= KIND_DIST) or size (>= KIND_PX px at the same 30 dmg).
-const KIND_DIST := 0.2
-const KIND_PX := 3
 
 func _last(fx: Fx) -> Dictionary:
 	var live := _live(fx)
@@ -154,36 +154,39 @@ func _read(fx: Fx) -> Dictionary:
 	return {"col": l.modulate, "px": l.font_size, "text": l.text, "kind": int(n["kind"]), "crit": bool(n["crit"]),
 		"outline": l.outline_size}
 
-func _kinds_read(m: Match, fx: Fx, P: Hunter, foe: Hunter) -> void:
+func _kinds_read(_m: Match, fx: Fx, p: Hunter, foe: Hunter) -> void:
 	Settings.set_v("damage_numbers", true, false)
 	foe.max_hp = 1e6
-	P.max_hp = 1e6
+	p.max_hp = 1e6
 	var got := {}
 	var land := func(name: String, prep: Callable, who: Hunter, by: Hunter, opts: Dictionary) -> void:
 		foe.armor = 0.0
 		foe.shield = 0.0
 		foe.shield_t = 0.0
 		foe.merge_st = {}
-		for h: Hunter in [foe, P]:
+		for h: Hunter in [foe, p]:
 			h.inv_t = 0.0
 			h.hp = 1e6
 		fx.nums.clear()
 		fx.set_process(false)
 		prep.call()
-		who.hurt(30.0, by, opts) if name != "heal" else fx.healed(who, 30.0)
+		if name == "heal":
+			fx.healed(who, 30.0)
+		else:
+			who.hurt(30.0, by, opts)
 		got[name] = _read(fx)
 		ok(not (got[name] as Dictionary).is_empty(), "kind %s prints a number" % name)
-	land.call("hit", func(): pass, foe, P, {"src": "shot"})
-	land.call("armour", func(): foe.armor = 200.0, foe, P, {"src": "shot"})
-	land.call("crit", func(): pass, foe, P, {"src": "shot", "crit": true})
-	land.call("empowered", func(): pass, foe, P, {"src": "shot", "heavy": true})
+	land.call("hit", func(): pass, foe, p, {"src": "shot"})
+	land.call("armour", func(): foe.armor = 200.0, foe, p, {"src": "shot"})
+	land.call("crit", func(): pass, foe, p, {"src": "shot", "crit": true})
+	land.call("empowered", func(): pass, foe, p, {"src": "shot", "heavy": true})
 	land.call("shield", func():
 		foe.shield = 200.0
-		foe.shield_t = 30.0, foe, P, {"src": "shot"})
+		foe.shield_t = 30.0, foe, p, {"src": "shot"})
 	land.call("shell", func(): foe.merge_st = {"shell": 200.0, "shell_max": 200.0, "form": {"glow": Color.RED}},
-		foe, P, {"src": "shot"})
-	land.call("heal", func(): foe.hp = 1.0, foe, P, {})
-	land.call("hurt", func(): pass, P, foe, {"src": "shot"})
+		foe, p, {"src": "shot"})
+	land.call("heal", func(): foe.hp = 1.0, foe, p, {})
+	land.call("hurt", func(): pass, p, foe, {"src": "shot"})
 	var want := {"hit": "hit", "armour": "armour", "crit": "crit", "empowered": "empowered", "shield": "shield",
 		"shell": "shell", "heal": "heal", "hurt": "hurt"}
 	for k in want:
