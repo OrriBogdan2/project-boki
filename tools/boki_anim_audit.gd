@@ -18,7 +18,8 @@ const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scal
 ## Paws the audit cannot read a stride off (no foot ever plants in the clip, so the measured stride is noise): their
 ## BokiRig.STRIDE is the old hand-set one and the stride match is skipped. Fix: re-key with boki_gait.planted
 ## (docs/DEBT.md).
-const STRIDE_DEBT := ["marchleaf", "lodestick"]
+## floenatee: its own flipper clips sweep 0.15 m/s at the best, past FEETLESS but never a planted step.
+const STRIDE_DEBT := ["marchleaf", "lodestick", "floenatee"]
 ## Boki that came in on the borrowed rig after auto_legs ran (ext/boki-more-ingame-1118): their clips are not re-keyed
 ## yet, so the stride match and the set-off check wait for auto_legs.py (docs/DEBT.md);
 ## slide and seam sit in OVER and SEAM_OVER.
@@ -30,7 +31,7 @@ const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE b
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
 	"gloamshell": "blob (snail foot)", "gibbelle": "blob", "casquebill": "seal (flippers)",
-	"floenatee": "seal (flippers)", "goliathite": "caterpillar", "threadwyrm": "worm", "velvorm": "caterpillar",
+	"goliathite": "caterpillar", "threadwyrm": "worm", "velvorm": "caterpillar",
 	"caecilith": "worm", "hoarheron": "heron on skates"}
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
@@ -38,6 +39,7 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 ## re-keyed with boki_gait.planted (docs/DEBT.md). Six rose 2-5 points once the clips lost the frame each loop held
 ## at its start (glb_clip_start.py): that frame let the rig play them faster under MAX_CADENCE, and slid itself.
 const OVER := {
+	"floenatee run": 0.84, "floenatee walk": 0.92,
 	"burrlet run": 0.78, "burrlet walk": 0.27, "cairnback run": 0.59, "duskapi run": 0.52, "glaciyak run": 0.44,
 	"glintmole run": 0.86, "glintmole walk": 0.40, "heatherhorn run": 0.38, "hivara run": 0.84,
 	"hivara walk": 0.39, "kestrike run": 0.61, "kestrike walk": 0.37,
