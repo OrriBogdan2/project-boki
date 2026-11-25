@@ -33,7 +33,7 @@ static func make_match(main: Node) -> Match:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "heart": true, "god": true,
+	m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "heart": true, "god": true,
 		"length": 1e9})
 	m.set_process(false)
 	for h in m.hunters:
@@ -71,7 +71,7 @@ static func on_screen_has(hud, id: String) -> bool:
 	return HudGroups.on_screen(hud).has(id)
 
 func run(main: Node) -> void:
-	var m: Match = await make_match(main)
+	var m: Match = make_match(main)
 	var hud := m.hud
 	var q: Dictionary = Heart.rules()["quest"]
 	var lead: float = HudGroups.rules()["ways_out_lead_s"]
