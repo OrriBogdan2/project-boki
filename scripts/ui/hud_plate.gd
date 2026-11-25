@@ -41,7 +41,11 @@ static func plate_offset(h: Hunter) -> float:
 ## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
 ## body, not who it is or how hurt. Teammates, the downed and the revealed (Hunter.reveal_t) always show.
 static func hidden(m: Match, h: Hunter) -> bool:
-	if m.player == null or h.team == m.player.team or h.downed or h.reveal_t > 0.0:
+	if m.player == null or h.team == m.player.team or h.downed:
+		return false
+	if m.has_meta("pitch_no_foe_plates"):      # the pitch-reel recorder films fights with no text over the foe
+		return true
+	if h.reveal_t > 0.0:
 		return false
 	return h.crouch or m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos)
 
