@@ -16,15 +16,35 @@
   hazard_warded         a soft two-note shimmer: your Boki keeps this ground off you (first time)
 Original synthesis, no samples.
 """
+
 import os, sys
 import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import (N, T, noise, lpf, hpf, bpf, env, mix, at, crack, grains, shape, soft_in, sub, tail,
-                     chime, creak, hiss, voice, pad)
+from sfx_lib import (
+    N,
+    T,
+    noise,
+    lpf,
+    bpf,
+    env,
+    mix,
+    at,
+    crack,
+    grains,
+    shape,
+    soft_in,
+    sub,
+    chime,
+    creak,
+    hiss,
+    voice,
+    pad,
+)
 
 S.reseed(6113)
-BED_S = 4.0          # s: one pass of a bed before it repeats
+BED_S = 4.0  # s: one pass of a bed before it repeats
 
 
 def wobble(d, rate, depth):
@@ -40,7 +60,7 @@ def scatter(d, count, make):
     for i in range(count):
         x = make(i)
         s0 = int(S.rng.uniform(N(0.1), max(N(0.1) + 1, N(d) - len(x) - N(0.1))))
-        out[s0:s0 + len(x)] += x
+        out[s0 : s0 + len(x)] += x
     return out
 
 
@@ -49,7 +69,11 @@ def bubble(_i):
     d = S.rng.uniform(0.08, 0.16)
     f0 = S.rng.uniform(140, 260)
     t = T(d)
-    return np.sin(2 * np.pi * np.cumsum(f0 * (1 + 2.5 * t / d)) / S.SR) * env(N(d), 0.004, d * 0.4) * S.rng.uniform(0.4, 1.0)
+    return (
+        np.sin(2 * np.pi * np.cumsum(f0 * (1 + 2.5 * t / d)) / S.SR)
+        * env(N(d), 0.004, d * 0.4)
+        * S.rng.uniform(0.4, 1.0)
+    )
 
 
 def bed_lava():
@@ -65,7 +89,11 @@ def gurgle(_i):
     d = S.rng.uniform(0.05, 0.1)
     f0 = S.rng.uniform(500, 1100)
     t = T(d)
-    return np.sin(2 * np.pi * np.cumsum(f0 * (1 + 1.2 * t / d)) / S.SR) * env(N(d), 0.003, d * 0.35) * S.rng.uniform(0.2, 0.6)
+    return (
+        np.sin(2 * np.pi * np.cumsum(f0 * (1 + 1.2 * t / d)) / S.SR)
+        * env(N(d), 0.003, d * 0.35)
+        * S.rng.uniform(0.2, 0.6)
+    )
 
 
 def bed_water():
@@ -91,7 +119,7 @@ def bed_ice():
 def bed_static():
     d = BED_S
     t = T(d)
-    hum = (np.sin(2 * np.pi * 75 * t) + 0.5 * np.sin(2 * np.pi * 150 * t + 0.4) + 0.25 * np.sin(2 * np.pi * 225 * t))
+    hum = np.sin(2 * np.pi * 75 * t) + 0.5 * np.sin(2 * np.pi * 150 * t + 0.4) + 0.25 * np.sin(2 * np.pi * 225 * t)
     hum = hum * wobble(d, 3, 0.25) * 0.35
     buzz = bpf(np.sign(np.sin(2 * np.pi * 75 * t)) * noise(d) * 0.4, 600, 3000) * wobble(d, 6, 0.6) * 0.25
     fizz = scatter(d, 8, lambda i: grains(0.12, 220, 2500, 9000, 0.001, 0.004) * 0.5)
@@ -129,7 +157,7 @@ def catch(_i):
 
 
 def breath():
-    gasp = voice(0.38, 300, 360, 'ah', breath=0.9, rasp=0.15, a=0.03)
+    gasp = voice(0.38, 300, 360, "ah", breath=0.9, rasp=0.15, a=0.03)
     throb = mix(sub(70, 55, 0.45, 0.08), at(sub(70, 55, 0.45, 0.08) * 0.7, 0.32)) * 0.8
     return soft_in(mix(gasp * 0.8, at(throb, 0.3)), 1.0)
 
@@ -167,18 +195,23 @@ def warded():
 
 
 def build():
-    for name, fn in [('lava', bed_lava), ('water', bed_water), ('ice', bed_ice), ('static', bed_static),
-                     ('bramble', bed_bramble)]:
-        S.save_loop('hazard_bed_' + name, fn(), 'loop')
-    S.takes_cat('hazard_lava_burn', burn, 3, 'dash')
-    S.save_cat('hazard_breath', breath(), 'grunt')
-    S.takes_cat('hazard_catch', catch, 3, 'impact')
-    S.takes_cat('hazard_ice_skid', skid, 3, 'dash')
-    S.takes_cat('hazard_static_crackle', crackle, 3, 'impact')
-    S.takes_cat('hazard_bramble_snag', snag, 3, 'dash')
-    S.save_cat('hazard_warded', warded(), 'ui')
+    for name, fn in [
+        ("lava", bed_lava),
+        ("water", bed_water),
+        ("ice", bed_ice),
+        ("static", bed_static),
+        ("bramble", bed_bramble),
+    ]:
+        S.save_loop("hazard_bed_" + name, fn(), "loop")
+    S.takes_cat("hazard_lava_burn", burn, 3, "dash")
+    S.save_cat("hazard_breath", breath(), "grunt")
+    S.takes_cat("hazard_catch", catch, 3, "impact")
+    S.takes_cat("hazard_ice_skid", skid, 3, "dash")
+    S.takes_cat("hazard_static_crackle", crackle, 3, "impact")
+    S.takes_cat("hazard_bramble_snag", snag, 3, "dash")
+    S.save_cat("hazard_warded", warded(), "ui")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build()
-    print('gen_sfx_hazards: done')
+    print("gen_sfx_hazards: done")
