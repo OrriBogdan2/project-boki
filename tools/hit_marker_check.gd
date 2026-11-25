@@ -3,10 +3,10 @@ extends RefCounted
 ##   1. one landed hit of yours on a rival raises exactly one tick, short
 ##   2. a zone (damage-over-time) tick, a teammate's hit, your Boki's hit, a hit on your own side and a
 ##      rival's hit on you raise none
-##   3. a hit that knocks a rival Hunter down raises the stronger knock tick, and every tick is gone in 0.12 s
+##   3. a hit that knocks a rival Hunter down raises the stronger knock tick, and every tick is gone in 0.22 s
 ## Never touches the save.
 
-const CAP_S := 0.12  # s: no tick may show longer than this
+const CAP_S := 0.22  # s: no tick may show longer than this (the knock tick; 11-24: a hit reads for 9 frames)
 
 var bad := 0
 
