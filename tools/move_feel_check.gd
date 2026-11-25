@@ -50,7 +50,7 @@ const T := {
 	"haste_cap_mps":           ["~", [8.07, 8.12], "m/s", "[game data] 700 uu/s x body_scale 1.16"],
 	"haste_clip_rate":         ["~", [0.99, 1.01], "x", "clip rate / (speed / clip speed), worst Warden"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
-	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
+	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; < 1.6: jump + mantle stays under 4 terraces"],
 	"jump_speed_vs_source":    ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
 	"jump_airtime":            ["~", [0.85, 1.05], "s", "[game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s"],
 	"air_carry_m":             [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],

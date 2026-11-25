@@ -158,7 +158,8 @@ static func tide_out(m_v: Match, p: Vector3) -> float:
 
 
 ## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the first ring before the
-## tide starts, so the drop map shows it; never past the play space, start_r; the final circle once it holds). `ahead` 2: two such steps on (bots).
+## tide starts, so the drop map shows it; never past the play space, start_r; the final circle once it holds).
+## `ahead` 2: two such steps on (bots).
 static func next_r(m_v: Match, ahead := 1) -> float:
 	if m_v.heart == null:
 		return 0.0

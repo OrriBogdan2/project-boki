@@ -2,7 +2,7 @@ class_name Mob
 extends Ent
 ## Monsters. Each attack is telegraphed on the ground before it lands.
 
-## The monster's one state (Fsm, docs/decisions/0061-mob-boss-state-machines.md). Only Mob and its subclasses move
+## The monster's one state (Fsm, docs/decisions/0177-mob-boss-state-machines.md). Only Mob and its subclasses move
 ## it, through _go() and _stun(); other files ask with aggro() and calm(). Each state, and what leaves it:
 ##   IDLE     calm by its camp, ambling and looking round; a sighting or a hit -> NOTICE
 ##   NOTICE   has just picked its target (this step); CHASE from the next
