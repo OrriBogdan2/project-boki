@@ -11322,3 +11322,4 @@ READY ext/vfx-neve-veil eaf45ce79831478413cd46fcf054ef0cc9afa11c (Neve Rimelock 
 READY ext/vfx-kael-lunge-trail 6f95eafa7c1 (Kael lunge telegraph and dash trail)
 READY ext/vfx-albert-faultline-rim 2f76705ff5ae8c854b1bf97d1d38a254b04cd50d (Albert Faultline lit rim)
 READY ext/vfx-own-telegraph-quiet a0e905a0440 (own telegraphs quieter than threats)
+READY ext/vfx-own-telegraph-quiet 5562433b3b6 (own telegraphs quieter than threats)
