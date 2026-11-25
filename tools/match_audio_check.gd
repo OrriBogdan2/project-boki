@@ -758,7 +758,7 @@ func _on_farm() -> bool:
 func _abyss() -> void:
 	var am := Match.new()
 	main.add_child(am)
-	await am.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	am.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	am.set_process(false)
 	for i in 30:
 		am.step(Match.DT)

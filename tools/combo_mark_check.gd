@@ -51,7 +51,7 @@ func run(ok: Callable, ac, arch: String) -> void:
 	ok.call("%s: the payoff hit flashes the body white" % tag, flashed, "stamp %.2f flash %.3f" % [stamp, t.flash_t])
 	ac.done(m)
 	if arch == "juggernaut":
-		await _chain(ok, ac)
+		_chain(ok, ac)
 
 ## Kael's second state: the Warchain's hold on a foe shows for its 5s, ends with the chain, and the pull
 ## flashes the foe.

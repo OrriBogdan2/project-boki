@@ -612,7 +612,7 @@ func _hud_size(demo: Match) -> void:
 	Save.d["tutorial"][FirstObjective.KEY] = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
+	m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
 	m.set_process(false)
 	var hud = m.hud
 	await _kill_feed(m)
