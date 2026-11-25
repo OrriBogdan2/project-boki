@@ -9,7 +9,8 @@ Shipped chain (from r19 glb f832cb7b):
    thigh/knee faces (8,408) and both thigh-liner prims (r16/r18 shards), fits the legs on the leg bones (piecewise boot top/knee/crotch
    heights, horizontal 0.62, inner side tanh-limited to the leg midline), nearest-vertex weights from the old leg verts (same side only),
    smooth UpLeg/Leg blend at the knee, slanted top (inner thigh top 0.90). Then `../hem_r19/compact19.py` (body-retex, leg-meshy).
-4. `python3 bowdent.py in.glb out.glb`: poses legs + bow + left hand at every 30 fps frame (same as geo_check) and dents the left thigh
-   where the bow hangs (walk f12, 2.4 cm -> 0).
-Checks: tools/anim/geo_check.py PASS (held worst 0.8 cm); legstretch.py (leg edges > 3x: 10).
+4. `python3 bowkey20.py in.glb out.glb` (walk): the bow's lower limb entered the left knee ball at walk f12 (geo 2.4 cm). The Bow joint
+   rotation of walk is re-keyed at 30 fps with a smoothed tilt about the grip (max 5.3 deg over 23 frames): 2.4 cm -> 0. Not used:
+   bowdent.py (dents the knee instead; even capped at 2.2 cm it crumples the ball at knee height, r20/meas/kz.jpg).
+Checks: tools/anim/geo_check.py PASS (held worst 0.8 cm, bow>thigh 0); legstretch.py (leg edges > 3x: 10).
 Not used: graft20 mirror step (my=) and legcut.py were for the r13 B donor (its upper thighs were open: skirt fused).

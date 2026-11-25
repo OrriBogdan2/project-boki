@@ -37,7 +37,7 @@ OB = [ld(p) for p in obs]
 def skin(M, P, J, W):
     S = np.einsum('vk,vkab->vab', W, M[J]); return np.einsum('vab,vb->va', S[:, :3, :3], P) + S[:, :3, 3], S
 LF = acc(j, b, leg['indices']).reshape(-1, 3)
-nb = cKDTree(LP).query(LP, 12)[1]
+nb = cKDTree(LP).query(LP, int(O.get('nb', 12)))[1]; CAP = float(O.get('cap', 1.0)); SM = int(O.get('sm', 2))
 for it in range(int(O.get('iters', 2))):
     push = np.zeros(len(LP)); dirb = np.zeros((len(LP), 3)); hits = 0
     for an in j['animations']:
@@ -57,7 +57,8 @@ for it in range(int(O.get('iters', 2))):
                         if need < push[u]: push[u] = need; dirb[u] = np.linalg.solve(S[u, :3, :3], NL[u]); hits += 1
     print('iter', it, 'verts pushed', int((push < 0).sum()), 'max cm', round(-push.min() * 100, 2), 'hits', hits)
     if not (push < 0).any(): break
-    for _ in range(2): push = np.minimum(push, push[nb].mean(1)); dirb = np.where((np.linalg.norm(dirb, axis=1) > 0)[:, None], dirb, dirb[nb].mean(1))
+    push = np.maximum(push, -CAP)
+    for _ in range(SM): push = np.minimum(push, push[nb].mean(1)) * 0.5 + push[nb].mean(1) * 0.5; dirb = np.where((np.linalg.norm(dirb, axis=1) > 0)[:, None], dirb, dirb[nb].mean(1))
     dn = dirb / np.maximum(np.linalg.norm(dirb, axis=1, keepdims=True), 1e-9)
     LP = LP + push[:, None] * dn
 fn = np.cross(LP[LF[:, 1]] - LP[LF[:, 0]], LP[LF[:, 2]] - LP[LF[:, 0]]); nn = np.zeros_like(LP)
