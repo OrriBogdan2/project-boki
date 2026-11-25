@@ -32,7 +32,7 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "heart": true,
+	m.start({"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "heart": true,
 		"god": true, "length": 1e9})
 	m.set_process(false)
 	var fade = main.get("fade")

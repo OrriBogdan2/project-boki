@@ -28,7 +28,7 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "thief",
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "thief",
 		"cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
 	m.set_process(false)
 	var p: Hunter = m.player
@@ -41,7 +41,7 @@ func run(main_node: Node) -> void:
 		await _kit(m, p, kit)
 	await _rebound(m, p)
 	m.free()
-	await _rebound_tutorial()
+	_rebound_tutorial()
 	print("ABILITY BAR CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -172,7 +172,7 @@ func _rebound(m: Match, p: Hunter) -> void:
 func _rebound_tutorial() -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	m.set_process(false)
 	var tu: Tutorial = m.tut
 	var seen := 0
