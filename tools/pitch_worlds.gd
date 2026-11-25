@@ -208,11 +208,11 @@ func _tidy() -> void:
 		if k.has("emote") and (k["emote"] as Label3D).text != "♥":
 			k["emote_t"] = 0.0  # no star, note or question mark over a Boki
 	_tick += 1
-	if _tick % 3 == 0:
+	if true:  # every frame: a heart can pop up and fill the lens between checks
 		for l in c.find_children("*", "Label3D", true, false):
 			var t: String = (l as Label3D).text
 			var cam: Camera3D = rig.main.get_viewport().get_camera_3d()
-			var close := cam != null and (l as Label3D).global_position.distance_to(cam.global_position) < 6.0
+			var close := cam != null and (l as Label3D).global_position.distance_to(cam.global_position) < 12.0
 			if t != "♥" and not (keep_say and t.length() > 16):  # every word or glyph over the world (signs, names, bubbles)
 				(l as Label3D).visible = false
 			elif t == "♥" and close:  # a heart right at the lens fills the frame
