@@ -25,13 +25,11 @@ with a 0.1 s blend and keep `KinFlinch` as the fallback. `--boki-flinch-shots --
 
 Boki garden states (`tools/anim_coverage_boki.gd`): every species with a rigged .glb in the game (a `BokiRig.FRAME`
 row and `art/kin/<id>/<id>.glb`, the Bokidex 3D models, 48 today) through idle, walk, run, attack, cast (`ability`),
-hop, eat (the feeder's `munch`) and sleep (the garden `nap`), read off the clips of a live rig (`munch` and `nap` are
-the species' own baked eat and sleep clips when those pass the test below, BokiHomeClips). `clip` is the species'
+hop, eat (the feeder's `munch`) and sleep (the garden `nap`), read off the clips of a live rig. `clip` is the species'
 own clip; `shared` a clip whose motion (each bone's turn at 16 samples) is the same as another species' (the generic
-set every Meshy batch-1 model was built with: no motion of its own); `proc` (eat and sleep only) a clip that fails the
-test, so `BokiHomeClips` builds the munch from idle and the nap from sleep instead (none today); `missing` no clip, a
-clip that holds one pose (no bone turns 2 deg; not sleep), or one whose every pose sits within 3 deg of a pose idle
-passes through (`BokiClipCover`). Rows run worst first (most `missing`, then most
+set every Meshy batch-1 model was built with: no motion of its own); `proc` a clip `BokiHomeClips` builds at runtime
+(munch from idle, nap from sleep); `missing` no clip, a clip that holds one pose (no bone turns 2 deg; not sleep), or
+one whose every pose sits within 3 deg of a pose idle passes through. Rows run worst first (most `missing`, then most
 `shared`, then the lowest Field Book number), and the five worst are written out as backlog lines.
 
 Mobs (`tools/anim_coverage_mobs.gd`): the seven common monsters through idle, walk, attack (the wind-up tell, plus
@@ -163,8 +161,24 @@ Worst five, backlog-ready:
 2. **Boki stomp is `missing`** (the Wisp stomp is the Hunter's, a Boki has none). The glide is `proc` now: no starter
    .glb has a glide clip, so a Boki on your shoulder or pack through your glide plays BokiHomeClips' `glide` (the
    species' idle with all four legs swung out and the ears back, `BokiHomePoses._glide`); `Kin.render` sets `kact`
-   `glide` while `owner_h.gliding`, the rider already banks and pitches with your body (`_ride_basis`), and BokiRig
-   blends in and out over 0.15 s (`GLIDE_FADE`). A big Boki's mount form still curls into a ball on your back.
+   `glide` while `owner_h.gliding`, the rider already banks and pitches with your body (`ride_basis`), and BokiRig
+   blends in and out over 0.15 s (`GLIDE_FADE`). A big Boki's mount form curls into a ball on your back instead,
+   and since 11-22 it hops up and down in `KinCurl.CURL_S` (0.6 s smoothstep, the same for every species): its root,
+   facing, size and ball pitch ease from where it was last drawn, carried along with you. Before, it jumped there in
+   one frame. `--boki-curl-check` (60 fps, run, jump, glide off the jump, landing; root against your spot on the
+   ground, pose weight = ball pitch / 0.9):
+
+   | Boki (mass) | | curl-on (glider opens) | curl-off (landing) | biggest pose-weight step |
+   |---|---|---|---|---|
+   | pebbit (1.4) | before | 3.136 m in 1 frame (f046) | 2.293 m in 1 frame (f101) | 1.00 |
+   | pebbit (1.4) | after | 0.119 m max a frame | 0.101 m max a frame | 0.04 |
+   | goliathite (2.0) | before | 3.136 m in 1 frame (f046) | 2.293 m in 1 frame (f101) | 1.00 |
+   | goliathite (2.0) | after | 0.119 m max a frame | 0.101 m max a frame | 0.04 |
+
+   (The same numbers for both, on the GPU runner and headless: the seat and the flank do not depend on the species.
+   Limits: 0.15 m, 0.5. The check's biggest step after the fix, 0.144 m at f101, is the landing frame itself, with the
+   Boki still fully seated: your shown torso drops that far as the glider closes. That is the Hunter's land blend,
+   not the curl.)
    The dash is `proc` too: `KinFlinch.dash` leans the body into the move and the landing squash settles it.
 3. **Hunter dash is `proc` for Gil only.** Albert (`shift_whirl`, `shift_charge`, `dash_short`, `dash_air`), Grimble
    (`lunge`, `lunge_out`, `pounce`), Motley (`swap_aim`, `swap`, `swap_air`) and Meeko (`skip`, `float`) already play a
@@ -173,13 +187,11 @@ Worst five, backlog-ready:
    owns the body through the 0.17 s dash and its spin (0.73 s); Meeko's skip (0.233 s) spans her 0.22 s hop; Grimble's
    lunge holds through the 0.18 s shove and its gap, then `lunge_out`; Motley's Trade is no travel dash (no roll), the
    aim then the lob. Their cells read `proc` only because the move names do not say dash, so `warden_anim/*.json`
-   marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
-   clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
-   theirs too.
-4. **21 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
-   models, 9116769e95: casquebill to velvorm in the table, less squalltross, threadwyrm, tuatrune and velvorm, which
-   have their own since `ext/anim-boki-own-clips-sttv`; hoarheron has its own idle only). Nothing is `missing` on
+   marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) carry the
+   same mark, so both cells read `clip`; claire, kael, ryzz, sable, tarek and vex key theirs too.
+4. **25 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
+   models, 9116769e95: casquebill to velvorm in the table; hoarheron has its own idle only). Nothing is `missing` on
    any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. That includes glomwort,
    whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
-   sleep play each species' baked clip (the generic set on the shared Boki); the built munch and nap are the fallback.
+   sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
