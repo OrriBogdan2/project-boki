@@ -121,13 +121,3 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p2/tools/` (armpit_g.py, vis.py, ctre
 - Attack: LeftArm/RightArm rotation keys bent around t .87 s and 1.8 s (`p3/atk/S6.spec`), so the forearms pass outside the head.
   geo_check worst 8.2 -> 1.8 cm, frames 25 -> 13. No other channel differs from 292acacd05df.
 Scripts: `~/gens/hunter-round-1124/sparkle/p3/tools/` (views.py, proj.py, swap.sh, atk.py).
-
-### Part pass 1125 (branch ext/sparkle-part-pass-1125, glb b01a6120ce98, 79,980 tris, on top of d9e0dbfb1f55)
-- Hair black flecks (the review's T1) are mip bleed, not paint: the flat full-res hair albedo is clean, but Image_0 is the old
-  whole-body Meshy atlas and the head prim (all the hair) samples only 11.5 % of it, packed tight against dark top/boot islands
-  it never draws. At mip 3-4 those dark texels bleed into the strand edges.
-- Fix = bake margin: every Image_0 texel outside the head prim's UV coverage (+1 texel) is replaced by its nearest covered
-  texel (EDT nearest). Covered texels change only by the JPEG re-encode (q98, mean 1.2/255). UVs, mesh, skin, clips and every
-  other image are byte-identical (1 of 1220 bufferViews differs). Dark texels inside the hair, simulated mip 4: back 450 -> 58,
-  side 50 -> 28; mip 3 back 45 -> 6.
-Scripts: `~/gens/sparkle-part-pass-1125/tools/` (pad.py, views_mip.py).
