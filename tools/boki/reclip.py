@@ -6,6 +6,7 @@ planted-paw trot): only the other clips are re-keyed, with the legs at rest as a
 
   blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>
 """
+
 import os
 import sys
 
@@ -30,7 +31,7 @@ def hidden_props(arm):
     for b in arm.pose.bones:
         if b.name.startswith("prop_"):
             w = b.bone.matrix_local.to_quaternion() @ b.location / boki_rig.CLIP_SCALE
-            out[b.name] = (w.x, w.z, -w.y)      # boki_rig.game_axis back again
+            out[b.name] = (w.x, w.z, -w.y)  # boki_rig.game_axis back again
     return out
 
 
