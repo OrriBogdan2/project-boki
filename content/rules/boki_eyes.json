@@ -1,0 +1,22 @@
+{
+	"desc": "Boki whose coat has no painted eyes of its own yet: they keep the face overlay (BokiRig.uses_overlay). Every other species drops the Face mesh and shows the model's eyes. Remove a species here when its eye-paint pass lands.",
+	"overlay_species": [
+		"cindle",
+		"puddlet",
+		"burrlet",
+		"pebbit",
+		"selenfin",
+		"zapple",
+		"gibbelle",
+		"goliathite",
+		"hoarheron",
+		"floenatee",
+		"duskapi",
+		"moundvark",
+		"murmurling",
+		"nacrolin",
+		"sentrikat",
+		"threadwyrm",
+		"lilybara"
+	]
+}
