@@ -87,7 +87,7 @@ What made the menus feel blocky, samey and hard to get through:
    outline unless they are *selected*. Group with spacing and eyebrows before reaching for a card.
 4. **Three button tiers.** `primary()` (the magenta ticket, pink text): the one thing the screen is for,
    at most one per screen, usually in the footer. `button()` (torn violet face, neon on hover): normal actions.
-   `ghost()` (text only): rare or small actions. `danger()` (red outline) for things that can't be
+   `ghost()` (dark glass pill with a thin light rim, so it shows on any background): rare or small actions. `danger()` (red outline) for things that can't be
    undone, always behind `confirm()`.
 5. **Colour roles.** `ACCENT` (magenta) means "act here" and "selected". `GOLD` means gems and rewards.
    `GOOD` owned/ready/success, `BAD` danger/loss/locked, `TEAL` info and extraction. Item rarity uses
