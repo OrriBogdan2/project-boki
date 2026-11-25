@@ -27,6 +27,7 @@ const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
 const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his crimson
 const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
+const LUNGE_HOT := 0.25                # 0..1: the Lunge lane's white-out at full charge (its rim stays crimson)
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const LUNGE_COIL_T := 0.2              # s on jug_lunge's clock where its held coil ends (kael.json "lead" -0.45 at
                                        # "rate" 2.2): a longer Lunge holds it there to its stop, thrusting on the stop
@@ -596,7 +597,7 @@ func rmb_hold_tick(t: float) -> void:
 	var ld: Dictionary = sd["lunge"]
 	var feel := float(dash_feel()["dist"])        # the lane shows the fling travel() really makes
 	var lane := {"len": float(ld["dist"][1]) * feel, "len0": float(ld["dist"][0]) * feel, "k": k, "fill": k,
-			"width": lunge_w(), "soft": true, "tip": true}
+			"width": lunge_w(), "soft": true, "hot": LUNGE_HOT}
 	if _aims_down_chain():
 		var to := warchain.to_anchor()
 		lane["dir"] = to
