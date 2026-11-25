@@ -369,7 +369,8 @@ func _apply_blockers() -> void:
 		if not w.inb(c.x, c.y): return
 		var i := w.idx(c.x, c.y)
 		if w.kind[i] == World.T_VOID: return
-		occ[i] = tag
+		if not tag.is_empty():
+			occ[i] = tag      # (a bed's tiles keep the crop patch's tag)
 		if solid:
 			if w.kind[i] == World.T_BLOCK and not w.no_deco.has(i):
 				w.kind[i] = World.T_GROUND      # a rim tree that grew where you'd put something
@@ -387,6 +388,8 @@ func _apply_blockers() -> void:
 		if HubLayout.holds(lay, String(e["id"])): continue
 		for c in HomeLayout.deco_cells(e):
 			mark.call(c, "d:%d" % int(e["u"]), HomeLayout.blocks(String(e["id"])), HomeLayout.top_of(String(e["id"])))
+	for c in PlotBlocks.tiles(h._plot_spots((h._d()["plots"] as Array).size())):
+		mark.call(c, "", true)
 	for k in lay["water"]:
 		mark.call(HomeLayout.unkey(k), "w", false)      # (feelfix) ponds are water you can wade and swim in, not walls
 	_evict_feeders()

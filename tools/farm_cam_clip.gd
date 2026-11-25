@@ -2,7 +2,8 @@ extends RefCounted
 ## --farm-cam-clip [--clip-dir=farm_cam_clip]: film the farm's third-person view (FarmCam) on a made-up garden (never
 ## the real save): you walk with the real keys (W is away from the camera) to the garden beds, drag the view round,
 ## to a roaming Boki, to the house, then back up to a wall so the camera is pulled in. PNG frames (cam_NN_<what>.png)
-## and the movie (farm_cam.avi) go to <tree>/<clip-dir>. Like tools/farm_greet_clip.gd it re-runs itself as a child
+## and the movie (farm_cam.avi) go to <tree>/<clip-dir>. --clip-arch=<id> plays that hunter (its class too);
+## --clip-beds-only stops after the garden beds shots. Like tools/farm_greet_clip.gd it re-runs itself as a child
 ## Godot under the movie writer (GPU worker). Prints FCCLIP lines.
 
 const FPS := 30
@@ -19,6 +20,8 @@ const SPECS := [["cindle", "Ash", 95.0], ["burrlet", "Moss", 60.0], ["zapple", "
 var main: Node
 var h
 var dir := "farm_cam_clip"
+var arch := ""
+var beds_only := false
 var shot_n := 0
 
 
@@ -27,6 +30,9 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--clip-dir="):
 			dir = String(a).substr(11)
+		elif String(a).begins_with("--clip-arch="):
+			arch = String(a).substr(12)
+	beds_only = "--clip-beds-only" in OS.get_cmdline_user_args()
 	if "--fc-child" not in OS.get_cmdline_user_args():
 		_record()
 		return
@@ -43,6 +49,9 @@ func run(main_node: Node) -> void:
 		d["roster"].append(rec)
 	d["roster"][0]["starter"] = true
 	d["active"] = d["roster"][0]["uid"]
+	if not arch.is_empty():
+		d["arch"] = arch
+		d["cls"] = Arch.weight(arch)
 	d["tutorial"] = {"home": true, "hatched": true, "intro": true, "day1_done": true}
 	var crops: Array = Data.CROPS.keys()
 	for i in 4:
@@ -55,8 +64,9 @@ func run(main_node: Node) -> void:
 	main.get_tree().create_timer(DEADLINE_S).timeout.connect(main.get_tree().quit.bind(1))  # never hang a worker
 	await _open("")
 	await _beds()
-	await _open(GardenZones.HUB)
-	await _hub()
+	if not beds_only:
+		await _open(GardenZones.HUB)
+		await _hub()
 	print("FCCLIP DONE shots=%d" % shot_n)
 	main.get_tree().quit()
 
