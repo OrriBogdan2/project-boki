@@ -8,7 +8,7 @@ const DT := 1.0 / 60.0
 
 var main: Node
 var m: Match
-var P: Hunter
+var hero: Hunter
 var dir := ""
 
 
@@ -22,23 +22,23 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	await _setup()
-	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
-	var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
+	var mate: Hunter = m.hunters.filter(func(x): return x.team == hero.team and x != hero)[0]
+	var foes: Array = m.hunters.filter(func(x): return x.team != hero.team)
 	var near: Hunter = foes[0]
 	var far: Hunter = foes[1]
-	P.teleport(_at(0.0, 0.0))      # (random_ground can be a roof: stand on the ground the Wisps lie on)
+	hero.teleport(_at(0.0, 0.0))  # (random_ground can be a roof: stand on the ground the Wisps lie on)
 	far.teleport(_at(6.0, -3.0))
 	await _go(1.0)
 	m.knock(mate, far, {})
-	m.knock(near, P, {})
-	await _go(1.0)      # (a knock throws the Wisp: set them down by you once it has settled)
-	P.teleport(near.pos + Vector3(-0.8, 0.0, 0.0))
+	m.knock(near, hero, {})
+	await _go(1.0)  # (a knock throws the Wisp: set them down by you once it has settled)
+	hero.teleport(near.pos + Vector3(-0.8, 0.0, 0.0))
 	mate.teleport(near.pos + Vector3(-2.4, 0.0, 0.6))
 	await _go(0.03)
 	for o: Hunter in [mate, near]:
-		print("STOMPSHOTS %s downed=%s d=%.2f dy=%.2f" % [o.pname, o.downed, P.flat_dist(o), P.pos.y - o.pos.y])
+		print("STOMPSHOTS %s downed=%s d=%.2f dy=%.2f" % [o.pname, o.downed, hero.flat_dist(o), hero.pos.y - o.pos.y])
 	await _shot("a_in_reach")
-	P.teleport(near.pos + Vector3(0.0, 0.0, 6.0))
+	hero.teleport(near.pos + Vector3(0.0, 0.0, 6.0))
 	await _go(0.5)
 	await _shot("b_out_of_reach")
 	print("STOMPSHOTS prompt=%s" % [m.interact.get("label", "")])
@@ -50,7 +50,7 @@ func _setup() -> void:
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
-	P = m.player
+	hero = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
@@ -61,16 +61,16 @@ func _setup() -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	main.get_viewport().warp_mouse(Vector2(4, 4))
-	P.teleport(m.world.random_ground())
+	hero.teleport(m.world.random_ground())
 	for h in m.hunters:
-		if h != P:
-			h.teleport(m.world.free_spot_near(P.pos + Vector3(30, 0, 0), [], 1.0, 0.4, 8.0))
+		if h != hero:
+			h.teleport(m.world.free_spot_near(hero.pos + Vector3(30, 0, 0), [], 1.0, 0.4, 8.0))
 
 
 ## `dx`, `dz` metres from you, on the ground there.
 func _at(dx: float, dz: float) -> Vector3:
-	var x := P.pos.x + dx
-	var z := P.pos.z + dz
+	var x := hero.pos.x + dx
+	var z := hero.pos.z + dz
 	return Vector3(x, m.world.ground_at(x, z), z)
 
 
@@ -79,7 +79,7 @@ func _go(secs: float) -> void:
 	while t < secs:
 		m.step(DT)
 		t += DT
-		m.cam.snap(P.pos)
+		m.cam.snap(hero.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
