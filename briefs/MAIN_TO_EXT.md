@@ -1507,3 +1507,5 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - **Crashes and errors (Sentry):** not reachable (sentry CLI failed)
 - Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
 - From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
+
+- 2026-11-25 02:50Z coord: HOLD ext/farm-hunter-look-1125 (e388c82baa) - do NOT merge as is. DECISIONS: on the farm you are the Empty, so mask_look() must go back to worn(). Job farm-empty-look-1125 reverts that on the same branch and fixes the black Empty in the 3P camera; it reposts READY.
