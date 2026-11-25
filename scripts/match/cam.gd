@@ -1,7 +1,7 @@
 class_name CamRig
 extends Camera3D
 ## The match camera: high, far and narrow. By default it slides toward the cursor ("pan", the target feel's data);
-## Centred and Locked stay on you, the other follow presets lean as their rows say (docs/MOVEMENT_FEEL.md "Camera lead").
+## Centred and Locked stay on you, the other presets lean as their rows say (docs/MOVEMENT_FEEL.md "Camera lead").
 
 const HEIGHT := 27.0
 const BACK := 17.5
@@ -383,7 +383,8 @@ func cursor_pan(at: Vector2, p: Vector3) -> Vector3:
 	var way := Vector2(rel.x / l, rel.y / l)
 	if follow_mode != "pan":
 		return Vector3(way.x, 0, way.y).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
-	var reach := Vector3(float(pan_ext["side_m"]) * way.x, 0, float(pan_ext["down_m"] if way.y > 0.0 else fm[2]) * way.y)
+	var vert := float(pan_ext["down_m"]) if way.y > 0.0 else float(fm[2])
+	var reach := Vector3(float(pan_ext["side_m"]) * way.x, 0, vert * way.y)
 	var want := reach.rotated(Vector3.UP, yaw) * f * lead
 	return want.limit_length(maxf(0.0, _cast_room(Vector2(want.x, want.z).normalized(), 0.0)))
 

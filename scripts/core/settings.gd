@@ -520,7 +520,7 @@ func load_file() -> ConfigFile:
 	migrate_cam(v)
 	if int(v.get("cam_v", 1)) < 2 or not cf.has_section_key("s", "cam_v"):
 		if String(v.get("cam_follow", "")) == "centred":
-			v["cam_follow"] = "pan"  # the cursor pan becomes everyone's default once (it follows the target feel's data)
+			v["cam_follow"] = "pan"  # the cursor pan becomes everyone's default once
 		v["cam_v"] = 2
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}  # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults

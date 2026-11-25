@@ -120,8 +120,10 @@ func _cap() -> void:
 ## ramp from 3.5 m deep, and a critically damped spring of omega 10 on the arm length.
 func _arm(lo: float, hi: float, step: float) -> void:
 	var wide := CamRig.style_across("default")
-	ok(absf(wide * hi - 34.17) < 0.1 and absf(wide * lo - 22.86) < 0.1,
-			"%.1f m across at the widest, %.1f m at the closest (34.2 / 22.9)" % [wide * hi, wide * lo])
+	ok(
+		absf(wide * hi - 34.17) < 0.1 and absf(wide * lo - 22.86) < 0.1,
+		"%.1f m across at the widest, %.1f m at the closest (34.2 / 22.9)" % [wide * hi, wide * lo]
+	)
 	ok(absf((hi - lo) / step - 4.0) < 0.01, "the wheel has four notches (%.2f)" % ((hi - lo) / step))
 	var cam: CamRig = m.cam
 	cam.user_zoom = hi
@@ -152,7 +154,7 @@ func _arm(lo: float, hi: float, step: float) -> void:
 		if i == 29:
 			at_half = (cam.zoom - hi) / 0.5
 	ok(overshoot < 0.0001, "the arm spring never overshoots (%.5f)" % overshoot)
-	ok(absf(at_half - 0.96) < 0.01, "half a second in, the arm is %.0f%% there (critical spring, omega 10: 96%%)" % [at_half * 100.0])
+	ok(absf(at_half - 0.96) < 0.01, "half a second in, the arm is %.0f%% there (omega 10: 96%%)" % [at_half * 100.0])
 	cam.zoom_omega = 0.0
 	cam.zoom = hi
 	cam.zoom_to = hi

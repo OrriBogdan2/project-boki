@@ -9,18 +9,24 @@ var bad := 0
 const DT := 1.0 / 60.0
 const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 
+
 func ok(cond: bool, what: String) -> void:
 	print("PRACTICEHERO %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	var tree := main.get_tree()
 	Save.no_write = true
 	var d := Save.fresh()
-	var k := Save.new_kin("zapple", "Pip"); d["roster"].append(k); d["active"] = k["uid"]
+	var k := Save.new_kin("zapple", "Pip")
+	d["roster"].append(k)
+	d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
-	d["cls"] = "medium"; d["arch"] = "gunslinger"
-	d["classes"] = ClassUnlock.legacy()      # an old save, every Hunter open (the locks: --hunter-unlock-check)
+	d["cls"] = "medium"
+	d["arch"] = "gunslinger"
+	d["classes"] = ClassUnlock.legacy()  # an old save, every Hunter open (the locks: --hunter-unlock-check)
 	Save.d = d
 	var areas := {
 		"training": {"training": true, "practice": true},
@@ -35,7 +41,8 @@ func run(main: Node) -> void:
 		main.add_child(m)
 		m.start(o)
 		m.set_process(false)
-		for i in 5: await tree.process_frame
+		for i in 5:
+			await tree.process_frame
 		await _area(main, m, String(area))
 		m.queue_free()
 		await tree.process_frame
@@ -48,6 +55,7 @@ func run(main: Node) -> void:
 	rm.queue_free()
 	print("PRACTICEHERO DONE, failures: %d" % bad)
 	tree.quit()
+
 
 func _area(main: Node, m: Match, area: String) -> void:
 	var tree := main.get_tree()
@@ -65,7 +73,10 @@ func _area(main: Node, m: Match, area: String) -> void:
 	ok(pr.picker != null and m.paused, "%s: the Hero button opens the picker (the game pauses)" % area)
 	var grid: GridContainer = pr.picker.get_meta("grid")
 	var archs: Array = grid.get_children().map(func(c): return String(c.get_meta("arch", "")))
-	ok(archs.size() == Arch.ORDER.size() and Arch.ORDER.all(func(a): return archs.has(a)), "%s: the picker shows all %d heroes" % [area, Arch.ORDER.size()])
+	ok(
+		archs.size() == Arch.ORDER.size() and Arch.ORDER.all(func(a): return archs.has(a)),
+		"%s: the picker shows all %d heroes" % [area, Arch.ORDER.size()]
+	)
 	await _key(tree, "hero")
 	ok(pr.picker == null and not m.paused, "%s: J closes it" % area)
 	await _key(tree, "hero")
@@ -76,25 +87,37 @@ func _area(main: Node, m: Match, area: String) -> void:
 	var target := "ostra" if P.arch != "ostra" else "mage"
 	var card: Control = null
 	for c in grid.get_children():
-		if String(c.get_meta("arch", "")) == target: card = c
-	var click := InputEventMouseButton.new(); click.button_index = MOUSE_BUTTON_LEFT; click.pressed = true
+		if String(c.get_meta("arch", "")) == target:
+			card = c
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
 	card.gui_input.emit(click)
 	await tree.process_frame
 	ok(pr.picker == null and not m.paused, "%s: picking closes the picker" % area)
-	ok(m.player == P and P.arch == target and P.cls == Arch.weight(target), "%s: the hunter swapped in place to %s (%s)" % [area, target, P.arch])
+	ok(
+		m.player == P and P.arch == target and P.cls == Arch.weight(target),
+		"%s: the hunter swapped in place to %s (%s)" % [area, target, P.arch]
+	)
 	ok(P.kin == kin_before and (kin_before == null or is_instance_valid(kin_before)), "%s: your Boki stays" % area)
 	ok(Hunter.SLOTS.all(func(s): return int(P.slot_lv[s]) >= 1), "%s: every rank is open" % area)
-	ok(Arch.of_save() == target and String(Save.d["weapon"]) == Arch.signature(target), "%s: saved as your expedition pick" % area)
-	for i in 3: m.step(DT)
+	ok(
+		Arch.of_save() == target and String(Save.d["weapon"]) == Arch.signature(target),
+		"%s: saved as your expedition pick" % area
+	)
+	for i in 3:
+		m.step(DT)
 	ok(not P.out and P.hp > 0.0, "%s: the new hero plays on" % area)
 	# the Esc menu
 	var was: Node = main.get("current")
-	main.set("current", m)         # (the Esc menu finds the match through the current screen)
+	main.set("current", m)  # (the Esc menu finds the match through the current screen)
 	Overlay.open_pause("match")
 	await tree.process_frame
 	Overlay.open_more()
 	await tree.process_frame
-	var labels: Array = Overlay.host.find_children("*", "Button", true, false).map(func(b): return String((b as Button).text))
+	var labels: Array = Overlay.host.find_children("*", "Button", true, false).map(
+		func(b): return String((b as Button).text)
+	)
 	ok(labels.any(func(t): return t.contains("Change Hunter")), "%s: the Esc menu's More page has Change Hunter" % area)
 	Overlay.close()
 	main.set("current", was)
@@ -103,24 +126,36 @@ func _area(main: Node, m: Match, area: String) -> void:
 	var z0 := m.cam.user_zoom
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_UP)
 	var zin := m.cam.user_zoom
-	m.set_process(true)        # (the camera follows in the render frame)
-	for i in 90: await tree.process_frame
+	m.set_process(true)  # (the camera follows in the render frame)
+	for i in 90:
+		await tree.process_frame
 	m.set_process(false)
-	ok(zin < z0 and m.cam.zoom_to < z0, "%s: the wheel zooms in (user zoom %.2f -> %.2f, camera %.2f)" % [area, z0, zin, m.cam.zoom])
+	ok(
+		zin < z0 and m.cam.zoom_to < z0,
+		"%s: the wheel zooms in (user zoom %.2f -> %.2f, camera %.2f)" % [area, z0, zin, m.cam.zoom]
+	)
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	ok(m.cam.user_zoom > zin, "%s: and out again (%.2f)" % [area, m.cam.user_zoom])
-	for i in 200: await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
-	ok(is_equal_approx(m.cam.user_zoom, CamWheel.far(true)), "%s: zoom stops at its limit (%.2f)" % [area, m.cam.user_zoom])
+	for i in 200:
+		await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
+	var far := CamWheel.far(true)
+	ok(is_equal_approx(m.cam.user_zoom, far), "%s: zoom stops at its limit (%.2f)" % [area, m.cam.user_zoom])
+
 
 func _key(tree: SceneTree, action: String) -> void:
-	var ev := InputEventAction.new(); ev.action = action; ev.pressed = true
+	var ev := InputEventAction.new()
+	ev.action = action
+	ev.pressed = true
 	Input.parse_input_event(ev)
 	await tree.process_frame
 	await tree.process_frame
 
+
 func _wheel(tree: SceneTree, button: int) -> void:
-	var ev := InputEventMouseButton.new(); ev.button_index = button; ev.pressed = true
+	var ev := InputEventMouseButton.new()
+	ev.button_index = button
+	ev.pressed = true
 	Input.parse_input_event(ev)
 	await tree.process_frame
