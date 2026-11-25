@@ -31,7 +31,7 @@ func run(main_node: Node) -> void:
 func _pell() -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	m.set_process(false)
 	if main.fade:
 		await main.fade.reveal(0.01)
