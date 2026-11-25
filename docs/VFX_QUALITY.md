@@ -136,9 +136,6 @@ Next in line (24-25, smaller): Lace's deep red against Kael's crimson (owner's c
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
   rimewright, tender, thief (Grimble is all `content/vfx/dredge.json` now; Sable's X, dash, LMB, RMB and E are data; only her blade, bola and dagger meshes and the blink's afterimage copies are `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
-  Lace (`pin_fx`) is on data except her arrow bodies, spent arrows, and the Spirit Walk body wash, screen tint and shell
-  (ext/lace-vfx-data): the perfect-release burst, the Heavy Shot's glint and release, the Hail Wall's burn, the dash
-  trail and the Spirit Walk shares are `archer.json` moves; the live Hail Wall is the same laced AimKit arc as its tell.
   Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit

@@ -112,6 +112,37 @@ void fragment() {
 	float a = clamp((rays + core * 1.4 + rg) * power, 0.0, 1.5) * (1.0 - smoothstep(0.85, 1.0, r));
 	vec3 col = mix(color.rgb, vec3(1.0), core * 0.6 * white);
 """ + _TAIL
+		# Hem's fletch burst (her stage and perfect-release flashes, the glint at her bow): leaf-shaped
+		# feathers radiating from a small core, each with a bright quill down its middle, an optional ring
+		"rosette":
+			return """shader_type spatial;
+render_mode unshaded, blend_add, depth_draw_never, depth_test_disabled, cull_disabled, shadows_disabled;
+uniform vec4 color : source_color = vec4(1.0);
+uniform float power = 1.0;
+// how many feathers
+uniform float leaves = 6.0;
+// radians the burst is turned by
+uniform float rot = 0.0;
+uniform float ring = 0.0;
+uniform float ring_r = 0.86;
+""" + _LAYER_UNIFORMS + """
+void vertex() {""" + _BILLBOARD + """}
+void fragment() {
+	vec2 uv = UV * 2.0 - 1.0;
+	float r = length(uv);
+	float seg = 6.28318 / leaves;
+	float ang = atan(uv.y, uv.x) + rot;
+	float off = abs(mod(ang + seg * 0.5, seg) - seg * 0.5);
+	// a feather: widest a third of the way out, pointed at both ends
+	float u = clamp((r - 0.12) / 0.8, 0.0, 1.0);
+	float half_w = seg * 0.42 * pow(sin(3.14159 * pow(u, 0.7)), 0.8);
+	float leaf = (1.0 - smoothstep(half_w * 0.7, half_w, off)) * step(0.12, r) * (1.0 - step(0.92, r));
+	float quill = leaf * exp(-off * r * 55.0);
+	float core = exp(-r * 10.0);
+	float rg = ring * exp(-pow((r - ring_r) * 16.0, 2.0));
+	float a = (leaf * 0.85 + quill * 0.5 + core + rg) * power * (1.0 - smoothstep(0.92, 1.0, r));
+	vec3 col = mix(color.rgb, vec3(1.0, 0.97, 0.8), quill * 0.3 + core * 0.3);
+""" + _TAIL
 		# a streak or ribbon: bright along its centre line (uv.y = 0.5), fading to its tail (uv.x = 0)
 		"streak":
 			return """shader_type spatial;
@@ -139,6 +170,26 @@ void fragment() {
 	float sh = 0.5 + 0.5 * sin((UV.y * 9.0 + TIME * 3.0) + UV.x * 2.0);
 	float a = (0.16 + 0.12 * sh * (1.0 - UV.y * 0.5) + edge * 0.8 + top * 0.5 + base * 0.7) * power;
 """ + _CEL + """	ALBEDO = mix(color.rgb, vec3(1.0), edge * 0.4 + top * 0.3) * a;
+	ALPHA = clamp(a, 0.0, 1.0) * color.a;
+}
+"""
+		# a licking flame on a billboard (Hem's anti-heal burn: blue)
+		"flame":
+			return """shader_type spatial;
+render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
+uniform vec4 color : source_color = vec4(1.0);
+uniform float power = 1.0;
+uniform float seed = 0.0;
+void vertex() {""" + _BILLBOARD + """}
+void fragment() {
+	vec2 uv = UV * 2.0 - 1.0;
+	float t = TIME * 5.0 + seed;
+	float wob = sin(uv.y * 6.0 + t) * 0.12 + sin(uv.y * 11.0 - t * 1.3) * 0.06;
+	float w = mix(0.75, 0.05, clamp((1.0 - uv.y) * 0.5, 0.0, 1.0));
+	float body = (1.0 - smoothstep(w * 0.2, w, abs(uv.x + wob * (1.0 - uv.y) * 0.5)));
+	float h = smoothstep(-1.0, -0.2, -uv.y * 0.9 + 0.1 * sin(t + uv.x * 5.0));
+	float a = body * (1.0 - smoothstep(0.6, 1.0, uv.y)) * smoothstep(-1.0, -0.4, uv.y) * power;
+""" + _CEL + """	ALBEDO = mix(color.rgb, vec3(1.0), body * h * 0.35) * a;
 	ALPHA = clamp(a, 0.0, 1.0) * color.a;
 }
 """
