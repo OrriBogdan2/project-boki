@@ -11331,3 +11331,4 @@ READY ext/sfx-four-snd3 b9e4f2bf40 (bulk-rebase: origin/main merged in mechanica
 READY ext/stuck-integ-fb8a2ad6 044dfb6eac (supersedes: mc-20261125-1110, merge-lane-n23a-1123, merge-lane-N3-1122, merge-lane-n23c-1123, merge-lane-N2-1122; on main 1992aeaa73; --check 0 fail, --cc-measure-check 44/44)
 READY ext/vfx-rival-read 0dedc3e5adcd6ed39cbdf5a11bf6e94afb08b326 (rivals readable at Hunter size; origin/main merged in cleanly, docs/COMBAT_CLARITY.md auto-merged; check.sh OK, health --strict only sfx loudness red = no numpy on w2, red on main too)
 READY ext/hud-passive-gauge-1125 d33e72c5eb (HUD passive gauge only for fill-up passives; Fever/Rocks/Salvage as buff icons)
+READY ext/cam-parity-1125 dca40c2ed1 (camera parity: default cursor pan, data zoom range, glide/abyss zoom, arm spring)
