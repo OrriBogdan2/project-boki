@@ -28,6 +28,13 @@ func _settle(want_k: float) -> void:
 		await main.get_tree().process_frame
 
 
+func _zoomed() -> void:
+	for i in FRAMES:
+		await main.get_tree().process_frame
+		if absf(home.cam.zoom - home.cam.zoom_to) < 0.005:
+			break
+
+
 func _back() -> float:
 	return home.cam.global_position.distance_to(home.cam.focus + Vector3(0, home.cam.rise, 0))
 
@@ -53,6 +60,7 @@ func run(m: Node) -> void:
 	await _settle(1.0)
 	_third_part(r)
 	_keys_part()
+	await _wheel_part(r)
 	await _wall_part()
 	await _build_part()
 	await _flag_part()
@@ -96,6 +104,22 @@ func _keys_part() -> void:
 	cam.yaw_to = 0.0
 
 
+func _wheel_part(r: Dictionary) -> void:
+	var cam: CamRig = home.cam
+	var far := _back()
+	cam.zoom_to = CamWheel.near()
+	await _zoomed()
+	var near := _back()
+	ok(near < far - 1.0 and near < float(r["dist_min"]) + 0.6, "wheel in: %.1f m back, from %.1f m" % [near, far])
+	cam.zoom_to = CamWheel.ctrl_zoom()
+	await _zoomed()
+	var wide := _back()
+	ok(wide > far + 0.5 and wide < float(r["dist_max"]) * 2.0, "the Ctrl look: %.1f m back" % wide)
+	cam.zoom_to = CamWheel.far()
+	await _zoomed()
+	ok(absf(_back() - far) < 0.2, "wheel out again: %.1f m back" % _back())
+
+
 func _wall_part() -> void:
 	var w: World = home.world
 	var cam: CamRig = home.cam
@@ -121,7 +145,10 @@ func _wall_part() -> void:
 		s += 0.1
 	ok(
 		not inside and cam.global_position.y > w.ground_at(cam.global_position.x, cam.global_position.z),
-		"no point of the view is inside a wall or the ground"
+		(
+			"no point of the view is inside a wall or the ground (inside %s, %.2f m back, y %.2f)"
+			% [inside, near, cam.global_position.y]
+		)
 	)
 	for t in tiles:
 		w.kind[t[0]] = t[1]
