@@ -174,8 +174,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 		reach = 9.0
 	elif sid == "kin" and not tu.flag:
 		reach = 14.0       # (the E line reaches the row from where you stand)
-	# (a monster far below the ledge the player stands on is out of reach however near it is: walk down to it)
-	if p.flat_dist(best) > reach or p.pos.y - best.pos.y > LEDGE_DROP: goto.call(best.pos)
+	# (the pack step: a monster far below the ledge the player stands on is out of reach however near it is: walk down)
+	if p.flat_dist(best) > reach or (sid == "pack" and p.pos.y - best.pos.y > LEDGE_DROP): goto.call(best.pos)
 	match sid:
 		"shoot": p.inp["fire"] = fire_key(m)
 		"sec": p.inp["fire"] = bool(tu.seen.get("sec", false)) and fire_key(m)      # (the cast first, then the rest)
