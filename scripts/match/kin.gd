@@ -716,7 +716,7 @@ func sim(dt: float) -> void:
 ## Where its speech bubble sits.
 func bubble_at() -> Vector3:
 	if state == "shoulder" and owner_h and not beside:
-		return owner_h.position + Vector3(0, 2.3, 0)
+		return owner_h.position + Vector3(0, 2.3 * CamRig.match_hunter_scale, 0)
 	return position + Vector3(0, 1.2, 0)
 
 ## Where it is for the eye (on you counts as your shoulder), for tests and callers that care.
