@@ -31,7 +31,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("gunslinger"))
+	m.start(Match.arena_opts("gunslinger"))
 	m.set_process(false)
 	var a: Arena = m.arena
 	var p: Hunter = m.player
