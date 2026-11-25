@@ -750,7 +750,7 @@ const FRAME := {
 	},
 	"threadwyrm":
 	{
-		"head": Vector3(0, 0.357, -0.0958),
+		"head": Vector3(0.113, 0.066, -0.150),
 		"top": 0.464,
 		"carry": Vector3(0, 0.517, 0.0491),
 		"ear_tip": Vector3(0.0602, 0.464, 0.0443),
@@ -1124,7 +1124,7 @@ const FRAME := {
 	},
 	"zephyrak":
 	{
-		"head": Vector3(0, 0.248, -0.0989),
+		"head": Vector3(-0.0275, 0.336, -0.118),
 		"top": 0.341,
 		"carry": Vector3(0, 0.248, 0.00952),
 		"ear_tip": Vector3(0.0786, 0.284, -0.0313),
@@ -1262,7 +1262,7 @@ const FRAME := {
 	},
 	"caecilith":
 	{
-		"head": Vector3(0, 0.328, -0.146),
+		"head": Vector3(0, 0.405, -0.161),
 		"top": 0.381,
 		"carry": Vector3(0, 0.152, 0.0473),
 		"ear_tip": Vector3(0.0413, 0.369, -0.0734),
@@ -1467,7 +1467,7 @@ const FRAME := {
 	},
 	"thrumbird":
 	{
-		"head": Vector3(0, 0.557, -0.0858),
+		"head": Vector3(0, 0.347, -0.010),
 		"top": 0.631,
 		"carry": Vector3(0, 0.192, -0.019),
 		"ear_tip": Vector3(0.0119, 0.411, 0.0451),
