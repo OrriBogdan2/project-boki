@@ -1,0 +1,10 @@
+# Lace (hem) r26 tools: the game-camera "trouser V" is the slit seen from above; close it per clip, keep the slit on design
+(plan /home/boki/gens/hunter-round-1124/lace/PLAN-1124o.md; numbers + renders /home/boki/gens/hunter-round-1124/lace/r26/)
+Cause (measured): the skirt covers 360 deg with a round radius (no figure-8), but the game camera looks down ~66 deg, so a ray
+through any front gap leaves through the open hem 10-15 cm later and hits the ground. r25's slit (20-30 deg wedge, hem to y 0.60,
+centred -40 deg) faces the camera in idle/attack; r25 closed it only in Attack, by 16 deg, and only below y 0.60 (a tear hole stayed above).
+- `slitclose.py` (post-pass on the shipped r25 glb + clips; mesh, textures, non-slit weights and all other keys untouched):
+  extra closing yaw on the SkirtSlitA/B keys per clip; band1/sy0/sy1 rebuild the slit weights with sway25's formula.
+  Shipped: `clo=Idle:1.2,walk:1.2,Crouch:1.0,run:0.7,Jump_Run:0.5,*:1.8 band1=30 sy0=0.92 sy1=0.66` (r25: 0.60..0.86, closed 1.0 in Attack/kits only).
+- `seethru.py GLB`: share of the skirt's game-camera hull (below the waist) where the ground shows through (all body prims as
+  occluders), mean/max over clip frames and model yaw -45/0/45. Live bell 0.009; r25 0.109; r26 0.083.
