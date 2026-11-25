@@ -131,3 +131,12 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p3/tools/` (views.py, proj.py, swap.s
 - Not shipped: COLOR_0 alpha 0 everywhere removes the last outline dots, but also hides the shield shell, which reuses the ink width
   (outline.gdshader `ink_mask`, ShieldLook). Per-vertex room (a port of fit_warden ink_room) still left dots on the silhouette.
 Scripts: `~/gens/hunter-round-1124/sparkle/p4/tools/` (slot.py, verify.py, room.py, addcol.py).
+
+### Round 1124o-6 (glb 5f84decbb8a9, 79,980 tris, on top of 0234e266a0eb)
+- Stance (approved doll A / 1118 turnaround): only rotation and root-translation keys of Idle, Attack and Crouch_Walk_with_Torch differ.
+  Mesh, weights, textures, walk, run and Jump_Run are byte-identical. `WardenNative._fit` fixes the height, so bones are not lengthened.
+- Idle: fore-aft foot gap .56-.61 -> about .10, hip about 1.01 -> 1.08, hands off the thigh (Rhand-Rleg pairs 17 -> 0).
+- Attack: hip dip and lunge width reduced, the slam stays (Lhand-Rhand pairs 114 -> 0; inner-thigh pairs 383 -> 590, Larm-head 5 -> 9).
+- Crouch: hip .83-.90 -> .88-.95, torso lean 37-40 -> 16-18 degrees, footsteps unchanged (inner-thigh pairs 323 -> 338).
+- glbstretch worst edge ratio: Idle 6.1 -> 5.2, Attack 14.3 -> 14.3, Crouch 12.1 -> 11.7.
+Scripts and recipe: `~/gens/hunter-round-1124/sparkle/p6/tools/` (stance.py, spread.py, crouch.py; recipe in PLAN-1124o.md).
