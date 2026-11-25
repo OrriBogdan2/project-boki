@@ -49,7 +49,7 @@ only for a source value). `--move-feel-check` asserts the match rows (`coyote_ju
 
 | Window | Ours (match) | Ours (feel prototype) | Source | Evidence |
 |---|---|---|---|---|
-| Coyote: jump after running off a ledge | 0.12 s (`hunter.gd` walk-off sets `coyote`); +0.05 / +0.10 s jump, +0.15 s doesn't | 0.1 s (`FeelConfig.coyote_time`) | none: `bCanWalkOffLedges` false, so the source never walks off a ledge to need one (we allow it, owner ruling) | [est]; [game data] has no coyote field |
+| Coyote: jump after running off a ledge | 0.25 s since 11-25 (`coyote_s`, [game data]; was 0.12 s) (`hunter.gd` walk-off sets `coyote`); +0.05 / +0.10 s jump, +0.15 s doesn't | 0.1 s (`FeelConfig.coyote_time`) | none: `bCanWalkOffLedges` false, so the source never walks off a ledge to need one (we allow it, owner ruling) | [est]; [game data] has no coyote field |
 | Jump buffer: jump pressed before landing | 0.12 s (`Hunter.JUMP_BUFFER`); 0.05 / 0.10 s before landing jump on landing, 0.15 s doesn't | 0.12 s (`FeelConfig.jump_buffer`) | none: `JumpCooldown` and `AirJumpPressDuration` are named but sit in the encrypted code | [est]; [game data] names only |
 | Wall kick, late press (after leaving the wall) | 0.2 s (`hunter.gd` `wall_touch_t`), or any time you face a wall within `WallMoves.FACE_REACH` 0.4 m | none (no wall kick) | none: `bCanWallJump` is the tall-ledge climb, not a press window | [est] |
 | Wall kick, early press (before reaching the wall) | only the 0.4 m `FACE_REACH`: further out an air press opens the glider (or buffers a landing jump), never a kick on contact | none | none | [est] |
