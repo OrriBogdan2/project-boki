@@ -290,7 +290,7 @@ var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sf
 ## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
 var sound_gain := {}
 var last_played := {}
-var foe_next := false       # play_foe is playing: _bus_for sends the voice to SFXFoe
+var foe_next := false  # play_foe is playing: _bus_for sends the voice to SFXFoe
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
 var cue_log = null
 var rng := RandomNumberGenerator.new()
@@ -708,6 +708,7 @@ func play_foe(sname: String, pos: Vector3, vol_db := 0.0) -> void:
 	foe_next = true
 	play(sname, pos, vol_db)
 	foe_next = false
+
 
 ## Settings > Audio: a short sound through one bus when its slider is let go, to hear the new level.
 func play_sample(bus_name: String) -> void:
