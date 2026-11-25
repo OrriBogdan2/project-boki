@@ -11296,3 +11296,4 @@ READY ext/merge-lane-M4-1121 72918b075f2662002fc6fa31211fecc3428f75b5 (PR #571: 
 READY ext/merge-lane-N1-1122 0d779a9ea435cfea8cce4f48d7ffacaf6c460121 (PR #641: main merged, kit golden re-blessed; 8 gate reds are load flakes also red on clean main, see answer.md; check.sh clean)
 READY ext/stomp-prompt-declutter a1b0a88dfd (PR #819: main merged, check.sh clean, --stomp-check/--stomp-style-check/--stomp-break-sweep-check 0 fail)
 READY ext/perf-ground-pixels 3a08eb85c8 (PR #895: main merged, PERF_DRAW/perf_fight conflicts resolved, check.sh clean, --depth-cue-check 0 fail)
+READY ext/parity-recheck-lace d733c2f6bc0d (origin/main 90a2d844de merged, 0 behind; only conflict tools/archer_bulwark_combo_check.gd kept main's lace-parting pin plus the branch's Hail Wall 0.5 s tick pin; --archer-combo-check 235/0, --clip-cancels-check 0, --check 0 failures, health --strict OK; supersedes 47370674c6)
