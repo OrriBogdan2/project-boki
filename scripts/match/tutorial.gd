@@ -62,7 +62,7 @@ const KIT_KEY := {
 
 const CARD_T := 1.5  # s a new step's panel counts as fresh: messages, bubbles and the scout hint wait
 const NAG_T := 8.0  # s without progress before the panel pulses and the Boki says it once more
-const NAG_QUICK := {"crouch": 4.0, "glove": 4.0}  # s: the same for a step that is one key or one walk (no thinking)
+const NAG_QUICK := {"crouch": 4.0, "glove": 4.0, "hook": 4.0}  # s: the same for a step that is one key or one walk (no thinking); the hook step has no banner and nothing else speaks for it
 const INTRO_T := 2.0  # s the first-time intro card stays up (any key closes it sooner)
 const SPOT_T := 5.0  # s the lookout shows the glove it spotted
 const POINTS_T := 3.5  # s the "one ability point" line stands before the first pick
