@@ -105,15 +105,15 @@ Each Boki has a few farm knacks (level 1 to 4). The best-suited Boki takes each 
 |---|---|---|---|
 | Tide | Watering | Waters the crops. | Kestrike 2, Mirrolin 3, Boltstrich 2, Bubblisk 3, Prismander 3, Barokat 2, Barrelmander 2, Canvastross 2, Zephyrak 2 |
 | Bloom | Planting | Sows seeds and tends crops. | Mycroll 3, Glomwort 3, Crofthorn 3, Soakybara 3, Marchleaf 2, Mossgrade 3, Spirevark 2, Murmurling 2, Terrasloth 3, Prismander 1, Knotwyrm 3, Hivara 3 |
-| Forage | Harvesting | Picks ripe crops. | Mycroll 2, Zippelith 3, Vespyx 1, Bellowary 1, Snuffapi 3, Gongibbon 2, Gloamshell 3, Crofthorn 2, Anvilbrock 1, Kindlewren 1, Soakybara 2, Mossgrade 2, Nettlynx 1, Terrasloth 2, Chuggamus 1, Thrumbird 2, Umbrathere 3, Pipewurm 1, Echolop 1 |
+| Forage | Harvesting | Picks ripe crops. | Mycroll 2, Zippelith 3, Vespyx 1, Bellowary 1, Snuffapi 3, Ermink 2, Gongibbon 2, Gloamshell 3, Crofthorn 2, Anvilbrock 1, Kindlewren 1, Soakybara 2, Mossgrade 2, Nettlynx 1, Terrasloth 2, Chuggamus 1, Thrumbird 2, Umbrathere 3, Pipewurm 1, Echolop 1 |
 | Ember | Kindling | Fires the Hearth Oven and warms Rare Eggs. | Vespyx 3, Bellowary 3, Anvilbrock 3, Kindlewren 3, Nettlynx 3, Chuggamus 3, Pipewurm 3 |
 | Timber | Lumbering | Cuts trees at a Lumber Camp into wood. | Rampartoad 2, Anchorbill 1, Glintmole 2, Effigeetle 2, Buckleron 2, Lodestick 1, Gravadillo 2, Lockatara 1, Cairnhorn 3 |
 | Stone | Mining | Mines boulders at a Quarry into stone. | Rampartoad 3, Anchorbill 3, Glintmole 3, Effigeetle 3, Buckleron 3, Lodestick 3, Gravadillo 3, Lockatara 2, Cairnhorn 4 |
-| Craft | Crafting | Turns wood and stone into scrap. | Zippelith 2, Bellowary 2, Snuffapi 2, Frigatee 2, Gongibbon 1, Prowyak 2, Gloamshell 2, Skateron 2, Anvilbrock 2, Kindlewren 2, Marchleaf 1, Lanterloris 1, Spirevark 1, Murmurling 1, Mirrolin 2, Bubblisk 2, Rimeshrew 2, Chuggamus 2, Selenfin 1, Thrumbird 1, Umbrathere 2, Lunowl 2, Hivara 2 |
+| Craft | Crafting | Turns wood and stone into scrap. | Zippelith 2, Bellowary 2, Snuffapi 2, Ermink 3, Frigatee 2, Gongibbon 1, Prowyak 2, Gloamshell 2, Skateron 2, Anvilbrock 2, Kindlewren 2, Marchleaf 1, Lanterloris 1, Spirevark 1, Murmurling 1, Mirrolin 2, Bubblisk 2, Rimeshrew 2, Chuggamus 2, Selenfin 1, Thrumbird 1, Umbrathere 2, Lunowl 2, Hivara 2 |
 | Spark | Powering | Powers the Spark Mill: the farm works faster. | Gongibbon 3, Kestrike 3, Boltstrich 3, Barokat 3, Barrelmander 3, Canvastross 3, Thrumbird 3, Echolop 3, Zephyrak 4 |
 | Frost | Cooling | Keeps the Cold Store cold: food fills more. | Frigatee 3, Prowyak 3, Skateron 3, Lanterloris 3, Rimeshrew 3, Selenfin 3, Lunowl 2 |
 | Haul | Hauling | Carries wood, stone and feeder food. | Rampartoad 1, Zippelith 1, Anchorbill 2, Snuffapi 1, Glintmole 1, Gloamshell 1, Effigeetle 1, Kestrike 1, Buckleron 1, Lodestick 2, Boltstrich 1, Gravadillo 2, Barokat 1, Barrelmander 1, Canvastross 1, Lockatara 3, Umbrathere 1, Echolop 2, Cairnhorn 2, Zephyrak 2 |
-| Mend | Mending | Cheers up Boki and brews tonics. | Vespyx 1, Frigatee 1, Prowyak 1, Glomwort 2, Crofthorn 1, Skateron 1, Soakybara 1, Lanterloris 2, Mossgrade 1, Mirrolin 1, Nettlynx 2, Bubblisk 1, Terrasloth 1, Prismander 2, Rimeshrew 1, Selenfin 2, Knotwyrm 2, Pipewurm 2 |
+| Mend | Mending | Cheers up Boki and brews tonics. | Vespyx 1, Ermink 1, Frigatee 1, Prowyak 1, Glomwort 2, Crofthorn 1, Skateron 1, Soakybara 1, Lanterloris 2, Mossgrade 1, Mirrolin 1, Nettlynx 2, Bubblisk 1, Terrasloth 1, Prismander 2, Rimeshrew 1, Selenfin 2, Knotwyrm 2, Pipewurm 2 |
 | Ranch | Ranching | Makes glowcaps, buns and kibble in the Ranch Pen. | Mycroll 1, Glomwort 1, Marchleaf 3, Spirevark 3, Murmurling 3, Knotwyrm 1, Lunowl 1, Hivara 4 |
 
 ## Tools

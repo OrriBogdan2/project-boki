@@ -7,8 +7,6 @@ const NAMES := [
 	"splash",
 	"swim",
 	"drip",
-	"smg",
-	"rifle",
 	"thump",
 	"boom",
 	"hit",
@@ -82,8 +80,8 @@ const NAMES := [
 	"k_fairy",
 	"k_crystal",
 	"k_sound",
-	"shotgun",
-	"sniper",
+	"hit_light",
+	"hit_solid",
 	"hit_heavy",
 	"slash_hit",
 	"armor_hit",
@@ -212,6 +210,8 @@ const MIN_GAP := {
 	"ab_slow": 120,
 	"hit": 45,
 	"crit": 60,
+	"hit_light": 45,
+	"hit_solid": 55,
 	"hit_heavy": 70,
 	"slash_hit": 60,
 	"armor_hit": 70,
@@ -243,9 +243,11 @@ const IMPACT_GAP := 90
 const STACK_MS := 90
 const STACK_DB := 3.5
 const SAME_CAP := 5  # one sound sounding in this many pool voices at once; a rival's wind-up cue is exempt
+const AMB_FADE := 2.5
 ## dB your own held fire drops while a rival's wind-up or ult cue sounds, so the warning cuts through it
 ## (docs/AUDIO.md, enemy priority); the duck lasts as long as the cue, and 0 turns the rule off
 var fire_duck_db := -4.0
+var foe_next := false       # play_foe is playing: _bus_for sends the voice to SFXFoe
 var _fire_duck_until := 0
 var _fire_names := {}  # held-fire sounds FireSfx has played: always ducked
 const REPEAT_MS := 400  # a sound of yours started again within this is repeating (hit confirms, hurt spam): ducked too
@@ -575,11 +577,11 @@ func _stop_layers(fade: float) -> void:
 ## Extra ambience beds on top of the main one (wind over the abyss, ruins, the garden's time-of-day
 ## and pond beds), each faded to a level by where you are; created on first use, freed once faded
 ## to nothing, stopped together by clear_amb_layers.
-var amb_layers := {}  # name -> {p, want}
+var amb_layers := {}  # name -> {p, want, fade}  (fade: seconds from silent to full)
 const MATCH_BEDS := ["abyss", "ruins"]  # MusicDir's beds; other amb_layers are the farm's
 
 
-func amb_layer(name: String, level: float) -> void:
+func amb_layer(name: String, level: float, fade_s := AMB_FADE) -> void:
 	if not amb_layers.has(name):
 		if level <= 0.001 or not ResourceLoader.exists("res://audio/amb_%s.ogg" % name):
 			return
@@ -589,8 +591,9 @@ func amb_layer(name: String, level: float) -> void:
 		p.volume_db = -60.0
 		add_child(p)
 		p.play()
-		amb_layers[name] = {"p": p, "want": 0.0}
+		amb_layers[name] = {"p": p, "want": 0.0, "fade": fade_s}
 	amb_layers[name]["want"] = clampf(level, 0.0, 1.0)
+	amb_layers[name]["fade"] = maxf(fade_s, 0.05)
 
 
 func clear_amb_layers(fade := 1.0) -> void:
@@ -609,7 +612,8 @@ func _process(delta: float) -> void:
 	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
-		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / 2.5)
+		var fade_s: float = float(amb_layers[n].get("fade", AMB_FADE))
+		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / fade_s)
 		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
 		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
 			ap.queue_free()
@@ -632,9 +636,9 @@ var _step_i := 0
 
 
 ## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
-func step(pos = null, vol := -16.0, reach := 0.0) -> void:
+func step(pos = null, vol := -16.0, reach := 0.0, pitch := 1.0) -> void:
 	_step_i = (_step_i + 1) % 3
-	play("step%d" % _step_i, pos, vol, 0.12, 1.0, reach)
+	play("step%d" % _step_i, pos, vol, 0.12, pitch, reach)
 
 
 func has(sname: String) -> bool:
@@ -682,12 +686,21 @@ func _voice(pos, rk: float, sname: String) -> AudioStreamPlayer:
 ## Which bus a sound at pos plays on: muffled behind terrain, low-passed when far, else its own kind's bus
 ## (SfxMix.bus_for). No position (a cue for you alone): its kind's bus, never muffled.
 func _bus_for(pos, sname := "") -> StringName:
+	if foe_next and pos != null and not occlusion.blocked(pos, listener):
+		return &"SFXFoe"
 	if pos == null:
 		return mix.bus_for(sname, false, false)
 	var muffled: bool = occlusion.blocked(pos, listener)
 	var far: bool = Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
 	return mix.bus_for(sname, muffled, far)
 
+
+## An enemy's ultimate cue (UltCue): the same sound as `play`, on the SFXFoe bus (SFX's compressor, no far
+## low-pass, so it carries out to its reach) unless terrain muffles it. A teammate's goes through `play`.
+func play_foe(sname: String, pos: Vector3, vol_db := 0.0) -> void:
+	foe_next = true
+	play(sname, pos, vol_db)
+	foe_next = false
 
 ## Settings > Audio: a short sound through one bus when its slider is let go, to hear the new level.
 func play_sample(bus_name: String) -> void:

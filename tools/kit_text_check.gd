@@ -23,7 +23,7 @@ const KEYS := {
 	"duration":
 	(
 		"(^|_)(t|time|tell|window|every|tick|delay|linger|stun|hold|full|nock|recover|duration|rate"
-		+ "|wind|windup|rise|grounded|drag_max|fuse|dur|grow|root|daze|recast)$|_(t|time|for)$"
+		+ "|wind|windup|rise|grounded|drag_max|fuse|dur|grow|root|daze|recast|knockup)$|_(t|time|for)$"
 	),
 	"damage": "(^|_)(dmg|dps|damage)(_|$)",
 	"slow": "(^|_)slow(?!_(for|t|after))",

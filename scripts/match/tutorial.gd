@@ -270,7 +270,7 @@ func update(dt: float) -> void:
 	if m.hud:
 		m.hud.msgs.hold = card_up()  # messages wait while the banner is up
 	var sid := id()
-	camps.update()
+	camps.update(dt)
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
 	if got != got_seen:
@@ -540,7 +540,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			return flag and near.call(5.0)
 		"wallkick":
 			seen["kick"] = seen.get("kick", false) or int(p.stats.get("wall_kicks", 0)) > kicks0
-			return on_lookout()
+			return seen["kick"] and on_lookout()  # (a jump and a ledge catch can climb it too: that does not count)
 		"crouch":
 			if p.crouch and on_lookout():
 				crouch_t += dt
@@ -618,7 +618,7 @@ func _boki_sent() -> bool:
 	return false
 
 
-## Standing on the lookout's top (the wall kick's goal and the scouting spot).
+## Standing on the lookout's top (the wall kick step ends here after a kick, and the scouting spot).
 func on_lookout() -> bool:
 	var p := m.player
 	return p.grounded and _dist(stop("crouch")) < LOOKOUT_R and p.pos.y > stop("crouch").y - LOOKOUT_DROP

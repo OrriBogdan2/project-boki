@@ -28,6 +28,9 @@ const CRIT := Color("ffd23f")             # critical hits
 const CRIT_ARMOR := Color("b0e4ff")
 const HURT := Color("ff6a5a")             # damage you take
 const HURT_KIN := Color("ffa08a")         # damage your Boki takes
+const NUM_SHIELD := Color("c4b5ff")       # a hit a shield soaked (Albert's aegis, timed ward, Boki shield)
+const NUM_SHELL := Color("5ff0d2")        # a hit a Fusion shell soaked
+const NUM_EMPOWERED := Color("ff9b3d")    # an empowered hit (o.heavy / o.payoff: a point-blank volley, a primed shot)
 const GOLD := Color("ffd27a")             # levels, points to spend
 const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
 const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
@@ -58,6 +61,11 @@ const KEY_FS := 12             # key label size
 ## 24 px margin, keeps the blocks inside the 5% band).
 const SAFE_FRAC := 0.05
 const KEY_REACH := 10.0        # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
+
+static var _italic: FontVariation
+# style boxes are made once per look and reused (dozens of frames are drawn every frame)
+static var _boxes := {}
+
 
 ## The margin on each side for a window of size `sz` (x for left and right, y for top and bottom).
 static func safe_pad(sz: Vector2) -> Vector2:
@@ -177,13 +185,32 @@ static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Col
 
 ## Floating damage number colour: by who was hit and how (Fx picks and draws). `plain` is a plain hit's
 ## colour (a Boki's hits wear its type colour); crits, armour and hurt keep theirs.
-static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool, plain := HIT) -> Color:
+static func dmg_col(
+	crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool, plain := HIT, empowered := false
+) -> Color:
 	if on_you: return HURT
 	if on_your_kin: return HURT_KIN
 	if crit: return CRIT_ARMOR if armor_hit else CRIT
-	return HIT_ARMOR if armor_hit else plain
+	if armor_hit: return HIT_ARMOR
+	return NUM_EMPOWERED if empowered else plain
 
-static var _italic: FontVariation
+## The one table of floating-number kinds: what a number counted, its colour, its size against a plain hit
+## (Fx.NUM_SCALE) and whether it wears the crit outline. Fx draws from it; --dmg-number-check reads it.
+## Every pair must differ by colour or size, readable at match zoom.
+const NUM_STYLE := {
+	"hit": {"col": HIT, "k": 1.0, "crit": false},
+	"armour": {"col": HIT_ARMOR, "k": 1.0, "crit": false},
+	"crit": {"col": CRIT, "k": 1.0, "crit": true},
+	"crit_armour": {"col": CRIT_ARMOR, "k": 1.0, "crit": true},
+	"empowered": {"col": NUM_EMPOWERED, "k": 1.12, "crit": false},
+	"shield": {"col": NUM_SHIELD, "k": 0.85, "crit": false},
+	"shell": {"col": NUM_SHELL, "k": 0.85, "crit": false},
+	"heal": {"col": HEAL, "k": 1.0, "crit": false},
+	"hurt": {"col": HURT, "k": 1.0, "crit": false},
+}
+static func num_style(kind: String) -> Dictionary:
+	return NUM_STYLE[kind]
+
 ## BIG slanted into a bold italic (the knock banners' words, the squad rows' KNOCKED / DEAD tags).
 static func big_italic() -> Font:
 	if _italic == null:
@@ -192,8 +219,6 @@ static func big_italic() -> Font:
 		_italic.variation_transform = Transform2D(Vector2(1.0, ITALIC_SLANT), Vector2(0.0, 1.0), Vector2.ZERO)
 	return _italic
 
-# style boxes are made once per look and reused (dozens of frames are drawn every frame)
-static var _boxes := {}
 ## A cached rounded style box (bg, corner radius, border colour and width): for widgets drawing their own shapes.
 static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 	var key := [bg, rad, border, bw]

@@ -11,11 +11,14 @@ const MISS_RATE := 0.3     # share of 0.5 s aim windows that land MISS_OFF to th
 const MISS_OFF := 3.0      # m a missed aim is off the target
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
+const LOOKOUT_OFF := 7.0     # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
+
 const REST_S := 1.0   # s of standing with the stick neutral after which the stuck-hop timer starts over
 
 const KEYS := [      # the action inputs
 		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
+static var _retreat := false   # a wall kick step bot that got up without a kick, walking off to retry
 static var human := false
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input
 static var idle := false         # this frame the player did nothing (no stick, no key, no Boki command)
@@ -44,6 +47,7 @@ static func drive(m: Match) -> void:
 	_rest_t = _rest_t + Match.DT if p.inp["move"] == Vector2.ZERO else 0.0      # (last frame's stick)
 	for k in KEYS:
 		p.inp[k] = false
+	p.inp["sec_hold"] = false     # (a step that ends mid-hold must let go: a stuck hold charges forever)
 	p.inp["move"] = Vector2.ZERO
 	_acted = false
 	if human:
@@ -86,7 +90,16 @@ static func drive(m: Match) -> void:
 					p.inp["jump"] = press     # the second press opens it
 					p.inp["glide"] = p.gliding or press     # holding only keeps it open
 		"wallkick":
-			goto.call(tu.stop("crouch"), 0.4)
+			var top := tu.stop("crouch")
+			if tu.on_lookout() and not tu.seen.get("kick", false):
+				_retreat = true      # (up without a kick: walk off the cliff and kick up it)
+			var back := top - Vector3(LOOKOUT_OFF, 0.0, 0.0)
+			if _retreat and p.flat_dist(back) < 1.0:
+				_retreat = false
+			if _retreat:
+				goto.call(back)
+			else:
+				goto.call(tu.stop("crouch"), 0.4)
 			_kick_up(m, tu.stop("crouch").y)
 		"crouch":
 			goto.call(dest, 0.4)

@@ -20,7 +20,7 @@ text is rare. Our looks stay ours: the signature colour is the body of every eff
 | the true area | `AbilityFx.land` / `cast` | an area landing rings exactly its radius (was 1.15x), in the side lean; a zone cast rings its radius once (the extra 1.8x ring is gone) |
 | the true area: lines | `AimKit.span` `width` | a placement line can carry the band it hits under it; Tenzo's X cracks sit on the 3.2 m band its rise slows (was a 0.16 m line), `docs/shots/combat-clarity/tenzo_x_tell_band.jpg` |
 | the hit | `Ent.render` | the hit flash holds full white for 3 frames (`FLASH_FADE`), then fades |
-| what it did: CC | `StatusLooks` + `BodyTell` | each status's own body look (`StatusLooks`, docs/STATUS_LOOKS.md: stars over the head for a stun, stakes at the feet for a root, rings down the legs for a slow, and Grounded, Dazed and the rest), the same from every source; and the body pulses that colour while it lasts (`BodyTell`). No floating CC words, no icon tiles beside other Hunters' plates (the plate's word stays in place of the name) |
+| what it did: CC | `StatusLooks` + `BodyTell` | each status's own body look (`StatusLooks`, docs/STATUS_LOOKS.md: stars over the head for a stun, stakes at the feet for a root, rings down the legs for a slow, and Grounded, Dazed and the rest), the same from every source; and the body pulses that colour while it lasts (`BodyTell`). No floating CC words: a status is an icon with its time ring in the plate's status row (`HudPlate.row`), and the plate keeps the name (no word in its place) |
 | less text | `Fx.word` | one floating word at a spot at a time (`WORD_ROOM` 3 m, `WORD_HOLD` 0.6 s), smaller (28 / 40 px) |
 | less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | while you or a squadmate fights (`BokiChatter.calm`) only your own Boki's speech bubble is drawn and no callout pin ("Behind you! · 3m"; `--clarity-shots` prints `CLARITYCHATTER n/20`, 0 is the rule); a Boki's ability name floats over your own Boki only (others' read from their looks) |
 | less text: hover cards | `HudHover.draw_world_tip` | the card about a monster, Boki or Hunter under a resting cursor ("Lace / The Red Stitch", "Boki: Prismander") is not drawn while you or a squadmate fights (`BokiChatter.calm`): in a fight the cursor rests on whoever you aim at. `--clarity-check` budget `hud world_tip` 0 |
@@ -101,8 +101,9 @@ Grade: clear / unclear, worst first. "Shared" = fixed or helped by this pass; th
 | Cinder (ashwick) | clear | the bar: layered flame cone | per-Hunter job |
 
 Shared things still noisy in the films: Boki ability names (`Stinger Hook`, `Prism Wall`) over other people's Boki
-and other Boki's bubbles ("Echolope: behind you!") are now off in a fight (above). Still open: the "Hold F to
-stomp" prompt over a downed fight (the downed rework on `ext/wisp-clarity-1112` changes it); Boki rings and the
+and other Boki's bubbles ("Echolope: behind you!") are now off in a fight (above). The "Hold F to
+stomp" prompt is one short HoldPrompt ring in the prompt bar, for the one closest downed rival inside stomp reach
+only (`StompTarget`; a teammate's Wisp never asks, no world text on the Wisp; `--stomp-check`). Boki rings and the
 Hunters' cast rings stack under a melee (fixed: Ground order, above).
 
 ## Hunter against the ground (11-23)

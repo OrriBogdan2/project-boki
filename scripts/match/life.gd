@@ -29,6 +29,7 @@ const R := {
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
 	"sickness_time": 12.0,      # [patch 1.0] resurrection sickness
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
+	"sickness_heal": 0.75,      # [patch 1.0] -25% healing received
 }
 
 const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
@@ -70,6 +71,11 @@ static func box_rarity(b: Dictionary) -> int:
 ## Is anyone on this team still in the fight (standing or a wisp)?
 static func team_alive(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted)
+
+## Does `h` have a squadmate in this match (alive or not)? Solos: never, so no squad UI shows.
+static func has_mates(m: Match, h: Hunter) -> bool:
+	return h != null and m.hunters.any(func(x): return x != h and x.team == h.team)
+
 
 static func team_standing(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted and not x.downed)
@@ -596,7 +602,7 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 		m.killcam_text = ""
 		if m.hud:
 			m.hud.flash(Color("9ee2a0"), 0.3)
-			m.hud.toast("You're back" + ("  ·  resurrection sickness: -25% damage for 12s" if sick else ""), Color("9ee2a0"))
+			m.hud.toast("You're back" + ("  ·  resurrection sickness: -25% damage and healing for 12s" if sick else ""), Color("9ee2a0"))
 
 ## Someone died for good: no box revive any more, and no beacon either.
 static func make_gone(m: Match, h: Hunter) -> void:

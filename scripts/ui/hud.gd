@@ -358,9 +358,10 @@ func _draw_world_labels() -> void:
 	ObjectiveTracker.world(self)      # the first expedition's next step: a pin, or an arrow at the screen edge
 	_draw_exit_labels()
 	_draw_lair_labels()
+	CampMark.world(self)
 	_draw_truce_marks()
 	_draw_wisp_rings()
-	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
+	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the payoff burst
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen or HudPlate.hidden(m, h):
 			continue
@@ -393,10 +394,10 @@ func _draw_world_labels() -> void:
 		LabelCull.mark(mb)
 		LabelClash.claim(sp, LabelClash.BAR)
 		if mb.stagger_t > 0.0:
-			_ctext(sp + Vector2(0, -12), "STAGGERED", 18, Color("fff27a"), big)
-		elif mb.stag_open > 0.0:
-			var a := 0.75 + 0.25 * sin(m.time * 12.0)
-			_ctext(sp + Vector2(0, -12), "STAGGERABLE", 17, Color(0.85, 0.6, 1.0, a), big)
+			c.draw_arc(sp + Vector2(0, -16), 9.0, 0, TAU, 20, Color("fff27a"), 3.0, true)
+		elif mb.stag_open > 0.0:       # a pulsing purple ring: hit it with an ability now (no word)
+			var ring_r := 9.0 + 2.0 * sin(m.time * 12.0)
+			c.draw_arc(sp + Vector2(0, -16), ring_r, 0, TAU, 20, Color(0.85, 0.6, 1.0), 3.0, true)
 		# compact bar; rare and mutated monsters (mb.rarity, mb.mutations) wear a tinted frame and
 		# little icons for their mutations, and always show their bar
 		var rare: bool = int(mb.rarity) > 0 or not mb.mutations.is_empty()
@@ -425,7 +426,7 @@ func _draw_world_labels() -> void:
 			_bar(br, bfrac, Color("e0b0ff") if mb.stagger_t > 0.0 else Color("ff8a6a"))
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
-			_status_row(sp + Vector2(0, 16), mb)
+			_status_row(sp + Vector2(0, 18), mb)
 	for k in m.kins:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
 			continue
@@ -689,6 +690,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	NestMap.minimap(self, to_map, on_map, hold)
+	CampMark.minimap(self, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.zone: m.zone.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
@@ -1106,7 +1108,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	# C and G (the Merge sits on the right: GripHud)
 	x = BokiHud.cg_slots(self, p, x, y, s)
 	# B (base to a teammate) as a small badge at the end of the row (the gloves sit on the right: GripHud)
-	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
+	if Life.has_mates(m, p):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
@@ -1155,7 +1157,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x = HunterUltTile.draw(self, p, x, y, s, gap)
 	# C: the Boki's own ability, G: throw / recall (hold: hold the spot or follow)
 	x = BokiHud.cg_slots(self, p, x, y, s)
-	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
+	if Life.has_mates(m, p):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
@@ -1360,19 +1362,10 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		# a bounty: a target over the plate and what knocking them is worth
 		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
 		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
-	if not h.downed:
-		ComboMark.draw(c, Vector2(sp.x, sp.y - 34), m.player, h, m.time)
 
-## Little icons for what's happening to someone: stunned, rooted, slowed, burning, shielded, braced.
+## The status row (HudPlate.row) centred on `at`, under a monster's bar.
 func _status_row(at: Vector2, e: Ent) -> void:
-	var icons: Array = HudPlate.statuses(e)
-	var x := at.x - icons.size() * 8.0 + 8.0
-	for ic in icons:
-		c.draw_circle(Vector2(x, at.y), 7.0, Color(0.03, 0.03, 0.05, 0.85))
-		Icons.draw(c, String(ic[0]), Vector2(x, at.y), 4.2, ic[1])
-		if HudPlate.shows_time(float(ic[3])):
-			_ctext(Vector2(x, at.y + 17), "%.1f" % float(ic[3]), 10, ic[1], big)
-		x += 16.0
+	HudPlate.draw_row(c, at, plates.row(m.player, e, HudPlate.statuses(e)), true)
 
 ## Teammates you can't see on screen get an arrow at the screen edge (with distance, coloured by
 ## how they're doing; a dead teammate's deathbox in their squad colour while their soul can still be saved).
@@ -1430,7 +1423,7 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 	var lead: Hunter = dr.leader(p.team) if dr else null
 	var i_lead := lead == p
 	var waits: bool = dr != null and dr.waits(p)
-	var squad := m.hunters.filter(func(x): return x.team == p.team).size() > 1
+	var squad := Life.has_mates(m, p)
 	var rr := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 92), Vector2(w, 122 if squad else 92))
 	_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 14)
 	if dr and dr.planning:
@@ -1490,9 +1483,9 @@ func _draw_squad_pings(p: Hunter) -> void:
 
 ## For the first seconds of every match: what each of your buttons does.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
-	if not HudGroups.kit_wanted(self, p):
+	if not HudReveal.kit_wanted(self, p):
 		return
-	var show_t := HudGroups.KIT_S if not m.opts.get("training", false) else 1e9
+	var show_t := HudReveal.kit_s(m)
 	var t := m.time - kit_t0
 	if p.dropping or p.riding:
 		# shown once you land, not over the drop map
@@ -1640,12 +1633,6 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position() if ret.pin == Vector2.INF else ret.pin
 	ret.draw(c, p, mp, m.time)
-	if p.ak and p.ak.has_meter():
-		# the payoff is armed (FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the resource arc
-		var rl := p.ak.ready_label()
-		if rl != "" and not m.has_meta("pitch_no_foe_plates"):  # (pitch-reel fights: no game text)
-			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
-			_ctext(mp + Vector2(0, Reticle.t("res_r") + 16.0), rl, 13, Color(p.ak.res_col().lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
@@ -1658,9 +1645,9 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.32 + 100.0), p)
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
-	var who := "You're a wisp: %ds left. A teammate or your Boki standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
+	var who := "You're a wisp: %ds left. %s standing on you brings you back. Enemies can stomp or execute you." % [int(ceil(left)), "A teammate or your Boki" if Life.has_mates(m, p) else "Your Boki"]
 	if p.kin and p.kin.state == "downed":
-		who = "You're a wisp: %ds left, and your Boki is down. Only a teammate standing on you can bring you back." % int(ceil(left))
+		who = "You're a wisp: %ds left, and your Boki is down. %s" % [int(ceil(left)), "Only a teammate standing on you can bring you back." if Life.has_mates(m, p) else "Nobody can bring you back."]
 	var stomped: bool = p.get_meta("stomped", false)
 	if stomped:
 		var sts: Array = p.get_meta("stompers", [])
@@ -1694,9 +1681,9 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if left_line != "":
 		y0 = sz.y * 0.58
 		_ctext(Vector2(sz.x * 0.5, y0 - 64), left_line, 20, GOLD, big)
-	if not b.is_empty() and Life.soul_here(m, b):
+	if not b.is_empty() and Life.soul_here(m, b) and Life.has_mates(m, p):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
-	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
+	if Life.has_mates(m, p): lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
 	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.2), p)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
@@ -1757,13 +1744,11 @@ func _draw_overhead(p: Hunter) -> void:
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
-		_ctext(sp + Vector2(0, 33), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
 		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
-		_ctext(sp + Vector2(0, 33), "REPAIRING", 11, ARMOR_COL, big)
 
 var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 

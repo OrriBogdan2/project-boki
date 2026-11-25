@@ -171,12 +171,34 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	ok(not BokiRig.has("no_model"), "an id without one keeps its KinModels body")
+	await _no_overlay(main)
+	BokiRig.face_overlay = true  # the rest tests the kept overlay face: its blend shapes, LODs and eye shader
 	for id in SPECIES_LIST:
 		kin_id = id
 		await _species(main)
 	await Fly.new().run(main, self)
 	print("BOKIRIG DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## The default look: a species with its own painted eyes keeps no Face mesh (and the rig plays on without one); one in
+## content/rules/boki_eyes.json keeps the overlay until its eye-paint pass lands.
+func _no_overlay(main: Node) -> void:
+	var listed := Content.rules("boki_eyes")["overlay_species"] as Array
+	for id in SPECIES_LIST:
+		ok(BokiRig.uses_overlay(id) == listed.has(id), "%s: the overlay follows boki_eyes.json" % id)
+		var k := Shots.rigged_kin(id)
+		main.add_child(k)
+		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+		var left := rig.model.find_children("*", "MeshInstance3D", true, false).filter(
+			func(n: Node) -> bool: return (n as MeshInstance3D).mesh.get_blend_shape_count() > 0
+		)
+		ok((rig.face != null) == listed.has(id) and left.size() == (1 if listed.has(id) else 0), "%s: face mesh" % id)
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+		k.queue_free()
+	for id in listed:
+		ok(SPECIES_LIST.has(id), "%s (boki_eyes.json) is a rigged species" % id)
 
 
 func _species(main: Node) -> void:
@@ -291,6 +313,14 @@ func _stepping(main: Node, rig: BokiRig) -> void:
 	var clip_s := rig.player.current_animation_position + rig.pace.held  # (plus what waits for its next step)
 	ok(absf(clip_s - 0.01 * frames) < 0.0001, "and kept up with the time: %.3f s of clip" % clip_s)
 	rig.pace.every = 1
+	# a crowded home (more than RigPace.crowd_from Boki out) steps its rigs every EVERY frames below Ultra
+	var calm: int = rig.pace._gap()
+	RigPace.crowd = RigPace.crowd_from + 1
+	var crowded: int = rig.pace._gap()
+	RigPace.crowd = 0
+	var want := 1 if Settings.quality() == "ultra" else RigPace.EVERY
+	ok(calm == 1 or RigPace.dear(), "a home with few Boki steps every frame (%d)" % calm)
+	ok(crowded == want or RigPace.dear(), "a crowded home steps every %d frames (want %d)" % [crowded, want])
 	rig.set_process(true)
 
 

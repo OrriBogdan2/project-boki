@@ -19,6 +19,7 @@ extends ArchKit
 const LIME := Color("b8f03c")  # palette "main", her signature (Arch.color)
 const HOT := Color("eaffa8")  # palette "hot"
 const DEEP := Color("4f8a12")  # palette "deep"
+const FEVER_DB := -9.0  # dB: the stim as Fever lights, under a knock's -3
 const BRONZE := Color("b9732f")  # Cinderfall's shell (gunslinger_ult)
 const GOLD := Color("ffcf3f")  # her coin (unshaded: the toon light turns gold red-brown)
 const GOLD_DARK := Color("d99a1e")  # its struck faces
@@ -42,6 +43,12 @@ const BRACKET_DEG := 56.0  # each bracket's arc
 ## reload sound (sfx-lib-1113) swaps in here.
 const RELOAD_SFX := "vn_cock"
 const E_RECOVER := 0.6  # s she is held after the beam: the source's recoil shove in 0.2 s, then a ~0.4 s
+const SLIDE_RATE := 1.25             # clip s per kit s of the dash clip (gunslinger_dash "rate" in vex.json)
+const SLIDE_LOOP_FROM := 0.367 / SLIDE_RATE    # kit s: the dash clip's slide loop (clip 0.367-0.5, three keys): a held
+const SLIDE_LOOP_T := 0.133 / SLIDE_RATE       # slide replays it from here, one period at a time (the drive pose), and
+                                               # she stands up (the clip's recovery) only once the slide ends
+const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
+                                     # is over to the clips (the kit's anim_id is read as long as it is set)
 # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
 # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
 
@@ -109,10 +116,6 @@ func fever_k() -> float:
 	return float(res_def()["vamp"]) * floorf(res)
 
 
-func ready_label() -> String:
-	return ""
-
-
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
 	if res_wait <= 0.0 and res > 0.0:
@@ -149,10 +152,6 @@ func shows_charge_ball() -> bool:
 	return false  # the Palm Lance charges an ember orb at her open palm instead
 
 
-const SLIDE_LOOP_FROM := 0.367  # s: the dash clip's slide loop (three keys): a held slide replays it from here,
-const SLIDE_LOOP_T := 0.133  # s: one period at a time, so she stands up as the skid ends
-const OVER := 2.0  # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
-# is over to the clips (the kit's anim_id is read as long as it is set)
 
 
 ## Walking out of the slide's stand-up once the skid has ended: the legs are hers again and the walk blends in
@@ -208,6 +207,8 @@ func gate_inputs() -> void:
 
 
 func add_fever(n := 1) -> void:
+	if res <= 0.0:
+		m.sfx("vn_stim", h.pos, FEVER_DB, 1.3)     # Hot Streak lights: the stim, quieter and higher than a knock's
 	res = minf(res_max(), res + float(n))
 	touch_res(float(res_def()["wait"]))
 
@@ -653,14 +654,6 @@ func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
 	vfx("rmb_hit", victim.pos, -dir, {"r": victim.r + 0.9})
 	if h == m.player and m.hud:
 		m.sfx("crit", at, -2.0, 0.8)
-
-
-## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
-func combo_marks(out: Array) -> void:
-	super(out)
-	for f in m.foes_of(h.team):
-		if KitStatus.rattled(f):
-			out.append(RecastCue.mark(f, 0, KitStatus.rattled_left(f), KitStatus.rattled_total(f), true))
 
 
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data). The status draws its own

@@ -27,7 +27,9 @@
   "garden_cup_sprout": "boki", "garden_cup_bloom": "boki", "garden_cup_crown": "boki",
   "garden_visit_in": "boki", "garden_visit_out": "boki", "garden_season": "boki",
   "kite_flap": "step", "kite_ring": "ui", "kite_updraft": "boki", "kite_finish": "boki",
-  "lantern_flip": "ui", "lantern_match": "ui", "lantern_miss": "ui", "lantern_win": "boki"
+  "lantern_flip": "ui", "lantern_match": "ui", "lantern_miss": "ui", "lantern_win": "boki",
+  "garden_snack_ripe": "boki", "garden_snack_crisp": "boki", "garden_snack_juicy": "boki",
+  "garden_snack_hard": "boki", "garden_snack_soft": "boki"
  },
  "signature": [],
  "replaces": [],
