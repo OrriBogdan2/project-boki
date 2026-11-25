@@ -22,6 +22,8 @@ const CAST := {
 
 var rig
 var h: Node = null  # the Home on screen now (it is a new one after every hop)
+var keep_say := false  # shot 17 keeps the Boki's bubble
+var _tick := 0
 
 
 func _init(r) -> void:
@@ -36,6 +38,8 @@ func play(shot: int) -> void:
 			await hop_take("glasswater")
 		16:
 			await montage()
+		17:
+			await ask_take()
 		_:
 			await zone_take(String(ZONE_OF_SHOT[shot]))
 
@@ -74,15 +78,15 @@ func _save() -> void:
 ## Shot 11: the Hunter walks up to the Waystone and steps in; the stone lights, the ink wipes, `zone` is there.
 func hop_take(zone: String) -> void:
 	await _load(GardenZones.HUB)
-	_place(HubWaystone.HUB_AT + Vector3(0.0, 0.0, 9.0))
+	_place(HubWaystone.HUB_AT + Vector3(0.0, 0.0, 8.0))
 	await _wait(0.8)
 	rig.mark("portal")
-	await _walk(HubWaystone.HUB_AT, 1.6)
+	await _walk(HubWaystone.HUB_AT, 2.1)
 	await _wait(0.3)
 	await _hop(zone)
 	rig.mark("arrived")
 	await _wait(1.0)
-	await _walk(_resident_at(zone), 2.5)
+	await _walk(_resident_at(zone), 2.0)
 	await _wait(1.5)
 
 
@@ -91,12 +95,10 @@ func zone_take(zone: String) -> void:
 	await _load(zone)
 	await _wait(1.0)
 	rig.mark(zone)
-	await _walk(_resident_at(zone, 0), 2.6)
+	await _walk(_resident_at(zone, 0), 2.0)
 	await _wait(0.4)
 	_orbit_start(1.1, 3.0)
-	await _walk(_resident_at(zone, 1), 2.6)
-	await _wait(1.2)
-	await _walk(_resident_at(zone, 2), 2.6)
+	await _walk(_resident_at(zone, 1), 2.0)
 	await _wait(1.5)
 
 
@@ -106,14 +108,30 @@ func montage() -> void:
 	_place(HubWaystone.HUB_AT + Vector3(0.0, 0.0, 6.0))
 	await _wait(0.5)
 	rig.mark("montage")
-	await _walk(HubWaystone.HUB_AT, 1.6)
+	await _walk(HubWaystone.HUB_AT, 2.1)
 	await _hop("glasswater")
 	await _wait(0.9)
 	await _hop(GardenZones.HUB)
 	await _wait(0.4)
-	await _walk(HubWaystone.HUB_AT, 1.6)
+	await _walk(HubWaystone.HUB_AT, 2.1)
 	await _hop("ridge")
 	await _wait(1.8)
+
+
+## Shot 17: a Boki that would thrive elsewhere goes to wait at the return pad with its bubble.
+func ask_take() -> void:
+	for rec in Save.d["roster"]:
+		if String(rec["name"]) == "Skateron":
+			rec["lean"] = {"fire": 20.0}
+	keep_say = true
+	await _load("glasswater")
+	var k: Dictionary = h.kins.filter(func(o): return String(o["rec"]["name"]) == "Skateron")[0]
+	var tries := 0
+	while not h.life._ask(k) and tries < 2000:
+		tries += 1
+	rig.mark("ask")
+	await _walk(h.hway.pad["pos"], 3.0)
+	await _wait(6.0)
 
 
 # ------------------------------------------------------------------ moving about
@@ -131,6 +149,9 @@ func _arrived() -> void:
 	h = rig.main.current
 	await rig.main.get_tree().process_frame
 	rig._crisp_shadows()
+	h.farm_cam.k = 1.0  # (a new Home starts on the top-down view and eases to the close one: start close)
+	h.farm_cam.pitch = deg_to_rad(float(FarmCam.rules()["pitch_deg"]))
+	h.cam.snap(h.ppos)
 	_tidy()
 
 
@@ -139,6 +160,13 @@ func _tidy() -> void:
 	if not is_instance_valid(c) or c.get("ppos") == null:
 		return
 	c.day_t = DAY_T
+	c.talk_cd = 1e9  # no chatter bubbles
+	_tick += 1
+	if _tick % 3 == 0 and not keep_say:
+		for l in c.find_children("*", "Label3D", true, false):
+			var t: String = (l as Label3D).text
+			if t.length() > 16 or t == "★":  # Boki bubbles, notice boards, the partner star: text in the frame
+				(l as Label3D).visible = false
 	if c.get("ui") != null:
 		(c.ui as CanvasLayer).visible = false
 
@@ -174,6 +202,9 @@ func _resident_at(zone: String, n := 0) -> Vector3:
 	var out: Array = h.kins.filter(func(k): return GardenZones.zone_of(k["rec"]) == zone and not k.has("indoors"))
 	if out.is_empty():
 		return h.ppos + Vector3(0, 0, -4)
+	var me: Vector3 = h.ppos
+	out.sort_custom(func(a, b): return (a["node"] as Node3D).global_position.distance_to(me) \
+		< (b["node"] as Node3D).global_position.distance_to(me))
 	return (out[mini(n, out.size() - 1)]["node"] as Node3D).global_position
 
 
