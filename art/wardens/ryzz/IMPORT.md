@@ -140,3 +140,11 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p4/tools/` (slot.py, verify.py, room.
 - Crouch: hip .83-.90 -> .88-.95, torso lean 37-40 -> 16-18 degrees, footsteps unchanged (inner-thigh pairs 323 -> 338).
 - glbstretch worst edge ratio: Idle 6.1 -> 5.2, Attack 14.3 -> 14.3, Crouch 12.1 -> 11.7.
 Scripts and recipe: `~/gens/hunter-round-1124/sparkle/p6/tools/` (stance.py, spread.py, crouch.py; recipe in PLAN-1124o.md).
+
+### Round 1124o-7 (glb f0d37d6438d9, 79,980 tris; replaces 5f84decbb8a9 on this branch)
+- Build chain: bustfit (bust = splash size) -> packrig (pack and rods rigid) -> hemrig (arm pull off the hem band) -> packfit (side hoses
+  tucked .65) -> rekey (head lifted, loose fists, uneven arms, calmer attack bow) -> hem (Meshy hem edit into Image_3) -> minmax.
+- Positions and weights of bust, pack and hem band differ; Image_3 differs only on the crop-top hem (0 arm texels changed).
+- geo_check: worst 3.2 cm, held worst 1.7 cm (hair>torso); hands L sep .51, R sep .54. art-gate GAME 6.7, LIVE GAME 5.0 (not a pass).
+- Open: side hoses read as netting at game view, patch on the side of the top in attack back 2, lace too fine.
+Scripts: `~/gens/hunter-round-1124/sparkle/p7/tools/`.
