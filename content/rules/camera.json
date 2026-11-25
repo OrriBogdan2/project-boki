@@ -15,6 +15,23 @@
 		"dynamic": [0.1, 0.9, 10.0, 10.0, false],
 		"locked": [0.0, 0.0, 0.0, 0.0, false]
 	},
+	"farm": {
+		"doc": "The farm's close third-person view (FarmCam, scripts/home/farm_cam.gd). third_person: false puts the top-down Settings view back in the farm, nothing else to change. pitch_deg: degrees down from level (a right-drag tips it between pitch_min_deg and pitch_max_deg). dist_min..dist_max: metres behind the aim point at the mouse wheel's closest and widest (look_out: the most Ctrl's wide look may go past the widest, as a share of that range). fov: the vertical lens, rise: metres above your feet the view aims at. orbit_per_px: radians a right-drag turns per pixel. wall_gap: metres the camera keeps off the ground and walls (it is pulled in along the view); building_m and tree_m: how tall a building and a tree count as for that (the placed block under them is only as high as you can climb). blend_s: seconds to turn between this view and the top-down one (build mode and the training sessions use that).",
+		"third_person": true,
+		"pitch_deg": 20.0,
+		"pitch_min_deg": 8.0,
+		"pitch_max_deg": 42.0,
+		"dist_min": 3.5,
+		"dist_max": 5.5,
+		"look_out": 2.0,
+		"fov": 50.0,
+		"rise": 1.3,
+		"orbit_per_px": 0.006,
+		"wall_gap": 0.35,
+		"building_m": 4.5,
+		"tree_m": 4.0,
+		"blend_s": 0.8
+	},
 	"frame_aspect": 1.7778,
 	"trail": {
 		"doc": "The camera's follow across the ground [footage: briefs/hero-ref/dredge.md 4 and 8, ostra.md 2-3, mooshmoosh.md 2; 50 px = 1 m]. Each frame the view closes on you at min(follow_rate x gap, sqrt(2 x catch_decel x gap)) m/s: a run keeps it ~0.35 m behind and stopped with you in ~0.2 s, and a dash leaves it behind, then it eases in at a steady deceleration (Grimble's 4.6 m dash in 0.12 s: the pan peaks ~700 px/s, is down to ~300 px/s at 0.3 s and stops by ~0.5 s; ~0.4 s for a blink). follow_rate (1/s): the tight part, near you. catch_decel (m/s^2): fitted to that pan. max_gap (m): the furthest it may trail, just over the source dash's own ~3.2 m gap, so a long 40 m/s Wirerun can't take you off screen. cut_speed (m/s): a move faster than this in one frame is a teleport, and the view cuts to it, as the source does on Motley's Lantern Trade.",

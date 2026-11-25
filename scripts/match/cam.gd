@@ -131,6 +131,9 @@ var dist_mul := 1.0
 ## style, see Hunter.fit_scale).
 var hunter_scale := 1.0
 
+## How much of CHAR_LEAN the bodies get: the farm's low third-person view (FarmCam) fades it out; a match keeps 1.
+var lean_scale := 1.0
+
 
 func air_zoom(h: Hunter, alt: float) -> float:
 	var z := GLIDE_ZOOM if h.gliding else 1.0
@@ -464,7 +467,7 @@ func _apply(shake: Vector3) -> void:
 func char_lean() -> Basis:
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
-	var a := CHAR_LEAN * (1.0 - k) * (1.0 - c)
+	var a := CHAR_LEAN * (1.0 - k) * (1.0 - c) * lean_scale
 	if a < 0.001:
 		return Basis()
 	return Basis(Vector3.RIGHT.rotated(Vector3.UP, yaw + Record.orbit_yaw), -a)
@@ -493,6 +496,8 @@ func _plane_at(mp: Vector2, y: float) -> Vector3:
 	if absf(d.y) < 0.0001:
 		return focus
 	var t := (y - o.y) / d.y
+	if t < 0.0:
+		return focus  # looking above the horizon: no ground there (the low farm view)
 	return o + d * t
 
 
