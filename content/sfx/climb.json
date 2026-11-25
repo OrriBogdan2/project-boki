@@ -1,6 +1,6 @@
 {
  "group": "climb",
- "name": "Wall kick, ledge grab and mantle by weight class",
+ "name": "Wall kick, ledge grab and ledge climb by weight class",
  "script": "tools/gen_sfx_climb.py",
  "sounds": {
   "wallkick_light": "step",
