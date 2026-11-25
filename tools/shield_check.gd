@@ -37,6 +37,9 @@ func run(main: Node) -> void:
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
+	for k in m.kins:    # wild Bokis too: one that lands beside the idle Hunter would chew the shield down (seed-dependent)
+		k.dead = true
+		k.visible = false
 	var P: Hunter = m.player
 	P.ctrl = "idle"
 	P.unlock_all()
