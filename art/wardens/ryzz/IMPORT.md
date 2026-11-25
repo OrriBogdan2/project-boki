@@ -121,3 +121,13 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p2/tools/` (armpit_g.py, vis.py, ctre
 - Attack: LeftArm/RightArm rotation keys bent around t .87 s and 1.8 s (`p3/atk/S6.spec`), so the forearms pass outside the head.
   geo_check worst 8.2 -> 1.8 cm, frames 25 -> 13. No other channel differs from 292acacd05df.
 Scripts: `~/gens/hunter-round-1124/sparkle/p3/tools/` (views.py, proj.py, swap.sh, atk.py).
+
+### Round 1124o-4, same branch (glb 0234e266a0eb, 79,980 tris, on top of d9e0dbfb1f55)
+- Material slots: WardenGlb takes a part's toon slot from the material name before "-". The names matched no slot, so hair, skin and boots
+  all got the painted defaults plus the ink outline shell, which drew the black flecks in the hair. The three materials are now split into
+  `hair-*`, `skin-*` and `leather-*` pieces plus the body (8 primitives, same vertices, triangles, weights and clips).
+- Image_3: repainted by Meshy nano-banana-pro edits of flat unlit views, projected back (texture set t6; gens and log in
+  `p4/gen_log.tsv`). Image_0 and Image_6 (face, eyes) are byte-identical.
+- Not shipped: COLOR_0 alpha 0 everywhere removes the last outline dots, but also hides the shield shell, which reuses the ink width
+  (outline.gdshader `ink_mask`, ShieldLook). Per-vertex room (a port of fit_warden ink_room) still left dots on the silhouette.
+Scripts: `~/gens/hunter-round-1124/sparkle/p4/tools/` (slot.py, verify.py, room.py, addcol.py).
