@@ -310,6 +310,12 @@ The knock card is the one hint that shows more than once on purpose: once per ma
 `content/rules/knock_tip.json`) per save, counted in `knock_tip`. The check pins both.
 The first-summon line (`first_summon`, key once per save) is on `ext/tut-first-summon`, not on main; when it lands, add
 a wisp-ready trigger to `_play` so it is counted too.
+## Telegraphed first camp
+
+The first camp of a run (`TutorialCamps.spawn`) does not appear at once: a ring on the ground and a clock (`CampMark`, drawn in
+the world and on the minimap like the nest marker) count down `TELEGRAPH_T` (3 s) on the spots the monsters then stand on. No
+step ends and no camp is re-spawned while it counts (`alive()` counts it). Step order is unchanged; the fight beats take about
+3 s longer. `--tutorial-fight-check` asserts the marker shows for 3 s with no monster out, then the monsters stand on its spots.
 
 ## Low-end PCs: the course at 30 fps and with stalls (`--tutorial-low-fps`)
 Every step runs on the match's fixed 60 Hz step (`Match.step`) and the garden on `FarmStep`, so a slow frame never skips
