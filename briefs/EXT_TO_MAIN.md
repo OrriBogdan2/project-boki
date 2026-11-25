@@ -11297,3 +11297,4 @@ READY ext/merge-lane-N1-1122 0d779a9ea435cfea8cce4f48d7ffacaf6c460121 (PR #641: 
 READY ext/stomp-prompt-declutter a1b0a88dfd (PR #819: main merged, check.sh clean, --stomp-check/--stomp-style-check/--stomp-break-sweep-check 0 fail)
 READY ext/perf-ground-pixels 3a08eb85c8 (PR #895: main merged, PERF_DRAW/perf_fight conflicts resolved, check.sh clean, --depth-cue-check 0 fail)
 READY ext/parity-recheck-lace d733c2f6bc0d (origin/main 90a2d844de merged, 0 behind; only conflict tools/archer_bulwark_combo_check.gd kept main's lace-parting pin plus the branch's Hail Wall 0.5 s tick pin; --archer-combo-check 235/0, --clip-cancels-check 0, --check 0 failures, health --strict OK; supersedes 47370674c6)
+READY ext/p01-sfx-1118 31d9d81c91 (PR #307 hazard field sounds: merged main a8a0bc72a7, fixed lint-ratchet red in hazard_sfx.gd + gen_sfx python; tools/check.sh rc 0; shadow gate at 462ba3e752 NEW-RED 0)
