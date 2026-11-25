@@ -312,11 +312,13 @@ func _held(s: Dictionary) -> String:
 	return ""
 
 
-## The clip a new one-shot starts this frame ("" none): a hit, a swing, cast or kit move, or a hard landing, in that
-## order. Every counter is read each frame, so a one-shot that loses to another one is not played later.
+## The clip a new one-shot starts this frame ("" none): a stagger (a chip hit only leans: WardenFlinch), a swing,
+## cast or kit move, or a hard landing, in that order. Every counter is read each frame, so a one-shot that loses to
+## another one is not played later.
 func _one_shot(s: Dictionary) -> String:
 	var swing := _swing(s)
-	var hurt := _new_hit(float(s.get("hit_t", 99.0)))
+	var hit := _new_hit(float(s.get("hit_t", 99.0)))
+	var hurt := hit and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
 	var landed := _landed()
 	if hurt and plays.has("hit") and (cur != "hit" or _fresh("hit")):  # (a hit cuts in on any swing)
 		return "hit"
