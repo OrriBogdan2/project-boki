@@ -16,7 +16,7 @@ Filled here: the uplink outposts (`exits.gd`: `uplink_start`, `uplink_steal`, `u
 warn/zap/thump/unlock/portal, and the two Blight mob wind-ups (`v_bl_skitter`, `v_bl_warden`,
 `tools/gen_sfx_blight_mobs.py`), which had no file and played nothing.
 
-## Holes left (57), ranked by how often a player hears them
+## Holes left (25 by the check), ranked by how often a player hears them
 
 Per match is an estimate (no telemetry), as in the kit audit.
 
@@ -28,9 +28,9 @@ Per match is an estimate (no telemetry), as in the kit audit.
 | 4 | Utilities: drink, repair, mend, smoke, scan, pad, effect items, tonic and armour kit done (`utility_use`) | 5-15 | **SHARED** `pickup`, `build`, `heal`, `cloak`, `ping`, `skill`, `throw`, `shield` | READY ext/sfx-utilities-2 e06c2ce8c (set `belt`: a start and end cue per item); ext/sfx-utility-items-rebased 82befd1f0 is the older take: merge one. |
 | 5 | Bosses (Colossus, Serpent, Brood): tells, slams, throws, dash, storm, spit, brood, burrow, phase-up (`boss *`) | 2-10 | **BORROWED** `v_warden`, `k_gravity`, `k_spore`, `zap`, `boom`, `whoosh`, `throw`, `die_small` | READY ext/sfx-mob-attacks covers `boss_<kind>_tell` and the boss strikes; what it leaves, it lists. |
 | 6 | Uplink yard: lift pulse while open (`exits _tick_outpost/open`), a monster wave arriving (`exits _waves`) | 2-8 | **SHARED** `thump` | Own: a low pulse of the lift (`uplink_pulse`) and a wave arrival thud, in gen_sfx_heart.py. Cheap; left so this branch stays one change. |
-| 7 | Heart wake / final gate (`heart _force`) | 1-2 | **SHARED** `portal` | HeartSfx already plays `heart_gate_open` on the same beat: check by ear whether the `portal` layer is wanted; if not, delete it (no new sound). |
-| 8 | Blight tide tick (`heart _tide_tick`) | 2-6 | **SHARED** `thump` | READY ext/sfx-blight-front 79731c9cd (TideSfx: `tide_onset`, `tide_rumble`, `tide_warn`): when merged, the `thump` here can go. |
-| 9 | Quest seat opens (`quest_seat _force`) | 1-3 | **SHARED** `horn` under `ways_open` | Same beat as `HeartSfx.call_out("open")`: by ear, then drop the `horn` or give the seat its own. |
-| 10 | Sealed Lair reseals (`quest_seats _reseal`) | 0-1 | **SHARED** `boom` | Own gate-slam in gen_sfx_heart.py. |
+| 7 | Heart charged / final gate (`heart _force`) | 1-2 | **OWN** | Done: the final gate drops its `portal` (HeartSfx plays `ways_open` and `heart_gate_open` on that beat); "charged" plays `heart_charged` (gen_sfx_heart.py). |
+| 8 | Blight tide tick (`heart _tide_tick`) | 2-6 | **OWN** | Done: `tide_bite` (gen_sfx_heart.py) replaces `thump`; TideSfx has no per-tick cue, only onset, rumble and stage warnings. |
+| 9 | Quest seat opens (`quest_seat _force`) | 1-3 | **OWN** | Done: plays `ways_open` (the Heart-set call sting) instead of `horn`; the quest seats never called `HeartSfx.call_out("open")`, so no double sound. |
+| 10 | Sealed Lair reseals (`quest_seats _reseal`) | 0-1 | **OWN** | Done: `lair_reseal` (iron gate slam, gen_sfx_heart.py) replaces `boom`. |
 | - | Garden games (race, shove, seek, volley, and the cue table in `garden_sfx.gd`) | - | OWN | 0 holes. |
 | - | Mob wind-up voices (`v_<kind>` for every kind that attacks through `Mob`) | 10-60 | OWN | `v_bl_skitter`, `v_bl_warden` added here; bosses run their own attacks. |
