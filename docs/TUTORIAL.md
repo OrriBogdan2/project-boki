@@ -266,6 +266,13 @@ The owner's first-match playtest on the PC build, and what each fix is:
   half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
   `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
 
+## Telegraphed first camp
+
+The first camp of a run (`TutorialCamps.spawn`) does not appear at once: a ring on the ground and a clock (`CampMark`, drawn in
+the world and on the minimap like the nest marker) count down `TELEGRAPH_T` (3 s) on the spots the monsters then stand on. No
+step ends and no camp is re-spawned while it counts (`alive()` counts it). Step order is unchanged; the fight beats take about
+3 s longer. `--tutorial-fight-check` asserts the marker shows for 3 s with no monster out, then the monsters stand on its spots.
+
 ## Low-end PCs: the course at 30 fps and with stalls (`--tutorial-low-fps`)
 Every step runs on the match's fixed 60 Hz step (`Match.step`) and the garden on `FarmStep`, so a slow frame never skips
 a step. `--tutorial-check[=<arch>] --tutorial-low-fps` plays the course again on the Low preset in the game's own frame

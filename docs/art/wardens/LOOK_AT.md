@@ -17,6 +17,9 @@ the same for every Hero: no per-hero script, no per-hero data, and the keyed pos
   procedural rig plays. A full-body clip (a cast, a flinch, a landing) owns the head as much as it owns the body
   (`WardenClips.act_w`); an upper-body clip leaves the head to the layer.
 
+On Meshy's skeleton (WardenNative, `docs/art/wardens/MESHY_NATIVE.md`) the same layer turns `Head`, `neck` and a capped share of the
+chest (`Spine02`); an Attack clip owns the head while it plays.
+
 ## The numbers
 | const | value | from |
 |---|---|---|
@@ -30,7 +33,7 @@ near 19 degrees on the first frame); a 170 degree turn-around takes eight frames
 the fourth.
 
 ## Proof
-- `--look-at-check`: every Hunter of the roster (13), the head bone read before the layer and after the whole frame
+- `--look-at-check`: every Hunter of the roster (13), then every Meshy-native Hunter on its own skeleton, the head bone read before the layer and after the whole frame
   (its turn is measured on the skeleton, not taken from the layer): 60 and 170 degree swings, a held aim, the clamps,
   and every off state.
 - `--look-at-shots --shots-dir=<dir>` (GPU): strips of four Hunters, before on top and after below.
