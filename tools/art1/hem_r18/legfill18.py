@@ -58,11 +58,21 @@ for side in ("Left", "Right"):
         for i in range(NA):
             a0, c0, d0, e0 = r * NA + i, r * NA + (i + 1) % NA, (r + 1) * NA + i, (r + 1) * NA + (i + 1) % NA
             Fs += [[a0, d0, c0], [c0, d0, e0]]
+    if F("caps", 1):  # close both ends (bottom faces down, top faces up) so no open end shows the dark leg inside
+        nr_ = len(ys); tb = len(V)
+        V = np.vstack([V, [C[0, 0], ys[0] + 0.003, C[0, 1]], [C[-1, 0], ys[-1] - 0.003, C[-1, 1]]])
+        top = [[tb, i, (i + 1) % NA] for i in range(NA)]; o = (nr_ - 1) * NA
+        bot = [[tb + 1, o + (i + 1) % NA, o + i] for i in range(NA)]
     Fa = np.array(Fs)
     nr = np.cross(V[Fa[:, 1]] - V[Fa[:, 0]], V[Fa[:, 2]] - V[Fa[:, 0]])
     cen = np.repeat(np.c_[C[:, 0], ys, C[:, 1]], NA, 0)
     if (nr * (V[Fa].mean(1) - cen[Fa[:, 0]])).sum() < 0: Fa = Fa[:, [0, 2, 1]]
-    t = np.clip((V[:, 1] - 0.54) / 0.06, 0, 1); t = t * t * (3 - 2 * t)
+    if F("caps", 1):
+        for cap, want in ((np.array(top), 1.0), (np.array(bot), -1.0)):
+            cn = np.cross(V[cap[:, 1]] - V[cap[:, 0]], V[cap[:, 2]] - V[cap[:, 0]])
+            if np.sign(cn[:, 1].sum()) != want: cap = cap[:, [0, 2, 1]]
+            Fa = np.vstack([Fa, cap])
+    t = np.clip((V[:, 1] - 0.54) / 0.06, 0, 1)  # caps included; t = t * t * (3 - 2 * t)
     Jn = np.zeros((len(V), 4), int); Jn[:, 0] = iu; Jn[:, 1] = il
     W = np.zeros((len(V), 4)); W[:, 0] = t; W[:, 1] = 1 - t
     allF.append(Fa + sum(len(v) for v in allV)); allV.append(V); allJ.append(Jn); allW.append(W)

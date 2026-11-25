@@ -5,7 +5,7 @@ Shipped chain (from r17b, glb blob d06c549e):
    further from the head (weight by hand-head distance), StringMid keys follow the hand (string stays in the hand).
    geo_check Attack: forearm_R>head 3.78 -> 0, hand_R>head 3.74 -> 0, bow>head 2.40 -> 0 cm.
 2. `blender -b -P handpts18.py -- k.glb handpts18.npz` (hand/bow points per frame in UpLeg and Leg rest space), then
-   `python3 legfill18.py k.glb a9.glb yt=0.75 yb=0.62 hp=handpts18.npz`: inner porcelain thigh tubes (thigh-liner material)
+   `python3 legfill18.py k.glb a10.glb yt=0.75 yb=0.62 hp=handpts18.npz`: inner porcelain thigh tubes, capped both ends, (thigh-liner material)
    y 0.75..0.62 at 0.86x the body's thigh radius, rigid on UpLeg, carved off hand/bow points. The Meshy body's thigh holes
    (hem.md D1 "black blotches") now show porcelain instead of the dark inside. Body bytes untouched. geo_check: no new pair.
    Not shipped: the knee band (bow presses the knee in walk: bow>tube 1.7 cm) and a boot-top tube (D6; skirt strands already
