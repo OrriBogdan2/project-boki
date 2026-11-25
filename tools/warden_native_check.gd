@@ -140,7 +140,8 @@ func _height(a: String) -> void:
 	var nm := WardenGlb.art(a)
 	var old := (load("res://art/wardens/%s/%s.glb" % [nm, nm]) as PackedScene).instantiate() as Node3D
 	var osk := WardenGlb.skeleton(old)
-	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y * float(WardenNative.entry(nm).get("size", 1.0))
+	var fit_x := float(WardenNative.entry(nm).get("size", 1.0))
+	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y * fit_x
 	old.free()
 	var m := _model(a)
 	var glb := m.get_node("Warden") as Node3D
