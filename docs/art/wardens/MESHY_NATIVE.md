@@ -13,14 +13,18 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
   need only bones run on Meshy's bones through the one bone lookup `WardenSkeleton.find` (contract name -> Meshy bone,
   RIG_CONTRACT.md "Bone lookup"; data `bones` adds a Hunter's own): the hit flinch (WardenFlinch on `Spine02`), the
   wall kick's plant and push (WardenWall), the open channel's reach (WardenOpen.make_on) and the Heartspark carry
-  (WardenCarry.hold_mote). The clips advance by hand in `_process` (AnimationMixer manual mode), then the layers. Still
-  off: springs, look-at, drop pose, squash, blink, moods. `WardenGlb.layers(model)` is the layer node either way.
+  (WardenCarry.hold_mote), the drop's ride and skydive poses (WardenDropPose, the contract numbers of
+  content/rules/drop_poses.json) and the landing squash (WardenClips.lay_feel: HunterAnim's land_k by weight class,
+  content/rules/land_feel.json, times WardenClips.LAND_SQUASH, on Meshy's `Hips` about the feet; the Hips scale goes
+  back to rest each frame, as Meshy keys none). The clips advance by hand in `_process` (AnimationMixer manual mode),
+  then the layers. Still off: springs, look-at, the run-start lean, blink, moods. `WardenGlb.layers(model)` is the
+  layer node either way.
 - Extract: the beat (`WardenClips.leave_t`, 0.7 s) plays Meshy's crouch for the dip, then its jump for the take-off.
 - Anchors from the contract `.glb` (every `anchor_*` and `weapon_muzzle*` data `anchors` does not place) ride the Meshy
   bone `find` names for their contract bone at the same offset from its head; one on a bone with no stand-in (a tail
   spring) rides the nearest Meshy bone. The Gun's Muzzle sits on the copied `weapon_muzzle` each frame.
 - HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
-  idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack`, crouch
+  idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack` (or its clip slot below), crouch
   `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
 - Crouch arms (`crouch_arms_from`): Meshy's only crouch holds a torch out in front, which read in game as Sable's
   pistol and Tenzo's stone arm floating off the body. The crouch plays a copy (`<clip>_arms`, added beside Meshy's
@@ -44,8 +48,16 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
-crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
+crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns,
+the drop poses hold --clip-check's bars); `--land-weight-check` measures every native Hunter's squash off the model
+(head height against the same frames unsquashed: depth and seconds within 10% of the contract numbers, feet on the
+ground); `--land-weight-shots [--before]` renders light, medium and heavy native Hunters landing (GPU);
 `--warden-glb-check` counts native Hunters apart. Renders: `--clip-shots --warden=<arch> --states [--match]`.
+Online: each `--remote-anim-1|2|3|rest-check` shard ends with a native row (Lace, Kael, Sable, Gil): through the
+online-feel proxy at 100 ms each way, the other player's copy plays the same state and clip as the owner's (idle,
+walk, run, air, attack, crouch, the extract beat) in order, at the same pace per state, with no stalled loop and no
+one-frame snap of the hand. A freshly dressed model reads its first filled state as the baseline (no phantom attack
+from old counters) and poses its idle at once (no rest T-pose frame).
 
 ## Weapons and orbit props
 Meshy's mesh carries the weapons (Sable's two pistols, Tenzo's one stone arm), so the rig's Gun and HunterAnim's
@@ -62,8 +74,47 @@ the parts' length as the contract clips key Cinder's jet bones (x0.06 at rest, x
 in Meshy's mesh (Meeko's sun and cloud, surfaces named as in `warden_anim/<art>.json` "companions") are cut out and
 circle her as on the contract path, the data's skeleton space carried onto Meshy's.
 
+## Clip slots (per-move and per-state clips)
+Data `clips` may add any of these keys beside idle, walk, run, jump, attack and crouch. Each names a clip; a missing key
+plays today's clip, so nothing changes until a Hunter's clips land (`WardenNative._one_shot` / `_held`).
+| Key | Plays | Without it |
+|---|---|---|
+| `lmb` | a melee swing or a shot | `attack` |
+| `lmb_hold` | a charged swing (state `combo` -1) | `lmb`, then `attack` |
+| `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
+| `hit` | one-shot when a hit lands (state `hit_t` jumps back) | the loop clip plays on |
+| `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
+| `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
+| `glide` | while `gliding` (loops) | `jump` |
+| `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
+| `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
+Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
+played) and play at `attack_rate`, `hit` and `land` at 1. A hit wins over a swing, a swing over a landing.
+A clip may come from an animation-only file `art/wardens/<art>/<art>_clips.glb`, packed with `native_pack.py` onto the
+same skeleton (Y-up Hips as in the main file). Clips the data names that Meshy's own file lacks are looked up there by
+clip name, their tracks laid on this skeleton's bones by bone name (tracks of a bone it lacks are dropped), and added
+once to the shared library (`WardenNative.borrow`). A slot whose clip is in neither file is dropped with a warning and
+plays today's clip.
+`--warden-native-check` rows (per Hunter, per slot): the slot empty plays today's clip; the slot filled plays its clip
+with at least 10 bones off Meshy's T-pose on the switch frame and after the crossfade; a charged swing takes `lmb`
+without `lmb_hold`; a synthetic clips file's clip lands on Meshy's bones and plays; every slot the data names has its clip.
+
+## Kit-move clips (data `kmoves`)
+A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
+"rate": x, "fade": s}}` (`WardenNativeMoves`). While the move lasts the clip is laid at the move's clock (`kmove_t`), so a
+release move, which the kit starts at the frame the arrow leaves, shows its release on its first frames. `hold_from` loops
+the clip from there to its end for as long as the move lasts; the kit ends the draw move with the hold input, so the loop
+never shows without it. A move with no clip, or whose clip no file has, keeps the slot clips above. The clips come from
+`<art>_clips.glb` by name like the slots'. Lace's (`tools/meshy/lace_clips.py`, poses by limb direction on her skeleton,
+no retarget; the string follows the drawing hand on `StringMid`): `lace_draw`, `lace_over`, `lace_tap`, `lace_loose`,
+`lace_super`, `lace_heavy_wind`, `lace_heavy`, `lace_spirit`, `lace_ult`, `lace_ult_final`. The clips are the whole body
+(the contract's upper-body layer is not on this path): the feet of the draw and Spirit Walk clips do not follow the ground.
+`--warden-native-check` rows (per kit move): the clip is there, plays on the move and is no T-pose; a hold loop stays in
+`[hold_from, end]` while the move lasts and is gone when it ends; a release has the string drawn on its first frame and
+back on the bow a frame later.
+
 ## Not on the native path (yet)
-Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Tenzo's
+Death, stun, ledge, emote and clips for moves beyond the slots above (Meshy gave six); the contract's per-hunter extras (Tenzo's
 ground rings, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
 
 ## Sable: hybrid rig (Meshy rig, scripted weight fixes)
