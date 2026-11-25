@@ -15,6 +15,7 @@ const CHECKS := {
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
 	# GPU: posed hunter clip frames, --geo-dir= --shots-dir=
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
+	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],  # a swing on the run, frames
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
 	# Meeko's sun and cloud: clear of the posed body in every state; GPU shots (--shots-dir=<dir> [--eye=<m>])
