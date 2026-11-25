@@ -92,7 +92,7 @@ existing recorded-colour fence. `pin_draw.gd` has no `#e8483e` any more.
 
 Still open (shared, not done here):
 - Data-driven kits: all 13 Hunters have `content/vfx/<arch>.json`; code still draws Albert's hammer and shield meshes (`bjorn_fx`, `aegis_wall`), Sable's LMB, RMB and E (`dj_fx`) and Tenzo's rock bodies (`breah_*`).
-- Zone rule (seen in the strips): a zone is a lit rim plus a soft inside (alpha 0.25 or less at the centre), never a solid fill. Vex's X, Albert's Faultline, Sable's RMB lane and Gil's lanes still break it (follow-ups above).
+- Zone rule (seen in the strips): a zone is a lit rim plus a soft inside (alpha 0.25 or less at the centre), never a solid fill. Vex's X, Albert's Faultline and Sable's RMB lane still break it (follow-ups above; Gil's lanes are soft since 11-25).
 
 ## Scorecard (re-scored 2026-11-22, worst first)
 Rubric, each axis 1-5: R readability, S shape, L layering, T timing, Sc scale, C colour (against the Hunter's current
@@ -101,18 +101,18 @@ code read (the strips are silent). The worker's ground renders yellow, so read c
 
 | # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | was | what the strips show |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Albert | bulwark | 3 | 4 | 3 | 3 | 3 | 3 | 4 | 23 | 24 | Faultline (R): the lane is a screen-wide pale cream slab with a lightning crack, it hides the ground and the foe; the 360 Smash ring (Shift) is amber/orange, not ivory; swing and shield-charge crescents are gold/ivory and read |
+| 1 | Albert | bulwark | 4 | 4 | 3 | 3 | 3 | 4 | 4 | 25 | 24 | Fixed 11-25 (ext/vfx-albert-faultline-rim; R 3 -> 4, C 3 -> 4, was 23): Faultline (R) is the AimKit soft lane (lit rails, inside under alpha 0.25), each erupting cell a lit outline over a faint inside instead of a solid cream slab and tall cream tubes, so the ground and the foe show through; same 5.5 m lane and timing. The 360 Smash ring (Shift) is ivory now. Swing and shield-charge crescents are gold/ivory and read. Strips: `docs/shots/vfx-albert-faultline-rim/` (grey = before, green = after) |
 | 2 | Grimble | dredge | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 23 | 25 | E: flat translucent orange hex slabs, the palette `main` is copper `d89040`, not coin gold; LMB slugs small; hook, dash ribbon and X fan read |
-| 3 | Vex | gunslinger | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 24 | 25 | X Nuke: the zone ends as a near-opaque dark green disc that hides the foe; E cone is a flat pale lime band; LMB tracer is a short lime dart (reads) |
+| 3 | Vex | gunslinger | 3 | 3 | 4 | 3 | 4 | 4 | 4 | 25 | 24 | re-scored 11-25 (ext/vfx-vex-nuke-rim; L 3 -> 4, was 24): the X Nuke burning patch is a lit lime rim over a soft inside now, the foe reads through it (the dark fill was `BURN_FILL_A` 3.0 in `scripts/arch/kits/gunslinger_ult.gd`, not the JSON: AimShapes stacks two discs, so it was ~0.9 alpha at the centre; now 0.8 = 0.25 at the centre, ~0.5 by the rim, halving as it burns; size and timing unchanged; `x_shell` is the falling streak, no zone, untouched). Strip `docs/shots/vfx-vex-nuke-rim/x_before_after.jpg` (top grey = main b7258e5028, jobq 20261125-184250-10987; bottom green = after, 20261125-184458-12815; `--hero-vfx-reel --reel-hero=gunslinger --reel-only=r`). Still open: E cone is a flat pale lime band; LMB tracer is a short lime dart (reads) |
 | 4 | Sable | thief | 4 | 3 | 3 | 3 | 4 | 4 | 3 | 24 | 24 | RMB Bola wind-up lane: a flat lavender slab; LMB bolt and hit now read, X rings are lit rims and read |
 | 5 | Sparkle | mage | 4 | 3 | 3 | 3 | 4 | 5 | 3 | 25 | 24 | Fixed 11-23 (ext/vfx-sparkle-skycall): E Skycall was a big white blob over a brown disc hiding the foe; now a thin pink-white column (`e_count` skirt, size 0.28) on a soft pink rim (pool `band` 0.2; the strike's char disc is the same rim), strike flare 1.8 to 1.2; the RMB orb's orange haze was its pink OmniLight on the yellow ground (`MageKit._build_mote`: slot pink `#ff5ab4`, energy 1.2 to 0.6; it is not in `mage_gum.gd`, which is only the bubblegum). Timing and hit radius unchanged. Strips `docs/shots/vfx-sparkle-skycall/{e,rmb}_before_after.jpg` (grey = main, green border = after; jobq 20261123-151731-04969 before, 20261123-152220-00557 rmb after, 20261123-152546-13620 e after, `--hero-vfx-reel --reel-hero=mage`); LMB bolt thin; X dome is a pink rim and reads |
 | 6 | Meeko | tender | 4 | 3 | 3 | 3 | 4 | 3 | 4 | 24 | 26 | LMB orb is orange with a gold ring (not leaf green); E ring is a thick flat green band; Hearth Call tether and heal rise read |
 | 5 | Sparkle | mage | 4 | 3 | 3 | 3 | 4 | 4 | 3 | 24 | 24 | E Skycall: a big white blob over a brown disc hides the foe for 3 frames; RMB orb sits in an orange haze (off pink); LMB bolt thin; X dome is a pink rim and reads |
 | 6 | Meeko | tender | 4 | 3 | 3 | 3 | 4 | 4 | 4 | 25 | 26 | re-scored 11-23 (ext/vfx-meeko-weak-col; C 3 -> 4, was 24): the LMB comet, trail and hit are leaf green now (pale-green hot core, leaf halo, leaf-star and amber debris, was an orange orb with a gold ring; Cinder's colour); GPU strip `docs/shots/vfx-meeko-weak-col/lmb_before_after.jpg` (grey = main 5a246f9696, jobq 20261123-021310-01890; green = after, -021623-09694). Still open: the Burrseed (RMB) field and its cast flare stay amber on purpose (a hostile zone reads against the green heals), E ring is a thick flat green band; Hearth Call tether and heal rise read |
 | 7 | Lace | archer | 3 | 3 | 3 | 4 | 4 | 4 | 4 | 25 | 25 | tap shots and misses: thin faint red lines at match zoom; Heavy Shot and X are layered and read |
-| 8 | Neve | rimewright | 4 | 3 | 4 | 3 | 3 | 4 | 4 | 25 | 25 | X Rimelock: no longer one cyan screen, but a grey-cyan veil with ice cracks still covers the whole frame for 0.4 s; dash plates read as ice |
+| 8 | Neve | rimewright | 4 | 3 | 4 | 3 | 3 | 4 | 4 | 25 | 25 | X Rimelock fixed 11-25 (ext/vfx-neve-veil): the grey-cyan veil with thick cyan cracks covered the whole frame at match zoom (rink fill alpha 0.2-0.45 plus saturated cracks, then a full-radius `rime_crash` scorch disc). Now the veil sits inside the 7.47 m radius only (unchanged), `care_disc` pattern 4 body is clear in the middle (centre alpha fill x 0.04 x 1.6 = 0.04, was 0.2) and gathers toward the lit rim, cracks live in the outer band only and are capped thin, and the crash scorch is a `pool` (rim band 0.12, frost-cyan) not a filled disc. Hit radius and timing unchanged. Strip `docs/shots/vfx-neve-veil/r_before_after.jpg` (grey = main, green border = after; jobq 20261125-183250-12037 before, -185538-26181 after, `--hero-vfx-reel --reel-hero=rimewright --reel-only=r`). Left: dash plates; not re-scored; dash plates read as ice |
 | 9 | Tenzo | dolm | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 25 | 23 | cobalt lane, rings and Rockfall slam layered; boulder is blue slate with rune-teal; dust is thin now. LMB punch has no own part in his reel |
-| 10 | Gil | gil | 4 | 3 | 3 | 3 | 4 | 4 | 4 | 25 | 26 | E and dash lanes are flat translucent rectangles with a hard edge; puddle rim, splash and wave read |
+| 10 | Gil | gil | 4 | 3 | 3→4 | 3 | 4 | 4 | 4 | 25→26 | 26 | Fixed 11-25 (ext/vfx-gil-soft-lanes): the E spout and Tidal Wave lanes (`_tick_lines`) and the Tide Lunge hold lane (`_tide_tick`) in `scripts/arch/kits/gil_kit.gd` were flat translucent rectangles with a hard edge; they are AimKit `soft` lanes in his colour now (lit rim glowing inward, inside alpha 0.097 at the base, 0.25 at most at the fill front; `SOFT_A` 1.2 keeps the base at 0.1 or less). Length, width and timing unchanged. Strips `docs/shots/vfx-gil-soft-lanes/{e,hold}_before_after.jpg` (grey = main b7258e50, jobq 20261125-183404-11251; green = after, 20261125-183918-08326; `--hero-vfx-reel --reel-hero=gil`, real GPU rc 0). Left: the lane still reads as a rectangle by its rim (that is the hit shape), Ground Swim draws no AimKit lane; puddle rim, splash and wave read |
 | 11 | Motley | ostra | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 27 | 24 | the black disc is gone: X is a teal rim with dashes and a pale inside, LMB orb bursts on the foe; first X frames show a flat pale grey disc before the rim lights |
 | 12 | Kael | juggernaut | 4 | 4 | 3 | 4 | 5 | 4 | 4 | 28 | 28 | slash arcs, burning lanes and slam read; the lunge telegraph is a pale flat pentagon box; the dash trail is a red/black checker bar |
 | 13 | Cinder | ashwick | 4 | 4 | 4 | 4 | 5 | 4 | 4 | 29 | 29 | the bar: layered flame, hot core, lava carpet on Flue Flight; Ignite orb is flame orange now |
@@ -125,13 +125,13 @@ Kael 27, Cinder 28), the 11-09 and 11-12 re-scores and each fix branch's own not
 `git show 41de1b3f01:docs/VFX_QUALITY.md`.
 
 ## Follow-ups: the worst five (not fixed here)
-1. Albert, `scripts/arch/kits/bjorn_ult.gd`: the Faultline lane is a screen-wide pale slab that hides the ground and the foe; make it a lit rim plus a soft inside. Also the 360 Smash ring (`spin` in `content/vfx/bulwark.json`) is amber, not ivory.
+1. Albert: done 11-25 (ext/vfx-albert-faultline-rim): Faultline is a soft lane with lit outlines, the 360 Smash ring is ivory.
 2. Grimble, `content/vfx/dredge.json`: the E fist/wedge slabs are flat translucent orange because palette `main` is copper `d89040`; move `main` to coin gold `#ffc832` and give the slab a lit rim.
 3. Vex, `content/vfx/gunslinger.json` `x_shell` / X zone end: the Nuke ends as a near-opaque dark green disc over the foe; cap the inside alpha at 0.25 and keep the lit rim.
 4. Sable, `scripts/arch/kits/thief_kit.gd` (RMB Bola wind-up lane): a flat lavender slab; use the `soft` AimKit lane (lit rim, inside at most 0.1).
 5. (done 11-23, ext/vfx-sparkle-skycall) Sparkle, `scripts/arch/kits/mage_sky.gd` (E Skycall; the data is `content/vfx/mage.json` `e_count`/`e_strike`): a white blob over a brown disc hides the foe; thin it to a pink-white column on a soft rim. The RMB orb's orange haze (`mage_gum.gd`) goes pink too.
 
-Next in line (24-25, smaller): Lace's deep red against Kael's crimson (owner's call), Neve's X veil, Lace/Sparkle thin tap trails.
+Next in line (24-25, smaller): Lace's deep red against Kael's crimson (owner's call), Lace/Sparkle thin tap trails.
 - `fx_dot` particles are `blend_mix` and have no soft-particle depth fade, so they clip hard into the ground. A depth fade
   breaks gl_compatibility, so it needs a mobile fallback.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
@@ -206,7 +206,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
 | Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | Grounded's flat orange disc on the target (LMB finger bolt fixed 11-22, ext/vfx-sparkle-bolt: a hot pink body ~0.75 m wide with a white core and a short 1.8 m tail, `content/vfx/mage.json` `lmb_trail`; strip `docs/shots/vfx-sparkle-bolt/lmb_before_after.jpg`, jobq 20261122-085823-02083 before / 20261122-091902-07818 after, `--hero-vfx-reel --reel-hero=mage --reel-only=lmb`; grey = main, green = better; not re-scored) |
 | Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded fixed 11-22 (ext/vfx-sparkle-grounded): two thin pink binding rings round the target, one dashed, seen by all (`MageSky._tick_bound`, the Bola's look without a filled disc), and the shared cords and arrow in the caster's colour (`KitStatus` meta `gnd_by` from the `kst` caster nid, `StatusLooks._tint`; Bola and Warchain stay amber); before/after `docs/shots/vfx-sparkle-grounded/grounded_before_after.jpg` |
-| Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
+| Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock veil confined to the 7.47 m rink (fixed 11-25, ext/vfx-neve-veil: clear middle, lit rim, thin outer cracks; not re-scored); dash path was flat grey tiles (since textured, ext/vfx-neve-ice-path) |
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
 | Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
 
@@ -240,7 +240,7 @@ marks a rock's footprint, not a hit or zone, so by the same rule it could go or 
 
 ## Backlog (remaining fixes, from the table)
 1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
-2. Neve X: shrink the screen-wide cyan wash to the hit area; texture the dash path tiles.
+2. Neve X: done 11-25 (ext/vfx-neve-veil); the dash path tiles are textured (ext/vfx-neve-ice-path).
 3. Vex LMB and hold: a wider, brighter tracer at match zoom.
 4. Tenzo LMB and hold: a bigger punch and a visible charge for the hold.
 5. Albert: ivory swing arcs for LMB/RMB.
@@ -429,7 +429,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
 | Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | Grounded's flat orange disc on the target (LMB finger bolt fixed 11-22, ext/vfx-sparkle-bolt: a hot pink body ~0.75 m wide with a white core and a short 1.8 m tail, `content/vfx/mage.json` `lmb_trail`; strip `docs/shots/vfx-sparkle-bolt/lmb_before_after.jpg`, jobq 20261122-085823-02083 before / 20261122-091902-07818 after, `--hero-vfx-reel --reel-hero=mage --reel-only=lmb`; grey = main, green = better; not re-scored) |
 | Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded fixed 11-22 (ext/vfx-sparkle-grounded): two thin pink binding rings round the target, one dashed, seen by all (`MageSky._tick_bound`, the Bola's look without a filled disc), and the shared cords and arrow in the caster's colour (`KitStatus` meta `gnd_by` from the `kst` caster nid, `StatusLooks._tint`; Bola and Warchain stay amber); before/after `docs/shots/vfx-sparkle-grounded/grounded_before_after.jpg` |
-| Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
+| Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock veil confined to the 7.47 m rink (fixed 11-25, ext/vfx-neve-veil: clear middle, lit rim, thin outer cracks; not re-scored); dash path was flat grey tiles (since textured, ext/vfx-neve-ice-path) |
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
 | Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
 
@@ -464,7 +464,7 @@ train) moves them to green fire and replaces this tracer with a HeroVfx ribbon; 
 
 ## Backlog (remaining fixes, from the table)
 1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
-2. Neve X: shrink the screen-wide cyan wash to the hit area; texture the dash path tiles.
+2. Neve X: done 11-25 (ext/vfx-neve-veil); the dash path tiles are textured (ext/vfx-neve-ice-path).
 3. Vex LMB and hold: a wider, brighter tracer at match zoom. Done (ext/vfx-vex-tracer-0246, "Vex's rounds" above).
 4. Tenzo LMB and hold: a bigger punch and a visible charge for the hold.
 5. Albert: ivory swing arcs for LMB/RMB.
