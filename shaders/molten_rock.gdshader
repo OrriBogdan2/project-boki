@@ -11,6 +11,8 @@ uniform vec4 glow : source_color = vec4(1.0, 0.45, 0.12, 1.0);
 uniform float heat : hint_range(0.0, 1.0) = 0.35;
 uniform float scale = 3.2;
 uniform float seed = 0.0;
+// the cracks breathe: share of their glow that swells and ebbs (0 = steady; Tarek's slate rocks use it)
+uniform float pulse = 0.0;
 // a warm light on the edges (Tarek's raised rocks; 0 elsewhere)
 uniform vec4 rim_col : source_color = vec4(1.0, 0.72, 0.42, 1.0);
 uniform float rim = 0.0;
@@ -32,6 +34,7 @@ void fragment() {
 	// the cracks glow brighter toward the base, where the heat comes up from the ground
 	float hot = crack * mix(1.0, 0.45, base) * (0.45 + heat);
 	hot = cel(min(hot, 1.0)) * max(hot, 1.0);     // the heat in flat cel bands
+	hot *= 1.0 + pulse * sin(TIME * 2.2 + seed * 5.0);
 	rock = mix(rock, cap_col.rgb, cap * smoothstep(0.4, 0.75, up));
 	ALBEDO = rock * (1.0 - crack * 0.6);
 	ROUGHNESS = 0.9;

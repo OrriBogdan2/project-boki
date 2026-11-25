@@ -11,7 +11,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 
 LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; the 'hold LMB through' rows below note where a hero's kit has its own say.
 
-An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; a lock that runs on past that answers with the deny cue. The footage shows no such press dropped (`--cast-lock-buffer-check`).
+An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0118-cc-exit-buffer.md): it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; a lock that runs on past that answers with the deny cue. The footage shows no such press dropped (`--cast-lock-buffer-check`).
 
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
@@ -399,7 +399,7 @@ Every Hunter's air dash is its ground dash or a special one the source has, neve
 | Sparkle (mage) | Wirerun (cd 8.0 s) | the same Wirerun (7.5 to 13 m by rank, one charge, same clip) | same | vireo.md: one Wirerun, no air variant |
 | Grimble (dredge) | Barge, 3.2 m in 0.16 s (cd 10.0 s) | `air_k` carry on the Barge | skipped | parity 13 (queued) |
 | Meeko (tender) | Relay Step, 3.15 m in 0.23 s (cd 7.0 s) | its own air-dash slot (`air` block, about 3.8 times the ground step), its own cooldown | special | mooshmoosh.md and owner item 24 |
-| Sable (thief) | Vault, 4.5 m in 0.48 s (cd 4.5 s) | 8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`) | special | dancer.md and owner items 7 / 129: the air dash is longer and slower |
+| Sable (thief) | Vault, 4.5 m in 0.48 s (cd 5.0 s) | 8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`) | special | dancer.md and owner items 7 / 129: the air dash is longer and slower |
 | Motley (ostra) | Lantern Trade (cd 9.5 s) | the same Lantern Trade (1.8 s), the same charge and clip | same | ostra.md: one Lantern Trade |
 
 ## Space and Shift together

@@ -100,6 +100,8 @@ const SEAM_MAX := 0.05  # the jump at a loop's seam, as a share of full scale
 const INV_UNDER_DB := 10.0  # dB: an inventory cue sits at least this far under the quietest hit or shot
 const HELD_S := 3.0  # s of held fire per sound
 const HELD_STEP_MS := 80  # ms a round: the source cadence of Vex's rifle
+const HOLD_BASE := 10  # a hold take is logged as HOLD_BASE + its index (the shot's own takes are 0..3)
+const HOLD_PEAK_DB := -3.0  # hold takes peak under this (dBFS)
 const UNDER_COMBAT_DB := 10.0  # dB: the rank-ready cue as played sits at least this far under a weapon shot ("fire")
 const READY_SECS := 0.5  # s: the new-point chime's audible length at most
 const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
@@ -117,6 +119,8 @@ const WIRED := {
 	"boki_unfuse": ["match/merge_xform.gd"],
 	"boki_eat": ["home/home.gd"],
 	"boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
+	"wisp_burst": ["match/kin_summon.gd"],
+	"wisp_fold": ["match/kin_summon.gd"],
 }
 
 ## 11. Meeko's channel loop, one training match per end path.
@@ -181,6 +185,7 @@ func run(main: Node) -> void:
 	_fusion_cues()
 	_training()
 	_boki_cues()
+	_summon_cues()
 	_pick_taken()
 	_ui_cues()
 	_low_hp()
@@ -216,6 +221,45 @@ func _boki_cues() -> void:
 	for theme in KinLib.TYPE_OF_THEME:
 		types[KinLib.TYPE_OF_THEME[theme]] = true
 	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
+
+
+## The summon pop's sounds (KinSummon.popped, BokiWispPop): the burst plays the bloom at the Boki with the species'
+## own happy cry layered on it, a fold plays the inward swish, a re-bloom the bloom again; each cue is a short
+## file in the wisp set, and every one goes through Sfx.play (so Sfx.MIN_GAP holds).
+func _summon_cues() -> void:
+	var stub := GDScript.new()
+	stub.source_code = "extends Node\nfunc sfx(n, p = null, vol := 0.0, pitch := 1.0, mine := false):\n"
+	stub.source_code += "\tSfx.play(n, p, vol, 0.07, pitch, 0.0, mine)\n"
+	stub.reload()
+	var k := Kin.new()
+	k.m = stub.new()
+	k.species = "cindle"
+	k.pos = Vector3(4, 0, 2)
+	var s := KinSummon.new(k)
+	var own := KinVoice.cue(k.species, "happy")
+	Sfx.cue_log = []
+	s.popped(false)
+	var burst: Array = Sfx.cue_log.duplicate()
+	Sfx.cue_log = []
+	s.popped(true)
+	var fold: Array = Sfx.cue_log.duplicate()
+	Sfx.cue_log = null
+	var heard := func(calls: Array) -> Array: return calls.map(func(c): return c[0])
+	ok(own.begins_with("bk_"), "summon: a Cindle has its own happy cry to layer (%s)" % own)
+	var want := ["wisp_burst", own]
+	ok(heard.call(burst) == want, "summon: the burst plays the bloom, then its own cry (%s)" % [heard.call(burst)])
+	ok(heard.call(fold) == ["wisp_fold"], "summon: the fold plays the swish alone (%s)" % [heard.call(fold)])
+	ok(
+		burst.all(func(c): return c[1] == k.pos and c[2]) and fold.all(func(c): return c[1] == k.pos and c[2]),
+		"summon: each cue is on file and played at the Boki"
+	)
+	var lens := []
+	for cue in [KinSummon.BURST_CUE, KinSummon.FOLD_CUE]:
+		var path: String = _takes(cue)[0]
+		lens.append(_data(path).size() / 2.0 / FileAccess.get_file_as_bytes(path).decode_u32(24))  # s: samples / rate
+	var short: bool = lens[0] <= 0.6 and lens[1] <= 0.4 and lens[0] > lens[1]
+	ok(short, "summon: bloom %.2f s, swish %.2f s (short, the bloom longer)" % lens)
+	k.free()
 
 
 func _check_set(path: String) -> void:
@@ -1081,6 +1125,7 @@ func _garden_moments() -> void:
 		[
 			"garden_egg",
 			"garden_friends",
+			"garden_bond_up",
 			"garden_chime_part",
 			"garden_evolve",
 			"garden_visit_in",
@@ -1135,7 +1180,7 @@ func _garden_moments() -> void:
 		"base_life.gd": '"garden_friends"',
 		"home_incubator.gd": '"garden_egg"',
 		"garden_prizes.gd": "GardenSfx.cup(",
-		"kin_bond_moment.gd": '"garden_friends"',
+		"kin_bond_moment.gd": '"garden_bond_up"',
 		"home.gd": '"garden_evolve"',
 		"garden_visitor.gd": '"garden_visit_out"',
 		"garden_sfx.gd": '"garden_season"'
@@ -1249,17 +1294,78 @@ func _held_fire(main: Node) -> void:
 			% [sname, sounds[sname], HELD_S, HELD_STEP_MS, before["peak"], after["peak"], FireSfx.VOICES]
 		)
 		ok(int(after["peak"]) <= FireSfx.VOICES, "%s, %d of %d shots sound" % [shown, takes.size(), before["shots"]])
+		var hold: String = String(sname) + FireSfx.HOLD_SUFFIX
+		var has_hold: bool = Sfx.take_count(hold) > 0
 		var opens: bool = not takes.is_empty() and takes[0] == 0 and not run_v.has(0)
 		var others := _distinct(run_v)
 		var want_others := mini(3, Sfx.take_count(sname) - 1)  # a gun with 3 recorded takes rotates its 2 others
+		if has_hold:
+			# the rest of a burst plays the short hold takes (take + HOLD_BASE), never the full shot again
+			want_others = mini(3, Sfx.take_count(hold))
+			opens = opens and run_v.all(func(t): return int(t) >= HOLD_BASE)
 		ok(
 			opens and repeats == 0 and others >= want_others,
 			(
-				"%s: first shot is the base take, the rest go round %d other takes without repeating (%s)"
-				% [sname, others, str(takes.slice(0, 8))]
+				"%s: first shot is the base take, the rest go round %d %s takes without repeating (%s)"
+				% [sname, others, "hold" if has_hold else "other", str(takes.slice(0, 8))]
 			)
 		)
+		if has_hold:
+			_hold_files(sname, hold)
 		await main.get_tree().create_timer(1.0).timeout
+
+
+## A hold take is shorter than the shot it follows, peaks under HOLD_PEAK_DB, and sits within 3 dB of the shot's
+## loudness. Read from the source .wav (the import is QOA-compressed): the generators write 16-bit mono PCM.
+func _hold_files(sname: String, hold: String) -> void:
+	var shot_len := 0.0
+	var shot_rms := 0.0
+	for t in Sfx.take_count(sname):
+		shot_len = maxf(shot_len, Sfx.take_len(sname, t))
+		shot_rms += _rms_db(_samples(sname, t)) / Sfx.take_count(sname)
+	var longest := 0.0
+	var peak := -99.0
+	var rms := 0.0
+	for t in Sfx.take_count(hold):
+		longest = maxf(longest, Sfx.take_len(hold, t))
+		peak = maxf(peak, _peak_db(_samples(hold, t)))
+		rms += _rms_db(_samples(hold, t)) / Sfx.take_count(hold)
+	ok(
+		longest < shot_len * 0.7 and longest <= 0.2,
+		"%s: longest hold take %.2f s, the shot's longest take %.2f s" % [hold, longest, shot_len]
+	)
+	ok(peak < HOLD_PEAK_DB, "%s: peak %.1f dBFS (under %.1f)" % [hold, peak, HOLD_PEAK_DB])
+	ok(absf(rms - shot_rms) <= 3.0, "%s: loudness %.1f dBFS vs the shot's %.1f" % [hold, rms, shot_rms])
+
+
+func _samples(sname: String, take: int) -> PackedFloat32Array:
+	var d := FileAccess.get_file_as_bytes("res://audio/%s.wav" % (sname if take == 0 else "%s_%d" % [sname, take]))
+	var out := PackedFloat32Array()
+	out.resize(maxi(0, (d.size() - 44) / 2))
+	for i in out.size():
+		out[i] = float(d.decode_s16(44 + i * 2)) / 32768.0
+	return out
+
+
+func _peak_db(a: PackedFloat32Array) -> float:
+	var pk := 1e-6
+	for v in a:
+		pk = maxf(pk, absf(v))
+	return 20.0 * log(pk) / log(10.0)
+
+
+## RMS in dBFS over the audible part (above 2% of the peak), as tools/sfx_lib.py levels it.
+func _rms_db(a: PackedFloat32Array) -> float:
+	var pk := 1e-6
+	for v in a:
+		pk = maxf(pk, absf(v))
+	var sum := 0.0
+	var n := 0
+	for v in a:
+		if absf(v) > pk * 0.02:
+			sum += v * v
+			n += 1
+	return 20.0 * log(sqrt(sum / maxf(1.0, n))) / log(10.0)
 
 
 func _distinct(a: Array) -> int:
@@ -1285,12 +1391,15 @@ func _hold(main: Node, sname: String, held: bool) -> Dictionary:
 			due += HELD_STEP_MS
 			shots += 1
 			var seen: int = Sfx.last_played.get(sname, -1)
+			var hold_seen: int = Sfx.last_played.get(sname + FireSfx.HOLD_SUFFIX, -1)
 			if held:
 				FireSfx.shot(7, sname, null, -2.0, 0.08)
 			else:
 				Sfx.play(sname, null, -2.0)
 			if int(Sfx.last_played.get(sname, -1)) != seen:
 				takes.append(int(Sfx.last_take.get(sname, 0)))
+			elif int(Sfx.last_played.get(sname + FireSfx.HOLD_SUFFIX, -1)) != hold_seen:
+				takes.append(HOLD_BASE + int(Sfx.last_take.get(sname + FireSfx.HOLD_SUFFIX, 0)))
 		var live := 0
 		for pl in Sfx.players:
 			live += 1 if pl.playing else 0
@@ -1313,6 +1422,7 @@ func _steps(main: Node) -> void:
 		var deck := Vector3(car.origin.x, m.skytrain.deck_y(car.origin + Vector3(0, 0.3, 0)), car.origin.z)
 		ok(StepSurface.at(m, deck) == "metal", "a sky train car's deck is metal")
 		spots["metal"] = deck
+	_style_rows(m)
 	var plank: Vector3 = spots.get("grass", Vector3.ZERO)
 	for surf in ["grass", "stone", "snow", "metal", "wood"]:
 		if surf == "wood":  # last: lays a plank tile on the grass one
@@ -1329,6 +1439,42 @@ func _steps(main: Node) -> void:
 	m.queue_free()
 
 
+## Every biome style a tile can have (Flora.STYLES, the generated regions, the styles the Hollow Crown's islands
+## carry) maps to one of the four step sets every Hunter has (content/rules/step_biomes.json), and the map's ember
+## and gloom ground plays stone, its frost snow.
+func _style_rows(m: Match) -> void:
+	var known := ["grass", "stone", "wood", "snow"]
+	var styles: Array = Flora.STYLES.duplicate()
+	for i in m.world.w * m.world.h:
+		var st := m.world.style_at(i)
+		if not styles.has(st):
+			styles.append(st)
+	var rules: Dictionary = Content.rules(StepSurface.RULES)
+	var bad_styles := []
+	for st in styles:
+		if not rules["styles"].has(st) or not known.has(StepSurface.for_style(st)):
+			bad_styles.append(st)
+	var good: bool = bad_styles.is_empty() and known.has(String(rules["default"]))
+	ok(good, "every biome style maps to a known step set (%s; unmapped %s)" % [styles, bad_styles])
+	ok(rules["styles"].keys().all(func(k): return styles.has(k)), "step_biomes.json lists no style the game lacks")
+	var want := [["ember", "stone"], ["gloom", "stone"], ["frost", "snow"]]
+	want += [["meadow", "grass"], ["bloom", "grass"], ["storm", "grass"]]
+	for pair in want:
+		ok(StepSurface.for_style(pair[0]) == pair[1], "%s ground plays %s" % pair)
+	var walked := {}
+	for z in m.world.h:
+		for x in m.world.w:
+			var i := m.world.idx(x, z)
+			var w: World = m.world
+			if w.kind[i] == World.T_GROUND and not (w.bridge.has(i) or w.stairs.has(i) or w.paint.has(i)):
+				var p := Vector3(x + 0.5, m.world.ground_at(x + 0.5, z + 0.5), z + 0.5)
+				var st := m.world.style_at(i)
+				if not walked.has(st):
+					walked[st] = true
+					var sf := StepSurface.for_style(st)
+					ok(StepSurface.at(m, p) == sf, "a bare %s tile on the Hollow Crown plays %s" % [st, sf])
+
+
 ## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the
 ## shared steps get quieter to heavier, and the sound has its takes loaded.
 func _step_on(_m: Match, h: Hunter, surf: String, p: Vector3) -> void:
@@ -1342,7 +1488,7 @@ func _step_on(_m: Match, h: Hunter, surf: String, p: Vector3) -> void:
 		Sfx.recent.clear()
 		Sfx.listener = p
 		Juice.footstep(h)
-		var got: Array = Sfx.last_played.keys()
+		var got: Array = Sfx.last_played.keys().filter(func(s): return not String(s).ends_with("_foley"))
 		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
 		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
 	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]
