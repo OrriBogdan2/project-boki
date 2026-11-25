@@ -26,7 +26,7 @@ func run(main: Node) -> void:
 	var fire := KinTypeTrail.colour("fire", Color.BLACK)
 	ok(fire == Color(String(KinTypeFx.LOOKS["fire"]["col"])), "the capture pop colour is the type colour")
 	ok(KinTypeTrail.colour("", Color.RED) == Color.RED, "a Boki with no type keeps its own colour")
-	await _match_test(main)
+	_match_test(main)
 	print("KINTRAIL DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
