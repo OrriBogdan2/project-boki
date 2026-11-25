@@ -18,6 +18,14 @@ const BOKI_NUM_K := 0.75  # a hit on a Boki prints its number this share of a Hu
 const SHELL_FLASH_T := 0.12  # s a hit on armour keeps the body flash shell-coloured
 const BREAK_FLASH_T := 0.3  # s the body holds then fades its flash when the armour breaks
 const FAR := 24.0  # beyond this from the player nothing is drawn for a hit
+## Impact power on our health scale (a Hunter has 124 to 193): a hit of this much damage lands at power 1 (the
+## rings draw), a rifle round or a slash; a dart or a pellet about 0.6, a heavy ability 3. Was 14, which left
+## every basic hit at the 0.35 floor (11-24 playtest: "hard to tell when I was doing damage").
+const POWER_DMG := 6.0
+const POWER_MIN := 0.35
+const POWER_MAX := 3.0
+const POWER_OTHERS := 0.65  # a hit between two others draws this share of the size
+const POWER_ABILITY := 1.3  # an ability hit always lands at least this big
 const ARMOR_BREAK_DB := -3.0  # dB: the armour crack as heard from another Hunter's break
 const ARMOR_BREAK_DB_VICTIM := 2.0  # dB: the same crack on your own armour, louder so you know it's gone
 const ARMOR_TICK_DB := -4.0  # dB: the attacker's "push now" tick (a high, short click, not the crack)
@@ -84,13 +92,9 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		return
 	var credit := _credit(by)
 	var mine := credit == p or target == p
-	var power := clampf(d / 14.0, 0.35, 3.0)
-	if not mine:
-		power *= 0.65
 	var col := flash_col(target, p)
 	var ability := o.has("ab") and src != "kin"
-	if ability:
-		power = maxf(power, 1.3)  # an ability hit always lands big
+	var power := impact_power(d, mine, ability)
 	m.fx.impact(at, dir, col, power, crit, armor)
 	# the body tells which it was: an armour hit flashes the shell's colour, a health hit white (a break keeps its own)
 	if armor:
@@ -111,11 +115,22 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		if w != "":
 			m.sfx(ImpactWeight.confirm(w), target.pos, ImpactWeight.confirm_db(w), 1.0, true)
 	elif target == p:
-		IncomingHitSfx.hit(m, by, d, o)      # from where it came, so you know which way to turn
+		IncomingHitSfx.hit(m, by, d, o)  # from where it came, so you know which way to turn
 		if armor:
 			m.sfx("armor_hit", null, -12.0, 0.85)
 	elif target != p and credit != p and not typed:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
+
+
+## How big a hit's impact lands (Fx.impact power, 0.35..3): by damage on our health scale, smaller for a hit
+## between two others, never under POWER_ABILITY for an ability hit.
+static func impact_power(d: float, mine: bool, ability: bool) -> float:
+	var power := clampf(d / POWER_DMG, POWER_MIN, POWER_MAX)
+	if not mine:
+		power *= POWER_OTHERS
+	if ability:
+		power = maxf(power, POWER_ABILITY)
+	return power
 
 
 ## The one blocked hit (Verbs walls through BarrierRipple, Albert's Shield Charge guard, Kael's Riposte guard): a
