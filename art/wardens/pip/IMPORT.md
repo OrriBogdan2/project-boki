@@ -177,3 +177,11 @@ the 2048 atlas (job tool r11/tools/pawcomp.py, no colour gain); every other texe
     python3 tools/art1/glb_bone_offset.py $G $G Idle Bone_013 0,1,0 -10
 
 The tail root is yawed 10 deg away from her right leg in Idle (geo_check Idle cloth>foot_R 0.61 -> 0 cm, cloth>shin_R 3.41 -> 3.07).
+
+## 11-25 round 12 (ext/meeko-body-1124): pip_meshy.glb rebuilt from the current turnaround (draft, owner check pending)
+New Meshy body from /home/boki/gens/v95-latest-ta-1119/meeko.webp (multi-image 2k, front/side/back: gen mv4), remeshed to
+300k tris, wings taken off by Meshy's part split, the wingless body rigged by Meshy (upload rig, 24 bones) with Meshy's
+Idle(0)/Attack(4)/Jump_Run(13)/Crouch_Walk_with_Torch(520) + the rig's walk/run. Blender only welds + decimates (62k body,
+14k wings); wings back on Spine02 as `meshy_textured-wing` (no ink), main's sun/cloud surfaces copied in
+(`tools/art1/glb_copy_prims.py`); tail and satchel weights moved off the legs onto Hips and smoothed; arm/leg key offsets
+per clip and the Attack hands cap (margin 0.15). Raw files and scripts: ~/meshy/meeko_r12_1125, ~/gens/hunter-round-1124/meeko/r12.
