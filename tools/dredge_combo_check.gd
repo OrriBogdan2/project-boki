@@ -175,14 +175,17 @@ func _slam_tell() -> void:
 	var lands := absf(float(fist["life"]) * float(fist["fall"]) - float(ed["windup"])) < 0.01
 	var fist_up: bool = HeroVfx.of(m).plays.get("anchor_fist", 0) == 1 and lands
 	ok(
-		"anchor tell: an outline (no fill) of the hit cone for all; the fist lands on the slam",
+		"anchor tell: a soft gold wedge of the hit cone for all (lit front = the wind-up); fist lands on the slam",
 		AimKit.shown(p, "e_tell") and bool(tell.get("all", false))
 			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
 			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
-			and bool(tell.get("outline", false)) and float(tell.get("fill", -1.0)) < 0.0
+			and bool(tell.get("soft", false)) and float(tell.get("fill", -1.0)) > 0.0
+			and float(tell.get("fill", 2.0)) < 1.0
+			and (tell.get("col", Color.BLACK) as Color).is_equal_approx(Color("ffc832"))
 			and fist_up and ak.dmg(t) == 0.0,
-		"len %.1f deg %.0f outline %s fist %s" % [
-			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), tell.get("outline"), fist_up]
+		"len %.1f deg %.0f fill %.2f fist %s" % [
+			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)),
+			float(tell.get("fill", -1.0)), fist_up]
 	)
 	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while k.wind > 0.03:
