@@ -146,10 +146,10 @@ disc on screen covers a shown Hunter's box (`HunterZone.rect_of`). Concealment (
 ## Rivals read at Hunter size (11-25)
 A rival was a red silhouette: `hero_toon`'s `side_rim` took every pixel with `nv < 0.55` (about a third of a Hunter, and
 all of a thin limb, at full strength with emission), and the nameplate (100 px wide) was ~2.5x the body's pixels.
-Now `side_rim` is a screen-width edge (`SIDE_RIM_PX` 1.6 px, from `nv / (2 * fwidth(nv))`, emission x0.8), the ground rim
-of `OcclusionOutline` leans to the side colour (`INK_SIDE_K` 0.3 of it in the dark ink), and `HudStyle.PLATE_W` is 76
-(was 100). The ownership ring is a thin band (0.16x the body's pixels) and as wide as the body: left as is, it is the
-hit circle.
+Now `side_rim` is a screen-width edge (`SIDE_RIM_PX` 1.6 px, from `nv / (2 * fwidth(nv))`, emission x0.8) and
+`HudStyle.PLATE_W` is 76 (was 100). A ground rim in a dark side hue was tried and dropped: it made `--hudref-check`'s
+armour-crack step fail. The ownership ring is a thin band (0.16x the body's pixels) and as wide as the body: left as
+is, it is the hit circle.
 `--clarity-shots` prints `CLARITYREAD` (`tools/clarity_read.gd`): means per shown Hunter over the bot 3v3 frames (1080p
 pixels): body, nameplate, ring band, ring width vs body width, and the share of a rival's body pixels within 0.12 of
 the same body drawn with `side_rim` off ("kept"). It saves `read<f>_<i>_on/off.png` and `clarity_read.tsv`.
