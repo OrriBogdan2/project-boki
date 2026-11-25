@@ -117,3 +117,17 @@ Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GL
   1036 -> 0, finger samples past the guard 5031 -> 414. Steel texels (neutral only): highlight roll-off, p95 lum 252 -> 216.
   The contract model (kael.glb, native off) holds the sword the same new way.
   Alternative not taken: warden_native.json "grip"/"turn" data (Gil's route); kept to the hunter's own files.
+
+**Round 24 (2026-11-25, ext/kael-r24-cape, plan /home/boki/gens/hunter-round-1124/kael/PLAN-1124o.md section 7):**
+- Ink room: kael_meshy.glb had no COLOR_0, so the game's ink shell (outline.gdshader ink_mask) drew the full line on
+  every vertex; on the one-layer cape, sash and scarf tatters and the near-touching Meshy layers its back face showed
+  as black slits. `python3 tools/meshy/native_ink.py OUT.glb IN.glb` (tool default rule, as Grimble) writes COLOR_0
+  (rgb 1, alpha = ink room) on both primitives; 13.6 % of body verts get no line (open sheets), the rest a line no wider
+  than half their free distance. Positions, UVs, skin, clips and Image_0 are unchanged. Near-black pixels vs round 23
+  on current main: match camera 1856 -> 422, eye 87,657 -> 69,017, knee 69,390 -> 55,824 (18 frames each).
+  Rejected: --full=0.0001 (open sheets only, full line elsewhere): match black 1716, the cape slits stayed.
+- Sword-arm veins glow: an emission image (`Image_emit`, Material_0 only) = round 23's own sword-arm vein field x the
+  ember colour x 2 (r24/emit13.py = edit13.py's R coverage; lines only, no halo, same widths), so the orange veins
+  read at eye/knee view without the round-21 neon slab. No emission on the off arm's white veins (the juggernaut
+  emit_tint would turn them crimson). Re-run: `emit13.py live_Image_0.jpg emit.jpg <r23 args> K=2.0`, then
+  `r24/add_emit.py IN.glb Material_0 emit.jpg OUT.glb`, then native_ink.py.
