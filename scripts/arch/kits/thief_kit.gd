@@ -40,6 +40,11 @@ const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers ge
 const KNIFE_RELEASE_S := 0.12      # s into thf_knife: the throw's key pose, where the knife leaves her hand
 const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist", "thf_exdash"]
 
+## Hunter nid -> {target instance id: target}: every body that hunter's Marks went on (add_mark, set_marks, the
+## only writers). While a hunter's is empty no foe carries one of its Marks, so the step skips the fade walk over
+## every foe on the map. Static: a kit rebuilt mid-match still finds the Marks its hunter left.
+static var marked_by := {}
+
 var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
 var mark_gap := {}             # target id -> time of its last Mark from us
@@ -124,6 +129,7 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	mk[h.nid] = [c, float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
 	t.set_meta("marks_t", now)
+	_track(t)
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
 	sync_marks(t)
@@ -166,6 +172,7 @@ func set_marks(t: Ent, n: int) -> void:
 	var had := int(e[0]) if float(e[1]) > 0.0 else 0
 	mk[h.nid] = [n, float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
+	_track(t)
 	_pip_pop(t, n)
 	_on_marks(t, had, n)
 	sync_marks(t)
@@ -270,13 +277,9 @@ func _tick(dt: float) -> void:
 			primed_t = 0.0
 			fx().puff(hand_pos(hand == 0), FIZZLE, 0.3, 0.2)       # unused, it fades from the hand
 	_tick_pips(dt)
-	# marks fade on every target we've touched
-	for f in m.foes_of(h.team):
-		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
-		if mk.has(h.nid):
-			var e: Array = mk[h.nid]
-			e[1] = float(e[1]) - dt
-			if float(e[1]) <= 0.0: mk.erase(h.nid)
+	var mine: Dictionary = marked_by.get(h.nid, {})
+	if not mine.is_empty():
+		_fade_marks(dt, mine)
 	if not bola_cast.is_empty(): _tick_bola_cast(dt)
 	if not bola.is_empty(): _tick_bola(dt)
 	encore.tick(dt)
@@ -289,6 +292,26 @@ func _tick(dt: float) -> void:
 	_tick_glint(dt)
 	_tick_aim_line()
 	_net_glint(dt)
+
+## Marks fade on every foe that carries one of ours; then the bodies that no longer carry one leave `mine`.
+func _fade_marks(dt: float, mine: Dictionary) -> void:
+	for f in m.foes_of(h.team):
+		if not f.has_meta("marks"):      # (get_meta with a null default logs an engine error when the key is missing)
+			continue
+		var mk: Dictionary = f.get_meta("marks")
+		if mk.has(h.nid):
+			var e: Array = mk[h.nid]
+			e[1] = float(e[1]) - dt
+			if float(e[1]) <= 0.0: mk.erase(h.nid)
+	for iid in mine.keys():
+		var t: Variant = mine[iid]
+		if not is_instance_valid(t) or not ((t as Node).get_meta("marks", {}) as Dictionary).has(h.nid):
+			mine.erase(iid)
+
+func _track(t: Ent) -> void:
+	if not marked_by.has(h.nid):
+		marked_by[h.nid] = {}
+	marked_by[h.nid][t.get_instance_id()] = t
 
 ## The aim line (your screen only): thin and pale lilac along the aim to the bolt's full range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
