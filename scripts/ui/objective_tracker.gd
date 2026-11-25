@@ -1,6 +1,6 @@
 class_name ObjectiveTracker
 extends RefCounted
-## Draws the first-expedition objective (FirstObjective): the card under the minimap's clock, a pin or an edge
+## Draws the first-expedition objective (FirstObjective): the card under the squad frames, a pin or an edge
 ## arrow in the world on what the line names, and a ring on the minimap. The only state is its edge arrow's layout.
 
 const COL := Color("ffd27a")  # the objective's colour: the pin, the ring and the card's rim
@@ -8,7 +8,7 @@ const TICK_COL := Color("8fe3c8")  # a finished step
 const CARD_W := 240.0  # px, in HUD units
 const CARD_H := 31.0
 const TEXT_W := CARD_W - 28.0  # px the line may take (the rim and the right margin)
-const GAP := 4.0  # px under the minimap column
+const GAP := 8.0  # px under the squad frames
 const LINE_PX := 15
 const PING_SAME_M := 6.0  # m: a ping this close to the target is on it
 const PIPS_R := 3.5  # px radius of a step pip
@@ -16,13 +16,13 @@ const PIPS_R := 3.5  # px radius of a step pip
 static var _edge := EdgeMarker.new()  # the objective's own screen-edge arrow (laid out afresh each frame)
 
 
-## The card, on the left column under whatever is above it (hud.mm_bottom); moves mm_bottom down.
+## The card, on the left column under the squad frames (or whatever is above it when there are none).
 static func draw(hud) -> void:
 	var o: FirstObjective = hud.m.objective
 	var p: Hunter = hud.m.player
 	if o == null or p == null or p.out or p.extracted or p.dropping or p.riding or not HudReveal.on(hud.m, "objective"):
 		return
-	var r := Rect2(Vector2(HudStyle.safe_pad(hud.c.size).x, hud.mm_bottom + GAP), Vector2(CARD_W, CARD_H))
+	var r := Rect2(Vector2(HudStyle.hud_pad(hud.c.size).x, SquadFrames.bottom(hud, p) + GAP), Vector2(CARD_W, CARD_H))
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	hud.c.draw_rect(Rect2(r.position + Vector2(0, 5), Vector2(4, r.size.y - 10)), COL)
 	var at := r.position + Vector2(16, 25)
@@ -37,7 +37,6 @@ static func draw(hud) -> void:
 	for i in pr.y:
 		var ctr := Vector2(r.end.x - 14.0 - (pr.y - 1 - i) * 11.0, r.position.y + 8)
 		hud.c.draw_circle(ctr, PIPS_R, COL if i <= pr.x else Color(1, 1, 1, 0.18))
-	hud.mm_bottom = r.end.y
 
 
 ## The pin over the target (Hud._draw_waypoint), or an arrow at the screen edge when it is off screen. The arrow

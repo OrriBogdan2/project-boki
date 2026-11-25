@@ -9,9 +9,9 @@ extends RefCounted
 ## Every size here is measured off the reference capture (scripts/ui/SQUAD_FRAMES_SPEC.md), in HUD
 ## units (the HUD is laid out at 1280x720 and scaled: 1 unit = 1.5 px at 1920x1080).
 
-const FIRST_DROP := 39.0  # units from the minimap's bottom to the first row's portrait centre
+const FIRST_DROP := 24.0  # units from the clock row's line to the first row's portrait centre
 const PITCH := 46.0  # units between rows
-const X := 35.0  # units: the portrait centre's distance from the left edge
+const X := 27.0  # units: the portrait centre's distance from the left edge (the HUD margin and the portrait's radius)
 const R := 13.2  # units: portrait radius
 const LABEL_X := 17.5  # units right of the portrait centre: label, name and bar start
 const LABEL_Y := -6.6  # units: the state label's baseline, from the portrait centre
@@ -75,6 +75,13 @@ static func rows(m: Match, p: Hunter) -> Array:
 ## The centre of row `i`'s portrait.
 static func centre(hud, i: int) -> Vector2:
 	return Vector2(X, float(hud.mm_bottom) + FIRST_DROP + PITCH * i)
+
+
+## The bottom of the last row, or of the left column above (hud.mm_bottom) when there are no rows: where the
+## objective card starts.
+static func bottom(hud, p: Hunter) -> float:
+	var n := rows(hud.m, p).size() if HudReveal.on(hud.m, "squad") else 0
+	return float(hud.mm_bottom) if n == 0 else centre(hud, n - 1).y + BAR_Y + BAR_H
 
 
 static func draw(hud, sz: Vector2, p: Hunter) -> void:

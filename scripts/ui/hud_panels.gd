@@ -68,8 +68,8 @@ func _draw_panels() -> void:
 			HudScale.begin(hud, "vitals", sz)
 			HudVitals.draw(hud, sz, p)
 			RankMarks.watch(hud)
-			HudScale.begin(hud, "abilities", sz)
 			ChannelBar.draw(hud, sz, p)
+			HudScale.begin(hud, "abilities", sz)
 			hud._draw_abilities(sz, p)
 			HudScale.begin(hud, "weapon", sz)
 			hud._draw_weapon(sz, p)
@@ -82,6 +82,8 @@ func _draw_panels() -> void:
 				HudScale.begin(hud, "squad", sz)
 				SquadFrames.draw(hud, sz, p)
 				TeamBoki.draw(hud, p)
+			HudScale.begin(hud, "squad", sz)
+			ObjectiveTracker.draw(hud)      # under the squad frames
 			if HudReveal.on(m, "perks"):
 				HudScale.begin(hud, "perks", sz)
 				hud._draw_perks(sz, p)

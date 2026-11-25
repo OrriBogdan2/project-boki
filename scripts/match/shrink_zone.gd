@@ -295,17 +295,20 @@ func _secs_text(hud) -> String:
 	return "FINAL ZONE"
 
 
-## The row under the match clock: the next close, and a warning while you're outside. Its bottom.
-func hud_row(hud, r: Rect2) -> float:
-	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.7), 6)
-	hud.c.draw_circle(r.position + Vector2(11, 10), 4.0, COL)
-	hud._text(r.position + Vector2(21, 14), _secs_text(hud), 10, COL, hud.big)
+## The ring's next close in a few words, for the clock row (HUD ClockRow).
+func row_text(hud) -> String:
+	if k < last() and m.time < t0[k + 1]:
+		return "ZONE %s" % hud._fmt(t0[k + 1] - m.time)
+	if k > 0 and m.time < t1[k]:
+		return "CLOSING %s" % hud._fmt(t1[k] - m.time)
+	return "FINAL ZONE"
+
+
+## The warning while you are outside the ring ("" inside it).
+func outside_text() -> String:
 	if m.player and not m.player.out and k > 0 and outside(m.player.pos):
-		var t := "OUTSIDE  -%.1f%%/s" % (dps[k] * 100.0)
-		var a := 0.6 + 0.4 * sin(m.time * 8.0)
-		var tw: float = hud.big.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
-		hud._text(Vector2(r.end.x - 8 - tw, r.position.y + 14), t, 10, Color(hud.BAD, a), hud.big)
-	return r.end.y
+		return "OUTSIDE  -%.1f%%/s" % (dps[k] * 100.0)
+	return ""
 
 
 ## The edge and the next circle on the minimap (only the parts in view).
