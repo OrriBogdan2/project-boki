@@ -170,7 +170,6 @@ func _prompt() -> void:
 	ok(StompTarget.target(m, s) == f, "a remote client's wisp is skipped")
 	o.remote = false
 
-
 ## A break is heard (a crack, and a relief chime for the wisp's squad); a stomp that runs out has neither.
 func _heard() -> void:
 	for sname in ["stomp_crack", "stomp_relief"]:
