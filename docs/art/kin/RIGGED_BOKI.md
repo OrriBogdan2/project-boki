@@ -144,6 +144,15 @@ strike and barometer pulse, and a sleep that nods off and jerks awake. Re-keyed 
 and atlases unchanged). 11-22: both have `auto_legs.py` legs (below), so reclip keeps the file's leg bones and its
 planted-paw walk and run and re-keys only the other 11 clips, legs at rest (the modules' own walk/run, the piston plod
 and stiff march, glide the paws and are not used). A full rebuild with `build_boki.py` needs `auto_legs.py` again.
+11-20: Buckleron (`limpetor`) and Lanterloris (`moonloris`) have their own clips (`limpetor_anim.py`, `moonloris_anim.py`)
+on the borrowed Glomwort skeleton: a limpet that creeps under a rocking shield, bashes it down and clamps to brace, and
+a slow loris that climbs hand over hand, freezes and snaps, and floats up with its lantern belly. Their glbs were
+re-keyed with `tools/boki/reclip.py` (`blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>`):
+it reads the built .glb back, swaps the actions for the module's `CLIPS` and exports again, for a species whose raw Meshy
+model is not at hand.
+11-22: both have `auto_legs.py` legs (below), so reclip keeps the file's leg bones and its planted-paw walk and run
+and re-keys only the other 11 clips, legs at rest (the modules' own creep and climb walk/run glide the paws and are not
+used). A full rebuild with `build_boki.py` needs `auto_legs.py` again.
 
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.
