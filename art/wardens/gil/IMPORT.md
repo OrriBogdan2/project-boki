@@ -102,3 +102,12 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - Attack re-keyed again (`r11/tools/handkey.py`): wind-up hand y 0.40 -> 0.35, bill ends forward (hips-local x 0.00-0.07 at 0.57-0.63 s, was +0.6 to his left), arm turn max 176 -> 40 deg.
 - Fin: 12 Meshy edits + 40 retextures of the fin island (`r11/fin/gen_log.tsv`), auto hue gate (coral 0-40 deg >= 25%, pink 290-355 < 5%, blue rays >= 10%): 0 pass (coral comes only with 11-24% pink). Live's fin texels kept. Meshy balance 1946 -> 1244 (account-wide).
 - geo_check vs main: held worst 6.8 cm (main 13.4), clipped frames 110 (main 159, r10b 61), held frames 76 (main 97).
+
+## Native model r12 (gil_meshy.glb), 2026-11-25
+- Fin colour: r11's Meshy edit v270_p2, fin texels only (`hunter-round-1124/gil/r12/fin/atlas_e2.png`): mean RGB 139/151/178 -> 136/99/112, coral webs and blue ribs. Hue gate: coral .48, blue .38, pink .067 (limit .05, missed).
+- Fin weights: per-height coat weights under the fin root instead of a Head blend (`r12/finskin2.py`), so the fin moves with the coat. Shear mean .085 -> .039, max .314 -> .085. Root gap p95 max .032 -> .034 (about the same).
+- Hat brim: numpy mesh repair, not Meshy (`r12/build.py`): rim pulled round, normals smoothed. Rim deficit max 2.32 -> 0.88 cm.
+- Nothing else changed: face, hands and swordfish vertices, UVs and weights equal r11.
+- geo_check same as r11: held worst 6.8 cm, 110 clipped frames, 76 held.
+- art-gate GAME: 7.1 vs live 6.3 (3 sheets, context text described the fixes) and 6.0 vs live 5.7 (4 sheets, neutral text). 7.0 bar not confirmed.
+- Open: dark pocket at the fin base in head-turn frames, fin edge-on from behind, near-black robe, small brim ticks.
