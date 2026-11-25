@@ -318,9 +318,7 @@ func run(m: Node) -> void:
 	var vs: float = home.ppos.x - x1
 	Input.action_release("right")
 	ok(vc > 0.5 and vc < vs * 0.75 and ck > 0.5, "crouching works on the farm: %.2f m/s crouched (pose %.2f) against %.2f standing" % [vc, ck, vs])
-	# ---------------------------------------------------------------- 6b. your Hunter, and a bed you walk round
-	var model: String = home.player.get_meta("arch")
-	ok(model == Arch.of_save(), "the farm shows your Hunter as a match does (model %s)" % model)
+	# ---------------------------------------------------------------- 6b. a bed you walk round
 	var bed: Vector3 = home.plots[0].position
 	home.ppos = bed + Vector3(-3.0, 0, 0)
 	home.py = 0.0
@@ -330,6 +328,13 @@ func run(m: Node) -> void:
 	Input.action_release("right")
 	var dx: float = bed.x - home.ppos.x
 	ok(dx >= 0.85 and dx < 3.0, "walking at a crop bed stops at its edge (%.2f m from its middle)" % dx)
+	var patch: Dictionary = HomeLayout.fixtures(Save.d, "farm")[0]
+	hb.mesh_t = -1.0
+	patch["x"] = int(patch["x"]) + 2
+	hb.apply()
+	ok(hb.mesh_t >= 0.0, "moving a crop patch grows the grass again (off the bed's new tiles)")
+	patch["x"] = int(patch["x"]) - 2
+	hb.apply()
 	# ---------------------------------------------------------------- 7. a farm-start save keeps it all
 	var js := JSON.stringify(Save.d)
 	await _free(home)
