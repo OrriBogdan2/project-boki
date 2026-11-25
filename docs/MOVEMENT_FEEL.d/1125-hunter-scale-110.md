@@ -15,3 +15,6 @@ never read it. What follows the scale:
 
 `--hunter-scale-shots --shots-dir=<dir>` (GPU) stands a Hunter on the same ground at 1.12 and at the rule's size and
 prints each body's height in px at 1920x1080, with the plate's gap over the head.
+Measured 11-25 (jobq 20261125-231836-28993, same spot, same pose, px at 1080p): Kael 117 -> 127, Vex 120 -> 133,
+Sparkle 126 -> 144 (her hair spikes swing a little with the size). Stun stars, the vulnerable sparks, the glider's heat
+smoke and a shoulder Boki's speech bubble also read their metres times `match_hunter_scale`.
