@@ -30,13 +30,13 @@ func off_line(from: Vector3, dir: Vector2, p: Vector3) -> float:
 
 ## The widest visible shader look of the Hero VFX within `reach` m of `at` (its node: world place and width), or null.
 func flare_near(m: Match, at: Vector3, reach: float) -> MeshInstance3D:
-	var best: MeshInstance3D = null
+	var widest: MeshInstance3D = null
 	for e: Dictionary in HeroVfx.of(m).live:
 		var node: MeshInstance3D = e["node"]
 		if node.visible and node.global_position.distance_to(at) < reach \
-				and (best == null or node.global_basis.get_scale().x > best.global_basis.get_scale().x):
-			best = node
-	return best
+				and (widest == null or node.global_basis.get_scale().x > widest.global_basis.get_scale().x):
+			widest = node
+	return widest
 
 func pin() -> void:
 	var r := setup("archer", 7.0, "", true)
