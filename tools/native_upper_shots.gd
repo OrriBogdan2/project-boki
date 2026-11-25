@@ -1,12 +1,20 @@
 extends "res://tools/clip_shots.gd"
-## --native-upper-shots --shots-dir=<dir> [--size=480] [--ids=a,b]: each native Hunter running at 4.6 m/s with a swing
-## pressed 0.3 s in, a side view, a frame every 1/30 s to 1.2 s: <dir>/<id>/f###.png. Needs a renderer.
+## --native-upper-shots --shots-dir=<dir> [--size=480] [--ids=a,b] [--mode=swing|strafe|back]: each native Hunter
+## running at 4.6 m/s, a frame every 1/30 s to 1.2 s: <dir>/<id>/f###.png. swing: a side view, a swing pressed 0.3 s in.
+## strafe: facing -Z, running right, seen from the front. back: facing -Z, running backwards. Needs a renderer.
 
 const DT := 1.0 / 30.0
 const PRESS := 0.3  # s into the run the swing starts
 const SECS := 1.2
 const RUN := 4.6  # m/s
 const IDS := ["mage", "juggernaut", "archer", "dredge"]
+## mode -> [velocity, the Hunter's yaw, the camera]
+const MODES := {
+	"swing": [Vector3(0, 0, -RUN), 90.0, Vector3(5.0, 1.2, 0.0)],
+	"strafe": [Vector3(RUN, 0, 0), 0.0, Vector3(3.0, 1.2, -4.5)],
+	"back": [Vector3(0, 0, RUN), 0.0, Vector3(3.0, 1.2, -4.5)],
+}
+var mode := "swing"
 
 
 func run(main: Node) -> void:
@@ -18,6 +26,8 @@ func run(main: Node) -> void:
 			out = a.substr(12)
 		if a.begins_with("--size="):
 			frame_px = int(a.substr(7))
+		if a.begins_with("--mode="):
+			mode = a.substr(7)
 		if a.begins_with("--ids="):
 			ids = a.substr(6).split(",")
 	if main.get("fade") != null:
@@ -26,7 +36,7 @@ func run(main: Node) -> void:
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
 	cam.fov = 30.0
-	cam.position = Vector3(5.0, 1.2, 0.0)
+	cam.position = MODES[mode][2]
 	cam.look_at(Vector3(0, 0.9, 0))
 	for id in ids:
 		await _hunter(String(id), out.path_join(String(id)))
@@ -37,20 +47,20 @@ func run(main: Node) -> void:
 func _hunter(id: String, dir: String) -> void:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
-	model.rotation.y = deg_to_rad(90.0)
+	model.rotation.y = deg_to_rad(float(MODES[mode][1]))
 	holder.add_child(model)
 	for k in 30:
 		await tree.process_frame
 	var poser := model.get_node("Warden/Native")
 	poser.set_process(false)
 	DirAccess.make_dir_recursive_absolute(dir)
-	var base := {"grounded": true, "face": model.rotation.y, "cast": 99.0, "vel": Vector3(0, 0, -RUN)}
+	var base := {"grounded": true, "face": model.rotation.y, "cast": 99.0, "vel": MODES[mode][0]}
 	for k in 20:
 		model.set_meta(WardenClips.STATE, base)
 		poser.call("_process", DT)
 	for i in int(SECS / DT):
 		var s := base.duplicate()
-		if i * DT >= PRESS:
+		if mode == "swing" and i * DT >= PRESS:
 			s["swing_n"] = 1
 			s["combo"] = 0
 			s["cast"] = 0.0

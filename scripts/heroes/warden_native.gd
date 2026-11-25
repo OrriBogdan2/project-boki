@@ -17,6 +17,7 @@ const FADE := 0.15  # s: one clip into the next
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
+const LEGS_RUN := ["walk", "run", "crouch"]  # the states where the legs carry him: they turn to his way (WardenNativeTwist)
 const LOOPS := ["idle", "walk", "run", "crouch"]
 ## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
 ## Swing and cast one-shots (the attack clip without them): lmb, lmb_hold (a charged swing), rmb, e, r (the kit's cast
@@ -72,6 +73,7 @@ var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest 
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
+var twist := WardenNativeTwist.new()  # the legs turned to the way he goes, the torso held on the aim
 var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
@@ -171,6 +173,9 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
 	torso_bi = WardenSkeleton.find(skel, "hips")
 	upper = WardenNativeUpper.make(skel, torso_bi)
+	twist.skel = skel
+	twist.hips = WardenSkeleton.find(skel, "root")
+	twist.torso = torso_bi
 	var rest: Dictionary = model.get_meta("rig_rest", {})
 	if torso_bi >= 0 and rest.has("hips"):
 		var at_rest := WardenGlb.model_xf(model, skel) * skel.get_bone_global_rest(torso_bi)
@@ -227,6 +232,7 @@ func _process(dt: float) -> void:
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
 	upper.lay(dt)
+	twist.step(dt, s, cur in LEGS_RUN)
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)

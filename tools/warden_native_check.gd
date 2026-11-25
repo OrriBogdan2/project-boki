@@ -148,6 +148,7 @@ func _states(main: Node, a: String) -> void:
 	_crouch_arms(a, nat)
 	await _slots(main, a, m, nat)
 	await _upper(main, a, m, nat)
+	_twist(a, nat)
 	await _kmoves(main, a, m, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
@@ -315,6 +316,23 @@ func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 		not nat.upper.on and nat.player.current_animation == String(nat.plays["attack"]),
 		"%s: a swing standing owns the body" % a
 	)
+
+
+## Strafing right while facing ahead turns the legs a quarter turn to the way he goes and leaves the torso where it
+## was (the aim); standing, nothing turns.
+func _twist(a: String, nat: WardenNative) -> void:
+	var sk := nat.skel
+	var hips_before := sk.get_bone_global_pose(nat.twist.hips).basis.get_rotation_quaternion()
+	var torso_before := sk.get_bone_global_pose(nat.twist.torso).basis.get_rotation_quaternion()
+	nat.twist.step(1.0, {"vel": Vector3(4.6, 0.0, 0.0), "face": 0.0}, true)
+	var legs: float = sk.get_bone_global_pose(nat.twist.hips).basis.get_rotation_quaternion().angle_to(hips_before)
+	var torso: float = sk.get_bone_global_pose(nat.twist.torso).basis.get_rotation_quaternion().angle_to(torso_before)
+	ok(
+		absf(legs - PI / 2.0) < 0.05 and torso < 0.05,
+		"%s: strafing turns the legs %.2f rad, the torso %.2f" % [a, legs, torso]
+	)
+	nat.twist.step(1.0, {"vel": Vector3.ZERO, "face": 0.0}, true)
+	ok(absf(nat.twist.turn) < 0.01, "%s: standing, the legs face the aim again" % a)
 
 
 ## A clips file (made here: a skeleton under another node name, one clip named SYNTH) lends its clip to a slot.
