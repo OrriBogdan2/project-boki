@@ -31,8 +31,8 @@ facts below come from the written play notes in `sv/briefs/kits.md`.
 ## 2. Ours on main [ours]
 
 - **Yes, we hide Hunters.** `Match.sees()` (match.gd ~2917) is the one rule: a team shares sight; each member sees
-  everything inside a 2.0 m circle (1.0 m crouched), plus a forward cone (dot > 0.5, 120 degrees; 106 until
-  2026-11-12, 170 until 2026-11-18, see VISION_LOOK.md) out to
+  everything inside a 2.0 m circle (1.0 m crouched), plus a forward cone (dot > 0.7071, 90 degrees; 106 until
+  2026-11-12, 170 until 2026-11-18, 120 until 2026-11-23, see VISION_LOOK.md) out to
   `VIEW_RANGE` 24 m (14 m crouched), x1.25 while crouching, x gear `sight`, x raid `sight_k`.
   Holding Look ahead (`scout`, C) adds x1.25 inside a 30 degree cone along the aim (`ScoutLook`, docs/specs/LOOK_AHEAD.md).
   Needs `world.los()`: rocks and higher ground block it; dynamic sight-blocking walls too.
