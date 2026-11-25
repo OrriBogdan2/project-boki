@@ -413,17 +413,17 @@ func _spots_part(home, center: Vector3) -> void:
 ## Raising leans (BaseAxes, base_axes.json): 10 days of each care style give the rows below, ten days of play make a
 ## busy Boki and ten of feeding alone a lazy one, and a lazier Boki naps more often on its own than a busy one.
 func _axes_part(home) -> void:
-	var r_v := Content.rules("base_axes")
+	var rules_ax := Content.rules("base_axes")
 	var rows := {}
-	for style in r_v["styles"]:
+	for style in rules_ax["styles"]:
 		var rec := Save.new_kin("burrlet", style)
 		for day in 10:
-			for kind in r_v["styles"][style]:
+			for kind in rules_ax["styles"][style]:
 				BaseAxes.care(rec, kind)
 		rows[style] = rec
-		var scales: Array = r_v["weights"].keys().map(func(a): return "%s x%.2f" % [a, BaseAxes.mult(rec, a)])
+		var scales: Array = rules_ax["weights"].keys().map(func(a): return "%s x%.2f" % [a, BaseAxes.mult(rec, a)])
 		print("BASELIFE axes %-8s %s %s" % [style, rec["raised"], ", ".join(scales)])
-	var cap := float(r_v["cap"])
+	var cap := float(rules_ax["cap"])
 	ok(rows["none"]["raised"].values().all(func(v): return v == 0.0), "no care leaves every axis at 0")
 	ok(
 		rows.values().all(func(r): return r["raised"].values().all(func(v): return absf(v) <= cap + 0.0001)),
@@ -606,9 +606,9 @@ func run(m: Node) -> void:
 	await _nap_sounds(home)
 	_spots_part(home, center)
 	_rival_beat(home)
-	_axes_part(home)
 	_play_sounds(home)
 	_notice_part(home, center)
+	_axes_part(home)
 	_left_alone(home)
 	rules["base_mode"] = false
 	home.queue_free()
