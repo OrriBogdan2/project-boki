@@ -16,6 +16,7 @@ const RING := 5.0  # m from the camp's middle to the Hunters
 const PEAK_AT := 19.5  # s into the camp: 0.9 s after the fourth wave's R, the scene inventory at an FX peak
 const QUIET_AT := 23.5  # s into the camp: the same inventory in the quiet before the run ends
 const FightScene := preload("res://tools/perf/fight_scene.gd")
+const GroundAb := preload("res://tools/perf/ground_ab.gd")
 
 var bench  # the PerfBench: frames are logged and summed by it
 var m: Match
@@ -31,6 +32,7 @@ var t_post := 0
 var t_phys := 0
 var stamp_us := {}  # RenderingDevice timestamp name -> us of CPU from it to the next one (the draw, split)
 var stamp_frame := -1
+var ab: GroundAb  # (--bench-ab-ground: the ground and sea variants, alternating inside one run)
 var stamp_frames := 0  # stamp sets read
 var stamp_gpu_us := {}  # timestamp name -> us of GPU from it to the next one (the draw's steps)
 var stamp_cpu_us := {}  # the same on the render thread's clock
@@ -209,6 +211,20 @@ func _camp() -> Array:
 			(we as WorldEnvironment).environment.glow_enabled = false
 		bench.main.get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 		print("BENCH fight post off")
+	if "--bench-flat-ground" in OS.get_cmdline_user_args():  # (a probe: what the terrain's noise costs the GPU)
+		for n in bench.main.get_tree().root.find_children("*", "MeshInstance3D", true, false):
+			var tm := (n as MeshInstance3D).material_override as ShaderMaterial
+			if tm and tm.shader and tm.shader.resource_path.ends_with("terrain.gdshader"):
+				tm.set_shader_parameter("flat_ground", true)
+		print("BENCH fight ground flat")
+	if "--bench-nosea" in OS.get_cmdline_user_args():  # (a probe: what the cloud-sea plane costs the GPU)
+		for n in m.world.find_children("*", "MeshInstance3D", false, false):
+			var sm := (n as MeshInstance3D).material_override as ShaderMaterial
+			if sm and sm.shader and sm.shader.resource_path.ends_with("clouds.gdshader"):
+				(n as MeshInstance3D).visible = false
+		print("BENCH fight sea off")
+	if "--bench-ab-ground" in OS.get_cmdline_user_args():  # (old, cut, flat, no sea: 45 frames each)
+		ab = GroundAb.new(bench.main.get_tree().root, m.world)
 	if "--bench-nohud" in OS.get_cmdline_user_args():  # (a probe: what the HUD's canvas costs the draw)
 		m.hud.visible = false
 		print("BENCH fight hud off")
@@ -235,6 +251,8 @@ func _camp() -> Array:
 				h.ak.use_e()
 			if wave_f == int(R_AFTER * 60.0):
 				h.ak.use_r()
+		if ab:
+			ab.frame(f)
 		var t0 := Time.get_ticks_usec()
 		await _step(1)
 		var now := Time.get_ticks_usec()
@@ -258,6 +276,8 @@ func _camp() -> Array:
 	_print_sections(stamp_us, "draw stamps (cpu)", fl.size())
 	_print_sections(stamp_gpu_us, "draw steps (gpu, each renderer stamp to the next)", stamp_frames, 40)
 	_print_sections(stamp_cpu_us, "draw steps (cpu, the same)", stamp_frames, 40)
+	if ab:
+		ab.report()
 	_print_casters()
 	_give_back()
 	return fl
@@ -347,6 +367,8 @@ func _add_steps(rd: RenderingDevice) -> void:
 	var gpu_all := int((rd.get_captured_timestamp_gpu_time(n - 1) - rd.get_captured_timestamp_gpu_time(0)) / 1000.0)
 	var cpu_all := rd.get_captured_timestamp_cpu_time(n - 1) - rd.get_captured_timestamp_cpu_time(0)
 	stamp_gpu_us[whole] = int(stamp_gpu_us.get(whole, 0)) + gpu_all
+	if ab:
+		ab.add_gpu(gpu_all)
 	stamp_cpu_us[whole] = int(stamp_cpu_us.get(whole, 0)) + cpu_all
 
 
