@@ -83,7 +83,7 @@ func run(h, main_node: Node) -> void:
 	Settings.reset_all()
 	_rebind_all()
 	await _match()
-	await _tutorial()
+	_tutorial()
 	_loading()
 	_static_text()
 	Settings.reset_all()
@@ -147,7 +147,7 @@ func _stale_in(texts: Array) -> Array:
 func _match() -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 3, "squad": 1, "tier": 0, "seed": 5, "no_drop": true})
+	m.start({"teams": 3, "squad": 1, "tier": 0, "seed": 5, "no_drop": true})
 	for i in 60:
 		m.step(1.0 / 60.0)
 	var p: Hunter = m.player
@@ -188,7 +188,7 @@ func _recast_keys() -> void:
 func _tutorial() -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	m.set_process(false)
 	var tu: Tutorial = m.tut
 	var texts: Array = []

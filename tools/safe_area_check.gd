@@ -142,7 +142,7 @@ func _hud() -> void:
 	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES  # the whole HUD: a new save gets it staged (HudReveal)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
+	m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
 	m.set_process(false)
 	main.current = m  # (the pause menu reads its options; the next screen frees it)
 	var rivals: Array = m.hunters.filter(func(h): return h.team != m.player.team)

@@ -44,7 +44,7 @@ func run(main: Node, what: String) -> void:
 	_hud(cam)
 	_ease(cam)
 	vp.queue_free()
-	var m := await _match(main)
+	var m := _match(main)
 	await _hud_live(main, m)
 	_cone(m)
 	_walk(m)
@@ -314,7 +314,7 @@ func _shots(main: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)  # (the screen fade from start-up still covers the view)

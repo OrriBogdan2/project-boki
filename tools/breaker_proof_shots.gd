@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 func _chain(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("bulwark"))
+	m.start(Match.arena_opts("bulwark"))
 	m.set_process(false)
 	var P: Hunter = m.player
 	P.fire_cd = 0.0

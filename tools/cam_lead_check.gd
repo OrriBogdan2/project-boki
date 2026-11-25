@@ -54,7 +54,7 @@ func run(main_node: Node, what: String) -> void:
 func _area(label: String, opts: Dictionary) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(opts)
+	m.start(opts)
 	m.set_process(false)
 	var p: Hunter = m.player
 	var cam: CamRig = m.cam
@@ -146,7 +146,7 @@ func _shots() -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
