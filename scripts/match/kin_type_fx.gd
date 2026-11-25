@@ -13,20 +13,20 @@ const LOOKS := {
 	"fire": {"col": "ff6a1a", "dots": {"n": 8, "speed": 2.2, "life": 0.9, "grav": -3.0, "size": 2.1, "spread": 80.0}},
 	"water": {"col": "2f9bff", "dots": {"n": 8, "speed": 4.5, "life": 0.55, "grav": 16.0, "size": 2.9, "spread": 55.0}},
 	"grass": {"col": "55d84a", "dots": {"n": 7, "speed": 1.8, "life": 1.0, "grav": 1.5, "size": 3.4, "spread": 180.0}},
-	"spore": {"col": "d8c27a", "dots": {"n": 5, "speed": 1.0, "life": 1.2, "grav": -0.8, "size": 5.7, "spread": 180.0}},
+	"spore": {"col": "9ccf6a", "dots": {"n": 5, "speed": 1.0, "life": 1.2, "grav": -0.8, "size": 5.7, "spread": 180.0}},
 	"electric":
-	{"col": "ffe53a", "streaks": {"n": 8, "speed": 12.0, "life": 0.18, "grav": 0.0, "size": 2.6, "spread": 180.0}},
+	{"col": "5f7fb8", "streaks": {"n": 8, "speed": 12.0, "life": 0.18, "grav": 0.0, "size": 2.6, "spread": 180.0}},
 	"ice": {"col": "7fe4ff", "streaks": {"n": 6, "speed": 5.0, "life": 0.5, "grav": 14.0, "size": 4.0, "spread": 70.0}},
-	"rock": {"col": "7a4f2a", "dots": {"n": 7, "speed": 3.5, "life": 0.5, "grav": 22.0, "size": 4.6, "spread": 40.0}},
+	"rock": {"col": "7a859f", "dots": {"n": 7, "speed": 3.5, "life": 0.5, "grav": 22.0, "size": 4.6, "spread": 40.0}},
 	"psychic":
 	{
-		"col": "c24dff",
+		"col": "bcebdf",
 		"dots": {"n": 4, "speed": 1.2, "life": 1.0, "grav": -1.5, "size": 1.8, "spread": 40.0},
 		"rings": [[1.1, 0.65], [1.9, 0.9]]
 	},
 	"flying":
 	{
-		"col": "cfe6ff",
+		"col": "6fe0cf",
 		"streaks": {"n": 5, "speed": 12.0, "life": 0.25, "grav": 0.0, "size": 2.0, "spread": 25.0, "fwd": true}
 	},
 	"dragon":
@@ -36,17 +36,17 @@ const LOOKS := {
 		"streaks": {"n": 4, "speed": 6.0, "life": 0.45, "grav": -4.0, "size": 2.9, "spread": 35.0}
 	},
 	"dark": {"col": "5a3d86", "dots": {"n": 6, "speed": 1.2, "life": 1.1, "grav": -0.5, "size": 6.2, "spread": 180.0}},
-	"poison": {"col": "a6e22e", "dots": {"n": 6, "speed": 1.6, "life": 0.9, "grav": -2.5, "size": 4.7, "spread": 60.0}},
+	"poison": {"col": "b98cff", "dots": {"n": 6, "speed": 1.6, "life": 0.9, "grav": -2.5, "size": 4.7, "spread": 60.0}},
 	"bug": {"col": "f0b030", "dots": {"n": 10, "speed": 3.0, "life": 0.8, "grav": 0.0, "size": 2.2, "spread": 180.0}},
 	"steel":
 	{
-		"col": "b4bfcc",
+		"col": "cbb48a",
 		"streaks": {"n": 5, "speed": 7.0, "life": 0.32, "grav": 0.0, "size": 4.2, "spread": 60.0, "fwd": true}
 	},
-	"fairy": {"col": "ffa8e0", "dots": {"n": 8, "speed": 1.4, "life": 1.1, "grav": -1.2, "size": 1.6, "spread": 180.0}},
+	"fairy": {"col": "cfdcff", "dots": {"n": 8, "speed": 1.4, "life": 1.1, "grav": -1.2, "size": 1.6, "spread": 180.0}},
 	"crystal":
-	{"col": "4fe8d0", "streaks": {"n": 5, "speed": 6.0, "life": 0.4, "grav": 0.0, "size": 3.6, "spread": 25.0}},
-	"sound": {"col": "ffd27a", "rings": [[0.8, 0.22], [1.3, 0.3], [1.8, 0.38]]},
+	{"col": "ff9fd0", "streaks": {"n": 5, "speed": 6.0, "life": 0.4, "grav": 0.0, "size": 3.6, "spread": 25.0}},
+	"sound": {"col": "6fb6ff", "rings": [[0.8, 0.22], [1.3, 0.3], [1.8, 0.38]]},
 }
 
 ## A Boki's type is its theme (KinParts.THEMES, what sp["type"] holds); each theme wears one look above.
