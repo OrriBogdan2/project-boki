@@ -104,7 +104,7 @@ func _names() -> void:
 		cues.append("garden_snack_" + texture)
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
-	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo, Show Ring, Relay, Kite, Lantern and snack patch cue exists (%d)"
+	ok(cues.all(func(c): return Sfx.ensure(c)), "every game and snack patch cue exists (%d)"
 			% cues.size())
 
 func _fishing() -> void:
