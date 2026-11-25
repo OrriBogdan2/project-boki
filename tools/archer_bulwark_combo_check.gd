@@ -273,8 +273,7 @@ func _archer_combos() -> void:
 	)
 	ok(
 		"pin reticle: no cursor ring and no bow glint (the line is the whole readout)",
-		float(AimKit.reticle(P).get("charge", 0.0)) < 0.0
-		and not HeroVfx.of(m).holds.has("%d/heavy_glint" % P.get_instance_id()),
+		float(AimKit.reticle(P).get("charge", 0.0)) < 0.0 and not K.fx.bow_glint.visible,
 		str(AimKit.reticle(P))
 	)
 	step(

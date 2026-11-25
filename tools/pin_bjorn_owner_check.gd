@@ -28,15 +28,13 @@ func off_line(from: Vector3, dir: Vector2, p: Vector3) -> float:
 	var d := Vector2(p.x - from.x, p.z - from.z)
 	return absf(d.x * dir.y - d.y * dir.x)
 
-## The widest visible shader look of the Hero VFX within `reach` m of `at` (its node: world place and width), or null.
-func flare_near(m: Match, at: Vector3, reach: float) -> MeshInstance3D:
-	var best: MeshInstance3D = null
-	for e: Dictionary in HeroVfx.of(m).live:
-		var node: MeshInstance3D = e["node"]
-		if node.visible and node.global_position.distance_to(at) < reach \
-				and (best == null or node.global_basis.get_scale().x > best.global_basis.get_scale().x):
-			best = node
-	return best
+## The first visible fletch burst of Hem's pool (its world place and width), or null.
+func burst_node(K: ArcherKit) -> MeshInstance3D:
+	for b in K.fx.bursts:
+		var node: MeshInstance3D = b["node"]
+		if node.visible:
+			return node
+	return null
 
 func pin() -> void:
 	var r := setup("archer", 7.0, "", true)
@@ -47,7 +45,6 @@ func pin() -> void:
 	var lv: int = r[5]
 	var K: ArcherKit = P.ak
 	P.equip("longbow", 0)
-	Sfx.listener = P.pos          # (the looks are drawn near the camera focus only)
 	step(m, 0.3)
 	_pin_no_early_release(m, P, T, K)
 	_pin_readout(m, P, T, K)
@@ -268,10 +265,9 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		float(AimKit.entry(P, "draw_mark").get("fill", -1.0)) > 0.0, "t %.3f" % P.draw_t)
 	var cue: Dictionary = AimKit.reticle(P)
 	ok("pin readout: no V and no UI: no cursor ring, no flare, no bow glint, all through the draw",
-		float(cue["charge"]) < 0.0 and float(cue["flare"]) == 0.0
-			and not HeroVfx.of(m).holds.has("%d/heavy_glint" % P.get_instance_id())
+		float(cue["charge"]) < 0.0 and float(cue["flare"]) == 0.0 and not K.fx.bow_glint.visible
 			and K.chg.is_empty() and not AimKit.shown(P, "draw_mark2"),
-		"%s chg %s" % [str(cue), str(K.chg)])
+		"%s glint %s chg %s" % [str(cue), K.fx.bow_glint.visible, str(K.chg)])
 	step(m, K.draw.perfect_t() + 0.1, aim)
 	ok("pin readout: after the last window the circle goes", not AimKit.shown(P, "draw_mark"), "t %.3f" % P.draw_t)
 	step(m, 0.2, aim)
@@ -304,9 +300,9 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	step(m, K.draw.stage_t().x + 0.05, aim)
 	P.inp["fire"] = false
 	m.step(DT)
-	var flash := flare_near(m, K.draw.bow_at(), 0.15)
+	var flash := burst_node(K)
 	var at := flash.global_position if flash != null else Vector3(999, 0, 999)
-	ok("pin readout: the perfect release burst (data 'perfect') sits on the aim line at the bow, with no cursor star",
+	ok("pin readout: the perfect release burst sits on the aim line at the bow, with no cursor star",
 		K.draw.perfect_now and flash != null and off_line(P.pos, d, at) < 0.05
 			and float(AimKit.reticle(P)["perfect"]) == 0.0,
 		"perfect %s off %.3f" % [K.draw.perfect_now, off_line(P.pos, d, at)])
@@ -404,11 +400,11 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	ok("pin heavy: it spawns its own projectile type (heavy), never an LMB arrow type",
 		heavy >= 1 and lmb_kinds == 0 and node != null and not (node.get_node("Core") as Node3D).visible,
 		"heavy %d lmb %d" % [heavy, lmb_kinds])
-	var burst := flare_near(m, K.bow_mouth(), 0.7)
-	var wide := burst.global_basis.get_scale().x if burst != null else 0.0
+	var burst := burst_node(K)
 	ok("pin heavy: a release burst at the bow's mouth, wider than the bow cues, with a screen kick",
-		burst != null and wide >= 1.2 and K.heavy_kicks == kicks0 + 1,
-		"scale %.1f kicks %d" % [wide, K.heavy_kicks - kicks0])
+		burst != null and burst.global_position.distance_to(K.bow_mouth()) < 0.6 and burst.scale.x >= 1.2
+			and K.heavy_kicks == kicks0 + 1,
+		"scale %.1f kicks %d" % [burst.scale.x if burst != null else 0.0, K.heavy_kicks - kicks0])
 	var flashed := 0.0
 	for i in 20:
 		m.step(DT)

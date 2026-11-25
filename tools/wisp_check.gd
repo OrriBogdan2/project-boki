@@ -504,7 +504,7 @@ func _summon_data() -> void:
 		if not row.has(KinLib.kin(id).size) or up < float(band[0]) or up > float(band[1]):
 			bad_ids.append(id)
 	ok(bad_ids.is_empty(), "summon: every species has a role x size window in the uptime band %s" % [bad_ids])
-	ok(KinSummon.times(KinLib.kin("cindle")) == Vector2(8, 60), "summon: Cindle (small bruiser) is out 8 s, rests 60 s")
+	ok(KinSummon.times(KinLib.kin("cindle")) == Vector2(7, 58), "summon: Cindle (own window) is out 7 s, rests 58 s")
 
 
 ## The Field Book card's summon row shows the numbers the summon uses, with the plain line its window picks.
@@ -565,7 +565,7 @@ func _summon() -> void:
 	KinSummon.anim_state(p, cs)
 	ok(cs["call"] == "call" and float(cs["call_t"]) < 0.05, "...and its Hunter's call gesture starts with the burst")
 	ok(k.tp_n > 0, "...put beside its hunter by a teleport, which the rig does not read as speed (%d)" % k.tp_n)
-	ok(k.ready_to_fight() and k.hp == k.max_hp and absf(s.left - 8.0) < 0.01, "...whole, on its AI, for its 8 s window")
+	ok(k.ready_to_fight() and k.hp == k.max_hp and absf(s.left - 7.0) < 0.01, "...whole, on its AI, for its 7 s window")
 	var lsh := k.brain.leash()
 	ok(lsh >= 8.0 and lsh <= 12.0, "...on a short leash (%.1f m)" % lsh)
 	ok(m.kins.filter(func(x: Kin): return x.owner_h == p and not x.wisp).size() == 1, "...one summon at a time")
@@ -578,9 +578,9 @@ func _summon() -> void:
 	ok(k.flat_dist(p) < 6.0 and s.out(), "...left 30 m behind it re-blooms beside you")
 	KinSummon.anim_state(p, cs)
 	ok(float(cs["call_t"]) > 0.25, "...without a second call gesture (%.2f s since the burst's)" % cs["call_t"])
-	_frames(8.0 + KinSummon.SHRINK_S)
+	_frames(7.0 + KinSummon.SHRINK_S)
 	ok(
-		k.wisp and k.state == "shoulder" and s.cd > 59.0 and s.cd <= 60.0,
+		k.wisp and k.state == "shoulder" and s.cd > 57.0 and s.cd <= 58.0,
 		"summon: the window ends, it shrinks back into a wisp, the cooldown runs (%.1f s)" % s.cd
 	)
 	k.render(DT, 1.0)
@@ -598,7 +598,7 @@ func _summon() -> void:
 	KinSummon.anim_state(p, cs)
 	ok(cs["call"] == "recall" and float(cs["call_t"]) < 0.05, "...and its Hunter's recall gesture starts with the fold")
 	_frames(KinSummon.SHRINK_S + 0.05)
-	ok(k.wisp and absf(s.cd - 60.0) < 0.2, "...full cooldown (%.1f s)" % s.cd)
+	ok(k.wisp and absf(s.cd - 58.0) < 0.2, "...full cooldown (%.1f s)" % s.cd)
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...and the wisp shows again after the fold")
 	s.cd = 0.0
 	p.downed = true
@@ -616,8 +616,8 @@ func _summon() -> void:
 	var foe: Hunter = m.hunters.filter(func(x: Hunter): return x.team != p.team)[0]
 	k.hurt(k.max_hp * 5.0, foe)
 	ok(
-		k.wisp and k.state == "shoulder" and absf(s.cd - 75.0) < 0.01,
-		"summon: killed by a rival, it turns back into a wisp, 75 s cooldown"
+		k.wisp and k.state == "shoulder" and absf(s.cd - 72.5) < 0.01,
+		"summon: killed by a rival, it turns back into a wisp, 72.5 s cooldown (58 x 1.25)"
 	)
 	s.cd = 0.0
 	KinSummon.press(p)
