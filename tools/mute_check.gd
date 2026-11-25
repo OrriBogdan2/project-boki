@@ -81,7 +81,7 @@ func _mute_button(view: Control) -> Button:
 func _match(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var mate: Hunter = m.hunters.filter(func(h): return h != m.player and h.team == m.player.team)[0]
 	var at: Vector3 = m.player.pos

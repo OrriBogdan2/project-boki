@@ -13,7 +13,7 @@ const MISS_WINDOW := 0.5   # s one aim roll holds
 
 const REST_S := 1.0   # s of standing with the stick neutral after which the stuck-hop timer starts over
 
-const KEYS := [      # the action inputs (sec_hold too: a step ending mid-hold must not hold a charge for ever)
+const KEYS := [      # the action inputs
 		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var human := false
@@ -163,6 +163,9 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if sid == "sec":
 		_rmb(m, tu)
 	if best == null:
+		if not tu.camps.coming.is_empty():
+			var ring: Vector3 = tu.camps.coming["at"]
+			if Vector2(p.pos.x - ring.x, p.pos.z - ring.z).length() > 8.0: goto.call(ring)  # (to the ring)
 		if sid == "summon" or sid == "pack":
 			_summon(m, tu)      # (the monster fell in a window called back early: the Boki still comes out again)
 		return

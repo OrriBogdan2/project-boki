@@ -138,7 +138,7 @@ func _match() -> void:
 	Save.d = d
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()

@@ -16,9 +16,9 @@ var tu: Tutorial
 var granting := false        # the tutorial is paying XP right now (any other XP is ignored)
 var ledger: Array = []       # this camp's monsters: {mb, to, paid}
 var count := 0               # how many the latest camp had
+var last_at := Vector3.INF   # where the camp last stood (the marker holds there while a fallen camp can't respawn yet)
 var told := false            # the first camp has been telegraphed (CampMark); later ones come at once
 var coming: Dictionary = {}  # the telegraphed camp: {sid, kinds, spots, at: marker spot, left: s to go}
-var last_at := Vector3.INF   # where the camp last stood (the marker holds there while a fallen camp can't respawn yet)
 
 func _init(t: Tutorial) -> void:
 	tu = t
@@ -102,8 +102,8 @@ func add(sid: String, kinds: Array) -> void:
 func _plan(sid: String, kinds: Array) -> Array:
 	var c: Dictionary = Content.rules("tutorial")["camps"].get(sid, {})
 	var ang := randf() * TAU
-	var spots: Array = []
 	var line: Array = row(kinds.size(), ang) if c.get("row", false) else []
+	var spots: Array = []
 	for i in kinds.size():
 		var at := Vector3.INF
 		if c.get("held", false):

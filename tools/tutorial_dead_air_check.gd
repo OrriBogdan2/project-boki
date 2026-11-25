@@ -14,6 +14,7 @@ const GAP_MAX := 4.0       # s: the longest the player may be left without a pro
 const BOT_FARM_S := 6.0    # s the farm bot takes over each step before it does it
 const SLOW_WAIT_S := 5.0   # s the slow player stands still at the start of each match step
 const QUIET_MAX := 8.0     # s: the longest a slow player may go with nothing new to go on
+const QUIET_SLACK := 0.25  # s: the nag fires at NAG_T; the tick that sees it counts, so a few over is no gap
 const HAMMER_BEAT_S := 0.8  # s one hammer swing of yours takes (farm_build.json)
 const MARKER_MOVE_M := 3.0  # m the marker has to shift to count as moving on
 const STARTERS := {"Lace": "archer", "Kael": "juggernaut", "Vex": "gunslinger"}
@@ -72,15 +73,15 @@ func _calm(fresh: bool, dt: float, where: String, at: float) -> void:
 		calm += dt
 		worst["quiet"] = maxf(float(worst.get("quiet", 0.0)), calm)
 		return
-	if calm > QUIET_MAX:
+	if calm > QUIET_MAX + QUIET_SLACK:
 		quiet.append("%s | %s | at %.1f s | %.1f s" % [where, last.get("sid", "?"), at - calm, calm])
 	calm = 0.0
 
 
 ## Whether the match tutorial shows the player something new this frame (the step or its line, the marker moving
-## on, the Boki leading, speaking or nagging).
+## on, the Boki leading, speaking or nagging, the player landing hits or progress on the step).
 func _match_fresh(m: Match, tu: Tutorial) -> bool:
-	var line := "%d|%s|%s" % [tu.step, tu.text, tu.label]
+	var line := "%d|%s|%s|%d" % [tu.step, tu.text, tu.label, tu.got + tu.hits]
 	var anchor: Vector3 = last.get("anchor", Vector3.INF)
 	var moved := (tu.target == Vector3.INF) != (anchor == Vector3.INF)
 	moved = moved or (anchor != Vector3.INF and anchor.distance_to(tu.target) > MARKER_MOVE_M)

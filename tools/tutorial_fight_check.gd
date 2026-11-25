@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	for id in STARTERS:
-		await _play(main, id)
+		_play(main, id)
 	print("TUTFIGHT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

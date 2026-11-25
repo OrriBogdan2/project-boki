@@ -22,7 +22,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	_rows()
-	var m: Match = await GROUPS.make_match(main)
+	var m: Match = GROUPS.make_match(main)
 	_pickups(m)
 	await _groups(m, main)
 	m.queue_free()
