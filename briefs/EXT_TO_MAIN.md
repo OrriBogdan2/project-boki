@@ -11302,3 +11302,5 @@ READY ext/farm-hunter-look-1125 90a701e579 (farm avatar is the Empty again; its 
 READY ext/merge-lane-n23d-1123 34db6c66df3d (PR #719: main merged, style/ruff ratchet fixed; shadow gate GREEN NEW-RED 0 at 1407fae878, 655 flags)
 READY ext/merge-lane-N1-1122 653c0989f9d0b3b6f3af0f4d32a24b8510982fe8 (PR #641: origin/main merged; only real conflict tools/base_life_check.gd, kept both the raising-leans part and main's left-alone part; 87 .uid add/add take main's; --check 0 fail, --base-life-check 0 fail, health --strict OK)
 READY ext/merge-lane-n23c-1123 26522ef26a (PR #710: main merged, lint/style ratchet fixed, Net 0.24.31; shadow gate GREEN NEW-RED 0, 658 flags, export 1085 MB)
+READY ext/anim-boki-own-clips-mms 3158eb5525 (bulk-rebase: origin/main merged in mechanically, was 5ca0948253; union 2 gen 0 files; the branch's own READY checks still apply)
+READY ext/merge-lane-M7-1121 fe0bfd301b (bulk-rebase: origin/main merged in mechanically, was d15e4fd63b; union 1 gen 0 files; the branch's own READY checks still apply)
