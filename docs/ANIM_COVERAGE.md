@@ -67,7 +67,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | ryzz | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 | sable | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 | tarek | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
-| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |  |
+| vex | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 
 ### Starter Boki
 
@@ -129,6 +129,54 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | cairnback | clip | clip | clip | clip | clip | clip | clip | clip |
 | hivara | clip | clip | clip | clip | clip | clip | clip | clip |
 | zephyrak | clip | clip | clip | clip | clip | clip | clip | clip |
+| casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
+| duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
+| floenatee | shared | shared | shared | shared | shared | shared | proc | proc |
+| gibbelle | shared | shared | shared | shared | shared | shared | proc | proc |
+| glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
+| glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
+| goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
+| moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
+| murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
+| nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
+| opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
+| scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
+| sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
+| spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
+| squalltross | shared | shared | shared | shared | shared | shared | proc | proc |
+| threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
+| tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
+| velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
+| hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
+| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
+| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
+| nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
+| orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| cindle | clip | clip | clip | clip | clip | clip | proc | proc |
+| puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
+| burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
+| zapple | clip | clip | clip | clip | clip | clip | proc | proc |
+| pebbit | clip | clip | clip | clip | clip | clip | proc | proc |
+| wisplet | clip | clip | clip | clip | clip | clip | proc | proc |
+| caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
+| glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
+| gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
+| heatherhorn | clip | clip | clip | clip | clip | clip | proc | proc |
+| kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
+| kilnbadger | clip | clip | clip | clip | clip | clip | proc | proc |
+| kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
+| lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
+| lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
+| marchleaf | clip | clip | clip | clip | clip | clip | proc | proc |
+| mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
+| nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
+| rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
+| selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
+| thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
+| umbrathere | clip | clip | clip | clip | clip | clip | proc | proc |
+| cairnback | clip | clip | clip | clip | clip | clip | proc | proc |
+| hivara | clip | clip | clip | clip | clip | clip | proc | proc |
+| zephyrak | clip | clip | clip | clip | clip | clip | proc | proc |
 
 Worst five, backlog-ready:
 
