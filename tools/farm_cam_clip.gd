@@ -95,7 +95,7 @@ func _open(zone: String) -> void:
 func _beds() -> void:
 	await _shot("start")
 	var bed: Vector3 = (h.plots[0] as Node3D).global_position
-	await _walk(bed + Vector3(0.0, 0, 1.6))
+	await _walk(bed + Vector3(0.0, 0, 1.6), null, "walk")
 	await _wait(0.6)
 	await _shot("beds")
 	await _orbit(-1.6)
@@ -121,10 +121,14 @@ func _hub() -> void:
 	await _shot("wall")
 
 
-## Walks to `goal` (xz) with the real keys, each frame held in the view's own terms.
-func _walk(goal: Vector3, chase: Node3D = null) -> void:
+## Walks to `goal` (xz) with the real keys, each frame held in the view's own terms. `shoot` names a frame taken on
+## the way, while the keys are down.
+func _walk(goal: Vector3, chase: Node3D = null, shoot := "") -> void:
 	var left := LEG_S * FPS
 	while left > 0 and Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length() > 0.5:
+		if not shoot.is_empty() and Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length() < 3.0:
+			await _shot(shoot)
+			shoot = ""
 		if chase != null:
 			goal = chase.global_position + Vector3(1.8, 0, 1.8)  # (a Boki that wanders: keep heading for it)
 		var way := Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).normalized().rotated(h.cam.yaw)
