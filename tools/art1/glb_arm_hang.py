@@ -57,7 +57,7 @@ def main():
             q = np.frombuffer(b, np.float32, a["count"] * 4, off).reshape(-1, 4).astype(np.float64)
             rest = np.array(j["nodes"][node].get("rotation", [0, 0, 0, 1]), np.float64)
             out = np.array([slerp(k / np.linalg.norm(k), rest, want[node]) for k in q], np.float32)
-            b[off:off + out.nbytes] = out.tobytes()
+            b[off : off + out.nbytes] = out.tobytes()
             if "min" in a:
                 a["min"] = out.min(0).tolist()
                 a["max"] = out.max(0).tolist()
