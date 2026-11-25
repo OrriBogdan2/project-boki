@@ -153,14 +153,15 @@ is, it is the hit circle.
 `--clarity-shots` prints `CLARITYREAD` (`tools/clarity_read.gd`): means per shown Hunter over the bot 3v3 frames (1080p
 pixels): body, nameplate, ring band, ring width vs body width, and the share of a rival's body pixels within 0.12 of
 the same body drawn with `side_rim` off ("kept"). It saves `read<f>_<i>_on/off.png` and `clarity_read.tsv`.
-rpg/rp GPU runs, before (origin/main b7258e5) -> after:
-| | before (2 runs) | after (2 runs) |
+GPU runs (rp workers), before (origin/main b7258e5, 2 runs) -> after (this branch's shader and plate; 4 runs, the last
+one the committed tree, the three before it also had the dropped ground-rim hue):
+| | before | after |
 |---|---|---|
-| rival colours kept | 52.6%, 55.6% | 62.8%, 60.4% |
-| nameplate px (x body) | 11841 (2.5), 10508 (2.4) | 6989 (1.6), 9425 (2.0) |
-| CLARITYCONTRAST (rim on vs off) | +29%, +42% | +65%, +39% |
-| ring band px / ring width vs body | ~606 / x1.0 | ~616-630 / x1.0-1.1 |
+| rival colours kept | 52.6%, 55.6% | 72.8% (committed); 62.8%, 60.4%, 56.7% (variant) |
+| nameplate px (x body) | 11841 (2.5), 10508 (2.4) | 8893 (1.7); 6989 (1.6), 9425 (2.0), 9825 (2.0) |
+| CLARITYCONTRAST (rim on vs off) | +29%, +42% | +39% (committed); +65%, +39%, +39% |
+| ring band px / ring width vs body | ~606 / x1.0 | ~608 / x1.0 |
 The bot fight is not repeatable (the same seed gives a different fight), so each run has different frames; the
 nameplate px count also depends on how many plates overlap. Kael and Cinder are red by nature and barely change;
 Vex (lime) keeps her body with a thin red edge: `docs/shots/vfx-rival-read/rival_bodies.png` (columns are different
-rivals; rows: before own colours, before as played, after own colours, after as played).
+rivals; rows: before own colours, before as played, after own colours, after as played; the after rows are the variant run with the dropped ground-rim hue).
