@@ -535,7 +535,10 @@ Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/im
 - A Hunter's hit takes its ability's weight from the rules' `hunters` table (arch -> lmb / rmb / dash / e / x,
   or a kit's own hit tag such as Tenzo's `rock`). The hit's `ab` tag names the ability; an untagged shot is the
   LMB. `--impact-weight-check` asserts every damaging ability of all 13 Hunters has a weight.
-- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a Boki, a monster, the world)
+- A summoned Boki's hit takes the rules' `boki` tier: its basic bite is light, a tagged hit (its ability, the throw,
+  the recall) is solid. Hits it takes, the Boki shield and the Merge shell use the same hold and flash numbers;
+  no Boki file sets its own freeze or flash (`--impact-weight-check` §9 and its `HITFEEL boki` row).
+- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a monster, the world)
   is light, or solid when it stuns, roots, lifts, knocks 8+ m/s or deals 8%+ of max HP.
 - No weight: ticks (`tick`, burns, falls, heat), monster hits, and slow-only touches under the solid line.
 - Heavy stays under one 10 fps frame (100ms), the longest hold in the reference footage.

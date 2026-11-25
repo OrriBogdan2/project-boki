@@ -123,3 +123,31 @@ Alternative not taken: the master's HD sword skinned to hand.R in place of the g
 **Restore branch (2026-11-17, ext/hunter-glb-restore-1117):** the restored e1 mesh (ca32bd97252) carried the same master swords (2440 triangles on the `*-v95c` materials, blade-shaped slabs at x 0.26..0.37). `glb_drop_mats.py kael.glb kael.glb '*-v95c'` took them out, so the restored picked Kael has one sword (the game's skinned one), like main's. Every other part, skin and the 54 clips are unchanged.
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): face-kael-1118 cand A_s2_FevHair texture-only: `python3 -I tools/art1/face_swap.py art/wardens/kael/kael.glb /home/boki/meshy/face-kael-1118/cand/A_s2_FevHair.glb /home/boki/meshy/kael-sword-1117/cand/A_keep_new.glb OUT.glb` blends the changed pixels into the embedded 4096 `v95` image (sword, rig, clips untouched). Re-run the same command on the rig-weights glb (PR #284) if it merges first.
+
+**Round 21 (2026-11-24, ext/hunter-round-kael-1124, plan /home/boki/gens/hunter-round-1124/kael/PLAN-1124o.md):**
+- Sword (kael.glb, the native path's prop source): the 0.9k-tri skinned slab (metal-sword, _dk, _edge, glow-sword,
+  leather-grip; flat colours on degenerate UVs, read as a black slab) is replaced by a Meshy image-to-3d sword (task
+  01a20e74-0cd4-75e5-9b8c-fbe018d02bfd, input = the kael_v2 master sheet's sword crop): 5.9k tris, its own 1024 px
+  texture (`kael_kael_sword_meshy.jpg`), one primitive `metal-sword` rigid on hand.R, fitted so guard face -> tip lies
+  exactly on the old blade (1.052 m; anchors and blade FX unchanged), width 0.21 m (old 0.18), thickness squashed to
+  0.05 m. Every other primitive, the skin, clips and images are byte-identical. Script:
+  `/home/boki/gens/hunter-round-1124/kael/sword/splice_sword.py kael.glb gen_A/model.glb OUT.glb 1024 0.55`.
+- Arms (kael_meshy.glb Image_0 only, built from main's texture, not from round 20's v3): the round-20 bone-segment mask
+  now runs 20 cm past the wrist, so the sword fist is dark red too; veins are the 3D-noise field with a low along-arm
+  frequency (s_along 3, s_round 60) so they run lengthwise and branch, 1.6 texels (orange, sword arm) / 1.3 (white,
+  off arm), no halo. Scripts: `/home/boki/gens/hunter-round-1124/kael/hands/` (`rast4.py live.glb 0.20`,
+  `edit12.py h1.jpg o_halo=0 o_hk=0 og=130 s_along=3 s_round=60 o_w=1.6 w_w=1.3`).
+
+**Round 22 (2026-11-24, ext/hunter-round-kael-1124, hair):** the black flecks on Kael's mane at the match camera were
+the painted ink shell (outline.gdshader): the raw Meshy glb has one material (`Material_0`) and no vertex colour, so the
+whole mesh, every thin hair strand included, took the ink line. `kael_meshy.glb` now has two primitives on the SAME
+vertex buffers: body (`Material_0`, 40,694 tris, unchanged) and hair (`hair-meshy`, 39,284 tris, same three images),
+so the hair takes WardenGlb's `hair` slot (NO_INK, hair shading + warden_look.json `slots.hair`). Positions, UVs,
+skin, clips and images are byte-identical; only the index buffer is split. Hair = neutral-white paint (luminance > 150,
+saturation < 28) above 1.0 m, majority-smoothed over welded neighbours (cloak cream is warm, sat > 55; face skin out).
+Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GLB Image_0.png mask.npy`,
+`split_hair.py GLB mask.npy OUT.glb`); re-run both on any new kael_meshy.glb.
+- Hair grade (same round): only the hair texels of Image_0 (the hair triangles rasterised in UV, grown 3 px into their
+  own padding) are graded to the kael_v2 turnaround's hair values: luminance median 212 -> 196, p5 177 -> 143,
+  p95 242 -> 229, chroma kept (silver with grey strand shading as in the ref; game view clipped-white hair pixels
+  20 % -> 0 %). `hair_grade.py r21.glb mask.npy Image_0.jpg`, then `set_image.py split.glb Image_0 Image_0.jpg OUT.glb`.

@@ -5,6 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--boki-type-colour-check": ["res://tools/boki_type_colour_check.gd", "boki_type_colour_check", null],
 	"--range-screen-check": ["res://tools/range_screen_check.gd", "range_screen_check", null],  # ability ends on screen
 	"--muzzle-check": ["res://tools/muzzle_check.gd", "muzzle_check", null],  # shots leave the weapon or hand
 	"--fog-ab-shots": ["res://tools/fog_ab_shots.gd", "fog_ab_shots", null],  # GPU: sight fog on/off, same frame
