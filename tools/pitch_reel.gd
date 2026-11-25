@@ -29,7 +29,8 @@ const RAID_DUOS := 3  # shot 9: teams of two
 const ESCAPE_CHARGE_LEFT := 4.0  # s of the uplink's charge left when shot 10 starts
 const CLOCK_LEFT_S := 840.0  # s on the match clock when a stepped shot starts (1e9 reads as junk)
 const KIT_GAP_M := 4.5  # m between the Hunter and its foe in the kit shot (both well inside the frame)
-const FIT_HALF := Vector2(10.8, 6.4)  # half the ground (m) the default camera frames at zoom 1, inside the cut's 1.08 push
+# half the ground (m) the default camera frames at zoom 1, inside the cut's 1.08 push
+const FIT_HALF := Vector2(10.8, 6.4)
 const FIT_PAD_X := 1.6  # m kept beside a fighter
 const FIT_PAD_Z := 2.4  # m kept above and below (a Hunter stands ~2 m tall up the screen)
 const FIT_MAX := 1.0
@@ -343,7 +344,8 @@ func _fit(at: Vector3) -> Vector3:
 		want = maxf(want, (absf(h.pos.x - fit_at.x) + FIT_PAD_X) / FIT_HALF.x)
 		want = maxf(want, (absf(h.pos.z - fit_at.z) + FIT_PAD_Z) / FIT_HALF.y)
 	want = minf(want, FIT_MAX)
-	fit_zoom = want if fit_zoom <= 0.0 else lerpf(fit_zoom, want, 1.0 - exp(-(9.0 if want > fit_zoom else 1.2) / FPS))
+	var rate := 9.0 if want > fit_zoom else 1.2
+	fit_zoom = want if fit_zoom <= 0.0 else lerpf(fit_zoom, want, 1.0 - exp(-rate / FPS))
 	m.set_meta("zoom_hold", fit_zoom)
 	return fit_at
 
