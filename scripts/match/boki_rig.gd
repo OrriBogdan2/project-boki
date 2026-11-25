@@ -376,7 +376,7 @@ const FRAME := {
 	},
 	"puddlet":
 	{
-		"head": Vector3(0, 0.209, -0.261),
+		"head": Vector3(0, 0.267, -0.295),
 		"top": 0.286,
 		"carry": Vector3(0, 0.271, -0.0591),
 		"ear_tip": Vector3(0.165, 0.343, -0.16),
@@ -393,7 +393,7 @@ const FRAME := {
 	},
 	"burrlet":
 	{
-		"head": Vector3(2.64e-17, 0.204, -0.141),
+		"head": Vector3(0, 0.213, -0.143),
 		"top": 0.276,
 		"carry": Vector3(2.64e-17, 0.349, -0.0104),
 		"ear_tip": Vector3(0.0725, 0.282, -0.0758),
@@ -866,8 +866,8 @@ const STRIDE := {
 	"umbrathere": [0.25, 0.60],
 	"duskapi": [0.36, 1.43],
 	"glaciyak": [0.35, 1.43],
-	"heatherhorn": [0.35, 1.43],
-	"kilnbadger": [0.34, 1.41],
+	"heatherhorn": [0.24, 1.20],
+	"kilnbadger": [0.39, 1.84],
 	"moundvark": [0.34, 1.41],
 	"tuatrune": [0.33, 1.35],
 	"moonloris": [0.35, 1.41],

@@ -15,7 +15,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
 | What | Reference (game area, then 1920x1080) | Ours |
 |---|---|---|
 | Player on screen | (985, 686) -> (946, 622): 49% across, 58% down | the match camera's own framing (camera.json) |
-| Wedge sides on screen | left side 18 deg above level, right side 23 deg below: ~185 deg of screen | 120 deg on the ground (`VIEW_COS` 0.5, `VIS_COS`; was 170 until 11-18, 106 before 11-12): a wide cone like the target feel, not the half-plane |
+| Wedge sides on screen | left side 18 deg above level, right side 23 deg below: ~185 deg of screen | 90 deg on the ground (`VIEW_COS` 0.7071, `VIS_COS`; was 120 until 11-23, 170 until 11-18, 106 before 11-12): a wide cone like the target feel, not the half-plane |
 | Wedge at the player | the line runs straight through the player, no lit circle behind | 2.0 m lit circle (`NEAR_SENSE`, `VIS_NEAR`; was 3.2) |
 | Edge line | ~3 px solid core, cyan peak about (45, 138, 180) on dim ground | none: a cone, not an outline (owner 11-17) |
 | Edge glow | 4-6 px into the lit side, none on the dim side | none: the lit side fades out over `VIS_SOFT` (1.6 m) inside the wedge's side |
@@ -31,7 +31,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
 - **Dim is a slight dark fog, partly grey, in every weather (owner 11-23).** The 11-20 fog was a full grey (the
   fogged ground sat at 0.37-0.63 of the lit luma and 32-156 degrees of hue from it); the first 11-23 answer, a flat
   0.82 dim, was too weak to read. The owner asked for something in between: "slight dark fog", grey not blue, like
-  Supervive. Two tunables, both in `RaidLook` and read by `vis_apply` (`shaders/vis.gdshaderinc`):
+  the reference. Two tunables, both in `RaidLook` and read by `vis_apply` (`shaders/vis.gdshaderinc`):
   `VIS_DARK` (albedo scale outside sight; 1 = no dimming) and `VIS_GREY` (share of the albedo pulled to its luma;
   0 = its own colours, 1 = full grey). The light's tint, the cool shadow side and the ambient are greyed by the same share
   as the albedo; the weather haze's colour is taken out in full; the cone is untouched. Default **B** (0.60 / 0.55).
@@ -64,7 +64,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
   haze by the fog share. The tier-0 void art around the islands is blue-violet in itself and is not part of
   the fog.
 
-- **The cone is 120 degrees.** Shots at 100, 120 and 140 on the same frame (`--vision-shots`, sheet in the job):
+- **The cone is 90 degrees (owner 11-23; 120 from 11-18).** Shots at 100, 120 and 140 on the same frame (`--vision-shots`, sheet in the job):
   see "Cone angle" below.
 - **The range circle is off screen.** Measured in the world it is the same size as ours (24 m), but our closer
   camera shows 11.8 m (standing) or 17 m (crouched) from the centre to the side, so the circle edge only shows when
@@ -73,7 +73,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
 - **A small lit circle stays behind you (2.0 m).** Someone touching your back is still seen; it is drawn as lit so
   the screen never lies about who you can see.
 - **A first-time line explains the dim side.** The first time a rival is hidden only by the wedge, or you swing
-  your aim 120 degrees within 0.6 s and the dim area sweeps, the hint lane says "You only see enemies in front of
+  your aim 90 degrees within 0.6 s and the dim area sweeps, the hint lane says "You only see enemies in front of
   you and near you" (`VisionHint`, through `Match._tips`): once per save, never with tips off or in the tutorial
   course. `--first-time-hint-check`.
 
@@ -82,8 +82,10 @@ Real-GPU shots on the same frame (stand, crouch, reveal, scout), `--vision-shots
 with cyan lines) against 100, 120 and 140 degrees with the grey fog. 100 reads as a narrow beam on the closer camera
 (a rival 50 degrees off your aim is already hidden); 140 is close to the old half-plane, the grey only shows a
 cone-shaped bite at the sides; 120 reads as a wide cone with a clear grey behind and beside you, and keeps the
-sweep-to-spot play (the rival at 165 degrees is hidden until you turn about 105 degrees). 120 is the default
-(`VIEW_COS` 0.5, `VIS_COS` 0.5). To change it set both together; `--vision-check` asserts they match.
+sweep-to-spot play (the rival at 165 degrees is hidden until you turn about 105 degrees). 120 was the default from 11-18; the owner set 90 on 11-23
+(`VIEW_COS` 0.7071, `VIS_COS` 0.7071). To change it set both together; `--vision-check` asserts they match.
+The shared aim line (`Match._update_aim`) and the kit lines (`AimKit.line`) take their direction from `aim_dir()`, the
+same vector as `vis_dir`, so they always run down the cone centre (`--vision-check`).
 
 ## Revealed rival
 A second owner frame, 4 s later, shows a rival past the wedge's side, drawn with her own soft lit circle while she
