@@ -110,3 +110,13 @@ Scripts, specs, renders: /home/boki/gens/hunter-round-1124/tenzo/C/.
   RightArm -5 deg abduct; run/Jump_Run thighs +3 deg spread; Attack stone arm lowered out in the wind-up (clear of the
   head), both arms swung apart in the smash (palms no longer inside the other forearm).
 - Image_0: dark/grey inner-crotch pants texels lifted to the outer plum (D/crotch.py, 66.6k texels, V 0.36 -> 0.40).
+
+### Round 32 (2026-11-25, job 20261125-083305-a1): seeing-stones teal glow
+- `tarek.glb` (contract file; on the native path only its `orbit_stones` props are used): the `glow-tarek` eye disc on
+  mesh `eye_stone` scaled x1.7 in its own plane (r 2.1 -> 3.5 cm; the rock's flat face reaches 5.3 cm). Only that
+  POSITION accessor's floats + its min/max changed (1 of 5306 bufferViews; JSON padded to the same length).
+  Tool: gens/hunter-round-1124/tenzo/F/disc.py.
+- `warden_look.json` tarek `bloom` on anchor_stones_0-2 (WardenFx.bloom, world-sized additive puffs): dolm teal
+  [0.36, 0.9, 0.72], alpha 0.40, 0.30 m, depth_test on (a stone turned away only rims; depth_test off washed the cobalt
+  rock teal: rejected). Halos unchanged. The screen-sized halos alone sat inside the brighter cobalt rock (round 27+)
+  and only lifted it to light blue at the long-lens judge view.
