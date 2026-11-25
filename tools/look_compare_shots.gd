@@ -35,7 +35,6 @@ func run(main_node: Node) -> void:
 	var foe2 := _hunter("b1", 1, "rimewright", "wisplet", _ground(base + Vector3(3.2, 0, 5.0)))
 	for h in [mate, foe, foe2]:
 		h.ctrl = "idle"
-		h.ai = null
 	p.teleport(base)
 	for _i in 90:
 		_purge()
