@@ -103,7 +103,7 @@ func _shots(out: String) -> void:
 		await main.fade.reveal(0.01)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{"teams": 1, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "god": true, "map": "skyreach", "length": 1e9}
 	)
 	m.set_process(false)

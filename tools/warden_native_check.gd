@@ -28,7 +28,7 @@ const SLOT_CASES := {
 	"dash": [{}, {"rolling": true}, "idle"],
 	"glide": [{"grounded": false}, {"grounded": false, "gliding": true}, "jump"],
 	"land": [{}, {"feel": Vector2(0.8, 0.0)}, "idle"],
-	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0}, "idle"],
+	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH}, "idle"],  # (a stagger; a chip hit only leans)
 	"downed": [{}, {"fall": 0.5}, "idle"],
 	"stomp": [{}, {"stomp": 0.4}, "idle"],
 }
@@ -114,9 +114,11 @@ func _states(main: Node, a: String) -> void:
 	# (every state carries "cast" like Hunter._anim_state's: without it WardenNative reads the state
 	# as not yet filled and ignores the swing; the idle case is the first read, the baseline
 	# the attack's swing_n 1 is counted against)
+	# (the walk at 1.5 m/s, or half the speed this Hunter's walk hands over to the run: Meeko's is under 1.5)
+	var walk := minf(1.5, 0.5 * float(WardenNative.entry(WardenGlb.art(a)).get("run_from", 3.0)))
 	var cases := [
 		["idle", {"cast": 99.0, "grounded": true}],
-		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
+		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -walk)}],
 		["run", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}],
 		["jump", {"cast": 99.0, "grounded": false, "vel": Vector3(0.0, 3.0, -4.0)}],
 		["crouch", {"cast": 99.0, "grounded": true, "crouch": 1.0}],

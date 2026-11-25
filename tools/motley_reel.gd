@@ -55,7 +55,7 @@ func _setup() -> void:
 	}
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:

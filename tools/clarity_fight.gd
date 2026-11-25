@@ -23,6 +23,7 @@ const BUDGET := {
 	"icon": 0.0,  # no world icon (Sprite3D) on a Hunter
 	"hud grip_icons": 6.0,  # in a fight the glove row shows only the merge-ready glow
 	"ring merge_look": 0.0,  # a ground ring means gameplay: the merge look wears none
+	"hud world_tip": 0.0,  # no hover card (HudHover.draw_world_tip) while you or a squadmate fights
 }
 
 
@@ -50,7 +51,7 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		"demo_kin_lv": "8:95"
 	}
 	o.merge({"arch": archs[0], "cls": Arch.weight(archs[0]), "weapon": Arch.signature(archs[0])}, true)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
