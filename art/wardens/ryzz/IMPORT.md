@@ -127,7 +127,7 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p3/tools/` (views.py, proj.py, swap.s
   all got the painted defaults plus the ink outline shell, which drew the black flecks in the hair. The three materials are now split into
   `hair-*`, `skin-*` and `leather-*` pieces plus the body (8 primitives, same vertices, triangles, weights and clips).
 - Image_3: repainted by Meshy nano-banana-pro edits of flat unlit views, projected back (texture set t6; gens and log in
-  `p4/gen_log.tsv`). Image_0 and Image_6 (face, eyes) are byte-identical.
+  `gen_log.tsv`). Image_0 and Image_6 (face, eyes) are byte-identical.
 - Not shipped: COLOR_0 alpha 0 everywhere removes the last outline dots, but also hides the shield shell, which reuses the ink width
   (outline.gdshader `ink_mask`, ShieldLook). Per-vertex room (a port of fit_warden ink_room) still left dots on the silhouette.
 Scripts: `~/gens/hunter-round-1124/sparkle/p4/tools/` (slot.py, verify.py, room.py, addcol.py).
