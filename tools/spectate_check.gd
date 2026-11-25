@@ -28,7 +28,7 @@ func setup() -> Array:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 4, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "sim_keep": true})
+	m.start({"teams": 2, "squad": 4, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "sim_keep": true})
 	m.set_process(false)
 	P = m.player
 	return m.hunters.filter(func(x): return x.team == P.team and x != P)
@@ -40,7 +40,7 @@ func settle(frames: int) -> void:
 
 func run(main_node: Node, mode: String = "check") -> void:
 	main = main_node
-	var mates: Array = await setup()
+	var mates: Array = setup()
 	var A: Hunter = mates[0]
 	var B: Hunter = mates[1]
 	var C: Hunter = mates[2]

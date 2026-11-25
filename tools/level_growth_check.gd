@@ -49,7 +49,7 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	var opts := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 31, "no_drop": true}
 	opts.merge({"arch": "thief", "cls": Arch.weight("thief")})
-	await m.start(opts)
+	m.start(opts)
 	m.set_process(false)
 	var pc: Hunter = m.player
 	var tip := LevelGrowth.tip(pc)
