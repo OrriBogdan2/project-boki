@@ -47,7 +47,7 @@ const T := {
 	# (move-speed bonuses: one MoveSpeed attribute in the data, so they add; slows multiply the total)
 	"haste_two_bonus_x": ["~", [1.49, 1.51], "x", "haste 0.35 + kin buff 0.15 add (1.55 if stacked)"],
 	"haste_bonus_slow_x": ["~", [0.80, 0.82], "x", "haste 0.35 under a 40% slow: 1.35 x 0.6"],
-	"haste_cap_mps": ["~", [6.95, 7.0], "m/s", "[game data] MaxMoveSpeed 700 uu/s"],
+	"haste_cap_mps": ["~", [8.07, 8.12], "m/s", "[game data] 700 uu/s x body_scale 1.16"],
 	"haste_clip_rate": ["~", [0.99, 1.01], "x", "clip rate / (speed / clip speed), worst Warden"],
 	"jump_input_frames": ["<=", 1.0, "frames", "press to lift-off, same sim step"],
 	"jump_apex": ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
@@ -1570,6 +1570,9 @@ func _dash_curves() -> void:
 			t *= float(p_v.ak.dash_feel()["time"])
 			rec("dash_curve_time", speeds.size() * DT / t)
 			rec("dash_curve_%s_exit_k" % id, float(speeds[-1]) / (want / t))
+		# a dash can queue a later step (Match.later): let it fire in its own kit, not the next one's
+		_clear_inp()
+		_steps(120)
 	_tender_glide()
 	p_v.reclass(cls_was, kit_was)
 
