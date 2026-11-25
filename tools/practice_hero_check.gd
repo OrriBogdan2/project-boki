@@ -33,7 +33,7 @@ func run(main: Node) -> void:
 		o.merge(areas[area], true)
 		var m := Match.new()
 		main.add_child(m)
-		await m.start(o)
+		m.start(o)
 		m.set_process(false)
 		for i in 5: await tree.process_frame
 		await _area(main, m, String(area))
@@ -42,7 +42,7 @@ func run(main: Node) -> void:
 	# a real match gets none of it
 	var rm := Match.new()
 	main.add_child(rm)
-	await rm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 77, "no_drop": true})
+	rm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 77, "no_drop": true})
 	rm.set_process(false)
 	ok(Practice.of(rm) == null, "a real match has no practice bar or picker")
 	rm.queue_free()

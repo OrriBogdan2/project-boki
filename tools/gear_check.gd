@@ -21,7 +21,7 @@ func run(main_node: Node) -> void:
 	_data()
 	_rolls()
 	_migration()
-	await _match()
+	_match()
 	_glove_combos()
 	print("GEARCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -115,7 +115,7 @@ func _migration() -> void:
 func _start(arch: String, seed_: int) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": seed_, "no_drop": true, "arch": arch, "cls": Arch.weight(arch)})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": seed_, "no_drop": true, "arch": arch, "cls": Arch.weight(arch)})
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
@@ -124,7 +124,7 @@ func _start(arch: String, seed_: int) -> Match:
 func _match() -> void:
 	# 1. every archetype starts with its signature weapon
 	for a in Arch.ids():
-		var m := await _start(String(a), 11)
+		var m := _start(String(a), 11)
 		var P: Hunter = m.player
 		ok("%s: starts with its signature %s" % [a, Arch.signature(String(a))], P.wid == Arch.signature(String(a)), P.wid)
 		var bots_ok := true
@@ -132,7 +132,7 @@ func _match() -> void:
 			if not Arch.weapon_ok(h.arch, h.wid): bots_ok = false
 		ok("%s match: every hunter holds their archetype's weapon" % a, bots_ok)
 		m.queue_free()
-	var m := await _start("archer", 5)
+	var m := _start("archer", 5)
 	var P: Hunter = m.player
 	# 2. gear effects
 	var hp0 := P.max_hp
@@ -169,7 +169,7 @@ func _match() -> void:
 	ok("Hotload hits harder", absf(float(P.wpn["dmg"]) - d0 * 1.10) < 0.01 * d0 + 0.001, "%.2f -> %.2f" % [d0, float(P.wpn["dmg"])])
 	ok("Deep Magazine is no use to the longbow, so it can't be taken", int(P.wpn["mag"]) == mag0)
 	ok("the weapon in hand is still the signature", P.wid == Arch.signature("archer"))
-	var rf := await _start("gunslinger", 6)
+	var rf := _start("gunslinger", 6)
 	var G: Hunter = rf.player
 	var gm0 := int(G.wpn["mag"])
 	G.add_perk("deepmag")

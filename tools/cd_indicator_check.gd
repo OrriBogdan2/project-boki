@@ -26,7 +26,7 @@ func run(main: Node) -> void:
 	for hero in HEROES:
 		var m := Match.new()
 		main.add_child(m)
-		await m.start(
+		m.start(
 			{
 				"teams": 2,
 				"squad": 1,
