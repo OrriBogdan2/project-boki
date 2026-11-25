@@ -10,30 +10,35 @@ extends "res://tools/remote_anim_check.gd"
 ## another team) as the same cue + ult_tag_foe at UltCue.DB_FOE, so the two tell apart by ear. Those rows
 ## run for ULT_ARCHS (3 Hunters).
 
-const NEAR_M := 3.0          # m: a cue's place on the watcher against where the caster's game put it
-const PAIR := Vector3(0.0, 0, 4.0)   # the guest stands this far from the caster (m)
+const NEAR_M := 3.0  # m: a cue's place on the watcher against where the caster's game put it
+const PAIR := Vector3(0.0, 0, 4.0)  # the guest stands this far from the caster (m)
 ## Cues that are not the cast's: the walk and the ambient ones play on their own on each game.
 ## The ultimate's team tag is the watcher's own side (ally or foe): _ult_tag asserts it.
 const NOT_CAST := ["step", "land", "ping", "tick", "ult_tag"]
-const ULT_ARCHS := ["archer", "mage", "thief"]      # the Hunters whose ultimate is also asserted by team
+const ULT_ARCHS := ["archer", "mage", "thief"]  # the Hunters whose ultimate is also asserted by team
 
-var rows: Array = []      # [name, position, dB]: every one-shot started on this game since the mark
+var rows: Array = []  # [name, position, dB]: every one-shot started on this game since the mark
+
 
 func _init() -> void:
 	tag = "SFXREMOTE"
 	guest_flag = "--sfx-remote-check=guest"
 
+
 func run(main_node: Node, shard := "") -> void:
 	Sfx.played.connect(_log)
 	await super.run(main_node, shard)
+
 
 func _sample() -> void:
 	if m and m.player:
 		Sfx.listener = m.player.pos
 
+
 func _log(sname: String, at, _db: float, _pitch: float) -> void:
 	if at != null:
 		rows.append([sname, at, _db])
+
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
@@ -42,12 +47,13 @@ func _host() -> void:
 		return _finish()
 	for arch in ARCHS:
 		for key in KEYS:
-			for held in ([false] if key in ["e", "r", "dash"] else [false, true]):
+			for held in [false] if key in ["e", "r", "dash"] else [false, true]:
 				await _cast_sfx(arch, key, held)
-	for arch in ULT_ARCHS:      # the ultimate (HunterKeys.ult_pressed; the check's "r" key is the Boki Merge)
+	for arch in ULT_ARCHS:  # the ultimate (HunterKeys.ult_pressed; the check's "r" key is the Boki Merge)
 		await _cast_sfx(arch, "x", false)
 		await _cast_sfx(arch, "x", false, true)
 	_finish()
+
 
 ## One cast, compared. A cue landing a frame either side of the mark/log window (a loaded box: the regate's
 ## two games share it with a whole suite) shows as a doubled or missing cue, so a mismatch is cast once more
@@ -64,6 +70,7 @@ func _cast_sfx(arch: String, key: String, held: bool, foe := false) -> void:
 		bad += 1
 	var verdict := "FAIL" if why != "" else "ok  "
 	print("%s %s %s: %d cues here, %d there %s" % [tag, verdict, what, res[1], res[2], why])
+
 
 func _cast_once(arch: String, key: String, held: bool, foe: bool) -> Array:
 	var P := m.player
@@ -87,7 +94,7 @@ func _cast_once(arch: String, key: String, held: bool, foe: bool) -> Array:
 		HunterKeys.ult_pressed(P)
 		await _run(DT)
 	elif key == "dash":
-		P.inp["dash"] = true      # (as the keyboard does: the sim takes it; _press calls do_dash outside it)
+		P.inp["dash"] = true  # (as the keyboard does: the sim takes it; _press calls do_dash outside it)
 		await _run(DT)
 	else:
 		await _press(key, held)
@@ -100,6 +107,7 @@ func _cast_once(arch: String, key: String, held: bool, foe: bool) -> Array:
 	if key == "x":
 		why += _ult_tag(arch, theirs, foe)
 	return [why, rows.size(), theirs.size()]
+
 
 ## "" when the watcher's cues match the caster's, else what differs: a cue it never played, one it played
 ## more often than the caster's game did, or one played away from where the caster's game put it.
@@ -126,17 +134,20 @@ func _diff(mine: Array, theirs: Array) -> String:
 					break
 	return "" if out.is_empty() else ("[" + "; ".join(out) + "]")
 
+
 func _suffix(held: bool, foe: bool) -> String:
 	var out := " held" if held else ""
 	if foe:
 		out += " (rival)"
 	return out
 
+
 ## Which side the watcher takes for a cast: only the ultimate rows pick one ("" keeps the game's own teams).
 func _side(key: String, foe: bool) -> String:
 	if key != "x":
 		return ""
 	return "foe" if foe else "ally"
+
 
 ## "" when the watcher heard the ultimate as the squad's or the enemy's: the cast's own cue and the team tag
 ## for that side, once each, at that side's level (the enemy's UltCue.DB_FOE, over the squad's UltCue.DB), and
@@ -156,13 +167,16 @@ func _ult_tag(arch: String, theirs: Array, foe: bool) -> String:
 		out.append("the other side's tag too")
 	return "" if out.is_empty() else (" [ult: " + "; ".join(out) + "]")
 
+
 func _counts(r: Array) -> bool:
 	return not NOT_CAST.any(func(w): return String(r[0]).contains(w))
+
 
 ## The walls an earlier cast left (Dolm's rocks) end with a sound on each game: they go before the next cast.
 func _clear_walls() -> void:
 	for w in m.verbs.walls.duplicate():
 		m.verbs._break_wall(w)
+
 
 # ------------------------------------------------------------------ the guest
 func _on_msg(topic: String, data, from: String) -> void:
@@ -183,6 +197,7 @@ func _on_msg(topic: String, data, from: String) -> void:
 				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": got})
 		return
 	super._on_msg(topic, data, from)
+
 
 ## The watcher's team for a cast: the caster's copy's (a teammate), or another one (a rival). The copy of the
 ## host's Hunter keeps the arch it was made with when the host reclasses it here, so it takes the cast's arch.

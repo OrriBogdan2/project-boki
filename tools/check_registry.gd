@@ -379,7 +379,7 @@ const CHECKS := {
 	"--cast-into-cast-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", null],
 	# dash -> ability rows, in four shards (each under the gate's 300 s cap)
 	"--dash-flow-1-check":
-		["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "archer,juggernaut,gunslinger,bulwark"],
+	["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "archer,juggernaut,gunslinger,bulwark"],
 	"--dash-flow-2-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "rimewright,ashwick,dolm"],
 	"--dash-flow-3-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "mage,dredge,tender"],
 	"--dash-flow-4-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "thief,ostra,gil"],
@@ -826,7 +826,7 @@ const CHECKS := {
 	"--online-feel-1-check": ["res://tools/online_feel_check.gd", "online_feel_check", "gunslinger"],
 	"--online-feel-2-check": ["res://tools/online_feel_check.gd", "online_feel_check", "juggernaut"],
 	"--online-feel-3-check": ["res://tools/online_feel_check.gd", "online_feel_check", "rimewright"],
-	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],     # second game, not gated
+	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],  # second game, not gated
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],  # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status

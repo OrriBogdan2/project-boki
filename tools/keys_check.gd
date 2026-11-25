@@ -21,18 +21,23 @@ var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
 
+
 func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
 	print("KEYCHECK %-58s %s  %s" % [label, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
 
-const SPILL_S := 0.9      # s: a kill dissolves first, then its drops spill (MobDissolve)
+
+const SPILL_S := 0.9  # s: a kill dissolves first, then its drops spill (MobDissolve)
+
 
 func step(m: Match, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
 		t += DT
+
 
 func build(seed_i: int, extra := {}) -> Match:
 	var m := Match.new()
@@ -43,22 +48,33 @@ func build(seed_i: int, extra := {}) -> Match:
 	m.set_process(false)
 	return m
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus|fewer|rebind runs one part while iterating
+	var only := ""  # --keys-part=carriers|chest|shrubling|bots|bonus|fewer|rebind runs one part while iterating
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--keys-part="): only = String(a).substr(12)
-	if only in ["", "carriers"]: await _carriers()
-	if only in ["", "chest"]: await _chest_and_keys()
-	if only in ["", "shrubling"]: await _shrubling()
-	if only in ["", "bots"]: _bots()
-	if only in ["", "bonus"]: await _bonus()
-	if only in ["", "fewer"]: await _fewer()
-	if only in ["", "card"]: _controls_card()
-	if only in ["", "rebind"]: await load("res://tools/rebind_keys_check.gd").new().run(self, main)
+		if String(a).begins_with("--keys-part="):
+			only = String(a).substr(12)
+	if only in ["", "carriers"]:
+		await _carriers()
+	if only in ["", "chest"]:
+		await _chest_and_keys()
+	if only in ["", "shrubling"]:
+		await _shrubling()
+	if only in ["", "bots"]:
+		_bots()
+	if only in ["", "bonus"]:
+		await _bonus()
+	if only in ["", "fewer"]:
+		await _fewer()
+	if only in ["", "card"]:
+		_controls_card()
+	if only in ["", "rebind"]:
+		await load("res://tools/rebind_keys_check.gd").new().run(self, main)
 	print("KEYCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
+
 
 # ------------------------------------------------------------------ 1. carriers
 func _carriers() -> void:
@@ -77,21 +93,26 @@ func _carriers() -> void:
 			carriers += int(r["carriers"])
 			elig += int(r["monsters"]) + int(r["shrublings"])
 			var want := mini(int(r["chests"]), int(r["monsters"]) + int(r["shrublings"]))
-			if int(r["carriers"]) != want: all_match = false
+			if int(r["carriers"]) != want:
+				all_match = false
 			var row := [sd, k, r["chests"], r["monsters"], r["shrublings"], r["carriers"], r["spilled_in"]]
 			var fmt := "KEYCHECK   seed %d region %-4s chests %d monsters %d shrublings %d carriers %d (spilled in %d)"
 			print(fmt % row)
 		ok("seed %d: carriers in each region equal its chests (or all its monsters)" % sd, all_match and chests > 0)
 		var spilled := 0
-		for k in rep: spilled += int(rep[k]["spilled_in"])
+		for k in rep:
+			spilled += int(rep[k]["spilled_in"])
 		ok(
-				"seed %d: the world holds one key per chest" % sd,
-				k_v.carriers.size() == mini(chests, elig + 0) or k_v.carriers.size() == chests,
-				"%d carriers, %d chests, %d spilled" % [k_v.carriers.size(), chests, spilled])
+			"seed %d: the world holds one key per chest" % sd,
+			k_v.carriers.size() == mini(chests, elig + 0) or k_v.carriers.size() == chests,
+			"%d carriers, %d chests, %d spilled" % [k_v.carriers.size(), chests, spilled]
+		)
 		var glints := k_v.carriers.filter(func(mb): return KeyCarry.glint_of(mb) != null).size()
 		ok(
-				"seed %d: every carrier wears a key glint" % sd, glints == k_v.carriers.size(),
-				"%d/%d" % [glints, k_v.carriers.size()])
+			"seed %d: every carrier wears a key glint" % sd,
+			glints == k_v.carriers.size(),
+			"%d/%d" % [glints, k_v.carriers.size()]
+		)
 		var ids := k_v.carriers.map(func(mb): return mb.nid)
 		ids.sort()
 		sets.append(ids)
@@ -100,13 +121,15 @@ func _carriers() -> void:
 		ok("seed %d: 1-3 Shrublings, all carriers" % sd, n_shrub >= 1 and n_shrub <= 3 and all_carry, "%d" % n_shrub)
 		var biomes_ok := true
 		for s in k_v.shrublings:
-			if not (KeyRun.rules()["shrubling"]["biomes"] as Array).has(m.world.biome_at(
-					s.pos.x, s.pos.z)): biomes_ok = false
-			if k_v.patches_near(s.pos, float(KeyRun.rules()["shrubling"]["sprint_r"])) < 3: biomes_ok = false
+			if not (KeyRun.rules()["shrubling"]["biomes"] as Array).has(m.world.biome_at(s.pos.x, s.pos.z)):
+				biomes_ok = false
+			if k_v.patches_near(s.pos, float(KeyRun.rules()["shrubling"]["sprint_r"])) < 3:
+				biomes_ok = false
 		ok("seed %d: Shrublings only in bloom/meadow/gloom/storm with 3+ patches near" % sd, biomes_ok)
 		m.queue_free()
 		await main.get_tree().process_frame
 	ok("carriers change between seeds", sets[0] != sets[1] or sets[1] != sets[2])
+
 
 # ------------------------------------------------------------------ 7. fewer chests
 func _fewer() -> void:
@@ -114,8 +137,10 @@ func _fewer() -> void:
 	var spots := at.map(func(p): return {"pos": p})
 	var kept := KeyChest.thin(spots)
 	var crowded_gone := not kept.any(func(c): return c["pos"] == at[2])
-	ok("thinning keeps chest.keep of the spots, the crowded one first out",
-			kept.size() == KeyChest.kept(5) and crowded_gone)
+	ok(
+		"thinning keeps chest.keep of the spots, the crowded one first out",
+		kept.size() == KeyChest.kept(5) and crowded_gone
+	)
 	ok("thinning is the same every time (no dice)", KeyChest.thin(spots) == kept)
 	for map_id in ["hollowcrown", "skyreach"]:
 		var m: Match = build(5, {"map": map_id})
@@ -124,25 +149,40 @@ func _fewer() -> void:
 		var caches: int = m.spawn_plan.active_of("cache").size()
 		var train := m.chests.filter(func(c): return c.has("ride")).size()
 		var map_n := m.chests.size() - vaults - caches - train
-		var info := "%s: map %d of %d spots, vaults %d, caches %d, train %d, total %d" % [
-				map_id, map_n, spots_n, vaults, caches, train, m.chests.size()]
+		var info := (
+			"%s: map %d of %d spots, vaults %d, caches %d, train %d, total %d"
+			% [map_id, map_n, spots_n, vaults, caches, train, m.chests.size()]
+		)
 		var pick := func(cat: String) -> int: return int(m.spawn_plan.cats[cat]["pick"][0])
-		ok("%s: chest.keep of the map's chests and caches, every vault" % map_id,
-				map_n == KeyChest.kept(spots_n) and caches == KeyChest.kept(pick.call("cache"))
-				and vaults == pick.call("vault"), info)
+		ok(
+			"%s: chest.keep of the map's chests and caches, every vault" % map_id,
+			(
+				map_n == KeyChest.kept(spots_n)
+				and caches == KeyChest.kept(pick.call("cache"))
+				and vaults == pick.call("vault")
+			),
+			info
+		)
 		m.queue_free()
 		await main.get_tree().process_frame
 	var tr: Match = build(5, {"training": true, "teams": 1})
 	var tr_spots: int = tr.world.chest_spots.size()
-	ok("training: chest.keep of its generated map's chests", tr.chests.size() == KeyChest.kept(tr_spots),
-			"%d of %d spots" % [tr.chests.size(), tr_spots])
+	ok(
+		"training: chest.keep of its generated map's chests",
+		tr.chests.size() == KeyChest.kept(tr_spots),
+		"%d of %d spots" % [tr.chests.size(), tr_spots]
+	)
 	tr.queue_free()
 	var tu: Match = build(5, {"tutorial": true, "teams": 1})
 	# (ext/tutorial-abilities dropped the chest step, so the tutorial island has no chest at all)
-	ok("tutorial: no chests (the tutorial has no chest step)", tu.chests.is_empty(),
-			"%d chests, the map has %d spots" % [tu.chests.size(), tu.world.chest_spots.size()])
+	ok(
+		"tutorial: no chests (the tutorial has no chest step)",
+		tu.chests.is_empty(),
+		"%d chests, the map has %d spots" % [tu.chests.size(), tu.world.chest_spots.size()]
+	)
 	tu.queue_free()
 	await main.get_tree().process_frame
+
 
 # ------------------------------------------------------------------ 2, 3, 4. chest, box, ground, carrier death
 func _chest_and_keys() -> void:
@@ -158,22 +198,26 @@ func _chest_and_keys() -> void:
 	p_v.chest_keys = 2
 	pr = KeyChest.prompt(p_v, c)
 	ok(
-			"with a key: the prompt offers to open it",
-			String(pr["kind"]) == "chest" and String(pr["label"]).contains("1 key"), String(pr["label"]))
+		"with a key: the prompt offers to open it",
+		String(pr["kind"]) == "chest" and String(pr["label"]).contains("1 key"),
+		String(pr["label"])
+	)
 	var gems0 := m.pickups.size()
 	Sfx.listener = c["pos"]
 	Sfx.last_played.clear()
 	m._open_chest(p_v, c)
 	ok("opening uses exactly one key", c["open"] and p_v.chest_keys == 1, "keys %d" % p_v.chest_keys)
 	var lid := ChestLoot.creak(ChestLoot.rarity_bonus(m, c["pos"]))
-	ok("the lid creaks by the chest's tier, not the pickup sound", Sfx.last_played.has(lid) and not Sfx.last_played.has(
-			"pickup"), lid)
+	ok(
+		"the lid creaks by the chest's tier, not the pickup sound",
+		Sfx.last_played.has(lid) and not Sfx.last_played.has("pickup"),
+		lid
+	)
 	m._open_chest(p_v, c)
 	ok("an open chest costs nothing more", p_v.chest_keys == 1)
 	ok("the chest pays out", m.pickups.size() > gems0)
 	# a second chest, hold it through the interact loop
-	var c2: Dictionary = m.chests.filter(func(x): return not x["open"] and not x.get(
-			"ride", false) and not x.get("free", false))[0]
+	var c2: Dictionary = m.chests.filter(func(x): return not x["open"] and not x.get("ride", false) and not x.get("free", false))[0]
 	p_v.teleport(c2["pos"] + Vector3(0.8, 0, 0))
 	p_v.vel = Vector3.ZERO
 	p_v.chest_keys = 0
@@ -190,8 +234,10 @@ func _chest_and_keys() -> void:
 	step(m, DT)
 	p_v.inp["interact"] = false
 	ok(
-			"one press of interact with a key opens it for one key, no hold",
-			c2["open"] and p_v.chest_keys == 0 and p_v.holding() != "chest", "keys %d" % p_v.chest_keys)
+		"one press of interact with a key opens it for one key, no hold",
+		c2["open"] and p_v.chest_keys == 0 and p_v.holding() != "chest",
+		"keys %d" % p_v.chest_keys
+	)
 	var free_c := {"free": true, "open": false}
 	ok("a free chest is still held open", String(KeyChest.prompt(p_v, free_c)["label"]).begins_with("Hold"))
 	# deathbox
@@ -207,7 +253,7 @@ func _chest_and_keys() -> void:
 	# on the ground
 	r.chest_keys = 0
 	BeltKeys.sync(r)
-	r.ctrl = "idle"      # it waits by the key, not wandering off an edge
+	r.ctrl = "idle"  # it waits by the key, not wandering off an edge
 	r.inp["move"] = Vector2.ZERO
 	var np := m.pickups.size()
 	m.drop("ckey", r.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)
@@ -219,33 +265,37 @@ func _chest_and_keys() -> void:
 	var k: KeyRun = m.keys
 	var car: Mob = k.carriers.filter(func(mb): return not (mb is Shrubling) and not mb.dead)[0]
 	var before := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
-	var bonus0 := k.bonus_given      # (the death may also roll a bonus key: KeyBonus)
+	var bonus0 := k.bonus_given  # (the death may also roll a bonus key: KeyBonus)
 	car.hurt(99999.0, p_v, {"src": "shot"})
 	step(m, SPILL_S)
 	var after := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	var bonus := k.bonus_given - bonus0
 	ok(
-			"a carrier drops its key when it dies", after == before + 1 + bonus and not KeyCarry.carries(car),
-			"%d -> %d (+%d bonus)" % [before, after, bonus])
+		"a carrier drops its key when it dies",
+		after == before + 1 + bonus and not KeyCarry.carries(car),
+		"%d -> %d (+%d bonus)" % [before, after, bonus]
+	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 ## The belt stack: at most 3 chest keys; past that a key stays on the ground and a box keeps the rest.
 ## KeyChest.count / take are what the utility belt shows and spends.
 func _cap_and_belt(m: Match, p_v: Hunter, r: Hunter) -> void:
 	var cap := KeyChest.cap()
-	r.ctrl = "idle"      # held still, so its own bot brain does not spend a key mid-test
+	r.ctrl = "idle"  # held still, so its own bot brain does not spend a key mid-test
 	r.inp["move"] = Vector2.ZERO
 	r.chest_keys = cap
 	for other in m.hunters:
 		if other != r:
-			other.teleport(r.pos + Vector3(30, 0, 30))     # (nobody else in grabbing range of the key)
+			other.teleport(r.pos + Vector3(30, 0, 30))  # (nobody else in grabbing range of the key)
 	var spot := r.pos
 	# only the key dropped here counts: a monster dying nearby in the wait drops its own loot (and key)
 	var ours := func() -> Array:
-		return m.pickups.filter(func(p):
-			return String(p["kind"]) == "ckey" and Vector3(p["pos"]).distance_to(spot) < 2.0)
-	m.drop("ckey", r.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)      # (no random toss: it stays in reach)
+		return m.pickups.filter(
+			func(p): return String(p["kind"]) == "ckey" and Vector3(p["pos"]).distance_to(spot) < 2.0
+		)
+	m.drop("ckey", r.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)  # (no random toss: it stays in reach)
 	step(m, 1.5)
 	var still_there: bool = ours.call().size() == 1
 	var held := r.chest_keys
@@ -253,9 +303,9 @@ func _cap_and_belt(m: Match, p_v: Hunter, r: Hunter) -> void:
 	ok("belt adapter: count", KeyChest.count(r, "chest") == cap)
 	ok("belt adapter: take spends keys", KeyChest.take(r, "chest", 2) == 2 and r.chest_keys == cap - 2)
 	ok("belt adapter: take never goes below zero", KeyChest.take(r, "chest", 9) == cap - 2 and r.chest_keys == 0)
-	r.belt = UtilityBelt.empty()      # a free belt slot too: a key type takes one (BeltKeys)
+	r.belt = UtilityBelt.empty()  # a free belt slot too: a key type takes one (BeltKeys)
 	for pk in ours.call():
-		r.teleport(pk["pos"] - Vector3(0, 0.3, 0))     # (the dropped key can roll out of reach while it waits)
+		r.teleport(pk["pos"] - Vector3(0, 0.3, 0))  # (the dropped key can roll out of reach while it waits)
 	step(m, 1.5)
 	ok("with room again it picks the key up", r.chest_keys == 1 and ours.call().is_empty(), "keys %d" % r.chest_keys)
 	p_v.chest_keys = 0
@@ -265,6 +315,7 @@ func _cap_and_belt(m: Match, p_v: Hunter, r: Hunter) -> void:
 	Life.smart_loot(m, r, box)
 	var kept := int(box["chest_keys"])
 	ok("looting a box past the cap leaves the rest in it", r.chest_keys == cap and kept == 2, "kept %d" % kept)
+
 
 # ------------------------------------------------------------------ 5. the Shrubling
 ## Gets S running: a light hit, then the hunter on its heels (3.5 m) for `secs`.
@@ -277,6 +328,7 @@ func _wake(m: Match, p_v: Hunter, s: Shrubling, secs: float) -> void:
 		t += 0.1
 		p_v.teleport(_ground_near(m, s.pos + Vector3(3.5, 0, 0)))
 
+
 ## Open ground (no grass) near `p` on the same island, or INF.
 func _open_near(m: Match, p: Vector3) -> Vector3:
 	var w := m.world
@@ -287,12 +339,19 @@ func _open_near(m: Match, p: Vector3) -> Vector3:
 			var z := p.z + sin(a) * r
 			var ix := int(floor(x))
 			var iz := int(floor(z))
-			if not w.inb(ix, iz) or w.is_void(x, z) or w.is_block(x, z) or w.bush.has(w.idx(ix, iz)) \
-					or w.island_of(x, z) != w.island_of(p.x, p.z):
+			if (
+				not w.inb(ix, iz)
+				or w.is_void(x, z)
+				or w.is_block(x, z)
+				or w.bush.has(w.idx(ix, iz))
+				or w.island_of(x, z) != w.island_of(p.x, p.z)
+			):
 				continue
-			if absf(w.ground_at(x, z) - p.y) > 0.3: continue
+			if absf(w.ground_at(x, z) - p.y) > 0.3:
+				continue
 			return Vector3(ix + 0.5, w.ground_at(ix + 0.5, iz + 0.5), iz + 0.5)
 	return Vector3.INF
+
 
 func _shrubling() -> void:
 	var m: Match = build(3, {"teams": 1, "god": true})
@@ -359,7 +418,7 @@ func _shrubling() -> void:
 		if s.ss == "flee":
 			seen_flee = true
 			peak = maxf(peak, Vector2(s.vel.x, s.vel.z).length())
-		p_v.teleport(_ground_near(m, s.pos + Vector3(4.0, 0, 0)))      # the hunter keeps pace
+		p_v.teleport(_ground_near(m, s.pos + Vector3(4.0, 0, 0)))  # the hunter keeps pace
 	ok("damage makes it flee", seen_flee, "moved %.1f m" % s.pos.distance_to(home))
 	ok("faster than a hunter on foot", peak > p_v.base_speed + 0.2, "%.2f vs %.2f" % [peak, p_v.base_speed])
 	ok("slower than a dash", peak < Hunter.DASH_SPEED * 0.5, "%.2f vs %.1f" % [peak, Hunter.DASH_SPEED])
@@ -367,9 +426,10 @@ func _shrubling() -> void:
 	p_v.teleport(_ground_near(m, s.pos + Vector3(60.0, 0, 0)))
 	step(m, 14.0)
 	ok(
-			"out of sight it dives into grass and hides again",
-			s.ss == "disguised" and m.world.in_bush(s.pos.x, s.pos.z),
-			"%s at %s" % [s.ss, str(s.pos.snapped(Vector3.ONE))])
+		"out of sight it dives into grass and hides again",
+		s.ss == "disguised" and m.world.in_bush(s.pos.x, s.pos.z),
+		"%s at %s" % [s.ss, str(s.pos.snapped(Vector3.ONE))]
+	)
 	step(m, 2.0)
 	var hide2 := s.pos
 	p_v.teleport(_ground_near(m, hide2 + Vector3(2.0, 0, 0)))
@@ -405,21 +465,26 @@ func _shrubling() -> void:
 	m.verbs.yank(s, to, 0.4)
 	step(m, 0.45)
 	ok(
-			"a grab drags it in", Vector2(s.pos.x - to.x, s.pos.z - to.z).length() < 1.2,
-			"%.2f m off" % Vector2(s.pos.x - to.x, s.pos.z - to.z).length())
+		"a grab drags it in",
+		Vector2(s.pos.x - to.x, s.pos.z - to.z).length() < 1.2,
+		"%.2f m off" % Vector2(s.pos.x - to.x, s.pos.z - to.z).length()
+	)
 	# a hit while disguised gives it away; killing it drops the key
 	s.hp = s.max_hp
 	var np := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	s.hurt(s.max_hp + 5.0, p_v, {"src": "shot"})
-	step(m, 0.3)      # (its key spills as the small body dissolves, before the player is near enough to take it)
+	step(m, 0.3)  # (its key spills as the small body dissolves, before the player is near enough to take it)
 	ok(
-			"it has low health and no attack",
-			s.dead and float(Data.MOBS["shrubling"]["dmg"]) == 0.0 and s.max_hp <= 60.0, "hp %.0f" % s.max_hp)
+		"it has low health and no attack",
+		s.dead and float(Data.MOBS["shrubling"]["dmg"]) == 0.0 and s.max_hp <= 60.0,
+		"hp %.0f" % s.max_hp
+	)
 	var nn := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	ok("catching it pays the key", nn == np + 1, "%d -> %d" % [np, nn])
 	ok("a hit uncovers a disguised one", _hit_reveal())
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 func _hit_reveal() -> bool:
 	var m: Match = build(3, {"teams": 1, "god": true})
@@ -431,14 +496,16 @@ func _hit_reveal() -> bool:
 	m.queue_free()
 	return good
 
+
 func _ground_near(m: Match, p: Vector3) -> Vector3:
 	var q := m.world.free_spot_near(p, [], 0.5, 0.4, 6.0)
 	return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
 
+
 # ------------------------------------------------------------------ 6. bots
 func _bots() -> void:
 	var m: Match = build(7, {"teams": 1, "squad": 1, "autoplay": true})
-	var b: Hunter = m.player      # (autoplay: the lone hunter is driven by the bot brain)
+	var b: Hunter = m.player  # (autoplay: the lone hunter is driven by the bot brain)
 	var c: Dictionary = m.chests.filter(func(x): return not x.get("ride", false) and not x.get("free", false))[0]
 	for mb in m.mobs:
 		if not mb.dead and not (mb is Blight):
@@ -449,7 +516,7 @@ func _bots() -> void:
 	b.chest_keys = 0
 	b.teleport(_ground_near(m, c["pos"] + Vector3(-12.0, 0, 0)))
 	var key_at := _ground_near(m, c["pos"] + Vector3(-17.0, 0, 3.0))
-	KeyCarry.drop_keys(m, key_at + Vector3(0, 0.6, 0), 1)      # the way a bonus key drops
+	KeyCarry.drop_keys(m, key_at + Vector3(0, 0.6, 0), 1)  # the way a bonus key drops
 	var open0 := m.chests.filter(func(x): return x["open"]).size()
 	var got_key := false
 	var t := 0.0
@@ -457,15 +524,16 @@ func _bots() -> void:
 	while t < 60.0 and not opened.call():
 		step(m, 0.5)
 		t += 0.5
-		if b.chest_keys > 0: got_key = true
+		if b.chest_keys > 0:
+			got_key = true
 	ok("a bot picks up a dropped (bonus) key", got_key or opened.call())
 	ok("then opens a chest with it, and spends exactly that key", opened.call() and b.chest_keys == 0, "%.0fs" % t)
 	# and a bot with no key does not stand at a locked chest
-	var c2: Dictionary = m.chests.filter(func(x): return not x["open"] and not x.get(
-			"ride", false) and not x.get("free", false))[0]
+	var c2: Dictionary = m.chests.filter(func(x): return not x["open"] and not x.get("ride", false) and not x.get("free", false))[0]
 	ok("a bot without a key has no chest goal", not BotKeys.chest_open_for(b, c2) or b.chest_keys > 0)
 	_given_up(m, b)
 	m.queue_free()
+
 
 ## A carrier the bot has given up on is left alone: the fight dropped it (no clear shot), or the walk
 ## did (no way there). The no-path clock follows a carrier that walks about instead of restarting.
@@ -478,8 +546,10 @@ func _given_up(m: Match, b: Hunter) -> void:
 	KeyCarry.mark(mb)
 	mb.pos = _ground_near(m, b.pos + Vector3(6.0, 0, 0))
 	var g := BotKeys.goal(m, b, Vector3.INF)
-	ok("a bot without a key goes for a carrier 6 m off",
-			not g.is_empty() and String(g[1]) == "keyhunt" and g[0] == mb.pos)
+	ok(
+		"a bot without a key goes for a carrier 6 m off",
+		not g.is_empty() and String(g[1]) == "keyhunt" and g[0] == mb.pos
+	)
 	b.ai["ignore"] = {"e": mb, "until": m.time + 4.0}
 	ok("not one its fight gave up on (no clear shot)", BotKeys.goal(m, b, Vector3.INF).is_empty())
 	b.ai.erase("ignore")
@@ -487,7 +557,7 @@ func _given_up(m: Match, b: Hunter) -> void:
 	b.ai["goal_kind"] = "keyhunt"
 	b.ai.erase("nopath")
 	var brain := Bot.new()
-	for i in 12:      # 2 s of no path while the carrier ambles 0.1 m a step
+	for i in 12:  # 2 s of no path while the carrier ambles 0.1 m a step
 		mb.pos.x += 0.1
 		b.ai["goal"] = mb.pos
 		brain._no_path(m, b)
@@ -496,14 +566,17 @@ func _given_up(m: Match, b: Hunter) -> void:
 	m.time += Bot.GIVE_UP_S
 	ok("and taken up again once the give-up runs out", not BotKeys.goal(m, b, Vector3.INF).is_empty())
 
+
 # ------------------------------------------------------------------ 7. bonus keys
 func _ckeys(m: Match) -> int:
 	return m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
+
 
 func _bonus() -> void:
 	await _surplus()
 	await _sources()
 	_never_sold()
+
 
 ## The surplus over six seeds: expected bonus keys against the locked chests, plus the real dice once.
 func _surplus() -> void:
@@ -530,11 +603,16 @@ func _surplus() -> void:
 	for share in shares:
 		mean += float(share)
 	mean /= float(shares.size())
-	print("KEYCHECK SURPLUS mean +%.1f%% over %d seeds (min +%.1f%%, max +%.1f%%)" % [
-			mean * 100.0, shares.size(), float(shares.min()) * 100.0, float(shares.max()) * 100.0])
+	print(
+		(
+			"KEYCHECK SURPLUS mean +%.1f%% over %d seeds (min +%.1f%%, max +%.1f%%)"
+			% [mean * 100.0, shares.size(), float(shares.min()) * 100.0, float(shares.max()) * 100.0]
+		)
+	)
 	ok("bonus keys: +20-30%% keys over chests on average (+%.1f%%)" % (mean * 100.0), mean >= 0.20 and mean <= 0.30)
 	var real := float(rolled) / maxf(1.0, float(chests_n))
 	ok("rolled for real: a surplus near that (+%.0f%%)" % (real * 100.0), real > 0.08 and real < 0.5)
+
 
 ## Every source fires (odds forced to 1 for the test), and a bonus key is an ordinary key on the ground.
 func _sources() -> void:
@@ -556,8 +634,11 @@ func _sources() -> void:
 			mb.hurt(mb.max_hp * 10.0 + 500.0, m.player, {"src": "shot"})
 			step(m, SPILL_S)
 		var want := 1 if kind_s == "monster" else 2
-		ok("a dead %s drops a bonus key" % kind_s, mb != null and m.keys.bonus_given == k0 + want,
-				"%d -> %d" % [k0, m.keys.bonus_given])
+		ok(
+			"a dead %s drops a bonus key" % kind_s,
+			mb != null and m.keys.bonus_given == k0 + want,
+			"%d -> %d" % [k0, m.keys.bonus_given]
+		)
 	for kind_s in ["pot", "crate", "barrel", "keg"]:
 		var brk := _break_of(m, kind_s)
 		var k0 := _ckeys(m)
@@ -578,6 +659,7 @@ func _sources() -> void:
 	await main.get_tree().process_frame
 	await _train_crate()
 
+
 ## The sky train runs on Skyreach: opening one of its crates can pay a key too.
 func _train_crate() -> void:
 	var m: Match = build(5, {"teams": 1, "god": true, "map": "skyreach"})
@@ -594,6 +676,7 @@ func _train_crate() -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+
 func _mob_of(m: Match, kind_s: String) -> Mob:
 	for mb in m.mobs:
 		if mb.dead or KeyBonus.mob_source(mb) != kind_s or m.world.is_void(mb.pos.x, mb.pos.z):
@@ -601,11 +684,13 @@ func _mob_of(m: Match, kind_s: String) -> Mob:
 		return mb
 	return null
 
+
 func _break_of(m: Match, kind_s: String) -> Dictionary:
 	for b in m.breaks:
 		if b["kind"] == kind_s and not b["dead"]:
 			return b
 	return {}
+
 
 ## Never for sale: no content table besides the key rules themselves lists a chest key.
 func _never_sold() -> void:
@@ -614,9 +699,10 @@ func _never_sold() -> void:
 		if not String(f).ends_with(".json") or f in ["keys.json", "chest_keys.json"]:
 			continue
 		var txt := FileAccess.get_file_as_string("res://content/rules/" + f)
-		if txt.contains("\"ckey\"") or txt.contains("chest_key"):
+		if txt.contains('"ckey"') or txt.contains("chest_key"):
 			listed.append(f)
 	ok("keys are never sold in shops", listed.is_empty(), ", ".join(listed))
+
 
 # ------------------------------------------------------------------ 7. the Controls card
 ## The key caps of a built card: [[actions, cap texts], ...] per row.
@@ -637,15 +723,18 @@ func _card_caps(id: String) -> Array:
 	v.free()
 	return out
 
+
 func _caps_match(rows: Array) -> bool:
 	for r in rows:
 		var want: Array = (r[0] as Array).map(func(a): return Settings.key_cap(String(a)))
-		if r[1] != want: return false
+		if r[1] != want:
+			return false
 	return true
+
 
 func _controls_card() -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/ui/controls_card.gd")
-	var lit := RegEx.create_from_string("\"(?:[A-Z0-9]|Space|Shift|Ctrl|[LRM]MB|Tab|Esc)\"")
+	var lit := RegEx.create_from_string('"(?:[A-Z0-9]|Space|Shift|Ctrl|[LRM]MB|Tab|Esc)"')
 	ok("the card script writes no key cap itself", lit.search(src) == null)
 	var all_slots := true
 	var all_caps := true

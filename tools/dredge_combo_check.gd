@@ -13,10 +13,13 @@ var fails := 0
 var n := 0
 var ak = null
 
+
 func ok(name: String, cond: bool, info := "") -> void:
 	n += 1
 	print("DREDGECHECK %-52s %s  %s" % [name, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -36,10 +39,14 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
-	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
-			rows_bad == 0, "%d failures" % rows_bad)
+	ok(
+		"item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
+		rows_bad == 0,
+		"%d failures" % rows_bad
+	)
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
 
 ## Taps the Deep Reach and steps through the coil-back and the flight (it grabs, misses or is stopped), then
 ## one frame more so a reel's first frame is drawn.
@@ -50,6 +57,7 @@ func _throw(m: Match, p: Hunter) -> void:
 		ak.step(m, ak.DT)
 		tw += ak.DT
 	ak.step(m, ak.DT)
+
 
 ## Item 31 (CastHold): from the throw until the miss or the end of the reel he keeps his height mid-air (no
 ## fall); while the hook flies out he walks at 15-25% of his walk; gravity is back once it ends.
@@ -76,7 +84,8 @@ func _hook_hold() -> void:
 	# (upper bound 0.26: the walk is timed 0.3 s after its start; it read exactly 0.25 on the lane, 0.25 on main)
 	ok(
 		"hook hold: while the hook flies out he walks at 15-25% speed",
-		k_v.flying and k >= 0.15 and k <= 0.26, "%.2f of %.1f m/s" % [k, walk]
+		k_v.flying and k >= 0.15 and k <= 0.26,
+		"%.2f of %.1f m/s" % [k, walk]
 	)
 	ak.step(m, 01.0)
 	p.inp["move"] = Vector2.ZERO
@@ -141,10 +150,11 @@ func _hook_hold() -> void:
 		drift = maxf(drift, absf(p.pos.y - y0))
 	ok(
 		"hook hold: mid-air his height holds from the throw to the end of the reel",
-		k_v.grapples >= 1 and k_v.arrivals >= 1 and drift <= 0.05, "grapples %d arrivals %d drift %.3f" % [
-			k_v.grapples, k_v.arrivals, drift]
+		k_v.grapples >= 1 and k_v.arrivals >= 1 and drift <= 0.05,
+		"grapples %d arrivals %d drift %.3f" % [k_v.grapples, k_v.arrivals, drift]
 	)
 	await ak.done(m)
+
 
 ## Item 33: through the wind-up an outline of the slam's area shows on the ground, for everyone, and it is the
 ## exact cone the slam hits: a foe just inside its edge is hit, one just outside is not, and only on the slam frame.
@@ -177,16 +187,23 @@ func _slam_tell() -> void:
 	var fist_up: bool = HeroVfx.of(m).plays.get("anchor_fist", 0) == 1 and lands
 	ok(
 		"anchor tell: a soft gold wedge of the hit cone for all (lit front = the wind-up); fist lands on the slam",
-		AimKit.shown(p, "e_tell") and bool(tell.get("all", false))
+		(
+			AimKit.shown(p, "e_tell")
+			and bool(tell.get("all", false))
 			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
-			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
-			and bool(tell.get("soft", false)) and float(tell.get("fill", -1.0)) > 0.0
+			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01
+			and tdir.distance_to(Vector2(1, 0)) < 0.02
+			and bool(tell.get("soft", false))
+			and float(tell.get("fill", -1.0)) > 0.0
 			and float(tell.get("fill", 2.0)) < 1.0
 			and (tell.get("col", Color.BLACK) as Color).is_equal_approx(Color("ffc832"))
-			and fist_up and ak.dmg(t) == 0.0,
-		"len %.1f deg %.0f fill %.2f fist %s" % [
-			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)),
-			float(tell.get("fill", -1.0)), fist_up]
+			and fist_up
+			and ak.dmg(t) == 0.0
+		),
+		(
+			"len %.1f deg %.0f fill %.2f fist %s"
+			% [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), float(tell.get("fill", -1.0)), fist_up]
+		)
 	)
 	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while k.wind > 0.03:
@@ -201,8 +218,8 @@ func _slam_tell() -> void:
 	)
 	# a stun in the wind-up stops the move: the tell and the falling fist go at once, and no slam
 	var v := HeroVfx.of(m)
-	v._process(1.0)             # (m.step leaves HeroVfx to the frame) the first fist has rested and faded
-	Sfx.listener = p.pos        # the camera on him, so the fist draws
+	v._process(1.0)  # (m.step leaves HeroVfx to the frame) the first fist has rested and faded
+	Sfx.listener = p.pos  # the camera on him, so the fist draws
 	k.cd["e"] = 0.0
 	p.ak.use_e()
 	ak.step(m, 0.1)
@@ -219,6 +236,7 @@ func _slam_tell() -> void:
 		"fist up %s, after the stun %s (anchors %d)" % [up, left, k.anchors]
 	)
 	await ak.done(m)
+
 
 ## Item 35: his own dash moves, a low clawing lunge on the ground and a pounce in the air, used by no other
 ## hero; each lands by the end of its 0.18 s dash and recovers no slower than the source, aiming and walking
@@ -253,13 +271,18 @@ func _dash_moves() -> void:
 		var lands := 0.0
 		for kf in keys:
 			if float((kf[1] as Dictionary).get("sq", 0.0)) >= 0.3 and float(kf[0]) > 0.0:
-				lands = float(kf[0])          # the squash he lands in
+				lands = float(kf[0])  # the squash he lands in
 				break
 		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + SRC_RECOVER_S
 	ok(
 		"dash moves: his own low lunge and air pounce, no other hero's, each fitting the dash",
-		ground_move == "dr_lunge" and air_move == "dr_pounce" and not others.has(ground_move)
-			and not others.has(air_move) and fits,
+		(
+			ground_move == "dr_lunge"
+			and air_move == "dr_pounce"
+			and not others.has(ground_move)
+			and not others.has(air_move)
+			and fits
+		),
 		"%s / %s, dash %.2f s" % [ground_move, air_move, dash_t]
 	)
 	# into_dash e: fire. Shift in the slam's wind-up barges at once, the fist still raised; the slam lands where
@@ -307,6 +330,7 @@ func _dash_moves() -> void:
 	)
 	await ak.done(m)
 
+
 ## Bug 26 pattern: the glider wins over the Anchor Drop. A fresh glide press in the air smash ends it (no hit) and
 ## he glides at the normal sink, never dragged down; after a ground slam a jump and glide is a normal glide.
 func _glide_wins() -> void:
@@ -336,8 +360,13 @@ func _glide_wins() -> void:
 		low = minf(low, p.pos.y)
 	ok(
 		"glide wins: a glide press in the air smash ends it and he glides at the normal sink",
-		diving and k.dive.is_empty() and p.gliding and k.quakes == q0
-			and low >= z0 - HunterMove.glide_sink * 0.3 - 0.35,
+		(
+			diving
+			and k.dive.is_empty()
+			and p.gliding
+			and k.quakes == q0
+			and low >= z0 - HunterMove.glide_sink * 0.3 - 0.35
+		),
 		"fell %.2f m in 0.3 s" % (z0 - low)
 	)
 	p.inp["glide"] = false
@@ -365,11 +394,13 @@ func _glide_wins() -> void:
 		low_g = minf(low_g, p.pos.y)
 	ok(
 		"glide wins: after the ground slam a jump and glide is a normal glide, not dragged down",
-		k.anchors >= 1 and p.gliding and low_g >= zg, "lowest %+.2f m from take-off" % (low_g - zg)
+		k.anchors >= 1 and p.gliding and low_g >= zg,
+		"lowest %+.2f m from take-off" % (low_g - zg)
 	)
 	p.inp["glide"] = false
 	p.inp["glide_btn"] = false
 	await ak.done(m)
+
 
 func _all() -> void:
 	var r: Array = ak.setup("dredge", 8.0, "", true)
@@ -391,7 +422,7 @@ func _all() -> void:
 		t.downed = false
 		t.dead = false
 		t.teleport(home + Vector3(8.0, 0, 0))
-		t.face = PI / 2.0     # facing away (west is +PI/2 away from P: east-looking is -PI/2)
+		t.face = PI / 2.0  # facing away (west is +PI/2 away from P: east-looking is -PI/2)
 		k.cd["rmb"] = 0.0
 		k.ch_rmb = 1.0
 		k.cd["e"] = 0.0
@@ -410,7 +441,8 @@ func _all() -> void:
 		p.fire_cd = 0.0
 		ak.aim_at(p, t.pos)
 	ok(
-		"dredge: heavy, shotgun, 3 barge charges", p.wid == "shotgun" and p.cls == "heavy" and p.max_dashes() >= 3.0,
+		"dredge: heavy, shotgun, 3 barge charges",
+		p.wid == "shotgun" and p.cls == "heavy" and p.max_dashes() >= 3.0,
 		"%s %s" % [p.wid, p.cls]
 	)
 	# --- the scattergun: a shot every 0.5s, one aim line
@@ -425,7 +457,8 @@ func _all() -> void:
 		ak.aim_at(p, home + Vector3(2.0, 0, 0))
 		m.step(ak.DT)
 		tf += ak.DT
-		if AimKit.shown(p, "spread"): cone_seen = true
+		if AimKit.shown(p, "spread"):
+			cone_seen = true
 	p.inp["fire"] = false
 	var cone: Dictionary = AimKit.entry(p, "spread")
 	ok(
@@ -481,7 +514,8 @@ func _all() -> void:
 	var reach_to: Vector3 = p.model.get_meta(WardenReach.TIP, Vector3.INF) if p.model else Vector3.INF
 	ok(
 		"reel: his own arm reaches to the foe (the model's reach tip on it)",
-		reach_to.distance_to(t.pos + Vector3(0, 0.95, 0)) < 0.5, "tip %s foe %s" % [reach_to, t.pos]
+		reach_to.distance_to(t.pos + Vector3(0, 0.95, 0)) < 0.5,
+		"tip %s foe %s" % [reach_to, t.pos]
 	)
 	var ghost := "%d/arm_ghost" % p.get_instance_id()
 	ok("reel: in the open no through-rock silhouette is drawn", not HeroVfx.of(k.m).holds.has(ghost))
@@ -502,7 +536,8 @@ func _all() -> void:
 	p.ak.on_dash(false)
 	ak.step(m, 0.15)
 	ok(
-		"reel: the barge still works", p.flat_dist(pos0) > 1.5 and p.dashes < p.max_dashes(),
+		"reel: the barge still works",
+		p.flat_dist(pos0) > 1.5 and p.dashes < p.max_dashes(),
 		"moved %.1f" % p.flat_dist(pos0)
 	)
 	var tw := 0.0
@@ -522,7 +557,7 @@ func _all() -> void:
 	k.cd["e"] = 0.0
 	var hp0: float = ak.dmg(t)
 	var at0 := p.pos
-	Sfx.listener = p.pos           # (the camera on him, so HeroVfx draws the stun swirl)
+	Sfx.listener = p.pos  # (the camera on him, so HeroVfx draws the stun swirl)
 	p.ak.use_e()
 	ak.step(m, 0.3)
 	var early := k.anchors
@@ -565,7 +600,7 @@ func _all() -> void:
 		w.level[w.idx(hx + 4, hz + dz)] = lv + 4
 	var g0 := k.grapples
 	_throw(m, p)
-	ak.step(m, 0.2)          # the reel under way
+	ak.step(m, 0.2)  # the reel under way
 	ok(
 		"cliff: the hook pierces a cliff face and hooks the foe behind it",
 		k.grapples == g0 + 1 and ak.dmg(t) >= 5.0 and p.flat_dist(t) < 7.5,
@@ -601,7 +636,8 @@ func _all() -> void:
 		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
 	)
 	m.verbs.walls.erase(wall)
-	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
+	if is_instance_valid(wall.get("node")):
+		(wall["node"] as Node).queue_free()
 	# --- owner rule, placed walls: Tenzo's ridge (his rocks) and Albert's raised shield stop the Hand too
 	reset.call()
 	var rock: Dictionary = HeroZones.rock(m, t, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
@@ -614,7 +650,8 @@ func _all() -> void:
 		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
 	)
 	m.verbs.walls.erase(rock)
-	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
+	if is_instance_valid(rock.get("node")):
+		(rock["node"] as Node).queue_free()
 	reset.call()
 	var albert: Hunter = m.make_hunter(
 		"AL", t.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"}
@@ -636,7 +673,8 @@ func _all() -> void:
 	for aw in m.verbs.walls.duplicate():
 		if aw.get("by") == albert:
 			m.verbs.walls.erase(aw)
-			if is_instance_valid(aw.get("node")): (aw["node"] as Node).queue_free()
+			if is_instance_valid(aw.get("node")):
+				(aw["node"] as Node).queue_free()
 	albert.queue_free()
 	m.hunters.erase(albert)
 	m.step(ak.DT)
@@ -698,7 +736,8 @@ func _all() -> void:
 	ak.step(m, 1.5)
 	ok(
 		"ally: they arrive safe (not Grounded)",
-		k.pull.is_empty() and not KitStatus.grounded(t2) and p.flat_dist(t2) < 2.5, "dist %.1f" % p.flat_dist(t2)
+		k.pull.is_empty() and not KitStatus.grounded(t2) and p.flat_dist(t2) < 2.5,
+		"dist %.1f" % p.flat_dist(t2)
 	)
 	t2.team = t2team
 	reset.call()
@@ -716,7 +755,8 @@ func _all() -> void:
 		tws += ak.DT
 		wmin = minf(wmin, p.flat_dist(t2))
 	ok(
-		"wisp: a downed hunter the hook passes is scooped up with the catch", p.flat_dist(t2) < w0 - 1.2,
+		"wisp: a downed hunter the hook passes is scooped up with the catch",
+		p.flat_dist(t2) < w0 - 1.2,
 		"wisp %.1f -> %.1f" % [w0, p.flat_dist(t2)]
 	)
 	t2.downed = false
@@ -747,20 +787,25 @@ func _all() -> void:
 		ak.step(m, ak.DT)
 		te += ak.DT
 		vy = minf(vy, p.vel.y)
-		if AimKit.shown(p, "e_land"): land_seen = true
-		if HeroVfx.of(k.m).holds.has("%d/dive" % p.get_instance_id()): anchor_seen = true
+		if AimKit.shown(p, "e_land"):
+			land_seen = true
+		if HeroVfx.of(k.m).holds.has("%d/dive" % p.get_instance_id()):
+			anchor_seen = true
 	var high: float = ak.dmg(t) - hp0
 	ok(
-		"air smash: straight down at once", vy <= -20.0 and absf(p.pos.x - home.x) < 0.4,
+		"air smash: straight down at once",
+		vy <= -20.0 and absf(p.pos.x - home.x) < 0.4,
 		"vy %.1f drift %.2f" % [vy, p.pos.x - home.x]
 	)
 	ok("air smash: the landing ring shows while you fall, the fist falls with you", land_seen and anchor_seen)
 	ok(
 		"air smash: it lands where you land, a ring of damage and stun",
-		k.quakes == q0 + 1 and high > 0.0 and t.stun_t > 0.5, "quakes %d stun %.2f" % [k.quakes - q0, t.stun_t]
+		k.quakes == q0 + 1 and high > 0.0 and t.stun_t > 0.5,
+		"quakes %d stun %.2f" % [k.quakes - q0, t.stun_t]
 	)
 	ok(
-		"air smash: height adds damage (6m: about +50%)", low > 20.0 and high >= low * 1.3 and k.last_quake_k > 1.4,
+		"air smash: height adds damage (6m: about +50%)",
+		low > 20.0 and high >= low * 1.3 and k.last_quake_k > 1.4,
 		"on foot %.0f from 6m %.0f k %.2f" % [low, high, k.last_quake_k]
 	)
 	reset.call()
@@ -777,10 +822,12 @@ func _all() -> void:
 		te += ak.DT
 	ok(
 		"air smash rank 3: the height bonus stays at +50% (the abyss is the rank's bonus)",
-		k.last_quake_k > 1.4 and k.last_quake_k < 1.55, "k %.2f" % k.last_quake_k
+		k.last_quake_k > 1.4 and k.last_quake_k < 1.55,
+		"k %.2f" % k.last_quake_k
 	)
 	ok(
-		"anchor rank 3: stun 1.5s (+0.1 a rank, and the rank's own +0.2)", absf(k._stun_t() - 1.5) < 0.01,
+		"anchor rank 3: stun 1.5s (+0.1 a rank, and the rank's own +0.2)",
+		absf(k._stun_t() - 1.5) < 0.01,
 		"stun %.2f" % k._stun_t()
 	)
 	p.slot_lv["kin"] = 1
@@ -811,7 +858,8 @@ func _all() -> void:
 		ak.aim_at(p, home + Vector3(2.0, 0, 0))
 		p.ak.use_e()
 		ak.step(m, 0.5)
-		if over: over_dmg = ak.dmg(t)
+		if over:
+			over_dmg = ak.dmg(t)
 	reset.call()
 	t.teleport(home + Vector3(8.0, 0, 0))
 	for dz in range(-2, 3):
@@ -897,11 +945,13 @@ func _all() -> void:
 	ak.step(m, 0.3)
 	var air_d := p.pos.x - home.x
 	ok(
-		"barge: in the air the same quick time, 35% further", air_quick > one * 1.2,
+		"barge: in the air the same quick time, 35% further",
+		air_quick > one * 1.2,
 		"air after %.2fs %.1f, ground %.1f" % [dash_t, air_quick, one]
 	)
 	ok(
-		"barge: further in the air than on the ground", air_d > ground_d * 1.15 and ground_d > 2.0,
+		"barge: further in the air than on the ground",
+		air_d > ground_d * 1.15 and ground_d > 2.0,
 		"ground %.1f air %.1f" % [ground_d, air_d]
 	)
 	# the air pounce is its own slot: source Brute Dash (Air) 12.5 s, 2 s less per rank, ground charges untouched
@@ -936,9 +986,11 @@ func _all() -> void:
 	var hp1 := p.hp
 	k.on_knock(t, false)
 	ok("passive: an assist stacks but does not heal", k.res == 2.0 and p.hp <= hp1 + p.max_hp * 0.03 + 0.5)
-	for i in 12: k.on_knock(t, false)
+	for i in 12:
+		k.on_knock(t, false)
 	ok(
-		"passive: capped at 10 stacks (+25%)", k.res == 10.0 and absf(p.max_hp - mh0 * 1.25) < 0.5,
+		"passive: capped at 10 stacks (+25%)",
+		k.res == 10.0 and absf(p.max_hp - mh0 * 1.25) < 0.5,
 		"res %.0f maxhp %.1f" % [k.res, p.max_hp]
 	)
 	p.downed = true
@@ -953,7 +1005,8 @@ func _all() -> void:
 	t.face = PI / 2.0
 	var front := k.outgoing(t, 10.0, {})
 	ok(
-		"passive: from behind +50%, from the front none", absf(behind - 15.0) < 0.01 and absf(front - 10.0) < 0.01,
+		"passive: from behind +50%, from the front none",
+		absf(behind - 15.0) < 0.01 and absf(front - 10.0) < 0.01,
 		"behind %.1f front %.1f" % [behind, front]
 	)
 	# --- rank 3: the Deep Reach refunds on a hit, pellet hits trim the barge recharge
@@ -963,7 +1016,8 @@ func _all() -> void:
 	_throw(m, p)
 	ok(
 		"deep reach rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
-		float(k.cd["rmb"]) < 9.6 * 0.5 + 0.5 and k.grapples >= 1, "cd %.1f" % float(k.cd["rmb"])
+		float(k.cd["rmb"]) < 9.6 * 0.5 + 0.5 and k.grapples >= 1,
+		"cd %.1f" % float(k.cd["rmb"])
 	)
 	p.dashes = 0.0
 	k.on_deal(t, 3.0, {"src": "shot"})
@@ -995,7 +1049,12 @@ func _all() -> void:
 	ak.step(m, 0.1)
 	ok(
 		"merge hold: dredge's reel ends with the merge, the rope is freed, nobody lands Grounded",
-		k.pull.is_empty() and (rope == null or not is_instance_valid(rope) or rope.is_queued_for_deletion()) and k.arrivals == ar0 and not KitStatus.grounded(t),
+		(
+			k.pull.is_empty()
+			and (rope == null or not is_instance_valid(rope) or rope.is_queued_for_deletion())
+			and k.arrivals == ar0
+			and not KitStatus.grounded(t)
+		),
 		"pull %s arrivals %d" % [not k.pull.is_empty(), k.arrivals - ar0]
 	)
 	KinMerge.end(p, "test")
@@ -1011,11 +1070,13 @@ func _all() -> void:
 	ok("merge hold: a merge is under way", ak.merge_now(p))
 	ak.step(m, 1.2)
 	ok(
-		"merge hold: dredge's Anchor wind-up is dropped, no slam mid-merge", k.wind <= 0.0 and k.anchors == an0,
+		"merge hold: dredge's Anchor wind-up is dropped, no slam mid-merge",
+		k.wind <= 0.0 and k.anchors == an0,
 		"wind %.2f anchors %d" % [k.wind, k.anchors - an0]
 	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 ## Upgrade parity (docs/heroes/dredge.md): per rank [RMB cd, dash recharge, E cd, E power, E stun, air pounce cd]
 ## against the source's tier II / III+IV numbers.
@@ -1025,25 +1086,53 @@ func _ranks() -> void:
 	var p: Hunter = r[1]
 	var k: DredgeKit = p.ak
 	var up: Array = []
-	for sl in ["sec", "dash", "kin"]: p.slot_lv[sl] = 1
+	for sl in ["sec", "dash", "kin"]:
+		p.slot_lv[sl] = 1
 	var pk := k.power("kin")
 	for rk in [1, 2, 3]:
-		for sl in ["sec", "dash", "kin"]: p.slot_lv[sl] = rk
+		for sl in ["sec", "dash", "kin"]:
+			p.slot_lv[sl] = rk
 		var cd_e: float = k.e_def()["cooldown"] * k.cd_k("kin")
-		up.append([k.rmb_def()["cooldown"] * k.cd_k("sec"), p.dash_regen(), cd_e, k.power("kin") / pk, k._stun_t(),
-				k.long_dash_cd()])
+		up.append(
+			[
+				k.rmb_def()["cooldown"] * k.cd_k("sec"),
+				p.dash_regen(),
+				cd_e,
+				k.power("kin") / pk,
+				k._stun_t(),
+				k.long_dash_cd()
+			]
+		)
 	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
-	ok("upgrade parity: Abyssal Hand cooldown 12 -> 10.3 -> 8.7 (-2.5s twice on the source's 18)",
-			near.call(up[1][0], 10.33) and near.call(up[2][0], 8.67), str(up))
-	ok("upgrade parity: Barge recharge 10 -> 8.2 -> 6.4 (-1.25s twice on the source's 7)",
-			near.call(up[1][1], 8.21) and near.call(up[2][1], 6.43), str(up))
-	ok("upgrade parity: air pounce 12.5 -> 10.5 -> 8.5 (-2s twice, the source's own numbers)",
-			near.call(up[1][5], 10.5) and near.call(up[2][5], 8.5), str(up))
-	ok("upgrade parity: Anchor cooldown 7 -> 5.5 -> 4.1, damage +20% / +40%, stun +0.1 / +0.4",
-			near.call(up[1][2], 5.54) and near.call(up[2][2], 4.08)
-			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4)
-			and near.call(up[1][4] - up[0][4], 0.1) and near.call(up[2][4] - up[0][4], 0.4), str(up))
+	ok(
+		"upgrade parity: Abyssal Hand cooldown 12 -> 10.3 -> 8.7 (-2.5s twice on the source's 18)",
+		near.call(up[1][0], 10.33) and near.call(up[2][0], 8.67),
+		str(up)
+	)
+	ok(
+		"upgrade parity: Barge recharge 10 -> 8.2 -> 6.4 (-1.25s twice on the source's 7)",
+		near.call(up[1][1], 8.21) and near.call(up[2][1], 6.43),
+		str(up)
+	)
+	ok(
+		"upgrade parity: air pounce 12.5 -> 10.5 -> 8.5 (-2s twice, the source's own numbers)",
+		near.call(up[1][5], 10.5) and near.call(up[2][5], 8.5),
+		str(up)
+	)
+	ok(
+		"upgrade parity: Anchor cooldown 7 -> 5.5 -> 4.1, damage +20% / +40%, stun +0.1 / +0.4",
+		(
+			near.call(up[1][2], 5.54)
+			and near.call(up[2][2], 4.08)
+			and near.call(up[1][3], 1.2)
+			and near.call(up[2][3], 1.4)
+			and near.call(up[1][4] - up[0][4], 0.1)
+			and near.call(up[2][4] - up[0][4], 0.4)
+		),
+		str(up)
+	)
 	await ak.done(m)
+
 
 ## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
 ## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop
@@ -1059,7 +1148,7 @@ func _parity_gun() -> void:
 	var from := p.pos
 	var v0 := k.volleys
 	var t := 0.0
-	var heads: Array = []            # the mean flight direction of each volley, as it leaves
+	var heads: Array = []  # the mean flight direction of each volley, as it leaves
 	var reach := 0.0
 	var seen := {}
 	while t < 1.02:
@@ -1090,8 +1179,7 @@ func _parity_gun() -> void:
 		"%d volleys, %.1f m/s of %.1f" % [k.volleys - v0, walk, p.base_speed]
 	)
 	var turned: bool = heads.size() >= 2 and (heads[0] as Vector2).x > 0.9 and (heads[-1] as Vector2).y < -0.9
-	ok("parity gun: each volley is fanned on the cursor's direction at its shot (east, then north)", turned,
-			str(heads))
+	ok("parity gun: each volley is fanned on the cursor's direction at its shot (east, then north)", turned, str(heads))
 	ok("parity gun: the slugs stop at 6.3 m with the cursor at 2 m", absf(reach - 6.3) < 0.5, "%.2f m" % reach)
 	var keys: Array = KMovesPair.MOVES["dr_shot"]["keys"]
 	ok(

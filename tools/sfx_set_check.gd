@@ -463,25 +463,34 @@ func _garden_names() -> void:
 	var named := seen.size() >= 12 and silent.is_empty()
 	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
 
+
 ## 10. The carry cues: on file, capped, the take carrying, and wired where the swap, claim and steal happen.
 func _carry() -> void:
-	var re := RegEx.create_from_string("\"(carry_[a-z_]+)\"")
+	var re := RegEx.create_from_string('"(carry_[a-z_]+)"')
 	var names := []
 	for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/match/carry_sfx.gd")):
 		if not names.has(hit.get_string(1)):
 			names.append(hit.get_string(1))
 	var wrong := names.filter(func(n): return not Sfx.ensure(n) or not Sfx.MIN_GAP.has(n))
-	ok(names.size() == 5 and wrong.is_empty(),
-			"carry: %d cues on file with a MIN_GAP (wrong: %s)" % [names.size(), wrong])
+	ok(
+		names.size() == 5 and wrong.is_empty(),
+		"carry: %d cues on file with a MIN_GAP (wrong: %s)" % [names.size(), wrong]
+	)
 	var reach: float = Sfx.sound_reach.get("carry_take", 0.0)
 	ok(reach > Sfx.hear_range and reach <= REACH_MAX, "carry: the thief's take carries %.0f m" % reach)
-	var calls := {"scripts/match/match.gd": "CarrySfx.swap(", "scripts/match/capture.gd": "CarrySfx.claim(",
-			"scripts/kin/kin_track.gd": "CarrySfx.stolen(", "scripts/match/life.gd": "CarrySfx.from_box("}
+	var calls := {
+		"scripts/match/match.gd": "CarrySfx.swap(",
+		"scripts/match/capture.gd": "CarrySfx.claim(",
+		"scripts/kin/kin_track.gd": "CarrySfx.stolen(",
+		"scripts/match/life.gd": "CarrySfx.from_box("
+	}
 	var unwired := calls.keys().filter(func(f): return not _src(f).contains(calls[f]))
 	ok(unwired.is_empty(), "carry: swap, claim, steal and deathbox paths play the cues (missing: %s)" % [unwired])
 
+
 static func _src(path: String) -> String:
 	return FileAccess.get_file_as_string("res://" + path)
+
 
 ## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
 func _ult_cues() -> void:
@@ -505,9 +514,17 @@ func _ult_cues() -> void:
 	var wired := press.contains("UltCue.cast(k)") and cue.contains('"ucast"')
 	wired = wired and match_src.contains('"ucast": UltCue.net_in')
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
-	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2 and cue.count("Sfx.play_foe(") == 2
-			and cue.count(", DB_FOE)") == 2 and UltCue.DB_FOE > UltCue.DB and AudioServer.get_bus_index("SFXFoe") >= 0,
-			"your team's cue and tag play at DB, a rival's the same sounds at DB_FOE (louder) on the SFXFoe bus")
+	ok(
+		(
+			cue.count("m.sfx(") == 2
+			and cue.count(", DB)") == 2
+			and cue.count("Sfx.play_foe(") == 2
+			and cue.count(", DB_FOE)") == 2
+			and UltCue.DB_FOE > UltCue.DB
+			and AudioServer.get_bus_index("SFXFoe") >= 0
+		),
+		"your team's cue and tag play at DB, a rival's the same sounds at DB_FOE (louder) on the SFXFoe bus"
+	)
 	var draw_src := FileAccess.get_file_as_string("res://scripts/match/aim/aim_draw.gd")
 	var tell_ok := Sfx.ensure("tell_foe") and Sfx.MIN_GAP.has("tell_foe") and TellCue.DB_BIG < UltCue.DB
 	tell_ok = tell_ok and draw_src.contains("TellCue.aim(")
