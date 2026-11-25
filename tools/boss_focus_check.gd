@@ -47,7 +47,7 @@ func run(main: Node) -> void:
 			"squad": 1,
 			"tier": 0,
 			"length": 1e9,
-			"seed": 21,
+			"seed": 22,
 			"no_drop": true,
 			"fresh_t": 0.0,
 			"demo_kin": "cindle"
