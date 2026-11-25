@@ -141,3 +141,12 @@ clip becomes rest * one curl about the palm-width axis (palm = the side facing t
 (Middle2 up to 95 deg, mixed axes), which crumpled round 4's re-weighted paws; round 3's R curl axis was flipped (thumb-side sign).
 geo_check vs round 3: Attack paws into each other 1.4 -> 0 cm, run cloth into R paw 3.2 -> 2.4 (live 2.5), run cloth into L paw
 1.0 -> 0, Jump_Run cloth into paws 3.4/2.8 -> 3.0/2.5; Crouch cloth into R forearm 2.9 -> 3.2 (live 3.0). Thumb keys unchanged.
+
+## 11-25 round 6: Crouch R arm and run L arm out (keys only; mesh, skin, textures byte-identical)
+Tool (job folder, not in the repo): `/home/boki/gens/hunter-round-1124/meeko/r6/tools/keys_r6.py` (keys_r3 ops, but every ancestor is
+sampled at the key's time, so tracks with other key counts are read right). Ops: `push Crouch_Walk_with_Torch RightArm 10`,
+`push Crouch_Walk_with_Torch RightForeArm 18`, `push run LeftArm 6`. geo_check vs round 5: Crouch cloth into R forearm 3.2 -> 0.5 cm
+(live 3.0), cloth into R paw 2.9 -> 1.2, torso into R forearm 4.0 -> 1.7 (held worst 4.0 -> 3.8); run L forearm into torso 1.6 -> 1.4;
+no pair worse. Stretch Crouch 13.7x / run 10.7x unchanged. Tried and dropped: Idle thighs 6/8 deg apart (cape hem into shins
++0.4/+1.0 cm), any R-arm push in run (R forearm into torso 2.5 -> 4.6-5.0), Jump_Run arm pushes (wing into R paw +0.9),
+Attack wing yaw damp 30/50 % (wing into back +0.5-2.3 cm, and the A7-A9 fault is the chest's forward pitch, not yaw).
