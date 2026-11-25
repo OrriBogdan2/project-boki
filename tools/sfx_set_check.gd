@@ -175,7 +175,7 @@ func run(main: Node) -> void:
 	_boss_moves()
 	_cc_cues()
 	_inv_cues()
-	await _steps(main)
+	_steps(main)
 	_rank_cues()
 	_barks()
 	_ambience()
@@ -1450,12 +1450,12 @@ func _style_rows(m: Match) -> void:
 		if not styles.has(st):
 			styles.append(st)
 	var rules: Dictionary = Content.rules(StepSurface.RULES)
-	var bad := []
+	var bad_styles := []
 	for st in styles:
 		if not rules["styles"].has(st) or not known.has(StepSurface.for_style(st)):
-			bad.append(st)
-	var good: bool = bad.is_empty() and known.has(String(rules["default"]))
-	ok(good, "every biome style maps to a known step set (%s; unmapped %s)" % [styles, bad])
+			bad_styles.append(st)
+	var good: bool = bad_styles.is_empty() and known.has(String(rules["default"]))
+	ok(good, "every biome style maps to a known step set (%s; unmapped %s)" % [styles, bad_styles])
 	ok(rules["styles"].keys().all(func(k): return styles.has(k)), "step_biomes.json lists no style the game lacks")
 	var want := [["ember", "stone"], ["gloom", "stone"], ["frost", "snow"]]
 	want += [["meadow", "grass"], ["bloom", "grass"], ["storm", "grass"]]

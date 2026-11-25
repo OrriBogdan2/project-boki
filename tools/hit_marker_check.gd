@@ -3,10 +3,10 @@ extends RefCounted
 ##   1. one landed hit of yours on a rival raises exactly one tick, short
 ##   2. a zone (damage-over-time) tick, a teammate's hit, your Boki's hit, a hit on your own side and a
 ##      rival's hit on you raise none
-##   3. a hit that knocks a rival Hunter down raises the stronger knock tick, and every tick is gone in 0.12 s
+##   3. a hit that knocks a rival Hunter down raises the stronger knock tick, and every tick is gone in 0.22 s
 ## Never touches the save.
 
-const CAP_S := 0.12  # s: no tick may show longer than this
+const CAP_S := 0.22  # s: no tick may show longer than this (the knock tick; 11-24: a hit reads for 9 frames)
 
 var bad := 0
 
@@ -21,7 +21,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
 	var p := m.player
 	var r: Reticle = m.hud.reticle
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]

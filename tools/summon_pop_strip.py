@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Joins --summon-pop-shots frames into one sheet: a row per type, a column per moment of the burst.
 
-    python3 tools/summon_pop_strip.py <shots-dir> <out.jpg>
+python3 tools/summon_pop_strip.py <shots-dir> <out.jpg>
 """
+
 import json, os, sys
 from PIL import Image, ImageDraw
 
@@ -18,7 +19,12 @@ sheet = Image.new("RGB", (cols * cw, 24 + len(types) * ch), (24, 24, 28))
 dr = ImageDraw.Draw(sheet)
 for r, t in enumerate(types):
     info = key["types"][t]
-    dr.text((4, 6), "rows: " + ", ".join("%s (%s, type #%s)" % (x, key["types"][x]["species"], key["types"][x]["type_col"]) for x in types), fill=(230, 230, 230))
+    dr.text(
+        (4, 6),
+        "rows: "
+        + ", ".join("%s (%s, type #%s)" % (x, key["types"][x]["species"], key["types"][x]["type_col"]) for x in types),
+        fill=(230, 230, 230),
+    )
     for c in range(cols):
         im = Image.open(os.path.join(d, "%s_%d.png" % (t, c))).convert("RGB").resize((cw, ch), Image.LANCZOS)
         sheet.paste(im, (c * cw, 24 + r * ch))
