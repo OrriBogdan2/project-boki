@@ -75,7 +75,7 @@ func _warden(id: String, lim: Dictionary) -> PackedFloat32Array:
 	var applied := _dist(pose, _pose(none))
 	ok(applied > float(lim["min_diff"]), "%s: the stance moves the procedural model by %.3f" % [id, applied])
 	await _glb(id, with, none)
-	await _cycle(id, with, float(lim["fidget_within"]))
+	_cycle(id, with, float(lim["fidget_within"]))
 	await _fire(id, with, none)
 	(with[1] as Node3D).queue_free()
 	(none[1] as Node3D).queue_free()

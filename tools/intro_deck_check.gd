@@ -30,7 +30,7 @@ func _start(id: String) -> Match:
 	var o := {"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242, "squad_intro": true}
 	o["cls"] = Arch.weight(id)
 	o["arch"] = id
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	return m
 
