@@ -192,8 +192,16 @@ def build(rig, q):
     torso = {k: (q["lean"] * v, q["yaw"] * v, q["roll"] * v) for k, v in SPLIT.items()}
     hx, hy, hz = q["hx"], q["hy"], q["hz"]
     sp = q["spin"]
-    torso["Hips"] = (torso["Hips"][0] + q["hl"], torso["Hips"][1], torso["Hips"][2] + sp)  # (hl: more pitch on the hips)
-    torso["neck"] = ((q["hpitch"] - q["lean"] - q["hl"]) * 0.5, (q["hyaw"] - q["yaw"]) * 0.5, -q["roll"] * 0.5)  # (a cartwheel keeps the head on the body)
+    torso["Hips"] = (
+        torso["Hips"][0] + q["hl"],
+        torso["Hips"][1],
+        torso["Hips"][2] + sp,
+    )  # (hl: more pitch on the hips)
+    torso["neck"] = (
+        (q["hpitch"] - q["lean"] - q["hl"]) * 0.5,
+        (q["hyaw"] - q["yaw"]) * 0.5,
+        -q["roll"] * 0.5,
+    )  # (a cartwheel keeps the head on the body)
     torso["Head"] = torso["neck"]
     base = {"turn": torso, "hips": (hx, hy, hz)}
     P, W = fk(rig, base)[1:]

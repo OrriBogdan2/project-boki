@@ -49,7 +49,14 @@ def tarek():
     rel = over(rest, yaw=30, lean=14, hy=-0.05, rho=0.25, rhu=0.0, rhf=1.0, lho=0.6, lhu=-0.55, lhf=-0.15, rff=0.18)
     out["tarek_throw"] = (
         0.55,
-        mirror([(0.0, cock, "lin"), (0.07, rel, "snap"), (0.2, over(rel, rhu=0.1, lean=10), "smooth"), (0.55, rest, "smooth")]),
+        mirror(
+            [
+                (0.0, cock, "lin"),
+                (0.07, rel, "snap"),
+                (0.2, over(rel, rhu=0.1, lean=10), "smooth"),
+                (0.55, rest, "smooth"),
+            ]
+        ),
     )
     # LMB hold, let go: the fist drives straight out of the held crouch, a 0.5 body-height step, out at 0.05 s
     draw = over(rest, yaw=-30, lean=18, hy=-0.2, rho=0.15, rhu=-0.5, rhf=-0.75, lho=0.3, lhu=-0.25, lhf=0.6, gap=0.1)
@@ -57,7 +64,14 @@ def tarek():
     drive["lff"] = 0.38
     out["tarek_punch"] = (
         0.6,
-        mirror([(0.0, draw, "lin"), (0.05, drive, "snap"), (0.22, over(drive, rhf=0.95, hz=0.2), "lin"), (0.6, rest, "smooth")]),
+        mirror(
+            [
+                (0.0, draw, "lin"),
+                (0.05, drive, "snap"),
+                (0.22, over(drive, rhf=0.95, hz=0.2), "lin"),
+                (0.6, rest, "smooth"),
+            ]
+        ),
     )
     # RMB Quakefall: a short gather, the hop with both fists high, the smash at 0.75 s, the landing held, up
     gather = over(rest, hy=-0.2, lean=14, lho=0.3, lhu=-0.8, lhf=-0.3, rho=0.3, rhu=-0.8, rhf=-0.3, gap=0.12)
@@ -102,19 +116,34 @@ def ostra():
     toss = over(rest, yaw=12, lean=7, rho=0.1, rhu=-0.05, rhf=1.0, lho=0.4, lhu=-0.75, lhf=-0.1, hyaw=0)
     out["ostra_orb"] = (
         0.4,
-        [(0.0, pull, "lin"), (0.06, toss, "snap"), (0.18, over(toss, rhu=-0.12, rhf=0.9), "smooth"), (0.4, rest, "smooth")],
+        [
+            (0.0, pull, "lin"),
+            (0.06, toss, "snap"),
+            (0.18, over(toss, rhu=-0.12, rhf=0.9), "smooth"),
+            (0.4, rest, "smooth"),
+        ],
     )
     both = over(rest, lean=-5, rho=0.12, rhu=-0.2, rhf=0.2, lho=0.12, lhu=-0.2, lhf=0.2)
     burst = over(rest, lean=10, rho=0.22, rhu=0.0, rhf=1.0, lho=0.22, lhu=0.0, lhf=1.0, hy=-0.03)
     out["ostra_orb_hot"] = (
         0.5,
-        [(0.0, both, "lin"), (0.05, burst, "snap"), (0.2, over(burst, rhf=0.9, lhf=0.9), "smooth"), (0.5, rest, "smooth")],
+        [
+            (0.0, both, "lin"),
+            (0.05, burst, "snap"),
+            (0.2, over(burst, rhf=0.9, lhf=0.9), "smooth"),
+            (0.5, rest, "smooth"),
+        ],
     )
     raise_ = over(rest, yaw=-10, rho=0.3, rhu=0.55, rhf=0.15, lho=0.4, lhu=-0.7, lhf=0.1)
     flick = over(rest, yaw=14, lean=6, rho=0.45, rhu=0.1, rhf=0.9, lho=0.4, lhu=-0.7, lhf=0.1)
     out["ostra_snap"] = (
         0.5,
-        [(0.0, raise_, "lin"), (0.12, flick, "snap"), (0.26, over(flick, rhu=0.0, rho=0.55), "smooth"), (0.5, rest, "smooth")],
+        [
+            (0.0, raise_, "lin"),
+            (0.12, flick, "snap"),
+            (0.26, over(flick, rhu=0.0, rho=0.55), "smooth"),
+            (0.5, rest, "smooth"),
+        ],
     )
     back = over(rest, yaw=-18, lean=14, hy=-0.04, rho=0.3, rhu=-0.75, rhf=-0.45, lho=0.4, lhu=-0.6, lhf=0.35)
     scoop = over(rest, yaw=16, lean=24, hy=-0.05, rho=0.2, rhu=-0.55, rhf=0.9, lho=0.45, lhu=-0.6, lhf=-0.1)
@@ -172,7 +201,9 @@ def sable():
     )  # fmt: skip
     # Vault: crouch and tip over, hands down one after the other, legs over the head, back on her feet at 0.48 s
     load = over(rest, hy=-0.1, lean=6, roll=-6, rho=0.55, rhu=0.7, rhf=0.1, lho=0.55, lhu=0.7, lhf=0.1)
-    q1 = over(rest, spin=90, hy=0.02, fb=1.0, rho=0.2, rhu=0.95, rhf=0.2, lho=0.5, lhu=0.55, lhf=0.1, lfo=0.15, rfo=0.15)
+    q1 = over(
+        rest, spin=90, hy=0.02, fb=1.0, rho=0.2, rhu=0.95, rhf=0.2, lho=0.5, lhu=0.55, lhf=0.1, lfo=0.15, rfo=0.15
+    )
     q2 = over(q1, spin=180, hy=0.06, rho=0.3, rhu=0.7, lho=0.2, lhu=0.95, lfo=0.3, rfo=0.3, lfu=0.0, rfu=0.0)
     q3 = over(q2, spin=270, hy=0.02, rho=0.45, rhu=0.55, lho=0.2, lhu=0.95)
     land = over(rest, spin=360, hy=-0.12, fb=1.0, lho=0.45, lhu=0.5, rho=0.45, rhu=0.5)
@@ -193,8 +224,10 @@ def encore_keys(rest):
     for k in range(10):
         t = 0.2 * k
         right = k % 2 == 0
-        arm = dict(rho=1.0, rhu=0.1, rhf=0.3, lho=0.5, lhu=-0.35, lhf=0.1) if right else dict(
-            lho=1.0, lhu=0.1, lhf=0.3, rho=0.5, rhu=-0.35, rhf=0.1
+        arm = (
+            dict(rho=1.0, rhu=0.1, rhf=0.3, lho=0.5, lhu=-0.35, lhf=0.1)
+            if right
+            else dict(lho=1.0, lhu=0.1, lhf=0.3, rho=0.5, rhu=-0.35, rhf=0.1)
         )
         keys.append((t + 0.1, over(rest, yaw=720 * (t + 0.1) / 2.0, fb=1.0, hy=-0.05, lean=4, **arm), "lin"))
     keys.append((2.0, over(rest, yaw=720, fb=1.0), "smooth"))
@@ -213,13 +246,41 @@ def gil():
     rest = pose(hk=1, hw=1, hy=-0.01, lean=3, lho=0.4, lhu=-0.85, lhf=0.1, rho=0.4, rhu=-0.85, rhf=0.1, gap=0.03)
     out = {}
     cock = over(rest, yaw=-22, lean=6, hy=-0.03, rho=0.3, rhu=-0.35, rhf=0.0, lho=0.4, lhu=-0.5, lhf=0.4)
-    stab = over(rest, bp=16, yaw=24, lean=16, hy=-0.04, hz=0.1, rho=0.1, rhu=-0.05, rhf=1.0, lho=0.5, lhu=-0.55, lhf=-0.2, lff=0.2)
+    stab = over(
+        rest,
+        bp=16,
+        yaw=24,
+        lean=16,
+        hy=-0.04,
+        hz=0.1,
+        rho=0.1,
+        rhu=-0.05,
+        rhf=1.0,
+        lho=0.5,
+        lhu=-0.55,
+        lhf=-0.2,
+        lff=0.2,
+    )
     out["gil_thrust"] = (
         0.32,
         [(0.0, cock, "lin"), (0.08, stab, "snap"), (0.16, over(stab, rhf=0.95), "smooth"), (0.32, rest, "smooth")],
     )
     draw = over(rest, yaw=-34, lean=10, hy=-0.08, rho=0.25, rhu=-0.3, rhf=-0.65, lho=0.4, lhu=-0.4, lhf=0.5, gap=0.08)
-    lunge = over(rest, bp=24, yaw=30, lean=24, hy=-0.1, hz=0.25, rho=0.05, rhu=-0.05, rhf=1.05, lho=0.55, lhu=-0.6, lhf=-0.25, lff=0.4)
+    lunge = over(
+        rest,
+        bp=24,
+        yaw=30,
+        lean=24,
+        hy=-0.1,
+        hz=0.25,
+        rho=0.05,
+        rhu=-0.05,
+        rhf=1.05,
+        lho=0.55,
+        lhu=-0.6,
+        lhf=-0.25,
+        lff=0.4,
+    )
     out["gil_lunge"] = (
         0.5,
         [(0.0, draw, "lin"), (0.08, lunge, "snap"), (0.22, over(lunge, rhf=0.98), "lin"), (0.5, rest, "smooth")],
@@ -231,15 +292,50 @@ def gil():
         0.45,
         [(0.0, dip, "lin"), (0.08, back, "smooth"), (0.15, toss, "snap"), (0.28, over(toss, rhu=0.2), "smooth"), (0.45, rest, "smooth")],
     )  # fmt: skip
-    spin = [(0.0, rest, "lin"), (0.1, over(rest, hy=-0.05, rho=0.95, rhu=0.15, rhf=0.1, lho=0.7, lhu=0.0, lhf=0.1), "smooth")]
+    spin = [
+        (0.0, rest, "lin"),
+        (0.1, over(rest, hy=-0.05, rho=0.95, rhu=0.15, rhf=0.1, lho=0.7, lhu=0.0, lhf=0.1), "smooth"),
+    ]
     for k in range(1, 8):
         t = 0.1 + 0.2 * k
         spin.append((t, over(spin[1][1], yaw=1080 * (t - 0.1) / 1.9, fb=1.0), "lin"))
-    spin += [(1.9, over(spin[1][1], yaw=1080, fb=1.0), "lin"), (2.0, over(rest, yaw=1080, hy=-0.04, lean=10, rho=0.2, rhu=0.0, rhf=1.0, lho=0.3, lhu=0.0, lhf=0.9, fb=1.0), "snap")]
+    spin += [
+        (1.9, over(spin[1][1], yaw=1080, fb=1.0), "lin"),
+        (
+            2.0,
+            over(rest, yaw=1080, hy=-0.04, lean=10, rho=0.2, rhu=0.0, rhf=1.0, lho=0.3, lhu=0.0, lhf=0.9, fb=1.0),
+            "snap",
+        ),
+    ]
     out["gil_riptide"] = (2.0, spin)
-    surf = over(rest, yaw=70, hy=-0.14, lean=10, rho=0.9, rhu=0.15, rhf=0.0, lho=0.9, lhu=0.1, lhf=0.1, gap=0.14, lff=0.0)
-    out["gil_wave"] = (1.0, [(0.0, rest, "lin"), (0.15, surf, "smooth"), (0.85, over(surf, lean=14), "smooth"), (1.0, over(surf, lean=12), "lin")])
-    swim = over(rest, bp=88, lean=30, hl=60, hpitch=-5, hy=-0.12, hz=0.1, rho=0.15, rhu=-0.1, rhf=-0.95, lho=0.15, lhu=-0.1, lhf=-0.95, fb=1.0)
+    surf = over(
+        rest, yaw=70, hy=-0.14, lean=10, rho=0.9, rhu=0.15, rhf=0.0, lho=0.9, lhu=0.1, lhf=0.1, gap=0.14, lff=0.0
+    )
+    out["gil_wave"] = (
+        1.0,
+        [
+            (0.0, rest, "lin"),
+            (0.15, surf, "smooth"),
+            (0.85, over(surf, lean=14), "smooth"),
+            (1.0, over(surf, lean=12), "lin"),
+        ],
+    )
+    swim = over(
+        rest,
+        bp=88,
+        lean=30,
+        hl=60,
+        hpitch=-5,
+        hy=-0.12,
+        hz=0.1,
+        rho=0.15,
+        rhu=-0.1,
+        rhf=-0.95,
+        lho=0.15,
+        lhu=-0.1,
+        lhf=-0.95,
+        fb=1.0,
+    )
     out["gil_swim"] = (0.55, [(0.0, rest, "lin"), (0.12, swim, "snap"), (0.55, over(swim, lean=34), "smooth")])
     return out
 
