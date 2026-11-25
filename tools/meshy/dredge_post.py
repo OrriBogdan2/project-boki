@@ -1177,7 +1177,7 @@ def rim_cycles(dedges, ring):
             path.append(nx)
 
 
-def cap_rims(js, b, out, rig):
+def cap_rims(js, b, out, rig, caps=None):
     """r13: every open rim listed in CAPS gets a dome (rings toward the centre, bulging outward), skinned and textured
     like its rim vertices. The goo's mouth at the shoulder (a flat D cut where the arm was parted from the torso) was the
     black slit at the neck: once the arm swung, the game's ink hull behind the open sleeve showed black."""
@@ -1191,7 +1191,7 @@ def cap_rims(js, b, out, rig):
     report = []
     capped = set()
     clash = 0
-    for name, pi, (lo, hi), minv, maxd, d, m, *fixed in CAPS:
+    for name, pi, (lo, hi), minv, maxd, d, m, *fixed in caps or CAPS:
         f = prim_faces(js, b, prims[pi])
         used = np.unique(f)
         q = np.round(pos[used] / ISLAND_TOL).astype(np.int64)
