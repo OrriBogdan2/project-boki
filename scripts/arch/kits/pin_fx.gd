@@ -1,25 +1,16 @@
 class_name PinFx
 extends Node3D
-## Hem's own effects, every one pooled (built once when the kit starts, then shown, moved and hidden). The
-## coloured ones are layered (KitShaders): an alpha-blended body in her red, its pale half and gold with the glow
-## on top, so they keep their colour on bright grass.
-## - fletch bursts (her own motif: feathers radiating from a core): the red stage-ready flash at the bow,
-##   the gold perfect-release burst with its ring, the glint at the bow hand (only while a stage is ready:
-##   red Empowered, white-hot Supercharged and a full Heavy Shot)
-## - stars: the red X-star on a Supercharged hit, the red-white Heavy Shot impact
+## Hem's own pooled meshes (built once when the kit starts, then shown, moved and hidden); every other look of hers
+## is HeroVfx data (content/vfx/archer.json). The coloured ones are layered (KitShaders): an alpha-blended body in her
+## red, its pale half with the glow on top, so they keep their colour on bright grass.
 ## - arrows: the look of each of her shots (Empowered red bolt, Supercharged white-red beam, a dull
 ##   overdrawn shaft, the big red Heavy Shot with a hot core), each with its own trail, drawn
 ##   over the shot the match moves (the round's own sphere is shrunk away)
 ## - spent arrows: one of the bow's arrows that lands with no hit stays stuck in the ground, thread attached,
 ##   for 4 s (the Heavy Shot leaves nothing: owner 11-08)
-## - the Rain of Arrows (Hail Wall): needle posts round the arc laced together like her corset, red thread
-##   criss-crossing between the posts and across the ground the wall covers (her laces, red, not a
-##   glowing band), arrows streaking down, blue burn flames on foes inside
 ## - the Spirit Walk screen tint while she is inside something (her own screen only)
 ## - the Spirit Walk body tint: her whole body darkens toward her deep orchid for the roll and the walk (every game)
 
-const STARS := 8
-const BURSTS := 3
 const ARROWS := 10
 const SPENT := 8
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
@@ -40,21 +31,10 @@ const WASH_MAX := 0.75              # 0..1: how far the body mixes toward WASH_C
 const WASH_RATE := 5.0              # 1/s: the tint fades in and out in 0.2 s
 
 var h: Hunter
-var stars: Array = []          # {node, t, dur, size, follow}
 var arrows: Array = []         # pooled arrow nodes
 var live := {}                 # shot sid -> {node, kind, pos, life}
 var spent: Array = []          # {node, t}
 var hits: Array = []           # [pos, time] of shot hits (a shot that hit someone isn't planted)
-var bursts: Array = []         # fletch bursts {node, t, dur, size, pow}
-var bow_glint: MeshInstance3D  # the fletch glint at the bow hand while a stage is ready
-var rain := {}                 # the live wall: {center, dir, radius, deg, t, every}
-var posts: Array = []
-var laces: Array = []          # {node, a, b}: the Hail Wall's threads, a -> b in the world
-var streaks: Array = []        # {node, t, from, to}
-var flames: Array = []         # {node, foe}
-var wisps: Array = []          # {node, t}
-var wisp_next := 0
-var wisp_at := -1.0
 var tint: ColorRect = null
 var tint_k := 0.0
 var tint_want := 0.0
@@ -68,48 +48,11 @@ func _init(hunter: Hunter) -> void:
 	name = "PinFx"
 
 func _ready() -> void:
-	for i in STARS:
-		var star_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", THREAD, true))
-		KitShaders.param(star_node, "white", 0.3)
-		stars.append({"node": star_node, "t": 0.0, "dur": 0.0})
-	for i in BURSTS:
-		var burst_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", GOLD, true))
-		burst_node.sorting_offset = 2.0         # drawn over the bow hand and the body
-		bursts.append({"node": burst_node, "t": 0.0, "dur": 0.0})
-	bow_glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", THREAD, true))
-	KitShaders.param(bow_glint, "leaves", 4.0)
 	for i in ARROWS:
 		arrows.append(_arrow_node())
 	for i in SPENT:
 		var n := _arrow_node()
 		spent.append({"node": n, "t": 0.0})
-	# the laces: solid toon thread (no added glow, so the red holds on bright grass); every other one in
-	# shade, the strand passing under
-	for i in (POSTS - 1) * 4:
-		var tone := THREAD if i % 2 == 0 else THREAD.darkened(0.3)
-		var lace := KitMeshes.inst(self, Models.box(LACE_W, LACE_W, 1.0), Models.toon(tone, false, 0.5))
-		laces.append({"node": lace, "a": Vector3.ZERO, "b": Vector3.ZERO})
-	for i in POSTS:
-		var p := KitMeshes.inst(self, Models.box(0.05, 1.0, 0.05), Models.glow_mat(Color(SILVER, 0.95)))
-		var fl := MeshInstance3D.new()
-		fl.mesh = Models.prism_tip()
-		fl.material_override = Models.glow_mat(Color(THREAD, 0.9))
-		fl.scale = Vector3(0.22, 0.24, 0.05)
-		fl.position = Vector3(0, 0.62, 0)
-		fl.rotation = Vector3(PI, 0, 0)
-		fl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		p.add_child(fl)
-		posts.append(p)
-	for i in STREAKS:
-		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.07, 1.3), KitShaders.mat("streak", SILVER))
-		streaks.append({"node": streak_node, "t": 0.0})
-	for i in WISPS:
-		var wisp := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", THREAD, true))
-		wisps.append({"node": wisp, "t": 0.0})
-	for i in FLAMES:
-		var fm := KitShaders.mat("flame", Color("ff4a3a"))
-		fm.set_shader_parameter("seed", float(i) * 1.7)
-		flames.append({"node": KitMeshes.inst(self, KitMeshes.quad(0.9, 1.3), fm), "foe": null})
 	aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))
 	aura.material_override.set_shader_parameter("bands", 3.0)
 
@@ -277,17 +220,6 @@ func _process(_delta: float) -> void:
 	# effects run on match time (a slow frame or a screenshot never skips them), long steps clamped
 	var delta := clampf(float(h.m.time) - fx_clock, 0.0, 1.0 / 30.0)
 	fx_clock = float(h.m.time)
-	for s in stars:
-		var n: MeshInstance3D = s["node"]
-		if float(s["t"]) >= float(s["dur"]):
-			n.visible = false
-			continue
-		s["t"] = float(s["t"]) + delta
-		var u := clampf(float(s["t"]) / maxf(0.01, float(s["dur"])), 0.0, 1.0)
-		n.scale = Vector3.ONE * float(s["size"]) * (0.6 + 0.6 * sin(minf(u * 2.2, 1.0) * PI * 0.5))
-		KitShaders.param(n, "power", float(s.get("pow", 1.6)) * (1.0 - u * u))
-	_tick_bursts(delta)
-	_tick_wisps(delta)
 	for c in spent:
 		if float(c["t"]) > 0.0:
 			c["t"] = float(c["t"]) - delta
@@ -296,8 +228,6 @@ func _process(_delta: float) -> void:
 			n2.scale = Vector3.ONE * f
 			if float(c["t"]) <= 0.0: n2.visible = false
 	tick_shots()
-	_tick_rain(delta)
-	_tick_streaks(delta)
 	var phasing: bool = h.ak is ArcherKit and (h.ak as ArcherKit).spirit.phasing()
 	wash_k = move_toward(wash_k, 1.0 if phasing else 0.0, delta * WASH_RATE)
 	h.wash = wash_k * WASH_MAX
@@ -306,17 +236,6 @@ func _process(_delta: float) -> void:
 		tint_k = move_toward(tint_k, tint_want, delta * 5.0)
 		tint.material.set_shader_parameter("power", tint_k)
 		tint.visible = tint_k > 0.01
-
-func _tick_bursts(delta: float) -> void:
-	for b in bursts:
-		var n: MeshInstance3D = b["node"]
-		if float(b["t"]) >= float(b["dur"]):
-			n.visible = false
-			continue
-		b["t"] = float(b["t"]) + delta
-		var fade := float(b["dur"]) - float(b["hold"])
-		var u := clampf((float(b["t"]) - float(b["hold"])) / maxf(0.01, fade), 0.0, 1.0)
-		KitShaders.param(n, "power", 1.6 * (1.0 - u))
 
 # ------------------------------------------------------------------ Spirit Walk aura
 var aura: MeshInstance3D       # built with the pools above, hidden until she walks

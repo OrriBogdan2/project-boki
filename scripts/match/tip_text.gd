@@ -80,13 +80,3 @@ static func send(boki: String) -> String:
 static func scan() -> String:
 	return "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact")
 
-
-static func stagger(mob: String) -> String:
-	var keys := ["secondary", "signature", "hunter_ult", "gear1"].map(func(a: String): return Settings.key_cap(a))
-	return (
-		(
-			"A purple ring means %s can be staggered. Hit it with an ability (%s, %s, %s or %s) for a big hit, a "
-			+ "long stun and your cooldown back."
-		)
-		% ([mob] + keys)
-	)

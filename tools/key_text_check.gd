@@ -370,7 +370,7 @@ func _hub() -> void:
 func _hint_files() -> void:
 	for s: String in [
 		TipText.rings(),
-		TipText.stagger("Skitter"),
+		TipText.stagger(),
 		TipText.send("Pip"),
 		TipText.scan(),
 		TipText.ability(true),

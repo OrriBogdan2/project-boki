@@ -12,11 +12,10 @@ extends Node
 ##      as the Hunter (Unmasked.blend) in a brief pose; their name and title on screen
 ##   6. the music comes back under a sting in the Hunter's key
 ## It plays through its own camera (the scene's own is current again after). Its text (the whisper, the name)
-## stays up for at least read_s. A tap (HoldSkip: click, Space, Enter, pad A) moves on to the next beat, but never
-## past the memories the first time (the owner saw them go by in 1-2 s); once a player has seen one
-## (Save.d.tutorial.mask_seen), a tap cuts to the last memory, and a hold of HoldSkip.HOLD_S or Esc skips
-## the rest. `done` gets the body standing there at the end: the Hunter's model with `swap`, else the body you
-## had (on the farm you stay yourself).
+## stays up for at least read_s. A click (or interact) moves on to the next beat, but never past the memories the
+## first time (the owner saw them go by in 1-2 s); once a player has seen one (Save.d.tutorial.mask_seen), a click
+## cuts to the last memory, and holding it for HOLD_SKIP_S or Esc skips the rest. `done` gets the body standing
+## there at the end: the Hunter's model with `swap`, else the body you had (on the farm you stay yourself).
 ## `short` is the quicker cut for a later Mask (never the first: play() runs the full beat until one has been seen).
 ##
 ##   MaskBeat.play(relic, you, func(body): ..., true)
@@ -24,23 +23,25 @@ extends Node
 signal finished(body: Node3D)
 
 const RULES := "mask_moment"
-const FACE_GAP := 0.27         # m in front of the head where the Mask settles (times the body's scale)
-const CAM_BACK := 1.55         # m in front of the face the camera eases toward
-const RIPPLE_M := 7.0          # m: how far the ripple of light runs out over the ground
-const RIPPLE_S := 0.9          # s it takes
-const PANEL_IN_S := 0.6       # s the first memory frame takes to come up out of the black
-const PANEL_PUSH := 0.12       # x: how far each memory frame pushes in (eased out, slowing into the hold)
-const PANEL_DARK := 0.6        # how dark the first frame starts (it brightens over its whole length)
-const CUT_FLASH := 0.25        # alpha of the white flash on the cut to the next memory frame
-const CROSS_S := 0.45          # s a memory frame cross-fades into the next (the earlier one fades out under it)
-const WHISPER_AT_S := 0.4      # s into the memory frames that the whisper starts
-const POSE_S := 0.6            # s: the Hunter's cast pose (HunterAnim's "ult" cast)
-const NAME_IN_S := 0.35        # s after the snap that the name comes in
-const STING_AT_S := 0.25       # s after the snap that the sting starts
-const HAND_BACK_S := 0.5       # s at the end that the camera eases back to the scene's own
-const READ_MIN_S := 3.0        # s: the least a line of the beat's text (whisper, name) stays on screen
-const READ_PER_CHAR_S := 0.06  # s per character, for a line too long to read in READ_MIN_S
-const SOUNDS := {               # our own (tools/gen_mask_sfx.py), loaded with the script so the beat starts at once
+const FACE_GAP := 0.27  # m in front of the head where the Mask settles (times the body's scale)
+const CAM_BACK := 1.55  # m in front of the face the camera eases toward
+const RIPPLE_M := 7.0  # m: how far the ripple of light runs out over the ground
+const RIPPLE_S := 0.9  # s it takes
+const PANEL_IN_S := 0.6  # s the first memory frame takes to come up out of the black
+const PANEL_PUSH := 0.12  # x: how far each memory frame pushes in (eased out, slowing into the hold)
+const PANEL_DARK := 0.6  # how dark the first frame starts (it brightens over its whole length)
+const CUT_FLASH := 0.25  # alpha of the white flash on the cut to the next memory frame
+const CROSS_S := 0.45  # s a memory frame cross-fades into the next (the earlier one fades out under it)
+const WHISPER_AT_S := 0.4  # s into the memory frames that the whisper starts
+const POSE_S := 0.6  # s: the Hunter's cast pose (HunterAnim's "ult" cast)
+const NAME_IN_S := 0.35  # s after the snap that the name comes in
+const STING_AT_S := 0.25  # s after the snap that the sting starts
+const HAND_BACK_S := 0.5  # s at the end that the camera eases back to the scene's own
+const READ_MIN_S := 3.0  # s: the least a line of the beat's text (whisper, name) stays on screen
+const READ_PER_CHAR_S := 0.075  # s per character (3 words a second), for a line too long to read in READ_MIN_S
+const WHISPER_TAIL_S := 0.1  # s the memories run past the whisper's reading time (its fade-in and a frame's rounding)
+const HOLD_SKIP_S := 1.0  # s of holding a click or interact that skips the rest (DECISIONS 11-11)
+const SOUNDS := {  # our own (tools/gen_mask_sfx.py), loaded with the script so the beat starts at once
 	"mask_swell": preload("res://audio/mask_swell.wav"),
 	"mask_heart": preload("res://audio/mask_heart.wav"),
 	"mask_whisper": preload("res://audio/mask_whisper.wav"),
@@ -63,11 +64,13 @@ var memory: TextureRect
 var memory_prev: TextureRect  # the earlier memory frame, fading out under the next
 var whisper_line: Label
 var name_box: Control
-var hold_skip: HoldSkip        # taps move on a beat, a hold skips the rest (the ring beside it)
+var skip_hint: Control
 var _times: Dictionary
-var _memory_lens: Array        # s per memory frame: the rules' lengths, stretched so the whisper can be read
-var _frames: Array[String]     # the memory frames' art, first to last (Portraits.memory_frames)
-var _reveal_s := 0.0           # s of the reveal: the rules' length, or long enough to read the name
+var _memory_lens: Array  # s per memory frame: the rules' lengths, stretched so the whisper can be read
+var _frames: Array[String]  # the memory frames' art, first to last (Portraits.memory_frames)
+var _reveal_s := 0.0  # s of the reveal: the rules' length, or long enough to read the name
+var _held_at := -1.0  # s (on _clock) the current click or interact went down; -1 when none is held
+var _clock := 0.0  # s since the beat began
 var _rules: Dictionary
 var _was_cam: Camera3D
 var _from: Transform3D  # the scene camera where the beat took over
@@ -183,16 +186,15 @@ func _build_ui() -> void:
 	whisper_line.add_theme_constant_override("outline_size", 10)
 	whisper_line.add_theme_color_override("font_outline_color", Color(0.02, 0.01, 0.04))
 	ui.add_child(whisper_line)
-	hold_skip = HoldSkip.new()
-	hold_skip.can_skip = seen()
-	hold_skip.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	hold_skip.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	hold_skip.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	hold_skip.offset_right = -24
-	hold_skip.offset_bottom = -16
-	hold_skip.tapped.connect(next_beat)
-	hold_skip.skipped.connect(skip_now)
-	ui.add_child(hold_skip)
+	if seen():
+		var key := Settings.key_cap("interact")
+		skip_hint = UI.label("Click  Next   ·   Hold %s  Skip" % key, 13, Color(1, 1, 1, 0.55))
+		skip_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		skip_hint.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		skip_hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		skip_hint.offset_right = -24
+		skip_hint.offset_bottom = -18
+		ui.add_child(skip_hint)
 
 
 ## A full-screen memory frame, hidden until its turn.
@@ -260,6 +262,12 @@ func _player(sound: String, db: float) -> AudioStreamPlayer:
 # ------------------------------------------------------------------ the beat
 func _process(dt: float) -> void:
 	t += dt
+	_clock += dt
+	if _held_at >= 0.0 and not _holding():
+		_held_at = -1.0
+	elif _held_at >= 0.0 and _clock - _held_at >= HOLD_SKIP_S and seen():
+		skip_now()
+		return
 	match phase:
 		"build":
 			_build_up(dt)
@@ -494,13 +502,25 @@ func _restore_ambience() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if phase == "done":
 		return
-	if event.is_action_pressed("ui_cancel") and seen():
+	var click: bool = event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
+	if click or event.is_action_pressed("interact") or event.is_action_pressed("ui_accept"):
+		get_viewport().set_input_as_handled()
+		_held_at = _clock
+		next_beat()
+	elif event.is_action_pressed("ui_cancel") and seen():
 		get_viewport().set_input_as_handled()
 		skip_now()
-	elif hold_skip.feed(event):
-		get_viewport().set_input_as_handled()
 
-## A tap: on to the next beat (the Mask's approach cuts to the black, the memories to the last one held; a line
+
+func _holding() -> bool:
+	return (
+		Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+		or Input.is_action_pressed("interact")
+		or Input.is_action_pressed("ui_accept")
+	)
+
+
+## A click: on to the next beat (the Mask's approach cuts to the black, the memories to the last one held; a line
 ## of text goes early). The first time, the memories play through whatever is pressed (they are the point).
 func next_beat() -> void:
 	match phase:
