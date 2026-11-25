@@ -101,7 +101,7 @@ code read (the strips are silent). The worker's ground renders yellow, so read c
 
 | # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | was | what the strips show |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Albert | bulwark | 3 | 4 | 3 | 3 | 3 | 3 | 4 | 23 | 24 | Faultline (R): the lane is a screen-wide pale cream slab with a lightning crack, it hides the ground and the foe; the 360 Smash ring (Shift) is amber/orange, not ivory; swing and shield-charge crescents are gold/ivory and read |
+| 1 | Albert | bulwark | 4 | 4 | 3 | 3 | 3 | 4 | 4 | 25 | 24 | Fixed 11-25 (ext/vfx-albert-faultline-rim; R 3 -> 4, C 3 -> 4, was 23): Faultline (R) is the AimKit soft lane (lit rails, inside under alpha 0.25), each erupting cell a lit outline over a faint inside instead of a solid cream slab and tall cream tubes, so the ground and the foe show through; same 5.5 m lane and timing. The 360 Smash ring (Shift) is ivory now. Swing and shield-charge crescents are gold/ivory and read. Strips: `docs/shots/vfx-albert-faultline-rim/` (grey = before, green = after) |
 | 2 | Grimble | dredge | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 23 | 25 | E: flat translucent orange hex slabs, the palette `main` is copper `d89040`, not coin gold; LMB slugs small; hook, dash ribbon and X fan read |
 | 3 | Vex | gunslinger | 3 | 3 | 4 | 3 | 4 | 4 | 4 | 25 | 24 | re-scored 11-25 (ext/vfx-vex-nuke-rim; L 3 -> 4, was 24): the X Nuke burning patch is a lit lime rim over a soft inside now, the foe reads through it (the dark fill was `BURN_FILL_A` 3.0 in `scripts/arch/kits/gunslinger_ult.gd`, not the JSON: AimShapes stacks two discs, so it was ~0.9 alpha at the centre; now 0.8 = 0.25 at the centre, ~0.5 by the rim, halving as it burns; size and timing unchanged; `x_shell` is the falling streak, no zone, untouched). Strip `docs/shots/vfx-vex-nuke-rim/x_before_after.jpg` (top grey = main b7258e5028, jobq 20261125-184250-10987; bottom green = after, 20261125-184458-12815; `--hero-vfx-reel --reel-hero=gunslinger --reel-only=r`). Still open: E cone is a flat pale lime band; LMB tracer is a short lime dart (reads) |
 | 4 | Sable | thief | 4 | 3 | 3 | 3 | 4 | 4 | 3 | 24 | 24 | RMB Bola wind-up lane: a flat lavender slab; LMB bolt and hit now read, X rings are lit rims and read |
@@ -125,7 +125,7 @@ Kael 27, Cinder 28), the 11-09 and 11-12 re-scores and each fix branch's own not
 `git show 41de1b3f01:docs/VFX_QUALITY.md`.
 
 ## Follow-ups: the worst five (not fixed here)
-1. Albert, `scripts/arch/kits/bjorn_ult.gd`: the Faultline lane is a screen-wide pale slab that hides the ground and the foe; make it a lit rim plus a soft inside. Also the 360 Smash ring (`spin` in `content/vfx/bulwark.json`) is amber, not ivory.
+1. Albert: done 11-25 (ext/vfx-albert-faultline-rim): Faultline is a soft lane with lit outlines, the 360 Smash ring is ivory.
 2. Grimble, `content/vfx/dredge.json`: the E fist/wedge slabs are flat translucent orange because palette `main` is copper `d89040`; move `main` to coin gold `#ffc832` and give the slab a lit rim.
 3. Vex, `content/vfx/gunslinger.json` `x_shell` / X zone end: the Nuke ends as a near-opaque dark green disc over the foe; cap the inside alpha at 0.25 and keep the lit rim.
 4. Sable, `scripts/arch/kits/thief_kit.gd` (RMB Bola wind-up lane): a flat lavender slab; use the `soft` AimKit lane (lit rim, inside at most 0.1).
