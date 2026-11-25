@@ -94,6 +94,11 @@ Chew, Zipseed, Hushpearl) with `lair_drop.chance` in `content/rules/garden_items
 the feed menu with the exact preview. The use writes the Boki card's journal line (`CareJournal` -> `JournalCard`):
 "ate Thumpnut: Power +3 (4 to 7)". `--garden-items-check` (loot part) proves the whole path; `--loot-nudge-shots` shows the card.
 
+The first time you come home with a garden item kind you never had, the nearest free Boki (not the most curious) walks up
+(`ComeLook` kind `item`, flag `loot_react_<id>` in Save.d tutorial, so once per kind per save and no migration), reacts by its
+traits (curious sniffs, timid hides and says `look_shy`, the rest puff up and say `look_item`) and its journal keeps one line:
+"sniffed the new Thumpnut". No pop-up. `--come-look-check` (two kinds, then plain loot) and a react row in `--garden-day-played-check`.
+
 ## Balance: 30 days for four players
 
 `python3 tools/garden_sim.py` plays 30 garden days, 200 seeds each, for four players (5 minutes plus a run, 30 minutes plus two runs, home only 30, home only 5) on the live care, prize, item, evolution, toy and race rules (`content/rules/garden_sim.json` holds the sim's own guesses). Every number must sit inside `bands` in that file; `--garden-sim-check` and the brief `briefs/design/GARDEN_MODERN_BALANCE.md` (tables regenerated with `--write`) keep it so.
