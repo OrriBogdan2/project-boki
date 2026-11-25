@@ -17,6 +17,7 @@ const SHARED := ["water", "metal"]  # surfaces with steps per weight class, not 
 const WEIGHT_DB := {"light": -1.5, "medium": 0.0, "heavy": 1.5}  # dB on every step: heavier boots carry more
 const WEIGHT_PITCH := {"light": 1.1, "medium": 1.0, "heavy": 0.88}  # pitch scale on every step: heavier is lower
 
+
 ## The surface under `pos` in match `m`.
 static func at(m: Match, pos: Vector3) -> String:
 	if m.skytrain != null and m.skytrain.on_deck(pos):
@@ -47,9 +48,11 @@ static func cue(h: Hunter, surf: String) -> String:
 		shared += "_" + weight_of(h.arch)
 	return HeroSfx.of(h, "step_" + surf, shared)
 
+
 ## The step's volume: `base` dB plus the weight class's (every surface, and the foot's contact step).
 static func vol_db(h: Hunter, base: float) -> float:
 	return base + float(WEIGHT_DB[weight_of(h.arch)])
+
 
 ## The step's pitch scale for h's weight class (light higher, heavy lower).
 static func pitch(h: Hunter) -> float:

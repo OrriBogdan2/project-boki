@@ -540,7 +540,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			return flag and near.call(5.0)
 		"wallkick":
 			seen["kick"] = seen.get("kick", false) or int(p.stats.get("wall_kicks", 0)) > kicks0
-			return seen["kick"] and on_lookout()      # (a jump and a ledge catch can climb it too: that does not count)
+			return seen["kick"] and on_lookout()  # (a jump and a ledge catch can climb it too: that does not count)
 		"crouch":
 			if p.crouch and on_lookout():
 				crouch_t += dt
