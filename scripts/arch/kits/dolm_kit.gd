@@ -495,8 +495,8 @@ func _punch(k: float) -> void:
 		hv = HunterMove.push(Vector2(h.vel.x, h.vel.z), dir, stepv * float(pd["air_k"]))
 	h.vel.x = hv.x
 	h.vel.z = hv.y
-	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
-	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
+	var dmg: float = float(pd["dmg"]) * m.dmg_mult(h)
+	var kb := float(pd["kb"])
 	vfx("punch", h.pos, dir, {"len": float(pd["len"]), "k": k})
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	var swept := sweep_rocks(dir)

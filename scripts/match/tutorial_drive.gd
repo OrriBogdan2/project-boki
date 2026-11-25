@@ -222,7 +222,6 @@ static func fire_key(m: Match) -> bool:
 		return fmod(m.time, 0.5) < 0.1
 	return true
 
-
 ## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:
 	var ph := fmod(tu.t, 2.0)

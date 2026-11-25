@@ -5,8 +5,7 @@ extends RefCounted
 ## names the starter's own move (draw, step in, shoot). The run levels: it lands at level 1 with every
 ## ability locked, the first pick can only be the right click, every ability ends up unlocked and used
 ## (right click, attack, dash, wall kick, Boki, E, glove), Fusion stays locked and unused (the tutorial never
-## teaches it, 11-18), and only the camps paid XP.
-## Each run also judges the framing at 1280x720 (TutorialFraming).
+## teaches it, 11-18), and only the camps paid XP. Each run also judges the framing at 1280x720 (TutorialFraming).
 
 var bad := 0
 
