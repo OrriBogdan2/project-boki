@@ -1171,7 +1171,7 @@ archetypes/rimewright.json:passive.fan_splinter	60.0
 archetypes/rimewright.json:passive.splinter_delay	0.4
 archetypes/rimewright.json:passive.splinter_dmg	37.0
 archetypes/rimewright.json:passive.splinter_r	3.0
-archetypes/rimewright.json:plate_offset	2.49
+archetypes/rimewright.json:plate_offset	2.56
 archetypes/rimewright.json:rank_cd.dash[0]	1
 archetypes/rimewright.json:rank_cd.dash[1]	0.8846
 archetypes/rimewright.json:rank_cd.dash[2]	0.7692
