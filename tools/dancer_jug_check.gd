@@ -592,8 +592,8 @@ func thief(a) -> void:
 		capped and DJFx.of(m).made <= made + 6,
 		"made %d -> %d" % [made, DJFx.of(m).made]
 	)
-	await _dancer_dash_flow(m, p_v, k, t_v, home)
-	await DFEEL.new().run(a_x, m, p_v, k, t_v, home)
+	_dancer_dash_flow(m, p_v, k, t_v, home)
+	DFEEL.new().run(a_x, m, p_v, k, t_v, home)
 	DPARITY.new().run(a_x, m, p_v, k, t_v, home)
 	DTIMING.new().run(a_x, m, k)
 	DLOOP.new().run(a_x, m, p_v, k, t_v, t2, home)

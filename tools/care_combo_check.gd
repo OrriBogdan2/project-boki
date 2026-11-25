@@ -1141,7 +1141,7 @@ func tender() -> void:
 			float(tele.get("band", 0.0)) > 0.0 and float(tele.get("fill", -1.0)) < 0.0 and field_n != null
 				and is_equal_approx(field_n.scale.x, K.burst_radius()),
 			"band %.2f disc r %.2f" % [float(tele.get("band", 0.0)), field_n.scale.x if field_n else 0.0])
-	await _burr_build(m, P, T, K, bid)
+	_burr_build(m, P, T, K, bid)
 	await _free(m)
 	# --- Hearthlight: on her a 2.6 m ring with its own cast move; E again throws it to the cursor at once
 	r = sc.setup("tender", 6.0)

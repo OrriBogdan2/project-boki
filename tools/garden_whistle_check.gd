@@ -170,7 +170,7 @@ func _in_a_match() -> void:
 	await main.get_tree().process_frame
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "thief",
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "thief",
 		"cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
 	m.set_process(false)
 	var before: Vector3 = m.player.pos
