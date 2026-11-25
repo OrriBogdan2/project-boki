@@ -95,3 +95,10 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - Hit: the fish drops low by the right hip, bill forward-down (hand y 0.55 -> 0.15), not lifted overhead; forearm/hand >= 1.5 cm off the thigh/torso.
 - Idle/walk: LeftArm in (hand x 0.44 -> 0.38 Idle, 0.41 -> 0.34 walk).
 - geo_check vs main: held worst 6.8 cm (main 13.4), clipped frames 61 (main 159, r9 59). Attack clip pairs drop (upper_arm_R>thigh_R 4.8 cm gone); Hit has none.
+
+## Native model r11 (gil_meshy.glb), 2026-11-25
+- Hit clip slot dropped from `content/rules/warden_native.json` (the re-keyed Hit locked the body 1.63 s); the WardenFlinch layer plays, as on live.
+- Left arm: r10's LeftArm/ForeArm/Hand keys slerped back toward live (`hunter-round-1124/gil/r11/tools/blendtrack.py`): Idle 35% of r10 (max off live 23 deg, r10 64), walk/run 55% (29/19 deg). Full live keys bring back held forearm_L>torso 8.2 cm in Idle.
+- Attack re-keyed again (`r11/tools/handkey.py`): wind-up hand y 0.40 -> 0.35, bill ends forward (hips-local x 0.00-0.07 at 0.57-0.63 s, was +0.6 to his left), arm turn max 176 -> 40 deg.
+- Fin: 12 Meshy edits + 40 retextures of the fin island (`r11/fin/gen_log.tsv`), auto hue gate (coral 0-40 deg >= 25%, pink 290-355 < 5%, blue rays >= 10%): 0 pass (coral comes only with 11-24% pink). Live's fin texels kept. Meshy balance 1946 -> 1244 (account-wide).
+- geo_check vs main: held worst 6.8 cm (main 13.4), clipped frames 110 (main 159, r10b 61), held frames 76 (main 97).
