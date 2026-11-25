@@ -7,7 +7,7 @@ extends RefCounted
 ## Reads the match only: the Heart's state for the two Heart seats, the QuestSeat machines for who is on or took a
 ## quest seat, their schedule (content/rules/heart.json "quest") for the rest. Drawn with HudStyle on the Hud's canvas.
 
-enum St {LOCKED, OPEN, USE, TAKEN, LOST}
+enum St { LOCKED, OPEN, USE, TAKEN, LOST }
 const NAMES := ["LAIR", "HEART", "UPLINK", "FINAL"]
 const CELL := Vector2(86.0, 40.0)
 const PIP_R := 7.0
@@ -15,6 +15,7 @@ const STATE_WORD := ["", "OPEN", "IN USE", "TAKEN", "LOST"]
 
 ## Reused every frame: name, st, t (seconds to open/shut or -1), team, viewer (the local squad).
 static var _seats: Array = [{}, {}, {}, {}]
+
 
 ## The four seats as they stand now (the same dictionaries every call).
 static func seats(m: Match) -> Array:
@@ -30,9 +31,11 @@ static func seats(m: Match) -> Array:
 		d["viewer"] = viewer
 	return _seats
 
+
 ## A squad other than the viewer's holds the seat (taking or having taken it).
 static func rival(s: Dictionary) -> bool:
 	return int(s["team"]) >= 0 and int(s["team"]) != int(s["viewer"])
+
 
 ## The seat's state word; a seat a squad uses or took says whose it is, so squad and rival never read by hue alone.
 static func state_word(s: Dictionary) -> String:
@@ -40,12 +43,14 @@ static func state_word(s: Dictionary) -> String:
 		return WaysOutLook.WORD_RIVAL if rival(s) else WaysOutLook.WORD_MINE
 	return STATE_WORD[int(s["st"])]
 
+
 static func _seat(i: int, st: int, t: float, team: int) -> void:
 	var d: Dictionary = _seats[i]
 	d["name"] = NAMES[i]
 	d["st"] = st
 	d["t"] = t
 	d["team"] = team
+
 
 ## A quest seat: taken or in use as its QuestSeat says (with the squad), else locked, open or lost by its window.
 static func _quest(i: int, now: float, open_s: float, shut_s: float, s: QuestSeat) -> void:
@@ -59,6 +64,7 @@ static func _quest(i: int, now: float, open_s: float, shut_s: float, s: QuestSea
 		_seat(i, St.OPEN, shut_s - now, -1)
 	else:
 		_seat(i, St.LOST, -1.0, -1)
+
 
 static func _heart_early(m: Match) -> void:
 	var ht: Heart = m.heart
@@ -75,6 +81,7 @@ static func _heart_early(m: Match) -> void:
 	else:
 		_seat(1, St.LOST, -1.0, -1)
 
+
 static func _heart_final(m: Match, now: float) -> void:
 	var ht: Heart = m.heart
 	match ht.state:
@@ -89,10 +96,12 @@ static func _heart_final(m: Match, now: float) -> void:
 static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]
 
+
 # ------------------------------------------------------------------ the strip
 ## Where the strip starts: the top of the window's safe area.
 static func top_y(sz: Vector2) -> float:
 	return HudStyle.hud_pad(sz).y
+
 
 ## The lowest y the strip and the line under it reach (the pill ends 11 px under its middle), or 0 when the strip
 ## is not drawn (no Heart, a tutorial, training or a duel): what sits under it at the top-centre starts lower.
@@ -103,25 +112,26 @@ static func bottom(m: Match) -> float:
 		return 0.0
 	return top_y(m.get_viewport().get_visible_rect().size) + CELL.y + 20.0 + 11.0
 
+
 static func draw(hud) -> void:
 	var m: Match = hud.m
 	if m.heart == null or m.heart.site == Vector3.INF or not HudGroups.ways_out_shown(m):
 		return
 	if m.heart_raid:
-		HeartRaidHud.draw(hud)      # a raid has one way out, the Heart ring: its own strip
+		HeartRaidHud.draw(hud)  # a raid has one way out, the Heart ring: its own strip
 		return
 	var c: Control = hud.c
 	var newcomer := HudReveal.newcomer(m)
-	var back := HudScale.begin(hud, "ways_strip", c.size)      # (drawn in the minimap's bar, hangs from the top centre)
+	var back := HudScale.begin(hud, "ways_strip", c.size)  # (drawn in the minimap's bar, hangs from the top centre)
 	var sd := seats(m)
 	if not HudReveal.on(m, "seat_pips"):
 		if not _any_open(sd):
 			return
-		HudReveal.see("seat_pips")      # the first open seat: the strip stays from now on
+		HudReveal.see("seat_pips")  # the first open seat: the strip stays from now on
 	var w := CELL.x * 4.0
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, top_y(c.size)), Vector2(w, CELL.y))
 	if newcomer:
-		ExtractGoal.draw(hud, r.position.y, true)      # a new player gets the one line, not the four seats
+		ExtractGoal.draw(hud, r.position.y, true)  # a new player gets the one line, not the four seats
 	else:
 		SafeArea.note_as("ways_strip", r)
 		c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
@@ -130,14 +140,16 @@ static func draw(hud) -> void:
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
 	QuestTracker.draw(hud, r)
 	if not newcomer:
-		ExtractGoal.draw(hud, r.end.y + QuestTracker.GAP, false)      # where to go and how, until you are on a quest
+		ExtractGoal.draw(hud, r.end.y + QuestTracker.GAP, false)  # where to go and how, until you are on a quest
 	HudScale.begin(hud, back, c.size)
+
 
 static func _any_open(sd: Array) -> bool:
 	for s in sd:
 		if int(s["st"]) == St.OPEN:
 			return true
 	return false
+
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
@@ -179,6 +191,7 @@ static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 		var nw := TextCache.width(HudStyle.BIG, s["name"], 11)
 		c.draw_line(Vector2(tx - 1, r.position.y + 12), Vector2(tx + nw + 1, r.position.y + 12), col, 1.5)
 
+
 ## A pip: a disc for your squad or nobody, a diamond for a rival's seat; filled or an outline.
 static func pip(c: Control, pv: Vector2, r: float, col: Color, diamond: bool, fill: bool) -> void:
 	if not diamond:
@@ -195,9 +208,11 @@ static func pip(c: Control, pv: Vector2, r: float, col: Color, diamond: bool, fi
 		pts.append(pts[0])
 		c.draw_polyline(pts, col, 2.0, true)
 
+
 # ------------------------------------------------------------------ the Heart Gate prompt
 static func is_gate_prompt(it: Dictionary) -> bool:
 	return it.get("kind", "") == "heart" and it.get("act", "") == "leave"
+
 
 ## What the carrier sees at the Gate: the live key, "Leave now: small reward", the hold bar (rules gate_hold_s),
 ## one line under it. `it` is the Heart's interact dictionary; false when it is not the carrier's leave prompt.
@@ -212,11 +227,13 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	var w := kw + 10.0 + mw + 26.0
 	var x := sz.x * 0.5 - w * 0.5
 	var sw := TextCache.width(HudStyle.BODY, stay_line(hud.m), 13) + 20.0
-	var shift := maxf(HudScale.nudge_right(Rect2(Vector2(x, y - 22), Vector2(w, 40)), sz),
-			HudScale.nudge_right(Rect2(Vector2(sz.x * 0.5 - sw * 0.5, y + 22), Vector2(sw, 20)), sz))
-	x += shift      # (the grown bottom-left block reaches the prompt at 130%: it steps right)
+	var shift := maxf(
+		HudScale.nudge_right(Rect2(Vector2(x, y - 22), Vector2(w, 40)), sz),
+		HudScale.nudge_right(Rect2(Vector2(sz.x * 0.5 - sw * 0.5, y + 22), Vector2(sw, 20)), sz)
+	)
+	x += shift  # (the grown bottom-left block reaches the prompt at 130%: it steps right)
 	var edge := Color(Heart.gate_col(), 0.7)
-	SafeArea.note_as("gate_prompt", Rect2(Vector2(x, y - 22), Vector2(w, 40)))      # (the box and its hold bar)
+	SafeArea.note_as("gate_prompt", Rect2(Vector2(x, y - 22), Vector2(w, 40)))  # (the box and its hold bar)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, edge, 1), Rect2(Vector2(x, y - 22), Vector2(w, 34)))
 	HudStyle.key_pill(c, Vector2(x + 13 + kw * 0.5, y - 5), key, Heart.gate_col())
 	HudStyle.text(c, Vector2(x + 13 + kw + 10, y), main, 16, HudStyle.INK)
@@ -228,6 +245,7 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 7, Color(0, 0, 0, 0), 0), back)
 	HudStyle.ctext(c, Vector2(mid, y + 37), stay, 13, HudStyle.INK, 3, HudStyle.BODY)
 	return true
+
 
 ## The line under the Gate prompt: what staying gets you.
 static func stay_line(m: Match) -> String:

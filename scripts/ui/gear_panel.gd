@@ -7,9 +7,10 @@ extends RefCounted
 const CELL := 38.0
 const GAP := 6.0
 
-static var _ups_key := -1        # hash of the perks the cached upgrade line was built for
+static var _ups_key := -1  # hash of the perks the cached upgrade line was built for
 static var _ups_txt := ""
 static var _ups_w := 0.0
+
 
 ## Rect of slot i for a screen size (right-aligned, above the weapon card and its row of tonic / kit / throw slots).
 static func cell_rect(sz: Vector2, i: int) -> Rect2:
@@ -19,6 +20,7 @@ static func cell_rect(sz: Vector2, i: int) -> Rect2:
 	var y := sz.y - pad.y - HudStyle.KEY_REACH - 62.0 - 66.0 - 22.0 - CELL
 	return Rect2(Vector2(x + i * (CELL + GAP), y), Vector2(CELL, CELL))
 
+
 ## True once any of the four slots holds gear: until then the row of empty frames stays off the HUD.
 static func worn_any(p: Hunter) -> bool:
 	for g in p.gear:
@@ -26,10 +28,12 @@ static func worn_any(p: Hunter) -> bool:
 			return true
 	return false
 
+
 static func draw(hud, sz: Vector2, p: Hunter) -> void:
 	if worn_any(p):
 		_draw_slots(hud, sz, p)
 	_draw_upgrades(hud, sz, p)
+
 
 static func _draw_slots(hud, sz: Vector2, p: Hunter) -> void:
 	for i in Gear.SLOTS.size():
@@ -46,10 +50,13 @@ static func _draw_slots(hud, sz: Vector2, p: Hunter) -> void:
 		Icons.draw(hud.c, Gear.icon_of(String(g["id"])), r.get_center(), CELL * 0.28, Gear.ALL[String(g["id"])]["col"])
 		if i < 2 and float(p.gear_cd[i]) > 0.0:
 			var f := Gloves.cd_frac(p, i)
-			hud.c.draw_rect(Rect2(r.position + Vector2(0, CELL * (1.0 - f)), Vector2(CELL, CELL * f)), Color(0, 0, 0, 0.5))
+			hud.c.draw_rect(
+				Rect2(r.position + Vector2(0, CELL * (1.0 - f)), Vector2(CELL, CELL * f)), Color(0, 0, 0, 0.5)
+			)
+
 
 static func _draw_upgrades(hud, sz: Vector2, p: Hunter) -> void:
-	var perks_key: int = p.perks.hash()      # the upgrade line only changes when the perks do (no string building per frame)
+	var perks_key: int = p.perks.hash()  # the upgrade line only changes when the perks do (no string building per frame)
 	if perks_key != _ups_key:
 		_ups_key = perks_key
 		_ups_txt = WeaponUps.summary(p)
@@ -61,8 +68,10 @@ static func _draw_upgrades(hud, sz: Vector2, p: Hunter) -> void:
 		var right := cell_rect(sz, Gear.SLOTS.size() - 1).end.x
 		hud._text(Vector2(right - _ups_w, r0.position.y - 6.0), _ups_txt, 11, Color(hud.GOOD, 0.9), hud.body)
 
+
 static func _empty_icon(i: int) -> String:
 	return ["glove", "glove", "fortify", "dash"][i]
+
 
 ## The second hover line: the slot name, or for a glove whether it is active (and its key) or passive.
 static func _kind_line(i: int, gid: String) -> String:
@@ -71,6 +80,7 @@ static func _kind_line(i: int, gid: String) -> String:
 	if Gear.active(gid):
 		return "Active glove  ·  %s" % Gloves.key_cap(i)
 	return "Passive glove  ·  always on"
+
 
 ## Hover text for slot i: [[line, colour, size?]...]
 static func tip(p: Hunter, i: int) -> Array:

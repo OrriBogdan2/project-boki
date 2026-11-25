@@ -13,7 +13,16 @@ extends RefCounted
 const FIRST := ["vitals", "abilities", "summon_ring", "objective"]
 # (beat_clock also comes on the first Ways Out beat or kill, HudGroups.clock_shown)
 const LATER := [
-	"beat_clock", "belt", "counters", "feed", "gear", "squad", "perks", "bonus_stats", "weather", "pace_tags",
+	"beat_clock",
+	"belt",
+	"counters",
+	"feed",
+	"gear",
+	"squad",
+	"perks",
+	"bonus_stats",
+	"weather",
+	"pace_tags",
 	"plate_colours"
 ]
 

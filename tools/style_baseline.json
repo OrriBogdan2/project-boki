@@ -631,9 +631,6 @@
 "long_line": 31,
 "nested_ternary": 5
 },
-"scripts/ui/bonus_stats.gd": {
-"long_line": 1
-},
 "scripts/ui/capture_hud.gd": {
 "long_line": 4
 },
@@ -652,7 +649,7 @@
 "semicolon": 10
 },
 "scripts/ui/gear_panel.gd": {
-"long_line": 2
+"long_line": 1
 },
 "scripts/ui/hatch.gd": {
 "long_line": 24,

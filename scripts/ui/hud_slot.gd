@@ -22,13 +22,13 @@ const ROW_TILE := 50.0         # px: one big tile of the ability row (RMB, Shift
 const ROW_GAP := 10.0          # px between two of them
 const ROW_FOUR := ROW_TILE * 4.0 + ROW_GAP * 3.0
 
+static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
+static var shown_pips := {}    # slot id -> the fill (0..1) of each charge pip last drawn (checks read it)
+
 ## Where the ability row starts: its four big tiles centred at the bottom edge of the screen, their key pills just
 ## above the margin. Vitals sit bottom left and the weapon bottom right, so nothing is stacked above the row.
 static func row_origin(sz: Vector2) -> Vector2:
 	return Vector2(sz.x * 0.5 - ROW_FOUR * 0.5, sz.y - HudStyle.hud_pad(sz).y - HudStyle.KEY_REACH - ROW_TILE)
-
-static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
-static var shown_pips := {}    # slot id -> the fill (0..1) of each charge pip last drawn (checks read it)
 
 ## Moves the per-slot animation state of host `H` on by `delta` s: presses age out, "ready" rings fade.
 static func decay(h, delta: float) -> void:

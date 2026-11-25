@@ -7,25 +7,29 @@ extends Control
 ## stays on Hud.c, redrawn every frame. While this draws, Hud.c points at this canvas, so the panel
 ## code (and the HudVitals / GearPanel / BeltHud helpers) draw here unchanged.
 
-const REDRAW_HZ := 20.0      # panel redraws per second
+const REDRAW_HZ := 20.0  # panel redraws per second
 var hud: Node
 var _t := 0.0
-var used_us := 0             # microseconds spent drawing since tooling last read it (--perf-bench)
-static var draws := 0        # panel redraws so far; RankMarks keeps a "+" only while the latest one drew it
+var used_us := 0  # microseconds spent drawing since tooling last read it (--perf-bench)
+static var draws := 0  # panel redraws so far; RankMarks keeps a "+" only while the latest one drew it
+
 
 static func make(h: Node) -> HudPanels:
 	var p := HudPanels.new()
 	p.hud = h
 	p.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	p.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS      # (the painted minimap, as on Hud.c)
+	p.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS  # (the painted minimap, as on Hud.c)
 	p.draw.connect(p._draw_panels)
 	return p
+
 
 ## Called from Hud._process every frame. At least MIN_FRAMES frames apart too, so a slow machine (where
 ## every frame is over 50 ms) still saves two draws in three.
 const MIN_FRAMES := 3
 var _frames := 0
+
+
 func tick(delta: float) -> void:
 	var box := SafeArea.frame(get_parent_area_size())  # (on 21:9 and wider, a centred 16:9 frame)
 	if box != get_rect():
@@ -38,6 +42,7 @@ func tick(delta: float) -> void:
 		_frames = 0
 		queue_redraw()
 
+
 func _draw_panels() -> void:
 	var t0 := Time.get_ticks_usec()
 	draws += 1
@@ -48,7 +53,7 @@ func _draw_panels() -> void:
 	var m: Match = hud.m
 	var p: Hunter = m.player
 	if DropHud.aboard(p):
-		hud._draw_minimap(size)      # aboard the rocket: the map and nothing else (DropHud)
+		hud._draw_minimap(size)  # aboard the rocket: the map and nothing else (DropHud)
 	elif not (m.tut and m.tut.intro):
 		var sz := size
 		HudScale.pass_start()
@@ -57,7 +62,7 @@ func _draw_panels() -> void:
 			hud._draw_top(sz)
 		if p and m.lairs:
 			HudScale.begin(hud, "boss", sz)
-			hud._draw_boss_bar(sz, p)        # (these two push the feed down: before it)
+			hud._draw_boss_bar(sz, p)  # (these two push the feed down: before it)
 			hud._draw_lair_victory(sz, p)
 		HudScale.begin(hud, "feed", sz)
 		if HudReveal.on(m, "feed"):
@@ -83,7 +88,7 @@ func _draw_panels() -> void:
 				SquadFrames.draw(hud, sz, p)
 				TeamBoki.draw(hud, p)
 			HudScale.begin(hud, "squad", sz)
-			ObjectiveTracker.draw(hud)      # under the squad frames
+			ObjectiveTracker.draw(hud)  # under the squad frames
 			if HudReveal.on(m, "perks"):
 				HudScale.begin(hud, "perks", sz)
 				hud._draw_perks(sz, p)

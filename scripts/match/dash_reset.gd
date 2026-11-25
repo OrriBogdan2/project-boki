@@ -10,11 +10,12 @@ extends RefCounted
 ## it: the reset sound (Sfx.play_reset_cue) and a pop on the HUD's Shift icon.
 ## The Second Wind perk (second_wind) refills the whole dash when a hit drops you under 30% health.
 
-const HEAL := 0.05          # of max health, per takedown, knocker only (a knock and the kill that follows each give it)
+const HEAL := 0.05  # of max health, per takedown, knocker only (a knock and the kill that follows each give it)
 const ASSIST_WINDOW := 4.0  # s: how recent a teammate's hit or CC on the victim must be to count as an assist
 const ASSIST_SOFTER_DB := 6.0  # dB: how much quieter an assist's reset cue plays than the knocker's
-const SECOND_WIND_HP := 0.3    # of max health: dropping under it fires the Second Wind perk
-const SECOND_WIND_CD := 45.0   # s between two Second Wind refreshes
+const SECOND_WIND_HP := 0.3  # of max health: dropping under it fires the Second Wind perk
+const SECOND_WIND_CD := 45.0  # s between two Second Wind refreshes
+
 
 ## Hunter `by` (or its Boki) landed damage or crowd control on enemy hunter `target`: remember when.
 ## One dictionary write per landed hit; takedown() reads it.
@@ -22,6 +23,7 @@ static func note(target: Ent, by: Ent) -> void:
 	var cred: Ent = by.owner_h if by is Kin and by.owner_h else by
 	if target is Hunter and cred is Hunter and cred.team != target.team:
 		target.hit_by[cred.get_instance_id()] = float(target.m.time)
+
 
 ## `h` earned a takedown on enemy hunter `victim`: refresh `h` and the teammates who assisted.
 static func takedown(h: Hunter, victim: Hunter) -> void:
@@ -35,6 +37,7 @@ static func takedown(h: Hunter, victim: Hunter) -> void:
 			mate.assists += 1
 			_refresh(mate, "assist")
 
+
 ## The Second Wind perk: a hit that takes `h` from at least SECOND_WIND_HP of its health to under it
 ## refreshes the dash, at most once every SECOND_WIND_CD seconds. `hp_before` is its health before the hit.
 static func second_wind(h: Hunter, hp_before: float) -> void:
@@ -46,6 +49,7 @@ static func second_wind(h: Hunter, hp_before: float) -> void:
 	if _refresh(h, "second_wind", true):
 		h.second_wind_at = float(h.m.time)
 
+
 ## Gives `h` its dash back by the rule above (`full`: every charge, Second Wind); false if it can't have it
 ## (down, out, another game's, opted out of the takedown refresh).
 static func _refresh(h: Hunter, source: String, full := false) -> bool:
@@ -56,6 +60,7 @@ static func _refresh(h: Hunter, source: String, full := false) -> bool:
 	h.ex_cd = 0.0
 	cue(h, source)
 	return true
+
 
 ## The dash came back for `h`: play the cue (softer for an assist) and pop the Shift icon (local hunter only).
 static func cue(h: Hunter, source := "hero") -> void:

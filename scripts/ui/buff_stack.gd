@@ -103,7 +103,7 @@ func draw(hud, p: Hunter, sz: Vector2) -> void:
 	more = maxi(0, rows.size() - MAX_ICONS)
 	var c: CanvasItem = hud.c
 	var x := SafeArea.frame(sz).end.x - EDGE - TILE
-	var y := HudScale.from_edge(TOP)      # (below the feed and toasts as they are once the HUD has grown)
+	var y := HudScale.from_edge(TOP)  # (below the feed and toasts as they are once the HUD has grown)
 	for r in rows.slice(0, MAX_ICONS):
 		var rect := Rect2(Vector2(x, y), Vector2(TILE, TILE))
 		_tile(c, rect, r)

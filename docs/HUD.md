@@ -172,7 +172,7 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 - Each panel group (`SafeArea.begin` in `HudPanels`) is drawn scaled about the corner or edge it hangs from
   (`HudScale.ANCHOR`), so it stays on its margin and grows inward; groups with one anchor scale together and
   keep their spacing. Hover spots and the registry's rects follow the scale. A widget that hangs from somewhere
-  else inside a group (the Ways Out strip, the hidden tag) starts its own with `HudScale.begin` and hands back.
+  else inside a group (the Ways Out strip) starts its own with `HudScale.begin` and hands back.
 - Growing never takes a corner into the one on its side under or over it: the factor steps down to what the last
   pass's extents leave room for, never below 100% (on 720p the left column, minimap + squad over the kin card
   and bars, tops out near 125%, and the big drop map holds it at 100%).

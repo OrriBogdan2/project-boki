@@ -138,19 +138,19 @@ static func _fight(m, P: Hunter) -> void:
 
 ## The fight picture's HUD groups that need something to show: your numbers, two perks, worn gear (the stat column)
 ## and two lines in the kill feed.
-static func _kit_out(m, P: Hunter) -> void:
-	P.knocks = 3
-	P.kills = 1
-	P.assists = 2
-	P.dmg_done = 640.0
-	P.gems = 137
-	P.perks = ["quickhands", "secondwind"]
-	P.gear[1] = {"id": "power_core", "rar": 1}
-	P.gear[2] = {"id": "quilted_coat", "rar": 1}
-	P.gear[3] = {"id": "quickstep_boots", "rar": 1}
-	P.refresh_gear()
-	var foes: Array = m.hunters.filter(func(x): return x != P)
-	KillFeed.knock(m, foes[0], P, KillFeed.icon_of(P, {}))
+static func _kit_out(m, me: Hunter) -> void:
+	me.knocks = 3
+	me.kills = 1
+	me.assists = 2
+	me.dmg_done = 640.0
+	me.gems = 137
+	me.perks = ["quickhands", "secondwind"]
+	me.gear[1] = {"id": "power_core", "rar": 1}
+	me.gear[2] = {"id": "quilted_coat", "rar": 1}
+	me.gear[3] = {"id": "quickstep_boots", "rar": 1}
+	me.refresh_gear()
+	var foes: Array = m.hunters.filter(func(x): return x != me)
+	KillFeed.knock(m, foes[0], me, KillFeed.icon_of(me, {}))
 	KillFeed.knock(m, foes[1], foes[2], KillFeed.icon_of(foes[2], {}))
 
 ## Everything that pops up text at the same moment: an ally knocked, an even level, a hint and toasts.
