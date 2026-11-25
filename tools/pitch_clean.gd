@@ -39,7 +39,7 @@ static func _drop_overlays(model: Node3D) -> void:
 
 ## Hides the dressing within `r` m (flat) of `at`; returns how many pieces went.
 static func clear_deco(m: Node, at: Vector3, r: float) -> int:
-	var deco := m.world.get_node_or_null("Deco")
+	var deco: Node = m.world.get_node_or_null("Deco")
 	if deco == null:
 		return 0
 	var n := 0
