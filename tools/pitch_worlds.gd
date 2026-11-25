@@ -6,6 +6,7 @@ extends RefCounted
 const FPS := 60
 const DAY_T := 0.45  # farm clock: mid-morning all film long
 const LEG_S := 6.0  # s at most to a goal
+const ZONE_TAKE_S := 8.0  # s a zone's walk lasts at least
 const ZONES := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const ZONE_OF_SHOT := {12: "glasswater", 13: "cinderstep", 14: "hushwood", 15: "ridge"}
 ## species, name, the lean type the zone loves
@@ -87,8 +88,6 @@ func hop_take(zone: String) -> void:
 	rig.mark("arrived")
 	await _wait(1.0)
 	await _walk(_resident_at(zone, 0), 1.9)
-	await _wait(0.6)
-	await _walk(_resident_at(zone, 1), 1.9)
 	await _wait(1.5)
 
 
@@ -97,11 +96,13 @@ func zone_take(zone: String) -> void:
 	await _load(zone)
 	await _wait(1.0)
 	rig.mark(zone)
+	var t0 := Engine.get_frames_drawn()
 	_orbit_start(1.4, 4.5)
 	for n in 4:  # walks up to its Boki one after the other (the nearest from where it stands)
 		await _walk(_resident_at(zone, n % 2), 1.9)
 		await _wait(0.5)
-	await _wait(1.0)
+	while Engine.get_frames_drawn() - t0 < int(ZONE_TAKE_S * FPS):
+		await _wait(0.5)
 
 
 ## Shot 16: hub -> zone -> hub -> zone, each hop the moment you arrive.
@@ -167,7 +168,7 @@ func _tidy() -> void:
 	if _tick % 3 == 0:
 		for l in c.find_children("*", "Label3D", true, false):
 			var t: String = (l as Label3D).text
-			if (t.length() > 16 and not keep_say) or t == "★":  # Boki bubbles, notice boards, the partner star: text in the frame
+			if (t.length() > 16 and not keep_say) or (not t.is_empty() and t.unicode_at(0) > 0x2000 and t != "♥"):  # Boki bubbles, notice boards, the partner star: text in the frame
 				(l as Label3D).visible = false
 	if c.get("ui") != null:
 		(c.ui as CanvasLayer).visible = false
