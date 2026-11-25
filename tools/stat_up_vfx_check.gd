@@ -107,6 +107,10 @@ func run(m: Node, mode: String = "check") -> void:
 	print("STATUP DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+## The lane's lines minus Old Pell's one-off "set up the Ransom House" toast (a fresh base save gets it on arrival).
+func _tips_only(lane: MsgLane) -> Array:
+	return lane.texts().filter(func(t): return not String(t).begins_with("Old Pell set up"))
+
 ## StatMeaning: the tip strip says what a stat does at its first rise on the save, and only then.
 func _tips(glint: StatGlint, rec: Dictionary) -> void:
 	var lane := MsgLane.of(home.root_ui)
@@ -115,14 +119,14 @@ func _tips(glint: StatGlint, rec: Dictionary) -> void:
 	for s in Care.STATS:
 		ok(String(Care.STATS[s]["means"]).begins_with(String(Care.STATS[s]["name"]) + ":"), "%s has its line" % s)
 		want.append(Care.STATS[s]["means"])
-	ok(seen == {"power": true} and lane.texts() == [want[0]], "the first rise (Power) said its line, and only that one")
+	ok(seen == {"power": true} and _tips_only(lane) == [want[0]], "the first rise (Power) said its line, and only that one")
 	await _settle(glint)
 	Care.add_stat(rec, "power", 1)
 	await _frames(2)
-	ok(lane.texts() == [want[0]], "Power again: not told twice")
+	ok(_tips_only(lane) == [want[0]], "Power again: not told twice")
 	Care.add_stat(rec, "guard", 1)
 	await _frames(2)
-	ok(not seen.has("guard") and lane.texts() == [want[0]], "Guard within a minute of the last tip: held back")
+	ok(not seen.has("guard") and _tips_only(lane) == [want[0]], "Guard within a minute of the last tip: held back")
 	await _settle(glint)
 	StatMeaning.last_s -= StatMeaning.GAP_S
 	home.games = [FakeGame.new()]
