@@ -217,7 +217,7 @@ func _chest_and_keys() -> void:
 	ok("an open chest costs nothing more", p_v.chest_keys == 1)
 	ok("the chest pays out", m.pickups.size() > gems0)
 	# a second chest, hold it through the interact loop
-	var c2: Dictionary = m.chests.filter(func(x): return not x["open"] and not x.get("ride", false) and not x.get("free", false))[0]
+	var c2: Dictionary = m.chests.filter(_is_plain_closed)[0]
 	p_v.teleport(c2["pos"] + Vector3(0.8, 0, 0))
 	p_v.vel = Vector3.ZERO
 	p_v.chest_keys = 0
@@ -529,7 +529,7 @@ func _bots() -> void:
 	ok("a bot picks up a dropped (bonus) key", got_key or opened.call())
 	ok("then opens a chest with it, and spends exactly that key", opened.call() and b.chest_keys == 0, "%.0fs" % t)
 	# and a bot with no key does not stand at a locked chest
-	var c2: Dictionary = m.chests.filter(func(x): return not x["open"] and not x.get("ride", false) and not x.get("free", false))[0]
+	var c2: Dictionary = m.chests.filter(_is_plain_closed)[0]
 	ok("a bot without a key has no chest goal", not BotKeys.chest_open_for(b, c2) or b.chest_keys > 0)
 	_given_up(m, b)
 	m.queue_free()
@@ -756,3 +756,7 @@ func _controls_card() -> void:
 	var shown := _caps_match(after) and flat.has("J") and flat.has("N") and not flat.has("E")
 	ok("a rebind shows at once", shown, str(flat))
 	Settings.reset_all()
+
+
+func _is_plain_closed(x: Dictionary) -> bool:
+	return not x["open"] and not x.get("ride", false) and not x.get("free", false)
