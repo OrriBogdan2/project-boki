@@ -106,9 +106,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
 | gongrowl | shared | shared | shared | shared | shared | shared | proc | proc |
 | gravitank | shared | shared | shared | shared | shared | shared | proc | proc |
-| heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
 | howlop | shared | shared | shared | shared | shared | shared | proc | proc |
-| kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
 | lanceron | shared | shared | shared | shared | shared | shared | proc | proc |
 | lanternlong | shared | shared | shared | shared | shared | shared | proc | proc |
 | limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -153,7 +151,9 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
+| heatherhorn | clip | clip | clip | clip | clip | clip | proc | proc |
 | kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
+| kilnbadger | clip | clip | clip | clip | clip | clip | proc | proc |
 | kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
 | lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
 | lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
