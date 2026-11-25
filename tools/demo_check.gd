@@ -33,6 +33,10 @@ func _boot(preset: String, args: PackedStringArray) -> bool:
 		await _wait(0.25)
 		t += 0.25
 	await _wait(RUN_SECS)
+	# the last preset's screen can still count as "up" while this one builds: wait out the swap too
+	while not _up(preset) and t < BOOT_SECS:
+		await _wait(0.25)
+		t += 0.25
 	return _up(preset)
 
 func run(m: Node) -> void:
