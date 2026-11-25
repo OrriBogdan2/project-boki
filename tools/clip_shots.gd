@@ -119,7 +119,7 @@ func run(main: Node) -> void:
 		cam.position = Vector3(0, at_y + 0.25 if cam_y < 0.0 else cam_y, dist)
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
-		await tree.process_frame       # (past the title's fade)
+		await tree.process_frame  # (past the title's fade)
 	if OS.get_cmdline_user_args().has("--states"):
 		var views: Array = []
 		for a in OS.get_cmdline_user_args():
@@ -218,6 +218,7 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
 
+
 ## --states: each STATE_SHOTS state fed to the model's pose node for its seconds; the attack is the kit's first move
 ## (contract clips) and one swing (a Meshy-native model).
 func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
@@ -250,6 +251,7 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
 	model.set_meta(WardenClips.FEEL, Vector2.ZERO)
+	i = await _native_moves(model, poser, fps, dir, i)
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
 
 
@@ -269,6 +271,29 @@ func _ramp(model: Node3D, s: Dictionary, ramp: String, t: float) -> void:
 			s["hit_dir"] = -ahead if ramp == "hit_front" else ahead
 		"downed":
 			s["fall"] = minf(t / 0.45, 1.0)
+
+
+## --states on a Meshy-native model, then each kit move it has a clip for (data "kmoves"), pressed standing: its clip's
+## length (a hold loop: one and a half laps) and 0.3 s of the move gone (the walk clips back, the loop with it).
+func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) -> int:
+	var moves: WardenNativeMoves = poser.get("moves")
+	if moves == null:
+		return i
+	for km in moves.moves:
+		var mv: Dictionary = moves.moves[km]
+		var len_s: float = poser.player.get_animation(String(poser.plays[WardenNativeMoves.KEY % km])).length
+		var hold := float(mv.get("hold_from", -1.0))
+		var secs: float = len_s if hold < 0.0 else hold + 1.5 * (len_s - hold)
+		for k in int((secs + 0.3) * fps):
+			var s := {"grounded": true, "face": model.rotation.y}
+			if k / fps < secs:
+				s["kmove"] = km
+				s["kmove_t"] = k / fps
+			model.set_meta(WardenClips.STATE, s)
+			poser.call("_process", 1.0 / fps)
+			await _grab(dir.path_join("f%03d.png" % i))
+			i += 1
+	return i
 
 
 func _grab(path: String) -> void:
