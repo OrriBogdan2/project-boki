@@ -48,11 +48,13 @@ func keys(mv: Vector2, cam: CamRig) -> Vector2:
 
 ## Once a frame, after the Settings camera and the distance multiplier are set: `free` is false while the farm wants
 ## the top-down view (building, a training session, a tutorial spotlight on something that may be behind you);
-## `games` are the farm's minigames (a round on tips the view up and draws it back so the whole court shows).
+## `games` are the farm's minigames (a round on tips the view up and draws it back so the whole court shows; Kite Tow's
+## loop is too wide for that, so it blends to the top-down view like building does).
 func tick(cam: CamRig, delta: float, free: bool, games: Array) -> void:
 	if not enabled():
 		return
 	var r := rules()
+	free = free and not games.any(_wants_top)
 	if k <= 0.0 and free:
 		pitch = deg_to_rad(float(r["pitch_deg"]))
 	k = move_toward(k, 1.0 if free else 0.0, delta / float(r["blend_s"]))
@@ -79,6 +81,11 @@ func tick(cam: CamRig, delta: float, free: bool, games: Array) -> void:
 
 static func _is_playing(g: Object) -> bool:
 	return g.playing()
+
+
+## Kite Tow flies your Boki round a 13 m loop while you stand at the stand: only the wide top-down view holds it.
+static func _wants_top(g: Object) -> bool:
+	return g is BaseKite and (g as BaseKite).playing()
 
 
 ## After the camera moved this frame: pulls it in along the view so it stays clear of the ground and walls. With a
