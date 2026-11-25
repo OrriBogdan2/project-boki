@@ -231,6 +231,7 @@
 		"slots": {
 			"wood-shield": {"albedo": [1.22, 1.2, 1.15], "desat": 0.45, "top_light": 0.3},
 			"wood-body": {"desat": 0.45, "albedo": [0.97, 1.0, 1.0]},
+			"wood-torso": {"desat": 0.45, "albedo": [0.97, 1.0, 1.0]},
 			"wood-helmet": {"desat": 0.5, "albedo": [0.86, 0.88, 0.8]},
 			"wood-fist": {"desat": 0.6, "albedo": [1.05, 1.1, 1.12], "fres": 0.2},
 			"wood-boot": {"desat": 0.5, "albedo": [1.15, 1.12, 1.12], "fres": 0.1},
