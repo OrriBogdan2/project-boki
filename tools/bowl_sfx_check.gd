@@ -26,7 +26,7 @@ func run(m: Node) -> void:
 	_names()
 	for r in GardenRecipes.all():
 		await _mix(r)
-	await _taste()
+	_taste()
 	await _fizzle()
 	print("BOWLSFX DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
