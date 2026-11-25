@@ -18,22 +18,25 @@ extends RefCounted
 enum S { IDLE, PLAY, RESULT }
 const TABLE := {S.IDLE: [S.PLAY], S.PLAY: [S.RESULT, S.IDLE], S.RESULT: [S.IDLE]}
 
-const GAME := "lantern"                      # the game's id in garden_prizes.json
-const PANEL := "Lantern Match"               # the panel's title (home panel_open while playing)
-const RING_OFF := Vector3(-2.8, 0, 2.9)      # m from the Training post to the glowcap ring's middle
-const RING_R := 0.7                          # m, the prop ring's radius
-const REACH := 1.4                           # m from the ring's middle to use it
-const CAP_R := 0.11                          # m, a prop glowcap's radius
-const UI_RING := 150.0                       # px, the panel ring's radius
-const RIVAL_PITCH := 0.88                    # the rival's caps sound a little lower than yours
-const UI_CAP := 54.0                         # px, a panel cap button's size
-const DARK := Color("2a2340")                # a closed cap on the panel
+const GAME := "lantern"  # the game's id in garden_prizes.json
+const PANEL := "Lantern Match"  # the panel's title (home panel_open while playing)
+const RING_OFF := Vector3(-2.8, 0, 2.9)  # m from the Training post to the glowcap ring's middle
+const RING_R := 0.7  # m, the prop ring's radius
+const REACH := 1.4  # m from the ring's middle to use it
+const CAP_R := 0.11  # m, a prop glowcap's radius
+const UI_RING := 150.0  # px, the panel ring's radius
+const RIVAL_PITCH := 0.88  # the rival's caps sound a little lower than yours
+const UI_CAP := 54.0  # px, a panel cap button's size
+const DARK := Color("2a2340")  # a closed cap on the panel
+
 
 static func rules() -> Dictionary:
 	return Content.rules("lantern_match")
 
+
 static func _stat(rec: Dictionary, s: String) -> float:
 	return float(rec.get("stats", {}).get(s, 0))
+
 
 ## Seconds between a Boki's sniffs: from Focus and curiosity.
 static func sniff_every(rec: Dictionary) -> float:
@@ -42,39 +45,42 @@ static func sniff_every(rec: Dictionary) -> float:
 	rate *= 1.0 + (float(rec.get("traits", {}).get("curiosity", 0.5)) - 0.5) * float(R["sniff_curiosity"])
 	return maxf(float(R["sniff_s"]) / rate, float(R["sniff_min"]))
 
+
 ## The chance your Boki notices a pair while it flashes.
 static func see_p(rec: Dictionary) -> float:
 	var R := rules()
 	return minf(float(R["see"]) + _stat(rec, "focus") * float(R["see_per_focus"]), 1.0)
+
 
 ## The chance the rival Boki remembers a cap it has seen.
 static func mem_p(rec: Dictionary) -> float:
 	var R := rules()
 	return minf(float(R["foe_mem"]) + _stat(rec, "focus") * float(R["foe_mem_per_focus"]), 0.95)
 
+
 ## One game on the ring: caps 0..11 round the ring, each holding a pair id.
 class Board:
 	var R: Dictionary
 	var rng: RandomNumberGenerator
-	var mine: Dictionary            # your Boki: it sniffs and points
-	var foe: Dictionary             # the rival Boki in versus, empty solo
-	var caps: Array = []            # pair id of each cap
-	var matched: Array = []         # each cap's pair is found
-	var saw: Array = []             # your Boki has seen this cap's colour
-	var mem: Array = []             # the rival remembers this cap's colour
-	var open: Array = []            # caps lit right now (at most two)
-	var pairs: Array = [0, 0]       # pairs found: you, the rival
-	var turn := 0                   # 0 you, 1 the rival
-	var t := 0.0                    # s on the clock (it waits while a ring flashes)
-	var flash_t := 0.0              # s of the ring's flash left
-	var shut_t := 0.0               # s until a mismatch goes dark
-	var last := -1                  # the last cap you opened
-	var hint := -1                  # the cap your Boki points at, -1 for none
-	var hints := 0                  # times it pointed
-	var sniff_t := 0.0              # s until its next sniff
-	var foe_t := 0.0                # s until the rival opens its next cap
-	var ver := 0                    # bumped on every change the panel shows
-	var heard: Array = []           # what the player should hear since the view last drained it: [sound, turn]
+	var mine: Dictionary  # your Boki: it sniffs and points
+	var foe: Dictionary  # the rival Boki in versus, empty solo
+	var caps: Array = []  # pair id of each cap
+	var matched: Array = []  # each cap's pair is found
+	var saw: Array = []  # your Boki has seen this cap's colour
+	var mem: Array = []  # the rival remembers this cap's colour
+	var open: Array = []  # caps lit right now (at most two)
+	var pairs: Array = [0, 0]  # pairs found: you, the rival
+	var turn := 0  # 0 you, 1 the rival
+	var t := 0.0  # s on the clock (it waits while a ring flashes)
+	var flash_t := 0.0  # s of the ring's flash left
+	var shut_t := 0.0  # s until a mismatch goes dark
+	var last := -1  # the last cap you opened
+	var hint := -1  # the cap your Boki points at, -1 for none
+	var hints := 0  # times it pointed
+	var sniff_t := 0.0  # s until its next sniff
+	var foe_t := 0.0  # s until the rival opens its next cap
+	var ver := 0  # bumped on every change the panel shows
+	var heard: Array = []  # what the player should hear since the view last drained it: [sound, turn]
 
 	func _init(me: Dictionary, rival: Dictionary, r: RandomNumberGenerator) -> void:
 		R = LanternMatch.rules()
@@ -91,7 +97,7 @@ class Board:
 		caps.clear()
 		for i in n * 2:
 			caps.append(i % n)
-		for i in range(caps.size() - 1, 0, -1):      # Fisher-Yates
+		for i in range(caps.size() - 1, 0, -1):  # Fisher-Yates
 			var j := rng.randi_range(0, i)
 			var c: int = caps[i]
 			caps[i] = caps[j]
@@ -163,10 +169,10 @@ class Board:
 			for c in open:
 				matched[c] = true
 			pairs[turn] += 1
-			open.clear()                              # a match keeps the turn
+			open.clear()  # a match keeps the turn
 			heard.append(["lantern_match", turn])
 			if not versus() and not matched.has(false):
-				heard.append(["lantern_win", turn])     # the whole ring lit: a round won
+				heard.append(["lantern_win", turn])  # the whole ring lit: a round won
 				_deal()
 		else:
 			shut_t = float(R["reveal_s"])
@@ -231,6 +237,7 @@ class Board:
 					unknown.append(i)
 		return unknown[rng.randi_range(0, unknown.size() - 1)]
 
+
 ## Pays out a finished game: energy, joy, trust, memories, gems, the prize roll and the cup.
 static func settle(b: Board) -> Dictionary:
 	var R := rules()
@@ -250,23 +257,26 @@ static func settle(b: Board) -> Dictionary:
 	var prize := GardenPrizes.settle(GAME, b.mine, b.foe if b.versus() else {"stats": {}}, won)
 	return {"won": won, "draw": draw, "pairs": b.pairs.duplicate(), "gems": int(R["gems"]), "prize": prize}
 
+
 # ------------------------------------------------------------------ on the base
-var h                          # the Home screen
+var h  # the Home screen
 var state := S.IDLE
-var refused := 0               # moves the TABLE turned down
-var state_t := 0.0             # s in the state
+var refused := 0  # moves the TABLE turned down
+var state_t := 0.0  # s in the state
 var ring: Node3D = null
 var board: Board = null
-var players: Array = []        # the home's kin entries in the game: you, then the rival in versus
-var buttons: Array = []        # the panel's cap buttons, by cap
-var head: Label = null         # the panel's clock and score line
-var note: Label = null         # the panel's sniff and turn line
+var players: Array = []  # the home's kin entries in the game: you, then the rival in versus
+var buttons: Array = []  # the panel's cap buttons, by cap
+var head: Label = null  # the panel's clock and score line
+var note: Label = null  # the panel's sniff and turn line
 var shown_ver := -1
 var shown_s := -1
 var card: Control = null
 
+
 func _init(home) -> void:
 	h = home
+
 
 ## The only writer of `state`: false (and counted) when the TABLE lacks the move.
 func go(to: S) -> bool:
@@ -276,6 +286,7 @@ func go(to: S) -> bool:
 	state = to
 	state_t = 0.0
 	return true
+
 
 ## The glowcap ring by the Training post (none without one); called when fixtures move.
 func place() -> void:
@@ -314,14 +325,20 @@ func place() -> void:
 		c.position = at + Vector3(0, 0.16, 0)
 		ring.add_child(c)
 
+
 func find(p2: Vector2) -> Dictionary:
-	if state == S.IDLE and is_instance_valid(ring) \
-			and p2.distance_to(Vector2(ring.position.x, ring.position.z)) <= REACH:
+	if (
+		state == S.IDLE
+		and is_instance_valid(ring)
+		and p2.distance_to(Vector2(ring.position.x, ring.position.z)) <= REACH
+	):
 		return {"kind": "lantern"}
 	return {}
 
+
 func label() -> String:
 	return "Play Lantern Match with %s" % Save.active_kin().get("name", "your partner")
+
 
 ## Opens the ring's panel: pick solo or versus.
 func use() -> void:
@@ -330,11 +347,18 @@ func use() -> void:
 		h._toast("Lantern Match needs a rested Boki out on the base")
 		return
 	var v: VBoxContainer = h._new_panel(PANEL, 520.0)
-	v.add_child(UI.para("Twelve glowcaps flash in pairs, then go dark. Open two at a time to find the pairs. "
-			+ "%s sniffs now and then and points at the partner of the cap you opened last." % ks[0]["rec"]["name"]))
+	v.add_child(
+		UI.para(
+			(
+				"Twelve glowcaps flash in pairs, then go dark. Open two at a time to find the pairs. "
+				+ "%s sniffs now and then and points at the partner of the cap you opened last." % ks[0]["rec"]["name"]
+			)
+		)
+	)
 	v.add_child(UI.primary("Solo against the clock", func(): _start([ks[0]])))
 	if ks.size() > 1:
 		v.add_child(UI.button("Turn by turn against %s" % ks[1]["rec"]["name"], func(): _start(ks.slice(0, 2))))
+
 
 func _start(ks: Array) -> void:
 	if not go(S.PLAY):
@@ -347,6 +371,7 @@ func _start(ks: Array) -> void:
 	board = Board.new(ks[0]["rec"], ks[1]["rec"] if ks.size() > 1 else {}, rng)
 	_board_panel()
 	GardenSfx.countdown(h, ks[0]["pos"])
+
 
 func _board_panel() -> void:
 	var v: VBoxContainer = h._new_panel(PANEL, 520.0)
@@ -369,22 +394,26 @@ func _board_panel() -> void:
 		var ang := TAU * i / board.caps.size()
 		b.position = Vector2.ONE * UI_RING + Vector2(sin(ang), -cos(ang)) * UI_RING
 		b.pressed.connect(_pick.bind(i))
-		UI.sfx(b, false)    # _pick plays its own click
+		UI.sfx(b, false)  # _pick plays its own click
 		ring_ui.add_child(b)
 		buttons.append(b)
 	shown_ver = -1
+
 
 func _pick(i: int) -> void:
 	if board != null:
 		board.pick(i)
 
+
 ## True while a round is on (GardenMusic ducks the music for it).
 func playing() -> bool:
 	return state == S.PLAY
 
+
 ## Home's _unhandled_input asks every base game; the board is clicked through its own panel, so nothing to take here.
 func input(_event: InputEvent) -> bool:
 	return false
+
 
 func tick(d: float) -> void:
 	state_t += d
@@ -404,11 +433,13 @@ func tick(d: float) -> void:
 					card.queue_free()
 				go(S.IDLE)
 
+
 ## The board's sounds since the last tick, at your Boki; the rival's caps a little lower.
 func _hear() -> void:
 	for e in board.heard:
 		GardenSfx.cue(String(e[0]), players[0]["pos"], RIVAL_PITCH if int(e[1]) == 1 else 1.0)
 	board.heard.clear()
+
 
 ## Repaints the panel when the board changed or the clock ticked a second.
 func _show() -> void:
@@ -437,6 +468,7 @@ func _show() -> void:
 	else:
 		note.text = "Your turn: open two caps"
 
+
 func _end(finished: bool) -> void:
 	var res := settle(board) if finished else {}
 	for k in players:
@@ -456,6 +488,7 @@ func _end(finished: bool) -> void:
 	players = []
 	buttons.clear()
 
+
 ## Versus: the winner's fanfare and the loser's huff (none on a draw). Solo: your Boki's fanfare, or the crowd's "aww".
 func _result_sound(res: Dictionary) -> void:
 	if players.size() > 1:
@@ -466,6 +499,7 @@ func _result_sound(res: Dictionary) -> void:
 		GardenSfx.cue("garden_win_" + GardenSfx.size_word(players[0]["rec"]), players[0]["pos"])
 	else:
 		GardenSfx.crowd("miss", players[0]["pos"])
+
 
 func _card(res: Dictionary) -> void:
 	if is_instance_valid(card):
@@ -478,5 +512,10 @@ func _card(res: Dictionary) -> void:
 	var line := "Pairs: you %d" % res["pairs"][0]
 	if board.versus():
 		line += ", %s %d" % [board.foe["name"], res["pairs"][1]]
-	card = BaseRace.result_card(h, [[title, 18, UI.ACCENT_HI], [line, 14, UI.INK],
-			["+%d gems" % res["gems"], 14, UI.GOLD]] + GardenPrizes.rows(res["prize"], 14))
+	card = BaseRace.result_card(
+		h,
+		(
+			[[title, 18, UI.ACCENT_HI], [line, 14, UI.INK], ["+%d gems" % res["gems"], 14, UI.GOLD]]
+			+ GardenPrizes.rows(res["prize"], 14)
+		)
+	)

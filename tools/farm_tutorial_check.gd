@@ -30,7 +30,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 	var d := Save.fresh()
 	for i in kin_count:
 		var k := Save.new_kin(["zapple", "cindle"][i], ["Pip", "Ash"][i])
-		k["uid"] = "ftut%d" % i      # likes are seeded from the uid: a random one hates the tutorial's food
+		k["uid"] = "ftut%d" % i  # likes are seeded from the uid: a random one hates the tutorial's food
 		k["level"] = 5
 		Care.ensure(k)
 		d["roster"].append(k)
@@ -70,7 +70,7 @@ func run(m: Node, mode := "") -> void:
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
 	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
-	FarmUnlocks.rules()["base_mode"] = false      # sections 1-4 are the old farm's Hob and twelve steps
+	FarmUnlocks.rules()["base_mode"] = false  # sections 1-4 are the old farm's Hob and twelve steps
 	_hob_rules()
 	_tutorial_rules()
 	_tracker_rules()
@@ -108,8 +108,9 @@ func _base_mode() -> void:
 	ok(not home.hmk.tabs().has("Exchange"), "on: no Exchange tab")
 	var wild: Array = (home.hb.wild_t as Dictionary).keys()
 	var w: World = home.world
-	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5,
-			int(int(wild[0]) / float(w.w)) + 0.5)
+	var tree_at := (
+		Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5, int(int(wild[0]) / float(w.w)) + 0.5)
+	)
 	ok(home.hg.find(tree_at).is_empty(), "on: wild trees and boulders are not choppable")
 	home.hw.scan()
 	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
@@ -924,12 +925,15 @@ func _build_spotlight() -> void:
 	for id in ["house", "hammer", "task"]:
 		FarmTutorial.mark(id)
 	FarmTutorial.detect()
-	ok(FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
-			"the trough step is up to place (%s)" % FarmTutorial.current())
+	ok(
+		FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
+		"the trough step is up to place (%s)" % FarmTutorial.current()
+	)
 	await _lights_build_tile(home, "feeder_trough", "trough")
 	home.queue_free()
 	await main.get_tree().process_frame
 	FarmSpotlight.reset()
+
 
 func _lights_build_tile(home, entry: String, what: String) -> void:
 	var hb: HomeBuild = home.hb
@@ -944,8 +948,10 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	await main.get_tree().process_frame
 	# the placing spotlight is modal (FarmSpotlight): it turns the bar to the piece's tab itself,
 	# so the Buildings tab is never left for the player to find
-	ok(FarmSpotlight.showing() and hb.cat == "Buildings" and FarmSpotlight._node.phase == "tile",
-			"%s step, build mode on another tab: the bar turns to the Buildings tab" % what)
+	ok(
+		FarmSpotlight.showing() and hb.cat == "Buildings" and FarmSpotlight._node.phase == "tile",
+		"%s step, build mode on another tab: the bar turns to the Buildings tab" % what
+	)
 	hb.cat = "Buildings"
 	hb._build_bar()
 	await main.get_tree().process_frame
@@ -958,10 +964,13 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	_pick_entry(hb, entry)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(FarmSpotlight.showing() and FarmSpotlight._node.phase == "spot",
-			"%s in hand: the spotlight moves to the ground it goes on" % what)
+	ok(
+		FarmSpotlight.showing() and FarmSpotlight._node.phase == "spot",
+		"%s in hand: the spotlight moves to the ground it goes on" % what
+	)
 	hb._drop_held()
 	hb.toggle()
+
 
 func _pick_entry(hb: HomeBuild, entry: String) -> void:
 	if entry.begins_with("feeder_"):
@@ -970,6 +979,7 @@ func _pick_entry(hb: HomeBuild, entry: String) -> void:
 		hb.take(entry)
 	hb._build_bar()
 
+
 ## Is the spotlight's first cut-out round this control?
 func _lit(c: Control) -> bool:
 	if c == null or not FarmSpotlight.showing() or FarmSpotlight._node._holes.is_empty():
@@ -977,10 +987,11 @@ func _lit(c: Control) -> bool:
 	var hole: Rect2 = FarmSpotlight._node._holes[0]
 	return hole.get_center().distance_to(c.get_global_rect().get_center()) < 2.0
 
+
 ## A Home with its interface built (its meshes build over a few frames; slower on a software rasterizer).
 func _ready_home():
 	var home = await main._hb_home()
-	var t0 := CheckClock.own_msec()      # the home builds its UI in frame slices: CPU work, not game time
+	var t0 := CheckClock.own_msec()  # the home builds its UI in frame slices: CPU work, not game time
 	while home.panel_host == null and CheckClock.own_msec() - t0 < 60000:
 		await main.get_tree().process_frame
 	home._close_panel()

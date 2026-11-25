@@ -11,23 +11,23 @@ extends Control
 ## then the exact ground it goes on (the ghost sits there, and a click in the cut-out puts it down). Each is ringed
 ## with a pulse and a short "Click here" (the spot's "click" text); it fades out once the piece is down.
 
-const BEAT_S := 0.9              # s, the opening beat: clicks held, the target flashes
-const FLASHES := 3               # ring flashes in the beat
-const DIM_BEAT := 0.72           # alpha of the dark round the target in the beat
-const DIM_VIGNETTE := 0.3        # alpha the dark settles to, far from the target
-const SOFT_BEAT_PX := 40.0       # px the dark takes to build up outside the cut-out in the beat
+const BEAT_S := 0.9  # s, the opening beat: clicks held, the target flashes
+const FLASHES := 3  # ring flashes in the beat
+const DIM_BEAT := 0.72  # alpha of the dark round the target in the beat
+const DIM_VIGNETTE := 0.3  # alpha the dark settles to, far from the target
+const SOFT_BEAT_PX := 40.0  # px the dark takes to build up outside the cut-out in the beat
 const SOFT_VIGNETTE_PX := 380.0  # the same once settled: a wide, light vignette
-const EASE_S := 0.45             # s the beat takes to settle
-const RING_PAD_PX := 6.0         # px between the target and its ring
-const FLASH_GROW_PX := 8.0       # px the ring swells at the top of a flash
+const EASE_S := 0.45  # s the beat takes to settle
+const RING_PAD_PX := 6.0  # px between the target and its ring
+const FLASH_GROW_PX := 8.0  # px the ring swells at the top of a flash
 const RING_WIDTH_PX := 3
 const CORNER_PX := 14
-const SOFT_PULSE_HZ := 0.8       # pulses per second once settled
-const BOKI_HEIGHT_M := 1.7       # m, how tall the cut-out round a Boki is
-const BOKI_MIN_PX := 64.0        # px, the smallest cut-out round a Boki (one far off)
+const SOFT_PULSE_HZ := 0.8  # pulses per second once settled
+const BOKI_HEIGHT_M := 1.7  # m, how tall the cut-out round a Boki is
+const BOKI_MIN_PX := 64.0  # px, the smallest cut-out round a Boki (one far off)
 ## A placing step's feel (dim alpha, soft_px, pulse_hz, ramp_s, fade_s) lives in tuning.json "farm_spotlight".
-const MODAL_MIN_PX := 56.0       # px, the smallest cut-out (one tile of ground is small on screen)
-const CARD_GAP_PX := 24.0        # px between the cut-out and the hint card
+const MODAL_MIN_PX := 56.0  # px, the smallest cut-out (one tile of ground is small on screen)
+const CARD_GAP_PX := 24.0  # px between the cut-out and the hint card
 const CARD_WIDTH_PX := 340.0
 
 const SHADER := """
@@ -52,13 +52,13 @@ void fragment() {
 static var _shader: Shader = null
 static var _node: FarmSpotlight = null
 static var _key := ""
-static var _seen := {}           # target keys that have had their beat (once each per run of the game)
+static var _seen := {}  # target keys that have had their beat (once each per run of the game)
 
 var h: Node
 var step_id := ""
 var spec := {}
-var phase := ""                  # "hub", "tile" or "spot" in a placing step, else ""
-var modal := false               # a placing step: dark throughout, clicks outside the cut-out do nothing
+var phase := ""  # "hub", "tile" or "spot" in a placing step, else ""
+var modal := false  # a placing step: dark throughout, clicks outside the cut-out do nothing
 var beat := true
 var age := 0.0
 var closing := false
@@ -70,6 +70,7 @@ var _card: PanelContainer = null
 var _holes: Array[Rect2] = []
 var _block: _Blocker = null
 var _ring_pad := RING_PAD_PX
+
 
 ## Starts, keeps or ends the spotlight for the tutorial's current step. FarmGuide calls this every poll.
 static func sync(home: Node, quiet: bool) -> void:
@@ -95,6 +96,7 @@ static func sync(home: Node, quiet: bool) -> void:
 	_seen[key] = true
 	home.root_ui.add_child(_node)
 
+
 ## Fades the spotlight out (a menu opened, the step moved on, a talk began).
 static func close() -> void:
 	if is_instance_valid(_node):
@@ -102,25 +104,35 @@ static func close() -> void:
 	_node = null
 	_key = ""
 
+
 ## Forgets which beats were shown (the next target gets its full beat again).
 static func reset() -> void:
 	close()
 	_seen.clear()
 
+
 ## Is the spotlight showing now?
 static func showing() -> bool:
 	return is_instance_valid(_node) and not _node.closing
+
 
 ## Is it in its opening beat (clicks held)?
 static func in_beat() -> bool:
 	return showing() and _node.beat and _node.age < BEAT_S
 
+
 ## Nothing in the way of the spotlight: no panel, talk or build animation; build mode only for a step that lights
 ## a build tile.
 static func _free_to_show(home: Node, in_build: bool) -> bool:
 	var building: bool = home.hb != null and home.hb.active
-	return home.panel_open == "" and not home.chat_open and not home.building_now and (in_build or not building) \
-			and not Overlay.is_open()
+	return (
+		home.panel_open == ""
+		and not home.chat_open
+		and not home.building_now
+		and (in_build or not building)
+		and not Overlay.is_open()
+	)
+
 
 ## Which part of a placing step the player is at: "hub" (build mode is off), "tile" (nothing, or the wrong piece,
 ## in hand) or "spot" (the piece is in hand). "" for every other spotlight.
@@ -133,6 +145,7 @@ static func _phase(home: Node, want: Dictionary) -> String:
 	var is_feeder: bool = not hb.held.is_empty() and hb.held["kind"] == "feeder"
 	var held := ("feeder_" if is_feeder else "") + String(hb.held.get("id", ""))
 	return "spot" if held == String(want["tile"]) else "tile"
+
 
 ## The screen boxes to light: the named bottom-bar button, and the step's marker in the world (a Boki); in a
 ## placing step the one thing for its phase (the button, the tile, the ground).
@@ -157,6 +170,7 @@ static func _rects(home: Node, id: String, want: Dictionary, step_phase := "") -
 		out.append(b.get_global_rect())
 	return out
 
+
 ## The screen box round a set of ground tiles (empty when they are behind the camera).
 static func _ground_box(cam: Camera3D, cells: Array) -> Rect2:
 	var lo := Vector2(INF, INF)
@@ -173,6 +187,7 @@ static func _ground_box(cam: Camera3D, cells: Array) -> Rect2:
 	var grow := maxf(0.0, MODAL_MIN_PX - minf(box.size.x, box.size.y)) * 0.5
 	return box.grow(grow)
 
+
 static func _world_box(home: Node, id: String) -> Rect2:
 	var at: Vector3 = home.guide.target(id)
 	var cam: Camera3D = home.cam
@@ -182,6 +197,7 @@ static func _world_box(home: Node, id: String) -> Rect2:
 	var feet := cam.unproject_position(at)
 	var tall := maxf(BOKI_MIN_PX, absf(feet.y - head.y))
 	return Rect2((head + feet) * 0.5 - Vector2(tall, tall) * 0.5, Vector2(tall, tall))
+
 
 func _init(home: Node, id: String, want: Dictionary, at_phase: String, with_beat: bool) -> void:
 	h = home
@@ -220,6 +236,7 @@ func _init(home: Node, id: String, want: Dictionary, at_phase: String, with_beat
 		add_child(_card)
 		Sfx.play("whoosh", null, -10.0)
 
+
 func _process(dt: float) -> void:
 	age += dt
 	if closing:
@@ -228,7 +245,7 @@ func _process(dt: float) -> void:
 		close()
 		return
 	if _phase(h, spec) != phase:
-		close()                  # the next part of a placing step: its spotlight starts now, not at the next poll
+		close()  # the next part of a placing step: its spotlight starts now, not at the next poll
 		sync(h, h.guide.quiet)
 		return
 	_holes = _rects(h, step_id, spec, phase)
@@ -251,6 +268,7 @@ func _process(dt: float) -> void:
 			_rings[i].size = r.size
 			_rings[i].modulate.a = _ring_a
 
+
 ## A placing step: stay on top of the build bar (it opens after us), let clicks through the cut-out only, and
 ## in the "spot" phase keep the ghost on the exact ground.
 func _follow(holes: Array[Rect2]) -> void:
@@ -259,6 +277,7 @@ func _follow(holes: Array[Rect2]) -> void:
 	_block.holes = holes.map(func(r: Rect2) -> Rect2: return r.grow(RING_PAD_PX + FLASH_GROW_PX))
 	if phase == "spot":
 		h.hb.debug_m = h.guide.place_mouse()
+
 
 func fade_out() -> void:
 	if closing:
@@ -273,11 +292,13 @@ func fade_out() -> void:
 	tw.tween_property(self, "modulate:a", 0.0, float(Tuning.of("farm_spotlight")["fade_s"]))
 	tw.tween_callback(queue_free)
 
+
 ## 0 in the opening beat, easing to 1 as it settles (always 1 for a target that already had its beat).
 func _settle() -> float:
 	if not beat:
 		return 1.0
 	return clampf((age - BEAT_S) / EASE_S, 0.0, 1.0)
+
 
 ## Sets the dim, the ring and the card for the moment: flashing in the beat, a soft pulse after.
 func _look(settle: float) -> void:
@@ -305,22 +326,25 @@ func _look(settle: float) -> void:
 		_card.modulate.a = 1.0 - settle
 		_place_card()
 
+
 func _hole(i: int) -> Vector4:
 	if i >= _holes.size():
 		return Vector4(-9000.0, -9000.0, 1.0, 1.0)
 	var r := _holes[i]
 	return Vector4(r.position.x, r.position.y, r.size.x, r.size.y)
 
+
 func _hint_card(text: String, width: float, font_px := 16) -> PanelContainer:
 	var card := UI.card(Color(0.06, 0.07, 0.11, 0.94), 10, 14)
 	UI.set_card_border(card, Color(UI.GOLD, 0.7), 2)
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var lbl := UI.label(text, font_px, UI.INK, UI.semi)
-	if width > 0.0:      # (wrapping with no width set squeezes it to one letter a line)
+	if width > 0.0:  # (wrapping with no width set squeezes it to one letter a line)
 		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		lbl.custom_minimum_size.x = width
 	card.add_child(lbl)
 	return card
+
 
 ## The hint card beside the first cut-out: above it when that is low on the screen, below it otherwise.
 func _place_card() -> void:
@@ -330,19 +354,26 @@ func _place_card() -> void:
 	var room_above := r.get_center().y > size.y * 0.5
 	var y := r.position.y - _card.size.y - CARD_GAP_PX if room_above else r.end.y + CARD_GAP_PX
 	var x := r.get_center().x - _card.size.x * 0.5
-	var safe := HudStyle.safe_rect(size)      # the card stays inside the safe frame, like the strip
-	_card.position = Vector2(_on_screen(x, safe.position.x, safe.end.x, _card.size.x),
-			_on_screen(y, safe.position.y, safe.end.y, _card.size.y))
+	var safe := HudStyle.safe_rect(size)  # the card stays inside the safe frame, like the strip
+	_card.position = Vector2(
+		_on_screen(x, safe.position.x, safe.end.x, _card.size.x),
+		_on_screen(y, safe.position.y, safe.end.y, _card.size.y)
+	)
+
 
 ## `at` kept so a box `extent` long fits between `lo` and `hi`.
 func _on_screen(at: float, lo: float, hi: float, extent: float) -> float:
 	return clampf(at, lo, maxf(lo, hi - extent))
 
+
 ## Takes every click except the ones inside the cut-out, which fall through to what is lit.
-class _Blocker extends Control:
+class _Blocker:
+	extends Control
 	var holes: Array = []
+
 	func _init() -> void:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		mouse_filter = Control.MOUSE_FILTER_STOP
+
 	func _has_point(at: Vector2) -> bool:
 		return not holes.any(func(r: Rect2) -> bool: return r.has_point(at))
