@@ -15,7 +15,7 @@ func ok(cond: bool, what: String) -> void:
 func _start(main: Node, teams: int, squad: int) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": teams, "squad": squad, "tier": 0, "length": 1e9, "seed": 7302,
+	m.start({"teams": teams, "squad": squad, "tier": 0, "length": 1e9, "seed": 7302,
 		"no_drop": true, "god": true})
 	for h in m.hunters:
 		h.ctrl = "idle"
@@ -29,7 +29,7 @@ func run(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			shots = String(a).substr(12)
-	var m := await _start(main, 4, 3)
+	var m := _start(main, 4, 3)
 	ok(AliveCounter.squads_left(m) == 4 and AliveCounter.players_left(m) == 12, "4 squads of 3: 4 squads, 12 players")
 	var foes: Array = m.hunters.filter(func(h): return h.team != m.player.team)
 	var one_team: Array = foes.filter(func(h): return h.team == foes[0].team)
@@ -47,7 +47,7 @@ func run(main: Node) -> void:
 			await main.get_tree().process_frame
 		main.get_viewport().get_texture().get_image().save_png(shots.path_join("alive_squads.png"))
 	m.queue_free()
-	var solo := await _start(main, 9, 1)
+	var solo := _start(main, 9, 1)
 	ok(AliveCounter.players_left(solo) == 9 and not AliveCounter.shows_squads(solo),
 		"solos: 9 players, players only")
 	for i in 3:

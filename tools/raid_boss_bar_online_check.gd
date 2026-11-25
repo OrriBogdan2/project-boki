@@ -49,7 +49,7 @@ func _build(d: Dictionary) -> void:
 	o.merge({"net": d, "seed": SEED, "no_drop": true, "cls": "medium"}, true)
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start(o)
+	nm.start(o)
 	nm.set_process(false)
 	nm.player.max_hp = 1.0e6
 	nm.player.hp = nm.player.max_hp

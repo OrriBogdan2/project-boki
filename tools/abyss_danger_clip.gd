@@ -45,7 +45,7 @@ func run(main_node: Node) -> void:
 	}
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
