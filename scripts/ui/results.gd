@@ -59,7 +59,8 @@ func show_result(r: Dictionary) -> void:
 	if int(s.get("place_gems", 0)) > 0:
 		head.add_child(UI.label("Placement pay: %d gems" % int(s["place_gems"]), UI.T_BODY, UI.GOLD, UI.semi))
 	if int(s.get("stolen_gems", 0)) > 0:
-		head.add_child(UI.label("Stolen wisps brought out: +%d gems" % int(s["stolen_gems"]), UI.T_BODY, UI.GOLD, UI.semi))
+		var stolen_line := "Stolen wisps brought out: +%d gems" % int(s["stolen_gems"])
+		head.add_child(UI.label(stolen_line, UI.T_BODY, UI.GOLD, UI.semi))
 	if WaysResult.hid_line(r) != "":
 		head.add_child(UI.label(WaysResult.hid_line(r), UI.T_BODY, UI.MUTED))
 	if r.has("heart_raid"):
