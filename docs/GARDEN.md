@@ -146,6 +146,22 @@ tutorial and never starts an expedition; it logs every line that points at an ex
 new one) plus a read of the garden code. Text and order nags are fixed on this branch (below). These
 need a design call:
 
+**Re-run on main 11-22 (ext/farm-garden-only-pass).** The check had rotted: `--garden-first-15-check` still
+took the first Relic after "Skip tutorial", but the pick now waits for the first portal use, so the bot read a
+freed screen and the 30 minutes never ran (and exit 1). Fixed. Run for real it found two new nags, both
+Goals rows only a match can fill: the played Hunter's mastery row ("Fly through 10 air rings") and the farm
+milestones ("Defeat a boss in a lair"). Both rows now wait for the first match while `base_mode` is on
+(`GoalTracker._home_only`); open question 2 below is closed for `mastery`, the `unlock` rows stay. The run also
+showed `BaseFetch` had no `playing()`, so `GardenMusic.tick` errored every 0.5 s with Fetch Cup in `Home.games`
+(zone music never switched): added. Result: 0 nags, 0 script errors, exit 0.
+
+**Zones open after 30 min of garden-only play: 1 of 5** (the start zone; `Black Market placed false, matches 0`).
+The Black Market is the only blocker left. A zone opens with two keys, a Wayseed and a leaning Boki
+(`GardenZones.keys`); a Wayseed comes from only two places, the Black Market's weekly stock (the building is
+placed once `matches >= 1`, `home.gd _fs_arrivals`) or a lair (an expedition). Nothing else gates a zone.
+`--garden-unlock-pace-check` passes (garden player: 2nd zone day 3, 5th day 12) because it buys the Wayseed
+without the building. Open question 1 is still the fix.
+
 1. **Old Pell's Black Market never stands on a new island.** `home.gd _fs_arrivals` places it (and the
    Challenge House) only once `matches >= 1`. The zone cards say a Wayseed comes from the Black Market
    (`black_market.gd` stocks one for the next locked zone every `wayseed_days`), so a player who never
@@ -154,7 +170,7 @@ need a design call:
    Fix options: (a) in base mode `_fs_arrivals` places the Black Market straight away (one condition;
    the Challenge House stays after the first expedition); (b) a Wayseed stall at the hub's Waystone.
    Default if nobody decides: (a).
-2. **Hunter unlock goals in the Goals card.** Eleven Hunters unlock by match challenges ("Knock 3 enemies
+2. **Hunter unlock goals in the Goals card.** (`mastery` rows and farm milestones now wait for the first match; only `unlock` is left.) Eleven Hunters unlock by match challenges ("Knock 3 enemies
    into walls") and show as `unlock` rows after the home rows. A Boki at the level cap loses its
    "Raise ... to level N" row, and then the first line of the card is one of these. Options: hide the
    `unlock` and `mastery` rows while the save has no match; or show them as "away" rows. Default: keep.
