@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dh3qs3t6nk7nt"
-path="res://.godot/imported/hem_meshy_leg20.jpg-bc4b9170cc401118de07be51e92c0159.ctex"
+uid="uid://xnoey1voh71t"
+path="res://.godot/imported/hem_meshy_leg20_r21.jpg-e41698db59ba9c6be45a16ba6a22d067.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "16b99b07eb4ecbdb2cd3df2b60336d8f"
+"md5": "427a85949cde5019ffc1eddbe45e7f4c"
 }
 
 [deps]
 
-source_file="res://art/wardens/hem/hem_meshy_leg20.jpg"
-dest_files=["res://.godot/imported/hem_meshy_leg20.jpg-bc4b9170cc401118de07be51e92c0159.ctex"]
+source_file="res://art/wardens/hem/hem_meshy_leg20_r21.jpg"
+dest_files=["res://.godot/imported/hem_meshy_leg20_r21.jpg-e41698db59ba9c6be45a16ba6a22d067.ctex"]
 
 [params]
 
