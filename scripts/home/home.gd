@@ -1088,7 +1088,7 @@ func _process(delta: float) -> void:
 	crouch_look.tick(cam, crouch_grounded, panel_open == "" and train.is_empty() and not building_now and not chat_open)
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
-	farm_cam.tick(cam, d, not building_now and train.is_empty() and not FarmSpotlight.showing())
+	farm_cam.tick(cam, d, not building_now and train.is_empty() and not FarmSpotlight.showing(), games)
 	var focus := kin_frame.frame(Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z))
 	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing() and not farm_cam.third()
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, lean)
@@ -2171,10 +2171,10 @@ func _find_interact() -> void:
 		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
-	if on_kin:
-		CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp)
-		return
 	var py_at := minf(vp.y - 110.0, (root_ui.get_node("Hints") as Control).global_position.y - prompt_box.size.y - 6.0)
+	if on_kin:
+		CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp, py_at)
+		return
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
 	_keep_off_hub(prompt_box)
 
