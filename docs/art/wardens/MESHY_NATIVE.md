@@ -82,7 +82,7 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `lmb` | a melee swing or a shot | `attack` |
 | `lmb_hold` | a charged swing (state `combo` -1) | `lmb`, then `attack` |
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
-| `hit` | one-shot when a hit lands (state `hit_t` jumps back) and pushes the body against its facing (struck from the front) | the loop clip plays on |
+| `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) and pushes the body against its facing (struck from the front) | the loop clip plays on |
 | `hit_back` | the same, when the hit pushes the body the way it faces (struck from behind); a Hunter with one of the two plays it for both | `hit` |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
 | `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
