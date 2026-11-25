@@ -11333,3 +11333,4 @@ READY ext/vfx-rival-read 0dedc3e5adcd6ed39cbdf5a11bf6e94afb08b326 (rivals readab
 READY ext/hud-passive-gauge-1125 d33e72c5eb (HUD passive gauge only for fill-up passives; Fever/Rocks/Salvage as buff icons)
 READY ext/cam-parity-1125 dca40c2ed1 (camera parity: default cursor pan, data zoom range, glide/abyss zoom, arm spring)
 READY ext/hunter-scale-110-1125 adac55c0eb8c93dde1ab70d597a15d13f446e4e2 (match Hunters x1.10 visual scale via camera.json match_hunter_scale; plates, native stride follow; px Kael 78->85, Vex 80->88, Sparkle 84->96)
+READY ext/hud-passive-gauge-1125 05f6720395 (supersedes d33e72c5eb; origin/main merged in, 0 behind; hud_vitals.gd conflict was comment spacing only, kept has_gauge(); --check 0, health --strict OK, archetype-check gauge 4/4 PASS, other 12 fails identical to main)
