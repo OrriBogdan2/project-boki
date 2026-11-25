@@ -765,17 +765,20 @@ func _archer_combos() -> void:
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
-	var wx := int(home.x) - 4
+	# (she starts 6 m east of home: the strip is flat only 8 tiles west of it, and the 3.4 m roll plus the drop
+	# carries her past that edge)
+	var start := home + Vector3(6, 0, 0)
+	var wx := int(start.x) - 4
 	var wl: PackedByteArray = W.level
 	for dz in range(-2, 3):
 		for dx in 2: wl[W.idx(wx - dx, int(home.z) + dz)] = lv + 2
 	W.level = wl
 	step(m, 0.5)
-	P.teleport(home)
+	P.teleport(start)
 	P.vel = Vector3.ZERO
 	step(m, 1.5, func(): P.inp["move"] = Vector2(-1, 0))
 	var plain_x := P.pos.x
-	P.teleport(home)
+	P.teleport(start)
 	P.dashes = P.max_dashes()
 	K.res = 80.0
 	P.inp["move"] = Vector2(-1, 0)

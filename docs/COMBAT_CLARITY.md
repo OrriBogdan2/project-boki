@@ -23,6 +23,7 @@ text is rare. Our looks stay ours: the signature colour is the body of every eff
 | what it did: CC | `StatusLooks` + `BodyTell` | each status's own body look (`StatusLooks`, docs/STATUS_LOOKS.md: stars over the head for a stun, stakes at the feet for a root, rings down the legs for a slow, and Grounded, Dazed and the rest), the same from every source; and the body pulses that colour while it lasts (`BodyTell`). No floating CC words, no icon tiles beside other Hunters' plates (the plate's word stays in place of the name) |
 | less text | `Fx.word` | one floating word at a spot at a time (`WORD_ROOM` 3 m, `WORD_HOLD` 0.6 s), smaller (28 / 40 px) |
 | less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | while you or a squadmate fights (`BokiChatter.calm`) only your own Boki's speech bubble is drawn and no callout pin ("Behind you! · 3m"; `--clarity-shots` prints `CLARITYCHATTER n/20`, 0 is the rule); a Boki's ability name floats over your own Boki only (others' read from their looks) |
+| less text: hover cards | `HudHover.draw_world_tip` | the card about a monster, Boki or Hunter under a resting cursor ("Lace / The Red Stitch", "Boki: Prismander") is not drawn while you or a squadmate fights (`BokiChatter.calm`): in a fight the cursor rests on whoever you aim at. `--clarity-check` budget `hud world_tip` 0 |
 
 ## Ground order (11-12): a melee is not one disc
 A ground ring means gameplay, so in a pile the draw order and strength are one rule (`SideColor.ORDER_*`, a material's
@@ -45,8 +46,15 @@ and off, the cast glint and ring, Boki bubbles and ability names in and out of a
 ## Toasts on the right rail (11-23)
 Toasts ("Fever is lit", "Bond full!") sit in the right rail under the alive counter and the kill feed (`TopStack.rail`), never in the top centre by the timer, level and HP. `--clarity-shots` pushes one on every fight frame and prints `CLARITYTOAST n/20`: n must be 0 (it was 20 before the rail).
 
+## Downed screen: one line for who, the tip clear of the card (11-24)
+Downed, the screen said who did it three times in the middle of the fight: "Knocked down by Kael", "You're down" and the card's "Downed by Kael with Warchain". The killcam line is now for a dead Hunter only (`Hud` draws `Match.killcam_text` when `p.out`); the downed screen is "You're down" plus the card. The "TIP" line was drawn through the card's two lines (and, moved under it, sat on your own wisp): it is now above "You're down" (`Hud._draw_downed`), where the screen is empty ground.
 ## First-time armour hint waits out the fight (11-24)
 "Hits on Hunters build armour. XP comes from monster kills." (`ArmourHint`, drawn by `ArmorHud.note` just over the LV / XP row) comes from your first hit on a Hunter, so it always landed mid-fight: its box sat on the vitals and on the fight next to them. While `Hud.in_fight()` is true it now waits, keeping its whole 6 s for the next lull. `--armour-hint-check` holds it.
+
+## Lace's Hail Wall laces (11-24, moved)
+The wall's red threads used to part round a shown Hunter (`PinFx._part_laces`, `PinFx.LACE_CLEAR`). The wall is now
+the laced `AimKit.arc_wall` (one pooled mesh, `archer_kit.gd`), so those per-lace nodes are gone and the parting with
+them; threads cross bodies again until the pooled arc learns to skip a Hunter's box. Open item.
 
 ## What sits on a Hunter (11-20, stabilize sprint: declutter only)
 `--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
@@ -123,3 +131,10 @@ ran `OcclusionOutline.for_match` (`Match._process` is off there), so no outline 
 Results (rpg6, GPU, 4090, three runs): rim on vs off +35%, +48%, +20% (10, 12, 7 frames); pooled over the 29 frames
 24.1 vs 17.6, +37%. The +30% goal (focus baseline 11-22) is met on the pooled number; a run of under ~10 frames swings
 ±15%.
+
+## Smoke puffs part on screen too (11-24)
+A smoke cloud (`Models.gear_smoke`: 14 opaque spheres up to 2.6 m, lit pink on the Hollow Crown) parted only round a
+Hunter's feet on the ground (`FxHunterCap._part`, radius + `PUFF_CLEAR`). The camera looks down at a slant, so a puff
+on its side of a Hunter still buried the body: the "pink sphere clusters" over a fight. A puff now also hides while its
+disc on screen covers a shown Hunter's box (`HunterZone.rect_of`). Concealment (`Match.in_smoke`) is untouched.
+`--fx-hunter-cap-check` holds it (a puff 3.6 m off on the ground, between the camera and the Hunter, parts).

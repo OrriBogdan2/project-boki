@@ -441,7 +441,7 @@ func _tick_rain(dt: float) -> void:
 	rain["tick"] = float(rain["tick"]) - dt
 	if float(rain["tick"]) > 0.0:
 		return
-	rain["tick"] = float(ed["every"])
+	rain["tick"] = float(rain["tick"]) + float(ed["every"])     # (the overshoot is kept: ticks are 0.5 s, not 0.517)
 	var stg := stage("e", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
 	for f in inside:
