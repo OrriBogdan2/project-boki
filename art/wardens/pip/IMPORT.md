@@ -133,3 +133,11 @@ Crouch LeftArm 8, RightForeArm 20; Jump_Run LeftForeArm 10, RightForeArm 30. Paw
 all clips. Idle: thighs 3 deg apart each. Mesh, skin and textures are byte-identical.
 geo_check: worst clip 4.6 -> 4.4 cm, run 3.7 -> 3.2, Idle 3.8 -> 3.5, Attack paws into each other 2.5 -> under 2.5 cm (no longer
 reported); no pair is newly worse than live. Not done: the held Crouch forearm 4.0 cm stays as it was (every push made another pair worse).
+
+## 11-25 round 5: paws get one designed finger curl (weights + keys; mesh and textures byte-identical)
+Tools (job folder, not in the repo): `/home/boki/gens/hunter-round-1124/meeko/r5/tools/finger_weights.py` (round 4's re-weight: the
+paw lobes past the knuckle ramp onto Middle1-3; thumb verts untouched) then `fingers_r5.py --deg 35,45,35`: every Middle1-3 key in every
+clip becomes rest * one curl about the palm-width axis (palm = the side facing the body midline). Meshy's own finger keys were random
+(Middle2 up to 95 deg, mixed axes), which crumpled round 4's re-weighted paws; round 3's R curl axis was flipped (thumb-side sign).
+geo_check vs round 3: Attack paws into each other 1.4 -> 0 cm, run cloth into R paw 3.2 -> 2.4 (live 2.5), run cloth into L paw
+1.0 -> 0, Jump_Run cloth into paws 3.4/2.8 -> 3.0/2.5; Crouch cloth into R forearm 2.9 -> 3.2 (live 3.0). Thumb keys unchanged.
