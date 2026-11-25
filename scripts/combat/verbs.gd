@@ -101,9 +101,16 @@ func _break_wall(w: Dictionary) -> void:
 	if is_instance_valid(w["node"]):
 		(w["node"] as Node3D).queue_free()
 
-## Whether a barrier blocks sight (World.los). A wall carried in front of a Hunter (a raised aegis, a Boki's
-## Mass Guard) never does: it would hide its own bearer from everyone they face.
+## Whether a barrier hides who stands behind it (World.los with sight: the fog, bots' sight). Only a rock
+## does: a translucent plate (a Boki's Prism Wall, a Barrier Glove, Neve's Rink Wall) may stop shots, never
+## make a Hunter vanish.
 static func blocks_sight(w: Dictionary) -> bool:
+	return bool(w.get("rock", false))
+
+
+## Whether a barrier blocks a shot line (World.los). A wall carried in front of a Hunter (a raised aegis, a
+## Boki's Mass Guard) never does: it would block its own bearer's aim at everyone they face.
+static func blocks_shots(w: Dictionary) -> bool:
 	return not bool(w.get("follow", false))
 
 ## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.) cls: the
