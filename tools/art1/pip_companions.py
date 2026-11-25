@@ -397,5 +397,4 @@ def main():
     print("exported", dst)
 
 
-if __name__ == "__main__":      # (pip_companions_native.py imports the builders and runs its own main)
-    main()
+main()

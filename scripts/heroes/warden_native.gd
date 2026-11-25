@@ -72,7 +72,6 @@ var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): wh
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
-var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
 
 
 ## The art's entry in warden_native.json ({} when it has none).
@@ -120,10 +119,6 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 		var mats: Array = model.get_meta("mats", [])
 		mats.append_array(WardenGlb._toon(glb, lk, MantleLook.warden(arch), own, arch))
 		model.set_meta("mats", mats)
-	# (after the toon pass: the faces' atlas shader replaces its override)
-	nat.mood = WardenMood.make(model, glb, nat.skel, nat.art_id)
-	if nat.companions:
-		nat.companions.mood = nat.mood
 	model.set_meta(META, true)
 
 
@@ -229,8 +224,6 @@ func _process(dt: float) -> void:
 	props.step(dt, String(s.get("kmove", "")))
 	if companions:
 		companions.step(dt)
-	if mood:
-		mood.step(dt)
 	if gun and gun.is_inside_tree() and hand >= 0:
 		gun.global_position = hand_position()
 		var mz := gun.get_node_or_null(^"Muzzle") as Node3D
