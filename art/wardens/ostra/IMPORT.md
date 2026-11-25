@@ -73,3 +73,10 @@ New joints: `CoatLag` (Hips' channels delayed 0.10 s, up to 0.45 on the coat-tai
 the hips' horizontal travel (the box slides with the attack lunge, stays on the floor and upright). Void emission = r2 layer + a violet glow toward
 the box mouth + 246 sparse twinkle stars inside the void mask. Mesh and albedo unchanged. Spike frames (glbstretch, 10 fps) live -> r3:
 Idle 0->0 (r2 31), Attack 27->5, Jump_Run 1->0, Crouch 0->0. Recipe: /home/boki/gens/hunter-round-1124/motley/r3/tools/mkfix4.py fix3.glb out 0.10 0.45 0.5.
+
+**r4 (2026-11-25, hunter-round-1124 job 20261125-000830-a3):** the left glove is modelled curled (the right one is an open palm), so r3's rigid
+mitts kept a cupped left fist in every clip. The live left-finger skin weights are back (4,150 verts) and every left finger joint is posed 80% of
+the way to mirror the open right hand (mapped through the two hand frames), held constant in every clip (Meshy's finger curls dropped). The void's
+pale-lilac texels emit 60% less (albedo luminance 0.45->0.75 ramp; stars and the box-mouth glow kept), so the curl reads deep violet from the side.
+Mesh, albedo and body motion unchanged. Left-hand stretched edges (ratio>2, 10 fps) live -> r4: Idle 4413->1460, Attack 3843->1436.
+Recipe: /home/boki/gens/hunter-round-1124/motley/r4/tools/mkfix5.py fix4.glb live.glb out 0.8 6, then mkfix6.py out final 0.6.
