@@ -6,7 +6,7 @@ drivers. It is **advisory**: it prints one `TUTT` row per step and only a stall 
 playtest. DECISIONS 2026-11-08 ask for a match tutorial of about 8 steps and a garden one of 4 to 5, one banner line each, with a
 visible Skip; the tables show how far the line is from that (section 5).
 
-**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main.
+**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main. The starter is Vex; `-- --starter=archer|juggernaut|gunslinger` plays it as Lace or Kael (2026-11-23, 3 runs each: Lace 86-90 s, Vex 85-93 s, Kael 106-118 s of course time, no step over 21 s but Kael's `sec`/`kin` at 9-19 s). Lace used to fall off the pack camp's edge and restart the step: TutorialDrive's stuck-hop fired on the first stride after a long wait (`pack_wait`).
 
 Columns: **Time** is sim seconds of the instant-reacting `TutorialDrive` (no reading, no misses; screens: wall seconds; farm and
 garden: the driver ticks them off at once, so n/a). **Read s** = words / 3.5 + 0.45 s, the pace of `docs/TUTORIAL_PACE.md` (add it to
@@ -303,3 +303,9 @@ The knock card is the one hint that shows more than once on purpose: once per ma
 `content/rules/knock_tip.json`) per save, counted in `knock_tip`. The check pins both.
 The first-summon line (`first_summon`, key once per save) is on `ext/tut-first-summon`, not on main; when it lands, add
 a wisp-ready trigger to `_play` so it is counted too.
+## Low-end PCs: the course at 30 fps and with stalls (`--tutorial-low-fps`)
+Every step runs on the match's fixed 60 Hz step (`Match.step`) and the garden on `FarmStep`, so a slow frame never skips
+a step. `--tutorial-check[=<arch>] --tutorial-low-fps` plays the course again on the Low preset in the game's own frame
+loop, at a 30 fps cap and at 60 fps with a 100 ms stall every 5th frame: same steps in order, none past 2x the
+fixed-step time + 5 s. `--farm-tutorial-check --tutorial-low-fps` does the same for the garden's five steps (meet, patch,
+eat, toy, out). Key taps surviving the same rates are `--low-fps-input-check`.

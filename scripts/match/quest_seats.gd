@@ -240,7 +240,7 @@ func _reseal(L: Dictionary) -> void:
 	for qq in L["gate_tiles"]:
 		w.kind[w.idx(qq.x, qq.y)] = World.T_BLOCK
 	(L["nodes"]["label"] as Label3D).text = "%s\nShut" % L["name"]
-	m.sfx("boom", L["gate_c"], 0.0, 0.5)
+	m.sfx("lair_reseal", L["gate_c"], 0.0)
 
 
 # ------------------------------------------------------------------ asked by lairs.gd and exits.gd
