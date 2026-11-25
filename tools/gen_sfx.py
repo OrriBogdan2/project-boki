@@ -17,6 +17,7 @@ from scipy.signal import butter, sosfilt
 SR = 22050
 OUT = os.path.join(os.path.dirname(__file__), '..', 'audio')
 rng = np.random.default_rng(7)
+AFTER_SOFT_GUNS = 18516006812027820076846601451037305446  # rng position once the retired soft guns had drawn
 
 
 # ------------------------------------------------------------------ building blocks
@@ -180,18 +181,11 @@ def takes(name, fn, n=3, **kw):
 def main():
     argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     # ================================================================== weapons
-    # guns: soft, rounded pops (a low body and a short puff), not cracks
-    def smg(i):
-        d = 0.11
-        return mix(thud(240 + 15 * i, 140, d, 0.003, 0.022, 1200, 0.3) * 0.6, bpf(noise(d), 450, 1700 + 150 * i) * env(N(d), 0.003, 0.02) * 1.6)
-    takes('smg', smg, rms_db=-23, lp=2600)
-
-
-    def rifle(i):
-        d = 0.28
-        return mix(thud(190 + 10 * i, 95, d, 0.003, 0.035, 900, 0.4) * 0.6, bpf(noise(d), 350, 1500 + 100 * i) * env(N(d), 0.004, 0.05) * 1.4,
-                   bpf(noise(d), 200, 700) * env(N(d), 0.02, 0.1) * 0.6)
-    takes('rifle', rifle, rms_db=-21, lp=2400)
+    # The soft smg and rifle pops are gone (the pickup guns play gun_*, tools/gen_sfx_guns.py). Their random draws are
+    # skipped to the stream position they left, so every sound after them stays the same take.
+    pinned = rng.bit_generator.state
+    pinned['state']['state'] = AFTER_SOFT_GUNS
+    rng.bit_generator.state = pinned
 
     # the shotgun, heartbeats, heavy bumps: a round low whomp
     save('thump', mix(thud(150, 70, 0.4, 0.005, 0.08, 900, 0.4) * 0.6, bpf(noise(0.4), 180, 800) * env(N(0.4), 0.005, 0.06) * 1.4), rms_db=-19, lp=1300)
