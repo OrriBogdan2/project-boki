@@ -2001,7 +2001,7 @@ func _update_glide(dt: float) -> void:
 			glide_fuel = 1.0
 		return
 	if grounded:
-		glide_fuel = minf(1.0, glide_fuel + dt / 1.2)
+		glide_fuel = minf(1.0, glide_fuel + dt / HunterMove.glide_regen_s)
 		glide_off_t = 9.0
 	elif not gliding:
 		glide_off_t += dt

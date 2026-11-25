@@ -45,6 +45,7 @@ static var haste: float = _phys["haste"]
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
+static var glide_regen_s: float = _phys["glide_regen_s"]      # s, an empty glider refills on the ground
 static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed, accel, glide)
 ## m/s, the glide cruise every hunter shares (MaxGlide), at body scale so a run into a glide keeps the source's ratio
 static var glide_cruise: float = _phys["glide_cruise"] * body_scale
