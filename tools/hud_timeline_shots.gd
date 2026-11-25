@@ -64,7 +64,7 @@ func _start() -> void:
 	m = Match.new()
 	main.add_child(m)
 	main.current = m
-	await m.start({"teams": Data.MATCH_PLAYERS, "squad": 1, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": 7})
+	m.start({"teams": Data.MATCH_PLAYERS, "squad": 1, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": 7})
 	m.set_process(false)
 	if main.fade:
 		await main.fade.reveal(0.01)
