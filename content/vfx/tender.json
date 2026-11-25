@@ -71,7 +71,7 @@
 			{"p": "ember", "y": 1.4, "n": 10, "speed": 2.5, "spread": 0.6, "drag": 1.0, "grav": 9.0, "life": 0.4,
 				"size": 0.1, "c": "ember", "c2": "ember_hot"}
 		]},
-		"seed_field": {"net": false, "fx": [
+		"seed_field": {"net": false, "zone": {"rim": "ember_lit", "in": "ember"}, "fx": [
 			{"p": "ember", "y": 0.9, "n": 3, "shape": "arc", "arc": 360, "w": 0.15, "radius": "r", "radius_x": 0.95,
 				"speed": 0.4, "spread": 0.2, "grav": 4.0, "life": 0.45, "size": 0.08, "c": "ember", "c2": "ember_hot"}
 		]},

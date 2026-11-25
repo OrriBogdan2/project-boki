@@ -784,7 +784,7 @@ func _sim_fly(dt: float) -> void:
 				m.sfx("kinhit", pos, 0.0)
 				m.fx.burst(pos, sp["color"], 14, 4.0)
 				if owner_h and owner_h.is_local():
-					m.freeze_frame(0.06)
+					m.freeze_frame(ImpactWeight.hold_s(ImpactWeight.of_boki(true)))
 				target = f
 	if k >= 1.0:
 		var land: Array = fly.get("land", [])
@@ -1109,7 +1109,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		shield -= soak
 		d -= soak
 		if d <= 0.0:
-			flash_t = 0.08
+			flash_t = ImpactWeight.flash_s("")
 			return 0.0
 	return super.hurt(d, by, opts)
 
