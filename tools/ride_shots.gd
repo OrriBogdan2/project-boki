@@ -23,7 +23,7 @@ func run(mn: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)      # the boot splash stays up when a check starts the match by hand
