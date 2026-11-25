@@ -1,6 +1,6 @@
 """Grimble (dredge) native model, round 29 (plan: gens/hunter-round-1124/grimble/PLAN-1124o.md section 12).
 
-  dredge_r29.py --goo OUT IN MESHY.glb [--width M] [--keep-horns] [--top Y]
+  dredge_r29.py --goo OUT IN MESHY.glb [--width M] [--keep-horns] [--bendy-horns] [--top Y]
 
 The goo arm is the weakest region (art-gate 4.0: "thin tube, detached from the shoulder, loose claws, torn end"; the
 turnaround's goo arm is a thick twisted mass with drips and cream horns, as wide as the torso). A Meshy goo arm
@@ -13,6 +13,7 @@ turnaround's goo arm is a thick twisted mass with drips and cream horns, as wide
     RightArm / RightForeArm), so it follows every clip as the old goo did.
   - texture: the Meshy base colour (2048 px JPEG) goes in place of the goo image (only the goo material uses it);
     material skin-goo keeps its name (warden_look's desat / no_ink lines still apply).
+  - the Meshy horns are rigid: each cream patch takes its root's weights (no bending / flattening in Attack).
   - horns: the old leather-horn prims are dropped when the Meshy arm carries its own horns (--keep-horns keeps them).
 Every other primitive, the skin, bones and clips are untouched. numpy + scipy + PIL.
 """
@@ -26,6 +27,8 @@ import sys
 
 import numpy as np
 from PIL import Image
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "art1"))
@@ -210,6 +213,39 @@ def horn_side(MP, UV, img):
     return (1 if cream.any() and (MP[cream, 0] - ax[0]).mean() > 0 else -1), cream
 
 
+def rigid_horns(NP, F, cream, nd):
+    """Each horn (a connected cream patch, welded by position so UV-seam copies stay one piece) takes the mean weights
+    of its root (its cream vertices that share a face with goo): it moves as one piece instead of bending and
+    flattening with the goo in Attack (r28 did the same for the old horn prims)."""
+    _, wi = np.unique(np.round(NP / 1e-4).astype(np.int64), axis=0, return_inverse=True)
+    wi = wi.ravel()
+    nw = wi.max() + 1
+    wc = np.zeros(nw, bool)
+    np.logical_or.at(wc, wi, cream)
+    WF = wi[F]
+    e = np.r_[WF[:, [0, 1]], WF[:, [1, 2]], WF[:, [2, 0]]]
+    both = wc[e[:, 0]] & wc[e[:, 1]]
+    ncomp, lab = connected_components(coo_matrix((np.ones(both.sum()), (e[both, 0], e[both, 1])), (nw, nw)),
+                                      directed=False)
+    mixed = wc[WF].any(1) & ~wc[WF].all(1)
+    root = np.zeros(nw, bool)
+    root[WF[mixed].ravel()] = True
+    root &= wc
+    ndw = np.zeros((nw, nd.shape[1]))
+    np.add.at(ndw, wi, nd)
+    ndw /= np.bincount(wi, minlength=nw)[:, None]
+    done = 0
+    for c in np.unique(lab[wc]):
+        m = wc & (lab == c)
+        r = m & root
+        if m.sum() < 20 or not r.any():
+            continue
+        ndw[m] = ndw[r].mean(0)
+        done += 1
+    print("rigid horns: %d cream patches made rigid on their root weights" % done)
+    return ndw[wi]
+
+
 def goo(o):
     js, b = load(o.inp)
     prims = js["meshes"][0]["primitives"]
@@ -240,6 +276,8 @@ def goo(o):
     d, idx = cKDTree(P).query(NP, NEAR)
     wgt = 1.0 / np.maximum(d, 1e-3)
     nd = (dense[idx] * wgt[..., None]).sum(1) / wgt.sum(1, keepdims=True)
+    if not o.bendy_horns:
+        nd = rigid_horns(NP, F, cream, nd)
     top4 = np.argsort(-nd, axis=1)[:, :4]
     tw = np.take_along_axis(nd, top4, 1)
     tw /= tw.sum(1, keepdims=True)
@@ -285,6 +323,7 @@ def main():
     ap.add_argument("--width", type=float, default=0.30, help="goo body width (m, horns excluded)")
     ap.add_argument("--top", type=float, default=1.70)
     ap.add_argument("--push", type=float, default=0.0, help="m: lower goo path moved out from the thigh (0.04/0.07 tried: clips got worse)")
+    ap.add_argument("--bendy-horns", action="store_true", help="horns keep the goo's per-vertex weights (r29a)")
     ap.add_argument("--keep-horns", action="store_true")
     o = ap.parse_args()
     goo(o)
