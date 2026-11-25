@@ -27,7 +27,7 @@ func _init() -> void:
 
 
 func _start_guest() -> int:
-	var args := "%s --dn-port=%d" % [guest_flag, port]
+	var args := "%s --dn-port=%d" % [guest_flag, _guest_door()]
 	if shots_dir != "":
 		args += " --shots-dir=" + shots_dir
 	return CheckChild.start(args, dir.path_join("guest.log"), shots_dir == "")
