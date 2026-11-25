@@ -231,6 +231,7 @@ static func bridge(
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
 const SEED_R0 := 0.08  # share of full size a fresh seed starts at (a speck, never zero)
 
+
 ## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
 static func seed_r(rmax: float, grow: float, t: float) -> float:
 	return rmax * clampf(t / grow, SEED_R0, 1.0)

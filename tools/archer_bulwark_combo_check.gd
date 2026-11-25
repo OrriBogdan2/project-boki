@@ -462,6 +462,13 @@ func _archer_combos() -> void:
 		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.laces.any(_lace_shown),
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
+	K.fx._part_laces()  # (PinFx parts them each drawn frame; the check steps the match without frames)
+	var on_t: Array = K.fx.laces.filter(func(l: Dictionary) -> bool: return _lace_by(l, T.pos) < K.fx.LACE_CLEAR)
+	ok(
+		"pin E: the laces part round the foe on the arc (COMBAT_CLARITY), the rest of the wall shows",
+		not on_t.is_empty() and not on_t.any(_lace_shown) and K.fx.laces.filter(_lace_shown).size() >= 16,
+		"%d laces by the foe, %d shown" % [on_t.size(), K.fx.laces.filter(_lace_shown).size()]
+	)
 	# the rain ticks every 0.5 s: 30 frames at 60 Hz, the remainder of a frame kept (it used to run 31 = 0.517 s)
 	var tick_at := []
 	var seen := dmg(T)
@@ -474,13 +481,6 @@ func _archer_combos() -> void:
 		"pin E: Hail Wall ticks every 0.5 s (30 frames)",
 		tick_at.size() >= 2 and tick_at[1] - tick_at[0] == 30,
 		"tick frames %s" % str(tick_at)
-	)
-	K.fx._part_laces()  # (PinFx parts them each drawn frame; the check steps the match without frames)
-	var on_t: Array = K.fx.laces.filter(func(l: Dictionary) -> bool: return _lace_by(l, T.pos) < K.fx.LACE_CLEAR)
-	ok(
-		"pin E: the laces part round the foe on the arc (COMBAT_CLARITY), the rest of the wall shows",
-		not on_t.is_empty() and not on_t.any(_lace_shown) and K.fx.laces.filter(_lace_shown).size() >= 16,
-		"%d laces by the foe, %d shown" % [on_t.size(), K.fx.laces.filter(_lace_shown).size()]
 	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
 	var cr0 := K.cremations
