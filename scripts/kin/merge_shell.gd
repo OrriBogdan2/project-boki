@@ -40,7 +40,7 @@ static func absorb(h: Hunter, d: float, opts := {}, by: Ent = null) -> float:
 	var sh := float(st["shell"])
 	var a := minf(sh, d)
 	st["shell"] = sh - a
-	h.flash_t = 0.06
+	h.flash_t = ImpactWeight.flash_s("")
 	opts["soaked"] = a
 	var col: Color = (st["form"] as Dictionary)["glow"]
 	SoakNumber.at(h, by, a, HudStyle.NUM_SHELL)
