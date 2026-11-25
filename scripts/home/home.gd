@@ -3253,7 +3253,7 @@ func _open_kin(rec: Dictionary) -> void:
 				c1.add_child(UI.kv("Parents", "%s and %s" % [rec["parents"][0], rec["parents"][1]]))
 	# looking after it: the care actions as one row, Feed first
 	var ft := UI.footer(v)
-	var fl := UI.hbox(4)
+	var fl := UI.hbox(8)
 	v.add_child(UI.spacer(2))
 	var roles := UI.hbox(6)
 	roles.add_child(UI.label("Role", UI.T_SMALL, UI.FAINT))
