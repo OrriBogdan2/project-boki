@@ -34,8 +34,8 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	_table()
 	_picking()
-	await _match_counts()
-	await _crouch_hint()
+	_match_counts()
+	_crouch_hint()
 	print("TIPSCHECK DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -121,7 +121,7 @@ func _match_counts() -> void:
 	_fresh()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
 	m.set_process(false)
 	var p: Hunter = m.player
 	var k: Kin = m.give_kin(p, Save.new_kin("zapple"))
@@ -161,7 +161,7 @@ func _crouch_hint() -> void:
 	)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
 	m.set_process(false)
 	var p: Hunter = m.player
 	var camp: Mob = m.spawn_mob("skitter", p.pos + Vector3(300, 0, 300))

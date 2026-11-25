@@ -92,7 +92,7 @@ func _sig(p: Hunter) -> Dictionary:
 func _build(main: Node, o: Dictionary, swap_to := "") -> Dictionary:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	if swap_to != "":
 		m.arena.set_arch(swap_to)
 	for i in 8:

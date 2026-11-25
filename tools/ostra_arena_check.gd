@@ -14,27 +14,27 @@ var D: Hunter
 
 func arena(main_node: Node) -> void:
 	main = main_node
-	await _start(Match.arena_opts("ostra"))
-	await _lines("arena", ["stone block"])
+	_start(Match.arena_opts("ostra"))
+	_lines("arena", ["stone block"])
 	var top := _find("raised ground", true)
 	ok("arena: the dais has floor to stand on and a top", not top.is_empty())
 	if not top.is_empty():
-		await _through("arena dais, up onto its top", top, NEAR)
-		await _through("arena dais, up onto its top", top, FAR)
+		_through("arena dais, up onto its top", top, NEAR)
+		_through("arena dais, up onto its top", top, FAR)
 	await done(m)
-	await _start(Match.arena_opts("gunslinger"))
+	_start(Match.arena_opts("gunslinger"))
 	m.arena.set_arch("ostra")
 	step(m, 0.1)
-	await _lines("arena after a swap to him", ["stone block"])
+	_lines("arena after a swap to him", ["stone block"])
 	await done(m)
-	await _start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "arch": "ostra",
+	_start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "arch": "ostra",
 		"cls": Arch.weight("ostra"), "weapon": Arch.signature("ostra")})
-	await _lines("expedition", ["ruin wall"])
+	_lines("expedition", ["ruin wall"])
 	var cliff := _find("raised ground", true)
 	ok("expedition: the map has a cliff with a terrace on top", not cliff.is_empty())
 	if not cliff.is_empty():
-		await _through("expedition cliff, up onto the terrace", cliff, NEAR)
-		await _through("expedition cliff, up onto the terrace", cliff, FAR)
+		_through("expedition cliff, up onto the terrace", cliff, NEAR)
+		_through("expedition cliff, up onto the terrace", cliff, FAR)
 	await done(m)
 
 func _lines(where: String, kinds: Array) -> void:
@@ -42,13 +42,13 @@ func _lines(where: String, kinds: Array) -> void:
 		var spot := _find(kind, false)
 		ok("%s: the map has a %s to shoot through" % [where, kind], not spot.is_empty())
 		if not spot.is_empty():
-			await _through("%s %s" % [where, kind], spot, NEAR)
-			await _through("%s %s" % [where, kind], spot, FAR)
+			_through("%s %s" % [where, kind], spot, NEAR)
+			_through("%s %s" % [where, kind], spot, FAR)
 
 func _start(opts: Dictionary) -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start(opts)
+	m.start(opts)
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs: mb.queue_free()

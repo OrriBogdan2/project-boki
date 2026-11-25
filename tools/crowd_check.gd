@@ -50,7 +50,7 @@ func _colours() -> void:
 func _napping(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 9, "no_drop": true})
+	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 9, "no_drop": true})
 	m.set_process(false)
 	_ok(not m.mobs.is_empty(), "napping: the map has camps")
 	if not m.mobs.is_empty():

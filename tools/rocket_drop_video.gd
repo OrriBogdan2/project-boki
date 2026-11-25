@@ -42,7 +42,7 @@ func run(main_node: Node) -> void:
 func _drop(clip: int) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242, "no_plan": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242, "no_plan": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)

@@ -109,7 +109,7 @@ func _host() -> void:
 		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
 		{"peer": gid, "team": 1, "name": "Actor", "cls": "medium", "weapon": "", "kin": {}}]}
 	Net.lobby_emit("of", {"c": "start", "d": d})
-	await _build(d)
+	_build(d)
 	var A: Hunter = m.ents_by_id.get("P" + gid, null)
 	var t1 := Time.get_ticks_msec()
 	while (A == null or A.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
@@ -384,7 +384,7 @@ func _connect(on_port: int) -> bool:
 func _build(d: Dictionary) -> void:
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
+	nm.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
 		"cls": "medium", "net": d})
 	nm.set_process(false)
 	var W: World = nm.world
