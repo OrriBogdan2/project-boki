@@ -21,7 +21,7 @@ func run(main_node: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	var opts := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
-	await m.start(Match.arena_opts("gunslinger").merged(opts))
+	m.start(Match.arena_opts("gunslinger").merged(opts))
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()

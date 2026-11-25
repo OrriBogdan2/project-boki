@@ -35,7 +35,7 @@ func run(main: Node, what: String) -> void:
 	Save.d = Save.fresh()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
 	p = m.player
 	m.set_process(false)
 	var r: Dictionary = CamWheel.rules()
@@ -151,7 +151,7 @@ func _shots(main: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(shot_dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)  # (the screen fade from start-up still covers the view)

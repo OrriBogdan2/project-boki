@@ -59,7 +59,7 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()

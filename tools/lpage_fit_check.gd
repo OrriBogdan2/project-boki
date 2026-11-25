@@ -20,7 +20,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("thief"))
+	m.start(Match.arena_opts("thief"))
 	var a := m.arena
 	a.give_glove("blink", 0)
 	a.give_glove("grapple", 1)
