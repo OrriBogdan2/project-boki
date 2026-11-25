@@ -111,3 +111,12 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - geo_check same as r11: held worst 6.8 cm, 110 clipped frames, 76 held.
 - art-gate GAME: 7.1 vs live 6.3 (3 sheets, context text described the fixes) and 6.0 vs live 5.7 (4 sheets, neutral text). 7.0 bar not confirmed.
 - Open: dark pocket at the fin base in head-turn frames, fin edge-on from behind, near-black robe, small brim ticks.
+
+## Native model r13 (gil_meshy.glb), 2026-11-25
+- Swordfish: RightArm/ForeArm/Hand re-keyed in Idle, walk, run, Jump_Run, Attack (`hunter-round-1124/gil/r13/tools/rekey.py`). Fish-to-head min, r12 -> r13: Idle .067 -> .142 m, walk .189 -> .336, run .129 -> .148, Jump_Run .05 -> .152, Attack .038 -> .149. Max face coverage 19/3/14/57/27% -> 0/0/0/4/1%.
+- Robe and hat: Meshy retexture texels (30 candidates, `r13/tex/gen_log.tsv`) on the robe/hat islands; plum with bright blue dots. Face and fin texels are r12's. Atlas JPEG quality 90.
+- Toon slots: robe/hat triangles that sat in the leather/skin prims moved to cloth (`r13/tools/rig13.py`: 469 + 481), 59 skin -> leather. Prims 22216 / 8733 / 29051 tris, 60,000 total. Removes the pale shards on the coat.
+- Back fin weights (`r13/tools/finharm.py`): harmonic blend from the coat weights at the root (screen .02, spread 3 cm). Replaces r12's rigid per-height weights, which opened a dark pocket at the root. Fin-zone tris stretched >3x, linear 0-5 cm blend -> this: Idle 22.5 -> 6, walk 1.3 -> .7, run 11 -> 4, Attack 60 -> 28.5.
+- geo_check same as r12: worst 7.2 cm, 110 frames, held 76, held worst 6.8 (main 13.6 / 159 / 97 / 13.4); hands ok. glbstretch spike frames: Attack 2/22, Idle 0/60, walk 2/15 (as r12); Jump_Run and Crouch equal main or 1 frame under.
+- art-gate neutral, 5 match sheets: GAME 6.6 vs live 4.9, FAIL (7.0 bar).
+- Open: the coat and fin crumple in the back-view attack wind-up (0.0-0.3 s). Damping spine/shoulder/neck/leg keys does not help (`r13/tools/atkdamp.py`: folds 2209 -> 2095 at best); it needs new coat weights around the shoulders. Also pale grey coat patches, dark satchel, teal face.
