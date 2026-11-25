@@ -22,6 +22,15 @@ static func arrived(lines: Array) -> void:
 	away = lines
 
 
+## The return message: one plain line, the first thing that happened and how many more.
+static func away_line(lines: Array) -> String:
+	var facts := ZoneAway.facts(lines)
+	if facts.is_empty():
+		return ""
+	var more := "" if facts.size() == 1 else " (+%d more)" % (facts.size() - 1)
+	return "While you were away: %s%s" % [facts[0], more]
+
+
 ## Builds the card on the home's UI layer, under any open menu.
 static func attach(home) -> void:
 	var card := BaseCard.new()
@@ -67,8 +76,7 @@ func _refresh() -> void:
 	for c in body.get_children():
 		c.queue_free()
 	if not away.is_empty():
-		var more := "" if away.size() == 1 else " (+%d more)" % (away.size() - 1)
-		body.add_child(_para("While you were away: %s%s" % [away[0], more], UI.MUTED))
+		body.add_child(_para(away_line(away), UI.MUTED))
 	if rec.is_empty():
 		return
 	body.add_child(UI.label(String(rec["name"]), 14, UI.INK, UI.semi))

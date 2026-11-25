@@ -52,6 +52,7 @@ func run(mn: Node) -> void:
 	for row in _soft():
 		_row(row[0], row[1], false)
 	_prompt()
+	_heard()
 	_finish()
 	print("STOMPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -169,13 +170,28 @@ func _prompt() -> void:
 	ok(StompPrompt.target(m, s) == f, "a remote client's wisp is skipped")
 	o.remote = false
 
+## A break is heard (a crack, and a relief chime for the wisp's squad); a stomp that runs out has neither.
+func _heard() -> void:
+	for sname in ["stomp_crack", "stomp_relief"]:
+		Sfx.last_played.erase(sname)
+	_stage()
+	Sfx.listener = s.pos      # (the camera sets it in a game)
+	s.hurt(1.0, f, {"src": "abil", "stun": 0.7})
+	_step(0.25)
+	ok(Sfx.last_played.has("stomp_crack"), "a break cracks at the stomper")
+	ok(Sfx.last_played.has("stomp_relief"), "a break plays the relief chime for the wisp's squad")
+	ok(m.player.team == o.team, "(the wisp is the listener's own, so the chime is its)")
+
 ## Last, since it kills the wisp: with no CC the animation finishes.
 func _finish() -> void:
+	for sname in ["stomp_crack", "stomp_relief"]:
+		Sfx.last_played.erase(sname)
 	_stage()
 	_step(Life.R["stomp_time"])
 	ok(s.stomp.is_empty() and o.out, "with no CC the animation finishes and the wisp dies")
 	ok(_cues() == {"stomp_windup": 1, "stomp_finish": 1}, "the kill plays the finish thud once, no crack (%s)" % [cues])
 	Sfx.cue_log = null
+	ok(not Sfx.last_played.has("stomp_relief"), "a finished stomp makes no relief chime")
 
 func _row(what: String, cc: Callable, cancels: bool) -> void:
 	_stage()
