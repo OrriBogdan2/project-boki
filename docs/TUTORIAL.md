@@ -272,3 +272,10 @@ The owner's first-match playtest on the PC build, and what each fix is:
 - **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
   half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
   `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
+
+## Low-end PCs: the course at 30 fps and with stalls (`--tutorial-low-fps`)
+Every step runs on the match's fixed 60 Hz step (`Match.step`) and the garden on `FarmStep`, so a slow frame never skips
+a step. `--tutorial-check[=<arch>] --tutorial-low-fps` plays the course again on the Low preset in the game's own frame
+loop, at a 30 fps cap and at 60 fps with a 100 ms stall every 5th frame: same steps in order, none past 2x the
+fixed-step time + 5 s. `--farm-tutorial-check --tutorial-low-fps` does the same for the garden's five steps (meet, patch,
+eat, toy, out). Key taps surviving the same rates are `--low-fps-input-check`.
