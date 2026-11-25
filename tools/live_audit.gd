@@ -4,7 +4,7 @@ extends "res://tools/clip_shots.gd"
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
 ## deg); with --close the same poses from eye height and knee height: <clip>_<k>_eye.jpg, <clip>_<k>_knee.jpg.
 ## --contract: native-flagged Hunters play their contract model; --video: see var video.
-## --film [--clips= --yaws= --spans= --fstep=]: every clip at each yaw, 15 fps; --mfov/--mpitch/--mdist/--cfit: camera.
+## --yaws=0,90,180,270: every clip at each model yaw (deg, 0 = facing the camera's side view) into <id>/y<deg>/.
 ## marks.txt lists the model's kind (contract / native), tris and the state each clip was fed.
 
 const DT := 1.0 / 30.0
@@ -27,21 +27,13 @@ const SAMPLES := {
 const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
-var film := false
-var film_clips: Array = ["idle", "run", "attack", "hit"]  # --clips=a,b: the clips a film plays
-## --yaws=deg,deg,..: a film plays every clip once at each of these yaws (front, side, back)
-var film_yaws: Array = [-PI, -PI / 2.0, 0.0]
-var film_span := {"idle": 1.0, "run": 0.9, "attack": 1.0, "hit": 0.7}  # --spans=idle:4.0,hit:1.4: seconds per film clip
-var film_step := 2  # --fstep=4: a film shoots every Nth step (2 = 15 fps)
 var native := false
-var mfov := 8.0  # --mfov=14: the match camera's field of view (wider = the hunter sits smaller in the tile)
-var mpitch := 66.0  # --mpitch=57: the match camera's pitch in degrees (the game plays ~57)
-var cfit := 0.85  # --cfit=0.6: the share of the close view's frame the body fills (lower = room for a long hammer)
-var mdist := 23.0  # --mdist: its distance to the hunter
 var video := false  # --video: every frame (30 fps) of idle 1.2 s, run 1.0 s, attack 0.6 s as v0000.jpg ...
 var vn := 0
 var gripcam := false  # --grip: a close camera on the right fist (grip_<clip>_<k>.jpg)
 var fincam := false  # --fin: tight head-fin cameras (fin_<clip>_<k>.jpg top-down like the match camera, fins_ side)
+var yaws: Array = []  # --yaws=: forced model yaws in degrees (empty: the run side view, else three-quarter)
+var yaw_force := NAN
 var probe := false  # --probe: probe.tsv, the fish and hand bones per frame
 ## --probe: probe.json = bones, per-bone capsule radii (bind verts), the fish's verts + local transform, and every
 ## frame's bone poses in world, for solving the fish's grip offline.
@@ -62,27 +54,6 @@ func run(main: Node) -> void:
 			frame_px = int(a.substr(7))
 		if a == "--close":
 			close = true
-		if a == "--film":
-			film = true
-		if a.begins_with("--mfov="):
-			mfov = float(a.substr(7))
-		if a.begins_with("--mpitch="):
-			mpitch = float(a.substr(9))
-		if a.begins_with("--mdist="):
-			mdist = float(a.substr(8))
-		if a.begins_with("--cfit="):
-			cfit = float(a.substr(7))
-		if a.begins_with("--clips="):
-			film_clips = Array(a.substr(8).split(",", false))
-		if a.begins_with("--spans="):
-			for kv in a.substr(8).split(",", false):
-				film_span[kv.get_slice(":", 0)] = float(kv.get_slice(":", 1))
-		if a.begins_with("--fstep="):
-			film_step = maxi(1, int(a.substr(8)))
-		if a.begins_with("--yaws="):
-			film_yaws = []
-			for d in a.substr(7).split(",", false):
-				film_yaws.append(deg_to_rad(float(d)))
 		if a == "--video":
 			video = true
 		if a == "--probe":
@@ -91,6 +62,8 @@ func run(main: Node) -> void:
 			gripcam = true
 		if a == "--fin":
 			fincam = true
+		if a.begins_with("--yaws="):
+			yaws = Array(a.substr(7).split(",", false))
 		if a == "--contract":
 			WardenNative.contract_only = true  # the live contract model of a native-flagged Hunter
 	if main.get("fade") != null:
@@ -100,14 +73,16 @@ func run(main: Node) -> void:
 	_stage(main)
 	await tree.create_timer(2.5).timeout  # (the title's logo fades in real time, not in frames)
 	for id in ids:
-		await _hunter(String(id), out.path_join(String(id)))
+		for y in yaws if yaws else [""]:
+			yaw_force = deg_to_rad(float(y)) if y else NAN
+			await _hunter(String(id), out.path_join(String(id)).path_join(("y" + y) if y else ""))
 	print("LIVE_AUDIT_DONE ", ids.size())
 	tree.quit()
 
 
 func _match_cam() -> void:
-	cam.fov = mfov
-	cam.position = Vector3(0, mdist * sin(deg_to_rad(mpitch)), mdist * cos(deg_to_rad(mpitch))) + Vector3(0, 0.8, 0)
+	cam.fov = 8.0
+	cam.position = Vector3(0, 21.0, 9.4)
 	cam.look_at(Vector3(0, 0.8, 0))
 
 
@@ -134,7 +109,7 @@ func _body_box(model: Node3D) -> Array:
 func _close_cam(bx: Array, knee: bool) -> void:
 	var h := float(bx[1])
 	var cy: float = float(bx[0]) + h * 0.5
-	var dist := h / (cfit * 2.0 * tan(deg_to_rad(15.0)))
+	var dist := h / (0.85 * 2.0 * tan(deg_to_rad(15.0)))
 	cam.fov = 30.0
 	cam.position = Vector3(0, float(bx[0]) + h * (0.3 if knee else 0.88), dist)
 	cam.look_at(Vector3(0, cy, 0))
@@ -146,7 +121,8 @@ func _forward(yaw: float) -> Vector3:
 
 func _state(id: String, clip: String, yaw: float, t: float) -> Dictionary:
 	var fw := _forward(yaw)
-	var s := {"face": yaw, "grounded": true, "vel": Vector3.ZERO}
+	# ("cast": the game's Hunter._anim_state always fills it; without it WardenNative._swing never plays a swing)
+	var s := {"face": yaw, "grounded": true, "vel": Vector3.ZERO, "cast": INF}
 	match clip:
 		"run":
 			s["vel"] = fw * RUN_MPS
@@ -187,25 +163,13 @@ func _hunter(id: String, dir: String) -> void:
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
 	var kind := "native" if native else "contract"
-	marks.append(
-		"kind %s glb %s tris %d body_h %.2f bottom_y %.3f" % [kind, WardenGlb.path(id), bx[2], bx[1], bx[0]]
-	)
-	var plays: Array = []  # [clip, yaw index, yaw]
-	var clips: Array = film_clips if film else (["idle", "run", "attack"] if video else CLIPS)
-	for clip in clips:
-		for yi in (film_yaws.size() if film else 1):
-			var cy := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
-			plays.append([clip, yi, float(film_yaws[yi]) if film else cy])
-	for pl in plays:
-		var clip: String = pl[0]
-		var yaw: float = pl[2]
-		var tag: String = clip if not film else "%s_y%d" % [clip, pl[1]]
+	marks.append("kind %s glb %s tris %d body_h %.2f" % [kind, WardenGlb.path(id), bx[2], bx[1]])
+	for clip in ["idle", "run", "attack"] if video else CLIPS:
+		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+		if not is_nan(yaw_force):
+			yaw = SIDE_YAW + yaw_force
 		model.rotation.y = yaw
-		var times: Array = SAMPLES.get(clip, SAMPLES["idle"])
-		if film:  # every film_step-th step (2 = 15 fps) over a clip's span
-			times = []
-			for j in int(float(film_span.get(clip, 1.0)) / (film_step * DT)):
-				times.append(j * film_step * DT)
+		var times: Array = SAMPLES[clip]
 		if probe:
 			times = [{"idle": 3.2, "run": 1.2, "dash": 1.0, "jump": 1.4, "attack": 2.4, "hit": 0.8}[clip]]
 		if video:
@@ -228,9 +192,9 @@ func _hunter(id: String, dir: String) -> void:
 			if probe:
 				_probe(model, clip, i)
 			if want < times.size() and t + DT * 0.5 >= float(times[want]):
-				await _shoot(model, dir, ("v%04d" % vn) if video else "%s_%d" % [tag, want], bx)
+				await _shoot(model, dir, ("v%04d" % vn) if video else "%s_%d" % [clip, want], bx)
 				vn += 1
-				marks.append("%s %d t=%.3f state=%s" % [tag, want, t, str(s)])
+				marks.append("%s %d t=%.3f state=%s" % [clip, want, t, str(s)])
 				want += 1
 		model.set_meta(WardenClips.STATE, {})
 	var f := FileAccess.open(dir.path_join("marks.txt"), FileAccess.WRITE)
@@ -352,7 +316,7 @@ func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
 		tree.root.get_texture().get_image().save_jpg(dir.path_join("grip_" + name + ".jpg"), 0.93)
 		return
 	if close:
-		for knee in ([false] if film else [false, true]):
+		for knee in [false, true]:
 			_close_cam(bx, knee)
 			await RenderingServer.frame_post_draw
 			await RenderingServer.frame_post_draw
