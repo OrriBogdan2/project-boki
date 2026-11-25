@@ -32,6 +32,7 @@ const TYPES := {
 	"bloom": {"name": "Bloom", "col": Color("6fd86a")},
 	"storm": {"name": "Storm", "col": Color("5f7fb8")},
 	"wild": {"name": "Normal", "col": Color("e8d9a8")},
+	"wyrm": {"name": "Wyrm", "col": Color("c8344f")},  # the Wyrm theme (Kite, ribbon): its type colour is its accent
 }
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
