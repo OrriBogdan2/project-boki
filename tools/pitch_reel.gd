@@ -50,6 +50,7 @@ var shot := 2
 var take := 1
 var fit_zoom := 0.0  # the eased zoom `--fit` holds so both fighters stay in frame (0: not started)
 var fit_at := Vector3.INF  # the eased focus `--fit` follows
+var spot_at := Vector3.INF  # the spot _roomy_ground picked (`--leash` keeps the fight on it)
 var hold_zoom := 0.0  # > 0: _step_frame holds the camera at this zoom (the kit shot)
 var hunter := Demo.DEFAULT_HUNTER
 var failed := false  # a shot that cannot be filmed on this build says so (fail()), and the take is dropped
@@ -301,6 +302,7 @@ func _escape() -> void:
 func _step_frame(at: Vector3) -> void:
 	_purge()
 	m.step(1.0 / FPS)
+	_leash()
 	if hold_zoom > 0.0 and "--fit" in OS.get_cmdline_user_args():
 		at = _fit(at)
 	if hold_zoom > 0.0:
@@ -311,6 +313,21 @@ func _step_frame(at: Vector3) -> void:
 	m.cam.snap(at)
 	for h in m.hunters:
 		h.render(1.0 / FPS, 1.0)
+
+
+## `--leash=<m>`: no fighter leaves the circle that wide round the spot `_roomy_ground` picked (a bot that kites would
+## run the fight off the open ground); one further off than FIT_FAR_M is parked, not fighting.
+func _leash() -> void:
+	var r := float(_arg("--leash=", "0"))
+	if r <= 0.0 or spot_at == Vector3.INF:
+		return
+	for h: Hunter in squad_a + squad_b:
+		if not is_instance_valid(h) or h.out:
+			continue
+		var d := Vector2(h.pos.x - spot_at.x, h.pos.z - spot_at.z)
+		if d.length() > r and d.length() < FIT_FAR_M:
+			d = d.normalized() * r
+			h.pos = Vector3(spot_at.x + d.x, h.pos.y, spot_at.z + d.y)
 
 
 ## `--fit`: the eased focus for `at`, and fit_zoom eased so every fighter still up is inside the frame with a margin
@@ -457,6 +474,7 @@ func _roomy_ground(p: Vector3) -> Vector3:
 	if best == Vector3.INF and not (biomes.is_empty() and isles.is_empty()):
 		fail("no roomy ground on --biome=%s --island=%s" % [biomes, isles])
 	if best != Vector3.INF:
+		spot_at = best
 		return _ground(best)
 	for dz in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
 		for dx in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
