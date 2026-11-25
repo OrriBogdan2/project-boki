@@ -73,3 +73,18 @@ New joints: `CoatLag` (Hips' channels delayed 0.10 s, up to 0.45 on the coat-tai
 the hips' horizontal travel (the box slides with the attack lunge, stays on the floor and upright). Void emission = r2 layer + a violet glow toward
 the box mouth + 246 sparse twinkle stars inside the void mask. Mesh and albedo unchanged. Spike frames (glbstretch, 10 fps) live -> r3:
 Idle 0->0 (r2 31), Attack 27->5, Jump_Run 1->0, Crouch 0->0. Recipe: /home/boki/gens/hunter-round-1124/motley/r3/tools/mkfix4.py fix3.glb out 0.10 0.45 0.5.
+
+**r4 (2026-11-25, hunter-round-1124 job 20261125-000830-a3):** the left glove is modelled curled (the right one is an open palm), so r3's rigid
+mitts kept a cupped left fist in every clip. The live left-finger skin weights are back (4,150 verts) and every left finger joint is posed 80% of
+the way to mirror the open right hand (mapped through the two hand frames), held constant in every clip (Meshy's finger curls dropped). The void's
+pale-lilac texels emit 60% less (albedo luminance 0.45->0.75 ramp; stars and the box-mouth glow kept), so the curl reads deep violet from the side.
+Mesh, albedo and body motion unchanged. Left-hand stretched edges (ratio>2, 10 fps) live -> r4: Idle 4413->1460, Attack 3843->1436.
+Recipe: /home/boki/gens/hunter-round-1124/motley/r4/tools/mkfix5.py fix4.glb live.glb out 0.8 6, then mkfix6.py out final 0.6.
+
+**r5 (2026-11-25, hunter-round-1124 job 20261125-021454-a4):** the side "pale column" was the ALBEDO: Meshy had baked big white/pale-lilac
+highlight smears into the void's texture (the turnaround's void is deep violet with violet wisps and small stars, no white). The void now
+takes its colour from a Meshy retexture of this exact mesh (task 01a21081-9f73-7765-b33b-af14fac3bdeb, meshy-7, original UVs kept: 100% of
+UVs match, refs = turnaround front/side/back), pasted ONLY inside the r1 void UV mask (feathered 3 px, islands edge-padded); coat, box,
+spring, face, gloves and bells keep the live texels. The emission layer is re-derived from the new void albedo (r1 formula; r3 stars and
+box-mouth glow kept). Mesh, skin, rig and clips are byte-identical to r4 (all 2821 accessors). `ostra_meshy_comp_B.jpg` is the new embedded albedo.
+Recipe: /home/boki/gens/hunter-round-1124/motley/r5/tools/{pad.py,mkfix7.py,compact.py} (pad.py live.glb tex.png pad.png; mkfix7.py r4.glb pad.png out; compact.py).
