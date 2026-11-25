@@ -21,7 +21,7 @@ func run(main: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	main.get_tree().root.size = win
 	main.get_tree().root.disable_3d = hud_only
-	var m: Match = await CHECK.make_match(main)
+	var m: Match = CHECK.make_match(main)
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)
 	for mb in m.mobs:
